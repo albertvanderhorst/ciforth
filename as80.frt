@@ -29,14 +29,14 @@ HEX
 ( which bits are missing from postitted, and the INSTRUCTION )
 ( Assemble an 1..3 byte instruction and post what is missing.)
 ( The last masks are for convenience in disassembly                     )
-: 1PI <BUILDS  , INVERT , INVERT , FF , CHECK1
+: 1PI <BUILDS  , INVERT , INVERT , 1 , CHECK1
 DOES> [ HERE TEMP ! ] <POST POST, , 1 CORRECT ;
 ( Return for DEA : it IS of type 1PI                                  )
 IS-A IS-1PI
-: 2PI <BUILDS  , INVERT , INVERT , FFFF , CHECK1 DOES>
+: 2PI <BUILDS  , INVERT , INVERT , 2 , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 2 CORRECT ;
 IS-A IS-2PI
-: 3PI <BUILDS  , INVERT , INVERT , FFFFFF , CHECK1 DOES>
+: 3PI <BUILDS  , INVERT , INVERT , 3 , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 3 CORRECT ;
 IS-A IS-3PI
 DECIMAL
@@ -52,17 +52,21 @@ DECIMAL
 : xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ISS @ OR! ;
 IS-A IS-xFI
 
-: >BODY PFA CELL+ ;
+: >BODY PFA CELL+ ; ( From % X to the data field of X )
 : >INST >BODY @ ;  ( Get you at fixup too)
 : >MASK >BODY CELL+ @ ;
 : >COMMA >BODY CELL+ CELL+ @ ;
-: >IMASK >BODY CELL+ CELL+ CELL+ @ ;
+HEX
+0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,
+DECIMAL
+: >CNT >BODY CELL+ CELL+ CELL+ @ ;
+: >IMASK >CNT CELLS TABLE + @ ;
 
 : CHECK DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK TALLY OR! ;
 ( Build with the LENGTH to comma the ADDRESS that is executint the comm )
 ( and a MASK with the bit for this commaer.                             )
-: COMMAER <BUILDS  SWAP , , ,
+: COMMAER <BUILDS  SWAP , , DUP , ,
 DOES> [ HERE TEMP ! ] @+ BOOKKEEPING   @ EXECUTE ;
 IS-A IS-COMMA
 
@@ -299,13 +303,11 @@ HERE POINTER !
    THEN
 ;
 
-0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,
 : VL. CELLS TABLE + @ AND U. ;
 ( Print the DEA in an appropriate way, it must be a comma-er   )
 : .COMMA 
-    DUP >BODY CELL+ CELL+ @     ( -- #bytes)
-    NEW-POINTER @ @ OVER VL.
-    NEW-POINTER +!              ( #bytes -- )
+    DUP >IMASK NEW-POINTER @ @ AND U.
+    DUP >CNT NEW-POINTER +!              
     ID.
 ;
 : .DISS' DISS DUP @ SWAP CELL+ DO
