@@ -7847,10 +7847,8 @@ error and and zero means okay.})
 _VERBOSE_({Beware that if error messages are loaded from disk,
 this may clear forthcode({DISK-ERROR}) })
 },
-_HOSTED_LINUX_({ {{BLOCK},{?LINUX-ERROR}}, })
-_USEBIOS_({ {{BLOCK},{R\W}}, })
-_HOSTED_LINUX_({ {{ CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{0},}, })
-_PC_({ {{ CR DISK-ERROR @ 0=},{0},}, }),
+{{BLOCK}}},
+{{." See BLOCK-EXIT"},{See BLOCK-EXIT}},
 enddoc)
 HEADER({DISK-ERROR},{DERR},{DOVAR}, )
         DC      -1
@@ -7879,9 +7877,6 @@ enddoc)
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, )
         DC      -1
 ;
-});_END_({_BLOCKSINFILE_})
-;
-_RWFILE_({
 worddoc( {STORAGE},{?DISK-ERROR},{disk_error_},{u---},{},
 {Interpret forthvar({u}) as the status of a disk i/o BDOS call.
 Report an error if it contains an error condition.
@@ -7899,7 +7894,7 @@ forthsamp({BLOCK-HANDLE}) can be used
 to acces it, with access code forthvar({n}) .
 },
 {{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{OPEN-FILE}},
-{{( Via MESSAGE)},{}},
+{{." Via MESSAGE"},{Via MESSAGE}},
 enddoc)
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      BLFL, SFET
@@ -7916,10 +7911,14 @@ worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
 Close the currently open block file forthcode({BLOCK-HANDLE}),
 i.e. the mass storage words no longer work, and will result in
 error messages.
-},{{BLOCK},{LIST},{LOAD}},
+If error messages were fetched from disk, they
+no longer are.},
+{{BLOCK},{LIST},{LOAD},{DISK-ERROR},{WARNING}},
 {
-{EMPTY-BUFFERS BLOCK-EXIT -1F MESSAGE}, {MSG # -31},
-{ CR DISK-ERROR @ 0= 0= . 2 BLOCK-INIT},{_T_},
+{EMPTY-BUFFERS BLOCK-EXIT},{},
+{0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
+ {PTY-BUFFERS 1 BLOCK ? MSG # 8},
+{ CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{_T_},
 {1 0 .LINE}, { LICENSE }
 },
 enddoc)
@@ -7953,9 +7952,15 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R\W}) determines the location on mass storage,
-performs the read or write and reports errors.
+performs the read or write and records errors, but doesn't abort on them.},
+{{BLOCK},{DISK-ERROR}},
+dnl we can use block 2 for scratch, -b is not an option in use.
+{
+{PAD B/BUF 41 FILL PAD 2 0 R\W},{},
+{PAD B/BUF 45 FILL PAD 2 1 R\W},{},
+{PAD 23 + 5 TYPE},{AAAAA},
 },
-{{BLOCK},{DISK-ERROR}}, {}, enddoc)
+enddoc)
 HEADER({R\W},{RSLW},{DOCOL})
         DC      TOR ;{ blk on top}
         DC      SEEK ;{ That's done}
@@ -7971,7 +7976,7 @@ RSLW2:
         DC      ZEQU, ZEQU, QDSKER
         DC      SEMIS
 ;
-});_END_({_RWFILE_})
+});_END_({_BLOCKSINFILE_})
 _LINUX_N_({
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
 {Have the operating system execute the command contained
@@ -8010,102 +8015,6 @@ SYSARG2: DB      "-c", 0
 COMBUF:  _RESB(256)
 SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + _CELLS(1), 0
 ;
-worddoc( {STORAGE},{BLOCK-INIT},{block_init},{n ---},{},
-{Map the blocks on the block file forthcode({BLOCK-FILE}),
-i.e. the mass storage words refer
-to the blocks in this file, using forthcode({BLOCK-HANDLE}) to acces it,
-with access code forthvar({n}) .
-If successful, forthcode({WARNING}) is reinitialised to use disk messages.
-},{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}},
-{{( Via MESSAGE)},{}},
-enddoc)
-HEADER({BLOCK-INIT},{BLINI},DOCOL)
-        DC      ZERO, BLFL, SFET, PLUS, STORE ; {Unix requires a c-string.}
-        DC      BLFL, SFET, DROP
-        DC      SWAP
-        DC      ZERO
-        DC      LIT, open
-        DC      LINOS
-        DC      LDUP, BHAN, STORE
-        DC      ZERO, MIN      ; 0/-errno
-        DC      LDUP, DERR, STORE
-        DC      ZEQU, ONE, LAND  ;{ 0 if disk problems. }
-        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      LWARN, STORE
-        DC      SEMIS
-;
-worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
-{A block file must have been opened by forthcode({BLOCK-INIT}) .
-Close the currently open block file forthcode({BLOCK-HANDLE}),
-i.e. the mass storage words no longer work, and will result in
-error messages. If error messages were fetched from disk, they
-no longer are.},
-{{BLOCK},{LIST},{LOAD},{DISK-ERROR},{WARNING}},
-{
-{EMPTY-BUFFERS BLOCK-EXIT},{},
-{0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
- {PTY-BUFFERS 1 BLOCK ? MSG # 8},
-{ CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{_T_},
-{1 0 .LINE}, { LICENSE }
-},
-enddoc)
-HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
-        DC      FLUSH
-        DC      ZERO
-        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      LWARN, STORE
-        DC      BHAN, FETCH
-        DC      ZERO,ZERO
-        DC      LIT, close
-        DC      LINOS
-        DC      ZERO, MIN      ; 0/-errno
-        DC      DERR, STORE
-        DC      SEMIS
-;
-worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
-{The ciforth primitive for read-write of blocks. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
-the sequential number of the referenced physical block; and
-forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R\W}) determines the location on mass storage,
-performs the read or write and records errors, but doesn't abort on them.},
-{{BLOCK},{DISK-ERROR}},
-dnl we can use block 2 for scratch, -b is not an option in use.
-{
-{PAD B/BUF 41 FILL PAD 2 0 R\W},{},
-{PAD B/BUF 45 FILL PAD 2 1 R\W},{},
-{PAD 23 + 5 TYPE},{AAAAA},
-},
-enddoc)
-;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
-HEADER({R\W},{RSLW},{DOCOL})
-        DC      TOR
-        DC      BBUF, STAR
-        DC      BHAN, FETCH, SWAP
-        DC      LIT, SEEK_SET
-        DC      LIT, lseek
-        DC      LINOS
-        DC      ZERO, MIN      ; 0/-errno
-        DC      LDUP, DERR, STORE
-        _0BRANCH( RSLW1 )
-        DC      RDROP
-        _BRANCH( RSLW2 )
-RSLW1:
-        DC      BHAN, FETCH, SWAP
-        DC      BBUF
-        DC      FROMR
-        _0BRANCH( RSLW3 )
-        DC     LIT, read
-        _BRANCH( RSLW4 )
-RSLW3:
-        DC      LIT, write
-RSLW4:  DC      LINOS
-        DC      BBUF, UNEQ     ; { Catches errors (negative) too.}
-        DC      DERR, STORE
-RSLW2:  DC      DERR, FETCH
-        DC      LIT, 8, QERR
-        DC      SEMIS
-
 });_END_({_LINUX_N_})
 
 _LINUX_C_({
