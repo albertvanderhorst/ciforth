@@ -1,4 +1,4 @@
-s         9 1 DO I J ! 5 SPACES ( eerst wat spaties)
+         9 1 DO I J ! 5 SPACES ( eerst wat spaties)
                 9 1 DO 9 J @1 - I BORD @ EMIT SPACE LOOP CR
 
 
@@ -110,7 +110,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
           BEGIN OVER OVER = 0=
           WHILE 0 CELL+ - DUP @ H.
           REPEAT DROP DROP  ;
- <HEX ( DEBUG SCR#7 )    
+ <HEX ( DEBUG SCR#7 )
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
  : CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
        [CHAR] | EMIT ;
@@ -492,7 +492,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 ( : $.... ( 0/1 leaves hex number 16 bits)
 (    0 HERE 6 + HERE 2 + DO 10 * I C@ TOH + LOOP
 (    [COMPILE] LITERAL ; IMMEDIATE
-(    1F WIDTH ! ) 
+(    1F WIDTH ! )
   1B CONSTANT ESC    0F CONSTANT SI   0E CONSTANT SO HEX>
  ." 84NOV25 Initialize STAR-printer AH "  <HEX
  : PEMIT 7F AND 5 BDOS DROP ;
@@ -527,20 +527,20 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 
 
  CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
+:  NONAME >R  
+    R >LFA @ OVER = IF R> RESULT ! ELSE R> DROP THEN ;
  : NEXTD ( CFA--DEA Get the DEA of the word defined)
-   C>D LATEST             ( after the CFA one)
-   2DUP = IF
-     DROP DROP HERE  ( No following word)
-   ELSE
-     BEGIN
-        2DUP >LFA @ <> WHILE
-        >LFA @
-     REPEAT
-     SWAP DROP ( The CFA) 
-   ENDIF 
+   0 RESULT !               ( after the CFA one)
+   C>D ' NONAME >CFA LATEST FOR-WORDS DROP
+   RESULT @ DUP 0= IF DROP HERE THEN
  ;
+
+
+
+
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
+
 
  CR ." KRAAKER"
  : KRAAK-FROM ( .--. Kraak, starting with following word)
@@ -561,7 +561,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 ( Elementary string: $@ $! $+! $C+     A0apr03-AH)
 ( All this should probably be low level )
 
- : $. TYPE ; 
+ : $. TYPE ;
  : C+! >R R C@ + R> C! ;
 
 
@@ -627,7 +627,7 @@ THEN ;
     OVER + SWAP FFF0 AND
     DO
         CR DUP H. I H. ." : "
-        I  
+        I
         10 0 DO
             2DUP I + L@ B.
             I 2 MOD IF SPACE THEN
@@ -783,17 +783,17 @@ KRAAKER
 
 
 ( testing of the block mechanism )
-: FOR-BLOCKS >R PREV @ 
+: FOR-BLOCKS >R PREV @
     BEGIN DUP R EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
-: SHOW-BLOCK 
-    DUP STALEST @ = IF CR ." STALEST:" THEN 
-    DUP CR H. 
-    DUP @ IF 
-        ." #" DUP ? 
+: SHOW-BLOCK
+    DUP STALEST @ = IF CR ." STALEST:" THEN
+    DUP CR H.
+    DUP @ IF
+        ." #" DUP ?
         CELL+ DUP @ IF ." LOCKED" ELSE ." NOT LOCKED" THEN
         CELL+ &: | EMIT 50 TYPE &: | EMIT
-    ELSE 
-        ." FREE" DROP 
+    ELSE
+        ." FREE" DROP
     THEN ;
 : .B ' SHOW-BLOCK >CFA FOR-BLOCKS ;
     .B
@@ -810,7 +810,7 @@ POOL VARIABLE PP ( LIKE DP)  : pd POOL PP @ OVER - DUMP ;
 ( WORD HAS SCANNED NOTHING )
 : EMPTY?  1 + C@  0= ;
 ( AS WORD BUT WITH AUTOMATIC REFILL )
-: WORD+ BEGIN DUP WORD DUP EMPTY?  WHILE DROP QUERY REPEAT 
+: WORD+ BEGIN DUP WORD DUP EMPTY?  WHILE DROP QUERY REPEAT
  SWAP DROP ;    : PARSE WORD+ COUNT $SAVE ;
 0 0 $SAVE CONSTANT NILL ( EMPTY STRING)
 BL PARSE ##  CONSTANT ##   ( END-SENTINEL) -->
@@ -1299,7 +1299,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
  0A0D VARIABLE CRLF    1A VARIABLE CTRLZ
  : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
 
- : FILL-FCB 22 WORD 
+ : FILL-FCB 22 WORD
     1+ HERE  COUNT ROT SWAP CMOVE  ;
 
  : SET-DMA  1A BDOS DROP ;
@@ -2070,7 +2070,7 @@ CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
 ( CODE TEST-MORE TO-REAL,   TO-PROT, NEXT C;               )
 ( CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,)
 ( GDT_DS COPY-SEG   NEXT C;                                  )
-RP@ 100 DUMP SP@ 100 DUMP 
+RP@ 100 DUMP SP@ 100 DUMP
 .B
 
 
@@ -2996,7 +2996,7 @@ FORWARD AUX1 BNF: AUX1 'A' [ 'B' | 'C' ] ;BNF
 : RUN[ 1 SUCCESS ! AUX1 SUCCESS ? ;
 : RUN{ 1 SUCCESS ! 'A' { 'B' 'C' } SUCCESS ? ;
 FORWARD <CHAR>
-BNF: <CHAR> @TOKEN DUP [CHAR] ) = >R DUP [CHAR] ( = >R 0=   
+BNF: <CHAR> @TOKEN DUP [CHAR] ) = >R DUP [CHAR] ( = >R 0=
    R> R> OR OR   0= DUP SUCCESS !      +TOKEN ;BNF
 ( This requires an enormous return stack ! )
 FORWARD <S>   BNF: <S>  '(' <S> ')' <S> | <CHAR> <S> | ;BNF

@@ -897,11 +897,12 @@ Skip remaining non-blank characters.},
 HEADER({&},{DCHAR},{DOCOL}, B_IMMED + B_DENOT)
         DC      INBRS, DROP, DROP
         DC      INBRS
-        DC      LDUP, QBL, ZEQU
+        DC      SWAP, DROP
+        DC      LDUP, QBL
         DC      LIT, 10, QERR
-        DC      LITER, DROP
+        DC      LITER
         DC      INBRS 
-        DC      QBL, LIT, 10, QERR
+        DC      QBL, ZEQU, LIT, 10, QERR
         DC      DROP
         DC      SEMIS
 ;
@@ -3143,14 +3144,24 @@ will be given.
 },{{WORD},{NUMBER}})
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  
-        DC      LBL, AWORD, COUNT
-;        DC      PWORD
+        DC      PWORD
         DC      LDUP      ;{ Zero length.}
         _0BRANCH(INTE8) ;{WHILE}
+;        DC      DOTS
+        DC      OVER, TOR
         DC      PFIND   ;{BEGIN}
-        DC      DDUP
+        DC      LDUP
         _0BRANCH(INTE2) ;{IF}
 ;        DC      LDUP, IDDOT
+        DC      LDUP, TFFA, FETCH, LIT, B_DENOT, LAND
+        _0BRANCH(INTE3A) ;{IF}
+        DC      FROMR, LIN, STORE
+        _BRANCH(INTE4A)  ;{ELSE}
+INTE3A:  
+        DC      FROMR, DROP
+                        ;{ENDIF}
+INTE4A:  
+;        DC      DOTS
         DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) ;{IF}
@@ -3163,7 +3174,11 @@ INTE3:
                         ;{ENDIF}
 INTE4:  DC      QSTAC
         _BRANCH(INTE5)  ;{ELSE}
-INTE2:  DC      HERE
+INTE2:  
+        DC      DROP
+        DC      FROMR, LIN, STORE
+        DC      LBL, AWORD, DROP
+        DC      HERE
         DC      NUMB
         DC      DPL
         DC      FETCH
