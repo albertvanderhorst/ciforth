@@ -1,6 +1,6 @@
-;{              clone1.frt : an example of clonding in Forth }
-;{ $Id$}
-;{ Copyright (2002):} Albert van der Horst {by GNU Public License}
+\               clone1.frt : an example of clonding in Forth
+\  $Id$
+\  Copyright (2002): Albert van der Horst by GNU Public License
 
 HEX
 \ Originally returnstacksize, doing double duty as tib size.
@@ -8,6 +8,7 @@ HEX
 \ needs a duplicate of : returnstack , tib data stack, user area .
 10000 CONSTANT RTS
 40 CELLS CONSTANT US
+
 : DUMP-IT
     "S0  "  TYPE S0  DUP H. SPACE @ H. CR
     "TIB "  TYPE TIB DUP H. SPACE @ H. CR
@@ -15,7 +16,7 @@ HEX
     "U0  "  TYPE U0  DUP H. SPACE @ H. CR CR
 ;
 
-\ Clone the stack frame to ``RTS'' in memory.
+\ Clone the stack frame to ``RTS'' lower in memory.
 \ This area extends up to ``R0 @ US + '' .
 : CLONE-VARIABLE-AREA DUMP-IT
     DSP@
@@ -30,7 +31,20 @@ HEX
     DUMP-IT
 ;
 
-: CLONE 78 LINOS ;
+\ Clone the stack frame to ``RTS'' lower in memory.
+\ This area extends up to ``R0 @ US + '' .
+: CVA
+    DSP@   DUP RTS -   U0 @ DSP@ - US +   MOVE
+    DSP@ RTS - DSP!    RSP@ RTS - RSP!
+    4 -1 DO   RTS NEGATE U0 I CELLS +   +!   LOOP
+;
+
+
+\ Keep item ONE and TWO on the data stack while
+\ switching the stack frame to new return stack POINTER.
+\ This also switches the user variables.
+: SWITCH-VARIABLE-AREA RSP! >R S0 @ DSP! R> ;
+
 : FORK _ _ _ 2 LINOS ;
 
 : hoezee
@@ -50,6 +64,11 @@ HEX
     hoezee
     _ _ _ 1 LINOS DROP
 ;
+
+
+\ Clone the current process, share memory and interrupts.
+\ Leave PID (or zero for the clone)
+: CLONE _ DSP@ 400 - 1FF 78 LINOS DUP ?ERRUR ;
 
 : (clone)
 \     >DFA @ >R
@@ -78,4 +97,13 @@ HEX
 \ The 1D (pause) waits for a signal.
 : clone   'doit (clone) ;
 
-: CVA   CLONE-VARIABLE-AREA ;
+: SVA   SWITCH-VARIABLE-AREA ;
+
+: THREAD CREATE RSP@ ,  CVA
+         DOES> ^ >R >R
+CLONE IF R> R> 2DROP ELSE ^ R> ^ R> ^ @ ^
+RSP! >R S0 @ DSP! R> ^
+\ SVA
+^ DUMP-IT ^
+. ^ CR ^ 1000 MS ^
+_ _ _ 1 LINOS THEN ;
