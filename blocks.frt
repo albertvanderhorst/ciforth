@@ -132,9 +132,9 @@ CR 2 LIST
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD
- ( EDITOR ) 109 LOAD         EXIT
- ( KRAKER )       10 16 THRU
- ( BACKUP        77 81 THRU   )
+ ( EDITOR ) 109 LOAD
+( KRAKER )       10 16 THRU EXIT
+ ( BACKUP )       250 LOAD   77 81 THRU
  ( ASSEMBLER 80x86 SAVE-BLOCKS) 120 LOAD   97 98 THRU
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
@@ -202,7 +202,7 @@ BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP (KRAAK) REPEAT DROP ;
 : B.. H.. ;
 ( For the NUMBER : it IS a proper `dea' )
 ( The <BM is not only optimisation, else `LIT 0' goes wrong.)
-: DEA? DUP BM @ < IF DROP 0 ELSE
+: DEA? DUP BM < IF DROP 0 ELSE
 DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
 
 
@@ -1230,9 +1230,11 @@ EXIT
 
 
 
-( SAVE CURRENT chunk TO CHUNK N      A1may16 AH&CH)  HEX
+?PC ?32 HEX ( 1 : SAVE CURRENT chunk TO CHUNK N A1sep01 AH&CH)
 SYS  0800,0000 B/BUF / CONSTANT CHUNK-SIZE  ( BLOCKS PER CHUNK)
-: CURRENT-CHUNK OFFSET @ CHUNK-SIZE / -6 +ORIGIN OVER SWAP C! ;
+: CHUNK-START  OFFSET @ 40 - ;
+: CURRENT-CHUNK
+CHUNK-START  CHUNK-SIZE / -6 +ORIGIN OVER SWAP C! ;
 ( -- offset and bl# where to patch OFFSET )
 : OFFSET-/MOD 'OFFSET >DFA @ +ORIGIN 7C00 - B/BUF /MOD ;
 : CHECK CURRENT-CHUNK = 0D ?ERROR ;
@@ -1244,9 +1246,7 @@ SYS  0800,0000 B/BUF / CONSTANT CHUNK-SIZE  ( BLOCKS PER CHUNK)
 ; DECIMAL
 
 
-
-
-( Second part: wipe a part of the disk A1may3 AH)
+?PC ?32 ( 2 : wipe a part of the disk A1may3 AH)
 : WIPE-BUFFER RW-BUFFER B/BUF &v FILL ;
 : WRITE-BUFFER RW-BUFFER SWAP OFFSET @ + 64 - 0 R/W ;
 : CHECK-RANGE 589 64 + CHUNK-SIZE WITHIN 0= 13 ?ERROR ;
@@ -1262,15 +1262,15 @@ CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
         DUP SHOW 1+ REPEAT DROP ;
 
 
-( Part 3 : write current chunk to fresh part of disk A1may3 AH)
- 240 LOAD
+?PC ?32 ( 3 : FIRST-FREE? BACKUP fresh part of disk A1may3 AH)
+ 239 LOAD
 : FREE? RW-BUFFER SWAP 1 R/W
 DISK-ERROR 1 AND   RW-BUFFER (FREE?)   OR ;
 : NON-FREE? FREE? INVERT ;
 : FIRST-FREE  ( -- FIRST FREE BLOCK IN BACKUP AREA)
 FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
 : FNTB ( First free in current chunk)
-  OFFSET @ 64 - CHUNK-SIZE OVER + 'NON-FREE? BIN-SEARCH 1+ ;
+  CHUNK-START CHUNK-SIZE OVER + 'NON-FREE? BIN-SEARCH 1+ ;
 : SAVE-COMMENT 200 BLOCK FIRST-FREE 0 R/W ;
 
 
@@ -1278,8 +1278,7 @@ FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
 
 
 
-( Part 4 : write current chunk to fresh part of disk A1may8 AH)
-HEX
+?PC ?32 HEX ( 4 : BLMOVE BLMOVE-FAST  BACKUP A1sep01 AH)
 : BLMOVE 0 DO  ( as MOVE for blocks.)
   SWAP RW-BUFFER OVER 1 R/W 1+   SWAP RW-BUFFER OVER 0 R/W 1+
   DUP SHOW KEY? IF UNLOOP EXIT THEN  LOOP . . ;
@@ -1289,13 +1288,14 @@ HEX
          SWAP RW-BUFFER OVER 0 R/W 40 +
          DUP SHOW KEY? IF UNLOOP EXIT THEN
 40 +LOOP . . 1<>64 ;
+
 : BACKUP ( BACKUP THE CURRENT CHUNK TO PRISTINE DISK )
-   OFFSET @ 40 - FNTB OVER - FIRST-FREE SWAP BLMOVE-FAST ;
+   CHUNK-START FNTB OVER - FIRST-FREE SWAP BLMOVE-FAST ;
 : SAVE-CHUNK DUP CHECK
  CURRENT-CHUNK CHUNK-SIZE * OVER CHUNK-SIZE * CHUNK-SIZE
 BLMOVE-FAST PATCH-CHUNK ; DECIMAL
-( Part 4 : write current chunk to fresh part of disk A1may8 AH)
-( Inspect physical disk BLOCK )
+?PC ?32 ( 5 : I-INSPECT A1sep01 AH)
+HEX
 : ASCII? DUP BL 7F WITHIN SWAP ^J = OR ;
 ( SC contains all ``ASCII'' )
 : ALL-ASCII? OVER + SWAP DO I C@ DUP ASCII? 0=
@@ -2334,7 +2334,7 @@ DECIMAL
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-( SAVE-SYSTEM TURNKEY )  HEX
+?LI ( SAVE-SYSTEM TURNKEY )  HEX
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -2350,7 +2350,7 @@ DECIMAL
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
-( ARGx Z$@ CTYPE C$. )
+?LI ( ARGx Z$@ CTYPE C$. )
 \ Return the NUMBER of arguments passed by Linux
 : ARGC ARGS @ @ ;
 
@@ -3198,10 +3198,9 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
-\ CHUNK 4.3 20001jun08 AH
-\   Screen 32 and 7 behind FENCE
-\   $ and DUMP
-\   Start of this chunk : 1083151
+\ CHUNK 5.0 20001sep01 AH
+\   Second conception
+\   Start of this chunk DECIMAL : 1084434
 
 
 
@@ -3215,7 +3214,8 @@ DROP KEY DROP .S ;
 
 
 
-
+BLK ?
+"BLK ?" EVALUATE
 
 
 
@@ -3342,12 +3342,12 @@ DECIMAL
 : RESTORE-BLOCKS
 256 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
 
-?32 ?PC
+?PC ?32 ( backup restore A1sep01 AH)
 \ Copy the currently booted chunk to free space on the hd,
 \ flanked by comment blocks (block 200, fill beforehand).
-: backup ;
+: backup SAVE-COMMENT BACKUP SAVE-COMMENT ;
 \ From START restore LEN blocks to ``DBS''.
-: restore ;
+: restore CHUNK-START SWAP BLMOVE ;
 
 
 
@@ -3828,7 +3828,7 @@ VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    COMP !  IMAX ! IMIN !
     BEGIN       \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ .S <> WHILE
+        IMIN @ IMAX @ ( .S) <> WHILE
         IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
         DUP COMP @ EXECUTE IF
            ( ihalf) IMIN !
@@ -3886,21 +3886,21 @@ VARIABLE COMP \ Execution token of comparison word.
     REPEAT
 IMIN @ ;
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
-( Patch the low system to accomodate save system. A1may04 AH )
-( Returns the FIRST free cell in the low area. )  HEX
-: FIND-EXIT >DFA @
-BEGIN DUP @ 'EXIT <> WHILE CELL+ REPEAT CELL+ ;
-( Use CONTENT to patch up the bootup parameters of the DEA )
-: PATCH >DFA @ +ORIGIN ! ;
-\ 100000 DUP 'DP PATCH 'FENCE PATCH   A0000 'LOW-EM PATCH
-\ 'TASK FIND-EXIT 'LOW-DP PATCH   ( Reset to 28400 come time.)
--1 BUFFER CONSTANT RW-BUFFER -1 LOCK ( get a locked buffer)
-( Write 1k from ADDRESS to BLOCK)
-: WRITE-1K   SWAP RW-BUFFER 400 CMOVE   RW-BUFFER SWAP 0 R/W ;
-( Convert block NR relative to chunk to ABSOLUTE )
-: >ABS OFFSET @ + 40 - ;
-: SAVE-SYSTEM 40 0 DO 7C00 400 I * + I >ABS WRITE-1K LOOP ;
-DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ( Binair zoeken, commentaar ) EXIT
 ( BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES )
@@ -3947,17 +3947,17 @@ PREVIOUS DEFINITIONS
 DECIMAL
 ( This has been loaded since chunk 0.5 and must not be
 reloaded.)
+I guess that only screen 248 should be used from now on.
 
 
-
-( Redefine R/W to accomdate larger addresses. A1may05AH)
- DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+( Redefine R/W to accomdate larger addresses. A1aug05AH)
+HEX
+( The screen BUFFER is apparently virgin)
 : (FREE?) B/BUF 0 DO DUP I + C@ &v - IF UNLOOP DROP 0 EXIT THEN
-   LOOP DROP -1 ;       8,F000 CONSTANT RW-BUFFER
+   LOOP DROP -1 ;
+8,F000 CONSTANT RW-BUFFER    ( A 64 kBYTE BUFFER)
+( Switch between reading 64K and 1 K)
 : 1<>64 LBAPAR 2 + 82 TOGGLE ;
-
-
-
 
 ( All: address block -- addres' block' And : SIZE 64K)
 : READ++   1<>64 DUP RW-BUFFER SWAP 1 R/W
@@ -3965,9 +3965,9 @@ OVER RW-BUFFER SWAP 1,0000 MOVE   40,0001,0000. D+ 1<>64 ;
 : WRITE++  1<>64 OVER RW-BUFFER 1,0000 MOVE
   DUP RW-BUFFER SWAP 0 R/W 40,0001,0000. D+ 1<>64 ;
 
-DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
-( Redefine R/W to accomdate larger addresses. A1may05AH)
-DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+DECIMAL
+( Words to load and store a system A1aug31 AH)
+HEX
 : MUD? B/BUF - (FREE?) ;  ( limit -- loaded/stored empty block)
 ( All: address block -- addres' block' )
 : LOAD-MID BEGIN OVER A,0000 < WHILE READ++ REPEAT ;
@@ -3976,7 +3976,7 @@ DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
 : LOAD-ALL
 2,7C00 OFFSET @ 40 +  LOAD-MID  ( Skip kernel, stack)
 SWAP DROP 10,0000 SWAP LOAD-HIGH   2DROP ;
-DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS  SYS
+
 : STORE-MID BEGIN OVER A,0000 < WHILE WRITE++ REPEAT ;
 : STORE-HIGH BEGIN OVER HERE < WHILE WRITE++ REPEAT ;
 : STORE-ALL  ( Store to next chunk, inc. kernel, stack )
@@ -3999,20 +3999,20 @@ R@   NOOP RBLK' DUP  @   R@   -   0=
 ' UPDATE' ' UPDATE 3 CELLS MOVE
 ' BLOCK' ' BLOCK 3 CELLS MOVE
 ( Redefine R/W to accomdate larger addresses. A1may05AH)
-ONLY FORTH 249 LOAD
-ONLY FORTH 250 LOAD ONLY FORTH
- DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+VOCABULARY SYS ONLY FORTH
+ DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
+247 248 THRU HEX
 : NEW-COLD
 EMPTY-BUFFERS   FIRST STALEST !   FIRST PREV !
 0 CELLS +ORIGIN DUP CELL+ @  40 CELLS CMOVE
 1<>64 LOAD-ALL (ABORT) ;
 'NEW-COLD 'COLD 3 CELLS MOVE
 DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
+  SYS
 : SAVE-SYSTEM
    U0 @   0 +ORIGIN   40 CELLS CMOVE ( Save user variables)
    STORE-ALL ;
-
-
+PREVIOUS
 
 ( Redefine R/W to accomdate larger addresses. A1may05AH)
 DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
