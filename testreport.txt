@@ -42,7 +42,7 @@ C 8 LIST 8 LOAD
 D (requires A) 25 LOAD 0 PAUSE ! 100 SIEVE
   primes ending in 99971 99989 99991
 E (requires A) KRAAK QUIT
-F (r. A ) 89 LOAD (does nothing for 16 bit)
+F (r. A ) 89 LOAD (does nothing for 16 bit, assembly code)
 G (r. A) Editing a screen
 H wc *.asm
 J Binary equivalent than compiled on linux
@@ -52,11 +52,12 @@ M  Documentation complete
 N "ls -l" SYSTEM or "dir" SYSTEM
 O Built in regression test
 P Johns Hopkins university test (always with restrictions)
+R Assemble empty code definition
 
 Pass criteria
 A booted OK
 B I made it through make (version can be built).
-C plausible content of 8, everything loads fine, ends in copyright screen
+C plausible content of 8, everything loads fine, shows  copyright screen
 D primes less then 100000 zip accross the screen
 E plausable decompilation of QUIT
 F timing of Byte benchmarks, must be 7 ms for a 500 Mhz Coppermine
@@ -67,16 +68,21 @@ J' disassembly reveals only gratuitous MASM deviations.
 K successful return to operating system (linux) or
 K' successful return to "operating system" (msdos)
 L Dos Directory correct on generated floppy.
-M .html .tex and .info file generated correctly
-O No difference with built in test output wanted
+M .html .tex and .info file generated correctly. (Not content!)
+O No difference with built in test output found(lina)
+O' Expected  differences with built in test output found
 P Output of test has only the expected restrictions
+R Assembler loads, and the empty definition runs.
 
 Test are always mentionned if applicable. A failed test is preceeded
 by -. Not all tests are always down.
 
 The following environments are defined (Only for BOOTFD BOOTHD):
-I Booted from FD or HD
-II Started from MSDOS
+I nasm version , Booted from FD or HD
+II nasm version, started from MSDOS
+III build with MASM 1.0 , Booted from FD or HD
+IV  build with MASM 1.0 , started from MSDOS
+III
 (Other environments following from the executable itself).
 Notes about ommitted data:
 - all linux versions use NASM  PROTECTED BITS32
@@ -87,34 +93,43 @@ This table can be used to decide whether you want to run
 an older better tested version. Data for older versions
 is not present if the new version passed all tests the older
 one does.
+FAILED TESTS ARE PRECEEDED with -.
 
 This test is for the ISO ciforth , version 3.###
 
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   135  lina.cfg         lina          BCDEFHKMOP
-hosted_linux linux_c native 135  linux.cfg        (ciforthc)    B-C-D-E-F-H-K M
+hosted_linux linux_native   153  lina.cfg         lina          BCDEFHKMOPR
+                            135                                 BCDEFHKMOP
+hosted_linux linux_c native 153  linux.cfg        (ciforthc)    BCDEFKMPO'R
 
-bootfd real                 N.A.       alone1.cfg      forth.com  Not even built
+bootfd real                 N.A.   alone1.cfg      forth.com       I B -A
+                                                                  II B -A
+bootfd prot16               153    alone.cfg       forth.com    B I  ACDEFGR
+                                                                  II ACDEFGK'LR
 
-                                                                  Not even built
-bootfd prot16               N.A.       alone.cfg       forth.com  Not even built
-
-hostedmsdos modern          N.A.   msdos.cfg       msdos.com      Not even built
-bootfd prot32               N.A.   alone3.cfg      forth.com      Not even built
-
-boothd prot32               N.A.   alonehd.cfg     no filesystem  Not even built
-hostedmsdos MASM bios       N.A.   msdos1.cfg      msdos.com      Not even built
-hostedmsdos MASM modern     N.A.   msdos2.cfg      msdos.com      Not even built
-hostedmsdos MASM classic    N.A.   msdos3.cfg      msdos.com      Not even built
-hostedmsdos MASM modern 32  N.A.   msdos9.cfg      forth.com      Not even built
+bootfd prot32               153    alone3.cfg      forth.com     B I ABCDEFG R     3)
+                                                                  II ABCDEFGK'LR
+boothd prot32               153    alonehd.cfg     no filesystem  ABCDEFGMR
+hostedmsdos real  bios      153    msdos1.cfg      msdos.com      II B CDEG K' R
+hostedmsdos real  modern 1) 153    msdos2.cfg      msdos.com      II B CDEG K' -O -P R 2)
+                            153    msdos2.cfg      forth.com      IV B CDEG K' -O -P R
+hostedmsdos classic    N.A.   msdos3.cfg      msdos.com            Not built
+hostedmsdos modern 32  N.A.   msdos9.cfg      forth.com           II BCDEFGK'MLR  3)
 
 
-It may seem strange that the versions are lower that those for
+It may seem strange that the versions are lower than those for
 figforth below. However this is in fact 3.### where fig is 2.###.
 
-N.A. : not applicable.
+N.A. : not available.
 L* :
+
+1)
+In MSDOS versions with modern i/o LIST looks bad, because the
+new lines are missing form the listing. This is cosmetic and not
+fixed in this release.
+2) O and P fail for the same reason, redirection doesn't function.
+3) Editor is sometimes unreliable ^U hangs.
 
 APPENDIX
 
