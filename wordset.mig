@@ -132,13 +132,59 @@ from the input stream. In this way the outer interpreter need not be very smart,
 because its capabilities can be extended by new words based on those 
 building blocks.},
 {},{},{},{})
-worddocchapter({SCREEN},{ },{CONTENT},{},{},{},{})
-worddocchapter({SECURITY},{ },{CONTENT},{},{},{},{})
-worddocchapter({STACKS},{ },{CONTENT},{},{},{},{})
-worddocchapter({STORAGE},{ },{CONTENT},{},{},{},{})
-worddocchapter({STRING},{ },{CONTENT},{},{},{},{})
-worddocchapter({SUPERFLUOUS},{ },{CONTENT},{},{},{},{})
-worddocchapter({VOCABULARIES},{ },{CONTENT},{},{},{},{})
+worddocchapter({SCREEN},{ },
+{Most of the mass storage is used for forthdefi({screen})'s that
+have 16 lines of 64 characters. They are used for source code
+and documentation. 
+Each screen is a whole number of forthcode({BLOCK})'s, 
+in our case it is one block. 
+The forthvar({SCREEN}) wordset contains facilities to view screens,
+and forthdefi({load}) them, that is compiling them and thus extending
+the base system. 
+A system is customized by loading source screens, possibly one of
+these extension is a text editor for screens.}, 
+{},{},{},{})
+worddocchapter({SECURITY},{ },
+{The wordset forthvar({SECURITY}) contains words that are used by control
+words to abort with an error message if the control structure is not
+correct. _VERBOSE_({Some say that this is not Forth-like.})
+You only need to know them if want to extend the 
+forthvar({CONTROL}) wordset.}, 
+{},{},{},{})
+worddocchapter({STACKS},{ },
+{The wordset forthvar({STACKS}) contains words related to the
+forthdefi({data stack}) and forthdefi({return stack}). 
+Words can be moved between both stacks. 
+Stacks can be reinitialised and the value used to initialise the
+forthdefi({stack pointer})'s can be altered.},
+{},{},{},{})
+worddocchapter({STORAGE},{ },
+{The wordset forthvar({STORAGE}) contains words to input and output
+to the mass storage, in this ciforth _BOOTFD_({ to the hard disk})
+_BOOTHD_({to the hard disk}) _HOSTED_({to the file
+forthfile({BLOCKS.BLK})}). 
+They are the underlying the forthvar({SCREEN}) facilities.}, 
+{},{},{},{})
+worddocchapter({STRING},{ },
+{The wordset forthvar({STRING}) contains words that manipulate 
+strings of characters.},
+{},{},{},{})
+worddocchapter({SUPERFLUOUS},{ },
+{The wordset forthvar({ SUPERFLUOUS}) contains words that are superfluous,
+because they are equivalent to small sequences of code.
+_VERBOSE_({Traditionally one hoped to speed Forth up by coding these words
+directly})},
+{},{},{},{})
+worddocchapter({VOCABULARIES},{ },
+{The dictionary is subdivided in non-overlapping subsets:
+the forthdefi({vocabulary})'s. forthxref({DICTIONARY}). 
+They are created by the defining word
+forthcode({VOCABULARY}) and filled by defining words while that
+vocabulary is forthcode({CURRENT}) . They regulate how words are
+found, different vocabularies can have words with the same names.
+The wordset forthvar({VOCABULARIES}) contains words that manipulate 
+those vocabularies.},
+{},{},{},{})
 worddocchapterend({COMPILING},{~},{CONTENT},{},{},{},{})
 worddocchapterend({CONTROL},{~},{CONTENT},{},{},{},{})
 worddocchapterend({DEFINING},{~},{CONTENT},{},{},{},{})
