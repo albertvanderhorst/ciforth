@@ -91,12 +91,12 @@ releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
 fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
 #  Do a static prelink to prevent that the whole free dictionary space ends
-#  up in the executable 
+#  up in the executable. This doesnot work. Bloody ld.
 fig86.static.o : fig86.linux.o ; ld -Tlink.script -r -o $@
 
 # This linking must be static, but a .5M executable is better than
 # a 64 M executable.
-figforth : figforth.c fig86.static.o ; cc figforth.c -Wl,-Tlink.script -lc -static -o $@
+figforth : figforth.c fig86.linux.o ; cc $+ -static -Wl,-Tlink.script -o $@ 
 
 # Add termporary stuff for testing, if needed.
 include test.mak
