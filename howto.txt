@@ -1,6 +1,19 @@
 ( $ Id: )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 
+Do a regression test on lina :
+    make testlina
+and
+    lina -e | tee aap
+Within Forth :
+    KRAAK-FROM FORTH BYE
+
+Then
+   sed -f blabla <aap >qqq
+   diff qqq officialdecompilation
+If approved :
+    mv officialdecompilation qqq
+
 How to create a floppy booting into ciforth
 
 make allboot
@@ -36,3 +49,24 @@ INSTALL-KERNEL    \ Insert floppy with kernel
 
 How to load a VOCABULARY high:
 2001 oct 9
+
+How to create a distribution :
+   Always start with
+   make clean
+   rm VERSION
+
+   Release generic version, official
+   make zip VERSION=4v0
+   Result in ci86g4v0.zip
+
+   Release generic version, beta
+   make zip VERSION=3d286
+   Result in ci86g3d286.zip
+
+   Release Linux version, official
+   make lina.zip VERSION=4v0
+   Result in lina4v0.zip
+
+   Release Linux version, beta
+   make lina.zip VERSION=3d286
+   Result in lina3d286.zip
