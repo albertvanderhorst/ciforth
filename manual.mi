@@ -206,7 +206,11 @@ Here forthvar({DOIT}) trims the dictionary just before the saving your system in
 file.
 You can use a similar sequence for expanding the system without
 building in the forthcode({SAVE-SYSTEM}) command as well.
-In that case you must use forthcode({FAR-DP}) a disposable part of the dictionary.
+
+forthcode({FAR-DP}) allows have a disposable part of the
+dictionary. This may be occasionally useful, but make sure to
+forthcode({FORGET}) always the disposed off words.
+
 
 @section Concepts
 
@@ -1050,9 +1054,11 @@ Also forthcode({REQUIRED}) is made available.
 forthitem
 forthsamp({-e})
 
-Load the elective screen, screen 5.
-But system wide default preferences
-can be installed there. _VERBOSE_({{In a elective screen you just put
+Load the elective screen, screen 5. This contains forthdefi({preferences}),
+the tools you want to have available running an interactive Forth.
+The  default library file contans system wide default preferences.
+See the forthsamp({-l}) option if the default preferences don't suite you.
+_VERBOSE_({{In a elective screen you just put
 commands you want to be executed after Forth starts up, such as }})
 _VERBOSE_({forthsamp({ "fortune -f /usr/lib/forthcookies" SYSTEM })})
 _VERBOSE_({{ or }})
@@ -1078,6 +1084,35 @@ forthsamp({-h})
 
 Print overview of options.
 
+_HOSTED_LINUX_({
+forthitem
+forthsamp({-i binpath libpath})
+
+Install the forth in forthsamp({binpath}) and the library in forthsamp({libpath}) .
+Both must be full path names, not just directories.
+The ciforth that is running is copied to forthfile({binpath}), and the block file
+is copied to forthfile({libpath}).
+
+For system wide installation the following is recommended:
+forthexample({
+    su
+    ./lina -i /usr/bin/lina /usr/lib/forth.lab
+    chmod 755 /usr/bin/lina
+    chmod 644 /usr/lib/forth.lab})
+})
+_HOSTED_LINUX_({
+forthitem
+forthsamp({--help})
+forthsamp({--version})
+forthsamp({--})
+forthsamp({-m})
+
+In ciforth all options are mapped onto a letter. All options
+that start with forthkey({-}) are mapped onto forthkey({m}).
+The result is the combination of -h and -v , so both help and
+version information is printed.
+_VERBOSE_({This conforms to the FSF-conventions.})
+})
 forthitem
 forthsamp({-l name})
 
@@ -1087,6 +1122,9 @@ of the line shifted, such that
 forthsamp({-l name}) disappears and the next option becomes the first.
 A file specified via forthsamp({-l}) is opened for reading and
 writing.
+Options ara again handled as as described in the begining of this section.
+In this way options may be added or reconfigured for personal use.
+
 Note that the default file is opened for reading only.
 
 _SUPPRESSED({ It is not clear whether we really want this. It will mostly be
@@ -1125,7 +1163,7 @@ forthenditemize
 
 The remaining screens are available for options to be added at a later time,
 or for user defined options in a private library.
-})_END_({_HOSTED_}).
+})_END_({_HOSTED_})
 @subsection Private libraries
 
 Working with source in files is quite comfortable using the default block library, especially
