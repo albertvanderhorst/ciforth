@@ -6,40 +6,40 @@ dnl        the corresponding menu item on channel 6
 dnl        and a definition for the second pass on channel 0 
 define({worddoc},{
 divert(9)dnl
-@node $1, next$2(), prev(), MyTop()
-@subsection $1
-
-NAME: $1 
-
-STACKEFFECT: $3
-
-DESCRIPTION: $5
-
-    define({prev},{$1})dnl
-    divert(0)dnl
-        {{$1})dnl
-        define({next$2},}
-divert(6)dnl
-* $1  ::  
-divert(9)dnl
-})dnl
-define({worddocsafe},{
-divert(9)dnl
-@node $2, next$2(), prev(), MyTop()
+@node $2, next$3(), prev(), MyTop()
 @subsection $2
 
-NAME: $1 
+NAME: $2 
 
-STACKEFFECT: $3
+STACKEFFECT: $4
 
-DESCRIPTION: $5
+DESCRIPTION: $6
 
     define({prev},{$2})dnl
     divert(0)dnl
         {{$2})dnl
-        define({next$2},}
+        define({next$3},}
+divert(6)dnl
+* $2  ::  
+divert(9)dnl
+})dnl
+define({worddocsafe},{
+divert(9)dnl
+@node $3, next$3(), prev(), MyTop()
+@subsection $3
+
+NAME: $2 
+
+STACKEFFECT: $4
+
+DESCRIPTION: $6
+
+    define({prev},{$3})dnl
+    divert(0)dnl
+        {{$3})dnl
+        define({next$3},}
     divert(6)dnl
-* $1  : $2  
+* $2  : $3  
 divert(9)dnl
 })dnl
 dnl Leave the first half of the first definition (unused) 
