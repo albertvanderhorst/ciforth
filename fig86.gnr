@@ -1391,14 +1391,14 @@ alter its content, nor assume anything is appended.})},
 {{IN[] A   EMIT TIB @ 5 + = .},{A{}_T_} },
 enddoc)
 HEADER({IN[]},{INBRS},{DOCOL})
-        DC      SOURC, CELLP, TFET
+        DC      SRC, CELLP, TFET
         DC      OVER, EQUAL
         _0BRANCH(INBRS1)
         DC      ZERO
         _BRANCH(INBRS2)
 INBRS1:
         DC      LDUP
-        _ISO_IN_({DC      SOURC, FETCH, PLUS ;{ Make IN >IN.}})
+        _ISO_IN_({DC      SRC, FETCH, PLUS ;{ Make IN >IN.}})
         DC      CFET
         DC      ONE, LIN, PSTORE
 INBRS2:
@@ -1417,7 +1417,7 @@ alter its content, nor assume anything is appended.})},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 HEADER({(WORD)},{PWORD},{DOCOL})
 PWORD1: DC INBRS
-        DC OVER, SOURC, CELLP, FETCH, LSUB
+        DC OVER, SRC, CELLP, FETCH, LSUB
         _0BRANCH(PWORD1B)
         DC QBL
         _0BRANCH(PWORD1A)
@@ -1432,7 +1432,7 @@ PWORD2: DC INBRS, QBL, ZEQU
         _BRANCH(PWORD2)
 PWORD2A:
         DC OVER, LSUB
-        _ISO_IN_({DC      SWAP, SOURC, FETCH, PLUS, SWAP})
+        _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{(PARSE)},{paren_word},{ --- addr3 },{},
@@ -1444,12 +1444,12 @@ _VERBOSE_({So no leading delimiters are skipped.})},
 {{WORD}},
 {{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 HEADER({(PARSE)},{PPARS},{DOCOL})
-        DC      SOURC, CELLP, TFET
+        DC      SRC, CELLP, TFET
         DC TOR
 PPARS1: DC LDUP, RR, LSUB
         _0BRANCH(PPARS2)
         DC OVER, OVER
-        _ISO_IN_({DC      SOURC, FETCH, PLUS})
+        _ISO_IN_({DC      SRC, FETCH, PLUS})
         DC CFET, LSUB
         _0BRANCH(PPARS2)
         DC ONEP
@@ -1461,30 +1461,62 @@ PPARS2: DC SWAP, DROP
         DC      LDUP, LIN, STORE
         DC      INBRS, DROP, DROP
         DC      OVER, LSUB
-        _ISO_IN_({DC      SWAP, SOURC, FETCH, PLUS, SWAP})
+        _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC SEMIS
 ;
-worddoc( {PARSING},{SOURCE},{source},{addr --- },{},
+worddoc( {PARSING},{SRC},{s_r_c},{addr --- },{},
 {Return the address forthsamp({addr})
 of the current scan specification, allocated in the user area.
 It consists of three cells:
 the lowest and non-inclusive highest address of the parse area
 _CIF_IN_({the non-inclusive highest address of the parse area and a pointer to the next character to be parsed.})
 _ISO_IN_({the number of characters and the current index in the parse area.})
-Changing forthsamp({SOURCE}) takes immediate effect,
+Changing forthsamp({SRC}) takes immediate effect,
 and must be atomic, by using forthsamp({RESTORE-INPUT}),
 or changing only the third cell.
 The third cell has the alias
 _CIF_IN_({forthsamp({IN}) .})
 _ISO_IN_({forthsamp({>IN}) .})
-_VERBOSE_({Words like forthsamp({BLK}) and
-forthsamp({SOURCE-ID}) are secondary,
-and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
+_VERBOSE_({Words like forthsamp({BLK SOURCE}) 
+and forthsamp({SOURCE-ID}) are secondary,
+and return their output by ``second-guessing'' forthsamp({SRC}) .})},
 {{BLK},{SOURCE-ID}},
-{{SOURCE @ TIB @ = .},{_T_}},
+{{SRC @ TIB @ = .},{_T_}},
 enddoc)
-HEADER({SOURCE},{SOURC},{DOUSE}, _CELLS(27))      ;{ And 28 and 29.}
+HEADER({SRC},{SRC},{DOUSE}, _CELLS(27))      ;{ And 28 and 29.}
 ;
+_LOAD_({
+worddoc( {PARSING},{SOURCE},{source},{ --- addr n1},{ISO},
+{Return the address and length of the current input source.
+},
+{{SRC},{SOURCE-ID}},
+{{SOURCE DROP TIB @ = .},{_T_}},
+enddoc)
+HEADER({SOURCE},{SOURCE},{DOCOL})
+        DC      SRC, FETCH
+        DC      SRC, CELLP, FETCH
+        DC      OVER, LSUB
+        DC      SEMIS
+;
+worddoc( {INPUT},{>IN},{iso_in},{--- addr},{ISO},
+{Return a variable that contains the offset from the start
+within the current input text buffer (terminal or disc) from
+which the next text will be accepted. All parsing words use and
+move the value of forthcode({IN}). The variable
+forthcode({>IN}) is not actually used and its content must be
+fetched immediately.}, 
+{{(>IN)},{IN}},
+{{: GS1 >IN @ ; QUIT
+GS1 .},{4}},
+enddoc)
+HEADER({>IN},{IIN},{DOCOL})
+        DC      LIN, FETCH
+_CIF_IN_({DC      SRC, FETCH, LSUB     })
+        DC      PIIN, STORE
+        DC      PIIN 
+        DC      SEMIS
+;
+});_END_({_LOAD_})
 worddoc( {OUTPUT},{CR},{cr},{},{L0},
 {Transmit character(s)
 to the terminal, that result in
@@ -1504,7 +1536,7 @@ worddoc( {MEMORY},{CMOVE},{cmove},{from to count --},{},
 {Move the specified quantity of characters beginning at address
 from forthvar({to}) address forthvar({to}) . The contents of
 address from is moved first proceeding toward high memory, such
-that memory propagation occurrs. As the Pentintel 86-family is
+that memory propagation occurrs. As the intel 86-family is
 byte-addressing there are no restrictions. }, 
 {},
 { {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 CMOVE dnl
@@ -1512,13 +1544,13 @@ PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
 {PAD DUP 1+ 2 CMOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAA} },
 enddoc)
 CODE_HEADER({CMOVE},{LCMOVE})
-        CLD             ;{INC DIRECTION}
-        MOV     BX,SI   ;{SAVE IF}
-        POP     CX      ;{COUNT}
-        POP     DI      ;{DEST}
-        POP     SI      ;{SOURCE}
-        REP     MOVSB   ;{THAT'S THE MOVE}
-        MOV     SI,BX   ;{GET BACK IP}
+        CLD             ;{direction}
+        MOV     BX,SI   ;{save IP}
+        POP     CX      ;{count}
+        POP     DI      ;{dest}
+        POP     SI      ;{source}
+        REP     MOVSB   
+        MOV     SI,BX   ;{get back IP}
         _NEXT
 ;
 worddoc( {MEMORY},{MOVE},{move},{from to count --},{},
@@ -1534,10 +1566,10 @@ PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
 {PAD DUP 1+ 2 MOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAB} },
 enddoc)
 CODE_HEADER({MOVE},{LMOVE})
-        MOV     BX,SI   ;{SAVE IF}
-        POP     CX      ;{COUNT}
-        POP     DI      ;{DEST}
-        POP     SI      ;{SOURCE}
+        MOV     BX,SI   ;{SAVE IP}
+        POP     CX      ;{count}
+        POP     DI      ;{dest}
+        POP     SI      ;{source}
         CMP     SI,DI
         JC    MOVE1
         CLD             ;{INC DIRECTION}
@@ -2427,7 +2459,7 @@ HEADER({R0},{RZERO},{DOUSE}, _CELLS(4))
 ;
 worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{U},
 {A user variable containing the address of the terminal input buffer.},{},
-{{." See SOURCE"},{See SOURCE}},
+{{." See SRC"},{See SRC}},
 enddoc)
 HEADER({TIB},{TIB},{DOUSE}, _CELLS(5))
 ;
@@ -2592,7 +2624,7 @@ enddoc)
 HEADER({BLK},{BLK},{DOUSE}, _CELLS(26))
 ;
 worddoc( {INPUT},{IN},{in},{--- addr},{L0},
-{A user variable containing the byte offset within the current input
+{A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted. All parsing words use and move the value of forthcode({IN}) .},
 {{WORD},{(WORD)},{NUMBER},{(PARSE)},{IN[]}},
@@ -2600,6 +2632,19 @@ accepted. All parsing words use and move the value of forthcode({IN}) .},
 enddoc)
 HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
 ;
+_LOAD_({
+worddocsafe( {INPUT},{(>IN)},{paren_iso_in},{--- addr},{},
+{If the standard word forthcode({>IN}) is used, this variable 
+contains the offset from the start
+within the current input
+text buffer (terminal or disc) from which the next text will be
+accepted. All parsing words use and move the value of forthcode({IN}) .},
+{{>IN}},
+{{." See >IN"},{See >IN}},
+enddoc)
+HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
+;
+});_END_({_LOAD_})
 ;{========== END USER VARIABLES =============;}
 ;
 worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
@@ -3243,7 +3288,7 @@ DTRA4:
         DC      SEMIS
 ;
 _LOAD_({
-worddocsafe( {STRING},{S"},{s-quote},{ --- addr1 n},{ISO,L0},
+worddocsafe( {STRING},{S"},{s_quote},{ --- addr1 n},{ISO,L0},
 { Used in the form:
   forthsamp({S" cccc"})
 Leaves an in-line string forthsamp({cccc}) (delimited by the
@@ -3322,11 +3367,11 @@ is almost always followed by a call to forthcode({INTERPRET}).})},
 enddoc)
 HEADER({(EVAL)},{PEVAL},{DOCOL})
         DC      OVER, PLUS
-        DC      SWAP, SOURC, TSTOR
-        DC      SOURC, FETCH
+        DC      SWAP, SRC, TSTOR
+        DC      SRC, FETCH
         DC      LIN, STORE ; { IN}
-_ISO_IN_({       DC     SOURC, FETCH, NEGATE, LDUP
-        DC     SOURC, CELLP, PSTORE
+_ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
+        DC     SRC, CELLP, PSTORE
         DC     LIN, PSTORE
 })
 ;       DC      DOTS
@@ -3700,9 +3745,9 @@ HEADER({ERROR},{ERROR},{DOCOL})
         _0BRANCH(ERRO1) ;{IF}
         DC      PABOR   ;{THEN}
 ERRO1:  DC      LIN, FETCH, LDUP
-        _ISO_IN_({DC    SOURC, FETCH, PLUS})
+        _ISO_IN_({DC    SRC, FETCH, PLUS})
         DC      LIT, 20, LSUB
-        DC      SOURC, FETCH, MAX
+        DC      SRC, FETCH, MAX
         DC      SWAP,OVER, LSUB
         DC      LTYPE
         _STRINGINLINE({? })
@@ -3713,7 +3758,7 @@ ERRO1:  DC      LIN, FETCH, LDUP
         DC      QDUP
         _0BRANCH(ERRO2) ;{ IF}
         DC      DOT
-        DC      LIN,FETCH, SOURC, FETCH, LSUB
+        DC      LIN,FETCH, SRC, FETCH, LSUB
         DC      DOT    ;{THEN}
 ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
@@ -4917,7 +4962,7 @@ FLUS2:
         DC      SEMIS
 ;
 worddoc( {STORAGE},{SAVE},{save},{ --- },{L0},
-{Save the content of forthcode({SOURCE}) on the return stack
+{Save the content of forthcode({SRC}) on the return stack
 prior to changing the forthdefi({current input source}).
 This must be balanced by a RESTORE in the same definition.},
 {{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}},
@@ -4926,7 +4971,7 @@ This must be balanced by a RESTORE in the same definition.},
 enddoc)
 HEADER({SAVE},{SAVE},{DOCOL})
         DC      FROMR
-        DC      SOURC, TFET
+        DC      SRC, TFET
         DC      LIN, FETCH
         DC      TOR, TOR, TOR
         DC      TOR
@@ -4934,7 +4979,7 @@ HEADER({SAVE},{SAVE},{DOCOL})
 ;
 worddoc( {STORAGE},{RESTORE},{restore},{ --- },{L0},
 {This must follow a forthcode({SAVE}) in the same definition.
-Restore the content of forthcode({SOURCE}) from the return stack
+Restore the content of forthcode({SRC}) from the return stack
 thusly restoring the forthdefi({current input source}) to what
 it was when the forthcode({SAVE}) was executed.
 },
@@ -4945,14 +4990,14 @@ HEADER({RESTORE},{RESTO},{DOCOL})
         DC      FROMR
         DC      FROMR, FROMR, FROMR
         DC      LIN, STORE
-        DC      SOURC, TSTOR
+        DC      SRC, TSTOR
         DC      TOR
         DC SEMIS
 ;
 _LOAD_({
 worddoc( {STORAGE},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO L0},
 {Get a complete specification of the input source stream. For
-ciforth this is the content of forthcode({SOURCE}). ciforth
+ciforth this is the content of forthcode({SRC}). ciforth
 needs 3 cells, and is always able to forthcode({RESTORE}) an
 input saved like this. _VERBOSE_({This doesn't make this
 definition of any use at the application level.}) },
@@ -4961,7 +5006,7 @@ definition of any use at the application level.}) },
     GS1 34 . ?CSP},{34} },
 enddoc)
 HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
-        DC      SOURC, TFET
+        DC      SRC, TFET
         DC      LIN, FETCH
         DC      LIT, 3
         DC SEMIS
@@ -4978,7 +5023,7 @@ enddoc)
 HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC      DROP
         DC      LIN, STORE
-        DC      SOURC, TSTOR
+        DC      SRC, TSTOR
         DC SEMIS
 ;
 });_END_({_LOAD_})
