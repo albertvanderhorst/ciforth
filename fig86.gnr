@@ -1,4 +1,4 @@
-;               HCC FIG generic 8086 FORTH}
+;{               HCC FIG generic 8086 FORTH}
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
@@ -910,7 +910,10 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         JZ      BRAN1   ;{ YES, BRANCH}
         LEA     SI,[SI+CELLS(1)]
         _NEXT
-        PAGE
+;
+worddoc({MISC},{NOOP},{no_operation},{},{},{
+Do nothing. Primarily useful as a placeholder.
+},{})
 HEADER({NOOP},{NOOP},{$+4})
 ;{      DEBUG STUFF}
 NOP0:   DC      $+CELLS(1)
@@ -978,7 +981,14 @@ CODE_HEADER({I},{IDO})
 worddoc({INIT},{+ORIGIN},{plus_origin},{n --- addr},{},{
 Leave the memory address relative by forthvar({n}) bytes 
 to the area from which the user variables are initialised, 
-so one can access or modify the boot-up parameters. },{{(ABORT)},{USER}})
+so one can access or modify the boot-up parameters.
+A user variable addresses with an offset from the 
+initialisation for forthvar({U0}), which is at forthsamp({0 CELL+ +ORIGIN }). 
+This can be swapped to get a fresh set of user variables.
+One can access or modify the boot-up parameters, prior to saving a
+customised boot image, or to change the initialisation by forthcode({COLD}).
+},
+{{(ABORT)},{USER}})
 HEADER({+ORIGIN},{PORIG},{DOCOL})
         DC      LIT
         DC      USINI
@@ -1296,6 +1306,11 @@ CODE_HEADER({SP!},{SPSTO})
         MOV     STACKPOINTER,[BX+CELLS(3)]        ;{RESET PARAM STACK POINTER}
         _NEXT
 ;
+worddocsafe({STACKS},{RP@},{r_p_fetch},{--- addr},{},{
+Return the address forthvar({addr}) of the current return
+stack position, i.e. pointing the current topmost value.
+  (e.g.  forthsamp({1 >R  RP@  @  . R>})     would
+   type forthsamp({1}) )},{{S0},{SP!}})
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
         MOV     AX,BP   ;{RETURN STACK ADDR}
         _PUSH
@@ -1466,16 +1481,16 @@ CODE_HEADER({TOGGLE},{TOGGL})
         XOR     [BX],AX ;
         _NEXT
 ;
-worddocsafe({MEMORY},{@},{fetch},{addr --- n},{L0},{
-Leave the 16 bit contents of forthvar({addr}) .},{{!},{C@},{2@}})
+worddocsafe({MEMORY},{@},{fetch},{addr --- n},{ISO L0},{
+Leave the _BITS_ bit contents of forthvar({addr}) .},{{!},{C@},{2@}})
 CODE_HEADER({@},{FETCH})
         POP     BX
         MOV     AX,[BX]
         _PUSH
 ;
-worddocsafe({MEMORY},{C@},{c_fetch},{addr --- b},{},{
-Leave the 8 bit contents of memory address. On word addressing
-computers, further specification is needed regarding byte
+worddocsafe({MEMORY},{C@},{c_fetch},{addr --- b},{ISO},{
+Leave the 8 bit contents of memory address. On the Intel architectures
+there are no restrictions regarding byte
 addressing.},{{C!},{@},{2@}})
 CODE_HEADER({C@},{CFET})
         POP     BX
@@ -1483,13 +1498,17 @@ CODE_HEADER({C@},{CFET})
         MOV     AL,[BX]
         _PUSH
 ;
+worddocsafe({MEMORY},{2@},{two_fetch},{addr--- x1 x2},{ISO},{
+Leave a pair of _32_ bits values forthvar({x1}) forthvar({x2}) from
+consequitive cells at forthvar({addr}) . forthvar({x2}) is fetched from
+the lowest address. },{{2!},{@},{C@}})
 CODE_HEADER({2@},{TFET})
         POP     BX      ;{ADDR}
         MOV     AX,[BX] ;{MSW}
         MOV     DX,[BX+CELLS(1)]        ;{LSW}
         _2PUSH
 ;
-worddoc({MEMORY},{!},{store},{n addr ---},{L0},{
+worddoc({MEMORY},{!},{store},{n addr ---},{ISO L0},{
 Store 16 bits of n at address.},{{@},{C!},{2!}})
 CODE_HEADER({!},{STORE})
         POP     BX      ;{ADDR}
@@ -1497,7 +1516,7 @@ CODE_HEADER({!},{STORE})
         MOV     [BX],AX
         _NEXT
 ;
-worddoc({MEMORY},{C!},{c_store},{b addr ---},{},{
+worddoc({MEMORY},{C!},{c_store},{b addr ---},{ISO},{
 Store 8 bits at forthvar({addr}) . On word addressing computers, further
 specification is necessary regarding byte addressing.},{{C@},{!}})
 CODE_HEADER({C!},{CSTOR})
@@ -1506,6 +1525,10 @@ CODE_HEADER({C!},{CSTOR})
         MOV     [BX],AL
         _NEXT
 ;
+worddoc({MEMORY},{2!},{two_store},{addr--- x1 x2},{ISO},{
+Store a pair of _32_ bits values forthvar({x1}) forthvar({x2}) to
+consecutive cells at forthvar({addr}) . forthvar({x2}) is stored at
+the lowest address. },{{2@},{!},{C!}})
 CODE_HEADER({2!},{TSTOR})
         POP     BX      ;{ADDR}
         POP     AX      ;{MSW}
@@ -1516,6 +1539,11 @@ CODE_HEADER({2!},{TSTOR})
 ;
 CODE_HEADER({L@},{LFET})
 _BITS32_({
+worddocsafe({MEMORY},{L@},{long_fetch},{rseg addr --- n},{},{
+Leave the _BITS_ bit contents of forthvar({rseg:addr}),
+interpreted as if it was a real mode segment plus offset addres.
+This only works if the data segment is mapped directly (not paged) from 
+physical address 0H . },{{L!},{@},{C@},{2@}})
         POP     BX      ;MEM LOC
         POP     AX      ;SEG REG VAL
         MOV     DX,10H
@@ -1525,6 +1553,10 @@ _BITS32_({
         _PUSH
 });_END_({ _BITS32_})
 _BITS16_({
+worddocsafe({MEMORY},{L@},{long_fetch},{rseg addr --- n},{},{
+Leave the _BITS_ bit contents of forthvar({rseg:addr}),
+the real mode segment plus offset addres.},
+{{L!},{@},{C@},{2@}})
         POP     BX      ;MEM LOC
         POP     CX      ;SEG REG VAL
         _SWITCH_({JMPHERE_FROM_PROT})
@@ -1539,6 +1571,12 @@ _BITS16_({
 ;
 CODE_HEADER({L!},{LSTORE})
 _BITS32_({
+worddoc({MEMORY},{L!},{long_store},{n nseg addr --- },{},{
+Store _BITS_ bits of forthvar({n}) at address
+forthvar({rseg:addr}),
+interpreted as if it was a real mode segment plus offset addres.
+This only works if the data segment is mapped directly (not paged) from 
+physical address 0H . },{{L@},{!},{C!},{2!}})
         POP     BX      ;MEM LOC
         POP     AX      ;SEG REG VAL
         MOV     DX,10H
@@ -1549,6 +1587,11 @@ _BITS32_({
         _NEXT
 });_END_({ _BITS32_})
 _BITS16_({
+worddoc({MEMORY},{L!},{long_store},{n nseg addr --- },{},{
+Store _BITS_ bits of forthvar({n}) at address
+forthvar({rseg:addr}),
+a real mode segment plus offset addres.
+},{{L@},{!},{C!},{2!}})
         POP     BX
         POP     CX
         POP     DX
@@ -1560,8 +1603,6 @@ _BITS16_({
         _SWITCH_({JMPHERE_FROM_REAL})
         _NEXT
 });_END_({ _BITS16_})
-        PAGE
-        ;{ At line     LINE ~1000}
 ;
 worddoc({DEFINING},{:},{colon},{},{P,E,L0},{
 Used in the form called a colon-definition:
@@ -1618,7 +1659,7 @@ HEADER({CONSTANT},{CON},{DOCOL})
 DOCON:  MOV     AX,[BX+CELLS(1)] ;{GET DATA FROM PFA}
         _PUSH
 ;
-worddoc({DEFINING},{VARIABLE},{variable},{},{E,LU},{
+worddoc({DEFINING},{VARIABLE},{variable},{},{NISO,E,LU},{
 A defining word used in the form:
                  forthsamp({n VARIABLE cccc})
 When forthcode({VARIABLE}) is executed, it creates the definition forthvar({cccc}) with its
@@ -1639,7 +1680,8 @@ The parameter field of forthvar({cccc}) contains forthvar({n}) as a fixed offset
 the user pointer register forthsamp({UP}) for this user variable. When forthvar({cccc}) is
 later executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
-particular variable.},{{VARIABLE}})
+particular variable. In ciforth the forthsamp({UP}) is fixed.
+},{{VARIABLE},{+ORIGIN}})
 HEADER({USER},{USER},{DOCOL})
         DC      CON
         DC      PSCOD
@@ -1672,12 +1714,15 @@ CODE_HEADER({3},{THREE})
         MOV     AX,3
         _PUSH
 ;
-worddoc({STRING},{BL},{BL},{--- c},{},{
-A constant that leaves the ascii value for "blank".},{})
-HEADER({BL},{BLS},{DOCON})
-;{      THIS IS ONLY A SPAC}
-        DC      20H
-;
+worddoc({STRING},{BL},{BL},{--- c},{},{ A constant that leaves the
+   ascii value for "blank".},{}) HEADER({BL},{BLS},{DOCON}) 
+;{ THIS IS ONLY A SPAC} 
+    DC 20H 
+;                
+worddoc({SCREEN},{C/L},{char_per_line},{--- c},{},
+{A constant that leaves the number of characters on a line of a
+standard screen. }, 
+{{LIST},{LINE}}) 
 HEADER({C/L},{CSLL},{DOCON})
         DC      64
 ;
@@ -1712,6 +1757,10 @@ _HIGH_BUF_({Actually this is the highest system memory.})
 HEADER({LIMIT},{LIMIT},{DOCON})
         DC      BUF1+(KBBUF+2*CW)*NBUF
 ;{ THE END  OF THE MEMORY }
+worddoc({MEMORY},{EM},{end_memory},{---- addr},{},{
+A constant leaving the address just above the highest memory
+in use.
+},{{DP}})
 HEADER({EM},{LEM},{DOCON})
         DC      EM
 ;
@@ -1736,9 +1785,20 @@ HEADER({B/SCR},{BSCR},{DOCON})
 ;{ with the values from USINI.}
 ;{ The implementation relies on the initialisation of }
 ;{ those with numbers (1..11), so change in concord with USINI.}
+worddoc({MISC},{U0},{u_zero},{--- addr},{},{
+A user variable, leaving the start address of the user area. This is
+for reference only. What is taken into account by user variables is
+the corresponding initialisation variable. 
+},{{USER},{+ORIGIN}})
 HEADER({U0},{UZERO},{DOUSE})
         DC      CELLS(1)
 ;
+worddoc({INPUT},{RUBOUT},{rub_out},{--- c},{},{
+A user variable, leaving the key code that must delete the
+last character from the input buffer.
+_HOSTED_(In this ciforth it is not used, as the terminal input
+editing is left to the host operating system.)
+},{{USER}})
 HEADER({RUBOUT},{RUBOUT},{DOUSE})
         DC      CELLS(2)
 ;
@@ -1826,6 +1886,9 @@ dictionary searches will first begin.},{{VOCABULARY},{CURRENT}})
 HEADER({CONTEXT},{CONT},{DOUSE})
         DC      CELLS(16)
 ;
+worddoc({VOCABULARIES},{CURRENT},{current},{--- addr},{U,L0},{
+A user variable containing a pointer to the vocabulary to which
+new words will be added.},{{VOCABULARY},{CONTEXT}})
 HEADER({CURRENT},{CURR},{DOUSE})
         DC      CELLS(17)
 ;
@@ -1910,6 +1973,12 @@ CODE_HEADER({2+},{TWOP})
         ADD     AX,2
         _PUSH
 ;
+worddoc({MEMORY},{CELL+},{cell_plus},{n1 --- n2},{},{
+Advance the memory pointer forthvar({n1}) by one _BITS_ cel to
+forthvar({n2}). _VERBOSE_({This is invaluable for writing portable
+code. Many of the screens of ciforth run on both 16 and 32 bits
+systems, thanks to this.}) 
+},{})
 CODE_HEADER({CELL+},{CELLP})
         POP     AX
         ADD     AX,CW
@@ -3248,8 +3317,9 @@ HEADER({(LINE)},{PLINE},{DOCOL})
 ;
 worddoc({SCREEN},{.LINE},{dot_line},{line scr --},{},{
 Print on the terminal device, a line of text from the disc by its
-line and screen number. Trailing blanks are suppressed,
-which leads to a tremendous speed advantage on modern glass tty's. },{})
+line and screen number. _VERBOSE_(
+{Trailing blanks are suppressed,
+which leads to a tremendous speed advantage on modern glass tty's.})},{{C/L}})
 HEADER({.LINE},{DLINE},{DOCOL})
         DC      PLINE
         DC      DTRAI
@@ -3442,7 +3512,7 @@ Interrupt the current input stream in order to
 interpret screen forthvar({n}) .
 At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input stream.},
-{{-->}},{QUIT}},{;S}})
+{{-->},{QUIT},{;S}})
 HEADER({LOAD},{LOAD},{DOCOL})
         DC      BLK
         DC      FETCH,TOR
@@ -5034,9 +5104,19 @@ MAT4:   MOV     AX,SI   ;{NEW CURSOR ADDR}
         PAGE
 _DIRECTMAPPED_({
 ;
+worddoc({MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},{
+A user variable leaving the lowest address that is free in the lowest
+1 Mbyte of physical memory. This variable can be swapped with DP to
+compile into this area. 
+},{{LOW-EM}})
 HEADER({LOW-DP},{LOWDP},{DOUSE})
         DC      CELLS(14)
 ;
+worddoc({MEMORY},{LOW-EM},{low_end_memory},{---- addr},{},{
+A user variable leaving the address just above the highest memory
+usable in the lowest 1 Mbyte of physical memory. This area can be used
+to compile buffers into that must be accessed from real mode. 
+},{{DP},{EM}})
 HEADER({LOW-EM},{LOWEM},{DOUSE})
         DC      CELLS(15)
 ;
