@@ -16,7 +16,7 @@ REQUIRE $
 VARIABLE CSC
 
 \ From WHERE do we have optimisable code. (Ends at ``HERE'')
-VARIABLE OPT-START           0 OPT-START !
+VARIABLE OPT-START
 
 
 : !OPT-START   HERE OPT-START !   0 CSC ! ;
@@ -26,9 +26,6 @@ VARIABLE OPT-START           0 OPT-START !
 
 \ For STACKEFFECTBYTE : it IS good, neither unknown or variable.
 : SE-GOOD DUP $F AND NO-GOOD SWAP 4 RSHIFT NO-GOOD OR  0= ;
-
-\   Start the optimisation if we didn't already.
-: ?OPT-START    OPT-START @ 0= IF   !OPT-START THEN ;
 
 \ For STACKEFFECTBYTE : we CAN still optimise, because we know we have
 \ sufficiantly constant stack cells.
@@ -42,11 +39,10 @@ VARIABLE OPT-START           0 OPT-START !
 \ Treat the DEA that is know to be ``NS''. Combine it to the
 \ optimisation, if possible. Return: we ARE still optimising.
 : TREAT-NS
-    ?OPT-START
     SE@ DUP STILL-OPTIMISE IF
         COMBINE-SE  -1
     ELSE
-        DROP 0 OPT-START ! 0
+        DROP 0
     THEN
 ;
 
@@ -58,24 +54,23 @@ VARIABLE OPT-START           0 OPT-START !
        POSTPONE (;)    OPT-START @ 'NONAME >DFA !    NONAME ;
 
 
-\ Throw away the executable code that has been optimised.
+\ Throw away the executable code that is to be replaced with optimised code.
 : THROW-AWAY   OPT-START @ DP ! ;
 
 \ Compile ``CSC'' constants instead of the code optimised away.
 \ They sit on the stack now. We need a buffer to reverse them.
 CREATE BUFFER 16 ALLOT
-: COMPILE-CONSTANTS
-    BUFFER CSC @ CELLS BOUNDS DO I ! 1 CELLS +LOOP
-    BUFFER CSC @ 1- CELLS OVER + DO POSTPONE LIT I @ , -1 CELLS +LOOP
+: COMPILE-CONSTANTS CSC @ 0= 13 ?ERROR
+    BUFFER CSC @ CELLS BOUNDS ?DO I ! 1 CELLS +LOOP
+    BUFFER CSC @ 1- CELLS OVER + ?DO POSTPONE LIT I @ , -1 CELLS +LOOP
     '(;) HERE !     \ To prevent too many crashes while testing.
 ;
 
 \ Optimisation is over. Run the optimisable code and compile constants
 \ instead.
 : TERMINATE-EXECUTE-REPLACE
-    OPT-START @ HERE <> IF
+    OPT-START @ HERE <> IF   ." TER"
         EXECUTE-DURING-COMPILE THROW-AWAY COMPILE-CONSTANTS
-        !OPT-START
     THEN
 ;
 
@@ -83,9 +78,10 @@ CREATE BUFFER 16 ALLOT
 \ Add DEA to the optimisation chain, if possible. Leave it WAS possible.
 :  ?TREAT-NS? DUP NS? IF TREAT-NS ELSE DROP 0 THEN ;
 
+VARIABLE AAP
 \ For DEA : handle its optimisation or the cashing and restart of
 \ the optimisation.
-:  OPT/NOOPT    ?TREAT-NS? 0= IF TERMINATE-EXECUTE-REPLACE THEN ;
+:  OPT/NOOPT    ?TREAT-NS? 0= DUP AAP ! IF TERMINATE-EXECUTE-REPLACE THEN ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
 : EXPAND
@@ -95,9 +91,10 @@ CREATE BUFFER 16 ALLOT
     WHILE
 ^       OPT/NOOPT
 ^       R> 2DUP -  ^ HL-CODE,      HERE H.
+        AAP @ IF !OPT-START THEN
 ^   REPEAT 2DROP RDROP
     TERMINATE-EXECUTE-REPLACE   POSTPONE (;)
 ;
 
 \ Optimise DEA regards folding.
-: OPT-FOLD  >DFA DUP HERE    OVER @ EXPAND   SWAP ! ;
+: OPT-FOLD  >DFA HERE    OVER @ EXPAND   SWAP ! ;
