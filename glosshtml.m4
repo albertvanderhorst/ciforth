@@ -1,5 +1,8 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl $Id$
+define({forall}, {ifelse(len({$2}),0,,
+{$1}({$2}) {forall({$1},{$3},{$4},{$5},{$6},{$7},{$8},{$9},{$10})}
+)})dnl
 dnl Define a word definition on channel 9
 dnl        the corresponding menu item on channel 6
 dnl        and a definition for the second pass on channel 0
@@ -7,9 +10,6 @@ define({forthvar}, <I>$1</I>)
 define({forthsamp}, <B>$1</B>)
 define({forthexample},<P><B>$1</B><P>)
 define({forthcode}, <A HREF="#$1">$1</A>)
-define({seealso}, {ifelse(len({$1}),0,,
-forthcode({$1}) {seealso({$2},{$3},{$4})}
-)})
 define({worddoc},{
 divert(9)dnl
 <P>
@@ -27,7 +27,7 @@ $6
 ifelse(len({$7}),0,,{
 <P>
 
-SEE ALSO: seealso($7)})
+SEE ALSO: forall({forthcode},$7)})
 divert(6)dnl
 <LI>
 <A HREF="#$2">$2</A></LI>
