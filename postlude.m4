@@ -16,8 +16,9 @@ _BOOTLBA_({define({_BOOTED_}, _yes)})
 _LINUX_N_({ define( {_HOSTED_LINUX_}, _yes)})
 _LINUX_C_({ define( {_HOSTED_LINUX_}, _yes)})
 _WIN32_({define({_HOSTED_}, _yes)})
-_HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
+_HOSTED_DPMI_({define({_HOSTED_}, _yes)})
 _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
+_HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 
 dnl Hard consequences
 _BOOTFD_({define({_BOOTSECTRK_}, _yes)})
@@ -62,9 +63,12 @@ _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
 
+_PC_({define({_MSDOS_BYE_}, _yes)})
+_ABSOLUTELOAD_({define({_CLEANUP_BYE_}, _yes)})
+_HOSTED_DPMI_({define({_CLEANUP_BYE_}, _yes)})
+_CLEANUP_BYE_({define({_MSDOS_BYE_}, _no)})
+
 dnl Defines that directly regulate source inclusions, without depending defines.
-_PC_({define({_NORMAL_BYE_}, _yes)}) dnl default
-_ABSOLUTELOAD_({define({_NORMAL_BYE_}, _no)}) dnl exception
 define({_NO_RESPECTDOS_}, _yes)}) dnl default
 _RESPECTDOS_({define({_NO_RESPECTDOS_}, _no)})}) dnl exception
 define({_NO_SECURITY_}, _yes)}) dnl default

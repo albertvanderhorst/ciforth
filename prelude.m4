@@ -52,8 +52,10 @@ define({M4_HS},{5})
 dnl Have code to switch ourselves to protected mode, e.g. after booting.
 dnl Move forth up such thar ORG agrees with LOADADDRESS.
 define( {_SWITCH_}, _no)dnl
-dnl Have a normal return to MSDOS (without jumping to a CS-corrector)
-define({_NORMAL_BYE_}, _no)
+dnl Have a normal return to MSDOS: the official terminate
+define({_MSDOS_BYE_}, _no)
+dnl Have a return to MSDOS via a far jump, presumably clean up code.
+define({_CLEANUP_BYE_}, _no)
 dnl Work on a PC, as a PC. Not Linux.
 define({_PC_}, _no)
 dnl Normally no code needed switch between modes.
