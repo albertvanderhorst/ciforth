@@ -437,7 +437,7 @@ BEGIN1: CALL    READSECTOR
         MOV     [LFHEADS],AL
         MOV     AL, [LSPT]
         MOV     [LFSPT],AL,
-        MOV     AL, [LMEDIA]
+        MOV     AL, 0
         MOV     [LFDRIVE], DL
 
         JMP     ENDBOOT
@@ -2217,12 +2217,12 @@ CODE_HEADER({FARMOVE},{FMOVE})
 FARMV1:
         POP     SI      ;{source}
         POP     DX
-        PUSH    DS
-        PUSH    BX      ;{ES in fact.}
         AND     DX,DX
         JZ      FARMV2
         MOV     DS,DX
 FARMV2:
+        PUSH    BX
+        PUSH    BX
         REP     MOVSB
         MOV     HIP,AX   ;{restore }
         POP     ES
@@ -2769,13 +2769,8 @@ segment address pair forthsamp({faraddr}).
 enddoc)
 CODE_HEADER({L@},{LFET})
         POP     BX      ;MEM LOC
-        POP     CX      ;SEG REG VAL
-_BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
-        MOV     DX,DS   ;{ Leave this for real mode code.}
-        MOV     DS,CX
-        MOV     BX,[BX]
-        MOV     DS,DX
-_BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
+        POP     FS      ;SEG REG VAL
+        MOV     BX,[FS:BX]
         PUSH    BX
         _NEXT
 ;
@@ -2788,14 +2783,9 @@ forthvar({faraddr}).
 enddoc)
 CODE_HEADER({L!},{LSTORE})
         POP     BX
-        POP     CX
+        POP     FS      ;SEG REG VAL
         POP     DX
-_BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
-        MOV     AX,DS
-        MOV     DS,CX
-        MOV     [BX],DX
-        MOV     DS,AX
-_BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
+        MOV     [FS:BX],DX
         _NEXT
 });_END_({_LOAD_})
 ;

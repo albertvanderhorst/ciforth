@@ -223,7 +223,7 @@ dnl ##################################################################
 dnl
 dnl Applicable if 'BOOTSECTRK = _yes'
 dnl Make a boot floppy that is DOS compatible.
-define({_RESPECTDOS_}, _yes )
+define({_RESPECTDOS_}, _no )
 dnl
 dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.
 dnl
