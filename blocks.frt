@@ -136,7 +136,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  ( KRAKER )        10 LOAD
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
- ( ASSEMBLER 80x86 SAVE-BLOCKS) ;S   120 LOAD   97 98 THRU
+ ( ASSEMBLER 80x86 SAVE-BLOCKS) EXIT   120 LOAD   97 98 THRU
  : \ 0 WORD DROP ;  IMMEDIATE
  2 LIST    : TASK ;
  ( OLD:  NEW SYSTEM      23 LOAD   )
@@ -151,10 +151,10 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : 3M+ ROT >R 2M+ R> ADC ;
  : 4M+ ROT >R 3M+ R> ADC ;
  : 2U*  ( d1,d2-q unsigned product)
- ROT ( l1,l2,h2,h1)    OVER OVER U* >R >R ^
- ROT ( l1,h2,h1,l2)    OVER OVER U* >R >R ^
- SWAP DROP ROT ROT ( l2,l1,h2) OVER OVER U* >R >R ^
- DROP ( l1,l2)    U* ^ R> ADC ^ R> ADC ^
+ ROT ( l1,l2,h2,h1)    OVER OVER UM* >R >R ^
+ ROT ( l1,h2,h1,l2)    OVER OVER UM* >R >R ^
+ SWAP DROP ROT ROT ( l2,l1,h2) OVER OVER UM* >R >R ^
+ DROP ( l1,l2)    UM* ^ R> ADC ^ R> ADC ^
   IF ( carry) R> R> 2M+ 1+ ." C" ELSE
               R> R> 2M+    ." NC" THEN  ^
   R> R> 2M+ DROP ^ ;
@@ -226,7 +226,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
  ( Decompilation of special high level words)
   : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
-   BEGIN ?Q DUP @  LIT ;S <> >R DUP LIM @ < R> AND WHILE
+   BEGIN ?Q DUP @  LIT EXIT <> >R DUP LIM @ < R> AND WHILE
         ITEM REPEAT
    CR DROP ." ;" ?IM IF ."  IMMEDIATE " THEN CR ;
        CFOF TASK @  BY -hi
@@ -260,7 +260,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
    BEGIN
       DUP NEXTD LATEST < WHILE
       NEXTC DUP (KRAAK)
-   REPEAT DROP ;    ;S Remainder is broke
+   REPEAT DROP ;    EXIT Remainder is broke
  0 VARIABLE aux
  : PEMIT $7F AND 5 BDOS DROP ;
  : TO-LP-KRAAK-FROM
@@ -472,7 +472,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
              10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
  : INIT-T   FLAGS SIZE 0FF FILL ; ( Preset to 'prime')
  DECIMAL
- : 8/MOD   0 8 U/ ; ( May be redefined in assembler )
+ : 8/MOD   0 8 UM/MOD ; ( May be redefined in assembler )
  : CLEAR-B ( BIT# --  clears the specified bit)
            8/MOD FLAGS + SWAP  ( Address in flags table)
            C-MASK + C@         ( Get mask)
@@ -491,7 +491,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
            BEGIN  DUP LIM @ U<  WHILE
                   DUP CLEAR-B  OVER +
            REPEAT   DROP DROP ;
- : CHECK SIZE 16 U* 1000 U/  THOUSANDS @ U< IF
+ : CHECK SIZE 16 UM* 1000 UM/MOD  THOUSANDS @ U< IF
        ." INCREASE SIZE " ABORT ELSE DROP DROP THEN ;
  -->
  ." ERATOSTHENES >5< Main program - A. van der Horst " CR
@@ -969,7 +969,7 @@ NO-SEX .rel   MEISJES .set   FILES du$
 : RAND SEED @ 107465 * 234567 + DUP SEED ! ;
 
 ( N -- R Leave a random number < N)
-: CHOOSE RAND U* SWAP DROP ;
+: CHOOSE RAND UM* SWAP DROP ;
 ( Swap the number at R with a number 1..N cells away)
 : @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
 ( RANDOM-SWAP ( R N -- )
@@ -1191,7 +1191,7 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE  ASSEMBLER DEFINITIONS
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
 4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
 2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
-6 CONSTANT M    6 CONSTANT SP   ' ;S >CFA 0B + @ CONSTANT (NEXT)
+6 CONSTANT M 6 CONSTANT SP ' EXIT >CFA 0B + @ CONSTANT (NEXT)
 : 1MI CREATE C, DOES> C@ C, ;  : 2MI CREATE C, DOES> C@ + C, ;
  : 3MI CREATE C, DOES> C@ SWAP 8* +  C, ;
 : 4MI CREATE C, DOES> C@ C, C, ;
@@ -1222,7 +1222,7 @@ E2 CONSTANT PE  F2 CONSTANT 0<   : NOT 8 + ;
 : ELSE C3 IF SWAP THEN ;           : BEGIN HERE ;
 : UNTIL C, , ;                     : WHILE IF ;
 : REPEAT SWAP C3 C, , THEN ;
-;S
+EXIT
 
 : ;CODE
 ?CSP   COMPILE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
@@ -1430,7 +1430,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
  : MARK-TIME TIME ;
  : .mS SPACE 0 <# # # # [CHAR] . HOLD #S #> TYPE ." mS "  ;
  : ELAPSED DMINUS TIME D+ 500 M/ SWAP DROP ;  DECIMAL
- ( ;S REMOVE THIS LINE IF YOU WANT A TEST )
+ ( EXIT REMOVE THIS LINE IF YOU WANT A TEST )
  : TASK ; 24 LOAD
  : MEASURE TIME 1000 0 DO DO-PRIME LOOP ELAPSED ;
   MEASURE
@@ -1943,7 +1943,7 @@ ASSEMBLER DEFINITIONS
 : REL, ISS @ - X, ;
 : B, C, ;
 ( To be used when overruling, e.g. prefix)
-: lsbyte, 0 100 U/ SWAP C, ;
+: lsbyte, 0 100 UM/MOD SWAP C, ;
 : W, lsbyte, lsbyte, DROP ;
 : L, lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
 : RELL, ISS @ - L, ;  : RELW, ISS @ - W, ;
@@ -1967,7 +1967,7 @@ ASSEMBLER DEFINITIONS
 : 3FI CREATE C, C, C, DOES> 3 + <FIX FIX| FIX| FIX| DROP ;
 
 ( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
-: SPLIT 0 100 U/ ; ( To handle two bytes at once )
+: SPLIT 0 100 UM/MOD ; ( To handle two bytes at once )
 : SPLIT2 SPLIT SPLIT ; ( To handle three bytes at once )
 ( INCREMENT, OPCODE , COUNT -- )
 : 1FAMILY, 0 DO DUP 1PI OVER + LOOP DROP DROP ;
@@ -2091,7 +2091,7 @@ HEX : SAVE 140 * SYSTEM-OFFSET !
   140 0 DO I 0 READ-BLOCK2 .
          SYSTEM-OFFSET @ I + 0 WRITE-BLOCK2 .
   LOOP ;
-: .ELECTIVE 140 U* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
+: .ELECTIVE 140 UM* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
 DECIMAL
 
 ( TEST OF HARD DISK )
@@ -2107,7 +2107,7 @@ HEX : SAVE 140 * SYSTEM-OFFSET !
   140 0 DO I 0 READ-BLOCK2 .
          SYSTEM-OFFSET @ I + 0 WRITE-BLOCK2 .
   LOOP ;
-: .ELECTIVE 140 U* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
+: .ELECTIVE 140 UM* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
 DECIMAL
 DECIMAL
 ( 16 BITS: Experimenting with drive parameters ) HEX
@@ -2232,7 +2232,7 @@ DECIMAL
              10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
  : INIT-T   FLAGS SIZE 0FF FILL ; ( Preset to 'prime')
  DECIMAL
- : 8/MOD   0 8 U/ ; ( May be redefined in assembler )
+ : 8/MOD   0 8 UM/MOD ; ( May be redefined in assembler )
  : CLEAR-B ( BIT# --  clears the specified bit)
            8/MOD FLAGS + SWAP  ( Address in flags table)
            C-MASK + C@         ( Get mask)
@@ -2842,7 +2842,7 @@ RELATION-HTML A-SEX OF HEB JE LIEVER EEN JONGEN"
 MEISJES JONGENS
 RELATION-HTML NO-SEX OF HEB JE LIEVER EEN JOPIE"
 MEISJES JOPIE     NO-SEX .rel
-;S NOT YET
+EXIT NOT YET
 1-1-RELATION-HTML VR OF WIL JE HAAR VRIENTJE" MEISJES JOMGENS
 1-1-RELATION-HTML RV OF WIL JE ZIJN VRIENDIN" JOMGENS MEISJES
 
@@ -2962,7 +2962,7 @@ DOES> skip =KEYWORD ;
 : `IF [COMPILE] IF ;            : `BEGIN [COMPILE] BEGIN ;
 : `ELSE [COMPILE] ELSE ;        : `WHILE [COMPILE] WHILE ;
 : `THEN [COMPILE] THEN ;        : `REPEAT [COMPILE] REPEAT ;
-: `EXIT COMPILE ;S ;
+: `EXIT COMPILE EXIT ;
 
 : <BNF  SUC@ `IF <PTS `ELSE `EXIT `THEN ;
 : BNF>  SUC@ `IF PTS> `ELSE BT> `THEN ;

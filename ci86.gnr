@@ -1432,7 +1432,11 @@ worddoc({MEMORY},{CMOVE},{cmove},{from to count --},{},
 {Move the specified quantity of bytes beginning at address from forthvar({to})
 address forthvar({to}) . The contents of address from is moved first proceeding
 toward high memory. As the Pentintel 86-family is byte-addressing there are
-no restrictions. },{}, {}, enddoc)
+no restrictions. },
+{}, 
+{ {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 CMOVE dnl
+PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC} },
+enddoc)
 CODE_HEADER({CMOVE},{LCMOVE})
         CLD             ;{INC DIRECTION}
         MOV     BX,SI   ;{SAVE IF}
@@ -1445,23 +1449,32 @@ CODE_HEADER({CMOVE},{LCMOVE})
         MOV     SI,BX   ;{GET BACK IP}
         _NEXT
 ;
-worddoc({MULTIPLYING},{U*},{u_start},{u1 u2 --- ud},{},
+worddoc({MULTIPLYING},{UM*},{u_start},{u1 u2 --- ud},{ISO},
 {A mixed magnitude math operation which leaves the double number
  forthvar({d}) : the unsigned product of two unsigned numbers
- forthvar({n1}) and forthvar({n2}) .},{{U/}, {M*}.{*}}, {}, enddoc)
-CODE_HEADER({U*},{USTAR})
+ forthvar({n1}) and forthvar({n2}) .},
+{{UM/MOD}, {M*}.{*}}, 
+{ { -1 -1 UM* . INVERT .},{-2 -2},
+  {DECIMAL 240 204 UM* D.},{48960} },
+enddoc)
+CODE_HEADER({UM*},{USTAR})
         POP     AX
         POP     BX
         MUL     BX      ;{UNSIGNED}
         XCHG    AX,DX   ;{AX NOW = MSW}
         _2PUSH          ;{STORE DOUBLE CELL}
 ;
-worddoc({MULTIPLYING},{U/},{u_slash},{ud u1 --- u2 u3},{},
-{Leave the unsigned remainder forthvar({u2}) and unsigned quotient forthvar({u3}) from the
-unsigned double dividend forthvar({ud}) and unsigned divisor forthvar({u1}) .},{{U*},{M/},{/}}, 
-{}, 
+worddoc({MULTIPLYING},{UM/MOD},{u_slash},{ud u1 --- u2 u3},{ISO},
+{Leave the unsigned remainder forthvar({u2}) and unsigned
+quotient forthvar({u3}) from the unsigned double dividend
+forthvar({ud}) and unsigned divisor forthvar({u1}) .},
+{{UM*},{M/},{/}}, 
+{ 
+{-1. -1 UM/MOD . .},{-1 -1},
+{DECIMAL 12.34 100 UM/MOD . .},{12 34}
+}, 
 enddoc)
-CODE_HEADER({U/},{USLAS})
+CODE_HEADER({UM/MOD},{USLAS})
         POP     BX      ;{DIVISOR}
         POP     DX      ;{MSW OF DIVIDEND}
         POP     AX      ;{LSW OF DIVIDEND}
@@ -1523,14 +1536,19 @@ CODE_HEADER({INVERT},{INVER})
 worddocsafe({STACKS},{SP@},{s_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the stack position,
 as it was before forthcode({SP@}) was executed.
-  (e.g.  forthsamp({1  2  SP@  @  ...})     would
-   type forthsamp({2  2   1}) )},{{S0},{SP!}}, {}, enddoc)
+},
+{{S0},{SP!}}, 
+{ {1  2  SP@  @  . . . },{2 2 1} },
+enddoc)
 CODE_HEADER({SP@},{SPFET})
         MOV     AX,STACKPOINTER   ;{ (S1) <- (SP)}
         _PUSH
 ;
 worddoc({STACKS},{SP!},{s_p_store},{},{},
-{Initialize the stack pointer from forthcode({S0}) .},{}, {}, enddoc)
+{Initialize the stack pointer from forthcode({S0}) .},
+{{SP@}}, 
+{{  1 2 3 SP! SP@ S0 @ = .},{1} },
+enddoc)
 CODE_HEADER({SP!},{SPSTO})
         MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
         MOV     STACKPOINTER,[BX+CELLS(3)]        ;{RESET PARAM STACK POINTER}
@@ -1539,25 +1557,37 @@ CODE_HEADER({SP!},{SPSTO})
 worddocsafe({STACKS},{RP@},{r_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the current return
 stack position, i.e. pointing the current topmost value.
-  (e.g.  forthsamp({1 >R  RP@  @  . R>})     would
-   type forthsamp({1}) )},{{S0},{SP!}}, {}, enddoc)
+},
+{{R0},{RP!}}, 
+{{: GS1 1 >R  RP@  @  . R> ; GS1},{1}},
+enddoc)
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
         MOV     AX,BP   ;{RETURN STACK ADDR}
         _PUSH
 ;
 worddoc({STACKS},{RP!},{r_p_store},{},{},
 {Initialize the return stack
-pointer from user variable forthcode({R0}) .},{}, {}, enddoc)
+pointer from user variable forthcode({R0}) .},
+{{RP@}}, 
+{}, 
+enddoc)
 CODE_HEADER({RP!},{RPSTO})
         MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
         MOV     BP,[BX+CELLS(4)]        ;{RESET RETURN STACK PTR}
         _NEXT
 ;
-worddoc({SCREEN},{;S},{semicolon_s},{},{P,L0},
-{Stop interpretation of a screen.
-forthcode({;S}) is also the run-time word compiled at the end of a
-colon-definition which returns execution to the calling proceedure.},{}, {}, enddoc)
-CODE_HEADER({;S},{SEMIS})
+worddoc({CONTROL},{EXIT},{semicolon_s},{},{ISO},
+{ Stop interpretation of the current definition.
+The return stack must not be engaged, such as 
+between forthcode({>R}) forthcode({R>}) or forthcode({DO}) forthcode({LOOP}) .
+In ciforth it can also be used to stop interpretation from a
+string, block or file.
+forthcode({EXIT}) is also the run-time word compiled at the end of a
+colon-definition which returns execution to the calling proceedure.},
+{}, 
+{ {: GS1 1 EXIT 2 ; GS1 .},{1} }, 
+enddoc)
+CODE_HEADER({EXIT},{SEMIS})
         MOV     SI,[BP] ;{(IP) <- (R1)}
         LEA     BP,[BP+CELLS(1)]
         _NEXT
@@ -1891,7 +1921,7 @@ _SWITCH_({
 ;
 worddoc({DEFINING},{;},{semicolon},{},{P,C,L0},
 {Terminate a colon-definition and stop further compilation. Compiles
-the run-time forthcode({;S}) .},{}, {}, enddoc)
+the run-time forthcode({EXIT}) .},{}, {}, enddoc)
 HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      QCSP
         DC      COMP
@@ -3989,7 +4019,7 @@ worddoc({SCREEN},{LOAD},{load},{n ---},{L0},
 interpret screen forthvar({n}) .
 At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input stream.},
-{{-->},{QUIT},{;S}}, {}, enddoc)
+{{-->},{QUIT},{EXIT}}, {}, enddoc)
 HEADER({LOAD},{LOAD},{DOCOL})
         DC      BLK, FETCH, TOR
         DC      SAVE
