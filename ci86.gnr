@@ -6477,7 +6477,7 @@ behalf of this registers are saved and restored in
 forthcode({REG-SET}) . Unadorned calls to real interrupts are
 only available as forthcode({BIOS31}) .})
 },{{BDOSN}},
-{{23 _ _ _ 28 BIOSN . DROP .},{0 23}},
+{{23 _ _ _ _ 28 BIOSN . DROP .},{0 23}},
 enddoc)
 
 _NORMAL_BIOS_({
@@ -6505,11 +6505,11 @@ RQBIOSN:  INT(0)          ;{ Request number to be overwritten.}
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
         POP     HIP
-        AND     DI, 1
-        JZ      ELSE4
-        NEG     DI
-        NEG     AX
-ELSE4:
+         AND     DI, 1
+;        JZ      ELSE4
+;        NEG     DI
+;        NEG     AX
+; ELSE4:
         PUSH     AX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
@@ -6545,11 +6545,11 @@ CODE_HEADER({BIOSN},{BIOSN})
         LEA     RPO,[RPO + _CELLS(1)] ;{Bump return stack. After the pop!}.
         MOV     AX,_CELL_PTR[SaveAX]
         MOV     DX,_CELL_PTR[SaveFlags]
-        AND     AX, 1
-        JZ     ELSE3
-        NEG     DX      ;{Unix convention of negative error numbers.}
-        NEG     AX      ;{True forth flag.}
-ELSE3:
+          AND     AX, 1
+;         JZ     ELSE3
+;         NEG     DX      ;{Unix convention of negative error numbers.}
+;         NEG     AX      ;{True forth flag.}
+; ELSE3:
         PUSH    DX
         PUSH    AX
         _NEXT
@@ -8049,15 +8049,30 @@ RSLW2:
         DC      SEMIS
 ;
 });_END_({_BLOCKSINFILE_})
-;
+worddoc( {OPERATINGSYSTEM},{SHELL},{shell},{---addr},{},
+{Leave the address forthvar({addr}) of a counted string,
+the name of a file that contains the command interpreter,
+or shell.
+This name may be changed an is used by the
+ forthcode({SYSTEM}) command.
+The name may contain a path and be at most}
+_FILENAMELENGHT_M4_ {characters long.
+_HOSTED_LINUX_({ The default name is forthsamp({/bin/sh}) .})
+_PC_({ The default name is forthsamp({\COMMAND.COM}) .})
+},{{SYSTEM}},
+,
+enddoc)
 HEADER({SHELL},{SHELL},{DOVAR}, )
-         _STRING({/bin/sh})
+         _HOSTED_LINUX_(
+{        _STRING({/bin/sh})})
+        _PC_(
+{        _STRING({\COMMAND.COM})})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
 ;
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
 {Have the operating system execute the command contained
 in the string forthsamp({sc1}).
-_MODERN({{The environment is passed to the
+_MODERN_({{The environment is passed to the
 command, but not the changes made after ciforth started.}})
 },{{BLOCK},{?ERROR},{?ERRUR}},
 _LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}}, })
@@ -8098,6 +8113,7 @@ SYSARGS: DC   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 _MODERN_({
 HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, TOR
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
         _STRINGINLINE({X /c })  ;{X contains BD string count.}
         DC      RR, SSTOR
         DC      RR, SADD, LIT, ACR, RR, CHAPP
@@ -8107,7 +8123,7 @@ _HOSTED_DPMI_(
         DC      LIT, Save_DS_PR, FETCH, OVER
         DC      LIT, 256
         DC      FMOVE                         }) _END_({_HOSTED_DPMI_})
-        DC      LIT, SHELL, X, LIT, LOADEXEC
+        DC      SHELL, CELLP, X, LIT, LOADEXEC
         DC      LIT, 4B00H, BDOSN
         DC      SWAP, QERR
         DC      SEMIS
@@ -8119,7 +8135,6 @@ LOADEXEC:   DW  0       ; {The 0 are filled in at boot with DS.}
         DW      7CH
         DW      0
 COMBUF:  _RESB(CW+256)  ;{One cell for high level string manipulation.}
-SHELL:   DB      "\COMMAND.COM",0
 });_END_({_MODERN_})
 _LINUX_C_({
 worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
@@ -9759,8 +9774,8 @@ worddocchapter({STORAGE},{ },
 {The wordset forthsamp({STORAGE}) contains words to input and output
 to the mass storage, mainly using blocks.
  In this ciforth blocks reside
-_BOOTSECTRK_({ on the disk, by sector and track, })
-_BOOTLBA_({on the hard disk}) _HOSTED_({in the file, named
+_RWSECTRK_({ on the disk, by sector and track, })
+_BOOTLBA_({on the hard disk}) _HOSTED_({in a file, named
 forthfile({forth.lab}) by default. }).
 They are underlying the forthsamp({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
