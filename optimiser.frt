@@ -178,7 +178,7 @@ HERE SWAP !
 \ BRANCH and TARGET is free with respect to GAP, i.e. this jump is either
 \ totally outside or totally inside the GAP.
 : FREE-WRT?
-    >R 2DUP = IF 2DROP DROP RDROP 0 EXIT THEN R> \ You may jump to the start of a gap always!
+    >R 2DUP = IF 2DROP DROP RDROP -1 EXIT THEN R> \ You may jump to the start of a gap always!
     D>R
     SWAP DR@ WITHIN              \ BRANCH inside
     SWAP DR> WITHIN  \ Target Inside
@@ -370,6 +370,7 @@ DROP 0 THEN ;
 ;
 \ Reorder a SEQUENCE to delay constants as much as possible.
 \ Return rearranged SEQUENCE (which is in fact the same address.)
+\ It is required that the ``BRANCHES'' set has been filled.
 : REORDER   DUP ( DUP FILL-BRANCHES)
     BEGIN DUP ?NOT-EXIT WHILE REORDER-ONE REPEAT DROP ;
 

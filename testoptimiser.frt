@@ -52,3 +52,6 @@ CRACK DOIT
 \ This example must not be handled by a match.
 : test6a  IF 2 + THEN 3 + ;
 'test6a SHOW-IT
+
+: test6b SWAP IF 3 THEN 5 7 9 BASE ! SWAP ;
+'test6b SHOW-IT
