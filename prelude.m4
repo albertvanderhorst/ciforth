@@ -101,6 +101,10 @@ dnl Run the forth in 32bits (so protected) mode
 dnl (must be in accordance with above).
 define( {_BITS32_}, _no)dnl
 dnl
+dnl This forth is 64 bits (compatibility with Alpha).
+dnl (must be in accordance with above).
+define( {_BITS64_}, _no)dnl
+dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl    Combine those marked A only with A's from the next group,
 dnl    same for B's

@@ -478,6 +478,54 @@ VARIABLE SEED
 ( RANDOM-SWAP ( R N -- )
 ( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
 RANDOMIZE
+( TIME&DATE ) CF: \ AH A30610
+REQUIRE +THRU
+1 2 +THRU
+
+
+
+
+
+
+
+
+
+
+
+
+
+( TIME&DATE ) ?LI \ AH A30610
+: SSE   0 0 0 13 LINOS ; ( Seconds since epoch: 1970/1/1)
+: |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
+CREATE TABLE ( start of month within leap period) 0
+    31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
+    31 | 28 | 5m 5m   DROP    : T[] CELLS TABLE + @ ;
+\ For DAYS within leap return MONTHS
+: MONTHS   >R 0 BEGIN R@ OVER T[] > WHILE 1+ REPEAT 1- RDROP ;
+\ For DAYS within leap period return DAY MONTH YEARS
+: SPLIT-LEAP  DUP MONTHS DUP >R T[] - 1+  R> 12 /MOD >R 1+ R> ;
+\ For TIME return SEC MIN HOUR DAYS
+: SPLIT-OFF-TIME   0 60 UM/MOD   60 /MOD   24 /MOD ;
+\ For DAYS return DAY MONTH YEAR
+: SPLIT-OFF-DATE  1461 /MOD >R SPLIT-LEAP   R> 4 * + 1970 + ;
+\ Return current  SEC MIN HOUR DAY MONTH YEAR
+: TIME&DATE   SSE   SPLIT-OFF-TIME   SPLIT-OFF-DATE ;
+( TIME&DATE ) ?PC \ AH A30612
+
+HEX
+
+\ Return current  DAY MONTH YEAR
+: DATE    2A00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
+    R> 100 /MOD   R> ;
+
+\ Return current  SEC MIN HOUR
+: TIME    2C00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
+    R> 100 /   R> 100 /MOD ;
+
+\ Return current  SEC MIN HOUR DAY MONTH YEAR
+: TIME&DATE TIME DATE ;
+
+DECIMAL
 ( **************Non ISO language extension *******************)
 
 
@@ -1086,8 +1134,24 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 
+( SET-TRAPS ) CF: \ AvdH A3jun12
+
+\ Default (MSDOS) no worky-worky
+: SET-TRAPS  DROP ;
+
+?LI
+'SET-TRAPS HIDDEN
+\ Make sure any traps restart Forth at ADDRESS .
+: SET-TRAPS  32 0 DO I OVER _ 48 LINOS DROP LOOP DROP ;
+
+
+
+
+
+
+
 ( DO-DEBUG NO-DEBUG ^ ) \ AvdH A1nov24
-REQUIRE OLD:
+REQUIRE OLD:    REQUIRE SET-TRAPS
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 \ Print index line of SCREEN .
@@ -1095,7 +1159,7 @@ REQUIRE OLD:
 \ An alternative ``THRU'' that displays first and last index.
 : NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
   OLD: THRU ;
-: SET-TRAPS  32 0 DO I OVER _ 48 LINOS DROP LOOP DROP ;
+
 \ Install and de-install the alternative ``OK''
 : DO-DEBUG   'WARM 16 - SET-TRAPS
    'NEW-OK >DFA @   'OK >DFA !

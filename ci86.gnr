@@ -2238,6 +2238,7 @@ quotient forthvar({u3}) from the unsigned double dividend
 forthvar({ud}) and unsigned divisor forthvar({u1}) .},
 {{UM*},{SM/REM},{/}},
 {
+{1 -2 -1 UM/MOD . .},{-1 0},
 {DECIMAL 12.34 100 UM/MOD . .},{12 34}
 },
 enddoc)
@@ -2629,7 +2630,7 @@ CODE_HEADER({2OVER},{TOVER})
         _2PUSH
 ;
 worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{ISO,FIG,L0},
-{ Add forthvar({n}) to the value forthvar({addr}).},
+{ Add forthvar({n}) to the value at forthvar({addr}).},
 {{TOGGLE},{!}},
 {{0 PAD ! 1 PAD +! PAD @ .},{1},
  {1 PAD ! -1 PAD +! PAD @ .},{0} },
@@ -2714,7 +2715,7 @@ CODE_HEADER({C!},{CSTOR})
         MOV     [BX],AL
         _NEXT
 ;
-worddoc( {MEMORY},{2!},{two_store},{addr--- x1 x2},{ISO},
+worddoc( {MEMORY},{2!},{two_store},{x1 x2 addr --- },{ISO},
 {Store a pair of _BITS_ bits values forthsamp({x1})
 forthsamp({x2}) to consecutive cells at forthvar({addr}) .
 forthsamp({x2}) is stored at the lowest address.
@@ -3402,7 +3403,7 @@ _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
 ;
 _HEADER({CELLS},{LCELLS},{DOCOL})
-        DC      _BITS16_({ONE}) _BITS32_({TWO})
+        DC      _BITS16_({ONE}) _BITS32_({TWO}) _BITS64_({{LIT, 4}})
         DC      LSHIFT
         DC      SEMIS
 ;
@@ -3451,15 +3452,16 @@ it if necessary to forthsamp({addr2}).
 _ALIGNED_(,{ In this ciforth this is a NOOP.})
 },{{ALIGN}},
 _ALIGNED_({
-{{ 4 ALIGNED .},{4},
-{5 ALIGNED . },{8}}
+_BITS16_({{{ 4 ALIGNED .},{4}, {5 ALIGNED . },{6}},}) dnl Expanded before worddoc.
+_BITS32_({{{ 4 ALIGNED .},{4}, {5 ALIGNED . },{8}},}) dnl Expanded before worddoc.
+_BITS64_({{{ 8 ALIGNED .},{8}, {0A ALIGNED . },{10}},}) dnl Expanded before worddoc.
 }),
 enddoc)
 CODE_HEADER({ALIGNED}, {ALIGNED}, {DOCOL})
 _ALIGNED_({
         POP     AX
         DEC     AX
-        OR      AL,3
+        OR      AX, _CELLS(1)-1
         INC     AX
         PUSH    AX
 },{dnl});_END_({_ALIGNED_})
@@ -5237,7 +5239,7 @@ _HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      ZERO, COMMA   ;{ Dummy code field}
         DC      ZERO, COMMA   ;{ Dummy data field}
         DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
-        DC      ZERO, COMMA ;{Links to the word FORTH}
+        DC      ZERO, COMMA ;{End of wordlist.}
 
         DC      DOES
 DOVOC:
@@ -6206,7 +6208,7 @@ BUFFER3:
 ;{ Remember the next stalest buffer. }
     DC       RR
 BUFFER2:
-    DC       PBUF, OVER, CELLP, FETCH,
+    DC       PBUF, OVER, CELLP, FETCH
     DC       LIT, -1, GREAT, LAND
     _0BRANCH(BUFFER2)
     DC       STALEST, STORE
@@ -7684,7 +7686,7 @@ _HEADER({KEY},{KEY},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {INPUT},{KEY?},{key_question},{--- ff},{ISO},
-{Return into forthvar({ff}) return whether a character is available.
+{Return into forthvar({ff}) whether a character is available.
 The next execution of forthcode({KEY}) will return the character immediately.
 },
 {{KEY},{ACCEPT},{KEY?}},
@@ -9070,7 +9072,7 @@ forthsamp({n1 n2}) is used for error testing.},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
 {0 1 2 3 4},
-{S0 @ DSP!},{}
+{6 GI3 .},{6}
 },
 enddoc)
 _HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
