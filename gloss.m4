@@ -57,5 +57,6 @@ divert(7)dnl
 dnl Normal description comes after the definitions but before the menu's 
 dnl and contents.
 divert(2)dnl
+{define({MyTop},{Glossary})dnl}
 
 
