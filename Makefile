@@ -217,7 +217,7 @@ boot: ci86.alone.bin
 # that is filled in with care.
 # The option BOOTSECTRK must be installed into alonetr.m4.
 trboot: ci86.alonetr.bin lina forth.lab
-	rm fdimage
+	rm fdimage || true
 	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
 	     \"fdimage\" PUT-FILE BYE | lina
 	cat forth.lab >>fdimage
