@@ -170,10 +170,6 @@ GDT_CS EQU 10H  ;{ % The protected mode code segment }
 ; { interrupts are executed while CS contains GDT_DS. The real mode code}
 ; { uses data from the sandbox.}
 GDT_DS         EQU     DS_SANDBOX ;{ % The protected mode data segment}
-; Start addresses belonging to the descriptors.
-CS_START        EQU     BOOTADDRESS - M4_ORG
-DS_START        EQU     CS_START ; {Don't want these to be different in prot. mode}
-SWITCH_START    EQU     10H*GDT_SWITCH ;{This relation makes switching possible.}
 
 IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
 IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
@@ -465,26 +461,29 @@ PROTECT:
         MOV     AX,GDTLEN
         STOSW
 ;{ The switch segment.         }
-;{ You can only switch between real and (16-bit) protected mode,}
-;{ while using this segment.}
-;{ PREPARE-CS : GDT_SWITCH:X (real) is the same address as  }
-;{ SWITCH_START +X (@@@) in protected mode }
-        MOV     DI,GDT_SWITCH
+;{ Switch between real and (16-bit) protected mode is done,}
+;{ while using this segment (Relocatable code only).}
+;{ GDT_SWITCH is arbitrary, here we ensure that the real mode address  }
+;{ is the same as the protected mode address  }
+        MOV     BX,GDT_SWITCH
+        MOV     DI,BX
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,SWITCH_START ; { @@@ }
+        SHL     BX,4
+        MOV     AX,BX
         STOSW
         MOV     AX,9A00H
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
-;{ PREPARE DS/SS/ES ; only SS used in real mode.   }
-;{  The real mode view of GDT_DS is DS_SANDBOX}
-;{  DS_SANDBOX must be empty          }
+;{ GDT_DS is arbitrary. }
+;{  The real mode view of GDT_DS would best be a SANDBOX (that is empty).}
+;{ But for the moment, DS is set after switching anyway.}
         MOV     DI,GDT_DS
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,DS_START
+        MOV     AX,CS   ; {Note that we made this correct!}
+        SHL     AX,4
         STOSW
         MOV     AX,9200H
         STOSW
@@ -494,15 +493,14 @@ PROTECT:
         MOV     DI,GDT_CS
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,CS_START
+        MOV     AX,CS   ; {Note that we made this correct!}
+        SHL     AX,4
         STOSW
         MOV     AX,9A00H
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW
 
-        MOV     AX,REALSEGMENT
-        MOV     ES,AX
         LGDT    [GDTLOAD]
 });_END___1__({ _SWITCH_1_})
 
