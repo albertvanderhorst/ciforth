@@ -175,7 +175,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
  : <> - 0= 0= ;   33 LOAD -->
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
-   HERE VARIABLE LIM
+   HERE VARIABLE LIM  : H.. BASE @ >R HEX . R> BASE ! ;
  : (KRAAK) ( CFA--. Decompile a word from its CFA )
     DUP NEXTN LIM ! ( Get an absolute limit)
     DUP @ SEL@ IF ( Is content of CFA known?)
@@ -184,7 +184,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
        CR DROP DUP DUP @ 0 CELL+ - = IF
            ." Code definition : " ELSE ." Can't handle : "
        ENDIF ID.. CR
-    ENDIF ;
+    ENDIF ;  : B.. H.. ;
  : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
@@ -195,11 +195,11 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
    T, CFOF T, ; ( a word from the input stream )
  ( Example of a defining word decompilation)
  ( It is done by examples of the defined words )
- : -co DUP C->P @ CR H. ." CONSTANT " ID.. CR ;
+ : -co DUP C->P @ CR H.. ." CONSTANT " ID.. CR ;
         CFOF BL @ BY -co
- : -va DUP C->P @ CR H. ." VARIABLE " ID.. CR ;
+ : -va DUP C->P @ CR H.. ." VARIABLE " ID.. CR ;
         CFOF SELTAB @ BY -va
- : -us DUP C->P C@ CR B. ."  USER " ID.. CR ;
+ : -us DUP C->P C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE @ BY -us
  : ITEM ( 1/1 Desinterpret next item, increments pointer)
      DUP @ SEL@ ( Something special ?)
@@ -215,7 +215,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
    CR DROP ." ;" ?IM IF ."  IMMEDIATE " THEN CR ;
        CFOF TASK @  BY -hi
  ( for all -words: 1/1 pointer before afd after execution)
- : -lit CELL+ DUP @ H. CELL+ ;
+ : -lit CELL+ DUP @ H.. CELL+ ;
      CFOF LIT BY -lit
  : -0br CR ." 0BRANCH [ " -lit ." , ] " ;
      CFOF 0BRANCH BY -0br
