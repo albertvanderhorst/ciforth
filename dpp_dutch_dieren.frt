@@ -36,7 +36,7 @@ EXPERIMENT.
 : IsIt$         "Is het een " ;
 : SmartEeh$     "Slim, he?" ;
 : DumbEeh$      "Ik moet toegeven dat ik het niet weet." ;
-: PleaseLearn$  "Vertel asjeblief wat je in gedachten had." ;
+: PleaseLearn$  "Vertel asjeblief wat je in gedachten had" ;
 : GotItWrong$   "Ik had het dus fout" ;
 : NeedQuestion1$ "Nu heb ik een vraag nodig om verschil te maken" ;
 : NeedQuestion2$ "tussen de twee volgende mogelijkheden" ;
@@ -46,9 +46,13 @@ EXPERIMENT.
 : AnswerQuestion$ "Beantwoord de vraag voor :" ;
 : NoGoodEeh1$   "Dus de vraag is eigenlijk toch niet goed, he?" ;
 : NoGoodEeh2$   "Ik laat het er maar bij." ;
-: AreYouSure1$  "Misschien moet de vraag :" ;
-: AreYouSure2$  "wel beantwoord worden met " ;
-: AreYouSure3$  "Ben je er zeker van" ;
+: AreYouSure1$  "De meeste mensen beantwoorden de vraag :" ;
+: AreYouSure2$  "voor een " ;
+: AreYouSure2a$  " *niet* met " ;
+: AreYouSure3$  
+"Voor de zekerheid vraag ik het nog een keer.
+Je mag bij twijfel ook onbekend (of ?) zeggen."
+;
 : GotLeft1$     "Er zijn er nog " ;
 : GotLeft2$     " over" ;
 : GoOn$         "Wil je nog een keer" ;
