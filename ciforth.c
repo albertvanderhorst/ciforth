@@ -246,7 +246,7 @@ int block_fid = -1;
 
 /* Open out block file with the Forth name `filename' */
 /* `filename' is a stored Forth string.               */
-int c_block_init( int count, char filename[] )
+int c_block_init( int access, int count, char filename[] )
 {
   /* turn into c-string */
   char zname[MAX_COMMAND];
@@ -254,7 +254,8 @@ int c_block_init( int count, char filename[] )
   zname[count] = 0;
 
   close(block_fid);    /* Silently. */
-  block_fid = open( zname, O_RDWR );
+  block_fid = open( zname, access );
+  printf("block_fid is %d\n", block_fid);
 
   return block_fid > 0 ? 0 : errno;
 }
