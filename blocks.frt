@@ -622,14 +622,14 @@ CURRENT @   'DENOTATION >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'DENOTATION >WID CURRENT ! instead of DEFINITIONS
-( COMPARE BOUNDS ) \ AvdH A1oct04
+( COMPARE BOUNDS ALIGN ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
      MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
+\ ISO
+: ALIGN   BEGIN HERE 0 CELL+ 1- AND WHILE 0 C, REPEAT ;
 \ In general use
 : BOUNDS   OVER + SWAP ;
-
-
 
 
 
@@ -1089,14 +1089,14 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 ( OOPS EDIT: ) \ AvdH A1oct12
 
 "EDIT" PRESENT? 0= ?LEAVE-BLOCK
+">SFA" PRESENT? 0= ?LEAVE-BLOCK
 
 \ edit the following word
 : EDIT: (WORD) FOUND >SFA @  1 MAX 255 MIN EDIT ;
 
+
 \ edit the latest word, the one with the bug
 : OOPS LATEST >SFA @ EDIT ;
-
-
 
 
 
@@ -1438,22 +1438,6 @@ IMMEDIATE
 
 
 
-( 2DROP ALIGN                 A0JUL03 AvdH HCCFIG HOLLAND)
-
-
-: ALIGN BEGIN HERE 0 CELL+ 1- AND WHILE 0 C, REPEAT ;
-
-
-
-
-
-
-
-
-
-
-
-
 ( 8086 ASSEMBLER TESTS    A0JUL05 AvdH HCC FIG HOLLAND)
 ( Tests applicable always )
   CODE TEST-NEXT NEXT  C;
@@ -1469,7 +1453,23 @@ IMMEDIATE
 
 
 
+\
+( spare )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
 ( Protected mode  switching macros A0JUL03 AvdH HCCFIG HOLLAND)
 ?32  ( Test applicable to 32 bit mode)
 
@@ -1489,7 +1489,7 @@ DECIMAL
 ( ASSEMBLER 32 BIT ELECTIVES A0JUL03 AH)
 1 2 HEX +THRU DECIMAL ( Load either 16 or 32 bit stuff)
 3 6 HEX +THRU  DECIMAL ( 8086 level instructions )
-7 13 HEX +THRU DECIMAL ( 80386 level instructions )
+7 10 HEX +THRU DECIMAL ( 80386 level instructions )
 
 
 
@@ -1630,54 +1630,6 @@ DECIMAL
 
 
 
-( LOCATED LOCATE .SOURCEFIELD ) REQUIRE CONFIG \ AvdH A1sep26
-">SFA" PRESENT? 0= ?LEAVE-BLOCK
-\ Interpret a SOURCEFIELD heuristically.
-: .SOURCEFIELD
-    DUP 0 = IF "Belongs to the kernel" TYPE CR ELSE
-    DUP 1000 < IF LIST ELSE
-    DUP TIB @ 40000 WITHIN IF "Typed in" TYPE CR ELSE
-    50 - 200 TYPE THEN THEN THEN ;
-\ Show the screen or text how SC is defined
-: LOCATED FOUND DUP 0= 11 ?ERROR >SFA @ .SOURCEFIELD ;
-\ Idem but string from input.
-: LOCATE (WORD) LOCATED ;
-
-
-
-
-( OS-IMPORT cd ) REQUIRE CONFIG ?LI \ AvdH A1sep25
-
-CREATE cmdbuf 1000 ALLOT
-: OS-IMPORT ( sc "name-forth"  -- )
-     CREATE , ,
-     DOES>
-     2@ cmdbuf $! BL cmdbuf $C+ \ Command
-     ^J (PARSE) cmdbuf $+!      \ Append
-     cmdbuf $@ SYSTEM          \  Execute
-;
-
-\ Change directory to SC .
-: cdED PAD $! 0 PAD $C+
-PAD CELL+ HERE HERE 12 LINOS ?LINUX-ERROR ;
-\ Idem but string from input.
-: cd (WORD) cdED ;
-( cat echo diff grep list ls make man rm   ee l ) \ AvdH A1oct0
-REQUIRE OS-IMPORT       ?LI
-"cat    "   OS-IMPORT cat
-"echo   "   OS-IMPORT echo
-"diff   "   OS-IMPORT diff
-"grep   "   OS-IMPORT grep
-"list   "   OS-IMPORT list
-"ls     "   OS-IMPORT ls
-"make   "   OS-IMPORT make
-"man    "   OS-IMPORT man
-"rm  -i "   OS-IMPORT rm
-
-"ee     "   OS-IMPORT ee
-"l      "   OS-IMPORT l
-""          OS-IMPORT !!
-
 ( protected mode  switching MACROS a0JUL03 AvdH HCCFIG HOLLAND)
 
 : GET-CR0   MOV|CD, F| CR0| R| AX| ;
@@ -1709,6 +1661,54 @@ REQUIRE OS-IMPORT       ?LI
 
 
 
+
+( LOCATED LOCATE .SOURCEFIELD ) REQUIRE CONFIG \ AvdH A1sep26
+">SFA" PRESENT? 0= ?LEAVE-BLOCK
+\ Interpret a SOURCEFIELD heuristically.
+: .SOURCEFIELD
+    DUP 0 = IF "Belongs to the kernel" TYPE CR ELSE
+    DUP 1000 < IF LIST ELSE
+    DUP TIB @ 40000 WITHIN IF "Typed in" TYPE CR ELSE
+    50 - 200 TYPE THEN THEN THEN ;
+\ Show the screen or text how SC is defined
+: LOCATED FOUND DUP 0= 11 ?ERROR >SFA @ .SOURCEFIELD ;
+\ Idem but string from input.
+: LOCATE (WORD) LOCATED ;
+
+
+
+
+( OS-IMPORT cd ) REQUIRE CONFIG ?LI \ AvdH A1sep25
+"SYSTEM" PRESENT? 0= ?LEAVE-BLOCK
+CREATE cmdbuf 1000 ALLOT
+: OS-IMPORT ( sc "name-forth"  -- )
+     CREATE , ,
+     DOES>
+     2@ cmdbuf $! BL cmdbuf $C+ \ Command
+     ^J (PARSE) cmdbuf $+!      \ Append
+     cmdbuf $@ SYSTEM          \  Execute
+;
+
+\ Change directory to SC .
+: cdED PAD $! 0 PAD $C+
+PAD CELL+ HERE HERE 12 LINOS ?LINUX-ERROR ;
+\ Idem but string from input.
+: cd (WORD) cdED ;
+( cat echo diff grep list ls make man rm   ee l ) \ AvdH A1oct0
+REQUIRE OS-IMPORT       ?LI
+"cat    "   OS-IMPORT cat
+"echo   "   OS-IMPORT echo
+"diff   "   OS-IMPORT diff
+"grep   "   OS-IMPORT grep
+"list   "   OS-IMPORT list
+"ls     "   OS-IMPORT ls
+"make   "   OS-IMPORT make
+"man    "   OS-IMPORT man
+"rm  -i "   OS-IMPORT rm
+
+"ee     "   OS-IMPORT ee
+"l      "   OS-IMPORT l
+""          OS-IMPORT !!
 
 ( EDITOR ) REQUIRE CONFIG   ?PC    \ AvdH A1oct05
 REQUIRE IVAR   REQUIRE +THRU
@@ -2004,14 +2004,14 @@ CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
 RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
  : R/W-BLOCK  ASSEMBLER
-  OS:, POPX, AX|   OS:, ADD, W| R| AX'| AX|
-  OS:, MOVFA, W1| BL# W,   PUSHX, SI|
+  OS:, POP|X, AX|   OS:, ADD, W| R| AX'| AX|
+  OS:, MOVFA, W1| BL# W,   PUSH|X, SI|
   MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
   MOVXI, SI| PARAM-BLOCK SWITCH_DS 10 * -  W,
   TO-REAL, SWITCH_DS COPY-SEG
- XCHG|AX, BX| INT, 13 B, PUSHF, POPX, BX|
+ XCHG|AX, BX| INT, 13 B, PUSHF, POP|X, BX|
  TO-PROT, GDT_DS COPY-SEG
-  POPX, SI|   PUSHX, BX|  NEXT ; PREVIOUS
+  POP|X, SI|   PUSH|X, BX|  NEXT ; PREVIOUS
 CODE READ-BLOCK 4200 R/W-BLOCK  C;
 CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
 \ --hd_LBA (HWD) (HRD) (FRD) (FWD) \ ?16 ?PC HEX
@@ -3060,9 +3060,9 @@ CODE PD PUSHS, DS| NEXT C;
 CODE PE PUSHS, ES| NEXT C;
 CODE PC PUSHS, CS| NEXT C;
 CODE BIOS31
-POPX, DI|   POPX, DX|   POPX, CX|   POPX, BX|   POPX, AX|
+POP|X, DI|   POP|X, DX|   POP|X, CX|   POP|X, BX|   POP|X, AX|
 INT, 31 C,
-PUSHX, AX|  PUSHX, BX|  PUSHX, CX|  PUSHX, DX|  PUSHF,
+PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX|  PUSH|X, DX|  PUSHF,
 NEXT C;
 : DOIT BIOSP 1 AND . ;
 A PD 0 0 0 DOIT 2DROP DROP CONSTANT PD'
@@ -3110,12 +3110,12 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
 ( We use the two l.s. bytes of 64 bit number)
               1 , 0 , 0 , 0 ,
  CODE WRITE-SYSTEM
-  PUSHX, SI|
+  PUSH|X, SI|
   MOVXI, AX| 4300 W,
   MOVXI, DX| 0080 W,
   MOVXI, SI| PARAM-BLOCK W,
   INT, 13  B,
-  POPX, SI|
+  POP|X, SI|
   PUSHF,
   NEXT C;            DECIMAL
 ( Experiment: switch to protected mode and back )
@@ -3129,7 +3129,7 @@ CODE TO-PROT1
     XCHG|AX, AX| XCHG|AX, AX| XCHG|AX, AX| XCHG|AX, AX|
     MOVFA, B| B.0400 SWAP , ,
     JMPFAR, HERE 6 + MEM, 0 , CODE-SEGMENT SEG,
- TO-REAL, STI, POPS, DS|  OS, PUSHX, AX|
+ TO-REAL, STI, POPS, DS|  OS, PUSH|X, AX|
  NEXT C; DECIMAL
 
 
@@ -3168,16 +3168,16 @@ CLI,  ( TO-PROT, MOVXI, AX| DATA-SEGMENT MEM,
 SS| R| AX| ) NEXT C;  DECIMAL
 ( Switch to protected mode and back replacement for DOCOL )
 CODE NEW-BIOS
-  POPX, AX|   MOVFA, B| HERE 0 ,    ( PATCH THE INTERRUPT #)
-  POPX, DX|  POPX, CX|  POPX, BX|  POPX, DI|
-PUSHX, SI|   PUSHX, BP| ( TO-REAL,) STI, XCHG|AX, DI|
+  POP|X, AX|   MOVFA, B| HERE 0 ,    ( PATCH THE INTERRUPT #)
+  POP|X, DX|  POP|X, CX|  POP|X, BX|  POP|X, DI|
+PUSH|X, SI|   PUSH|X, BP| ( TO-REAL,) STI, XCHG|AX, DI|
   INT, HERE SWAP ! 0 C, ( PATCH THE ADDRESS WHERE TO PATCH )
-  PUSHF, POPX, DI|   ( SAVE FLAGS BEFORE THEY ARE DESTROYED)
+  PUSHF, POP|X, DI|   ( SAVE FLAGS BEFORE THEY ARE DESTROYED)
   XCHG|AX, SI| ( FREE AX)  CLI,  ( TO-PROT,)
   ( NOW ALL REGISTERS ARE TIED UP EXCEPT ax| [!])
-POPX, BP|  POPX, AX|  XCHG|AX, SI|  ( RESTORE FORTH REGISTERS)
-PUSHX, AX|    PUSHX, BX|    PUSHX, CX|    PUSHX, DX|
-PUSHX, DI|    NEXT C;
+POP|X, BP|  POP|X, AX|  XCHG|AX, SI| ( RESTORE FORTH REGISTERS)
+PUSH|X, AX|    PUSH|X, BX|    PUSH|X, CX|    PUSH|X, DX|
+PUSH|X, DI|    NEXT C;
 CODE HLT HLT, C;
 : PATCH-BIOS 'NEW-BIOS >DFA 'BIOS >CFA ! ;
 : PATCH PATCH-BIOS SWITCH ;
@@ -3206,12 +3206,12 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
 ( We use the two l.s. bytes of 64 bit number)
               1 , 0 , 0 , 0 ,
  CODE WRITE-SYSTEM
-  PUSHX, SI|
+  PUSH|X, SI|
   MOVXI, AX| 4300 W,
   MOVXI, DX| 0080 W,
   MOVXI, SI| PARAM-BLOCK W,
   INT, 13  B,
-  POPX, SI|
+  POP|X, SI|
   PUSHF,
   NEXT C;            DECIMAL
 ( TEST OF HARD DISK ) ?16 HEX
@@ -3236,15 +3236,15 @@ ALIGN 0 IVAR RW-BUFFER B/BUF ALLOT
 2 , ( 2 sectors/block) RW-BUFFER , 7C0 ,
 HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
  : R/W-BLOCK  ASSEMBLER  ( MACRO: OPCODE -- . )
-  POPX, BX|    POPX, AX|
+  POP|X, BX|    POP|X, AX|
   ADD, W| AX'| R| AX|  MOVFA, W1| BL# W, XCHG|AX, BX|
   ADC, W| AX'| R| AX|  MOVFA, W1| BL# 2 + W,
-  PUSHX, SI|  MOVXI, BX| W,  MOVXI, DX| 0080 W,
+  PUSH|X, SI|  MOVXI, BX| W,  MOVXI, DX| 0080 W,
   MOVXI, SI| PARAM-BLOCK W,  TO-REAL,
   MOVI, W| AX| 7C0 MEM,  MOVSW, T| DS| AX|
   XCHG|AX, BX|
-  INT, 13 B, PUSHF, POPX, BX| TO-PROT,
-  POPX, SI|   PUSHX, BX|  NEXT ;
+  INT, 13 B, PUSHF, POP|X, BX| TO-PROT,
+  POP|X, SI|   PUSH|X, BX|  NEXT ;
 DECIMAL
 ( **************ciforth FIG model examples **************)
         EXIT
