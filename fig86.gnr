@@ -2878,7 +2878,7 @@ flag.(Interpreted as unsigned numbers).},{{<}},
  {0 -1 U< .},{_T_},
  {1 1 U< .},{0} },
 enddoc)
-CODE_HEADER({U<},{ULESS},{DOCOL})
+CODE_HEADER({U<},{ULESS})
         POP     AX
         POP     DX
         SUB     DX,AX
@@ -2897,6 +2897,21 @@ enddoc)
 HEADER({>},{GREAT},{DOCOL})
         DC      SWAP
         DC      LESS
+        DC      SEMIS
+;
+worddoc( {LOGIC},{<>},{unequal},{n1 n2 --- f},{ISO,L0},
+{Leave a true flag if forthvar({n1}) is not equal than
+forthvar({n2}) ; otherwise a false flag.},
+{{>},{=},{0<}},
+{{1 2 <> .},{_T_},
+ {-1 -2 <> .},{_T_},
+ {0 -1 <> .},{_T_},
+ {1 1 <> .},{0} },
+enddoc)
+HEADER({<>},{UNEQ},{DOCOL})
+        DC      LSUB
+        DC      ZEQU
+        DC      ZEQU
         DC      SEMIS
 ;
 worddoc( {JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{L0},
@@ -4702,7 +4717,7 @@ CODE_HEADER({SM/REM},{MSLAS})
 _LOAD_({
 worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
 {An arithmetical shift right for a two complement machine.
-This is the same as forthsamp({2 SM/REM SWAP DROP}).
+> This is the same as forthsamp({S>D 2 FM/MOD SWAP DROP}).
 It is not the same as forthsamp({2 /}), nor is it the same as
 forthsamp({1 RSHIFT}).
 _VERBOSE_({This confusing word should never be used.})},
@@ -4710,10 +4725,11 @@ _VERBOSE_({This confusing word should never be used.})},
 {
 {2 2/ . },{1},
 {-2 2/ . },{-1},
+{-1 2/ . },{-1},
 },
 enddoc)
 HEADER({2/},{TWOSL},{DOCOL})
-        DC      STOD, TWO, MSLAS
+        DC      STOD, TWO, FMSLAS
         DC      SWAP, DROP
         DC      SEMIS
 ;
@@ -5728,7 +5744,7 @@ dnl BUT THEN, THE COMMAND INTERPRETER DEPENDS ON IT
 {
 {PAD 10 ACCEPT},{},
  {GIBBON
-  . PAD 5 TYPE},{7 GIBBO},
+  . PAD 5 TYPE},{6 GIBBO},
  {( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)( 1 A)},{},
  {( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )( 6)},{},
  {( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)( 1 Z)},{}
@@ -5763,6 +5779,7 @@ ACCEP4:
 ACCEP5:  DC      COUNT, ZEQU
         _0BRANCH(ACCEP5)
         DC      SWAP, LSUB
+        DC      ONE, LSUB
         DC      SEMIS
 ACCEP_B:
 ;
