@@ -41,11 +41,11 @@ VOCABULARY ASSEMBLER IMMEDIATE
 : % [COMPILE] ' NFA ;
 : >BODY PFA CELL+ ; ( From DEA to the DATA field of `X' *FOR A <BUILDS WORD!!*)
 : INVERT -1 XOR ;
-
 1 VARIABLE TABLE 1 , ( I TABLE + @ yields $100^[-x mod 4] ) 
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in ) 
 ( memory! Not as printed on a big endian machine! ) 
 : ROTLEFT TABLE + @ U* OR ; 
+
 : & CURRENT @ @ ID. ; ." TESTING STUFF: &"
 ( First cell : l.s. byte 4 pairs of bits that are mutually exclusive    )
 ( remainder contains bits down for each COMMAER still needed. The       )
@@ -174,9 +174,10 @@ IS-A IS-COMMA
 
 ( Fill in the tally prototype with COMMAMASK and INSTRUCTIONMASK )
 : T! PRO-TALLY CELL+ ! PRO-TALLY ! ;
-( From `PRO-TALLY' and the  INSTRUCTION code)
+
 ( prepare THE THREE CELLS for an instruction )
 : PREPARE >R PRO-TALLY @ PRO-TALLY CELL+ @ R> ;
+( From `PRO-TALLY' and the  INSTRUCTION code)
 ( By INCREMENTing the OPCODE a NUMBER of times generate as much )
 (  instructions)
 : 1FAMILY, 0 DO DUP PREPARE 1PI OVER + LOOP DROP DROP ;
@@ -193,10 +194,8 @@ HEX
 : VOCEND? @ FFFF AND A081 = ;
 ( Leave the first DEA of the assembler vocabulary.                    )
 : STARTVOC ' ASSEMBLER 2 +  CELL+ @ ;
-
 (   The FIRST set is contained in the SECOND set, leaving it IS       )
 : CONTAINED-IN OVER AND = ;
-
 : SET <BUILDS HERE CELL+ , CELLS ALLOT DOES> ;
 ( Add ITEM to the SET )
 : SET+! DUP >R @ ! 0 CELL+ R> +! ;
@@ -395,9 +394,9 @@ HERE POINTER !
  0 CELL+ +LOOP CR ;
 
 ( Dissassemble one instruction from `POINTER'. )
+( Based on what is currently left in `TALLY!' )
 ( Leave `POINTER' pointing after that instruction. )
-: (DISASSEMBLE)
-    !DISS   !TALLY
+: ((DISASSEMBLE)) 
     POINTER @ >R
     STARTVOC BEGIN
         dis-PI dis-xFI dis-xFIR dis-COMMA
@@ -411,6 +410,14 @@ HERE POINTER !
       R> COUNT . POINTER ! ."  C," CR
     THEN
 ;
+
+( As `((DISASSEMBLE))' but starting with a clean slate.)
+: (DISASSEMBLE) !DISS !TALLY ((DISASSEMBLE)) ;
+
+( Forced dissassembly of one instruction from `POINTER'. )
+( Force interpretation as DEA instruction. )
+( This is useful for instructions otherwise hidden in the dictionary. )
+: F-D  !DISS   !TALLY   dis-PI DROP   ((DISASSEMBLE)) ;
 
 : DDD (DISASSEMBLE) ;
 
