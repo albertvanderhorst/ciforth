@@ -2,36 +2,36 @@
 ; $Id$
 ; Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 ;
-        PAGE  66,106
+	PAGE  66,106
  TITLE   GENERIC FORTH FOR 8086 $Revision$
  _HEADER_ASM
 _COMMENT 
-              FIG-FORTH
+	      FIG-FORTH
    implemented by:  Charlie Krajewski
-                    205 ( BIG ) Blue Rd.
+		    205 ( BIG ) Blue Rd.
 		    Middletown, CT  06457
 
-        This generic version by:
-                Albert van der Horst
-                HCC Forth user group
-                The Netherlands
-                www.forth.hccnet.nl
+	This generic version by:
+		Albert van der Horst
+		HCC Forth user group
+		The Netherlands
+		www.forth.hccnet.nl
 
   This implementation supports only one 64k segment
 
   The listing has been made possible by the
   prior work of:
-               Thomas Newman, Hayward, Ca.
+	       Thomas Newman, Hayward, Ca.
 
  : other_acknowledgements
-         John_Cassidy
-         Kim_Harris
-         George_Flammer
-         Robert_D._Villwock ;
+	 John_Cassidy
+	 Kim_Harris
+	 George_Flammer
+	 Robert_D._Villwock ;
  To upgrade, modify, and understand Fig Forth, the
  value of the following book cannot be overstated:
-         Systems Guide to FIG Forth
-         C. H. Ting, PhD
+	 Systems Guide to FIG Forth
+	 C. H. Ting, PhD
  It is available through MVP.  See any recent issue
  of FORTH Dimensions for their ad.
 
@@ -55,11 +55,11 @@ basement support.
 All publications of the FORTH Interest Group are public domain.
 They may be further distributed by the inclusion of this
 credit notice:
-               This publication has been made available by:
+	       This publication has been made available by:
        
-               FORTH Interest Group
-               P.O. Box 1105
-               San Carlos, Ca.  94070
+	       FORTH Interest Group
+	       P.O. Box 1105
+	       San Carlos, Ca.  94070
 _ENDCOMMENT
 	PAGE
 FIGREL	EQU	1	; FIG RELEASE #
@@ -142,36 +142,36 @@ _COMMENT
    FORTH   8088     FORTH PRESERVATION RULES
    -----   ----     ----- ------------ -----
     IP      SI      Interpreter pointer.  Must be preserved
-                    across FORTH words.
+		    across FORTH words.
 
      W      DX      Working register.  Jump to 'DPUSH' will
-                    push contents onto the parameter stack
-                    before executing 'APUSH'.
+		    push contents onto the parameter stack
+		    before executing 'APUSH'.
  
     SP      SP      Parameter stack pointer.  Must be preserved 
-                    across FORTH words.
+		    across FORTH words.
  
     RP      BP      Return stack.  Must be preserved across
-                    FORTH words.
+		    FORTH words.
 
-            AX      General register.  Must be preserved across
-                    FORTH words.
+	    AX      General register.  Must be preserved across
+		    FORTH words.
 
-            BX      General purpose register.
+	    BX      General purpose register.
  
-            CX      General purpose register.
+	    CX      General purpose register.
 
-            DI      General purpose register.
+	    DI      General purpose register.
 
-            CS      Segment register.  Must be preserved
-                    across FORTH words.
+	    CS      Segment register.  Must be preserved
+		    across FORTH words.
 
-            DS      ditto
-        
-            SS      ibid
+	    DS      ditto
+	
+	    SS      ibid
  
-            ES      Temporary segment register only used by
-                    a few words.
+	    ES      Temporary segment register only used by
+		    a few words.
 
 ---------------------------------------------------------- 
 _ENDCOMMENT
@@ -209,7 +209,7 @@ _COMMENT
 _ENDCOMMENT
 	PAGE
 _COMMENT 
-             DEBUG SUPPORT
+	     DEBUG SUPPORT
 
 THIS ROUTINE WILL ALLOW YOU TO STEP THRU FORTH PROGRAMS
 EVERY TIME 'NEXT' IS EXECUTED.
@@ -217,13 +217,13 @@ EVERY TIME 'NEXT' IS EXECUTED.
 IN ORDER TO USE THE STEP FEATURE YOU MUST DO THE FOLLOWING:
 
 	1.  PATCH THE INSTRUCTION IN 'NEXT' WITH A JUMP
-            TO 'TNEXT'
+	    TO 'TNEXT'
  
-    	2.  PATCH YOUR BREAKPOINT ROUTINE AT
-            LABEL   'BREAK'
+	2.  PATCH YOUR BREAKPOINT ROUTINE AT
+	    LABEL   'BREAK'
 	
 	3.  SET VARIABLES, `BIP' & `BIPE' TO THE
-            ADDRESSES YOU WANT TO STEP THRU.
+	    ADDRESSES YOU WANT TO STEP THRU.
 
 THE CONTENTS OF THE 2 VARIABLES 'BIP` AND `BIPE'
 ARE INTERPRETED AS FOLLOWS:
@@ -238,7 +238,7 @@ ADDR1  ADDR2    TRACE `ADDR1' TO `ADDR1'
 
 NOTE:	THE ABOVE ADDRESSES CAN'T POINT TO A
 	`CODE FIELD ADDRESS'. 
-       	X = DON'T CARE
+	X = DON'T CARE
 
 ----------------------------------------------------- 
 _ENDCOMMENT
@@ -297,22 +297,13 @@ NEXT1:	MOV	DX,BX	; (W) <- (IP)
 	INC	DX	; (W) <- (W) + 1
 	JMP     _WORD_PTR[BX]    ; TO `CFA'
 	PAGE
-DP0	DB	83H
-	DB	'LI'
-	DB	'T'+80H
-	DW	0	; START OF DICTIONARY
-LIT	DW	$+2	; (S1) <- ((IP))
+_START_DICTIONARY
+DP0:    HEADER({LIT},{LIT},{$ + 2})
 	LODSW		; AX <- LITERAL
 	JMP SHORT     APUSH   ; TO TOP OF STACK
-
-;        EXECUTE
 ;
-	DB	87H
-	DB	'EXECUT'
-	DB	'E'+80H
-	DW	LIT-6
-EXEC	DW	$+2
-	POP	BX	; GET CFA
+	HEADER({EXECUTE},{EXEC},{$ + 2})
+	POP     BX      ; GET CFA
 	JMP SHORT     NEXT1   ; EXECUTE NEXT
 ;
 ;	BRANCH
@@ -408,7 +399,7 @@ IDO	DW	$+2	; (SI) <- (RI)
 	MOV	AX,[BP]	; GET INDEX VALUE
 	JMP	APUSH	; TO PARAMETER STACK
 ;
- 	DB	85H
+	DB	85H
 	DB	'DIGI'
 	DB	'T'+80H
 	DW	IDO-4
@@ -3286,7 +3277,7 @@ RSEC	DW	$+2
 	DB	'C'+80H
 	DW	RSEC-7
 WSEC	DW	$+2
-    	CALL	SSEC
+	CALL	SSEC
 	PUSH	SI
 	PUSH	BP
 	INT	26H
@@ -3306,7 +3297,7 @@ DOK:	POPF		;POP FLAGS
 ;	R/W
 ;
 ;	( ADDR  SECTOR#  FLAG (0=W, 1=R) --- )
- 	DB	83H
+	DB	83H
 	DB	'R/'
 	DB	'W'+80H
 	DW	WSEC-7
@@ -3439,10 +3430,10 @@ PCR:	MOV	AL,ACR
 ;-------------------------------------
 ;
 POUT	PROC	NEAR
-     	CALL	CHO	;CONSOLE OUT
+	CALL	CHO	;CONSOLE OUT
 	TEST _BYTE   [EPRINT],1        ;PRINTER ECHO?
-        _EXTRANOP     ; In NASM there is a NOP here 
-                      ;  to get the same code layout as with MASM
+	_EXTRANOP     ; In NASM there is a NOP here 
+		      ;  to get the same code layout as with MASM
 	JZ	POUT1	;OFF
 	CALL	LO	;LIST OUTPUT
 POUT1:	RET
@@ -3480,7 +3471,7 @@ _ENDP CSTAT   ENDP
 ; WAITS FOR KEY FROM KEYBOARD
 ;
 CI	PROC	NEAR
-   	MOV	AH,0	; READ CHAR FUNCTION
+	MOV	AH,0	; READ CHAR FUNCTION
 	INT	16H
 	RET
 _ENDP CI      ENDP
@@ -3495,7 +3486,7 @@ _ENDP CI      ENDP
 ;
 CHO	PROC	NEAR
 	PUSH	DX
-    	PUSH	AX	;SAVE CHAR
+	PUSH	AX	;SAVE CHAR
 	MOV	DL,AL	;CHAR TO WRITE
 	MOV	AH,2	;CHAR OUT FUNCTION
 	INT	21H	;DOS
@@ -3514,7 +3505,7 @@ _ENDP CHO     ENDP
 ; EXIT: REG AL = CHAR
 ;
 LO	PROC	NEAR
-   	PUSH	AX	;SAVE CHAR
+	PUSH	AX	;SAVE CHAR
 	PUSH	DX
 	MOV	DX,PRINTER_NO
 	MOV	AH,0	;PRINT CHAR
@@ -4090,12 +4081,12 @@ DOTCPU	DW	DOCOL
 	PAGE
 _COMMENT 
 
-            CODE LEVEL "MATCH" DEFINITIONS
+	    CODE LEVEL "MATCH" DEFINITIONS
 
  STACK PARAMETERS:
 
  ( cursor:addr   byte:left   str:addr  str:len
-           ---   flag  new:cursor:offset         )
+	   ---   flag  new:cursor:offset         )
 
  This version of MATCH will handle string lengths
       up to 65535 bytes in length.
