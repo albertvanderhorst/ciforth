@@ -510,6 +510,12 @@ HERE5:
         MOV     SS,AX
         CLD     ; Reset direction to going up.
 
+        JMP     ENDREADJUST
+        RESB    01FEH-($-$$)
+        ; Signature. Last piece of boot sector.
+        DB         055H, 0AAH
+ENDREADJUST:
+
 ;
 ; ########################################################################################
 ;                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
@@ -566,6 +572,20 @@ REP2:
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
+; The interrupt segment.
+; This is a 16 bit real mode segment, but we hope it will
+; work in (16-bit) protected mode.
+        MOV     BX, 0F000H
+        MOV     DI,BX
+        MOV     AX,0FFFFH
+        STOSW
+        SHL     BX,4     ;  Turn segment register into IP
+        MOV     AX,BX
+        STOSW
+        MOV     AX,IDENTIFY_XR
+        STOSW
+        MOV     AX,IDENTIFY_16
+        STOSW
 ;
 ; GDT_DS/GDT_SS to an extent be chosen arbitrarily,
 ; The real mode view of GDT_SS is valid, isolated and reserved for real stack.
@@ -598,12 +618,6 @@ REP2:
 ;
 
 ;
-
-        JMP     ENDREADJUST
-        RESB    01FEH-($-$$)
-        ; Signature. Last piece of boot sector.
-        DB         055H, 0AAH
-ENDREADJUST:
 ;
 
 
