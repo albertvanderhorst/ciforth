@@ -112,6 +112,10 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 
 \ Irritating exceptions
 0FF '?DUP !SE
+0FF 'EXECUTE !SE
+021 'FOR-VOCS !SE       \ Despite an execute this is known
+031 'FOR-WORDS !SE
+044 '(FIND) !SE
 
 \ FILL IN EVERYTHING
 \ Add to an existing pure STACK EFFECT the pure STACK EFFECT. Return the combined
@@ -178,7 +182,7 @@ HERE OVER - 0 CELL+ / 1- SWAP !
 \ To a stack effect BYTE apply a CHAIN of high level code.
 \ Return the resulting stack effect BYTE.
 : ANALYSE-CHAIN
-        BEGIN @+ DUP ID. DUP CHAIN? WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
+        BEGIN @+ ( DUP ID.) DUP CHAIN? WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
 
 \ For DEA return the stack effect BYTE.
 \ It must be a high level definition
@@ -191,14 +195,17 @@ HERE OVER - 0 CELL+ / 1- SWAP !
 \ For DEA return the stack effect BYTE.
 \ It can be any definition.
 : FIND-SE-ANY
-    DUP >FFA @ 1 AND IF DROP 0 ELSE     \ Ignore dummy headers
     DUP >CFA @ DOCOL = IF FIND-SE-DOCOL ELSE
     DUP >CFA @ DODOES = IF FIND-SE-DODOES ELSE
-    FIND-SE-CODE THEN THEN THEN ;
+    FIND-SE-CODE THEN THEN ;
 
 \ For DEA find the stack effect and fill it in.
 \ It can be any definition.
-: FILL-SE DUP FIND-SE-ANY SWAP !SE ;
+\ Dummy headers are ignored.
+: FILL-SE
+    DUP >FFA @ 1 AND 0= IF \ Ignore dummy headers
+        DUP FIND-SE-ANY SWAP !SE _
+    THEN DROP ;
 
 \ The number of entries with unknown stack effect.
 VARIABLE #UNKNOWNS
@@ -206,12 +213,20 @@ VARIABLE #UNKNOWNS
 : !UNKNOWNS 0 #UNKNOWNS ! ;
 
 \ For DEA fill in the stack effect if it is not yet known.
-: ?FILL-SE?   DUP ID. CR
+: ?FILL-SE?   ( DUP ID. CR)
 DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
 
-\ Sweep through the dictionary from WID filling in stack effects.
-\ Fill in ``#UNKNOWNS''.
-: FILL-ALL !UNKNOWNS '?FILL-SE? 'TASK FOR-WORDS ;
+\ For a WID fill in all stack effects.
+: FILL-SE-WID '?FILL-SE? SWAP FOR-WORDS ;
+
+\ Sweep once through the base dictionary filling in stack effects.
+\ There are three vocabularies. ``Forth'' is done partly, from ``TASK''.
+\ ``ENVIRNONMENT'' is done in full. ``DENOTATION'' hangs off ``FORTH''.
+\ Count the ``#UNKNOWNS''.
+: FILL-ALL   !UNKNOWNS   'TASK FILL-SE-WID   'ENVIRONMENT >WID FILL-SE-WID ;
+
+\ Go on
+: FILL-ALL-SE 0 BEGIN FILL-ALL #UNKNOWNS @ SWAP OVER = UNTIL DROP ;
 
 13 '(NUMBER) !SE
 DECIMAL
