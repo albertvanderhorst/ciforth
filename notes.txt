@@ -155,3 +155,9 @@ Cautious introduction of protected mode (using the inherited invisible
 parts of real mode) succeeds resulting in
 version
 2.35
+At least here the GDT has been filled in correctly.
+2.36
+2.36 works nicely in protected mode.
+
+2.38 has also the hard disk and the use of extra segment fixed up.
+And has the label FIRSTWORKINGPROT
