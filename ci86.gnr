@@ -1811,20 +1811,19 @@ LINE LINEFEED WORD ;}). })},
 {{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 HEADER({(WORD)},{LPWORD},{DOCOL})
-PWORD1: DC INBRS, QBL
-        DC OVER, SRC, CELLP, FETCH, LSUB
-        DC LAND
-        _0BRANCH(PWORD1A)
-        DC DROP
-        _BRANCH(PWORD1)
-PWORD1A:
+        DC      ZERO ; { Dummy to drop }
+PWORD0: DC      DROP
+        DC      INBRS, QBL
+        DC      OVER, SRC, CELLP, FETCH, LSUB ;{ At end?}
+        DC      LAND, ZEQU
+        _0BRANCH(PWORD0)
 
-PWORD2: DC INBRS, QBL, ZEQU
-        _0BRANCH(PWORD2A)
-        DC DROP
-        _BRANCH(PWORD2)
-PWORD2A:
-        DC OVER, LSUB
+        DC      ZERO ; { Dummy to drop }
+PWORD1: DC      DROP
+        DC      INBRS, QBL
+        _0BRANCH(PWORD1)
+
+        DC      OVER, LSUB
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
