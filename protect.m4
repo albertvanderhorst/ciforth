@@ -12,4 +12,15 @@ define({TO_REAL},{
 	 MOV CR0,EAX            ;set real mode
          STI
 })dnl
+define({JMPHERE_FROM_32},{
+	JMPFAR
+	DD      $+6
+	DW      $1
+})dnl
+define({JMPHERE_FROM_16},{
+	JMPFAR
+	DW      $+4
+	DW      $1
+})dnl
+
 

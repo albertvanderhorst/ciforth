@@ -9,8 +9,8 @@ dnl Note: this cannot be used in HEADER, because index must look in the real str
 dnl not on some variable that contains the string.
 dnl The digression using _squote is needed because the single quote is used in m4.
 define(_squote,')
-define({_dbquoted},"{$1}")dnl
-define({_sgquoted},'{$1}')dnl
+define({_dbquoted},"{{$1}}")dnl
+define({_sgquoted},'{{$1}}')dnl
 define({_quoted},{ifelse( -1, index({$1},"),{_dbquoted},{_sgquoted})}({{$1}}))
 define({_STRING},{
         DB      len({$1}),_quoted}({{$1}}))dnl
@@ -27,7 +27,7 @@ define({_x},len({$1}))dnl
 define({_y}, {substr({$1},eval(_x-1),1)})dnl
 define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  ********_star(len({$1})) 
-;  *   $1   *
+;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
 _$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
@@ -70,9 +70,19 @@ dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl The link field of the word with assembler name $1
 define({_LINK_FIELD},_$1)dnl
+dnl     Handle Branching
+define({_0BRANCH},dnl
+{DC      ZBRAN
+        DC      $1-$})dnl
+define({_BRANCH},dnl
+{DC      BRAN
+        DC      $1-$})dnl
+define({_LOOP},dnl
+{DC      XLOOP
+        DC      $1-$})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
-define({_VOC_LATEST}, $1+6)
-define({CODE_HEADER},{HEADER({$1},{$2},{$+2})})dnl
+define({_VOC_LATEST}, $1+CELLS(3))
+define({CODE_HEADER},{HEADER({$1},{$2},{$+CELLWIDTH})})dnl
 define({TO_PROTECTED},{})dnl
 define({TO_REAL},{})dnl
 define({JMPFAR},{DB    0EAH})dnl

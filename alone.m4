@@ -5,6 +5,8 @@ include(default.m4)
 define( {_USEBIOS_1_}, _yes )dnl
 define( {_BOOTFD__1_}, _yes )dnl       
 define( {_PROTECTED_1_}, _yes )dnl       
+dnl define( {OPTIONAL_SWITCH_TO_32MODE}, )dnl       
+define( {OPTIONAL_SWITCH_TO_32MODE}, {include(width32.m4)})dnl       
 include(header.m4)
 include(protect.m4)
 include(width16.m4)
