@@ -85,15 +85,15 @@ REQUIRE COMPARE
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
 : FIND2-a
     BEGIN
+        DUP WHILE
         DUP >R >XFA @ DUP IF MATCH2 THEN
         0< IF
                 DUP .S ID. "REJECTED " TYPE DROP R>
+                >LFA @
         ELSE
-        DUP .S ID. "OKAY " TYPE RDROP
+                DUP .S ID. "OKAY " TYPE RDROP
         THEN
     MATCH2 0 > WHILE
-        >LFA @ DUP
-    DUP WHILE DROP
     REPEAT
 THEN
 ;
@@ -102,6 +102,8 @@ THEN
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
 : FIND2   FIND2-a FIND2-b ;
 
+DO-DEBUG
 'FORTH FILL-XFA
-"DROP" 'FORTH >WID >LFA @ FIND2
+"DROP" 'FORTH >WID >LFA @ FIND2   ID. CR
 "POPE" 'FORTH >WID >LFA @ FIND2
+\ "!" 'FORTH >WID >LFA @ FIND2      ID. CR
