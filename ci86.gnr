@@ -4742,13 +4742,7 @@ INTE1:
 ;       DC      DOTS
 ;       DC      TDUP, LTYPE
         DC      OVER, TOR       ; {Save old parse pointer.}
-        DC      FOUND, LDUP, ZEQU
-        _0BRANCH(INTE3A) ;{IF}
-        DC      DROP
-        DC      RR, ONE
-        DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
-        DC      PFIND, SWAP, DROP, SWAP, DROP
-INTE3A:                  ;{THEN THEN }
+        DC      FOUND
         DC      LDUP, ZEQU, LIT, 12, QERR
         DC      LDUP, TFFA, FETCH
         DC      LDUP, LIT, B_DENOT, LAND ;{Retain copy of flags.}
