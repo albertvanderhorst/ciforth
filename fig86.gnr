@@ -2498,8 +2498,12 @@ set to zero.
 HEADER({QUERY},{QUERY},{DOCOL})
         DC      TIB
         DC      FETCH
+        DC      LDUP
         DC      LIT,RTS/2
-        DC      EXPEC
+        DC      ACCEP
+; Keep the next line in for debugging ACCEPT for MSDOS.
+;        DC      LIT, 41H, EMIT, TDUP, LTYPE, LIT, 41H, EMIT
+        DC      PLUS, ZERO, SWAP, CSTOR
         DC      ZERO
         DC      LIN
         DC      STORE
@@ -3219,9 +3223,9 @@ _LINUX_N_({
         DC      LIT, _PARAMETER_FIELD(STTERM)
         DC      LIT, STTERM_B-STTERM_A
         DC      LCMOVE
-        DC      LIT, EXPEC_A
-        DC      LIT, _PARAMETER_FIELD(EXPEC)
-        DC      LIT, EXPEC_B-EXPEC_A
+        DC      LIT, ACCEP_A
+        DC      LIT, _PARAMETER_FIELD(ACCEP)
+        DC      LIT, ACCEP_B-ACCEP_A
         DC      LCMOVE
 COLD1:
 });_END_({_LINUX_N_})
@@ -3956,6 +3960,34 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      DROP
         DC      SEMIS
 ;
+worddoc({INPUT},{ACCEPT},{accept},{addr count ---},{ISO FIG L0},
+{Transfer characters from the terminal to address, until a "return"
+or the count of characters have been received.
+Rely on the operating system for input editing.
+One or more nulls are added at the end of the text.},
+{{KEY},{?TERMINAL}},
+{{( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)},{( 1 A)},
+{( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )},{( 6)},
+{( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)},{( 1 Z)}})
+HEADER({ACCEPT},{ACCEP},{DOCOL})
+        DC      ZERO    ; filedescriptor 0 for standard input.
+        DC      ROT
+        DC      ROT
+        DC      LIT, read
+        DC      LINOS
+        DC      ONE, LSUB, ZERO, MAX ; Position of CR (or 0 for failure)
+        DC      SEMIS
+        _RESB    CELLS(4)        ; Room for patching
+; Alternative: if no terminal, this is copied over above code during boot
+ACCEP_A:
+        DC      OVER, TOR
+        DC      EXPEC
+        DC      FROMR, LDUP
+ACCEP4  DC      COUNT, ZEQU
+        _0BRANCH(ACCEP4)
+        DC      SWAP, LSUB
+        DC      SEMIS
+ACCEP_B:
 worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
 {Transfer characters from the terminal to address, until a "return"
 or the count of characters have been received.
@@ -3963,19 +3995,6 @@ Rely on the operating system for input editing.
 One or more nulls are added at the end of the text.},
 {{KEY},{?TERMINAL}})
 HEADER({EXPECT},{EXPEC},{DOCOL})
-        DC      ZERO    ; filedescriptor 0 for standard input.
-        DC      ROT
-        DC      LDUP, TOR   ; Remember start of buffer
-        DC      ROT
-        DC      LIT, read
-        DC      LINOS
-        DC      ONE, LSUB, ZERO, MAX ; Position of CR (or 0 for failure)
-        DC      FROMR, PLUS          ; Address
-        DC      ZERO,SWAP,CSTOR      ; Erase it
-        DC      SEMIS
-        _RESB    CELLS(4)        ; Room for patching
-; Alternative: if no terminal, this is copied over above code during boot
-EXPEC_A:
         DC      OVER, OVER, ONEP, LERASE
         DC      OVER, PLUS, SWAP     ; Bounds
         DC      XDO
@@ -3988,7 +4007,6 @@ EXPEC1: DC      KEY, LDUP, LIT, LF
 EXPEC2: DC      IDO,CSTOR
 EXPEC3: _LOOP(EXPEC1)
         DC      SEMIS
-EXPEC_B:
 ;
 worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},
 {Leave the ascii value of the next terminal key struck.},
