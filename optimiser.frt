@@ -36,15 +36,18 @@ VARIABLE OPT-START
 \ ``-'' works here because both nibbles have offset 1!
 : COMBINE-SE    SE:1>2 SWAP -   CSC +! ;
 
+\ Combine DEA's effect into the current state, return "we CAN optimise"
+: CAN-COMBINE?   NS? OVER SE@ STILL-OPTIMISE AND ;
+
 \ Treat the DEA that is know to be ``NS''. Combine it to the
 \ optimisation, if possible. Return: we ARE still optimising.
-: TREAT-NS
-    SE@ DUP STILL-OPTIMISE IF
-        COMBINE-SE  -1
+\ Add DEA to the optimisation chain, if possible. Leave it WAS possible.
+:  ?TREAT-NS?
+    DUP CAN-COMBINE? IF
+        SE@ COMBINE-SE  -1
     ELSE
         DROP 0
-    THEN
-;
+    THEN ;
 
 \ Execute at compile time the ``NONAME'' word: the optimisable code we have collected from
 \ ``OPT-START''
@@ -75,13 +78,18 @@ CREATE BUFFER 16 ALLOT
 ;
 
 
-\ Add DEA to the optimisation chain, if possible. Leave it WAS possible.
-:  ?TREAT-NS? DUP NS? IF TREAT-NS ELSE DROP 0 THEN ;
 
 VARIABLE AAP
 \ For DEA : handle its optimisation or the cashing and restart of
 \ the optimisation.
-:  OPT/NOOPT    ?TREAT-NS? 0= DUP AAP ! IF TERMINATE-EXECUTE-REPLACE THEN ;
+:  OPT/NOOPT
+    DUP CAN-COMBINE?
+    DUP 0= AAP !
+    IF
+        SE@ COMBINE-SE
+    ELSE
+        DROP TERMINATE-EXECUTE-REPLACE
+    THEN ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
 : EXPAND
@@ -89,12 +97,21 @@ VARIABLE AAP
     BEGIN DUP >R
         NEXT-PARSE
     WHILE
-^       OPT/NOOPT
-^       R> 2DUP -  ^ HL-CODE,      HERE H.
+        OPT/NOOPT
+        R> 2DUP -  HL-CODE,      \ HERE H.
         AAP @ IF !OPT-START THEN
-^   REPEAT 2DROP RDROP
+    REPEAT 2DROP RDROP
     TERMINATE-EXECUTE-REPLACE   POSTPONE (;)
 ;
 
 \ Optimise DEA regards folding.
 : OPT-FOLD  >DFA HERE    OVER @ EXPAND   SWAP ! ;
+\D : test 1 SWAP 3 2 SWAP ;
+\D 'test OPT-FOLD
+\D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
+\D : test1 1 2 + 3 4 * OR ;
+\D 'test1 OPT-FOLD
+\D "EXPECT `` F '' :" CR TYPE CRACK test1
+\D : test2 1 2 SWAP ;
+\D 'test2 OPT-FOLD
+\D "EXPECT `` 2 1 '' :" CR TYPE CRACK test2
