@@ -43,7 +43,7 @@ REQUIRE ^
 \ File name
 : FileName   ARGV 3 CELLS + @ Z$@ ;
 
-: PrintWithEscapes  OVER + SWAP DO
+: PrintWithEscapes  OVER + SWAP ?DO
     I C@
     DUP &\ = IF &\ EMIT THEN
     DUP &( = IF &\ EMIT THEN
@@ -53,10 +53,11 @@ LOOP ;
 
 \ Get the next LINE from the screens .
 CREATE FileContent 2 CELLS ALLOT
-: Line   FileContent 2@  ^J $S   2SWAP FileContent 2! ;
+: Line   FileContent 2@  OVER IF ^J $S   2SWAP FileContent 2! THEN ;
 
 \ Output the next line from the screens to position, first place to next line.
-: PrintLine &( EMIT   Line PrintWithEscapes   &) EMIT
+: PrintLine
+    &( EMIT   Line PrintWithEscapes   &) EMIT
     0 NextLine .COORDINATE ." rmoveto gsave show grestore" CR ;
 
 \ Add the next line to the output at POSITION .
@@ -65,7 +66,7 @@ CREATE FileContent 2 CELLS ALLOT
 \ Return the screen WAS empty.
 
 \ Draw a border around the screen at POSITION .
-: DrawBorder ".5 setgray" TYPE CR
+: DrawBorder ." .5 setgray" CR
     .COORDINATE ."  moveto "
     C/L 1 +          . ." CW mul 0 rlineto "
     NextLine         . ." 16.5 mul 0 exch rlineto "
@@ -89,14 +90,14 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output a SCREEN and following at PAGE in two columns of screens.
 \ Leave incremented SCREEN and PAGE and indication we MUST stop.
 : NextPage
-      DUP &( EMIT 4 .R ") (Appendix A. forth.lab) exch StartPage " TYPE CR 1+ >R
+      DUP &( EMIT 4 .R ." ) (Appendix A. forth.lab) exch StartPage " CR 1+ >R
       LeftColumn 2@ ScreenNumber
       LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
       RightColumn 2@ ScreenNumber
       RightColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
-      "EndPage " TYPE CR
+      ." EndPage " CR
       R>
-      1
+      FileContent @ 0=
 ;
 
 \ Output the prelude : PostScript code.
@@ -187,16 +188,15 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output the postlude : PostScript code.
 : PostLude
 "%%Trailer
-%%Pages: 22
-" TYPE ;
+%%Pages:"  TYPE . CR ;
 
 
 \ Output it all.
 : OutputScreens
     FileName GET-FILE FileContent 2!
     PreLude
-    0 1  BEGIN NextPage UNTIL  2DROP
-    PostLude
+    0 1  BEGIN NextPage UNTIL
+    1- PostLude DROP
 ;
 
 OutputScreens
