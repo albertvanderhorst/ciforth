@@ -13,7 +13,7 @@ define({_OFFSET})dnl Ignore this design error altogether.
 define({PAGE},;)dnl Turn PAGE into comment.
 define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
-define({_CELL_PTR},{ CELL})dnl Make it specify SIZE only.
+define({_CELL_PTR},{ CELL_M4})dnl Make it specify SIZE only.
 dnl
 dnl NASM doesnot allow to shift the program counter with ORG
 define({_NEW_ORG},
