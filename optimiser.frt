@@ -466,48 +466,25 @@ DROP 0 THEN ;
 \ else cash it and restart it. ``BEGIN'' ``END'' is the code copied.
 \ (Mostly ``DEA'' plus inline belonging to it.)
 \ Return a new BEGIN for the code to be moved, mostly the old ``END''.
-:  ?OPT-FOLD?
-    DUP CAN-FOLD?
-    IF
+:  FOLD-ONE
+    DUP NEXT-PARSE DROP
+    DUP CAN-FOLD? IF
         SE@ COMBINE-VD               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
     ELSE
         DROP ( DUP FIND-REORDER) CASH  ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
         !OPT-START
-    THEN ;
-
-\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
-\ Do not initialise, or terminate.
-: (FOLD)
-    BEGIN DUP
-        NEXT-PARSE
-    WHILE  ?OPT-FOLD?
-    REPEAT DROP DROP DROP
+    THEN
 ;
-
-\ Copy the SEQUENCE DEA of high level code to ``HERE'' ,  possibly folding it.
-\ Leave a POINTER to the equivalent optimised code.
-: FOLD   !OPT-START HERE SWAP    (FOLD)   CASH   POSTPONE (;)  ;
-
-\ Optimise DEA regards folding.
-: OPT-FOLD    >DFA DUP @ FOLD   SWAP ! ;
-
-\ For BEGIN END : copy the DEA's high level or low level code to here.
-\ This is assuming only low level code is followed by in line stuff.
-\ In high level coding doing this you must block optimisation.
-\ Leave END.
-: FOLD-HIGH/LOW    DUP HIGH-LEVEL? IF >DFA @ (FOLD) SWAP DROP
-    ELSE ?OPT-FOLD? THEN ;
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
-: (EXPAND) BEGIN DUP NEXT-PARSE WHILE FOLD-HIGH/LOW REPEAT 2DROP DROP ;
+: (EXPAND) BEGIN DUP ?NOT-EXIT WHILE FOLD-ONE REPEAT DROP ;
 
 \ Expand each constituent of SEQUENCE to ``HERE'' ,  possibly folding it.
 \ Leave a POINTER to equivalent optimised code.
 : EXPAND   !OPT-START HERE SWAP    (EXPAND)   CASH   POSTPONE (;)  ;
-
 
 \ ----------------------------------------------------------------
 
