@@ -1460,7 +1460,7 @@ _REAL_({
         DC      SEMIS
 ;
 worddoc({ENVIRONMENTS},{VERSION},{version}, {--- sc},{CI},
-{An environment query giving the version of this Forth as string constant.
+{An environment query giving the version of this Forth as a string constant.
 },
 {{ENVIRONMENT?}},
 dnl Expect nothing to be typed, because the testing filters out RCS stuff.
@@ -1480,7 +1480,7 @@ _ENDCOMMENT
         DC      SEMIS
 ;
 worddoc({ENVIRONMENTS},{NAME},{name}, {--- sc},{CI},
-{An environment query giving the name of this Forth as string constant.
+{An environment query giving the name of this Forth as a string constant.
 },
 {{ENVIRONMENT?}},
 {{"NAME" ENVIRONMENT? . TYPE },{_T_ ciforth}},
@@ -1490,7 +1490,7 @@ HEADER({NAME},{LNAME},{DOCOL})
         DC      SEMIS
 ;
 worddoc({ENVIRONMENTS},{SUPPLIER},{supplier}, {--- sc},{CI},
-{An environment query giving the SUPPLIER of this Forth as string constant.
+{An environment query giving the SUPPLIER of this Forth as a string constant.
 },
 {{ENVIRONMENT?}},
 {{"SUPPLIER" ENVIRONMENT? . TYPE },{_T_ Albert van der Horst}},
@@ -2939,7 +2939,7 @@ enddoc)
 HEADER({C/L},{CSLL},{DOCON}, 64)
 ;
 _HIGH_BUF_({
-worddoc( {STORAGE~},{FIRST},{first},{--- n},{},
+worddoc( {BLOCKS~},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.},
 {{BLOCK},{LIMIT}},
@@ -2952,7 +2952,7 @@ _LOW_BUF_({
         _ALIGN  2       ; Otherwise INT 13 hangs when filling
         ; in into the lba block as a buffer address.
         DB      0       ;{Padding the odd # of bytes in the name FIRST.}
-worddoc( {STORAGE~},{FIRST},{first},{--- n},{},
+worddoc( {BLOCKS~},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.
 This is allocated in the lowest 1 Megabyte of memory,
@@ -2964,7 +2964,7 @@ HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB( (KBBUF+2*CW)*NBUF )
 });_END_({ _LOW_BUF_})
 ;
-worddoc( {STORAGE~},{LIMIT},{limit},{---- n},{},
+worddoc( {BLOCKS~},{LIMIT},{limit},{---- n},{},
 {A constant leaving the address just above the highest memory
 available for a disc buffer.
 _HIGH_BUF_({Actually this is the highest system memory.})
@@ -2989,7 +2989,7 @@ in use by Forth.
 enddoc)
 HEADER({BM},{LBM},{DOCON}, ORG0)
 ;
-worddoc( {STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},
+worddoc( {BLOCKS},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
 count read from disc by forthcode({BLOCK}) .
 The ISO standard fixes this to 1024.},{{(BUFFER)}},
@@ -3035,8 +3035,8 @@ HEADER({TIB},{TIB},{DOUSE}, _CELLS(4))
 worddoc( {INPUT},{RUBOUT},{rub_out},{--- c},{},
 {A user variable, leaving the key code that must delete the
 last character from the input buffer.
-_HOSTED_({In this ciforth it is not used, as the terminal input
-editing is left to the host operating system.})
+_HOSTED_({{In this ciforth it is not used, as the terminal input
+editing is left to the host operating system.}})
 },{{USER}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -3044,16 +3044,14 @@ HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(5))
 ;
 worddoc( {ERRORS},{WARNING},{warning},{--- addr},{FIG,U},
 {A user variable containing a value controlling messages. If it
-is 1, a screen system is present, and forthcode({ERRSCR}) contains
-the base
-location for messages. If it is 0, no such screen system is
-present and messages will be presented by number.
-If forthcode({WARNING}) is set to 0 and there are disk
-problems: nothing will be printed in case of disk errors, not
-even that there is a disk error ( because forthcode({ERROR})
-uses forthcode({MESSAGE}) ).
+is 1, a library file is open, and messages are fetched from it.
+If it is 0,
+messages will be presented by number only.
+Don't set forthcode({WARNING}) to 1 if there is no block system available,
+because the error system will call itself recursively.
+This may lead to a crash.
 },
-{{MESSAGE},{ERROR}},
+{{MESSAGE},{ERROR},{ERRSCR}},
 {{." See MESSAGE"},{See MESSAGE}},
 enddoc)
 HEADER({WARNING},{LWARN},{DOUSE}, _CELLS(7))
@@ -3085,7 +3083,7 @@ vocabularies.})},
 enddoc)
 HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 ;
-worddoc( {STORAGE~},{OFFSET},{offset},{--- addr},{U},
+worddoc( {BLOCKS~},{OFFSET},{offset},{--- addr},{U},
 {A user variable which contains a block offset to disc drives;
 in this way a part of it is available for boot-code.
 _HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system it is 0.})
@@ -3138,8 +3136,8 @@ HEADER({BASE},{BASE},{DOUSE}, _CELLS(19))
 ;
 worddoc( {FORMATTING~},{DPL},{d_p_l},{---- addr},{FIG,U,L0},
 {A user variable containing the address of the decimal point on
-double integer input, or a nil pointer. It may also be used to
-hold output column location of a decimal point, in user
+double integer input, or a forthdefi({nil pointer}). It may also be used to
+hold the output column location of a decimal point, in user
 generated formating. },
 {{<#},{FLD},{HLD}},
 {{1234.56 DPL @ 0= . 2DROP},{0}},
@@ -3191,7 +3189,7 @@ forthkey(LF) embedded in a string that is forthcode({TYPE})d.},
 enddoc)
 HEADER({OUT},{LOUT},{DOUSE}, _CELLS(25))
 ;
-worddocsafe( {STORAGE~},{(BLK)},{paren_blk},{--- addr},{U},
+worddocsafe( {BLOCKS~},{(BLK)},{paren_blk},{--- addr},{U},
 {When the standard word forthcode({BLK}) is used, this user variable
 reflects the state of the forthsamp({current input source}).
 It indicates the block number being interpreted, or
@@ -3253,7 +3251,7 @@ It points into the return stack.
 If there is a forthcode({THROW}), the return stack
 is restored from forthcode({HANDLER}) effecting a multiple level return.
 It is called a frame because more things are restored, such as the
-position of the data stack top, and the previous value of forthsamp({HANDLER})},
+position of the data stack top, and the previous value of forthcode({HANDLER}) .},
 {{CATCH},{THROW}},
 {{." See CATCH"},{See CATCH}},
 enddoc)
@@ -3756,14 +3754,19 @@ HEADER({!CSP},{SCSP},{DOCOL})
 });_END_({_SECURITY_})
 worddoc( {ERRORS},{?ERROR},{question_error},{f n --},{},
 {
-If the boolean flag is true. forthdefi({signal}) an error with
-number forthsamp({n}). This means that an exception is thrown,
-but it is remembered that this is the original place where the
-exception originated. All error signalled by the kernel go
-through this word, allowing to catch e.g. disk errors. Also the
-errors signalled using forthcode({?ERRUR}) do.
+If the boolean flag is true, forthdefi({signal}) an error with
+number forthsamp({n}).
+This means that an exception is thrown,
+and it is remembered that this is the original place where the
+exception originated.
+If the exception is never caught, an error message is displayed
+using forthcode({ERROR}) .
+All errors signalled by the kernel go
+through this word, allowing to catch
+dnl The following may be a design error
+e.g. errors in accessing the block file.
 },
-{ERROR},
+{{ERROR},{?ERRUR}},
 {{0 12 ?ERROR},{},
  {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? ciforth ERROR # 18 },
  {CR},{} },
@@ -3780,12 +3783,11 @@ QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
 ;
 worddoc( {ERRORS},{?ERRUR},{query_error_Unix},{n ---},{},
-{Handle the possible
-error forthsamp({n}) in Unix fashion. If it zero or positive, this means okay.
-If it is negative, its value identifies an error condition. This error
-is signalled, meaning the error forthvar({errno}) is displayed and the word
-is aborted.
-},{{?ERROR}},
+{Handle the possible error forthsamp({n}) in Unix fashion. If
+it is zero or positive, this means okay. If it is negative, its
+value identifies an error condition. This error is handled in
+the same way as by forthcode({?ERROR}) . },
+{{ERROR},{?ERROR}},
 {
 {0 ?ERRUR 1 ?ERRUR},{},
 {0 WARNING ! -20 ?ERRUR },
@@ -4644,7 +4646,7 @@ error with number forthvar({n}) has occurred.
 The word that caused it is found using forthcode({WHERE}) and displayed .
 Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a description
  of the error.
-This word is executed by forthcode({CATCH}) before restarting the interpreter
+This word is executed by forthcode({THROW}) before restarting the interpreter
 and can be revectored to give more elaborate diagnostics. },
 {{?ERROR},{WARNING}},
 { {0. WHERE 2! 12 ERROR},{? ciforth ERROR # 18},
@@ -4699,9 +4701,8 @@ forthcode({CATCH}) for the effect of a non-zero
 forthsamp({tc}). If we are executing not under control of a
 forthcode({CATCH}), a non-zero forthsamp({tc}) gives a message to the effect
 that this exception has occurred and starts Forth anew.
-aborts.
 },
-{{CATCH},{QUIT},{HANDLER},{?ERROR}},
+{{CATCH},{QUIT},{HANDLER},{?ERROR},{ERROR}},
 {{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
 { 2 3 12 THROW ; GS1 ? ciforth ERROR # 18},
  {CR},{} },
@@ -5072,7 +5073,7 @@ Then follows a dummy dea that serves as forthdefi({word list
 identifier}) or WID in the sense of the ISO standard. with
 empty fields, except for the link field
 (forthdefi({DLFA})) that points to the dea of the first word of
-the vocabulary or a zero pointer if empty. Executing the
+the vocabulary or a nil pointer if empty. Executing the
 vocabulary means pushing its WID on top of the
 forthcode({SEARCH-ORDER}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
@@ -5274,8 +5275,8 @@ OKAY:
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
 worddoc( {INIT},{OK},{ok},{},{ISO,FIG},
-{Takes care of printing the "okay" message, after interpreting
-a line. Default it prints okay only for an interactive session
+{Takes care of printing the okay-message, after interpreting
+a line. Default it prints ``OK'' only for an interactive session
 in interpret forthcode({STATE}). },
 {{QUIT},{COLD}},
 {{OK ( Gives OK unless interpreted from stream)},{},
@@ -5356,15 +5357,14 @@ HEADER({WARM},{WARM},{DOCOL})
 ;
 _HOSTED_({
 worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
-{Handle command line options, i.e. execute the screen corresponding
-to the option letter.
-By redefining this as a forthcode({NOOP}) ,
-the handling of options during cold boot is suppressed, useful
-for turnkey applications. Accept and return a flag
+{Handle command line options, i.e. execute the screen
+corresponding to the option letter. Accept and return a flag
 forthvar({f}) whether the signon message must be
-displayed._VERBOSE_({Simply replace by a forthcode({NOOP}) if
-options must be suppressed.})
-},{{COLD}},
+displayed._VERBOSE_({{ By redefining this as a
+forthsamp({NOOP}), the handling of options during cold boot is
+suppressed, useful for turnkey applications. By redefining as
+forthsamp({DROP 0}), execution and signon are suppressed.}}) },
+{{COLD}},
 {{( No test)},{}},
 enddoc)
 HEADER({OPTIONS},{OPTIONS},{DOCOL})
@@ -5399,15 +5399,15 @@ OPT4:
 });_END_({_HOSTED_})
 
 worddoc( {INIT},{COLD},{cold},{},{FIG},
-{Reinitialise the system. Clear all block buffers.
-Reinitialise all user variables to their boot up values
-values, i.a. the stacks and the dictionary pointers. Restart via
-forthcode({ABORT}) . May be called from the terminal to remove
-application programs and restart, as long as there are no
+{Reinitialise the system. Clear all block buffers. Reinitialise
+all user variables to their boot up values values, i.a. the
+stacks and the dictionary pointers. _BLOCKSINFILE_({Opens the
+file that contains the blocks.}) Restart via forthcode({ABORT})
+. May be called from the terminal to remove application
+programs and restart, as long as there are no
 new vocabularies with definitions.
 _HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
 _BOOTED_({But it is better to reboot.})
-_BLOCKSINFILE_({Opens the file that contains the blocks.})
 },{{WARM},{BLOCK},{LIST}},
 {{( No test)},{}},
 enddoc)
@@ -5841,8 +5841,8 @@ from which messages are offset. Messages
 correspond with lines and the offset
 may be positive or negative.
 forthsamp({0 MESSAGE}) prints the first line of this screen.
-_VERBOSE_({Traditionally this was screen 4, but the negative
-Unix error numbers makes this unattractive.})
+_VERBOSE_({{Traditionally this was screen 4, but the negative
+Unix error numbers makes this unfeasible.}})
 },{{C/L},{MESSAGE}},
 {{HEX ERRSCR ?},{30}},
 enddoc)
@@ -5852,12 +5852,12 @@ HEADER({ERRSCR},{ERRSCR},{DOVAR}, )
 worddoc( {ERRORS},{MESSAGE},{message},{n --},{},
 { forthcode({MESSAGE}) is generally used to print error and
 warning messages.
-Print on the _HOSTED_LINUX_({standard error channel})_PC_({output device})
+Print on the _HOSTED_LINUX_({standard error channel}) _PC_({output device})
 the text of line
 forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
 positive or negative and beyond just screen forthcode({ERRSCR}).
 The messages with negative offset contain
-the strings belonging to the return values for _HOSTED_LINUX_({Linux system calls})_PC_({BDOS calls}).
+the strings belonging to the return values for _HOSTED_LINUX_({Linux system calls}) _PC_({BDOS calls}).
 forthsamp({0 MESSAGE}) will print version information about the library file,
 the messages sit in.
 If forthcode({WARNING}) is zero (disc unavailable), the message will simply be ignored.
@@ -5946,7 +5946,7 @@ CODE_HEADER({P!},{PSTO})
         OUT     {DX},AX   ;{WORD OUTPUT}
         _NEXT
 ;
-worddoc( {STORAGE~},{STALEST},{stalest},{--- addr},{},
+worddoc( {BLOCKS~},{STALEST},{stalest},{--- addr},{},
 {A variable containing the address of the oldest
 block buffer, the first candidate to be claimed if a new
 one is needed.},{{BLOCK}},
@@ -5955,7 +5955,7 @@ enddoc)
 HEADER({STALEST},{STALEST},{DOVAR}, )
         DC BUF1
 ;
-worddoc( {STORAGE~},{PREV},{prev},{---- addr},{},
+worddoc( {BLOCKS~},{PREV},{prev},{---- addr},{},
 {A variable containing the address of the disc buffer (not its
 content field!) most recently referenced. The
 forthcode({UPDATE}) command marks this buffer to be
@@ -5965,7 +5965,7 @@ enddoc)
 HEADER({PREV},{PREV},{DOVAR}, )
         DC      BUF1
 ;
-worddoc( {STORAGE},{#BUFF},{hash_buf},{--- c},{},
+worddoc( {BLOCKS},{#BUFF},{hash_buf},{--- c},{},
 {A constant that leaves the number of block buffers.
 Because a buffer that is being interpreted is locked in memory,
 this is also a limit to the nesting depth of blocks loading other
@@ -5975,7 +5975,7 @@ blocks. },
 enddoc)
 HEADER({#BUFF},{NOBUF},{DOCON}, NBUF)
 ;
-worddoc( {STORAGE~},{+BUF},{plus_buf},{add1 --- addr2 f},{FIG},
+worddoc( {BLOCKS~},{+BUF},{plus_buf},{add1 --- addr2 f},{FIG},
 {Advance the disc buffer address forthvar({addr1}) to the address of
 the next buffer forthvar({addr2}) . Boolean forthvar({f}) is false
 when forthvar({addr2}) is the buffer presently pointed to by variable
@@ -5995,7 +5995,7 @@ HEADER({+BUF},{PBUF},{DOCOL})
 PBUF1:  DC      LDUP, PREV, FETCH, LSUB
         DC      SEMIS
 ;
-worddoc( {STORAGE},{UPDATE},{update},{},{ISO,FIG,L0},
+worddoc( {BLOCKS},{UPDATE},{update},{},{ISO,FIG,L0},
 {Marks the most recently referenced block (pointed to by
 forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
@@ -6013,7 +6013,7 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      RSLW
         DC      SEMIS
 ;
-worddoc( {STORAGE},{EMPTY-BUFFERS},{empty_buffers},{},{ISO FIG L0},
+worddoc( {BLOCKS},{EMPTY-BUFFERS},{empty_buffers},{},{ISO FIG L0},
 {Mark all block-buffers as empty. Updated blocks are not
 written to the disc. This is an initialization proceedure
 before first use of the disc. _VERBOSE_({The usage as an
@@ -6028,7 +6028,7 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      SEMIS
         PAGE
 ;
-worddocsafe({STORAGE~},{(BUFFER)},{paren_buffer},{n --- addr},{},
+worddocsafe({BLOCKS~},{(BUFFER)},{paren_buffer},{n --- addr},{},
 {Return the addres forthvar({addr}) of a buffer assigned to
 block forthvar({n}) .
 The buffer layout is as follows: a cell
@@ -6043,10 +6043,9 @@ marked as updated. In ciforth this is never needed, because
 updated blocks are written immediately. In ciforth blocks can
 be locked, and locked buffers are never freed by
 forthcode({(BUFFER)}) .
-_VERBOSE_({{An update flag would somehow be
-multiplexed with the lock count, but it is not needed in
-ciforth.}}) If all buffers were locked, forthcode({(BUFFER)})
-freezes the system.
+_VERBOSE_({{An update flag would somehow be multiplexed with
+the lock count, but it is not needed in ciforth.}}) If all
+buffers were locked, forthcode({(BUFFER)}) freezes the system.
 },
 {{BLOCK},{STALEST},{PREV},{#BUFF},{LOCK},{UNLOCK}},
 {{!CSP 1 (BUFFER) FIRST LIMIT WITHIN . ?CSP},{_T_}},
@@ -6080,7 +6079,7 @@ BUFFER2:
     DC  SEMIS
 ;
 
-worddoc( {STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
+worddoc( {BLOCKS},{BLOCK},{block},{n --- addr},{ISO FIG L0},
 {Leave forthvar({addr}) the disc buffer containing block
 forthvar({n}), which is the physical disk block
 forthsamp({OFFSET+n}). The address left is the field within the
@@ -6112,7 +6111,7 @@ BLOCK1:
         DC      CELLP, CELLP
         DC      SEMIS
 ;
-worddoc( {STORAGE~},{FLUSH},{flush},{},{ISO FIG L0},
+worddoc( {BLOCKS~},{FLUSH},{flush},{},{ISO FIG L0},
 {Make sure that the content of all forthcode({UPDATE}) d block buffers
 has been transferred to disk.
 They are no longer associated with a block and their content is
@@ -6134,7 +6133,7 @@ FLUS1:  DC      ZERO, IDO, STORE
 FLUS2:
         DC      SEMIS
 ;
-worddoc( {STORAGE~},{SAVE},{save},{ --- },{},
+worddoc( {BLOCKS~},{SAVE},{save},{ --- },{},
 {Save the content of forthcode({SRC}) on the return stack
 prior to changing the forthdefi({current input source}).
 This must be balanced by a RESTORE in the same definition.},
@@ -6150,7 +6149,7 @@ HEADER({SAVE},{SAVE},{DOCOL})
         DC      TOR
         DC SEMIS
 ;
-worddoc( {STORAGE~},{RESTORE},{restore},{ --- },{},
+worddoc( {BLOCKS~},{RESTORE},{restore},{ --- },{},
 {This must follow a forthcode({SAVE}) in the same definition.
 Restore the content of forthcode({SRC}) from the return stack
 thusly restoring the forthdefi({current input source}) to what
@@ -6168,7 +6167,7 @@ HEADER({RESTORE},{RESTO},{DOCOL})
         DC SEMIS
 ;
 _LOAD_({
-worddoc( {STORAGE~},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
+worddoc( {BLOCKS~},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
 {Get a complete specification of the input source stream. For
 ciforth this is the content of forthcode({SRC}). ciforth needs
 3 cells, and is always able to forthcode({RESTORE}) an input
@@ -6186,7 +6185,7 @@ HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
         DC      LIT, 3
         DC SEMIS
 ;
-worddoc( {STORAGE~},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3--- f},{ISO},
+worddoc( {BLOCKS~},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3--- f},{ISO},
 {Restore the input source stream from what was saved by
 SAVE-INPUT .
 ciforth is always able to restore the input across
@@ -6206,13 +6205,13 @@ HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC SEMIS
 ;
 });_END_({_LOAD_})
-worddoc( {STORAGE},{LOCK},{lock},{ n --- },{CI},
+worddoc( {BLOCKS},{LOCK},{lock},{ n --- },{CI},
 {Lock the block forthvar({n}).
 Multiple locks are possible, and require multiple unlocks.
 _VERBOSE_({{Probably, because it
 is to become the forthdefi({current input source}).}})
 The result is that its buffer will not be reclaimed
-until a forthcode({UNLOCK}) occurs.},
+until an forthcode({UNLOCK}) occurs.},
 {{BLOCK},{UNLOCK},{#BUFF}},
 { {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
     PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{-1 _T_} },
@@ -6223,8 +6222,8 @@ HEADER({LOCK},{LLOCK},{DOCOL})
         DC      LIT, -2, SWAP, PSTORE
         DC      SEMIS
 ;
-worddoc( {STORAGE},{UNLOCK},{unlock},{ n --- },{CI},
-{Unlock the block forthvar({n})
+worddoc( {BLOCKS},{UNLOCK},{unlock},{ n --- },{CI},
+{Unlock the block forthvar({n}).
 _VERBOSE_({{Probably, because it
 is no longer the forthdefi({current input source.})}})
 The result is that its buffer can again be reclaimed.
@@ -6289,7 +6288,7 @@ THRU2:
 ;
 _LOAD_({
 ;
-worddoc( {STORAGE~},{BLK},{blk},{--- addr},{ISO},
+worddoc( {BLOCKS~},{BLK},{blk},{--- addr},{ISO},
 {When the standard word forthcode({BLK}) is used, the content
 of the user variable forthsamp({(BLK)}) is refreshed to reflect
 the state of the current input source and its address is returned
@@ -6525,7 +6524,7 @@ CODE_HEADER({BIOSN},{BIOSN})
 ;
 _SWITCH_({SPSAVE: DC       0H})
 ;
-worddoc( {STORAGE},{REG-SET},{register_set},{--- addr},{},
+worddoc( {BLOCKS},{REG-SET},{register_set},{--- addr},{},
 {Leaves the forthvar({addr}) the register storage areas for
 cross-mode interrupt handling. _VERBOSE_({ This structure is
 defined by the DPMI specifications for use with interrupt 31H
@@ -6818,7 +6817,7 @@ BDOSN1:
 ;
 });_END_({_MODERN_})
 _FILES_({
-worddoc( {STORAGE~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
+worddoc( {BLOCKS~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
 {A constant that leaves the address of a disk buffer used by
 file i/o words._HOSTED_MSDOS_({{It is primarily used for building up
 a zero ended string, such as not to burden pad.}})
@@ -6925,7 +6924,7 @@ OFILE2:
 ;
 worddoc( {FILES},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO},
 {Close the file with file handle in forthvar({fileid}). Return
-a result code into forthvar({ior}). The latter is the MSDOS
+a result code into forthvar({ior}). The latter is the _PC_({MSDOS}) _HOSTED_LINUX_({Linux})
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{." See OPEN-FILE"},{See OPEN-FILE}},
@@ -6951,15 +6950,16 @@ CFILE2:
 worddoc( {FILES},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
 {_MODERN_({ Create a file with name forthvar({sc}) and
 properties forthvar({u}), for normal files this is just 0.
-_VERBOSE_({The meaning is to be found in the MSDOS programmers
+_PC_({The meaning is to be found in the MSDOS programmers
 manual at INT 21h function 3Ch "Create file with handle"}).})
-_LINUX_N_({ Create a file with name forthvar({sc}) and file
+_HOSTED_LINUX_({ Create a file with name forthvar({sc}) and file
 access privileges forthvar({u}) }) If the file already exists,
 it is truncated to zero length. Return a file handle into
-forthvar({fileid}) and a result code into forthvar({ior}). The
-latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({ forthvar({errno})
-}) negated, to be inspected using forthcode({MESSAGE}). The
-handle is open for READ_WRITE. },
+forthvar({fileid}) and a result code into forthvar({ior}).
+The latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({
+forthvar({errno}) }) negated, to be inspected using
+forthcode({MESSAGE}) .
+The handle is open for READ_WRITE. },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}},
@@ -6987,8 +6987,11 @@ CRFILE2:
 ;
 worddoc( {FILES},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
 {Delete the file with name forthvar({sc}). Return
-a result code into forthvar({ior}). The latter is the MSDOS
-error code negated, to be inspected using forthcode({MESSAGE}). },
+a result code into forthvar({ior}).
+The latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({
+forthvar({errno}) }) negated, to be inspected using
+forthcode({MESSAGE}) .
+},
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{"AAP" 0 CREATE-FILE . CLOSE-FILE .},{0 0},
 {"AAP" DELETE-FILE . },{0 },
@@ -7069,11 +7072,10 @@ RC:     DC      0
 ;
 worddoc( {FILES}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
 {Position the file that is open at forthvar({fd}) at position
-forthvar({ud}).
-forthvar({ior}) is 0 for success, or otherwise
-_PC_({the MSDOS error code negated }){}_HOSTED_LINUX_({ -1 with
-more information in forthvar({errno}) }). Information about error codes
-can be found by forthcode({MESSAGE}). },
+forthvar({ud}). forthvar({ior}) is 0 for success, or otherwise
+_PC_({the MSDOS error code}) _HOSTED_LINUX_({forthvar({errno})})
+negated . Information about
+error codes can be found by forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD },{0 },
@@ -7227,8 +7229,8 @@ HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      SEMIS
 ;
 worddoc( {FILES},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
-{Save the string constant forthsamp({sc2} as a new file with
-the name forthsamp({sc1}) ) . Any errors are thrown. },
+{Save the string constant forthsamp({sc2}) to a file with
+the name forthsamp({sc1}). Any errors are thrown. },
 {{GET-FILE},{OPEN-FILE},{THROW}},
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
@@ -7264,16 +7266,21 @@ INCLUD2:
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the terminal input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
-forthkey({RET}). If the input is redirected (such that reading
-after forthkey({RET}) cannot be prevented)
-forthsamp({REMAINDER 2@}) contains the part of
-forthcode({TIB}) that is outside the reach of forthcode({SRC}) ,
-is not consumed nor consumable directly by Forth parsing words,
-such as forthcode({ACCEPT}) or forthcode({WORD}).
+forthkey({RET}).
+It is now consumable
+by forthcode({ACCEPT}) or after forthcode({SET-SRC})
+by Forth parsing words like forthcode({WORD}) .
+The editing functions
+are those described by forthcode({ACCEPT}).
 Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
 the characters ready in the input buffer. All characters are
-retained including the forthkey({RET}). The editing functions
-are those described by forthcode({ACCEPT}).
+retained including the forthkey({RET}).
+
+If the input is redirected (such that reading
+after forthkey({RET}) cannot be prevented)
+forthsamp({REMAINDER 2@}) contains the part of
+forthcode({TIB}) that is not yet consumed by forthcode({(ACCEPT)}) ,
+and outside the reach of forthcode({SRC}) .
 },
 {{ACCEPT},{(ACCEPT)}},
 {
@@ -7441,14 +7448,12 @@ HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
-{Accept characters from the terminal, until a forthkey({LF})
+{Accept characters from the terminal, until a forthkey({RET})
 is received and return the result as a constant string
 forthvar({sc}).
-It doesn't contain the forthkey({LF}),
-but the buffer still does and after forthcode({1+}) the string
-contains forthkey({RET}).
-The
-editing functions are the same as with forthcode({ACCEPT}) .
+It doesn't contain any line ending, but the buffer still does
+and after forthcode({1+}) the string ends in a forthkey({LF}).
+The editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than forthcode({ACCEPT}) }})
 },
@@ -7515,7 +7520,7 @@ HEADER({KEY},{KEY},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
-{Into forthvar({f}) return whether a character is available.
+{Return into forthvar({f}) return whether a character is available.
 The next execution of forthcode({KEY}) will return the character immediately.
 },
 {{KEY},{ACCEPT},{KEY?}},
@@ -7905,14 +7910,17 @@ EXPE8:
 ;{       SYSTEM DEPENDANT DISK I/O}
 ;{------------------------------------}
 define({_FILENAMELENGHT_M4_},_BITS16_(30)_BITS32_(254))
-worddoc( {STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},
-{Leave the address forthvar({addr}) of a variable containing
+worddoc( {BLOCKS},{DISK-ERROR},{disk_error},{--- addr},{},
+{_PC_({
+Leave the address forthvar({addr}) of a variable containing
 information about the latest disk error in opening, using or
-closing the block file. _HOSTED_LINUX_({ This is just
-a flag, indicating there was an error. }). _PC_({ One means an
-error and and zero means okay.})
-_VERBOSE_({Beware that if error messages are loaded from disk,
-this may clear forthcode({DISK-ERROR}) })
+closing the block file.
+One means an
+error and and zero means okay.
+_VERBOSE_({{Beware that if error messages are loaded from disk,
+this may clear forthcode({DISK-ERROR}) }})})
+dnl _HOSTED_LINUX_({ This is just a flag, indicating there was an error. }).
+_HOSTED_LINUX_({ This flag is not used, errors are thrown. }).
 },
 {{BLOCK}},
 {{." See BLOCK-EXIT"},{See BLOCK-EXIT}},
@@ -7921,7 +7929,7 @@ HEADER({DISK-ERROR},{DERR},{DOVAR}, )
         DC      -1
 ;
 _BLOCKSINFILE_({
-worddoc( {STORAGE},{BLOCK-FILE},{block_file},{---addr},{},
+worddoc( {BLOCKS},{BLOCK-FILE},{block_file},{---addr},{},
 {Leave the address forthvar({addr}) of a counted string,
 the name of a file in which blocks are (to be) allocated.
 The name may contain a path and be at most}
@@ -7935,7 +7943,7 @@ enddoc)
 HEADER({BLOCK-FILE},{BLFL},{DOVAR}, )
         _STRING({forth.lab})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
-worddoc( {STORAGE},{BLOCK-HANDLE},{block_handle},{---n},{},
+worddoc( {BLOCKS},{BLOCK-HANDLE},{block_handle},{---n},{},
 {Leave a file handle in forthvar({n}) .
 If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
@@ -7946,15 +7954,15 @@ enddoc)
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, )
         DC      -1
 ;
-worddoc( {STORAGE},{?DISK-ERROR},{disk_error_},{u---},{},
-{Interpret forthvar({u}) as the status of a disk i/o BDOS call.
-Report an error if it contains an error condition.
+worddoc( {BLOCKS},{?DISK-ERROR},{disk_error_},{n---},{},
+{Interpret forthvar({n}) as the status of a disk i/o call.
+forthdefi({Signal}) an error if it contains an error condition.
 },{{BLOCK-FILE},{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
 HEADER({?DISK-ERROR},{QDSKER},{DOCOL})
         DC      LIT, 8, QERR
         DC      SEMIS
 ;
-worddoc( {STORAGE},{BLOCK-INIT},{block_init},{n ---},{},
+worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{n ---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
 to the blocks in this file. The handle
@@ -7974,7 +7982,7 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      BHAN, STORE
         DC      SEMIS
 ;
-worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
+worddoc( {BLOCKS},{BLOCK-EXIT},{block_exit},{---},{},
 {A block file must have been opened by forthcode({BLOCK-INIT}) .
 Close the currently open block file forthcode({BLOCK-HANDLE}),
 i.e. the mass storage words no longer work, and will result in
@@ -8000,7 +8008,7 @@ HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      QDSKER
         DC      SEMIS
 ;
-worddoc( {STORAGE~},{SEEK},{seek},{n---},{},
+worddoc( {BLOCKS~},{SEEK},{seek},{n---},{},
 {A block file must have been opened by forthcode({BLOCK-INIT}) .
 Position the file pointer at block forthvar({n})
 in behalf of subsequent reads and writes.
@@ -8013,13 +8021,13 @@ HEADER({SEEK},{SEEK},{DOCOL})
         DC      QDSKER
         DC      SEMIS
 ;
-worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
+worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk f --},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R\W}) determines the location on mass storage,
-performs the read or write and records errors, but doesn't abort on them.},
+performs the read or write and throws an exception on errors.},
 {{BLOCK},{DISK-ERROR}},
 dnl we can use block 2 for scratch, -b is not an option in use.
 {
@@ -8132,7 +8140,7 @@ LOADEXEC:   DW  0       ; {The 0 are filled in at boot with DS.}
 COMBUF:  _RESB(CW+256)  ;{One cell for high level string manipulation.}
 });_END_({_MODERN_})
 _LINUX_C_({
-worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
+worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
 to the blocks in this file. The handle to use it is
@@ -8154,7 +8162,7 @@ CODE_HEADER({BLOCK-INIT},{BLINI})
         LEA     ESP,[ESP+_CELLS(2)]    ; remove input
         _NEXT
 ;
-worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
+worddoc( {BLOCKS},{BLOCK-EXIT},{block_exit},{---},{},
 {A block file must have been opened by forthcode({BLOCK-INIT}) .
 Close the currently open block file,
 i.e. the mass storage words no longer work, and will result in
@@ -8169,7 +8177,7 @@ CODE_HEADER({BLOCK-EXIT},{BLEXI})
         CALL    c_block_exit
         _NEXT
 ;
-worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{FIG},
+worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk f --},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
@@ -8187,7 +8195,7 @@ CODE_HEADER({R\W},{RSLW})
 
 });_END_({_LINUX_C_})
 _RWSECTRK_({
-worddoc( {STORAGE},{DRIVE},{drive},{--- addr},{},
+worddoc( {BLOCKS},{DRIVE},{drive},{--- addr},{},
 {Leave the address forthvar({addr}) of a character buffer,
 containing the
 drive used for mass storage, the number of sectors in a
@@ -8215,7 +8223,7 @@ _CLASSIC_({
 ; It may not be pretty but it surely is the smallest.
 ;
 ;
-worddoc( {STORAGE},{DRIVE},{drive},{--- addr},{},
+worddoc( {BLOCKS},{DRIVE},{drive},{--- addr},{},
 {Leave the address forthvar({addr}) of a variable containing the
 drive used for mass storage. This is in MSDOS coding,
 0 is floppy A: , 1 is floppy B:, 80H is drive C:,
@@ -8244,7 +8252,7 @@ SBLK    PROC    NEAR
         RET
 _ENDP SBLK    ENDP
 ;
-worddoc( {STORAGE},{RBLK},{read_block},{addr blk --},{},
+worddoc( {BLOCKS},{RBLK},{read_block},{addr blk --},{},
 {forthsamp({1 R\W}) is an abbreviation for forthsamp({RBLK}).
 },{{R\W}}, {}, enddoc)
 CODE_HEADER({RBLK},{RBLK})
@@ -8256,7 +8264,7 @@ CODE_HEADER({RBLK},{RBLK})
         LEA     DX,[RERR]
         JMP     RWERR
 ;
-worddoc( {STORAGE},{WBLK},{write_block},{addr blk --},{},
+worddoc( {BLOCKS},{WBLK},{write_block},{addr blk --},{},
 {forthsamp({0 R\W}) is an abbreviation for forthsamp({WBLK}).
 },{{R\W}}, {}, enddoc)
 CODE_HEADER({WBLK},{WBLK})
@@ -8279,7 +8287,7 @@ DOK:    POPF            ;{POP FLAGS}
         POP     HIP      ;{INTERPRETER PNTR}
         _NEXT
 ;
-worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
+worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk f --},{},
 {The basic mass storage read-write linkage. (Already present in
 figforth.) forthvar({addr}) specifies the source or destination
 block buffer, forthsamp({blk}) is the sequential number of the
@@ -8304,7 +8312,7 @@ RSLW2:  DC      SEMIS
 });_END_({_CLASSIC_})
 _USEBIOS_({
 ;
-worddoc( {STORAGE},{SEC/BLK},{sectors_per_block},{--- c},{},
+worddoc( {BLOCKS},{SEC/BLK},{sectors_per_block},{--- c},{},
 {This constant leaves the number of sectors per block. _VERBOSE_(
 The original idea was that a sector forthemph({is}) a block. In
 fact SEC/BLK is set such that B/SRC is one, as is required for ISO.)
@@ -8314,7 +8322,7 @@ HEADER({SEC/BLK},{SPBLK},{DOCON}, SPB)
 });_END_({_USEBIOS_})
 ;
 _RWSECTRK_({
-worddoc( {STORAGE},{SEC-RW},{sector_read_write},{com addr sec --},{},
+worddoc( {BLOCKS},{SEC-RW},{sector_read_write},{com addr sec --},{},
 {Performs the BIOS function forthsamp({com}) , for
 a single sector
 forthsamp({sec}) either a read to forthvar({addr}) or write from
@@ -8340,7 +8348,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      DROP
         DC      SEMIS
 ;
-worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{FIG},
+worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk f --},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
@@ -8388,7 +8396,7 @@ _RWLBA_({
 
 ;{ Warning : if this LBA is used apart from by R\W}
 ;{ the fields marked default must be restored.}
-worddoc( {STORAGE},{LBAPAR},{l_b_a_params},{--},{},
+worddoc( {BLOCKS},{LBAPAR},{l_b_a_params},{--},{},
 { A data structure used by R\W , that also must be filled in for disk
 operations forthcode({RBLK}) and forthcode({WBLK}) . Do not touch the
 first 16-bits word. The second word is the number of sectors to be
@@ -8410,7 +8418,7 @@ HEADER({LBAPAR},{LBA},{DOVAR}, )
         DD      0       ;{ sector number}
         DD      0       ;{ M.S. 32 BITS default}
 
-worddoc( {STORAGE},{RBLK},{read_block},{--},{},
+worddoc( {BLOCKS},{RBLK},{read_block},{--},{},
 {Perform a disk read operation using a properly filled in LBA structure
 in forthcode({LBAPAR}). },
 {{R\W},{WBLK}}, {}, enddoc)
@@ -8418,7 +8426,7 @@ CODE_HEADER({RBLK},{RBLK})
         MOV     BX,4200H
         JMP    RWBLK
 ;
-worddoc( {STORAGE},{WBLK},{write_block},{--},{},
+worddoc( {BLOCKS},{WBLK},{write_block},{--},{},
 {Perform a disk write operation using a properly filled in LBA
 structure in forthcode({LBAPAR}). },
 {{R\W},{RBLK}}, {}, enddoc)
@@ -8442,7 +8450,7 @@ RWBLK:
         PUSH    BX
         _NEXT
 
-worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
+worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk f --},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, It must reside
 in the lowest 1 Mbyte of physical memory.
@@ -8508,8 +8516,8 @@ given. In ciforth this word is just an alias for forthcode({'}) ,
 so it can be used in interpret mode too. It is recommended that
 for non-portable code the
 forthdefi({denotation}) forthcode({'}) is used instead, and
-that is is never postponed. (Use a combination of
-forthcode({WORD}) and forthcode({FIND})
+that it is never postponed. (Use a combination of
+forthcode({WORD}) and forthcode({FIND}) instead.
 ). },
 {{FOUND},{'},{EXECUTE}} ,
 {{ : APE 1 2 ; : GS1 ['] APE ; GS1 EXECUTE  GS1 ID. . .},{APE 2 1}},
@@ -9017,7 +9025,7 @@ HEADER({#>},{EDIGS},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {FORMATTING},{SIGN},{sign},{n --- },{ISO,FIG},
-{Stores an ASCII "-" sign just before a converted numeric output
+{Stores an ASCII minus-sign forthkey({-}) just before a converted numeric output
 string in the text output buffer when forthvar({n}) is negative.
 Must be used between forthcode({<#}) and
 forthcode({#>}) .},
@@ -9060,12 +9068,12 @@ DIG1:   DC      LIT,30H
         DC      SEMIS
 ;
 worddoc( {FORMATTING},{#S},{number_sign_s},{d1 --- d2},{ISO,FIG,L0},
-{Generates ASCII text in the text output buffer,
-by the use of (sharp) dnl forthcode({#}),
-until a zero double number forthvar({d2}) results.
-Used between forthcode({<#}) and forthcode({#>}).},{},
-{
-{!CSP 1.23 <# #S #> TYPE ?CSP},{123},
+{Generates ASCII text in the text output buffer, by the use of
+forthcode({{{{{#}}}}}), until a zero double number
+forthvar({d2}) results. Used between forthcode({<#}) and
+forthcode({#>}).},
+{},
+{{!CSP 1.23 <# #S #> TYPE ?CSP},{123},
 {!CSP 1.23456 <# #S #> TYPE ?CSP},{123456}
 },
 enddoc)
@@ -9387,8 +9395,8 @@ DOC1:    DC DROP, DROP
         DC      LIT, ASC, EMIT
         DC SEMIS
 ;
-worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},( addr n -- i*x t/f ),{ISO},
-{If the string forthsamp({addr n})
+worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},( sc -- i*x t/f ),{ISO},
+{If the string forthsamp({sc})
 is a known environment
 attribute, leave into forthsamp({i*x}) the information about that attribute and
 a true flag, else leave a false flag.
@@ -9620,11 +9628,12 @@ to this wordset.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DOUBLE},{ },
 {The wordset forthsamp({DOUBLE}) contains words that manipulate forthdefi({double})'s.
-_BITS32_({In this 32 Forth you would never need doubles if it weren't
+_BITS32_({In this 32 Forth you would hardly need doubles if it weren't
 for the NUMBER formatting wordset that uses them exclusively.})},
 {},{},{},{}, {}, enddoc)
 worddocchapter({ERRORS},{ },
-{The wordset forthsamp({ERRORS}) contains words to handle errors.},
+{The wordset forthsamp({ERRORS}) contains words to handle errors
+and exceptions.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({FORMATTING},{ },
 {The wordset forthsamp({FORMATTING}) generates formatted output for
@@ -9660,18 +9669,18 @@ identical in interpret and compile mode and they cannot be
 postponed. },
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
-{The wordset forthsamp({ENVIRONMENT}) contain words for all Forth
-environment queries that are recognized.
-By executing they leave the information
-such as is required for each of these queries.
-Except for the true flag at the end.
-_VERBOSE_({{Note that these are not environment
-variables that are passed from an operating system to a program.}})
-},
+{The wordset forthsamp({ENVIRONMENTS}) contains all words of
+the forthcode({ENVIRONMENT}) vocabulary and those words needed
+to recognize them as Forth environment queries.
+_VERBOSE_({{Note that these are not environment variables in
+the sense that are passed from an operating system to a
+program.}}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
 {The wordset forthsamp({INPUT}) contains words to get input from the terminal
-and such. For disk I/O: forthxref({FILES}) forthxref({STORAGE}) },
+and such.
+forthxref({FILES}) for disk I/O.
+forthxref({BLOCKS}) for access of blocks. },
 {},{},{},{}, {}, enddoc)
 worddocchapter({JUGGLING},{ },
 {The wordset forthsamp({JUGGLING}) contains words that change the lifo-buffer.
@@ -9744,7 +9753,7 @@ forthxref({MULTIPLYING}).})},
 {},{},{},{}, {}, enddoc)
 worddocchapter({OUTPUT},{ },
 {The wordset forthsamp({OUTPUT}) contains words to output
-to the terminal and such. For disk I/O: forthxref({FILES}) forthxref({STORAGE}) },
+to the terminal and such. For disk I/O: forthxref({FILES}) forthxref({BLOCKS}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
@@ -9789,20 +9798,19 @@ Words can be moved between both stacks.
 Stacks can be reinitialised and the value used to initialise the
 forthdefi({stack pointer})'s can be altered.},
 {},{},{},{}, {}, enddoc)
-worddocchapter({STORAGE},{ },
-{The wordset forthsamp({STORAGE}) contains words to input and output
-to the mass storage, mainly using blocks.
- In this ciforth blocks reside
-_RWSECTRK_({ on the disk, by sector and track, })
-_BOOTLBA_({on the hard disk}) _HOSTED_({in a file, named
-forthfile({forth.lab}) by default. }).
-They are underlying the forthsamp({SCREEN}) facilities.},
+worddocchapter({BLOCKS},{ },
+{The wordset forthsamp({BLOCKS}) contains words to input and
+output to the block mass storage. In this ciforth blocks reside
+_RWSECTRK_({{ on the disk, by sector and track, }}) _BOOTLBA_({
+on the hard disk}) _HOSTED_({{in a file, by default
+named forthfile({forth.lab}). }}). They are underlying the
+forthsamp({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
 _FILES_({
 worddocchapter({FILES},{ },
 {The wordset forthsamp({FILES}) contains words to input and output
 to files, or load words from files.
-They are underlying the forthsamp({STORAGE}) facilities.},
+_HOSTED_({They are underlying the forthsamp({BLOCKS}) facilities.})},
 {},{},{},{}, {}, enddoc)
 });_END_({_FILES_})
 worddocchapter({STRING},{ },
