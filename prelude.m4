@@ -20,8 +20,7 @@ dnl If you try to make Forth words with { } your coat is sold.
 changequote({,})dnl
 changecom{}dnl no braindamaged comment with #
 dnl Indicate that a large part of conditional assembly ends here
-define({_END_}, )dnl obsolete version
-define({_END_}, )dnl preferred version
+define({_END_},{$1})dnl
 dnl _yes and  _no are expanded during definition time and generate
 dnl define({aap},$1) or define({aap},$2)
 dnl By e.g. _BITS32_({DC LIT, X},{dnl}) can extra blank lines
