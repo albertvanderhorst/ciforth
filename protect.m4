@@ -34,7 +34,8 @@ dnl The curly brackets prevent AX to be expanded to EAX
         MOV     ES,{AX}
         MOV     SS,{AX}
         STI
-        _BITS32_1_({BITS 32})
+        ;_BITS32_1_({
+        BITS 32})
 })dnl
 define({JMPHERE_FROM_REAL},{
 	TO_PROTECTED    
