@@ -1,20 +1,17 @@
 ;               HCC FIG generic 8086 FORTH
 ; $Id$
+; Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 ; NASM listing: Make some MASM directives harmless up front.
 %macro IGNORE1 1+ ; One or more parameters
 %endmacro
 %define IGNORE   ; no parameters
-%define PAGE IGNORE
 %define CSEG IGNORE1
 %define ASSUME IGNORE1
 %define PROC IGNORE1
-%define TITLE IGNORE1
 %define OFFSET IGNORE
-%define END IGNORE1
-; ENDP can only be made harmless by commenting the whole line out
 ; `comment x' is replace by `%if 0' constructions.
-	; PAGE  66,106
- TITLE   GENERIC FORTH FOR 8086 $Ver:$
+        PAGE  66,106
+ TITLE   GENERIC FORTH FOR 8086 $Revision$
 %if 0 
               FIG-FORTH
    implemented by:  Charlie Krajewski
@@ -3272,7 +3269,7 @@ GSEC1:	POP	BX	;TRANSFER ADDR
 	MOV	CX,1	;READ 1 SECTOR
 	PUSH	DI	;GET THAT RETURN BACK
 	RET
-;SSEC    ENDP
+_ENDP SSEC    ENDP
 ;
 ;	RSEC
 ;
@@ -3455,7 +3452,7 @@ POUT	PROC	NEAR
 	JZ	POUT1	;OFF
 	CALL	LO	;LIST OUTPUT
 POUT1:	RET
-;POUT    ENDP
+_ENDP POUT    ENDP
 ;
 ; PRINTER ECHO FLAG
 ;
@@ -3480,7 +3477,7 @@ CSTAT	PROC	NEAR
 	INT	21H
 	POP	DX
 STATRT: RET
-;CSTAT   ENDP
+_ENDP CSTAT   ENDP
 ;
 ;-------------------------
 ; CONSOLE INPUT
@@ -3492,7 +3489,7 @@ CI	PROC	NEAR
    	MOV	AH,0	; READ CHAR FUNCTION
 	INT	16H
 	RET
-;CI      ENDP
+_ENDP CI      ENDP
 	PAGE
 ;--------------------
 ; CONSOLE OUTPUT
@@ -3511,7 +3508,7 @@ CHO	PROC	NEAR
 	POP	AX
 	POP	DX
 	RET
-;CHO     ENDP
+_ENDP CHO     ENDP
 ;
 ;----------------------
 ;	LIST OUTPUT
@@ -3531,7 +3528,7 @@ LO	PROC	NEAR
 	POP	DX
 	POP	AX
 	RET
-;LO      ENDP
+_ENDP LO      ENDP
 	PAGE
 	; At line     LINE ~3500
 ;	'
@@ -4187,7 +4184,7 @@ used for:
 					
 	RESB    EM-($-$$)    ; Make EM The last location.
  CSEG    ENDS
-; ORIG    ENDP
+_ENDP  ORIG    ENDP
 	PAGE
 %if 0 
 
