@@ -1,6 +1,8 @@
 dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 include(header.m4)
+dnl Work around a deficiency in nasm : an ORG requires a numeric argument
+define({M4_BIOSBOOT},{07C00H})
 dnl architectural consequences
 _BOOTFD__1_({define({_SWITCH_1_},_yes)})
 _BOOTHD__1_({define({_SWITCH_1_},_yes)})

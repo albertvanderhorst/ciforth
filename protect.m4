@@ -5,8 +5,8 @@ _BITS16_1_( {define({IDENTIFY_PROT},{IDENTIFY_16})})
 _BITS32_1_( {define({IDENTIFY_PROT},{IDENTIFY_32})})
 define({JMPHERE_FROM_PROT},{
         JMPFAR
-	DC      $+2+CW
-        DW      CS_COMMON
+	DC      $+2+CW-CS_START+SWITCH_START
+        DW      GDT_SWITCH
 	MOV EAX,CR0
 	DEC AL  
 	MOV CR0,EAX            ;set real mode
@@ -25,11 +25,11 @@ define({JMPHERE_FROM_REAL},{
 	INC AL  
 	MOV CR0,EAX            ;set protected mode
         JMPFAR
-	DW      $+4 + BOOTOFFSET
-        DW      CS_PROT    
-        MOV     AX,DS_PROT
+	DW      $+4-SWITCH_START+CS_START
+        DW      GDT_CS   
+        MOV     AX,GDT_DS
         MOV     DS,AX
-        MOV     ES,AX
+        MOV     ES,AX                       
         MOV     SS,AX
 })dnl     
 divert{}dnl
