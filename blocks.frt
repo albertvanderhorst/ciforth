@@ -128,11 +128,11 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 ;    HEX>
  ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 3.43    AH"
   -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
- ( MAINTENANCE )  100 LOAD   32 LOAD
-( HEX CHAR DUMP)  6 LOAD 30 LOAD 7 LOAD 39 LOAD ( i.a. editor)
+ ( MAINTENANCE )  100 LOAD   34 LOAD
+( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD 37 LOAD
  ( EDITOR ) 109 LOAD
- ( CP/M READ WRITE LOAD    15 LOAD 18 LOAD 21 LOAD 21: BUGS)
+ ( CP/M READ WRITE LOAD    17 LOAD 21 LOAD 24 LOAD 21: BUGS)
  ( KRAKER )        10 LOAD
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
@@ -173,7 +173,23 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
        SELTOP @ SELTAB DO
            DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
- : <> - 0= 0= ;   33 LOAD -->
+ : <> - 0= 0= ;   -->
+ CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
+:  NONAME >R  
+    R >LFA @ OVER = IF R> RESULT ! ELSE R> DROP THEN ;
+ : NEXTD ( CFA--DEA Get the DEA of the word defined)
+   0 RESULT !               ( after the CFA one)
+   C>D ' NONAME >CFA LATEST FOR-WORDS DROP
+   RESULT @ DUP 0= IF DROP LATEST THEN
+ ;
+
+
+
+
+ : NEXTC ( CFA--CFA Like previous definition, giving CFA)
+   NEXTD >CFA ;
+
+                  -->
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
    HERE VARIABLE LIM  : H.. BASE @ >R HEX . R> BASE ! ;
  : (KRAAK) ( CFA--. Decompile a word from its CFA)
@@ -226,6 +242,9 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : -dq CELL+ DUP $@ CR [CHAR] . EMIT [CHAR] " EMIT BL EMIT
      TYPE [CHAR] " EMIT BL EMIT  $@ + ;
                              CFOF (.") BY -dq
+  : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT 
+         ."  ] DLITERAL " $@ + 4 CELLS + ;
+                      CFOF SKIP BY -sk
   : -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT
       TYPE [CHAR] " EMIT BL EMIT  $@ + ;
                              CFOF ($) BY -sq
@@ -234,11 +253,24 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
   ( : -cm ." COMPILE " -lit ;  CFOF COMPILE BY -cm    )
   : -cm ID.+ ID.+ ;            CFOF COMPILE BY -cm
+      -->
+ CR ." KRAAKER"
   ( DIRTY TRICK FOLLOWING :)
   : -pc CR ." ;CODE plus code (suppressed)"
     DROP ' TASK >PFA ; ( Destroy deecompile pointer !)
-      CFOF (;CODE) BY -pc
- ( DISK IO SCREEN 15 SCHRIJVEN >1< VERSIE #1)
+      CFOF (;CODE) BY -pc  
+ : KRAAK-FROM ( .--. Kraak, starting with following word)
+   CFOF
+   BEGIN
+      DUP NEXTD LATEST < WHILE
+      NEXTC DUP (KRAAK)
+   REPEAT DROP ;    ;S Remainder is broke
+ 0 VARIABLE aux
+ : PEMIT $7F AND 5 BDOS DROP ;
+ : TO-LP-KRAAK-FROM
+   ' EMIT >CFA >R       ' PEMIT >CFA ' EMIT >PFA !
+   KRAAK-FROM           R> ' EMIT >PFA ! ;
+ ( DISK IO SCREEN 17 SCHRIJVEN >1< VERSIE #1)
  <HEX  0 VARIABLE FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
  : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
  : FILL-FCB 22 WORD
@@ -254,7 +286,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 
 
 
- ( SCR # 16 SCHRIJVEN >2<   )
+ ( SCR # 18 SCHRIJVEN >2<   )
  0 VARIABLE DISK-BUFFER-W 100 ALLOT
  DISK-BUFFER-W VARIABLE POINTER-W
  : .OPENW FCB2 CLEAN-FCB FCB2 FILL-FCB ?PRES
@@ -270,7 +302,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
            R> POINTER-W +!
            POINTER-W @ DISK-BUFFER-W -
            80 >  IF   -->
-  ( SCREEN #17 SCHRIJVEN  >3<)
+  ( SCREEN #19 SCHRIJVEN  >3<)
               DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
               MOVE-DOWN
           THEN ;
@@ -302,7 +334,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
                -->
 
 
- ( SCR # 19,  TWEEDE SCREEN VAN CP/M READ)
+ ( SCR # 21,  TWEEDE SCREEN VAN CP/M READ)
  : ?EMPTY ( POINTER -- CORRECTED PNR, READ SECTOR IF AT END)
      DUP END-BUF = IF DISK-BUFFER-R SET-DMA  FCB2 14 BDOS .
                     DROP DISK-BUFFER-R THEN  ;
@@ -526,38 +558,6 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 
 
 
- CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
-:  NONAME >R  
-    R >LFA @ OVER = IF R> RESULT ! ELSE R> DROP THEN ;
- : NEXTD ( CFA--DEA Get the DEA of the word defined)
-   0 RESULT !               ( after the CFA one)
-   C>D ' NONAME >CFA LATEST FOR-WORDS DROP
-   RESULT @ DUP 0= IF DROP LATEST THEN
- ;
-
-
-
-
- : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTD >CFA ;
-
-
- CR ." KRAAKER"
- : KRAAK-FROM ( .--. Kraak, starting with following word)
-   CFOF
-   BEGIN
-      DUP NEXTD LATEST < WHILE
-      NEXTC DUP (KRAAK)
-   REPEAT
-   DROP
- ;        ;S Remainder is broke
- 0 VARIABLE aux
- : PEMIT $7F AND 5 BDOS DROP ;
- : TO-LP-KRAAK-FROM
-   ' EMIT >CFA >R
-   ' PEMIT >CFA ' EMIT >PFA !
-   KRAAK-FROM
-   R> ' EMIT >PFA ! ;
 ( Elementary string: $@ $! $+! $C+     A0apr03-AH)
 ( All this should probably be low level )
 

@@ -980,9 +980,9 @@ worddoc({DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {},
 {{"AAP" TYPE},{AAP},
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
-HEADER({%},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
+HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
-        DC      LIT,'%' 
+        DC      LIT,'"' 
         DC      PPARS
         DC      LIT, SKIP, COMMA
         DC      SCOMMA, SFET
@@ -2695,41 +2695,17 @@ HEADER({(.")},{PDOTQ},{DOCOL})
         DC      TOR
         DC      LTYPE
         DC      SEMIS
-;
+;       
 worddocsafe({OUTPUT},{."},{dot_quote},{},{P,L0},
 {Used in the form:
   forthsamp({." cccc"})
-Compiles an in-line string forthsamp({cccc}) (delimited by the trailing ") with
-an execution proceedure to transmit the text to the selected output
-device.
-If executed outside a definition, forthcode({."}) will immediately print the text
-until the final ". The maximum number of characters may be an
-installation dependent value.},{{OUT},{(.")}}, {}, enddoc)
-HEADER({."},{DOTP},{DOCOL}, , B_IMMED)
-        DC      LIT,22H
-        DC      STATE
-        DC      FETCH
-        _0BRANCH(DOTP1) ;{ IF}
-        DC      COMP
-        DC      PDOTQ
-        DC      PPARS
-        DC      SCOMMA, DROP
-        _BRANCH(DOTP2)  ;{ ELSE}
-DOTP1:  DC      PPARS
-        DC      LTYPE   ;{ ENDIF}
-DOTP2:  DC      SEMIS
-;
-;
-worddocsafe({OUTPUT},{.%},{dot_quote},{},{P,L0},
-{Used in the form:
-  forthsamp({.% cccc%})
 Compiles an in-line string forthsamp({cccc}) (delimited by the trailing %) with
 an execution proceedure to transmit the text to the selected output
 device.
-If executed outside a definition, forthcode({.%}) will immediately print the text
-until the final %. The maximum number of characters may be an
-installation dependent value.},{{OUT},{(.%)}}, {}, enddoc)
-HEADER({.%},{DOTQ},{DOCOL}, , B_IMMED)
+If executed outside a definition, forthcode({."}) will immediately print the text
+until the final ". In ciforth the number of characters has no limit.},
+{{OUT},{(.")}}, {}, enddoc)
+HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(DOTQ1) ;{ IF}
@@ -2737,7 +2713,7 @@ HEADER({.%},{DOTQ},{DOCOL}, , B_IMMED)
         DC      DENQ
         DC      COMP, LTYPE   
         _BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1:  DC      LIT,22H
+DOTQ1:  DC      LIT,'"'
         DC      PPARS
         DC      LTYPE   ;{ ENDIF}
 DOTQ2:  DC      SEMIS
@@ -3051,8 +3027,8 @@ HEADER({ERROR},{ERROR},{DOCOL})
 ERRO1:  DC      HERE
         DC      COUNT
         DC      LTYPE
-        DC      PDOTQ
-        _STRING({? })
+        _STRINGINLINE({? })
+        DC      LTYPE
         DC      MESS
         DC      SPSTO
         DC      BLK,FETCH
@@ -3390,8 +3366,8 @@ QUIT1:  DC      RPSTO   ;{BEGIN}
         DC      FETCH
         DC      ZEQU
         _0BRANCH(QUIT2) ;{IF}
-        DC      PDOTQ
-        _STRING({OK})   ;{ENDIF}
+        _STRINGINLINE({OK})   ;{ENDIF}
+        DC      LTYPE
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
 ;
 worddoc({INIT},{ABORT},{abort},{},{FIG NISO L0},
@@ -3406,16 +3382,18 @@ HEADER({ABORT},{ABORT},{DOCOL})
         DC      QSTAC   ;{ IT DID TO & INCL THIS}
         DC      CR
         DC      DOTCPU
-        DC      PDOTQ
 
 _COMMENT
 ;{       If this is there it is an official release}
-        DB      22
-        DB      'IBM-PC Fig-Forth'
+        DC      SKIP
+        DC      22
+IBMPC:  DB      'IBM-PC Fig-Forth'
         DB      FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
+        DC      LIT, IBMPC, LIT, 22
 _ENDCOMMENT
 ;{       If this is there it is a beta release}
-        _STRING({IBM-PC $RCSfile$ $Revision$ })
+        _STRINGINLINE({IBM-PC $RCSfile$ $Revision$ })
+        DC      LTYPE
         DC      FORTH
         DC      DEFIN
         DC      QUIT
@@ -3723,8 +3701,8 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         DC      DLINE
         DC      SPACE   ;{ENDIF}
 MESS2:  _BRANCH(MESS3)  ;{ELSE}
-MESS1:  DC      PDOTQ
-        _STRING({MSG # })
+MESS1:  _STRINGINLINE({MSG # })
+        DC      LTYPE
         DC      DOT     ;{ENDIF}
 MESS3:  DC      SEMIS
 ;
@@ -5797,8 +5775,8 @@ HEADER({LIST},{LLIST},{DOCOL})
         DC      DECA
         DC      CR,LDUP
         DC      SCR,STORE
-        DC      PDOTQ
-        _STRING({SCR # })
+        _STRINGINLINE({SCR # })
+        DC      LTYPE
         DC      DOT
         DC      LIT,10H
         DC      ZERO,XDO
@@ -5833,8 +5811,9 @@ INDE2:  _LOOP(INDE1)
         DC      SEMIS
 ;
 HEADER({^},{DOTS},{DOCOL})
-        DC      CR, PDOTQ
-        _STRING({S: })
+        DC      CR
+        _STRINGINLINE({S: })
+        DC      LTYPE
         DC      SPFET, SZERO, FETCH,
 DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
         _0BRANCH(DOC1)
