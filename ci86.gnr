@@ -1136,24 +1136,6 @@ DP0:
 ; Only the word FORTH links to the DENOTATION wordlist,
 ; that in turn links to 0.
 
-worddoc( {WORDLISTS},{FORTH},{forth},{},{ISO,FIG,I,L1},
-{The name of the primary vocabulary. Execution adds
-forthcode({FORTH}) to the forthcode({SEARCH-ORDER}) forthsamp({word}) list.
-Until additional user word list 's are created, new user definitions
-become a part of forthcode({FORTH}) . forthcode({FORTH}) is
-immediate, so it will execute during the creation of a
-colon-definition, to select this forthdefi({word list}) at compile time.},
-{{VOCABULARY}},
-{ { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH-ORDER @ = .},{0},
-  { FORTH ' FORTH >WID SEARCH-ORDER @ = .},{_T_} },
-enddoc)
-dnl Force a pointer to the denotations in FORTH 's link field.
-define({_LINKOLD}, DENOTBODY )dnl
-HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
-        DC      DOVOC
-        DC      0       ;{ END OF VOCABULARY LIST}
-HEADER( , , ,0, B_DUMMY,_DEA(TASK))
-;
 define({_LINKOLD},0)dnl
 worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: .
@@ -1282,6 +1264,26 @@ HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
 ;
 dnl Remember the top of the denotation chain.
 define({_STARTOFDENOTATIONS_},_LINKOLD)dnl
+worddoc( {WORDLISTS},{FORTH},{forth},{},{ISO,FIG,I,L1},
+{The name of the primary vocabulary. Execution adds
+forthcode({FORTH}) to the forthcode({SEARCH-ORDER}) forthsamp({word}) list.
+Until additional user word list 's are created, new user definitions
+become a part of forthcode({FORTH}) . forthcode({FORTH}) is
+immediate, so it will execute during the creation of a
+colon-definition, to select this forthdefi({word list}) at compile time.},
+{{VOCABULARY}},
+{ { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH-ORDER @ = .},{0},
+  { FORTH ' FORTH >WID SEARCH-ORDER @ = .},{_T_} },
+enddoc)
+dnl Force a pointer to the denotations in FORTH 's link field.
+define({_LINKOLD}, DENOTBODY )dnl
+; The FORTH vocabulary is the only one not to link to zero.
+; It links to the DENOTATION vocabulary.
+HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
+        DC      DOVOC
+        DC      0       ;{ END OF VOCABULARY LIST}
+HEADER( , , ,0, B_DUMMY,_DEA(TASK))
+;
 dnl Reset the link chain at this to start the ENVIRONMENT wordlist.
 define({_LINKOLD},0)dnl
 ;
@@ -3535,7 +3537,7 @@ enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
         DC      SWAP
         _0BRANCH(QERR1) ;{IF}
-        DC      THROW
+        DC      ERROR
         _BRANCH(QERR2)  ;{ELSE}
 QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
@@ -5830,16 +5832,19 @@ least recently written. If the block occupying that buffer has
 been marked as updated, it is rewritten to disc before block
 forthvar({n}) is read into the buffer. In ciforth this cannot
 happen, because updates are written immediately.
+_VERBOSE_({Blocks are generally
+used to contain source code to be interpreted
+by forthcode({LOAD}). They can be equally useful to contain
+other data, e.g. for implementing a database. })
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0FFH.})},
-{{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}},
+{{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH},{LOAD}},
 {{!CSP 1 BLOCK FIRST LIMIT WITHIN . ?CSP},{_T_} },
-{{BUFFER},{B/BUF}},
+{{BUFFER},{B/BUF},{LOAD}},
 enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
-        DC      OFSET
-        DC      FETCH,PLUS
+        DC      OFSET, FETCH, PLUS
         DC      TOR,PREV
         DC      FETCH,LDUP
         DC      FETCH,RR
@@ -5850,7 +5855,8 @@ BLOC2:  DC      PBUF,ZEQU
         DC      DROP,RR
         DC      BUFFE,LDUP
         DC      CELLP, CELLP    ;{ Content address.}
-        DC      RR,ONE
+        DC      RR
+        DC      ONE
         DC      RSLW
 BLOC3:  DC      LDUP,FETCH
         DC      RR,LSUB
@@ -5998,7 +6004,7 @@ interpret screen forthvar({n}) .
 _VERBOSE_({{The stack changes in according with the words executed.}})
 At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input source.},
-{{#BUFF},{THRU},{QUIT},{EXIT},{-->}},
+{{BLOCK},{#BUFF},{THRU},{QUIT},{EXIT},{-->},{LIST}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({LOAD},{LOAD},{DOCOL})
@@ -6012,7 +6018,7 @@ interpret screen forthvar({n1}) through forthvar({n2})
 _VERBOSE_({{The stack changes in according with the words executed.}})
 At the end of the screens, barring errors or forced changes,
 it continues with the interrupted input source.},
-{{#BUFF},{LOAD},{QUIT},{EXIT},{-->}},
+{{#BUFF},{BLOCK},{LOAD},{QUIT},{EXIT},{-->}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({THRU},{THRU},{DOCOL})
@@ -6060,7 +6066,7 @@ HEADER({BLK},{BLK},{DOCOL})
         DC      LIT, 1024, EQUAL, LAND
         _0BRANCH(BLK1)
         DC      SRC, FETCH, TWO, LCELLS, LSUB, FETCH
-        DC      OFSET, FETCH, LSUB
+         DC      OFSET, FETCH, LSUB
         _BRANCH(BLK2)
 BLK1:
         DC      ZERO
@@ -7126,11 +7132,14 @@ EXPE8:
 ;{------------------------------------}
 define({_FILENAMELENGHT_M4_},_BITS16_(30)_BITS32_(254))
 worddoc( {STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},
-{Leave the address forthvar({addr}) of a variable containing the latest
-disk error in opening, using or closing the block file.
-_HOSTED_LINUX_({ Negative means an error
-(the Unix forthsamp({errno})) and zero means okay.}).
-_PC_({ One means an error and and zero means okay.}) },
+{Leave the address forthvar({addr}) of a variable containing
+information about the latest disk error in opening, using or
+closing the block file. _HOSTED_LINUX_({ This is just
+a flag, indicating there was an error. }). _PC_({ One means an
+error and and zero means okay.})
+_VERBOSE_({Beware that if error messages are loaded from disk,
+this may clear forthcode({DISK-ERROR}) })
+},
 _HOSTED_LINUX_({ {{BLOCK},{?LINUX-ERROR}}, })
 _USEBIOS_({ {{BLOCK},{R/W}}, })
 _HOSTED_LINUX_({ {{ CR DISK-ERROR @ 0 < . BLOCK-INIT},{0},}, })
@@ -7247,9 +7256,9 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write and aborts on errors.
+performs the read or write and reports errors.
 },
-{{BLOCK}}, {}, enddoc)
+{{BLOCK},{DISK-ERROR}}, {}, enddoc)
 HEADER({R/W},{RSLW},{DOCOL})
         _0BRANCH(RSLW1)
         DC      LIT, 03F00H     ;{ Disk read }
@@ -7424,8 +7433,8 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write and records errors, but doesn't abort on them.},
-{{BLOCK}},
+performs the read or write and records errors, but doesn't abort on them.},
+{{BLOCK},{DISK-ERROR}},
 dnl we can use block 0 for scratch
 {
 {PAD B/BUF 41 FILL PAD 0 0 R/W},{},
@@ -7508,7 +7517,7 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write and shows errors via forthcode({DISK-ERROR}).},
+performs the read or write and shows errors via forthcode({DISK-ERROR}).},
 {{BLOCK}}, {}, enddoc)
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R)}
 CODE_HEADER({R/W},{RSLW})
@@ -8583,10 +8592,10 @@ HEADER({BYE},{BYE},{DOCOL})
 });_END_({ _HOSTED_LINUX_})
 ;
 worddoc( {SCREEN},{LIST},{list},{n ---},{ISO,FIG,L0},
-{Display the ascii text of screen forthvar({n}) on the selected output device.
+{Display the ascii text of forthdefi({screen}) forthvar({n}).
 The number of the screen is always printed in decimal.
 forthcode({SCR}) contains the screen number during and after this process.},
-{},
+{{BLOCK}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({LIST},{LLIST},{DOCOL})
