@@ -494,6 +494,9 @@ CREATE P
 \ ``P'' is used as a placeholder for a data item to be copied to the
 \ optimised side. Several P's must be replaced in order, even if escaped
 \ by a ``LIT''
+\ The replacement code must not be longer, such that it can always be copied
+\ into a gap. It is padded with noop's.
+
     'ALIGN-NOOPS ALIAS |                         \ Convenience alias.
     : ]L ] POSTPONE LITERAL ; IMMEDIATE \ Convenience alias.
 
@@ -502,7 +505,7 @@ CREATE P
 'P  EXECUTE             | P                       |       \ Execute optimisation
 'P  + 'P  +             | 'P  'P  + +             |       \ Associativity optimisation
 'P  + 'P  -             | 'P  'P  - +             |
-'P  - 'P  +             | 'P  'P  SWAP - +        |
+'P  - 'P  +             | 'P  'P  - -             |
 'P  - 'P  -             | 'P  'P  + -             |
 'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP |       \ Invalid if last drop removed!
 'P  OR 'P  OR           | 'P  'P  OR OR           |
@@ -557,11 +560,13 @@ STRIDE SET PEES
 : [I] POSTPONE I POSTPONE [] ; IMMEDIATE
 
 \ For a SEQUENCE and an ENTRY in ``MATCH-TABLE'' :
-\ Return the LIMIT to where matched and the MATCH itself, or two zeros.
+\ Return the STRING to be copied into the gap, else two zeros.
+\ It is matched in length to the gap, but may end in noop's.
+\ Return the MATCH itself, or two zeros.
 \ As a side effect, remember the place holders.
 : ?MATCH    !PEES
     STRIDE 0 DO
-        DUP [I] 'NOOP = IF SWAP I CELLS + SWAP LEAVE THEN       \ Success
+        DUP [I] 'NOOP = IF SWAP DROP STRIDE CELLS + I CELLS LEAVE THEN       \ Success
         DUP [I] 'P = IF
             OVER [I] PEES SET+!
         ELSE OVER [I] OVER [I] <> IF
@@ -571,18 +576,21 @@ STRIDE SET PEES
 ;
 
 \ Match any entry of the table to SEQUENCE.
-\ Return the LIMIT to where matched and the MATCH itself, else two zeros.
-: ?MM   MATCH-TABLE
+\ Return the STRING to be copied into the gap, else two zeros.
+: (?MM)   MATCH-TABLE
     BEGIN    2DUP ?MATCH DUP IF 2SWAP 2DROP EXIT THEN 2DROP
         STRIDE 2 * CELLS + DUP ?NOT-EXIT WHILE REPEAT
     2DROP 0 0 ;
+
+
+: ?MM DUP (?MM) ROT + SWAP ;
 
 \ If ADDRESS contains a place holder, replace it by the next placeholder data.
 : ?PEE? DUP @ 'P = IF PEES SET+@ SWAP ! _ THEN DROP ;
 
 \ Copy MATCH to THERE filling in the place holders.
 : COPY-MATCH   !PEES
-    >R STRIDE CELLS + R@ STRIDE CELLS MOVE
+    >R R@ STRIDE CELLS MOVE
     R>
     BEGIN DUP ?TILL-NOOP WHILE DUP ?PEE? CELL+ REPEAT
     DROP
