@@ -92,8 +92,8 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 ( --------- special fixups ----------)
 
 00 10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
-00 10E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
-40 10F 70 1PI J,
+00 00E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
+4000 10F 70 1PI J,
 
 00 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
 00 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
