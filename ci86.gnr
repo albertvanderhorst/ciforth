@@ -486,9 +486,9 @@ ORIG:
 ;************************
 OPTIONAL_SWITCH_TO_32MODE
 ;************************
-          JMPFAR 
-          DW      SAME3
-          DW     CS_32
+	  JMPFAR 
+	  DW      SAME3
+	  DW     CS_32
 GDTLOAD DW     GDTLEN
 	DD     GDT 
 
@@ -649,6 +649,25 @@ TNEXT3:	LODSW            ; AX <- (IP)
 	MOV	BX,AX
 	JMP	SHORT	NEXT1
 	PAGE
+DISPLAYSI:
+	JMPHERE_FROM_32(CODESEGMENT) 
+	TO_REAL         ; Nought unless using protected mode.
+	BITS    16
+	MOV     AX,SI   
+	CALL    DISPLAYW 
+	MOV     AX,DI   
+	CALL    DISPLAYW 
+        CALL    DISPLAYCR
+	BITS    32
+	MOV     AH,10H
+	INT     16H
+	TO_PROTECTED    
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
+	RET
 DPUSH:	PUSH	DX
 APUSH:	PUSH	AX
 _COMMENT
@@ -660,6 +679,7 @@ _ENDCOMMENT
 NEXT:	LODSW            ;AX <- (IP)
 ;
 NEXT1:	MOV	DI,AX   ; (W) <- (IP)
+;       CALL    DISPLAYSI
 	JMP     _CELL_PTR[DI]    ; TO `CFA'
 	PAGE
 ;
@@ -767,7 +787,7 @@ _ENDCOMMENT
 UP	DC	STRUSA	; USER AREA POINTER 1
 	DC      0       ; (Unused)          2
 	DC 	INITS0	; INIT (S0)         3
-        DC 	INITR0	; INIT (R0)         4
+	DC 	INITR0	; INIT (R0)         4
 	DC 	STRTIB  ; INIT (TIB)        5
 	DC	32	; INIT (WIDTH)      6
 	DC	0	; INIT (WARNING)      7
@@ -1121,12 +1141,18 @@ CODE_HEADER({2!},{TSTOR})
 CODE_HEADER({L@},{LFET})
 	POP	BX	;MEM LOC
 	POP	CX	;SEG REG VAL
+	JMPHERE_FROM_32(CODESEGMENT) 
 	TO_REAL         
 	MOV	DX,DS
 	MOV	DS,CX
 	MOV	BX,[BX]
 	MOV	DS,DX
 	TO_PROTECTED         
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 	PUSH    BX
 	JMP	NEXT
 ;
@@ -1141,6 +1167,7 @@ CODE_HEADER({L@},{LFET})
 CODE_HEADER({L!},{LSTORE})
 	POP	BX
 	POP	CX
+	JMPHERE_FROM_32(CODESEGMENT) 
 	TO_REAL
 	MOV	DX,DS
 	MOV	DS,CX
@@ -1148,6 +1175,11 @@ CODE_HEADER({L!},{LSTORE})
 	MOV	[BX],AX
 	MOV	DS,DX
 	TO_PROTECTED
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 	JMP	NEXT
 	PAGE
 	; At line     LINE ~1000
@@ -1166,16 +1198,14 @@ DOCOL:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;R1 <- (IP)
 	LEA     SI,[DI+CELLS(1)]  ;(IP) <- (PFA)
 ;____1_____ _PROTECTED_1_({
-	JMPFAR
-	DC      SAME1
-	DW      CODESEGMENT
-SAME1:
+	JMPHERE_FROM_32(CODESEGMENT) 
 	TO_REAL         
 	TO_PROTECTED    
-	JMPFAR
-	DC      SAME2
-	DW      CODESEGMENT   ; To become CODESEGMENT32
-SAME2:
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 });_END___1__({ _PROTECTED_1_})
 	JMP	NEXT
 ;
@@ -2310,7 +2340,7 @@ CODE_HEADER({PC@},{PCFET})
 ; FETCH CHARACTER (BYTE) FROM PORT
 	POP	DX	; PORT ADDR
 	IN	AL,{DX}   ; BYTE INPUT
-        SUB     AH,AH
+	SUB     AH,AH
 	JMP	APUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
@@ -2472,6 +2502,7 @@ CODE_HEADER({BIOS},{BIOS})
 	PUSH     SI      ; Save Forth registers. NEEDED? 
 	PUSH     BP      
 	XCHG    SI,AX   ; Save AX in (already free) SI
+	JMPHERE_FROM_32(CODESEGMENT) 
 	TO_REAL         ; Nought unless using protected mode.
 	XCHG    SI,AX   
 RQBIOS: INT(0)          ; Request number to be overwritten.
@@ -2479,6 +2510,11 @@ RQBIOS: INT(0)          ; Request number to be overwritten.
 	POP     DI      
 	XCHG    SI,AX   ; Save AX in (still free) SI     
 	TO_PROTECTED    
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 	XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
 	POP	SI	;INTERPRETER PNTR
@@ -2497,12 +2533,30 @@ CODE_HEADER({BDOS},{BDOS})
 	POP     CX      
 	POP     BX      
 	POP     AX      
-	INT(21H)
+	PUSH     SI      ; Save Forth registers. NEEDED? 
+	PUSH     BP      
+	XCHG    SI,AX   ; Save AX in (already free) SI
+	JMPHERE_FROM_32(CODESEGMENT) 
+	TO_REAL         ; Nought unless using protected mode.
+	XCHG    SI,AX   
+	INT     21H
+	PUSHF      ; Save status into DI 
+	POP     DI      
+	XCHG    SI,AX   ; Save AX in (still free) SI     
+	TO_PROTECTED    
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
+	XCHG    SI,AX   
+	POP	BP	; Restore Forth registers. NEEDED? 
+	POP	SI	;INTERPRETER PNTR
 	PUSH     AX      
 	PUSH     BX      
 	PUSH     CX      
 	PUSH     DX      
-	PUSHF      ; Status usually returned into flags!
+	PUSH     DI     ; i.e. flags 
 	JMP     NEXT 
 
 	     ; SVGA-modus 43*132 char's
@@ -2987,12 +3041,18 @@ CODE_HEADER({RBLK},{RBLK})
 	PUSH	BP	;RETURN POINTER
 	MOV     BX,4200H       
 	MOV     DX,0080H  ;   Disk C                                 
+	JMPHERE_FROM_32(CODESEGMENT) 
 	TO_REAL
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ; REMEMBER STATUS
 	POP     BX
 	TO_PROTECTED
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 	POP	BP	;RETURN STACK
 	POP	SI	;INTERPRETER PNTR
 	PUSH    BX      ; REMEMBER STATUS
@@ -3005,12 +3065,18 @@ CODE_HEADER({WBLK},{WBLK})
 	PUSH	BP	;RETURN POINTER
 	MOV     BX,4300H       
 	MOV     DX,0080H  ;   Disk C                                 
+	JMPHERE_FROM_32(CODESEGMENT) 
 	TO_REAL
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ; REMEMBER STATUS
 	POP     BX
 	TO_PROTECTED
+	JMPHERE_FROM_16(CS_32) 
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 	POP	BP	;RETURN STACK
 	POP	SI	;INTERPRETER PNTR
 	PUSH    BX
