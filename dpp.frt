@@ -1,5 +1,6 @@
-\ Copyrillght (2001): Albert van der Horst, HCC FIG Holland by GNU Public License
+\ Copyright 2001: Albert van der Horst, HCC FIG Holland by GNU Public License
 \ $Id$
+
 
 \ Diagnostic program.
 \ Asks questions from the user to arrive at a diagnosis.
@@ -10,8 +11,7 @@
 \ 1. Case insensitive answers
 \ 2. Clean first part of new question, start with upper case etc.
 \ 3. Provide for unreadable database (or handle with THROW).
-\ curiosity, not sealing database in turnkey, question selection,
-\ confirmation of conflicting answers.
+\ not sealing database in turnkey
 \ Not in old version
 \ 101. Internet interface.
 \ 102. Logging of answer vectors for disapproval.
@@ -19,36 +19,23 @@
 : Notice1$      "This program is Copyright 2001 by the foundation Dutch Forth Workshop" ;
 : Notice2$      "dpp.frt (c) 2001 It may be freely copied under the GNU Public License" ;
 
+
 REQUIRE Z$@
 REQUIRE -LEADING
 REQUIRE COMPARE
 REQUIRE POSTFIX
 
-\ ################ FIXME ######################################################
-\ Upper limits for arrays
-1000 CONSTANT MAX-DIAGNOSES
-200 CONSTANT MAX-QUESTIONS
+"dppconfig.frt" INCLUDED
+LANGUAGE-FILE INCLUDED
 
+\ #################### GENERAL ########################################
 
 \ This is used as an invalid index into an array to indicate that
 \ there was no array item at all.
 -1 CONSTANT NONE
 
-\ #################### CONFIGURATION ##################################
-
-\ Leave a FRACTION (numerator/denominator) that decides whether
-\ the difference between occurences of answers is significant.
-: CRITERION 5 1 ;
-\ This means yes-answers must outnumber the no-answers 5 to 1, or vv.
-
-\ On a scale from 0 to 1000, the tendency to ask questions that
-\ learn at the expense of faster retrieval.
-: CURIOSITY 720 ;
-
 \ #################### DATABASE #######################################
 
-\     : \D ; \ Debug
-    : \D POSTPONE \ ; IMMEDIATE
 
 \ File format :
 \    number of diagnoses  ND
@@ -70,8 +57,6 @@ REQUIRE POSTFIX
 \ ... all answers
 
 
-  "dpp_dutch_dieren.frt" INCLUDED
-\ "dpp_english.frt" INCLUDED
 
 : WELCOME
     Notice1$ TYPE CR Notice2$ TYPE CR CR CR
@@ -125,32 +110,32 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 
     ^J $S atoi    DUP #DIAGNOSES !
     "DIAGNOSES*" POSTFIX $ARRAY
-    LATEST 'DIAGNOSES ^ 3 CELLS MOVE
+    LATEST 'DIAGNOSES 3 CELLS MOVE
     ^J $S atoi    DUP #QUESTIONS !
     "QUESTIONS*" POSTFIX $ARRAY
-    LATEST 'QUESTIONS ^ 3 CELLS MOVE
+    LATEST 'QUESTIONS 3 CELLS MOVE
 
     #QUESTIONS @ SPARE + CELLS STRIDE !
 
     ^J $S CR TYPE   \ Show potential problems.
 
     "YESSES*" POSTFIX ANSWER-ARRAY
-    LATEST 'YESSES ^ 3 CELLS MOVE
+    LATEST 'YESSES 3 CELLS MOVE
 
     ^J $S CR TYPE   \ Show potential problems.
 
     "NOES*" POSTFIX ANSWER-ARRAY
-    LATEST 'NOES ^ 3 CELLS MOVE
+    LATEST 'NOES 3 CELLS MOVE
 
     ^J $S CR TYPE   \ Show potential problems.
 
     "?ES*" POSTFIX ANSWER-ARRAY
-    LATEST '?ES ^ 3 CELLS MOVE
+    LATEST '?ES 3 CELLS MOVE
 
     2DROP
 ;
 
-\D "database" READ-DATABASE
+\D DB-FILE READ-DATABASE
 \D CR ." Expect 0 : " DEPTH . CR
 \D 0 0 YESSES ." YESSES Expect 0 0 : " ? DEPTH .  CR
 \D 0 0 NOES   ." NOES   Expect 2 0 : " ? DEPTH .  CR
@@ -174,18 +159,18 @@ VARIABLE OUTPUT$
 \ Add a STRING to the output.
 : type  OUTPUT$ @ $+!    ;
 \D HERE 0 , 100 ALLOT OUTPUT$ !
-\D "OEPS" type ." Expect |OEPS| : 0 " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
+\D "OEPS" type ." Expect |OEPS| 0 : " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
 
 \ Add a carriage return to the output.
 : cr ^J OUTPUT$ @ $C+ ;
 
 \ Add a blank to the output.
 : bl BL OUTPUT$ @ $C+ ;
-\D bl ." Expect |OEPS | : 0 " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
+\D bl ." Expect |OEPS | 0 : " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
 
 \ Add a NUMBER to the output.
 : u. (U.) OUTPUT$ @ $+!    ;
-\D 12 u. ." Expect |OEPS 12| : 0 " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
+\D 12 u. ." Expect |OEPS 12| 0 : " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
 
 \ Add the strings of an ARRAY of N pointers to strings to the output.
 \ The array is passed as an xt.
@@ -216,7 +201,7 @@ DATABASE
     0 0 YESSES  PUT-ANSWERS
     0 0 NOES    PUT-ANSWERS
     0 0 ?ES     PUT-ANSWERS
-    OUTPUT$ @ $@ "database2" PUT-FILE
+    OUTPUT$ @ $@ DB-FILE PUT-FILE
 ;
 
 \ ############################################################################
@@ -267,10 +252,17 @@ VOCABULARY INTERACTION
 INTERACTION DEFINITIONS
 
 \ Possible values for what we call an answer.
-0 CONSTANT A_YES
-1 CONSTANT A_NO
-2 CONSTANT A_AMB
-3 CONSTANT A_NONE       \ No answer yet.
+ 0 CONSTANT A_NONE       \ No answer yet.
+ 1 CONSTANT A_YES
+ 2 CONSTANT A_NO
+ 3 CONSTANT A_AMB
+ 4 CONSTANT MAX-ANSWER
+ CREATE MAY-BE-DISTINGUISHING
+ \ A_NONE A_YES A_NO A_AMB  outcome
+  1 ,     1 ,     1 ,     0 ,    \  A_NONE   db diagnosis
+  1 ,     0 ,     1 ,     0 ,    \  A_YES    "
+  1 ,     1 ,     0 ,     0 ,    \  A_NO     "
+  0 ,     0 ,     0 ,     0 ,    \  A_AMB    "
 
 \ Convert a STRING to an ANSWER.
 : TO-ANSWER 0= IF DROP A_NONE EXIT THEN
@@ -480,10 +472,10 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
        2DUP APPARENT?   IF 2DROP A_YES EXIT THEN
        SWAP APPARENT?   IF A_NO EXIT THEN
        A_NONE ;
-\D 0 0 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO  . DEPTH . CR
-\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 0 0 0 : " . A_YES . DEPTH . CR
-\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
-\D 1 1 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
+\D 0 0 ANSWER-FOR ." ANSWER-FOR Expect 2 2 0 : " . A_NO  . DEPTH . CR
+\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_YES . DEPTH . CR
+\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 2 2 0 : " . A_NO . DEPTH . CR
+\D 1 1 ANSWER-FOR ." ANSWER-FOR Expect 2 2 0 : " . A_NO . DEPTH . CR
 
 \ Eliminate, if uncompatible with ANSWER to QUESTION, a DIAGNOSIS.
 \ The diagnosis was not yet excluded and the answer is unambiguous.
@@ -612,11 +604,14 @@ DATABASE CONSULTING STRATEGY
 \D ." ?DIST Expect 1 0 : " 0 1 ?DISTINGHUISABLE . DEPTH . CR
 \D ." ?DIST Expect 1 0 : " 1 0 ?DISTINGHUISABLE . DEPTH . CR
 
-\   For the GUESSED diagnosis and QUESTION : it MAKES sense to
-\   ask it for the current outcome.
-: ?SELECTABLE SWAP ." Guessed " . &| EMIT
-DUP ?POSED 0=   SWAP   QUESTION-QUALITY REAL-BAD <> AND ;
-\D ." ?SELECTABLE Expect 0 0 : " 0 ?SELECTABLE . DEPTH .
+\ For the GUESSED diagnosis and QUESTION : it MAKES sense to ask
+\ it to distinguish between diagnosis and the current outcome.
+: ?SELECTABLE DUP ?POSED IF 2DROP 0 ELSE
+     DUP >R ANSWER-FOR   R> ANSWER-VECTOR @ ^
+    MAX-ANSWER * + CELLS MAY-BE-DISTINGUISHING + @
+    THEN
+;
+\D ." ?SELECTABLE Expect 0 0 : " 1 0 ?SELECTABLE . DEPTH . CR
 
 \ Print a QUESTION with an identification for selection.
 : PRINT-FOR-SELECT DUP 3 .R 5 SPACES   QUESTIONS 2@ TYPE   CR ;
@@ -739,7 +734,7 @@ RDROP ;
 \D ." ADD-A Expect 2 2 0 : " 0 1 YESSES ? 0 1 NOES ? DEPTH . CR
 \D ." ADD-A Expect 7 2 0 : " 1 1 YESSES ? 1 1 NOES ? DEPTH . CR
 
-: INIT "database" READ-DATABASE ;
+: INIT DB-FILE READ-DATABASE ;
 
 
 \ Ask as many question as makes sense to zoom in onto the diagnosis.
@@ -755,8 +750,10 @@ RDROP ;
 : ONE-DIAGNOSIS
     !EXCLUSIONS !ANSWER-VECTOR  #DIAGNOSES @ POSSIBILITIES !
     INTERROGATION
-    POSE-DIAGNOSIS DUP NONE = IF DROP NEW-DIAGNOSIS THEN
-    DUP ELIMINATE-AMBIGUITY ADD-ANSWERS
+    POSE-DIAGNOSIS DUP NONE = IF
+        DROP NEW-DIAGNOSIS DUP ELIMINATE-AMBIGUITY
+    THEN
+    ADD-ANSWERS
     !ANSWER-VECTOR
 ;
 
