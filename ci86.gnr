@@ -431,9 +431,8 @@ _COMMENT
     IP      SI      Interpreter pointer.  Must be preserved
 		    across FORTH words.
 
-     W      DX      Working register.  Jump to 'DPUSH' will
-		    push contents onto the parameter stack
-		    before executing 'APUSH'.
+     W      DI      Working register.  When entering a word 
+		    via its code field the CFA is passed in DI.
  
     SP      SP      Parameter stack pointer.  Must be preserved 
 		    across FORTH words.
@@ -441,14 +440,15 @@ _COMMENT
     RP      BP      Return stack.  Must be preserved across
 		    FORTH words.
 
-	    AX      General register.  Must be preserved across
-		    FORTH words.
+	    AX      General register.  Used to pass data from 
+		    FORTH words, see label APUSH. 
+
+	    DX      General register.  Used to pass more data from
+		    FORTH words, see label DPUSH. 
 
 	    BX      General purpose register.
  
 	    CX      General purpose register.
-
-	    DI      General purpose register.
 
 	    CS      Segment register.  Must be preserved
 		    across FORTH words.
@@ -578,7 +578,7 @@ _ENDCOMMENT
 NEXT:	LODSW		;AX <- (IP)
 	MOV	BX,AX
 ;
-NEXT1:	MOV	DX,BX	; (W) <- (IP)
+NEXT1:	MOV	DI,BX   ; (W) <- (IP)
 	JMP     _WORD_PTR[BX]    ; TO `CFA'
 	PAGE
 ;
@@ -1066,11 +1066,10 @@ HEADER({:},{COLON},{DOCOL},1)
 	DC	CREAT
 	DC	RBRAC
 	DC	PSCOD
-DOCOL:	INC	DX	; W now points to PFA
-	INC	DX	
+DOCOL:	LEA     DI,[DI+CELL]   ; NEXT CELL: PFA 
 	LEA	BP,[BP-CELL]
 	MOV	[BP],SI	;R1 <- (RP)
-	MOV	SI,DX	;(IP) <- (W)
+	MOV	SI,DI   ;(IP) <- (W)
 	JMP	NEXT
 ;
 HEADER({;},{SEMI},{DOCOL},1)
@@ -1086,26 +1085,23 @@ HEADER({CONSTANT},{CON},{DOCOL})
 	DC	SMUDG
 	DC	COMMA
 	DC	PSCOD
-DOCON:	INC	DX	;PFA
-	INC	DX	
-	MOV	BX,DX
+DOCON:	LEA     DI,[DI+CELL]   ; NEXT CELL: PFA 
+	MOV	BX,DI
 	MOV	AX,[BX]	;GET DATA
 	JMP	APUSH
 ;
 HEADER({VARIABLE},{VAR},{DOCOL})
 	DC	CON
 	DC	PSCOD
-DOVAR:	INC	DX	;(DE) <- PFA
-	INC	DX	
-	PUSH	DX
+DOVAR:	LEA     DI,[DI+CELL]   ; NEXT CELL: PFA  
+	PUSH	DI
 	JMP	NEXT
 ;
 HEADER({USER},{USER},{DOCOL})
 	DC	CON
 	DC	PSCOD
-DOUSE:	INC	DX	;PFA
-	INC	DX	
-	MOV	BX,DX
+DOUSE:	LEA     DI,[DI+CELL]   ; NEXT CELL: PFA 
+	MOV	BX,DI
 	MOV	BL,[BX]
 	SUB	BH,BH
 	MOV	DI,[UP]   ;USER VAR ADDRESS
@@ -1487,13 +1483,11 @@ HEADER({DOES>},{DOES},{DOCOL})
 DODOE:	XCHG	BP,SP	;GET RETURN STACK
 	PUSH	SI	; (RP) <- (IP)
 	XCHG	BP,SP
-	INC	DX	;PFA
-	INC	DX	
-	MOV	BX,DX
+	LEA     DI,[DI+CELL]   ; NEXT CELL: PFA  
+	MOV	BX,DI
 	MOV	SI,[BX]	;NEW CFA
-	INC	DX
-	INC	DX
-	PUSH	DX	;PFA
+	LEA     DI,[DI+CELL]   ; NEXT CELL: PFA  
+	PUSH	DI      ;PFA
 	JMP	NEXT
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
