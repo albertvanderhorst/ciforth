@@ -81,7 +81,7 @@ define({_LOOP},dnl
 {DC      XLOOP
         DC      $1-$})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
-define({_VOC_LATEST}, $1+CELLS(3))
+define({_VOC_LATEST}, $1+2+CELLS(2))
 define({CODE_HEADER},{HEADER({$1},{$2},{$+CW})})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
