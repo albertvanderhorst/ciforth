@@ -1318,7 +1318,7 @@ leave the end and a zero.
 _VERBOSE_({As it goes with string constants, you may not
 alter its content, nor assume anything is appended.})},
 {{BLK},{WORD},{IN}},
-{{IN[] A   EMIT TIB @ 5 + = .},{A-1} },
+{{IN[] A   EMIT TIB @ 5 + = .},{A{}_T_} },
 enddoc)
 HEADER({IN[]},{INBRS},{DOCOL})
         DC      SOURC, CELLP, TFET
@@ -1427,6 +1427,7 @@ enddoc)
 HEADER({CR},{CR},{DOCOL})
         DC      LIT,LF
         DC      EMIT
+        DC      ZERO, LOUT, STORE
         DC      SEMIS
 ;
 worddoc({MEMORY},{CMOVE},{cmove},{from to count --},{},
@@ -2101,14 +2102,6 @@ CODE_HEADER({2},{TWO})
         MOV     AX,2
         _PUSH
 ;
-worddoc({SUPERFLUOUS},{3},{three},{--- 3},{},
-{Leave the number 3. },{{CONSTANT}}, 
-{{3 .},{3}},
-enddoc)
-CODE_HEADER({3},{THREE})
-        MOV     AX,3
-        _PUSH
-;
 worddoc({STRING},{BL},{BL},{--- c},{},
 { A constant that leaves the
    ascii value for "blank".},{}, 
@@ -2231,7 +2224,9 @@ HEADER({EM},{LEM},{DOCON}, EM)
 worddoc({MEMORY},{BM},{begin_memory},{---- addr},{},
 {A constant leaving the address of the lowest memory
 in use by Forth.
-},{{DP},{EM}}, {}, enddoc)
+},{{DP},{EM}}, 
+{{." No test"},{No test} },
+enddoc)
 HEADER({BM},{LBM},{DOCON}, ORG0)
 ;
 worddoc({STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},
@@ -2331,99 +2326,141 @@ The
 contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before calling
  forthvar({R/W}) .
 Messages by forthcode({MESSAGE}) are independent of forthcode({OFFSET}) .},
-{{BLOCK},{MESSAGE} }, {}, enddoc)
+{{BLOCK},{MESSAGE} }, 
+{{OFFSET @ 1000000 U< .},{_T_}},
+enddoc)
 HEADER({OFFSET},{OFSET},{DOUSE}, CELLS(11))
 ;
 ;{ End of user variables with fixed place.}
 ;
 worddoc({SCREEN},{SCR},{s_c_r},{--- addr},{U},
 {A user variable containing the screen number most recently reference
-by forthcode({LIST}) .},{{BLOCK}}, {}, enddoc)
+by forthcode({LIST}) .},{{BLOCK}}, 
+{{." interactive"},{interactive}},
+enddoc)
 HEADER({SCR},{SCR},{DOUSE}, CELLS(14))
 ;
-worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{U,L0},
+worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{ISO,U,L0},
 {A user variable containing a pointer into the data of
 a vocabulary that contains a dummy dea with which the
-dictionary searches will first begin.},{{VOCABULARY},{CURRENT}}, {}, enddoc)
+dictionary searches will first begin.},{{VOCABULARY},{CURRENT}}, 
+{{CONTEXT @ ' FORTH >DFA = .},{_T_}},
+enddoc)
 HEADER({CONTEXT},{CONT},{DOUSE}, CELLS(16))
 ;
-worddoc({VOCABULARIES},{CURRENT},{current},{--- addr},{U,L0},
+worddoc({VOCABULARIES},{CURRENT},{current},{--- addr},{ISO,U,L0},
 {A user variable containing a pointer to data field of
 a vocabulary to
 new words will be added.
 This is done by linking them in between the link field of the
-dummy dea and the next definition.},{{VOCABULARY},{CONTEXT}}, {}, enddoc)
+dummy dea and the next definition.},
+{{VOCABULARY},{CONTEXT}}, 
+{{CURRENT @ ' FORTH >DFA = .},{_T_}},
+enddoc)
 HEADER({CURRENT},{CURR},{DOUSE}, CELLS(17))
 ;
-worddoc({PARSING},{STATE},{state},{--- addr},{L0,U},
+worddoc({PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
 {A user variable containing the compilation state. A non-zero value
-indicates compilation. The value itself may be implementation
-dependent.},{}, {}, enddoc)
+indicates compilation.},{}, 
+{{STATE @ .},{0},
+{ : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
+enddoc)
 HEADER({STATE},{STATE},{DOUSE}, CELLS(18))
 ;
-worddoc({FORMATTING},{BASE},{base},{--- addr},{U,L0},
+worddoc({FORMATTING},{BASE},{base},{--- addr},{ISO,U,L0},
 {A user variable containing the current number base used for input
-and output conversion.},{{DECIMAL},{HEX},{<#}}, {}, enddoc)
+and output conversion.},
+{{DECIMAL},{HEX},{<#}}, 
+{{DECIMAL BASE @ 16 BASE ! .},{A}}, 
+enddoc)
 HEADER({BASE},{BASE},{DOUSE}, CELLS(19))
 ;
-worddoc({FORMATTING},{DPL},{d_p_l},{---- addr},{U,L0},
-{A user variable containing the number of digits to the right of the
-decimal on double integer input. It may also be used hold output
-column location of a decimal point, in user generated formating. The
-default value on single number input is -1.},{{<#},{FLD},{HLD}}, {}, enddoc)
+worddoc({FORMATTING},{DPL},{d_p_l},{---- addr},{ISO,U,L0},
+{A user variable containing the address of the decimal point on
+double integer input, or a nil pointer. It may also be used to
+hold output column location of a decimal point, in user
+generated formating. }, 
+{{<#},{FLD},{HLD}}, 
+{{1234.56 DPL @ 0= .},{0}},
+enddoc)
 HEADER({DPL},{DPL},{DOUSE}, CELLS(20))
 ;
 worddoc({FORMATTING},{FLD},{f_l_d},{--- addr},{U},
-{A user variable for control of number output field width. Presently
-unused in fig-FORTH.},{}, {}, enddoc)
+{A user variable for control of number output field width. 
+Unused in the kernel of ciforth.},
+{}, 
+{{." No test"},{No test} },
+enddoc)
 HEADER({FLD},{LFLD},{DOUSE}, CELLS(21))
 ;
+_SECURITY_({
 worddoc({SECURITY},{CSP},{c_s_p},{---- addr},{U},
 {A user variable temporarily storing the stack pointer position, for
-compilation error checking.},{}, {}, enddoc)
+compilation error checking.},{}, 
+{{1256 CSP ! CSP @ .},{1256}}, 
+enddoc)
 HEADER({CSP},{LCSP},{DOUSE}, CELLS(22))
+});_END_({_SECURITY_})
 ;
 worddoc({SCREEN},{R#},{r_hash},{--- addr},{U},
 {A user variable which may contain the location of an editing cursor,
-or other file related function.},{}, {}, enddoc)
+or other file related function.
+Unused in the kernel of ciforth.},
+{}, 
+{{." No test"},{No test} },
+enddoc)
 HEADER({R#},{RNUM},{DOUSE}, CELLS(23))
 ;
 worddoc({FORMATTING},{HLD},{hld},{--- addr},{L0},
 {A user variable that holds the address of the latest character of
-text during numeric output conversion.},{{<#},{DPL},{FLD}}, {}, enddoc)
+text during numeric output conversion.},
+{{<#},{DPL},{FLD}}, 
+{{." No test"},{No test} },
+enddoc)
 HEADER({HLD},{HLD},{DOUSE}, CELLS(24))
 ;
 worddoc({OUTPUT},{OUT},{OUT},{--- addr},{U},
-{A user variable that reflects the position at the current line of the output
-device where the next character transmitted will appear.
-The first position is zero. },{{EMIT},{TYPE},{CR}}, {}, enddoc)
+{A user variable that reflects the position at the current line
+of the output device where the next character transmitted will
+appear. The first position is zero. Only an explicit
+forthcode({CR}) will reset forthcode({OUT}) , not an
+forthkey(LF) embedded in a string that is forthcode({TYPE})d.}, 
+{{EMIT},{TYPE},{CR}}, 
+{{CR 41 EMIT 42 EMIT OUT @ .},{AB2}},
+enddoc)
 HEADER({OUT},{LOUT},{DOUSE}, CELLS(25))
 ;
-worddoc({STORAGE},{BLK},{blk},{--- addr},{U,L0},
-{A user variable containing the block number being interpreted. If
-zero, input is being taken from the terminal input buffer.},{{BLOCK},{TIB}}, {}, enddoc)
+worddoc({STORAGE},{BLK},{blk},{--- addr},{NISO,U,L0},
+{A user variable that reflects the state of the current input source.
+It indicates the block number being interpreted, or 
+zero, if input is being taken from the terminal input buffer.
+In ciforth it only does so with a loadable extension that redefines it.
+Changing forthcode({BLK}) has no effect, and its content must be fetched before
+the forthdefi({current input source}) has changed.},
+{{BLOCK},{TIB}}, 
+{{BLK @ .},{0}},
+enddoc)
 HEADER({BLK},{BLK},{DOUSE}, CELLS(26))
 ;
 worddoc({INPUT},{IN},{in},{--- addr},{L0},
 {A user variable containing the byte offset within the current input
 text buffer (terminal or disc) from which the next text will be
-accepted. forthcode({WORD}) uses and moves the value of forthcode({IN}) .},{}, {}, enddoc)
+accepted. All parsing words use and move the value of forthcode({IN}) .},
+{{WORD},{(WORD)},{NUMBER},{(PARSE)},{IN[]}},
+{{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
+enddoc)
 HEADER({IN},{LIN},{DOUSE}, CELLS(29))
 ;
 ;{========== END USER VARIABLES =============;}
 ;
 worddoc({SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
-{Shorthand for ``forthvar({1}) forthcode({+})''.},{}, {}, enddoc)
+{Shorthand for ``forthvar({1}) forthcode({+})''.},
+{{CELL+}},
+{{5 1+ .},{6}},
+enddoc)
 CODE_HEADER({1+},{ONEP})
         POP     AX
         INC     AX
-        _PUSH
-;
-worddoc({SUPERFLUOUS},{2+},{two_plus},{n1 --- n2},{},
-{Shorthand for ``forthvar({2}) forthcode({+})''.},{}, {}, enddoc)
-CODE_HEADER({2+},{TWOP})
-        POP     AX
-        ADD     AX,2
         _PUSH
 ;
 worddoc({MEMORY},{CELL+},{cell_plus},{n1 --- n2},{},
@@ -2675,6 +2712,7 @@ HEADER({?ERROR},{QERR},{DOCOL})
 QERR1:  DC      DROP    ;{ENDIF}
 QERR2:  DC      SEMIS
 ;
+_SECURITY_({
 worddoc({SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}}, {}, enddoc)
 HEADER({?COMP},{QCOMP},{DOCOL})
@@ -2725,6 +2763,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      QERR
         DC      SEMIS
 ;
+});_END_({_SECURITY_})
 worddoc({COMPILING},{COMPILE},{compile},{},{C2},
 {When the word containing forthcode({COMPILE}) executes, the execution address of
 the word following forthcode({COMPILE}) is copied (compiled) into the dictionary.
@@ -4497,6 +4536,7 @@ I/O can be redirected, by forthref({revectoring}) it
 _VERBOSE_(and the usual redirection or forthvar({tee})-ing by Linux).
 forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
+        DC      LDUP, LOUT, PSTOR
         DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
         DC      LIT, write
         DC      LINOS
@@ -5576,7 +5616,7 @@ HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      COMP
         DC      XDO
         DC      HERE
-        DC      THREE   ;{ Magic number}
+        DC      LIT,3    ;{ Magic number}
         DC      SEMIS
 ;
 worddoc({CONTROL},{LOOP},{loop},{addr n --- (compiling)},{P,C2,L0},
@@ -5596,7 +5636,7 @@ offset to forthvar({DO}) . forthvar({n}) is used for error testing.},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
 HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
-        DC      THREE   ;{ Magic number}
+        DC      LIT,3    ;{ Magic number}
         DC      QPAIR
         DC      COMP
         DC      XLOOP
@@ -5622,7 +5662,7 @@ forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
 enddoc)
 HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
-        DC      THREE   ;{ Magic number}
+        DC      LIT, 3    ;{ Magic number}
         DC      QPAIR
         DC      COMP
         DC      XPLOO
@@ -5755,7 +5795,7 @@ reserved offset. The stack values will be resolved by forthcode({REPEAT}) .},
 {}, {}, enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      LIF
-        DC      TWOP        ;{ Magic number           }
+        DC      LIT, 2, PLUS ;{ Magic number           }
         DC      SEMIS
 ;
 worddoc({OUTPUT},{SPACES},{spaces},{n ---},{L0},
