@@ -31,7 +31,7 @@ LINUXFORTHS= figforth lina
 # Auxiliary targets
 OTHERTARGETS= BLOCKS.BLK toblock fromblock
 # C-sources with various aims.
-CSRC= figforth toblock fromblock robconstant
+CSRC= figforth toblock fromblock stealconstant
 
 RELEASECONTENT = \
 fig86.gnr        \
@@ -45,6 +45,7 @@ readme.txt       \
 fig86.alone.asm  \
 fig86.msdos.msm  \
 fig86.linux.asm  \
+fig86.lina.asm  \
 masm.m4          \
 nasm.m4          \
 genboot.bat      \
