@@ -90,7 +90,7 @@ KBBUF	EQU	1024    ;DATA BYTES PER DISK BUFFER
 US	EQU	100H     ; USER VARIABLE SPACE
 RTS	EQU	0A0H	; RETURN STACK & TERM BUFFER
 ;
-CO	EQU	KBBUF+4		; DISK BUFFER + 4 BYTES
+CO	EQU	KBBUF+8         ; DISK BUFFER + 2 NUMBERS (AT MOST 32 BIT)
 BUF1	EQU	EM-CO*NBUF	; FIRST DISK BUFFER
 STRUSA  EQU     BUF1-US         ; User area
 STRTIB  EQU     STRUSA-RTS      ; Start return stack area
@@ -146,13 +146,12 @@ _ENDCOMMENT
 CODESEGMENT     EQU     BOOTADDRESS/10H ; PC jumps to 0:7C00 to boot
 ;____1_____ _PROTECTED_1_({
 REALSEGMENT     EQU     BOOTADDRESS/10H ; All real code executes here
-CS_COMMON       EQU     BOOTADDRESS/10H ; Protected overlapping segment with same
+CS_COMMON       EQU     REALSEGMENT     ; Protected overlapping segment with same
 DS_16           EQU     1800H           ; Real mode may dabble here
+DS_32           EQU     1800H           ; Real mode may dabble here
 CODE_SEGMENT EQU 07C0H ; The same for real and prot)         
 CS_16 EQU 10H  ; 16 BITS CODE SEGMENT DID                 
 CS_32 EQU 10H  ; 32 BITS CODE SEGMENT DID                 
-;DS_16 EQU 7B8H ; 16 BITS DATA SEGMENT DID                  
-DS_32 EQU 7B8H ; 32 BITS DATA SEGMENT DID                  
 
 IDENTIFY_16 EQU 008FH   ; Identification of 16 bit data segment
 IDENTIFY_32 EQU 00CFH   ; Identification of 32 bit data segment
@@ -475,17 +474,7 @@ ORIG:
 	STOSW
 	MOV     AX,9A00H      
 	STOSW
-	MOV     AX,IDENTIFY_32          ; WRONG! FOR TESTING
-	STOSW
-; PREPARE-DS 32 BITS                                                   
-	MOV     DI,DS_32
-	MOV     AX,0FFFFH
-	STOSW
-	MOV     AX,BOOTADDRESS 
-	STOSW
-	MOV     AX,9200H      
-	STOSW
-	MOV     AX,IDENTIFY_32 
+	MOV     AX,IDENTIFY_PROT
 	STOSW
 
 	MOV     AX,REALSEGMENT 
@@ -496,19 +485,15 @@ ORIG:
 include(width32.m4)       
 });_END___1__({ _BITS32_1_})
 ;************************
+CW      EQU     CELLWIDTH       ; I.e. for the mode used in Forth, not in the bootcode.
+BMASK   EQU     BLOCKS_IN_USE_MASK
+
 	JMPHERE_FROM_REAL
 	 JMP     SAME3
-;         JMPFAR         ;32BIT 
-;         DW      LCLD   ;32BIT 
-	  DW     CS_32   ;32BIT 
 GDTLOAD DW     GDTLEN
 	DD     GDT 
 
 SAME3:
-;        MOV     AX,DS_32 ;32BIT 
-;        MOV     DS,AX    ;32BIT 
-;        MOV     ES,AX    ;32BIT 
-;        MOV     SS,AX    ;32BIT 
 });_END___1__({ _PROTECTED_1_})
 	NOP
 	JMP	LCLD     ;VECTOR TO COLD START
@@ -2378,7 +2363,7 @@ PBUF1	DC	DUPE,PREV
 HEADER({UPDATE},{UPDAT},{DOCOL})
 	DC      PREV
 	DC	FETCH,FETCH
-	DC	LIT,8000H
+	DC	LIT,BMASK
 	DC	LOR
 	DC	PREV,FETCH
 	DC	STORE,SEMIS
