@@ -159,11 +159,12 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     make mslinks ; \
     echo ms$(VERSION) $+ |xargs zip
 
-%.info : prelude.m4 postlude.m4 manual.m4 figforth.mi menu.mi intro.mi manual.mi % %.mig ;
-	make $(@:%.info=%.mi)
-	mv $(@:%.info=%.mi) gloss.mi
+%.doc : %.asm ;
+
+%.info : prelude.m4 postlude.m4 manual.m4 figforth.mi menu.mi intro.mi manual.mi %.mi ;
+	cp $(@:%.info=%.mi) gloss.mi
 	make wordset.mi
-	m4 figforth.mi | makeinfo
+	(echo 'define(figforthversion,$@)' ; cat figforth.mi)| m4 | makeinfo
 	rm gloss.mi
 
 # Sort the raw information and add the wordset headers
@@ -174,7 +175,7 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 menu.mi : menu.m4 wordset.mig ; m4 menu.m4 >$@
 
-wordset.mi : wordset.m4 wordset.mig gloss.mi ;
+wordset.mi : wordset.m4 wordset.mig gloss.mi
 	(echo 'changequote({,})' ; m4 wordset.m4)|m4 >$@
 
 # For tex we do not need to use the safe macro's
