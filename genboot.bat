@@ -1,3 +1,6 @@
+REM               HCC FIG generic 8086 FORTH
+REM $Id$
+REM Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 REM Generates a bootable disk from a TASM/MASM forth FigForth src in %1
 REM It must be configured as USEDOS and BOOTED and for the proper disk format.
 
