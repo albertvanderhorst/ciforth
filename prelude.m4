@@ -56,10 +56,11 @@ define( {_NATIVE_1_}, _no({$0}) )dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
-dnl Run the forth in 16 bits mode, (must be in accordance with above).
+dnl Run the forth in 16 bits mode
 define( {_BITS16_1_}, _no({$0}) )dnl       
 dnl
-dnl Run the forth in 32bits (so protected) mode.
+dnl Run the forth in 32bits (so protected) mode
+dnl (must be in accordance with above).
 define( {_BITS32_1_}, _no({$0}) )dnl       
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
@@ -95,7 +96,7 @@ dnl Boot sector present for use on PC. _USEBIOS_ required.
 dnl May run under MSDOS as well. Boot from hard disk.
 define( {_BOOTHD__1_}, _no({$0}) )dnl       
 dnl
-dnl Use BIOS for I/O. No redirection but possible stand alone.
+dnl Use MSDOS for I/O. Redirection possible.
 define( {_HOSTED_MSDOS_1_}, _no({$0}) )dnl       
 dnl
 dnl Use LINUX for I/O. Redirection possible.
@@ -103,22 +104,33 @@ define( {_HOSTED_LINUX_1_}, _no({$0}) )dnl
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl
+dnl Keep the old debugging facility with place for breakpoints
+define( {_OLDDEBUG_1_}, _no({$0}) )dnl       
+dnl
+dnl Keep the new debugging facility that allow to print IP (register SI)
+define( {_NEWDEBUG_1_}, _no({$0}) )dnl       
+dnl
 dnl Keep old FIG features like WIDTH ENCLOSE
+dnl STILL ON WISH LIST
 define( {_OLDFIG__1_}, _no({$0}) )dnl       
 dnl
 dnl Put all ANSI CORE definitions in, even if they could be loaded
+dnl STILL ON WISH LIST
 define( {_CORE____1_}, _no({$0}) )dnl
 dnl
 dnl If undefined, a really minimalistic system results.
+dnl STILL ON WISH LIST
 define( {_MAXIM___1_}, _no({$0}) )dnl
 dnl
 dnl To strip even further use NODOUBLE instead of DOUBLE (Not ANSI!)
+dnl STILL ON WISH LIST
 define( {_DOUBLE__1_}, _no({$0}) )dnl
 define( {_NODOUBLE_1_}, _no({$0}) )dnl
 dnl
 dnl Put interrupts on overflows in. (Not ANSI!)
 dnl In practice you limit your memory to under $7f00.0000.0000.0000
 dnl (even less for <64 bit systems) 
+dnl STILL ON WISH LIST
 define( {_SAFECALC_1_}, _no({$0}) )dnl
 
 

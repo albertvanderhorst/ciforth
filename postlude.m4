@@ -15,6 +15,9 @@ _HOSTED_LINUX_1_({define( {_EQULAYOUT_1_}, _no )})
 dnl immediate consequences
 _BITS32_1_({define({M4_CELLWIDTH},4)})
 _BITS16_1_({define({M4_CELLWIDTH},2)})
+_BITS32_1_({define({_NEXT},{_NEXT32})})
+_BITS32_1_({define({_PUSH},{_PUSH32})})
+_BITS32_1_({define({_2PUSH},{_2PUSH32})})
 dnl LEAVE THIS! THE BOOT CODE IS ALWAYS 16 BITS.
 include(width16.m4)
 include(constant.m4)

@@ -90,4 +90,25 @@ define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPFAR},{DB    0EAH})dnl
 define({CELLS},(CW*$1))dnl
+#
+# Start of Intel dependant code part
+# The 32 bit version may be used in the postlude to redefine
+# _NEXT etc. to generate faster code.
+#
+# See definition of NEXT in glossary.
 define({_NEXT},{JMP     NEXT})   
+define({_NEXT32},
+        {LODSW                 ; NEXT
+        MOV     BX,AX                  
+        JMP     _CELL_PTR[BX]  } )
+# See definition of PUSH in glossary.
+define({_PUSH},{JMP     APUSH})   
+define({_PUSH32},
+        {PUSH    AX
+        _NEXT32})
+# Like PUSH but for two numbers.      
+define({_2PUSH},{JMP     DPUSH})   
+define({_2PUSH32},
+        {PUSH    DX
+        _PUSH32})
+
