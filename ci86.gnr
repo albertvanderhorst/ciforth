@@ -9190,7 +9190,8 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 enddoc)
 ;{Works for DPMI too. If it was high level and called BIOS, it would not.}
 CODE_HEADER({BYE},{BYE})
-        MOV     AX,4C00H
+        MOV     AL,[_VAR_FIELD(XCODE)]
+        MOV     AH,4CH
         INT     21H
 ;{ EXIT TO PC-DOS}
 });_END_({ _MSDOS_BYE_})
