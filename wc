@@ -8,7 +8,7 @@ lina <<% | tail -n$#
 ( VARIABLE expects an initial value. )
 ( 1 is used for a true flag)
 
-8 CONSTANT TAB
+9 CONSTANT TAB
 10 CONSTANT LF
 : IS-BLANK  ( char -- flag)
   0 ( Innocent until proven guilty)
