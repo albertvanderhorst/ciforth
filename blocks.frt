@@ -2335,12 +2335,12 @@ DECIMAL
    NEXTD >CFA ;
 
 ( SAVE-SYSTEM )  HEX
- 8049000 CONSTANT SM
- : SAVE-SYSTEM
- HERE SM -    SM 20 + ! ( File size)
- HERE BM -    SM 44 + ! ( Dict size)
- HERE FENCE !
-\     U0 @   0 +ORIGIN   100   CMOVE
+ CREATE MAGIC 7F C, &E C, &L C, &F C,
+ : FIND-START BM BEGIN DUP @ MAGIC @ <> WHILE
+ 1 CELLS - REPEAT ; FIND-START CONSTANT SM
+
+HERE SM -  SM 20 + ! HERE BM -  SM 44 + ! ( File&Dict size)
+ HERE FENCE !     U0 @   0 +ORIGIN   100   CMOVE
  BLOCK-FILE $@ PAD $! BLOCK-EXIT ( Save blockfile)
  "lina.new" BLOCK-FILE $! BLOCK-INIT 0 WARNING !
  PAD $@ BLOCK-FILE $! ( Right blockfile in image!)
