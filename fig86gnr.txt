@@ -156,3 +156,26 @@ MASM.EXE is available
 
 The original fig documentation is at 
 This include the pictures.
+
+Linux application notes
+The "break key" is implemented as the "any key". This key is lost, as is
+perfectly allowed in the fig model. The EXPECT has not the " return if
+maximum reached property", so it is not strictly conforming. This can be
+done at the expense of handling each character separately. (Use KEY to
+implement EXPECT as in the CLASSIC I/O model). This results in loosing
+interruptability. Moreover Linux knows better what the RUBOUT key should be,
+although for your convenenience it is already placed in a user variable and
+can be easily changed. 
+By using quit, a loop can be interrupted. So ^\ results in a warm start.
+A segmentation fault also results in a warm start. ^C immediately leaves.
+^S/^Q can be used to hold up output and are not interpreted as a break
+in e.g. VLIST.
+
+Bugs
+1. 
+   Linux version.
+   Once you have used a SIGQUIT to interrupt a loop, BYE no longer works.
+   You can exit the program by "0 0 0 1 LINOS", which is exit(0) in
+   c-parlance or by pressing ^C, or by killing it from some other terminal,
+   or by just closing the window. 
+
