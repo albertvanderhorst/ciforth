@@ -20,7 +20,7 @@ are in thisforth. As soon as you leave thisforth, this command
 is gone.
 forthbreak
 In order to make a stand alone program to say hello you have to
-save the source to a file, such as forthfile({hello.frt})
+save the source to a file, such as forthfile({hello.frt}).
 It just contains the definition we typed earlier:
 forthexample({ : HELLO "Hello world!" TYPE CR ;})
 Now build the program by
@@ -46,7 +46,7 @@ they are allocated in the dictionary and are permanent.
 
 If you want to run a program written on some other Forth, it
 may use facilities that are not available in thisforth's kernel,
-but they may be available in the library.
+but they may be available in the forthdefi({library}).
 A library is a store with facilities, available on demand.
 Forth as such doesn't have a library mechanism,
 but thisforth does.
@@ -55,7 +55,7 @@ thisforth uses the forthdefi({blocks}) as a library
 by addition of the word forthcode({REQUIRED}) and a convention.
 Starting with forthsamp({lina -r}) or most any option you have this
 facility available. If you are already in thisforth, you can
-type forthcode({1 LOAD}) .
+type forthsamp({1 LOAD}).
 _VERBOSE_({ The extension of forthsamp({.lab}) in
 forthfile({forth.lab}) means Library Addressable by Block.})
 
@@ -78,7 +78,7 @@ S[ 1 ] OK})
 You can turn forthcode({DO-DEBUG}) off with forthcode({NO-DEBUG}) .
 
 If you try to forthcode({INCLUDE}) a program, you may
-get errors like forthsamp({TUCK? ciforth ERROR # 12 : NOT RECOGNIZED}) .
+get errors like forthsamp({TUCK? ciforth ERROR # 12 : NOT RECOGNIZED}).
 forthxref({Errors}) Section Explanations.
 Apparently, thisforth doesn't know about a forth word named
 forthcode({TUCK}), but after forthsamp({"TUCK" REQUIRED}) maybe
@@ -108,10 +108,12 @@ ERATOSTHENES SIEVE -- PRIMES LESS THAN 10 000
 
 If you want to try things out, or write a program -- as
 opposed to just running a ready made program -- you best
-start up thisforth by forthsamp({lina -e}) .
+start up thisforth by forthsamp({lina -e}).
 That is forthkey({e}) for elective. That name means
 that you can configure this to suit your particular
-needs. We will come back to that later.
+needs.
+dnl NEEDED description of adapting the elective screen
+dnl We will come back to that later.
 forthbreak
 You will have available:
 forthenumerate
@@ -177,7 +179,7 @@ until your testing causes your Forth to crash.
 @subsection Finding things out.
 If you want to find things out
 you must
-start up thisforth again by forthsamp({lina -e}) .
+start up thisforth again by forthsamp({lina -e}).
 The sequence
 forthexample(
 {REQUIRE TUCK
@@ -186,7 +188,8 @@ shows you the source for TUCK if it is in the library somewhere.
 forthexample(
 {REQUIRE TUCK
 CRACK TUCK})
-show you the source for TUCK if it is in the library or in the kernel.
+show you the source for TUCK if it is in the library or in the kernel,
+but without comment or usage information.
 
 @section Configuring
 For configuring your thisforth, without enlarging the dictionary,
@@ -196,7 +199,7 @@ forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
 REQUIRE SAVE-SYSTEM
 : DOIT
     'CONTAINS 'FORTH FORGET-VOC
-    'CONTAINS >NFA DP !
+    'CONTAINS >NFA @ DP !
     "newforth" SAVE-SYSTEM BYE ;
 DOIT })
 Here forthvar({DOIT}) trims the dictionary just before the saving your system into a new
@@ -237,11 +240,11 @@ Apart from the name a word contains data and executable code,
 (forthpxref({VOCABULARY})).
 
 The concept word list is part of the ISO standard, but we will
-use forthdefi({vocabulary}) . A vocabulary is much more
+use forthdefi({vocabulary}). A vocabulary is much more
 convenient, being a word list with a name, created by
 forthcode({VOCABULARY}) . ISO merely knows
 forthdefi({word list identification}) 's, a kind of handle,
-abbreviated as forthdefi({WID}) . A new word list is
+abbreviated as forthdefi({WID}). A new word list is
 created by the use of forthcode({VOCABULARY}), and
 by executing the vocabulary word the associated
 word list is pushed
@@ -260,8 +263,8 @@ A high level word, one defined by forthcode({:}) , is little more than a
 sequence of addresses of other words. The forthdefi({inner interpreter})dnl
 takes care to execute these words in order.
 It acts by fetching the address pointed by forthvar({HIP}) , storing
-this value in register forthvar({W}) . It then jumps to the address
-pointed to by the address pointed to by forthvar({W}) . forthvar({W}) dnl
+this value in register forthvar({W}). It then jumps to the address
+pointed to by the address pointed to by forthvar({W}). forthvar({W}) dnl
 points to the code field of a definition which contains the address of
 the code which executes for that definition. This usage of indirect
 threaded code is a major contributor to the power, portability, and
@@ -277,7 +280,7 @@ forthdefi({return stack}).
 The usage of two stacks is another hall mark of Forth.
 
 A word that generates a new entry in the dictionary is called a
-forthdefi({defining word}) (forthxref({DEFINING})).
+forthdefi({defining word}) (forthpxref({DEFINING})).
 The new word is created in the forthcode({CURRENT}) word list .
 
 Each processor has a natural size for the information. (This is
@@ -296,7 +299,7 @@ The operator forthcode({+}) can be used to add numbers, to set a bit in
 a bitmap or advance a pointer a couple of bytes.
 In accordance with this there are no errors such as overflow given.
 
-Sometimes we use data of two cells, a forthdefi({double}) .
+Sometimes we use data of two cells, a forthdefi({double}).
 The high-order cell are most accessible on the stack and if stored in
 memory, it is highest.
 
@@ -350,6 +353,7 @@ $8000403A
 These examples demonstrate
 that a denotation may contain spaces, and still are easy to scan.
 And yes, I insist that forthsamp({' DROP}) is a denotation.
+
 Of course a sensible programmer will not define a word that looks like
 a denotation :
 forthexample({ : 7 CR "This must be my lucky day" TYPE ; ( DON'T DO THIS) })
@@ -454,7 +458,7 @@ It is used for two purposes, that are in fact the same.
 Make a customised Forth, like forthemph({you}) want to have it.
 Make a customised environment, like a customer wants to have it.
 Such a ``customised environment'', for example a game, is also
-called a forthdefi({turnkey system}) .
+called a forthdefi({turnkey system}).
 It often hides the normal working of the underlying Forth.
 Of course, whether you have a
 hosted system _HOSTED_LINUX_(like this one) _HOSTED_MSDOS_(like this one) or
@@ -547,7 +551,7 @@ and the very important dictionary pointer forthcode({DP})dnl
 that determines the boundary between the dictionary and free space.
 
 Instead they are copied to a separate area the forthdefi({user area}) ,
-each time a Forth task, or Forth itself, is started.
+each time Forth is started.
 The bootup area itself is not changed, but the variables in the user
 area are.
 By having several user area's, and switching between them,
@@ -557,8 +561,9 @@ have loaded an editor, you can make these permanent by updating the
 initial values in the boot-area and saving the result to disk as an
 executable program.
 The boot-up parameters
-extends from forthsamp({0 +ORIGIN}) M4_US cells
-upward. This is the image for the forthdefi({user area}).
+extends from forthsamp({0 +ORIGIN}) and has initial value for all
+of the user area.
+This is the image for the forthdefi({user area}).
 _SUPPRESSED({ It is not quite clear whether this will be restored.
 Presently it is not present.
 It also extends 6 cells downwards, containing machine code for two
@@ -661,7 +666,7 @@ Even without tools, code can be
 tested by piping it into Forth, then commanding Forth to
 look to the console, as follows :
 forthbreak
-forthsamp({(echo 8 LOAD; cat pascal.frt - )| thisforth })
+forthsamp({ (echo 8 LOAD; cat pascal.frt - )| thisforth })
 forthbreak
 Primitive and preliminary as this may seem,
 it has been used for quite substantial developments like the
@@ -670,13 +675,14 @@ forthbreak
 More advanced is using Your Favorite Editor, followed by
 including files:
 forthbreak
-forthsamp({"vim mysrc.frt" SYSTEM})
+forthsamp({ "vim mysrc.frt" SYSTEM })
 forthbreak
-forthsamp({"mysrc.frt" INCLUDED})
+forthsamp({ "mysrc.frt" INCLUDED })
+forthbreak
 })forthxref(Manual) Section Getting Started.
 
 386 and a 8086
-Forth assemblers are available in forthfile({forth.lab}) .
+Forth assemblers are available in forthfile({forth.lab}).
 They are loaded in accordance with the system that is run.
 
 It is essential that you regard thisforth as just a way to get started
@@ -744,20 +750,20 @@ They go from lowest in memory to highest:
 forthenumerate
 forthitem
 The code field. This is one cell.
-A pointer to such a field is called a forthdefi({code field address}) .
+A pointer to such a field is called a forthdefi({code field address}).
 It contains the address of the code to be executed for this word.
 forthitem
 The data field, of the DEA, not in the ISO sense.
 This is one cell.
-A pointer to such a field is called a forthdefi({data field address}) .
+A pointer to such a field is called a forthdefi({data field address}).
 It contains a pointer to an area owned by this definition.
 forthitem
 The flag field. This is one cell.
-A pointer to such a field is called a forthdefi({flag field address}) .
+A pointer to such a field is called a forthdefi({flag field address}).
 For the meaning of the bits of the flag field sea below.
 forthitem
 The link field. This is one cell.
-A pointer to such a field is called a forthdefi({link field address}) .
+A pointer to such a field is called a forthdefi({link field address}).
 It contains the
 dictionary entry address of the last word that was
 defined in the same forthdefi({word list}) before this one.
@@ -785,7 +791,7 @@ Past the header . This is actually not a field, but the
 free roaming dictionary. However, most of the time the part of
 the dictionary space owned by a dictionary entry starts here. A
 pointer to such a field is called a forthdefi({post header
-address}) .
+address}).
 Mostly a forthdefi({data field address}) contains a
 pointer to just this address.
 forthendenumerate
@@ -857,21 +863,21 @@ forthenditemize
 
 A forthdefi({dictionary entry address}) can be turned into any
 of these fields by words that are in the vocabulary
-forthsamp({DICTIONARY}) . forthxref({DICTIONARY}), for thos field words. They
-customarily start with > .
+forthsamp({DICTIONARY}). forthxref({DICTIONARY}), for those field words. They
+customarily start with forthkey({>}).
 
 A dictionary falls apart into the
 forthenumerate
 forthitem
 Headers, with their fields.
 forthitem
-Names, pointed to by some forthdefi({name field address}) .
+Names, pointed to by some forthdefi({name field address}).
 forthitem
-Data, pointed to by some forthdefi({data field address}) .
+Data, pointed to by some forthdefi({data field address}).
 This includes high level code, that is merely data fed into
 the high level interpreter.
 forthitem
-Code, pointed to by some forthdefi({code field address}) .
+Code, pointed to by some forthdefi({code field address}).
 This is directly executable machine code.
 forthendenumerate
 @subsection Details of memory layout
@@ -894,22 +900,20 @@ buffer.
 The distance between forthcode({FIRST}) and forthcode({LIMIT}) is a multiple of
 forthcode({B/BUF CELL+ CELL+}) bytes.
 
-I set the number of disk buffers at 8, the minimum possible.
-_VERBOSE_(
-{Even a floppy
-is fast enough that working with blocks from memory has no merits.
-It is
-dangerous because during testing you never know what was saved and what not.})
+For this ciforth the number of disk buffers is configured
+at M4_NBUF . The minimum possible is approximately 8 because nesting and locking
+requires that much blocks available at the same time.
 
-The user area is 100H bytes, most of it unused. There is no
+The user area is configured at
+M4_US cells, most of it unused. There is no
 word to add user variables.
 _HIGH_BUF_({ The user area is just under the disc
 buffers. So it ends at forthcode({FIRST}) . }) _LOW_BUF_({ The
 user area is at the upper bound of RAM memory. So it ends at
 forthcode({EM}) . })
 
-The terminal input buffer  and the return stack share an area of
-M4_RTS bytes.
+The terminal input buffer  and the return stack share an area configured at a
+size of M4_RTS bytes.
 The lower half is intended for the terminal input buffer, and the higher part
 is used for the return stack, growing down from the end.
 The initial stack pointer is in variable forthcode({R0}).
@@ -924,9 +928,9 @@ During a cold start, the user variables are initialised from the bootup paramete
 to contain the addresses of the above memory assignments.
 _VERBOSE_({
 They can be changed.
-The safest way is to change the bootup parameters and
-perform forthcode({COLD}). forthxref({+ORIGIN}).
-But if you are careful you can change the system on the fly.})
+forthxref({+ORIGIN}) for the bootup area.
+But take care. You probably need to study the source for how and when they
+take effect.})
 
 _VERBOSE_( {If you need multi-tasking you have to allocate a
 separate user area for each task, as well as a separate return
@@ -942,8 +946,8 @@ Remember that in normal Forth system,
 all printing of numbers is to the terminal,
 not to a file or even a buffer.
 
-_HOSTED_LINUX_({On a linux system the need for this is less,
-because of the redirection facilities available.})
+_HOSTED_LINUX_({On a linux system this can be accomplished
+by the redirection facilities available.})
 _HOSTED_MSDOS_({On a MSDOS system the need for this should be low,
 because of the redirection facilities available.
 However they are buggy.})
@@ -955,32 +959,28 @@ _LINUX_N_({For thisforth it is forthcode({TYPE}) }).
 Because this is defined in high level code it can temporarily be replaced
 by other code.
 As an example we replace forthcode({TYPE}) by forthcode({MYTYPE}) .
-forthbreak
-forthsamp({' MYTYPE >DFA @ ' TYPE >DFA !})
-forthbreak
+forthbreak forthsamp({' MYTYPE >DFA @ ' TYPE >DFA !}) forthbreak
 And back to default:
-forthbreak
-forthsamp({' TYPE >PHA ' TYPE >DFA !})
+forthbreak forthsamp({' TYPE >PHA ' TYPE >DFA !}) forthbreak
 Be careful not to define forthcode({MYTYPE}) in terms of forthcode({TYPE}) , as a
 recursive tangle will result.
-This method works in all versions of ciforth and is called forthdefi({revectoring}) .
+This method works in all versions of ciforth and is called forthdefi({revectoring}).
 
 A similar technique is not so useful on the input side,
-because keys entered during EXPECT are subject to correction
+because keys entered during forthcode({EXPECT}) are subject to correction
 until <RET> has been pressed.
 _HOSTED_LINUX_({On thisforth forthcode({EXPECT}) is left to the
 operating system, such that inputting to thisforth has the same
 look and feel as other input.
 Text can be pasted in with the mouse, etc.
 Consequently forthcode({RUBOUT}) is not used.
-}).
-
+})
 
 @section Libraries and options
 
 In ciforth there is no notion of object (i.e. compiled) libraries,
 only of source libraries.
-A Forth library is a block file adorned with one convention.
+A Forth forthdefi({library}) is a block file adorned with one convention.
 This is that the words defined in a screen are
 mentioned on the first line of that screen,
 the forthdefi({index line}).
@@ -1001,10 +1001,10 @@ equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
  forthsamp({-Z}) is equivalent to forthsamp({26 LOAD}).})
 @subsection Options
 ciforth is a primitive system, and can interpret just one option on the
-command line. If the first argument is not starting with forthkey({-})
+command line. If the first argument is not starting with forthkey({-}) _PC_({or forthkey({/})})
 ciforth returns with error code 3.
-However the option forthsamp({-e}) can bootstrap it into
-more sophisticated behaviour. See also forthsamp({-l}) .
+However the option forthsamp({-l}) can bootstrap it into
+more sophisticated behaviour.
 
 The following options can be passed to thisforth on the command line:
 
@@ -1023,8 +1023,8 @@ forthitem
 forthsamp({-c name})
 
 Compile the file forthfile({name}) to an executable binary. The name of the binary
-is forthfile({name}) without the trailing forthsamp({.frt}) or else forthfile({a.out}) .
-Upon invocation of the binary the word defined latest is executed , then Forth goes
+is forthfile({name}) without the trailing forthsamp({.frt}) or else forthfile({a.out}).
+Upon invocation of the binary the word defined latest is executed, then Forth goes
  forthcode({BYE}) .
 _VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
 Also forthcode({REQUIRED}) is made available.
@@ -1036,15 +1036,15 @@ Load the elective screen, screen 5.
 But system wide default preferences
 can be installed there. _VERBOSE_({{In a elective screen you just put
 commands you want to be executed after Forth starts up, such as }})
-_VERBOSE_({forthsamp({"fortune -f /usr/lib/forthcookies" SYSTEM})})
+_VERBOSE_({forthsamp({ "fortune -f /usr/lib/forthcookies" SYSTEM })})
 _VERBOSE_({{ or }})
-_VERBOSE_({forthsamp({REQUIRE EDIT})})
+_VERBOSE_({forthsamp({ REQUIRE EDIT })})
 
 forthitem
 forthsamp({-f forthcode})
 
 Execute the forthsamp({forthcode}) in the order present.
-_UNIMPLEMENTED(
+_SUPPRESSED({ It is not clear whether we really want this.
 Options such as in this list are available on the remainder of the line, but they
 must be invoked with two slashes instead of one, and having more letters is allowed
 but ignored.
@@ -1053,7 +1053,7 @@ forthsamp({--library}) behaves slightly different than
 forthsamp({-l}). The library is switched, taking effect for the
 remainder of forthsamp({forthcode}), but no shifting is done of
 the arguments.
-)
+})
 
 forthitem
 forthsamp({-h})
@@ -1063,19 +1063,23 @@ Print overview of options.
 forthitem
 forthsamp({-l name})
 
-Use a library forthsamp({name}) .
+Use a library forthsamp({name}).
 Restart Forth with as a block file forthfile({name}) and as options the remainder
 of the line shifted, such that
 forthsamp({-l name}) disappears and the next option becomes the first.
+A file specified via forthsamp({-l}) is opened for reading and
+writing.
+Note that the default file is opened for reading only.
 
-_UNIMPLEMENTED(
+_SUPPRESSED({ It is not clear whether we really want this. It will mostly be
+part of -e anyway, and makes little sense otherwise. Or maybe for scripting?
 forthitem
 forthsamp({-o})
 
 Import operating system commands. Some often used commands like
 forthsamp({ls more cat cd echo make }) can be typed to Forth as if it where a shell.
 forthcode({OS-IMPORT}) is made available to add to this list.
-)
+})
 
 forthitem
 forthsamp({-r})
@@ -1088,9 +1092,9 @@ forthsamp({-s script})
 Load the file forthfile({script}) , but ignore its first line.
 This is intended to be used for scripts, i.e. a piece of code to be
 interpreted rather than compiled.
-_VERBOSE_({{The first line is probably}
+_HOSTED_LINUX_({_VERBOSE_({{The first line is probably}
 forthsamp({#!lina -s}){ or some such as }
-forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})
+forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})})
 In a script forthcode({REQUIRED}) is available and
 you can use standard in and standard out.
 
@@ -1114,31 +1118,35 @@ In order to customize the forth library, you have to make a
 copy _HOSTED_LINUX_({of the default
 forthfile({/usr/lib/ciforth/forth.lab}) to your home directory}), preferably to a lib
 subdirectory.
+Then you can start up using a forthsamp({-l}) option, or make a customized thisforth.
+forthxref(Manual) Subsection Configuring.
 
 _HOSTED_LINUX_({
 Most shells allow you to redefine commands, such as e.g. in bash:
-
-forthsamp({alias lina='lina -l $HOME/lib/forth.lab'}).
+forthbreak alias lina='lina -l $HOME/lib/forth.lab' forthbreak
 })
 _HOSTED_DPMI_({You can make a pif file that start forthsamp({wina}) with
 a library:
-
-wina -l c:/projects/database/forth.lab.})
+forthbreak wina -l c:/projects/database/forth.lab. forthbreak
+})
 _HOSTED_MSDOS_({You can make a forthvar({.BAT}) file that start forthsamp({mina}) with
 a library :
-
-mina -l c:/projects/database/forth.lab.})
+forthbreak mina -l c:/projects/database/forth.lab %1 %2 forthbreak
+})
 
 Note that the forthsamp({-l}) option hides itself, such that
 such an alias can be used completely identical to the original
 with respect to all options, including forthsamp({-l}).
-Analysing arguments passed to thisforth in your programs remains
-completely the same.
-An additional feature is that the default file is opened for reading only.
-A file specified via forthsamp({-l}) is opened for reading and
-writing.
+Analysing arguments passed to thisforth in your programs can remain
+the same.
 
 @subsection Turnkey applications.
-A turnkey application should always attempt to close the library file that is default
-opened in forthcode({COLD}) , by executing forthcode({BLOCK-EXIT}).
-Errors never lead to throws and can be safely ignored.
+Turnkey application are made using the word forthcode({TURNKEY}) .
+They take a word, that is to be done, and a string with the file name.
+Mostly it is much easier to just use the forthsamp({-c}) option.
+forthxref(Manual) Getting Started Subsection Hello World!
+A turnkey application should decide what to do with the library file that is default
+opened in forthcode({COLD}) . Make sure to forthcode({CATCH}) errors from
+forthcode({BLOCK-EXIT}) and ignore them.
+dnl This was the former philosophy: (is it better?)
+dnl Errors from BLOCK-EXIT never lead to throws and can be safely ignored.
