@@ -4,11 +4,13 @@
 
 : \D POSTPONE \ ; IMMEDIATE
 \ : \D ;
-'$@ ALIAS @+
 'COUNT ALIAS C@+
 : CELL/ 2 RSHIFT ;   \ From #addres to #cell.
 
+REQUIRE @+
 REQUIRE TRUE
+REQUIRE WITHIN
+
 INCLUDE set.frt
 INCLUDE bits.frt
 INCLUDE defer.frt
@@ -128,13 +130,27 @@ DROP
 \ -----------------------------------------------------------------------
 \                  matched substrings
 \ -----------------------------------------------------------------------
-\ This table contains the ends and starts of matching substrings between ( )
-\ 0 is what matches the whole expression, and is available without ( )
-CREATE SUBSTRING-TABLE 20 CELLS ALLOT
+\ This table contains the ends and starts of a number of strings.
+\ 1. Offset 0 and 1 : the string in which a match is sought
+\ 2. Offset 2 and 3 : the part that the matches the whole expression.
+\ 3. Offset 4 and 5 : the parts that match subexpression 1, between first pair of ( and )
+\ 2n. 2n+1 : subexpression n-1.
+
+CREATE STRING-TABLE 20 CELLS ALLOT
 \ To where has the table been used (during expression parsing).
+
+\ For string INDEX, return WHERE its start address is stored. (end is one cell beyond)
+: STRING[] 2* CELLS STRING-TABLE + ;
+
+\ For CP : "It POINTS in the string to be matched."
+: IN-STRING? STRING-TABLE 2@ SWAP WITHIN ;
+
+\ For CHARPOINTER : "It POINTS (just) past the end of the input string"
+: AT-END? STRING-TABLE CELL+ @ = ;
+
 VARIABLE ALLOCATOR
 \ Initialise ALLOCATOR
-: !ALLOCATOR 2 ALLOCATOR ! ;
+: !ALLOCATOR 4 ALLOCATOR ! ;
 
 \ Give an error message for unmatched parantheses.
 : ?ALLOCATOR ALLOCATOR @ 1 AND ABORT" Parenthesis ( ) not matched in re, user error" ;
@@ -154,10 +170,10 @@ DUP 1 AND 0= ABORT" ) where ( expected, inproper nesting, user error" ;
 \ Remember CHARPOINTER as the substring with INDEX.
 : REMEMBER()
 \D DUP 0 10 WITHIN 0= ABORT" substring index out of range, system error"
-CELLS SUBSTRING-TABLE + ! ;
+CELLS STRING-TABLE + ! ;
 
 \ For INDEX create a "word" that returns the matched string with that index.
-: CREATE\ CREATE 2 * CELLS SUBSTRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
+: CREATE\ CREATE 1+ 2 * CELLS STRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
 
 \ &9 1+ &0 DO   &\ PAD C!   I PAD 1+ C!   PAD 2 POSTFIX CREATE\ LOOP
 0 CREATE\ \0    1 CREATE\ \1    2 CREATE\ \2    3 CREATE\ \3   4 CREATE\ \4
@@ -265,7 +281,7 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ *not* start with `^'.
 : FORTRACK
     BEGIN 2DUP (MATCH) 0= WHILE
-        2DROP   OVER C@ 0= IF FALSE EXIT THEN   SWAP 1 + SWAP
+        2DROP   OVER AT-END? IF FALSE EXIT THEN   SWAP 1 + SWAP
     REPEAT
     2SWAP 2DROP TRUE ;
 
@@ -278,15 +294,16 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ (Note: this is an end-check, to be done only when the expression ends with '$'.)
 : CHECK$
 \D DUP @ ABORT" CHECK$ compiled not at end of expression, system error"
-    OVER C@ 0= ;
+    OVER AT-END? ;
 
 \ Where the matched part of the string starts.
-: STARTPOINTER    SUBSTRING-TABLE @ ;
+: STARTPOINTER    STRING-TABLE @ ;
 
-\ For POINTER : "it POINTS into a word". 0 is considered "in a word".
-: IN-WORD C@ >R  R@ \w IN-CHAR-SET   R> 0= OR ;
-\ For POINTER : "it DOESNOT point into a word". 0 is considered "not in a word".
-: NOT-IN-WORD C@ >R  R@ \w IN-CHAR-SET 0=  R> 0= OR ;
+\ For POINTER : "it POINTS into a word". start or end is considered "in a word".
+: IN-WORD DUP IN-STRING? IF C@ \w IN-CHAR-SET ELSE DROP TRUE THEN ;
+\ For POINTER : "it DOESNOT point into a word".
+\ Start or end is considered "not in a word". (Too!).
+: NOT-IN-WORD DUP IN-STRING? IF C@ \w IN-CHAR-SET 0= ELSE DROP TRUE THEN ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the start of a word"
@@ -442,10 +459,10 @@ VARIABLE RE-EXPR-END
 
 \ Everything to be initialised for a build. Take EXPRESSION string, leave IT.
 : INIT-BUILD   REMEMBER-START-RE !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   !ALLOCATOR
-    'FORTRACK RE,   'HANDLE() RE, 0 RE, ;
+    'FORTRACK RE,   'HANDLE() RE, 2 RE, ;
 
 \ Everything to be harvested after a build.
-: EXIT-BUILD   HARVEST-NORMAL-CHARS   'HANDLE() RE, 1 RE,   0 RE,   ?ALLOCATOR ;
+: EXIT-BUILD   HARVEST-NORMAL-CHARS   'HANDLE() RE, 3 RE,   0 RE,   ?ALLOCATOR ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
@@ -514,16 +531,25 @@ VARIABLE RE-EXPR-END
 : RE-BUILD INIT-BUILD OVER + BEGIN RE-BUILD-ONE UNTIL 2DROP EXIT-BUILD
    RE-COMPILED ;
 
-\ Null-ended copy of the string in which we try to match.
-CREATE STRING-COPY MAX-RE ALLOT
-
 \ Copy the STRING to ``STRING-COPY'' zero-ending at both ends.
 \ Return a POINTER to the zero ended string.
-: STRING-COPY-BUILD 0 STRING-COPY C!  0 OVER 1+ STRING-COPY + C!
-   STRING-COPY 1+ SWAP CMOVE    STRING-COPY 1+ ;
+: STRING-BUILD OVER +   OVER STRING-TABLE 2! ;
 
 \ For STRING and regular expression STRING:
 \ "there IS a match". \0 ..\9 have been filled in.
-: RE-MATCH RE-BUILD >R STRING-COPY-BUILD R> (MATCH) >R 2DROP R> ;
+: RE-MATCH RE-BUILD >R STRING-BUILD R> (MATCH) >R 2DROP R> ;
+
+\ Return remaining STRING of ``STRING-COPY'' after substring INDEX.
+: REMAINDER STRING[] CELL+ @   0 STRING[] CELL+ @ OVER - ;
+
+\ Replace substring INDEX with a hole of LENGTH.
+: MAKE-OF-SIZE   DUP >R DUP STRING[] @ R@ + SWAP REMAINDER   >R SWAP R> MOVE
+  R> STRING-TABLE CELL+ +! ;
+
+\ Replace STRING for substring INDEX.
+: (RE-REPLACE) 2DUP SWAP MAKE-OF-SIZE   2* CELLS STRING-TABLE + @ SWAP MOVE ;
+
+\ Replace all substrings with STRING1 STRING2 .. STRINGN
+: RE-REPLACE  ALLOCATOR @ 2/ 1- 1 DO (RE-REPLACE) -1 +LOOP ;
 
 \D INCLUDE debug-re.frt
