@@ -171,40 +171,40 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( assembling and add the fixup/posti/commaer to the disassembly struct. )
 ( Leave the DEA.                                                        )
 : DIS-1PI
-    DUP IS-1PI IF 
+    DUP IS-1PI IF
     AT-REST? IF
         DUP >BODY POST, DROP
         DUP +DISS
     THEN
     THEN
-;      
+;
 
 : DIS-xFI
-   DUP IS-xFI IF 
+   DUP IS-xFI IF
    DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
        DUP >BODY FIX| DROP
        DUP +DISS
    THEN
    THEN
-;          
+;
 : DIS-COMMA
-   DUP IS-COMMA IF 
+   DUP IS-COMMA IF
    DUP >BODY @ TALLY @ INVERT CONTAINED-IN IF
        DUP >BODY @ TALLY OR!
        DUP +DISS
    THEN
    THEN
-;          
+;
 
 ( Generate the situation back, with one less item in `DISS')
 : REBUILD
     0 CELL+ MINUS DISS +!
-    !TALLY 
-    DISS? IF 
+    !TALLY
+    DISS? IF
         DISS @+ SWAP -DISS
-        DO 
-            I @ DIS-1PI DIS-xFI DIS-COMMA DROP  
-        0 CELL+ +LOOP 
+        DO
+            I @ DIS-1PI DIS-xFI DIS-COMMA DROP
+        0 CELL+ +LOOP
     THEN
 ;
 
@@ -213,31 +213,79 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( used up or incorrect                                                  )
 : BACKTRACK
 (   ." BACKTRACKING"                                                    )
-    DROP DISS @ 0 CELL+ - @                                         
+    DROP DISS @ 0 CELL+ - @
     >NEXT%
-    REBUILD                                                         
+    REBUILD
 ;
 
-: RESULT   
+: RESULT
     AT-REST? DISS? AND IF
         .DISS
-        REBUILD                                                         
+        REBUILD
     THEN
 ;
 
 : DOIT
-    -DISS 
+    -DISS
     !TALLY
-    START 
-    BEGIN 
-        DIS-1PI DIS-xFI DIS-COMMA 
-        RESULT   
-        >NEXT% 
+    START
+    BEGIN
+        DIS-1PI DIS-xFI DIS-COMMA
+        RESULT
+        >NEXT%
 (       DUP ID.                                                         )
-        BEGIN DUP DICTEND? DISS? AND WHILE BACKTRACK REPEAT 
+        BEGIN DUP DICTEND? DISS? AND WHILE BACKTRACK REPEAT
     DUP DICTEND? UNTIL
     DROP
 ;
 
+0 VARIABLE POINTER
+HERE POINTER !
+( Disassemble the instruction at `POINTER' and accumulated into         )
+( `DISS'. `POINTER' has advanced to the commadata                       )
+: .DISS2 DISS DUP @ SWAP CELL+ DO
+    I @ DUP IS-COMMA IF
+       POINTER @ .
+       DUP >BODY CELL+ POINTER +!
+    THEN ID.
+ 0 CELL+ +LOOP CR ;
+
+( These dissassemblers are quite similar:                               )
+( if the DEA on the stack is of the right type and if the               )
+( precondition is fullfilled and if the dissassembly fits,              )
+( it does the reassuring actions toward the tally as with               )
+( assembling and add the fixup/posti/commaer to the                     )
+( disassembly struct.
+( Leave the DEA.                                                        )
+: dis-1PI
+    DUP IS-1PI IF
+    AT-REST? IF
+    DUP >MASK POINTER @ @ ^ AND FF AND OVER >INST ^ = IF
+        DUP >BODY POST, DROP
+        DUP +DISS
+        DUP ID.
+        ." BINGA"
+    THEN
+    THEN
+    THEN
+;
+
+: RESULT? AT-REST? DISS? AND  ;
+( Dissassemble one instruction from ADDRESS. )
+( Leave `POINTER' pointing after that instruction. )
+: DOIT2
+    POINTER !
+    -DISS
+    !TALLY
+    START
+    BEGIN
+        dis-1PI ( DIS-xFI DIS-COMMA )
+        >NEXT%
+(       DUP ID.                                                         )
+    DUP DICTEND? RESULT? OR UNTIL
+    DROP
+;
+
 ." COMES JAN"
-(   CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        )
+    CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        )
+' JAN CFA @ DOIT2
