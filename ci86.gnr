@@ -7068,6 +7068,7 @@ HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
 });_END_({_LINUX_N_})
 _MODERN_({
 HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
+        _BITS32_({DC      DROP, LIT, 10000H, SLMOD})
         DC      LIT, lseek, BDOSN
         _0BRANCH({PFILE1})
         DC      NEGATE
@@ -7939,8 +7940,7 @@ in behalf of subsequent reads and writes.
 },{{BLOCK},{LIST},{LOAD}}, {}, enddoc)
 HEADER({SEEK},{SEEK},{DOCOL})
         DC      BBUF
-        _BITS16_({DC      USTAR})
-        _BITS32_({DC      STAR, LIT, 10000H, SLMOD})
+        DC      USTAR
         DC      BHAN, FETCH
         DC      PFILE           ;{ Disk position.}
         DC      ZEQU, ZEQU, QDSKER
