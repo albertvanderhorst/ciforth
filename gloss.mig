@@ -57,4 +57,7 @@ worddocsafe({C,},{comma},{n  ---},{L0},{
 Store forthvar({n}) into the next available dictionary memory cell, advancing        
 the dictionary pointer.},{})
 
+worddoc({-},{minus},{n1  n2  ---  diff},{L0},{
+        Leave the difference of forthvar({n1-n2}) .},{})
+
 
