@@ -789,16 +789,23 @@ ORIG:                         ; Accommodate also .exe files
         MOV     BX, (((100H + TEXTEND-ORIG)-1)|0FFFFH)/10H+1 ;{Leave at least 64K.}
         MOV     AH,4Ah              ;Modify memory allocation
         INT     21h
-
 ; These are real mode descriptors !
         MOV     _CELL_PTR[SaveCS],CS           ; Once and for all
         MOV     _CELL_PTR[SaveDS],DS
         MOV     _CELL_PTR[SaveES],ES           ; Still pointing to PSP (!?)
-_PC_(
-{;{Must be done before switching to protected mode.}
-        MOV     AX, _CELL_PTR[ES:2CH]
-        MOV     _CELL_PTR[USINI+_CELLS(31)],AX   ;{Remember ENV pointer.}
-})
+});_END_({_HOSTED_DPMI_})
+_MODERN_({
+        MOV     [LOADEXEC+4], DS
+        MOV     [LOADEXEC+8], DS
+        MOV     [LOADEXEC+12], DS
+
+;{Must be done before switching to protected mode.}
+        MOV     AX, [ES:2CH]
+        MOV     [USINI+_CELLS(31)],AX   ;{Remember ENV pointer.}
+        MOV     [LOADEXEC], AX
+});_END_({_MODERN_})
+
+_HOSTED_DPMI_({
 ;
 ; Check to see if DPMI is available, and make the switch if it is
 ; If one is, the stat info is stored.
@@ -987,13 +994,6 @@ RETDOS:
 ENDDPMI:
 ; ######################### DPMI END ###############################################################
 });_END_({_HOSTED_DPMI_})
-
-_MODERN_({
-        MOV     [LOADEXEC], DS
-        MOV     [LOADEXEC+4], DS
-        MOV     [LOADEXEC+8], DS
-        MOV     [LOADEXEC+12], DS
-});_END_({_MODERN_})
 
 _BITS32_({
 ;{************************}
@@ -2242,7 +2242,7 @@ worddoc( {LOGIC},{INVERT},{INVERT},{n1 --- n2},{L1},
 {{AND},{OR}},
 { { 2 BASE ! 11101101 INVERT 11111111 AND .},{10010} },
 enddoc)
-CODE_HEADER({INVERT},{INVER})
+CODE_HEADER({INVERT},{INVERT})
         POP     AX      ;{ (S1) <- (S1) XOR (S2)}
         NOT     AX
         _PUSH
@@ -8041,7 +8041,9 @@ RSLW2:
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
 {Have the operating system execute the command contained
 in the string forthsamp({sc1}).
-},{{BLOCK},{?ERRUR}},
+_MODERN({{The environment is passed to the
+command, but not the changes made after ciforth started.}})
+},{{BLOCK},{?ERROR},{?ERRUR}},
 _LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}}, })
 _MODERN_({ {{"TYPE hello.frt" SYSTEM },{." Hello world!"}}, })
 enddoc)
@@ -8074,22 +8076,22 @@ STATUS   DC     0
 SYSARG1:
 SHELL:   DB      "/bin/sh",0
 SYSARG2: DB      "-c", 0
-COMBUF:  _RESB(256)
-SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + _CELLS(1), 0
+COMBUF:  _RESB(CW+256)  ;{One cell for high level string manipulation.}
+SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + CW, 0
 ;
 });_END_({_LINUX_N_})
 _MODERN_({
 HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, TOR
-        _STRINGINLINE({X /c })
+        _STRINGINLINE({X /c })  ;{X contains BD string count.}
         DC      RR, SSTOR
         DC      RR, SADD, LIT, ACR, RR, CHAPP
         DC      FROMR, SFET, ONEM, SWAP, CSTOR ;{Fill in (BD) count at X.}
 _HOSTED_DPMI_(
-{       DC      0, LIT, COMBUF
+{       DC      ZERO, LIT, COMBUF + CW
         DC      LIT, Save_DS_PR, FETCH, OVER
+        DC      LIT, 256
         DC      FMOVE                         }) _END_({_HOSTED_DPMI_})
-        DC      ARGS, FETCH, LIT, LOADEXEC, STORE
         DC      LIT, SHELL, X, LIT, LOADEXEC
         DC      LIT, 4B00H, BDOSN
         DC      SWAP, QERR
@@ -8101,7 +8103,7 @@ LOADEXEC:   DW  0       ; {The 0 are filled in at boot with DS.}
         DW      0
         DW      7CH
         DW      0
-COMBUF:  _RESB(256)
+COMBUF:  _RESB(CW+256)  ;{One cell for high level string manipulation.}
 SHELL:   DB      "\COMMAND.COM",0
 });_END_({_MODERN_})
 _LINUX_C_({
