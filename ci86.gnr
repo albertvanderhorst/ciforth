@@ -826,8 +826,8 @@ MEM_HANDLESI: DW     0000
 MEM_HANDLEDI: DW     0000
 
 ;Error-- called from diverse places.
-           MOV     AL, BL ; {Use the infamous errorlevel.}
 ERRMSG:
+           MOV     AL, BL ; {Use the infamous errorlevel.}
            MOV     AH,4CH
            INT     21H
 ; The error number is patched!
@@ -861,26 +861,25 @@ DPMISUCCESS:
             MOV     CX,AX
             JC      ERRMSG
 
-            LEA     DI,[Scratch]
-            MOV     AX,000BH            ;{Get Description.}
+            MOV     AX,0007H            ;{Set base address.}
             MOV     BX,FS
+            MOV     CX, [LINAD_HIGH]
+            MOV     DX, [LINAD_LOW]
             INT     31H
             MOV     BL,6
 ERRMSG2:    JC      ERRMSG
-            MOV     AL,[DI+6]
-            AND     AL, ~ BITS32_TOGGLE ;{Make sure it is 16 bits.}
-            ADD     AL, (EM-1)/10000H
-            MOV     [DI+6],AL
-            MOV     AX, (EM-1) & 0FFFFH
-            MOV     [DI], AX
-            MOV     AX, [LINAD_LOW]
-            MOV     [DI+2], AX
-            MOV     AX, [LINAD_HIGH]
-            MOV     [DI+4], AL
-            MOV     [DI+7], AH
 
-            MOV     AX,000CH            ;{Set Description.}
+            MOV     AX,0008H            ;{Set segment limit.}
             MOV     BX,FS
+            MOV     CX, (EM-1)/10000H
+            MOV     DX, (EM-1) & 0FFFFH
+            INT     31H
+            MOV     BL,7
+            JC      ERRMSG2
+
+            MOV     AX,0009H            ;{Set acces rights.}
+            MOV     BX,FS
+            MOV     CX, 00F2H ; %0000 0000 1111 0010
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
@@ -913,37 +912,16 @@ ERRMSG2:    JC      ERRMSG
 
 ; -------------- Fill in the alias descriptors, possibly 32 bits --------
 
-            LEA     DI,[Scratch]
-            MOV     AX,000BH            ;{Get Description.}
+            PUSH    CX
+            MOV     AX,0009H            ;{Set acces rights.}
             MOV     BX,CX
-            INT     31H
-            MOV     BL,6
-            JC      ERRMSG2
-            MOV     AL,[DI+6]
-_BITS32_({  XOR     AL, BITS32_TOGGLE },{dnl})
-            MOV     [DI+6],AL
-            MOV     AL,[DI+5]
-            XOR     AL, CODE_TOGGLE
-            MOV     [DI+5],AL
-            MOV     AX,000CH            ;{Set Description.}
-            MOV     BX,CX
+            MOV     CX, _BITS16_({ 00FAH }); %0000 0000 1111 1010
             INT     31H
             MOV     BL,7
-ERRMSG3:    JC      ERRMSG2
+            JC      ERRMSG2
+            POP     CX
 
-            MOV     AX,000BH            ;{Get Description.}
-            MOV     BX,DX
-            INT     31H
-            MOV     BL,8
-            JC      ERRMSG3
-            MOV     AL,[DI+6]
-_BITS32_({  XOR     AL, BITS32_TOGGLE },{dnl})
-            MOV     [DI+6],AL
-            MOV     AX,000CH            ;{Set Description.}
-            MOV     BX,DX
-            INT     31H
-            MOV     BL,9
-            JC      ERRMSG3
+; DX should be okay as it is.
 
 ; -------------- Use the alias descriptors for CS and DS --------
             PUSH    CX    ; {Corrected code segment}
