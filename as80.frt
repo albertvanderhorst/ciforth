@@ -245,7 +245,6 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ;
 
 0 VARIABLE POINTER
-0 VARIABLE NEW-POINTER
 HERE POINTER !
 
 ( These dissassemblers are quite similar:                               )
@@ -261,7 +260,8 @@ HERE POINTER !
     DUP >MASK OVER >IMASK AND POINTER @ @ AND OVER >INST = IF
         DUP >BODY POST, DROP
         DUP +DISS
-        POINTER @ 1+ NEW-POINTER !
+        POINTER @ ISS !
+        DUP >CNT POINTER +!              
     THEN
     THEN
     THEN
@@ -270,7 +270,7 @@ HERE POINTER !
 : dis-xFI
    DUP IS-xFI IF
    DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
-   DUP >MASK  POINTER @ @ AND OVER >INST = IF
+   DUP >MASK  ISS @ @ AND OVER >INST = IF
        DUP >BODY FIX| DROP
        DUP +DISS
    THEN
@@ -289,8 +289,8 @@ HERE POINTER !
 
 ( Print the DEA in an appropriate way, it must be a comma-er   )
 : .COMMA 
-    DUP >IMASK NEW-POINTER @ @ AND U.
-    DUP >CNT NEW-POINTER +!              
+    DUP >IMASK POINTER @ @ AND U.
+    DUP >CNT POINTER +!              
     ID.
 ;
 : .DISS' DISS DUP @ SWAP CELL+ DO
@@ -308,19 +308,18 @@ HERE POINTER !
 ( Dissassemble one instruction from ADDRESS. )
 ( Leave `POINTER' pointing after that instruction. )
 : (DISASSEMBLE)
-    !DISS
-    !TALLY
+    !DISS   !TALLY
+    POINTER @ >R
     STARTVOC BEGIN
         dis-PI dis-xFI  dis-COMMA 
         >NEXT%
 (       DUP ID.                                                         )
     DUP VOCEND? RESULT? OR UNTIL DROP
     RESULT? IF
+      R> DROP
       .DISS' 
-      NEW-POINTER @ POINTER !
     ELSE
-      POINTER @ C@ . ."  C,"
-      1 POINTER +!
+      R> COUNT . 1 POINTER ! ."  C," CR
     THEN
 ;
 
