@@ -1300,14 +1300,25 @@ worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {Leave a forthkey({"}) delimited string.},
 {},
 {{"APE" TYPE},{APE},
-{: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
+{: GS1 "NOOT" ; GS1 TYPE},{NOOT}},
+enddoc)
 HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      LIT,'"'
-        DC      PPARS
-        DC      LIT, SKIP, COMMA
-        DC      SCOMMA, SFET
-        DC      DLITE
-        _SECURITY_({DC      QDELIM})
+        DC      LIT, SKIP, COMMA        ;  'SKIP , HERE >R 0 ,
+        DC      HERE, TOR, ZERO, COMMA
+DENQ1:
+        DC      LIT, '"', PPARS         ;           BEGIN &" (PARSE)
+        DC      INBRS, LDUP, LIT, '"', EQUAL ;           IN[] DUP &" =
+        _0BRANCH(DENQ2)                 ;           WHILE
+        DC      TDROP, ONEP,            ;           2DROP 1+ R@ $+!
+        DC      LDUP, ALLOT, RR, SPTOR
+        _BRANCH(DENQ1)                  ;           REPEAT
+DENQ2:
+        DC      QBL, ZEQU,
+        DC      LIT, 10, QERR           ;           ?BLANK 0= 5 ?ERROR
+        DC      DROP,                   ;                DROP R@ $+!
+        DC      LDUP, ALLOT, RR, SPTOR
+_ALIGNED_({ DC LALIGN}, {dnl})
+        DC      FROMR, SFET, DLITE      ;           R> $@ POSTPONE DLITERAL ;
         DC      SEMIS
 ;
 dnl Remember the top of the denotation chain.
@@ -3907,22 +3918,13 @@ Leaves an in-line string forthsamp({cccc}) (delimited by the
 trailing forthkey({"})) as a constant string forthsamp({addr1
 n}) . In ciforth the number of characters has no limit and
 using forthsamp({S"}) has always an effect on
-forthcode({HERE}), even during interpretation. It skips leading
-delimiters.
+forthcode({HERE}), even during interpretation.
 },{{DEN"}},
 {{S" NUKES  " 41 EMIT TYPE 41 EMIT},{ANUKES  A},
 {: GS1 S" NUKES  " 41 EMIT TYPE 41 EMIT ; GS1},{ANUKES  A},
-{S" """BD  " 41 EMIT TYPE 41 EMIT},{ABD  A}},
+{S" ""BD  " 41 EMIT TYPE 41 EMIT},{A"BD  A}},
 enddoc)
 HEADER({S"},{SQUOT},{DOCOL}, , B_IMMED)
-SQUO1:  DC      INBRS, LIT, '"', EQUAL
-        _0BRANCH(SQUO2)
-        DC      DROP
-        _BRANCH(SQUO1)
-SQUO2:
-        DC      DROP
-;       Backtrace to before the first non-quote
-        DC      LIT, -1, LIN, PSTORE
         DC      DENQ
         DC      SEMIS
 ;
@@ -3938,7 +3940,9 @@ on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
 _VERBOSE_({We want forthsamp({." cccc"}) replaced by forthsamp({"cccc" TYPE}).})},
 {{OUT}},
-{{: GS1 ." the end" ; GS1 },{the end}},
+{{." the end" },{the end},
+{: GS1 ." ""the end"" he said" ; GS1 },{"the end" he said}},
+{: GS1 ." the end" ; GS1 },{the end}},
 enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      DENQ
@@ -5014,6 +5018,9 @@ such that one can regain control.
 enddoc)
 HEADER({ONLY},{ONLY},{DOCOL})
         DC      LIT, FORTH, SEARCH, STORE
+        DC      SEARCH, LDUP, CELLP
+        DC      LIT, _CELLS(M4_MAXWORDLIST-1)
+        DC      LCMOVE
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{(},{paren},{},{ISO,FIG,I,L0},
