@@ -511,6 +511,20 @@ These fields may have zero or more parts.
 The ``Test'' field contain the tests in the odd fields, and the
 expected outcome in the following even fields.
 
+@subsection Defining aliases
+Sometimes you need aliases, i.e. other names for macro's,
+Although it doesn't properly belong here as a technique, I want
+to mention it, because the amount of brackets is hard to sort
+out. An alias is useful in a transition period, where you want
+to rename something, but where you want to be able to do that
+gradually on a file by file basis.
+
+ forthsamp({define(_lbracket__OLDNAME__rbracket_,_lbracket__NEWNAME_(_lbracket_$1_rbracket_,_lbracket_$2_rbracket_)_rbracket_)})
+
+After forthvar({_OLDNAME_}) is phased out everywhere this definition can be deleted.
+Note that for this to work all parameters applicable to forthvar({_NEWNAME_}) must be
+taken into account, the two shown here are just an example.
+
 @subsection Impress the crowd
 By using macro's to define other macro's, then pass the result through
 forthprog({m4}) another time, severe stress can be laid upon the intelligence
@@ -759,7 +773,7 @@ If you run on Linux with
 The resulting floppy will even be recognized by
 MSDOS, such that you can copy block sources to it.
  forthsamp({make moreboot})
-will do this from Linux, then you will have forthfile({BLOCKS.BLK})
+will do this from Linux, then you will have forthfile({forth.lab})
 available.
 forthsamp({make allboot})
 will do it all, but it needs a working forth
@@ -770,7 +784,7 @@ The file forthfile({msdos.msm}) can be assembled
 using forthprog({TASM.EXE}) and forthprog({MASM.EXE}).
 The resulting Forth
 executable can be run off hard disk and respects the file system on it.
-It uses the file forthfile({BLOCKS.BLK}) .
+It uses the file forthfile({forth.lab}) .
 
 @subsection A generic Forth
 As was mentioned before, ciforth has one single source file: the generic forthfile({ci86.gnr}) .
@@ -825,7 +839,7 @@ You can use dos forthmacro({_CLASSIC_}) in the classic way as with the original.
 means that the floppy is used directly without regard for directory
 structures. This uses calls that are declared obsolete.
 You can use dos in a modern way. forthmacro({_MODERN_}). This allocates block in the
-file with name forthfile({BLOCKS.BLK}) . This name is available in the string forthcodeni({BLOCK-FILE})
+file with name forthfile({forth.lab}) . This name is available in the string forthcodeni({BLOCK-FILE})
 for you to change, also at run time. No (as of 2000 ) obsolete MSDOS calls
 are used (Checked against MS-DOS programmers reference "covers through
 version 6" ISBN 1-55615-546-8)
@@ -1034,7 +1048,7 @@ forthendenumerate
 Contact me if you want to contribute to the wider usability of this package.
 
 @subsection Programs
-In the file forthfile({BLOCKS.BLK}) is available a screen editor, assembler, decompiler
+In the file forthfile({forth.lab}) is available a screen editor, assembler, decompiler
 and tools like forthcodeni({DUMP}).
 Beware! Some of the tools handle hards disks.
 There are example programs and benchmarks.
@@ -1113,11 +1127,11 @@ forthexample({
 })
 It is about 20k and the dictionary space is set at 64 Mbyte.
 
-Blocks are allocated in a file called forthfile({BLOCKS.BLK}) This name can be changed in
+Blocks are allocated in a file called forthfile({forth.lab}) This name can be changed in
 listing and also during run time.
- forthfile({BLOCKS.BLK}) can be changed into an editable file and back by
-forthsamp({cat BLOCKS.BLK | fromblocks > blocks.frt
-cat blocks.frt | toblocks > BLOCKS.BLK})
+ forthfile({forth.lab}) can be changed into an editable file and back by
+forthsamp({cat forth.lab | fromblocks > blocks.frt
+cat blocks.frt | toblocks > forth.lab})
 
 The user variable forthsamp({EM}) still is the end of the memory.
 The forthsamp({M4_EM}) in the configuration files is such that it designates the relative
