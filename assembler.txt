@@ -257,4 +257,65 @@ and what not and you will see that assembly program is not for the faint
 of heart. The ASSUME of the MASM assembler buys you nothing, but 
 inconvenience.
 
+Appendix.
+An incomplete and irregular guide to the instruction mnemonics.
+Note that some of the instruction are Pentium and as yet
+not present in the as586.frt (which should still be called as386.frt).
+
+Never use an instruction that end in a {BP+IS]' except in  case
+of address size overwrites *and* you know what you are doing.
+----
+SET : Byte Set on Condition
+BT :  Bit Test 
+BTR:  Bit Test and Reset
+BTS:  Bit Test and Set
+BTC:  Bit Test and Complement
+CPUID: CPU Identification
+CLTS: 
+L :   Load Full Pointer
+LAR : Load Access Rights Byte
+LLDT: Load Local Descriptor Table Register
+LGDT: Load General Descriptor Table Register
+LIDT: Load Interrupt Descriptor Table Register
+LTR:  Load Task Register
+LMSW: Load Machine Status Word
+MOV : Move
+RSM:
+RDTSC: Read from Time Stamp Counter
+RDMSR: Read from Model Specific Register 
+SHLD: Double Precision Shift Left
+SHRD: Double Precision Shift Right
+SLDT: Store Local Descriptor Table Register
+SMSW: Store Machine Status Word
+VERR: Verify a Segment for Reading or Writing
+WRMSR: Write to Model Specific Register 
+---------
+Suffices of the opcode
+|ALL : All
+|CD : Control/Debug register
+|FS : Replaces FS| in irregular opcodes. 
+|GS : Replaces GS| in irregular opcodes. 
+|AD : Implicit A and Double result.
+|C  : Implicit C (count)
+---------
+Items in Fixups.
+Y| : Yes, Use the condition straight 
+N| : No, Use the condition inverted 
+O| : Overflow 
+C| : Carry
+Z| : Zero
+CZ| : C || Z (unsigned <= )
+S| : Sign ( <0 )
+P| : Parity (even)
+L| :  S != O (signed < )
+LE| : L || Z (signed <= )
+<AH| : As a second register is a source,
+       different in size from the destination.
+T| : To (primed or special register)
+F| : From (primed or special register)
+V| : Variable number
+----
+OB : Obligatory byte
+OW : Obligatory word (=16bits)
+
 
