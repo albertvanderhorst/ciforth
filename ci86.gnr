@@ -291,7 +291,7 @@ BEGIN1: CALL    READSECTOR
         INC     CX
         ADD     BX,BPS
         JB      RETRY
-        CMP     BX,TEXTEND-$$
+        CMP     BX,RELATIVE_WRT_ORIG(TEXTEND)
         JB      BEGIN1
 
         MOV     AL,'W'
@@ -324,7 +324,7 @@ HUGESECS      DD         000H
         DB    "RAW     "
 
 BOOTLBA:  DB      10H, 0
-        DW      (TEXTEND-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
+        DW      (RELATIVE_WRT_ORIG(TEXTEND))/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
         DW      BPS             ;{ OFFSET AND SEGMENT}
         DW      REALSEGMENT
         ;{ At a hard disk we just read sector from sector 1        }
@@ -435,7 +435,8 @@ ENDBOOT:
 ;                       ADJUST CODE SEGMENT REGISTER (still real mode)
 ; ########################################################################################
 ;{ Required start of .COM program.}
-    _HOSTED_MSDOS_1_(_REAL_1_({ORG     100H}))
+    _HOSTED_MSDOS_1_(_REAL_1_({ORG     100H
+ORIG:                         ; {Accommodate also .exe files} }))
 
 _COMMENT
 ;____1_____ _BOOTED_1_({
@@ -954,7 +955,7 @@ _COMMENT
 ;{ The 2 is rounding plus the extra sector in .EXE files.}
 ;{ However it deviates much from the classic model and requires}
 ;{ that the disk parameters are available (not only for USEBIOS)}
-        DC      (TEXTEND-$$-1)/KBBUF+1 ; +1 for EXE
+        DC      (RELATIVE_WRT_ORIG(TEXTEND)-1)/KBBUF+1 ; +1 for EXE
 _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
@@ -967,7 +968,7 @@ _ENDCOMMENT
 ;{ Round up both parts separately.}
 ;       You need a filler file of one sector,
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
-        DC      (SECSTRT+((TEXTEND-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
+        DC      (SECSTRT+((RELATIVE_WRT_ORIG(TEXTEND)-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
 });_END___1__({_USEBIOS_1_})
 ;____1_____ _BOOTHD__1_({
 ;{ This will reserve place for the system itself, on the first part of a }
@@ -1169,7 +1170,7 @@ CODE_HEADER({SP@},{SPFET})
         _PUSH
 ;
 CODE_HEADER({SP!},{SPSTO})
-        MOV     BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
+        MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
         MOV     STACKPOINTER,[BX+CELLS(3)]        ;{RESET PARAM STACK POINTER}
         _NEXT
 ;
@@ -1178,7 +1179,7 @@ CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
         _PUSH
 ;
 CODE_HEADER({RP!},{RPSTO})
-        MOV     BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
+        MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
         MOV     BP,[BX+CELLS(4)]        ;{RESET RETURN STACK PTR}
         _NEXT
         PAGE
@@ -1427,7 +1428,7 @@ HEADER({USER},{USER},{DOCOL})
         DC      CON
         DC      PSCOD
 DOUSE:  MOV     BX,[BX+CELLS(1)] ;{PFA  }
-        MOV     DI,[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
+        MOV     DI,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
         PAGE
@@ -2375,7 +2376,7 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      LIT,_VOC_LATEST(FORTH)
         DC      STORE
 ;____1_____ _MODERN_1_({
-        DC      BLINI           ;{ Can abort!}
+        DC      BLINI           
 });_END___1__({_MODERN_1_})
 ;____1_____ _LINUX_C_1_({
         DC      BLINI
@@ -3215,13 +3216,15 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      BLFL
         DC      COUNT, OVER, PLUS
         DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
-        DC      BDOS, DERR
+        DC      BDOS
+        DC      ONE, LAND, ZEQU, WARN, STORE
         DC      DROP, DROP, DROP
         DC      BHAN, STORE
         DC      SEMIS
 ;
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
-        DC      LIT, 03E00H    ;{ Open file for read/write}
+        DC      LIT, 03E00H    ;{ Close file }
+        DW      ZERO, WARN, STORE
         DC      BHAN, FETCH
         DC      ZERO, ZERO
         DC      BDOS, DERR
@@ -3278,10 +3281,12 @@ HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      LINOS
         DC      LDUP, BHAN, STORE
         DC      ZERO, MIN      ; 0/-errno
-        DC      DERR, STORE
+        DC      LDUP, DERR, STORE
+        DC      ZEQU, WARN, STORE
         DC      SEMIS
 ;
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
+        DC      ZERO, WARN, STORE
         DC      BHAN, FETCH
         DC      ZERO,ZERO
         DC      LIT, close
