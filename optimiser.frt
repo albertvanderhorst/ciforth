@@ -121,6 +121,20 @@ VARIABLE MIN-DEPTH
 
 \ ---------------------------------------------------------------------
 
+\ For DEA : it IS a branch, i.e. it is followed by a relative control target.
+: IS-A-BRANCH   DUP 'LIT <>   SWAP >FFA @ FMASK-IL AND 0= 0= AND ;
+
+\ The set of absolute branch targets.
+50 SET BRANCH-TARGETS
+: !TARGETS   BRANCH-TARGETS !SET ;
+
+\ If there is some branch at ADDRESS fill its target in into ``BRANCH-TARGETS''
+: FILL-ONE-TARGET DUP @ IS-A-BRANCH IF CELL+ $@ + BRANCH-TARGETS SET+! _ THEN DROP ;
+
+\ For a SEQUENCE fill the ``BRANCH-TARGET'' set.
+: FILL-TARGETS !TARGETS BEGIN DUP FILL-ONE-TARGET NEXT-PARSE WHILE DROP REPEAT 2DROP ;
+
+
 CREATE DROPS  HERE 0 ,
 ' DROP       ,          ' 2DROP      ,
 HERE SWAP !
@@ -128,9 +142,9 @@ HERE SWAP !
 \ For DEA : it IS a trivial annihilator.
 : IS-A-DROP DROPS IN-SET? ;
 
-ASSEMBLER
+\ ASSEMBLER
 50 SET ANNIHILATORS
-PREVIOUS
+\ PREVIOUS
 
 \ For DEA return "it CAN be part of annihilatable code",
 \ as far as its stack & side effects are concerned.
