@@ -1,15 +1,15 @@
 #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
 lina <<% | tail -n$#
 \ ( Environmental dependancies : )
-\ ( This is a fig Forth Program using only standard fig Words)
+\ ( This is a ISO Forth Program using only standard ISO Words)
 \ ( plus LINOS (par1, par2, par3, function# -- result/error )
 \ ( The following words are not ANSI : none (any more))
-\ ( 1 is used for a true flag)
+\ ( An environmental dependancy ?BLANK is used. )
 
 9 CONSTANT TAB
 10 CONSTANT LF
  ( char -- flag)
-\ : IS-BLANK    BL 1+ < ;
+\ : IS-BLANK    BL 1+ < ;   Compiles under ISO.
 : IS-BLANK ?BLANK ;
 
 VARIABLE LAST-WAS-BLANK
@@ -29,10 +29,10 @@ CREATE BUFFER SIZE ALLOT
 : COUNT-CHAR COUNT-C COUNT-W COUNT-L ;
 : COUNT-BUFFER BUFFER SWAP OVER + SWAP DO I C@ COUNT-CHAR DROP LOOP ; ( len-)
 
-5 CONSTANT OPEN   
-3 CONSTANT READ  
-6 CONSTANT CLOSE 
-0 CONSTANT O_RDONLY 
+5 CONSTANT OPEN
+3 CONSTANT READ
+6 CONSTANT CLOSE
+0 CONSTANT O_RDONLY
 
 VARIABLE HANDLE
 : COUNT-FILE BEGIN HANDLE @ BUFFER SIZE READ LINOS DUP 0 >
@@ -40,7 +40,7 @@ WHILE COUNT-BUFFER REPEAT DROP ;
 
 : ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
 ( c-name -- handle/err )
-: OPEN-LINUX ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR ; 
+: OPEN-LINUX ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR ;
 : STILL-FILES HERE C@  ( -- flag ) ;  ( Count <>0 means more files)
 : OPEN-FILE BL WORD STILL-FILES ( [filename-at-here] -- handle/-1 )
     IF HERE COUNT TYPE HERE OPEN-LINUX ELSE -1 THEN  HANDLE ! ;
@@ -55,8 +55,7 @@ DO-FILE $*
 
 # The remainder is interpreted by the shell as a here document,
 # but forth has long gone bye.
-# 
+#
 # Note that we need to go BYE in DO-FILE otherwhise we get a spurious new
 # line. Furthermore we need ``|tail -n<number of file>'' otherwise there will
 # be a lot of OK's.
-
