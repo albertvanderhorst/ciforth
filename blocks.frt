@@ -1438,7 +1438,7 @@ LABEL NEXT2      ( REPLACES NEXT!)
   MEASURE
 CR  ." THE BYTE BENCHMARK LASTED "  1000 / .mS
 
-( POSTIT/FIXUP 8086 ASSEMBLER LOAD SCREEN AvdH HCC HOLLAND)
+( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
 ASSEMBLER DEFINITIONS HEX
 : 3PI <BUILDS C, C, C, DOES> POST, POST, POST, DROP ;
 : 3FI <BUILDS C, C, C, DOES> <FIX 3 + FIX| FIX| FIX| DROP ;
@@ -1446,25 +1446,25 @@ ASSEMBLER DEFINITIONS HEX
 8 0 4 1FAMILY| CR0| ILL| CR1| CR2|  00 20 0F 3PI MOVCD,
 : GET-CR0   MOVCD, F| CR0| R| AX| ;
 : PUT-CR0   MOVCD, T| CR0| R| AX| ;
-: TO-PROT,  GET-CR0  INCX, AX|  PUT-CR0
-  JMPFAR, HERE 4 + , 10 W, ;
-: TO-REAL,  GET-CR0  DECX, AX|  PUT-CR0
-JMPFAR, HERE 4 + , 7C0 W, ;
+ 7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
+: JMP-PROT, JMPFAR, HERE 4 + , 10 W, ;
+: JMP-REAL, JMPFAR, HERE 4 + SWITCH_DS 10 * - , SWITCH_DS W, ;
+: TO-PROT,  GET-CR0  INCX, AX|  PUT-CR0 JMP-PROT, ;
+: TO-REAL,  JMP-REAL,  GET-CR0  DECX, AX|  PUT-CR0 ;
+: COPY-SEG  MOVXI, AX| ( DAT -- ) W,   MOVSW, T| DS| R| AX|
+            MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
+-->
+( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
 66 1PI OS,   67 1PI AS, ( OPERAND AND ADDRESS SIZE OVERWRITE)
 : NOP, XCHGX, AX| ;
 : CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
--->
-( POSTIT/FIXUP 8086 ASSEMBLER SYSDEPENDANT AvdH HCC HOLLAND)
 FORTH DEFINITIONS DECIMAL
 : 2DROP DROP DROP ;
 : ALIGN HERE 1 AND IF 0 C, THEN ;
-
-
-
-
-
-
-
+CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
+CODE TEST-MORE TO-REAL,   TO-PROT, NEXT C;
+CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
+  GDT_DS COPY-SEG   NEXT C;
 
 
 
@@ -1553,27 +1553,27 @@ FORTH DEFINITIONS
 ( Basic block manipulapions ) HEX ( ASSUMES BLOCK 90)
 ALIGN 0 VARIABLE RW-BUFFER B/BUF ALLOT
 0 VARIABLE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
-2 , ( 2 sectors/block) RW-BUFFER , 7C0 ,
+2 , ( 2 sectors/block) RW-BUFFER , 0 ,
 HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
  : R/W-BLOCK  ASSEMBLER
   POPX, AX|            ADD, W| R| AX1| AX|
   MOVFA, W1| BL# W,    PUSHX, SI|
-  MOVXI, BX| W,   MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,  TO-REAL, MOVI, W| AX| 7C0 MEM,
- MOVSW, T| DS| AX| XCHGX, BX|
- INT, 13 B, PUSHF, POPX, BX| TO-PROT,
+  MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
+  MOVXI, SI| PARAM-BLOCK SWITCH_DS 10 * -  W,
+  TO-REAL, SWITCH_DS COPY-SEG
+ XCHGX, BX| INT, 13 B, PUSHF, POPX, BX|
+ TO-PROT, GDT_DS COPY-SEG
   POPX, SI|   PUSHX, BX|  NEXT ;
 CODE READ-BLOCK 4200 R/W-BLOCK  C;
-CODE WRITE-BLOCK 4300 R/W-BLOCK  C;
-DECIMAL
+CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
 HEX ( copy a hd system, wa written to a floppy to the
 hard disk. Done by a Forth booted from another floppy.)
 40 CONSTANT HD-OFFSET
-: SAFE HD-OFFSET OFFSET @ = 17 ?ERROR ;
+: SAFE HD-OFFSET OFFSET @ = 17 ?ERROR EMPTY-BUFFERS
+0 0 0 0 13 BIOS  80 0 0 0 13 BIOS ;
 : COPY-FLOPPY SAFE
-  HERE B/BUF / 1+ 0 DO
-    RW-BUFFER I 1 R/W
-    I WRITE-BLOCK 1 AND .
+    HD-OFFSET 0 DO
+    RW-BUFFER I 1 R/W   I WRITE-BLOCK 1 AND .
   LOOP ;
 : RESTORE-BLOCKS SAFE 100 0 DO
    RW-BUFFER I OFFSET @ + 1 R/W
@@ -3070,116 +3070,6 @@ MEISJES JOPIE     NO-SEX .rel
 
 
 
- u DFW---HD        @                  )  @            FAT12
-                B    >     `      P   U    k    K    a  D \   !
-u       F L                 P  r    r  W -     O    "      XPP
-   XP       X$ '       00
-
-
-
-                                                              U
-  !               @                       (          P 0   t =
-t 9 t w  2   t 9 r    X      RP     B ' LI   o     EXECUT g ~ [
-  BRANC r    4   0BRANC     X  t FF   (LOOP         ^  F +F 1 x
-   FF   NOO                  (+LOOP     [   (DO     ZX  PR   `
-      F  S  DIGI     ZX,0r < v , < r 8 s )      + )  '  (FIND
-B     [Y      2 $?u CG  2   u s    S   (    Cr           u
-  ENCLOS 7   X[S     KCB: t R:'u   B   CB: t :'u        @    C
- . m   E    CMOV        Y_^         y  U     X[    h  U     [ZX9
- s    U       M  AN     X[!  ?  O   & X[   1  XO   5 X[1  "  SP
-- D       SP < Q   ,  g     RP I c       RP [ p   ,  o     ; h
-  v EE    LEAV z    F  F     >     [MM ^     R      F EE
-  0     X     t H    0     X     x H w       X[   j  D     XZ[Y
-    W  MINU     X   H  DMINU   ! [Y)   )    /  OVE   7 ZXP    DR
-O . F X    SWA = S ZX    DU J ` XP    2DU X n XZRP    + e | [X
-    TOGGL u   X[0          [      C     [  (     2     [   W
-      [X      C     [X      2     [X  X G  r  L     [Y         ]
-  L     [Y    X     I     .               \   BMM v    &     .
- 8   q N    CONSTAN 9 .   q Y   B        VARIABL K . V   BR    U
-SE h . V   B    (  >,        ~   1
-           B   `    C/   ` @  FIRS   `    LIMI   `    E   `    B
-/BU   `    B/SC   `    +ORIGI   . m        S        R *      TI
-3      WIDT <      WARNIN F      FENC R      D `      VOC-LIN l
-     BL u      I        OU        SC        OFFSE        CONTEX
-       CURREN     "  STAT     $  BAS     &  DP     (  FL     *
-CS     ,  R     .  HL     0  1   # X@ 6  2   / X    (  HER ( . q
-      ALLO 6 . q z     E . =     M    C U . =     M     e | ZX)
-     v . z           ZX  1 x )      y @    U   . l 3       D
-     z         . Q      RO     Z[XS w  SPAC   .   E    -DU   . ^
-     ^    TRAVERS   . Q 5   m   5         Q D    LATES   .
-    LF 0 . m   z    CF C .   z    NF S . m   z m        PF a .
-   m        !CS w . B        ?ERRO   . Q           D    ?COM   .
-       m        ?EXE   .     m        ?PAIR   . z m        ?CS
- . B     z m        ?LOADIN   .       m        COMPIL   .     ^
--     Y     . .           J . m          SMUDG X . 9 m        HE
- h . m          DECIMA } . m          (;CODE   .   9 } Y      ;C
-OD   .   8   N      <BUILD   .   V    DOES   .   9 }       V  B
-  7BBR V  COUN   . ^ ! Q      -TRAILIN   . ^     5 5     z     z
-             z        (."   .     ^ !            . U . m "
-   8 \ ` =   ! M     ` =        QUER p . B   m P y             .
-       *     z               z             D       D    FIL
-XY_        R  ERAS   .        BLANK   .        HOL   . m     z
-        PA . . = m T      WOR G .             A     B         Q
-  = m " &   z 5 z     =     = !        (NUMBER Y . ! ^
-   , Q       D               !         z            NUMBE   .
-    ^ !   m -   ^     m         ^     z     ^   m . z
-D            -FIN   .   ` =       @ ^       D = 9 @    (ABORT L
-.      ERRO v . \           =     \  ?   O               Q    ID
-   . M m   m _   ^ } I 5 z M Q   M   m       z l       m     E
-    CREAT   . T     D g   m       = ^   N     ! M ^ m     =   z
-m     9 Y       = - Y    [COMPILE   . T       D Y Y    LITERA X
-.         8 m Y    DLITERA v .         Q        ?STAC   . B /
-Q       B = m       m        INTERPRE   . T               Y Y
-  Y |       =       !           D          IMMEDIAT   . 9 m @
-   VOCABULAR * .   m   Y     Y Y =     Y       -        FORT B
- o        DEFINITION w .               . m ) `    QUI   .
-N n                 \  OK     ABOR   . O       c \  IBM-PC Fig-F
-orth 2.0.C          I    WAR   .      N               CC       &
-        ..    W  COL   .     k     v   m   m ,   m     m     m
-      S-> P   Z)   y H    +   .            D+   .            AB
-  . ^      DAB   . ^      MI   . l       Q D    MA   . l       Q
- D    M   . l 3     Q            M   . 5                 3   Q
-   Q       .   D    /MO G .       %     S . Z Q D    MO f . Z D
-   */MO t .       %    *   .   Q D    M/MO   .           Q
-    (LINE   .   m @         K   A   m @    .LIN   .   )      MES
-SAG   . \             m           \  MSG # '    PC   7 Z (     P
-C / F ZX     P > S Z     P L _ ZX     US X y    PRE e y    #BUF
-o `    +BU z . m     ^         D   ^ v   z    UPDAT   . v     m
-  $ v        EMPTY-BUFFER   .     5 z      BUFFE   . m     k   ^
-         k               -     m       ~       v     -    BLOC
- . m             v   ^     z ^     4         D     ^     ~   z ^
-     z ^         ^ v     D -    FLUS 9 .   !         D        LO
-A   .                     K                      --   .
-      5 z z   z    BIO     X & ZY[XVU  ]^PSQR  .  BDO   : ZY[X !
-PSQR     SMAL 1 . m  Om       m     D D D D D    EXPEC H . 5   5
-     ^ m           * D ^     ^     z         m       m     ( ^ m
-           D         ^         !   E     D    KE p . m         m
-     D D D D m        TYP   .       5   Q       E         D    E
-MI   .     z m     ^ m         m   x       x    (EMIT > . m
-      m     D D D D D    ?TERMINA o . m         m     m @
-D D D D      POU   .       m     D D D D D    DRIV   y    RECOR
-  y    SEC/BL   `    DISK-ERRO   y    LBAPA   y
- RBL % I XV  U  B     ]^     WBL @ e XV  U  C     ]^     R/ \ .
-  m   K . m       . m       .       G     c ^ !       ^     m
-  z       x . T       D      FORGE   .         z m       ^ h
- m     ^ g q   I            BAC   . = z Y    BEGI   .   =      E
-NDI , .       = 5 z Q      THE > . F    D Z . 8   =      LOO g .
-     8   "    +LOO x .     8   "    UNTI   .     8   "    EN   .
-      AGAI   .     8   "    REPEA   .             z F    I   . 8
-   =   Y      ELS   .     8   =   Y Q   F      WHIL   .   -    S
-PACE . .                        < > . M        # _ . D D     M 5
- z    SIG n .         m - 5       .         m   5       m     m
-0   5    #   .   5 5 $          D.   .   Q 5   d     s   5 z G
-    .   .            D   .             .         # .   '    U /
-.        VLIS ; . m                                 ^       } I
-  ^     $     D    BY H    ' LIS   .     ^     \  SCR # ' m
-      m                                INDE   . m   E   ! Q
-  m                            TRIA   . m   E m   j m   K m   5
-  Q                          .CP   .     m $     m (
-  MATC \     Y[Z^V : u SQVIt Jt C : t ^Y[Ju    YYY  ^)       TAS
-   .     TRIA   . m   9 m   j m   K m   5   Q       M
-       .CP   .     m $     m (              MATC   5   Y[Z^V : u
- SQVIt Jt C : t ^Y[Ju    YYY  ^)       TAS + .   1 .
 
 
 
@@ -3342,70 +3232,180 @@ PACE . .                        < > . M        # _ . D D     M 5
 
 
 
-  Y DFW--EXP        @                  )   }NO NAME    FAT12
-                             D     ! u  k    F
-    r  "       r ;   |  W    e  _   QS  1  6      1  6
-   [      YA  >  1    8  )    0  !    (
-       "      XPP     XP       X$ '       00
 
 
-                                                               U
-     @  `                 /  @  `                !  #@ %` '  )
-+  -  /  1  3@ 5` 7  9  ;  =  ?  A  C@ E` G  I  K  M  O  Q  S@ U
-` W  Y  [  ]  _  a  c@ e` g  i  k  m  o  q  s@ u` w  y  {  }
-     @  `                    @  `                    @  `
-             @  `                    @  `                    @
-`                    @  `                    @  `
-  !  A  a                 !  A  a                !! #A %a '  )
-+  -  /  1! 3A 5a 7  9  ;  =  ?  A! CA Ea G  I  K  M  O  Q! SA U
-  L     [Y    X     I     .               \   BMM v    &     .
- 8   q N    CONSTAN 9 .   q Y   B        VARIABL K . V   BR    U
-SE h . V   B    (  >,        ~   1
-           B   `    C/   ` @  FIRS   `    LIMI   `    E   `    B
-/BU   `    B/SC   `    +ORIGI   . m        S        R *      TI
-3      WIDT <      WARNIN F      FENC R      D `      VOC-LIN l
-     BL u      I        OU        SC        OFFSE        CONTEX
-       CURREN     "  STAT     $  BAS     &  DP     (  FL     *
-CS     ,  R     .  HL     0  1   # X@ 6  2   / X    (  HER ( . q
-      ALLO 6 . q z     E . =     M    C U . =     M     e | ZX)
-     v . z           ZX  1 x )      y @    U   . l 3       D
-     z         . Q      RO     Z[XS w  SPAC   .   9    -DU   . ^
-     ^    TRAVERS   . Q 5   m   5         Q D    LATES   .
-    LF 0 . m   z    CF C .   z    NF S . m   z m        PF a .
-   m        !CS w . B        ?ERRO   . Q           D    ?COM   .
-       m        ?EXE   .     m        ?PAIR   . z m        ?CS
- . B     z m        ?LOADIN   .       m        COMPIL   .     ^
--     Y     . .           J . m          SMUDG X . 9 m        HE
- h . m          DECIMA } . m          (;CODE   .   9 } Y      ;C
-OD   .   8   N      <BUILD   .   V    DOES   .   9 }       V  B
-  7BBR V  COUN   . ^ ! Q      -TRAILIN   . ^     5 5     z     z
-             z        (."   .     ^ !            . U . m "
-   8 \ ` =   ! M     ` =        QUER p . B   m P m             .
-       *     z               z             D       D    FIL
-XY_        R  ERAS   .        BLANK   .        HOL   . m     z
-        PA . . = m T      WOR G .             ;     B         Q
-  = m " &   z 5 z     =     = !        (NUMBER Y . ! ^
-   , Q       D               !         z            NUMBE   .
-    ^ !   m -   ^     m         ^     z     ^   m . z
-D            -FIN   .   ` =       @ ^       D = 9 @    (ABORT L
-.      ERRO v . \           =     \  ?   O               Q    ID
-   . M m   m _   ^ } I 5 z M Q   M   m       z l       m     9
-    CREAT   . T     D g   m       = ^   N     ! M ^ m     =   z
-m     9 Y       = - Y    [COMPILE   . T       D Y Y    LITERA X
-.         8 m Y    DLITERA v .         Q        ?STAC   . B /
-Q       B = m       m        INTERPRE   . T               Y Y
-  Y |       =       !           D          IMMEDIAT   . 9 m @
-   VOCABULAR * .   m   Y     Y Y =     Y       -        FORT B
- o        DEFINITION w .               . m ) `    QUI   .
-N n                 \  OK     ABOR   . O       i \  IBM-PC Fig-F
-orth 2.0.A          I    WAR   .      N               CC       &
-        ..    W  COL   .     k     v   m   m ,   m     m     m
-      S-> P   Z)   y H    +   .            D+   .            AB
-  . ^      DAB   . ^      MI   . l       Q D    MA   . l       Q
- D    M   . l 3     Q            M   . 5                 3   Q
-   Q       .   D    /MO G .       %     S . Z Q D    MO f . Z D
-   */MO t .       %    *   .   Q D    M/MO   .           Q
-    (LINE   .   m @         K   ;   m @    .LIN   .   )      MES
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
