@@ -1,4 +1,4 @@
-( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+( Copyright{2002}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 
 ( $Id$)
 
@@ -13,7 +13,9 @@ REQUIRE TRUE
 \ The following aspects are handled:
 \    1. Compiling ^ (begin only)  $  (end only) and special characters + ? * [ ] < >
 \    2. Grouping using ( ) , only for replacement.
-\    3. Above characters must be escaped if used as is.
+\    3. Above characters must be escaped if used as is by \ , making \ a special char.
+\    4. Some sets are escaped by \ (\w) , some non-printables are denote by an
+\       escape sequence.
 
 \ Implementation notes:
 \ * Usually regular expressions are compiled into a buffer consisting of
@@ -85,6 +87,9 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 
 REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Forth.
 
+\ The set of characters to be escaped. Present in CHAR-SET-SET but unfindable.
+0 CHAR-SET \\     \ | ^ | $ | + | ? | * | [ | ] | < | > | ( | ) |  DROP
+
 &w CHAR-SET \w   256 1 DO I IS-BLANK? 0= IF I | THEN LOOP DROP
 
 \ Example of another set definition
@@ -109,7 +114,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 
 
 \ -----------------------------------------------------------------------
-\                  substrings
+\                  matched substrings
 \ -----------------------------------------------------------------------
 \ This table contains the ends and starts of matching substrings between ( )
 \ 0 is what matches the whole expression, and is available without ( )
@@ -138,6 +143,7 @@ CELLS SUBSTRING-TABLE + ! ;
 \ For INDEX create a "word" that returns the matched string with that index.
 : CREATE\ 2 * CELLS SUBTRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
 
+\ &9 1+ &0 DO   &\ PAD C!   I PAD 1+ C!   PAD 2 POSTFIX CREATE\ LOOP
 0 CREATE\ \0    1 CREATE\ \1    2 CREATE\ \2    3 CREATE\ \3   4 CREATE\ \4
 5 CREATE\ \5    6 CREATE\ \6    7 CREATE\ \7    8 CREATE\ \8   9 CREATE\ \9
 
@@ -214,7 +220,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ advance both past the match, else leave them as is.
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
 \ In a regular expression buffer this xt must be followed by a char-set.
-: ADVANCE-CHAR  OVER C@ OVER IN-SET? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
+: ADVANCE-CHAR  OVER C@ OVER BIT? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the char sequence at charpointer matches the string variable at the
@@ -265,7 +271,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : HANDLE() @+ >R   OVER R> REMEMBER() TRUE ;
 
 \ If the following match xt (at ``EXPRESSIONPOINTER'' ) works out,
-\ with the modifier ( * + ? ) ,
+\ with one of the modifiers: * + ?
 \ advance both past the remainder of the expression, else leave them as is.
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
 \ In a regular expression buffer each of those xt must be followed by the
@@ -273,3 +279,59 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : ADVANCE? OVER >R @+ EXECUTE DROP R> BACKTRACK ;
 : ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
 : ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
+
+
+\ ---------------------------------------------------------------------------
+\                    building the regexp
+\ ---------------------------------------------------------------------------
+
+\ Regular expressions are parsed using a simple recursive descent
+\ parser.
+
+\ Build up a string to be matched simply.
+CREATE NORMAL-CHARS 1000 ALLOT
+
+\ To where is the compiled expression filled.
+VARIABLE RE-FILLED
+
+\ Everything to be initialised for a build.
+: INIT-BUILD   "" NORMAL-CHARS $!   RE-EXPR RE-FILLED ! ;
+
+\ Add the CHAR to the simple match.
+: ADD-TO-NORMAL NORMAL-CHARS $+! ;
+
+\ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
+\ expression.
+: HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF RE-FILLED
+        'MATCH-NORMAL OVER ! CELL+
+        NORMAL-CHARS $@ OVER $!   NORMAL-CHARS @ + ALIGNED
+        RE-FILLED !
+    THEN
+;
+
+\ For CHAR : "it IS special".
+: SPECIAL?   \\ BIT? ;
+
+\ For EP and CHAR : EP plus "it IS one of ^ $ with its special meaning".
+\ ``EP'' points after ``CHAR'' in the re, and is of course needed to
+\ determine this.
+: ^$? DUP &^ = IF DROP RE-PATTERN 1+ OVER = ELSE
+    &$ = IF OVER C@ 0= 0= ELSE FALSE THEN THEN ;
+
+\ Replace CHAR with: the escaped CHAR it represents. However check.
+: GET-ESCAPE-CHECKED   GET-ESCAPE DUP 0= ABORT" Illegal escape" ;
+
+\ If the character at EP is normal, return incremented EP plus IT,
+\ else EP plus FALSE. EP may be incremented past 2 char escapes!
+: NORMAL-CHAR? C@+   DUP SPECIAL? 0= IF EXIT THEN
+                     DUP ^$? IF EXIT THEN
+                     &\ = IF C@+ GET-ESCAPE-CHECKED EXIT THEN
+                     1- FALSE ;
+
+\ Parse one element of regular EXPRESSION .
+\ Leave EXPRESSION incremented past parsed part.
+: BUILD-RE-ONE    NORMAL-CHAR? IF ADD-TO-NORMAL ELSE PARSE-CHAR-SET THEN ;
+
+\ Parse the zero-ended regular EXPRESSION , put the result in the buffer
+\ ``RE-PATTERN''.
+; BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE C@ 0= UNTIL DROP ;
