@@ -1,6 +1,12 @@
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( $Id$)
 
+\   For INDEX1 and INDEX2 and TABLE, return corresponding ADDRESS1
+\   and ADDRESS2 .
+: PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
+
+\ For ADDRESS1 and ADDRESS2 return CONTENT1 and CONTENT2.
+: PAIR@   >R @ R> @ ;
 
 \ Regression test
 CREATE INT-TABLE
@@ -8,17 +14,17 @@ CREATE INT-TABLE
 
 : W INT-TABLE CR 10 CELLS BOUNDS  DO I @ . 1 CELLS +LOOP CR ;
 
-\ Expect nice order.
 
 W
-\ How to compare two things by the ADDRESSES
-: MY-<   >R @ R> @ < ;
+\ How to compare two things of ``INT-TABLE'' by the 2 INDICES
+: MY-<   INT-TABLE PAIR[]   PAIR@   < ;
 
-\ Swap the contents of cells at ADDRESS1 and ADDRESS2.
-: <-->    0 CELL+ EXCHANGE ;
+\ Swap the contents of two things of ``INT-TABLE'' by the 2 INDICES
+: <-->    INT-TABLE PAIR[]   0 CELL+   EXCHANGE ;
 
-INT-TABLE   DUP 10 1- CELLS +   'MY-<   '<-->   SORT
+0 9 'MY-<   '<-->   SORT
 
+\ Expect nice order.
 W
 
 : A0 S" nine" ;
@@ -37,14 +43,15 @@ CREATE STRING-TABLE
 ' A5 ,   ' A6 ,   ' A7 ,   ' A8 ,   ' A9 ,
 
 
-: W2 STRING-TABLE CR 10 CELLS BOUNDS  DO I @ EXECUTE TYPE 1 CELLS +LOOP CR ;
+: W2 STRING-TABLE CR 10 CELLS BOUNDS  DO I @ EXECUTE TYPE SPACE 1 CELLS +LOOP CR ;
 
 W2
-\  : $<  EXECUTE ROT EXECUTE 2SWAP 2DUP TYPE 2OVER TYPE COMPARE .S 0 < ;
-: $<  @ EXECUTE ROT @ EXECUTE 2SWAP COMPARE 0 < ;
+: $<  STRING-TABLE PAIR[]   @ EXECUTE ROT @ EXECUTE   2SWAP COMPARE 0 < ;
+
+\ Swap the contents of two things of ``STRING-TABLE'' by the 2 INDICES
+: $<-->    STRING-TABLE PAIR[]   0 CELL+   EXCHANGE ;
 
 
-
-STRING-TABLE   DUP 10 1- CELLS +   '$<   '<-->   SORT
+0 9 '$<   '$<-->   SORT
 
 W2

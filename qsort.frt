@@ -30,7 +30,7 @@ DEFER *<
 \   ' SPRECEDES IS *<
 
 
-DEFER *<-->    
+DEFER *<-->
 
 \ For ADDRESS return a next lower ADDRESS that is aligned.
 \ This may work only on two complement machines.
@@ -39,19 +39,19 @@ DEFER *<-->
 : CELL-  ( addr -- addr' )  1 CELLS - ;
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
+    2DUP + 2/   >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP R@ *< WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER *< WHILE  CELL-  REPEAT
+         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
          2DUP > NOT IF
             \ Do we have a new position for our pivot?
             OVER R@ = IF RDROP DUP >R ELSE
             DUP  R@ = IF RDROP OVER >R THEN THEN
             2DUP *<-->
-            >R CELL+ R> CELL-
+            >R 1+ R> 1-
         THEN
     2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
-    R> DROP                            ( R: )
+    RDROP                            ( R: )
     SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
     ;
 

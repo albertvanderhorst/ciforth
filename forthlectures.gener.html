@@ -629,16 +629,18 @@ generality at this point that we can sort all the other tables
 described in the introduction. We have attained genericity.
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  >R  ( R: median)
+    2DUP + 2/   >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP R@  PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER PRECEDES WHILE  CELL-  REPEAT
-    2DUP < WHILE
-        \ Do we have a new position for out pivot?
-        OVER R@ = IF RDROP DUP >R THEN
-        DUP  R@ = IF RDROP OVER >R THEN
-        2DUP EXCHANGE
-    REPEAT ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
     RDROP                            ( R: )
     SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
     ;
@@ -647,6 +649,33 @@ described in the introduction. We have attained genericity.
 There is a lot to be changed in the regression test.
 
 To my surprise and relief the regression test succeeds.
+
+Isn't it beautiful? Let us have a look at it without those ugly 
+comments.
+
+: PARTITION         
+    2DUP + 2/   >R  
+    2DUP BEGIN      
+         SWAP BEGIN  DUP R@  *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > NOT IF
+            OVER R@ = IF RDROP DUP >R  ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL    
+    RDROP           
+    SWAP ROT        
+    ;
+
+: QSORT             
+    PARTITION       
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
+
+This looks clean and crisp compared to Knuth's algorithm Q 
+(TACP part 3). But this is actual code...
 
 OUR TENTH CHANGE: NOTHING TO DO EXCEPT ....
 
@@ -664,18 +693,9 @@ We read back looking for optimisations that can be put back in.
     2OVER 2OVER  - +         ( . . . . lo_1 hi_1+lo_2-hi_2)
         < IF  2SWAP  THEN    ( lo_1 hi_1 lo_2 hi_2)
 
-2.
-        2DUP EXCHANGE
-becomes
-         2DUP EXCHANGE  >R 1+ R> 1-
-
 This probably is worthwhile. Is it? Answer test.
 
-3. After  the REPEAT
-we may try to swap the pivot in place, and have it no longer part of
-partition.
-
-This may or may not be worthwhile and is left as an exercise for the reader.
+This is left as an exercise for the reader.       
 
 BOTTOM LINE
 
