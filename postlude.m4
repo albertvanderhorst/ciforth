@@ -43,6 +43,8 @@ dnl _BITS32_({define({M4_MAXWORDLIST}, 16 )}) NOT YET!
 
 dnl Consequences with exceptions
 dnl switch back and forth between protected and real mode.
+define({_NO_DPMI_}, _yes)
+_HOSTED_DPMI_({define({_NO_DPMI_}, _no)})
 _PC_({_PROTECTED_({define({_SWITCH_}, _yes)})})
 _HOSTED_DPMI_({define({_SWITCH_}, _no)})
 _PC_({define({_NORMAL_BIOS_}, _yes)})
