@@ -6,6 +6,7 @@
 
 '$@ ALIAS @+
 'COUNT ALIAS C@+
+: CELL/ 2 RSHIFT ;   \ From #addres to #cell.
 
 REQUIRE TRUE
 INCLUDE set.frt
@@ -106,11 +107,18 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 
 \ This contains alternatingly an escaped character, and its ASCII meaning.
 100 SET ESCAPE-TABLE     ESCAPE-TABLE !SET
-ESCAPE-TABLE &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |   DROP
+ESCAPE-TABLE &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |
+\ The char's from \\ represent themselves when escaped.
+&\ &\ | &^ &^ | &$ &$ | &+ &+ | &? &? | &* &* |
+&[ &[ | &] &] | &< &< | &> &> | &( &( | &) &) |
+DROP
 
 \ For CHARACTER return the ``ASCII'' VALUE it represents, when escaped.
-: GET-ESCAPE DUP &a &z 1+ WITHIN 0= IF DROP 0 EXIT THEN
-    ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ THEN ;
+\ else zero. Do not find at odd positions.
+ : GET-ESCAPE
+    ESCAPE-TABLE WHERE-IN-SET DUP IF
+         DUP ESCAPE-TABLE - CELL/ 1 AND IF CELL+ @ ELSE DROP 0 THEN
+    THEN ;
 '| HIDDEN
 
 \ -----------------------------------------------------------------------
@@ -420,7 +428,7 @@ CREATE (RE-EXPR) 1000 ALLOT
                      R@ SPECIAL? 0= IF R> EXIT THEN
                      R@ ^$? IF R> EXIT THEN
                      \ Escapes representing a character are okay too.
-                     R@ &\ = IF C@ GET-ESCAPE IF RDROP C@+ GET-ESCAPE EXIT THEN THEN
+                     R@ &\ = IF DUP C@ GET-ESCAPE IF RDROP C@+ GET-ESCAPE EXIT THEN THEN
                      RDROP 1- FALSE ;
 
 \ - - - - - - - - - - - - - - - - - - - - - - - -
