@@ -8,6 +8,14 @@
 .SUFFIXES:
 .SUFFIXES:.com.asm.m4.v
 
+INGREDIENTS = \
+default.m4       \
+header.m4        \
+protect.m4       \
+width16.m4       \
+width32.m4       \
+# That's all folks!
+
 RELEASECONTENT = \
 Makefile         \
 release.txt      \
@@ -48,8 +56,7 @@ fig86.%     : %.m4         fig86.gnr ; m4 $+ >$@
 fig86.$(s).com :
 
 # Put include type of dependancies here
-msdos.m4 : default.m4 header.m4 ; co $@
-alone.m4 : default.m4 header.m4 protect.m4 ; co $@ 
+alone.m4 msdos.m4 : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
 all: $(TARGETS:%=fig86.%.com) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
