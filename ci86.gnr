@@ -376,6 +376,7 @@ ELSE3:
 ;____1_____ _ABSOLUTELOAD_1_({
 ;{ Apparently we may have to move the code, e.g. if started from MSDOS.}
 ;{ Prepare return to MSDOS using the original code segment.}
+        MOV     AX,CS
         MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
         MOV     AX,RETDOS-M4_ORG+100H
         MOV     [RETDOSV-M4_ORG+100H ],AX
@@ -437,42 +438,6 @@ ENDBOOT:
 ;{ Required start of .COM program.}
     _HOSTED_MSDOS_1_(_REAL_1_({ORG     100H
 ORIG:                         ; {Accommodate also .exe files} }))
-
-_COMMENT
-;____1_____ _BOOTED_1_({
-
-;{ Remember: our model assumes that all segments the same (small model, or }
-;{ .com program) ). Now make sure the CS agrees with the absolute addresses}
-;{ used in Forth. Make other segments the same.                            }
-;{In fact the following is needed and works only if booted code is started }
-;{ by MSDOS [ Or for booted code, the load address is not the boot address,}
-;{ but that is bizar].}
-;{ Protected mode requires this very temporarily, until GDTLOAD is filled.}
-        CALL  HERE1
-HERE1:  POP   AX         ;{ Reality.}
-        MOV BX, HERE1 ;{ Dream.}
-        SUB AX,BX      ;{ Discrepancy between dream and reality}
-        MOV CX,10h     ;{ How much units would that be for the segment?}
-        CWD
-        IDIV CX
-        CMP DX,0
-MYSELF: JNZ MYSELF    ; { If there is a remainder, we cannot correct, so hang.}
-        MOV CX,CS
-        ADD CX,AX    ;
-        PUSH CX     ; {Corrected code segment}
-        MOV BX, HERE2
-        PUSH BX     ; {Correct program counter}
-        RETF        ; {Returning to here now}
-HERE2:
-        CLI                     ;{ Disallow interrups until stack ready}
-        MOV     AX,CS           ;{ Will do for now (real mode)}
-        MOV     DS,AX
-        MOV     SS,AX
-        MOV     ES,AX
-        MOV     STACKPOINTER,0H
-        STI                     ;{ Allow interrupts}
-});_END___1__({ _BOOTED_1_})
-_ENDCOMMENT
 
 ; ########################################################################################
 ;                       MOVE CODE TO ITS PLACE (still real mode)
@@ -569,7 +534,7 @@ PROTECT:
         LGDT    [GDTLOAD]
 });_END___1__({ _SWITCH_1_})
 
-;____1_____ _PROTECTED_1_({
+;____1_____ _SWITCH_1_({
 ;{ Remember: we are now in the real mode for a protected model.}
 ;{ Make sure we are in the switch segment, such that we can switch.}
         MOV   BX,CS      ;{ Reality.}
@@ -586,7 +551,7 @@ HERE3:  POP   BX         ;{ Reality.}
         PUSH BX     ; {Corrected program counter}
         RETF        ; {Returning to HERE4 now}
 HERE4:
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _SWITCH_1_})
 
 
 ;{************************}
@@ -3821,11 +3786,11 @@ VLIS2:  DC      LDUP
         DC      DROP
         DC      SEMIS
 ;
-;____1_____ _HOSTED_MSDOS_1_({
+;____1_____ _NORMAL_BYE_1_({
 HEADER({BYE},{BYE},{DOCOL})
         DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
 ;{ EXIT TO PC-DOS}
-});_END___1__({ _HOSTED_MSDOS_1_})
+});_END___1__({ _NORMAL_BYE_1_})
 ;____1_____ _ABSOLUTELOAD_1_({
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
