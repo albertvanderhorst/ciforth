@@ -195,7 +195,7 @@ RAWIO           EQU     (ECHO | ICANON)
 
         PAGE
 ; ########################################################################################
-;                       BOOTCODE    (optional, always real mode)
+;                      BOOTCODE    (optional, always real mode)
 ; ########################################################################################
 
 ; All bootcode must be relocatable and its memory references absolute.
@@ -203,7 +203,7 @@ RAWIO           EQU     (ECHO | ICANON)
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
 ;____1_____ _BOOTFD__1_({
-          ORG     0H
+          ORG     M4_ORG
 ORG0:   JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -257,11 +257,11 @@ ELSE3:
         ;{ The first file copied to a freshly formatted floppy will}
         ;{ be at SECSTRT (See also genboot.bat)}
         MOV     CX,SECSTRT      ; {Counting from zero}
-        MOV     AX,REALSEGMENT  
+        MOV     AX,REALSEGMENT
         MOV     ES,AX
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
-        INC     CX 
+        INC     CX
         ADD     BX,BPS
         JB      RETRY
         CMP     BX,INITDP-$$
@@ -296,7 +296,7 @@ READSECTOR:
 });_END___1__({ _BOOTFD__1_})
 
 ;____1_____ _BOOTHD__1_({
-          ORG     0H
+        ORG     M4_ORG
 ORG0:   JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -407,7 +407,7 @@ ENDBOOT:
 });_END___1__({ _BOOTED_1_})
 
 ; ########################################################################################
-;                       READJUST CODE SEGMENT REGISTER (still real mode)
+;                       ADJUST CODE SEGMENT REGISTER (still real mode)
 ; ########################################################################################
 ;____1_____ _HOSTED_MSDOS_1_({
         ORG     100H    ;{ Required start of .COM program.}
@@ -415,20 +415,23 @@ ENDBOOT:
 
 ;____1_____ _BOOTED_1_({
 
-;{ Remember: our model assumes that all segments the same (small model, or } 
-;{ .com program) ). Now make sure the CS agrees with the offsets assumed.  }
-;{ Make other segments the same                                            }
+;{ Remember: our model assumes that all segments the same (small model, or }
+;{ .com program) ). Now make sure the CS agrees with the absolute addresses}
+;{ used in Forth. Make other segments the same.                            }
+;{In fact the following is needed and works only if booted real code is started }
+;{ by MSDOS. Otherwise the code is correct. Protected mode doesn't care    }
+;{ about the real mode codesegment anyway. }
         CALL  HERE1
 HERE1:  POP   AX         ;{ Reality.}
         MOV BX, HERE1 ;{ Dream.}
         SUB AX,BX      ;{ Discrepancy between dream and reality}
         MOV CX,10h     ;{ How much units would that be for the segment?}
         XOR DX,DX
-        DIV CX         
+        DIV CX
         CMP DX,0
 MYSELF: JNZ MYSELF    ; { If there is a remainder, we cannot correct, so hang.}
         MOV CX,CS
-        ADD CX,AX    ; 
+        ADD CX,AX    ;
         PUSH CX     ; {Corrected code segment}
         MOV BX, HERE2
         PUSH BX     ; {Correct program counter}

@@ -134,5 +134,7 @@ dnl In practice you limit your memory to under $7f00.0000.0000.0000
 dnl (even less for <64 bit systems) 
 dnl STILL ON WISH LIST
 define( {_SAFECALC_1_}, _no({$0}) )dnl
-
+dnl OTHER MISCELLANEOUS 
+dnl Work around a deficiency in nasm : an ORG requires a numeric argument
+define({M4_BIOSBOOT},{07C00H})
 
