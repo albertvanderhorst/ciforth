@@ -21,5 +21,4 @@ _BITS32_1_({define({_PUSH},{_PUSH32})})
 _BITS32_1_({define({_2PUSH},{_2PUSH32})})
 dnl LEAVE THIS! THE BOOT CODE IS ALWAYS 16 BITS.
 include(width16.m4)
-include(constant.m4)
 divert{}dnl
