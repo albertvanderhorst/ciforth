@@ -34,7 +34,7 @@
 (               10 Register op        20 Memory op                    )
 (               40 D0                 80 [BP]' {16} [BP] {32}         )
 (  sib:        100 normal             200 [AX +8*| DI]               )
-
+(              400 src B / dst W      800 consistent size            )
 ( Only valid for 16 bits real mode, in combination with an address      )
 ( overwite. Use W, L, and end the line in TALLY! to defeat checks.      )
 0120 0700 0s T!
@@ -45,7 +45,7 @@
 0001A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
-0111 0700 0s T!
+0911 0700 0s T!
  0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 0112 0700 0s T!
  0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
@@ -92,7 +92,6 @@
 02 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
 02 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
 0022 FF0000 T!   001 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
-01 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
 02 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
 ( --------- one fixup operands ----------)
 040000 C701 00C6 2PI MOVI,
@@ -154,6 +153,9 @@
 00 000E 0s T!   02 0s 0 8 xFAMILY|R O'| C'| Z'| CZ'| S'| P'| L'| LE'| ( 3)
 01 C72F00 00900F 3PI SET,  ( 3)
 
+0512 0700 0s T! ( 3)
+ 0100 0s 0 8 xFAMILY|R <AL| <CL| <DL| <BL| <AH| <CH| <DH| <BH| ( 3) 
+502 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3) 
 ( --------- no fixups ---------------)
 
 040001 00 CD 1PI INT,
