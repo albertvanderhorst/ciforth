@@ -975,6 +975,20 @@ HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
         DC      NUMB, SEMIS
 ;
+worddoc({DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
+{Leave a forthkey({"}) delimited string.},
+{},
+{{"AAP" TYPE},{AAP},
+{: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
+HEADER({%},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
+        DC      ONE, LIN, PSTOR
+        DC      LIT,'%' 
+        DC      PPARS
+        DC      LIT, SKIP, COMMA
+        DC      SCOMMA, SFET
+        DC      DLITE
+        DC      SEMIS
+;
 dnl Remember the top of the denotation chain.
 define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
 dnl Reset the link chain at this point to keep denotations
@@ -1036,6 +1050,15 @@ _VERBOSE_({The DEA serves as an execution token.})
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
+;
+worddoc({CONTROL},{SKIP},{skip},{},{C2,L0},
+{Skip over an area in memory, where the length is given in the next cell.
+_VERBOSE_({Internal, used for nested compilation})},
+{}, {}, enddoc)
+CODE_HEADER({SKIP},{SKIP})
+        ADD     SI,[SI]
+        LEA     SI,[SI+CELLS(1)]
+        _NEXT    ;{ JUMP TO OFFSET}
 ;
 worddoc({CONTROL},{BRANCH},{branch},{},{C2,L0},
 {The run-time proceedure to unconditionally branch. An in-line offset
@@ -1365,7 +1388,8 @@ PPARS2: DC SWAP, DROP
         DC FROMR, DROP
         DC      LIN, FETCH
         DC      SWAP
-        DC      LDUP, ONEP, LIN, STORE
+        DC      LDUP, LIN, STORE
+        DC      INBRS, DROP, DROP
         DC      OVER, LSUB
         DC SEMIS
 ;
@@ -2681,17 +2705,40 @@ device.
 If executed outside a definition, forthcode({."}) will immediately print the text
 until the final ". The maximum number of characters may be an
 installation dependent value.},{{OUT},{(.")}}, {}, enddoc)
-HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
+HEADER({."},{DOTP},{DOCOL}, , B_IMMED)
         DC      LIT,22H
         DC      STATE
         DC      FETCH
-        _0BRANCH(DOTQ1) ;{ IF}
+        _0BRANCH(DOTP1) ;{ IF}
         DC      COMP
         DC      PDOTQ
         DC      PPARS
         DC      SCOMMA, DROP
+        _BRANCH(DOTP2)  ;{ ELSE}
+DOTP1:  DC      PPARS
+        DC      LTYPE   ;{ ENDIF}
+DOTP2:  DC      SEMIS
+;
+;
+worddocsafe({OUTPUT},{.%},{dot_quote},{},{P,L0},
+{Used in the form:
+  forthsamp({.% cccc%})
+Compiles an in-line string forthsamp({cccc}) (delimited by the trailing %) with
+an execution proceedure to transmit the text to the selected output
+device.
+If executed outside a definition, forthcode({.%}) will immediately print the text
+until the final %. The maximum number of characters may be an
+installation dependent value.},{{OUT},{(.%)}}, {}, enddoc)
+HEADER({.%},{DOTQ},{DOCOL}, , B_IMMED)
+        DC      STATE
+        DC      FETCH
+        _0BRANCH(DOTQ1) ;{ IF}
+        DC      LIT, -1, LIN, PSTOR
+        DC      DENQ
+        DC      COMP, LTYPE   
         _BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1:  DC      PPARS
+DOTQ1:  DC      LIT,22H
+        DC      PPARS
         DC      LTYPE   ;{ ENDIF}
 DOTQ2:  DC      SEMIS
 ;
