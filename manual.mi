@@ -753,7 +753,7 @@ forthitem
 forthsamp({-c name})
 
 Compile the file forthfile({name}) to an executable binary. The name of the binary
-is forthfile({name}) without the leading forthsamp({.frt}) or else forthfile({a.out}) .
+is forthfile({name}) without the trailing forthsamp({.frt}) or else forthfile({a.out}) .
 Upon invokation of the binary the word defined latest is executed , then Forth goes
  forthcode({BYE}) .
 _VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
@@ -777,7 +777,7 @@ must be invoked with two slashes instead of one, and having more letters is allo
 but ignored.
 _VERBOSE_({{So }forthsamp({--compile}){ instead of }forthsamp({-c})}).
 forthsamp({--library}) behaves slighly different than
-forthsamp({-l}). The library is switched, taken effect for the
+forthsamp({-l}). The library is switched, taking effect for the
 remainder of forthsamp({forthcode}), but no shifting is done of
 the arguments.
 
