@@ -168,7 +168,7 @@ ci86.%.msm : %.cfg masm.m4 ci86.gnr ; \
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.msm=%.rawdoc)
-	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.asm=%.rawtest)
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.msm=%.rawtest)
 	rm $(TEMPFILE)
 
 ci86.%pres  : %.cfg gas.m4  ci86.gnr ; m4 $+ >$@
