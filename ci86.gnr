@@ -2532,12 +2532,12 @@ HEADER({."},{DOTQ},{DOCOL},1)
         _0BRANCH(DOTQ1) ;{ IF}
         DC      COMP
         DC      PDOTQ
-        DC      LWORD
+        DC      AWORD
         DC      CFET
         DC      ONEP
         DC      ALLOT
         _BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1:  DC      LWORD
+DOTQ1:  DC      AWORD
         DC      COUNT
         DC      LTYPE   ;{ ENDIF}
 DOTQ2:  DC      SEMIS
@@ -2664,7 +2664,7 @@ otherwise from the disc block stored in forthcode({BLK}) .},
 {{BLK} ,{IN}},
 {{: GS2 BL WORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
 {HEX : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ},{2 Q}})
-HEADER({AWORD},{AWORD},{DOCOL})
+HEADER({WORD},{AWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(AWORD1)
         DC      DROP
@@ -2691,28 +2691,23 @@ AWORD2:
 ;        DC      DOTS
         DC      SEMIS
 ;
-worddoc({PARSING},{WORD},{word},{c ---addr},{CI L0},
-{Parse the input stream using forthsamp({c}) for a delimiter.
-Skip leading delimiters then advance the input pointer to past
+worddoc({PARSING},{MWORD},{m_word},{ ---sc},{CI L0},
+{Parse the forthdefi({current input stream})
+for a word, i.e. observing forthcode({?BLANK}) .
+Skip leading delimiters then advance the input pointer to 
 the next delimiter or past the end of the input stream.
-Leave at forthsamp({addr}) as a counted string a copy of the string,
-that was surrounded by forthsamp({c}) in the input stream. 
-In ciforth the character string is positioned 
-at the dictionary buffer forthcode({HERE}) . 
-forthcode({WORD})
-leaves the character count in the first byte, the characters, and
-ends with two or more blanks. 
-If forthcode({BLK}) is zero text is taken from the terminal input buffer,
-otherwise from the disc block stored in forthcode({BLK}) .},
-{{BLK} ,{IN}},
-{{: GS2 BL WORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
-{HEX : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ},{2 Q}})
-HEADER({WORD},{LWORD},{DOCOL})
-;        DC      SOURC, FETCH
-;        DC      SOURC, CELLP, FETCH
-;        DC      SOURC, CELLP, CELLP, FETCH
-;        DC      DOTS, DROP, DROP, DROP
-        DC      AWORD
+Leave the word found as a string constant.
+_VERBOSE_({As it goes with string constants, you may not
+alter its content, nor assume anything is appended.})},
+{{BLK},{WORD},{IN}},
+{{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
+{HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}})
+HEADER({MWORD},{MWORD},{DOCOL})
+        DC      SOURC, CELLP, TFET
+        DC      PWORD
+        DC      LDUP, LIN, STORE
+;        DC      DOTS
+        DC      OVER, LSUB
         DC      SEMIS
 ;
 worddoc({PARSING},{&:},{char_follows}, {--- c},{CI},
@@ -2724,7 +2719,7 @@ Skip remaining non-blank characters.},
 {{: GS1 &: HELLO ; GS1 HEX .] },{48 },
 {: GS1 &: X ; GS1 HEX .},{58 }})
 HEADER({&:},{CHF},{DOCOL}, 1)
-        DC       LBL, LWORD, ONEP, CFET, LITER
+        DC      MWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{^:},{control_follows}, {--- c},{CI},
@@ -2736,7 +2731,7 @@ Skip remaining non-blank characters.},
 {{: GS1 ^: HELLO ; GS1 HEX .] },{8 },
 {: GS1 ^: X ; GS1 HEX .},{18 }})
 HEADER({^:},{CTF},{DOCOL}, 1)
-        DC       LBL, LWORD, ONEP, CFET, LIT, 40H, LSUB, LITER
+        DC       MWORD, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
@@ -2839,7 +2834,7 @@ NUMB2:  DC      DROP
 NUMB3:  DC      SEMIS
 ;
 HEADER({--FIND},{DDFIND},{DOCOL})
-        DC      LBL, LWORD, COUNT, PFIND
+        DC      MWORD, PFIND
         DC SEMIS
 ;
 worddoc({DICTIONARY},{(FIND)},{paren_find},{sc --- dea)},{},
@@ -2932,9 +2927,7 @@ by such words as forthcode({CODE}) and forthcode({CONSTANT}) to create a diction
 a Forth definition. The code field contains the address of the words
 parameter field. },{})
 HEADER({CREATE},{CREAT},{DOCOL})
-        DC      LBL
-        DC      LWORD
-        DC      COUNT
+        DC      LBL, AWORD, COUNT
         DC      PFIND
         DC      HERE
         DC      ONEP
@@ -2977,9 +2970,7 @@ that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
 compile time.},{COMPILE})
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
-        DC      LBL
-        DC      LWORD
-        DC      COUNT
+        DC      MWORD
         DC      PFIND
         DC      LDUP
         DC      ZEQU
@@ -3058,13 +3049,9 @@ will be given.
 },{{WORD},{NUMBER}})
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  
-        DC      LBL
-        DC      LWORD
-        DC      LDUP, CFET      ;{ Zero length, regular.}
+        DC      LBL, AWORD, COUNT
+        DC      LDUP      ;{ Zero length, regular.}
         _0BRANCH(INTE8) ;{WHILE}
-        DC      LDUP, ONEP, CFET ;{ Zero first byte, bd (tm).FIXME}
-        _0BRANCH(INTE8) ;{WHILE}
-        DC      COUNT
         DC      PFIND   ;{BEGIN}
         DC      DDUP
         _0BRANCH(INTE2) ;{IF}
@@ -3206,7 +3193,7 @@ parenthesis on the same line. May occur during execution or in a
 colon-definition. A blank after the leading parenthesis is required.},{})
 HEADER({(},{PAREN},{DOCOL},1)
         DC      LIT,')'
-        DC      LWORD
+        DC      AWORD
         DC      DROP
         DC      SEMIS
 ;
@@ -5036,9 +5023,7 @@ the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
 {{CFA},{>LFA},{>NFA},{>PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
-        DC      LBL
-        DC      LWORD
-        DC      COUNT
+        DC      MWORD
         DC      PFIND
         DC      LDUP
         DC      ZEQU
