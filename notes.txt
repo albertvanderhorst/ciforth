@@ -50,4 +50,13 @@ The previous version is called FIGFORTH for MSDOS.
 With conditional compilation one can get FIGFORTH for PC,
 which is stand alone.
 
+The label UNCHANGEDBUTMOVED is hung of all sources that
+are reorganised to have all dependant stuff together.
+That is conditionally put in for _USEDOS_1_
+We can now plug in for the conditional part the 
+_USEBIOS_1_ stuff.
 
+The label MSDOSBIOS marks a clean version that supports the 
+choise between MSDOS and BIOS. These cleanups resulted in the
+removal of the printer stuff, but in BIOS there is no
+CR send with each LF.
