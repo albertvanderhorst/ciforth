@@ -394,7 +394,6 @@ ELSE NORMAL-CHARS $C+ THEN ;
     THEN THEN
 ;
 
-
 \ Build up the set between [ and ] into ``SET-MATCHED''.
 \ EP points after the intial [ , leave IT pointing after the closing ].
 : (PARSE[])
@@ -409,14 +408,14 @@ ELSE NORMAL-CHARS $C+ THEN ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
-\ A coy of the regular expression string, zero ended.
-CREATE (RE-EXPR) MAX-RE ALLOT
+\ A copy of the start and end of the regular expression string.
+VARIABLE RE-EXPR-START
+VARIABLE RE-EXPR-END
 
-\ Remember the start if the EXPRESSION string. Leave IT.
-: REMEMBER-START-RE OVER (RE-EXPR) ! ;
+\ Remember the limits of the EXPRESSION string. Leave IT.
+: REMEMBER-START-RE OVER RE-EXPR-START ! 2DUP + RE-EXPR-END ! ;
 
-\ Everything to be initialised for a build. Take EXPRESSION string, leave zero-ended
-\ EXPRESSION.
+\ Everything to be initialised for a build. Take EXPRESSION string, leave IT.
 : INIT-BUILD   REMEMBER-START-RE !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   'FORTRACK RE, ;
 
 \ Everything to be harvested after a build.
@@ -427,8 +426,8 @@ CREATE (RE-EXPR) MAX-RE ALLOT
 \ For EP and CHAR : EP plus "it IS one of ^ $ without its special meaning".
 \ ``EP'' points after ``CHAR'' in the re, and is of course needed to
 \ determine this.
-: ^$? DUP &^ = IF DROP (RE-EXPR) @ 1+ OVER <> ELSE
-    &$ = IF DUP C@ 0= 0= ELSE FALSE THEN THEN ;
+: ^$? DUP &^ = IF DROP RE-EXPR-START @ 1+ OVER <> ELSE
+    &$ = IF RE-EXPR-END @ OVER <> ELSE  FALSE THEN THEN ;
 
 \ If the character at EP is to be treated normally, return incremented EP plus IT,
 \ else EP plus FALSE. EP may be incremented past 2 char escapes!
