@@ -18,22 +18,29 @@
 1        ' C, CFA  400000 COMMAER (RB,) ( byte relative to IP )
 2        ' W, CFA  200000 COMMAER SG,   (  Segment: WORD      )
 1        ' C, CFA  100000 COMMAER P,    ( port number ; byte     )
+2        ' OW, CFA  80000 COMMAER W,    ( obligatory word     )
 0 CELL+  ' ,  CFA   40002 COMMAER IX,   ( immediate data : cell)
 1        ' C, CFA   40001 COMMAER IB,   ( immediate byte data)
 0 CELL+  ' ,  CFA   20008 COMMAER X,    ( immediate data : address/offset )
 1        ' C, CFA   20004 COMMAER B,    ( immediate byte : address/offset )
-2        ' W, CFA   10000 COMMAER W,    ( obligatory word     )
 
 FFFF INCONSISTENCY-PAIRS !
 ( Inconsistent:  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
 (               10 Register op        20 Memory op                    )
-(               40 D0                 80 [BP]                         )
-( Only valid for 16 bits real mode  A0JUL04 AvdH )
+(               40 D0                 80 [BP]' {16} [BP] {32}         )
+
+( Only valid for 16 bits real mode, in combination with an address
+  overwite. Use W, L, and end the line in TALLY! to defeat checks.
 20 0700 0s T!
- 0100 0s 0 8 xFAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] -- [BX]
-A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
+ 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
+A0 0700 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check) 
+ 0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX] 
+010020 0700 0s 0400 0s xFIR [SIB]   ( Fits in the hole, requires also SIB, ) 
+0000A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check) 
+ 0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
+
 12 0700 0s T!
  0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
 11 0700 0s T!
@@ -43,12 +50,19 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 020024 C000 0s 4000 0s xFIR      DB|
 020028 C000 0s 8000 0s xFIR      DW|
 000010 C000 0s C000 0s xFIR      R|
-020008 C700 0s 0600 0s xFIR      MEM| ( Overrules D0| [BP] )
+020008 C700 0s 0600 0s xFIR      MEM|' ( Overrules D0| [BP]')
+020008 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )
 
 02 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 01 3800 0s T!
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
+
+00 FF 00 1PI ((SIB)),
+: (SIB), TALLY @ !TALLY ((SIB)), 
+  30 XOR ( Toggle from using memory to registers)
+  TALLY ! ;
+1        ' (SIB), CFA   10000 COMMAER SIB, ( Most bizarre     )
 
 00 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
 01 0001 0s 0 0s xFIR B|
@@ -113,7 +127,7 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 040001 00 CD 1PI INT,
 220008 00 9A 1PI CALLFAR,
 220008 00 EA 1PI JMPFAR,
-010002 00 T!   08 C2 2 1FAMILY, RET+, RETFAR+,
+080002 00 T!   08 C2 2 1FAMILY, RET+, RETFAR+,
 800004 00 T!   01 E8 2 1FAMILY, CALL, JMP,
 400000 00 EB 1PI JMPS,
 00 00 T!
