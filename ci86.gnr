@@ -155,28 +155,36 @@ _ENDCOMMENT
 
 ;____1_____ _SWITCH_1_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
-SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
-SANDBOXSIZE     EQU     10000H   ; { For stack items while switching modes.}
-GDTSIZE         EQU     8000H   ; { For GDT-table.}
+;{ Names starting in A_ are linear, physical (32 bit), absolute addresses }
+SANDBOXSIZE     EQU     10000H  ;{ For stack items while switching modes.}
+GDTSIZE         EQU     8000H   ;{ For GDT-table.}
+;{IDTSIZE EQU.. JUMPTABLE EQU ..}
 M4_FORTHORG     EQU     M4_LOADADDRESS - M4_ORG ; { Start of Forth CS = SS = ES . }
-SWITCHSEGMENT     EQU     M4_SWITCHORG/10H ;{ @ DS and CS for real code }
+
+A_SWITCH        EQU     M4_SWITCHORG
+A_SANDBOX       EQU     A_SWITCH + 10000H
+A_GDT             EQU     A_SANDBOX + SANDBOXSIZE
+A_LOWDP         EQU     A_GDT + GDTSIZE
+
+DS_SANDBOX      EQU     A_SANDBOX/10H ;{ @ Harmless place for the stack.}
+SWITCHSEGMENT     EQU     A_SWITCH/10H ;{ @ DS and CS for real code }
 ; {Add this to go from GDT_CS addresses to GDT_SWITCH addresses.}
 M4_SWITCHOFFSET EQU  ( M4_FORTHORG - M4_SWITCHORG)
-DS_SANDBOX      EQU     SWITCHSEGMENT + SEGSIZE ;{ @ Harmless place for the stack.}
-GDT_SEGMENT     EQU     DS_SANDBOX + SANDBOXSIZE/10H       ;{ @ General descriptor table.}
-;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen and }
-;{ must be a multiple of 08H }
+
+;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen }
+;{ as far as the GDT goes as long as they are a multiple of 08H }
+;{ Switching sometimes restricts these to a particular value.}
 GDT_SWITCH       EQU    SWITCHSEGMENT  ;{ % Switching segment, must be same for switching to work! }
 GDT_CS EQU 10H  ;{ % The protected mode code segment }
 ; { This choice is a relic. If switched from protected mode }
 ; { the real mode code then uses data from the sandbox.}
 ; { In fact we set the DS immediately after switching.}
 GDT_DS         EQU     DS_SANDBOX ;{ % The protected mode data segment}
+GDT_SEGMENT    EQU     A_GDT/10H       ;{ @ General descriptor table.}
 
 IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
 IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
 
-GDT EQU GDT_SEGMENT * 10H ; {Corresponding address.}
 GDTLEN EQU GDTSIZE-1      ; {Intel peculiarity.}
 BOOTOFFSET EQU 0
 });_END___1__({ _SWITCH_1_})
@@ -484,7 +492,7 @@ HERE5:
 ;____1_____ _SWITCH_1_({
         JMP    PROTECT
 GDTLOAD DW     GDTLEN
-        DD     GDT
+        DD     A_GDT
 PROTECT:
 ;{Prepare. Remember STOSW uses ES:DI                              }
         MOV     AX,GDT_SEGMENT ;{ GDT segment}
@@ -992,7 +1000,7 @@ CPUNM:  DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END___1__({ _REAL_1_})
 ;____1_____ _SWITCH_1_({
 ; {Swap the following with DP to allocate in conventional memory.}
-         DC     TEXTEND+SANDBOXSIZE+GDTSIZE  ; {LOW-DP        14}
+         DC     A_LOWDP ; {LOW-DP        14}
 ; {Leave space to start conventional programs}
          DC     80000H          ; {LOW-EM        15}
 });_END___1__({ _SWITCH_1_})
