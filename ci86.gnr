@@ -1357,8 +1357,13 @@ _VERBOSE_({Internal, used for nested compilation. })},
 {20 1}},
 enddoc)
 CODE_HEADER({SKIP},{SKIP})
-BRAN1:  ADD     SI,[SI]
-        LEA     SI,[SI+_CELLS(1)]
+BRAN1:  MOV     AX,[SI]
+_ALIGNED_({
+        DEC     AX
+        OR      AL,3
+        INC     AX
+},{dnl});_END_({_ALIGNED_})
+        LEA     SI,[SI+AX+_CELLS(1)]
         _NEXT
 ;
 worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C2},
@@ -2625,6 +2630,7 @@ HEADER({$,},{SCOMMA},{DOCOL})
         DC HERE, TOR
         DC LDUP, CELLP, ALLOT
         DC RR, SSTOR, FROMR
+_ALIGNED_({ DC LALIGN}, {dnl})
         DC SEMIS
 ;
 worddoc( {SCREEN},{C/L},{char_per_line},{--- c},{},
@@ -3030,9 +3036,16 @@ it if necessary. This means that data of any size can be fetched
 from that address.
 In this ciforth this is a noop.
 },{{ALIGNED}},
-{{( See ALIGNED)},{}},
+_ALIGNED_({
+{{ 1 ALLOT ALIGN HERE 0 CELL+ MOD . },{0}}
+}),
 enddoc)
 HEADER({ALIGN}, {LALIGN}, {DOCOL}, , {B_IMMED})
+_ALIGNED_({
+        DC      LDP, FETCH
+        DC      ALIGNED
+        DC      LDP, STORE
+},{dnl});_END_({_ALIGNED_})
         DC      SEMIS
 ;
 worddoc( {MEMORY},{ALIGNED},{aligned},{ad1 --- ad2},{ISO},
@@ -3040,10 +3053,20 @@ worddoc( {MEMORY},{ALIGNED},{aligned},{ad1 --- ad2},{ISO},
 it if necessary to forthsamp({ad2}).
 In this ciforth this is a noop.
 },{{ALIGN}},
-{{HERE 1 ALLOT ALIGN 123 , 1+ ALIGNED @ .},{123}},
+_ALIGNED_({
+{{ 4 ALIGNED .},{4},
+{5 ALIGNED . },{8}}
+}),
 enddoc)
-HEADER({ALIGNED}, {ALIGNED}, {DOCOL}, , {B_IMMED})
-        DC      SEMIS
+CODE_HEADER({ALIGNED}, {ALIGNED}, {DOCOL})
+_ALIGNED_({
+        POP     AX
+        DEC     AX
+        OR      AL,3
+        INC     AX
+        PUSH    AX
+},{dnl});_END_({_ALIGNED_})
+        _NEXT
 ;
 worddoc( {DICTIONARY},{HERE},{here},{--- addr},{ISO,FIG,L0},
 {Leave the address forthvar({addr}) of the next available
@@ -4415,7 +4438,9 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      SPACE   ;{THEN}
         DC      ZERO
 CREA1:  DC      DROP
+_ALIGNED_({ DC      LALIGN},{dnl})
         DC      SCOMMA
+_ALIGNED_({ DC      LALIGN},{dnl})
         DC      HERE,TOR
 
         DC      RR, LIT, _CELLS(PH_OFFSET), PLUS
