@@ -992,8 +992,8 @@ the current search order, a string consisting only of its first
 letter is looked up in this vocabulary. If found the parse
 pointer is moved back to after this first letter of the word,
 and the corresponding denotation definition executed. This
-vocabulary is not intended to be used as a
-forthcode({CONTEXT}) vocabulary; and only as a
+vocabulary must be used with care as a
+forthcode({SEARCH}) vocabulary; and only as a
 forthcode({CURRENT}) whenever you want to add a denotation.},
 {{VOCABULARY}},
 {{: GS1 [COMPILE] DENOTATION DEFINITIONS LATEST ID. [COMPILE] dnl
@@ -1009,7 +1009,7 @@ worddoc( {VOCABULARIES},{ENVIRONMENT},{environment},{},{CI},
 vocabulary contains environment queries. The names of words
 present in forthcode({ENVIRONMENT}) are recognized by
 forthcode({ENVIRONMENT?}). This vocabulary is not intended to
-be used as a forthcode({CONTEXT}) vocabulary; and only as a
+be used as a forthcode({SEARCH}) vocabulary; and only as a
 forthcode({CURRENT}) whenever you want to add an environment
 query.},
 {{VOCABULARY}},
@@ -2568,32 +2568,28 @@ by forthcode({LIST}) .},{{BLOCK}},
 enddoc)
 HEADER({SCR},{SCR},{DOUSE}, _CELLS(14))
 ;
-worddoc( {VOCABULARIES},{CONTEXT},{context},{--- addr},{FIG,U,L0},
-{A user variable containing a pointer into the data of
-a vocabulary that contains a dummy dea with which the
-dictionary searches will first begin.},{{VOCABULARY},{CURRENT}},
-{{CONTEXT @ ' FORTH >DDEA = .},{_T_}},
+worddoc( {VOCABULARIES},{SEARCH},{search},{--- addr},{FIG,U,L0},
+{A double user variable containing containing the wid 's of the
+two vocabularies that are searched for definitions during
+interpretation. _VERBOSE_({This falls short of the 8 required
+by the ISO standard.}) },
+{{FOUND},{VOCABULARY},{CURRENT}},
+{{SEARCH @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({CONTEXT},{CONT},{DOUSE}, _CELLS(16))
+HEADER({SEARCH},{SEARCH},{DOUSE}, _CELLS(16))
 ;
-worddoc( {VOCABULARIES},{CURRENT},{current},{--- addr},{FIG,U,L0},
-{A user variable containing a pointer to data field of
-a vocabulary to
-new words will be added.
-This is done by linking them in between the link field of the
-dummy dea and the next definition.},
-{{VOCABULARY},{CONTEXT}},
-{{CURRENT @ ' FORTH >DDEA = .},{_T_}},
+worddoc( {VOCABULARIES},{CURRENT},{compilation},{--- addr},{FIG,U,L0},
+{A user variable containing the WID of a vocabulary to which
+new words will be added. The WID has the structure of a
+dictionary entry. This allows to link in a new word between the
+link field of the WID and the next definition. _VERBOSE_({It is
+the forthdefi({compilation word list}) in the sens of the ISO
+standard.})
+},
+{{VOCABULARY},{SEARCH}},
+{{CURRENT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(17))
-;
-worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
-{A user variable containing the compilation state. A non-zero value
-indicates compilation.},{},
-{{STATE @ .},{0},
-{ : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
-enddoc)
-HEADER({STATE},{STATE},{DOUSE}, _CELLS(18))
+HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(18))
 ;
 worddoc( {FORMATTING},{BASE},{base},{--- addr},{ISO,FIG,U,L0},
 {A user variable containing the current number base used for input
@@ -2719,6 +2715,14 @@ position of the data stack top, and the previous value of forthsamp({HANDLER})},
 {{." See CATCH"},{See CATCH}},
 enddoc)
 HEADER({HANDLER},{HANDLER},{DOUSE}, _CELLS(32))
+;
+worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
+{A user variable containing the compilation state. A non-zero value
+indicates compilation.},{},
+{{STATE @ .},{0},
+{ : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
+enddoc)
+HEADER({STATE},{STATE},{DOUSE}, _CELLS(33))
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -3100,15 +3104,15 @@ HEADER({CFA>},{CTOD},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>DDEA},{to_dummy_dea},{dea1 --- dea2},{},
+worddoc( {DICTIONARY~},{>WID},{to_w_i_d},{dea1 --- dea2},{},
 {Given the dictionary entry addres forthvar({dea1}) of a
-vocabulary return the address forthvar({dea2}) of the
-forthdefi({DDEA}), a dummy DEA that serves as the start of a
+vocabulary return the address forthvar({dea2}) of its
+forthdefi({WID}), a dummy DEA that serves as the start of a
 dictionary search. },
 {{VOCABULARY},{>CFA}},
-{{: APE ; ' FORTH >DDEA >LFA @ ID.},{APE}},
+{{: APE ; ' FORTH >WID >LFA @ ID.},{APE}},
 enddoc)
-HEADER({>DDEA},{TDDEA},{DOCOL})
+HEADER({>WID},{TWID},{DOCOL})
         DC      TOBODY
         DC      CELLP ; {Skip vfa link.}
         DC      SEMIS
@@ -3261,8 +3265,8 @@ prevents that a word can be used recursively.}})
 },
 {{IMMEDIATE},{RECURSE}},
 dnl NOTE: a word starting with e.g. C would be a denotation.
-{{"ZXJEP" 2DUP (CREATE) 2DUP (FIND) 0= .},{0},
-{LATEST HIDDEN (FIND) .},{0} },
+{{"ZXJEP" 2DUP (CREATE) 2DUP FOUND 0= .},{0},
+{LATEST HIDDEN FOUND .},{0} },
 enddoc)
 HEADER({HIDDEN},{HIDDEN},{DOCOL})
         DC      TFFA
@@ -3308,10 +3312,11 @@ HEADER({(;CODE)},{PSCOD},{DOCOL})
 worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{ISO,FIG,I,C,L0},
 {Used in the form:
   forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
-Stop compilation and terminate a new defining
-word forthsamp({cccc}) by compiling forthcode({(;CODE)}). Set the
-forthcode({CONTEXT}) vocabulary to forthcode({ASSEMBLER}) ,
-assembling to machine code the following mnemonics.
+Stop compilation and terminate a new defining word
+forthsamp({cccc}) by compiling forthcode({(;CODE)}). Set
+forthcode({ASSEMBLER}) to the top of the forthcode({SEARCH})
+order. Start assembling to machine code the following
+mnemonics.
 
 When forthsamp({cccc}) later executes in the form:
                      forthsamp({cccc nnnn})
@@ -3870,7 +3875,8 @@ TONUM9:
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
 { Look the string up forthvar({sc}) according to
-forthcode({(FIND)}) . If found, and it is not a denotation,
+forthcode({(FIND)}) in both forthcode({SEARCH}) vocabularies.
+ If found,
 leave the dictionary entry address forthvar({dea}) of the
 first entry found, else leave a nil pointer.},
 {{FIND},{VOCABULARY}},
@@ -3880,24 +3886,28 @@ first entry found, else leave a nil pointer.},
 },
 enddoc)
 HEADER({FOUND},{FOUND},{DOCOL})
+        DC      SEARCH, FETCH
         DC      PFIND
-        DC      LDUP
-        _0BRANCH(FOUND1) ;{IF}
-        DC      LDUP, TFFA, FETCH,
-        DC      LIT, B_DENOT, LAND
-        _0BRANCH(FOUND1) ;{IF}
-        DC      DROP, ZERO
-FOUND1:               ;{THEN THEN}
-        DC SEMIS
+        DC      TOR
+        DC      RR, ZEQU
+        _0BRANCH(DFIN1)
+        DC      RDROP
+        DC      SEARCH, CELLP, FETCH
+        DC      PFIND
+        DC      TOR
+DFIN1:
+        DC      TDROP, FROMR
+        DC      SEMIS
 ;
 worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO},
 {For the (old fashioned) string _VERBOSE_({(stored with a
 preceeding character count)}) at forthvar({addr}) find a Forth
-word with that name in the forthcode({CONTEXT}) and then
-forthcode({CURRENT}) vocabularies and return its execution
-token forthsamp({xt}). If the word is immediate, also return 1,
-otherwise also return -1. If it is not found, leave the original
-forthvar({addr}) and a zero. },
+word with that name in the first or second
+of the forthcode({SEARCH}) vocabularies.
+Return its
+execution token forthsamp({xt}). If the word is immediate, also
+return 1, otherwise also return -1. If it is not found, leave
+the original forthvar({addr}) and a zero. },
 {{FOUND},{(FIND)}},
 {
 { : FIND: BL WORD FIND ; dnl
@@ -3919,43 +3929,23 @@ HEADER({FIND},{FIND},{DOCOL})
 FIND1:               ;{THEN THEN}
         DC      SEMIS
 ;
-worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},{sc --- dea},{},
-{For the string constant forthvar({sc}) search the
-forthcode({CONTEXT}) and then forthcode({CURRENT}) and
-forthcode({DENOTATION}) vocabularies for a matching entry.
-_VERBOSE_({A denotation matches if the first letter is
-correct.}). If found, leave the dictionary entry address
-forthvar({dea}) of the first entry found, else leave a nil
-pointer.},
-{{FIND}},
-{ { : BONOBO ; "BONOBO" (FIND) ' BONOBO = .},{_T_} },
+worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},
+{sc dea1 --- sc dea2},{},
+{Search down from the forthdefi({DEA}) forthvar({dea}) for a
+word with name forthvar({sc}) found and leave its
+forthdefi({DEA}) as forthvar({dea2}) or a nil pointer if not
+found. This DEA can be a forthdefi({WID}). _VERBOSE_({The
+forthvar({dea1}) is mostly the forthdefi({WID}) of a
+vocabulary, or the content of forthcode({CURRENT}) or
+forthcode({SEARCH}) }). Leave the dictionary entry address
+forthvar({dea2}) of the first entry found, else leave a nil
+pointer. Do not consume the string forthvar({sc})_VERBOSE_({{,
+as this is a repetitive action}}). },
+{{FIND},{FOUND}},
+{ { : BONOBO ; "BONOBO" CURRENT @ (FIND) ' BONOBO = .},{_T_},
+ {TYPE},{BONOBO} },
 enddoc)
 HEADER({(FIND)},{PFIND},{DOCOL})
-        DC      CONT, FETCH
-        DC      PPFIND
-        DC      TOR
-        DC      RR, ZEQU
-        _0BRANCH(DFIN1)
-        DC      RDROP
-        DC      CURR, FETCH
-        DC      PPFIND
-        DC      TOR
-DFIN1:
-        DC      TDROP, FROMR
-        DC      SEMIS
-;
-worddocsafe( {DICTIONARY~},{((FIND))},{paren_paren_find},{sc dea1 --- sc dea2},{},
-{Search down from the DEA forthvar({dea}) for a word with name
-forthvar({sc}) found and leave its DEA as dea2 or a nil pointer
-if not found. _VERBOSE_({The forthvar({dea1}) is mostly the
-forthdefi({DDEA}) of a vocabulary, or the content of
-forthcode({CURRENT}) or forthcode({CONTEXT}) }). Leave the
-dictionary entry address forthvar({dea2}) of the first entry
-found, else leave a nil pointer.},
-{{FIND},{(FIND)}},
-{ { : BONOBO ; CURRENT @ "BONOBO" (FIND) ' BONOBO = .},{_T_} },
-enddoc)
-HEADER({((FIND))},{PPFIND},{DOCOL})
         DC      ZERO, RESULT, STORE
         DC      LIT, MATCHING, SWAP, FORW
         DC      RESULT,FETCH
@@ -4162,7 +4152,7 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LIT,5
         DC      QERR
         DC      TDUP
-        DC      PFIND
+        DC      FOUND
         DC      LDUP
         _0BRANCH(CREA1) ;{IF}
         DC      LDUP, TFFA, FETCH,
@@ -4206,7 +4196,7 @@ compile time.},{{POSTPONE}},
 enddoc)
 HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      PWORD
-        DC      PFIND
+        DC      FOUND
         DC      LDUP
         DC      ZEQU
         DC      ZERO
@@ -4231,7 +4221,7 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}). },
 enddoc)
 HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         DC      PWORD
-        DC      PFIND
+        DC      FOUND
         DC      LDUP
         DC      ZEQU
         DC      ZERO
@@ -4286,7 +4276,8 @@ HEADER({DLITERAL},{DLITE},{DOCOL}, , B_IMMED)
 DLIT1:  DC      SEMIS
 ;
 ;
-worddoc( {COMPILING~},{SDLITERAL},{sdliteral},{d --- s/d (executing) d --- (compiling)},{I},
+worddoc( {COMPILING~},{SDLITERAL},{sdliteral},
+{d --- s/d (executing) d --- (compiling)},{I},
 {If compiling, compile a stack double number into a literal or
 double literal, depending on whether forthcode({DPL}) contains a
 nil pointer or points into the input. Later execution of the
@@ -4342,20 +4333,16 @@ worddoc( {PARSING},{INTERPRET},{interpret},{},{},
 {Repeatedly fetch the next text word in the input source and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
-up in forthcode({CONTEXT}) and forthcode({CURRENT}) respectively.
-Failing that a string consisting of the first character is looked
-up in the forthcode({DENOTATION}) wordlist.
-If it is not found at all, an error message " ?" will be given.
-_VERBOSE_({
-If the word name cannot be found
-after a search of forthcode({CONTEXT}) and then
-forthcode({CURRENT}), it is considered as a
+up in the vocabularies of forthcode({SEARCH}) . Failing that a
+string consisting of the first character is looked up in the
+forthcode({DENOTATION}) wordlist. If it is not found at all, it
+is an forthcode({ERROR}).
+_VERBOSE_({ If the word name cannot be found after a search of
+forthcode({SEARCH}), it is considered as a
 forthdefi({denotation}) of a number, a double number, a
-character or a string or whatever.
-Denotations are handled respectively
-by the words forthcode({0}) ... forthcode({F})
-forthcode({&}) forthcode({"}) and any other word
-of the
+character or a string or whatever. Denotations are handled
+respectively by the words forthcode({0}) ... forthcode({F})
+forthcode({&}) forthcode({"}) and any other word of the
 forthcode({DENOTATION}) wordlist, depending on the first
 character. A number is converted according to the current base.
 If a decimal point is found as part of a number, the number
@@ -4373,12 +4360,12 @@ INTE1:
 ;       DC      DOTS
 ;       DC      TDUP, LTYPE
         DC      OVER, TOR       ; {Save old parse pointer.}
-        DC      PFIND, LDUP, ZEQU
+        DC      FOUND, LDUP, ZEQU
         _0BRANCH(INTE3B) ;{IF}
         DC      DROP
         DC      RR, ONE
         DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
-        DC      PPFIND, SWAP, DROP, SWAP, DROP, LDUP
+        DC      PFIND, SWAP, DROP, SWAP, DROP, LDUP
         _0BRANCH(INTE3B) ;{IF}
         DC      RR, ONEP, LIN, STORE
 INTE3B:                  ;{THEN THEN THEN}
@@ -4421,7 +4408,7 @@ worddoc( {DEFINING},{VOCABULARY},{vocabulary},{},{FIG,E,L},
 {A defining word used in the form: forthcode({VOCABULARY})
 forthsamp({cccc}) to create a vocabulary definition
 forthsamp({cccc}) . Subsequent use of forthsamp({cccc}) will
-make it the forthcode({CONTEXT}) vocabulary which is searched
+make it the forthcode({SEARCH}) vocabulary which is searched
 first by forthcode({INTERPRET}) . The sequence
 forthsamp({cccc}) forthcode({DEFINITIONS}) also make
 forthsamp({cccc}) the forthcode({CURRENT}) vocabulary into
@@ -4435,16 +4422,20 @@ forthdefi({VLFA}) ) The VLFA points to the VLFA of the next
 vocabulary or 0 for the end.
 
 Then follows
-a dummy dea (forthdefi({DDEA})) with empty
+a dummy dea that serves as forthdefi({word list identifier}) or
+WID in the sense of the ISO standard.
+with empty
 fields, except for the
 link field  (forthdefi({DLFA}))
 that points to the dea of
-the first word of the vocabulary. Actually executing the
-vocabulary means storing its DDEA into forthcode({CONTEXT}) .
+the first word of the vocabulary. Executing the
+vocabulary means pushing its WID on top of the
+forthcode({SEARCH}) order. The current top WID becomes
+second and the second one gets lost.
 
-In ciforth cccc will be so chained as to include all
-definitions of the vocabulary in which forthsamp({cccc}) is
-itself defined. All vocabularys ultimately chain to Forth. By
+In ciforth forthvar({cccc}) will be so chained as to have FORTH as
+its last word, such that one always can regain control.
+By
 convention, vocabulary names are to be declared
 forthcode({IMMEDIATE}) .},
 {{VOC-LINK}},
@@ -4470,8 +4461,13 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      ZERO, COMMA   ;{ Dummy name field}
         DC      DOES
 DOVOC:
+        DC      SEARCH
+        DC      SEARCH,CELLP
+        DC      LIT, _CELLS(1) ;{ISO would be at least 7 cells.}
+        DC      LMOVE
+
         DC      CELLP   ;{ Get dummy DEA. }
-        DC      CONT
+        DC      SEARCH
         DC      STORE
         DC      SEMIS
         PAGE
@@ -4482,14 +4478,14 @@ DOVOC:
 ;
 worddoc( {VOCABULARIES},{FORTH},{forth},{},{ISO,FIG,I,L1},
 {The name of the primary vocabulary. Execution makes
-forthcode({FORTH}) the forthcode({CONTEXT}) vocabulary. Until
+forthcode({FORTH}) the forthcode({SEARCH}) vocabulary. Until
 additional user vocabularies are defined, new user definitions
 become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.},
 {{VOCABULARY}},
-{ { VOCABULARY JOHN JOHN ' FORTH >DDEA CONTEXT @ = .},{0},
-  { FORTH ' FORTH >DDEA CONTEXT @ = .},{_T_} },
+{ { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH @ = .},{0},
+  { FORTH ' FORTH >WID SEARCH @ = .},{_T_} },
 enddoc)
 HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
@@ -4499,7 +4495,7 @@ HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 worddoc( {VOCABULARIES},{ASSEMBLER},{assembler},{},{ISO,FIG,I,L1},
 {The name of the vocabulary to make machine code definitions.
 Execution makes forthcode({ASSEMBLER}) the
-forthcode({CONTEXT}) vocabulary. forthcode({ASSEMBLER}) is
+forthcode({SEARCH}) vocabulary. forthcode({ASSEMBLER}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.
 This word makes only sense in combination with
@@ -4514,21 +4510,21 @@ worddoc( {VOCABULARIES},{DEFINITIONS},{definitions},{},{NISO,FIG,L1},
 {Used in the form:
            forthsamp({cccc DEFINITIONS})
 Set the forthcode({CURRENT}) vocabulary to the
-forthcode({CONTEXT}) vocabulary. In the example, executing
-vocabulary name forthsamp({cccc}) made it the
-forthcode({CONTEXT}) vocabulary and executing
+forthcode({SEARCH}) vocabulary. In the example, executing
+vocabulary name forthsamp({cccc}) made it the topmost
+forthcode({SEARCH}) vocabulary and executing
 forthcode({DEFINITIONS}) made both specify vocabulary
 forthsamp({cccc}) .},
 {{VOCABULARY}},
 {
   { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; dnl
-  ' FORTH >DDEA >LFA @ ' ORAN = .},{0},
-  {' JOHN >DDEA >LFA @ ' ORAN = .},{_T_},
+  ' FORTH >WID >LFA @ ' ORAN = .},{0},
+  {' JOHN >WID >LFA @ ' ORAN = .},{_T_},
   {FORTH DEFINITIONS},{}
 },
 enddoc)
 HEADER({DEFINITIONS},{DEFIN},{DOCOL})
-        DC      CONT
+        DC      SEARCH
         DC      FETCH
         DC      CURR
         DC      STORE
@@ -7021,7 +7017,7 @@ Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
-forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.
+forthcode({SEARCH}) and forthcode({CURRENT}) , an appropriate error message is given.
 This word is intended for interpret mode,  but in ciforth it works as
 well in compilation mode.
 It is recommended this word is not postponed.},
@@ -7045,7 +7041,7 @@ Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to
 compile the address as a literal. If the word is not found
-after a search of forthcode({CONTEXT}) and
+after a search of forthcode({SEARCH}) and
 forthcode({CURRENT}), an appropriate error message is given.
 This word is intended for compilation mode, but in ciforth it
 works as well in interpret mode. It is recommended this word is
@@ -7082,7 +7078,7 @@ HEADER({FORGET-VOC},{FORGV},{DOCOL})
 ; { Forget part of contents.}
         DC      SWAP
         DC      TOR
-        DC      TDDEA
+        DC      TWID
         DC      LDUP
 FORGV3:
         DC      TLFA,FETCH    ; {Next voc}
@@ -7107,10 +7103,10 @@ FORGV2: DC      SEMIS
 ;
 worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
 {Executed in the form:
-               forthcode({FORGET}) forthsamp({cccc})
- Deletes definition named forthsamp({cccc}) from the dictionary with all entries
-physically following it. In ciforth, an error message will occur
-if the forthcode({CURRENT}) and forthcode({CONTEXT}) vocabularies are not currently the same.},
+               forthcode({FORGET}) forthvar({cccc})
+Deletes definition named forthvar({cccc}) from the dictionary
+with all entries physically following it.
+},
 {{FENCE}},
 {
 {: GO ; HERE : CH ; : GI ; FORGET CH LATEST ID. },{GO},
@@ -7118,13 +7114,6 @@ if the forthcode({CURRENT}) and forthcode({CONTEXT}) vocabularies are not curren
 },
 enddoc)
 HEADER({FORGET},{FORG},{DOCOL})
-        DC      CURR
-        DC      FETCH
-        DC      CONT
-        DC      FETCH
-        DC      LSUB
-        DC      LIT,18H
-        DC      QERR
         DC      TICK
         DC      LDUP
         DC      FENCE
@@ -7781,7 +7770,7 @@ HEADER({WORDS},{WORDS},{DOCOL})
         DC      LOUT
         DC      STORE
         DC      LIT, IDDOT
-        DC      CONT
+        DC      SEARCH
         DC      FETCH
         DC      FORW
         DC      SEMIS
@@ -7900,7 +7889,7 @@ HEADER({ENVIRONMENT?},{ENVQ},{DOCOL})
         DC      ZERO, RESULT, STORE
         DC      LIT, MATCHING
         DC      LIT, ENV
-        DC      TDDEA, FORW, TDROP
+        DC      TWID, FORW, TDROP
         DC      RESULT, FETCH
         DC      LDUP
         _0BRANCH(ENVQ1)
@@ -8318,7 +8307,8 @@ forthcode({VOCABULARY}) and filled by defining words while that
 vocabulary is forthcode({CURRENT}) . They regulate how words are
 found, different vocabularies can have words with the same names.
 The wordset forthsamp({VOCABULARIES}) contains words that manipulate
-those vocabularies. Vocabularies are similar to but not identical to the wordlist
-of the ISO standard, if only because they have a name.
+those vocabularies. Vocabularies are associated with the wordlist 's
+of the ISO standard, the primary difference is that
+they have a name.
 },
 {},{},{},{})

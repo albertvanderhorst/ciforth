@@ -18,10 +18,20 @@ It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 This structure is called a forthdefi({dictionary entry}).
 A word can be executed by typing its name.
-Each word in the dictionary belongs to precisely one forthdefi({vocabulary}).
+Each word in the dictionary belongs to precisely one forthdefi({word list}),
+or as we will say here vocabulary.
 Apart from the name a word contains data and executable code,
 (interpreted or not) and linking information
 forthpxref({VOCABULARY}).
+
+The concept word list is part of the ISO standard, but we will
+use forthdefi({vocabulary}) . A vocabulary is much more
+convenient, being a word list with a name, created by
+forthcode({VOCABULARY}) . ISO merely knows
+forthdefi({word list identification}) 's, a kind of handle,
+abbreviated as forthdefi({WID}) . A new word list is
+initiated by the use of forthcode({VOCABULARY}), and if
+you know the name you know the forthdefi({WID}) .
 
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}). Its code is called
@@ -49,7 +59,7 @@ The usage of two stacks is another hall mark of Forth.
 
 A word that generates a new entry in the dictionary is called a
 forthdefi({defining word}) forthxref({DEFINING}).
-The new word is created in the forthcode({CURRENT}) vocabulary.
+The new word is created in the forthcode({CURRENT}) word list .
 
 Each processor has a natural size for the information. (This is
 sometimes called a machine word). For an Pentium processor this is
@@ -475,7 +485,7 @@ The link field. This is one cell.
 A pointer to such a field is called a forthdefi({link field address}) .
 It contains the
 dictionary entry address of the last word that was
-defined in the same forthdefi({vocabulary}) before this one.
+defined in the same forthdefi({word list}) before this one.
 forthitem
 The name field. This is one cell.
 This contains a pointer to a string.
@@ -524,7 +534,7 @@ forthitem
 The DUMMY bit =1 for a dictionary header contained in the
 data of a vocabulary. This indicates that it shoudl not be executed.
 forthitem
-The DENOTATION bit =1 for a word from the DENOTATION vocabulary.
+The DENOTATION bit =1 for a word from the DENOTATION word list.
 This means that it is a one letter word, that can parse
 all forthdefi({denotation})'s (numbers) that start with that letter, e.g. 0 .
 _ALIGNED_(
