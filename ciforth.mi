@@ -131,6 +131,7 @@ a user manual.
 * Rationale & legalese:: For experts. You don't want to read this.
 * Manual::         User manual
 _PC_({* Editor::         The full screen editor})dnl
+* Assembler::      The assemblers
 * Documentation::  Some references
 * Glossary::       Description of Forth words
 * Glossary Index:: Find a Forth words in the glossary
@@ -148,12 +149,11 @@ include(intro.mi)
 include(rational.mi)
 
 _HOSTED_LINUX_({
-@node Manual, Documentation, Rationale & legalese, top
+@node Manual, Assembler, Rationale & legalese, top
 @chapter Manual
 include(manual.mi)
 
-@node Documentation, Glossary, Manual, top
-@chapter  Documentation summary
+@node Assembler, Documentation, Manual, top
 })
 
 _PC_({
@@ -161,7 +161,7 @@ _PC_({
 @chapter Manual
 include(manual.mi)
 
-@node Editor, Documentation, Manual, top
+@node Editor, Assembler, Manual, top
 @chapter Editor
 
 The editor is a very simple screen editor.
@@ -205,11 +205,16 @@ swap lines ^Y ^E ^P.
 
 delete line without stacking <ret> ^E ^J ^O
 
-@node Documentation, Glossary, Editor, top
-@chapter  Documentation summary
+@node Assembler, Documentation, Editor, top
 })
+@chapter Assembler
+include(assembler.mi)
 
-You bet this is utterly and totally out of date.
+@node Documentation, Glossary, Assembler, top
+@chapter  Documentation summary
+
+This is copied from the FIG documentation 1978.
+It is probably out of date now.
 
 The following manuals are in print:
 
