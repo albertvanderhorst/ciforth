@@ -1,6 +1,5 @@
-include(manual.m4)dnl
 \input texinfo
-@setfilename figforth.info
+@setfilename figforthversion
 @settitle fig-FORTH 3.0 manual
 @setchapternewpage odd
 @ifinfo 

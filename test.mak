@@ -165,6 +165,13 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 # but they can't go through a common texinfo file, because of the restrictions
 # of info regarding names. (which would spoil tex-output unecessarily.)
 
+# Macro building blocks for texinfo files.
+SRCMI= \
+figforth.mi \
+intro.mi    \
+manual.mi   \
+# That's all folks!
+
 %.rawdoc : %.asm ;
 
 %.info : prelude.m4 postlude.m4 manual.m4 figforth.mi menu.texinfo intro.mi manual.mi %.mi ;
@@ -179,13 +186,14 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 %.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+| sed -e 's/@ /@@/g')| m4 > $@
 
-menu.texinfo : menu.m4 wordset.mig ; m4 menu.m4 >$@
+menu.texinfo : menu.m4 wordset.mig ; m4 $+ >$@
 
 # For tex we do not need to use the safe macro's
-%.tex :  prelude.m4 postlude.m4 manual.m4 gloss.m4 figforth.mi intro.mi manual.mi menu.texinfo %.mi wordset.m4 wordset.mig 
+fig86.%.tex : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4 
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.tex=%.mi) )|m4 >wordset.mi
-	m4 $(@:fig86.%.tex=%.cfg) figforth.mi >$@
-#       rm gloss.mi wordset.mi
+	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
+	   m4 > $@
+#       rm menu.texinfo wordset.mi
 
 gloss.html : prelude.m4 postlude.m4 glosshtml.m4 gloss.mig ; \
        cat gloss.mig                    |\
