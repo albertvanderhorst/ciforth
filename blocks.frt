@@ -219,7 +219,7 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
         CFOF FENCE @ BY -us
  : ITEM ( 1/1 Desinterpret next item, increments pointer)
      DUP @ SEL@ ( Something special ?)
-     IF EXECUTE ( The special) ELSE
+     IF EXECUTE ( The special) ALIGNED ELSE
         DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
  CR ." A0MAR30  FORTH KRAKER >4<  ALBERT VAN DER HORST "
@@ -3913,7 +3913,7 @@ het moet voor alle waarden tot en met IMAX
 aangeroepen mogen worden. BIN-SEARCH vindt de
 laatste index `IT' tussen `IMIN' en `IMAX'
 (inclusief) waarvoor `COMP' WAAR teruggeeft.
-Voorbeeld: -100 100 ' 0< BIN-SEARCH . 
+Voorbeeld: -100 100 ' 0< BIN-SEARCH .
 -1 OK
 
 
