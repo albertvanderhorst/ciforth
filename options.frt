@@ -312,7 +312,7 @@ ARGV CELL+ CELL+ @ Z$@ $, CONSTANT SCRIPT-NAME
     "Fatal error at : " TYPE
     OLD: ERROR CR CR CR CR ( BYE)
     ;
--1 WARNING !     ' MY-ERROR >DFA @     ' ERROR >DFA !
+-1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 
 SCRIPT-NAME $@ GET-FILE
 ^J $S 2DROP     \ Line with #!lina

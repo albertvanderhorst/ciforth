@@ -1291,7 +1291,7 @@ DP0:
 ; that in turn links to 0.
 
 define({_LINKOLD},0)dnl
-worddocsafe( {DENOTATIONS},{'},{tick},{--- addr},{ISO,FIG,I,L0},
+worddocsafe( {DENOTATIONS},{'},{tick_denotation},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: forthexample({' nnnn
 'nnnn})
 In interpret mode it
@@ -1300,27 +1300,37 @@ dictionary entry address) of dictionary word forthsamp({nnnn}).
 If the word is not found after a search of
 forthcode({SEARCH-ORDER}) an appropriate error message is
 given. In ciforth it can be used in compilation mode too, it
-then compiles the address as a literal. It is recommended that
-for non-portable code forthcode({'}) is used as a
-forthdefi({denotation}) and that it is never postponed. (Use a
+then compiles the address as a literal.
+It is recommended that
+one never compiles or postpones it.
+(Use a
 combination of forthcode({WORD}) and forthcode({FIND}) _VERBOSE_({{or
 any form of explicit parsing and searching }})
-instead.)},
-{{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
-{{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1},
-{ : AAPE 1 2 ; 'AAPE EXECUTE  'AAPE ID. . .},{AAPE 2 1},
-{'APEEE },{'APEEE ?  ciforth ERROR # 11 : WORD IS NOT FOUND},
-{CR},{}
+instead.)
+Furthermore it is recommended
+that
+for non-portable code forthcode({'}) is used in its
+forthdefi({denotation}) form _VERBOSE_({without the space}).
+},
+{{[']},{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
+dnl Make sure to use the DENOTATION ' not the FORTH '
+{{ : X EXECUTE ; : [[ ALSO POSTPONE DENOTATION ; : ]] PREVIOUS ;},{},
+{ [[ : QPE 1 2 ; ' QPE X  ' QPE ID. . . 'QPE ID. ]]},{QPE 2 1 QPE},
+{ [[ : QQ  ' QPE X ' QPE ID. . . 'QPE ID. ; QQ ]] },{QPE 2 1 QPE},
+{[[ 'QPEEE },{[[ 'QPEEE ?  ciforth ERROR # 11 : WORD IS NOT FOUND},
+{]]},{}
 },
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LPWORD, LDUP, TOR
         DC      FOUND
-        DC      LDUP, ZEQU
-        DC      LIT, 11, QERR
+        DC      LDUP
+        _0BRANCH(TICK1)
         DC      LDUP, TNFA, FETCH, FETCH ; { Get precise length.}
-        DC      FROMR, EQUAL, ZEQU
-        DC      LIT, 11, QERR ; { to prevent match for denotation.}
+        DC      RR, EQUAL
+TICK1:
+        DC      RDROP
+        DC      ZEQU, LIT, 11, QERR
         DC      LITER
         DC      SEMIS
 ;
@@ -1437,7 +1447,7 @@ _ALIGNED_({ DC LALIGN}, {dnl})
         DC      SEMIS
 ;
 dnl Remember the top of the denotation chain.
-define({_STARTOFDENOTATIONS_},_LINKOLD)dnl
+define({_STARTOFDENOTATION_},_LINKOLD)dnl
 worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
 {The name of the primary vocabulary. Execution pushes the
 forthcode({FORTH}) forthdefi({WID})
@@ -1565,7 +1575,7 @@ HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      _DEA(FORTH)     ;{ NEXT VOCABULARY }
 DENOTBODY:
-HEADER( , , ,0, B_DUMMY, _STARTOFDENOTATIONS_)
+HEADER( , , ,0, B_DUMMY, _STARTOFDENOTATION_)
 ;
 worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
 {The name of the forthcode({ENVIRONMENT}) vocabulary. The
@@ -4473,14 +4483,20 @@ IWORD2:
 worddoc( {PARSING},{CHAR},{char}, {--- c},{ISO,I},
 {Parse a word and
 leave forthvar({c}) the first non blank char of that word in the
-input source. In ciforth this word works also in compiled mode.},
-{{DEN&},{CHAR}},
+input source.
+If compiled the searching is done while
+the word being compiled is executed.
+Because this is so confusing,
+it is recommended that
+one never compiles or postpones forthcode({CHAR}).
+},
+{{DEN&},{[CHAR]},{'}},
 {{CHAR HELL .},{48 },
 {CHAR X  .},{58 },
-{: GS1 CHAR HELLO ; GS1 . },{48 },
-{: GS2 CHAR X ; GS2 .},{58 }},
+{: GS1 CHAR ; GS1 HELLO . },{48 },
+{: GS2 CHAR ; GS2 X .},{58 }},
 enddoc)
-HEADER({CHAR},{LCHAR},{DOCOL}, , B_IMMED)
+HEADER({CHAR},{LCHAR},{DOCOL})
         DC      LPWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
@@ -8089,7 +8105,7 @@ no longer are.},
 {EMPTY-BUFFERS BLOCK-EXIT},{},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
  {PTY-BUFFERS 1 BLOCK ? ciforth ERROR # 8},
-{ CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{_T_},
+{ CR DISK-ERROR @ 0 < . 1 WARNING ! 2 BLOCK-INIT},{_T_},
 {1 0 (LINE) TYPE}, { LICENSE }
 },
 enddoc)
@@ -8602,6 +8618,37 @@ RSLW4:
 });_END_({ _RWLBA_})
 ;
 _LOAD_({
+worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG,I,L0},
+{Used in the form: forthexample({' nnnn })
+It
+leaves the forthdefi({execution token}) (equivalent to the
+dictionary entry address) of dictionary word forthsamp({nnnn}).
+If the word is not found after a search of
+forthcode({SEARCH-ORDER}) an appropriate error message is
+given.
+If compiled the searching is done while
+the word being compiled is executed.
+Because this is so confusing,
+it is recommended that
+one never compiles or postpones forthcode({'}).
+(Use a
+combination of forthcode({WORD}) and forthcode({FIND}) _VERBOSE_({{or
+any form of explicit parsing and searching }})
+instead.)
+Furthermore it is recommended
+that
+for non-portable code forthcode({'}) is used in its
+forthdefi({denotation}) form _VERBOSE_({without the space}).
+},
+{{[']},{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
+{
+{ : QPE 1 2 ; ' QPE EXECUTE ' QPE ID. . . },{QPE 2 1 },
+{ : QQ  ' EXECUTE ' ID. . . ; QQ  QPE QPE },{QPE 2 1},
+{' QPEEE },{' QPEEE ?  ciforth ERROR # 11 : WORD IS NOT FOUND},
+},
+enddoc)
+HEADER({'},{ITICK},{DOCOL}, _VAR_FIELD({TICK}), )
+;
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
 {Used in the form:
 forthexample({['] nnnn})
@@ -9362,7 +9409,7 @@ dnl A break as per forthcode({KEY?}) will terminate the listing.
 {{SEARCH-ORDER}},
 {
 {VOCABULARY JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
-{: Q ' GO >LFA ;},{},
+{: Q 'GO >LFA ;},{},
 {: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
 {FORTH DEFINITIONS},{}
 },
@@ -9756,7 +9803,7 @@ forthcode({NUMBER}) . Any word starting with the prefix is considered found in t
 dictionary and the prefix word executed.
 These words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant.
-They reside in a special vocabulary, called forthcode({DENOTATIONS}).
+They reside in a special vocabulary, called forthcode({DENOTATION}).
 To make a distinction with the same words in other wordlists,
 the names of denotations are prepended with ``DEN'' in the
 documentation. Actual names in the dictionary do not contain

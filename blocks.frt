@@ -676,7 +676,7 @@ REQUIRE CONFIG   REQUIRE +THRU
 \ Return the START of the ``ELF'' header.
  : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
 \ Return the VALUE of ``HERE'' when this forth started.
- : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
+ : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
 \ Save the system in a file with NAME .
  : SAVE-SYSTEM
 \ Increment the file and dictionary sizes
@@ -685,7 +685,7 @@ REQUIRE CONFIG   REQUIRE +THRU
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
-: TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
+: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
 ( --save_system_ turnkey ) ?PC HEX \ AvdH
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer
@@ -716,7 +716,7 @@ VARIABLE HEAD-DP  \ Fill in pointer
 
 \ Actually this is the same than in Linux.
 \ Save a system to do SOMETHING in a file with NAME .
-: TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
+: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
 
 ( PD PE PC PS get_selectors/descriptors ) \ AvdH A1nov02
 REQUIRE ASSEMBLERi86 HEX
@@ -2716,8 +2716,8 @@ HEX \ Redefine R\W to accomodate blocks in SOURCE
 R@   NOOP RBLK' DUP  @   R@   -   0=
 0BRANCH [ -50 , ] DUP   PREV   !   RDROP   CELL+   CELL+   ;
 : UPDATE' PREV @ DUP CELL+ CELL+ SWAP @ WBLK' ;
-' UPDATE' ' UPDATE 3 CELLS MOVE
-' BLOCK' ' BLOCK 3 CELLS MOVE
+' UPDATE' 'UPDATE 3 CELLS MOVE
+' BLOCK' 'BLOCK 3 CELLS MOVE
 ( Redefine R\W to accomodate larger addresses. A1may05AH)
 VOCABULARY SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
