@@ -4060,6 +4060,8 @@ THEN ;
 ( Honest to god Unix read ( fd buf len -- len/err)
 : READ ROT READ-FILE OR ;
 
+
+
 ( WRITE-FILE READ-FILE --large_buffers ) ?WI \ AvdH
 REQUIRE OLD:
 \ ISO WRITE-FILE : Chop into 32 K chunks for using WRITE
@@ -4070,9 +4072,25 @@ REQUIRE OLD:
     SWAP 8000 + SWAP REPEAT
 RDROP 2DROP 0 ;
 VARIABLE RC
+
+
+
+
+
+
+( WRITE-FILE READ-FILE --large_buffers ) ?WI \ AvdH
 : READ-FILE 0 RC ! >R
     BEGIN 2DUP 8000 MAX R@ OLD: READ-FILE
     DUP IF RDROP >R 2DROP R> EXIT THEN DROP
     RC +! 8000 - DUP 0> WHILE
     SWAP 8000 + SWAP REPEAT
 RDROP 2DROP RC @ 0 ;   'RC HIDDEN
+
+
+
+
+
+
+
+
+( 4096 last line)
