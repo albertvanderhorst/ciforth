@@ -14,7 +14,7 @@
  : ERROR, NO FURTHER INFORMATION
  : SAVE/RESTORE MUST RUN FROM FLOPPY
  : CANNOT FIND WORD TO BE POSTPONED
- : CANNOT FIND WORD TO BE COMPILED  
+ : CANNOT FIND WORD TO BE COMPILED
  : COMPILATION ONLY, USE IN DEFINITION
  : EXECUTION ONLY
  : CONDITIONALS NOT PAIRED
@@ -862,6 +862,70 @@ VARIABLE HEAD-DP  \ Fill in pointer
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
 
+( NESTED-COMPILE ) \ AvdH A2oct28
+
+\ Isolate the latest word from the dictionary. Leave its DEA.
+: UNLINK-LATEST LATEST CURRENT @ >LFA DUP @ >LFA @ SWAP ! ;
+
+\ Link DEA into the dictionary, as the latest.
+: LINK-LATEST LATEST OVER >LFA ! CURRENT @ >LFA ! ;
+
+\ Save all compilation information on the return stack. It is
+\ restored upon exit of the calling word.
+: NESTED-COMPILE R>   CSP @ >R DPL @ >R UNLINK-LATEST >R
+  STATE @ >R   >R CO    R> STATE ! R> LINK-LATEST R> DPL !
+  R> CSP !   ;
+
+
+\
+\ LATEST-WORD (WORD-BACK)             \ A2oct28 AvdH
+\ Trim a possible leading &' from a word.
+: TRIM' OVER C@ &' = IF 1- SWAP 1+ SWAP THEN ;
+\ Fpr POINTER into/past word, return START of word.
+: (WORD-BACK) BEGIN 1- DUP C@ ?BLANK 0= UNTIL 1+
+    BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ;
+\ Return SC the latest word in the input.
+: LATEST-WORD IN @ (WORD-BACK) SRC @ MAX IN ! (WORD) ( TRIM') ;
+\ The compiled program can't run.
+VARIABLE FAILED    0 FAILED !
+\ The compiled program can run, after reload.
+VARIABLE SECOND-PASS 0 SECOND-PASS !
+: .SUCCESS "REQUIRE " TYPE TYPE CR ;
+: .FAILURE "Find out about " TYPE TYPE CR -1 FAILED ! ;
+
+
+( REMEDY FIX-DEA FIX-NMB )             \ A2oct28 AvdH
+REQUIRE SWAP-DP    REQUIRE LATEST-WORD   REQUIRE NESTED-COMPILE
+\ Try to add the current, missing word to the dictionary: DEA.
+: REMEDY NESTED-COMPILE   POSTPONE [ SWAP-DP LATEST-WORD 2DUP
+ REQUIRED SWAP-DP   2DUP PRESENT? IF 2DUP .SUCCESS FOUND ELSE
+.FAILURE 'NOOP THEN ;
+\ Make words that look like malformed numbers (like 2R> )
+\ compile without error, but with run time errors.
+\ Loading the same code another time will give correct code.
+: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 IN +!
+-1 SECOND-PASS !   -1 POSTPONE LITERAL   13 POSTPONE LITERAL
+ POSTPONE ?ERROR   " Recompile!" TYPE CR ;
+\ Fix up errors caused by unknown words, if the library can
+\ resolve them. At least go on compiling.
+: FIX-DEA REMEDY 0 DSP@ 3 CELLS + ! DSP@ 3 CELLS + ! ;
+
+( ?ERROR-FIXING AUTOLOAD NO-AUTOLOAD ) \ A2oct28 AvdH
+REQUIRE OLD: REQUIRE FIX-NMB REQUIRE FIX-DEA
+\ Replacement for ?ERROR. Fix up errors, see FIX-NMB FIX-DEA.
+: ?ERROR-FIXING OVER IF
+DUP 10 = IF FIX-NMB ELSE DUP 11 = IF FIX-DEA ELSE
+DUP 12 = IF FIX-DEA ELSE DUP 15 = IF FIX-DEA ELSE
+DUP 16 = IF FIX-DEA ELSE THEN THEN THEN THEN THEN
+THEN OLD: ?ERROR ;
+\ Try to automatically load missing words.
+: AUTOLOAD '?ERROR-FIXING >DFA @ '?ERROR >DFA ! ;
+: NO-AUTOLOAD '?ERROR RESTORED ;  \ And off again.
+
+
+
+
+
 ( PD PE PC PS get_selectors/descriptors ) \ AvdH A1nov02
 REQUIRE ASSEMBLERi86 HEX
 CODE PC PUSHS, CS| NEXT C;
@@ -926,7 +990,7 @@ REQUIRE OLD:
    'NEW-THRU >DFA @   'THRU >DFA ! ;
 : NO-DEBUG   'OK RESTORED   'THRU RESTORED ;
 : ^ .S ;
-( CASE-INSENSITIVE CASE-SENSITIVE ) \ AvdH A2oct24
+( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A2oct24
 REQUIRE RESTORED HEX
 \ Characters ONE and TWO are equal, ignoring case.
 : C=-IGNORE DUP >R   XOR DUP 0= IF 0= ELSE

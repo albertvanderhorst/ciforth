@@ -4913,8 +4913,7 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      TNFA, FETCH, SFET, ETYPE
         DC      LIT,4
         DC      MESS
-        DC      SPACE   ;{THEN}
-        DC      ZERO
+        DC      X       ;{THEN}
 CREA1:  DC      DROP
 _ALIGNED_({ DC      LALIGN},{dnl})
         DC      SCOMMA
@@ -4980,7 +4979,7 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}). },
 { POSTPONE NON-EXISTING }, {STPONE NON-EXISTING ?  ciforth ERROR # 15},
 dnl This must not find 7 in the DENOTATION wordlist
 {POSTPONE 7F89 .}, {POSTPONE 7F89 ? ciforth ERROR # 15}
-},          
+},
 enddoc)
 HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         DC      LPWORD
@@ -5986,7 +5985,6 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         DC      X
 MESS1:                  ;{THEN}
         DC      DROP
-        DC      CR
         DC      SEMIS
 ;
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
@@ -8111,7 +8109,7 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      ROT
         DC      OFILE
         DC      ZEQU, NEGATE  ;{ 0 if disk problems, 1 if not.}
-        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      LWARN, FETCH, MIN ;{ AND but WARNING is 0/1.}
         DC      LWARN, STORE
         DC      BHAN, STORE
         DC      SEMIS
@@ -8136,8 +8134,7 @@ HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      FLUSH
         DC      BHAN, FETCH
         DC      CFILE
-        DC      ZERO, LWARN, FETCH, MIN
-        DC      LWARN, STORE            ;{ Affect WARNING only if it was 1.}
+        DC      ZERO, LWARN, STORE
         DC      LIT, -1, BHAN, STORE    ;{Regardless of close errors.}
         DC      QDSKER
         DC      SEMIS

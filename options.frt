@@ -318,20 +318,20 @@ SCRIPT-NAME $@ GET-FILE
 ^J $S 2DROP     \ Line with #!lina
 EVALUATE
 BYE
-( -t :_This_option_is_available )
+( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
+.SIGNON 1 LOAD
+\ Reload REQUIRE with new ``CORA'' but hide it direct after.
+REQUIRE CORA-IGNORE
+: CORA CORA-IGNORE ;   1 LOAD   'CORA HIDDEN
 
+REQUIRE [IF]   REQUIRE ARG[]   REQUIRE $
 
+REQUIRE CASE-INSENSITIVE    CASE-INSENSITIVE
+REQUIRE AUTOLOAD            AUTOLOAD
 
-
-
-
-
-
-
-
-
-
-
+2 ARG[] INCLUDED
+SECOND-PASS @ 0= ?LEAVE-BLOCK
+2 ARG[] INCLUDED
 
 \
 ( -u :_This_option_is_available )

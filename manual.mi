@@ -418,7 +418,7 @@ Despite the fact that thisforth contains only one state-smart word besides
  forthcode({SLITERAL})  (that word is forthcode({."}) )
 which is about politically correct,
 as a consequence all denotations and some other words like
- forthcode({[CHAR]}) and forthcode({[']}) 
+ forthcode({[CHAR]}) and forthcode({[']})
 (but not forthcode({CHAR}) and forthcode({'}))
 turn out to be state smart as a design consequence.
 This is used freely in the libraries of ciforth; it is
@@ -1167,6 +1167,15 @@ forthsamp({#!lina -s}){ or some such as }
 forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})})
 In a script forthcode({REQUIRED}) is available and
 you can use standard in and standard out.
+
+forthitem
+forthsamp({-t sourcefile})
+
+Try to load the file forthfile({script}) automatically, by possibly unsafe means. 
+Report facilities that were required. 
+This is a first step in a porting activity.
+_VERBOSE_({Redefinition messages are issued on the error channel that
+can be redirected to /dev/nul leaving the report.})
 
 forthitem
 forthsamp({-v})
