@@ -240,10 +240,9 @@ THEN RDROP ;
 THEN RDROP ;
 
 \ Delete from ``BRANCHES'' what is marked for elimination.
-\ Must go back because otherwise the we would disturb the later addresses.
-: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ ?DO
-    I 1 CELLS - @ BRANCHES SET-REMOVE
--1 CELLS +LOOP ;
+\ Must go back because otherwise we would disturb the later addresses.
+: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+
+   BEGIN 2DUP < WHILE   1 CELLS -   DUP @ BRANCHES SET-REMOVE   REPEAT 2DROP ;
 
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
 : ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES @+ SWAP ?DO
