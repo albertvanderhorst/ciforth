@@ -2340,11 +2340,11 @@ DECIMAL
  1 CELLS - REPEAT ; FIND-START CONSTANT SM
  : HERE-AT-STARTUP  ' DP >PFA @ +ORIGIN @ ;
  : SAVE-SYSTEM
-  HERE-AT-STARTUP  HERE 2DUP 150 MOVE 
-  SWAP - DUP 
+
+  HERE HERE-AT-STARTUP - DUP 
   SM 20 + +!      SM 44 + +! ( File&Dict size)
    U0 @   0 +ORIGIN   100   MOVE ( Save user variables)
-   SM    HERE 150 + SM - "lina.new" PUT-FILE
+   SM    HERE  SM - "lina.new" PUT-FILE
 ;
 : ARGC ARGS @ @ ;  : ARGV ARGS @ CELL+ ;
 : ENV ARGS @ $@ 1+ CELLS + ;
