@@ -162,6 +162,9 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 
 _USEBIOS_({
 DRIVE   EQU     0       ;{ Use floppy A for blocks.}
+_COMMENT
+DRIVE   EQU     80      ;{ Use drive C for blocks.}
+_ENDCOMMENT
 });_END_({_USEBIOS_})
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
@@ -202,6 +205,19 @@ NFAT    EQU     2       ;{ Number of FATS}
 SECROOT EQU     ?       ;{ Sectors for root directory entry.}
 SECFAT  EQU     ?       ;{ Sectors per FAT}
 MEDIA   EQU    F0H      ;{ Descriptor byte. Anachronism.}
+_ENDCOMMENT
+
+_COMMENT
+;{ Hard drive }
+;{This works supposedly with all reasonably modern drives, }
+;{ but has the 1Gbyte limit.}
+TRKS    EQU     1024      ;{Number of tracks}
+SPT     EQU     63      ;{Sectors/track}
+HEADS   EQU     16      ;{Number of heads }
+NFAT    EQU     2       ;{ Number of FATS}
+SECROOT EQU     ?       ;{ Sectors for root directory entry.}
+SECFAT  EQU     ?       ;{ Sectors per FAT}
+MEDIA   EQU    F9H      ;{ Descriptor byte. Anachronism.}
 _ENDCOMMENT
 
 ;{ Bios specific equates.}
@@ -1411,11 +1427,11 @@ CODE_HEADER({NOOP},{NOOP})
 ;
 _OLDDEBUG_({ ;{ Rather unclear what this is supposed to.}
 NOP0:   DC      $+_CELLS(1)
-        JMP SHORT NEXT
+        JMP NEXT
 NOP1:   DC      $+_CELLS(1)
-        JMP SHORT NEXT
+        JMP NEXT
 NOP2:   DC      $+_CELLS(1)
-        JMP SHORT NEXT
+        JMP NEXT
 });_END_({_OLDDEBUG_ })
 ;
 worddoc( {COMPILING~},{LIT},{lit},{--- n},{FIG,C2,L0},
@@ -2892,7 +2908,7 @@ forthsamp({R/W}). },
 {{BLOCK},{MESSAGE} },
 {{OFFSET @ 1000 U< .},{_T_}},
 enddoc)
-HEADER({OFFSET},{OFSET},{DOUSE}, _CELLS(11))
+HEADER({OFFSET},{LOFFSET},{DOUSE}, _CELLS(11))
 ;
 ;{ End of user variables with fixed place.}
 ;
@@ -5772,7 +5788,7 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV, FETCH
         DC      LDUP, CELLP,CELLP
         DC      SWAP, FETCH
-        DC      OFSET,  FETCH, PLUS
+        DC      LOFFSET,  FETCH, PLUS
         DC      ZERO
         DC      RSLW
         DC      SEMIS
@@ -5856,7 +5872,7 @@ BLOC2:  DC      PBUF, ZEQU
         DC      BUFFE, LDUP
         DC      CELLP, CELLP    ;{ Content address.}
         DC      RR
-        DC      OFSET,  FETCH, PLUS
+        DC      LOFFSET,  FETCH, PLUS
         DC      ONE
         DC      RSLW
 BLOC3:  DC      LDUP, FETCH
