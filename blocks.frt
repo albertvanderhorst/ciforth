@@ -584,8 +584,8 @@ BYE
 0 CELL+ 8 <> CONFIG ?64
  "LINOS"  PRESENT? 0=   CONFIG ?LI   \ Linux
  "BIOS31" PRESENT? 0=   CONFIG ?WI   \ DPMI ("windows")
- "BDOS"   PRESENT? 0=   CONFIG ?MS   \ MS-DOS
- "BIOS"   PRESENT? 0=   CONFIG ?PC   \ Possibly stand alone
+ "BDOSN"  PRESENT? 0=   CONFIG ?MS   \ MS-DOS
+ "BIOSN"  PRESENT? 0=   CONFIG ?PC   \ Possibly stand alone
  "LBAPAR" PRESENT? 0=   CONFIG ?HD   \ Hard disk, modern
  "SEC-RW" PRESENT? 0=   CONFIG ?FD   \ Floppy or hard disk old
 
