@@ -34,7 +34,6 @@
 (               10 Register op        20 Memory op                    )
 (               40 D0                 80 [BP]' {16} [BP] {32}         )
 (  sib:        100 normal             200 [AX +8*| DI]               )
-(              400 src B / dst W      800 consistent size            )
 ( Only valid for 16 bits real mode, in combination with an address      )
 ( overwite. Use W, L, and end the line in TALLY! to defeat checks.      )
 0120 0700 0s T!
@@ -45,7 +44,7 @@
 0001A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
-0911 0700 0s T!
+0111 0700 0s T!
  0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 0112 0700 0s T!
  0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
@@ -92,7 +91,6 @@
 02 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
 02 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
 0022 FF0000 T!   001 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
-02 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
 ( --------- one fixup operands ----------)
 040000 C701 00C6 2PI MOVI,
 0012 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
@@ -131,12 +129,12 @@
 ( --------- special fixups ----------)
 
 00     10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
-00     00E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
-400000 10F 70 1PI J,
+00     40E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
+400000 50F 70 1PI J,
 
-00 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
-00 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
-02 DF02 08C 2PI MOV|SG,
+00 21800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
+00 218 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
+02 2DF02 08C 2PI MOV|SG,
 
 00 20002 0s 00 0s xFIR 1|   00 20002 0s 02 0s xFIR V|          ( 3) 
 0 2C703 T! ( 20000 is a lockin for 1| V|)                      ( 3) 
@@ -147,14 +145,13 @@
  0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
 12 3F4300 C0200F 3PI  MOV|CD,
 
-800000 10F00 800F 2PI J|X,                                           ( 3)
+800000 50F00 800F 2PI J|X,                                           ( 3)
 00 0021 0s T!   01 0s 0 2 xFAMILY|R Y'| N'|                          ( 3)
 00 000E 0s T!   02 0s 0 8 xFAMILY|R O'| C'| Z'| CZ'| S'| P'| L'| LE'| ( 3)
-01 C72F00 00900F 3PI SET,  ( 3)
+0101 C72F00 00900F 3PI SET,  ( 3)
+0101 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
+0102 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
 
-0512 0700 0s T! ( 3)
- 0100 0s 0 8 xFAMILY|R <AL| <CL| <DL| <BL| <AH| <CH| <DH| <BH| ( 3) 
-502 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3) 
 ( --------- no fixups ---------------)
 
 040001 00 CD 1PI INT,
@@ -176,7 +173,7 @@
    01   60 2 1FAMILY, PUSH|ALL, POP|ALL, ( 3)
    01   64 4 1FAMILY, FS:, GS:, OS:, AS:, ( 3)
  0100 A00F 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
- 0100 A80F 2 2FAMILY, PUSH|GS, POP|GS, RSM,
+ 0100 A80F 2 2FAMILY, PUSH|GS, POP|GS, ( RSM,)
   040002 00   68 1PI PUSHI|X,  ( 3)
   040001 00   6A 1PI PUSHI|B,  ( 3)
 01040001 00   C8 1PI ENTER, ( 3)
