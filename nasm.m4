@@ -8,10 +8,15 @@ dnl Directives ignored by NASM.
 define({ASSUME},;)dnl Turn ASSUME into comment.
 define({CSEG},;)dnl Turn CSEG into comment.
 define({END},;)dnl Turn END into comment.
-define({OFFSET})dnl Ignore this design error altogether.
+define({OFFSET})dnl Ignore this design error altogether. 
 define({PAGE},;)dnl Turn PAGE into comment.
 define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
+define({_WRD_PTR},)dnl Ignore 'WRD PTR' altogether. 
+dnl
+dnl Specification of the length of an operand,
+dnl needed to get exactly the same code as MASM.
+define({_BYTE},BYTE)dnl Operand has length BYTE.
 dnl
 dnl More complicated tricks to get rid of MASM.
 define({_ENDP},;)dnl Each ENDP is started with _ENDP in generic listing.
