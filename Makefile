@@ -1,7 +1,7 @@
 # $Id$
 # Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
-# This defines the transformation from the generic file fig86.gnr
+# This defines the transformation from the generic file ci86.gnr
 # into a diversity of Intel 86 assembly sources, and further into
 # one of the $(TARGETS) Forth's.
 
@@ -26,15 +26,15 @@
 #* .rawtest : unsorted and unexpanded tests.
 #+ .m4 : m4 macro's possibly including other macro's
 #   except constant.m4
-# .cfg : m4 macro's generating files ( fig86.%.x + %.cfg -> fig86.%.y)
+# .cfg : m4 macro's generating files ( ci86.%.x + %.cfg -> ci86.%.y)
 # .mi : files that after processed by m4 give a .texinfo file
 # .mig : Currently in use for the wordset, which is a .mi file (WRONG!)
 # It could be, but it has been stolen.
 
-# ALL FILES STARTING IN ``fig86'' BUT BUT ``fig86.gnr'' ARE GENERATED
+# ALL FILES STARTING IN ``ci86'' (OUTHER ``ci86.gnr'') ARE GENERATED
 
 INGREDIENTS = \
-header.m4        \
+header.m4       \
 postlude.m4      \
 prelude.m4       \
 protect.m4       \
@@ -47,7 +47,7 @@ gloss.m4        \
 glosshtml.m4    \
 indexhtml.m4    \
 manual.m4       \
-menu.m4         \
+menu.m4  \
 names.m4        \
 wordset.m4      \
 # That's all folks!
@@ -60,17 +60,17 @@ TARGETS= msdos alone linux lina alonehd
 BINTARGETS= msdos alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
-LINUXFORTHS= figforth lina
+LINUXFORTHS= ciforthc lina
 # Auxiliary targets. Because of GNU make bug, keep constant.m4.
 OTHERTARGETS= BLOCKS.BLK toblock fromblock # constant.m4
 # C-sources with various aims.
 CSRCAUX= toblock fromblock stealconstant
-CSRCFORTH= figforth stealconstant
+CSRCFORTH= ciforth stealconstant
 CSRC= $(CSRCAUX) $(CSRCFORTH)
 
 # Texinfo files still to be processed by m4.
 SRCMI= \
-figforth.mi \
+ciforth.mi \
 intro.mi    \
 manual.mi   \
 rational.mi  \
@@ -78,13 +78,13 @@ rational.mi  \
 
 # Documentation files and archives
 DOC = \
-COPYING          \
+COPYING   \
 assembler.txt    \
 editor.txt     \
 release.txt      \
 fig86gnr.txt       \
 testreport.txt     \
-cfg.zip         \
+cfg.zip  \
 $(SRCMI) \
 # That's all folks!
 
@@ -97,18 +97,18 @@ figdoc.zip    \
 
 # These files can easily be generated, if you have linux.
 EXAMPLES = \
-fig86.alone.asm  \
-fig86.msdos.msm  \
-fig86.linux.asm  \
-fig86.lina.asm  \
-fig86.alonehd.asm  \
+ci86.alone.asm  \
+ci86.msdos.msm  \
+ci86.linux.asm  \
+ci86.lina.asm  \
+ci86.alonehd.asm  \
 # That's all folks!
 
 RELEASECONTENT = \
-fig86.gnr        \
+ci86.gnr        \
 $(CSRC:%=%.c)    \
 $(TARGETS:%=%.cfg) \
-$(DOC)           \
+$(DOC)     \
 Makefile         \
 test.mak        \
 $(INGREDIENTS)   \
@@ -118,7 +118,7 @@ blocks.frt       \
 genboot.bat      \
 link.script    \
 $(EXAMPLES)     \
-wc              \
+wc            \
 # That's all folks!
 
 # r## revision 2.## a beta release
@@ -126,18 +126,18 @@ wc              \
 VERSION=test  # Because normally VERSION is passed via the command line.
 
 RELEASELINA = \
-COPYING          \
-fig86.lina.html \
-fig86.lina.texinfo \
+COPYING   \
+ci86.lina.html \
+ci86.lina.texinfo \
 linarelease.txt  \
-fig86.lina.asm      \
-lina          \
+ci86.lina.asm      \
+lina      \
 BLOCKS.BLK       \
 $(CSRCAUX:%=%.c)    \
-wc              \
+wc            \
 # That's all folks!
 
-TEMPFILE=/tmp/figforthscratch
+TEMPFILE=/tmp/ciforthscratch
 
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm
@@ -145,10 +145,10 @@ TEMPFILE=/tmp/figforthscratch
 
 
 # msdos.cfg and alone.cfg are present (at least via RCS)
-# allow to generate fig86.msdos.bin etc.
-fig86.%.rawdoc fig86.%.rawtest : fig86.%.asm ;
+# allow to generate ci86.msdos.bin etc.
+ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
-fig86.%.asm : %.cfg nasm.m4 fig86.gnr
+ci86.%.asm : %.cfg nasm.m4 ci86.gnr
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
@@ -156,7 +156,7 @@ fig86.%.asm : %.cfg nasm.m4 fig86.gnr
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
-fig86.%.msm fig86.%.rawdoc fig86.%.rawtest : %.cfg masm.m4 fig86.gnr ; \
+ci86.%.msm ci86.%.rawdoc ci86.%.rawtest : %.cfg masm.m4 ci86.gnr ; \
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
@@ -164,8 +164,8 @@ fig86.%.msm fig86.%.rawdoc fig86.%.rawtest : %.cfg masm.m4 fig86.gnr ; \
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
-fig86.%pres  : %.cfg gas.m4  fig86.gnr ; m4 $+ >$@
-fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
+ci86.%pres  : %.cfg gas.m4  ci86.gnr ; m4 $+ >$@
+ci86.%     : %.cfg       ci86.gnr ; m4 $+ >$@
 
 # gas needs extra transformations that m4 cannot handle.
 # In particular the order of operands.
@@ -174,27 +174,27 @@ fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
 .PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release
 
 # Default target for convenience
-default : figforth
-fig86.$(s).bin :
+default : lina
+ci86.$(s).bin :
 
 # Put include type of dependancies here
 $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
 # Some of these targets make no sense and will fail
-all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(BINTARGETS:%=fig86.%.bin) \
+all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
     $(LINUXFORTHS) $(OTHERTARGETS)
 
-clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
+clean : ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
 
 #msdos32.zip soesn't work yet.
-release : figdoc.zip zip msdos.zip lina.zip as.zip
+release : figdoc.zip zip msdos.zip lina.zip # as.zip
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
 # then creating a dos file system in accordance with the boot sector,
 # then copying the forth system to exact the first available cluster.
 # The option BOOTFD must be installed into alone.m4.
-boot: fig86.alone.bin
+boot: ci86.alone.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 	mformat -k a:
 	mcopy $+ a:forth.com
@@ -204,17 +204,17 @@ filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 # Figforth calculates whether the screen boundaries are off by a sector.
 # You can copy the filler by hand if this calculation fails, e.g. 5" floppies.
 # The symptom is 8 LIST show the electives screen half and half of some other screen.
-filler: fig86.alone.bin lina filler.frt
+filler: ci86.alone.bin lina filler.frt
 	rm -f wc # Use the official `wc' command
 	# Have forth calculate whether we need the filler sector
 	# Use the exit command to return 1 or 0
-	(filesize=`cat fig86.alone.bin |wc -c`; \
+	(filesize=`cat ci86.alone.bin |wc -c`; \
 	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
-moreboot: BLOCKS.BLK fig86.alone.bin  fig86.msdos.bin
+moreboot: BLOCKS.BLK ci86.alone.bin  ci86.msdos.bin
 	mcopy BLOCKS.BLK a:
-	mcopy fig86.msdos.bin      a:msdos.com
+	mcopy ci86.msdos.bin      a:msdos.com
 
 allboot: boot filler moreboot
 
@@ -223,49 +223,49 @@ BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
 # The option BOOTHD must be installed into alone.m4.
-hdboot: fig86.alonehd.bin
+hdboot: ci86.alonehd.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 
 figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 
-zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip
+zip : $(RELEASECONTENT) ; echo ci86g$(VERSION) $+ | xargs zip
 
-# For msdos truncate all file stems to 8 char's and loose prefix `fig86.'
+# For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply BLOCKS.BLK
 msdos.zip : $(RELEASECONTENT) mslinks ;\
-    echo fg$(VERSION) $(RELEASECONTENT) |\
-    sed -e's/ fig86\./ /g' |\
-    sed -e's/ gnr / fig86.gnr /g' |\
+    echo FG$(VERSION) $(RELEASECONTENT) |\
+    sed -e's/ ci86\./ /g' |\
+    sed -e's/ gnr / ci86.gnr /g' |\
     xargs zip -k
 
 # More messy things in behalf of msdos
 mslinks :
-	ln -sf fig86.lina.asm lina.asm
-	ln -sf fig86.linux.asm linux.asm
-	ln -sf fig86.msdos.msm msdos.msm
-	ln -sf fig86.msdos.asm forth32.asm
-	ln -sf fig86.msdos.bin forth32.com
-	ln -sf fig86.alone.asm alone.asm
-	ln -sf fig86.alonehd.asm alonehd.asm
+	ln -sf ci86.lina.asm lina.asm
+	ln -sf ci86.linux.asm linux.asm
+	ln -sf ci86.msdos.msm msdos.msm
+	ln -sf ci86.msdos.asm forth32.asm
+	ln -sf ci86.msdos.bin forth32.com
+	ln -sf ci86.alone.asm alone.asm
+	ln -sf ci86.alonehd.asm alonehd.asm
 
 lina.zip : $(RELEASELINA) ; zip lina$(VERSION) $+
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
-fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
+ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
 # This linking must be static, because `link.script' is tricky enough.
 # but a .5M executable is better than a 64 M executable.
-figforth : figforth.c fig86.linux.o link.script
-	$(CC) $(CFLAGS) figforth.c fig86.linux.o -static -Wl,-Tlink.script -Wl,-M -o $@
+ciforthc : ciforth.c ci86.linux.o link.script
+	$(CC) $(CFLAGS) ciforth.c ci86.linux.o -static -Wl,-Tlink.script -Wl,-M -o $@
 
 # Linux native forth
-lina : fig86.lina.o ; ld $+ -o $@
+lina : ci86.lina.o ; ld $+ -o $@
 
 # Error in GNU make. This dependancy is not seen.
 # Do `make constant.m4' explicitly beforehand.
-fig86.alone.asm : constant.m4
+ci86.alone.asm : constant.m4
 
 # Convenience under linux. Steal the definitions of constants from c include's.
 constant.m4 : stealconstant.c ;  \
