@@ -240,9 +240,9 @@ testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab ;
 	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
-	lina <$@.1 | grep -v RCSfile >$@.3
+	lina <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
-	lina -a <tsuite.frt >tsuite.out
+	lina -a <tsuite.frt 2>&1 |cat >tsuite.out
 	diff tsuite.out testresults || true
 	rm forth.lab
 	rm $(TEMPFILE)
