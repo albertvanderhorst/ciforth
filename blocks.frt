@@ -1,11 +1,10 @@
 COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
-modify it under the terms of version 2 the GNU General Public
-License as published by the Free Software Foundation.
+modify it under the terms of version 2 of the GNU General
+Public License as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be
-useful,
+This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
@@ -14,6 +13,7 @@ You should have received a copy of the GNU General Public
 License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
+
 ( -a This_option_is_available )
 
 
@@ -72,7 +72,7 @@ LATEST EXEC-NAME   TURNKEY
  MSG # 7 : FULL STACK
  MSG # 8 : DISC ERROR !
  MSG # 9 : UNRESOLVED FORWARD REFERENCE
- MSG # 10 : DENOTATION IS NOT BLANK DELIMITED
+ MSG # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION
  MSG # 11 : WORD IS NOT FOUND
  MSG # 12 : NOT RECOGNIZED
  MSG # 13 : ERROR, NO FURTHER INFORMATION
@@ -265,7 +265,7 @@ REQ EDITOR REQ OOPS
 REQ CRACK    REQ LOCATE
  ( BACKUP        250 LOAD   77 81 THRU )
 ( REQ ASSEMBLER )
-
+( REQ DEADBEEF )
 
 
 : TASK ;   ( 'REQ HIDDEN)
@@ -356,7 +356,7 @@ BYE
 "                 LIBRARY FILE: " TYPE CR
 "$RCSfile$ $Revision$" TYPE CR
 CR
-28 BLOCK B/BUF TYPE
+27 BLOCK B/BUF TYPE
 BYE
 
 
@@ -382,12 +382,12 @@ BYE
 
 
 
-( CORE EXTENSION WORDS ASSUMED BY HAYDN, OTHERS TEST NEEDS)
- -1 CONSTANT TRUE       0 CONSTANT FALSE
-REQUIRE ?LEAVE-BLOCK
+( -x This_option_is_available )
 
-"!CSP" FOUND ?LEAVE-BLOCK
- : !CSP ; : ?CSP ;
+
+
+
+
 
 
 
@@ -433,8 +433,8 @@ REQUIRE ?LEAVE-BLOCK
 COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
-modify it under the terms of version 2 the GNU General Public
-License as published by the Free Software Foundation.
+modify it under the terms of version 2 of the GNU General
+Public License as published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -449,12 +449,12 @@ License along with this program; if not, write to the
 ( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
 \ For LINE and WORD sc's : line CONTAINS word.
-: CONTAINS   0 PAD ! BL PAD $C+ PAD $+! BL PAD $C+
+: CONTAINS   0 PAD !   BL PAD $C+   PAD $+!   BL PAD $C+
     0 ROT ROT   PAD @ - OVER + SWAP
     DO   I PAD $@ CORA   0= IF DROP -1 LEAVE THEN   LOOP ;
 \ Find WORD in the block library and load it.
 : FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
-256 28 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
+256 28 DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 2DROP ;
 \ For WORD sc: it IS found but not a built-in denotation.
 : PRESENT? FOUND 'FORTH U< 0= ;
@@ -501,6 +501,8 @@ An ISO language extension is either an ISO word, implemented in
 a possibly non-portable way, or a word that is not defined in
 the standard but that is implemented by using only standard
 words.
+Sometimes it is an ``in''tension, a loadable extension required
+for ISO, that in my opinion should never be loaded.
 
 
 
@@ -508,8 +510,22 @@ words.
 
 
 
-
-
+( DEADBEEF leading_hex_digit) REQUIRE CONFIG \ AvdH A1oct13
+\ Are denotations starting with "D" already known?
+"D" 'DENOTATION >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
+\ Apparently not, so:
+REQUIRE ALIAS
+CURRENT @   DENOTATION DEFINITIONS   '3   PREVIOUS
+\ Make sure Forth understands DEADBEEF as a hex number
+DUP ALIAS A   DUP ALIAS B   DUP ALIAS C   DUP ALIAS D
+DUP ALIAS E   DUP ALIAS F   DUP ALIAS G   DUP ALIAS H
+DUP ALIAS I   DUP ALIAS J   DUP ALIAS K   DUP ALIAS L
+DUP ALIAS M   DUP ALIAS N   DUP ALIAS O   DUP ALIAS P
+DUP ALIAS Q   DUP ALIAS R   DUP ALIAS S   DUP ALIAS T
+DUP ALIAS U   DUP ALIAS V   DUP ALIAS W   DUP ALIAS X
+DUP ALIAS Y   DUP ALIAS Z
+DROP   CURRENT !
+\ Use  'DENOTATION >WID CURRENT ! instead of DEFINITIONS
 ( COMPARE ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
@@ -517,6 +533,22 @@ words.
 
 
 
+
+
+
+
+
+
+
+
+
+( --manifest TRUE FALSE NULL NULL$ NONE ) \ AvdH A1oct15
+\ Define some manifest constants.
+-1 CONSTANT TRUE       \ Flag
+0 CONSTANT FALSE       \ Flag
+0 CONSTANT NULL        \ Invalid address
+: NULL$ 0 0 ;          \ Invalid string
+-1 CONSTANT NONE       \ Invalid index, where valid is pos.
 
 
 
@@ -747,7 +779,7 @@ CREATE BASE' 0 ,
 
 
 
-: STRING CREATE &" PARSE $, DROP DOES> $@ ;
+: STRING CREATE &" (PARSE) $, DROP DOES> $@ ;
 
 
 ( TIME ELAPSED ) REQUIRE CONFIG ?32 \ AvdH A1oct05
@@ -848,12 +880,12 @@ REQUIRE T[
 
 ( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE CONFIG  ?LI \ A1sep25
 \ Return the NUMBER of arguments passed by Linux
-: ARGC ARGS @ @ ;
+: ARGC   ARGS @   @ ;
 
 \ Return the argument VECTOR passed by Linux
-: ARGV ARGS @ CELL+ ;
+: ARGV   ARGS @   CELL+ ;
 \ Return the environment POINTER passed by Linux
-: ENV ARGS @ $@ 1+ CELLS + ;
+: ENV   ARGS @   $@ 1+ CELLS + ;
 
 \ For a CSTRING (pointer to zero ended chars) return a STRING.
 : Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
@@ -1445,7 +1477,7 @@ CREATE cmdbuf 1000 ALLOT
      CREATE , ,
      DOES>
      2@ cmdbuf $! BL cmdbuf $C+ \ Command
-     ^J PARSE cmdbuf $+!      \ Append
+     ^J (PARSE) cmdbuf $+!      \ Append
      cmdbuf $@ SYSTEM          \  Execute
 ;
 
@@ -1729,7 +1761,7 @@ HEX>
 ( FREE-BLOCK REFRESH ) REQUIRE CONFIG   ?LI   \ AvdH A1oct03
 \ Return the first BLOCK not written yet.
 : FREE-BLOCK
-    1 BEGIN DUP 'BLOCK CATCH 0= WHILE DROP 1+ REPEAT ;
+    1 BEGIN DUP 'BLOCK CATCH 0= WHILE DROP 1+ REPEAT DROP ;
 : REFRESH
     BLOCK-EXIT
     "ee BLOCKS.BLK;cp BLOCKS.BLK blocks.frt" SYSTEM
@@ -3582,515 +3614,3 @@ problems, CP/M dependant tricks and knowledge.
           ?DUP IF
           OVER + SWAP DO I C@ PEMIT LOOP THEN ;
   : P."  "" WORD COUNT PTYPE ;       34 LOAD
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
