@@ -302,11 +302,22 @@ POSTPONE BRANCH 0 ,   ;
 \ For all the ``EXITS'' remembered, fill in the ``SHIFTS'' caused by expansion
 \ of the ``EXIT''. To be called when ``HERE'' is where the ``EXIT'' must
 \ branch to.
-: HANDLE-EXITS
+: HANDLE-EXITS-BRANCHES
 EXITS @+ SWAP ?DO
-    I @ CELL+    HERE OVER CELL+ -   SWAP !
     I @ SHIFTS SET+!    0 CELL+ SHIFTS SET+!
 0 CELL+ +LOOP ;
+
+\ For all the ``EXITS'' expanded, fill in its branch offset.
+\ The correction that will later be applied caused by shift,
+\ must be precompenstated.
+: HANDLE-EXITS-SHIFTS EXITS @+ -  \ Correction : #EXITS cells.
+EXITS @+ SWAP ?DO
+HERE OVER +   I @ CELL+ -    I @ CELL+ !   CELL+
+0 CELL+ +LOOP DROP ;
+
+\ Keep data structures up to date, w.r.t. ``EXITS''
+\ To be called when ``HERE'' is where the ``EXIT'' must branch to.
+: HANDLE-EXITS HANDLE-EXITS-BRANCHES HANDLE-EXITS-SHIFTS ;
 
 \ Copy a GAP containing a single statement (xt plus possible inline stuff)
 \ to ``HERE'' take into account specialties associated with its DEA.
@@ -368,7 +379,7 @@ BRANCHES @+ SWAP ?DO
 
 \ Expand each constituent of SEQUENCE to ``HERE'' .
 \ Leave a POINTER to equivalent linearised code.
-: EXPAND HERE SWAP    !SHIFTS   (EXPAND) CORRECT-BRANCHES POSTPONE (;)  ;
+: EXPAND HERE SWAP    !SHIFTS   (EXPAND) POSTPONE (;) CORRECT-BRANCHES ;
 
 \ ----------------------    Annihilaton ----------------------
 
