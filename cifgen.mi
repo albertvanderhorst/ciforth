@@ -526,7 +526,143 @@ Once we know what the fields are,
 and within that field on the second. We just use the ordinary ASCII collating
 sort, indicated by forthsamp({S}) .
 
+@chapter Structures and processes
+@section The generic source file
+The generic source file forthfile({fig86.gnr}) mostly 
+consists of Intel assembly code, with which, I assume,
+you are familiar. All macro's in the following are forthfile({m4}) macro's.
+Words are divided in small (<20) groups of cooperating words, 
+the forthdefi({wordset}). See also ``thinking Forth''.
 
+The things that differ among assemblers, are taken care of by
+simple macro's, e.g. forthmacro({_COMMENT}) starts a comment.
+Most of the time they don't have parameters.
+
+The selection of parts that go or don't go into a particular configuration
+is done by multiline macro's, generally with a call on a separate line.
+Such as:
+forthexample({
+{_HIGH_BUF_}(_lbracket_
+BUF1    EQU     EM-(KBBUF+2*2)*NBUF      ;_lbracket_ FIRST DISK BUFFER_rbracket_
+STRUSA  EQU     BUF1-US         ;_lbracket_ User area_rbracket_
+_rbracket_);{_END_}(_lbracket_ _HIGH_BUF__rbracket_)  })
+Note how comments are protected from macro expansion by quotation.
+The forthmacro({_END_}) is an adornment. It expands to nothing.
+So it doesn't show up in the output, 
+but it helps to keep the generic source organised.
+
+The forthmacro({worddoc}) macro defines a structure with additional information
+of a word.
+Generally it is placed in front of the word.
+The same word can be found several times in the input file,
+but only one is selected in a particular configuration.
+The same goes for the corresponding forthmacro({worddoc}) .
+forthbreak
+Its fields are:
+forthenumerate
+forthitem
+Wordset name.
+forthitem
+Word name.
+forthitem
+Pronunciation. 
+This is a pure textual and pronouncable identification of the word.
+It is also used in forthfile({texinfo}) that doesn't handle special characters well.
+forthitem
+Stack effect. 
+The stack effect obeys all the conventions put forth in the user manual.
+forthitem
+Properties.
+Properties are i.a. immediate and such, and the standards with which
+this word complies.
+Again this is described in the user manual.
+forthitem
+Description.
+forthitem
+References. 
+This is a list of names of other Forth words,
+that can be studied to better understand this one.
+forthitem
+Tests.
+This is a list. 
+The first and all other odd members is a test,
+code that can be passed to Forth.
+The second and all other even members is the expected outcome of the
+preceding test.
+forthendenumerate
+forthmacro({worddoc}) are such that a structure starts with forthsamp({worddoc( })  and 
+end with a forthsamp({_rbracket_)}) at the end of a line.
+This means that a worddoc 
+can be simply skipped if it occurrs in Forth code,
+by defining a word forthcode({{worddoc(}}) that reads and ignores source up to the
+end sentinel.
+
+The forthmacro({worddocchapter}) macro defines a wordset. 
+It has the same fields as a forthmacro({worddoc}) macro,
+but most are left empty.
+It is primarily used for its ``description'' field, 
+that is used as an overview description for the wordset in glossaries.
+These macro's can be put anywhere, 
+but take care to exclude macro's for wordsets that are not present.
+
+@section The process
+The ultimate information about how a ciforth is generated are the makefile's :
+ forthfile({Makefile}) and forthfile({test.mak}) .
+
+The process of generating a program proceeds along the following steps:
+forthenumerate
+forthitem
+Generated the assembler source from the generic source via a configuration file.
+The file suffix indicates which assembler to use.
+forthitem
+Generate an object file.
+forthitem 
+Link the object file.
+forthendenumerate
+Once you have an assembler file, 
+you can do what you want with it.
+Proceeding from an assembler source file to a binary is in general straightforward.
+
+The process of generating program's documentation
+(TeX and info)
+proceeds along the following steps:
+forthenumerate
+forthitem
+Generated the raw glossary documentation
+from the generic source via a configuration file.
+The file suffix is forthfile({.rawdoc}) . 
+forthitem
+Sort the forthfile({.rawdoc}) file, 
+such that words of a wordset appear together, 
+and are preceeded by a wordset documentation.
+The file suffix is forthfile({.mig}) . 
+forthitem
+Generate the glossary documentation from the forthfile({.mig})
+by expanding the forthmacro({worddoc}) 's into glossary entries by 
+forthfile({gloss.m4}) or forthfile({glosshtml.m4}) .
+This, for a second time (!), takes into account the configuration file{}_VERBOSE_(
+{, to generate exactly fitting information}).
+forthitem 
+Expand the ``postponed markup's '' in forthfile({figforth.mi}) 
+by the macro's from forthfile({manual.m4}) to 
+generate the texinfo commands. 
+This file include all the other forthfile({.mi}) files with postponed markup's.
+forthendenumerate
+
+The process for generating html has the postponed markups and the 
+expansion into glossary entries in the same file forthfile({glosshtml.m4}).
+Only the documentation of the glossary enters into html ,
+and the forthfile({ciforth.html}) is generated from the intermediate
+file forthfile({.mig}). 
+
+Generating documents is made more complicated by the requirements for special tables.
+For forthsamp({html}) we want an extra alphabetic list of all the words where we click on to
+get at the glossary entry immediately.
+forthbreak
+In forthfile({texinfo}) we need to build complicated menu structures, that refer back and forth.
+forthbreak
+This is done by separate passses over the forthfile({.rawdoc})  or forthfile({.mig}) 
+files, with other macro's.            
 @chapter off we go
 @section Introduction
 
