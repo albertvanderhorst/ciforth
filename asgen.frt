@@ -143,8 +143,8 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 0 VARIABLE ISS  ( Start of current instruction)
 0 VARIABLE ISL  ( Lenghth of current instruction)
 
-( Initialise ``TALLY''
-: !TALLY   0 TALLY-BI !   0 TALLY-BY !   0 TALLY-BA ! ; 
+( Initialise ``TALLY''                                                  )
+: !TALLY   0 TALLY-BI !   0 TALLY-BY !   0 TALLY-BA !  0 PREVIOUS ! ;
 ( Return: instruction IS complete, or not started)
 : AT-REST? TALLY-BI @ 0=   TALLY-BY @ 0=  AND ;
 : BADPAIRS? DUP 2 * AND AAAAAAAA AND ; ( For N : it CONTAINS bad pairs)
@@ -223,7 +223,7 @@ IS-A IS-xFI   : xFI   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP> ;
 : CORRECT-R 0 CELL+ ISL @ - ROTLEFT ;
 ( Bookkeeping for a fixup-from-reverse using a pointer to the BIBYBA    )
 ( information, can fake a fixup in disassembling too.                   )
-: TALLY:|R  @+ CORRECT-R ^ TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR! ; 
+: TALLY:|R  @+ CORRECT-R TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR! ; 
 ( Fix up the instruction from reverse using a pointer to DATA. )
 : FIXUP<   @+ CORRECT-R ISS @ OR!   TALLY:|R  CHECK32 ;
 ( Define a fixup-from-reverse by BA BY BI and the FIXUP bits )
@@ -242,10 +242,9 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 
  0 VARIABLE PRO-TALLY 2 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 ( Fill in the tally prototype with BA BY BI information )           
-( It gets a prime until T! has been phased out. )
-: T!' PRO-TALLY !+ !+ ! ;
+: T! PRO-TALLY !+ !+ !+ DROP ;
 ( Get the data from the tally prototype back BA BY BI )
-: T@ PRO-TALLY 3 CELLS +  @- @- @ ;
+: T@ PRO-TALLY 3 CELLS +  @- @- @- DROP ;
 ( Add INCREMENT to the OPCODE a NUMBER of times generate as much        )
 ( instructions                                                          )
 : 1FAMILY,    0 DO   DUP >R T@ R> 1PI   OVER + LOOP DROP DROP ;
@@ -258,9 +257,11 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 ( in one byte. It is now used to run assemblers that have still the     )
 ( old conventions. It identifies the `BA' part.                         )
 FF VARIABLE INCONSISTENCY-PAIRS 
-( As `T! but has BABY BI information, multiplexed as per                )
+( As `T!' but has BABY BI information, multiplexed as per               )
 ( `INCONSISTENSY-PAIRS'                                                 )
-: T! >R >R R INCONSISTENCY-PAIRS @ AND R> INCONSISTENCY-PAIRS @ AND R> T!' ;
+: T!' >R >R 
+    R INCONSISTENCY-PAIRS @ AND 
+    R> INCONSISTENCY-PAIRS @ INVERT AND R> T! ;
 
 ( ############### PART II DISASSEMBLER #################################### )
 
@@ -286,6 +287,7 @@ FF VARIABLE INCONSISTENCY-PAIRS
  0 CELL+ +LOOP CR ;
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
+: DISS- 0 CELL+ MINUS DISS +! ; ( Discard last item of `DISS' )
 
 ( ------------- TRYERS --------------------------------------------------) 
  
@@ -343,10 +345,10 @@ FF VARIABLE INCONSISTENCY-PAIRS
 ( incorrect --. Replace DEA with the proper DEA to inspect from here.   )
 : BACKTRACK
 (   ." BACKTRACKING"                                                    )
-( Proposed DROP DISS @ @- DISS ! 
-    DROP DISS @ 0 CELL+ - @
+    DROP DISS @ @- DISS ! 
+(   DROP DISS @ 0 CELL+ - @                                             )
     >NEXT%
-    0 CELL+ MINUS DISS +!
+(   DISS-                                                               )
     REBUILD
 ;
 
@@ -355,9 +357,11 @@ FF VARIABLE INCONSISTENCY-PAIRS
 ( Return: the disassembly CONTAINS a result.                             )
 : RESULT? AT-REST? DISS? AND   BAD? 0= AND ;
 
+( If present, print a result and continue searching for a new last item )
 : RESULT
     RESULT? IF
         .DISS
+        DISS-
         REBUILD
     THEN
 ;
@@ -409,19 +413,19 @@ HERE POINTER !
 : DIS-PI
     DUP IS-PI IF
     AT-REST? IF
-    DUP >BI @ OVER >CNT @ FIRSTBYTES POINTER @ @ AND OVER >DATA @ = IF
+    DUP >BI @ INVERT OVER >CNT @ FIRSTBYTES POINTER @ @ AND OVER >DATA @ = IF
         DUP >BI TALLY:,
         DUP +DISS
         POINTER @ ISS !
-        DUP >CNT POINTER +!   
+        DUP >CNT @ POINTER +!   
     THEN
     THEN
     THEN
 ;
 : DIS-xFI
    DUP IS-xFI IF
-   DUP >BI   TALLY-BI @ CONTAINED-IN IF
-   DUP >BI   INSTRUCTION AND   OVER >DATA @ = IF
+   DUP >BI @ TALLY-BI @ CONTAINED-IN IF
+   DUP >BI @ INSTRUCTION AND   OVER >DATA @ = IF
    DUP >BA @  COMPATIBLE? IF
        DUP >BI TALLY:|
        DUP +DISS
@@ -432,8 +436,8 @@ HERE POINTER !
 ;
 : DIS-xFIR
    DUP IS-xFIR IF     
-   DUP >BI CORRECT-R   TALLY-BI @ CONTAINED-IN IF
-   DUP >BI CORRECT-R   INSTRUCTION AND   OVER >DATA @ CORRECT-R = IF
+   DUP >BI @ CORRECT-R   TALLY-BI @ CONTAINED-IN IF
+   DUP >BI @ CORRECT-R   INSTRUCTION AND   OVER >DATA @ CORRECT-R = IF
    DUP >BA @  COMPATIBLE? IF
        DUP >BI TALLY:|R
        DUP +DISS
@@ -455,16 +459,16 @@ HERE POINTER !
 ( Print the disassembly for the DEA , it must be a comma-er   )
 : .COMMA
     POINTER @ @ OVER >CNT @ FIRSTBYTES U.
-    DUP >CNT POINTER +!
+    DUP >CNT @ POINTER +!
     ID.
 ;
 : .DISS' DISS @+ SWAP DO
     I @ DUP IS-COMMA 0= IF
         ID.
-    ELSE DUP >CNT  IF
+    ELSE DUP >CNT @ IF
        .COMMA       ( DEA -- )
     ELSE
-       POINTER @ OVER >DIS EXECUTE POINTER !
+       POINTER @ OVER >DIS @ EXECUTE POINTER !
     THEN
     THEN
  0 CELL+ +LOOP CR ;
