@@ -3456,13 +3456,15 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      COMMA
         DC      VOCL
         DC      STORE
-        DC      ZERO, COMMA   ;{ Dummy name field}
+        DC      ZERO, COMMA   ;{ Dummy code field}
+        DC      ZERO, COMMA   ;{ Dummy parameter field}
         DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
         DC      CURR
         DC      FETCH
         DC      TLFA
         DC      FETCH
         DC      COMMA    ; { Points to DLFA of current vocabulary.}
+        DC      ZERO, COMMA   ;{ Dummy name field}
         DC      DOES
 DOVOC:
         DC      CELLP   ;{ Get dummy DEA. }
@@ -3565,6 +3567,7 @@ _ENDCOMMENT
 ;{       If this is there it is a beta release}
         _STRINGINLINE({IBM-PC $RCSfile$ $Revision$ })
         DC      LTYPE
+        DC      CR
         DC      FORTH
         DC      DEFIN
         DC      QUIT
@@ -4879,7 +4882,7 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS
-        DC      ONE, LAND, ZEQU, WARN, STORE
+        DC      ONE, LAND, ONE, XOR, WARN, STORE
         DC      DROP, DROP, DROP
         DC      BHAN, STORE
         DC      SEMIS
@@ -4972,7 +4975,8 @@ HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      LDUP, BHAN, STORE
         DC      ZERO, MIN      ; 0/-errno
         DC      LDUP, DERR, STORE
-        DC      ZEQU, WARN, STORE
+        DC      ZEQU, ONE, LAND
+        DC      WARN, STORE
         DC      SEMIS
 ;
 worddoc({STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
