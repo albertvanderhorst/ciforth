@@ -161,12 +161,9 @@ Wherever it says
  forthdefi({double}) or ``double precision number'' a 
 _BITS16_({32})_BITS32_({64}) bits number is meant.
 
-forthcode({X}) must be understood that there is no actual definition with name forthvar({X}). 
-In the assembler listing it has label NULL.
-
 The first line of each entry shows a symbolic description of the action of
 the proceedure on the parameter stack. The symbols indicate the order in
-which input parameters have been placed on the stack. Three dashes "---"
+which input parameters have been placed on the stack. The dashes "---"
 indicate the execution point; any parameters left on the stack are listed.
 In this notation, the top of the stack is to the right.
 
@@ -191,8 +188,8 @@ _BITS_ bit signed integer number
 forthitem u      
 _BITS_ bit unsigned integer
 forthitem sc
-A string constant, i.e. two cells address and length.
-Length characters are present address.
+A string constant, i.e. two cells, an address and a length.
+Length characters are present at the address.
 _VERBOSE_({They must not be changed.})
 forthitem tf     
 boolean true flag=non-zero
@@ -210,14 +207,14 @@ forthitem E
 Intended for execution only.
 forthitem FIG      
 Belongs to the FIG model
+forthitem I      
+Has immediate bit set. Will execute even when compiling.
 forthitem ISO      
 Belongs to ISO standard
 forthitem L0     
 Level Zero definition of FORTH-78
 forthitem L1     
 Level One definition of FORTH-78
-forthitem P      
-Has precedence bit set. Will execute even when compiling.
 forthitem U      
 A user variable.
 @end table 
