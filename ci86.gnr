@@ -764,11 +764,12 @@ _COMMENT
   NAME        =  Address of name
   (NAME)      =  Contents of name
 
-  CFA         =  CODE FIELD: a pointer
+  CFA         =  CODE FIELD: a pointer to executable code
+  DFA         =  PARAMETER FIELD: a pointer into
+  FFA         =  FLAG FIELD: contains flags
   LFA         =  LINK FIELD: a pointer
   NFA         =  NAME FIELD: a pointer to a variable number of chars
-  FFA         =  FLAG FIELD: contains flags
-  PFA         =  PARAMETER FIELD: a variable nuber of au
+  PHA         =  POST HEADER ADDRESS
 
   S1          =  Parameter stack - 1st cell
   S2          =  Parameter stack - 2nd cell
@@ -925,6 +926,30 @@ HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
 HEADER( , , ,0, B_DUMMY,_DEA(TASK))
+;
+worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
+{Used in the form: .
+forthsamp({' nnnn})
+Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
+This also serves as an execution token.
+As a compiler directive, executes in a colon-definition to compile
+the address as a literal. If the word is not found after a search of
+forthcode({SEARCH}) and forthcode({CURRENT}) , an appropriate error message is given.
+This word is intended for interpret mode,  but in ciforth it works as
+well in compilation mode.
+It is recommended this word is not postponed.},
+{{FOUND},{>CFA},{>FFA},{>LFA},{>NFA},{>DFA},{EXECUTE}} ,
+{{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
+{{ : APE 1 2 ; 'APE EXECUTE  'APE ID. . .},{APE 2 1}},
+enddoc)
+HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
+        DC      PWORD
+        DC      FOUND
+        DC      LDUP
+        DC      ZEQU
+        DC      LIT, 11, QERR
+        DC      LITER
+        DC      SEMIS
 ;
 worddoc( {DENOTATIONS},{DEN&},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
@@ -3967,7 +3992,9 @@ HEADER({FIND},{FIND},{DOCOL})
         DC      LDUP
         _0BRANCH(FIND1) ;{IF}
         DC      SWAP, DROP ; {The address.}
-        DC      LDUP, TFFA, FETCH,
+        ; {Fine point, get xt by TCFA. Even if a nop.}
+        DC      LDUP, TCFA, SWAP
+        DC      TFFA, FETCH,
         DC      LIT, B_IMMED, LAND
         DC      LIT, -1, SWAP
         _0BRANCH(FIND1) ;{IF}
@@ -3982,7 +4009,7 @@ word with name forthvar({sc}) found and leave its
 forthdefi({DEA}) as forthvar({dea2}) or a nil pointer if not
 found. This DEA can be a forthdefi({WID}). _VERBOSE_({The
 forthvar({dea1}) is mostly the forthdefi({WID}) of a
-vocabulary, or the content of forthcode({CURRENT}) or
+vocabulary, or the content of forthcode({DENOTATION}) or
 forthcode({SEARCH}) }). Leave the dictionary entry address
 forthvar({dea2}) of the first entry found, else leave a nil
 pointer. Do not consume the string forthvar({sc})_VERBOSE_({{,
@@ -7098,29 +7125,6 @@ RSLW4:
 ;
 });_END_({ _RWHD_})
 ;
-worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
-{Used in the form: .
-forthsamp({' nnnn})
-Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
-This also serves as an execution token.
-As a compiler directive, executes in a colon-definition to compile
-the address as a literal. If the word is not found after a search of
-forthcode({SEARCH}) and forthcode({CURRENT}) , an appropriate error message is given.
-This word is intended for interpret mode,  but in ciforth it works as
-well in compilation mode.
-It is recommended this word is not postponed.},
-{{FOUND},{>CFA},{>FFA},{>LFA},{>NFA},{>DFA},{EXECUTE}} ,
-{{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
-enddoc)
-HEADER({'},{TICK},{DOCOL}, , B_IMMED)
-        DC      PWORD
-        DC      FOUND
-        DC      LDUP
-        DC      ZEQU
-        DC      LIT, 11, QERR
-        DC      LITER
-        DC      SEMIS
-;
 _LOAD_({
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
 {Used in the form: .
@@ -7131,13 +7135,14 @@ As a compiler directive, executes in a colon-definition to
 compile the address as a literal. If the word is not found
 after a search of forthcode({SEARCH}) and
 forthcode({CURRENT}), an appropriate error message is given.
-This word is intended for compilation mode, but in ciforth it
-works as well in interpret mode. It is recommended this word is
+This word is intended for compilation mode, using it in interpret
+mode in ciforth is harmless, but useless.
+It is recommended this word is not used at all, and certainly
 not postponed (Use forthcode({FOUND}) .).},
 {{FOUND},{'},{EXECUTE}} ,
 {{ : APE 1 2 ; : GS1 ['] APE ; GS1 EXECUTE  GS1 ID. . .},{APE 2 1}},
 enddoc)
-dnl An alias header. CFA FFA PFA are the same.
+dnl An alias header. CFA DFA are the same.
 HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 ;
 });_END_({_LOAD_})

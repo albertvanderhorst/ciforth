@@ -163,7 +163,7 @@ TYPE CR 2 LIST
  : T,  ( N--. Put N in select table)
      SELTOP @ !  0 CELL+ SELTOP +!  ;
  : CFOF ( --N Get dea of word following )
-    [COMPILE] ' CFA> ;
+    (WORD) FOUND ;
 
  : ID.. CFA> ID. ; ( cfa--. Print a words name )
  : ID.+ DUP @ ID.. CELL+ ; ( dip -- dip' Print a words name )
@@ -202,7 +202,7 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
        THEN ID.. CR
     THEN ;
 : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
-     CFOF (KRAAK) ;
+    (WORD) FOUND DUP 0= 11 ?ERROR (KRAAK) ;
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
@@ -220,7 +220,7 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
  : ITEM ( 1/1 Desinterpret next item, increments pointer)
      DUP @ SEL@ ( Something special ?)
      IF EXECUTE ( The special) ELSE
-        DUP ?IM IF ." [COMPILE] " THEN ID.. CELL+
+        DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
  CR ." A0MAR30  FORTH KRAKER >4<  ALBERT VAN DER HORST "
  CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
@@ -253,7 +253,7 @@ CR ;
   : -pc CR ." ;CODE plus code (suppressed)"
   ( DIRTY TRICK FOLLOWING :
 make decompile pointer point to exit!)
-    DROP ' TASK >DFA @ ;             CFOF (;CODE) BY -pc
+    DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
  CR ." KRAAKER"
  : -dd CFA> ." CREATE DOES> word " ID.. CR ;
         CFOF FORTH @ BY -dd
@@ -763,7 +763,7 @@ POPX, BP|  POPX, AX|  XCHGX, SI|  ( RESTORE FORTH REGISTERS)
 PUSHX, AX|    PUSHX, BX|    PUSHX, CX|    PUSHX, DX|
 PUSHX, DI|    NEXT C;
 CODE HLT HLT, C;
-: PATCH-BIOS ' NEW-BIOS >DFA ' BIOS >CFA ! ;
+: PATCH-BIOS 'NEW-BIOS >DFA 'BIOS >CFA ! ;
 : PATCH PATCH-BIOS SWITCH ;
 KRAAKER
  : A0 ;
@@ -795,7 +795,7 @@ KRAAKER
     ELSE
         ." FREE" DROP
     THEN ;
-: .B ' SHOW-BLOCK >CFA FOR-BLOCKS ;
+: .B 'SHOW-BLOCK >CFA FOR-BLOCKS ;
     .B
 
 ( A0dec21 www STRING AND PARSING words )
@@ -1191,7 +1191,7 @@ ASSEMBLER DEFINITIONS ( ;CODE see screen3 )
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
 4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
 2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
-6 CONSTANT M 6 CONSTANT SP ' EXIT >CFA 0B + @ CONSTANT (NEXT)
+6 CONSTANT M 6 CONSTANT SP 'EXIT >CFA 0B + @ CONSTANT (NEXT)
 : 1MI CREATE C, DOES> C@ C, ;  : 2MI CREATE C, DOES> C@ + C, ;
  : 3MI CREATE C, DOES> C@ SWAP 8* +  C, ;
 : 4MI CREATE C, DOES> C@ C, C, ;
@@ -3119,14 +3119,14 @@ PS ABA + BABAA
   THEN ;
 
 ( WORDS and VOCS )
-: WORDS ' ID. FOR-WORDS ;
+: WORDS 'ID. FOR-WORDS ;
 
 : .VOC 2 CELLS - 2 - N>P ID. ;
-: VOCS ' .VOC >CFA FOR-VOCS ;
+: VOCS '.VOC >CFA FOR-VOCS ;
 
 (   Up til LIMIT forget in all vocabularies.        )
 : FORGET [COMPILE] ' DUP H.
-    ' FORGET-VOC >CFA FOR-VOCS DROP ;
+    'FORGET-VOC >CFA FOR-VOCS DROP ;
 
 
 
@@ -3151,10 +3151,10 @@ DEFINITIONS
 
 
 AAP
- ' PIET   VOC-LINK @  FORGET-VOC
- ' TASK VOC-LINK @  FORGET-VOC
+ 'PIET   VOC-LINK @  FORGET-VOC
+ 'TASK VOC-LINK @  FORGET-VOC
 
- ' .VOC >CFA FOR-VOCS
+ '.VOC >CFA FOR-VOCS
 FORTH
 
 
@@ -3194,10 +3194,10 @@ BL THEN THEN EMIT ;
 : DB 0 LIMIT FIRST DO CR DUP . 1+
 I .SPECIAL .HEAD .CON B/BUF CELL+ CELL+ +LOOP
 DROP KEY DROP .S ;
-' BLOCK ALIAS BLOCK2
+'BLOCK ALIAS BLOCK2
 : NEW-BLOCK BLOCK2 DB ;
-: DB-INSTALL ' NEW-BLOCK ' BLOCK 3 CELLS MOVE ;
-: DB-UNINSTALL ' BLOCK2 ' BLOCK 3 CELLS MOVE ;
+: DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
+: DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
 
 
 
@@ -3722,7 +3722,7 @@ R> R> R> Z ! Y ! X !
          R> R> R> tak
     THEN ;
 : tak' SWAP ROT kat >R DROP DROP DROP R> ;
-' tak' >DFA @ ' tak >DFA ! ( solve forward reference)
+'tak' >DFA @ 'tak >DFA ! ( solve forward reference)
 
 : q MARK-TIME 18 12 6 tak . ELAPSED ;
 
@@ -3740,7 +3740,7 @@ R> R> R> Z ! Y ! X !
     ELSE
         >R >R DUP R> SWAP R> SWAP \ 2 PICK
     THEN ;
-' kat >DFA @ ' kat' >DFA ! ( solve forward reference)
+'kat >DFA @ 'kat' >DFA ! ( solve forward reference)
 : q MARK-TIME 18 12 6 tak . ELAPSED ;
 ( tak, Look mother! Only stacks, already less comprehensible)
 : kat' ;  ( Forward definition of ``kat''. Mutual recursion!)
@@ -3756,7 +3756,7 @@ R> R> R> Z ! Y ! X !
    ELSE  1+
        >R >R DUP R> SWAP R> SWAP \ 2 PICK
    THEN ;
-' kat >DFA @ ' kat' >DFA ! ( solve forward reference)
+'kat >DFA @ 'kat' >DFA ! ( solve forward reference)
 : q MARK-TIME 18 12 6 tak . ELAPSED ;
 ( tak, Look mother! Only stacks, less and less comprehensible)
 : kat' ;  ( Forward definition of ``kat''. Mutual recursion!)
@@ -3772,7 +3772,7 @@ R> R> R> Z ! Y ! X !
    ELSE
        >R >R DUP R> SWAP R> SWAP \ 2 PICK
    THEN ;
-' kat >DFA @ ' kat' >DFA ! ( solve forward reference)
+'kat >DFA @ 'kat' >DFA ! ( solve forward reference)
 : q MARK-TIME 18 12 6 tak . ELAPSED ;
 ( tak, using 3SWAP NIP and PICK doesn't run on ciforth)
 : PICK 1+ CELLS DSP@ + @ ;
@@ -3788,7 +3788,7 @@ R> R> R> Z ! Y ! X !
        2 PICK
    THEN ;
 : tak 3SWAP 1+ kat NIP NIP NIP ;
-' tak >DFA @ ' tak' >DFA ! ( Solve forward reference)
+'tak >DFA @ 'tak' >DFA ! ( Solve forward reference)
 
 
 
@@ -3839,8 +3839,8 @@ and `IMAX' (inclusive) for which `COMP' returns true.
 
 
 ( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-VARIABLE IMIN  \ IMIN ' COMP EXECUTE is always TRUE
-VARIABLE IMAX  \ IX ' COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    COMP !  IMAX ! IMIN !
     BEGIN       \ Loop variant IMAX - IMIN
@@ -3855,7 +3855,7 @@ VARIABLE COMP \ Execution token of comparison word.
 IMIN @ ;
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
 ( Binary search, comment, Test )
-: <100 100 < ;  -1000 +1000 ' <100 BIN-SEARCH
+: <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
 ." EXPECT 99:" .
 CREATE XXX 123 , 64 , 32 , 12
 \ Find first number < 40
@@ -3872,7 +3872,7 @@ CREATE XXX 123 , 64 , 32 , 12
 
 ( Solution)
 : CC CELLS XXX + @ 40 < 0= ;
-0 3 ' CC BIN-SEARCH 1+ CELLS XXX + @
+0 3 'CC BIN-SEARCH 1+ CELLS XXX + @
 
 
 
@@ -3887,8 +3887,8 @@ CREATE XXX 123 , 64 , 32 , 12
 
 
 ( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-VARIABLE IMIN  \ IMIN ' COMP EXECUTE is always TRUE
-VARIABLE IMAX  \ IX ' COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    COMP !  IMAX ! IMIN !
     BEGIN       \ Loop variant IMAX - IMIN
