@@ -4857,7 +4857,7 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LDUP, TFFA, FETCH
         DC      LIT, B_DENOT, LAND, ZEQU
         _0BRANCH(CREA1) ;{IF}
-        DC      IDDOT
+        DC      TNFA, FETCH, SFET, ETYPE
         DC      LIT,4
         DC      MESS
         DC      SPACE   ;{THEN}

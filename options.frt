@@ -1,5 +1,5 @@
 COPYRIGHT (c) 2000-2002 Albert van der Horst, THE NETHERLANDS
-		   LICENSE
+                   LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
 Public License as published by the Free Software Foundation.
@@ -11,7 +11,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public
 License along with this program; if not, write to the
-	    Free Software Foundation, Inc.,
+            Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
 ( -a :_Make_require_available_silently ) \ AvdH A2jan20
@@ -25,8 +25,8 @@ License along with this program; if not, write to the
 : FIND&LOAD     256 ERRSCR @ 4 +
 DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 2DROP ;
-\ For WORD sc: it IS found but not a built-in denotation.
-: PRESENT? FOUND 'FORTH U< 0= ;
+\ For WORD sc: it IS found but not an abbreviation/denotation.
+: PRESENT? DUP >R FOUND DUP IF >NFA @ @ R@ = THEN RDROP ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
@@ -49,19 +49,19 @@ DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 ( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH A1oct02
 1 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
 REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
-
-2 ARG[] $, CONSTANT FILE-NAME
+: MY-ERROR  "ciforth ERROR # " ETYPE DECIMAL DUP S>D 0 (D.R)
+ETYPE " " ETYPE DUP -128 32 WITHIN IF MESSAGE _ THEN DROP BYE ;
 \ Be economic with disk space
 : INCD'   SWAP-DP GET-FILE SWAP-DP EVALUATE ;
 : INC' (WORD) INCD' ;
+: MY-OPTIONS DROP 0 ;  \ No options, no sign on.
+'MY-ERROR DUP 'ERROR 3 CELLS CMOVE  HIDDEN
 'INCD' DUP 'INCLUDED 3 CELLS MOVE   HIDDEN
 'INC'  DUP 'INCLUDE 3 CELLS MOVE    HIDDEN
-: MY-OPTIONS DROP 0 ;  \ No options, no sign on.
 'MY-OPTIONS DUP 'OPTIONS 3 CELLS MOVE  HIDDEN
-FILE-NAME $@ INCLUDED
-LATEST   FILE-NAME $@ SRC>EXEC   TURNKEY
-
-
+ARGC 3 < 13 ?ERROR  0 HANDLER ! ( We are being caught!)
+2 ARG[] INCLUDED
+LATEST   2 ARG[] SRC>EXEC   TURNKEY
 ( -d :_This_option_is_available )
 
 
