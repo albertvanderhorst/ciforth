@@ -1,6 +1,10 @@
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( $Id$)
 
+REQUIRE BOUNDS
+REQUIRE QSORT
+REQUIRE PAIR[]
+
 \ For ADDRESS1 and ADDRESS2 return CONTENT1 and CONTENT2.
 : PAIR@   >R @ R> @ ;
 
@@ -19,7 +23,7 @@ CREATE INT-TABLE
 
 \ Expect order in the second print.
 W
-0 9 'MY-<   '<-->   SORT
+0 9 'MY-<   '<-->   QSORT
 W
 
 : A0 S" nine" ;
@@ -47,7 +51,7 @@ CREATE STRING-TABLE
 
 
 W2
-0 9 '$<   '$<-->   SORT
+0 9 '$<   '$<-->   QSORT
 W2
 
 CREATE DOUBLE-TABLE
@@ -63,7 +67,7 @@ CREATE DOUBLE-TABLE
 : MY-D<-->    ADDRESSES   2 CELLS   EXCHANGE ;
 
 WD
-0 9 'MY-D<   'MY-D<-->   SORT
+0 9 'MY-D<   'MY-D<-->   QSORT
 WD
 
 
@@ -73,15 +77,15 @@ CREATE x-TABLE , ,
 
 : WT CR x-TABLE 2@ TYPE CR ;
 
-: ADDRESSES x-TABLE 2@ DROP >R  8 * R@ + SWAP   8 * R@ + SWAP   RDROP ;
+: x-ADDRESSES x-TABLE 2@ DROP >R  8 * R@ + SWAP   8 * R@ + SWAP   RDROP ;
 
-: x<  ADDRESSES   8 CORA 0< ;
+: x<  x-ADDRESSES   8 CORA 0< ;
 
 \ Swap the contents of two things of ``x-TABLE'' by the 2 INDICES
 : x<-->    ADDRESSES 8 EXCHANGE ;
 
 WT
-0 9 'x< 'x<--> SORT
+0 9 'x< 'x<--> QSORT
 WT
 
 \ Usage
