@@ -484,7 +484,7 @@ ORIG:
 	LGDT    [GDTLOAD]
 	TO_PROTECTED    ;   "
 
-         JMP     SAME3
+	 JMP     SAME3
 ;         JMPFAR 
 ;         DW      LCLD
 ;         DW     CODESEGMENT
@@ -1111,23 +1111,38 @@ CODE_HEADER({2!},{TSTOR})
 	MOV	[CELL+BX],AX
 	JMP	NEXT
 ;
+; Do it the old way, via real mode (!)
+; Because L@ and L! are to be removed anyway.
 CODE_HEADER({L@},{LFET})
-
 	POP	BX	;MEM LOC
-	POP	ES      ;SEG REG VAL
-	MOV	AX,[ES:BX]
-        MOV     DX,DS
-        MOV     ES,DX
-	JMP	APUSH
+	POP	CX	;SEG REG VAL
+	TO_REAL         
+	MOV	DX,DS
+	MOV	DS,CX
+	MOV	BX,[BX]
+	MOV	DS,DX
+	TO_PROTECTED         
+        PUSH    BX
+	JMP	NEXT
+;
+;
+;        POP     BX      ;MEM LOC
+;        POP     ES      ;SEG REG VAL
+;        MOV     AX,[ES:BX]
+;        MOV     DX,DS
+;        MOV     ES,DX
+;        JMP     APUSH
 ;
 CODE_HEADER({L!},{LSTORE})
 	POP	BX
 	POP	CX
+	TO_REAL
 	MOV	DX,DS
 	MOV	DS,CX
 	POP	AX
 	MOV	[BX],AX
 	MOV	DS,DX
+	TO_PROTECTED
 	JMP	NEXT
 	PAGE
 	; At line     LINE ~1000
@@ -1146,14 +1161,16 @@ DOCOL:	LEA     BP,[BP-CELL]
 	MOV	[BP],SI	;R1 <- (IP)
 	LEA     SI,[DI+CELL]  ;(IP) <- (PFA)
 ;____1_____ _PROTECTED_1_({
-;        JMPFAR
-;        DW      SAME1,CODESEGMENT
-;SAME1:
+	JMPFAR
+	DC      SAME1
+	DW      CODESEGMENT
+SAME1:
 	TO_REAL         
 	TO_PROTECTED    
-;        JMPFAR
-;        DW      SAME2,CODESEGMENT
-;SAME2:
+	JMPFAR
+	DC      SAME2
+	DW      CODESEGMENT   ; To become CODESEGMENT32
+SAME2:
 });_END___1__({ _PROTECTED_1_})
 	JMP	NEXT
 ;
