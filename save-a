@@ -1,0 +1,22 @@
+#!/bin/sh
+# Add flag information to lina, then save.
+# This particular form is needed because including
+# adds garbage to the dictionary (the content of the included file.).
+# So the marker must be the very first item.
+
+lina  <<'the-end'
+CREATE marker-a
+"analyser.frt" INCLUDED
+
+REQUIRE SAVE-SYSTEM
+REQUIRE RESTORED
+\ A definition must be in one go.
+: SAVE-A
+    FORGET  ( in line "name" )
+    'OK RESTORED \ Restore `` OK '' that was replaced by a noop.
+    "lina+a" SAVE-SYSTEM
+;
+
+SAVE-A marker-a
+BYE
+the-end

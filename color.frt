@@ -104,13 +104,11 @@ REQUIRE RESTORED
 : X-BLOB 1 +  COLORED-BLOB default-white ;
 
 \ Revector to have colors.
+\ If the user defines a blob not belonging to the cracker: oops!
 : DO-COLOR
    'COLOR-ID.   'ID.    REVECTOR
-   'X-BLOB   'BLOB    REVECTOR
+   "BLOB" PRESENT DUP IF   'X-BLOB OVER REVECTOR   THEN  DROP
 ;
 
 \ No more colors.
-: NO-COLOR
-   'COLOR-ID. RESTORED
-   'X-BLOB RESTORED
-;
+: NO-COLOR   'COLOR-ID. RESTORED   'X-BLOB RESTORED ;

@@ -1,4 +1,4 @@
-,ciforth lab  $Revision$ (c) Albert van der Horst
+  ciforth.lab  $Revision$ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -1317,8 +1317,8 @@ make decompile pointer point to exit!)
 : -lit CELL+ DUP @ DEA? IF -dea ELSE -con THEN SPACE ;
 ' LIT BY -lit
 : -sk CELL+ CR ." [ " &" EMIT DUP @+ TYPE &" EMIT
-    ."  ] DLITERAL " @+ + 4 CELLS + ;   ' SKIP BY -sk
-
+    ."  ] DLITERAL" 2 BLOB SPACE @+ + 4 CELLS + ;
+' SKIP BY -sk
 
 
 

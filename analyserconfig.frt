@@ -39,6 +39,18 @@ FMASK-ES FMASK-ST OR CONSTANT FMASK-NS \ No side effects at all.
 \ Leave hidden, immediate etc. alone.
 : !FLAGS >R COMPOSE-FLAGS R> >FFA OR!U ;
 
+\ Fill in the stack effect BYTE into the flag field of DEA.
+: !SE >FFA 3 + C! ;
+
+\ For DEA return its stack effect BYTE.
+: SE@ >FFA 3 + C@ ;
+
+\ Split a BYTE into a STACK EFFECT .
+: SE:1>2 DUP 4 RSHIFT SWAP 0F AND ;
+
+\ Combine the STACK EFFECT into one BYTE.
+: SE:2>1 0F AND SWAP 4 LSHIFT OR ;
+
 \ ------------------------------------------------
 
 'TASK >CFA @ CONSTANT DOCOL
