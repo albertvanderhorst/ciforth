@@ -200,18 +200,18 @@ BRANCHES @+ SWAP ?DO
 \ ----------------------    Closing a gap -------------------
 
 \ The offset over which the gap is shifted shut, generally negative.
-VARIABLE ANNIL-OFFSET
+VARIABLE GAP-OFFSET
 
 \ For GAP and POSITION of a branch offset, adjust if it jumps from left
-\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
+\ over the gap. ``GAP-OFFSET'' must have been filled in.
 : ADJUST-BRANCH-FROM-LEFT    >R   R@ >TARGET <=   SWAP R@ >   AND IF
-    ANNIL-OFFSET @ R@ +!
+    GAP-OFFSET @ R@ +!
 THEN RDROP ;
 
 \ For GAP and POSITION of a branch offset, adjust if it jumps from right
-\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
+\ over the gap. ``GAP-OFFSET'' must have been filled in.
 : ADJUST-BRANCH-FROM-RIGHT    >R   R@ <  SWAP R@ >TARGET >=   AND IF
-    ANNIL-OFFSET @ NEGATE R@ +!
+    GAP-OFFSET @ NEGATE R@ +!
 THEN RDROP ;
 
 \ The set of branches that is marked for elimination from the set ``BRANCHES''.
@@ -239,12 +239,12 @@ THEN RDROP ;
 
 \ For END of gap, shift the remainder to close the gap.
 : SHIFT-GAP-SHUT
-    DUP END-OF-SEQUENCE OVER - >R   DUP ANNIL-OFFSET @ +  R>   MOVE ;
+    DUP END-OF-SEQUENCE OVER - >R   DUP GAP-OFFSET @ +  R>   MOVE ;
 
 \ Correct the branch-addresses higher than the START of a gap,
 \ to reflect the position they have after closing the gap.
 : MOVE-BRANCHES   BRANCHES @+ SWAP ?DO
-    DUP I @ < IF ANNIL-OFFSET @   I +! THEN
+    DUP I @ < IF GAP-OFFSET @   I +! THEN
 0 CELL+ +LOOP DROP ;
 
 \ Correct the GAP, i.e. correct its end with ``GAP-OFFSET''.
@@ -257,7 +257,7 @@ THEN RDROP ;
     2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES   OVER MOVE-BRANCHES
     DUP SHIFT-GAP-SHUT
     \ Correct the end. The start is the same.
-    ANNIL-OFFSET @ +
+    GAP-OFFSET @ +
 ;
 
 
@@ -318,11 +318,11 @@ BRANCHES @+ SWAP ?DO
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
-: (EXPAND-NEW)   BEGIN DUP NEXT-PARSE WHILE EXPAND-ONE REPEAT 2DROP DROP ;
+: (EXPAND)   BEGIN DUP NEXT-PARSE WHILE EXPAND-ONE REPEAT 2DROP DROP ;
 
 \ Expand each constituent of SEQUENCE to ``HERE'' .
 \ Leave a POINTER to equivalent linearised code.
-: EXPAND-NEW HERE SWAP    !SHIFTS   (EXPAND-NEW) CORRECT-BRANCHES POSTPONE (;)  ;
+: EXPAND HERE SWAP    !SHIFTS   (EXPAND) CORRECT-BRANCHES POSTPONE (;)  ;
 
 \ ----------------------    Annihilaton ----------------------
 
@@ -364,8 +364,9 @@ BRANCHES @+ SWAP ?DO
 : ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
     DUP 0<> ANNIL-STABLE? AND ;
 
-\ Form START and END of gap and virtual depth calculate ``ANNIL-OFFSET''.
-: CALCULATE-ANNIL-OFFSET - VD @ CELLS - ANNIL-OFFSET ! ;
+\ For GAP and virtual depth calculate ``GAP-OFFSET'' such as used
+\ in ``CORRECT-GAP'' .
+: CALCULATE-ANNIL-OFFSET - VD @ CELLS - GAP-OFFSET ! ;
 
 \ Fill the gap at START with ``DROP'' s.
 : FILL-WITH-DROPS   DUP VD @ NEGATE CELLS +   'DROP   WFILL ;
@@ -515,11 +516,11 @@ DROP 0 THEN ;
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
-: (EXPAND) BEGIN DUP ?NOT-EXIT WHILE FOLD-ONE REPEAT DROP ;
+: (FOLD) BEGIN DUP ?NOT-EXIT WHILE FOLD-ONE REPEAT DROP ;
 
 \ Expand each constituent of SEQUENCE to ``HERE'' ,  possibly folding it.
 \ Leave a POINTER to equivalent optimised code.
-: EXPAND   !OPT-START HERE SWAP    (EXPAND)   CASH   POSTPONE (;)  ;
+: FOLD   !OPT-START HERE SWAP    (FOLD)   CASH   POSTPONE (;)  ;
 
 \ ----------------------------------------------------------------
 
@@ -672,8 +673,8 @@ STRIDE SET PEES
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
 : OPT-EXPAND   >DFA DUP @  ^^
-    EXPAND-NEW
-    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER ^^ ANNIHILATE ^^
+    EXPAND
+    BEGIN !PROGRESS FOLD ^^ OPTIMISE ^^ REORDER ^^ ANNIHILATE ^^
 PROGRESS @ WHILE REPEAT
 SWAP ! ;
 
