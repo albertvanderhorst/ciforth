@@ -35,7 +35,7 @@ Environment  3.0 ...
 ciforth, an ISO forth.
 With the same hardware configuration as above.
 
-The following "tests" are defined:
+The following tests are defined:
 A Booting
 B make it
 C 8 LIST 8 LOAD
@@ -99,7 +99,8 @@ This test is for the ISO ciforth , version 3.###
 
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   154  lina.cfg         lina          J
+hosted_linux linux_native   176  lina.cfg         lina          BCDEFHKMOPR
+                            154  lina.cfg         lina          J
                             153  lina.cfg         lina          BCDEFHKMOPR
                             135                                 BCDEFHKMOP
 hosted_linux linux_c        154  linux.cfg        (ciforthc)    J'
@@ -107,13 +108,16 @@ hosted_linux linux_c        154  linux.cfg        (ciforthc)    J'
 
 bootfd real                 N.A.   alone1.cfg      forth.com       I B -A
                                                                   II B -A
-bootfd prot16               154    alone.cfg       forth.com    J'
-                            153    alone.cfg       forth.com    B I  ACDEFGR
-                                                                  II ACDEFGK'LR
+bootfd prot16               176    alone.cfg       forth.com    B I  ACDEGR
+                                                                  II ACDEGK'LR
+                            154    alone.cfg       forth.com    J'
+                            153    alone.cfg       forth.com    B I  ACDEGR
+                                                                  II ACDEGK'LR
 
 bootfd prot32               153    alone3.cfg      forth.com     B I ABCDEFG R     3)
                                                                   II ABCDEFGK'LR
-boothd prot32               154    alonehd.cfg     no filesystem  J'
+boothd prot32               177    alonehd.cfg     no filesystem  ABCDEFGMR
+                            154    alonehd.cfg     no filesystem  J'
             2               153    alonehd.cfg     no filesystem  ABCDEFGMR
 hostedmsdos real  bios      153    msdos1.cfg      msdos.com      II B CDEG K' R
 hostedmsdos real  modern 1) 154    msdos2.cfg      msdos.com      J'

@@ -57,7 +57,7 @@ dnl Normally no code needed switch between modes.
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 dnl This is an experimental version, restricted to 255 blocks.
-define({_FEWBLOCKS_}, _yes)
+define({_FEWBLOCKS_}, _no) dnl NO MORE!
 dnl Blocks are allocated in a file.
 define({_BLOCKSINFILE_}, _no)
 dnl Real BIOS is simulated from protected mode.
