@@ -99,6 +99,14 @@ testas86: asgen.frt asi86.frt testset8086 ; \
     diff -w $@ testset8086 >$@.diff ;\
     diff $@.diff testresults
 
+testas586: asgen.frt asi586.frt testset8086 ; \
+    (echo 8 LOAD; cat $+)|\
+    lina |\
+    sed '1,/TEST STARTS HERE/d' |\
+    sed 's/^[^:]*://' >$@       ;\
+    diff -w $@ testset8086 >$@.diff ;\
+    diff $@.diff testresults
+
 testas80: asgen.frt as80.frt testset8080 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\

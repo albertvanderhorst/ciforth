@@ -16,15 +16,15 @@
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
 ( right order                                                           )
-0 CELL+  ' ,  CFA  8000 COMMAER (RX,) ( cell relative to IP )
-1        ' C, CFA  4000 COMMAER (RB,) ( byte relative to IP )
-2        ' W, CFA  2000 COMMAER SG,   (  Segment: WORD      )
-1        ' C, CFA  1000 COMMAER P,    ( port number ; byte     )
-0 CELL+  ' ,  CFA   402 COMMAER IX,   ( immediate data : cell)
-1        ' C, CFA   401 COMMAER IB,   ( immediate byte data)
-0 CELL+  ' ,  CFA   208 COMMAER X,    ( immediate data : address/offset )
-1        ' C, CFA   204 COMMAER B,    ( immediate byte : address/offset )
-2        ' W, CFA   100 COMMAER W,    ( obligatory word     )
+0 0 CELL+  ' ,  CFA  8000 COMMAER (RX,) ( cell relative to IP )
+0 1        ' C, CFA  4000 COMMAER (RB,) ( byte relative to IP )
+0 2        ' W, CFA  2000 COMMAER SG,   (  Segment: WORD      )
+0 1        ' C, CFA  1000 COMMAER P,    ( port number ; byte     )
+0 0 CELL+  ' ,  CFA   402 COMMAER IX,   ( immediate data : cell)
+0 1        ' C, CFA   401 COMMAER IB,   ( immediate byte data)
+0 0 CELL+  ' ,  CFA   208 COMMAER X,    ( immediate data : address/offset )
+0 1        ' C, CFA   204 COMMAER B,    ( immediate byte : address/offset )
+0 2        ' W, CFA   100 COMMAER W,    ( obligatory word     )
 ( Bits in TALLY  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
@@ -62,7 +62,7 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 00 FF03 0088 2PI MOV,
 22 FF00 008D 2PI LEA,
 22 FF00 T!   0001 00C4 2 2FAMILY, LES, LDS,
-00 FF01 00C6 2PI MOVI,
+0400 C701 00C6 2PI MOVI,
 
 ( --------- one fixup operands ----------)
 12 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,

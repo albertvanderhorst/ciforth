@@ -18,14 +18,15 @@
 1        ' C, CFA  400000 COMMAER (RB,) ( byte relative to IP )
 2        ' W, CFA  200000 COMMAER SG,   (  Segment: WORD      )
 1        ' C, CFA  100000 COMMAER P,    ( port number ; byte     )
-2        ' OW, CFA  80000 COMMAER W,    ( obligatory word     )
-0 CELL+  ' ,  CFA   40002 COMMAER IX,   ( immediate data : cell)
-1        ' C, CFA   40001 COMMAER IB,   ( immediate byte data)
-0 CELL+  ' ,  CFA   20008 COMMAER X,    ( immediate data : address/offset )
-1        ' C, CFA   20004 COMMAER B,    ( immediate byte : address/offset )
-1        ' C, CFA   10000 COMMAER Q,    ( Most bizarre     )
+2        ' OW, CFA 080000 COMMAER W,    ( obligatory word     )
+0 CELL+  ' ,  CFA  040002 COMMAER IX,   ( immediate data : cell)
+1        ' C, CFA  040001 COMMAER IB,   ( immediate byte data)
+0 CELL+  ' ,  CFA  020008 COMMAER X,    ( immediate data : address/offset )
+1        ' C, CFA  020004 COMMAER B,    ( immediate byte : address/offset )
+1        ' C, CFA  010000 COMMAER SIBQ,   ( Most bizarre     )
+1        ' C, CFA    8000 COMMAER SIMQ,   ( Most bizarre     )
 
-FFFF INCONSISTENCY-PAIRS !
+3FFF INCONSISTENCY-PAIRS !
 ( Inconsistent:  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
@@ -39,7 +40,7 @@ FFFF INCONSISTENCY-PAIRS !
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
 ( A0 0700 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check)
  0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX]
-010120 0700 0s 0400 0s xFIR [SIB]   ( Fits in the hole, requires also SIB, )
+010120 0700 0s 0400 0s xFIR SIB|   ( Fits in the hole, requires also SIB, )
 0001A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
@@ -52,7 +53,8 @@ FFFF INCONSISTENCY-PAIRS !
 020128 C000 0s 8000 0s xFIR      DW|
 000110 C000 0s C000 0s xFIR      R|
 ( 020008 C700 0s 0600 0s xFIR      MEM|' ( Overrules D0| [BP]')
-020108 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )
+008120 C700 0s 0400 0s xFIR SIM|   ( Overrules D0| SIB| )                     
+020108 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )                     
 0101 3800 0s T!
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
 0102 3800 0s T!
@@ -64,8 +66,8 @@ FFFF INCONSISTENCY-PAIRS !
  4000 0s 0 4 xFAMILY|R  +1* +2* +4* +8*
 0200 10700 0s T!
  0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP [BP [SI [DI
-
 0200 1FF 00 1PI SIB,
+0200 0F8 00 1PI SIM,
 (   : (SIB), TALLY @ !TALLY ((SIB)),                                    )
 (     30 XOR ( Toggle from using memory to registers)                   )
 (     TALLY ! ;                                                         )
@@ -82,9 +84,13 @@ FFFF INCONSISTENCY-PAIRS !
 00 FF03 0088 2PI MOV,
 22 FF00 008D 2PI LEA,
 0022 FF00 T!   0001 00C4 2 2FAMILY, LES, LDS,
-00 FF01 00C6 2PI MOVI,
+22 FF00 0062 2PI BOUND,  ( 3)                            
+02 FF00 0064 2PI ARPL,   ( 3)                            
+040002 FF00 0069 2PI IMULI|IX, ( 3)                            
+040001 FF00 006B 2PI IMULI|IB, ( 3)                            
 
 ( --------- one fixup operands ----------)
+040000 C701 00C6 2PI MOVI,
 0012 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
 12 07 90 1PI XCHG|AX,
 040011 07 B0 1PI MOVI|BR,
@@ -146,6 +152,10 @@ FFFF INCONSISTENCY-PAIRS !
  01 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
  01 F0 6 1FAMILY, LOCK, -- REPNZ, REPZ, HLT, CMC,
  01 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD,
+ 01 60 2 1FAMILY, PUSH|ALL, POP|ALL, ( 3) 
+ 01 64 4 1FAMILY, FS:, GS:, OS:, AS:, ( 3) 
+040002 00 68 1PI PUSHI|X,  ( 3) 
+040001 00 6A 1PI PUSHI|B,  ( 3) 
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may always want to use these instead of (RB,)

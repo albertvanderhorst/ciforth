@@ -1,5 +1,6 @@
 !TALLY
-16 HERE 16 MOD - ALLOT ( To get a nice DUMP)
+HEX
+10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
 HERE
 HLT
 RET

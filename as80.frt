@@ -1,12 +1,12 @@
-( $Id: )
+( $Id$)
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( ############## 8080 ASSEMBLER PROPER ################################ )
 ASSEMBLER DEFINITIONS
 ( Note the decompiler hits them in the reverse order                    )
-1        ' C, CFA   100 COMMAER IB, ( immediate byte data)
-0 CELL+  ' ,  CFA   200 COMMAER IX, ( immediate data : cell)
-0 CELL+  ' ,  CFA   400 COMMAER X,  ( immediate data : address)
-1        ' C, CFA   800 COMMAER P,  ( port number ; byte     )
+0 1        ' C, CFA   100 COMMAER IB, ( immediate byte data)
+0 0 CELL+  ' ,  CFA   200 COMMAER IX, ( immediate data : cell)
+0 0 CELL+  ' ,  CFA   400 COMMAER X,  ( immediate data : address)
+0 1        ' C, CFA   800 COMMAER P,  ( port number ; byte     )
 
 00 00 T!
  08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC

@@ -1,5 +1,6 @@
 !TALLY 
-16 HERE 16 MOD - ALLOT ( To get a nice DUMP)
+HEX
+10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
 HERE
 STD, 
 CLD, 
@@ -2871,518 +2872,70 @@ INC|X, BX|
 INC|X, DX| 
 INC|X, CX| 
 INC|X, AX| 
-MOVI, W| DI'| MEM| 14 X, 
-MOVI, W| DI'| R| DI| 
-MOVI, W| DI'| R| SI| 
-MOVI, W| DI'| R| BP| 
-MOVI, W| DI'| R| SP| 
-MOVI, W| DI'| R| BX| 
-MOVI, W| DI'| R| DX| 
-MOVI, W| DI'| R| CX| 
-MOVI, W| DI'| R| AX| 
-MOVI, W| DI'| DW| [BP] 18 X, 
-MOVI, W| DI'| DW| [BX] 18 X, 
-MOVI, W| DI'| DW| [DI] 18 X, 
-MOVI, W| DI'| DW| [SI] 18 X, 
-MOVI, W| DI'| DW| [BP+DI] 18 X, 
-MOVI, W| DI'| DW| [BP+SI] 18 X, 
-MOVI, W| DI'| DW| [BX+DI] 18 X, 
-MOVI, W| DI'| DW| [BX+SI] 18 X, 
-MOVI, W| DI'| DB| [BP] 18 B, 
-MOVI, W| DI'| DB| [BX] 18 B, 
-MOVI, W| DI'| DB| [DI] 18 B, 
-MOVI, W| DI'| DB| [SI] 18 B, 
-MOVI, W| DI'| DB| [BP+DI] 18 B, 
-MOVI, W| DI'| DB| [BP+SI] 18 B, 
-MOVI, W| DI'| DB| [BX+DI] 18 B, 
-MOVI, W| DI'| DB| [BX+SI] 18 B, 
-MOVI, W| DI'| D0| [BX] 
-MOVI, W| DI'| D0| [DI] 
-MOVI, W| DI'| D0| [SI] 
-MOVI, W| DI'| D0| [BP+DI] 
-MOVI, W| DI'| D0| [BP+SI] 
-MOVI, W| DI'| D0| [BX+DI] 
-MOVI, W| DI'| D0| [BX+SI] 
-MOVI, W| SI'| MEM| 14 X, 
-MOVI, W| SI'| R| DI| 
-MOVI, W| SI'| R| SI| 
-MOVI, W| SI'| R| BP| 
-MOVI, W| SI'| R| SP| 
-MOVI, W| SI'| R| BX| 
-MOVI, W| SI'| R| DX| 
-MOVI, W| SI'| R| CX| 
-MOVI, W| SI'| R| AX| 
-MOVI, W| SI'| DW| [BP] 18 X, 
-MOVI, W| SI'| DW| [BX] 18 X, 
-MOVI, W| SI'| DW| [DI] 18 X, 
-MOVI, W| SI'| DW| [SI] 18 X, 
-MOVI, W| SI'| DW| [BP+DI] 18 X, 
-MOVI, W| SI'| DW| [BP+SI] 18 X, 
-MOVI, W| SI'| DW| [BX+DI] 18 X, 
-MOVI, W| SI'| DW| [BX+SI] 18 X, 
-MOVI, W| SI'| DB| [BP] 18 B, 
-MOVI, W| SI'| DB| [BX] 18 B, 
-MOVI, W| SI'| DB| [DI] 18 B, 
-MOVI, W| SI'| DB| [SI] 18 B, 
-MOVI, W| SI'| DB| [BP+DI] 18 B, 
-MOVI, W| SI'| DB| [BP+SI] 18 B, 
-MOVI, W| SI'| DB| [BX+DI] 18 B, 
-MOVI, W| SI'| DB| [BX+SI] 18 B, 
-MOVI, W| SI'| D0| [BX] 
-MOVI, W| SI'| D0| [DI] 
-MOVI, W| SI'| D0| [SI] 
-MOVI, W| SI'| D0| [BP+DI] 
-MOVI, W| SI'| D0| [BP+SI] 
-MOVI, W| SI'| D0| [BX+DI] 
-MOVI, W| SI'| D0| [BX+SI] 
-MOVI, W| BP'| MEM| 14 X, 
-MOVI, W| BP'| R| DI| 
-MOVI, W| BP'| R| SI| 
-MOVI, W| BP'| R| BP| 
-MOVI, W| BP'| R| SP| 
-MOVI, W| BP'| R| BX| 
-MOVI, W| BP'| R| DX| 
-MOVI, W| BP'| R| CX| 
-MOVI, W| BP'| R| AX| 
-MOVI, W| BP'| DW| [BP] 18 X, 
-MOVI, W| BP'| DW| [BX] 18 X, 
-MOVI, W| BP'| DW| [DI] 18 X, 
-MOVI, W| BP'| DW| [SI] 18 X, 
-MOVI, W| BP'| DW| [BP+DI] 18 X, 
-MOVI, W| BP'| DW| [BP+SI] 18 X, 
-MOVI, W| BP'| DW| [BX+DI] 18 X, 
-MOVI, W| BP'| DW| [BX+SI] 18 X, 
-MOVI, W| BP'| DB| [BP] 18 B, 
-MOVI, W| BP'| DB| [BX] 18 B, 
-MOVI, W| BP'| DB| [DI] 18 B, 
-MOVI, W| BP'| DB| [SI] 18 B, 
-MOVI, W| BP'| DB| [BP+DI] 18 B, 
-MOVI, W| BP'| DB| [BP+SI] 18 B, 
-MOVI, W| BP'| DB| [BX+DI] 18 B, 
-MOVI, W| BP'| DB| [BX+SI] 18 B, 
-MOVI, W| BP'| D0| [BX] 
-MOVI, W| BP'| D0| [DI] 
-MOVI, W| BP'| D0| [SI] 
-MOVI, W| BP'| D0| [BP+DI] 
-MOVI, W| BP'| D0| [BP+SI] 
-MOVI, W| BP'| D0| [BX+DI] 
-MOVI, W| BP'| D0| [BX+SI] 
-MOVI, W| SP'| MEM| 14 X, 
-MOVI, W| SP'| R| DI| 
-MOVI, W| SP'| R| SI| 
-MOVI, W| SP'| R| BP| 
-MOVI, W| SP'| R| SP| 
-MOVI, W| SP'| R| BX| 
-MOVI, W| SP'| R| DX| 
-MOVI, W| SP'| R| CX| 
-MOVI, W| SP'| R| AX| 
-MOVI, W| SP'| DW| [BP] 18 X, 
-MOVI, W| SP'| DW| [BX] 18 X, 
-MOVI, W| SP'| DW| [DI] 18 X, 
-MOVI, W| SP'| DW| [SI] 18 X, 
-MOVI, W| SP'| DW| [BP+DI] 18 X, 
-MOVI, W| SP'| DW| [BP+SI] 18 X, 
-MOVI, W| SP'| DW| [BX+DI] 18 X, 
-MOVI, W| SP'| DW| [BX+SI] 18 X, 
-MOVI, W| SP'| DB| [BP] 18 B, 
-MOVI, W| SP'| DB| [BX] 18 B, 
-MOVI, W| SP'| DB| [DI] 18 B, 
-MOVI, W| SP'| DB| [SI] 18 B, 
-MOVI, W| SP'| DB| [BP+DI] 18 B, 
-MOVI, W| SP'| DB| [BP+SI] 18 B, 
-MOVI, W| SP'| DB| [BX+DI] 18 B, 
-MOVI, W| SP'| DB| [BX+SI] 18 B, 
-MOVI, W| SP'| D0| [BX] 
-MOVI, W| SP'| D0| [DI] 
-MOVI, W| SP'| D0| [SI] 
-MOVI, W| SP'| D0| [BP+DI] 
-MOVI, W| SP'| D0| [BP+SI] 
-MOVI, W| SP'| D0| [BX+DI] 
-MOVI, W| SP'| D0| [BX+SI] 
-MOVI, W| BX'| MEM| 14 X, 
-MOVI, W| BX'| R| DI| 
-MOVI, W| BX'| R| SI| 
-MOVI, W| BX'| R| BP| 
-MOVI, W| BX'| R| SP| 
-MOVI, W| BX'| R| BX| 
-MOVI, W| BX'| R| DX| 
-MOVI, W| BX'| R| CX| 
-MOVI, W| BX'| R| AX| 
-MOVI, W| BX'| DW| [BP] 18 X, 
-MOVI, W| BX'| DW| [BX] 18 X, 
-MOVI, W| BX'| DW| [DI] 18 X, 
-MOVI, W| BX'| DW| [SI] 18 X, 
-MOVI, W| BX'| DW| [BP+DI] 18 X, 
-MOVI, W| BX'| DW| [BP+SI] 18 X, 
-MOVI, W| BX'| DW| [BX+DI] 18 X, 
-MOVI, W| BX'| DW| [BX+SI] 18 X, 
-MOVI, W| BX'| DB| [BP] 18 B, 
-MOVI, W| BX'| DB| [BX] 18 B, 
-MOVI, W| BX'| DB| [DI] 18 B, 
-MOVI, W| BX'| DB| [SI] 18 B, 
-MOVI, W| BX'| DB| [BP+DI] 18 B, 
-MOVI, W| BX'| DB| [BP+SI] 18 B, 
-MOVI, W| BX'| DB| [BX+DI] 18 B, 
-MOVI, W| BX'| DB| [BX+SI] 18 B, 
-MOVI, W| BX'| D0| [BX] 
-MOVI, W| BX'| D0| [DI] 
-MOVI, W| BX'| D0| [SI] 
-MOVI, W| BX'| D0| [BP+DI] 
-MOVI, W| BX'| D0| [BP+SI] 
-MOVI, W| BX'| D0| [BX+DI] 
-MOVI, W| BX'| D0| [BX+SI] 
-MOVI, W| DX'| MEM| 14 X, 
-MOVI, W| DX'| R| DI| 
-MOVI, W| DX'| R| SI| 
-MOVI, W| DX'| R| BP| 
-MOVI, W| DX'| R| SP| 
-MOVI, W| DX'| R| BX| 
-MOVI, W| DX'| R| DX| 
-MOVI, W| DX'| R| CX| 
-MOVI, W| DX'| R| AX| 
-MOVI, W| DX'| DW| [BP] 18 X, 
-MOVI, W| DX'| DW| [BX] 18 X, 
-MOVI, W| DX'| DW| [DI] 18 X, 
-MOVI, W| DX'| DW| [SI] 18 X, 
-MOVI, W| DX'| DW| [BP+DI] 18 X, 
-MOVI, W| DX'| DW| [BP+SI] 18 X, 
-MOVI, W| DX'| DW| [BX+DI] 18 X, 
-MOVI, W| DX'| DW| [BX+SI] 18 X, 
-MOVI, W| DX'| DB| [BP] 18 B, 
-MOVI, W| DX'| DB| [BX] 18 B, 
-MOVI, W| DX'| DB| [DI] 18 B, 
-MOVI, W| DX'| DB| [SI] 18 B, 
-MOVI, W| DX'| DB| [BP+DI] 18 B, 
-MOVI, W| DX'| DB| [BP+SI] 18 B, 
-MOVI, W| DX'| DB| [BX+DI] 18 B, 
-MOVI, W| DX'| DB| [BX+SI] 18 B, 
-MOVI, W| DX'| D0| [BX] 
-MOVI, W| DX'| D0| [DI] 
-MOVI, W| DX'| D0| [SI] 
-MOVI, W| DX'| D0| [BP+DI] 
-MOVI, W| DX'| D0| [BP+SI] 
-MOVI, W| DX'| D0| [BX+DI] 
-MOVI, W| DX'| D0| [BX+SI] 
-MOVI, W| CX'| MEM| 14 X, 
-MOVI, W| CX'| R| DI| 
-MOVI, W| CX'| R| SI| 
-MOVI, W| CX'| R| BP| 
-MOVI, W| CX'| R| SP| 
-MOVI, W| CX'| R| BX| 
-MOVI, W| CX'| R| DX| 
-MOVI, W| CX'| R| CX| 
-MOVI, W| CX'| R| AX| 
-MOVI, W| CX'| DW| [BP] 18 X, 
-MOVI, W| CX'| DW| [BX] 18 X, 
-MOVI, W| CX'| DW| [DI] 18 X, 
-MOVI, W| CX'| DW| [SI] 18 X, 
-MOVI, W| CX'| DW| [BP+DI] 18 X, 
-MOVI, W| CX'| DW| [BP+SI] 18 X, 
-MOVI, W| CX'| DW| [BX+DI] 18 X, 
-MOVI, W| CX'| DW| [BX+SI] 18 X, 
-MOVI, W| CX'| DB| [BP] 18 B, 
-MOVI, W| CX'| DB| [BX] 18 B, 
-MOVI, W| CX'| DB| [DI] 18 B, 
-MOVI, W| CX'| DB| [SI] 18 B, 
-MOVI, W| CX'| DB| [BP+DI] 18 B, 
-MOVI, W| CX'| DB| [BP+SI] 18 B, 
-MOVI, W| CX'| DB| [BX+DI] 18 B, 
-MOVI, W| CX'| DB| [BX+SI] 18 B, 
-MOVI, W| CX'| D0| [BX] 
-MOVI, W| CX'| D0| [DI] 
-MOVI, W| CX'| D0| [SI] 
-MOVI, W| CX'| D0| [BP+DI] 
-MOVI, W| CX'| D0| [BP+SI] 
-MOVI, W| CX'| D0| [BX+DI] 
-MOVI, W| CX'| D0| [BX+SI] 
-MOVI, W| AX'| MEM| 14 X, 
-MOVI, W| AX'| R| DI| 
-MOVI, W| AX'| R| SI| 
-MOVI, W| AX'| R| BP| 
-MOVI, W| AX'| R| SP| 
-MOVI, W| AX'| R| BX| 
-MOVI, W| AX'| R| DX| 
-MOVI, W| AX'| R| CX| 
-MOVI, W| AX'| R| AX| 
-MOVI, W| AX'| DW| [BP] 18 X, 
-MOVI, W| AX'| DW| [BX] 18 X, 
-MOVI, W| AX'| DW| [DI] 18 X, 
-MOVI, W| AX'| DW| [SI] 18 X, 
-MOVI, W| AX'| DW| [BP+DI] 18 X, 
-MOVI, W| AX'| DW| [BP+SI] 18 X, 
-MOVI, W| AX'| DW| [BX+DI] 18 X, 
-MOVI, W| AX'| DW| [BX+SI] 18 X, 
-MOVI, W| AX'| DB| [BP] 18 B, 
-MOVI, W| AX'| DB| [BX] 18 B, 
-MOVI, W| AX'| DB| [DI] 18 B, 
-MOVI, W| AX'| DB| [SI] 18 B, 
-MOVI, W| AX'| DB| [BP+DI] 18 B, 
-MOVI, W| AX'| DB| [BP+SI] 18 B, 
-MOVI, W| AX'| DB| [BX+DI] 18 B, 
-MOVI, W| AX'| DB| [BX+SI] 18 B, 
-MOVI, W| AX'| D0| [BX] 
-MOVI, W| AX'| D0| [DI] 
-MOVI, W| AX'| D0| [SI] 
-MOVI, W| AX'| D0| [BP+DI] 
-MOVI, W| AX'| D0| [BP+SI] 
-MOVI, W| AX'| D0| [BX+DI] 
-MOVI, W| AX'| D0| [BX+SI] 
-MOVI, B| BH'| MEM| 14 X, 
-MOVI, B| BH'| R| BH| 
-MOVI, B| BH'| R| DH| 
-MOVI, B| BH'| R| CH| 
-MOVI, B| BH'| R| AH| 
-MOVI, B| BH'| R| BL| 
-MOVI, B| BH'| R| DL| 
-MOVI, B| BH'| R| CL| 
-MOVI, B| BH'| R| AL| 
-MOVI, B| BH'| DW| [BP] 18 X, 
-MOVI, B| BH'| DW| [BX] 18 X, 
-MOVI, B| BH'| DW| [DI] 18 X, 
-MOVI, B| BH'| DW| [SI] 18 X, 
-MOVI, B| BH'| DW| [BP+DI] 18 X, 
-MOVI, B| BH'| DW| [BP+SI] 18 X, 
-MOVI, B| BH'| DW| [BX+DI] 18 X, 
-MOVI, B| BH'| DW| [BX+SI] 18 X, 
-MOVI, B| BH'| DB| [BP] 18 B, 
-MOVI, B| BH'| DB| [BX] 18 B, 
-MOVI, B| BH'| DB| [DI] 18 B, 
-MOVI, B| BH'| DB| [SI] 18 B, 
-MOVI, B| BH'| DB| [BP+DI] 18 B, 
-MOVI, B| BH'| DB| [BP+SI] 18 B, 
-MOVI, B| BH'| DB| [BX+DI] 18 B, 
-MOVI, B| BH'| DB| [BX+SI] 18 B, 
-MOVI, B| BH'| D0| [BX] 
-MOVI, B| BH'| D0| [DI] 
-MOVI, B| BH'| D0| [SI] 
-MOVI, B| BH'| D0| [BP+DI] 
-MOVI, B| BH'| D0| [BP+SI] 
-MOVI, B| BH'| D0| [BX+DI] 
-MOVI, B| BH'| D0| [BX+SI] 
-MOVI, B| DH'| MEM| 14 X, 
-MOVI, B| DH'| R| BH| 
-MOVI, B| DH'| R| DH| 
-MOVI, B| DH'| R| CH| 
-MOVI, B| DH'| R| AH| 
-MOVI, B| DH'| R| BL| 
-MOVI, B| DH'| R| DL| 
-MOVI, B| DH'| R| CL| 
-MOVI, B| DH'| R| AL| 
-MOVI, B| DH'| DW| [BP] 18 X, 
-MOVI, B| DH'| DW| [BX] 18 X, 
-MOVI, B| DH'| DW| [DI] 18 X, 
-MOVI, B| DH'| DW| [SI] 18 X, 
-MOVI, B| DH'| DW| [BP+DI] 18 X, 
-MOVI, B| DH'| DW| [BP+SI] 18 X, 
-MOVI, B| DH'| DW| [BX+DI] 18 X, 
-MOVI, B| DH'| DW| [BX+SI] 18 X, 
-MOVI, B| DH'| DB| [BP] 18 B, 
-MOVI, B| DH'| DB| [BX] 18 B, 
-MOVI, B| DH'| DB| [DI] 18 B, 
-MOVI, B| DH'| DB| [SI] 18 B, 
-MOVI, B| DH'| DB| [BP+DI] 18 B, 
-MOVI, B| DH'| DB| [BP+SI] 18 B, 
-MOVI, B| DH'| DB| [BX+DI] 18 B, 
-MOVI, B| DH'| DB| [BX+SI] 18 B, 
-MOVI, B| DH'| D0| [BX] 
-MOVI, B| DH'| D0| [DI] 
-MOVI, B| DH'| D0| [SI] 
-MOVI, B| DH'| D0| [BP+DI] 
-MOVI, B| DH'| D0| [BP+SI] 
-MOVI, B| DH'| D0| [BX+DI] 
-MOVI, B| DH'| D0| [BX+SI] 
-MOVI, B| CH'| MEM| 14 X, 
-MOVI, B| CH'| R| BH| 
-MOVI, B| CH'| R| DH| 
-MOVI, B| CH'| R| CH| 
-MOVI, B| CH'| R| AH| 
-MOVI, B| CH'| R| BL| 
-MOVI, B| CH'| R| DL| 
-MOVI, B| CH'| R| CL| 
-MOVI, B| CH'| R| AL| 
-MOVI, B| CH'| DW| [BP] 18 X, 
-MOVI, B| CH'| DW| [BX] 18 X, 
-MOVI, B| CH'| DW| [DI] 18 X, 
-MOVI, B| CH'| DW| [SI] 18 X, 
-MOVI, B| CH'| DW| [BP+DI] 18 X, 
-MOVI, B| CH'| DW| [BP+SI] 18 X, 
-MOVI, B| CH'| DW| [BX+DI] 18 X, 
-MOVI, B| CH'| DW| [BX+SI] 18 X, 
-MOVI, B| CH'| DB| [BP] 18 B, 
-MOVI, B| CH'| DB| [BX] 18 B, 
-MOVI, B| CH'| DB| [DI] 18 B, 
-MOVI, B| CH'| DB| [SI] 18 B, 
-MOVI, B| CH'| DB| [BP+DI] 18 B, 
-MOVI, B| CH'| DB| [BP+SI] 18 B, 
-MOVI, B| CH'| DB| [BX+DI] 18 B, 
-MOVI, B| CH'| DB| [BX+SI] 18 B, 
-MOVI, B| CH'| D0| [BX] 
-MOVI, B| CH'| D0| [DI] 
-MOVI, B| CH'| D0| [SI] 
-MOVI, B| CH'| D0| [BP+DI] 
-MOVI, B| CH'| D0| [BP+SI] 
-MOVI, B| CH'| D0| [BX+DI] 
-MOVI, B| CH'| D0| [BX+SI] 
-MOVI, B| AH'| MEM| 14 X, 
-MOVI, B| AH'| R| BH| 
-MOVI, B| AH'| R| DH| 
-MOVI, B| AH'| R| CH| 
-MOVI, B| AH'| R| AH| 
-MOVI, B| AH'| R| BL| 
-MOVI, B| AH'| R| DL| 
-MOVI, B| AH'| R| CL| 
-MOVI, B| AH'| R| AL| 
-MOVI, B| AH'| DW| [BP] 18 X, 
-MOVI, B| AH'| DW| [BX] 18 X, 
-MOVI, B| AH'| DW| [DI] 18 X, 
-MOVI, B| AH'| DW| [SI] 18 X, 
-MOVI, B| AH'| DW| [BP+DI] 18 X, 
-MOVI, B| AH'| DW| [BP+SI] 18 X, 
-MOVI, B| AH'| DW| [BX+DI] 18 X, 
-MOVI, B| AH'| DW| [BX+SI] 18 X, 
-MOVI, B| AH'| DB| [BP] 18 B, 
-MOVI, B| AH'| DB| [BX] 18 B, 
-MOVI, B| AH'| DB| [DI] 18 B, 
-MOVI, B| AH'| DB| [SI] 18 B, 
-MOVI, B| AH'| DB| [BP+DI] 18 B, 
-MOVI, B| AH'| DB| [BP+SI] 18 B, 
-MOVI, B| AH'| DB| [BX+DI] 18 B, 
-MOVI, B| AH'| DB| [BX+SI] 18 B, 
-MOVI, B| AH'| D0| [BX] 
-MOVI, B| AH'| D0| [DI] 
-MOVI, B| AH'| D0| [SI] 
-MOVI, B| AH'| D0| [BP+DI] 
-MOVI, B| AH'| D0| [BP+SI] 
-MOVI, B| AH'| D0| [BX+DI] 
-MOVI, B| AH'| D0| [BX+SI] 
-MOVI, B| BL'| MEM| 14 X, 
-MOVI, B| BL'| R| BH| 
-MOVI, B| BL'| R| DH| 
-MOVI, B| BL'| R| CH| 
-MOVI, B| BL'| R| AH| 
-MOVI, B| BL'| R| BL| 
-MOVI, B| BL'| R| DL| 
-MOVI, B| BL'| R| CL| 
-MOVI, B| BL'| R| AL| 
-MOVI, B| BL'| DW| [BP] 18 X, 
-MOVI, B| BL'| DW| [BX] 18 X, 
-MOVI, B| BL'| DW| [DI] 18 X, 
-MOVI, B| BL'| DW| [SI] 18 X, 
-MOVI, B| BL'| DW| [BP+DI] 18 X, 
-MOVI, B| BL'| DW| [BP+SI] 18 X, 
-MOVI, B| BL'| DW| [BX+DI] 18 X, 
-MOVI, B| BL'| DW| [BX+SI] 18 X, 
-MOVI, B| BL'| DB| [BP] 18 B, 
-MOVI, B| BL'| DB| [BX] 18 B, 
-MOVI, B| BL'| DB| [DI] 18 B, 
-MOVI, B| BL'| DB| [SI] 18 B, 
-MOVI, B| BL'| DB| [BP+DI] 18 B, 
-MOVI, B| BL'| DB| [BP+SI] 18 B, 
-MOVI, B| BL'| DB| [BX+DI] 18 B, 
-MOVI, B| BL'| DB| [BX+SI] 18 B, 
-MOVI, B| BL'| D0| [BX] 
-MOVI, B| BL'| D0| [DI] 
-MOVI, B| BL'| D0| [SI] 
-MOVI, B| BL'| D0| [BP+DI] 
-MOVI, B| BL'| D0| [BP+SI] 
-MOVI, B| BL'| D0| [BX+DI] 
-MOVI, B| BL'| D0| [BX+SI] 
-MOVI, B| DL'| MEM| 14 X, 
-MOVI, B| DL'| R| BH| 
-MOVI, B| DL'| R| DH| 
-MOVI, B| DL'| R| CH| 
-MOVI, B| DL'| R| AH| 
-MOVI, B| DL'| R| BL| 
-MOVI, B| DL'| R| DL| 
-MOVI, B| DL'| R| CL| 
-MOVI, B| DL'| R| AL| 
-MOVI, B| DL'| DW| [BP] 18 X, 
-MOVI, B| DL'| DW| [BX] 18 X, 
-MOVI, B| DL'| DW| [DI] 18 X, 
-MOVI, B| DL'| DW| [SI] 18 X, 
-MOVI, B| DL'| DW| [BP+DI] 18 X, 
-MOVI, B| DL'| DW| [BP+SI] 18 X, 
-MOVI, B| DL'| DW| [BX+DI] 18 X, 
-MOVI, B| DL'| DW| [BX+SI] 18 X, 
-MOVI, B| DL'| DB| [BP] 18 B, 
-MOVI, B| DL'| DB| [BX] 18 B, 
-MOVI, B| DL'| DB| [DI] 18 B, 
-MOVI, B| DL'| DB| [SI] 18 B, 
-MOVI, B| DL'| DB| [BP+DI] 18 B, 
-MOVI, B| DL'| DB| [BP+SI] 18 B, 
-MOVI, B| DL'| DB| [BX+DI] 18 B, 
-MOVI, B| DL'| DB| [BX+SI] 18 B, 
-MOVI, B| DL'| D0| [BX] 
-MOVI, B| DL'| D0| [DI] 
-MOVI, B| DL'| D0| [SI] 
-MOVI, B| DL'| D0| [BP+DI] 
-MOVI, B| DL'| D0| [BP+SI] 
-MOVI, B| DL'| D0| [BX+DI] 
-MOVI, B| DL'| D0| [BX+SI] 
-MOVI, B| CL'| MEM| 14 X, 
-MOVI, B| CL'| R| BH| 
-MOVI, B| CL'| R| DH| 
-MOVI, B| CL'| R| CH| 
-MOVI, B| CL'| R| AH| 
-MOVI, B| CL'| R| BL| 
-MOVI, B| CL'| R| DL| 
-MOVI, B| CL'| R| CL| 
-MOVI, B| CL'| R| AL| 
-MOVI, B| CL'| DW| [BP] 18 X, 
-MOVI, B| CL'| DW| [BX] 18 X, 
-MOVI, B| CL'| DW| [DI] 18 X, 
-MOVI, B| CL'| DW| [SI] 18 X, 
-MOVI, B| CL'| DW| [BP+DI] 18 X, 
-MOVI, B| CL'| DW| [BP+SI] 18 X, 
-MOVI, B| CL'| DW| [BX+DI] 18 X, 
-MOVI, B| CL'| DW| [BX+SI] 18 X, 
-MOVI, B| CL'| DB| [BP] 18 B, 
-MOVI, B| CL'| DB| [BX] 18 B, 
-MOVI, B| CL'| DB| [DI] 18 B, 
-MOVI, B| CL'| DB| [SI] 18 B, 
-MOVI, B| CL'| DB| [BP+DI] 18 B, 
-MOVI, B| CL'| DB| [BP+SI] 18 B, 
-MOVI, B| CL'| DB| [BX+DI] 18 B, 
-MOVI, B| CL'| DB| [BX+SI] 18 B, 
-MOVI, B| CL'| D0| [BX] 
-MOVI, B| CL'| D0| [DI] 
-MOVI, B| CL'| D0| [SI] 
-MOVI, B| CL'| D0| [BP+DI] 
-MOVI, B| CL'| D0| [BP+SI] 
-MOVI, B| CL'| D0| [BX+DI] 
-MOVI, B| CL'| D0| [BX+SI] 
-MOVI, B| AL'| MEM| 14 X, 
-MOVI, B| AL'| R| BH| 
-MOVI, B| AL'| R| DH| 
-MOVI, B| AL'| R| CH| 
-MOVI, B| AL'| R| AH| 
-MOVI, B| AL'| R| BL| 
-MOVI, B| AL'| R| DL| 
-MOVI, B| AL'| R| CL| 
-MOVI, B| AL'| R| AL| 
-MOVI, B| AL'| DW| [BP] 18 X, 
-MOVI, B| AL'| DW| [BX] 18 X, 
-MOVI, B| AL'| DW| [DI] 18 X, 
-MOVI, B| AL'| DW| [SI] 18 X, 
-MOVI, B| AL'| DW| [BP+DI] 18 X, 
-MOVI, B| AL'| DW| [BP+SI] 18 X, 
-MOVI, B| AL'| DW| [BX+DI] 18 X, 
-MOVI, B| AL'| DW| [BX+SI] 18 X, 
-MOVI, B| AL'| DB| [BP] 18 B, 
-MOVI, B| AL'| DB| [BX] 18 B, 
-MOVI, B| AL'| DB| [DI] 18 B, 
-MOVI, B| AL'| DB| [SI] 18 B, 
-MOVI, B| AL'| DB| [BP+DI] 18 B, 
-MOVI, B| AL'| DB| [BP+SI] 18 B, 
-MOVI, B| AL'| DB| [BX+DI] 18 B, 
-MOVI, B| AL'| DB| [BX+SI] 18 B, 
-MOVI, B| AL'| D0| [BX] 
-MOVI, B| AL'| D0| [DI] 
-MOVI, B| AL'| D0| [SI] 
-MOVI, B| AL'| D0| [BP+DI] 
-MOVI, B| AL'| D0| [BP+SI] 
-MOVI, B| AL'| D0| [BX+DI] 
-MOVI, B| AL'| D0| [BX+SI] 
+MOVI, W| MEM| 10 X, 14 IX, 
+MOVI, W| R| DI| 14 IX, 
+MOVI, W| R| SI| 14 IX, 
+MOVI, W| R| BP| 14 IX, 
+MOVI, W| R| SP| 14 IX, 
+MOVI, W| R| BX| 14 IX, 
+MOVI, W| R| DX| 14 IX, 
+MOVI, W| R| CX| 14 IX, 
+MOVI, W| R| AX| 14 IX, 
+MOVI, W| DW| [BP] 14 X, 18 IX, 
+MOVI, W| DW| [BX] 14 X, 18 IX, 
+MOVI, W| DW| [DI] 14 X, 18 IX, 
+MOVI, W| DW| [SI] 14 X, 18 IX, 
+MOVI, W| DW| [BP+DI] 14 X, 18 IX, 
+MOVI, W| DW| [BP+SI] 14 X, 18 IX, 
+MOVI, W| DW| [BX+DI] 14 X, 18 IX, 
+MOVI, W| DW| [BX+SI] 14 X, 18 IX, 
+MOVI, W| DB| [BP] 14 B, 18 IX, 
+MOVI, W| DB| [BX] 14 B, 18 IX, 
+MOVI, W| DB| [DI] 14 B, 18 IX, 
+MOVI, W| DB| [SI] 14 B, 18 IX, 
+MOVI, W| DB| [BP+DI] 14 B, 18 IX, 
+MOVI, W| DB| [BP+SI] 14 B, 18 IX, 
+MOVI, W| DB| [BX+DI] 14 B, 18 IX, 
+MOVI, W| DB| [BX+SI] 14 B, 18 IX, 
+MOVI, W| D0| [BX] 14 IX, 
+MOVI, W| D0| [DI] 14 IX, 
+MOVI, W| D0| [SI] 14 IX, 
+MOVI, W| D0| [BP+DI] 14 IX, 
+MOVI, W| D0| [BP+SI] 14 IX, 
+MOVI, W| D0| [BX+DI] 14 IX, 
+MOVI, W| D0| [BX+SI] 14 IX, 
+MOVI, B| MEM| 10 X, 14 IB, 
+MOVI, B| R| BH| 14 IB, 
+MOVI, B| R| DH| 14 IB, 
+MOVI, B| R| CH| 14 IB, 
+MOVI, B| R| AH| 14 IB, 
+MOVI, B| R| BL| 14 IB, 
+MOVI, B| R| DL| 14 IB, 
+MOVI, B| R| CL| 14 IB, 
+MOVI, B| R| AL| 14 IB, 
+MOVI, B| DW| [BP] 14 X, 18 IB, 
+MOVI, B| DW| [BX] 14 X, 18 IB, 
+MOVI, B| DW| [DI] 14 X, 18 IB, 
+MOVI, B| DW| [SI] 14 X, 18 IB, 
+MOVI, B| DW| [BP+DI] 14 X, 18 IB, 
+MOVI, B| DW| [BP+SI] 14 X, 18 IB, 
+MOVI, B| DW| [BX+DI] 14 X, 18 IB, 
+MOVI, B| DW| [BX+SI] 14 X, 18 IB, 
+MOVI, B| DB| [BP] 14 B, 18 IB, 
+MOVI, B| DB| [BX] 14 B, 18 IB, 
+MOVI, B| DB| [DI] 14 B, 18 IB, 
+MOVI, B| DB| [SI] 14 B, 18 IB, 
+MOVI, B| DB| [BP+DI] 14 B, 18 IB, 
+MOVI, B| DB| [BP+SI] 14 B, 18 IB, 
+MOVI, B| DB| [BX+DI] 14 B, 18 IB, 
+MOVI, B| DB| [BX+SI] 14 B, 18 IB, 
+MOVI, B| D0| [BX] 14 IB, 
+MOVI, B| D0| [DI] 14 IB, 
+MOVI, B| D0| [SI] 14 IB, 
+MOVI, B| D0| [BP+DI] 14 IB, 
+MOVI, B| D0| [BP+SI] 14 IB, 
+MOVI, B| D0| [BX+DI] 14 IB, 
+MOVI, B| D0| [BX+SI] 14 IB, 
 LDS, DI'| MEM| 10 X, 
 LDS, DI'| DW| [BP] 14 X, 
 LDS, DI'| DW| [BX] 14 X, 
