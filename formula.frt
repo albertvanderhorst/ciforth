@@ -29,6 +29,10 @@ CR ." EXPECT 1 2 : " 1 2 3 4 2DROP . .
 1 ?TEST
 CR ." EXPECT 1 2 3 4  : |" 2 1 4 3 2SWAP . . . . 
 
+: D= DMINUS D+ OR 0= ;
+1 ?TEST
+CR ." EXPECT 1 1 0 123 |"  123 -1. -1. D= . 0. 0. D= . 2. 4. D= . .
+
 \ worddocchapter( {STRING},{ },{},{},
 \ { The idea of strings is that a character string (s) is a
 \ forthdef({string variable}). This is in fact a counted string (sc) a
@@ -124,7 +128,7 @@ FORGET Q
 \ Return forthvar({f}) the difference between
 \ the first two nonequal char's or 0 for all equal.
 \ },{{}})
-VARIABLE EQUALITY
+0 VARIABLE EQUALITY
 : COMPARE-AREA  
     0 DO   
         OVER I + C@   OVER I + C@  - 
@@ -260,11 +264,11 @@ MAXEVENT 8 ARRAY EVENT[]
 
 \ worddoc( {EVENT},{#EMPTY},{amount_empty},{ --- n},{},
 \ {Gives the lenght of the emptied part of the event table.
-\ this part must not be empty, such that if the two
-\ pointers are equal the table is totally full.},
+\ this part contains at least one spare, such that if the two
+\ pointers are equal it means the table is totally empty.},
 \ {{EVENT[]},{EMPTIED},{FILLED}})
 : #EMPTY   EMPTIED @   FILLED @ -  
-    DUP 0< IF MAXEVENT + THEN ;
+    -1 OVER < IF MAXEVENT + THEN ;
 
 \ worddoc( {EVENT},{#FULL},{amount_full},{ --- n},{},
 \ {Gives the lenght of the filled part of the event table.
@@ -274,9 +278,9 @@ MAXEVENT 8 ARRAY EVENT[]
     DUP 0< IF MAXEVENT + THEN ;
 
 1 ?TEST
-." EXPECT 1 123 " MAXEVENT 1 - . ." :" 123 #FULL . #EMPTY . .
+." EXPECT 1 " MAXEVENT 1 - . ." 123 :" 123 #FULL . #EMPTY . .
 
-\ worddoc( {EVENT},{FIND-EVENT},{FIND_event},{ d --- n},{},
+\ worddoc( {EVENT},{FIND-EVENT},{find_event},{ d --- n},{},
 \ {Find the place where forthvar({d}) is to be put into the event table,
 \ such that it remains sorted.},
 \ {{EVENT[]},{INSERT-EVENT},{GET-EVENT},{SET-EVENT}})
@@ -288,27 +292,72 @@ MAXEVENT 8 ARRAY EVENT[]
     WHILE  R> 1 - >R 
     REPEAT 2DROP R> R> DROP ;
 
-1 ?TEST 
+6 ?TEST 
 3 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2! 
-: F FIND-EVENT ; ^
+: F FIND-EVENT ; 
 123
-." EXPECT 0 0 1 1 :" 11. F . 12. F . 13. F . 14. F . ^
-." EXPECT 2 2 3 123 :" 15. F . 16. F . 17. F . . ^
+." EXPECT 0 0 1 1 :" 11. F . 12. F . 13. F . 14. F . 
+." EXPECT 2 2 3 123 :" 15. F . 16. F . 17. F . . 
+FORGET F
 
-BYE
+\ worddoc( {EVENT},{SHIFT-UP-EVENT},{shift_up_event},{ n ---},{},
+\ {Shift the event table open at place forthcode({n}) .},
+\ {{EVENT[]},{FIND-EVENT},{GET-EVENT},{SET-EVENT}},{INSERT-EVENT}})
+: SHIFT-UP-EVENT
+      1 FILLED +!
+      FILLED @ 2 - 
+      2DUP 1+ < IF DO   ( Ungraceful zero looping)
+          I EVENT[] 2@   I 1+ EVENT[] 2!
+      -1 +LOOP ELSE 2DROP THEN 
+;
+
+8 ?TEST
+2 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2!
+17. 3 EVENT[] 2! 18. 4 EVENT[] 2!
+: T EVENT[] 2@ D. ;
+123    1 SHIFT-UP-EVENT 
+." EXPECT 3 12 14 14 17 123 :" FILLED ? 0 T 1 T 2 T 3 T .
+123    3 SHIFT-UP-EVENT  
+." EXPECT 4 14 14 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
+FORGET T
+
+\ worddoc( {EVENT},{INSERT-EVENT},{insert_event},{ d n ---},{},
+\ {Insert the event forthvar({d}) into the event table,
+\ that is known to have space,
+\ at the place forthcode({n}) that is known to keep things sorted .},
+\ {{EVENT[]},{FIND-EVENT},{GET-EVENT},{SET-EVENT}})
+: INSERT-EVENT
+    DUP SHIFT-UP-EVENT
+    EVENT[] 2! 
+;
+
+9 ?TEST
+!EVENT     
+: T EVENT[] 2@ D. ;
+123
+ 12. 0 INSERT-EVENT 14. 1 INSERT-EVENT  16. 2 INSERT-EVENT 
+." EXPECT 3 12 14 16 123 :" FILLED ? 0 T 1 T 2 T .
+123    
+17. 3 INSERT-EVENT 18. 4 INSERT-EVENT 
+." EXPECT 5 14 16 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
+FORGET T
 
 
-: INSERT-EVENT DROP DROP DROP 1 FILLED +! ;
 \ worddoc( {EVENT},{SET-EVENT},{set_event},{ d --- n},{},
 \ {Put an event forthvar({d}) into the event table.
 \ This may fail, if the event table is full.
 \ forthvar({n}) is the position where it was put,
 \ and -1 means ``operation has failed''.},
 \ {{EVENT[]},{EMPTIED},{FILLED}})
-: SET-EVENT #EMPTY IF 
-    2DUP FIND-EVENT >R
-    R INSERT-EVENT
-    R> ELSE -1 THEN ;
+: SET-EVENT 
+    #EMPTY 1 = IF 2DROP -1 ELSE
+        2DUP FIND-EVENT >R
+        2DUP R EVENT[] 2@ D= IF
+            2DROP R> ( Event already present)
+        ELSE
+            R INSERT-EVENT R> 
+        THEN 
+    THEN ;
 
 \ worddoc( {EVENT},{GET-EVENT},{get_event},{ --- n},{},
 \ {Attempt to deschedule the first event from the event 
@@ -326,9 +375,12 @@ BYE
     THEN THEN  ;
 
 3 ?TEST
-." EXPECT 1 1 1 123 :" 123  10. SET-EVENT . 20. SET-EVENT . 30. SET-EVENT . .
-0. 0 EVENT[] 2!         0. 1 EVENT[] 2!         0. 2 EVENT[] 2!
+!EVENT 123
+." EXPECT 0 1 2 123 :" 123  10. SET-EVENT . 30. SET-EVENT . 20. SET-EVENT . .
 ." EXPECT 0 1 2 -1 :"   GET-EVENT . GET-EVENT . GET-EVENT . GET-EVENT .
+." EXPECT 3 3 -1 :" 40. SET-EVENT . GET-EVENT . GET-EVENT .
+." EXPECT 20 123 :" 1 EVENT[] 2@ D. .
 
+^
 
 
