@@ -1727,7 +1727,6 @@ CODE_HEADER({DROP},{DROP})
         POP     AX
         _NEXT
 ;
-;
 worddoc({JUGGLING},{2DROP},{two_drop},{n1 n2 ---},{L0},
 {Drop the topmost two 
 numbers (or double number)
@@ -1774,8 +1773,11 @@ CODE_HEADER({2DUP},{TDUP})
         _2PUSH
 ;
 worddoc({MEMORY},{+!},{plus_store},{n addr ---},{L0},
-{ Add
-forthvar({n}) to the value at the address.},{{TOGGLE},{!}} , {}, enddoc)
+{ Add forthvar({n}) to the value at the
+address.},{{TOGGLE},{!}}, 
+{{0 PAD ! 1 PAD +! PAD @ .},{1},
+ {1 PAD ! -1 PAD +! PAD @ .},{0} },
+enddoc)
 CODE_HEADER({+!},{PSTOR})
         POP     BX      ;{ADDRESS}
         POP     AX      ;{INCREMENT}
@@ -1783,8 +1785,12 @@ CODE_HEADER({+!},{PSTOR})
         _NEXT
 ;
 worddoc({MEMORY},{TOGGLE},{toggle},{addr b --},{},
-{Complement the contents of forthvar({addr}) by the bit pattern forthvar({b}) .},
-{{XOR},{+!} }, {}, enddoc)
+{Complement the contents of forthvar({addr}) by the bit pattern
+forthvar({b}) .}, 
+{{XOR},{+!} }, 
+{{0 PAD ! PAD 1 TOGGLE PAD @ .},{1},
+ {1 PAD ! PAD 1 TOGGLE PAD @ .},{0} },
+enddoc)
 CODE_HEADER({TOGGLE},{TOGGL})
         POP     AX      ;{BIT PATTERN}
         POP     BX      ;{ADDR}
@@ -1793,7 +1799,10 @@ CODE_HEADER({TOGGLE},{TOGGL})
 ;
 worddocsafe({MEMORY},{@},{fetch},{addr --- n},{ISO L0},
 {Leave the _BITS_ bit contents forthvar({n})
-of forthvar({addr}) .},{{!},{C@},{2@},{P@},{PC@},{L@}}, {}, enddoc)
+of forthvar({addr}) .},
+{{!},{C@},{2@},{P@},{PC@},{L@}}, 
+{ {-23 PAD ! PAD @ .},{-23} }, 
+enddoc)
 CODE_HEADER({@},{FETCH})
         POP     BX
         MOV     AX,[BX]
@@ -1802,7 +1811,9 @@ CODE_HEADER({@},{FETCH})
 worddocsafe({MEMORY},{C@},{c_fetch},{addr --- b},{ISO},
 {Leave the 8 bit contents of memory address. On the Intel architectures
 there are no restrictions regarding byte
-addressing.},{{C!},{@},{2@}}, {}, enddoc)
+addressing.},{{C!},{@},{2@}}, 
+{ {-23 PAD C! PAD C@ .},{DD} }, 
+enddoc)
 CODE_HEADER({C@},{CFET})
         POP     BX
         XOR     AX,AX
@@ -1812,7 +1823,9 @@ CODE_HEADER({C@},{CFET})
 worddocsafe({MEMORY},{2@},{two_fetch},{addr--- x1 x2},{ISO},
 {Leave a pair of _32_ bits values forthvar({x1}) forthvar({x2}) from
 consequitive cells at forthvar({addr}) . forthvar({x2}) is fetched from
-the lowest address. },{{2!},{@},{C@}}, {}, enddoc)
+the lowest address. },{{2!},{@},{C@}}, 
+{ {-23. PAD 2! PAD 2@ D.},{-23} }, 
+enddoc)
 CODE_HEADER({2@},{TFET})
         POP     BX      ;{ADDR}
         MOV     AX,[BX] ;{MSW}
@@ -1820,7 +1833,9 @@ CODE_HEADER({2@},{TFET})
         _2PUSH
 ;
 worddoc({MEMORY},{!},{store},{n addr ---},{ISO L0},
-{Store 16 bits of n at address.},{{@},{C!},{2!},{L!},{P!},{PC!}}, {}, enddoc)
+{Store 16 bits of n at address.},{{@},{C!},{2!},{L!},{P!},{PC!}}, 
+{{." Via @"},{Via @}},
+enddoc)
 CODE_HEADER({!},{STORE})
         POP     BX      ;{ADDR}
         POP     AX      ;{DATA}
@@ -1829,7 +1844,9 @@ CODE_HEADER({!},{STORE})
 ;
 worddoc({MEMORY},{C!},{c_store},{b addr ---},{ISO},
 {Store 8 bits at forthvar({addr}) . On word addressing computers, further
-specification is necessary regarding byte addressing.},{{C@},{!}}, {}, enddoc)
+specification is necessary regarding byte addressing.},{{C@},{!}}, 
+{{." Via C@"},{Via C@}},
+enddoc)
 CODE_HEADER({C!},{CSTOR})
         POP     BX      ;{ADDR}
         POP     AX      ;{DATA}
@@ -1839,7 +1856,9 @@ CODE_HEADER({C!},{CSTOR})
 worddoc({MEMORY},{2!},{two_store},{addr--- x1 x2},{ISO},
 {Store a pair of _32_ bits values forthvar({x1}) forthvar({x2}) to
 consecutive cells at forthvar({addr}) . forthvar({x2}) is stored at
-the lowest address. },{{2@},{!},{C!}}, {}, enddoc)
+the lowest address. },{{2@},{!},{C!}}, 
+{{." Via 2@"},{Via 2@}},
+enddoc)
 CODE_HEADER({2!},{TSTOR})
         POP     BX      ;{ADDR}
         POP     AX      ;{MSW}
@@ -1871,7 +1890,10 @@ worddocsafe({MEMORY},{L@},{long_fetch},{rseg addr --- n},{},
 {Leave the _BITS_ bit contents of forthvar({rseg:addr}),
 interpreted as if it was a real mode segment plus offset addres.
 This only works if the data segment is mapped directly (not paged) from
-physical address 0H . },{{L!},{@},{C@},{2@}}, {}, enddoc)
+physical address 0H . },
+{{L!},{@},{C@},{2@}}, 
+{{." No test"},{No test} },
+enddoc)
         POP     BX      ;MEM LOC
         POP     AX      ;SEG REG VAL
         MOV     DX,10H
@@ -1884,7 +1906,9 @@ _BITS16_({
 worddocsafe({MEMORY},{L@},{long_fetch},{rseg addr --- n},{},
 {Leave the _BITS_ bit contents of forthvar({rseg:addr}),
 the real mode segment plus offset addres.},
-{{L!},{@},{C@},{2@}}, {}, enddoc)
+{{L!},{@},{C@},{2@}}, 
+{{." No test"},{No test} },
+enddoc)
         POP     BX      ;MEM LOC
         POP     CX      ;SEG REG VAL
         _SWITCH_({JMPHERE_FROM_PROT})
@@ -1904,7 +1928,9 @@ worddoc({MEMORY},{L!},{long_store},{n nseg addr --- },{},
 forthvar({rseg:addr}),
 interpreted as if it was a real mode segment plus offset addres.
 This only works if the data segment is mapped directly (not paged) from
-physical address 0H . },{{L@},{!},{C!},{2!}}, {}, enddoc)
+physical address 0H . },{{L@},{!},{C!},{2!}}, 
+{{." No test"},{No test} },
+enddoc)
         POP     BX      ;MEM LOC
         POP     AX      ;SEG REG VAL
         MOV     DX,10H
@@ -1915,11 +1941,13 @@ physical address 0H . },{{L@},{!},{C!},{2!}}, {}, enddoc)
         _NEXT
 });_END_({ _BITS32_})
 _BITS16_({
-worddoc({MEMORY},{L!},{long_store},{n nseg addr --- },{},
+worddoc( {MEMORY},{L!},{long_store},{n nseg addr --- },{},
 {Store _BITS_ bits of forthvar({n}) at address
 forthvar({rseg:addr}),
 a real mode segment plus offset addres.
-},{{L@},{!},{C!},{2!}})
+},{{L@},{!},{C!},{2!}},
+{{." No test"},{No test} },
+enddoc)
         POP     BX
         POP     CX
         POP     DX
@@ -1941,7 +1969,9 @@ forthcode({';'}) or forthcode({';CODE'}) .
 The compiling process is done by the text interpreter as long as
 forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
 set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
-set (P) are executed rather than being compiled.},{}, {}, enddoc)
+set (P) are executed rather than being compiled.},{}, 
+{{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
+enddoc)
 HEADER({:},{COLON},{DOCOL}, , B_IMMED)
         DC      QEXEC
         DC      SCSP
@@ -1967,7 +1997,9 @@ _SWITCH_({
 ;
 worddoc({DEFINING},{;},{semicolon},{},{P,C,L0},
 {Terminate a colon-definition and stop further compilation. Compiles
-the run-time forthcode({EXIT}) .},{}, {}, enddoc)
+the run-time forthcode({EXIT}) .},{},
+{{." Via ;"},{Via ;}},
+enddoc)
 HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      QCSP
         DC      COMP
@@ -1979,9 +2011,12 @@ HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
 worddoc({DEFINING},{CONSTANT},{constant},{n ---},{L0},
 {A defining word used in the form:
     forthvar({n}) forthcode({CONSTANT}) forthvar({cccc})
-to create word forthvar({cccc}) , with its data field containing forthcode({n}) . When
-forthvar({cccc}) is later executed, it will push the value of forthcode({n}) to the stack.},
-{{VARIABLE}}, {}, enddoc)
+to create word forthvar({cccc}) , with its data field containing
+forthcode({n}) . When forthvar({cccc}) is later executed, it
+will push the value of forthcode({n}) to the stack.}, 
+{{VARIABLE}}, 
+{{12A CONSTANT FRED FRED .},{12A} },
+enddoc)
 HEADER({CONSTANT},{CONST},{DOCOL})
         DC      PWORD
         DC      PCREAT
