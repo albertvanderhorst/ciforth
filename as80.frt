@@ -181,10 +181,15 @@ DROP DROP
 % MOV >MASK  H.
 % MOV >COMMA H.
 
-: SET+! DUP >R @ ! 0 CELL+ R> +! ;
 : SET <BUILDS HERE CELL+ , CELLS ALLOT DOES> ;
+( Add ITEM to the SET )
+: SET+! DUP >R @ ! 0 CELL+ R> +! ;
+( Make the SET empty )
 : -SET DUP CELL+ SWAP ! ;
+( Print the SET )
 : .SET DUP @ SWAP DO I . 0 CELL+ +LOOP ;
+( For the SET : it IS non-empty )
+: SET? DUP @ SWAP CELL+ = 0= ;
 12 SET DISS
 DISS 10 DUMP
 123456 DISS SET+!
@@ -196,6 +201,7 @@ DISS .SET
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
 : +DISS DISS SET+! ;
+: DISS? DISS SET? ;
 87654 +DISS
 DISS .SET
 -DISS
@@ -240,49 +246,77 @@ DISS .SET
 
     % ONLY-DO-INST FOR-ALL-AS
 
-: BACKTRACK
-    AT-REST? IF
-        .DISS
-        !TALLY
-(       DISS @ 1 CELLS - @                                                  )
-    THEN
-;
-
 ( These dissassemblers are quite similar:
-  If the precondition is fullfilled it does the reassuring
+  if the DEA on the stack is of the right type and
+  if the precondition is fullfilled it does the reassuring
   actions toward the tally as with assembling and add the 
-  fixup/posti/commaer to the disassembly struct.  )
+  fixup/posti/commaer to the disassembly struct. Leave the DEA)
 : DIS-1PI
+    DUP IS-1PI IF 
     AT-REST? IF
         DUP >BODY POST, DROP
         DUP +DISS
-        BACKTRACK                                                   
+    THEN
     THEN
 ;      
 
 : DIS-xFI
+   DUP IS-xFI IF 
    DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
        DUP >BODY FIX| DROP
        DUP +DISS
-   BACKTRACK                                                         
+   THEN
    THEN
 ;          
 : DIS-COMMA
+   DUP IS-COMMA IF 
    DUP >BODY @ TALLY @ INVERT CONTAINED-IN IF
        DUP >BODY @ TALLY OR!
        DUP +DISS
-       BACKTRACK                                                         
+   THEN
    THEN
 ;          
+
+( Generate the situation back, with one less item in `DISS')
+: REBUILD
+    0 CELL+ MINUS DISS +!
+    !TALLY 
+    DISS? IF 
+        DISS @+ SWAP -DISS
+        DO 
+            I @ DIS-1PI DIS-xFI DIS-COMMA DROP  
+        0 CELL+ +LOOP 
+    THEN
+;
+
+( Replace DEA with the next DEA )                                       )
+( Discard the last item of the disassembly that is either               )
+( used up or incorrect                                                  )
+: BACKTRACK
+(   ." BACKTRACKING"                                                    )
+    DROP DISS @ 0 CELL+ - @                                         
+    >NEXT%
+    REBUILD                                                         
+;
+
+: RESULT   
+    AT-REST? DISS? AND IF
+        .DISS
+        REBUILD                                                         
+    THEN
+;
+
 : DOIT
     -DISS 
     !TALLY
     START 
-    BEGIN ^
-        DUP IS-1PI   IF DUP ID. DIS-1PI THEN 
-        DUP IS-xFI   IF DUP ID. DIS-xFI THEN 
-        DUP IS-COMMA IF DUP ID. DIS-COMMA THEN 
-    >NEXT% DUP DICTEND? UNTIL
+    BEGIN 
+        DIS-1PI DIS-xFI DIS-COMMA 
+        RESULT   
+        >NEXT% 
+(       DUP ID.                                                         )
+        BEGIN DUP DICTEND? DISS? AND WHILE BACKTRACK REPEAT 
+    DUP DICTEND? UNTIL
     DROP
 ;
 
