@@ -132,6 +132,7 @@ _ENDCOMMENT
 
 ; Bios specific equates.
 BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
+CODESEGMENT     EQU     BOOTADDRESS/10H ; PC jumps to 0:7C00 to boot
 SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
 	; Skip boot sector,fats and root dir and first sector of file.
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
@@ -141,6 +142,16 @@ _COMMENT
 SECSTRT EQU     1       
 _ENDCOMMENT
 ; END  OF PHYSICAL DISK PARAMETERS
+;____1_____ _PROTECTED_1_({
+GDTLEN EQU 7FFFH 
+GDT EQU 28000H 
+GDT_SEGMENT EQU GDT/10H
+CODE_SEGMENT EQU 07C0H ; The same for real and prot)         
+DATA_SEGMENT EQU 1800H       
+CS_32 EQU 10H  ; 32 BITS CODE SEGMENT)                      
+DS_32 EQU 7B8H ; 32 BITS DATA SEGMENT)                      
+
+});_END___1__({ _PROTECTED_1_})
 
 	PAGE
 	CSEG    SEGMENT PARA PUBLIC 'CODE'
@@ -195,7 +206,7 @@ BOOT:
 ;       JMP FAR BOOTADDRESS+ELSE1
 	 DB      0EAH
 	 DW      ELSE1
-	 DW     BOOTADDRESS/10H
+	 DW     CODESEGMENT
 ELSE1:  
 ;MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE
 	MOV     AL,'F'
@@ -315,7 +326,7 @@ HUGESECS      DD         000H
 BOOTLBA:  DB      10H, 0
 	DW      (INITDP-$$)/BPS      ; ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.
 	DW      BPS             ; OFFSET AND SEGMENT
-	DW      BOOTADDRESS/10H
+	DW      CODESEGMENT
 	; At a hard disk we just read sector from sector 1        
 	DD      1       ; Start
 	DD      0       ; M.S. 32 BITS
@@ -351,9 +362,9 @@ BOOT:
 	; beating the assembler. After 10 attempts I gave up
 	; This is a simple straightforward intersegment jump
 ;       JMP FAR BOOTADDRESS+ELSE1
-	 DB      0EAH
+	 JMPFAR 
 	 DW      ELSE1
-	 DW     BOOTADDRESS/10H
+	 DW     CODESEGMENT
 ELSE1:  
 ;MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE
 	MOV     AL,'F'
@@ -418,7 +429,69 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
 
 ORIG:
 ;____1_____ _PROTECTED_1_({
-  	TO_PROTECTED    ;   "
+;CODE-SEGMENT  10 * CONSTANT CODE-START                          
+	MOV     AX,GDT_SEGMENT ; GDT segment
+	MOV     ES,AX
+	MOV     DI,0 
+	MOV     AX,GDTLEN
+	STOSW
+; PREPARE-CS : THIS MUST LOOK THE SAME IN REAL AND 16 BITS                                                    
+;               PROTECTED MODE
+	MOV     DI,CODESEGMENT 
+	MOV     AX,0FFFFH
+	STOSW
+	MOV     AX,BOOTADDRESS 
+	STOSW
+	MOV     AX,9A00H      
+	STOSW
+	MOV     AX,008FH 
+	STOSW
+; PREPARE DS/SS/ES ; only SS used in real mode.                                                    
+;  BECAUSE IT IS USED IN REAL MODE DATA_SEGMENT
+;  MUST BE EMPTY.            
+	MOV     DI,DATA_SEGMENT
+	MOV     AX,0FFFFH
+	STOSW
+	MOV     AX,BOOTADDRESS 
+	STOSW
+	MOV     AX,9200H      
+	STOSW
+	MOV     AX,008FH 
+	STOSW
+; PREPARE-CS 32 BITS                                                   
+	MOV     DI,CS_32
+	MOV     AX,0FFFFH
+	STOSW
+	MOV     AX,BOOTADDRESS 
+	STOSW
+	MOV     AX,9A00H      
+	STOSW
+	MOV     AX,00CFH 
+	STOSW
+; PREPARE-DS 32 BITS                                                   
+	MOV     DI,DS_32
+	MOV     AX,0FFFFH
+	STOSW
+	MOV     AX,BOOTADDRESS 
+	STOSW
+	MOV     AX,9200H      
+	STOSW
+	MOV     AX,00CFH 
+	STOSW
+
+	MOV     AX,CODESEGMENT 
+	MOV     ES,AX
+	LGDT    [GDTLOAD]
+	TO_PROTECTED    ;   "
+
+         JMP     SAME3
+;         JMPFAR 
+;         DW      LCLD
+;         DW     CODESEGMENT
+GDTLOAD DW     GDTLEN
+	DD     GDT 
+
+SAME3:
 });_END___1__({ _PROTECTED_1_})
 	NOP
 	JMP	LCLD     ;VECTOR TO COLD START
@@ -461,8 +534,8 @@ _COMMENT
  
 	    ES      Temporary segment register only used by
 		    a few words. However it MUST remain equal to
-                    DS, such that string primitives can be used
-                    with impunity.
+		    DS, such that string primitives can be used
+		    with impunity.
 
 ---------------------------------------------------------- 
 _ENDCOMMENT
@@ -567,7 +640,7 @@ BREAK:  JMP	SHORT	TNEXT3	;CONT WITH PROGRAM
 ;
 TNEXT2:	POP	AX
 	POPF
-TNEXT3:	LODSW		; AX <- (IP)
+TNEXT3:	LODSW           ; AX <- (IP)
 	MOV	BX,AX
 	JMP	SHORT	NEXT1
 	PAGE
@@ -697,7 +770,7 @@ RPP     DC 	INITR0	; INIT (R0)         4
 	DC	INITDP  ;	INIT (DP)     9
 	DC	_VOC_LATEST(FORTH) ;       INIT (VOC-LINK) 10
 	;
-        _RESB(CELLS(14))        ; User variables up to 24 in use
+	_RESB(CELLS(14))        ; User variables up to 24 in use
 ;	<<<<< end of data used by cold start >>>>>
 ;
 ;	The following is the CPU's name, printed
@@ -1039,12 +1112,12 @@ CODE_HEADER({2!},{TSTOR})
 	JMP	NEXT
 ;
 CODE_HEADER({L@},{LFET})
+
 	POP	BX	;MEM LOC
-	POP	CX	;SEG REG VAL
-	MOV	DX,DS
-	MOV	DS,CX
-	MOV	AX,[BX]
-	MOV	DS,DX
+	POP	ES      ;SEG REG VAL
+	MOV	AX,[ES:BX]
+        MOV     DX,DS
+        MOV     ES,DX
 	JMP	APUSH
 ;
 CODE_HEADER({L!},{LSTORE})
@@ -1071,9 +1144,17 @@ HEADER({:},{COLON},{DOCOL},1)
 	DC	PSCOD
 DOCOL:	LEA     BP,[BP-CELL]
 	MOV	[BP],SI	;R1 <- (IP)
-  	LEA     SI,[DI+CELL]  ;(IP) <- (PFA)
-  	TO_REAL         ; Nought unless using protected mode.
-  	TO_PROTECTED    ;   "
+	LEA     SI,[DI+CELL]  ;(IP) <- (PFA)
+;____1_____ _PROTECTED_1_({
+;        JMPFAR
+;        DW      SAME1,CODESEGMENT
+;SAME1:
+	TO_REAL         
+	TO_PROTECTED    
+;        JMPFAR
+;        DW      SAME2,CODESEGMENT
+;SAME2:
+});_END___1__({ _PROTECTED_1_})
 	JMP	NEXT
 ;
 HEADER({;},{SEMI},{DOCOL},1)
@@ -1090,22 +1171,22 @@ HEADER({CONSTANT},{CON},{DOCOL})
 	DC	COMMA
 	DC	PSCOD
 DOCON:  MOV     AX,[DI+CELL] ;GET DATA FROM PFA
-  	JMP	APUSH
+	JMP	APUSH
 ;               
 HEADER({VARIABLE},{VAR},{DOCOL})
 	DC      CON
 	DC      PSCOD
 DOVAR:	LEA     AX,[DI+CELL] ;(AX) <- PFA
-  	JMP	APUSH
+	JMP	APUSH
 ;
 HEADER({USER},{USER},{DOCOL})
 	DC	CON
 	DC	PSCOD
 DOUSE:  XOR     BX,BX
-        MOV     BL,[DI+CELL] ;PFA  
-  	MOV	DI,[UP]   ;USER VAR ADDRESS
-  	LEA	AX,[BX+DI]	;ADDR OF VARIABLE
-  	JMP	APUSH
+	MOV     BL,[DI+CELL] ;PFA  
+	MOV	DI,[UP]   ;USER VAR ADDRESS
+	LEA	AX,[BX+DI]	;ADDR OF VARIABLE
+	JMP	APUSH
 	PAGE
 CODE_HEADER({0},{ZERO})
 	XOR	AX,AX
@@ -1481,9 +1562,9 @@ HEADER({DOES>},{DOES},{DOCOL})
 	DC	PSCOD
 DODOE:	LEA     BP,[BP-CELL]
 	MOV	[BP],SI	;R1 <- (IP)
-  	MOV	SI,[DI+CELL] ;NEW IP 
-  	LEA     AX,[DI+2*CELL]
-  	JMP	APUSH 
+	MOV	SI,[DI+CELL] ;NEW IP 
+	LEA     AX,[DI+2*CELL]
+	JMP	APUSH 
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
 	DC	DUPE
@@ -1999,7 +2080,7 @@ HEADER({WARM},{WARM},{DOCOL})
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
 ;____1_____ _HOSTED__1_({
-        PUSH    DS
+	PUSH    DS
 	MOV	AX,0
 	MOV	DS,AX		;TO VECTOR AREA
 	MOV	BX,08CH
@@ -2008,7 +2089,7 @@ LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
 	INC	BX
 	INC	BX
 	MOV	[BX],CS
-        POP     DS
+	POP     DS
 });_END___1__({ _HOSTED__1_})
 	CLD			; DIR = INC
 	MOV	SP,_WORD_PTR[USINI+CELLS(3)]    ;PARAM. STACK
@@ -2368,15 +2449,15 @@ CODE_HEADER({BIOS},{BIOS})
 	POP     AX      
 	PUSH     SI      ; Save Forth registers. NEEDED? 
 	PUSH     BP      
-        XCHG    SI,AX   ; Save AX in (already free) SI
-  	TO_REAL         ; Nought unless using protected mode.
-        XCHG    SI,AX   
+	XCHG    SI,AX   ; Save AX in (already free) SI
+	TO_REAL         ; Nought unless using protected mode.
+	XCHG    SI,AX   
 RQBIOS: INT(0)          ; Request number to be overwritten.
 	PUSHF      ; Save status into DI 
 	POP     DI      
-        XCHG    SI,AX   ; Save AX in (still free) SI     
-  	TO_PROTECTED    
-        XCHG    SI,AX   
+	XCHG    SI,AX   ; Save AX in (still free) SI     
+	TO_PROTECTED    
+	XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
 	POP	SI	;INTERPRETER PNTR
 	PUSH     AX      
@@ -2476,7 +2557,7 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
 EXPE1	DC	KEY                             
 	DC	DUPE                            
 	DC	RUBOUT 
-        DC      FETCH
+	DC      FETCH
 	DC	EQUAL                           
 	_0BRANCH(EXPE2) ; IF                    
 	DC	DROP                            
@@ -2596,7 +2677,7 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
 EXPE1	DC	KEY                             
 	DC	DUPE                            
 	DC	RUBOUT 
-        DC      FETCH
+	DC      FETCH
 	DC	EQUAL                           
 	_0BRANCH(EXPE2) ; IF                    
 	DC	DROP                            
@@ -2871,7 +2952,7 @@ HEADER({LBAPAR},{LBA},{DOVAR})
 	DB      10H, 0      ; default    
 	DC      SPB         ; default    
 	DC      0           ; to be filled with offset
-	DC      BOOTADDRESS/10H ; default
+	DC      CODESEGMENT ; default segment
 	; At a hard disk we just read sector from sector 1        
 	DD      0       ; sector number
 	DD      0       ; M.S. 32 BITS default
@@ -3411,4 +3492,3 @@ _ENDCOMMENT
 
 ; Define the entry point, not valid for auto booting.
 	END	ORIG
-
