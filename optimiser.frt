@@ -14,6 +14,8 @@ REQUIRE $
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
+\ Store a LOW HIGH range with hl-code in the dictionary.
+: HL-RANGE, OVER - HL-CODE, ;
 
 \ For POINTER : it POINTS not yet to an ``EXIT''.
 : ?TILL-EXIT   @ '(;) = 0= ;
@@ -122,8 +124,9 @@ DROP 0 THEN ;
 : COLLECT-SWAPPER !SWAPPER-START DUP
      BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
 \           BEGIN DUP @ NOT-YET-STABLE? OVER ?TILL-NOOP AND WHILE NEXT-ITEM REPEAT
-     OVER -
+     OVER -    OVER ?TILL-EXIT AND ( 0 if at exit)
      UNSTABLE? IF DROP 0 THEN \ Alles umsonst.
+     DUP 0<> CSPP @ 0<> AND PROGRESS OR!
 ;
 
 \ Assuming there has been folding, increment SEQUENCE to point past all
@@ -132,16 +135,30 @@ DROP 0 THEN ;
 \ For SEQUENCE , return the POINTER to first constant (``LIT'')
 : FIND-LIT BEGIN DUP @ 'LIT <> OVER ?TILL-EXIT AND WHILE NEXT-ITEM  REPEAT ;
 
-
 \ For SEQUENCE , return the STRING that is swappable.
 \ 0 length : no good.
 : (FIND-SWAPPABLE) !OPT-START FIND-LIT COUNT-LIT COLLECT-SWAPPER ;
 
 \ For SEQUENCE , return the STRING that is swappable.
+\ FIXME : ?TILL-EXIT can be dropped here.
 \ 0 length : there is none.
-: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?TILL-EXIT OVER 0<> OR UNTIL ;
+: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?TILL-EXIT OVER 0= AND WHILE DROP REPEAT ;
 
-: REORDER ;
+\ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
+\ The order to be compiled is A-B C-D B-C .
+ : GET-PIECES   DUP  FIND-SWAPPABLE   ( D) OVER + >R
+    CSC @ 2 * CELLS -  DUP CSPP @ 2 * CELLS + R>
+    "CSPP is dus nu" TYPE CSPP ? ;
+
+: COMPILE-PIECES ( C) OVER >R   2SWAP   ( B) DUP >R
+    HL-RANGE,  HL-RANGE,   R> R> HL-RANGE, ;
+
+\ Reorder a SEQUENCE with respect to the get-latest strategy.
+\ Return rearragned SEQUENCE
+: REORDER HERE SWAP
+BEGIN GET-PIECES DUP >R COMPILE-PIECES R> DUP ?TILL-EXIT 0= UNTIL DROP
+POSTPONE (;)  ;
+
 \ ---------------------------------------------------------------------
 \ Combine a STACKEFFECTBYTE into ``CSC''.
 \ ``-'' works here because both nibbles have offset 1!
@@ -398,7 +415,7 @@ STRIDE SET PEES
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
 : OPT-EXPAND   >DFA DUP @  ^^
-    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER PROGRESS @ WHILE REPEAT
+    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER ^^ PROGRESS @ WHILE REPEAT
 SWAP ! ;
 
 \ For DEA remember that it has been optimised
