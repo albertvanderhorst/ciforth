@@ -111,6 +111,7 @@ NBUF    EQU     M4_NBUF   ; {No. of buffers aka screens }
 KBBUF   EQU     1024      ; {Data bytes per disk buffer}
 US      EQU     M4_US*CW  ; {User variable space}
 EM      EQU     M4_EM     ; {Where the memory ends w.r.t. ORIG.}
+EMP     EQU     (EM-1)/1000H+1 ; {Number of pages.}
 RTS     EQU     M4_RTS    ; {Return stack & terminal input buffer} })
 ;
 _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}})
@@ -779,9 +780,10 @@ _HOSTED_DPMI_({
 ; Required start of .COM program.
     ORG     100H
 ORIG:                         ; Accommodate also .exe files
-            MOV     BX, EM/10H          ;BX=paragraphs needed (64K)
+            MOV     BX, (((100H + TEXTEND-ORIG)-1)|0FFFFH)/10H+1 ;{Leave at least 64K.}
             MOV     AH,4Ah              ;Modify memory allocation
             INT     21h
+
 ; These are real mode descriptors !
             MOV     _CELL_PTR[SaveCS],CS           ; Once and for all
             MOV     _CELL_PTR[SaveDS],DS
@@ -814,7 +816,8 @@ ORIG:                         ; Accommodate also .exe files
             JC      ERRMSG              ;Could not allocate
 
 Plunge:     MOV     ES,AX
-            MOV     AX, 0       ; Windows 3.11 +w32s : 1 doesn't work here.
+;{Setting this bit, doesn't mean you arrive in a 32 bit segment!}
+            MOV     AX, _BITS16_(0)_BITS32_(1)
             _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
 ; {From here to where the assembler switches to protected mode,}
 ; {code must be 16/32 bit independant.}
@@ -877,24 +880,29 @@ ERRMSG2:    JC      ERRMSG
 
             MOV     AX,0008H            ;{Set segment limit.}
             MOV     BX,ES
-            MOV     CX, (EM-1)/10000H
-            MOV     DX, (EM-1) & 0FFFFH
+            MOV     CX, (EMP-1)/10000H
+            MOV     DX, (EMP-1) & 0FFFFH
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
 
             MOV     AX,0009H            ;{Set acces rights.}
             MOV     BX,ES
-            MOV     CX, 00F2H ; %0000 0000 1111 0010 Wyatt pg.618
+            MOV     CX, 80F2H ; %1000 0000 1111 0010 Wyatt pg.618
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
 
 ; -------------- Copy Forth to the new segment ES --------
-            MOV     CX, EM
+            MOV     CX, TEXTEND
             XOR     DI, DI      ;{dest}
             XOR     SI, SI      ;{dest}
             REP     MOVSB
+
+;{We are now in a position to release the original memory.}
+;           MOV     BX, 1000H          ;BX=paragraphs needed (64K)
+;           MOV     AH,4Ah              ;Modify memory allocation
+;           INT     21h
 
 ; -------------- Alias descriptors for ES --------
 ; After this section : ES is an alias for CS , DX for DS.
@@ -910,16 +918,16 @@ ERRMSG2:    JC      ERRMSG
 
             MOV     AX,0009H            ;{Set acces rights.}
             MOV     BX,ES
-            ; %0000 0000 1111 1010  %0100 0000 1111 1010
-            MOV     CX, 00FAH _BITS32_({ | 4000H })
+            ; %1000 0000 1111 1010  %1100 0000 1111 1010
+            MOV     CX, 80FAH _BITS32_({ | 4000H })
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
 
             MOV     AX,0009H            ;{Set acces rights.}
             MOV     BX,DX
-            ; %0000 0000 1111 1010  %0100 0000 1111 1010
-            MOV     CX, 00F2H _BITS32_({ | 4000H })
+            ; %1000 0000 1111 1010  %1100 0000 1111 1010
+            MOV     CX, 80F2H _BITS32_({ | 4000H })
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
@@ -5801,7 +5809,6 @@ MESS1:  _STRINGINLINE({MSG # })
         DC      SWAP, DOT
         DC      BASE, STORE
 MESS2:                      ;{THEN}
-        DC      CR
         DC      SEMIS
 ;
 _PC_({
