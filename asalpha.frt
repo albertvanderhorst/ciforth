@@ -26,7 +26,7 @@ ASSEMBLER DEFINITIONS  HEX
 \     0001,0000 AMASK 0 is clear           0002,0000 Instruction requires AMASK 0
 \     0004,0000 AMASK 1 is clear           0008,0000 Instruction requires AMASK 1
 \     0010,0000 AMASK 2 is clear           0020,0000 Instruction requires AMASK 2
-\     0040,0000 AMASK 8 is clear           0800,0000 Instruction requires AMASK 8
+\     0040,0000 AMASK 8 is clear           0080,0000 Instruction requires AMASK 8
 
 ( Transform the XX.XXX code such as used in appendix C into             )
 ( a proper BI mask.                                                     )
@@ -206,7 +206,6 @@ A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
 
 ( **************************** Misc Opr ******************************  )
 
-0 0 F3I-MASK BI: 11.6C 4PI IMPLVER
 ( ***************************** 16 bits displacement ****************** )
 
 0 0 0000,FFFF 0 DFI D16|
@@ -248,12 +247,34 @@ BI: 00.200 BI: 1A.000 4 4FAMILY, JMP, JSR, RET, JSR_COROUTINE,
 8 0 NORMAL-MASK  T!
 BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 
-( ********************************************************************* )
-00 00 NORMAL-MASK T!
-\ BI: 1.0 BI: 0.0 8 4FAMILY, CALL_PAL OPC01 OPC02 OPC03 OPC04 OPC05 OPC06 OPC07
+( ***************************** 4.11 Misc. **************************** )
+
+( This instruction requires no more Ra register                         )
+0 0 1F,F01F 47E0,0C20 4PI AMASK,
+
+( Dirty trick out board hanging bit, to prevent matches with other      )
+( assembler parts. Doing this via the ``BAD'' mechanism is just too     )
+( expensive.                                                            )
+0 0 1,03FF,FFFF 0 DFI N25|    ( 26 bits number built in)
+0 0 1,03FF,FFFF BI: 0.0     4PI CALL_PAL
+0 0   001F,0000  6000,E800 4PI ECB
+0 0   0000,0000  6000,0400 4PI EXCB
+0 0 001F,0000 T!
+      0000,2000  6000,8000 2 4FAMILY, FETCH, FETCH_M,
+0 0   0000,001F BI: 11.6C 4PI IMPLVER,
+0 0   0000,0000  6000,4000 4PI MB,
+0 0   03E0,0000  6000,E000 4PI RC,
+0 0   03E0,0000  6000,C000 4PI RPCC,
+0 0   03E0,0000  6000,F000 4PI RS,
+0 0   0000,0000  6000,0000 4PI TRAPB,
+0 0   001F,0000  6000,F800 4PI WH64,
+0 0   0000,0000  6000,4400 4PI WMB,
+
 
 ( ********************************************************************* )
-80,0000 0 03FF,FFFF 0 DFI N25|    ( 26 bits number built in)
+00 00 NORMAL-MASK T!
+
+( ********************************************************************* )
 ( ********************************************************************* )
 
 
@@ -271,6 +292,8 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 
 : SHOW:   TOGGLE-TRIM SHOW: TOGGLE-TRIM ;
 : SHOW-ALL   TOGGLE-TRIM SHOW-ALL TOGGLE-TRIM ;
+
+
 
 
 \ : NEXT CHECK26 ;
