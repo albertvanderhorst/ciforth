@@ -224,15 +224,12 @@ zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip
 # Compiling a simple c-program may be too much, so supply BLOCKS.BLK
 msdoszip : $(RELEASECONTENT) mslinks ;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
-    sed -e's/\<fig86\.//g' |\
-    sed -e's/\<gnr\>/fig86.gnr/' |\
-    sed -e's/\<blocks.frt\>/BLOCKS.BLK/' |\
-    sed -e's/ \([^ .]\{1,8\}\)[^ .]*\./ \1./g' |\
-    xargs zip
+    sed -e's/ fig86\./ /g' |\
+    sed -e's/ gnr / fig86.gnr /g' |\
+    xargs zip -k
 
 # More messy things in behalf of msdos
 mslinks :
-	ln -sf fromblock.c frombloc.c
 	ln -sf fig86.lina.asm lina.asm
 	ln -sf fig86.linux.asm linux.asm
 	ln -sf fig86.msdos.msm msdos.msm
@@ -240,8 +237,6 @@ mslinks :
 	ln -sf fig86.msdos.bin forth32.com
 	ln -sf fig86.alone.asm alone.asm
 	ln -sf fig86.alonehd.asm alonehd.asm
-	ln -sf figdocadd.txt figdocad.txt
-	ln -sf stealconstant.c stealcon.c
 
 lina.zip : $(RELEASELINA) ; zip lina$(VERSION) $+
 
