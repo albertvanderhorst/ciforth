@@ -76,6 +76,9 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 \ For a CHAR-SET ; convert it into its complementary set.
 : INVERT-SET MAX-SET 1+ 0 DO I OVER + DUP C@ INVERT SWAP C! LOOP  0 SWAP CLEAR-BIT ;
 
+\ For CHAR and CHARSET return "it BELONGS to the charset".
+: IN-CHAR-SET   BIT? ;
+
 \ ------------------------------------------
 \                  char sets, actual part
 \ ------------------------------------------
@@ -104,6 +107,40 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 : GET-ESCAPE ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ _ THEN DROP ;
 '| HIDDEN
 
+
+\ -----------------------------------------------------------------------
+\                  substrings
+\ -----------------------------------------------------------------------
+\ This table contains the ends and starts of matching substrings between ( )
+\ 0 is what matches the whole expression, and is available without ( )
+CREATE SUBSTRING-TABLE 20 CELLS ALLOT
+\ To where has the table been used (during expression parsing).
+VARIABLE ALLOCATOR
+\ Initialise ALLOCATOR
+: ALLOCATOR! 2 ALLOCATOR ! ;
+\ Return a new ALLOCATOR index, and increment it.
+: ALLOCATOR++
+    ALLOCATOR @ DUP 11 = ABORT" Too many substrings with ( ), max 9, user error"
+    1 ALLOCATOR +! ;
+
+\ Return a new INDEX for a '('.
+: ALLOCATE( ALLOCATOR++
+DUP 1 AND ABORT" ( where ) expected, inproper nesting, user error" ;
+\ Return a new INDEX for a ')'.
+: ALLOCATE( ALLOCATOR++
+DUP 1 AND 0= ABORT" ) where ( expected, inproper nesting, user error" ;
+
+\ Remember CHARPOINTER as the substring with INDEX.
+: REMEMBER()
+\D DUP 0 10 WITHIN 0= ABORT" substring index out of range, system error"
+CELLS SUBSTRING-TABLE + ! ;
+
+\ For INDEX create a "word" that returns the matched string with that index.
+: CREATE\ 2 * CELLS SUBTRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
+
+0 CREATE\ \0    1 CREATE\ \1    2 CREATE\ \2    3 CREATE\ \3   4 CREATE\ \4
+5 CREATE\ \5    6 CREATE\ \6    7 CREATE\ \7    8 CREATE\ \8   9 CREATE\ \9
+
 \ -----------------------------------------------------------------------
 
 \ The compiled pattern.
@@ -119,42 +156,26 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ atom = 'ADVANCE( <term>+ <endsentinel>
 
 CREATE RE-PATTERN MAX-RE CELLS ALLOT
-Backup from ADDRESS one cell. Leave decremented ADDRESS.
+\ Backup from ADDRESS one cell. Leave decremented ADDRESS.
 : CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
 : (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT CELL- TRUE;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
-\ if the character matches the charset at the expression,
-\ advance both past the match, else leave them as is.
-\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
-: ADVANCE-CHAR  OVER C@ OVER IN-SET? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
-
-\ For CHARPOINTER and EXPRESSIONPOINTER :
 \ as long as the character agrees with the matcher at the expression,
 \ advance it.
 \ Return CHARPOINTER advanced and EXPRESSIONPOINTER advanced past the matcher.
-: (ADVANCE*)
-    @+ >R
-    BEGIN
-        2DUP R@ EXECUTE
-    WHILE
-        DROP >R >R DROP R> R> SWAP
-    REPEAT
-    >R DROP DROP R> RDROP ;
+    \ From ONE TWO THREE FOUR leave THREE and TWO
+    : KEEP32 DROP >R >R DROP R> R> SWAP ;
+    \ From ONE TWO THREE FOUR leave ONE and FOUR
+    : KEEP14 >R DROP DROP R> ;
+: (ADVANCE*)   @+ >R BEGIN 2DUP R@ EXECUTE WHILE KEEP32 REPEAT KEEP14 RDROP ;
+
 \ This would benefit from locals :
 \ : (ADVANCE*) @+ LOCAL MATCHER   LOCAL EP   LOCAL CP
 \         BEGIN CP EP MATCHER EXECUTE WHILE DROP TO CP REPEAT
 \         TO EP DROP     CP EP ;
-
-\ For CHARPOINTER and EXPRESSIONPOINTER :
-\ if the char sequence at charpointer matches the string variable at the
-\ expressionpointer, advance both past the match, else leave them as is.
-\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
-: ADVANCE-EXACT  2DUP $@ CORA 0= DUP >R IF $@ >R SWAP R@ + SWAP R> + ALIGNED THEN R> ;
-
-\
 
 \ For CHARPOINTER and EXPRESSIONPOINTER and BACKTRACKPOINTER :
 \ if there is match between btp and cp with the ep,
@@ -168,6 +189,39 @@ Backup from ADDRESS one cell. Leave decremented ADDRESS.
         SWAP 1 - SWAP
     REPEAT
     RDROP TRUE ;
+
+\-----------------------------------------------------------------
+\           xt's that may be present in a compiled expression
+\-----------------------------------------------------------------
+
+\ All of those xt's accept a charpointer and an expressionpointer.
+\ The char pointer points into the string to be matched that must be
+\ zero ended. The expressionpointer points into the buffer with
+\ Polish xt's, i.e. xt's to be executed with a pointer to the
+\ data following the xt.
+\ They either leave those as is, and return FALSE, or
+\ If the \ match still stands after the operation intended,
+\ both pointers are bumped passed the characters consumed, and
+\ data, and possibly more xt's and more data consumed.
+\ The incremented pointers are returned, plus a true flag.
+\ Otherwise the pointers are returned unchanged, plus a false flag.
+\ The xt's need not do a match, they can do an operation that
+\ never fails, such as remembering a pointer.
+
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ if the character matches the charset at the expression,
+\ advance both past the match, else leave them as is.
+\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
+\ In a regular expression buffer this xt must be followed by a char-set.
+: ADVANCE-CHAR  OVER C@ OVER IN-SET? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ if the char sequence at charpointer matches the string variable at the
+\ expressionpointer, advance both past the match, else leave them as is.
+\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
+\ In a regular expression buffer this xt must be followed by a string.
+: ADVANCE-EXACT  2DUP $@ CORA 0= DUP >R IF $@ >R SWAP R@ + SWAP R> + ALIGNED THEN R> ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if there is match between cp and the end of string with the ep,
@@ -190,6 +244,19 @@ Backup from ADDRESS one cell. Leave decremented ADDRESS.
     OVER C@ 0= ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
+\ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the start of a word"
+: CHECK< OVER STARTPOINTER @ = DUP 0= IF DROP OVER 1- C@ \w IN-CHAR-SET 0= THEN >R
+         OVER C@ DUP IF \w IN-CHAR-SET THEN   R> AND ;
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the end of a word"
+: CHECK< OVER STARTPOINTER @ = 0= DUP IF DROP OVER 1- C@ \w IN-CHAR-SET THEN >R
+         OVER C@ DUP IF \w IN-CHAR-SET THEN 0=  R> AND ;
+
+\D DUP @ 0= ABORT" CHECK$ compiled not at end of expression, system error"
+    OVER C@ 0= ;
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
 \ Remember this as the start or end of a substring.
 \ Leave CHARPOINTER and leave the EXPRESSIONPOINTER after the substring number.
 \ Plus "yeah, it IS okay"
@@ -197,12 +264,12 @@ Backup from ADDRESS one cell. Leave decremented ADDRESS.
 \ the last (and final) position is remembered.
 : HANDLE() @+ >R   OVER R> REMEMBER() TRUE ;
 
-\ if the following match xt (at ``EXPRESSIONPOINTER'' ) works out,
+\ If the following match xt (at ``EXPRESSIONPOINTER'' ) works out,
 \ with the modifier ( * + ? ) ,
-\ advance both past the match, else leave them as is.
+\ advance both past the remainder of the expression, else leave them as is.
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
-: ADVANCE? OVER >R   \ Remember backtrack point
-    @+ EXECUTE DROP
-    R> BACKTRACK ;
-: ADVANCE* OVER >R   (ADVANCE*) R> BRACKTRACK ;
+\ In a regular expression buffer each of those xt must be followed by the
+\ xt of ADVANCE-CHAR.
+: ADVANCE? OVER >R @+ EXECUTE DROP R> BACKTRACK ;
+: ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
 : ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
