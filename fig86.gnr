@@ -875,9 +875,11 @@ _ENDCOMMENT });_END_({_OLDDEBUG_ })
 DPUSH:  PUSH    DX      ;{ Fall through.}
 APUSH:  PUSH    AX
 NEXT:
-;        PUSH    SI
-;        CALL    c_debug
-;        POP     SI
+_LINUX_C_({
+         PUSH    SI
+         CALL    c_debug
+         POP     SI
+});_END_({_LINUX_C_})
         LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
 _NEWDEBUG_({ CALL    DISPLAYSI})
@@ -992,7 +994,7 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
+HEADER({DENOTATION},{DENOT},{DODOE}, $+CELLS(1) , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -1250,9 +1252,9 @@ in one vocabulary chain.},{{BLOCK}}, {}, enddoc)
 HEADER({RESULT},{RESULT},{DOVAR}, $ + CELLS(1) )
         DC 0
 ;
-worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1}, {},
+worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}, {},
 {Intended to cooperate with forthcode({FOR-WORDS}) .
-Compares the string variable forthsamp({addr1}) with the dea forthvar({addr2}).
+Compares the string constant forthsamp({sc}) with the dea forthvar({addr2}).
 If it is a match, it
 returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely
 from forthcode({FOR-WORDS}).},
@@ -1263,6 +1265,7 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      LIT, B_INVIS | B_DUMMY
         DC      LAND, ZEQU
         _0BRANCH(MATS2)
+;       DC      RR, IDDOT
         DC      LDUP
         DC      RR, TNFA, FETCH, FETCH
         DC      EQUAL   ;{ Compare counts.}
@@ -2613,7 +2616,8 @@ HEADER({DOES>},{DOES},{DOCOL})
 DODOE:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
         MOV     SI,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{NEW IP }
-        LEA     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET+1))]
+        LEA     AX,[SI+CELLS(1)]
+        MOV     SI,[SI]
         _PUSH
 ;
 worddoc({STRING},{COUNT},{count},{addr1 --- addr2 n},{L0},
@@ -2967,7 +2971,7 @@ HEADER({(FIND)},{PFIND},{DOCOL})
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
         DC      DROP, ONE
-        DC      LIT, _DEA(DENOT) + CELLS(D_HOFFSET  + 1)
+        DC      LIT, _DEA(DENOT) + CELLS(D_HOFFSET  + 2)
         DC      LIT, MATCHING, SWAP, FORW
 DFIN1:
         DC      DROP, DROP
@@ -3282,7 +3286,7 @@ vocabularies are defined, new user definitions become a part of
 forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during the creation of
 a colon-definition, to select this vocabulary at compile time.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
+HEADER({FORTH},{FORTH},{DODOE},$+CELLS(1), B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
