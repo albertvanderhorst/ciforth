@@ -95,6 +95,7 @@ fit the Forth to the description or vice versa})
 
 These are the features:
 
+This is version ci86gnrversion.
 _PROTECTED_({It is running in protected mode.}) dnl
 _REAL_({It is running in real mode.}) dnl
 _BOOTED_({It is a standalone Forth.}) dnl
