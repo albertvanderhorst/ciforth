@@ -69,9 +69,9 @@ bootfd real                        alone1.cfg      forth.com      B I  ACDEG
 bootfd prot16               114    alone2.cfg      forth.com      B I  ACDEG                                                 
                             112                                     II  CDEG -K'L                                             
                             114                                     II  CDEG K'L                                             
-bootfd prot32               114    alone3.cfg      forth.com      B I  ACDEG                                                 
-                            114                                     II  CDE-G K' L                                             
-boothd prot32                      alone4.cfg      no filesystem  B I  ACDEG                                                 
+bootfd prot32               116    alone3.cfg      forth.com      B I  ACDEG   L                                             
+                            116                                     II  CDE-G K' L                                             
+boothd prot32               116    alone4.cfg      no filesystem  B I  ACDEG                                                 
 hostedmsdos MASM bios              msdos1.cfg      msdos.com      B II  CDEG K' L 
 hostedmsdos MASM modern            msdos2.cfg      msdos.com      B II  CDEG K' L 
 hostedmsdos MASM classic           msdos3.cfg      msdos.com      B II  CDEG K' L*
