@@ -38,6 +38,7 @@ steal({T}{CGETS},TCGETS)
 steal({T}{CSETS},TCSETS)
 steal({E}{CHO},ECHO)
 steal({E}{AGAIN},EAGAIN)
+steal({E}{INTR},EINTR)
 steal({E}{PIPE},EPIPE)
 steal({V}{MIN},VMIN)
 steal({V}{TIME},VTIME)
@@ -63,6 +64,7 @@ steal({i}{octl},__NR_ioctl)
 steal({l}{seek},__NR_lseek)
 steal({e}{xecve},__NR_execve)
 steal({f}{ork},__NR_fork)
+steal({w}{aitpid},__NR_waitpid)
 ; ------------------------------------------------------------
 ;   End of constants stolen from C.
 ; ------------------------------------------------------------
