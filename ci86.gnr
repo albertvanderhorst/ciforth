@@ -511,12 +511,9 @@ include(width32.m4)
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
-;        MOV     EBP,ESP
-;        MOV     EAX,[EBP+CELLS(3)]        ; Get jump table vector.
-        POP     EAX
-        POP     EAX
-        POP     EAX
-        POP     EAX
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
+        MOV     EBP,ESP
+        MOV     EAX,[EBP+CELLS(3)]        ; Get jump table vector.
         MOV     _CELL_PTR[JMPTABLE],EAX
         JMP     BOOTUP
 
@@ -525,8 +522,9 @@ RETURN_LINUX:
         MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
         MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
         MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
+        MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
         RET     ; Assuming the old stack has not been disturbed.
-SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI
+SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
 JMPTABLE:	DD	0			; Linux jump table address
 
 _ReadKbd	EQU	4			; Service offsets
@@ -865,6 +863,9 @@ _ENDCOMMENT
 ;____1_____ _PROTECTED_1_({
 CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END___1__({ _PROTECTED_1_})
+;____1_____ _LINUXHOSTED_1_({
+CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
+});_END___1__({ _LINUXHOSTED_1_})
 ;____1_____ _REAL_1_({
 CPUNM   DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END___1__({ _REAL_1_})
@@ -2197,6 +2198,13 @@ _COMMENT
 _ENDCOMMENT
 ;{       If this is there it is a beta release}
 	_STRING({IBM-PC $RCSfile$ $Revision$ })
+        DC      LIT,'Q'    ; To be removed 
+        DC      EMIT       ; To be removed 
+        DC      KEY        ; To be removed 
+        DC      EMIT       ; To be removed 
+        DC      QTERM
+        DC      DOT
+        DC      DOT
 	DC	FORTH
 	DC	DEFIN
 	DC	QUIT
@@ -2704,9 +2712,7 @@ CODE_HEADER({TYPE},{LTYPE})
         PUSH    EAX
 	MOV	EAX, _CELL_PTR[JMPTABLE]
 	CALL	[_Type+EAX]                   
-;        LEA     ESP,[ESP+CELLS(2)]    ; remove input
-        POP     EAX
-        POP     EAX
+        LEA     ESP,[ESP+CELLS(2)]    ; remove input
 	POP	ESI			; restore Forth
 	POP	EBP
         _NEXT
@@ -2772,7 +2778,7 @@ EXPE3	DC	EMIT
 ;
 HEADER({KEY},{KEY},{DOCOL})
 KEY1:		DC	QRX 
-		DC	BRAN,KEY1
+		_0BRANCH(KEY1)
                 DC      SEMIS
 
 CODE_HEADER({?RX},{QRX})
@@ -2794,8 +2800,10 @@ CODE_HEADER({?RX},{QRX})
 A_CHAR:		
         _NEXT
 ;
-HEADER({?TERMINAL},{QTERM},{0})
-
+HEADER({?TERMINAL},{QTERM},{DOCOL})
+        DC      QRX
+        DC      SEMIS
+;
 });_END___1__({_LINUXIO_1_})
 ;____1_____ _USEDOS_1_({
 ;{ All I/O goes through the 3 assembler functions}
