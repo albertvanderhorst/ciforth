@@ -50,8 +50,13 @@ CRACK DOIT
 'test6 SHOW-IT
 
 \ This example must not be handled by a match.
-: test6a  IF 2 + THEN 3 + ;
-'test6a SHOW-IT
+: test7  IF 2 + THEN 3 + ;
+'test7 SHOW-IT
 
-: test6b SWAP IF 3 THEN 5 7 9 BASE ! SWAP ;
-'test6b SHOW-IT
+: test8 SWAP IF 3 THEN 5 7 9 BASE ! SWAP ;
+'test8 SHOW-IT
+
+: (test1) + AND OR LSHIFT ;
+: test9 BEGIN (test1) AGAIN ;
+\ This is all we can do for the moment:
+'test9 >DFA @ EXPAND-NEW CRACK-CHAIN
