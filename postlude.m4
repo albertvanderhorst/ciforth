@@ -19,7 +19,6 @@ _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 
 dnl Hard consequences
-_BITS32_({define({_PROTECTED_}, _yes)})
 _REAL_({define({_BITS16_}, _yes)})
 _BOOTFD_({define({_RWFD_}, _yes)})
 _BOOTHD_({define({_RWHD_}, _yes)})
@@ -32,6 +31,7 @@ _HOSTED_DPMI_({define({_PROTECTED_}, _yes)})
 _BOOTED_({define({_USEBIOS_}, _yes)})
 _USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
 _CLASSIC_({define({_KEY_BY_KEY_}, _yes )})
+_BITS32_({define({_PROTECTED_}, _yes)})
 
 dnl Consequences with exceptions
 dnl switch back and forth between protected and real mode.
@@ -77,6 +77,8 @@ _USEBIOS_({ _MODERN_( {errprint({BIOS and Modern I/O model are in conflict. Choo
 })m4exit(1007)})})
 _HOSTED_DPMI_({ _HOSTED_MSDOS_({errprint({You must choose either hosting by dos or by windows, not both.
 })m4exit(1008)})})
+_SOURCEFIELD_({ _LOAD_(, {errprint({You must have BLK to use source fields, hence require loadables.
+})m4exit(1009)})})
 dnl immediate consequences
 _SOURCEFIELD_({define({M4_HS},{6})})
 _BITS32_({define({M4_CELLWIDTH}, 4)})
