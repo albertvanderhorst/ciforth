@@ -145,6 +145,10 @@ _CLASSIC_({
 DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 });_END_({_CLASSIC_})
 
+_USEBIOS_({
+DRIVE   EQU     0       ;{ Use floppy A for blocks.}
+});_END_({_USEBIOS_})
+
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
 CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.}
@@ -621,7 +625,27 @@ _ENDCOMMENT
         LGDT    [GDTLOAD]
 });_END_({ _SWITCH_})
 
+_HOSTED_MSDOS_({
+        PUSH    DS
+        MOV     AX,0
+        MOV     DS,AX
+        LEA     AX,[WRM]
+        LEA     BX,[4*23H]
+        MOV     [BX],AX         ;{Jump to WRM on <CTRL-BREAK>}
+        INC     BX
+        INC     BX
+        MOV     AX,CS
+        MOV     _CELL_PTR[BX], AX
+        POP     DS
+ENDREADJUST:
+});_END_({ _HOSTED_MSDOS_})
 _BOOTED_({
+        LEA     AX,[WRM + M4_SWITCHOFFSET]
+        LEA     BX,[4*1BH]
+        MOV     [BX],AX         ;{Jump to WRM on <CTRL-BREAK>}
+        INC     BX
+        INC     BX
+        MOV     _CELL_PTR[BX], SWITCHSEGMENT
         JMP     ENDREADJUST
         _NEW_ORG(01FEH)
         ;{ Signature. Last piece of boot sector. }
@@ -802,8 +826,8 @@ SWITCHSEG:
 _BITS32_({
 ;{************************}
 include(width32.m4)
-;{************************},
-{dnl} })
+;{************************}}
+,{dnl})
 _SWITCH_({
         CLI     ;{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
@@ -1010,7 +1034,6 @@ _PC_({
 _NEWDEBUG_({
 DISPLAYSI:
         _SWITCH_({JMPHERE_FROM_FORTH})
-        SET_16_BIT_MODE
         PUSH    SI
         PUSH    BP
         PUSH    WR
@@ -1021,13 +1044,12 @@ DISPLAYSI:
         MOV     AX,SI
         CALL    DISPLAYW
         CALL    DISPLAYCR
-        _BITS32_({SET_32_BIT_MODE})
-        MOV     AH,10H
-        INT     16H
-        _SWITCH_({JMPHERE_FROM_OS})
+;        MOV     AH,10H
+;        INT     16H
         POP    WR
         POP    BP
         POP    SI
+        _SWITCH_({JMPHERE_FROM_OS})
         RET
 ;
 });_END_({_NEWDEBUG_ })
@@ -1963,7 +1985,7 @@ CODE_HEADER({DSP!},{SPSTO})
 _LOAD_({
 worddoc( {STACKS},{DEPTH},,{--- n1},{ISO},
 {Leave into forthvar({n1}) the number of items on the data stack,
-before forthcode({n1}) was pushed.},
+before forthsamp({n1}) was pushed.},
 {{DSP@}},
 {{  1 2 3 DEPTH .},{3} },
 enddoc)
@@ -2450,8 +2472,8 @@ worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{ISO,FIG,L0},
 {A defining word used in the form:
     forthvar({n}) forthcode({CONSTANT}) forthsamp({cccc})
 to create word forthsamp({cccc}) , with its data field containing
-forthcode({n}) . When forthsamp({cccc}) is later executed, it
-will push the value of forthcode({n}) to the stack.},
+forthsamp({n}) . When forthsamp({cccc}) is later executed, it
+will push the value of forthsamp({n}) to the stack.},
 {{VARIABLE}},
 {{12A CONSTANT FRED FRED .},{12A} },
 enddoc)
@@ -3350,7 +3372,7 @@ HEADER({!CSP},{SCSP},{DOCOL})
 ;
 });_END_({_SECURITY_})
 worddoc( {ERRORS},{?ERROR},{question_error},{f n --},{},
-{  Issue an error message number forthcode({n}) , if the boolean flag is true.},
+{  Issue an error message number forthsamp({n}) , if the boolean flag is true.},
 {ERROR},
 {{0 12 ?ERROR},{},
  {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? MSG # 12 },
@@ -4247,7 +4269,7 @@ ERRO2:
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
 {Execute forthsamp({xt}). If it executes successfully, i.e. no
 forthcode({THROW}) is executed by forthvar({xt}), leave a zero
-into forthcode({tc}) in addition to any stack effect
+into forthsamp({tc}) in addition to any stack effect
 forthcode({xt}) itself might have. Otherwise in forthsamp({tc})
 the non-zero throw code is left, and the stack depth is
 restored. The values of the parameters for
@@ -4845,15 +4867,29 @@ OKAY:
 });_END_({_LINUX_N_})
         DC       SETSRC
         DC      INTER
-NOOPS:  DC      STATE  ;{ This code may be patched.}
-        DC      FETCH  ;{ This code may be patched.}
+        DC      OK
+        _BRANCH(QUIT1)  ;{AGAIN}
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
+;
+worddoc( {INIT},{OK},{ok},{},{ISO,FIG},
+{Takes care of printing the "okay" message, after interpreting
+a line. Default it prints okay only for an interactive session
+in interpret forthcode({STATE}). },
+{{QUIT},{COLD}},
+{{OK ( Gives OK unless interpreted from stream) },{ },
+{: GS1 STATE @ 1 STATE ! OK STATE ! ; GS1},{}
+ },
+enddoc)
+HEADER({OK},{OK},{DOCOL})
+        DC      STATE
+        DC      FETCH
         DC      ZEQU
-        _0BRANCH(QUIT2) ;{IF}
+        _0BRANCH(OK2) ;{IF}
         _STRINGINLINE({ OK})   ;{THEN}
         DC      LTYPE
         DC      CR
-QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
-        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
+OK2:
+        DC      SEMIS
 ;
 worddoc( {INIT},{ABORT},{abort},{},{ISO,FIG,L0},
 {Restart the system. In addition and before the actions of
@@ -4891,9 +4927,26 @@ _ENDCOMMENT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
 ;{      WARM START VECTOR COMES HERE}
-;
-WRM:    MOV     SI,_OFFSET WRM1
-        _NEXT
+;{      For booting code we enter here, real mode and using the switchsegment.}
+;{      BY control BREAK.}
+WRM:
+_BOOTED_({
+;{Without this clearing of the disk status, the system hangs too.}
+        XOR     AX,AX
+        MOV     DL, DRIVE
+        INT     13H     ;{Reset floppy disk system.}
+        XOR     AX,AX
+        MOV     DL, 80H
+        INT     13H     ;{Reset hard disk system.}
+;{Without this clearing of the keyboard status, the system hangs at}
+;{the next call of KEY (INT 10H function 0EH)}
+        XOR     AX,AX
+        MOV     DS,AX
+        MOV     [417H],AX
+});_END_({ _BOOTED_})
+        _SWITCH_({JMPHERE_FROM_OS})
+        MOV     SI,_OFFSET WRM1
+        JMP     SETUPST         ;{Use cold stacks. Till ABORT .}
 ;
 WRM1:   DC      WARM
 ;
@@ -4912,22 +4965,32 @@ HEADER({WARM},{WARM},{DOCOL})
 ;{      COLD START VECTOR COMES HERE}
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
+_PC_({
 _COMMENT
+_BOOTED_({
+        LEA     AX,[WRM + M4_SWITCHOFFSET]
+        LEA     [4*1BH],BX
+        MOV     [BX],AX         ;{Jump to WRM on <CTRL-BREAK>}
+        INC     BX
+        INC     BX
+        MOV     [BX], SWITCHSEGMENT
+});_END_({ _BOOTED_})
 _HOSTED_MSDOS_({
         PUSH    DS
         MOV     AX,0
         MOV     DS,AX           ;{TO VECTOR AREA}
         MOV     BX,08CH
         LEA     AX,[WRM]
-        MOV     [BX],AX         ;{JUMP TO WRM ON <CTRL-BREAK>}
         INC     BX
         INC     BX
         MOV     [BX],CS
         POP     DS
 });_END_({ _HOSTED_MSDOS_})
 _ENDCOMMENT
+});_END_({ _PC_})
         CLD                     ;{ DIR = INC}
         MOV     _CELL_PTR[USINI+_CELLS(31)],STACKPOINTER ;{Remember ARGS.}
+SETUPST:
         MOV     STACKPOINTER,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
         MOV     BP,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
         _NEXT
@@ -4941,7 +5004,7 @@ values, i.a. the stacks and the dictionary pointers. Restart via
 forthcode({ABORT}) . May be called from the terminal to remove
 application programs and restart, as long as there are no
 new vocabularies with definitions.
-_HOSTED_({But it is better to say forthciode({BYE}) to Forth and start again.})
+_HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
 _BOOTED_({But it is better to reboot.})
 _BLOCKSINFILE_({Opens the file that contains the blocks.})
 },{{WARM},{BLOCK},{LIST}},
@@ -4953,6 +5016,8 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      STALEST,STORE
         DC      FIRST
         DC      PREV,STORE
+        DC      LIT, _DEA(TASK)
+        DC      LIT, FORTH, TWID, TLFA, STORE
 ;{ Fill user area for single task.}
         DC      LIT, USINI
         DC      LIT, USINI+_CELLS(1), FETCH
@@ -4962,15 +5027,13 @@ _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
-        ;{ Not a terminal.}
+        ;{ Not a terminal. Cannot set the terminal, get rid of "OK".}
         DC      LIT, TDROP    ;{ STTERM becomes 2DROP.}
         DC      LIT, STTERM
-        DC      LIT, _CELLS(3)
-        DC      LCMOVE
+        DC      LIT, _CELLS(3), LCMOVE ; {Patch.}
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
-        DC      LIT,NOOPS, STORE
-        DC      LIT,ONE
-        DC      LIT,NOOPS+_CELLS(1), STORE
+        DC      LIT,OK
+        DC      LIT, _CELLS(3), LCMOVE
 COLD1:
 });_END_({_LINUX_N_})
 _BLOCKSINFILE_({
@@ -5342,7 +5405,7 @@ HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {SCREEN},{(LINE)},{paren_line},{n1 n2 --- sc },{},
-{Convert the line number forthcode({n1}) and the screen
+{Convert the line number forthsamp({n1}) and the screen
 forthvar({n2}) to a string forthvar({sc}) the content of the
 line (without the trailing new line). },
 {{LINE}},
@@ -7265,7 +7328,7 @@ The drive may be switched but this should only be
 attempted after forthcode({EMPTY-BUFFERS}) .},
 {{BLOCK},{FLUSH}}, {}, enddoc)
 HEADER({DRIVE},{LDRIVE},{DOVAR}, )
-      DC  0
+      DC  DRIVE
 ;
 WERR    DB      'DISK WRITE ERROR  $'
 RERR    DB      'DISK READ ERROR   $'
@@ -7368,6 +7431,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      SWAP, LIT, SPT, SLMOD, TOR
         DC      SWAP, LIT, 0100H, STAR, PLUS, ONEP
         DC      FROMR, LIT, 0100H, STAR  ;{ .. to arrive at CX, DX}
+        DC      LIT, DRIVE, PLUS
         DC      LIT, 13H, BIOS
         DC      ONE, LAND, DERR, PSTORE
         DC      DROP, DROP, DROP, DROP
@@ -7526,7 +7590,7 @@ RSLW4:
 _LOAD_({
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
 {Used in the form: .
-forthcode({[']}) forthcode({nnnn})
+forthcode({[']}) forthsamp({nnnn})
 Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to
