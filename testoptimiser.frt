@@ -45,7 +45,10 @@ CRACK DOIT
 : test5 SWAP 1 2 3 5 BASE ! SWAP ;
 'test5 SHOW-IT
 
+\ This example must not be handled by folding, but by annihilating.
 : test6 BASE @ IF SWAP THEN 2DROP ;
 'test6 SHOW-IT
 
-
+\ This example must not be handled by a match.
+: test6a  IF 2 + THEN 3 + ;
+'test6a SHOW-IT

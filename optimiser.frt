@@ -36,7 +36,7 @@ REQUIRE $
 
 : D>R POSTPONE >R POSTPONE >R ; IMMEDIATE
 : DR> POSTPONE R> POSTPONE R> ; IMMEDIATE
-: DR@ DR> POSTPONE 2DUP D>R ; IMMEDIATE
+: DR@ POSTPONE DR> POSTPONE 2DUP POSTPONE D>R ; IMMEDIATE
 
 : SDSWAP   ROT ;
 : DSSWAP   ROT ROT ;
@@ -188,7 +188,7 @@ HERE SWAP !
 \ For a GAP : it IS forbidden, i.e. there is some branch crossing the gap boundary.
 : FORBIDDEN-GAP?
 BRANCHES @+ SWAP ?DO
-    I @ DUP >TARGET 2OVER FREE-WRT? IF 2DROP 0. LEAVE THEN
+    I @ DUP >TARGET 2OVER FREE-WRT? 0= IF 2DROP 0. LEAVE THEN
 0 CELL+ +LOOP OR 0= ;
 
 \ ----------------------    Annihilaton ----------------------
@@ -596,11 +596,10 @@ STRIDE SET PEES
 \ replacing it by a match optimisation.
 \ Leave sequence BEGIN' of what is still to be handled.
 :  MATCH-ONE
-        DUP ?MM DUP 0= IF
-            2DROP NEXT-ITEM
-        ELSE
+        DUP ?MM DUP 0= IF   2DROP NEXT-ITEM   ELSE
+        >R OVER R@ OVER + FORBIDDEN-GAP? IF RDROP DROP NEXT-ITEM ELSE R>
             COPY-MATCH -1 PROGRESS !
-        THEN
+        THEN THEN
 ;
 
 \ Find optimisation patterns in the SEQUENCE of high level code
@@ -609,7 +608,7 @@ STRIDE SET PEES
 : (MATCH) BEGIN DUP ?NOT-EXIT WHILE MATCH-ONE REPEAT DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
-: OPTIMISE   DUP (MATCH)   ;
+: OPTIMISE   DUP DUP FILL-BRANCHES (MATCH)   ;
 
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
