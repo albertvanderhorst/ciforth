@@ -144,11 +144,11 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 (   Given a DEA, return the next DEA)
 : >NEXT% PFA LFA @ ;
 : % [COMPILE] ' NFA ;
-( The DEA is in fact not a dea, leave: it IS the endmarker             )
-: DICTEND? @ $FFFF AND $A081 = ;
+( The CONTENT of a linkfield is not a dea, leave: it IS the endmarker   )
+: VOCEND? @ $FFFF AND $A081 = ;
 : %EXECUTE PFA CFA EXECUTE ;
 ( Leave the first DEA of the assembler vocabulary.                    )
-: START ' ASSEMBLER 2 +  CELL+ @ ;
+: STARTVOC ' ASSEMBLER 2 +  CELL+ @ ;
 
 
 (   The FIRST set is contained in the SECOND set, leaving IT            )
@@ -158,14 +158,14 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( Add ITEM to the SET )
 : SET+! DUP >R @ ! 0 CELL+ R> +! ;
 ( Make the SET empty )
-: -SET DUP CELL+ SWAP ! ;
+: !SET DUP CELL+ SWAP ! ;
 ( Print the SET )
 : .SET DUP @ SWAP DO I . 0 CELL+ +LOOP ;
 ( For the SET : it IS non-empty )
 : SET? DUP @ SWAP CELL+ = 0= ;
 12 SET DISS
 
-: -DISS DISS -SET ;
+: !DISS DISS !SET ;
 : .DISS DISS DUP @ SWAP CELL+ DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
@@ -208,7 +208,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
     0 CELL+ MINUS DISS +!
     !TALLY
     DISS? IF
-        DISS @+ SWAP -DISS
+        DISS @+ SWAP !DISS
         DO
             I @ DIS-PI DIS-xFI DIS-COMMA DROP
         0 CELL+ +LOOP
@@ -233,17 +233,15 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ;
 
 : DOIT
-    -DISS
+    !DISS
     !TALLY
-    START
-    BEGIN
+    STARTVOC BEGIN
         DIS-PI DIS-xFI DIS-COMMA
         RESULT
         >NEXT%
 (       DUP ID.                                                         )
-        BEGIN DUP DICTEND? DISS? AND WHILE BACKTRACK REPEAT
-    DUP DICTEND? UNTIL
-    DROP
+        BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
+    DUP VOCEND? UNTIL DROP
 ;
 
 0 VARIABLE POINTER
@@ -257,15 +255,13 @@ HERE POINTER !
 ( assembling and add the fixup/posti/commaer to the                     )
 ( disassembly struct.
 ( Leave the DEA.                                                        )
-: dis-1PI
+: dis-PI
     DUP IS-PI IF
     AT-REST? IF
     DUP >MASK OVER >IMASK AND POINTER @ @ AND OVER >INST = IF
         DUP >BODY POST, DROP
         DUP +DISS
         POINTER @ 1+ NEW-POINTER !
-(       DUP ID.                                                         )
-(       ." BINGA"                                                       )
     THEN
     THEN
     THEN
@@ -277,8 +273,6 @@ HERE POINTER !
    DUP >MASK  POINTER @ @ AND OVER >INST = IF
        DUP >BODY FIX| DROP
        DUP +DISS
-(       DUP ID.                                                         )
-(       ." BINGU"                                                       )
    THEN
    THEN
    THEN
@@ -289,8 +283,6 @@ HERE POINTER !
    DUP >BODY @ TALLY @ INVERT CONTAINED-IN IF
        DUP >BODY @ TALLY OR!
        DUP +DISS
-(       DUP ID.                                                         )
-(       ." BINGIIIIIIIIIIIII"                                           )
    THEN
    THEN
 ;
@@ -309,22 +301,20 @@ HERE POINTER !
     THEN 
  0 CELL+ +LOOP CR ;
 
-( If the disassembly contains something: `AT-REST?' means
+( If the disassembly contains something: `AT-REST?' means               )
 ( we have gone full cycle rest->postits->fixups->commaers               )
-( so the disassembly contains a result.                                 )
+( so the disassembly contains a result. Return THAT.                    )
 : RESULT? AT-REST? DISS? AND  ;
 ( Dissassemble one instruction from ADDRESS. )
 ( Leave `POINTER' pointing after that instruction. )
-: DOIT2
-    -DISS
+: (DISASSEMBLE)
+    !DISS
     !TALLY
-    START
-    BEGIN
-        dis-1PI dis-xFI  dis-COMMA 
+    STARTVOC BEGIN
+        dis-PI dis-xFI  dis-COMMA 
         >NEXT%
 (       DUP ID.                                                         )
-    DUP DICTEND? RESULT? OR UNTIL
-    DROP
+    DUP VOCEND? RESULT? OR UNTIL DROP
     RESULT? IF
       .DISS' 
       NEW-POINTER @ POINTER !
@@ -334,21 +324,24 @@ HERE POINTER !
     THEN
 ;
 
-: D-F-A POINTER ! DOIT2 ;
+: DDD (DISASSEMBLE) ;
+
+( Dissassemble one instruction from ADDRESS. )
+: D-F-A POINTER ! (DISASSEMBLE) ;
 : DIS-RANGE
     SWAP POINTER !
-    BEGIN DOIT2 POINTER @ OVER < 0= UNTIL 
+    BEGIN (DISASSEMBLE) POINTER @ OVER < 0= UNTIL 
     DROP
 ;
 ." COMES JAN"
     CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        
     ' JAN HERE DIS-RANGE
-' JAN CFA @ D-F-A DOIT2 DOIT2 
+' JAN CFA @ D-F-A DDD DDD DDD 
 
 CODE JAN
 CC, Y| LS| 3 X,
 CC, A'| 3 X,
 NEXT C;
 ' JAN CFA @ 10 DUMP
-' JAN CFA @ D-F-A DOIT2 DOIT2 
+' JAN CFA @ D-F-A DDD DDD DDD DDD 
 
