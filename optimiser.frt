@@ -18,7 +18,7 @@ REQUIRE $
 : HL-RANGE, OVER - HL-CODE, ;
 
 \ For POINTER : it POINTS not yet to an ``EXIT''.
-: ?TILL-EXIT   @ '(;) = 0= ;
+: ?NOT-EXIT   @ '(;) = 0= ;
 \ For POINTER : it POINTS not yet to a ``NOOP''.
 : ?TILL-NOOP   @ 'NOOP = 0= ;
 
@@ -67,8 +67,8 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ For STACKEFFECTBYTE : it IS good, neither unknown or variable.
 : SE-GOOD DUP $F AND NO-GOOD SWAP 4 RSHIFT NO-GOOD OR  0= ;
 
-\ For STACKEFFECTBYTE : we CAN still optimise, because we know we have
-\ sufficiantly constant stack cells.
+\ For STACKEFFECTBYTE : we KNOW we have enough pops, i.e. after applying
+\ this stackeffect the virtual stack doesn't underflow.
 : ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSC @ > 0=  AND ;
 
 \ ---------------------------------------------------------------------
@@ -101,23 +101,22 @@ VARIABLE MIN-DEPTH
 \ placed after the swappable code.
 : STILL-SWAPPING? DUP NSST? 0= SWAP SE@ ENOUGH-POPS AND ;
 
-\ We are at an unstable point. i.e. somewhere earlier we have replaced one
-\ of the constants, without consuming it afterwards.
-: UNSTABLE? CSC @ MIN-DEPTH @ <> MIN-DEPTH 0 > AND ;
+\ We are at an stable point. i.e. we consumed all the constants,
+\ we may have replaced ourselves. Or we can't swap anyway.
+: STABLE? CSC @ MIN-DEPTH @ = MIN-DEPTH 1 < OR ;
 
-\ For DEA : executing it would result in a not yet stable sequence.
-\ If it is stable that may mean that there is surely no optimisation.
+\ For DEA : adding it would result in a not yet stable sequence.
+\ Otherwise the optimisation is known to end here or there is no optimisation.
 : NOT-YET-STABLE?
-DUP STILL-SWAPPING? IF SE@ COMBINE-CSC UNSTABLE? ELSE -1 MIN-DEPTH !
+DUP STILL-SWAPPING? IF SE@ COMBINE-CSC STABLE? 0= ELSE -1 MIN-DEPTH !
 DROP 0 THEN ;
 
 \ From ADDRESS collect all code to be executed before (some of the) constants
 \ collected. Leave ADDRESS LENGTH (in address units.)
-: COLLECT-SWAPPER !SWAPPER-START DUP
-     BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
-\           BEGIN DUP @ NOT-YET-STABLE? OVER ?TILL-NOOP AND WHILE NEXT-ITEM REPEAT
-     OVER -    OVER ?TILL-EXIT AND ( 0 if at exit)
-     UNSTABLE? IF DROP 0 THEN \ Alles umsonst.
+: COLLECT-SWAPPER !SWAPPER-START
+    DUP ?NOT-EXIT 0= IF 0 EXIT THEN
+    DUP BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
+     OVER -   STABLE? AND
      DUP 0<> CSC @ 0<> AND PROGRESS OR!
 ;
 
@@ -125,7 +124,7 @@ DROP 0 THEN ;
 \ constants at its start. Return incrementer SEQUENCE.
 : COUNT-LIT BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 CSC +! REPEAT ;
 \ For SEQUENCE , return the POINTER to first constant (``LIT'')
-: FIND-LIT BEGIN DUP @ 'LIT <> OVER ?TILL-EXIT AND WHILE NEXT-ITEM  REPEAT ;
+: FIND-LIT BEGIN DUP @ 'LIT <> OVER ?NOT-EXIT AND WHILE NEXT-ITEM  REPEAT ;
 
 VARIABLE CODE-MARKER
 
@@ -134,9 +133,9 @@ VARIABLE CODE-MARKER
 : (FIND-SWAPPABLE) FIND-LIT !OPT-START DUP CODE-MARKER ! COUNT-LIT COLLECT-SWAPPER ;
 
 \ For SEQUENCE , return the STRING that is swappable.
-\ FIXME : ?TILL-EXIT can be dropped here.
+\ FIXME : ?NOT-EXIT can be dropped here.
 \ 0 length : there is none.
-: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?TILL-EXIT OVER 0= AND WHILE DROP REPEAT ;
+: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?NOT-EXIT OVER 0= AND WHILE DROP REPEAT ;
 
 \ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
 \ The order to be compiled is A-B C-D B-C .
@@ -151,7 +150,7 @@ VARIABLE CODE-MARKER
 \ Reorder a SEQUENCE to delay constants as much as possible.
 \ Return rearragned SEQUENCE.
 : REORDER HERE SWAP
-    BEGIN GET-PIECES DUP >R COMPILE-PIECES R> DUP ?TILL-EXIT 0= UNTIL DROP
+    BEGIN GET-PIECES DUP >R COMPILE-PIECES R> DUP ?NOT-EXIT 0= UNTIL DROP
 POSTPONE (;)  ;
 
 \ ---------------------------------------------------------------------
@@ -372,7 +371,7 @@ STRIDE SET PEES
 \ Return the LIMIT to where matched and the MATCH itself, else two zeros.
 : ?MM   MATCH-TABLE
     BEGIN    2DUP ?MATCH DUP IF 2SWAP 2DROP EXIT THEN 2DROP
-        STRIDE 2 * CELLS + DUP ?TILL-EXIT WHILE REPEAT
+        STRIDE 2 * CELLS + DUP ?NOT-EXIT WHILE REPEAT
     2DROP 0 0 ;
 
 \ If ITEM is a place holder, replace it by the next placeholder DATA.
@@ -399,7 +398,7 @@ STRIDE SET PEES
 \ and perform optimisation while copying to ``HERE'' ,
 \ Do not initialise, or terminate.
 
-: (MATCH) BEGIN DUP ?TILL-EXIT WHILE ?MATCH-EXEC? REPEAT DROP ;
+: (MATCH) BEGIN DUP ?NOT-EXIT WHILE ?MATCH-EXEC? REPEAT DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
 : OPTIMISE   HERE SWAP    (MATCH)   POSTPONE (;)  ;
