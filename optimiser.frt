@@ -39,16 +39,6 @@ VARIABLE OPT-START
 \ Combine DEA's effect into the current state, return "we CAN optimise"
 : CAN-COMBINE?   NS? OVER SE@ STILL-OPTIMISE AND ;
 
-\ Treat the DEA that is know to be ``NS''. Combine it to the
-\ optimisation, if possible. Return: we ARE still optimising.
-\ Add DEA to the optimisation chain, if possible. Leave it WAS possible.
-:  ?TREAT-NS?
-    DUP CAN-COMBINE? IF
-        SE@ COMBINE-SE  -1
-    ELSE
-        DROP 0
-    THEN ;
-
 \ Execute at compile time the ``NONAME'' word: the optimisable code we have collected from
 \ ``OPT-START''
 \ The result is supposedly ``CSC'' stack items.
@@ -61,11 +51,12 @@ VARIABLE OPT-START
 : THROW-AWAY   OPT-START @ DP ! ;
 
 \ Compile ``CSC'' constants instead of the code optimised away.
-\ They sit on the stack now. We need a buffer to reverse them.
-CREATE BUFFER 16 ALLOT
+\ They sit on the stack now. We need to store backwards to reverse them.
 : COMPILE-CONSTANTS CSC @ 0= 13 ?ERROR
-    BUFFER CSC @ CELLS BOUNDS ?DO I ! 1 CELLS +LOOP
-    BUFFER CSC @ 1- CELLS OVER + ?DO POSTPONE LIT I @ , -1 CELLS +LOOP
+    HERE >R   CSC @ CELLS 2 * ALLOT   HERE >R
+    BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
+        'LIT R@ !  R@ CELL+ ! REPEAT
+    2DROP
     '(;) HERE !     \ To prevent too many crashes while testing.
 ;
 
