@@ -156,20 +156,25 @@ _ENDCOMMENT
 ;____1_____ _SWITCH_1_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
 ;{ Names starting in A_ are linear, physical (32 bit), absolute addresses }
-SANDBOXSIZE     EQU     10000H  ;{ For stack items while switching modes.}
+RSTSIZE     EQU     10000H  ;{ For real mode stack. }
 GDTSIZE         EQU     8000H   ;{ For GDT-table.}
-;{IDTSIZE EQU.. JUMPTABLE EQU ..}
-M4_FORTHORG     EQU     M4_LOADADDRESS - M4_ORG ; { Start of Forth CS = SS = ES . }
+IDTSIZE         EQU     0800H   ;{ For IDT-table. Not yet used. }
+A_FORTH0     EQU     M4_LOADADDRESS - M4_ORG ; { Physical address of Forth's CS:0 = SS:0 = ES:0 . }
 
 A_SWITCH        EQU     M4_SWITCHORG
-A_SANDBOX       EQU     A_SWITCH + 10000H
-A_GDT             EQU     A_SANDBOX + SANDBOXSIZE
+A_RST       EQU     A_SWITCH + 10000H
+A_GDT             EQU     A_RST + RSTSIZE
+A_IDT             EQU     A_GDT + GDTSIZE
+; A_LOWDP         EQU     A_IDT + IDTSIZE ; { Must become this. }
 A_LOWDP         EQU     A_GDT + GDTSIZE
 
-DS_SANDBOX      EQU     A_SANDBOX/10H ;{ @ Harmless place for the stack.}
+;{ @ Real mode place for the stack.}
+;{ This is such that after switching to real mode an isolated }    
+;{ Stack is available }
+SS_RST      EQU     A_RST/10H ;
 SWITCHSEGMENT     EQU     A_SWITCH/10H ;{ @ DS and CS for real code }
 ; {Add this to go from GDT_CS addresses to GDT_SWITCH addresses.}
-M4_SWITCHOFFSET EQU  ( M4_FORTHORG - M4_SWITCHORG)
+M4_SWITCHOFFSET EQU  ( A_FORTH0 - M4_SWITCHORG)
 
 ;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen }
 ;{ as far as the GDT goes as long as they are a multiple of 08H }
@@ -179,11 +184,15 @@ GDT_CS EQU 10H  ;{ % The protected mode code segment }
 ; { This choice is a relic. If switched from protected mode }
 ; { the real mode code then uses data from the sandbox.}
 ; { In fact we set the DS immediately after switching.}
-GDT_DS         EQU     DS_SANDBOX ;{ % The protected mode data segment}
+GDT_SS         EQU     SS_RST ;{ % The protected mode data segment}
+GDT_DS         EQU     SS_RST ;{ % The protected mode data segment}
 GDT_SEGMENT    EQU     A_GDT/10H       ;{ @ General descriptor table.}
 
-IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
-IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
+IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment, byte 6}
+IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment, byte 6}
+IDENTIFY_INT EQU 8E00H  ;{ Identification of an interrupt descriptor, byte 5}
+IDENTIFY_XR  EQU 9A00H  ;{ Identification of a code segment, execute read, byte 5}
+IDENTIFY_RW  EQU 9200H  ;{ Identification of a data segment, read write, byte 5}
 
 GDTLEN EQU GDTSIZE-1      ; {Intel peculiarity.}
 BOOTOFFSET EQU 0
@@ -469,7 +478,7 @@ HERE6:  POP     AX                 ; { Calculate address of the first byte to mo
         MOV     SI,AX           ; {Relocatable address, w.r.t code segment.}
         MOV     AX,CS
         MOV     DS,AX
-        MOV     AX, M4_FORTHORG/10H ; Destination segment
+        MOV     AX, A_FORTH0/10H ; Destination segment
         MOV     ES, AX
         MOV     DI, TEXTEND-1 
         REPNZ
@@ -503,10 +512,11 @@ PROTECT:
 ;{ The switch segment.         }
 ;{ Switch between real and (16-bit) protected mode is done,}
 ;{ while using this segment (Relocatable code only).}
-;{ GDT_SWITCH is arbitrary, here we ensure that the real mode address  }
-;{ is the same as the protected mode address  }
-;{ It is not totally arbitrary. You can only switch when you }
-;{ are currently executing in the range GDT_SWITCH:[0:FFFFH] }
+;{ GDT_SWITCH can to an extent be choosen arbitraryly,} 
+;{ as long as here we ensure that the real mode address  }
+;{ is equal to the protected mode address. }
+;{ You can only switch while staying at the same physical address}
+;{ when you are currently executing in the range GDT_SWITCH:[0:FFFFH] }
         MOV     BX,GDT_SWITCH
         MOV     DI,BX
         MOV     AX,0FFFFH
@@ -514,21 +524,21 @@ PROTECT:
         SHL     BX,4     ; { Turn segment register into IP}
         MOV     AX,BX
         STOSW
-        MOV     AX,9A00H
+        MOV     AX,IDENTIFY_XR
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
-;{ GDT_DS is arbitrary. }
-;{  The real mode view of GDT_DS would best be a SANDBOX (that is empty).}
-;{ But for the moment, DS is set after switching anyway.}
+;{ GDT_DS/GDT_SS to an extent be choosen arbitraryly,} 
+;{ The real mode view of GDT_SS is valid, isolated and reserved for real stack.}
+;{ DS is reset after switching anyway.}
 ;{ Accomodate a 24 bit start address, a maximal limit, large pages. }
-        MOV     DI,GDT_DS
+        MOV     DI,GDT_SS ;{Identical to GDT_DS}
         MOV     AX,0FFFFH
         STOSW
-        MOV     EAX,M4_FORTHORG
+        MOV     EAX,A_FORTH0
         STOSW           ; {Only 16 bits}
         SHR     EAX,8
-        ADD     AX,9200H
+        ADD     AX,IDENTIFY_RW
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW
@@ -536,10 +546,10 @@ PROTECT:
         MOV     DI,GDT_CS
         MOV     AX,0FFFFH
         STOSW
-        MOV     EAX,M4_FORTHORG
+        MOV     EAX,A_FORTH0
         STOSW           ; {Only 16 bits}
         SHR     EAX,8
-        ADD     AX,9A00H
+        ADD     AX,IDENTIFY_XR
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW

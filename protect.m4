@@ -24,7 +24,7 @@ dnl Do everything to restore coming from Forth.
 define({JMPHERE_FROM_FORTH},{
         SAVE_SP
         JMPHERE_FROM_PROT
-        MOV     {AX},DS_SANDBOX ; {Make stack valid}
+        MOV     {AX},SS_RST ; {Make stack valid}
         MOV     SS,{AX}
         STI})dnl
 dnl Switch from real mode stay at the same place.
