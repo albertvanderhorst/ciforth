@@ -205,7 +205,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
       C>D >FFA C@ 4 AND ;
- : ?Q ?TERMINAL IF QUIT THEN ; ( NOODREM) -->
+ : ?Q KEY? IF QUIT THEN ; ( NOODREM) -->
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
  : BY ( CFA--. the CFA word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
@@ -2530,7 +2530,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
 : ECR 13 4 BDOS DROP ;
 : WAIT BEGIN 0 3 BDOS DUP EMIT DUP STORE
-     127 AND   "> = ?TERMINAL OR UNTIL  ;
+     127 AND   "> = KEY? OR UNTIL  ;
  : \ ( Sends a line and wait for a prompt)
      P." ECR ( Send the remainder of the line)
      WAIT ;
@@ -2706,7 +2706,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
  : TRY-EVERY-WHERE ( As TRY-HERE but in the whole map)
  TRY-HERE
- BEGIN  ?TERMINAL 0= WHILE
+ BEGIN  KEY? 0= WHILE
    L-U-U 1 - DIST-LIST + C@ ( Get some place from prev. list)
    M-U-F UNK SWAP FIND-FROM
    DROP ( direction found)
@@ -4022,7 +4022,7 @@ DECIMAL  getit
      1 RAWIO tc
 ;
 ( expect zero keys and retain the count.)
-: ?TERMINAL2
+: KEY?2
     0 RAWIO tc
     0 SP@
     0 SWAP 1 read LINOS SWAP DROP

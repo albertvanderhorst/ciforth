@@ -37,11 +37,13 @@ steal({S}{EEK_SET},SEEK_SET)
 steal({T}{CGETS},TCGETS)
 steal({T}{CSETS},TCSETS)
 steal({E}{CHO},ECHO)
+steal({E}{AGAIN},EAGAIN)
 steal({V}{MIN},VMIN)
 steal({V}{TIME},VTIME)
 steal({I}{CANON},ICANON)
 steal({O}{_RDWR},O_RDWR)
 steal({O}{_RDONLY},O_RDONLY)
+steal({O}{_NONBLOCK},O_NONBLOCK)
 
 ; Numbers of system calls. See "Linux kernel Internals" Appendix A.
 ; By M.Beck, H. Boehme e.a. Addison Wesley.
@@ -51,10 +53,11 @@ steal({e}{xit},__NR_exit)
 steal({o}{pen},__NR_open)
 steal({c}{lose},__NR_close)
 steal({r}{ead},__NR_read)
+steal({s}{elect},__NR_select)
+steal({_}{newselect},__NR__newselect)
 steal({w}{rite},__NR_write)
 steal({i}{octl},__NR_ioctl)
 steal({l}{seek},__NR_lseek)
-
 ; ------------------------------------------------------------
 ;   End of constants stolen from C.
 ; ------------------------------------------------------------

@@ -877,9 +877,11 @@ DPUSH:  PUSH    DX      ;{ Fall through.}
 APUSH:  PUSH    AX
 NEXT:
 _LINUX_C_({
+_NEWDEBUG_({ 
          PUSH    SI
          CALL    c_debug
          POP     SI
+});_END_({_NEWDEBUG_ })
 });_END_({_LINUX_C_})
         LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
@@ -5264,6 +5266,29 @@ CODE_HEADER({LINOS},{LINOS})
         POP     BX        ; First parameter.
         INT     80H        ;{ Generic call on LINUX }
         _PUSH     ; Positive means okay. Negative means -errno.
+;       
+worddoc( {SYSTEM},{LINOS5},{linos5},{p1 p2 p3 p4 p5 n---ret},{},
+{ Do a Linux
+system call (man 2) with parameters forthsamp({p1 p2 p3 p4 p5}).
+forthvar({ret}) is the return value of the call. If it is negative, it
+is mostly an error, such as known by forthvar({errno}) . This makes
+available forthemph({all}) facilities present in Linux.
+},{{?LINUX-ERROR}},
+{{1 "CHIMP" 0 0 4 LINOS5 .},{CHIMP5}},
+enddoc)
+CODE_HEADER({LINOS5},{LINOS5})
+        LEA     BP,[BP-_CELLS(1)] ;{Save SI on return stack.}
+        MOV     [BP],SI
+        POP     AX        ; Function number
+        POP     DI        ; 5th parameter, if any
+        POP     SI        ; 4th parameter, if any
+        POP     DX        ; Third parameter, if any
+        POP     CX        ; Second parameter, if any
+        POP     BX        ; First parameter.
+        INT     80H        ;{ Generic call on LINUX }
+        MOV     SI,[BP]    ;{ Restore}
+        LEA     BP,[BP+_CELLS(1)]
+        _PUSH     ; Positive means okay. Negative means -errno.
 });_END_({ _HOSTED_LINUX_})
 
 _PC_({
@@ -5322,7 +5347,7 @@ worddoc( {INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
 or a number of forthvar({count}) characters have been received.
 Rely on the operating system for input editing.
 One or more nulls are
-added at the end of the text.}, {{KEY},{?TERMINAL}}, {}, enddoc)
+added at the end of the text.}, {{KEY},{KEY?}}, {}, enddoc)
  HEADER({EXPECT},{EXPEC},{DOCOL})
 _BITS32_({; MSDOS cannot handle a 32 bits address: use the buffer.})
 _BITS32_({        DC      LIT, EXPECTBUF})
@@ -5343,18 +5368,18 @@ _BITS32_({EXPECTBUF:  _RESB    0100H })
 ;
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO FIG L0},
 {Leave the ascii value of the next terminal key struck.},
-{ACCEPT},{?TERMINAL}, {}, enddoc)
+{ACCEPT},{KEY?}, {}, enddoc)
 HEADER({KEY},{KEY},{DOCOL})
         DC         LIT, 1000H, ZERO, ZERO, ZERO
         DC         LIT, 0016H, BIOS
         DC         DROP,DROP,DROP,DROP
         DC         LIT, 00FFH, LAND, SEMIS
 ;
-worddoc( {INPUT},{?TERMINAL},{question_terminal},{--- f},{},
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
 A true flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
-HEADER({?TERMINAL},{QTERM},DOCOL)
+HEADER({KEY?},{KEYQ},DOCOL)
         DC      LIT,0B00H
         DC      ZERO,ZERO,ZERO
         DC      BDOS, DROP ;{ ignore error }
@@ -5381,7 +5406,7 @@ until a "return" is received.
 [ NONO THIS IS EXPECT or a number of forthvar({count}) characters have been
 received.] Rely on the operating system for input editing. One or more
 nulls are added at the end of the text.
-},{{KEY},{?TERMINAL}}, {}, enddoc)
+},{{KEY},{KEY?}}, {}, enddoc)
 CODE_HEADER({ACCEPT},{ACCEP})
         CALL    c_expec
         LEA     ESP,[ESP+_CELLS(2)]    ; remove input
@@ -5395,11 +5420,11 @@ CODE_HEADER({KEY},{KEY})
         PUSH    EAX
         _NEXT
 ;
-worddoc( {INPUT},{?TERMINAL},{question_terminal},{--- f},{},
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
 A true flag indicates actuation. },{}, {}, enddoc)
-CODE_HEADER({?TERMINAL},{QTERM})
+CODE_HEADER({KEY?},{KEYQ})
         CALL    c_qterm
         PUSH    EAX
         _NEXT
@@ -5485,7 +5510,7 @@ Typically these are ^H and ^U.
 Note that excess characters after forthsamp({count}) remain in the type ahead
 buffer and will be returned as the next input, or interpreted as a console
 command.},
-{{KEY},{?TERMINAL},{EXPECT}},
+{{KEY},{KEY?},{EXPECT}},
 dnl THE ACCEP_A VERSION OF ACCEPT IS TESTED WITH
 dnl THE AUTOMATIC TESTING FACILITY.
 dnl THE DEFAULT CAN ONLY BE TESTING INTERACTIVELY
@@ -5540,7 +5565,7 @@ property is an important difference with forthcode({ACCEPT})
 .}) Rely on the operating system for input editing. This is not
 ISO as the number of characters is not stored. And the buffer
 is zeroed up till forthsamp({count}). },
-{{KEY},{?TERMINAL}},
+{{KEY},{KEY?}},
 dnl THE TEST CODE HERE IS PARTLY INPUT FOR EXPECT
 dnl HENCE THE CRITICAL LAYOUT WITH RESPECT TO CR'S
 {
@@ -5571,7 +5596,7 @@ EXPEC4:
 });_END_({_LOAD_})
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO FIG L0},
 {Leave the ascii value of the next terminal key struck.},
-{{ACCEPT},{?TERMINAL}},
+{{ACCEPT},{KEY?}},
 dnl THE TEST CODE HERE IS PARTLY INPUT FOR KEY
 dnl HENCE THE CRITICAL LAYOUT WITH RESPECT TO CR'S
 {
@@ -5592,22 +5617,44 @@ HEADER({KEY},{KEY},{DOCOL})
         DC      ONE, LIT, RAWIO, STTERM       ; Toggle back
         DC      SEMIS
 ;
-worddoc( {INPUT},{?TERMINAL},{question_terminal},{--- f},{},
-{Perform a test of the terminal keyboard for a break request.
-Any key pressed is interpreted as such and the key is consumed.
-A true flag indicates actuation. },
-{{KEY},{ACCEPT}},
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
+{Into forthsamp({f}) return whether a character is available.
+The next execution of forthcode({KEY}) will return the character immediately.
+},
+{{KEY},{ACCEPT},{KEY?}},
 {{( Interactive)},{}},
 enddoc)
-HEADER({?TERMINAL},{QTERM},{DOCOL})
-        ; Return immediately even for zero characters available
+HEADER({KEY?},{KEYQ},{DOCOL})
         DC      ZERO, LIT, RAWIO, STTERM
-        DC      ZERO, SPFET     ; Expect single key on stack
-        DC      ZERO            ; Standard input
-        DC      SWAP, ONE       ; Buffer and length
-        DC      LIT, read, LINOS
-        DC      SWAP, DROP      ; Retain only count
-        DC      ONE, LIT, RAWIO, STTERM       ; Toggle back
+        DC      ONE     ;{ # of highest channel to watch.}
+        DC      LIT, RFDS   ;{ Waiting for input }
+        DC      ONE, OVER, STORE ;{ Waiting for standard in.}
+        DC      ZERO, ZERO  ;{ Not output, not events.}
+        DC      ZERO, ZERO  
+        DC      LIT, TV, TSTOR ;{ Time out of zero.}
+        DC      LIT, TV     
+        DC      LIT, _newselect, LINOS5
+        DC      LDUP,  QLERR
+        DC      NEGATE        ; {1 -> flag.}
+        DC      ZERO, LIT, RAWIO, STTERM
+        DC      SEMIS
+        _ALIGN  4
+RFDS:   _RESB   128     ;{32 channels maximum.}
+TV:     _RESB   8
+;
+worddoc( {SYSTEM},{MS},{millisecond},{n1 ---},{ISO}
+{ Wait for forthsamp({n1}) miliseconds. },
+{{KEY?}},
+{{ 123 10 MS . },{123}},
+enddoc)
+HEADER({MS},{MS},{DOCOL})
+        DC      LIT, 1000, SLMOD
+        DC      LIT, TV, TSTOR 
+        DC      ZERO, ZERO  
+        DC      ZERO, ZERO  
+        DC      LIT, TV     
+        DC      LIT, _newselect, LINOS5
+        DC      QLERR
         DC      SEMIS
 ;
 });_END_({_LINUX_N_})
@@ -5634,7 +5681,7 @@ property is an important difference with forthcode({ACCEPT})
 .}) Rely on the operating system for input editing. This is not
 ISO as the number of characters is not stored. And the buffer
 is zeroed up till forthsamp({count}). },
-{{KEY},{?TERMINAL}},
+{{KEY},{KEY?}},
 dnl THE TEST CODE HERE IS PARTLY INPUT FOR ACCEPT
 dnl HENCE THE CRITICAL LAYOUT WITH RESPECT TO CR'S
 {
@@ -5667,7 +5714,7 @@ until a "return" or a number of forthvar({count}) characters have been
 received. One or more nulls are added at the end of the text. Receive
 characters key by key using forthcode({KEY}). Observe
 forthcode({RUBOUT}). },
-{{KEY},{?TERMINAL}}, {}, enddoc)
+{{KEY},{KEY?}}, {}, enddoc)
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
@@ -5786,12 +5833,12 @@ CHO     PROC    NEAR
         RET
 _ENDP CHO     ENDP
 ;
-worddoc( {INPUT},{?TERMINAL},{question_terminal},{--- f},{FIG},
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
 A true flag indicates actuation. },
 {{KEY},{ACCEPT}}, {}, enddoc)
-CODE_HEADER({?TERMINAL},{QTERM})
+CODE_HEADER({KEY?},{KEYQ})
         JMP     PQTER
 PQTER:  CALL    CSTAT   ;{TEST FOR KEY}
         OR      AL,AL   ;{ANY KEY?}
@@ -5816,7 +5863,7 @@ until a "return" or a number of forthvar({count}) characters have been
 received. Receive characters key by forthcode({KEY}) and observe
 forthcode({RUBOUT}) . One or more nulls are added at the end of the
 text. Uses ``BIOS''. },
-{{KEY},{?TERMINAL}}, {}, enddoc)
+{{KEY},{KEY?}}, {}, enddoc)
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
@@ -5921,12 +5968,12 @@ HEADER({(EMIT)},{PEMIT},{DOCOL})
              DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 
 ;
-worddoc( {INPUT},{?TERMINAL},{question_terminal},{--- f},{},
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
 A true flag indicates actuation. },
 {{KEY},{ACCEPT}}, {}, enddoc)
-HEADER({?TERMINAL},{QTERM},{DOCOL})
+HEADER({KEY?},{KEYQ},{DOCOL})
              DC      LIT, 01100H, ZERO, ZERO, ZERO
              DC      LIT, 016H, BIOS
              DC      LIT, 040H, LAND, ZEQU, TOR
@@ -7240,7 +7287,7 @@ FORV1:  DC      FROMR
 ;
 worddoc( {DICTIONARY},{WORDS},{words},{},{},
 {List the names of the definitions in the context vocabulary.
-dnl A break as per forthcode({?TERMINAL}) will terminate the listing.
+dnl A break as per forthcode({KEY?}) will terminate the listing.
 }, {}, 
 {
 {VOCABULARY JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
@@ -7314,7 +7361,7 @@ LIST1:  DC      CR,IDO
         DC      DOTR,SPACE
         DC      IDO,SCR
         DC      FETCH,DLINE
-        DC      QTERM   ;{ ?TERMINAL}
+        DC      KEYQ   ;{ KEY?}
         _0BRANCH(LIST2)
         DC      LLEAV
 LIST2:  _LOOP(LIST1)
@@ -7337,7 +7384,7 @@ INDE1:  DC      CR,IDO
         DC      LIT,3
         DC      DOTR,SPACE
         DC      ZERO,IDO
-        DC      DLINE,QTERM
+        DC      DLINE,KEYQ
         _0BRANCH(INDE2)
         DC      LLEAV
 INDE2:  _LOOP(INDE1)
@@ -7383,7 +7430,7 @@ HEADER({TRIAD},{TRIAD},{DOCOL})
         _DO(TRIA9)
 TRIA1:  DC      CR,IDO
         DC      LLIST
-        DC      QTERM   ;{ ?TERMINAL}
+        DC      KEYQ   
         _0BRANCH(TRIA2)
         DC      LLEAV   ;{LEAVE}
 TRIA2:  _LOOP(TRIA1)    ;{THEN}
