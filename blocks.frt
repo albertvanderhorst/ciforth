@@ -127,7 +127,7 @@ CREATE BASE' 0 ,
     10 I 0F AND - +LOOP         CR
 ;    HEX>
 ." SYSTEM ELECTIVE $RCSfile$ $Revision$"
-CR 2 LIST  9 LOAD
+CR 2 LIST  18 LOAD
   REQUIRE ?32 ( 16/32 BIT DEPENDANCIES)
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
@@ -142,22 +142,22 @@ CR 2 LIST  9 LOAD
  ( FIG:  SAVE-SYSTEM      23 LOAD   )
 : TASK ;
 ( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD )
-( COMPARE PRESENT? REQUIRE REQUIRED ) \ AvdH A1sep24
 
- : COMPARE ( ISO) ROT 2DUP SWAP - >R
-     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
-\ For LINE and WORD sc's : line CONTAINS word.
-: CONTAINS   PAD $! BEGIN BL $S PAD $@ COMPARE 0= DUP >R 0=
-OVER AND WHILE RDROP REPEAT 2DROP R> ;
-\ Find WORD in the block library and load it.
-: FIND&LOAD
- 256 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
- 2DROP ;
-\ For WORD sc: it IS found not as a denotation.
-: PRESENT? DUP >R FOUND DUP IF >NFA @ @ R> = ELSE RDROP THEN ;
-\ Make sure WORD is present in the ``FORTH'' vocabulary.
-: REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
-: REQUIRE (WORD) REQUIRED ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  CR ." A1MAY17  FORTH KRAKER >1<  ALBERT VAN DER HORST "
  CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
  : T,  ( N--. Put N in select table)
@@ -270,15 +270,6 @@ CFOF BRANCH BY -br
 
 
 
- ( DISK IO SCREEN 17 SCHRIJVEN >1< VERSIE #1)
- <HEX  0 IVAR FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
- : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
- : FILL-FCB 22 WORD
-    1+ HERE  COUNT ROT SWAP CMOVE  ;
- : SET-DMA  1A BDOS DROP ;
- : ?PRES   FCB2 0F BDOS 0FF - IF ." ALREADY PRESENT" QUIT THEN
-    FCB2 10 BDOS DROP ;
-   18 19 THRU
 
 
 
@@ -286,101 +277,110 @@ CFOF BRANCH BY -br
 
 
 
- ( SCR # 18 SCHRIJVEN >2<   )
- 0 IVAR DISK-BUFFER-W 100 ALLOT
- DISK-BUFFER-W IVAR POINTER-W
- : .OPENW FCB2 CLEAN-FCB FCB2 FILL-FCB ?PRES
-   FCB2 16 BDOS 0FF = IF ." DISK FULL " QUIT THEN
-   DISK-BUFFER-W POINTER-W ! ;
- : .CLOSEW
-      DISK-BUFFER-W SET-DMA FCB2 15 BDOS . ." LAST RECORD" CR
-            FCB2 10 BDOS . ." CLOSE STATUS" CR ;
- 0A0D IVAR CRLF    1A IVAR CTRLZ
- : MOVE-DOWN   -80 POINTER-W +!
-               DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
- : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
-           R> POINTER-W +!
-           POINTER-W @ DISK-BUFFER-W -
-           80 >  IF
-  ( SCREEN #19 SCHRIJVEN  >3<)
-              DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
-              MOVE-DOWN
-          THEN ;
-
- : .WRITE  ( 2/0 WRITE SCREEN-1 .. SCREEN-2 TO DISK)
-      1+ B/SCR * SWAP B/SCR * ( GET START BUFFER #'S)
-        DO I BLOCK DUP
-        40 -TRAILING TO-DISK  CRLF 2 TO-DISK
-        40 + 40 -TRAILING TO-DISK CRLF 2 TO-DISK
-      LOOP CTRLZ 1 TO-DISK
- ;   HEX>
 
 
 
 
- ( DISK IO, LEZEN )
- <HEX  ( BUG: 64 char lines go wrong)
- 0 IVAR DISK-BUFFER-R  80 ALLOT 0 IVAR POINTER-R
-  0A CONSTANT "LF"  0D CONSTANT "CR"
-  1A CONSTANT ^Z    DISK-BUFFER-R 80 + CONSTANT END-BUF
-  0 IVAR EOF
- : .OPENR   FCB2 DUP CLEAN-FCB FILL-FCB
-       END-BUF POINTER-R !
-       FCB2 0F BDOS 0FF = IF ." NOT PRESENT" QUIT THEN
-       0 EOF ! ;
- : .CLOSER   FCB2 10 BDOS . ." CLOSE STATUS" CR ;
-
-
-               21 22 THRU
-
-
- ( SCR # 21,  TWEEDE SCREEN VAN CP/M READ)
- : ?EMPTY ( POINTER -- CORRECTED PNR, READ SECTOR IF AT END)
-     DUP END-BUF = IF DISK-BUFFER-R SET-DMA  FCB2 14 BDOS .
-                    DROP DISK-BUFFER-R THEN  ;
- : GET-CHAR
-    POINTER-R @
-      ?EMPTY                   ( GET NEW BUFFER IF NEEDED)
-      DUP C@ "LF" = IF 1+ ?EMPTY THEN ( SKIP OVER LF)
-      DUP C@ SWAP              ( GET CHAR, POINTER ON TOP)
-      OVER ^Z =
-      IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
-    POINTER-R !  ;
 
 
 
 
- CR ." READ CP/M files >3< AH   84/06/13"
- : GET-LINE ( ADR -- . reads a line to ADR )
-      DUP 40 20 FILL ( preset spaces )
-      41 OVER + SWAP ( max $41 char to a line, CR!)
-      DO  GET-CHAR
-          DUP "CR" = IF DROP 20 LEAVE THEN
-          DUP ^Z   = IF DROP 20 LEAVE THEN
-          I C! ( may leave spurious 81th space)
-      LOOP  ;
- : .READ ( 2/0 READ SCREEN-2 TO SCREEN -1)
-      1+ B/SCR * SWAP B/SCR * ( get start buffer #'s)
-      DO  I BLOCK DUP GET-LINE
-          DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
-          I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
-      LOOP
-; HEX>
- ( 01-APR-83 LADEN VAN CP/M FILE  #1 )
- ( EXAMPLE: .OPENR TEMP" 25 26 .LOAD .CLOSER )
- <HEX  0 IVAR LBUF 3E ALLOT 0 C,
- : I-F-A ( ADRES -- . ,INTERPRET FROM ADDRESS )
-     TIB @ >R  IN @ >R  ( SAVE CURRENT INTERPRET POSITION)
-     TIB !     0 IN !   ( NEW POSITION)
-     0 INTERPRET
-     >R IN !   >R TIB ! ( RESTORE)  ;
 
- : .LOAD ( LOAD THE CPM FILE SPECIFIED IN FCB2 )
-         BEGIN   LBUF DUP GET-LINE I-F-A
-         EOF @ UNTIL ;
+( -r COMPARE PRESENT? REQUIRE REQUIRED ) \ AvdH A1sep24
+
+ : COMPARE ( ISO) ROT 2DUP SWAP - >R
+     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
+\ For LINE and WORD sc's : line CONTAINS word.
+: CONTAINS   PAD $! BEGIN BL $S PAD $@ COMPARE 0= DUP >R 0=
+OVER AND WHILE RDROP REPEAT 2DROP R> ;
+\ Find WORD in the block library and load it.
+: FIND&LOAD
+ 256 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
+ 2DROP ;
+\ For WORD sc: it IS found not as a denotation.
+: PRESENT? DUP >R FOUND DUP IF >NFA @ @ R> = ELSE RDROP THEN ;
+\ Make sure WORD is present in the ``FORTH'' vocabulary.
+: REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
+: REQUIRE (WORD) REQUIRED ;
 
 
-    HEX>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ( CORE EXTENSION WORDS ASSUMED BY HAYDN, OTHERS TEST NEEDS)
  -1 CONSTANT TRUE       0 CONSTANT FALSE
@@ -990,117 +990,117 @@ RANDOMIZE
 : +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
 : REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
 : UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
+ ( DISK IO SCREEN 17 SCHRIJVEN >1< VERSIE #1)
+ <HEX  0 IVAR FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
+ : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
+ : FILL-FCB 22 WORD
+    1+ HERE  COUNT ROT SWAP CMOVE  ;
+ : SET-DMA  1A BDOS DROP ;
+ : ?PRES   FCB2 0F BDOS 0FF - IF ." ALREADY PRESENT" QUIT THEN
+    FCB2 10 BDOS DROP ;
+   18 19 THRU
+
+
+
+
+
+
+
+ ( SCR # 18 SCHRIJVEN >2<   )
+ 0 IVAR DISK-BUFFER-W 100 ALLOT
+ DISK-BUFFER-W IVAR POINTER-W
+ : .OPENW FCB2 CLEAN-FCB FCB2 FILL-FCB ?PRES
+   FCB2 16 BDOS 0FF = IF ." DISK FULL " QUIT THEN
+   DISK-BUFFER-W POINTER-W ! ;
+ : .CLOSEW
+      DISK-BUFFER-W SET-DMA FCB2 15 BDOS . ." LAST RECORD" CR
+            FCB2 10 BDOS . ." CLOSE STATUS" CR ;
+ 0A0D IVAR CRLF    1A IVAR CTRLZ
+ : MOVE-DOWN   -80 POINTER-W +!
+               DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
+ : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
+           R> POINTER-W +!
+           POINTER-W @ DISK-BUFFER-W -
+           80 >  IF
+  ( SCREEN #19 SCHRIJVEN  >3<)
+              DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
+              MOVE-DOWN
+          THEN ;
+
+ : .WRITE  ( 2/0 WRITE SCREEN-1 .. SCREEN-2 TO DISK)
+      1+ B/SCR * SWAP B/SCR * ( GET START BUFFER #'S)
+        DO I BLOCK DUP
+        40 -TRAILING TO-DISK  CRLF 2 TO-DISK
+        40 + 40 -TRAILING TO-DISK CRLF 2 TO-DISK
+      LOOP CTRLZ 1 TO-DISK
+ ;   HEX>
+
+
+
+
+ ( DISK IO, LEZEN )
+ <HEX  ( BUG: 64 char lines go wrong)
+ 0 IVAR DISK-BUFFER-R  80 ALLOT 0 IVAR POINTER-R
+  0A CONSTANT "LF"  0D CONSTANT "CR"
+  1A CONSTANT ^Z    DISK-BUFFER-R 80 + CONSTANT END-BUF
+  0 IVAR EOF
+ : .OPENR   FCB2 DUP CLEAN-FCB FILL-FCB
+       END-BUF POINTER-R !
+       FCB2 0F BDOS 0FF = IF ." NOT PRESENT" QUIT THEN
+       0 EOF ! ;
+ : .CLOSER   FCB2 10 BDOS . ." CLOSE STATUS" CR ;
+
+
+               21 22 THRU
+
+
+ ( SCR # 21,  TWEEDE SCREEN VAN CP/M READ)
+ : ?EMPTY ( POINTER -- CORRECTED PNR, READ SECTOR IF AT END)
+     DUP END-BUF = IF DISK-BUFFER-R SET-DMA  FCB2 14 BDOS .
+                    DROP DISK-BUFFER-R THEN  ;
+ : GET-CHAR
+    POINTER-R @
+      ?EMPTY                   ( GET NEW BUFFER IF NEEDED)
+      DUP C@ "LF" = IF 1+ ?EMPTY THEN ( SKIP OVER LF)
+      DUP C@ SWAP              ( GET CHAR, POINTER ON TOP)
+      OVER ^Z =
+      IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
+    POINTER-R !  ;
+
+
+
+
+ CR ." READ CP/M files >3< AH   84/06/13"
+ : GET-LINE ( ADR -- . reads a line to ADR )
+      DUP 40 20 FILL ( preset spaces )
+      41 OVER + SWAP ( max $41 char to a line, CR!)
+      DO  GET-CHAR
+          DUP "CR" = IF DROP 20 LEAVE THEN
+          DUP ^Z   = IF DROP 20 LEAVE THEN
+          I C! ( may leave spurious 81th space)
+      LOOP  ;
+ : .READ ( 2/0 READ SCREEN-2 TO SCREEN -1)
+      1+ B/SCR * SWAP B/SCR * ( get start buffer #'s)
+      DO  I BLOCK DUP GET-LINE
+          DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
+          I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
+      LOOP
+; HEX>
+ ( 01-APR-83 LADEN VAN CP/M FILE  #1 )
+ ( EXAMPLE: .OPENR TEMP" 25 26 .LOAD .CLOSER )
+ <HEX  0 IVAR LBUF 3E ALLOT 0 C,
+ : I-F-A ( ADRES -- . ,INTERPRET FROM ADDRESS )
+     TIB @ >R  IN @ >R  ( SAVE CURRENT INTERPRET POSITION)
+     TIB !     0 IN !   ( NEW POSITION)
+     0 INTERPRET
+     >R IN !   >R TIB ! ( RESTORE)  ;
 
+ : .LOAD ( LOAD THE CPM FILE SPECIFIED IN FCB2 )
+         BEGIN   LBUF DUP GET-LINE I-F-A
+         EOF @ UNTIL ;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    HEX>
 
 
 
