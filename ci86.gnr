@@ -91,6 +91,22 @@ BUF1	EQU	EM-CO*NBUF	; FIRST DISK BUFFER
 INITR0	EQU	BUF1-US		; ( RO )
 INITS0	EQU	INITR0-RTS	; ( S0 )
 ;
+;____1_____ _USEBIOS_1_({
+;
+; Disk parameters:
+; HD drive 3" selected.
+BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
+BPS             EQU     512             ;Bytes/sector, common to all of MSDOS
+TRKS            EQU     80              ;Tracks on hd disk
+SPT1            EQU     18              ;3 inch high density sectors/track
+SPT2            EQU     15              ;5 inch high density sectors/track
+HEADS           EQU     2
+SPDRV1          EQU     HEADS*TRKS*SPT1 ;3 inch Single density sectors/drive
+SPDRV2          EQU     HEADS*TRKS*SPT2 ;5 inch Double density sectors/drive
+RESERV          EQU     (2*SPT1)        ; Reserved for the system
+DODE            EQU     0               ; Selects 3" now, doesnot make sense REMOVE!
+});_END___1__({_USEBIOS_1_})
+
  PAGE
  CSEG    SEGMENT PARA PUBLIC 'CODE'
 	ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
@@ -1661,7 +1677,9 @@ CLD1	DW	COLD
 	DW	USE,STORE
 	DW	FIRST
 	DW	PREV,STORE
+;____1_____ _USEDOS_1_({
 	DW	DRZER
+});_END___1__({_USEDOS_1_})
 	DW	LIT
 	DW	ORIG+12H
 	DW	LIT,UP
@@ -1875,10 +1893,6 @@ MESS3	DW	SEMIS
 	OUT	DX,AX	;WORD OUTPUT
 	JMP	NEXT
 ;
-_COMMENT STANDALONE
-BPS	EQU	512	;BYTES PER SECTOR
-_ENDCOMMENT
-;
  	HEADER({USE},{USE},{DOVAR})
         ;ADDR OF NEXT BUFR TO USE
 	DW BUF1
@@ -1886,14 +1900,6 @@ _ENDCOMMENT
  	HEADER({PREV},{PREV},{DOVAR})
 ;       ;ADDR OF PREV USED BUFR
 	DW	BUF1
-;
-_COMMENT STANDALONE
-_M4_COMMENT 
- 	HEADER({SEC/BLK},{SPBLK},{DOCON})
-        ;# SECTORS/BLOCK
-	DW	KBBUF/BPS
-_M4_ENDCOMMENT
-_ENDCOMMENT
         PAGE
  	HEADER({#BUFF},{NOBUF},{DOCON})
         ;NO. OF BUFFERS
@@ -2003,41 +2009,83 @@ SCREEN	DW	FROMR,INN
 	DW	BLK
 	DW	PSTOR
 	DW	SEMIS
-	PAGE
+        PAGE
+;
+; Generic call on BIOS. A boon for experimenters.
+; Because there is no such thing as a variable interrupt:
+; THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!
+; BEWARE OF THE SOFTWARE POLICE!
+        HEADER({BIOS},{BIOS},{$ + 2})
+        POP     AX      ; Function code
+        ; Once we are more acknowledgable, put segment overwrite here.
+        MOV     _BYTE [RQBIOS+1],AL ; Patch the code.
+        POP     DX        
+        POP     CX      
+        POP     BX      
+        POP     AX      
+	PUSH     SI      ; Save Forth registers. NEEDED? 
+	PUSH     BP      
+RQBIOS: INT(0)          ; Request number to be overwritten.
+	POP	BP	; Restore Forth registers. NEEDED? 
+	POP	SI	;INTERPRETER PNTR
+        PUSHF      ; Sometimes status is returned into flags!
+        PUSH     AX      
+        PUSH     BX      
+        PUSH     CX      
+        PUSH     DX      
+        JMP     NEXT    ;
+; SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!
+
+; Generic call on MSDOS/MS WIndows2000
+; This works in a standalone Forth (if started from MSDOS).
+        HEADER({BDOS},{BDOS},{$ + 2})
+        POP     AX      ; Function code
+        POP     DX      ; Extra data
+        INT(21H)
+        SUB     AH,AH   ; AL is return code.Clear m.s byte
+        JMP     APUSH
+
+             ; SVGA-modus 43*132 char's
+             HEADER({SMALL},{SMALL},{DOCOL})
+             DW      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
+             DW      LIT, 0010H, BIOS
+             DW      DROP, DROP, DROP, DROP, DROP, SEMIS
+             ;                          ^ MUST BE 4FH
+	PAGE    
 ;------------------------------------
 ;       SYSTEM DEPENDANT CHAR I/O
 ;------------------------------------
 ;____1_____ _USEDOS_1_({
- 	HEADER({EXPECT},{EXPEC},{DOCOL})
-	DW	OVER
-	DW	PLUS
-	DW	OVER
-	DW	XDO	; DO
-EXPE1	DW	KEY
-	DW	DUPE
-	DW	LIT,0EH
-	DW	PORIG
-	DW	FETCH
-	DW	EQUAL
-	_0BRANCH(EXPE2) ; IF
-	DW	DROP
-	DW	DUPE
-	DW	IDO
-	DW	EQUAL
-	DW	DUPE
-	DW	FROMR
-	DW	TWO
-	DW	SUBB
-	DW	PLUS
-	DW	TOR
-	_0BRANCH(EXPE6) ; IF
-	DW	LIT
-	DW	BELL
-	_BRANCH(EXPE7)  ; ELSE
-EXPE6	DW	LIT
-	DW	BSOUT	; ENDIF
-EXPE7	_BRANCH(EXPE3)  ; ELSE
-EXPE2	DW	DUPE
+ 	HEADER({EXPECT},{EXPEC},{DOCOL})        
+	DW	OVER                            
+	DW	PLUS                            
+	DW	OVER                            
+	DW	XDO	; DO                    
+EXPE1	DW	KEY                             
+	DW	DUPE                            
+	DW	LIT,0EH                         
+	DW	PORIG                           
+	DW	FETCH                           
+	DW	EQUAL                           
+	_0BRANCH(EXPE2) ; IF                    
+	DW	DROP                            
+	DW	DUPE                            
+	DW	IDO                             
+	DW	EQUAL                           
+	DW	DUPE                            
+	DW	FROMR                           
+	DW	TWO                             
+	DW	SUBB                            
+	DW	PLUS                            
+	DW	TOR                             
+	_0BRANCH(EXPE6) ; IF                    
+	DW	LIT                             
+	DW	BELL                            
+	_BRANCH(EXPE7)  ; ELSE                  
+EXPE6	DW	LIT                             
+	DW	BSOUT	; ENDIF                 
+EXPE7	_BRANCH(EXPE3)  ; ELSE                  
+EXPE2	DW	DUPE                            
 	DW	LIT,0DH
 	DW	EQUAL
 	_0BRANCH(EXPE4) ; IF
@@ -2128,6 +2176,98 @@ CSTAT	PROC	NEAR
 STATRT: RET
 _ENDP CSTAT   ENDP
 });_END___1__({_USEDOS_1_})
+;____1_____ _USEBIOS_1_({
+ 	HEADER({EXPECT},{EXPEC},{DOCOL})        
+	DW	OVER                            
+	DW	PLUS                            
+	DW	OVER                            
+	DW	XDO	; DO                    
+EXPE1	DW	KEY                             
+	DW	DUPE                            
+	DW	LIT,0EH                         
+	DW	PORIG                           
+	DW	FETCH                           
+	DW	EQUAL                           
+	_0BRANCH(EXPE2) ; IF                    
+	DW	DROP                            
+	DW	DUPE                            
+	DW	IDO                             
+	DW	EQUAL                           
+	DW	DUPE                            
+	DW	FROMR                           
+	DW	TWO                             
+	DW	SUBB                            
+	DW	PLUS                            
+	DW	TOR                             
+	_0BRANCH(EXPE6) ; IF                    
+	DW	LIT                             
+	DW	BELL                            
+	_BRANCH(EXPE7)  ; ELSE                  
+EXPE6	DW	LIT                             
+	DW	BSOUT	; ENDIF                 
+EXPE7	_BRANCH(EXPE3)  ; ELSE                  
+EXPE2	DW	DUPE                            
+	DW	LIT,0DH
+	DW	EQUAL
+	_0BRANCH(EXPE4) ; IF
+	DW	LLEAV
+	DW	DROP
+	DW	BLS
+	DW	ZERO
+	_BRANCH(EXPE5)  ; ELSE
+EXPE4	DW	DUPE	; ENDIF
+EXPE5	DW	IDO
+	DW	CSTOR
+	DW	ZERO
+	DW	IDO
+	DW	ONEP
+	DW	STORE	; ENDIF
+EXPE3	DW	EMIT
+	_LOOP(EXPE1) 	; LOOP
+	DW	DROP
+	DW	SEMIS
+;
+             HEADER({KEY},{KEY},{DOCOL})
+             DW         LIT, 1000H, ZERO, ZERO, ZERO
+             DW         LIT, 0016H, BIOS
+             DW         DROP,DROP,DROP,SWAP,DROP
+             DW         LIT, 00FFH, ANDD, SEMIS
+
+             HEADER({TYPE},{TYPES},{DOCOL})
+             DW      DDUP
+             _0BRANCH(TYPE1)
+             DW      OVER,   PLUS
+             DW      SWAP,   XDO
+TYPE2:       DW      IDO,    CAT,    EMIT
+             _LOOP(TYPE2)
+             _BRANCH(TYPE3)
+TYPE1:       DW      DROP
+TYPE3:       DW      SEMIS
+;            
+             HEADER({EMIT},{EMIT},{DOCOL})
+             DW      LIT, 07FH, ANDD
+             DW      PEMIT
+             DW      ONE,OUTT
+             DW      PSTOR,SEMIS
+;            
+             HEADER({(EMIT)},{PEMIT},{DOCOL})
+             DW      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
+             DW      LIT, 0010H, BIOS
+             DW      DROP, DROP, DROP, DROP, DROP, SEMIS
+
+;
+             HEADER({?TERMINAL},{QTERM},{DOCOL})
+             DW      LIT, 01100H, ZERO, ZERO, ZERO
+             DW      LIT, 016H, BIOS, DROP, DROP, DROP, DROP
+             DW      LIT, 040H, ANDD, ZEQU, SEMIS
+
+             ; Output to PRN 
+             HEADER({POUT},{POUT},{DOCOL})
+             DW      ZERO, ZERO, ZERO
+             DW      LIT, 0017H, BIOS
+             DW      DROP, DROP, DROP, DROP, DROP, SEMIS
+;
+});_END___1__({_USEBIOS_1_})
 	PAGE
 ;------------------------------------
 ;       SYSTEM DEPENDANT DISK I/O
@@ -2188,6 +2328,83 @@ DOK:	POPF		;POP FLAGS
 RSLW1	DW	WSEC
 RSLW2	DW	SEMIS
 });_END___1__({_USEDOS_1_})
+;____1_____ _USEBIOS_1_({
+;
+                HEADER({DRIVE},{DRIVE},{DOVAR})
+      DW  0
+;
+                HEADER({RECORD},{REC},{DOVAR})
+      DW  0
+;
+ 	HEADER({SEC/BLK},{SPBLK},{DOCON}) ;# SECTORS/BLOCK
+	DW	KBBUF/BPS
+;
+                HEADER({DENSITY},{DENSTY},{DOVAR})
+      DW  DODE
+
+;
+                HEADER({DISK-ERROR},{DSKERR},{DOVAR})
+      DW  0
+
+                HEADER({T&SCALC},{TSCALC},{DOCOL})
+                DW      DENSTY, FETCH
+                _0BRANCH(TSCALS)
+                DW      LIT,    SPDRV2, SLMOD
+                DW      DRIVE,  STORE
+                DW      REC,    STORE,  SEMIS
+;               single density calculations :
+TSCALS:         DW      LIT,    SPDRV1, SLMOD
+                DW      DRIVE,  STORE
+                DW      REC,    STORE,  SEMIS
+;
+                HEADER({BLOCK-READ},{BLKRD},{DOCOL})
+                DW      LIT, 0201H, USE, FETCH                ;AL = drive no.
+                DW      REC, FETCH, LIT, SPT1*HEADS, SLMOD
+                DW      SWAP, LIT, SPT1, SLMOD, TOR
+                DW      SWAP, LIT, 0100H, STAR, PLUS, ONEP
+                DW      FROMR, LIT, 0100H, STAR, DRIVE, FETCH, PLUS
+                DW      LIT, 13H, BIOS
+                DW      DROP, DROP, DROP, DROP
+                DW      ONE, ANDD, DSKERR, STORE
+                DW      SEMIS
+
+                HEADER({BLOCK-WRITE},{BLKWRT},{DOCOL})
+                DW      LIT, 0301H, USE, FETCH                ;AL = drive no.
+                DW      REC, FETCH, LIT, SPT1*HEADS, SLMOD
+                DW      SWAP, LIT, SPT1, SLMOD, TOR
+                DW      SWAP, LIT, 0100H, STAR, PLUS, ONEP
+                DW      FROMR, LIT, 0100H, STAR, DRIVE, FETCH, PLUS
+                DW      LIT, 13H, BIOS
+                DW      DROP, DROP, DROP, DROP
+                DW      ONE, ANDD, DSKERR, STORE
+                DW      SEMIS
+;
+;
+                HEADER({R/W},{RSLW},{DOCOL})
+                DW      USE,    FETCH,     TOR
+                DW      TOR
+                DW      SWAP,   USE, STORE
+                DW      SPBLK,  STAR
+                DW      TSCALC
+                DW      FROMR
+                _0BRANCH(RSLW1)
+                DW      BLKRD
+                _BRANCH(RSLW2)
+RSLW1:          DW      BLKWRT
+RSLW2:          DW      FROMR,  USE,    STORE
+                DW      DSKERR, FETCH,     DDUP
+                _0BRANCH(RSLW5)              ;OK
+                DW      ZLESS
+                _0BRANCH(RSLW3)
+                DW      LIT,    9                       ;Write error
+                _BRANCH(RSLW4)
+RSLW3:          DW      LIT,    8                       ;Read error
+RSLW4:          DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
+                                                        ; is no good!
+                DW      QERR
+RSLW5:          DW      SEMIS
+;
+});_END___1__({_USEBIOS_1_})
 	PAGE
 	; At line     LINE ~3500
  	HEADER({'},{TICK},{DOCOL},1)
