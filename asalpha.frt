@@ -155,20 +155,56 @@ ASSEMBLER DEFINITIONS  HEX
 
 ( ***************************** 4.10 FP Operate *********************** )
 
+(     At Dec the /N bit is set in the 3 operand instruction, i.e.       )
+(     normal rounding is built in in the assembler instruction for      )
+(     normal calculations. This are the first two groups.               )
 94 0 F3F-MASK T!
     BI: 0.001 BI: 16.000 4 4FAMILY, ADDS, SUBS, MULS, DIVS,
     BI: 0.001 BI: 16.020 4 4FAMILY, ADDT, SUBT, MULT, DIVT,
-\     BI: 0.001 BI: 16.080 4 4FAMILY, ADDS, SUBS, MULS, DIVS,
-\     BI: 0.001 BI: 16.0A0 4 4FAMILY, ADDT, SUBT, MULT, DIVT,
+    BI: 0.001 BI: 16.024 4 4FAMILY, CMPTUN, CMPTEQ, CMPTLT, CMPTLE,
+    BI: 0.020 BI: 14.00B 2 4FAMILY, SQRTS, SQRTT,
 
 A4 0 F3F-MASK T!
-\     BI: 0.001 BI: 15.080 4 4FAMILY, ADDF, SUBF, MULF, DIVF,
-\     BI: 0.001 BI: 15.08A 4 4FAMILY, ADDG, SUBG, MULG, DIVG,
+    BI: 0.001 BI: 15.000 4 4FAMILY, ADDF, SUBF, MULF, DIVF,
+    BI: 0.001 BI: 15.00A 4 4FAMILY, ADDG, SUBG, MULG, DIVG,
+    BI: 0.001 BI: 15.025 3 4FAMILY, CMPGEQ, CMPGLT, CMPGLE,
+    BI: 0.020 BI: 14.00A 2 4FAMILY, SQRTF, SQRTG,
 
+
+04 0 F3F-MASK T!
+A4 0 F3F-MASK BI: 15.01E 4PI CVTDG,
+A4 0 F3F-MASK BI: 15.02C 4PI CVTGF,
+A4 0 F3F-MASK BI: 15.02D 4PI CVTGD,
+64 0 F3F-MASK BI: 15.02F 4PI CVTGQ,
+A4 0 F3F-MASK BI: 15.03E 4PI CVTQG,
+A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
+
+94 0 F3F-MASK BI: 16.02C 4PI CVTTS,
+54 0 F3F-MASK BI: 16.02F 4PI CVTTQ,
+94 0 F3F-MASK BI: 16.03C 4PI CVTQS,
+94 0 F3F-MASK BI: 16.03E 4PI CVTQT,
+94 0 F3F-MASK BI: 16.00C 4PI CVTST,
+
+( Instructions without the /N bit built in.                             )
 04 0 F3F-MASK T!
     BI: 0.001 BI: 17.020 3 4FAMILY, CPYS, CPYSE, CPYSN,
 
-( ***************************** Misc Opr ****************************** )
+44 0 F3F-MASK T!
+    BI: 0.020 BI: 17.010 2 4FAMILY, CVTLQ, CVTQL,
+
+84 0 F3F-MASK T!
+    BI: 0.001 BI: 17.02A 6 4FAMILY, FCMOVEQ, FCMOVNE, FCMOVLT, FCMOVGE,
+        FCMOVLE, FCMOVGT,
+    BI: 0.001 BI: 17.024 2 4FAMILY, MT_FPCR, MF_FPCR,
+
+54 0 F3F-MASK T!
+    BI: 0.010 BI: 14.004 3 4FAMILY, ITOFS, ITOFF, ITOFT,
+
+( At Dec the /C bit is set in the instruction, no /N. )
+54 0 F3F-MASK T!
+    BI: 0.008 BI: 1C.030 2 4FAMILY, FTOIT, FTOIS,
+
+( **************************** Misc Opr ******************************  )
 
 0 0 F3I-MASK BI: 11.6C 4PI IMPLVER
 ( ***************************** 16 bits displacement ****************** )
