@@ -127,7 +127,7 @@ And A5 (``eight'') will go to the top.
 
 And lastly it will fail on
 
-"nine  | fout  | three | seven | zero  | eight | two   | six   | one   | five  |"
+" nine  | fout  | three | seven | zero  | eight | two   | six   | one   | five  |"
 
 CREATE x-TABLE , ,
 
@@ -650,12 +650,12 @@ There is a lot to be changed in the regression test.
 
 To my surprise and relief the regression test succeeds.
 
-Isn't it beautiful? Let us have a look at it without those ugly 
+Isn't it beautiful? Let us have a look at it without those ugly
 comments.
 
-: PARTITION         
-    2DUP + 2/   >R  
-    2DUP BEGIN      
+: PARTITION
+    2DUP + 2/   >R
+    2DUP BEGIN
          SWAP BEGIN  DUP R@  *< WHILE  1+  REPEAT
          SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
          2DUP > NOT IF
@@ -664,17 +664,17 @@ comments.
             2DUP *<-->
             >R 1+ R> 1-
         THEN
-    2DUP > UNTIL    
-    RDROP           
-    SWAP ROT        
+    2DUP > UNTIL
+    RDROP
+    SWAP ROT
     ;
 
-: QSORT             
-    PARTITION       
+: QSORT
+    PARTITION
     2DUP < IF  RECURSE  ELSE  2DROP  THEN
     2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
 
-This looks clean and crisp compared to Knuth's algorithm Q 
+This looks clean and crisp compared to Knuth's algorithm Q
 (TACP part 3). But this is actual code...
 
 OUR TENTH CHANGE: NOTHING TO DO EXCEPT ....
@@ -695,7 +695,7 @@ We read back looking for optimisations that can be put back in.
 
 This probably is worthwhile. Is it? Answer test.
 
-This is left as an exercise for the reader.       
+This is left as an exercise for the reader.
 
 BOTTOM LINE
 
@@ -703,16 +703,62 @@ We have now a generic algorithm for qsort.
 Using EXCHANGE to exchange memory area's and properly filling in
 PRECEEDES and <--> vectors we can have the joy of really fast sorting.
 
-The definition of sort now becomes :
+\   For INDEX1 and INDEX2 and TABLE, return corresponding ADDRESS1
+\   and ADDRESS2 .
+: PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
 
+With proper description of the words using the Stallman convention
+we get at last :
+
+
+\ ----------------- auxiliary -------------------------------
+
+\ Exchange the content at ADDRESS1 and ADDRESS2 over a fixed LENGTH.
+: EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
+                   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
+
+\   For INDEX1 and INDEX2 and TABLE, return corresponding ADDRESS1
+\   and ADDRESS2 .
+: PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
+
+\ ----------------- quick sort proper -----------------------
+
+\ Compare item N1 and N2. Return ``N1'' IS lower and not equal.
+DEFER *<
+\ Exchange item N1 and N2.
+DEFER *<-->
+
+\ Sort the range LOW to HIGH inclusive observing *< and *<-->
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP + 2/   >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    RDROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+\ Sort the range LOW to HIGH inclusive observing
+\ ``LOW'' and ``HIGH'' must be indices compatible with the current
+\ values of *< and *<-->
+: QSORT             ( lo hi -- )
+    PARTITION                ( lo_1 hi_1 lo_2 hi_2)
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
 
 \ Sort the range FIRST to LAST (inclusive) of item compared by the xt
 \ COMPARING and exchanged by the xt EXHANGING.
-\ ``For FIRST<=I<J<=LAST      I J COMPARING EXECUTE leaves TRUE.''
-
-And a example of usage is
-: P[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
-: (<) $-TABLE P[]   6 CORA 0 < ;
-: (<-->) $-TABLE P[] 6 EXCHANGE ;
-
-$-TABLE 0 9 ' (<) '(<-->)' SORT
+\ All indices in this range must be proper to pass to both of the xt's.
+\ The xt's are filled in into *< and *<--> and must observe the
+\ interface.
+\ After the call we have that :
+\ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
+: SORT   '*<--> >BODY !   '*< >BODY !   QSORT ;
