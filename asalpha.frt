@@ -76,18 +76,18 @@ ASSEMBLER DEFINITIONS  HEX
 \ Otherwise a ``SHOW:'' would generate 32^3 lines.
 2  0  1F T!
 1 0   20 xFAMILY|
-  c0| c1| c2| c3| c4| c5| c6| c7| c8| c9| c10| c11| c12| c13| c14| c15| c16|
-  c17| c18| c19| c20| c21| c22| c23| c24| c25| c26| c27| c28| c29| c30| cz|
+  R0c R1c R2c R3c R4c R5c R6c R7c R8c R9c R10c R11c R12c R13c R14c R15c R16c
+  R17c R18c R19c R20c R21c R22c R23c R24c R25c R26c R27c R28c R29c R30c Rzc
 
 6  0  001F,0000 T!
 0001,0000 0  20 xFAMILY|
-  b0| b1| b2| b3| b4| b5| b6| b7| b8| b9| b10| b11| b12| b13| b14| b15| b16|
-  b17| b18| b19| b20| b21| b22| b23| b24| b25| b26| b27| b28| b29| b30| bz|
+  R0b R1b R2b R3b R4b R5b R6b R7b R8b R9b R10b R11b R12b R13b R14b R15b R16b
+  R17b R18b R19b R20b R21b R22b R23b R24b R25b R26b R27b R28b R29b R30b Rzb
 
 2  0  03E0,0000 T!
 0020,0000 0   20 xFAMILY|
-  a0| a1| a2| a3| a4| a5| a6| a7| a8| a9| a10| a11| a12| a13| a14| a15| a16|
-  a17| a18| a19| a20| a21| a22| a23| a24| a25| a26| a27| a28| a29| a30| az|
+  R0a R1a R2a R3a R4a R5a R6a R7a R8a R9a R10a R11a R12a R13a R14a R15a R16a
+  R17a R18a R19a R20a R21a R22a R23a R24a R25a R26a R27a R28a R29a R30a Rza
 
 (   Toggle the a-register field in the MASK. Leave IT.                  )
 (   This can be use to clear the register field in a BI-mask as well    )
@@ -98,11 +98,11 @@ ASSEMBLER DEFINITIONS  HEX
 
 ( Toggle some register fixup's back to interesting, i.e. make it show   )
 ( up in disassembly.                                                    )
-'a0| 2 !BAD             'a7| 2 !BAD             'az| 2 !BAD
-'b0| 2 !BAD             'b7| 2 !BAD             'bz| 2 !BAD
-'c0| 2 !BAD             'c7| 2 !BAD             'cz| 2 !BAD
+'R0a 2 !BAD             'R7a 2 !BAD             'Rza 2 !BAD
+'R0b 2 !BAD             'R7b 2 !BAD             'Rzb 2 !BAD
+'R0c 2 !BAD             'R7c 2 !BAD             'Rzc 2 !BAD
 \ Prohibit some instructions from using the zero register.
-'az| 0800 !BAD          'bz| 2000 !BAD
+'Rza 0800 !BAD          'Rzb 2000 !BAD
 
 ( ***************************** 8 bit data field ********************** )
 
@@ -317,5 +317,14 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 
 : SHOW:   TOGGLE-TRIM SHOW: TOGGLE-TRIM ;
 : SHOW-ALL   TOGGLE-TRIM SHOW-ALL TOGGLE-TRIM ;
+
+\ Set the bad bits in the default according to an AMASK .
+\ Failing bits in amask, give bad bits that are set.
+: SET-AMASK
+    DUP  1 0 LSHIFT AND 0= IF BA-DEFAULT 0001,0000 TOGGLE THEN
+    DUP  1 1 LSHIFT AND 0= IF BA-DEFAULT 0004,0000 TOGGLE THEN
+    DUP  1 2 LSHIFT AND 0= IF BA-DEFAULT 0010,0000 TOGGLE THEN
+    DUP  1 8 LSHIFT AND 0= IF BA-DEFAULT 0040,0000 TOGGLE THEN
+    DROP ;
 
 PREVIOUS DEFINITIONS
