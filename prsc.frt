@@ -3,6 +3,7 @@
 
 REQUIRE ARGV
 REQUIRE ^
+REQUIRE if
 
 \ ################# CONVENTIONS ###################################
 \ Any LINE is a sc.
@@ -204,10 +205,29 @@ CREATE FileContent 2 CELLS ALLOT
 \ Get the next LINE .
 : Line   FileContent 2@  OVER IF ^J $S   2SWAP FileContent 2! THEN ;
 
-\ Output the next line from the screens to position, first place to next line.
+\ Consume a line and print it at current position. Move to next line.
 : PrintLine
     ." ("   Line PrintWithEscapes   ." )"
     0 NextLine .COORDINATE ." rmoveto gsave show grestore" CR ;
+
+\ Output at POSITION a NUMBER of lines.
+: MultLine >R
+      2DUP .COORDINATE ." moveto 1 MM " CR
+      R> 0 DO PrintLine LOOP
+;
+
+\ Print the header of page NUMBER .
+: PageHeader
+    DUP PSPagePragma
+    ." (" 4 .R ." ) (Appendix " .Appendix &. EMIT SPACE
+    FileName 2@ TYPE ." ) exch StartPage " CR
+;
+
+\ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
+\ As a side effect the proper font for printing screens is set.
+: ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
+    ." moveto " C/L 3 / . ." MM (SCR #"
+    DUP . ." ) TitleF show BodyFl" CR #Screens + ;
 
 \ Draw a border around the screen at POSITION .
 : DrawBorder ." .5 setgray" CR
@@ -217,27 +237,9 @@ CREATE FileContent 2 CELLS ALLOT
     C/L 1 + NEGATE   . ." CW mul 0 rlineto " CR
                        ." closepath CW setlinewidth .5 setgray stroke 0 setgray" CR
 ;
-\ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
-\ As a side effect set the proper font for printing screens.
-: ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
-    ." moveto " C/L 3 / . ." MM (SCR #"
-    DUP . ." ) TitleF show BodyFl" CR #Screens + ;
 
-\ Output at POSITION a NUMBER lines. Return it was EMPTY.
-: MultLine >R
-      2DUP .COORDINATE ." moveto 1 MM " CR
-      R> 0 DO PrintLine LOOP
-;
-
-\ Output a screen at POSITION unless empty. Return it was EMPTY.
+\ Output a screen at POSITION .
 : OneScreen    16 MultLine DrawBorder ;
-
-\ Print the header of page NUMBER .
-: PageHeader
-    DUP PSPagePragma
-    ." (" 4 .R ." ) (Appendix " .Appendix &. EMIT SPACE
-    FileName 2@ TYPE ." ) exch StartPage " CR
-;
 
 \ Output a SCREEN and following at PAGE in two columns of screens.
 \ Leave incremented SCREEN and PAGE.
@@ -255,7 +257,7 @@ CREATE FileContent 2 CELLS ALLOT
 : OutputScreens
     BlockLineStride
     GetNextFile
-    0 1  BEGIN NextPage FileContent @ 0= UNTIL
+    1  BEGIN NextPage FileContent @ 0= UNTIL
     DROP
 ;
 
@@ -270,11 +272,11 @@ CREATE FileContent 2 CELLS ALLOT
 
 \ Output a PAGE in two columns. Leave incremented PAGE.
 : NextPageSrc
-    DUP PageHeader 1+
+    DUP PageHeader 1+ >R
     LeftColumn 2@ OneColumn
     DrawBar
     RightColumn 2@ OneColumn
-    ." EndPage " CR
+    ." EndPage " CR R>
 ;
 
 \ Output the file given by NAME in the next appendix in two columns.
@@ -285,10 +287,10 @@ CREATE FileContent 2 CELLS ALLOT
     DROP
 ;
 
-    0 CurrentPage !
+    154 CurrentPage !
 \     Header              \ Select this if it must be independantly printed.
     FixupDVIps          \ Select this if it is an appendix to a DVIps output
     PreLude
     1 ARG$ OutputScreens
-    2 ARG$ OutputFile
+    ARGC 2 - 2 do I ARG$ OutputFile loop
     PostLude
