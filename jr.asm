@@ -258,7 +258,7 @@ initial_idtr:
   
 initial_gdtr:
  	DW  0400h            ; gdt limit
- 	DD 02000h           ; gdt physical address
+ 	DD A_GDT             ; gdt physical address
   
  RESB 01feh-($-$$)
  DW  0AA55h   ; Claim to be a PEEEEEEE.CEE bootsector.
