@@ -26,7 +26,7 @@ VOCABULARY ASSEMBLER IMMEDIATE
 ( The first 8 bits of the TALLY need not be consumed. )
 HEX
 : AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
-: INCONSISTENT? TALLY @ INVERT DUP 2 * AND ;
+: INCONSISTENT? TALLY @ INVERT DUP 2 * AND A0A0 AND ;
 DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
 : CHECK32 INCONSISTENT? 32 ?ERROR ;
@@ -107,7 +107,7 @@ HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
 : >IMASK >CNT CELLS TABLE + @ ;
 
 : CHECK30 DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
-: BOOKKEEPING CHECK30 TALLY OR! ;
+: BOOKKEEPING CHECK32 CHECK30 TALLY OR! ;
 ( Build with the LENGTH to comma the ADDRESS that is executint the comm )
 ( and a MASK with the bit for this commaer.                             )
 : COMMAER <BUILDS  , , DUP , ,
@@ -223,7 +223,7 @@ HEX
 ( If the disassembly contains something: `AT-REST?' means               )
 ( we have gone full cycle rest->postits->fixups->commaers               )
 ( Return: the disassembly CONTAINS a result.                             )
-: RESULT? AT-REST? DISS? AND  ;
+: RESULT? AT-REST? DISS? AND   INCONSISTENT? 0= AND ;
 
 : RESULT
     RESULT? IF
@@ -244,6 +244,20 @@ HEX
         INCONSISTENT? IF BACKTRACK THEN
         BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
     DUP VOCEND? UNTIL DROP
+;
+
+: DOONE
+    % 
+    !DISS
+    !TALLY
+    DUP BEGIN
+        DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
+        RESULT
+        >NEXT%
+(       DUP ID.                                                         )
+        INCONSISTENT? IF BACKTRACK THEN
+        BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
+     OVER DISS CELL+ @ - UNTIL DROP DROP
 ;
 
 0 VARIABLE POINTER
