@@ -1,8 +1,7 @@
 \input texinfo
-@macro figforth
-fig-Forth
-@end macro
 @setfilename figforthversion
+dnl @smallbook
+@afourpaper
 @settitle ciforth manual
 @setchapternewpage odd
 @ifinfo 
@@ -17,7 +16,6 @@ modern file i/o.
 A _BITS16_({16})_BITS32_({32})-bits _BOOTED_({standalone}) Forth _HOSTED_LINUX_({running under Linux})_HOSTED_MSDOS_({running under MSDOS})
 @author Albert van der Horst 
 Dutch Forth Workshop
-@end titlepage
 
 
 @page
@@ -26,6 +24,7 @@ Copyright @copyright{{}} 2000 Dutch Forth Workshop
 
 Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
+@end titlepage
 
 
 @ifinfo 
@@ -85,6 +84,10 @@ It is indirect threaded.
 * Rationale & legalese:: For experts. You don't want to read this.
 * Manual::	   User manual 
 * Glossary::  	   Description of Forth words
+* Glossary Index:: Find a Forth words in the glossary
+* Forth Word Index:: All references to Forth words
+* Concept Index::
+dnl* Forth Word Index :: 
 @end menu
 
 @node General Introduction, Rationale & legalese, top, top
@@ -174,5 +177,21 @@ FLUSH CURRENT 2DUP RP@ U.
 
 include(menu.texinfo)
 include(wordset.mi)
+
+@node Glossary Index,,,Top
+@unnumbered Glossary Index
+This index finds the glossary description of each word.
+@printindex pg
+@node Forth Word Index,,,Top
+@unnumbered Forth Word Index
+This index contains $emph{{all}} references to a word.
+Use the glossary index to find the glossary description of each word.
+@printindex fn
+@node Concept Index,,,Top
+@unnumbered Concept Index
+The first reference is where the concept is explained.
+@printindex cp
+@summarycontents
+@contents
 @bye
 
