@@ -240,9 +240,10 @@ THEN RDROP ;
 THEN RDROP ;
 
 \ Delete from ``BRANCHES'' what is marked for elimination.
-: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ SWAP ?DO
+\ Must go back because otherwise the we would disturb the later addresses.
+: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ 1 CELLS - ?DO
     I @ BRANCHES SET-REMOVE
-0 CELL+ +LOOP ;
+-1 CELLS +LOOP ;
 
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
 : ADJUST-BRANCHES BRANCHES @+ SWAP DO
@@ -258,7 +259,15 @@ THEN RDROP ;
 \ For START of gap, fill with ``DROP''.
 : FILL-WITH-DROPS   DUP VD @ NEGATE CELLS +   'DROP   WFILL ;
 
-\ Do something with START END and number of equivalent drops.
+\ For START of gap, Move all branches that are greater to reflect
+\ the position they have after closing the gap.
+: MOVE-BRANCHES   BRANCHES @+ SWAP DO
+    DUP I @ < IF ANNIL-OFFSET @   I +! THEN
+0 CELL+ +LOOP DROP ;
+
+\ Annihilate the gap from START to END such that the sequence to which
+\ it belongs behaves equivalently and ``BRANCHES'' reflects the new
+\ situation.
 \ Return the new position of END (where we have to go on optimising.).
 : ANNIHILATE-GAP
     2DUP CALCULATE-ANNIL-OFFSET
@@ -266,7 +275,7 @@ THEN RDROP ;
     DUP >R
 \ " Between " TYPE SWAP H. " and " TYPE H.
 \ " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
-    SHIFT-GAP-SHUT  FILL-WITH-DROPS
+    SHIFT-GAP-SHUT   DUP MOVE-BRANCHES   FILL-WITH-DROPS
     R>
 ;
 
