@@ -1854,21 +1854,21 @@ DECIMAL
 
 
 
-( OS-IMPORT ) \ AvdH A1sep25
+( OS-IMPORT cd ) \ AvdH A1sep25
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
      CREATE , ,
      DOES>
-     2@ cmdbuf $!       \ Command
-     BL cmdbuf $C+     \ Append a blank
-     ^J (PARSE) cmdbuf $+! \ Append rest of line
-     cmdbuf $@ SYSTEM   \ Execute
+     2@ cmdbuf $! BL cmdbuf $C+ \ Command
+     ^J (PARSE) cmdbuf $+!      \ Append
+     cmdbuf $@ SYSTEM          \  Execute
 ;
 
-
-
-
-
+\ Change directory to SC .
+: cdED PAD $! 0 PAD $C+
+PAD CELL+ HERE HERE 12 LINOS ?LINUX-ERROR ;
+\ Idem but string from input.
+: cd (WORD) cdED ;
 
 ( cat echo grep list ls make man rm   ee l ) \ AvdH A1sep26
 REQUIRE 32-bit ?LI   REQUIRE OS-IMPORT
@@ -1883,7 +1883,7 @@ REQUIRE 32-bit ?LI   REQUIRE OS-IMPORT
 
 "ee     "   OS-IMPORT ee
 "l      "   OS-IMPORT l
-
+""          OS-IMPORT !!
 
 
 ( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
