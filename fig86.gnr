@@ -4250,7 +4250,7 @@ HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
 });_END_({_BLOCKSINFILE_})
 ;
 _RWFILE_({
-worddoc({STORAGE},{DISK-ERR},{disk_error},{u---},{},{
+worddoc({STORAGE},{DISK-ERR},{disk_error_},{u---},{},{
 Interpret forthvar({u}) as the status of a disk i/o BDOS call.
 Report an error if it contains an error condition.
 },{{BLOCK-FILE},{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}})
@@ -4953,7 +4953,6 @@ There is no effect on the stack. Execution cannot leave this loop
 
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},{})
-
 HEADER({AGAIN},{AGAIN},{DOCOL},1)
         DC      ONE
         DC      QPAIR
@@ -5169,9 +5168,9 @@ HEADER({D.},{DDOT},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe({OUTPUT},{.},{dot},{n ---},{L0},{
-Print a number from a signed l6 bit two's complement value,
+Print a number from a signed _BITS_ bit two's complement value,
 converted according to the numeric forthcode({BASE}) .
-A trailing blanks follows.},{{OUT},{.R},{D.R},{D.}})
+A trailing blanks follows.},{{OUT},{U.},{.R},{D.R},{D.}})
 HEADER({.},{DOT},{DOCOL})
         DC      STOD
         DC      DDOT
@@ -5185,6 +5184,10 @@ HEADER({?},{QUES},{DOCOL})
         DC      DOT
         DC      SEMIS
 ;
+worddocsafe({OUTPUT},{U.},{u_dot},{u ---},{L0},{
+Print a number from a unsigned _BITS_ bit value,
+converted according to the numeric forthcode({BASE}) .
+A trailing blanks follows.},{{OUT},{.},{.R},{D.R},{D.}})
 HEADER({U.},{UDOT},{DOCOL})
         DC      ZERO
         DC      DDOT
@@ -5226,11 +5229,18 @@ VLIS2:  DC      LDUP
         DC      SEMIS
 ;
 _NORMAL_BYE_({
+worddoc({SYSTEM},{BYE},{bye},{---},{ISO FIG},{
+Return to the host environment MSDOS.
+},{{COLD}})
 HEADER({BYE},{BYE},{DOCOL})
         DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
 ;{ EXIT TO PC-DOS}
 });_END_({ _NORMAL_BYE_})
 _ABSOLUTELOAD_({
+worddoc({SYSTEM},{BYE},{bye},{---},{ISO FIG},{
+_PROTECTED_({Switch back to real mode.})
+Return to the host environment MSDOS.
+},{{COLD}})
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -5239,6 +5249,9 @@ RETDOSV: JMP 0:0        ; {Filled in during boot}
 
 });_END_({ _ABSOLUTELOAD_})
 _HOSTED_LINUX_({
+worddoc({SYSTEM},{BYE},{bye},{---},{ISO FIG},{
+Return to the host environment Linux.
+},{{COLD}})
 HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
@@ -5308,7 +5321,11 @@ TRIA1:  DC      CR,IDO
 TRIA2:  _LOOP(TRIA1)    ;{ENDIF}
         DC      CR
         DC      SEMIS
-;
+; This word is not even fig!
+worddoc({MISC},{.CPU},{dot_cpu},{---},{}, 
+{Print the name of the CPU processor present in the boot up
+parameters. Using the bizar convention of a base-36 number.},
+{{ABORT},{COLD}})
 HEADER({.CPU},{DOTCPU},{DOCOL})
 ;{ PRINT CPU TYPE (8088)}
         DC      BASE,FETCH
@@ -5322,11 +5339,13 @@ _BITS32_({
         DC      DDOT
         DC      BASE,STORE
         DC      SEMIS
-        PAGE
-_COMMENT
-
-            CODE LEVEL "MATCH" DEFINITIONS
-
+;
+;           CODE LEVEL "MATCH" DEFINITIONS
+;
+worddoc({STRING},{MATCH},{match},{add1 n1 addr2 n2 -- f o},{},
+{This word supposedly compares strings. 
+Its documentation looked like this
+forthexample({
  STACK PARAMETERS:
 
  ( cursor:addr   byte:left   str:addr  str:len
@@ -5334,8 +5353,10 @@ _COMMENT
 
  This version of MATCH will handle string lengths
       up to 65535 bytes in length.
-
-_ENDCOMMENT
+}) 
+I hope I interpreted this stack diagram right.
+},
+{})
 CODE_HEADER({MATCH},{MATCH})
         MOV     DI,SI   ;{ SAVE IP}
         POP     CX      ;{ STRING COUNT}
