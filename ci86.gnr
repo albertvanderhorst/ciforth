@@ -6304,18 +6304,12 @@ CODE_HEADER({BIOS31},{BIOS31})
         POP     CX
         POP     BX
         POP     AX
-        PUSH     HIP      ;{ Save Forth registers. NEEDED? }
-        PUSH     RPO
-RQBIOS: INT(31)          ;{ Request number to be overwritten.}
-        PUSHF      ;{ Save status into DI }
-        POP     {DI}
-        POP     RPO      ;{ Restore Forth registers. NEEDED? }
-        POP     HIP
+RQBIOS: INT(31H)          ;{ Request number to be overwritten.}
         PUSH     AX
         PUSH     BX
         PUSH     CX
         PUSH     DX
-        PUSH     DI     ;{ i.e. flags }
+        PUSHF
         _NEXT
 });_END_({_SIMULATE_BIOS_})
 worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
@@ -6342,7 +6336,6 @@ CODE_HEADER({BDOS},{BDOS})
         POP     {DI};{ Not EDI! }
         XCHG    {SI},{AX}  ;{ Save AX in (still free) SI     }
         _SWITCH_({JMPHERE_FROM_OS})
-;        XCHG    {SI},{AX}   ; This is more correct actually.
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
         POP     HIP
