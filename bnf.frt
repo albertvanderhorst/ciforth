@@ -2,11 +2,13 @@
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( Uses Richard Stallmans convention. Uppercased word are parameters.    )
 
-( Environmental dependancies :  
+( Environmental dependancies :
 ( This is a fig Forth Program using standard fig Words                  )
 ( plus LINOS (par1, par2, par3, function# -- result/error               )
 ( plus everything in the book available in the screens of a fully       )
 ( loaded lina system. Plus the BNF system.                              )
+
+( ERROR 201 : file too large > SIZE , currently 1 Megabyte             )
 
 (   \ is not known by figforth, it can be used with impunity outside    )
 (   of  definitions because it only results in "\ MSG #0", but          )
@@ -118,99 +120,99 @@ TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 digit-sequence 0234 SUCCESS ? . ^
 
 ( ---------- Some special symbols ------------------------------------ )
 
-BNF:  `+'    '+'                ;BNF 
-BNF:  `?'    '?'                ;BNF 
-BNF:  `['    '['                ;BNF 
-BNF:  `]'    ']'                ;BNF 
-BNF:  `.'    '.'                ;BNF 
-BNF:  `,'    ','                ;BNF 
-BNF:  `:'    ':'                ;BNF 
-BNF:  `;'    ';'                ;BNF 
-BNF:  `'''   '''                ;BNF 
-BNF:  `('    '('                ;BNF 
-BNF:  `)'    ')'                ;BNF 
-BNF:  `**'   '*' '*'            ;BNF 
-BNF:  `<>'   '<' '>'            ;BNF 
-BNF:  `<='   '<' '='            ;BNF 
-BNF:  `>='   '>' '='            ;BNF 
-BNF:  `:='   ':' '='            ;BNF 
-BNF:  `..'   '.' '.'            ;BNF 
-BNF:  `><'   '>' '<'            ;BNF 
-BNF:  `=>'   '=' '>'            ;BNF 
+BNF:  `+'    '+'                ;BNF
+BNF:  `?'    '?'                ;BNF
+BNF:  `['    '['                ;BNF
+BNF:  `]'    ']'                ;BNF
+BNF:  `.'    '.'                ;BNF
+BNF:  `,'    ','                ;BNF
+BNF:  `:'    ':'                ;BNF
+BNF:  `;'    ';'                ;BNF
+BNF:  `'''   '''                ;BNF
+BNF:  `('    '('                ;BNF
+BNF:  `)'    ')'                ;BNF
+BNF:  `**'   '*' '*'            ;BNF
+BNF:  `<>'   '<' '>'            ;BNF
+BNF:  `<='   '<' '='            ;BNF
+BNF:  `>='   '>' '='            ;BNF
+BNF:  `:='   ':' '='            ;BNF
+BNF:  `..'   '.' '.'            ;BNF
+BNF:  `><'   '>' '<'            ;BNF
+BNF:  `=>'   '=' '>'            ;BNF
 
 TEST ." EXPECT 1 2:" 1 SUCCESS ! `=>' =>2 SUCCESS ? . ^
 
 (   Where I got it from these are relational operators, even more       )
 (   special                                                             )
-BNF:  `='    '='                ;BNF 
-BNF:  `!'    '!'                ;BNF 
-BNF:  `!?'   '!' '?'            ;BNF 
-BNF:  `!='   '!' '='            ;BNF 
-BNF:  `?='   '?' '='            ;BNF 
-BNF:  `=?'   '=' '?'            ;BNF 
-                
+BNF:  `='    '='                ;BNF
+BNF:  `!'    '!'                ;BNF
+BNF:  `!?'   '!' '?'            ;BNF
+BNF:  `!='   '!' '='            ;BNF
+BNF:  `?='   '?' '='            ;BNF
+BNF:  `=?'   '=' '?'            ;BNF
+
 (  More operators missing from special symbols                          )
-BNF:  `-'    '-'                ;BNF 
-BNF:  `#'    '#'                ;BNF 
-BNF:  `*'    '*'                ;BNF 
-BNF:  `/'    '/'                ;BNF 
-BNF:  `e'    [ 'e' | 'E' ]      ;BNF 
+BNF:  `-'    '-'                ;BNF
+BNF:  `#'    '#'                ;BNF
+BNF:  `*'    '*'                ;BNF
+BNF:  `/'    '/'                ;BNF
+BNF:  `e'    [ 'e' | 'E' ]      ;BNF
 
 
 ( ---------- The keywords -------------------------------------------- )
-KEYWORD  `and'        and           
-KEYWORD  `array'      array         
-KEYWORD  `begin'      begin         
-KEYWORD  `bindable'   bindable      
-KEYWORD  `case'       case          
-                       
-KEYWORD  `const'      const         
-KEYWORD  `div'        div           
-KEYWORD  `do'         do            
-KEYWORD  `downto'     downto        
-KEYWORD  `else'       else          
-KEYWORD  `end'        end           
-KEYWORD  `export'     export        
-                       
-KEYWORD  `file'       file          
-KEYWORD  `for'        for           
-KEYWORD  `function'   function      
-KEYWORD  `goto'       goto          
-KEYWORD  `if'         if            
-KEYWORD  `import'     import        
-                       
-KEYWORD  `in'         in            
-KEYWORD  `label'      label         
-KEYWORD  `mod'        mod           
-KEYWORD  `module'     module        
-KEYWORD  `nil'        nil           
-KEYWORD  `not'        not           
-KEYWORD  `of'         of            
-                       
-KEYWORD  `only'       only          
-KEYWORD  `or'         or            
-KEYWORD  `otherwise'  otherwise     
-KEYWORD  `packed'     packed        
-KEYWORD  `pow'        pow           
-                       
-KEYWORD  `procedure'  procedure     
-KEYWORD  `program'    program       
-KEYWORD  `protected'  protected     
-KEYWORD  `qualified'  qualified     
-                       
-KEYWORD  `record'     record        
-KEYWORD  `repeat'     repeat        
+KEYWORD  `and'        and
+KEYWORD  `array'      array
+KEYWORD  `begin'      begin
+KEYWORD  `bindable'   bindable
+KEYWORD  `case'       case
+
+KEYWORD  `const'      const
+KEYWORD  `div'        div
+KEYWORD  `do'         do
+KEYWORD  `downto'     downto
+KEYWORD  `else'       else
+KEYWORD  `end'        end
+KEYWORD  `export'     export
+
+KEYWORD  `file'       file
+KEYWORD  `for'        for
+KEYWORD  `function'   function
+KEYWORD  `goto'       goto
+KEYWORD  `if'         if
+KEYWORD  `import'     import
+
+KEYWORD  `in'         in
+KEYWORD  `label'      label
+KEYWORD  `mod'        mod
+KEYWORD  `module'     module
+KEYWORD  `nil'        nil
+KEYWORD  `not'        not
+KEYWORD  `of'         of
+
+KEYWORD  `only'       only
+KEYWORD  `or'         or
+KEYWORD  `otherwise'  otherwise
+KEYWORD  `packed'     packed
+KEYWORD  `pow'        pow
+
+KEYWORD  `procedure'  procedure
+KEYWORD  `program'    program
+KEYWORD  `protected'  protected
+KEYWORD  `qualified'  qualified
+
+KEYWORD  `record'     record
+KEYWORD  `repeat'     repeat
 KEYWORD  `restricted' restricted
-KEYWORD  `set'        set           
-KEYWORD  `then'       then          
-KEYWORD  `to'         to            
-                       
-KEYWORD  `type'       type          
-KEYWORD  `until'      until         
-KEYWORD  `value'      value         
-KEYWORD  `var'        var           
-KEYWORD  `while'      while         
-KEYWORD  `with'       with          
+KEYWORD  `set'        set
+KEYWORD  `then'       then
+KEYWORD  `to'         to
+
+KEYWORD  `type'       type
+KEYWORD  `until'      until
+KEYWORD  `value'      value
+KEYWORD  `var'        var
+KEYWORD  `while'      while
+KEYWORD  `with'       with
 
 TEST ." EXPECT 1:" 1 SUCCESS ! `with'    {follows with} with SUCCESS @ 0= 0= . ^
 
@@ -219,11 +221,47 @@ BNF: `and_then'  `and' `then' ;BNF
 
 BNF: character-string ''' { ident-symbol | ''' ''' } ''' ;BNF
 
-( Simple renames )
-: (   [COMPILE] (( ;  IMMEDIATE 
-: )   [COMPILE] )) ;  IMMEDIATE 
+
+( ################# Input table ####################################### )
+
+1000000 CONSTANT SIZE 
+0 VARIABLE FILE-BUFFER SIZE ALLOT
+
+5 CONSTANT OPEN
+3 CONSTANT READ
+6 CONSTANT CLOSE
+0 CONSTANT O_RDONLY
+
+0 VARIABLE HANDLE
+0 VARIABLE FILE-NAME 255 ALLOT
+" paranoia.pas" FILE-NAME $! 0 FILE-NAME $C+
+
+( Convert the STRING variable naar een Unix ZERO-ENDED-STRING )
+: ZERO-ENDED COUNT OVER + 0 SWAP C! ; 
+
+( Open the file from `FILE-NAME' such that `HANDLE' becomes available )
+: OPEN-LINUX FILE-NAME ZERO-ENDED O_RDONLY 0 OPEN LINOS 
+    DUP ?LINUX-ERROR HANDLE ! ; 
+
+( Turn `FILE-BUFFER' into a good input buffer, zero ended               )
+(   containing the file,                                                )
+: READ-FILE HANDLE @ FILE-BUFFER SIZE READ LINOS 
+    DUP ?LINUX-ERROR   DUP SIZE = 201 ?ERROR 
+    FILE-BUFFER + 0 SWAP !     ;
+
+( Close the file again )
+: CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?LINUX-ERROR ;
+
+( Get the file to the buffer )
+: GET-FILE OPEN-LINUX READ-FILE CLOSE-FILE ;
+
+( ################# Simple renames ####################################### )
+( This must be done at the last minute, because it hides the Forth      )
+( comment sign.                                                         )
+
+: (   [COMPILE] (( ;  IMMEDIATE
+: )   [COMPILE] )) ;  IMMEDIATE
 : digit COMPILE digit-symbol ; IMMEDIATE
 : letter COMPILE letter-symbol ; IMMEDIATE
-
 
 
