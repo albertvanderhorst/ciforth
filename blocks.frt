@@ -782,21 +782,21 @@ KRAAKER
 
 
 
-( testing of the block mechanism )
-: FOR-BLOCKS >R PREV @
-    BEGIN DUP R@ EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
-: SHOW-BLOCK
-    DUP STALEST @ = IF CR ." STALEST:" THEN
-    DUP CR H.
-    DUP @ IF
-        ." #" DUP ?
-        CELL+ DUP @ IF ." LOCKED" ELSE ." NOT LOCKED" THEN
-        CELL+ &: | EMIT 50 TYPE &: | EMIT
-    ELSE
-        ." FREE" DROP
-    THEN ;
-: .B 'SHOW-BLOCK >CFA FOR-BLOCKS ;
-    .B
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ( A0dec21 www STRING AND PARSING words )
 FORGET TASK      : TASK ;  CHAR " CONSTANT DLM   36 38 THRU
@@ -3294,20 +3294,20 @@ LOOP DROP   DROP   DISK-ERROR   @   ?DUP
 BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
 ;  : R-floppy 1 R/W-floppy ;  : W-floppy 0 R/W-floppy ;
 
-?PC ?16 ( copy a hd system, was written to a floppy to the
-hard disk. Done by a Forth booted from another floppy.)
-DECIMAL
-( As R/W but relative, counting from ``OFFSET''. )
-: RELR/W SWAP OFFSET @ + SWAP R/W ;
-( Read absolute BLOCK from floppy into default buffer.)
-: (FRD) RW-BUFFER SWAP 1 R/W ;
-( Write absolute BLOCK to floppy from default buffer.)
-: (FWD) RW-BUFFER SWAP 0 R/W ;
-\ DBS : default boot system, first 1400 K of hd.
-\ Prompt for empty floppy. Save from hard disk BLOCK
-\ (a 32-bit number) and 1400K following to the floppy.
-: BACKUP>FLOPPY  SWAP-FLOPPY
-1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3332,7 +3332,6 @@ DECIMAL
 : backup SAVE-COMMENT BACKUP SAVE-COMMENT ;
 \ From START restore LEN blocks to ``DBS''.
 : restore CHUNK-START SWAP BLMOVE ;
-
 
 
 
@@ -4013,14 +4012,15 @@ ONLY POSTPONE FORTH DEFINITIONS QUIT ;
 DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 
 
+
 ( Last line, preserve !! Must be line 4016)
 ( **************ISO language extension ***********************)
+                    EXIT
 
-
-
-
-
-
+An ISO language extension is either an ISO word, implemented in
+a possibly non-portable way, or a word that is not defined in
+the standard but that is implemented by using only standard
+words.
 
 
 
@@ -4054,6 +4054,70 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 \ Print the current search order by vocabulary names
 : ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
 2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
+
+
+
+
+
+
+
+
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+\ SOS `IMIN'  \ IMIN 'COMP EXECUTE is always TRUE
+\ TOS `IMAX'  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    >R
+    BEGIN       \ Loop variant IMAX - IMIN
+        2DUP ( .S) <> WHILE
+        OVER 1+   OVER   + 2/  ( -- ihalf )
+        DUP R@ EXECUTE IF
+           SWAP   ROT DROP \ Replace IMIN
+        ELSE
+           1-     SWAP DROP \ Replace IMAX
+        THEN
+    REPEAT
+DROP RDROP ;
+
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    COMP !  IMAX ! IMIN !
+    BEGIN       \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ ( .S) <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ ;
+\  HIDE IMIN   HIDE IMAX   HIDE COMP
+( Binary search, comment ) EXIT
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+Uses a comparison routine with execution token `COMP' `COMP'
+must have the stack diagram ( IT -- flag) , where flag
+typically means that IT compares lower or equal to some fixed
+value. It should be TRUE for `IMIN' and decreasing in between
+`IMIN' and `IMAX' . Finds the last index `IT' between `IMIN'
+and `IMAX' (inclusive) for which `COMP' returns true.
+
+
+
+
+
+
+
+
+( Binary search, Test )
+: <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
+." EXPECT 99:" .
+CREATE XXX 123 , 64 , 32 , 12
+\ Find first number < 40
+
+
+
 
 
 
@@ -4117,8 +4181,6 @@ CREATE BASE' 0 ,
  : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
 
 
-
-
 : IVAR CREATE , ;
 
 : ^ .S ;
@@ -4126,6 +4188,8 @@ CREATE BASE' 0 ,
 "INCLUDED" PRESENT? 0= ?LEAVE-BLOCK
 
 : INCLUDE (WORD) INCLUDED ;
+
+
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
 VARIABLE FAR-DP         \ Alternative DP
 DSP@ HERE + 2 / ALIGNED FAR-DP !
@@ -4254,69 +4318,21 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
-( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-\ SOS `IMIN'  \ IMIN 'COMP EXECUTE is always TRUE
-\ TOS `IMAX'  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
-VARIABLE COMP \ Execution token of comparison word.
-: BIN-SEARCH    >R
-    BEGIN       \ Loop variant IMAX - IMIN
-        2DUP ( .S) <> WHILE
-        OVER 1+   OVER   + 2/  ( -- ihalf )
-        DUP R@ EXECUTE IF
-           SWAP   ROT DROP \ Replace IMIN
-        ELSE
-           1-     SWAP DROP \ Replace IMAX
-        THEN
-    REPEAT
-DROP RDROP ;
-
-( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
-VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
-VARIABLE COMP \ Execution token of comparison word.
-: BIN-SEARCH    COMP !  IMAX ! IMIN !
-    BEGIN       \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ ( .S) <> WHILE
-        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-        DUP COMP @ EXECUTE IF
-           ( ihalf) IMIN !
-        ELSE
-           ( ihalf) 1- IMAX !
-        THEN
-    REPEAT
-IMIN @ ;
-\  HIDE IMIN   HIDE IMAX   HIDE COMP
-( Binary search, comment ) EXIT
-( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-Uses a comparison routine with execution token `COMP' `COMP'
-must have the stack diagram ( IT -- flag) , where flag
-typically means that IT compares lower or equal to some fixed
-value. It should be TRUE for `IMIN' and decreasing in between
-`IMIN' and `IMAX' . Finds the last index `IT' between `IMIN'
-and `IMAX' (inclusive) for which `COMP' returns true.
-
-
-
-
-
-
-
-
-( Binary search, Test )
-: <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
-." EXPECT 99:" .
-CREATE XXX 123 , 64 , 32 , 12
-\ Find first number < 40
-
-
-
-
-
-
-
-
-
-
+( FOR-BLOCKS SHOW-BLOCK .B Testing_of_block ) \ AvdH A1oct09
+REQUIRE H.
+: FOR-BLOCKS >R PREV @
+    BEGIN DUP R@ EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
+: SHOW-BLOCK
+    DUP STALEST @ = IF CR ." STALEST:" THEN
+    DUP CR H.
+    DUP @ IF
+        ." #"  DUP ?
+        CELL+ DUP @ IF ."     LOCKED" ELSE ." NOT LOCKED" THEN
+        CELL+ &| EMIT 50 TYPE &| EMIT
+    ELSE
+        ." FREE " DROP
+    THEN ;
+: .B 'SHOW-BLOCK >CFA FOR-BLOCKS ;
 
 ( SEE CRACK KRAAK KRAKER ) \ AvdH A1oct04
 REQUIRE +THRU
@@ -4455,8 +4471,8 @@ VOCABULARY ASSEMBLER IMMEDIATE
 ; IMMEDIATE
 : C;   ?CSP [COMPILE] PREVIOUS ; IMMEDIATE
 
-ASSEMBLER DEFINITIONS
 REQUIRE IVAR   REQUIRE +THRU
+ASSEMBLER DEFINITIONS
  1 4 HEX +THRU  DECIMAL ( Common code , prelude)
  DECIMAL 10 DUP +THRU ( protected mode 16/32)
 
@@ -4942,8 +4958,8 @@ HEX
 : JOL PAD-B CURL 1+ PUT-L GET-R CURL 1+ PUSH-D ;
 DECIMAL
 
-HEX
- 0 IVAR I-MODE
+( INSELETING JOINITTING )
+HEX 0 IVAR I-MODE
 : INSELETING
       DUP ^H = IF RUB-C ELSE
       DUP ^G = IF DEL-C ELSE
@@ -5076,7 +5092,7 @@ REQUIRE CONFIG   REQUIRE ASSEMBLER   REQUIRE BIOSI
 ( copy a hd system, present on a floppy to the
 hard disk. Done by a Forth booted from another floppy.)
 
-1 5 +THRU DECIMAL
+1 6 +THRU DECIMAL
 
 
 
@@ -5086,7 +5102,7 @@ hard disk. Done by a Forth booted from another floppy.)
 
 
 
-( READ-BLOCK WRITE-BLOCK Acces_hd_via_LBA ) ?16 ?PC HEX
+( READ-BLOCK WRITE-BLOCK RW-BUFFER hd_via_LBA ) ?16 ?PC HEX
 HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
 CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
@@ -5118,6 +5134,22 @@ DECIMAL
 
 
 
+\ (FRD) (FWD) ) ?PC ?16 \ AvdH A1oct07
+?PC ?16
+( copy a hd system, was written to a floppy to the
+hard disk. Done by a Forth booted from another floppy.)
+DECIMAL
+( As R/W but relative, counting from ``OFFSET''. )
+: RELR/W SWAP OFFSET @ + SWAP R/W ;
+( Read absolute BLOCK from floppy into default buffer.)
+: (FRD) RW-BUFFER SWAP 1 R/W ;
+( Write absolute BLOCK to floppy from default buffer.)
+: (FWD) RW-BUFFER SWAP 0 R/W ;
+\ DBS : default boot system, first 1400 K of hd.
+\ Prompt for empty floppy. Save from hard disk BLOCK
+\ (a 32-bit number) and 1400K following to the floppy.
+: BACKUP>FLOPPY  SWAP-FLOPPY
+1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
 ( BACKUP-KERNEL BACKUP-BLOCKS ) ?PC ?16
 REQUIRE SWAP-FLOPPY   REQUIRE (HRD)   REQUIRE (FWD)
 \ Prompt for floppy created with ``BACKUP>FLOPPY''
