@@ -54,6 +54,7 @@
 (  sib:       0100 no ..             0200 [AX +8*| DI]               )
 (  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
 (  segment    1000 no ..             2000 ES| ..                        )
+(  test/debug 4000 no ..             8000 CR0 ..DB0
 
 ( Names *ending* in primes BP|' -- not BP'| the prime registers -- are  )
 ( only valid for 16 bits real mode, in combination with an address      )
@@ -86,25 +87,29 @@
 000110 C000 0s C000 0s xFIR'      R|
 ( 020008 C700 0s 0600 0s xFIR'      MEM|' ( Overrules D0| [BP]')
 020108 C700 0s 0500 0s xFIR'      MEM| ( Overrules D0| [BP] )
-1101 3800 0s T!'
+
+041101 0 3800 0s T!
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
-0102 3800 0s T!'
+041102 0 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
+042100 0  1800 0s T!   0800 0s 0 0s 6 xFAMILY|R ES| CS| SS| DS| FS| GS|
+080002 0 3801 0s T!   ( 3)
+ 0800 0s 0000 0s 5 xFAMILY|R CR0| -- CR2| CR3| CR4|                 ( 3)
+ 0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
 
-0600 1FF 00 1PI' ~SIB,
-
-( --------- 0F must be found last -------)
-2100 1800 0s T!'   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
-2000 18 T!'   01 06 2 1FAMILY, PUSH|SG, POP|SG,
+( MODERNIZED TILL HERE )
 0000 0002 0s T!'   0002 0s 0 0s 2 xFAMILY|R F| T|
 0401 0001 0s 0 0s xFIR' B|
 0402 0001 0s 1 0s xFIR' X|
+
+( --------- These must be found last -------)
+0600 1FF 00 1PI' ~SIB,
 ( --------- two fixup operands ----------)
-1000 FF03 T!'
+041000 0 FF03 T!
  0008 0000 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
-1000 FF01 T!'
+041000 0 FF01 T! 
  0002 0084 2 2FAMILY, TEST, XCHG,
-1000 FF03 0088 2PI' MOV,
+041000 0 FF03 0088 2PI MOV,
 1022 FF00 008D 2PI' LEA,
 1022 FF00 T!'   0001 00C4 2 2FAMILY, L|ES, L|DS,
 1022 FF00 0062 2PI' BOUND,  ( 3)
@@ -143,10 +148,11 @@
   080000 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,  ( 3) 
 22 C70000 T!' ( It says X but in fact memory of different sizes) ( 3)  
   080000 00010F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,       ( 3) 
+
 ( --------- no fixup operands ----------)
 01 20100 0s 0000 0s xFIR' B'|
 02 20100 0s 0100 0s xFIR' W'|
-020008 201 T!'    02 A0 2 1FAMILY, MOVTA, MOVFA,
+020008 201 T!'    02 A0 2 1FAMILY, MOV|TA, MOV|FA,
 040000 201 T!'
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
 00 201 A8 1PI' TESTI|A,
@@ -161,16 +167,12 @@
 0800     40E00 0s T!'   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
 400800 50F 70 1PI' J,
 
-2102 DF02 08C 2PI' MOV|SG,
+2102 FF02 08C 2PI' MOV|SG,
 
 00 20002 0s 00 0s xFIR' 1|   00 20002 0s 02 0s xFIR' V|          ( 3) 
 0100 2C703 T!' ( 20000 is a lockin for 1| V|)                   ( 3) 
- 0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, SAL, SAR,  ( 3) 
-
-02 83801 0s T!'   ( 40 is the lock-in byte for MOV|CD ..CRx| / DRx| ) ( 3)
- 0800 0s 0000 0s 5 xFAMILY|R CR0| -- CR2| CR3| CR4|                 ( 3)
- 0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
-12 83F0300 C0200F 3PI'  MOV|CD,
+ 0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,  ( 3) 
+80012 0 3F0300 C0200F 3PI  MOV|CD,  ( 3)
 
 800800 50F00 800F 2PI' J|X,                                           ( 3)
 0800 0001 0s T!'   01 0s 0 2 xFAMILY|R Y'| N'|                          ( 3)
@@ -179,20 +181,23 @@
 
 ( --------- no fixups ---------------)
 
+2000 0 0 T!  08 06 4 1FAMILY, PUSH|ES, PUSH|CS, PUSH|SS, PUSH|DS,  
+2000 0 0 T!  08 07 4 1FAMILY, POP|ES, -- POP|SS, POP|DS,  
+
+040001 00 T!'    01 D4 2 1FAMILY, AAM, AAD, 
 040001 00 CD 1PI' INT,
 220008 00 9A 1PI' CALLFAR,
 220008 00 EA 1PI' JMPFAR,
 01000000 00 T!'   08 C2 2 1FAMILY, RET+, RETFAR+,
 800004 00 T!'   01 E8 2 1FAMILY, CALL, JMP,
 400000 00 EB 1PI' JMPS,
+400000 00 T!'   01 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
 00 00 T!'
    08   26 4 1FAMILY, ES:, CS:, SS:, DS:,
    08   27 4 1FAMILY, DAA, DAS, AAA, AAS,
    01   98 8 1FAMILY, CBW, CWD, -- WAIT, PUSHF, POPF, SAHF, LAHF,
    08   C3 2 1FAMILY, RET,  RETFAR,
    01   CC 4 1FAMILY, INT3, -- INTO, IRET,
-   01   D4 4 1FAMILY, AAM, AAD, -- XLAT,
-   01   E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
    01   F0 6 1FAMILY, LOCK, -- REPNZ, REPZ, HLT, CMC,
    01   F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD,
    01   60 2 1FAMILY, PUSH|ALL, POP|ALL, ( 3)
@@ -203,6 +208,7 @@
   040001 00   6A 1PI' PUSHI|B,  ( 3)
 01040001 00   C8 1PI' ENTER, ( 3)
       00 00   C9 1PI' LEAVE, ( 3)
+      00 00   D7 1PI' XLAT,  ( 3)
       00 00 060F 2PI' CLTS,  ( 3)
 
 ( ############## HANDLING THE SIB BYTE ################################ )
