@@ -307,10 +307,9 @@ THEN RDROP ;
     ANNIHILATE-GAP THEN THEN THEN ;
 
 \ Annihilate as much as possible from SEQUENCE.
-\ Return recompiled SEQUENCE.
 \ Return recompiled SEQUENCE (which is in fact the same address.)
 : ANNIHILATE DUP   DUP FILL-BRANCHES
-    BEGIN ANNIHILATE-ONE DUP ?NOT-EXIT 0= UNTIL DROP
+    BEGIN DUP ?NOT-EXIT WHILE ANNIHILATE-ONE REPEAT DROP
 ;
 
 \ ---------------------------------------------------------------------
@@ -571,11 +570,6 @@ STRIDE SET PEES
     LOOP
 ;
 
-\ This was a typical example of premature optimisation.
-\ \ Seen the code SEQUENCE (its begin), return there MAY be a match in the table.
-\ : OPT-SPECIAL?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0<> ELSE
-\     DROP 0 THEN ;
-
 \ Match any entry of the table to SEQUENCE.
 \ Return the LIMIT to where matched and the MATCH itself, else two zeros.
 : ?MM   MATCH-TABLE
@@ -583,31 +577,33 @@ STRIDE SET PEES
         STRIDE 2 * CELLS + DUP ?NOT-EXIT WHILE REPEAT
     2DROP 0 0 ;
 
-\ If ITEM is a place holder, replace it by the next placeholder DATA.
-: ?PEE? DUP 'P = IF DROP PEES SET+@ THEN ;
+\ If ADDRESS contains a place holder, replace it by the next placeholder data.
+: ?PEE? DUP @ 'P = IF PEES SET+@ SWAP ! _ THEN DROP ;
 
-\ Copy MATCH to ``HERE'' filling in the place holders.
-: COPY-MATCH   !PEES   STRIDE CELLS +
-    BEGIN DUP ?TILL-NOOP WHILE DUP @ ?PEE? , CELL+ REPEAT
+\ Copy MATCH to THERE filling in the place holders.
+: COPY-MATCH   !PEES
+    >R STRIDE CELLS + R@ STRIDE CELLS MOVE
+    R>
+    BEGIN DUP ?TILL-NOOP WHILE DUP ?PEE? CELL+ REPEAT
     DROP
 ;
 
 \ For SEQUENCE : copy its first item to ``HERE'' possibly
 \ replacing it by a match optimisation.
 \ Leave sequence BEGIN' of what is still to be handled.
-:  ?MATCH-EXEC?
-        DUP ?MM DUP IF
-            COPY-MATCH SWAP DROP    -1 PROGRESS !
+:  MATCH-ONE
+        DUP ?MM DUP 0= IF
+            2DROP DUP NEXT-ITEM >HERE
         ELSE
-             2DROP DUP NEXT-ITEM >HERE
+            HERE STRIDE CELLS ALLOT
+            COPY-MATCH SWAP DROP    -1 PROGRESS !
         THEN
 ;
 
 \ Find optimisation patterns in the SEQUENCE of high level code
 \ and perform optimisation while copying to ``HERE'' ,
 \ Do not initialise, or terminate.
-
-: (MATCH) BEGIN DUP ?NOT-EXIT WHILE ?MATCH-EXEC? REPEAT DROP ;
+: (MATCH) BEGIN DUP ?NOT-EXIT WHILE MATCH-ONE REPEAT DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
 : OPTIMISE   HERE SWAP    (MATCH)   POSTPONE (;)  ;
