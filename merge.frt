@@ -5,12 +5,12 @@ VOCABULARY AAP AAP DEFINITIONS
 : C ;
 : B ;
 
-VOCABULARY NOOT NOOT DEFINITIONS
+\ VOCABULARY NOOT NOOT DEFINITIONS
 : N ;
 : M ;
 : A ;
 
-VOCABULARY MIES MIES DEFINITIONS
+\ VOCABULARY MIES MIES DEFINITIONS
 : SC ;
 : QL ;
 : RB ;
@@ -48,3 +48,37 @@ BEGIN DUP ID. >N DUP 0= UNTIL DROP ;
       BEGIN DUP >N  DUP IF ?? *< ELSE 0 THEN WHILE SWAP DROP REPEAT
       >R   0 SWAP LINK!
       R> R> ;
+
+\ For UNLINK leave SLINKP SLINKP UNLINK  or SLINKP 0 .
+: SNIP2   SNIP SWAP 1 SWAP DUP IF SNIP SWAP 1 SWAP THEN ;
+
+\ Try to merge LINK1 LEVEl1 and LINK2P LEVEL2 .
+\ This is done if the links are at the same LEVEL.
+\ If so LINK LEVEL TRUE plus one else leave IT FALSE
+: TRY-MERGE >R  OVER R@ = IF SWAP DROP MERGE R> 1+ -1 ELSE R> 0 THEN ;
+
+\ Keep on merging as long as the top of the stack contains
+\ two SLINKP 's of the same level. Shrinking the stack.
+: TRY-MERGES   BEGIN TRY-MERGE WHILE REPEAT ;
+
+\ Try to merge LINK1 LEVEl1 and LINK2P LEVEL2 .
+\ This is done if the level2 is lower.
+\ If so LINK LEVEL TRUE plus one else leave IT FALSE
+: TRY-MERGE' >R  OVER R@ > IF SWAP DROP MERGE R> 1+ -1 ELSE R> 0 THEN ;
+
+\ Keep on merging as long as the top of the stack contains
+\ two SLINKP 's of the same level. Shrinking the stack.
+: SHRINK BEGIN TRY-MERGE' WHILE REPEAT ;
+
+\ Expand UNLINK into ZERO SLINKP .... SLINKP
+: EXPAND    0 SWAP BEGIN SNIP2
+    >R TRY-MERGES R> DUP WHILE REPEAT DROP ;
+
+\ For linked LIST , leave a sorted LIST1.
+: MERGE-SORT EXPAND SHRINK DROP SWAP DROP ;
+
+\ Sort the WORDLIST
+: SORT-WID CELL+ DUP >N MERGE-SORT SWAP LINK! ;
+
+\ Sort the vocabulary given by its XT.
+: SORT-VOC >BODY SORT-WID ;
