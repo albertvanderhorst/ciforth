@@ -119,16 +119,37 @@ CREATE FileContent 2 CELLS ALLOT
       FileContent @ 0=
 ;
 
-\ Output the prelude : PostScript code.
-: PreLude
+\ Output some PostScript code to fixup the use of dictionary by ``DVIps''
+\ By this proper usage ``gv'' can now view each page independantly,
+\ from the ``DVIps'' output and from ``prsc'' output.
+: FixupDVIps
+"TeXDict begin
+    { TeXDict begin bop }
+    { eop end }
+end
+
+/eop exch def
+/bop exch def
+
+" TYPE ;
+
+\ Output the Prolog : PostScript comment, in fact pragma's.
+: Header
 "%!PS-Adobe-1.0
-%%Title: blocks.frt
-%%Creator: nenscript v1.13++ (US version) 24-November-1992
-%%For: albert
+%%Title: Forth appendix
+%%Creator:  $Id:
+%%For:
 %%CreationDate:
 %%DocumentFonts: Courier Courier-Bold
-%%Pages: (atend)
+%%Pages: 66
+%%PageOrder: ascend
 %%EndComments
+" TYPE ;
+
+\ Output the Prolog : PostScript code.
+: PreLude
+"/ForthDict 30 dict def
+ForthDict begin
 /newcodes       % foreign character encodings
 [
 160/space 161/exclamdown 162/cent 163/sterling 164/currency
@@ -201,6 +222,9 @@ CREATE FileContent 2 CELLS ALLOT
   0 setgray TitleF 2500 80700 moveto show 32 M show
   BodyFs 0 setgray CW setlinewidth 1 setlinejoin } def
 /EndPage   {showpage SavedPage restore } def
+{ ForthDict begin StartPage } {EndPage end } % Only ones to be exported
+end  % ForthDict
+/EndPage exch def   /StartPage exch def
 %%EndProlog
 " TYPE ;
 
@@ -208,13 +232,13 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output the postlude : PostScript code.
 : PostLude
 "%%Trailer
-%%EOF" TYPE ; CR
+%%EOF
+" TYPE ;
 
 
 \ Output the screens.
 : OutputScreens
     ScreensName GET-FILE FileContent 2!
-    PreLude
     0 1  BEGIN NextPage UNTIL
     1- PostLude DROP
 ;
@@ -237,7 +261,7 @@ CREATE FileContent 2 CELLS ALLOT
 ;
 
 \ Output a PAGE in two columns.
-\ Leave incremented SCREEN and PAGE and indication we MUST stop.
+\ Leave incremented PAGE and indication we MUST stop.
 : NextPageSrc
       DUP "B-" PrintPageNumber
       DUP ." (" 4 .R ." ) (Appendix B. assembler) exch StartPage " CR 1+ >R
@@ -257,7 +281,9 @@ CREATE FileContent 2 CELLS ALLOT
     1- PostLude DROP
 ;
 
-154 CurrentPage !
-
-OutputScreens
-OutputFile
+    0 CurrentPage !
+\     Header              \ Select this if it must be independantly pri
+    FixupDVIps          \ Select this if it is an appendix to a DVIps
+    PreLude
+    OutputScreens
+    OutputFile
