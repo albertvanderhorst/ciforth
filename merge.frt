@@ -10,9 +10,15 @@ VOCABULARY NOOT NOOT DEFINITIONS
 : M ;
 : A ;
 
+VOCABULARY MIES MIES DEFINITIONS
+: SC ;
+: QL ;
+: RB ;
+: PK ;
+
 : >N   >LFA @ ;
 : .CHAIN
-BEGIN DUP ID. >N DUP 0= UNTIL ;
+BEGIN DUP ID. >N DUP 0= UNTIL DROP ;
 
 : GET-NAME >NFA @ $@   ;
 
@@ -27,13 +33,18 @@ BEGIN DUP ID. >N DUP 0= UNTIL ;
      *< 0= IF SWAP THEN OVER >R RECURSE R@ ! R> THEN ;
 \ For LINK1 ( > ) LINK2 return LINK1 LINK2' advanced but still link1 < link2'
 : FIND-END BEGIN DUP >R >N DUP IF
-OVER ID. DUP ID. CR
 *< 0= ELSE 0 THEN WHILE RDROP REPEAT DROP R> ;
 
 \ Merge LINK1 ( > ) LINK2.
 : (MERGE)
-    BEGIN ?? FIND-END DUP >R  DUP >N >R
-        LINK! R> R> .S OVER 0= UNTIL 2DROP ;
+    BEGIN FIND-END DUP >R  DUP >N >R
+        LINK! R> R> OVER 0= UNTIL 2DROP ;
 
 \ Merge LINK1 and LINK2, leave merged LINK.
 : MERGE   *< IF SWAP THEN   DUP >R (MERGE) R> ;
+
+\ Cut LINK in two return remaining ULINK and SLINK (first part in ascending order)
+: SNIP DUP >R
+      BEGIN DUP >N  DUP IF ?? *< ELSE 0 THEN WHILE SWAP DROP REPEAT
+      >R   0 SWAP LINK!
+      R> R> ;
