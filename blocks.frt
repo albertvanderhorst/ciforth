@@ -199,8 +199,8 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
     ELSE
        CR DROP DUP DUP @ SWAP 5 CELLS + = IF
            ." Code definition : " ELSE ." Can't handle : "
-       ENDIF ID.. CR
-    ENDIF ;  : B.. H.. ;
+       THEN ID.. CR
+    THEN ;  : B.. H.. ;
  : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
@@ -2329,7 +2329,7 @@ DECIMAL
         >LFA @
      REPEAT
      SWAP DROP ( The CFA)
-   ENDIF
+   THEN
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
