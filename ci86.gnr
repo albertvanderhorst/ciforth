@@ -5854,16 +5854,17 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      DROP
         DC      SEMIS
 ;
-worddoc( {INPUT},{ACCEPT},{accept},{addr count ---},{ISO},
-{Transfer at most forthsamp({count})
-characters from the terminal to address, until a
-forthkey({RET}) is received.
-The simple tty editing functions of Linux are observed, i.e.
-the ``erase'' (delete a character) and ``kill'' (delete a line) characters.
-Typically these are the backspace key and ^U.
-Note that excess characters after forthsamp({count}) remain in the type ahead
-buffer and will be returned as the next input, or interpreted as a console
-command.},
+worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
+{Transfer at most forthsamp({count}) characters from the
+terminal to address, until a forthkey({RET}) is received. The
+simple tty editing functions of Linux are observed, i.e. the
+``erase'' (delete a character) and ``kill'' (delete a line)
+characters. Typically these are the backspace key and ^U. Note
+that excess characters after forthsamp({count}) remain in the
+type ahead buffer and will be returned as the next input, or
+interpreted as a console command. The number of characters not
+including the forthkey({RET}) is returned into forthsamp({n}).
+}, 
 {{KEY},{KEY?},{EXPECT}},
 dnl The ACCEP_A version of ACCEPT is tested with
 dnl the automatic testing facility.
@@ -6461,7 +6462,8 @@ _LINUX_N_({
 worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
 {Get the content of the file with name forthsamp({sc1});
 leave it as a string forthsamp({sc2}) .
-},{{BLOCK},{?LINUX-ERROR}},
+},
+{{BLOCK},{?LINUX-ERROR}},
 {{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
 enddoc)
 HEADER({GET-FILE},{GFILE},DOCOL)
@@ -6480,9 +6482,9 @@ HEADER({GET-FILE},{GFILE},DOCOL)
         DC      TDUP, PLUS, LDP, STORE
         DC      SEMIS
 ;
-worddoc( {STORAGE},{PUT-FILE},{get_file},{sc1 sc2 --- },{},
-{Save the string forthsamp({sc2} as a new file with the name
-forthsamp({sc1}) ) . }, 
+worddoc( {STORAGE},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
+{Save the string constant forthsamp({sc2} as a new file with
+the name forthsamp({sc1}) ) . }, 
 {{BLOCK},{?LINUX-ERROR}},
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
@@ -6490,7 +6492,7 @@ HEADER({PUT-FILE},{PFILE},DOCOL)
         DC      PAD, SSTOR, ZERO, PAD, CHAPP ; {Unix requires a c-string.}
         DC      TOR, TOR
         DC      PAD, CELLP
-        DC      LIT, O_RDWR | O_CREAT, LIT, 666Q
+        DC      LIT, O_RDWR | O_CREAT, LIT, 777Q
         DC      LIT, open, LINOS, LDUP, QLERR
         DC      LDUP, FROMR, FROMR
         DC      LIT, write, LINOS, QLERR
@@ -6760,7 +6762,7 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write. This version of ciforthh features the
+performs the read-write. This version of ciforth features the
 most classic
 mass storage. Blocks are counted sequentially from 0
 on the drive with MSDOS code in forthcode({DRIVE}),
@@ -7988,8 +7990,9 @@ _COMMENT
   MISC. NOTES AND SCATTERED THOUGHTS
 
 - This source will assemble on all platforms where NASM is
-  available by the command line:
-  nasm -fbin fig86.asm -o fig86.com
+  available.
+  On MSDOS the command line is:
+  nasm -fbin ci86.asm -o ci86.com
   (There may be exceptions for special configurations.)
   The result will run on MSDOS systems only, or stand alone
   an an IBM-compatible computer

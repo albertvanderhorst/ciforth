@@ -128,7 +128,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 ;    HEX>
  ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 3.43    AH"
  : IVAR CREATE , ;   : ^ .S ; : INCLUDE &" (PARSE) INCLUDED ;
-  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES) 24 LOAD (  etc.)
+  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES) 
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD 37 LOAD
@@ -1427,16 +1427,16 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
  50 C, 52 C,  NEXT C;
 
  DECIMAL
+ ." What is the speed of your Pentium (in Mhz)?"
+ PAD DUP 80 ACCEPT EVALUATE CONSTANT SPEED
  : MARK-TIME TIME ;
  : .mS SPACE 0 <# # # # [CHAR] . HOLD #S #> TYPE ." mS "  ;
- : ELAPSED DNEGATE TIME D+ 500 SM/REM SWAP DROP ;  DECIMAL
+ : ELAPSED DNEGATE TIME D+ SPEED SM/REM SWAP DROP ;  DECIMAL
  ( EXIT REMOVE THIS LINE IF YOU WANT A TEST )
  : TASK ; 26 LOAD
  : MEASURE TIME DO-PRIME ELAPSED ;
   MEASURE
 CR  ." THE BYTE BENCHMARK LASTED " .mS
-
-
 
  CR ." TAARTEN AUTOMATISERING DOOR DRS HENK" CR
  ." EEN VOORBEELD UIT BRODIE"     CR
@@ -2339,12 +2339,12 @@ DECIMAL
  : FIND-START BM BEGIN DUP @ MAGIC @ <> WHILE
  1 CELLS - REPEAT ; FIND-START CONSTANT SM
  : HERE-AT-STARTUP  ' DP >PFA @ +ORIGIN @ ;
- : SAVE-SYSTEM
+ : SAVE-SYSTEM ( sc -- )
 
   HERE HERE-AT-STARTUP - DUP 
   SM 20 + +!      SM 44 + +! ( File&Dict size)
    U0 @   0 +ORIGIN   100   MOVE ( Save user variables)
-   SM    HERE  SM - "lina.new" PUT-FILE
+   SM    HERE  SM - 2SWAP ( name) PUT-FILE
 ;
 : ARGC ARGS @ @ ;  : ARGV ARGS @ CELL+ ;
 : ENV ARGS @ $@ 1+ CELLS + ;
@@ -3598,150 +3598,150 @@ THE BYTE BENCHMARK LASTED  7.650mS OK
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( tak )
+VARIABLE X      VARIABLE Y      VARIABLE Z
+
+: tak 
+X @ Y @ Z @ >R >R >R 
+Z ! Y ! X !
+    X @ Y @ > 0= IF 
+        Z @
+    ELSE 
+        X @ 1 - Y @ Z @ RECURSE
+        Y @ 1 - Z @ X @ RECURSE
+        Z @ 1 - X @ Y @ RECURSE
+        RECURSE
+    THEN
+R> R> R> Z ! Y ! X !
+;
+( tak , Using poor man's locals on the data stack)
+: Z "R@ @" EVALUATE ; IMMEDIATE
+: Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
+: X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
+: tak 
+     DSP@  >R  \ X . Y . Z . CR
+     X Y > 0= IF 
+         Z 
+     ELSE 
+         X 1 - Y Z RECURSE
+         Y 1 - Z X RECURSE
+         Z 1 - X Y RECURSE
+         RECURSE
+     THEN
+     RDROP \ Drop frame pointer.
+     >R DROP DROP DROP R> ; \ Discard input, leave result
+( tak )
+: Z "R@ @" EVALUATE ; IMMEDIATE
+: Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
+: X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
+: tak SWAP ROT  
+     DSP@  >R  \ X . Y . Z . CR
+     X Y > 0= IF 
+         Z 
+     ELSE 
+         X 1 - Y Z SWAP ROT  RECURSE
+         Y 1 - Z X SWAP ROT  RECURSE
+         Z 1 - X Y SWAP ROT  RECURSE
+         SWAP ROT  RECURSE
+     THEN   RDROP \ Drop frame pointer.
+     >R DROP DROP DROP R> ; \ Discard input, leave result
+: tak SWAP ROT tak ;
+( tak )
+: Z "R@ @" EVALUATE ; IMMEDIATE
+: Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
+: X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
+: tak SWAP ROT  
+     DSP@  >R  \ X . Y . Z . CR
+     X Y > 0= IF 
+         Z 
+     ELSE 
+         Y X Z 1 - RECURSE
+         X Z Y 1 - RECURSE
+         Z Y X 1 - RECURSE
+         RECURSE
+     THEN   RDROP \ Drop frame pointer.
+     >R DROP DROP DROP R> ; \ Discard input, leave result
+: tak SWAP ROT tak ;
+( tak )
+: Z "R@ @" EVALUATE ; IMMEDIATE
+: Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
+: X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
+: tak SWAP ROT  
+     DSP@  >R  \ X . Y . Z . CR
+     X Y > 0= IF 
+         Z 
+     ELSE 
+         Y X Z 1 - RECURSE  >R DROP DROP DROP R> 
+         X Z Y 1 - RECURSE  >R DROP DROP DROP R> 
+         Z Y X 1 - RECURSE  >R DROP DROP DROP R> 
+         RECURSE >R DROP DROP DROP R> 
+     THEN   RDROP \ Drop frame pointer.
+; \ Discard input, leave result
+: tak SWAP ROT tak >R DROP DROP DROP R> ;
+( tak )
+: X "R@ @" EVALUATE ; IMMEDIATE
+: Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
+: Z "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
+: tak 
+     2DUP < 0= IF 
+         >R >R DUP R> SWAP R> SWAP 
+     ELSE 
+         DSP@  >R  \ X . Y . Z . CR
+         Y X Z 1 - RECURSE  >R DROP DROP DROP R> 
+         X Z Y 1 - RECURSE  >R DROP DROP DROP R> 
+         Z Y X 1 - RECURSE  >R DROP DROP DROP R> 
+         RECURSE >R DROP DROP DROP R> 
+         RDROP \ Drop frame pointer.
+     THEN ; 
+: tak SWAP ROT tak >R DROP DROP DROP R> ;
+( tak )
+: kat
+    2DUP < 0= IF 
+         >R >R DUP R> SWAP R> SWAP 
+    ELSE 
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+ 
+         R> R> R> SWAP ROT 
+         RECURSE 
+        >R DROP DROP DROP R> 
+    THEN ; 
+: tak SWAP ROT kat >R DROP DROP DROP R> ;
+
+
+
+( tak, Look mother! Only stacks and still comprehensible)
+: 2PICK  ">R >R DUP R> SWAP R> SWAP" EVALUATE ; IMMEDIATE 
+: tak ; ( Forward)
+: kat
+    2DUP < 0= IF 2PICK 
+    ELSE 
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+ 
+         R> R> R> tak 
+    THEN ; 
+: tak' SWAP ROT kat >R DROP DROP DROP R> ;
+' tak' >PFA @ ' tak >PFA ! ( solve forward reference)
+
+: q MARK-TIME 18 12 6 tak . ELAPSED ;
+
+( tak, Look mother! Only stacks and still comprehensible)
+: kat' ;  ( Forward definition of ``kat''. Mutual recursion!)
+\ For X Y Z return the VALUE of take-uchi.
+: tak SWAP ROT kat' >R DROP DROP DROP R> ( 3 NIP's ) ;
+\ Like ``tak'' but arguments in reverse order and not consumed.
+: kat  
+    2DUP < IF 
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+ 
+         R> R> R> tak 
+    ELSE 
+        >R >R DUP R> SWAP R> SWAP \ 2 PICK
+    THEN ;    
+' kat >PFA @ ' kat' >PFA ! ( solve forward reference)
+: q MARK-TIME 18 12 6 tak . ELAPSED ;
 
 
 
