@@ -809,7 +809,12 @@ UP	DC	STRUSA	;{ USER AREA POINTER 1}
 ;{       during cold start.}
 ;{       The name is 32 bits in base 36.}
 ;
+;____1_____ _PROTECTED_1_({
+CPUNM   DC      0CDH,1856H       ;{ '80386'     25 26 }
+});_END___1__({ _PROTECTED_1_})
+;____1_____ _REAL_1_({
 CPUNM   DC      5H,0B328H       ;{ '8088'     25 26 }
+});_END___1__({ _REAL_1_})
 	DC      FIGREL + FIGREV *100H  ;{ FIG RELEASE + REVISION 27}
        DC      USRVER  + 0EH*100H      ;{ USER REVISION + VERSION ATTRIBUTES 28}
 LAINI:  DC	_LINK_FIELD(TASK) ;{ LAST CELL 29 }
@@ -1143,39 +1148,45 @@ CODE_HEADER({2!},{TSTOR})
 	MOV	[CELLS(1)+BX],AX
 	JMP	NEXT
 ;
-;{ Do it the old way, via real mode (!)}
-;{ Because L@ and L! are to be removed anyway.}
 CODE_HEADER({L@},{LFET})
-	POP	BX	;{MEM LOC}
-	POP	CX	;{SEG REG VAL}
-        JMPHERE_FROM_PROT
-	MOV	DX,DS
-	MOV	DS,CX
-	MOV	BX,[BX]
-	MOV	DS,DX
-        JMPHERE_FROM_REAL
-	PUSH    BX
-	JMP	NEXT
-;
-;
-;{        POP     BX      ;MEM LOC}
-;{        POP     ES      ;SEG REG VAL}
-;{        MOV     AX,[ES:BX]}
-;{        MOV     DX,DS}
-;{        MOV     ES,DX}
-;{        JMP     APUSH}
+;____1_____ _REAL_1_({
+        POP     BX      ;MEM LOC 
+        POP     ES      ;SEG REG VAL 
+        MOV     AX,[ES:BX]
+        JMP     APUSH
+});_END___1__({ _REAL_1_})
+;____1_____ _PROTECTED_1_({
+	POP	BX      ;MEM LOC 
+	POP	AX      ;SEG REG VAL 
+        MOV     DX,10H
+        MUL     DX
+        ADD     AX,BX
+        SUB     AX, BOOTADDRESS
+
+        MOV     AX,[AX]
+        JMP     APUSH
+});_END___1__({ _PROTECTED_1_})
 ;
 CODE_HEADER({L!},{LSTORE})
+;____1_____ _REAL_1_({
+        POP     BX      ;MEM LOC 
+        POP     ES      ;SEG REG VAL 
+        POP     AX
+        MOV     [ES:BX],AX
+	  JMP     NEXT
+});_END___1__({ _REAL_1_})
+;____1_____ _PROTECTED_1_({
+	POP	BX      ;MEM LOC 
+	POP	AX      ;SEG REG VAL 
+        MOV     DX,10H
+        MUL     DX
+        ADD     AX,BX
+        SUB     AX, BOOTADDRESS
+
 	POP	BX
-	POP	CX
-        JMPHERE_FROM_PROT
-	MOV	DX,DS
-	MOV	DS,CX
-	POP	AX
-	MOV	[BX],AX
-	MOV	DS,DX
-        JMPHERE_FROM_REAL
+	MOV	[AX],BX
 	JMP	NEXT
+});_END___1__({ _PROTECTED_1_})
 	PAGE
 	;{ At line     LINE ~1000}
 ;
@@ -1359,9 +1370,15 @@ CODE_HEADER({1+},{ONEP})
 	INC	AX
 	JMP	APUSH
 ;
-CODE_HEADER({2+},{TWOP})   ;{ Needed also CELLP}
+CODE_HEADER({2+},{TWOP})   
 	POP	AX
 	ADD	AX,2
+	JMP	APUSH
+;
+;
+CODE_HEADER({CELL+},{CELLP})   
+	POP	AX
+	ADD	AX,CW
 	JMP	APUSH
 ;
 HEADER({HERE},{HERE},{DOCOL})
@@ -1465,7 +1482,7 @@ HEADER({LATEST},{LATES},{DOCOL})
 	DC	SEMIS
 ;
 HEADER({LFA},{LFA},{DOCOL})
-	DC	LIT,4
+	DC	LIT,CELLS(2)
 	DC	LSUB
 	DC	SEMIS
 ;
@@ -3431,6 +3448,9 @@ HEADER({.CPU},{DOTCPU},{DOCOL})
 	DC	BASE,STORE
 	DC	LIT,CPUNM-USINI,PORIG ; 
 	DC	TFET
+;____1_____ _BITS32_1_({
+        DC      LIT, 10000H, STAR, PLUS, ZERO
+});_END___1__({ _BITS32_1_})
 	DC	DDOT
 	DC	BASE,STORE
 	DC	SEMIS
