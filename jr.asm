@@ -1,74 +1,73 @@
   
- .org 07c00h             # This means we'll have to trim the
+ ORG  07c00h             # This means we'll have to trim the
  			#    binary with dd or something. Well worth it.
  			#    After   as   and   objcopy -O binary   do
  			#    dd < a.out > whatever bs=512 skip=62
   
  BITS 16
- .global _start
 _start:
   
  cli	;
   
- movw $gdt_entries , %si	# copy initial GDT descriptors to  x2000
- movw $02008h , %di              #       skip and thus allocate entry 0
- mov %di , %bx
- add $0100h , %bx
+ mov si        ,gdt_entries  # copy initial GDT descriptors to  x2000
+ mov di        ,02008h  #       skip and thus allocate entry 0
+ mov bx,di 
+ add bx,0100h  
 for_128_duals:                  # move 256 bytes
- 	mov  (%si) , %ax
- 	mov  %ax, %es:(%di)
- 	add $2 , %di
- 	add $2 , %si
- 	cmp %bx , %di
+ 	mov  ax,(si) 
+ 	mov  es:(di),ax
+ 	add di,2 
+ 	add si,2 
+ 	cmp di,bx 
  jnz for_128_duals
- 				# 	assuming %es=0 and ss makes sense.
+ 				# 	assuming es=0 and ss makes sense.
  				#	My P166 BIOS allows this. YMMV.
   
  lgdt initial_gdtr		# This is one reason for the .org 07c00
   
- movh %cr0 , %ecx
- inc %cx
- mov %ecx , %cr0		# protection is on, but we need to get into
+ mov cr0 , ecx
+ inc cx
+ mov ecx , cr0                # protection is on, but we need to get into
  				# 32 bit segments. You have to branch to
  				# a new cs, mov won't do cs.
   
  				# hand assembled jmp sd1:cs32
  DB   066h                    # we're still IN 16 bit
  DB   0eah
- .long   cs32
+ DL   cs32
  DW   008h                    # 8 is GDT index 1, our code seg. selector
   
 cs32:
   
  BITS 32                 # since we just jumped to a 32 bit segment
   
- mov $010h , %eax                # selector 010h is index 2, our 32 bit data
- movw %ax , %ds
- movw %ax , %ss			# This might help with the 32/16/32 stunts.
+ mov eax,                $010h  # selector 010h is index 2, our 32 bit data
+ movw ds,ax 
+ movw ss,                 ax  # This might help with the 32/16/32 stunts.
   
- mov $09000h , %esp              # first 64k of second meg is our stack
+ mov esp,              $09000h  # first 64k of second meg is our stack
   
  #
  ## BUILD Interrupt Descriptor Table at 01000h physical
  #	256 interrupt gate descriptors that call sequential IIT
  #	calls, which all call INTCALLER.
   
- movw $07003h , %eax
- movl $01000h , %edi
+ movw eax,07003h 
+ movl edi$01000h , 
 per_IDT_descriptor:                     # Our first (example) entry is...
- 	movw %eax , (%edi)		# 03 70       starting at 01000h 
- 	inc %edi			# offset
- 	inc %edi
- 	movw $008h , (%edi)
- 	inc %edi			# 03 70 	08 00
- 	inc %edi			# 		pmode code sel.
- 	movl $000008e00h , (%edi)
- 	inc %edi			# 03 70 20 00 	00 8e 00 00
- 	inc %edi			# 		present    intrrgate
- 	inc %edi
- 	inc %edi
- 	add $8 , %eax
- 	cmp $07803h, %eax
+ 	movw (edi),eax               # 03 70       starting at 01000h 
+ 	inc edi                        # offset
+ 	inc edi
+ 	movw (edi),008h 
+ 	inc edi                        # 03 70         08 00
+ 	inc edi                        #               pmode code sel.
+ 	movl (edi),000008e00h  
+ 	inc edi                        # 03 70 20 00   00 8e 00 00
+ 	inc edi                        #               present    intrrgate
+ 	inc edi
+ 	inc edi
+ 	add eax, $8 
+ 	cmp  eax,07803h
  jnz per_IDT_descriptor
   
  lidt initial_idtr
@@ -78,34 +77,34 @@ per_IDT_descriptor:                     # Our first (example) entry is...
  #	calls that INTCALLER can pop the return address of to find out
  #	what int is happening.
   
- mov	$0ffh , %ebx
- mov 	$07000h , %edi
- mov	$(INTCALLER - 07008h )  , %eax           # first relative offset
+ mov	ebx,$0ffh  
+ mov 	edi, 07000h , 
+ mov	 eax,           $(INTCALLER - 07008h )  # first relative offset
  						# byte following
 while_B:
  		# dest is cursor into IIT
  		# eax is current call offset
  		# ebx is an entry counter, and is extraneous
   
- 	movl	$0e8909090h , (%edi)    # e8 opcode for CALL rel32
+ 	movl	(edi),0e8909090h     # e8 opcode for CALL rel32
  					# prefixed with NOPs. Note endianism.
- 	add $4 ,  %edi
- 	movl	%eax , (%edi)		# append 4 byte relative offset
- 	add $4 ,  %edi
- 	subl	$8, %eax			# relative offset from next IIT call to
+ 	add edi, 4   
+ 	movl	(edi) ,  eax           # append 4 byte relative offset
+ 	add edi,4 
+ 	subl	eax, $8                        # relative offset from next IIT call to
  					# INTCALLER will be 8 less.
- 	dec %ebx
+ 	dec ebx
  jnz while_B
   
  sti	;
   
 HANG: nop  ;
   
- 	mov  0b8060h , %eax
- 	inc %eax
- 	inc %eax
- 	mov %eax , 0b8060h 
- 	int $040h 
+ 	mov   eax, [0b8060h] 
+ 	inc eax
+ 	inc eax
+ 	mov [ 0b8060h] ,eax 
+ 	int 040h 
   
  jmp HANG ###########
  #################################
@@ -114,14 +113,14 @@ INTCALLER:              # System code, so to speak.
   
  			# we are in the system 32-bit segments
   
- mov %eax , 06300
- poph %eax                        # gotta pop the I.I.T. return value to calculate
+ mov 06300,eax , 
+ poph eax                        # gotta pop the I.I.T. return value to calculate
  			#   which int we are.
   
-  mov  0b8060h + 320 , %eax
-  inc %eax
-  inc %eax
-  mov %eax , 0b8060h +320
+  mov   eax,0b8060h + 320 
+  inc eax
+  inc eax
+  mov 0b8060h +320,eax 
   
  DB   0eah                    # far jmp to a suitable-for-real-mode cs
  .long	small_code_segment
@@ -131,14 +130,14 @@ small_code_segment:             #h we are a 16-bit machine with no useful
   
  BITS 16
   
- movl $018h , %eax                       # upgrade to an 8086
+ movl  eax                       ,018h # upgrade to an 8086
   
- movw %eax , %ds
- movw %eax , %ss
+ movw  ds,eax 
+ movw  ss,eax 
   
- mov %cr0 , %ecx
- dec %cx
- mov %ecx , %cr0		# turn off protection, losing the segments
+ mov ecx,cr0  
+ dec cx
+ mov  cr0                ,ecx # turn off protection, losing the segments
  				# 	again.
   
  DB   0eah 
@@ -147,16 +146,16 @@ small_code_segment:             #h we are a 16-bit machine with no useful
   
 rereal:
   
- mov $0b800h , %ax               # real mode demo code. This, I think, could be
- mov %ax , %ds			#   an 8086 int caller, which is
- mov 06400h , %ax
- sub $1, %ax			#   Left as an Excercize to the Reader.
- mov %ax , 1620			#   HINT:  pushf
- mov %ax , 06400h 
+ mov  ax               ,0b800h # real mode demo code. This, I think, could be
+ mov ds                  ,ax  #   an 8086 int caller, which is
+ mov ax,06400h 
+ sub ax                    ,1 #   Left as an Excercize to the Reader.
+ mov 1620,ax                  #   HINT:  pushf
+ mov 06400h,ax  
   
- mov %cr0 , %ecx
- inc %ecx
- mov %ecx , %cr0
+ mov ecx,cr0 
+ inc ecx
+ mov cr0,ecx 
   
  DB   0eah 
  DW   recs32
@@ -166,15 +165,15 @@ recs32:
   
  BITS 32
   
- movw $010h , %eax
+ mov eax,010h 
   
- mov %eax , %ds
- mov %eax , %ss
+ mov ds,eax  
+ mov  ss,eax 
   
-  mov  0b8060h + 640 , %eax
-  inc %eax
-  inc %eax
-  mov %eax , 0b8060h +640
+  mov   eax,0b8060h + 640 
+  inc eax
+  inc eax
+  mov 0b8060h +640,eax 
   
  iret
   
@@ -254,7 +253,7 @@ initial_gdtr:
  	DW  0400h            # gdt limit
  	.long  02000h           # gdt physical address
   
- .org 07dfeh
+ RESB 01feh-$
  DW  0AA55h   # Claim to be a PEEEEEEE.CEE bootsector.
   
 STAGE_II:
