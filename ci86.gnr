@@ -3059,7 +3059,7 @@ enddoc)
 HEADER({WARNING},{LWARN},{DOUSE}, _CELLS(7))
 ;
 worddoc( {DICTIONARY~},{FENCE},{fence},{---  addr},{FIG,U},
-{A user variable containing an address below which forthcode({FORGOTTEN}) ting is
+{A user variable containing an address below which forthcode({FORGET}) ting is
 trapped. To forget below this point the user must alter the contents
 of forthcode({FENCE}) .},{},
 {{." interactive"},{interactive}},
@@ -3078,7 +3078,7 @@ worddoc( {WORDLISTS~},{VOC-LINK},{voc_link},{--- addr},{U},
 {A user variable containing the forthdefi({dictionary entry
 address}) of the word most recently created by
 forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
-linked by these fields to allow forthcode({FORGOTTEN}) to find all
+linked by these fields to allow forthcode({FORGET}) to find all
 vocabularies.})},
 {{VOCABULARY}},
 {{VOC-LINK @ ' ENVIRONMENT = .},{_T_}},
@@ -8534,7 +8534,7 @@ forthvar({deav}) . Leave forthvar({deaw}) (as
 forthcode({FORGET-VOC}) is intended to be used with
 forthcode({FOR-VOCS})) . If any whole vocabulary is forgotten,
 the search order is reset to forthsamp({ONLY FORTH}). },
-{{FORGOTTEN}},
+{{FORGET}},
 {
 {!CSP VOCABULARY APE dnl
 APE DEFINITIONS : GO ; : CH ; : GI ; dnl
@@ -8575,19 +8575,20 @@ FORGV1:
         DC      DEFIN
 FORGV2: DC      SEMIS
 ;
-worddoc( {DICTIONARY},{FORGOTTEN},{forgotten},{addr --},{ISO,FIG,E,L0},
-{
-Unlinks all definitions from the dictionary with a
-forthdefi({dictionary entry address}) higher or equal to
-forthvar({addr}) , irrespective of word list.
+worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
+{Executed in the form:
+               forthcode({FORGET}) forthvar({cccc})
+Deletes definition named forthvar({cccc}) from the dictionary
+with all entries physically following it.
 },
 {{FENCE},{FORGET-VOC}},
 {
-{: GO ; HERE : CH ; : GI ; 'CH FORGOTTEN LATEST ID. },{GO},
+{: GO ; HERE : CH ; : GI ; FORGET CH LATEST ID. },{GO},
 {HERE - .},{0},
 },
 enddoc)
-HEADER({FORGOTTEN},{FORG},{DOCOL})
+HEADER({FORGET},{FORG},{DOCOL})
+        DC      TICK
         DC      LDUP
         DC      FENCE
         DC      FETCH

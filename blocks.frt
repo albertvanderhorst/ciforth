@@ -191,14 +191,14 @@ DOIT    COMMAND-BUFFER $@
 
 \
 ( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
-HERE \ To be FORGOTTEN
+CREATE task
 1 LOAD   REQUIRE SHIFT-ARGS
-\ Install other library, then forget all from ADDRESS up.
+\ Install other library
 : SWITCH-LIBS   BLOCK-EXIT
     ARGV 2 CELLS + @ Z$@ BLOCK-FILE $!
     BLOCK-INIT
     SHIFT-ARGS   SHIFT-ARGS
-    FORGOTTEN COLD ;
+    'task 'FORTH FORGET-VOC COLD ;
 
 \ Must all be done in one go!
 SWITCH-LIBS
@@ -862,13 +862,13 @@ CREATE BASE' 0 ,
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
 
 
-(  ALIAS HIDE IVAR FORGET INCLUDE ) REQUIRE CONFIG \ AvdH
+(  ALIAS HIDE INCLUDE IVAR ) REQUIRE CONFIG \ AvdH A1oct05
 
 : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
 
 : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
 
-: FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
+\ : FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
 : IVAR CREATE , ;
 
 
@@ -971,7 +971,7 @@ REQUIRE POSTFIX
   MEASURE-PRIME
 
 CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY &Y =  IF
-  'TASK FORGOTTEN
+  "TASK" POSTFIX FORGET
 THEN
 
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
@@ -1089,7 +1089,7 @@ REQUIRE Z$@
 ( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) \ AvdH A1nov25
 REQUIRE CONFIG   REQUIRE +THRU
 
-1 2 +THRU
+1 3 +THRU
 
 
 
@@ -1131,8 +1131,24 @@ HEX
 ( Find a STRING in the environment, -its VALUE or NULL string)
 \ : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
 : GET-ENV TRUE ABORT" GET-ENV not implemented for MSDOS, yet" ;
-\ : SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
-: SRC>EXEC TRUE ABORT" GET-ENV not implemented for MS, yet" ;
+
+
+DECIMAL
+( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?PC \ AvdH A1nov24
+REQUIRE -LEADING \   REQUIRE ENV   REQUIRE COMPARE
+HEX
+
+
+\ Linux versions kept for reference
+( Find a STRING in the environment, -its VALUE or NULL string)
+\ : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
+: GET-ENV 1 ABORT" GET-ENV not implemented for MSDOS, yet" ;
+\ : 4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+
+: SRC>EXEC   PAD $!   PAD $@ + 4 - >R
+   R@ 4 + R@ 1 + DO I C@ 20 INVERT AND I C! LOOP \ Uppercase
+   R> ".FRT" CORA IF "AOUT.EXE" ELSE
+   -4 PAD +!   ".EXE" PAD $+!   PAD $@ THEN ;
 DECIMAL
 ( SAVE-SYSTEM TURNKEY ) \ AvdH
 REQUIRE CONFIG   REQUIRE +THRU
@@ -1158,7 +1174,7 @@ REQUIRE CONFIG   REQUIRE +THRU
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
 \ Save the system in a file with NAME .
- : SAVE-SYSTEM   HERE FORGOTTEN
+ : SAVE-SYSTEM
 \ Increment the file and dictionary sizes
   HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
