@@ -1008,7 +1008,7 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({DENOTATION},{DENOT},{DODOE}, $+CELLS(1) , B_IMMED)
+HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -1272,7 +1272,7 @@ DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
 worddoc({STORAGE},{RESULT},{result},{--- addr},{},
 {A variable containing the address of the result of searching
 in one vocabulary chain.},{{BLOCK}}, {}, enddoc)
-HEADER({RESULT},{RESULT},{DOVAR}, $ + CELLS(1) )
+HEADER({RESULT},{RESULT},{DOVAR}, )
         DC 0
 ;
 worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}, {},
@@ -1841,12 +1841,13 @@ HEADER({:},{COLON},{DOCOL}, , B_IMMED)
         DC      CONT
         DC      STORE
         DC      CREAT
+        DC      HERE, CELLP, COMMA
         DC      RBRAC
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-         LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
-;        MOV     SI,[BX+CELLS(P_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
+;        LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
+         MOV     SI,[BX+CELLS(P_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -2680,22 +2681,7 @@ DTRA2:  DC      ONE
         DC      LSUB    ;{ ENDIF}
 DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
         DC      SEMIS
-        PAGE
-        ;{ At line     LINE ~2000}
-worddocsafe({PARSING},{(.")},{paren_dot_quote},{},{C+},
-{The run-time proceedure, compiled by forthcode({."}) which transmits the
-following in-line text to the selected output device.},{{."}}, {}, enddoc)
-HEADER({(.")},{PDOTQ},{DOCOL})
-        DC      RR
-        DC      SFET
-        DC      LDUP
-        DC      CELLP
-        DC      FROMR
-        DC      PLUS
-        DC      TOR
-        DC      LTYPE
-        DC      SEMIS
-;       
+;
 worddocsafe({OUTPUT},{."},{dot_quote},{},{P,L0},
 {Used in the form:
   forthsamp({." cccc"})
@@ -2706,17 +2692,15 @@ If executed outside a definition, forthcode({."}) will immediately print the tex
 until the final ". In ciforth the number of characters has no limit.},
 {{OUT},{(.")}}, {}, enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
+        DC      LIT, -1, LIN, PSTOR
+        DC      DENQ
         DC      STATE
         DC      FETCH
         _0BRANCH(DOTQ1) ;{ IF}
-        DC      LIT, -1, LIN, PSTOR
-        DC      DENQ
-        DC      COMP, LTYPE   
-        _BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1:  DC      LIT,'"'
-        DC      PPARS
-        DC      LTYPE   ;{ ENDIF}
-DOTQ2:  DC      SEMIS
+        DC      COMP
+DOTQ1:                  ;{ ENDIF}
+        DC      LTYPE   
+        DC      SEMIS
 ;
 worddoc({PARSING},{QUERY},{query},{},{},
 {Input 80 characters of text (or until a "return") from the operators
@@ -3309,7 +3293,7 @@ vocabularies are defined, new user definitions become a part of
 forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during the creation of
 a colon-definition, to select this vocabulary at compile time.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({FORTH},{FORTH},{DODOE},$+CELLS(1), B_IMMED)
+HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -3751,14 +3735,14 @@ worddoc({STORAGE},{STALEST},{stalest},{--- addr},{},
 {A variable containing the address of the oldest
 block buffer, the first candidate to be claimed if a new
 one is needed.},{{BLOCK}}, {}, enddoc)
-HEADER({STALEST},{STALEST},{DOVAR}, $ + CELLS(1) )
+HEADER({STALEST},{STALEST},{DOVAR}, )
         DC BUF1
 ;
 worddoc({STORAGE},{PREV},{prev},{---- addr},{},
 {A variable containing the address of the disc buffer most recently
 referenced. The forthcode({UPDATE}) command marks this buffer to be
 later written to disc.},{{BLOCK}}, {}, enddoc)
-HEADER({PREV},{PREV},{DOVAR}, $ + CELLS(1) )
+HEADER({PREV},{PREV},{DOVAR}, )
         DC      BUF1
 ;
 worddoc({STORAGE},{#BUFF},{hash_buf},{--- c},{},
@@ -4247,7 +4231,7 @@ worddoc({INPUT},{TERMIO},{termio},{--- addr},{},
 {Leave the address of the terminal description, this has the layout of
 a the c-structure forthsamp({termio}) .
 },{{SET-TERM}}, {}, enddoc)
-HEADER({TERMIO},{TERMIO},{DOVAR}, $ + CELLS(1) )
+HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
 worddoc({INPUT},{SET-TERM},{set_term},{len b --- },{},
@@ -4669,7 +4653,7 @@ The name may contain a path and be at most}
 _FILENAMELENGHT_M4_ {characters long.
 The default name is forthvar({BLOCKS.BLK}) .
 },{{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
-HEADER({BLOCK-FILE},{BLFL},{DOVAR}, $ + CELLS(1) )
+HEADER({BLOCK-FILE},{BLFL},{DOVAR}, )
         _STRING({BLOCKS.BLK})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
 worddoc({STORAGE},{BLOCK-HANDLE},{block_handle},{---n},{},
@@ -4678,7 +4662,7 @@ If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
 _LINUX_C_({In this ciforth forthcode({BLOCK-HANDLE}) is not used.})
 },{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
-HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, $ + CELLS(1) )
+HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, )
         DC      -1
 ;
 });_END_({_BLOCKSINFILE_})
@@ -4778,7 +4762,7 @@ latest disk error in opening, using or closing the block file.
 Negative means an error
 (the Unix forthsamp({errno}) and zero means okay.)
 },{{BLOCK},{LINUX-ERROR}}, {}, enddoc)
-HEADER({DISK-ERROR},{DERR},{DOVAR}, $ + CELLS(1) )
+HEADER({DISK-ERROR},{DERR},{DOVAR}, )
         DC      -1
 ;
 });_END_({_HOSTED_LINUX_})
@@ -4919,7 +4903,7 @@ drive used for mass storage. This is in MSDOS coding,
 The drive may be switched but this should only be
 attempted after forthcode({EMPTY-BUFFERS}) .},
 {{BLOCK},{FLUSH}}, {}, enddoc)
-HEADER({DRIVE},{LDRIVE},{DOVAR}, $ + CELLS(1) )
+HEADER({DRIVE},{LDRIVE},{DOVAR}, )
       DC  0
 ;
 WERR    DB      'DISK WRITE ERROR  $'
@@ -5013,7 +4997,7 @@ worddoc({STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},
 latest disk error in opening, using or closing the block file.
 One means an error and and zero means okay.
 },{{BLOCK},{R/W}}, {}, enddoc)
-HEADER({DISK-ERROR},{DSKERR},{DOVAR}, $ + CELLS(1) )
+HEADER({DISK-ERROR},{DSKERR},{DOVAR}, )
       DC  0
 });_END_({_USEBIOS_})
 ;
@@ -5094,7 +5078,7 @@ Word 1,2,4 6 and 7 must be restored to their previous value after
 calling forthcode({RBLK}) and forthcode({WLBK}) so as not to interfere
 with forthcode({R/W}). },
 {{R/W},{BLOCK},{OFFSET}}, {}, enddoc)
-HEADER({LBAPAR},{LBA},{DOVAR}, $ + CELLS(1) )
+HEADER({LBAPAR},{LBA},{DOVAR}, )
         DB      10H, 0      ;{ default    }
         DW      SPB         ;{ default    }
         DW      0           ;{ to be filled with offset}

@@ -225,7 +225,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  CR ." A0MAR30  FORTH KRAKER >4<  ALBERT VAN DER HORST "
  CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
  ( Decompilation of special high level words)
-  : -hi CR ." : " DUP DUP ID.. CELL+ CR
+  : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
    BEGIN ?Q DUP @  LIT ;S <> >R DUP LIM @ < R> AND WHILE
         ITEM REPEAT
    CR DROP ." ;" ?IM IF ."  IMMEDIATE " THEN CR ;
@@ -239,9 +239,6 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
      CFOF BRANCH BY -br
   -->
  CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
-  : -dq CELL+ DUP $@ CR [CHAR] . EMIT [CHAR] " EMIT BL EMIT
-     TYPE [CHAR] " EMIT BL EMIT  $@ + ;
-                             CFOF (.") BY -dq
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT 
          ."  ] DLITERAL " $@ + 4 CELLS + ;
                       CFOF SKIP BY -sk
@@ -253,12 +250,11 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
   ( : -cm ." COMPILE " -lit ;  CFOF COMPILE BY -cm    )
   : -cm ID.+ ID.+ ;            CFOF COMPILE BY -cm
+  : -pc CR ." ;CODE plus code (suppressed)"
+  ( DIRTY TRICK FOLLOWING : Destroy decompile pointer !) 
+    DROP ' TASK >PFA ;          CFOF (;CODE) BY -pc  
       -->
  CR ." KRAAKER"
-  ( DIRTY TRICK FOLLOWING :)
-  : -pc CR ." ;CODE plus code (suppressed)"
-    DROP ' TASK >PFA ; ( Destroy deecompile pointer !)
-      CFOF (;CODE) BY -pc  
  : KRAAK-FROM ( .--. Kraak, starting with following word)
    CFOF
    BEGIN
@@ -270,6 +266,10 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : TO-LP-KRAAK-FROM
    ' EMIT >CFA >R       ' PEMIT >CFA ' EMIT >PFA !
    KRAAK-FROM           R> ' EMIT >PFA ! ;
+
+
+
+
  ( DISK IO SCREEN 17 SCHRIJVEN >1< VERSIE #1)
  <HEX  0 VARIABLE FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
  : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;

@@ -40,9 +40,9 @@ N_$2:   _STRING({$1})
         DC    ifelse(0,len($5),0H,$5) 
         DC    _LINKOLD
 $2:     DC     $3
-dnl        DC    ifelse(0,len($4),$ + CELLS(1),$4) 
-ifelse(0,len($4),, {
-    DC    $4}) 
+        DC    ifelse(0,len($4),$ + CELLS(1),$4) 
+dnl ifelse(0,len($4),, {
+dnl    DC    $4}) 
 define({_LINKOLD},{$2-CELLS(C_HOFFSET)})dnl
 })dnl
 dnl
