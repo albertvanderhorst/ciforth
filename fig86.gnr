@@ -315,7 +315,7 @@ HUGESECS      DD         000H
         DB 000H, 000H, 029H                  ;{ Required magic.}
         DB         004H, 01CH, 040H,  00BH
         DB    "           "
-        DB    "FAT12   "
+        DB    "RAW     "
 
 BOOTLBA:  DB      10H, 0
         DW      (INITDP-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
@@ -326,11 +326,12 @@ BOOTLBA:  DB      10H, 0
         DD      0       ;{ M.S. 32 BITS}
 
 HDREAD:
+        MOV     AX,REALSEGMENT
+        MOV     DS,AX
+        MOV     SI,BOOTLBA     ; {DS:SI absolute address of lba.}
         MOV     AX,4200H  ;{   Read extended                                }
         MOV     DX,0080H  ;{   Disk C                                 }
-        MOV     SI,BOOTLBA
         INT     13H
-
         RET
 RETRY:
         CALL    DISPLAYW
@@ -353,17 +354,6 @@ BOOT:
         JZ  ELSE3
         JMP ENDBOOT     ; {Skip booting if started from MSDOS}
 ELSE3:
-        ; {See also the comment at BOOTFD}
-        ;{ Adjust code segment address without leaving the ball}
-        ;{ Generating machine code is actually simpler than}
-        ;{ beating the assembler. After 10 attempts I gave up}
-        ;{ This is a simple straightforward intersegment jump}
-;{       JMP FAR BOOTADDRESS+ELSE1}
-         JMPFAR
-         DW      ELSE1
-         DW     REALSEGMENT
-ELSE1:
-;{MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE}
         MOV     AL,'F'
         CALL    DISPLAY
         CLI                     ;{ Disallow interrups until stack ready}
