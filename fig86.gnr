@@ -5249,18 +5249,18 @@ HEADER({U.},{UDOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt ---},{},
-{For all words in the current context execute forthvar({xt})
+worddoc({DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt dea --},{},
+{For the word with the forthdefi({dictionary entry address}) forthsamp({dea}) 
+and all that are linked from that word
+execute forthvar({xt})   
  with as data forthvar({x1..xn}) plus
 the forthcode({NFA}) of those words.         forthvar({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
 {{FOR-VOCS},{EXECUTE}})
 HEADER({FOR-WORDS},{FORW},{DOCOL})
+        DC      SWAP
         DC      TOR
-        DC      CONT
-        DC      FETCH
-        DC      FETCH
         DC      TOR
 FORW1:  DC      FROMR
         DC      RR
@@ -5314,6 +5314,9 @@ HEADER({VLIST},{VLIST},{DOCOL})
         DC      LOUT
         DC      STORE
         DC      LIT, IDDOT
+        DC      CONT
+        DC      FETCH
+        DC      FETCH
         DC      FORW
         DC      SEMIS
 ;
