@@ -4,7 +4,10 @@
 #include <sys/times.h>
 #include "tty.c"
 
-#define EFORTH 0x8050000
+void (*figforth)() = 0x8050000;
+
+/* This is absolutely necessary, but I have no clue. */
+char reservespace[1000000];
 
 struct tms tm;
 struct tty std_in;
@@ -123,109 +126,6 @@ char *xterm_rawkey_string[] =	/* Strings sent by function keys */
   "\033[2~"			/* kI - insert character key */
 };				/* 21 strings */
 
-void 
-t_puts (int cap)
-{
-  fputs (control_string[cap], stdout);
-}
-
-int 
-get_ticks (void)
-{
-  times (&tm);
-  return tm.tms_utime + tm.tms_stime;
-}				/* 10 ms ticks */
-
-/******************************************
- * Output to screen, control with termcap *
- ******************************************/
-
-static int rows = 25, cols = 80, row, col;
-
-void 
-gotoxy (int x, int y)
-{
-  col = x;
-  row = y;
-  printf ("\033[%d;%dH", x + 1, y + 1);
-  fflush (stdout);
-}
-
-int 
-wherexy (void)
-{
-  return ((col << 16) | (row & 0xFFFF));
-}
-
-void 
-home (void)
-{
-  t_puts (cursor_home);
-  row = col = 0;
-}
-void 
-clrscr (void)
-{
-  t_puts (clear_screen);
-  home ();
-}
-void 
-clreol (void)
-{
-  t_puts (clr_eol);
-}
-void 
-clrdown (void)
-{
-  t_puts (clr_eos);
-}
-void 
-tbell (void)
-{
-  t_puts (bell);
-}
-
-void 
-standout_on (void)
-{
-  t_puts (enter_standout_mode);
-}
-void 
-standout_off (void)
-{
-  t_puts (exit_standout_mode);
-}
-void 
-underline_on (void)
-{
-  t_puts (enter_underline_mode);
-}
-void 
-underline_off (void)
-{
-  t_puts (exit_underline_mode);
-}
-void 
-bright (void)
-{
-  t_puts (enter_bold_mode);
-}
-void 
-reverse (void)
-{
-  t_puts (enter_reverse_mode);
-}
-void 
-blinking (void)
-{
-  t_puts (enter_blink_mode);
-}
-void 
-normal (void)
-{
-  t_puts (exit_attribute_mode);
-}
-
 char buf[257];
 
 int 
@@ -274,48 +174,10 @@ static int row, col;		/* track cursor position */
 void 
 emit (int ch)
 {
-  switch (ch)
-    {
-    case 7:
-      fputc ('\a', stdout);
-      break;			/* bell */
-    case 127:			/* delete key */
-    case 8:
-      fputc ('\b', stdout);
-      if (col > 0)
-	col--;
-      break;			/* backspace */
-    case 9:
-      fputc ('\t', stdout);
-      col = ((col / 8) + 1) * 8;
-      break;			/* tab */
-    case 10:
-      fputc ('\n', stdout);
-      col = 0;
-      if (row < rows - 1)
-	row++;
-      break;			/* line feed */
-    case 12:
-      clrscr ();
-      break;			/* form feed */
-    case 13:
-      fputc ('\r', stdout);
-      col = 0;
-      break;			/* carriage return */
-    default:
-      fputc (ch, stdout);
-      if (col < cols - 1)
-	col++;
-    }
+  fputc (ch, stdout);
   fflush (stdout);
 }
 
-void 
-goaway (int retval)
-{
-  tty_restore (&std_in);
-  exit (retval);
-}
 void 
 type (int count, char *addr)
 {
@@ -337,42 +199,17 @@ shell (int count, char addr[])
   return system (str);
 }
 
-int 
-qkb (void)
-{
-  return !nodevice;
-}
-
 typedef int FUNC ();		/* array with I/O functions */
 FUNC *call[256] =
 {
-  0,				/* eForth itself */
+  0,                      /* eForth itself */
   qkey,				/*  1   */
   emit,				/*  2   */
-  goaway,			/*  3   */
+  0,                            /*  3   */
   type,				/*  4   */
   shell,			/*  5   */
 /* REMAINDER NOT USED IN EFORTH */
-  qkb,				/*  6   */
-  home,				/*  7   cursor_home */
-  clrscr,			/*  8   clear_screen */
-  clreol,			/*  9   clr_eol */
-  clrdown,			/* 10   clr_eos */
-  tbell,			/* 11   bell */
-  standout_on,			/* 12   enter_standout_mode */
-  standout_off,			/* 13   exit_standout_mode */
-  underline_on,			/* 14   enter_underline_mode */
-  underline_off,		/* 15   exit_underline_mode */
-  bright,			/* 16   enter_bold_mode */
-  reverse,			/* 17   enter_reverse_mode */
-  blinking,			/* 18   enter_blink_mode */
-  normal,			/* 19   exit_attribute_mode */
-  gotoxy,			/* 20   */
-  wherexy,			/* 21   */
-  get_ticks			/* 22   */
 };
-
-char *eforth[1000000];		/* array with eForth binary */
 
 int 
 main (int argc, char *argv[])
@@ -383,10 +220,9 @@ main (int argc, char *argv[])
       printf ("Problem opening fig86.linux.bin\n");
       exit (1);
     }
-  fread ((char *) EFORTH, 1, 1000000, in);
+  fread ((char *) figforth, 1, 1000000, in);
   fclose (in);
-  printf ("[0x%x] ", eforth);
-  call[0] = (FUNC *) EFORTH;
+/*printf ("[0x%x] ", figforth);                                              */
   tty_init (0, &std_in);
   tty_keymode (&std_in);
   tty_noecho (&std_in);
@@ -394,13 +230,11 @@ main (int argc, char *argv[])
     if (strcmp (getenv ("TERM"), "linux"))
       {
 	inkeys = xterm_rawkey_string;
-	rows = 24;
       }
     else
       {
 	inkeys = linux_rawkey_string;
-	rows = 25;
       }
-  call[0] (argc, argv, &call);
-  goaway(0);
+  figforth (argc, argv, &call);
+  tty_restore (&std_in);
 }

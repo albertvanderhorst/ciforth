@@ -7,7 +7,6 @@
 #include "tty.h"
 
 extern int errno;
-/*  extern char     *sys_errlist[];                                          */
 int nodevice;
 
 /* ****************************************************************************
