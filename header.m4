@@ -72,4 +72,16 @@ dnl The link field of the word with assembler name $1
 define({_LINK_FIELD},_$1)dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({_VOC_LATEST}, $1+6)
-
+define({CODE_HEADER},{HEADER({$1},{$2},{$+2})})dnl
+define({TO_PROTECTED},{
+         CLI
+	 MOV EAX,CR0
+	 INC AL  
+	 MOV CR0,EAX            ;set protected mode
+})dnl
+define({TO_REAL},{
+	 MOV EAX,CR0
+	 DEC AL  
+	 MOV CR0,EAX            ;set real mode
+         STI
+})dnl
