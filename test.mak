@@ -132,3 +132,25 @@ testas80: asgen.frt as80.frt testset8080 ; \
     diff -w $@ testset8080 >$@.diff ;\
     diff $@.diff testresults
 
+RELEASEASSEMBLER=      \
+as80.frt        \
+assembler.txt   \
+asgen.frt       \
+asi586.frt      \
+asi86.frt       \
+asm386endtest   \
+ass.frt         \
+p0.asi586.ps    \
+p0F.asi586.ps   \
+ps.frt          \
+qr8086.ps       \
+qr8080.ps       \
+testset386      \
+testset8080     \
+testset8086     \
+test.mak        \
+# That's all folks!
+# testset386a    (fails)
+
+aszip : $(RELEASEASSEMBLER) ; echo as$(VERSION) $+ | xargs zip
+
