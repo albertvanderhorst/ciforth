@@ -88,6 +88,8 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
 00 201 A8 1PI TESTI|A,
 00 201 T!  02 A4 6 1FAMILY, MOVS, CMPS, -- STOS, LODS, SCAS,
+1000 201 T!   02 E4 2 1FAMILY, IN|P, OUT|P,
+0000 201 T!   02 EC 2 1FAMILY, IN|D, OUT|D,
 
 ( --------- special fixups ----------)
 
@@ -110,7 +112,6 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 2208 00 9A 1PI CALLFAR,
 2208 00 EA 1PI JMPFAR,
 0102 00 T!   08 C2 2 1FAMILY, RET+, RETFAR+,
-1000 00 T!   02 E4 2 1FAMILY, IN|P, OUT|P,
 8004 00 T!   01 E8 2 1FAMILY, CALL, JMP,
 4000 00 EB 1PI JMPS,
 00 00 T!
@@ -121,8 +122,7 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
  01 CC 4 1FAMILY, INT3, -- INTO, IRET,
  01 D4 4 1FAMILY, AAM, AAD, -- XLAT,
  01 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
- 02 EC 2 1FAMILY, IN|D, OUT|D,
- 01 F0 6 1FAMILY, LOCK, -- REP, REPZ, HLT, CMC,
+ 01 F0 6 1FAMILY, LOCK, -- REPNZ, REPZ, HLT, CMC,
  01 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD,
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
