@@ -941,6 +941,11 @@ HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
         DC      PNUMB, DMINU, SDLITE
         DC      SEMIS
 ;
+worddoc({DENOTATIONS},{DEN+},{den_plus}, {--- s/d},{CI},
+{Implements forthcode({NUMBER}) for numbers that start with forthkey({+}) .},
+{},
+{{+48 .},{48 },
+{: GS1 +58 ; GS1 .},{58 }}, enddoc)
 HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
         DC      NUMB, SEMIS
@@ -977,7 +982,10 @@ executed.
 This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
-{{VOCABULARY}}, {}, enddoc)
+{{VOCABULARY}}, 
+{: GS1 [COMPILE] DENOTATION DEFINITIONS LATEST ID. [COMPILE] dnl
+FORTH ;},{"}}, 
+enddoc)
 HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
@@ -985,7 +993,8 @@ HEADER( , , ,0, B_DUMMY, _ENDOFDENOTATIONS_)
 ;
 worddoc({MISC},{NOOP},{no_operation},{},{},
 {Do nothing. Primarily useful as a placeholder.
-},{}, {}, enddoc)
+},{}, 
+{{NOOP},{}}, enddoc)
 CODE_HEADER({NOOP},{NOOP})
        _NEXT
 ;
@@ -1000,21 +1009,23 @@ NOP2:   DC      $+CELLS(1)
 ;
 worddoc({COMPILING},{LIT},{lit},{--- n},{FIG,C2,L0},
 {Within a colon-definition, forthcode({LIT}) is compiled followed by a
-_BITS_ bit literal number given during compilation. Later execution of
-forthcode({LIT}) causes the contents of this next dictionary address to be pushed
-to the stack.},{},
+_BITS_ bit literal number given during compilation. 
+Later execution of forthcode({LIT}) causes the contents of this
+next dictionary cell to be pushed to the stack.},{{LITERAL}}, 
 {{: TL LIT [ 123 , ] ; TL .},{123}}, enddoc)
-;
 CODE_HEADER({LIT},{LIT})
         LODSW           ;{ AX <- LITERAL}
         _PUSH          ;{ TO TOP OF STACK}
 ;
-worddoc({MISC},{EXECUTE},{execute},{addr -},{},
+worddoc({MISC},{EXECUTE},{execute},{addr -},{ISO},
 {Execute the definition whose forthdefi({dictionary entry address})
 is given by forthvar({addr}) .
-_VERBOSE_({The DEA serves as an execution token.})
+_VERBOSE_({The forthdefi({dictionary entry address})
+serves as an execution token. forthdefi({>CFA}) is gives the code field,
+but this has offset 0.})
 },{{'},{>CFA}},
-{{ ' BL >CFA EXECUTE .},{20}}, enddoc)
+{{ ' BL >CFA EXECUTE .},{20},
+{ ' BL EXECUTE .},{20}}, enddoc)
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
@@ -1022,7 +1033,10 @@ CODE_HEADER({EXECUTE},{EXEC})
 worddoc({CONTROL},{SKIP},{skip},{},{C2,L0},
 {Skip over an area in memory, where the length is given in the next cell.
 _VERBOSE_({Internal, used for nested compilation})},
-{}, {}, enddoc)
+{}, 
+{{ : GS1 1 SKIP [ 0 CELL+ , ] BL BL ; GS1 . .},
+{20 1}},
+enddoc)
 CODE_HEADER({SKIP},{SKIP})
         ADD     SI,[SI]
         LEA     SI,[SI+CELLS(1)]
@@ -1031,7 +1045,11 @@ CODE_HEADER({SKIP},{SKIP})
 worddoc({CONTROL},{BRANCH},{branch},{},{C2,L0},
 {The run-time proceedure to unconditionally branch. An in-line offset
 is added to the interpretive pointer forthcode({IP}) to branch ahead or back.
-forthcode({BRANCH}) is compiled by forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT}) .},{}, {}, enddoc)
+forthcode({BRANCH}) is compiled by forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT}) .},
+{{0BRANCH}}, 
+{{ : GS1 1 BRANCH [ 0 CELL+ CELL+ , ] BL BL ; GS1 . .},
+{20 1}},
+enddoc)
 CODE_HEADER({BRANCH},{BRAN})
 BRAN1:  ADD     SI,[SI]
         _NEXT    ;{ JUMP TO OFFSET}
@@ -1040,7 +1058,10 @@ worddoc({CONTROL},{0BRANCH},{zero_branch},{f ---},{C2},
 {The run-time proceedure to conditionally branch. If forthvar({f}) is false
 (zero), the following in-line parameter is added to the interpretive
 pointer to branch ahead or back. Compiled by forthcode({IF}) , forthcode({UNTIL}) , and forthcode({WHILE}) .
-},{}, {}, enddoc)
+},{{BRANCH}}, 
+{{ : GS1 1 0 0BRANCH [ 0 CELL+ CELL+ , ] BL BL ; GS1 . .}, {20 1},
+{ : GS2 1 1 0BRANCH [ 0 CELL+ CELL+ , ] BL BL ; GS2 . .}, {20 20}},
+enddoc)
 CODE_HEADER({0BRANCH},{ZBRAN})
         POP     AX      ;{ GET STACK VALUE}
         OR      AX,AX   ;{ ZERO?}
@@ -1079,14 +1100,19 @@ are discarded and execution continues ahead.
 
 At compile time, forthcode({+LOOP}) compiles the run-time word forthcode({(+LOOP)}) and the
 branch offset computed from forthcode({HERE}) to the address left on the stack by
-forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{}, {}, enddoc)
+forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{}, 
+{ { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
+  { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
+enddoc)
 CODE_HEADER({(+LOOP)},{XPLOO})
         POP     BX      ;{ GET LOOP VALUE}
         JMP SHORT     XLOO1
 ;
 worddocsafe({CONTROL},{(DO)},{paren_do},{},{C},
 {The run-time proceedure compiled by forthcode({DO}) which moves the loop control
-parameters to the return stack.},{{DO}}, {}, enddoc)
+parameters to the return stack.},{{DO}}, 
+{ { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA} },
+enddoc)
 CODE_HEADER({(DO)},{XDO})
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     AX      ;{ LIMIT VALUE}
@@ -1098,7 +1124,9 @@ CODE_HEADER({(DO)},{XDO})
 ;
 worddoc({CONTROL},{I},{i},{--- n},{C,L0},
 {Used within a do-loop to copy the loop index to the stack. Other use
-is implementation dependent.},{{R}}, {}, enddoc)
+is implementation dependent.},{{R}}, 
+{ { : GS1 DO I . LOOP ; 3 0 GS1},{0 1 2 } },
+enddoc)
 CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
         _PUSH          ;{ TO PARAMETER STACK}
@@ -3011,9 +3039,8 @@ HEADER({ID.},{IDDOT},{DOCOL})
 IDDOT1:
         DC      SEMIS
 ;
-worddoc({DEFINING},{(CREATE)},{paren_create},{sc --},{},
-{This is the basis for all defining words. used in the form:
-A well defined header is created with the string constant forthsamp({sc}) 
+worddocsafe({DEFINING},{(CREATE)},{paren_create},{sc --},{},
+{This is the basis for all defining words. 
 as the namefield. It is linked into the CURRENT vocabulary.
 The code field and data field both 
 point to the area owned by this header, i.e. immediately following the
