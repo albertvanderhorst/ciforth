@@ -3033,7 +3033,7 @@ _HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system i
 _HOSTED_LINUX_({As blocks are allocated in a file on the host operating system it is 0.})
 The
 contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before calling
-forthsamp({R/W}). },
+forthsamp({R\W}). },
 {{BLOCK},{MESSAGE} },
 {{OFFSET @ 1000 U< .},{_T_}},
 enddoc)
@@ -5801,6 +5801,7 @@ MESS1:  _STRINGINLINE({MSG # })
         DC      SWAP, DOT
         DC      BASE, STORE
 MESS2:                      ;{THEN}
+        DC      CR
         DC      SEMIS
 ;
 _PC_({
@@ -6001,7 +6002,7 @@ by forthcode({LOAD}). They can be equally useful to contain
 other data, e.g. for implementing a database. })
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0FFH.})},
-{{(BUFFER)},{R/W},{OFFSET},{UPDATE},{FLUSH},{LOAD}},
+{{(BUFFER)},{R\W},{OFFSET},{UPDATE},{FLUSH},{LOAD}},
 {{!CSP 1 BLOCK FIRST LIMIT WITHIN . ?CSP},{_T_} },
 enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
@@ -6925,7 +6926,7 @@ position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters succesfully read,
 this may be zero. forthvar({ior}) is 0 for success, or otherwise
 the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
-{{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R/W}},
+{{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R\W}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD FD 0 > . },{0 _T_},
 {PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 ." Hello world!"},
@@ -6991,7 +6992,7 @@ or otherwise the MSDOS error code
 negated, to be inspected using forthcode({MESSAGE}).
 dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
 },
-{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R/W}},
+{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R\W}},
 {
 { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
 {"."" Hello world!""" FD WRITE-FILE .},{0},
@@ -7725,7 +7726,7 @@ _VERBOSE_({Beware that if error messages are loaded from disk,
 this may clear forthcode({DISK-ERROR}) })
 },
 _HOSTED_LINUX_({ {{BLOCK},{?LINUX-ERROR}}, })
-_USEBIOS_({ {{BLOCK},{R/W}}, })
+_USEBIOS_({ {{BLOCK},{R\W}}, })
 _HOSTED_LINUX_({ {{ CR DISK-ERROR @ 0 < . BLOCK-INIT},{0},}, })
 _PC_({ {{ CR DISK-ERROR @ 0=},{0},}, }),
 enddoc)
@@ -7832,16 +7833,16 @@ HEADER({SEEK},{SEEK},{DOCOL})
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
-worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
+worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R/W}) determines the location on mass storage,
+read. forthcode({R\W}) determines the location on mass storage,
 performs the read or write and reports errors.
 },
 {{BLOCK},{DISK-ERROR}}, {}, enddoc)
-HEADER({R/W},{RSLW},{DOCOL})
+HEADER({R\W},{RSLW},{DOCOL})
         DC      TOR ;{ blk on top}
         DC      SEEK ;{ That's done}
         DC      BBUF
@@ -8007,23 +8008,23 @@ HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
         DC      DERR, STORE
         DC      SEMIS
 ;
-worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
+worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R/W}) determines the location on mass storage,
+read. forthcode({R\W}) determines the location on mass storage,
 performs the read or write and records errors, but doesn't abort on them.},
 {{BLOCK},{DISK-ERROR}},
 dnl we can use block 2 for scratch, -b is not an option in use.
 {
-{PAD B/BUF 41 FILL PAD 2 0 R/W},{},
-{PAD B/BUF 45 FILL PAD 2 1 R/W},{},
+{PAD B/BUF 41 FILL PAD 2 0 R\W},{},
+{PAD B/BUF 45 FILL PAD 2 1 R\W},{},
 {PAD 23 + 5 TYPE},{AAAAA},
 },
 enddoc)
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
-HEADER({R/W},{RSLW},{DOCOL})
+HEADER({R\W},{RSLW},{DOCOL})
         DC      TOR
         DC      BBUF, STAR
         DC      BHAN, FETCH, SWAP
@@ -8091,16 +8092,16 @@ CODE_HEADER({BLOCK-EXIT},{BLEXI})
         CALL    c_block_exit
         _NEXT
 ;
-worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{FIG},
+worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R/W}) determines the location on mass storage,
+read. forthcode({R\W}) determines the location on mass storage,
 performs the read or write and shows errors via forthcode({DISK-ERROR}).},
 {{BLOCK}}, {}, enddoc)
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R)}
-CODE_HEADER({R/W},{RSLW})
+CODE_HEADER({R\W},{RSLW})
         CALL c_rslw
         MOV     [_VAR_FIELD(DERR)],AX
         LEA     ESP,[ESP+_CELLS(3)]    ; remove input
@@ -8167,8 +8168,8 @@ SBLK    PROC    NEAR
 _ENDP SBLK    ENDP
 ;
 worddoc( {STORAGE},{RBLK},{read_block},{addr blk --},{},
-{forthsamp({1 R/W}) is an abbreviation for forthsamp({RBLK}).
-},{{R/W}}, {}, enddoc)
+{forthsamp({1 R\W}) is an abbreviation for forthsamp({RBLK}).
+},{{R\W}}, {}, enddoc)
 CODE_HEADER({RBLK},{RBLK})
         CALL    SBLK
         PUSH    HIP      ;{PRESERVE INTERPRETER POINTER}
@@ -8179,8 +8180,8 @@ CODE_HEADER({RBLK},{RBLK})
         JMP     RWERR
 ;
 worddoc( {STORAGE},{WBLK},{write_block},{addr blk --},{},
-{forthsamp({0 R/W}) is an abbreviation for forthsamp({WBLK}).
-},{{R/W}}, {}, enddoc)
+{forthsamp({0 R\W}) is an abbreviation for forthsamp({WBLK}).
+},{{R\W}}, {}, enddoc)
 CODE_HEADER({WBLK},{WBLK})
         CALL    SBLK
         PUSH    HIP
@@ -8201,22 +8202,22 @@ DOK:    POPF            ;{POP FLAGS}
         POP     HIP      ;{INTERPRETER PNTR}
         _NEXT
 ;
-worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
+worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
 {The basic mass storage read-write linkage. (Already present in
 figforth.) forthvar({addr}) specifies the source or destination
 block buffer, forthsamp({blk}) is the sequential number of the
 referenced physical block; and forthvar({f}) is a flag for
 forthvar({f})=0 write and forthvar({f})=l read.
-forthcode({R/W}) determines the location on mass storage,
+forthcode({R\W}) determines the location on mass storage,
 performs the read-write. This version of ciforth features the
 most classic mass storage. Blocks are counted sequentially from
 0 on the drive with MSDOS code in forthcode({DRIVE}), so
-forthcode({R/W}) can be used to write boot code. Errors are
+forthcode({R\W}) can be used to write boot code. Errors are
 handled by writing directly to the console after they are
 detected. },
 {{BLOCK},{DRIVE}}, {}, enddoc)
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
-HEADER({R/W},{RSLW},{DOCOL})
+HEADER({R\W},{RSLW},{DOCOL})
          _SWITCH_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         _0BRANCH(RSLW1)
         DC      RBLK
@@ -8243,7 +8244,7 @@ forthsamp({sec}) either a read to forthvar({addr}) or write from
 forthvar({addr}) .
 Disk errors are stored in
 forthcode({DISK-ERROR}).},
-{{BLOCK},{R/W}}, {}, enddoc)
+{{BLOCK},{R\W}}, {}, enddoc)
 HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, LFSPT, CFET, SLMOD
         DC      LIT, LFHEADS, CFET, SLMOD   ;{ Now #sec, #head, #cyl}
@@ -8261,18 +8262,18 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
-worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{FIG},
+worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R/W}) determines the location on mass storage,
+read. forthcode({R\W}) determines the location on mass storage,
 performs the read-write and aborts with an error message for failures.
 forthcode({DISK-ERROR}) contains an error count for the latest operation.
 },
 {{BLOCK},{DISK-ERROR},{SECRW}}, {}, enddoc)
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
-HEADER({R/W},{RSLW},{DOCOL})
+HEADER({R\W},{RSLW},{DOCOL})
          _SWITCH_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         DC      ZERO, DERR, STORE
         _0BRANCH(RSLW1)
@@ -8307,10 +8308,10 @@ RSLW5:  DC      SEMIS
 });_END_({ _RWSECTRK_})
 _RWLBA_({
 
-;{ Warning : if this LBA is used apart from by R/W}
+;{ Warning : if this LBA is used apart from by R\W}
 ;{ the fields marked default must be restored.}
 worddoc( {STORAGE},{LBAPAR},{l_b_a_params},{--},{},
-{ A data structure used by R/W , that also must be filled in for disk
+{ A data structure used by R\W , that also must be filled in for disk
 operations forthcode({RBLK}) and forthcode({WBLK}) . Do not touch the
 first 16-bits word. The second word is the number of sectors to be
 transferred. The third and fourth word contain a long real mode
@@ -8320,8 +8321,8 @@ If a 2 Terabyte disk is not enough this can be extended into
 the sixth and seventh word.
 Word 1,2,4 6 and 7 must be restored to their previous value after
 calling forthcode({RBLK}) and forthcode({WLBK}) so as not to interfere
-with forthcode({R/W}). },
-{{R/W},{BLOCK},{OFFSET}}, {}, enddoc)
+with forthcode({R\W}). },
+{{R\W},{BLOCK},{OFFSET}}, {}, enddoc)
 HEADER({LBAPAR},{LBA},{DOVAR}, )
         DB      10H, 0      ;{ default    }
         DW      SPB         ;{ default    }
@@ -8334,7 +8335,7 @@ HEADER({LBAPAR},{LBA},{DOVAR}, )
 worddoc( {STORAGE},{RBLK},{read_block},{--},{},
 {Perform a disk read operation using a properly filled in LBA structure
 in forthcode({LBAPAR}). },
-{{R/W},{WBLK}}, {}, enddoc)
+{{R\W},{WBLK}}, {}, enddoc)
 CODE_HEADER({RBLK},{RBLK})
         MOV     BX,4200H
         JMP    RWBLK
@@ -8342,7 +8343,7 @@ CODE_HEADER({RBLK},{RBLK})
 worddoc( {STORAGE},{WBLK},{write_block},{--},{},
 {Perform a disk write operation using a properly filled in LBA
 structure in forthcode({LBAPAR}). },
-{{R/W},{RBLK}}, {}, enddoc)
+{{R\W},{RBLK}}, {}, enddoc)
 CODE_HEADER({WBLK},{WBLK})
         MOV     BX,4300H
 RWBLK:
@@ -8363,14 +8364,14 @@ RWBLK:
         PUSH    BX
         _NEXT
 
-worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
+worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, It must reside
 in the lowest 1 Mbyte of physical memory.
 forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R/W}) determines the location on mass storage,
+read. forthcode({R\W}) determines the location on mass storage,
 performs the read-write and aborts with an error message for failures.
 This function uses ``LBA'' : Logical Block Addressing and may
 not work on elderly hard disks.
@@ -8382,7 +8383,7 @@ bit 1 (carry flag) indicates an error.
 },
 {{BLOCK},{DISK-ERROR},{LBAPAR},{RBLK},{WBLK}}, {}, enddoc)
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
-HEADER({R/W},{RSLW},{DOCOL})
+HEADER({R\W},{RSLW},{DOCOL})
         DC      TOR
         DC      SWAP
 ;       On a big endian machine the following code is 16/32 bit clean.
