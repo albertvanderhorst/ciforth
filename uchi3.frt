@@ -1,7 +1,7 @@
 \ #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
 
-\     : \D ;    IMMEDIATE \ Use debug lines.
-      : \D POSTPONE \ ;  IMMEDIATE \ Comment out debug lines
+\      : \D ;    IMMEDIATE \ Use debug lines.
+       : \D POSTPONE \ ;  IMMEDIATE \ Comment out debug lines
 
 8 LOAD  \ get libraries
 38 LOAD         \ $@=
@@ -14,16 +14,19 @@
 \ In good Unix style, the name of the program and
 \ usage is printed.
 : MY-ERROR
-    DECIMAL . SPACE ARGV @ CTYPE ": FATAL ERROR" TYPE CR
-    "Usage: " TYPE CR
-    ARGV @ CTYPE " <integer1> <integer2> <integer3>" TYPE CR
-    BYE ;
+    CR ARGV @ CTYPE   ": FATAL ERROR #" TYPE   DECIMAL . SPACE
+    CR "Usage: " TYPE
+    CR ARGV @ CTYPE   " < input >output" TYPE
+    CR BYE ;
 
 \ Install it as the handler for uncaught exceptions.
 \ No way one could use the ``uchi1'' program
 \ to fire up a Forth interpreter and hose Linux.
     -1 WARNING !
     'MY-ERROR >DFA @   '(ABORT) >DFA !
+
+\ Argument count must be 1 .
+: GET-ARGS ARGC 1 <> IF 2001 THROW THEN ;
 
 \ Create an array of LEN elements of size STRIDE .
 \ Run time: For an INDEX leave the ADDRESS of the element
@@ -65,7 +68,8 @@ CREATE LINES \ Not yet
     LINE# @ SAVE-AT-POS
     1 LINE# +!
 ;
-\D ." EXPECT aap123 :" 123 "aap" SAVE-LINE 0 LINES @ $@ TYPE . CR
+\D ALLOCATE-LINES
+\D ." EXPECT noot123 :" 123 "aap        noot" SAVE-LINE 0 LINES @ $@ TYPE . CR
 
 \ Compares record INDEX with the last record:
 \ "that record COMPARES less than the last one"
@@ -154,11 +158,10 @@ CREATE LINES \ Not yet
 
 \ Guess what? The main program.
 : main
+    GET-ARGS
     ALLOCATE-LINES
-\     -41 THROW
     'GET-ALL CATCH
     DUP -32 = IF DROP 0 THEN \ EPIPE is not an error
     THROW       \ All other errors
     PUT-ALL BYE ;
-\  ALLOCATE-LINES
  'main "uchi3" TURNKEY
