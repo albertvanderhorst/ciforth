@@ -247,7 +247,12 @@ BOOT:
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
         JZ  ELSE3
-        JMP ENDBOOT     ; {Skip booting if started from MSDOS}
+
+;{ Apparently we are started from MSDOS. Prepare return to MSDOS}
+        MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
+        MOV     AX,RETDOS-M4_ORG+100H
+        MOV     [RETDOSV-M4_ORG+100H ],AX
+        JMP ENDBOOT     ; {Skip booting }
 ELSE3:
         MOV     AL,'F'
         CALL    DISPLAY
@@ -356,7 +361,11 @@ BOOT:
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
         JZ  ELSE3
-        JMP ENDBOOT     ; {Skip booting if started from MSDOS}
+;{ Apparently we are started from MSDOS. Prepare return to MSDOS}
+        MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
+        MOV     AX,RETDOS-M4_ORG+100H
+        MOV     [RETDOSV-M4_ORG+100H ],AX
+        JMP ENDBOOT     ; {Skip booting }
 ELSE3:
         MOV     AL,'F'
         CALL    DISPLAY
@@ -405,6 +414,16 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         INT(10H)
         RET
 
+; {THE FOLLOWING HAS BEEN DEBUGGED. IT FOLLOWS THE SPECIFICATION OF 4CH.}
+; {IT CAN BE EXECUTED FROM THE DEBUGGER. YET IT HANGS IF BYE CALLED FROM}
+; {FORTH}
+RETDOS:
+        MOV     AX,CS
+        MOV     DS,AX
+        MOV     ES,AX
+        MOV     SS,AX
+        MOV     AH,4CH
+        INT     21H    ;{ Only works if cs is the same as while starting.}
 ENDBOOT:
 });_END___1__({ _BOOTED_1_})
 
@@ -463,13 +482,13 @@ _ENDCOMMENT
         MOV     CX,TEXTEND-HERE5 ; Amount to move
         CALL  HERE6
 HERE6:  POP     AX                 ; { Calculate address of the first byte to move}
-        ADD     AX,TEXTEND-HERE6-1     
+        ADD     AX,TEXTEND-HERE6-1
         MOV     SI,AX           ; {Relocatable address, w.r.t code segment.}
-        MOV     AX,CS           
+        MOV     AX,CS
         MOV     DS,AX
         MOV     AX, (LOADADDRESS-M4_ORG)/10H ; Destination segment
         MOV     ES, AX
-        MOV     DI, TEXTEND-1     
+        MOV     DI, TEXTEND-1
         REPNZ
         MOVSB
         PUSH    ES    ; {Corrected code segment}
@@ -1324,7 +1343,6 @@ CODE_HEADER({L@},{LFET})
         MOV     BX,[BX]
         MOV     DS,DX
         _SWITCH_1_({JMPHERE_FROM_REAL})
-        JMPHERE_FROM_REAL
         PUSH    BX
         _NEXT
 });_END___1__({ _BITS16_1_})
@@ -3805,20 +3823,24 @@ VLIS2:  DC      LDUP
         DC      SEMIS
 ;
 ;____1_____ _HOSTED_MSDOS_1_({
-;{ EXIT TO PC-DOS}
-CODE_HEADER({BYE},{BYE})
-        INT      27H     ;{I'M HISTORY}
-});_END___1__({ _HOSTED_MSDOS_1_})
-;____1_____ _BOOTED_1_({
-;{ EXIT TO PC-DOS, if run from PC-DOS}
-CODE_HEADER({BYE},{BYE})
-        INT      27H     ;{I'M HISTORY}
-});_END___1__({ _BOOTED_1_})
-;____1_____ _HOSTED_LINUX_1_({
 HEADER({BYE},{BYE},{DOCOL})
+        DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
+;{ EXIT TO PC-DOS}
+});_END___1__({ _HOSTED_MSDOS_1_})
+;____1_____ _SWITCH_1_({
+CODE_HEADER({BYE},{BYE})
+;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
+        JMPHERE_FROM_PROT
+        JMPFAR
+RETDOSV: DW     0       ; {Filled in during boot}
+        DW      0
+        _BITS32_1_({SET_32_BIT_MODE})
+
+});_END___1__({ _SWITCH_1_})
+;____1_____ _HOSTED_LINUX_1_({
+;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
 });_END___1__({ _HOSTED_LINUX_1_})
-
         PAGE
 HEADER({LIST},{LLIST},{DOCOL})
         DC      DECA
