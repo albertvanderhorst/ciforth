@@ -15,6 +15,7 @@
 
 
   HEX
+  : ^ .S ;     : IVAR CREATE , ;
 : LC@ L@ FF AND ;
 : LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
  : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
@@ -29,7 +30,6 @@
 : ?LI "LINOS" FOUND 0= ?LEAVE-BLOCK ;
 "INCLUDED" FOUND 0= ?LEAVE-BLOCK
 : INCLUDE &" (PARSE) INCLUDED ;
-
 COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
            I have a beautiful disclaimer,
      but this screen is too small to contain it.
@@ -47,8 +47,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
            THIS IS A WARNING ONLY.
  THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
 ( Commands aplicable to 32 bit mode A0jun29 )
-  HEX   ( This block only loaded for a 32 bits Forth.)
- 0 CONSTANT CS_START
+  : ^ .S ;     : IVAR CREATE , ;
+  HEX 0 CONSTANT CS_START
  : LC@ SWAP 10 * + CS_START - C@ ;
  : LC! SWAP 10 * + CS_START - C! ;
  : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
@@ -62,7 +62,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 : ?LI "LINOS" FOUND 0= ?LEAVE-BLOCK ;
 "INCLUDED" FOUND 0= ?LEAVE-BLOCK
 : INCLUDE &" (PARSE) INCLUDED ;
-
+ ( ERROR MESSAGES   )
  MSG # 1 : EMPTY STACK
  MSG # 2 : DICTIONARY FULL
  MSG # 3 : HAS INCORRECT ADDRESS MODE
@@ -77,7 +77,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  MSG # 12 : NOT RECOGNIZED
  MSG # 13 : UNKNOWN
  MSG # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY
- ( FIG FORTH FOR CP/M 2.0 ADAPTED BY A. VD HORST HCCH )
+ ( CIFORTH $Revision$ ADAPTED BY AvdH HCCFIG HOLLAND)
  ( ERROR MESSAGES   )
  MSG # 17 : COMPILATION ONLY, USE IN DEFINITION
  MSG # 18 : EXECUTION ONLY
@@ -126,8 +126,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
-" SYSTEM ELECTIVE $Id$ AH" TYPE CR 2 LIST
- : ^ .S ;         : IVAR CREATE , ;
+" SYSTEM ELECTIVE $RCSfile$ $Revision$"
+TYPE CR 2 LIST
   -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
@@ -135,13 +135,13 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( EDITOR ) 109 LOAD         EXIT
  ( KRAKER )       10 16 THRU
  ( ASSEMBLER 80x86 SAVE-BLOCKS) 120 LOAD   97 98 THRU
-
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
  ( CP/M READ WRITE LOAD    17 LOAD 21 LOAD 24 LOAD 21: BUGS)
+ ( FIG:  SAVE-SYSTEM      23 LOAD   )
 : TASK ;
- ( OLD:  NEW SYSTEM      23 LOAD   )
 ( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD )
+
  ." QUADRUPLE ARITHMETIC 08-02-84 "
  : ADC ( n1,n2-n,c  add, leave sum and carry)
     0 SWAP 0 D+ ;
@@ -432,19 +432,19 @@ make decompile pointer point to exit!)
      . ." PRIMES" ;
  ." ERATOSTHENES >1< Variables - A. van der Horst"  CR
  ( User specified variables:)
- ( 52) 80 IVAR CH/L  ( Characters per line)
- ( 22) 24 IVAR LN/P  ( Lines per page)
-  1 IVAR PAUSE ( Boolean: pause between pages)
+VARIABLE CH/L  80 CH/L  !  ( Characters per line)
+VARIABLE LN/P  24 LN/P  ! ( Lines per page)
+VARIABLE PAUSE  1 PAUSE ! ( Boolean: pause between pages)
 
  ( Other:)
  6250 CONSTANT SIZE ( 16 numbers pro byte)
- 0 IVAR FLAGS      SIZE ALLOT
+ CREATE FLAGS      SIZE ALLOT
  FLAGS SIZE + CONSTANT END-FLAGS
- 0 IVAR LIM     ( part of FLAGS considered)
- 0 IVAR C#      0 IVAR L#  ( char and line counter)
- 0 IVAR THOUSANDS ( #  thousand to be sieved)
- 0 IVAR MILS      ( Contains current thousand)
- 0 IVAR MANTISSA  ( The current thousands is to be printed)
+ VARIABLE LIM     ( part of FLAGS considered)
+ VARIABLE C#      VARIABLE L#  ( char and line counter)
+ VARIABLE THOUSANDS ( #  thousand to be sieved)
+ VARIABLE MILS      ( Contains current thousand)
+ VARIABLE MANTISSA  ( The current thousands is to be printed)
  28 31 THRU
  ." ERATOSTHENES >2< Pretty printing - A. van der Horst"  CR
  : FFEED  PAUSE @ IF CR ." KEY FOR NEXT SCREEN" KEY DROP THEN
@@ -465,10 +465,9 @@ make decompile pointer point to exit!)
  ." ERATOSTHENES >3< Bit manipulation - A. van der Horst " CR
    HEX
  : NOT   0FF XOR ( N -- N  FLIP ALL BITS OF N) ;
- 0 IVAR S-MASK -1 CELLS ALLOT
-01 C, 02 C, 04 C, 08 C, 10 C, 20 C, 40 C, 80 C,
- 0 IVAR C-MASK -1 CELLS ALLOT
-             01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
+CREATE S-MASK
+    01 C, 02 C, 04 C, 08 C, 10 C, 20 C, 40 C, 80 C,
+CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
              10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
  : INIT-T   FLAGS SIZE 0FF FILL ; ( Preset to 'prime')
  DECIMAL
@@ -509,7 +508,8 @@ make decompile pointer point to exit!)
      DUP THOUSANDS !   DUP CHECK   500 * LIM !  0 MILS !
      INIT-T INIT-P 2 .P BATCH1
      THOUSANDS @ 1
-     DO I MILS !  1 MANTISSA !  NEWLINE I 500 * BATCH LOOP ;
+     ?DO I MILS !  1 MANTISSA !  NEWLINE I 500 * BATCH LOOP ;
+
  ." DEFINIEER ^. EN  ''.  85JAN06 ALBERT VAN DER HORST"
  <HEX
   : TOH 30 - DUP 9 > IF 7 - THEN ;
@@ -558,11 +558,11 @@ make decompile pointer point to exit!)
 
 
 
-( Elementary string: $@ $! $+! $C+     A0apr03-AH)
+( Elementary string: $. remains      A1mar15-AH)
 ( All this should probably be low level )
 
  : $. TYPE ;
- : C+! >R R@ C@ + R> C! ;
+
 
 
 
@@ -1774,7 +1774,7 @@ DECIMAL
 
 
 
-( 16 BITS PROTECTED MODE A0jul04  AvdH HCC HOLLAND)  ?16
+( 16 BITS PROTECTED MODE A0jul04  AvdH HCCFIG HOLLAND)  ?16
 ( C7) 6 1FI MEM|  ( OVERRULES D0| BP| )
 ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]
 [SI] [DI] [BP] [BX]
@@ -1790,7 +1790,7 @@ DECIMAL
 ( F8) 04 1FI +0|'
 ( C0) 40 0 4 1FAMILY| +1*| +2*| +4*| +8*|
 
-( 32 BITS PROTECTED MODE A0jul04  AvdH HCC HOLLAND)  ?32
+( 32 BITS PROTECTED MODE A0jul04  AvdH HCCFIG HOLLAND)  ?32
 ( FF) C4 1FI MEM| ( MEM| MEM, OVERRULES D0| SIB| SIB, BP| )
 ( 07) 05 1PI MEM, ( REQUIRED AFTER MEM|)
 ( COMBINES WITH D0| DB| DX| )
@@ -1806,7 +1806,7 @@ DECIMAL
 ( C7) 6 1FI MEM|'
 ( 07) 1 0 8 1FAMILY| [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]'
 [SI]' [DI]' [BP]' [BX]'
-( OPERAND AND ADDRESS SIZE OVERWRITE a0jul03 AvdH HCC HOLLAND)
+( OPERAND AND ADDR. SIZE OVERWRITE a0jul03 AvdH HCCFIG HOLLAND)
 1 60 2 1FAMILY, PUSHA, POPA,
 1 62 2 2FAMILY, BOUND, ARPL,
 1 64 4 1FAMILY, FS:, GS:, OS:, AS:,
@@ -1886,7 +1886,7 @@ DECIMAL
 
 
 
-( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCC HOLLAND)
+( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
 
 : GET-CR0   MOV|CD, F| CR0| R| AX| ;
 : PUT-CR0   MOV|CD, T| CR0| R| AX| ;
@@ -1902,7 +1902,7 @@ DECIMAL
 
 
 
-( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCC HOLLAND)
+( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
 : NOP, XCHGX, AX| ;
 : CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
 
@@ -1966,7 +1966,7 @@ PREVIOUS DEFINITIONS
 : 2FI CREATE C, C, DOES> 2 + <FIX FIX| FIX| DROP ;
 : 3FI CREATE C, C, C, DOES> 3 + <FIX FIX| FIX| FIX| DROP ;
 
-( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
+( PROTECTED MODE  SWITCHING a0jun20        AvdH HCCFIG HOLLAND)
 : SPLIT 0 100 UM/MOD ; ( To handle two bytes at once )
 : SPLIT2 SPLIT SPLIT ; ( To handle three bytes at once )
 ( INCREMENT, OPCODE , COUNT -- )
@@ -2030,7 +2030,7 @@ ASSEMBLER DEFINITIONS
 
 
 
-( 2DROP ALIGN                         A0JUL03 AvdH HCC HOLLAND)
+( 2DROP ALIGN                 A0JUL03 AvdH HCCFIG HOLLAND)
 PREVIOUS DEFINITIONS
 : 2DROP DROP DROP ;
 : ALIGN HERE 1 AND IF 0 C, THEN ;
@@ -2049,8 +2049,9 @@ PREVIOUS DEFINITIONS
 ( 8086 ASSEMBLER TESTS    A0JUL05 AvdH HCC FIG HOLLAND)
 ( Tests applicable always )
   CODE TEST-NEXT NEXT  C;
+  " Testing next " TYPE
   TEST-NEXT
-  ." HOERA WE ZIJN NIET GECRASHT"
+  " next Tested " TYPE
 
 
 
@@ -2062,7 +2063,7 @@ PREVIOUS DEFINITIONS
 
 
 
-( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCC HOLLAND)
+( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
 ?32  ( Test applicable to 32 bit mode)
 
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
@@ -2071,7 +2072,7 @@ CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
 ( CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,)
 ( GDT_DS COPY-SEG   NEXT C;                                  )
 DECIMAL
-RSP@ 100 DUMP DSP@ 100 DUMP
+
 
 
 
