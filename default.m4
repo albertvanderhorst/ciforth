@@ -27,6 +27,9 @@ dnl If you try to make Forth words with { } your coat is sold.
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
+dnl Run the forth in protected mode.
+define( {_PROTECTED_1_}, _no({$0}) )dnl       
+dnl
 dnl Use BIOS for I/O. No redirection but possible stand alone.
 define( {_USEBIOS_1_}, _no({$0}) )dnl       
 dnl
@@ -40,8 +43,11 @@ dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl Boot sector present for use on PC. _USEBIOS_ required.
-dnl May run under MSDOS as well.
-define( {_BOOTED__1_}, _no({$0}) )dnl       
+dnl May run under MSDOS as well. Boot from floppy.
+define( {_BOOTFD__1_}, _no({$0}) )dnl       
+dnl Boot sector present for use on PC. _USEBIOS_ required.
+dnl May run under MSDOS as well. Boot from hard disk.
+define( {_BOOTHD__1_}, _no({$0}) )dnl       
 dnl
 dnl Use BIOS for I/O. No redirection but possible stand alone.
 define( {_HOSTED__1_}, _no({$0}) )dnl       
