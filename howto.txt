@@ -6,7 +6,7 @@ Do a regression test on lina :
 and
     lina -e | tee aap
 Within Forth :
-    KRAAK-FROM FORTH BYE
+    CRACK-FROM FORTH BYE
 
 Then
    sed -f blabla <aap >qqq

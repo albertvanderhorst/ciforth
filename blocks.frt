@@ -398,10 +398,11 @@ CREATE BASE' 0 ,
 : STRING CREATE &" (PARSE) $, DROP DOES> $@ ;
 
 
-( TICKS TICKS-PER-SECOND ) \ AvdH A1nov25
+( MS@ TICKS TICKS-PER-SECOND ) \ AvdH A2oct21
 REQUIRE CONFIG   REQUIRE +THRU
 1 2 +THRU
 
+TICKS
 
 
 
@@ -413,40 +414,39 @@ REQUIRE CONFIG   REQUIRE +THRU
 
 
 
-
-( TICKS TICKS-PER-SECOND ) ?LI \ AvdH A1nov25
+( MS@ TICKS TICKS-PER-SECOND ) \ AvdH A2oct21
 \ Assuming we run on an 486 or better, and a 32 bits Forth
 REQUIRE ASSEMBLERi86 HEX
-\  CODE TICKS 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
-CODE TICKS 0F C, 31 C, 50 C, 52 C, NEXT C;
-
+CODE  TEST-EF POPF, PUSHF, NEXT C;
 DECIMAL
-." What is the speed of your Pentium (in Mhz)?"
-PAD DUP 80 ACCEPT EVALUATE CONSTANT TICKS-PER-SECOND
-
-
+1 21 LSHIFT CONSTANT ID-FLAG
+: MS@ 0 0 0 43 LINOS 10 * ;
+ID-FLAG TEST-EF 0 TEST-EF XOR ID-FLAG AND 0= ?LEAVE-BLOCK
+HEX CODE CPUID POP|X, AX| 0F C, A2 C, PUSH|X, DX| NEXT C;
+1 CPUID 10 AND 0= DECIMAL ?LEAVE-BLOCK HEX
+CODE TICKS 0F C, 31 C, 50 C, 52 C, NEXT C;
+DECIMAL TICKS DNEGATE 1000 MS TICKS D+ DROP
+  CONSTANT TICKS-PER-SECOND
 \ For a TIME in ticks: it IS in the past.
 : PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
-
-
-
-( TICKS TICKS-PER-SECOND ) ?PC ?32 \ AvdH nyi
+: MS@ TICKS TICKS-PER-SECOND 1000 / M/MOD DROP SWAP DROP ;
+( MS@ TICKS TICKS-PER-SECOND ) ?PC ?32 \ AvdH A2oct21
 \ The idea is to use the timer ticks on the pc.
 \ Until then the following works for 486 and better.
 REQUIRE ASSEMBLERi86 HEX
 \  CODE TICKS 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
-CODE TICKS 0F C, 31 C, 50 C, 52 C, NEXT C;
 
 DECIMAL
 ." What is the speed of your Pentium (in Mhz)?"
 PAD DUP 80 ACCEPT EVALUATE CONSTANT TICKS-PER-SECOND
 
-
 \ For a TIME in ticks: it IS in the past.
 : PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 
+: MS@ TICKS TICKS-PER-SECOND 1000 / M/MOD DROP SWAP DROP ;
 
-( MARK-TIME .mS .uS ELAPSED ) \ AvdH A1nov25
+
+( MARK-TIME .mS .uS ELAPSED ) \ AvdH A2oct21
 REQUIRE TICKS
 DECIMAL
 \ Mark a point in time by leaving its tick COUNT.
@@ -457,8 +457,8 @@ DECIMAL
 : .uS SPACE . ." uS "  ;
 \ For the TIME (in ticks) on the stack return ELAPSED time
 \ since then, in uS.
-: ELAPSED   DNEGATE TICKS D+   TICKS-PER-SECOND SM/REM
-    SWAP DROP ;
+: ELAPSED   DNEGATE TICKS D+ DROP
+    1,000,000 TICKS-PER-SECOND */ ;
 DECIMAL
 
 
@@ -478,13 +478,13 @@ CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY &Y =  IF
   "TASK" POSTFIX FORGET
 THEN
 
-( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
+( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct21
 VARIABLE FAR-DP         \ Alternative DP
 DSP@ 1 RSHIFT HERE 1 RSHIFT + ALIGNED FAR-DP !
 \ Use alternative dictionary area or back.
 : SWAP-DP   DP @ FAR-DP @   DP ! FAR-DP ! ;
 \ Remove all words from the scratch area.
-: TRIM   HERE 'FORGET-VOC FOR-VOCS ;
+: TRIM   HERE 'FORGET-VOC FOR-VOCS DROP ;
 
 
 
@@ -1054,7 +1054,7 @@ PREVIOUS DEFINITIONS
 
 
 
-( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
+( --assembler_postit_fixup_1 ) \ A2oct21 AvdH
  0 IVAR ISS ( Instruction start )
 : X, , ;    ( Cell size du jour)
 : MEM, X, ;
@@ -1070,7 +1070,7 @@ PREVIOUS DEFINITIONS
 : SEG, W, ;
 
 
-( AUXILIARY DEFINITIONS )
+( --assembler_postit_fixup_2 ) \ A2oct21 AvdH
 : <POST HERE ISS ! ;
  0 IVAR IDP
 : <FIX HERE IDP ! ; : IHERE IDP @ ;
@@ -1086,7 +1086,7 @@ PREVIOUS DEFINITIONS
 : 2FI CREATE C, C, DOES> 2 + <FIX FIX| FIX| DROP ;
 : 3FI CREATE C, C, C, DOES> 3 + <FIX FIX| FIX| FIX| DROP ;
 
-( Protected mode  switching a0jun20        AvdH HCCFIG HOLLAND)
+( --assembler_postit_fixup_3 ) \ A2oct21 AvdH
 : SPLIT 0 100 UM/MOD ; ( To handle two bytes at once )
 : SPLIT2 SPLIT SPLIT ; ( To handle three bytes at once )
 ( INCREMENT, OPCODE , COUNT -- )
@@ -1102,7 +1102,7 @@ PREVIOUS DEFINITIONS
 
 
 
-( spare )
+( spare_1 )
 
 
 
@@ -1118,7 +1118,7 @@ PREVIOUS DEFINITIONS
 
 
 
-( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
+( --assembler_macros_1 NEXT PUSH PUSH1 ) \ A2oct21 AvdH
 
 : NEXT
      LODS, W1|
@@ -1126,7 +1126,7 @@ PREVIOUS DEFINITIONS
      JMPO, D0| [BX]
  ;
 : PUSH PUSH, AX| NEXT ;
-: PUSH2 PUSH, DX| NEXT ;
+: PUSH2 PUSH, DX| PUSH ;
 
 IMMEDIATE
 : C; PREVIOUS ?EXEC ?CSP ; IMMEDIATE
@@ -1134,8 +1134,9 @@ IMMEDIATE
 
 
 
-( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
-
+( --assembler_macros_2 TO-PROT, TO-REAL, ) \ A2oct21 AvdH
+\ These macro's are useful for protected mode under MSDOS
+\ or for stand alone booting systems.
  7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
  10 CONSTANT GDT_CS
 : JMP-PROT, JMPFAR, HERE 4 + , GDT_CS W, ;
@@ -1149,8 +1150,7 @@ IMMEDIATE
 
 
 
-
-( 8086 ASSEMBLER TESTS    A0JUL05 AvdH HCC FIG HOLLAND)
+( --assembler_test_1 TEST-NEXT ) \ A2oct21 AvdH
 ( Tests applicable always )
   CODE TEST-NEXT NEXT  C;
   " Testing next " TYPE
@@ -1166,7 +1166,7 @@ IMMEDIATE
 
 
 \
-( spare )
+( spare_2 )
 
 
 
@@ -1182,7 +1182,7 @@ IMMEDIATE
 
 
 \
-( Protected mode  switching macros A0JUL03 AvdH HCCFIG HOLLAND)
+( --assembler_test_2 TEST-JUMP ) \ A2oct21 AvdH
 ?32  ( Test applicable to 32 bit mode)
 
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
@@ -1198,7 +1198,8 @@ DECIMAL
 
 
 
-( ASSEMBLER 32 BIT ELECTIVES A0JUL03 AH)
+( --assembler_i86_electives ) \ A2oct21 AvdH
+
 1 2 HEX +THRU DECIMAL ( Load either 16 or 32 bit stuff)
 3 6 HEX +THRU  DECIMAL ( 8086 level instructions )
 7 10 HEX +THRU DECIMAL ( 80386 level instructions )
@@ -1213,8 +1214,7 @@ DECIMAL
 
 
 
-
-( 16 bits protected mode A0jul04  AvdH HCCFIG HOLLAND)  ?16
+( --assembler_i86_fixups_1 ) ?16 \ A2oct21 AvdH
 ( C7) 6 1FI MEM|  ( OVERRULES D0| BP| )
 ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]
 [SI] [DI] [BP] [BX]
@@ -1230,7 +1230,7 @@ DECIMAL
 ( F8) 04 1FI +0|'
 ( C0) 40 0 4 1FAMILY| +1*| +2*| +4*| +8*|
 
-( 32 bits protected mode A0jul04  AvdH HCCFIG HOLLAND)  ?32
+( --assembler_i86_fixups_1 ) ?32 \ A2oct21 AvdH
 ( FF) C4 1FI MEM| ( MEM| MEM, OVERRULES D0| SIB| SIB, BP| )
 ( 07) 05 1PI MEM, ( REQUIRED AFTER MEM|)
 ( COMBINES WITH D0| DB| DX| )
@@ -1246,7 +1246,7 @@ DECIMAL
 ( C7) 6 1FI MEM|'
 ( 07) 1 0 8 1FAMILY| [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]'
 [SI]' [DI]' [BP]' [BX]'
-( 8086 assembler fix ups a0jul05  AvdH HCCFIG HOLLAND)
+( --assembler_i86_fixups_2 opcodes ) \ A2oct21 AvdH
  8 0 4 1FAMILY| ES| CS| SS| DS|    1 6 2 1FAMILY, PUSHS, POPS,
  8 26 4 1FAMILY, ES:, CS:, SS:, DS:,
  8 27 4 1FAMILY, DAA, DAS, AAA, AAS,
@@ -1262,7 +1262,7 @@ DECIMAL
  1 0 8 1FAMILY| AL| CL| DL| BL| AH| CH| DH| BH|
 
 
-( 8086 ASSEMBLER OPCODES PART 1, A0jul05 AvdH HCCFIG HOLLAND)
+( --assembler_i86_opcodes_1 fixups ) \ A2oct21 AvdH
 1 0 2 2FAMILY| B| W|   2 0 2 2FAMILY| F| T|
 8 0 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
 2 84 2 2FAMILY, TEST, XCHG,   0 88 2PI MOV,
@@ -1278,7 +1278,7 @@ DECIMAL
 1 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
 2 E4 2 1FAMILY, INAP, OUTAP,  2 EC 2 1FAMILY, INAD, OUTAD,
 1 E8 2 1FAMILY, CALL, JMP,  EA 1PI JMPFAR,  EB 1PI JMPS,
-( 8086 ASSEMBLER OPCODES PART 2, A0jul05 AvdH HCCFIG HOLLAND)
+( --assembler_i86_opcodes_2 ) \ A2oct21 AvdH
 1 F0 6 1FAMILY, LOCK, ILL, REP, REPZ, HLT, CMC,
 1 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)
 800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI,
@@ -1294,7 +1294,7 @@ DECIMAL
 
 
 
-( spare )
+( spare_3 )
 
 
 
@@ -1310,7 +1310,7 @@ DECIMAL
 
 
 
-( OPERAND AND ADDR. SIZE OVERWRITE a0jul03 AvdH HCCFIG HOLLAND)
+( --assembler_i386_opcodes_1 ) \ A2oct21
 1 60 2 1FAMILY, PUSHA, POPA,
 1 62 2 2FAMILY, BOUND, ARPL,
 1 64 4 1FAMILY, FS:, GS:, OS:, AS:,
@@ -1326,7 +1326,7 @@ DECIMAL
 80 0F 2PI J|X,         ( FFF08C) 00 90 0F 3PI SET,
 100 0 2 1FAMILY| Y'| N'|
 200 0 8 1FAMILY| O'| C'| Z'| CZ'| S'| P'| L'| LE'|
-( 80386_instructions_PUSH..LMSW )
+( --assembler_i386_opcodes_2 ) \ A2oct21 AvdH
 1 A00F 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
 800 A30F 4 3FAMILY, BT, BTS, BTR, BTC,
 800 A40F 2 3FAMILY, SHLDI, SHRDI,
@@ -1342,7 +1342,7 @@ DECIMAL
 
 
 
-( protected mode  switching MACROS a0JUL03 AvdH HCCFIG HOLLAND)
+( --assembler_macros_1' TO-PROT, TO-REAL, ) \ A2oct21 AvdH
 
 : GET-CR0   MOV|CD, F| CR0| R| AX| ;
 : PUT-CR0   MOV|CD, T| CR0| R| AX| ;
@@ -1358,7 +1358,7 @@ DECIMAL
 
 
 
-( protected mode  switching macros a0JUL03 AvdH HCCFIG HOLLAND)
+( --assembler_macros_2' NOP, CP, ) \ A2oct21 AvdH
 : NOP, XCHG|AX, AX| ;
 : CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
 
