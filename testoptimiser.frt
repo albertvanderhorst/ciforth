@@ -1,6 +1,6 @@
 
 ONLY FORTH
-: SHOW-IT DUP OPTIMISE-O   DUP CRACKED HIDDEN ;
+: SHOW-IT DUP OPTIMISE   DUP CRACKED HIDDEN ;
 : A-MARKER ;
 
 : test 1 SWAP 3 2 SWAP ;
@@ -97,7 +97,7 @@ AGAIN ;
 'testH SHOW-IT
 
 \ Expansion with EXITs present.
-: (TESTI)  IF AND EXIT THEN ;
+: (TESTI)  IF AND EXIT THEN ROT ;
 : testI    (TESTI) (TESTI) ;
 'testI SHOW-IT
 
@@ -118,6 +118,29 @@ DUP IF LEAVE ELSE EXIT THEN SWAP
 LOOP ROT ;
 : testL    (TESTL) 2OVER ;
 'testL SHOW-IT
+
+\ Patterns, combined with inlining.
+0 CONSTANT z
+1 CONSTANT o
+: A0-A CELL+ ;   : A0-B 1- ;
+: A1 A0-A A0-B ;   : A2 A1 z + A1  ;    : A3 A2 o * A2  ;
+: A4 A3 A3     ;   : A5 A4 z + A4  ;    : A6 A5 o * A5  ;
+: A7 A6 A6     ;   : A8 A7 z + A7  ;    : A9 A8 o * A8  ;
+
+: B0-A A9   BASE @ DUP ;    : B0-B   10 = IF 2* THEN DROP  A9 A9     ;
+
+: B1 B0-A B0-B ;   : B2 B1 z + B1 ;    : B3 B2 o * B2 ;
+: B4 B3 B3 ;       : B5 B4 z + B4 ;    : B6 B5 o * B5 ;
+: B7 B6 B6 ;       : B8 B7 z + B7 ;    : B9 B8 o * B8 ;
+: C0 B9 B9 ;
+: testM C0 ;
+'testM SHOW-IT
+HIDE A1 HIDE A2 HIDE A3
+HIDE A4 HIDE A5 HIDE A6 HIDE A7
+HIDE A8 HIDE A9
+
+: testN BEGIN ROT WHILE IF DROP THEN REPEAT 2OVER ;
+'testN SHOW-IT
 
 \ ---------------------------------------------------------------------------
 
@@ -194,8 +217,8 @@ CR "SPLIT HERE" TYPE CR
 'testH SHOW-IT
 
 : testI
-IF AND BRANCH [ (FORWARD >R ] THEN [ R> FORWARD) ]
-IF AND BRANCH [ (FORWARD >R ] THEN [ R> FORWARD) ]
+IF AND BRANCH [ (FORWARD >R ] THEN ROT [ R> FORWARD) ]
+IF AND BRANCH [ (FORWARD >R ] THEN ROT [ R> FORWARD) ]
 ;
 
 'testI SHOW-IT
@@ -226,4 +249,12 @@ ROT
 ;
 
 'testL SHOW-IT
+
+: testM $120000 + ;
+'testM SHOW-IT
+
+: testN [ (BACK >R ] BEGIN ROT WHILE 0BRANCH [ R> BACK) ] DROP REPEAT 2OVER ;
+'testN SHOW-IT
+
+
 CR

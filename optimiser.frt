@@ -209,13 +209,14 @@ MAX-SET SET BRANCHES
 \ For a POSITION of a branch offset, find the target.
 : >TARGET   @+ + ;
 
-\ For START if there is some branch at ADDRESS add it to ``BRANCHES''
-: FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
-    CELL+   BRANCHES SET+!
-    _ THEN DROP ;
-
-\ For a SEQUENCE fill the ``BRANCHES'' set.
-: FILL-BRANCHES !BRANCHES BEGIN DUP FILL-ONE-BRANCH NEXT-PARSE WHILE DROP REPEAT 2DROP ;
+\ \\\WORKING BUT NO LONGER USED
+\ \\\\ For START if there is some branch at ADDRESS add it to ``BRANCHES''
+\ \\\: FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
+\ \\\    CELL+   BRANCHES SET+!
+\ \\\    _ THEN DROP ;
+\ \\\
+\ \\\\ For a SEQUENCE fill the ``BRANCHES'' set.
+\ \\\: FILL-BRANCHES !BRANCHES BEGIN DUP FILL-ONE-BRANCH NEXT-PARSE WHILE DROP REPEAT 2DROP ;
 
 \ BRANCH and TARGET is free with respect to GAP, i.e. this jump is either
 \ totally outside or totally inside the GAP.
@@ -535,7 +536,7 @@ EXPAND-SPECIAL ;
 
 \ Annihilate as much as possible from SEQUENCE.
 \ Return recompiled SEQUENCE (which is in fact the same address.)
-: ANNIHILATE DUP   DUP FILL-BRANCHES
+: ANNIHILATE DUP   ( DUP FILL-BRANCHES)
     BEGIN DUP ?NOT-EXIT WHILE ANNIHILATE-ONE REPEAT DROP
 ;
 
@@ -721,6 +722,9 @@ CREATE P
 'P  LSHIFT 'P  LSHIFT   | 'P  'P  + LSHIFT        |       \ Distributivity optimisation
 'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT        |
 ;
+( [ 0 ]L 0BRANCH          | BRANCH                  |                     )
+( [ 1 ]L 0BRANCH          | NOOP                    |                     )
+( BRANCH [ 0 ]L           | NOOP                    |                     )
 
 FMASK-SP 'EXECUTE >FFA OR!
 FMASK-SP '+ >FFA OR!
@@ -796,19 +800,42 @@ STRIDE SET PEES
         THEN THEN
 ;
 
-\ Find optimisation patterns in the SEQUENCE of high level code
-\ and perform optimisation while copying to ``HERE'' ,
-\ Do not initialise, or terminate.
-: (MATCH) BEGIN DUP ?NOT-EXIT WHILE MATCH-ONE REPEAT DROP ;
-
 \ Optimise a SEQUENCE using pattern matching.
-: OPTIMISE   DUP DUP FILL-BRANCHES (MATCH)   ;
+\ Return optimised SEQUENCE (which is in fact the same address.)
+\ It is required that the ``BRANCHES'' set has been filled.
+: MATCH   DUP BEGIN DUP ?NOT-EXIT WHILE MATCH-ONE REPEAT DROP ;
+
+\ ----------------------    Branch shortcuts, dead code  -------------------------------
+
+: ?DEAD-CODE? ( not yet) ;
+
+\ The branch (loop whatever) at ADDRESS jumps to a ``BRANCH''.
+\ Shortcut it.
+: SHORTEN-BRANCH CELL+ >R   R@ >TARGET CELL+ >TARGET
+    R@ CELL+ -   R> ! ;
+
+\ If possible, shortcut the branch at the start of SEQUENCE .
+: ?SHORTEN-BRANCH?
+BEGIN DUP CELL+ >TARGET @ 'BRANCH = WHILE DUP SHORTEN-BRANCH REPEAT DROP ;
+
+\ Try to apply branch optimisation to the start of a SEQUENCE .
+\ Always leave the new SEQUENCE bumped by one item.
+: BRANCH-SPECIAL-ONE
+    DUP @ 'BRANCH = IF ( DUP ?DEAD-CODE?) THEN
+    DUP @ IS-A-BRANCH IF DUP ?SHORTEN-BRANCH? THEN
+    NEXT-ITEM
+;
+
+\ Expand some special xt's from SEQUENCE. In partical ``LEAVE''.
+\ Return recompiled SEQUENCE (which is in fact the same address.)
+\ It is required that the ``BRANCHES'' set has been filled.
+: DEAD-CODE DUP BEGIN DUP ?NOT-EXIT WHILE BRANCH-SPECIAL-ONE REPEAT DROP ;
 
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
 : OPT-EXPAND   >DFA DUP @  ^^
     EXPAND
-    BEGIN !PROGRESS FOLD ^^ OPTIMISE ^^ REORDER ^^ ANNIHILATE ^^
+    BEGIN !PROGRESS FOLD ^^ MATCH ^^ REORDER ^^ ANNIHILATE ^^ DEAD-CODE ^^
 PROGRESS @ WHILE REPEAT
 SWAP ! ;
 
@@ -820,7 +847,7 @@ SWAP ! ;
 
 \ Try and optimise the DEA with respect HL inlining.
 \ Reach trough to underlying levels first.
-: OPTIMISE-O
+: OPTIMISE
     DUP H-OPTIMISABLE? IF
         DUP >DFA @ BEGIN NEXT-PARSE WHILE RECURSE REPEAT 2DROP
         DUP OPT-EXPAND
@@ -828,16 +855,16 @@ SWAP ! ;
     DUP ?FILL-SE?   DUP FILL-OB   !OPTIMISED ;
 
 \D : test 1 SWAP 3 2 SWAP ;
-\D 'test OPTIMISE-O
+\D 'test OPTIMISE
 \D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
 \D : test1 1 2 + 3 4 * OR ;
-\D 'test1 OPTIMISE-O
+\D 'test1 OPTIMISE
 \D "EXPECT `` F '' :" CR TYPE CRACK test1
 \D : test2 1 2 SWAP ;
-\D 'test2 OPTIMISE-O
+\D 'test2 OPTIMISE
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test2
 \D : test3 1 2 'SWAP EXECUTE ;
-\D 'test3 OPTIMISE-O
+\D 'test3 OPTIMISE
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test3
 \D : A0 1 ;
 \D : A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
@@ -845,5 +872,5 @@ SWAP ! ;
 \D : A7 A6 A6 + ;   : A8 A7 A7 + ;    : A9 A8 A8 + ;
 \D
 \D : B0 A9 A9 + ;
-\D 'B0 OPTIMISE-O
+\D 'B0 OPTIMISE
 \D "EXPECT `` 400 '' :" CR TYPE CRACK B0
