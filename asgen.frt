@@ -150,7 +150,7 @@ IS-A IS-xFIR
 HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
 ( From a MASK leave only SOME first bytes up, return IT ) 
 ( First means lower in memory, this looks different if printed on b.e.) 
-: FIRSTBYTES CELLS TABLE + @ ; 
+: FIRSTBYTES CELLS TABLE + @ AND ;
 : >IMASK >CNT FIRSTBYTES ; 
 
 : CHECK30 DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
@@ -311,7 +311,7 @@ HEX
 HERE POINTER !
 
 ( Get the valid part of the INSTRUCTION examined                        )
-: INSTRUCTION  POINTER @ @   ISL @   FIRSTBYTES ;
+: INSTRUCTION  ISS @ @   ISL @   FIRSTBYTES ;
 
 ( These disassemblers are quite similar:                                )
 ( if the DEA on the stack is of the right type and if the               )
@@ -323,7 +323,7 @@ HERE POINTER !
 : dis-PI
     DUP IS-PI IF
     AT-REST? IF
-    DUP >MASK OVER >IMASK AND POINTER @ @ AND OVER >INST = IF
+    DUP >MASK OVER >IMASK POINTER @ @ AND OVER >INST = IF
         DUP >BODY TALLY:,
         DUP +DISS
         POINTER @ ISS !
@@ -362,9 +362,9 @@ HERE POINTER !
    THEN
 ;
 
-( Print the DEA in an appropriate way, it must be a comma-er   )
+( Print the disassembly for the DEA , it must be a comma-er   )
 : .COMMA
-    DUP >IMASK POINTER @ @ AND U.
+    POINTER @ @ OVER >IMASK U.
     DUP >CNT POINTER +!
     ID.
 ;
@@ -376,7 +376,7 @@ HERE POINTER !
     THEN
  0 CELL+ +LOOP CR ;
 
-( Dissassemble one instruction from ADDRESS. )
+( Dissassemble one instruction from `POINTER'. )
 ( Leave `POINTER' pointing after that instruction. )
 : (DISASSEMBLE)
     !DISS   !TALLY
