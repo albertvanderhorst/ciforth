@@ -17,18 +17,23 @@ divert(9)dnl
 @subsection $8
 @pindex $2
 
+@noindent
 Name: $2
 
+@noindent
 ifelse($4,,
 {No stackeffect},
 {Stackeffect: $4})
 
+@noindent
 Attributes: $5
 
-Description: 
+@noindent
+Description:
 $6
 
-ifelse(len({$7}),0,, {See also: forall({forthsamp},$7)})dnl
+ifelse(len({$7}),0,, {@noindent
+See also: forall({forthsamp},$7)})dnl
     {define({_prev},{$8})dnl}
     divert(1)dnl
 {{{$8}})dnl
