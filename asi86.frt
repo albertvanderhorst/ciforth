@@ -9,7 +9,7 @@
 ( bytes this trick allows to debug -- but not run -- 8086 assembler     )
 ( of 32 bits system. The pattern 00 01 {$100} to fixup the last bit     )
 ( becomes 00 00 00 01 {$1000000} on a 16 bit system                     )
-: 0s 2 ROTLEFT ;  ." WARNING : testing version on 8086"                 )
+: 0s 2 ROTLEFT ;  ." WARNING : testing version on 8086"                 
 ( By defining 0s as a NOP you get a normal 8086 version                 )
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
@@ -58,15 +58,15 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 00 FF01 T!
  0002 0084 2 2FAMILY, TEST, XCHG,
 00 FF03 0088 2PI MOV,
-02 FF00 008D 2PI LEA,
-00 FF00 T!   0001 00C4 2 2FAMILY, LES, LDS,
+22 FF00 008D 2PI LEA,
+22 FF00 T!   0001 00C4 2 2FAMILY, LES, LDS,
 00 FF01 00C6 2PI MOVI,
 
 ( --------- one fixup operands ----------)
-00 07 T!   08 40 4 1FAMILY, INCX, DECX, PUSHX, POPX,
-00 07 90 1PI XCHGX,
-0401 07 B0 1PI MOVI|BR,
-0402 07 B8 1PI MOVI|XR,
+12 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
+12 07 90 1PI XCHG|AX,
+0411 07 B0 1PI MOVI|BR,
+0412 07 B8 1PI MOVI|XR,
 0400 C701 T!
  0800 0080 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI, CMPI,
 0401 C700 T!
@@ -83,7 +83,7 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 ( --------- no fixup operands ----------)
 01 20100 0s 0000 0s xFIR B'|
 02 20100 0s 0100 0s xFIR W'|
-08 201 T!    02 A0 2 1FAMILY, MOVTA, MOVFA,
+0208 201 T!    02 A0 2 1FAMILY, MOVTA, MOVFA,
 0400 201 T!
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
 00 201 A8 1PI TESTI|A,
@@ -107,8 +107,8 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 ( --------- no fixups ---------------)
 
 0401 00 CD 1PI INT,
-0028 00 9A 1PI CALLFAR,
-2204 00 EA 1PI JMPFAR,
+2208 00 9A 1PI CALLFAR,
+2208 00 EA 1PI JMPFAR,
 0102 00 T!   08 C2 2 1FAMILY, RET+, RETFAR+,
 1000 00 T!   02 E4 2 1FAMILY, IN|P, OUT|P,
 8004 00 T!   01 E8 2 1FAMILY, CALL, JMP,
@@ -127,8 +127,8 @@ A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may always want to use these instead of (RB,)
-    : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;                    )
-    : RW, ISS @ - (RW,) ;      : RL, ISS @ - (RL,) ;                    )
+    : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;                    
+    : RW, ISS @ - (RW,) ;      : RL, ISS @ - (RL,) ;                    
 (   : D0|  ' [BP] REJECT D0|  ;                                         )
 (   : [BP] ' D0|  REJECT [BP] ;                                         )
 (   : R| ' LES, REJECT ' LDS REJECT R| ;                                )
