@@ -342,23 +342,14 @@ DROP 0 THEN ;
 \ Assuming there has been folding, increment SEQUENCE to point past all
 \ constants at its start. Return incrementer SEQUENCE.
 : COUNT-LIT BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 VD +! REPEAT ;
-\ For SEQUENCE , return the POINTER to first constant (``LIT'')
-: FIND-LIT BEGIN DUP @ 'LIT <> OVER ?NOT-EXIT AND WHILE NEXT-ITEM  REPEAT ;
 
-\ For SEQUENCE , return the ADDRESS where the next constants start and
-\ the STRING thereafter that may be swappable.
-: (FIND-SWAPPABLE) FIND-LIT !OPT-START DUP COUNT-LIT COLLECT-SWAPPER ;
+\ For ADDRESS where constants start, leave the STRING thereafter that may be swappable.
+: FIND-SWAPPABLE !OPT-START COUNT-LIT COLLECT-SWAPPER ;
 
-\ For SEQUENCE , return ADDRESS ADDRESS1 that comprise two possible swappable part ends.
-\ Note that backtracking occurs to the end of the litterals that failed to optimise.
-: FIND-SWAPPABLE
-    BEGIN (FIND-SWAPPABLE) OVER ?NOT-EXIT OVER 0= AND WHILE
-    DROP SWAP DROP
-    REPEAT + ;
-
-\ Get from SEQUENCE four boundaries, delineating 3 areas. Return B C D.
+\ From ADDRESS where constants start, and a swappable STRING
+\ calculate three boundaries, delineating 2 areas. Return B C D.
 \ The order to be compiled is C-D B-C .
-: GET-PIECES   FIND-SWAPPABLE ( B D) >R DUP VD @ 2 * CELLS + R> ;
+: GET-PIECES  + ( B D) >R DUP VD @ 2 * CELLS + R> ;
 
 \ Inspect B C D and report into ``PROGRESS'' whether there is any
 \ optimisation by swapping. For that B-C and C-D must be both non-empty.
@@ -372,11 +363,16 @@ DROP 0 THEN ;
     DUP R>   OVER -   PAD $+!
     PAD $@ >R SWAP R> MOVE ;
 
+: REORDER-ONE
+    DUP @ 'LIT <> IF NEXT-ITEM  ELSE
+    DUP FIND-SWAPPABLE DUP 0= IF 2DROP NEXT-ITEM ELSE
+    GET-PIECES ?PROGRESS? DUP >R COMPILE-PIECES R>
+    THEN THEN
+;
 \ Reorder a SEQUENCE to delay constants as much as possible.
 \ Return rearranged SEQUENCE (which is in fact the same address.)
-: REORDER DUP
-    BEGIN GET-PIECES ?PROGRESS? DUP >R COMPILE-PIECES R> DUP ?NOT-EXIT 0= UNTIL DROP
-POSTPONE (;)  ;
+: REORDER   DUP ( DUP FILL-BRANCHES)
+    BEGIN DUP ?NOT-EXIT WHILE REORDER-ONE REPEAT DROP ;
 
 \ ---------------------------------------------------------------------
 
