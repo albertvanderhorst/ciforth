@@ -196,7 +196,7 @@ CREATE task
 \ Install other library
 : SWITCH-LIBS   BLOCK-EXIT
     2 ARG[] BLOCK-FILE $!
-    BLOCK-INIT
+    2 BLOCK-INIT
     SHIFT-ARGS   SHIFT-ARGS
     'task 'FORTH FORGET-VOC COLD ;
 
@@ -2501,7 +2501,7 @@ DECIMAL
 : REFRESH
     BLOCK-EXIT
     "ee BLOCKS.BLK;cp BLOCKS.BLK blocks.frt" SYSTEM
-    BLOCK-INIT
+    2 BLOCK-INIT
     1 WARNING ! ;
 
 
