@@ -117,13 +117,13 @@ TEMPFILE=/tmp/figforthscratch
 
 # msdos.cfg and alone.cfg are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
-fig86.%.asm : %.cfg nasm.m4 fig86.gnr
+fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
 	rm $(TEMPFILE)
 
-fig86.%.msm : %.cfg masm.m4 fig86.gnr ; \
+fig86.%.msm fig86.%.rawdoc : %.cfg masm.m4 fig86.gnr ; \
 	m4 $+ >$(TEMPFILE) ; \
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@ ; \
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)

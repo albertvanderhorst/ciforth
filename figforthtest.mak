@@ -172,8 +172,6 @@ intro.mi    \
 manual.mi   \
 # That's all folks!
 
-%.rawdoc : %.asm ;
-
 fig86.%.info : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.info=%.mi) )|m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.info=%.cfg) manual.m4 figforth.mi)|\
