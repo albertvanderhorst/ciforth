@@ -55,6 +55,37 @@ extensibility of Forth.
 
 In combination with the change of the boot-up parameters at
 forthcode({+ORIGIN}) this allows to make a turnkey system.
+The procedure for saving the system.
+
+In the following we use the naming convention of ISO about cells.
+A cell is the fundamental unit of storage for the Forth engine.
+Here it is _BITS_ bits (_BITS16_(2)_BITS32_(4) bytes).
+
+Save the system as follows.
+forthenumerate
+forthitem
+All user variables are saved by copying them from forthcode({U0})
+to forthsamp({0 +ORIGIN}) 
+ forthcode({U0}) is a user variable pointing to the start of the user area.
+forthitem
+If all user variables are to be initialised to what they are in this live system
+skip to step 5.
+Adjust any variables to what you want them to be in the 
+saved system in the forthcode({+ORIGIN}) area.
+The initialisation for user variable forthvar({Q}) can be found at 
+    forthsamp({' Q @ +ORIGIN}).
+forthitem
+Adjust forthcode({VOCLINK}) (the 10-th user variable, so at forthvar({10 CELLS +ORIGIN})  )
+forthitem
+Adjust version information at 2 cells before forthcode({+ORIGIN}) (if needed)
+forthitem
+Copy from X to HERE to disk or where ever you want to restore 
+from. _HOSTED_({In this ciforth you can do this 
+By changing the current block file to the program file (using forthcode({BLOCK-EXIT}) and 
+ forthcode({BLOCK-INIT}) )
+and performing raw writes (using forthcode({R/W}) ), then switching back to your 
+original block file. })
+forthendenumerate
 
 @section Memory organization
 
