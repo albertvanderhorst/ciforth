@@ -132,7 +132,6 @@ _ENDCOMMENT
 
 ; Bios specific equates.
 BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
-CODESEGMENT     EQU     BOOTADDRESS/10H ; PC jumps to 0:7C00 to boot
 SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
 	; Skip boot sector,fats and root dir and first sector of file.
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
@@ -142,15 +141,25 @@ _COMMENT
 SECSTRT EQU     1       
 _ENDCOMMENT
 ; END  OF PHYSICAL DISK PARAMETERS
+
+; Segments
+CODESEGMENT     EQU     BOOTADDRESS/10H ; PC jumps to 0:7C00 to boot
 ;____1_____ _PROTECTED_1_({
+REALSEGMENT     EQU     BOOTADDRESS/10H ; All real code executes here
+CS_COMMON       EQU     BOOTADDRESS/10H ; Protected overlapping segment with same
+DS_16           EQU     1800H           ; Real mode may dabble here
+CODE_SEGMENT EQU 07C0H ; The same for real and prot)         
+CS_16 EQU 10H  ; 16 BITS CODE SEGMENT DID                 
+CS_32 EQU 10H  ; 32 BITS CODE SEGMENT DID                 
+;DS_16 EQU 7B8H ; 16 BITS DATA SEGMENT DID                  
+DS_32 EQU 7B8H ; 32 BITS DATA SEGMENT DID                  
+
+IDENTIFY_16 EQU 008FH   ; Identification of 16 bit data segment
+IDENTIFY_32 EQU 00CFH   ; Identification of 32 bit data segment
+
 GDTLEN EQU 7FFFH 
 GDT EQU 28000H 
 GDT_SEGMENT EQU GDT/10H
-CODE_SEGMENT EQU 07C0H ; The same for real and prot)         
-DATA_SEGMENT EQU 1800H       
-CS_32 EQU 10H  ; 32 BITS CODE SEGMENT)                      
-DS_32 EQU 7B8H ; 32 BITS DATA SEGMENT)                      
-
 });_END___1__({ _PROTECTED_1_})
 
 	PAGE
@@ -206,7 +215,7 @@ BOOT:
 ;       JMP FAR BOOTADDRESS+ELSE1
 	 DB      0EAH
 	 DW      ELSE1
-	 DW     CODESEGMENT
+	 DW     REALSEGMENT
 ELSE1:  
 ;MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE
 	MOV     AL,'F'
@@ -326,7 +335,7 @@ HUGESECS      DD         000H
 BOOTLBA:  DB      10H, 0
 	DW      (INITDP-$$)/BPS      ; ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.
 	DW      BPS             ; OFFSET AND SEGMENT
-	DW      CODESEGMENT
+	DW      REALSEGMENT
 	; At a hard disk we just read sector from sector 1        
 	DD      1       ; Start
 	DD      0       ; M.S. 32 BITS
@@ -364,7 +373,7 @@ BOOT:
 ;       JMP FAR BOOTADDRESS+ELSE1
 	 JMPFAR 
 	 DW      ELSE1
-	 DW     CODESEGMENT
+	 DW     REALSEGMENT
 ELSE1:  
 ;MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE
 	MOV     AL,'F'
@@ -437,36 +446,36 @@ ORIG:
 	STOSW
 ; PREPARE-CS : THIS MUST LOOK THE SAME IN REAL AND 16 BITS                                                    
 ;               PROTECTED MODE
-	MOV     DI,CODESEGMENT 
+	MOV     DI,CS_COMMON 
 	MOV     AX,0FFFFH
 	STOSW
 	MOV     AX,BOOTADDRESS 
 	STOSW
 	MOV     AX,9A00H      
 	STOSW
-	MOV     AX,008FH 
+	MOV     AX,IDENTIFY_16 
 	STOSW
 ; PREPARE DS/SS/ES ; only SS used in real mode.                                                    
-;  BECAUSE IT IS USED IN REAL MODE DATA_SEGMENT
+;  BECAUSE IT IS USED IN REAL MODE DS_16
 ;  MUST BE EMPTY.            
-	MOV     DI,DATA_SEGMENT
+	MOV     DI,DS_PROT
 	MOV     AX,0FFFFH
 	STOSW
 	MOV     AX,BOOTADDRESS 
 	STOSW
 	MOV     AX,9200H      
 	STOSW
-	MOV     AX,008FH 
+	MOV     AX,IDENTIFY_PROT 
 	STOSW
-; PREPARE-CS 32 BITS                                                   
-	MOV     DI,CS_32
+; PREPARE-CS 16/32 BITS                                                   
+	MOV     DI,CS_PROT
 	MOV     AX,0FFFFH
 	STOSW
 	MOV     AX,BOOTADDRESS 
 	STOSW
 	MOV     AX,9A00H      
 	STOSW
-	MOV     AX,00CFH 
+	MOV     AX,IDENTIFY_32          ; WRONG! FOR TESTING
 	STOSW
 ; PREPARE-DS 32 BITS                                                   
 	MOV     DI,DS_32
@@ -476,16 +485,18 @@ ORIG:
 	STOSW
 	MOV     AX,9200H      
 	STOSW
-	MOV     AX,00CFH 
+	MOV     AX,IDENTIFY_32 
 	STOSW
 
-	MOV     AX,CODESEGMENT 
+	MOV     AX,REALSEGMENT 
 	MOV     ES,AX
 	LGDT    [GDTLOAD]
-	TO_PROTECTED    ;   "
 ;************************
-OPTIONAL_SWITCH_TO_32MODE
+;____1_____ _BITS32_1_({
+include(width32.m4)       
+});_END___1__({ _BITS32_1_})
 ;************************
+	JMPHERE_FROM_REAL
 	 JMP     SAME3
 ;         JMPFAR         ;32BIT 
 ;         DW      LCLD   ;32BIT 
@@ -653,7 +664,6 @@ TNEXT3:	LODSW           ; AX <- (IP)
 _COMMENT
 DISPLAYSI:
 	JMPHERE_FROM_PROT
-	TO_REAL         ; Nought unless using protected mode.
 	BITS    16
 	MOV     AX,SI   
 	CALL    DISPLAYW 
@@ -663,7 +673,6 @@ DISPLAYSI:
 	BITS    32
 	MOV     AH,10H
 	INT     16H
-	TO_PROTECTED    
 	JMPHERE_FROM_REAL
 	RET
 _ENDCOMMENT
@@ -1141,12 +1150,10 @@ CODE_HEADER({L@},{LFET})
 	POP	BX	;MEM LOC
 	POP	CX	;SEG REG VAL
         JMPHERE_FROM_PROT
-	TO_REAL         
 	MOV	DX,DS
 	MOV	DS,CX
 	MOV	BX,[BX]
 	MOV	DS,DX
-	TO_PROTECTED
         JMPHERE_FROM_REAL
 	PUSH    BX
 	JMP	NEXT
@@ -1163,13 +1170,11 @@ CODE_HEADER({L!},{LSTORE})
 	POP	BX
 	POP	CX
         JMPHERE_FROM_PROT
-	TO_REAL
 	MOV	DX,DS
 	MOV	DS,CX
 	POP	AX
 	MOV	[BX],AX
 	MOV	DS,DX
-	TO_PROTECTED
         JMPHERE_FROM_REAL
 	JMP	NEXT
 	PAGE
@@ -1190,8 +1195,6 @@ DOCOL:	LEA     BP,[BP-CELLS(1)]
 	LEA     SI,[DI+CELLS(1)]  ;(IP) <- (PFA)
 ;____1_____ _PROTECTED_1_({
         JMPHERE_FROM_PROT
-	TO_REAL         
-	TO_PROTECTED    
         JMPHERE_FROM_REAL
 });_END___1__({ _PROTECTED_1_})
 	JMP	NEXT
@@ -2490,13 +2493,11 @@ CODE_HEADER({BIOS},{BIOS})
 	PUSH     BP      
 	XCHG    SI,AX   ; Save AX in (already free) SI
         JMPHERE_FROM_PROT
-	TO_REAL         ; Nought unless using protected mode.
 	XCHG    SI,AX   
 RQBIOS: INT(0)          ; Request number to be overwritten.
 	PUSHF      ; Save status into DI 
 	POP     DI      
 	XCHG    SI,AX   ; Save AX in (still free) SI     
-	TO_PROTECTED    
         JMPHERE_FROM_REAL
 	XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
@@ -2520,13 +2521,11 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     BP      
 	XCHG    SI,AX   ; Save AX in (already free) SI
         JMPHERE_FROM_PROT
-	TO_REAL         ; Nought unless using protected mode.
 	XCHG    SI,AX   
         INT     21H          
 	PUSHF      ; Save status into DI 
 	POP     DI      
 	XCHG    SI,AX   ; Save AX in (still free) SI     
-	TO_PROTECTED    
         JMPHERE_FROM_REAL
 	XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
@@ -3007,7 +3006,7 @@ HEADER({LBAPAR},{LBA},{DOVAR})
 	DB      10H, 0      ; default    
 	DC      SPB         ; default    
 	DC      0           ; to be filled with offset
-	DC      CODESEGMENT ; default segment
+	DC      REALSEGMENT ; default segment
 	; At a hard disk we just read sector from sector 1        
 	DD      0       ; sector number
 	DD      0       ; M.S. 32 BITS default
@@ -3021,12 +3020,10 @@ CODE_HEADER({RBLK},{RBLK})
 	MOV     BX,4200H       
 	MOV     DX,0080H  ;   Disk C                                 
         JMPHERE_FROM_PROT
-	TO_REAL
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ; REMEMBER STATUS
 	POP     BX
-	TO_PROTECTED
         JMPHERE_FROM_REAL
 	POP	BP	;RETURN STACK
 	POP	SI	;INTERPRETER PNTR
@@ -3041,12 +3038,10 @@ CODE_HEADER({WBLK},{WBLK})
 	MOV     BX,4300H       
 	MOV     DX,0080H  ;   Disk C                                 
         JMPHERE_FROM_PROT
-	TO_REAL
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ; REMEMBER STATUS
 	POP     BX
-	TO_PROTECTED
         JMPHERE_FROM_REAL
 	POP	BP	;RETURN STACK
 	POP	SI	;INTERPRETER PNTR
