@@ -1,3 +1,5 @@
+( $Id: )
+( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( ############## 8080 ASSEMBLER PROPER ################################ )
 ASSEMBLER DEFINITIONS
 ( Note the decompiler hits them in the reverse order                    )

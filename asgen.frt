@@ -1,4 +1,5 @@
-
+( $Id: )
+( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 VOCABULARY ASSEMBLER IMMEDIATE
 ( This file `asgen.frt' contains generic tools and is usable at least   )
 ( for making assemblers for e.g. 8080 8086 80386 Pentium 6809 68000     )

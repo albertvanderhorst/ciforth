@@ -1,5 +1,6 @@
-( Dissassemble one instruction from `POINTER'. )
-( Leave `POINTER' pointing after that instruction. )
+( $Id: )
+( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+( Generate postscript data sheet. )
 DECIMAL
 : PRELUDE
   ." SNIP TILL HERE" CR

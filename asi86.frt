@@ -1,3 +1,5 @@
+( $Id: )
+( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
 ( The patch ofr the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
