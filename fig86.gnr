@@ -2784,8 +2784,9 @@ CODE_HEADER({?TERMINAL},{QTERM})
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
 HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
-        DC      LIT, 64         ; SCREEN 4..7.
-        DC      OVER, LSUB, QERR  ; Make errno's count from the top.
+        DC      LDUP, ZERO, MIN, SWAP ; ( errno -- error flag, errno)
+        DC      LIT, 64, PLUS   ; Project onto SCREEN 4..7.
+        DC      QERR  ; Make errno's count from the top.
         DC      SEMIS
 ;
 HEADER({TERMIO},{TERMIO},{DOVAR})
@@ -2840,6 +2841,7 @@ EXPEC_A:
 EXPEC1: DC      KEY, LDUP, LIT, LF
         DC      EQUAL
         _0BRANCH(EXPEC2)
+        DC      DROP
         DC      LLEAV
         _BRANCH(EXPEC3)
 EXPEC2: DC      IDO,CSTOR
