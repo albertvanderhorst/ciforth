@@ -3278,48 +3278,48 @@ A PC 0 0 0 DOIT 2DROP DROP CONSTANT PC'
 : TO32 B OVER 0 0 PAD DOIT 2DROP 2DROP
 PAD 6 + C0 TOGGLE C SWAP 0 0 PAD DOIT  2DROP 2DROP ;
 DECIMAL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( CRB compare content of L1 and L2 over range LEN) ?32 ?PC HEX
+B/BUF 10 / CONSTANT SZ
+VARIABLE B
+: ?TERMINATE KEY &Q = IF QUIT THEN ;
+: RWBUF0 0 BLOCK 0 LOCK ;   : RWBUF1 1 BLOCK 1 LOCK ;
+: CB B/BUF 0 DO
+   OVER I +   OVER I +   SZ CORA
+IF  CR B . I . OVER I + SZ DUMP   DUP I + SZ DUMP  ?TERMINATE
+THEN   SZ +LOOP 2DROP ;
+( Compare FROM and FROM1 over RANGE )
+: read SWAP 1 R/W ;   : write SWAP 0 R/W ;
+: CRB     0 DO I 10 .R ^M EMIT
+I B ! OVER I + RWBUF0 read DUP I + RWBUF1 read
+RWBUF0 RWBUF1 CB LOOP 2DROP ;
+( Restore FROM length RANGE to booting )
+: restore 0 DO DUP I + RWBUF0 read I RWBUF0 write LOOP ;
+?PC ?32 HEX ( R/W must only be used for low buffers.)
+2 CONSTANT SEC/BLK
+: SEC-RW  ( function address bl# -- )
+24 /MOD   SWAP   12 /MOD   >R   SWAP   100 *   +   1+
+R>   100 *   0 +   13 ^ BIOS   1
+AND   DISK-ERROR   +!   DROP DROP DROP DROP ;
+\ : SEC-RW CR . . . ;
+: R/W-floppy       0 DISK-ERROR ! ^
+0BRANCH [ 10 , ] 201  BRANCH  [ 8 , ] 301  ^
+SWAP SEC/BLK * SEC/BLK OVER + SWAP
+DO SWAP   ^ 2DUP   I   SEC-RW   200 +   ^ SWAP
+LOOP DROP   DROP   DISK-ERROR   @   ?DUP
+0BRANCH [ 38 , ] 0< 0BRANCH [ 10 , ] 9
+BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
+;  : R-floppy 1 R/W-floppy ;  : W-floppy 0 R/W-floppy ;
+DECIMAL
+?PC HEX ( copy a hd system, was written to a floppy to the
+hard disk. Done by a Forth booted from another floppy.)
+?16 ?PC    40 CONSTANT HD-OFFSET
+: SAFE HD-OFFSET OFFSET @ = 17 ?ERROR ;
+: SAVE-BLOCKS   ( First Last -- )
+EMPTY-BUFFERS  ." Put hd floppy and key"
+KEY DROP
+OVER - DO
+   DUP + READ-BLOCK 1 AND .
+   RW-BUFFER I 0 R/W LOOP 2DROP ;  DECIMAL
 
 
 
@@ -4030,6 +4030,21 @@ DECIMAL  getit
 ;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( Trying to implement SYSTEM )
 : CV OVER + 1 - 0 SWAP C! ;
   CREATE COMMAND 256 ALLOT
@@ -4046,34 +4061,19 @@ DECIMAL  getit
 
 
 
-( CATCH and THROW)
- VARIABLE HANDLER
-: CATCH
-    DSP@ CELL+ >R
-\    SAVE
-    HANDLER @ >R
-    RSP@ HANDLER !
-    EXECUTE
-    R> HANDLER !
-\    RDROP RDROP RDROP
-    RDROP 0 ;
 
 
 
 
 
-( CATCH and THROW)
-: THROW
-?DUP IF
-   HANDLER @ 0= IF ERROR THEN
-   HANDLER @ RSP!
-   R> HANDLER !
-\   RESTORE
-   R> SWAP >R ( Keep throw code)
-   DSP!
-   R>
-   THEN ;
-: T12 12 THROW ;
+
+
+
+
+
+
+
+
 
 
 
