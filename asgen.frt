@@ -1,31 +1,70 @@
 
 VOCABULARY ASSEMBLER IMMEDIATE
+( This file `asgen.frt' contains generic tools and is usable at least   )
+( for making assemblers for e.g. 8080 8086 80386 Pentium 6809 68000     )
+( 6502 8051.                                                            )
+( Most instruction set follow this basic idea that it contains of three )
+( distinct parts:                                                       )
+(   1. the opcode that identifies the operation                         )
+(   2. modifiers such as the register working on                        )
+(   3. data, including addresses or offsets.                            )
+( This assembler goes through three stages for each instruction:        )
+(   1. postit: assemblers the opcode with holes for the modifiers.      )
+(      This has a fixed length. Also posts requirements for commaers.   )
+(   2. fixup: fill up the holes, either from the beginning or the       )
+(     end of the post. These can also post required commaers            )
+(   3. The commaers. Any user supplied data in addition to opcode.      )
+(      Each has a separate command, where checks are built in.          )
+( Keeping track of this is done by a bit array called TALLY, similar    )
+( to the a.i. blackboard concept.                                       )
+( This setup allows a complete check of validity of code and complete   )
+( control over what code is generated. Even so all checks can be        )
+( defeated if need be.                                                  )
+( The generic tools include:                                            )
+(   - the defining words for 1 2 3 byte postits,                        )
+(   -  for fixups from front and behind and                             )
+(   -  for comma-ers,                                                   )
+(   - showing a list of possible instructions, for all opcodes or       )
+(   -  for a single one.                                                )
+(   -  disassembly of a single instruction or a range                   )
+( To write an assembler, make the tables, generate the complete list    )
+( of instructions, assemble it and disassemble it again. If equal, you  )
+( have a starting point for confidence in your work.                    )
+
+( THIS CODE IS UTTERLY BIG-ENDIAN DEPENDANT!                            )
+( AT PLACES A 32 BIT MACHINE IS ASSUMED!                                )
+( IT USES THE VOCABULARY AS A LINKED LIST OF STRUCTS: FIGFORTH  
+
 ( Returns the DEA from the inline word. Like an xt in ans. )
 ( A subsequent `ID.' must print the name of that word      )
 : % [COMPILE] ' NFA ;
 : >BODY PFA CELL+ ; ( From DEA to the DATA field of `X' *FOR A <BUILDS WORD!!*)
 : INVERT -1 XOR ;
 
-1 VARIABLE TABLE 1 , ( I TABLE + @ yields $100^x )
-( Rotate X by I bytes right  leaving X')
-: ROTRIGHT TABLE + @ U* OR ;
+1 VARIABLE TABLE 1 , ( I TABLE + @ yields $100^[-x mod 4] ) 
+( Rotate X by I bytes left leaving X' Left i.e. such as it appears in ) 
+( memory! Not as printed on a big endian machine! ) 
+: ROTLEFT TABLE + @ U* OR ; 
 : & CURRENT @ @ ID. ; ." TESTING STUFF: &"
-( First cell : l.s. byte 4 pairs of bits that are mutually exclusive )
-( remainder contains bits down for each COMMAER still needed )
-( The actual commaer must match bits in l.s. byte, if indicated      )
+( First cell : l.s. byte 4 pairs of bits that are mutually exclusive    )
+( remainder contains bits down for each COMMAER still needed. The       )
+( actual commaer must match bits in l.s. byte too. This allows to       )
+( force consistencies in particular operands sizes.                     )
 ( Second cell contains bits up to be filled by TALLY:| )
  0 VARIABLE TALLY 0 CELL+ ALLOT  ( 4 BYTES FOR COMMAER 4 FOR INSTRUCTION)
  0 VARIABLE PRO-TALLY 0 CELL+ ALLOT  ( Prototype for TALLY)
  0 VARIABLE ISS  ( Start of current instruction)
- 0 VARIABLE ISL  ( Start of current instruction)
+ 0 VARIABLE ISL  ( Lenghth of current instruction)
  0 VARIABLE PREVIOUS ( Previous comma, or zero)
 : !POST HERE ISS !  0 PREVIOUS ! ;
 : @+ >R R CELL+ R> @ ;
 : !TALLY -1 TALLY ! -1 TALLY CELL+ ! ;
-( Return: instruction IS complete, or not started)
-( The first 8 bits of the TALLY need not be consumed. )
 HEX
+( Return: instruction IS complete, or not started)
+( All of the `TALLY' except the first 8 bits must have been filled up.  )
 : AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
+( Return : there IS an inconsistency, i.e. even and subsequent ) 
+( odd bit in the l.s. `TALLY' byte are both up. ) 
 : INCONSISTENT? TALLY @ INVERT DUP 2 * AND AA AND ;
 DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
@@ -38,18 +77,19 @@ DECIMAL
 : DO-POST CHECK26 CHECK32 !POST DUP TALLY:, @ , ISL @ CORRECT ;
 HEX
 0 VARIABLE TEMP ( Should be passed via the stack )
-( Build a word that tests whether it of same type as stored )
-( in `TEMP'. Execution: Leave for DEA : it IS of same type )
+( Build a word that tests for same type compared to stored ) 
+( in `TEMP'. Execution: Leave for DEA : it IS of same type ) 
 : IS-A <BUILDS TEMP @ , DOES> @ SWAP PFA CFA CELL+ @ = ;
-( Generate error if data for postit defining word was inconsistent)
+( Generate error on data for postit/fixup, if the bits to fill in     )
+( stick out of the mask.                                                )
 : CHECK31 HERE 4 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
 
 ( Apply to 1PI ..3PI 1FI ..3FI . Defines data layout. All work from DEA )
 : >INST >BODY @ ;  ( Get INSTRUCTION/FIXUP )
 : >MASK >BODY CELL+ @ ; ( Get the BITS in the code that become valid.)
 : >COMMA >BODY CELL+ CELL+ @ ; ( WHICH comma-actions are expected? )
-( How MANY bytes is the postit/ WHERE sits the byte to be fixed up
-( counting backwards from the end of the instruction )
+( How MANY bytes is the valid part of the postit/ valid part of fixup ) 
+( Bits may be up outside this part and are useful for forcing consistency ) 
 : >CNT >BODY CELL+ CELL+ CELL+ @ ;
 ( Accept a MASK with a bit up for each commaer, a MASK indicating       )
 ( which bits are missing from postitted, and the INSTRUCTION )
@@ -78,7 +118,7 @@ DECIMAL
 : TALLY:| CELL+ @+ TALLY CELL+ OR! @ TALLY AND! ;
 
 ( Note: the mask is inverted compared to postit, such that a            )
-( postit and a fixup that go tohether have the same mask                )
+( postit and a fixup that go together have the same mask                )
 ( Accept a MASK with a bit up for each commaer, a MASK indicating       )
 ( which bits are fixupped, and the FIXUP )
 ( The fixup is a string of 0 CELL+ byte that is masked in this order    )
@@ -88,27 +128,34 @@ DECIMAL
 DOES> [ HERE TEMP ! ] DUP TALLY:| @ ISS @ OR! ;
 IS-A IS-xFI
 
-: CORRECT-I 0 CELL+ ISL @ - ROTRIGHT ;
-(   Based on PFA of a fixup fix into tally )
+( Rotate the MASK etc from a fixup-from-reverse into a NEW mask fit ) 
+( for using for a straight instruction. ) 
+: CORRECT-I 0 CELL+ ISL @ - ROTLEFT ;
+(   Based on PFA of a fixup: fix into tally )
 : TALLY:|R CELL+ @+ CORRECT-I TALLY CELL+ OR! @ TALLY AND! ;
-( Note: the mask is inverted compared to postit, such that a            )
-( postit and a fixup that go together have a masks differing in a shift )
-( over whole byte.                                                      )
-( Accept a MASK with a bit up for each commaer, a MASK indicating
-( which bits are fixupped, and the FIXUP )
-( The fixup is a string of `0 CELL+ bytes' that is masked in from )
-( behind from the end of the instruction.                               )
-( One size fits all. Due to the mask )
+
+( Generate a reverse fixup: a string of `0 CELL+' bytes that is masked  )
+( in from behind from the end of the instruction.                       )
+( Accept a MASK with a bit up for each commaer, a MASK indicating       )
+( which bits are fixupped, and the FIXUP .                              )
+( One size fits all. Due to the mask                                    )
 : xFIR <BUILDS , , INVERT , 0 , CHECK31
 DOES> [ HERE TEMP ! ] DUP TALLY:|R @ ISS @ ISL @ + 0 CELL+ - OR! ;
 IS-A IS-xFIR
 
+( Note: the mask is inverted for a fixup compared to postit, such that  )
+( a postit and a fixup that go together have a masks differing in a     )
+( shift over whole byte.                                                )
+
 HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
-: >IMASK >CNT CELLS TABLE + @ ;
+( From a MASK leave only SOME first bytes up, return IT ) 
+( First means lower in memory, this looks different if printed on b.e.) 
+: FIRSTBYTES CELLS TABLE + @ ; 
+: >IMASK >CNT FIRSTBYTES ; 
 
 : CHECK30 DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK32 CHECK30 TALLY OR! ;
-( Build with the LENGTH to comma the ADDRESS that is executint the comm )
+( Build with the LENGTH to comma the ADDRESS that is executing the comm )
 ( and a MASK with the bit for this commaer.                             )
 : COMMAER <BUILDS  , , DUP , ,
 DOES> [ HERE TEMP ! ] @+ BOOKKEEPING   @ EXECUTE ;
@@ -133,12 +180,10 @@ HEX
 : >NEXT% BEGIN  PFA LFA @   DUP 1+ C@ &- - UNTIL ;
 ( The CONTENT of a linkfield is not a dea, leave: it IS the endmarker   )
 : VOCEND? @ FFFF AND A081 = ;
-: %EXECUTE PFA CFA EXECUTE ;
 ( Leave the first DEA of the assembler vocabulary.                    )
 : STARTVOC ' ASSEMBLER 2 +  CELL+ @ ;
 
-
-(   The FIRST set is contained in the SECOND set, leaving IT            )
+(   The FIRST set is contained in the SECOND set, leaving it IS       )
 : CONTAINED-IN OVER AND = ;
 
 : SET <BUILDS HERE CELL+ , CELLS ALLOT DOES> ;
@@ -147,13 +192,13 @@ HEX
 ( Make the SET empty )
 : !SET DUP CELL+ SWAP ! ;
 ( Print the SET )
-: .SET DUP @ SWAP DO I . 0 CELL+ +LOOP ;
+: .SET @+ SWAP DO I . 0 CELL+ +LOOP ;
 ( For the SET : it IS non-empty )
-: SET? DUP @ SWAP CELL+ = 0= ;
+: SET? @+ = 0= ;
 12 SET DISS
 
 : !DISS DISS !SET ;
-: .DISS DISS DUP @ SWAP CELL+ DO
+: .DISS DISS @+ SWAP DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
 : +DISS DISS SET+! ;
@@ -233,37 +278,42 @@ HEX
 ;
 
      % RESULT +DISS                                                      
-: DOIT
+( Try to expand the current instruction in `DISS' by looking whether    )
+( DEA fits. Leave the NEXT dea.                                         )
+: SHOW-STEP    
+        DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
+        RESULT
+        >NEXT%
+(       DUP ID.                                                         )
+        INCONSISTENT? IF BACKTRACK THEN
+        BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
+;
+
+( Show all the instructions present in the assembler vocabulary )
+: SHOW-ALL
     !DISS
     !TALLY
     STARTVOC BEGIN
-        DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
-        RESULT
-        >NEXT%
-(       DUP ID.                                                         )
-        INCONSISTENT? IF BACKTRACK THEN
-        BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
+       SHOW-STEP       
     DUP VOCEND? UNTIL DROP
 ;
 
-: DOONE
-    % 
+( Show all instructions valid for the "OPCODE" given. )
+: SHOW-ONE
     !DISS
     !TALLY
-    DUP BEGIN
-        DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
-        RESULT
-        >NEXT%
-(       DUP ID.                                                         )
-        INCONSISTENT? IF BACKTRACK THEN
-        BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
+    % DUP BEGIN
+        SHOW-STEP
      OVER DISS CELL+ @ - UNTIL DROP DROP
 ;
 
 0 VARIABLE POINTER
 HERE POINTER !
 
-( These dissassemblers are quite similar:                               )
+( Get the valid part of the INSTRUCTION examined                        )
+: INSTRUCTION  POINTER @ @   ISL @   FIRSTBYTES ;
+
+( These disassemblers are quite similar:                                )
 ( if the DEA on the stack is of the right type and if the               )
 ( precondition is fullfilled and if the dissassembly fits,              )
 ( it does the reassuring actions toward the tally as with               )
@@ -277,16 +327,15 @@ HERE POINTER !
         DUP >BODY TALLY:,
         DUP +DISS
         POINTER @ ISS !
-        DUP >CNT POINTER +!
+        DUP >CNT POINTER +!   
     THEN
     THEN
     THEN
 ;
-
 : dis-xFI
    DUP IS-xFI IF
-   DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
-   DUP >MASK  ISS @ @ AND OVER >INST = IF
+   DUP >MASK   TALLY CELL+ @ INVERT   CONTAINED-IN IF
+   DUP >MASK   INSTRUCTION AND   OVER >INST = IF
        DUP >BODY TALLY:|
        DUP +DISS
    THEN
@@ -295,8 +344,8 @@ HERE POINTER !
 ;
 : dis-xFIR
    DUP IS-xFIR IF     
-   DUP >MASK CORRECT-I TALLY CELL+ @ INVERT CONTAINED-IN IF
-   DUP >MASK  POINTER @ 0 CELL+ - @ AND OVER >INST = IF
+   DUP >MASK CORRECT-I   TALLY CELL+ @ INVERT   CONTAINED-IN IF
+   DUP >MASK CORRECT-I   INSTRUCTION AND   OVER >INST CORRECT-I = IF
        DUP >BODY TALLY:|R
        DUP +DISS
    THEN
@@ -319,7 +368,7 @@ HERE POINTER !
     DUP >CNT POINTER +!
     ID.
 ;
-: .DISS' DISS DUP @ SWAP CELL+ DO
+: .DISS' DISS @+ SWAP DO
     I @ DUP IS-COMMA IF
        .COMMA       ( DEA -- )
     ELSE
