@@ -1,8 +1,8 @@
 include(prelude.m4)dnl
 include(postlude.m4)dnl 
 dnl Define a word definition on channel 9 
-dnl        the corresponding menu item on channel 6 
-dnl        and a definition for the second pass on channel 0 
+dnl   the corresponding menu item on channel 6 
+dnl   and the content including a definition for the second pass on channel 1
 define({worddoccommon},{
 divert(9)dnl
 @node $8, next$3(), prev(), MyTop()
@@ -15,7 +15,7 @@ STACKEFFECT: $4
 DESCRIPTION: $6
 
     {define({prev},{$8})dnl}
-    divert(0)dnl
+    divert(1)dnl
 {{{$8}})dnl
 define({next$3},}dnl
     divert(6)dnl
@@ -23,13 +23,14 @@ define({next$3},}dnl
 divert(9)dnl
 })dnl
 define({worddocchapter},
-    {@subsection $1}
+dnl Another macro call, resolved at yet a higher level
+wordsetnode_$1() 
     {$2}
     {$3}
     {$4}
 {{define({MyTop},{{$1}})dnl}}
 dnl Leave the first half of the first definition (unused) 
-{divert(0)dnl}
+{divert(1)dnl}
     {{
 define({{__dummy__}},dnl}}
 dnl Initialise menu channel 
@@ -49,11 +50,12 @@ define({worddocsafe},
 )dnl
 define({worddocchapterend},
 dnl Complete the last half of the last definition empty 
-{divert(0)dnl}
+{divert(1)dnl}
     {{)dnl}}
 dnl Close menu channel 
 {divert(6)dnl}
 {{@end menu}}
+{divert}
 {undivert}
 )
 {define({MyTop},{Glossary})dnl}
