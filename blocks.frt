@@ -2879,17 +2879,17 @@ MEISJES JOPIE     NO-SEX .rel
 
 
 ( Main screen for parser AH&CH                        A0oct03  )
- 181 182 THRU
-
-
-
-
-
-
-
-
-
-
+ 181 184 THRU
+( Create a forward definition, one that patches its own
+  call with a cfa that is in its data field. Then goes on
+  with that definition. )
+ : FORWARD <BUILDS 0 , DOES> @ R> 1 CELLS - DUP >R  ! ;
+( : DOIT HERE IN @ COMPILE ' ! IN ! COMPILE : ;   )
+: :R  IN @ >R [COMPILE] : R> IN !
+HERE CFA -FIND 0= 0 ?ERROR DROP CELL+ ! ; IMMEDIATE
+FORWARD FAC
+:R FAC   DUP 0= IF DROP 1 ELSE DUP 1 - FAC * THEN ;
+^ 4 FAC ^ ." 4! IS " .
 
 
 
@@ -2917,47 +2917,47 @@ IMMEDIATE
 ELSE       DROP THEN ;
 : TOKEN <BUILDS ( c) C, DOES> ( a) C@ =TOKEN ;
 
-
-
-
-
-
-
-
-
-
+: SKIP-BLANKS TIB @ IN @ + BEGIN DUP C@ BL = WHILE
+  1+ 1 IN +! REPEAT DROP ;
+: +KEYWORD ( f ) IF C@ IN +! ELSE DROP THEN ;
+: =KEYWORD  ( VS -) SUCCESS @ IF DUP
+IN @ TIB @ + SWAP 255 SWAP $@ ^ MATCH ^ DROP DUP SUCCESS !
++KEYWORD ELSE DROP THEN ;
+: KEYWORD <BUILDS BL WORD HERE C@ 1+ ALLOT
+DOES> SKIP-BLANKS =KEYWORD ;
+^
 ( UNIVERSAL 'X' )
 1 WIDTH !
 : '__  HERE 2 + C@ [COMPILE] LITERAL COMPILE =TOKEN ; IMMEDIATE
 31 WIDTH !
 BNF: <CHAR>  @TOKEN DUP &) = >R DUP &( = >R 0=   R> R> OR OR
     0= DUP SUCCESS !      +TOKEN ;BNF
-0 TOKEN <EOL>
+0 TOKEN <EOL>    $0A TOKEN 'CR'    BL TOKEN 'BL'
 BNF: <S>  '(' <S> ')' <S> | <CHAR> <S> | ;BNF
 : PARSE 1 SUCCESS ! <S> <EOL>  SUCCESS @ IF ." ok" ELSE ." NOK"
  THEN ;
-: (  COMPILE SUCCESS COMPILE @ COMPILE >R COMPILE LIT HERE 0 ,
-COMPILE >R COMPILE <BNF ; IMMEDIATE
-: ) COMPILE BNF> HERE SWAP ! COMPILE R> COMPILE DROP COMPILE R>
-COMPILE SUCCESS COMPILE ! ; IMMEDIATE
-: RUNA 1 SUCCESS ! 'A' ( 'B' 'C' ) SUCCESS ? ;
-
-( THE { } )
-: {  COMPILE SUCCESS COMPILE @ COMPILE >R [COMPILE] BEGIN
-COMPILE SUCCESS COMPILE @ [COMPILE] WHILE COMPILE <BNF
-;  IMMEDIATE
-: } COMPILE BNF> [COMPILE] REPEAT COMPILE R> COMPILE SUCCESS
-COMPILE ! ; IMMEDIATE
- RUND 1 SUCCESS ! 'A' { ',' 'A' } SUCCESS ? ;
+( Bracket an optional part, i.e. its success depends on what is
+  before it. The part must balance the return stack. )
+: <OPT  COMPILE SUCCESS COMPILE @ COMPILE >R ;
+: OPT>  COMPILE R> COMPILE SUCCESS COMPILE ! ;
 
 
-
-
-
-
-
-
-
+( THE { } round_bracket_pair and [ ] definitions )
+( Fake an embedded colon definition, i.e. an `EXIT' between
+  `<FAKE' and `FAKE>' must return after `FAKE>' )
+: <FAKE COMPILE LIT HERE 0 , COMPILE >R ;
+: FAKE>  COMPILE R> COMPILE DROP  HERE SWAP ! ;
+: <<BNF <FAKE COMPILE <BNF ;
+: BNF>> COMPILE BNF> FAKE> ;
+: (( <<BNF ;  IMMEDIATE
+: )) BNF>> ;  IMMEDIATE
+: [ <OPT <<BNF ;  IMMEDIATE
+: ] BNF>> OPT> ;  IMMEDIATE
+: {  <OPT [COMPILE] BEGIN COMPILE SUCCESS COMPILE @
+[COMPILE] WHILE <<BNF ;  IMMEDIATE
+: } BNF>> [COMPILE] REPEAT OPT> ; IMMEDIATE
+: RUNA 1 SUCCESS ! 'A' [ 'B' | 'C' ] SUCCESS ? ;
+: RUND 1 SUCCESS ! 'A' { 'B' 'C' } SUCCESS ? ;
 
 &( TOKEN '(' &) TOKEN ')'    0 TOKEN <EOL>
 BNF: "KEY"  'K' 'E' 'Y' ;BNF
