@@ -29,7 +29,7 @@ DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 : PRESENT? PRESENT 0= 0= ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
-: REQUIRE (WORD) REQUIRED ;
+: REQUIRE (WORD) REQUIRED ;    : CF "CONFIG" REQUIRED ;
 ( -b :_This_option_is_available )
 
 

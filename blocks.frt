@@ -270,22 +270,54 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 
 
 \
-( @+ SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
-REQUIRE ALIAS    '$@ ALIAS @+
+( SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
+
 ( Build a set "x" with X items. )
 : SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
 : SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
 : SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
 : .SET   @+ SWAP ?DO I ? 0 CELL+ +LOOP ;   ( Print SET )
-( Retract from SET in same order. Leave ITEM. Use after !SET )
-: SET+@   DUP >R @ @ 0 CELL+ R> +! ;
+
+
 ( Remove entry at ADDRESS from SET. )
 : SET-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE
     -1 CELLS R> +! ;
 ( For VALUE and SET : value IS present in set.)
 : IN-SET? $@ SWAP ?DO
    DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
+( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE ) \ AvdH A3apr25
+
+( Build a bag "x" with X items. )
+: BAG   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
+: !BAG   DUP CELL+ SWAP ! ;   ( Make the BAG empty )
+: BAG?   @+ = 0= ;   ( For the BAG : it IS non-empty )
+: BAG+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Push ITEM to the BAG )
+: BAG@- 0 CELL+ NEGATE OVER +! @ @ ;   ( From BAG: pop ITEM )
+( Remove entry at ADDRESS from BAG. )
+: BAG-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE
+    -1 CELLS R> +! ;
+
+
+
+
+
+( DO-BAG LOOP-BAG .BAG BAG-WHERE IN-BAG? BAG- ) \ AvdH A3apr25
+\ Loop over a bag, see ``.BAG'' for an example.
+: DO-BAG  POSTPONE @+ POSTPONE SWAP POSTPONE ?DO ; IMMEDIATE
+: LOOP-BAG 0 CELL+ POSTPONE LITERAL POSTPONE +LOOP ; IMMEDIATE
+: .BAG   DO-BAG I ? LOOP-BAG ; ( Print BAG )
+( For VALUE and BAG : ADDRESS of value in bag/nill.)
+: BAG-WHERE DO-BAG DUP I @ = IF DROP I UNLOOP EXIT THEN
+    LOOP-BAG  DROP 0 ;
+( For VALUE and BAG : value IS present in bag.)
+: IN-BAG? BAG-WHERE 0= 0= ;
+( Remove VALUE from BAG. )
+: BAG-   DUP >R   BAG-WHERE   R> BAG-REMOVE ;
+( Add VALUE to bag, used as a SET, i.e. no duplicates.)
+: SET+   2DUP IN-BAG? IF 2DROP ELSE BAG+! THEN ;
+(   : BAG+ BAG+! ;    : SET- BAG- ;                           )
+
 ( BIN-SEARCH binary_search_by stack ) \ AvdH
 ( nmin nmax xt -- nres )
 \ See description in next screen.
@@ -510,16 +542,16 @@ CREATE BASE' 0 ,
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
 
 
-(  ALIAS HIDE INCLUDE IVAR ) REQUIRE CONFIG \ AvdH A1oct05
+(  ALIAS @+ HIDE INCLUDE IVAR ) REQUIRE CONFIG \ A3apr25
 
 : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
+
+'$@ ALIAS @+
 
 : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
 
 \ : FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
 : IVAR CREATE , ;
-
-
 
 "INCLUDED" PRESENT? 0= ?LEAVE-BLOCK
 
@@ -1167,7 +1199,7 @@ DROP KEY DROP .S ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
 ( SEE KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
-REQUIRE +THRU   REQUIRE ALIAS
+REQUIRE +THRU   REQUIRE ALIAS   REQUIRE @+
 : BLOB DROP ; \ For DEPTH: print blob in correct color.
 : H.. BASE @ >R HEX 0 .R R> BASE ! ;
 : B.. H.. ;
@@ -1182,7 +1214,7 @@ REQUIRE +THRU   REQUIRE ALIAS
 
 
 
-( cracker0_inspectors )                 \ AvdH A3apr22
+( ?IM ?DN ?CD NEXTDEA DEA?   cracker0) \ AvdH A3apr25
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
 \ For the DEA: it IS a code word.
@@ -1192,19 +1224,19 @@ REQUIRE +THRU   REQUIRE ALIAS
 2DROP 2DROP 0 EXIT THEN <> WHILE >LFA @ REPEAT SWAP DROP ;
 \ For ADDRESS : it IS a proper `dea'
 : DEA? NEXTDEA 0= 0= ;
+
+
+
+
+
+
+( cracker1 ) \ AvdH A3apr25
 '' ALIAS HEAD'         \ If dea is intended rather than xt.
-'$@ ALIAS @+
+ : ?Q KEY? ABORT" Aborted by user" ; \ Emergency
 
-\ Emergency
- : ?Q KEY? ABORT" Aborted by user" ;
-
-( cracker1 ) \ AvdH A1MAY17
  CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
  \ Put N in select table
  : T, SELTOP @ !  0 CELL+ SELTOP +!  ;
-
-
-
 
 
 \ Look up N in ``SELTAB'', return DEA/N and "n IS present"

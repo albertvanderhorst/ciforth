@@ -23,8 +23,9 @@
 \ INCLUDE asi586.frt
 
 REQUIRE BOUNDS
-REQUIRE SET
-REQUIRE CRACKED
+REQUIRE BAG
+REQUIRE IN-BAG?
+REQUIRE ?CD
 
 \ ------------------------------------------------
 \ Set BITS of mask in ADDRESS.
@@ -186,8 +187,8 @@ VARIABLE #POPS          VARIABLE #PUSHES
 \ Add the bookkeeping of pops and pushes for the latest instruction
 \ dissassembled.
 : COUNT-PP
-    OPCODE POPS IN-SET? #PUSHES @ IF #PUSHES +! ELSE NEGATE #POPS +! THEN
-    OPCODE PUSHES IN-SET? NEGATE #PUSHES +!   ;
+    OPCODE POPS IN-BAG? #PUSHES @ IF #PUSHES +! ELSE NEGATE #POPS +! THEN
+    OPCODE PUSHES IN-BAG? NEGATE #PUSHES +!   ;
 
 \ Bookkeeping for input and output side effects.
 VARIABLE PROTO-FMASK
@@ -213,17 +214,17 @@ VARIABLE PROTO-FMASK
 \ instead of FLAG IF MASK ELSE 0 THEN''.
 : REVISE-FMASK
     0
-    OPCODE STORES IN-SET? IS-STORING
-    OPCODE FETCHES IN-SET? IS-FETCHING
-    OPCODE EDIERS IN-SET?  IS-LOOPING
-    'R| DISS IN-SET? 0= IF
-        'T| DISS IN-SET?   IS-FETCHING
-        'F| DISS IN-SET?   IS-STORING
+    OPCODE STORES IN-BAG? IS-STORING
+    OPCODE FETCHES IN-BAG? IS-FETCHING
+    OPCODE EDIERS IN-BAG?  IS-LOOPING
+    'R| DISS IN-BAG? 0= IF
+        'T| DISS IN-BAG?   IS-FETCHING
+        'F| DISS IN-BAG?   IS-STORING
         \ Memory (non-move) operations always fetch!
-        'F| DISS IN-SET?    'MOV, OPCODE <>    AND  IS-FETCHING
+        'F| DISS IN-BAG?    'MOV, OPCODE <>    AND  IS-FETCHING
     THEN
     \ Overrule : operations on the return stack don't count.
-    '[BP] DISS IN-SET? IF DROP 0 THEN
+    '[BP] DISS IN-BAG? IF DROP 0 THEN
     PROTO-FMASK AND!U
 ;
 
@@ -268,8 +269,11 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 : FILL-FLAG-CODE   >R   R@ ANALYSE-CODE   PROTO-FMASK @   R@ >FFA   OR!U
   #POPS @ 1+   #PUSHES @ 1+   SE:2>1   R> !SE ;
 
+\ From FLAGS POPS PUSHES compose a flag field content and return IT.
+: COMPOSE-FLAGS 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR ;
+
 \ Fill FLAGS POPS PUSHES in into DEA's flag field.
-: !FLAGS >R 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR R> >FFA ! ;
+: !FLAGS >R COMPOSE-FLAGS R> >FFA ! ;
 
 \ Irritating exceptions filled in by hand. Filling in the stack effect
 \ (although it could be found automatically), prevents changes.
@@ -336,7 +340,7 @@ CREATE STOPPERS HERE 0 ,
 HERE SWAP !
 
 \ The DEA means : we ARE still in a chain.
-: CHAIN? STOPPERS IN-SET? 0= ;
+: CHAIN? STOPPERS IN-BAG? 0= ;
 
 \ To a stack effect BYTE apply a CHAIN of high level code.
 \ Return the resulting stack effect BYTE.
@@ -351,14 +355,23 @@ HERE SWAP !
 \ It must be a ``CREATE .. DOES>'' definition
 : FILL-SE-DODOES   >R   12   R@ >DFA @ @   ANALYSE-CHAIN   R> !SE ;
 
+\ A code definition ( not ``:'' and not ``DOES>'') may be a type if the
+\ code pointer is not pointing past the header. Reanalysing is then a waste
+\ of time, so that dea's can be looked up here.
+\ Moreover the analyser now works independantly of the dissassembler, if the
+\ user fills in the stack effect of his code words if any.
+CREATE CODE-TYPES  HERE 0 ,
+    FMASK-NS 0 1 COMPOSE-FLAGS   \ Content of flag field for all those types.
+    DOCON , DUP ,   DOVAR , DUP ,   DOUSER , DUP ,
+DROP    HERE SWAP !
+
 \ For DEA fill in the stack effect byte and the side effect bits.
 \ It can be any code definition.
-: FILL-ANY-CODE
-    DUP >CFA @ >R
-    R@ DOCON =   R@ DOVAR =   R> DOUSER =    OR OR
-    IF >R FMASK-NS 0 1 R> !FLAGS
+: FILL-ANY-CODE >R
+    R@ >CFA @ CODE-TYPES BAG-WHERE DUP IF
+        CELL+ @ R> >FFA OR!U
     ELSE
-        FILL-FLAG-CODE  \ Normal code definition.
+        DROP R> FILL-FLAG-CODE  \ Normal code definition.
     THEN ;
 
 \ For DEA find the stack effect and fill it in.

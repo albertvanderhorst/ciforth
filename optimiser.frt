@@ -10,6 +10,10 @@
 REQUIRE $
 REQUIRE SWAP-DP
 REQUIRE SET
+( Retract from BAG in same order. Leave ITEM. Use after !BAG )
+\ This is tricky, it uses the filled pointer so while retracting
+\ No other bag word can be used. Afterwards do !BAG.
+: BAG+@   DUP >R @ @ 0 CELL+ R> +! ;
 
 ( ------------ PORTABILITY --------------------------------- )
 
@@ -819,7 +823,7 @@ STRIDE SET PEES
     2DROP 0 0 ;
 
 \ If ADDRESS contains a place holder, replace it by the next placeholder data.
-: ?PEE? DUP @ 'P = IF PEES SET+@ SWAP ! _ THEN DROP ;
+: ?PEE? DUP @ 'P = IF PEES BAG+@ SWAP ! _ THEN DROP ;
 
 \ Replace code at SEQUENCE with STRING , filling in the place holders.
 \ Leave the END of the replaced string (where matching must continue.)
