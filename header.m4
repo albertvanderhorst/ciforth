@@ -29,12 +29,11 @@ define(HEADER,{
 define({_x},len({$1}))dnl
 define({_y}, {substr({$1},eval(_x-1),1)})dnl
 define({_z}, {substr({$1},0,eval(_x-1))})dnl
-_$2:
 ;  ********_star(len({$1})) 
 ;  *   $1   *
 ;  ********_star(len({$1})) 
 ;  
-         DB   80H+len({$1})ifelse(1,$4,+40H,)
+_$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
          DB       ifelse(1,_x, , "{_z}"{,})"_y"+80H
          DW    _LINKOLD
 $2:      DW     $3
