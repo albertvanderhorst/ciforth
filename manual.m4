@@ -16,7 +16,7 @@ define({forthmacro},{@samp{{$1}}})
 define({forthprog},{@code{{$1}}})
 define({forthcodeni},{@code{{$1}}})
 define({forthbreak},{@*})
-define({forthurl},{@var{{$1}}})
+define({forthurl},{@samp{{$1}}})
 define({forthemph},{@b{{$1}}})
 dnl There is a problem. Using this and the following
 dnl macro at the end of line, leads to a break.
