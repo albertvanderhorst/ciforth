@@ -32,8 +32,8 @@ define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  
 _$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
          DB       ifelse(1,_x, , "{_z}"{,})"_y"+80H
-         DW    _LINKOLD
-$2:      DW     $3
+         DC    _LINKOLD
+$2:      DC     $3
          undefine({_x})dnl
          undefine({_y})dnl
          undefine({_z})dnl
@@ -52,8 +52,8 @@ define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  
 _$2:    DB   80H+len({$1})ifelse(1,$4,+40H,)
         DB       ifelse(1,_x, , _squote{_z}_squote{,})_squote{}_y{}_squote+80H
-        DW    _LINKOLD
-$2:     DW     $3
+        DC    _LINKOLD
+$2:     DC     $3
         undefine({_x})dnl
         undefine({_y})dnl
         undefine({_z})dnl
@@ -62,8 +62,8 @@ define({_LINKOLD},{_$2})dnl
 dnl
 define({HEADER_NULL},{
 _$2:            DB      0C1H,80H
-                DW      _LINKOLD
-$2:             DW      $3
+                DC      _LINKOLD
+$2:             DC      $3
 define({_LINKOLD},{_$2})dnl
 })
 dnl
