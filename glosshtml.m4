@@ -2,7 +2,8 @@ dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl $Id$
 divert(-1)
 define({forall}, {ifelse(len({$2}),0,,
-{$1}({$2}) {forall({$1},{$3},{$4},{$5},{$6},{$7},{$8},{$9},{$10})}
+{$1}({{{$2}}})
+ {forall({$1},{$3},{$4},{$5},{$6},{$7},{$8},{$9},{$10})}
 )})dnl
 dnl Define a word definition on channel 9
 dnl        the corresponding menu item on channel 6
@@ -27,7 +28,7 @@ $2</H2>
 STACKEFFECT: $4
 <P>
 
-DESCRIPTION: 
+DESCRIPTION:
 <P>
 $6
 <P>
@@ -69,7 +70,7 @@ divert(0)dnl
 <HTML>
 <HEAD>
 dnl<META HTTP-EQUIV="Content-Type" CONTENT="text/html"; charset="iso-8859-1">
-   <TITLE>Fig-Forth 3.0 Manual</TITLE>
+   <TITLE>ciforth Version [ ci86grnversion ] Manual</TITLE>
 </HEAD>
 <BODY>
 
@@ -81,4 +82,3 @@ divert(0)dnl
 dnl Normal description comes after the definitions but before the menu's
 dnl and contents.
 <PRE>
-
