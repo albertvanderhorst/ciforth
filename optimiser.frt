@@ -191,6 +191,55 @@ BRANCHES @+ SWAP ?DO
     I @ DUP >TARGET 2OVER FREE-WRT? 0= IF 2DROP 0. LEAVE THEN
 0 CELL+ +LOOP OR 0= ;
 
+\ ----------------------    Expansion  ----------------------
+\ the new expansion is supposed to take care of branches.
+
+\ The set of shifts ; Each pairs is and ADDRESS SHIFT.
+\ All branches-parts (start or targets) higher than address are to be
+\ offset by the corresponding shift. These offsets are cumulative.
+50 SET SHIFTS     : !SHIFTS   SHIFTS !SET ;
+
+\ A GAP to be copied contains some branching.
+: REMEMBER-BRANCH   HERE SHIFTS SET+!   SWAP - SHIFTS SET+! ;
+
+: COPY-ONE IS-A-BRANCH IF HERE CELL+ BRANCHES SET+!  THEN >HERE ;
+
+\ For a branch at ADDRESS do all the corrections found in ``SHIFTS''.
+: CORRECT-ONE-BRANCH
+SHIFTS @+ SWAP ?DO
+    I @ OVER   DUP DUP @ + SWAP CELL+ WITHIN IF I CELL+ @ OVER +! THEN
+    I @ OVER   DUP DUP @ + WITHIN IF I CELL+ @ NEGATE OVER +! THEN
+2 CELLS +LOOP DROP ;
+
+\ Correct all branches.
+: CORRECT-BRANCHES
+BRANCHES @+ SWAP ?DO
+    I @ CORRECT-ONE-BRANCH
+0 CELL+ +LOOP ;
+
+\ Copy the SEQUENCE of high level code to ``HERE'' .
+\ Do not initialise, or terminate.
+: (EXPAND-ONE) DUP >R HERE >R
+    BEGIN DUP NEXT-PARSE WHILE  COPY-ONE REPEAT
+    R> SHIFTS SET+!
+    2DROP
+    R> CELL+ -   SHIFTS SET+!
+;
+
+\ For GAP and DEA : expand GAP to ``HERE'' filling in ``SHIFTS''.
+\ Leave the END of the gap.
+: EXPAND-ONE
+    DUP HIGH-LEVEL? IF >DFA @ (EXPAND-ONE) SWAP DROP
+    ELSE COPY-ONE THEN ;
+
+\ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
+\ Do not initialise, or terminate.
+: (EXPAND-NEW)   BEGIN DUP NEXT-PARSE WHILE EXPAND-ONE REPEAT 2DROP DROP ;
+
+\ Expand each constituent of SEQUENCE to ``HERE'' .
+\ Leave a POINTER to equivalent linearised code.
+: EXPAND-NEW HERE SWAP    !SHIFTS   (EXPAND-NEW) CORRECT-BRANCHES POSTPONE (;)  ;
+
 \ ----------------------    Annihilaton ----------------------
 
 \ For DEA return "it CAN be part of annihilatable code",
@@ -611,6 +660,7 @@ STRIDE SET PEES
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
 : OPT-EXPAND   >DFA DUP @  ^^
+    EXPAND-NEW
     BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER ^^ ANNIHILATE ^^
 PROGRESS @ WHILE REPEAT
 SWAP ! ;
