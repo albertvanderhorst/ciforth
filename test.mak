@@ -210,7 +210,7 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 ci86.%.info : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 namescooked.m4
 	m4 menu.m4 $(@:%.info=%.mig) > menu.texinfo
 	m4 wordset.m4 $(@:%.info=%.mim)  $(@:%.info=%.mig) |m4 >wordset.mi
-	cat $(@:ci86.%.info=%.cfg) manual.m4 namescooked.m4 ciforth.mi)|\
+	(cat $(@:ci86.%.info=%.cfg) manual.m4 namescooked.m4 ciforth.mi)|\
 	  m4 | tee spy | makeinfo
 	rm wordset.mi menu.texinfo
 
