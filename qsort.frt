@@ -57,7 +57,7 @@ DEFER *<-->
 \ Sort the range LOW to HIGH inclusive observing 
 \ ``LOW'' and ``HIGH'' must be indices compatible with the current
 \ values of *< and *<-->
-: QSORT             ( lo hi -- )
+: (QSORT)             ( lo hi -- )
     PARTITION                ( lo_1 hi_1 lo_2 hi_2)
     2DUP < IF  RECURSE  ELSE  2DROP  THEN
     2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
@@ -69,4 +69,4 @@ DEFER *<-->
 \ interface.
 \ After the call we have that : 
 \ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
-: SORT   '*<--> >BODY !   '*< >BODY !   QSORT ;
+: QSORT   '*<--> >BODY !   '*< >BODY !   (QSORT) ;
