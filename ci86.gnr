@@ -3661,7 +3661,9 @@ worddoc({SECURITY},{?STACK},{question_stack},{},{},
 {Issue an error message if the stack is out of bounds.},
 {{?ERROR}}, 
 {{ SP! ?STACK},{},
-{0 WARNING !  DROP ?STACK},{RNING !  DROP ?STACK? MSG # 1 },
+{0 WARNING ! : GS1 DROP ?STACK ;},{},
+dnl Do not use the part of TIB that is corrupted!
+ {                               GS1},{      GS1 ? MSG # 1 },
  {CR},{} },
 enddoc)
 HEADER({?STACK},{QSTAC},{DOCOL})
@@ -3821,7 +3823,7 @@ immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.}, 
 {{VOCABULARY}}, 
 { { VOCABULARY JOHN JOHN ' FORTH >DDEA CONTEXT @ = .},{0},
-  { FORTH ' FORTH >DDEA CONTEXT @ = .},[_T_} },
+  { FORTH ' FORTH >DDEA CONTEXT @ = .},{_T_} },
 enddoc)
 HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
@@ -3829,20 +3831,31 @@ HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
 HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 ;
 worddoc({VOCABULARIES},{ASSEMBLER},{assembler},{},{P,L1},
-{The name of the primary vocabulary.
-Execution makes forthcode({ASSEMBLER}) the forthcode({CONTEXT}) vocabulary.
- forthcode({ASSEMBLER}) is immediate, so it will execute during the creation of
-a colon-definition, to select this vocabulary at compile time. },
-{{VOCABULARY}}, {}, enddoc)
+{The name of the vocabulary to make machine code definitions.
+Execution makes forthcode({ASSEMBLER}) the forthcode({CONTEXT})
+vocabulary. forthcode({ASSEMBLER}) is immediate, so it will
+execute during the creation of a colon-definition, to select
+this vocabulary at compile time. }, 
+{{VOCABULARY}}, 
+{{( No test) },{}},
+enddoc)
 ;
 worddoc({VOCABULARIES},{DEFINITIONS},{definitions},{},{L1},
 {Used in the form:
            forthvar({cccc}) forthcode({DEFINITIONS})
-Set the forthcode({CURRENT}) vocabulary to the forthcode({CONTEXT}) vocabulary. In the
-example, executing vocabulary name forthvar({cccc}) made it the forthcode({CONTEXT})
-vocabulary and executing forthcode({DEFINITIONS}) made both specify vocabulary
-forthvar({cccc}) .},
-{{VOCABULARY}}, {}, enddoc)
+Set the forthcode({CURRENT}) vocabulary to the
+forthcode({CONTEXT}) vocabulary. In the example, executing
+vocabulary name forthvar({cccc}) made it the
+forthcode({CONTEXT}) vocabulary and executing
+forthcode({DEFINITIONS}) made both specify vocabulary
+forthvar({cccc}) .}, 
+{{VOCABULARY}}, 
+{
+  { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; dnl
+  ' FORTH >DDEA >LFA @ ' ORAN = .},{0},
+  {' JOHN >DDEA >LFA @ ' ORAN = .},{_T_} },
+}, 
+enddoc)
 HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      CONT
         DC      FETCH
@@ -3850,21 +3863,45 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddocsafe({PARSING},{(},{paren},{},{P,L0},
+worddocsafe({PARSING},{(},{paren},{},{ISO,P,L0},
 {Used in the form:
 forthsamp({( cccc)})
 Ignore a comment that will be delimited by a right
 parenthesis on the same line. May occur during execution or in a
-colon-definition. A blank after the leading parenthesis is required.},{}, {}, enddoc)
+colon-definition. A blank after the leading parenthesis is required.},
+{{\}}, 
+{{( Nothing to be seen) 8374 .},{8374} }, 
+enddoc)
 HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      LIT,')'
         DC      PPARS
-        DC      DROP, DROP
+        DC      TDROP
         DC      SEMIS
 ;
-worddoc({INIT},{QUIT},{quit},{},{},
-{Clear the return stack, stop compilation, and return control to the
-operators terminal. No message is given.},{}, {}, enddoc)
+;
+worddocsafe({PARSING},{\},{backslash},{},{ISO,P,L0},
+{Used in the form:
+forthsamp({\ cccc})
+Ignore a comment that will be delimited by the end of the current line.
+May occur during execution or in a
+colon-definition. A blank after the leading parenthesis is required.},
+{{(}}, 
+{{\ Nothing to be seen 8374 .},{OK} }, 
+enddoc)
+HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
+        DC      LIT,LF
+        DC      PPARS
+        DC      TDROP
+        DC      SEMIS
+;
+worddoc({INIT},{QUIT},{quit},{},{ISO},
+{Restart the interpreter. Clear the return stack, stop
+compilation, and return control to the operators terminal. No
+message is given.}, 
+{{ABORT}}, 
+{{1243 QUIT
+  . },{1243} },
+enddoc)
 HEADER({QUIT},{QUIT},{DOCOL})
         DC      ZERO
         DC      BLK
@@ -3883,14 +3920,16 @@ QUIT1:  DC      RPSTO   ;{BEGIN}
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
 ;
 worddoc({INIT},{ABORT},{abort},{},{FIG NISO L0},
-{Clear the stacks and enter the execution state. Set BASE to
-decimal._VERBOSE_({Note how this is different from COLD , where the
-bootup value is reinstalled(!)}) Return control to the operators
-terminal, printing a startup message with the version number.
-},{{WARM}}, {}, enddoc)
+{Restart the system. In addition and before the actions of
+forthcode({QUIT}), clear also the data stack and reset the 
+search order and numeric base to default.
+Print a startup message with the version number.
+},{{WARM}}, 
+{{( No test)},{}},
+enddoc)
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SPSTO
-        DC      HEX
+        DC      DECA
         DC      QSTAC   ;{ IT DID TO & INCL THIS}
         DC      CR
         DC      DOTCPU
@@ -3911,7 +3950,7 @@ _ENDCOMMENT
         DC      DEFIN
         DC      QUIT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
-        PAGE
+;
 ;{      WARM START VECTOR COMES HERE}
 ;
 WRM:    MOV     SI,_OFFSET WRM1
@@ -3920,10 +3959,12 @@ WRM:    MOV     SI,_OFFSET WRM1
 WRM1:   DC      WARM
 ;
 worddoc({INIT},{WARM},{warm},{},{FIG L0},
-{Discard blocks; they may not be written back to mass storage.
-Clear the stacks and enter the execution state. Return control to
-the operators terminal, printing a startup message with the version number.
-},{{ABORT}}, {}, enddoc)
+{Perform a so called "warm" start. In addition and before the
+actions of forthcode({ABORT}), discard blocks; they may not be
+written back to mass storage. 
+},{{ABORT}}, 
+{{( No test)},{}},
+enddoc)
 HEADER({WARM},{WARM},{DOCOL})
         DC      MTBUF
         DC      ABORT
@@ -3954,13 +3995,18 @@ _ENDCOMMENT
 CLD1:   DC      COLD
 ;
 worddoc({INIT},{COLD},{cold},{},{FIG},
-{The cold start proceedure to adjust all user variables to their intial
+{Reinitialise the system. Clear all block buffers.
+Reinitialise all user variables to their boot up values
 values, i.a. the stacks and the dictionary pointers. Restart via
 forthcode({ABORT}) . May be called from the terminal to remove
-application programs and restart.
-_RWFILE_({Opens the file that contains the blocks.})
-_HOSTED_LINUX_({Opens the file that contains the blocks.})
-},{{WARM},{BLOCK},{LIST}}, {}, enddoc)
+application programs and restart, as long as there are no
+new vocabularies with definitions.
+_HOSTED_({But it is better to say BYE to Forth and start again.})
+_BOOTED_({But it is better to reboot.})
+_BLOCKSINFILE_({Opens the file that contains the blocks.})
+},{{WARM},{BLOCK},{LIST}}, 
+{{( No test)},{}},
+enddoc)
 HEADER({COLD},{COLD},{DOCOL})
         DC      MTBUF
         DC      FIRST
@@ -3992,10 +4038,13 @@ _BLOCKSINFILE_({
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
-        PAGE
-worddoc({DOUBLE},{S->D},{s_to_d},{n --- d},{},
-{Sign extend a single number to form a double number.},{}, {}, enddoc)
-CODE_HEADER({S->D},{STOD})
+worddoc({DOUBLE},{S>D},{s_to_d},{n --- d},{},
+{Sign extend a single number to form a double number.},{}, 
+{{ 0 S>D D.},{0},
+ { 1 S>D D.},{1},
+ { -1 S>D D.},{-1} },
+enddoc)
+CODE_HEADER({S>D},{STOD})
         POP     DX      ;{S1}
         SUB     AX,AX
         OR      DX,DX
