@@ -556,6 +556,8 @@ the proceedure on the parameter stack. The {symbols} indicate the order in
 which input parameters have been placed on the stack. The dashes ``---''
 indicate the execution point; any parameters left on the stack are listed.
 In this notation, the top of the stack is to the right.
+Any symbol may be followed by a number to indicate different data items
+passed to or from a Forth word.
 
 The {symbols} include:
 
@@ -563,28 +565,37 @@ The {symbols} include:
 forthitem addr
 memory address
 forthitem b
-8 bit byte (i.e. hi 8 bits zero)
+8 bit byte (i.e. high 8 bits zero)
 forthitem c
-7 bit ascii character (hi 9 bits zero)
+7 bit ascii character (high 9 bits zero)
 forthitem d
 _BITS16_({32})_BITS32_({64}) bit signed double integer: most significant portion with sign
-on top of stack.
+on top of stack
 forthitem f
-boolean forthdefi({flag}) . 0=false, non-zero=true
+logical forthdefi({flag}): zero is interpreted as false, non-zero as true
+forthitem faraddr
+_PROTECTED_({a <selector:address> pair})
+_REAL_({A <segment descriptor:address> pair})
 forthitem ff
-boolean false flag=0
+forthdefi({Forth flag}), a well-formed logical flag, 0=false, -1=true.
+forthitem false
+a false forthdefi({Forth flag}): 0
 forthitem n
-_BITS_ bit signed integer number.
-It is also used for a _BITS_ entity where it is irrelevant what number it represents.
+_BITS_ bit signed integer number;
+it is also used for a _BITS_ entity where it is irrelevant what number it represents
+forthitem sc
+a string constant, i.e. two cells, an address and a length;
+length characters are present at the address
+_VERBOSE_({They must not be changed.})
+forthitem true
+a true forthdefi({Forth flag}): -1.
 forthitem u
 _BITS_ bit unsigned integer
-forthitem sc
-A string constant, i.e. two cells, an address and a length.
-Length characters are present at the address.
-_VERBOSE_({They must not be changed.})
-forthitem tf
-boolean true flag=non-zero
+forthitem ud
+_BITS16_({32})_BITS32_({64}) bit unsigned double integer: most significant portion
+on top of stack
 @end table
+
 
 The capital letters on the right show definition characteristics:
 
