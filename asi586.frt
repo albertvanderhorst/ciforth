@@ -92,7 +92,7 @@
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
 041102 0 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
-042100 0  1800 0s T!   0800 0s 0 0s 6 xFAMILY|R ES| CS| SS| DS| FS| GS|
+042100 0  3800 0s T!   0800 0s 0 0s 6 xFAMILY|R ES| CS| SS| DS| FS| GS|
 080002 0 3801 0s T!   ( 3)
  0800 0s 0000 0s 5 xFAMILY|R CR0| -- CR2| CR3| CR4|                 ( 3)
  0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
@@ -151,7 +151,7 @@
 
 ( --------- no fixup operands ----------)
 01 20100 0s 0000 0s xFIR' B'|
-02 20100 0s 0100 0s xFIR' W'|
+02 20100 0s 0100 0s xFIR' X'|
 020008 201 T!'    02 A0 2 1FAMILY, MOV|TA, MOV|FA,
 040000 201 T!'
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
