@@ -163,3 +163,10 @@ figforth.info : prelude.m4 postlude.m4 manual.m4 figforth.mi intro.mi manual.mi 
 
 %.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+| sed -e 's/@ /@@/g')| m4 > $@
 
+# For tex we do not need to use the safe macro's
+figforth.dvi :  prelude.m4 postlude.m4 manual.m4 gloss.m4 figforth.mi intro.mi manual.mi gloss.mig ; \
+       ( cat prelude.m4 postlude.m4 ; (sed -e s'/worddocsafe/worddoc/g' <gloss.mig|m4 gloss.m4  -)|\
+           sed -e 's/@ /@@/g')| m4 > gloss.mi;\
+       m4 figforth.mi >figforth.tex;\
+       tex figforth.tex;\
+      rm gloss.mi
