@@ -532,7 +532,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : NEXTD ( CFA--DEA Get the DEA of the word defined)
    0 RESULT !               ( after the CFA one)
    C>D ' NONAME >CFA LATEST FOR-WORDS DROP
-   RESULT @ DUP 0= IF DROP HERE THEN
+   RESULT @ DUP 0= IF DROP LATEST THEN
  ;
 
 
@@ -546,7 +546,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : KRAAK-FROM ( .--. Kraak, starting with following word)
    CFOF
    BEGIN
-      DUP NEXTD HERE < WHILE
+      DUP NEXTD LATEST < WHILE
       NEXTC DUP (KRAAK)
    REPEAT
    DROP
