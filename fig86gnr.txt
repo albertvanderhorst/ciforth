@@ -278,11 +278,4 @@ versions have been tested.
    More a misfeature. The negative error numbers of Linux system calls
    can be handled by negative offset's from screen 4. Now an offset
    of 64 is added. (The messages have not been filled in anyway.).
-4.
-  If the 32 bit protected mode booting Forth is started from MSDOS, (it can,
-  and it works), or more in general any booting version, BYE leaves the
-  system hanging sometimes. I now believe that it has little to do with 
-  the 32 bit, and if running on a clean undisturbed MSDOS system gives
-  not problems.
-  MSDOS 3.3 is not even aware of the existence of protected mode.
-  So it cannot be a trick of Bill to hamper Linux or some such.
+
