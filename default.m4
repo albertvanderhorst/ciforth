@@ -33,6 +33,10 @@ define({_no},
 define({_END___1__},  
 _______1__ {$1})dnl
 define({_yes},{${}1})
+dnl
+dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
+define( {_EQULAYOUT_1_}, _yes )dnl       
+dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl Run the forth in real mode.

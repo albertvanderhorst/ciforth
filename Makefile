@@ -87,7 +87,9 @@ zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
 
-figforth : figforth.c ; $(CC) $(CFLAGS) $+ -o $@
+fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@
+
+figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -o $@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
