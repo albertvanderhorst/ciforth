@@ -25,9 +25,9 @@ for_128_duals:                  ; move 256 bytes
   
  lgdt [initial_gdtr]              ; This is one reason for the .org 07c00
   
- mov cr0 , ecx
+ mov ecx , cr0 
  inc cx
- mov ecx , cr0                ; protection is on, but we need to get into
+ mov cr0 ,ecx  ; protection is on, but we need to get into
  				; 32 bit segments. You have to branch to
  				; a new cs, mov won't do cs.
   
@@ -52,21 +52,21 @@ cs32:
  ;      256 interrupt gate descriptors that call sequential IIT
  ;      calls, which all call INTCALLER.
   
- mov eax,07003h 
+ mov ax,07003h 
  mov edi,01000h 
 per_IDT_descriptor:                     ; Our first (example) entry is...
- 	mov [edi],eax               ; 03 70       starting at 01000h 
+ 	mov [edi],ax               ; 03 70       starting at 01000h 
  	inc edi                        ; offset
  	inc edi
  	mov WORD [edi],008h 
  	inc edi                        ; 03 70         08 00
  	inc edi                        ;               pmode code sel.
- 	mov WORD [edi],000008e00h  
+ 	mov LONG [edi],000008e00h  
  	inc edi                        ; 03 70 20 00   00 8e 00 00
  	inc edi                        ;               present    intrrgate
  	inc edi
  	inc edi
- 	add eax, 8 
+ 	add eax, BYTE 8 
  	cmp  eax,07803h
  jnz per_IDT_descriptor
   
@@ -88,10 +88,10 @@ while_B:
   
  	mov LONG    [edi],0e8909090h     ; e8 opcode for CALL rel32
  					; prefixed with NOPs. Note endianism.
- 	add edi, 4   
+ 	add edi, BYTE 4   
  	mov    [edi] ,  eax           ; append 4 byte relative offset
- 	add edi,4 
- 	sub LONG    eax, 8                        ; relative offset from next IIT call to
+ 	add edi,BYTE 4 
+ 	sub eax, BYTE 8                        ; relative offset from next IIT call to
  					; INTCALLER will be 8 less.
  	dec ebx
  jnz while_B
@@ -106,7 +106,7 @@ HANG: nop  ;
  	mov [ 0b8060h] ,eax 
  	int 040h 
   
- jmp HANG ;#;#;#;#;#;
+ jmp short HANG ;#;#;#;#;#;
  ;#;#;#;#;#;#;#;#;#;#;#;#;#;#;#;#;
   
 INTCALLER:              ; System code, so to speak.
@@ -124,7 +124,7 @@ INTCALLER:              ; System code, so to speak.
   
  DB   0eah                    ; far jmp to a suitable-for-real-mode cs
  DD small_code_segment
- DW   020
+ DW   020H
 small_code_segment:             ;h we are a 16-bit machine with no useful
  				;       segments.
   
@@ -132,8 +132,8 @@ small_code_segment:             ;h we are a 16-bit machine with no useful
   
  mov  eax                       ,018h ; upgrade to an 8086
   
- mov  ds,eax 
- mov  ss,eax 
+ mov  ds,ax 
+ mov  ss,ax 
   
  mov ecx,cr0  
  dec cx
@@ -149,7 +149,7 @@ rereal:
  mov  ax               ,0b800h ; real mode demo code. This, I think, could be
  mov ds                  ,ax  ;   an 8086 int caller, which is
  mov ax,[6400h]
- sub ax                    ,1 ;   Left as an Excercize to the Reader.
+ sub ax                    ,BYTE 1 ; Left as an Excercize to the Reader.
  mov [1620],ax                  ;   HINT:  pushf
  mov [06400h],ax  
   
@@ -165,7 +165,7 @@ recs32:
   
  BITS 32
   
- mov eax,010h 
+ mov ax,010h 
   
  mov ds,eax  
  mov  ss,eax 
