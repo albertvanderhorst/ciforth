@@ -32,10 +32,6 @@ define({forthexample},
 @cartouche $1
 @end cartouche
 @end example})dnl
-
-dnl Macros later we want some nice formatting
-define({figforth},fig-Forth)
-define({ciforth},ciForth)
-define({DFW},D.F.W.)
-define({_BITS_},_BITS16_({16})_BITS32_({32}))
+include(names.m4)
 divert(0)dnl
+
