@@ -122,12 +122,15 @@ $(ASSEMBLERS:%=%.m4) \
 $(DOCTRANSFORMS) \
 $(TOOLS)        \
 blocks.frt       \
+options.frt     \
 genboot.bat      \
 $(EXAMPLES)     \
 wc            \
+errors.linux.txt \
+errors.msdos.txt \
 # That's all folks!
 
-# 4v0 ### Version : an official release 4.0
+# 4.0 ### Version : an official release 4.0
 # Left out : beta, revision number is taken from rcs e.g. 3.154
 VERSION=  # Because normally VERSION is passed via the command line.
 DATE=2030     # To get the newest version
@@ -164,9 +167,9 @@ ci86.gnr:RCS/ci86.gnr,v ; co -d$(DATE) $<
 # allow to generate ci86.mina.bin etc.
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
-VERSION : ; echo 'define(M4_VERSION,$(VERSION))' >VERSION
+VERSION : ; echo 'define({M4_VERSION},$(VERSION))' >VERSION
 
-ci86.%.asm : VERSION %.cfg nasm.m4 ci86.gnr
+ci86.%.asm : %.cfg VERSION nasm.m4 ci86.gnr
 	make constant.m4
 	cat $+ | m4 >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
@@ -258,7 +261,13 @@ moreboot: forth.lab ci86.alone.bin  ci86.mina.bin
 
 allboot: boot filler moreboot
 
-forth.lab : toblock blocks.frt ; toblock <blocks.frt >$@
+forth.lab.lina : toblock options.frt errors.linux.txt blocks.frt
+	cat options.frt errors.linux.txt blocks.frt | toblock >$@
+	ln -sf $@ forth.lab
+
+forth.lab.wina : toblock options.frt errors.dos.txt blocks.frt
+	cat options.frt errors.dos.txt blocks.frt | toblock >$@
+	ln -sf $@ forth.lab
 
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
@@ -274,6 +283,7 @@ zip : $(RELEASECONTENT) ; echo ciforth-$(VERSION).zip $+ | xargs zip
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply forth.lab
 msdos.zip : $(RELEASECONTENT) mslinks ;\
+	ln -sf forth.lab forth.lab.dos;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/ ci86\./ /g' |\
     sed -e's/ gnr / ci86.gnr /g' |\
@@ -290,10 +300,11 @@ mslinks :
 	ln -sf ci86.alonehd.asm alonehd.asm
 
 lina.zip : $(RELEASELINA) ;
-	  ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	  (cd ..; ln -s ci86 lina-$(VERSION))
-	  (cd ..; tar -czvf ci86/lina-$(VERSION).tar.gz `cat ci86/MANIFEST`)
-	  (cd ..; rm lina-$(VERSION))
+	ln -sf forth.lab forth.lab.linux
+	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
+	(cd ..; ln -s ci86 lina-$(VERSION))
+	(cd ..; tar -czvf ci86/lina-$(VERSION).tar.gz `cat ci86/MANIFEST`)
+	(cd ..; rm lina-$(VERSION))
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 

@@ -1483,13 +1483,10 @@ IBMPC:  DB      'IBM-PC ciforth'
         DB      FIGREL+40H,ADOT,FIGREV+30H,ADOT,USRVER+30H
         DC      LIT, IBMPC, LIT, 22
 _ENDCOMMENT
-;{       If this is there it is a beta release}
-; Before M4_VERSION
-define({M4_VERSION2}, ifelse( index(M4_VERSION,v), -1,
+;{       If M4_VERSION exists and contains a . it is an official release}
+define({M4_VERSION2}, ifelse( index(M4_VERSION,.), -1,
 {{{beta $RCSfile$ $Revision$}}},
-translit(M4_VERSION,{v},{.})))dnl
-; After M4_VERSION2
-; After dumpdef({M4_VERSION2})
+M4_VERSION))dnl
         _STRINGINLINE( M4_VERSION2)
 undefine({M4_VERSION2})dnl
         DC      SEMIS
