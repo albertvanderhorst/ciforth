@@ -54,17 +54,68 @@ DOES> SWAP CELLS + ;
 
 "database" GET-FILE
 
-^J $S atoi    DUP #DIAGNOSES !  $ARRAY DIAGNOSES
-^J $S atoi    DUP #QUESTIONS !  $ARRAY QUESTIONS
+    ^J $S atoi    DUP #DIAGNOSES !  $ARRAY DIAGNOSES
+    ^J $S atoi    DUP #QUESTIONS !  $ARRAY QUESTIONS
 
-^J $S CR TYPE   \ Show potential problems.
+    ^J $S CR TYPE   \ Show potential problems.
 
-ANSWER-ARRAY YESSES
+    ANSWER-ARRAY YESSES
 
-^J $S CR TYPE   \ Show potential problems.
+    ^J $S CR TYPE   \ Show potential problems.
 
-ANSWER-ARRAY NOES
+    ANSWER-ARRAY NOES
 
-^J $S CR TYPE   \ Show potential problems.
+    ^J $S CR TYPE   \ Show potential problems.
 
-ANSWER-ARRAY ?ES
+    ANSWER-ARRAY ?ES
+
+2DROP
+
+\ Add STRING as a diagnosis.
+: ADD-DIAGNOSIS $, $@ #DIAGNOSES @ DIAGNOSES 2! 1 #DIAGNOSES +! ;
+
+\ Add STRING as a QUESTION.
+: ADD-QUESTION $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
+
+: (U.) 0 <# #S #> ;
+
+\ Receive the output database.
+VARIABLE OUTPUT$
+
+\ Add a carriage return to the output.
+: cr ^J OUTPUT$ @ $C+ ;
+
+\ Add a blank to the output.
+: bl BL OUTPUT$ @ $C+ ;
+
+\ Add a NUMBER to the output.
+: u. (U.) OUTPUT$ @ $+!    ;
+
+\ Add the string of an ARRAY of N pointers to strings to the output.
+\ The array is passed as an xt.
+: .dot.   0 DO I OVER EXECUTE 2@ OUTPUT$ @ $+!  cr LOOP DROP ;
+
+\ Add from an ARRAY of N numbers to a line in the output.
+: PUT-NUMBERS 0 DO I CELLS OVER + @ u. bl LOOP cr DROP ;
+
+: uk "------" OUTPUT$ @ $+! cr ;
+
+\ Add an ARRAY of answers ``#ANSWERS'' by ``#QUESTIONS'' to the output.
+: PUT-ANSWERS
+    uk
+    #DIAGNOSES @ 0 DO
+        DUP #QUESTIONS @ PUT-NUMBERS #QUESTIONS @ CELLS +
+    LOOP DROP ;
+
+\ Write the database to the file "database2"
+: WRITE-DATABASE
+    HERE OUTPUT$ ! 0 , 10,000,000 ALLOT
+
+    #DIAGNOSES @ DUP u. cr   'DIAGNOSES SWAP .dot.
+    #QUESTIONS @ DUP u. cr   'QUESTIONS SWAP .dot.
+
+    0 YESSES  PUT-ANSWERS
+    0 NOES    PUT-ANSWERS
+    0 ?ES     PUT-ANSWERS
+    OUTPUT$ @ $@ "database2" PUT-FILE
+;
