@@ -37,7 +37,7 @@ CREATE Buffer SIZE ALLOT
 VARIABLE HANDLE
 : COUNT-FILE
     BEGIN
-        HANDLE @ Buffer SIZE READ LINOS DUP ?LINUX-ERROR
+        HANDLE @ Buffer SIZE READ LINOS DUP ?ERRUR
     DUP 0 > WHILE
         COUNT-BUFFER
     REPEAT DROP ;
@@ -45,16 +45,16 @@ VARIABLE HANDLE
 : ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
 : STILL-FILES C@  ; ( string variable -- flag )( Length <>0 means more files)
 ( c-name -- ) ( Open file with the specified name, c-name must be modifiable)
-: OPEN-FILE ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR HANDLE ! ;
+: MY-OPEN-FILE ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?ERRUR HANDLE ! ;
 ( [filename-at-here] -- handle/-1 )
 : TREAT-FILE ZERO-COUNT COUNT-FILE COUNT TYPE SHOW-COUNT ;
-: CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?LINUX-ERROR ;
+: MY-CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?ERRUR ;
 
 : DO-FILE
     BEGIN
         BL WORD
     DUP STILL-FILES WHILE
-        DUP OPEN-FILE TREAT-FILE CLOSE-FILE
+        DUP MY-OPEN-FILE TREAT-FILE MY-CLOSE-FILE
     REPEAT ;
 
 0 WARNING !
