@@ -1,0 +1,149 @@
+#  Copyright 2000 (2): Albert van der Horst, Dutch Forth Worksshop by GPL
+lina <<%
+8 LOAD
+
+8 CONSTANT TAB
+10 CONSTANT LF
+: IS-BLANK  ( char -- flag)
+  0 ( Innocent until proven guilty)
+  OVER TAB = OR
+  OVER LF = OR
+  OVER BL = OR
+  SWAP DROP ;
+
+TAB IS-BLANK . ^
+&A IS-BLANK . ^
+BL IS-BLANK . ^
+&# IS-BLANK . ^
+LF IS-BLANK . ^
+
+0 VARIABLE LAST-WAS-BLANK
+0 VARIABLE C
+0 VARIABLE W
+0 VARIABLE L
+: ZERO-COUNT 0 C !   0 W !   0 L ! ;
+: SHOW-COUNT C @ . W @ . L @ . CR ;
+
+: COUNT-FILE ;
+: OPEN-FILE BL WORD HERE 1+ C@ IF HERE COUNT TYPE 1 ^ ELSE 0 ^ THEN ;
+: CLOSE-FILE ;
+: HANDLE-FILE ZERO-COUNT COUNT-FILE SHOW-COUNT ;
+
+: DO-FILE BEGIN OPEN-FILE WHILE ( HANDLE-FILE CLOSE-FILE) REPEAT ^ ;
+." HERE IT COMES "
+DO-FILE $*
+." HERE IT GOES "
+BYE
+
+ Specs in man wc
+1. imporove
+bodie -
+moore comment
+2.
+3. Make a Magic-7 analysis of the program
+
+
+A Magic-7 map of a source is a subdivision of the source in parts
+(7-space's) where each part has at most seven names that are global (i.e.
+used by some other part) and each part uses names from at most seven other
+parts. 
+
+A 7-space that is used by some program part is sometimes called a handle.
+For example: using the  named COMMON /FGR17A/
+with 11 numbers in it, costs us two handles. (Because the common has to 
+be split into two 7-spaces, 13 would us cost 3 7-spaces, because 
+the name of the common itself must also be in the 7-space).
+
+Operators of the language used, keywords, macro names,
+names of include files (or name spaces) all count as names.
+Of course a part must be connected, (i.e. consist of consecutive lines,
+you cannot put all ROT operators on a separate line and make it a magic-7
+part.) But a magic-7 part may be totally embedded in some other magic-7 part,
+without making the later part invalid. 
+
+Language elements that do not count as magic-7 names are brackets,
+trait d'unions, quotes and comment.
+For example the { in C is a bracket, but the begin in PASCAL (with the
+same function) is also a bracket. The . and -> and ; in c are trait d'unions
+as is the of in ALGOL68. Do not worry that the use of structs in c is too cheap,
+any struct with more that 6 fields costs is two handles.
+The : ? in c and ( .. | .. ) count as one name.
+Magic numbers are, of course, counted as names, so
+in c open(" x", 2) has the same impact as open(filename,O_RW). (in particular
+the magic constant must be assigned to a 7-space.).
+The keyword global such as used in assembler count as comment. This may be
+surprising but it can be 
+seen as follows. If the source were such that all symbols were globally visible
+that would make no difference for the magic-7 globality. In that case
+we were allowed to leave out the global key word without difference in meaning.
+
+For a valid analysis of a source body were a language c is used two things
+are required :
+divide the language set into 7-spaces 
+without concern wether those 7-space are valid with respect
+to the 
+implementation of the language (that is invisible). Furthermore it must
+be documented which language element are counted as brackets, quotation,
+and trait d'union, and how comment is detected and treated.
+Once some one
+has proven that it is possible to implement the c-language with respect 
+to that division with a finite complexity count. 
+
+If the source body is the linux system this doesnot apply because 
+the source of the compiler is part of the 
+source body.
+
+Allmost all programs, and certainly those written in c and java are
+essentially magic-7 defective, i.e. even
+by regrouping program lines 
+ such that the program 
+remain equivalent, it is not poosible to make magic-7 set.
+
+The definition of magic-7 is reasonably water thight. For example, using
+embedded assembler, which might go unnoticed in other analysis,
+really
+boost the complexity count. Every memonic, and every number that replaces
+a mnemonic (for those willing to cheat), boosts the complexity count.
+
+The magic-7 complexity count is the cardinality of the magic-7 map.
+A magic-7 defective program is said to have 
+ a complexity count of infinity.
+
+Hypothesis :
+All current programs have a complexitiy count of infinity.
+
+In order to get at least some hold we can define the generalised
+magic-n complexity by replacing 7 by n in the definition of magic-7
+complexity.
+
+Definition: the complexity class of a program is the smallest number
+n such that the magic-n complexity count is not infinity.
+
+Definition: the complexity evaluation of a program consists of
+its complexity class n, and generalised complexity with respect to
+this class.
+Theorem : the complexity class of the concatenation of n unrelated
+source bodies is equal to the maximum of the complexity class of 
+the individual source bodies. The complexity with respect to that class
+is less or equal to the 
+sum of the complexity of the composing bodies.
+
+Theorem  : the complexity class of the concatenation of n source bodies
+with possible common sources is greater or equal to the maximum of the
+complexity class of the individual source bodies. Nothing can be said 
+about the complexity with respect of the resulting class.
+
+Theorem  : the complexity class of the concatenation of n source bodies
+with possible common sources where the common sources have the same 
+division in n-spaces 
+is greater or equal to the maximum of the
+complexity class of the individual source bodies. The complexity of the concatenation
+is less or equal to the sun of the complexities, were the common sources are counted
+onces.
+
+These two theorems show that the properties complexity and quality class.
+
+An interesting corollary of all this is the following.
+External interfaces. 
+For a program using a 
+Work on it!
