@@ -6,7 +6,7 @@
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
 ( The patch for the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
-: lsbyte, 0 100 UM/MOD SWAP C, ; ( FIXME replace by DUP C, 8 RSHIFT )
+: lsbyte, DUP C, 8 RSHIFT ;
 : W, lsbyte, lsbyte, DROP ;
 : L, lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
 
@@ -16,17 +16,17 @@
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
 ( right order                                                           )
-0 2        00 01000000 ' W, >CFA COMMAER OW,    ( obligatory word     )
-0 0 CELL+  00   800000 ' ,  >CFA COMMAER (RX,) ( cell relative to IP )
-0 1        00   400000 ' C, >CFA COMMAER (RB,) ( byte relative to IP )
-0 2        00   200000 ' W, >CFA COMMAER SG,   (  Segment: WORD      )
-0 1        00   100000 ' C, >CFA COMMAER P,    ( port number ; byte     )
-0 1        00   080000 ' C, >CFA COMMAER IS,    ( Single -obl-  byte )
-0 0 CELL+  02   040000 ' ,  >CFA COMMAER IX,   ( immediate data : cell)
-0 1        01   040000 ' C, >CFA COMMAER IB,   ( immediate byte data)
-0 0 CELL+  08   020000 ' ,  >CFA COMMAER X,    ( immediate data : address/offset )
-0 1        04   020000 ' C, >CFA COMMAER B,    ( immediate byte : address/offset )
-0 1        00   010000 ' C, >CFA COMMAER SIB,,   ( Most bizarre     )
+0 2        00 0100,0000 ' W, >CFA COMMAER OW,    ( obligatory word     )
+0 0 CELL+  00   80,0000 ' ,  >CFA COMMAER (RX,) ( cell relative to IP )
+0 1        00   40,0000 ' C, >CFA COMMAER (RB,) ( byte relative to IP )
+0 2        00   20,0000 ' W, >CFA COMMAER SG,   (  Segment: WORD      )
+0 1        00   10,0000 ' C, >CFA COMMAER P,    ( port number ; byte     )
+0 1        00   08,0000 ' C, >CFA COMMAER IS,    ( Single -obl-  byte )
+0 0 CELL+  02   04,0000 ' ,  >CFA COMMAER IX,   ( immediate data : cell)
+0 1        01   04,0000 ' C, >CFA COMMAER IB,   ( immediate byte data)
+0 0 CELL+  08   02,0000 ' ,  >CFA COMMAER X,    ( immediate data : address/offset )
+0 1        04   02,0000 ' C, >CFA COMMAER B,    ( immediate byte : address/offset )
+0 1        00   01,0000 ' C, >CFA COMMAER SIB,,   ( Most bizarre     )
 
 
 ( #################### TO BE PHASED OUT ############################### )
@@ -56,7 +56,7 @@ VARIABLE INCONSISTENCY-PAIRS   3FFF  INCONSISTENCY-PAIRS !
 (  sib:       0100 no ..             0200 [AX +8*| DI]               )
 (  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
 (  segment    1000 no ..             2000 ES| ..                        )
-( test/debug 40000 no ..            80000 CR0 ..DB0
+( test/debug 4,0000 no ..            8,0000 CR0 ..DB0
 
 ( Names *ending* in primes BP|' -- not BP'| the prime registers -- are  )
 ( only valid for 16 bits real mode, in combination with an address      )
@@ -73,133 +73,133 @@ VARIABLE INCONSISTENCY-PAIRS   3FFF  INCONSISTENCY-PAIRS !
  4000,0000 0 4 xFAMILY|R  +1* +2* +4* +8*
 0200 0700,0001 T!'
  0100,0000 0 8 xFAMILY|R [AX [CX [DX [BX [SP -- [SI [DI
-000280 0700,0001 0500,0000 xFIR' [BP   ( Fits in the hole, safe inconsistency check)
-020240 0700,0001 0500,0000 xFIR' [MEM  ( Fits in the hole, safe inconsistency check)
+00,0280 0700,0001 0500,0000 xFIR' [BP   ( Fits in the hole, safe inconsistency check)
+02,0240 0700,0001 0500,0000 xFIR' [MEM  ( Fits in the hole, safe inconsistency check)
 
 0120 0700,0000 T!'
   0100,0000 0 8
     xFAMILY|R16 [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
 A0 0 0720,0000 0600,0000 xFIR16 [BP]'  ( Fits in the hole, safe inconsistency check)
  0100,0000 0000,0000 4 xFAMILY|R [AX] [CX] [DX] [BX]
-010120 0700,0000 0400,0000 xFIR' ~SIB|   ( Fits in the hole, requires also ~SIB, )
-0001A0 0700,0000 0500,0000 xFIR' [BP]   ( Fits in the hole, safe inconsistency check)
+01,0120 0700,0000 0400,0000 xFIR' ~SIB|   ( Fits in the hole, requires also ~SIB, )
+00,01A0 0700,0000 0500,0000 xFIR' [BP]   ( Fits in the hole, safe inconsistency check)
  0100,0000 0600,0000 2 xFAMILY|R [SI] [DI]
 
 0111 0700,0000 T!'
  0100,0000 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 0112 0700,0000 T!'
  0100,0000 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
-0160 000000 C000,0000 0000,0000 xFIR      D0|
-0124 020000 C000,0000 4000,0000 xFIR      DB|
-0128 020000 C000,0000 8000,0000 xFIR      DW|
-0110 000000 C000,0000 C000,0000 xFIR      R|
-0008 020000 C700,0000 0600,0000 xFIR16    MEM|' ( Overrules D0| [BP]')
-0108 020000 C700,0000 0500,0000 xFIR      MEM| ( Overrules D0| [BP] )
+0160 00,0000 C000,0000 0000,0000 xFIR      D0|
+0124 02,0000 C000,0000 4000,0000 xFIR      DB|
+0128 02,0000 C000,0000 8000,0000 xFIR      DW|
+0110 00,0000 C000,0000 C000,0000 xFIR      R|
+0008 02,0000 C700,0000 0600,0000 xFIR16    MEM|' ( Overrules D0| [BP]')
+0108 02,0000 C700,0000 0500,0000 xFIR      MEM| ( Overrules D0| [BP] )
 
-041101 0 3800,0000 T!
+04,1101 0 3800,0000 T!
  0800,0000 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
-041102 0 3800,0000 T!
+04,1102 0 3800,0000 T!
  0800,0000 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
-042100 0  3800,0000 T!   0800,0000 0,0000 6 xFAMILY|R ES| CS| SS| DS| FS| GS|
-080002 0 3801,0000 T!   ( 3)
+04,2100 0  3800,0000 T!   0800,0000 0,0000 6 xFAMILY|R ES| CS| SS| DS| FS| GS|
+08,0002 0 3801,0000 T!   ( 3)
  0800,0000 0000,0000 5 xFAMILY|R CR0| -- CR2| CR3| CR4|                 ( 3)
  0800,0000 0001,0000 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
 
 0000 0 0002,0000 T!   0002,0000 0,0000 2 xFAMILY|R F| T|
-040401 0 01,0000 0,0000 xFIR B|
-040402 0 01,0000 1,0000 xFIR X|
+04,0401 0 01,0000 0,0000 xFIR B|
+04,0402 0 01,0000 1,0000 xFIR X|
 ( MODERNIZED TILL HERE )
 
 ( --------- These must be found last -------)
 0600 1FF 00 1PI' ~SIB,
 ( --------- two fixup operands ----------)
-041000 0 FF03 T!
+04,1000 0 FF03 T!
  0008 0000 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
-041000 0 FF01 T!
+04,1000 0 FF01 T!
  0002 0084 2 2FAMILY, TEST, XCHG,
-041000 0 FF03 0088 2PI MOV,
+04,1000 0 FF03 0088 2PI MOV,
 1022 FF00 008D 2PI' LEA,
 1022 FF00 T!'   0001 00C4 2 2FAMILY, LES, LDS,
 1022 FF00 0062 2PI' BOUND,  ( 3)
 1002 FF00 0063 2PI' ARPL,   ( 3)
-041002 FF00 0069 2PI' IMULI, ( 3)
-081002 FF00 006B 2PI' IMULSI, ( 3)
-1002 FF0000 T!' 100 00020F 2 3FAMILY, LAR, LSL, ( 3)
-1002 FF0000 T!' 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
-1002 FF0000 T!' 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
-1002 FF0000 T!' 100 00BC0F 2 3FAMILY, BSF, BSR,          ( 3)
-081002 FF0000 T!' 800 00A40F 2 3FAMILY, SHLDI, SHRDI,    ( 3)
-1022 FF0000 T!' 100 00B20F 4 3FAMILY, LSS, -- LFS, LGS, ( 3)
-1501 FF0000 T!' 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
-1502 FF0000 T!' 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
-1002 FF0000 00AF0F 3PI' IMUL,                     ( 3)
+04,1002 FF00 0069 2PI' IMULI, ( 3)
+08,1002 FF00 006B 2PI' IMULSI, ( 3)
+1002 FF,0000 T!' 100 00,020F 2 3FAMILY, LAR, LSL, ( 3)
+1002 FF,0000 T!' 800 00,A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
+1002 FF,0000 T!' 800 00,A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
+1002 FF,0000 T!' 100 00,BC0F 2 3FAMILY, BSF, BSR,          ( 3)
+08,1002 FF,0000 T!' 800 00,A40F 2 3FAMILY, SHLDI, SHRDI,    ( 3)
+1022 FF,0000 T!' 100 00,B20F 4 3FAMILY, LSS, -- LFS, LGS, ( 3)
+1501 FF,0000 T!' 800 00,B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
+1502 FF,0000 T!' 800 00,B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
+1002 FF,0000 00,AF0F 3PI' IMUL,                     ( 3)
 ( --------- one fixup operands ----------)
-040000 C701 00C6 2PI' MOVI,
+04,0000 C701 00C6 2PI' MOVI,
 0012 07 T!'   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
 12 07 90 1PI' XCHG|AX,
-040011 07 B0 1PI' MOVI|BR,
-040012 07 B8 1PI' MOVI|XR,
-040000 C701 T!'
+04,0011 07 B0 1PI' MOVI|BR,
+04,0012 07 B8 1PI' MOVI|XR,
+04,0000 C701 T!'
  0800 0080 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI, CMPI,
-080002 C700 T!'
+08,0002 C700 T!'
  0800 0083 8 2FAMILY, ADDSI, -- ADCSI, SBBSI, -- SUBSI, -- CMPSI,
 0000 C701 T!'
  0800 10F6 6 2FAMILY, NOT, NEG, MUL|AD, IMUL|AD, DIV|AD, IDIV|AD,
  0800 00FE 2 2FAMILY, INC, DEC,
-040000 C701 00F6 2PI' TESTI,
+04,0000 C701 00F6 2PI' TESTI,
 02 C700 008F 2PI' POP,
 02 C700 30FF 2PI' PUSH,
 02 C700 T!'  1000 10FF 2 2FAMILY, CALLO, JMPO,
 22 C700 T!'  1000 18FF 2 2FAMILY, CALLFARO, JMPFARO,
-080002 C70000 T!'  080000 20BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI, ( 3)
-02 C70000 T!' ( It says X but in fact W : descriptor mostly - ) ( 3)
-  080000 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,  ( 3)
-22 C70000 T!' ( It says X but in fact memory of different sizes) ( 3)
-  080000 00010F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,       ( 3)
+08,0002 C7,0000 T!'  08,0000 20,BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI, ( 3)
+02 C7,0000 T!' ( It says X but in fact W : descriptor mostly - ) ( 3)
+  08,0000 00,000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,  ( 3)
+22 C7,0000 T!' ( It says X but in fact memory of different sizes) ( 3)
+  08,0000 00,010F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,       ( 3)
 
 ( --------- no fixup operands ----------)
 01 0100,0002 0000,0000 xFIR' B'|
 02 0100,0002 0100,0000 xFIR' X'|
-020008 201 T!'    02 A0 2 1FAMILY, MOV|TA, MOV|FA,
-040000 201 T!'
+02,0008 201 T!'    02 A0 2 1FAMILY, MOV|TA, MOV|FA,
+04,0000 201 T!'
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
 00 201 A8 1PI' TESTI|A,
 00 201 T!'  02 A4 6 1FAMILY, MOVS, CMPS, -- STOS, LODS, SCAS,
-100000 0201 T!'   02 E4 2 1FAMILY, IN|P, OUT|P,
-000000 0201 T!'   02 EC 2 1FAMILY, IN|D, OUT|D,
-000000 0201 T!'   02 6C 2 1FAMILY, INS, OUTS,   ( 3)
+10,0000 0201 T!'   02 E4 2 1FAMILY, IN|P, OUT|P,
+00,0000 0201 T!'   02 EC 2 1FAMILY, IN|D, OUT|D,
+00,0000 0201 T!'   02 6C 2 1FAMILY, INS, OUTS,   ( 3)
 
 ( --------- special fixups ----------)
 
 0800     0100,0001 T!'   0100,0000 0,0000 2 xFAMILY|R Y| N|
 0800     0E00,0004 T!'   0200,0000 0,0000 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
-400800 50F 70 1PI' J,
+40,0800 50F 70 1PI' J,
 
 2102 FF02 08C 2PI' MOV|SG,
 
 00 0002,0002 00,0000 xFIR' 1|   00 0002,0002 02,0000 xFIR' V|          ( 3)
-0100 2C703 T!' ( 20000 is a lockin for 1| V|)                   ( 3)
+0100 2,C703 T!' ( 2,0000 is a lockin for 1| V|)                   ( 3)
  0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,  ( 3)
-80012 0 3F0300 C0200F 3PI  MOV|CD,  ( 3)
+8,0012 0 3F,0300 C0,200F 3PI  MOV|CD,  ( 3)
 
-800800 50F00 800F 2PI' J|X,                                           ( 3)
+80,0800 5,0F00 800F 2PI' J|X,                                           ( 3)
 0800 0001,0000 T!'   01,0000 0 2 xFAMILY|R Y'| N'|                          ( 3)
 0800 000E,0000 T!'   02,0000 0 8 xFAMILY|R O'| C'| Z'| CZ'| S'| P'| L'| LE'| ( 3)
-0901 C70F00 00900F 3PI' SET,  ( 3)
+0901 C7,0F00 00,900F 3PI' SET,  ( 3)
 
 ( --------- no fixups ---------------)
 
 2000 0 0 T!  08 06 4 1FAMILY, PUSH|ES, PUSH|CS, PUSH|SS, PUSH|DS,
 2000 0 0 T!  08 07 4 1FAMILY, POP|ES, -- POP|SS, POP|DS,
 
-040001 00 T!'    01 D4 2 1FAMILY, AAM, AAD,
-040001 00 CD 1PI' INT,
-220008 00 9A 1PI' CALLFAR,
-220008 00 EA 1PI' JMPFAR,
-01000000 00 T!'   08 C2 2 1FAMILY, RET+, RETFAR+,
-800004 00 T!'   01 E8 2 1FAMILY, CALL, JMP,
-400000 00 EB 1PI' JMPS,
-400000 00 T!'   01 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
+04,0001 00 T!'    01 D4 2 1FAMILY, AAM, AAD,
+04,0001 00 CD 1PI' INT,
+22,0008 00 9A 1PI' CALLFAR,
+22,0008 00 EA 1PI' JMPFAR,
+0100,0000 00 T!'   08 C2 2 1FAMILY, RET+, RETFAR+,
+80,0004 00 T!'   01 E8 2 1FAMILY, CALL, JMP,
+40,0000 00 EB 1PI' JMPS,
+40,0000 00 T!'   01 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
 00 00 T!'
    08   26 4 1FAMILY, ES:, CS:, SS:, DS:,
    08   27 4 1FAMILY, DAA, DAS, AAA, AAS,
@@ -212,9 +212,9 @@ A0 0 0720,0000 0600,0000 xFIR16 [BP]'  ( Fits in the hole, safe inconsistency ch
    01   64 4 1FAMILY, FS:, GS:, OS:, AS:, ( 3)
  0100 A00F 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
  0100 A80F 2 2FAMILY, PUSH|GS, POP|GS, ( RSM,)
-  040002 00   68 1PI' PUSHI|X,  ( 3)
-  040001 00   6A 1PI' PUSHI|B,  ( 3)
-01040001 00   C8 1PI' ENTER, ( 3)
+  04,0002 00   68 1PI' PUSHI|X,  ( 3)
+  04,0001 00   6A 1PI' PUSHI|B,  ( 3)
+0104,0001 00   C8 1PI' ENTER, ( 3)
       00 00   C9 1PI' LEAVE, ( 3)
       00 00   D7 1PI' XLAT,  ( 3)
       00 00 060F 2PI' CLTS,  ( 3)
@@ -223,7 +223,7 @@ A0 0 0720,0000 0600,0000 xFIR16 [BP]'  ( Fits in the hole, safe inconsistency ch
 
 ( Handle a `sib' bytes as an instruction-within-an-instruction )
 ( This is really straightforward, we say the sib commaer is a sib       )
-( instruction. as per -- error checking omitted -- " 10000 ' ~SIB, >CFA )
+( instruction. as per -- error checking omitted -- " 1,0000 ' ~SIB, >CFA )
 ( COMMAER SIB,,"                                                        )
 ( All the rest is to nest the state in this recursive situation:        )
 ( 900 are the bad bits conflicting with ~SIB,                           )
