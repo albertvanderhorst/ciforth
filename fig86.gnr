@@ -91,6 +91,7 @@ KBBUF	EQU	1024    ;{DATA BYTES PER DISK BUFFER}
 US	EQU	100H     ;{ USER VARIABLE SPACE}
 RTS	EQU	0A0H	;{ RETURN STACK & TERM BUFFER}
 ;
+;____1_____ _EQULAYOUT_1_({
 ;____1_____ _REAL_1_({
 BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
@@ -99,7 +100,6 @@ STRUSA  EQU     BUF1-US         ;{ User area}
 STRUSA  EQU     EM-US         ;{ User area at end }
 });_END___1__({ _PROTECTED_1_})
 
-;____1_____ _EQULAYOUT_1_({
 STRTIB  EQU     STRUSA-RTS      ;{ Start return stack area}
 				;{ Under this : data stack}
 INITR0  EQU     STRUSA         ;{ Grows down}
@@ -442,7 +442,7 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 
 ;____1_____ _HOSTED__1_({
 	ORG	100H	;{ Required start of .COM program.}
-        JMP     BOOTUP
+	JMP     BOOTUP
 });_END___1__({ _HOSTED__1_})
 
 PROTECT:
@@ -505,35 +505,27 @@ GDTLOAD DW     GDTLEN
 
 ;____1_____ _LINUXHOSTED_1_({
 include(width32.m4)       
-        global _figforth        ; Underscore means callable from c.
-        section forth progbits write exec alloc
-_figforth:
+	global  figforth        ; Called from c. Remainder c-routines to be called from here.
+        extern  c_type,c_expec,c_key,c_qterm,c_qterm 
+	section forth progbits write exec alloc
+figforth:
 ;       ORG     M4_ORIG 
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
-        MOV     EBP,ESP
-        MOV     EAX,[EBP+CELLS(3)]        ; Get jump table vector.
-        MOV     _CELL_PTR[JMPTABLE],EAX
-        JMP     BOOTUP
+	MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
+	MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
+	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
+	MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
+	MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
+	MOV     EBP,ESP
+	JMP     BOOTUP
 
 RETURN_LINUX:
-        MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
-        MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
-        MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
-        MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
-        MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
-        RET     ; Assuming the old stack has not been disturbed.
+	MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
+	MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
+	MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
+	MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
+	MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
+	RET     ; Assuming the old stack has not been disturbed.It shouldn't.
 SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
-JMPTABLE:	DD	0			; Linux jump table address
-
-_ReadKbd	EQU	4			; Service offsets
-_TTYOut		EQU	8
-_ExitJob	EQU	12
-_Type		EQU	16
-_System		EQU	20
 });_END___1__({ _LINUXHOSTED_1_})
 
 ;{ The following is not known until the final width m4 final has been included.}
@@ -690,23 +682,23 @@ _COMMENT
 DISPLAYSI:
 	JMPHERE_FROM_PROT
 	BITS    16
-        PUSH    SI
-        PUSH    BP
-        PUSH    BX
+	PUSH    SI
+	PUSH    BP
+	PUSH    BX
 	MOV     AX,BX   
 	CALL    DISPLAYW 
 	MOV     AX,' '
 	CALL    DISPLAY
 	MOV     AX,SI   
 	CALL    DISPLAYW 
-        CALL    DISPLAYCR
+	CALL    DISPLAYCR
 	BITS    32
 	MOV     AH,10H
 	INT     16H
 	JMPHERE_FROM_REAL
-        POP    BX
-        POP    BP
-        POP    SI
+	POP    BX
+	POP    BP
+	POP    SI
 	RET
 _ENDCOMMENT
 DPUSH:  PUSH    DX
@@ -767,7 +759,7 @@ XLOO1:	ADD	[BP],BX	;{ INDEX = INDEX + INCR}
 ;{  END OF `DO' LOOP}
 	ADD	BP,_BYTE CELLS(2)  ;{ ADJ RETURN STACK}
 	LEA	SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
-        _NEXT                                  
+	_NEXT                                  
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
 	POP	BX	;{ GET LOOP VALUE}
@@ -780,7 +772,7 @@ CODE_HEADER({(DO)},{XDO})
 	PUSH	AX
 	PUSH	DX
 	XCHG	BP,STACKPOINTER   ;{ GET PARAMETER STACK}
-        _NEXT                            
+	_NEXT                            
 	PAGE
 CODE_HEADER({I},{IDO})
 	MOV	AX,[BP]	;{ GET INDEX VALUE}
@@ -797,25 +789,25 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
 BOOTUP:
-        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
-        _BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
-        _BITS32_1_({NOP })
+	NOP                    ; Fills jump to 4 bytes (for 16 bits code)
+	_BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
+	_BITS32_1_({NOP })
 	JMP	LCLD     ;{VECTOR TO COLD START}
-        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
-        _BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
-        _BITS32_1_({NOP })
+	NOP                    ; Fills jump to 4 bytes (for 16 bits code)
+	_BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
+	_BITS32_1_({NOP })
 	JMP	WRM	;{ VECTOR TO WARM START}
 	DB	FIGREL	;{ FIG RELEASE #}
 	DB	FIGREV	;{ FIG REVISION #}
 	DB	USRVER	;{ USER REVISION #}
 	DB	0EH	;{ VERSION ATTRIBUTES}
-        _BITS32_1_({DC 0   ; Fill version info up to two cells. })
+	_BITS32_1_({DC 0   ; Fill version info up to two cells. })
 USINI:
-        DC	_NAME_FIELD(TASK) ;{ FIRST DEFINITION 0 }
-  	DC	STRUSA	;{ INIT (U0) USER AREA POINTER 1}
+	DC	_NAME_FIELD(TASK) ;{ FIRST DEFINITION 0 }
+	DC	STRUSA	;{ INIT (U0) USER AREA POINTER 1}
 	DC	BSIN	;{ RUBOUT: get rid of latest char 2}
 	DC 	INITS0	;{ INIT (S0)         3}
-        DC 	INITR0	;{ INIT (R0)         4}
+	DC 	INITR0	;{ INIT (R0)         4}
 	DC 	STRTIB  ;{ INIT (TIB)        5}
 	DC	32	;{ INIT (WIDTH)      6}
 	DC	0	;{ INIT (WARNING)      7}
@@ -998,7 +990,7 @@ CODE_HEADER({CMOVE},{LCMOVE})
 ;{       MOV	ES,AX	;ES <- DS}
 	REP	MOVSB	;{THAT'S THE MOVE}
 	MOV	SI,BX	;{GET BACK IP}
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({U*},{USTAR})
 	POP	AX
@@ -1046,7 +1038,7 @@ CODE_HEADER({SP@},{SPFET})
 CODE_HEADER({SP!},{SPSTO})
 	MOV	BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
 	MOV	STACKPOINTER,[CELLS(3)+BX]        ;{RESET PARAM STACK POINTER}
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
 	MOV	AX,BP	;{RETURN STACK ADDR}
@@ -1055,24 +1047,24 @@ CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
 CODE_HEADER({RP!},{RPSTO})
 	MOV	BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
 	MOV	BP,[CELLS(4)+BX]        ;{RESET RETURN STACK PTR}
-        _NEXT                            
+	_NEXT                            
 	PAGE
 CODE_HEADER({;S},{SEMIS})
 	MOV	SI,[BP]	;{(IP) <- (R1)}
 	LEA	BP,[BP+CELLS(1)]
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
 	MOV	AX,[BP]	;{GET INDEX}
 	MOV	[CELLS(1)+BP],AX        ;{STORE IT AT LIMIT}
-        _NEXT                            
+	_NEXT                            
 	PAGE
 ;
 CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
 	POP	BX	;{GET STACK PARAMETER}
 	LEA	BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
 	MOV	[BP],BX	;{ADD TO RETURN STACK}
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
 	MOV	AX,[BP]	;{ GET RETURN STACK VALUE}
@@ -1135,7 +1127,7 @@ CODE_HEADER({OVER},{OVER})
 ;
 CODE_HEADER({DROP},{DROP})
 	POP	AX
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({SWAP},{SWAP})
 	POP	DX
@@ -1158,13 +1150,13 @@ CODE_HEADER({+!},{PSTOR})
 	POP	BX	;{ADDRESS}
 	POP	AX	;{INCREMENT}
 	ADD	[BX],AX
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({TOGGLE},{TOGGL})
 	POP	AX	;{BIT PATTERN}
 	POP	BX	;{ADDR}
 	XOR	[BX],AX	;
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({@},{FETCH})
 	POP	BX
@@ -1173,7 +1165,7 @@ CODE_HEADER({@},{FETCH})
 	PAGE
 CODE_HEADER({C@},{CFET})
 	POP	BX
-        XOR     AX,AX
+	XOR     AX,AX
 	MOV	AL,[BX]
 	JMP	APUSH
 ;
@@ -1187,13 +1179,13 @@ CODE_HEADER({!},{STORE})
 	POP	BX	;{ADDR}
 	POP	AX	;{DATA}
 	MOV	[BX],AX
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({C!},{CSTOR})
 	POP	BX	;{ADDR}
 	POP	AX	;{DATA}
 	MOV	[BX],AL
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({2!},{TSTOR})
 	POP	BX	;{ADDR}
@@ -1201,57 +1193,57 @@ CODE_HEADER({2!},{TSTOR})
 	MOV	[BX],AX
 	POP	AX	;{LSW}
 	MOV	[CELLS(1)+BX],AX
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({L@},{LFET})
 ;____1_____ _BITS32_1_({
 	POP	BX      ;MEM LOC 
 	POP	AX      ;SEG REG VAL 
-        MOV     DX,10H
-        MUL     DX
-        ADD     AX,BX
-        SUB     AX, BOOTADDRESS
+	MOV     DX,10H
+	MUL     DX
+	ADD     AX,BX
+	SUB     AX, BOOTADDRESS
 
-        MOV     AX,[AX]
-        JMP     APUSH
+	MOV     AX,[AX]
+	JMP     APUSH
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
 	POP	BX	;MEM LOC
 	POP	CX	;SEG REG VAL
-        JMPHERE_FROM_PROT
+	JMPHERE_FROM_PROT
 	MOV	DX,DS
 	MOV	DS,CX
 	MOV	BX,[BX]
 	MOV	DS,DX
-        JMPHERE_FROM_REAL
+	JMPHERE_FROM_REAL
 	PUSH    BX
-        _NEXT                            
+	_NEXT                            
 });_END___1__({ _BITS16_1_})
 ;
 CODE_HEADER({L!},{LSTORE})
 ;____1_____ _BITS32_1_({
 	POP	BX      ;MEM LOC 
 	POP	AX      ;SEG REG VAL 
-        MOV     DX,10H
-        MUL     DX
-        ADD     AX,BX
-        SUB     AX, BOOTADDRESS
+	MOV     DX,10H
+	MUL     DX
+	ADD     AX,BX
+	SUB     AX, BOOTADDRESS
 
 	POP	BX
 	MOV	[AX],BX
-        _NEXT                            
+	_NEXT                            
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
 	POP	BX
 	POP	CX
-        JMPHERE_FROM_PROT
+	JMPHERE_FROM_PROT
 	MOV	DX,DS
 	MOV	DS,CX
 	POP	AX
 	MOV	[BX],AX
 	MOV	DS,DX
-        JMPHERE_FROM_REAL
-        _NEXT                            
+	JMPHERE_FROM_REAL
+	_NEXT                            
 });_END___1__({ _BITS16_1_})
 	PAGE
 	;{ At line     LINE ~1000}
@@ -1271,10 +1263,10 @@ DOCOL:	LEA     BP,[BP-CELLS(1)]
 	LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 ;____1_____ _PROTECTED_1_({
-        JMPHERE_FROM_PROT
-        JMPHERE_FROM_REAL
+	JMPHERE_FROM_PROT
+	JMPHERE_FROM_REAL
 });_END___1__({ _PROTECTED_1_})
-        _NEXT                            
+	_NEXT                            
 ;
 HEADER({;},{SEMI},{DOCOL},1)
 	DC	QCSP
@@ -1342,7 +1334,7 @@ HEADER({FIRST},{FIRST},{DOCON})
 ;____1_____ _PROTECTED_1_({
 HEADER({FIRST},{FIRST},{DOVAR})
 BUF1    EQU     FIRST+CW
-        RESB    (KBBUF+2*CW)*NBUF       
+	RESB    (KBBUF+2*CW)*NBUF       
 });_END___1__({ _PROTECTED_1_})
 ;
 ;{ THE END OF THE BUFFERS}
@@ -1809,7 +1801,7 @@ CODE_HEADER({FILL},{FILL})
 ;{       MOV	ES,BX	; ES <- DS}
 	CLD		;{ INC DIRECTION}
 	REP	STOSB	;{STORE BYTE}
-        _NEXT                            
+	_NEXT                            
 ;
 HEADER({ERASE},{ERASEE},{DOCOL})
 	DC	ZERO
@@ -2130,7 +2122,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
 	DC	LIT, " "+80H, CCOMM
 	DC	CURR
 	DC	FETCH
-        DC      LIT, 2, LSUB ; Skip backwards over dummy name field.
+	DC      LIT, 2, LSUB ; Skip backwards over dummy name field.
 	DC	COMMA
 	DC	HERE
 	DC	VOCL
@@ -2207,7 +2199,7 @@ _ENDCOMMENT
 ;{	WARM START VECTOR COMES HERE}
 ;
 WRM:	MOV	SI,_OFFSET WRM1
-        _NEXT                            
+	_NEXT                            
 ;
 WRM1	DC	WARM
 ;
@@ -2233,7 +2225,7 @@ LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
 	CLD			;{ DIR = INC}
 	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
 	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
-        _NEXT                            
+	_NEXT                            
 ;
 CLD1	DC	COLD
 ;
@@ -2426,7 +2418,7 @@ MESS3	DC	SEMIS
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
 	POP	DX	;{ PORT ADDR}
-        XOR     AX,AX
+	XOR     AX,AX
 	IN	AL,{DX}   ;{ BYTE INPUT}
 	JMP	APUSH
 ;
@@ -2435,7 +2427,7 @@ CODE_HEADER({PC!},{PCSTO})
 	POP	DX	;{PORT ADDR}
 	POP	AX	;{DATA}
 	OUT	{DX},AL   ;{ BYTE OUTPUT}
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({P@},{PFET})
 ;{ FETCH WORD FROM PORT}
@@ -2448,7 +2440,7 @@ CODE_HEADER({P!},{PSTO})
 	POP	DX	;{PORT ADDR}
 	POP	AX	;{DATA}
 	OUT	{DX},AX   ;{WORD OUTPUT}
-        _NEXT                            
+	_NEXT                            
 ;
 HEADER({USE},{USE},{DOVAR})
 	;{ADDR OF NEXT BUFR TO USE}
@@ -2589,13 +2581,13 @@ CODE_HEADER({BIOS},{BIOS})
 	PUSH     SI      ;{ Save Forth registers. NEEDED? }
 	PUSH     BP      
 	XCHG    SI,AX   ;{ Save AX in (already free) SI}
-        JMPHERE_FROM_PROT
+	JMPHERE_FROM_PROT
 	XCHG    SI,AX   
 RQBIOS: INT(0)          ;{ Request number to be overwritten.}
 	PUSHF      ;{ Save status into DI }
 	POP     DI      
 	XCHG    SI,AX   ;{ Save AX in (still free) SI     }
-        JMPHERE_FROM_REAL
+	JMPHERE_FROM_REAL
 	XCHG    SI,AX   
 	POP	BP	;{ Restore Forth registers. NEEDED? }
 	POP	SI	;{INTERPRETER PNTR}
@@ -2604,7 +2596,7 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
 	PUSH     CX      
 	PUSH     DX      
 	PUSH     DI     ;{ i.e. flags }
-        _NEXT                            
+	_NEXT                            
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
 ;{ Generic call on MSDOS/MS WIndows2000}
@@ -2617,13 +2609,13 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     SI      ;{ Save Forth registers. NEEDED? }
 	PUSH     BP      
 	XCHG    SI,AX   ;{ Save AX in (already free) SI}
-        JMPHERE_FROM_PROT
+	JMPHERE_FROM_PROT
 	XCHG    SI,AX   
-        INT     21H          
+	INT     21H          
 	PUSHF      ;{ Save status into DI }
 	POP     DI      
 	XCHG    SI,AX   ;{ Save AX in (still free) SI     }
-        JMPHERE_FROM_REAL
+	JMPHERE_FROM_REAL
 	XCHG    SI,AX   
 	POP	BP	;{ Restore Forth registers. NEEDED? }
 	POP	SI	;{INTERPRETER PNTR}
@@ -2632,7 +2624,7 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     CX      
 	PUSH     DX      
 	PUSH     DI     ;{ i.e. flags }
-        _NEXT                            
+	_NEXT                            
 
 	     ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
@@ -2698,19 +2690,19 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
 ;____1_____ _LINUXIO_1_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
+;{ Lower case labels starting with "c_.." are c-supplied facilities.}
 CODE_HEADER({TYPE},{LTYPE})
-        POP     EAX
-        POP     EBX
+	POP     EAX
+	POP     EBX
 	PUSH	EBP			; save Forth machine
 	PUSH	ESI
-        PUSH    EBX
-        PUSH    EAX
-	MOV	EAX, _CELL_PTR[JMPTABLE]
-	CALL	[_Type+EAX]                   
-        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+	PUSH    EBX
+	PUSH    EAX
+	CALL	c_type                  
+	LEA     ESP,[ESP+CELLS(2)]    ; remove input
 	POP	ESI			; restore Forth
 	POP	EBP
-        _NEXT
+	_NEXT
 ;
 HEADER({EMIT},{EMIT},{DOCOL})      
 	DC      DUPE,LIT,LF,EQUAL
@@ -2773,51 +2765,35 @@ EXPE3	DC	EMIT
 	DC	SEMIS
 _ENDCOMMENT
 CODE_HEADER({EXPECT},{EXPEC})
-        POP     EAX
-        POP     EBX
+	POP     EAX
+	POP     EBX
 	PUSH	EBP			; save Forth machine
 	PUSH	ESI
-        PUSH    EBX
-        PUSH    EAX
-	MOV	EAX, _CELL_PTR[JMPTABLE]
-	CALL	[EAX+CELLS(5)]                
-        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+	PUSH    EBX
+	PUSH    EAX
+	CALL	c_expec               
+	LEA     ESP,[ESP+CELLS(2)]    ; remove input
 	POP	ESI			; restore Forth
 	POP	EBP
-        _NEXT
+	_NEXT
 ;
 CODE_HEADER({KEY},{KEY})
 	PUSH	EBP			; save Forth machine
 	PUSH	ESI
-	MOV	EAX, _CELL_PTR[JMPTABLE]
-	CALL	[EAX+CELLS(3)]                   
+	CALL	c_key
 	POP	ESI			; restore Forth
 	POP	EBP
 	PUSH	EAX
-        _NEXT
-
-CODE_HEADER({?RX},{QRX})
-	PUSH	EBP			; save Forth machine
-	PUSH	ESI
-	MOV	EAX, _CELL_PTR[JMPTABLE]
-	CALL	[_ReadKbd+EAX]                   
-	POP	ESI			; restore Forth
-	POP	EBP
-        
-	PUSH	EAX
-	PUSH	LONG 1
-        
-	CMP	EAX, 0FFFFFFFFh		; not cmp eax, 0ffh ???
-	JNE	SHORT A_CHAR		; not EOF -> a char 
-	POP	EAX			; undo T flag
-	POP	EAX			; remove char
-	PUSH    LONG 0                       ; false flag
-A_CHAR:		
-        _NEXT
+	_NEXT
 ;
 HEADER({?TERMINAL},{QTERM},{DOCOL})
-        DC      QRX
-        DC      SEMIS
+	PUSH	EBP			; save Forth machine
+	PUSH	ESI
+	CALL	c_qterm
+	POP	ESI			; restore Forth
+	POP	EBP
+	PUSH	EAX
+	DC      SEMIS
 ;
 });_END___1__({_LINUXIO_1_})
 ;____1_____ _USEDOS_1_({
@@ -2914,7 +2890,7 @@ PEMIT	DC	$+CELLS(1)
 	MOV	AL,LF  
 	;{ Bizar, without the colon MASM reports error.}
 PEMIT1: CALL	CHO    ;{CHAR OUTPUT}
-        _NEXT                            
+	_NEXT                            
 CHO	PROC	NEAR
 	PUSH	DX
 	PUSH	AX	;{SAVE CHAR}
@@ -3213,7 +3189,7 @@ DERR:	PUSH	AX
 DOK:	POPF		;{POP FLAGS}
 	POP	BP	;{RETURN STACK}
 	POP	SI	;{INTERPRETER PNTR}
-        _NEXT                            
+	_NEXT                            
 ;
 ;
 ;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
@@ -3302,16 +3278,16 @@ CODE_HEADER({RBLK},{RBLK})
 	PUSH	BP	;{RETURN POINTER}
 	MOV     BX,4200H       
 	MOV     DX,0080H  ;{   Disk C                                 }
-        JMPHERE_FROM_PROT
+	JMPHERE_FROM_PROT
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ;{ REMEMBER STATUS}
 	POP     BX
-        JMPHERE_FROM_REAL
+	JMPHERE_FROM_REAL
 	POP	BP	;{RETURN STACK}
 	POP	SI	;{INTERPRETER PNTR}
 	PUSH    BX      ;{ REMEMBER STATUS}
-        _NEXT                            
+	_NEXT                            
 ;
 CODE_HEADER({WBLK},{WBLK})
 	POP     AX     
@@ -3320,26 +3296,26 @@ CODE_HEADER({WBLK},{WBLK})
 	PUSH	BP	;{RETURN POINTER}
 	MOV     BX,4300H       
 	MOV     DX,0080H  ;{   Disk C                                 }
-        JMPHERE_FROM_PROT
+	JMPHERE_FROM_PROT
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ;{ REMEMBER STATUS}
 	POP     BX
-        JMPHERE_FROM_REAL
+	JMPHERE_FROM_REAL
 	POP	BP	;{RETURN STACK}
 	POP	SI	;{INTERPRETER PNTR}
 	PUSH    BX
-        _NEXT                            
+	_NEXT                            
 
 ;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
 	DC      TOR
 	DC      LIT, SPB, STAR  ;{ Sector number}
-        DC      SWAP
+	DC      SWAP
 ;       On a big endian machine the following code is 32 bit clean.
 ;       The 2 m.s. bytes are overwritten by the next store.
 	DC      LBA, LIT, 4, PLUS, STORE  
-        DC      LIT, REALSEGMENT, 
+	DC      LIT, REALSEGMENT, 
 	DC      LBA, LIT, 6, PLUS, STORE  
 	DC      LBA, LIT, 8, PLUS, STORE  
 	DC      LBA
@@ -3650,7 +3626,7 @@ CODE_HEADER({BYE},{BYE})
 	INT	27H	;{I'M HISTORY}
 });_END___1__({ _HOSTED__1_})
 ;____1_____ _LINUXHOSTED_1_({
-        JMP     RETURN_LINUX    
+	JMP     RETURN_LINUX    
 });_END___1__({ _LINUXHOSTED_1_})
  
 	PAGE
@@ -3716,7 +3692,7 @@ HEADER({.CPU},{DOTCPU},{DOCOL})
 	DC	LIT,CELLS(12),PORIG ; 
 	DC	TFET
 ;____1_____ _BITS32_1_({
-        DC      LIT, 10000H, STAR, PLUS, ZERO
+	DC      LIT, 10000H, STAR, PLUS, ZERO
 });_END___1__({ _BITS32_1_})
 	DC	DDOT
 	DC	BASE,STORE
@@ -3783,14 +3759,21 @@ MAT4:	MOV	AX,SI	;{NEW CURSOR ADDR}
 HEADER({TASK},{TASK},{DOCOL})
 	DC	SEMIS
 ;
+;____1_____ _EQULAYOUT_1_({
 INITDP	EQU	$	;{SHOW END OF DICTIONARY}
+});_END___1__({ _EQULAYOUT_1_})
+FORTHSIZE       EQU     $-figforth
 
 ;____1_____ _LINUXHOSTED_1_({
-        FORTHSIZE       EQU  (INITDP-_figforth)
-        BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF  
-        RESB    FORTHSIZE - RTS - US - BUFFERSIZE      
-         section dictionary nobits write exec alloc
-        RESB    EM-FORTHSIZE -(KBBUF+2*CW)*NBUF  
+;       This is the proper way to do it.
+;       No memory addresses should be arrived at through equates.
+	section dictionary nobits write exec alloc
+
+INITDP:                 ; It may be that it is not consecutive with TASK
+			; But that presents no problem.
+	BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF  
+	RESB    FORTHSIZE - RTS - US - BUFFERSIZE      
+	RESB    EM-FORTHSIZE -(KBBUF+2*CW)*NBUF  
 INITS0:                         ;{ Growns down}
 STRTIB: RESB     RTS             ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
@@ -3861,4 +3844,4 @@ _COMMENT
 _ENDCOMMENT
 
 ;{ Define the entry point, not valid for auto booting.}
-        END     ORIG
+	END     ORIG

@@ -174,7 +174,7 @@ qkey (void)
     return buf;			/* only one */
 }
 
-int QTERMINAL(void)
+int c_qterm(void)
 {
   fd_set rfds;
   struct timeval tv; 
@@ -191,7 +191,7 @@ int QTERMINAL(void)
   return FD_ISSET(0, &rfds);     
 }
  
-int KEY( void )
+int c_key( void )
 {
   char key;
   int i;
@@ -201,23 +201,24 @@ int KEY( void )
   return key;                 
 }
 
-void EMIT(int ch)
+void c_emit(int ch)
 {
   fputc (ch, stdout);
   fflush (stdout);
 }
 
-void TYPE(int count, char *buffer)
+void c_type(int count, char *buffer)
 {
   write (1, buffer, count);
   fflush (stdout);
 }
 
-int EXPECT(int count, char *buffer)
+int c_expec(int count, char *buffer)
 {
   int i;
   if ( count <= 0 ) return 0;
 
+  tty_linemode (&std_in);                                                       
   i= read(0, buffer, count);
   buffer[--i]=0;  /* Eat the cr. */
 
@@ -229,7 +230,7 @@ int EXPECT(int count, char *buffer)
 /* Perform ANSI Forth 'SYSTEM' */
 /* Interpret the Forth string (`command',`count') as linux                   */
 /* command and execute it.                                                   */
-int SYSTEM(int count, char command[])
+int c_system(int count, char command[])
 {
   int i;
   char buffer[MAX_COMMAND];
@@ -243,22 +244,11 @@ int SYSTEM(int count, char command[])
   return system (buffer);
 }
 
-typedef int FUNC ();		/* array with I/O functions */
-
-FUNC *call[256] =
-{
-  QTERMINAL,                    /*  0   */
-  qkey,				/*  1   */
-  EMIT,				/*  2   */
-  KEY,                          /*  3   */
-  TYPE,				/*  4   */
-  EXPECT,                       /*  5   */
-  SYSTEM,                       /*  6   */
-};
 
 int main (int argc, char *argv[])
 {
   tty_init (0, &std_in);                                                       
-  _figforth (argc, argv, &call);
+  if ( nodevice ) {printf("oei oei nodevice\n");exit(1);}
+  figforth (argc, argv);
   tty_restore (&std_in);                                                       
 }
