@@ -491,20 +491,29 @@ DATABASE CONSULTING STRATEGY
     QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION #QUESTIONS @ 1- ;
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 return a QUESTION that will make a
+\ make a distinction between the two.
 : GENERATE-QUESTION
      NeedQuestion1$ TYPE CR      NeedQuestion2$ TYPE CR
-     OVER DIAGNOSES 2@ TYPE CR   P DIAGNOSES 2@ TYPE CR
+     OVER DIAGNOSES 2@ TYPE CR   DUP DIAGNOSES 2@ TYPE CR
      2DUP  SELECT-EXISTING
-     DUP -1 <> IF DROP 2DUP NEW-QUESTION THEN
+     DUP -1 = IF DROP 2DUP NEW-QUESTION THEN
      >R 2DROP R>
+;
+
+\ Eliminate the ambiguity for DIAGNOSIS and OUTCOME diagnosis by
+\ having a question answered by the user.
+: (EL-AM)
+    2DUP GENERATE-QUESTION
+    AnswerQuestion$ TYPE CR    OVER DIAGNOSES 2@ TYPE CR
+^    QUESTIONS 2@ GET-ANSWER >R  ( new_question -- )
+^    DUP R@ SWAP ANSWER-VECTOR !
+^    R@ A_YES = IF SWAP NOES 2 SWAP +! ELSE
+^    R@ A_NO = IF SWAP YESSES 2 SWAP +! ELSE
+^    DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
+^    THEN THEN RDROP
 ;
 EXIT
 
-
-: (EL-AM)
-    2DUP GENERATE-QUESTION
-    etc.
-;
 \ The outcome was the diagnosis INDEX. (Maybe just added.)
 \ Ask the operator for help to make sure this diagnosis can be
 \ distinguished from other diagnoses by some question.
@@ -513,7 +522,7 @@ EXIT
 : ELIMINATE-AMBIGUITY
     #DIAGNOSES @ 0 DO
        DUP I <>   I ?EXCLUDED 0= AND   OVER I ?DISTINGHUISABLE AND
-       IF DUP I (EL-AM) THEN
+       IF I OVER (EL-AM) THEN
     LOOP DROP ;
 
 : NEW-QUESTION ;
