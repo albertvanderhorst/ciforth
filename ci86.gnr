@@ -6452,8 +6452,9 @@ worddoc( {OPERATINGSYSTEM},{BIOSN},{biosn},{d c b a i---ar fl},{},
 {Do a call of ``BIOS'' interrupt forthsamp({i}) with
 forthsamp({a b c d}) in registers forthsamp({AX BX CX DX}).
 Return as a result the content of register forthsamp({ar}).
-forthsamp({fl}) is the carry flag, that is one for a failed
-operation. In general forthvar({ar}) then contains some error
+forthsamp({fl}) is true if the carry flag is set, presumably a
+failed operation. _VERBOSE_({For other conventions you have to resort to forthcode({BIOSO}) .})
+In general forthvar({ar}) then contains some error
 code. _HOSTED_DPMI_({ If you want selectors forthvar({DS}) or
 forthvar({ES}) different from the Forth segment, or any
 register different from the default, you must fill that in in
@@ -6495,8 +6496,12 @@ RQBIOSN:  INT(0)          ;{ Request number to be overwritten.}
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
         POP     HIP
-        PUSH     AX
         AND     DI, 1
+        JZ      ELSE4
+        NEG     DI
+        NEG     AX
+ELSE4:
+        PUSH     AX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
@@ -6530,9 +6535,13 @@ CODE_HEADER({BIOSN},{BIOSN})
         POPAD   ;{Get it all back.}
         LEA     RPO,[RPO + _CELLS(1)] ;{Bump return stack. After the pop!}.
         MOV     AX,_CELL_PTR[SaveAX]
-        PUSH     AX
-        MOV     AX,_CELL_PTR[SaveFlags]
+        MOV     DX,_CELL_PTR[SaveFlags]
         AND     AX, 1
+        JZ     ELSE3
+        NEG     DX      ;{Unix convention of negative error numbers.}
+        NEG     AX      ;{True forth flag.}
+ELSE3:
+        PUSH    DX
         PUSH    AX
         _NEXT
 ;
@@ -6745,7 +6754,7 @@ A true flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
 HEADER({KEY?},{KEYQ},DOCOL)
         DC      X, X, X, LIT, 0B00H
         DC      BDOSN, DROP ;{ ignore error }
-        DC      LIT, 01H, LAND
+        DC      LIT, 01H, LAND  ;{Dubious!! FIXME!!}
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
@@ -6921,7 +6930,7 @@ HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, X, X
         DC      LIT, open, FROMR, PLUS, BDOSN
         _0BRANCH({OFILE1})
-        DC      NEGATE, LDUP
+        DC      LDUP
         _BRANCH({OFILE2})
 OFILE1:
         DC      ZERO
@@ -6947,7 +6956,6 @@ HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      TOR, X, X, FROMR
         DC      LIT, close, BDOSN
         _0BRANCH({CFILE1})
-        DC      NEGATE
         _BRANCH({CFILE2})
 CFILE1:
         DC      DROP, ZERO
@@ -6984,7 +6992,7 @@ HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, ZEN, FROMR, X
         DC      LIT, create, BDOSN
         _0BRANCH({CRFILE1})
-        DC      NEGATE, LDUP
+        DC      LDUP
         _BRANCH({CRFILE2})
 CRFILE1:
         DC      ZERO
@@ -7011,12 +7019,10 @@ _MODERN_({
 HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN, X, X
         DC      LIT, delete, BDOSN
+        DC      ZEQU
         _0BRANCH({DFILE1})
-        DC      NEGATE
-        _BRANCH({DFILE2})
-DFILE1:
         DC      DROP, ZERO
-DFILE2:
+DFILE1:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
@@ -7045,7 +7051,7 @@ _HOSTED_MSDOS_({
 HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      LIT, read, BDOSN
         _0BRANCH({RFILE1})
-        DC      NEGATE, ZERO, SWAP
+        DC      ZERO, SWAP
         _BRANCH({RFILE2})
 RFILE1:
         DC      ZERO
@@ -7104,12 +7110,10 @@ _MODERN_({
 HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         _BITS32_({DC     TOR, DROP, LIT, 10000H, SLMOD, FROMR})
         DC      LIT, lseek, BDOSN
+        DC      ZEQU
         _0BRANCH({PFILE1})
-        DC      NEGATE
-        _BRANCH({PFILE2})
-PFILE1:
         DC      DROP, ZERO
-PFILE2:
+PFILE1:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
@@ -7144,12 +7148,10 @@ HEADER({WRITE-FILE},{WFILE},{DOCOL})
 _HOSTED_MSDOS_({
 HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      LIT, write, BDOSN
+        DC      ZEQU
         _0BRANCH({WFILE1})
-        DC      NEGATE
-        _BRANCH({WFILE2})
-WFILE1:
         DC      DROP, ZERO
-WFILE2:
+WFILE1:
         DC      SEMIS
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
@@ -7189,7 +7191,7 @@ HEADER({READ},{READ},{DOCOL})
         DC      LIT, read, BDOSN        ; 3F00 BDOSN IF
         _0BRANCH({READ1})
         DC      TOR, DROP               ; >R DROP
-        DC      ZERO, FROMR, NEGATE     ; 0 R> NEGATE ELSE
+        DC      ZERO, FROMR             ; 0 R> NEGATE ELSE
         _BRANCH({READ2})
 READ1:
         DC      TOR, TOR         ; >R >R
@@ -7213,13 +7215,11 @@ HEADER({WRITE},{WRITE},{DOCOL})
         DC      RR, FMOVE               ; R@ FARMOVE
         DC      RWBUF, FROMR, FROMR     ; RW-BUFFER R> R>
         DC      LIT, write, BDOSN       ;  4000 BDOSN
+        DC      ZEQU
         _0BRANCH({WRITE1})              ; IF NEGATE ELSE DROP 0 THEN ;
-        DC      NEGATE
-        _BRANCH({WRITE2})
-WRITE1:
         DC      DROP
         DC      ZERO
-WRITE2:
+WRITE1:
         DC      SEMIS
 ;
 });_END_({ _HOSTED_DPMI_})
