@@ -702,10 +702,10 @@ _COMMENT
     IP      SI      Interpreter pointer.  Must be preserved
                     across FORTH words.
 
-     W      BX      Working register.  When entering a word
-                    via its code field the CFA is passed in BX.
+     {W}      AX      Working register.  When entering a word
+                    via its code field the DEA is passed in W.
 
-    SP      SP      Parameter stack pointer.  Must be preserved
+    {SP}      SP      Parameter stack pointer.  Must be preserved
                     across FORTH words.
 
     RP      BP      Return stack.  Must be preserved across
@@ -838,7 +838,7 @@ BREAK:  JMP     SHORT   TNEXT3  ;{CONT WITH PROGRAM}
 TNEXT2: POP     AX
         POPF
 TNEXT3: LODSW           ;{ AX <- (IP)}
-        MOV     BX,AX
+        MOV     W,AX
         JMP     SHORT   NEXT1
 });_END_({_OLDDEBUG_ })
         PAGE
@@ -848,8 +848,8 @@ DISPLAYSI:
         SET_16_BIT_MODE
         PUSH    SI
         PUSH    BP
-        PUSH    BX
-        MOV     AX,BX
+        PUSH    W
+        MOV     AX,W
         CALL    DISPLAYW
         MOV     AX,' '
         CALL    DISPLAY
@@ -860,7 +860,7 @@ DISPLAYSI:
         MOV     AH,10H
         INT     16H
         _SWITCH_({JMPHERE_FROM_OS})
-        POP    BX
+        POP    W
         POP    BP
         POP    SI
         RET
@@ -884,9 +884,9 @@ _NEWDEBUG_({
 });_END_({_NEWDEBUG_ })
 });_END_({_LINUX_C_})
         LODSW           ;{AX <- (IP)}
-NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
+NEXT1:  MOV     W,AX   ;{ (W) <- (IP)}
 _NEWDEBUG_({ CALL    DISPLAYSI})
-        JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
+        JMP     _CELL_PTR[W]    ;{ TO `CFA'}
 ;
 ;{       Dictionary starts here.}
 
@@ -1057,8 +1057,8 @@ gives the code field, but this has offset 0.}})
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
 CODE_HEADER({EXECUTE},{EXEC})
-        POP     BX      ;{ GET CFA}
-        JMP     _CELL_PTR[BX]
+        POP     W      ;{ GET CFA}
+        JMP     _CELL_PTR[W]
 ;
 _LOAD_({
 worddoc( {CONTROL},{RECURSE},,{(varies)},{ISO},
@@ -2220,7 +2220,7 @@ HEADER({:},{COLON},{DOCOL})
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-         MOV     SI,[BX+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
+         MOV     SI,[W+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -2256,7 +2256,7 @@ HEADER({CONSTANT},{CONST},{DOCOL})
         DC      SMUDG
         DC      LATEST, TPFA, STORE
         DC      PSCOD
-DOCON:  MOV     AX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
+DOCON:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
 ;
 worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,E,LU},
@@ -2275,7 +2275,7 @@ HEADER({VARIABLE},{VAR},{DOCOL})
         DC      SMUDG
         DC      ZERO, COMMA
         DC      PSCOD
-DOVAR:  MOV     AX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
+DOVAR:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
 worddoc( {DEFINING},{USER},{user},{n ---},{ISO,L0},
@@ -2295,7 +2295,7 @@ enddoc)
 HEADER({USER},{USER},{DOCOL})
         DC      CONST
         DC      PSCOD
-DOUSE:  MOV     BX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
+DOUSE:  MOV     BX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI]
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
@@ -3328,7 +3328,7 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      PSCOD
 DODOE:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-        MOV     SI,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        MOV     SI,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
         LEA     AX,[SI+_CELLS(1)]
         MOV     SI,[SI]
         _PUSH
@@ -6472,12 +6472,29 @@ HEADER({GET-FILE},{GFILE},DOCOL)
         DC      FROMR, SFET, OVER, PLUS, TOR
         DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
         DC      LDUP, QLERR
-        DC      LDUP, RR, LIT,  9999000, LIT
-        DC      read, LINOS
+        DC      LDUP, RR, LIT,  9999000, 
+        DC      LIT ,read, LINOS
         DC      LDUP, QLERR, TOR
         DC      ZERO,ZERO, LIT, close, LINOS, QLERR
         DC      FROMR, FROMR, SWAP
         DC      TDUP, PLUS, LDP, STORE
+        DC      SEMIS
+;
+worddoc( {STORAGE},{PUT-FILE},{get_file},{sc1 sc2 --- },{},
+{Save the string forthsamp({sc2} as a new file with the name
+forthsamp({sc1}) ) . }, 
+{{BLOCK},{?LINUX-ERROR}},
+{{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
+enddoc)
+HEADER({PUT-FILE},{PFILE},DOCOL)
+        DC      PAD, SSTOR, ZERO, PAD, CHAPP ; {Unix requires a c-string.}
+        DC      TOR, TOR
+        DC      PAD, CELLP
+        DC      LIT, O_RDWR | O_CREAT, LIT, 666Q
+        DC      LIT, open, LINOS, LDUP, QLERR
+        DC      LDUP, FROMR, FROMR
+        DC      LIT, write, LINOS, QLERR
+        DC      ZERO,ZERO, LIT, close, LINOS, QLERR
         DC      SEMIS
 ;
 worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
