@@ -5,6 +5,8 @@
 : \D ;
 
 '$@ ALIAS @+
+'COUNT ALIAS C@+
+
 REQUIRE TRUE
 INCLUDE set.frt
 INCLUDE bits.frt
@@ -74,6 +76,9 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 
 \ For CHAR : "it IS special".
 : SPECIAL?   \\ BIT? ;
+
+\ The empty set
+0 CHAR-SET \EMPTY DROP
 
 \ The set matched by .
 0 CHAR-SET \.  ^J | INVERT-SET
@@ -285,7 +290,7 @@ CREATE RE-COMPILED 1000 ALLOT
 
 \ Build up a string to be matched simply.
 CREATE NORMAL-CHARS 1000 ALLOT
-: NORMAL-CHARS!   0 NORMAL-CHARS ! ;
+: !NORMAL-CHARS   0 NORMAL-CHARS ! ;
 
 \ To where is the compiled expression filled.
 VARIABLE RE-FILLED
@@ -307,31 +312,32 @@ VARIABLE RE-FILLED
     DUP DUP CELL+ R> MOVE
     1 CELLS RE-FILLED +! ;
 
+\ FAILS THE MOST SIMPLE TEST !
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
 : HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF
-        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ RE$,   NORMAL-CHARS!
+        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ RE$,   !NORMAL-CHARS
     THEN
 ;
+: HARVEST-NORMAL-CHARS ;
+
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
 \ Build up a set to be matched.
-CREATE SET-MATCHED ALLOT-CHAR-SET
-: SET-MATCHED!   SET-MATCHED MAX-SET ERASE   1 SET-MATCHED C! ;
+CREATE SET-MATCHED ALLOT-CHAR-SET DROP
+: !SET-MATCHED   SET-MATCHED MAX-SET ERASE   1 SET-MATCHED C! ;
 
 
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
-: HARVEST-SET-MATCHED SET-MATCHED @ IF
-    'ADVANCE-CHAR RE,   SET-MATCHED RE-SET,  SET-MATCHED!
-THEN
-;
+: HARVEST-SET-MATCHED 'ADVANCE-CHAR RE,   SET-MATCHED RE-SET,  !SET-MATCHED  ;
+
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 \ For EP and CHAR : add the char to the simple match, or make it
 \ a single character set, whatever is needed. Leave EP.
 : ADD-TO-NORMAL OVER C@ QUANTIFIER? IF
-    HARVEST-NORMAL-CHARS 'ADVANCE-CHAR RE, RE-FILLED \EMPTY RE-SET, SWAP SET-BIT
-ELSE NORMAL-CHARS $+! THEN ;
+    HARVEST-NORMAL-CHARS 'ADVANCE-CHAR RE, RE-FILLED @ \EMPTY RE-SET, SET-BIT
+ELSE NORMAL-CHARS $C+ THEN ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
@@ -339,9 +345,10 @@ ELSE NORMAL-CHARS $+! THEN ;
              DUP 0= ABORT" Illegal escaped char set, user error"
              CELL+ @ ;
 
-\ EP is pointing after an '\' between '[  and ']'. Add the escaped
+\ EP is pointing to an '\' between '[  and ']'. Add the escaped
 \ char (or set) to ``SET-MATCHED''
-: ESCAPE[] C@+
+\ Leave EP incremented after the character consumed.
+: ESCAPE[] 1+ C@+
     DUP GET-ESCAPE DUP IF SET-MATCHED SET-BIT DROP ELSE
         DROP GET-CHAR-SET SET-MATCHED OR-SET! THEN ;
 
@@ -350,24 +357,23 @@ ELSE NORMAL-CHARS $+! THEN ;
 \ CAN'T HANDLE ESCAPES, BUT WE ARE GOING TO DO THIS BY ELIMINATING
 \ THE ESCAPES IN THE FIRST ROUND BY COPYING THE DATA TO A TEMPORARY
 \ AREA, AND ADDING THE ZERO.
-: SET-RANGE DUP C@ DUP 2+ C@ 1+ SWAP DO I SET-MATCHED SET-BIT LOOP 2DROP 3 + ;
+: SET-RANGE DUP C@ OVER 2 + C@ 1+ SWAP DO I SET-MATCHED SET-BIT LOOP 3 + ;
 
-
-\ For EP and the first CHAR of an item (pointing between [ and ] ) add
-\ the item to ``SET-MATCHED''. Leave EP pointing after the item.
-: ADD[]-1  C@+
+\ For EP (pointing between [ and ] ) add one item to ``SET-MATCHED''.
+\ Leave EP pointing after the item.
+: ADD[]-1  DUP C@
     DUP &\ = IF DROP ESCAPE[] ELSE
-    OVER C@ &- = IF DROP SET-RANGE ELSE
-    SET-MATCHED SET-BIT
+    OVER 1+ C@ &- = IF DROP SET-RANGE ELSE
+    SET-MATCHED SET-BIT 1+
     THEN THEN
 ;
 
 
 \ Build up the set between [ and ] into ``SET-MATCHED''.
 \ EP points after the intial [ , leave it pointing after the closing ].
-: PARSE[]    SET-MATCHED! C@+
-    DUP &^ = IF DROP RECURSE SET-MATCHED INVERT-SET ELSE
-    BEGIN ADD[]-1 C@+ DUP &] = UNTIL
+: PARSE[]    !SET-MATCHED
+    DUP C@ &^ = IF 1+ RECURSE SET-MATCHED INVERT-SET ELSE
+    BEGIN ADD[]-1 DUP C@ DUP 0= ABORT" Premature end of '[' character set" &] = UNTIL 1+
     THEN ;
 
 \ EP points to a char-set. Add it to the compiled expression.
@@ -387,7 +393,7 @@ ELSE NORMAL-CHARS $+! THEN ;
 : FIRST-PASS >R (RE-EXPR) R@ MOVE   0 (RE-EXPR) R> + C!   (RE-EXPR) ;
 
 \ Everything to be initialised for a build.
-: INIT-BUILD   FIRST-PASS NORMAL-CHARS!   SET-MATCHED!   RE-EXPR RE-FILLED ! ;
+: INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   RE-EXPR RE-FILLED ! ;
 
 \ Everything to be harvested after a build.
 : EXIT-BUILD   HARVEST-NORMAL-CHARS   HARVEST-CHAR-SET ;
