@@ -148,6 +148,9 @@ define( {_HOSTED_DPMI_}, _no)dnl
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl
+dnl The offset of the errors in the Library Addressable by Block file.
+define( {M4_ERRORSCREEN}, 32)dnl
+dnl
 dnl Include all loadable extensions, that are present in the source.
 dnl Alternatively, see this as a marking for words to be moved out.
 define( {_LOAD_}, _yes)dnl
