@@ -107,9 +107,9 @@ CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.
 ERRORSCREEN EQU     M4_ERRORSCREEN    ;{ Screen where the error messages start.}
 ;
 ;{      MEMORY LAYOUT.}
-;{ These values can be changed at this single place. }
-;{ They can also be changed at the m4 configuration level.}
-NBUF    EQU     M4_NBUF   ; {No. of buffers aka screens }
+;{ Normally this is specified at the m4 configuration level.}
+;{ For a configured system these values can be changed at this single place. }
+NBUF    EQU     M4_NBUF   ; {No. of buffers, or screens }
 KBBUF   EQU     1024      ; {Data bytes per disk buffer}
 US      EQU     M4_US*CW  ; {User variable space, eats into next data stack, if any.}
 EM      EQU     M4_EM     ; {Where the memory ends w.r.t. ORIG.}
@@ -195,7 +195,7 @@ _RWSECTRK_({
 ;{ PHYSICAL DISK PARAMETERS}
 ;
 ;{ Disk parameters: }
-;{ HD drive 3" }
+;{ FD drive 3" }
 TRKS    EQU     80    ;{Number of tracks}
 SPT     EQU     18    ;{Sectors/track}
 HEADS   EQU     2     ;{Number of heads }
@@ -205,7 +205,7 @@ SECFAT  EQU     9     ;{ Sectors per FAT}
 MEDIA   EQU    0F0H   ;{ Descriptor byte. Used for selecting between A: and C:.}
 
 _COMMENT
-;{ HD drive 5" }
+;{ FD drive 5" }
 TRKS    EQU     80      ;{Number of tracks}
 SPT     EQU     15      ;{Sectors/track}
 HEADS   EQU     2       ;{Number of heads }
@@ -234,7 +234,7 @@ _RESPECTDOS_({
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
 });_END_({_RESPECTDOS_})
 _NO_RESPECTDOS_({
-;{ The disk need not be recognized by MSDOS}
+;{ The disk needs not to be recognized by MSDOS}
 ;{ Usable for generating a bootable floppy simple.}
 ;{ Always used for hard disk.}
 SECSTRT EQU     1
@@ -242,7 +242,7 @@ SECSTRT EQU     1
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 });_END_({_RWSECTRK_})
 _BOOTLBA_({
-;{ The first gigabyte of the disk is divided chunks, }
+;{ The first gigabyte of the disk is divided into chunks, }
 ;{ the size of the core memory to alternately boot from, as a backup.}
 CHUNKSIZE       EQU     80H * 100000H ;{ 128 Mb. }
 ;{Size in sectors. }
@@ -371,7 +371,7 @@ READSECTOR:
         DIV     CL
         MOV     CL,AH
         INC     CL      ;{ Sectors counting from 1!}
-        XOR     AH,AH   ; {Rid of remainder}
+        XOR     AH,AH   ;{ Get rid of remainder}
         MOV     CH,[LHEADS]
         DIV     CH
         MOV     DH,AH   ;{ Head number}
@@ -1158,11 +1158,12 @@ _COMMENT
   NAME        =  Address of name
   (NAME)      =  Contents of name
 
-  CFA         =  CODE FIELD: a pointer to executable code
-  DFA         =  PARAMETER FIELD: a pointer into
-  FFA         =  FLAG FIELD: contains flags
-  LFA         =  LINK FIELD: a pointer
-  NFA         =  NAME FIELD: a pointer to a variable number of chars
+  CFA         =  CODE FIELD ADDRESS : a pointer to executable code
+  DFA         =  DATA FIELD ADDRESS : a pointer to
+                        data/high level code/ DOES> pointer
+  FFA         =  FLAG FIELD ADDRESS: contains flags
+  LFA         =  LINK FIELD ADDRESS: a pointer
+  NFA         =  NAME FIELD ADDRESS: a pointer to a variable number of chars
   PHA         =  POST {HEADER} ADDRESS
 
   S1          =  Parameter stack - 1st cell
@@ -1308,14 +1309,14 @@ DP0:
 
 define({_LINKOLD},0)dnl
 worddocsafe( {DENOTATIONS},{Prefix__TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,L0},
-{Used in the form: forthexample({' nnnn
-'nnnn})
+{Used in the form: forthexample({'nnnn})
 In interpret mode it
 leaves the forthdefi({execution token}) (equivalent to the
 dictionary entry address) of dictionary word forthsamp({nnnn}).
-If the word is not found after a search of
-forthcode({SEARCH-ORDER}) an appropriate error message is
-given. In ciforth it can be used in compilation mode too, it
+If the word is not found after a search of the search order
+an appropriate error message is
+given.
+In ciforth it can be used in compilation mode too, it
 then compiles the address as a literal.
 It is recommended that
 one never compiles or postpones it.
@@ -1324,11 +1325,12 @@ combination of forthcode({WORD}) and forthcode({FIND}) _VERBOSE_({{or
 any form of explicit parsing and searching }})
 instead.)
 Furthermore it is recommended
-that
-for non-portable code forthcode({'}) is used in its
-forthdefi({denotation}) form _VERBOSE_({without the space}).
+that for non-portable code forthcode({'}) is used in its
+forthdefi({denotation}) form _VERBOSE_({{without the space.
+Note that if you separate by a space, the ISO-conforming version of
+ forthcode({'}) is found}}).
 },
-{{[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
+{{SEARCH-ORDER}, {[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
 dnl Make sure to use the DENOTATION ' not the FORTH '
 {{ : X EXECUTE ; : [[ ALSO POSTPONE DENOTATION ; : ]] PREVIOUS ;},{},
 { [[ : QPE 1 2 ; ' QPE X  ' QPE ID. . . 'QPE ID. ]]},{QPE 2 1 QPE},
@@ -1462,7 +1464,7 @@ forthcode({FORTH}) forthdefi({WID})
 to the top of the forthcode({SEARCH-ORDER}) .
 (For ISO-compliance it
 would replace the top.)
-Until additional user word list 's are created, new user definitions
+Until additional user forthdefi({word list}) 's are created, new user definitions
 become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this forthdefi({word list}) at compile time.},
@@ -1498,7 +1500,7 @@ base-36 number. },
 _PROTECTED_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 80386}},})
 _REAL_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 8088}},})
 enddoc)
-HEADER({CPU},{CPU},{DOCOL})
+HEADER({CPU},{LCPU},{DOCOL})
 _PROTECTED_({
        _BITS32_({DC      LIT, 0CD1856H, ZERO})      ;{ '80386'}
        _BITS16_({DC      LIT, 1856H, LIT, 0CDH})    ;{ '80386'}
@@ -1570,7 +1572,7 @@ If found the parse pointer is moved back to immediately after
 the prefix, and the corresponding denotation definition
 executed. This word list must be used with care as a
 forthcode({SEARCH-ORDER}) word list; and only as a
-forthcode({CURRENT}) whenever you want to add a denotation.
+forthcode({CURRENT}) word list whenever you want to add a denotation.
 _VERBOSE_({{The word forthcode({FORTH}) is hidden by the word
 forthcode({F}). Use forthsamp({{ONLY FORTH}}) to regain
 control.}})
@@ -2247,7 +2249,7 @@ CODE_HEADER({UM/MOD},{USLAS})
         DIV     BX      ;{16 BIT DIVIDE}
         _2PUSH          ;{STORE QUOT/REM}
 ;
-worddoc( {LOGIC},{AND},{and},{n1 n2 --- n2},{ISO,FIG,L0},
+worddoc( {LOGIC},{AND},{and},{n1 n2 --- n3},{ISO,FIG,L0},
 {Leave the bitwise logical and of forthvar({n1}) and
 forthvar({n2}) as forthvar({n3}) .},
 {{XOR},{OR}},
@@ -2259,8 +2261,8 @@ CODE_HEADER({AND},{LAND})
         AND     AX,BX
         _PUSH
 ;
-worddoc( {LOGIC},{OR},{or},{n1 n2 --- or},{ISO,FIG,L0},
-{Leave the bit-wise logical or of two _BITS_ bit
+worddoc( {LOGIC},{OR},{or},{n1 n2 --- n3},{ISO,FIG,L0},
+{Leave the bit-wise logical or of two _BITS_-bit
 values.},{{AND},{XOR}},
 { { 2 BASE !  11110000 11001100 OR .},{11111100} },
 enddoc)
@@ -2270,9 +2272,9 @@ CODE_HEADER({OR},{LOR})
         OR      AX,BX
         _PUSH
 ;
-worddoc( {LOGIC},{XOR},{xor},{nl n2 --- xor},{L1},
+worddoc( {LOGIC},{XOR},{xor},{nl n2 --- n3},{L1},
 {Leave the bitwise logical exclusive or of two
-values.},{{AND},{OR}},
+ _BITS_-bit values.},{{AND},{OR}},
 { { 2 BASE !  11110000 11001100 XOR .},{111100} },
 enddoc)
 CODE_HEADER({XOR},{LXOR})
@@ -2282,7 +2284,7 @@ CODE_HEADER({XOR},{LXOR})
         _PUSH
 ;
 worddoc( {LOGIC},{INVERT},{INVERT},{n1 --- n2},{ISO,L1},
-{Invert all bits of forthvar({n1}) leaving forthvar({n3}) .
+{Invert all bits of forthvar({n1}) leaving forthvar({n2}) .
 For pure flags (0 or -1) this is the forthdefi({logical not}) operator.
 },
 {{AND},{OR}},
@@ -3353,12 +3355,14 @@ HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
 ;      IMPORTANT
 ; REQUIRES ONE MORE CELL!
 ;
-worddoc( {WORDLISTS},{SEARCH-ORDER},{search_order},{--- addr},{FIG,U,L0},
-{ The current search order is a row of WID 's found
-at an area in the user space forthvar({addr}) ending with the minimum search order
-WID.
-The corresponding wordlists are searched for definitions during
-interpretation. It may contain up to M4_MAXWORDLIST WID 's in
+worddoc( {WORDLISTS},{SEARCH-ORDER},{context},{--- addr},{FIG,U,L0},
+{ The context is the address where the WID is found of the wordlist
+that is searched first. In ciforth forthvar({addr}) actually points
+to a row of WID 's allocated in the user space,
+ending with the minimum search order WID.
+The corresponding wordlists are searched in that order for definitions during
+interpretation.
+It may contain up to M4_MAXWORDLIST WID 's in
 this ciforth, while the ISO Search-Order wordset requires a capacity of at
 least 8. },
 {{PRESENT},{VOCABULARY},{CURRENT}},
@@ -4147,7 +4151,7 @@ enddoc)
 HEADER({-TRAILING},{DTRAI},{DOCOL})
         DC      LDUP
         DC      ZERO
-        _DO(DTRA4)
+        _QDO(DTRA4)
 DTRA1:  DC      OVER
         DC      OVER
         DC      PLUS
@@ -5283,12 +5287,12 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ALSO},{also},{},{ISO},
-{Duplicate the topmost forthdefi({WID}) in the SEARCH-ORDER order stack.
+{Duplicate the topmost forthdefi({WID}) in the search order stack.
 If there were already M4_MAXWORDLIST WID 's,
 ciforth looses the last one.
 This is not counting
 the forthcode({ONLY}) search order.},
-{{VOCABULARY}},
+{{SEARCH-ORDER},{VOCABULARY}},
 {
   { VOCABULARY JOHN ALSO ' JOHN >WID SEARCH-ORDER ! DEFINITIONS dnl
   : ORAN ; ' FORTH >WID >LFA @ ' ORAN = .},{0},
@@ -5306,9 +5310,9 @@ HEADER({ALSO},{ALSO},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{PREVIOUS},{PREVIOUS},{},{ISO},
-{Pop the topmost forthdefi({WID}) from the forthcode({SEARCH-ORDER}) order stack.
+{Pop the topmost forthdefi({WID}) from the search order stack.
 If empty still the forthcode({ONLY}) search order is left.},
-{{VOCABULARY}},
+{{SEARCH-ORDER},{VOCABULARY}},
 {
   { SEARCH-ORDER @ VOCABULARY JOHN JOHN DUP SEARCH-ORDER @ = .},{0},
   { PREVIOUS SEARCH-ORDER @ = .},{_T_}
@@ -5321,7 +5325,7 @@ HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
-{Make the forthcode({SEARCH-ORDER}) order stack empty, leaving the minimum search order ,
+{Make forthcode({SEARCH-ORDER}), the search order stack empty, leaving the minimum search order ,
 which is approximately the forthcode({DENOTATION}) word list plus the word forthcode({FORTH}).
 By using forthcode({FORTH}) one can regain control.
 },
@@ -6095,7 +6099,7 @@ enddoc)
 HEADER({PREV},{PREV},{DOVAR}, )
         DC      BUF1
 ;
-worddoc( {BLOCKS},{#BUFF},{hash_buf},{--- c},{},
+worddoc( {BLOCKS},{#BUFF},{hash_buf},{--- n},{},
 {A constant that leaves the number of block buffers.
 Because a buffer that is being interpreted is locked in memory,
 this is also a limit to the nesting depth of blocks loading other
@@ -6105,7 +6109,7 @@ blocks. },
 enddoc)
 HEADER({#BUFF},{NOBUF},{DOCON}, NBUF)
 ;
-worddoc( {BLOCKS~},{+BUF},{plus_buf},{add1 --- addr2 ff},{FIG},
+worddoc( {BLOCKS~},{+BUF},{plus_buf},{addr1 --- addr2 ff},{FIG},
 {Advance the disc buffer address forthvar({addr1}) to the address of
 the next buffer forthvar({addr2}) . Boolean forthvar({ff}) is false
 when forthvar({addr2}) is the buffer presently pointed to by variable
@@ -6209,7 +6213,7 @@ BUFFER2:
 ;
 
 worddoc( {BLOCKS},{BLOCK},{block},{n --- addr},{ISO FIG L0},
-{Leave forthvar({addr}) the disc buffer containing block
+{Leave forthvar({addr}), the disc buffer containing block
 forthvar({n}), which is the physical disk block
 forthsamp({OFFSET+n}). The address left is the field within the
 buffer to be used for data storage. If the block is not already
@@ -6279,7 +6283,7 @@ HEADER({SAVE},{SAVE},{DOCOL})
 worddoc( {BLOCKS~},{RESTORE},{restore},{ ---},{},
 {This must follow a forthcode({SAVE}) in the same definition.
 Restore the content of forthcode({SRC}) from the return stack
-thusly restoring the forthdefi({current input source}) to what
+thus restoring the forthdefi({current input source}) to what
 it was when the forthcode({SAVE}) was executed.
 },
 {{RESTORE-INPUT},{SAVE-INPUT}},
@@ -6658,7 +6662,7 @@ CODE_HEADER({BIOSN},{BIOSN})
 _SWITCH_({SPSAVE: DC       0H})
 ;
 worddoc( {BLOCKS},{REG-SET},{register_set},{--- addr},{},
-{Leaves the forthvar({addr}) the register storage areas for
+{Leaves the start forthvar({addr}) of the register storage area for
 cross-mode interrupt handling. _VERBOSE_({{ This structure is
 defined by the DPMI specifications for use with interrupt 31H
 function 0300H.}}) The layout is as forthvar({DI SI BP BX DX CX
@@ -8123,7 +8127,11 @@ worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{n ---},{},
 i.e. the mass storage words refer
 to the blocks in this file. The handle
 forthsamp({BLOCK-HANDLE}) can be used
-to access it, with access code forthvar({n}) .
+to access it, with access code forthvar({n})
+_VERBOSE_({{(2 for read and write)}}).
+This command fails silently.
+You must activate mnemonic error messages explicitly
+by setting forthcode({WARNING}).
 },
 {{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{OPEN-FILE}},
 {{." Via MESSAGE"},{Via MESSAGE}},
@@ -8217,7 +8225,7 @@ This name may be changed an is used by the
 The name may contain a path and be at most}
 _FILENAMELENGHT_M4_ {characters long.
 _HOSTED_LINUX_({ The default name is forthsamp({/bin/sh}) .})
-_PC_({ The default name is forthsamp({\COMMAND.COM}) .})
+_PC_({ The default name is forthsamp({C:\COMMAND.COM}) .})
 },{{SYSTEM}},
 ,
 enddoc)
@@ -8225,7 +8233,7 @@ HEADER({SHELL},{SHELL},{DOVAR}, )
          _HOSTED_LINUX_(
 {        _STRING({/bin/sh})})
         _PC_(
-{        _STRING({\COMMAND.COM})})
+{        _STRING({C:\COMMAND.COM})})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
 ;
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc ---},{ISO},
@@ -8664,11 +8672,10 @@ RSLW4:
 _LOAD_({
 worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: forthexample({' nnnn })
-It
-leaves the forthdefi({execution token}) (equivalent to the
+It leaves the forthdefi({execution token}) (equivalent to the
 dictionary entry address) of dictionary word forthsamp({nnnn}).
 If the word is not found after a search of
-forthcode({SEARCH-ORDER}) an appropriate error message is
+the search order an appropriate error message is
 given.
 If compiled the searching is done while
 the word being compiled is executed.
@@ -8704,8 +8711,8 @@ In compilation mode it leaves the
 forthdefi({execution token}) (equivalent to the dictionary
 entry address) of dictionary word forthsamp({nnnn}). So as a
 compiler directive it compiles the address as a literal. If the
-word is not found after a search of
-forthcode({SEARCH-ORDER}) an appropriate error message is
+word is not found after a search of the search order
+an appropriate error message is
 given. In ciforth this word is just an alias for forthcode({'}) ,
 so it can be used in interpret mode too. It is recommended that
 for non-portable code the
@@ -8913,8 +8920,9 @@ forthvar({n2}) are determined at run-time and may be the result
 of other operations. Within a loop forthcode({I}) will copy the
 current value of the index to the stack.
 
-When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
-the following address forthvar({addr}) and forthvar({n}) for later error checking.},
+When compiling within the colon definition, forthcode({DO}) compiles
+forthcode({(DO)}) and leaves the following address forthvar({addr}) and
+forthvar({n}) for later error checking.},
 {{I},{LOOP},{+LOOP},{LEAVE}},
 { { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA},
   {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{1} },
@@ -9024,7 +9032,7 @@ worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{ISO,FIG,I,C2,L0},
 {Used in a colon-definition in the form:
     forthexample({BEGIN ... AGAIN})
 At run-time,
-forthcode({AGAIN}) forces execution to return to corresponding
+forthcode({AGAIN}) forces execution to return to the corresponding
 forthcode({BEGIN}) . There is no effect on the stack. Execution
 cannot leave this loop except for forthcode({EXIT}). At compile
 time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an
@@ -9069,7 +9077,7 @@ HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
 worddoc( {CONTROL},{IF},{if},
 {f --- (run-time) / --- addr n (compile)},
 {ISO,FIG,I,C2,L0},
-{Occurs is a colon-definition in form:
+{Occurs in a colon-definition in form:
       forthexample({IF (tp) ...  THEN})
     or
       forthexample({IF (tp) ... ELSE (fp) ... THEN})
@@ -9146,7 +9154,7 @@ forthcode({0BRANCH}) and tucks the
 target address forthsamp({addr2})
 under the forthsamp({addr1}) left there by
 forthcode({BEGIN}) . The stack values will be resolved by
-Forthcode({REPEAT}) . forthvar({n1}) and forthvar({n2})
+forthcode({REPEAT}) . forthvar({n1}) and forthvar({n2})
 provide checks for compiler security.},
 {{(FORWARD},{BEGIN}},
 {
@@ -9648,8 +9656,8 @@ TRIA9:
 ; This word is not even fig!
 worddocsafe( {MISC},{.SIGNON},{dot_cpu},{---},{},
 {Print a message identifying the version of this Forth.
-_VERBOSE_({{ The name of the CPU processor present in the boot
-up parameters is printed using the bizarre convention of a
+_VERBOSE_({{ The name of the processor known from the environment
+query forthcode({CPU}) is printed using the bizarre convention of a
 base-36 number. This is a tribute to those FIG-pioneers.}}) },
 {{ABORT},{COLD}},
 {{." Interactive"},{Interactive}},
@@ -9660,7 +9668,7 @@ HEADER({.SIGNON},{SIGNON},{DOCOL})
         DC      CR
         DC      BASE,FETCH
         DC      LIT,36, BASE,STORE
-        DC      CPU, DDOT
+        DC      LCPU, DDOT
         DC      BASE,STORE
 ;
         DC      LNAME, LTYPE, SPACE
@@ -9899,9 +9907,9 @@ because they are confusing.},
 worddocchapter({LOGIC},{ },
 {The wordset forthsamp({LOGIC}) contains logic operators and
 comparison operators.
-A comparison operators (such as forthcode({=}) ) delivers a
+A comparison operator (such as forthcode({=}) ) delivers a
 forthdefi({Forth flag}), -1 for true, 0 for false, representing a
-condition (such as that two numbers are equal).
+condition (such as equality of two numbers).
 _VERBOSE_({{The number -1 has all bits set to one.}})
 The logical operators ( forthcode({AND}) etc.)
 work on all _BITS_ bits, one by one.

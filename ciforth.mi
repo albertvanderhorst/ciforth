@@ -290,16 +290,19 @@ forthcode({CASE-SENSITIVE}).
 Case insensitivity applies to the words looked up in the dictionary,
 not to hex digits.
 
-@subsection Error 8 at startup
-If you get an error 8 at startup, as soon as you try to forthcode({LOAD}) or forthcode({LIST}) a screen
-or use an option,
-this is because you cannot access the
-library file. It may not be there, or it may not be at the expected place.
+@subsection Error 8 or only error numbers
+If you get an error 8 as soon as you try to forthcode({LOAD}) or forthcode({LIST}) a screen
+or use an option, or if errors show up only as numbers without the mnemonic message,
+this is because you cannot access the library file.
+It may not be there, or it may not be at the expected place.
 ciforth contains a string forthcode({BLOCK-FILE}) , that contains the name of the
 library file interpreter, with as a default forthfile({forth.lab}).
 If this is not correct you may change it as appropriate by e.g.
 _PC_({ forthsamp({S" C:/FORTH/forth.lab" BLOCK-FILE $! })})
 _HOSTED_LINUX_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
+The library is accessible for read and write access and mnemonic message
+will be fetched from it,
+after you install it with forthsamp({2 BLOCK-INIT    1 WARNING !}).
 
 _PC_({{If you have run ciforth without this message
 before, the problem is most probably caused by
@@ -606,14 +609,14 @@ The {symbols} include:
 forthitem addr
 memory address
 forthitem b
-8 bit byte (i.e. high 8 bits zero)
+8 bit byte (the remaining bits are zero)
 forthitem c
-7 bit ascii character (high 9 bits zero)
+7 bit ascii character (the remaining bits are zero)
 forthitem d
 _BITS16_({32})_BITS32_({64}) bit signed double integer: most significant portion with sign
 on top of stack
 forthitem dea
-An forthdefisamp({dictionary entry address}) , the basic address of a Forth word from which
+An forthdefi({dictionary entry address}) , the basic address of a Forth word from which
 all its fields can be found.
 forthitem f
 logical forthdefi({flag}): zero is interpreted as false, non-zero as true
@@ -626,7 +629,7 @@ forthitem false
 a false forthdefi({Forth flag}): 0
 forthitem n
 _BITS_ bit signed integer number;
-it is also used for a _BITS_ entity where it is irrelevant what number it represents
+it is also used for a _BITS_-bit entity where it is irrelevant what number it represents
 forthitem sc
 a forthdefi({string constant}), i.e. two cells, an address and a length;
 length characters are present at the address
@@ -634,9 +637,9 @@ _VERBOSE_({(they must not be changed)})
 forthitem true
 a true forthdefi({Forth flag}): -1.
 forthitem u
-_BITS_ bit unsigned integer
+_BITS_-bit unsigned integer
 forthitem ud
-_BITS16_({32})_BITS32_({64}) bit unsigned double integer: most significant portion
+_BITS16_({32})_BITS32_({64})-bit unsigned double integer: most significant portion
 on top of stack
 @end table
 
@@ -674,11 +677,11 @@ not that some word of that name is present.
 _VERBOSE_({Words marked with forthsamp({ISO,FIG,L0}) will behave identically
 over all but the whole spectra of Forth's.})
 
-Unless otherwise noted, all references to numbers are for _BITS_ bit
-signed integers. For _BITS16_({32})_BITS32_({64}) signed numbers, the
+Unless otherwise noted, all references to numbers are for _BITS_-bit
+signed integers. For _BITS16_({32})_BITS32_({64})-bit signed numbers, the
 most significant part (with the sign) is on top.
 
-All arithmetic is implicitly _BITS_ bit signed integer math, with error and
+All arithmetic is implicitly _BITS_-bit signed integer math, with error and
 under-flow indication unspecified.
 
 A forthdefi({nil pointer}) is an address containing zero. This

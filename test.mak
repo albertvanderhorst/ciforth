@@ -11,11 +11,21 @@ TESTTARGETS=*.ps testas* testlina.[0-9] testmina.[0-9] testlinux.[0-9]
 
 testclean: ; rm -f $(TESTTARGETS)
 
+# WARNING : the generation of postscript and pdf use the same files
+# for indices, but with different content.
+
 %.ps:%.dvi  ;
-	 texindex  $(@:%.ps=%.??)
+	for i in $(INDICES) ; do texindex  $(@:%.ps=%.$$i) ; done
 	 dvips -ta4 $< -o$@
 #       dvips -A -r -i       -S10 $< -oA$@
 #       dvips -B -i -T 1.8cm,0.0cm -S10 $< -oB$@
+
+%.pdf:%.texinfo  ;
+	pdftex $<
+	for i in $(INDICES) ; do texindex  $(@:%.pdf=%.$$i) ; done
+	pdftex $<
+	# Don't leave invalid indices for postscript!
+	for i in $(INDICES) ; do rm $(@:%.pdf=%.$$i) ; done
 
 %.ps : asgen.frt %.frt ps.frt ; \
     ( \

@@ -58,6 +58,9 @@ TOOLS=  \
 ssort   \
 # That's all folks!
 
+# Index files used by info, some are empty for ciforth.
+INDICES= cp fn ky pg tp vr
+
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
@@ -200,11 +203,14 @@ $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ 
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
     $(LINUXFORTHS) $(OTHERTARGETS)
 
-clean: ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy
+clean: \
+; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy\
+; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
+
 cleanall: clean  testclean ; \
     rcsclean ; \
     rm -f $(OTHERTARGETS) ; \
-    rm -f *.aux *.cp *.cps *.fn *.fns *.ky *.kys *.log *.pg *.pgs *.ps *.toc *.tp *.tps *.vr *.vrs
+    rm -f *.aux *.log *.ps *.toc *.pdf
 
 
 #msdos32.zip doesn't work yet.
@@ -256,11 +262,11 @@ allboot: boot filler moreboot
 
 forth.lab.lina : toblock options.frt errors.linux.txt blocks.frt
 	cat options.frt errors.linux.txt blocks.frt | toblock >$@
-	ln -sf $@ forth.lab
+	ln -f $@ forth.lab
 
 forth.lab.wina : toblock options.frt errors.dos.txt blocks.frt
 	cat options.frt errors.dos.txt blocks.frt | toblock >$@
-	ln -sf $@ forth.lab
+	ln -f $@ forth.lab
 
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
@@ -276,7 +282,7 @@ zip : $(RELEASECONTENT) ; echo ciforth-$(VERSION).tar.gz $+ | xargs tar -cvzf
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply forth.lab
 msdos.zip : $(RELEASECONTENT) mslinks ;\
-	ln -sf forth.lab.wina forth.lab ;\
+	ln -f forth.lab.wina forth.lab ;\
     echo fg$(VERSION) $(RELEASECONTENT) forth.lab |\
     sed -e's/ ci86\./ /g' |\
     sed -e's/ gnr / ci86.gnr /g' |\
@@ -292,12 +298,14 @@ mslinks :
 	ln -sf ci86.mina.bin forth32.com
 	ln -sf ci86.alone.asm alone.asm
 	ln -sf ci86.alonehd.asm alonehd.asm
+	ln -f forth.lab.wina forth.lab
 
 
-forth.lab : forth.lab.lina ;
-	ln -sf forth.lab.lina forth.lab
+forth.lab : forth.lab.lina forth.lab.wina
 
-lina.zip : $(RELEASELINA) ;
+lina.zip : $(RELEASELINA) ;\
+	make forth.lab.lina
+	ln -f forth.lab.lina forth.lab
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
 	(cd ..; ln -s ciforth lina-$(VERSION))
 	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
@@ -326,7 +334,7 @@ lina : ci86.lina.o ; ld $+ -o $@
 
 # Convenience under linux. Steal the definitions of constants from c include's.
 stealconstant: stealconstant.c ;  \
-    cc -I/usr/include/asm $+ -o stealconstant
+    cc $+ -o stealconstant
 
 # Convenience under linux. Steal the definitions of constants from c include's.
 constant.m4 : stealconstant ; $+ >$@

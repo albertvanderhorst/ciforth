@@ -1,4 +1,4 @@
- : ( ciforth lab  $Revision$ (c) Albert van der Horst
+ ciforth lab  $Revision$ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -260,7 +260,7 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
 \ Print the current search order by vocabulary names
-: ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
+: ORDER CONTEXT BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
 2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 \ This is a BUFFER compatible with FIG-Forth.
 : BUFFER   (BUFFER) CELL+ CELL+ ;
@@ -414,7 +414,7 @@ DECIMAL
 
 
 
-( -LEADING                    ) \ AvdH A2jun18
+( -LEADING DROP-WORD                   ) \ AvdH A3mar21
 REQUIRE COMPARE
  : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
     BEGIN                        ( heading blanks )
@@ -424,8 +424,8 @@ REQUIRE COMPARE
     REPEAT  ;
 
 
-
-
+\ From a STRING remove the first word. Leave the rest STRING.
+: DROP-WORD   -LEADING BL $S 2DROP ;
 
 
 
@@ -702,14 +702,7 @@ REQUIRE T[
 \ Use only while compiling, or you crash the system
 : POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
 \ Example: : :P POSTFIX : !CSP ;
-( Z$@ CTYPE ) \ A1sep25
-
-
-
-
-
-
-
+( Z$@ CTYPE C$.S ) \ AvdH A3mar20
 
 \ For a CSTRING (pointer to zero ended chars) return a STRING.
 : Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
@@ -717,27 +710,20 @@ REQUIRE T[
 \ Print a CSTRING.
 : CTYPE Z$@ TYPE ;
 
-
-( ARGC ARGV ENV C$.S ) REQUIRE CONFIG  ?LI \ A1sep25
-REQUIRE Z$@
-\ Return the NUMBER of arguments passed by Linux
-: ARGC   ARGS @   @ ;
-
-\ Return the argument VECTOR passed by Linux
-: ARGV   ARGS @   CELL+ ;
-\ Return the environment POINTER passed by Linux
-: ENV   ARGS @   $@ 1+ CELLS + ;
-
-
-
 \ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
 : C$.S BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
 
 
-( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) \ AvdH A1nov25
+
+
+
+
+( ARGC ARG[] SHIFT-ARGS SRC>EXEC ) \ AvdH A3mar20
+
+
 REQUIRE CONFIG   REQUIRE +THRU
 
-1 3 +THRU
+1 4 +THRU
 
 
 
@@ -748,11 +734,14 @@ REQUIRE CONFIG   REQUIRE +THRU
 
 
 
-
-
-( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?LI \ AvdH A1nov24
-REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
-: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV ) ?LI \ AvdH A3mar20
+REQUIRE Z$@   REQUIRE COMPARE
+\ Return the NUMBER of arguments passed by Linux
+: ARGC   ARGS @   @ ;
+\ Return the argument VECTOR passed by Linux
+: ARGV   ARGS @   CELL+ ;
+\ Return the environment POINTER passed by Linux
+: ENV   ARGS @   $@ 1+ CELLS + ;
 \ Find argument INDEX, counting from one. Return as a STRING.
 : ARG[] CELLS ARGV + @ Z$@ ;
 \ Return POINTER behind the end-0 of the environment.
@@ -760,44 +749,71 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 \ Shift the arguments, so as to remove argument 1.
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
+
+( SRC>EXEC   ) ?LI \ AvdH A3mar20
+
+\ Given a source file NAME, return the binary file NAME.
+: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+
+
+
+
+
+
+
+
+
+
+
+
+( ARG$ ARGC ARG[] SHIFT-ARGS ) ?PC \ AvdH A3mar25
+HEX    REQUIRE DROP-WORD
+\ Return argument STRING for (prot) DOS.
+: ARG$   80 COUNT -LEADING -TRAILING ;
+
+\ Return the NUMBER of arguments.
+: ARGC  ARG$ 80 1 DO DUP 0= IF I LEAVE THEN DROP-WORD LOOP
+   >R 2DROP R> ;
+\ Find argument INDEX, counting from one. Return as a STRING.
+: ARG[]   >R ARG$   R@ 1 < 0D ?ERROR
+    R> 1 ?DO DROP-WORD LOOP   -LEADING BL $S 2SWAP 2DROP ;
+
+\ Shift the arguments, so as to remove argument 1. Keep cr!
+: SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
+DECIMAL
+
+( SRC>EXEC ) ?PC                \ AvdH A3mar20
+HEX
+\ Given a source file NAME, return the binary file NAME.
+: SRC>EXEC   PAD $!   PAD $@ + 4 - >R
+   R@ 4 + R@ 1 + DO I C@ 20 INVERT AND I C! LOOP \ Uppercase
+   R> ".FRT" CORA IF "AOUT.EXE" ELSE
+   -4 PAD +!   ".EXE" PAD $+!   PAD $@ THEN ;
+DECIMAL
+
+
+
+
+
+
+
+
+( GET-ENV ) REQUIRE CONFIG ?LI \ AvdH A3mar20
+\ This must be defined on MS-DOS too
+
+REQUIRE Z$@   REQUIRE COMPARE   REQUIRE ENV
+
 \ For SC and ENVSTRING leave SC / CONTENT and GOON flag.
 : (MENV)   DUP 0= IF   DROP 2DROP 0. 0   ELSE
     Z$@ &= $S 2SWAP >R >R 2OVER COMPARE
     IF   RDROP RDROP 1   ELSE   2DROP R> R> 0   THEN THEN ;
 ( Find a STRING in the environment, -its VALUE or NULL string)
 : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
-( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?PC \ AvdH A1nov24
-REQUIRE -LEADING \   REQUIRE ENV   REQUIRE COMPARE
-HEX
-\ From a STRING remove the first word. Leave the rest STRING.
-: DROP-WORD   -LEADING BL $S 2DROP ;
-\ Find argument INDEX, counting from one. Return as a STRING.
-: ARG[]   >R 80 COUNT   R@ 1 < 0D ?ERROR
-    R> 1 ?DO DROP-WORD LOOP   -LEADING BL $S 2SWAP 2DROP ;
-\ Shift the arguments, so as to remove argument 1. Keep cr!
-: SHIFT-ARGS  80 COUNT   DROP-WORD  80 $!-BD
-   ^M 80 COUNT + C! ;
-\ Linux versions kept for reference
-( Find a STRING in the environment, -its VALUE or NULL string)
-\ : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
-: GET-ENV 1 ABORT" GET-ENV not implemented for MSDOS, yet" ;
-DECIMAL
-( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?PC \ AvdH A1nov24
-REQUIRE -LEADING \   REQUIRE ENV   REQUIRE COMPARE
-HEX
 
 
-\ Linux versions kept for reference
-( Find a STRING in the environment, -its VALUE or NULL string)
-\ : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
-: GET-ENV 1 ABORT" GET-ENV not implemented for MSDOS, yet" ;
-\ : 4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
 
-: SRC>EXEC   PAD $!   PAD $@ + 4 - >R
-   R@ 4 + R@ 1 + DO I C@ 20 INVERT AND I C! LOOP \ Uppercase
-   R> ".FRT" CORA IF "AOUT.EXE" ELSE
-   -4 PAD +!   ".EXE" PAD $+!   PAD $@ THEN ;
-DECIMAL
+
+
 ( SAVE-SYSTEM TURNKEY ) \ AvdH
 REQUIRE CONFIG   REQUIRE +THRU
 1 3 +THRU
@@ -830,7 +846,7 @@ REQUIRE CONFIG   REQUIRE +THRU
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
-( --save_system_ turnkey ) ?PC HEX \ AvdH
+( --save_system_turnkey ) ?PC HEX \ AvdH
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer
 
@@ -1678,7 +1694,7 @@ DECIMAL
 
 
 
-( OS-IMPORT cd ) REQUIRE CONFIG \ AvdH A2feb05
+( OS-IMPORT cdED ) REQUIRE CONFIG \ AvdH A2feb05
 "SYSTEM" PRESENT? 0= ?LEAVE-BLOCK   REQUIRE +THRU
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
@@ -1687,16 +1703,34 @@ CREATE cmdbuf 1000 ALLOT
      2@ cmdbuf $! BL cmdbuf $C+ \ Command
      ^J (PARSE) cmdbuf $+!      \ Append
      cmdbuf $@ SYSTEM          \  Execute
-;   1 3 +THRU
+;
 ?LI
 \ Change directory to SC .
-: cdED PAD $! 0 PAD $C+
-PAD CELL+ HERE HERE 12 LINOS ?ERRUR ;
-\ Idem but string from input.
-: cd (WORD) cdED ;
-( cat echo diff grep list ls make man rm cp ee l ) ?LI
-REQUIRE OS-IMPORT       ?LI
+: cdED   ZEN HERE HERE 12 LINOS ?ERRUR ;
+
+
+
+( cat echo diff grep list ls make man rm cd cp ee l )
+\ Unix like commands
+REQUIRE CONFIG   REQUIRE +THRU
+1 2 +THRU
+
+
+
+
+
+
+
+
+
+
+
+
+( cat cp echo diff grep list ls make man rm   ee l unix) ?LI
+REQUIRE OS-IMPORT ( and cdED )          \ AvdH A30325
 "cat    "   OS-IMPORT cat
+: cd (WORD) cdED ;      \ Change directory to "SC"
+"cp     "   OS-IMPORT cp
 "echo   "   OS-IMPORT echo
 "diff   "   OS-IMPORT diff
 "grep   "   OS-IMPORT grep
@@ -1704,14 +1738,11 @@ REQUIRE OS-IMPORT       ?LI
 "ls     "   OS-IMPORT ls
 "make   "   OS-IMPORT make
 "man    "   OS-IMPORT man
-"cp     "   OS-IMPORT cp
 "rm  -i "   OS-IMPORT rm
-
-"ee     "   OS-IMPORT ee
-"l      "   OS-IMPORT l
+"ee     "   OS-IMPORT ee  \ My favorite editor ee
+"l      "   OS-IMPORT l   \ Very short personal command
 ""          OS-IMPORT !!
-( cat echo list ls cp cd rm edit ) ?PC
-"I-LIKE-DOS" PRESENT? ?LEAVE-BLOCK
+( cat cd cp echo edit list ls rm   ee l unix) ?PC \ AvdH A30325
 REQUIRE OS-IMPORT
 "TYPE   "   OS-IMPORT cat
 "ECHO   "   OS-IMPORT echo
@@ -1722,23 +1753,24 @@ REQUIRE OS-IMPORT
 "DEL    "   OS-IMPORT rm
 "CD     "   OS-IMPORT cd
 "EDIT   "   OS-IMPORT edit
-\ "ee     "   OS-IMPORT ee
+"ee     "   OS-IMPORT ee  \ My favorite editor
+"l      "   OS-IMPORT l   \ Very short personal command
 
-
-
-( TYPE ECHO MORE LIST DIR COPY DEL CD EDIT ) ?PC
-"I-LIKE-DOS" PRESENT? 0= ?LEAVE-BLOCK
+""          OS-IMPORT !!
+"A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
+( type ECHO MORE list DIR COPY DEL CD edit ) ?PC  \ AvdH A30325
 REQUIRE OS-IMPORT
-"TYPE   "   OS-IMPORT TYPE
+"TYPE   "   OS-IMPORT type
 "ECHO   "   OS-IMPORT ECHO
 "MORE<  "   OS-IMPORT MORE
-\ "LIST   "   OS-IMPORT LIST
+"LIST   "   OS-IMPORT list  \ Not to conflict with: #BL LIST
 "DIR    "   OS-IMPORT DIR
 "COPY   "   OS-IMPORT COPY
 "DEL    "   OS-IMPORT DEL
 "CD     "   OS-IMPORT CD
-"EDIT   "   OS-IMPORT edit  \ Not to conflict with: BL EDIT
-
+"EDIT   "   OS-IMPORT edit  \ Not to conflict with: #BL EDIT
+"RENAME "   OS-IMPORT RENAME
+"A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
 
 
 

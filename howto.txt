@@ -77,3 +77,12 @@ How to create a distribution :
    releasemina.bat 3d275
    releasewina.bat 4d0
    releasewina.bat 3d275
+
+How to patch, say release 4.0.2
+
+Make sure there is a branch rel-4-0-patches
+Get it. Because you want to make 4.0.2
+apparently you wil get 4.0.2 plus maybe some patches
+already made.
+Before release, call this version 4.0.3.
+From then on 4.0.2 can no longer be patched.
