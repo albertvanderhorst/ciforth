@@ -1410,9 +1410,12 @@ _ALIGNED_({ DC LALIGN}, {dnl})
 ;
 dnl Remember the top of the denotation chain.
 define({_STARTOFDENOTATIONS_},_LINKOLD)dnl
-worddoc( {WORDLISTS},{FORTH},{forth},{},{ISO,FIG,I,L1},
-{The name of the primary vocabulary. Execution adds
-forthcode({FORTH}) to the forthcode({SEARCH-ORDER}) forthsamp({word}) list.
+worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
+{The name of the primary vocabulary. Execution pushes the
+forthcode({FORTH}) forthdefi({WID})
+to the top of the forthcode({SEARCH-ORDER}) .
+(For ISO-compliance it
+would replace the top.)
 Until additional user word list 's are created, new user definitions
 become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
@@ -1517,7 +1520,7 @@ executed. This word list must be used with care as a
 forthcode({SEARCH-ORDER}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add a denotation.
 _VERBOSE_({{The word forthcode({FORTH}) is hidden by the word
-forthcode({F}). Use forthsample({{ONLY FORTH}}) to regain
+forthcode({F}). Use forthsamp({{ONLY FORTH}}) to regain
 control.}})
 },
 {{VOCABULARY}},
@@ -1532,9 +1535,10 @@ DENOTBODY:
 HEADER( , , ,0, B_DUMMY, _STARTOFDENOTATIONS_)
 ;
 worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
-{The name of the forthcode({ENVIRONMENT}) vocabulary. The associated forthdefi({word list})
-contains environment queries. The names of words
-present in forthcode({ENVIRONMENT}) are recognized by
+{The name of the forthcode({ENVIRONMENT}) vocabulary. The
+associated forthdefi({word list}) contains environment queries.
+The names of words present in forthcode({ENVIRONMENT}) are
+recognized by
 forthcode({ENVIRONMENT?}). This word list is not intended to
 be used as a forthcode({SEARCH-ORDER}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add an environment
@@ -1980,8 +1984,8 @@ PWORD1: DC      DROP
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
-worddocsafe( {PARSING~},{(PARSE)},{paren_parse},{ ch --- sc },{},
-{Scan the forthdefi({current input source}) for the character forthvar({ch}) .
+worddocsafe( {PARSING~},{(PARSE)},{paren_parse},{ c --- sc },{},
+{Scan the forthdefi({current input source}) for the character forthvar({c}) .
 Return forthvar({sc}): a string from the current position in the
 input stream, ending before the first such character,
 or at the end of the current input source if it isn't
@@ -2340,8 +2344,8 @@ HEADER({LEAVE},{LLEAV},{DOCOL})  ;{LIMIT <- INDEX}
         DC      SEMIS
 ;
 worddoc( {STACKS},{>R},{to_r},{n ---},{ISO,FIG,C,L0},
-{Remove a number from the computation stack and place as the most
-accessable on the return stack. Use should be balanced with forthcode({R>}) in
+{Remove a number from the forthdefi({data stack}) and place as the most
+accessable on the forthdefi({return stack}). Use should be balanced with forthcode({R>}) in
 the same definition.},{{R@}},
 { {: GS1 1 2 3 >R . R@ . R> . . ; GS1},{2 3 3 1} },
 enddoc)
@@ -2352,8 +2356,8 @@ CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
         _NEXT
 ;
 worddoc( {STACKS},{R>},{r_from},{--- n},{ISO,FIG,L0},
-{Remove the top value from the return stack and leave it on the
-computation stack. },{{>R},{R@}},
+{Remove the top value from the forthdefi({return stack}) and leave it on the
+forthdefi({data stack}) . },{{>R},{R@}},
 {{." Via >R"},{Via >R}},
 enddoc)
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
@@ -2370,7 +2374,7 @@ CODE_HEADER({RDROP},{RDROP})      ;{(S1) <- (R1)}
         _NEXT
 ;
 worddocsafe( {STACKS},{R},{r_fetch},{--- n},{ISO},
-{Copy the top of the return stack to the computation stack.},{{>R},{<R}},
+{Copy the top of the return stack to the data stack.},{{>R},{<R}},
 {{." Via >R"},{Via >R}},
 enddoc)
 HEADER({R@},{RR},{_VAR_FIELD(IDO)})
@@ -2671,7 +2675,7 @@ worddoc( {MEMORY},{WITHIN},{within},{n1 n2 n3 --- ff},{ISO},
 the range forthvar({n2}) (inclusive)
 to forthsamp({n3}) (non-inclusive).
 This works for signed as well as unsigned numbers.
-Shorthand for: forthsamp({OVER - >R - R U<}) },
+This is shorthand for: forthsamp({OVER - >R - R U<}) },
 {{<},{U<}},
 {{ 1 1 3 WITHIN .},{_T_},
 { 2 1 3 WITHIN .},{_T_},
@@ -3283,11 +3287,12 @@ HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
 ; REQUIRES ONE MORE CELL!
 ;
 worddoc( {WORDLISTS},{SEARCH-ORDER},{search_order},{--- addr},{FIG,U,L0},
-{ The current search order is a zero ended row of WID 's found
-at an area in the user space forthvar({addr}) . The
-corresponding wordlists are searched for definitions during
-interpretation. At most M4_MAXWORDLIST WID 's are present in
-this ciforth, while the ISO Search-Order wordset requires at
+{ The current search order is a row of WID 's found
+at an area in the user space forthvar({addr}) ending with the minimum search order
+WID.
+The corresponding wordlists are searched for definitions during
+interpretation. It may contain up to M4_MAXWORDLIST WID 's in
+this ciforth, while the ISO Search-Order wordset requires a capacity of at
 least 8. },
 {{FOUND},{VOCABULARY},{CURRENT}},
 {{SEARCH-ORDER @ ' FORTH >WID = .},{_T_}},
@@ -3300,7 +3305,7 @@ HEADER({SEARCH-ORDER},{SEARCH},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
 ;{========== END USER VARIABLES =============;}
 ;
 worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
-{Shorthand for ``forthsamp({1}) forthcode({+})''.},
+{This is shorthand for ``forthsamp({1}) forthcode({+})''.},
 {{CELL+},{1-}},
 {{5 1+ .},{6}},
 enddoc)
@@ -3801,7 +3806,7 @@ HEADER({?ERRUR},{QERRUR},{DOCOL})
 ;
 _SECURITY_({
 worddoc( {SECURITY},{?DELIM},{question_delimiter},{},{},
-{Parse a character and issue error message if it is not a
+{Parse a character and issue error message if it is not a blank
 delimiter.},{},
 {
 {DECIMAL 0 WARNING !   ?DELIM   },{},
@@ -4249,9 +4254,9 @@ CORA3:
         MOV     HIP,DX  ;{Restore}
         _PUSH
 ;
-worddoc( {STRING},{$I},{string_index},{sc ch -- addr},{},
-{Find the first forthvar({ch}) in the string constant forthvar({sc}) and
-return its forthvar({addr1}) if present.
+worddoc( {STRING},{$I},{string_index},{sc c -- addr},{},
+{Find the first forthvar({c}) in the string constant forthvar({sc}) and
+return its forthvar({addr}) if present.
 Otherwise return a nil pointer (0). },
 {{$S},{CORA}},
 {{ 132 "ORANG" OVER >R &N $I R> - . .},{3 132},
@@ -4274,15 +4279,15 @@ SINDEX1:
         PUSH    DI
         _NEXT
 ;
-worddoc( {STRING},{$S},{string_split},{sc ch -- sc1 sc2},{},
-{Find the first forthvar({ch}) in the string constant
+worddoc( {STRING},{$S},{string_split},{sc c -- sc1 sc2},{},
+{Find the first forthvar({c}) in the string constant
 forthvar({sc}) and split it at that address. Return the strings
-after and before forthvar({ch}) into forthvar({sc1}) and
+after and before forthvar({c}) into forthvar({sc1}) and
 forthvar({sc2}) respectively. If the character is not present
 forthvar({sc1}) is a null string _VERBOSE_({{(its address is
 zero)}}) and forthvar({sc2}) is the original string.
 _VERBOSE_({{Both forthvar({sc1}) and forthvar({sc2}) may be
-empty strings (i.e. their count is zero), if forthvar({ch}) is
+empty strings (i.e. their count is zero), if forthvar({c}) is
 the last or first character in forthvar({sc}) .}}) },
 {{$I},{CORA}},
 {{ 132 "ORANG" &O $S . DROP TYPE . },{0 RANG132},
@@ -4316,7 +4321,7 @@ SSPLIT2:
         _NEXT
 ;
 worddoc( {MEMORY},{ERASE},{erase},{addr n ---},{ISO},
-{Shorthand for forthsamp({0 FILL}).},
+{This is shorthand for forthsamp({0 FILL}).},
 {{BLANK},{FILL}},
 {{ !CSP HERE 41 C, 41 C, 41 C, 41 C, DUP 3 ERASE dnl
     COUNT . COUNT . COUNT . COUNT . DROP},{0 0 0 41} },
@@ -4328,7 +4333,7 @@ HEADER({ERASE},{LERASE},{DOCOL})
 ;
 _LOAD_({
 worddoc( {MEMORY},{BLANK},,{addr count ---},{ISO},
-{Shorthand for ``forthcode({BL}) forthcode({FILL})''.},{},
+{This is shorthand for ``forthcode({BL}) forthcode({FILL})''.},{},
 {{ !CSP HERE 41 C, 41 C, 41 C, 41 C, DUP 3 BLANK dnl
     COUNT . COUNT . COUNT . COUNT . DROP},{20 20 20 41} },
 enddoc)
@@ -5113,11 +5118,11 @@ DOVOC:
 ;{   It is updated each time a definition is}
 ;{   appended to the 'FORTH' vocabulary.}
 ;
-worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{NISO,FIG,I,L1},
+worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{B,NISO,FIG,I,L1},
 {The name of the vocabulary to make machine code definitions.
 In ciforth execution it pushes the associated word list to the
 top of the forthcode({SEARCH-ORDER}) stack. (For ISO-compliance it
-would replace the top of the stack.) forthcode({ASSEMBLER}) is
+would replace the top.) forthcode({ASSEMBLER}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.
 This word makes only sense in combination with the words that
@@ -5157,7 +5162,7 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
 worddoc( {WORDLISTS},{ALSO},{also},{},{ISO},
 {Duplicate the topmost forthdefi({wid}) in the SEARCH-ORDER order stack.
 If there were already M4_MAXWORDLIST wid 's,
-ciforth looses the last one,
+ciforth looses the last one.
 This is not counting
 the forthcode({ONLY}) search order.},
 {{VOCABULARY}},
@@ -5193,9 +5198,9 @@ HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
-{Make the forthcode({SEARCH-ORDER}) order stack empty.
-The word forthcode({FORTH}) can still be found,
-such that one can regain control.
+{Make the forthcode({SEARCH-ORDER}) order stack empty, leaving the minimum search order ,
+which is approximately the forthcode({DENOTATION}) word list plus the word forthcode({FORTH}).
+By using forthcode({FORTH}) one can regain control.
 },
 {{VOCABULARY}},
 {
@@ -5637,7 +5642,7 @@ HEADER({2*},{TWOST},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {SUPERFLUOUS},{1-},{one_minus},{n1 --- n2},{ISO},
-{ This is the shorthand for forthsamp({1 -}). },
+{ This is shorthand for forthsamp({1 -}). },
 {{1+} },
 {
 {  2 1- . },{1},
@@ -9465,6 +9470,7 @@ TRIA1:  DC      CR,IDO
 TRIA2:  _LOOP(TRIA1)    ;{THEN}
 TRIA9:
         DC      CR
+        DC      ZERO, MESS
         DC      SEMIS
 });_END_({_LOAD_})
 ;
@@ -9777,10 +9783,10 @@ blocks.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
-i.e. it gets a word from the forthdefi( {current input source}
-) and interprets or compiles it, advancing the _CIF_IN_(
-{forthcode({IN})}) _ISO_IN_( {forthcode({>IN})}) pointer. The
-wordset forthsamp({PARSING}) contains the words used by this
+i.e. it gets a word from the forthdefi(
+{current input source} ) and interprets or compiles it,
+advancing the _CIF_IN_( {forthcode({IN})}) _ISO_IN_( {forthcode({>IN})}) pointer.
+The wordset forthsamp({PARSING}) contains the words used by this
 interpreter and other words that consume characters from the
 input source. In this way the outer interpreter need not be
 very smart, because its capabilities can be extended by new
@@ -9790,8 +9796,7 @@ worddocchapter({SCREEN},{ },
 {Most of the mass storage is used for forthdefi({screen})'s that
 have 16 lines of 64 characters. They are used for source code
 and documentation.
-Each screen is a whole number of forthcode({BLOCK})'s,
-in our case it is one block.
+Each screen is one forthcode({BLOCK}) as required by ISO.
 The forthsamp({SCREEN}) wordset contains facilities to view screens,
 and forthdefi({load}) them, that is compiling them and thus extending
 the base system.
@@ -9843,7 +9848,7 @@ strings of characters.
 In ciforth strings have been given their civil rights.
 So they are entitled to a forthdefi({denotation}) and have a proper
 fetch and store. An (address length) pair is considered a forthdefi({string constant}).
-It may be trimmed, but the data referring to via address must not be changed.
+It may be trimmed, but the data referring to via the address must not be changed.
 It can be stored in a buffer, a forthdefi({string variable}), that contains
 in its first cell the count. Formerly this was in the first byte, and these
 are called forthdefi({old fashioned}) _VERBOSE_({{ (or less
@@ -9862,18 +9867,18 @@ system or functions available in the BIOS-rom.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({WORDLISTS},{ },
 {The dictionary is subdivided in non-overlapping subsets: the
-forthdefi({word list})'s. forthxref({DICTIONARY}).
-_VERBOSE_({With one exception: FORTH is part of all word list
-'s}) They are created by the defining word
+forthdefi({word list})'s (forthxpref({DICTIONARY})).
+_VERBOSE_({{There is one exception: the DENOTATION wordlist is also part of the FORTH word list.  }})
+ They are created by the defining word
 forthcode({VOCABULARY}) and filled by defining words while that
 vocabulary is forthcode({CURRENT}) . They regulate how words
-are found, different vocabularies can have words with the same
-names. Word list's in the ISO sense have no name, which is
-inconvenient. So we will loosely use the word vocabulary for
-the word list that is associated with a word that is created by
-the defining word forthcode({VOCABULARY}) . The wordset
-forthsamp({WORDLISTS}) contains words that manipulate those
-vocabularies. Vocabularies are associated with the wordlist 's
-of the ISO standard, the primary difference is that they have a
-name. },
+are found; different vocabularies can have words with the same
+names.
+
+Word list's in the ISO sense have no name, which is
+inconvenient. We use vocabulary words created by the defining
+word forthcode({VOCABULARY}) . They are used to manipulate the
+word list's that are associated with them. _VERBOSE_({{So
+vocabularies are nearly the wordlist 's of the ISO standard,
+the primary difference is that they have a name.}}) },
 {},{},{},{})
