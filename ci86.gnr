@@ -2902,7 +2902,7 @@ _THREADS_(
 },
 {        MOV     AX,_CELL_PTR[USINI]
 })dnl _END_({_THREADS_})
-        LEA     AX,[BX+AX]      ;{ADDR OF VARIABLE}
+        ADD     AX,BX      ;{ADDR OF VARIABLE}
         _PUSH
 ;
 ;
