@@ -126,8 +126,9 @@ D_HOFFSET EQU     1       ;{ Same for data field}
 F_HOFFSET EQU     2       ;{ Same for flag field}
 L_HOFFSET EQU     3       ;{ Same for link field}
 N_HOFFSET EQU     4       ;{ Same for name field}
-PH_OFFSET EQU     5       ;{ Past header field: Start of data area. }
-BD_OFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
+_SOURCEFIELD_({S_HOFFSET EQU     5       ;{ Same for source field}}, {dnl})
+PH_OFFSET EQU     M4_HS   ;{ Past header field: Start of data area. }
+BD_OFFSET EQU     M4_HS+1 ;{ Start of BODY for CREATEd word.}
 ;
 _EQULAYOUT_({
 _HIGH_BUF_({
@@ -1153,7 +1154,7 @@ forthcode({SEARCH}) and forthcode({CURRENT}) , an appropriate error message is g
 This word is intended for interpret mode,  but in ciforth it works as
 well in compilation mode.
 It is recommended this word is not postponed.},
-{{FOUND},{>CFA},{>FFA},{>LFA},{>NFA},{>DFA},{EXECUTE}} ,
+{{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
 {{ : APE 1 2 ; 'APE EXECUTE  'APE ID. . .},{APE 2 1}},
 enddoc)
@@ -3323,7 +3324,7 @@ forthdefi({code field address}) forthvar({cfa}) : the address
 that is compiled within high level definitions. It serves as an
 execution token as well. In ciforth this is actually the same
 as the forthdefi({DEA}) .},
-{{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>PHA}},
+{{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
@@ -3338,7 +3339,7 @@ code word, to the high level code for a colon-definition, and
 to the forthcode({DOES>}) pointer for a word build using
 forthcode({CREATE}) . Normally this is the area behind the
 header, found via forthcode({>PHA}) . },
-{{'},{>CFA},{>FFA},{>LFA},{>NFA},{>PHA}},
+{{'},{>CFA},{>FFA},{>LFA},{>NFA},,{>SFA},{>PHA}},
 {{ "APE" (CREATE) HERE ' APE >DFA @ = .},{_T_}},
 enddoc)
 HEADER({>DFA},{TDFA},{DOCOL})
@@ -3349,7 +3350,7 @@ HEADER({>DFA},{TDFA},{DOCOL})
 worddoc( {DICTIONARY~},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return its
 forthdefi({flag field address}) forthvar({ffa}) .},
-{{'},{>CFA},{>DFA},{>LFA},{>NFA},{>PHA}},
+{{'},{>CFA},{>DFA},{>LFA},{>NFA},,{>SFA},{>PHA}},
 {{"FRED" (CREATE) ' FRED >FFA DUP @ . IMMEDIATE @ .},{0 4}},
 enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
@@ -3361,7 +3362,7 @@ worddoc( {DICTIONARY~},{>LFA},{to_link_field_address},{dea --- lfa},{},
 {Given a dictionary entry addres return its
 forthdefi({link field address}) forthvar({lfa}). It contains
 the DEA of the previous word. },
-{{'},{>CFA},{>DFA},{>FFA},{>NFA},{>PHA}},
+{{'},{>CFA},{>DFA},{>FFA},{>NFA},{>PHA},{>SFA}},
 {{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}},
 enddoc)
 HEADER({>LFA},{TLFA},{DOCOL})
@@ -3372,13 +3373,27 @@ HEADER({>LFA},{TLFA},{DOCOL})
 worddoc( {DICTIONARY~},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
  forthdefi({name field address}).},
-{{'},{>CFA},{>DFA},{>FFA},{>LFA}},
+{{'},{>CFA},{>DFA},{>FFA},{>LFA},{>SFA}},
 {{ ' WORDS >NFA @ $@ TYPE},{WORDS}},
 enddoc)
 HEADER({>NFA},{TNFA},{DOCOL})
         DC      LIT,_CELLS(N_HOFFSET)
         DC      PLUS
         DC      SEMIS
+;
+_SOURCEFIELD_({
+worddoc( {DICTIONARY~},{>SFA},{to_source_field_address},{dea --- sfa},{},
+{Given a dictionary entry addres return the
+ forthdefi({source field address}).},
+{{'},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA}},
+{{ ' WORDS >SFA @ .},{0}},
+enddoc)
+;
+HEADER({>SFA},{TSFA},{DOCOL})
+        DC      LIT,_CELLS(S_HOFFSET)
+        DC      PLUS
+        DC      SEMIS
+},{dnl});_END_({_SOURCEFIELD_})
 ;
 worddoc( {DICTIONARY~},{>PHA},{past_header_address},{dea --- addr},{},
 {Given a dictionary entry addres return the
@@ -4487,7 +4502,10 @@ HEADER({ID.},{IDDOT},{DOCOL})
         DC      SPACE
         DC      SPACE
         DC      SPACE
+        _BRANCH(IDDOT2)
 IDDOT1:
+        DC      DROP
+IDDOT2:
         DC      SEMIS
 ;
 worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc --},{},
@@ -4538,6 +4556,8 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 
         DC      COMMA   ; {Name field.}
 
+_SOURCEFIELD_({ DC      ZERO, COMMA  ; {Source field.}
+},{dnl})
         DC      RDROP
         DC      SEMIS
 ;
@@ -8412,7 +8432,7 @@ search order.
 dnl A break as per forthcode({KEY?}) will terminate the listing.
 }, {},
 {
-{VOCABULARY JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
+{VOCABULARY JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q ' GO >LFA ;},{},
 {: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
 {FORTH DEFINITIONS},{}
