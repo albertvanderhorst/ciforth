@@ -4014,3 +4014,17 @@ problems, CP/M dependant tricks and knowledge.
           ?DUP IF
           OVER + SWAP DO I C@ PEMIT LOOP THEN ;
   : P."  "" WORD COUNT PTYPE ;       34 LOAD
+( READ-FILE ) ( AvdH A1nov3 )
+HEX
+CREATE RW-BUFFER 400 ALLOT
+( ISO  ( buf len fd -- len ior)
+: READ-FILE   3F00 ROT ROT SWAP RW-BUFFER BDOS 1 AND IF
+   2DROP DROP >R DROP 0 R> NEGATE ELSE
+   2DROP DROP >R >R   0 RW-BUFFER   0 R>   R@ FARMOVE   R> 0
+THEN ;
+( ISO  ( buf len fd -- len ior)
+: WRITE-FILE   >R >R  0 SWAP  0 RW-BUFFER R@ FARMOVE
+   4000 R> R> SWAP RW-BUFFER BDOS 1 AND IF
+   2DROP DROP 0 SWAP NEGATE ELSE  2DROP DROP 0 THEN ;
+( Honest to god Unix read ( fd buf len -- len/err)
+: READ ROT READ-LINE OR ;
