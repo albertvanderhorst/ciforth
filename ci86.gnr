@@ -198,8 +198,8 @@ HUGESECS      DD         000H
 
 RETRY:
 	CALL    DISPLAYW
+	XOR     AX,AX   ;{ Reset}
 	MOV     AL,' '
-	MOV     AH,00   ;{ Reset}
 	MOV     DL,00            ;{Drive 0 (floppy 1)}
 	INT(13H)                 ;{BIOS disk read function}
 	CALL    DISPLAYW
@@ -506,8 +506,34 @@ GDTLOAD DW     GDTLEN
 
 ;____1_____ _LINUXHOSTED_1_({
 include(width32.m4)       
-	ORG	M4_ORIG 
+        ORG     M4_ORIG 
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
+;        MOV     EBP,ESP
+;        MOV     EAX,[EBP+CELLS(3)]        ; Get jump table vector.
+        POP     EAX
+        POP     EAX
+        POP     EAX
+        POP     EAX
+        MOV     _CELL_PTR[JMPTABLE],EAX
         JMP     BOOTUP
+
+RETURN_LINUX:
+        MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
+        MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
+        MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
+        MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
+        RET     ; Assuming the old stack has not been disturbed.
+SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI
+JMPTABLE:	DD	0			; Linux jump table address
+
+_ReadKbd	EQU	4			; Service offsets
+_TTYOut		EQU	8
+_ExitJob	EQU	12
+_Type		EQU	16
+_System		EQU	20
 });_END___1__({ _LINUXHOSTED_1_})
 
 ;{ The following is not known until the final width m4 final has been included.}
@@ -1134,7 +1160,7 @@ CODE_HEADER({+!},{PSTOR})
 CODE_HEADER({TOGGLE},{TOGGL})
 	POP	AX	;{BIT PATTERN}
 	POP	BX	;{ADDR}
-	XOR	[BX],AL	;
+	XOR	[BX],AX	;
         _NEXT                            
 ;
 CODE_HEADER({@},{FETCH})
@@ -1144,8 +1170,8 @@ CODE_HEADER({@},{FETCH})
 	PAGE
 CODE_HEADER({C@},{CFET})
 	POP	BX
+        XOR     AX,AX
 	MOV	AL,[BX]
-	SUB	AH,AH
 	JMP	APUSH
 ;
 CODE_HEADER({2@},{TFET})
@@ -2397,8 +2423,8 @@ MESS3	DC	SEMIS
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
 	POP	DX	;{ PORT ADDR}
+        XOR     AX,AX
 	IN	AL,{DX}   ;{ BYTE INPUT}
-	SUB	AH,AH
 	JMP	APUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
@@ -2669,7 +2695,21 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
 ;____1_____ _LINUXIO_1_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
-HEADER({TYPE},{LTYPE},{0})
+CODE_HEADER({TYPE},{LTYPE})
+        POP     EAX
+        POP     EBX
+	PUSH	EBP			; save Forth machine
+	PUSH	ESI
+        PUSH    EBX
+        PUSH    EAX
+	MOV	EAX, _CELL_PTR[JMPTABLE]
+	CALL	[_Type+EAX]                   
+;        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        POP     EAX
+        POP     EAX
+	POP	ESI			; restore Forth
+	POP	EBP
+        _NEXT
 ;
 HEADER({EMIT},{EMIT},{DOCOL})      
 	DC      DUPE,LIT,LF,EQUAL
@@ -2681,9 +2721,78 @@ EMIT1:
 	DC      DROP
 	DC	SEMIS
 ;
- HEADER({EXPECT},{EXPEC},{0})
+HEADER({EXPECT},{EXPEC},{DOCOL})        
+	DC	OVER                            
+	DC	PLUS                            
+	DC	OVER                            
+	DC	XDO	;{ DO                    }
+EXPE1	DC	KEY                             
+	DC	DUPE                            
+	DC	RUBOUT 
+	DC      FETCH
+	DC	EQUAL                           
+	_0BRANCH(EXPE2) ;{ IF                    }
+	DC	DROP                            
+	DC	DUPE                            
+	DC	IDO                             
+	DC	EQUAL                           
+	DC	DUPE                            
+	DC	FROMR                           
+	DC	TWO     ;{ Remove last 2 chars }
+	DC	LSUB                            
+	DC	PLUS                            
+	DC	TOR                             
+	_0BRANCH(EXPE6) ;{ IF                    }
+	DC	LIT                             
+	DC	BELL                            
+	_BRANCH(EXPE7)  ;{ ELSE                  }
+EXPE6	DC	LIT                             
+	DC	BSOUT	;{ ENDIF                 }
+EXPE7	_BRANCH(EXPE3)  ;{ ELSE                  }
+EXPE2	DC	DUPE                            
+	DC	LIT,0DH
+	DC	EQUAL
+	_0BRANCH(EXPE4) ;{ IF}
+	DC	LLEAV
+	DC	DROP
+	DC	BLS
+	DC	ZERO
+	_BRANCH(EXPE5)  ;{ ELSE}
+EXPE4	DC	DUPE	;{ ENDIF}
+EXPE5	DC	IDO
+	DC	CSTOR
+	DC	ZERO
+	DC	IDO
+	DC	ONEP
+	DC	STORE	;{ ENDIF}
+EXPE3	DC	EMIT
+	_LOOP(EXPE1) 	;{ LOOP}
+	DC	DROP
+	DC	SEMIS
 ;
-HEADER({KEY},{KEY},{0})
+HEADER({KEY},{KEY},{DOCOL})
+KEY1:		DC	QRX 
+		DC	BRAN,KEY1
+                DC      SEMIS
+
+CODE_HEADER({?RX},{QRX})
+	PUSH	EBP			; save Forth machine
+	PUSH	ESI
+	MOV	EAX, _CELL_PTR[JMPTABLE]
+	CALL	[_ReadKbd+EAX]                   
+	POP	ESI			; restore Forth
+	POP	EBP
+        
+	PUSH	EAX
+	PUSH	LONG 1
+        
+	CMP	EAX, 0FFFFFFFFh		; not cmp eax, 0ffh ???
+	JNE	SHORT A_CHAR		; not EOF -> a char 
+	POP	EAX			; undo T flag
+	POP	EAX			; remove char
+	PUSH    LONG 0                       ; false flag
+A_CHAR:		
+        _NEXT
 ;
 HEADER({?TERMINAL},{QTERM},{0})
 
@@ -3517,7 +3626,9 @@ CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS}
 	INT	27H	;{I'M HISTORY}
 });_END___1__({ _HOSTED__1_})
-CYCLE:  _0BRANCH(CYCLE) ;{PREVENT DISASTERS}
+;____1_____ _LINUXHOSTED_1_({
+        JMP     RETURN_LINUX    
+});_END___1__({ _LINUXHOSTED_1_})
  
 	PAGE
 HEADER({LIST},{LISTC},{DOCOL})
