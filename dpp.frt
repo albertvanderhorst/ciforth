@@ -102,10 +102,10 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 
 2DROP
 \D CR ." Expect 0 : " DEPTH . CR
-\D 0 0 YESSES ." YESSES Expect 0 0 :" ? DEPTH .  CR
-\D 0 0 NOES   ." NOES   Expect 1 0 :" ? DEPTH .  CR
-\D 1 0 NOES   ." NOES   Expect 1 0 :" ? DEPTH .  CR
-\D 1 1 NOES   ." NOES   Expect 1 0 :" ? DEPTH .  CR
+\D 0 0 YESSES ." YESSES Expect 0 0 : " ? DEPTH .  CR
+\D 0 0 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
+\D 1 0 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
+\D 1 1 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
 
 \ Upper limits for arrays
 #DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
@@ -208,7 +208,7 @@ INTERACTION DEFINITIONS
 : CLEAN-STRING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN ;
 
 \D "How ? " CLEAN-STRING
-\D ." Expect |How |0 :" &| EMIT TYPE &| EMIT DEPTH . CR
+\D ." Expect |How |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
 
 
 PREVIOUS DEFINITIONS
@@ -316,11 +316,11 @@ MAX-QUESTIONS ARRAY BEEN-POSED
        SWAP APPARENT?   IF 1 C_NO +! EXIT THEN
        1 C_AMB +!
 ;
-\D !ANSWERS ." !ANSWERS Expect 0 0 0 :" C_YES ? C_NO ? DEPTH . CR
-\D 0 0 ACCUMULATE ." ACCUMULATE Expect 0 1 0 :" C_YES ? C_NO ? DEPTH . CR
-\D 0 1 ACCUMULATE ." ACCUMULATE Expect 1 1 0 :" C_YES ? C_NO ? DEPTH . CR
-\D 1 0 ACCUMULATE ." ACCUMULATE Expect 1 2 0 :" C_YES ? C_NO ? DEPTH . CR
-\D 1 1 ACCUMULATE ." ACCUMULATE Expect 1 3 0 :" C_YES ? C_NO ? DEPTH . CR
+\D !ANSWERS ." !ANSWERS Expect 0 0 0 : " C_YES ? C_NO ? DEPTH . CR
+\D 0 0 ACCUMULATE ." ACCUMULATE Expect 0 1 0 : " C_YES ? C_NO ? DEPTH . CR
+\D 0 1 ACCUMULATE ." ACCUMULATE Expect 1 1 0 : " C_YES ? C_NO ? DEPTH . CR
+\D 1 0 ACCUMULATE ." ACCUMULATE Expect 1 2 0 : " C_YES ? C_NO ? DEPTH . CR
+\D 1 1 ACCUMULATE ." ACCUMULATE Expect 1 3 0 : " C_YES ? C_NO ? DEPTH . CR
 
 \ Evaluates and returns the quality for question number INDEX
 \ for the current focus. It is a number between 0 and 1000.
@@ -330,7 +330,65 @@ MAX-QUESTIONS ARRAY BEEN-POSED
    !ANSWERS   #DIAGNOSES @ 0 DO DUP I ACCUMULATE LOOP DROP
    C_UNAMB 0= IF 0 ELSE BAL UNAMB 1000 */ THEN
 ;
-\D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 :" . DEPTH . CR
-\D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 :" . DEPTH . CR
+\D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 : " . DEPTH . CR
+\D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 : " . DEPTH . CR
+
+\ Select the best question still available. Return its INDEX.
+: SELECT-QUESTION -1 0  \ Initial INDEX and QUALITY.
+    #QUESTIONS @ 0 DO I ?POSED 0= IF
+       DUP I  QUESTION-QUALITY 2DUP < IF >R >R 2DROP R> R> ELSE 2DROP THEN
+    THEN LOOP DROP
+;
+\D SELECT-QUESTION ." SELECT-QUESTION Expect 0 0 : " . DEPTH . CR
 
 PREVIOUS
+
+ONLY FORTH DEFINITIONS
+VOCABULARY CONSULTING
+CONSULTING DEFINITIONS INTERACTION DATABASE STRATEGY
+
+VARIABLE POSSIBILITIES  \ Number of diagnoses left
+\ The ANSWER is ambiguous, i.e. cannot be used to exclude diagnoses.
+: ?AMBIGUOUS DUP A_YES = SWAP A_NO = OR 0= ;
+\D A_NONE ?AMBIGUOUS ." Expect -1 0 : " . DEPTH . CR
+\D A_NO ?AMBIGUOUS ." Expect 0 0 : " . DEPTH . CR
+
+\ Return for QUESTION and DIAGNOSIS what the answer is according
+\ to the database. All ambiguous answers are mapped to ``A_NONE''.
+: ANSWER-FOR
+       2DUP NOES @ >R YESSES @ R>
+       2DUP + 0=        IF 2DROP A_NONE EXIT THEN
+       2DUP APPARENT?   IF 2DROP A_YES EXIT THEN
+       SWAP APPARENT?   IF A_NO EXIT THEN
+       A_NONE ;
+\D 0 0 ANSWER-FOR ." ANSWER-FOR Expect 0 0 : " . DEPTH . CR
+\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 1 0 : " . DEPTH . CR
+\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 1 0 : " . DEPTH . CR
+\D 1 1 ANSWER-FOR ." ANSWER-FOR Expect 1 0 : " . DEPTH . CR
+
+\ Eliminate, if uncompatible with ANSWER to QUESTION, a DIAGNOSIS.
+\ The diagnosis was not yet excluded and the answer is unambiguous.
+: ELIMINATE-ONE ^
+        DUP >R
+        ANSWER-FOR DUP ?AMBIGUOUS IF
+            2DROP
+        ELSE
+            <> IF 1 R@ EXCLUSIONS ! -1 POSSIBILITIES +! THEN
+        THEN
+        RDROP
+;
+\D A_NO  0 0 ELIMINATE-ONE ." E-ONE Expect 0 0 : " 0 EXCLUSIONS ? DEPTH . CR
+\D A_YES 0 0 ELIMINATE-ONE ." E-ONE Expect 1 0 : " 0 EXCLUSIONS ? DEPTH . CR
+
+\ Eliminate all diagnoses, uncompatible with ANSWER to QUESTION.
+: ELIMINATE OVER ?AMBIGUOUS 0= IF
+    #DIAGNOSES @ 0 DO I ?EXCLUDED 0= IF 2DUP I ELIMINATE-ONE THEN LOOP
+  THEN 2DROP ;
+\D !EXCLUSIONS
+\D A_NO  0 ELIMINATE ." ELIMINATE  Expect 0 1 : " 0 EXCLUSIONS ? 1 EXCLUSIONS ? CR
+\D !EXCLUSIONS
+\D A_YES  0 ELIMINATE ." ELIMINATE  Expect 1 0 : " 0 EXCLUSIONS ? 1 EXCLUSIONS ? CR
+\D !EXCLUSIONS
+\D ." Expect 0 : " DEPTH . CR
+
+ONLY FORTH DEFINITIONS
