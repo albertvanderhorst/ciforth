@@ -1036,7 +1036,7 @@ USINI:
         DC      INITS0  ;{ INIT (S0)         3}
         DC      INITR0  ;{ INIT (R0)         4}
         DC      STRTIB  ;{ INIT (TIB)        5}
-        DC      32      ;{ INIT (WIDTH)      6}
+        DC      0       ;{ AVAILABLE         6}
         DC      0       ;{ INIT (WARNING)      7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
@@ -1848,16 +1848,6 @@ worddoc({INPUT},{TIB},{t_i_b},{--- addr},{U},
 {A user variable containing the address of the terminal input buffer.},{})
 HEADER({TIB},{TIB},{DOUSE})
         DC      CELLS(5)
-;
-worddoc({DICTIONARY},{WIDTH},{width},{--- addr},{U},
-{In fig-FORTH, a user variable containing the maximum number of
-letters saved in the compilation of a definitions' name.
-( Characters not saved need not match in a dictionary search).
-It must be 1 thru 31, with a default value of 31. The name character count and
-its natural characters are saved, up to the value in forthcode({WIDTH}) . The
-value may be changed at any time within the above limits.},{})
-HEADER({WIDTH},{WIDTHE},{DOUSE})
-        DC      CELLS(6)
 ;
 worddoc({ERRORS},{WARNING},{warning},{--- addr},{U},
 {A user variable containing a value controlling messages. If = 1 disc
@@ -2875,9 +2865,6 @@ HEADER({CREATE},{CREAT},{DOCOL})
 CREA1:  DC      HERE
         DC      LDUP
         DC      CFET
-        DC      WIDTHE
-        DC      FETCH
-        DC      MIN
         DC      ONEP
         DC      ALLOT
         DC      LDUP

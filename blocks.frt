@@ -110,7 +110,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
           BEGIN OVER OVER = 0=
           WHILE 0 CELL+ - DUP @ H.
           REPEAT DROP DROP  ;
- <HEX ( DEBUG SCR#7 )
+ <HEX ( DEBUG SCR#7 )   7C CONSTANT &|   2E CONSTANT &. 
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP &. THEN ;
  : CHARS  &| EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
        &| EMIT ;
@@ -188,7 +188,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
-      C->P NFAO C@ $40 AND ;
+      C->P NFAO C@ 64 AND ;
  : ?Q ?TERMINAL IF QUIT THEN ; ( NOODREM) -->
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
  : BY ( CFA--. the CFAO word is decompiled using : )
@@ -481,19 +481,19 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ." DEFINIEER ^. EN  ''.  85JAN06 ALBERT VAN DER HORST"
  <HEX
   : TOH 30 - DUP 9 > IF 7 - THEN ;
-     1 WIDTH !
-  : &. ( 0/1 Leaves ASCII character at .  f.i. &A leaves 41H)
-    HERE 2 + C@ [COMPILE] LITERAL ; IMMEDIATE
-  : ^. ( 0/1 leaves control character at . f.i. ^A leaves 01H)
-    HERE 2 + C@ 1F AND [COMPILE] LITERAL ; IMMEDIATE
-  : $.. ( 0/1 leaves hex number f.i. $0A leaves 0AH)
-    HERE 2 + C@ TOH 10 * HERE 3 + C@ TOH + [COMPILE] LITERAL ;
-  IMMEDIATE
-  : $.... ( 0/1 leaves hex number 16 bits)
-     0 HERE 6 + HERE 2 + DO 10 * I C@ TOH + LOOP
-     [COMPILE] LITERAL ; IMMEDIATE
-     1F WIDTH ! HEX>
-  $1B CONSTANT ESC    $0F CONSTANT SI   $0E CONSTANT SO
+(    1 WIDTH !
+( : &. ( 0/1 Leaves ASCII character at .  f.i. &A leaves 41H)
+(   HERE 2 + C@ [COMPILE] LITERAL ; IMMEDIATE
+( : ^. ( 0/1 leaves control character at . f.i. ^A leaves 01H)
+(   HERE 2 + C@ 1F AND [COMPILE] LITERAL ; IMMEDIATE
+( : $.. ( 0/1 leaves hex number f.i. $0A leaves 0AH)
+(   HERE 2 + C@ TOH 10 * HERE 3 + C@ TOH + [COMPILE] LITERAL ;
+( IMMEDIATE
+( : $.... ( 0/1 leaves hex number 16 bits)
+(    0 HERE 6 + HERE 2 + DO 10 * I C@ TOH + LOOP
+(    [COMPILE] LITERAL ; IMMEDIATE
+(    1F WIDTH ! ) 22 CONSTANT &"
+  1B CONSTANT ESC    0F CONSTANT SI   0E CONSTANT SO HEX>
  ." 84NOV25 Initialize STAR-printer AH "  <HEX
  : PEMIT 7F AND 5 BDOS DROP ;
  : PCR   0D PEMIT   0A PEMIT ;
@@ -550,7 +550,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
       NEXTC DUP (KRAAK)
    REPEAT
    DROP
- ;
+ ;        ;S Remainder is broke
  0 VARIABLE aux
  : PEMIT $7F AND 5 BDOS DROP ;
  : TO-LP-KRAAK-FROM
@@ -709,7 +709,7 @@ CODE TO-PROT1
     JMPFAR, HERE 4 + MEM, CS-32 SEG,
     MOVI, W| R| AX| DS-32 , 0 ,
     MOVSW, T| DS| R| AX|
-    MOVI, W| R| AX| &a , 0 ,
+    MOVI, W| R| AX| 61 , 0 ,
     XCHGX, AX| XCHGX, AX| XCHGX, AX| XCHGX, AX|
     MOVFA, B| B.0400 SWAP , ,
     JMPFAR, HERE 6 + MEM, 0 , CODE-SEGMENT SEG,
@@ -1135,11 +1135,11 @@ DECIMAL  (  For 32 bits, but not yet schecked)
 
 
 ." CRC CHECK FOR FIG  85JAN06 ALBERT VAN DER HORST"
-( Adapted from FORTH DIMENSIONS IV-3 )
+( Adapted from FORTH DIMENSIONS IV-3 ) HEX
  : ACCUMULATE ( oldcrc/char -- newcrc )
-   $0100 * XOR
+   0100 * XOR
    8 0 DO
-      DUP 0< IF $4002 XOR DUP + 1+ ELSE DUP + THEN
+      DUP 0< IF 4002 XOR DUP + 1+ ELSE DUP + THEN
    LOOP ;
  : DISPOSE ( crcvalue/adres/len -- newcrcvalue)
     OVER DUP C@ "( = SWAP 1+ C@ BL = AND OVER 1 = AND IF
@@ -1230,13 +1230,13 @@ E2 CONSTANT PE  F2 CONSTANT 0<   : NOT 8 + ;
 
 
 
-CR ." SIMPLE PROFILER AH   85FEB15"
+CR ." SIMPLE PROFILER AH   85FEB15" HEX
 LABEL NEXT2      ( REPLACES NEXT!)
    B LDAX   B INX   A L MOV
    B LDAX   B INX   A H MOV   (NEXT) 6 + JMP C;
    (NEXT) 3 + JMP C;
- ODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
-   $C3 A MVI  (NEXT) STA
+CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
+   C3 A MVI  (NEXT) STA
    NEXT2 H LXI    (NEXT) 1+ SHLD     NEXT C;
 
 
@@ -1713,7 +1713,7 @@ THEN THEN THEN THEN ;
 ( DISPATCHER )    HEX
 : AT-END VH 1 - VW * CURSOR ! SET ;
 : DEBUG CURSOR @ AT-END ^ CURSOR ! ;
-: EXITING KEY &Q - IF PUT-S THEN ;
+: EXITING KEY 51 - IF PUT-S THEN ;
 : ROUTE BEGIN KEY
 PRINT DELSTORING
 INSELETING JOINITTING
