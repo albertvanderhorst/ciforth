@@ -1,4 +1,4 @@
- ( $Id$ )
+( $Id$ )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
 ( The patch for the assembler doesn't belong in the generic part        )
@@ -24,8 +24,7 @@
 0 1        01   040000 ' C, CFA COMMAER IB,   ( immediate byte data)
 0 0 CELL+  08   020000 ' ,  CFA COMMAER X,    ( immediate data : address/offset )
 0 1        04   020000 ' C, CFA COMMAER B,    ( immediate byte : address/offset )
-0 1        00   010000 ' C, CFA COMMAER SIBQ,   ( Most bizarre     )
-0 1        00     8000 ' C, CFA COMMAER SIMQ,   ( Most bizarre     )
+0 1        00   010000 ' C, CFA COMMAER SIB,,   ( Most bizarre     )
 
 ( The `INCONSISTENCY-PAIRS' is a remnant from the time BY and BA where  )
 ( in one byte. It is now used to run assemblers that have still the     )
@@ -47,7 +46,7 @@
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
 (               10 Register op         20 Memory op                    )
-(               40 D0| SIM|            80 [BP]' {16} [BP] SIB| {32}     )
+(               40 D0|                 80 [BP]' {16} [BP]      {32}     )
 (  sib:       0100 no ..             0200 [AX +8*| DI]               )
 (  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
 (  segment    1000 no ..             2000 ES| ..                        )
@@ -67,7 +66,7 @@
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
 ( A0 0720 0s 0600 0s xFIR' [BP]'  ( Fits in the hole, safe inconsistency check)
  0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX]
-0101A0 0700 0s 0400 0s xFIR' SIB|   ( Fits in the hole, requires also SIB, )
+010120 0700 0s 0400 0s xFIR' SIB|   ( Fits in the hole, requires also SIB, )
 0001A0 0700 0s 0500 0s xFIR' [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
@@ -80,18 +79,13 @@
 020128 C000 0s 8000 0s xFIR'      DW|
 000110 C000 0s C000 0s xFIR'      R|
 ( 020008 C700 0s 0600 0s xFIR'      MEM|' ( Overrules D0| [BP]')
-0081A0 C700 0s 0400 0s xFIR' SIM|   ( Overrules D0| SIB| )
 020108 C700 0s 0500 0s xFIR'      MEM| ( Overrules D0| [BP] )
 1101 3800 0s T!'
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
 0102 3800 0s T!'
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 
-0680 1FF 00 1PI' SIB,
-0640 1FF 00 1PI' SIM,
-(   : (SIB}, TALLY @ !TALLY ((SIB}},                                    )
-(     30 XOR ( Toggle from using memory to registers}                   )
-(     TALLY ! ;                                                         )
+0600 1FF 00 1PI' SIB,
 
 ( --------- 0F must be found last -------)
 2100 1800 0s T!'   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
