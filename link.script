@@ -1,0 +1,7 @@
+SECTIONS {
+/*  .init : { *(.init) }                                                     */
+/*  .text : { *(.text)  }                                                    */
+    forth      0x8100000 :  {  fig86.linux.o(forth) }
+    dictionary :  {  fig86.linux.o(dictionary)  }
+}
+
