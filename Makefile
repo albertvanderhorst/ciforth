@@ -61,9 +61,9 @@ ssort   \
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= msdos alone linux lina alonehd msdos32 dpmi
+TARGETS= lina wina mina alone linux alonehd msdos32
 # The kinds of Forth's binaries that can be made using NASM (not used)
-BINTARGETS= msdos alone
+BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
 LINUXFORTHS= ciforthc lina
@@ -104,7 +104,7 @@ figdoc.zip    \
 # These files can easily be generated, if you have linux.
 EXAMPLES = \
 ci86.alone.asm  \
-ci86.msdos.msm  \
+ci86.mina.msm  \
 ci86.linux.asm  \
 ci86.lina.asm  \
 ci86.alonehd.asm  \
@@ -155,8 +155,8 @@ ci86.gnr:RCS/ci86.gnr,v ; co -d$(DATE) $<
 	nasm -fbin $< -o $@ -l $*.lst
 
 
-# msdos.cfg and alone.cfg are present (at least via RCS)
-# allow to generate ci86.msdos.bin etc.
+# mina.cfg and alone.cfg are present (at least via RCS)
+# allow to generate ci86.mina.bin etc.
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
 ci86.%.asm : %.cfg nasm.m4 ci86.gnr
@@ -199,7 +199,7 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
 clean : ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
 
 #msdos32.zip soesn't work yet.
-release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
+release : strip figdoc.zip zip mina.zip lina.zip # as.zip
 
 # You may need to run the following run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
@@ -236,9 +236,9 @@ filler: ci86.alone.bin lina filler.frt
 	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
-moreboot: forth.lab ci86.alone.bin  ci86.msdos.bin
+moreboot: forth.lab ci86.alone.bin  ci86.mina.bin
 	mcopy forth.lab a:
-	mcopy ci86.msdos.bin      a:msdos.com
+	mcopy ci86.mina.bin      a:mina.com
 
 allboot: boot filler moreboot
 
@@ -257,7 +257,7 @@ zip : $(RELEASECONTENT) ; echo ci86g$(VERSION) $+ | xargs zip
 
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply forth.lab
-msdos.zip : $(RELEASECONTENT) mslinks ;\
+mina.zip : $(RELEASECONTENT) mslinks ;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/ ci86\./ /g' |\
     sed -e's/ gnr / ci86.gnr /g' |\
@@ -267,9 +267,9 @@ msdos.zip : $(RELEASECONTENT) mslinks ;\
 mslinks :
 	ln -sf ci86.lina.asm lina.asm
 	ln -sf ci86.linux.asm linux.asm
-	ln -sf ci86.msdos.msm msdos.msm
-	ln -sf ci86.msdos.asm forth32.asm
-	ln -sf ci86.msdos.bin forth32.com
+	ln -sf ci86.mina.msm mina.msm
+	ln -sf ci86.mina.asm forth32.asm
+	ln -sf ci86.mina.bin forth32.com
 	ln -sf ci86.alone.asm alone.asm
 	ln -sf ci86.alonehd.asm alonehd.asm
 

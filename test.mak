@@ -7,7 +7,7 @@
 MASK=FF
 PREFIX=0
 TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
-TESTTARGETS=*.ps testas* testlina.[0-9] testmsdos.[0-9] testlinux.[0-9]
+TESTTARGETS=*.ps testas* testlina.[0-9] testmina.[0-9] testlinux.[0-9]
 
 testclean: ; rm $(TESTTARGETS)
 
@@ -36,8 +36,8 @@ qr8086.ps  : lina forth.lab ; make asi86.ps ; mv p0.asi86.ps $@
 p0.asi586.ps  : lina forth.lab  ; make asi586.ps PREFIX=0 MASK=FF
 p0F.asi586.ps : lina forth.lab  ; make asi586.ps PREFIX=0F MASK=FFFF
 
-do : ci86.msdos.msm
-		diff -w ci86.msdos.msm orig/FORTH > masm.dif ||true
+do : ci86.mina.msm
+		diff -w ci86.mina.msm orig/FORTH > masm.dif ||true
 		more masm.dif
 
 da : ci86.alone.asm
@@ -47,18 +47,18 @@ da : ci86.alone.asm
 cm :
 		cmp ci86.alone.bin cmp2/ci86.alone.bin
 
-did: ci86.msdos.msm
-		diff -w ci86.msdos.msm $(cd)/compare.asm
+did: ci86.mina.msm
+		diff -w ci86.mina.msm $(cd)/compare.asm
 
-#ci86.msdos.asm : header.m4 msdos.m4 nasm.m4 ci86.gnr ; m4 $+ >$@
+#ci86.mina.asm : header.m4 mina.m4 nasm.m4 ci86.gnr ; m4 $+ >$@
 
 #copy: $(TARGETS:%=ci86.%.bin) $(TARGETS:%=ci86.%.msm)
 copy:
-		cp ci86.msdos.bin  $(cd)/../test/msdos.com
+		cp ci86.mina.bin  $(cd)/../test/mina.com
 		cp ci86.alone.bin  $(cd)/../test/alone.com
-		cp ci86.msdos.asm  $(cd)/../test/msdos.asm
+		cp ci86.mina.asm  $(cd)/../test/mina.asm
 		cp ci86.alone.asm  $(cd)/../test/alone.asm
-		cp ci86.msdos.msm  $(cd)/../test/msdos.msm
+		cp ci86.mina.msm  $(cd)/../test/mina.msm
 		cp ci86.msdos1.msm  $(cd)/../test/msdos1.msm
 		cp ci86.msdos2.msm  $(cd)/../test/msdos2.msm
 		cp ci86.msdos3.msm  $(cd)/../test/msdos3.msm
@@ -66,10 +66,10 @@ copy:
 		cp forth.lab       $(cd)/../test/forth.lab
 		cp genboot.bat      $(cd)/../test/genboot.bat
 
-cmp: ci86.msdos.bin ci86.alone.bin ciforth lina
+cmp: ci86.mina.bin ci86.alone.bin ciforth lina
 		strip lina
 		strip ciforth
-		cmp ci86.msdos.bin  cmp/ci86.msdos.bin
+		cmp ci86.mina.bin  cmp/ci86.mina.bin
 		cmp ci86.alone.bin  cmp/ci86.alone.bin
 		cmp lina cmp/lina
 		cmp ciforth cmp/ciforth
@@ -80,7 +80,7 @@ strip : lina
 copy1: $(TARGETS:%=ci86.%.bin)
 		mount /mnt/dosa
 		cp ci86.alone.bin  /mnt/dosa/alone.com
-		cp ci86.msdos.bin  /mnt/dosa/msdos.com
+		cp ci86.mina.bin  /mnt/dosa/mina.com
 		cp genboot.bat    /mnt/dosa
 		cp /mnt/dosc/project/ci86/install/tlink.exe /mnt/dosa
 		cp /mnt/dosc/project/ci86/install/tasm.exe  /mnt/dosa
