@@ -87,6 +87,8 @@ dnl A1 Hard disk I/O
 define({_RWHD_1_},_no)
 dnl A1 Floppy disk I/O 
 define({_RWFD_1_},_no)
+dnl A1 Blocks in files 
+define({_RWFILE_1_},_no)
 dnl
 dnl A Use DOS for I/O. Possibility of redirection.
 dnl Rely partly on DOS for I/O. The original mishmesh, using 

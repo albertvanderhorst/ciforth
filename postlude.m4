@@ -31,6 +31,7 @@ _BOOTED_1_({define({_USEBIOS_1_},_yes)})
 _SWITCH_1_({define({_ABSOLUTELOAD_1_},_yes)})
 _ABSOLUTELOAD_1_({define({_NORMAL_BYE_1_},_no)})
 _HOSTED_LINUX_1_({define( {_EQULAYOUT_1_}, _no )})
+_MODERN_1_({define({_RWFILE_1_},_yes)})
 dnl Detectable error situations. Terminate.
 _RWFD_1_({ _RWHD_1_({errprint({Mass storage cannot be at the same time from floppy and hard disk.
 })m4exit(1000)})})

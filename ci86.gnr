@@ -377,9 +377,16 @@ ELSE3:
 ;{ Apparently we may have to move the code, e.g. if started from MSDOS.}
 ;{ Prepare return to MSDOS using the original code segment.}
         MOV     AX,CS
-        MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
-        MOV     AX,RETDOS-M4_ORG+100H
-        MOV     [RETDOSV-M4_ORG+100H ],AX
+        MOV     DS,AX
+        CALL    HERE1
+HERE1:  POP     BX
+        MOV     CX,BX
+        ADD     BX,RETDOSV-HERE1        ;{ Independant of load address.}
+        ADD     CX,RETDOS-HERE1
+        MOV     [BX],CX
+        INC     BX
+        INC     BX
+        MOV     [BX],AX
         JMP ENDBOOT     ; {Skip booting }
 });_END___1__({ _ABSOLUTELOAD_1_})
 
@@ -909,9 +916,9 @@ USINI:
 ;____1_____ _LINUX_N_1_({
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_LINUX_N_1_})
-;____1_____ _MODERN_1_({
+;____1_____ _RWFILE_1_({
         DC      0       ;{ INIT (OFFSET) }
-});_END___1__({_MODERN_1_})
+});_END___1__({_RWFILE_1_})
 ;____1_____ _CLASSIC_1_({
 _COMMENT
 ;{ This will steer clear of a forth executable, provided it is}
@@ -2306,6 +2313,7 @@ HEADER({WARM},{WARM},{DOCOL})
 ;{      COLD START VECTOR COMES HERE}
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
+_COMMENT
 ;____1_____ _HOSTED_MSDOS_1_({
         PUSH    DS
         MOV     AX,0
@@ -2318,6 +2326,7 @@ LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
         MOV     [BX],CS
         POP     DS
 });_END___1__({ _HOSTED_MSDOS_1_})
+_ENDCOMMENT
         CLD                     ;{ DIR = INC}
         MOV     STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
         MOV     BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
@@ -2340,9 +2349,9 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      FETCH
         DC      LIT,_VOC_LATEST(FORTH)
         DC      STORE
-;____1_____ _MODERN_1_({
-        DC      BLINI           
-});_END___1__({_MODERN_1_})
+;____1_____ _RWFILE_1_({
+        DC      BLINI
+});_END___1__({_RWFILE_1_})
 ;____1_____ _LINUX_C_1_({
         DC      BLINI
 });_END___1__({_LINUX_C_1_})
@@ -2773,6 +2782,7 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LIT,04000H ;{ Write file or device }
         DC      ONE     ;{ Handle}
         DC      FROMR, FROMR, SWAP
+         _SWITCH_1_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS, DROP ;{ ignore error }
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
@@ -2793,6 +2803,7 @@ EMIT1:
         DC      LIT,03F00H ;{ Write file or device }
         DC      ZERO     ;{ Handle}
         DC      FROMR, FROMR
+         _SWITCH_1_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS, DROP ;{ ignore error }
         DC      DROP, DROP, DROP ;{ Leave count}
         DC      TWO, LSUB ;{ Rid of 0D0A}
@@ -3162,7 +3173,7 @@ HEADER({POUT},{POUT},{DOCOL})
 ;{       SYSTEM DEPENDANT DISK I/O}
 ;{------------------------------------}
 
-;____1_____ _MODERN_1_({
+;____1_____ _RWFILE_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
         _STRING({BLOCKS.BLK})
         _RESB(20)               ;{ Allow for some path}
@@ -3181,6 +3192,7 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      BLFL
         DC      COUNT, OVER, PLUS
         DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
+         _SWITCH_1_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS
         DC      ONE, LAND, ZEQU, WARN, STORE
         DC      DROP, DROP, DROP
@@ -3189,7 +3201,7 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
 ;
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      LIT, 03E00H    ;{ Close file }
-        DW      ZERO, WARN, STORE
+        DC      ZERO, WARN, STORE
         DC      BHAN, FETCH
         DC      ZERO, ZERO
         DC      BDOS, DERR
@@ -3201,15 +3213,15 @@ HEADER({SEEK},{SEEK},{DOCOL})
         DC      SWAP, TOR, TOR
         DC      LIT, 04200H     ;{ Seek from start}
         DC      FROMR           ;{ Handle}
-        DC      FROMR, BBUF, USTAR
-        DC      SWAP    ;{ L.S. ON TOP}
+        DC      FROMR, BBUF
+        _BITS16_1_({DC      USTAR,SWAP})    ;{ L.S. ON TOP}
+        _BITS32_1_({DC      STAR, LIT, 10000H, SLMOD,SWAP})    ;{ L.S. ON TOP}
         DC      BDOS, DERR
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
-         _SWITCH_1_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         _0BRANCH(RSLW1)
         DC      LIT, 03F00H     ;{ Disk read }
         _BRANCH(RSLW2)
@@ -3220,12 +3232,13 @@ RSLW2:  DC      TOR
         DC      BHAN, FETCH
         DC      BBUF
         DC      FROMR           ;{ ADDR}
+        _SWITCH_1_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS, DERR
         DC      DROP, DROP, DROP
         DC      BBUF, LSUB, DERR
         DC      SEMIS
 
-});_END___1__({_MODERN_1_})
+});_END___1__({_RWFILE_1_})
 ;____1_____ _LINUX_N_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
         _STRING({BLOCKS.BLK})
@@ -3483,7 +3496,7 @@ HEADER({R/W},{RSLW},{DOCOL})
         DC      LBA, LIT, 4, PLUS, STORE   ; { Address }
         DC      LIT, REALSEGMENT,
         DC      LBA, LIT, 6, PLUS, STORE
-        DC      LBA, LIT, 8, PLUS, STORE   
+        DC      LBA, LIT, 8, PLUS, STORE
         DC      LBA
         DC      RR
         _0BRANCH(RSLW1)
