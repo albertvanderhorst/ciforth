@@ -60,7 +60,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
 : ?32 ;
 : ?16 BLK @ IF 1023 IN ! THEN ;
- 
+
 
  ( ERROR MESSAGES   )
  MSG # 1 : EMPTY STACK
@@ -136,12 +136,12 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( KRAKER )        10 LOAD
  ( NEW SYSTEM      23 LOAD   )
  ( CRC             71 LOAD   )
- ( ASSEMBLER 8080  74 LOAD ) ( 8086 )  96 LOAD
+ ( ASSEMBLER 8080  74 LOAD   )
+ ( ASSEMBLER 80x86) 120 LOAD
  ( STAR PRINTER    31 LOAD   )
  ( CP/M CONVERT    80 LOAD   )
  WARNING 1 TOGGLE
  2 LIST    : TASK ;
-
  ." QUADRUPLE ARITHMETIC 08-02-84 "
  : ADC ( n1,n2-n,c  add, leave sum and carry)
     0 SWAP 0 D+ ;
@@ -1423,10 +1423,8 @@ LABEL NEXT2      ( REPLACES NEXT!)
 
 
 ( Using the internal timer for testing A0JUN28 AH) ?32 HEX
- :  NEXT32 AD C, 89 C, C3 C, FF C, 23 C, ;
- CODE TEST-NEXT NEXT32 C;
  CODE TIME 0F C, 31 C, ( 90 C, 90 C, 90 C, 90 C, )
- 50 C, 52 C,  NEXT32 C;
+ 50 C, 52 C,  NEXT C;
 
  DECIMAL
  : MARK-TIME TIME ;
@@ -1438,23 +1436,25 @@ LABEL NEXT2      ( REPLACES NEXT!)
   MEASURE
 CR  ." THE BYTE BENCHMARK LASTED "  1000 / .mS
 
-( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
-ASSEMBLER DEFINITIONS HEX
-: 3PI <BUILDS C, C, C, DOES> POST, POST, POST, DROP ;
-: 3FI <BUILDS C, C, C, DOES> <FIX 3 + FIX| FIX| FIX| DROP ;
-8 0 8 1FAMILY| DR0| DR1| DR2| DR3| ILL| ILL| DR6| DR7|
-8 0 4 1FAMILY| CR0| ILL| CR1| CR2|  00 20 0F 3PI MOVCD,
-: GET-CR0   MOVCD, F| CR0| R| AX| ;
-: PUT-CR0   MOVCD, T| CR0| R| AX| ;
- 7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
-: JMP-PROT, JMPFAR, HERE 4 + , 10 W, ;
-: JMP-REAL, JMPFAR, HERE 4 + SWITCH_DS 10 * - , SWITCH_DS W, ;
-: TO-PROT,  GET-CR0  INCX, AX|  PUT-CR0 JMP-PROT, ;
-: TO-REAL,  JMP-REAL,  GET-CR0  DECX, AX|  PUT-CR0 ;
-: COPY-SEG  MOVXI, AX| ( DAT -- ) W,   MOVSW, T| DS| R| AX|
-            MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
--->
-( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
+
+
+( ASSSEMBLER 16 BIT ELECTIVES A0JUL03 AH)
+ ?16
+ 92 HEX LOAD DECIMAL
+ 93 96  HEX THRU DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+  ( spare pare aALREADY COPIED un20        AvdH HCC HOLLAND)
 66 1PI OS,   67 1PI AS, ( OPERAND AND ADDRESS SIZE OVERWRITE)
 : NOP, XCHGX, AX| ;
 : CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
@@ -1470,25 +1470,25 @@ CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
 
 
 
-( AUXILIARY DEFINITIONS ) DECIMAL
-0 VARIABLE IDP   : <FIX HERE IDP ! ; : IHERE IDP @ ;
-: C|, -1 IDP +! IHERE C@ OR IHERE C! ;  ( c.f. C, )
-: C@+ COUNT ;  : C@- 1 - DUP C@ ; ( : C!+ >R R ! R> 1+ ;)
-: MEM, , ; : R, HERE - 2 + , ; : B, C, ;  : W, , ; : SEG, , ;
-: POST, C@+ C, ;       : FIX| C@- C|, ;
-: 1PI <BUILDS C, DOES> POST, DROP ;
-: 2PI <BUILDS C, C, DOES> POST, POST, DROP ;
-: 1FI <BUILDS C, DOES> <FIX 1+ FIX| DROP ;
-: 2FI <BUILDS C, C, DOES> <FIX 2+ FIX| FIX| DROP ;
-: 1FAMILY,  ( INCREMENT, OPCODE , COUNT -- )
-   0 DO DUP 1PI OVER + LOOP DROP DROP ;
-: 1FAMILY| 0 DO DUP 1FI OVER + LOOP DROP DROP ;
-: SPLIT 256 /MOD SWAP ; ( To handle two bytes at once )
-: 2FAMILY, 0 DO DUP SPLIT 2PI OVER + LOOP DROP DROP ;
-: 2FAMILY| 0 DO DUP SPLIT 2FI OVER + LOOP DROP DROP ;
-( POST-IT/FIX-UP 8086 ASSEMBLER , OPCODES AvdH HCCFIG HOLLAND)
+( Only valid for 16 bits !)
+ ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]
+[SI] [DI] [BP] [BX]
+ ( 07) 1 0 8 1FAMILY| [AX]' [CX]' [DX]' [BX]'
+[SP]' [BP]' [SI]' [DI]'
+
+
+
+
+
+
+
+
+
+
+
+( Spare already copied  MBLER , OPCODES AvdH HCCFIG HOLLAND)
  8 0 4 1FAMILY| ES| CS| SS| DS|    1 6 2 1FAMILY, PUSHS, POPS,
- HEX 8 26 4 1FAMILY, ES:, CS:, SS:, DS:,
+ 8 26 4 1FAMILY, ES:, CS:, SS:, DS:,
  8 27 4 1FAMILY, DAA, DAS, AAA, AAS,
  1 0 2 1FAMILY| B1| W1|   08 04 8 1FAMILY, ADDAI, ORAI, ADCAI,
 SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
@@ -1498,9 +1498,9 @@ SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
  08 40 4 1FAMILY, INCX, DECX, PUSHX, POPX,    90 1PI XCHGX,
  ( C7) 6 1FI MEM|   ( C0) 40 00 4 1FAMILY| D0| DB| DW| R|
  ( 38) 08 00 8 1FAMILY| AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
- ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]
-[SI] [DI] [BP] [BX]
  1 0 8 1FAMILY| AL| CL| DL| BL| AH| CH| DH| BH|
+
+
 
 ( POST-IT/FIX-UP 8086 ASSEMBLER , OPCODES AvdH HCCFIG HOLLAND)
 1 0 2 2FAMILY| B| W|   2 0 2 2FAMILY| F| T|
@@ -1508,11 +1508,11 @@ SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
 2 84 2 2FAMILY, TEST, XCHG,   0 88 2PI MOV,
 ( 00FD) 0 8C 2PI MOVSW,   ( 00FE) 0 8D 2PI LEA,
 ( IRR,egular)  ( FF) 9A 1PI CALLFAR,  ( FE) A8 1PI TESTAI, ( FF)
-1 98 8 1FAMILY, CBW, CWD, IR2, WAIT, PUSHF, POPF, SAHF, LAHF,
+ 1 98 8 1FAMILY, CBW, CWD, IR2, WAIT, PUSHF, POPF, SAHF, LAHF,
 ( FE) 2 A4 6 1FAMILY, MOVS, CMPS, IR3, STOS, LODS, SCAS,
 08 B0 2 1FAMILY, MOVRI, MOVXI,
 8 C2 2 1FAMILY, RET+, RETFAR+,  8 C3 2 1FAMILY, RET,  RETFAR,
-1 C4 2 1FAMILY, LES, LDS,  0 C6 2PI MOVI,  0 CD 1PI INT,
+1 C4 2 1FAMILY, LES, LDS,  0 C6 2PI MOVI,   CD 1PI INT,
 1 CC 4 1FAMILY, INT3, IRR, INTO, IRET,
 1 D4 4 1FAMILY, AAM, AAD, IL1, XLAT,
 1 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
@@ -1522,7 +1522,7 @@ SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
 1 F0 6 1FAMILY, LOCK, ILL, REP, REPZ, HLT, CMC,
 1 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)
 800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI, CMPI,
-800 83 8 2FAMILY, ADDSI, IL3, ADCSI, SBBSI, IL4, SUBSI, IL5,
+ 800 83 8 2FAMILY, ADDSI, IL3, ADCSI, SBBSI, IL4, SUBSI, IL5,
 CMPSI,   2 0 2 2FAMILY| 1| V|
 800 D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, IL6, RAR,
 800 10F6 6 2FAMILY, NOT, NEG, MUL, IMUL, DIV, IDIV,
@@ -1534,21 +1534,21 @@ CMPSI,   2 0 2 2FAMILY| 1| V|
 
 
 
-( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
-VOCABULARY ASSEMBLER IMMEDIATE
-' ASSEMBLER CFA ' ;CODE 4 CELLS + !    ( PATCH ;CODE IN NUCLEUS)
-ASSEMBLER DEFINITIONS 92 95 HEX THRU DECIMAL
-: C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE
-: NEXT
-     LODS, W1|
-     MOV, W| F| R| DI| AX'|
-     MOV, W| F| R| BX| DI'|
-     JMPO, D0| [DI]
- ;
-FORTH DEFINITIONS
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
-( This assembler is 16 bit. TEST will crash for 32 bit. See 89)
- CODE TEST NEXT  C;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ( Basic block manipulapions ) HEX ( ASSUMES BLOCK 90)
 ALIGN 0 VARIABLE RW-BUFFER B/BUF ALLOT
@@ -1758,6 +1758,40 @@ DECIMAL
 
 
 
+( ASSSEMBLER 32 BIT ELECTIVES A0JUL03 AH)
+ ?32
+ 111 HEX LOAD DECIMAL
+ 93 96  HEX THRU  DECIMAL
+ 112 119 HEX THRU DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+( Only valid for 16 bits !)
+ ( 07) 1 0 8 1FAMILY| [AX] [CX] [DX] [BX] [SP] [BP] [SI] [DI]
+
+ ( 07) 1 0 8 1FAMILY| [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]'
+[SI]' [DI]' [BP]' [BX]'
+
+
+
+
+
+
+
+
+
+
+
+( OPERAND AND ADDRESS SIZE OVERWRITE a0jul03 AvdH HCC HOLLAND)
+66 1PI OS,   67 1PI AS,
 
 
 
@@ -1790,95 +1824,200 @@ DECIMAL
 
 
 
-         9 1 DO I J
-
-! 5 SPACES
-A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST
-  0 COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
-TASK  MSG # 4 : ISN'T UNIQUE  OK
-112 EDIT
-112 EDIT
-112 EDIT
-( eerst
-wat
-spaties)
 
 
 
 
- HEX   : HOME 1A EMIT ;   0 VARIABLE I-STATE
- : A-L    SCR @ (LINE) ; ( 1/2 ADDRESS OF LINE)
- : GET-L  A-L F000 SWAP CMOVE ; ( /0 MOVE LINE TO SCREEN)
- : PUT-L  A-L F000 ROT ROT CMOVE ; ( /0 MOVE LINE FR SCREEN)
- : DISPATCH ( 1/0 EXECUTE CONTROL CHARACTER)
- ( ^D) DUP  4 = IF  1B EMIT  57 EMIT  DROP ELSE
- ( ^I) DUP  9 = IF  I-STATE 1 TOGGLE  DROP ELSE
- ( ^X) DUP 18 = IF  1B EMIT  45 EMIT  DROP ELSE
- ( ^Y) DUP 19 = IF  1B EMIT  52 EMIT  DROP ELSE
- ( ^Q) DUP 11 = IF  ." ABORTED"       QUIT ELSE
-   EMIT THEN THEN THEN THEN THEN ;
- : EMIT1  I-STATE @ IF  1B EMIT  51 EMIT  THEN EMIT ; ( 1/0)
- : XX     BEGIN  KEY DUP DUP 20 <
-              IF DISPATCH ELSE EMIT1 THEN ( ^E) 5 = UNTIL  ;
- : E-L    HOME DUP GET-L XX A EMIT PUT-L UPDATE ;
- : C-L    SWAP A-L DROP SWAP A-L CMOVE  ;  -->
- ( GET-S   10 0 DO I A-L F000 I 80 * + SWAP CMOVE LOOP ;     )
- ( PUT-S   10 0 DO F000 I 80 * + I A-L UPDATE CMOVE LOOP ;   )
- ( CLEAN   F800 F000 DO I C@ 7F AND I C! LOOP ;              )
- ( E-S     0 I-STATE !  HOME GET-S XX CLEAN PUT-S HOME )
- ( EDIT SCR ! E-S )  : L-S SCR @ LIST ; : LO-S SCR @ LOAD ;
- : INIT-STAR 1B 5 BDOS . 43 5 BDOS . 42 5 BDOS .
-             1B 5 BDOS . 4E 5 BDOS . 4 5 BDOS . ;
- : LAST-SEC ( 0/1 LEAVES ONE MORE THAN THE LAST BLOCK NR)
-     0 BEGIN 1+ F000 OVER 1 R/W DISK-ERROR @ UNTIL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8 0 8 1FAMILY| DR0| DR1| DR2| DR3| ILL| ILL| DR6| DR7|
+8 0 4 1FAMILY| CR0| ILL| CR1| CR2|  00 20 0F 3PI MOVCD,
+
+
+
+
+
+
+
+
+
+
+
+
+
+( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCC HOLLAND)
+ASSEMBLER DEFINITIONS
+: GET-CR0   MOVCD, F| CR0| R| AX| ;
+: PUT-CR0   MOVCD, T| CR0| R| AX| ;
+ 7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
+: JMP-PROT, JMPFAR, HERE 4 + , 10 W, ;
+: JMP-REAL, JMPFAR, HERE 4 + SWITCH_DS 10 * - , SWITCH_DS W, ;
+: TO-PROT,  GET-CR0  INCX, AX|  PUT-CR0 JMP-PROT, ;
+: TO-REAL,  JMP-REAL,  GET-CR0  DECX, AX|  PUT-CR0 ;
+: COPY-SEG  MOVXI, AX| ( DAT -- ) W,   MOVSW, T| DS| R| AX|
+            MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
+
+
+
+
+
+( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCC HOLLAND)
+: NOP, XCHGX, AX| ;
+: CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+( GENERAL ASSEMBLER ELECTIVES 0AJUL03 AH )
+ 121 124 HEX THRU  DECIMAL ( Common code , prelude)
+ DECIMAL 110 LOAD  ( 32 BITS)
+ DECIMAL 90 LOAD   ( 16 BITS)
+ 125 129 THRU  DECIMAL ( Common code, postlude)
+
+
+
+
+
+
+
+
+
+
+
+( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
+VOCABULARY ASSEMBLER IMMEDIATE
+' ASSEMBLER CFA ' ;CODE 4 CELLS + !    ( PATCH ;CODE IN NUCLEUS)
+ 0 VARIABLE IDP
+: X, , ;    ( Cell size du jour)
+: MEM, X, ;
+: DAT, X, ;
+: REL, IDP @ - X, ;
+: B, C, ;
+( To be used when overruling, e.g. prefix)
+: lsbyte, DUP C, 100 / ;
+: W, lsbyte, lsbyte, DROP ;
+: L, lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
+: RELL, IDP @ - L, ;  : RELW, IDP @ - W, ;
+: RELB, IDP @ - B, ;
+: SEG, W, ;
+( AUXILIARY DEFINITIONS )
+: <FIX HERE IDP ! ; : IHERE IDP @ ;
+: C|, -1 IDP +! IHERE C@ OR IHERE C! ;  ( c.f. C, )
+: C@+ COUNT ;  : C@- 1 - DUP C@ ; ( : C!+ >R R ! R> 1+ ;)
+: POST, C@+ C, ;       : FIX| C@- C|, ;
+
+: 1PI <BUILDS C, DOES> POST, DROP ;
+: 2PI <BUILDS C, C, DOES> POST, POST, DROP ;
+: 3PI <BUILDS C, C, C, DOES> POST, POST, POST, DROP ;
+
+: 1FI <BUILDS C, DOES> <FIX 1+ FIX| DROP ;
+: 2FI <BUILDS C, C, DOES> <FIX 2+ FIX| FIX| DROP ;
+: 3FI <BUILDS C, C, C, DOES> <FIX 3 + FIX| FIX| FIX| DROP ;
+
+
+
+( PROTECTED MODE  SWITCHING a0jun20        AvdH HCC HOLLAND)
+: SPLIT 100 /MOD SWAP ; ( To handle two bytes at once )
+: SPLIT2 SPLIT >R SPLIT R> ; ( To handle two bytes at once )
+( INCREMENT, OPCODE , COUNT -- )
+: 1FAMILY, 0 DO DUP 1PI OVER + LOOP DROP DROP ;
+: 2FAMILY, 0 DO DUP SPLIT 2PI OVER + LOOP DROP DROP ;
+: 3FAMILY, 0 DO DUP SPLIT2 SPLIT 3PI OVER + LOOP DROP DROP ;
+
+: 1FAMILY| 0 DO DUP 1FI OVER + LOOP DROP DROP ;
+: 2FAMILY| 0 DO DUP SPLIT 2FI OVER + LOOP DROP DROP ;
+: 3FAMILY| 0 DO DUP SPLIT2 3FI OVER + LOOP DROP DROP ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
+
+: NEXT
+     LODS, W1|
+     MOV, W| F| AX'| R| BX|
+     JMPO, D0| [BX]
  ;
- : EXTEND   ( 1/0 EXTENDS # BLOCKS WITH NUMBER-1 )
-   8 * LAST-SEC HOME ( GET AMOUNT OF BLOCKS)
-   SWAP OVER + SWAP DO F000 I 0 R/W LOOP
-   FCB 10 BDOS DROP    ( CLOSE THE FILE,I.E. UPDATE DIRECTORY)
-   FCB 0F BDOS DROP    ( OPEN AGAIN  )
- ;   DECIMAL
-         ( SCR # 3 NIET DEBUGGED 84 AUG 24)
- : M-L-N 15 A-L DROP
-      1 SCR +!  0 A-L CMOVE   -1 SCR +! ;
- : FETCH  ( 1/0 GET SCREEN-1 INTO MEMORY )
-      FLUSH SWAP DUP FETCH
-      B/SCR * SWAP B/SCR * ( GET START BUFFER #'S)
-      B/SCR 0 DO
-         OVER I + BLOCK
-         OVER I + 0 R/W ( zou gevaarlijk zonder FLUSH)
-      LOOP
-      DROP DROP
-
- ;
-
-
-
- ( ERROR MESSAGES   )
- MSG # 1 : EMPTY STACK
- MSG # 2 : DICTIONARY FULL
- MSG # 3 : HAS INCORRECT ADDRESS MODE
- MSG # 4 : ISN'T UNIQUE
-
- MSG # 6 : DISK RANGE ?
- MSG # 7 : FULL STACK
- MSG # 8 : DISC ERROR !
+FORTH DEFINITIONS
+: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
+: C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE
+ CODE TEST-NEXT NEXT  C;
 
 
 
 
 
-
- ( FIG FORTH FOR CP/M 2.0 ADAPTED BY A. VD HORST HCCH )
- ( ERROR MESSAGES   )
- MSG # 17 : COMPILATION ONLY, USE IN DEFINITION
- MSG # 18 : EXECUTION ONLY
- MSG # 19 : CONDITIONALS NOT PAIRED
- MSG # 20 : DEFINITION NOT FINISHED
- MSG # 21 : IN PROTECTED DICTIONARY
- MSG # 22 : USE ONLY WHEN LOADING
- MSG # 23 : OFF CURRENT EDITING SCREEN
- MSG # 24 : DECLARE VOCABULARY
+( 2DROP ALIGN                         A0JUL03 AvdH HCC HOLLAND)
+FORTH DEFINITIONS
+: 2DROP DROP DROP ;
+: ALIGN HERE 1 AND IF 0 C, THEN ;
 
 
 
@@ -1886,159 +2025,6 @@ spaties)
 
 
 
-  (  DEBUG   SCR#6)    0 VARIABLE BASE'
- : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
- : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
- (        1/0  PRINT IN HEX REGARDLESS OF BASE)
- : H.     <HEX 0 <# # # # # #> TYPE SPACE HEX> ;
- (        1/0  IDEM FOR A SINGLE BYTE)
- : B.     <HEX 0 <# # # #> TYPE HEX> ;
- : BASE?  BASE @ H. ;                ( 0/0 TRUE VALUE OF BASE)
- : ^      ( 0/0 NON DESTRUCTIVE STACK PRINT)
-          CR ." S: " SP@ S0 @ ( FIND LIMITS)
-          BEGIN OVER OVER = 0=
-          WHILE 2 - DUP @ H.
-          REPEAT
-          DROP DROP
- ;
-                                                -->
- <HEX ( DEBUG SCR#7 )
- :  DUMP   ( 2/0  DUMPS FROM ADDRESS-2 AMOUNT-1 BYTES)
-           OVER + SWAP FFF0 AND
-           DO
-              CR I H. ." : "
-              I
-              10 0 DO
-                 DUP I + C@ B.
-                 I 2 MOD IF SPACE THEN
-              LOOP
-              1B EMIT 67 EMIT
-              10 0 DO DUP I + C@ EMIT LOOP
-              1B EMIT 47 EMIT
-              DROP
-           10 +LOOP         CR
- ;    HEX>
- ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 84AUG12 AH"
-
- ( EDITOR )         1 LOAD
-
- ( HEX UT. )        6 LOAD
- ( QUADR. ARITHM.)  9 LOAD
- ( CP/M READ )     15 LOAD
- ( CP/M WRITE)     18 LOAD
- ( CP/M LOAD )     21 LOAD   ( BUGS)
- ( KRAKER )        10 LOAD
- ( NEW SYSTEM)     23 LOAD
- ( CRC )           71 LOAD
- ( SPECIAL CHAR )  30 LOAD
- ( ASSEMBLER)      74 LOAD
- ( STAR PRINTER )  31 LOAD
- ( CP/M CONVERT )  80 LOAD
- ." QUADRUPLE ARITHMETIC 08-02-84 "
- : ADC ( n1,n2-n,c  add, leave sum and carry)
-    0 SWAP 0 D+ ;
- : 2M+ ( d1,d2-d,c  add double )
-   >R SWAP >R    ADC R> ADC   R> SWAP >R
-   ADC R> + ;
- : 3M+ ROT >R 2M+ R> ADC ;
- : 4M+ ROT >R 3M+ R> ADC ;
- : 2U*  ( d1,d2-q unsigned product)
- ROT ( l1,l2,h2,h1)    OVER OVER U* >R >R ^
- ROT ( l1,h2,h1,l2)    OVER OVER U* >R >R ^
- SWAP DROP ROT ROT ( l2,l1,h2) OVER OVER U* >R >R ^
- DROP ( l1,l2)    U* ^ R> ADC ^ R> ADC ^
-  IF ( carry) R> R> 2M+ 1+ ." C" ELSE
-              R> R> 2M+    ." NC" THEN  ^
-  R> R> 2M+ DROP ^ ;
- CR ." 84NOV22  FORTH KRAKER >1<  ALBERT VAN DER HORST "
- 0 VARIABLE SELTAB 120 ALLOT   SELTAB VARIABLE SELTOP
- : T,  ( N--. Put N in select table)
-     SELTOP @ !  2 SELTOP +!  ;
- : CFOF ( --N Get cfa of word following )
-    [COMPILE] ' CFA ;
- : C->P 2 + ; ( N--N Converteer cfa naar pfa )
- : ID.. C->P NFA ID. ; ( cfa--. Print a words name )
- : SEL@    ( N--M,F F="value N present in table" )
-    ( if F then M is vector address else M=N)
-       0 SWAP ( initialise flag)
-       SELTOP @ SELTAB DO
-           DUP I @ = IF ( FOUND!) DROP DROP 1 I 2+ @ THEN
-       4 +LOOP        SWAP   ( get flag up)  ;
- : <> - 0= 0= ;  : CR 13 EMIT 10 EMIT ;
- 30 LOAD 33 LOAD -->
-  CR ." 84NOV24  FORTH KRAKER >2<  ALBERT VAN DER HORST "
-   HERE VARIABLE LIM
- : (KRAAK) ( CFA--. Decompile a word from its CFA )
-    DUP NEXTN LIM ! ( Get an absolute limit)
-    DUP @ SEL@ IF ( Is content of CFA known?)
-       EXECUTE ( Assuming CFA also on stack)
-    ELSE
-       CR DROP DUP DUP @ 2 - = IF
-           ." Code definition : " ELSE ." Can't handle : "
-       ENDIF ID.. CR
-    ENDIF ;
- : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
-     CFOF (KRAAK) ;
- : ?IM  ( CFA--f tests whether word IMMEDIATE )
-      C->P NFA C@ $40 AND ;
- : ?Q ?TERMINAL IF QUIT THEN ; ( NOODREM) -->
- CR ." 84NOV24  FORTH KRAKER >3<  ALBERT VAN DER HORST "
- : BY ( CFA--. the CFA word is decompiled using : )
-   T, CFOF T, ; ( a word from the input stream )
- ( Example of a defining word decompilation)
- ( It is done by examples of the defined words )
- : -co DUP C->P @ CR H. ." CONSTANT " ID.. CR ;
-        CFOF 0 @ BY -co
- : -va DUP C->P @ CR H. ." VARIABLE " ID.. CR ;
-        CFOF SELTAB @ BY -va
- : -us DUP C->P C@ CR B. ."  USER " ID.. CR ;
-        CFOF FENCE @ BY -us
- : ITEM ( 1/1 Desinterpret next item, increments pointer)
-     DUP @ SEL@ ( Something special ?)
-     IF EXECUTE ( The special) ELSE
-        DUP ?IM IF ." [COMPILE] " THEN ID.. 2+
-     THEN ; -->
- CR ." 84NOV24  FORTH KRAKER >4<  ALBERT VAN DER HORST "
- CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
- ( Decompilation of special high level words)
-  : -hi CR ." : " DUP DUP ID.. 2 +  CR
-   BEGIN ?Q DUP @  LIT ;S <> >R DUP LIM @ < R> AND WHILE
-        ITEM REPEAT
-   CR DROP ." ;" ?IM IF ."  IMMEDIATE " THEN CR ;
-       CFOF TASK @  BY -hi
- ( for all -words: 1/1 pointer before afd after execution)
- : -lit 2+ DUP @ H. 2+ ;
-     CFOF LIT BY -lit
- : -0br CR ." 0BRANCH [ " -lit ." , ] " ;
-     CFOF 0BRANCH BY -0br
- : -br  CR ." BRANCH  [ " -lit ." , ] " ;
-     CFOF BRANCH BY -br
-  -->
- CR ." 84JAN06  FORTH KRAKER >5<  ALBERT VAN DER HORST "
-  : -dq 2+ DUP COUNT CR ". EMIT "" EMIT BL EMIT
-     TYPE "" EMIT BL EMIT  COUNT + ;
-                             CFOF (.") BY -dq
-
-  : -do CR ." DO " 2 + ;     CFOF (DO) BY -do
-  : -lo CR ." LOOP " 2 + ;   CFOF (LOOP) BY -lo
-  : -pl CR ." +LOOP " 2 + ;  CFOF (+LOOP) BY -pl
-  : -cm ." COMPILE " -lit ;  CFOF COMPILE BY -cm
-  ( DIRTY TRICK FOLLOWING :)
-  : -pc CR ." ;CODE plus code (suppressed)"
-    DROP ' TASK ; ( Destroy deecompile pointer !)
-      CFOF (;CODE) BY -pc
-
-
-
- ( DISK IO SCREEN 15 SCHRIJVEN >1< VERSIE #1)
- <HEX  0 VARIABLE FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
- : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
- : FILL-FCB 22 WORD
-    1+ HERE  COUNT ROT SWAP CMOVE  ;
- : SET-DMA  1A BDOS DROP ;
- : ?PRES   FCB2 0F BDOS 0FF - IF ." ALREADY PRESENT" QUIT THEN
-    FCB2 10 BDOS DROP ;
-   -->
 
 
 
@@ -2046,38 +2032,52 @@ spaties)
 
 
 
- ( SCR # 16 SCHRIJVEN >2<   )
- 0 VARIABLE DISK-BUFFER-W 100 ALLOT
- DISK-BUFFER-W VARIABLE POINTER-W
- : .OPENW FCB2 CLEAN-FCB FCB2 FILL-FCB ?PRES
-   FCB2 16 BDOS 0FF = IF ." DISK FULL " QUIT THEN
-   DISK-BUFFER-W POINTER-W ! ;
- : .CLOSEW
-      DISK-BUFFER-W SET-DMA FCB2 15 BDOS . ." LAST RECORD" CR
-            FCB2 10 BDOS . ." CLOSE STATUS" CR ;
- 0A0D VARIABLE CRLF    1A VARIABLE CTRLZ
- : MOVE-DOWN   -80 POINTER-W +!
-               DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
- : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
-           R> POINTER-W +!
-           POINTER-W @ DISK-BUFFER-W -
-           80 >  IF   -->
-( 16 BITS: Experimenting with drive parameters ) HEX
-ALIGN 0 VARIABLE RW-BUFFER B/BUF ALLOT
-0 VARIABLE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
-2 , ( 2 sectors/block) RW-BUFFER , 7C0 ,
-HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
- : R/W-BLOCK  ASSEMBLER  ( MACRO: OPCODE -- . )
-  POPX, BX|    POPX, AX|
-  ADD, W| AX'| R| AX|  MOVFA, W1| BL# W, XCHGX, BX|
-  ADC, W| AX'| R| AX|  MOVFA, W1| BL# 2+ W,
-  PUSHX, SI|  MOVXI, BX| W,  MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,  TO-REAL,
-  MOVI, W| AX| 7C0 MEM,  MOVSW, T| DS| AX|
-  XCHGX, BX|
-  INT, 13 B, PUSHF, POPX, BX| TO-PROT,
-  POPX, SI|   PUSHX, BX|  NEXT ;
-DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCC HOLLAND)
+?32  ( Test applicable to 32 bit mode)
+FORTH DEFINITIONS DECIMAL
+CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
+CODE TEST-MORE TO-REAL,   TO-PROT, NEXT C;
+CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
+  GDT_DS COPY-SEG   NEXT C;
+
+
+
+
+
+
+
+
+
 ( TEST OF HARD DISK ) ?16 HEX
 CODE READ-BLOCK2 4200 R/W-BLOCK  C;  ( D - . )
  CODE WRITE-BLOCK2 4300 R/W-BLOCK  C; ( D - . )
@@ -2110,22 +2110,22 @@ HEX : SAVE 140 * SYSTEM-OFFSET !
 : .ELECTIVE 140 U* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
 DECIMAL
 DECIMAL
- CR ." READ CP/M files >3< AH   84/06/13"
- : GET-LINE ( ADR -- . reads a line to ADR )
-      DUP 40 20 FILL ( preset spaces )
-      41 OVER + SWAP ( max $41 char to a line, CR!)
-      DO  GET-CHAR
-          DUP "CR" = IF DROP 20 LEAVE THEN
-          DUP ^Z   = IF DROP 20 LEAVE THEN
-          I C! ( may leave spurious 81th space)
-      LOOP  ;
- : .READ ( 2/0 READ SCREEN-2 TO SCREEN -1)
-      1+ B/SCR * SWAP B/SCR * ( get start buffer #'s)
-      DO  I BLOCK DUP GET-LINE
-          DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
-          I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
-      LOOP
-; HEX>
+( 16 BITS: Experimenting with drive parameters ) HEX
+ALIGN 0 VARIABLE RW-BUFFER B/BUF ALLOT
+0 VARIABLE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
+2 , ( 2 sectors/block) RW-BUFFER , 7C0 ,
+HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
+ : R/W-BLOCK  ASSEMBLER  ( MACRO: OPCODE -- . )
+  POPX, BX|    POPX, AX|
+  ADD, W| AX'| R| AX|  MOVFA, W1| BL# W, XCHGX, BX|
+  ADC, W| AX'| R| AX|  MOVFA, W1| BL# 2+ W,
+  PUSHX, SI|  MOVXI, BX| W,  MOVXI, DX| 0080 W,
+  MOVXI, SI| PARAM-BLOCK W,  TO-REAL,
+  MOVI, W| AX| 7C0 MEM,  MOVSW, T| DS| AX|
+  XCHGX, BX|
+  INT, 13 B, PUSHF, POPX, BX| TO-PROT,
+  POPX, SI|   PUSHX, BX|  NEXT ;
+DECIMAL
  ( 01-APR-83 LADEN VAN CP/M FILE  #1 )
  ( EXAMPLE: .OPENR TEMP" 25 26 .LOAD .CLOSER )
  <HEX  0 VARIABLE LBUF 3E ALLOT 0 C,
@@ -2286,22 +2286,22 @@ DECIMAL
      [COMPILE] LITERAL ; IMMEDIATE
      1F WIDTH ! HEX>
   $1B CONSTANT ESC    $0F CONSTANT SI   $0E CONSTANT SO
- ." 84NOV25 Initialize STAR-printer AH "  <HEX
- : PEMIT 7F AND 5 BDOS DROP ;
- : PCR   0D PEMIT   0A PEMIT ;
- : INIT-STAR ( N--. N is lines per pages)
-    ESC PEMIT "@ PEMIT ESC PEMIT "C PEMIT ( TOS) PEMIT ;
- : CONDENSED  ESC PEMIT "P PEMIT "3 PEMIT ;
- : EMPHASIZED ESC PEMIT  "E PEMIT ;
- : DOUBLE ESC PEMIT "G PEMIT ;
- : BOLD EMPHASIZED DOUBLE ;
- ( 137 CH/L !    60 LN/P !     0 PAUSE ! )
-  : PSPACES  ( 1/0 print N-1 spaces)
-    0 DO 20 PEMIT LOOP ;
-  : PTYPE  ( ADDRESS,LENGTH -- . PRINT LENGTH CHAR AT ADDRESS)
-          -DUP IF
-          OVER + SWAP DO I C@ PEMIT LOOP THEN ;
-  : P."  "" WORD HERE COUNT PTYPE ;       -->
+ ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 3.43    AH"
+    1 LOAD  ( 16/32 BIT DEPENDANCIES)
+ ( MAINTENANCE )  100 LOAD 32 LOAD
+( HEX CHAR DUMP)  6 LOAD 30 LOAD 7 LOAD 39 LOAD ( i.a. editor)
+ ( STRING         36 LOAD 37 LOAD )
+ ( EDITOR )       101 105 THRU 107 LOAD 106 LOAD
+ ( CP/M READ WRITE LOAD    15 LOAD 18 LOAD 21 LOAD 21: BUGS)
+ ( KRAKER )        10 LOAD
+ ( NEW SYSTEM      23 LOAD   )
+ ( CRC             71 LOAD   )
+ ( ASSEMBLER 8080  74 LOAD   )
+ ( ASSEMBLER 80x86) 120 LOAD
+ ( STAR PRINTER    31 LOAD   )
+ ( CP/M CONVERT    80 LOAD   )
+ WARNING 1 TOGGLE
+ 2 LIST    : TASK ;
  ( SUPER-TRIO)
    0 VARIABLE L
  :  HEADER  CR DUP 3 + SWAP
