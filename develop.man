@@ -1,0 +1,65 @@
+ Copyright (2000): Dutch Forth Workshop Foundation (The Netherlands) by GNU Public License.
+ $Id$
+
+DEVELOPERS OPERATIONS MANUAL
+
+These operations change constantly.
+Make sure you have the version that agrees with your
+program mark.
+The letter after a step means:
+"A" On Artemis.
+"L" On linux development system.
+
+Environment
+Linux with mtools nasm and RCS.
+Artemis : standalone forth computer with LBA hard disk.
+All floppies are assumed 3" hd and on A:.
+
+/*****************************************************************************/
+A. Put the official version of blocks.frt in RCS
+/*****************************************************************************/
+
+The official version of the blocks reside at the hard disk of 
+Artemis. 
+You get them as follows:
+1. make a 16 bit bootable floppy version
+2. boot Artemis from this version
+3A, 8 LOAD (preferences screen) 90 LOAD (ALIGN etc.) 97 98 THRU (SAVE-BLOCKS)
+4A. EMPTY-BUFFERS SAVE-BLOCKS FLUSH
+5L. mcopy a:BLOCKS.BLK .
+['5 make fromblock]
+6L. 
+    co -l blocks.frt 
+    fromblock <BLOCKS.BLK >blocks.frt
+    ci -u blocks.frt 
+
+Remarks :
+- the 32 bits version would not assemble correctly.
+
+/*****************************************************************************/
+B. Make a floppy bootable version
+/*****************************************************************************/
+1L. Make sure that 
+    - lina.cfg contains BOOTFD_1_(_yes)
+    - wc is absent
+    - lina is present
+2L. Set PROTECTED / REAL and BITS32 / BITS16 as wanted
+3L. make allboot
+
+/*****************************************************************************/
+C. Make a floppy with a hd-bootable version
+/*****************************************************************************/
+1L. Make sure that lina.cfg contains
+    BOOTHD_1_(_yes)
+2L. Set PROTECTED and BITS32 to "_yes"
+3L. make hdboot
+
+/*****************************************************************************/
+D. Install a hd booting version
+/*****************************************************************************/
+1L. Make a 16BIT PROTECTED floppy bootable version (See B).
+2L. Make a floppy with a hd-bootable version(See C).
+3A. Boot Artemis from 16 bit PROTECTED version
+4A. 8 LOAD (preferences screen) 90 LOAD (ALIGN etc.) 97 98 THRU (SAVE-BLOCKS)
+5A. COPY-FLOPPY
+
