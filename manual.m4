@@ -6,6 +6,8 @@ define({forthsamp},{@samp{}quote($1)})
 define({forthcode},{@code{}quote($1)})
 define({forthexample},
 {@example
+@cartouche
 {$1}
+@end cartouche
 @end example})dnl
 
