@@ -209,30 +209,35 @@ MAX-SET SET BRANCHES
 \ For a POSITION of a branch offset, find the target.
 : >TARGET   @+ + ;
 
-\ \\\WORKING BUT NO LONGER USED
-\ \\\\ For START if there is some branch at ADDRESS add it to ``BRANCHES''
-\ \\\: FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
-\ \\\    CELL+   BRANCHES SET+!
-\ \\\    _ THEN DROP ;
-\ \\\
-\ \\\\ For a SEQUENCE fill the ``BRANCHES'' set.
-\ \\\: FILL-BRANCHES !BRANCHES BEGIN DUP FILL-ONE-BRANCH NEXT-PARSE WHILE DROP REPEAT 2DROP ;
+\ WORKING BUT NO LONGER USED. INVALUABLE DURING TESTIN.
+\ For START if there is some branch at ADDRESS add it to ``BRANCHES''
+: FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
+    CELL+   BRANCHES SET+!
+    _ THEN DROP ;
 
-\ BRANCH and TARGET is free with respect to GAP, i.e. this jump is either
-\ totally outside or totally inside the GAP.
-: FREE-WRT?
-    >R 2DUP = IF 2DROP DROP RDROP -1 EXIT THEN R> \ You may jump to the start of a gap always!
+\ For a SEQUENCE fill the ``BRANCHES'' set.
+: FILL-BRANCHES !BRANCHES BEGIN DUP FILL-ONE-BRANCH NEXT-PARSE WHILE DROP REPEAT 2DROP ;
+
+\ BRANCH and TARGET is unfree with respect to GAP, i.e. return :
+\ 0 if this jump is either totally outside or totally inside the GAP.
+\ 1 jumping to outside
+\ 2 jumping to inside
+: UNFREE-WRT?
+    >R 2DUP = IF 2DROP DROP RDROP 0 EXIT THEN R> \ You may jump to the start of a gap always!
     D>R
-    SWAP DR@ WITHIN              \ BRANCH inside
-    SWAP DR> WITHIN  \ Target Inside
-    =                        \ Same
+    SWAP DR@ WITHIN        \ BRANCH inside
+    SWAP DR> WITHIN         \ Target Inside
+    2DUP = IF 2DROP 0 ELSE < 2 + THEN
 ;
 
+\ Contains the worst case for all gaps.
+VARIABLE WORST-CASE
+
 \ For a GAP : it IS forbidden, i.e. there is some branch crossing the gap boundary.
-: FORBIDDEN-GAP?
+: FORBIDDEN-GAP? 0 WORST-CASE !
 BRANCHES @+ SWAP ?DO
-    I @ DUP >TARGET 2OVER FREE-WRT? 0= IF 2DROP 0. LEAVE THEN
-0 CELL+ +LOOP OR 0= ;
+    I @ DUP >TARGET 2OVER UNFREE-WRT? WORST-CASE OR!
+0 CELL+ +LOOP 2DROP WORST-CASE @ ;
 
 \ For an ADDRESS : it is the TARGET of a branch.
 : IS-A-BRANCH-TARGET
@@ -531,7 +536,7 @@ EXPAND-SPECIAL ;
 : ANNIHILATE-ONE
     DUP @ IS-A-DROP IF NEXT-ITEM ELSE
     DUP ANNIHILATE-SEQ? 0= IF DROP NEXT-ITEM ELSE
-    2DUP FORBIDDEN-GAP? IF DROP NEXT-ITEM ELSE
+    2DUP FORBIDDEN-GAP? 1 > IF DROP NEXT-ITEM ELSE
     ANNIHILATE-GAP THEN THEN THEN ;
 
 \ Annihilate as much as possible from SEQUENCE.
@@ -659,12 +664,6 @@ SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
 
 \ ----------------------------------------------------------------
 
-\ Belongs in analyser.frt
-HEX
-800 CONSTANT FMASK-SP    \ Special optimisation possible. Pattern.
-DECIMAL
-\ ----------------------------------------------------------------
-
 10 CONSTANT STRIDE       \ # of cells between entries in MATCH-TABLE
 
 \ Add as many noops to the dictionary to have it aligned at an stride*cell
@@ -726,9 +725,6 @@ CREATE P
 ( [ 1 ]L 0BRANCH          | NOOP                    |                     )
 ( BRANCH [ 0 ]L           | NOOP                    |                     )
 
-FMASK-SP 'EXECUTE >FFA OR!
-FMASK-SP '+ >FFA OR!
-FMASK-SP '- >FFA OR!
 \ Optimalisation of this table is thoroughly forbidden!
 FMASK-HOB '(MATCH-TABLE) >FFA OR!
 \ Get rid of those auxiliary words.

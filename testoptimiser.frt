@@ -137,10 +137,15 @@ LOOP ROT ;
 'testM SHOW-IT
 HIDE A1 HIDE A2 HIDE A3
 HIDE A4 HIDE A5 HIDE A6 HIDE A7
-HIDE A8 HIDE A9
 
 : testN BEGIN ROT WHILE IF DROP THEN REPEAT 2OVER ;
 'testN SHOW-IT
+
+\ These empty branches are taking care off by the annihilator.
+: testO1 IF THEN ;
+'testO1 SHOW-IT
+: testO2 IF ROT ELSE THEN ;
+'testO2 SHOW-IT
 
 \ ---------------------------------------------------------------------------
 
@@ -256,5 +261,8 @@ ROT
 : testN [ (BACK >R ] BEGIN ROT WHILE 0BRANCH [ R> BACK) ] DROP REPEAT 2OVER ;
 'testN SHOW-IT
 
-
+: testO1 DROP ;
+'testO1 SHOW-IT
+: testO2 IF ROT THEN ;
+'testO2 SHOW-IT
 CR
