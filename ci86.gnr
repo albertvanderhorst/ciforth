@@ -949,7 +949,6 @@ ERRMSG2:    JC      ERRMSG
 HERE6:
             MOV     DS,DX
             MOV     ES,DX
-            MOV     SS,DX
         JMP  ENDDPMI
 
 ; ######################### DPMI CLEAN UP CODE #####################################################
@@ -1034,28 +1033,16 @@ _start:
 COLD_ENTRY:
         CLD                     ;{ DIR = INC}
         _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
-_PROTECTED_({
-        MOV     AX,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
-        MOV     [STACK_LOAD],AX ;{PARAM. STACK}
-        MOV     [STACK_LOAD+CW],DS ;{Stack segment}
-        LSS     SPO,[STACK_LOAD]    ;{PARAM. STACK}
-});_END_({ _PROTECTED_})
-_REAL_({
-        CLI
+;{This one seems to crash DPMI systems.}
+;;;;;;;;_PC_({MOV     _CELL_PTR[USINI+_CELLS(31)],81H}) ;{Remember ARGS.}
+        MOV     {AX},DS
+        MOV     SS,{AX}           ;{Atomic with next instruction.}
         MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
-        MOV     AX,DS
-        MOV     SS,AX
-        STI
-});_END_({ _REAL_})
         MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    ;{RETURN STACK}
         MOV     HIP,_OFFSET CLD1  ;{ (IP) <-}
         _NEXT
 ;
 CLD1:   DC      COLD    ; { This is a piece of headerless high level code.}
-_PROTECTED_({
-STACK_LOAD:     DC      0       ;{Stack pointer.}
-                DW      0       ;{Stack segment.}
-});_END_({ _PROTECTED_})
 ;
 ; ########################################################################################
 ;                       FORTH ITSELF (entry point : BOOTUP)
@@ -7087,7 +7074,7 @@ HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
 });_END_({_LINUX_N_})
 _MODERN_({
 HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
-        _BITS32_({DC      DROP, LIT, 10000H, SLMOD})
+        _BITS32_({DC     TOR, DROP, LIT, 10000H, SLMOD, FROMR})
         DC      LIT, lseek, BDOSN
         _0BRANCH({PFILE1})
         DC      NEGATE
@@ -7108,7 +7095,7 @@ negated, to be inspected using forthcode({MESSAGE}).
 dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
 },
 {{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R\W}},
-_HOSTED_MSDOS_({
+_PC_({
 { { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
 {"."" Hello world!""" FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
@@ -7179,7 +7166,7 @@ the name forthsamp({sc1}) ) . Any errors are thrown. },
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
 HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      _HOSTED_MSDOS_({ZERO})_LINUX_N_({LIT, 644Q})
+        DC      _PC_({{ZERO}})_LINUX_N_({{LIT, 644Q}})
         DC      CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
