@@ -11,7 +11,7 @@ forthcode({$1}) {seealso({$2},{$3},{$4})}
 dnl {@code{}quote($1) seealso({$2},{$3},{$4})}
 define({worddoccommon},{
 divert(9)dnl
-@node $8, next$3(), prev(), MyTop()
+@node $8, _next$3(), _prev(), MyTop()
 @subsection $8
 @pindex $2
 
@@ -26,10 +26,10 @@ Attributes: $5
 Description: $6
 
 ifelse(len({$7}),0,, {See also: seealso({$7})})dnl
-    {define({prev},{$8})dnl}
+    {define({_prev},{$8})dnl}
     divert(1)dnl
 {{{$8}})dnl
-define({next$3},}dnl
+define({_next$3},}dnl
     divert(6)dnl
 * $2  :ifelse($9,,:,$9)
 divert(9)dnl
@@ -50,7 +50,7 @@ dnl Normal description comes after the definitions but before the menu's
 dnl and contents.
 {divert(6)dnl}
 {{dnl
-define({prev},{{$1}})dnl}}
+define({_prev},{{$1}})dnl}}
 {
 @menu}
 )
