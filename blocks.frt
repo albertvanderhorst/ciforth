@@ -31,7 +31,7 @@ REQUIRE 32_bit_loaded_from_block_1 ?16
  : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
 COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
-	   I have a beautiful disclaimer,
+           I have a beautiful disclaimer,
      but this screen is too small to contain it.
 THE FILE COPYING THAT IS SUPPLIED WITH THIS PROGRAM APPLIES.
 AN EXCERPT FOLLOWS. BECAUSE THE PROGRAM IS LICENSED FREE OF
@@ -44,7 +44,7 @@ RELATED TO USE OF, ABUSE OF OR INABILITY TO USE THIS PROGRAM.
 THIS IS COPYRIGHTED SOFTWARE. YOUR RIGHTS (IN PARTICULAR YOUR
 RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
-	   THIS IS A WARNING ONLY.
+           THIS IS A WARNING ONLY.
  THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
 
 
@@ -115,15 +115,15 @@ CREATE BASE' 0 ,
  : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
        [CHAR] | EMIT ;
  : BYTES 0 DO
-	    DUP I + C@ B.
-	    I 2 MOD IF SPACE THEN
-	LOOP ;
+            DUP I + C@ B.
+            I 2 MOD IF SPACE THEN
+        LOOP ;
 :  DUMP   ( 2/0  DUMPS FROM ADDRESS-2 AMOUNT-1 BYTES)
     OVER + SWAP
     DO
-	CR I H. ." : "
-	I 0F AND DUP 5 2 */ SPACES 10 SWAP -
-	I   OVER BYTES   OVER .CHARS   DROP DROP
+        CR I H. ." : "
+        I 0F AND DUP 5 2 */ SPACES 10 SWAP -
+        I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
 ( -h :_help,_show_options ) \ AvdH A1oct04
@@ -171,7 +171,7 @@ CREATE BASE' 0 ,
     ( if F then M is vector address else M=N)
        0 SWAP ( initialise flag)
        SELTOP @ SELTAB DO
-	   DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
+           DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
 
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
@@ -180,9 +180,9 @@ CREATE BASE' 0 ,
     DUP @ SEL@ IF ( Is content of CFA known?)
        EXECUTE ( Assuming CFA also on stack)
     ELSE
-	DROP CR
-	DUP >CFA @ OVER >PHA = IF
-	   ." Code definition : " ELSE ." Can't handle : "
+        DROP CR
+        DUP >CFA @ OVER >PHA = IF
+           ." Code definition : " ELSE ." Can't handle : "
        THEN ID.. CR
     THEN ;
 : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
@@ -212,22 +212,22 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
  ( Example of a defining word decompilation)
  ( It is done by examples of the defined words )
  : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
-	CFOF BL @ BY -co
+        CFOF BL @ BY -co
  : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
     ID.. CR ;              CFOF RESULT @ BY -va
  : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
-	CFOF FENCE @ BY -us
+        CFOF FENCE @ BY -us
  : ITEM ( 1/1 Desinterpret next item, increments pointer)
      DUP @ SEL@ ( Something special ?)
      IF EXECUTE ( The special) ALIGNED ELSE
-	DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
+        DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
  CR ." A0MAR30  FORTH KRAKER >4<  ALBERT VAN DER HORST "
  CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
  ( Decompilation of special high level words)
   : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
    BEGIN ?Q DUP @  LIT (;) <> ( >R DUP LIM @ < R> AND ) WHILE
-	ITEM REPEAT   CR DROP ." ;"  DUP
+        ITEM REPEAT   CR DROP ." ;"  DUP
 ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
 CR ;         CFOF TASK @  BY -hi
  ( for all -words: 1/1 pointer before afd after execution)
@@ -240,8 +240,8 @@ CFOF LIT BY -lit
 
  CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
-	 ."  ] DLITERAL " $@ + 4 CELLS + ;
-		      CFOF SKIP BY -sk
+         ."  ] DLITERAL " $@ + 4 CELLS + ;
+                      CFOF SKIP BY -sk
 : -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT TYPE [CHAR] " EMIT
   BL EMIT $@ + ;                     CFOF ($) BY -sq
   : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
@@ -256,7 +256,7 @@ make decompile pointer point to exit!)
     DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
  CR ." A1MAY17  FORTH KRAKER >7<  ALBERT VAN DER HORST "
  : -dd CFA> ." CREATE DOES> word " ID.. CR ;
-	CFOF FORTH @ BY -dd
+        CFOF FORTH @ BY -dd
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 : .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
 : -target DUP ( IP -- IP ,print comment about current jump)
@@ -305,19 +305,19 @@ CFOF BRANCH BY -br
 ( -s SCRIPT-FILE_:_interpret_SCRIPT-FILE ) \ AvdH A1oct02
 28 LOAD    REQUIRE CTYPE
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT SCRIPT-NAME
-: MY-ERROR
-    " : Fatal error" TYPE MESSAGE CR
-    "In file " TYPE SCRIPT-NAME $@ TYPE CR
-    ARGV @ CTYPE " <integer1> <integer2> <integer3>" TYPE CR
+\ This error handler may be overwritten by the script.
+: MY-ERROR    DECIMAL
+    "In file " TYPE SCRIPT-NAME $@ TYPE " run by " TYPE
+    ARGV @ CTYPE CR
+    "Fatal error : " TYPE
+    DUP 0 32 WITHIN IF MESSAGE ELSE . THEN CR
     BYE ;
 -1 WARNING !     ' MY-ERROR >DFA @     ' (ABORT) >DFA !
-\ 12 THROW
+
 SCRIPT-NAME $@ GET-FILE
-^J $S 2DROP
+^J $S 2DROP     \ Line with #!lina
 EVALUATE
 BYE
-
-
 
 
 
@@ -539,8 +539,8 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
   : PSPACES  ( 1/0 print N-1 spaces)
     0 DO 20 PEMIT LOOP ;
   : PTYPE  ( ADDRESS,LENGTH -- . PRINT LENGTH CHAR AT ADDRESS)
-	  ?DUP IF
-	  OVER + SWAP DO I C@ PEMIT LOOP THEN ;
+          ?DUP IF
+          OVER + SWAP DO I C@ PEMIT LOOP THEN ;
   : P."  "" WORD COUNT PTYPE ;       34 LOAD
  ( SUPER-QUAD)  ?PC
    0 IVAR L
@@ -626,14 +626,14 @@ REQUIRE Z$@   REQUIRE ENV
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
     DO
-	CR DUP H. I H. ." : "
-	I
-	10 0 DO
-	    2DUP I + L@ B.
-	    I 2 MOD IF SPACE THEN
-	LOOP  [CHAR] | EMIT
-	10 0 DO 2DUP I + L@ FF AND TO-PRINT EMIT LOOP
-	[CHAR] | EMIT DROP
+        CR DUP H. I H. ." : "
+        I
+        10 0 DO
+            2DUP I + L@ B.
+            I 2 MOD IF SPACE THEN
+        LOOP  [CHAR] | EMIT
+        10 0 DO 2DUP I + L@ FF AND TO-PRINT EMIT LOOP
+        [CHAR] | EMIT DROP
     10 +LOOP CR DROP
 ;    HEX>
 
@@ -692,7 +692,7 @@ B/BUF SEC/BLK / CONSTANT SEC-LEN
 0 IVAR PARAM-BLOCK -2 ALLOT 10 C, 0 C,
 HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
 ( We use the two l.s. bytes of 64 bit number)
-	      1 , 0 , 0 , 0 ,
+              1 , 0 , 0 , 0 ,
  CODE WRITE-SYSTEM
   PUSHX, SI|
   MOVXI, AX| 4300 W,
@@ -789,11 +789,11 @@ KRAAKER
     DUP STALEST @ = IF CR ." STALEST:" THEN
     DUP CR H.
     DUP @ IF
-	." #" DUP ?
-	CELL+ DUP @ IF ." LOCKED" ELSE ." NOT LOCKED" THEN
-	CELL+ &: | EMIT 50 TYPE &: | EMIT
+        ." #" DUP ?
+        CELL+ DUP @ IF ." LOCKED" ELSE ." NOT LOCKED" THEN
+        CELL+ &: | EMIT 50 TYPE &: | EMIT
     ELSE
-	." FREE" DROP
+        ." FREE" DROP
     THEN ;
 : .B 'SHOW-BLOCK >CFA FOR-BLOCKS ;
     .B
@@ -1014,24 +1014,24 @@ RANDOMIZE
    DISK-BUFFER-W POINTER-W ! ;
  : .CLOSEW
       DISK-BUFFER-W SET-DMA FCB2 15 BDOS . ." LAST RECORD" CR
-	    FCB2 10 BDOS . ." CLOSE STATUS" CR ;
+            FCB2 10 BDOS . ." CLOSE STATUS" CR ;
  0A0D IVAR CRLF    1A IVAR CTRLZ
  : MOVE-DOWN   -80 POINTER-W +!
-	       DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
+               DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
  : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
-	   R> POINTER-W +!
-	   POINTER-W @ DISK-BUFFER-W -
-	   80 >  IF
+           R> POINTER-W +!
+           POINTER-W @ DISK-BUFFER-W -
+           80 >  IF
   ( SCREEN #19 SCHRIJVEN  >3<)
-	      DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
-	      MOVE-DOWN
-	  THEN ;
+              DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
+              MOVE-DOWN
+          THEN ;
 
  : .WRITE  ( 2/0 WRITE SCREEN-1 .. SCREEN-2 TO DISK)
       1+ B/SCR * SWAP B/SCR * ( GET START BUFFER #'S)
-	DO I BLOCK DUP
-	40 -TRAILING TO-DISK  CRLF 2 TO-DISK
-	40 + 40 -TRAILING TO-DISK CRLF 2 TO-DISK
+        DO I BLOCK DUP
+        40 -TRAILING TO-DISK  CRLF 2 TO-DISK
+        40 + 40 -TRAILING TO-DISK CRLF 2 TO-DISK
       LOOP CTRLZ 1 TO-DISK
  ;   HEX>
 
@@ -1051,13 +1051,13 @@ RANDOMIZE
  : .CLOSER   FCB2 10 BDOS . ." CLOSE STATUS" CR ;
 
 
-	       21 22 THRU
+               21 22 THRU
 
 
  ( SCR # 21,  TWEEDE SCREEN VAN CP/M READ)
  : ?EMPTY ( POINTER -- CORRECTED PNR, READ SECTOR IF AT END)
      DUP END-BUF = IF DISK-BUFFER-R SET-DMA  FCB2 14 BDOS .
-		    DROP DISK-BUFFER-R THEN  ;
+                    DROP DISK-BUFFER-R THEN  ;
  : GET-CHAR
     POINTER-R @
       ?EMPTY                   ( GET NEW BUFFER IF NEEDED)
@@ -1075,15 +1075,15 @@ RANDOMIZE
       DUP 40 20 FILL ( preset spaces )
       41 OVER + SWAP ( max $41 char to a line, CR!)
       DO  GET-CHAR
-	  DUP "CR" = IF DROP 20 LEAVE THEN
-	  DUP ^Z   = IF DROP 20 LEAVE THEN
-	  I C! ( may leave spurious 81th space)
+          DUP "CR" = IF DROP 20 LEAVE THEN
+          DUP ^Z   = IF DROP 20 LEAVE THEN
+          I C! ( may leave spurious 81th space)
       LOOP  ;
  : .READ ( 2/0 READ SCREEN-2 TO SCREEN -1)
       1+ B/SCR * SWAP B/SCR * ( get start buffer #'s)
       DO  I BLOCK DUP GET-LINE
-	  DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
-	  I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
+          DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
+          I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
       LOOP
 ; HEX>
  ( 01-APR-83 LADEN VAN CP/M FILE  #1 )
@@ -1096,8 +1096,8 @@ RANDOMIZE
      >R IN !   >R TIB ! ( RESTORE)  ;
 
  : .LOAD ( LOAD THE CPM FILE SPECIFIED IN FCB2 )
-	 BEGIN   LBUF DUP GET-LINE I-F-A
-	 EOF @ UNTIL ;
+         BEGIN   LBUF DUP GET-LINE I-F-A
+         EOF @ UNTIL ;
 
 
     HEX>
@@ -1212,7 +1212,7 @@ C6 4MI ADI     CE 4MI ACI     D6 4MI SUI    DE 4MI SBI
 E6 4MI ANI     EE 4MI XRI     F6 4MI ORI    FE 4MI CPI
 22 5MI SHLD    2A 5MI LHLD    32 5MI STA    3A 5MI LDA
 CD 5MI CALL    C3 5MI JMP
-	       ( CZ,CNZ,CCY,CNC)
+               ( CZ,CNZ,CCY,CNC)
 
 CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >3<"
 C9 1MI RET                   C2 CONSTANT 0=  D2 CONSTANT CS
@@ -1259,7 +1259,7 @@ CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
 : doit  CHUNK-SIZE 589 64 + CR WIPE-RANGE ;
 : WIPE-HD WIPE-BUFFER FIRST-BLOCK
      BEGIN RW-BUFFER OVER 0 R/W DISK-ERROR 1 AND 0= WHILE
-	DUP SHOW 1+ REPEAT DROP ;
+        DUP SHOW 1+ REPEAT DROP ;
 
 
 ?PC ?32 ( 3 : FIRST-FREE? BACKUP fresh part of disk A1may3 AH)
@@ -1284,9 +1284,9 @@ FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
   DUP SHOW KEY? IF UNLOOP EXIT THEN  LOOP . . ;
 : BLMOVE-FAST  ( as MOVE for blocks, ONLY MULTIPLES OF 64K.)
  1<>64 0 DO
-	 SWAP RW-BUFFER OVER 1 R/W 40 +
-	 SWAP RW-BUFFER OVER 0 R/W 40 +
-	 DUP SHOW KEY? IF UNLOOP EXIT THEN
+         SWAP RW-BUFFER OVER 1 R/W 40 +
+         SWAP RW-BUFFER OVER 0 R/W 40 +
+         DUP SHOW KEY? IF UNLOOP EXIT THEN
 40 +LOOP . . 1<>64 ;
 
 : BACKUP ( BACKUP THE CURRENT CHUNK TO PRISTINE DISK )
@@ -1443,13 +1443,13 @@ CR  ." THE ISO BYTE BENCHMARK LASTED " .mS
  ." TYPE HELP VOOR DE GLOSSARY"  CR
  0 IVAR TAARTEN     0 IVAR DIEP-VRIES
  : HELP CR ." GLOSSARY:" CR ." BAK-TAART"
-	CR ." EET-TAART" CR ." VRIES-IN" CR ." ONTDOOI"
-	CR ." START" CR ." STATUS" CR ;
+        CR ." EET-TAART" CR ." VRIES-IN" CR ." ONTDOOI"
+        CR ." START" CR ." STATUS" CR ;
  : START 0 TAARTEN ! 0 DIEP-VRIES ! ;
  : BAK-TAART 1 TAARTEN +! ;
  : EET-TAART TAARTEN @ DUP
        IF -1 TAARTEN +! CR ." DANKJEWEL !" CR ELSE
-	 CR ." WELKE TAART ?" CR DROP THEN ;
+         CR ." WELKE TAART ?" CR DROP THEN ;
  : VRIES-IN TAARTEN @ DIEP-VRIES +! 0 TAARTEN ! ;
  : ONTDOOI DIEP-VRIES @ TAARTEN +! 0 DIEP-VRIES ! ;
  : STATUS CR ." AANTAL AANWEZIGE TAARTEN: " TAARTEN ?
@@ -1588,7 +1588,7 @@ CREATE RW-BUFFER B/BUF ALLOT
 CREATE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
 HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
 ( We use the two l.s. bytes of 64 bit number)
-	      1 , 0 , 0 , 0 ,
+              1 , 0 , 0 , 0 ,
  CODE WRITE-SYSTEM
   PUSHX, SI|
   MOVXI, AX| 4300 W,
@@ -1620,7 +1620,7 @@ VH VW * CONSTANT VL
 : A-L SCR @ (LINE) ;
 : VA ( I - VS,VO ) DUP + VID SWAP ;
 : >V SWAP 0 DO  ( sc offset - )
-	OVER I + C@ 700 OR   OVER I + VA LC!
+        OVER I + C@ 700 OR   OVER I + VA LC!
      LOOP DROP DROP ;
 : V> ( BUF -LEN OFFSET- )
 SWAP 0 DO OVER I +   OVER I + VA
@@ -1893,7 +1893,7 @@ REQUIRE ?LI ?LI   REQUIRE OS-IMPORT
 : TO-PROT,  GET-CR0  INCX, AX|  PUT-CR0 ;
 : TO-REAL,  GET-CR0  DECX, AX|  PUT-CR0 ;
 : COPY-SEG  MOVXI, AX| ( DAT -- ) W,   MOVSW, T| DS| R| AX|
-	    MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
+            MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
 
 
 
@@ -2083,13 +2083,13 @@ CODE READ-BLOCK2 4200 R/W-BLOCK  C;  ( D - . )
  CODE WRITE-BLOCK2 4300 R/W-BLOCK  C; ( D - . )
 DECIMAL : TEST  0.
   BEGIN  CR 2DUP D.
-	 2000. D+ ( SKIP 1 MEG)
-	 2DUP READ-BLOCK2 1 AND UNTIL
+         2000. D+ ( SKIP 1 MEG)
+         2DUP READ-BLOCK2 1 AND UNTIL
 DROP DROP ;
 0 IVAR SYSTEM-OFFSET
 HEX : SAVE 140 * SYSTEM-OFFSET !
   140 0 DO I 0 READ-BLOCK2 .
-	 SYSTEM-OFFSET @ I + 0 WRITE-BLOCK2 .
+         SYSTEM-OFFSET @ I + 0 WRITE-BLOCK2 .
   LOOP ;
 : .ELECTIVE 140 UM* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
 DECIMAL
@@ -2099,13 +2099,13 @@ HEX  CODE READ-BLOCK2 4200 R/W-BLOCK  C;  ( D - . )
  CODE WRITE-BLOCK2 4300 R/W-BLOCK  C; ( D - . )
 DECIMAL : TEST  0.
   BEGIN  CR 2DUP D.
-	 2000. D+ ( SKIP 1 MEG)
-	 2DUP READ-BLOCK2 1 AND UNTIL
+         2000. D+ ( SKIP 1 MEG)
+         2DUP READ-BLOCK2 1 AND UNTIL
 DROP DROP ;
 0 IVAR SYSTEM-OFFSET
 HEX : SAVE 140 * SYSTEM-OFFSET !
   140 0 DO I 0 READ-BLOCK2 .
-	 SYSTEM-OFFSET @ I + 0 WRITE-BLOCK2 .
+         SYSTEM-OFFSET @ I + 0 WRITE-BLOCK2 .
   LOOP ;
 : .ELECTIVE 140 UM* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
 DECIMAL
@@ -2136,8 +2136,8 @@ DECIMAL
      >R IN !   >R TIB ! ( RESTORE)  ;
 
  : .LOAD ( LOAD THE CPM FILE SPECIFIED IN FCB2 )
-	 BEGIN   LBUF DUP GET-LINE I-F-A
-	 EOF @ UNTIL ;
+         BEGIN   LBUF DUP GET-LINE I-F-A
+         EOF @ UNTIL ;
 
 
     HEX>
@@ -2147,13 +2147,13 @@ DECIMAL
  ." TYPE HELP VOOR DE GLOSSARY"  CR
  0 IVAR TAARTEN     0 IVAR DIEP-VRIES
  : HELP CR ." GLOSSARY:" CR ." BAK-TAART"
-	CR ." EET-TAART" CR ." VRIES-IN" CR ." ONTDOOI"
-	CR ." START" CR ." STATUS" CR ;
+        CR ." EET-TAART" CR ." VRIES-IN" CR ." ONTDOOI"
+        CR ." START" CR ." STATUS" CR ;
  : START 0 TAARTEN ! 0 DIEP-VRIES ! ;
  : BAK-TAART 1 TAARTEN +! ;
  : EET-TAART TAARTEN @ DUP
        IF -1 TAARTEN +! CR ." DANKJEWEL !" CR ELSE
-	 CR ." WELKE TAART ?" CR DROP THEN ;
+         CR ." WELKE TAART ?" CR DROP THEN ;
  : VRIES-IN TAARTEN @ DIEP-VRIES +! 0 TAARTEN ! ;
  : ONTDOOI DIEP-VRIES @ TAARTEN +! 0 DIEP-VRIES ! ;
  : STATUS CR ." AANTAL AANWEZIGE TAARTEN: " TAARTEN ?
@@ -2325,8 +2325,8 @@ DECIMAL
      DROP DROP HERE  ( No following word)
    ELSE
      BEGIN
-	2DUP >LFA @ <> WHILE
-	>LFA @
+        2DUP >LFA @ <> WHILE
+        >LFA @
      REPEAT
      SWAP DROP ( The CFA)
    THEN
@@ -2391,7 +2391,7 @@ DECIMAL
  : MAP[]   ( N -- M Converts position N to address M)
       LEN * MAP + ;
  : CN   ( defines a characterization )
-	 0 IVAR ; ( later misschien net vocabje)
+         0 IVAR ; ( later misschien net vocabje)
   CN AMBIGUOUS  CN BLOCKED  CN UNKNOWN
  : ID..   ID. ;
  : .CHAR  DUP MAP[] [char] @ ( N-- Print char'n)
@@ -2473,10 +2473,10 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
        ROT @ ROT @ ROT P-CONNECT ;
  : ?FIX  MAP[] [char] @ DUP 0= 0= SWAP @ AMB = 0= AND ;
  : ?SWAP ( P1 P2 -- {P1,P2} Change order such that )
-	 ( P2 has no fixed characterization)
+         ( P2 has no fixed characterization)
    DUP ?FIX IF SWAP THEN
    DUP ?FIX IF
-	CR ." Places differently characterized"  QUIT
+        CR ." Places differently characterized"  QUIT
    THEN  ;
  CR  ." #43 FROBOZZ AMATEUR ADVENTURER >8< 84/4/19"
  : REPLACE ( P1 P2--. Replace all references to P2 by P1)
@@ -2486,9 +2486,9 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
    THEN
    256  0 DO ( For all place do)
       I MAP[] 0 [dir] 10 OVER + SWAP DO ( For 10 dir's do)
-	 I C@ OVER ( P2) = IF
-	    OVER ( P1) I C!
-	 THEN
+         I C@ OVER ( P2) = IF
+            OVER ( P1) I C!
+         THEN
       LOOP
    LOOP  DROP DROP
  ;
@@ -2502,9 +2502,9 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
       OVER MAP[] I [dir] C@
       OVER MAP[] I [dir] C@
       2DUP = >R 2DUP UNK = SWAP UNK =  OR R> OR IF
-	 MAX OVER MAP[] I [dir] C!
+         MAX OVER MAP[] I [dir] C!
       ELSE
-	 CR MYSELF
+         CR MYSELF
       THEN
    LOOP
    DROP ( Destination location) CLEAR! ( Other)
@@ -2518,10 +2518,10 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
  : STORE ( C--. Store char in REMEMBER)
       127 AND ( strip parity)
       DUP "> - IF ( unless prompt)
-	 L-W-L @ IF 0 REMEMBER C! THEN
-	 DUP REMEMBER COUNT + C!      ( Store char an place)
-	 REMEMBER C@ 1 + REMEMBER C!  ( Bump count)
-	 ^J = L-W-L ! ( Keep flag)
+         L-W-L @ IF 0 REMEMBER C! THEN
+         DUP REMEMBER COUNT + C!      ( Store char an place)
+         REMEMBER C@ 1 + REMEMBER C!  ( Bump count)
+         ^J = L-W-L ! ( Keep flag)
       ELSE DROP THEN  ;
  : L-STORE ( A L -. Store A in list L )
   2 OVER +! DUP @ + ! ;
@@ -2551,8 +2551,8 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
    MAP[] DUP [dist] C@ 1+ ( Get the marking on top)
    SWAP 0 [dir] 10 OVER + SWAP DO
       I C@ MAP[] [dist] 2DUP C@ < IF
-	OVER SWAP C! ( I C@ MYSELF) ELSE
-	DROP THEN
+        OVER SWAP C! ( I C@ MYSELF) ELSE
+        DROP THEN
    LOOP  DROP  ;
  : M-D  MAP[] [dist] C! ; ( Mark distance)
  : INIT-AUX  ( Zeros all normal places)
@@ -2579,7 +2579,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  : MARK-EX ( I,N-- Appends all exits from N to the Ith list)
    MAP[] 0 [dir] 10 OVER + SWAP DO
       I C@ MAP[] [dist] C@ 0= IF ( This exit not yet marked)
-	   DUP I C@ APPEND
+           DUP I C@ APPEND
       THEN
    LOOP  DROP ;
  0 IVAR START
@@ -2592,8 +2592,8 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
  CR  ." #50 FROBOZZ AMATEUR ADVENTURER >14< 84/5/27 "
  : (M-U-F) ( N --M Generates circular lists )
-	( until place #N in last one or last list empty)
-	( returns M: moves needed)
+        ( until place #N in last one or last list empty)
+        ( returns M: moves needed)
    0 DIST-LIST !
    0 CURPOS @ APPEND ( Create 0th circular list )
    0 BEGIN
@@ -2610,13 +2610,13 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 : FIND-something ( CFA -- )
    CFA> LATEST             ( after the CFAO one)
    2DUP = IF
-	      ( from place #K to #J in direction D)
-	      ( Leaves -1 if nothing found)
+              ( from place #K to #J in direction D)
+              ( Leaves -1 if nothing found)
    -1 ROT ROT SWAP ( Initiate not found flag)
    MAP[] 0 [dir] ( get first exit from #K)
    10 0 DO
       2DUP I + C@ = IF
-	DROP I ROT ROT LEAVE ( the direction as a flag)
+        DROP I ROT ROT LEAVE ( the direction as a flag)
       THEN
    LOOP  DROP DROP ;
 
@@ -2624,7 +2624,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
  CR ." #52 FROBOZZ AMATEUR ADVENTURER >16< 84/6/12 "
  : FIND-FROM ( M,J--D,N Find out place #N in sublist #J)
-	     ( from where to go in direction D to arrive at M)
+             ( from where to go in direction D to arrive at M)
   DIST-LIST + C@
   BEGIN
      MAP[] [dist] C@ 2DUP ( get next place from list)
@@ -2645,7 +2645,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
    -1 SWAP ( leave stack bottom) DUP M-U-F
    DUP DIST-LIST + C@ IF
       1 - -1 SWAP DO
-	 I FIND-FROM SWAP
+         I FIND-FROM SWAP
       -1 +LOOP DROP
    ELSE
       CR ." CAN'T REACH THAT ROOM " CR
@@ -2663,9 +2663,9 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  : =$ ( S1,S2--F Leaves flag indication equality of strings)
       1 ROT ROT ( Start with equal flag)
       DUP C@ 1+ 0 DO
-	 OVER I + C@ OVER I + C@ - IF
-	    ROT DROP 0 ROT ROT ( Replace flag with 0) LEAVE
-	 THEN
+         OVER I + C@ OVER I + C@ - IF
+            ROT DROP 0 ROT ROT ( Replace flag with 0) LEAVE
+         THEN
       LOOP DROP DROP  ;
 
 
@@ -2677,9 +2677,9 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
    0 SWAP ( Start with no flag)
    DUP @ ?DUP IF
      0 DO
-	DUP I 1+ 2 * + @ REMEMBER =$ IF
-	   SWAP DROP 1 SWAP LEAVE
-	THEN
+        DUP I 1+ 2 * + @ REMEMBER =$ IF
+           SWAP DROP 1 SWAP LEAVE
+        THEN
      LOOP
    THEN  DROP ;
 
@@ -2689,17 +2689,17 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  CR  ." #56 FROBOZZ INTELLIGENT ENQUIRER >20< 84/6/27"
  0 IVAR BLK-TEXTS 10 ALLOT
  : BLOCKED? BLK-TEXTS COMPARE-TEXTS IF
-	   BLOCKED!
-	ELSE
-	   CR ." Please do by hand! " CR QUIT
-	THEN ;
+           BLOCKED!
+        ELSE
+           CR ." Please do by hand! " CR QUIT
+        THEN ;
  : TRY-HERE ( investigates all exits of the current position)
  ( If it discovers blocked exits, it will take care of that,)
  ( Special cases are left to the adventurer himself)
    CURPOS @ MAP[] 0 [dir] 10 0 DO
      DUP I + C@ UNK = IF
-	I SEND-DIR ECR WAIT ( try this direction)
-	I DIRECTION    BLOCKED?
+        I SEND-DIR ECR WAIT ( try this direction)
+        I DIRECTION    BLOCKED?
      THEN
    LOOP ;
  CR  ." #57 FROBOZZ INTELLIGENT ENQUIRER >21< 84/6/27 "
@@ -2848,7 +2848,7 @@ EXIT NOT YET
 
  ( STREAM READ ROUTINES CP/M 85/012/08  AH )
  : F_READ ( B,N-N2 Tries to read N char's to buffer B)
-	  ( N2 is number actually read, 0 for EOF)
+          ( N2 is number actually read, 0 for EOF)
       ( NOT  YET: NOW IT IS FILLED WITH ^Z, NOTHING RETURNED )
   BEGIN
      SWAP GET-CHAR
@@ -3180,7 +3180,7 @@ FORTH
  SWAP DROP ROT ROT ( l2,l1,h2) OVER OVER UM* >R >R .S
  DROP ( l1,l2)    UM* .S R> ADC .S R> ADC .S
   IF ( carry) R> R> 2M+ 1+ ." C" ELSE
-	      R> R> 2M+    ." NC" THEN  .S
+              R> R> 2M+    ." NC" THEN  .S
   R> R> 2M+ DROP .S ;
 ( Show block properties )
 : .CON &| EMIT   28 TYPE   &| EMIT ;
@@ -3258,7 +3258,7 @@ BLK ?
 .REG .ES       .REG .DS       .REG .FS        .REG .GS
 .REG .IP       .REG .CS       .REG .SP        .REG .SS
 : .REGS  .DIL .DIH .SIL .SIH  CR  .BPL .BPH .RSL .RSH CR
-	 .AXL .AXH .BXL .BXH  CR  .CXL .CXH .DXL .DXH CR ;
+         .AXL .AXH .BXL .BXH  CR  .CXL .CXH .DXL .DXH CR ;
 : .SYSS   .ES .DS .FS .GS CR   .IP .CS .SP .SS .PSW CR   ;
 : .ALL .REGS .SYSS ;
 
@@ -3828,13 +3828,13 @@ VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    COMP !  IMAX ! IMIN !
     BEGIN       \ Loop variant IMAX - IMIN
-	IMIN @ IMAX @ ( .S) <> WHILE
-	IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-	DUP COMP @ EXECUTE IF
-	   ( ihalf) IMIN !
-	ELSE
-	   ( ihalf) 1- IMAX !
-	THEN
+        IMIN @ IMAX @ ( .S) <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
     REPEAT
 IMIN @ ;
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
@@ -3876,13 +3876,13 @@ VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    COMP !  IMAX ! IMIN !
     BEGIN       \ Loop variant IMAX - IMIN
-	IMIN @ IMAX @ <> WHILE
-	IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-	DUP COMP @ EXECUTE IF
-	   ( ihalf) IMIN !
-	ELSE
-	   ( ihalf) 1- IMAX !
-	THEN
+        IMIN @ IMAX @ <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
     REPEAT
 IMIN @ ;
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
@@ -3922,16 +3922,16 @@ Voorbeeld: -100 100 ' 0< BIN-SEARCH .
 VARIABLE COMP \ Execution token van het "Orakel"
 VARIABLE IMIN \ IMIN 'COMP EXECUTE is altijd waar.
 VARIABLE IMAX \ Als IX 'COMP EXECUTE waar is,
-	      \ dan ook voor IY mits IY > IX
+              \ dan ook voor IY mits IY > IX
 : BIN-SEARCH   COMP !  IMAX ! IMIN !
     BEGIN     \ Loop variant IMAX - IMIN
-	IMIN @ IMAX @ <> WHILE
-	IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-	DUP COMP @ EXECUTE IF
-	   ( ihalf) IMIN !
-	ELSE
-	   ( ihalf) 1- IMAX !
-	THEN
+        IMIN @ IMAX @ <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
     REPEAT
 IMIN @ ;
 ( Alternative for COLD A1may04 AH)  HEX
@@ -4118,12 +4118,12 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
      FLAGS SIZE 1 FILL
      0 ( 0 COUNT ) SIZE 0
      DO FLAGS I + C@
-	IF I DUP + 3 +  ( DUP . )
-	   DUP I +
-	   BEGIN DUP SIZE <
-	   WHILE 0 OVER FLAGS +  C!  OVER + REPEAT
-	   DROP DROP 1+
-	THEN
+        IF I DUP + 3 +  ( DUP . )
+           DUP I +
+           BEGIN DUP SIZE <
+           WHILE 0 OVER FLAGS +  C!  OVER + REPEAT
+           DROP DROP 1+
+        THEN
      LOOP ;
 
 ( ERATOSTHENES by_multiple_batches ) \ AvdH A1oct04
@@ -4180,29 +4180,29 @@ VARIABLE PAUSE  1 PAUSE ! ( Boolean: pause between pages)
 CREATE S-MASK
     01 C, 02 C, 04 C, 08 C, 10 C, 20 C, 40 C, 80 C,
 CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
-	     10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
+             10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
  : INIT-T   FLAGS SIZE 0FF FILL ; ( Preset to 'prime')
  DECIMAL
  : 8/MOD   0 8 UM/MOD ; ( May be redefined in assembler )
  : CLEAR-B ( BIT# --  clears the specified bit)
-	   8/MOD FLAGS + SWAP  ( Address in flags table)
-	   C-MASK + C@         ( Get mask)
-	   OVER C@ AND SWAP C! ( Clear the bit)  ;
+           8/MOD FLAGS + SWAP  ( Address in flags table)
+           C-MASK + C@         ( Get mask)
+           OVER C@ AND SWAP C! ( Clear the bit)  ;
 
 
  ." ERATOSTHENES >4< Bit manipulation - A. van der Horst " CR
  : SET-B ( BIT# --  sets the specified bit)
-	   8/MOD FLAGS + SWAP  ( Address in flags table)
-	   S-MASK + C@         ( Get mask)
-	   OVER C@ OR SWAP C!  ( Store with bit set)  ;
+           8/MOD FLAGS + SWAP  ( Address in flags table)
+           S-MASK + C@         ( Get mask)
+           OVER C@ OR SWAP C!  ( Store with bit set)  ;
  : TEST-B ( BIT# -- FLAG  Gets a FLAG testable by IF)
-	   8/MOD FLAGS + C@ SWAP  ( Get flag)
-	   S-MASK + C@ AND        ( Result: =0 or #0)     ;
+           8/MOD FLAGS + C@ SWAP  ( Get flag)
+           S-MASK + C@ AND        ( Result: =0 or #0)     ;
  : FLIP ( PRIME,START -- .  , marks multiples of PRIME as
-	(  non prime starting with START)
-	   BEGIN  DUP LIM @ U<  WHILE
-		  DUP CLEAR-B  OVER +
-	   REPEAT   DROP DROP ;
+        (  non prime starting with START)
+           BEGIN  DUP LIM @ U<  WHILE
+                  DUP CLEAR-B  OVER +
+           REPEAT   DROP DROP ;
  : CHECK SIZE 16 UM* 1000 UM/MOD  THOUSANDS @ U< IF
        ." INCREASE SIZE " ABORT ELSE DROP DROP THEN ;
 
@@ -4210,8 +4210,8 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
  : BATCH1 ( First batch of 500 numbers)
       500 1 ( Only odd numbers)
      DO I TEST-B
-	IF I DUP + 1 + DUP .P ( get prime number)
-	   I FLIP THEN ( Mark multiple as non-prime)
+        IF I DUP + 1 + DUP .P ( get prime number)
+           I FLIP THEN ( Mark multiple as non-prime)
      LOOP ;
  : BATCH ( OFFSET --  every  following batch )
       500 0
@@ -4229,12 +4229,12 @@ VARIABLE X      VARIABLE Y      VARIABLE Z
 X @ Y @ Z @ >R >R >R
 Z ! Y ! X !
     X @ Y @ > 0= IF
-	Z @
+        Z @
     ELSE
-	X @ 1 - Y @ Z @ RECURSE
-	Y @ 1 - Z @ X @ RECURSE
-	Z @ 1 - X @ Y @ RECURSE
-	RECURSE
+        X @ 1 - Y @ Z @ RECURSE
+        Y @ 1 - Z @ X @ RECURSE
+        Z @ 1 - X @ Y @ RECURSE
+        RECURSE
     THEN
 R> R> R> Z ! Y ! X !
 ;
@@ -4245,12 +4245,12 @@ R> R> R> Z ! Y ! X !
 : tak
      DSP@  >R  \ X . Y . Z . CR
      X Y > 0= IF
-	 Z
+         Z
      ELSE
-	 X 1 - Y Z RECURSE
-	 Y 1 - Z X RECURSE
-	 Z 1 - X Y RECURSE
-	 RECURSE
+         X 1 - Y Z RECURSE
+         Y 1 - Z X RECURSE
+         Z 1 - X Y RECURSE
+         RECURSE
      THEN
      RDROP \ Drop frame pointer.
      >R DROP DROP DROP R> ; \ Discard input, leave result
@@ -4261,12 +4261,12 @@ R> R> R> Z ! Y ! X !
 : tak SWAP ROT
      DSP@  >R  \ X . Y . Z . CR
      X Y > 0= IF
-	 Z
+         Z
      ELSE
-	 X 1 - Y Z SWAP ROT  RECURSE
-	 Y 1 - Z X SWAP ROT  RECURSE
-	 Z 1 - X Y SWAP ROT  RECURSE
-	 SWAP ROT  RECURSE
+         X 1 - Y Z SWAP ROT  RECURSE
+         Y 1 - Z X SWAP ROT  RECURSE
+         Z 1 - X Y SWAP ROT  RECURSE
+         SWAP ROT  RECURSE
      THEN   RDROP \ Drop frame pointer.
      >R DROP DROP DROP R> ; \ Discard input, leave result
 : tak SWAP ROT tak ;
@@ -4277,12 +4277,12 @@ R> R> R> Z ! Y ! X !
 : tak SWAP ROT
      DSP@  >R  \ X . Y . Z . CR
      X Y > 0= IF
-	 Z
+         Z
      ELSE
-	 Y X Z 1 - RECURSE
-	 X Z Y 1 - RECURSE
-	 Z Y X 1 - RECURSE
-	 RECURSE
+         Y X Z 1 - RECURSE
+         X Z Y 1 - RECURSE
+         Z Y X 1 - RECURSE
+         RECURSE
      THEN   RDROP \ Drop frame pointer.
      >R DROP DROP DROP R> ; \ Discard input, leave result
 : tak SWAP ROT tak ;
@@ -4293,12 +4293,12 @@ R> R> R> Z ! Y ! X !
 : tak SWAP ROT
      DSP@  >R  \ X . Y . Z . CR
      X Y > 0= IF
-	 Z
+         Z
      ELSE
-	 Y X Z 1 - RECURSE  >R DROP DROP DROP R>
-	 X Z Y 1 - RECURSE  >R DROP DROP DROP R>
-	 Z Y X 1 - RECURSE  >R DROP DROP DROP R>
-	 RECURSE >R DROP DROP DROP R>
+         Y X Z 1 - RECURSE  >R DROP DROP DROP R>
+         X Z Y 1 - RECURSE  >R DROP DROP DROP R>
+         Z Y X 1 - RECURSE  >R DROP DROP DROP R>
+         RECURSE >R DROP DROP DROP R>
      THEN   RDROP \ Drop frame pointer.
 ; \ Discard input, leave result
 : tak SWAP ROT tak >R DROP DROP DROP R> ;
@@ -4308,27 +4308,27 @@ R> R> R> Z ! Y ! X !
 : Z "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
 : tak
      2DUP < 0= IF
-	 >R >R DUP R> SWAP R> SWAP
+         >R >R DUP R> SWAP R> SWAP
      ELSE
-	 DSP@  >R  \ X . Y . Z . CR
-	 Y X Z 1 - RECURSE  >R DROP DROP DROP R>
-	 X Z Y 1 - RECURSE  >R DROP DROP DROP R>
-	 Z Y X 1 - RECURSE  >R DROP DROP DROP R>
-	 RECURSE >R DROP DROP DROP R>
-	 RDROP \ Drop frame pointer.
+         DSP@  >R  \ X . Y . Z . CR
+         Y X Z 1 - RECURSE  >R DROP DROP DROP R>
+         X Z Y 1 - RECURSE  >R DROP DROP DROP R>
+         Z Y X 1 - RECURSE  >R DROP DROP DROP R>
+         RECURSE >R DROP DROP DROP R>
+         RDROP \ Drop frame pointer.
      THEN ;
 : tak SWAP ROT tak >R DROP DROP DROP R> ;
 ( tak7 )
 : kat
     2DUP < 0= IF
-	 >R >R DUP R> SWAP R> SWAP
+         >R >R DUP R> SWAP R> SWAP
     ELSE
-	 ROT 1 - RECURSE  >R 1+
-	 ROT 1 - RECURSE  >R 1+
-	 ROT 1 - RECURSE  >R 1+
-	 R> R> R> SWAP ROT
-	 RECURSE
-	>R DROP DROP DROP R>
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         R> R> R> SWAP ROT
+         RECURSE
+        >R DROP DROP DROP R>
     THEN ;
 : tak SWAP ROT kat >R DROP DROP DROP R> ;
 
@@ -4340,10 +4340,10 @@ R> R> R> Z ! Y ! X !
 : kat
     2DUP < 0= IF 2PICK
     ELSE
-	 ROT 1 - RECURSE  >R 1+
-	 ROT 1 - RECURSE  >R 1+
-	 ROT 1 - RECURSE  >R 1+
-	 R> R> R> tak
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         R> R> R> tak
     THEN ;
 : tak' SWAP ROT kat >R DROP DROP DROP R> ;
 'tak' >DFA @ 'tak >DFA ! ( solve forward reference)
@@ -4357,12 +4357,12 @@ R> R> R> Z ! Y ! X !
 \ Like ``tak'' but arguments in reverse order and not consumed
 : kat
     2DUP < IF
-	 ROT 1 - RECURSE  >R 1+
-	 ROT 1 - RECURSE  >R 1+
-	 ROT 1 - RECURSE  >R 1+
-	 R> R> R> tak
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         ROT 1 - RECURSE  >R 1+
+         R> R> R> tak
     ELSE
-	>R >R DUP R> SWAP R> SWAP \ 2 PICK
+        >R >R DUP R> SWAP R> SWAP \ 2 PICK
     THEN ;
 'kat >DFA @ 'kat' >DFA ! ( solve forward reference)
 : q MARK-TIME 18 12 6 tak . ELAPSED ;
@@ -4438,12 +4438,12 @@ R> R> R> Z ! Y ! X !
      FLAGS SIZE 1 FILL
      0 ( 0 COUNT ) SIZE 0
      DO FLAGS I + C@
-	IF I DUP + 3 +  ( DUP . )
-	   DUP I +
-	   BEGIN DUP SIZE <
-	   WHILE 0 OVER FLAGS +  C!  OVER + REPEAT
-	   DROP DROP 1+
-	THEN
+        IF I DUP + 3 +  ( DUP . )
+           DUP I +
+           BEGIN DUP SIZE <
+           WHILE 0 OVER FLAGS +  C!  OVER + REPEAT
+           DROP DROP 1+
+        THEN
      LOOP
      . ." PRIMES" ;
  ." ERATOSTHENES >1< Variables - A. van der Horst"  CR
@@ -4482,31 +4482,31 @@ R> R> R> Z ! Y ! X !
    HEX
  : NOT   0FF XOR ( N -- N  FLIP ALL BITS OF N) ;
  0 IVAR S-MASK -2 ALLOT 01 C, 02 C, 04 C, 08 C,
-			    10 C, 20 C, 40 C, 80 C,
+                            10 C, 20 C, 40 C, 80 C,
  0 IVAR C-MASK -2 ALLOT
-	     01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
-	     10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
+             01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
+             10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
  : INIT-T   FLAGS SIZE 0FF FILL ; ( Preset to 'prime')
  DECIMAL
  : 8/MOD   0 8 UM/MOD ; ( May be redefined in assembler )
  : CLEAR-B ( BIT# --  clears the specified bit)
-	   8/MOD FLAGS + SWAP  ( Address in flags table)
-	   C-MASK + C@         ( Get mask)
-	   OVER C@ AND SWAP C! ( Clear the bit)  ;
+           8/MOD FLAGS + SWAP  ( Address in flags table)
+           C-MASK + C@         ( Get mask)
+           OVER C@ AND SWAP C! ( Clear the bit)  ;
 
  ." ERATOSTHENES >4< Bit manipulation - A. van der Horst " CR
  : SET-B ( BIT# --  sets the specified bit)
-	   8/MOD FLAGS + SWAP  ( Address in flags table)
-	   S-MASK + C@         ( Get mask)
-	   OVER C@ OR SWAP C!  ( Store with bit set)  ;
+           8/MOD FLAGS + SWAP  ( Address in flags table)
+           S-MASK + C@         ( Get mask)
+           OVER C@ OR SWAP C!  ( Store with bit set)  ;
  : TEST-B ( BIT# -- FLAG  Gets a FLAG testable by IF)
-	   8/MOD FLAGS + C@ SWAP  ( Get flag)
-	   S-MASK + C@ AND        ( Result: =0 or #0)     ;
+           8/MOD FLAGS + C@ SWAP  ( Get flag)
+           S-MASK + C@ AND        ( Result: =0 or #0)     ;
  : FLIP ( PRIME,START -- .  , marks multiples of PRIME as
-	(  non prime starting with START)
-	   BEGIN  DUP LIM @ U<  WHILE
-		  DUP CLEAR-B  OVER +
-	   REPEAT   DROP DROP ;
+        (  non prime starting with START)
+           BEGIN  DUP LIM @ U<  WHILE
+                  DUP CLEAR-B  OVER +
+           REPEAT   DROP DROP ;
 
 
 
@@ -4514,8 +4514,8 @@ R> R> R> Z ! Y ! X !
  : BATCH1 ( First batch of 500 numbers)
       500 1 ( Only odd numbers)
      DO I TEST-B
-	IF I DUP + 1 + DUP .P ( get prime number)
-	   I FLIP THEN ( Mark multiple as non-prime)
+        IF I DUP + 1 + DUP .P ( get prime number)
+           I FLIP THEN ( Mark multiple as non-prime)
      LOOP ;
  : BATCH ( OFFSET --  every  following batch )
       500 0
@@ -4538,24 +4538,24 @@ R> R> R> Z ! Y ! X !
    DISK-BUFFER-W POINTER-W ! ;
  : .CLOSEW
       DISK-BUFFER-W SET-DMA FCB2 15 BDOS . ." LAST RECORD" CR
-	    FCB2 10 BDOS . ." CLOSE STATUS" CR ;
+            FCB2 10 BDOS . ." CLOSE STATUS" CR ;
  : MOVE-DOWN   -80 POINTER-W +!
-	       DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
+               DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
 
  ( DISC IO SCREEN 17 WRITE    >2<   85/12/08 AH )3<)
  : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
-	   R> POINTER-W +!
-	   POINTER-W @ DISK-BUFFER-W -
-	   80 >  IF   -->
-	      DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
-	      MOVE-DOWN
-	  THEN ;
+           R> POINTER-W +!
+           POINTER-W @ DISK-BUFFER-W -
+           80 >  IF   -->
+              DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
+              MOVE-DOWN
+          THEN ;
 
  : .WRITE  ( 2/0 WRITE SCREEN-1 .. SCREEN-2 TO DISK)
       1+ B/SCR * SWAP B/SCR * ( GET START BUFFER #'S)
-	DO I BLOCK DUP
-	40 -TRAILING TO-DISK  CRLF 2 TO-DISK
-	40 + 40 -TRAILING TO-DISK CRLF 2 TO-DISK
+        DO I BLOCK DUP
+        40 -TRAILING TO-DISK  CRLF 2 TO-DISK
+        40 + 40 -TRAILING TO-DISK CRLF 2 TO-DISK
       LOOP CTRLZ 1 TO-DISK
  ;   HEX>
  ( DISC IO SCREEN 18 READ     >1<   85/12/08 AH )
@@ -4577,7 +4577,7 @@ R> R> R> Z ! Y ! X !
  ( DISC IO SCREEN 19 READ     >2<   85/12/08 AH )
  : ?EMPTY ( POINTER -- CORRECTED PNR, READ SECTOR IF AT END)
      DUP END-BUF = IF DISK-BUFFER-R SET-DMA  FCB2 14 BDOS .
-		    DROP DISK-BUFFER-R THEN  ;
+                    DROP DISK-BUFFER-R THEN  ;
  : GET-CHAR
     POINTER-R @
       ?EMPTY                   ( GET NEW BUFFER IF NEEDED)
@@ -4595,15 +4595,15 @@ R> R> R> Z ! Y ! X !
       DUP 40 20 FILL ( preset spaces )
       41 OVER + SWAP ( max $41 char to a line, CR!)
       DO  GET-CHAR
-	  DUP "CR" = IF DROP 20 LEAVE THEN
-	  DUP ^Z   = IF DROP 20 LEAVE THEN
-	  I C! ( may leave spurious 81th space)
+          DUP "CR" = IF DROP 20 LEAVE THEN
+          DUP ^Z   = IF DROP 20 LEAVE THEN
+          I C! ( may leave spurious 81th space)
       LOOP  ;
  : .READ ( 2/0 READ SCREEN-2 TO SCREEN -1)
       1+ B/SCR * SWAP B/SCR * ( get start buffer #'s)
       DO  I BLOCK DUP GET-LINE
-	  DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
-	  I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
+          DUP 40 + GET-LINE  81 + 0 SWAP C! UPDATE
+          I #BUFF MOD 0= IF ( full load of buffers) FLUSH THEN
       LOOP
 ; HEX>
  ( DISC IO SCREEN 21  LOAD    >1<   85/12/08 AH )
@@ -4616,9 +4616,8 @@ R> R> R> Z ! Y ! X !
      >R IN !   >R TIB ! ( RESTORE)  ;
 
  : .LOAD ( LOAD THE CPM FILE SPECIFIED IN FCB2 )
-	 BEGIN   LBUF DUP GET-LINE I-F-A
-	 EOF @ UNTIL ;
+         BEGIN   LBUF DUP GET-LINE I-F-A
+         EOF @ UNTIL ;
 
 
     HEX>
-
