@@ -24,6 +24,7 @@ ASSEMBLER DEFINITIONS  HEX
 \     0000,0100 F-P Opcode 14              0000,0200 F-P Opcode 16 / 15
 \     0000,0400 az| must not be used       0000,0800 az| is actually used
 \     0000,1000 bz| must not be used       0000,2000 bz| is actually used
+\     0000,4000 no #/R field               0000,8000 #/R possible
 \
 \     0001,0000 AMASK 0 is clear           0002,0000 Instruction requires AMASK 0
 \     0004,0000 AMASK 1 is clear           0008,0000 Instruction requires AMASK 1
@@ -50,23 +51,23 @@ ASSEMBLER DEFINITIONS  HEX
 ( ***************************** 4.7 FP Modifiers ********************** )
 
 (                                   TRP bits                            )
-0000 0 E000 0000 xFI /I
-0080 0 E000 2000 xFI /U
-0040 0 E000 2000 xFI /V
-0080 0 E000 4000 xFI --
-0080 0 E000 6000 xFI --
-0020 0 E000 8000 xFI /S
-0080 0 E000 A000 xFI /SU
-0040 0 E000 A000 xFI /SV
-0090 0 E000 C000 xFI --
-0090 0 E000 E000 xFI /SUI
-0050 0 E000 E000 xFI /SVI
+4000 0 E000 0000 xFI /I
+4080 0 E000 2000 xFI /U
+4040 0 E000 2000 xFI /V
+4080 0 E000 4000 xFI --
+4080 0 E000 6000 xFI --
+4020 0 E000 8000 xFI /S
+4080 0 E000 A000 xFI /SU
+4040 0 E000 A000 xFI /SV
+4090 0 E000 C000 xFI --
+4090 0 E000 E000 xFI /SUI
+4050 0 E000 E000 xFI /SVI
 
 (                                   RND bits                            )
-0000 0 1800 0000 xFI /C
-0010 0 1800 0800 xFI /M
-0000 0 1800 1000 xFI /N
-0010 0 1800 1800 xFI /D
+4000 0 1800 0000 xFI /C
+4010 0 1800 0800 xFI /M
+4000 0 1800 1000 xFI /N
+4010 0 1800 1800 xFI /D
 
 ( ***************************** register fixups *********************** )
 \ Note all registers are set to uninteresting by default.
@@ -96,9 +97,9 @@ ASSEMBLER DEFINITIONS  HEX
 
 ( ***************************** 8 bit data field ********************** )
 
-8 0 001F,E000 0D DFI b#|    ( 8 bit data field for b-operand)
-4  0  0000,F000 0 xFI R|
-8  0  0000,1000 1000 xFI #|
+8008 0 001F,E000 0D DFI b#|    ( 8 bit data field for b-operand)
+8004 0 0000,F000 0 xFI R|
+8008 0 0000,1000 1000 xFI #|
 
 ( ***************************** 4.4 ARITHMETIC ************************ )
 
@@ -117,7 +118,7 @@ ASSEMBLER DEFINITIONS  HEX
 ( Have ``bz|'' and ``R|'' fixed in the instruction. )
 20,0000 0 F3I-MASK  'bz| >BI @ XOR   'R| >BI @ XOR  T!
     BI: 0.01 BI: 1C.30 'bz| >DATA @ OR   'R| >DATA @ OR  4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
-( Resolve conflict with ``FTOIT,'' )
+( Resolve conflict with ``FTOIT,'' by disallowing ``az|'' )
 ' CTPOP, 0400 !BAD
 
 ( ***************************** 4.13 MULTIMEDIA *********************** )
@@ -155,8 +156,8 @@ ASSEMBLER DEFINITIONS  HEX
     BI: 0.10 BI: 12.02 8 4FAMILY, MSKBL, MSKWL, MSKLL, MSKQL, -- MSKWH, MSKLH, MSKQH,
     BI: 0.01 BI: 12.30 2 4FAMILY, ZAP, ZAPNOT,
 
-0 0 F3I-MASK BI: 1C.00 4PI SEXTB,
-0 0 F3I-MASK BI: 1C.01 4PI SEXTW,
+2,0000 0 F3I-MASK BI: 1C.00 4PI SEXTB,
+2,0000 0 F3I-MASK BI: 1C.01 4PI SEXTW,
 
 ( ***************************** 4.7 FP Formats ************************ )
 
@@ -175,50 +176,52 @@ ASSEMBLER DEFINITIONS  HEX
 (     At Dec the /N bit is set in the 3 operand instruction, i.e.       )
 (     normal rounding is built in in the assembler instruction for      )
 (     normal calculations. This are the first two groups.               )
-94 0 F3F-MASK T!
+4094 0 F3F-MASK T!
     BI: 0.001 BI: 16.000 4 4FAMILY, ADDS, SUBS, MULS, DIVS,
     BI: 0.001 BI: 16.020 4 4FAMILY, ADDT, SUBT, MULT, DIVT,
     BI: 0.001 BI: 16.024 4 4FAMILY, CMPTUN, CMPTEQ, CMPTLT, CMPTLE,
-    BI: 0.020 BI: 14.00B 2 4FAMILY, SQRTS, SQRTT,
+8,4094 0 F3F-MASK 'az| >BI @ XOR   T!
+    BI: 0.020 BI: 14.00B 'az| >DATA @ OR  2 4FAMILY, SQRTS, SQRTT,
 
-A4 0 F3F-MASK T!
+40A4 0 F3F-MASK T!
     BI: 0.001 BI: 15.000 4 4FAMILY, ADDF, SUBF, MULF, DIVF,
     BI: 0.001 BI: 15.00A 4 4FAMILY, ADDG, SUBG, MULG, DIVG,
     BI: 0.001 BI: 15.025 3 4FAMILY, CMPGEQ, CMPGLT, CMPGLE,
-    BI: 0.020 BI: 14.00A 2 4FAMILY, SQRTF, SQRTG,
+8,40A4 0 F3F-MASK 'az| >BI @ XOR   T!
+    BI: 0.020   BI: 14.00A  'az| >DATA @ OR  2 4FAMILY, SQRTF, SQRTG,
 
 
-04 0 F3F-MASK T!
-A4 0 F3F-MASK BI: 15.01E 4PI CVTDG,
-A4 0 F3F-MASK BI: 15.02C 4PI CVTGF,
-A4 0 F3F-MASK BI: 15.02D 4PI CVTGD,
-64 0 F3F-MASK BI: 15.02F 4PI CVTGQ,
-A4 0 F3F-MASK BI: 15.03E 4PI CVTQG,
-A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
+4004 0 F3F-MASK T!
+40A4 0 F3F-MASK BI: 15.01E 4PI CVTDG,
+40A4 0 F3F-MASK BI: 15.02C 4PI CVTGF,
+40A4 0 F3F-MASK BI: 15.02D 4PI CVTGD,
+4064 0 F3F-MASK BI: 15.02F 4PI CVTGQ,
+40A4 0 F3F-MASK BI: 15.03E 4PI CVTQG,
+40A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
 
-94 0 F3F-MASK BI: 16.02C 4PI CVTTS,
-54 0 F3F-MASK BI: 16.02F 4PI CVTTQ,
-94 0 F3F-MASK BI: 16.03C 4PI CVTQS,
-94 0 F3F-MASK BI: 16.03E 4PI CVTQT,
-94 0 F3F-MASK BI: 16.00C 4PI CVTST,
+4094 0 F3F-MASK BI: 16.02C 4PI CVTTS,
+4054 0 F3F-MASK BI: 16.02F 4PI CVTTQ,
+4094 0 F3F-MASK BI: 16.03C 4PI CVTQS,
+4094 0 F3F-MASK BI: 16.03E 4PI CVTQT,
+4094 0 F3F-MASK BI: 16.00C 4PI CVTST,
 
 ( Instructions without the /N bit built in.                             )
-04 0 F3F-MASK T!
+4084 0 F3F-MASK T!
     BI: 0.001 BI: 17.020 3 4FAMILY, CPYS, CPYSE, CPYSN,
 
-44 0 F3F-MASK T!
+4044 0 F3F-MASK T!
     BI: 0.020 BI: 17.010 2 4FAMILY, CVTLQ, CVTQL,
 
-84 0 F3F-MASK T!
+4084 0 F3F-MASK T!
     BI: 0.001 BI: 17.02A 6 4FAMILY, FCMOVEQ, FCMOVNE, FCMOVLT, FCMOVGE,
         FCMOVLE, FCMOVGT,
     BI: 0.001 BI: 17.024 2 4FAMILY, MT_FPCR, MF_FPCR,
 
-54 0 F3F-MASK T!
+8,4054 0 F3F-MASK T!
     BI: 0.010 BI: 14.004 3 4FAMILY, ITOFS, ITOFF, ITOFT,
 
 ( Fix ``az|'' in the instruction, disallow ``bz|''. See ``CTPOP''       )
-1054 0 F3F-MASK 'az| >BI @ XOR   T!
+8,5054 0 F3F-MASK 'az| >BI @ XOR   T!
     BI: 0.008 BI: 1C.030  'az| >DATA @ OR   2 4FAMILY, FTOIT, FTOIS,
 
 ( **************************** Misc Opr ******************************  )
@@ -230,11 +233,11 @@ A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
 ( ***************************** 4.2 LOAD/STORE ************************ )
 
 ( DEC calls this a memory instruction format.                           )
-0 0 NORMAL-MASK  T!
+8004 0 NORMAL-MASK  T!
 BI: 01.0 BI: 28.0 8 4FAMILY, LDL, LDQ, LDL_L, LDQ_L, STL, STQ, STL_C, STQ_C,
-BI: 01.0 BI: 08.0 8 4FAMILY, --   --    LDBU, --     LDWU, STW, STB, --
-02,0004 0 NORMAL-MASK  T!      \ Like above, however requires AMASK 0
 BI: 01.0 BI: 08.0 8 4FAMILY, LDA, LDAH, --    LDQ_U, --    --   --   STQ_U,
+02,8004 0 NORMAL-MASK  T!      \ Like above, however requires AMASK 0
+BI: 01.0 BI: 08.0 8 4FAMILY, --   --    LDBU, --     LDWU, STW, STB, --
 
 ( ***************************** 4.8 LOAD/STORE FP ********************* )
 
@@ -242,21 +245,19 @@ BI: 01.0 BI: 08.0 8 4FAMILY, LDA, LDAH, --    LDQ_U, --    --   --   STQ_U,
 0 0 NORMAL-MASK  T!
 BI: 01.0 BI: 20.0 8 4FAMILY, LDF, LDG, LDS, LDT, STF, STG, STS, STT,
 
-( ***************************** 21 bits displacement ****************** )
-
-20,0000 0 001F,FFFF 0 DFI D21|
-
 ( ***************************** 4.3 CONTROL *************************** )
-
-( DEC calls this a branch instruction format.                           )
-8 0 NORMAL-MASK  T!
-BI: 01.0 BI: 38.0 8 4FAMILY, BLBC, BEQ, BLT, BLE, BLBS, BNE, BGE, BGT,
-BI: 04.0 BI: 30.0 2 4FAMILY, BR, BRS,
 
 0 0 0000,3FFF 0 DFI h#|        \ 14 bits hint
 
 0 0 3FF,3FFF T!
 BI: 00.200 BI: 1A.000 4 4FAMILY, JMP, JSR, RET, JSR_COROUTINE,
+
+20,0000 0 001F,FFFF 0 DFI D21| \ 21 bits displacement
+
+( DEC calls this a branch instruction format.                           )
+8 0 NORMAL-MASK  T!
+BI: 01.0 BI: 38.0 8 4FAMILY, BLBC, BEQ, BLT, BLE, BLBS, BNE, BGE, BGT,
+BI: 04.0 BI: 30.0 2 4FAMILY, BR, BRS,
 
 ( ***************************** 4.9 CONTROL FP************************* )
 
