@@ -1136,8 +1136,8 @@ prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
         MOV     BX,_CELL_PTR[SI]  ; {Get inline relative target.}
-        LEA     SI,[SI+_CELLS(1)]
         LEA     BX,[SI+BX] ;{Make absolute}
+        LEA     SI,[SI+_CELLS(1)]
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     AX      ;{ LIMIT VALUE}
         CMP     DX,AX
@@ -1154,11 +1154,22 @@ QXDO1:  MOV     SI,BX
 worddoc( {CONTROL},{I},{i},{--- n},{C,L0},
 {Used within a do-loop to copy the loop index to the stack.},
 {{DO},{LOOP},{+LOOP}},
-{ { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
-  { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
+{ { : GS1 DO I . LOOP 0 . ; 2 -2 GS1},{-2 -1 0 1 0},
+  { : GS2 DO I . LOOP 0 . ; 4 0 GS2},{0 1 2 3 0} },
 enddoc)
 CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
+        _PUSH          ;{ TO PARAMETER STACK}
+;
+worddoc( {CONTROL},{J}, ,{--- n},{C,L0},
+{Used within a nested do-loop to copy the loop index of the
+outer do-loop to the stack.}, 
+{{DO},{LOOP},{+LOOP}},
+{ { : GS1 DO 1 0 DO J . LOOP LOOP ; 2 -2 GS1},{-2 -1 0 1},
+  { : GS2 DO 1 0 DO J . LOOP LOOP ; 4 0 GS2},{0 1 2 3} },
+enddoc)
+CODE_HEADER({J},{JDO})
+        MOV     AX,[BP+_CELLS(3)] ;{ GET INDEX VALUE}
         _PUSH          ;{ TO PARAMETER STACK}
 ;
 worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{C,L0},
@@ -6306,7 +6317,10 @@ Leaves the dictionary entry address of dictionary word forthvar({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
-forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
+forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.
+This word is intended for interpret mode,  but in ciforth it works as
+well in compilation mode.
+It is recommended this word is not postponed.},
 {{CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
 enddoc)
@@ -6320,6 +6334,26 @@ HEADER({'},{TICK},{DOCOL}, , B_IMMED)
         DC      LITER
         DC      SEMIS
 ;
+_LOAD_({
+worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
+{Used in the form: .
+forthcode({[']}) forthcode({nnnn})
+Leaves the dictionary entry address of dictionary word forthvar({nnnn}).
+This also serves as an execution token.
+As a compiler directive, executes in a colon-definition to
+compile the address as a literal. If the word is not found
+after a search of forthcode({CONTEXT}) and forthcode({CURRENT}),
+an appropriate error message is given. 
+This word is intended for compilation mode,  
+but in ciforth it works as well in interpret mode.
+It is recommended this word is not postponed.}, 
+{{'}, {CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
+{{ : APE 1 2 ; : GS1 ['] APE ; GS1 EXECUTE  GS1 ID. . .},{APE 2 1}},
+enddoc)
+dnl An alias header. CFA FFA PFA are the same.
+HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
+;
+});_END_({_LOAD_})
 worddoc( {DICTIONARY},{FORGET-VOC},{forget_voc},{deaw deav -- deaw },{},
 {Forget the words forthvar({deaw}) and all later words from the
 vocabulary whose dea is given by forthvar({dea}) . Leave
@@ -6535,8 +6569,8 @@ addr n --- (compile)},{ISO,I,C2,L0},
 It behaves like DO , with the exception that if n1 and n2 are equal
 the loop body is not executed.},
 {{DO},{I},{LOOP},{+LOOP},{LEAVE}},
-{ { : GS1 ?DO 41 EMIT LOOP ; 3 0 GS1},{AAA},
-  {: GS3 0 1 2 1 ?DO I . LOOP . ; GS3 },{0} },
+{ { : GS1 ?DO 41 EMIT LOOP 0 . ; 3 0 GS1},{AAA0 },
+  {: GS3 0 1 1 ?DO I . LOOP . ; GS3 },{0} },
 enddoc)
 HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
          DC      LIT, XQDO, COMMA, PFORWARD, PBACK
