@@ -23,6 +23,7 @@
 #* .bin : a binary image without header (useful i.a. for msdos .com)
 #* .gas : input file for `gas' assembler
 #* .rawdoc : unsorted glossary items from the generic source.
+#* .rawtest : unsorted and unexpanded tests.
 #+ .m4 : m4 macro's possibly including other macro's
 #   except constant.m4
 # .cfg : m4 macro's generating files ( fig86.%.x + %.cfg -> fig86.%.y)
@@ -145,16 +146,22 @@ TEMPFILE=/tmp/figforthscratch
 
 # msdos.cfg and alone.cfg are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
-fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr
+fig86.%.rawdoc fig86.%.rawtest : fig86.%.asm ;
+
+fig86.%.asm : %.cfg nasm.m4 fig86.gnr
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
+	sed -e '/Split here for test/,$$d' >$(@:%.asm=%.rawdoc)
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
-fig86.%.msm fig86.%.rawdoc : %.cfg masm.m4 fig86.gnr ; \
-	m4 $+ >$(TEMPFILE) ; \
-	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@ ; \
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
+fig86.%.msm fig86.%.rawdoc fig86.%.rawtest : %.cfg masm.m4 fig86.gnr ; \
+	m4 $+ >$(TEMPFILE)
+	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
+	sed -e '/Split here for test/,$$d' >$(@:%.asm=%.rawdoc)
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
 fig86.%pres  : %.cfg gas.m4  fig86.gnr ; m4 $+ >$@
@@ -180,7 +187,7 @@ all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(BINTARGETS:%=fig86.%.bi
 clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
 
 #msdos32.zip soesn't work yet.
-release : figdoc.zip zip msdos.zip lina.zip as.zip 
+release : figdoc.zip zip msdos.zip lina.zip as.zip
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
