@@ -15,7 +15,10 @@ VOCABULARY ASSEMBLER IMMEDIATE
 : @+ >R R CELL+ R> @ ;
 : !TALLY -1 TALLY ! -1 TALLY CELL+ ! ;
 ( Return: instruction IS complete, or not started)
-: AT-REST? TALLY @ -1 =   TALLY CELL+ @ -1 = AND ;
+( The first 8 bits of the TALLY need not be consumed. )
+HEX
+: AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
+DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
 ( Based on DATAFIELD of a postit, tally it)
 : TALLY:, CELL+ @+ TALLY CELL+ ! @ TALLY ! ;
@@ -47,15 +50,15 @@ HEX
 DOES> [ HERE TEMP ! ] DO-POST ;
 ( Return for DEA : it IS of type 1PI                                  )
 IS-A IS-1PI
-: 2PI <BUILDS  , INVERT , INVERT , 2 , CHECK31 DOES>
-DOES> [ HERE TEMP ! ] !POST DUP TALLY:, , 2 CORRECT ;
+: 2PI <BUILDS  , INVERT , INVERT , 2 , CHECK31 
+DOES> [ HERE TEMP ! ] DO-POST ;
 IS-A IS-2PI
-: 3PI <BUILDS  , INVERT , INVERT , 3 , CHECK31 DOES>
-DOES> [ HERE TEMP ! ] !POST DUP TALLY:, , 3 CORRECT ;
+: 3PI <BUILDS  , INVERT , INVERT , 3 , CHECK31 
+DOES> [ HERE TEMP ! ] DO-POST ;
 IS-A IS-3PI
 : IS-PI  >R R IS-1PI R IS-2PI R IS-3PI OR OR R> DROP ;
 DECIMAL
-: CHECK28 2DUP AND 28 ?ERROR ;
+: CHECK28 2DUP AND -256 AND 28 ?ERROR ;
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @  CHECK28 OR R> ! ;
 ( And DATA into ADDRESS. If bits were already down its wrong.)
@@ -68,7 +71,7 @@ DECIMAL
 ( postit and a fixup that go tohether have the same mask                )
 ( Accept a MASK with a bit up for each commaer, a MASK indicating
 ( which bits are fixupped, and the FIXUP )
-< ( One size fits all. )
+( One size fits all. )
 : xFI <BUILDS , , INVERT , 1 , CHECK31
 DOES> [ HERE TEMP ! ] DUP TALLY:| @ ISS @ OR! ;
 IS-A IS-xFI
@@ -98,12 +101,6 @@ IS-A IS-COMMA
 : xFAMILY| 0 DO DUP PREPARE xFI OVER + LOOP DROP DROP ;
 
 HEX 
-' ASSEMBLER CFA ' ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
-: C; CURRENT @ CONTEXT ! ?EXEC CHECK26 SMUDGE ; IMMEDIATE
-: LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
-    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
-
 (   Given a DEA, return the next DEA)
 : >NEXT% PFA LFA @ ;
 ( The CONTENT of a linkfield is not a dea, leave: it IS the endmarker   )
@@ -158,7 +155,7 @@ HEX
 ;
 : DIS-COMMA
    DUP IS-COMMA IF
-   DUP >BODY @ TALLY @ INVERT CONTAINED-IN IF
+   DUP >BODY @ TALLY @ INVERT FF OR CONTAINED-IN IF
        DUP >BODY @ TALLY OR!
        DUP +DISS
    THEN
@@ -299,4 +296,10 @@ HERE POINTER !
 (   : M| ' M'|  REJECT M| ;  To forbid M| M'| in combination      )
 
 ( ************************* )
+' ASSEMBLER CFA ' ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
+: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
+: C; CURRENT @ CONTEXT ! ?EXEC CHECK26 SMUDGE ; IMMEDIATE
+: LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
+    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
+
 
