@@ -13,7 +13,8 @@ define({_dbquoted},"{{$1}}")dnl
 define({_sgquoted},'{{$1}}')dnl
 define({_quoted},{ifelse( -1, index({$1},"),{_dbquoted},{_sgquoted})}({{$1}}))
 define({_STRING},{
-        DB      len({$1}),_quoted}({{$1}}))dnl
+        DB      len({$1})
+        DSS      _quoted}({{$1}}))dnl
 dnl             
 dnl _LINKOLD is a m4 variable that generates numbers in sequence.
 dnl We lay down a nice square around the definition as a tribute to Thomas Newman
@@ -31,7 +32,10 @@ define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  ********_star(len({$1})) 
 ;  
 _$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
-         DB       ifelse(1,_x, , "{_z}"{,})"_y"+80H
+ifelse(1,_x, , 
+{         DSS      }"{_z}"
+)dnl
+         DB     "_y"+80H
          DC    _LINKOLD
 $2:      DC     $3
          undefine({_x})dnl
@@ -51,7 +55,10 @@ define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  ********_star(len({$1})) 
 ;  
 _$2:    DB   80H+len({$1})ifelse(1,$4,+40H,)
-        DB       ifelse(1,_x, , _squote{_z}_squote{,})_squote{}_y{}_squote+80H
+ifelse(1,_x, , 
+{         DSS      }_squote{_z}_squote
+)dnl
+         DB     _squote{}_y{}_squote+80H
         DC    _LINKOLD
 $2:     DC     $3
         undefine({_x})dnl

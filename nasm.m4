@@ -9,7 +9,7 @@ dnl Directives ignored by NASM.
 define({ASSUME},;)dnl Turn ASSUME into comment.
 define({CSEG},;)dnl Turn CSEG into comment.
 define({END},;)dnl Turn END into comment.
-define({_OFFSET})dnl Ignore this design error altogether. 
+define({_OFFSET})dnl Ignore this design error altogether.
 define({PAGE},;)dnl Turn PAGE into comment.
 define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
@@ -32,11 +32,11 @@ dnl More complicated tricks to get rid of MASM.
 define({_ENDP},;)dnl Each ENDP is started with _ENDP in generic listing.
 dnl
 dnl Handling large blocks of comment
-define({_COMMENT}, %if 0 
+define({_COMMENT}, %if 0
 )dnl
 define({_ENDCOMMENT}, %endif
 )dnl
 define({_BYTE_PTR},{BYTE $1})dnl
 define({SET_32_BIT_MODE},    BITS   32 )dnl
 define({_ALIGN},{ALIGN    $1})dnl
-
+define({DSS},{DB})dnl

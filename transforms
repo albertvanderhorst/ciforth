@@ -5,6 +5,7 @@ s/\([0-9][0-9A-F]*\)H/0x\1/g
 s/\<EQU\>/=/
 s/\<DW\>/ .WORD /
 s/\<DB\>/ .BYTE /
+s/\<DD\>/ .LONG /
 # Reverse the order of the operands of an instruction
 # Not of .HEADER() !
 s/^[ 	]*\([^\.]\<[A-Z][A-Z]*\>\)\([^,]*\),\(.*\)/\1 \3,\2/

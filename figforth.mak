@@ -21,6 +21,7 @@ width32.m4       \
 # That's all folks!
 
 # Different assemblers should generate equivalent Forth's.
+ASSEMBLERS= masm nasm gas          
 # The kinds of Forth assembler sources that can be made using any assembler
 TARGETS= msdos alone linux lina
 # The kinds of Forth's binaries that can be made using NASM (not used)
@@ -37,6 +38,7 @@ RELEASECONTENT = \
 fig86.gnr        \
 BLOCKS.BLK       \
 $(INGREDIENTS)   \
+$(ASSEMBLERS:%=%.m4) \
 $(TARGETS:%=%.cfg) \
 $(CSRC:%=%.c)    \
 Makefile         \
@@ -46,8 +48,6 @@ fig86.alone.asm  \
 fig86.msdos.msm  \
 fig86.linux.asm  \
 fig86.lina.asm  \
-masm.m4          \
-nasm.m4          \
 genboot.bat      \
 link.script    \
 # That's all folks!
@@ -60,11 +60,16 @@ VERSION=0A
 %.bin:%.asm
 	nasm -fbin $< -o $@ -l $*.lst 
 
-# msdos.cfg and alone.m4 are present (at least via RCS)
+# msdos.cfg and alone.cfg are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
 fig86.%.asm : %.cfg nasm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%.msm : %.cfg masm.m4 fig86.gnr ; m4 $+ >$@
+fig86.%.ps  : %.cfg gas.m4  fig86.gnr ; m4 $+ >$@
 fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
+
+# gas needs extra transformations that m4 cannot handle.
+# In particular the order of operands.
+%.s : %.ps ; sed -f transforms <$+ >$@
 
 .PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip
 # Default target for convenience
