@@ -43,6 +43,7 @@ release.txt      \
 figdoc.zip    \
 figdocadd.txt \
 fig86gnr.txt       \
+testreport.txt     \
 cfg.zip         \
 # That's all folks!
 
