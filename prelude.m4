@@ -78,6 +78,10 @@ dnl Use LINUX for I/O. Possibility of redirection.
 dnl File based.
 define( {_LINUX_C_1_}, _no({$0}) )dnl
 dnl
+dnl Use LINUX for I/O. Possibility of redirection. 
+dnl File based.  No c involved.
+define( {_LINUX_N_1_}, _no({$0}) )dnl
+dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl
