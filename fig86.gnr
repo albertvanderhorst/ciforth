@@ -153,22 +153,23 @@ SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 
-;{ Segments}
-REALSEGMENT     EQU     BOOTADDRESS/10H ;{ All real code executes here}
+;{ Segments   @ Valid in real mode % Valid in protected mode }
+SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
+REALSEGMENT     EQU     BOOTADDRESS/10H ;{ @ All real code executes here}
 ;____1_____ _SWITCH_1_({
-CS_COMMON       EQU     REALSEGMENT     ;{ Protected overlapping segment with same}
-DS_16           EQU     1800H           ;{ Real mode may dabble here}
-DS_32           EQU     1800H           ;{ Real mode may dabble here}
-CODE_SEGMENT EQU 07C0H ;{ The same for real and prot)         }
-CS_16 EQU 10H  ;{ 16 BITS CODE SEGMENT DID                 }
-CS_32 EQU 10H  ;{ 32 BITS CODE SEGMENT DID                 }
+CS_COMMON       EQU     REALSEGMENT     ;{ @% Protected overlapping segment with same}
+DS_SANDBOX      EQU     REALSEGMENT + SEGSIZE ;{ @ Real mode may dabble here}
+DS_PROT         EQU     REALSEGMENT + SEGSIZE ;{ % The protected mode data segment}
+GDT_SEGMENT     EQU     DS_SANDBOX + SEGSIZE       ;{ @ General descriptor table.}
+CODE_SEGMENT EQU 07C0H ;{ @% The same for real and prot)         }
+CS_PROT EQU 10H  ;{ % The protected mode code segment }
 
 IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
 IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
 
+GDT EQU GDT_SEGMENT * 10H ; {Corresponding address.}
 GDTLEN EQU 7FFFH
-GDT EQU 28000H
-GDT_SEGMENT EQU GDT/10H
+BOOTOFFSET EQU 0
 });_END___1__({ _SWITCH_1_})
 
 ;____1_____ _LINUX_N_1_({
@@ -448,19 +449,21 @@ PROTECT:
         MOV     DI,0
         MOV     AX,GDTLEN
         STOSW
-;{ PREPARE-CS : THIS MUST LOOK THE SAME IN REAL AND 16 BITS                                                    }
-;{               PROTECTED MODE}
+;{ The switch segment. If you are using this segment, you can }
+;{ switch between real and (16-bit) protected mode.}
+;{ PREPARE-CS : CS_COMMON:X (real) is the same address as  }
+;{ CS_COMMON*10H +X (@@@) in protected mode }
         MOV     DI,CS_COMMON
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,BOOTADDRESS
+        MOV     AX,CS_COMMON*10H   ; { @@@ }
         STOSW
         MOV     AX,9A00H
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
 ;{ PREPARE DS/SS/ES ; only SS used in real mode.                                                    }
-;{  BECAUSE IT IS USED IN REAL MODE DS_16}
+;{  The real mode view of DS_PROT is DS_SANDBOX}
 ;{  MUST BE EMPTY.            }
         MOV     DI,DS_PROT
         MOV     AX,0FFFFH
@@ -3871,9 +3874,8 @@ INITDP  EQU     $       ;{SHOW END OF DICTIONARY}
 ;____1_____ _HOSTED_LINUX_1_({
 ;       This is the proper way to do it.
 ;       No memory addresses should be arrived at through equates.
-;       However there is no way to teach the linker to keep the
-;       two sections together. So we are going to write all those
-;       zero bits in the output file.
+;       However now we must teach the linker to keep the
+;       two sections together.
 
 FORTHSIZE       EQU     $-figforth
          section dictionary nobits write exec alloc
