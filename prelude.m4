@@ -157,6 +157,11 @@ define({M4_INITDP},{110000H})
 dnl ############## USER CHOICES END #########################################
 
 dnl ############## STILL ON WISH LIST ################## IGNORE ##############
+dnl
+dnl The fields in the dictionary headers are aligned to a cell boundary.
+dnl STILL ON WISH LIST
+define( {_ALIGNED_}, _no)dnl
+dnl
 dnl Keep old FIG features like WIDTH ENCLOSE
 dnl STILL ON WISH LIST
 define( {_OLDFIG_}, _no)dnl
