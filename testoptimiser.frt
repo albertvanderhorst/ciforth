@@ -1,43 +1,39 @@
-: LINE  20 0 DO &# EMIT LOOP CR ;
-: SHOW-IT LINE
-"BEFORE" TYPE DUP CRACKED DUP OPTIMISE-O "AFTER" TYPE CRACKED ;
 
+ONLY FORTH
+: SHOW-IT DUP OPTIMISE-O   DUP CRACKED HIDDEN ;
+: A-MARKER ;
 
 : test 1 SWAP 3 2 SWAP ;
+
+
 'test SHOW-IT
 
 : test1 1 2 + 3 4 * OR ;
 'test1 SHOW-IT
-: test2 1 2 SWAP ;
+
+: test2 2 1 ;
 'test2 SHOW-IT
+
 : test3 1 2 'SWAP EXECUTE ;
 'test3 SHOW-IT
 
-LINE
-" \ BEFORE :
 : A0 1 ;
 : A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
 : A4 A3 A3 + ;   : A5 A4 A4 + ;    : A6 A5 A5 + ;
 : A7 A6 A6 + ;   : A8 A7 A7 + ;    : A9 A8 A8 + ;
 : B0 A9 A9 + ;
-" 2DUP TYPE EVALUATE
+'B0 SHOW-IT
+HIDE A0 HIDE A1 HIDE A2 HIDE A3
+HIDE A4 HIDE A5 HIDE A6 HIDE A7
+HIDE A8 HIDE A9
 
-'B0 OPTIMISE-O
-"AFTER: 'B0 OPTIMISE-O" TYPE
-CRACK A0   CRACK A1  CRACK A5 CRACK B0
-
-LINE
-" \ BEFORE :
 'SWAP CONSTANT (SWAP)
 : ((SWAP)) (SWAP) ;
 : WRONG 'EXECUTE ((SWAP)) ;
 : RIGHT 'SWAP 'EXECUTE ;
 : DOIT 1 2 WRONG RIGHT EXECUTE EXECUTE ;
-" 2DUP TYPE EVALUATE
 
-'DOIT OPTIMISE-O
-"AFTER: 'DOIT OPTIMISE-O"  TYPE
-CRACK DOIT
+'DOIT SHOW-IT
 
 : test4 1 2 3 4 BASE ! ;
 'test4 SHOW-IT
@@ -45,55 +41,158 @@ CRACK DOIT
 : test5 SWAP 1 2 3 5 BASE ! SWAP ;
 'test5 SHOW-IT
 
-\ This example must not be handled by folding, but by annihilating.
+\ Test of annihilating.
 : test6 BASE @ IF SWAP THEN 2DROP ;
 'test6 SHOW-IT
 
-\ This example must not be handled by a match.
+\ Test of match. Cannot be optimised.
 : test7  IF 2 + THEN 3 + ;
 'test7 SHOW-IT
 
+\ Reorder.
 : test8 SWAP IF 3 THEN 5 7 9 BASE ! SWAP ;
 'test8 SHOW-IT
 
+\ Forward branch around expansion.
 : (test1) + AND OR LSHIFT ;
 : test9 IF (test1) THEN ;
 'test9 SHOW-IT
 
-: (test1) + AND OR LSHIFT ;
+\ Forward branch around expansion.
+: (testA) + AND OR LSHIFT ;
 : testA IF (test1) (test1) THEN ;
 'testA SHOW-IT
 
-: (test1) + AND OR LSHIFT ;
+\ Backward branch around expansion.
+: (testB) + AND OR LSHIFT ;
 : testB BEGIN (test1) AGAIN ;
 'testB SHOW-IT
 
-: (test1) + AND OR LSHIFT ;
+\ Backward branch around expansion.
+: (testC) + AND OR LSHIFT ;
 : testC BEGIN (test1) (test1) AGAIN ;
 'testC SHOW-IT
 
+\ Annihilator involving a fetch.
 : testD IF SWAP ELSE DROP BASE @ THEN 2DROP ;
 'testD SHOW-IT
 
+\ Annihilator
 : testE + DROP ;
 'testE SHOW-IT
 
+\ Annihilator
 : testF IF 1 ELSE 2 THEN DROP ;
 'testF SHOW-IT
 
+\ Backward branch around annihilator.
 : testG BEGIN IF 1 ELSE 2 THEN DROP AGAIN ;
 'testG SHOW-IT
 
+\ Backward branch around multiple annihilators.
 : testH BEGIN
 IF 1 ELSE 2 THEN DROP
 IF 5 ELSE 6 THEN DROP
 AGAIN ;
 'testH SHOW-IT
 
+\ Expansion with EXITs present.
 : (TESTI)  IF AND EXIT THEN ;
 : testI    (TESTI) (TESTI) ;
 'testI SHOW-IT
 
+\ Expansion with EXITs present.
 : (TESTJ)  IF AND EXIT ELSE OR EXIT THEN SWAP ;
 : testJ    (TESTJ) ;
 'testJ SHOW-IT
+
+\ ---------------------------------------------------------------------------
+
+CR "SPLIT HERE" TYPE CR
+
+: test 1 SWAP 2 3 ;
+'test SHOW-IT
+
+: test1 $0F ;
+'test1 SHOW-IT
+
+: test2 2 1 ;
+'test2 SHOW-IT
+
+: test3 2 1 ;
+'test3 SHOW-IT
+
+: A0 1 ;
+: A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
+: A4 A3 A3 + ;   : A5 A4 A4 + ;    : A6 A5 A5 + ;
+: A7 A6 A6 + ;   : A8 A7 A7 + ;    : A9 A8 A8 + ;
+: B0 [ A9 A9 + ] LITERAL ;
+
+'B0 SHOW-IT
+
+: DOIT 2 1 ;
+
+'DOIT SHOW-IT
+
+: test4 4 BASE ! 1 2 3 ;
+'test4 SHOW-IT
+
+: test5 SWAP 5 BASE ! 1 3 2 ;
+'test5 SHOW-IT
+
+\ Test of annihilating.
+: test6 BASE @ IF SWAP THEN 2DROP ;
+'test6 SHOW-IT
+
+\ Test of match. Cannot be optimised.
+: test7  IF 2 + THEN 3 + ;
+'test7 SHOW-IT
+
+\ Reorder.
+: test8 SWAP IF 3 THEN 9 BASE ! 7 5 ;
+'test8 SHOW-IT
+
+\ Expansion.
+: test9 IF + AND OR LSHIFT THEN ;
+'test9 SHOW-IT
+
+: testA IF + AND OR LSHIFT + AND OR LSHIFT THEN ;
+'testA SHOW-IT
+
+: testB BEGIN + AND OR LSHIFT AGAIN ;
+'testB SHOW-IT
+
+: testC BEGIN + AND OR LSHIFT + AND OR LSHIFT AGAIN ;
+'testC SHOW-IT
+
+: testD DROP DROP DROP ;
+'testD SHOW-IT
+
+: testE DROP DROP ;
+'testE SHOW-IT
+
+: testF DROP ;
+'testF SHOW-IT
+
+: testG BEGIN DROP AGAIN ;
+'testG SHOW-IT
+
+: testH BEGIN DROP DROP AGAIN ;
+'testH SHOW-IT
+
+: testI
+IF AND BRANCH [ (FORWARD >R ] THEN [ R> FORWARD) ]
+IF AND BRANCH [ (FORWARD >R ] THEN [ R> FORWARD) ]
+;
+
+'testI SHOW-IT
+
+: testJ
+IF AND BRANCH [ (FORWARD >R ]
+ELSE OR BRANCH [ (FORWARD >R ]
+THEN SWAP
+[ R> FORWARD) R> FORWARD) ]
+;
+
+'testJ SHOW-IT
+CR
