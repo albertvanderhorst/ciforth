@@ -626,6 +626,27 @@ most significant part (with the sign) is on top.
 All arithmetic is implicitly _BITS_ bit signed integer math, with error and
 under-flow indication unspecified.
 
+A forthdefi({nil pointer}) is an address containing zero. This
+indicates an invalid address.
+
+The Forth words are divided into forthdefi({wordset})s, that contain
+words that logically belong together. Each wordset has a separate section
+with a description.
+The following rules take precedence over any wordset a word may
+logically belong to.
+forthitemize
+forthitem
+A defining word --- one that adds to the dictionary --- is
+present in the wordset forthsamp({DEFINING}).
+forthitem
+A denotation word -- one that has the denotation bit set -- is
+present in the wordset forthsamp({DENOTATIONS}).
+forthitem
+An environmental query word --- one that is understood by
+forthcode({?ENVIRONMENT}) --- is present in the wordset
+forthsamp({ENVIRONMENTS}).
+forthenditemize
+
 include(menu.texinfo)
 undefine({W})
 include(wordset.mi)
