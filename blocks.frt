@@ -134,7 +134,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 ( STRINGS      )  35 LOAD 36 LOAD 37 LOAD
  ( EDITOR ) 109 LOAD
  ( CP/M READ WRITE LOAD    17 LOAD 21 LOAD 24 LOAD 21: BUGS)
- ( KRAKER )        10 LOAD
+ ( KRAKER )        10 16 THRU
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
  ( ASSEMBLER 80x86 SAVE-BLOCKS) EXIT   120 LOAD   97 98 THRU
@@ -173,7 +173,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
        SELTOP @ SELTAB DO
            DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
- : <> - 0= 0= ;   -->
+ : <> - 0= 0= ;   
  CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
 :  NONAME >R
     R@ >LFA @ OVER = IF R> RESULT ! ELSE R> DROP THEN ;
@@ -189,7 +189,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-                  -->
+                  
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
    HERE IVAR LIM  : H.. BASE @ >R HEX . R> BASE ! ;
  : (KRAAK) ( CFA--. Decompile a word from its CFA)
@@ -205,7 +205,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
       C>D >FFA C@ 4 AND ;
- : ?Q KEY? IF QUIT THEN ; ( NOODREM) -->
+ : ?Q KEY? IF QUIT THEN ; ( NOODREM) 
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
  : BY ( CFA--. the CFA word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
@@ -221,7 +221,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
      DUP @ SEL@ ( Something special ?)
      IF EXECUTE ( The special) ELSE
         DUP ?IM IF ." [COMPILE] " THEN ID.. CELL+
-     THEN ; -->
+     THEN ; 
  CR ." A0MAR30  FORTH KRAKER >4<  ALBERT VAN DER HORST "
  CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
  ( Decompilation of special high level words)
@@ -237,7 +237,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
      CFOF 0BRANCH BY -0br
  : -br  CR ." BRANCH  [ " -lit ." , ] " ;
      CFOF BRANCH BY -br
-  -->
+  
  CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
@@ -248,12 +248,12 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : -qdo CR ." ?DO " CELL+ CELL+ ;   CFOF (?DO) BY -qdo
   : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
   : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
-  ( : -cm ." COMPILE " -lit ;  CFOF COMPILE BY -cm    )
-    : -cm ID.+ ID.+ ;                CFOF COMPILE BY -cm
+  
+  (  : -cm ID.+ ID.+ ;                CFOF COMPILE BY -cm )
   : -pc CR ." ;CODE plus code (suppressed)"
   ( DIRTY TRICK FOLLOWING : Destroy decompile pointer !)
     DROP ' TASK >PFA ;               CFOF (;CODE) BY -pc
-      -->
+      
  CR ." KRAAKER"
  : -dd C>D ." CREATE DOES> word " ID.. CR ;
         CFOF FORTH @ BY -dd
@@ -278,7 +278,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : SET-DMA  1A BDOS DROP ;
  : ?PRES   FCB2 0F BDOS 0FF - IF ." ALREADY PRESENT" QUIT THEN
     FCB2 10 BDOS DROP ;
-   -->
+   18 19 THRU
 
 
 
@@ -301,7 +301,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
            R> POINTER-W +!
            POINTER-W @ DISK-BUFFER-W -
-           80 >  IF   -->
+           80 >  IF   
   ( SCREEN #19 SCHRIJVEN  >3<)
               DISK-BUFFER-W SET-DMA FCB2 15 BDOS .
               MOVE-DOWN
@@ -331,7 +331,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : .CLOSER   FCB2 10 BDOS . ." CLOSE STATUS" CR ;
 
 
-               -->
+               21 22 THRU
 
 
  ( SCR # 21,  TWEEDE SCREEN VAN CP/M READ)
@@ -347,7 +347,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
       IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
     POINTER-R !  ;
 
- -->
+
 
 
  CR ." READ CP/M files >3< AH   84/06/13"
@@ -445,7 +445,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  0 IVAR THOUSANDS ( #  thousand to be sieved)
  0 IVAR MILS      ( Contains current thousand)
  0 IVAR MANTISSA  ( The current thousands is to be printed)
- -->
+ 28 31 THRU
  ." ERATOSTHENES >2< Pretty printing - A. van der Horst"  CR
  : FFEED  PAUSE @ IF CR ." KEY FOR NEXT SCREEN" KEY DROP THEN
      12 EMIT CR ." ERATOSTHENES SIEVE -- PRIMES LESS THAN"
@@ -460,7 +460,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
       DUP C# +! C# @ CH/L @ >
       IF NEWLINE C# +! ELSE DROP THEN ;
  : .P   4 ?L SPACE 0 <# # # # #> TYPE ;
- : INIT-P  FFEED NEWLINE  ;   -->
+ : INIT-P  FFEED NEWLINE  ;   
 
  ." ERATOSTHENES >3< Bit manipulation - A. van der Horst " CR
    HEX
@@ -477,7 +477,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
            8/MOD FLAGS + SWAP  ( Address in flags table)
            C-MASK + C@         ( Get mask)
            OVER C@ AND SWAP C! ( Clear the bit)  ;
- -->
+ 
  ." ERATOSTHENES >4< Bit manipulation - A. van der Horst " CR
  : SET-B ( BIT# --  sets the specified bit)
            8/MOD FLAGS + SWAP  ( Address in flags table)
@@ -493,7 +493,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
            REPEAT   DROP DROP ;
  : CHECK SIZE 16 UM* 1000 UM/MOD  THOUSANDS @ U< IF
        ." INCREASE SIZE " ABORT ELSE DROP DROP THEN ;
- -->
+ 
  ." ERATOSTHENES >5< Main program - A. van der Horst " CR
  : BATCH1 ( First batch of 500 numbers)
       500 1 ( Only odd numbers)
@@ -541,7 +541,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : PTYPE  ( ADDRESS,LENGTH -- . PRINT LENGTH CHAR AT ADDRESS)
           ?DUP IF
           OVER + SWAP DO I C@ PEMIT LOOP THEN ;
-  : P."  "" WORD COUNT PTYPE ;       -->
+  : P."  "" WORD COUNT PTYPE ;       34 LOAD
  ( SUPER-QUAD)  ?MS
    0 IVAR L
  : CONDENSED 34 MODE ;
@@ -620,8 +620,8 @@ THEN ;
          ROT DROP 0 ROT ROT ( Replace flag with 0 )
          LEAVE
       THEN LOOP DROP DROP  ;
- : $= MATCH DROP ;  ( TC TC -- f , use only for C=C)
-
+( TC TC -- f , use only for C=C)
+ : $= ROT OVER = IF CORA ELSE 2DROP DROP 0 THEN ;  
  <HEX ( DEBUG SCR#7 )
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
@@ -813,13 +813,13 @@ POOL IVAR PP ( LIKE DP)  : pd POOL PP @ OVER - DUMP ;
 : WORD+ BEGIN DUP WORD DUP EMPTY?  WHILE DROP QUERY REPEAT
  SWAP DROP ;    : PARSE WORD+ COUNT $SAVE ;
 0 0 $SAVE CONSTANT NILL ( EMPTY STRING)
-BL PARSE ##  CONSTANT ##   ( END-SENTINEL) -->
+BL PARSE ##  CONSTANT ##   ( END-SENTINEL) 51 59 THRU
 ( A0dec21 www SET words )
 : SET+! DUP >R @ ! 0 CELL+ R> +! ;
 : SET CREATE HERE CELL+ , ## , 100 CELLS ALLOT DOES> ;
 ( This construct presents ## for a set with 0 members)
 : SET-FOR-ALL POSTPONE DUP POSTPONE @ POSTPONE SWAP
-COMPILE CELL+ POSTPONE (DO) HERE POSTPONE I POSTPONE @ ;
+POSTPONE CELL+ POSTPONE (DO) HERE POSTPONE I POSTPONE @ ;
 IMMEDIATE
 : END-S-F-A  POSTPONE 0 POSTPONE CELL+ POSTPONE
 (+LOOP) BACK ; IMMEDIATE
@@ -829,7 +829,7 @@ IMMEDIATE
 : ?IN-SET #IN-SET -1 = 0= ;
 : #IN-SET-$ -1 ROT ROT SET-FOR-ALL OVER
 $@= IF SWAP DROP I SWAP THEN END-S-F-A DROP ;
-: ?IN-SET-$ #IN-SET-$ -1 = 0= ; -->
+: ?IN-SET-$ #IN-SET-$ -1 = 0= ; 
 ( A0apr12 www META-SET's van files sets and relations )
 SET META-HTML        ( ALL SETS OF HTML FILES )
 : REGISTER-HTML META-HTML SET+! ;
@@ -845,7 +845,7 @@ IF FILES SET+! ELSE DROP THEN ;
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
 ELSE 0 THEN ;
-: du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;     -->
+: du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;     
 ( A0apr12 www COLLECT NAMES FOR A SET )
 : COLLECT-REST ( OF LINE, MAY CONTAIN SPACES ## MEANS EMPTY)
  DLM WORD ## $@= IF NILL ELSE HERE COUNT $SAVE THEN , ;
@@ -860,7 +860,7 @@ HERE 0 , COLLECT HERE SWAP ! ( make it a set) DOES> ;
 : EXPECT-SET BL PARSE DUP NAME-TO-SET 0= 18 ?ERROR ;
 : RELATION-HTML CREATE HERE REGISTER-RELATION COLLECT-REST
 EXPECT-SET , BL PARSE ,  DOES> ;
--->
+
 
 ( Randomize a set)
 : #SET CELL+ DUP @ SWAP CELL+ - 0 CELL+ / ;
@@ -876,7 +876,7 @@ DUP CHOOSE-FROM-SET I @SWAP
 SET META-1-1      : REGISTER-1-1 META-1-1 SET+! ;
 : 1-1-HTML CREATE HERE REGISTER-1-1 COLLECT-REST
 EXPECT-SET DUP , EXPECT-SET DUP ,  CHECK# DOES> ;
--->
+
 
 ( output words for testing )
 : $? $@ $. ;
@@ -888,7 +888,7 @@ EXPECT-SET DUP , EXPECT-SET DUP ,  CHECK# DOES> ;
 
 
 
--->
+
 
 
 
@@ -907,7 +907,7 @@ OVER OVER #IN-SET CELL+ SWAP CHANGE-IF-LAST SWAP DROP @ ;
 : DO-SETS META-HTML SET-FOR-ALL  ( F-F)
    OVER OVER CELL+ ?IN-SET-$ IF OVER REF-SET ELSE DROP THEN
 END-S-F-A ;
--->
+
 
 
 ( SHOW RELATION'S AND 1-1 RELATIONS )
@@ -924,12 +924,12 @@ CELL+ CELL+ @ NAME-TO-SET + @ SWAP @ REF-WRITE ;
 : DO-1-1 META-1-1 SET-FOR-ALL   ( F -- F)
    OVER OVER CELL+ @ NAME-TO-SET CELL+ #IN-SET-$ DUP -1 = IF
       DROP DROP ELSE REF-1-1 THEN END-S-F-A ;
--->
+
 
 ( Show all html references for all files )
 : DO-FILE DO-SETS DO-RELATIONS DO-1-1 DROP ;   ( f-- )
 : DO-ALL FILES SET-FOR-ALL  CR DUP $? DO-FILE END-S-F-A ;
--->
+
 
 
 
@@ -1197,7 +1197,7 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE  ASSEMBLER DEFINITIONS
 : 4MI CREATE C, DOES> C@ C, C, ;
 : 5MI CREATE C, DOES> C@ C, , ;  : PSH1 C3 C, (NEXT) 1 - , ;
 : PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;
- -->
+75 76 THRU 
 CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 00 1MI NOP     76 1MI HLT     F3 1MI DI     FB 1MI EI
 07 1MI RLC     0F 1MI RRC     17 1MI RAL    1F 1MI RAR
@@ -1212,7 +1212,7 @@ C6 4MI ADI     CE 4MI ACI     D6 4MI SUI    DE 4MI SBI
 E6 4MI ANI     EE 4MI XRI     F6 4MI ORI    FE 4MI CPI
 22 5MI SHLD    2A 5MI LHLD    32 5MI STA    3A 5MI LDA
 CD 5MI CALL    C3 5MI JMP
-               ( CZ,CNZ,CCY,CNC)  -->
+               ( CZ,CNZ,CCY,CNC)  
 
 CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >3<"
 C9 1MI RET                   C2 CONSTANT 0=  D2 CONSTANT CS
@@ -1304,7 +1304,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
 
  : SET-DMA  1A BDOS DROP ;
 
-   -->
+   
 
 
 
@@ -1325,7 +1325,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
             FCB2 10 BDOS . ." CLOSE STATUS" CR ;
  : MOVE-DOWN   -80 POINTER-W +!
                DISK-BUFFER-W 80 OVER + SWAP 80 CMOVE ;
-     -->
+     
  ( DISC IO SCREEN 17 WRITE    >2<   85/12/08 AH )3<)
  : TO-DISK DUP >R POINTER-W @ SWAP CMOVE
            R> POINTER-W +!
@@ -1355,7 +1355,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
  : .CLOSER   FCB2 10 BDOS . ." CLOSE STATUS" CR ;
 
 
-               -->
+               
 
 
  ( DISC IO SCREEN 19 READ     >2<   85/12/08 AH )
@@ -1371,7 +1371,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
       IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
     POINTER-R !  ;
 
- -->
+ 
 
 
  ( DISC IO SCREEN 20 READ     >3<   85/12/08 AH )
@@ -2205,7 +2205,7 @@ DECIMAL
  0 IVAR THOUSANDS ( #  thousand to be sieved)
  0 IVAR MILS      ( Contains current thousand)
  0 IVAR MANTISSA  ( The current thousands is to be printed)
- -->
+ 
  ." ERATOSTHENES >2< Pretty printing - A. van der Horst"  CR
  : FFEED  PAUSE @ IF CR ." KEY FOR NEXT SCREEN" KEY DROP THEN
      12 EMIT CR ." ERATOSTHENES SIEVE -- PRIMES LESS THAN"
@@ -2220,7 +2220,7 @@ DECIMAL
       DUP C# +! C# @ CH/L @ >
       IF NEWLINE C# +! ELSE DROP THEN ;
  : .P   4 ?L SPACE 0 <# # # # #> TYPE ;
- : INIT-P  FFEED NEWLINE  ;   -->
+ : INIT-P  FFEED NEWLINE  ;   
 
  ." ERATOSTHENES >3< Bit manipulation - A. van der Horst " CR
    HEX
@@ -2237,7 +2237,7 @@ DECIMAL
            8/MOD FLAGS + SWAP  ( Address in flags table)
            C-MASK + C@         ( Get mask)
            OVER C@ AND SWAP C! ( Clear the bit)  ;
- -->
+ 
  ." ERATOSTHENES >4< Bit manipulation - A. van der Horst " CR
  : SET-B ( BIT# --  sets the specified bit)
            8/MOD FLAGS + SWAP  ( Address in flags table)
@@ -2251,7 +2251,7 @@ DECIMAL
            BEGIN  DUP LIM @ U<  WHILE
                   DUP CLEAR-B  OVER +
            REPEAT   DROP DROP ;
- -->
+ 
 
 
  ." ERATOSTHENES >5< Main program - A. van der Horst " CR
@@ -2346,25 +2346,26 @@ DECIMAL
  PAD $@ BLOCK-FILE $! ( Right blockfile in image!)
  BLOCK-HANDLE @   SM    HERE SM -  DECIMAL
  4 LINOS DUP ?LINUX-ERROR BLOCK-EXIT BLOCK-INIT DROP ;
-: ARGC ARGS @ @ ;  : ARGV ARGS @ CELL+ ; 
+: ARGC ARGS @ @ ;  : ARGV ARGS @ CELL+ ;
 : ENV ARGS @ $@ 1+ CELLS + ;
 : CTYPE CR BEGIN COUNT DUP WHILE EMIT REPEAT DROP DROP ;
 : .C$ BEGIN $@ DUP WHILE CTYPE REPEAT DROP DROP ;
-5 CONSTANT OPEN   
-3 CONSTANT READ  
-6 CONSTANT CLOSE 
-0 CONSTANT O_RDONLY 
+5 CONSTANT OPEN
+3 CONSTANT READ
+6 CONSTANT CLOSE
+0 CONSTANT O_RDONLY
 : GET-FILE              ( <a><u> --- i*x )
    HERE >R   10000000 ALLOT
    R@ $! 0 R@ $C+  "FiLeBuF" R@ $+!
    R> $@ OVER + >R
-   O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR 
+   O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR
    DUP R@ 9999000 READ LINOS DUP ?LINUX-ERROR >R
-   0 0 CLOSE LINOS ?LINUX-ERROR 
+   0 0 CLOSE LINOS ?LINUX-ERROR
    R> R> SWAP 2DUP + DP !;
 : INCLUDED
   GET-FILE
   SAVE (EVAL) INTERPRET RESTORE ;
+
  CR ." #36 FROBOZZ AMATEUR ADVENTURER >1< 84/4/5 "
  ( DIRECTIONS )
  0 CONSTANT N  1 CONSTANT NE
@@ -2380,7 +2381,7 @@ DECIMAL
  254 CONSTANT AMB ( iguous)   255 CONSTANT BLO ( cked)
  : [dir] + 2 + ;  ( M D -- A address A from MAP entry M dir D)
  : [char] 12 + ; ( characterisation : 2 bytes)
- : ZAP MAP LEN 256 * ERASE ;     -->
+ : ZAP MAP LEN 256 * ERASE ;  149 169 THRU
  CR  ." #37 FROBOZZ AMATEUR ADVENTURER >2< 84/5/27"
  0 IVAR STATUS 10 ALLOT   ( last 10 moves)
  0 IVAR CURPOS ( This position in map)
@@ -2396,7 +2397,7 @@ DECIMAL
  : .CHAR  DUP MAP[] [char] @ ( N-- Print char'n)
    DUP IF
      DUP ID.. @ AMB = IF ." #" . ELSE DROP THEN
-   ELSE    DROP ." PLACE:#" . THEN ;   -->
+   ELSE    DROP ." PLACE:#" . THEN ;   
  CR ." #38 FROBOZZ AMATEUR ADVENTURER >3< 84/5/27"
  : WHERE? CURPOS @ .CHAR ;
  : C-CONNECT ( C P -- Cross connect links between an )
@@ -2410,7 +2411,7 @@ DECIMAL
  : NEW-ENTRY ( -- n Find first free position n in MAP)
      MAP 0  BEGIN 1+ SWAP LEN + SWAP OVER [inuse]  C@ 0= UNTIL
      SWAP TRUE SWAP [inuse] !
- ;              -->
+ ;              
 
 
  CR  ." #39 FROBOZZ AMATEUR ADVENTURER >4< 84/4/8 "
@@ -2428,7 +2429,7 @@ DECIMAL
        FILL-IN ( Only effective by a new entry )
      ELSE
        DROP
-     THEN  ;              -->
+     THEN  ;              
 CR  ." #40 FROBOZZ AMATEUR ADVENTURER >5< 84/6/27"
  : HERE: ( Defining word:makes a name for the current place)
    CURPOS @ MAP[] [char] @ 0= IF
@@ -2444,7 +2445,7 @@ CR  ." #40 FROBOZZ AMATEUR ADVENTURER >5< 84/6/27"
    CURPOS @ MAP[] 10 0 DO
      DUP I [dir] C@
      DUP BLO - IF CR I .DIR ." : " .CHAR ELSE DROP THEN
-   LOOP DROP ; -->
+   LOOP DROP ; 
 CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
  : CLEAR! ( N -- Clears a place)
    MAP[] LEN ERASE ;
@@ -2460,7 +2461,7 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
  : BACKK    OLDPOS @ CURPOS !  ;
  : BLOCKED! BLO AUX! BACKK ;
  : AMB!     AMB AUX! ;
- : KILL! DUP @ MAP[] [char] 0 SWAP !  0 SWAP ! ;   -->
+ : KILL! DUP @ MAP[] [char] 0 SWAP !  0 SWAP ! ;   
  CR  ." #42 FROBOZZ AMATEUR ADVENTURER >7< 84/6/28"
  : P?    ( P -- Dumps a place)
    CR ." PLACE# FL AU " TEXT ." CHAR"  CR
@@ -2476,7 +2477,7 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
    DUP ?FIX IF SWAP THEN
    DUP ?FIX IF
         CR ." Places differently characterized"  QUIT
-   THEN  ;   -->
+   THEN  ;   
  CR  ." #43 FROBOZZ AMATEUR ADVENTURER >8< 84/4/19"
  : REPLACE ( P1 P2--. Replace all references to P2 by P1)
    ?SWAP   ( or the other way around if P2 characterized)
@@ -2491,7 +2492,7 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
       LOOP
    LOOP  DROP DROP
  ;
-     -->
+     
 
  CR  ." #44 FROBOZZ AMATEUR ADVENTURER >9< 84/5/27"
  : MYSELF LATEST >CFA , ; IMMEDIATE
@@ -2523,7 +2524,7 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
          ^J = L-W-L ! ( Keep flag)
       ELSE DROP THEN  ;
  : L-STORE ( A L -. Store A in list L )
-  2 OVER +! DUP @ + ! ;    -->
+  2 OVER +! DUP @ + ! ;    
 
 CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
@@ -2539,7 +2540,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  : s S COM-DIR ;  : sw SW COM-DIR ;
  : w W COM-DIR ;  : nw NW COM-DIR ;
  : u U COM-DIR ;  : d  D  COM-DIR ;
- : bl BLOCKED! ; : ex EXIT? ; : wh WHERE? ; -->
+ : bl BLOCKED! ; : ex EXIT? ; : wh WHERE? ; 
 
  CR  ." #47 FROBOZZ AMATEUR ADVENTURER >11< 84/6/12 "
  : SEND-NAME  >NFA @ $@ 127 AND PTYPE ;
@@ -2556,7 +2557,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  : M-D  MAP[] [dist] C! ; ( Mark distance)
  : INIT-AUX  ( Zeros all normal places)
    255 UNK M-D 255 AMB M-D 255 BLO M-D
-   254 MAP[] [dist] 1 MAP[] [dist] DO 0 I C! LEN +LOOP ; -->
+   254 MAP[] [dist] 1 MAP[] [dist] DO 0 I C! LEN +LOOP ; 
  CR  ." #48 FROBOZZ AMATEUR ADVENTURER >12< 84/5/22 "
  ( The [dist]'s are in a circular list for each distance)
  ( The DIST-LIST contains the start entries in these lists)
@@ -2570,7 +2571,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
       SWAP DIST-LIST + C@   ( Get start of circular last)
       2DUP MAP[] [dist] C@ SWAP MAP[] [dist] C! ( Redarect 2nd)
       MAP[] [dist] C! ( Make 1th of list point to new entry)
-   THEN ;   -->
+   THEN ;   
 
 
  CR  ." #49 FROBOZZ AMATEUR ADVENTURER >13< 84/5/22 "
@@ -2586,7 +2587,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
      0 OVER DIST-LIST + C! ( initialize to empty)
      DUP 1 - DIST-LIST + C@ DUP START C! ( Keep end of list)
      BEGIN 2DUP MARK-EX MAP[] [dist] C@ DUP START C@ = UNTIL
-     DROP DROP ;                          -->
+     DROP DROP ;                          
 
 
  CR  ." #50 FROBOZZ AMATEUR ADVENTURER >14< 84/5/27 "
@@ -2604,7 +2605,8 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
   : M-U-F  INIT-AUX (M-U-F) ; ( N--M As M-U-F but initialized)
   : L-U-U  ( --M Lists incorrect,find length to first UNKNOWN)
      INIT-AUX   0 UNK M-D  UNK (M-U-F) ;
-        -->
+        
+ CR ." #51 FROBOZZ AMATEUR ADVENTURER >15< 01/2/20 "
 : FIND-something ( CFA -- )
    C>D LATEST             ( after the CFAO one)
    2DUP = IF
@@ -2617,8 +2619,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
         DROP I ROT ROT LEAVE ( the direction as a flag)
       THEN
    LOOP  DROP DROP ;
-                                 -->
-
+                                 
 
 
  CR ." #52 FROBOZZ AMATEUR ADVENTURER >16< 84/6/12 "
@@ -2630,7 +2631,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
      SWAP CONNECTED? -1 -
   UNTIL
   DUP ROT CONNECTED? ( Repeat last,sucessful query)
- ; -->
+ ; 
 
 
 
@@ -2652,7 +2653,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
  : GOTO!# ( Use: KITCHEN @ GOTO!# )
     F-P-B-N CR BEGIN DUP 1+ WHILE COM-DIR CR REPEAT DROP ;
- : GOTO!  @ GOTO!# ; ( Use: KITCHEN @ GOTO!# ) -->
+ : GOTO!  @ GOTO!# ; ( Use: KITCHEN @ GOTO!# ) 
  CR  ." #54 FROBOZZ INTELLIGENT ENQUIRER >18< 84/6/12 "
 
  : KEEP: ( Get the info from REMEMBER into a named buffer)
@@ -2666,7 +2667,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
             ROT DROP 0 ROT ROT ( Replace flag with 0) LEAVE
          THEN
       LOOP DROP DROP  ;
-   -->
+   
 
 
  CR  ." #55 FROBOZZ INTELLIGENT ENQUIRER >19< 84/5/27 "
@@ -2682,7 +2683,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
      LOOP
    THEN  DROP ;
 
-   -->
+   
 
 
  CR  ." #56 FROBOZZ INTELLIGENT ENQUIRER >20< 84/6/27"
@@ -2700,7 +2701,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
         I SEND-DIR ECR WAIT ( try this direction)
         I DIRECTION    BLOCKED?
      THEN
-   LOOP ;   -->
+   LOOP ;   
  CR  ." #57 FROBOZZ INTELLIGENT ENQUIRER >21< 84/6/27 "
 
  : TRY-EVERY-WHERE ( As TRY-HERE but in the whole map)
@@ -2732,7 +2733,7 @@ POOL IVAR PP ( LIKE DP)  : pd POOL PP @ OVER - DUMP ;
 : WORD+ BEGIN DUP WORD  EMPTY?  WHILE QUERY REPEAT DROP ;
 : PARSE WORD+ HERE COUNT $SAVE ;
 0 0 $SAVE CONSTANT NILL ( EMPTY STRING)
-BL PARSE ##  CONSTANT ##   ( END-SENTINEL) -->
+BL PARSE ##  CONSTANT ##   ( END-SENTINEL) 
 ( A0apr12 www SET words )
 : SET+! DUP >R @ ! 0 CELL+ R> +! ;
 : SET-FOR-ALL POSTPONE DUP POSTPONE @ POSTPONE SWAP
@@ -2748,7 +2749,7 @@ POSTPONE (+LOOP) BACK ; IMMEDIATE
 : #IN-SET-$ -1 ROT ROT SET-FOR-ALL OVER
 $@= IF SWAP DROP I SWAP THEN END-S-F-A DROP ;
 : ?IN-SET-$ #IN-SET-$ -1 = 0= ;
--->
+
 ( A0apr12 www SET words )
 SET META-HTML        ( ALL SETS OFHTML FILES )
 : REGISTER-HTML META-HTML SET+! ;
@@ -2764,7 +2765,7 @@ IF FILES SET+! ELSE DROP THEN ;
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
 ELSE 0 THEN ;
-: du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;     -->
+: du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;     
 ( A0apr12 www SET words ) HEX
 : COLLECT-REST ( OF LINE, MAY CONTAIN SPACES ## MEANS EMPTY)
 DLM WORD HERE ## $@= IF NILL ELSE HERE COUNT $SAVE THEN , ;
@@ -2780,7 +2781,7 @@ HERE 0 , COLLECT HERE SWAP ! ( make it a set) DOES> ;
 : #SET CELL+ DUP @ SWAP CELL+ - 0 CELL+ / ;
 : RELATION-HTML CREATE HERE REGISTER-RELATION COLLECT-REST
 BL PARSE DUP IS-SET-NAME 0= 18 ?ERROR , BL PARSE ,  DOES> ;
-DECIMAL -->
+DECIMAL 
 ( Randomize a set)
 89 LOAD 60 LOAD
 : CHOOSE-FROM-SET DUP #SET CHOOSE 2 + CELLS + ;
@@ -2793,7 +2794,7 @@ CELL+ DUP @ SWAP CELL+ DO
 DUP CHOOSE-FROM-SET I .S @SWAP
 0 CELL+ +LOOP DROP ;
 
--->
+
 
 
 
@@ -4035,14 +4036,16 @@ DECIMAL  getit
 
 
 
+
+
 ( Trying to implement SYSTEM )
 : CV OVER + 1 - 0 SWAP C! ;
   CREATE COMMAND 256 ALLOT
-  "-c " CV "sh " CV CREATE ARG[] , , COMMAND CELL+ , 0 , 
+  "-c " CV "sh " CV CREATE ARG[] , , COMMAND CELL+ , 0 ,
 "/bin/sh " CV CONSTANT SHELL
 : SYSTEM COMMAND $! 0 COMMAND $C+
-     0 0 0 2 LINOS DUP ?LINUX-ERROR 
-     0= IF SHELL ARG[] ENV 11 LINOS ?LINUX-ERROR THEN 
+     0 0 0 2 LINOS DUP ?LINUX-ERROR
+     0= IF SHELL ARG[] ENV 11 LINOS ?LINUX-ERROR THEN
 ;
 
 
@@ -4074,18 +4077,18 @@ DECIMAL  getit
 
 
 
+( last block with BLK')
+: BLK'
+    IN @ FIRST LIMIT WITHIN
+    SRC 2@ - 1024 = AND
+    IF SRC @ 2 CELLS - @ ELSE 0 THEN
+    BLK !
+    BLK
+;
+ BLK' ? BLKP ?
 
-
-
-
-
-
-
-
-
-
-
-
+" BLK' ?" EVALUATE
+" BLKP ?" EVALUATE
 
 
 
