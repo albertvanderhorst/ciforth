@@ -80,7 +80,7 @@ LATEST EXEC-NAME   TURNKEY
 \
 ( -e system_electives ) \ AvdH A1oct19
 .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
-: DEVELOP   BLOCK-EXIT 2 BLOCK-INIT ;
+
 REQ CONFIG
 ( MAINTENANCE ) REQ L-S  REQ DO-DEBUG
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
@@ -1796,9 +1796,9 @@ REQUIRE VIDEO-MODE   REQUIRE $
   1 12 +THRU
 
 
+"BLOCK-INIT" PRESENT? 0= ?LEAVE-BLOCK
 
-
-
+: DEVELOP   BLOCK-EXIT 2 BLOCK-INIT ;
 
 
 
@@ -1840,11 +1840,11 @@ DECIMAL
 
 ( 32_bit_editor_stuff ) ?32 \ A1oct05
 "VID" PRESENT? ?LEAVE-BLOCK  \ Already protected mode
+HEX
 B800 CONSTANT VID
   HEX 0 CONSTANT CS_START
  : LC@ SWAP 10 * + CS_START - C@ ;
  : LC! SWAP 10 * + CS_START - C! ;
-
 
 
 
@@ -1922,7 +1922,7 @@ LOOP DROP R> + ^J SWAP 2DROP ;
 0 IVAR CURSOR
  : CURL CURSOR @ VW / ; : CP CURSOR @ VW MOD  ;
  : BIOS-CURSOR CURSOR @ VW /MOD 100 * + ;
-: SET 200 0 0 BIOS-CURSOR 10 BIOSO DROP DROP DROP DROP DROP ;
+: SET BIOS-CURSOR X 0 200 10 BIOSN 2DROP ;
 : MOVE-CURSOR   ( WORD STAR)
 DUP ^D = IF  1 ELSE   DUP ^E = IF 0 VW - ELSE
 DUP ^I = IF  8 ELSE   DUP ^M = IF VW CP - ELSE
@@ -2031,21 +2031,21 @@ HEX>
 : LIST LIST' ;
 
 ( BIOSI VIDEO-MODE DISK-INIT ) ?PC \ AvdH A1oct05
+HEX
+
+
+
+: BIOSI SWAP 2SWAP SWAP BIOSN 2DROP ;  ( Ignore result)
+: VIDEO-MODE  >R X X X R> 10 BIOSN 2DROP ;
+\ Reset DISK (C: 80 D: 81 A: 0 B: 1 etc.)
+: DISK-INIT   X X 0 13 BIOSN 2DROP  ;
 
 
 
 
-: BIOSI BIOSO DROP DROP DROP DROP DROP ;  ( Ignore result)
-: VIDEO-MODE 0 0 0 16 BIOSI ;
-: DISK-INIT 0 0 0 0 19 BIOSI ;
 
 
-
-
-
-
-
-
+DECIMAL
 ( DUMP2 ) REQUIRE CONFIG ?PC \ AvdH A1oct
 <HEX
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
@@ -2143,7 +2143,7 @@ DECIMAL
 
 
 ( --hd_LBA utils_for_stand_alone_disk ) REQUIRE CONFIG ?PC ?16
-REQUIRE ASSEMBLERi86   REQUIRE BIOSI   REQUIRE +THRU
+REQUIRE ASSEMBLERi86   REQUIRE DISK-INIT   REQUIRE +THRU
 ( backup and restore a stand alone hard disk system to floppy )
 ( run from a booted floppy system )
 ( this is for a 16 bit system, because the assembly assumes )
@@ -2197,7 +2197,7 @@ DECIMAL
 : SWAP-FLOPPY   0 WARNING !
   "Swap floppy and press a key" TYPE
   KEY 32 OR &q = IF ABORT THEN   0 '(FRD) CATCH DROP
-  EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
+  EMPTY-BUFFERS   0 DISK-INIT   80 DISK-INIT ;
 
 \ copy a hd system, was written to a floppy to the
 \  hard disk. Done by a Forth booted from another floppy.)
