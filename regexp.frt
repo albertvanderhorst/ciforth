@@ -300,13 +300,13 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ ---------------------------------------------------------------------------
 
 \ The compiled expression.
-CREATE RE-COMPILED 1000 ALLOT
+CREATE RE-COMPILED MAX-RE ALLOT
 
 \ Regular expressions are parsed using a simple recursive descent
 \ parser.
 
 \ Build up a string to be matched simply.
-CREATE NORMAL-CHARS 1000 ALLOT
+CREATE NORMAL-CHARS MAX-RE ALLOT
 : !NORMAL-CHARS   0 NORMAL-CHARS ! ;
 
 \ To where is the compiled expression filled.
@@ -386,26 +386,21 @@ ELSE NORMAL-CHARS $C+ THEN ;
 
 
 \ Build up the set between [ and ] into ``SET-MATCHED''.
-\ EP points after the intial [ , leave it pointing after the closing ].
-: PARSE[]
-    DUP C@ &^ = IF 1+ RECURSE SET-MATCHED INVERT-SET ELSE
+\ EP points after the intial [ , leave IT pointing after the closing ].
+: (PARSE[])
     BEGIN ADD[]-1 DUP C@ DUP 0= ABORT" Premature end of '[' character set" &] = UNTIL 1+
-    THEN ;
-
-\ EP points to a char-set. Put it into the compiled expression.
-\ Leave EP incremented past the char-set.
-: PARSE-CHAR-SET !SET-MATCHED C@+
-    DUP &. = IF DROP \. SET-MATCHED MAX-SET MOVE ELSE
-    DUP &\ = IF DROP C@+ GET-CHAR-SET SET-MATCHED MAX-SET MOVE ELSE
-    DUP &[ = IF DROP ^ PARSE[] ELSE
-    SET-MATCHED SET-BIT
-    THEN THEN THEN
-    HARVEST-SET-MATCHED
 ;
+
+\ Compile a set between [ and ].
+\ EP points after the intial [ , leave IT pointing after the closing ].
+: PARSE[]
+    DUP C@ &^ = IF 1+ (PARSE[]) SET-MATCHED INVERT-SET ELSE (PARSE[]) THEN
+    HARVEST-SET-MATCHED  ;
+
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
 \ A coy of the regular expression string, zero ended.
-CREATE (RE-EXPR) 1000 ALLOT
+CREATE (RE-EXPR) MAX-RE ALLOT
 
 \ Transform the EXPRESSION string. Copy it to the ``(RE-EXPR)'' buffer,
 \ and make it zero ended.
@@ -466,17 +461,17 @@ CREATE (RE-EXPR) 1000 ALLOT
 
 \ Parse one element of regular EXPRESSION .
 \ Leave EXPRESSION incremented past parsed part.
-: BUILD-RE-ONE    NORMAL-CHAR? DUP IF ADD-TO-NORMAL ELSE DROP C@+ DO-ABNORMAL THEN ;
+: RE-BUILD-ONE    NORMAL-CHAR? DUP IF ADD-TO-NORMAL ELSE DROP C@+ DO-ABNORMAL THEN ;
 
 \ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
-: BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE DUP C@ 0= UNTIL DROP EXIT-BUILD ;
+: RE-BUILD INIT-BUILD BEGIN RE-BUILD-ONE DUP C@ 0= UNTIL DROP EXIT-BUILD ;
 
 \ Null-ended copy fo the string in which we try to match.
-CREATE STRING-COPY 1000 ALLOT
+CREATE STRING-COPY MAX-RE ALLOT
 
 \ For STRING and regular expression STRING:
 \ "there IS a match". \0 ..\9 have been filled in.
-: RE-MATCH BUILD-RE
+: RE-MATCH RE-BUILD
     STRING-COPY $! 0 STRING-COPY $C+ STRING-COPY $@ DROP RE-COMPILED
     (MATCH) >R 2DROP R> ;
