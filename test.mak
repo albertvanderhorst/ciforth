@@ -19,7 +19,7 @@ testclean: ; rm -f $(TESTTARGETS)
 
 %.ps : asgen.frt %.frt ps.frt ; \
     ( \
-	echo 8 LOAD; \
+	echo 5 LOAD; \
 	cat $+ ;\
 	echo 'PRELUDE' ;\
 	echo 'HEX $(MASK) MASK ! $(PREFIX) PREFIX ! DECIMAL ' ;\
@@ -115,7 +115,7 @@ lina2 : ci86.lina.s ; gcc $+ -l 2>aap
 ci86.lina.s :
 
 testas86: asgen.frt asi86.frt testset8086 ; \
-    (echo 8 LOAD; cat $+)|\
+    (echo 5 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
     sed 's/^[0-9A-F \.,]*://' >$@       ;\
@@ -123,7 +123,7 @@ testas86: asgen.frt asi86.frt testset8086 ; \
     diff $@.diff testresults
 
 testas386: asgen.frt asi586.frt testset386 ; \
-    (echo 8 LOAD; cat $+)|\
+    (echo 5 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
     sed 's/^[0-9A-F \.,]*://' >$@       ;\
@@ -132,7 +132,7 @@ testas386: asgen.frt asi586.frt testset386 ; \
 
 # Special test to exercise otherwise hidden instructions.
 testas386a: asgen.frt asi586.frt testset386a ; \
-    (echo 8 LOAD; cat $+)|\
+    (echo 5 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
     sed '/^OK$$/d' |\
@@ -141,7 +141,7 @@ testas386a: asgen.frt asi586.frt testset386a ; \
     diff $@.diff testresults
 
 testas80: asgen.frt as80.frt testset8080 ; \
-    (echo 8 LOAD; cat $+)|\
+    (echo 5 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
     sed 's/^[0-9A-F \.,]*://' >$@       ;\
@@ -246,15 +246,17 @@ ci86.linux.rawtest
 
 # No output expected, except for an official version (VERSION=A.B.C)
 # The version number shows up in the diff.
-testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab tsuite.frt ;
+testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab.lina tsuite.frt ;
+	rm forth.lab
+	cp forth.lab.lina forth.lab
 	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	lina <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
 	lina -a <tsuite.frt 2>&1 |cat >tsuite.out
-	diff tsuite.out testresults || true
-	rm forth.lab
+	diff -b -B tsuite.out testresults || true
+	ln -sf forth.lab.lina  forth.lab
 	rm $(TEMPFILE)
 
 testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;

@@ -152,11 +152,6 @@ wc            \
 
 TEMPFILE=/tmp/ciforthscratch
 
-# Try to work with old files.
-%.c:RCS/%.c,v ; co -d$(DATE) $<
-%:RCS/%,v ; co -d$(DATE) $<
-ci86.gnr:RCS/ci86.gnr,v ; co -d$(DATE) $<
-
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm
 	nasm -fbin $< -o $@ -l $*.lst
