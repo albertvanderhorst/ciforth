@@ -26,7 +26,7 @@ VOCABULARY ASSEMBLER IMMEDIATE
 ( The first 8 bits of the TALLY need not be consumed. )
 HEX
 : AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
-: INCONSISTENT? TALLY @ INVERT DUP 2 * AND A0A0 AND ;
+: INCONSISTENT? TALLY @ INVERT DUP 2 * AND AA AND ;
 DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
 : CHECK32 INCONSISTENT? 32 ?ERROR ;
@@ -129,8 +129,8 @@ IS-A IS-COMMA
 : xFAMILY|R 0 DO DUP PREPARE xFIR OVER + LOOP DROP DROP ;
 
 HEX 
-(   Given a DEA, return the next DEA)
-: >NEXT% PFA LFA @ ;
+(   Given a DEA, return the next DEA. Skip holes, with name -xxx )
+: >NEXT% BEGIN  PFA LFA @   DUP 1+ C@ &- - UNTIL ;
 ( The CONTENT of a linkfield is not a dea, leave: it IS the endmarker   )
 : VOCEND? @ FFFF AND A081 = ;
 : %EXECUTE PFA CFA EXECUTE ;
