@@ -44,7 +44,8 @@ dnl be careful, an example always occupies whole lines.
 define({forthexample},
 {@example
 @iftex
-@cartouche $1
+@cartouche
+$1
 @end cartouche
 @end iftex
 @ifinfo
