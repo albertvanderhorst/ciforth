@@ -1072,7 +1072,9 @@ CODE_HEADER({0BRANCH},{ZBRAN})
 worddocsafe({CONTROL},{(LOOP)},{paren_loop},{},{C2},
 {The run-time proceedure compiled by LOOP which increments the loop
 index and tests for loop completion.
-},{{LOOP}}, {}, enddoc)
+},{{LOOP}},
+{{." See LOOP"},{See LOOP}}, 
+enddoc)
 CODE_HEADER({(LOOP)},{XLOOP})
         MOV     BX,1    ;{ INCREMENT}
 XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
@@ -1110,8 +1112,9 @@ CODE_HEADER({(+LOOP)},{XPLOO})
 ;
 worddocsafe({CONTROL},{(DO)},{paren_do},{},{C},
 {The run-time proceedure compiled by forthcode({DO}) which moves the loop control
+
 parameters to the return stack.},{{DO}}, 
-{ { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA} },
+{{." See DO"},{See DO}}, 
 enddoc)
 CODE_HEADER({(DO)},{XDO})
         POP     DX      ;{ INITIAL INDEX VALUE}
@@ -1125,7 +1128,8 @@ CODE_HEADER({(DO)},{XDO})
 worddoc({CONTROL},{I},{i},{--- n},{C,L0},
 {Used within a do-loop to copy the loop index to the stack. Other use
 is implementation dependent.},{{R}}, 
-{ { : GS1 DO I . LOOP ; 3 0 GS1},{0 1 2 } },
+{ { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
+  { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
 CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
@@ -1141,13 +1145,14 @@ This can be swapped to get a fresh set of user variables.
 One can access or modify the boot-up parameters, prior to saving a
 customised boot image, or to change the initialisation by forthcode({COLD}).
 },
-{{(ABORT)},{USER}}, {}, enddoc)
+{{(ABORT)},{USER}}, 
+{{0A 0 CELL+ * +ORIGIN @ ' FORTH = .}, {1}},
+enddoc)
 HEADER({+ORIGIN},{PORIG},{DOCOL})
         DC      LIT
         DC      USINI
         DC      PLUS
         DC      SEMIS
-;
 ;
 ;{      Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
@@ -1244,7 +1249,11 @@ _SWITCH_({
 worddoc({FORMATTING},{DIGIT},{digit},{c n1 --- n2 tf (ok) c n1 --- ff (bad)},{},
 {Converts the ascii character forthvar({c}) (using base forthvar({n1}) ) to its binary
 equivalent forthvar({n2}) , accompanied by a true flag. If the conversion is
-invalid, leaves only a false flag.},{}, {}, enddoc)
+invalid, leaves only a false flag.},{}, 
+{ {31 0A DIGIT . .},{1 1},
+  {41 0A DIGIT .},{0},
+  {41 10 DIGIT . .},{1 A} },
+enddoc)
 CODE_HEADER({DIGIT},{DIGIT})
         POP     DX      ;{NUMBER BASE}
         POP     AX      ;{ASCII DIGIT}
@@ -1277,7 +1286,10 @@ Compares the string constant forthsamp({sc}) with the dea forthvar({addr2}).
 If it is a match, it
 returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely
 from forthcode({FOR-WORDS}).},
-{{FIND}}, {}, enddoc)
+{{FIND}}, 
+{{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl 
+"MATCHING-WORDS" ' MATCHING-WORDS GS1 .},{1}}, 
+enddoc)
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      TOR
         DC      RR, TFFA, FETCH
@@ -1311,15 +1323,15 @@ HEADER({?BLANK},{QBL},{DOCOL})
 ;
 worddoc({PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
 {Parse the forthdefi({current input stream})
-for a character and leave the its address.
+for a character and leave its address and the character.
 Advance the input pointer to the next character.
 If at the end of the end of the input stream,
 leave the end and a zero.
-_VERBOSE_({If the streaAs it goes with string constants, you may not
+_VERBOSE_({As it goes with string constants, you may not
 alter its content, nor assume anything is appended.})},
 {{BLK},{WORD},{IN}},
-{{},{},
-{},{}}, enddoc)
+{{IN[] A EMIT TIB @ 5 + = .},{A1} },
+enddoc)
 HEADER({IN[]},{INBRS},{DOCOL})
         DC      SOURC, CELLP, TFET
         DC      OVER, EQUAL
@@ -1407,7 +1419,10 @@ HEADER({SOURCE},{SOURC},{DOUSE}, CELLS(27))      ;{ And 28 and 29.}
 ;
 worddoc({OUTPUT},{CR},{cr},{},{L0},
 {Transmit a carriage return and line feed to the selected output
-device.},{{OUT}}, {}, enddoc)
+device.},{{OUT}}, 
+{{ 41 EMIT CR 42 EMIT},{A 
+B}},
+enddoc)
 HEADER({CR},{CR},{DOCOL})
         DC      LIT,LF
         DC      EMIT
@@ -1461,7 +1476,11 @@ DZERO:  MOV     AX,-1
         _2PUSH          ;{STORE QUOT/REM}
 ;
 worddoc({LOGIC},{AND},{and},{n1 n2 --- n2},{L0},
-{Leave the bitwise logical and of forthvar({n1}) and forthvar({n2}) as forthvar({n3}) .},{{XOR},{OR}}, {}, enddoc)
+{Leave the bitwise logical and of forthvar({n1}) and
+forthvar({n2}) as forthvar({n3}) .}, 
+{{XOR},{OR}}, 
+{ { 2 BASE !  11110000 11001100 AND .},{11000000} },
+enddoc)
 CODE_HEADER({AND},{LAND})
         POP     AX
         POP     BX
@@ -1469,7 +1488,10 @@ CODE_HEADER({AND},{LAND})
         _PUSH
 ;
 worddoc({LOGIC},{OR},{or},{n1 n2 --- or},{L0},
-{Leave the bit-wise logical or of two _BITS_ bit values.},{{AND},{XOR}}, {}, enddoc)
+{Leave the bit-wise logical or of two _BITS_ bit
+values.},{{AND},{XOR}}, 
+{ { 2 BASE !  11110000 11001100 OR .},{11111100} },
+enddoc) 
 CODE_HEADER({OR},{LOR})
         POP     AX      ;{ (S1) <- (S1) OR (S2)}
         POP     BX
@@ -1477,11 +1499,25 @@ CODE_HEADER({OR},{LOR})
         _PUSH
 ;
 worddoc({LOGIC},{XOR},{xor},{nl n2 --- xor},{L1},
-{Leave the bitwise logical exclusive or of two values.},{{AND},{OR}}, {}, enddoc)
+{Leave the bitwise logical exclusive or of two
+values.},{{AND},{OR}}, 
+{ { 2 BASE !  11110000 11001100 XOR .},{111100} },
+enddoc) 
 CODE_HEADER({XOR},{LXOR})
         POP     AX      ;{ (S1) <- (S1) XOR (S2)}
         POP     BX
         XOR     AX,BX
+        _PUSH
+;       
+worddoc({LOGIC},{INVERT},{INVERT},{n1 --- n2},{L1},
+{Invert all bits of forthsamp({n1}) leaving forthsamp({n3}) .},
+{{AND},{OR}}, 
+{ { 2 BASE ! 11101101 INVERT 11111111 AND .},{10010} },
+enddoc) 
+CODE_HEADER({INVERT},{INVER})
+        POP     AX      ;{ (S1) <- (S1) XOR (S2)}
+        NEG     AX
+        DEC     AX
         _PUSH
 ;
 worddocsafe({STACKS},{SP@},{s_p_fetch},{--- addr},{},
@@ -1582,7 +1618,9 @@ CODE_HEADER({0<},{ZLESS})
 ZLESS1: _PUSH
 ;
 worddoc({OPERATOR},{+},{plus},{n1 n2 --- sum},{L0},
-{Leave the sum of forthvar({n1+n2}) .},{{-},{*},{/},{MOD}}, {}, enddoc)
+{Leave the sum of forthvar({n1+n2}) .},{{-},{*},{/},{MOD}}, 
+{ { 0A BASE !  240 204 + .},{444} },
+{}, enddoc)
 CODE_HEADER({+},{PLUS})
         POP     AX      ;{(S1) <- (S1) + (S2)}
         POP     BX
@@ -2265,7 +2303,9 @@ HEADER({C,},{CCOMM},{DOCOL})
         DC      SEMIS
 ;
 worddoc({OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{L0},
-{Leave the difference of forthvar({n1-n2}) .},{{MINUS},{+},{*},{/},{MOD}}, {}, enddoc)
+{Leave the difference of forthvar({n1-n2}) .},{{MINUS},{+},{*},{/},{MOD}}, 
+{ { 0A BASE !  240 204 - .},{36} },
+{}, enddoc)
 CODE_HEADER({-},{LSUB})
         POP     DX      ;{S1}
         POP     AX
@@ -2822,7 +2862,7 @@ If forthcode({BLK}) is zero text is taken from the terminal input buffer,
 otherwise from the disc block stored in forthcode({BLK}) .},
 {{BLK} ,{IN}},
 {{: GS2 BL WORD COUNT . C@ EMIT ; GS2 CELLO},{5 C},
-{( : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ)},{}}, enddoc)
+{( : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ)},{}, dnl Fails still
 { : GS1 5A WORD COUNT . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 HEADER({WORD},{AWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
@@ -5328,7 +5368,9 @@ stack.
 
 When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
 the following address forthvar({addr}) and forthvar({n}) for later error checking.},
-{{I},{LOOP},{+LOOP},{LEAVE}}, {}, enddoc)
+{{I},{LOOP},{+LOOP},{LEAVE}}, 
+{ { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA} },
+enddoc)
 HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      COMP
         DC      XDO
@@ -5348,7 +5390,10 @@ ahead.
 
 At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
 offset to forthvar({DO}) . forthvar({n}) is used for error testing.},
-{}, {}, enddoc)
+{}, 
+{ { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
+  { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
+enddoc)
 HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
