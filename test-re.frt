@@ -216,7 +216,11 @@ ESCAPE$ "[^.]" RE-MATCH match
 " " "[\w]" RE-MATCH nomatch
 " " "[^\w]" RE-MATCH match
 
-\ Start and end of strings.
+\ More difficult backtracking with sets
+"A B C" "A.*B.*C" RE-MATCH match
+"A B C" "A.*C.*C" RE-MATCH nomatch
+
+\ Start and end of strings.  -----------------------------------
 " AAP " "<AAP" RE-MATCH match
 "QAAP " "<AAP" RE-MATCH nomatch
 " AAP " "AAP>" RE-MATCH match
@@ -229,3 +233,53 @@ ESCAPE$ "[^.]" RE-MATCH match
 " AAP " "<.*>" RE-MATCH match
 " AAP " "<[A-Z]*>" RE-MATCH match
 " AAP " "<[^P]*>" RE-MATCH nomatch
+
+\ Grouping   -------------------------
+
+\ "AP"
+"AAPE" "AP" RE-MATCH match  CR \0 TYPE
+
+\ "AP"
+"AAPE" "(AP)" RE-MATCH match  CR \1 TYPE
+
+\ "NOOT" "NOOT"
+"   AAP  NOOT " "<(....)>"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AP" "AQ"
+"AAPEAQE" "(A[PQ]).*(A[PQ])" RE-MATCH match CR \1 TYPE \2 TYPE
+
+\ "NOOT" "NOOT"
+"   AAP  NOOT " "(<....>)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "NOOT" "NOOT"
+"   AAP  NOOT " "(\w\w\w\w)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AAP" "AAP"
+"   AAP  NOOT " "(\w+)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AAP" "AAP"
+"   AAP  NOOT " "(<\w+>)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AAP" "AAP"
+"   AAP  NOOT " "<(\w+)>"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AAP" "AAP"
+"   AAP  NOOT " "([A-Z]+)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AAP" "AAP"
+"   AAP  NOOT " "(<[A-Z]+>)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "AAP" "AAP"
+"   AAP  NOOT " "<([A-Z]+)>"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "P" "P"
+"   AAP  NOOT " "([B-Z]+)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "NOOT" "NOOT"
+"   AAP  NOOT " "(<[B-Z]+>)"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "NOOT" "NOOT"
+"   AAP  NOOT " "<([B-Z]+)>"   RE-MATCH match CR \0 TYPE \1 TYPE
+
+\ "A" "B" "C"
+"A B C" "(A).*(B).*(C)" RE-MATCH match CR \1 TYPE \2 TYPE \3 TYPE
