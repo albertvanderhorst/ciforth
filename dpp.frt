@@ -247,14 +247,19 @@ VARIABLE C_UNKNOWN  \ The number of questions that never got a definite answer
 VARIABLE C_YES      \ The number of questions that got a yes answer
 VARIABLE C_NO      \ The number of questions that got a no answer
 VARIABLE C_AMB      \ The number of questions that is considered ambiguous
-VARIABLE C_TOTAL   \ Auxiliary: total number of questions
-VARIABLE C_UNAMB   \ Auxiliary: total number of unambiguous questions
-VARIABLE C_UN_CUR  \ Auxiliary: number unambiguous questions corrected for curiosity
+\ Auxiliary: total number of unambiguous questions
+: C_UNAMB C_YES @ C_NO @ + ;
+\ Auxiliary: total number of questions
+: C_TOTAL C_AMB @ C_UNAMB C_UNKNOWN @   + + ;
 
-VARIABLE Q_YES  \ Number of yes answers for current question and diagnosis
-VARIABLE Q_NO   \ Number of no answers for current question and diagnosis
-VARIABLE UNAMB  \ Indicate unambiguousness : 0. is bad , 1000. is perfect
-VARIABLE BAL    \ Indicate balance         : 0. is bad , 1000. is perfect
+: C_UN_CUR*1000 C_UNKNOWN @ CURIOSITY M* ;
+\ Auxiliary: number unambiguous questions corrected for curiosity
+: C_UN_CUR C_UN_CUR*1000 1000 M/ ;
+
+\ Indicate unambiguousness : 0. is bad , 1000. is perfect
+: UNAMB C_UNAMB 1000 M*    C_UN_CUR*1000  D+ C_TOTAL M/ ;
+\ Indicate balance         : 0. is bad , 1000. is perfect
+: BAL 1000 C_YES @ C_NO @ - ABS 1000 M* C_UNAMB C_UN_CUR + M/ - ;
 
 \ Reinitalise the answer ballots.
 : !ANSWERS 0 C_UNKNOWN !   0 C_YES !   0 C_NO !   0 C_AMB ! ;
@@ -312,20 +317,11 @@ DATABASE
 \ it is proportional to the number of diagnoses that can be eliminated
 \ provided the user can answer the question.
 : QUESTION-QUALITY
-   !ANSWERS
-   #DIAGNOSES @ 0 DO DUP I ACCUMULATE LOOP DROP
-   C_YES @ C_NO @ + C_UNAMB !
-   C_AMB @ C_UNAMB @ C_UNKNOWN @   + + C_TOTAL !
+   !ANSWERS   #DIAGNOSES @ 0 DO DUP I ACCUMULATE LOOP DROP
 
-   C_UNAMB @ 0= IF 0 EXIT THEN  \ No quality at all.
+   C_UNAMB 0= IF 0 EXIT THEN  \ No quality at all.
 
-   1000 C_YES @ C_NO @ - ABS 1000 M* C_UNAMB @ C_UN_CUR @ + M/ -
-   DUP BAL !
-
-   C_UNAMB @ 1000 M*    C_UNKNOWN @ CURIOSITY M*  D+ C_TOTAL @ M/
-   DUP UNAMB !
-
-   1000 */
+   BAL UNAMB 1000 */
 ;
 \D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 :" . DEPTH . CR
 \D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 :" . DEPTH . CR
