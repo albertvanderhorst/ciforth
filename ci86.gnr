@@ -6760,14 +6760,11 @@ dnl {." Type an 'ABCDEF'" DUP . },{6},
 enddoc)
 HEADER({(ACCEPT)},{PACCEP},{DOCOL})
 PACCEP2:
-;        DC      NOLF
-;        DC       LIT, 'a', EMIT
         DC      REMAIND
         DC      TFET
         DC      LIT, ALF, SINDEX
         DC      ZEQU
         _0BRANCH(PACCEP1)
-;        DC      RETOBO
         DC      REMAIND, TFET
         DC      TIB, FETCH
         DC      SWAP, LMOVE
@@ -6776,72 +6773,11 @@ PACCEP2:
         DC      REFTIB
         _BRANCH(PACCEP2)
 PACCEP1:
-;        DC      SPLOFF
-;;;;;;;;DC      REMAIND             ; go
-;;;;;;;;DC      TFET                     ; go
-;;;;;;;;DC      LIT, ALF, SINDEX          ; go
-;;;;;;;;DC      ZEQU                     ; go
-;;;;;;;;DC      LIT, 13, QERR            ; go
         DC      REMAIND, TFET
         DC      LIT, ALF, SSPLIT
         DC      TSWAP, REMAIND, TSTOR
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
-;
-worddoc( {STORAGE~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
-{A constant that leaves the address of a disk buffer used by
-file i/o words._HOSTED_MSDOS_({{It is primarily used for building up
-a zero ended string, such as not to burden pad.}})
-_HOSTED_DPMI_({{It is aliased with a "real" segment, to pass data
-from protected mode to the the DPMI-interface. Therefore it must be 16-bits
-addressable. It occupies 32K from 8000H onwards. }})
-},
-{{READ-FILE}, {OPEN-FILE}},
-{{( not yet)},{}},
-enddoc)
-_HOSTED_DPMI_({
-HEADER({RW-BUFFER},{RWBUF},{DOCON}, 8000H)
-});_END_({ _HOSTED_DPMI_})
-_HOSTED_MSDOS_({
-HEADER({RWBUF},{RWBUF},{DOVAR},)
-        _RESB(80H)
-});_END_({ _HOSTED_MSDOS_})
-
-worddoc( {STORAGE~},{ZEN},{zren},{sc --- addr},{},
-{Leaves an address that contains a zero-ended equivalent of forthvar({sc}).
-The same buffer is reused, such that this word is not reentrant.
-_VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
-to MSDOS. In fact this is forthcode({RW-BUFFER}) }})
-_HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
-only is useful to be passed to DPMI. }})
-},
-{{OPEN-FILE}},
-_HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
-_HOSTED_DPMI_({
-{{"AAP" ZEN REG-SET 34 + @ SWAP},{},
-{2DUP L@ FF AND EMIT SPACE 3 + L@ .},{A 0}}
-})
-,
-enddoc)
-_HOSTED_MSDOS_({
-HEADER({ZEN},{ZEN}, {DOCOL})
-        DC      RWBUF, SSTOR
-        DC      ZERO, RWBUF, CHAPP
-        DC      RWBUF, CELLP
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      SEMIS
-});_END_({ _HOSTED_MSDOS_})
-_HOSTED_DPMI_({
-HEADER({ZEN},{ZEN}, {DOCOL})
-        DC      TOR, ZERO, SWAP
-        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
-        DC      RR, FMOVE        ;  R@ FARMOVE
-        DC      ZERO
-        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
-        DC      FROMR, PLUS, LSTORE
-        DC      RWBUF
-        DC      SEMIS
-});_END_({ _HOSTED_DPMI_})
 ;
 worddoc( {OPERATINGSYSTEM},{BDOSN},{bdosn},{d c b a ---ar fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthvar({d c b a }) in
@@ -6862,10 +6798,80 @@ HEADER({BDOSN},{BDOSN},{DOCOL})
         DC      LIT, 21H, BIOSN
         DC      SEMIS
 ;
+});_END_({_MODERN_})
+_FILES_({
+worddoc( {STORAGE~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
+{A constant that leaves the address of a disk buffer used by
+file i/o words._HOSTED_MSDOS_({{It is primarily used for building up
+a zero ended string, such as not to burden pad.}})
+_HOSTED_DPMI_({{It is aliased with a "real" segment, to pass data
+from protected mode to the the DPMI-interface. Therefore it must be 16-bits
+addressable. It occupies 32K from 8000H onwards. }})
+},
+{{READ-FILE}, {OPEN-FILE}},
+{{( not yet)},{}},
+enddoc)
+_HOSTED_DPMI_({
+HEADER({RW-BUFFER},{RWBUF},{DOCON}, 8000H)
+});_END_({ _HOSTED_DPMI_})
+_HOSTED_MSDOS_({
+HEADER({RWBUF},{RWBUF},{DOVAR},)
+        _RESB(80H)
+});_END_({ _HOSTED_MSDOS_})
+_HOSTED_LINUX_({
+HEADER({RWBUF},{RWBUF},{DOVAR},)
+        _RESB(200H)
+});_END_({ _HOSTED_LINUX_})
+;
+worddoc( {STORAGE~},{ZEN},{zren},{sc --- addr},{},
+{Leaves an address that contains a zero-ended equivalent of forthvar({sc}).
+The same buffer is reused, such that this word is not reentrant.
+_VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
+to MSDOS. In fact this is forthcode({RW-BUFFER}) }})
+_HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
+only is useful to be passed to DPMI. }})
+},
+{{OPEN-FILE}},
+_HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
+_HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
+_HOSTED_DPMI_({
+{{"AAP" ZEN REG-SET 34 + @ SWAP},{},
+{2DUP L@ FF AND EMIT SPACE 3 + L@ .},{A 0}}
+})
+,
+enddoc)
+_HOSTED_LINUX_({
+HEADER({ZEN},{ZEN}, {DOCOL})
+        DC      RWBUF, SSTOR
+        DC      ZERO, RWBUF, CHAPP
+        DC      RWBUF, CELLP
+         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
+        DC      SEMIS
+});_END_({ _HOSTED_LINUX_})
+_HOSTED_MSDOS_({
+HEADER({ZEN},{ZEN}, {DOCOL})
+        DC      RWBUF, SSTOR
+        DC      ZERO, RWBUF, CHAPP
+        DC      RWBUF, CELLP
+         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
+        DC      SEMIS
+});_END_({ _HOSTED_MSDOS_})
+_HOSTED_DPMI_({
+HEADER({ZEN},{ZEN}, {DOCOL})
+        DC      TOR, ZERO, SWAP
+        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
+        DC      RR, FMOVE        ;  R@ FARMOVE
+        DC      ZERO
+        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
+        DC      FROMR, PLUS, LSTORE
+        DC      RWBUF
+        DC      SEMIS
+});_END_({ _HOSTED_DPMI_})
+;
 worddoc( {STORAGE},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
-and a result code into forthvar({ior}). The latter is the MSDOS
+and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
 error code negated, to be inspected using forthcode({MESSAGE}).
  forthvar({fam}) is one of 0=READ_ONLY, 1=WRITE_ONLY, 2=READ_WRITE.
 },
@@ -6876,6 +6882,14 @@ error code negated, to be inspected using forthcode({MESSAGE}).
 {CLOSE-FILE .},{0}
 },
 enddoc)
+_HOSTED_LINUX_({
+HEADER({OPEN-FILE},{OFILE},{DOCOL})
+        DC      TOR, ZEN, FROMR, X
+        DC      LIT, open, LINOS
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      SEMIS
+});_END_({_HOSTED_LINUX_})
+_MODERN_({
 HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, X, X
         DC      LIT, open, FROMR, PLUS, BDOSN
@@ -6886,6 +6900,7 @@ OFILE1:
         DC      ZERO
 OFILE2:
         DC      SEMIS
+});_END_({_MODERN_})
 ;
 worddoc( {STORAGE},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO},
 {Close the file with file handle in forthvar({fileid}). Return
@@ -6894,6 +6909,13 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{." See OPEN-FILE"},{See OPEN-FILE}},
 enddoc)
+_HOSTED_LINUX_({
+HEADER({CLOSE-FILE},{CFILE},{DOCOL})
+        DC      X, X
+        DC      LIT, close, LINOS
+        DC      SEMIS
+});_END_({_HOSTED_LINUX_})
+_MODERN_({
 HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      TOR, X, X, FROMR
         DC      LIT, close, BDOSN
@@ -6904,21 +6926,33 @@ CFILE1:
         DC      DROP, ZERO
 CFILE2:
         DC      SEMIS
+});_END_({_MODERN_})
 ;
 worddoc( {STORAGE},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
-{Create a file with name forthvar({sc}) and properties
-forthvar({u}), for normal files this is just 0. _VERBOSE_({The
-meaning is to be found in the MSDOS programmers manual at INT
-21h function 3Ch "Create file with handle"}). If the file
-already exists, it is truncated to zero length. Return a file
-handle into forthvar({fileid}) and a result code into
-forthvar({ior}). The latter is the MSDOS error code negated, to
-be inspected using forthcode({MESSAGE}). The handle is open for
-READ_WRITE. },
+{_MODERN_({ Create a file with name forthvar({sc}) and
+properties forthvar({u}), for normal files this is just 0.
+_VERBOSE_({The meaning is to be found in the MSDOS programmers
+manual at INT 21h function 3Ch "Create file with handle"}).})
+_LINUX_N_({ Create a file with name forthvar({sc}) and file
+access privileges forthvar({u}) }) If the file already exists,
+it is truncated to zero length. Return a file handle into
+forthvar({fileid}) and a result code into forthvar({ior}). The
+latter is the _PC_({ MSDOS})_HOSTED_LINUX_({ forthvar({errno})
+}) negated, to be inspected using forthcode({MESSAGE}). The
+handle is open for READ_WRITE. },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}},
 enddoc)
+_HOSTED_LINUX_({
+HEADER({CREATE-FILE},{CREATEF},{DOCOL})
+        DC      TOR, TDUP, DFILE, DROP
+        DC      ZEN, FROMR, X
+        DC      LIT, creat, LINOS
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      SEMIS
+});_END_({_HOSTED_LINUX_})
+_MODERN_({
 HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, ZEN, FROMR, X
         DC      LIT, create, BDOSN
@@ -6929,6 +6963,7 @@ CRFILE1:
         DC      ZERO
 CRFILE2:
         DC      SEMIS
+});_END_({_MODERN_})
 ;
 worddoc( {STORAGE},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
 {Delete the file with name forthvar({sc}). Return
@@ -6939,7 +6974,14 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {"AAP" DELETE-FILE . },{0 },
 {345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345}},
 enddoc)
-HEADER({DELETE-FILE},{DELETE},{DOCOL})
+_HOSTED_LINUX_({
+HEADER({DELETE-FILE},{DFILE},{DOCOL})
+        DC      ZEN, X, X
+        DC      LIT, unlink, LINOS
+        DC      SEMIS
+});_END_({_HOSTED_LINUX_})
+_MODERN_({
+HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN, X, X
         DC      LIT, delete, BDOSN
         _0BRANCH({DFILE1})
@@ -6949,13 +6991,15 @@ DFILE1:
         DC      DROP, ZERO
 DFILE2:
         DC      SEMIS
+});_END_({_MODERN_})
 ;
 worddoc( {STORAGE},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO},
 {Read forthvar({n}) characters to forthvar({addr}) from current
 position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters succesfully read,
-this may be zero. forthvar({ior}) is 0 for success, or otherwise
-the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
+this may be zero. forthvar({ior}) is 0 for success, or
+otherwise _PC_({the MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
+error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R\W}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD FD 0 > . },{0 _T_},
@@ -6963,6 +7007,13 @@ the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
+_LINUX_N_({
+HEADER({READ-FILE},{RFILE},{DOCOL})
+        DC      ROT, ROT
+        DC      LIT, read, LINOS
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      SEMIS
+});_END_({ _LINUX_N_})
 _HOSTED_MSDOS_({
 HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      LIT, read, BDOSN
@@ -6995,7 +7046,9 @@ worddoc( {STORAGE}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO
 {Position the file that is open at forthvar({fd}) at position
 forthvar({ud}).
 forthvar({ior}) is 0 for success, or otherwise
-the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
+_PC_({the MSDOS error code negated })_HOSTED_LINUX_({ -1 with
+more information in forthvar({errno}) }). Information about error codes
+can be found by forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD },{0 },
@@ -7004,6 +7057,16 @@ the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
+_LINUX_N_({
+HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
+        DC      TOR, DROP, FROMR   ;{Convert to single precision.}
+        DC      SWAP
+        DC      LIT, SEEK_SET
+        DC      LIT, lseek, LINOS
+        DC      ZERO, MIN
+        DC      SEMIS
+});_END_({_LINUX_N_})
+_MODERN_({
 HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      LIT, lseek, BDOSN
         _0BRANCH({PFILE1})
@@ -7013,22 +7076,36 @@ PFILE1:
         DC      DROP, ZERO
 PFILE2:
         DC      SEMIS
+});_END_({_MODERN_})
 ;
 worddoc( {STORAGE},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
-{Write forthvar({n}) characters from addr to the file that is
+{Write forthvar({n}) characters from forthvar({addr}) to the file that is
 open at forthvar({fd}) , starting at its current position.
 forthvar({u1}) is 0 for success,
-or otherwise the MSDOS error code
+or otherwise _PC_({the MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
+error code
 negated, to be inspected using forthcode({MESSAGE}).
 dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
 },
 {{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R\W}},
-{
-{ "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
+_HOSTED_MSDOS_({
+{ { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
 {"."" Hello world!""" FD WRITE-FILE .},{0},
-{FD CLOSE-FILE .},{0}
-},
+{FD CLOSE-FILE .},{0} },
+})
+_LINUX_N_({
+{ { "hello.frt" 8 BASE ! 644 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE-FILE .},{0},
+{FD CLOSE-FILE .},{0} },
+})
 enddoc)
+_LINUX_N_({
+HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      ROT, ROT
+        DC      LIT, write, LINOS
+        DC      ZERO, MIN
+        DC      SEMIS
+});_END_({ _LINUX_N_})
 _HOSTED_MSDOS_({
 HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      LIT, write, BDOSN
@@ -7057,7 +7134,6 @@ WFILE2:
         DC      SEMIS
 });_END_({ _HOSTED_DPMI_})
 ;
-;
 worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
 {Get the content of the file with name forthsamp({sc1});
 leave it as a string forthsamp({sc2}). Any errors are thrown. },
@@ -7083,13 +7159,36 @@ the name forthsamp({sc1}) ) . Any errors are thrown. },
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
 HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      ZERO, CREATEF, THROW
+        DC      _HOSTED_MSDOS_({ZERO})_LINUX_N_({LIT, 644Q})
+        DC      CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
         DC      FROMR, CFILE, THROW
         DC      SEMIS
 ;
-
+worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
+{Interpret the content of the file with name forthsamp({sc1})
+as if it was typed from the console, leaving result
+forthsamp({i*x}). },
+{{LOAD},{}},
+{{"hello.frt" INCLUDED},{Hello world!}},
+enddoc)
+HEADER({INCLUDED},{INCLUD},DOCOL)
+        DC      HERE, TOR
+        DC      LIT, GETFILE, CATCH
+        DC      LDUP
+        _0BRANCH(INCLUD1)
+        DC      FROMR, LDP, STORE
+        DC      THROW
+        _BRANCH(INCLUD2)
+INCLUD1:
+        DC      RDROP, DROP
+INCLUD2:
+        DC      EVALUATE
+        DC      SEMIS
+;
+});_END_({_FILES_})
+_MODERN_({
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the terminal input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
@@ -7460,7 +7559,7 @@ _PC_({
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthsamp({count}) characters from the
 terminal to address, until a forthkey({RET}) is received.
-_LINUX_({ The simple tty editing functions of Linux are
+_HOSTED_LINUX_({ The simple tty editing functions of Linux are
 observed, i.e. the ``erase'' (delete a character) and ``kill''
 (delete a line) characters. Typically these are the backspace
 key and ^U.}) _PC_({The editing functions such as described by
@@ -7874,67 +7973,6 @@ RSLW2:
 ;
 });_END_({_RWFILE_})
 _LINUX_N_({
-worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
-{Get the content of the file with name forthsamp({sc1});
-leave it as a string forthsamp({sc2}) .
-},
-{{BLOCK},{?LINUX-ERROR}},
-{{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
-enddoc)
-HEADER({GET-FILE},{GETFILE},DOCOL)
-        DC      HERE, TOR, LIT, 10000000, ALLOT
-        DC      RR, SSTOR, ZERO, RR, CHAPP ; {Unix requires a c-string.}
-        _STRINGINLINE({FiLeBuF})        ; {Magic number.}
-        DC      RR, SPTOR
-        DC      FROMR, SFET, OVER, PLUS, TOR
-        DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
-        DC      LDUP, QLERR
-        DC      LDUP, RR, LIT,  9999000
-        DC      LIT ,read, LINOS
-        DC      LDUP, QLERR, TOR
-        DC      ZERO,ZERO, LIT, close, LINOS, QLERR
-        DC      FROMR, FROMR, SWAP
-        DC      TDUP, PLUS, LDP, STORE
-        DC      SEMIS
-;
-worddoc( {STORAGE},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
-{Save the string constant forthsamp({sc2} as a new file with
-the name forthsamp({sc1}) ) . },
-{{BLOCK},{?LINUX-ERROR}},
-{{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
-enddoc)
-HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      PAD, SSTOR, ZERO, PAD, CHAPP ; {Unix requires a c-string.}
-        DC      TOR, TOR
-        DC      PAD, CELLP
-        DC      LIT, O_RDWR _OR_ O_CREAT, LIT, 777Q
-        DC      LIT, open, LINOS, LDUP, QLERR
-        DC      LDUP, FROMR, FROMR
-        DC      LIT, write, LINOS, QLERR
-        DC      ZERO,ZERO, LIT, close, LINOS, QLERR
-        DC      SEMIS
-;
-worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
-{Interpret the content of the file with name forthsamp({sc1})
-as if it was typed from the console, leaving result
-forthsamp({i*x}). },
-{{BLOCK},{?LINUX-ERROR}},
-{{"hello.frt" INCLUDED},{Hello world!}},
-enddoc)
-HEADER({INCLUDED},{INCLUD},DOCOL)
-        DC      HERE, TOR
-        DC      LIT, GETFILE, CATCH
-        DC      LDUP
-        _0BRANCH(INCLUD1)
-        DC      FROMR, LDP, STORE
-        DC      THROW
-        _BRANCH(INCLUD2)
-INCLUD1:
-        DC      RDROP, DROP
-INCLUD2:
-        DC      EVALUATE
-        DC      SEMIS
-;
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
 {Have the operating system execute the command contained
 in the string forthsamp({sc1}).
@@ -9216,7 +9254,7 @@ code. Its content is passed to the host environment while going
 forthcode({BYE}) . It is custom to return zero if there are no
 errors.
 _PC_({MSDOS allows only single byte return codes.})
-_LINUX_({Linux allows only single byte return codes.})
+_HOSTED_LINUX_({Linux allows only single byte return codes.})
 },{{BYE}},
 {{." See BYE"},{See BYE}},
 enddoc)
