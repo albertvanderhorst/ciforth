@@ -4,6 +4,8 @@ dnl Split each wordtest() struct into tests (odd) and testresults (even)
 dnl on different diversion.
 divert(-1)dnl
 changequote({,})dnl
+define({_T_},{-1})
+define({_TO_},{1})
 define({forall2}, {ifelse(len({$2}),0,{dnl},
 {$1}({{$2}},{{$3}}){forall2({$1},{$4},{$5},{$6},{$7},{$8},{$9},{$10})} )})dnl
 dnl Define a words test test on channel 2
