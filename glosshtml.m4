@@ -1,5 +1,5 @@
-include(prelude.m4)dnl
-include(postlude.m4)dnl
+dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl $Id$
 dnl Define a word definition on channel 9
 dnl        the corresponding menu item on channel 6
 dnl        and a definition for the second pass on channel 0

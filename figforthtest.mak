@@ -174,11 +174,11 @@ manual.mi   \
 
 %.rawdoc : %.asm ;
 
-%.info : prelude.m4 postlude.m4 manual.m4 figforth.mi menu.texinfo intro.mi manual.mi %.mi ;
-	cp $(@:%.info=%.mi) gloss.mi
-	make wordset.mi
-	(echo 'define(figforthversion,$@)' ; cat figforth.mi)| m4 | makeinfo
-	rm gloss.mi
+fig86.%.info : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
+	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.info=%.mi) )|m4 >wordset.mi
+	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.info=%.cfg) manual.m4 figforth.mi)|\
+	  m4 | makeinfo
+	rm wordset.mi
 
 # Sort the raw information and add the wordset headers
 %.mig : wordset.mig %.rawdoc ;
@@ -189,14 +189,14 @@ manual.mi   \
 menu.texinfo : menu.m4 wordset.mig ; m4 $+ >$@
 
 # For tex we do not need to use the safe macro's
-fig86.%.tex : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4 
+fig86.%.tex : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.tex=%.mi) )|m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
 	   m4 > $@
-#       rm menu.texinfo wordset.mi
+	rm wordset.mi
 
-gloss.html : prelude.m4 postlude.m4 glosshtml.m4 gloss.mig ; \
-       cat gloss.mig                    |\
-       sed -e s'/worddocsafe/worddoc/g' |\
-       sed -e 's/@ /@/g'               |\
-       m4 glosshtml.m4  - > $@
+fig86.%.html : %.cfg glosshtml.m4 fig86.%.mig
+	cat $+                           |\
+	sed -e s'/worddocsafe/worddoc/g' |\
+	sed -e 's/@ /@/g'                |\
+	m4 > $@
