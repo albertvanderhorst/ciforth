@@ -81,7 +81,7 @@ FF	EQU	0CH	; FORM FEED
 ;
 ;	MEMORY + I/O CONSTANTS
 ;
-EM	EQU	04000H	; END OF MEMORY + 1
+EM	EQU	10000H  ; END OF MEMORY + 1
 NBUF	EQU	2	; NO. OF BUFFERS AKA SCREENS 
 KBBUF	EQU	1024    ;DATA BYTES PER DISK BUFFER
 US	EQU	40H	; USER VARIABLE SPACE
@@ -338,6 +338,31 @@ LAINI:  DW	_LINK_FIELD(TASK) ; LAST WORD
 ;       the system under control, only to remove user programs.
 ;
 USINI:
+;____1_____ _MODERN_1_({
+	DW      0       ; INIT (OFFSET) 
+});_END___1__({_MODERN_1_})
+;____1_____ _USEDOS_1_({
+_COMMENT
+; This will steer clear of a forth executable, provided it is
+; the first file on the floppy. 
+; The 2 is rounding plus the extra sector in .EXE files.
+; However it deviates much from the classic model and requires
+; that the disk parameters are available (not only for USEBIOS)
+        DW      (INITDP-$$-1)/KBBUF+1 
+_ENDCOMMENT
+; So for now just the classic, swap disk after booting.
+	DW      0       ; INIT (OFFSET) 
+});_END___1__({_USEDOS_1_})
+;____1_____ _USEBIOS_1_({
+; This will reserve place for dos information, such that the floppy
+; can be accessed from DOS and makes sure blocks are not allocated
+; within the forth system itself. 
+; (X-1)/S+1 rounds up to whole `S', and yes both parts separately.
+        DW      (SECSTRT-1)/SPB+1 + (INITDP-$$-1)/KBBUF+1 
+                        ; INIT (OFFSET) 
+});_END___1__({_USEBIOS_1_})
+        DW      0       ; (Unused) 
+        DW      0       ; (Unused) 
 	DW 	INITS0	; INIT (S0)
 	DW 	INITR0	; INIT (R0)
 	DW 	STRTIB  ; INIT (TIB)
@@ -1031,7 +1056,7 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 	DW	SEMIS
 	PAGE
 ;
-; The following user variables are intialised 
+; The following user variables are initialised 
 ; with the values from USINI.
 ; Their numbers (6..16H) are fixed.
 HEADER({S0},{SZERO},{DOUSE})
@@ -1903,34 +1928,10 @@ HEADER({COLD},{COLD},{DOCOL})
 	DW	USE,STORE
 	DW	FIRST
 	DW	PREV,STORE
-;____1_____ _USEDOS_1_({
-_COMMENT
-; This will steer clear of a forth executable, provided it is
-; the first file on the floppy. 
-; The 2 is rounding plus the extra sector in .EXE files.
-; However it deviates much from the classic model and requires
-; that the disk parameters are available (not only for USEBIOS)
-	DW      LEM, BBUF, SLASH,TWOP
-	DW      OFSET,STORE
-_ENDCOMMENT
-	DW      ZERO, OFSET,STORE
-});_END___1__({_USEDOS_1_})
-;____1_____ _USEBIOS_1_({
-; This will reserve place for dos information, such that the floppy
-; can be accessed from DOS and makes sure blocks are not allocated
-; within the forth system itself. 
-; (X-1)/S+1 rounds up to whole `S'
-        DW      LIT, (SECSTRT-1)/SPB+1
-	DW      LIT, INITDP, ONE, LSUB, BBUF, SLASH,ONEP 
-        DW      PLUS
-	DW      OFSET,STORE
-});_END___1__({_USEBIOS_1_})
 	DW	LIT, USINI   
 	DW	LIT,UP
 	DW	FETCH
-	DW	LIT,6
-	DW	PLUS
-	DW	LIT,10H
+	DW	LIT,16H
 	DW	LCMOVE
 	DW	LIT,LAINI
 	DW	FETCH
@@ -1938,7 +1939,6 @@ _ENDCOMMENT
 	DW	STORE
 ;____1_____ _MODERN_1_({
 	DW      BLINI           ; Can abort!
-	DW      ZERO, OFSET,STORE
 });_END___1__({_MODERN_1_})
 	DW	ABORT
 	PAGE
@@ -2281,11 +2281,11 @@ HEADER({BIOS},{BIOS},{$ + 2})
 RQBIOS: INT(0)          ; Request number to be overwritten.
 	POP	BP	; Restore Forth registers. NEEDED? 
 	POP	SI	;INTERPRETER PNTR
-	PUSHF      ; Sometimes status is returned into flags!
 	PUSH     AX      
 	PUSH     BX      
 	PUSH     CX      
 	PUSH     DX      
+	PUSHF      ; Sometimes status is returned into flags!
 	JMP     NEXT    ;
 ; SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!
 
@@ -2350,12 +2350,10 @@ EMIT1:
 	DW      SEMIS
 ;
 HEADER({KEY},{KEY},{$+2})
-	DW      LIT,0800H 
-	DW      ZERO,ZERO,ZERO
-	DW      BDOS, DROP ; ignore error 
-	DW      DROP, DROP, DROP
-	DW      LIT, 0FFH, LAND
-	DW      SEMIS
+	DW         LIT, 1000H, ZERO, ZERO, ZERO
+	DW         LIT, 0016H, BIOS
+	DW         DROP,DROP,DROP,DROP
+	DW         LIT, 00FFH, LAND, SEMIS
 ;
 HEADER({?TERMINAL},{QTERM},{DOCOL})
 	DW      LIT,0B00H 
@@ -2423,8 +2421,7 @@ EXPE3	DW	EMIT
 	DW	SEMIS
 ;
 HEADER({KEY},{KEY},{$+2})
-	JMP	PKEY
-PKEY:	CALL	CI	;CONSOLE INPUT
+        CALL	CI	;CONSOLE INPUT
 	MOV     AH,0    ;MAKE 16 BITS
 	JMP	APUSH	;SAVE KEY VALUE
 CI	PROC	NEAR
@@ -2547,7 +2544,7 @@ EXPE3	DW	EMIT
 HEADER({KEY},{KEY},{DOCOL})
 	     DW         LIT, 1000H, ZERO, ZERO, ZERO
 	     DW         LIT, 0016H, BIOS
-	     DW         DROP,DROP,DROP,SWAP,DROP
+	     DW         DROP,DROP,DROP,DROP
 	     DW         LIT, 00FFH, LAND, SEMIS
 
 HEADER({TYPE},{TYPES},{DOCOL})
@@ -2579,8 +2576,10 @@ HEADER({(EMIT)},{PEMIT},{DOCOL})
 ;
 HEADER({?TERMINAL},{QTERM},{DOCOL})
 	     DW      LIT, 01100H, ZERO, ZERO, ZERO
-	     DW      LIT, 016H, BIOS, DROP, DROP, DROP, DROP
-	     DW      LIT, 040H, LAND, ZEQU, SEMIS
+	     DW      LIT, 016H, BIOS
+	     DW      LIT, 040H, LAND, ZEQU, TOR
+             DW      DROP, DROP, DROP, DROP
+             DW      FROMR, SEMIS
 
 	     ; Output to PRN 
 HEADER({POUT},{POUT},{DOCOL})
@@ -2604,7 +2603,7 @@ HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
 ;
 HEADER({DISK-ERR},{DERR},{DOCOL})
 	DW      ONE, LAND
-	DW      LIT, 21H, QERR
+	DW      LIT, 08H, QERR
 	DW	SEMIS
 ;
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
