@@ -26,7 +26,7 @@ _HOSTED_MSDOS_({C:\ciforth>thisforth}){}dnl
 _HOSTED_DPMI_({[After clicking on the thisforth icon]})}){}dnl
 _BOOTED_({[After booting]})
 
-80386 ciforth beta ${R}CSfile: ci86.gnr,v $ ${R}evision: 3.275) $
+_PROTECTED_(80386){}_REAL_(8088) ciforth beta ${R}CSfile: ci86.gnr,v $ ${R}evision: 3.275 $
 
 1 2 + 7 *
  OK

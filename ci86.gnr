@@ -8655,7 +8655,7 @@ HEADER({(BACK},{PBACK},{DOCOL})
 worddocsafe( {CONTROL~},{BACK)},{back_paren},{addr ---},{},
 {Complete a backward branch by compiling an offset from
 forthcode({HERE}) to forthvar({addr}), left there by
-forthcode({paren_BACK}) . _VERBOSE_({{Usage is
+forthcode({{{{{(BACK}}}}}) . _VERBOSE_({{Usage is
 forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) }})},
 {{LOOP},{UNTIL}},
 {{( See (BACK )},{}},
@@ -9818,7 +9818,7 @@ very smart, because its capabilities can be extended by new
 words based on those building blocks.},
 {},{},{},{})
 worddocchapter({SCREEN},{ },
-{Most of the forthdefin{blocks}) mass storage is used for forthdefi({screen})'s that
+{Most of the forthdefin({blocks}) mass storage is used for forthdefi({screen})'s that
 have 16 lines of 64 characters. They are used for source code
 and documentation.
 Each screen is one forthcode({BLOCK}) as required by ISO.
