@@ -1,5 +1,9 @@
  ( $Id$ )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+
+                          HEX
+ ASSEMBLER DEFINITIONS
+
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
 ( The patch ofr the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
@@ -137,11 +141,13 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 (   : D0|  ' [BP] REJECT D0|  ;                                         )
 (   : [BP] ' D0|  REJECT [BP] ;                                         )
 (   : R| ' LES, REJECT 'O LDS REJECT R| ;                               )
- ASSEMBLER DEFINITIONS
 (   : NEXT                                                              )
-(        LODS, W1|                                                      )
+(        LODS, W'|                                                      )
 (        MOV, W| F| AX'| R| BX|                                         )
 (        JMPO, D0| [BX]                                                 )
 (    ;                                                                  )
 ( ############## 8086 ASSEMBLER POST ################################## )
-( CODE JAN MOV|SG, T| ES| R| AX| C;                                     )
+( CODE JAN MOV|SG, T| ES| R| AX| ENDCODE                                )
+
+                        DECIMAL
+PREVIOUS DEFINITIONS

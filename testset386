@@ -1,3 +1,4 @@
+ASSEMBLER
 : firstset ." First set" ;
 !TALLY
 HEX
@@ -5421,582 +5422,582 @@ MOVZX|B, AL'| D0| [BX]
 MOVZX|B, AL'| D0| [DX]
 MOVZX|B, AL'| D0| [CX]
 MOVZX|B, AL'| D0| [AX]
-L|GS, DI'| MEM| 10 X,
-L|GS, DI'| DW| [DI] 14 X,
-L|GS, DI'| DW| [SI] 14 X,
-L|GS, DI'| DW| [BP] 14 X,
-L|GS, DI'| DW| [AX +1* BX] 18 X,
-L|GS, DI'| DW| [BX] 14 X,
-L|GS, DI'| DW| [DX] 14 X,
-L|GS, DI'| DW| [CX] 14 X,
-L|GS, DI'| DW| [AX] 14 X,
-L|GS, DI'| DB| [DI] 14 B,
-L|GS, DI'| DB| [SI] 14 B,
-L|GS, DI'| DB| [BP] 14 B,
-L|GS, DI'| DB| [AX +1* BX] 18 B,
-L|GS, DI'| DB| [BX] 14 B,
-L|GS, DI'| DB| [DX] 14 B,
-L|GS, DI'| DB| [CX] 14 B,
-L|GS, DI'| DB| [AX] 14 B,
-L|GS, DI'| D0| [DI]
-L|GS, DI'| D0| [SI]
-L|GS, DI'| D0| [AX +1* BX]
-L|GS, DI'| D0| [BX]
-L|GS, DI'| D0| [DX]
-L|GS, DI'| D0| [CX]
-L|GS, DI'| D0| [AX]
-L|GS, SI'| MEM| 10 X,
-L|GS, SI'| DW| [DI] 14 X,
-L|GS, SI'| DW| [SI] 14 X,
-L|GS, SI'| DW| [BP] 14 X,
-L|GS, SI'| DW| [AX +1* BX] 18 X,
-L|GS, SI'| DW| [BX] 14 X,
-L|GS, SI'| DW| [DX] 14 X,
-L|GS, SI'| DW| [CX] 14 X,
-L|GS, SI'| DW| [AX] 14 X,
-L|GS, SI'| DB| [DI] 14 B,
-L|GS, SI'| DB| [SI] 14 B,
-L|GS, SI'| DB| [BP] 14 B,
-L|GS, SI'| DB| [AX +1* BX] 18 B,
-L|GS, SI'| DB| [BX] 14 B,
-L|GS, SI'| DB| [DX] 14 B,
-L|GS, SI'| DB| [CX] 14 B,
-L|GS, SI'| DB| [AX] 14 B,
-L|GS, SI'| D0| [DI]
-L|GS, SI'| D0| [SI]
-L|GS, SI'| D0| [AX +1* BX]
-L|GS, SI'| D0| [BX]
-L|GS, SI'| D0| [DX]
-L|GS, SI'| D0| [CX]
-L|GS, SI'| D0| [AX]
-L|GS, BP'| MEM| 10 X,
-L|GS, BP'| DW| [DI] 14 X,
-L|GS, BP'| DW| [SI] 14 X,
-L|GS, BP'| DW| [BP] 14 X,
-L|GS, BP'| DW| [AX +1* BX] 18 X,
-L|GS, BP'| DW| [BX] 14 X,
-L|GS, BP'| DW| [DX] 14 X,
-L|GS, BP'| DW| [CX] 14 X,
-L|GS, BP'| DW| [AX] 14 X,
-L|GS, BP'| DB| [DI] 14 B,
-L|GS, BP'| DB| [SI] 14 B,
-L|GS, BP'| DB| [BP] 14 B,
-L|GS, BP'| DB| [AX +1* BX] 18 B,
-L|GS, BP'| DB| [BX] 14 B,
-L|GS, BP'| DB| [DX] 14 B,
-L|GS, BP'| DB| [CX] 14 B,
-L|GS, BP'| DB| [AX] 14 B,
-L|GS, BP'| D0| [DI]
-L|GS, BP'| D0| [SI]
-L|GS, BP'| D0| [AX +1* BX]
-L|GS, BP'| D0| [BX]
-L|GS, BP'| D0| [DX]
-L|GS, BP'| D0| [CX]
-L|GS, BP'| D0| [AX]
-L|GS, SP'| MEM| 10 X,
-L|GS, SP'| DW| [DI] 14 X,
-L|GS, SP'| DW| [SI] 14 X,
-L|GS, SP'| DW| [BP] 14 X,
-L|GS, SP'| DW| [AX +1* BX] 18 X,
-L|GS, SP'| DW| [BX] 14 X,
-L|GS, SP'| DW| [DX] 14 X,
-L|GS, SP'| DW| [CX] 14 X,
-L|GS, SP'| DW| [AX] 14 X,
-L|GS, SP'| DB| [DI] 14 B,
-L|GS, SP'| DB| [SI] 14 B,
-L|GS, SP'| DB| [BP] 14 B,
-L|GS, SP'| DB| [AX +1* BX] 18 B,
-L|GS, SP'| DB| [BX] 14 B,
-L|GS, SP'| DB| [DX] 14 B,
-L|GS, SP'| DB| [CX] 14 B,
-L|GS, SP'| DB| [AX] 14 B,
-L|GS, SP'| D0| [DI]
-L|GS, SP'| D0| [SI]
-L|GS, SP'| D0| [AX +1* BX]
-L|GS, SP'| D0| [BX]
-L|GS, SP'| D0| [DX]
-L|GS, SP'| D0| [CX]
-L|GS, SP'| D0| [AX]
-L|GS, BX'| MEM| 10 X,
-L|GS, BX'| DW| [DI] 14 X,
-L|GS, BX'| DW| [SI] 14 X,
-L|GS, BX'| DW| [BP] 14 X,
-L|GS, BX'| DW| [AX +1* BX] 18 X,
-L|GS, BX'| DW| [BX] 14 X,
-L|GS, BX'| DW| [DX] 14 X,
-L|GS, BX'| DW| [CX] 14 X,
-L|GS, BX'| DW| [AX] 14 X,
-L|GS, BX'| DB| [DI] 14 B,
-L|GS, BX'| DB| [SI] 14 B,
-L|GS, BX'| DB| [BP] 14 B,
-L|GS, BX'| DB| [AX +1* BX] 18 B,
-L|GS, BX'| DB| [BX] 14 B,
-L|GS, BX'| DB| [DX] 14 B,
-L|GS, BX'| DB| [CX] 14 B,
-L|GS, BX'| DB| [AX] 14 B,
-L|GS, BX'| D0| [DI]
-L|GS, BX'| D0| [SI]
-L|GS, BX'| D0| [AX +1* BX]
-L|GS, BX'| D0| [BX]
-L|GS, BX'| D0| [DX]
-L|GS, BX'| D0| [CX]
-L|GS, BX'| D0| [AX]
-L|GS, DX'| MEM| 10 X,
-L|GS, DX'| DW| [DI] 14 X,
-L|GS, DX'| DW| [SI] 14 X,
-L|GS, DX'| DW| [BP] 14 X,
-L|GS, DX'| DW| [AX +1* BX] 18 X,
-L|GS, DX'| DW| [BX] 14 X,
-L|GS, DX'| DW| [DX] 14 X,
-L|GS, DX'| DW| [CX] 14 X,
-L|GS, DX'| DW| [AX] 14 X,
-L|GS, DX'| DB| [DI] 14 B,
-L|GS, DX'| DB| [SI] 14 B,
-L|GS, DX'| DB| [BP] 14 B,
-L|GS, DX'| DB| [AX +1* BX] 18 B,
-L|GS, DX'| DB| [BX] 14 B,
-L|GS, DX'| DB| [DX] 14 B,
-L|GS, DX'| DB| [CX] 14 B,
-L|GS, DX'| DB| [AX] 14 B,
-L|GS, DX'| D0| [DI]
-L|GS, DX'| D0| [SI]
-L|GS, DX'| D0| [AX +1* BX]
-L|GS, DX'| D0| [BX]
-L|GS, DX'| D0| [DX]
-L|GS, DX'| D0| [CX]
-L|GS, DX'| D0| [AX]
-L|GS, CX'| MEM| 10 X,
-L|GS, CX'| DW| [DI] 14 X,
-L|GS, CX'| DW| [SI] 14 X,
-L|GS, CX'| DW| [BP] 14 X,
-L|GS, CX'| DW| [AX +1* BX] 18 X,
-L|GS, CX'| DW| [BX] 14 X,
-L|GS, CX'| DW| [DX] 14 X,
-L|GS, CX'| DW| [CX] 14 X,
-L|GS, CX'| DW| [AX] 14 X,
-L|GS, CX'| DB| [DI] 14 B,
-L|GS, CX'| DB| [SI] 14 B,
-L|GS, CX'| DB| [BP] 14 B,
-L|GS, CX'| DB| [AX +1* BX] 18 B,
-L|GS, CX'| DB| [BX] 14 B,
-L|GS, CX'| DB| [DX] 14 B,
-L|GS, CX'| DB| [CX] 14 B,
-L|GS, CX'| DB| [AX] 14 B,
-L|GS, CX'| D0| [DI]
-L|GS, CX'| D0| [SI]
-L|GS, CX'| D0| [AX +1* BX]
-L|GS, CX'| D0| [BX]
-L|GS, CX'| D0| [DX]
-L|GS, CX'| D0| [CX]
-L|GS, CX'| D0| [AX]
-L|GS, AX'| MEM| 10 X,
-L|GS, AX'| DW| [DI] 14 X,
-L|GS, AX'| DW| [SI] 14 X,
-L|GS, AX'| DW| [BP] 14 X,
-L|GS, AX'| DW| [AX +1* BX] 18 X,
-L|GS, AX'| DW| [BX] 14 X,
-L|GS, AX'| DW| [DX] 14 X,
-L|GS, AX'| DW| [CX] 14 X,
-L|GS, AX'| DW| [AX] 14 X,
-L|GS, AX'| DB| [DI] 14 B,
-L|GS, AX'| DB| [SI] 14 B,
-L|GS, AX'| DB| [BP] 14 B,
-L|GS, AX'| DB| [AX +1* BX] 18 B,
-L|GS, AX'| DB| [BX] 14 B,
-L|GS, AX'| DB| [DX] 14 B,
-L|GS, AX'| DB| [CX] 14 B,
-L|GS, AX'| DB| [AX] 14 B,
-L|GS, AX'| D0| [DI]
-L|GS, AX'| D0| [SI]
-L|GS, AX'| D0| [AX +1* BX]
-L|GS, AX'| D0| [BX]
-L|GS, AX'| D0| [DX]
-L|GS, AX'| D0| [CX]
-L|GS, AX'| D0| [AX]
-L|FS, DI'| MEM| 10 X,
-L|FS, DI'| DW| [DI] 14 X,
-L|FS, DI'| DW| [SI] 14 X,
-L|FS, DI'| DW| [BP] 14 X,
-L|FS, DI'| DW| [AX +1* BX] 18 X,
-L|FS, DI'| DW| [BX] 14 X,
-L|FS, DI'| DW| [DX] 14 X,
-L|FS, DI'| DW| [CX] 14 X,
-L|FS, DI'| DW| [AX] 14 X,
-L|FS, DI'| DB| [DI] 14 B,
-L|FS, DI'| DB| [SI] 14 B,
-L|FS, DI'| DB| [BP] 14 B,
-L|FS, DI'| DB| [AX +1* BX] 18 B,
-L|FS, DI'| DB| [BX] 14 B,
-L|FS, DI'| DB| [DX] 14 B,
-L|FS, DI'| DB| [CX] 14 B,
-L|FS, DI'| DB| [AX] 14 B,
-L|FS, DI'| D0| [DI]
-L|FS, DI'| D0| [SI]
-L|FS, DI'| D0| [AX +1* BX]
-L|FS, DI'| D0| [BX]
-L|FS, DI'| D0| [DX]
-L|FS, DI'| D0| [CX]
-L|FS, DI'| D0| [AX]
-L|FS, SI'| MEM| 10 X,
-L|FS, SI'| DW| [DI] 14 X,
-L|FS, SI'| DW| [SI] 14 X,
-L|FS, SI'| DW| [BP] 14 X,
-L|FS, SI'| DW| [AX +1* BX] 18 X,
-L|FS, SI'| DW| [BX] 14 X,
-L|FS, SI'| DW| [DX] 14 X,
-L|FS, SI'| DW| [CX] 14 X,
-L|FS, SI'| DW| [AX] 14 X,
-L|FS, SI'| DB| [DI] 14 B,
-L|FS, SI'| DB| [SI] 14 B,
-L|FS, SI'| DB| [BP] 14 B,
-L|FS, SI'| DB| [AX +1* BX] 18 B,
-L|FS, SI'| DB| [BX] 14 B,
-L|FS, SI'| DB| [DX] 14 B,
-L|FS, SI'| DB| [CX] 14 B,
-L|FS, SI'| DB| [AX] 14 B,
-L|FS, SI'| D0| [DI]
-L|FS, SI'| D0| [SI]
-L|FS, SI'| D0| [AX +1* BX]
-L|FS, SI'| D0| [BX]
-L|FS, SI'| D0| [DX]
-L|FS, SI'| D0| [CX]
-L|FS, SI'| D0| [AX]
-L|FS, BP'| MEM| 10 X,
-L|FS, BP'| DW| [DI] 14 X,
-L|FS, BP'| DW| [SI] 14 X,
-L|FS, BP'| DW| [BP] 14 X,
-L|FS, BP'| DW| [AX +1* BX] 18 X,
-L|FS, BP'| DW| [BX] 14 X,
-L|FS, BP'| DW| [DX] 14 X,
-L|FS, BP'| DW| [CX] 14 X,
-L|FS, BP'| DW| [AX] 14 X,
-L|FS, BP'| DB| [DI] 14 B,
-L|FS, BP'| DB| [SI] 14 B,
-L|FS, BP'| DB| [BP] 14 B,
-L|FS, BP'| DB| [AX +1* BX] 18 B,
-L|FS, BP'| DB| [BX] 14 B,
-L|FS, BP'| DB| [DX] 14 B,
-L|FS, BP'| DB| [CX] 14 B,
-L|FS, BP'| DB| [AX] 14 B,
-L|FS, BP'| D0| [DI]
-L|FS, BP'| D0| [SI]
-L|FS, BP'| D0| [AX +1* BX]
-L|FS, BP'| D0| [BX]
-L|FS, BP'| D0| [DX]
-L|FS, BP'| D0| [CX]
-L|FS, BP'| D0| [AX]
-L|FS, SP'| MEM| 10 X,
-L|FS, SP'| DW| [DI] 14 X,
-L|FS, SP'| DW| [SI] 14 X,
-L|FS, SP'| DW| [BP] 14 X,
-L|FS, SP'| DW| [AX +1* BX] 18 X,
-L|FS, SP'| DW| [BX] 14 X,
-L|FS, SP'| DW| [DX] 14 X,
-L|FS, SP'| DW| [CX] 14 X,
-L|FS, SP'| DW| [AX] 14 X,
-L|FS, SP'| DB| [DI] 14 B,
-L|FS, SP'| DB| [SI] 14 B,
-L|FS, SP'| DB| [BP] 14 B,
-L|FS, SP'| DB| [AX +1* BX] 18 B,
-L|FS, SP'| DB| [BX] 14 B,
-L|FS, SP'| DB| [DX] 14 B,
-L|FS, SP'| DB| [CX] 14 B,
-L|FS, SP'| DB| [AX] 14 B,
-L|FS, SP'| D0| [DI]
-L|FS, SP'| D0| [SI]
-L|FS, SP'| D0| [AX +1* BX]
-L|FS, SP'| D0| [BX]
-L|FS, SP'| D0| [DX]
-L|FS, SP'| D0| [CX]
-L|FS, SP'| D0| [AX]
-L|FS, BX'| MEM| 10 X,
-L|FS, BX'| DW| [DI] 14 X,
-L|FS, BX'| DW| [SI] 14 X,
-L|FS, BX'| DW| [BP] 14 X,
-L|FS, BX'| DW| [AX +1* BX] 18 X,
-L|FS, BX'| DW| [BX] 14 X,
-L|FS, BX'| DW| [DX] 14 X,
-L|FS, BX'| DW| [CX] 14 X,
-L|FS, BX'| DW| [AX] 14 X,
-L|FS, BX'| DB| [DI] 14 B,
-L|FS, BX'| DB| [SI] 14 B,
-L|FS, BX'| DB| [BP] 14 B,
-L|FS, BX'| DB| [AX +1* BX] 18 B,
-L|FS, BX'| DB| [BX] 14 B,
-L|FS, BX'| DB| [DX] 14 B,
-L|FS, BX'| DB| [CX] 14 B,
-L|FS, BX'| DB| [AX] 14 B,
-L|FS, BX'| D0| [DI]
-L|FS, BX'| D0| [SI]
-L|FS, BX'| D0| [AX +1* BX]
-L|FS, BX'| D0| [BX]
-L|FS, BX'| D0| [DX]
-L|FS, BX'| D0| [CX]
-L|FS, BX'| D0| [AX]
-L|FS, DX'| MEM| 10 X,
-L|FS, DX'| DW| [DI] 14 X,
-L|FS, DX'| DW| [SI] 14 X,
-L|FS, DX'| DW| [BP] 14 X,
-L|FS, DX'| DW| [AX +1* BX] 18 X,
-L|FS, DX'| DW| [BX] 14 X,
-L|FS, DX'| DW| [DX] 14 X,
-L|FS, DX'| DW| [CX] 14 X,
-L|FS, DX'| DW| [AX] 14 X,
-L|FS, DX'| DB| [DI] 14 B,
-L|FS, DX'| DB| [SI] 14 B,
-L|FS, DX'| DB| [BP] 14 B,
-L|FS, DX'| DB| [AX +1* BX] 18 B,
-L|FS, DX'| DB| [BX] 14 B,
-L|FS, DX'| DB| [DX] 14 B,
-L|FS, DX'| DB| [CX] 14 B,
-L|FS, DX'| DB| [AX] 14 B,
-L|FS, DX'| D0| [DI]
-L|FS, DX'| D0| [SI]
-L|FS, DX'| D0| [AX +1* BX]
-L|FS, DX'| D0| [BX]
-L|FS, DX'| D0| [DX]
-L|FS, DX'| D0| [CX]
-L|FS, DX'| D0| [AX]
-L|FS, CX'| MEM| 10 X,
-L|FS, CX'| DW| [DI] 14 X,
-L|FS, CX'| DW| [SI] 14 X,
-L|FS, CX'| DW| [BP] 14 X,
-L|FS, CX'| DW| [AX +1* BX] 18 X,
-L|FS, CX'| DW| [BX] 14 X,
-L|FS, CX'| DW| [DX] 14 X,
-L|FS, CX'| DW| [CX] 14 X,
-L|FS, CX'| DW| [AX] 14 X,
-L|FS, CX'| DB| [DI] 14 B,
-L|FS, CX'| DB| [SI] 14 B,
-L|FS, CX'| DB| [BP] 14 B,
-L|FS, CX'| DB| [AX +1* BX] 18 B,
-L|FS, CX'| DB| [BX] 14 B,
-L|FS, CX'| DB| [DX] 14 B,
-L|FS, CX'| DB| [CX] 14 B,
-L|FS, CX'| DB| [AX] 14 B,
-L|FS, CX'| D0| [DI]
-L|FS, CX'| D0| [SI]
-L|FS, CX'| D0| [AX +1* BX]
-L|FS, CX'| D0| [BX]
-L|FS, CX'| D0| [DX]
-L|FS, CX'| D0| [CX]
-L|FS, CX'| D0| [AX]
-L|FS, AX'| MEM| 10 X,
-L|FS, AX'| DW| [DI] 14 X,
-L|FS, AX'| DW| [SI] 14 X,
-L|FS, AX'| DW| [BP] 14 X,
-L|FS, AX'| DW| [AX +1* BX] 18 X,
-L|FS, AX'| DW| [BX] 14 X,
-L|FS, AX'| DW| [DX] 14 X,
-L|FS, AX'| DW| [CX] 14 X,
-L|FS, AX'| DW| [AX] 14 X,
-L|FS, AX'| DB| [DI] 14 B,
-L|FS, AX'| DB| [SI] 14 B,
-L|FS, AX'| DB| [BP] 14 B,
-L|FS, AX'| DB| [AX +1* BX] 18 B,
-L|FS, AX'| DB| [BX] 14 B,
-L|FS, AX'| DB| [DX] 14 B,
-L|FS, AX'| DB| [CX] 14 B,
-L|FS, AX'| DB| [AX] 14 B,
-L|FS, AX'| D0| [DI]
-L|FS, AX'| D0| [SI]
-L|FS, AX'| D0| [AX +1* BX]
-L|FS, AX'| D0| [BX]
-L|FS, AX'| D0| [DX]
-L|FS, AX'| D0| [CX]
-L|FS, AX'| D0| [AX]
-L|SS, DI'| MEM| 10 X,
-L|SS, DI'| DW| [DI] 14 X,
-L|SS, DI'| DW| [SI] 14 X,
-L|SS, DI'| DW| [BP] 14 X,
-L|SS, DI'| DW| [AX +1* BX] 18 X,
-L|SS, DI'| DW| [BX] 14 X,
-L|SS, DI'| DW| [DX] 14 X,
-L|SS, DI'| DW| [CX] 14 X,
-L|SS, DI'| DW| [AX] 14 X,
-L|SS, DI'| DB| [DI] 14 B,
-L|SS, DI'| DB| [SI] 14 B,
-L|SS, DI'| DB| [BP] 14 B,
-L|SS, DI'| DB| [AX +1* BX] 18 B,
-L|SS, DI'| DB| [BX] 14 B,
-L|SS, DI'| DB| [DX] 14 B,
-L|SS, DI'| DB| [CX] 14 B,
-L|SS, DI'| DB| [AX] 14 B,
-L|SS, DI'| D0| [DI]
-L|SS, DI'| D0| [SI]
-L|SS, DI'| D0| [AX +1* BX]
-L|SS, DI'| D0| [BX]
-L|SS, DI'| D0| [DX]
-L|SS, DI'| D0| [CX]
-L|SS, DI'| D0| [AX]
-L|SS, SI'| MEM| 10 X,
-L|SS, SI'| DW| [DI] 14 X,
-L|SS, SI'| DW| [SI] 14 X,
-L|SS, SI'| DW| [BP] 14 X,
-L|SS, SI'| DW| [AX +1* BX] 18 X,
-L|SS, SI'| DW| [BX] 14 X,
-L|SS, SI'| DW| [DX] 14 X,
-L|SS, SI'| DW| [CX] 14 X,
-L|SS, SI'| DW| [AX] 14 X,
-L|SS, SI'| DB| [DI] 14 B,
-L|SS, SI'| DB| [SI] 14 B,
-L|SS, SI'| DB| [BP] 14 B,
-L|SS, SI'| DB| [AX +1* BX] 18 B,
-L|SS, SI'| DB| [BX] 14 B,
-L|SS, SI'| DB| [DX] 14 B,
-L|SS, SI'| DB| [CX] 14 B,
-L|SS, SI'| DB| [AX] 14 B,
-L|SS, SI'| D0| [DI]
-L|SS, SI'| D0| [SI]
-L|SS, SI'| D0| [AX +1* BX]
-L|SS, SI'| D0| [BX]
-L|SS, SI'| D0| [DX]
-L|SS, SI'| D0| [CX]
-L|SS, SI'| D0| [AX]
-L|SS, BP'| MEM| 10 X,
-L|SS, BP'| DW| [DI] 14 X,
-L|SS, BP'| DW| [SI] 14 X,
-L|SS, BP'| DW| [BP] 14 X,
-L|SS, BP'| DW| [AX +1* BX] 18 X,
-L|SS, BP'| DW| [BX] 14 X,
-L|SS, BP'| DW| [DX] 14 X,
-L|SS, BP'| DW| [CX] 14 X,
-L|SS, BP'| DW| [AX] 14 X,
-L|SS, BP'| DB| [DI] 14 B,
-L|SS, BP'| DB| [SI] 14 B,
-L|SS, BP'| DB| [BP] 14 B,
-L|SS, BP'| DB| [AX +1* BX] 18 B,
-L|SS, BP'| DB| [BX] 14 B,
-L|SS, BP'| DB| [DX] 14 B,
-L|SS, BP'| DB| [CX] 14 B,
-L|SS, BP'| DB| [AX] 14 B,
-L|SS, BP'| D0| [DI]
-L|SS, BP'| D0| [SI]
-L|SS, BP'| D0| [AX +1* BX]
-L|SS, BP'| D0| [BX]
-L|SS, BP'| D0| [DX]
-L|SS, BP'| D0| [CX]
-L|SS, BP'| D0| [AX]
-L|SS, SP'| MEM| 10 X,
-L|SS, SP'| DW| [DI] 14 X,
-L|SS, SP'| DW| [SI] 14 X,
-L|SS, SP'| DW| [BP] 14 X,
-L|SS, SP'| DW| [AX +1* BX] 18 X,
-L|SS, SP'| DW| [BX] 14 X,
-L|SS, SP'| DW| [DX] 14 X,
-L|SS, SP'| DW| [CX] 14 X,
-L|SS, SP'| DW| [AX] 14 X,
-L|SS, SP'| DB| [DI] 14 B,
-L|SS, SP'| DB| [SI] 14 B,
-L|SS, SP'| DB| [BP] 14 B,
-L|SS, SP'| DB| [AX +1* BX] 18 B,
-L|SS, SP'| DB| [BX] 14 B,
-L|SS, SP'| DB| [DX] 14 B,
-L|SS, SP'| DB| [CX] 14 B,
-L|SS, SP'| DB| [AX] 14 B,
-L|SS, SP'| D0| [DI]
-L|SS, SP'| D0| [SI]
-L|SS, SP'| D0| [AX +1* BX]
-L|SS, SP'| D0| [BX]
-L|SS, SP'| D0| [DX]
-L|SS, SP'| D0| [CX]
-L|SS, SP'| D0| [AX]
-L|SS, BX'| MEM| 10 X,
-L|SS, BX'| DW| [DI] 14 X,
-L|SS, BX'| DW| [SI] 14 X,
-L|SS, BX'| DW| [BP] 14 X,
-L|SS, BX'| DW| [AX +1* BX] 18 X,
-L|SS, BX'| DW| [BX] 14 X,
-L|SS, BX'| DW| [DX] 14 X,
-L|SS, BX'| DW| [CX] 14 X,
-L|SS, BX'| DW| [AX] 14 X,
-L|SS, BX'| DB| [DI] 14 B,
-L|SS, BX'| DB| [SI] 14 B,
-L|SS, BX'| DB| [BP] 14 B,
-L|SS, BX'| DB| [AX +1* BX] 18 B,
-L|SS, BX'| DB| [BX] 14 B,
-L|SS, BX'| DB| [DX] 14 B,
-L|SS, BX'| DB| [CX] 14 B,
-L|SS, BX'| DB| [AX] 14 B,
-L|SS, BX'| D0| [DI]
-L|SS, BX'| D0| [SI]
-L|SS, BX'| D0| [AX +1* BX]
-L|SS, BX'| D0| [BX]
-L|SS, BX'| D0| [DX]
-L|SS, BX'| D0| [CX]
-L|SS, BX'| D0| [AX]
-L|SS, DX'| MEM| 10 X,
-L|SS, DX'| DW| [DI] 14 X,
-L|SS, DX'| DW| [SI] 14 X,
-L|SS, DX'| DW| [BP] 14 X,
-L|SS, DX'| DW| [AX +1* BX] 18 X,
-L|SS, DX'| DW| [BX] 14 X,
-L|SS, DX'| DW| [DX] 14 X,
-L|SS, DX'| DW| [CX] 14 X,
-L|SS, DX'| DW| [AX] 14 X,
-L|SS, DX'| DB| [DI] 14 B,
-L|SS, DX'| DB| [SI] 14 B,
-L|SS, DX'| DB| [BP] 14 B,
-L|SS, DX'| DB| [AX +1* BX] 18 B,
-L|SS, DX'| DB| [BX] 14 B,
-L|SS, DX'| DB| [DX] 14 B,
-L|SS, DX'| DB| [CX] 14 B,
-L|SS, DX'| DB| [AX] 14 B,
-L|SS, DX'| D0| [DI]
-L|SS, DX'| D0| [SI]
-L|SS, DX'| D0| [AX +1* BX]
-L|SS, DX'| D0| [BX]
-L|SS, DX'| D0| [DX]
-L|SS, DX'| D0| [CX]
-L|SS, DX'| D0| [AX]
-L|SS, CX'| MEM| 10 X,
-L|SS, CX'| DW| [DI] 14 X,
-L|SS, CX'| DW| [SI] 14 X,
-L|SS, CX'| DW| [BP] 14 X,
-L|SS, CX'| DW| [AX +1* BX] 18 X,
-L|SS, CX'| DW| [BX] 14 X,
-L|SS, CX'| DW| [DX] 14 X,
-L|SS, CX'| DW| [CX] 14 X,
-L|SS, CX'| DW| [AX] 14 X,
-L|SS, CX'| DB| [DI] 14 B,
-L|SS, CX'| DB| [SI] 14 B,
-L|SS, CX'| DB| [BP] 14 B,
-L|SS, CX'| DB| [AX +1* BX] 18 B,
-L|SS, CX'| DB| [BX] 14 B,
-L|SS, CX'| DB| [DX] 14 B,
-L|SS, CX'| DB| [CX] 14 B,
-L|SS, CX'| DB| [AX] 14 B,
-L|SS, CX'| D0| [DI]
-L|SS, CX'| D0| [SI]
-L|SS, CX'| D0| [AX +1* BX]
-L|SS, CX'| D0| [BX]
-L|SS, CX'| D0| [DX]
-L|SS, CX'| D0| [CX]
-L|SS, CX'| D0| [AX]
-L|SS, AX'| MEM| 10 X,
-L|SS, AX'| DW| [DI] 14 X,
-L|SS, AX'| DW| [SI] 14 X,
-L|SS, AX'| DW| [BP] 14 X,
-L|SS, AX'| DW| [AX +1* BX] 18 X,
-L|SS, AX'| DW| [BX] 14 X,
-L|SS, AX'| DW| [DX] 14 X,
-L|SS, AX'| DW| [CX] 14 X,
-L|SS, AX'| DW| [AX] 14 X,
-L|SS, AX'| DB| [DI] 14 B,
-L|SS, AX'| DB| [SI] 14 B,
-L|SS, AX'| DB| [BP] 14 B,
-L|SS, AX'| DB| [AX +1* BX] 18 B,
-L|SS, AX'| DB| [BX] 14 B,
-L|SS, AX'| DB| [DX] 14 B,
-L|SS, AX'| DB| [CX] 14 B,
-L|SS, AX'| DB| [AX] 14 B,
-L|SS, AX'| D0| [DI]
-L|SS, AX'| D0| [SI]
-L|SS, AX'| D0| [AX +1* BX]
-L|SS, AX'| D0| [BX]
-L|SS, AX'| D0| [DX]
-L|SS, AX'| D0| [CX]
-L|SS, AX'| D0| [AX]
+LGS, DI'| MEM| 10 X,
+LGS, DI'| DW| [DI] 14 X,
+LGS, DI'| DW| [SI] 14 X,
+LGS, DI'| DW| [BP] 14 X,
+LGS, DI'| DW| [AX +1* BX] 18 X,
+LGS, DI'| DW| [BX] 14 X,
+LGS, DI'| DW| [DX] 14 X,
+LGS, DI'| DW| [CX] 14 X,
+LGS, DI'| DW| [AX] 14 X,
+LGS, DI'| DB| [DI] 14 B,
+LGS, DI'| DB| [SI] 14 B,
+LGS, DI'| DB| [BP] 14 B,
+LGS, DI'| DB| [AX +1* BX] 18 B,
+LGS, DI'| DB| [BX] 14 B,
+LGS, DI'| DB| [DX] 14 B,
+LGS, DI'| DB| [CX] 14 B,
+LGS, DI'| DB| [AX] 14 B,
+LGS, DI'| D0| [DI]
+LGS, DI'| D0| [SI]
+LGS, DI'| D0| [AX +1* BX]
+LGS, DI'| D0| [BX]
+LGS, DI'| D0| [DX]
+LGS, DI'| D0| [CX]
+LGS, DI'| D0| [AX]
+LGS, SI'| MEM| 10 X,
+LGS, SI'| DW| [DI] 14 X,
+LGS, SI'| DW| [SI] 14 X,
+LGS, SI'| DW| [BP] 14 X,
+LGS, SI'| DW| [AX +1* BX] 18 X,
+LGS, SI'| DW| [BX] 14 X,
+LGS, SI'| DW| [DX] 14 X,
+LGS, SI'| DW| [CX] 14 X,
+LGS, SI'| DW| [AX] 14 X,
+LGS, SI'| DB| [DI] 14 B,
+LGS, SI'| DB| [SI] 14 B,
+LGS, SI'| DB| [BP] 14 B,
+LGS, SI'| DB| [AX +1* BX] 18 B,
+LGS, SI'| DB| [BX] 14 B,
+LGS, SI'| DB| [DX] 14 B,
+LGS, SI'| DB| [CX] 14 B,
+LGS, SI'| DB| [AX] 14 B,
+LGS, SI'| D0| [DI]
+LGS, SI'| D0| [SI]
+LGS, SI'| D0| [AX +1* BX]
+LGS, SI'| D0| [BX]
+LGS, SI'| D0| [DX]
+LGS, SI'| D0| [CX]
+LGS, SI'| D0| [AX]
+LGS, BP'| MEM| 10 X,
+LGS, BP'| DW| [DI] 14 X,
+LGS, BP'| DW| [SI] 14 X,
+LGS, BP'| DW| [BP] 14 X,
+LGS, BP'| DW| [AX +1* BX] 18 X,
+LGS, BP'| DW| [BX] 14 X,
+LGS, BP'| DW| [DX] 14 X,
+LGS, BP'| DW| [CX] 14 X,
+LGS, BP'| DW| [AX] 14 X,
+LGS, BP'| DB| [DI] 14 B,
+LGS, BP'| DB| [SI] 14 B,
+LGS, BP'| DB| [BP] 14 B,
+LGS, BP'| DB| [AX +1* BX] 18 B,
+LGS, BP'| DB| [BX] 14 B,
+LGS, BP'| DB| [DX] 14 B,
+LGS, BP'| DB| [CX] 14 B,
+LGS, BP'| DB| [AX] 14 B,
+LGS, BP'| D0| [DI]
+LGS, BP'| D0| [SI]
+LGS, BP'| D0| [AX +1* BX]
+LGS, BP'| D0| [BX]
+LGS, BP'| D0| [DX]
+LGS, BP'| D0| [CX]
+LGS, BP'| D0| [AX]
+LGS, SP'| MEM| 10 X,
+LGS, SP'| DW| [DI] 14 X,
+LGS, SP'| DW| [SI] 14 X,
+LGS, SP'| DW| [BP] 14 X,
+LGS, SP'| DW| [AX +1* BX] 18 X,
+LGS, SP'| DW| [BX] 14 X,
+LGS, SP'| DW| [DX] 14 X,
+LGS, SP'| DW| [CX] 14 X,
+LGS, SP'| DW| [AX] 14 X,
+LGS, SP'| DB| [DI] 14 B,
+LGS, SP'| DB| [SI] 14 B,
+LGS, SP'| DB| [BP] 14 B,
+LGS, SP'| DB| [AX +1* BX] 18 B,
+LGS, SP'| DB| [BX] 14 B,
+LGS, SP'| DB| [DX] 14 B,
+LGS, SP'| DB| [CX] 14 B,
+LGS, SP'| DB| [AX] 14 B,
+LGS, SP'| D0| [DI]
+LGS, SP'| D0| [SI]
+LGS, SP'| D0| [AX +1* BX]
+LGS, SP'| D0| [BX]
+LGS, SP'| D0| [DX]
+LGS, SP'| D0| [CX]
+LGS, SP'| D0| [AX]
+LGS, BX'| MEM| 10 X,
+LGS, BX'| DW| [DI] 14 X,
+LGS, BX'| DW| [SI] 14 X,
+LGS, BX'| DW| [BP] 14 X,
+LGS, BX'| DW| [AX +1* BX] 18 X,
+LGS, BX'| DW| [BX] 14 X,
+LGS, BX'| DW| [DX] 14 X,
+LGS, BX'| DW| [CX] 14 X,
+LGS, BX'| DW| [AX] 14 X,
+LGS, BX'| DB| [DI] 14 B,
+LGS, BX'| DB| [SI] 14 B,
+LGS, BX'| DB| [BP] 14 B,
+LGS, BX'| DB| [AX +1* BX] 18 B,
+LGS, BX'| DB| [BX] 14 B,
+LGS, BX'| DB| [DX] 14 B,
+LGS, BX'| DB| [CX] 14 B,
+LGS, BX'| DB| [AX] 14 B,
+LGS, BX'| D0| [DI]
+LGS, BX'| D0| [SI]
+LGS, BX'| D0| [AX +1* BX]
+LGS, BX'| D0| [BX]
+LGS, BX'| D0| [DX]
+LGS, BX'| D0| [CX]
+LGS, BX'| D0| [AX]
+LGS, DX'| MEM| 10 X,
+LGS, DX'| DW| [DI] 14 X,
+LGS, DX'| DW| [SI] 14 X,
+LGS, DX'| DW| [BP] 14 X,
+LGS, DX'| DW| [AX +1* BX] 18 X,
+LGS, DX'| DW| [BX] 14 X,
+LGS, DX'| DW| [DX] 14 X,
+LGS, DX'| DW| [CX] 14 X,
+LGS, DX'| DW| [AX] 14 X,
+LGS, DX'| DB| [DI] 14 B,
+LGS, DX'| DB| [SI] 14 B,
+LGS, DX'| DB| [BP] 14 B,
+LGS, DX'| DB| [AX +1* BX] 18 B,
+LGS, DX'| DB| [BX] 14 B,
+LGS, DX'| DB| [DX] 14 B,
+LGS, DX'| DB| [CX] 14 B,
+LGS, DX'| DB| [AX] 14 B,
+LGS, DX'| D0| [DI]
+LGS, DX'| D0| [SI]
+LGS, DX'| D0| [AX +1* BX]
+LGS, DX'| D0| [BX]
+LGS, DX'| D0| [DX]
+LGS, DX'| D0| [CX]
+LGS, DX'| D0| [AX]
+LGS, CX'| MEM| 10 X,
+LGS, CX'| DW| [DI] 14 X,
+LGS, CX'| DW| [SI] 14 X,
+LGS, CX'| DW| [BP] 14 X,
+LGS, CX'| DW| [AX +1* BX] 18 X,
+LGS, CX'| DW| [BX] 14 X,
+LGS, CX'| DW| [DX] 14 X,
+LGS, CX'| DW| [CX] 14 X,
+LGS, CX'| DW| [AX] 14 X,
+LGS, CX'| DB| [DI] 14 B,
+LGS, CX'| DB| [SI] 14 B,
+LGS, CX'| DB| [BP] 14 B,
+LGS, CX'| DB| [AX +1* BX] 18 B,
+LGS, CX'| DB| [BX] 14 B,
+LGS, CX'| DB| [DX] 14 B,
+LGS, CX'| DB| [CX] 14 B,
+LGS, CX'| DB| [AX] 14 B,
+LGS, CX'| D0| [DI]
+LGS, CX'| D0| [SI]
+LGS, CX'| D0| [AX +1* BX]
+LGS, CX'| D0| [BX]
+LGS, CX'| D0| [DX]
+LGS, CX'| D0| [CX]
+LGS, CX'| D0| [AX]
+LGS, AX'| MEM| 10 X,
+LGS, AX'| DW| [DI] 14 X,
+LGS, AX'| DW| [SI] 14 X,
+LGS, AX'| DW| [BP] 14 X,
+LGS, AX'| DW| [AX +1* BX] 18 X,
+LGS, AX'| DW| [BX] 14 X,
+LGS, AX'| DW| [DX] 14 X,
+LGS, AX'| DW| [CX] 14 X,
+LGS, AX'| DW| [AX] 14 X,
+LGS, AX'| DB| [DI] 14 B,
+LGS, AX'| DB| [SI] 14 B,
+LGS, AX'| DB| [BP] 14 B,
+LGS, AX'| DB| [AX +1* BX] 18 B,
+LGS, AX'| DB| [BX] 14 B,
+LGS, AX'| DB| [DX] 14 B,
+LGS, AX'| DB| [CX] 14 B,
+LGS, AX'| DB| [AX] 14 B,
+LGS, AX'| D0| [DI]
+LGS, AX'| D0| [SI]
+LGS, AX'| D0| [AX +1* BX]
+LGS, AX'| D0| [BX]
+LGS, AX'| D0| [DX]
+LGS, AX'| D0| [CX]
+LGS, AX'| D0| [AX]
+LFS, DI'| MEM| 10 X,
+LFS, DI'| DW| [DI] 14 X,
+LFS, DI'| DW| [SI] 14 X,
+LFS, DI'| DW| [BP] 14 X,
+LFS, DI'| DW| [AX +1* BX] 18 X,
+LFS, DI'| DW| [BX] 14 X,
+LFS, DI'| DW| [DX] 14 X,
+LFS, DI'| DW| [CX] 14 X,
+LFS, DI'| DW| [AX] 14 X,
+LFS, DI'| DB| [DI] 14 B,
+LFS, DI'| DB| [SI] 14 B,
+LFS, DI'| DB| [BP] 14 B,
+LFS, DI'| DB| [AX +1* BX] 18 B,
+LFS, DI'| DB| [BX] 14 B,
+LFS, DI'| DB| [DX] 14 B,
+LFS, DI'| DB| [CX] 14 B,
+LFS, DI'| DB| [AX] 14 B,
+LFS, DI'| D0| [DI]
+LFS, DI'| D0| [SI]
+LFS, DI'| D0| [AX +1* BX]
+LFS, DI'| D0| [BX]
+LFS, DI'| D0| [DX]
+LFS, DI'| D0| [CX]
+LFS, DI'| D0| [AX]
+LFS, SI'| MEM| 10 X,
+LFS, SI'| DW| [DI] 14 X,
+LFS, SI'| DW| [SI] 14 X,
+LFS, SI'| DW| [BP] 14 X,
+LFS, SI'| DW| [AX +1* BX] 18 X,
+LFS, SI'| DW| [BX] 14 X,
+LFS, SI'| DW| [DX] 14 X,
+LFS, SI'| DW| [CX] 14 X,
+LFS, SI'| DW| [AX] 14 X,
+LFS, SI'| DB| [DI] 14 B,
+LFS, SI'| DB| [SI] 14 B,
+LFS, SI'| DB| [BP] 14 B,
+LFS, SI'| DB| [AX +1* BX] 18 B,
+LFS, SI'| DB| [BX] 14 B,
+LFS, SI'| DB| [DX] 14 B,
+LFS, SI'| DB| [CX] 14 B,
+LFS, SI'| DB| [AX] 14 B,
+LFS, SI'| D0| [DI]
+LFS, SI'| D0| [SI]
+LFS, SI'| D0| [AX +1* BX]
+LFS, SI'| D0| [BX]
+LFS, SI'| D0| [DX]
+LFS, SI'| D0| [CX]
+LFS, SI'| D0| [AX]
+LFS, BP'| MEM| 10 X,
+LFS, BP'| DW| [DI] 14 X,
+LFS, BP'| DW| [SI] 14 X,
+LFS, BP'| DW| [BP] 14 X,
+LFS, BP'| DW| [AX +1* BX] 18 X,
+LFS, BP'| DW| [BX] 14 X,
+LFS, BP'| DW| [DX] 14 X,
+LFS, BP'| DW| [CX] 14 X,
+LFS, BP'| DW| [AX] 14 X,
+LFS, BP'| DB| [DI] 14 B,
+LFS, BP'| DB| [SI] 14 B,
+LFS, BP'| DB| [BP] 14 B,
+LFS, BP'| DB| [AX +1* BX] 18 B,
+LFS, BP'| DB| [BX] 14 B,
+LFS, BP'| DB| [DX] 14 B,
+LFS, BP'| DB| [CX] 14 B,
+LFS, BP'| DB| [AX] 14 B,
+LFS, BP'| D0| [DI]
+LFS, BP'| D0| [SI]
+LFS, BP'| D0| [AX +1* BX]
+LFS, BP'| D0| [BX]
+LFS, BP'| D0| [DX]
+LFS, BP'| D0| [CX]
+LFS, BP'| D0| [AX]
+LFS, SP'| MEM| 10 X,
+LFS, SP'| DW| [DI] 14 X,
+LFS, SP'| DW| [SI] 14 X,
+LFS, SP'| DW| [BP] 14 X,
+LFS, SP'| DW| [AX +1* BX] 18 X,
+LFS, SP'| DW| [BX] 14 X,
+LFS, SP'| DW| [DX] 14 X,
+LFS, SP'| DW| [CX] 14 X,
+LFS, SP'| DW| [AX] 14 X,
+LFS, SP'| DB| [DI] 14 B,
+LFS, SP'| DB| [SI] 14 B,
+LFS, SP'| DB| [BP] 14 B,
+LFS, SP'| DB| [AX +1* BX] 18 B,
+LFS, SP'| DB| [BX] 14 B,
+LFS, SP'| DB| [DX] 14 B,
+LFS, SP'| DB| [CX] 14 B,
+LFS, SP'| DB| [AX] 14 B,
+LFS, SP'| D0| [DI]
+LFS, SP'| D0| [SI]
+LFS, SP'| D0| [AX +1* BX]
+LFS, SP'| D0| [BX]
+LFS, SP'| D0| [DX]
+LFS, SP'| D0| [CX]
+LFS, SP'| D0| [AX]
+LFS, BX'| MEM| 10 X,
+LFS, BX'| DW| [DI] 14 X,
+LFS, BX'| DW| [SI] 14 X,
+LFS, BX'| DW| [BP] 14 X,
+LFS, BX'| DW| [AX +1* BX] 18 X,
+LFS, BX'| DW| [BX] 14 X,
+LFS, BX'| DW| [DX] 14 X,
+LFS, BX'| DW| [CX] 14 X,
+LFS, BX'| DW| [AX] 14 X,
+LFS, BX'| DB| [DI] 14 B,
+LFS, BX'| DB| [SI] 14 B,
+LFS, BX'| DB| [BP] 14 B,
+LFS, BX'| DB| [AX +1* BX] 18 B,
+LFS, BX'| DB| [BX] 14 B,
+LFS, BX'| DB| [DX] 14 B,
+LFS, BX'| DB| [CX] 14 B,
+LFS, BX'| DB| [AX] 14 B,
+LFS, BX'| D0| [DI]
+LFS, BX'| D0| [SI]
+LFS, BX'| D0| [AX +1* BX]
+LFS, BX'| D0| [BX]
+LFS, BX'| D0| [DX]
+LFS, BX'| D0| [CX]
+LFS, BX'| D0| [AX]
+LFS, DX'| MEM| 10 X,
+LFS, DX'| DW| [DI] 14 X,
+LFS, DX'| DW| [SI] 14 X,
+LFS, DX'| DW| [BP] 14 X,
+LFS, DX'| DW| [AX +1* BX] 18 X,
+LFS, DX'| DW| [BX] 14 X,
+LFS, DX'| DW| [DX] 14 X,
+LFS, DX'| DW| [CX] 14 X,
+LFS, DX'| DW| [AX] 14 X,
+LFS, DX'| DB| [DI] 14 B,
+LFS, DX'| DB| [SI] 14 B,
+LFS, DX'| DB| [BP] 14 B,
+LFS, DX'| DB| [AX +1* BX] 18 B,
+LFS, DX'| DB| [BX] 14 B,
+LFS, DX'| DB| [DX] 14 B,
+LFS, DX'| DB| [CX] 14 B,
+LFS, DX'| DB| [AX] 14 B,
+LFS, DX'| D0| [DI]
+LFS, DX'| D0| [SI]
+LFS, DX'| D0| [AX +1* BX]
+LFS, DX'| D0| [BX]
+LFS, DX'| D0| [DX]
+LFS, DX'| D0| [CX]
+LFS, DX'| D0| [AX]
+LFS, CX'| MEM| 10 X,
+LFS, CX'| DW| [DI] 14 X,
+LFS, CX'| DW| [SI] 14 X,
+LFS, CX'| DW| [BP] 14 X,
+LFS, CX'| DW| [AX +1* BX] 18 X,
+LFS, CX'| DW| [BX] 14 X,
+LFS, CX'| DW| [DX] 14 X,
+LFS, CX'| DW| [CX] 14 X,
+LFS, CX'| DW| [AX] 14 X,
+LFS, CX'| DB| [DI] 14 B,
+LFS, CX'| DB| [SI] 14 B,
+LFS, CX'| DB| [BP] 14 B,
+LFS, CX'| DB| [AX +1* BX] 18 B,
+LFS, CX'| DB| [BX] 14 B,
+LFS, CX'| DB| [DX] 14 B,
+LFS, CX'| DB| [CX] 14 B,
+LFS, CX'| DB| [AX] 14 B,
+LFS, CX'| D0| [DI]
+LFS, CX'| D0| [SI]
+LFS, CX'| D0| [AX +1* BX]
+LFS, CX'| D0| [BX]
+LFS, CX'| D0| [DX]
+LFS, CX'| D0| [CX]
+LFS, CX'| D0| [AX]
+LFS, AX'| MEM| 10 X,
+LFS, AX'| DW| [DI] 14 X,
+LFS, AX'| DW| [SI] 14 X,
+LFS, AX'| DW| [BP] 14 X,
+LFS, AX'| DW| [AX +1* BX] 18 X,
+LFS, AX'| DW| [BX] 14 X,
+LFS, AX'| DW| [DX] 14 X,
+LFS, AX'| DW| [CX] 14 X,
+LFS, AX'| DW| [AX] 14 X,
+LFS, AX'| DB| [DI] 14 B,
+LFS, AX'| DB| [SI] 14 B,
+LFS, AX'| DB| [BP] 14 B,
+LFS, AX'| DB| [AX +1* BX] 18 B,
+LFS, AX'| DB| [BX] 14 B,
+LFS, AX'| DB| [DX] 14 B,
+LFS, AX'| DB| [CX] 14 B,
+LFS, AX'| DB| [AX] 14 B,
+LFS, AX'| D0| [DI]
+LFS, AX'| D0| [SI]
+LFS, AX'| D0| [AX +1* BX]
+LFS, AX'| D0| [BX]
+LFS, AX'| D0| [DX]
+LFS, AX'| D0| [CX]
+LFS, AX'| D0| [AX]
+LSS, DI'| MEM| 10 X,
+LSS, DI'| DW| [DI] 14 X,
+LSS, DI'| DW| [SI] 14 X,
+LSS, DI'| DW| [BP] 14 X,
+LSS, DI'| DW| [AX +1* BX] 18 X,
+LSS, DI'| DW| [BX] 14 X,
+LSS, DI'| DW| [DX] 14 X,
+LSS, DI'| DW| [CX] 14 X,
+LSS, DI'| DW| [AX] 14 X,
+LSS, DI'| DB| [DI] 14 B,
+LSS, DI'| DB| [SI] 14 B,
+LSS, DI'| DB| [BP] 14 B,
+LSS, DI'| DB| [AX +1* BX] 18 B,
+LSS, DI'| DB| [BX] 14 B,
+LSS, DI'| DB| [DX] 14 B,
+LSS, DI'| DB| [CX] 14 B,
+LSS, DI'| DB| [AX] 14 B,
+LSS, DI'| D0| [DI]
+LSS, DI'| D0| [SI]
+LSS, DI'| D0| [AX +1* BX]
+LSS, DI'| D0| [BX]
+LSS, DI'| D0| [DX]
+LSS, DI'| D0| [CX]
+LSS, DI'| D0| [AX]
+LSS, SI'| MEM| 10 X,
+LSS, SI'| DW| [DI] 14 X,
+LSS, SI'| DW| [SI] 14 X,
+LSS, SI'| DW| [BP] 14 X,
+LSS, SI'| DW| [AX +1* BX] 18 X,
+LSS, SI'| DW| [BX] 14 X,
+LSS, SI'| DW| [DX] 14 X,
+LSS, SI'| DW| [CX] 14 X,
+LSS, SI'| DW| [AX] 14 X,
+LSS, SI'| DB| [DI] 14 B,
+LSS, SI'| DB| [SI] 14 B,
+LSS, SI'| DB| [BP] 14 B,
+LSS, SI'| DB| [AX +1* BX] 18 B,
+LSS, SI'| DB| [BX] 14 B,
+LSS, SI'| DB| [DX] 14 B,
+LSS, SI'| DB| [CX] 14 B,
+LSS, SI'| DB| [AX] 14 B,
+LSS, SI'| D0| [DI]
+LSS, SI'| D0| [SI]
+LSS, SI'| D0| [AX +1* BX]
+LSS, SI'| D0| [BX]
+LSS, SI'| D0| [DX]
+LSS, SI'| D0| [CX]
+LSS, SI'| D0| [AX]
+LSS, BP'| MEM| 10 X,
+LSS, BP'| DW| [DI] 14 X,
+LSS, BP'| DW| [SI] 14 X,
+LSS, BP'| DW| [BP] 14 X,
+LSS, BP'| DW| [AX +1* BX] 18 X,
+LSS, BP'| DW| [BX] 14 X,
+LSS, BP'| DW| [DX] 14 X,
+LSS, BP'| DW| [CX] 14 X,
+LSS, BP'| DW| [AX] 14 X,
+LSS, BP'| DB| [DI] 14 B,
+LSS, BP'| DB| [SI] 14 B,
+LSS, BP'| DB| [BP] 14 B,
+LSS, BP'| DB| [AX +1* BX] 18 B,
+LSS, BP'| DB| [BX] 14 B,
+LSS, BP'| DB| [DX] 14 B,
+LSS, BP'| DB| [CX] 14 B,
+LSS, BP'| DB| [AX] 14 B,
+LSS, BP'| D0| [DI]
+LSS, BP'| D0| [SI]
+LSS, BP'| D0| [AX +1* BX]
+LSS, BP'| D0| [BX]
+LSS, BP'| D0| [DX]
+LSS, BP'| D0| [CX]
+LSS, BP'| D0| [AX]
+LSS, SP'| MEM| 10 X,
+LSS, SP'| DW| [DI] 14 X,
+LSS, SP'| DW| [SI] 14 X,
+LSS, SP'| DW| [BP] 14 X,
+LSS, SP'| DW| [AX +1* BX] 18 X,
+LSS, SP'| DW| [BX] 14 X,
+LSS, SP'| DW| [DX] 14 X,
+LSS, SP'| DW| [CX] 14 X,
+LSS, SP'| DW| [AX] 14 X,
+LSS, SP'| DB| [DI] 14 B,
+LSS, SP'| DB| [SI] 14 B,
+LSS, SP'| DB| [BP] 14 B,
+LSS, SP'| DB| [AX +1* BX] 18 B,
+LSS, SP'| DB| [BX] 14 B,
+LSS, SP'| DB| [DX] 14 B,
+LSS, SP'| DB| [CX] 14 B,
+LSS, SP'| DB| [AX] 14 B,
+LSS, SP'| D0| [DI]
+LSS, SP'| D0| [SI]
+LSS, SP'| D0| [AX +1* BX]
+LSS, SP'| D0| [BX]
+LSS, SP'| D0| [DX]
+LSS, SP'| D0| [CX]
+LSS, SP'| D0| [AX]
+LSS, BX'| MEM| 10 X,
+LSS, BX'| DW| [DI] 14 X,
+LSS, BX'| DW| [SI] 14 X,
+LSS, BX'| DW| [BP] 14 X,
+LSS, BX'| DW| [AX +1* BX] 18 X,
+LSS, BX'| DW| [BX] 14 X,
+LSS, BX'| DW| [DX] 14 X,
+LSS, BX'| DW| [CX] 14 X,
+LSS, BX'| DW| [AX] 14 X,
+LSS, BX'| DB| [DI] 14 B,
+LSS, BX'| DB| [SI] 14 B,
+LSS, BX'| DB| [BP] 14 B,
+LSS, BX'| DB| [AX +1* BX] 18 B,
+LSS, BX'| DB| [BX] 14 B,
+LSS, BX'| DB| [DX] 14 B,
+LSS, BX'| DB| [CX] 14 B,
+LSS, BX'| DB| [AX] 14 B,
+LSS, BX'| D0| [DI]
+LSS, BX'| D0| [SI]
+LSS, BX'| D0| [AX +1* BX]
+LSS, BX'| D0| [BX]
+LSS, BX'| D0| [DX]
+LSS, BX'| D0| [CX]
+LSS, BX'| D0| [AX]
+LSS, DX'| MEM| 10 X,
+LSS, DX'| DW| [DI] 14 X,
+LSS, DX'| DW| [SI] 14 X,
+LSS, DX'| DW| [BP] 14 X,
+LSS, DX'| DW| [AX +1* BX] 18 X,
+LSS, DX'| DW| [BX] 14 X,
+LSS, DX'| DW| [DX] 14 X,
+LSS, DX'| DW| [CX] 14 X,
+LSS, DX'| DW| [AX] 14 X,
+LSS, DX'| DB| [DI] 14 B,
+LSS, DX'| DB| [SI] 14 B,
+LSS, DX'| DB| [BP] 14 B,
+LSS, DX'| DB| [AX +1* BX] 18 B,
+LSS, DX'| DB| [BX] 14 B,
+LSS, DX'| DB| [DX] 14 B,
+LSS, DX'| DB| [CX] 14 B,
+LSS, DX'| DB| [AX] 14 B,
+LSS, DX'| D0| [DI]
+LSS, DX'| D0| [SI]
+LSS, DX'| D0| [AX +1* BX]
+LSS, DX'| D0| [BX]
+LSS, DX'| D0| [DX]
+LSS, DX'| D0| [CX]
+LSS, DX'| D0| [AX]
+LSS, CX'| MEM| 10 X,
+LSS, CX'| DW| [DI] 14 X,
+LSS, CX'| DW| [SI] 14 X,
+LSS, CX'| DW| [BP] 14 X,
+LSS, CX'| DW| [AX +1* BX] 18 X,
+LSS, CX'| DW| [BX] 14 X,
+LSS, CX'| DW| [DX] 14 X,
+LSS, CX'| DW| [CX] 14 X,
+LSS, CX'| DW| [AX] 14 X,
+LSS, CX'| DB| [DI] 14 B,
+LSS, CX'| DB| [SI] 14 B,
+LSS, CX'| DB| [BP] 14 B,
+LSS, CX'| DB| [AX +1* BX] 18 B,
+LSS, CX'| DB| [BX] 14 B,
+LSS, CX'| DB| [DX] 14 B,
+LSS, CX'| DB| [CX] 14 B,
+LSS, CX'| DB| [AX] 14 B,
+LSS, CX'| D0| [DI]
+LSS, CX'| D0| [SI]
+LSS, CX'| D0| [AX +1* BX]
+LSS, CX'| D0| [BX]
+LSS, CX'| D0| [DX]
+LSS, CX'| D0| [CX]
+LSS, CX'| D0| [AX]
+LSS, AX'| MEM| 10 X,
+LSS, AX'| DW| [DI] 14 X,
+LSS, AX'| DW| [SI] 14 X,
+LSS, AX'| DW| [BP] 14 X,
+LSS, AX'| DW| [AX +1* BX] 18 X,
+LSS, AX'| DW| [BX] 14 X,
+LSS, AX'| DW| [DX] 14 X,
+LSS, AX'| DW| [CX] 14 X,
+LSS, AX'| DW| [AX] 14 X,
+LSS, AX'| DB| [DI] 14 B,
+LSS, AX'| DB| [SI] 14 B,
+LSS, AX'| DB| [BP] 14 B,
+LSS, AX'| DB| [AX +1* BX] 18 B,
+LSS, AX'| DB| [BX] 14 B,
+LSS, AX'| DB| [DX] 14 B,
+LSS, AX'| DB| [CX] 14 B,
+LSS, AX'| DB| [AX] 14 B,
+LSS, AX'| D0| [DI]
+LSS, AX'| D0| [SI]
+LSS, AX'| D0| [AX +1* BX]
+LSS, AX'| D0| [BX]
+LSS, AX'| D0| [DX]
+LSS, AX'| D0| [CX]
+LSS, AX'| D0| [AX]
 SHRDI, DI'| MEM| 10 X, 14 IS,
 SHRDI, DI'| R| DI| 14 IS,
 SHRDI, DI'| R| SI| 14 IS,
@@ -10029,390 +10030,390 @@ BOUND, AX'| D0| [BX]
 BOUND, AX'| D0| [DX]
 BOUND, AX'| D0| [CX]
 BOUND, AX'| D0| [AX]
-L|DS, DI'| MEM| 10 X,
-L|DS, DI'| DW| [DI] 14 X,
-L|DS, DI'| DW| [SI] 14 X,
-L|DS, DI'| DW| [BP] 14 X,
-L|DS, DI'| DW| [AX +1* BX] 18 X,
-L|DS, DI'| DW| [BX] 14 X,
-L|DS, DI'| DW| [DX] 14 X,
-L|DS, DI'| DW| [CX] 14 X,
-L|DS, DI'| DW| [AX] 14 X,
-L|DS, DI'| DB| [DI] 14 B,
-L|DS, DI'| DB| [SI] 14 B,
-L|DS, DI'| DB| [BP] 14 B,
-L|DS, DI'| DB| [AX +1* BX] 18 B,
-L|DS, DI'| DB| [BX] 14 B,
-L|DS, DI'| DB| [DX] 14 B,
-L|DS, DI'| DB| [CX] 14 B,
-L|DS, DI'| DB| [AX] 14 B,
-L|DS, DI'| D0| [DI]
-L|DS, DI'| D0| [SI]
-L|DS, DI'| D0| [AX +1* BX]
-L|DS, DI'| D0| [BX]
-L|DS, DI'| D0| [DX]
-L|DS, DI'| D0| [CX]
-L|DS, DI'| D0| [AX]
-L|DS, SI'| MEM| 10 X,
-L|DS, SI'| DW| [DI] 14 X,
-L|DS, SI'| DW| [SI] 14 X,
-L|DS, SI'| DW| [BP] 14 X,
-L|DS, SI'| DW| [AX +1* BX] 18 X,
-L|DS, SI'| DW| [BX] 14 X,
-L|DS, SI'| DW| [DX] 14 X,
-L|DS, SI'| DW| [CX] 14 X,
-L|DS, SI'| DW| [AX] 14 X,
-L|DS, SI'| DB| [DI] 14 B,
-L|DS, SI'| DB| [SI] 14 B,
-L|DS, SI'| DB| [BP] 14 B,
-L|DS, SI'| DB| [AX +1* BX] 18 B,
-L|DS, SI'| DB| [BX] 14 B,
-L|DS, SI'| DB| [DX] 14 B,
-L|DS, SI'| DB| [CX] 14 B,
-L|DS, SI'| DB| [AX] 14 B,
-L|DS, SI'| D0| [DI]
-L|DS, SI'| D0| [SI]
-L|DS, SI'| D0| [AX +1* BX]
-L|DS, SI'| D0| [BX]
-L|DS, SI'| D0| [DX]
-L|DS, SI'| D0| [CX]
-L|DS, SI'| D0| [AX]
-L|DS, BP'| MEM| 10 X,
-L|DS, BP'| DW| [DI] 14 X,
-L|DS, BP'| DW| [SI] 14 X,
-L|DS, BP'| DW| [BP] 14 X,
-L|DS, BP'| DW| [AX +1* BX] 18 X,
-L|DS, BP'| DW| [BX] 14 X,
-L|DS, BP'| DW| [DX] 14 X,
-L|DS, BP'| DW| [CX] 14 X,
-L|DS, BP'| DW| [AX] 14 X,
-L|DS, BP'| DB| [DI] 14 B,
-L|DS, BP'| DB| [SI] 14 B,
-L|DS, BP'| DB| [BP] 14 B,
-L|DS, BP'| DB| [AX +1* BX] 18 B,
-L|DS, BP'| DB| [BX] 14 B,
-L|DS, BP'| DB| [DX] 14 B,
-L|DS, BP'| DB| [CX] 14 B,
-L|DS, BP'| DB| [AX] 14 B,
-L|DS, BP'| D0| [DI]
-L|DS, BP'| D0| [SI]
-L|DS, BP'| D0| [AX +1* BX]
-L|DS, BP'| D0| [BX]
-L|DS, BP'| D0| [DX]
-L|DS, BP'| D0| [CX]
-L|DS, BP'| D0| [AX]
-L|DS, SP'| MEM| 10 X,
-L|DS, SP'| DW| [DI] 14 X,
-L|DS, SP'| DW| [SI] 14 X,
-L|DS, SP'| DW| [BP] 14 X,
-L|DS, SP'| DW| [AX +1* BX] 18 X,
-L|DS, SP'| DW| [BX] 14 X,
-L|DS, SP'| DW| [DX] 14 X,
-L|DS, SP'| DW| [CX] 14 X,
-L|DS, SP'| DW| [AX] 14 X,
-L|DS, SP'| DB| [DI] 14 B,
-L|DS, SP'| DB| [SI] 14 B,
-L|DS, SP'| DB| [BP] 14 B,
-L|DS, SP'| DB| [AX +1* BX] 18 B,
-L|DS, SP'| DB| [BX] 14 B,
-L|DS, SP'| DB| [DX] 14 B,
-L|DS, SP'| DB| [CX] 14 B,
-L|DS, SP'| DB| [AX] 14 B,
-L|DS, SP'| D0| [DI]
-L|DS, SP'| D0| [SI]
-L|DS, SP'| D0| [AX +1* BX]
-L|DS, SP'| D0| [BX]
-L|DS, SP'| D0| [DX]
-L|DS, SP'| D0| [CX]
-L|DS, SP'| D0| [AX]
-L|DS, BX'| MEM| 10 X,
-L|DS, BX'| DW| [DI] 14 X,
-L|DS, BX'| DW| [SI] 14 X,
-L|DS, BX'| DW| [BP] 14 X,
-L|DS, BX'| DW| [AX +1* BX] 18 X,
-L|DS, BX'| DW| [BX] 14 X,
-L|DS, BX'| DW| [DX] 14 X,
-L|DS, BX'| DW| [CX] 14 X,
-L|DS, BX'| DW| [AX] 14 X,
-L|DS, BX'| DB| [DI] 14 B,
-L|DS, BX'| DB| [SI] 14 B,
-L|DS, BX'| DB| [BP] 14 B,
-L|DS, BX'| DB| [AX +1* BX] 18 B,
-L|DS, BX'| DB| [BX] 14 B,
-L|DS, BX'| DB| [DX] 14 B,
-L|DS, BX'| DB| [CX] 14 B,
-L|DS, BX'| DB| [AX] 14 B,
-L|DS, BX'| D0| [DI]
-L|DS, BX'| D0| [SI]
-L|DS, BX'| D0| [AX +1* BX]
-L|DS, BX'| D0| [BX]
-L|DS, BX'| D0| [DX]
-L|DS, BX'| D0| [CX]
-L|DS, BX'| D0| [AX]
-L|DS, DX'| MEM| 10 X,
-L|DS, DX'| DW| [DI] 14 X,
-L|DS, DX'| DW| [SI] 14 X,
-L|DS, DX'| DW| [BP] 14 X,
-L|DS, DX'| DW| [AX +1* BX] 18 X,
-L|DS, DX'| DW| [BX] 14 X,
-L|DS, DX'| DW| [DX] 14 X,
-L|DS, DX'| DW| [CX] 14 X,
-L|DS, DX'| DW| [AX] 14 X,
-L|DS, DX'| DB| [DI] 14 B,
-L|DS, DX'| DB| [SI] 14 B,
-L|DS, DX'| DB| [BP] 14 B,
-L|DS, DX'| DB| [AX +1* BX] 18 B,
-L|DS, DX'| DB| [BX] 14 B,
-L|DS, DX'| DB| [DX] 14 B,
-L|DS, DX'| DB| [CX] 14 B,
-L|DS, DX'| DB| [AX] 14 B,
-L|DS, DX'| D0| [DI]
-L|DS, DX'| D0| [SI]
-L|DS, DX'| D0| [AX +1* BX]
-L|DS, DX'| D0| [BX]
-L|DS, DX'| D0| [DX]
-L|DS, DX'| D0| [CX]
-L|DS, DX'| D0| [AX]
-L|DS, CX'| MEM| 10 X,
-L|DS, CX'| DW| [DI] 14 X,
-L|DS, CX'| DW| [SI] 14 X,
-L|DS, CX'| DW| [BP] 14 X,
-L|DS, CX'| DW| [AX +1* BX] 18 X,
-L|DS, CX'| DW| [BX] 14 X,
-L|DS, CX'| DW| [DX] 14 X,
-L|DS, CX'| DW| [CX] 14 X,
-L|DS, CX'| DW| [AX] 14 X,
-L|DS, CX'| DB| [DI] 14 B,
-L|DS, CX'| DB| [SI] 14 B,
-L|DS, CX'| DB| [BP] 14 B,
-L|DS, CX'| DB| [AX +1* BX] 18 B,
-L|DS, CX'| DB| [BX] 14 B,
-L|DS, CX'| DB| [DX] 14 B,
-L|DS, CX'| DB| [CX] 14 B,
-L|DS, CX'| DB| [AX] 14 B,
-L|DS, CX'| D0| [DI]
-L|DS, CX'| D0| [SI]
-L|DS, CX'| D0| [AX +1* BX]
-L|DS, CX'| D0| [BX]
-L|DS, CX'| D0| [DX]
-L|DS, CX'| D0| [CX]
-L|DS, CX'| D0| [AX]
-L|DS, AX'| MEM| 10 X,
-L|DS, AX'| DW| [DI] 14 X,
-L|DS, AX'| DW| [SI] 14 X,
-L|DS, AX'| DW| [BP] 14 X,
-L|DS, AX'| DW| [AX +1* BX] 18 X,
-L|DS, AX'| DW| [BX] 14 X,
-L|DS, AX'| DW| [DX] 14 X,
-L|DS, AX'| DW| [CX] 14 X,
-L|DS, AX'| DW| [AX] 14 X,
-L|DS, AX'| DB| [DI] 14 B,
-L|DS, AX'| DB| [SI] 14 B,
-L|DS, AX'| DB| [BP] 14 B,
-L|DS, AX'| DB| [AX +1* BX] 18 B,
-L|DS, AX'| DB| [BX] 14 B,
-L|DS, AX'| DB| [DX] 14 B,
-L|DS, AX'| DB| [CX] 14 B,
-L|DS, AX'| DB| [AX] 14 B,
-L|DS, AX'| D0| [DI]
-L|DS, AX'| D0| [SI]
-L|DS, AX'| D0| [AX +1* BX]
-L|DS, AX'| D0| [BX]
-L|DS, AX'| D0| [DX]
-L|DS, AX'| D0| [CX]
-L|DS, AX'| D0| [AX]
-L|ES, DI'| MEM| 10 X,
-L|ES, DI'| DW| [DI] 14 X,
-L|ES, DI'| DW| [SI] 14 X,
-L|ES, DI'| DW| [BP] 14 X,
-L|ES, DI'| DW| [AX +1* BX] 18 X,
-L|ES, DI'| DW| [BX] 14 X,
-L|ES, DI'| DW| [DX] 14 X,
-L|ES, DI'| DW| [CX] 14 X,
-L|ES, DI'| DW| [AX] 14 X,
-L|ES, DI'| DB| [DI] 14 B,
-L|ES, DI'| DB| [SI] 14 B,
-L|ES, DI'| DB| [BP] 14 B,
-L|ES, DI'| DB| [AX +1* BX] 18 B,
-L|ES, DI'| DB| [BX] 14 B,
-L|ES, DI'| DB| [DX] 14 B,
-L|ES, DI'| DB| [CX] 14 B,
-L|ES, DI'| DB| [AX] 14 B,
-L|ES, DI'| D0| [DI]
-L|ES, DI'| D0| [SI]
-L|ES, DI'| D0| [AX +1* BX]
-L|ES, DI'| D0| [BX]
-L|ES, DI'| D0| [DX]
-L|ES, DI'| D0| [CX]
-L|ES, DI'| D0| [AX]
-L|ES, SI'| MEM| 10 X,
-L|ES, SI'| DW| [DI] 14 X,
-L|ES, SI'| DW| [SI] 14 X,
-L|ES, SI'| DW| [BP] 14 X,
-L|ES, SI'| DW| [AX +1* BX] 18 X,
-L|ES, SI'| DW| [BX] 14 X,
-L|ES, SI'| DW| [DX] 14 X,
-L|ES, SI'| DW| [CX] 14 X,
-L|ES, SI'| DW| [AX] 14 X,
-L|ES, SI'| DB| [DI] 14 B,
-L|ES, SI'| DB| [SI] 14 B,
-L|ES, SI'| DB| [BP] 14 B,
-L|ES, SI'| DB| [AX +1* BX] 18 B,
-L|ES, SI'| DB| [BX] 14 B,
-L|ES, SI'| DB| [DX] 14 B,
-L|ES, SI'| DB| [CX] 14 B,
-L|ES, SI'| DB| [AX] 14 B,
-L|ES, SI'| D0| [DI]
-L|ES, SI'| D0| [SI]
-L|ES, SI'| D0| [AX +1* BX]
-L|ES, SI'| D0| [BX]
-L|ES, SI'| D0| [DX]
-L|ES, SI'| D0| [CX]
-L|ES, SI'| D0| [AX]
-L|ES, BP'| MEM| 10 X,
-L|ES, BP'| DW| [DI] 14 X,
-L|ES, BP'| DW| [SI] 14 X,
-L|ES, BP'| DW| [BP] 14 X,
-L|ES, BP'| DW| [AX +1* BX] 18 X,
-L|ES, BP'| DW| [BX] 14 X,
-L|ES, BP'| DW| [DX] 14 X,
-L|ES, BP'| DW| [CX] 14 X,
-L|ES, BP'| DW| [AX] 14 X,
-L|ES, BP'| DB| [DI] 14 B,
-L|ES, BP'| DB| [SI] 14 B,
-L|ES, BP'| DB| [BP] 14 B,
-L|ES, BP'| DB| [AX +1* BX] 18 B,
-L|ES, BP'| DB| [BX] 14 B,
-L|ES, BP'| DB| [DX] 14 B,
-L|ES, BP'| DB| [CX] 14 B,
-L|ES, BP'| DB| [AX] 14 B,
-L|ES, BP'| D0| [DI]
-L|ES, BP'| D0| [SI]
-L|ES, BP'| D0| [AX +1* BX]
-L|ES, BP'| D0| [BX]
-L|ES, BP'| D0| [DX]
-L|ES, BP'| D0| [CX]
-L|ES, BP'| D0| [AX]
-L|ES, SP'| MEM| 10 X,
-L|ES, SP'| DW| [DI] 14 X,
-L|ES, SP'| DW| [SI] 14 X,
-L|ES, SP'| DW| [BP] 14 X,
-L|ES, SP'| DW| [AX +1* BX] 18 X,
-L|ES, SP'| DW| [BX] 14 X,
-L|ES, SP'| DW| [DX] 14 X,
-L|ES, SP'| DW| [CX] 14 X,
-L|ES, SP'| DW| [AX] 14 X,
-L|ES, SP'| DB| [DI] 14 B,
-L|ES, SP'| DB| [SI] 14 B,
-L|ES, SP'| DB| [BP] 14 B,
-L|ES, SP'| DB| [AX +1* BX] 18 B,
-L|ES, SP'| DB| [BX] 14 B,
-L|ES, SP'| DB| [DX] 14 B,
-L|ES, SP'| DB| [CX] 14 B,
-L|ES, SP'| DB| [AX] 14 B,
-L|ES, SP'| D0| [DI]
-L|ES, SP'| D0| [SI]
-L|ES, SP'| D0| [AX +1* BX]
-L|ES, SP'| D0| [BX]
-L|ES, SP'| D0| [DX]
-L|ES, SP'| D0| [CX]
-L|ES, SP'| D0| [AX]
-L|ES, BX'| MEM| 10 X,
-L|ES, BX'| DW| [DI] 14 X,
-L|ES, BX'| DW| [SI] 14 X,
-L|ES, BX'| DW| [BP] 14 X,
-L|ES, BX'| DW| [AX +1* BX] 18 X,
-L|ES, BX'| DW| [BX] 14 X,
-L|ES, BX'| DW| [DX] 14 X,
-L|ES, BX'| DW| [CX] 14 X,
-L|ES, BX'| DW| [AX] 14 X,
-L|ES, BX'| DB| [DI] 14 B,
-L|ES, BX'| DB| [SI] 14 B,
-L|ES, BX'| DB| [BP] 14 B,
-L|ES, BX'| DB| [AX +1* BX] 18 B,
-L|ES, BX'| DB| [BX] 14 B,
-L|ES, BX'| DB| [DX] 14 B,
-L|ES, BX'| DB| [CX] 14 B,
-L|ES, BX'| DB| [AX] 14 B,
-L|ES, BX'| D0| [DI]
-L|ES, BX'| D0| [SI]
-L|ES, BX'| D0| [AX +1* BX]
-L|ES, BX'| D0| [BX]
-L|ES, BX'| D0| [DX]
-L|ES, BX'| D0| [CX]
-L|ES, BX'| D0| [AX]
-L|ES, DX'| MEM| 10 X,
-L|ES, DX'| DW| [DI] 14 X,
-L|ES, DX'| DW| [SI] 14 X,
-L|ES, DX'| DW| [BP] 14 X,
-L|ES, DX'| DW| [AX +1* BX] 18 X,
-L|ES, DX'| DW| [BX] 14 X,
-L|ES, DX'| DW| [DX] 14 X,
-L|ES, DX'| DW| [CX] 14 X,
-L|ES, DX'| DW| [AX] 14 X,
-L|ES, DX'| DB| [DI] 14 B,
-L|ES, DX'| DB| [SI] 14 B,
-L|ES, DX'| DB| [BP] 14 B,
-L|ES, DX'| DB| [AX +1* BX] 18 B,
-L|ES, DX'| DB| [BX] 14 B,
-L|ES, DX'| DB| [DX] 14 B,
-L|ES, DX'| DB| [CX] 14 B,
-L|ES, DX'| DB| [AX] 14 B,
-L|ES, DX'| D0| [DI]
-L|ES, DX'| D0| [SI]
-L|ES, DX'| D0| [AX +1* BX]
-L|ES, DX'| D0| [BX]
-L|ES, DX'| D0| [DX]
-L|ES, DX'| D0| [CX]
-L|ES, DX'| D0| [AX]
-L|ES, CX'| MEM| 10 X,
-L|ES, CX'| DW| [DI] 14 X,
-L|ES, CX'| DW| [SI] 14 X,
-L|ES, CX'| DW| [BP] 14 X,
-L|ES, CX'| DW| [AX +1* BX] 18 X,
-L|ES, CX'| DW| [BX] 14 X,
-L|ES, CX'| DW| [DX] 14 X,
-L|ES, CX'| DW| [CX] 14 X,
-L|ES, CX'| DW| [AX] 14 X,
-L|ES, CX'| DB| [DI] 14 B,
-L|ES, CX'| DB| [SI] 14 B,
-L|ES, CX'| DB| [BP] 14 B,
-L|ES, CX'| DB| [AX +1* BX] 18 B,
-L|ES, CX'| DB| [BX] 14 B,
-L|ES, CX'| DB| [DX] 14 B,
-L|ES, CX'| DB| [CX] 14 B,
-L|ES, CX'| DB| [AX] 14 B,
-L|ES, CX'| D0| [DI]
-L|ES, CX'| D0| [SI]
-L|ES, CX'| D0| [AX +1* BX]
-L|ES, CX'| D0| [BX]
-L|ES, CX'| D0| [DX]
-L|ES, CX'| D0| [CX]
-L|ES, CX'| D0| [AX]
-L|ES, AX'| MEM| 10 X,
-L|ES, AX'| DW| [DI] 14 X,
-L|ES, AX'| DW| [SI] 14 X,
-L|ES, AX'| DW| [BP] 14 X,
-L|ES, AX'| DW| [AX +1* BX] 18 X,
-L|ES, AX'| DW| [BX] 14 X,
-L|ES, AX'| DW| [DX] 14 X,
-L|ES, AX'| DW| [CX] 14 X,
-L|ES, AX'| DW| [AX] 14 X,
-L|ES, AX'| DB| [DI] 14 B,
-L|ES, AX'| DB| [SI] 14 B,
-L|ES, AX'| DB| [BP] 14 B,
-L|ES, AX'| DB| [AX +1* BX] 18 B,
-L|ES, AX'| DB| [BX] 14 B,
-L|ES, AX'| DB| [DX] 14 B,
-L|ES, AX'| DB| [CX] 14 B,
-L|ES, AX'| DB| [AX] 14 B,
-L|ES, AX'| D0| [DI]
-L|ES, AX'| D0| [SI]
-L|ES, AX'| D0| [AX +1* BX]
-L|ES, AX'| D0| [BX]
-L|ES, AX'| D0| [DX]
-L|ES, AX'| D0| [CX]
-L|ES, AX'| D0| [AX]
+LDS, DI'| MEM| 10 X,
+LDS, DI'| DW| [DI] 14 X,
+LDS, DI'| DW| [SI] 14 X,
+LDS, DI'| DW| [BP] 14 X,
+LDS, DI'| DW| [AX +1* BX] 18 X,
+LDS, DI'| DW| [BX] 14 X,
+LDS, DI'| DW| [DX] 14 X,
+LDS, DI'| DW| [CX] 14 X,
+LDS, DI'| DW| [AX] 14 X,
+LDS, DI'| DB| [DI] 14 B,
+LDS, DI'| DB| [SI] 14 B,
+LDS, DI'| DB| [BP] 14 B,
+LDS, DI'| DB| [AX +1* BX] 18 B,
+LDS, DI'| DB| [BX] 14 B,
+LDS, DI'| DB| [DX] 14 B,
+LDS, DI'| DB| [CX] 14 B,
+LDS, DI'| DB| [AX] 14 B,
+LDS, DI'| D0| [DI]
+LDS, DI'| D0| [SI]
+LDS, DI'| D0| [AX +1* BX]
+LDS, DI'| D0| [BX]
+LDS, DI'| D0| [DX]
+LDS, DI'| D0| [CX]
+LDS, DI'| D0| [AX]
+LDS, SI'| MEM| 10 X,
+LDS, SI'| DW| [DI] 14 X,
+LDS, SI'| DW| [SI] 14 X,
+LDS, SI'| DW| [BP] 14 X,
+LDS, SI'| DW| [AX +1* BX] 18 X,
+LDS, SI'| DW| [BX] 14 X,
+LDS, SI'| DW| [DX] 14 X,
+LDS, SI'| DW| [CX] 14 X,
+LDS, SI'| DW| [AX] 14 X,
+LDS, SI'| DB| [DI] 14 B,
+LDS, SI'| DB| [SI] 14 B,
+LDS, SI'| DB| [BP] 14 B,
+LDS, SI'| DB| [AX +1* BX] 18 B,
+LDS, SI'| DB| [BX] 14 B,
+LDS, SI'| DB| [DX] 14 B,
+LDS, SI'| DB| [CX] 14 B,
+LDS, SI'| DB| [AX] 14 B,
+LDS, SI'| D0| [DI]
+LDS, SI'| D0| [SI]
+LDS, SI'| D0| [AX +1* BX]
+LDS, SI'| D0| [BX]
+LDS, SI'| D0| [DX]
+LDS, SI'| D0| [CX]
+LDS, SI'| D0| [AX]
+LDS, BP'| MEM| 10 X,
+LDS, BP'| DW| [DI] 14 X,
+LDS, BP'| DW| [SI] 14 X,
+LDS, BP'| DW| [BP] 14 X,
+LDS, BP'| DW| [AX +1* BX] 18 X,
+LDS, BP'| DW| [BX] 14 X,
+LDS, BP'| DW| [DX] 14 X,
+LDS, BP'| DW| [CX] 14 X,
+LDS, BP'| DW| [AX] 14 X,
+LDS, BP'| DB| [DI] 14 B,
+LDS, BP'| DB| [SI] 14 B,
+LDS, BP'| DB| [BP] 14 B,
+LDS, BP'| DB| [AX +1* BX] 18 B,
+LDS, BP'| DB| [BX] 14 B,
+LDS, BP'| DB| [DX] 14 B,
+LDS, BP'| DB| [CX] 14 B,
+LDS, BP'| DB| [AX] 14 B,
+LDS, BP'| D0| [DI]
+LDS, BP'| D0| [SI]
+LDS, BP'| D0| [AX +1* BX]
+LDS, BP'| D0| [BX]
+LDS, BP'| D0| [DX]
+LDS, BP'| D0| [CX]
+LDS, BP'| D0| [AX]
+LDS, SP'| MEM| 10 X,
+LDS, SP'| DW| [DI] 14 X,
+LDS, SP'| DW| [SI] 14 X,
+LDS, SP'| DW| [BP] 14 X,
+LDS, SP'| DW| [AX +1* BX] 18 X,
+LDS, SP'| DW| [BX] 14 X,
+LDS, SP'| DW| [DX] 14 X,
+LDS, SP'| DW| [CX] 14 X,
+LDS, SP'| DW| [AX] 14 X,
+LDS, SP'| DB| [DI] 14 B,
+LDS, SP'| DB| [SI] 14 B,
+LDS, SP'| DB| [BP] 14 B,
+LDS, SP'| DB| [AX +1* BX] 18 B,
+LDS, SP'| DB| [BX] 14 B,
+LDS, SP'| DB| [DX] 14 B,
+LDS, SP'| DB| [CX] 14 B,
+LDS, SP'| DB| [AX] 14 B,
+LDS, SP'| D0| [DI]
+LDS, SP'| D0| [SI]
+LDS, SP'| D0| [AX +1* BX]
+LDS, SP'| D0| [BX]
+LDS, SP'| D0| [DX]
+LDS, SP'| D0| [CX]
+LDS, SP'| D0| [AX]
+LDS, BX'| MEM| 10 X,
+LDS, BX'| DW| [DI] 14 X,
+LDS, BX'| DW| [SI] 14 X,
+LDS, BX'| DW| [BP] 14 X,
+LDS, BX'| DW| [AX +1* BX] 18 X,
+LDS, BX'| DW| [BX] 14 X,
+LDS, BX'| DW| [DX] 14 X,
+LDS, BX'| DW| [CX] 14 X,
+LDS, BX'| DW| [AX] 14 X,
+LDS, BX'| DB| [DI] 14 B,
+LDS, BX'| DB| [SI] 14 B,
+LDS, BX'| DB| [BP] 14 B,
+LDS, BX'| DB| [AX +1* BX] 18 B,
+LDS, BX'| DB| [BX] 14 B,
+LDS, BX'| DB| [DX] 14 B,
+LDS, BX'| DB| [CX] 14 B,
+LDS, BX'| DB| [AX] 14 B,
+LDS, BX'| D0| [DI]
+LDS, BX'| D0| [SI]
+LDS, BX'| D0| [AX +1* BX]
+LDS, BX'| D0| [BX]
+LDS, BX'| D0| [DX]
+LDS, BX'| D0| [CX]
+LDS, BX'| D0| [AX]
+LDS, DX'| MEM| 10 X,
+LDS, DX'| DW| [DI] 14 X,
+LDS, DX'| DW| [SI] 14 X,
+LDS, DX'| DW| [BP] 14 X,
+LDS, DX'| DW| [AX +1* BX] 18 X,
+LDS, DX'| DW| [BX] 14 X,
+LDS, DX'| DW| [DX] 14 X,
+LDS, DX'| DW| [CX] 14 X,
+LDS, DX'| DW| [AX] 14 X,
+LDS, DX'| DB| [DI] 14 B,
+LDS, DX'| DB| [SI] 14 B,
+LDS, DX'| DB| [BP] 14 B,
+LDS, DX'| DB| [AX +1* BX] 18 B,
+LDS, DX'| DB| [BX] 14 B,
+LDS, DX'| DB| [DX] 14 B,
+LDS, DX'| DB| [CX] 14 B,
+LDS, DX'| DB| [AX] 14 B,
+LDS, DX'| D0| [DI]
+LDS, DX'| D0| [SI]
+LDS, DX'| D0| [AX +1* BX]
+LDS, DX'| D0| [BX]
+LDS, DX'| D0| [DX]
+LDS, DX'| D0| [CX]
+LDS, DX'| D0| [AX]
+LDS, CX'| MEM| 10 X,
+LDS, CX'| DW| [DI] 14 X,
+LDS, CX'| DW| [SI] 14 X,
+LDS, CX'| DW| [BP] 14 X,
+LDS, CX'| DW| [AX +1* BX] 18 X,
+LDS, CX'| DW| [BX] 14 X,
+LDS, CX'| DW| [DX] 14 X,
+LDS, CX'| DW| [CX] 14 X,
+LDS, CX'| DW| [AX] 14 X,
+LDS, CX'| DB| [DI] 14 B,
+LDS, CX'| DB| [SI] 14 B,
+LDS, CX'| DB| [BP] 14 B,
+LDS, CX'| DB| [AX +1* BX] 18 B,
+LDS, CX'| DB| [BX] 14 B,
+LDS, CX'| DB| [DX] 14 B,
+LDS, CX'| DB| [CX] 14 B,
+LDS, CX'| DB| [AX] 14 B,
+LDS, CX'| D0| [DI]
+LDS, CX'| D0| [SI]
+LDS, CX'| D0| [AX +1* BX]
+LDS, CX'| D0| [BX]
+LDS, CX'| D0| [DX]
+LDS, CX'| D0| [CX]
+LDS, CX'| D0| [AX]
+LDS, AX'| MEM| 10 X,
+LDS, AX'| DW| [DI] 14 X,
+LDS, AX'| DW| [SI] 14 X,
+LDS, AX'| DW| [BP] 14 X,
+LDS, AX'| DW| [AX +1* BX] 18 X,
+LDS, AX'| DW| [BX] 14 X,
+LDS, AX'| DW| [DX] 14 X,
+LDS, AX'| DW| [CX] 14 X,
+LDS, AX'| DW| [AX] 14 X,
+LDS, AX'| DB| [DI] 14 B,
+LDS, AX'| DB| [SI] 14 B,
+LDS, AX'| DB| [BP] 14 B,
+LDS, AX'| DB| [AX +1* BX] 18 B,
+LDS, AX'| DB| [BX] 14 B,
+LDS, AX'| DB| [DX] 14 B,
+LDS, AX'| DB| [CX] 14 B,
+LDS, AX'| DB| [AX] 14 B,
+LDS, AX'| D0| [DI]
+LDS, AX'| D0| [SI]
+LDS, AX'| D0| [AX +1* BX]
+LDS, AX'| D0| [BX]
+LDS, AX'| D0| [DX]
+LDS, AX'| D0| [CX]
+LDS, AX'| D0| [AX]
+LES, DI'| MEM| 10 X,
+LES, DI'| DW| [DI] 14 X,
+LES, DI'| DW| [SI] 14 X,
+LES, DI'| DW| [BP] 14 X,
+LES, DI'| DW| [AX +1* BX] 18 X,
+LES, DI'| DW| [BX] 14 X,
+LES, DI'| DW| [DX] 14 X,
+LES, DI'| DW| [CX] 14 X,
+LES, DI'| DW| [AX] 14 X,
+LES, DI'| DB| [DI] 14 B,
+LES, DI'| DB| [SI] 14 B,
+LES, DI'| DB| [BP] 14 B,
+LES, DI'| DB| [AX +1* BX] 18 B,
+LES, DI'| DB| [BX] 14 B,
+LES, DI'| DB| [DX] 14 B,
+LES, DI'| DB| [CX] 14 B,
+LES, DI'| DB| [AX] 14 B,
+LES, DI'| D0| [DI]
+LES, DI'| D0| [SI]
+LES, DI'| D0| [AX +1* BX]
+LES, DI'| D0| [BX]
+LES, DI'| D0| [DX]
+LES, DI'| D0| [CX]
+LES, DI'| D0| [AX]
+LES, SI'| MEM| 10 X,
+LES, SI'| DW| [DI] 14 X,
+LES, SI'| DW| [SI] 14 X,
+LES, SI'| DW| [BP] 14 X,
+LES, SI'| DW| [AX +1* BX] 18 X,
+LES, SI'| DW| [BX] 14 X,
+LES, SI'| DW| [DX] 14 X,
+LES, SI'| DW| [CX] 14 X,
+LES, SI'| DW| [AX] 14 X,
+LES, SI'| DB| [DI] 14 B,
+LES, SI'| DB| [SI] 14 B,
+LES, SI'| DB| [BP] 14 B,
+LES, SI'| DB| [AX +1* BX] 18 B,
+LES, SI'| DB| [BX] 14 B,
+LES, SI'| DB| [DX] 14 B,
+LES, SI'| DB| [CX] 14 B,
+LES, SI'| DB| [AX] 14 B,
+LES, SI'| D0| [DI]
+LES, SI'| D0| [SI]
+LES, SI'| D0| [AX +1* BX]
+LES, SI'| D0| [BX]
+LES, SI'| D0| [DX]
+LES, SI'| D0| [CX]
+LES, SI'| D0| [AX]
+LES, BP'| MEM| 10 X,
+LES, BP'| DW| [DI] 14 X,
+LES, BP'| DW| [SI] 14 X,
+LES, BP'| DW| [BP] 14 X,
+LES, BP'| DW| [AX +1* BX] 18 X,
+LES, BP'| DW| [BX] 14 X,
+LES, BP'| DW| [DX] 14 X,
+LES, BP'| DW| [CX] 14 X,
+LES, BP'| DW| [AX] 14 X,
+LES, BP'| DB| [DI] 14 B,
+LES, BP'| DB| [SI] 14 B,
+LES, BP'| DB| [BP] 14 B,
+LES, BP'| DB| [AX +1* BX] 18 B,
+LES, BP'| DB| [BX] 14 B,
+LES, BP'| DB| [DX] 14 B,
+LES, BP'| DB| [CX] 14 B,
+LES, BP'| DB| [AX] 14 B,
+LES, BP'| D0| [DI]
+LES, BP'| D0| [SI]
+LES, BP'| D0| [AX +1* BX]
+LES, BP'| D0| [BX]
+LES, BP'| D0| [DX]
+LES, BP'| D0| [CX]
+LES, BP'| D0| [AX]
+LES, SP'| MEM| 10 X,
+LES, SP'| DW| [DI] 14 X,
+LES, SP'| DW| [SI] 14 X,
+LES, SP'| DW| [BP] 14 X,
+LES, SP'| DW| [AX +1* BX] 18 X,
+LES, SP'| DW| [BX] 14 X,
+LES, SP'| DW| [DX] 14 X,
+LES, SP'| DW| [CX] 14 X,
+LES, SP'| DW| [AX] 14 X,
+LES, SP'| DB| [DI] 14 B,
+LES, SP'| DB| [SI] 14 B,
+LES, SP'| DB| [BP] 14 B,
+LES, SP'| DB| [AX +1* BX] 18 B,
+LES, SP'| DB| [BX] 14 B,
+LES, SP'| DB| [DX] 14 B,
+LES, SP'| DB| [CX] 14 B,
+LES, SP'| DB| [AX] 14 B,
+LES, SP'| D0| [DI]
+LES, SP'| D0| [SI]
+LES, SP'| D0| [AX +1* BX]
+LES, SP'| D0| [BX]
+LES, SP'| D0| [DX]
+LES, SP'| D0| [CX]
+LES, SP'| D0| [AX]
+LES, BX'| MEM| 10 X,
+LES, BX'| DW| [DI] 14 X,
+LES, BX'| DW| [SI] 14 X,
+LES, BX'| DW| [BP] 14 X,
+LES, BX'| DW| [AX +1* BX] 18 X,
+LES, BX'| DW| [BX] 14 X,
+LES, BX'| DW| [DX] 14 X,
+LES, BX'| DW| [CX] 14 X,
+LES, BX'| DW| [AX] 14 X,
+LES, BX'| DB| [DI] 14 B,
+LES, BX'| DB| [SI] 14 B,
+LES, BX'| DB| [BP] 14 B,
+LES, BX'| DB| [AX +1* BX] 18 B,
+LES, BX'| DB| [BX] 14 B,
+LES, BX'| DB| [DX] 14 B,
+LES, BX'| DB| [CX] 14 B,
+LES, BX'| DB| [AX] 14 B,
+LES, BX'| D0| [DI]
+LES, BX'| D0| [SI]
+LES, BX'| D0| [AX +1* BX]
+LES, BX'| D0| [BX]
+LES, BX'| D0| [DX]
+LES, BX'| D0| [CX]
+LES, BX'| D0| [AX]
+LES, DX'| MEM| 10 X,
+LES, DX'| DW| [DI] 14 X,
+LES, DX'| DW| [SI] 14 X,
+LES, DX'| DW| [BP] 14 X,
+LES, DX'| DW| [AX +1* BX] 18 X,
+LES, DX'| DW| [BX] 14 X,
+LES, DX'| DW| [DX] 14 X,
+LES, DX'| DW| [CX] 14 X,
+LES, DX'| DW| [AX] 14 X,
+LES, DX'| DB| [DI] 14 B,
+LES, DX'| DB| [SI] 14 B,
+LES, DX'| DB| [BP] 14 B,
+LES, DX'| DB| [AX +1* BX] 18 B,
+LES, DX'| DB| [BX] 14 B,
+LES, DX'| DB| [DX] 14 B,
+LES, DX'| DB| [CX] 14 B,
+LES, DX'| DB| [AX] 14 B,
+LES, DX'| D0| [DI]
+LES, DX'| D0| [SI]
+LES, DX'| D0| [AX +1* BX]
+LES, DX'| D0| [BX]
+LES, DX'| D0| [DX]
+LES, DX'| D0| [CX]
+LES, DX'| D0| [AX]
+LES, CX'| MEM| 10 X,
+LES, CX'| DW| [DI] 14 X,
+LES, CX'| DW| [SI] 14 X,
+LES, CX'| DW| [BP] 14 X,
+LES, CX'| DW| [AX +1* BX] 18 X,
+LES, CX'| DW| [BX] 14 X,
+LES, CX'| DW| [DX] 14 X,
+LES, CX'| DW| [CX] 14 X,
+LES, CX'| DW| [AX] 14 X,
+LES, CX'| DB| [DI] 14 B,
+LES, CX'| DB| [SI] 14 B,
+LES, CX'| DB| [BP] 14 B,
+LES, CX'| DB| [AX +1* BX] 18 B,
+LES, CX'| DB| [BX] 14 B,
+LES, CX'| DB| [DX] 14 B,
+LES, CX'| DB| [CX] 14 B,
+LES, CX'| DB| [AX] 14 B,
+LES, CX'| D0| [DI]
+LES, CX'| D0| [SI]
+LES, CX'| D0| [AX +1* BX]
+LES, CX'| D0| [BX]
+LES, CX'| D0| [DX]
+LES, CX'| D0| [CX]
+LES, CX'| D0| [AX]
+LES, AX'| MEM| 10 X,
+LES, AX'| DW| [DI] 14 X,
+LES, AX'| DW| [SI] 14 X,
+LES, AX'| DW| [BP] 14 X,
+LES, AX'| DW| [AX +1* BX] 18 X,
+LES, AX'| DW| [BX] 14 X,
+LES, AX'| DW| [DX] 14 X,
+LES, AX'| DW| [CX] 14 X,
+LES, AX'| DW| [AX] 14 X,
+LES, AX'| DB| [DI] 14 B,
+LES, AX'| DB| [SI] 14 B,
+LES, AX'| DB| [BP] 14 B,
+LES, AX'| DB| [AX +1* BX] 18 B,
+LES, AX'| DB| [BX] 14 B,
+LES, AX'| DB| [DX] 14 B,
+LES, AX'| DB| [CX] 14 B,
+LES, AX'| DB| [AX] 14 B,
+LES, AX'| D0| [DI]
+LES, AX'| D0| [SI]
+LES, AX'| D0| [AX +1* BX]
+LES, AX'| D0| [BX]
+LES, AX'| D0| [DX]
+LES, AX'| D0| [CX]
+LES, AX'| D0| [AX]
 LEA, DI'| MEM| 10 X,
 LEA, DI'| DW| [DI] 14 X,
 LEA, DI'| DW| [SI] 14 X,
@@ -20845,8 +20846,11 @@ ADD, B| F| AL'| D0| [BX]
 ADD, B| F| AL'| D0| [DX]
 ADD, B| F| AL'| D0| [CX]
 ADD, B| F| AL'| D0| [AX]
+
+( PADDING)
+0 ,
 HERE
 ." TEST STARTS HERE"
 2DUP OVER - DUMP
-DIS-RANGE
+DISASSEMBLE-RANGE
 BYE

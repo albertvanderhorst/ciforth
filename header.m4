@@ -3,7 +3,7 @@ dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl
 dnl _STRING : Lay down a string in memory.
 dnl Take care of embedded double quotes by using single quotes.
-dnl Note: this cannot be used in HEADER, because index must look in the real string,
+dnl Note: this cannot be used in _HEADER, because index must look in the real string,
 dnl not on some variable that contains the string.
 dnl The digression using _squote is needed because the single quote is used in m4.
 define(_squote,')
@@ -36,7 +36,7 @@ dnl
 dnl Lay down a header with forth name $1, assembler name $2 and code field $3
 dnl and data field $4, flag field $5, link field $6.
 dnl All except the assembler name are optional.
-define(HEADER, {dnl
+define(_HEADER, {dnl
 ifelse(0,len({$1}),,
 ;  ********_star(len({$1}))
 ;  *   {{$1}}   *
@@ -82,7 +82,7 @@ define({_LOOP},dnl
         DC      $1-$-CW})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
-{HEADER({$1},
+{_HEADER({$1},
 {$2},
 {$+_CELLS(PH_OFFSET-C_HOFFSET)},
 {$+_CELLS(PH_OFFSET-D_HOFFSET)},

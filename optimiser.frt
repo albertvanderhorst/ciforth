@@ -29,6 +29,10 @@ REQUIRE SET
 : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
 \ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
 
+VARIABLE CHECK-SP
+: !CHECK-SP DSP@ CHECK-SP ! ;
+: ?CHECK-SP DSP@ CHECK-SP @ - 13 ?ERROR ;
+
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
 \ For a SET print it backwards. Primarily intended as how to loop backwards example.
 : SET-PRINT-BACKWARDS
@@ -679,10 +683,10 @@ SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
 \ The return stack is used because downward loops don't handle the zero case
 \ gracefully.
 : FILL-WITH-CONSTANTS
-    DSSWAP   SWAP >R >R   !CSP EXECUTE-GAP
+    DSSWAP   SWAP >R >R   !CHECK-SP EXECUTE-GAP
     BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
         'LIT R@ !  R@ CELL+ ! REPEAT
-    DROP ?CSP DROP
+    DROP ?CHECK-SP DROP
 ;
 
 \ For a foldable GAP, replace it with constants. Leave the new END of

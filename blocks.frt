@@ -259,12 +259,12 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 : .VOCS 'ID. FOR-VOCS ;
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
+: CONTEXT SEARCH-ORDER ;
 \ Print the current search order by vocabulary names
 : ORDER CONTEXT BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
 2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 \ This is a BUFFER compatible with FIG-Forth.
 : BUFFER   (BUFFER) CELL+ CELL+ ;
-
 
 
 
@@ -701,7 +701,7 @@ REQUIRE T[
 \ The name must be a string constant on the stack
 \ Use only while compiling, or you crash the system
 : POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
-\ Example: : :P POSTFIX : !CSP ;
+
 ( Z$@ CTYPE C$.S ) \ AvdH A3mar20
 
 \ For a CSTRING (pointer to zero ended chars) return a STRING.
@@ -952,9 +952,9 @@ REQUIRE TASK-TABLE   REQUIRE CVA
 
 \ Save all compilation information on the return stack. It is
 \ restored upon exit of the calling word.
-: NESTED-COMPILE R>   CSP @ >R DPL @ >R UNLINK-LATEST >R
+: NESTED-COMPILE R> DPL @ >R UNLINK-LATEST >R
   STATE @ >R   >R CO    R> STATE ! R> LINK-LATEST R> DPL !
-  R> CSP !   ;
+  ;
 
 
 \
@@ -1297,7 +1297,7 @@ CFOF BRANCH BY -br
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
 VOCABULARY ASSEMBLER IMMEDIATE
 \ ISO standard words.
-: CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER !CSP  ;
+: CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER DSP@  ;
 : ;CODE
 ?CSP   POSTPONE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
 ; IMMEDIATE
@@ -3712,11 +3712,11 @@ Some of them did work on FIG though.
   R> R> 2M+ DROP .S ;
 ( ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"                  )
 HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
+: CODE ?EXEC CREATE [COMPILE] ASSEMBLER DSP@ ; IMMEDIATE
 ASSEMBLER DEFINITIONS ( ;CODE see screen3 )
 : C; PREVIOUS ?EXEC ?CSP ; IMMEDIATE
 : LABEL ?EXEC 0 IVAR SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
-    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
+    DSP@ ; IMMEDIATE     ASSEMBLER DEFINITIONS
 4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
 2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
 6 CONSTANT M 6 CONSTANT SP 'EXIT >CFA 0B + @ CONSTANT (NEXT)
