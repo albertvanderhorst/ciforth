@@ -255,7 +255,7 @@ FORGET SWITCH-LIBS
 
 
 ( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
-.SIGNON CR 27 LIST  28 LOAD    : REQ REQUIRE ;
+.SIGNON CR 0 LIST  28 LOAD    : REQ REQUIRE ;
 REQ CONFIG
 REQ L-S ( MAINTENANCE )
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
@@ -356,7 +356,7 @@ BYE
 "                 LIBRARY FILE: " TYPE CR
 "$RCSfile$ $Revision$" TYPE CR
 CR
-27 BLOCK B/BUF TYPE
+0 LIST
 BYE
 
 
@@ -430,21 +430,21 @@ BYE
 
 
 
-COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
-                   LICENSE
-This program is free software; you can redistribute it and/or
-modify it under the terms of version 2 of the GNU General
-Public License as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public
-License along with this program; if not, write to the
-            Free Software Foundation, Inc.,
-   59 Temple Place, Suite 330, Boston, MA 02111, USA.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
@@ -511,19 +511,19 @@ for ISO, that in my opinion should never be loaded.
 
 
 ( DEADBEEF leading_hex_digit) REQUIRE CONFIG \ AvdH A1oct13
-\ Are denotations starting with "D" already known?
-"D" 'DENOTATION >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
+\ Are denotations starting with "Z" already known?
+"Z" 'DENOTATION >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
 \ Apparently not, so:
 REQUIRE ALIAS
-CURRENT @   DENOTATION DEFINITIONS   '3   PREVIOUS
+CURRENT @   'DENOTATION >WID CURRENT !  '3
 \ Make sure Forth understands DEADBEEF as a hex number
-DUP ALIAS A   DUP ALIAS B   DUP ALIAS C   DUP ALIAS D
-DUP ALIAS E   DUP ALIAS F   DUP ALIAS G   DUP ALIAS H
-DUP ALIAS I   DUP ALIAS J   DUP ALIAS K   DUP ALIAS L
-DUP ALIAS M   DUP ALIAS N   DUP ALIAS O   DUP ALIAS P
-DUP ALIAS Q   DUP ALIAS R   DUP ALIAS S   DUP ALIAS T
-DUP ALIAS U   DUP ALIAS V   DUP ALIAS W   DUP ALIAS X
-DUP ALIAS Y   DUP ALIAS Z
+(   DUP ALIAS A   DUP ALIAS B   DUP ALIAS C   DUP ALIAS D    )
+(   DUP ALIAS E   DUP ALIAS F ) DUP ALIAS G   DUP ALIAS H
+    DUP ALIAS I   DUP ALIAS J   DUP ALIAS K   DUP ALIAS L
+    DUP ALIAS M   DUP ALIAS N   DUP ALIAS O   DUP ALIAS P
+    DUP ALIAS Q   DUP ALIAS R   DUP ALIAS S   DUP ALIAS T
+    DUP ALIAS U   DUP ALIAS V   DUP ALIAS W   DUP ALIAS X
+    DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'DENOTATION >WID CURRENT ! instead of DEFINITIONS
 ( COMPARE ) \ AvdH A1oct04
@@ -558,7 +558,7 @@ DROP   CURRENT !
 
 
 
-( ORDER .WID .VOCS ) \ AvdH A1sep25
+( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
 \ Print all vocabularies names in existence.
 : .VOCS 'ID. FOR-VOCS ;
 \ Print a voc's name from the WID)
@@ -566,7 +566,7 @@ DROP   CURRENT !
 \ Print the current search order by vocabulary names
 : ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
 2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
-
+: BUFFER   (BUFFER) CELL+ CELL+ ;
 
 
 
@@ -589,7 +589,7 @@ VARIABLE COMP \ Execution token of comparison word.
            1-     SWAP DROP \ Replace IMAX
         THEN
     REPEAT
-DROP RDROP ;
+DROP RDROP 1+ ;
 ( BIN-SEARCH binary_search_variables ) \ AvdH
 VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
 VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
@@ -604,7 +604,7 @@ VARIABLE COMP \ Execution token of comparison word.
            ( ihalf) 1- IMAX !
         THEN
     REPEAT
-IMIN @ ; ( diagram is same than previous screen )
+IMIN @ 1+ ; ( diagram is same than previous screen )
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
 ( binary_search_description )
 EXIT
@@ -613,9 +613,9 @@ Uses a comparison routine with execution token `COMP'
 `COMP' must have the stack diagram ( IT -- flag) , where flag
 typically means that IT compares lower or equal to some fixed
 value. It should be TRUE for `IMIN' and monotonic towards
-`IMIN' and `IMAX' . Finds the last index `IT' between `IMIN'
-and `IMAX' (exclusive) for which `COMP' returns true.
-or else ``IMIN -1''
+`IMIN' and `IMAX' . Finds the first index `IT' between `IMIN'
+and `IMAX' (exclusive) for which `COMP' returns false.
+or else ``IMAX''
 An empty range is allowed.
 
 
@@ -623,11 +623,11 @@ An empty range is allowed.
 
 
 ( binary_search_test )
+REQUIRE BIN-SEARCH
 : <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
-." EXPECT 99:" .
+." EXPECT 100:" .
 CREATE XXX 123 , 64 , 32 , 12
 \ Find first number < 40
-
 
 
 
@@ -933,6 +933,22 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 
 
 
+
+
+
+
+
+
+
+
+
+( DO-DEBUG NO-DEBUG ) \ AvdH A1oct15
+\ An alternative ``OK'' message with a stack dump.
+: NEW-OK   .S ."  OK " ;
+
+\ Install and de-install the alternative ``OK''
+: DO-DEBUG   'NEW-OK >DFA @   'OK >DFA ! ;
+: NO-DEBUG   'OK >PHA    'OK >DFA ! ;
 
 
 
@@ -1790,9 +1806,8 @@ HEX>
 
 
 
-( --hd_LBA utils_for_stand_alone_disk ) REQUIRE ?PC   ?PC ?16
-REQUIRE CONFIG   REQUIRE ASSEMBLER   REQUIRE BIOSI
-REQUIRE +THRU
+( --hd_LBA utils_for_stand_alone_disk ) REQUIRE CONFIG ?PC ?16
+REQUIRE ASSEMBLER   REQUIRE BIOSI   REQUIRE +THRU
 ( backup and restore a stand alone hard disk system to floppy )
 ( run from a booted floppy system )
 ( this is for a 16 bit system, because the assembly assumes )
@@ -1800,6 +1815,7 @@ REQUIRE +THRU
 : --hd_LBA ;
 256 CONSTANT #BLOCKS
 1 5 +THRU DECIMAL
+
 
 
 
@@ -1937,18 +1953,18 @@ DECIMAL
 ( INSTALL-FORTH-ON-HD ) REQUIRE CONFIG \ AvdH A1oct11
 REQUIRE +THRU
 \ Elective and configuration screen
-
+\ Define and overrule this for manual installation
 CREATE #BLOCKS 256 ,
 HEX F8 CONSTANT MEDIA-ID \ For hard disk.
-
+\ ?? CONSTANT #HEADS   ?? CONSTANT SECTORS/TRACK
 1 5 +THRU
 
 INSTALL-FORTH-ON-HD
 EXIT
-Re-installs a sector and track ciforth to a hard disk (or
+Re-installs a sector-and-track ciforth to a hard disk (or
 floppy). This is a user utility, so it can be run for other
 type ciforth's. But then it only explains to the user what is
-going on.
+going wrong.
 
 ( --disclaimer_INSTALL_FORTH_ON_HD ) ?HD \ AvdH A1oct11
 
@@ -1988,10 +2004,10 @@ CR ." The number of heads on your hard disk is reported: "
 #HEADS DUP . B. &H EMIT
 CR ." The number of sectors/track is reported: "
 SECTORS/TRACK DUP . B. &H EMIT
+CR ." (If this is incorrect, you have to configure manually)"
 CR CR ." Do you believe this? Y/N" CR
 
 stop?
-
 
 
 
