@@ -90,8 +90,8 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 
 00 FF T! 08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
 00 FF T! 08 E3 4 1FAMILY, XTHL XCHG DI EI
-00 FF T! 08 E9 2 1FAMILY, PCHL SPHL
-00 FF T! 01 C7 8 1FAMILY, RST0 RST1 RST2 RST3 RST4 RST5 RST6 RST7
+00 FF T! 10 E9 2 1FAMILY, PCHL SPHL
+00 FF T! 08 C7 8 1FAMILY, RST0 RST1 RST2 RST3 RST4 RST5 RST6 RST7
 
 00 07 T! 01 00 8 xFAMILY| B| C| D| E| H| L| M| A| ( src)
 00 F8 T! 08 80 8 1FAMILY, ADD ADC SUB SBB ANA XRA ORA CMP ( B|)
@@ -289,7 +289,7 @@ HERE POINTER !
 : dis-xFI
    DUP IS-xFI IF
    DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
-   DUP >INST  POINTER @ @ TALLY CELL+ @ INVERT AND = IF
+   DUP >MASK  POINTER @ @ AND OVER >INST = IF
        DUP >BODY FIX| DROP
        DUP +DISS
 (       DUP ID.                                                         )
@@ -310,11 +310,13 @@ HERE POINTER !
    THEN
 ;
 
-
+0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,
+: VL. CELLS TABLE + @ AND U. ;
 ( Print the DEA in an appropriate way, it must be a comma-er   )
 : .COMMA 
-    NEW-POINTER @ @ .
-    DUP >BODY CELL+ CELL+ @ NEW-POINTER +!
+    DUP >BODY CELL+ CELL+ @     ( -- #bytes)
+    NEW-POINTER @ @ OVER VL.
+    NEW-POINTER +!              ( #bytes -- )
     ID.
 ;
 : .DISS' DISS DUP @ SWAP CELL+ DO
@@ -344,12 +346,27 @@ HERE POINTER !
     RESULT? IF
       .DISS' 
       NEW-POINTER @ POINTER !
+    ELSE
+      POINTER @ C@ . ."  C,"
+      1 POINTER +!
     THEN
 ;
 
 : D-F-A POINTER ! DOIT2 ;
-
+: DIS-RANGE
+    SWAP POINTER !
+    BEGIN DOIT2 POINTER @ OVER < 0= UNTIL 
+    DROP
+;
 ." COMES JAN"
-    CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        )
+    CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        
+    ' JAN HERE DIS-RANGE
+' JAN CFA @ D-F-A DOIT2 DOIT2 
+
+CODE JAN
+CC, Y| LS| 3 X,
+CC, A'| 3 X,
+NEXT C;
+' JAN CFA @ 10 DUMP
 ' JAN CFA @ D-F-A DOIT2 DOIT2 
 
