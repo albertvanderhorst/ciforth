@@ -1,10 +1,10 @@
 \ INCLUDE regexp.frt
 VARIABLE OLDIN : !OLDIN IN @ OLDIN ! ; !OLDIN
-: test IF CR "The following failed: " TYPE OLDIN @ IN @ OVER - TYPE CR THEN !OLDIN ;
+\     : test IF CR "The following failed: " TYPE OLDIN @ IN @ OVER - TYPE CR THEN !OLDIN ;
 \ Verbose
-\     : test CR IF "The following failed: " ELSE "The following suceeded: " THEN TYPE
-\     OLDIN @ IN @ OVER - TYPE CR !OLDIN ;
-
+: test CR IF "Test failed: " ELSE "Test suceeded: " THEN TYPE
+OLDIN @ IN @ OVER - TYPE CR !OLDIN ;
+: \ POSTPONE \ !OLDIN ; IMMEDIATE
 : match 0= test ;
 : nomatch test ;
 
@@ -215,3 +215,17 @@ ESCAPE$ "[^.]" RE-MATCH match
 " " "\w" RE-MATCH nomatch
 " " "[\w]" RE-MATCH nomatch
 " " "[^\w]" RE-MATCH match
+
+\ Start and end of strings.
+" AAP " "<AAP" RE-MATCH match
+"QAAP " "<AAP" RE-MATCH nomatch
+" AAP " "AAP>" RE-MATCH match
+" AAPQ" "AAP>" RE-MATCH nomatch
+" AAP " "<AAP>" RE-MATCH match
+"QAAPQ" "<AAP>" RE-MATCH nomatch
+" A " "<.>" RE-MATCH match
+" AAP " "<.>" RE-MATCH nomatch
+" AAP " "<...>" RE-MATCH match
+" AAP " "<.*>" RE-MATCH match
+" AAP " "<[A-Z]*>" RE-MATCH match
+" AAP " "<[^P]*>" RE-MATCH nomatch

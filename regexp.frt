@@ -21,7 +21,7 @@ INCLUDE defer.frt
 \    2. Grouping using ( ) , only for replacement.
 \    4. Ranges and inversion of char set (between [ ] ).
 \    3. Above characters must be escaped if used as is by \ , making \ a special char.
-\    4. Some sets are escaped by \ (\w) , some non-printables are denote by an
+\    4. Some sets are escaped by \ (\w) , some non-printables are denoted by an
 \       escape sequence.
 \ 5. It is an error to escape characters that do no denote blank
 \       space, are not special, nor are denoting a set, However ^ - $
@@ -32,8 +32,7 @@ INCLUDE defer.frt
 \   tokens followed by strings or characters in some format.
 \   We follow the same here, except that tokens are execution tokens.
 \ * No attempt is done at reentrant code.
-\ * \d \s \w etc. can be handled by making the expression compiler more
-\   powerful.
+\ * \d \s \w etc. can be handled by just adding sets
 
 \ Data structures :
 \   a char set is a bit set, with a bit up for the matching character.
@@ -92,11 +91,13 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ The set matched by .
 0 CHAR-SET \.  ^J | INVERT-SET
 
+\ The characters that can be part of a "word". In C this would be [a-zA-Z0-9_]
+\ In c this would probably be \s (blank Space).
 &w CHAR-SET \w   256 1 DO I ?BLANK 0= IF I | THEN LOOP DROP
 
 \ Example of another set definition
 \ &d CHAR-SET \d   &9 1+ &0 DO I | LOOP   DROP
-\ &D CHAR-SET \D   \d OVER MAX-SET MOVE  INVERT-SET
+\ &D CHAR-SET \D   \d OVER COPY-SET  INVERT-SET
 
 '| HIDDEN
 
@@ -277,15 +278,20 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ Where the matched part of the string starts.
 : STARTPOINTER    SUBSTRING-TABLE @ ;
 
+\ For POINTER : "it POINTS into a word". 0 is considered "in a word".
+: IN-WORD C@ >R  R@ \w IN-CHAR-SET   R> 0= OR ;
+\ For POINTER : "it DOESNOT point into a word". 0 is considered "not in a word".
+: NOT-IN-WORD C@ >R  R@ \w IN-CHAR-SET 0=  R> 0= OR ;
+
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the start of a word"
-: CHECK< OVER STARTPOINTER @ = DUP 0= IF DROP OVER 1- C@ \w IN-CHAR-SET 0= THEN >R
-         OVER C@ DUP IF \w IN-CHAR-SET THEN   R> AND ;
+\ ``CHAR-POINTER'' must point into a string that is zero-ended at both ends
+\ ( ``STRING-COPY'' ).
+: CHECK< OVER   DUP 1- NOT-IN-WORD  SWAP IN-WORD AND ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the end of a word"
-: CHECK> OVER STARTPOINTER @ = 0= DUP IF DROP OVER 1- C@ \w IN-CHAR-SET THEN >R
-         OVER C@ DUP IF \w IN-CHAR-SET THEN 0=  R> AND ;
+: CHECK> OVER   DUP 1- IN-WORD  SWAP NOT-IN-WORD AND ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ Remember this as the start or end of a substring.
@@ -339,7 +345,7 @@ VARIABLE RE-FILLED
 : RE$,   DUP >R RE-FILLED @ $!   RE-FILLED @ CELL+ R> + ALIGNED RE-FILLED ! ;
 
 \ Add CHARSET to the ``RE-EXPR''.
-: RE-SET,   RE-FILLED @ MAX-SET MOVE   MAX-SET RE-FILLED +! ;
+: RE-SET,   RE-FILLED @ COPY-SET   MAX-SET RE-FILLED +! ;
 
 \ Make a hole in the ``RE-EXPR'' for a quantifier, and leave IT.
 : MAKE-HOLE   MAX-SET CELL+ >R  RE-FILLED @ R@ -
@@ -358,7 +364,7 @@ VARIABLE RE-FILLED
 
 \ Build up a set to be matched.
 CREATE SET-MATCHED ALLOT-CHAR-SET DROP
-: !SET-MATCHED   SET-MATCHED MAX-SET ERASE ;
+: !SET-MATCHED   \EMPTY SET-MATCHED COPY-SET ;
 
 
 \ Add the command to match the set in ``SET-MATCHED'' to the compiled
@@ -417,7 +423,7 @@ ELSE NORMAL-CHARS $C+ THEN ;
 \ Compile a set denoted by a \.
 \ EP points after the intial \ , leave IT pointing after the set indicating character.
 : PARSE\
-    C@+ GET-CHAR-SET SET-MATCHED MAX-SET MOVE
+    C@+ GET-CHAR-SET SET-MATCHED COPY-SET
     HARVEST-SET-MATCHED  ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
@@ -498,16 +504,20 @@ VARIABLE RE-EXPR-END
         2DUP = IF TRUE ELSE >R (RE-BUILD-ONE) R> FALSE THEN ;
 
 \ Parse the EXPRESSION string, put the result in the buffer
-\ ``RE-COMPILED''
-: RE-BUILD INIT-BUILD OVER + BEGIN RE-BUILD-ONE UNTIL 2DROP EXIT-BUILD ;
+\ ``RE-COMPILED''. Leave a POINTER to that buffer.
+: RE-BUILD INIT-BUILD OVER + BEGIN RE-BUILD-ONE UNTIL 2DROP EXIT-BUILD
+   RE-COMPILED ;
 
-\ Null-ended copy fo the string in which we try to match.
+\ Null-ended copy of the string in which we try to match.
 CREATE STRING-COPY MAX-RE ALLOT
+
+\ Copy the STRING to ``STRING-COPY'' zero-ending at both ends.
+\ Return a POINTER to the zero ended string.
+: STRING-COPY-BUILD 0 STRING-COPY C!  0 OVER 1+ STRING-COPY + C!
+   STRING-COPY 1+ SWAP CMOVE    STRING-COPY 1+ ;
 
 \ For STRING and regular expression STRING:
 \ "there IS a match". \0 ..\9 have been filled in.
-: RE-MATCH RE-BUILD
-    STRING-COPY $! 0 STRING-COPY $C+ STRING-COPY $@ DROP RE-COMPILED
-    (MATCH) >R 2DROP R> ;
+: RE-MATCH RE-BUILD >R STRING-COPY-BUILD R> (MATCH) >R 2DROP R> ;
 
 \D INCLUDE debug-re.frt
