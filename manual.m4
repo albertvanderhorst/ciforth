@@ -11,6 +11,9 @@ define({forthsamp},{@samp{{$1}}})
 define({forthmacro},{@samp{{$1}}})
 define({forthprog},{@code{{$1}}})
 define({forthcodeni},{@code{{$1}}})
+dnl A line break? Apparently texinfo can't do it.
+define({forthbreak},{@*})
+define({forthemph},{@b{{$1}}})
 define({forthcode},{@code{{$1}}
 @findex $1
 })
