@@ -164,9 +164,9 @@ A_FORTH0     EQU     M4_LOADADDRESS - M4_ORG ; { Physical address of Forth's CS:
 A_SWITCH        EQU     M4_SWITCHORG
 A_RST       EQU     A_SWITCH + 10000H
 A_GDT             EQU     A_RST + RSTSIZE
-A_IDT             EQU     A_GDT + GDTSIZE
-; A_LOWDP         EQU     A_IDT + IDTSIZE ; { Must become this. }
-A_LOWDP         EQU     A_GDT + GDTSIZE
+A_IDT             EQU     A_GDT + GDTSIZE  ; { reserved but not yet used. }
+;A_LOWDP         EQU     A_IDT + IDTSIZE ; { Must become this. }
+ A_LOWDP         EQU     A_GDT + IDTSIZE 
 
 ;{ @ Real mode place for the stack.}
 ;{ This is such that after switching to real mode an isolated }    
@@ -181,8 +181,7 @@ M4_SWITCHOFFSET EQU  ( A_FORTH0 - M4_SWITCHORG)
 ;{ Switching sometimes restricts these to a particular value.}
 GDT_SWITCH       EQU    SWITCHSEGMENT  ;{ % Switching segment, must be same for switching to work! }
 GDT_CS EQU 10H  ;{ % The protected mode code segment }
-; { This choice is a relic. If switched from protected mode }
-; { the real mode code then uses data from the sandbox.}
+GDT_SS16 EQU 10H  ;{ % To access the real mode stack segment from protected. }
 ; { In fact we set the DS immediately after switching.}
 GDT_SS         EQU     SS_RST ;{ % The protected mode data segment}
 GDT_DS         EQU     SS_RST ;{ % The protected mode data segment}
@@ -440,9 +439,8 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 });_END___1__({ _BOOTED_1_})
 
 ;____1_____ _ABSOLUTELOAD_1_({
-; {THE FOLLOWING HAS BEEN DEBUGGED. IT FOLLOWS THE SPECIFICATION OF 4CH.}
-; {IT CAN BE EXECUTED FROM THE DEBUGGER. YET IT HANGS IF BYE CALLED FROM}
-; {FORTH}
+;{ Returns to DOS, provided we started from dos as a .COM.}
+;{ Use far jump restoring CS to .COM value. }
 RETDOS:
         MOV     AX,CS
         MOV     DS,AX
@@ -528,6 +526,21 @@ PROTECT:
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
+_COMMENT
+;{ The protected mode view of the real stack segment. }
+;{ GDT_SS16 is arbitrary.} 
+        MOV     BX,GDT_SS16
+        MOV     DI,BX
+        MOV     AX,0FFFFH
+        STOSW
+        MOV     EAX,A_RST
+        STOSW           ; {Only 16 bits}
+        SHR     EAX,8
+        ADD     AX,IDENTIFY_RW
+        STOSW
+        MOV     AX,IDENTIFY_16
+        STOSW
+_ENDCOMMENT
 ;{ GDT_DS/GDT_SS to an extent be choosen arbitraryly,} 
 ;{ The real mode view of GDT_SS is valid, isolated and reserved for real stack.}
 ;{ DS is reset after switching anyway.}
@@ -556,6 +569,14 @@ PROTECT:
 
         LGDT    [GDTLOAD]
 });_END___1__({ _SWITCH_1_})
+
+;____1_____ _BOOTED_1_({
+        JMP     ENDREADJUST
+        _NEW_ORG(01FEH)
+        ;{ Signature. Last piece of boot sector. }
+        DB         055H, 0AAH
+ENDREADJUST:
+});_END___1__({ _BOOTED_1_})
 
 ;____1_____ _SWITCH_1_({
 ;{ Remember: we are now in the real mode for a protected model.}
@@ -605,6 +626,8 @@ BMASK   EQU     BLOCKS_IN_USE_MASK
 ;____1_____ _SWITCH_1_({
         CLI     ;{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
+        MOV     AX,GDT_SS
+        MOV     SS,AX
 REP1:
 ;____1_____ _BITS32_1_({
         INC AX                  ;{ Wait until a20 works(!)}
@@ -650,14 +673,6 @@ ENDIF1:
 figforth:
 _start:
 });_END___1__({_LINUX_N_1_})
-
-;____1_____ _BOOTED_1_({
-        JMP     ENDREADJUST
-        _NEW_ORG(01FEH)
-        ;{ Signature. Last piece of boot sector. }
-        DB         055H, 0AAH
-ENDREADJUST:
-});_END___1__({ _BOOTED_1_})
 
         JMP     BOOTUP                  ; Cold start
 
@@ -827,7 +842,7 @@ DISPLAYSI:
         MOV     AX,SI
         CALL    DISPLAYW
         CALL    DISPLAYCR
-        SET_32_BIT_MODE
+        _BITS32_1_({SET_32_BIT_MODE})
         MOV     AH,10H
         INT     16H
         _SWITCH_1_({JMPHERE_FROM_OS})
