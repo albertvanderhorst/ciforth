@@ -188,6 +188,9 @@ RAWIO           EQU     (ECHO | ICANON)
 ; ########################################################################################
 ;                       BOOTCODE    (optional, always real mode)
 ; ########################################################################################
+
+; All bootcode must be relocatable and its memory references absolute.
+
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
 ;____1_____ _BOOTFD__1_({
@@ -264,9 +267,11 @@ ELSE1:
 
         ;{ The first file copied to a freshly formatted floppy will}
         ;{ be at SECSTRT (See also genboot.bat)}
-        MOV     CX,SECSTRT
+        MOV     CX,SECSTRT      ; {Counting from zero}
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
+        INC     CX
+        ADD     BX,BPS
         JB      RETRY
         CMP     BX,INITDP-$$
         JB      BEGIN1
@@ -281,23 +286,20 @@ READSECTOR:
         PUSH    CX
         PUSH    BX
         MOV     AX,CX
-        XOR     DX,DX
-        DIV     _CELL_PTR[LSPT]
-        MOV     CL,DL
+        MOV     CL,SPT
+        DIV     CL
+        MOV     CL,AH
         INC     CL      ;{ Sectors counting from 1!}
-        XOR     DX,DX
-        DIV     _CELL_PTR[LHEADS]
-        MOV     DH,DL   ;{ Head number}
+        XOR     AH,AH   ; {Rid of remainder}
+        MOV     CH,HEADS
+        DIV     CH
+        MOV     DH,AH   ;{ Head number}
         MOV     CH,AL   ;{ Only small disks <256 cylinders}
         MOV     DL,00            ;{Drive 0 (floppy 1)}
         MOV     AX,0201H   ;{ Read absolute one sector}
         INT(13H)                 ;{BIOS disk read function}
         POP     BX
-        PUSHF
-        ADD     BX,BPS
-        POPF
         POP     CX
-        INC     CX
         RET
 
 });_END___1__({ _BOOTFD__1_})
@@ -316,8 +318,8 @@ RESSECTORS  DW     01H
         DW         SPDRV
         DB         MEDIA
         DB         SECFAT, 0H
-LSPT    DW         SPT
-LHEADS  DW       HEADS
+        DW         SPT
+        DW       HEADS
 HIDDENSECS    DD        0H
 HUGESECS      DD         000H
       ;{ BIOS parameter block ends here}
