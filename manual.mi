@@ -1016,13 +1016,14 @@ in the input stream.
 These words are not in the kernel but are in screen 17, that
 corresponds to the forthsamp({-r}) option.
 
-Screen 0 and screen 1 to 26 are reserved.
+Screen 0 and screen 1 to 31 are reserved.
 _HOSTED_({
 When a Forth is started up with
 a first parameter that is a one-letter option, the corresponding
 screen is to be executed. _VERBOSE_({So forthsamp({-a}) or forthsamp({-A}) is
 equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
  forthsamp({-Z}) is equivalent to forthsamp({26 LOAD}).})
+ _VERBOSE_({{In fact all options are mapped onto screen 0..31 by a bitwise and.}})
 @subsection Options
 ciforth is a primitive system, and can interpret just one option on the
 command line. If the first argument is not starting with forthkey({-}) _PC_({or forthkey({/})})
@@ -1035,7 +1036,7 @@ The following options can be passed to thisforth on the command line:
 forthitemize
 
 forthitem
-forthsamp({-a name})
+forthsamp({-a})
 
 Make sure forthcode({REQUIRED}) is available.
 This is a copy of the forthsamp({-r}) command
@@ -1070,7 +1071,13 @@ forthitem
 forthsamp({-f forthcode})
 
 Execute the forthsamp({forthcode}) in the order present.
-_SUPPRESSED({ It is not clear whether we really want this.
+_VERBOSE_({{Beware of the special characters in the shell. Also
+the shell will collapse multiple spaces into one.}})
+
+_SUPPRESSED({
+forthitem
+forthsamp({-i forthcode})
+It is not clear whether we really want this.
 Options such as in this list are available on the remainder of the line, but they
 must be invoked with two slashes instead of one, and having more letters is allowed
 but ignored.
