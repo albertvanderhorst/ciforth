@@ -114,15 +114,16 @@ boot: fig86.alone.bin
 # Figforth calculates whether the screen boundaries are off by a sector.
 # You can copy the filler by hand if this calculation fails, e.g. 5" floppies.
 # The symptom is 8 LIST show the electives screen half and half of some other screen.
-filler: fig86.alone.bin
+filler: fig86.alone.bin lina
+	rm -f wc # Use the official `wc' command
 	# Have forth calculate whether we need the filler sector
         # Use the exit command to return 1 or 0
-	(filesize=`cat $+|wc -c`; \
+	(filesize=`cat fig86.alone.bin |wc -c`; \
 	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
-moreboot: BLOCKS.BLK fig86.alone.bin  
-	mcopy BLOCKS.BLK a:
+moreboot: BLOCKS.BLK fig86.alone.bin  fig86.msdos.bin	   
+	mcopy BLOCKS.BLK a: 
 	mcopy fig86.msdos.bin	   a:msdos.com
                           
 allboot: boot filler moreboot
