@@ -316,6 +316,8 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.})
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
     _ABSOLUTELOAD_({ ORG     M4_ORG})
+    _BOOTED_(_REAL_({ORG     100H
+ORIG:                         ; {Accommodate also .exe files} }))
 ORG0:
 
 _BOOTSECTRK_({
@@ -713,12 +715,6 @@ _HOSTED_MSDOS_({
 ENDREADJUST:
 });_END_({ _HOSTED_MSDOS_})
 _BOOTED_({
-        LEA     AX,[WRM + M4_SWITCHOFFSET]
-        LEA     BX,[4*1BH]
-        MOV     [BX],AX         ;{Jump to WRM on <CTRL-BREAK>}
-        INC     BX
-        INC     BX
-        MOV     _CELL_PTR[BX], SWITCHSEGMENT
         JMP     ENDREADJUST
         _NEW_ORG(01FEH)
         ;{ Signature. Last piece of boot sector. }
@@ -1369,7 +1365,7 @@ _PROTECTED_({
        _BITS16_({DC      LIT, 1856H, LIT, 0CDH})    ;{ '80386'}
 });_END_({ _PROTECTED_})
 _REAL_({
-       DC      5H,0B328H       ;{ '8088'     }
+       DC      LIT, 0B328H, LIT, 5H      ;{ '8088'     }
 })
         DC      SEMIS
 ;
