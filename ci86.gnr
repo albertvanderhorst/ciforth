@@ -2951,13 +2951,13 @@ HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
 worddoc( {OPERATINGSYSTEM},{ARGS},{arguments},{--- addr},{},
 {This is a system dependant pointer to any arguments
 that is passed from the operating system to ciforth
-during startup.
+during startup.}
 _LINUX_N_({{
 In this ciforth it points to an area with the argument count,
 followed by a a null ended array of arguments strings,
 then by a null ended array of environment strings.
 }});_END_({_LINUX_N_})
-},
+,
 {{SYSTEM}},
 {{." Interactive"},{Interactive}},
 enddoc)
@@ -7769,8 +7769,8 @@ HEADER({(BACK},{PBACK},{DOCOL})
 worddocsafe( {CONTROL~},{BACK)},{back_paren},{addr ---},{},
 {Complete a backward branch by compiling an offset from
 forthcode({HERE}) to forthvar({addr}), left there by
-forthcode({(BACK)}) . _VERBOSE_({Usage is forthsamp({ (BACK ..
-POSTPONE BRANCH BACK) }) })},
+forthcode({paren_BACK}) . _VERBOSE_({Usage is
+forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) })},
 {{LOOP},{UNTIL}},
 {{( See (BACK )},{}},
 enddoc)
@@ -7784,8 +7784,8 @@ HEADER({BACK)},{BACKP},{DOCOL})
 worddocsafe( {CONTROL~},{(FORWARD},{paren_forward},{--- addr},{},
 {Start a forward branch by leaving the address that must be
 backpatched with an offset into forthvar({addr}).
-_VERBOSE_({Usage is forthsamp({ POSTPONE BRANCH (FORWARD ..
-FORWARD) }) })},
+_VERBOSE_({Usage is
+forthsamp({ POSTPONE BRANCH (FORWARD .. FORWARD) }) })},
 {{LOOP},{UNTIL}},
 {
 {: GS1 2 BRANCH [ (FORWARD ] 4 [ FORWARD) ] 6 ; GS1 . .},
@@ -8460,7 +8460,7 @@ HEADER({LIST},{LLIST},{DOCOL})
         DC      LIT,1024
 LLIST1: DC      LIT, ALF, SSPLIT
         DC      CR, LTYPE
-        DC      OVER,ZEQU
+        DC      OVER,ZEQU ;{DUP would not show a last empty line!}
         _0BRANCH(LLIST1)
         DC      TDROP
         DC      SEMIS
