@@ -1139,8 +1139,9 @@ PFIN2:  INC     BX
         MOV     AL,[BX]
         XOR     AL,[DI] ;{COMPARE NAMES}
         ADD     AL,AL   ;{THIS WILL BE TEST BIT 8}
-        JNZ     PFIN5   ;{NO MATCH}
-        JNB     PFIN2   ;{MATCH SO FAR - LOOP}
+        JNZ     PFIN5A  ;{NO MATCH}
+        TEST    _BYTE_PTR[BX],080H;{Last char of NFA?.}
+        JZ      PFIN2   
 ;
 ;{   FOUND END OF NAME (BIT 8 SET) - A MATCH}
         ADD     BX,_BYTE 1+CELLS(2);{ BX = PFA}
@@ -1156,7 +1157,7 @@ PFIN2:  INC     BX
 ;
 PFIN5:  INC     BX      ;{NEXT ADDR}
         JB      PFIN6   ;{END OF NAME}
-        MOV     AL,[BX] ;{GET NEXT CHAR}
+PFIN5A: MOV     AL,[BX] ;{GET NEXT CHAR}
         ADD     AL,AL   ;{SET/RESET CARRY}
         JMP SHORT     PFIN5   ;{LOOP UNTIL FOUND}
 ;
