@@ -346,12 +346,12 @@ READSECTOR:
         PUSH    CX
         PUSH    BX
         MOV     AX,CX
-        MOV     CL,SPT
+        MOV     CL,[LSPT]
         DIV     CL
         MOV     CL,AH
         INC     CL      ;{ Sectors counting from 1!}
         XOR     AH,AH   ; {Rid of remainder}
-        MOV     CH,HEADS
+        MOV     CH,[LHEADS]
         DIV     CH
         MOV     DH,AH   ;{ Head number}
         MOV     CH,AL   ;{ Only small disks <256 cylinders}
@@ -375,7 +375,7 @@ RETRY:
         MOV     AL,' '
         CALL DISPLAY
 BOOT:
-        MOV     DL, 080H
+        MOV     AL, [LMEDIA]
         CMP     AL, 0F8H        ; {Fixed disk.}
         JZ     ENDIF1A
         MOV     DL, 0H          ; {Floppy.}
@@ -959,11 +959,6 @@ _start:
 });_END_({_LINUX_N_})
 
         JMP     BOOTUP                  ; Cold start
-_RWSECTRK_({
-LFDRIVE DB      DRIVE                   ; {To be used by Forth.}
-LFSPT   DB      SPT
-LFHEADS DB      HEADS
-});_END_({_RWSECTRK_})
 ; ########################################################################################
 ;                       FORTH ITSELF (entry point : BOOTUP)
 ; ########################################################################################
@@ -1714,6 +1709,10 @@ _ENDCOMMENT
         DC      0       ;{ INIT (OFFSET) }
 });_END_({_CLASSIC_})
 _RWSECTRK_({
+_NO_RESPECTDOS_({
+        DC      40H     ;{ INIT (OFFSET) }
+});_END_({_NO_RESPECTDOS_})
+_RESPECTDOS_({
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
 ;{ within the forth system itself. }
@@ -1722,6 +1721,8 @@ _RWSECTRK_({
 ;       You need a filler file of one sector,
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
         DC      (SECSTRT+((RELATIVE_WRT_ORIG(TEXTEND)-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
+});_END_({_RESPECTDOS_})
+
 });_END_({_RWSECTRK_})
 _RWLBA_({
 ;{ This will reserve place for the system itself, on the first part of a }
@@ -7564,13 +7565,37 @@ CODE_HEADER({R/W},{RSLW})
 
 
 });_END_({_LINUX_C_})
+_RWSECTRK_({
+worddoc( {STORAGE},{DRIVE},{drive},{--- addr},{},
+{Leave the address forthvar({addr}) of a character buffer,
+containing the
+drive used for mass storage, the number of sectors in a
+track, and the number of heads.
+The drive
+ is in MSDOS coding,
+0 is floppy A: , 1 is floppy B:, 80H is drive C:,
+81H is drive D: and so forth.
+These parameters
+may be switched but this should only be
+attempted after forthcode({EMPTY-BUFFERS}) .
+_VERBOSE_({These are manipulated in rare cases where an
+other disk is to be accessed, such as installing a bootable
+system on hard disk from floppy.})},
+{{BLOCK},{FLUSH}}, {}, enddoc)
+HEADER({DRIVE},{LDRIVE},{DOVAR}, )
+LFDRIVE DB      DRIVE                   ; {To be used by Forth.}
+LFSPT   DB      SPT
+LFHEADS DB      HEADS
+        _ALIGNED_({_ALIGN 4})
+;
+});_END_({ _RWSECTRK_})
 _CLASSIC_({
 ; This the mass storage I/O that looks most like FIG.
 ; It may not be pretty but it surely is the smallest.
 ;
 ;
 worddoc( {STORAGE},{DRIVE},{drive},{--- addr},{},
-{Leave the address addr of a variable containing the
+{Leave the address forthvar({addr}) of a variable containing the
 drive used for mass storage. This is in MSDOS coding,
 0 is floppy A: , 1 is floppy B:, 80H is drive C:,
 81H is drive D: and so forth.
