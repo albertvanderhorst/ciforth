@@ -28,8 +28,8 @@ TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
     sed '/SI[MB]/d' |\
     sed '/OK/d' >p$(PREFIX).$@
 
-qr8080.ps  : lina BLOCKS.BLK ; make as80.ps ; mv p0.as80.ps $@ 
-qr8086.ps  : lina BLOCKS.BLK ; make asi86.ps ; mv p0.asi86.ps $@     
+qr8080.ps  : lina BLOCKS.BLK ; make as80.ps ; mv p0.as80.ps $@
+qr8086.ps  : lina BLOCKS.BLK ; make asi86.ps ; mv p0.asi86.ps $@
 p0.asi586.ps  : lina BLOCKS.BLK  ; make asi586.ps PREFIX=0 MASK=FF
 p0F.asi586.ps : lina BLOCKS.BLK  ; make asi586.ps PREFIX=0F MASK=FFFF
 
@@ -182,7 +182,8 @@ manual.mi   \
 rational.mi  \
 # That's all folks!
 
-fig86.%.info : %.cfg $(SRCMI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
+fig86.%.info : %.cfg $(SRCMI) fig86.%.mi manual.m4 wordset.m4
+	m4 menu.m4 $(@:%.info=%.rawdoc)
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.info=%.mi) )|m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.info=%.cfg) manual.m4 figforth.mi)|\
 	  m4 | makeinfo
