@@ -12,7 +12,15 @@
 #include <fcntl.h>
 #include <errno.h>
  
+void print_cold( void )
+{
+    printf("COLD COLD COLD\n");
+}
 
+void print_hot( void )
+{
+    printf("HOT HOT HOT\n");
+}
 /* Entry point of figforth. */
 
 /* The offset into the boot parameters. */
@@ -26,126 +34,98 @@ extern void figforth( BOOT_OFFSET offset, int argc, char **argv );
 #define KBBUF 1024
 
 /* public declarations */ 
-struct ttystate { struct termios tio; }; 
-struct tty      { int fd; struct ttystate org; struct ttystate now; };  
+typedef struct tty      
+{ 
+    int fd; 
+    struct termios org; 
+    struct termios now; 
+    int device;
+} TTY;  
  
-extern int errno;
-int nodevice;
 
-/* ****************************************************************************
- * tty_error(),tty_warning():
- *     error handling and cleanup
- * ***************************************************************************/
-void 
-tty_error (char *s)
+void tty_error(char *s)
 {
-  fprintf (stderr, "\n\nerror: %s, (%s)\n", s, sys_errlist[errno]);
-  fflush (stderr);
+  fprintf(stderr, "\n\nerror: %s, (%s)\n", s, sys_errlist[errno]);
+  fflush(stderr);
 }
 
-void 
-tty_warning (char *s)
+void tty_warning(char *s) 
 {
-  fprintf (stderr, "\n\nwarning: %s, (%s)\n", s, sys_errlist[errno]);
-  fflush (stderr);
+  fprintf(stderr, "\n\nwarning: %s, (%s)\n", s, sys_errlist[errno]);
+  fflush(stderr);
 }
-unsigned int y = figforth;
+
+/* In behalf of debugging                                                   
 DISPLAYSI(unsigned int x)
 {
+    static unsigned int y = figforth;
     printf("%08x\n", x-y);
 }
-/* ****************************************************************************
- * tty_init(), tty_set(), tty_restore()  : 
- *     primitive functions to encapsulate terminal state changes. Any
- *     terminal state modification is done through this two functions.
- * ***************************************************************************/
-void 
-tty_set (struct tty *ptty)
+*/
+
+void tty_set(TTY *ptty) 
 {
-  if (nodevice)
+  if (!ptty->device)
     return;
-  if (tcsetattr (ptty->fd, TCSADRAIN, &ptty->now.tio) < 0)
+  if (tcsetattr (ptty->fd, TCSADRAIN, &ptty->now) < 0)
     tty_error ("unable to set tty state");
 }
 
-void 
-tty_restore (struct tty *ptty)
+void tty_restore(TTY *ptty) 
 {				/* write termio struct */
-  if (nodevice)
+  if (!ptty->device)
     return;
-  if (tcsetattr (ptty->fd, TCSADRAIN, &ptty->org.tio) < 0)
-    tty_error ("unable to restore tty state");
+  if (tcsetattr(ptty->fd, TCSADRAIN, &ptty->org) < 0)
+    tty_error("unable to restore tty state");
 }
 
-void 
-tty_init (int fd, struct tty *ptty)
+void tty_init(int fd, TTY *ptty) 
 {				/* fill-in tty struct */
   ptty->fd = fd;
-  nodevice = 0;
-  /* save original tty_state */
-  if (tcgetattr (ptty->fd, &ptty->org.tio) < 0)
-    nodevice = 1;
-  if (nodevice)
-    return;
-  /* template for new tty_state */
-  if (tcgetattr (ptty->fd, &ptty->now.tio) < 0)
-    nodevice = 1;
-  if (nodevice)
-    return;
+  ptty->device = tcgetattr(ptty->fd, &ptty->org) >= 0 &&
+		 tcgetattr(ptty->fd, &ptty->now) >= 0;
   /* disable some special characters */
-/*ptty->now.tio.c_cc[VINTR] = _POSIX_VDISABLE;                               */
-/*ptty->now.tio.c_cc[VQUIT] = _POSIX_VDISABLE;                               */
-/*ptty->now.tio.c_cc[VSUSP] = _POSIX_VDISABLE;                               */
-  tty_set (ptty);
+/*ptty->now.c_cc[VINTR] = _POSIX_VDISABLE;                               */
+/*ptty->now.c_cc[VQUIT] = _POSIX_VDISABLE;                               */
+/*ptty->now.c_cc[VSUSP] = _POSIX_VDISABLE;                               */
+  tty_set(ptty);
 }
 
-/* ****************************************************************************
- * tty_echo(), tty_noecho() :
- *     change tty attributes
- * ***************************************************************************/
-void 
-tty_echo (struct tty *ptty)
+void tty_echo(TTY *ptty) 
 {
-  if (nodevice)
+  if (!ptty->device)
     return;
-  ptty->now.tio.c_lflag |= ECHO;
-  tty_set (ptty);
+  ptty->now.c_lflag |= ECHO;
+  tty_set(ptty);
 }
 
-void 
-tty_noecho (struct tty *ptty)
+void tty_noecho(TTY *ptty) 
 {
-  if (nodevice)
+  if (!ptty->device)
     return;
-  ptty->now.tio.c_lflag &= ~ECHO;
-  tty_set (ptty);
+  ptty->now.c_lflag &= ~ECHO;
+  tty_set(ptty);
 }
 
-/* ****************************************************************************
- * tty_keymode(), tty_linemode() :
- *    change main tty operating mode
- * ***************************************************************************/
-void 
-tty_keymode (struct tty *ptty)
+void tty_keymode(TTY *ptty) 
 {
-  if (nodevice)
+  if (!ptty->device)
     return;
-  ptty->now.tio.c_lflag &= ~ICANON;
-  ptty->now.tio.c_cc[VMIN] = 1;
-  ptty->now.tio.c_cc[VTIME] = 0;
-  tty_set (ptty);
+  ptty->now.c_lflag &= ~ICANON;
+  ptty->now.c_cc[VMIN] = 1;
+  ptty->now.c_cc[VTIME] = 0;
+  tty_set(ptty);
 }
 
-void 
-tty_linemode (struct tty *ptty)
+void tty_linemode(TTY *ptty) 
 {
-  if (nodevice)
+  if (!ptty->device)
     return;
-  ptty->now.tio.c_lflag |= ICANON;
+  ptty->now.c_lflag |= ICANON;
 /* VMIN, VTIME are overloaded and should really be restored ... */
-  ptty->now.tio.c_cc[VMIN] = ptty->org.tio.c_cc[VMIN];
-  ptty->now.tio.c_cc[VTIME] = ptty->org.tio.c_cc[VTIME];
-  tty_set (ptty);
+  ptty->now.c_cc[VMIN] = ptty->org.c_cc[VMIN];
+  ptty->now.c_cc[VTIME] = ptty->org.c_cc[VTIME];
+  tty_set(ptty);
 }
 
 
@@ -163,14 +143,15 @@ void break_int( int ignore )
 }
 
 /* To be executed on SIGQUIT (Normally ^\) */
+/* and on SIGSEGV (Normally invalid address) */
 jmp_buf restart_forth;
-void break_quit( int ignore )
+void break_quit( int signum )
 {
-  signal(SIGQUIT, break_quit);
+  signal(signum, break_quit);
   longjmp(restart_forth, WARM );
 }
 
-struct tty std_in;
+TTY std_in;
 
 /* Actions performed in behalf of Forth.                                     */
 /*  The Forth names fully specifiy the action, once you know that the stack  */
@@ -209,9 +190,8 @@ int c_key( void )
 {
   char key;
   int i;
-  tty_keymode (&std_in);                                                       
-  printf("Watingin for a key \n");
-  i=read (0, &key, 1);
+  tty_keymode(&std_in);                                                       
+  i=read(0, &key, 1);
   if ( 1!=i) {fprintf(stderr,"oei oei\n"); /* exit(1);*/}                           
   return key;                 
 }
@@ -219,17 +199,15 @@ int c_key( void )
 /* EMIT */
 void c_emit(int ch)
 {
-  fputc (ch, stdout);
-  fflush (stdout);
+  fputc(ch, stdout);
+  fflush(stdout);
 }
 
 /* TYPE */
 void c_type(int count, char buffer[])
 {
-  unsigned x = buffer;
-  printf("Trying to type %d %x\n", x-y );
-  write (1, buffer, count);
-  fflush (stdout);
+  write(1, buffer, count);
+  fflush(stdout);
 }
 
 /* EXPECT */
@@ -238,12 +216,10 @@ int c_expec(int count, char buffer[])
   int i;
   if ( count <= 0 ) return 0;
 
-  tty_linemode (&std_in);                                                       
+  tty_linemode(&std_in);                                                       
   i= read(0, buffer, count);
   buffer[--i]=0;  /* Eat the cr. */
 
-  printf(" Har there, we have a total of %d chars\n", i);
-  printf(" It looks like **%s**\n", buffer);
   return i;     /* Ignored by fig-Forth, use it and you have ANSI ACCEPT */
 }
 
@@ -274,14 +250,14 @@ int c_block_exit( void )
 int c_rslw(int control, int block, void *pmem )
 {
     /* Did you now the real signature of `read' ? */
-    ssize_t (*rslw)(int, void *, size_t ) = control? read: write ;           
+    ssize_t(*rslw)(int, void *, size_t ) = control? read: write ;           
     off_t where = block * KBBUF;
 
     return 
-         block_fid <= 0 ? -1 :
-         where != lseek( block_fid, where, SEEK_SET ) ? errno :
-         KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
-         0 ;
+	 block_fid <= 0 ? -1 :
+	 where != lseek( block_fid, where, SEEK_SET ) ? errno :
+	 KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
+	 0 ;
 }
 
 /* Perform ANSI Forth 'SYSTEM' */
@@ -298,36 +274,33 @@ int c_system(int count, char command[])
   strncpy( buffer, command, count);
   buffer[count]=0;
   buffer[count-1]=0;
-  return system (buffer);
+  return system(buffer);
 }
 
 
 int main (int argc, char *argv[])
 {
   BOOT_OFFSET bootmode = COLD;
-  signal(SIGINT, break_int);
+  /* The ^C is worthless because it is ony recognized while waiting */
+  signal(SIGINT, SIG_IGN);
+  /* Convenient interrupting of long loops */
   signal(SIGQUIT, break_quit);
+  /* Restart when inspecting non existing memory */
+  signal(SIGSEGV, break_quit);
 
-
-  tty_init (0, &std_in);                                                       
-  if ( nodevice ) {printf("oei oei nodevice\n");/*exit(1);*/}
+  tty_init(0, &std_in);                                                       
+  if ( !std_in.device ) {printf("oei oei nodevice\n");/*exit(1);*/}
 
   for(;;)
   if ( !setjmp(restart_forth) )
   {
        printf(bootmode==COLD?"icy":bootmode==WARM?"hot":"UNKNOWN");
-      figforth ( bootmode, argc, argv);
+      figforth( bootmode, argc, argv);
       break;
   }
   else 
   {
-        bootmode = WARM;
+	bootmode = WARM;
   }
-  /*
-  else
-  {
-        printf("hot");
-      figforth ( WARM, argc, argv);
-  } */
-  tty_restore (&std_in);                                                       
+  tty_restore(&std_in);                                                       
 }
