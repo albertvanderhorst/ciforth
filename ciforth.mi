@@ -20,7 +20,7 @@ forthitem
 _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
 forthitem
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
-})
+})_HOSTED_DPMI_({running under Windows})dnl
 _BOOTED_({ _RESPECTDOS_({It tries to keep bootfloppy's in MSDOS-compatible format})})
 _FEWBLOCKS_({forthitem
 number of blocks limited to 256})
@@ -134,7 +134,7 @@ be interested in.
 * Manual::         User manual
 _PC_({* Editor::         The full screen editor})dnl
 * Assembler::      The assemblers
-* Errors::  What means forthsamp({ ERR ###})?
+* Errors::  What means forthsamp({ ciforth ERROR ###})?
 * Documentation::  Some references
 * Glossary::       Description of Forth words
 * Glossary Index:: Find a Forth words in the glossary
@@ -222,7 +222,9 @@ include(assembler.mi)
 
 @node Errors, Documentation, Assembler, top
 @chapter  Errors
-Errors are identified by a number.
+Errors are identified by a number and by the reporting program.
+This information ``ciforth ERROR '' and the number is always printed
+immediately and directly.
 _VERBOSE_({Of course the error numbers are given in decimal, always.})
 Preferably in
 addition to the number a mnemonic messages is displayed.
@@ -252,7 +254,7 @@ they are given as hex numbers.})
 
 forthitemize
 forthitem
-forthsamp({ERR # 1 : EMPTY STACK})
+forthsamp({ciforth ERROR # 1 : EMPTY STACK})
 
 _SECURITY_({ The stack has underflowed. This is detected by
 forthcode({?STACK}) at several places, in particular in
@@ -261,12 +263,12 @@ There is ample slack, but malicious intent can crash the system
 before this is detected. },{dnl})_END_({_SECURITY_})
 
 forthitem
- forthsamp({ERR # 2 : DICTIONARY FULL})
+ forthsamp({ciforth ERROR # 2 : DICTIONARY FULL})
 
 Not used.
 
 forthitem
-forthsamp({ERR # 3 : FIRST ARGUMENT MUST BE OPTION})
+forthsamp({ciforth ERROR # 3 : FIRST ARGUMENT MUST BE OPTION})
 
 _HOSTED_({
 If you pass arguments to ciforth, your first argument must be
@@ -274,14 +276,14 @@ an option (such as -a), otherwise it doesn't know what to
 do with it.})
 
 forthitem
- forthsamp({ERR # 4 : ISN'T UNIQUE})
+ forthsamp({ciforth ERROR # 4 : ISN'T UNIQUE})
 
 Not being unique is not so much an error as a warning. The word
 printed is the latest defined. It was already in the current
 search order.
 
 forthitem
- forthsamp({ERR # 5 : EMPTY NAME FOR NEW DEFINITION})
+ forthsamp({ciforth ERROR # 5 : EMPTY NAME FOR NEW DEFINITION})
 
 An attempt is made to define a new word with an empty string
 for a name. This is detected by forthcode({(CREATE)}) .
@@ -289,13 +291,13 @@ All forthdefi({defining}) word can return this message. It is
 typically caused by using such a word at the end of a line.
 
 forthitem
-forthsamp({ERR # 6 : DISK RANGE ?})
+forthsamp({ciforth ERROR # 6 : DISK RANGE ?})
 
 Reading to the terminal input buffer failed. The message is
 probably inappropiate.
 
 forthitem
-forthsamp({ERR # 7 : FULL STACK})
+forthsamp({ciforth ERROR # 7 : FULL STACK})
 
 _SECURITY_({ The stack has run into the dictionary. This can be
 caused by pushing too many items, but usually it must be
@@ -306,7 +308,7 @@ forthcode({INTERPRET}) after each word interpreted.
 },{dnl})_END_({_SECURITY_})
 
 forthitem
- forthsamp({ERR # 8 : DISC ERROR !})
+ forthsamp({ciforth ERROR # 8 : DISC ERROR !})
 
 An access to the Library Accessible by Block (screen aka block
 file) has failed. This is detected by
@@ -320,12 +322,12 @@ forthcode({DEVELOP}) in order to reopen it in read/write mode.
 If you forget, you get this message too.
 
 forthitem
- forthsamp({ERR # 9 : UNRESOLVED FORWARD REFERENCE})
+ forthsamp({ciforth ERROR # 9 : UNRESOLVED FORWARD REFERENCE})
 
 Not used.
 
 forthitem
- forthsamp({ERR # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION})
+ forthsamp({ciforth ERROR # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION})
 
 The string printed was not found in the dictionary as such,
 but its first part matches a forthdefi({denotation}) .
@@ -339,42 +341,42 @@ If the forthcode({DENOTATION}) vocabulary is on top of the search order,
 you get this message if you type forthcode({2SWAP}) .
 
 forthitem
- forthsamp({ERR # 11 : WORD IS NOT FOUND})
+ forthsamp({ciforth ERROR # 11 : WORD IS NOT FOUND})
 
 The string printed was not found in the dictionary.
 This error is detected by forthcode({'}) (tick).
 
 forthitem
- forthsamp({ERR # 12 : NOT RECOGNIZED})
+ forthsamp({ciforth ERROR # 12 : NOT RECOGNIZED})
 
 The string printed was not found in the dictionary, nor
 does it match a number, or some other denotation.
 
 forthitem
- forthsamp({ERR # 13 : ERROR, NO FURTHER INFORMATION})
+ forthsamp({ciforth ERROR # 13 : ERROR, NO FURTHER INFORMATION})
 
 This error is used temporily, whenever there is need for
 an error message but there is not yet one assigned.
 
 forthitem
- forthsamp({ERR # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY})
+ forthsamp({ciforth ERROR # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY})
 
 _BOOTLBA_({
 If the library is saved to or restored from
 floppy this must be done in a Forth that boots from floppy.})
 
 forthitem
- forthsamp({ERR # 15 : CANNOT FIND WORD TO BE POSTPONED})
+ forthsamp({ciforth ERROR # 15 : CANNOT FIND WORD TO BE POSTPONED})
 
 Not used.
 
 forthitem
-forthsamp({ERR # 16 : SYSTEM HAS ABORTED })
+forthsamp({ciforth ERROR # 16 : SYSTEM HAS ABORTED })
 
 Not used.
 
 forthitem
-forthsamp({ERR # 17 : COMPILATION ONLY, USE IN DEFINITION})
+forthsamp({ciforth ERROR # 17 : COMPILATION ONLY, USE IN DEFINITION})
 
 _SECURITY_({
 This error is reported by forthcode({?COMP}). You try to use a
@@ -385,7 +387,7 @@ require forthcode({NEW-IF}) .})
 })
 
 forthitem
-forthsamp({ERR # 18 : EXECUTION ONLY})
+forthsamp({ciforth ERROR # 18 : EXECUTION ONLY})
 _SECURITY_({
 This error is reported by forthcode({?EXEC.}). You try to use a
 word that doesn't work properly in compile mode. You will not
@@ -393,7 +395,7 @@ see this error, because all words in ciforth do.
 })
 
 forthitem
- forthsamp({ERR # 19 : CONDITIONALS NOT PAIRED})
+ forthsamp({ciforth ERROR # 19 : CONDITIONALS NOT PAIRED})
 
 _SECURITY_({
 This error is reported by forthcode({?PAIRS}). You try to
@@ -402,7 +404,7 @@ forthcode({THEN}) , or forthcode({DO}) and forthcode({LOOP}) )
 })
 
 forthitem
-forthsamp({ERR # 20 : DEFINITION NOT FINISHED})
+forthsamp({ciforth ERROR # 20 : DEFINITION NOT FINISHED})
 
 _SECURITY_({
 This error is reported by forthcode({?CSP}). It detects
@@ -422,13 +424,13 @@ to keep the stack at the same depth.
 })
 
 forthitem
-forthsamp({ERR # 21 : IN PROTECTED DICTIONARY})
+forthsamp({ciforth ERROR # 21 : IN PROTECTED DICTIONARY})
 
 The word you are trying to forthcode({FORGET}) is below the forthcode({FENCE}) ,
 such that forgetting is not allowed.
 
 forthitem
-forthsamp({ERR # 22 : USE ONLY WHEN LOADING})
+forthsamp({ciforth ERROR # 22 : USE ONLY WHEN LOADING})
 
 _SECURITY_({
 This error is reported by forthcode({?LOAD}). You try to use a
@@ -437,13 +439,13 @@ in casu forthcode({-->}) .
 })
 
 forthitem
-forthsamp({ERR # 23 : OFF CURRENT EDITING SCREEN})
+forthsamp({ciforth ERROR # 23 : OFF CURRENT EDITING SCREEN})
 
 forthitem
- forthsamp({ERR # 24 : DECLARE VOCABULARY})
+ forthsamp({ciforth ERROR # 24 : DECLARE VOCABULARY})
 
 forthitem
- forthsamp({ERR # 25 : LIST EXPECTS DECIMAL})
+ forthsamp({ciforth ERROR # 25 : LIST EXPECTS DECIMAL})
 
 This message is used by a redefined forthcode({LIST}) , to prevent
 getting the wrong screen.
@@ -480,13 +482,14 @@ Wherever it says
  forthdefi({double}) or ``double precision number'' a
 _BITS16_({32})_BITS32_({64}) bits number is meant.
 
+dnl symbols is a reserved name in `m4'.
 The first line of each entry shows a symbolic description of the action of
-the proceedure on the parameter stack. The symbols indicate the order in
+the proceedure on the parameter stack. The {symbols} indicate the order in
 which input parameters have been placed on the stack. The dashes "---"
 indicate the execution point; any parameters left on the stack are listed.
 In this notation, the top of the stack is to the right.
 
-The symbols include:
+The {symbols} include:
 
 @table @samp
 forthitem addr
