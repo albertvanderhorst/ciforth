@@ -30,6 +30,8 @@ _HOSTED_LINUX_({ define( {_BITS32_}, _yes)})
 _HOSTED_LINUX_({ define({_BLOCKSINFILE_}, _yes)})
 _HOSTED_DPMI_({define({_PROTECTED_}, _yes)})
 _BOOTED_({define({_USEBIOS_}, _yes)})
+_USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
+_CLASSIC_({define({_KEY_BY_KEY_}, _yes )})
 
 dnl Consequences with exceptions
 dnl switch back and forth between protected and real mode.
