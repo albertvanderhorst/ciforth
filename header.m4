@@ -10,8 +10,8 @@ define(_squote,')
 define({_dbquoted},"{{$1}}")dnl
 define({_sgquoted},'{{$1}}')dnl
 define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
-define({_STRING},{
-        DB      len({$1})
+define({_STRING},
+{DB      len({$1})
         DSS      _quoted}({{$1}}))dnl
 dnl             
 dnl _LINKOLD is a m4 variable that generates numbers in sequence.
@@ -27,29 +27,14 @@ define({_x},len({$1}))dnl
 ;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
-N_$2:     DB   len({$1})
-ifelse(1,_x, , 
-{         DSS      }_quoted({substr({$1},0,eval(_x-1))})
-)dnl    
-dnl Rather mysterious: without the dummy ifelse it just doesn;t work
-ifelse(1,2, , 
-{         DB       }_quoted({substr({$1},eval(_x-1),1)})
-)dnl
-         DC    N_$2
-         DC    0{}ifelse(1,$4,+40H,)
-         DC    _LINKOLD
-$2:      DC     $3
+N_$2:   _STRING({$1})
+        DC    N_$2
+        DC    ifelse(1,$4,+40H,0H)
+        DC    _LINKOLD
+$2:     DC     $3
          undefine({_x})dnl
 define({_LINKOLD},{$2-3*CW})dnl
 })dnl
-define({HEADER_NULL},{
-N_$2:            DB      01H,0H
-         DC    N_$2
-         DC    40H
-         DC    _LINKOLD
-$2:             DC      $3
-define({_LINKOLD},{$2-3*CW})dnl
-})
 dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------

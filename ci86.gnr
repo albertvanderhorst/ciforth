@@ -2464,41 +2464,6 @@ HEADER({QUERY},{QUERY},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc({MISC},{X},{x},{},{},
-{This is pseudonym for the "null" or dictionary entry for a name of
-one character of ascii null.
-All buffers being interpreted ends with this word, that is
-actually executed.
-It terminates interpretation of a line of text from the terminal or
-of a disc buffer,
-},{})
-HEADER_NULL({NULL},{NULL},{DOCOL},1)
-;{       Special header putting an ASCII NULL in the dictionary.}
-        DC      BLK
-        DC      FETCH
-        _0BRANCH(NULL1) ;{ IF}
-        DC      ONE
-        DC      BLK
-        DC      PSTOR
-        DC      ZERO
-        DC      LIN
-        DC      STORE
-        DC      BLK
-        DC      FETCH
-        DC      BSCR
-        DC      ONE
-        DC      LSUB
-        DC      LAND
-        DC      ZEQU
-        _0BRANCH(NULL2) ;{ IF}
-        DC      QEXEC
-        DC      FROMR
-        DC      DROP    ;{ ENDIF}
-NULL2:  _BRANCH(NULL3)  ;{ ELSE}
-NULL1:  DC      FROMR
-        DC      DROP    ;{ ENDIF}
-NULL3:  DC      SEMIS
-;
 worddoc({MEMORY},{FILL},{fill},{addr quan b --},{},
 {Fill memory at the address with the specified quantity of bytes forthvar({b}) .},{})
 CODE_HEADER({FILL},{FILL})
@@ -2947,6 +2912,8 @@ will be given.
 },{{WORD},{NUMBER}})
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  DC      DFIND   ;{BEGIN}
+        DC      HERE, ONEP, CFET
+        _0BRANCH(INTE8) ;{WHILE}
         _0BRANCH(INTE2) ;{IF}
         DC      LDUP, TFFA, CFET
         DC      STATE
@@ -2972,6 +2939,7 @@ INTE6:  DC      DROP
         DC      LITER   ;{ENDIF}
 INTE7:  DC      QSTAC   ;{ENDIF}
 INTE5:  _BRANCH(INTE1)  ;{AGAIN}
+INTE8:  DC      SEMIS
 ;
 worddoc({DICTIONARY},{IMMEDIATE},{immediate},{},{},
 {Mark the most recently made definition so that when encountered at
