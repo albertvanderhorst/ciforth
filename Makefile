@@ -21,12 +21,12 @@ width32.m4       \
 # That's all folks!
 
 # Different assemblers should generate equivalent Forth's.
-ASSEMBLERS= masm nasm gas          
+ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= msdos alone linux lina
+TARGETS= msdos alone linux lina alonehd
 # The kinds of Forth's binaries that can be made using NASM (not used)
-BINTARGETS= msdos alone 
-# If this makefile runs under Linux, the following forth's can be made and 
+BINTARGETS= msdos alone
+# If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
 LINUXFORTHS= figforth lina
 # Auxiliary targets
@@ -36,25 +36,31 @@ CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= figforth stealconstant
 CSRC= $(CSRCAUX) $(CSRCFORTH)
 
-RELEASECONTENT = \
+# Documentation files and archives
+DOC = \
 COPYING          \
+release.txt      \
+figdoc.zip    \
+figdocadd.txt \
+fig86gnr.txt       \
+cfg.zip         \
+# That's all folks!
+
+RELEASECONTENT = \
 fig86.gnr        \
-blocks.frt       \
+$(DOC)           \
 $(INGREDIENTS)   \
 $(ASSEMBLERS:%=%.m4) \
 $(TARGETS:%=%.cfg) \
 $(CSRC:%=%.c)    \
 Makefile         \
-release.txt      \
-figdocadd.txt \
-fig86gnr.txt       \
+blocks.frt       \
 fig86.alone.asm  \
 fig86.msdos.msm  \
 fig86.linux.asm  \
 fig86.lina.asm  \
 genboot.bat      \
 link.script    \
-figdoc.zip    \
 # That's all folks!
 
 # r## revision 2.## a beta release
@@ -76,7 +82,7 @@ wc              \
 
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm
-	nasm -fbin $< -o $@ -l $*.lst 
+	nasm -fbin $< -o $@ -l $*.lst
 
 # msdos.cfg and alone.cfg are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
@@ -97,7 +103,7 @@ fig86.$(s).bin :
 # Put include type of dependancies here
 $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
-# Some of these targets make no sense and will fail 
+# Some of these targets make no sense and will fail
 all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(BINTARGETS:%=fig86.%.bin) \
     $(LINUXFORTHS) $(OTHERTARGETS)
 
@@ -108,9 +114,9 @@ clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTAR
 # then creating a dos file system in accordance with the boot sector,
 # then copying the forth system to exact the first available cluster.
 # The option BOOTFD must be installed into alone.m4.
-boot: fig86.alone.bin 
-	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
-	mformat -k a: 
+boot: fig86.alone.bin
+	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
+	mformat -k a:
 	mcopy $+ a:forth.com
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
@@ -126,10 +132,10 @@ filler: fig86.alone.bin lina filler.frt
 	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
-moreboot: BLOCKS.BLK fig86.alone.bin  fig86.msdos.bin	   
-	mcopy BLOCKS.BLK a: 
-	mcopy fig86.msdos.bin	   a:msdos.com
-	                  
+moreboot: BLOCKS.BLK fig86.alone.bin  fig86.msdos.bin
+	mcopy BLOCKS.BLK a:
+	mcopy fig86.msdos.bin      a:msdos.com
+
 allboot: boot filler moreboot
 
 BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
@@ -137,12 +143,12 @@ BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
 # The option BOOTHD must be installed into alone.m4.
-hdboot: fig86.alone.bin  
-	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
+hdboot: fig86.alone.bin
+	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 
-zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip 
+zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip
 
 # For msdos truncate all file stems to 8 char's and loose prefix `fig86.'
 # Compiling a simple c-program may be too much, so supply BLOCKS.BLK
@@ -152,15 +158,15 @@ msdoszip : $(RELEASECONTENT) mslinks ;\
     sed -e's/\<gnr\>/fig86.gnr/' |\
     sed -e's/\<blocks.frt\>/BLOCKS.BLK/' |\
     sed -e's/ \([^ .]\{1,8\}\)[^ .]*\./ \1./g' |\
-    xargs zip 
+    xargs zip
 
 # More messy things in behalf of msdos
-mslinks : 
-	ln -sf fromblock.c frombloc.c  
-	ln -sf fig86.lina.asm lina.asm 
-	ln -sf fig86.linux.asm linux.asm 
-	ln -sf fig86.msdos.msm msdos.msm 
-	ln -sf fig86.alone.asm alone.asm 
+mslinks :
+	ln -sf fromblock.c frombloc.c
+	ln -sf fig86.lina.asm lina.asm
+	ln -sf fig86.linux.asm linux.asm
+	ln -sf fig86.msdos.msm msdos.msm
+	ln -sf fig86.alone.asm alone.asm
 	ln -sf figdocadd.txt figdocad.txt
 	ln -sf stealconstant.c stealcon.c
 
@@ -173,7 +179,7 @@ fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 # This linking must be static, because `link.script' is tricky enough.
 # but a .5M executable is better than a 64 M executable.
 figforth : figforth.c fig86.linux.o link.script
-	$(CC) $(CFLAGS) figforth.c fig86.linux.o -static -Wl,-Tlink.script -o $@ 
+	$(CC) $(CFLAGS) figforth.c fig86.linux.o -static -Wl,-Tlink.script -o $@
 
 # Linux native forth
 lina : fig86.lina.o ; ld $+ -o $@
