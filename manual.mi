@@ -93,13 +93,21 @@ Sometimes we use data of two cells, a forthdefi({double}) .
 The high-order cell are most accessable on the stack and if stored in
 memory, it is highest.
 
-The code for a high level word can be typed in from the terminal,
-but it can also fed into Forth by redirection from a file, or
-you can forthdefi({load}) it from the file forthfile({BLOCKS.BLK}) .
-This file is divided into forthdefi({screen})'s , consisting of
-16 lines of 64 characters.
-To forthdefi({load}) such a screen has the same effect as
-typing its content from the terminal.
+The code for a high level word can be typed in from the
+terminal, but it can also fed into Forth by redirection from a
+file, forthcode({INCLUDED}) from a file or you can
+forthdefi({load}) it from the file forthfile({forth.lab}) .
+because you can load a piece of this library at will once you
+know the block number. This file is divided into
+forthdefi({blocks}) of 1 Kbyte. They may contain any data, but
+a most important application is containing source code. A block
+contain source code is called a forthdefi({screen}). It
+consists of 16 lines of 64 characters. In ciforth the 64-th
+character is forthkey(^J) such that they may be edited in a
+normal way with some editors. To forthdefi({load}) such a
+screen has the same effect as typing its content from the
+terminal.
+The extension lab stands for forthcode({Library Addressable by Block}),
 
 Traditionnally Forthers have things called
 forthdefi({number})'s, words that are present in the source be
@@ -413,7 +421,7 @@ forthsamp({"mysrc.frt" INCLUDED})
 })
 
 386 and a 8086
-Forth assemblers are available in forthfile({BLOCKS.BLK}) .
+Forth assemblers are available in forthfile({forth.lab}) .
 They are loaded in accordance with the system that is run.
 
 It is essential that you regard ciforth as just a way to get started
@@ -529,8 +537,7 @@ forthendenumerate
 
 Note that the entries are not only in alphabetic order, they
 are in order of essentiality. They are accessed by
-forthcode({>CFA}) forthcode({>DFA}) forthcode({>FFA})
-forthcode({>LFA}) forthcode({>NFA}) forthcode({>SHA}) .
+forthcode({>CFA}) forthcode({>DFA}) forthcode({>FFA}) forthcode({>LFA}) forthcode({>NFA}) forthcode({>SFA}) .
 
 Note forthdefi({data field}) has a specific meaning in the ISO
 standard. It is accessed through forthcode({>BODY}) from the
@@ -750,6 +757,15 @@ The following options can be passed to ciforth on the command line:
 forthitemize
 
 forthitem
+forthsamp({-a name})
+
+Make sure forthcode({REQUIRED}) is available.
+This is a copy of the forthsamp({-r}) command
+because it is easier to remember forthsamp({1 LOAD}) if the screen
+must be loaded manually.
+In addition the signon message is suppressed.
+
+forthitem
 forthsamp({-c name})
 
 Compile the file forthfile({name}) to an executable binary. The name of the binary
@@ -762,11 +778,13 @@ Also forthcode({REQUIRED}) is made available.
 forthitem
 forthsamp({-e})
 
-Load the elective screen, screen 5. This is most useful after forthsamp({-l}).
+Load the elective screen, screen 5.
 But system wide default preferences
 can be installed there. _VERBOSE_({{In a preference screen you just put
-commands you want to be executed after Forth starts up, such as }
-forthsamp({"fortune -f /usr/lib/forthcookies" SYSTEM}).})
+commands you want to be executed after Forth starts up, such as }})
+_VERBOSE_({forthsamp({"fortune -f /usr/lib/forthcookies" SYSTEM})})
+_VERBOSE_({{ or }})
+_VERBOSE_({forthsamp({REQUIRE EDIT})})
 
 forthitem
 forthsamp({-f forthcode})
@@ -776,10 +794,12 @@ Options such as in this list are available on the remainder of the line, but the
 must be invoked with two slashes instead of one, and having more letters is allowed
 but ignored.
 _VERBOSE_({{So }forthsamp({--compile}){ instead of }forthsamp({-c})}).
+_UNIMPLEMENTED(
 forthsamp({--library}) behaves slighly different than
 forthsamp({-l}). The library is switched, taking effect for the
 remainder of forthsamp({forthcode}), but no shifting is done of
 the arguments.
+)
 
 forthitem
 forthsamp({-h})
@@ -794,12 +814,14 @@ Restart Forth with as a block file forthfile({name}) and as options the remainde
 of the line shifted, such that
 forthsamp({-l name}) disappears and the next option becomes the first.
 
+_UNIMPLEMENTED(
 forthitem
 forthsamp({-o})
 
 Import operating system commands. Some often used commands like
 forthsamp({ls more cat cd echo make }) can be typed to Forth as if it where a shell.
-     forthcode({OS-IMPORT})  is available to add to this list.
+forthcode({OS-IMPORT}) is made available to add to this list.
+)
 
 forthitem
 forthsamp({-r})
@@ -814,7 +836,7 @@ This is intended to be used for scripts, i.e. a piece of code to be
 interpreted rather than compiled.
 _VERBOSE_({{The first line is probably}
 forthsamp({#!lina -s}){ or some such as }
-forthsamp({#!lina -l /usr/lib/forth/cgi/forthlib.blk -s}).})
+forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})
 In a script forthcode({REQUIRED}) is available and
 you can use standard in and standard out.
 
@@ -835,10 +857,10 @@ if sufficient tools have been added to it. In principle all ISO words should be
 made available via forthcode({REQUIRED}) .
 
 In order to customize the forth library, you have to copy the default
-forthfile({/usr/lib/ciforth/forthlib.blk}) to your home directory, preferably to a lib
+forthfile({/usr/lib/ciforth/forth.lab}) to your home directory, preferably to a lib
 subdirectory. Most shells allow you to redefine commands, such as e.g. in bash:
 
-forthsamp({alias lina='lina -l $HOME/lib/forthlib.blk'}).
+forthsamp({alias lina='lina -l $HOME/lib/forth.lab'}).
 
 Note that the forthsamp({-l}) option hides itself, such that
 such an alias can be used completely identical to the original
