@@ -10,9 +10,11 @@ dnl        and a definition for the second pass on channel 0
 define({forthvar}, <I>$1</I>)
 define({forthdefi}, <I>$1</I>)
 define({forthsamp}, <B>$1</B>)
+define({forthfile}, ``$1'')
 define({forthexample},<P><B>$1</B><P>)
 define({forthcode}, <A HREF="#$1">$1</A>)
 define({forthxref}, <A HREF="#$1">See also $1</A>)
+define({forthpxref}, <A HREF="#$1">See also $1</A>)
 dnl ----------------------- worddoc ------------------------------------
 define({worddoc},{
 divert(9)dnl
