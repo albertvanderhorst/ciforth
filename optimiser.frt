@@ -698,16 +698,16 @@ CREATE P
 
 : (MATCH-TABLE)                         |
 \ `` MATCH-TABLE'' points here :
-'P  EXECUTE             | P                        |       \ Execute optimisation
-'P  + 'P  +             | 'P  'P  + +              |       \ Associativity optimisation
+'P  EXECUTE             | P                        | \ Execute optimisation
+'P  + 'P  +             | 'P  'P  + +              | \ Associativity optimisation
 'P  + 'P  -             | 'P  'P  - +              |
 'P  - 'P  +             | 'P  'P  - -              |
 'P  - 'P  -             | 'P  'P  + -              |
-'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP  |       \ Invalid if last drop removed!
+'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP  | \ Invalid if last drop removed!
 'P  OR 'P  OR           | 'P  'P  OR OR            |
 'P  AND 'P  AND         | 'P  'P  AND AND          |
 'P  XOR 'P  XOR         | 'P  'P  XOR XOR          |
-[ 0 ]L +                | NOOP                     |       \ Shortcut evalutions
+[ 0 ]L +                | NOOP                     | \ Shortcut evalutions
 [ 0 ]L -                | NOOP                     |
 [ 0 ]L M* DROP          | DROP 0                   |
 [ 0 ]L OR               | NOOP                     |
@@ -720,10 +720,10 @@ CREATE P
 [ -1 ]L OR              | DROP -1                  |
 [ -1 ]L AND             | NOOP                     |
 [ -1 ]L XOR             | INVERT                   |
-'P  LSHIFT 'P  LSHIFT   | 'P  'P  + LSHIFT         |       \ Distributivity optimisation
+'P  LSHIFT 'P  LSHIFT   | 'P  'P  + LSHIFT         | \ Distributivity optimisation
 'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT         |
-[ 0 ]L 0BRANCH [ 'P , ] | NOP1 NOP1 BRANCH [ 'P , ] |       \ Branch optimisation
-[ -1 ]L 0BRANCH [ 'P , ] | NOOP                    |
+[ 0 ]L 0BRANCH [ 'P , ] | NOP1 NOP1 BRANCH [ 'P , ] | \ Branch optimisation
+'P 0BRANCH [ 'P , ]     | NOOP                     | \ Non-zero, zero is matched by previous
 ;
 
 \ Optimalisation of this table is thoroughly forbidden!
