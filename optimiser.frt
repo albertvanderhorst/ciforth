@@ -208,6 +208,12 @@ BRANCHES @+ SWAP ?DO
     I @ DUP >TARGET 2OVER FREE-WRT? 0= IF 2DROP 0. LEAVE THEN
 0 CELL+ +LOOP OR 0= ;
 
+\ For an ADDRESS : it is the TARGET of a branch.
+: IS-A-BRANCH-TARGET
+BRANCHES @+ SWAP ?DO
+    DUP I @ >TARGET = IF DROP -1 LEAVE THEN
+0 CELL+ +LOOP   -1 = ;
+
 \ ----------------------    Closing a gap -------------------
 
 \ The offset over which the gap is shifted shut, generally negative.
@@ -482,8 +488,9 @@ DROP 0 THEN ;
 RDROP ;
 
 \ For START return the END of the largest GAP starting there that can be folded.
-: FIND-FOLD BEGIN DUP NEXT-PARSE OVER CAN-FOLD? AND WHILE
-        SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
+: FIND-FOLD BEGIN DUP NEXT-PARSE >R  DUP CAN-FOLD? >R   OVER IS-A-BRANCH-TARGET 0=
+    R> AND   R> AND WHILE
+SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
 
 
 \ For GAP and virtual depth calculate ``GAP-OFFSET'' such as used

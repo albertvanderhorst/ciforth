@@ -58,20 +58,34 @@ CRACK DOIT
 
 : (test1) + AND OR LSHIFT ;
 : test9 IF (test1) THEN ;
-\ This is all we can do for the moment:
-'test9 >DFA @ EXPAND CRACK-CHAIN
+'test9 SHOW-IT
 
 : (test1) + AND OR LSHIFT ;
 : testA IF (test1) (test1) THEN ;
-\ This is all we can do for the moment:
-'testA >DFA @ EXPAND CRACK-CHAIN
+'testA SHOW-IT
 
 : (test1) + AND OR LSHIFT ;
 : testB BEGIN (test1) AGAIN ;
-\ This is all we can do for the moment:
-'testB >DFA @ EXPAND CRACK-CHAIN
+'testB SHOW-IT
 
 : (test1) + AND OR LSHIFT ;
 : testC BEGIN (test1) (test1) AGAIN ;
-\ This is all we can do for the moment:
-'testC >DFA @ EXPAND CRACK-CHAIN CR
+'testC SHOW-IT
+
+: testD IF SWAP ELSE DROP BASE @ THEN 2DROP ;
+'testD SHOW-IT
+
+: testE + DROP ;
+'testE SHOW-IT
+
+: testF IF 1 ELSE 2 THEN DROP ;
+'testF SHOW-IT
+
+: testG BEGIN IF 1 ELSE 2 THEN DROP AGAIN ;
+'testG SHOW-IT
+
+: testH BEGIN
+IF 1 ELSE 2 THEN DROP
+IF 5 ELSE 6 THEN DROP
+AGAIN ;
+'testH SHOW-IT
