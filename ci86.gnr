@@ -6704,43 +6704,15 @@ HEADER({KEY?},{KEYQ},DOCOL)
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through this word. It's first word is a forthcode({NOOP}) so terminal
+All terminal I/O goes through this word, so terminal
 I/O can be redirected, by forthdefi({revectoring}) it.
 In this ciforth the string must not contain embedded LF's.
 forthcode({OUT}) is incremented for each character output.},
 {{EMIT},{OUT}}, {}, enddoc)
-_HOSTED_DPMI_({
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTORE
-        DC      TOR     ; { Count.}
-        DC      ZERO, SWAP, LIT, Save_DS_PR, FETCH
-        DC      LIT, TYPEBUF, RR
-        DC      FMOVE
-
-        DC      LIT, TYPEBUF, FROMR
-        DC      ONE     ;{ Handle}
-        DC      LIT, write
-
-        DC      BDOSN, DROP ;{ ignore error }
-        DC      DROP
+        DC      ONE, WFILE, DROP
         DC      SEMIS
-;
-TYPEBUF:  _RESB(0400H)
-});_END_({ _HOSTED_DPMI_})
-_NO_DPMI_({
-HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      LDUP, LOUT, PSTORE
-        DC      TOR     ; { Count.}
-_BITS32_({; MSDOS cannot handle a 32 bits address: copy the buffer.})
-_BITS32_({        DC      LIT, TYPEBUF, RR, LCMOVE })
-_BITS32_({        DC      LIT, TYPEBUF })
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      FROMR   ;{Get count back.}
-        DC      ONE     ;{ Handle}
-        DC      WFILE, DROP ;{ ignore error }
-        DC      SEMIS
-_BITS32_({TYPEBUF:  _RESB(0400H) })
-});_END_({ _NO_DPMI_})
 ;
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({RET})
@@ -6818,15 +6790,18 @@ addressable. It occupies 32K from 8000H onwards. }})
 {{( not yet)},{}},
 enddoc)
 _HOSTED_DPMI_({
+define({SIZE_RWBUF}, {8000H})
 HEADER({RW-BUFFER},{RWBUF},{DOCON}, 8000H)
 });_END_({ _HOSTED_DPMI_})
 _HOSTED_MSDOS_({
+define({SIZE_RWBUF}, {200H})
 HEADER({RWBUF},{RWBUF},{DOVAR},)
-        _RESB(80H)
+        _RESB(SIZE_RWBUF)
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_LINUX_({
+define({SIZE_RWBUF}, {200H})
 HEADER({RWBUF},{RWBUF},{DOVAR},)
-        _RESB(200H)
+        _RESB(SIZE_RWBUF)
 });_END_({ _HOSTED_LINUX_})
 ;
 worddoc( {STORAGE~},{ZEN},{zren},{sc --- addr},{},
@@ -7033,18 +7008,7 @@ RFILE2:
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
 HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      LIT, 3F00H , ROT, ROT, SWAP    ;  3F00 ROT ROT SWAP RW-BUFFER
-        DC      RWBUF, BDOS, ONE, LAND        ;  DOS 1 AND IF
-        _0BRANCH({RFILE1})
-        DC      TDROP, DROP, TOR, DROP        ; 2DROP DROP >R DROP
-        DC      ZERO, FROMR, NEGATE           ; 0 R> NEGATE ELSE
-        _BRANCH({RFILE2})
-RFILE1:
-        DC      TDROP, DROP, TOR, TOR         ; 2DROP DROP >R >R
-        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
-        DC      ZERO, FROMR                   ; 0 R>
-        DC      RR, FMOVE, FROMR, ZERO        ; R@ FARMOVE   R> 0
-RFILE2:
+        DC      READ    ;{FIXME replace by multi-buffer loop.}
         DC      SEMIS
 });_END_({ _HOSTED_DPMI_})
 ;
@@ -7126,21 +7090,60 @@ WFILE2:
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
 HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR, TOR, ZERO, SWAP    ; >R >R  0 SWAP
-        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
-        DC      RR, FMOVE        ;  R@ FARMOVE
-        DC      LIT, 4000H, FROMR, FROMR       ; 4000 R> R>
-        DC      SWAP, RWBUF, BDOS, ONE, LAND        ; SWAP RW-BUFFER BDOS 1 AND
-        _0BRANCH({WFILE1})
-        DC      TDROP, DROP                   ; 2DROP DROP
-        DC      NEGATE            ; NEGATE
-        _BRANCH({WFILE2})                    ; ELSE
-WFILE1:
-        DC      TDROP, TDROP, ZERO             ;  2DROP DROP 0 THEN ;
-WFILE2:
+        DC      WRITE   ;{FIXME replace by multi-buffer loop.}
         DC      SEMIS
 });_END_({ _HOSTED_DPMI_})
 ;
+_HOSTED_DPMI_({
+worddoc( {STORAGE},{READ}, {read}, {addr n1 fd --- n2 ior }, {ISO},
+{As forthcode({READ-FILE}) , but can handle only 32K.
+},
+{{READ-FILE}},
+{
+{ "hello.frt" 0 OPEN-FILE . CONSTANT FD FD 0 > . },{0 _T_},
+{PAD 1024 FD READ . PAD SWAP TYPE },{0 ." Hello world!"},
+{FD CLOSE-FILE .},{0}
+},
+enddoc)
+HEADER({READ},{READ},{DOCOL})
+        DC      RWBUF, ROT, ROT         ; RW-BUFFER ROT ROT
+        DC      LIT, read, BDOSN        ; 3F00 BDOSN IF
+        _0BRANCH({READ1})
+        DC      TOR, DROP               ; >R DROP
+        DC      ZERO, FROMR, NEGATE     ; 0 R> NEGATE ELSE
+        _BRANCH({READ2})
+READ1:
+        DC      TOR, TOR         ; >R >R
+        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
+        DC      ZERO, FROMR                   ; 0 R>
+        DC      RR, FMOVE, FROMR, ZERO        ; R@ FARMOVE   R> 0
+READ2:
+        DC      SEMIS
+;
+worddoc( {STORAGE},{WRITE}, {write},{addr n fd --- u1 }, {ISO},
+{As forthcode({WRITE-FILE}) , but can handle only 32K.
+},
+{{RW-BUFFER}},
+{ { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE .},{0},
+{FD CLOSE-FILE .},{0} },
+enddoc)
+HEADER({WRITE},{WRITE},{DOCOL})
+        DC      TOR, TOR, ZERO, SWAP    ;   >R >R  0 SWAP
+        DC      LIT, Save_DS_PR, FETCH, RWBUF  ; PD RW-BUFFER
+        DC      RR, FMOVE               ; R@ FARMOVE
+        DC      RWBUF, FROMR, FROMR     ; RW-BUFFER R> R>
+        DC      LIT, write, BDOSN       ;  4000 BDOSN
+        _0BRANCH({WRITE1})              ; IF NEGATE ELSE DROP 0 THEN ;
+        DC      NEGATE
+        _BRANCH({WRITE2})
+WRITE1:
+        DC      DROP
+        DC      ZERO
+WRITE2:
+        DC      SEMIS
+;
+});_END_({ _HOSTED_DPMI_})
 worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
 {Get the content of the file with name forthsamp({sc1});
 leave it as a string forthsamp({sc2}). Any errors are thrown. },
@@ -7151,9 +7154,9 @@ HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      TDUP, SCOMMA, DROP
         DC      LIT, 'F'+(100H*('i'+100H*('L'+100H*'e'))), COMMA ;{Magic number.}
         DC      ZERO, OFILE, THROW, TOR
-        DC      HERE
-        DC      LIT, _BITS16_(10000)_BITS32_(10000000), ALLOT
-        DC      LDUP, LIT, _BITS16_(9000)_BITS32_(9999000)
+        DC      HERE, LDUP
+        DC      LEM, LIT, 6, SLASH, LDUP, ALLOT
+        DC      LIT, 1000, LSUB
         DC      RR, RFILE, THROW
         DC      FROMR, CFILE, THROW
         DC      TDUP, PLUS, LDP, STORE        ;{ No allocation if it fails.}
@@ -7194,8 +7197,47 @@ INCLUD2:
         DC      EVALUATE
         DC      SEMIS
 ;
+worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
+{Accept characters from the terminal input stream such as to
+fill up forthcode({TIB}) . Normally this means until a
+forthkey({RET}). If the input is redirected (such that reading
+after forthkey({RET}) cannot be prevented)
+forthsamp({REMAINDER 2@}) contains the part of
+forthcode({TIB}) that is outside the reach of forthcode({SRC}) ,
+is not consumed nor consumable directly by Forth parsing words,
+such as forthcode({ACCEPT}) or forthcode({WORD}).
+Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
+the characters ready in the input buffer. All characters are
+retained including the forthkey({RET}). The editing functions
+are those described by forthcode({ACCEPT}).
+},
+{{ACCEPT},{(ACCEPT)}},
+{
+{"see (ACCEPT)" TYPE},{see (ACCEPT)}
+},
+enddoc)
+_PC_({define({EPIPE},{32})dnl})
+HEADER({REFILL-TIB},{REFTIB},{DOCOL})
+        DC      REMAIND, FETCH, TOR
+        DC      TIB, FETCH, RR, PLUS
+        DC      LIT, RTS/2, RR, LSUB
+        DC      ZERO, RFILE
+_LINUX_N_(
+{        DC      QLERR})
+_PC_(
+{        DC      ZERO, MIN, LDUP, QERR})
+        DC      LDUP, ZEQU, LIT, -EPIPE, LAND ; {Presumably end of pipe.}
+_LINUX_N_(
+{        DC      QLERR})
+_PC_(
+{        DC      ZERO, MIN, LDUP, QERR})
+        DC      TIB, FETCH, SWAP, FROMR, PLUS
+        DC      REMAIND, TSTOR
+        DC      SEMIS
+;
 });_END_({_FILES_})
 _MODERN_({
+_SUPPRESSED({{ Leave this in for reference.
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the terminal input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
@@ -7270,6 +7312,7 @@ PACCEP3:
 _BITS32_({EXPECTBUF:  _RESB( 0200H ) },{dnl})
 ;
 });_END_({ _NO_DPMI_})
+}});_END_({ _SUPPRESSED_}) dnl with this this whole MODERN sextion has been burned down!
 });_END_({_MODERN_})
 _LINUX_C_({
 ;{ Code fields are filled in during bootup. }
@@ -7481,10 +7524,7 @@ that case forthcode({OUT}) is not observed. },
 enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTORE
-        DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
-        DC      LIT, write
-        DC      LINOS
-        DC      DROP
+        DC      ONE, WFILE, DROP
         DC      SEMIS
 ;
 worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
@@ -7495,37 +7535,6 @@ a c-structure forthsamp({termio}) .
 enddoc)
 HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB(SIZE_TERMIO)     ; Filled induring cold boot.
-;
-worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
-{Accept characters from the terminal input stream such as to
-fill up forthcode({TIB}) . Normally this means until a
-forthkey({RET}). If the input is redirected (such that reading
-after forthkey({RET}) cannot be prevented)
-forthsamp({REMAINDER 2@}) contains the part of
-forthcode({TIB}) that is outside the reach of forthcode({SRC}) ,
-is not consumed nor consumable directly by Forth parsing words,
-such as forthcode({ACCEPT}) or forthcode({WORD}).
-Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
-the characters ready in the input buffer. All characters are
-retained including the forthkey({RET}). The editing functions
-are those described by forthcode({ACCEPT}).
-},
-{{ACCEPT},{(ACCEPT)}},
-{
-{"see (ACCEPT)" TYPE},{see (ACCEPT)}
-},
-enddoc)
-HEADER({REFILL-TIB},{REFTIB},{DOCOL})
-        DC      REMAIND, FETCH, TOR
-        DC      ZERO
-        DC      TIB, FETCH, RR, PLUS
-        DC      LIT, RTS/2, RR, LSUB
-        DC      LIT, read
-        DC      LINOS, LDUP, QLERR
-        DC      LDUP, ZEQU, LIT, -EPIPE, LAND, QLERR ; {Presumably end of pipe.}
-        DC      TIB, FETCH, SWAP, FROMR, PLUS
-        DC      REMAIND, TSTOR
-        DC      SEMIS
 ;
 worddoc( {INPUT~},{SET-TERM},{set_term},{len b --- },{},
 {Set the terminal length to forthsamp({len}) and toggle the c_lflag field
