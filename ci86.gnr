@@ -2820,10 +2820,10 @@ systems, thanks to this.}})
 _BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
 _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
-; ))))
+;
 CODE_HEADER({CELLS},{LCELLS})
         POP     AX
-        SHL     AX,2
+        SHL     AX, _BITS32_(2) _BITS16_(1)
         _PUSH
 ;
 worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
@@ -4071,17 +4071,11 @@ may forthcode({DROP}) those items.},
 },
 enddoc)
 HEADER({CATCH},{CATCH},{DOCOL})
-;   DSP@ CELL+ >R
         DC      SPFET, CELLP, TOR
-;   HANDLER @ >R
         DC      HANDLER, FETCH, TOR
-;   RSP@ HANDLER !
         DC      RPFET, HANDLER, STORE
-;   EXECUTE
         DC      EXEC
-;   R> HANDLER !
         DC      FROMR, HANDLER, STORE
-;   RDROP 0 ;
         DC      RDROP, ZERO
         DC      SEMIS
 ;
@@ -4097,25 +4091,17 @@ forthsamp({tc ERROR}) .},
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
-;    ?DUP IF
         DC      QDUP
         _0BRANCH(THROW1)
-;   HANDLER @ 0= IF ERROR THEN
         DC      HANDLER, FETCH, ZEQU
         _0BRANCH(THROW2)
         DC      ERROR
 THROW2:
-;   HANDLER @ RSP!
         DC      HANDLER, FETCH, RPSTO
-;   R> HANDLER !
         DC      FROMR, HANDLER, STORE
-;   R> SWAP >R ( Keep throw code)
         DC      FROMR, SWAP, TOR
-;   DSP!
         DC      SPSTO
-;   R>
         DC      FROMR
-;   THEN ;
 THROW1:
         DC      SEMIS
 ;
@@ -5799,7 +5785,7 @@ _BITS32_({        DC      LIT, TYPEBUF })
         DC      BDOS, DROP ;{ ignore error }
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
-_BITS32_({TYPEBUF:  _RESB    0100H })
+_BITS32_({TYPEBUF:  _RESB    0400H })
 ;
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ascii character forthvar({c}) to the output device.
@@ -5825,7 +5811,8 @@ added at the end of the text.}, {{KEY},{KEY?}}, {}, enddoc)
  HEADER({EXPECT},{EXPEC},{DOCOL})
 _BITS32_({; MSDOS cannot handle a 32 bits address: use the buffer.})
 _BITS32_({        DC      LIT, EXPECTBUF})
-_BITS16_({        DC      OVER})
+dnl    _BITS16_({        DC      SWAP})
+        _BITS16_({        DC      OVER})
         DC      TOR, TOR
         DC      LIT,03F00H ;{ Write file or device }
         DC      ZERO     ;{ Handle}
@@ -6139,8 +6126,8 @@ GIBBO}
 enddoc)
 HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      OVER, TOR
-        DC      OVER, OVER, ONEP, LERASE
-        DC      OVER, OVER, EXPEC
+        DC      TDUP, ONEP, LERASE
+        DC      EXPEC
         DC      FROMR, LDUP
 ACCEP4:  DC      COUNT, ZEQU
         _0BRANCH(ACCEP4)
@@ -6192,7 +6179,8 @@ EXPE2:  DC      LDUP
         DC      LIT,0DH
         DC      EQUAL
         _0BRANCH(EXPE4) ;{ IF}
-        DC      LLEAV
+        ; {Emulate old fashioned LEAVE.}
+        DC      FROMR, RDROP, LDUP, TOR, TOR
         DC      DROP
         DC      LBL
         DC      ZERO
@@ -6341,7 +6329,8 @@ EXPE2:  DC      LDUP
         DC      LIT,0DH
         DC      EQUAL
         _0BRANCH(EXPE4) ;{ IF}
-        DC      LLEAV
+        ; {Emulate old fashioned LEAVE.}
+        DC      FROMR, RDROP, LDUP, TOR, TOR
         DC      DROP
         DC      LBL
         DC      ZERO
