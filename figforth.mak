@@ -56,10 +56,17 @@ clean : ; rm $(TARGETS:%=fig86.%.*)
 # Make a boot floppy by filling the bootsector by a raw copy,
 # then creating a dos file system in accordance with the boot sector,
 # then copying the forth system to exact the first available cluster.
+# The option BOOTFD must be installed into alone.m4.
 boot: fig86.alone.com  
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 	mformat -k a: 
 	mcopy $+ a:forth.com
+
+# Like above. However there is no attempt to have MSDOS reading from
+# the hard disk succeed.
+# The option BOOTHD must be installed into alone.m4.
+hdboot: fig86.alone.com  
+	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 
 # ZIP targets
 msdos.msm : fig86.msdos.msm ; cp $+ $@
