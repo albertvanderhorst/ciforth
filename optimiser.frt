@@ -197,6 +197,70 @@ BRANCHES @+ SWAP ?DO
     I @ DUP >TARGET 2OVER FREE-WRT? 0= IF 2DROP 0. LEAVE THEN
 0 CELL+ +LOOP OR 0= ;
 
+\ ----------------------    Closing a gap -------------------
+
+\ The offset over which the gap is shifted shut, generally negative.
+VARIABLE ANNIL-OFFSET
+
+\ For GAP and POSITION of a branch offset, adjust if it jumps from left
+\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
+: ADJUST-BRANCH-FROM-LEFT    >R   R@ >TARGET <=   SWAP R@ >   AND IF
+    ANNIL-OFFSET @ R@ +!
+THEN RDROP ;
+
+\ For GAP and POSITION of a branch offset, adjust if it jumps from right
+\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
+: ADJUST-BRANCH-FROM-RIGHT    >R   R@ <  SWAP R@ >TARGET >=   AND IF
+    ANNIL-OFFSET @ NEGATE R@ +!
+THEN RDROP ;
+
+\ The set of branches that is marked for elimination from the set ``BRANCHES''.
+50 SET MARKED-BRANCHES
+: !MARKED-BRANCHES  MARKED-BRANCHES !SET ;
+
+\ For GAP and ADDRESS of entry in branches, if the branch is taken from inside
+\ the gap, mark it for elimination from the table.
+\ We can't remove them from the set right away because things get entangled.
+: ELIMINATE-BRANCH-IN-GAP   >R   R@ @ DSSWAP WITHIN IF
+    R@ MARKED-BRANCHES SET+!
+THEN RDROP ;
+
+\ Delete from ``BRANCHES'' what is marked for elimination.
+\ Must go back because otherwise we would disturb the later addresses.
+: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+
+   BEGIN 2DUP < WHILE   1 CELLS -   DUP @ BRANCHES SET-REMOVE   REPEAT 2DROP ;
+
+\ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
+: ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES @+ SWAP ?DO
+    2DUP I @ ADJUST-BRANCH-FROM-LEFT
+    2DUP I @ ADJUST-BRANCH-FROM-RIGHT
+    2DUP I ELIMINATE-BRANCH-IN-GAP
+0 CELL+ +LOOP 2DROP ;
+
+\ For END of gap, shift the remainder to close the gap.
+: SHIFT-GAP-SHUT
+    DUP END-OF-SEQUENCE OVER - >R   DUP ANNIL-OFFSET @ +  R>   MOVE ;
+
+\ Correct the branch-addresses higher than the START of a gap,
+\ to reflect the position they have after closing the gap.
+: MOVE-BRANCHES   BRANCHES @+ SWAP ?DO
+    DUP I @ < IF ANNIL-OFFSET @   I +! THEN
+0 CELL+ +LOOP DROP ;
+
+\ Correct the GAP, i.e. correct its end with ``GAP-OFFSET''.
+\ The gaps content becomes invalid.
+\ Adjust all branches over the gap and information about branches.
+\ It is assumed that the gap is part of a sequence that ends at ``HERE'',
+\ such that the dictionary may be adjusted.
+\ Return the new GAP.
+: CORRECT-GAP
+    2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES   OVER MOVE-BRANCHES
+    DUP SHIFT-GAP-SHUT
+    \ Correct the end. The start is the same.
+    ANNIL-OFFSET @ +
+;
+
+
 \ ----------------------    Expansion  ----------------------
 \ the new expansion is supposed to take care of branches.
 
@@ -300,70 +364,21 @@ BRANCHES @+ SWAP ?DO
 : ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
     DUP 0<> ANNIL-STABLE? AND ;
 
-\ The offset over which the gap is shifted shut, generally negative.
-VARIABLE ANNIL-OFFSET
 \ Form START and END of gap and virtual depth calculate ``ANNIL-OFFSET''.
 : CALCULATE-ANNIL-OFFSET - VD @ CELLS - ANNIL-OFFSET ! ;
-
-\ For GAP and POSITION of a branch offset, adjust if it jumps from left
-\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
-: ADJUST-BRANCH-FROM-LEFT    >R   R@ >TARGET <=   SWAP R@ >   AND IF
-    ANNIL-OFFSET @ R@ +!
-THEN RDROP ;
-
-\ For GAP and POSITION of a branch offset, adjust if it jumps from right
-\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
-: ADJUST-BRANCH-FROM-RIGHT    >R   R@ <  SWAP R@ >TARGET >=   AND IF
-    ANNIL-OFFSET @ NEGATE R@ +!
-THEN RDROP ;
-
-\ The set of branches that is marked for elimination from the set ``BRANCHES''.
-50 SET MARKED-BRANCHES
-: !MARKED-BRANCHES  MARKED-BRANCHES !SET ;
-
-\ For GAP and ADDRESS of entry in branches, if the branch is in the gap.
-\ mark it for elimination from the table.
-\ We can't remove them from the set right away because things get entangled.
-: ELIMINATE-BRANCH-IN-GAP   >R   R@ @ DSSWAP WITHIN IF
-    R@ MARKED-BRANCHES SET+!
-THEN RDROP ;
-
-\ Delete from ``BRANCHES'' what is marked for elimination.
-\ Must go back because otherwise we would disturb the later addresses.
-: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+
-   BEGIN 2DUP < WHILE   1 CELLS -   DUP @ BRANCHES SET-REMOVE   REPEAT 2DROP ;
-
-\ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
-: ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES @+ SWAP ?DO
-    2DUP I @ ADJUST-BRANCH-FROM-LEFT
-    2DUP I @ ADJUST-BRANCH-FROM-RIGHT
-    2DUP I ELIMINATE-BRANCH-IN-GAP
-0 CELL+ +LOOP 2DROP ;
-
-\ For END of gap, shift the remainder to close the gap.
-: SHIFT-GAP-SHUT
-    DUP END-OF-SEQUENCE OVER - >R   DUP ANNIL-OFFSET @ +  R>   MOVE ;
 
 \ Fill the gap at START with ``DROP'' s.
 : FILL-WITH-DROPS   DUP VD @ NEGATE CELLS +   'DROP   WFILL ;
 
-\ Correct the branch-addresses higher than the START of a gap,
-\ to reflect the position they have after closing the gap.
-: MOVE-BRANCHES   BRANCHES @+ SWAP ?DO
-    DUP I @ < IF ANNIL-OFFSET @   I +! THEN
-0 CELL+ +LOOP DROP ;
-
-\ Annihilate the gap from START to END such that the sequence to which
-\ it belongs behaves equivalently and ``BRANCHES'' reflects the new
-\ situation.
+\ Annihilate the GAP i.e. replace it by the equivalent number of ``DROP''.
+\ Assure ``BRANCHES'' reflects the new situation.
 \ Return the new position of END (where we have to go on optimising.).
 : ANNIHILATE-GAP
     2DUP CALCULATE-ANNIL-OFFSET
-    2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES
+    CORRECT-GAP
 \     2DUP " Between " TYPE SWAP H. " and " TYPE H.
 \     " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
-    SHIFT-GAP-SHUT   DUP MOVE-BRANCHES   DUP FILL-WITH-DROPS
-    VD @ NEGATE CELLS +
+      SWAP FILL-WITH-DROPS
 ;
 
 \ Investigate the start of SEQUENCE. If it can be anihilated do it.
