@@ -1,6 +1,6 @@
           1 DO I J ! 5 SPACES ( eerst wat spaties)
-                9 1 DO 9 J @1 - I BORD @ EMIT SPACE LOOP CR
 
+                9 1 DO 9 J @1 - I BORD @ EMIT SPACE LOOP CR
 
 
 
@@ -25,7 +25,7 @@ HEX
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  DECIMAL
 : LEAVE-BLOCK BLK @ IF SRC CELL+ @ IN ! THEN ;
-"BIOS" FOUND CONSTANT MSMS    
+"BIOS" FOUND CONSTANT MSMS
 "LINOS" FOUND CONSTANT LILI S0 @ DSP!
 : ?16 ;         : ?32 LEAVE-BLOCK ;
 : ?PC MSMS 0= IF LEAVE-BLOCK THEN ;
@@ -57,7 +57,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  DECIMAL   : LEAVE-BLOCK BLK @ IF SRC CELL+ @ IN ! THEN ;
-"BIOS" FOUND  CONSTANT MSMS    
+"BIOS" FOUND  CONSTANT MSMS
 "LINOS" FOUND  CONSTANT LILI S0 @ DSP!
 : ?32 ;         : ?16 LEAVE-BLOCK ;
 : ?PC MSMS 0= IF LEAVE-BLOCK THEN ;
@@ -73,7 +73,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  MSG # 8 : DISC ERROR !
  MSG # 9 : UNRESOLVED FORWARD REFERENCE
  MSG # 10 : IMPROPER CHARACTER DENOTATION
- MSG # 11 : UNKNOWN
+ MSG # 11 : WORD IS NOT FOUND
  MSG # 12 : UNKNOWN
  MSG # 13 : UNKNOWN
  MSG # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY
@@ -94,8 +94,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  MSG # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER
  MSG # 30 : AS: COMMAERS IN WRONG ORDER
  MSG # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK
-( MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT
  (  DEBUG   SCR#6     A0JUN21 AVDHORST DFW HOLLAND)
+( MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT )
 0 IVAR BASE'
  : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
  : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
@@ -105,9 +105,9 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  (        1/0  IDEM FOR A SINGLE BYTE)
  : B.     <HEX 0 <# # # #> TYPE HEX> ;
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
-
-
-
+ : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
+ : HIDDEN >FFA 2 TOGGLE ;
+ : HIDE BL WORD FIND 0= 11 ?ERROR HIDDEN ;
 
 
  <HEX ( DEBUG SCR#7 )
@@ -128,13 +128,13 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 ;    HEX>
  ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 3.43    AH"
  : IVAR CREATE , ;   : ^ .S ; : INCLUDE &" (PARSE) INCLUDED ;
-  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES) 
+  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD 37 LOAD
  ( EDITOR ) 109 LOAD
  ( CP/M READ WRITE LOAD    17 LOAD 21 LOAD 24 LOAD 21: BUGS)
- ( KRAKER )        10 16 THRU
+ ( KRAKER         10 16 THRU )
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
  ( ASSEMBLER 80x86 SAVE-BLOCKS) EXIT   120 LOAD   97 98 THRU
@@ -387,7 +387,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  -1 CELL+ LOAD
 : STOPIT IF LEAVE-BLOCK THEN ;
 "!CSP" FOUND STOPIT
- : !CSP ; : ?CSP ; 
+ : !CSP ; : ?CSP ;
 
 
 
@@ -592,13 +592,13 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
  ( STRING MANIPULATIONS : $I $S A0APR04-AH) ( HORRIBLE!)
  : $I ( cs, del - Index   Index is the first place del is found
-in the string else 0. It is assumed del cannot be a valid addr)
+in the string else 0.
+It is assumed del cannot be a valid addr )
 OVER 0= IF DROP DROP DROP 0 ELSE  DUP >R
      ROT ROT OVER + SWAP DO
      DUP I C@ = IF DROP I LEAVE THEN
    LOOP R> OVER = IF DROP 0 THEN  ( Tricky)
 THEN ;
-
  : $S ( cs, del -- cs2 , cs1 )  ( Splits the text at the del )
    ( in two, if not present, cs2 is a null string )
    >R OVER OVER R> $I  DUP IF
@@ -613,15 +613,15 @@ THEN ;
     WHILE
       1 - SWAP 1 + SWAP
     REPEAT  ;
+ : $= ROT 2DUP SWAP - >R
+     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
  : $@=  ( S1 S2 --F string at address S1 equal to other one)
-   1 ROT ROT  ( Start with a zero flag)
-   DUP C@ 1+ ( Compare also count ) 0 DO
-      OVER I + C@ OVER I + C@ <> IF
-         ROT DROP 0 ROT ROT ( Replace flag with 0 )
-         LEAVE
-      THEN LOOP DROP DROP  ;
-( TC TC -- f , use only for C=C)
- : $= ROT OVER = IF CORA ELSE 2DROP DROP 0 THEN ;
+   >R $@ R> $@ $=
+;
+
+
+
+
 ?PC  <HEX ( DEBUG SCR#7 )
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
@@ -2336,16 +2336,16 @@ DECIMAL
 
 ( SAVE-SYSTEM )  HEX
  CREATE MAGIC 7F C, &E C, &L C, &F C,
- : FIND-START BM BEGIN DUP @ MAGIC @ <> WHILE
- 1 CELLS - REPEAT ; FIND-START CONSTANT SM
+ : FIND-ELF BM BEGIN DUP @ MAGIC @ <> WHILE
+ 1 CELLS - REPEAT ; FIND-ELF CONSTANT SM
  : HERE-AT-STARTUP  ' DP >PFA @ +ORIGIN @ ;
  : SAVE-SYSTEM ( sc -- )
-
-  HERE HERE-AT-STARTUP - DUP 
+  HERE HERE-AT-STARTUP - DUP
   SM 20 + +!      SM 44 + +! ( File&Dict size)
    U0 @   0 +ORIGIN   100   MOVE ( Save user variables)
-   SM    HERE  SM - 2SWAP ( name) PUT-FILE
-;
+   SM    HERE  SM - 2SWAP ( name) PUT-FILE ;
+: TURNKEY  ( dea sc -- ) ROT
+>PFA @  ' ABORT >PFA !  SAVE-SYSTEM BYE ; DECIMAL
 : ARGC ARGS @ @ ;  : ARGV ARGS @ CELL+ ;
 : ENV ARGS @ $@ 1+ CELLS + ;
 : CTYPE CR BEGIN COUNT DUP WHILE EMIT REPEAT DROP DROP ;
@@ -3601,12 +3601,12 @@ THE BYTE BENCHMARK LASTED  7.650mS OK
 ( tak )
 VARIABLE X      VARIABLE Y      VARIABLE Z
 
-: tak 
-X @ Y @ Z @ >R >R >R 
+: tak
+X @ Y @ Z @ >R >R >R
 Z ! Y ! X !
-    X @ Y @ > 0= IF 
+    X @ Y @ > 0= IF
         Z @
-    ELSE 
+    ELSE
         X @ 1 - Y @ Z @ RECURSE
         Y @ 1 - Z @ X @ RECURSE
         Z @ 1 - X @ Y @ RECURSE
@@ -3618,11 +3618,11 @@ R> R> R> Z ! Y ! X !
 : Z "R@ @" EVALUATE ; IMMEDIATE
 : Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
 : X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
-: tak 
+: tak
      DSP@  >R  \ X . Y . Z . CR
-     X Y > 0= IF 
-         Z 
-     ELSE 
+     X Y > 0= IF
+         Z
+     ELSE
          X 1 - Y Z RECURSE
          Y 1 - Z X RECURSE
          Z 1 - X Y RECURSE
@@ -3634,11 +3634,11 @@ R> R> R> Z ! Y ! X !
 : Z "R@ @" EVALUATE ; IMMEDIATE
 : Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
 : X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
-: tak SWAP ROT  
+: tak SWAP ROT
      DSP@  >R  \ X . Y . Z . CR
-     X Y > 0= IF 
-         Z 
-     ELSE 
+     X Y > 0= IF
+         Z
+     ELSE
          X 1 - Y Z SWAP ROT  RECURSE
          Y 1 - Z X SWAP ROT  RECURSE
          Z 1 - X Y SWAP ROT  RECURSE
@@ -3650,11 +3650,11 @@ R> R> R> Z ! Y ! X !
 : Z "R@ @" EVALUATE ; IMMEDIATE
 : Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
 : X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
-: tak SWAP ROT  
+: tak SWAP ROT
      DSP@  >R  \ X . Y . Z . CR
-     X Y > 0= IF 
-         Z 
-     ELSE 
+     X Y > 0= IF
+         Z
+     ELSE
          Y X Z 1 - RECURSE
          X Z Y 1 - RECURSE
          Z Y X 1 - RECURSE
@@ -3666,15 +3666,15 @@ R> R> R> Z ! Y ! X !
 : Z "R@ @" EVALUATE ; IMMEDIATE
 : Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
 : X "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
-: tak SWAP ROT  
+: tak SWAP ROT
      DSP@  >R  \ X . Y . Z . CR
-     X Y > 0= IF 
-         Z 
-     ELSE 
-         Y X Z 1 - RECURSE  >R DROP DROP DROP R> 
-         X Z Y 1 - RECURSE  >R DROP DROP DROP R> 
-         Z Y X 1 - RECURSE  >R DROP DROP DROP R> 
-         RECURSE >R DROP DROP DROP R> 
+     X Y > 0= IF
+         Z
+     ELSE
+         Y X Z 1 - RECURSE  >R DROP DROP DROP R>
+         X Z Y 1 - RECURSE  >R DROP DROP DROP R>
+         Z Y X 1 - RECURSE  >R DROP DROP DROP R>
+         RECURSE >R DROP DROP DROP R>
      THEN   RDROP \ Drop frame pointer.
 ; \ Discard input, leave result
 : tak SWAP ROT tak >R DROP DROP DROP R> ;
@@ -3682,45 +3682,45 @@ R> R> R> Z ! Y ! X !
 : X "R@ @" EVALUATE ; IMMEDIATE
 : Y "R@ CELL+ @" EVALUATE ; IMMEDIATE
 : Z "R@ CELL+ CELL+ @" EVALUATE ; IMMEDIATE
-: tak 
-     2DUP < 0= IF 
-         >R >R DUP R> SWAP R> SWAP 
-     ELSE 
+: tak
+     2DUP < 0= IF
+         >R >R DUP R> SWAP R> SWAP
+     ELSE
          DSP@  >R  \ X . Y . Z . CR
-         Y X Z 1 - RECURSE  >R DROP DROP DROP R> 
-         X Z Y 1 - RECURSE  >R DROP DROP DROP R> 
-         Z Y X 1 - RECURSE  >R DROP DROP DROP R> 
-         RECURSE >R DROP DROP DROP R> 
+         Y X Z 1 - RECURSE  >R DROP DROP DROP R>
+         X Z Y 1 - RECURSE  >R DROP DROP DROP R>
+         Z Y X 1 - RECURSE  >R DROP DROP DROP R>
+         RECURSE >R DROP DROP DROP R>
          RDROP \ Drop frame pointer.
-     THEN ; 
+     THEN ;
 : tak SWAP ROT tak >R DROP DROP DROP R> ;
 ( tak )
 : kat
-    2DUP < 0= IF 
-         >R >R DUP R> SWAP R> SWAP 
-    ELSE 
+    2DUP < 0= IF
+         >R >R DUP R> SWAP R> SWAP
+    ELSE
          ROT 1 - RECURSE  >R 1+
          ROT 1 - RECURSE  >R 1+
-         ROT 1 - RECURSE  >R 1+ 
-         R> R> R> SWAP ROT 
-         RECURSE 
-        >R DROP DROP DROP R> 
-    THEN ; 
+         ROT 1 - RECURSE  >R 1+
+         R> R> R> SWAP ROT
+         RECURSE
+        >R DROP DROP DROP R>
+    THEN ;
 : tak SWAP ROT kat >R DROP DROP DROP R> ;
 
 
 
 ( tak, Look mother! Only stacks and still comprehensible)
-: 2PICK  ">R >R DUP R> SWAP R> SWAP" EVALUATE ; IMMEDIATE 
+: 2PICK  ">R >R DUP R> SWAP R> SWAP" EVALUATE ; IMMEDIATE
 : tak ; ( Forward)
 : kat
-    2DUP < 0= IF 2PICK 
-    ELSE 
+    2DUP < 0= IF 2PICK
+    ELSE
          ROT 1 - RECURSE  >R 1+
          ROT 1 - RECURSE  >R 1+
-         ROT 1 - RECURSE  >R 1+ 
-         R> R> R> tak 
-    THEN ; 
+         ROT 1 - RECURSE  >R 1+
+         R> R> R> tak
+    THEN ;
 : tak' SWAP ROT kat >R DROP DROP DROP R> ;
 ' tak' >PFA @ ' tak >PFA ! ( solve forward reference)
 
@@ -3728,20 +3728,65 @@ R> R> R> Z ! Y ! X !
 
 ( tak, Look mother! Only stacks and still comprehensible)
 : kat' ;  ( Forward definition of ``kat''. Mutual recursion!)
-\ For X Y Z return the VALUE of take-uchi.
+\ For X Y Z return the VALUE of take-uchi: tak(X,Y,Z)
 : tak SWAP ROT kat' >R DROP DROP DROP R> ( 3 NIP's ) ;
-\ Like ``tak'' but arguments in reverse order and not consumed.
-: kat  
-    2DUP < IF 
+\ Like ``tak'' but arguments in reverse order and not consumed
+: kat
+    2DUP < IF
          ROT 1 - RECURSE  >R 1+
          ROT 1 - RECURSE  >R 1+
-         ROT 1 - RECURSE  >R 1+ 
-         R> R> R> tak 
-    ELSE 
+         ROT 1 - RECURSE  >R 1+
+         R> R> R> tak
+    ELSE
         >R >R DUP R> SWAP R> SWAP \ 2 PICK
-    THEN ;    
+    THEN ;
 ' kat >PFA @ ' kat' >PFA ! ( solve forward reference)
 : q MARK-TIME 18 12 6 tak . ELAPSED ;
+( tak, Look mother! Only stacks, already less comprehensible)
+: kat' ;  ( Forward definition of ``kat''. Mutual recursion!)
+\ For X Y Z return the VALUE of take-uchi: tak(X,Y,Z)
+: tak SWAP ROT 1+ kat' >R DROP DROP DROP R> ( 3 NIP's ) ;
+\ For Z Y X   --- return Z Y X tak(X-1,Y,Z)
+: kat
+   1-
+   2DUP < IF
+       ROT RECURSE >R   ROT RECURSE >R   ROT RECURSE >R
+       1+
+       R> R> R> tak
+   ELSE  1+
+       >R >R DUP R> SWAP R> SWAP \ 2 PICK
+   THEN ;
+' kat >PFA @ ' kat' >PFA ! ( solve forward reference)
+: q MARK-TIME 18 12 6 tak . ELAPSED ;
+( tak, Look mother! Only stacks, less and less comprehensible)
+: kat' ;  ( Forward definition of ``kat''. Mutual recursion!)
+\ For X Y Z return the VALUE of take-uchi: tak(X,Y,Z)
+: tak SWAP ROT 1+ kat' >R DROP DROP DROP R> ( 3 NIP's ) ;
+\ For Z Y X   --- return Z Y X tak(X-1,Y,Z)
+: kat
+   2DUP > IF
+       >R >R DUP R> SWAP R> SWAP \ 2 PICK
+   ELSE
+       1-
+       ROT RECURSE >R   ROT RECURSE >R   ROT RECURSE >R
+       1+
+       R> R> R> tak
+   THEN ;
+' kat >PFA @ ' kat' >PFA ! ( solve forward reference)
+: q MARK-TIME 18 12 6 tak . ELAPSED ;
+( tak, using 3SWAP NIP and PICK doesn't run on ciforth)
+\ : 3SWAP ROT SWAP ; Reverse top 3 elements.
+: tak' ;  ( Forward reference)
+\ Auxiliary: For Z Y X   --- return Z Y X tak(X-1,Y,Z)
+: kat
+   2DUP > IF
+       2 PICK
+   ELSE
+       1-  ROT RECURSE >R  ROT RECURSE >R  ROT RECURSE >R  1+
+       R> R> R> tak
+   THEN ;
+: tak 3SWAP 1+ kat NIP NIP NIP ;
+' tak >PFA @ ' tak' >PFA ! ( Solve forward reference)
 
 
 
@@ -3761,7 +3806,14 @@ R> R> R> Z ! Y ! X !
 
 
 
+( Mini editor by retyping, Usage ME) <HEX
+: EL LINE C/L 1 - BLANK ;
+: GL PAD C/L  ACCEPT C/L 1- MIN >R LINE PAD SWAP R> MOVE ;
+: OEPS SCR @ LIST "PROCEED?" $. KEY 20 OR
+  &y <> 2000 ?ERROR  "GO" $. CR ;
+: ME SCR ! OEPS 10 0 DO I EL I GL LOOP ;
 
+HEX>
 
 
 
@@ -3770,6 +3822,14 @@ R> R> R> Z ! Y ! X !
 
 
 
+( Binary search, comment ) EXIT
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+Uses a comparison routine with execution token `COMP' `COMP'
+must have the stack diagram ( IT -- flag) , where flag
+typically means that IT compares lower or equal to some fixed
+value. It should be TRUE for `IMIN' and decreasing in between
+`IMIN' and `IMAX' . Finds the last index `IT' between `IMIN'
+and `IMAX' (inclusive) for which `COMP' returns true.
 
 
 
@@ -3778,6 +3838,27 @@ R> R> R> Z ! Y ! X !
 
 
 
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+VARIABLE IMIN  \ IMIN ' COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX ' COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    COMP !  IMAX ! IMIN !
+    BEGIN       \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ .S <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ ;
+\  HIDE IMIN   HIDE IMAX   HIDE COMP
+( Binary search, comment, Test )
+: <100 100 < ;  -1000 +1000 ' <100 BIN-SEARCH
+." EXPECT 99:" .
+CREATE XXX 123 , 64 , 32 , 12
+\ Find first number < 40
 
 
 
@@ -3789,6 +3870,9 @@ R> R> R> Z ! Y ! X !
 
 
 
+( Solution)
+: CC CELLS XXX + @ 40 < 0= ;
+0 3 ' CC BIN-SEARCH 1+ CELLS XXX + @
 
 
 
@@ -3802,105 +3886,22 @@ R> R> R> Z ! Y ! X !
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+VARIABLE IMIN  \ IMIN ' COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX ' COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    COMP !  IMAX ! IMIN !
+    BEGIN       \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ ;
+\  HIDE IMIN   HIDE IMAX   HIDE COMP
 
 
 
@@ -3983,7 +3984,6 @@ R> R> R> Z ! Y ! X !
 
 
 123 THROW
-
 
 
 
