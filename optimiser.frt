@@ -8,6 +8,7 @@
 \ have been filled in in the flag fields.
 
 REQUIRE $
+REQUIRE SWAP-DP
 
 ( ------------ DEBUGGING ------------------------------------- )
       : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
@@ -44,7 +45,9 @@ R> R> REPEAT 2DROP ;
 : DR> POSTPONE R> POSTPONE R> ; IMMEDIATE
 : DR@ POSTPONE DR> POSTPONE 2DUP POSTPONE D>R ; IMMEDIATE
 
+\ Swap a SINGLE and a DOUBLE. Leave the DOUBLE and the SINGLE.
 : SDSWAP   ROT ;
+\ Swap a DOUBLE and a SINGLE. Leave the SINGLE and the DOUBLE.
 : DSSWAP   ROT ROT ;
 
 \ ----------------------    ( From optimiser.frt)
@@ -52,6 +55,14 @@ R> R> REPEAT 2DROP ;
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
 \ Store a LOW HIGH range with hl-code in the dictionary.
 : HL-RANGE, OVER - HL-CODE, ;
+
+\ Compile a GAP in a temporary area. Return a POINTER to the
+\ unnamed code.
+: COMPILE-GAP   SWAP-DP HERE DSSWAP HL-RANGE, POSTPONE (;) SWAP-DP ;
+
+\ Execute the CODE from a gap such as returned by ``COMPILE-GAP''.
+\ This leaves a variable number of stack items.
+: EXECUTE-GAP >R ;
 
 \ Recompile the code from BEGIN END. Leave END as the new begin.
 : >HERE SWAP 2DUP -  HL-CODE, ;
@@ -257,7 +268,7 @@ THEN RDROP ;
     2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES   OVER MOVE-BRANCHES
     DUP SHIFT-GAP-SHUT
     \ Correct the end. The start is the same.
-    GAP-OFFSET @ +
+    GAP-OFFSET @ DUP ALLOT +
 ;
 
 
@@ -461,66 +472,57 @@ DROP 0 THEN ;
 
 \ ---------------------------------------------------------------------
 
-\ Execute at compile time the optimisable code we have collected from
-\ ``OPT-START''
-\ The result is supposedly ``VD'' stack items.
-: EXECUTE-DURING-COMPILE   POSTPONE (;)    OPT-START @ ^^ >R ;
-
-\ Throw away the executable code that is to be replaced with optimised code.
-: THROW-AWAY   OPT-START @ DP ! ;
-
-\ Compile a NUMBER of constants instead of the code optimised away.
-\ They sit on the stack now, under ``NUMBER''.
-\ We need to store backwards to reverse them.
-: COMPILE-CONSTANTS \ DUP 0= 13 ?ERROR
-    HERE >R  CELLS 2* ALLOT   HERE >R
-    BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
-        'LIT R@ !  R@ CELL+ ! REPEAT
-    2DROP
-    '(;) HERE !     \ To prevent too many crashes while testing.
-;
-\ WHAT ABOU
-\ HERE BEGIN DUP R@ <> WHILE 'LIT SWAP -! -! REPEAT DROP
-
-\ Optimisation is over. Run the optimisable code and compile constants
-\ instead of them. "Cash the optimisation check."
-: CASH
-    OPT-START @ HERE <> IF
-        !CSP
-        EXECUTE-DURING-COMPILE
-        THROW-AWAY
-        VD @ COMPILE-CONSTANTS
-        ?CSP
-    THEN
-;
+\ Initialise the stack tracking for folding.
+: !FOLD-START   0 VD ! ;
 
 \ Combining the effect of DEA into the current state, return
 \ "the folding optimisation still HOLDS".
-: CAN-FOLD?   DUP NS? SWAP SE@ ENOUGH-POPS AND ;
+: CAN-FOLD?   >R
+   R@ NS?    R@ SE@ ENOUGH-POPS AND    R@ IS-A-BRANCH 0= AND
+RDROP ;
 
-\ For BEGIN END DEA : if DEA allows it, add to optimisation,
-\ else cash it and restart it. ``BEGIN'' ``END'' is the code copied.
-\ (Mostly ``DEA'' plus inline belonging to it.)
-\ Return a new BEGIN for the code to be moved, mostly the old ``END''.
-:  FOLD-ONE
-    DUP NEXT-PARSE DROP
-    DUP CAN-FOLD? IF
-        SE@ COMBINE-VD               ( DEA -- )
-        >HERE                        ( BEGIN END -- BEGIN' )
-    ELSE
-        DROP ( DUP FIND-REORDER) CASH  ( DEA -- )
-        >HERE                        ( BEGIN END -- BEGIN' )
-        !OPT-START
+\ For START return the END of the largest GAP starting there that can be folded.
+: FIND-FOLD BEGIN DUP NEXT-PARSE OVER CAN-FOLD? AND WHILE
+        SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
+
+
+\ For GAP and virtual depth calculate ``GAP-OFFSET'' such as used
+\ in ``CORRECT-GAP'' .
+: CALCULATE-FOLD-OFFSET - VD @ CELLS 2* + GAP-OFFSET ! ;
+
+\ Fill the GAP with constants calculated via a NONAME_XT (See ``COMPILE-GAP'').
+\ The return stack is used because downward loops don't handle the zero case
+\ gracefully.
+: FILL-WITH-CONSTANTS
+    DSSWAP   SWAP >R >R   !CSP EXECUTE-GAP
+    BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
+        'LIT R@ !  R@ CELL+ ! REPEAT
+    DROP ?CSP DROP
+;
+
+\ For a foldable GAP, replace it with constants. Leave the new END of
+\ the gap where optimisation continues.
+: FOLD-GAP 2DUP COMPILE-GAP >R
+           2DUP CALCULATE-FOLD-OFFSET
+           CORRECT-GAP
+           2DUP R> FILL-WITH-CONSTANTS
+           SWAP DROP
+;
+
+\ Try to reorder one gap at the start of a SEQUENCE, leave the incremented
+\ SEQUENCE.
+: FOLD-ONE
+    !FOLD-START
+    DUP FIND-FOLD
+    2DUP = IF DROP NEXT-ITEM ELSE
+       FOLD-GAP
     THEN
 ;
 
-\ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
-\ Do not initialise, or terminate.
-: (FOLD) BEGIN DUP ?NOT-EXIT WHILE FOLD-ONE REPEAT DROP ;
-
-\ Expand each constituent of SEQUENCE to ``HERE'' ,  possibly folding it.
-\ Leave a POINTER to equivalent optimised code.
-: FOLD   !OPT-START HERE SWAP    (FOLD)   CASH   POSTPONE (;)  ;
+\ Fold a SEQUENCE i.e. replace code with constants where possible.
+\ Return rearranged SEQUENCE (which is in fact the same address.)
+\ It is required that the ``BRANCHES'' set has been filled.
+: FOLD   DUP BEGIN DUP ?NOT-EXIT WHILE FOLD-ONE REPEAT DROP ;
 
 \ ----------------------------------------------------------------
 
