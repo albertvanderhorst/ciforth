@@ -105,7 +105,7 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   179  lina.cfg         lina          BCDEFHKMOPR
+hosted_linux linux_native   181  lina.cfg         lina          BCDEFHKMOPR
                             176  lina.cfg         lina          BCDEFHKMOPR
                             154  lina.cfg         lina          J
                             153  lina.cfg         lina          BCDEFHKMOPR
