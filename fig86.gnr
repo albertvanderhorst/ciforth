@@ -1017,7 +1017,7 @@ BOOTUP:
         DB      0EH     ;{ VERSION ATTRIBUTES}
         _BITS32_({DC 0   ; Fill version info up to two cells. })
 USINI:
-        DC      _NAME_FIELD(TASK) ;{ FIRST DEFINITION 0 }
+        DC      _DEA(TASK) ;{ FIRST DEFINITION 0 }
         DC      STRUSA  ;{ INIT (U0) USER AREA POINTER 1}
         DC      BSIN    ;{ RUBOUT: get rid of latest char 2}
         DC      INITS0  ;{ INIT (S0)         3}
@@ -1027,7 +1027,7 @@ USINI:
         DC      0       ;{ INIT (WARNING)      7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
-        DC      _VOC_LATEST(FORTH)+CELLS(1) ;{       INIT (VOC-LINK) 10}
+        DC      _DEA(FORTH) ;{       INIT (VOC-LINK) 10}
 _LINUX_C_({
         DC      0       ;{ INIT (OFFSET) }
 });_END_({_LINUX_C_})
@@ -3046,12 +3046,14 @@ declared forthcode({IMMEDIATE}) .},
 {{VOC-LINK}})
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      BUILD
+        DC      HERE
+        DC      LCELL,LSUB ;{ Skip over dovoc.}
+        DC      PTON       ;{ Future VOC-LINK.}
         DC      LIT, 80H+1, CCOMM    ; Dummy name field
         DC      LIT, " "+80H, CCOMM
         DC      CURR
         DC      FETCH
         DC      COMMA    ; { Points to DLFA of current vocabulary.}
-        DC      HERE
         DC      VOCL
         DC      FETCH
         DC      COMMA    ; {VLFA points to VLFA of previous VOC-LINK}
@@ -3076,7 +3078,7 @@ a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
 HEADER({FORTH},{FORTH},{DODOE},1)
         DC      DOVOC
         DB      80H+1, " "+80H  ; Dummy name field
-        DC      _NAME_FIELD(TASK)
+        DC      _DEA(TASK)
         DC      0       ;{ END OF VOCABULARY LIST}
 ;
 worddoc({VOCABULARIES},{DEFINITIONS},{definitions},{},{L1},
@@ -3211,10 +3213,6 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      FETCH
         DC      LIT,US
         DC      LCMOVE
-        DC      LIT,USINI + CELLS(0)    ; I.e. lfa of TASK
-        DC      FETCH
-        DC      LIT,_VOC_LATEST(FORTH)
-        DC      STORE
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
@@ -4887,12 +4885,13 @@ HEADER({'O},{TICKO},{DOCOL},1)
         DC      LITER
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{FORGET-VOC},{forget_voc},{n1 addr -- n1 },{},
+worddoc({DICTIONARY},{FORGET-VOC},{forget_voc},{n1 dea -- n1 },{},
 {Forget all words below forthvar({n1}) from the vocabulary
-whose VLFA is given by forthvar({addr}) . Leave n1 as this word is
+whose dea is given by forthvar({dea}) . Leave n1 as this word is
 intended to be used with forthcode({FOR-VOCS}) .},
 {{FORGET}})
 HEADER({FORGET-VOC},{FORGV},{DOCOL})
+        DC      TVFA
         DC      TDUP
         DC      ULESS
         _0BRANCH(FORGV1)
@@ -5373,7 +5372,7 @@ FORW1:  DC      FROMR
 ;
 worddoc({DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt ---},{},
 {For all vocabularies execute forthvar({xt})
- with as data the forthdefi({VLFA}) of those words. forthvar({xt})
+ with as data the forthdefi({dea}) of those words. forthvar({xt})
 must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}})
@@ -5385,6 +5384,7 @@ HEADER({FOR-VOCS},{FORV},{DOCOL})
 FORV1:  DC      FROMR
         DC      RR
         DC      OVER
+        DC      TVFA
         DC      FETCH
         DC      TOR
         DC      EXEC

@@ -3119,7 +3119,7 @@ R> DROP R> DROP ;
   THEN ;
 
 ( WORDS and VOCS )
-: WORDS ' ID. >CFA FOR-WORDS ;
+: WORDS ' ID. FOR-WORDS ;
 
 : .VOC 2 CELLS - 2 - N>P ID. ;
 : VOCS ' .VOC >CFA FOR-VOCS ;

@@ -50,7 +50,7 @@ dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl The link etc. field of the word with assembler name $1
-define({_NAME_FIELD},N_$1)dnl
+define({_DEA},N_$1)dnl
 define({_LINK_FIELD},($1-CW))dnl
 define({_CODE_FIELD},$1)dnl
 define({_PARAMETER_FIELD},($1+CW))dnl
@@ -65,7 +65,6 @@ define({_LOOP},dnl
 {DC      XLOOP
         DC      $1-$})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
-define({_VOC_LATEST}, $1+2+CELLS(2))
 define({CODE_HEADER},{HEADER({$1},{$2},{$+CW})})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
