@@ -7,7 +7,7 @@
  			;    dd < a.out > whatever bs=512 skip=62
   
 A_GDT             EQU     27C00H
-A_IDT             EQU     01000H
+A_IDT             EQU     2FC00H
  BITS 16
 _start:
   
