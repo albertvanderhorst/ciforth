@@ -33,7 +33,7 @@ ifelse(1,_x, ,
 )dnl    
 dnl Rather mysterious: without the dummy ifelse it just doesn;t work
 ifelse(1,2, , 
-{         DB       }_quoted({substr({$1},eval(_x-1),1)})+80H
+{         DB       }_quoted({substr({$1},eval(_x-1),1)})
 )dnl
          DC    N_$2
          DC    0{}ifelse(1,$4,+40H,)
@@ -43,7 +43,7 @@ $2:      DC     $3
 define({_LINKOLD},{$2-3*CW})dnl
 })dnl
 define({HEADER_NULL},{
-N_$2:            DB      081H,80H
+N_$2:            DB      081H,0H
          DC    N_$2
          DC    40H
          DC    _LINKOLD

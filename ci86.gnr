@@ -1165,12 +1165,33 @@ If it is a a match, it
 returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely 
 from forthcode({FOR-WORDS}).},
 {{FIND}})
-HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
+HEADER({MATCHING-WORDS0},{MATCHING0},{DOCOL})
         DC      TDUP, MATCHW
         _0BRANCH(MATS1)
         DC      FROMR, FROMR, DROP, ZERO, TOR, TOR ;{FORCE END}
         DC      LDUP, RESULT, STORE
 MATS1:  DC      DROP
+        DC      SEMIS
+;
+worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1 )}, {},
+{Intended to cooperate with forthcode({FOR-WORDS}) .
+Compares the string variable forthsamp({addr1}) with the dea forthvar({addr2}).
+If it is a a match, it 
+returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely 
+from forthcode({FOR-WORDS}).},
+{{FIND}})
+HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
+        DC      OVER, CFET
+        DC      OVER, TNFA, FETCH, CFET, LIT, 1FH, LAND
+        DC      EQUAL
+        _0BRANCH(MATS2)
+        DC      OVER, ONEP
+        DC      OVER, TNFA, FETCH, COUNT, LIT, 1FH, LAND
+        DC      CORA, ZEQU
+        _0BRANCH(MATS2)
+        DC      FROMR, FROMR, DROP, ZERO, TOR, TOR ;{FORCE END}
+        DC      LDUP, RESULT, STORE 
+MATS2:  DC      DROP
         DC      SEMIS
 ;
 worddoc({PARSING},{ENCLOSE},{enclose},{addr1 c --- addr1 n1 n2 n3},{},
@@ -2544,6 +2565,39 @@ CODE_HEADER({FILL},{FILL})
         REP     STOSB   ;{STORE BYTE}
         _NEXT
 ;
+worddoc({MEMORY},{CORA},{CORA},{addr1 addr2 len  -- n},{},
+{Compare the memory areas at forthsamp({addr1}) and forthsamp({addr2})
+over a length forthsamp({len}) .
+For the first bytes that differ, return the difference between the byte
+from forthsamp({addr1}) and the one from forthsamp({addr2}),
+or zero if all forthsamp({len}) bytes are equal.
+_VERBOSE_({This is an abbreviation of forthcode({COMPARE-AREA}).
+It should have been named forthsamp({COMPARE}) , 
+but that is taken by ISO.})
+},
+{},
+{{ HEX 41 C, 42 C, 43 C, HERE 3 - DUP 3 CORA .},{0 },
+{HERE 2 - HERE 3 - 2 CORRA . },{1 },
+{HERE 3 - HERE 2 - 2 CORA .},{-1 }}
+)
+CODE_HEADER({CORA},{CORA})
+;{       MOV    ES,BX   ; ES <- DS}
+;{       MOV    BX,DS}
+        MOV     DX,SI
+        XOR     AX,AX   ;{ Result}
+        POP     CX      ;{ count}
+        POP     DI      ;{ addr2}
+        POP     SI      ;{ addr1}
+        CLD             ;{ INC DIRECTION}
+        REP     CMPSB   ;{ Compare BYTE}
+        JZ      CORA3
+        MOV     AL,1    ;{Remainder is already 0}
+        JNC     CORA3
+        NEG     AX
+CORA3:          
+        MOV     SI,DX
+        _PUSH
+;
 worddoc({MEMORY},{ERASE},{erase},{addr n --},{},
 {Shorthand for ``forthvar({0}) forthcode({FILL})''.},{})
 HEADER({ERASE},{LERASE},{DOCOL})
@@ -2819,11 +2873,6 @@ CREA1:  DC      HERE
         DC      ALLOT
         DC      LDUP
         DC      LIT,080H
-        DC      TOGGL
-        DC      HERE
-        DC      ONE
-        DC      LSUB
-        DC      LIT,80H
         DC      TOGGL
         DC      HERE,TOR
         DC      COMMA   ; {Name field.}
