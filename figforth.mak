@@ -96,7 +96,7 @@ fig86.static.o : fig86.linux.o ; ld -Tlink.script -r -o $@
 
 # This linking must be static, but a .5M executable is better than
 # a 64 M executable.
-figforth : figforth.c fig86.linux.o ; cc $+ -static -Wl,-Tlink.script -o $@ 
+figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@ 
 
 # Add termporary stuff for testing, if needed.
 include test.mak
