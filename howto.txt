@@ -28,7 +28,11 @@ REQUIRE SAVE-SYSTEM
 
 How to install a kernel on hard disk
 Boot from version created by alone.cfg
-18 LOAD
+28 LOAD
 REQUIRE INSTALL-KERNEL
 RESTORE-BLOCKS    \ If you want these blocks on hd too
 INSTALL-KERNEL    \ Insert floppy with kernel
+
+How to load a VOCABULARY high:
+
+2001 oct 9
