@@ -5430,8 +5430,8 @@ _BLOCKSINFILE_({
         DC      ONLY    ; {FIXME has to go done by ABORT anyway.}
         DC      FORTH   ; {FIXME has to go done by ABORT anyway.}
         DC      DEFIN   ; {FIXME has to go done by ABORT anyway.}
-_LINUX_N_({
         DC      ONE            ; {Sign on wanted.}
+_LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
