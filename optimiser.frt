@@ -160,12 +160,15 @@ VARIABLE CURRENT-DEA
 \ Leave a POINTER to the equivalent optimised code.
 : FOLD   HERE SWAP    !OPT-START   >DFA @ (FOLD)   CASH   POSTPONE (;)  ;
 
+\ Optimise DEA regards folding.
+: OPT-FOLD  DUP FOLD   SWAP >DFA ! ;
+
 \ For BEGIN END : copy the DEA's high level or low level code to here.
 \ This is assuming only low level code is followed by in line stuff.
 \ In high level coding doing this you must block optimisation.
 \ Leave END.
 : FOLD-HIGH/LOW    DUP HIGH-LEVEL? IF >DFA @ (FOLD) SWAP DROP
-ELSE FOLD-BODY THEN ;
+    ELSE FOLD-BODY THEN ;
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
@@ -175,12 +178,9 @@ ELSE FOLD-BODY THEN ;
 \ Leave a POINTER to the equivalent optimised code.
 : EXPAND   HERE SWAP    !OPT-START   >DFA @ (EXPAND)   CASH   POSTPONE (;)  ;
 
-\ Optimise DEA regards folding.
-: OPT-FOLD  DUP FOLD   SWAP >DFA ! ;
-
-\ Try and optimise the DEA with respect to method `B' (HL inlining.)
-\ Reach trough to underlying levels.
-CREATE OPTIMISE-O
+\ Concatenate the code of all elements of DEA , turning it into
+\ a collapsed HL definition. This must be allowed or we crash.
+: OPT-EXPAND DUP EXPAND SWAP >DFA ! ;
 
 \ For DEA remember that it has been optimised
 : !OPTIMISED   FMASK-HO SWAP >FFA OR!  ;
@@ -191,28 +191,16 @@ CREATE OPTIMISE-O
 \ ---- tested -------------------------------
 \ For all elements of DEA attempt a ``OPTIMISE-O'' .
 \ Leave a flag indicating that the DEA itself is b-optimisable.
-: OPTIMISE-O1 DUP H-OPTIMISABLE? IF
-        -1 >R
-        DUP
-        >DFA @ BEGIN NEXT-PARSE WHILE
-        CFA> DUP OPTIMISE-O
-        B-INLINABLE? R> AND >R REPEAT
-        2DROP
-        DUP FILL-SE    FILL-OB
-        R>  DROP 1 \D .S
-    ELSE
-       DROP 0  \D .S
+
+
+\ Try and optimise the DEA with respect to method `B' (HL inlining.)
+\ Reach trough to underlying levels first.
+: OPTIMISE-O
+    DUP H-OPTIMISABLE? IF
+        DUP >DFA @ BEGIN NEXT-PARSE WHILE RECURSE REPEAT 2DROP
+        DUP FILL-SE   DUP FILL-OB   DUP OPT-EXPAND
     THEN
-;
-
-\ Concatenate the code of all elements of DEA , turning it into
-\ a collapsed HL definition. This must be allowed or we crash.
-: OPTIMISE-O2 DUP EXPAND SWAP >DFA ! ;
-
-\ Resolve OPTIMISE-O
-: (OPTIMISE-O) DUP OPTIMISE-O1 IF DUP OPTIMISE-O2 THEN !OPTIMISED ;
-
-'(OPTIMISE-O)   'OPTIMISE-O 3 CELLS MOVE
+    !OPTIMISED ;
 
 \D : test 1 SWAP 3 2 SWAP ;
 \D 'test OPT-FOLD
