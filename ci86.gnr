@@ -109,9 +109,9 @@ INITR0  EQU     STRUSA         ;{ Grows down}
 INITS0  EQU     STRTIB          ;{ Growns down}
 });_END___1__({ _EQULAYOUT_1_})
 
-;____1_____ _USEDOS_1_({
+;____1_____ _CLASSIC_1_({
 DRIVE   EQU     0       ;{ Use floppy A for blocks.}
-});_END___1__({_USEDOS_1_})
+});_END___1__({_CLASSIC_1_})
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
@@ -153,6 +153,9 @@ SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 
+;____1____ _ABSOLUTELOAD_1_({
+LOADADDRESS     EQU     M4_LOADADDRESS
+});_END___1__({_ABSOLUTELOAD_1_})
 ;____1_____ _SWITCH_1_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
@@ -161,7 +164,6 @@ GDTSIZE         EQU     8000H   ; { For GDT-table.}
 REALSEGMENT     EQU     (BOOTADDRESS-M4_SWITCHORG)/10H ;{ @ DS and CS for real code }
 ; {The absolute address that agrees with ORG.}
 ; {It may be that code has to be repositioned to make this true.}
-LOADADDRESS     EQU     M4_LOADADDRESS
 M4_SWITCHOFFSET EQU  (M4_SWITCHORG-M4_ORG)
 DS_SANDBOX      EQU     REALSEGMENT + SEGSIZE ;{ @ Harmless place for the stack.}
 GDT_SEGMENT     EQU     DS_SANDBOX + SANDBOXSIZE/10H       ;{ @ General descriptor table.}
@@ -200,12 +202,14 @@ RAWIO           EQU     (ECHO | ICANON)
 ;                      BOOTCODE    (optional, always real mode)
 ; ########################################################################################
 
-; All bootcode must be relocatable and its memory references absolute.
+; {All bootcode must be relocatable and its memory references absolute.}
+; {Not for the sake of booting, but to allow MSDOS to start the program too. }
 
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
+    _ABSOLUTELOAD_1_({ ORG     M4_ORG})
+
 ;____1_____ _BOOTFD__1_({
-          ORG     M4_ORG
 ORG0:   JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -228,6 +232,28 @@ HUGESECS      DD         000H
         DB    "           "
         DB    "FAT12   "
 
+;{       Read the sector with number in CX (Counting from 0) to ES:BX.}
+;{       Keep BX, CX  }
+READSECTOR:
+        PUSH    CX
+        PUSH    BX
+        MOV     AX,CX
+        MOV     CL,SPT
+        DIV     CL
+        MOV     CL,AH
+        INC     CL      ;{ Sectors counting from 1!}
+        XOR     AH,AH   ; {Rid of remainder}
+        MOV     CH,HEADS
+        DIV     CH
+        MOV     DH,AH   ;{ Head number}
+        MOV     CH,AL   ;{ Only small disks <256 cylinders}
+        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        MOV     AX,0201H   ;{ Read absolute one sector}
+        INT(13H)                 ;{BIOS disk read function}
+        POP     BX
+        POP     CX
+        RET
+
 RETRY:
         CALL    DISPLAYW
         XOR     AX,AX   ;{ Reset}
@@ -246,14 +272,8 @@ BOOT:
         CALL    DISPLAY
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
-        JZ  ELSE3
+        JNZ  ELSE3
 
-;{ Apparently we are started from MSDOS. Prepare return to MSDOS}
-        MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
-        MOV     AX,RETDOS-M4_ORG+100H
-        MOV     [RETDOSV-M4_ORG+100H ],AX
-        JMP ENDBOOT     ; {Skip booting }
-ELSE3:
         MOV     AL,'F'
         CALL    DISPLAY
         MOV     AH,00   ;{ Reset}
@@ -278,32 +298,9 @@ BEGIN1: CALL    READSECTOR
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
-;{       Read the sector with number in CX (Counting from 0) to ES:BX.}
-;{       Keep BX, CX  }
-READSECTOR:
-        PUSH    CX
-        PUSH    BX
-        MOV     AX,CX
-        MOV     CL,SPT
-        DIV     CL
-        MOV     CL,AH
-        INC     CL      ;{ Sectors counting from 1!}
-        XOR     AH,AH   ; {Rid of remainder}
-        MOV     CH,HEADS
-        DIV     CH
-        MOV     DH,AH   ;{ Head number}
-        MOV     CH,AL   ;{ Only small disks <256 cylinders}
-        MOV     DL,00            ;{Drive 0 (floppy 1)}
-        MOV     AX,0201H   ;{ Read absolute one sector}
-        INT(13H)                 ;{BIOS disk read function}
-        POP     BX
-        POP     CX
-        RET
-
 });_END___1__({ _BOOTFD__1_})
 
 ;____1_____ _BOOTHD__1_({
-        ORG     M4_ORG
 ORG0:   JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -360,13 +357,7 @@ BOOT:
         CALL    DISPLAY
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
-        JZ  ELSE3
-;{ Apparently we are started from MSDOS. Prepare return to MSDOS}
-        MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
-        MOV     AX,RETDOS-M4_ORG+100H
-        MOV     [RETDOSV-M4_ORG+100H ],AX
-        JMP ENDBOOT     ; {Skip booting }
-ELSE3:
+        JNZ  ELSE3
         MOV     AL,'F'
         CALL    DISPLAY
         MOV     AH,00   ;{ Reset}
@@ -380,6 +371,16 @@ ELSE3:
         CALL    DISPLAYCR
         JMP     ENDBOOT
 });_END___1__({ _BOOTHD__1_})
+
+ELSE3:
+;____1_____ _ABSOLUTELOAD_1_({
+;{ Apparently we may have to move the code, e.g. if started from MSDOS.}
+;{ Prepare return to MSDOS using the original code segment.}
+        MOV     [RETDOSV+2-M4_ORG+100H ],AX ;
+        MOV     AX,RETDOS-M4_ORG+100H
+        MOV     [RETDOSV-M4_ORG+100H ],AX
+        JMP ENDBOOT     ; {Skip booting }
+});_END___1__({ _ABSOLUTELOAD_1_})
 
 ;____1_____ _BOOTED_1_({
 ; Debug code, could be dispensed with in an ideal world.
@@ -413,7 +414,9 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         MOV     AH,0EH
         INT(10H)
         RET
+});_END___1__({ _BOOTED_1_})
 
+;____1_____ _ABSOLUTELOAD_1_({
 ; {THE FOLLOWING HAS BEEN DEBUGGED. IT FOLLOWS THE SPECIFICATION OF 4CH.}
 ; {IT CAN BE EXECUTED FROM THE DEBUGGER. YET IT HANGS IF BYE CALLED FROM}
 ; {FORTH}
@@ -424,15 +427,15 @@ RETDOS:
         MOV     SS,AX
         MOV     AH,4CH
         INT     21H    ;{ Only works if cs is the same as while starting.}
+});_END___1__({ _ABSOLUTELOAD_1_})
+
 ENDBOOT:
-});_END___1__({ _BOOTED_1_})
 
 ; ########################################################################################
 ;                       ADJUST CODE SEGMENT REGISTER (still real mode)
 ; ########################################################################################
-;____1_____ _HOSTED_MSDOS_1_({
-        ORG     100H    ;{ Required start of .COM program.}
-});_END___1__({ _HOSTED_MSDOS_1_})
+;{ Required start of .COM program.}
+    _HOSTED_MSDOS_1_(_REAL_1_({ORG     100H}))
 
 _COMMENT
 ;____1_____ _BOOTED_1_({
@@ -474,10 +477,11 @@ _ENDCOMMENT
 ;                       MOVE CODE TO ITS PLACE (still real mode)
 ; ########################################################################################
 
-;____1____ _SWITCH_1_({
-; {Move code up to where it belongs.}
-; {This should do the job because everything else is assembled }
-; {as if everything is where it belongs. (Sound logical, isn't it?)}
+;____1____ _ABSOLUTELOAD_1_({
+; {  Take care of the situation where booting code is actually started up by  }
+; {  MSDOS. This is no problem as long as the code is moved to where it would }
+; {  be if booted. If the code is at its place, nothing really happens here.  }
+; {  Furthermore all protected code started by MSDOS must be at an absolute address.}
         STD     ; Start at the end going back.
         MOV     CX,TEXTEND-HERE5 ; Amount to move
         CALL  HERE6
@@ -499,7 +503,7 @@ HERE5:
         MOV     AX,CS
         MOV     DS,AX
         CLD     ; {Reset direction to going up.}
-});_END___1__({ _SWITCH_1_})
+});_END___1__({_ABSOLUTELOAD_1_})
 
 ; ########################################################################################
 ;                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
@@ -940,7 +944,7 @@ USINI:
 ;____1_____ _MODERN_1_({
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
-;____1_____ _USEDOS_1_({
+;____1_____ _CLASSIC_1_({
 _COMMENT
 ;{ This will steer clear of a forth executable, provided it is}
 ;{ the first file on the floppy. }
@@ -952,7 +956,7 @@ _COMMENT
 _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
-});_END___1__({_USEDOS_1_})
+});_END___1__({_CLASSIC_1_})
 ;____1_____ _BOOTFD__1_({
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
@@ -2964,7 +2968,7 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
         DC      SEMIS
 ;
 });_END___1__({_LINUX_N_1_})
-;____1_____ _USEDOS_1_({
+;____1_____ _CLASSIC_1_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
 ;{ code definitions, but this way they are available}
@@ -3087,7 +3091,7 @@ CSTAT   PROC    NEAR
         POP     DX
 STATRT: RET
 _ENDP CSTAT   ENDP
-});_END___1__({_USEDOS_1_})
+});_END___1__({_CLASSIC_1_})
 ;____1_____ _USEBIOS_1_({
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
@@ -3343,7 +3347,7 @@ CODE_HEADER({R/W},{RSLW})
         _NEXT
 
 });_END___1__({_LINUX_C_1_})
-;____1_____ _USEDOS_1_({
+;____1_____ _CLASSIC_1_({
 ;
 WERR    DB      'DISK WRITE ERROR  $'
 RERR    DB      'DISK READ ERROR   $'
@@ -3399,7 +3403,7 @@ HEADER({R/W},{RSLW},{DOCOL})
         _BRANCH(RSLW2)
 RSLW1:  DC      WBLK
 RSLW2:  DC      SEMIS
-});_END___1__({_USEDOS_1_})
+});_END___1__({_CLASSIC_1_})
 ;____1_____ _USEBIOS_1_({
 ;
 HEADER({DRIVE},{DRIVE},{DOVAR})
@@ -3415,7 +3419,7 @@ HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DC  0
 });_END___1__({_USEBIOS_1_})
 ;
-;____1_____ _BOOTFD__1_({
+;____1_____ _RWFD_1_({
 ;{  (Command, address, sec# -- )}
 HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, SPT*HEADS, SLMOD   ;{ Juggle #sec, #head, #track}
@@ -3458,8 +3462,8 @@ RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;{This  buffer}
         DC      QERR
 RSLW5:  DC      SEMIS
 ;
-});_END___1__({ _BOOTFD__1_})
-;____1_____ _BOOTHD__1_({
+});_END___1__({ _RWFD_1_})
+;____1_____ _RWHD_1_({
 ;{ Warning : if this LBA is used apart from by R/W}
 ;{ the fields marked default must be restored.}
 HEADER({LBAPAR},{LBA},{DOVAR})
@@ -3539,7 +3543,7 @@ RSLW4:
         DC      QERR
         DC      SEMIS
 ;
-});_END___1__({ _BOOTHD__1_})
+});_END___1__({ _RWHD_1_})
         PAGE
         ;{ At line     LINE ~3500}
 HEADER({'},{TICK},{DOCOL},1)
@@ -3827,17 +3831,18 @@ HEADER({BYE},{BYE},{DOCOL})
         DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
 ;{ EXIT TO PC-DOS}
 });_END___1__({ _HOSTED_MSDOS_1_})
-;____1_____ _SWITCH_1_({
+;____1_____ _ABSOLUTELOAD_1_({
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
-        JMPHERE_FROM_PROT
+        _SWITCH_1_({JMPHERE_FROM_PROT})
         JMPFAR
 RETDOSV: DW     0       ; {Filled in during boot}
         DW      0
         _BITS32_1_({SET_32_BIT_MODE})
 
-});_END___1__({ _SWITCH_1_})
+});_END___1__({ _ABSOLUTELOAD_1_})
 ;____1_____ _HOSTED_LINUX_1_({
+HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
 });_END___1__({ _HOSTED_LINUX_1_})

@@ -46,6 +46,13 @@ dnl    Booting directly into forth, from floppy or hard disk.
 define({_BOOTED_1_},_no)dnl
 dnl    The 32 bit mode uses no paging for access to memory.     
 define({_DIRECTMAPPED_1_},_no)dnl
+dnl    The code must be load at an absolute address.
+define({_ABSOLUTELOAD_1_},_no)dnl
+dnl Work around a deficiency in nasm : an ORG requires a numeric argument
+define({M4_BIOSBOOT},{07C00H})
+dnl Have code to switch ourselves to protected mode, e.g. after booting.
+dnl Move forth up such thar ORG agrees with LOADADDRESS.
+define( {_SWITCH_1_}, _no({$0}) )dnl       
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
@@ -54,9 +61,6 @@ define( {_REAL_1_}, _no({$0}) )dnl
 dnl
 dnl Run the forth in protected mode, in fact mucho invisible.
 define( {_PROTECTED_1_}, _no({$0}) )dnl       
-dnl
-dnl Have code to switch ourselves to protected mode, e.g. after booting.
-define( {_SWITCH_1_}, _no({$0}) )dnl       
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
@@ -68,42 +72,48 @@ dnl (must be in accordance with above).
 define( {_BITS32_1_}, _no({$0}) )dnl       
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
+dnl    Combine those marked A only with A's from the next group,
+dnl    same for B's
 dnl
-dnl Use BIOS for I/O. No redirection but possible stand alone.
+dnl A Use BIOS for I/O. No redirection but possible stand alone.
 define( {_USEBIOS_1_}, _no({$0}) )dnl       
+dnl A1 In addition choose either 
+dnl A1 Hard disk I/O 
+define({_RWHD_1_},_no)
+dnl A1 Floppy disk I/O 
+define({_RWFD_1_},_no)
 dnl
-dnl Use DOS for I/O. Possibility of redirection.
-define( {_USEDOS_1_}, _no({$0}) )dnl
+dnl A Use DOS for I/O. Possibility of redirection.
+dnl Rely partly on DOS for I/O. The original mishmesh, using 
+dnl the physical floppy lay out and some functions now declared obsolete.
+define( {_CLASSIC_1_}, _no({$0}) )dnl
 dnl
-dnl Use DOS for I/O. Possibility of redirection. 
-dnl File based, no obsolete MSDOS features.
+dnl A File based, no obsolete MSDOS features.
 define( {_MODERN_1_}, _no({$0}) )dnl
 dnl
-dnl Use LINUX for I/O. Possibility of redirection. 
+dnl B Use LINUX for I/O. Possibility of redirection. 
 dnl File based.
 define( {_LINUX_C_1_}, _no({$0}) )dnl
 dnl
-dnl Use LINUX for I/O. Possibility of redirection. 
+dnl B Use LINUX for I/O. Possibility of redirection. 
 dnl File based.  No c involved.
 define( {_LINUX_N_1_}, _no({$0}) )dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
+dnl     See remarks of previous group.
 dnl
-dnl
-dnl    CHOOSE ONE OF THE FOLLOWING
-dnl
-dnl Boot sector present for use on PC. _USEBIOS_ required.
+dnl A Boot sector present for use on PC. _USEBIOS_ & RWFD required.
 dnl May run under MSDOS as well. Boot from floppy.
 define( {_BOOTFD__1_}, _no({$0}) )dnl       
 dnl
-dnl Boot sector present for use on PC. _USEBIOS_ required.
+dnl A Boot sector present for use on PC. _USEBIOS_ & RWHD required.
 dnl May run under MSDOS as well. Boot from hard disk.
 define( {_BOOTHD__1_}, _no({$0}) )dnl       
 dnl
-dnl Use MSDOS for I/O. Redirection possible.
+dnl A Rely on MSDOS to start the program.  
 define( {_HOSTED_MSDOS_1_}, _no({$0}) )dnl       
 dnl
-dnl Use LINUX for I/O. Redirection possible.
+dnl B Rely on LINUX to start the program.  
 define( {_HOSTED_LINUX_1_}, _no({$0}) )dnl       
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
@@ -114,6 +124,33 @@ dnl
 dnl Keep the new debugging facility that allow to print IP (register SI)
 define( {_NEWDEBUG_1_}, _no({$0}) )dnl       
 dnl
+dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
+define({M4_EM},10000H)
+dnl
+dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.
+dnl
+dnl Applicable if 'SWITCH = _yes'
+dnl The absolute position where the code is loaded, i.e. agrees with ORG.
+dnl For 'BOOTED = _yes' : this is naturally M4_BIOSBOOT
+dnl For 'HOSTED_MSDOS = _yes' : it is made true by moving code. 
+define({M4_LOADADDRESS},M4_BIOSBOOT)dnl No quotes, must be numeric!
+dnl
+dnl Applicable if 'SWITCH = _yes'
+dnl The position with respect to the start of the Forth code segment
+dnl where the code is to be compiled.
+define({M4_ORG},M4_BIOSBOOT)dnl No quotes, must be numeric!
+dnl
+dnl    FEATURES THAT NEED SELDOM CHANGES
+dnl Applicable if 'SWITCH = _yes'
+dnl The position relative to ORG where the switch segment start.
+dnl 0H: this maximizes the amount of code able to communicate with the BIOS
+define({M4_SWITCHORG},0H)
+dnl
+dnl Where the dictionary starts for 32 bit systems.
+dnl (Is automatically overwritten for 16 bits systems.0
+define({M4_INITDP},{110000H})
+
+dnl ############## STILL ON WISH LIST ################## IGNORE ##############
 dnl Keep old FIG features like WIDTH ENCLOSE
 dnl STILL ON WISH LIST
 define( {_OLDFIG__1_}, _no({$0}) )dnl       
@@ -137,6 +174,4 @@ dnl (even less for <64 bit systems)
 dnl STILL ON WISH LIST
 define( {_SAFECALC_1_}, _no({$0}) )dnl
 dnl OTHER MISCELLANEOUS 
-dnl Work around a deficiency in nasm : an ORG requires a numeric argument
-define({M4_BIOSBOOT},{07C00H})
 

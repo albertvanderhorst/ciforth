@@ -6,7 +6,8 @@ dnl YOU SHOULD NEVER NEED TO CHANGE THIS FILE.
 dnl The choices are put in a configuration file, such as alone.m4
 dnl What is put here sets defaults.
 dnl Make sure the choices are compatible, in particular :
-dnl a bootable system must rely on BIOS not MSDOS
+dnl a bootable system must rely on BIOS not CLASSIC/MSDOS
+
 dnl a 32 bit system cannot be real mode
 dnl (And of course activating 16 and 32 bit at the same time is really out.)
 dnl
@@ -59,7 +60,7 @@ dnl Use BIOS for I/O. No redirection but possible stand alone.
 define( {_USEBIOS_1_}, _no({$0}) )dnl       
 dnl
 dnl Use DOS for I/O. Possibility of redirection.
-define( {_USEDOS_1_}, _no({$0}) )dnl
+define( {_CLASSIC_1_}, _no({$0}) )dnl
 dnl
 dnl Use DOS for I/O. Possibility of redirection. 
 dnl File based, no obsolete MSDOS features.
