@@ -74,7 +74,6 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ ---------------------------------------------------------------------
 \ INCLUDE nss.frt
 
-
 \ For DEA : it HAS no side effects regards stack.
 : NSST?   >FFA @ FMASK-ST AND FMASK-ST = ;
 
@@ -84,39 +83,32 @@ FMASK-ST 'DEPTH >FFA OR!
 \ From WHERE do we have optimisable code. (Ends at ``HERE'')
 VARIABLE SWAPPER-START
 
-\ How MANY stack cells are there on top since the code at ``OPT-START''.
-VARIABLE CSPP
-
 \ The minimum step depth we have encountered.
 VARIABLE MIN-DEPTH
 
-: REMEMBER-DEPTH CSPP @   MIN-DEPTH @   MIN MIN-DEPTH ! ;
+: REMEMBER-DEPTH CSC @   MIN-DEPTH @   MIN MIN-DEPTH ! ;
 
-: !SWAPPER-START   HERE SWAPPER-START !   CSC @  DUP CSPP !   MIN-DEPTH ! ;
-
-\ For STACKEFFECTBYTE : we CAN still optimise, because we know we have
-\ sufficiantly constant stack cells.
-: ENOUGH-POPS'   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSPP @ > 0=  AND ;
+: !SWAPPER-START   HERE SWAPPER-START !   CSC @  MIN-DEPTH ! ;
 
 \ Combine a STACKEFFECTBYTE into ``CSCPP''.
 \ Remember : both nibbles have offset 1!
-: COMBINE-CSPP    SE:1>2 SWAP 1- NEGATE CSPP +! REMEMBER-DEPTH 1- CSPP +! ;
+: COMBINE-CSC    SE:1>2 SWAP 1- NEGATE CSC +! REMEMBER-DEPTH 1- CSC +! ;
 
 \ For DEA we are still in the swappable code, i.e. we don't dig below
 \ the constant stack entries, and we have no stack side effects that kill.
-\ At this point ``CSPP'' contains the remaining stack depth, i.e. the
+\ At this point ``CSC'' contains the remaining stack depth, i.e. the
 \ number of constants not touched by the swappable code. Those can be
 \ placed after the swappable code.
-: STILL-SWAPPING? DUP NSST? 0= SWAP SE@ ENOUGH-POPS' AND ;
+: STILL-SWAPPING? DUP NSST? 0= SWAP SE@ ENOUGH-POPS AND ;
 
 \ We are at an unstable point. i.e. somewhere earlier we have replaced one
 \ of the constants, without consuming it afterwards.
-: UNSTABLE? CSPP @ MIN-DEPTH @ <> MIN-DEPTH 0 > AND ;
+: UNSTABLE? CSC @ MIN-DEPTH @ <> MIN-DEPTH 0 > AND ;
 
 \ For DEA : executing it would result in a not yet stable sequence.
 \ If it is stable that may mean that there is surely no optimisation.
 : NOT-YET-STABLE?
-DUP STILL-SWAPPING? IF SE@ COMBINE-CSPP UNSTABLE? ELSE -1 MIN-DEPTH !
+DUP STILL-SWAPPING? IF SE@ COMBINE-CSC UNSTABLE? ELSE -1 MIN-DEPTH !
 DROP 0 THEN ;
 
 \ From ADDRESS collect all code to be executed before (some of the) constants
@@ -126,7 +118,7 @@ DROP 0 THEN ;
 \           BEGIN DUP @ NOT-YET-STABLE? OVER ?TILL-NOOP AND WHILE NEXT-ITEM REPEAT
      OVER -    OVER ?TILL-EXIT AND ( 0 if at exit)
      UNSTABLE? IF DROP 0 THEN \ Alles umsonst.
-     DUP 0<> CSPP @ 0<> AND PROGRESS OR!
+     DUP 0<> CSC @ 0<> AND PROGRESS OR!
 ;
 
 \ Assuming there has been folding, increment SEQUENCE to point past all
@@ -135,9 +127,11 @@ DROP 0 THEN ;
 \ For SEQUENCE , return the POINTER to first constant (``LIT'')
 : FIND-LIT BEGIN DUP @ 'LIT <> OVER ?TILL-EXIT AND WHILE NEXT-ITEM  REPEAT ;
 
+VARIABLE CODE-MARKER
+
 \ For SEQUENCE , return the STRING that is swappable.
 \ 0 length : no good.
-: (FIND-SWAPPABLE) !OPT-START FIND-LIT COUNT-LIT COLLECT-SWAPPER ;
+: (FIND-SWAPPABLE) FIND-LIT !OPT-START DUP CODE-MARKER ! COUNT-LIT COLLECT-SWAPPER ;
 
 \ For SEQUENCE , return the STRING that is swappable.
 \ FIXME : ?TILL-EXIT can be dropped here.
@@ -146,23 +140,21 @@ DROP 0 THEN ;
 
 \ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
 \ The order to be compiled is A-B C-D B-C .
- : GET-PIECES   DUP  FIND-SWAPPABLE   ( D) OVER + >R
-    CSC @ 2 * CELLS -  DUP CSPP @ 2 * CELLS + R>
-    "CSPP is dus nu" TYPE CSPP ? ;
+: GET-PIECES   DUP  FIND-SWAPPABLE   ( D) + >R
+    CODE-MARKER @ ( H.) DUP CSC @ 2 * CELLS + R> ;
 
+\ For addresses A B C D compile A-B ordinary sequence, C-D no stack side
+\ effect sequence, B-C postponable constants sequence
 : COMPILE-PIECES ( C) OVER >R   2SWAP   ( B) DUP >R
     HL-RANGE,  HL-RANGE,   R> R> HL-RANGE, ;
 
-\ Reorder a SEQUENCE with respect to the get-latest strategy.
-\ Return rearragned SEQUENCE
+\ Reorder a SEQUENCE to delay constants as much as possible.
+\ Return rearragned SEQUENCE.
 : REORDER HERE SWAP
-BEGIN GET-PIECES DUP >R COMPILE-PIECES R> DUP ?TILL-EXIT 0= UNTIL DROP
+    BEGIN GET-PIECES DUP >R COMPILE-PIECES R> DUP ?TILL-EXIT 0= UNTIL DROP
 POSTPONE (;)  ;
 
 \ ---------------------------------------------------------------------
-\ Combine a STACKEFFECTBYTE into ``CSC''.
-\ ``-'' works here because both nibbles have offset 1!
-: COMBINE-CSC    SE:1>2 SWAP -   CSC +! ;
 
 \ Execute at compile time the optimisable code we have collected from
 \ ``OPT-START''
