@@ -10,9 +10,14 @@
 \ 1. Case insensitive answers
 \ 2. Clean first part of new question, start with upper case etc.
 \ 3. Provide for unreadable database (or handle with THROW).
+\ curiosity, not sealing database in turnkey, question selection,
+\ confirmation of conflicting answers.
 \ Not in old version
 \ 101. Internet interface.
 \ 102. Logging of answer vectors for disapproval.
+
+: Notice1$      "This program is Copyright 2001 by the foundation Dutch Forth Workshop" ;
+: Notice2$      "dpp.frt (c) 2001 It may be freely copied under the GNU Public License" ;
 
 REQUIRE Z$@
 REQUIRE -LEADING
@@ -54,7 +59,13 @@ REQUIRE COMPARE
 \ ... all answers
 
 
-"dstring.frt" INCLUDED
+  "dpp_dutch_dieren.frt" INCLUDED
+\ "dpp_english.frt" INCLUDED
+
+: WELCOME
+    Notice1$ TYPE CR Notice2$ TYPE CR CR CR
+    Welcome$  TYPE CR CR
+;
 
 : VOCABULARY CREATE DOES> DROP ;
 : PREVIOUS ;
@@ -516,7 +527,8 @@ DATABASE CONSULTING STRATEGY
 : CONFIRM-ANSWERS
     #QUESTIONS @ 0 DO
         I ANSWER-VECTOR @   DUP I ANSWER-FOR CONFLICTING? IF
-            AreYouSure1$  TYPE CR  AreYouSure2$
+            AreYouSure1$  TYPE CR
+            AreYouSure2$ TYPE CR
             I ANSWER-VECTOR @ A_YES = IF Yes$ ELSE No$ THEN TYPE CR
             AreYouSure3$  POSE-QUESTION A_YES <> IF
                 I POSE-QUESTION DUP I ANSWER-VECTOR !
@@ -654,7 +666,7 @@ RDROP ;
 \ Ask as many question as makes sense to zoom in onto the diagnosis.
 : INTERROGATION
     BEGIN SELECT-QUESTION DUP -1 <> POSSIBILITIES @ 1 > AND WHILE
-        GotLeft$ TYPE POSSIBILITIES @ . CR
+        GotLeft1$ TYPE POSSIBILITIES @ . GotLeft2$ TYPE CR
         DUP QUESTIONS 2@ GET-ANSWER   SWAP
         2DUP ANSWER-VECTOR !    ELIMINATE
 \D      PRINTTABLE
@@ -673,7 +685,7 @@ D-MAIN DEFINITIONS
 \ Now doit.
 : DOIT
     INIT
-    Welcome$  TYPE CR Notice1$ TYPE CR Notice2$ TYPE CR CR ?STACK
+    WELCOME ?STACK
     BEGIN ONE-DIAGNOSIS GoOn$ GET-ANSWER A_YES = WHILE REPEAT
     FINISH
 ;
