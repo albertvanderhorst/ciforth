@@ -889,7 +889,7 @@ DP0:
 worddoc({DENOTATIONS},{&},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
 Skip remaining non-blank characters.},
-{{}},
+{},
 {{& HELL HEX .},{48 },
 {& X  HEX .},{58 },
 {: GS1 & HELLO ; GS1 HEX .] },{48 },
@@ -906,9 +906,9 @@ HEADER({&},{DCHAR},{DOCOL}, B_IMMED + B_DENOT)
         DC      DROP
         DC      SEMIS
 ;
-worddoc({DENOTATIONS},{0},{int_follows}, {--- s/d},{CI},
+worddocsafe({DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({0}) .},
-{{}},
+{},
 {{048 .},{48 },
 {: GS1 058 ; GS1 .},{58 }}, enddoc)
 HEADER({0},{DEN0},{DOCOL}, B_IMMED + B_DENOT)
@@ -959,9 +959,9 @@ HEADER({E},{DENE},{DOCOL}, B_IMMED + B_DENOT)
 HEADER({F},{DENF},{DOCOL}, B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-worddoc({DENOTATIONS},{-},{neg_int_follows}, {--- s/d},{CI},
+worddoc({DENOTATIONS},{-},{den_minus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
-{{}},
+{},
 {{-48 .},{-48 },
 {: GS1 -58 ; GS1 .},{-58 }}, enddoc)
 HEADER({-},{DENM},{DOCOL}, B_IMMED + B_DENOT)
@@ -978,8 +978,8 @@ define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
 dnl Reset the link chain at this point to keep denotations
 dnl out of the normal search.
 define({_LINKOLD},0)dnl
-worddoc({VOCABULARIES},{DENOTATIONS},{DENOTATIONS},{},{CI},
-{The name of the DENOTATIONS vocabulary.
+worddoc({VOCABULARIES},{DENOTATION},{DENOTATION},{},{CI},
+{The name of the forthcode({DENOTATION}) vocabulary.
 This vocabulary contains one-letter words, called
  forthdefi({denotation}) definitions.
 If a word is not found in the current search order,
@@ -992,7 +992,7 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({DENOTATIONS},{DENOT},{DODOE},B_IMMED)
+HEADER({DENOTATION},{DENOT},{DODOE},B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -1018,7 +1018,7 @@ worddoc({COMPILING},{LIT},{lit},{--- n},{FIG,C2,L0},
 {Within a colon-definition, forthcode({LIT}) is compiled followed by a
 _BITS_ bit literal number given during compilation. Later execution of
 forthcode({LIT}) causes the contents of this next dictionary address to be pushed
-to the stack.},{{}},
+to the stack.},{},
 {{: TL LIT [ 123 , ] ; TL .},{123}}, enddoc)
 ;
 CODE_HEADER({LIT},{LIT})
@@ -1250,7 +1250,7 @@ in one vocabulary chain.},{{BLOCK}}, {}, enddoc)
 HEADER({RESULT},{RESULT},{DOVAR})
         DC 0
 ;
-worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1 )}, {},
+worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1}, {},
 {Intended to cooperate with forthcode({FOR-WORDS}) .
 Compares the string variable forthsamp({addr1}) with the dea forthvar({addr2}).
 If it is a match, it
@@ -1310,7 +1310,7 @@ INBRS1:
 INBRS2:
         DC      SEMIS
 ;
-worddoc({PARSING},{MY-PARSE},{m_parse},{del ---sc},{CI L0},
+worddocsafe({PARSING},{(WORD)},{m_parse},{del ---sc},{CI L0},
 {Parse the forthdefi({current input stream})
 for a word, i.e. observing forthcode({?BLANK}) .
 Skip leading delimiters then advance the input pointer to
@@ -1337,37 +1337,6 @@ PWORD2: DC INBRS, QBL, ZEQU
         DC DROP
         _BRANCH(PWORD2)
 PWORD2A:
-        DC OVER, LSUB
-        DC      SEMIS
-;
-worddoc({PARSING},{MY-PARSE},{m_parse},{del ---sc},{CI L0},
-{Parse the forthdefi({current input stream})
-with forthsamp({del}) for a delimiter.
-Skip leading delimiters then advance the input pointer to
-past the next delimiter or past the end of the input stream.
-Leave the word found as a string constant.
-_VERBOSE_({As it goes with string constants, you may not
-alter its content, nor assume anything is appended.})},
-{{BLK},{WORD},{IN}},
-{{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
-{HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
-HEADER({MY-PARSE},{MPARS},{DOCOL})
-        DC      TOR
-MPARS1: DC INBRS, RR, EQUAL
-        _0BRANCH(MPARS1A)
-        DC DROP
-        _BRANCH(MPARS1)
-MPARS1A:
-
-MPARS2: DC INBRS
-        DC LDUP
-        _0BRANCH(MPARS3A)
-        DC RR, LSUB
-        _0BRANCH(MPARS2A)
-        DC DROP
-        _BRANCH(MPARS2)
-MPARS3A: DC DROP
-MPARS2A: DC FROMR, DROP
         DC OVER, LSUB
         DC      SEMIS
 ;
@@ -2895,7 +2864,7 @@ AWORD2:
 worddoc({PARSING},{&:},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
 Skip remaining non-blank characters.},
-{{}},
+{},
 {{&: HELL HEX .},{48 },
 {&: X  HEX .},{58 },
 {: GS1 &: HELLO ; GS1 HEX .] },{48 },
@@ -2907,7 +2876,7 @@ HEADER({&:},{CHF},{DOCOL}, B_IMMED)
 worddoc({PARSING},{^:},{control_follows}, {--- c},{CI},
 {Leave forthvar({c}) the control version of the non blank char that follows.
 Skip remaining non-blank characters.},
-{{}},
+{},
 {{^: HELL HEX .},{8 },
 {^: X  HEX .},{18 },
 {: GS1 ^: HELLO ; GS1 HEX .] },{8 },
@@ -2920,7 +2889,7 @@ worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
 {Parse a word and
 leave forthvar({c}) the first non blank char of that word
 input stream.},
-{{}},
+{},
 {{CHAR HELLO HEX .},{48 },
 {CHAR X  HEX .},{58 }}, enddoc)
 HEADER({CHAR},{LCHAR},{DOCOL})
@@ -2931,7 +2900,7 @@ worddocsafe({PARSING},{[CHAR]},{ bracket_char_bracket}, {--- c},{ISO I},
 {A compiling word. Parse a word.  Add the run time behaviour:
 leave forthvar({c}), the first non blank char of that word in the
 input stream.},
-{{}},
+{},
 {{: GS1 [CHAR] HELLO ; GS1 HEX .] },{48 },
 {: GS1 [CHAR] X ; GS1 HEX .},{58 }}, enddoc)
 HEADER({[CHAR]},{BCHAR},{DOCOL},B_IMMED)
@@ -6023,13 +5992,13 @@ forthxref({IMMEDIATE}) words and numbers.
 You need special precautions because these words would execute during
 compilation. Numbers are compiled forthdefi({in line}) , behind a word that fetches
 them.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({CONTROL},{ },
 {The wordset forthvar({CONTROL}) contains words that influence the control flow
 of a program, i.e. the sequence in which commands are executed in compiled words.
 With control words you can have actions performed repeatedly, or
 depending on conditions.
-},{},{},{},{})
+},{},{},{},{}, {}, enddoc)
 worddocchapter({DEFINING},{ },
 {The wordset forthvar({DEFINING}) contains words that add new entries
 to the dictionary. A number of such forthdefi({defining word})'s
@@ -6037,7 +6006,7 @@ are predefined, but there is
 also the possibility to make new defining words, using
 forthcode({<BUILDS}) and forthcode({DOES>}) .
 },
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({DICTIONARY},{ },
 {The wordset forthvar({DICTIONARY}) contains words that at a lower level than
 the wordset forthvar({DEFINING}) concern the memory area that
@@ -6047,15 +6016,15 @@ The dictionary space may also be shrunk, and the words that were there are lost.
 The forthdefi({dictionary entry}) of a word is represented by its lowest address. Based on that
 an entry may considered a record with fields. Words to access those fields also belong
 to this wordset.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({DOUBLE},{ },
 {The wordset forthvar({DOUBLE}) contains words that manipulate forthdefi({double})'s.
 _BITS32_({In this 32 Forth you would never need double's if it weren't
 for the NUMBER formatting wordset that uses them exclusively.})},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({ERRORS},{ },
 {The wordset forthvar({ERRORS}) contains words to handle errors.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({FORMATTING},{ },
 {The wordset forthvar({FORMATTING}) generates formatted output for
 numbers, i.e. printing the digits in a field with a certain width,
@@ -6067,14 +6036,21 @@ Single numbers are handled by converting them to forthdefi({double}) first.
 This requires some double precision operators to be present in the Forth core.
 forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
 },
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({INIT},{ },
 {The wordset forthvar({INIT}) contains words to initialise or reinitialise Forth.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
+worddocchapter({DENOTATIONS},{ },
+{The wordset forthvar({DENOTATIONS}) contains one letter
+words that introduced a forthdefi({denotation}), i.e. a generalisation of 
+forthcode({NUMBER}) . These words parse input and leave a constant 
+(number, char or string) on the stack, or compile such constant.
+They reside in a special vocabulary, called forthcode({DENOTATIONS}).},
+{},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
 {The wordset forthvar({INPUT}) contains words to get input from the terminal
 and such. For disk I/O: forthxref({STORAGE}) },
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({JUGGLING},{ },
 {The wordset forthvar({JUGGLING}) contains words that change the lifo-buffer.
 The necessity for this arise, because the data you want to feed to a program
@@ -6083,7 +6059,7 @@ It also possible that  you need the same data twice, because you have to feed
 it to two different program's.
 Design your program such that you need them as little as possible,
 because they are confusing.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({LOGIC},{ },
 {The wordset forthvar({LOGIC}) contains logic operators and
 comparison operators.
@@ -6101,16 +6077,16 @@ forthcode({-}) can mean non-equal to forthcode({IF}).
 Such conditions (often named just forthdefi({flag})'s)
 cannot be directly combined using logical operators,
 but forthsamp({0= 0=}) can help.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({MEMORY},{ },
 {The wordset forthvar({MEMORY}) contains words to fetch and
 store numbers from forthdefi({double})s, forthdefi({cell})s or bytes in memory.
 There are also words to copy blocks of memory or fill them, and words that
 fetch a forthdefi({cell}), operate on it and store it back.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({MISC},{ },
 {The wordset forthvar({MISC}) contains words that defy categorisation.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({MULTIPLYING},{ },
 {The _BITS32_(original) 16 bits Forth's have problems with scaling (forthpxref({OPERATOR})).
 Operators with intermediate results of double precision solve this and are
@@ -6119,7 +6095,7 @@ you will have less need, but scaling remain tricky.}).
 Formatting is done with forthdefi({double})'s exclusively, and relies
 on this wordset. Operators with mixed precision and unsigned operators
 allow to build arbitray precision from them in forthdefi({high level}) code.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({OPERATOR},{ },
 {The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc.
 The result of the operation is always
@@ -6139,11 +6115,11 @@ overflow in intermediate results during forthdefi({scaling:}) a multiplication
 followed by a division. _VERBOSE_({ For example forthsamp({: ADD10% 110
 * 100 / ;})}). There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({OUTPUT},{ },
 {The wordset forthvar({OUTPUT}) contains words to output
 to the terminal and such. For disk I/O: forthxref({STORAGE}) },
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing, i.e.
 it gets a word from the input stream and interprets or compiles it,
@@ -6164,42 +6140,42 @@ and forthdefi({load}) them, that is compiling them and thus extending
 the base system.
 A system is customized by loading source screens, possibly one of
 these extension is a text editor for screens.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({SECURITY},{ },
 {The wordset forthvar({SECURITY}) contains words that are used by control
 words to abort with an error message if the control structure is not
 correct. _VERBOSE_({Some say that this is not Forth-like.})
 You only need to know them if want to extend the
 forthvar({CONTROL}) wordset.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({STACKS},{ },
 {The wordset forthvar({STACKS}) contains words related to the
 forthdefi({data stack}) and forthdefi({return stack}).
 Words can be moved between both stacks.
 Stacks can be reinitialised and the value used to initialise the
 forthdefi({stack pointer})'s can be altered.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({STORAGE},{ },
 {The wordset forthvar({STORAGE}) contains words to input and output
 to the mass storage, in this ciforth _BOOTFD_({ to the hard disk})
 _BOOTHD_({to the hard disk}) _HOSTED_({to the file
 forthfile({BLOCKS.BLK})}).
 They are the underlying the forthvar({SCREEN}) facilities.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({STRING},{ },
 {The wordset forthvar({STRING}) contains words that manipulate
 strings of characters.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({SUPERFLUOUS},{ },
 {The wordset forthvar({ SUPERFLUOUS}) contains words that are superfluous,
 because they are equivalent to small sequences of code.
 _VERBOSE_({Traditionally one hoped to speed Forth up by coding these words
 directly})},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({SYSTEM},{ },
 {The wordset forthvar({SYSTEM}) contains words that call the underlying operating
 system or functions available in the BIOS-rom.},
-{},{},{},{})
+{},{},{},{}, {}, enddoc)
 worddocchapter({VOCABULARIES},{ },
 {The dictionary is subdivided in non-overlapping subsets:
 the forthdefi({vocabulary})'s. forthxref({DICTIONARY}).
