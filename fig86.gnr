@@ -211,6 +211,10 @@ _LINUX_C_({
         global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
 });_END_({_LINUX_C_})
 
+_HOSTED_LINUX_({
+        section forth progbits write exec alloc
+});_END_({ _HOSTED_LINUX_})
+
         PAGE
 ; ########################################################################################
 ;                      BOOTCODE    (optional, always real mode)
@@ -641,10 +645,6 @@ _BITS32_({
 ; ########################################################################################
 ;                       FORTH GLUE CODE (optional, except for the jump)
 ; ########################################################################################
-
-_HOSTED_LINUX_({
-        section forth progbits write exec alloc
-});_END_({ _HOSTED_LINUX_})
 
 _LINUX_C_({
 SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
@@ -1761,10 +1761,17 @@ HEADER({LIMIT},{LIMIT},{DOCON})
 ;{ THE END  OF THE MEMORY }
 worddoc({MEMORY},{EM},{end_memory},{---- addr},{},{
 A constant leaving the address just above the highest memory
-in use.
-},{{DP}})
+in use by Forth.
+},{{DP},{BM}})
 HEADER({EM},{LEM},{DOCON})
         DC      EM
+;
+worddoc({MEMORY},{BM},{begin_memory},{---- addr},{},{
+A constant leaving the address of the lowest memory
+in use by Forth.
+},{{DP},{EM}})
+HEADER({BM},{LBM},{DOCON})
+        DC      ORG0
 ;
 worddoc({STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},{
 This constant leaves the number of bytes per disc buffer, the byte
