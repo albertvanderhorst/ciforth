@@ -2,11 +2,16 @@ dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 dnl
+dnl DO NOT CHANGE THIS FILE FOR CONFIGURATION!
+dnl OVERWRITE CONFIGURATION ITEMS IN A .cfg FILE.
+dnl
+dnl No version means the rcs version id counts.
+dnl This may be redefined by a ``VERSION=xx'' parameter passed to ``make''.
+define( {M4_VERSION}, )dnl
+
 dnl This file contains the default version and mechanism for configuration
 dnl for the generic figforth system.
-dnl TO CHANGE THIS FILE FOR THE PURPOSE OF GENERATION
-dnl A DIFFERENT VERSION OF FIGFORTH RESTRICT YOURSELF TO THE USE CHOICE'S PART
-dnl The choices are put in a configuration file, such as alone.m4
+dnl The choices are put in a configuration file, such as alone.cfg
 dnl What is put here sets defaults.
 dnl Make sure the choices are compatible, in particular :
 dnl a bootable system must rely on BIOS not MSDOS
