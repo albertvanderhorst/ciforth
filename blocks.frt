@@ -3086,10 +3086,47 @@ PS ABA + BABAA
 
 
 
+( For all words in the current context execute WORD )
+( with as data the `NFA' of those words.            )
+: FOR-WORDS 
+>R CONTEXT @ @ >R
+    BEGIN   R> R OVER PFA LFA @ >R EXECUTE 
+    R 0= UNTIL
+R> DROP R> DROP ;
+( For all vocabularies execute WORD with as data    )
+( the `VLFA' of those words.                        )
+: FOR-VOCS 
+>R VOC-LINK @ >R
+    BEGIN R> R   OVER @ >R   EXECUTE     R 0= UNTIL
+R> DROP R> DROP ;
 
+: H. BASE @ >R HEX . R> BASE ! ;
+: CELLS 0 CELL+ * ;
+( Up til LIMIT forget the vocabulary whose VLFA is given. )
+(   Leave LIMIT    )
+: FORGET-VOC
+  2DUP U< IF ( contains nothing)
+     [COMPILE]  FORTH  DEFINITIONS
+     @ VOC-LINK ! (  unlink)
+  ELSE       ( contains something)
+      SWAP >R
+      2 CELL+ -     ( start with phantom nfa )
+      DUP
+ BEGIN CR DUP ID. PFA  LFA  @  DUP  DUP H. R  DUP H. U<  UNTIL
+        CR DUP H. DUP ID.
+          SWAP  2 + !
+    R>
+  THEN ;
 
+( WORDS and VOCS )
+: WORDS ' ID. CFA FOR-WORDS ;
 
+: .VOC 2 CELLS - 2 - NFA ID. ;
+: VOCS ' .VOC CFA FOR-VOCS ;
 
+(   Up til LIMIT forget in all vocabularies.        )
+: FORGET [COMPILE] ' NFA DUP H.
+    ' FORGET-VOC CFA FOR-VOCS DROP ;
 
 
 
@@ -3105,57 +3142,20 @@ PS ABA + BABAA
 
 
 
+( Test screens                                      )
 
+VOCABULARY AAP
+AAP
+DEFINITIONS
+: JAN ; : PIET ; : KLAAS ;
 
 
+AAP
+' PIET   VOC-LINK @  FORGET-VOC
+' TASK VOC-LINK @  FORGET-VOC
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+' .VOC CFA FOR-VOCS
+FORTH
 
 
 
