@@ -2,7 +2,8 @@
 This Forth is called ciforth and is made available through the
 DFW
 All publications of the DFW are available under GPL, the GNU public license.
-The file COPYING containing the legal expression of these lines must accompagny it.
+The file forthfile({COPYING}) containing the legal expression of these
+lines must accompagny it.
 
 Because Forth is ``programming by extending the language'' the GPL
 could be construed to mean that systems based on ciforth
@@ -42,13 +43,13 @@ The three files comprising it must be kept together and in particular
 the reference section with the World Wide Web sites.
 
 
-The generic system that created this ciforth
-is found at
+The latest version of thisforth is found at
 forthbreak
 forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html}).
 
-Once you have the generic system,
-you can see how you can contact the author in its documentation.
+Via that link you can also download ciforth's for other OS's and
+the generic system, if you want to make important modifications.
+Also you can see how you can contact the author.
 Otherwise in case of questions about this ciforth, contact the person or
 organisation that generated it for you.
 
@@ -73,8 +74,15 @@ manual for the generic Forth.
 @section The Generic System this Forth is based on.
 
 The source and executable of this ciforth was generated, out of at
-least dozen's of possibilities, by a generic system. An important goal
+least dozen's of possibilities, by a generic system.
+You can configure
+the operating system, memory sizes, file names and minor issues like
+security policy. You can select between a 16 and 32 bit word size.
+You may undertake more fundamental changes by adapting one or more of
+the macro header files.
+An important goal
 was to generate exactly fitting documentation, that contains only
-relevant information.
-The original system can be obtained via
+relevant information and with some care your configuration will have
+that too.
+This generic system can be obtained via
 forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html}).

@@ -9,8 +9,8 @@ forthexample({"Hello world!" TYPE
 Hello world! OK })
 forthbreak
 Making it into an interactively usable program is also easy:
-forthexample({
-: HELLO "Hello world!" TYPE CR ;
+forthexample(
+{: HELLO "Hello world!" TYPE CR ;
 OK
 HELLO
 Hello world!
@@ -28,12 +28,12 @@ forthbreak
 thisforth -c hello.frt
 forthbreak
 (That is forthkey({c}) for compile.)
-The result is a file forthfile({hello}) forthfile({HELLO.EXE}).
+The result is a file _HOSTED_LINUX_({forthfile({hello})}) _PC_({forthfile({HELLO.EXE})}).
 For the compiler to run you must have the library correctly
 installed. If that failed, or anything else fails, you will
 get a message with at least forthsamp({ ciforth ERROR ###})
 and hopefully some more or less helpful text as well.
-The forthsamp({###}) is an error number forthxref({Errors}).
+The forthsamp({###}) is an error number. forthxref({Errors}) Section Explanations.
 
 Note for the old hands. Indeed the quoted strings are not ISO.
 They surely are a Forth-like extension. Read up on denotations,
@@ -65,9 +65,9 @@ It is handy during development, after every line it
 shows you what numbers Forth remembers for you.
 Also from now on
 the header of each
-block that is forthcode({LOAD})-ed is shown.
-Type
-forthexample({
+block that is forthcode({LOAD})-ed is shown. forthbreak
+Type (forthsamp({1 LOAD}) may not be necessary):
+forthexample({1 LOAD
 "DO-DEBUG" REQUIRED
 OK
 DO-DEBUG
@@ -75,14 +75,13 @@ DO-DEBUG
 S[ ] OK 1
 
 S[ 1 ] OK})
-You can turn forthcode({DO-DEBUG})
-off with forthcode({NO-DEBUG}) .
+You can turn forthcode({DO-DEBUG}) off with forthcode({NO-DEBUG}) .
 
 If you try to forthcode({INCLUDE}) a program, you may
-get errors like ``xxx? ciforth ERROR # 12 : NOT RECOGNIZED'' .
-forthxref({Errors}).
-Apparently, thisforth doesn't know about forthcode({xxx}),
-but after forthsamp({"xxx" REQUIRED}) maybe
+get errors like forthsamp({TUCK? ciforth ERROR # 12 : NOT RECOGNIZED}) .
+forthxref({Errors}) Section Explanations.
+Apparently, thisforth doesn't know about a forth word named
+forthcode({TUCK}), but after forthsamp({"TUCK" REQUIRED}) maybe
 it does. You may try again.
 
 The convention about the way the library file must be
@@ -95,8 +94,8 @@ block is compiled.
 The library file contains examples for you
 to load using forthcode({REQUIRE}) .
 Try
-forthexample({
-REQUIRE SIEVE
+forthexample(
+{REQUIRE SIEVE
 LIM # 4 ISN'T UNIQUE
 OK
 10 SIEVE
@@ -173,20 +172,38 @@ _PC_({a DOS window or plain DOS}) _HOSTED_LINUX_({the shell}).
 Of course you now have to switch between editing a file
 and thisforth. But at least you need not set up your Forth again,
 until your testing causes your Forth to crash.
- })_END_({_HOSTED_}).
+ })_END_({_HOSTED_})
+
+@subsection Finding things out.
+If you want to find things out
+you must
+start up thisforth again by forthsamp({lina -e}) .
+The sequence
+forthexample(
+{REQUIRE TUCK
+LOCATE TUCK})
+shows you the source for TUCK if it is in the library somewhere.
+forthexample(
+{REQUIRE TUCK
+CRACK TUCK})
+show you the source for TUCK if it is in the library or in the kernel.
 
 @section Configuring
-For configuring your thisforth, without traces, you may use the following sequence
+For configuring your thisforth, without enlarging the dictionary,
+you may use the following sequence
 forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
 1 LOAD
 REQUIRE SAVE-SYSTEM
-: DOIT 'CONTAINS 'FORTH FORGET-VOC "newforth" SAVE-SYSTEM BYE ;
+: DOIT
+    'CONTAINS 'FORTH FORGET-VOC
+    'CONTAINS >NFA DP !
+    "newforth" SAVE-SYSTEM BYE ;
 DOIT })
 Here forthvar({DOIT}) trims the dictionary just before the saving your system into a new
 file.
 You can use a similar sequence for expanding the system without
 building in the forthcode({SAVE-SYSTEM}) command as well.
-A similar sequence canbe used
+In that case you must use forthcode({FAR-DP}) a disposable part of the dictionary.
 
 @section Concepts
 
@@ -207,7 +224,7 @@ The forthdefi({dictionary}) is the part of the memory where the forthcode({words
 It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 This structure is called a forthdefi({dictionary entry}).
-Its address is called a forthdefi({dictionary entry address})
+Its address is called a forthdefi({dictionary entry address})dnl
 or forthdefi({dea}). In ciforth's this address is used for external
 reference in a consistent way. For example it is used as the
 forthdefi({execution token}) of a word in the ISO sense.
@@ -217,7 +234,7 @@ or as we will say here vocabulary, with the exception of the word
 forthword({FORTH}) that is the common end point of all word lists.
 Apart from the name a word contains data and executable code,
 (interpreted or not) and linking information
-forthpxref({VOCABULARY}).
+(forthpxref({VOCABULARY})).
 
 The concept word list is part of the ISO standard, but we will
 use forthdefi({vocabulary}) . A vocabulary is much more
@@ -233,16 +250,16 @@ In fact in ciforth's every dea can serve as a WID. It defines a
 wordlist consisting of itself and all earlier words in the same
 vocabulary.
 If needed you can
-always derive the forthdefi({WID}) from the dea of a vocabulary.
+always derive the WID from the dea of a vocabulary.
 
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}). Its code is called
 forthdefi({high level}) code.
 
-A high level word, one defined by forthcode({:}) , is just a
+A high level word, one defined by forthcode({:}) , is little more than a
 sequence of addresses of other words. The forthdefi({inner interpreter})dnl
-takes care to execute these words in sequence.
-It acts by fetching the address pointed by forthvar({IP}) , storing
+takes care to execute these words in order.
+It acts by fetching the address pointed by forthvar({HIP}) , storing
 this value in register forthvar({W}) . It then jumps to the address
 pointed to by the address pointed to by forthvar({W}) . forthvar({W}) dnl
 points to the code field of a definition which contains the address of
@@ -252,7 +269,7 @@ extensibility of Forth.
 
 If the inner interpreter must execute another high level word,
 while it is interpreting, it must remember the old value of
-forthvar({IP}), and this so called forthdefi({nesting}) could go several
+forthvar({HIP}), and this so called forthdefi({nesting}) could go several
 levels deep.
 Keeping this on the data stack would interfere with the data the
 words are expecting, so they are kept on a separate stack, the
@@ -260,7 +277,7 @@ forthdefi({return stack}).
 The usage of two stacks is another hall mark of Forth.
 
 A word that generates a new entry in the dictionary is called a
-forthdefi({defining word}) forthxref({DEFINING}).
+forthdefi({defining word}) (forthxref({DEFINING})).
 The new word is created in the forthcode({CURRENT}) word list .
 
 Each processor has a natural size for the information. (This is
@@ -286,7 +303,7 @@ memory, it is highest.
 The code for a high level word can be typed in from the
 terminal, but it can also fed into Forth by redirection from a
 file, forthcode({INCLUDED}) from a file or you can
-forthdefi({load}) it from the file forthfile({forth.lab}) .
+forthdefi({load}) it from the file forthfile({forth.lab}),
 because you can load a piece of this library at will once you
 know the block number. This file is divided into
 forthdefi({blocks}) of 1 Kbyte. They may contain any data, but
@@ -309,8 +326,9 @@ could be adapted to the application.
 For such an extensible language as
 Forth, and in particular where strings and floating point
 numbers play an increasing role, numbers must be generalised to
-the concept of forthdefi({denotation})'s and the need of a way
-that catch those is as present as it was in those early days.
+the concept of forthdefi({denotation})'s.
+The need for a way to
+catch those is as present as it was in those early days.
 Denotations put a
 constant object on the stack without the need to define it
 first. Naturally they look, and in fact are, the same in both
@@ -354,9 +372,9 @@ has no number assigned to it.
 Negative numbers are identical
 to the numbers used by the host operating system.
 No attempt is made to do better than reproduce the messages
-belonging to the number _HOSTED_LINUX_({as given by strerror})_PC_({stated
+belonging to the number _HOSTED_LINUX_({as given by strerror.}) _PC_({stated
 in Ralph Browns list, which is slightly better than the MSDOS
-programmers Manual})
+programmers Manual.})
 forthitem
 It is not possible to catch the following words :
 forthcode({ABORT"}) forthcode({ABORT}) forthcode({QUIT}) .
@@ -403,7 +421,7 @@ forthcodeni({<#}) and forthcodeni({#>}) leads to a crash.
 Whenever we explicitly mention ciforth in a sentence that appears
 in a glossary entry,
 the behaviour may not apply to other ISO standard systems.
-This is called forthdefi({ciforth specific behaviour})
+This is called forthdefi({ciforth specific behaviour}). dnl
 If it mentions ``this ciforth'' or ``thisforth'', you cannot even trust that
 behaviour to be the same on other ciforth systems.
 Often this is called an ``implementation defined'' behaviour in the standard.
@@ -456,7 +474,7 @@ forthitem
 All user variables are saved by copying them from forthsamp({U0 @@})
 to forthsamp({0 +ORIGIN}).
 The user variable forthcode({U0}) dnl
-points to the start of the user area. The length of the area is hex 100.
+points to the start of the user area. The length of the area is M4_US cells.
 If in doubt check out the variable forthvar({US}) in the assembler code.
 forthitem
 If all user variables are to be initialised to what they are in this live system
@@ -485,14 +503,14 @@ A running ciforth has 3 distinct memory areas.
 They occur sequentially from low memory to high.
 forthitemize
 forthitem
-The dictionary,
+The dictionary
 forthitem
-Free memory, available for dictionary, from below, and stacks, from above.
-Its lowest part is used as a scratch area
+Free memory, available for dictionary, from below, and stacks, from above
 forthitem
 Stacks{}_HIGH_BUF_({, disk block buffers}) and terminal
 input buffer.
 forthenditemize
+The lowest part of the free memory is used as a scratch area.
 
 _LOW_BUF_({The disk block buffers are allocated in the dictionary,
 because otherwise they would not be accessible to the BIOS})
@@ -538,14 +556,17 @@ When you have made extensions to your system, like for instance you
 have loaded an editor, you can make these permanent by updating the
 initial values in the boot-area and saving the result to disk as an
 executable program.
-The boot-area extends from forthsamp({0 +ORIGIN}) 0100H bytes
+The boot-up parameters
+extends from forthsamp({0 +ORIGIN}) M4_US cells
 upward. This is the image for the forthdefi({user area}).
+_SUPPRESSED({ It is not quite clear whether this will be restored.
+Presently it is not present.
 It also extends 6 cells downwards, containing machine code for two
-jumps, to the warm and the cold start, and a version number.
+jumps, to the warm and the cold start, and a version number.})
 So in ciforth the bootup parameters are more or less the data field of the
 forthcode({+ORIGIN}) word.
-Executing forthcode({+ORIGIN}) leaves a pointer in this area but after the jump vectors
-and the release numbers.
+Executing forthsamp({0 +ORIGIN}) leaves a pointer in this area.
+_SUPPRESSED({but after the jump vectors and the release numbers.})
 
 @subsection                     Installation Dependent Code
 
@@ -568,9 +589,7 @@ The forthdefi({code word})'s as these lowest level programs are called,
 execute machine code directly, if you invoke them from
 the terminal or from some other definition.
 The other definitions, called forthdefi({high level}) code,
-consist of a
-sequence
-of the machine executable code words.
+ultimately execute a sequence of the machine executable code words.
 The Forth forthdefi({inner interpreter}) takes care that
 these code words are executed in turn.
 
@@ -630,11 +649,11 @@ A text editor and machine code assembler are the first tools
 normally available.
 An assembler is
 not part of ciforth as delivered, but it
-is available after forthsamp({REQUIRE ASEMBLERi86}).
+is available after forthsamp({REQUIRE ASSEMBLERi86}).
 It automatically loads the proper _BITS_-bits version.
-You can load a more elaborate assembler. forthxref(Assembler)
+You can load a more elaborate assembler. forthxref(Assembler) Section Overview.
 They are among the first candidates to be integrated into
-your system by SAVE-SYSTEM .
+your system by forthcode({SAVE-SYSTEM}) .
 _PC_({ We are including a sample editor, that is quite handy})
 _HOSTED_LINUX_({An editor is not part of ciforth as delivered.
 Development in Linux uses the there available editors.
@@ -654,7 +673,7 @@ forthbreak
 forthsamp({"vim mysrc.frt" SYSTEM})
 forthbreak
 forthsamp({"mysrc.frt" INCLUDED})
-})
+})forthxref(Manual) Section Getting Started.
 
 386 and a 8086
 Forth assemblers are available in forthfile({forth.lab}) .
@@ -676,7 +695,7 @@ Again words belonging to tools are perfectly normal dictionary entries.
 The RAM workspace contains the compilation space for the dictionary,
 _HIGH_BUF_({disc buffers,}) the computation and return stacks, the user area,
 and the terminal input buffer,
-_VERBOSE_({From the figforthuser manual
+_VERBOSE_({From the figforth user manual
 forthquotation
 For a single user system, at least 2k bytes must be available above the
 compiled system (the dictionary). A 16k byte total system is most typical.
@@ -746,12 +765,12 @@ forthitem
 The name field. This is one cell.
 This contains a pointer to a string.
 A pointer to such a field is called a forthdefi({name field address}).
-The name itself is stored at outside of the dictionary header
+The name itself is stored outside of the dictionary header
 in a regular string, i.e. a one cell count followed by as many characters.
 _VERBOSE_({Unfortunately, forthdefi({name field address}) is
-often used, where a forthdefi({dictionary entry address}) would
-be more correct, especially in older documentation, and this
-usage may leak into this document. This came about because the
+sometimes used, where a forthdefi({dictionary entry address}) would
+be more correct, especially in older documentation.
+This came about because the
 name was lowest in memory. That they happen to be the same is
 no reason to confuse two completely different concepts. In this
 Forth the code field address and the dictionary address are the
@@ -810,7 +829,7 @@ it is called by all defining words.
 For all forthdefi({colon definition}) the code field contains
 a pointer to the same code, the forthdefi({inner interpreter}), called
 forthsamp({DOCOL}).
-For all word defined via forthsamp({CREATE ... DOES>}) the code field
+For all words defined via forthsamp({CREATE ... DOES>}) the code field
 contains the same code, forthsamp({DODOES}).
 
 At the forthdefi({data field address}) we find a pointer to an area with a
@@ -838,7 +857,7 @@ forthenditemize
 
 A forthdefi({dictionary entry address}) can be turned into any
 of these fields by words that are in the vocabulary
-forthsamp({DICTIONARY}) . forthxref({DICTIONARY}). They
+forthsamp({DICTIONARY}) . forthxref({DICTIONARY}), for thos field words. They
 customarily start with > .
 
 A dictionary falls apart into the

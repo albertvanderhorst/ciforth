@@ -61,7 +61,7 @@ Forth's that can be generated in many different version
 for many different operation systems.
 It is sufficiently close to the ISO standard to run most programs intended
 to be portable. It deviates where less used features where
-objectionable to implement forthcref({Portability})
+objectionable to implement. forthxref({Manual}) Section Portability.
 
 This file documents what you as a user needs to know for using this
 particular version of ciforth called ``thisforth'' once it is installed on your system.
@@ -70,25 +70,26 @@ ciforth consists of three files:
 forthitemize
 forthitem
 _BOOTED_({A booting floppy or hard disk}) dnl
-_HOSTED_DPMI_({wina.com})_HOSTED_MSDOS_({mina.com})dnl
-_LINUX_N_({lina})_LINUX_C_({ciforthc})  : the program
+_HOSTED_DPMI_({forthfile{(wina.com})})_HOSTED_MSDOS_({ forthfile({mina.com}) }) dnl
+_LINUX_N_({ forthfile({lina}) })_LINUX_C_({ forthfile({ciforthc}) })  : the program
 _BOOTED_({_RESPECTDOS_({If you inspect a booting floppy from MSDOS you discover that you can
-see the  files {ciforth}.com and ciforth.blk. You can even start the program from MSDOS})})
+see the  files forthfile({ciforth.com}) and forthfile({forth.lab}) . You can even start the program from MSDOS})})
 forthitem
-{ciforth}.ps {ciforth}.html : the documentation
+forthfile({ciforth.ps}) forthfile({ciforth.html}) : the documentation
 forthitem
-forth.lab: source library for auxiliary programs
+forthfile({forth.lab}) : source library for auxiliary programs
 forthenditemize
 
-These files are generated together by the generic system fig86.gnr.
-The documentation only applies to the ciforth with which it goes.
+These files are generated together by a generic systemfrom the file
+forthfile({fig86.gnr}) .
+The documentation applies to the ciforth with which it goes.
 
 If your Forth doesn't fit the description below get a new version.
 The information below allows an expert to reconstruct how to
-generate a corresponding version. _VERBOSE_({Not all of it may make
+generate a corresponding version{}_VERBOSE_({. Not all of it may make
 sense to you. Tell him whether you want to
-fit the Forth to the description or vice versa.}).
-forthpxref({Rationale & legalese})
+fit the Forth to the description or vice versa})
+(forthpxref({Rationale & legalese})).
 
 These are the features:
 
@@ -124,7 +125,7 @@ It is indirect threaded.
 
 @iftex
 If you are new to Forth you may want to read the Gentle Introduction,
-otherwise you better skip this. The third chapter most users will not
+otherwise you better skip it. The third chapter most users will not
 be interested in.
 @end iftex
 
@@ -149,21 +150,21 @@ include(intro.mi)
 
 @node Rationale & legalese, Manual, Gentle Introduction, top
 @chapter  Rationale & legalese
-include(rational.mi)
+include(rational.mi)                                                              `
 
 _HOSTED_LINUX_({
 @node Manual, Assembler, Rationale & legalese, top
-@chapter Manual
-include(manual.mi)
-
-@node Assembler, Errors, Manual, top
 })
-
 _PC_({
 @node Manual, Editor, Rationale & legalese, top
+})
+
 @chapter Manual
 include(manual.mi)
-
+_HOSTED_LINUX_({
+@node Assembler, Errors, Manual, top
+})
+_PC_({
 @node Editor, Assembler, Manual, top
 @chapter Editor
 
@@ -227,7 +228,7 @@ Errors are uniquely identified by a number.
 The error code is the same as the forthcode({THROW}) code. In other words
 the Forth exception system is used for errors.
 A ciforth always displays
-the text ``ciforth ERROR #'' plus the error number, 
+the text ``ciforth ERROR #'' plus the error number,
 immediately and directly.
 _VERBOSE_({Of course the error numbers are given in decimal. irrespective of forthcode({BASE}).})
 This allows you to look the error up in the section ``Error explanations''.
@@ -267,7 +268,7 @@ security you will never see error 1. If it says ``not used'', this
 means it is not used by any ciforth.
 
 The errors whose message starts with forthsamp({AS:}) are used by the PostIt FixUp assembler
-in the file forthfile({asgen.frt}) . forthpxref({Assembler})
+in the file forthfile({asgen.frt}),(forthpxref({Assembler})).
 
 _HOSTED_({Negative error numbers are those reported by
 _PC_({MSDOS}) _HOSTED_LINUX_({Linux}). If possible, mnemonic
@@ -516,7 +517,7 @@ _HOSTED_LINUX_({ It may be of course that you don't have privilege to write
 to the file. As non-privileged user you cannot edit the the system-wide library file.
 })
 You may always edit and use a private copy of the library file, by the forthsamp({-l}) option.
-forthxref({Manual}) _VERBOSE_({The forthsamp({-l}) option itself works only if at least the
+forthxref({Manual}). _VERBOSE_({The forthsamp({-l}) option itself works only if at least the
 official library file has been correctly installed.})
 })
 @node Documentation,Glossary,Errors,top
