@@ -1192,9 +1192,7 @@ HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LDUP, QBL
         DC      LIT, 10, QERR
         DC      LITER
-        DC      INBRS
-        DC      QBL, ZEQU, LIT, 10, QERR
-        DC      DROP
+        _SECURITY_({DC      QDELIM})
         DC      SEMIS
 ;
 worddoc( {DENOTATIONS},{DEN^},{control_follows}, {--- b},{CI},
@@ -1213,9 +1211,7 @@ HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LIT, 10, QERR
         DC      LIT, '@', LSUB
         DC      LITER
-        DC      INBRS
-        DC      QBL, ZEQU, LIT, 10, QERR
-        DC      DROP
+        _SECURITY_({DC      QDELIM})
         DC      SEMIS
 ;
 worddocsafe( {DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
@@ -1273,6 +1269,7 @@ HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LIT, SKIP, COMMA
         DC      SCOMMA, SFET
         DC      DLITE
+        _SECURITY_({DC      QDELIM})
         DC      SEMIS
 ;
 dnl Remember the top of the denotation chain.
@@ -3505,6 +3502,23 @@ QERR2:  DC      SEMIS
 ;
 ;
 _SECURITY_({
+worddoc( {SECURITY},{?DELIM},{question_delimiter},{},{},
+{Parse a character and issue error message if it is not a
+delimiter.},{},
+{
+{DECIMAL 0 WARNING !   ?DELIM   },{},
+{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1? MSG # 10 },
+ {CR},{} },
+enddoc)
+HEADER({?DELIM},{QDELIM},{DOCOL})
+        DC      INBRS
+        DC      QBL
+        DC      ZEQU
+        DC      LIT, 10
+        DC      QERR
+        DC      DROP
+        DC      SEMIS
+;
 worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
 {Issue error message if stack position differs from value saved in
 forthsamp({CSP}) .},{},
@@ -4170,7 +4184,7 @@ NPNUM2:
 NPNUM4:
         DC      SWAP, DROP
         DC      BASE, FETCH, DIGIT
-        DC      ZEQU, LIT, 5, QERR
+        DC      ZEQU, LIT, 10, QERR
 
         DC      SWAP
         DC      BASE
