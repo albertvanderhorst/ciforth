@@ -95,24 +95,23 @@ testas86: asgen.frt asi86.frt testset8086 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[^:]*://' >$@       ;\
+    sed 's/^[0-9A-F][^:]*://' >$@       ;\
     diff -w $@ testset8086 >$@.diff ;\
     diff $@.diff testresults
 
-testas586: asgen.frt asi586.frt testset8086 ; \
+testas386: asgen.frt asi586.frt testset386 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[^:]*://' >$@       ;\
-    diff -w $@ testset8086 >$@.diff ;\
+    sed 's/^[0-9A-F \.]*://' >$@       ;\
+    diff -w $@ testset386 >$@.diff ;\
     diff $@.diff testresults
 
 testas80: asgen.frt as80.frt testset8080 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[^:]*://' >$@       ;\
+    sed 's/^[0-9A-F \.]*://' >$@       ;\
     diff -w $@ testset8080 >$@.diff ;\
     diff $@.diff testresults
-
 
