@@ -29,6 +29,8 @@ dnl
 dnl More complicated tricks to get rid of MASM.
 define({_ENDP},;)dnl Each ENDP is started with _ENDP in generic listing.
 dnl
+define({RELATIVE_WRT_ORIG}, {$1 - $$})
+dnl
 dnl Handling large blocks of comment
 define({_COMMENT},{%if 0})dnl
 define({_ENDCOMMENT},{%endif})dnl
