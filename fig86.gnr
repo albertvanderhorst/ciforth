@@ -853,40 +853,37 @@ DISPLAYSI:
         RET
 ;
 });_END_({_NEWDEBUG_ })
-
-HEADER({^},{DOTS},{DOCOL})
-        DC      CR, PDOTQ
-        _STRING({S: })
-        DC      SPFET, SZERO, FETCH, 
-DOC2:   DC      OVER, OVER,  EQUAL, ZEQU 
-        _0BRANCH(DOC1) 
-        DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
-        _BRANCH(DOC2)
-DOC1    DC DROP, DROP 
-        DC SEMIS
 ;
-
-DPUSH:  PUSH    DX
-APUSH:  PUSH    AX
-
-_OLDDEBUG_({
-_COMMENT
-
-    Patch the next 3 locations ( using a DBUG monitor ) with a
+_OLDDEBUG_({ _COMMENT
+    Patch the code from NEXT:  ( using a debugger ) with a
     `JMP TNEXT' for tracing through high level FORTH words.
-
-_ENDCOMMENT
-});_END_({_OLDDEBUG_ })
-
+_ENDCOMMENT });_END_({_OLDDEBUG_ })
 ;{ In 32 bit versions there may be no jumps to NEXT at all }
 ;{ The label NEXT1 is rarely relevant (for _OLDDEBUG_) }
+DPUSH:  PUSH    DX      ;{ Fall through.}
+APUSH:  PUSH    AX
 NEXT:   LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
 _NEWDEBUG_({ CALL    DISPLAYSI})
         JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
-        PAGE
 ;
 ;{       Dictionary starts here.}
+worddoc({MISC},{NOOP},{no_operation},{},{},
+{Do nothing. Primarily useful as a placeholder.
+},{})
+HEADER({NOOP},{NOOP},{NOOP0})
+NOOP0:   DC      $+CELLS(1)
+       _NEXT
+;
+_OLDDEBUG_({ ;{ Rather unclear what this is supposed to.}
+NOP0:   DC      $+CELLS(1)
+        JMP SHORT NEXT
+NOP1:   DC      $+CELLS(1)
+        JMP SHORT NEXT
+NOP2:   DC      $+CELLS(1)
+        JMP SHORT NEXT
+});_END_({_OLDDEBUG_ })
+;
 worddoc({COMPILING},{LIT},{lit},{--- n},{FIG,C2,L0},
 {Within a colon-definition, forthcode({LIT}) is compiled followed by a
 _BITS_ bit literal number given during compilation. Later execution of
@@ -927,18 +924,6 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         JZ      BRAN1   ;{ YES, BRANCH}
         LEA     SI,[SI+CELLS(1)]
         _NEXT
-;
-worddoc({MISC},{NOOP},{no_operation},{},{},
-{Do nothing. Primarily useful as a placeholder.
-},{})
-HEADER({NOOP},{NOOP},{$+4})
-;{      DEBUG STUFF}
-NOP0:   DC      $+CELLS(1)
-        JMP NEXT
-NOP1:   DC      $+CELLS(1)
-        JMP NEXT
-NOP2:   DC      $+CELLS(1)
-        JMP NEXT
 ;
 worddocsafe({CONTROL},{(LOOP)},{paren_loop},{},{C2},
 {The run-time proceedure compiled by LOOP which increments the loop
@@ -2144,6 +2129,16 @@ HEADER({BODY>},{BODYF},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{>BODY},{to_body},{dea --- addr},{},
+{Given the dictionary entry addres 
+of a definition created with a forthcode({DOES>}) 
+construct return its  data field forthsamp({addr}).},
+{{'},{>CFA},{>LFA},{>NFA}})
+HEADER({>BODY},{TOBODY},{DOCOL})
+        DC      LIT,CELLS(4)
+        DC      PLUS
+        DC      SEMIS
+;
 worddoc({DICTIONARY},{C>D},{parameter_field_address},{cfa --- dea},{},
 {Convert the code field address of a compiled definition to its
 dea address.},{{'},{>CFA},{>LFA},{>NFA}})
@@ -2195,8 +2190,7 @@ worddoc({DICTIONARY},{>DFA},{cfa},{dea --- cfa},{},
 return the address of the dummy dea.
 },{{VOCABULARY},{>CFA}})
 HEADER({>DFA},{TDFA},{DOCOL})
-        DC      TPFA
-        DC      CELLP   ;{Skip over DOVOC.}
+        DC      TOBODY
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
@@ -2204,8 +2198,7 @@ worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
 return the address of the link to the next vocabulary.
 },{{VOCABULARY},{>CFA}})
 HEADER({>VFA},{TVFA},{DOCOL})
-        DC      CELLP
-        DC      TPFA    ;{Dummy dea.}
+        DC      TOBODY
         DC      CELLP,CELLP ; {Skip dummy nfa and lfa}
         DC      SEMIS
 ;
@@ -5424,6 +5417,17 @@ INDE1:  DC      CR,IDO
         DC      LLEAV
 INDE2:  _LOOP(INDE1)
         DC      SEMIS
+;
+HEADER({^},{DOTS},{DOCOL})
+        DC      CR, PDOTQ
+        _STRING({S: })
+        DC      SPFET, SZERO, FETCH, 
+DOC2:   DC      OVER, OVER,  EQUAL, ZEQU 
+        _0BRANCH(DOC1) 
+        DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
+        _BRANCH(DOC2)
+DOC1    DC DROP, DROP 
+        DC SEMIS
 ;
 worddoc({SCREEN},{TRIAD},{triad},{scr --},{},
 {Display on the selected output device the three screens which

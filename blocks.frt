@@ -177,7 +177,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
    HERE VARIABLE LIM  : H.. BASE @ >R HEX . R> BASE ! ;
  : (KRAAK) ( CFA--. Decompile a word from its CFA)
-    DUP NEXTN LIM ! ( Get an absolute limit)
+    DUP NEXTD >NFA @ LIM ! ( Get an absolute limit)
     DUP @ SEL@ IF ( Is content of CFA known?)
        EXECUTE ( Assuming CFA also on stack)
     ELSE
@@ -527,7 +527,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
 
  CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
- : NEXTN ( CFA--DEA Get the DEA of the word defined)
+ : NEXTD ( CFA--DEA Get the DEA of the word defined)
    C>D LATEST             ( after the CFA one)
    2DUP = IF
      DROP DROP HERE  ( No following word)
@@ -536,17 +536,17 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
         2DUP >LFA @ <> WHILE
         >LFA @
      REPEAT
-     SWAP DROP ( The CFA)
+     SWAP DROP ( The CFA) 
    ENDIF 
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTN >CFA ;
+   NEXTD >CFA ;
 
  CR ." KRAAKER"
  : KRAAK-FROM ( .--. Kraak, starting with following word)
    CFOF
    BEGIN
-      DUP NEXTN HERE < WHILE
+      DUP NEXTD HERE < WHILE
       NEXTC DUP (KRAAK)
    REPEAT
    DROP
@@ -2319,7 +2319,7 @@ DECIMAL
 
 
  CR ." KRAAKER"
- : NEXTN ( CFA--DEA Get the DEA of the word defined)
+ : NEXTD ( CFA--DEA Get the DEA of the word defined)
    C>D LATEST             ( after the CFAO one)
    2DUP = IF
      DROP DROP HERE  ( No following word)
@@ -2332,7 +2332,7 @@ DECIMAL
    ENDIF
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTN >CFA ;
+   NEXTD >CFA ;
 
 ( SAVE-SYSTEM )  HEX
  8049000 CONSTANT SM
