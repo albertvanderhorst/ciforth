@@ -514,8 +514,8 @@ _COMMENT
     IP      SI      Interpreter pointer.  Must be preserved
 		    across FORTH words.
 
-     W      DI      Working register.  When entering a word 
-		    via its code field the CFA is passed in DI.
+     W      BX      Working register.  When entering a word 
+		    via its code field the CFA is passed in BX.
  
     SP      SP      Parameter stack pointer.  Must be preserved 
 		    across FORTH words.
@@ -656,15 +656,23 @@ _COMMENT
 DISPLAYSI:
 	JMPHERE_FROM_PROT
 	BITS    16
-	MOV     AX,SI   
+        PUSH    SI
+        PUSH    BP
+        PUSH    BX
+	MOV     AX,BX   
 	CALL    DISPLAYW 
-	MOV     AX,DI   
+	MOV     AX,' '
+	CALL    DISPLAY
+	MOV     AX,SI   
 	CALL    DISPLAYW 
         CALL    DISPLAYCR
 	BITS    32
 	MOV     AH,10H
 	INT     16H
 	JMPHERE_FROM_REAL
+        POP    BX
+        POP    BP
+        POP    SI
 	RET
 _ENDCOMMENT
 DPUSH:  PUSH    DX
@@ -677,9 +685,9 @@ _COMMENT
 _ENDCOMMENT
 NEXT:	LODSW		;{AX <- (IP)}
 ;
-NEXT1:	MOV	DI,AX   ;{ (W) <- (IP)}
-;{       CALL    DISPLAYSI}
-	JMP     _CELL_PTR[DI]    ;{ TO `CFA'}
+NEXT1:	MOV	BX,AX   ;{ (W) <- (IP)}
+;        CALL    DISPLAYSI
+	JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
 	PAGE
 ;
 ;{       Dictionary starts here.}
@@ -689,8 +697,8 @@ CODE_HEADER({LIT},{LIT})
 	JMP SHORT     APUSH   ;{ TO TOP OF STACK}
 ;
 CODE_HEADER({EXECUTE},{EXEC})
-	POP     DI      ;{ GET CFA}
-	JMP     _CELL_PTR[DI]    
+	POP     BX      ;{ GET CFA}
+	JMP     _CELL_PTR[BX]    
 ;{                                 }
 CODE_HEADER({BRANCH},{BRAN})      
 BRAN1:	ADD     SI,[SI]           
@@ -1183,7 +1191,8 @@ HEADER({:},{COLON},{DOCOL},1)
 	DC	PSCOD
 DOCOL:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;{R1 <- (IP)}
-	LEA     SI,[DI+CELLS(1)]  ;{(IP) <- (PFA)}
+	LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
+;        CALL    DISPLAYSI
 ;____1_____ _PROTECTED_1_({
         JMPHERE_FROM_PROT
         JMPHERE_FROM_REAL
@@ -1203,20 +1212,19 @@ HEADER({CONSTANT},{CON},{DOCOL})
 	DC	SMUDG
 	DC	COMMA
 	DC	PSCOD
-DOCON:  MOV     AX,[DI+CELLS(1)] ;{GET DATA FROM PFA}
+DOCON:  MOV     AX,[BX+CELLS(1)] ;{GET DATA FROM PFA}
 	JMP	APUSH
 ;{               }
 HEADER({VARIABLE},{VAR},{DOCOL})
 	DC      CON
 	DC      PSCOD
-DOVAR:	LEA     AX,[DI+CELLS(1)] ;{(AX) <- PFA}
+DOVAR:	LEA     AX,[BX+CELLS(1)] ;{(AX) <- PFA}
 	JMP	APUSH
 ;
 HEADER({USER},{USER},{DOCOL})
 	DC	CON
 	DC	PSCOD
-DOUSE:  XOR     BX,BX
-	MOV     BL,[DI+CELLS(1)] ;{PFA  }
+DOUSE:  MOV     BX,[BX+CELLS(1)] ;{PFA  }
 	MOV	DI,[UP]   ;{USER VAR ADDRESS}
 	LEA	AX,[BX+DI]	;{ADDR OF VARIABLE}
 	JMP	APUSH
@@ -1602,8 +1610,8 @@ HEADER({DOES>},{DOES},{DOCOL})
 	DC	PSCOD
 DODOE:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;{R1 <- (IP)}
-	MOV	SI,[DI+CELLS(1)] ;{NEW IP }
-	LEA     AX,[DI+2*CELLS(1)]
+	MOV	SI,[BX+CELLS(1)] ;{NEW IP }
+	LEA     AX,[BX+2*CELLS(1)]
 	JMP	APUSH 
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
