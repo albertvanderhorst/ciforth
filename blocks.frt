@@ -2342,7 +2342,7 @@ DECIMAL
  : SAVE-SYSTEM ( sc -- )
   HERE HERE-AT-STARTUP - DUP
   SM 20 + +!      SM 44 + +! ( File&Dict size)
-   U0 @   0 +ORIGIN   100   MOVE ( Save user variables)
+   U0 @   0 +ORIGIN   40 CELLS  MOVE ( Save user variables)
    SM    HERE  SM - 2SWAP ( name) PUT-FILE ;
 : TURNKEY  ( dea sc -- ) ROT
 >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL

@@ -90,11 +90,14 @@ FIGREL  EQU     4       ;{ FIG RELEASE #}
 FIGREV  EQU     0       ;{ FIG REVISION #}
 USRVER  EQU     0      ;{ USER VERSION NUMBER, a digit now}
 ;
+;{      VERY ELEMENTARY .}
+CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.}
+;
 ;{      MEMORY LAYOUT.}
 ;{ These values can be changed at this single place. }
 NBUF    EQU     8      ;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
-US      EQU     100H     ;{ USER VARIABLE SPACE}
+US      EQU     40H*CW     ;{ USER VARIABLE SPACE}
 EM      EQU     M4_EM    ;{Where the memory ends w.r.t. ORIG.}
 _BITS16_({RTS     EQU     0100H    ;{ RETURN STACK & TERM BUFFER} })
 _BITS32_({RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
@@ -151,7 +154,6 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
-CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.}
 ;
 _RWHD_({
 ;{ PHYSICAL DISK PARAMETERS}
@@ -5100,8 +5102,6 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      STALEST,STORE
         DC      FIRST
         DC      PREV,STORE
-        DC      LIT, _DEA(TASK)
-        DC      LIT, FORTH, TWID, TLFA, STORE
 ;{ Fill user area for single task.}
         DC      LIT, USINI
         DC      LIT, USINI+_CELLS(1), FETCH
