@@ -67,6 +67,7 @@ blocks.frt       \
 genboot.bat      \
 link.script    \
 $(EXAMPLES)     \
+wc              \
 # That's all folks!
 
 # r## revision 2.## a beta release
