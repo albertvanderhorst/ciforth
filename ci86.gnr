@@ -6551,7 +6551,7 @@ Save_ES_PR: DW    0000
 ;
 worddoc( {OPERATINGSYSTEM},{BIOS31},{bios31},{a b c d di---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt 31H, directly from
-protected mode. _VERBOSE_({The word forthcode({BIOS}) simulates
+protected mode. _VERBOSE_({The word forthcode({BIOSN}) simulates
 a real mode interrupt; that is what you usually want.})
 dnl forthsamp({i})
 with forthsamp({a b c d di}) in registers
@@ -6559,7 +6559,7 @@ forthsamp({AX BX CX DX DI}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
 content of the processors flag register. _VERBOSE_({
 forthsamp({1 AND}) leaves a zero if the call was successful.})
-},{{BIOS},{BDOS}}, {}, enddoc)
+},{{BIOSN},{BDOSN}}, {}, enddoc)
 ; Wanted here is a generic call on BIOS. A boon for experimenters.
 ;{ Because there is no such thing as a variable interrupt:}
 ; I tried to use self modifying code , filling in the interrupt
@@ -7718,9 +7718,11 @@ worddocsafe( {OUTPUT},{(EMIT)},{paren_emit},{c ---},{},
 by a BIOS call.
 },{{EMIT}}, {}, enddoc)
 HEADER({(EMIT)},{PEMIT},{DOCOL})
-             DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
-             DC      LIT, 0010H, BIOSO
-             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+        DC      TOR, X, X, X, FROMR
+        DC      LIT, 0E00H, PLUS
+        DC      LIT, 0010H, BIOSN
+        DC      TDROP           ;{Ignore errors.}
+        DC      SEMIS
 ;
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ascii character forthvar({c}) to the terminal.
@@ -7742,10 +7744,11 @@ EMIT1:       DC      PEMIT
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ascii value of the next terminal key struck.},{}, {}, enddoc)
 HEADER({KEY},{KEY},{DOCOL})
-             DC         LIT, 1000H, ZERO, ZERO, ZERO
-             DC         LIT, 0016H, BIOSO
-             DC         DROP,DROP,DROP,DROP
-             DC         LIT, 00FFH, LAND, SEMIS
+        DC      X, X, X, LIT, 1000H
+        DC      LIT, 0016H, BIOSN
+        DC      DROP
+        DC      LIT, 00FFH, LAND
+        DC      SEMIS
 ;
 worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
@@ -7764,9 +7767,10 @@ worddoc( {OUTPUT},{POUT)},{p_out},{c ---},{},
 by a BIOS call. forthcode({OUT}) is not observed.
 },{{EMIT}}, {}, enddoc)
 HEADER({POUT},{POUT},{DOCOL})
-             DC      ZERO, ZERO, ZERO
-             DC      LIT, 0017H, BIOSO
-             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+        DC      TOR, X, X, X, FROMR
+        DC      LIT, 0017H, BIOSN
+        DC      TDROP           ;{Ignore errors.}
+        DC      SEMIS
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit count characters from forthvar({addr}) to the output device.
@@ -8230,7 +8234,7 @@ HEADER({SEC/BLK},{SPBLK},{DOCON}, SPB)
 ;
 _RWSECTRK_({
 worddoc( {STORAGE},{SEC-RW},{sector_read_write},{com addr sec --},{},
-{Performs the forthcode({BIOS}) function forthsamp({com}) , for
+{Performs the BIOS function forthsamp({com}) , for
 a single sector
 forthsamp({sec}) either a read to forthvar({addr}) or write from
 forthvar({addr}) .
@@ -8249,9 +8253,10 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, 8, LSHIFT
         DC      LIT, LFDRIVE, CFET
         DC      LOR   ;{ High, low -- reg DX. }
-        DC      LIT, 13H, BIOSO
-        DC      ONE, LAND, DERR, PSTORE
-        DC      DROP, DROP, DROP, DROP
+        DC      SWAP, TSWAP, SWAP ;{ ABCD -> DCBA}
+        DC      LIT, 13H, BIOSN
+        DC      DERR, PSTORE
+        DC      DROP
         DC      SEMIS
 ;
 worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{FIG},
