@@ -58,6 +58,8 @@ dnl This is an experimental version, restricted to 255 blocks.
 define({_FEWBLOCKS_}, _yes)
 dnl Blocks are allocated in a file.
 define({_BLOCKSINFILE_}, _no)
+dnl Real BIOS is simulated from protected mode.
+define({_SIMULATE_BIOS_}, _no)
 dnl
 dnl ############## USER CHOICES #############################################
 dnl
@@ -124,6 +126,9 @@ define( {_HOSTED_MSDOS_}, _no)dnl
 dnl
 dnl B Rely on LINUX to start the program.
 define( {_HOSTED_LINUX_}, _no)dnl
+dnl
+dnl B Rely on WINDOWS / OS/2 to start the program.
+define( {_HOSTED_DPMI_}, _no)dnl
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl

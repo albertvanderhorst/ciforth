@@ -56,7 +56,8 @@ ciforth consists of three files:
 forthitemize
 forthitem
 _BOOTED_({A booting floppy or hard disk}) dnl
-_HOSTED_MSDOS_({ciforth.com})_LINUX_N_({lina})_LINUX_C_({ciforthc})  : the program
+_HOSTED_DPMI_({ciforth.com})_HOSTED_MSDOS_({ciforth.com})dnl
+_LINUX_N_({lina})_LINUX_C_({ciforthc})  : the program
 _BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can
 see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})
 forthitem
@@ -84,6 +85,7 @@ _BOOTHD_({It is booting directly from a hard disk.}) dnl
 _BOOTFD_({It is booting from a floppy disk.}) dnl
 _HOSTED_LINUX_({It is running under Linux.}) dnl
 _HOSTED_MSDOS_({It is running under MSDOS.}) dnl
+_HOSTED_DPMI_({It is running under DPMI (OS/2 or MS-Windows).}) dnl
 _USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.}) dnl
 _RWHD_({Blocks are on a raw hard disk.}) dnl
 _RWFD_({Blocks are on a raw floppy disk.}) dnl

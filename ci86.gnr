@@ -11,9 +11,13 @@
 ;
 ; Configuration of this particular version:
 ; _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })
-; _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
+; _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl
+_HOSTED_DPMI_({running under DPMI (OS/2 or MS-Windows)
 ; _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
-}) _LINUX_C_({with c-routines for I/O})_LINUX_N_({with native forth I/O})
+})dnl
+_HOSTED_MSDOS_({running under MSDOS
+; _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
+}) _LINUX_C_({;  with c-routines for I/O})_LINUX_N_({;  with native forth I/O})
 ; Normally ciforth doesn't observe ISO >IN{}_ISO_IN_({{, but this one does}}).
 ; Contains :
 _SECURITY_({{;        Security words
@@ -420,9 +424,8 @@ BOOT:
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
+
 });_END_({ _BOOTHD_})
-
-
 _BOOTED_({
 ; Debug code, could be dispensed with in an ideal world.
 DISPLAYCR:
@@ -455,8 +458,8 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         MOV     AH,0EH
         INT(10H)
         RET
-});_END_({ _BOOTED_})
 
+});_END_({ _BOOTED_})
 NOBOOT:         ; {Skip till here if not booting.}
 
 _ABSOLUTELOAD_({
@@ -484,8 +487,8 @@ RETDOS:
         MOV     SS,AX
         MOV     AH,4CH
         INT     21H    ;{ Only works if cs is the same as while starting.}
-});_END_({ _ABSOLUTELOAD_})
 
+});_END_({ _ABSOLUTELOAD_})
 ENDBOOT:
 
 ; ########################################################################################
@@ -498,7 +501,6 @@ ORIG:                         ; {Accommodate also .exe files} }))
 ; ########################################################################################
 ;                       MOVE CODE TO ITS PLACE (still real mode)
 ; ########################################################################################
-
 _ABSOLUTELOAD_({
 ; {  Take care of the situation where booting code is actually started up by  }
 ; {  MSDOS. This is no problem as long as the code is moved to where it would }
@@ -527,8 +529,8 @@ HERE5:
         MOV     ES,AX
         MOV     SS,AX
         CLD     ; {Reset direction to going up.}
-});_END_({_ABSOLUTELOAD_})
 
+});_END_({_ABSOLUTELOAD_})
 ; ########################################################################################
 ;                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
 ; ########################################################################################
@@ -651,14 +653,105 @@ THERE4:
         OUT 060H,AL
 });_END_({ _BITS32_})
 });_END_({ _SWITCH_})
+; ########################################################################################
+;                       PREPARE FOR USING DPMI (OPTIONAL)
+; ########################################################################################
+_HOSTED_DPMI_({
 
+; Required start of .COM program.
+    ORG     100H
+ORIG:                         ; Accommodate also .exe files
+            MOV     BX,4000H            ;BX=paragraphs needed (64K)
+            MOV     AH,4Ah              ;Modify memory allocation
+            INT     21h
+; These are real mode descriptors !
+            MOV     _CELL_PTR[SaveCS],CS           ; Once and for all
+            MOV     _CELL_PTR[SaveDS],DS
+            MOV     _CELL_PTR[SaveES],ES           ; Still pointing to PSP (!?)
+            MOV     _CELL_PTR[SaveSS],SS
+            XOR     AX,AX
+            MOV     SP,AX
+;
+; Check to see if DPMI is available, and make the switch if it is
+            CALL    ChkDPMI             ;See if host is present
+            MOV     BX,'0'
+            JC      ERRMSG              ;Not there
+
+            MOV     AX,0                ;In case no memory needed
+            MOV     BX,[MemNeeded]        ;Get number of paragraphs needed by host
+            CMP     BL,'0'                ;Any allocation needed?
+            JE      Plunge              ;No, so continue
+            MOV     AH,48h              ;Allocate memory
+            INT     21h
+            MOV     BL,'1'
+            JC      ERRMSG              ;Could not allocate
+
+Plunge:     MOV     ES,AX
+            MOV     AX,0                ;Indicate 16-bit application
+            _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
+            MOV     BL,'2'
+            JC      ERRMSG              ;Error--still in real mode
+
+; If we reach this point, we are operating in protected mode
+
+            PUSH    DS                  ; Throw away PSP, for now
+            POP     ES
+            JMP     BOOTUP
+
+; The error number is patched!
+EMsg       DB      'ciforth DPMI : ERROR #',13,10
+EMsgS      EQU     $-EMsg
+
+ERRMSG:    LEA     SI, [EMsg]
+           MOV    _BYTE_PTR[SI+21], BL
+           MOV     AX,4000H
+           MOV     BX, 01H
+           MOV     CX, EMsgS
+           LEA     DX,  [EMsg]
+           INT     21H
+           MOV     AX,4C00H
+           INT     21H
+
+; The following routine checks to see if a DPMI master program is installed.
+; If one is not, the carry flag is set on return
+; If one is, the stat info is stored and the carry flag is cleared on return
+
+Flag32      DB      00
+ProcType    DB      00
+VerNum      DW      0000
+MemNeeded   DW      0000
+DPMIentry   DW      0000,0000
+
+ChkDPMI     : ;    USES AX BX CX DX SI DI ES
+            MOV     AX,1687h            ;Get DPMI host address
+            INT     2Fh                 ;Multiplex interrupt
+            CMP     AX,0                ;Was it there?
+            JNE     NotThere            ;Nope, so exit
+
+            MOV     AL,0
+            AND     BL,00000001b        ;Test bit 1 (32-bit OK?)
+            JNE   ELSE1
+            MOV     AL,1
+ELSE1:
+            MOV     [Flag32],AL
+            MOV     [ProcType],CL
+            MOV     [VerNum],DX
+            MOV     [MemNeeded],SI
+            MOV     [DPMIentry+0],DI
+            MOV     [DPMIentry+2],ES
+            CLC                         ;Set for no error
+            JNC     Done
+
+NotThere:   STC
+Done:       RET
+
+; ######################### DPMI END ###############################################################
+
+});_END_({_HOSTED_DPMI_})
 
 ;{************************}
 _BITS32_({include(width32.m4) })
 ;{************************}
-;{ The following had to wait until width32.m4 had been included.}
-BMASK   EQU     BLOCKS_IN_USE_MASK
-
 _SWITCH_({
         CLI     ;{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
@@ -771,7 +864,7 @@ _COMMENT
   FFA         =  FLAG FIELD: contains flags
   LFA         =  LINK FIELD: a pointer
   NFA         =  NAME FIELD: a pointer to a variable number of chars
-  PHA         =  POST HEADER ADDRESS
+  PHA         =  POST {HEADER} ADDRESS
 
   S1          =  Parameter stack - 1st cell
   S2          =  Parameter stack - 2nd cell
@@ -924,6 +1017,8 @@ colon-definition, to select this forthdefi({word list}) at compile time.},
 { { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH @ = .},{0},
   { FORTH ' FORTH >WID SEARCH @ = .},{_T_} },
 enddoc)
+dnl Force a nil pointer in FORTH 's link field.
+define({_LINKOLD},0)dnl
 HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
@@ -1396,14 +1491,18 @@ _RWHD_({
 ;{       during cold start.}
 ;{       The name is 32 bits in base 36.}
 ;
-_SWITCH_({
-; We either switch to prot, run linux (always prot) or run real mode
+; We either switch to prot, run linux (always prot) or run real mode,
+; or run under DPMI (Windows)
 ; Be careful that these classes are mutually exclusive and cover all.
-CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END_({ _SWITCH_})
 _HOSTED_LINUX_({
 CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END_({ _HOSTED_LINUX_})
+_SWITCH_({
+CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
+});_END_({ _SWITCH_})
+_HOSTED_DPMI_({
+CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
+});_END_({ _HOSTED_DPMI_})
 _REAL_({
 CPUNM:  DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END_({ _REAL_})
@@ -5685,6 +5784,7 @@ register.
 ;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
 ;{ BEWARE OF THE SOFTWARE POLICE!}
 CODE_HEADER({BIOS},{BIOS})
+_NORMAL_BIOS_({
         POP     AX      ;{ Function code}
         ;{ Once we are more acknowledgable, put segment overwrite here.}
         MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
@@ -5713,7 +5813,94 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         _NEXT
 _SWITCH_({SPSAVE: DC       0H})
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
+});_END_({_NORMAL_BIOS_})
+_SIMULATE_BIOS_({
+        POP     DI      ; Function code
+        POP     DX
+        POP     CX
+        POP     BX
+        POP     AX
+            CALL    SaveRegs
+            CALL    BIOSfunc
+            CALL    GetRegs
+        PUSH     AX
+        PUSH     BX
+        PUSH     CX
+        PUSH     DX
+        PUSHF
+        JMP     NEXT
 
+SaveRegs    : ;    NEAR USES AX
+            MOV     _CELL_PTR[SaveAX],AX
+            MOV     _CELL_PTR[SaveBX],BX
+            MOV     _CELL_PTR[SaveCX],CX
+            MOV     _CELL_PTR[SaveDX],DX
+            MOV     _CELL_PTR[SaveSI],SI
+            MOV     _CELL_PTR[SaveDI],DI
+            MOV     _CELL_PTR[SaveBP],BP
+            PUSHF
+            POP     AX
+            MOV     _CELL_PTR[SaveFlags],AX
+            RET
+
+GetRegs     : ;    NEAR
+            MOV     AX,_CELL_PTR[SaveFlags]
+            PUSH    AX
+            POPF
+            MOV     AX,_CELL_PTR[SaveAX]
+            MOV     BX,_CELL_PTR[SaveBX]
+            MOV     CX,_CELL_PTR[SaveCX]
+            MOV     DX,_CELL_PTR[SaveDX]
+            MOV     SI,_CELL_PTR[SaveSI]
+            MOV     DI,_CELL_PTR[SaveDI]
+            MOV     BP,_CELL_PTR[SaveBP]
+            RET
+
+
+DOSfunc     : ;    NEAR USES AX BX CX ES
+            MOV     AX,0300h            ;Simulate real-mode interrupt
+            MOV     BL,21h              ;Want the DOS interrupt
+            MOV     BH,0                ;Should be 0
+            MOV     CX,0                ;Copy nothing from stack
+            PUSH    DS                  ;ES:DI must point to data structure
+            POP     ES
+            LEA     DI, [RegSet]
+            INT     31h
+            RET
+
+BIOSfunc     : ;    NEAR USES AX BX CX ES
+            MOV     AX,0300h            ;Simulate real-mode interrupt
+            MOV     BX,DI               ; Specify interrupt
+            MOV     CX,0                ;Copy nothing from stack
+            PUSH    DS                  ;ES:DI must point to data structure
+            POP     ES
+            LEA     DI, [RegSet]
+            INT     31h
+            RET
+
+; Register storage areas for cross-mode interrupt handling
+; This structure is defined by the DPMI specifications for
+; use with function 0300h
+
+RegSet:
+SaveDI:     DD      00000000
+SaveSI:     DD      00000000
+SaveBP:     DD      00000000
+            DD      00000000            ;Reserved area--set to 0
+SaveBX:     DD      00000000
+SaveDX:     DD      00000000
+SaveCX:     DD      00000000
+SaveAX:     DD      00000000
+SaveFlags:  DW      0000
+SaveES:     DW      0000
+SaveDS:     DW      0000
+SaveFS:     DW      0000
+SaveGS:     DW      0000
+SaveIP:     DW      0000
+SaveCS:     DW      0000
+SaveSP:     DW      0000
+SaveSS:     DW      0000
+});_END_({_SIMULATE_BIOS_})
 worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthsamp({a b c d}) in
 registers forthsamp({AX BX CX DX}). Upon return those registers
@@ -5722,6 +5909,7 @@ of the processors flag register. This draws upon all facilities made
 available by MSDOS. _BOOTFD_({This works in this standalone Forth, but
 only if it is started from MSDOS.})
 },{{BIOS}}, {}, enddoc)
+_NORMAL_BIOS_({
 CODE_HEADER({BDOS},{BDOS})
         POP     DX
         POP     CX
@@ -5747,6 +5935,13 @@ CODE_HEADER({BDOS},{BDOS})
         PUSH     DX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
+});_END_({_NORMAL_BIOS_})
+_SIMULATE_BIOS_({
+HEADER({BDOS},{BDOS},{DOCOL})
+        DW      LIT,  21H
+        DW      BIOS
+        DW      SEMIS
+});_END_({_SIMULATE_BIOS_})
 });_END_({ _PC_})
 _HOSTED_LINUX_({
 worddoc( {OPERATINGSYSTEM},{LINOS},{linos},{p1 p2 p3 n---ret},{},
@@ -7876,12 +8071,14 @@ HEADER({WORDS},{WORDS},{DOCOL})
 ;
 _NORMAL_BYE_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
-{Return to the host environment MSDOS.
+{Return to the host environment MSDOS , OS/2, Windows.
 },{{COLD}},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({BYE},{BYE},{DOCOL})
-        DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
+;{Works for DPMI too. If it was high level and called BIOS, it would not.}
+CODE_HEADER({BYE},{BYE})
+        MOV     AX,4C00H
+        INT     21H
 ;{ EXIT TO PC-DOS}
 });_END_({ _NORMAL_BYE_})
 _ABSOLUTELOAD_({
