@@ -874,11 +874,14 @@ _NEWDEBUG_({ CALL    DISPLAYSI})
         PAGE
 ;
 ;{       Dictionary starts here.}
-worddoc({COMPILING},{LIT},{lit},{--- n},{C2,L0},{
+worddoc({COMPILING},{LIT},{lit},{--- n},{FIG,C2,L0},{
 Within a colon-definition, forthcode({LIT}) is compiled followed by a
-16 bit literal number given during compilation. Later execution of
+_BITS_ bit literal number given during compilation. Later execution of
 forthcode({LIT}) causes the contents of this next dictionary address to be pushed
-to the stack.},{})
+to the stack.},{{}},
+{{: TL LIT [ 123 , ] ; TL .},{123},
+{: TL LIT [ 246 , ] ; TL .},{246}
+})
 DP0:
 CODE_HEADER({LIT},{LIT})
         LODSW           ;{ AX <- LITERAL}
@@ -5222,7 +5225,7 @@ HEADER({.},{DOT},{DOCOL})
 ;
 worddoc({OUTPUT},{?},{question},{addr --},{L0},{
 Print the value contained at the address in free format according to
-the current base.},{{OUT}},{.})
+the current base.},{{OUT},{.}})
 HEADER({?},{QUES},{DOCOL})
         DC      FETCH
         DC      DOT
@@ -5791,6 +5794,3 @@ found, different vocabularies can have words with the same names.
 The wordset forthvar({VOCABULARIES}) contains words that manipulate
 those vocabularies.},
 {},{},{},{})
-divert(2)dnl m4 generates code on channel 1, documentation on 3
-; Split here for documentation
-_GENERATE_CODE
