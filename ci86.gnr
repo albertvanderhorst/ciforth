@@ -1182,6 +1182,45 @@ PWORD2: DC LDUP, RR, LSUB
 PWORD2A: DC FROMR, DROP
         DC SEMIS
 ;
+worddocsafe({PARSING},{(PARSE)},{paren_word},{ch addr1 addr2 --- addr3 },{},
+{Scan the area between forthsamp({addr1}) and 
+forthsamp({addr2}) (non-inclusive) for the character forthsamp({ch}) .
+Return forthsamp({addr3}): the address of the first such character
+at or after forthsamp({addr2}), but not past forthvar({addr2}) .
+_VERBOSE_({So if forthsamp({addr2}) equals forthvar({addr3}) 
+the characer is not present.})},
+{{WORD}},
+{{ HEX 20 C, 41 C, 20 C, 41 HERE 3 - HERE (PARSE) HERE - . },{-2 }})
+HEADER({(PARSE)},{PPARS},{DOCOL})
+        DC TOR  
+PPARS1: DC LDUP, RR, LSUB
+        _0BRANCH(PPARS2)
+        DC OVER, OVER, CFET, LSUB
+        _0BRANCH(PPARS2)
+        DC ONEP
+        _BRANCH(PPARS1)
+PPARS2: DC SWAP, DROP
+        DC FROMR, DROP
+        DC SEMIS
+;
+worddocsafe({PARSING},{SOURCE},{source},{addr --- },{},
+{Return the address forthsamp({addr}) 
+of the current scan specification, allocated in the user area.
+It consists of three cells: a pointer to the next character 
+to be parsed, and the lowest and non-inclusive highest value
+this pointer may have.
+Changing forthsamp({SOURCE}) takes immediate effect, 
+and must be atomic, by using forthsamp({RESTORE-INPUT}),
+or changing only the first cell. 
+The first cell has the alias forthsamp({IN}) .
+_VERBOSE_({Words like forthsamp({BLK}) and 
+forthsamp({SOURCE-ID}) are secondary, 
+and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
+{{BLK},{SOURCE-ID}},
+{{ 9 2 SOURCE +! 8 9 . .},{9 9 }})
+HEADER({SOURCE},{SOURC},{DOUSE})
+        DC      CELLS(27)       ;{ And 28 and 29.}
+;              
 worddoc({PARSING},{ENCLOSE},{enclose},{addr1 c --- addr1 n1 n2 n3},{},
 {The text scanning primitive used by forthcode({WORD}) . From the text address
 addr1 and an ascii delimiting character forthvar({c}) , is determined the byte
@@ -1958,25 +1997,25 @@ text during numeric output conversion.},{{<#},{DPL},{FLD}})
 HEADER({HLD},{HLD},{DOUSE})
         DC      CELLS(24)
 ;
-worddoc({INPUT},{IN},{in},{--- addr},{L0},
-{A user variable containing the byte offset within the current input
-text buffer (terminal or disc) from which the next text will be
-accepted. forthcode({WORD}) uses and moves the value of forthcode({IN}) .},{})
-HEADER({IN},{LIN},{DOUSE})
-        DC      CELLS(25)
-;
 worddoc({OUTPUT},{OUT},{OUT},{--- addr},{U},
 {A user variable that reflects the position at the current line of the output
 device where the next character transmitted will appear.
 The first position is zero. },{{EMIT},{TYPE},{CR}})
 HEADER({OUT},{LOUT},{DOUSE})
-        DC      CELLS(26)
+        DC      CELLS(25)
 ;
 worddoc({STORAGE},{BLK},{blk},{--- addr},{U,L0},
 {A user variable containing the block number being interpreted. If
 zero, input is being taken from the terminal input buffer.},{{BLOCK},{TIB}})
 HEADER({BLK},{BLK},{DOUSE})
-        DC      CELLS(27)
+        DC      CELLS(26)
+;
+worddoc({INPUT},{IN},{in},{--- addr},{L0},
+{A user variable containing the byte offset within the current input
+text buffer (terminal or disc) from which the next text will be
+accepted. forthcode({WORD}) uses and moves the value of forthcode({IN}) .},{})
+HEADER({IN},{LIN},{DOUSE})
+        DC      CELLS(30)
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -2498,15 +2537,19 @@ set to zero.
 HEADER({QUERY},{QUERY},{DOCOL})
         DC      TIB
         DC      FETCH
-        DC      LDUP
         DC      LIT,RTS/2
         DC      ACCEP
 ; Keep the next line in for debugging ACCEPT for MSDOS.
 ;        DC      LIT, 41H, EMIT, TDUP, LTYPE, LIT, 41H, EMIT
-        DC      PLUS, ZERO, SWAP, CSTOR
-        DC      ZERO
-        DC      LIN
-        DC      STORE
+        DC      LDUP
+        DC      TIB
+        DC      FETCH
+        DC      PLUS, ZERO, SWAP, CSTOR ; {Delimiting zero.}
+        DC      ZERO, LIN, STORE
+        DC      TIB, FETCH
+        DC      LDUP, SOURC, STORE
+        DC      LDUP, SOURC, CELLP, STORE
+        DC      PLUS, SOURC, CELLP, CELLP, STORE
         DC      SEMIS
 ;
 worddoc({MEMORY},{FILL},{fill},{addr quan b --},{},
