@@ -1,4 +1,8 @@
 \ #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
+
+\     : \D ;    IMMEDIATE \ Use debug lines.
+      : \D POSTPONE \ ;  IMMEDIATE \ Comment out debug lines
+
 8 LOAD  \ get libraries
 38 LOAD         \ $@=
 243 LOAD        \ Binary search library
@@ -20,11 +24,8 @@
 \ to fire up a Forth interpreter and hose Linux.
 : INSTALL-ERROR
     -1 WARNING !
-    ' MY-ERROR >PFA @   ' (ABORT) >PFA !
+    ' MY-ERROR >DFA @   ' (ABORT) >DFA !
 ;
-
-\     : \D ;    IMMEDIATE \ Use debug lines.
-      : \D POSTPONE \ ;  IMMEDIATE \ Comment out debug lines
 
 \ Create an array of LEN elements of size STRIDE .
 \ Run time: For an INDEX leave the ADDRESS of the element
