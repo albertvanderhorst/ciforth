@@ -740,7 +740,7 @@ _COMMENT
 _ENDCOMMENT
 });_END___1__({_OLDDEBUG_1_ })
 
-;{ In 32 bit versions there may be no jumps at all to NEXT}
+;{ In 32 bit versions there may be no jumps to NEXT at all }
 ;{ The label NEXT1 is rarely relevant (for _OLDDEBUG_1_) }
 NEXT:   LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
@@ -920,7 +920,7 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
         _2PUSH          ;{ADD TO STACK}
 ;{   NUMBER ERROR}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
-        _PUSH          
+        _PUSH
         PAGE
 CODE_HEADER({(FIND)},{PFIND})
 ;{       MOV     AX,DS}
@@ -1052,23 +1052,23 @@ CODE_HEADER({AND},{LAND})
         POP     AX
         POP     BX
         AND     AX,BX
-        _PUSH          
+        _PUSH
 ;
 CODE_HEADER({OR},{LOR})
         POP     AX      ;{ (S1) <- (S1) OR (S2)}
         POP     BX
         OR      AX,BX
-        _PUSH          
+        _PUSH
 ;
 CODE_HEADER({XOR},{LXOR})
         POP     AX      ;{ (S1) <- (S1) XOR (S2)}
         POP     BX
         XOR     AX,BX
-        _PUSH          
+        _PUSH
         PAGE
 CODE_HEADER({SP@},{SPFET})
         MOV     AX,STACKPOINTER   ;{ (S1) <- (SP)}
-        _PUSH          
+        _PUSH
 ;
 CODE_HEADER({SP!},{SPSTO})
         MOV     BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
@@ -1077,7 +1077,7 @@ CODE_HEADER({SP!},{SPSTO})
 ;
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
         MOV     AX,BP   ;{RETURN STACK ADDR}
-        _PUSH          
+        _PUSH
 ;
 CODE_HEADER({RP!},{RPSTO})
         MOV     BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
@@ -1104,7 +1104,7 @@ CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
         MOV     AX,[BP] ;{ GET RETURN STACK VALUE}
         LEA     BP,[BP+CELLS(1)]
-        _PUSH          
+        _PUSH
 ;
 HEADER({R},{RR},{IDO+CELLS(1)})
         PAGE
@@ -1114,7 +1114,7 @@ CODE_HEADER({0=},{ZEQU})
         MOV     AX,1    ;{TRUE}
         JZ      ZEQU1   ;{IT'S 0}
         DEC     AX      ;{FALSE}
-ZEQU1:  _PUSH          
+ZEQU1:  _PUSH
 ;
 CODE_HEADER({0<},{ZLESS})
         POP     AX
@@ -1122,13 +1122,13 @@ CODE_HEADER({0<},{ZLESS})
         MOV     AX,1    ;{TRUE}
         JS      ZLESS1
         DEC     AX      ;{FALSE}
-ZLESS1: _PUSH          
+ZLESS1: _PUSH
 ;
 CODE_HEADER({+},{PLUS})
         POP     AX      ;{(S1) <- (S1) + (S2)}
         POP     BX
         ADD     AX,BX
-        _PUSH          
+        _PUSH
         PAGE
 CODE_HEADER({D+},{DPLUS})
         POP     AX      ;{ YHW}
@@ -1142,7 +1142,7 @@ CODE_HEADER({D+},{DPLUS})
 CODE_HEADER({MINUS},{MINUS})
         POP     AX
         NEG     AX
-        _PUSH          
+        _PUSH
 ;
 CODE_HEADER({DMINUS},{DMINU})
         POP     BX
@@ -1172,7 +1172,7 @@ CODE_HEADER({SWAP},{SWAP})
 CODE_HEADER({DUP},{DUPE})
         POP     AX
         PUSH    AX
-        _PUSH          
+        _PUSH
         PAGE
 CODE_HEADER({2DUP},{TDUP})
         POP     AX
@@ -1196,13 +1196,13 @@ CODE_HEADER({TOGGLE},{TOGGL})
 CODE_HEADER({@},{FETCH})
         POP     BX
         MOV     AX,[BX]
-        _PUSH          
+        _PUSH
         PAGE
 CODE_HEADER({C@},{CFET})
         POP     BX
         XOR     AX,AX
         MOV     AL,[BX]
-        _PUSH          
+        _PUSH
 ;
 CODE_HEADER({2@},{TFET})
         POP     BX      ;{ADDR}
@@ -1240,7 +1240,7 @@ CODE_HEADER({L@},{LFET})
         SUB     AX, BOOTADDRESS
 
         MOV     AX,[AX]
-        _PUSH          
+        _PUSH
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
         POP     BX      ;MEM LOC
@@ -1317,13 +1317,13 @@ HEADER({CONSTANT},{CON},{DOCOL})
         DC      COMMA
         DC      PSCOD
 DOCON:  MOV     AX,[BX+CELLS(1)] ;{GET DATA FROM PFA}
-        _PUSH          
+        _PUSH
 ;{               }
 HEADER({VARIABLE},{VAR},{DOCOL})
         DC      CON
         DC      PSCOD
 DOVAR:  LEA     AX,[BX+CELLS(1)] ;{(AX) <- PFA}
-        _PUSH          
+        _PUSH
 ;
 HEADER({USER},{USER},{DOCOL})
         DC      CON
@@ -1331,7 +1331,7 @@ HEADER({USER},{USER},{DOCOL})
 DOUSE:  MOV     BX,[BX+CELLS(1)] ;{PFA  }
         MOV     DI,[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
-        _PUSH          
+        _PUSH
         PAGE
 CODE_HEADER({0},{ZERO})
         XOR     AX,AX
@@ -1362,8 +1362,10 @@ HEADER({FIRST},{FIRST},{DOCON})
 });_END___1__({ _HIGH_BUF_1_})
 ;
 ;____1_____ _LOW_BUF_1_({
+        _ALIGN  2       ; Otherwise INT 13 hangs when filling
+        ; in into the lba block as a buffer address.
 HEADER({FIRST},{FIRST},{DOVAR})
-BUF1    EQU     FIRST+CW
+BUF1    EQU     FIRST+CW     ; Must be even!
         RESB    (KBBUF+2*CW)*NBUF
 });_END___1__({ _LOW_BUF_1_})
 ;

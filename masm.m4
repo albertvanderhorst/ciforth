@@ -25,4 +25,5 @@ define({_COMMENT},COMMENT ~
 define({_ENDCOMMENT},~
 )dnl
 define({_BYTE_PTR},{BYTE PTR $1})dnl
+define({_ALIGN},{ALIGN    $1})dnl
 

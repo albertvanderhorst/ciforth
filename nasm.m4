@@ -38,4 +38,5 @@ define({_ENDCOMMENT}, %endif
 )dnl
 define({_BYTE_PTR},{BYTE $1})dnl
 define({SET_32_BIT_MODE},    BITS   32 )dnl
+define({_ALIGN},{ALIGN    $1})dnl
 
