@@ -64,7 +64,7 @@ credit notice:
 _ENDCOMMENT
 	PAGE
 FIGREL	EQU	2	; FIG RELEASE #
-FIGREV	EQU	0	;FIG REVISION #
+FIGREV	EQU	0	; FIG REVISION #
 USRVER  EQU     0  	; USER VERSION NUMBER
 ;
 ;	ASCII CHARACTER EQUIVALENTS
@@ -94,24 +94,30 @@ STRTIB  EQU     STRUSA-RTS      ; Start return stack area
                                 ; Under this : data stack
 INITR0  EQU     STRUSA         ; Grows down
 INITS0  EQU     STRTIB          ; Growns down
+
+;____1_____ _USEDOS_1_({
+DRIVE   EQU     0       ; Use floppy A for blocks.
+});_END___1__({_USEDOS_1_})
+
+BPS     EQU     512             ;Bytes/sector, common to all of MSDOS
 ;
 ;____1_____ _USEBIOS_1_({
 ;
 ; Disk parameters:
 ; HD drive 3" 
-TRKS    EQU     80              ;Number of tracks
-SPT     EQU     18              ;Sectors/track
-HEADS   EQU     2               ;Number of heads 
-NFAT    EQU     2       ; Number of FATS
-SECROOT EQU     0EH    ; Sectors for root directory entry.
-SECFAT  EQU     9       ; Sectors per FAT
-MEDIA   EQU    0F0H      ; Descriptor byte. Anachronism.
+TRKS    EQU     80    ;Number of tracks
+SPT     EQU     18    ;Sectors/track
+HEADS   EQU     2     ;Number of heads 
+NFAT    EQU     2     ; Number of FATS
+SECROOT EQU     0EH   ; Sectors for root directory entry.
+SECFAT  EQU     9     ; Sectors per FAT
+MEDIA   EQU    0F0H   ; Descriptor byte. Anachronism.
 
 _COMMENT
 ; HD drive 5" 
-TRKS    EQU     80              ;Number of tracks
-SPT     EQU     15              ;Sectors/track
-HEADS   EQU     2               ;Number of heads 
+TRKS    EQU     80      ;Number of tracks
+SPT     EQU     15      ;Sectors/track
+HEADS   EQU     2       ;Number of heads 
 NFAT    EQU     2       ; Number of FATS
 SECROOT EQU     ?       ; Sectors for root directory entry.
 SECFAT  EQU     ?       ; Sectors per FAT
@@ -120,7 +126,6 @@ _ENDCOMMENT
 
 ; Bios specific equates.
 BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
-BPS     EQU     512             ;Bytes/sector, common to all of MSDOS
 SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
         ; Skip boot sector,fats and root dir.
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT            
@@ -1920,7 +1925,7 @@ HEADER({D+-},{DPM},{DOCOL})
 	DW	DMINU	;ENDIF
 DPM1	DW	SEMIS
 ;
-HEADER({ABS},{ABS1},{DOCOL})
+HEADER({ABS},{LABS},{DOCOL})
 	DW	DUPE
 	DW	PM
 	DW	SEMIS
@@ -1950,9 +1955,9 @@ HEADER({M*},{MSTAR},{DOCOL})
         DW      TDUP
 	DW	LXOR       
 	DW	TOR
-	DW	ABS1
+	DW	LABS
 	DW	SWAP
-	DW	ABS1
+	DW	LABS
 	DW	USTAR
 	DW	FROMR
 	DW	DPM
@@ -1964,7 +1969,7 @@ HEADER({M/},{MSLAS},{DOCOL})
 	DW	TOR
 	DW	DABS
 	DW	RR
-	DW	ABS1
+	DW	LABS
 	DW	USLAS
 	DW	FROMR
 	DW	RR
@@ -2555,20 +2560,22 @@ HEADER({DR0},{DRZER},{DOCOL})
 WERR	DB  	'DISK WRITE ERROR  $'
 RERR	DB  	'DISK READ ERROR   $'
 ;
-SSEC	PROC	NEAR
-;	( ADDR  SEC# -- )
-;	THIS ROUTINE WILL SELECT THE HEAD & DRIVE
+SBLK    PROC    NEAR
+;	( ADDR  BLK# -- )
+;	THIS ROUTINE WILL PREPARE PARAMETERS FOR DISK I/O
+;       DRIVE, ADDRESS, LENGTH, SEC#
 	POP	DI	;SAVE RETURN
-	POP	DX	;SECTOR #
-	MOV	AL,0	;SELECT DR A
+	MOV	CX,KBBUF/BPS 
+	POP	DX	;BLK #
+        MUL     DX,CX   ;SEC #
+	MOV	AL,DRIVE    ;SELECT DR A
         POP     BX      ;TRANSFER ADDR
-	MOV	CX,1	;READ 1 SECTOR
 	PUSH	DI	;GET THAT RETURN BACK
 	RET
-_ENDP SSEC    ENDP
+_ENDP SBLK    ENDP
 ;
-HEADER({RSEC},{RSEC},{$+2})
-	CALL	SSEC
+HEADER({RBLK},{RBLK},{$+2})
+	CALL	SBLK
 	PUSH	SI	;PRESERVE INTERPRETER POINTER
 	PUSH	BP	;RETURN POINTER
 	INT	25H
@@ -2576,8 +2583,8 @@ HEADER({RSEC},{RSEC},{$+2})
 	LEA	DX,[RERR]
 	JMP	DERR
 ;
-HEADER({WSEC},{WSEC},{$+2})
-	CALL	SSEC
+HEADER({WBLK},{WBLK},{$+2})
+	CALL	SBLK
 	PUSH	SI
 	PUSH	BP
 	INT	26H
@@ -2596,11 +2603,11 @@ DOK:	POPF		;POP FLAGS
 ;
 ;
 HEADER({R/W},{RSLW},{DOCOL})
-;	( ADDR  SECTOR#  FLAG (0=W, 1=R) --- )
+;	( ADDR  BLK#  FLAG (0=W, 1=R) --- )
 	_0BRANCH(RSLW1) 
-	DW	RSEC
+	DW	RBLK
 	_BRANCH(RSLW2) 
-RSLW1	DW	WSEC
+RSLW1	DW	WBLK
 RSLW2	DW	SEMIS
 });_END___1__({_USEDOS_1_})
 ;____1_____ _USEBIOS_1_({
