@@ -4,3 +4,8 @@ define({quote},{{{$1}}})
 define({forthvar},{@var{}quote($1)})
 define({forthsamp},{@samp{}quote($1)})
 define({forthcode},{@code{}quote($1)})
+define({forthexample},
+{@example
+{$1}
+@end example})dnl
+
