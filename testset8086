@@ -8,10 +8,8 @@ CLC,
 CMC, 
 HLT, 
 REPZ, 
-REP, 
+REPNZ, 
 LOCK, 
-OUT|D, 
-IN|D, 
 JCXZ, 
 LOOP, 
 LOOPZ, 
@@ -42,8 +40,6 @@ ES:,
 JMPS, 8 (RB,) 
 JMP, 8 (RX,) 
 CALL, 8 (RX,) 
-OUT|P, 8 P, 
-IN|P, 8 P, 
 RETFAR+, 8 W, 
 RET+, 8 W, 
 JMPFAR, 8 X, C SG, 
@@ -1353,6 +1349,14 @@ J, C| N| 10 (RB,)
 J, C| Y| 10 (RB,) 
 J, O| N| 10 (RB,) 
 J, O| Y| 10 (RB,) 
+OUT|D, W'| 
+OUT|D, B'| 
+IN|D, W'| 
+IN|D, B'| 
+OUT|P, W'| C P, 
+OUT|P, B'| C P, 
+IN|P, W'| C P, 
+IN|P, B'| C P, 
 SCAS, W'| 
 SCAS, B'| 
 LODS, W'| 
@@ -14193,5 +14197,5 @@ ADD, B| F| AL'| D0| [BP+DI]
 ADD, B| F| AL'| D0| [BP+SI] 
 ADD, B| F| AL'| D0| [BX+DI] 
 ADD, B| F| AL'| D0| [BX+SI] 
-
 HERE DIS-RANGE
+BYE
