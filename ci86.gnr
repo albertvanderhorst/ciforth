@@ -893,6 +893,15 @@ ERRMSG2:    JC      ERRMSG
             MOV     BL,7
             JC      ERRMSG2
 
+; -------------- FIll in the vector at BYE ----------------------
+;{This must be done before copying!}
+        LEA     ECX,[RETDOS]
+        LEA     BX,[RETDOSV+1]
+        MOV     [BX],ECX
+        LEA     BX, [BX+CW]
+        MOV     AX,CS
+        MOV     [BX],AX
+
 ; -------------- Copy Forth to the new segment ES --------
             MOV     CX, TEXTEND
             XOR     DI, DI      ;{dest}
@@ -941,8 +950,29 @@ HERE6:
             MOV     DS,DX
             MOV     ES,DX
             MOV     SS,DX
-; ######################### DPMI END ###############################################################
+        JMP  ENDDPMI
 
+; ######################### DPMI CLEAN UP CODE #####################################################
+STACK_SPEC:     DW      0,0
+
+RETDOS:
+;       JMP     SHORT $
+;{ BY jumping back here from BYE CS is restored.}
+;{ Restore also the DS ES and SS.}
+        MOV     AX, [Save_DS_PR] ;{Aliased.}
+        MOV     DS,AX
+        MOV     ES,AX
+        MOV     [STACK_SPEC+2],AX
+        LSS     SP,[STACK_SPEC]    ;{We must help the OS to keep a valid stack at all times!}
+
+; FIXME   the real cleanup code comes here
+
+        MOV     AL,BL
+        MOV     AH,4CH
+        INT     21H    ;{ Only works if cs is the same as while starting.}
+
+ENDDPMI:
+; ######################### DPMI END ###############################################################
 });_END_({_HOSTED_DPMI_})
 _BITS32_({
 ;{************************}
@@ -5333,7 +5363,7 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      LIT, US
         DC      LCMOVE
 _BLOCKSINFILE_({
-        DC      BLINI
+        DC      LIT, 0, BLINI  ;{Default, don't write in the library file!}
 });_END_({_BLOCKSINFILE_})
         DC      DECA    ; {FIXME has to go done by ABORT anyway.}
         DC      ONLY    ; {FIXME has to go done by ABORT anyway.}
@@ -5917,7 +5947,7 @@ forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
 storage of a different block. In fact the block is transferred
 to disk immediately.},{{BLOCK},{SCREEN}},
-{{!CSP 1 BLOCK DROP UPDATE ?CSP},{} },
+{{BLOCK-EXIT 2 BLOCK-INIT 1 BLOCK DROP UPDATE},{} },
 },
 enddoc)
 HEADER({UPDATE},{UPDAT},{DOCOL})
@@ -6836,7 +6866,9 @@ worddoc( {STORAGE},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
 and a result code into forthvar({ior}). The latter is the MSDOS
-error code negated, to be inspected using forthcode({MESSAGE}). },
+error code negated, to be inspected using forthcode({MESSAGE}).
+ forthvar({fam}) is one of 0=READ_ONLY, 1=WRITE_ONLY, 2=READ_WRITE.
+},
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {
 {345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345},
@@ -6873,12 +6905,16 @@ CFILE1:
 CFILE2:
         DC      SEMIS
 ;
-worddoc( {STORAGE},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO},
-{Create a file with name forthvar({sc}) and file access method
-forthvar({fam}). If it already exists, it is truncated to zero length.
-Return a file handle into forthvar({fileid})
-and a result code into forthvar({ior}). The latter is the MSDOS
-error code negated, to be inspected using forthcode({MESSAGE}). },
+worddoc( {STORAGE},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
+{Create a file with name forthvar({sc}) and properties
+forthvar({u}), for normal files this is just 0. _VERBOSE_({The
+meaning is to be found in the MSDOS programmers manual at INT
+21h function 3Ch "Create file with handle"}). If the file
+already exists, it is truncated to zero length. Return a file
+handle into forthvar({fileid}) and a result code into
+forthvar({ior}). The latter is the MSDOS error code negated, to
+be inspected using forthcode({MESSAGE}). The handle is open for
+READ_WRITE. },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}},
@@ -7714,7 +7750,7 @@ this may clear forthcode({DISK-ERROR}) })
 },
 _HOSTED_LINUX_({ {{BLOCK},{?LINUX-ERROR}}, })
 _USEBIOS_({ {{BLOCK},{R\W}}, })
-_HOSTED_LINUX_({ {{ CR DISK-ERROR @ 0 < . BLOCK-INIT},{0},}, })
+_HOSTED_LINUX_({ {{ CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{0},}, })
 _PC_({ {{ CR DISK-ERROR @ 0=},{0},}, }),
 enddoc)
 HEADER({DISK-ERROR},{DERR},{DOVAR}, )
@@ -7756,17 +7792,19 @@ HEADER({?DISK-ERROR},{QDSKER},{DOCOL})
         DC      LIT, 8, QERR
         DC      SEMIS
 ;
-worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
+worddoc( {STORAGE},{BLOCK-INIT},{block_init},{n ---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
-to the blocks in this file, using forthsamp({BLOCK-HANDLE}) to acces it.
+to the blocks in this file. The handle
+forthsamp({BLOCK-HANDLE}) can be used
+to acces it, with access code forthvar({n}) .
 },
-{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT}},
+{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{OPEN-FILE}},
 {{( Via MESSAGE)},{}},
 enddoc)
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      BLFL, SFET
-        DC      LIT, 02H    ;{ read/write}
+        DC      ROT
         DC      OFILE
         DC      ZEQU, NEGATE  ;{ 0 if disk problems, 1 if not.}
         DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
@@ -7782,7 +7820,7 @@ error messages.
 },{{BLOCK},{LIST},{LOAD}},
 {
 {EMPTY-BUFFERS BLOCK-EXIT -1F MESSAGE}, {MSG # -31},
-{ CR DISK-ERROR @ 0= 0= . BLOCK-INIT},{_T_},
+{ CR DISK-ERROR @ 0= 0= . 2 BLOCK-INIT},{_T_},
 {1 0 .LINE}, { LICENSE }
 },
 enddoc)
@@ -7934,10 +7972,11 @@ SYSARG2: DB      "-c", 0
 COMBUF:  _RESB(256)
 SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + _CELLS(1), 0
 ;
-worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
+worddoc( {STORAGE},{BLOCK-INIT},{block_init},{n ---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
-to the blocks in this file, using forthcode({BLOCK-HANDLE}) to acces it.
+to the blocks in this file, using forthcode({BLOCK-HANDLE}) to acces it,
+with access code forthvar({n}) .
 If successful, forthcode({WARNING}) is reinitialised to use disk messages.
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}},
 {{( Via MESSAGE)},{}},
@@ -7945,7 +7984,7 @@ enddoc)
 HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      ZERO, BLFL, SFET, PLUS, STORE ; {Unix requires a c-string.}
         DC      BLFL, SFET, DROP
-        DC      LIT, O_RDWR
+        DC      SWAP
         DC      ZERO
         DC      LIT, open
         DC      LINOS
@@ -7968,7 +8007,7 @@ no longer are.},
 {EMPTY-BUFFERS BLOCK-EXIT},{},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
  {PTY-BUFFERS 1 BLOCK ? MSG # 8},
-{ CR DISK-ERROR @ 0 < . BLOCK-INIT},{_T_},
+{ CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{_T_},
 {1 0 .LINE}, { LICENSE }
 },
 enddoc)
@@ -9143,10 +9182,10 @@ HEADER({WORDS},{WORDS},{DOCOL})
         DC      FORW
         DC      SEMIS
 ;
-_NORMAL_BYE_({
+_MSDOS_BYE_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment MSDOS , OS/2, Windows.
-},{{COLD}},
+},{{COLD},{EXIT-CODE}},
 {{." interactive"},{interactive}},
 enddoc)
 ;{Works for DPMI too. If it was high level and called BIOS, it would not.}
@@ -9154,8 +9193,8 @@ CODE_HEADER({BYE},{BYE})
         MOV     AX,4C00H
         INT     21H
 ;{ EXIT TO PC-DOS}
-});_END_({ _NORMAL_BYE_})
-_ABSOLUTELOAD_({
+});_END_({ _MSDOS_BYE_})
+_CLEANUP_BYE_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 {_PROTECTED_({Switch back to real mode.})
 Return to the host environment MSDOS.
@@ -9164,20 +9203,35 @@ Return to the host environment MSDOS.
 enddoc)
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
+        MOV     BX,[_VAR_FIELD(XCODE)]
         _SWITCH_({JMPHERE_FROM_FORTH})
 RETDOSV: JMP 0:0        ; {Filled in during boot}
         _BITS32_({SET_32_BIT_MODE})
 
-});_END_({ _ABSOLUTELOAD_})
+});_END_({ _CLEANUP_BYE_})
+worddoc( {OPERATINGSYSTEM},{EXIT-CODE},{exit_code},{addr ---},{},
+{Return forthvar({addr}) the address of a variable with the exit
+code. Its content is passed to the host environment while going
+forthcode({BYE}) . It is custom to return zero if there are no
+errors.
+_PC_({MSDOS allows only single byte return codes.})
+_LINUX_({Linux allows only single byte return codes.})
+},{{BYE}},
+{{." See BYE"},{See BYE}},
+enddoc)
+HEADER({EXIT-CODE},{XCODE},{DOVAR}, )
+        DC      0
+;
 _HOSTED_LINUX_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment Linux.
 },{{COLD}},
-{{." interactive"},{interactive}},
+{{"lina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
+{23 EXIT-CODE ! BYE 23}},
 enddoc)
 HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
-        DC      ZERO, ZERO, ZERO, ONE, LINOS
+        DC      XCODE, FETCH, X, X, ONE, LINOS
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 });_END_({ _HOSTED_LINUX_})
 ;
