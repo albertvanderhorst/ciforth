@@ -23,7 +23,7 @@ testclean: ; rm $(TESTTARGETS)
 	cat $+ ;\
 	echo 'PRELUDE' ;\
 	echo 'HEX $(MASK) MASK ! $(PREFIX) PREFIX ! DECIMAL ' ;\
-	echo ' STRING NEW $(TITLE)"   NEW TITLE $$!' ;\
+	echo ' "$(TITLE)"   TITLE $$!' ;\
 	echo ' QUICK-REFERENCE BYE' \
     )|\
     lina |\
