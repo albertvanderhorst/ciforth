@@ -1,5 +1,8 @@
 ( $Id$ )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+
+ ASSEMBLER DEFINITIONS HEX
+
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
 ( The patch for the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
@@ -251,5 +254,6 @@ A0 0 0720,0000 0600,0000 xFIR16 [BP]'  ( Fits in the hole, safe inconsistency ch
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may want to use these always instead of (RB,)
     : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;
- ASSEMBLER DEFINITIONS
+
+PREVIOUS DEFINITIONS DECIMAL
 ( ############## 8086 ASSEMBLER POST ################################## )

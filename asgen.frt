@@ -1,4 +1,4 @@
- ( $Id$ )
+( $Id$ )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( Uses Richard Stallmans convention. Uppercased word are parameters.    )
 
@@ -105,7 +105,7 @@ CREATE TABLE 1 , 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 VOCABULARY ASSEMBLER IMMEDIATE   ASSEMBLER DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
 ( Return the DEA from "word". )
-ALSO DENOTATION : % POSTPONE ' ; PREVIOUS
+DENOTATION : % POSTPONE ' ; PREVIOUS
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
 : %>BODY >CFA >BODY ; ( From DEA to the DATA field of a created word )
 : %BODY> BODY> CFA> ; ( Reverse of above)
@@ -393,7 +393,7 @@ VARIABLE DISS-VECTOR    ' .DISS-AUX DISS-VECTOR !
     THEN
 ;
 
-     % RESULT +DISS
+\     % RESULT +DISS Spurious? Remove after next total test.
 ( Try to expand the current instruction in `DISS' by looking whether    )
 ( DEA fits. Leave the NEXT dea.                                         )
 : SHOW-STEP
@@ -535,42 +535,40 @@ VARIABLE POINTER       HERE POINTER !
  0 CELL+ +LOOP
 ;
 
-( Dissassemble one instruction from `POINTER' starting at DEA. )
+( Dissassemble one instruction from POINTER starting at DEA. )
 ( Based on what is currently left in `TALLY!' )
-( Leave `POINTER' pointing after that instruction. )
+( Leave a POINTER pointing after that instruction. )
 : ((DISASSEMBLE))
-    POINTER @ >R
+    SWAP
+    >R R@ POINTER !
     ( startdea -- ) BEGIN
         DIS-PI DIS-xFI DIS-DFI DIS-xFIR DIS-COMMA
         >NEXT%
 (       DUP ID. ." : "  DISS-VECTOR @ EXECUTE                                 )
     DUP VOCEND? RESULT? OR UNTIL DROP
     RESULT? IF
-      R> DROP
-      .DISS
+      .DISS     \ Advances pointer past commaers
+      RDROP POINTER @
     ELSE
-      R> COUNT . POINTER ! ."  C, "
+      R> COUNT . ."  C, "
     THEN
 ;
 
-( As `((DISASSEMBLE}}' but starting with a clean slate and looking in  )
-( the whole dictionary.                                                )
+( Dissassemble one instruction from POINTER using the whole instruction set )
+( and starting with a clean slate. )
+( Leave a POINTER pointing after that instruction. )
 : (DISASSEMBLE)   !DISS !TALLY STARTVOC ((DISASSEMBLE)) ;
 
 ( Forced dissassembly of one instruction from `POINTER'. )
 ( Force interpretation as DEA instruction. )
 ( This is useful for instructions otherwise hidden in the dictionary. )
-: F-D  !DISS   !TALLY   ((DISASSEMBLE)) ;
+: F-D  !DISS   !TALLY   POINTER @ SWAP ((DISASSEMBLE)) DROP ;
 
 : DDD (DISASSEMBLE) ;
 
-( Dissassemble one instruction from ADDRESS. )
-: D-F-A POINTER ! (DISASSEMBLE) CR ;
 ( Dissassemble one instruction from address ONE to address TWO. )
 : DIS-RANGE
-    SWAP POINTER !
-    BEGIN (DISASSEMBLE) CR POINTER @ OVER < 0= UNTIL
-    DROP
+    SWAP   BEGIN (DISASSEMBLE) CR 2DUP > 0= UNTIL   2DROP
 ;
 (   : M| ' xxx  REJECT M| ;  To forbid M| xxx  in combination      )
 ( xxx must be PI or FI not FIR )
@@ -590,4 +588,5 @@ VARIABLE POINTER       HERE POINTER !
 : ;CODE
     ?CSP   POSTPONE (;CODE)   POSTPONE [   POSTPONE ASSEMBLER
 ; IMMEDIATE
-PREVIOUS DEFINITIONS
+
+PREVIOUS DEFINITIONS DECIMAL
