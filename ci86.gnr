@@ -1098,7 +1098,7 @@ XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
         JS      BRAN1   ;{ KEEP LOOPING}
 ;
 ;{  END OF `DO' LOOP}
-        ADD     BP,_BYTE _CELLS(2)  ;{ ADJ RETURN STACK}
+        LEA     BP,[BP+_CELLS(3)]  ;{ ADJ RETURN STACK}
         LEA     SI,[SI+_CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
         _NEXT
 ;
@@ -1113,16 +1113,42 @@ CODE_HEADER({(+LOOP)},{XPLOO})
 ;
 worddocsafe( {CONTROL},{(DO)},{paren_do},{},{C},
 {The run-time proceedure compiled by forthcode({DO}) which
-moves the loop control parameters to the return stack.},{{DO}}, 
+prepares the return stack, where the looping bookkeeping is kept.},{{DO}}, 
 {{( See DO)},{}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
+        MOV     BX,_CELL_PTR[SI]
+        LEA     BX,[SI+BX] ;{Make absolute}
+        LEA     SI,[SI+_CELLS(1)]
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     AX      ;{ LIMIT VALUE}
         XCHG    BP,STACKPOINTER   ;{ GET RETURN STACK}
+        PUSH    BX      ;{ Target location.}
         PUSH    AX
         PUSH    DX
         XCHG    BP,STACKPOINTER   ;{ GET PARAMETER STACK}
+        _NEXT
+;
+worddocsafe( {CONTROL},{(QDO)},{paren_question_do},{},{C},
+{The run-time proceedure compiled by forthcode({?DO}) which
+prepares the return stack, where the looping bookkeeping is kept.},{{?DO}}, 
+{{( See ?DO)},{}},
+enddoc)
+CODE_HEADER({(?DO)},{XQDO})
+        MOV     BX,_CELL_PTR[SI]  ; {Get inline relative target.}
+        LEA     SI,[SI+_CELLS(1)]
+        LEA     BX,[SI+BX] ;{Make absolute}
+        POP     DX      ;{ INITIAL INDEX VALUE}
+        POP     AX      ;{ LIMIT VALUE}
+        CMP     DX,AX
+        JZ      QXDO1
+        XCHG    BP,STACKPOINTER   ;{ GET RETURN STACK}
+        PUSH    BX      ;{ Target location.}
+        PUSH    AX
+        PUSH    DX
+        XCHG    BP,STACKPOINTER   ;{ GET PARAMETER STACK}
+        _NEXT
+QXDO1:  MOV     SI,BX 
         _NEXT
 ;
 worddoc( {CONTROL},{I},{i},{--- n},{C,L0},
@@ -1150,6 +1176,7 @@ dnl {0 1 2 3},
 },
 enddoc)
 HEADER({UNLOOP},{UNLOOP}, {DOCOL}, ,{B_IMMED})
+        DC      LIT, RDROP, COMMA
         DC      LIT, RDROP, COMMA
         DC      LIT, RDROP, COMMA
         DC      SEMIS
@@ -1657,18 +1684,16 @@ CODE_HEADER({EXIT},{SEMIS})
         LEA     BP,[BP+_CELLS(1)]
         _NEXT
 ;
-worddoc( {CONTROL},{LEAVE},{leave},{},{C,L0},
-{Force termination of a do-loop at the next opportunity by
-setting the loop limit equal to the current value of the index.
-The index itself remains unchanged, and execution proceeds
-normally until forthcode({LOOP}) or forthcode({+LOOP}) is
-encountered.},{},
-{ {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3 4} },
+worddoc( {CONTROL},{LEAVE},{leave},{},{ISO},
+{Termination a do-loop by branching to directly behind the
+end of a loop started by forthsamp({DO}) or forthsamp({?DO}) .
+So after the 
+forthcode({LOOP}) or forthcode({+LOOP}) that corresponds.},{},
+{ {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3} },
 enddoc)
-CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
-        MOV     AX,[BP] ;{GET INDEX}
-        MOV     [BP+_CELLS(1)],AX        ;{STORE IT AT LIMIT}
-        _NEXT
+HEADER({LEAVE},{LLEAV},{DOCOL})  ;{LIMIT <- INDEX}
+        DC      RDROP, RDROP, RDROP
+        DC      SEMIS
 ;
 worddoc( {STACKS},{>R},{to_r},{n ---},{C,L0},
 {Remove a number from the computation stack and place as the most
@@ -2579,8 +2604,8 @@ forthvar({n2}). _VERBOSE_({This is invaluable for writing portable
 code. Many of the screens of ciforth run on both 16 and 32 bits
 systems, thanks to this.})
 },{{CELL+}},
-_BITS32_({{{2 _CELLS .},{8}},})dnl expanded before worddoc is!
-_BITS16_({{{2 CELL+ .},{4}},})dnl expanded before worddoc is!
+_BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
+_BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
 ; ))))
 CODE_HEADER({CELLS},{L_CELLS})
@@ -3172,7 +3197,7 @@ enddoc)
 HEADER({-TRAILING},{DTRAI},{DOCOL})
         DC      LDUP
         DC      ZERO
-        DC      XDO     ;{DO}
+        _DO(DTRA4) 
 DTRA1:  DC      OVER
         DC      OVER
         DC      PLUS
@@ -3187,6 +3212,7 @@ DTRA1:  DC      OVER
 DTRA2:  DC      ONE
         DC      LSUB    ;{ THEN}
 DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
+DTRA4:
         DC      SEMIS
 ;
 worddocsafe( {OUTPUT},{."},{dot_quote},{},{I,L0},
@@ -4776,11 +4802,12 @@ HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
 ; Unlock all buffers
         DC      LIMIT
         DC      FIRST, CELLP
-        DC      XDO
+        _DO(FLUS2)
 FLUS1:  DC      ZERO, IDO, STORE
         DC      LIT,(KBBUF+2*CW)
         DC      PLOOP
         DC      (FLUS1-$)
+FLUS2:
         DC      SEMIS
 ;
 worddoc( {STORAGE},{SAVE},{save},{ --- },{L0},
@@ -4904,7 +4931,8 @@ enddoc)
 HEADER({THRU},{THRU},{DOCOL})
         DC      BLK, FETCH, TOR
         DC      SAVE
-        DC      ONEP, SWAP, XDO
+        DC      ONEP, SWAP
+        _DO(THRU2)
 THRU1:
         DC      IDO, BLK,STORE
         DC      IDO, LLOCK
@@ -4914,6 +4942,7 @@ THRU1:
         DC      INTER   ;{INTERPRET FROM OTHER}
         DC      IDO, LUNLOCK
         _LOOP({THRU1})
+THRU2:
         DC      RESTO
         DC      FROMR, BLK, STORE
         DC      SEMIS
@@ -5278,7 +5307,7 @@ ACCEP_A:
         DC      OVER, TOR
         DC      OVER, OVER, ONEP, LERASE
         DC      OVER, PLUS, SWAP     ; Bounds
-        DC      XDO
+        _DO(ACCEP4)
 ACCEP1: DC      KEY
         DC      LDUP, LIT, LF
         DC      EQUAL
@@ -5288,9 +5317,10 @@ ACCEP1: DC      KEY
         _BRANCH(ACCEP3)
 ACCEP2: DC      IDO,CSTOR
 ACCEP3: _LOOP(ACCEP1)
+ACCEP4:
         DC      FROMR, LDUP
-ACCEP4:  DC      COUNT, ZEQU
-        _0BRANCH(ACCEP4)
+ACCEP5:  DC      COUNT, ZEQU
+        _0BRANCH(ACCEP5)
         DC      SWAP, LSUB
         DC      SEMIS
 ACCEP_B:
@@ -5318,7 +5348,7 @@ enddoc)
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER, OVER, ONEP, LERASE
         DC      OVER, PLUS, SWAP     ; Bounds
-        DC      XDO
+        _DO(EXPEC4)
 EXPEC1: DC      KEY,
         DC      LDUP, EMIT
         DC      LDUP, LIT, LF
@@ -5329,6 +5359,7 @@ EXPEC1: DC      KEY,
         _BRANCH(EXPEC3)
 EXPEC2: DC      IDO,CSTOR
 EXPEC3: _LOOP(EXPEC1)
+EXPEC4:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
@@ -5435,7 +5466,7 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
         DC      OVER
-        DC      XDO     ;{ DO                    }
+        _DO(EXPE8)
 EXPE1:  DC      KEY
         DC      LDUP
         DC      RUBOUT
@@ -5477,6 +5508,7 @@ EXPE5:  DC      IDO
         DC      STORE   ;{ THEN}
 EXPE3:  DC      EMIT
         _LOOP(EXPE1)    ;{ LOOP}
+EXPE8:
         DC      DROP
         DC      SEMIS
 ;
@@ -5503,11 +5535,12 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      OVER
         DC      PLUS
         DC      SWAP
-        DC      XDO     ;{ DO}
+        _DO(TYPE4)
 TYPE2:  DC      IDO
         DC      CFET
         DC      EMIT
         _LOOP(TYPE2)    ;{ LOOP}
+TYPE4:  
         _BRANCH(TYPE3)  ;{ ELSE}
 TYPE1:  DC      DROP    ;{ THEN}
 TYPE3:  DC      SEMIS
@@ -5582,7 +5615,7 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
         DC      OVER
-        DC      XDO     ;{ DO                    }
+        _DO(EXPE8)
 EXPE1:  DC      KEY
         DC      LDUP
         DC      RUBOUT
@@ -5624,6 +5657,7 @@ EXPE5:  DC      IDO
         DC      STORE   ;{ THEN}
 EXPE3:  DC      EMIT
         _LOOP(EXPE1)    ;{ LOOP}
+EXPE8:
         DC      DROP
         DC      SEMIS
 ;
@@ -5645,10 +5679,12 @@ HEADER({TYPE},{LTYPE},{DOCOL})
              DC      QDUP
              _0BRANCH(TYPE1)
              DC      OVER,   PLUS
-             DC      SWAP,   XDO
+             DC      SWAP
+             _DO(TYPE4)
 TYPE2:       DC      IDO,    CFET,    EMIT
              _LOOP(TYPE2)
              _BRANCH(TYPE3)
+TYPE4:       
 TYPE1:       DC      DROP
 TYPE3:       DC      SEMIS
 ;{            }
@@ -6134,13 +6170,15 @@ RSLW1:  DC      LIT, 0301H      ;{ Write (AH) one (AL) sector }
 RSLW2:  DC      SWAP
         DC      SPBLK,  STAR
         DC      SPBLK,  OVER, PLUS
-        DC      SWAP,   XDO
+        DC      SWAP
+        _DO(RSLW9)
 RSLW0:
         DC      SWAP, TDUP
         DC      IDO
         DC      SECRW
         DC      LIT, BPS, PLUS, SWAP
         _LOOP(RSLW0)
+RSLW9:
         DC      DROP, DROP
         DC      DSKERR, FETCH,     QDUP
         _0BRANCH(RSLW5)              ;{OK}
@@ -6485,9 +6523,23 @@ the following address forthvar({addr}) and forthvar({n}) for later error checkin
 enddoc)
 dnl ISO VIOLATION :
 dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4},
-
 HEADER({DO},{DO},{DOCOL}, , B_IMMED)
-        DC      LIT, XDO, COMMA, PBACK
+         DC      LIT, XDO, COMMA, PFORWARD, PBACK
+        _SECURITY_({DC      LIT,3    ;{ Magic number}})
+        DC      SEMIS
+;
+worddoc( {CONTROL},{?DO},{question_do},{n1 n2 --- (execute)
+addr n --- (compile)},{ISO,I,C2,L0},
+{Occurs in a colon-definition in form:
+    forthsamp({?DO ... LOOP})
+It behaves like DO , with the exception that if n1 and n2 are equal
+the loop body is not executed.},
+{{DO},{I},{LOOP},{+LOOP},{LEAVE}},
+{ { : GS1 ?DO 41 EMIT LOOP ; 3 0 GS1},{AAA},
+  {: GS3 0 1 2 1 ?DO I . LOOP . ; GS3 },{0} },
+enddoc)
+HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
+         DC      LIT, XQDO, COMMA, PFORWARD, PBACK
         _SECURITY_({DC      LIT,3    ;{ Magic number}})
         DC      SEMIS
 ;
@@ -6512,6 +6564,7 @@ enddoc)
 HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      LIT, 3, QPAIR})
         DC      LIT, XLOOP, COMMA, BACKP
+        DC      FORWARDP ;{ For DO to push the leave address.}
         DC      SEMIS
 ;
 worddoc( {CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{I,C2,L0},
@@ -6538,6 +6591,7 @@ enddoc)
 HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      LIT, 3, QPAIR})
         DC      LIT, XPLOO, COMMA, BACKP
+        DC      FORWARDP ;{ For DO to push the leave address.}
         DC      SEMIS
 ;
 worddoc( {CONTROL},{UNTIL},{until},{f --- (run-time)
@@ -6569,8 +6623,7 @@ worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{I,C2,L0},
 At run-time, forthcode({AGAIN}) forces execution to return to corresponding
 forthcode({BEGIN}) .
 There is no effect on the stack. Execution cannot leave this loop
-(unless forthcode({R>}) forthcode({DROP}) is executed one level below).
-
+except for forthcode({EXIT}).
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},
 {{BEGIN}}, 
@@ -6708,7 +6761,7 @@ HEADER({SPACES},{SPACES},{DOCOL})
         DC      QDUP
         _0BRANCH(SPAX1)
         DC      ZERO
-        DC      XDO     ;{DO}
+        _DO(SPAX1)
 SPAX2:  DC      SPACE
         _LOOP(SPAX2)    ;{LOOP}
 SPAX1:  
@@ -7025,7 +7078,8 @@ HEADER({LIST},{LLIST},{DOCOL})
         DC      LTYPE
         DC      DOT
         DC      LIT,10H
-        DC      ZERO,XDO
+        DC      ZERO
+        _DO(LIST9)
 LIST1:  DC      CR,IDO
         DC      LIT,3
         DC      DOTR,SPACE
@@ -7035,6 +7089,7 @@ LIST1:  DC      CR,IDO
         _0BRANCH(LIST2)
         DC      LLEAV
 LIST2:  _LOOP(LIST1)
+LIST9:
         DC      CR,SEMIS
 ;
 worddoc( {SCREEN},{INDEX},{index},{from to --},{},
@@ -7048,7 +7103,7 @@ HEADER({INDEX},{INDEX},{DOCOL})
         DC      LIT,FF
         DC      EMIT,CR
         DC      ONEP,SWAP
-        DC      XDO
+        _DO(INDE9)
 INDE1:  DC      CR,IDO
         DC      LIT,3
         DC      DOTR,SPACE
@@ -7057,6 +7112,7 @@ INDE1:  DC      CR,IDO
         _0BRANCH(INDE2)
         DC      LLEAV
 INDE2:  _LOOP(INDE1)
+INDE9:
         DC      SEMIS
 ;
 worddoc( {STACKS},{DOTS},{dots},{from to --},{},
@@ -7094,13 +7150,15 @@ HEADER({TRIAD},{TRIAD},{DOCOL})
         DC      STAR
         DC      LIT,3
         DC      OVER,PLUS
-        DC      SWAP,XDO
+        DC      SWAP
+        _DO(TRIA9)
 TRIA1:  DC      CR,IDO
         DC      LLIST
         DC      QTERM   ;{ ?TERMINAL}
         _0BRANCH(TRIA2)
         DC      LLEAV   ;{LEAVE}
 TRIA2:  _LOOP(TRIA1)    ;{THEN}
+TRIA9:
         DC      CR
         DC      SEMIS
 ;       

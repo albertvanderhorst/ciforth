@@ -245,7 +245,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT
       TYPE [CHAR] " EMIT BL EMIT  $@ + ;
                              CFOF ($) BY -sq
-  : -do CR ." DO " CELL+ ;     CFOF (DO) BY -do
+  : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
   : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
   : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
   ( : -cm ." COMPILE " -lit ;  CFOF COMPILE BY -cm    )

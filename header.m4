@@ -61,8 +61,14 @@ define({_0BRANCH},dnl
 define({_BRANCH},dnl
 {DC      BRAN
         DC      $1-$})dnl
+define({_DO},dnl
+{DC     XDO
+        DC      $1-$})dnl
+define({_QDO},dnl
+{DC     XQDO
+        DC      $1-$})dnl
 define({_LOOP},dnl
-{DC      XLOOP
+{DC     XLOOP
         DC      $1-$})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
