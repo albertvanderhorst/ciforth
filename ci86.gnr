@@ -868,11 +868,11 @@ _NEWDEBUG_({ CALL    DISPLAYSI})
         JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
 ;
 ;{       Dictionary starts here.}
+DP0:
 worddoc({MISC},{NOOP},{no_operation},{},{},
 {Do nothing. Primarily useful as a placeholder.
 },{})
-HEADER({NOOP},{NOOP},{NOOP0})
-NOOP0:   DC      $+CELLS(1)
+CODE_HEADER({NOOP},{NOOP})
        _NEXT
 ;
 _OLDDEBUG_({ ;{ Rather unclear what this is supposed to.}
@@ -890,7 +890,7 @@ _BITS_ bit literal number given during compilation. Later execution of
 forthcode({LIT}) causes the contents of this next dictionary address to be pushed
 to the stack.},{{}},
 {{: TL LIT [ 123 , ] ; TL .},{123}})
-DP0:
+;
 CODE_HEADER({LIT},{LIT})
         LODSW           ;{ AX <- LITERAL}
         _PUSH          ;{ TO TOP OF STACK}
@@ -2125,7 +2125,7 @@ worddoc({DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
 of a definition created with a forthcode({DOES>}) 
 construct to it dea.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({BODY>},{BODYF},{DOCOL})
-        DC      LIT,CELLS(4)
+        DC      LIT,CELLS(5)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2135,7 +2135,7 @@ of a definition created with a forthcode({DOES>})
 construct return its  data field forthsamp({addr}).},
 {{'},{>CFA},{>LFA},{>NFA}})
 HEADER({>BODY},{TOBODY},{DOCOL})
-        DC      LIT,CELLS(4)
+        DC      LIT,CELLS(5)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2143,7 +2143,7 @@ worddoc({DICTIONARY},{C>D},{parameter_field_address},{cfa --- dea},{},
 {Convert the code field address of a compiled definition to its
 dea address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({C>D},{CTOD},{DOCOL})
-        DC      LIT,CELLS(2)
+        DC      LIT,CELLS(3)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2166,6 +2166,7 @@ worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
 link field address.},{{'},{>LFA}})
 HEADER({>LFA},{TLFA},{DOCOL})
         DC      CELLP
+        DC      CELLP
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
@@ -2174,12 +2175,14 @@ code field address.},{{'},{>CFA}})
 HEADER({>CFA},{TCFA},{DOCOL})
         DC      CELLP
         DC      CELLP
+        DC      CELLP
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
 parameter field address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({>PFA},{TPFA},{DOCOL})
+        DC      CELLP
         DC      CELLP
         DC      CELLP
         DC      CELLP
@@ -2825,6 +2828,7 @@ CREA1:  DC      HERE
         DC      TOGGL
         DC      HERE,TOR
         DC      COMMA   ; {Name field.}
+        DC      ZERO,COMMA ; {Flag field.}
         DC      LATES
         DC      COMMA   ; {Link field.}
         DC      FROMR
@@ -2997,7 +3001,8 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      COMMA    
         DC      VOCL
         DC      STORE
-        DC      LIT, DUMMY, COMMA   ; Dummy name field
+        DC      LIT, DUMMY, COMMA   ;{ Dummy name field}
+        DC      ZERO, COMMA         ;{ Dummy flag field}
         DC      CURR
         DC      FETCH
         DC      TLFA
@@ -3025,7 +3030,8 @@ a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
 HEADER({FORTH},{FORTH},{DODOE},1)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
-        DC      DUMMY; Dummy name field
+        DC      DUMMY   ;{ Dummy name field}
+        DC      0       ;{ Dummy flag field}
         DC      _DEA(TASK)
 ;
 worddoc({VOCABULARIES},{ASSEMBLER},{forth},{},{P,L1},
