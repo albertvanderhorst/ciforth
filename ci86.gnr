@@ -5371,7 +5371,13 @@ _LINUX_N_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) ; {No options}  })
 _PC_(
-{        DC      LIT, 80H, COUNT
+{        DC      LIT, 80H
+        DC      X
+OPT0:
+        DC      DROP
+        DC      COUNT
+        DC      OVER, CFET, LBL, UNEQ
+        _0BRANCH(OPT0) ; {Skip blanks.}
         _0BRANCH(OPT4) ; {No options}
 OPT1:
         DC      LDUP, CFET, LBL, EQUAL
@@ -5445,8 +5451,9 @@ _HOSTED_(
         _0BRANCH(COLD5)
         DC      SIGNON    ; {Suppressed for scripting! Or any options.}
 COLD5:
+        DC      LIT, BYE, TOR ; {In case of turnkey programs.}
         DC      ABORT
-        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
+        DC      SEMIS   ; {Unnecessary, but helpful for decompilation.}
 ;
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
 {Sign extend a single number to form a double number.},{},
