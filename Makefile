@@ -61,7 +61,7 @@ ssort   \
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= msdos alone linux lina alonehd msdos32
+TARGETS= msdos alone linux lina alonehd msdos32 dpmi
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= msdos alone
 # If this makefile runs under Linux, the following forth's can be made and
@@ -144,6 +144,10 @@ wc            \
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
+
+# Try to work with old files.
+%:RCS/%,v ; co -d$(DATE) $<
+ci86.gnr:RCS/ci86.gnr,v ; co -d$(DATE) $<
 
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm

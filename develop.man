@@ -79,5 +79,17 @@ D. Install a hd booting version
 
 /*****************************************************************************/
                  Generate a sector and track version.
+/*****************************************************************************/
 1L. Boot from a floppy as made in the second alternative of B.
 2L. 28 LOAD REQUIRE INSTALL-FORTH-ON-HD
+
+/*****************************************************************************/
+                Build some old version
+/*****************************************************************************/
+1. Check out the old version of ci86.gnr.
+2. Mark the date into some shell variable like
+   D='"2001/09/04 07:00:00"'
+3. Do
+   make <whatever> DATE=$D
+4. If some files are too new, just throw them away.
+   This doesn't work for the makefile itself, though.
