@@ -37,7 +37,7 @@ HEX
 : >COMMA >BODY CELL+ CELL+ @ ; ( WHICH comma-actions are expected? )
 ( How MANY bytes is the postit/ WHERE sits the byte to be fixed up
 ( counting backwards from the end of the instruction )
-: >CNT >BODY CELL+ CELL+ CELL+ @ ; 
+: >CNT >BODY CELL+ CELL+ CELL+ @ ;
 ( Accept a MASK with a bit up for each commaer, a MASK indicating       )
 ( which bits are missing from postitted, and the INSTRUCTION )
 ( Assemble an 1..3 byte instruction and post what is missing.)
@@ -63,10 +63,13 @@ DECIMAL
 (   Based on PFA of a fixup fix into tally and leave the FIXUi  )
 : TALLY:| CELL+ @+ TALLY CELL+ OR! @ TALLY AND! ;
 
+( Note: the maks is inverted compared to postit, such that a            )
+( postit and a fixup that go tohether have the same mask                )
 ( Accept a MASK with a bit up for each commaer, a MASK indicating
 ( which bits are fixupped, and the FIXUP )
-( One size fits all. )
-: xFI <BUILDS , , INVERT , CHECK31 DOES> [ HERE TEMP ! ] DUP TALLY:| @ ISS @ OR! ;
+< ( One size fits all. )
+: xFI <BUILDS , , INVERT , 1 , CHECK31
+DOES> [ HERE TEMP ! ] DUP TALLY:| @ ISS @ OR! ;
 IS-A IS-xFI
 
 HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
@@ -82,10 +85,10 @@ IS-A IS-COMMA
 
 ( Fill in the tally prototype with COMMAMASK and INSTRUCTIONMASK )
 : T! PRO-TALLY CELL+ ! PRO-TALLY ! ;
-( From `TALLY' and the  INSTRUCTION code)
+( From `PRO-TALLY' and the  INSTRUCTION code)
 ( prepare THE THREE CELLS for an instruction )
 : PREPARE >R PRO-TALLY @ PRO-TALLY CELL+ @ R> ;
-( By INCREMENTing the OPCODE a NUMBER of times generate number          )
+( By INCREMENTing the OPCODE a NUMBER of times generate as much )
 (  instructions)
 : 1FAMILY, 0 DO DUP PREPARE 1PI OVER + LOOP DROP DROP ;
 : 2FAMILY, 0 DO DUP PREPARE 2PI OVER + LOOP DROP DROP ;
@@ -346,10 +349,11 @@ HERE POINTER !
     BEGIN (DISASSEMBLE) POINTER @ OVER < 0= UNTIL
     DROP
 ;
-." COMES JAN"
-    CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;
-    ' JAN HERE DIS-RANGE
-' JAN CFA @ D-F-A DDD DDD DDD
-
 : REJECT NFA DUP >MASK ISS @ @ AND SWAP >INST = 27 ?ERROR ;
 (   : M| ' M'|  REJECT M| ;  To forbid M| M'| in combination      )
+
+
+    ." COMES JAN"                                                          
+        CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                          
+        ' JAN HERE DIS-RANGE                                                  
+    ' JAN CFA @ D-F-A DDD DDD DDD                                             
