@@ -440,10 +440,10 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 		 
 });_END___1__({ _BOOTHD__1_})
 
-;____1_____ _HOSTED__1_({
+;____1_____ _HOSTED_MSDOS_1_({
 	ORG	100H	;{ Required start of .COM program.}
 	JMP     BOOTUP
-});_END___1__({ _HOSTED__1_})
+});_END___1__({ _HOSTED_MSDOS_1_})
 
 PROTECT:
 ;____1_____ _PROTECTED_1_({
@@ -503,7 +503,7 @@ GDTLOAD DW     GDTLEN
 
 });_END___1__({ _PROTECTED_1_})
 
-;____1_____ _LINUXHOSTED_1_({
+;____1_____ _HOSTED_LINUX_1_({
 include(width32.m4)       
 	global  figforth        ; Called from c. Remainder c-routines to be called from here.
         extern  c_type,c_expec,c_key,c_qterm
@@ -513,15 +513,15 @@ include(width32.m4)
 	section forth progbits write exec alloc
 figforth:
 ;       ORG     M4_ORIG 
-        LEA     ECX,[ESP+CELLS(1)]
-        XOR     EAX,EAX
-        CMP     EAX,_CELL_PTR[ECX]
-        JNZ     ENDIF1          ; Warm
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
+        LEA     ECX,[ESP+CELLS(1)]
+        XOR     EAX,EAX
+        CMP     EAX,_CELL_PTR[ECX]
+        JNZ     ENDIF1          ; Warm
         call    print_cold
 	JMP     BOOTUP                  ; Cold start
 ENDIF1: 
@@ -536,7 +536,7 @@ RETURN_LINUX:
 	MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
 	RET     ; Assuming the old stack has not been disturbed.It shouldn't.
 SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
-});_END___1__({ _LINUXHOSTED_1_})
+});_END___1__({ _HOSTED_LINUX_1_})
 
 ;{ The following is not known until the final width m4 final has been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
@@ -824,9 +824,9 @@ USINI:
 	DC	INITDP	;{	INIT (FENCE)  8}
 	DC	INITDP  ;{	INIT (DP)     9}
 	DC	_VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
-;____1_____ _LINUXIO_1_({
+;____1_____ _LINUX_C_1_({
 	DC      0       ;{ INIT (OFFSET) }
-});_END___1__({_LINUXIO_1_})
+});_END___1__({_LINUX_C_1_})
 ;____1_____ _MODERN_1_({
 	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
@@ -867,9 +867,9 @@ _ENDCOMMENT
 ;____1_____ _PROTECTED_1_({
 CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END___1__({ _PROTECTED_1_})
-;____1_____ _LINUXHOSTED_1_({
+;____1_____ _HOSTED_LINUX_1_({
 CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END___1__({ _LINUXHOSTED_1_})
+});_END___1__({ _HOSTED_LINUX_1_})
 ;____1_____ _REAL_1_({
 CPUNM   DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END___1__({ _REAL_1_})
@@ -1336,10 +1336,10 @@ HEADER({FIRST},{FIRST},{DOCON})
 	DC	BUF1
 });_END___1__({ _REAL_1_})
 ;
-;____1_____ _LINUXHOSTED_1_({
+;____1_____ _HOSTED_LINUX_1_({
 HEADER({FIRST},{FIRST},{DOCON})
 	DC	BUF1
-});_END___1__({ _LINUXHOSTED_1_})
+});_END___1__({ _HOSTED_LINUX_1_})
 ;
 ;____1_____ _PROTECTED_1_({
 HEADER({FIRST},{FIRST},{DOVAR})
@@ -2222,7 +2222,7 @@ HEADER({WARM},{WARM},{DOCOL})
 ;{	COLD START VECTOR COMES HERE}
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
-;____1_____ _HOSTED__1_({
+;____1_____ _HOSTED_MSDOS_1_({
 	PUSH    DS
 	MOV	AX,0
 	MOV	DS,AX		;{TO VECTOR AREA}
@@ -2233,7 +2233,7 @@ LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
 	INC	BX
 	MOV	[BX],CS
 	POP     DS
-});_END___1__({ _HOSTED__1_})
+});_END___1__({ _HOSTED_MSDOS_1_})
 	CLD			;{ DIR = INC}
 	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
 	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
@@ -2699,7 +2699,7 @@ CODE_HEADER({?TERMINAL},{QTERM})
 ;
 
 });_END___1__({_MODERN_1_})
-;____1_____ _LINUXIO_1_({
+;____1_____ _LINUX_C_1_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
@@ -2733,7 +2733,7 @@ CODE_HEADER({?TERMINAL},{QTERM})
 	PUSH	EAX
 	_NEXT
 ;
-});_END___1__({_LINUXIO_1_})
+});_END___1__({_LINUX_C_1_})
 ;____1_____ _USEDOS_1_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
@@ -3021,7 +3021,7 @@ RSLW2:  DC      TOR
 	DC      SEMIS
 
 });_END___1__({_MODERN_1_})
-;____1_____ _LINUXIO_1_({
+;____1_____ _LINUX_C_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
 	_STRING({BLOCKS.FRT})
 	_RESB(20)               ;{ Allow for some path}
@@ -3051,7 +3051,7 @@ CODE_HEADER({R/W},{RSLW})
 	LEA     ESP,[ESP+CELLS(3)]    ; remove input
         _NEXT
 
-});_END___1__({_LINUXIO_1_})
+});_END___1__({_LINUX_C_1_})
 ;____1_____ _USEDOS_1_({
 ;
 WERR	DB  	'DISK WRITE ERROR  $'
@@ -3529,13 +3529,13 @@ VLIS2	DC	DUPE
 	DC	SEMIS
 ;
 CODE_HEADER({BYE},{BYE})
-;____1_____ _HOSTED__1_({
+;____1_____ _HOSTED_MSDOS_1_({
 ;{ EXIT TO PC-DOS}
 	INT	27H	;{I'M HISTORY}
-});_END___1__({ _HOSTED__1_})
-;____1_____ _LINUXHOSTED_1_({
+});_END___1__({ _HOSTED_MSDOS_1_})
+;____1_____ _HOSTED_LINUX_1_({
 	JMP     RETURN_LINUX    
-});_END___1__({ _LINUXHOSTED_1_})
+});_END___1__({ _HOSTED_LINUX_1_})
  
 	PAGE
 HEADER({LIST},{LISTC},{DOCOL})
@@ -3671,7 +3671,7 @@ HEADER({TASK},{TASK},{DOCOL})
 INITDP	EQU	$	;{SHOW END OF DICTIONARY}
 });_END___1__({ _EQULAYOUT_1_})
 
-;____1_____ _LINUXHOSTED_1_({
+;____1_____ _HOSTED_LINUX_1_({
 ;       This is the proper way to do it.
 ;       No memory addresses should be arrived at through equates.
 ;       However there is no way to teach the linker to keep the
@@ -3690,7 +3690,7 @@ STRTIB: RESB     RTS            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
 STRUSA: RESB    US              ;{ User area}
 BUF1:   RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
-});_END___1__({ _LINUXHOSTED_1_})
+});_END___1__({ _HOSTED_LINUX_1_})
 ;
 _COMMENT 
 

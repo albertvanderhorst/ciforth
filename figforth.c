@@ -160,19 +160,23 @@ TTY std_in;
 
 /* ?TERMINAL */
 /* ^C is the break key. */
+/* This idea turned out to be useless, because it is accepted synchronously  */
+/* only.                                                                     */
+/*
 int c_qterm(void)
 {
    return break_pressed-- >0;
 }
+*/
 
 /* ?TERMINAL */
 /* The "any key" is the break key. */
-int c_qterm_old(void) 
+int c_qterm(void) 
 {
-
   fd_set rfds;
   struct timeval tv; 
 
+  tty_keymode(&std_in);                                                       
   /* Zero timeout, must be set each time! */
   /* A Linux peculiarity.                 */
   tv.tv_sec = 0;
@@ -294,6 +298,7 @@ int main (int argc, char *argv[])
   for(;;)
   if ( !setjmp(restart_forth) )
   {
+       printf(!bootmode?"ICY":"STEAMY");
        printf(bootmode==COLD?"icy":bootmode==WARM?"hot":"UNKNOWN");
       figforth( bootmode, argc, argv);
       break;

@@ -9,56 +9,55 @@
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
 INGREDIENTS = \
-default.m4       \
 header.m4        \
+postlude.m4      \
+prelude.m4       \
 protect.m4       \
 width16.m4       \
 width32.m4       \
 # That's all folks!
 
+# The kinds of Forth's that can be made
+# Different assemblers should generate equivalent Forth's.
+TARGETS= msdos alone linux
+CSRC= figforth 
+
 RELEASECONTENT = \
+fig86.gnr        \
+$(INGREDIENTS)   \
+$(TARGETS:%=%.cfg) \
+$(CSRC:%=%.c)    \
 Makefile         \
 release.txt      \
 readme.txt       \
-fig86.gnr        \
 alone.asm        \
 msdos.msm        \
-default.m4       \
-alone.m4         \
-msdos.m4         \
+linux.asm        \
 masm.m4          \
 nasm.m4          \
-header.m4        \
-protect.m4       \
-width16.m4       \
-width32.m4       \
 genboot.bat      \
 # That's all folks!
 
 # Letter versions are beta!
 VERSION=0A
 
-# The kinds of Forth's that can be made.
-# Different assemblers should generate equivalent Forth's.
-TARGETS= msdos alone linux
-CSRCS= figforth tty
 
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm
 	nasm -fbin $< -o $@ -l $*.lst 
 
-# msdos.m4 and alone.m4 are present (at least via RCS)
+# msdos.cfg and alone.m4 are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
-fig86.%.asm : %.m4 nasm.m4 fig86.gnr ; m4 $+ >$@
-fig86.%.msm : %.m4 masm.m4 fig86.gnr ; m4 $+ >$@
-fig86.%     : %.m4         fig86.gnr ; m4 $+ >$@
+fig86.%.asm : %.cfg nasm.m4 fig86.gnr ; m4 $+ >$@
+fig86.%.msm : %.cfg masm.m4 fig86.gnr ; m4 $+ >$@
+fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
 
 # Default target for convenience
 default : figforth
 fig86.$(s).bin :
 
 # Put include type of dependancies here
-alone.m4 msdos.m4 linux.m4 : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
+alone.cfg msdos.cfg linux.cfg : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
 all: $(TARGETS:%=fig86.%.bin) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
