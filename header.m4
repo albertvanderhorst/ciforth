@@ -44,7 +44,7 @@ dnl The link etc. field of the word with assembler name $1
 define({_DEA},{$1-CELLS(C_HOFFSET)})dnl
 define({_LINK_FIELD},{($1+CELLS(L_HOFFSET-C_HOFFSET))})dnl
 define({_CODE_FIELD},$1)dnl
-define({_PARAMETER_FIELD},{($1+CELLS(P_HOFFSET-C_HOFFSET))})dnl
+define({_PARAMETER_FIELD},{($1+CELLS(P_HOFFSET-C_HOFFSET+1))})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN

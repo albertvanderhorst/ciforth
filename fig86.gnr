@@ -1247,7 +1247,7 @@ DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
 worddoc({STORAGE},{RESULT},{result},{--- addr},{},
 {A variable containing the address of the result of searching
 in one vocabulary chain.},{{BLOCK}}, {}, enddoc)
-HEADER({RESULT},{RESULT},{DOVAR})
+HEADER({RESULT},{RESULT},{DOVAR}, $ + CELLS(1) )
         DC 0
 ;
 worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1}, {},
@@ -1861,9 +1861,12 @@ parameter field initialized to forthvar({n}) . When forthvar({cccc}) is later ex
 address of its parameter field (containing forthvar({n}) ) is left on the stack,
 so that a fetch or store may access this location.},{{USER},{CONSTANT}}, {}, enddoc)
 HEADER({VARIABLE},{VAR},{DOCOL})
-        DC      CON
+        DC      CREAT
+        DC      HERE, CELLP, COMMA
+        DC      SMUDG
+        DC      COMMA
         DC      PSCOD
-DOVAR:  LEA     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
+DOVAR:  MOV     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
 worddoc({DEFINING},{USER},{user},{n ---},{L0},
@@ -1998,9 +2001,8 @@ buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
 },{{BLOCK},{LIMIT}}, {}, enddoc)
-HEADER({FIRST},{FIRST},{DOVAR})
-BUF1:    EQU     FIRST+CW     ; Must be even!
-        _RESB    (KBBUF+2*CW)*NBUF
+HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
+BUF1:   _RESB    (KBBUF+2*CW)*NBUF
 });_END_({ _LOW_BUF_})
 ;
 worddoc({STORAGE},{LIMIT},{limit},{---- n},{},
@@ -3720,14 +3722,14 @@ worddoc({STORAGE},{STALEST},{stalest},{--- addr},{},
 {A variable containing the address of the oldest
 block buffer, the first candidate to be claimed if a new
 one is needed.},{{BLOCK}}, {}, enddoc)
-HEADER({STALEST},{STALEST},{DOVAR})
+HEADER({STALEST},{STALEST},{DOVAR}, $ + CELLS(1) )
         DC BUF1
 ;
 worddoc({STORAGE},{PREV},{prev},{---- addr},{},
 {A variable containing the address of the disc buffer most recently
 referenced. The forthcode({UPDATE}) command marks this buffer to be
 later written to disc.},{{BLOCK}}, {}, enddoc)
-HEADER({PREV},{PREV},{DOVAR})
+HEADER({PREV},{PREV},{DOVAR}, $ + CELLS(1) )
         DC      BUF1
 ;
 worddoc({STORAGE},{#BUFF},{hash_buf},{--- c},{},
@@ -4216,7 +4218,7 @@ worddoc({INPUT},{TERMIO},{termio},{--- addr},{},
 {Leave the address of the terminal description, this has the layout of
 a the c-structure forthsamp({termio}) .
 },{{SET-TERM}}, {}, enddoc)
-HEADER({TERMIO},{TERMIO},{DOVAR})
+HEADER({TERMIO},{TERMIO},{DOVAR}, $ + CELLS(1) )
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
 worddoc({INPUT},{SET-TERM},{set_term},{len b --- },{},
@@ -4638,7 +4640,7 @@ The name may contain a path and be at most}
 _FILENAMELENGHT_M4_ {characters long.
 The default name is forthvar({BLOCKS.BLK}) .
 },{{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
-HEADER({BLOCK-FILE},{BLFL},{DOVAR})
+HEADER({BLOCK-FILE},{BLFL},{DOVAR}, $ + CELLS(1) )
         _STRING({BLOCKS.BLK})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
 worddoc({STORAGE},{BLOCK-HANDLE},{block_handle},{---n},{},
@@ -4647,7 +4649,7 @@ If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
 _LINUX_C_({In this ciforth forthcode({BLOCK-HANDLE}) is not used.})
 },{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
-HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
+HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, $ + CELLS(1) )
         DC      -1
 ;
 });_END_({_BLOCKSINFILE_})
@@ -4747,7 +4749,7 @@ latest disk error in opening, using or closing the block file.
 Negative means an error
 (the Unix forthsamp({errno}) and zero means okay.)
 },{{BLOCK},{LINUX-ERROR}}, {}, enddoc)
-HEADER({DISK-ERROR},{DERR},{DOVAR})
+HEADER({DISK-ERROR},{DERR},{DOVAR}, $ + CELLS(1) )
         DC      -1
 ;
 });_END_({_HOSTED_LINUX_})
@@ -4888,7 +4890,7 @@ drive used for mass storage. This is in MSDOS coding,
 The drive may be switched but this should only be
 attempted after forthcode({EMPTY-BUFFERS}) .},
 {{BLOCK},{FLUSH}}, {}, enddoc)
-HEADER({DRIVE},{LDRIVE},{DOVAR})
+HEADER({DRIVE},{LDRIVE},{DOVAR}, $ + CELLS(1) )
       DC  0
 ;
 WERR    DB      'DISK WRITE ERROR  $'
@@ -4982,7 +4984,7 @@ worddoc({STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},
 latest disk error in opening, using or closing the block file.
 One means an error and and zero means okay.
 },{{BLOCK},{R/W}}, {}, enddoc)
-HEADER({DISK-ERROR},{DSKERR},{DOVAR})
+HEADER({DISK-ERROR},{DSKERR},{DOVAR}, $ + CELLS(1) )
       DC  0
 });_END_({_USEBIOS_})
 ;
@@ -5063,7 +5065,7 @@ Word 1,2,4 6 and 7 must be restored to their previous value after
 calling forthcode({RBLK}) and forthcode({WLBK}) so as not to interfere
 with forthcode({R/W}). },
 {{R/W},{BLOCK},{OFFSET}}, {}, enddoc)
-HEADER({LBAPAR},{LBA},{DOVAR})
+HEADER({LBAPAR},{LBA},{DOVAR}, $ + CELLS(1) )
         DB      10H, 0      ;{ default    }
         DW      SPB         ;{ default    }
         DW      0           ;{ to be filled with offset}

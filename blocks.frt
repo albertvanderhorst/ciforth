@@ -197,7 +197,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  ( It is done by examples of the defined words )
  : -co DUP C>D >PFA @ CR H.. ." CONSTANT " ID.. CR ;
         CFOF BL @ BY -co
- : -va DUP C>D >PFA @ CR H.. ." VARIABLE " ID.. CR ;
+ : -va DUP C>D >PFA @ @ CR H.. ." VARIABLE " ID.. CR ;
         CFOF SELTAB @ BY -va
  : -us DUP C>D >PFA C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE @ BY -us
