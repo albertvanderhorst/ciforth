@@ -910,6 +910,27 @@ HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      DROP
         DC      SEMIS
 ;
+worddoc( {DENOTATIONS},{DEN^},{control_follows}, {--- b},{CI},
+{Leave forthvar({b}) the control character value of the char that follows
+_VERBOSE_({{i.e. forthsamp({^A}) results in 1 and so on}}).
+Skip another blank character.},
+{},
+{{^C .},{3 },
+{^I  .},{9 },
+{: GS1 ^C ; GS1 .},{3 },
+{: GS2 ^I ; GS2 .},{9 }}, enddoc)
+HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
+        DC      INBRS
+        DC      SWAP, DROP
+        DC      LDUP, QBL
+        DC      LIT, 10, QERR
+        DC      LIT, '@', LSUB
+        DC      LITER
+        DC      INBRS
+        DC      QBL, ZEQU, LIT, 10, QERR
+        DC      DROP
+        DC      SEMIS
+;
 worddocsafe( {DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({0}) .},
 {},
@@ -2566,30 +2587,15 @@ worddoc( {SCREEN},{SCR},{s_c_r},{--- addr},{U},
 by forthcode({LIST}) .},{{BLOCK}},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({SCR},{SCR},{DOUSE}, _CELLS(14))
+HEADER({SCR},{SCR},{DOUSE}, _CELLS(13))
 ;
-worddoc( {VOCABULARIES},{SEARCH},{search},{--- addr},{FIG,U,L0},
-{A double user variable containing containing the wid 's of the
-two vocabularies that are searched for definitions during
-interpretation. _VERBOSE_({This falls short of the 8 required
-by the ISO standard.}) },
-{{FOUND},{VOCABULARY},{CURRENT}},
-{{SEARCH @ ' FORTH >WID = .},{_T_}},
+worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
+{A user variable containing the compilation state. A non-zero value
+indicates compilation.},{},
+{{STATE @ .},{0},
+{ : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
 enddoc)
-HEADER({SEARCH},{SEARCH},{DOUSE}, _CELLS(16))
-;
-worddoc( {VOCABULARIES},{CURRENT},{compilation},{--- addr},{FIG,U,L0},
-{A user variable containing the WID of a vocabulary to which
-new words will be added. The WID has the structure of a
-dictionary entry. This allows to link in a new word between the
-link field of the WID and the next definition. _VERBOSE_({It is
-the forthdefi({compilation word list}) in the sens of the ISO
-standard.})
-},
-{{VOCABULARY},{SEARCH}},
-{{CURRENT @ ' FORTH >WID = .},{_T_}},
-enddoc)
-HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(18))
+HEADER({STATE},{STATE},{DOUSE}, _CELLS(18))
 ;
 worddoc( {FORMATTING},{BASE},{base},{--- addr},{ISO,FIG,U,L0},
 {A user variable containing the current number base used for input
@@ -2716,13 +2722,34 @@ position of the data stack top, and the previous value of forthsamp({HANDLER})},
 enddoc)
 HEADER({HANDLER},{HANDLER},{DOUSE}, _CELLS(32))
 ;
-worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
-{A user variable containing the compilation state. A non-zero value
-indicates compilation.},{},
-{{STATE @ .},{0},
-{ : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
+worddoc( {VOCABULARIES},{CURRENT},{compilation},{--- addr},{FIG,U,L0},
+{A user variable containing the WID of a vocabulary to which
+new words will be added. The WID has the structure of a
+dictionary entry. This allows to link in a new word between the
+link field of the WID and the next definition. _VERBOSE_({It is
+the forthdefi({compilation word list}) in the sens of the ISO
+standard.})
+},
+{{VOCABULARY},{SEARCH}},
+{{CURRENT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({STATE},{STATE},{DOUSE}, _CELLS(33))
+HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(33))
+;
+worddoc( {VOCABULARIES},{SEARCH},{search},{--- addr},{FIG,U,L0},
+{ The current search order is a zero ended row of WID 's found
+at an area in the user space forthvar({addr}) . The
+corresponding wordlists are searched for definitions during
+interpretation. At most M4_MAXWORDSET WID 's are present in
+this ciforth, while the ISO Search-Order wordset requires at
+least 8. },
+{{FOUND},{VOCABULARY},{CURRENT}},
+{{SEARCH @ ' FORTH >WID = .},{_T_}},
+enddoc)
+HEADER({SEARCH},{SEARCH},{DOUSE}, _CELLS(34))
+;
+;      IMPORTANT
+;     M4_MAXWORDSET USER SPACE CELLS MUST BE KEPT FREE
+;     IN ADDITION TO THE ONE FOR SEARCH
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -3719,21 +3746,6 @@ IWORD2:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
-worddoc( {PARSING},{^%},{control_follows}, {--- c},{CI},
-{
-Leave forthvar({c}) the control version of the
-first character of the following word.
-dnl non blank char that follows. Skip remaining non-blank characters.
-},
-{},
-{{^: HELL .},{8 },
-{^: X  .},{18 },
-{: GS1 ^: HELLO ; GS1 . },{8 },
-{: GS2 ^: X ; GS2 .},{18 }}, enddoc)
-HEADER({^:},{CTF},{DOCOL}, , B_IMMED)
-        DC       PWORD, DROP, CFET, LIT, 40H, LSUB, LITER
-        DC      SEMIS
-;
 worddoc( {PARSING},{CHAR},{char}, {--- c},{ISO,I},
 {Parse a word and
 leave forthvar({c}) the first non blank char of that word in the
@@ -3875,40 +3887,38 @@ TONUM9:
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
 { Look the string up forthvar({sc}) according to
-forthcode({(FIND)}) in both forthcode({SEARCH}) vocabularies.
+forthcode({(FIND)}) in the current search order.
  If found,
 leave the dictionary entry address forthvar({dea}) of the
 first entry found, else leave a nil pointer.},
-{{FIND},{VOCABULARY}},
+{{SEARCH}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 { 243 "BONNOBO" FOUND . .},{0 243},
 { 541 "MYBONOBO" FOUND . .},{0 541}
 },
 enddoc)
 HEADER({FOUND},{FOUND},{DOCOL})
-        DC      SEARCH, FETCH
-        DC      PFIND
-        DC      TOR
-        DC      RR, ZEQU
-        _0BRANCH(DFIN1)
-        DC      RDROP
-        DC      SEARCH, CELLP, FETCH
-        DC      PFIND
-        DC      TOR
-DFIN1:
-        DC      TDROP, FROMR
+        DC      SEARCH, TOR
+FOUND1: DC      RR, FETCH, LDUP
+        _0BRANCH(FOUND3)
+        DC      PFIND, LDUP, ZEQU
+        _0BRANCH(FOUND3)
+        DC      DROP
+        DC      FROMR, CELLP, TOR
+        _BRANCH(FOUND1)
+FOUND3: DC      RDROP
+        DC      SWAP,DROP,SWAP,DROP
         DC      SEMIS
 ;
 worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO},
 {For the (old fashioned) string _VERBOSE_({(stored with a
 preceeding character count)}) at forthvar({addr}) find a Forth
-word with that name in the first or second
-of the forthcode({SEARCH}) vocabularies.
+word in the current search order.
 Return its
 execution token forthsamp({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
-{{FOUND},{(FIND)}},
+{{SEARCH},{FOUND},{(FIND)}},
 {
 { : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
@@ -4361,17 +4371,20 @@ INTE1:
 ;       DC      TDUP, LTYPE
         DC      OVER, TOR       ; {Save old parse pointer.}
         DC      FOUND, LDUP, ZEQU
-        _0BRANCH(INTE3B) ;{IF}
+        _0BRANCH(INTE3A) ;{IF}
         DC      DROP
         DC      RR, ONE
         DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
-        DC      PFIND, SWAP, DROP, SWAP, DROP, LDUP
+        DC      PFIND, SWAP, DROP, SWAP, DROP,
+INTE3A:                  ;{THEN THEN }
+        DC      LDUP, ZEQU, LIT, 12, QERR
+        DC      LDUP, TFFA, FETCH
+        DC      LDUP, LIT, B_DENOT, LAND ;{Retain copy of flags.}
         _0BRANCH(INTE3B) ;{IF}
         DC      RR, ONEP, LIN, STORE
-INTE3B:                  ;{THEN THEN THEN}
+INTE3B:                  ;{THEN }
         DC      RDROP           ; {Drop old parse pointer.}
-        DC      LDUP, ZEQU, LIT, 12, QERR
-        DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
+        DC      LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) ;{IF}
         DC      TCFA
@@ -4461,12 +4474,13 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      ZERO, COMMA   ;{ Dummy name field}
         DC      DOES
 DOVOC:
-        DC      SEARCH
-        DC      SEARCH,CELLP
-        DC      LIT, _CELLS(1) ;{ISO would be at least 7 cells.}
+        DC      SEARCH, LDUP, CELLP
+        DC      LIT, _CELLS(M4_MAXWORDSET-1)
         DC      LMOVE
-
-        DC      CELLP   ;{ Get dummy DEA. }
+        DC      ZERO
+        DC      SEARCH, LIT, _CELLS(M4_MAXWORDSET), PLUS
+        DC      STORE ;{Trim sets of wordset.}
+        DC      CELLP   ;{ Make it a WID. }
         DC      SEARCH
         DC      STORE
         DC      SEMIS
@@ -4528,7 +4542,6 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      FETCH
         DC      CURR
         DC      STORE
-        DC      FORTH
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{(},{paren},{},{ISO,FIG,I,L0},
@@ -4631,6 +4644,7 @@ _ENDCOMMENT
         _STRINGINLINE({ciforth beta $RCSfile$ $Revision$ })
         DC      LTYPE
         DC      CR
+        DC      FORTH
         DC      FORTH
         DC      DEFIN
         DC      QUIT

@@ -36,7 +36,7 @@ dnl    Block buffer are allocated in the dictionary
 define( {_LOW_BUF_}, _no)dnl
 dnl    Booting directly into forth, from floppy or hard disk.
 define({_BOOTED_},_no)dnl
-dnl    Started by an operating system. 
+dnl    Started by an operating system.
 define({_HOSTED_},_no)dnl
 dnl    The 32 bit mode uses no paging for access to memory.
 define({_DIRECTMAPPED_},_no)dnl
@@ -149,6 +149,9 @@ dnl
 dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
 define({M4_EM},10000H)
 dnl
+dnl The maximum number of wordsets that can be in the search order.
+define({M4_MAXWORDSET},2)
+dnl
 dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.
 dnl
 dnl Applicable if 'SWITCH = _yes'
@@ -215,18 +218,18 @@ dnl such that the output is code, separation message, documentation.
 
 define({_SUPPRESSED}, )dnl
 dnl Switch the system to generate assembler source
-define( {_GENERATE_CODE}, 
+define( {_GENERATE_CODE},
 {divert(1)dnl}
 )
 
 dnl Switch the system to generate documentation
-define( {_GENERATE_DOC}, 
+define( {_GENERATE_DOC},
 {divert(3)dnl}
 )
 
 dnl Switch the system to split off testinfo
 dnl the real tests are further down the pipeline
-define( {_GENERATE_TEST}, 
+define( {_GENERATE_TEST},
 {divert(5)dnl}
 )
 
@@ -249,7 +252,7 @@ define({worddocsafe},
 {_GENERATE_CODE{}dnl}
 )dnl
 
-dnl Same for ``worddocchapter'' 
+dnl Same for ``worddocchapter''
 define({worddocchapter},
 {_GENERATE_DOC{}dnl}
 {{worddocchapter({$1},{ },{$3},{$4},{$5},{$6},{$7})}}
@@ -261,8 +264,7 @@ dnl m4 generates code on channel 1
 divert(2)dnl
 ; Split here for documentation
 dnl m4 generates documentation on 3
-divert(4)dnl 
+divert(4)dnl
 ; Split here for test
 dnl m4 generates tests on 5
 divert(-1){}dnl
-

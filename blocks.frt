@@ -15,7 +15,6 @@
 
 
 
-HEX
 : LC@ L@ FF AND ;
 : LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
  : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
@@ -30,6 +29,7 @@ HEX
 : ?16 ;         : ?32 LEAVE-BLOCK ;
 : ?PC MSMS 0= IF LEAVE-BLOCK THEN ;
 : ?LI LILI 0= IF LEAVE-BLOCK THEN ;
+
 COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
            I have a beautiful disclaimer,
      but this screen is too small to contain it.
@@ -138,7 +138,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
  ( ASSEMBLER 80x86 SAVE-BLOCKS) EXIT   120 LOAD   97 98 THRU
- : \ 0 WORD DROP ;  IMMEDIATE
+
  2 LIST    : TASK ;
  ( OLD:  NEW SYSTEM      23 LOAD   )
 ( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD )
@@ -162,9 +162,9 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  0 IVAR SELTAB 60 CELLS ALLOT   SELTAB IVAR SELTOP
  : T,  ( N--. Put N in select table)
      SELTOP @ !  0 CELL+ SELTOP +!  ;
- : CFOF ( --N Get cfa of word following )
-    [COMPILE] ' >CFA ;
- ( : CFA> ... ; ( N--N Converteer cfa naar dea )
+ : CFOF ( --N Get dea of word following )
+    [COMPILE] ' CFA> ;
+
  : ID.. CFA> ID. ; ( cfa--. Print a words name )
  : ID.+ DUP @ ID.. CELL+ ; ( dip -- dip' Print a words name )
  : SEL@    ( N--M,F F="value N present in table" )
@@ -188,23 +188,23 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
  : NEXTC ( DEA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-
+ VARIABLE LIM   : H.. BASE @ >R HEX . R> BASE ! ;  : B.. H.. ;
 
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
- VARIABLE LIM        : H.. BASE @ >R HEX . R> BASE ! ;
- : (KRAAK) ( CFA--. Decompile a word from its CFA)
+ : (KRAAK) ( DEA--. Decompile a word from its DEA)
   (  DUP NEXTD >NFA @ LIM ! Get an absolute limit)
     DUP @ SEL@ IF ( Is content of CFA known?)
        EXECUTE ( Assuming CFA also on stack)
     ELSE
-       CR DROP DUP DUP @ SWAP 5 CELLS + = IF
+        DROP CR
+        DUP >CFA @ OVER >PHA = IF
            ." Code definition : " ELSE ." Can't handle : "
        THEN ID.. CR
-    THEN ;  : B.. H.. ;
+    THEN ;
 : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
-      CFA> >FFA C@ 4 AND ;
+      >FFA @ 4 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
  : BY ( DEA --. the CFA word is decompiled using : )
@@ -3199,7 +3199,6 @@ FORTH
 
 
 
-
              `
 quityes899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES18
 MES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899
@@ -3209,6 +3208,7 @@ RIMES1899 PRI
 ES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 P
 899 PRIMES189
 THE BYTE BENCHMARK LASTED  7.650mS OK
+
 
 
 
