@@ -2284,7 +2284,17 @@ HEADER({COLD},{COLD},{DOCOL})
 });_END___1__({_LINUX_C_1_})
 ;____1_____ _LINUX_N_1_({
         DC      ZERO, LIT, TCGETS, TERMIO
-        DC      LIT, ioctl, LINOS, QLERR
+        DC      LIT, ioctl, LINOS, ZLESS
+        _0BRANCH(COLD1)
+        DC      LIT, STTERM_A 
+        DC      LIT, _PARAMETER_FIELD(STTERM) 
+        DC      LIT, STTERM_B-STTERM_A
+        DC      LCMOVE
+        DC      LIT, EXPEC_A 
+        DC      LIT, _PARAMETER_FIELD(EXPEC)
+        DC      LIT, EXPEC_B-EXPEC_A
+        DC      LCMOVE
+COLD1:
         DC      BLINI
 });_END___1__({_LINUX_N_1_})
         DC      ABORT
@@ -2791,6 +2801,12 @@ HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      ZERO, LIT, TCSETS, TERMIO
         DC      LIT, ioctl, LINOS, QLERR
         DC      SEMIS
+; Alternative: if no terminal, this is copied over above code during boot
+STTERM_A:       
+        DC      DROP, DROP
+        DC      SEMIS
+STTERM_B:
+        
 ;
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
@@ -2800,11 +2816,6 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      SEMIS
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
-        DC      LDUP,LIT,LF,EQUAL
-        _0BRANCH(EMIT1)
-        DC      LIT,ACR,EMIT
-        DC      ZERO,LOUT,STORE
-EMIT1:
         DC      SPFET, ONE, LTYPE
         DC      DROP
         DC      SEMIS
@@ -2820,9 +2831,24 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      FROMR, PLUS          ; Address
         DC      ZERO,SWAP,CSTOR      ; Erase it
         DC      SEMIS
+        RESB    CELLS(4)        ; Room for patching
+; Alternative: if no terminal, this is copied over above code during boot
+EXPEC_A:     
+        DC      OVER, OVER, ONEP, LERASE
+        DC      OVER, PLUS, SWAP     ; Bounds
+        DC      XDO
+EXPEC1: DC      KEY, LDUP, LIT, LF
+        DC      EQUAL
+        _0BRANCH(EXPEC2)
+        DC      LLEAV
+        _BRANCH(EXPEC3)
+EXPEC2: DC      IDO,CSTOR
+EXPEC3: _LOOP(EXPEC1)
+        DC      SEMIS
+EXPEC_B:
 ;
 HEADER({KEY},{KEY},{DOCOL})
-        DC      ONE, LIT, RAWIO, STTERM  ; Do not wait for CR
+        DC      ONE, LIT, RAWIO, STTERM ; Do not wait for CR
         DC      ZERO, SPFET     ; Expect single key on stack
         DC      ZERO            ; Standard input
         DC      SWAP, ONE       ; Buffer and length
