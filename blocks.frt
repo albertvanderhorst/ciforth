@@ -96,7 +96,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  MSG # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK
  (  DEBUG   SCR#6     A0JUN21 AVDHORST DFW HOLLAND)
 ( MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT )
-0 IVAR BASE'
+CREATE BASE' 0 ,
  : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
  : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
 ( Add a . after 4 digits )
@@ -3118,29 +3118,36 @@ PS ABA + BABAA
      >VFA @ VOC-LINK ! (  unlink)
   THEN ;
 
+( A free stack )
+: STACK CREATE HERE CELL+ , CELLS ALLOT DOES> ;
+100 STACK DEBUG-STACK
+: PUSH DEBUG-STACK @ SWAP OVER ! 1 CELLS +  DEBUG-STACK ! ;
+: POP DEBUG-STACK @ 1 CELLS - DUP @ SWAP DEBUG-STACK ! ;
+
+
+
+
+
+
+
+
+
+
+
 ( WORDS and VOCS )
-: WORDS 'ID. FOR-WORDS ;
+\ Print all vocabularies names in existence.
+: .VOCS 'ID. FOR-VOCS ;
+\ Print a voc's name from the WID)
+: .WID 0 CELL+ - BODY> ID. ;
+\ Print the current search order by vocabulary names
+: ORDER SEARCH BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT DROP ;
 
-: .VOC 2 CELLS - 2 - N>P ID. ;
-: VOCS '.VOC >CFA FOR-VOCS ;
-
-(   Up til LIMIT forget in all vocabularies.        )
-: FORGET [COMPILE] ' DUP H.
-    'FORGET-VOC >CFA FOR-VOCS DROP ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+'EXECUTE ALIAS NEW-EXEC  CREATE X
+: EXEC'  DUP ID. R> PUSH NEW-EXEC POP >R ;
+: DEBUG 'EXEC' 'EXECUTE 2 CELLS MOVE ;
+: NODEBUG 'EXECUTE DUP >R >PHA DUP   R@ >CFA !   R> >DFA !  ;
+: IP-DEBUG BEGIN POP $@ SWAP PUSH DUP ID. EXECUTE AGAIN ;
+: DEBUG: (WORD) FOUND >DFA @ PUSH IP-DEBUG POP DROP ;
 
 ( Test screens                                      )
 
