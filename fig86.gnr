@@ -159,7 +159,7 @@ LOADADDRESS     EQU     M4_LOADADDRESS
 ;____1_____ _SWITCH_1_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
-SANDBOXSIZE     EQU     1000H   ; { For stack items while switching modes.}
+SANDBOXSIZE     EQU     10000H   ; { For stack items while switching modes.}
 GDTSIZE         EQU     8000H   ; { For GDT-table.}
 SWITCHSEGMENT     EQU     (LOADADDRESS-M4_SWITCHORG)/10H ;{ @ DS and CS for real code }
 ; {The absolute address that agrees with ORG.}
@@ -208,9 +208,10 @@ RAWIO           EQU     (ECHO | ICANON)
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
     _ABSOLUTELOAD_1_({ ORG     M4_ORG})
+ORG0:
 
 ;____1_____ _BOOTFD__1_({
-ORG0:   JMP     SHORT BOOT
+        JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
         DB    "DFW--EXP"
@@ -301,7 +302,7 @@ BEGIN1: CALL    READSECTOR
 });_END___1__({ _BOOTFD__1_})
 
 ;____1_____ _BOOTHD__1_({
-ORG0:   JMP     SHORT BOOT
+        JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
         DB    "DFW---HD"
@@ -465,11 +466,11 @@ HERE6:  POP     AX                 ; { Calculate address of the first byte to mo
         MOV     DS,AX
         MOV     AX, (LOADADDRESS-M4_ORG)/10H ; Destination segment
         MOV     ES, AX
-        MOV     DI, TEXTEND-1
+        MOV     DI, TEXTEND-1 
         REPNZ
         MOVSB
         PUSH    ES    ; {Corrected code segment}
-        MOV BX, HERE5
+        MOV BX, HERE5 
         PUSH BX     ; {Correct program counter}
         RETF        ; {Returning to here5 now}
 HERE5:
@@ -2802,7 +2803,11 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;{ file I/O.    }
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTOR
-        DC      TOR, TOR
+        DC      TOR     ; { Count.}
+_BITS32_1_({; MSDOS cannot handle a 32 bits address: copy the buffer.})
+_BITS32_1_({        DC      LIT, TYPEBUF, RR, LCMOVE })
+_BITS32_1_({        DC      LIT, TYPEBUF })
+        DC      TOR     ; { Buffer address.}
         DC      LIT,04000H ;{ Write file or device }
         DC      ONE     ;{ Handle}
         DC      FROMR, FROMR, SWAP
@@ -2810,6 +2815,7 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      BDOS, DROP ;{ ignore error }
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
+_BITS32_1_({TYPEBUF:  _RESB    0100H })
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
         DC      LDUP,LIT,LF,EQUAL
@@ -2822,7 +2828,9 @@ EMIT1:
         DC      SEMIS
 ;
  HEADER({EXPECT},{EXPEC},{DOCOL})
-        DC      OVER
+_BITS32_1_({; MSDOS cannot handle a 32 bits address: use the buffer.})
+_BITS32_1_({        DC      LIT, EXPECTBUF})
+_BITS16_1_({        DC      OVER})
         DC      TOR, TOR
         DC      LIT,03F00H ;{ Write file or device }
         DC      ZERO     ;{ Handle}
@@ -2831,8 +2839,11 @@ EMIT1:
         DC      BDOS, DROP ;{ ignore error }
         DC      DROP, DROP, DROP ;{ Leave count}
         DC      TWO, LSUB ;{ Rid of 0D0A}
+_BITS32_1_({; Copy the buffer.})
+_BITS32_1_({        DC      TOR, LDUP, LIT, EXPECTBUF, SWAP, RR, LCMOVE, FROMR })
         DC      PLUS, ZERO, SWAP, CSTOR
         DC      SEMIS
+_BITS32_1_({EXPECTBUF:  _RESB    0100H })
 ;
 HEADER({KEY},{KEY},{DOCOL})
         DC         LIT, 1000H, ZERO, ZERO, ZERO
