@@ -1,4 +1,4 @@
-;
+
 
 ( First cell : contains bits down for each COMMAER still needed)
 ( Second cell contains bits up to be filled by FIX| )
@@ -50,12 +50,14 @@ DECIMAL
 : BOOKKEEPING CHECK TALLY OR! ;
 ( Accept a MASK with the bit for this commaer and the ADDRESS of)
 ( what is to be executed to comma. )
-: COMMAER <BUILDS  SWAP , , DOES> @+ BOOKKEEPING   @ EXECUTE ;
+: COMMAER <BUILDS  SWAP , , , DOES> @+ BOOKKEEPING   @ EXECUTE ;
 
-1 ' C, CFA COMMAER IB,   ( immediate byte data )
-2 ' ,  CFA COMMAER IX,   ( immediate data : cell )
-4 ' ,  CFA COMMAER X,    ( immediate data : address )
-8 ' C, CFA COMMAER P,     ( port number ; byte       )
+( The increasing order means that a decompiler hits them in the         )
+( right order                                                           )
+1   ' C, CFA   1        COMMAER IB, ( immediate byte data)
+2   ' ,  CFA   0 CELL+  COMMAER IX, ( immediate data : cell)
+4   ' ,  CFA   0 CELL+  COMMAER X,  ( immediate data : address)
+8   ' C, CFA   1        COMMAER P,  ( port number ; byte     )
 
 ( Fill in the tally prototype with FIRST and SECOND data )
 : T! PRO-TALLY CELL+ ! PRO-TALLY ! ;
@@ -128,7 +130,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 : %EXECUTE PFA CFA EXECUTE ;
 ( Execute the DEA with as data the                                        )
 ( NAMEFIELD that is given plus for all other words in                     )
-the same vocabulary., 
+(   the same vocabulary.,                                               )
 : FOR-REMAINING-AS
 BEGIN
 2DUP SWAP %EXECUTE
@@ -136,7 +138,7 @@ BEGIN
 DUP DICTEND? UNTIL
 DROP DROP 
 ;
-( Execute the DEA with as data each time                              )
+( Execute the DEA with as data each time                              ) 
 ( the namefield of the assembler vocabulary.                          )
 ( a dea can be found using % )
 : FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS ;
@@ -168,38 +170,56 @@ DROP DROP
 % MOV >INST  H.
 % MOV >MASK  H.
 % MOV >COMMA H.
-: DOIT 
+
+: SET+! DUP >R @ ! 0 CELL+ R> +! ;
+: SET <BUILDS HERE CELL+ , CELLS ALLOT DOES> ;
+: -SET DUP CELL+ SWAP ! ;
+: .SET DUP @ SWAP DO I . 0 CELL+ +LOOP ;
+12 SET DISS
+DISS 10 DUMP
+123456 DISS SET+!
+DISS 10 DUMP
+DISS .SET
+
+: -DISS DISS -SET ;
+: .DISS DISS DUP @ SWAP CELL+ DO I @ ID. 0 CELL+ +LOOP CR ;
+: +DISS DISS SET+! ;
+87654 +DISS
+DISS .SET
+-DISS
+
+." TO HIER?"
+^
+: DO-FIX 
  DUP IS-xFI IF 
 DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.) 
 CONTAINED-IN IF 
 DUP >BODY FIX| DROP   
-ID. 
++DISS 
 ELSE DROP THEN 
 ELSE DROP THEN ;
 % MOV >MASK TALLY !
 % MOV >COMMA TALLY CELL+ !
-% DOIT % MOV FOR-REMAINING-AS
+% DO-FIX % MOV FOR-REMAINING-AS                                     
 % LXI >MASK TALLY !
 % LXI >COMMA TALLY CELL+ !
-% DOIT % LXI FOR-REMAINING-AS DROP DROP
-
-(   : DO-INST                                                           )
-(      DUP >INST POST, DROP                                             )
-(      DUP ID.                                                          )
-(      [ % DOIT ] LITERAL SWAP FOR-REMAINING-AS                         )
-(   ;                                                                   )
+(   % DO-FIX % LXI FOR-REMAINING-AS                                     )
 
 ( Reconstruct from DEA an instruction with fixups. )
 : DO-INST 
     !TALLY                                                              
     DUP >BODY POST, DROP   
-    DUP ID.                       
-    [ % DOIT ] LITERAL SWAP FOR-REMAINING-AS  CR 
-;
+    DUP +DISS       
+    [ % DO-FIX ] LITERAL SWAP FOR-REMAINING-AS  
+    .DISS
+    -DISS
+;  
 : ONLY-DO-INST
    DUP IS-1PI IF DO-INST ELSE DROP THEN
 ;  
     % MOV DO-INST                                                       
     % LXI DO-INST                                                       
+    
 
-% ONLY-DO-INST FOR-ALL-AS
+
+    % ONLY-DO-INST FOR-ALL-AS                                           
