@@ -101,6 +101,7 @@ USRVER  EQU     0      ;{ USER VERSION NUMBER, a digit now}
 ;
 ;{      VERY ELEMENTARY .}
 CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.}
+ERRORSCREEN EQU     M4_ERRORSCREEN    ;{ Size of a cell in Forth, not in the bootcode.}
 ;
 ;{      MEMORY LAYOUT.}
 ;{ These values can be changed at this single place. }
@@ -2895,7 +2896,8 @@ HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(5))
 ;
 worddoc( {ERRORS},{WARNING},{warning},{--- addr},{FIG,U},
 {A user variable containing a value controlling messages. If it
-is 1, a screen system is present, and screen 4 is the base
+is 1, a screen system is present, and forthcode({ERRSCR}) contains
+the base
 location for messages. If it is 0, no such screen system is
 present and messages will be presented by number.
 If forthcode({WARNING}) is set to 0 and there are disk
@@ -3599,7 +3601,7 @@ catch e.g. disk errors.
 },
 {ERROR},
 {{0 12 ?ERROR},{},
- {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? MSG # 12 },
+ {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? MSG # 18 },
  {CR},{} },
 enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
@@ -3635,7 +3637,7 @@ worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
 {Issue error message if stack position differs from value saved in
 forthsamp({CSP}) .},{},
 {{!CSP ?CSP},{},
-{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? MSG # 14 },
+{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? MSG # 20 },
  {CR},{} },
 enddoc)
 HEADER({?CSP},{QCSP},{DOCOL})
@@ -3648,7 +3650,7 @@ HEADER({?CSP},{QCSP},{DOCOL})
 ;
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}},
-{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? MSG # 11 },
+{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? MSG # 17 },
  {CR},{} },
 enddoc)
 HEADER({?COMP},{QCOMP},{DOCOL})
@@ -3673,7 +3675,7 @@ worddoc( {SECURITY},{?PAIRS},{question_pairs},{n1 n2 --},{},
 {Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
 indicates that compiled conditionals do not match.},{{?ERROR}},
 {{ 1 1 ?PAIRS},{},
-{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? MSG # 13 },
+{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? MSG # 19 },
  {CR},{} },
 {},
 enddoc)
@@ -3685,7 +3687,7 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
 _LOAD_({
 worddoc( {SECURITY},{?LOADING},{question_loading},{},{},
 {Issue an error message if not loading},{{?ERROR}},
-{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? MSG # 16 },
+{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? MSG # 22 },
  {CR},{} },
 enddoc)
 HEADER({?LOADING},{QLOAD},{DOCOL})
@@ -4464,7 +4466,7 @@ Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a descript
 This word is executed by forthcode({CATCH}) before restarting the interpreter
 and can be revectored to give more elaborate diagnostics. },
 {{?ERROR},{WARNING}},
-{ {SCR @ DUP WHERE 2! 12 ERROR},{? MSG # 12},
+{ {SCR @ DUP WHERE 2! 12 ERROR},{? MSG # 18},
  {CR},{} },
 enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
@@ -4512,7 +4514,7 @@ forthcode({CATCH}), a non-zero forthsamp({tc}) aborts.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR}},
 {{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
-{ 2 3 12 THROW ; GS1 ? MSG # 12},
+{ 2 3 12 THROW ; GS1 ? MSG # 18},
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
@@ -5659,10 +5661,10 @@ forthsamp({0 MESSAGE}) prints the first line of this screen.
 _VERBOSE_({Traditionally this was screen 4, but the negative
 Unix error numbers makes this unattractive.})
 },{{C/L},{MESSAGE}},
-{{ERRSCR ?},{4}},
+{{HEX ERRSCR ?},{20}},
 enddoc)
 HEADER({ERRSCR},{ERRSCR},{DOVAR}, )
-        DC 4
+        DC ERRORSCREEN
 ;
 worddoc( {ERRORS},{MESSAGE},{message},{n --},{},
 {Print on the selected output device the text of line
@@ -5670,13 +5672,19 @@ forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
 positive or negative and beyond just screen forthcode({ERRSCR}).
 forthcode({MESSAGE}) is generally used to print error and
 warning messages.
+_PC_({This ciforth contains only messages with positive offset.})
+_HOSTED_LINUX_({The messages with only with negative offset contain
+the strings belonging to the return values for Linux system calls.})
+forthsamp({0 MESSAGE}) will print version information about the library file,
+the messages sit in.
 If forthcode({WARNING}) is zero, the message will simply be
-printed as a number (disc unavailable).
+printed as a number (disc unavailable) in decimal, ignoring the
+current forthcode({BASE}).
 },
 {{ERROR}},
 {
-{1 WARNING ! -20 MESSAGE}, {( -b This_option_is_available )},
-{0 WARNING ! 12 MESSAGE},{MSG # 12 }},
+{1 WARNING ! -190 MESSAGE}, {( -g This_option_is_available )},
+{0 WARNING ! HEX 12 MESSAGE},{MSG # 18 }},
 enddoc)
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      LWARN
@@ -5688,8 +5696,12 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         _BRANCH(MESS2)  ;{ELSE}
 MESS1:  _STRINGINLINE({MSG # })
         DC      LTYPE
-        DC      DOT     ;{THEN}
-MESS2:  DC      SEMIS
+        DC      BASE, FETCH
+        DC      DECA
+        DC      SWAP, DOT
+        DC      BASE, STORE
+MESS2:                      ;{THEN}
+        DC      SEMIS
 ;
 _PC_({
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
@@ -6395,7 +6407,7 @@ is aborted.
 {
 {0 ?LINUX-ERROR 1 ?LINUX-ERROR},{},
 {0 WARNING ! -20 ?LINUX-ERROR },
-{ ! -20 ?LINUX-ERROR ? MSG # -20},
+{ ! -20 ?LINUX-ERROR ? MSG # -32},
 {CR},{},
 },
 enddoc)
@@ -7474,10 +7486,10 @@ forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
 performs the read or write and records errors, but doesn't abort on them.},
 {{BLOCK},{DISK-ERROR}},
-dnl we can use block 0 for scratch
+dnl we can use block 2 for scratch, -b is not an option in use.
 {
-{PAD B/BUF 41 FILL PAD 1 0 R/W},{},
-{PAD B/BUF 45 FILL PAD 1 1 R/W},{},
+{PAD B/BUF 41 FILL PAD 2 0 R/W},{},
+{PAD B/BUF 45 FILL PAD 2 1 R/W},{},
 {PAD 23 + 5 TYPE},{AAAAA},
 },
 enddoc)
@@ -8760,8 +8772,8 @@ worddoc( {SCREEN},{TRIAD},{triad},{scr --},{},
 {Display on the selected output device the three screens which
 include that numbered forthsamp({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
-reference line at the bottom taken from line 15 of screen 4.},
-{{MESSAGE}},
+reference line at the bottom taken from line 0 of the first error screen.},
+{{MESSAGE},{ERRSCR} },
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({TRIAD},{TRIAD},{DOCOL})

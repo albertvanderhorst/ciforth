@@ -14,22 +14,22 @@ License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
-( -a This_option_is_available )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\
+( -a silent_version_of_require)
+( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
+\ This screen must be at a fixed location. To find REQUIRED.
+\ For LINE and WORD sc's : line CONTAINS word.
+: CONTAINS   0 PAD !   BL PAD $C+   PAD $+!   BL PAD $C+
+    0 ROT ROT   PAD @ - OVER + SWAP
+    DO   I PAD $@ CORA   0= IF DROP -1 LEAVE THEN   LOOP ;
+\ Find WORD in the block library and load it.
+: FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
+256 35 DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
+2DROP ;
+\ For WORD sc: it IS found but not a built-in denotation.
+: PRESENT? FOUND 'FORTH U< 0= ;
+\ Make sure WORD is present in the ``FORTH'' vocabulary.
+: REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
+: REQUIRE (WORD) REQUIRED ;
 ( -b This_option_is_available )
 
 
@@ -47,7 +47,7 @@ License along with this program; if not, write to the
 
 \
 ( -c PROGRAM_:_compile_PROGRAM_to_binary ) \ AvdH A1oct02
-28 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
+1 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT FILE-NAME
 : EXEC-NAME   FILE-NAME $@ + 4 - ".frt" CORA
     IF "a.out" ELSE FILE-NAME $@ 4 - THEN ;
@@ -62,40 +62,40 @@ FILE-NAME $@ INCLUDED
 LATEST CONSTANT XXX
 : DOIT [ XXX , ] BYE ;
 LATEST EXEC-NAME   TURNKEY
- MSG # 0 : CANNOT FIND WORD TO BE POSTPONED
- MSG # 1 : EMPTY STACK
- MSG # 2 : DICTIONARY FULL
- MSG # 3 : FIRST ARGUMENT MUST BE OPTION
- MSG # 4 : ISN'T UNIQUE
- MSG # 5 : EMPTY NAME FOR NEW DEFINITION
- MSG # 6 : DISK RANGE ?
- MSG # 7 : FULL STACK
- MSG # 8 : DISC ERROR !
- MSG # 9 : UNRESOLVED FORWARD REFERENCE
- MSG # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION
- MSG # 11 : WORD IS NOT FOUND
- MSG # 12 : NOT RECOGNIZED
- MSG # 13 : ERROR, NO FURTHER INFORMATION
- MSG # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY
- ( CIFORTH $Revision$ ADAPTED BY AvdH HCCFIG HOLLAND)
- ( ERROR MESSAGES   )
- MSG # 17 : COMPILATION ONLY, USE IN DEFINITION
- MSG # 18 : EXECUTION ONLY
- MSG # 19 : CONDITIONALS NOT PAIRED
- MSG # 20 : DEFINITION NOT FINISHED
- MSG # 21 : IN PROTECTED DICTIONARY
- MSG # 22 : USE ONLY WHEN LOADING
- MSG # 23 : OFF CURRENT EDITING SCREEN
- MSG # 24 : DECLARE VOCABULARY
- MSG # 25 : LIST EXPECTS DECIMAL
- MSG # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE
- MSG # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY
- MSG # 28 : AS: UNEXPECTED FIXUP/COMMAER
- MSG # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER
- MSG # 30 : AS: COMMAERS IN WRONG ORDER
- MSG # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK
+( -d This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
+( -e system_electives ) \ AvdH A1oct19
+.SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
+REQ CONFIG
+REQ L-S ( MAINTENANCE )
+REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
+REQ $.   REQ ^
+REQ EDITOR REQ OOPS
+\ REQ REFRESH ( temporaryly)
+REQ CRACK    REQ LOCATE
+ ( BACKUP        250 LOAD   77 81 THRU )
+( REQ ASSEMBLERi86 )
+( REQ DEADBEEF )
+
+
+: TASK ;   ( 'REQ HIDDEN)
+OK
 ( -f forth_words_to_be_executed_80_chars) \ AvdH A1oct05
-28 LOAD  REQUIRE CONFIG   ?LI
+1 LOAD  REQUIRE CONFIG   ?LI
 REQUIRE ARGV   REQUIRE CTYPE
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
 : DOIT   ARGV CELL+ CELL+
@@ -192,9 +192,8 @@ DOIT    COMMAND-BUFFER $@
 \
 ( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
 CREATE task
-28 LOAD   REQUIRE SHIFT-ARGS
+1 LOAD   REQUIRE SHIFT-ARGS
 \ Install other library
-\ Can't be done while interpreting from a block!
 : SWITCH-LIBS   BLOCK-EXIT
     ARGV 2 CELLS + @ Z$@ BLOCK-FILE $!
     BLOCK-INIT
@@ -204,7 +203,8 @@ CREATE task
 \ Must all be done in one go!
 SWITCH-LIBS
 
-FORGET SWITCH-LIBS
+
+
 \
 ( -m This_option_is_available )
 
@@ -255,7 +255,8 @@ FORGET SWITCH-LIBS
 
 \
 ( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
-.SIGNON CR 0 LIST  28 LOAD    : REQ REQUIRE ;
+\ Leave temporarily, replace by -e
+.SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
 REQ CONFIG
 REQ L-S ( MAINTENANCE )
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
@@ -266,7 +267,6 @@ REQ CRACK    REQ LOCATE
  ( BACKUP        250 LOAD   77 81 THRU )
 ( REQ ASSEMBLERi86 )
 ( REQ DEADBEEF )
-
 
 : TASK ;   ( 'REQ HIDDEN)
 OK
@@ -287,7 +287,7 @@ OK
 
 \
 ( -r :_make_require_available ) \ AvdH A1oct04
-.SIGNON   28 LOAD   OK
+.SIGNON   1 LOAD   OK
 
 
 
@@ -303,7 +303,7 @@ OK
 
 \
 ( -s SCRIPT-FILE_:_interpret_SCRIPT-FILE ) \ AvdH A1oct02
-DROP  28 LOAD    REQUIRE CTYPE   REQUIRE OLD:
+DROP  1 LOAD    REQUIRE CTYPE   REQUIRE OLD:
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT SCRIPT-NAME
 \ This error handler may be overwritten by the script.
 : MY-ERROR    DECIMAL
@@ -430,7 +430,7 @@ BYE
 
 
 \
-
+(    This_option_is_available )
 
 
 
@@ -446,22 +446,118 @@ BYE
 
 
 \
-( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
-\ This screen must be at a fixed location. To find REQUIRED.
-\ For LINE and WORD sc's : line CONTAINS word.
-: CONTAINS   0 PAD !   BL PAD $C+   PAD $+!   BL PAD $C+
-    0 ROT ROT   PAD @ - OVER + SWAP
-    DO   I PAD $@ CORA   0= IF DROP -1 LEAVE THEN   LOOP ;
-\ Find WORD in the block library and load it.
-: FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
-256 28 DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
-2DROP ;
-\ For WORD sc: it IS found but not a built-in denotation.
-: PRESENT? FOUND 'FORTH U< 0= ;
-\ Make sure WORD is present in the ``FORTH'' vocabulary.
-: REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
-: REQUIRE (WORD) REQUIRED ;
+(    This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 \
+(    This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
+( -  This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
+( -? This_option_is_available )
+
+8 LOAD
+
+
+
+
+
+
+
+
+
+
+
+
+\
+ ( CIFORTH $Revision$ ADAPTED BY AvdH HCCFIG HOLLAND)
+ MSG # 1 : EMPTY STACK
+ MSG # 2 : DICTIONARY FULL
+ MSG # 3 : FIRST ARGUMENT MUST BE OPTION
+ MSG # 4 : ISN'T UNIQUE
+ MSG # 5 : EMPTY NAME FOR NEW DEFINITION
+ MSG # 6 : DISK RANGE ?
+ MSG # 7 : FULL STACK
+ MSG # 8 : DISC ERROR !
+ MSG # 9 : UNRESOLVED FORWARD REFERENCE
+ MSG # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION
+ MSG # 11 : WORD IS NOT FOUND
+ MSG # 12 : NOT RECOGNIZED
+ MSG # 13 : ERROR, NO FURTHER INFORMATION
+ MSG # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY
+ MSG # 15 : CANNOT FIND WORD TO BE POSTPONED
+ MSG # 16 : (this error messages is not in use)
+ MSG # 17 : COMPILATION ONLY, USE IN DEFINITION
+ MSG # 18 : EXECUTION ONLY
+ MSG # 19 : CONDITIONALS NOT PAIRED
+ MSG # 20 : DEFINITION NOT FINISHED
+ MSG # 21 : IN PROTECTED DICTIONARY
+ MSG # 22 : USE ONLY WHEN LOADING
+ MSG # 23 : OFF CURRENT EDITING SCREEN
+ MSG # 24 : DECLARE VOCABULARY
+ MSG # 25 : LIST EXPECTS DECIMAL
+ MSG # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE
+ MSG # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY
+ MSG # 28 : AS: UNEXPECTED FIXUP/COMMAER
+ MSG # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER
+ MSG # 30 : AS: COMMAERS IN WRONG ORDER
+ MSG # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK
+ MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( ************** configuration *******************************)
 
 
@@ -735,7 +831,7 @@ $1B CONSTANT ESC    $0F CONSTANT SI   $0E CONSTANT SO
 
 
 (  H. B. DH. BASE? <HEX ) \ AvdH A1oct04
-( MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT )
+
 CREATE BASE' 0 ,
  : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
  : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
@@ -1761,7 +1857,7 @@ THEN THEN THEN THEN ;
 ( DISPATCHER )    HEX
 : AT-END VH 1 - VW * CURSOR ! SET ;
 : DEBUG CURSOR @ AT-END .S CURSOR ! ;
-: EXITING KEY 51 - IF PUT-S THEN ;
+: EXITING KEY 20 OR &q <> IF PUT-S THEN ;
 : ROUTE BEGIN KEY
 PRINT DELSTORING
 INSELETING JOINITTING
@@ -1940,7 +2036,7 @@ DECIMAL
 ( Prompt for floppy change, plus whatever needed.)
 : SWAP-FLOPPY   0 WARNING !
   "Swap floppy and press a key" TYPE
-  KEY &Q = IF ABORT THEN   0 '(FRD) CATCH DROP
+  KEY 32 OR &q = IF ABORT THEN   0 '(FRD) CATCH DROP
   EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
 
 \ copy a hd system, was written to a floppy to the
@@ -2282,7 +2378,7 @@ IF DROP UNLOOP 0 EXIT THEN 0= IF UNLOOP -1 EXIT THEN LOOP -1 ;
 BEGIN KEY >R
 R@ ^E = IF 1 - THEN R@ ^X = IF 1 + THEN
 R@ ^R = IF 8 - THEN R@ ^C = IF 8 + THEN
-DUP . DUP INSPECT R> &Q = UNTIL ;
+DUP . DUP INSPECT R> 20 OR &q = UNTIL ;
 DECIMAL  PREVIOUS
 
 
@@ -2689,7 +2785,7 @@ IMIN @ ;
 ( CRB compare_blocks_content ) ?32 ?PC HEX
 B/BUF 10 / CONSTANT SZ
 VARIABLE B
-: ?TERMINATE KEY &Q = IF QUIT THEN ;
+: ?TERMINATE KEY 20 OR &q = IF QUIT THEN ;
 : RWBUF0 0 BLOCK 0 LOCK ;   : RWBUF1 1 BLOCK 1 LOCK ;
 : CB B/BUF 0 DO
    OVER I +   OVER I +   SZ CORA
