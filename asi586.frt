@@ -19,7 +19,7 @@
 0 1        ' C, CFA   400000 COMMAER (RB,) ( byte relative to IP )
 0 2        ' W, CFA   200000 COMMAER SG,   (  Segment: WORD      )
 0 1        ' C, CFA   100000 COMMAER P,    ( port number ; byte     )
-0 2        ' C, CFA   080000 COMMAER IS,    ( Sign extended byte )
+0 1        ' C, CFA   080000 COMMAER IS,    ( Sign extended byte )
 0 0 CELL+  ' ,  CFA   040002 COMMAER IX,   ( immediate data : cell)
 0 1        ' C, CFA   040001 COMMAER IB,   ( immediate byte data)
 0 0 CELL+  ' ,  CFA   020008 COMMAER X,    ( immediate data : address/offset )
@@ -44,7 +44,9 @@
 0200 C000 0s T!
  4000 0s 0 4 xFAMILY|R  +1* +2* +4* +8*
 0200 10700 0s T!
- 0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP [BP [SI [DI
+ 0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP -- [SI [DI
+000280 10700 0s 0500 0s xFIR [BP   ( Fits in the hole, safe inconsistency check)
+000240 10700 0s 0500 0s xFIR [..   ( Fits in the hole, safe inconsistency check)
 
 0120 0700 0s T!
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
@@ -70,8 +72,8 @@
 0102 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 
-0240 1FF 00 1PI SIB,
-0280 0F8 00 1PI SIM,
+0280 1FF 00 1PI SIB,
+0240 1FF 00 1PI SIM,
 (   : (SIB}, TALLY @ !TALLY ((SIB}},                                    )
 (     30 XOR ( Toggle from using memory to registers}                   )
 (     TALLY ! ;                                                         )
@@ -83,21 +85,21 @@
 0401 0001 0s 0 0s xFIR B|
 0402 0001 0s 1 0s xFIR W|
 ( --------- two fixup operands ----------)
-0000 FF03 T!
+1000 FF03 T!
  0008 0000 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
-0000 FF01 T!
+1000 FF01 T!
  0002 0084 2 2FAMILY, TEST, XCHG,
-00 FF03 0088 2PI MOV,
-22 FF00 008D 2PI LEA,
-0022 FF00 T!   0001 00C4 2 2FAMILY, L|ES, L|DS,
-22 FF00 0062 2PI BOUND,  ( 3)
-02 FF00 0064 2PI ARPL,   ( 3)
-040002 FF00 0069 2PI IMULI, ( 3)
-080002 FF00 006B 2PI IMULSI, ( 3)
-02 FF0000 T! 100 00020F 2 3FAMILY, LAR, LSL, ( 3)
-02 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
-02 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
-0022 FF0000 T!   001 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
+1000 FF03 0088 2PI MOV,
+1022 FF00 008D 2PI LEA,
+1022 FF00 T!   0001 00C4 2 2FAMILY, L|ES, L|DS,
+1022 FF00 0062 2PI BOUND,  ( 3)
+1002 FF00 0063 2PI ARPL,   ( 3)
+041002 FF00 0069 2PI IMULI, ( 3)
+081002 FF00 006B 2PI IMULSI, ( 3)
+1002 FF0000 T! 100 00020F 2 3FAMILY, LAR, LSL, ( 3)
+1002 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
+1002 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
+1022 FF0000 T!   001 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
 1501 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
 1502 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
 ( --------- one fixup operands ----------)
@@ -120,9 +122,9 @@
 22 C700 T!  1000 18FF 2 2FAMILY, CALLFARO, JMPFARO,
 080002 C70000 T!   800 20BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI, ( 3) 
 02 C70000 T! ( It says X but in fact W : descriptor mostly - ) ( 3)  
- 1000 0800 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,  ( 3) 
+  080000 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,  ( 3) 
 22 C70000 T! ( It says X but in fact memory of different sizes) ( 3)  
-  1000 0800 000F0F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,       ( 3) 
+  080000 00010F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,       ( 3) 
 ( --------- no fixup operands ----------)
 01 20100 0s 0000 0s xFIR B'|
 02 20100 0s 0100 0s xFIR W'|
