@@ -827,6 +827,24 @@ configuration files.
 See the examples forthfile({msdos.cfg}) and forthfile({alone.cfg}) and the Makefile.
 You can find out what the options are by inspecting forthfile({prelude.m4}) .
 
+There is a division of labor between your configuration file
+and the forthfile({prelude.m4}) and forthfile({postlude.m4})
+files. forthfile({prelude.m4}) sets all variables to defaults,
+for sets of alternatives this is NO, waiting to be overwritten.
+For the other options it is the most sensible one. You must
+include forthfile({prelude.m4}) first in your configuration
+file. Then you specify your configuration and include
+forthfile({postlude.m4}). forthfile({postlude.m4}) will correct
+the options to the most, or the only, sensible ones for that configuration.
+It will reject some of the configurations that will not
+compile, or lead to programs that do not work. Then you can
+after including forthfile({postlude.m4}) overwrite some of the
+sensible defaults.
+An example is the default stack size of 64K
+for 32 bit programs. Sensible as it is, you may want to have a
+32 bit Forth that runs in 64K. You will overwrite that stack
+size. Be careful.
+
 With respect to the assembler you can choose between forthprog({nasm}) and forthprog({MASM.EXE}) , with
 file extension forthfile({.asm}) and forthfile({.msm}) respectively.
 The forthvar({.msm}) are acceptable by
@@ -878,11 +896,14 @@ forthmacro({_RWHD_}) is turned on because you wanted to boot
 from hard disk or you specified it yourself in the first place.
 Etc.
 
-forthfile({postlude.m4}) does you another favor. It derives logical consequences, such
-as once you decide for a forthmacro({_REAL_}) mode Forth, it must be forthmacro({_BITS16_})
-and you need not specify
-that_VERBOSE_({ (And yes, we could add a real mode 32 bits Forth, any volunteers?)}).
-In particular forthmacro({_LINUX_N_}) or forthmacro({_LINUX_C_}) define a whole configuration.
+forthfile({postlude.m4}) does you another favor. It derives
+logical consequences, such as once you decide for a
+forthmacro({_REAL_}) mode Forth, it must be
+forthmacro({_BITS16_}) and you need not specify that_VERBOSE_({
+(And yes, we could add a real mode 32 bits Forth, any
+volunteers?)}). In particular forthmacro({_LINUX_N_}) or
+forthmacro({_LINUX_C_}) define a whole configuration.
+
 
 @subsection Level 2 customization.
 You are on your own here.
@@ -1008,18 +1029,18 @@ forthsamp({_BITS32_(_lbracket_define(_lbracket__NEXT_rbracket_,_lbracket__NEXT32
 from forthfile({postlude.m4}).
 forthitem
 Enter the cold start at the origin.
-Upon the break, check that the interpretive pointer IP points within forthcodeni({ABORT})
+Upon the break, check that the interpretive pointer HIP points within forthcodeni({ABORT})
 and W points to forthcodeni({SP!}) .
-In ciforth IP is held in the Intel 86 register DI.
+But in the source the symbolic names is used.
 forthcodeni({COLD}) being a colon-definition,
-the IP has been initialized on the way to NEXT and your testing will
+the HIP has been initialized on the way to NEXT and your testing will
 begin in forthcodeni({COLD}) .
-The purpose of forthcodeni({COLD}) is to initialize IP, SP, RP, VP,
+The purpose of forthcodeni({COLD}) is to initialize HIP, SPO, RPO, UP,
 and some user variables from the start-up
 parameters at the origin.
 forthitem
 Continue execution one word at a time.
-Clever individuals could write a simple trace routine to print IP, W, SP, RP
+Clever individuals could write a simple trace routine to print HIP, WOR, SPO, RPO
 and the top of the stacks.
 Run in this single step mode until the greeting message is printed.
 Note that the interpretation is several hundred cycles to this stage!
