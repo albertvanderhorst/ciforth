@@ -22,12 +22,17 @@ ASSEMBLER DEFINITIONS  HEX
 \     0000,0010 F-P IEEE                   0000,0020 F-P VAX
 \     0000,0040 F-P Integer out            0000,0080 F-P Floating point out
 \     0000,0100 F-P Opcode 14              0000,0200 F-P Opcode 16 / 15
+\     0000,0400 az| must not be used       0000,0800 az| is actually used
+\     0000,1000 bz| must not be used       0000,2000 bz| is actually used
 \
 \     0001,0000 AMASK 0 is clear           0002,0000 Instruction requires AMASK 0
 \     0004,0000 AMASK 1 is clear           0008,0000 Instruction requires AMASK 1
 \     0010,0000 AMASK 2 is clear           0020,0000 Instruction requires AMASK 2
 \     0040,0000 AMASK 8 is clear           0080,0000 Instruction requires AMASK 8
 
+
+\ For DEA set and individual MASK to bad (or back).
+: !BAD    SWAP >BA SWAP TOGGLE ;
 ( Transform the XX.XXX code such as used in appendix C into             )
 ( a proper BI mask.                                                     )
 : BI: 0. &. (PARSE) >NUMBER 2DROP DROP 1A LSHIFT
@@ -76,11 +81,18 @@ ASSEMBLER DEFINITIONS  HEX
   b0| b1| b2| b3| b4| b5| b6| b7| b8| b9| b10| b11| b12| b13| b14| b15| b16|
   b17| b18| b19| b20| b21| b22| b23| b24| b25| b26| b27| b28| b29| b30| bz|
 
-
 2  0  03E0,0000 T!
 0020,0000 0   20 xFAMILY|
   a0| a1| a2| a3| a4| a5| a6| a7| a8| a9| a10| a11| a12| a13| a14| a15| a16|
   a17| a18| a19| a20| a21| a22| a23| a24| a25| a26| a27| a28| a29| a30| az|
+
+( Toggle some register fixup's back to interesting, i.e. make it show   )
+( up in disassembly.                                                    )
+'a0| 2 !BAD             'a7| 2 !BAD             'az| 2 !BAD
+'b0| 2 !BAD             'b7| 2 !BAD             'bz| 2 !BAD
+'c0| 2 !BAD             'c7| 2 !BAD             'cz| 2 !BAD
+\ Prohibit some instructions from using the zero register.
+'az| 0800 !BAD          'bz| 2000 !BAD
 
 ( ***************************** 8 bit data field ********************** )
 
@@ -102,13 +114,19 @@ ASSEMBLER DEFINITIONS  HEX
 
     BI: 0.10 BI: 10.1D 6 4FAMILY, CMPULT, CMPEQ, CMPULE, CMPLT, -- CMPLE,
 
-20,0000 0 F3I-MASK T!
-    BI: 0.01 BI: 1C.30 4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
-80,000 0 F3I-MASK BI: 1C.31    4PI       PERR,
+( Have ``bz|'' and ``R|'' fixed in the instruction. )
+20,0000 0 F3I-MASK  'bz| >BI @ XOR   'R| >BI @ XOR  T!
+    BI: 0.01 BI: 1C.30 'bz| >DATA @ OR   'R| >DATA @ OR  4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
+( Resolve conflict with ``FTOIT,'' )
+' CTPOP, 0400 !BAD
+
+( ***************************** 4.13 MULTIMEDIA *********************** )
 
 80,0000 0 F3I-MASK T!
-    BI: 0.01 BI: 1C.34 0C 4FAMILY, UNPKBW, UNPKBL, PKWB, PKLB, MINSB8, MINSW4,
-    MINUB8, MINUW4, MAXUB8, MAXUW4, MAXSB8, MAXSW4,
+    BI: 0.01 BI: 1C.31 0F 4FAMILY, PERR, -- -- UNPKBW, UNPKBL, PKWB, PKLB,
+    MINSB8, MINSW4, MINUB8, MINUW4, MAXUB8, MAXUW4, MAXSB8, MAXSW4,
+( Resolve conflict with ``FTOIS,'' )
+' MINSB8, 0400 !BAD
 
 ( ***************************** 4.5 LOGIC ***************************** )
 
@@ -151,7 +169,6 @@ ASSEMBLER DEFINITIONS  HEX
 \ 0020 0 0600 0000 xFI F|       ( VAX)
 \ 0220 0 0600 0200 xFI D|
 \ 0020 0 0600 0400 xFI G|
-
 
 ( ***************************** 4.10 FP Operate *********************** )
 
@@ -200,9 +217,9 @@ A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
 54 0 F3F-MASK T!
     BI: 0.010 BI: 14.004 3 4FAMILY, ITOFS, ITOFF, ITOFT,
 
-( At Dec the /C bit is set in the instruction, no /N. )
-54 0 F3F-MASK T!
-    BI: 0.008 BI: 1C.030 2 4FAMILY, FTOIT, FTOIS,
+( Fix ``az|'' in the instruction, disallow ``bz|''. See ``CTPOP''       )
+1054 0 F3F-MASK 'az| >BI @ XOR   T!
+    BI: 0.008 BI: 1C.030  'az| >DATA @ OR   2 4FAMILY, FTOIT, FTOIS,
 
 ( **************************** Misc Opr ******************************  )
 
@@ -283,12 +300,7 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 \   Toggle the bit that governs showing uninteresting instructions in the disassembly.
 : TOGGLE-TRIM    BA-DEFAULT 1 TOGGLE ;
 
-\ Define the instruction part DEA as interesting, i.e. make it show up
-\   in disassembly.
-: INTERESTING!   >BA 2 TOGGLE ;
-'a0| INTERESTING!       'a7| INTERESTING!       'az| INTERESTING!
-'b0| INTERESTING!       'b7| INTERESTING!       'bz| INTERESTING!
-'c0| INTERESTING!       'c7| INTERESTING!       'cz| INTERESTING!
+4 I-ALIGNMENT !
 
 : SHOW:   TOGGLE-TRIM SHOW: TOGGLE-TRIM ;
 : SHOW-ALL   TOGGLE-TRIM SHOW-ALL TOGGLE-TRIM ;
