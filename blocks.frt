@@ -87,7 +87,7 @@ REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
 REQ $.   REQ ^
 \ REQ REFRESH ( temporaryly)
 REQ CRACK    REQ LOCATE
-REQ EDITOR REQ OOPS                             EXIT
+REQ EDITOR REQ OOPS                         OK  EXIT
  ( BACKUP        250 LOAD   77 81 THRU )
 ( REQ ASSEMBLERi86 )
 ( REQ DEADBEEF )
@@ -1771,10 +1771,10 @@ CREATE cmdbuf 1000 ALLOT
 
 \ Change directory to SC .
 : cdED PAD $! 0 PAD $C+
-PAD CELL+ HERE HERE 12 LINOS ?LINUX-ERROR ;
+PAD CELL+ HERE HERE 12 LINOS ?ERRUR ;
 \ Idem but string from input.
 : cd (WORD) cdED ;
-( cat echo diff grep list ls make man rm   ee l ) \ AvdH A1oct0
+( cat echo diff grep list ls make man rm cp ee l ) \ AvdH 
 REQUIRE OS-IMPORT       ?LI
 "cat    "   OS-IMPORT cat
 "echo   "   OS-IMPORT echo
@@ -1784,12 +1784,12 @@ REQUIRE OS-IMPORT       ?LI
 "ls     "   OS-IMPORT ls
 "make   "   OS-IMPORT make
 "man    "   OS-IMPORT man
+"cp     "   OS-IMPORT cp
 "rm  -i "   OS-IMPORT rm
 
 "ee     "   OS-IMPORT ee
 "l      "   OS-IMPORT l
 ""          OS-IMPORT !!
-
 ( EDITOR ) REQUIRE CONFIG   ?PC    \ AvdH A1oct05
 REQUIRE IVAR   REQUIRE +THRU
 REQUIRE VIDEO-MODE   REQUIRE $
