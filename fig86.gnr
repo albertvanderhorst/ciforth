@@ -702,14 +702,14 @@ CODE_HEADER({EXECUTE},{EXEC})
 ;{                                 }
 CODE_HEADER({BRANCH},{BRAN})      
 BRAN1:	ADD     SI,[SI]           
-	JMP SHORT     NEXT    ;{ JUMP TO OFFSET}
+	_NEXT    ;{ JUMP TO OFFSET}
 ;
 CODE_HEADER({0BRANCH},{ZBRAN})
 	POP	AX	;{ GET STACK VALUE}
 	OR	AX,AX	;{ ZERO?}
 	JZ	BRAN1	;{ YES, BRANCH}
 	LEA	SI,[SI+CELLS(1)]
-	JMP SHORT     NEXT
+	_NEXT                            
 	PAGE
 HEADER({NOOP},{NOOP},{$+4})
 ;{	DEBUG STUFF}
@@ -733,7 +733,7 @@ XLOO1:	ADD	[BP],BX	;{ INDEX = INDEX + INCR}
 ;{  END OF `DO' LOOP}
 	ADD	BP,_BYTE CELLS(2)  ;{ ADJ RETURN STACK}
 	LEA	SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
-	JMP     NEXT
+        _NEXT                                  
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
 	POP	BX	;{ GET LOOP VALUE}
@@ -746,7 +746,7 @@ CODE_HEADER({(DO)},{XDO})
 	PUSH	AX
 	PUSH	DX
 	XCHG	BP,STACKPOINTER   ;{ GET PARAMETER STACK}
-	JMP	NEXT
+        _NEXT                            
 	PAGE
 CODE_HEADER({I},{IDO})
 	MOV	AX,[BP]	;{ GET INDEX VALUE}
@@ -946,7 +946,7 @@ CODE_HEADER({CMOVE},{LCMOVE})
 ;{       MOV	ES,AX	;ES <- DS}
 	REP	MOVSB	;{THAT'S THE MOVE}
 	MOV	SI,BX	;{GET BACK IP}
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({U*},{USTAR})
 	POP	AX
@@ -994,7 +994,7 @@ CODE_HEADER({SP@},{SPFET})
 CODE_HEADER({SP!},{SPSTO})
 	MOV	BX,[UP]   ;{USER VAR BASE ADDR}
 	MOV	STACKPOINTER,[CELLS(3)+BX]        ;{RESET PARAM STACK POINTER}
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
 	MOV	AX,BP	;{RETURN STACK ADDR}
@@ -1003,24 +1003,24 @@ CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
 CODE_HEADER({RP!},{RPSTO})
 	MOV	BX,[UP]   ;{(AX) <- USR VAR BASE}
 	MOV	BP,[CELLS(4)+BX]        ;{RESET RETURN STACK PTR}
-	JMP	NEXT
+        _NEXT                            
 	PAGE
 CODE_HEADER({;S},{SEMIS})
 	MOV	SI,[BP]	;{(IP) <- (R1)}
 	LEA	BP,[BP+CELLS(1)]
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
 	MOV	AX,[BP]	;{GET INDEX}
 	MOV	[CELLS(1)+BP],AX        ;{STORE IT AT LIMIT}
-	JMP	NEXT
+        _NEXT                            
 	PAGE
 ;
 CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
 	POP	BX	;{GET STACK PARAMETER}
 	LEA	BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
 	MOV	[BP],BX	;{ADD TO RETURN STACK}
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
 	MOV	AX,[BP]	;{ GET RETURN STACK VALUE}
@@ -1083,7 +1083,7 @@ CODE_HEADER({OVER},{OVER})
 ;
 CODE_HEADER({DROP},{DROP})
 	POP	AX
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({SWAP},{SWAP})
 	POP	DX
@@ -1106,13 +1106,13 @@ CODE_HEADER({+!},{PSTOR})
 	POP	BX	;{ADDRESS}
 	POP	AX	;{INCREMENT}
 	ADD	[BX],AX
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({TOGGLE},{TOGGL})
 	POP	AX	;{BIT PATTERN}
 	POP	BX	;{ADDR}
 	XOR	[BX],AL	;
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({@},{FETCH})
 	POP	BX
@@ -1135,13 +1135,13 @@ CODE_HEADER({!},{STORE})
 	POP	BX	;{ADDR}
 	POP	AX	;{DATA}
 	MOV	[BX],AX
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({C!},{CSTOR})
 	POP	BX	;{ADDR}
 	POP	AX	;{DATA}
 	MOV	[BX],AL
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({2!},{TSTOR})
 	POP	BX	;{ADDR}
@@ -1149,7 +1149,7 @@ CODE_HEADER({2!},{TSTOR})
 	MOV	[BX],AX
 	POP	AX	;{LSW}
 	MOV	[CELLS(1)+BX],AX
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({L@},{LFET})
 ;____1_____ _BITS32_1_({
@@ -1173,7 +1173,7 @@ CODE_HEADER({L@},{LFET})
 	MOV	DS,DX
         JMPHERE_FROM_REAL
 	PUSH    BX
-	JMP	NEXT
+        _NEXT                            
 });_END___1__({ _BITS16_1_})
 ;
 CODE_HEADER({L!},{LSTORE})
@@ -1187,7 +1187,7 @@ CODE_HEADER({L!},{LSTORE})
 
 	POP	BX
 	MOV	[AX],BX
-	JMP	NEXT
+        _NEXT                            
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
 	POP	BX
@@ -1199,7 +1199,7 @@ CODE_HEADER({L!},{LSTORE})
 	MOV	[BX],AX
 	MOV	DS,DX
         JMPHERE_FROM_REAL
-	JMP	NEXT
+        _NEXT                            
 });_END___1__({ _BITS16_1_})
 	PAGE
 	;{ At line     LINE ~1000}
@@ -1222,7 +1222,7 @@ DOCOL:	LEA     BP,[BP-CELLS(1)]
         JMPHERE_FROM_PROT
         JMPHERE_FROM_REAL
 });_END___1__({ _PROTECTED_1_})
-	JMP	NEXT
+        _NEXT                            
 ;
 HEADER({;},{SEMI},{DOCOL},1)
 	DC	QCSP
@@ -1748,7 +1748,7 @@ CODE_HEADER({FILL},{FILL})
 ;{       MOV	ES,BX	; ES <- DS}
 	CLD		;{ INC DIRECTION}
 	REP	STOSB	;{STORE BYTE}
-	JMP	NEXT
+        _NEXT                            
 ;
 HEADER({ERASE},{ERASEE},{DOCOL})
 	DC	ZERO
@@ -2146,7 +2146,7 @@ _ENDCOMMENT
 ;{	WARM START VECTOR COMES HERE}
 ;
 WRM:	MOV	SI,_OFFSET WRM1
-	JMP	NEXT
+        _NEXT                            
 ;
 WRM1	DC	WARM
 ;
@@ -2172,7 +2172,7 @@ LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
 	CLD			;{ DIR = INC}
 	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
 	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
-	JMP	NEXT
+        _NEXT                            
 ;
 CLD1	DC	COLD
 ;
@@ -2374,7 +2374,7 @@ CODE_HEADER({PC!},{PCSTO})
 	POP	DX	;{PORT ADDR}
 	POP	AX	;{DATA}
 	OUT	{DX},AL   ;{ BYTE OUTPUT}
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({P@},{PFET})
 ;{ FETCH WORD FROM PORT}
@@ -2387,7 +2387,7 @@ CODE_HEADER({P!},{PSTO})
 	POP	DX	;{PORT ADDR}
 	POP	AX	;{DATA}
 	OUT	{DX},AX   ;{WORD OUTPUT}
-	JMP	NEXT
+        _NEXT                            
 ;
 HEADER({USE},{USE},{DOVAR})
 	;{ADDR OF NEXT BUFR TO USE}
@@ -2543,7 +2543,7 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
 	PUSH     CX      
 	PUSH     DX      
 	PUSH     DI     ;{ i.e. flags }
-	JMP     NEXT    ;
+        _NEXT                            
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
 ;{ Generic call on MSDOS/MS WIndows2000}
@@ -2571,7 +2571,7 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     CX      
 	PUSH     DX      
 	PUSH     DI     ;{ i.e. flags }
-	JMP     NEXT    
+        _NEXT                            
 
 	     ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
@@ -2728,7 +2728,7 @@ PEMIT	DC	$+CELLS(1)
 	MOV	AL,LF  
 	;{ Bizar, without the colon MASM reports error.}
 PEMIT1: CALL	CHO    ;{CHAR OUTPUT}
-	JMP	NEXT
+        _NEXT                            
 CHO	PROC	NEAR
 	PUSH	DX
 	PUSH	AX	;{SAVE CHAR}
@@ -2966,7 +2966,7 @@ DERR:	PUSH	AX
 DOK:	POPF		;{POP FLAGS}
 	POP	BP	;{RETURN STACK}
 	POP	SI	;{INTERPRETER PNTR}
-	JMP	NEXT
+        _NEXT                            
 ;
 ;
 ;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
@@ -3064,7 +3064,7 @@ CODE_HEADER({RBLK},{RBLK})
 	POP	BP	;{RETURN STACK}
 	POP	SI	;{INTERPRETER PNTR}
 	PUSH    BX      ;{ REMEMBER STATUS}
-	JMP	NEXT
+        _NEXT                            
 ;
 CODE_HEADER({WBLK},{WBLK})
 	POP     AX     
@@ -3082,7 +3082,7 @@ CODE_HEADER({WBLK},{WBLK})
 	POP	BP	;{RETURN STACK}
 	POP	SI	;{INTERPRETER PNTR}
 	PUSH    BX
-	JMP	NEXT
+        _NEXT                            
 
 ;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})

@@ -87,4 +87,4 @@ define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPFAR},{DB    0EAH})dnl
 define({CELLS},(CW*$1))dnl
-        
+define({_NEXT},{JMP     NEXT})   
