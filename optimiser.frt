@@ -139,33 +139,63 @@ VARIABLE CURRENT-DEA
         EMPTY>
     THEN ;
 
-\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
-: (EXPAND)
-    BEGIN DUP CR &N EMIT ^
-        NEXT-PARSE
-    WHILE CURRENT-DEA !
+\ BEGIN END DEA copy DEA's CODE to HERE.
+\ Leave END.
+: FOLD-BODY
+        CURRENT-DEA !
         CR &E EMIT ^ ?OPT-EXEC?
         CR &F EMIT ^ ?OPT-FOLD?
+;
+
+\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
+\ Do not initialise, or terminate.
+: (FOLD)
+    BEGIN DUP CR &N EMIT ^
+        NEXT-PARSE
+    WHILE  FOLD-BODY
     REPEAT CR &L EMIT ^ DROP DROP DROP
 ;
 
-\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
-: EXPAND
-    !OPT-START
-    (EXPAND)
-    ^ CASH   ^ POSTPONE (;) ^
-;
+\ Copy the DEA's high level code to ``HERE'' ,  possibly folding it.
+\ Leave a POINTER to the equivalent optimised code.
+: FOLD   HERE SWAP    !OPT-START   >DFA @ (FOLD)   CASH   POSTPONE (;)  ;
+
+\ For BEGIN END : copy the DEA's high level or low level code to here.
+\ This is assuming only low level code is followed by in line stuff.
+\ In high level coding doing this you must block optimisation.
+\ Leave END.
+: FOLD-HIGH/LOW    DUP HIGH-LEVEL? IF >DFA @ (FOLD) SWAP DROP
+ELSE FOLD-BODY THEN ;
+
+\ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
+\ Do not initialise, or terminate.
+: (EXPAND) BEGIN DUP NEXT-PARSE ^ WHILE FOLD-HIGH/LOW REPEAT 2DROP DROP ;
+
+\ Expand each constituent of DEA to ``HERE'' ,  possibly folding it.
+\ Leave a POINTER to the equivalent optimised code.
+: EXPAND   HERE SWAP    !OPT-START   >DFA @ (EXPAND)   CASH   POSTPONE (;)  ;
+
+\ Optimise DEA regards folding.
+: OPT-FOLD  DUP FOLD   SWAP >DFA ! ;
 
 \ Try and optimise the DEA with respect to method `B' (HL inlining.)
 \ Reach trough to underlying levels.
 CREATE OPTIMISE-O
 
+\ For DEA remember that it has been optimised
+: !OPTIMISED   FMASK-HO SWAP >FFA OR!  ;
+
+\ For DEA : it IS eligable for high level optimisation.
+: H-OPTIMISABLE?  DUP HIGH-LEVEL?  SWAP  >FFA @ FMASK-HO AND 0=  AND ;
+
+\ ---- tested -------------------------------
 \ For all elements of DEA attempt a ``OPTIMISE-O'' .
 \ Leave a flag indicating that the DEA itself is b-optimisable.
-: OPTIMISE-O1 DUP HIGH-LEVEL? OVER >FFA @ FMASK-HO AND 0= AND IF
+: OPTIMISE-O1 DUP H-OPTIMISABLE? IF
     -1 >R
     >DFA @ BEGIN NEXT-PARSE WHILE
     CFA> DUP OPTIMISE-O
+    DUP FILL-SE    DUP FILL-OB
     B-INLINABLE? R> AND >R REPEAT
     2DROP R>  \D .S
     ELSE
@@ -175,20 +205,13 @@ CREATE OPTIMISE-O
 
 \ Concatenate the code of all elements of DEA , turning it into
 \ a collapsed HL definition. This must be allowed or we crash.
-: OPTIMISE-O2 DUP >R HERE >R
-    >DFA @ !OPT-START
-    BEGIN NEXT-PARSE ^ WHILE >DFA @ (EXPAND) REPEAT
-    2DROP CASH POSTPONE (;)
-    R> R@ >DFA !
-    FMASK-HO R> >FFA OR! ;
+: OPTIMISE-O2 DUP EXPAND SWAP >DFA ! ;
 
 \ Resolve OPTIMISE-O
-: (OPTIMISE-O)
-    DUP OPTIMISE-O1 IF OPTIMISE-O2 _ THEN DROP ;
+: (OPTIMISE-O) DUP OPTIMISE-O1 IF DUP OPTIMISE-O2 THEN !OPTIMISED ;
+
 '(OPTIMISE-O)   'OPTIMISE-O 3 CELLS MOVE
 
-\ Optimise DEA regards folding.
-: OPT-FOLD  >DFA HERE    OVER @ EXPAND   SWAP ! ;
 \D : test 1 SWAP 3 2 SWAP ;
 \D 'test OPT-FOLD
 \D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
