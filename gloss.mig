@@ -141,7 +141,7 @@ worddocsafe({(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},{
         Addr2 is the address of the first unconvertable digit.},{{NUMBER}})
 
 
-worddoc({*},{star},{n1  n2  ---  prod},{L0},{
+worddocsafe({*},{star},{n1  n2  ---  prod},{L0},{
         Leave the signed product of two signed numbers.},{})
 
 
@@ -232,13 +232,13 @@ worddoc({-TRAILING},{dash_trailing},{addr n1 --- addr n2},{},{
         forthvar({addr+n1}) to forthvar({addr+n2}) are blanks.},{})
 
 
-worddoc({.},{dot},{n  ---},{L0},{
+worddocsafe({.},{dot},{n  ---},{L0},{
         Print a number from a signed l6 bit two's complement value,
         converted according to the numeric forthcode({BASE}) .
         A trailing blanks follows.},{})
 
 
-worddoc({."},{dot_quote},{},{P,L0},{
+worddocsafe({."},{dot_quote},{},{P,L0},{
         Used in the form:
             forthcode({." cccc"})
         Compiles an in-line string cccc (delimited by the trailing ") with
@@ -254,7 +254,7 @@ worddoc({-LINE},{dash_line},{line scr --},{},{
         line and screen number. Trailing blanks are suppressed.},{})
 
 
-worddoc({.R},{dot_r},{n1  n2  ---},{
+worddocsafe({.R},{dot_r},{n1  n2  ---},{
         Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
         following blank is printed.},{})
 
