@@ -31,16 +31,26 @@
 ( Inconsistent:  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
-(               10 Register op        20 Memory op                    )
-(               40 D0                 80 [BP]' {16} [BP] {32}         )
-(  sib:        100 normal             200 [AX +8*| DI]               )
+(               10 Register op         20 Memory op                    )
+(               40 D0| SIM|            80 [BP]' {16} [BP] SIB| {32}     )
+(  sib:       0100 no ..             0200 [AX +8*| DI]               )
+(  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
+(  segment    1000 no ..             2000 ES| ..                        )
 ( Only valid for 16 bits real mode, in combination with an address      )
 ( overwite. Use W, L, and end the line in TALLY! to defeat checks.      )
+
+0200 3800 0s T!
+ 0800 0s 0 8 xFAMILY|R AX] CX] DX] BX] 0] BP] SI] DI]
+0200 C000 0s T!
+ 4000 0s 0 4 xFAMILY|R  +1* +2* +4* +8*
+0200 10700 0s T!
+ 0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP [BP [SI [DI
+
 0120 0700 0s T!
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
 ( A0 0720 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check)
  0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX]
-010120 0700 0s 0400 0s xFIR SIB|   ( Fits in the hole, requires also SIB, )
+0101A0 0700 0s 0400 0s xFIR SIB|   ( Fits in the hole, requires also SIB, )
 0001A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
@@ -53,28 +63,25 @@
 020128 C000 0s 8000 0s xFIR      DW|
 000110 C000 0s C000 0s xFIR      R|
 ( 020008 C700 0s 0600 0s xFIR      MEM|' ( Overrules D0| [BP]')
-008120 C700 0s 0400 0s xFIR SIM|   ( Overrules D0| SIB| )
+0081A0 C700 0s 0400 0s xFIR SIM|   ( Overrules D0| SIB| )
 020108 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )
-0101 3800 0s T!
+1101 3800 0s T!
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
 0102 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 
-0200 3800 0s T!
- 0800 0s 0 8 xFAMILY|R AX] CX] DX] BX] SP] BP] SI] DI]
-0200 C000 0s T!
- 4000 0s 0 4 xFAMILY|R  +1* +2* +4* +8*
-0200 10700 0s T!
- 0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP [BP [SI [DI
-0200 1FF 00 1PI SIB,
-0200 0F8 00 1PI SIM,
+0240 1FF 00 1PI SIB,
+0280 0F8 00 1PI SIM,
 (   : (SIB}, TALLY @ !TALLY ((SIB}},                                    )
 (     30 XOR ( Toggle from using memory to registers}                   )
 (     TALLY ! ;                                                         )
 
+( --------- 0F must be found last -------)
+2000 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
+2000 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
 0000 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
-0001 0001 0s 0 0s xFIR B|
-0002 0001 0s 1 0s xFIR W|
+0401 0001 0s 0 0s xFIR B|
+0402 0001 0s 1 0s xFIR W|
 ( --------- two fixup operands ----------)
 0000 FF03 T!
  0008 0000 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
@@ -91,6 +98,8 @@
 02 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
 02 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
 0022 FF0000 T!   001 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
+1501 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
+1502 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
 ( --------- one fixup operands ----------)
 040000 C701 00C6 2PI MOVI,
 0012 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
@@ -128,16 +137,14 @@
 
 ( --------- special fixups ----------)
 
-00     10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
-00     40E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
-400000 50F 70 1PI J,
+0800     10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
+0800     40E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
+400800 50F 70 1PI J,
 
-00 21800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
-00 218 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
-02 2DF02 08C 2PI MOV|SG,
+2102 DF02 08C 2PI MOV|SG,
 
 00 20002 0s 00 0s xFIR 1|   00 20002 0s 02 0s xFIR V|          ( 3) 
-0 2C703 T! ( 20000 is a lockin for 1| V|)                      ( 3) 
+0100 2C703 T! ( 20000 is a lockin for 1| V|)                   ( 3) 
  0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, SAL, SAR,  ( 3) 
 
 02 3841 0s T!   ( 40 is the lock-in byte for MOV|CD ..CRx| / DRx| ) ( 3)
@@ -145,12 +152,10 @@
  0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
 12 3F4300 C0200F 3PI  MOV|CD,
 
-800000 50F00 800F 2PI J|X,                                           ( 3)
-00 0021 0s T!   01 0s 0 2 xFAMILY|R Y'| N'|                          ( 3)
-00 000E 0s T!   02 0s 0 8 xFAMILY|R O'| C'| Z'| CZ'| S'| P'| L'| LE'| ( 3)
-0101 C72F00 00900F 3PI SET,  ( 3)
-0101 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
-0102 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
+800800 50F00 800F 2PI J|X,                                           ( 3)
+0800 0001 0s T!   01 0s 0 2 xFAMILY|R Y'| N'|                          ( 3)
+0800 000E 0s T!   02 0s 0 8 xFAMILY|R O'| C'| Z'| CZ'| S'| P'| L'| LE'| ( 3)
+0901 C70F00 00900F 3PI SET,  ( 3)
 
 ( --------- no fixups ---------------)
 
