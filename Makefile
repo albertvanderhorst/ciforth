@@ -145,10 +145,12 @@ figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip 
 
 # For msdos truncate all file stems to 8 char's and loose prefix `fig86.'
+# Compiling a simple c-program may be too much, so supply BLOCKS.BLK
 msdoszip : $(RELEASECONTENT) mslinks ;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/\<fig86\.//g' |\
     sed -e's/\<gnr\>/fig86.gnr/' |\
+    sed -e's/\<blocks.frt\>/BLOCKS.BLK/' |\
     sed -e's/ \([^ .]\{1,8\}\)[^ .]*\./ \1./g' |\
     xargs zip 
 
