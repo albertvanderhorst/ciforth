@@ -20,10 +20,18 @@ width16.m4       \
 width32.m4       \
 # That's all folks!
 
-# The kinds of Forth's that can be made
 # Different assemblers should generate equivalent Forth's.
+# The kinds of Forth assembler sources that can be made using any assembler
 TARGETS= msdos alone linux lina
-CSRC= figforth toblock fromblock stealconstant
+# The kinds of Forth's binaries that can be made using NASM (not used)
+BINTARGETS= msdos alone 
+# If this makefile runs under Linux, the following forth's can be made and 
+# subsequently run
+LINUXFORTHS= figforth lina
+# Auxiliary targets
+OTHERTARGETS= BLOCKS.BLK toblock fromblock
+# C-sources with various aims.
+CSRC= figforth toblock fromblock robconstant
 
 RELEASECONTENT = \
 fig86.gnr        \
@@ -57,6 +65,7 @@ fig86.%.asm : %.cfg nasm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%.msm : %.cfg masm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
 
+.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip
 # Default target for convenience
 default : figforth
 fig86.$(s).bin :
@@ -64,28 +73,38 @@ fig86.$(s).bin :
 # Put include type of dependancies here
 $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
-all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.bin) 
+# Some of these targets make no sense and will fail 
+all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(BINTARGETS:%=fig86.%.bin) \
+    $(LINUXFORTHS) $(OTHERTARGETS)
 
-clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) figforth
+clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
 # then creating a dos file system in accordance with the boot sector,
 # then copying the forth system to exact the first available cluster.
 # The option BOOTFD must be installed into alone.m4.
-boot: fig86.alone.bin  
+boot: fig86.alone.bin 
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 	mformat -k a: 
 	mcopy $+ a:forth.com
 
-# Use this if screen boundaries are off by a sector.
-filler: 
-	mcopy filler.frt a:filler.frt
+# Figforth calculates whether the screen boundaries are off by a sector.
+# You can copy the filler by hand if this calculation fails, e.g. 5" floppies.
+# The symptom is 8 LIST show the electives screen half and half of some other screen.
+filler: fig86.alone.bin
+	# Have forth calculate whether we need the filler sector
+        # Use the exit command to return 1 or 0
+	(filesize=`cat $+|wc -c`; \
+	echo $$filesize 1 - 512 MOD 1 + 2 MOD 0 0 1 LINOS | figforth>/dev/null; \
+	if [ 1 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
 moreboot: BLOCKS.BLK fig86.alone.bin  
 	mcopy BLOCKS.BLK a:
 	mcopy fig86.msdos.bin	   a:msdos.com
-                           
+			   
+allboot: boot filler moreboot
+
 BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 
 # Like above. However there is no attempt to have MSDOS reading from
