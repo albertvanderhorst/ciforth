@@ -52,7 +52,7 @@ dnl The link etc. field of the word with assembler name $1
 define({_DEA},{$1-CELLS(C_HOFFSET)})dnl
 define({_LINK_FIELD},{($1+CELLS(L_HOFFSET-C_HOFFSET))})dnl
 define({_CODE_FIELD},$1)dnl
-define({_PARAMETER_FIELD},{($1+CELLS(P_HOFFSET-C_HOFFSET+1))})dnl
+define({_VAR_FIELD},{($1+CELLS(D_HOFFSET-C_HOFFSET))})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
@@ -64,7 +64,12 @@ define({_LOOP},dnl
 {DC      XLOOP
         DC      $1-$})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
-define({CODE_HEADER},{HEADER({$1},{$2},{$+CELLS(2)},{$+CELLS(1)},$5)})dnl
+define({CODE_HEADER},
+{HEADER({$1},
+{$2},
+{$+CELLS(D_HOFFSET-C_HOFFSET)},
+{$+CELLS(D_HOFFSET-P_HOFFSET)},
+$5)})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPFAR},{DB    0EAH})dnl

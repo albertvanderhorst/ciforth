@@ -3452,11 +3452,11 @@ _LINUX_N_({
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
         DC      LIT, STTERM_A
-        DC      LIT, _PARAMETER_FIELD(STTERM)
+        DC      LIT, _VAR_FIELD(STTERM)
         DC      LIT, STTERM_B-STTERM_A
         DC      LCMOVE
         DC      LIT, ACCEP_A
-        DC      LIT, _PARAMETER_FIELD(ACCEP)
+        DC      LIT, _VAR_FIELD(ACCEP)
         DC      LIT, ACCEP_B-ACCEP_A
         DC      LCMOVE
 COLD1:
@@ -4245,9 +4245,9 @@ In particular toggling with 0AH makes that
 the terminal doesn't wait for a <return>.
 },{{SET-TERM}}, {}, enddoc)
 HEADER({SET-TERM},{STTERM},{DOCOL})
-        DC      LIT, _PARAMETER_FIELD(TERMIO)+CELLS(3)
+        DC      LIT, _VAR_FIELD(TERMIO)+CELLS(3)
         DC      SWAP, TOGGL
-        DC      LIT, _PARAMETER_FIELD(TERMIO)+CELLS(4)+7
+        DC      LIT, _VAR_FIELD(TERMIO)+CELLS(4)+7
         DC      CSTOR
         DC      ZERO, LIT, TCSETS, TERMIO
         DC      LIT, ioctl, LINOS, QLERR
@@ -4471,7 +4471,7 @@ PEMIT   DC      $+CELLS(1)
         POP     AX      ;{GET CHAR}
         CMP     AL,LF   ;{ Precede ^J with ^M}
         JNE     PEMIT1
-        MOV     _CELL_PTR[_PARAMETER_FIELD(LOUT)],0H
+        MOV     _CELL_PTR[_VAR_FIELD(LOUT)],0H
         MOV     AL,ACR
         CALL    CHO
         MOV     AL,LF
@@ -4857,12 +4857,12 @@ _VERBOSE_({This word is executed by c-code outside of Forth})
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-INIT},{BLINI})
         XOR     AX,AX
-        MOV     AL,[_PARAMETER_FIELD(BLFL)]
-        MOV     BX,_PARAMETER_FIELD(BLFL)+1
+        MOV     AL,[_VAR_FIELD(BLFL)]
+        MOV     BX,_VAR_FIELD(BLFL)+1
         PUSH    BX
         PUSH    AX
         CALL    c_block_init
-        MOV     [_PARAMETER_FIELD(DERR)],AX
+        MOV     [_VAR_FIELD(DERR)],AX
         LEA     ESP,[ESP+CELLS(2)]    ; remove input
         _NEXT
 ;
@@ -4888,7 +4888,7 @@ performs the read-write and shows errors via forthcode({DISK-ERROR}).},
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R)}
 CODE_HEADER({R/W},{RSLW})
         CALL c_rslw
-        MOV     [_PARAMETER_FIELD(DERR)],AX
+        MOV     [_VAR_FIELD(DERR)],AX
         LEA     ESP,[ESP+CELLS(3)]    ; remove input
         _NEXT
 
@@ -4922,7 +4922,7 @@ SBLK    PROC    NEAR
         MOV     CX,SPB
         MUL     CX   ;{SEC #}
         MOV     DX,AX
-        MOV     AL,[_PARAMETER_FIELD(LDRIVE)]    ;{SELECT DR A}
+        MOV     AL,[_VAR_FIELD(LDRIVE)]    ;{SELECT DR A}
         POP     BX      ;{TRANSFER ADDR}
         PUSH    DI      ;{GET THAT RETURN BACK}
         RET
