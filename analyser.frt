@@ -46,15 +46,23 @@ HEX
 0FF00 CONSTANT FMASK
 
 \ ----------------------    ( From analyser.frt)
+01 CONSTANT FMASK-DUM   \ Dummy header, not to be executed.
 10 CONSTANT FMASK-IL    \ Data is following in line.
 20 CONSTANT FMASK-HO    \ This definition has been high level optimised.
 40 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
+80 CONSTANT FMASK-DUP   \ This is a duplicator, i.e. stack items consumed
+                        \ are put back unchanged.
 
+\ If 0 the side effects are absent.
 100 CONSTANT FMASK-N@    \ No input side effects. "No fetches."
 200 CONSTANT FMASK-N!    \ No output side effects. "No stores."
 400 CONSTANT FMASK-ST    \ No stack side effects. "No absolute stack reference."
+800 CONSTANT FMASK-FDI   \ This definition has the `EDI'' register free. "No loop"
 
-FMASK-N@ FMASK-N! OR FMASK-ST OR CONSTANT FMASK-NS \ No side effects.
+FMASK-N@ FMASK-N! OR FMASK-ST OR FMASK-FDI OR CONSTANT FMASK-NS \ No side effects.
+
+\ For DEA : it IS a real (non-dummy) header.
+: REAL? >FFA @ 1 AND 0= ;
 
 \ Fill optimisations BITS in into DEA.
 : !OB   >FFA >R    R@ @ FMASK INVERT AND   OR  R> ! ;
@@ -83,13 +91,15 @@ ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
 \ For DEA type its optimisation and other properties.
 : OPT? >FFA @
     CR "Optim. bits etc.: " TYPE
-    DUP FMASK AND 0= IF "No optimisations " TYPE THEN
-    DUP FMASK-N@ AND IF "No fetches " TYPE THEN
-    DUP FMASK-N! AND IF "No stores " TYPE THEN
-    DUP FMASK-ST AND IF "No depth " TYPE THEN
-    DUP FMASK-IL AND IF "In line data " TYPE THEN
-    DUP FMASK-HO AND IF "Been optimised " TYPE THEN
+    DUP FMASK     AND 0= IF "No optimisations " TYPE THEN
+    DUP FMASK-N@  AND IF "No fetches " TYPE THEN
+    DUP FMASK-N!  AND IF "No stores " TYPE THEN
+    DUP FMASK-ST  AND IF "No depth " TYPE THEN
+    DUP FMASK-IL  AND IF "In line data " TYPE THEN
+    DUP FMASK-HO  AND IF "Been optimised " TYPE THEN
     DUP FMASK-HOB AND IF "Cannot be optimised " TYPE THEN
+    DUP FMASK-FDI AND IF "Loop index is available " TYPE THEN
+    DUP FMASK-DUP AND IF "A duplicator" TYPE THEN
     DROP
 ;
 
@@ -98,6 +108,15 @@ ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
 
 \ For DEA type everything.
 : .DE DUP SE? DUP CRACKED OPT? ;
+
+\ Set of duplicators.
+CREATE DUPS  HERE 0 ,
+' DUP       ,           ' 2DUP ,
+' OVER      ,           ' 2OVER ,
+HERE SWAP !
+
+\ Mark all duplicators as such.
+: MARK-DUP  DUPS @+ SWAP ?DO   FMASK-DUP I @ >FFA OR!U   0 CELL+ +LOOP ;
 
 ASSEMBLER
 CREATE POPS  HERE 0 ,
@@ -134,6 +153,14 @@ CREATE STORES HERE 0 ,
                         ' INT,       ,
 HERE SWAP !
 
+
+\ Instruction that use EDI. Normally this is not done.
+\ But some (string) operations require it.
+CREATE EDIERS HERE 0 ,
+                                                ' STOS,      ,
+' SCAS,      ,          ' CMPS,      ,          ' MOVS,      ,
+HERE SWAP !
+
 \ Bookkeeping for pops and pushes.
 VARIABLE #POPS          VARIABLE #PUSHES
 : !PP    0 #POPS !    0 #PUSHES ! ;
@@ -157,10 +184,15 @@ VARIABLE PROTO-FMASK
 \ Return the new FLAGS. (So those are the flags to become invalid.)
 : IS-STORING       FMASK-N! AND    OR ;
 
+\ Add to FLAGS if instruction IS looping, i.e. it uses register IDE.
+\ Return the new FLAGS. (So those are the flags to become invalid.)
+: IS-LOOPING       FMASK-FDI AND    OR ;
+
 \ Add to FLAGS if instruction IS fetching, the no input side effects flag.
 \ Return the new FLAGS. (So those are the flags to become invalid.)
-\ Look whether we have the current disassembled instruction forces us to
 : IS-FETCHING   FMASK-N@ AND    OR ;
+
+\ Look whether we have the current disassembled instruction forces us to
 \ revise the flag mask.
 \ A forth flag has all bit set. Hence the idiom ``FLAG MASK AND''
 \ instead of FLAG IF MASK ELSE 0 THEN''.
@@ -168,6 +200,7 @@ VARIABLE PROTO-FMASK
     0
     OPCODE STORES IN-SET? IS-STORING
     OPCODE FETCHES IN-SET? IS-FETCHING
+    OPCODE EDIERS IN-SET?  IS-LOOPING
     'R| DISS IN-SET? 0= IF
         'T| DISS IN-SET?   IS-FETCHING
         'F| DISS IN-SET?   IS-STORING
@@ -249,8 +282,8 @@ FMASK-NS FMASK-IL OR 2 0 '(DO)      !FLAGS
 FMASK-NS FMASK-IL OR 2 0 '(?DO)     !FLAGS
 
 \ FILL IN EVERYTHING
-\ Add to an existing pure STACK EFFECT the pure STACK EFFECT. Return the combined
-\ pure STACK EFFECT.
+\ Add to an existing pure STACK EFFECT the pure STACK EFFECT.
+\ Return the combined pure STACK EFFECT.
 : COMBINE-PSE >R - DUP 0< IF - 0 THEN R> + ;
 
 \ Combine two STACK EFFECT's. Return the resulting STACK EFFECT.
@@ -325,29 +358,21 @@ HERE SWAP !
 \ It can be any definition.
 \ Dummy headers are ignored.
 : FILL-SE
-    DUP >FFA @ 1 AND 0= IF \ Ignore dummy headers
+    DUP REAL? IF
         DUP FIND-SE-ANY SWAP !SE _
     THEN DROP ;
 
 \ Keep track of the number of entries with something unknown.
-VARIABLE #UNKNOWNS
-: !UNKNOWNS 0 #UNKNOWNS ! ;
+VARIABLE #UNKNOWNS      VARIABLE PROGRESS
+: !UNKNOWNS 0 #UNKNOWNS !    0 PROGRESS ! ;
 
 \ For DEA fill in the stack effect if it is not yet known.
-: ?FILL-SE?   ( DUP ID. CR)
+: ?FILL-SE?   \ DUP ID. \ CR
 DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
 
 \ For a WID fill in all stack effects.
-: FILL-SE-WID '?FILL-SE? SWAP FOR-WORDS ;
+: FILL-SE-WID   DUP ID.   >WID '?FILL-SE? SWAP FOR-WORDS ;
 
-\ Sweep once through the base dictionary filling in stack effects.
-\ There are three vocabularies. ``Forth'' is done partly, from ``TASK''.
-\ ``ENVIRNONMENT'' is done in full. ``DENOTATION'' hangs off ``FORTH''.
-\ Count the ``#UNKNOWNS''.
-: FILL-ALL   !UNKNOWNS   'TASK FILL-SE-WID   'ENVIRONMENT >WID FILL-SE-WID ;
-
-\ Go on until the number of unknown stack effects no longer changes.
-: FILL-ALL-SE 0 BEGIN FILL-ALL #UNKNOWNS @ SWAP OVER = UNTIL DROP ;
 \ Inspect POINTER and XT. If the xt is of a type followed by inline
 \ code advance pointer to next high level code.
 \ Leave new POINTER and XT.
@@ -390,29 +415,28 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
 \ It can be any definition.
 \ Dummy headers are ignored.
 : FILL-OB
-    DUP >FFA @ 1 AND 0= IF \ Ignore dummy headers
+    DUP REAL? IF
         DUP FIND-OB-ANY SWAP !OB _
     THEN DROP ;
 
 \ For DEA fill in the opt bits and remember if there was a change.
-: ?FILL-OB?   ( DUP ID. CR)
-    DUP >FFA @ >R   DUP FILL-OB    >FFA @ R> <> NEGATE #UNKNOWNS +! ;
+: ?FILL-OB?   \ DUP ID. \ CR
+    DUP >FFA @ >R   DUP FILL-OB    >FFA @ R> <> PROGRESS OR!U ;
 
 \ For a WID fill in all optimisation bits.
-: FILL-OB-WID '?FILL-OB? SWAP FOR-WORDS ;
+: FILL-OB-WID DUP ID. >WID '?FILL-OB? SWAP FOR-WORDS ;
 
-\ Sweep once through the base dictionary filling in optimisation bits.
-\ There are three vocabularies. ``Forth'' is done partly, from ``TASK''.
-\ ``ENVIRNONMENT'' is done in full. ``DENOTATION'' hangs off ``FORTH''.
-\ Count the ``#UNKNOWNS''.
-: (FILL-ALL-OB)   !UNKNOWNS   'TASK FILL-OB-WID   'ENVIRONMENT >WID FILL-OB-WID ;
+\ General part
 
-\ Go on until the number of unknown stack effects no longer changes.
-\ ``FILL-ALL-SE'' must be done before or this fails.
-: FILL-ALL-OB 0 BEGIN (FILL-ALL-OB) #UNKNOWNS @ SWAP OVER = UNTIL DROP ;
+\ Sweep once through all vocabularies filling in flag fields.
+\ Keep track of progress.
+: (FILL-ONCE)  !UNKNOWNS   'FILL-SE-WID FOR-VOCS 'FILL-OB-WID FOR-VOCS ;
 
+\ Go on filling flag fields until the number of unknown stack effects no longer changes.
+: (FILL-ALL) 0 BEGIN (FILL-ONCE) DUP .
+#UNKNOWNS @ SWAP OVER = PROGRESS @ 0= AND UNTIL DROP ;
+
+\ Fill in everything.
+: FILL-ALL MARK-DUP (FILL-ALL) ;
 
 DECIMAL
-
-FILL-ALL-SE
-FILL-ALL-OB

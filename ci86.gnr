@@ -1075,16 +1075,16 @@ COLD_ENTRY:
         CLD                     ;{ DIR = INC}
 _THREADS_({
         MOV     EAX, _CELL_PTR[USINI+_CELLS(1)]
-        MOV     EDI, EAX
-        DEC     EDI
-        OR      EDI, STACKSIZE-1    ;Requires it is power of 2.
-        INC     EDI
-        SUB     EDI,EAX
-        ADD     LONG[USINI+(CW*(0))], EDI
-        ADD     LONG[USINI+(CW*(1))], EDI
-        ADD     LONG[USINI+(CW*(2))], EDI
-        ADD     LONG[USINI+(CW*(3))], EDI
-        ADD     LONG[USINI+(CW*(4))], EDI
+        MOV     EBX, EAX
+        DEC     EBX
+        OR      EBX, STACKSIZE-1    ;Requires it is power of 2.
+        INC     EBX
+        SUB     EBX,EAX
+        ADD     LONG[USINI+(CW*(0))], EBX
+        ADD     LONG[USINI+(CW*(1))], EBX
+        ADD     LONG[USINI+(CW*(2))], EBX
+        ADD     LONG[USINI+(CW*(3))], EBX
+        ADD     LONG[USINI+(CW*(4))], EBX
 
 });_END_({_THREADS_})
 _HOSTED_LINUX_(
@@ -2883,13 +2883,13 @@ _HEADER({USER},{USER},{DOCOL})
         DC      PSCOD
 DOUSE:  MOV     BX,[WOR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
 _THREADS_(
-{       MOV     DI, BP
-        OR      EDI, STACKSIZE-1  ;Requires it is power of 2.
-        INC     DI
+{       MOV     AX, BP
+        OR      AX, STACKSIZE-1  ;Requires it is power of 2.
+        INC     AX
 },
-{        MOV     DI,_CELL_PTR[USINI]
+{        MOV     AX,_CELL_PTR[USINI]
 })dnl _END_({_THREADS_})
-        LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
+        LEA     AX,[BX+AX]      ;{ADDR OF VARIABLE}
         _PUSH
 ;
 ;
@@ -3147,7 +3147,7 @@ address}) of the word most recently created by
 forthcode({VOCABULARY}) . _VERBOSE_({{All vocabulary names are
 linked by these fields to allow forthcode({FORGET}) to find all
 vocabularies.}})},
-{{VOCABULARY}},
+{{VOCABULARY},{FOR-VOCS}},
 {{VOC-LINK @ ' ENVIRONMENT = .},{_T_}},
 enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
@@ -5225,7 +5225,7 @@ forthcode({SEARCH-ORDER}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
 oldest one gets lost. The vocabularies generated are
 forthcode({IMMEDIATE}) words.},
-{{VOC-LINK},{DEFINITIONS}},
+{{VOC-LINK},{DEFINITIONS},{FOR-VOCS}},
 {{123 VOCABULARY JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
