@@ -53,6 +53,11 @@ define({M4_BIOSBOOT},{07C00H})
 dnl Have code to switch ourselves to protected mode, e.g. after booting.
 dnl Move forth up such thar ORG agrees with LOADADDRESS.
 define( {_SWITCH_1_}, _no({$0}) )dnl       
+dnl Have a normal return to MSDOS (without jumping to a CS-corrector)
+define({_NORMAL_BYE_1_}, _no )
+dnl Normally no code needed switch between modes.
+define({JMPHERE_FROM_REAL},{})dnl
+define({JMPHERE_FROM_PROT},{})dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
