@@ -142,7 +142,7 @@ MEDIA   EQU    F0H      ;{ Descriptor byte. Anachronism.}
 _ENDCOMMENT
 
 ;{ Bios specific equates.}
-BOOTADDRESS     EQU     07C00H          ;{ PC jumps to 0:7C00 to boot}
+BOOTADDRESS     EQU     M4_BIOSBOOT ;{ PC jumps to 0:7C00 to boot}
 SPDRV   EQU     HEADS*TRKS*SPT    ;{ sectors/drive}
         ;{ Skip boot sector,fats and root dir and first sector of file.}
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
@@ -157,12 +157,20 @@ _ENDCOMMENT
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
 REALSEGMENT     EQU     BOOTADDRESS/10H ;{ @ All real code executes here}
 ;____1_____ _SWITCH_1_({
-CS_COMMON       EQU     REALSEGMENT     ;{ @% Protected overlapping segment with same}
 DS_SANDBOX      EQU     REALSEGMENT + SEGSIZE ;{ @ Real mode may dabble here}
-DS_PROT         EQU     REALSEGMENT + SEGSIZE ;{ % The protected mode data segment}
 GDT_SEGMENT     EQU     DS_SANDBOX + SEGSIZE       ;{ @ General descriptor table.}
-CODE_SEGMENT EQU 07C0H ;{ @% The same for real and prot)         }
-CS_PROT EQU 10H  ;{ % The protected mode code segment }
+;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen and }
+;{ must be a multiple of 08H }
+GDT_SWITCH       EQU    M4_BIOSBOOT/10H  ;{ @% Switching segment }
+GDT_CS EQU 10H  ;{ % The protected mode code segment }
+; {This choice is opportunistic, it prevents problems for the situation}
+; { interrupts are executed while CS contains GDT_DS. The real mode code}
+; { uses data from the sandbox.}
+GDT_DS         EQU     DS_SANDBOX ;{ % The protected mode data segment}
+; Start addresses belonging to the descriptors.
+CS_START        EQU     BOOTADDRESS
+DS_START        EQU     CS_START ; {Don't want these to be different in prot. mode}
+SWITCH_START    EQU     10H*GDT_SWITCH ;{This relation makes switching possible.}
 
 IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
 IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
@@ -412,7 +420,7 @@ ENDBOOT:
 ;{ Make other segments the same                                            }
         CALL  HERE1
 HERE1:  POP   AX         ;{ Reality.}
-        MOV BX, HERE1-$$ ;{ Dream.}
+        MOV BX, HERE1 ;{ Dream.}
         SUB AX,BX      ;{ Discrepancy between dream and reality}
         MOV CX,10h     ;{ How much units would that be for the segment?}
         XOR DX,DX
@@ -422,7 +430,7 @@ MYSELF: JNZ MYSELF    ; { If there is a remainder, we cannot correct, so hang.}
         MOV CX,CS
         ADD CX,AX    ; 
         PUSH CX     ; {Corrected code segment}
-        ADD  BX, HERE2-HERE1
+        MOV BX, HERE2
         PUSH BX     ; {Correct program counter}
         RETF        ; {Returning to here2 now}
 HERE2:
@@ -433,13 +441,14 @@ HERE2:
         MOV     ES,AX
         MOV     STACKPOINTER,0H
         STI                     ;{ Allow interrupts}
-_SWITCH_1_({        JMP     PROTECT})
 });_END___1__({ _BOOTED_1_})
+
 
 ; ########################################################################################
 ;                       SWITCH TO PROTECTED MODE/32 BITS (optional)
 ; ########################################################################################
 ;____1_____ _SWITCH_1_({
+        JMP    PROTECT
 GDTLOAD DW     GDTLEN
         DD     GDT
 PROTECT:
@@ -449,36 +458,37 @@ PROTECT:
         MOV     DI,0
         MOV     AX,GDTLEN
         STOSW
-;{ The switch segment. If you are using this segment, you can }
-;{ switch between real and (16-bit) protected mode.}
-;{ PREPARE-CS : CS_COMMON:X (real) is the same address as  }
-;{ CS_COMMON*10H +X (@@@) in protected mode }
-        MOV     DI,CS_COMMON
+;{ The switch segment.         }
+;{ You can only switch between real and (16-bit) protected mode,}
+;{ while using this segment.}
+;{ PREPARE-CS : GDT_SWITCH:X (real) is the same address as  }
+;{ SWITCH_START +X (@@@) in protected mode }
+        MOV     DI,GDT_SWITCH
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,CS_COMMON*10H   ; { @@@ }
+        MOV     AX,SWITCH_START ; { @@@ }
         STOSW
         MOV     AX,9A00H
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
-;{ PREPARE DS/SS/ES ; only SS used in real mode.                                                    }
-;{  The real mode view of DS_PROT is DS_SANDBOX}
-;{  MUST BE EMPTY.            }
-        MOV     DI,DS_PROT
+;{ PREPARE DS/SS/ES ; only SS used in real mode.   }
+;{  The real mode view of GDT_DS is DS_SANDBOX}
+;{  DS_SANDBOX must be empty          }
+        MOV     DI,GDT_DS
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,BOOTADDRESS
+        MOV     AX,DS_START
         STOSW
         MOV     AX,9200H
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW
 ;{ PREPARE-CS 16/32 BITS                                                   }
-        MOV     DI,CS_PROT
+        MOV     DI,GDT_CS
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,BOOTADDRESS
+        MOV     AX,CS_START
         STOSW
         MOV     AX,9A00H
         STOSW
@@ -493,10 +503,10 @@ PROTECT:
 
 ;{************************}
 _BITS32_1_({ include(width32.m4) })
+;{************************}
 ;{ The following had to wait until width32.m4 had been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
 
-;{************************}
 ;____1_____ _SWITCH_1_({
         JMPHERE_FROM_REAL
 });_END___1__({ _SWITCH_1_})
@@ -740,7 +750,7 @@ _ENDCOMMENT
 ;{ The label NEXT1 is rarely relevant (for _OLDDEBUG_1_) }
 NEXT:   LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
-;        CALL    DISPLAYSI
+_NEWDEBUG_1_({ CALL    DISPLAYSI})
         JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
         PAGE
 ;
