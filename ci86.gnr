@@ -1265,7 +1265,7 @@ CODE_HEADER({AND},{LAND})
         _PUSH
 ;
 worddoc({LOGIC},{OR},{or},{n1 n2 --- or},{L0},{
-Leave the bit-wise logical or of two l6 bit values.},{{AND},{XOR}})
+Leave the bit-wise logical or of two _BITS_ bit values.},{{AND},{XOR}})
 CODE_HEADER({OR},{LOR})
         POP     AX      ;{ (S1) <- (S1) OR (S2)}
         POP     BX
@@ -4101,7 +4101,7 @@ HEADER({SEEK},{SEEK},{DOCOL})
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
-worddoc({},{R/W},{read_slash_write},{addr blk f --},{},{
+worddoc({STORAGE},{R/W},{read_slash_write},{addr blk f --},{},{
 The fig-FORTH standard disc read-write linkage. forthvar({addr}) specifies the
 source or destination block buffer, forthvar({blk}) is the sequential number of
 the referenced physical block; and forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l read.
