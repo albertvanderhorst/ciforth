@@ -6,14 +6,18 @@ First part for ISO forth's, in the appendix some figforth's.
 Summary
 This is a test report for 12 out of a zillion Forths that can be
 generated from fig86.gnr and ci86.gnr .
-This is not a professional regression test.
-I know that. Please be forgiving.
+Only the hosted version have a a automated regression test.
+The booting version take more time to test.
 
 However, please tell me if any of the following tests fails
 you, where it doesn't fail me.
 It looks as if sometimes K' fails. But not for a freshly booted system.
 If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
+
+Environment  4.0 S.u.S.e.
+ciforth, an ISO forth.
+With the same hardware configuration as above.
 
 Environment  3.0 ...
 ciforth, an ISO forth.
@@ -57,7 +61,7 @@ N "ls -l" SYSTEM or "dir" SYSTEM
 O Built in regression test
 P Johns Hopkins university test (always with restrictions)
 R Assemble empty code definition
-Z Assembler source equivalent with previous version
+Z The assembly source of this version is equivalent with previous version
 
 Before 3.223
 The following tests are defined:
@@ -128,7 +132,8 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   275  lina.cfg         lina          BCDEFHKMOPR
+hosted_linux linux_native   4.0  lina.cfg         lina          BCDEFHKMOPR
+                            275  lina.cfg         lina          BCDEFHKMOPR
                             223  lina.cfg         lina          BCDEFHKMOPR
                             189  lina.cfg         lina          BCDEFHKMOPR
                             181  lina.cfg         lina          BCDEFHKMOPR
@@ -136,13 +141,17 @@ hosted_linux linux_native   275  lina.cfg         lina          BCDEFHKMOPR
                             154  lina.cfg         lina          J
                             153  lina.cfg         lina          BCDEFHKMOPR
                             135                                 BCDEFHKMOP
-dpmi ("windows")            275  wina.cfg         WINA.COM      BCDEFGLMOR
-hostedmsdos real  modern 1) 275  mina.cfg         mina.com      II B CDEG K' O P R
+dpmi ("windows" 32)         4.0  wina.cfg         WINA.COM      BCDEFGLMOR
+                            275  wina.cfg         WINA.COM      BCDEFGLMOR
+hostedmsdos real  modern    4.0  mina.cfg         mina.com      II B CDEG K' O P R
+                            275  mina.cfg         mina.com      II B CDEG K' O P R
+                            275  mina.cfg         mina.com      II B CDEG K' O P R
                             224  msdos.cfg       msdos.com      II B CDEG K' O P R
                             154    msdos2.cfg      msdos.com      J'
                             153    msdos2.cfg      forth.com      IV B CDEG K' -O -P R
 hostedmsdos real  bios      153    msdos1.cfg      msdos.com      II B CDEG K' R
-hosted_linux linux_c        223  linux.cfg        (ciforthc)    BCDEFK  O'PR
+hosted_linux linux_c        4.0  linux.cfg        (ciforthc)    BCDEFK  O'PR
+                            223  linux.cfg        (ciforthc)    BCDEFK  O'PR
                             189  linux.cfg        (ciforthc)    BCDEFK  O'PR
                             154  linux.cfg        (ciforthc)    J'
                             153  linux.cfg        (ciforthc)    BCDEFKMPO'R
@@ -151,21 +160,26 @@ bootfd real                 224    alone1.cfg      forth.com    B I -A
                                                                 B II ACDEG K' R
                             N.A.   alone1.cfg      forth.com       I B -A
                                                                   II B -A
-bootfd prot16               223    alone.cfg       forth.com    B I  ACDEGR
-                                                                  II A-C-DE-G-K'L-R
+bootfd prot16               4.0    alone.cfg       forth.com    B I  ACDEFGR
+                                                                  II L   1)
+                            223    alone.cfg       forth.com    B I
+                                                                  II A-C-DE-G-K'L-R 1)
                             176    alone.cfg       forth.com    B I  A-CDEGR
                                                                   II ACDEGK'LR
                             154    alone.cfg       forth.com    J'
                             153    alone.cfg       forth.com    B I  ACDEGR
                                                                   II ACDEGK'LR
 
-bootfd prot32               224    alone3.cfg      forth.com     Z
-                            223    alone3.cfg      forth.com     B I ACDEFG M R
+bootfd prot32               4.0    alone3.cfg      forth.com     B I ACDEFG M R
+                                                                   II ACDEF-G K'MR 5) 6)
+                            224    alone3.cfg      forth.com     Z
+                            223    alone3.cfg      forth.com
                                                                   II ABCDEF-GK'LR 5)
                             153    alone3.cfg      forth.com     B I ACDEFG R     3)
                                                                   II ABCDEFGK'LR
 
-boothd prot32               223    alonehd.cfg     no filesystem  ABCDEFG M R
+boothd prot32               4.0    alonehd.cfg     no filesystem  ABCDEFG M R
+                            223    alonehd.cfg     no filesystem  ABCDEFG M R
                             189    alonehd.cfg     no filesystem  ABCDEFG M -R' 4)
                             177    alonehd.cfg     no filesystem  ABCDEFGMR
                             154    alonehd.cfg     no filesystem  J'
@@ -174,20 +188,18 @@ hostedmsdos classic    N.A.   msdos3.cfg      msdos.com            Not built
 hostedmsdos modern 32  N.A.   msdos9.cfg      forth.com           II BCDEFGK'MLR  3)
 
 
-It may seem strange that the versions are lower than those for
-figforth below. However this is in fact 3.### where fig is 2.###.
+Versions are 3.xxx unless a dot is present.
 
 N.A. : not available.
 L* :
 
-1)
-In MSDOS versions with modern i/o LIST looks bad, because the
-new lines are missing form the listing. This is cosmetic and not
-fixed in this release.
+1) This requires a special CONFIG.SYS/AUTOEXEC.BAT to free memory <64K
 2) O and P not tested, because these version have no redirection.
 3) Editor is sometimes unreliable ^U hangs.
 4) Only Postscript file fails.
-5) Most editor commands work ^T fails.
+5) Most editor commands work ^T fails or a hangup occurs.
+6) Floppy is extremely slow.
+
 APPENDIX
 
 The test for the latest version that conformed to the fig
