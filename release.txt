@@ -8,53 +8,70 @@ Copyright: GPL, inasfar not public domain by FIG
 Archive: not yet
 
 All generic FIG86 forths have version number 2.
-Preliminary releases show an RCS version, such as 2.76.
-Stable will use the regular fig numbering.
+Preliminary releases derive their version id, in this case as 2.105, from
+the RCS version of the generic source file `fig86.gnr' 
+Stable versions will use the regular fig numbering. 
 
 Release :
-Version r76  consists of
+Version 2d105  consists of
+
+Documentation
+COPYING         : the conditions under which you are allowed to use all this
+release.txt     : this text
+figdoc.zip      : general figForth documentation and glossary
+figdocadd.txt  *: deviations from the above, plus concretisations for fig86.gnr
+fig86gnr.txt    : documentation applicable to all versions about genericity
+
+Source
 Makefile        : Make a runnable Forth but also targets for building floppies.
 forth.gnr       : generic source
 figforth.c      : C-source that complements assembler on Linux.
-release.txt     : this text
-fig86gnr.txt    : generic documentation
 
-*.cfg           : Each of these m4-files stand for some system.
-*release.txt    : Each of *release.txt correspond to one system,
-                  such that reading of fig86gnr.txt is no longer
-                  essential. It remains fruitful. 
+*.cfg           : Each of these cfg-files stand for some system.
+*release.txt   *: if a corresponding *release.txt is present, its intention
+                  is that for that system reading of fig86gnr.txt is no
+                  longer essential. It remains fruitful. 
+
+Derived sources. For an msdos archive `fig86.' is ommitted.
+fig86.alone.asm : nasm source for bootable system using BIOS i/o 16bit protected
+fig86.msdos.msm : MASM/TASM source for hosted system using modern MSDOS i/o
+fig86.lina.asm  : nasm source for native linux version. 
+fig86.linux.asm : nasm source for linux version with I/O in c.
+
+These files are example configurations that can be used out of
+the box via the Makefile. 
+The first four generate the `Derived files' from the previous section.
+alone.cfg       : 16 bit protected mode, boots from floppy, uses BIOS for IO
+msdos.cfg       : 16 bit real mode, hosted by MSDOS, blocks in files.
+linux.cfg       : 32 bit protected mode, hosted by linux, links with figforth.c
+lina.cfg        : 32 bit protected mode, hosted by linux, direct system calls. 
+!!alonehd.cfg     : 32 bit protected mode, boots from hard disk, uses BIOS
+for IO
+
+!!cfg.zip         : More .cfg files that make sense.
 
 Auxiliary files.
 The m4 files are used transparently by the Makefile.
-prelude.m4      : Sets defaults.
+prelude.m4      : Sets defaults. Show configuration options.
 postlude.m4     : Makes sure everything is consistent. 
+gas.m4          : Included for using gas (experimental, only half way).
 nasm.m4         : Included for using nasm.
 masm.m4         : Included for using masm/tasm.
 header.m4       : Handles the headers. Approximately set threading type.
 width16.m4      : Handles 16 bits code.
 width32.m4      : Handles 32 bits code.
+protect.m4      : Handles switching between real and protected mode.
 link.script     : Links a hybrid c/assembler version on Linux.
 genboot.bat     : Generate a bootable floppy on an MSDOS system
 toblock.c       : Convert a text file to blocks.
-fromblock.c     : Convert from blocks to a text file.
+fromblock.c    *: Convert from blocks to a text file.
+stealconstant.c*: Converted to constant.m4 with Linux symbolic constants.
 
-Derived files.
-alone.asm       : NASM source for bootable system using BIOS i/o
-msdos.msm       : MASM source for hosted system using modern MSDOS i/o
-lina.asm        : NASM source for native linux version.
 
-To help you these files are example configurations that can be used out of
-the box via the Makefile. The first and third are related to the targets
-fig86.alone.bin and fig86.msdos.bin respectively. (rename to xxx.com for
-copying to msdos.) 
-
-alone.cfg       : 16 bit protected mode, boots from floppy, uses BIOS for IO
-alonehd.cg      : 32 bit protected mode, boots from hard disk, uses BIOS for IO 
-msdos.cfg       : 16 bit real mode, hosted by MSDOS, blocks in files.
-linux.cfg       : 32 bit protected mode, hosted by linux, links with figforth.c
-lina.cfg        : 32 bit protected mode, hosted by linux, direct system calls. 
-
-Example Sources :
-blocks.frt      : Source for editor assembler decompiler etc.
-BLOCKS.BLK      : Same but in block format
+Example Forth sources.
+blocks.frt      : Source for editor assembler decompiler etc. Normal archives.
+BLOCKS.BLK      : Same but in block format, supplied in MSDOS archive instead of blocks.frt
 wc              : Featuring lina as a script language.
+
+The files marked *: have names too long for plain MSDOS. These names are
+truncated if you down loaded the MSDOS archive.
