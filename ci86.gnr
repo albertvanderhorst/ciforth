@@ -768,16 +768,13 @@ _HOSTED_DPMI_({
 ; Required start of .COM program.
     ORG     100H
 ORIG:                         ; Accommodate also .exe files
-            MOV     BX,4000H            ;BX=paragraphs needed (64K)
+            MOV     BX, EM/10H          ;BX=paragraphs needed (64K)
             MOV     AH,4Ah              ;Modify memory allocation
             INT     21h
 ; These are real mode descriptors !
             MOV     _CELL_PTR[SaveCS],CS           ; Once and for all
             MOV     _CELL_PTR[SaveDS],DS
             MOV     _CELL_PTR[SaveES],ES           ; Still pointing to PSP (!?)
-            MOV     _CELL_PTR[SaveSS],SS
-            XOR     AX,AX
-            MOV     SP,AX
 ;
 ; Check to see if DPMI is available, and make the switch if it is
 ; If one is, the stat info is stored.
@@ -808,10 +805,12 @@ ORIG:                         ; Accommodate also .exe files
 Plunge:     MOV     ES,AX
             MOV     AX, _BITS16_(0) _BITS32_(1)
             _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
+; {From here to where the assembler switches to protected mode,}
+; {code must be 16/32 bit independant.}
             MOV     BL,3
             JC      ERRMSG      ;still in real mode
 
-            JMP     DPMISUCCESS
+            JMP     SHORT DPMISUCCESS
 ; Data used by check DPMI.
 
 Flag32      DB      00
@@ -833,6 +832,8 @@ EMsgS      EQU     $-EMsg
 
 ; If we reach this point, we are operating in protected mode
 DPMISUCCESS:
+_SUPPRESSED({ DON'T BOTHER WITH THIS FOR THE MOMENT.
+IT MAKES NO SENSE FOR 16 BITS, AND DOESN'T WORK FOR 32 BITS
 ; -------------- Alias descriptors for CS and DS --------
             MOV     AX,000AH            ;{Alias for LDT descriptor.}
             MOV     BX,CS
@@ -883,13 +884,16 @@ _BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
             JC      ERRMSG2
 
 ; -------------- Use the alias descriptors for CS and DS --------
+THE POINT OF THIS VIRTUOSO DISPLAY, WASTE ANOTHER 64 K OF MEMORY.
             MOV     ES,CX       ;{CX -> ES -> CS}.
             ES
             JMP     SWITCHSEG
 SWITCHSEG:
             MOV     DS,DX
-            MOV     ES,DX
-            MOV     SS,DX
+});_END_({_SUPPRESSED})
+            MOV     AX,DS
+            MOV     ES,AX
+            MOV     SS,AX
 ; ######################### DPMI END ###############################################################
 
 });_END_({_HOSTED_DPMI_})
@@ -1295,13 +1299,13 @@ DENQ1:
         DC      LIT, '"', PPARS         ;           BEGIN &" (PARSE)
         DC      INBRS, LDUP, LIT, '"', EQUAL ;           IN[] DUP &" =
         _0BRANCH(DENQ2)                 ;           WHILE
-        DC      TDROP, ONEP,            ;           2DROP 1+ R@ $+!
+        DC      TDROP, ONEP             ;           2DROP 1+ R@ $+!
         DC      LDUP, ALLOT, RR, SPTOR
         _BRANCH(DENQ1)                  ;           REPEAT
 DENQ2:
-        DC      QBL, ZEQU,
+        DC      QBL, ZEQU
         DC      LIT, 10, QERR           ;           ?BLANK 0= 5 ?ERROR
-        DC      DROP,                   ;                DROP R@ $+!
+        DC      DROP                    ;                DROP R@ $+!
         DC      LDUP, ALLOT, RR, SPTOR
 _ALIGNED_({ DC LALIGN}, {dnl})
         DC      FROMR, SFET, DLITE      ;           R> $@ POSTPONE DLITERAL ;
@@ -1365,7 +1369,7 @@ worddoc({ENVIRONMENTS},{VERSION},{version}, {--- sc},{CI},
 dnl Expect nothing to be typed, because the testing filters out RCS stuff.
 {{"VERSION" ENVIRONMENT? . CR TYPE },{_T_ }},
 enddoc)
-HEADER({VERSION},{VERSION},{DOCOL})
+HEADER({VERSION},{LVERSION},{DOCOL})
 _COMMENT
 ;{       If this is there it is an official release}
         DC      SKIP
@@ -1384,7 +1388,7 @@ worddoc({ENVIRONMENTS},{NAME},{name}, {--- sc},{CI},
 {{ENVIRONMENT?}},
 {{"NAME" ENVIRONMENT? . TYPE },{_T_ ciforth}},
 enddoc)
-HEADER({NAME},{NAME},{DOCOL})
+HEADER({NAME},{LNAME},{DOCOL})
         _STRINGINLINE({ciforth})
         DC      SEMIS
 ;
@@ -8801,8 +8805,8 @@ HEADER({.SIGNON},{SIGNON},{DOCOL})
         DC      CPU, DDOT
         DC      BASE,STORE
 ;
-        DC      NAME, LTYPE, SPACE
-        DC      VERSION, LTYPE, SPACE
+        DC      LNAME, LTYPE, SPACE
+        DC      LVERSION, LTYPE, SPACE
         DC      CR
         DC      SEMIS
 ;
