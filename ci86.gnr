@@ -6458,7 +6458,7 @@ behalf of this registers are saved and restored in
 forthcode({REG-SET}) . Unadorned calls to real interrupts are
 only available as forthcode({BIOS31}) .})
 },{{BDOSN}},
-{{23 _ _ _ _ 28 BIOSN . DROP .},{0 23}},
+{{23 &A _ _ 200 21 BIOSN 1 AND . DROP .},{A0 23}},
 enddoc)
 
 _NORMAL_BIOS_({
@@ -6486,11 +6486,6 @@ RQBIOSN:  INT(0)          ;{ Request number to be overwritten.}
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
         POP     HIP
-         AND     DI, 1
-;        JZ      ELSE4
-;        NEG     DI
-;        NEG     AX
-; ELSE4:
         PUSH     AX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
@@ -6819,6 +6814,13 @@ parameters backwards, and returns too many useless parameters. }})
 enddoc)
 HEADER({BDOSN},{BDOSN},{DOCOL})
         DC      LIT, 21H, BIOSN
+        DC      ONE, LAND
+        DC      LDUP
+        _0BRANCH(BDOSN1)
+        DC      SWAP
+        DC      NEGATE
+        DC      SWAP
+BDOSN1:
         DC      SEMIS
 ;
 });_END_({_MODERN_})
@@ -8340,7 +8342,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, LFDRIVE, CFET
         DC      LOR   ;{ High, low -- reg DX. }
         DC      SWAP, TSWAP, SWAP ;{ ABCD -> DCBA}
-        DC      LIT, 13H, BIOSN
+        DC      LIT, 13H, BIOSN, ONE, LAND
         DC      DERR, PSTORE
         DC      DROP
         DC      SEMIS
