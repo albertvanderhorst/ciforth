@@ -264,7 +264,7 @@ REQ EDITOR REQ OOPS
 \ REQ REFRESH ( temporaryly)
 REQ CRACK    REQ LOCATE
  ( BACKUP        250 LOAD   77 81 THRU )
-( REQ ASSEMBLER )
+( REQ ASSEMBLERi86 )
 ( REQ DEADBEEF )
 
 
@@ -1182,31 +1182,31 @@ VOCABULARY ASSEMBLER IMMEDIATE
 
 
 
-( ASSEMBLERi86 )  \ AvdH A0oct03
-REQUIRE ASSEMBLER
+( ASSEMBLERi86-HIGH )  \ AvdH A0oct17
+REQUIRE CONFIG ?32
+REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
+REQUIRE SWAP-DP
+
 "ASSEMBLERi86" PRESENT? ?LEAVE-BLOCK
 : ASSEMBLERi86 ;
 
-REQUIRE CONFIG   REQUIRE IVAR   REQUIRE +THRU
-REQUIRE SWAP-DP   SWAP-DP
 ASSEMBLER DEFINITIONS
-
+SWAP-DP
 2 DUP +THRU
-
-PREVIOUS DEFINITIONS
 SWAP-DP
+PREVIOUS DEFINITIONS
 
 
 
-( ASSEMBLERi86-HIGH )  \ AvdH A0oct03
-REQUIRE ASSEMBLER  REQUIRE SWAP-DP
+( ASSEMBLERi86 )  \ AvdH A0oct17
+REQUIRE CONFIG
+REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
+
 "ASSEMBLERi86" PRESENT? ?LEAVE-BLOCK
 : ASSEMBLERi86 ;
 
 ASSEMBLER DEFINITIONS
-SWAP-DP
 1 DUP +THRU
-SWAP-DP
 PREVIOUS DEFINITIONS
 
 
@@ -1838,6 +1838,22 @@ HEX>
 
 
 
+( SET-MEMORY TEST-MEMORY MEM-SIZE ) ?PC ?32 \ AvdH A1oct17
+DECIMAL  123456789 CONSTANT MAGIC  HEX
+HERE MAGIC , 10,0000 - CONSTANT MM
+VARIABLE (MEM-SIZE)   1000 (MEM-SIZE) ! \ Megabytes
+: FAIL? DUP >R   @ MAGIC =   MAGIC R@ ! R> @ MAGIC <>  OR ;
+: SET-MEMORY (MEM-SIZE) @ 2 DO
+   I 14 LSHIFT  MM +
+   DUP FAIL?   IF I (MEM-SIZE) ! LEAVE THEN
+   \ ^M EMIT ." probing " I . 4 SPACES
+   I SWAP !
+LOOP ;
+: TEST-MEMORY (MEM-SIZE) @ 2 DO
+   I 14 LSHIFT  MM +  @ I <>  IF I (MEM-SIZE) ! LEAVE THEN
+   LOOP ;
+: MEM-SIZE SET-MEMORY TEST-MEMORY (MEM-SIZE) @ ;
+DECIMAL
 ( **************communication with stand alone hd ************)
 
 
@@ -1855,7 +1871,7 @@ HEX>
 
 
 ( --hd_LBA utils_for_stand_alone_disk ) REQUIRE CONFIG ?PC ?16
-REQUIRE ASSEMBLER   REQUIRE BIOSI   REQUIRE +THRU
+REQUIRE ASSEMBLERi86   REQUIRE BIOSI   REQUIRE +THRU
 ( backup and restore a stand alone hard disk system to floppy )
 ( run from a booted floppy system )
 ( this is for a 16 bit system, because the assembly assumes )
@@ -1998,17 +2014,17 @@ DECIMAL
 
 
 
-( INSTALL-FORTH-ON-HD ) REQUIRE CONFIG \ AvdH A1oct11
-REQUIRE +THRU
+( INSTALL-FORTH-ON-HD ) REQUIRE CONFIG ?32 \ AvdH A1oct11
+REQUIRE +THRU   REQUIRE NEW-IF
 \ Elective and configuration screen
 \ Define and overrule this for manual installation
 CREATE #BLOCKS 256 ,
 HEX F8 CONSTANT MEDIA-ID \ For hard disk.
 \ ?? CONSTANT #HEADS   ?? CONSTANT SECTORS/TRACK
-1 5 +THRU
-
-INSTALL-FORTH-ON-HD
+\ ?? CONSTANT MEM-SIZE
+1 6 +THRU
 EXIT
+INSTALL-FORTH-ON-HD
 Re-installs a sector-and-track ciforth to a hard disk (or
 floppy). This is a user utility, so it can be run for other
 type ciforth's. But then it only explains to the user what is
@@ -2058,10 +2074,26 @@ CR CR ." Do you believe this? Y/N" CR
 stop?
 
 
+CR ." Analysing..." CR
 
 
 
+( --disclaimer_INSTALL_FORTH_ON_HD ) ?FD ?32 \ AvdH A1oct17
+REQUIRE MEM-SIZE   REQUIRE B.   REQUIRE NEW-IF
+DECIMAL
+CR ." The amount of Megabytes on your system is probed as: "
+MEM-SIZE DUP . HEX 0 .R &H EMIT DECIMAL
+CR ." (If this is incorrect, you have to configure manually)"
+CR CR ." Do you believe this? Y/N" CR
 
+stop?
+HEX
+\ Now patch the systems memory size.
+\ This takes effect after booting only.
+
+: PATCH-MEM BM -  \ Addres to which start of buffer corresponds
+ 5 0 DO MEM-SIZE 14 LSHIFT EM - OVER I CELLS + +ORIGIN +!
+LOOP  MEM-SIZE 14 LSHIFT SWAP 'EM >DFA + ! ;
 ( PATCH-NEW-FORTH PATCH-THIS-FORTH ) ?FD ?32 \ AvdH A1oct12
 REQUIRE #HEADS HEX
 \ The SIZE of Forth (kernel +blocks) in blocks.
@@ -2092,7 +2124,7 @@ CREATE buffer SIZE-FORTH B/BUF * ALLOT
 : ready ." Press the reset button, to boot your new FORTH"
     CR ;
 : INSTALL-FORTH-ON-HD  DRIVE @ 0 WARNING ! READ-FORTH
-PATCH-NEW-FORTH PATCH-THIS-FORTH WRITE-FORTH
+buffer PATCH-MEM PATCH-NEW-FORTH PATCH-THIS-FORTH WRITE-FORTH
 EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
 ( --hd_driver_standalone_) REQUIRE CONFIG ?PC ?32 ?HD HEX
 
