@@ -223,11 +223,11 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
      CFOF BRANCH BY -br
   -->
  CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
-  : -dq CELL+ DUP COUNT CR [CHAR] . EMIT [CHAR] " EMIT BL EMIT
-     TYPE [CHAR] " EMIT BL EMIT  COUNT + ;
+  : -dq CELL+ DUP $@ CR [CHAR] . EMIT [CHAR] " EMIT BL EMIT
+     TYPE [CHAR] " EMIT BL EMIT  $@ + ;
                              CFOF (.") BY -dq
-  : -sq CELL+ DUP COUNT CR [CHAR] " EMIT BL EMIT
-      TYPE [CHAR] " EMIT BL EMIT  COUNT + ;
+  : -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT
+      TYPE [CHAR] " EMIT BL EMIT  $@ + ;
                              CFOF ($) BY -sq
   : -do CR ." DO " CELL+ ;     CFOF (DO) BY -do
   : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo

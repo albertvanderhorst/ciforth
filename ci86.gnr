@@ -1204,22 +1204,22 @@ alter its content, nor assume anything is appended.})},
 {{BLK},{WORD},{IN}},
 {{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
 {HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}})
-HEADER({MY-WORD},{MWORDN},{DOCOL})
-MWORDN1: DC INBRS
+HEADER({(WORD)},{PWORD},{DOCOL})
+PWORD1: DC INBRS
         DC OVER, SOURC, CELLP, FETCH, LSUB
-        _0BRANCH(MWORDN1B)
+        _0BRANCH(PWORD1B)
         DC QBL
-        _0BRANCH(MWORDN1A)
+        _0BRANCH(PWORD1A)
         DC DROP
-        _BRANCH(MWORDN1)
-MWORDN1B: 
+        _BRANCH(PWORD1)
+PWORD1B: 
         DC DROP
-MWORDN1A: 
-MWORDN2: DC INBRS, QBL, ZEQU  
-        _0BRANCH(MWORDN2A)
+PWORD1A: 
+PWORD2: DC INBRS, QBL, ZEQU  
+        _0BRANCH(PWORD2A)
         DC DROP
-        _BRANCH(MWORDN2)
-MWORDN2A: 
+        _BRANCH(PWORD2)
+PWORD2A: 
         DC OVER, LSUB
         DC      SEMIS
 ;
@@ -1254,36 +1254,6 @@ MPARS2A: DC FROMR, DROP
         DC OVER, LSUB
         DC      SEMIS
 ;
-worddocsafe({PARSING},{(WORD)},{paren_word},{addr1 addr2 --- addr3 addr4},{},
-{Scan the area between forthsamp({addr1}) and 
-forthsamp({addr2}) (non-inclusive) for blank delimited word.
-Return forthsamp({addr3}): the address of the first non-blank 
-at or after forthsamp({addr2}), but not past forthvar({addr2}) .
-Return forthsamp({addr4}): the address of the first blank 
-at or after forthsamp({addr3}), but not past forthvar({addr2}) .
-_VERBOSE_({So if forthsamp({addr2}) equals forthvar({addr3}) 
-the parse area is exhausted.})
-The function IS-BLANK decides what is a blank.},
-{{WORD}},
-{{ HEX 20 C, 41 C, 20 C, HERE 3 - HERE (WORD) HERE - . HERE - .},{-1 -2 }})
-HEADER({(WORD)},{PWORD},{DOCOL})
-        DC TOR  
-PWORD1: DC LDUP, RR, LSUB
-        _0BRANCH(PWORD1A)
-        DC LDUP, CFET, QBL
-        _0BRANCH(PWORD1A)
-        DC ONEP
-        _BRANCH(PWORD1)
-PWORD1A: DC LDUP
-PWORD2: DC LDUP, RR, LSUB
-        _0BRANCH(PWORD2A)
-        DC LDUP, CFET, QBL, ZEQU
-        _0BRANCH(PWORD2A)
-        DC ONEP
-        _BRANCH(PWORD2)
-PWORD2A: DC FROMR, DROP
-        DC SEMIS
-;
 worddocsafe({PARSING},{(PARSE)},{paren_word},{ch addr1 addr2 --- addr3 },{},
 {Scan the area between forthsamp({addr1}) and 
 forthsamp({addr2}) (non-inclusive) for the character forthsamp({ch}) .
@@ -1294,6 +1264,7 @@ the characer is not present.})},
 {{WORD}},
 {{ HEX 20 C, 41 C, 20 C, 41 HERE 3 - HERE (PARSE) HERE - . },{-2 }})
 HEADER({(PARSE)},{PPARS},{DOCOL})
+        DC      SOURC, CELLP, TFET
         DC TOR  
 PPARS1: DC LDUP, RR, LSUB
         _0BRANCH(PPARS2)
@@ -1303,6 +1274,10 @@ PPARS1: DC LDUP, RR, LSUB
         _BRANCH(PPARS1)
 PPARS2: DC SWAP, DROP
         DC FROMR, DROP
+        DC      LIN, FETCH
+        DC      SWAP
+        DC      LDUP, ONEP, LIN, STORE
+        DC      OVER, LSUB
         DC SEMIS
 ;
 worddocsafe({PARSING},{SOURCE},{source},{addr --- },{},
@@ -2619,9 +2594,9 @@ worddocsafe({PARSING},{(.")},{paren_dot_quote},{},{C+},
 following in-line text to the selected output device.},{{."}})
 HEADER({(.")},{PDOTQ},{DOCOL})
         DC      RR
-        DC      COUNT
+        DC      SFET
         DC      LDUP
-        DC      ONEP
+        DC      CELLP
         DC      FROMR
         DC      PLUS
         DC      TOR
@@ -2644,13 +2619,10 @@ HEADER({."},{DOTQ},{DOCOL},1)
         _0BRANCH(DOTQ1) ;{ IF}
         DC      COMP
         DC      PDOTQ
-        DC      AWORD
-        DC      CFET
-        DC      ONEP
-        DC      ALLOT
+        DC      PPARS
+        DC      SCOMMA, DROP
         _BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1:  DC      AWORD
-        DC      COUNT
+DOTQ1:  DC      PPARS
         DC      LTYPE   ;{ ENDIF}
 DOTQ2:  DC      SEMIS
 ;
@@ -2780,20 +2752,10 @@ HEADER({WORD},{AWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(AWORD1)
          DC      DROP
-;         DC      SOURC, CELLP, TFET
-;         DC      PWORD
-;         DC      LDUP, LIN, STORE
-;        DC      OVER, LSUB
-         DC      MWORDN
-;        DC      DOTS
+         DC      PWORD
         _BRANCH(AWORD2)
 AWORD1:
-        DC      SOURC, CELLP, TFET
         DC      PPARS
-        DC      LIN, FETCH
-        DC      SWAP
-        DC      LDUP, ONEP, LIN, STORE
-        DC      OVER, LSUB
 ;        DC      DOTS
 AWORD2:
         DC      HERE
@@ -2814,7 +2776,7 @@ Skip remaining non-blank characters.},
 {{: GS1 &: HELLO ; GS1 HEX .] },{48 },
 {: GS1 &: X ; GS1 HEX .},{58 }})
 HEADER({&:},{CHF},{DOCOL}, 1)
-        DC      MWORDN, DROP, CFET, LITER
+        DC      PWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{^:},{control_follows}, {--- c},{CI},
@@ -2826,7 +2788,7 @@ Skip remaining non-blank characters.},
 {{: GS1 ^: HELLO ; GS1 HEX .] },{8 },
 {: GS1 ^: X ; GS1 HEX .},{18 }})
 HEADER({^:},{CTF},{DOCOL}, 1)
-        DC       MWORDN, DROP, CFET, LIT, 40H, LSUB, LITER
+        DC       PWORD, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
@@ -2929,7 +2891,7 @@ NUMB2:  DC      DROP
 NUMB3:  DC      SEMIS
 ;
 HEADER({FIND:},{DDFIND},{DOCOL})
-        DC      MWORDN, PFIND
+        DC      PWORD, PFIND
         DC SEMIS
 ;
 worddoc({DICTIONARY},{(FIND)},{paren_find},{sc --- dea)},{},
@@ -3012,7 +2974,7 @@ by such words as forthcode({CODE}) and forthcode({CONSTANT}) to create a diction
 a Forth definition. The code field contains the address of the words
 parameter field. },{})
 HEADER({CREATE},{CREAT},{DOCOL})
-        DC      MWORDN
+        DC      PWORD
         DC      LDUP
         DC      ZEQU
         DC      LIT,5
@@ -3050,7 +3012,7 @@ that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
 compile time.},{COMPILE})
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
-        DC      MWORDN
+        DC      PWORD
         DC      PFIND
         DC      LDUP
         DC      ZEQU
@@ -3130,14 +3092,14 @@ will be given.
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  
         DC      LBL, AWORD, COUNT
-;        DC      MWORDN
-        DC      LDUP      ;{ Zero length, regular.}
+;        DC      PWORD
+        DC      LDUP      ;{ Zero length.}
         _0BRANCH(INTE8) ;{WHILE}
         DC      PFIND   ;{BEGIN}
         DC      DDUP
         _0BRANCH(INTE2) ;{IF}
 ;        DC      LDUP, IDDOT
-        DC      LDUP, TFFA, CFET
+        DC      LDUP, TFFA, FETCH
         DC      STATE
         DC      FETCH
         DC      LESS
@@ -3274,8 +3236,8 @@ parenthesis on the same line. May occur during execution or in a
 colon-definition. A blank after the leading parenthesis is required.},{})
 HEADER({(},{PAREN},{DOCOL},1)
         DC      LIT,')'
-        DC      AWORD
-        DC      DROP
+        DC      PPARS
+        DC      DROP, DROP
         DC      SEMIS
 ;
 worddoc({INIT},{QUIT},{quit},{},{},
@@ -4610,7 +4572,7 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      LIT, 03D02H    ;{ Open file for read/write}
         DC      ZERO,ZERO
         DC      BLFL
-        DC      COUNT, OVER, PLUS
+        DC      SFET, OVER, PLUS
         DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS
@@ -4698,8 +4660,8 @@ to the blocks in this file, using forthcode({BLOCK-HANDLE}) to acces it.
 If successful, forthcode({WARNING}) is reinitialised to use disk messages.
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}})
 HEADER({BLOCK-INIT},{BLINI},DOCOL)
-        DC      ZERO, BLFL, COUNT, PLUS, STORE ; {Unix requires a c-string.}
-        DC      BLFL, ONEP
+        DC      ZERO, BLFL, SFET, PLUS, STORE ; {Unix requires a c-string.}
+        DC      BLFL, SFET, DROP
         DC      LIT, O_RDWR
         DC      ZERO
         DC      LIT, open
@@ -5104,7 +5066,7 @@ the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
 {{CFA},{>LFA},{>NFA},{>PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
-        DC      MWORDN
+        DC      PWORD
         DC      PFIND
         DC      LDUP
         DC      ZEQU
