@@ -14,9 +14,9 @@ ASSEMBLER DEFINITIONS  HEX
 \     0000,0004 b reg operand              0000,0008 8 bit data field
 \
 \     0001,0000 AMASK 0 is clear           0002,0000 Instruction requires AMASK 0
-\     0010,0000 AMASK 1 is clear           0020,0000 Instruction requires AMASK 1
-\     0040,0000 AMASK 2 is clear           0080,0000 Instruction requires AMASK 2
-\     0100,0000 AMASK 8 is clear           0200,0000 Instruction requires AMASK 8
+\     0004,0000 AMASK 1 is clear           0008,0000 Instruction requires AMASK 1
+\     0010,0000 AMASK 2 is clear           0020,0000 Instruction requires AMASK 2
+\     0040,0000 AMASK 8 is clear           0800,0000 Instruction requires AMASK 8
 
 ( Transform the XX.XXX code such as used in appendix C into             )
 ( a proper BI mask.                                                     )
@@ -43,8 +43,6 @@ ASSEMBLER DEFINITIONS  HEX
   b0| b1| b2| b3| b4| b5| b6| b7| b8| b9| b10| b11| b12| b13| b14| b15| b16|
   b17| b18| b19| b20| b21| b22| b23| b24| b25| b26| b27| b28| b29| b30| bz|
 
-4  0  0000,F000 0 xFI R|
-8  0  0000,1000 1000 xFI #|
 
 2  0  03E0,0000 T!
 0020,0000 0   20 xFAMILY|
@@ -54,9 +52,45 @@ ASSEMBLER DEFINITIONS  HEX
 ( ***************************** 8 bit data field ********************** )
 
 8 0 001F,E000 0D DFI b#|    ( 8 bit data field for b-operand)
+4  0  0000,F000 0 xFI R|
+8  0  0000,1000 1000 xFI #|
 
-( DEC calls this a operate instruction format.                          )
-0 0 F3-MASK BI: 10.20 .S 4PI ADDQ,
+( ***************************** 4.4 ARITHMETIC ************************ )
+
+( DEC calls this an operate instruction format.                          )
+0 0 F3-MASK T!
+    BI: 0.20 BI: 10.00 4 4FAMILY, ADDL, ADDQ, ADDL/V, ADDQ/V,
+    BI: 0.20 BI: 10.09 4 4FAMILY, SUBL, SUBQ, SUBL/V, SUBQ/V,
+    BI: 0.20 BI: 13.00 4 4FAMILY, MULL, MULQ, MULL/V, MULQ/V,
+
+    BI: 0.10 BI: 10.02 4 4FAMILY, S4ADDL, S8ADDL, S4ADDQ, S8ADDQ,
+    BI: 0.10 BI: 10.0B 4 4FAMILY, S4SUBL, S8SUBL, S4SUBQ, S8SUBQ,
+
+    BI: 0.10 BI: 10.1D 6 4FAMILY, CMPULT, CMPEQ, CMPULE, CMPLT, -- CMPLE,
+
+20,0000 0 F3-MASK T!
+    BI: 0.01 BI: 1C.30 4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
+80,000 0 F3-MASK BI: 1C.31    4PI PERR,
+80,0000 0 F3-MASK T!
+    BI: 0.01 BI: 1C.34 0C 4FAMILY, UNPKBW, UNPKBL, PKWB, PKLB, MINSB8, MINSW4,
+    MINUB8, MINUW4, MAXUB8, MAXUW4, MAXSB8, MAXSW4,
+
+( ***************************** 4.5 LOGIC ***************************** )
+
+0 0 F3-MASK T!
+    BI: 0.20 BI: 11.00 3 4FAMILY, AND, XOR, BIS,
+    BI: 0.20 BI: 11.08 3 4FAMILY, BIC, ORNOT, EQV,
+
+0 0 F3-MASK BI: 11.14 4PI CMOVLBS,
+    BI: 0.20 BI: 11.24 3 4FAMILY, CMOVEQ, CMOVLT, CMOVLE,
+
+0 0 F3-MASK BI: 11.16 4PI CMOVLBC,
+    BI: 0.20 BI: 11.26 3 4FAMILY, CMOVNE, CMOVGE, CMOVGT,
+
+0 0 F3-MASK BI: 12.34 4PI SRL,
+0 0 F3-MASK BI: 12.39 4PI SLL,
+0 0 F3-MASK BI: 12.3C 4PI SRA,
+
 ( ***************************** 16 bits displacement ****************** )
 
 0 0 0000,FFFF 0 DFI D16|
@@ -88,7 +122,7 @@ BI: 00.200 BI: 1A.000 4 4FAMILY, JMP, JSR, RET, JSR_COROUTINE,
 
 ( ********************************************************************* )
 00 00 NORMAL-MASK T!
-BI: 1.0 BI: 0.0 8 4FAMILY, CALL_PAL OPC01 OPC02 OPC03 OPC04 OPC05 OPC06 OPC07
+\ BI: 1.0 BI: 0.0 8 4FAMILY, CALL_PAL OPC01 OPC02 OPC03 OPC04 OPC05 OPC06 OPC07
 
 ( ********************************************************************* )
 80,0000 0 03FF,FFFF 0 DFI N25|    ( 26 bits number built in)
