@@ -31,8 +31,8 @@ REQUIRE COMPARE
 
 \ #################### DATABASE #######################################
 
-  : \D ; \ Debug
-\ : \D POSTPONE \ ; IMMEDIATE
+\   : \D ; \ Debug
+  : \D POSTPONE \ ; IMMEDIATE
 
 \ File format :
 \    number of diagnoses  ND
@@ -123,9 +123,9 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 #DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
 #QUESTIONS @ SPARE + CONSTANT MAX-QUESTIONS
 \D : .QUESTION CR DUP . DUP 0 #QUESTIONS @ WITHIN 0= ABORT" QUESTION OUT  OF BOUNDS"
-   DUP QUESTIONS 2@ TYPE CR ;
+\D   DUP QUESTIONS 2@ TYPE CR ;
 \D : .DIAGNOSIS CR DUP . DUP 0 #DIAGNOSES @ WITHIN 0= ABORT" DIAGNOSIS OUT  OF BOUNDS"
-   DUP DIAGNOSES 2@ TYPE CR ;
+\D   DUP DIAGNOSES 2@ TYPE CR ;
 
 \ For a STRING return a STRING without leading spaces.
 \D "   X ? " -LEADING ." Expect |X ? |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
@@ -164,15 +164,23 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 
 \ Receive the output database.
 VARIABLE OUTPUT$
+\D : ?OUTPUT OUTPUT$ @ $@ TYPE ;
+
+\ Add a STRING to the output.
+: type  OUTPUT$ @ $+!    ;
+\D HERE 0 , 100 ALLOT OUTPUT$ !
+\D "OEPS" type ." Expect |OEPS| : 0 " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
 
 \ Add a carriage return to the output.
 : cr ^J OUTPUT$ @ $C+ ;
 
 \ Add a blank to the output.
 : bl BL OUTPUT$ @ $C+ ;
+\D bl ." Expect |OEPS | : 0 " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
 
 \ Add a NUMBER to the output.
 : u. (U.) OUTPUT$ @ $+!    ;
+\D 12 u. ." Expect |OEPS 12| : 0 " &| EMIT ?OUTPUT &| EMIT DEPTH . CR
 
 \ Add the strings of an ARRAY of N pointers to strings to the output.
 \ The array is passed as an xt.
@@ -181,7 +189,7 @@ VARIABLE OUTPUT$
 \ Add from an ARRAY of N numbers to a line in the output.
 : PUT-NUMBERS 0 DO I CELLS OVER + @ u. bl LOOP cr DROP ;
 
-: uk "------" OUTPUT$ @ $+! cr ;
+: uk "------" type cr ;
 
 \ Add an ARRAY of answers ``#ANSWERS'' by ``#QUESTIONS'' to the output.
 : PUT-ANSWERS
@@ -192,17 +200,17 @@ VARIABLE OUTPUT$
 
 ONLY FORTH DEFINITIONS
 DATABASE
-
+\D         : ^^  "OUTPUT :" TYPE ?OUTPUT CR ;
 \ Write the database to the file "database2"
 : WRITE-DATABASE
     HERE OUTPUT$ ! 0 , 10,000,000 ALLOT
 
-    #DIAGNOSES @ DUP u. cr   'DIAGNOSES SWAP .$ARRAY
-    #QUESTIONS @ DUP u. cr   'QUESTIONS SWAP .$ARRAY
+    #DIAGNOSES @ DUP u. cr    'DIAGNOSES SWAP .$ARRAY
+    #QUESTIONS @ DUP u. cr    'QUESTIONS SWAP .$ARRAY
 
-    0 YESSES  PUT-ANSWERS
-    0 NOES    PUT-ANSWERS
-    0 ?ES     PUT-ANSWERS
+    0 0 YESSES  PUT-ANSWERS
+    0 0 NOES    PUT-ANSWERS
+    0 0 ?ES     PUT-ANSWERS
     OUTPUT$ @ $@ "database2" PUT-FILE
 ;
 
@@ -258,7 +266,7 @@ D-MAIN DEFINITIONS   DATABASE INTERACTION
 \ Do whatever need to be done if the user wants to stop.
 : FINISH
      QuerySave$ GET-ANSWER A_NO = IF EXIT THEN
-     Save$ TYPE CR 'WRITE-DATABASE CATCH ERROR-BYE
+     Save$ TYPE CR WRITE-DATABASE
 ;
 ONLY FORTH
 
@@ -400,7 +408,7 @@ DATABASE
 
 \ Select the best question still available. Return its INDEX.
 : SELECT-QUESTION -1 0  \ Initial INDEX and QUALITY.
-    #QUESTIONS @ 0 DO ^ I ?POSED 0= IF
+    #QUESTIONS @ 0 DO I ?POSED 0= IF
        I  I QUESTION-QUALITY BEST-PAIR
     THEN LOOP DROP
 ;
@@ -438,8 +446,8 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
         DUP >R
         SWAP ANSWER-FOR DUP ?AMBIGUOUS IF
             2DROP
-        ELSE ^
-            <> IF ." EXCLUDED!" 1 R@ EXCLUSIONS ! -1 POSSIBILITIES +! THEN
+        ELSE
+            <> IF 1 R@ EXCLUSIONS ! -1 POSSIBILITIES +! THEN
         THEN
         RDROP
 ;
@@ -619,14 +627,14 @@ RDROP ;
 
 \ For a DIAGNOSIS and INDEX add the PAIR to the
 \ ``YES'' and ``NOES' arrays.
-: ADDIT >R >R 2DUP YESSES R> SWAP ^ +! NOES R> SWAP ^ +! ;
+: ADDIT >R >R 2DUP YESSES R> SWAP +! NOES R> SWAP +! ;
 \D ." ADDIT Expect 0 5 0 : " 0 0 0 3 ADDIT  0 0 YESSES ? 0 0 NOES ? DEPTH . CR
 \D ." ADDIT Expect 7 2 0 : " 1 1 7 0 ADDIT  1 1 YESSES ? 1 1 NOES ? DEPTH . CR
 
 \ Add the answer vector for the OUTCOME diagnosis to the database
 : ADD-ANSWERS
     #QUESTIONS @ 0 DO
-        DUP I I ANSWER-VECTOR @ ^ ADDABLE   ^ ADDIT
+        DUP I I ANSWER-VECTOR @ ADDABLE   ADDIT
     LOOP DROP
 ;
 \D !ANSWER-VECTOR PRINTTABLE
@@ -645,26 +653,25 @@ RDROP ;
 
 \ Ask as many question as makes sense to zoom in onto the diagnosis.
 : INTERROGATION
-    BEGIN ^ SELECT-QUESTION DUP -1 <> POSSIBILITIES @ ^ 1 > AND WHILE
-        ^ GotLeft$ TYPE ^ POSSIBILITIES @ . CR
-        ^ DUP QUESTIONS ^ 2@ ^ GET-ANSWER ^   SWAP
+    BEGIN SELECT-QUESTION DUP -1 <> POSSIBILITIES @ 1 > AND WHILE
+        GotLeft$ TYPE POSSIBILITIES @ . CR
+        DUP QUESTIONS 2@ GET-ANSWER   SWAP
         2DUP ANSWER-VECTOR !    ELIMINATE
-        PRINTTABLE
-    REPEAT
+\D      PRINTTABLE
+    REPEAT DROP
 ;
 
 : ONE-DIAGNOSIS
     !EXCLUSIONS !ANSWER-VECTOR  #DIAGNOSES @ POSSIBILITIES !
-    PRINTTABLE
     INTERROGATION
     POSE-DIAGNOSIS DUP -1 = IF DROP NEW-DIAGNOSIS THEN
     DUP ELIMINATE-AMBIGUITY ADD-ANSWERS
-    !ANSWER-VECTOR PRINTTABLE  DROP
+    !ANSWER-VECTOR
 ;
 
 D-MAIN DEFINITIONS
 \ Now doit.
-: MAIN
+: DOIT
     INIT
     Welcome$  TYPE CR Notice1$ TYPE CR Notice2$ TYPE CR CR ?STACK
     BEGIN ONE-DIAGNOSIS GoOn$ GET-ANSWER A_YES = WHILE REPEAT
@@ -673,3 +680,4 @@ D-MAIN DEFINITIONS
 
 ONLY FORTH DEFINITIONS
 D-MAIN
+: MAIN 'DOIT CATCH ERROR-BYE ;
