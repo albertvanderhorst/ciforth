@@ -1,5 +1,5 @@
-include(prelude.m4)dnl
-include(postlude.m4)dnl 
+dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl $Id$
 define({quote},{{{$1}}})
 define({forthvar},{@var{}quote($1)})
 define({forthsamp},{@samp{}quote($1)})

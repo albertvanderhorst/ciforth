@@ -12,7 +12,9 @@ modern file i/o.
 
 @titlepage
 @title fig-Forth Manual
-@author Albert van der Horst Dutch Forth Workshop
+A _BITS16_1_({16})_BITS32_1_({32})-bits _BOOTED_1_({standalone}) Forth _HOSTED_LINUX_1_({running under Linux})_HOSTED_MSDOS_1_({running under MSDOS})
+@author Albert van der Horst 
+Dutch Forth Workshop
 @end titlepage
 
 
@@ -44,6 +46,6 @@ include(intro.mi)
 
 @node Glossary, top ,Manual,top
 @chapter Glossary
-include(menu.mi)
+include(menu.texinfo)
 include(wordset.mi)
 @bye
