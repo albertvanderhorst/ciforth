@@ -309,8 +309,8 @@ HEX
     DUP VOCEND? UNTIL DROP
 ;
 
-( Show all instructions valid for the "OPCODE" given. )
-: SHOW-ONE
+( Show at least all instructions valid for the "OPCODE" given. )
+: SHOW:
     !DISS
     !TALLY
     % DUP BEGIN
@@ -321,7 +321,7 @@ HEX
 0 VARIABLE POINTER
 HERE POINTER !
 
-( Get the valid part of the INSTRUCTION examined                        )
+( Get the valid part of the INSTRUCTION under examination               )
 : INSTRUCTION  ISS @ @   ISL @   FIRSTBYTES ;
 
 ( These disassemblers are quite similar:                                )
