@@ -2,7 +2,9 @@ dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl
 define({_HEADER_ASM},{;
-; MASM/TASM version of FIG FORTH created by M4 from generic listing.
+; MASM/TASM version of ciforth created by ``m4'' from generic listing.
+; This source can be assembled using the ubiquitous microsoft MASM assembler.
+; Alternatively with the Borland TASM assembler.
 ;})dnl
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl

@@ -4,18 +4,25 @@
 ;
 ;{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
- TITLE   GENERIC FORTH FOR 8086 $Revision$
+ TITLE   ciforth $Revision$
 ;
 ; For the generic system (to generate ciforth in an other configuration than this one):
 ;     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html
 ;
 ; Configuration of this particular version:
-; must become i n c l u d e (config.mi)
-; _BITS_{}-bits _REAL_({real mode })_PROTECTED_({protected mode })
+; _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })
 ; _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
 ; _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 }) _LINUX_C_({with c-routines for I/O})_LINUX_N_({with native forth I/O})
-_FEWBLOCKS_({; number of blocks limited to 256})dnl
+; Normally ciforth doesn't observe ISO >IN{}_ISO_IN_({{, but this one does}}).
+; Contains :
+_SECURITY_({{;        Security words
+}})dnl
+_LOAD_({{;         Loadable words, i.e. all of ISO CORE, more than is needed
+;           for a self contained kernel.
+}})dnl
+_FEWBLOCKS_({{; number of blocks limited to 256
+}})dnl
 ;
  _HEADER_ASM
 _COMMENT
@@ -1295,7 +1302,7 @@ USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      INITR0  ;{ INIT (R0)         4}
         DC      STRTIB  ;{ INIT (TIB)        5}
         DC      0       ;{ AVAILABLE         6}
-        DC      0       ;{ INIT (WARNING)      7}
+        DC      1       ;{ INIT (WARNING)     7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
         DC      _DEA(FORTH) ;{       INIT (VOC-LINK) 10}
