@@ -914,53 +914,22 @@ worddocsafe({DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
 {},
 {{048 .},{48 },
 {: GS1 058 ; GS1 .},{58 }}, enddoc)
-HEADER({0},{DEN0},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({1},{DEN1},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({2},{DEN2},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({3},{DEN3},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({4},{DEN4},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({5},{DEN5},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({6},{DEN6},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({7},{DEN7},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({8},{DEN8},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({9},{DEN9},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({A},{DENA},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({B},{DENB},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({C},{DENC},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({D},{DEND},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({E},{DENE},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
-;
-HEADER({F},{DENF},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      NUMB, SEMIS
+HEADER({0},{DEN0},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({1},{DEN1},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({2},{DEN2},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({3},{DEN3},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({4},{DEN4},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({5},{DEN5},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({6},{DEN6},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({7},{DEN7},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({8},{DEN8},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({9},{DEN9},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({A},{DENA},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({B},{DENB},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({C},{DENC},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({D},{DEND},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({E},{DENE},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({F},{DENF},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 ;
 worddoc({DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
@@ -2942,7 +2911,7 @@ decimal point it is a double else a single integer number.
 If numeric conversion is
 not possible, an error message will be given.},{{BASE},{(NUMBER)}}, {}, enddoc)
 HEADER({NUMBER},{NUMB},{DOCOL})
-        DC      PNUMB, SDLITE
+LNUMB:  DC      PNUMB, SDLITE
         DC      SEMIS
 ;
 ;
