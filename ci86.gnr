@@ -89,6 +89,8 @@ FF      EQU     0CH     ;{ FORM FEED}
 ;{      HEADER RELATED EQUATES}
 B_DUMMY   EQU     01H     ;{ dea is dummy, from vocabulary link}
 B_INVIS   EQU     02H     ;{ dea is invisible, "smudged".}
+B_IMMED   EQU     04H     ;{ dea is a immediate.}
+B_DENOT   EQU     08H     ;{ dea is a denotation.}
 C_HOFFSET EQU     3       ;{ Offsets of code field in cells, w.r.t. dea}
 F_HOFFSET EQU     1       ;{ Same for flag field}
 L_HOFFSET EQU     2       ;{ Same for link field}
@@ -892,7 +894,7 @@ Skip remaining non-blank characters.},
 {& X  HEX .},{58 }},
 {{: GS1 & HELLO ; GS1 HEX .] },{48 },
 {: GS1 & X ; GS1 HEX .},{58 }})
-HEADER({&},{DCHAR},{DOCOL}, 1)
+HEADER({&},{DCHAR},{DOCOL}, B_IMMED + B_DENOT)
         DC      INBRS, DROP, DROP
         DC      INBRS
         DC      LDUP, QBL, ZEQU
@@ -920,7 +922,7 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
 {{VOCABULARY}})
-HEADER({DENOTATIONS},{DENOT},{DODOE},1)
+HEADER({DENOTATIONS},{DENOT},{DODOE},B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -1763,7 +1765,7 @@ The compiling process is done by the text interpreter as long as
 forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
 set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
 set (P) are executed rather than being compiled.},{})
-HEADER({:},{COLON},{DOCOL},1)
+HEADER({:},{COLON},{DOCOL},B_IMMED)
         DC      QEXEC
         DC      SCSP
         DC      CURR
@@ -1787,7 +1789,7 @@ _SWITCH_({
 worddoc({DEFINING},{;},{semicolon},{},{P,C,L0},
 {Terminate a colon-definition and stop further compilation. Compiles
 the run-time forthcode({;S}) .},{})
-HEADER({;},{SEMI},{DOCOL},1)
+HEADER({;},{SEMI},{DOCOL},B_IMMED)
         DC      QCSP
         DC      COMP
         DC      SEMIS
@@ -2487,7 +2489,7 @@ forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
 This allows calculation or compilation exceptions before resuming
 compilation with forthcode({]})},{{LITERAL} ,{]}})
-HEADER({[},{LBRAC},{DOCOL},1)
+HEADER({[},{LBRAC},{DOCOL},B_IMMED)
         DC      ZERO
         DC      STATE
         DC      STORE
@@ -2497,7 +2499,7 @@ worddoc({PARSING},{]},{righ_bracket},{},{L1},
 {Resume compilation, to the completion of a colon-definition.},
 {{[}})
 HEADER({]},{RBRAC},{DOCOL})
-        DC      LIT,040H
+        DC      ONE
         DC      STATE
         DC      STORE
         DC      SEMIS
@@ -2657,7 +2659,7 @@ device.
 If executed outside a definition, forthcode({."}) will immediately print the text
 until the final ". The maximum number of characters may be an
 installation dependent value.},{{OUT},{(.")}})
-HEADER({."},{DOTQ},{DOCOL},1)
+HEADER({."},{DOTQ},{DOCOL},B_IMMED)
         DC      LIT,22H
         DC      STATE
         DC      FETCH
@@ -2820,7 +2822,7 @@ Skip remaining non-blank characters.},
 {&: X  HEX .},{58 }},
 {{: GS1 &: HELLO ; GS1 HEX .] },{48 },
 {: GS1 &: X ; GS1 HEX .},{58 }})
-HEADER({&:},{CHF},{DOCOL}, 1)
+HEADER({&:},{CHF},{DOCOL}, B_IMMED)
         DC      PWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
@@ -2832,7 +2834,7 @@ Skip remaining non-blank characters.},
 {^: X  HEX .},{18 }},
 {{: GS1 ^: HELLO ; GS1 HEX .] },{8 },
 {: GS1 ^: X ; GS1 HEX .},{18 }})
-HEADER({^:},{CTF},{DOCOL}, 1)
+HEADER({^:},{CTF},{DOCOL}, B_IMMED)
         DC       PWORD, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
@@ -2854,7 +2856,7 @@ input stream.},
 {{}},
 {{: GS1 [CHAR] HELLO ; GS1 HEX .] },{48 },
 {: GS1 [CHAR] X ; GS1 HEX .},{58 }})
-HEADER({[CHAR]},{BCHAR},{DOCOL},1)
+HEADER({[CHAR]},{BCHAR},{DOCOL},B_IMMED)
         DC      CHF
         DC      SEMIS
 ;
@@ -3061,7 +3063,7 @@ forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
 that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
 compile time.},{COMPILE})
-HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
+HEADER({[COMPILE]},{BCOMP},{DOCOL},B_IMMED)
         DC      PWORD
         DC      PFIND
         DC      LDUP
@@ -3080,7 +3082,7 @@ definition. The intended use is:
 Compilation is suspended for the compile time calculation of a
 value.
 Compilation is resumed and forthcode({LITERAL}) compiles this value.},{})
-HEADER({LITERAL},{LITER},{DOCOL},1)
+HEADER({LITERAL},{LITER},{DOCOL},B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(LITE1) ;{IF}
@@ -3094,7 +3096,7 @@ worddoc({COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)
 {If compiling, compile a stack double number into a literal. Later
 execution of the definition containing the literal will push it to
 the stack. If executing, the number will remain on the stack.},{})
-HEADER({DLITERAL},{DLITE},{DOCOL},1)
+HEADER({DLITERAL},{DLITE},{DOCOL},B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(DLIT1) ;{ IF}
@@ -3149,16 +3151,16 @@ INTE1:
         DC      DDUP
         _0BRANCH(INTE2) ;{IF}
 ;        DC      LDUP, IDDOT
-        DC      LDUP, TFFA, FETCH
-        DC      STATE
-        DC      FETCH
-        DC      LESS
+        DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
+        DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) ;{IF}
         DC      TCFA
-        DC      COMMA
+        DC      EXEC    
         _BRANCH(INTE4)  ;{ELSE}
-INTE3:  DC      TCFA
-        DC      EXEC    ;{ENDIF}
+INTE3:  
+        DC      TCFA
+        DC      COMMA
+                        ;{ENDIF}
 INTE4:  DC      QSTAC
         _BRANCH(INTE5)  ;{ELSE}
 INTE2:  DC      HERE
@@ -3187,7 +3189,7 @@ preceeding it with forthcode({[COMPILE]}) .},{})
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
         DC      LATES
         DC      TFFA
-        DC      LIT,40H
+        DC      LIT, B_IMMED
         DC      TOGGL
         DC      SEMIS
 ;
@@ -3249,7 +3251,7 @@ Execution makes forthcode({FORTH}) the forthcode({CONTEXT}) vocabulary. Until ad
 vocabularies are defined, new user definitions become a part of
 forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during the creation of
 a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
-HEADER({FORTH},{FORTH},{DODOE},1)
+HEADER({FORTH},{FORTH},{DODOE},B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -3284,7 +3286,7 @@ forthsamp({( cccc)})
 Ignore a comment that will be delimited by a right
 parenthesis on the same line. May occur during execution or in a
 colon-definition. A blank after the leading parenthesis is required.},{})
-HEADER({(},{PAREN},{DOCOL},1)
+HEADER({(},{PAREN},{DOCOL},B_IMMED)
         DC      LIT,')'
         DC      PPARS
         DC      DROP, DROP
@@ -3905,7 +3907,7 @@ SCREEN: DC      RESTO
 ;
 worddocsafe({SCREEN},{-->},{next_screen},{},{P,L0},
 {Continue interpretation with the next disc screen.},{{LOAD}})
-HEADER({-->},{ARROW},{DOCOL},1)
+HEADER({-->},{ARROW},{DOCOL},B_IMMED)
         DC      QLOAD
         DC      ONE
         DC      BLK
@@ -5115,7 +5117,7 @@ As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
 {{CFA},{>LFA},{>NFA},{>PFA}} )
-HEADER({'},{TICK},{DOCOL},1)
+HEADER({'},{TICK},{DOCOL},B_IMMED)
         DC      PWORD
         DC      PFIND
         DC      LDUP
@@ -5212,7 +5214,7 @@ for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) al
 
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
 error checking.},{})
-HEADER({BEGIN},{BEGIN},{DOCOL},1)
+HEADER({BEGIN},{BEGIN},{DOCOL},B_IMMED)
         DC      QCOMP
         DC      HERE
         DC      ONE
@@ -5230,7 +5232,7 @@ in fig-FORTH.
 At compile-time, forthcode({ENDIF}) computes the forward branch offset from forthvar({addr})
 to forthcode({HERE}) and stores it at forthvar({addr}) . forthvar({n}) is used for error tests.},
 {{IF},{ELSE}})
-HEADER({ENDIF},{LENDIF},{DOCOL},1)
+HEADER({ENDIF},{LENDIF},{DOCOL},B_IMMED)
         DC      QCOMP
         DC      TWO     ;{ Magic number}
         DC      QPAIR
@@ -5243,7 +5245,7 @@ HEADER({ENDIF},{LENDIF},{DOCOL},1)
 ;
 worddoc({CONTROL},{THEN},{then},{},{P,CO,L O},
 {An alias for forthcode({ENDIF}) .},{})
-HEADER({THEN},{THEN},{DOCOL},1)
+HEADER({THEN},{THEN},{DOCOL},B_IMMED)
         DC      LENDIF
         DC      SEMIS
 ;
@@ -5266,7 +5268,7 @@ stack.
 When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
 the following address forthvar({addr}) and forthvar({n}) for later error checking.},
 {{I},{LOOP},{+LOOP},{LEAVE}})
-HEADER({DO},{DO},{DOCOL},1)
+HEADER({DO},{DO},{DOCOL},B_IMMED)
         DC      COMP
         DC      XDO
         DC      HERE
@@ -5285,7 +5287,7 @@ ahead.
 
 At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
 offset to forthvar({DO}) . forthvar({n}) is used for error testing.},{})
-HEADER({LOOP},{LLOOP},{DOCOL},1)
+HEADER({LOOP},{LLOOP},{DOCOL},B_IMMED)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
         DC      COMP
@@ -5296,7 +5298,7 @@ HEADER({LOOP},{LLOOP},{DOCOL},1)
 worddocsafe({CONTROL},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
 {The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
 index by n and tests for loop completion.},{{+LOOP}})
-HEADER({+LOOP},{PLOOP},{DOCOL},1)
+HEADER({+LOOP},{PLOOP},{DOCOL},B_IMMED)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
         DC      COMP
@@ -5315,7 +5317,7 @@ if true, execution continues ahead.
 
 At compile-time, forthcode({UNTIL}) compiles forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error tests.},{})
-HEADER({UNTIL},{UNTIL},{DOCOL},1)
+HEADER({UNTIL},{UNTIL},{DOCOL},B_IMMED)
         DC      ONE
         DC      QPAIR
         DC      COMP
@@ -5325,7 +5327,7 @@ HEADER({UNTIL},{UNTIL},{DOCOL},1)
 ;
 worddoc({CONTROL},{END},{end},{},{P,C2,L0},
 {This is an 'alias' or duplicate definition for forthcode({UNTIL}) .},{{BEGIN}})
-HEADER({END},{LEND},{DOCOL},1)
+HEADER({END},{LEND},{DOCOL},B_IMMED)
         DC      UNTIL
         DC      SEMIS
 ;
@@ -5339,7 +5341,7 @@ There is no effect on the stack. Execution cannot leave this loop
 
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},{})
-HEADER({AGAIN},{AGAIN},{DOCOL},1)
+HEADER({AGAIN},{AGAIN},{DOCOL},B_IMMED)
         DC      ONE
         DC      QPAIR
         DC      COMP
@@ -5355,7 +5357,7 @@ after the corresponding forthcode({BEGIN}) .
 
 At compile-time, forthcode({REPEAT}) compiles forthcode({BRANCH}) and the offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error testing.},{{WHILE}})
-HEADER({REPEAT},{REPEA},{DOCOL},1)
+HEADER({REPEAT},{REPEA},{DOCOL},B_IMMED)
         DC      TOR
         DC      TOR
         DC      AGAIN
@@ -5380,7 +5382,7 @@ skips to just after forthcode({ENDIF}) .
 At compile-time forthcode({IF}) compiles forthcode({0BRANCH}) and reserves space for an offset
 at forthvar({addr}) . forthvar({addr}) and forthvar({n}) are used later for resolution of the offset and
 error testing.},{})
-HEADER({IF},{LIF},{DOCOL},1)
+HEADER({IF},{LIF},{DOCOL},B_IMMED)
         DC      COMP
         DC      ZBRAN
         DC      HERE
@@ -5400,7 +5402,7 @@ At compile-time forthcode({ELSE}) emplaces forthcode({BRANCH}) reserving a branc
 leaves the address forthvar({addr2}) and forthvar({n2}) for error testing. forthcode({ELSE}) also
 resolves the pending forward branch from forthcode({IF}) by calculating the
 offset from forthvar({addr1}) to forthcode({HERE}) and storing at forthvar({addr1}) .},{})
-HEADER({ELSE},{LELSE},{DOCOL},1)
+HEADER({ELSE},{LELSE},{DOCOL},B_IMMED)
         DC      TWO     ;{ Magic number }
         DC      QPAIR
         DC      COMP
@@ -5425,7 +5427,7 @@ structure.
 
 At compile time, forthcode({WHILE}) emplaces forthcode({0BRANCH}) and leaves forthvar({ad2}) of the
 reserved offset. The stack values will be resolved by forthcode({REPEAT}) .},{})
-HEADER({WHILE},{WHILE},{DOCOL},1)
+HEADER({WHILE},{WHILE},{DOCOL},B_IMMED)
         DC      LIF
         DC      TWOP        ;{ Magic number           }
         DC      SEMIS

@@ -29,7 +29,7 @@ define({_x},len({$1}))dnl
 ;  
 N_$2:   _STRING({$1})
         DC    N_$2
-        DC    ifelse(1,$4,+40H,0H)
+        DC    ifelse(0,len($4),0H,$4) 
         DC    _LINKOLD
 $2:     DC     $3
          undefine({_x})dnl
