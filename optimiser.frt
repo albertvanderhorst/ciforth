@@ -93,14 +93,12 @@ VARIABLE OPT-START
 \ "the folding optimisation still HOLDS".
 : CAN-FOLD?   NS? OVER SE@ ENOUGH-POPS AND ;
 
-VARIABLE CURRENT-DEA
-
-\ For BEGIN END : if ``CURRENT-DEA'' allows it, add to optimisation,
+\ For BEGIN END DEA : if DEA allows it, add to optimisation,
 \ else cash it and restart it. ``BEGIN'' ``END'' is the code copied.
-\ (Mostly ``DEA"" plus inline belonging to it.)
+\ (Mostly ``DEA'' plus inline belonging to it.)
 \ Return a new BEGIN for the code to be moved, mostly the old ``END''.
 :  ?OPT-FOLD?
-    CURRENT-DEA @ DUP CAN-FOLD?
+    DUP CAN-FOLD?
     IF
         SE@ COMBINE-CSC               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
@@ -110,67 +108,62 @@ VARIABLE CURRENT-DEA
         !OPT-START
     THEN ;
 
-\ FIXME : all special optimisations must be tried only if the
-\ the special optimisations flag is on, not always.
-
-\ FIXME : the stack effect is no good, not uniform.
-
-\ Combining the effect of DEA into the current state, return
-\ "the ``EXECUTE'' optimisation IS possible"
-: CAN-EXEC?   'EXECUTE = CSC @ 0 > AND ;
-
-\ For ``CURRENT-DEA'' try the execute optimisation.
-\ For BEGIN END: leave sequence BEGIN' END' of what is still to be handled.
-:  ?OPT-EXEC?
-    CURRENT-DEA @ CAN-EXEC? IF
-        CASH
-        HERE 1 CELLS - @  -2 CELLS ALLOT ,
-        !OPT-START
-        EMPTY>
-    THEN ;
-
-\ BEGIN END DEA copy DEA's CODE to HERE.
-\ Leave END.
-: FOLD-BODY
-        CURRENT-DEA !
-        ?OPT-EXEC?
-        ?OPT-FOLD?
-;
-
 \ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
 : (FOLD)
     BEGIN DUP
         NEXT-PARSE
-    WHILE  FOLD-BODY
+    WHILE  ?OPT-FOLD?
     REPEAT DROP DROP DROP
 ;
 
-\ Copy the DEA's high level code to ``HERE'' ,  possibly folding it.
+\ Copy the SEQUENCE DEA of high level code to ``HERE'' ,  possibly folding it.
 \ Leave a POINTER to the equivalent optimised code.
-: FOLD   HERE SWAP    !OPT-START   >DFA @ (FOLD)   CASH   POSTPONE (;)  ;
+: FOLD   HERE SWAP    (FOLD)   CASH   POSTPONE (;)  ;
 
 \ Optimise DEA regards folding.
-: OPT-FOLD  DUP FOLD   SWAP >DFA ! ;
+: OPT-FOLD  !OPT-START   >DFA DUP @ FOLD   SWAP ! ;
 
 \ For BEGIN END : copy the DEA's high level or low level code to here.
 \ This is assuming only low level code is followed by in line stuff.
 \ In high level coding doing this you must block optimisation.
 \ Leave END.
 : FOLD-HIGH/LOW    DUP HIGH-LEVEL? IF >DFA @ (FOLD) SWAP DROP
-    ELSE FOLD-BODY THEN ;
+    ELSE ?OPT-FOLD? THEN ;
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
 : (EXPAND) BEGIN DUP NEXT-PARSE WHILE FOLD-HIGH/LOW REPEAT 2DROP DROP ;
 
-\ Expand each constituent of DEA to ``HERE'' ,  possibly folding it.
-\ Leave a POINTER to the equivalent optimised code.
-: EXPAND   HERE SWAP    !OPT-START   >DFA @ (EXPAND)   CASH   POSTPONE (;)  ;
+\ Expand each constituent of SEQUENCE to ``HERE'' ,  possibly folding it.
+\ Leave a POINTER to equivalent optimised code.
+: EXPAND   HERE SWAP    (EXPAND)   CASH   POSTPONE (;)  ;
 
-\ Concatenate the code of all elements of DEA , turning it into
-\ a collapsed HL definition. This must be allowed or we crash.
-: OPT-EXPAND DUP EXPAND SWAP >DFA ! ;
+\ ----------------------------------------------------------------
+
+\ Combining the effect of DEA into the current state, return
+\ "the ``EXECUTE'' optimisation IS possible"
+: CAN-EXEC?   'EXECUTE = HERE 2 CELLS - @ 'LIT = AND ;
+
+\ For DEA try the execute optimisation.
+\ For BEGIN END: leave sequence BEGIN' END' of what is still to be handled.
+:  ?MATCH-EXEC?
+    CAN-EXEC? IF
+        HERE 1 CELLS - @  -2 CELLS ALLOT ,
+        EMPTY>
+    THEN ;
+
+\ Find optimisation patterns in the SEQUENCE of high level code
+\ and perform optimisation while copying to ``HERE'' ,
+\ Do not initialise, or terminate.
+: (MATCH) BEGIN DUP NEXT-PARSE WHILE ?MATCH-EXEC? >HERE REPEAT 2DROP DROP ;
+
+\ Optimise a SEQUENCE using pattern matching.
+: OPTIMISE   HERE SWAP    (MATCH)   POSTPONE (;)  ;
+
+\ ----------------------------------------------------------------
+\ Optimise DEA by expansion plus applying optimations to the expanded code.
+: OPT-EXPAND   !OPT-START   >DFA DUP @ EXPAND OPTIMISE    SWAP ! ;
 
 \ For DEA remember that it has been optimised
 : !OPTIMISED   FMASK-HO SWAP >FFA OR!  ;
@@ -178,12 +171,7 @@ VARIABLE CURRENT-DEA
 \ For DEA : it IS eligable for high level optimisation.
 : H-OPTIMISABLE?  DUP HIGH-LEVEL?  SWAP  >FFA @ FMASK-HO AND 0=  AND ;
 
-\ ---- tested -------------------------------
-\ For all elements of DEA attempt a ``OPTIMISE-O'' .
-\ Leave a flag indicating that the DEA itself is b-optimisable.
-
-
-\ Try and optimise the DEA with respect to method `B' (HL inlining.)
+\ Try and optimise the DEA with respect HL inlining.
 \ Reach trough to underlying levels first.
 : OPTIMISE-O
     DUP H-OPTIMISABLE? IF
