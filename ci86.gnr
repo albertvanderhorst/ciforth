@@ -1793,7 +1793,16 @@ in the string variable at address forthsamp({addr}).},
 {{$@},{$+!},{$C+}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $! PAD $@ TYPE},{A9}})
 HEADER({$!},{SSTOR},{DOCOL})
-;        DC TDUP, STORE, CELLP, SWAP, LCMOVE
+        DC TDUP, STORE, CELLP, SWAP, LCMOVE
+        DC SEMIS
+;
+worddoc({STRING},{$!-BD},{string_store},{sc addr --- },{},
+{Store a string constant forthsamp({sc}) 
+in the brain damaged 
+string variable at address forthsamp({addr}).},
+{{COUNT},{$!}},
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $! PAD $@ TYPE},{A9}})
+HEADER({$!-BD},{SSTORBD},{DOCOL})
         DC TDUP, CSTOR, ONEP, SWAP, LCMOVE
         DC SEMIS
 ;
@@ -2500,7 +2509,9 @@ worddoc({STRING},{COUNT},{count},{addr1 --- addr2 n},{L0},
 {Leave the byte address forthvar({addr2}) and byte count forthvar({n}) of a message text
 beginning at address forthvar({addr1}) . It is presumed that the first byte at
 forthvar({addr1}) contains the text byte count and the actual text starts with
-the second byte. },{{TYPE}})
+the second byte. Alternatively stated, fetch a string constant forthsamp({addr n}) 
+from the brain damaged string variable at forthsamp({addr1}) .
+},{{TYPE}})
 HEADER({COUNT},{COUNT},{DOCOL})
         DC      LDUP
         DC      ONEP
@@ -2733,7 +2744,7 @@ WORD1:  DC      DROP    ; { BL who wants that blank? }
         DC      LIT,22H
         DC      BLANK
         DC      HERE
-        DC      SSTOR 
+        DC      SSTORBD     ; {FIXME}
         DC      HERE
 ;        DC      DOTS
 WORD2:  
@@ -2839,31 +2850,27 @@ NUMB2:  DC      DROP
 NUMB3:  DC      SEMIS
 ;
 HEADER({--FIND},{DDFIND},{DOCOL})
-        DC      LBL, LWORD, DFIND
+        DC      LBL, LWORD, COUNT, PFIND
         DC SEMIS
 ;
-worddoc({DICTIONARY},{-FIND},{minus_find},{sc --- dea tf (found) --- ff (not found)},{},
-{For the string constant forthsamp({sc}) 
-search the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
-for a matching entry. If found, the dictionary entry address 
-and a dirty true flag is left.
-Otherwise, only a boolean false is left.},{})
-HEADER({-FIND},{DFIND},{DOCOL})
+worddoc({DICTIONARY},{(FIND)},{paren_find},{sc --- dea)},{},
+{For the string constant forthsamp({sc}) search the
+forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
+for a matching entry. If found, leave the dictionary entry
+address forthsamp({dea}) of the first entry found, else leave a
+nill pointer.}, 
+{})
+HEADER({(FIND)},{PFIND},{DOCOL})
         DC      ZERO, RESULT, STORE
-        DC      COUNT
-        DC      CONT
-        DC      FETCH
-        DC      TLFA
-        DC      FETCH
+        DC      CONT, FETCH
         DC      LIT, MATCHING, SWAP, FORW
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
-        DC      LATES
+        DC      CURR, FETCH
         DC      LIT, MATCHING, SWAP, FORW
 DFIN1:                          
         DC      DROP, DROP
         DC      RESULT,FETCH
-        DC      DDUP
         DC      SEMIS
 ;
 worddocsafe({INIT},{(ABORT)},{paren_abort},{},{},
@@ -2935,13 +2942,15 @@ parameter field. },{})
 HEADER({CREATE},{CREAT},{DOCOL})
         DC      LBL
         DC      LWORD
-        DC      DFIND
+        DC      COUNT
+        DC      PFIND
         DC      HERE
         DC      ONEP
         DC      CFET
         DC      ZEQU
         DC      LIT,5
         DC      QERR
+        DC      DDUP
         _0BRANCH(CREA1) ;{IF}
         DC      IDDOT
         DC      LIT,4
@@ -2978,7 +2987,9 @@ compile time.},{COMPILE})
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
         DC      LBL
         DC      LWORD
-        DC      DFIND
+        DC      COUNT
+        DC      PFIND
+        DC      LDUP
         DC      ZEQU
         DC      ZERO
         DC      QERR
@@ -3059,9 +3070,11 @@ INTE1:
         DC      LWORD
         DC      LDUP, CFET      ;{ Zero length, regular.}
         _0BRANCH(INTE8) ;{WHILE}
-        DC      LDUP, ONEP, CFET ;{ Zero first byte, bd (tm).} 
+        DC      LDUP, ONEP, CFET ;{ Zero first byte, bd (tm).FIXME}
         _0BRANCH(INTE8) ;{WHILE}
-        DC      DFIND   ;{BEGIN}
+        DC      COUNT
+        DC      PFIND   ;{BEGIN}
+        DC      DDUP
         _0BRANCH(INTE2) ;{IF}
         DC      LDUP, TFFA, CFET
         DC      STATE
@@ -4971,7 +4984,9 @@ forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is 
 HEADER({'},{TICK},{DOCOL},1)
         DC      LBL
         DC      LWORD
-        DC      DFIND
+        DC      COUNT
+        DC      PFIND
+        DC      LDUP
         DC      ZEQU
         DC      ZERO
         DC      QERR
