@@ -283,3 +283,36 @@ ESCAPE$ "[^.]" RE-MATCH match
 
 \ "A" "B" "C"
 "A B C" "(A).*(B).*(C)" RE-MATCH match CR \1 TYPE \2 TYPE \3 TYPE
+
+\ "ABCDEFGHI" "ABCDEFGHI" "(A)(B)(C)(D)(E)(F)(G)(H)(I)" RE-MATCH match
+CR \1 TYPE \2 TYPE \3 TYPE \4 TYPE \5 TYPE \6 TYPE \7 TYPE \8 TYPE \9 TYPE
+
+\ Substitution -------------------------------------------
+\ "AQC"
+"ABC" "B" RE-MATCH match
+"Q" RE-REPLACE CR TYPE
+
+\ "AQC"
+"ARC" "[D-Z]" RE-MATCH match
+"Q" RE-REPLACE CR TYPE
+
+\ "AQC"
+"ARC" "[D-Z]*" RE-MATCH match
+"Q" RE-REPLACE CR TYPE
+
+\ "ARC"
+"ARC" "[D-Z]*" RE-MATCH match
+"\0" RE-REPLACE CR TYPE
+
+\ "ABQBC"
+"ABC" "(B)" RE-MATCH match
+"\1Q\1" RE-REPLACE CR TYPE
+
+\ "ABCABC"
+"ABC" ".*" RE-MATCH match
+"\0\0" RE-REPLACE CR TYPE
+
+\ "IHGFEDCBA"
+"ABCDEFGHI" "(A)(B)(C)(D)(E)(F)(G)(H)(I)" RE-MATCH match
+"\8\7\6\5\4\3\2\1" RE-REPLACE CR TYPE
+\ "\9\8\7\6\5\4\3\2\1" RE-REPLACE CR TYPE
