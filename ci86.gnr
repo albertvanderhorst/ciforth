@@ -1693,6 +1693,7 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         LEA     HIP,[HIP+_CELLS(1)]
         _NEXT
 ;
+;
 worddocsafe( {CONTROL~},{(LOOP)},{paren_loop},{},{C2},
 {The run-time proceedure compiled by LOOP which increments the loop
 index and tests for loop completion.
@@ -1720,6 +1721,7 @@ enddoc)
 CODE_HEADER({(+LOOP)},{XPLOO})
         POP     BX      ;{ GET LOOP VALUE}
         JMP SHORT     XLOO1
+        _NEXT           ;{Helpfull for disassembly.}
 ;
 worddocsafe( {CONTROL~},{(DO)},{paren_do},{},{C},
 {The run-time proceedure compiled by forthcode({DO}) which
@@ -2792,7 +2794,7 @@ HEADER({:},{COLON},{DOCOL})
         DC      LATEST, HIDDEN
         DC      RBRAC
         DC      PSCOD
-DOCOL:  LEA     RPO,[RPO - _CELLS(1)]
+DOCOL:  LEA     RPO,[RPO - _CELLS(1)]  ;{Push HIP}
         MOV     [RPO],HIP ;{R1 <- (IP)}
          MOV     HIP,[WOR+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
@@ -3357,10 +3359,10 @@ worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
 {{CELL+},{1-}},
 {{5 1+ .},{6}},
 enddoc)
-CODE_HEADER({1+},{ONEP})
-        POP     AX
-        INC     AX
-        _PUSH
+HEADER({1+},{ONEP},{DOCOL})
+        DC      ONE
+        DC      PLUS
+        DC      SEMIS
 ;
 worddoc( {MEMORY},{CELL+},{cell_plus},{n1 --- n2},{ISO},
 {Advance the memory pointer forthvar({n1}) by one (in this case  _BITS_ bits) cell to
@@ -3371,10 +3373,10 @@ systems, thanks to this.}})
 _BITS32_({{{0 CELL+ .},{4}},})dnl expanded before worddoc is!
 _BITS16_({{{0 CELL+ .},{2}},})dnl
 enddoc)
-CODE_HEADER({CELL+},{CELLP})
-        POP     AX
-        ADD     AX,CW
-        _PUSH
+HEADER({CELL+},{CELLP},{DOCOL})
+        DC      LIT, CW
+        DC      PLUS
+        DC      SEMIS
 ;
 worddoc( {MEMORY},{CELLS},{cells},{n1 --- n2},{ISO},
 {Return the equivalent of forthvar({n1}) cells in bytes:
@@ -3386,11 +3388,10 @@ _BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
 _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
 ;
-CODE_HEADER({CELLS},{LCELLS})
-        POP     AX
-        SHL     AX,1
-        _BITS32_({SHL     AX,1})
-        _PUSH
+HEADER({CELLS},{LCELLS},{DOCOL})
+        DC      _BITS16_({ONE})_BITS32_({TWO})
+        DC      LSHIFT
+        DC      SEMIS
 ;
 worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
 {Advance the memory pointer forthvar({n1}) by one character to
@@ -3400,7 +3401,7 @@ the ISO standard has no way to address bytes.}})
 },{{CELL+}},
 {{123 CHAR+ .},{124}},
 enddoc)
-HEADER({CHAR+}, {CHARP}, {_VAR_FIELD(ONEP)})
+HEADER({CHAR+}, {CHARP},{DOCOL}, {_VAR_FIELD(ONEP)})
 ;
 worddoc( {MEMORY},{CHARS},{chars},{n1 --- n2},{ISO},
 {Return the equivalent of forthvar({n1}) chars in bytes:
@@ -4071,7 +4072,7 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      PCREAT
         DC      LIT, HLNOOP, COMMA
         DC      PSCOD
-DODOE:  LEA     RPO,[RPO - _CELLS(1)] ;{Pop HIP.}
+DODOE:  LEA     RPO,[RPO - _CELLS(1)] ;{Push HIP.}
         MOV     [RPO],HIP
         MOV     HIP,[WOR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
         LEA     AX,[HIP+_CELLS(1)]
@@ -5638,20 +5639,12 @@ forthvar({n1}) and forthvar({n2}) .},
 { { -1 -1 M* D. },{1},
   {DECIMAL 240 204 M* D.},{48960} },
 enddoc)
-HEADER({M*},{MSTAR},{DOCOL})
-        DC      TDUP
-        DC      LXOR
-        DC      TOR
-        DC      LABS
-        DC      SWAP
-        DC      LABS
-        DC      USTAR
-        DC      FROMR
-        DC      ZLESS
-        _0BRANCH(DPM2)  ;{IF}
-        DC      DNEGA   ;{THEN}
-DPM2:
-        DC      SEMIS
+CODE_HEADER({M*},{MSTAR})
+        POP     AX
+        POP     BX
+        IMUL     BX      ;{SIGNED}
+        XCHG    AX,DX   ;{AX NOW = MSW}
+        _2PUSH          ;{STORE DOUBLE CELL}
 ;
 worddoc( {MULTIPLYING},{SM/REM},{m_slash},{d n1 --- n2 n3},{ISO},
 {A mixed magnitude math operator which leaves the signed
@@ -8748,9 +8741,9 @@ HEADER({FORGET},{FORG},{DOCOL})
 ;
 worddocsafe( {CONTROL~},{(BACK},{paren_back},{--- addr},{},
 {Start a backward branch by leaving the target address
-forthcode({HERE}) into forthvar({addr}). _VERBOSE_({{Usage is
-forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) }})},
-{{BEGIN},{DO}},
+forthcode({HERE}) into forthvar({addr}). _VERBOSE_({Usage is
+forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) })},
+{{BACK)},{BEGIN},{DO}},
 {
 {: GS1 -1 [ (BACK ] 1+ DUP .
 DUP 0BRANCH [ BACK) ] ; GS1 .},
