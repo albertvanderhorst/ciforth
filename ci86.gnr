@@ -5772,6 +5772,7 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV, FETCH
         DC      LDUP, CELLP,CELLP
         DC      SWAP, FETCH
+        DC      OFSET,  FETCH, PLUS
         DC      ZERO
         DC      RSLW
         DC      SEMIS
@@ -5844,28 +5845,28 @@ restricts the number of blocks to 0FFH.})},
 enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
-        DC      OFSET, FETCH, PLUS
-        DC      TOR,PREV
-        DC      FETCH,LDUP
-        DC      FETCH,RR
+        DC      TOR, PREV
+        DC      FETCH, LDUP
+        DC      FETCH, RR
         DC      LSUB
         _0BRANCH(BLOC1)
-BLOC2:  DC      PBUF,ZEQU
+BLOC2:  DC      PBUF, ZEQU
         _0BRANCH(BLOC3)
-        DC      DROP,RR
-        DC      BUFFE,LDUP
+        DC      DROP, RR
+        DC      BUFFE, LDUP
         DC      CELLP, CELLP    ;{ Content address.}
         DC      RR
+        DC      OFSET,  FETCH, PLUS
         DC      ONE
         DC      RSLW
-BLOC3:  DC      LDUP,FETCH
-        DC      RR,LSUB
+BLOC3:  DC      LDUP, FETCH
+        DC      RR, LSUB
         DC      ZEQU
         _0BRANCH(BLOC2)
-        DC      LDUP,PREV
+        DC      LDUP, PREV
         DC      STORE
 BLOC1:  DC      RDROP
-        DC      CELLP,CELLP
+        DC      CELLP, CELLP
         DC      SEMIS
 ;
 worddoc( {STORAGE~},{FLUSH},{flush},{},{ISO FIG L0},
@@ -6066,7 +6067,6 @@ HEADER({BLK},{BLK},{DOCOL})
         DC      LIT, 1024, EQUAL, LAND
         _0BRANCH(BLK1)
         DC      SRC, FETCH, TWO, LCELLS, LSUB, FETCH
-         DC      OFSET, FETCH, LSUB
         _BRANCH(BLK2)
 BLK1:
         DC      ZERO
