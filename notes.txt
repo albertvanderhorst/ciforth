@@ -1,0 +1,53 @@
+The following had to be done in order to change 
+the listing of FIG86 for NASM.
+
+1. Got rid of most of the useless MASM directives
+by redefining them as empty macros.
+2. Others where commented out by hand: PAGE ENDP
+3. comment ~ /~
+   was replaced by
+   %if 0 / %endif
+4. NASM doesn't allow labels that duplicate instruction
+   names, so renames: CLD -> LCLD, AT -> FETCH, LEAVE -> LLEAV
+   CMOVE -> LCMOVE
+5. Did by hand the real differences i.e. square brackets
+   around memory references.
+
+This version is marked in RCS as SANSHEADER
+
+The following had to be done to make a generic listing
+1. define generic comment introducer etc. and define
+it for both assemblers
+2. Leave the renames thatavoid duplication with instructions.
+3. Tweak instructions that behave differently, e.g.
+define _BYTE as BYTE on NASM and as nought on MASM.
+4. define GENERIC header handling.
+The following macro helped to generate the proper header.
+\E3=ssp"^[A-Z][A-Z0-9]*"sdfesn dew ufl
+\E2=solimf txt' ' gtc"9" imn txt"HEADER({"eoltxt"},{" max ssp"^[A-Z][A-Z0-9]*"sdfesn gtc"16" ete sol dew ufl mae gmx ufl eol txt"},{})"clecle unl ssp"^;[^ ][^ ]*$" cdo mas dml
+\E1=ssp"^;[^ ][^ ]*$"
+
+Get rid of the OFFSET related to branching.
+\E4=cdo gtc"9" dew dew dew imf txt"_0BRANCH(" ((("99"cridec)))ufl eol txt")"
+
+This version is marked in RCS as HEADERMACROS
+It is still FIGFORTH IBM 1.0.0 because the executable is not changed a bit.
+
+The following is done but is is called version 2.0.0 
+This is still FIGFORTH, but
+1. in line with ANSI the buffer length is made equal to the screen length.
+2. the blocks are allocated in a disk file, using FCB
+3. the stuff related to having two drives is removed, also the mess
+with printing.
+4. an explicit BDOS (and BIOS) word is introduced
+and where opportune the terminal I/O and other I/O uses these
+word.
+5. the I/O relying on MSDOS is surrounded with conditional assembly, such
+that it can be replaced easily.
+
+Next step :
+The previous version is called FIGFORTH for MSDOS.
+With conditional compilation one can get FIGFORTH for PC,
+which is stand alone.
+
+
