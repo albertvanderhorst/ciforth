@@ -185,9 +185,10 @@ fig86.%.info : %.cfg $(SRCMI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 
 # Sort the raw information and add the wordset headers
 %.mig : wordset.mig %.rawdoc ;
-	cat $+ | ssort -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s >$@
+	cat $+ | ssort -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s |\
+	sed -e 's/@/@@/g' >$@
 
-%.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+| sed -e 's/@ /@@/g')| m4 > $@
+%.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+ )| m4 > $@
 
 menu.texinfo : menu.m4 wordset.mig ; m4 $+ >$@
 
@@ -195,11 +196,11 @@ menu.texinfo : menu.m4 wordset.mig ; m4 $+ >$@
 fig86.%.tex : %.cfg $(SRCMI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.tex=%.mi) )|m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
-	   m4 > $@
+	   tee spy | m4 > $@
 	rm wordset.mi
 
 fig86.%.html : %.cfg glosshtml.m4 fig86.%.mig
 	cat $+                           |\
+	sed -e 's/@@/@/g'                |\
 	sed -e s'/worddocsafe/worddoc/g' |\
-	sed -e 's/@ /@/g'                |\
 	m4 > $@
