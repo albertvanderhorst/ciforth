@@ -81,29 +81,30 @@ REQUIRE COMPARE
 '2DROP '?PAIRS 3 CELLS MOVE
 
 
-\ For NAME DEA, return NAME DEA2. skipping the part before dea's far link.
-\ Find NAME in WID, return DEA or zero. Assume it is sorted.
+\ For NAME DEA, return NAME DEA2
+\ dea2 is where the search stops, a match, mismatch or zero.
 : FIND2-a
     BEGIN
-        DUP WHILE
-        DUP >R >XFA @ DUP IF MATCH2 THEN
+    DUP WHILE
+    MATCH2 0 > WHILE
+        DUP >R >XFA @ DUP IF MATCH2 ELSE 0 THEN
         0< IF
                 DUP .S ID. "REJECTED " TYPE DROP R>
                 >LFA @
         ELSE
-                DUP .S ID. "OKAY " TYPE RDROP
+                DUP .S DUP IF ID. "OKAY " TYPE ELSE DROP "ATEND" TYPE THEN RDROP
         THEN
-    MATCH2 0 > WHILE
     REPEAT
 THEN
 ;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
-: FIND2-b MATCH2 IF DROP 0 THEN >R 2DROP R> ;
+: FIND2-b DUP IF MATCH2 IF DROP 0 THEN THEN   >R 2DROP R> ;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
 : FIND2   FIND2-a FIND2-b ;
 
 DO-DEBUG
 'FORTH FILL-XFA
 "DROP" 'FORTH >WID >LFA @ FIND2   ID. CR
-"POPE" 'FORTH >WID >LFA @ FIND2
-\ "!" 'FORTH >WID >LFA @ FIND2      ID. CR
+"POPE" 'FORTH >WID >LFA @ FIND2   . CR
+"!" 'FORTH >WID >LFA @ FIND2      ID. CR
+"~~~~" 'FORTH >WID >LFA @ FIND2   . CR
