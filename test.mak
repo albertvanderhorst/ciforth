@@ -107,6 +107,16 @@ testas386: asgen.frt asi586.frt testset386 ; \
     diff -w $@ testset386 >$@.diff ;\
     diff $@.diff testresults
 
+# Special test to exercise otherwise hidden instructions.
+testas386a: asgen.frt asi586.frt testset386a ; \
+    (echo 8 LOAD; cat $+)|\
+    lina |\
+    sed '1,/TEST STARTS HERE/d' |\
+    sed '/^OK$$/d' |\
+    sed 's/^[0-9A-F \.]*://' >$@       ;\
+    diff -w $@ testset386a >$@.diff ;\
+    diff $@.diff testresults
+
 testas80: asgen.frt as80.frt testset8080 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\

@@ -72,14 +72,14 @@
 0102 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 
-0280 1FF 00 1PI SIB,
-0240 1FF 00 1PI SIM,
+0680 1FF 00 1PI SIB,
+0640 1FF 00 1PI SIM,
 (   : (SIB}, TALLY @ !TALLY ((SIB}},                                    )
 (     30 XOR ( Toggle from using memory to registers}                   )
 (     TALLY ! ;                                                         )
 
 ( --------- 0F must be found last -------)
-2000 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
+2100 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
 2000 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
 0000 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
 0401 0001 0s 0 0s xFIR B|
@@ -99,7 +99,7 @@
 1002 FF0000 T! 100 00020F 2 3FAMILY, LAR, LSL, ( 3)
 1002 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
 1002 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
-1022 FF0000 T!   001 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
+1022 FF0000 T! 100 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
 1501 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
 1502 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
 ( --------- one fixup operands ----------)
