@@ -63,7 +63,7 @@ void tty_set(TTY *ptty)
 }
 
 void tty_restore(TTY *ptty) 
-{				/* write termio struct */
+{                               /* write termio struct */
   if (!ptty->is_a_tty)
     return;
   if (tcsetattr(ptty->fd, TCSADRAIN, &ptty->org) < 0)
@@ -71,10 +71,10 @@ void tty_restore(TTY *ptty)
 }
 
 void tty_init(int fd, TTY *ptty) 
-{				/* fill-in tty struct */
+{                               /* fill-in tty struct */
   ptty->fd = fd;
   ptty->is_a_tty = tcgetattr(ptty->fd, &ptty->org) >= 0 &&
-		 tcgetattr(ptty->fd, &ptty->now) >= 0;
+                 tcgetattr(ptty->fd, &ptty->now) >= 0;
 }
 
 /* Disabling these special char's is only useful when                        */
@@ -269,10 +269,10 @@ int c_rslw(int control, int block, void *pmem )
     off_t where = block * KBBUF;
 
     return 
-	 block_fid <= 0 ? -1 :
-	 where != lseek( block_fid, where, SEEK_SET ) ? errno :
-	 KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
-	 0 ;
+         block_fid <= 0 ? -1 :
+         where != lseek( block_fid, where, SEEK_SET ) ? errno :
+         KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
+         0 ;
 }
 
 /* Perform ANSI Forth 'SYSTEM' */
@@ -292,10 +292,35 @@ int c_system(int count, char command[])
   return system(buffer);
 }
 
+void c_debug(void ***pcfa)
+{
+    void **dea = *pcfa;
+    long *nfa = *(int **)(dea-3);                                     
+    char *pc;
+    int len;
+    int i;                                                             
+
+    printf("%p ",pcfa);
+    printf("%p ",dea);
+    printf("%p ",nfa);
+    if ( 0x08100000 < (int)nfa && (int)nfa <0x08200000 )
+    {
+        len = *nfa++; 
+        pc = (char *)nfa;
+        if (len<32) 
+        {
+            printf("%d ",len);
+            for (i=0; i<len; i++)                                              
+                printf("%c", *pc++);                                                
+        }
+    }                                                                  
+    printf("\n");                                                     
+}
 
 int main (int argc, char *argv[])
 {
   BOOT_OFFSET bootmode = COLD;
+/*printf("Hello world\n");exit(0);                                           */
 /*signal(SIGINT, SIG_IGN);                                                   */
   /* Convenient interrupting of long loops */
   signal(SIGQUIT, break_quit);                                                 
@@ -312,7 +337,7 @@ int main (int argc, char *argv[])
   }
   else 
   {
-	bootmode = WARM;
+        bootmode = WARM;
   }
   tty_restore(&std_in);                                                       
 }
