@@ -77,7 +77,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ Passing a 0 makes a char-set unfindable in ``CHAR-SET-SET''.
 
 \ The set of characters to be escaped.
-0 CHAR-SET \\     &\ | &^ | &$ | &+ | &? | &* | &[ | &] | &< | &> | &( | &) |  DROP
+0 CHAR-SET \\     &. | &\ | &^ | &$ | &+ | &? | &* | &[ | &] | &< | &> | &( | &) |  DROP
 
 \ For CHAR : "it IS special".
 : SPECIAL?   \\ BIT? ;
@@ -109,7 +109,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 100 SET ESCAPE-TABLE     ESCAPE-TABLE !SET
 ESCAPE-TABLE &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |
 \ The char's from \\ represent themselves when escaped.
-&\ &\ | &^ &^ | &$ &$ | &+ &+ | &? &? | &* &* |
+&. &. | &\ &\ | &^ &^ | &$ &$ | &+ &+ | &? &? | &* &* |
 &[ &[ | &] &] | &< &< | &> &> | &( &( | &) &) |
 DROP
 
@@ -156,7 +156,6 @@ CELLS SUBSTRING-TABLE + ! ;
 5 CREATE\ \5    6 CREATE\ \6    7 CREATE\ \7    8 CREATE\ \8   9 CREATE\ \9
 
 \ -----------------------------------------------------------------------
-\ START OF TESTED FOR COMPILATION ONLY AREA
 
 \ The compiled pattern.
 \ It contains xt's, strings and charsets in a sequential format, i.e.
@@ -176,6 +175,8 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
 : (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT DROP CELL- TRUE ;
+
+\ START OF TESTED FOR COMPILATION ONLY AREA
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ as long as the character agrees with the matcher at the expression,
@@ -230,12 +231,16 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ In a regular expression buffer this xt must be followed by a char-set.
 : ADVANCE-CHAR  OVER C@ OVER BIT? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
 
+\ END OF TESTED FOR COMPILATION ONLY AREA
+
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the char sequence at charpointer matches the string variable at the
 \ expressionpointer, advance both past the match, else leave them as is.
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
 \ In a regular expression buffer this xt must be followed by a string.
 : ADVANCE-EXACT  2DUP $@ CORA 0= DUP >R IF $@ >R SWAP R@ + SWAP R> + ALIGNED THEN R> ;
+
+\ START OF TESTED FOR COMPILATION ONLY AREA
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if there is match between cp and the end of string with the ep,
@@ -248,7 +253,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
         SWAP 1 + SWAP
         OVER C@ 0= IF FALSE EXIT THEN
     REPEAT
-    RDROP TRUE ;
+    TRUE ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "the strings HAS been used up".
@@ -392,7 +397,7 @@ ELSE NORMAL-CHARS $C+ THEN ;
 : PARSE-CHAR-SET !SET-MATCHED C@+
     DUP &. = IF DROP \. SET-MATCHED MAX-SET MOVE ELSE
     DUP &\ = IF DROP C@+ GET-CHAR-SET SET-MATCHED MAX-SET MOVE ELSE
-    DUP &[ = IF DROP PARSE[] ELSE
+    DUP &[ = IF DROP ^ PARSE[] ELSE
     SET-MATCHED SET-BIT
     THEN THEN THEN
     HARVEST-SET-MATCHED
@@ -444,11 +449,13 @@ CREATE (RE-EXPR) 1000 ALLOT
 : ADD>   'CHECK> RE, ;
 : ADD(   'HANDLE() RE, ALLOCATE( RE, ;
 : ADD)   'HANDLE() RE, ALLOCATE) RE, ;
+: ADD.   'ADVANCE-CHAR RE, \. RE-SET, ;
 
 30 SET COMMAND-SET     COMMAND-SET !SET
 
 : | COMMAND-SET 2SET+! ;    \ Shorthand, about to be hidden.
-&[ 'PARSE-CHAR-SET |   &< 'ADD< |   &> 'ADD> | &( 'ADD( | &) 'ADD) |
+&. 'ADD. | &[ 'PARSE[] |
+&< 'ADD< |   &> 'ADD> | &( 'ADD( | &) 'ADD) |
 &* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
 '| HIDDEN
 
@@ -463,7 +470,7 @@ CREATE (RE-EXPR) 1000 ALLOT
 
 \ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
-: BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE DUP @ 0= UNTIL DROP EXIT-BUILD ;
+: BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE DUP C@ 0= UNTIL DROP EXIT-BUILD ;
 
 \ Null-ended copy fo the string in which we try to match.
 CREATE STRING-COPY 1000 ALLOT
