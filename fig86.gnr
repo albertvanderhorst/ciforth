@@ -6,16 +6,17 @@
  TITLE   GENERIC FORTH FOR 8086 $Revision$
  _HEADER_ASM
 _COMMENT 
-	      FIG-FORTH
-   implemented by:  Charlie Krajewski
-		    205 ( BIG ) Blue Rd.
-		    Middletown, CT  06457
-
-	This generic version by:
+	A generic version of FIG-FORTH for IBM type standard PC's
 		Albert van der Horst
 		HCC Forth user group
 		The Netherlands
 		www.forth.hccnet.nl
+
+              based on 
+	      FIG-FORTH
+   implemented by:  Charlie Krajewski
+		    205 ( BIG ) Blue Rd.
+		    Middletown, CT  06457
 
   This implementation supports only one 64k segment
 
@@ -33,7 +34,7 @@ _COMMENT
 	 Systems Guide to FIG Forth
 	 C. H. Ting, PhD
  It is available through MVP.  See any recent issue
- of FORTH Dimensions for their ad.
+ of FORTH Dimensions for their ad. (DIXIT AD MDCCCCLXXX)
 
 No one who programs with FORTH can afford to be without:
   Starting Forth
@@ -62,7 +63,7 @@ credit notice:
 	       San Carlos, Ca.  94070
 _ENDCOMMENT
 	PAGE
-FIGREL	EQU	1	; FIG RELEASE #
+FIGREL	EQU	2	; FIG RELEASE #
 FIGREV	EQU	0	;FIG REVISION #
 USRVER  EQU     0  	; USER VERSION NUMBER
 ;
@@ -123,7 +124,11 @@ BPS     EQU     512             ;Bytes/sector, common to all of MSDOS
 SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
         ; Skip boot sector,fats and root dir.
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT            
-
+_COMMENT
+; Alternative if the disk need not be recognized by MSDOS
+; Usable for generating a bootable floppy simple.
+SECSTRT EQU     1       
+_ENDCOMMENT
 });_END___1__({_USEBIOS_1_})
 
         PAGE
@@ -199,15 +204,13 @@ ELSE1:
         INT(13H)                 ;BIOS disk read function
         JB      RETRY
 
-        ; Forth sits in the part reserved for system stuff.
-        ; (Assuming an MSDOS floppy with a system.)
-;       MOV     CX,SECSTRT
-        MOV     CX,1
+        ; The first file copied to a freshly formatted floppy will
+        ; be at SECSTRT (See also genboot.bat)
+        MOV     CX,SECSTRT                                                     
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
         JB      RETRY
-        CMP     CX,RESSECTORS
-;       CMP     CX,RESSECTORS+36
+        CMP     CX,SECSTRT + EM/BPS      ; Grossly overestimated.
         JNE     BEGIN1
         
         MOV     AL,'W'
