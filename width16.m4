@@ -4,5 +4,7 @@ define({CELL_M4},{WORD})dnl
 define({CELLWIDTH},2)dnl
 define({LCELL},TWO)dnl
 define({DC},DW)dnl
-define({STACKPOINTER},{SP})dnl
-define({WR},{BX})dnl
+define({SPO},{SP})dnl
+define({RPO},{BP})dnl
+define({LIP},{SI})dnl
+define({WOR},{BX})dnl

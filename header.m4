@@ -99,7 +99,7 @@ define({_CELLS},(CW*($1)))dnl
 define({_NEXT},{JMP     NEXT})
 define({_NEXT32},
         {LODSW                 ; NEXT
-        JMP     _CELL_PTR[WR]  } )
+        JMP     _CELL_PTR[WOR]  } )
 # See definition of PUSH in glossary.
 define({_PUSH},{JMP     APUSH})
 define({_PUSH32},

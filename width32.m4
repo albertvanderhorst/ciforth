@@ -13,6 +13,6 @@ define({DI},{EDI})dnl
 define({SI},{ESI})dnl
 define({BP},{EBP})dnl
 define({SP},{ESP})dnl
-define({STACKPOINTER},{ESP})dnl
+define({SPO},{ESP})dnl
 define({LODSW},{LODSD})dnl
-define({WR},{EAX})dnl
+define({WOR},{EAX})dnl
