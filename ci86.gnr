@@ -120,15 +120,15 @@ PH_OFFSET EQU     5       ;{ Past header field: Start of data area. }
 BD_OFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
 ;
 ;{      MEMORY + I/O CONSTANTS}
-;
+;{ These values can be changed at this single place. }
 NBUF    EQU     8      ;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
 US      EQU     100H     ;{ USER VARIABLE SPACE}
-_BITS16_({ RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER} })
+EM      EQU     M4_EM    ;{Where the memory ends w.r.t. ORIG.}
+_BITS16_({ RTS     EQU     0100H    ;{ RETURN STACK & TERM BUFFER} })
 _BITS32_({ RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
 ;
 _EQULAYOUT_({
-EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
 _HIGH_BUF_({
 BUF1    EQU     EM-(KBBUF+2*M4_CELLWIDTH)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
@@ -1184,8 +1184,9 @@ word list must be used with care as a
 forthcode({SEARCH}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add a denotation.},
 {{VOCABULARY}},
-{{: GS1 [COMPILE] DENOTATION DEFINITIONS LATEST ID. [COMPILE] dnl
-FORTH DEFINITIONS ; GS1},{"}},
+{{: AUX1 [COMPILE] DENOTATION DEFINITIONS ;},{},
+{: AUX2 [COMPILE] FORTH DEFINITIONS ;},{},
+{: GS1 AUX1 LATEST ID. AUX2 ; GS1},{"}},
 enddoc)
 HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
@@ -2603,7 +2604,7 @@ worddoc( {STORAGE~},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.},
 {{BLOCK},{LIMIT}},
-{{LIMIT FIRST - B/BUF /MOD #BUFF = .},{_T_}},
+{{LIMIT FIRST - B/BUF 2 CELLS + /MOD #BUFF = .},{_T_}},
 enddoc)
 HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 });_END_({ _HIGH_BUF_})
@@ -2618,7 +2619,7 @@ buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
 },{{BLOCK},{LIMIT}},
-{{LIMIT FIRST - B/BUF @ /MOD DROP #BUFF = .},{_T_}},
+{{LIMIT FIRST - B/BUF 2 CELLS + /MOD DROP #BUFF = .},{_T_}},
 enddoc)
 HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB    (KBBUF+2*CW)*NBUF
@@ -5398,7 +5399,7 @@ worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
 forthsamp({port}). A port address is always 16 bits .},
 {{PC!},{P@},{P!},{@}},
-{{No test)},{}},
+{{(No test)},{}},
 enddoc)
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
@@ -5412,7 +5413,7 @@ worddoc( {MEMORY},{PC!},{port_char_store},{b port --- },{},
 forthsamp({port}).
 A port address is always 16 bits .},
 {{PC@},{P!},{P@},{!}},
-{{No test)},{}},
+{{(No test)},{}},
 enddoc)
 CODE_HEADER({PC!},{PCSTO})
         POP     DX      ;{PORT ADDR}
@@ -5424,7 +5425,7 @@ worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
 forthsamp({port}). A port address is always 16 bits .},
 {{P!},{PC@},{PC!},{@}},
-{{No test)},{}},
+{{(No test)},{}},
 enddoc)
 CODE_HEADER({P@},{PFET})
         POP     DX      ;{PORT ADDR}
@@ -5435,7 +5436,7 @@ worddoc( {MEMORY},{P!},{port_store},{n port --- },{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
 forthsamp({port}) .},
 {{P@},{PC!},{PC@},{!}},
-{{No test)},{}},
+{{(No test)},{}},
 enddoc)
 CODE_HEADER({P!},{PSTO})
         POP     DX      ;{PORT ADDR}
@@ -6139,46 +6140,103 @@ _BITS32_({        DC      LIT, TYPEBUF })
         DC      SEMIS
 _BITS32_({TYPEBUF:  _RESB    0400H })
 ;
-worddoc( {PARSING},{(ACCEPT)},,{-- sc},{ISO},
-{Input a line
-until a "return") from the operators terminal, and leave it as
-a string constant. It doesn't contain a trailing forthkey({LF}).
+worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
+{Accept characters from the terminal, until a forthkey({RET})
+is received and return the result as a constant string
+forthvar({sc}).
+It doesn't contain a trailing forthkey({LF}).
 But possibly a trailing forthkey({RET}) (0DH).
+The
+editing functions are the same as with forthcode({ACCEPT}) .
+_VERBOSE({{This is lighter on the system and sometimes easier
+to use than forthcode({ACCEPT}).
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning.
+forthcode({TIB @}), but not necessarily at the beginning.}})
 },
-{{ACCEPT},{EVALUATE}},
-{{." interactive"},{interactive}},
+{{KEY},{KEY?},{ACCEPT}},
+{
+{(ACCEPT)},{},
+ {GIBBON
+  _PC_(1-) DUP . TYPE},{6 GIBBON},
+dnl { ." Type an 'A'" (ACCEPT) DUP . TYPE},{1 A)},
+dnl {." Type an 'ABCDEF'" DUP . },{6},
+},
 enddoc)
 HEADER({(ACCEPT)},{PACCEP},{DOCOL})
-        DC      TIB
-        DC      FETCH
-        DC      LDUP
-        DC      LIT,RTS/2
-        DC      OVER, TOR
-        DC      TDUP, ONEP, LERASE
-;        DC      EXPEC
-_BITS32_({; MSDOS cannot handle a 32 bits address: use the buffer.})
-_BITS32_({        DC      LIT, EXPECTBUF})
-dnl    _BITS16_({        DC      SWAP})
-        _BITS16_({        DC      OVER})
-        DC      TOR, TOR
-        DC      LIT,03F00H ;{ Write file or device }
-        DC      ZERO     ;{ Handle}
-        DC      FROMR, FROMR
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      BDOS, DROP ;{ ignore error }
-        DC      DROP, DROP, DROP ;{ Leave count}
-        DC      TWO, LSUB ;{ Rid of 0D0A}
-_BITS32_({; Copy the buffer.})
-_BITS32_({        DC      TOR, LDUP, LIT, EXPECTBUF, SWAP, RR, LCMOVE, FROMR })
-        DC      PLUS, ZERO, SWAP, CSTOR
-        DC      FROMR, LDUP
-ACCEP4A:  DC      COUNT, ZEQU
-        _0BRANCH(ACCEP4A)
-        DC      SWAP, LSUB
+PACCEP2:
+;        DC      NOLF
+;        DC       LIT, 'a', EMIT
+        DC      LIT, REMAIND
+        DC      TFET
+        DC      LIT, LF, SINDEX
+        DC      ZEQU
+        _0BRANCH(PACCEP1)
+;        DC      RETOBO
+        DC      LIT, REMAIND, TFET
+        DC      TIB, FETCH
+        DC      SWAP, LMOVE
+        DC      TIB, FETCH
+        DC      LIT, REMAIND, CELLP, STORE
+        DC      REFTIB
+        _BRANCH(PACCEP2)
+PACCEP1:
+;        DC      SPLOFF
+        DC      LIT, REMAIND             ; go
+        DC      TFET                     ; go
+        DC      LIT, LF, SINDEX          ; go
+        DC      ZEQU                     ; go
+        DC      LIT, 13, QERR            ; go
+        DC      LIT, REMAIND, TFET
+        DC      LIT, LF, SSPLIT
+        DC      TSWAP, LIT, REMAIND, TSTOR
         DC      SEMIS
-_BITS32_({EXPECTBUF:  _RESB    0100H },{dnl})
+
+REMAIND:        DC      0, STRTIB
+;
+worddocsafe( {INPUT~},{(REFILL-TIB)},{refill-tib},{ --- } ,{},
+{Accept characters from the current input stream such as to
+fill up forthcode({TIB}) . Normally this means until a
+forthkey({RET}). If the input is redirected (such that reading
+after forthkey({RET}) cannot be prevented)
+forthsamp({REMAINDER 2@}) contains the first part of
+forthcode({TIB}) that has a left over from the previous read.
+After forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
+the characters ready in the input buffer. All characters are
+retained including the forthkey({RET}). The editing functions
+are the same as with forthcode({ACCEPT}).
+},
+{{ACCEPT},{(ACCEPT)}},
+{
+{( "see (ACCEPT)" TYPE)},{}
+},
+enddoc)
+HEADER({REFILL-TIB},{REFTIB},{DOCOL})
+        DC      LIT,03F00H ;{ Read file or device }
+        DC      ZERO     ;{ Handle}
+        DC      LIT, REMAIND, FETCH, TOR
+_BITS16_(
+{        DC      LIT, RTS/2, RR, LSUB
+        DC      TIB, FETCH, RR, PLUS},
+{dnl})
+_BITS32_(
+{;{ MSDOS cannot handle a 32 bits address: use the buffer.}
+        DC      LIT, 0200H
+        DC       LIT, EXPECTBUF },
+{dnl})
+_SWITCH_({        DC   LIT, M4_SWITCHOFFSET, PLUS, },{dnl})
+        DC      BDOS, ONE, LAND, LIT, 6, QERR
+        DC      DROP, DROP, DROP ;{ Leave count}
+_BITS32_(
+{;{ Copy the buffer.}
+        DC      LIT, EXPECTBUF, OVER
+        DC      TIB, FETCH, RR, PLUS
+        DC      SWAP, LCMOVE},
+{dnl})
+        DC      LDUP, ZEQU, LIT, -32, LAND, THROW ; {Presumably end of pipe.}
+        DC      TIB, FETCH, SWAP, FROMR, PLUS
+        DC      LIT, REMAIND, TSTOR
+        DC      SEMIS
+_BITS32_({EXPECTBUF:  _RESB    0200H },{dnl})
 ;
 });_END_({_MODERN_})
 _LINUX_C_({
@@ -6477,7 +6535,7 @@ terminal to address, until a forthkey({RET}) is received.
 _LINUX_({ The simple tty editing functions of Linux are
 observed, i.e. the ``erase'' (delete a character) and ``kill''
 (delete a line) characters. Typically these are the backspace
-key and ^U.}) _PC({The editing functions such as described by
+key and ^U.}) _PC_({The editing functions such as described by
 forthcode({(ACCEPT)}) are observed.}) Note that excess
 characters after forthsamp({count}) are ignored. The number of
 characters not including the forthkey({RET}) is returned into
@@ -6830,15 +6888,12 @@ Close the currently open block file forthcode({BLOCK-HANDLE}),
 i.e. the mass storage words no longer work, and will result in
 error messages.
 },{{BLOCK},{LIST},{LOAD}},
-_HOSTED_LINUX_({ {
-{( Superfluous but keep as an example)},{},
-}, })
-_PC({ { dnl We are in _RWFILE_ a fortiori in _PC_ already
+{
 {BLOCK-EXIT},{},
-{1 WARNING ! -1F MESSAGE}, { },
+{0 WARNING ! -1F MESSAGE}, {MSG # -1F},
 { CR DISK-ERROR @ 0= 0= . BLOCK-INIT},{_T_},
 {1 WARNING ! -1F MESSAGE}, { I have a beautiful disclaimer,},
-}, })
+},
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      FLUSH
@@ -8400,13 +8455,13 @@ INITDP:                 ;  It may be that it is not consecutive with TASK
                         ;  And that is a hell of a problem.
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
-       _RESB    M4_EM - FORTHSIZE - RTS - US - BUFFERSIZE
+       _RESB    EM - FORTHSIZE - RTS - US - BUFFERSIZE
 INITS0:                         ;{ Growns down}
 STRTIB: _RESB     RTS            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
 STRUSA: _RESB    US              ;{ User area}
 BUF1:   _RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
-EM:
+; { EM: as a label would point here.}
 });_END_({ _HOSTED_LINUX_})
 ;
 
