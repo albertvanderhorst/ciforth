@@ -8,6 +8,9 @@ dnl define({forthvar},{{@samp{$1}}})
 define({forthvar},{{@var{$1}}})
 define({forthfile},{@file{{$1}}})
 define({forthsamp},{@samp{{$1}}})
+define({forthmacro},{@samp{{$1}}})
+define({forthprog},{@code{{$1}}})
+define({forthcodeni},{@code{{$1}}})
 define({forthcode},{@code{{$1}}
 @findex $1
 })
@@ -27,6 +30,7 @@ define({forthitem},{{@item}})
 define({forthbullet},{{@bullet}})
 define({note},{$2})
 dnl define({a},{{@a}}) define({enda},{{@end a}})
+dnl be careful, an example always occupies whole lines.
 define({forthexample},
 {@example
 @cartouche $1
