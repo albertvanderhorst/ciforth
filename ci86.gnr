@@ -2,37 +2,37 @@
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
-	PAGE  66,106
+        PAGE  66,106
  TITLE   GENERIC FORTH FOR 8086 $Revision$
  _HEADER_ASM
-_COMMENT 
-	A generic version of FIG-FORTH for IBM type standard PC's
-		Albert van der Horst
-		HCC Forth user group
-		The Netherlands
-		www.forth.hccnet.nl
+_COMMENT
+        A generic version of FIG-FORTH for IBM type standard PC's
+                Albert van der Horst
+                HCC Forth user group
+                The Netherlands
+                www.forth.hccnet.nl
 
-	      based on 
-	      FIG-FORTH
+              based on
+              FIG-FORTH
    implemented by:  Charlie Krajewski
-		    205 ( BIG ) Blue Rd.
-		    Middletown, CT  06457
+                    205 ( BIG ) Blue Rd.
+                    Middletown, CT  06457
 
   This implementation supports only one 64k segment
 
   The listing has been made possible by the
   prior work of:
-	       Thomas Newman, Hayward, Ca.
+               Thomas Newman, Hayward, Ca.
 
  : other_acknowledgements
-	 John_Cassidy
-	 Kim_Harris
-	 George_Flammer
-	 Robert_D._Villwock ;
+         John_Cassidy
+         Kim_Harris
+         George_Flammer
+         Robert_D._Villwock ;
  To upgrade, modify, and understand Fig Forth, the
  value of the following book cannot be overstated:
-	 Systems Guide to FIG Forth
-	 C. H. Ting, PhD
+         Systems Guide to FIG Forth
+         C. H. Ting, PhD
  It is available through MVP.  See any recent issue
  of FORTH Dimensions for their ad. (DIXIT AD MDCCCCLXXX)
 
@@ -46,7 +46,7 @@ will probably type in from the FIG-Forth installation
 manual.
 
 Although there is much to be said for typing in your own
-listing and getting it running, there is much to be said 
+listing and getting it running, there is much to be said
 not typing in your own listing.  If you feel that 100+
 pages of plinking is nutty, contact me for availability
 of a disc with source & executable files.  Obtainable at
@@ -56,44 +56,44 @@ basement support.
 All publications of the FORTH Interest Group are public domain.
 They may be further distributed by the inclusion of this
 credit notice:
-	       This publication has been made available by:
-       
-	       FORTH Interest Group
-	       P.O. Box 1105
-	       San Carlos, Ca.  94070
+               This publication has been made available by:
+
+               FORTH Interest Group
+               P.O. Box 1105
+               San Carlos, Ca.  94070
 _ENDCOMMENT
-	PAGE
-FIGREL	EQU	2	;{ FIG RELEASE #}
-FIGREV	EQU	0	;{ FIG REVISION #}
+        PAGE
+FIGREL  EQU     2       ;{ FIG RELEASE #}
+FIGREV  EQU     0       ;{ FIG REVISION #}
 USRVER  EQU     34      ;{ USER VERSION NUMBER, a digit now}
 ;
 ;{       PROTECTION}
 CW      EQU     M4_CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
 PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}
 ;
-;{	ASCII CHARACTER EQUIVALENTS}
+;{      ASCII CHARACTER EQUIVALENTS}
 ;
-ABL	EQU	20H	;{ SPACE}
-ACR	EQU    	0DH	;{ CR}
-ADOT	EQU	2EH	;{ PERIOD}
-BELL	EQU	07H	;{ ^G}
-BSIN	EQU	08H	;{ INPUT DELETE CHARACTER}
-BSOUT	EQU	08H	;{ OUTPUT BACKSPACE ( ^H )}
-LF	EQU 	0AH	;{ LINE FEED, USED INTERNALLY AS}
-			;{ LINE ENDER}
-FF	EQU	0CH	;{ FORM FEED}
+ABL     EQU     20H     ;{ SPACE}
+ACR     EQU     0DH     ;{ CR}
+ADOT    EQU     2EH     ;{ PERIOD}
+BELL    EQU     07H     ;{ ^G}
+BSIN    EQU     08H     ;{ INPUT DELETE CHARACTER}
+BSOUT   EQU     08H     ;{ OUTPUT BACKSPACE ( ^H )}
+LF      EQU     0AH     ;{ LINE FEED, USED INTERNALLY AS}
+                        ;{ LINE ENDER}
+FF      EQU     0CH     ;{ FORM FEED}
 ;
-;{	MEMORY + I/O CONSTANTS}
+;{      MEMORY + I/O CONSTANTS}
 ;
-EM	EQU	M4_EM   ;{ END OF MEMORY + 1}
-NBUF	EQU	2	;{ NO. OF BUFFERS AKA SCREENS }
-KBBUF	EQU	1024    ;{DATA BYTES PER DISK BUFFER}
-US	EQU	100H     ;{ USER VARIABLE SPACE}
-RTS	EQU	0A0H	;{ RETURN STACK & TERM BUFFER}
+EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
+NBUF    EQU     2       ;{ NO. OF BUFFERS AKA SCREENS }
+KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
+US      EQU     100H     ;{ USER VARIABLE SPACE}
+RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER}
 ;
 ;____1_____ _EQULAYOUT_1_({
 ;____1_____ _HIGH_BUF_1_({
-BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
+BUF1    EQU     EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
 });_END___1__({ _HIGH_BUF_1_})
 ;____1_____ _LOW_BUF_1_({
@@ -101,7 +101,7 @@ STRUSA  EQU     EM-US         ;{ User area at end }
 });_END___1__({ _LOW_BUF_1_})
 
 STRTIB  EQU     STRUSA-RTS      ;{ Start return stack area}
-				;{ Under this : data stack}
+                                ;{ Under this : data stack}
 INITR0  EQU     STRUSA         ;{ Grows down}
 INITS0  EQU     STRTIB          ;{ Growns down}
 });_END___1__({ _EQULAYOUT_1_})
@@ -141,12 +141,12 @@ _ENDCOMMENT
 ;{ Bios specific equates.}
 BOOTADDRESS     EQU     07C00H          ;{ PC jumps to 0:7C00 to boot}
 SPDRV   EQU     HEADS*TRKS*SPT    ;{ sectors/drive}
-	;{ Skip boot sector,fats and root dir and first sector of file.}
+        ;{ Skip boot sector,fats and root dir and first sector of file.}
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
 _COMMENT
 ;{ Alternative if the disk need not be recognized by MSDOS}
 ;{ Usable for generating a bootable floppy simple.}
-SECSTRT EQU     1       
+SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 
@@ -163,375 +163,392 @@ CS_32 EQU 10H  ;{ 32 BITS CODE SEGMENT DID                 }
 IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
 IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
 
-GDTLEN EQU 7FFFH 
-GDT EQU 28000H 
+GDTLEN EQU 7FFFH
+GDT EQU 28000H
 GDT_SEGMENT EQU GDT/10H
 });_END___1__({ _NATIVE_1_})
 
-	PAGE
-	CSEG    SEGMENT PARA PUBLIC 'CODE'
-	ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
+        PAGE
+        CSEG    SEGMENT PARA PUBLIC 'CODE'
+        ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
 ;____1_____ _BOOTFD__1_({
-	  ORG     0H
+          ORG     0H
 ORG0:   JMP     SHORT BOOT
-	NOP
-	;{ MSDOS programmers reference (thru 6, 3.9)}
-	DB    "DFW--EXP"
+        NOP
+        ;{ MSDOS programmers reference (thru 6, 3.9)}
+        DB    "DFW--EXP"
 LBPS    DW         BPS
-	DB         1
+        DB         1
 RESSECTORS  DW     01H
-	DB         NFAT 
-	DW BPS*SECROOT/32
-	DW         SPDRV
-	DB         MEDIA
-	DB         SECFAT, 0H
+        DB         NFAT
+        DW BPS*SECROOT/32
+        DW         SPDRV
+        DB         MEDIA
+        DB         SECFAT, 0H
 LSPT    DW         SPT
 LHEADS  DW       HEADS
 HIDDENSECS    DD        0H
 HUGESECS      DD         000H
       ;{ BIOS parameter block ends here}
-	DB 000H, 000H, 029H                  ;{ Required magic.}
-	DB         004H, 01CH, 040H,  00BH
-	DB    "           "
-	DB    "FAT12   "
+        DB 000H, 000H, 029H                  ;{ Required magic.}
+        DB         004H, 01CH, 040H,  00BH
+        DB    "           "
+        DB    "FAT12   "
 
 RETRY:
-	CALL    DISPLAYW
-	XOR     AX,AX   ;{ Reset}
-	MOV     AL,' '
-	MOV     DL,00            ;{Drive 0 (floppy 1)}
-	INT(13H)                 ;{BIOS disk read function}
-	CALL    DISPLAYW
-	MOV     AL,' '
-	CALL DISPLAY
-	MOV     AX,CX
-	CALL    DISPLAYW
-	MOV     AL,' '
-	CALL DISPLAY
-BOOT:   
-	MOV     AL,'D'
-	CALL    DISPLAY
-	MOV AX,CS
-	AND AX,AX       ;{ Z = BOOTING ?}
-	JNZ  ELSE1
-	;{ Adjust code segment address without leaving the ball}
-	;{ Generating machine code is actually simpler than}
-	;{ beating the assembler. After 10 attempts I gave up}
-	;{ This is a simple straightforward intersegment jump}
+        CALL    DISPLAYW
+        XOR     AX,AX   ;{ Reset}
+        MOV     AL,' '
+        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        INT(13H)                 ;{BIOS disk read function}
+        CALL    DISPLAYW
+        MOV     AL,' '
+        CALL DISPLAY
+        MOV     AX,CX
+        CALL    DISPLAYW
+        MOV     AL,' '
+        CALL DISPLAY
+BOOT:
+        MOV     AL,'D'
+        CALL    DISPLAY
+        MOV AX,CS
+        AND AX,AX       ;{ Z = BOOTING ?}
+        JNZ  ELSE1
+        ;{ Adjust code segment address without leaving the ball}
+        ;{ Generating machine code is actually simpler than}
+        ;{ beating the assembler. After 10 attempts I gave up}
+        ;{ This is a simple straightforward intersegment jump}
 ;{       JMP FAR BOOTADDRESS+ELSE1}
-	 DB      0EAH
-	 DW      ELSE1
-	 DW     REALSEGMENT
-ELSE1:  
+         DB      0EAH
+         DW      ELSE1
+         DW     REALSEGMENT
+ELSE1:
 ;{MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE}
-	MOV     AL,'F'
-	CALL    DISPLAY
-	CLI                     ;{ Disallow interrups until stack ready}
-	MOV     AX,CS           ;{ Will do for now (real mode)}
-	MOV     DS,AX
-	MOV     SS,AX
-	MOV     ES,AX
-	MOV     STACKPOINTER,0H
-	STI                     ;{ Allow interrupts}
-	MOV     AH,00   ;{ Reset}
-	MOV     DL,00            ;{Drive 0 (floppy 1)}
-	INT(13H)                 ;{BIOS disk read function}
-	JB      RETRY
+        MOV     AL,'F'
+        CALL    DISPLAY
+        CLI                     ;{ Disallow interrups until stack ready}
+        MOV     AX,CS           ;{ Will do for now (real mode)}
+        MOV     DS,AX
+        MOV     SS,AX
+        MOV     ES,AX
+        MOV     STACKPOINTER,0H
+        STI                     ;{ Allow interrupts}
+        MOV     AH,00   ;{ Reset}
+        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        INT(13H)                 ;{BIOS disk read function}
+        JB      RETRY
 
-	;{ The first file copied to a freshly formatted floppy will}
-	;{ be at SECSTRT (See also genboot.bat)}
-	MOV     CX,SECSTRT                                                     
-	MOV     BX,BPS
+        ;{ The first file copied to a freshly formatted floppy will}
+        ;{ be at SECSTRT (See also genboot.bat)}
+        MOV     CX,SECSTRT
+        MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
-	JB      RETRY
-	CMP     BX,[ENDLD]            
-	JL      BEGIN1
-	
-	MOV     AL,'W'
-	CALL    DISPLAY
-	CALL    DISPLAYCR
+        JB      RETRY
+        CMP     BX,[ENDLD]
+        JL      BEGIN1
+
+        MOV     AL,'W'
+        CALL    DISPLAY
+        CALL    DISPLAYCR
 _REAL_1_({        JMP     BOOTUP})
 _NATIVE_1_({        JMP     PROTECT})
 ENDLD:  DW      INITDP
 ;{       Read the sector with number in CX (Counting from 0)}
 ;{       Leave into CX the incremented sec# }
 READSECTOR:
-	PUSH    CX
-	PUSH    BX
-	MOV     AX,CX
-	XOR     DX,DX
-	DIV     _CELL_PTR[LSPT]
-	MOV     CL,DL
-	INC     CL      ;{ Sectors counting from 1!}
-	XOR     DX,DX
-	DIV     _CELL_PTR[LHEADS]
-	MOV     DH,DL   ;{ Head number}
-	MOV     CH,AL   ;{ Only small disks <256 cylinders}
-	MOV     DL,00            ;{Drive 0 (floppy 1)}
-	MOV     AX,0201H   ;{ Read absolute one sector}
-	INT(13H)                 ;{BIOS disk read function}
-	POP     BX
-	PUSHF
-	ADD     BX,BPS
-	POPF
-	POP     CX
-	INC     CX
-	RET
-	
+        PUSH    CX
+        PUSH    BX
+        MOV     AX,CX
+        XOR     DX,DX
+        DIV     _CELL_PTR[LSPT]
+        MOV     CL,DL
+        INC     CL      ;{ Sectors counting from 1!}
+        XOR     DX,DX
+        DIV     _CELL_PTR[LHEADS]
+        MOV     DH,DL   ;{ Head number}
+        MOV     CH,AL   ;{ Only small disks <256 cylinders}
+        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        MOV     AX,0201H   ;{ Read absolute one sector}
+        INT(13H)                 ;{BIOS disk read function}
+        POP     BX
+        PUSHF
+        ADD     BX,BPS
+        POPF
+        POP     CX
+        INC     CX
+        RET
+
 DISPLAYCR:
-	MOV     AL,ACR
-	CALL    DISPLAY
-	MOV     AL,LF
-	JMP DISPLAY
-	
+        MOV     AL,ACR
+        CALL    DISPLAY
+        MOV     AL,LF
+        JMP DISPLAY
+
 DISPLAYPC:      POP     AX
-	PUSH    AX
+        PUSH    AX
 DISPLAYW:       PUSH    AX              ;{ Display AX in hex }
-	MOV     AL,AH
-	CALL    DISPLAYHEX
-	POP     AX
-	;{ CALL DISPLAYHEX ; RET}
+        MOV     AL,AH
+        CALL    DISPLAYHEX
+        POP     AX
+        ;{ CALL DISPLAYHEX ; RET}
 DISPLAYHEX:     PUSH    AX              ;{ Display AL in hex }
-	MOV     CL,4
-	SAR     AL,CL
-	CALL    DISPLAYHD
-	POP     AX
-	;{ CALL DISPLAYHD ; RET}
+        MOV     CL,4
+        SAR     AL,CL
+        CALL    DISPLAYHD
+        POP     AX
+        ;{ CALL DISPLAYHD ; RET}
 DISPLAYHD:      AND     AL,0FH          ;{ Display AL as one hex digit}
-	DAA
-	MOV     AH,AL
-	MOV     CL,5
-	SHR     AH,CL
-	ADC     AL,30H
-	;{ CALL DISPLAY ; RET}
+        DAA
+        MOV     AH,AL
+        MOV     CL,5
+        SHR     AH,CL
+        ADC     AL,30H
+        ;{ CALL DISPLAY ; RET}
 DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
-	MOV     AH,0EH
-	INT(10H)
-	RET
-	
-	_NEW_ORG(01FEH)
-	;{ Signature. }
-	DB         055H, 0AAH
-		 
+        MOV     AH,0EH
+        INT(10H)
+        RET
+
+        _NEW_ORG(01FEH)
+        ;{ Signature. }
+        DB         055H, 0AAH
+
 });_END___1__({ _BOOTFD__1_})
 
 ;____1_____ _BOOTHD__1_({
-	  ORG     0H
+          ORG     0H
 ORG0:   JMP     SHORT BOOT
-	NOP
-	;{ MSDOS programmers reference (thru 6, 3.9)}
-	DB    "DFW---HD"
+        NOP
+        ;{ MSDOS programmers reference (thru 6, 3.9)}
+        DB    "DFW---HD"
 LBPS    DW         BPS
-	DB         1
+        DB         1
 RESSECTORS  DW     01H
-	DB         NFAT 
-	DW BPS*SECROOT/32
-	DW         SPDRV
-	DB         MEDIA
-	DB         SECFAT, 0H
+        DB         NFAT
+        DW BPS*SECROOT/32
+        DW         SPDRV
+        DB         MEDIA
+        DB         SECFAT, 0H
 LSPT    DW         SPT
 LHEADS  DW       HEADS
 HIDDENSECS    DD        0H
 HUGESECS      DD         000H
       ;{ BIOS parameter block ends here}
-	DB 000H, 000H, 029H                  ;{ Required magic.}
-	DB         004H, 01CH, 040H,  00BH
-	DB    "           "
-	DB    "FAT12   "
+        DB 000H, 000H, 029H                  ;{ Required magic.}
+        DB         004H, 01CH, 040H,  00BH
+        DB    "           "
+        DB    "FAT12   "
 
 BOOTLBA:  DB      10H, 0
-	DW      (INITDP-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
-	DW      BPS             ;{ OFFSET AND SEGMENT}
-	DW      REALSEGMENT
-	;{ At a hard disk we just read sector from sector 1        }
-	DD      1       ;{ Start}
-	DD      0       ;{ M.S. 32 BITS}
+        DW      (INITDP-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
+        DW      BPS             ;{ OFFSET AND SEGMENT}
+        DW      REALSEGMENT
+        ;{ At a hard disk we just read sector from sector 1        }
+        DD      1       ;{ Start}
+        DD      0       ;{ M.S. 32 BITS}
 
 HDREAD:
-	MOV     AX,4200H  ;{   Read extended                                }
-	MOV     DX,0080H  ;{   Disk C                                 }
-	MOV     SI,BOOTLBA
-	INT     13H
+        MOV     AX,4200H  ;{   Read extended                                }
+        MOV     DX,0080H  ;{   Disk C                                 }
+        MOV     SI,BOOTLBA
+        INT     13H
 
-	RET
+        RET
 RETRY:
-	CALL    DISPLAYW
-	MOV     AL,' '
-	MOV     AH,00   ;{ Reset}
-	MOV     DL,80            ;{Drive 80 (hd C:)}
-	INT(13H)                 ;{BIOS disk read function}
-	CALL    DISPLAYW
-	MOV     AL,' '
-	CALL DISPLAY
-	MOV     AX,CX
-	CALL    DISPLAYW
-	MOV     AL,' '
-	CALL DISPLAY
-BOOT:   
-	MOV     AL,'D'
-	CALL    DISPLAY
-	MOV AX,CS
-	AND AX,AX       ;{ Z = BOOTING ?}
-	JNZ  ELSE1
-	;{ Adjust code segment address without leaving the ball}
-	;{ Generating machine code is actually simpler than}
-	;{ beating the assembler. After 10 attempts I gave up}
-	;{ This is a simple straightforward intersegment jump}
+        CALL    DISPLAYW
+        MOV     AL,' '
+        MOV     AH,00   ;{ Reset}
+        MOV     DL,80            ;{Drive 80 (hd C:)}
+        INT(13H)                 ;{BIOS disk read function}
+        CALL    DISPLAYW
+        MOV     AL,' '
+        CALL DISPLAY
+        MOV     AX,CX
+        CALL    DISPLAYW
+        MOV     AL,' '
+        CALL DISPLAY
+BOOT:
+        MOV     AL,'D'
+        CALL    DISPLAY
+        MOV AX,CS
+        AND AX,AX       ;{ Z = BOOTING ?}
+        JNZ  ELSE1
+        ;{ Adjust code segment address without leaving the ball}
+        ;{ Generating machine code is actually simpler than}
+        ;{ beating the assembler. After 10 attempts I gave up}
+        ;{ This is a simple straightforward intersegment jump}
 ;{       JMP FAR BOOTADDRESS+ELSE1}
-	 JMPFAR 
-	 DW      ELSE1
-	 DW     REALSEGMENT
-ELSE1:  
+         JMPFAR
+         DW      ELSE1
+         DW     REALSEGMENT
+ELSE1:
 ;{MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE}
-	MOV     AL,'F'
-	CALL    DISPLAY
-	CLI                     ;{ Disallow interrups until stack ready}
-	MOV     AX,CS           ;{ Will do for now (real mode)}
-	MOV     DS,AX
-	MOV     SS,AX
-	MOV     ES,AX
-	MOV     STACKPOINTER,0H
-	STI                     ;{ Allow interrupts}
-	MOV     AH,00   ;{ Reset}
-	MOV     DL,80            ;{Drive 80 (hd C:)}
-	INT(13H)                 ;{BIOS disk read function}
-	JB      RETRY
-	CALL    HDREAD
-	JB      RETRY
-	MOV     AL,'W'
-	CALL    DISPLAY
-	CALL    DISPLAYCR
+        MOV     AL,'F'
+        CALL    DISPLAY
+        CLI                     ;{ Disallow interrups until stack ready}
+        MOV     AX,CS           ;{ Will do for now (real mode)}
+        MOV     DS,AX
+        MOV     SS,AX
+        MOV     ES,AX
+        MOV     STACKPOINTER,0H
+        STI                     ;{ Allow interrupts}
+        MOV     AH,00   ;{ Reset}
+        MOV     DL,80            ;{Drive 80 (hd C:)}
+        INT(13H)                 ;{BIOS disk read function}
+        JB      RETRY
+        CALL    HDREAD
+        JB      RETRY
+        MOV     AL,'W'
+        CALL    DISPLAY
+        CALL    DISPLAYCR
 _REAL_1_({        JMP     BOOTUP})
 _NATIVE_1_({        JMP     PROTECT})
 DISPLAYCR:
-	MOV     AL,ACR
-	CALL    DISPLAY
-	MOV     AL,LF
-	JMP DISPLAY
-	
+        MOV     AL,ACR
+        CALL    DISPLAY
+        MOV     AL,LF
+        JMP DISPLAY
+
 DISPLAYPC:      POP     AX
-	PUSH    AX
+        PUSH    AX
 DISPLAYW:       PUSH    AX              ;{ Display AX in hex }
-	MOV     AL,AH
-	CALL    DISPLAYHEX
-	POP     AX
-	;{ CALL DISPLAYHEX ; RET}
+        MOV     AL,AH
+        CALL    DISPLAYHEX
+        POP     AX
+        ;{ CALL DISPLAYHEX ; RET}
 DISPLAYHEX:     PUSH    AX              ;{ Display AL in hex }
-	MOV     CL,4
-	SAR     AL,CL
-	CALL    DISPLAYHD
-	POP     AX
-	;{ CALL DISPLAYHD ; RET}
+        MOV     CL,4
+        SAR     AL,CL
+        CALL    DISPLAYHD
+        POP     AX
+        ;{ CALL DISPLAYHD ; RET}
 DISPLAYHD:      AND     AL,0FH          ;{ Display AL as one hex digit}
-	DAA
-	MOV     AH,AL
-	MOV     CL,5
-	SHR     AH,CL
-	ADC     AL,30H
-	;{ CALL DISPLAY ; RET}
+        DAA
+        MOV     AH,AL
+        MOV     CL,5
+        SHR     AH,CL
+        ADC     AL,30H
+        ;{ CALL DISPLAY ; RET}
 DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
-	MOV     AH,0EH
-	INT(10H)
-	RET
-	
-	_NEW_ORG(01FEH)
-	;{ Signature. }
-	DB         055H, 0AAH
-		 
+        MOV     AH,0EH
+        INT(10H)
+        RET
+
+        _NEW_ORG(01FEH)
+        ;{ Signature. }
+        DB         055H, 0AAH
+
 });_END___1__({ _BOOTHD__1_})
 
 ;____1_____ _HOSTED_MSDOS_1_({
-	ORG	100H	;{ Required start of .COM program.}
-	JMP     BOOTUP
+        ORG     100H    ;{ Required start of .COM program.}
+        JMP     BOOTUP
 });_END___1__({ _HOSTED_MSDOS_1_})
 
 PROTECT:
 ;____1_____ _NATIVE_1_({
 ;{CODE-SEGMENT  10 * CONSTANT CODE-START                          }
-	MOV     AX,GDT_SEGMENT ;{ GDT segment}
-	MOV     ES,AX
-	MOV     DI,0 
-	MOV     AX,GDTLEN
-	STOSW
+        MOV     AX,GDT_SEGMENT ;{ GDT segment}
+        MOV     ES,AX
+        MOV     DI,0
+        MOV     AX,GDTLEN
+        STOSW
 ;{ PREPARE-CS : THIS MUST LOOK THE SAME IN REAL AND 16 BITS                                                    }
 ;{               PROTECTED MODE}
-	MOV     DI,CS_COMMON 
-	MOV     AX,0FFFFH
-	STOSW
-	MOV     AX,BOOTADDRESS 
-	STOSW
-	MOV     AX,9A00H      
-	STOSW
-	MOV     AX,IDENTIFY_16 
-	STOSW
+        MOV     DI,CS_COMMON
+        MOV     AX,0FFFFH
+        STOSW
+        MOV     AX,BOOTADDRESS
+        STOSW
+        MOV     AX,9A00H
+        STOSW
+        MOV     AX,IDENTIFY_16
+        STOSW
 ;{ PREPARE DS/SS/ES ; only SS used in real mode.                                                    }
 ;{  BECAUSE IT IS USED IN REAL MODE DS_16}
 ;{  MUST BE EMPTY.            }
-	MOV     DI,DS_PROT
-	MOV     AX,0FFFFH
-	STOSW
-	MOV     AX,BOOTADDRESS 
-	STOSW
-	MOV     AX,9200H      
-	STOSW
-	MOV     AX,IDENTIFY_PROT 
-	STOSW
+        MOV     DI,DS_PROT
+        MOV     AX,0FFFFH
+        STOSW
+        MOV     AX,BOOTADDRESS
+        STOSW
+        MOV     AX,9200H
+        STOSW
+        MOV     AX,IDENTIFY_PROT
+        STOSW
 ;{ PREPARE-CS 16/32 BITS                                                   }
-	MOV     DI,CS_PROT
-	MOV     AX,0FFFFH
-	STOSW
-	MOV     AX,BOOTADDRESS 
-	STOSW
-	MOV     AX,9A00H      
-	STOSW
-	MOV     AX,IDENTIFY_PROT
-	STOSW
+        MOV     DI,CS_PROT
+        MOV     AX,0FFFFH
+        STOSW
+        MOV     AX,BOOTADDRESS
+        STOSW
+        MOV     AX,9A00H
+        STOSW
+        MOV     AX,IDENTIFY_PROT
+        STOSW
 
-	MOV     AX,REALSEGMENT 
-	MOV     ES,AX
-	LGDT    [GDTLOAD]
+        MOV     AX,REALSEGMENT
+        MOV     ES,AX
+        LGDT    [GDTLOAD]
 ;{************************}
 ;____1_____ _BITS32_1_({
-include(width32.m4)       
+include(width32.m4)
 });_END___1__({ _BITS32_1_})
 ;{************************}
 
-	JMPHERE_FROM_REAL
-	 JMP     BOOTUP
+        JMPHERE_FROM_REAL
+         JMP     BOOTUP
 GDTLOAD DW     GDTLEN
-	DD     GDT 
+        DD     GDT
 
 });_END___1__({ _NATIVE_1_})
 
 ;____1_____ _HOSTED_LINUX_1_({
-include(width32.m4)       
-	global  figforth        ; Called from c. Remainder c-routines to be called from here.
-	extern  c_type,c_expec,c_key,c_qterm
-        extern  c_rslw, c_block_exit, c_block_init
+include(width32.m4)
 
-	section forth progbits write exec alloc
+;____1_____ _LINUX_N_1_({
+include(constant.m4)
+SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
+RAWIO           EQU     (ECHO | ICANON)
+});_END___1__({_LINUX_N_1_})
+
+;____1_____ _LINUX_C_1_({
+        extern  c_type,c_expec,c_key,c_qterm
+        extern  c_rslw, c_block_exit, c_block_init
+});_END___1__({_LINUX_C_1_})
+
+        global  figforth        ; Called from c. Remainder c-routines to be called from here.
+
+        section forth progbits write exec alloc
 figforth:
-	MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
-	MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
-	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
-	MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
-	MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
-	LEA     ECX,[ESP+CELLS(1)]
-	XOR     EAX,EAX
-	CMP     EAX,_CELL_PTR[ECX]
-	JNZ     ENDIF1          
-	JMP     BOOTUP                  ; Cold start
-ENDIF1: 
-	JMP     BOOTUP+CELLS(2)         ; Warm start
+;____1_____ _LINUX_C_1_({
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
+        MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
+        LEA     ECX,[ESP+CELLS(1)]
+        XOR     EAX,EAX
+        CMP     EAX,_CELL_PTR[ECX]
+        JNZ     ENDIF1
+        JMP     BOOTUP                  ; Cold start
+ENDIF1:
+        JMP     BOOTUP+CELLS(2)         ; Warm start
 
 RETURN_LINUX:
-	MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
-	MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
-	MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
-	MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
-	MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
-	RET     ; Assuming the old stack has not been disturbed.It shouldn't.
+        MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
+        MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
+        MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
+        MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
+        MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
+        RET     ; Assuming the old stack has not been disturbed.It shouldn't.
 SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
+});_END___1__({_LINUX_C_1_})
+
+;____1_____ _LINUX_N_1_({
+        JMP     BOOTUP                  ; Cold start
+});_END___1__({_LINUX_N_1_})
+
 });_END___1__({ _HOSTED_LINUX_1_})
 
 ;{ The following is not known until the final width m4 final has been included.}
@@ -544,43 +561,43 @@ _COMMENT
    FORTH   8088     FORTH PRESERVATION RULES
    -----   ----     ----- ------------ -----
     IP      SI      Interpreter pointer.  Must be preserved
-		    across FORTH words.
+                    across FORTH words.
 
-     W      BX      Working register.  When entering a word 
-		    via its code field the CFA is passed in BX.
- 
-    SP      SP      Parameter stack pointer.  Must be preserved 
-		    across FORTH words.
- 
+     W      BX      Working register.  When entering a word
+                    via its code field the CFA is passed in BX.
+
+    SP      SP      Parameter stack pointer.  Must be preserved
+                    across FORTH words.
+
     RP      BP      Return stack.  Must be preserved across
-		    FORTH words.
+                    FORTH words.
 
-	    AX      General register.  Used to pass data from 
-		    FORTH words, see label APUSH. 
+            AX      General register.  Used to pass data from
+                    FORTH words, see label APUSH.
 
-	    DX      General register.  Used to pass more data from
-		    FORTH words, see label DPUSH. 
+            DX      General register.  Used to pass more data from
+                    FORTH words, see label DPUSH.
 
-	    BX      General purpose register.
- 
-	    CX      General purpose register.
+            BX      General purpose register.
 
-	    CS      Segment register.  Must be preserved
-		    across FORTH words.
+            CX      General purpose register.
 
-	    DS      ditto
-	
-	    SS      ibid
- 
-	    ES      Temporary segment register only used by
-		    a few words. However it MUST remain equal to
-		    DS, such that string primitives can be used
-		    with impunity.
+            CS      Segment register.  Must be preserved
+                    across FORTH words.
 
----------------------------------------------------------- 
+            DS      ditto
+
+            SS      ibid
+
+            ES      Temporary segment register only used by
+                    a few words. However it MUST remain equal to
+                    DS, such that string primitives can be used
+                    with impunity.
+
+----------------------------------------------------------
 _ENDCOMMENT
-	PAGE
-_COMMENT 
+        PAGE
+_COMMENT
 ---------------------------------------------
 
    COMMENT CONVENTIONS
@@ -609,225 +626,225 @@ _COMMENT
   HB          =  High byte
   LW          =  Low  word
 
------------------------------------------------------------- 
+------------------------------------------------------------
 _ENDCOMMENT
-	PAGE
-_COMMENT 
-	     DEBUG SUPPORT
+        PAGE
+_COMMENT
+             DEBUG SUPPORT
 
 THIS ROUTINE WILL ALLOW YOU TO STEP THRU FORTH PROGRAMS
 EVERY TIME 'NEXT' IS EXECUTED.
 
 IN ORDER TO USE THE STEP FEATURE YOU MUST DO THE FOLLOWING:
 
-	1.  PATCH THE INSTRUCTION IN 'NEXT' WITH A JUMP
-	    TO 'TNEXT'
- 
-	2.  PATCH YOUR BREAKPOINT ROUTINE AT
-	    LABEL   'BREAK'
-	
-	3.  SET VARIABLES, `BIP' & `BIPE' TO THE
-	    ADDRESSES YOU WANT TO STEP THRU.
+        1.  PATCH THE INSTRUCTION IN 'NEXT' WITH A JUMP
+            TO 'TNEXT'
+
+        2.  PATCH YOUR BREAKPOINT ROUTINE AT
+            LABEL   'BREAK'
+
+        3.  SET VARIABLES, `BIP' & `BIPE' TO THE
+            ADDRESSES YOU WANT TO STEP THRU.
 
 THE CONTENTS OF THE 2 VARIABLES 'BIP` AND `BIPE'
 ARE INTERPRETED AS FOLLOWS:
 
-BIP	BIPE	DEBUG-CONDITION
----	----	---------------
+BIP     BIPE    DEBUG-CONDITION
+---     ----    ---------------
 
-  0	   X	OFF
- -1	   X    TRACE ALL `NEXT' CALLS
+  0        X    OFF
+ -1        X    TRACE ALL `NEXT' CALLS
 ADDR1      0    TRACE `ADDR1' ONLY
 ADDR1  ADDR2    TRACE `ADDR1' TO `ADDR1'
 
-NOTE:	THE ABOVE ADDRESSES CAN'T POINT TO A
-	`CODE FIELD ADDRESS'. 
-	X = DON'T CARE
+NOTE:   THE ABOVE ADDRESSES CAN'T POINT TO A
+        `CODE FIELD ADDRESS'.
+        X = DON'T CARE
 
------------------------------------------------------ 
+-----------------------------------------------------
 _ENDCOMMENT
 
-BIP	DC	0	;{ BREAKPOINT START ADDRESS}
-BIPE	DC	0	;{ BREAKPOINT END ADDR}
-	PAGE
-;{	THIS IS THE `NEXT' WITH DEBUG SUPPORT}
+BIP     DC      0       ;{ BREAKPOINT START ADDRESS}
+BIPE    DC      0       ;{ BREAKPOINT END ADDR}
+        PAGE
+;{      THIS IS THE `NEXT' WITH DEBUG SUPPORT}
 
-TNEXT:  PUSHF		;{SAVE REGISTER}
-	PUSH	AX
-	MOV	AX,[BIP]  ;{ BREAKPOINT START ADDR}
-	OR	AX,AX	;{ ZERO?}
-	JZ	TNEXT2	;{ NO BREAKPOINT}
-	CMP	AX,-1
-	JZ	TNEXT1	;{ STEP ALL POINTS}
-	CMP	AX,SI	;{ IN BREAKPOINT RANGE?}
-	JZ	TNEXT1	;{ STEP THIS LOCATION}
-	JA	TNEXT2	;{ NO}
-	MOV	AX,[BIPE] ;{ BREAKPOINT END ADDR}
-	OR	AX,AX	;{ ZERO?}
-	JZ	TNEXT2	;{ ONLY 1 LOCATION}
-	CMP	AX,SI	;{ IN RANGE STILL?}
-	JB	TNEXT2	;{ NO}
+TNEXT:  PUSHF           ;{SAVE REGISTER}
+        PUSH    AX
+        MOV     AX,[BIP]  ;{ BREAKPOINT START ADDR}
+        OR      AX,AX   ;{ ZERO?}
+        JZ      TNEXT2  ;{ NO BREAKPOINT}
+        CMP     AX,-1
+        JZ      TNEXT1  ;{ STEP ALL POINTS}
+        CMP     AX,SI   ;{ IN BREAKPOINT RANGE?}
+        JZ      TNEXT1  ;{ STEP THIS LOCATION}
+        JA      TNEXT2  ;{ NO}
+        MOV     AX,[BIPE] ;{ BREAKPOINT END ADDR}
+        OR      AX,AX   ;{ ZERO?}
+        JZ      TNEXT2  ;{ ONLY 1 LOCATION}
+        CMP     AX,SI   ;{ IN RANGE STILL?}
+        JB      TNEXT2  ;{ NO}
 
-;{	PAUSE ON ADDRESS}
+;{      PAUSE ON ADDRESS}
 ;
 TNEXT1: POPF
 ;
 ;{********  ADD YOUR BREAKPOINT HERE  **********}
 ;
-BREAK:  JMP	SHORT	TNEXT3	;{CONT WITH PROGRAM}
+BREAK:  JMP     SHORT   TNEXT3  ;{CONT WITH PROGRAM}
 ;
-;{	NO BREAKPOINT PAUSE - RESTORE REGISTERS}
+;{      NO BREAKPOINT PAUSE - RESTORE REGISTERS}
 ;
-TNEXT2:	POP	AX
-	POPF
-TNEXT3:	LODSW           ;{ AX <- (IP)}
-	MOV	BX,AX
-	JMP	SHORT	NEXT1
-	PAGE
+TNEXT2: POP     AX
+        POPF
+TNEXT3: LODSW           ;{ AX <- (IP)}
+        MOV     BX,AX
+        JMP     SHORT   NEXT1
+        PAGE
 _COMMENT
 DISPLAYSI:
-	JMPHERE_FROM_PROT
-	BITS    16
-	PUSH    SI
-	PUSH    BP
-	PUSH    BX
-	MOV     AX,BX   
-	CALL    DISPLAYW 
-	MOV     AX,' '
-	CALL    DISPLAY
-	MOV     AX,SI   
-	CALL    DISPLAYW 
-	CALL    DISPLAYCR
-	BITS    32
-	MOV     AH,10H
-	INT     16H
-	JMPHERE_FROM_REAL
-	POP    BX
-	POP    BP
-	POP    SI
-	RET
+        JMPHERE_FROM_PROT
+        BITS    16
+        PUSH    SI
+        PUSH    BP
+        PUSH    BX
+        MOV     AX,BX
+        CALL    DISPLAYW
+        MOV     AX,' '
+        CALL    DISPLAY
+        MOV     AX,SI
+        CALL    DISPLAYW
+        CALL    DISPLAYCR
+        BITS    32
+        MOV     AH,10H
+        INT     16H
+        JMPHERE_FROM_REAL
+        POP    BX
+        POP    BP
+        POP    SI
+        RET
 _ENDCOMMENT
 DPUSH:  PUSH    DX
-APUSH:	PUSH	AX
+APUSH:  PUSH    AX
 _COMMENT
 
     Patch the next 3 locations ( using a DBUG monitor ) with a
-    `JMP TNEXT' for tracing through high level FORTH words. 
+    `JMP TNEXT' for tracing through high level FORTH words.
 
 _ENDCOMMENT
-NEXT:	LODSW		;{AX <- (IP)}
+NEXT:   LODSW           ;{AX <- (IP)}
 ;
-NEXT1:	MOV	BX,AX   ;{ (W) <- (IP)}
+NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
 ;        CALL    DISPLAYSI
-	JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
-	PAGE
+        JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
+        PAGE
 ;
 ;{       Dictionary starts here.}
 DP0:
 CODE_HEADER({LIT},{LIT})
-	LODSW		;{ AX <- LITERAL}
-	JMP SHORT     APUSH   ;{ TO TOP OF STACK}
+        LODSW           ;{ AX <- LITERAL}
+        JMP SHORT     APUSH   ;{ TO TOP OF STACK}
 ;
 CODE_HEADER({EXECUTE},{EXEC})
-	POP     BX      ;{ GET CFA}
-	JMP     _CELL_PTR[BX]    
+        POP     BX      ;{ GET CFA}
+        JMP     _CELL_PTR[BX]
 ;{                                 }
-CODE_HEADER({BRANCH},{BRAN})      
-BRAN1:	ADD     SI,[SI]           
-	_NEXT    ;{ JUMP TO OFFSET}
+CODE_HEADER({BRANCH},{BRAN})
+BRAN1:  ADD     SI,[SI]
+        _NEXT    ;{ JUMP TO OFFSET}
 ;
 CODE_HEADER({0BRANCH},{ZBRAN})
-	POP	AX	;{ GET STACK VALUE}
-	OR	AX,AX	;{ ZERO?}
-	JZ	BRAN1	;{ YES, BRANCH}
-	LEA	SI,[SI+CELLS(1)]
-	_NEXT                            
-	PAGE
+        POP     AX      ;{ GET STACK VALUE}
+        OR      AX,AX   ;{ ZERO?}
+        JZ      BRAN1   ;{ YES, BRANCH}
+        LEA     SI,[SI+CELLS(1)]
+        _NEXT
+        PAGE
 HEADER({NOOP},{NOOP},{$+4})
-;{	DEBUG STUFF}
-NOP0	DC	$+CELLS(1)
-	JMP SHORT     NEXT
-NOP1	DC 	$+CELLS(1)
-	JMP SHORT     NEXT
-NOP2	DC	$+CELLS(1)
-	JMP SHORT     NEXT
+;{      DEBUG STUFF}
+NOP0    DC      $+CELLS(1)
+        JMP SHORT     NEXT
+NOP1    DC      $+CELLS(1)
+        JMP SHORT     NEXT
+NOP2    DC      $+CELLS(1)
+        JMP SHORT     NEXT
 ;
 
 ;
 CODE_HEADER({(LOOP)},{XLOOP})
-	MOV	BX,1	;{ INCREMENT}
-XLOO1:	ADD	[BP],BX	;{ INDEX = INDEX + INCR}
-	MOV	AX,[BP]	;{ GET NEW INDEX}
-	SUB	AX,[CELLS(1)+BP]        ;{ COMPARE WITH LIMIT}
-	XOR	AX,BX	;{ TEST SIGN}
-	JS	BRAN1	;{ KEEP LOOPING}
+        MOV     BX,1    ;{ INCREMENT}
+XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
+        MOV     AX,[BP] ;{ GET NEW INDEX}
+        SUB     AX,[CELLS(1)+BP]        ;{ COMPARE WITH LIMIT}
+        XOR     AX,BX   ;{ TEST SIGN}
+        JS      BRAN1   ;{ KEEP LOOPING}
 ;
 ;{  END OF `DO' LOOP}
-	ADD	BP,_BYTE CELLS(2)  ;{ ADJ RETURN STACK}
-	LEA	SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
-	_NEXT                                  
+        ADD     BP,_BYTE CELLS(2)  ;{ ADJ RETURN STACK}
+        LEA     SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
+        _NEXT
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
-	POP	BX	;{ GET LOOP VALUE}
-	JMP SHORT     XLOO1
+        POP     BX      ;{ GET LOOP VALUE}
+        JMP SHORT     XLOO1
 ;
 CODE_HEADER({(DO)},{XDO})
-	POP	DX	;{ INITIAL INDEX VALUE}
-	POP	AX	;{ LIMIT VALUE}
-	XCHG	BP,STACKPOINTER   ;{ GET RETURN STACK}
-	PUSH	AX
-	PUSH	DX
-	XCHG	BP,STACKPOINTER   ;{ GET PARAMETER STACK}
-	_NEXT                            
-	PAGE
+        POP     DX      ;{ INITIAL INDEX VALUE}
+        POP     AX      ;{ LIMIT VALUE}
+        XCHG    BP,STACKPOINTER   ;{ GET RETURN STACK}
+        PUSH    AX
+        PUSH    DX
+        XCHG    BP,STACKPOINTER   ;{ GET PARAMETER STACK}
+        _NEXT
+        PAGE
 CODE_HEADER({I},{IDO})
-	MOV	AX,[BP]	;{ GET INDEX VALUE}
-	JMP	APUSH	;{ TO PARAMETER STACK}
+        MOV     AX,[BP] ;{ GET INDEX VALUE}
+        JMP     APUSH   ;{ TO PARAMETER STACK}
 ;
 HEADER({+ORIGIN},{PORIG},{DOCOL})
-	DC	LIT
-	DC	USINI
-	DC	PLUS
-	DC	SEMIS
+        DC      LIT
+        DC      USINI
+        DC      PLUS
+        DC      SEMIS
 ;
 ;
-;{	Initialisation block for user variables through VOC-LINK}
+;{      Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
 BOOTUP:
-	NOP                    ; Fills jump to 4 bytes (for 16 bits code)
-	_BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
-	_BITS32_1_({NOP })
-	JMP	LCLD     ;{VECTOR TO COLD START}
-	NOP                    ; Fills jump to 4 bytes (for 16 bits code)
-	_BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
-	_BITS32_1_({NOP })
-	JMP	WRM	;{ VECTOR TO WARM START}
-	DB	FIGREL	;{ FIG RELEASE #}
-	DB	FIGREV	;{ FIG REVISION #}
-	DB	USRVER	;{ USER REVISION #}
-	DB	0EH	;{ VERSION ATTRIBUTES}
-	_BITS32_1_({DC 0   ; Fill version info up to two cells. })
+        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
+        _BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
+        _BITS32_1_({NOP })
+        JMP     LCLD     ;{VECTOR TO COLD START}
+        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
+        _BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
+        _BITS32_1_({NOP })
+        JMP     WRM     ;{ VECTOR TO WARM START}
+        DB      FIGREL  ;{ FIG RELEASE #}
+        DB      FIGREV  ;{ FIG REVISION #}
+        DB      USRVER  ;{ USER REVISION #}
+        DB      0EH     ;{ VERSION ATTRIBUTES}
+        _BITS32_1_({DC 0   ; Fill version info up to two cells. })
 USINI:
-	DC	_NAME_FIELD(TASK) ;{ FIRST DEFINITION 0 }
-	DC	STRUSA	;{ INIT (U0) USER AREA POINTER 1}
-	DC	BSIN	;{ RUBOUT: get rid of latest char 2}
-	DC 	INITS0	;{ INIT (S0)         3}
-	DC 	INITR0	;{ INIT (R0)         4}
-	DC 	STRTIB  ;{ INIT (TIB)        5}
-	DC	32	;{ INIT (WIDTH)      6}
-	DC	0	;{ INIT (WARNING)      7}
-	DC	INITDP	;{	INIT (FENCE)  8}
-	DC	INITDP  ;{	INIT (DP)     9}
-	DC	_VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
+        DC      _NAME_FIELD(TASK) ;{ FIRST DEFINITION 0 }
+        DC      STRUSA  ;{ INIT (U0) USER AREA POINTER 1}
+        DC      BSIN    ;{ RUBOUT: get rid of latest char 2}
+        DC      INITS0  ;{ INIT (S0)         3}
+        DC      INITR0  ;{ INIT (R0)         4}
+        DC      STRTIB  ;{ INIT (TIB)        5}
+        DC      32      ;{ INIT (WIDTH)      6}
+        DC      0       ;{ INIT (WARNING)      7}
+        DC      INITDP  ;{      INIT (FENCE)  8}
+        DC      INITDP  ;{      INIT (DP)     9}
+        DC      _VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
 ;____1_____ _LINUX_C_1_({
-	DC      0       ;{ INIT (OFFSET) }
+        DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_LINUX_C_1_})
 ;____1_____ _LINUX_N_1_({
-	DC      0       ;{ INIT (OFFSET) }
+        DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_LINUX_N_1_})
 ;____1_____ _MODERN_1_({
-	DC      0       ;{ INIT (OFFSET) }
+        DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
 ;____1_____ _USEDOS_1_({
 _COMMENT
@@ -837,10 +854,10 @@ _COMMENT
 ;{ The 2 is rounding plus the extra sector in .EXE files.}
 ;{ However it deviates much from the classic model and requires}
 ;{ that the disk parameters are available (not only for USEBIOS)}
-	DC      (INITDP-$$-1)/KBBUF+1 ; +1 for EXE 
+        DC      (INITDP-$$-1)/KBBUF+1 ; +1 for EXE
 _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
-	DC      0       ;{ INIT (OFFSET) }
+        DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_USEDOS_1_})
 ;____1_____ _BOOTFD__1_({
 ;{ This will reserve place for dos information, such that the floppy}
@@ -848,18 +865,18 @@ _ENDCOMMENT
 ;{ within the forth system itself. }
 ;{ BPS subtracted because SECSTRT corresponds with one sector into source. }
 ;{ Round up both parts separately.}
-;       You need a filler file of one sector, 
-;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive). 
-	DC      (SECSTRT+((INITDP-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
+;       You need a filler file of one sector,
+;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
+        DC      (SECSTRT+((INITDP-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
 });_END___1__({_BOOTFD__1_})
 ;____1_____ _BOOTHD__1_({
 ;{ This will reserve place for the system itself, on the first part of a }
 ;{ hard disk. No problem to just reserve whole memory.}
-	DC      64      ;{ Kbyte.}
+        DC      64      ;{ Kbyte.}
 });_END___1__({_BOOTHD__1_})
 ;
 ;
-;{	The following is the CPU's name, printed}
+;{      The following is the CPU's name, printed}
 ;{       during cold start.}
 ;{       The name is 32 bits in base 36.}
 ;
@@ -873,1785 +890,1788 @@ CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
 CPUNM   DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END___1__({ _REAL_1_})
 
-;{	<<<<< end of data used by cold start >>>>>}
-	_RESB(US-CELLS(13))        ;{ All user can be initialised.}
+;{      <<<<< end of data used by cold start >>>>>}
+        _RESB(US-CELLS(13))        ;{ All user can be initialised.}
 ;
 CODE_HEADER({DIGIT},{DIGIT})
-	POP	DX	;{NUMBER BASE}
-	POP	AX	;{ASCII DIGIT}
-	SUB	AL,'0'
-	JB	DIGI2	;{NUMBER ERROR}
-	CMP	AL,9
-	JBE	DIGI1	;{NUMBER = 0 THRU 9}
-	SUB	AL,7
-	CMP	AL,10	;{NUMBER 'A' THRU 'Z'?}
-	JB	DIGI2	;{NO}
-DIGI1:	CMP	AL,DL	;{ COMPARE NUMBER TO BASE}
-	JAE	DIGI2	;{NUMBER ERROR}
-	SUB	DX,DX	;{ZERO}
-	MOV	DL,AL	;{NEW BINARY NUMBER}
-	MOV	AL,1	;{TRUE FLAG}
-	JMP	DPUSH	;{ADD TO STACK}
+        POP     DX      ;{NUMBER BASE}
+        POP     AX      ;{ASCII DIGIT}
+        SUB     AL,'0'
+        JB      DIGI2   ;{NUMBER ERROR}
+        CMP     AL,9
+        JBE     DIGI1   ;{NUMBER = 0 THRU 9}
+        SUB     AL,7
+        CMP     AL,10   ;{NUMBER 'A' THRU 'Z'?}
+        JB      DIGI2   ;{NO}
+DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
+        JAE     DIGI2   ;{NUMBER ERROR}
+        SUB     DX,DX   ;{ZERO}
+        MOV     DL,AL   ;{NEW BINARY NUMBER}
+        MOV     AL,1    ;{TRUE FLAG}
+        JMP     DPUSH   ;{ADD TO STACK}
 ;{   NUMBER ERROR}
-DIGI2:	SUB	AX,AX	;{FALSE FLAG}
-	JMP	APUSH
-	PAGE
+DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
+        JMP     APUSH
+        PAGE
 CODE_HEADER({(FIND)},{PFIND})
 ;{       MOV     AX,DS}
-;{       MOV	ES,AX	;ES = DS}
-	POP	BX	;{NFA}
-	POP	CX	;{STRING ADDR}
+;{       MOV    ES,AX   ;ES = DS}
+        POP     BX      ;{NFA}
+        POP     CX      ;{STRING ADDR}
 ;
 ;{  SEARCH LOOP}
-PFIN1:  MOV	DI,CX	;{GET ADDR}
-	MOV	AL,[BX]	;{GET WORD LENGTH}
-	MOV	DL,AL	;{SAVE WORD LENGTH}
-	XOR	AL,[DI]
-	AND	AL,3FH	;{CHECK LENGTHS}
-	JNZ	PFIN5	;{LENGTHS DIFFER}
+PFIN1:  MOV     DI,CX   ;{GET ADDR}
+        MOV     AL,[BX] ;{GET WORD LENGTH}
+        MOV     DL,AL   ;{SAVE WORD LENGTH}
+        XOR     AL,[DI]
+        AND     AL,3FH  ;{CHECK LENGTHS}
+        JNZ     PFIN5   ;{LENGTHS DIFFER}
 
 ;
 ;{   LENGTHS MATCH - CHECK EACH CHARACTER IN NAME}
-PFIN2:	INC	BX
-	INC	DI	;{ NEXT CHAR OF NAME}
-	MOV	AL,[BX]
-	XOR	AL,[DI]	;{COMPARE NAMES}
-	ADD	AL,AL	;{THIS WILL BE TEST BIT 8}
-	JNZ	PFIN5	;{NO MATCH}
-	JNB	PFIN2	;{MATCH SO FAR - LOOP}
+PFIN2:  INC     BX
+        INC     DI      ;{ NEXT CHAR OF NAME}
+        MOV     AL,[BX]
+        XOR     AL,[DI] ;{COMPARE NAMES}
+        ADD     AL,AL   ;{THIS WILL BE TEST BIT 8}
+        JNZ     PFIN5   ;{NO MATCH}
+        JNB     PFIN2   ;{MATCH SO FAR - LOOP}
 ;
 ;{   FOUND END OF NAME (BIT 8 SET) - A MATCH}
-	ADD	BX,_BYTE 1+CELLS(2);{ BX = PFA}
-	PUSH	BX	;{ (S3) <- PFA}
-	MOV	AX,1	;{TRUE VALUE}
-	SUB	DH,DH
-	JMP	DPUSH
+        ADD     BX,_BYTE 1+CELLS(2);{ BX = PFA}
+        PUSH    BX      ;{ (S3) <- PFA}
+        MOV     AX,1    ;{TRUE VALUE}
+        SUB     DH,DH
+        JMP     DPUSH
 ;
 ;{   NO NAME MATCH - TRY ANOTHER}
 ;
 ;{ GET NEXT LINK FIELD ADDR (LFA)}
 ;{ ( ZERO = FIRST WORD OF DICTIONARY )}
 ;
-PFIN5:	INC	BX	;{NEXT ADDR}
-	JB	PFIN6	;{END OF NAME}
-	MOV	AL,[BX]	;{GET NEXT CHAR}
-	ADD	AL,AL	;{SET/RESET CARRY}
-	JMP SHORT     PFIN5   ;{LOOP UNTIL FOUND}
+PFIN5:  INC     BX      ;{NEXT ADDR}
+        JB      PFIN6   ;{END OF NAME}
+        MOV     AL,[BX] ;{GET NEXT CHAR}
+        ADD     AL,AL   ;{SET/RESET CARRY}
+        JMP SHORT     PFIN5   ;{LOOP UNTIL FOUND}
 ;
-PFIN6:	MOV	BX,[BX]	;{ GET LINK FIELD ADDR}
-	OR	BX,BX	;{ START OF DICT ( 0 )}
-	JNZ	PFIN1	;{ NO , LOOK MORE}
-	MOV	AX,0	;{ FALSE FLAG}
-	JMP	APUSH	;{ DONE ( NO MATCH FOUND )}
-	PAGE
+PFIN6:  MOV     BX,[BX] ;{ GET LINK FIELD ADDR}
+        OR      BX,BX   ;{ START OF DICT ( 0 )}
+        JNZ     PFIN1   ;{ NO , LOOK MORE}
+        MOV     AX,0    ;{ FALSE FLAG}
+        JMP     APUSH   ;{ DONE ( NO MATCH FOUND )}
+        PAGE
 CODE_HEADER({ENCLOSE},{ENCL})
-	POP	AX	;{S1 - TERMINATOR CHAR}
-	POP	BX	;{S2 - TEXT ADDR}
-	PUSH	BX	;{ADDR - BACK TO STACK ( IT RHYMES )}
-	MOV	AH,0	;{ZERO}
-	MOV	DX,-1	;{CHAR OFFSET COUNTER}
-	DEC	BX	;{ADDR -1}
+        POP     AX      ;{S1 - TERMINATOR CHAR}
+        POP     BX      ;{S2 - TEXT ADDR}
+        PUSH    BX      ;{ADDR - BACK TO STACK ( IT RHYMES )}
+        MOV     AH,0    ;{ZERO}
+        MOV     DX,-1   ;{CHAR OFFSET COUNTER}
+        DEC     BX      ;{ADDR -1}
 ;
 ;{   SCAN TO FIRST NON-TERMINATOR CHARACTER}
-ENCL1:	INC	BX	;{ADDR+1}
-	INC	DX	;{COUNT+1}
-	CMP	AL,[BX]
-	JZ	ENCL1	;{WAIT FOR NON-TERMINATOR}
-	PUSH	DX	;{OFFSET TO 1ST TEXT CHAR}
-	CMP	AH,[BX]	;{NULL CHAR?}
-	JNZ	ENCL2	;{NO}
+ENCL1:  INC     BX      ;{ADDR+1}
+        INC     DX      ;{COUNT+1}
+        CMP     AL,[BX]
+        JZ      ENCL1   ;{WAIT FOR NON-TERMINATOR}
+        PUSH    DX      ;{OFFSET TO 1ST TEXT CHAR}
+        CMP     AH,[BX] ;{NULL CHAR?}
+        JNZ     ENCL2   ;{NO}
 ;
 ;{  FOUND NULL BEFORE 1ST NON-TERM CHAR}
-	MOV	AX,DX	;{COPY COUNTER}
-	INC	DX	;{ +1}
-	JMP	DPUSH
+        MOV     AX,DX   ;{COPY COUNTER}
+        INC     DX      ;{ +1}
+        JMP     DPUSH
 ;
 ;{   FOUND FIRST TEXT CHAR - COUNT THE CHARS}
-ENCL2:	INC	BX	;{ ADDR+1}
-	INC	DX	;{COUNT+1}
-	CMP	AL,[BX]	;{TERMINATOR CHAR?}
-	JZ	ENCL4	;{YES}
-	CMP	AH,[BX]	;{NULL CHAR?}
-	JNZ	ENCL2	;{NO, LOOP AGAIN}
+ENCL2:  INC     BX      ;{ ADDR+1}
+        INC     DX      ;{COUNT+1}
+        CMP     AL,[BX] ;{TERMINATOR CHAR?}
+        JZ      ENCL4   ;{YES}
+        CMP     AH,[BX] ;{NULL CHAR?}
+        JNZ     ENCL2   ;{NO, LOOP AGAIN}
 ;
 ;{   FOUND NULL AT END OF TEXT}
-ENCL3:	MOV	AX,DX	;{COUNTERS ARE EQUAL}
-	JMP	DPUSH
+ENCL3:  MOV     AX,DX   ;{COUNTERS ARE EQUAL}
+        JMP     DPUSH
 ;
 ;{   FOUND TERMINATOR CHARACTER}
-ENCL4:	MOV	AX,DX
-	INC	AX	;{COUNT+1}
-	JMP	DPUSH
-	PAGE
-	;{ At line     LINE ~500}
+ENCL4:  MOV     AX,DX
+        INC     AX      ;{COUNT+1}
+        JMP     DPUSH
+        PAGE
+        ;{ At line     LINE ~500}
 HEADER({CR},{CR},{DOCOL})
-	DC      LIT,LF
-	DC      EMIT
-	DC      SEMIS
-	PAGE       
+        DC      LIT,LF
+        DC      EMIT
+        DC      SEMIS
+        PAGE
 CODE_HEADER({CMOVE},{LCMOVE})
-	CLD             ;{INC DIRECTION}
-	MOV	BX,SI	;{SAVE IF}
-	POP	CX	;{COUNT}
-	POP	DI	;{DEST}
-	POP	SI	;{SOURCE}
-;{       MOV	AX,DS}
-;{       MOV	ES,AX	;ES <- DS}
-	REP	MOVSB	;{THAT'S THE MOVE}
-	MOV	SI,BX	;{GET BACK IP}
-	_NEXT                            
+        CLD             ;{INC DIRECTION}
+        MOV     BX,SI   ;{SAVE IF}
+        POP     CX      ;{COUNT}
+        POP     DI      ;{DEST}
+        POP     SI      ;{SOURCE}
+;{       MOV    AX,DS}
+;{       MOV    ES,AX   ;ES <- DS}
+        REP     MOVSB   ;{THAT'S THE MOVE}
+        MOV     SI,BX   ;{GET BACK IP}
+        _NEXT
 ;
 CODE_HEADER({U*},{USTAR})
-	POP	AX
-	POP	BX
-	MUL	BX	;{UNSIGNED}
-	XCHG	AX,DX	;{AX NOW = MSW}
-	JMP	DPUSH	;{STORE DOUBLE CELL}
+        POP     AX
+        POP     BX
+        MUL     BX      ;{UNSIGNED}
+        XCHG    AX,DX   ;{AX NOW = MSW}
+        JMP     DPUSH   ;{STORE DOUBLE CELL}
 ;
 CODE_HEADER({U/},{USLAS})
-	POP	BX	;{DIVISOR}
-	POP	DX	;{MSW OF DIVIDEND}
-	POP	AX	;{LSW OF DIVIDEND}
-	CMP	DX,BX	;{DICIDE BY 0?}
-	JNB	DZERO	;{ ERROR - ZERO DIVIDE}
-	DIV	BX	;{16 BIT DIVIDE}
-	JMP	DPUSH	;{STORE QUOT/REM}
+        POP     BX      ;{DIVISOR}
+        POP     DX      ;{MSW OF DIVIDEND}
+        POP     AX      ;{LSW OF DIVIDEND}
+        CMP     DX,BX   ;{DICIDE BY 0?}
+        JNB     DZERO   ;{ ERROR - ZERO DIVIDE}
+        DIV     BX      ;{16 BIT DIVIDE}
+        JMP     DPUSH   ;{STORE QUOT/REM}
 ;
-;{	DIVIDE BY ZERO ERROR - SHOW MAX NUMBERS}
-DZERO:	MOV	AX,-1
-	MOV	DX,AX
-	JMP	DPUSH	;{STORE QUOT/REM}
-	PAGE
+;{      DIVIDE BY ZERO ERROR - SHOW MAX NUMBERS}
+DZERO:  MOV     AX,-1
+        MOV     DX,AX
+        JMP     DPUSH   ;{STORE QUOT/REM}
+        PAGE
 CODE_HEADER({AND},{LAND})
-	POP	AX
-	POP	BX
-	AND	AX,BX
-	JMP	APUSH
+        POP     AX
+        POP     BX
+        AND     AX,BX
+        JMP     APUSH
 ;
 CODE_HEADER({OR},{LOR})
-	POP	AX      ;{ (S1) <- (S1) OR (S2)}
-	POP	BX
-	OR	AX,BX
-	JMP	APUSH
+        POP     AX      ;{ (S1) <- (S1) OR (S2)}
+        POP     BX
+        OR      AX,BX
+        JMP     APUSH
 ;
 CODE_HEADER({XOR},{LXOR})
-	POP	AX      ;{ (S1) <- (S1) XOR (S2)}
-	POP	BX
-	XOR	AX,BX
-	JMP	APUSH
-	PAGE
+        POP     AX      ;{ (S1) <- (S1) XOR (S2)}
+        POP     BX
+        XOR     AX,BX
+        JMP     APUSH
+        PAGE
 CODE_HEADER({SP@},{SPFET})
-	MOV	AX,STACKPOINTER   ;{ (S1) <- (SP)}
-	JMP	APUSH
+        MOV     AX,STACKPOINTER   ;{ (S1) <- (SP)}
+        JMP     APUSH
 ;
 CODE_HEADER({SP!},{SPSTO})
-	MOV	BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
-	MOV	STACKPOINTER,[CELLS(3)+BX]        ;{RESET PARAM STACK POINTER}
-	_NEXT                            
+        MOV     BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
+        MOV     STACKPOINTER,[CELLS(3)+BX]        ;{RESET PARAM STACK POINTER}
+        _NEXT
 ;
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
-	MOV	AX,BP	;{RETURN STACK ADDR}
-	JMP	APUSH
+        MOV     AX,BP   ;{RETURN STACK ADDR}
+        JMP     APUSH
 ;
 CODE_HEADER({RP!},{RPSTO})
-	MOV	BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
-	MOV	BP,[CELLS(4)+BX]        ;{RESET RETURN STACK PTR}
-	_NEXT                            
-	PAGE
+        MOV     BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
+        MOV     BP,[CELLS(4)+BX]        ;{RESET RETURN STACK PTR}
+        _NEXT
+        PAGE
 CODE_HEADER({;S},{SEMIS})
-	MOV	SI,[BP]	;{(IP) <- (R1)}
-	LEA	BP,[BP+CELLS(1)]
-	_NEXT                            
+        MOV     SI,[BP] ;{(IP) <- (R1)}
+        LEA     BP,[BP+CELLS(1)]
+        _NEXT
 ;
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
-	MOV	AX,[BP]	;{GET INDEX}
-	MOV	[CELLS(1)+BP],AX        ;{STORE IT AT LIMIT}
-	_NEXT                            
-	PAGE
+        MOV     AX,[BP] ;{GET INDEX}
+        MOV     [CELLS(1)+BP],AX        ;{STORE IT AT LIMIT}
+        _NEXT
+        PAGE
 ;
 CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
-	POP	BX	;{GET STACK PARAMETER}
-	LEA	BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
-	MOV	[BP],BX	;{ADD TO RETURN STACK}
-	_NEXT                            
+        POP     BX      ;{GET STACK PARAMETER}
+        LEA     BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
+        MOV     [BP],BX ;{ADD TO RETURN STACK}
+        _NEXT
 ;
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
-	MOV	AX,[BP]	;{ GET RETURN STACK VALUE}
-	LEA	BP,[BP+CELLS(1)]
-	JMP	APUSH
+        MOV     AX,[BP] ;{ GET RETURN STACK VALUE}
+        LEA     BP,[BP+CELLS(1)]
+        JMP     APUSH
 ;
 HEADER({R},{RR},{IDO+CELLS(1)})
-	PAGE
+        PAGE
 CODE_HEADER({0=},{ZEQU})
-	POP	AX
-	OR	AX,AX	;{DO TEST}
-	MOV	AX,1	;{TRUE}
-	JZ	ZEQU1	;{IT'S 0}
-	DEC	AX	;{FALSE}
-ZEQU1:	JMP	APUSH
+        POP     AX
+        OR      AX,AX   ;{DO TEST}
+        MOV     AX,1    ;{TRUE}
+        JZ      ZEQU1   ;{IT'S 0}
+        DEC     AX      ;{FALSE}
+ZEQU1:  JMP     APUSH
 ;
 CODE_HEADER({0<},{ZLESS})
-	POP	AX
-	OR	AX,AX	;{SET FLAGS}
-	MOV	AX,1	;{TRUE}
-	JS	ZLESS1
-	DEC	AX	;{FALSE}
-ZLESS1:	JMP	APUSH
+        POP     AX
+        OR      AX,AX   ;{SET FLAGS}
+        MOV     AX,1    ;{TRUE}
+        JS      ZLESS1
+        DEC     AX      ;{FALSE}
+ZLESS1: JMP     APUSH
 ;
 CODE_HEADER({+},{PLUS})
-	POP	AX      ;{(S1) <- (S1) + (S2)}
-	POP	BX
-	ADD	AX,BX
-	JMP	APUSH
-	PAGE
+        POP     AX      ;{(S1) <- (S1) + (S2)}
+        POP     BX
+        ADD     AX,BX
+        JMP     APUSH
+        PAGE
 CODE_HEADER({D+},{DPLUS})
-	POP	AX	;{ YHW}
-	POP	DX	;{ YLW}
-	POP	BX	;{ XHW}
-	POP	CX	;{ XLW}
-	ADD	DX,CX	;{ SLW}
-	ADC	AX,BX	;{ SHW}
-	JMP	DPUSH
+        POP     AX      ;{ YHW}
+        POP     DX      ;{ YLW}
+        POP     BX      ;{ XHW}
+        POP     CX      ;{ XLW}
+        ADD     DX,CX   ;{ SLW}
+        ADC     AX,BX   ;{ SHW}
+        JMP     DPUSH
 ;
 CODE_HEADER({MINUS},{MINUS})
-	POP	AX
-	NEG	AX
-	JMP	APUSH
+        POP     AX
+        NEG     AX
+        JMP     APUSH
 ;
 CODE_HEADER({DMINUS},{DMINU})
-	POP	BX
-	POP	CX
-	SUB	AX,AX
-	MOV	DX,AX
-	SUB	DX,CX	;{ MAKE 2'S COMPLEMENT}
-	SBB	AX,BX	;{ HIGH CELL}
-	JMP	DPUSH
-	PAGE
+        POP     BX
+        POP     CX
+        SUB     AX,AX
+        MOV     DX,AX
+        SUB     DX,CX   ;{ MAKE 2'S COMPLEMENT}
+        SBB     AX,BX   ;{ HIGH CELL}
+        JMP     DPUSH
+        PAGE
 ;
 CODE_HEADER({OVER},{OVER})
-	POP	DX
-	POP	AX
-	PUSH	AX
-	JMP	DPUSH
+        POP     DX
+        POP     AX
+        PUSH    AX
+        JMP     DPUSH
 ;
 CODE_HEADER({DROP},{DROP})
-	POP	AX
-	_NEXT                            
+        POP     AX
+        _NEXT
 ;
 CODE_HEADER({SWAP},{SWAP})
-	POP	DX
-	POP	AX
-	JMP	DPUSH
+        POP     DX
+        POP     AX
+        JMP     DPUSH
 ;
 CODE_HEADER({DUP},{DUPE})
-	POP	AX
-	PUSH	AX
-	JMP	APUSH
-	PAGE
+        POP     AX
+        PUSH    AX
+        JMP     APUSH
+        PAGE
 CODE_HEADER({2DUP},{TDUP})
-	POP	AX
-	POP	DX
-	PUSH	DX
-	PUSH	AX
-	JMP	DPUSH
+        POP     AX
+        POP     DX
+        PUSH    DX
+        PUSH    AX
+        JMP     DPUSH
 ;
 CODE_HEADER({+!},{PSTOR})
-	POP	BX	;{ADDRESS}
-	POP	AX	;{INCREMENT}
-	ADD	[BX],AX
-	_NEXT                            
+        POP     BX      ;{ADDRESS}
+        POP     AX      ;{INCREMENT}
+        ADD     [BX],AX
+        _NEXT
 ;
 CODE_HEADER({TOGGLE},{TOGGL})
-	POP	AX	;{BIT PATTERN}
-	POP	BX	;{ADDR}
-	XOR	[BX],AX	;
-	_NEXT                            
+        POP     AX      ;{BIT PATTERN}
+        POP     BX      ;{ADDR}
+        XOR     [BX],AX ;
+        _NEXT
 ;
 CODE_HEADER({@},{FETCH})
-	POP	BX
-	MOV	AX,[BX]
-	JMP	APUSH
-	PAGE
+        POP     BX
+        MOV     AX,[BX]
+        JMP     APUSH
+        PAGE
 CODE_HEADER({C@},{CFET})
-	POP	BX
-	XOR     AX,AX
-	MOV	AL,[BX]
-	JMP	APUSH
+        POP     BX
+        XOR     AX,AX
+        MOV     AL,[BX]
+        JMP     APUSH
 ;
 CODE_HEADER({2@},{TFET})
-	POP	BX	;{ADDR}
-	MOV	AX,[BX]	;{MSW}
-	MOV	DX,[CELLS(1)+BX]        ;{LSW}
-	JMP	DPUSH
+        POP     BX      ;{ADDR}
+        MOV     AX,[BX] ;{MSW}
+        MOV     DX,[CELLS(1)+BX]        ;{LSW}
+        JMP     DPUSH
 ;
 CODE_HEADER({!},{STORE})
-	POP	BX	;{ADDR}
-	POP	AX	;{DATA}
-	MOV	[BX],AX
-	_NEXT                            
+        POP     BX      ;{ADDR}
+        POP     AX      ;{DATA}
+        MOV     [BX],AX
+        _NEXT
 ;
 CODE_HEADER({C!},{CSTOR})
-	POP	BX	;{ADDR}
-	POP	AX	;{DATA}
-	MOV	[BX],AL
-	_NEXT                            
+        POP     BX      ;{ADDR}
+        POP     AX      ;{DATA}
+        MOV     [BX],AL
+        _NEXT
 ;
 CODE_HEADER({2!},{TSTOR})
-	POP	BX	;{ADDR}
-	POP	AX	;{MSW}
-	MOV	[BX],AX
-	POP	AX	;{LSW}
-	MOV	[CELLS(1)+BX],AX
-	_NEXT                            
+        POP     BX      ;{ADDR}
+        POP     AX      ;{MSW}
+        MOV     [BX],AX
+        POP     AX      ;{LSW}
+        MOV     [CELLS(1)+BX],AX
+        _NEXT
 ;
 CODE_HEADER({L@},{LFET})
 ;____1_____ _BITS32_1_({
-	POP	BX      ;MEM LOC 
-	POP	AX      ;SEG REG VAL 
-	MOV     DX,10H
-	MUL     DX
-	ADD     AX,BX
-	SUB     AX, BOOTADDRESS
+        POP     BX      ;MEM LOC
+        POP     AX      ;SEG REG VAL
+        MOV     DX,10H
+        MUL     DX
+        ADD     AX,BX
+        SUB     AX, BOOTADDRESS
 
-	MOV     AX,[AX]
-	JMP     APUSH
+        MOV     AX,[AX]
+        JMP     APUSH
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
-	POP	BX	;MEM LOC
-	POP	CX	;SEG REG VAL
-	JMPHERE_FROM_PROT
-	MOV	DX,DS
-	MOV	DS,CX
-	MOV	BX,[BX]
-	MOV	DS,DX
-	JMPHERE_FROM_REAL
-	PUSH    BX
-	_NEXT                            
+        POP     BX      ;MEM LOC
+        POP     CX      ;SEG REG VAL
+        JMPHERE_FROM_PROT
+        MOV     DX,DS
+        MOV     DS,CX
+        MOV     BX,[BX]
+        MOV     DS,DX
+        JMPHERE_FROM_REAL
+        PUSH    BX
+        _NEXT
 });_END___1__({ _BITS16_1_})
 ;
 CODE_HEADER({L!},{LSTORE})
 ;____1_____ _BITS32_1_({
-	POP	BX      ;MEM LOC 
-	POP	AX      ;SEG REG VAL 
-	MOV     DX,10H
-	MUL     DX
-	ADD     AX,BX
-	SUB     AX, BOOTADDRESS
+        POP     BX      ;MEM LOC
+        POP     AX      ;SEG REG VAL
+        MOV     DX,10H
+        MUL     DX
+        ADD     AX,BX
+        SUB     AX, BOOTADDRESS
 
-	POP	BX
-	MOV	[AX],BX
-	_NEXT                            
+        POP     BX
+        MOV     [AX],BX
+        _NEXT
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
-	POP	BX
-	POP	CX
-	JMPHERE_FROM_PROT
-	MOV	DX,DS
-	MOV	DS,CX
-	POP	AX
-	MOV	[BX],AX
-	MOV	DS,DX
-	JMPHERE_FROM_REAL
-	_NEXT                            
+        POP     BX
+        POP     CX
+        JMPHERE_FROM_PROT
+        MOV     DX,DS
+        MOV     DS,CX
+        POP     AX
+        MOV     [BX],AX
+        MOV     DS,DX
+        JMPHERE_FROM_REAL
+        _NEXT
 });_END___1__({ _BITS16_1_})
-	PAGE
-	;{ At line     LINE ~1000}
+        PAGE
+        ;{ At line     LINE ~1000}
 ;
 HEADER({:},{COLON},{DOCOL},1)
-	DC	QEXEC
-	DC	SCSP
-	DC	CURR
-	DC	FETCH
-	DC	CONT
-	DC	STORE
-	DC	CREAT
-	DC	RBRAC
-	DC	PSCOD
-DOCOL:	LEA     BP,[BP-CELLS(1)]
-	MOV	[BP],SI	;{R1 <- (IP)}
-	LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
+        DC      QEXEC
+        DC      SCSP
+        DC      CURR
+        DC      FETCH
+        DC      CONT
+        DC      STORE
+        DC      CREAT
+        DC      RBRAC
+        DC      PSCOD
+DOCOL:  LEA     BP,[BP-CELLS(1)]
+        MOV     [BP],SI ;{R1 <- (IP)}
+        LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 ;____1_____ _NATIVE_1_({
-	JMPHERE_FROM_PROT
-	JMPHERE_FROM_REAL
+        JMPHERE_FROM_PROT
+        JMPHERE_FROM_REAL
 });_END___1__({ _NATIVE_1_})
-	_NEXT                            
+        _NEXT
 ;
 HEADER({;},{SEMI},{DOCOL},1)
-	DC	QCSP
-	DC	COMP
-	DC	SEMIS
-	DC	SMUDG
-	DC	LBRAC
-	DC	SEMIS
-	PAGE
+        DC      QCSP
+        DC      COMP
+        DC      SEMIS
+        DC      SMUDG
+        DC      LBRAC
+        DC      SEMIS
+        PAGE
 HEADER({CONSTANT},{CON},{DOCOL})
-	DC	CREAT
-	DC	SMUDG
-	DC	COMMA
-	DC	PSCOD
+        DC      CREAT
+        DC      SMUDG
+        DC      COMMA
+        DC      PSCOD
 DOCON:  MOV     AX,[BX+CELLS(1)] ;{GET DATA FROM PFA}
-	JMP	APUSH
+        JMP     APUSH
 ;{               }
 HEADER({VARIABLE},{VAR},{DOCOL})
-	DC      CON
-	DC      PSCOD
-DOVAR:	LEA     AX,[BX+CELLS(1)] ;{(AX) <- PFA}
-	JMP	APUSH
+        DC      CON
+        DC      PSCOD
+DOVAR:  LEA     AX,[BX+CELLS(1)] ;{(AX) <- PFA}
+        JMP     APUSH
 ;
 HEADER({USER},{USER},{DOCOL})
-	DC	CON
-	DC	PSCOD
+        DC      CON
+        DC      PSCOD
 DOUSE:  MOV     BX,[BX+CELLS(1)] ;{PFA  }
-	MOV	DI,[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
-	LEA	AX,[BX+DI]	;{ADDR OF VARIABLE}
-	JMP	APUSH
-	PAGE
+        MOV     DI,[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
+        LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
+        JMP     APUSH
+        PAGE
 CODE_HEADER({0},{ZERO})
-	XOR	AX,AX
-	JMP	APUSH
+        XOR     AX,AX
+        JMP     APUSH
 ;
 CODE_HEADER({1},{ONE})
-	MOV	AX,1
-	JMP	APUSH
+        MOV     AX,1
+        JMP     APUSH
 ;
 CODE_HEADER({2},{TWO})   ;{ Needed also CELLS}
-	MOV	AX,2
-	JMP	APUSH
+        MOV     AX,2
+        JMP     APUSH
 ;
 CODE_HEADER({3},{THREE})
-	MOV	AX,3
-	JMP	APUSH
+        MOV     AX,3
+        JMP     APUSH
 ;
 HEADER({BL},{BLS},{DOCON})
-;{	THIS IS ONLY A SPAC}
-	DC	20H
+;{      THIS IS ONLY A SPAC}
+        DC      20H
 ;
 HEADER({C/L},{CSLL},{DOCON})
-	DC	64
+        DC      64
 ;
 ;____1_____ _HIGH_BUF_1_({
 HEADER({FIRST},{FIRST},{DOCON})
-	DC	BUF1
+        DC      BUF1
 });_END___1__({ _HIGH_BUF_1_})
 ;
 ;____1_____ _LOW_BUF_1_({
 HEADER({FIRST},{FIRST},{DOVAR})
 BUF1    EQU     FIRST+CW
-	RESB    (KBBUF+2*CW)*NBUF       
+        RESB    (KBBUF+2*CW)*NBUF
 });_END___1__({ _LOW_BUF_1_})
 ;
 ;{ THE END OF THE BUFFERS}
 HEADER({LIMIT},{LIMIT},{DOCON})
-	DC	BUF1+(KBBUF+2*CW)*NBUF        
+        DC      BUF1+(KBBUF+2*CW)*NBUF
 ;{ THE END  OF THE MEMORY }
 HEADER({EM},{LEM},{DOCON})
-	DC	EM
+        DC      EM
 ;
 HEADER({B/BUF},{BBUF},{DOCON})
-	DC	KBBUF
+        DC      KBBUF
 ;
 HEADER({B/SCR},{BSCR},{DOCON})
-	DC	400H/KBBUF
+        DC      400H/KBBUF
 ;
-	PAGE
+        PAGE
 ;
 ;{ All user variables are initialised }
 ;{ with the values from USINI.}
 ;{ The implementation relies on the initialisation of }
 ;{ those with numbers (1..11), so change in concord with USINI.}
 HEADER({U0},{UZERO},{DOUSE})
-	DC	CELLS(1) 
+        DC      CELLS(1)
 ;
 HEADER({RUBOUT},{RUBOUT},{DOUSE})
-	DC	CELLS(2)
+        DC      CELLS(2)
 ;
 HEADER({S0},{SZERO},{DOUSE})
-	DC	CELLS(3) 
+        DC      CELLS(3)
 ;
 HEADER({R0},{RZERO},{DOUSE})
-	DC	CELLS(4) 
+        DC      CELLS(4)
 ;
 HEADER({TIB},{TIB},{DOUSE})
-	DC	CELLS(5) 
+        DC      CELLS(5)
 ;
 HEADER({WIDTH},{WIDTHE},{DOUSE})
-	DC	CELLS(6) 
+        DC      CELLS(6)
 ;
 HEADER({WARNING},{WARN},{DOUSE})
-	DC	CELLS(7) 
+        DC      CELLS(7)
 ;
 HEADER({FENCE},{FENCE},{DOUSE})
-	DC	CELLS(8) 
+        DC      CELLS(8)
 ;
 HEADER({DP},{LDP},{DOUSE})
-	DC	CELLS(9) 
+        DC      CELLS(9)
 ;
 HEADER({VOC-LINK},{VOCL},{DOUSE})
-	DC	CELLS(10)
+        DC      CELLS(10)
 ;
 HEADER({OFFSET},{OFSET},{DOUSE})
-	DC	CELLS(11)
+        DC      CELLS(11)
 ;
 ;{ End of user variables with fixed place.}
-	PAGE
+        PAGE
 HEADER({SCR},{SCR},{DOUSE})
-	DC	CELLS(14)
+        DC      CELLS(14)
 ;
 HEADER({CONTEXT},{CONT},{DOUSE})
-	DC	CELLS(16)
+        DC      CELLS(16)
 ;
 HEADER({CURRENT},{CURR},{DOUSE})
-	DC	CELLS(17)
+        DC      CELLS(17)
 ;
 HEADER({STATE},{STATE},{DOUSE})
-	DC	CELLS(18)
+        DC      CELLS(18)
 ;
 HEADER({BASE},{BASE},{DOUSE})
-	DC	CELLS(19)
+        DC      CELLS(19)
 ;
 HEADER({DPL},{DPL},{DOUSE})
-	DC	CELLS(20)
+        DC      CELLS(20)
 ;
 HEADER({FLD},{LFLD},{DOUSE})
-	DC	CELLS(21)
+        DC      CELLS(21)
 ;
 HEADER({CSP},{LCSP},{DOUSE})
-	DC	CELLS(22)
+        DC      CELLS(22)
 ;
 HEADER({R#},{RNUM},{DOUSE})
-	DC	CELLS(23)
+        DC      CELLS(23)
 ;
 HEADER({HLD},{HLD},{DOUSE})
-	DC	CELLS(24)
+        DC      CELLS(24)
 ;
 HEADER({IN},{LIN},{DOUSE})
-	DC	CELLS(25)
+        DC      CELLS(25)
 ;
 HEADER({OUT},{LOUT},{DOUSE})
-	DC	CELLS(26)
+        DC      CELLS(26)
 ;
 HEADER({BLK},{BLK},{DOUSE})
-	DC	CELLS(27)
+        DC      CELLS(27)
 ;
 ;{========== END USER VARIABLES =============;}
-	PAGE
+        PAGE
 CODE_HEADER({1+},{ONEP})
-	POP	AX
-	INC	AX
-	JMP	APUSH
+        POP     AX
+        INC     AX
+        JMP     APUSH
 ;
-CODE_HEADER({2+},{TWOP})   
-	POP	AX
-	ADD	AX,2
-	JMP	APUSH
+CODE_HEADER({2+},{TWOP})
+        POP     AX
+        ADD     AX,2
+        JMP     APUSH
 ;
 ;
-CODE_HEADER({CELL+},{CELLP})   
-	POP	AX
-	ADD	AX,CW
-	JMP	APUSH
+CODE_HEADER({CELL+},{CELLP})
+        POP     AX
+        ADD     AX,CW
+        JMP     APUSH
 ;
 HEADER({HERE},{HERE},{DOCOL})
-	DC	LDP
-	DC	FETCH
-	DC	SEMIS
+        DC      LDP
+        DC      FETCH
+        DC      SEMIS
 ;
 HEADER({ALLOT},{ALLOT},{DOCOL})
-	DC	LDP
-	DC	PSTOR
-	DC	SEMIS
+        DC      LDP
+        DC      PSTOR
+        DC      SEMIS
 ;
 HEADER({,},{COMMA},{DOCOL})
-	DC	HERE
-	DC	STORE
-	DC	LCELL
-	DC	ALLOT
-	DC	SEMIS
+        DC      HERE
+        DC      STORE
+        DC      LCELL
+        DC      ALLOT
+        DC      SEMIS
 ;
 HEADER({C,},{CCOMM},{DOCOL})
-	DC	HERE
-	DC	CSTOR
-	DC	ONE
-	DC	ALLOT
-	DC	SEMIS
+        DC      HERE
+        DC      CSTOR
+        DC      ONE
+        DC      ALLOT
+        DC      SEMIS
 ;
 CODE_HEADER({-},{LSUB})
-	POP	DX	;{S1}
-	POP	AX
-	SUB	AX,DX
-	JMP	APUSH	;{S1 = S2 - S1}
+        POP     DX      ;{S1}
+        POP     AX
+        SUB     AX,DX
+        JMP     APUSH   ;{S1 = S2 - S1}
 ;
 HEADER({=},{EQUAL},{DOCOL})
-	DC	LSUB
-	DC	ZEQU
-	DC	SEMIS
+        DC      LSUB
+        DC      ZEQU
+        DC      SEMIS
 ;
 CODE_HEADER({<},{LESS})
-	POP	DX	;{S1}
-	POP	AX	;{S2}
-	MOV	BX,DX
-	XOR	BX,AX	;{TEST FOR EQUAL SIGNS}
-	JS	LES1	;{SIGNS ARE NOT THE SAME}
-	SUB	AX,DX
-LES1:	OR	AX,AX	;{TEST SIGN BIT}
-	MOV	AX,0	;{ASSUME FALSE}
-	JNS	LES2	;{NOT LESS THAN}
-	INC	AX	;{TRUE (1)}
-LES2:	JMP	APUSH
+        POP     DX      ;{S1}
+        POP     AX      ;{S2}
+        MOV     BX,DX
+        XOR     BX,AX   ;{TEST FOR EQUAL SIGNS}
+        JS      LES1    ;{SIGNS ARE NOT THE SAME}
+        SUB     AX,DX
+LES1:   OR      AX,AX   ;{TEST SIGN BIT}
+        MOV     AX,0    ;{ASSUME FALSE}
+        JNS     LES2    ;{NOT LESS THAN}
+        INC     AX      ;{TRUE (1)}
+LES2:   JMP     APUSH
 ;
 HEADER({U<},{ULESS},{DOCOL})
-	DC      TDUP
-	DC	LXOR,ZLESS
-	_0BRANCH(ULES1) ;{IF}
-	DC	DROP,ZLESS
-	DC	ZEQU
-	_BRANCH(ULES2) 
-ULES1	DC	LSUB,ZLESS      ;{ELSE}
-ULES2	DC	SEMIS		;{ENDIF}
+        DC      TDUP
+        DC      LXOR,ZLESS
+        _0BRANCH(ULES1) ;{IF}
+        DC      DROP,ZLESS
+        DC      ZEQU
+        _BRANCH(ULES2)
+ULES1   DC      LSUB,ZLESS      ;{ELSE}
+ULES2   DC      SEMIS           ;{ENDIF}
 ;
 HEADER({>},{GREAT},{DOCOL})
-	DC	SWAP
-	DC	LESS
-	DC	SEMIS
+        DC      SWAP
+        DC      LESS
+        DC      SEMIS
 ;
 CODE_HEADER({ROT},{ROT})
-	POP	DX	;{S1}
-	POP	BX	;{S2}
-	POP	AX	;{S3}
-	PUSH	BX
-	JMP	DPUSH
+        POP     DX      ;{S1}
+        POP     BX      ;{S2}
+        POP     AX      ;{S3}
+        PUSH    BX
+        JMP     DPUSH
 ;
 HEADER({SPACE},{SPACE},{DOCOL})
-	DC	BLS
-	DC	EMIT
-	DC	SEMIS
+        DC      BLS
+        DC      EMIT
+        DC      SEMIS
 ;
 HEADER({-DUP},{DDUP},{DOCOL})
-	DC	DUPE
-	_0BRANCH(DDUP1) ;{ IF}
-	DC	DUPE	;{ENDIF}
-DDUP1	DC	SEMIS
+        DC      DUPE
+        _0BRANCH(DDUP1) ;{ IF}
+        DC      DUPE    ;{ENDIF}
+DDUP1   DC      SEMIS
 ;
 HEADER({TRAVERSE},{TRAV},{DOCOL})
-	DC	SWAP
-TRAV1	DC	OVER	;{BEGIN}
-	DC	PLUS
-	DC	LIT,7FH
-	DC	OVER
-	DC	CFET
-	DC	LESS
-	_0BRANCH(TRAV1) ;{UNTIL}
-	DC	SWAP
-	DC	DROP
-	DC	SEMIS
+        DC      SWAP
+TRAV1   DC      OVER    ;{BEGIN}
+        DC      PLUS
+        DC      LIT,7FH
+        DC      OVER
+        DC      CFET
+        DC      LESS
+        _0BRANCH(TRAV1) ;{UNTIL}
+        DC      SWAP
+        DC      DROP
+        DC      SEMIS
 ;
 HEADER({LATEST},{LATES},{DOCOL})
-	DC	CURR
-	DC	FETCH
-	DC	FETCH
-	DC	SEMIS
+        DC      CURR
+        DC      FETCH
+        DC      FETCH
+        DC      SEMIS
 ;
 HEADER({LFA},{LFA},{DOCOL})
-	DC	LIT,CELLS(2)
-	DC	LSUB
-	DC	SEMIS
+        DC      LIT,CELLS(2)
+        DC      LSUB
+        DC      SEMIS
 ;
 HEADER({CFA},{CFA},{DOCOL})
-	DC	LCELL
-	DC	LSUB
-	DC	SEMIS
+        DC      LCELL
+        DC      LSUB
+        DC      SEMIS
 ;
 HEADER({NFA},{NFA},{DOCOL})
-	DC	LIT,1+CELLS(2)
-	DC	LSUB
-	DC	LIT,-1
-	DC	TRAV
-	DC	SEMIS
+        DC      LIT,1+CELLS(2)
+        DC      LSUB
+        DC      LIT,-1
+        DC      TRAV
+        DC      SEMIS
 ;
 HEADER({PFA},{PFA},{DOCOL})
-	DC	ONE
-	DC	TRAV
-	DC	LIT,1+CELLS(2)
-	DC	PLUS
-	DC	SEMIS
-	PAGE
-	;{ At line     LINE ~1500}
+        DC      ONE
+        DC      TRAV
+        DC      LIT,1+CELLS(2)
+        DC      PLUS
+        DC      SEMIS
+        PAGE
+        ;{ At line     LINE ~1500}
 HEADER({!CSP},{SCSP},{DOCOL})
-	DC	SPFET
-	DC	LCSP
-	DC	STORE
-	DC	SEMIS
+        DC      SPFET
+        DC      LCSP
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({?ERROR},{QERR},{DOCOL})
-	DC	SWAP
-	_0BRANCH(QERR1) ;{IF}
-	DC	ERROR
-	_BRANCH(QERR2)  ;{ELSE}
-QERR1	DC	DROP	;{ENDIF}
-QERR2	DC	SEMIS
+        DC      SWAP
+        _0BRANCH(QERR1) ;{IF}
+        DC      ERROR
+        _BRANCH(QERR2)  ;{ELSE}
+QERR1   DC      DROP    ;{ENDIF}
+QERR2   DC      SEMIS
 ;
 HEADER({?COMP},{QCOMP},{DOCOL})
-	DC	STATE
-	DC	FETCH
-	DC	ZEQU
-	DC	LIT,11H
-	DC	QERR
-	DC	SEMIS
-	PAGE
+        DC      STATE
+        DC      FETCH
+        DC      ZEQU
+        DC      LIT,11H
+        DC      QERR
+        DC      SEMIS
+        PAGE
 HEADER({?EXEC},{QEXEC},{DOCOL})
-	DC	STATE
-	DC	FETCH
-	DC	LIT,12H
-	DC	QERR
-	DC	SEMIS
+        DC      STATE
+        DC      FETCH
+        DC      LIT,12H
+        DC      QERR
+        DC      SEMIS
 ;
 HEADER({?PAIRS},{QPAIR},{DOCOL})
-	DC	LSUB
-	DC	LIT,13H
-	DC	QERR
-	DC	SEMIS
+        DC      LSUB
+        DC      LIT,13H
+        DC      QERR
+        DC      SEMIS
 ;
 HEADER({?CSP},{QCSP},{DOCOL})
-	DC	SPFET
-	DC	LCSP
-	DC	FETCH
-	DC	LSUB
-	DC	LIT,14H
-	DC	QERR
-	DC	SEMIS
+        DC      SPFET
+        DC      LCSP
+        DC      FETCH
+        DC      LSUB
+        DC      LIT,14H
+        DC      QERR
+        DC      SEMIS
 ;
 HEADER({?LOADING},{QLOAD},{DOCOL})
-	DC	BLK
-	DC	FETCH
-	DC	ZEQU
-	DC	LIT,16H
-	DC	QERR
-	DC	SEMIS
-	PAGE
+        DC      BLK
+        DC      FETCH
+        DC      ZEQU
+        DC      LIT,16H
+        DC      QERR
+        DC      SEMIS
+        PAGE
 HEADER({COMPILE},{COMP},{DOCOL})
-	DC	QCOMP
-	DC	FROMR
-	DC	DUPE
-	DC	CELLP
-	DC	TOR
-	DC	FETCH
-	DC	COMMA
-	DC	SEMIS
+        DC      QCOMP
+        DC      FROMR
+        DC      DUPE
+        DC      CELLP
+        DC      TOR
+        DC      FETCH
+        DC      COMMA
+        DC      SEMIS
 ;
 HEADER({[},{LBRAC},{DOCOL},1)
-	DC	ZERO
-	DC	STATE
-	DC	STORE
-	DC	SEMIS
+        DC      ZERO
+        DC      STATE
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({]},{RBRAC},{DOCOL})
-	DC	LIT,0C0H
-	DC	STATE
-	DC	STORE
-	DC	SEMIS
-	PAGE
+        DC      LIT,0C0H
+        DC      STATE
+        DC      STORE
+        DC      SEMIS
+        PAGE
 HEADER({SMUDGE},{SMUDG},{DOCOL})
-	DC	LATES
-	DC	LIT,20H
-	DC	TOGGL
-	DC	SEMIS
+        DC      LATES
+        DC      LIT,20H
+        DC      TOGGL
+        DC      SEMIS
 ;
 HEADER({HEX},{HEX},{DOCOL})
-	DC	LIT,16
-	DC	BASE
-	DC	STORE
-	DC	SEMIS
+        DC      LIT,16
+        DC      BASE
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({DECIMAL},{DECA},{DOCOL})
-	DC	LIT,10               
-	DC	BASE
-	DC	STORE
-	DC	SEMIS
+        DC      LIT,10
+        DC      BASE
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({(;CODE)},{PSCOD},{DOCOL})
-	DC	FROMR
-	DC	LATES
-	DC	PFA
-	DC	CFA
-	DC	STORE
-	DC	SEMIS
+        DC      FROMR
+        DC      LATES
+        DC      PFA
+        DC      CFA
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({;CODE},{SEMIC},{DOCOL},1)
-	DC	QCSP
-	DC	COMP
-	DC	PSCOD
-	DC	LBRAC
-SEMI1	DC	NOOP	;{ ( ASSEMBLER )}
-	DC	SEMIS
+        DC      QCSP
+        DC      COMP
+        DC      PSCOD
+        DC      LBRAC
+SEMI1   DC      NOOP    ;{ ( ASSEMBLER )}
+        DC      SEMIS
 ;
 HEADER({<BUILDS},{BUILD},{DOCOL})
-	DC	ZERO
-	DC	CON
-	DC	SEMIS
+        DC      ZERO
+        DC      CON
+        DC      SEMIS
 ;
 HEADER({DOES>},{DOES},{DOCOL})
-	DC	FROMR
-	DC	LATES
-	DC	PFA
-	DC	STORE
-	DC	PSCOD
-DODOE:	LEA     BP,[BP-CELLS(1)]
-	MOV	[BP],SI	;{R1 <- (IP)}
-	MOV	SI,[BX+CELLS(1)] ;{NEW IP }
-	LEA     AX,[BX+2*CELLS(1)]
-	JMP	APUSH 
+        DC      FROMR
+        DC      LATES
+        DC      PFA
+        DC      STORE
+        DC      PSCOD
+DODOE:  LEA     BP,[BP-CELLS(1)]
+        MOV     [BP],SI ;{R1 <- (IP)}
+        MOV     SI,[BX+CELLS(1)] ;{NEW IP }
+        LEA     AX,[BX+2*CELLS(1)]
+        JMP     APUSH
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
-	DC	DUPE
-	DC	ONEP
-	DC	SWAP
-	DC	CFET
-	DC	SEMIS
+        DC      DUPE
+        DC      ONEP
+        DC      SWAP
+        DC      CFET
+        DC      SEMIS
 ;
 HEADER({-TRAILING},{DTRAI},{DOCOL})
-	DC	DUPE
-	DC	ZERO
-	DC	XDO	;{DO}
-DTRA1	DC	OVER
-	DC	OVER
-	DC	PLUS
-	DC	ONE
-	DC	LSUB
-	DC	CFET
-	DC	BLS
-	DC	LSUB
-	_0BRANCH(DTRA2) ;{IF}
-	DC	LLEAV
-	_BRANCH(DTRA3)  ;{ ELSE}
-DTRA2	DC	ONE
-	DC	LSUB    ;{ ENDIF}
-DTRA3	_LOOP(DTRA1)    ;{ LOOP}
-	DC	SEMIS
-	PAGE
-	;{ At line     LINE ~2000}
+        DC      DUPE
+        DC      ZERO
+        DC      XDO     ;{DO}
+DTRA1   DC      OVER
+        DC      OVER
+        DC      PLUS
+        DC      ONE
+        DC      LSUB
+        DC      CFET
+        DC      BLS
+        DC      LSUB
+        _0BRANCH(DTRA2) ;{IF}
+        DC      LLEAV
+        _BRANCH(DTRA3)  ;{ ELSE}
+DTRA2   DC      ONE
+        DC      LSUB    ;{ ENDIF}
+DTRA3   _LOOP(DTRA1)    ;{ LOOP}
+        DC      SEMIS
+        PAGE
+        ;{ At line     LINE ~2000}
 HEADER_SGQ({(.")},{PDOTQ},{DOCOL})
-	DC	RR
-	DC	COUNT
-	DC	DUPE
-	DC	ONEP
-	DC	FROMR
-	DC	PLUS
-	DC	TOR
-	DC	LTYPE
-	DC	SEMIS
+        DC      RR
+        DC      COUNT
+        DC      DUPE
+        DC      ONEP
+        DC      FROMR
+        DC      PLUS
+        DC      TOR
+        DC      LTYPE
+        DC      SEMIS
 ;
 HEADER_SGQ({."},{DOTQ},{DOCOL},1)
-	DC	LIT,22H
-	DC	STATE
-	DC	FETCH
-	_0BRANCH(DOTQ1) ;{ IF}
-	DC	COMP
-	DC	PDOTQ
-	DC	WORDS
-	DC	HERE
-	DC	CFET
-	DC	ONEP
-	DC	ALLOT
-	_BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1	DC	WORDS
-	DC	HERE
-	DC	COUNT
-	DC	LTYPE   ;{ ENDIF}
-DOTQ2	DC	SEMIS
-	PAGE
+        DC      LIT,22H
+        DC      STATE
+        DC      FETCH
+        _0BRANCH(DOTQ1) ;{ IF}
+        DC      COMP
+        DC      PDOTQ
+        DC      WORDS
+        DC      HERE
+        DC      CFET
+        DC      ONEP
+        DC      ALLOT
+        _BRANCH(DOTQ2)  ;{ ELSE}
+DOTQ1   DC      WORDS
+        DC      HERE
+        DC      COUNT
+        DC      LTYPE   ;{ ENDIF}
+DOTQ2   DC      SEMIS
+        PAGE
 HEADER({QUERY},{QUERY},{DOCOL})
-	DC	TIB
-	DC	FETCH
-	DC	LIT,50H
-	DC	EXPEC
-	DC	ZERO
-	DC	LIN
-	DC	STORE
-	DC	SEMIS
-	PAGE
+        DC      TIB
+        DC      FETCH
+        DC      LIT,50H
+        DC      EXPEC
+        DC      ZERO
+        DC      LIN
+        DC      STORE
+        DC      SEMIS
+        PAGE
 HEADER_NULL({(NULL)},{NULL},{DOCOL})
 ;{       Special header putting an ASCII NULL in the dictionary.}
-	DC	BLK
-	DC	FETCH
-	_0BRANCH(NULL1) ;{ IF}
-	DC	ONE
-	DC	BLK
-	DC	PSTOR
-	DC	ZERO
-	DC	LIN
-	DC	STORE
-	DC	BLK
-	DC	FETCH
-	DC	BSCR
-	DC	ONE
-	DC	LSUB
-	DC	LAND
-	DC	ZEQU
-	_0BRANCH(NULL2) ;{ IF}
-	DC	QEXEC
-	DC	FROMR
-	DC	DROP	;{ ENDIF}
-NULL2	_BRANCH(NULL3)  ;{ ELSE}
-NULL1	DC	FROMR
-	DC	DROP	;{ ENDIF}
-NULL3	DC	SEMIS
+        DC      BLK
+        DC      FETCH
+        _0BRANCH(NULL1) ;{ IF}
+        DC      ONE
+        DC      BLK
+        DC      PSTOR
+        DC      ZERO
+        DC      LIN
+        DC      STORE
+        DC      BLK
+        DC      FETCH
+        DC      BSCR
+        DC      ONE
+        DC      LSUB
+        DC      LAND
+        DC      ZEQU
+        _0BRANCH(NULL2) ;{ IF}
+        DC      QEXEC
+        DC      FROMR
+        DC      DROP    ;{ ENDIF}
+NULL2   _BRANCH(NULL3)  ;{ ELSE}
+NULL1   DC      FROMR
+        DC      DROP    ;{ ENDIF}
+NULL3   DC      SEMIS
 ;
 CODE_HEADER({FILL},{FILL})
-	POP	AX	;{ FILL CHAR}
-	POP	CX	;{ FILL COUNT}
-	POP	DI	;{ BEGIN ADDR}
-;{       MOV	BX,DS}
-;{       MOV	ES,BX	; ES <- DS}
-	CLD		;{ INC DIRECTION}
-	REP	STOSB	;{STORE BYTE}
-	_NEXT                            
+        POP     AX      ;{ FILL CHAR}
+        POP     CX      ;{ FILL COUNT}
+        POP     DI      ;{ BEGIN ADDR}
+;{       MOV    BX,DS}
+;{       MOV    ES,BX   ; ES <- DS}
+        CLD             ;{ INC DIRECTION}
+        REP     STOSB   ;{STORE BYTE}
+        _NEXT
 ;
 HEADER({ERASE},{ERASEE},{DOCOL})
-	DC	ZERO
-	DC	FILL
-	DC	SEMIS
+        DC      ZERO
+        DC      FILL
+        DC      SEMIS
 ;
 HEADER({BLANKS},{BLANK},{DOCOL})
-	DC	BLS
-	DC	FILL
-	DC	SEMIS
+        DC      BLS
+        DC      FILL
+        DC      SEMIS
 ;
 HEADER({HOLD},{HOLD},{DOCOL})
-	DC	LIT,-1
-	DC	HLD
-	DC	PSTOR
-	DC	HLD
-	DC	FETCH
-	DC	CSTOR
-	DC	SEMIS
+        DC      LIT,-1
+        DC      HLD
+        DC      PSTOR
+        DC      HLD
+        DC      FETCH
+        DC      CSTOR
+        DC      SEMIS
 ;
 HEADER({PAD},{PAD},{DOCOL})
-	DC	HERE
-	DC	LIT,84
-	DC	PLUS
-	DC	SEMIS
+        DC      HERE
+        DC      LIT,84
+        DC      PLUS
+        DC      SEMIS
 ;
 HEADER({WORD},{WORDS},{DOCOL})
-	DC	BLK
-	DC	FETCH
-	_0BRANCH(WORD1) ;{ IF}
-	DC	BLK
-	DC	FETCH
-	DC	BLOCK
-	_BRANCH(WORD2)  ;{ ELSE}
-WORD1	DC	TIB
-	DC	FETCH      ;{ ENDIF}
-WORD2	DC	LIN
-	DC	FETCH
-	DC	PLUS
-	DC	SWAP
-	DC	ENCL
-	DC	HERE
-	DC	LIT,22H
-	DC	BLANK
-	DC	LIN
-	DC	PSTOR
-	DC	OVER
-	DC	LSUB
-	DC	TOR
-	DC	RR
-	DC	HERE
-	DC	CSTOR
-	DC	PLUS
-	DC	HERE
-	DC	ONEP
-	DC	FROMR
-	DC	LCMOVE
-	DC	SEMIS
-	PAGE
+        DC      BLK
+        DC      FETCH
+        _0BRANCH(WORD1) ;{ IF}
+        DC      BLK
+        DC      FETCH
+        DC      BLOCK
+        _BRANCH(WORD2)  ;{ ELSE}
+WORD1   DC      TIB
+        DC      FETCH      ;{ ENDIF}
+WORD2   DC      LIN
+        DC      FETCH
+        DC      PLUS
+        DC      SWAP
+        DC      ENCL
+        DC      HERE
+        DC      LIT,22H
+        DC      BLANK
+        DC      LIN
+        DC      PSTOR
+        DC      OVER
+        DC      LSUB
+        DC      TOR
+        DC      RR
+        DC      HERE
+        DC      CSTOR
+        DC      PLUS
+        DC      HERE
+        DC      ONEP
+        DC      FROMR
+        DC      LCMOVE
+        DC      SEMIS
+        PAGE
 HEADER({(NUMBER)},{PNUMB},{DOCOL})
-PNUM1	DC	ONEP	;{ BEGIN}
-	DC	DUPE
-	DC	TOR
-	DC	CFET
-	DC	BASE
-	DC	FETCH
-	DC	DIGIT
-	_0BRANCH(PNUM2) ;{ WHILE}
-	DC	SWAP
-	DC	BASE
-	DC	FETCH
-	DC	USTAR
-	DC	DROP
-	DC	ROT
-	DC	BASE
-	DC	FETCH
-	DC	USTAR
-	DC	DPLUS
-	DC	DPL
-	DC	FETCH
-	DC	ONEP
-	_0BRANCH(PNUM3) ;{ IF}
-	DC	ONE
-	DC	DPL
-	DC	PSTOR	;{ ENDIF}
-PNUM3	DC	FROMR
-	_BRANCH(PNUM1)  ;{ REPEAT}
-PNUM2	DC	FROMR
-	DC	SEMIS
-	PAGE
+PNUM1   DC      ONEP    ;{ BEGIN}
+        DC      DUPE
+        DC      TOR
+        DC      CFET
+        DC      BASE
+        DC      FETCH
+        DC      DIGIT
+        _0BRANCH(PNUM2) ;{ WHILE}
+        DC      SWAP
+        DC      BASE
+        DC      FETCH
+        DC      USTAR
+        DC      DROP
+        DC      ROT
+        DC      BASE
+        DC      FETCH
+        DC      USTAR
+        DC      DPLUS
+        DC      DPL
+        DC      FETCH
+        DC      ONEP
+        _0BRANCH(PNUM3) ;{ IF}
+        DC      ONE
+        DC      DPL
+        DC      PSTOR   ;{ ENDIF}
+PNUM3   DC      FROMR
+        _BRANCH(PNUM1)  ;{ REPEAT}
+PNUM2   DC      FROMR
+        DC      SEMIS
+        PAGE
 HEADER({NUMBER},{NUMB},{DOCOL})
-	DC	ZERO
-	DC	ZERO
-	DC	ROT
-	DC	DUPE
-	DC	ONEP
-	DC	CFET
-	DC	LIT,2DH
-	DC	EQUAL
-	DC	DUPE
-	DC	TOR
-	DC	PLUS
-	DC	LIT,-1
-NUMB1	DC	DPL	;{ BEGIN}
-	DC	STORE
-	DC	PNUMB
-	DC	DUPE
-	DC	CFET
-	DC	BLS
-	DC	LSUB
-	_0BRANCH(NUMB2) ;{ WHILE}
-	DC	DUPE
-	DC	CFET
-	DC	LIT,2EH
-	DC	LSUB
-	DC	ZERO
-	DC	QERR
-	DC	ZERO
-	_BRANCH(NUMB1)  ;{ REPEAT}
-NUMB2	DC	DROP
-	DC	FROMR
-	_0BRANCH(NUMB3) ;{ IF}
-	DC	DMINU	;{ ENDIF}
-NUMB3	DC	SEMIS
-	PAGE
+        DC      ZERO
+        DC      ZERO
+        DC      ROT
+        DC      DUPE
+        DC      ONEP
+        DC      CFET
+        DC      LIT,2DH
+        DC      EQUAL
+        DC      DUPE
+        DC      TOR
+        DC      PLUS
+        DC      LIT,-1
+NUMB1   DC      DPL     ;{ BEGIN}
+        DC      STORE
+        DC      PNUMB
+        DC      DUPE
+        DC      CFET
+        DC      BLS
+        DC      LSUB
+        _0BRANCH(NUMB2) ;{ WHILE}
+        DC      DUPE
+        DC      CFET
+        DC      LIT,2EH
+        DC      LSUB
+        DC      ZERO
+        DC      QERR
+        DC      ZERO
+        _BRANCH(NUMB1)  ;{ REPEAT}
+NUMB2   DC      DROP
+        DC      FROMR
+        _0BRANCH(NUMB3) ;{ IF}
+        DC      DMINU   ;{ ENDIF}
+NUMB3   DC      SEMIS
+        PAGE
 HEADER({-FIND},{DFIND},{DOCOL})
-	DC	BLS
-	DC	WORDS
-	DC	HERE
-	DC	CONT
-	DC	FETCH
-	DC	FETCH
-	DC	PFIND
-	DC	DUPE
-	DC	ZEQU
-	_0BRANCH(DFIN1) ;{IF}
-	DC	DROP
-	DC	HERE
-	DC	LATES
-	DC	PFIND	;{ENDIF}
-DFIN1	DC	SEMIS
+        DC      BLS
+        DC      WORDS
+        DC      HERE
+        DC      CONT
+        DC      FETCH
+        DC      FETCH
+        DC      PFIND
+        DC      DUPE
+        DC      ZEQU
+        _0BRANCH(DFIN1) ;{IF}
+        DC      DROP
+        DC      HERE
+        DC      LATES
+        DC      PFIND   ;{ENDIF}
+DFIN1   DC      SEMIS
 ;
 HEADER({(ABORT)},{PABOR},{DOCOL})
-	DC	ABORT
-	DC	SEMIS
+        DC      ABORT
+        DC      SEMIS
 ;
 HEADER({ERROR},{ERROR},{DOCOL})
-	DC	WARN
-	DC	FETCH
-	DC	ZLESS
-	_0BRANCH(ERRO1) ;{IF}
-	DC	PABOR	;{ENDIF}
-ERRO1	DC	HERE
-	DC	COUNT
-	DC	LTYPE
-	DC	PDOTQ
-	_STRING({? })
-	DC	MESS
-	DC	SPSTO
+        DC      WARN
+        DC      FETCH
+        DC      ZLESS
+        _0BRANCH(ERRO1) ;{IF}
+        DC      PABOR   ;{ENDIF}
+ERRO1   DC      HERE
+        DC      COUNT
+        DC      LTYPE
+        DC      PDOTQ
+        _STRING({? })
+        DC      MESS
+        DC      SPSTO
 ;
-;{	CHANGE FROM FIG MODEL}
-;{	DC LIN,FETCH,BLK,FETCH}
+;{      CHANGE FROM FIG MODEL}
+;{      DC LIN,FETCH,BLK,FETCH}
 ;
-	DC	BLK,FETCH
-	DC	DDUP
-	_0BRANCH(ERRO2) ;{ IF}
-	DC	LIN,FETCH
-	DC	SWAP	;{ENDIF}
-ERRO2	DC	QUIT
+        DC      BLK,FETCH
+        DC      DDUP
+        _0BRANCH(ERRO2) ;{ IF}
+        DC      LIN,FETCH
+        DC      SWAP    ;{ENDIF}
+ERRO2   DC      QUIT
 ;
 HEADER({ID.},{IDDOT},{DOCOL})
-	DC	PAD
-	DC	LIT,20H
-	DC	LIT,5FH
-	DC	FILL
-	DC	DUPE
-	DC	PFA
-	DC	LFA
-	DC	OVER
-	DC	LSUB
-	DC	PAD
-	DC	SWAP
-	DC	LCMOVE
-	DC	PAD
-	DC	COUNT
-	DC	LIT,1FH
-	DC	LAND
-	DC      ONE
-	DC      LSUB
-	DC      TDUP
-	DC	LTYPE
-	DC      PLUS
-	DC      CFET
-	DC      LIT,07FH
-	DC      LAND
-	DC      EMIT
-	DC	SPACE
-	DC	SEMIS
-	PAGE
+        DC      PAD
+        DC      LIT,20H
+        DC      LIT,5FH
+        DC      FILL
+        DC      DUPE
+        DC      PFA
+        DC      LFA
+        DC      OVER
+        DC      LSUB
+        DC      PAD
+        DC      SWAP
+        DC      LCMOVE
+        DC      PAD
+        DC      COUNT
+        DC      LIT,1FH
+        DC      LAND
+        DC      ONE
+        DC      LSUB
+        DC      TDUP
+        DC      LTYPE
+        DC      PLUS
+        DC      CFET
+        DC      LIT,07FH
+        DC      LAND
+        DC      EMIT
+        DC      SPACE
+        DC      SEMIS
+        PAGE
 HEADER({CREATE},{CREAT},{DOCOL})
-	DC	DFIND
-	_0BRANCH(CREA1) ;{IF}
-	DC	DROP
-	DC	NFA
-	DC	IDDOT
-	DC	LIT,4
-	DC	MESS
-	DC	SPACE	;{ENDIF}
-CREA1	DC	HERE
-	DC	DUPE
-	DC	CFET
-	DC	WIDTHE
-	DC	FETCH
-	DC	MIN
-	DC	ONEP
-	DC	ALLOT
-	DC	DUPE
-	DC	LIT,0A0H
-	DC	TOGGL
-	DC	HERE
-	DC	ONE
-	DC	LSUB
-	DC	LIT,80H
-	DC	TOGGL
-	DC	LATES
-	DC	COMMA
-	DC	CURR
-	DC	FETCH
-	DC	STORE
-	DC	HERE
-	DC	CELLP
-	DC	COMMA
-	DC	SEMIS
-	PAGE
+        DC      DFIND
+        _0BRANCH(CREA1) ;{IF}
+        DC      DROP
+        DC      NFA
+        DC      IDDOT
+        DC      LIT,4
+        DC      MESS
+        DC      SPACE   ;{ENDIF}
+CREA1   DC      HERE
+        DC      DUPE
+        DC      CFET
+        DC      WIDTHE
+        DC      FETCH
+        DC      MIN
+        DC      ONEP
+        DC      ALLOT
+        DC      DUPE
+        DC      LIT,0A0H
+        DC      TOGGL
+        DC      HERE
+        DC      ONE
+        DC      LSUB
+        DC      LIT,80H
+        DC      TOGGL
+        DC      LATES
+        DC      COMMA
+        DC      CURR
+        DC      FETCH
+        DC      STORE
+        DC      HERE
+        DC      CELLP
+        DC      COMMA
+        DC      SEMIS
+        PAGE
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
-	DC	DFIND
-	DC	ZEQU
-	DC	ZERO
-	DC	QERR
-	DC	DROP
-	DC	CFA
-	DC	COMMA
-	DC	SEMIS
+        DC      DFIND
+        DC      ZEQU
+        DC      ZERO
+        DC      QERR
+        DC      DROP
+        DC      CFA
+        DC      COMMA
+        DC      SEMIS
 ;
 HEADER({LITERAL},{LITER},{DOCOL},1)
-	DC	STATE
-	DC	FETCH
-	_0BRANCH(LITE1) ;{IF}
-	DC	COMP
-	DC	LIT
-	DC	COMMA	;{ENDIF}
-LITE1	DC	SEMIS
-	PAGE
+        DC      STATE
+        DC      FETCH
+        _0BRANCH(LITE1) ;{IF}
+        DC      COMP
+        DC      LIT
+        DC      COMMA   ;{ENDIF}
+LITE1   DC      SEMIS
+        PAGE
 ;
 HEADER({DLITERAL},{DLITE},{DOCOL},1)
-	DC	STATE
-	DC	FETCH
-	_0BRANCH(DLIT1) ;{ IF}
-	DC	SWAP
-	DC	LITER
-	DC	LITER	;{ ENDIF}
-DLIT1	DC	SEMIS
+        DC      STATE
+        DC      FETCH
+        _0BRANCH(DLIT1) ;{ IF}
+        DC      SWAP
+        DC      LITER
+        DC      LITER   ;{ ENDIF}
+DLIT1   DC      SEMIS
 ;
 HEADER({?STACK},{QSTAC},{DOCOL})
-	DC	SPFET
-	DC	SZERO
-	DC	FETCH
-	DC	SWAP
-	DC	ULESS
-	DC	ONE
-	DC	QERR
-	DC	SPFET
-	DC	HERE
-	DC	LIT,80H
-	DC	PLUS
-	DC	ULESS
-	DC	LIT,7
-	DC	QERR
-	DC	SEMIS
-	PAGE
-	;{ At line     LINE ~2500}
+        DC      SPFET
+        DC      SZERO
+        DC      FETCH
+        DC      SWAP
+        DC      ULESS
+        DC      ONE
+        DC      QERR
+        DC      SPFET
+        DC      HERE
+        DC      LIT,80H
+        DC      PLUS
+        DC      ULESS
+        DC      LIT,7
+        DC      QERR
+        DC      SEMIS
+        PAGE
+        ;{ At line     LINE ~2500}
 HEADER({INTERPRET},{INTER},{DOCOL})
-INTE1	DC	DFIND	;{BEGIN}
-	_0BRANCH(INTE2) ;{IF}
-	DC	STATE
-	DC	FETCH
-	DC	LESS
-	_0BRANCH(INTE3) ;{IF}
-	DC	CFA
-	DC	COMMA
-	_BRANCH(INTE4)  ;{ELSE}
-INTE3	DC	CFA
-	DC	EXEC	;{ENDIF}
-INTE4	DC	QSTAC
-	_BRANCH(INTE5)  ;{ELSE}
-INTE2	DC	HERE
-	DC	NUMB
-	DC	DPL
-	DC	FETCH
-	DC	ONEP
-	_0BRANCH(INTE6) ;{IF}
-	DC	DLITE
-	_BRANCH(INTE7)  ;{ELSE}
-INTE6	DC	DROP
-	DC	LITER	;{ENDIF}
-INTE7	DC	QSTAC	;{ENDIF}
-INTE5	_BRANCH(INTE1)  ;{AGAIN}
-	PAGE
+INTE1   DC      DFIND   ;{BEGIN}
+        _0BRANCH(INTE2) ;{IF}
+        DC      STATE
+        DC      FETCH
+        DC      LESS
+        _0BRANCH(INTE3) ;{IF}
+        DC      CFA
+        DC      COMMA
+        _BRANCH(INTE4)  ;{ELSE}
+INTE3   DC      CFA
+        DC      EXEC    ;{ENDIF}
+INTE4   DC      QSTAC
+        _BRANCH(INTE5)  ;{ELSE}
+INTE2   DC      HERE
+        DC      NUMB
+        DC      DPL
+        DC      FETCH
+        DC      ONEP
+        _0BRANCH(INTE6) ;{IF}
+        DC      DLITE
+        _BRANCH(INTE7)  ;{ELSE}
+INTE6   DC      DROP
+        DC      LITER   ;{ENDIF}
+INTE7   DC      QSTAC   ;{ENDIF}
+INTE5   _BRANCH(INTE1)  ;{AGAIN}
+        PAGE
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
-	DC	LATES
-	DC	LIT,40H
-	DC	TOGGL
-	DC	SEMIS
+        DC      LATES
+        DC      LIT,40H
+        DC      TOGGL
+        DC      SEMIS
 ;
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
-	DC	BUILD
-	DC	LIT, 80H+1, CCOMM    ; Dummy name field 
-	DC	LIT, " "+80H, CCOMM
-	DC	CURR
-	DC	FETCH
-	DC      LIT, 2, LSUB ; Skip backwards over dummy name field.
-	DC	COMMA
-	DC	HERE
-	DC	VOCL
-	DC	FETCH
-	DC	COMMA
-	DC	VOCL
-	DC	STORE
-	DC	DOES
-DOVOC	DC	TWOP    ; i.e. Skip ' ' name.
-	DC	CONT
-	DC	STORE
-	DC	SEMIS
-	PAGE
+        DC      BUILD
+        DC      LIT, 80H+1, CCOMM    ; Dummy name field
+        DC      LIT, " "+80H, CCOMM
+        DC      CURR
+        DC      FETCH
+        DC      LIT, 2, LSUB ; Skip backwards over dummy name field.
+        DC      COMMA
+        DC      HERE
+        DC      VOCL
+        DC      FETCH
+        DC      COMMA
+        DC      VOCL
+        DC      STORE
+        DC      DOES
+DOVOC   DC      TWOP    ; i.e. Skip ' ' name.
+        DC      CONT
+        DC      STORE
+        DC      SEMIS
+        PAGE
 ;
 ;{   THE LINKFIELD OF TASK IS A COLD START VALUE ONLY.}
 ;{   IT IS CHANGED EACH TIME A DEFINITION IS}
 ;{   APPENDED TO THE 'FORTH' VOCABULARY.}
 ;
 HEADER({FORTH},{FORTH},{DODOE},1)
-	DC	DOVOC
-	DB      80H+1, " "+80H  ; Dummy name field 
-	DC	_NAME_FIELD(TASK)
-	DC	0	;{ END OF VOCABULARY LIST}
+        DC      DOVOC
+        DB      80H+1, " "+80H  ; Dummy name field
+        DC      _NAME_FIELD(TASK)
+        DC      0       ;{ END OF VOCABULARY LIST}
 ;
 HEADER({DEFINITIONS},{DEFIN},{DOCOL})
-	DC	CONT
-	DC	FETCH
-	DC	CURR
-	DC	STORE
-	DC	SEMIS
+        DC      CONT
+        DC      FETCH
+        DC      CURR
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({(},{PAREN},{DOCOL},1)
-	DC	LIT,')'
-	DC	WORDS
-	DC	SEMIS
-	PAGE
+        DC      LIT,')'
+        DC      WORDS
+        DC      SEMIS
+        PAGE
 HEADER({QUIT},{QUIT},{DOCOL})
-	DC	ZERO
-	DC	BLK
-	DC	STORE
-	DC	LBRAC
-QUIT1	DC	RPSTO	;{BEGIN}
-	DC	CR
-	DC	QUERY
-	DC	INTER
-	DC	STATE
-	DC	FETCH
-	DC	ZEQU
-	_0BRANCH(QUIT2) ;{IF}
-	DC	PDOTQ
-	_STRING({OK})   ;{ENDIF}
-QUIT2	_BRANCH(QUIT1)  ;{AGAIN}
+        DC      ZERO
+        DC      BLK
+        DC      STORE
+        DC      LBRAC
+QUIT1   DC      RPSTO   ;{BEGIN}
+        DC      CR
+        DC      QUERY
+        DC      INTER
+        DC      STATE
+        DC      FETCH
+        DC      ZEQU
+        _0BRANCH(QUIT2) ;{IF}
+        DC      PDOTQ
+        _STRING({OK})   ;{ENDIF}
+QUIT2   _BRANCH(QUIT1)  ;{AGAIN}
 ;
 HEADER({ABORT},{ABORT},{DOCOL})
-	DC	SPSTO
-	DC	DECA
-	DC	QSTAC	;{ IT DID TO & INCL THIS}
-	DC	CR
-	DC	DOTCPU
-	DC	PDOTQ
+        DC      SPSTO
+        DC      DECA
+        DC      QSTAC   ;{ IT DID TO & INCL THIS}
+        DC      CR
+        DC      DOTCPU
+        DC      PDOTQ
 
 _COMMENT
 ;{       If this is there it is an official release}
-	DB	22
-	DB	'IBM-PC Fig-Forth '
-	DB	FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
+        DB      22
+        DB      'IBM-PC Fig-Forth '
+        DB      FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
 _ENDCOMMENT
 ;{       If this is there it is a beta release}
-	_STRING({IBM-PC $RCSfile$ $Revision$ })
-	DC	FORTH
-	DC	DEFIN
-	DC	QUIT
-	PAGE
-;{	WARM START VECTOR COMES HERE}
+        _STRING({IBM-PC $RCSfile$ $Revision$ })
+        DC      FORTH
+        DC      DEFIN
+        DC      QUIT
+        PAGE
+;{      WARM START VECTOR COMES HERE}
 ;
-WRM:	MOV	SI,_OFFSET WRM1
-	_NEXT                            
+WRM:    MOV     SI,_OFFSET WRM1
+        _NEXT
 ;
-WRM1	DC	WARM
+WRM1    DC      WARM
 ;
 HEADER({WARM},{WARM},{DOCOL})
-	DC	MTBUF
-	DC	ABORT
+        DC      MTBUF
+        DC      ABORT
 ;
-;{	COLD START VECTOR COMES HERE}
+;{      COLD START VECTOR COMES HERE}
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
 ;____1_____ _HOSTED_MSDOS_1_({
-	PUSH    DS
-	MOV	AX,0
-	MOV	DS,AX		;{TO VECTOR AREA}
-	MOV	BX,08CH
-	LEA	AX,[WRM]
-	MOV	[BX],AX		;{JUMP TO WRM ON <CTRL-BREAK>}
-	INC	BX
-	INC	BX
-	MOV	[BX],CS
-	POP     DS
+        PUSH    DS
+        MOV     AX,0
+        MOV     DS,AX           ;{TO VECTOR AREA}
+        MOV     BX,08CH
+        LEA     AX,[WRM]
+        MOV     [BX],AX         ;{JUMP TO WRM ON <CTRL-BREAK>}
+        INC     BX
+        INC     BX
+        MOV     [BX],CS
+        POP     DS
 });_END___1__({ _HOSTED_MSDOS_1_})
-	CLD			;{ DIR = INC}
-	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
-	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
-	_NEXT                            
+        CLD                     ;{ DIR = INC}
+        MOV     STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
+        MOV     BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
+        _NEXT
 ;
-CLD1	DC	COLD
+CLD1    DC      COLD
 ;
 HEADER({COLD},{COLD},{DOCOL})
-	DC	MTBUF
-	DC	FIRST
-	DC	USE,STORE
-	DC	FIRST
-	DC	PREV,STORE
-	DC	LIT, USINI   
-	DC	LIT,USINI+CELLS(1)
-	DC	FETCH
-	DC	LIT,US
-	DC	LCMOVE
-	DC	LIT,USINI + CELLS(0)    ; I.e. lfa of TASK
-	DC	FETCH
-	DC	LIT,_VOC_LATEST(FORTH)
-	DC	STORE
+        DC      MTBUF
+        DC      FIRST
+        DC      USE,STORE
+        DC      FIRST
+        DC      PREV,STORE
+        DC      LIT, USINI
+        DC      LIT,USINI+CELLS(1)
+        DC      FETCH
+        DC      LIT,US
+        DC      LCMOVE
+        DC      LIT,USINI + CELLS(0)    ; I.e. lfa of TASK
+        DC      FETCH
+        DC      LIT,_VOC_LATEST(FORTH)
+        DC      STORE
 ;____1_____ _MODERN_1_({
-	DC      BLINI           ;{ Can abort!}
+        DC      BLINI           ;{ Can abort!}
 });_END___1__({_MODERN_1_})
 ;____1_____ _LINUX_C_1_({
-	DC      BLINI           
+        DC      BLINI
 });_END___1__({_LINUX_C_1_})
 ;____1_____ _LINUX_N_1_({
-	DC      BLINI           
+        DC      ZERO, LIT, TCGETS, TERMIO
+        DC      LIT, ioctl, LINOS, QLERR
+        DC      BLINI
 });_END___1__({_LINUX_N_1_})
-	DC	ABORT
-	PAGE
+        DC      ABORT
+;
+        PAGE
 CODE_HEADER({S->D},{STOD})
-	POP	DX	;{S1}
-	SUB	AX,AX
-	OR	DX,DX
-	JNS	STOD1	;{POS}
-	DEC	AX	;{NEG}
-STOD1:	JMP	DPUSH
+        POP     DX      ;{S1}
+        SUB     AX,AX
+        OR      DX,DX
+        JNS     STOD1   ;{POS}
+        DEC     AX      ;{NEG}
+STOD1:  JMP     DPUSH
 ;
 HEADER({+-},{PM},{DOCOL})
-	DC	ZLESS
-	_0BRANCH(PM1)   ;{IF}
-	DC	MINUS	;{ENDIF}
-PM1	DC	SEMIS
+        DC      ZLESS
+        _0BRANCH(PM1)   ;{IF}
+        DC      MINUS   ;{ENDIF}
+PM1     DC      SEMIS
 ;
 HEADER({D+-},{DPM},{DOCOL})
-	DC	ZLESS
-	_0BRANCH(DPM1)  ;{IF}
-	DC	DMINU	;{ENDIF}
-DPM1	DC	SEMIS
+        DC      ZLESS
+        _0BRANCH(DPM1)  ;{IF}
+        DC      DMINU   ;{ENDIF}
+DPM1    DC      SEMIS
 ;
 HEADER({ABS},{LABS},{DOCOL})
-	DC	DUPE
-	DC	PM
-	DC	SEMIS
+        DC      DUPE
+        DC      PM
+        DC      SEMIS
 ;
 HEADER({DABS},{DABS},{DOCOL})
-	DC	DUPE
-	DC	DPM
-	DC	SEMIS
+        DC      DUPE
+        DC      DPM
+        DC      SEMIS
 ;
 HEADER({MIN},{MIN},{DOCOL})
-	DC      TDUP
-	DC	GREAT
-	_0BRANCH(MIN1)  ;{IF}
-	DC	SWAP	;{ENDIF}
-MIN1	DC	DROP
-	DC	SEMIS
+        DC      TDUP
+        DC      GREAT
+        _0BRANCH(MIN1)  ;{IF}
+        DC      SWAP    ;{ENDIF}
+MIN1    DC      DROP
+        DC      SEMIS
 ;
 HEADER({MAX},{MAX},{DOCOL})
-	DC      TDUP
-	DC	LESS
-	_0BRANCH(MAX1)  ;{IF}
-	DC	SWAP	;{ENDIF}
-MAX1	DC	DROP
-	DC	SEMIS
-	PAGE
+        DC      TDUP
+        DC      LESS
+        _0BRANCH(MAX1)  ;{IF}
+        DC      SWAP    ;{ENDIF}
+MAX1    DC      DROP
+        DC      SEMIS
+        PAGE
 HEADER({M*},{MSTAR},{DOCOL})
-	DC      TDUP
-	DC	LXOR       
-	DC	TOR
-	DC	LABS
-	DC	SWAP
-	DC	LABS
-	DC	USTAR
-	DC	FROMR
-	DC	DPM
-	DC	SEMIS
+        DC      TDUP
+        DC      LXOR
+        DC      TOR
+        DC      LABS
+        DC      SWAP
+        DC      LABS
+        DC      USTAR
+        DC      FROMR
+        DC      DPM
+        DC      SEMIS
 ;
 HEADER({M/},{MSLAS},{DOCOL})
-	DC	OVER
-	DC	TOR
-	DC	TOR
-	DC	DABS
-	DC	RR
-	DC	LABS
-	DC	USLAS
-	DC	FROMR
-	DC	RR
-	DC	LXOR
-	DC	PM
-	DC	SWAP
-	DC	FROMR
-	DC	PM
-	DC	SWAP
-	DC	SEMIS
+        DC      OVER
+        DC      TOR
+        DC      TOR
+        DC      DABS
+        DC      RR
+        DC      LABS
+        DC      USLAS
+        DC      FROMR
+        DC      RR
+        DC      LXOR
+        DC      PM
+        DC      SWAP
+        DC      FROMR
+        DC      PM
+        DC      SWAP
+        DC      SEMIS
 ;
 HEADER({*},{STAR},{DOCOL})
-	DC	MSTAR
-	DC	DROP
-	DC	SEMIS
+        DC      MSTAR
+        DC      DROP
+        DC      SEMIS
 ;
 HEADER({/MOD},{SLMOD},{DOCOL})
-	DC	TOR
-	DC	STOD
-	DC	FROMR
-	DC	MSLAS
-	DC	SEMIS
+        DC      TOR
+        DC      STOD
+        DC      FROMR
+        DC      MSLAS
+        DC      SEMIS
 ;
 HEADER({/},{SLASH},{DOCOL})
-	DC	SLMOD
-	DC	SWAP
-	DC	DROP
-	DC	SEMIS
+        DC      SLMOD
+        DC      SWAP
+        DC      DROP
+        DC      SEMIS
 ;
 HEADER({MOD},{MODD},{DOCOL})
-	DC	SLMOD
-	DC	DROP
-	DC	SEMIS
+        DC      SLMOD
+        DC      DROP
+        DC      SEMIS
 ;
 HEADER({*/MOD},{SSMOD},{DOCOL})
-	DC	TOR
-	DC	MSTAR
-	DC	FROMR
-	DC	MSLAS
-	DC	SEMIS
+        DC      TOR
+        DC      MSTAR
+        DC      FROMR
+        DC      MSLAS
+        DC      SEMIS
 ;
 HEADER({*/},{SSLA},{DOCOL})
-	DC	SSMOD
-	DC	SWAP
-	DC	DROP
-	DC	SEMIS
+        DC      SSMOD
+        DC      SWAP
+        DC      DROP
+        DC      SEMIS
 ;
 HEADER({M/MOD},{MSMOD},{DOCOL})
-	DC	TOR
-	DC	ZERO
-	DC	RR
-	DC	USLAS
-	DC	FROMR
-	DC	SWAP
-	DC	TOR
-	DC	USLAS
-	DC	FROMR
-	DC	SEMIS
-	PAGE
+        DC      TOR
+        DC      ZERO
+        DC      RR
+        DC      USLAS
+        DC      FROMR
+        DC      SWAP
+        DC      TOR
+        DC      USLAS
+        DC      FROMR
+        DC      SEMIS
+        PAGE
 HEADER({(LINE)},{PLINE},{DOCOL})
-	DC	TOR
-	DC	LIT,64
-	DC	BBUF
-	DC	SSMOD
-	DC	FROMR
-	DC	BSCR
-	DC	STAR
-	DC	PLUS
-	DC	BLOCK
-	DC	PLUS
-	DC	LIT,64
-	DC	SEMIS
+        DC      TOR
+        DC      LIT,64
+        DC      BBUF
+        DC      SSMOD
+        DC      FROMR
+        DC      BSCR
+        DC      STAR
+        DC      PLUS
+        DC      BLOCK
+        DC      PLUS
+        DC      LIT,64
+        DC      SEMIS
 ;
 HEADER({.LINE},{DLINE},{DOCOL})
-	DC	PLINE
-	DC	DTRAI
-	DC	LTYPE
-	DC	SEMIS
+        DC      PLINE
+        DC      DTRAI
+        DC      LTYPE
+        DC      SEMIS
 ;
 HEADER({MESSAGE},{MESS},{DOCOL})
-	DC	WARN
-	DC	FETCH
-	_0BRANCH(MESS1) ;{IF}
-	DC	DDUP
-	_0BRANCH(MESS2) ;{IF}
-	DC	LIT,4
-	DC	DLINE
-	DC	SPACE	;{ENDIF}
-MESS2	_BRANCH(MESS3)  ;{ELSE}
-MESS1	DC	PDOTQ
-	_STRING({MSG # })
-	DC	DOT	;{ENDIF}
-MESS3	DC	SEMIS
-	PAGE
-	;{ At line     LINE ~3000}
+        DC      WARN
+        DC      FETCH
+        _0BRANCH(MESS1) ;{IF}
+        DC      DDUP
+        _0BRANCH(MESS2) ;{IF}
+        DC      LIT,4
+        DC      DLINE
+        DC      SPACE   ;{ENDIF}
+MESS2   _BRANCH(MESS3)  ;{ELSE}
+MESS1   DC      PDOTQ
+        _STRING({MSG # })
+        DC      DOT     ;{ENDIF}
+MESS3   DC      SEMIS
+        PAGE
+        ;{ At line     LINE ~3000}
 ;{--------------------------------------------}
 ;
-;{	8086/88 PORT FETCH AND STORE}
+;{      8086/88 PORT FETCH AND STORE}
 ;
 ;{--------------------------------------------}
 ;
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
-	POP	DX	;{ PORT ADDR}
-	XOR     AX,AX
-	IN	AL,{DX}   ;{ BYTE INPUT}
-	JMP	APUSH
+        POP     DX      ;{ PORT ADDR}
+        XOR     AX,AX
+        IN      AL,{DX}   ;{ BYTE INPUT}
+        JMP     APUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
 ;{ STORE CHARACTER (BYTE) AT PORT}
-	POP	DX	;{PORT ADDR}
-	POP	AX	;{DATA}
-	OUT	{DX},AL   ;{ BYTE OUTPUT}
-	_NEXT                            
+        POP     DX      ;{PORT ADDR}
+        POP     AX      ;{DATA}
+        OUT     {DX},AL   ;{ BYTE OUTPUT}
+        _NEXT
 ;
 CODE_HEADER({P@},{PFET})
 ;{ FETCH WORD FROM PORT}
-	POP	DX	;{PORT ADDR}
-	IN	AX,{DX}   ;{WORD INPUT}
-	JMP	APUSH
+        POP     DX      ;{PORT ADDR}
+        IN      AX,{DX}   ;{WORD INPUT}
+        JMP     APUSH
 ;
 CODE_HEADER({P!},{PSTO})
 ;{ STORE WORD AT PORT}
-	POP	DX	;{PORT ADDR}
-	POP	AX	;{DATA}
-	OUT	{DX},AX   ;{WORD OUTPUT}
-	_NEXT                            
+        POP     DX      ;{PORT ADDR}
+        POP     AX      ;{DATA}
+        OUT     {DX},AX   ;{WORD OUTPUT}
+        _NEXT
 ;
 HEADER({USE},{USE},{DOVAR})
-	;{ADDR OF NEXT BUFR TO USE}
-	DC BUF1
+        ;{ADDR OF NEXT BUFR TO USE}
+        DC BUF1
 ;
 HEADER({PREV},{PREV},{DOVAR})
 ;{       ;ADDR OF PREV USED BUFR}
-	DC	BUF1
-	PAGE
+        DC      BUF1
+        PAGE
 HEADER({#BUFF},{NOBUF},{DOCON})
-	;{NO. OF BUFFERS}
-	DC      NBUF
+        ;{NO. OF BUFFERS}
+        DC      NBUF
 ;
 HEADER({+BUF},{PBUF},{DOCOL})
-	DC	LIT,(KBBUF+2*CW)
-	DC	PLUS,DUPE
-	DC	LIMIT,EQUAL
-	_0BRANCH(PBUF1) 
-	DC	DROP,FIRST
-PBUF1	DC	DUPE,PREV
-	DC	FETCH,LSUB
-	DC	SEMIS
+        DC      LIT,(KBBUF+2*CW)
+        DC      PLUS,DUPE
+        DC      LIMIT,EQUAL
+        _0BRANCH(PBUF1)
+        DC      DROP,FIRST
+PBUF1   DC      DUPE,PREV
+        DC      FETCH,LSUB
+        DC      SEMIS
 ;
 HEADER({UPDATE},{UPDAT},{DOCOL})
-	DC      PREV
-	DC	FETCH,FETCH
-	DC	LIT,BMASK
-	DC	LOR
-	DC	PREV,FETCH
-	DC	STORE,SEMIS
+        DC      PREV
+        DC      FETCH,FETCH
+        DC      LIT,BMASK
+        DC      LOR
+        DC      PREV,FETCH
+        DC      STORE,SEMIS
 ;
 HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
-	DC      FIRST
-	DC	LIMIT,OVER
-	DC	LSUB,ERASEE
-	DC	SEMIS
-	PAGE
+        DC      FIRST
+        DC      LIMIT,OVER
+        DC      LSUB,ERASEE
+        DC      SEMIS
+        PAGE
 ;
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
-	DC      USE
-	DC	FETCH,DUPE
-	DC	TOR
-BUFF1	DC	PBUF
-	_0BRANCH(BUFF1) 
-	DC	USE,STORE
-	DC	RR,FETCH
-	DC	ZLESS
-	_0BRANCH(BUFF2) 
-	DC	RR,CELLP
-	DC	RR,FETCH
-	DC	LIT,7FFFH
-	DC	LAND,ZERO
-	DC	RSLW
-BUFF2	DC	RR,STORE
-	DC	RR,PREV
-	DC	STORE,FROMR
-	DC	CELLP,SEMIS
-	PAGE
+        DC      USE
+        DC      FETCH,DUPE
+        DC      TOR
+BUFF1   DC      PBUF
+        _0BRANCH(BUFF1)
+        DC      USE,STORE
+        DC      RR,FETCH
+        DC      ZLESS
+        _0BRANCH(BUFF2)
+        DC      RR,CELLP
+        DC      RR,FETCH
+        DC      LIT,7FFFH
+        DC      LAND,ZERO
+        DC      RSLW
+BUFF2   DC      RR,STORE
+        DC      RR,PREV
+        DC      STORE,FROMR
+        DC      CELLP,SEMIS
+        PAGE
 HEADER({BLOCK},{BLOCK},{DOCOL})
-	DC      LIT, PMASK, LAND
-	DC      OFSET
-	DC	FETCH,PLUS
-	DC	TOR,PREV
-	DC	FETCH,DUPE
-	DC	FETCH,RR
-	DC	LSUB
-	DC	DUPE,PLUS
-	_0BRANCH(BLOC1) 
-BLOC2	DC	PBUF,ZEQU
-	_0BRANCH(BLOC3) 
-	DC	DROP,RR
-	DC	BUFFE,DUPE
-	DC	RR,ONE
-	DC	RSLW
-	DC	LCELL,LSUB
-BLOC3	DC	DUPE,FETCH
-	DC	RR,LSUB
-	DC	DUPE,PLUS
-	DC	ZEQU
-	_0BRANCH(BLOC2) 
-	DC	DUPE,PREV
-	DC	STORE
-BLOC1	DC	FROMR,DROP
-	DC	CELLP,SEMIS
-	PAGE
+        DC      LIT, PMASK, LAND
+        DC      OFSET
+        DC      FETCH,PLUS
+        DC      TOR,PREV
+        DC      FETCH,DUPE
+        DC      FETCH,RR
+        DC      LSUB
+        DC      DUPE,PLUS
+        _0BRANCH(BLOC1)
+BLOC2   DC      PBUF,ZEQU
+        _0BRANCH(BLOC3)
+        DC      DROP,RR
+        DC      BUFFE,DUPE
+        DC      RR,ONE
+        DC      RSLW
+        DC      LCELL,LSUB
+BLOC3   DC      DUPE,FETCH
+        DC      RR,LSUB
+        DC      DUPE,PLUS
+        DC      ZEQU
+        _0BRANCH(BLOC2)
+        DC      DUPE,PREV
+        DC      STORE
+BLOC1   DC      FROMR,DROP
+        DC      CELLP,SEMIS
+        PAGE
 HEADER({FLUSH},{FLUSH},{DOCOL})
-	DC	NOBUF,ONEP
-	DC	ZERO,XDO
-FLUS1	DC	ZERO,BUFFE
-	DC	DROP
-	_LOOP(FLUS1) 
-	DC	SEMIS
+        DC      NOBUF,ONEP
+        DC      ZERO,XDO
+FLUS1   DC      ZERO,BUFFE
+        DC      DROP
+        _LOOP(FLUS1)
+        DC      SEMIS
 ;
 HEADER({LOAD},{LOAD},{DOCOL})
-	DC      BLK
-	DC	FETCH,TOR
-	DC	LIN,FETCH
-	DC	TOR,ZERO
-	DC	LIN,STORE
-	DC	BSCR,STAR
-	DC	BLK,STORE	;{BLK <- SCR * B/SCR}
-	DC	INTER	;{INTERPRET FROM OTHER}
-SCREEN	DC	FROMR,LIN
-	DC	STORE
-	DC	FROMR,BLK
-	DC	STORE
-	DC	SEMIS
-	PAGE
+        DC      BLK
+        DC      FETCH,TOR
+        DC      LIN,FETCH
+        DC      TOR,ZERO
+        DC      LIN,STORE
+        DC      BSCR,STAR
+        DC      BLK,STORE       ;{BLK <- SCR * B/SCR}
+        DC      INTER   ;{INTERPRET FROM OTHER}
+SCREEN  DC      FROMR,LIN
+        DC      STORE
+        DC      FROMR,BLK
+        DC      STORE
+        DC      SEMIS
+        PAGE
 HEADER({-->},{ARROW},{DOCOL},1)
-	DC	QLOAD
-	DC	ZERO
-	DC	LIN
-	DC	STORE
-	DC	BSCR
-	DC	BLK
-	DC	FETCH
-	DC	OVER
-	DC	MODD
-	DC	LSUB
-	DC	BLK
-	DC	PSTOR
-	DC	SEMIS
-	PAGE
+        DC      QLOAD
+        DC      ZERO
+        DC      LIN
+        DC      STORE
+        DC      BSCR
+        DC      BLK
+        DC      FETCH
+        DC      OVER
+        DC      MODD
+        DC      LSUB
+        DC      BLK
+        DC      PSTOR
+        DC      SEMIS
+        PAGE
 ;
 ;{ Generic call on BIOS. A boon for experimenters.}
 ;{ Because there is no such thing as a variable interrupt:}
 ;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
 ;{ BEWARE OF THE SOFTWARE POLICE!}
 CODE_HEADER({BIOS},{BIOS})
-	POP     AX      ;{ Function code}
-	;{ Once we are more acknowledgable, put segment overwrite here.}
-	MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
-	POP     DX        
-	POP     CX      
-	POP     BX      
-	POP     AX      
-	PUSH     SI      ;{ Save Forth registers. NEEDED? }
-	PUSH     BP      
-	XCHG    SI,AX   ;{ Save AX in (already free) SI}
-	JMPHERE_FROM_PROT
-	XCHG    SI,AX   
+        POP     AX      ;{ Function code}
+        ;{ Once we are more acknowledgable, put segment overwrite here.}
+        MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
+        POP     DX
+        POP     CX
+        POP     BX
+        POP     AX
+        PUSH     SI      ;{ Save Forth registers. NEEDED? }
+        PUSH     BP
+        XCHG    SI,AX   ;{ Save AX in (already free) SI}
+        JMPHERE_FROM_PROT
+        XCHG    SI,AX
 RQBIOS: INT(0)          ;{ Request number to be overwritten.}
-	PUSHF      ;{ Save status into DI }
-	POP     DI      
-	XCHG    SI,AX   ;{ Save AX in (still free) SI     }
-	JMPHERE_FROM_REAL
-	XCHG    SI,AX   
-	POP	BP	;{ Restore Forth registers. NEEDED? }
-	POP	SI	;{INTERPRETER PNTR}
-	PUSH     AX      
-	PUSH     BX      
-	PUSH     CX      
-	PUSH     DX      
-	PUSH     DI     ;{ i.e. flags }
-	_NEXT                            
+        PUSHF      ;{ Save status into DI }
+        POP     DI
+        XCHG    SI,AX   ;{ Save AX in (still free) SI     }
+        JMPHERE_FROM_REAL
+        XCHG    SI,AX
+        POP     BP      ;{ Restore Forth registers. NEEDED? }
+        POP     SI      ;{INTERPRETER PNTR}
+        PUSH     AX
+        PUSH     BX
+        PUSH     CX
+        PUSH     DX
+        PUSH     DI     ;{ i.e. flags }
+        _NEXT
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
 ;{ Generic call on MSDOS/MS WIndows2000}
 ;{ This works in a standalone Forth (if started from MSDOS).}
 CODE_HEADER({BDOS},{BDOS})
-	POP     DX        
-	POP     CX      
-	POP     BX      
-	POP     AX      
-	PUSH     SI      ;{ Save Forth registers. NEEDED? }
-	PUSH     BP      
-	XCHG    SI,AX   ;{ Save AX in (already free) SI}
-	JMPHERE_FROM_PROT
-	XCHG    SI,AX   
-	INT     21H          
-	PUSHF      ;{ Save status into DI }
-	POP     DI      
-	XCHG    SI,AX   ;{ Save AX in (still free) SI     }
-	JMPHERE_FROM_REAL
-	XCHG    SI,AX   
-	POP	BP	;{ Restore Forth registers. NEEDED? }
-	POP	SI	;{INTERPRETER PNTR}
-	PUSH     AX      
-	PUSH     BX      
-	PUSH     CX      
-	PUSH     DX      
-	PUSH     DI     ;{ i.e. flags }
-	_NEXT                            
+        POP     DX
+        POP     CX
+        POP     BX
+        POP     AX
+        PUSH     SI      ;{ Save Forth registers. NEEDED? }
+        PUSH     BP
+        XCHG    SI,AX   ;{ Save AX in (already free) SI}
+        JMPHERE_FROM_PROT
+        XCHG    SI,AX
+        INT     21H
+        PUSHF      ;{ Save status into DI }
+        POP     DI
+        XCHG    SI,AX   ;{ Save AX in (still free) SI     }
+        JMPHERE_FROM_REAL
+        XCHG    SI,AX
+        POP     BP      ;{ Restore Forth registers. NEEDED? }
+        POP     SI      ;{INTERPRETER PNTR}
+        PUSH     AX
+        PUSH     BX
+        PUSH     CX
+        PUSH     DX
+        PUSH     DI     ;{ i.e. flags }
+        _NEXT
 
 ;{ Generic call on LINUX }
 CODE_HEADER({LINOS},{LINOS})
-	POP     AX        ; Function number
-	POP     DX        ; Third parameter, if any
-	POP     CX        ; Second parameter, if any
-	POP     BX        ; First parameter.
-	INT     80H          
-	JMP     APUSH     ; Positive means okay. Negative means -errno.                    
+        POP     AX        ; Function number
+        POP     DX        ; Third parameter, if any
+        POP     CX        ; Second parameter, if any
+        POP     BX        ; First parameter.
+        INT     80H
+        JMP     APUSH     ; Positive means okay. Negative means -errno.
 
-	     ;{ SVGA-modus 43*132 char's}
+             ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
-	     DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
-	     DC      LIT, 0010H, BIOS
-	     DC      DROP, DROP, DROP, DROP, DROP, SEMIS
-	     ;{                          ^ MUST BE 4FH}
-	PAGE    
+             DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
+             DC      LIT, 0010H, BIOS
+             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+             ;{                          ^ MUST BE 4FH}
+        PAGE
 ;{------------------------------------}
 ;{       SYSTEM DEPENDANT CHAR I/O}
 ;{------------------------------------}
@@ -2659,50 +2679,50 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;{ All I/O goes through the modern (unix-borrowed)}
 ;{ file I/O.    }
 HEADER({TYPE},{LTYPE},{DOCOL})
-	DC      DUPE, LOUT, PSTOR
-	DC      TOR, TOR
-	DC      LIT,04000H ;{ Write file or device }
-	DC      ONE     ;{ Handle}
-	DC      FROMR, FROMR, SWAP
-	DC      BDOS, DROP ;{ ignore error }
-	DC      DROP, DROP, DROP, DROP
-	DC      SEMIS
+        DC      DUPE, LOUT, PSTOR
+        DC      TOR, TOR
+        DC      LIT,04000H ;{ Write file or device }
+        DC      ONE     ;{ Handle}
+        DC      FROMR, FROMR, SWAP
+        DC      BDOS, DROP ;{ ignore error }
+        DC      DROP, DROP, DROP, DROP
+        DC      SEMIS
 ;
-HEADER({EMIT},{EMIT},{DOCOL})      
-	DC      DUPE,LIT,LF,EQUAL
-	_0BRANCH(EMIT1)
-	DC      LIT,ACR,EMIT
-	DC      ZERO,LOUT,STORE
-EMIT1:  
-	DC	SPFET, ONE, LTYPE
-	DC      DROP
-	DC	SEMIS
+HEADER({EMIT},{EMIT},{DOCOL})
+        DC      DUPE,LIT,LF,EQUAL
+        _0BRANCH(EMIT1)
+        DC      LIT,ACR,EMIT
+        DC      ZERO,LOUT,STORE
+EMIT1:
+        DC      SPFET, ONE, LTYPE
+        DC      DROP
+        DC      SEMIS
 ;
  HEADER({EXPECT},{EXPEC},{DOCOL})
-	DC      OVER 
-	DC      TOR, TOR
-	DC      LIT,03F00H ;{ Write file or device }
-	DC      ZERO     ;{ Handle}
-	DC      FROMR, FROMR
-	DC      BDOS, DROP ;{ ignore error }
-	DC      DROP, DROP, DROP ;{ Leave count}
-	DC      TWO, LSUB ;{ Rid of 0D0A}
-	DC      PLUS, ZERO, SWAP, CSTOR
-	DC      SEMIS
+        DC      OVER
+        DC      TOR, TOR
+        DC      LIT,03F00H ;{ Write file or device }
+        DC      ZERO     ;{ Handle}
+        DC      FROMR, FROMR
+        DC      BDOS, DROP ;{ ignore error }
+        DC      DROP, DROP, DROP ;{ Leave count}
+        DC      TWO, LSUB ;{ Rid of 0D0A}
+        DC      PLUS, ZERO, SWAP, CSTOR
+        DC      SEMIS
 ;
 CODE_HEADER({KEY},{KEY})
-	DC         LIT, 1000H, ZERO, ZERO, ZERO
-	DC         LIT, 0016H, BIOS
-	DC         DROP,DROP,DROP,DROP
-	DC         LIT, 00FFH, LAND, SEMIS
+        DC         LIT, 1000H, ZERO, ZERO, ZERO
+        DC         LIT, 0016H, BIOS
+        DC         DROP,DROP,DROP,DROP
+        DC         LIT, 00FFH, LAND, SEMIS
 ;
 HEADER({?TERMINAL},{QTERM},DOCOL)
-	DC      LIT,0B00H 
-	DC      ZERO,ZERO,ZERO
-	DC      BDOS, DROP ;{ ignore error }
-	DC      DROP, DROP, DROP
-	DC      LIT, 01H, LAND
-	DC      SEMIS
+        DC      LIT,0B00H
+        DC      ZERO,ZERO,ZERO
+        DC      BDOS, DROP ;{ ignore error }
+        DC      DROP, DROP, DROP
+        DC      LIT, 01H, LAND
+        DC      SEMIS
 ;
 
 });_END___1__({_MODERN_1_})
@@ -2711,69 +2731,107 @@ HEADER({?TERMINAL},{QTERM},DOCOL)
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
 CODE_HEADER({TYPE},{LTYPE})
-	CALL	c_type                  
-	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	_NEXT
+        CALL    c_type
+        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        _NEXT
 ;
-HEADER({EMIT},{EMIT},{DOCOL})      
-	DC      DUPE,LIT,LF,EQUAL
-	_0BRANCH(EMIT1)
-	DC      LIT,ACR,EMIT
-	DC      ZERO,LOUT,STORE
-EMIT1:  
-	DC	SPFET, ONE, LTYPE
-	DC      DROP
-	DC	SEMIS
+HEADER({EMIT},{EMIT},{DOCOL})
+        DC      DUPE,LIT,LF,EQUAL
+        _0BRANCH(EMIT1)
+        DC      LIT,ACR,EMIT
+        DC      ZERO,LOUT,STORE
+EMIT1:
+        DC      SPFET, ONE, LTYPE
+        DC      DROP
+        DC      SEMIS
 ;
 CODE_HEADER({EXPECT},{EXPEC})
-	CALL	c_expec               
-	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	_NEXT
+        CALL    c_expec
+        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        _NEXT
 ;
 CODE_HEADER({KEY},{KEY})
-	CALL	c_key
-	PUSH	EAX
-	_NEXT
+        CALL    c_key
+        PUSH    EAX
+        _NEXT
 ;
 CODE_HEADER({?TERMINAL},{QTERM})
-	CALL	c_qterm
-	PUSH	EAX
-	_NEXT
+        CALL    c_qterm
+        PUSH    EAX
+        _NEXT
 ;
 });_END___1__({_LINUX_C_1_})
 ;____1_____ _LINUX_N_1_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
-CODE_HEADER({TYPE},{LTYPE})
-	CALL	c_type                  
-	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	_NEXT
+HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
+        DC      LIT, 64         ; SCREEN 4..7.
+        DC      OVER, LSUB, QERR  ; Make errno's count from the top.
+        DC      SEMIS
 ;
-HEADER({EMIT},{EMIT},{DOCOL})      
-	DC      DUPE,LIT,LF,EQUAL
-	_0BRANCH(EMIT1)
-	DC      LIT,ACR,EMIT
-	DC      ZERO,LOUT,STORE
-EMIT1:  
-	DC	SPFET, ONE, LTYPE
-	DC      DROP
-	DC	SEMIS
+HEADER({TERMIO},{TERMIO},{DOVAR})
+        RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
-CODE_HEADER({EXPECT},{EXPEC})
-	CALL	c_expec               
-	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	_NEXT
+;          ( len b -- )
+;  Set the terminal length to len and toggle the c_lflag field with b
+HEADER({SET-TERM},{STTERM},{DOCOL})
+        DC      LIT, _PARAMETER_FIELD(TERMIO)+CELLS(3)
+        DC      SWAP, TOGGL
+        DC      LIT, _PARAMETER_FIELD(TERMIO)+CELLS(4)+7
+        DC      CSTOR
+        DC      ZERO, LIT, TCSETS, TERMIO
+        DC      LIT, ioctl, LINOS, QLERR
+        DC      SEMIS
 ;
-CODE_HEADER({KEY},{KEY})
-	CALL	c_key
-	PUSH	EAX
-	_NEXT
+HEADER({TYPE},{LTYPE},{DOCOL})
+        DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
+        DC      LIT, write
+        DC      LINOS
+        DC      DROP
+        DC      SEMIS
 ;
-CODE_HEADER({?TERMINAL},{QTERM})
-	CALL	c_qterm
-	PUSH	EAX
-	_NEXT
+HEADER({EMIT},{EMIT},{DOCOL})
+        DC      DUPE,LIT,LF,EQUAL
+        _0BRANCH(EMIT1)
+        DC      LIT,ACR,EMIT
+        DC      ZERO,LOUT,STORE
+EMIT1:
+        DC      SPFET, ONE, LTYPE
+        DC      DROP
+        DC      SEMIS
+;
+HEADER({EXPECT},{EXPEC},{DOCOL})
+        DC      ZERO    ; filedescriptor 0 for standard input.
+        DC      ROT
+        DC      DUPE, TOR   ; Remember start of buffer
+        DC      ROT
+        DC      LIT, read
+        DC      LINOS
+        DC      ONE, LSUB, ZERO, MAX ; Position of CR (or 0 for failure)
+        DC      FROMR, PLUS          ; Address
+        DC      ZERO,SWAP,CSTOR      ; Erase it
+        DC      SEMIS
+;
+HEADER({KEY},{KEY},{DOCOL})
+        DC      ONE, LIT, RAWIO, STTERM  ; Do not wait for CR
+        DC      ZERO, SPFET     ; Expect single key on stack
+        DC      ZERO            ; Standard input
+        DC      SWAP, ONE       ; Buffer and length
+        DC      LIT, read, LINOS, DROP ; Retain char, drop count/error
+        DC      ONE, LIT, RAWIO, STTERM       ; Toggle back
+        DC      SEMIS
+;
+HEADER({?TERMINAL},{QTERM},{DOCOL})
+        ; Return immediately even for zero characters available
+        DC      ZERO, LIT, RAWIO, STTERM
+        DC      ZERO, SPFET     ; Expect single key on stack
+        DC      ZERO            ; Standard input
+        DC      SWAP, ONE       ; Buffer and length
+        DC      LIT, read, LINOS
+        DC      SWAP, DROP      ; Retain only count
+        DC      ONE, LIT, RAWIO, STTERM       ; Toggle back
+        DC      SEMIS
 ;
 });_END___1__({_LINUX_N_1_})
 ;____1_____ _USEDOS_1_({
@@ -2781,342 +2839,342 @@ CODE_HEADER({?TERMINAL},{QTERM})
 ;{ CI CHO CSTAT. They could be collapsed into the }
 ;{ code definitions, but this way they are available}
 ;{ to be called from code.}
-HEADER({EXPECT},{EXPEC},{DOCOL})        
-	DC	OVER                            
-	DC	PLUS                            
-	DC	OVER                            
-	DC	XDO	;{ DO                    }
-EXPE1	DC	KEY                             
-	DC	DUPE                            
-	DC	RUBOUT 
-	DC      FETCH
-	DC	EQUAL                           
-	_0BRANCH(EXPE2) ;{ IF                    }
-	DC	DROP                            
-	DC	DUPE                            
-	DC	IDO                             
-	DC	EQUAL                           
-	DC	DUPE                            
-	DC	FROMR                           
-	DC	TWO     ;{ Remove last 2 chars }
-	DC	LSUB                            
-	DC	PLUS                            
-	DC	TOR                             
-	_0BRANCH(EXPE6) ;{ IF                    }
-	DC	LIT                             
-	DC	BELL                            
-	_BRANCH(EXPE7)  ;{ ELSE                  }
-EXPE6	DC	LIT                             
-	DC	BSOUT	;{ ENDIF                 }
-EXPE7	_BRANCH(EXPE3)  ;{ ELSE                  }
-EXPE2	DC	DUPE                            
-	DC	LIT,0DH
-	DC	EQUAL
-	_0BRANCH(EXPE4) ;{ IF}
-	DC	LLEAV
-	DC	DROP
-	DC	BLS
-	DC	ZERO
-	_BRANCH(EXPE5)  ;{ ELSE}
-EXPE4	DC	DUPE	;{ ENDIF}
-EXPE5	DC	IDO
-	DC	CSTOR
-	DC	ZERO
-	DC	IDO
-	DC	ONEP
-	DC	STORE	;{ ENDIF}
-EXPE3	DC	EMIT
-	_LOOP(EXPE1) 	;{ LOOP}
-	DC	DROP
-	DC	SEMIS
+HEADER({EXPECT},{EXPEC},{DOCOL})
+        DC      OVER
+        DC      PLUS
+        DC      OVER
+        DC      XDO     ;{ DO                    }
+EXPE1   DC      KEY
+        DC      DUPE
+        DC      RUBOUT
+        DC      FETCH
+        DC      EQUAL
+        _0BRANCH(EXPE2) ;{ IF                    }
+        DC      DROP
+        DC      DUPE
+        DC      IDO
+        DC      EQUAL
+        DC      DUPE
+        DC      FROMR
+        DC      TWO     ;{ Remove last 2 chars }
+        DC      LSUB
+        DC      PLUS
+        DC      TOR
+        _0BRANCH(EXPE6) ;{ IF                    }
+        DC      LIT
+        DC      BELL
+        _BRANCH(EXPE7)  ;{ ELSE                  }
+EXPE6   DC      LIT
+        DC      BSOUT   ;{ ENDIF                 }
+EXPE7   _BRANCH(EXPE3)  ;{ ELSE                  }
+EXPE2   DC      DUPE
+        DC      LIT,0DH
+        DC      EQUAL
+        _0BRANCH(EXPE4) ;{ IF}
+        DC      LLEAV
+        DC      DROP
+        DC      BLS
+        DC      ZERO
+        _BRANCH(EXPE5)  ;{ ELSE}
+EXPE4   DC      DUPE    ;{ ENDIF}
+EXPE5   DC      IDO
+        DC      CSTOR
+        DC      ZERO
+        DC      IDO
+        DC      ONEP
+        DC      STORE   ;{ ENDIF}
+EXPE3   DC      EMIT
+        _LOOP(EXPE1)    ;{ LOOP}
+        DC      DROP
+        DC      SEMIS
 ;
 CODE_HEADER({KEY},{KEY})
-	CALL	CI	;{CONSOLE INPUT}
-	MOV     AH,0    ;{MAKE 16 BITS}
-	JMP	APUSH	;{SAVE KEY VALUE}
-CI	PROC	NEAR
-	MOV	AH,0	;{ READ CHAR FUNCTION}
-	INT	16H
-	RET
+        CALL    CI      ;{CONSOLE INPUT}
+        MOV     AH,0    ;{MAKE 16 BITS}
+        JMP     APUSH   ;{SAVE KEY VALUE}
+CI      PROC    NEAR
+        MOV     AH,0    ;{ READ CHAR FUNCTION}
+        INT     16H
+        RET
 _ENDP CI      ENDP
 ;
 HEADER({TYPE},{LTYPE},{DOCOL})
-	DC	DDUP
-	_0BRANCH(TYPE1) ;{ IF}
-	DC	OVER
-	DC	PLUS
-	DC	SWAP
-	DC	XDO	;{ DO}
-TYPE2	DC	IDO
-	DC	CFET
-	DC	LIT,7FH
-	DC	LAND    ;{STRIP 80H FROM LAST CHAR}
-	DC	EMIT
-	_LOOP(TYPE2)    ;{ LOOP}
-	_BRANCH(TYPE3)  ;{ ELSE}
-TYPE1	DC	DROP	;{ ENDIF}
-TYPE3	DC	SEMIS
+        DC      DDUP
+        _0BRANCH(TYPE1) ;{ IF}
+        DC      OVER
+        DC      PLUS
+        DC      SWAP
+        DC      XDO     ;{ DO}
+TYPE2   DC      IDO
+        DC      CFET
+        DC      LIT,7FH
+        DC      LAND    ;{STRIP 80H FROM LAST CHAR}
+        DC      EMIT
+        _LOOP(TYPE2)    ;{ LOOP}
+        _BRANCH(TYPE3)  ;{ ELSE}
+TYPE1   DC      DROP    ;{ ENDIF}
+TYPE3   DC      SEMIS
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
-	DC	PEMIT
-	DC	ONE,LOUT
-	DC	PSTOR,SEMIS
-PEMIT	DC	$+CELLS(1)
-	POP	AX	;{GET CHAR}
-	CMP     AL,LF   ;{ Precede ^J with ^M}
-	JNE     PEMIT1
-	MOV	AL,ACR
-	CALL	CHO    
-	MOV	AL,LF  
-	;{ Bizar, without the colon MASM reports error.}
-PEMIT1: CALL	CHO    ;{CHAR OUTPUT}
-	_NEXT                            
-CHO	PROC	NEAR
-	PUSH	DX
-	PUSH	AX	;{SAVE CHAR}
-	MOV	DL,AL	;{CHAR TO WRITE}
-	MOV	AH,2	;{CHAR OUT FUNCTION}
-	INT	21H	;{DOS}
-	POP	AX
-	POP	DX
-	RET
+        DC      PEMIT
+        DC      ONE,LOUT
+        DC      PSTOR,SEMIS
+PEMIT   DC      $+CELLS(1)
+        POP     AX      ;{GET CHAR}
+        CMP     AL,LF   ;{ Precede ^J with ^M}
+        JNE     PEMIT1
+        MOV     AL,ACR
+        CALL    CHO
+        MOV     AL,LF
+        ;{ Bizar, without the colon MASM reports error.}
+PEMIT1: CALL    CHO    ;{CHAR OUTPUT}
+        _NEXT
+CHO     PROC    NEAR
+        PUSH    DX
+        PUSH    AX      ;{SAVE CHAR}
+        MOV     DL,AL   ;{CHAR TO WRITE}
+        MOV     AH,2    ;{CHAR OUT FUNCTION}
+        INT     21H     ;{DOS}
+        POP     AX
+        POP     DX
+        RET
 _ENDP CHO     ENDP
 ;
 CODE_HEADER({?TERMINAL},{QTERM})
-	JMP	PQTER
-PQTER:	CALL	CSTAT	;{TEST FOR KEY}
-	OR	AL,AL	;{ANY KEY?}
-	JZ	PQTER1	;{NO}
-	MOV	AL,1	;{TRUE = CHAR FOUND}
-PQTER1:	MOV	AH,0	;{MAKE 16 BITS}
-	JMP	APUSH	;{SAVE STATUS}
+        JMP     PQTER
+PQTER:  CALL    CSTAT   ;{TEST FOR KEY}
+        OR      AL,AL   ;{ANY KEY?}
+        JZ      PQTER1  ;{NO}
+        MOV     AL,1    ;{TRUE = CHAR FOUND}
+PQTER1: MOV     AH,0    ;{MAKE 16 BITS}
+        JMP     APUSH   ;{SAVE STATUS}
 ;
-CSTAT	PROC	NEAR
-	PUSH	DX
-	MOV	DX,0FFH
-	MOV	AX,0600H
-	INT	21H
-	POP	DX
+CSTAT   PROC    NEAR
+        PUSH    DX
+        MOV     DX,0FFH
+        MOV     AX,0600H
+        INT     21H
+        POP     DX
 STATRT: RET
 _ENDP CSTAT   ENDP
 });_END___1__({_USEDOS_1_})
 ;____1_____ _USEBIOS_1_({
-HEADER({EXPECT},{EXPEC},{DOCOL})        
-	DC	OVER                            
-	DC	PLUS                            
-	DC	OVER                            
-	DC	XDO	;{ DO                    }
-EXPE1	DC	KEY                             
-	DC	DUPE                            
-	DC	RUBOUT 
-	DC      FETCH
-	DC	EQUAL                           
-	_0BRANCH(EXPE2) ;{ IF                    }
-	DC	DROP                            
-	DC	DUPE                            
-	DC	IDO                             
-	DC	EQUAL                           
-	DC	DUPE                            
-	DC	FROMR                           
-	DC	TWO     ;{ Remove last 2 chars }
-	DC	LSUB                            
-	DC	PLUS                            
-	DC	TOR                             
-	_0BRANCH(EXPE6) ;{ IF                    }
-	DC	LIT                             
-	DC	BELL                            
-	_BRANCH(EXPE7)  ;{ ELSE                  }
-EXPE6	DC	LIT                             
-	DC	BSOUT	;{ ENDIF                 }
-EXPE7	_BRANCH(EXPE3)  ;{ ELSE                  }
-EXPE2	DC	DUPE                            
-	DC	LIT,0DH
-	DC	EQUAL
-	_0BRANCH(EXPE4) ;{ IF}
-	DC	LLEAV
-	DC	DROP
-	DC	BLS
-	DC	ZERO
-	_BRANCH(EXPE5)  ;{ ELSE}
-EXPE4	DC	DUPE	;{ ENDIF}
-EXPE5	DC	IDO
-	DC	CSTOR
-	DC	ZERO
-	DC	IDO
-	DC	ONEP
-	DC	STORE	;{ ENDIF}
-EXPE3	DC	EMIT
-	_LOOP(EXPE1) 	;{ LOOP}
-	DC	DROP
-	DC	SEMIS
+HEADER({EXPECT},{EXPEC},{DOCOL})
+        DC      OVER
+        DC      PLUS
+        DC      OVER
+        DC      XDO     ;{ DO                    }
+EXPE1   DC      KEY
+        DC      DUPE
+        DC      RUBOUT
+        DC      FETCH
+        DC      EQUAL
+        _0BRANCH(EXPE2) ;{ IF                    }
+        DC      DROP
+        DC      DUPE
+        DC      IDO
+        DC      EQUAL
+        DC      DUPE
+        DC      FROMR
+        DC      TWO     ;{ Remove last 2 chars }
+        DC      LSUB
+        DC      PLUS
+        DC      TOR
+        _0BRANCH(EXPE6) ;{ IF                    }
+        DC      LIT
+        DC      BELL
+        _BRANCH(EXPE7)  ;{ ELSE                  }
+EXPE6   DC      LIT
+        DC      BSOUT   ;{ ENDIF                 }
+EXPE7   _BRANCH(EXPE3)  ;{ ELSE                  }
+EXPE2   DC      DUPE
+        DC      LIT,0DH
+        DC      EQUAL
+        _0BRANCH(EXPE4) ;{ IF}
+        DC      LLEAV
+        DC      DROP
+        DC      BLS
+        DC      ZERO
+        _BRANCH(EXPE5)  ;{ ELSE}
+EXPE4   DC      DUPE    ;{ ENDIF}
+EXPE5   DC      IDO
+        DC      CSTOR
+        DC      ZERO
+        DC      IDO
+        DC      ONEP
+        DC      STORE   ;{ ENDIF}
+EXPE3   DC      EMIT
+        _LOOP(EXPE1)    ;{ LOOP}
+        DC      DROP
+        DC      SEMIS
 ;
 HEADER({KEY},{KEY},{DOCOL})
-	     DC         LIT, 1000H, ZERO, ZERO, ZERO
-	     DC         LIT, 0016H, BIOS
-	     DC         DROP,DROP,DROP,DROP
-	     DC         LIT, 00FFH, LAND, SEMIS
+             DC         LIT, 1000H, ZERO, ZERO, ZERO
+             DC         LIT, 0016H, BIOS
+             DC         DROP,DROP,DROP,DROP
+             DC         LIT, 00FFH, LAND, SEMIS
 
 HEADER({TYPE},{LTYPE},{DOCOL})
-	     DC      DDUP
-	     _0BRANCH(TYPE1)
-	     DC      OVER,   PLUS
-	     DC      SWAP,   XDO
+             DC      DDUP
+             _0BRANCH(TYPE1)
+             DC      OVER,   PLUS
+             DC      SWAP,   XDO
 TYPE2:       DC      IDO,    CFET,    EMIT
-	     _LOOP(TYPE2)
-	     _BRANCH(TYPE3)
+             _LOOP(TYPE2)
+             _BRANCH(TYPE3)
 TYPE1:       DC      DROP
 TYPE3:       DC      SEMIS
 ;{            }
 HEADER({EMIT},{EMIT},{DOCOL})
-	     DC      ONE,LOUT,PSTOR
-	     DC      LIT, 07FH, LAND
-	     DC      DUPE,LIT,LF,EQUAL
-	     _0BRANCH(EMIT1)
-	     DC      LIT,ACR,PEMIT
-	     DC      ZERO,LOUT,STORE
+             DC      ONE,LOUT,PSTOR
+             DC      LIT, 07FH, LAND
+             DC      DUPE,LIT,LF,EQUAL
+             _0BRANCH(EMIT1)
+             DC      LIT,ACR,PEMIT
+             DC      ZERO,LOUT,STORE
 EMIT1:       DC      PEMIT
-	     DC      SEMIS
+             DC      SEMIS
 ;{            }
 HEADER({(EMIT)},{PEMIT},{DOCOL})
-	     DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
-	     DC      LIT, 0010H, BIOS
-	     DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+             DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
+             DC      LIT, 0010H, BIOS
+             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 
 ;
 HEADER({?TERMINAL},{QTERM},{DOCOL})
-	     DC      LIT, 01100H, ZERO, ZERO, ZERO
-	     DC      LIT, 016H, BIOS
-	     DC      LIT, 040H, LAND, ZEQU, TOR
-	     DC      DROP, DROP, DROP, DROP
-	     DC      FROMR, SEMIS
+             DC      LIT, 01100H, ZERO, ZERO, ZERO
+             DC      LIT, 016H, BIOS
+             DC      LIT, 040H, LAND, ZEQU, TOR
+             DC      DROP, DROP, DROP, DROP
+             DC      FROMR, SEMIS
 
-	     ;{ Output to PRN }
+             ;{ Output to PRN }
 HEADER({POUT},{POUT},{DOCOL})
-	     DC      ZERO, ZERO, ZERO
-	     DC      LIT, 0017H, BIOS
-	     DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+             DC      ZERO, ZERO, ZERO
+             DC      LIT, 0017H, BIOS
+             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 ;
 });_END___1__({_USEBIOS_1_})
-	PAGE
+        PAGE
 ;{------------------------------------}
 ;{       SYSTEM DEPENDANT DISK I/O}
 ;{------------------------------------}
 
 ;____1_____ _MODERN_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
-	_STRING({BLOCKS.BLK})
-	_RESB(20)               ;{ Allow for some path}
+        _STRING({BLOCKS.BLK})
+        _RESB(20)               ;{ Allow for some path}
 ;
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
-	DC      0
+        DC      0
 ;
 HEADER({DISK-ERR},{DERR},{DOCOL})
-	DC      ONE, LAND
-	DC      LIT, 08H, QERR
-	DC	SEMIS
+        DC      ONE, LAND
+        DC      LIT, 08H, QERR
+        DC      SEMIS
 ;
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
-	DC      LIT, 03D02H    ;{ Open file for read/write}
-	DC      ZERO,ZERO
-	DC      BLFL
-	DC      COUNT, OVER, PLUS
-	DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP
-	DC      BHAN, STORE
-	DC	SEMIS
+        DC      LIT, 03D02H    ;{ Open file for read/write}
+        DC      ZERO,ZERO
+        DC      BLFL
+        DC      COUNT, OVER, PLUS
+        DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
+        DC      BDOS, DERR
+        DC      DROP, DROP, DROP
+        DC      BHAN, STORE
+        DC      SEMIS
 ;
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
-	DC      LIT, 03E00H    ;{ Open file for read/write}
-	DC      BHAN, FETCH
-	DC      ZERO, ZERO
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP, DROP
-	DC	SEMIS
+        DC      LIT, 03E00H    ;{ Open file for read/write}
+        DC      BHAN, FETCH
+        DC      ZERO, ZERO
+        DC      BDOS, DERR
+        DC      DROP, DROP, DROP, DROP
+        DC      SEMIS
 ;
 ;{       Block #, Handle}
 HEADER({SEEK},{SEEK},{DOCOL})
-	DC      SWAP, TOR, TOR
-	DC      LIT, 04200H     ;{ Seek from start}
-	DC      FROMR           ;{ Handle}
-	DC      FROMR, BBUF, USTAR
-	DC      SWAP    ;{ L.S. ON TOP}
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP, DROP
-	DC      SEMIS
+        DC      SWAP, TOR, TOR
+        DC      LIT, 04200H     ;{ Seek from start}
+        DC      FROMR           ;{ Handle}
+        DC      FROMR, BBUF, USTAR
+        DC      SWAP    ;{ L.S. ON TOP}
+        DC      BDOS, DERR
+        DC      DROP, DROP, DROP, DROP
+        DC      SEMIS
 ;
-;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
+;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
-	_0BRANCH(RSLW1) 
-	DC	LIT, 03F00H     ;{ Disk read }
-	_BRANCH(RSLW2) 
-RSLW1	DC      LIT, 04000H     ;{ Disk write}
-RSLW2:  DC      TOR 
-	DC      BHAN, FETCH, SEEK ;{ That's done}
-	DC      FROMR, SWAP, TOR
-	DC      BHAN, FETCH
-	DC      BBUF
-	DC      FROMR           ;{ ADDR}
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP
-	DC      BBUF, LSUB, DERR
-	DC      SEMIS
+        _0BRANCH(RSLW1)
+        DC      LIT, 03F00H     ;{ Disk read }
+        _BRANCH(RSLW2)
+RSLW1   DC      LIT, 04000H     ;{ Disk write}
+RSLW2:  DC      TOR
+        DC      BHAN, FETCH, SEEK ;{ That's done}
+        DC      FROMR, SWAP, TOR
+        DC      BHAN, FETCH
+        DC      BBUF
+        DC      FROMR           ;{ ADDR}
+        DC      BDOS, DERR
+        DC      DROP, DROP, DROP
+        DC      BBUF, LSUB, DERR
+        DC      SEMIS
 
 });_END___1__({_MODERN_1_})
 ;____1_____ _LINUX_N_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
-	_STRING({BLOCKS.BLK})
-	DB      0       ; { Easier on linux}
-	_RESB(19)               ;{ Allow for some path}
+        _STRING({BLOCKS.BLK})
+        DB      0       ; { Easier on linux}
+        _RESB(19)               ;{ Allow for some path}
 ;
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
-	DC      0
+        DC      0
 ;
 HEADER({DISK-ERROR},{DERR},{DOVAR})
-	DC      0
+        DC      0
 ;
 HEADER({BLOCK-INIT},{BLINI},DOCOL)
-	DC      BLFL, ONEP
-	DC      LIT, M4_O_RDWR
-	DC      ZERO
-	DC      LIT, M4_open
-	DC      LINOS
-	DC      DUPE, BHAN, STORE
-	DC      ZERO, MIN      ; 0/-errno
+        DC      BLFL, ONEP
+        DC      LIT, O_RDWR
+        DC      ZERO
+        DC      LIT, open
+        DC      LINOS
+        DC      DUPE, BHAN, STORE
+        DC      ZERO, MIN      ; 0/-errno
         DC      DERR, STORE
-	DC      SEMIS
+        DC      SEMIS
 ;
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
-	DC      BHAN, FETCH
-	DC      ZERO,ZERO
-	DC      LIT, M4_close
-	DC      LINOS
-	DC      ZERO, MIN      ; 0/-errno
+        DC      BHAN, FETCH
+        DC      ZERO,ZERO
+        DC      LIT, close
+        DC      LINOS
+        DC      ZERO, MIN      ; 0/-errno
         DC      DERR, STORE
-	DC      SEMIS
+        DC      SEMIS
 ;
-;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
+;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
         DC      TOR
-        DC      BBUF, STAR 
-	DC      BHAN, FETCH, SWAP
-        DC      LIT, M4_SEEK_SET
-	DC      LIT, M4_lseek
+        DC      BBUF, STAR
+        DC      BHAN, FETCH, SWAP
+        DC      LIT, SEEK_SET
+        DC      LIT, lseek
         DC      LINOS
         DC      ZERO, MIN      ; 0/-errno
         DC      DUPE, DERR, STORE
         _0BRANCH( RSLW1 )
         DC      FROMR, DROP
         _BRANCH( RSLW2 )
-RSLW1:  
+RSLW1:
         DC      BHAN, FETCH, SWAP
         DC      BBUF
         DC      FROMR
         _0BRANCH( RSLW3 )
-        DC     LIT, M4_read
+        DC     LIT, read
         _BRANCH( RSLW4 )
-RSLW3:  
-        DC      LIT, M4_write
+RSLW3:
+        DC      LIT, write
 RSLW4:  DC      LINOS
         DC      ZERO, MIN      ; 0/-errno
         DC      DERR, STORE
@@ -3125,90 +3183,90 @@ RSLW2:  DC      SEMIS
 });_END___1__({_LINUX_N_1_})
 ;____1_____ _LINUX_C_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
-	_STRING({BLOCKS.BLK})
-	_RESB(20)               ;{ Allow for some path}
+        _STRING({BLOCKS.BLK})
+        _RESB(20)               ;{ Allow for some path}
 ;
 HEADER({DISK-ERROR},{DERR},{DOVAR})
-	DC      0
+        DC      0
 ;
 CODE_HEADER({BLOCK-INIT},{BLINI})
-	XOR     AX,AX
-	MOV     AL,[_PARAMETER_FIELD(BLFL)]
-	MOV     BX,_PARAMETER_FIELD(BLFL)+1
-	PUSH    BX
-	PUSH    AX
-	CALL    c_block_init
-	MOV     [_PARAMETER_FIELD(DERR)],AX
-	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	_NEXT
+        XOR     AX,AX
+        MOV     AL,[_PARAMETER_FIELD(BLFL)]
+        MOV     BX,_PARAMETER_FIELD(BLFL)+1
+        PUSH    BX
+        PUSH    AX
+        CALL    c_block_init
+        MOV     [_PARAMETER_FIELD(DERR)],AX
+        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        _NEXT
 ;
 CODE_HEADER({BLOCK-EXIT},{BLEXI})
-	CALL    c_block_exit
-	_NEXT
+        CALL    c_block_exit
+        _NEXT
 ;
-;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
+;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 CODE_HEADER({R/W},{RSLW})
-	CALL c_rslw
-	MOV     [_PARAMETER_FIELD(DERR)],AX
-	LEA     ESP,[ESP+CELLS(3)]    ; remove input
-	_NEXT
+        CALL c_rslw
+        MOV     [_PARAMETER_FIELD(DERR)],AX
+        LEA     ESP,[ESP+CELLS(3)]    ; remove input
+        _NEXT
 
 });_END___1__({_LINUX_C_1_})
 ;____1_____ _USEDOS_1_({
 ;
-WERR	DB  	'DISK WRITE ERROR  $'
-RERR	DB  	'DISK READ ERROR   $'
+WERR    DB      'DISK WRITE ERROR  $'
+RERR    DB      'DISK READ ERROR   $'
 ;
 SBLK    PROC    NEAR
-;{	( ADDR  BLK# -- )}
-;{	THIS ROUTINE WILL PREPARE PARAMETERS FOR DISK I/O}
+;{      ( ADDR  BLK# -- )}
+;{      THIS ROUTINE WILL PREPARE PARAMETERS FOR DISK I/O}
 ;{       DRIVE, ADDRESS, LENGTH, SEC#}
-	POP	DI	;{SAVE RETURN}
-	POP	AX      ;{BLK #}
-	MOV	CX,SPB 
-	MUL     CX   ;{SEC #}
-	MOV     DX,AX
-	MOV	AL,DRIVE    ;{SELECT DR A}
-	POP     BX      ;{TRANSFER ADDR}
-	PUSH	DI	;{GET THAT RETURN BACK}
-	RET
+        POP     DI      ;{SAVE RETURN}
+        POP     AX      ;{BLK #}
+        MOV     CX,SPB
+        MUL     CX   ;{SEC #}
+        MOV     DX,AX
+        MOV     AL,DRIVE    ;{SELECT DR A}
+        POP     BX      ;{TRANSFER ADDR}
+        PUSH    DI      ;{GET THAT RETURN BACK}
+        RET
 _ENDP SBLK    ENDP
 ;
 CODE_HEADER({RBLK},{RBLK})
-	CALL	SBLK
-	PUSH	SI	;{PRESERVE INTERPRETER POINTER}
-	PUSH	BP	;{RETURN POINTER}
-	INT	25H
-	JNC	DOK	;{NO ERRORS}
-	LEA	DX,[RERR]
-	JMP	DERR
+        CALL    SBLK
+        PUSH    SI      ;{PRESERVE INTERPRETER POINTER}
+        PUSH    BP      ;{RETURN POINTER}
+        INT     25H
+        JNC     DOK     ;{NO ERRORS}
+        LEA     DX,[RERR]
+        JMP     DERR
 ;
 CODE_HEADER({WBLK},{WBLK})
-	CALL	SBLK
-	PUSH	SI
-	PUSH	BP
-	INT	26H
-	JNC	DOK
-	LEA	DX,[WERR]
-DERR:	PUSH	AX
-	MOV	AH,9	;{STRING WRITE FNCN}
-	INT	21H
-	POP	AX	;{ERROR CODE IN AX}
+        CALL    SBLK
+        PUSH    SI
+        PUSH    BP
+        INT     26H
+        JNC     DOK
+        LEA     DX,[WERR]
+DERR:   PUSH    AX
+        MOV     AH,9    ;{STRING WRITE FNCN}
+        INT     21H
+        POP     AX      ;{ERROR CODE IN AX}
 ;{  WRITE ERROR MESSAGE HERE}
 ;
-DOK:	POPF		;{POP FLAGS}
-	POP	BP	;{RETURN STACK}
-	POP	SI	;{INTERPRETER PNTR}
-	_NEXT                            
+DOK:    POPF            ;{POP FLAGS}
+        POP     BP      ;{RETURN STACK}
+        POP     SI      ;{INTERPRETER PNTR}
+        _NEXT
 ;
 ;
-;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
+;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
-	_0BRANCH(RSLW1) 
-	DC	RBLK
-	_BRANCH(RSLW2) 
-RSLW1	DC	WBLK
-RSLW2	DC	SEMIS
+        _0BRANCH(RSLW1)
+        DC      RBLK
+        _BRANCH(RSLW2)
+RSLW1   DC      WBLK
+RSLW2   DC      SEMIS
 });_END___1__({_USEDOS_1_})
 ;____1_____ _USEBIOS_1_({
 ;
@@ -3219,7 +3277,7 @@ HEADER({RECORD},{REC},{DOVAR})
       DC  0
 ;
 HEADER({SEC/BLK},{SPBLK},{DOCON}) ;{# SECTORS/BLOCK}
-	DC	SPB
+        DC      SPB
 ;
 HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DC  0
@@ -3228,43 +3286,43 @@ HEADER({DISK-ERROR},{DSKERR},{DOVAR})
 ;____1_____ _BOOTFD__1_({
 ;{  (Command, address, sec# -- )}
 HEADER({SEC-RW},{SECRW},{DOCOL})
-	DC      LIT, SPT*HEADS, SLMOD   ;{ Juggle #sec, #head, #track}
-	DC      SWAP, LIT, SPT, SLMOD, TOR
-	DC      SWAP, LIT, 0100H, STAR, PLUS, ONEP
-	DC      FROMR, LIT, 0100H, STAR  ;{ .. to arrive at CX, DX}
-	DC      LIT, 13H, BIOS
-	DC      ONE, LAND, DSKERR, STORE
-	DC      DROP, DROP, DROP, DROP
-	DC      SEMIS
+        DC      LIT, SPT*HEADS, SLMOD   ;{ Juggle #sec, #head, #track}
+        DC      SWAP, LIT, SPT, SLMOD, TOR
+        DC      SWAP, LIT, 0100H, STAR, PLUS, ONEP
+        DC      FROMR, LIT, 0100H, STAR  ;{ .. to arrive at CX, DX}
+        DC      LIT, 13H, BIOS
+        DC      ONE, LAND, DSKERR, STORE
+        DC      DROP, DROP, DROP, DROP
+        DC      SEMIS
 ;
-;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
+;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
-	DC      ZERO, DSKERR, STORE
-	_0BRANCH(RSLW1)
-	DC      LIT, 0201H      ;{ Read (AH) one (AL) sector }
-	_BRANCH(RSLW2)
+        DC      ZERO, DSKERR, STORE
+        _0BRANCH(RSLW1)
+        DC      LIT, 0201H      ;{ Read (AH) one (AL) sector }
+        _BRANCH(RSLW2)
 RSLW1:  DC      LIT, 0301H      ;{ Write (AH) one (AL) sector }
 RSLW2:  DC      SWAP
-	DC      SPBLK,  STAR
-	DC      SPBLK,  OVER, PLUS
-	DC      SWAP,   XDO
-RSLW0:  
-	DC      SWAP, TDUP        
-	DC      IDO
-	DC      SECRW
-	DC      LIT, BPS, PLUS, SWAP
-	_LOOP(RSLW0)
-	DC      DROP, DROP
-	DC      DSKERR, FETCH,     DDUP
-	_0BRANCH(RSLW5)              ;{OK}
-	DC      ZLESS
-	_0BRANCH(RSLW3)
-	DC      LIT,    9   ;{Write error}
-	_BRANCH(RSLW4)
+        DC      SPBLK,  STAR
+        DC      SPBLK,  OVER, PLUS
+        DC      SWAP,   XDO
+RSLW0:
+        DC      SWAP, TDUP
+        DC      IDO
+        DC      SECRW
+        DC      LIT, BPS, PLUS, SWAP
+        _LOOP(RSLW0)
+        DC      DROP, DROP
+        DC      DSKERR, FETCH,     DDUP
+        _0BRANCH(RSLW5)              ;{OK}
+        DC      ZLESS
+        _0BRANCH(RSLW3)
+        DC      LIT,    9   ;{Write error}
+        _BRANCH(RSLW4)
 RSLW3:  DC      LIT,    8   ;{Read error}
 RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;{This  buffer}
-						   ;{ is no good!}
-	DC      QERR
+                                                   ;{ is no good!}
+        DC      QERR
 RSLW5:  DC      SEMIS
 ;
 });_END___1__({ _BOOTFD__1_})
@@ -3272,506 +3330,506 @@ RSLW5:  DC      SEMIS
 ;{ Warning : if this LBA is used apart from by R/W}
 ;{ the fields marked default must be restored.}
 HEADER({LBAPAR},{LBA},{DOVAR})
-	DB      10H, 0      ;{ default    }
-	DW      SPB         ;{ default    }
-	DW      0           ;{ to be filled with offset}
-	DW      REALSEGMENT ;{ default segment}
-	;{ At a hard disk we just read sector from sector 1        }
-	DD      0       ;{ sector number}
-	DD      0       ;{ M.S. 32 BITS default}
+        DB      10H, 0      ;{ default    }
+        DW      SPB         ;{ default    }
+        DW      0           ;{ to be filled with offset}
+        DW      REALSEGMENT ;{ default segment}
+        ;{ At a hard disk we just read sector from sector 1        }
+        DD      0       ;{ sector number}
+        DD      0       ;{ M.S. 32 BITS default}
 
 ;{ Reads/ writes the block such as in LBA}
 CODE_HEADER({RBLK},{RBLK})
-	POP     AX     
-	PUSH	SI	;{PRESERVE INTERPRETER POINTER}
-	MOV     SI,AX  
-	PUSH	BP	;{RETURN POINTER}
-	MOV     BX,4200H       
-	MOV     DX,0080H  ;{   Disk C                                 }
-	JMPHERE_FROM_PROT
-	XCHG    BX,AX
-	INT     13H
-	PUSHF           ;{ REMEMBER STATUS}
-	POP     BX
-	JMPHERE_FROM_REAL
-	POP	BP	;{RETURN STACK}
-	POP	SI	;{INTERPRETER PNTR}
-	PUSH    BX      ;{ REMEMBER STATUS}
-	_NEXT                            
+        POP     AX
+        PUSH    SI      ;{PRESERVE INTERPRETER POINTER}
+        MOV     SI,AX
+        PUSH    BP      ;{RETURN POINTER}
+        MOV     BX,4200H
+        MOV     DX,0080H  ;{   Disk C                                 }
+        JMPHERE_FROM_PROT
+        XCHG    BX,AX
+        INT     13H
+        PUSHF           ;{ REMEMBER STATUS}
+        POP     BX
+        JMPHERE_FROM_REAL
+        POP     BP      ;{RETURN STACK}
+        POP     SI      ;{INTERPRETER PNTR}
+        PUSH    BX      ;{ REMEMBER STATUS}
+        _NEXT
 ;
 CODE_HEADER({WBLK},{WBLK})
-	POP     AX     
-	PUSH	SI	;{PRESERVE INTERPRETER POINTER}
-	MOV     SI,AX  
-	PUSH	BP	;{RETURN POINTER}
-	MOV     BX,4300H       
-	MOV     DX,0080H  ;{   Disk C                                 }
-	JMPHERE_FROM_PROT
-	XCHG    BX,AX
-	INT     13H
-	PUSHF           ;{ REMEMBER STATUS}
-	POP     BX
-	JMPHERE_FROM_REAL
-	POP	BP	;{RETURN STACK}
-	POP	SI	;{INTERPRETER PNTR}
-	PUSH    BX
-	_NEXT                            
+        POP     AX
+        PUSH    SI      ;{PRESERVE INTERPRETER POINTER}
+        MOV     SI,AX
+        PUSH    BP      ;{RETURN POINTER}
+        MOV     BX,4300H
+        MOV     DX,0080H  ;{   Disk C                                 }
+        JMPHERE_FROM_PROT
+        XCHG    BX,AX
+        INT     13H
+        PUSHF           ;{ REMEMBER STATUS}
+        POP     BX
+        JMPHERE_FROM_REAL
+        POP     BP      ;{RETURN STACK}
+        POP     SI      ;{INTERPRETER PNTR}
+        PUSH    BX
+        _NEXT
 
-;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
+;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
-	DC      TOR
-	DC      LIT, SPB, STAR  ;{ Sector number}
-	DC      SWAP
+        DC      TOR
+        DC      LIT, SPB, STAR  ;{ Sector number}
+        DC      SWAP
 ;       On a big endian machine the following code is 32 bit clean.
 ;       The 2 m.s. bytes are overwritten by the next store.
-	DC      LBA, LIT, 4, PLUS, STORE  
-	DC      LIT, REALSEGMENT, 
-	DC      LBA, LIT, 6, PLUS, STORE  
-	DC      LBA, LIT, 8, PLUS, STORE  
-	DC      LBA
-	DC      RR
-	_0BRANCH(RSLW1)
-	DC      RBLK
-	_BRANCH(RSLW2)
+        DC      LBA, LIT, 4, PLUS, STORE
+        DC      LIT, REALSEGMENT,
+        DC      LBA, LIT, 6, PLUS, STORE
+        DC      LBA, LIT, 8, PLUS, STORE
+        DC      LBA
+        DC      RR
+        _0BRANCH(RSLW1)
+        DC      RBLK
+        _BRANCH(RSLW2)
 RSLW1:  DC      WBLK
 RSLW2:  DC      DUPE, DSKERR, STORE
 
-	DC      ONE, LAND, DUPE
-	_0BRANCH(RSLW4)
+        DC      ONE, LAND, DUPE
+        _0BRANCH(RSLW4)
 ;{        DC      ZERO,   PREV,   FETCH,     STORE   ;This  buffer}
-						   ;{ is no good!}
-RSLW4:  
-	;{ Handle error}
-	DC      LIT,    9   ;{Write error}
-	DC      FROMR, LSUB ;{ 1 less: read error}
-	DC      QERR
-	DC      SEMIS
+                                                   ;{ is no good!}
+RSLW4:
+        ;{ Handle error}
+        DC      LIT,    9   ;{Write error}
+        DC      FROMR, LSUB ;{ 1 less: read error}
+        DC      QERR
+        DC      SEMIS
 ;
 });_END___1__({ _BOOTHD__1_})
-	PAGE
-	;{ At line     LINE ~3500}
+        PAGE
+        ;{ At line     LINE ~3500}
 HEADER({'},{TICK},{DOCOL},1)
-	DC	DFIND
-	DC	ZEQU
-	DC	ZERO
-	DC	QERR
-	DC	DROP
-	DC	LITER
-	DC	SEMIS
+        DC      DFIND
+        DC      ZEQU
+        DC      ZERO
+        DC      QERR
+        DC      DROP
+        DC      LITER
+        DC      SEMIS
 ;
 HEADER({FORGET},{FORG},{DOCOL})
-	DC	CURR
-	DC	FETCH
-	DC	CONT
-	DC	FETCH
-	DC	LSUB
-	DC	LIT,18H
-	DC	QERR
-	DC	TICK
-	DC	DUPE
-	DC	FENCE
-	DC	FETCH
-	DC	LESS
-	DC	LIT,15H
-	DC	QERR
-	DC	DUPE
-	DC	NFA
-	DC	LDP
-	DC	STORE
-	DC	LFA
-	DC	FETCH
-	DC	CONT
-	DC	FETCH
-	DC	STORE
-	DC	SEMIS
-	PAGE
+        DC      CURR
+        DC      FETCH
+        DC      CONT
+        DC      FETCH
+        DC      LSUB
+        DC      LIT,18H
+        DC      QERR
+        DC      TICK
+        DC      DUPE
+        DC      FENCE
+        DC      FETCH
+        DC      LESS
+        DC      LIT,15H
+        DC      QERR
+        DC      DUPE
+        DC      NFA
+        DC      LDP
+        DC      STORE
+        DC      LFA
+        DC      FETCH
+        DC      CONT
+        DC      FETCH
+        DC      STORE
+        DC      SEMIS
+        PAGE
 HEADER({BACK},{BACK},{DOCOL})
-	DC	HERE
-	DC	LSUB
-	DC	COMMA
-	DC	SEMIS
+        DC      HERE
+        DC      LSUB
+        DC      COMMA
+        DC      SEMIS
 ;
 HEADER({BEGIN},{BEGIN},{DOCOL},1)
-	DC	QCOMP
-	DC	HERE
-	DC	ONE
-	DC	SEMIS
+        DC      QCOMP
+        DC      HERE
+        DC      ONE
+        DC      SEMIS
 ;
 HEADER({ENDIF},{ENDIFF},{DOCOL},1)
-	DC	QCOMP
-	DC	TWO     ;{ Magic number}
-	DC	QPAIR
-	DC	HERE
-	DC	OVER
-	DC	LSUB
-	DC	SWAP
-	DC	STORE
-	DC	SEMIS
-	PAGE
+        DC      QCOMP
+        DC      TWO     ;{ Magic number}
+        DC      QPAIR
+        DC      HERE
+        DC      OVER
+        DC      LSUB
+        DC      SWAP
+        DC      STORE
+        DC      SEMIS
+        PAGE
 HEADER({THEN},{THEN},{DOCOL},1)
-	DC	ENDIFF
-	DC	SEMIS
+        DC      ENDIFF
+        DC      SEMIS
 ;
 HEADER({DO},{DO},{DOCOL},1)
-	DC	COMP
-	DC	XDO
-	DC	HERE
-	DC	THREE   ;{ Magic number}
-	DC	SEMIS
+        DC      COMP
+        DC      XDO
+        DC      HERE
+        DC      THREE   ;{ Magic number}
+        DC      SEMIS
 ;
 HEADER({LOOP},{LOOPC},{DOCOL},1)
-	DC	THREE   ;{ Magic number}
-	DC	QPAIR
-	DC	COMP
-	DC	XLOOP
-	DC	BACK
-	DC	SEMIS
-	PAGE
+        DC      THREE   ;{ Magic number}
+        DC      QPAIR
+        DC      COMP
+        DC      XLOOP
+        DC      BACK
+        DC      SEMIS
+        PAGE
 HEADER({+LOOP},{PLOOP},{DOCOL},1)
-	DC	THREE   ;{ Magic number}
-	DC	QPAIR
-	DC	COMP
-	DC	XPLOO
-	DC	BACK
-	DC	SEMIS
+        DC      THREE   ;{ Magic number}
+        DC      QPAIR
+        DC      COMP
+        DC      XPLOO
+        DC      BACK
+        DC      SEMIS
 ;
 HEADER({UNTIL},{UNTIL},{DOCOL},1)
-	DC	ONE
-	DC	QPAIR
-	DC	COMP
-	DC	ZBRAN
-	DC      BACK
-	DC	SEMIS
+        DC      ONE
+        DC      QPAIR
+        DC      COMP
+        DC      ZBRAN
+        DC      BACK
+        DC      SEMIS
 ;
 HEADER({END},{ENDD},{DOCOL},1)
-	DC	UNTIL
-	DC	SEMIS
-	PAGE
+        DC      UNTIL
+        DC      SEMIS
+        PAGE
 HEADER({AGAIN},{AGAIN},{DOCOL},1)
-	DC	ONE
-	DC	QPAIR
-	DC	COMP
-	DC	BRAN
-	DC      BACK
-	DC	SEMIS
+        DC      ONE
+        DC      QPAIR
+        DC      COMP
+        DC      BRAN
+        DC      BACK
+        DC      SEMIS
 ;
 HEADER({REPEAT},{REPEA},{DOCOL},1)
-	DC	TOR
-	DC	TOR
-	DC	AGAIN
-	DC	FROMR
-	DC	FROMR
-	DC	TWO     ;{ Magic number}
-	DC	LSUB
-	DC	ENDIFF
-	DC	SEMIS
+        DC      TOR
+        DC      TOR
+        DC      AGAIN
+        DC      FROMR
+        DC      FROMR
+        DC      TWO     ;{ Magic number}
+        DC      LSUB
+        DC      ENDIFF
+        DC      SEMIS
 ;
 HEADER({IF},{IFF},{DOCOL},1)
-	DC	COMP
-	DC	ZBRAN
-	DC      HERE
-	DC	ZERO
-	DC	COMMA
-	DC	TWO     ;{ Magic number           }
-	DC	SEMIS
-	PAGE
+        DC      COMP
+        DC      ZBRAN
+        DC      HERE
+        DC      ZERO
+        DC      COMMA
+        DC      TWO     ;{ Magic number           }
+        DC      SEMIS
+        PAGE
 HEADER({ELSE},{ELSEE},{DOCOL},1)
-	DC	TWO     ;{ Magic number }
-	DC	QPAIR
-	DC	COMP
-	DC	BRAN
-	DC      HERE
-	DC	ZERO
-	DC	COMMA
-	DC	SWAP
-	DC	TWO     ;{ Magic number           }
-	DC	ENDIFF
-	DC	TWO     ;{ Magic number           }
-	DC	SEMIS
+        DC      TWO     ;{ Magic number }
+        DC      QPAIR
+        DC      COMP
+        DC      BRAN
+        DC      HERE
+        DC      ZERO
+        DC      COMMA
+        DC      SWAP
+        DC      TWO     ;{ Magic number           }
+        DC      ENDIFF
+        DC      TWO     ;{ Magic number           }
+        DC      SEMIS
 ;
 HEADER({WHILE},{WHILE},{DOCOL},1)
-	DC	IFF
-	DC	TWOP        ;{ Magic number           }
-	DC	SEMIS
-	PAGE
+        DC      IFF
+        DC      TWOP        ;{ Magic number           }
+        DC      SEMIS
+        PAGE
 HEADER({SPACES},{SPACS},{DOCOL})
-	DC	ZERO
-	DC	MAX
-	DC	DDUP
-	_0BRANCH(SPAX1) 
-	DC	ZERO
-	DC	XDO	;{DO}
-SPAX2	DC	SPACE
-	_LOOP(SPAX2) 	;{LOOP}
-SPAX1	DC	SEMIS
+        DC      ZERO
+        DC      MAX
+        DC      DDUP
+        _0BRANCH(SPAX1)
+        DC      ZERO
+        DC      XDO     ;{DO}
+SPAX2   DC      SPACE
+        _LOOP(SPAX2)    ;{LOOP}
+SPAX1   DC      SEMIS
 ;
 HEADER({<#},{BDIGS},{DOCOL})
-	DC	PAD
-	DC	HLD
-	DC	STORE
-	DC	SEMIS
+        DC      PAD
+        DC      HLD
+        DC      STORE
+        DC      SEMIS
 ;
 HEADER({#>},{EDIGS},{DOCOL})
-	DC	DROP
-	DC	DROP
-	DC	HLD
-	DC	FETCH
-	DC	PAD
-	DC	OVER
-	DC	LSUB
-	DC	SEMIS
-	PAGE
+        DC      DROP
+        DC      DROP
+        DC      HLD
+        DC      FETCH
+        DC      PAD
+        DC      OVER
+        DC      LSUB
+        DC      SEMIS
+        PAGE
 HEADER({SIGN},{SIGN},{DOCOL})
-	DC	ROT
-	DC	ZLESS
-	_0BRANCH(SIGN1) ;{IF}
-	DC	LIT,2DH
-	DC	HOLD	;{ENDIF}
-SIGN1	DC	SEMIS
+        DC      ROT
+        DC      ZLESS
+        _0BRANCH(SIGN1) ;{IF}
+        DC      LIT,2DH
+        DC      HOLD    ;{ENDIF}
+SIGN1   DC      SEMIS
 ;
 HEADER({#},{DIG},{DOCOL})
-	DC	BASE
-	DC	FETCH
-	DC	MSMOD
-	DC	ROT
-	DC	LIT,9
-	DC	OVER
-	DC	LESS
-	_0BRANCH(DIG1)  ;{IF}
-	DC	LIT,7
-	DC	PLUS	;{ENDIF}
-DIG1	DC	LIT,30H
-	DC	PLUS
-	DC	HOLD
-	DC	SEMIS
+        DC      BASE
+        DC      FETCH
+        DC      MSMOD
+        DC      ROT
+        DC      LIT,9
+        DC      OVER
+        DC      LESS
+        _0BRANCH(DIG1)  ;{IF}
+        DC      LIT,7
+        DC      PLUS    ;{ENDIF}
+DIG1    DC      LIT,30H
+        DC      PLUS
+        DC      HOLD
+        DC      SEMIS
 ;
 HEADER({#S},{DIGS},{DOCOL})
-DIGS1	DC	DIG	;{BEGIN}
-	DC	OVER
-	DC	OVER
-	DC	LOR
-	DC	ZEQU
-	_0BRANCH(DIGS1) ;{UNTIL}
-	DC	SEMIS
+DIGS1   DC      DIG     ;{BEGIN}
+        DC      OVER
+        DC      OVER
+        DC      LOR
+        DC      ZEQU
+        _0BRANCH(DIGS1) ;{UNTIL}
+        DC      SEMIS
 ;
 HEADER({D.R},{DDOTR},{DOCOL})
-	DC	TOR
-	DC	SWAP
-	DC	OVER
-	DC	DABS
-	DC	BDIGS
-	DC	DIGS
-	DC	SIGN
-	DC	EDIGS
-	DC	FROMR
-	DC	OVER
-	DC	LSUB
-	DC	SPACS
-	DC	LTYPE
-	DC	SEMIS
+        DC      TOR
+        DC      SWAP
+        DC      OVER
+        DC      DABS
+        DC      BDIGS
+        DC      DIGS
+        DC      SIGN
+        DC      EDIGS
+        DC      FROMR
+        DC      OVER
+        DC      LSUB
+        DC      SPACS
+        DC      LTYPE
+        DC      SEMIS
 ;
 HEADER({.R},{DOTR},{DOCOL})
-	DC	TOR
-	DC	STOD
-	DC	FROMR
-	DC	DDOTR
-	DC	SEMIS
-	PAGE
+        DC      TOR
+        DC      STOD
+        DC      FROMR
+        DC      DDOTR
+        DC      SEMIS
+        PAGE
 HEADER({D.},{DDOT},{DOCOL})
-	DC	ZERO
-	DC	DDOTR
-	DC	SPACE
-	DC	SEMIS
+        DC      ZERO
+        DC      DDOTR
+        DC      SPACE
+        DC      SEMIS
 ;
 HEADER({.},{DOT},{DOCOL})
-	DC	STOD
-	DC	DDOT
-	DC	SEMIS
+        DC      STOD
+        DC      DDOT
+        DC      SEMIS
 ;
 HEADER({?},{QUES},{DOCOL})
-	DC	FETCH
-	DC	DOT
-	DC	SEMIS
+        DC      FETCH
+        DC      DOT
+        DC      SEMIS
 ;
 HEADER({U.},{UDOT},{DOCOL})
-	DC	ZERO
-	DC	DDOT
-	DC	SEMIS
-	PAGE
-	;{ At line     LINE ~4000}
+        DC      ZERO
+        DC      DDOT
+        DC      SEMIS
+        PAGE
+        ;{ At line     LINE ~4000}
 HEADER({VLIST},{VLIST},{DOCOL})
-	DC	LIT,80H
-	DC	LOUT
-	DC	STORE
-	DC	CONT
-	DC	FETCH
-	DC	FETCH
-VLIS1	DC	LOUT    ;{BEGIN}
-	DC	FETCH
-	DC	CSLL
-	DC	GREAT
-	_0BRANCH(VLIS2) ;{IF}
-	DC	CR
-	DC	ZERO
-	DC	LOUT
-	DC	STORE	;{ENDIF}
-VLIS2	DC	DUPE
-	DC	IDDOT
-	DC	SPACE
-	DC	SPACE
-	DC	PFA
-	DC	LFA
-	DC	FETCH
-	DC	DUPE
-	DC	ZEQU
-	DC	QTERM
-	DC	LOR
-	_0BRANCH(VLIS1) ;{UNTIL}
-	DC	DROP
-	DC	SEMIS
+        DC      LIT,80H
+        DC      LOUT
+        DC      STORE
+        DC      CONT
+        DC      FETCH
+        DC      FETCH
+VLIS1   DC      LOUT    ;{BEGIN}
+        DC      FETCH
+        DC      CSLL
+        DC      GREAT
+        _0BRANCH(VLIS2) ;{IF}
+        DC      CR
+        DC      ZERO
+        DC      LOUT
+        DC      STORE   ;{ENDIF}
+VLIS2   DC      DUPE
+        DC      IDDOT
+        DC      SPACE
+        DC      SPACE
+        DC      PFA
+        DC      LFA
+        DC      FETCH
+        DC      DUPE
+        DC      ZEQU
+        DC      QTERM
+        DC      LOR
+        _0BRANCH(VLIS1) ;{UNTIL}
+        DC      DROP
+        DC      SEMIS
 ;
-CODE_HEADER({BYE},{BYE})
 ;____1_____ _HOSTED_MSDOS_1_({
 ;{ EXIT TO PC-DOS}
-	INT	27H	;{I'M HISTORY}
+CODE_HEADER({BYE},{BYE})
+        INT      27H     ;{I'M HISTORY}
 });_END___1__({ _HOSTED_MSDOS_1_})
 ;____1_____ _HOSTED_LINUX_1_({
-	JMP     RETURN_LINUX    
+HEADER({BYE},{BYE},{DOCOL})
+        DC      ZERO, ZERO, ZERO, ONE, LINOS
 });_END___1__({ _HOSTED_LINUX_1_})
-	HLT     ; Wait for reset
 
-	PAGE
+        PAGE
 HEADER({LIST},{LISTC},{DOCOL})
-	DC      DECA
-	DC	CR,DUPE
-	DC	SCR,STORE
-	DC	PDOTQ
-	_STRING({SCR # })
-	DC	DOT
-	DC	LIT,10H
-	DC	ZERO,XDO
-LIST1	DC	CR,IDO
-	DC	LIT,3
-	DC	DOTR,SPACE
-	DC	IDO,SCR
-	DC	FETCH,DLINE
-	DC	QTERM	;{ ?TERMINAL}
-	_0BRANCH(LIST2) 
-	DC	LLEAV
-LIST2	_LOOP(LIST1) 
-	DC	CR,SEMIS
+        DC      DECA
+        DC      CR,DUPE
+        DC      SCR,STORE
+        DC      PDOTQ
+        _STRING({SCR # })
+        DC      DOT
+        DC      LIT,10H
+        DC      ZERO,XDO
+LIST1   DC      CR,IDO
+        DC      LIT,3
+        DC      DOTR,SPACE
+        DC      IDO,SCR
+        DC      FETCH,DLINE
+        DC      QTERM   ;{ ?TERMINAL}
+        _0BRANCH(LIST2)
+        DC      LLEAV
+LIST2   _LOOP(LIST1)
+        DC      CR,SEMIS
 ;
 HEADER({INDEX},{INDEX},{DOCOL})
-	DC	LIT,FF
-	DC	EMIT,CR
-	DC	ONEP,SWAP
-	DC	XDO
-INDE1	DC	CR,IDO
-	DC	LIT,3
-	DC	DOTR,SPACE
-	DC	ZERO,IDO
-	DC	DLINE,QTERM
-	_0BRANCH(INDE2) 
-	DC	LLEAV
-INDE2	_LOOP(INDE1) 
-	DC	SEMIS
-	PAGE
+        DC      LIT,FF
+        DC      EMIT,CR
+        DC      ONEP,SWAP
+        DC      XDO
+INDE1   DC      CR,IDO
+        DC      LIT,3
+        DC      DOTR,SPACE
+        DC      ZERO,IDO
+        DC      DLINE,QTERM
+        _0BRANCH(INDE2)
+        DC      LLEAV
+INDE2   _LOOP(INDE1)
+        DC      SEMIS
+        PAGE
 HEADER({TRIAD},{TRIAD},{DOCOL})
-	DC	LIT,FF
-	DC	EMIT
-	DC	LIT,3
-	DC	SLASH
-	DC	LIT,3
-	DC	STAR
-	DC	LIT,3
-	DC	OVER,PLUS
-	DC	SWAP,XDO
-TRIA1	DC	CR,IDO
-	DC	LISTC
-	DC	QTERM	;{ ?TERMINAL}
-	_0BRANCH(TRIA2) 
-	DC	LLEAV   ;{LEAVE}
-TRIA2	_LOOP(TRIA1) 	;{ENDIF}
-	DC	CR
-	DC	SEMIS
+        DC      LIT,FF
+        DC      EMIT
+        DC      LIT,3
+        DC      SLASH
+        DC      LIT,3
+        DC      STAR
+        DC      LIT,3
+        DC      OVER,PLUS
+        DC      SWAP,XDO
+TRIA1   DC      CR,IDO
+        DC      LISTC
+        DC      QTERM   ;{ ?TERMINAL}
+        _0BRANCH(TRIA2)
+        DC      LLEAV   ;{LEAVE}
+TRIA2   _LOOP(TRIA1)    ;{ENDIF}
+        DC      CR
+        DC      SEMIS
 ;
 HEADER({.CPU},{DOTCPU},{DOCOL})
 ;{ PRINT CPU TYPE (8088)}
-	DC	BASE,FETCH
-	DC	LIT,36
-	DC	BASE,STORE
-	DC	LIT,CELLS(12),PORIG ; 
-	DC	TFET
+        DC      BASE,FETCH
+        DC      LIT,36
+        DC      BASE,STORE
+        DC      LIT,CELLS(12),PORIG ;
+        DC      TFET
 ;____1_____ _BITS32_1_({
-	DC      LIT, 10000H, STAR, PLUS, ZERO
+        DC      LIT, 10000H, STAR, PLUS, ZERO
 });_END___1__({ _BITS32_1_})
-	DC	DDOT
-	DC	BASE,STORE
-	DC	SEMIS
-	PAGE
-_COMMENT 
+        DC      DDOT
+        DC      BASE,STORE
+        DC      SEMIS
+        PAGE
+_COMMENT
 
-	    CODE LEVEL "MATCH" DEFINITIONS
+            CODE LEVEL "MATCH" DEFINITIONS
 
  STACK PARAMETERS:
 
  ( cursor:addr   byte:left   str:addr  str:len
-	   ---   flag  new:cursor:offset         )
+           ---   flag  new:cursor:offset         )
 
  This version of MATCH will handle string lengths
       up to 65535 bytes in length.
 
 _ENDCOMMENT
 CODE_HEADER({MATCH},{MATCH})
-	MOV	DI,SI	;{ SAVE IP}
-	POP	CX	;{ STRING COUNT}
-	POP	BX	;{STRING ADDR}
-	POP	DX	;{BYTES LEFT TO SEARCH}
-	POP	SI	;{CURSOR ADDR}
-	PUSH	SI	;{SAVE COPY}
-MAT1:	LODSB		;{GET FIRST BYTE}
-	CMP	AL,[BX]	;{MATCH?}
-	JNZ	MAT3	;{NO}
-	PUSH	BX	;{SAVE STRING ADDR}
-	PUSH	CX	;{ &   STRING COUNT}
-	PUSH	SI	;{ &   CURSOR ADDR}
+        MOV     DI,SI   ;{ SAVE IP}
+        POP     CX      ;{ STRING COUNT}
+        POP     BX      ;{STRING ADDR}
+        POP     DX      ;{BYTES LEFT TO SEARCH}
+        POP     SI      ;{CURSOR ADDR}
+        PUSH    SI      ;{SAVE COPY}
+MAT1:   LODSB           ;{GET FIRST BYTE}
+        CMP     AL,[BX] ;{MATCH?}
+        JNZ     MAT3    ;{NO}
+        PUSH    BX      ;{SAVE STRING ADDR}
+        PUSH    CX      ;{ &   STRING COUNT}
+        PUSH    SI      ;{ &   CURSOR ADDR}
 ;{ TRY TO MATCH REMAINING CHARS IN STRING}
 ;
-MAT2:	DEC	CX	;{STR. COUNT -1}
-	JZ	MATCHOK	;{EXIT - MATCH FOUND}
-	DEC	DX	;{BYTES LEFT -1}
-	JZ	NOMATCH	;{EXIT - NO MATCH}
-	INC	BX	;{NEXT STR CHAR ADDR}
-	LODSB		;{GET FIRST BYTE}
-	CMP	AL,[BX]	;{MATCH?}
-	JZ	MAT2	;{YES, GET MORE}
+MAT2:   DEC     CX      ;{STR. COUNT -1}
+        JZ      MATCHOK ;{EXIT - MATCH FOUND}
+        DEC     DX      ;{BYTES LEFT -1}
+        JZ      NOMATCH ;{EXIT - NO MATCH}
+        INC     BX      ;{NEXT STR CHAR ADDR}
+        LODSB           ;{GET FIRST BYTE}
+        CMP     AL,[BX] ;{MATCH?}
+        JZ      MAT2    ;{YES, GET MORE}
 ;{ NO MATCH YET}
-	POP	SI
-	POP	CX
-	POP	BX	;{RESTORE POINTERS}
-MAT3:	DEC	DX	;{BYTE LEFT COUNT -1}
-	JNZ	MAT1	;{START OVER}
-	JMP	MAT4	;{EXIT...NO MATCH}
+        POP     SI
+        POP     CX
+        POP     BX      ;{RESTORE POINTERS}
+MAT3:   DEC     DX      ;{BYTE LEFT COUNT -1}
+        JNZ     MAT1    ;{START OVER}
+        JMP     MAT4    ;{EXIT...NO MATCH}
 MATCHOK:
 NOMATCH:
-	POP	CX	;{ADJUST STACK}
-	POP	CX	;{FOR EXIT}
-	POP	CX
+        POP     CX      ;{ADJUST STACK}
+        POP     CX      ;{FOR EXIT}
+        POP     CX
 ;{ EXIT HERE: DX = TRUE/FALSE FLAG ( 0=NO MATCH)}
 ;
-MAT4:	MOV	AX,SI	;{NEW CURSOR ADDR}
-	POP	SI	;{GET STARTING ADDR}
-	SUB	AX,SI	;{COMPUTE CURSOR OFFSET}
-	MOV	SI,DI	;{GET BACK UP}
-	JMP	DPUSH	;{ BYE..BYE}
-	PAGE
+MAT4:   MOV     AX,SI   ;{NEW CURSOR ADDR}
+        POP     SI      ;{GET STARTING ADDR}
+        SUB     AX,SI   ;{COMPUTE CURSOR OFFSET}
+        MOV     SI,DI   ;{GET BACK UP}
+        JMP     DPUSH   ;{ BYE..BYE}
+        PAGE
 ;
 ;{**** LAST DICTIONARY WORD ****}
 HEADER({TASK},{TASK},{DOCOL})
-	DC	SEMIS
+        DC      SEMIS
 ;
 ;____1_____ _EQULAYOUT_1_({
-INITDP	EQU	$	;{SHOW END OF DICTIONARY}
+INITDP  EQU     $       ;{SHOW END OF DICTIONARY}
 });_END___1__({ _EQULAYOUT_1_})
 
 ;____1_____ _HOSTED_LINUX_1_({
@@ -3782,12 +3840,12 @@ INITDP	EQU	$	;{SHOW END OF DICTIONARY}
 ;       zero bits in the output file.
 
 FORTHSIZE       EQU     $-figforth
-	 section dictionary nobits write exec alloc             
+         section dictionary nobits write exec alloc
 
 INITDP:                 ;  It may be that it is not consecutive with TASK
-			;  And that is a hell of a problem.
-	BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF  
-	RESB    EM - FORTHSIZE - RTS - US - BUFFERSIZE       
+                        ;  And that is a hell of a problem.
+        BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
+        RESB    EM - FORTHSIZE - RTS - US - BUFFERSIZE
 INITS0:                         ;{ Growns down}
 STRTIB: RESB     RTS            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
@@ -3795,28 +3853,28 @@ STRUSA: RESB    US              ;{ User area}
 BUF1:   RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
 });_END___1__({ _HOSTED_LINUX_1_})
 ;
-_COMMENT 
+_COMMENT
 
-The remaining memory ( up to 'EM' ) is 
+The remaining memory ( up to 'EM' ) is
 used for:
 
-	1. EXTENSION DICTIONARY
-	2. PARAMETER STACK
-	3. TERMINAL INPUT BUFFER
-	4. RETURN STACK
-	5. USER VARIABLE AREA
-	6. DISK BUFFERS
+        1. EXTENSION DICTIONARY
+        2. PARAMETER STACK
+        3. TERMINAL INPUT BUFFER
+        4. RETURN STACK
+        5. USER VARIABLE AREA
+        6. DISK BUFFERS
 
 
 _ENDCOMMENT
-					
+
  CSEG    ENDS
-	PAGE
-_COMMENT 
+        PAGE
+_COMMENT
 
   MISC. NOTES AND SCATTERED THOUGHTS
 
-- This source will assemble on all platforms where NASM is 
+- This source will assemble on all platforms where NASM is
   available by the command line:
   nasm -fbin fig86.asm -o fig86.com
   (There may be exceptions for special configurations.)
@@ -3830,7 +3888,7 @@ _COMMENT
 - Use the installation manual.  Descriptions for all FIG
   words are given.  Those ERROR messages you get in FORTH
   correspond to the relative line numbers in blocks
-  4 and 5 of the installation manual's model.  
+  4 and 5 of the installation manual's model.
 
 - Remember that all the FORTH words in this version are
   upper case letters.  Use <CAPS LOCK> when in FORTH.
@@ -3858,4 +3916,4 @@ _COMMENT
 _ENDCOMMENT
 
 ;{ Define the entry point, not valid for auto booting.}
-	END     ORIG
+        END     ORIG
