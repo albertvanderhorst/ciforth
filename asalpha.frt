@@ -33,9 +33,6 @@ ASSEMBLER DEFINITIONS  HEX
 
 \    1,000,0000 Disallow /U/SU IEEE        2,0000,0000 /S or /SU trap.
 \    4,000,0000 Disallow /U/SU/SUI         8,0000,0000 /U /SU /SUI trap.
-\   10,000,0000 Disallow /SUI             20,0000,0000  /SUI trap.
-
-
 
 \ For DEA set and individual MASK to bad (or back).
 : !BAD    SWAP >BA SWAP TOGGLE ;
@@ -50,7 +47,7 @@ ASSEMBLER DEFINITIONS  HEX
 : F3I-MASK [ BI: 3F.7F INVERT FFFF,FFFF AND ] LITERAL ;
 ( Mask for floating operate instruction opcodes.)
 : F3F-MASK [ BI: 3F.3F INVERT FFFF,FFFF AND ] LITERAL ;
-( Mask for all other opcodes.)
+( Mask for opcodes with 16 bits data on board. No c-register.           )
 : NORMAL-MASK [ BI: 3F.0 INVERT FFFF,FFFF AND ] LITERAL ;
 
 ( ***************************** 4.7 FP Modifiers ********************** )
@@ -128,21 +125,17 @@ ASSEMBLER DEFINITIONS  HEX
     BI: 0.10 BI: 10.1D 6 4FAMILY, CMPULT, CMPEQ, CMPULE, CMPLT, -- CMPLE,
 
 ( Have ``bz|'' and ``R|'' fixed in the instruction. )
-20,0000 0 F3I-MASK  NO-b 'R| >BI @ XOR  T!
-    BI: 0.01 BI: 1C.30 NO-b 'R| >DATA @ OR  4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
-\ ( Resolve conflict with ``FTOIT,'' by disallowing ``az|'' )
-\ ' CTPOP, 0400 !BAD
+20,0000 0 001F,001F T!
+    BI: 0.01 BI: 1C.30 NO-a 4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
 
 ( ***************************** 4.13 MULTIMEDIA *********************** )
 
-80,0000 0 F3I-MASK BI: 1C.31 4PI PERR,
-80,0000 0 F3I-MASK NO-a T!
+80,0000 0 03FF,001F BI: 1C.31 4PI PERR,
+80,0000 0 001F,001F T!
     BI: 0.01 BI: 1C.34 NO-a 4 4FAMILY, UNPKBW, UNPKBL, PKWB, PKLB,
 80,0000 0 F3I-MASK T!
     BI: 0.01 BI: 1C.38
     8 4FAMILY, MINSB8, MINSW4, MINUB8, MINUW4, MAXUB8, MAXUW4, MAXSB8, MAXSW4,
-\ ( Resolve conflict with ``FTOIS,'' )
-\ ' MINSB8, 0400 !BAD
 
 ( ***************************** 4.5 LOGIC ***************************** )
 
@@ -171,8 +164,8 @@ ASSEMBLER DEFINITIONS  HEX
     BI: 0.10 BI: 12.02 8 4FAMILY, MSKBL, MSKWL, MSKLL, MSKQL, -- MSKWH, MSKLH, MSKQH,
     BI: 0.01 BI: 12.30 2 4FAMILY, ZAP, ZAPNOT,
 
-2,0000 0 F3I-MASK BI: 1C.00 4PI SEXTB,
-2,0000 0 F3I-MASK BI: 1C.01 4PI SEXTW,
+2,0000 0   F3I-MASK NO-a   BI: 1C.00 NO-a   4PI SEXTB,
+2,0000 0   F3I-MASK NO-a   BI: 1C.01 NO-a   4PI SEXTW,
 
 ( ***************************** 4.7 FP Formats ************************ )
 
@@ -192,7 +185,7 @@ ASSEMBLER DEFINITIONS  HEX
 (  If alternatives for /N are allowed, the /N bit is stripped in the    )
 (  base instruction, i.e. subtract 80 from yyy in BI: xx.yyy            )
 
-\ SPLIT LATER IN TRAPPING AND NON TRAPPING. NORMAL ROUNDING OBLIGATORY.
+\ REORDER LATER IN TRAPPING AND NON TRAPPING. NORMAL ROUNDING OBLIGATORY.
 4094 0 F3F-MASK T!
     BI: 0.001 BI: 16.000 4 4FAMILY, ADDS, SUBS, MULS, DIVS,
     BI: 0.001 BI: 16.020 4 4FAMILY, ADDT, SUBT, MULT, DIVT,
@@ -203,7 +196,7 @@ ASSEMBLER DEFINITIONS  HEX
 
 40A4 0 F3F-MASK T!
     BI: 0.001 BI: 15.000 4 4FAMILY, ADDF, SUBF, MULF, DIVF,
-    BI: 0.001 BI: 15.00A 4 4FAMILY, ADDG, SUBG, MULG, DIVG,
+    BI: 0.001 BI: 15.020 4 4FAMILY, ADDG, SUBG, MULG, DIVG,
 4,0000,40A4 0 03FF,E01F  T!
     BI: 0.001 BI: 15.0A5 3 4FAMILY, CMPGEQ, CMPGLT, CMPGLE,
 8,40A4 0 F3F-MASK NO-a T!
@@ -231,10 +224,9 @@ ASSEMBLER DEFINITIONS  HEX
 4084 0 03FF,001F T!
     BI: 0.001 BI: 17.020 3 4FAMILY, CPYS, CPYSE, CPYSN,
 
-4044 0 03FF,001F BI: 17.010 4PI CVTLQ,
+4044 0 001F,001F BI: 17.010 NO-a 4PI CVTLQ,
 ( Mark this instruction as VAX floating for trap modifiers.             )
-4064 0 001F,E01F BI: 17.030 4PI CVTQL,
-\ 10,0000,4044 0 03FF,E01F BI: 17.030 4PI CVTQL,
+4064 0 001F,E01F BI: 17.030 NO-a 4PI CVTQL,
 
 4084 0 03FF,001F T!
     BI: 0.001 BI: 17.02A 6 4FAMILY, FCMOVEQ, FCMOVNE, FCMOVLT, FCMOVGE,
@@ -311,15 +303,12 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 0 0   001F,0000  6000,F800 4PI WH64,
 0 0   0000,0000  6000,4400 4PI WMB,
 
-
-( ********************************************************************* )
-00 00 NORMAL-MASK T!
-
-( ********************************************************************* )
 ( ********************************************************************* )
 
+( Any PALCODE can be added as in this example :                         )
+(       0 0 0 BI: 00.0083 4PI callsys                                   )
 
-( ---------------------------------------test -----------------         )
+( ***************************** POSTLUDE ****************************** )
 
 \   Toggle the bit that governs showing uninteresting instructions in the disassembly.
 : TOGGLE-TRIM    BA-DEFAULT 1 TOGGLE ;
