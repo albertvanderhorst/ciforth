@@ -1116,6 +1116,78 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
         _PUSH
         PAGE
+worddocsafe({DICTIONARY},{MATCH-WORD},{match_word},{addr1 addr2 --- f )}, {},
+{Compares the string variable addr1 with the name field address forthvar({addr2}).
+Returns flag forthsamp({f}) indicating whether there is a a match. 
+If no match is found, a boolean false is left.},{{FIND}})
+CODE_HEADER({MATCH-WORD},{MATCHW})
+;{       MOV     AX,DS}
+;{       MOV    ES,AX   ;ES = DS}
+        POP     BX      ;{NFA}
+        POP     CX      ;{STRING ADDR}
+;
+;{  SEARCH LOOP}
+MAT1:  MOV     DI,CX   ;{GET ADDR}
+        MOV     AL,[BX] ;{GET WORD LENGTH}
+        MOV     DL,AL   ;{SAVE WORD LENGTH}
+        XOR     AL,[DI]
+        AND     AL,3FH  ;{CHECK LENGTHS}
+        JNZ     MAT5   ;{LENGTHS DIFFER}
+
+;
+;{   LENGTHS MATCH - CHECK EACH CHARACTER IN NAME}
+MAT2:  INC     BX
+        INC     DI      ;{ NEXT CHAR OF NAME}
+        MOV     AL,[BX]
+        XOR     AL,[DI] ;{COMPARE NAMES}
+        ADD     AL,AL   ;{THIS WILL BE TEST BIT 8}
+        JNZ     MAT5   ;{NO MATCH}
+        TEST    _BYTE_PTR[BX],080H;{Last char of NFA?.}
+        JZ      MAT2   
+;
+;{   FOUND END OF NAME (BIT 8 SET) - A MATCH}
+        MOV     AX,1    ;{TRUE VALUE}
+        JMP     SHORT MAT6
+MAT5:
+        XOR     AX,AX
+MAT6: 
+        _PUSH
+;
+worddoc({STORAGE},{RESULT},{result},{--- addr},{},
+{A variable containing the address of the result of searching 
+in one vocabulary chain.},{{BLOCK}})
+HEADER({RESULT},{RESULT},{DOVAR})
+        DC 0
+;
+worddocsafe({DICTIONARY},{MATSIE},{matsie},{addr1 addr2 --- addr1 )}, {},
+{Intended to cooperate with forthcode({FOR-WORDS}) .
+Compares the string variable addr1 with the dea forthvar({addr2}).
+Returns into forthcode({RESULT}) this dea if is a a match and exits prematurely 
+from forthcode({FOR-WORDS}).},
+{{FIND}})
+HEADER({MATSIE},{MATSIE},{DOCOL})
+        DC      TDUP, MATCHW
+        _0BRANCH(MATS1)
+        DC      FROMR, FROMR, DROP, ZERO, TOR, TOR ;{FORCE END}
+        DC      LDUP, RESULT, STORE
+MATS1:  DC      DROP
+        DC      SEMIS
+
+; {As (FIND) but high level.}
+HEADER({FINDIE},{FINDIE},{DOCOL})
+        DC      ZERO, RESULT, STORE
+        DC      LIT, MATSIE, SWAP, FORW, DROP
+        DC      RESULT, FETCH
+        _0BRANCH(FINDIE1)
+        DC      RESULT,FETCH, PFA
+        DC      RESULT, FETCH, CFET
+        DC      ONE
+        _BRANCH(FINDIE2)
+FINDIE1:
+        DC      ZERO
+FINDIE2:
+         DC       SEMIS
+        ;
 worddocsafe({DICTIONARY},{(FIND)},{paren_find},{addr1 addr2 --- pfa b tf (ok)
 addr1 addr2 .--- ff (bad)},{},
 {Searches the dictionary starting at the name field address forthvar({addr2}),
@@ -5432,66 +5504,6 @@ _BITS32_({
         DC      BASE,STORE
         DC      SEMIS
 ;
-;           CODE LEVEL "MATCH" DEFINITIONS
-;
-worddoc({STRING},{MATCH},{match},{add1 n1 addr2 n2 -- f o},{},
-{This word supposedly compares strings.
-Its documentation looked like this
-forthexample({
- STACK PARAMETERS:
-
- ( cursor:addr   byte:left   str:addr  str:len
-           ---   flag  new:cursor:offset         )
-
- This version of MATCH will handle string lengths
-      up to 65535 bytes in length.
-})
-I hope I interpreted this stack diagram right.
-},
-{})
-CODE_HEADER({MATCH},{MATCH})
-        MOV     DI,SI   ;{ SAVE IP}
-        POP     CX      ;{ STRING COUNT}
-        POP     BX      ;{STRING ADDR}
-        POP     DX      ;{BYTES LEFT TO SEARCH}
-        POP     SI      ;{CURSOR ADDR}
-        PUSH    SI      ;{SAVE COPY}
-MAT1:   LODSB           ;{GET FIRST BYTE}
-        CMP     AL,[BX] ;{MATCH?}
-        JNZ     MAT3    ;{NO}
-        PUSH    BX      ;{SAVE STRING ADDR}
-        PUSH    CX      ;{ &   STRING COUNT}
-        PUSH    SI      ;{ &   CURSOR ADDR}
-;{ TRY TO MATCH REMAINING CHARS IN STRING}
-;
-MAT2:   DEC     CX      ;{STR. COUNT -1}
-        JZ      MATCHOK ;{EXIT - MATCH FOUND}
-        DEC     DX      ;{BYTES LEFT -1}
-        JZ      NOMATCH ;{EXIT - NO MATCH}
-        INC     BX      ;{NEXT STR CHAR ADDR}
-        LODSB           ;{GET FIRST BYTE}
-        CMP     AL,[BX] ;{MATCH?}
-        JZ      MAT2    ;{YES, GET MORE}
-;{ NO MATCH YET}
-        POP     SI
-        POP     CX
-        POP     BX      ;{RESTORE POINTERS}
-MAT3:   DEC     DX      ;{BYTE LEFT COUNT -1}
-        JNZ     MAT1    ;{START OVER}
-        JMP     MAT4    ;{EXIT...NO MATCH}
-MATCHOK:
-NOMATCH:
-        POP     CX      ;{ADJUST STACK}
-        POP     CX      ;{FOR EXIT}
-        POP     CX
-;{ EXIT HERE: DX = TRUE/FALSE FLAG ( 0=NO MATCH)}
-;
-MAT4:   MOV     AX,SI   ;{NEW CURSOR ADDR}
-        POP     SI      ;{GET STARTING ADDR}
-        SUB     AX,SI   ;{COMPUTE CURSOR OFFSET}
-        MOV     SI,DI   ;{GET BACK UP}
-        _2PUSH          ;{ BYE..BYE}
-        PAGE
 _DIRECTMAPPED_({
 ;
 worddoc({MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
