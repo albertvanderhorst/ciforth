@@ -179,3 +179,18 @@ block files. PROT16B
 Because BX can index as well as DI can, and it is not associated with ES
 I am using BX as the pointer to the new code field address ("working register")
 (and because I hope this gives an indication why the 32 bit version doesnot work.)
+
+2.44 contain the bug in REPEAT that 2 is used instead of CW for subtraction.
+
+2.45 is a working 32 bit version (label PROT). The diffence is in protect.m4
+so make sure you check out everything belonging to that.
+
+2.51 is quite a decent version. 32 bit protected through 16 bit msdos 
+works for NASM.
+
+2.53 Is the best version till now with all options available.
+
+2.55 A bug was present in C@ (The high part of AX was not cleared!).
+Removed and a slightly working version of linux.
+
+2.58 The first version of linux figforth. It is directly linked.
