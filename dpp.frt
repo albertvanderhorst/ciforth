@@ -46,15 +46,18 @@ LANGUAGE-FILE INCLUDED
 \    question 1
 \    ....
 \    question NQ
-\    Answer acceptable for type 1
-\    ND answers for question 1
+\  Separation line
+\    NQ answers for diagnosis 1 : # times YES
 \ ......
-\    ND answers for question NQ
-\    Answer type 2
-\    ND answers for question 1
+\    NQ answers for diagnosis ND : # times YES
+\  Separation line
+\    NQ answers for diagnosis 1 : # times NO
 \ ......
-\    ND answers for question NQ
-\ ... all answers
+\    NQ answers for diagnosis ND : # times NO
+\  Separation line
+\    NQ answers for diagnosis 1 : # times UNKNOWN
+\ ......
+\    NQ answers for diagnosis ND : # times UNKNOWN
 
 
 
@@ -104,6 +107,13 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 "NOES"      (CREATE)
 "?ES"       (CREATE)
 
+\ Trim a line from the STRING , leaving remainder STRING.
+: TRIM-SEPARATOR-LINE
+    ^J $S CR
+\D  2DUP TYPE   \ Show potential problems.
+    2DROP
+;
+
 \ Read the database from file with NAME .
 : READ-DATABASE
     GET-FILE
@@ -117,20 +127,18 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 
     #QUESTIONS @ SPARE + CELLS STRIDE !
 
-    ^J $S CR TYPE   \ Show potential problems.
-
+    TRIM-SEPARATOR-LINE
     "YESSES*" POSTFIX ANSWER-ARRAY
     LATEST 'YESSES 3 CELLS MOVE
 
-    ^J $S CR TYPE   \ Show potential problems.
-
+    TRIM-SEPARATOR-LINE
     "NOES*" POSTFIX ANSWER-ARRAY
     LATEST 'NOES 3 CELLS MOVE
 
-    ^J $S CR TYPE   \ Show potential problems.
-
+    TRIM-SEPARATOR-LINE
     "?ES*" POSTFIX ANSWER-ARRAY
     LATEST '?ES 3 CELLS MOVE
+    CR
 
     2DROP
 ;
@@ -294,7 +302,15 @@ VOCABULARY D-MAIN
 D-MAIN DEFINITIONS   DATABASE INTERACTION
 
 \ Exit to linux with whatever ERROR was caught, hopefuly zero.
-: ERROR-BYE NEGATE 0 0 1 LINOS ;
+: MY-ERROR
+    DUP IF DUP
+     "? dpp ERROR # " TYPE
+    BASE   @   DECIMAL   OVER   S>D   0 (D.R)   ETYPE   BASE   !
+\   DUP MESSAGE   \ Comment in if there is a library with error messages.
+    CR
+    THEN
+    0= 0= EXIT-CODE ! BYE
+;
 
 \ Do whatever need to be done if the user wants to stop.
 : FINISH
@@ -768,4 +784,7 @@ D-MAIN DEFINITIONS
 
 ONLY FORTH DEFINITIONS
 D-MAIN
-: MAIN 'DOIT CATCH ERROR-BYE ;
+: MAIN 'DOIT CATCH MY-ERROR ;
+
+\   Install error handler. Not before compilation finished!
+' MY-ERROR   'ERROR 3 CELLS MOVE
