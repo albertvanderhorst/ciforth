@@ -5595,7 +5595,7 @@ forthvar({n2}) to a string forthvar({sc}) the content of the
 line (without the trailing new line). },
 {{LINE}},
 {
-{1 2 (LINE) TYPE}, { I have a beautiful disclaimer,}
+{1 1B (LINE) TYPE}, { LICENSE }
 },
 enddoc)
 HEADER({(LINE)},{PLINE},{DOCOL})
@@ -5618,7 +5618,7 @@ line and screen number. _VERBOSE_(
 which leads to a tremendous speed advantage on modern glass tty's.}})},
 {{C/L}},
 {
-{1 2 .LINE}, { I have a beautiful disclaimer,}
+{1 1B .LINE}, { LICENSE }
 },
 enddoc)
 HEADER({.LINE},{DLINE},{DOCOL})
@@ -5640,7 +5640,7 @@ will be printed in case of disk errors, not even that there is
 a disk error. },
 {{ERROR}},
 {
-{1 WARNING ! -1F MESSAGE}, { I have a beautiful disclaimer,},
+{1 WARNING ! -20 MESSAGE}, {( -b This_option_is_available )},
 {0 WARNING ! 12 MESSAGE},{MSG # 12 }},
 enddoc)
 HEADER({MESSAGE},{MESS},{DOCOL})
@@ -7208,7 +7208,7 @@ error messages.
 {BLOCK-EXIT},{},
 {0 WARNING ! -1F MESSAGE}, {MSG # -1F},
 { CR DISK-ERROR @ 0= 0= . BLOCK-INIT},{_T_},
-{1 WARNING ! -1F MESSAGE}, { I have a beautiful disclaimer,},
+{1 WARNING ! -20 MESSAGE}, {( -b This_option_is_available )},
 },
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
@@ -7402,7 +7402,7 @@ no longer are.},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
  {PTY-BUFFERS 1 BLOCK ? MSG # 8},
 { CR DISK-ERROR @ 0 < . BLOCK-INIT},{_T_},
-{1 2 .LINE}, { I have a beautiful disclaimer,}
+{1 1B .LINE}, { LICENSE }
 },
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
@@ -7871,7 +7871,7 @@ worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
 Deletes definition named forthvar({cccc}) from the dictionary
 with all entries physically following it.
 },
-{{FENCE}},
+{{FENCE},{FORGET-VOC}},
 {
 {: GO ; HERE : CH ; : GI ; FORGET CH LATEST ID. },{GO},
 {HERE - .},{0},

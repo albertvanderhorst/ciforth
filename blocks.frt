@@ -255,21 +255,21 @@ SWITCH-LIBS
 
 
 ( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
-.SIGNON CR 27 LIST  28 LOAD
-  REQUIRE ?32   REQUIRE ?PC ( Configuration )
- ( MAINTENANCE )  100 LOAD   34 LOAD
-REQUIRE H. REQUIRE DUMP ( CHAR )  LOAD 39 LOAD ( i.a. editor)
-( STRINGS      )  35 LOAD 36 LOAD
- ( EDITOR ) 109 LOAD
-    REQUIRE CRACK EXIT
- ( BACKUP )       250 LOAD   77 81 THRU
- ( ASSEMBLER 80x86 SAVE-BLOCKS) 120 LOAD   97 98 THRU
- ( CRC             71 LOAD   )
- ( ASSEMBLER 8080  74 LOAD   )
- ( CP/M READ WRITE LOAD    17 LOAD 21 LOAD 24 LOAD 21: BUGS)
- ( FIG:  SAVE-SYSTEM      23 LOAD   )
-: TASK ;
-( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD ) OK
+.SIGNON CR 27 LIST  28 LOAD    : REQ REQUIRE ;
+REQ ?16
+REQ L-S ( MAINTENANCE )
+REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
+REQ $.   REQ C"
+REQ editor_electives
+REQ REFRESH ( temporaryly)
+REQ CRACK    REQ LOCATE
+ ( BACKUP        250 LOAD   77 81 THRU )
+( REQ assembler386_electives )  ( SAVE-BLOCKS 97 98 THRU )
+
+
+
+: TASK ;   ( 'REQ HIDDEN)
+OK
 ( -q This_option_is_available )
 
 
@@ -431,7 +431,7 @@ REQUIRE ?LEAVE-BLOCK
 
 
 COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
-        license
+                   LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License as
 published by the Free Software Foundation; either version 2 of
@@ -443,9 +443,9 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public
-License along with this program; if not, write to the Free
-Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-MA 02111, USA.
+License along with this program; if not, write to the
+            Free Software Foundation, Inc.,
+   59 Temple Place, Suite 330, Boston, MA 02111, USA.
 ( COMPARE PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
  : COMPARE ( ISO) ROT 2DUP SWAP - >R
@@ -542,8 +542,8 @@ REQUIRE 32_bit_loaded_from_block_1 ?16
           ?DUP IF
           OVER + SWAP DO I C@ PEMIT LOOP THEN ;
   : P."  "" WORD COUNT PTYPE ;       34 LOAD
- ( SUPER-QUAD)  ?PC
-   0 IVAR L
+ ( SUPER-QUAD SQ )  REQUIRE ?PC   ?PC
+   VARIABLE L
  : CONDENSED 34 MODE ;
  :  HEADER  CR DUP 2 + SWAP
     DO 3  SPACES ." SCR #" I 4 .R 54  SPACES LOOP ;
@@ -574,12 +574,12 @@ REQUIRE 32_bit_loaded_from_block_1 ?16
 
 
 
-( PARSING  & STRINGS                   A0apr03-AH)
+( PARSE C" STRING ) \ A0apr03-AH)
 ( HANDY & Preparation for ANSI-fication)
 : PARSE WORD COUNT ;     \ Halfway ISO
-: ($) R@ $@ DUP CELL+ R> + >R ;
 
 
+\ ISO
 : C"  HERE [ DENOTATION ] POSTPONE " [ PREVIOUS ]
     DUP @ SWAP CELL+ 1 - C! ( Make it brain damaged)
     POSTPONE DROP POSTPONE CELL+ POSTPONE 1- ;
@@ -622,7 +622,7 @@ REQUIRE COMPARE
 
 
 
-?PC  <HEX ( DEBUG SCR#7 )
+( DUMP2 )  REQUIRE ?PC  ?PC \ AvdH A1oct
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
     DO
@@ -1134,45 +1134,6 @@ DECIMAL  (  For 32 bits, but not yet schecked)
 
 
 
-." CRC CHECK FOR FIG  85JAN06 ALBERT VAN DER HORST"
-( Adapted from FORTH DIMENSIONS IV-3 ) HEX
- : ACCUMULATE ( oldcrc/char -- newcrc )
-   0100 * XOR
-   8 0 DO
-      DUP 0< IF 4002 XOR DUP + 1+ ELSE DUP + THEN
-   LOOP ;
- : DISPOSE ( crcvalue/adres/len -- newcrcvalue)
-    OVER DUP C@ "( = SWAP 1+ C@ BL = AND OVER 1 = AND IF
-       ( comment; skip it) DROP DROP ") WORD DROP
-    ELSE
-       1+ OVER + SWAP DO I C@ ACCUMULATE LOOP
-    THEN ;
- : MORE ( -- adr f  Leaves flag if there is more in the block)
-    BL WORD DUP C@ 2 < OVER 1+ C@ "! < AND 0=
- ;
- ." CRC 2 "
- : VERIFY-BLOCK ( oldcrc/blnr -- newcrc)
-   BLK @ >R IN @ >R   BLK !  0 IN !
-   BEGIN MORE WHILE
-       BL OVER COUNT + C! COUNT DISPOSE
-   REPEAT DROP ( drop the address left by MORE)
-   R> IN ! R> BLK ! ;
- : VERIFY ( scrnr/crc)
-   0 SWAP B/SCR * DUP B/SCR + SWAP DO
-      I VERIFY-BLOCK
-   LOOP
- ;
- : VER   SCR @ VERIFY U. ;
-
-
-
-( Test screen)
-     For program exchange, the medium of hard copy is cheap,
-convenient, and machine-independent. Its primary disadvantages
-are the time required for hand-typing the source code and the
-possibility of human error in the process. Even if the screens
-LOAD without error messages, some errors may pass undetected
-until run-time, when the system crashes mysteriously.
 
 
 
@@ -1182,51 +1143,90 @@ until run-time, when the system crashes mysteriously.
 
 
 
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
-HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
-ASSEMBLER DEFINITIONS ( ;CODE see screen3 )
-: C; PREVIOUS ?EXEC ?CSP ; IMMEDIATE
-: LABEL ?EXEC 0 IVAR SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
-    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
-4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
-2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
-6 CONSTANT M 6 CONSTANT SP 'EXIT >CFA 0B + @ CONSTANT (NEXT)
-: 1MI CREATE C, DOES> C@ C, ;  : 2MI CREATE C, DOES> C@ + C, ;
- : 3MI CREATE C, DOES> C@ SWAP 8* +  C, ;
-: 4MI CREATE C, DOES> C@ C, C, ;
-: 5MI CREATE C, DOES> C@ C, , ;  : PSH1 C3 C, (NEXT) 1 - , ;
-: PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;
-75 76 THRU
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
-00 1MI NOP     76 1MI HLT     F3 1MI DI     FB 1MI EI
-07 1MI RLC     0F 1MI RRC     17 1MI RAL    1F 1MI RAR
-E9 1MI PCHL    F9 1MI SPHL    E3 1MI XTHL   EB 1MI XCHG
-27 1MI DAA     2F 1MI CMA     37 1MI STC    3F 1MI CMC
-80 2MI ADD     88 2MI ADC     90 2MI SUB    98 2MI SBB
-A0 2MI ANA     A8 2MI XRA     B0 2MI ORA    B8 2MI CMP
-09 3MI DAD     C1 3MI POP     C5 3MI PUSH   02 3MI STAX
-0A 3MI LDAX    04 3MI INR     05 3MI DCR    03 3MI INX
-0B 3MI DCX     C7 3MI RST     D3 4MI OUT    DB 4MI IN
-C6 4MI ADI     CE 4MI ACI     D6 4MI SUI    DE 4MI SBI
-E6 4MI ANI     EE 4MI XRI     F6 4MI ORI    FE 4MI CPI
-22 5MI SHLD    2A 5MI LHLD    32 5MI STA    3A 5MI LDA
-CD 5MI CALL    C3 5MI JMP
-               ( CZ,CNZ,CCY,CNC)
 
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >3<"
-C9 1MI RET                   C2 CONSTANT 0=  D2 CONSTANT CS
-E2 CONSTANT PE  F2 CONSTANT 0<   : NOT 8 + ;
-: MOV 8* 40 + + C, ;   : MVI 8* 6 + C, C, ;  : LXI 8* 1+ C, , ;
-: THEN HERE SWAP ! ;               : IF C, HERE 0 , ;
-: ELSE C3 IF SWAP THEN ;           : BEGIN HERE ;
-: UNTIL C, , ;                     : WHILE IF ;
-: REPEAT SWAP C3 C, , THEN ;
-EXIT
 
-: ;CODE
-?CSP   POSTPONE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
-; IMMEDIATE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1598,7 +1598,7 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
   POPX, SI|
   PUSHF,
   NEXT C;            DECIMAL
-( BASIC STYLE MINI EDITOR - FORTH DIM iii/2 @ SHAPIN)
+( BASIC STYLE mini_editor L-S C-S - FORTH DIM iii/2 @ SHAPIN)
 HEX : TEXT HERE C/L 1+ BLANK WORD PAD C/L 1+ CMOVE ;
 : LINE DUP FFF0 AND 17 ?ERROR SCR @ (LINE) DROP ;
 : -MOVE LINE C/L 1- ( leave \n) CMOVE UPDATE ;
@@ -1742,7 +1742,7 @@ DECIMAL
 
 
 
-( editor elective screen)
+( editor_electives )
 ?PC
    101 107 THRU
 
@@ -1855,6 +1855,7 @@ DECIMAL
 
 
 ( OS-IMPORT cd ) \ AvdH A1sep25
+REQUIRE ?LI ?LI
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
      CREATE , ,
@@ -1869,9 +1870,8 @@ CREATE cmdbuf 1000 ALLOT
 PAD CELL+ HERE HERE 12 LINOS ?LINUX-ERROR ;
 \ Idem but string from input.
 : cd (WORD) cdED ;
-
 ( cat echo diff grep list ls make man rm   ee l ) \ AvdH A1oct0
-REQUIRE ?LI ?LI   REQUIRE OS-IMPORT
+REQUIRE OS-IMPORT       ?LI
 "cat    "   OS-IMPORT cat
 "echo   "   OS-IMPORT echo
 "diff   "   OS-IMPORT diff
@@ -1918,7 +1918,7 @@ REQUIRE ?LI ?LI   REQUIRE OS-IMPORT
 
 
 
-( ASSEMBLER CODE C; )  \ electives AvdH A0JUL03
+( assembler386_electives  ASSEMBLER CODE C; )  \ AvdH A0oct03
 REQUIRE ?16   REQUIRE ?32   "ASSEMBLER" PRESENT? ?LEAVE-BLOCK
 VOCABULARY ASSEMBLER IMMEDIATE
 : CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER !CSP  ;
@@ -3237,8 +3237,8 @@ BLK ?
 : REFRESH
     BLOCK-EXIT
     "ee BLOCKS.BLK;cp BLOCKS.BLK blocks.frt" SYSTEM
-    BLOCK-INIT ;
-
+    BLOCK-INIT
+    1 WARNING ! ;
 
 
 
@@ -4270,11 +4270,11 @@ REQUIRE Z$@   REQUIRE ENV
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
-( CRACK KRAAK KRAKER ) \ AvdH A1oct04
+( SEE CRACK KRAAK KRAKER ) \ AvdH A1oct04
 BLK @ DUP 1 + SWAP 7 + THRU
 
-
-
+: SEE   KRAAK ;
+: CRACK KRAAK ;
 
 
 
@@ -4370,8 +4370,8 @@ CFOF LIT BY -lit
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
                       CFOF SKIP BY -sk
-: -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT TYPE [CHAR] " EMIT
-  BL EMIT $@ + ;                     CFOF ($) BY -sq
+
+
   : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
   : -qdo CR ." ?DO " CELL+ CELL+ ;   CFOF (?DO) BY -qdo
   : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
@@ -4434,7 +4434,7 @@ CFOF BRANCH BY -br
 ( Adaptations from CP/M : VARIABLE )
 
 
-BLK DUP 1 + SWAP 5 + THRU
+BLK @ DUP 1 + SWAP 5 + THRU
 
 
 
@@ -4725,6 +4725,102 @@ R> R> R> Z ! Y ! X !
 
 
 
+
+
+
+
+
+
+
+
+
+CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
+HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
+: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
+ASSEMBLER DEFINITIONS ( ;CODE see screen3 )
+: C; PREVIOUS ?EXEC ?CSP ; IMMEDIATE
+: LABEL ?EXEC 0 IVAR SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
+    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
+4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
+2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
+6 CONSTANT M 6 CONSTANT SP 'EXIT >CFA 0B + @ CONSTANT (NEXT)
+: 1MI CREATE C, DOES> C@ C, ;  : 2MI CREATE C, DOES> C@ + C, ;
+ : 3MI CREATE C, DOES> C@ SWAP 8* +  C, ;
+: 4MI CREATE C, DOES> C@ C, C, ;
+: 5MI CREATE C, DOES> C@ C, , ;  : PSH1 C3 C, (NEXT) 1 - , ;
+: PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;
+75 76 THRU
+CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
+00 1MI NOP     76 1MI HLT     F3 1MI DI     FB 1MI EI
+07 1MI RLC     0F 1MI RRC     17 1MI RAL    1F 1MI RAR
+E9 1MI PCHL    F9 1MI SPHL    E3 1MI XTHL   EB 1MI XCHG
+27 1MI DAA     2F 1MI CMA     37 1MI STC    3F 1MI CMC
+80 2MI ADD     88 2MI ADC     90 2MI SUB    98 2MI SBB
+A0 2MI ANA     A8 2MI XRA     B0 2MI ORA    B8 2MI CMP
+09 3MI DAD     C1 3MI POP     C5 3MI PUSH   02 3MI STAX
+0A 3MI LDAX    04 3MI INR     05 3MI DCR    03 3MI INX
+0B 3MI DCX     C7 3MI RST     D3 4MI OUT    DB 4MI IN
+C6 4MI ADI     CE 4MI ACI     D6 4MI SUI    DE 4MI SBI
+E6 4MI ANI     EE 4MI XRI     F6 4MI ORI    FE 4MI CPI
+22 5MI SHLD    2A 5MI LHLD    32 5MI STA    3A 5MI LDA
+CD 5MI CALL    C3 5MI JMP
+               ( CZ,CNZ,CCY,CNC)
+
+CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >3<"
+C9 1MI RET                   C2 CONSTANT 0=  D2 CONSTANT CS
+E2 CONSTANT PE  F2 CONSTANT 0<   : NOT 8 + ;
+: MOV 8* 40 + + C, ;   : MVI 8* 6 + C, C, ;  : LXI 8* 1+ C, , ;
+: THEN HERE SWAP ! ;               : IF C, HERE 0 , ;
+: ELSE C3 IF SWAP THEN ;           : BEGIN HERE ;
+: UNTIL C, , ;                     : WHILE IF ;
+: REPEAT SWAP C3 C, , THEN ;
+EXIT
+
+: ;CODE
+?CSP   POSTPONE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
+; IMMEDIATE
+
+
+
+." CRC CHECK FOR FIG  85JAN06 ALBERT VAN DER HORST"
+( Adapted from FORTH DIMENSIONS IV-3 ) HEX
+ : ACCUMULATE ( oldcrc/char -- newcrc )
+   0100 * XOR
+   8 0 DO
+      DUP 0< IF 4002 XOR DUP + 1+ ELSE DUP + THEN
+   LOOP ;
+ : DISPOSE ( crcvalue/adres/len -- newcrcvalue)
+    OVER DUP C@ "( = SWAP 1+ C@ BL = AND OVER 1 = AND IF
+       ( comment; skip it) DROP DROP ") WORD DROP
+    ELSE
+       1+ OVER + SWAP DO I C@ ACCUMULATE LOOP
+    THEN ;
+ : MORE ( -- adr f  Leaves flag if there is more in the block)
+    BL WORD DUP C@ 2 < OVER 1+ C@ "! < AND 0=
+ ;
+ ." CRC 2 "
+ : VERIFY-BLOCK ( oldcrc/blnr -- newcrc)
+   BLK @ >R IN @ >R   BLK !  0 IN !
+   BEGIN MORE WHILE
+       BL OVER COUNT + C! COUNT DISPOSE
+   REPEAT DROP ( drop the address left by MORE)
+   R> IN ! R> BLK ! ;
+ : VERIFY ( scrnr/crc)
+   0 SWAP B/SCR * DUP B/SCR + SWAP DO
+      I VERIFY-BLOCK
+   LOOP
+ ;
+ : VER   SCR @ VERIFY U. ;
+
+
+
+( Test screen)
+     For program exchange, the medium of hard copy is cheap,
+convenient, and machine-independent. Its primary disadvantages
+are the time required for hand-typing the source code and the
+possibility of human error in the process. Even if the screens
+LOAD without error messages, some errors may pass undetected
+until run-time, when the system crashes mysteriously.
 
 
 
