@@ -9,7 +9,7 @@ PREFIX=0
 TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
 TESTTARGETS=*.ps testas* testlina.[0-9] testmina.[0-9] testlinux.[0-9]
 
-testclean: ; rm $(TESTTARGETS)
+testclean: ; rm -f $(TESTTARGETS)
 
 %.ps:%.dvi  ;
 	 texindex  $(@:%.ps=%.??)
@@ -191,8 +191,10 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
-	echo "define({ci86gnrversion}, ifelse(M4_VERSION,,{M4_VERSION}, \
-{beta `rlog -r -h -N ci86.gnr|grep head|sed -e s/head://`}))dnl" >>$@
+	echo "define({ci86gnrversion}, ifelse(M4_VERSION,,\
+{snapshot `rlog -r -h -N ci86.gnr|grep head|sed -e s/head://`},\
+{M4_VERSION}\
+))dnl" >>$@
 
 # Make the worddoc macro's into glossary paragraphs to our liking
 %.mim : gloss.m4 %.mig ; \
