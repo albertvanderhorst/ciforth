@@ -525,14 +525,12 @@ HERE4:
 
 
 ;{************************}
-_BITS32_1_({ include(width32.m4) })
+_BITS32_1_({include(width32.m4) })
 ;{************************}
 ;{ The following had to wait until width32.m4 had been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
 
-;____1_____ _SWITCH_1_({
-        JMPHERE_FROM_REAL
-});_END___1__({ _SWITCH_1_})
+        _SWITCH_1_({JMPHERE_FROM_REAL})
 
 ; ########################################################################################
 ;                       FORTH GLUE CODE (optional, except for the jump)
@@ -735,8 +733,8 @@ TNEXT3: LODSW           ;{ AX <- (IP)}
         PAGE
 ;____1_____ _NEWDEBUG_1_({
 DISPLAYSI:
-        JMPHERE_FROM_PROT
-        BITS    16
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
+        SET_16_BIT_MODE
         PUSH    SI
         PUSH    BP
         PUSH    BX
@@ -747,10 +745,10 @@ DISPLAYSI:
         MOV     AX,SI
         CALL    DISPLAYW
         CALL    DISPLAYCR
-        BITS    32
+        SET_32_BIT_MODE
         MOV     AH,10H
         INT     16H
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_OS})
         POP    BX
         POP    BP
         POP    SI
@@ -1276,11 +1274,12 @@ CODE_HEADER({L@},{LFET})
 ;____1_____ _BITS16_1_({
         POP     BX      ;MEM LOC
         POP     CX      ;SEG REG VAL
-        JMPHERE_FROM_PROT
-        MOV     DX,DS
+        _SWITCH_1_({JMPHERE_FROM_PROT})
+        MOV     DX,DS   ;{ Leave this for real mode code.} 
         MOV     DS,CX
         MOV     BX,[BX]
         MOV     DS,DX
+        _SWITCH_1_({JMPHERE_FROM_REAL})
         JMPHERE_FROM_REAL
         PUSH    BX
         _NEXT
@@ -1302,13 +1301,13 @@ CODE_HEADER({L!},{LSTORE})
 ;____1_____ _BITS16_1_({
         POP     BX
         POP     CX
-        JMPHERE_FROM_PROT
-        MOV     DX,DS
+        _SWITCH_1_({JMPHERE_FROM_PROT})
+        MOV     DX,DS   ;{ Leave this for real mode code.} 
         MOV     DS,CX
         POP     AX
         MOV     [BX],AX
         MOV     DS,DX
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_REAL})
         _NEXT
 });_END___1__({ _BITS16_1_})
         PAGE
@@ -1329,8 +1328,8 @@ DOCOL:  LEA     BP,[BP-CELLS(1)]
         LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 ;____1_____ _SWITCH_1_({
-        JMPHERE_FROM_PROT
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
+        _SWITCH_1_({JMPHERE_FROM_OS})
 });_END___1__({ _SWITCH_1_})
         _NEXT
 ;
@@ -2663,18 +2662,14 @@ CODE_HEADER({BIOS},{BIOS})
         PUSH     SI      ;{ Save Forth registers. NEEDED? }
         PUSH     BP
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
-        MOV     _CELL_PTR[SPSAVE],STACKPOINTER
-        AND     AX,AX
-        MOV     STACKPOINTER,AX
-        JMPHERE_FROM_PROT
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
         XCHG    {SI},{AX}
 RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         PUSHF      ;{ Save status into DI }
         POP     {DI}
         XCHG    {SI},{AX}  ;{ Save AX in (still free) SI     }
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_OS})
         XCHG    SI,AX
-        MOV     STACKPOINTER,_CELL_PTR[SPSAVE]
         POP     BP      ;{ Restore Forth registers. NEEDED? }
         POP     SI      ;{INTERPRETER PNTR}
         PUSH     AX
@@ -2683,7 +2678,7 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         PUSH     DX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
-SPSAVE: DC       0H
+_SWITCH_1_({SPSAVE: DC       0H})
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
 ;{ Generic call on MSDOS/MS WIndows2000}
@@ -2696,13 +2691,13 @@ CODE_HEADER({BDOS},{BDOS})
         PUSH     SI      ;{ Save Forth registers. NEEDED? }
         PUSH     BP
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
-        JMPHERE_FROM_PROT
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
         XCHG    {SI},{AX}
         INT     21H
         PUSHF      ;{ Save status into DI }
         POP     {DI} ;{ Not EDI! }
         XCHG    {SI},{AX}   ;{ Save AX in (still free) SI     }
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_OS})
 ;        XCHG    {SI},{AX}   ; This is more correct actually.
         XCHG    SI,AX
         POP     BP      ;{ Restore Forth registers. NEEDED? }
@@ -3422,12 +3417,12 @@ CODE_HEADER({RBLK},{RBLK})
         PUSH    BP      ;{RETURN POINTER}
         MOV     BX,4200H
         MOV     DX,0080H  ;{   Disk C                                 }
-        JMPHERE_FROM_PROT
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
         XCHG    BX,AX
         INT     13H
         PUSHF           ;{ REMEMBER STATUS}
         POP     BX
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_OS})
         POP     BP      ;{RETURN STACK}
         POP     SI      ;{INTERPRETER PNTR}
         PUSH    BX      ;{ REMEMBER STATUS}
@@ -3440,12 +3435,12 @@ CODE_HEADER({WBLK},{WBLK})
         PUSH    BP      ;{RETURN POINTER}
         MOV     BX,4300H
         MOV     DX,0080H  ;{   Disk C                                 }
-        JMPHERE_FROM_PROT
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
         XCHG    BX,AX
         INT     13H
         PUSHF           ;{ REMEMBER STATUS}
         POP     BX
-        JMPHERE_FROM_REAL
+        _SWITCH_1_({JMPHERE_FROM_OS})
         POP     BP      ;{RETURN STACK}
         POP     SI      ;{INTERPRETER PNTR}
         PUSH    BX

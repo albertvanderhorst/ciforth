@@ -16,11 +16,9 @@ define({TITLE},;)dnl Turn TITLE into comment.
 define({_CELL_PTR},{ CELL_M4})dnl Make it specify SIZE only.
 dnl
 dnl NASM doesnot allow to shift the program counter with ORG
-define({_NEW_ORG},
-        RESB    $1-($-$$))dnl
+define({_NEW_ORG},{RESB    $1-($-$$)})dnl
 dnl
-define({_RESB},
-        RESB    $1)dnl
+define({_RESB},{RESB    $1})dnl
 dnl
 dnl Specification of the length of an operand,
 dnl needed to get exactly the same code as MASM.
@@ -32,11 +30,10 @@ dnl More complicated tricks to get rid of MASM.
 define({_ENDP},;)dnl Each ENDP is started with _ENDP in generic listing.
 dnl
 dnl Handling large blocks of comment
-define({_COMMENT}, %if 0
-)dnl
-define({_ENDCOMMENT}, %endif
-)dnl
+define({_COMMENT},{%if 0})dnl
+define({_ENDCOMMENT},{%endif})dnl
 define({_BYTE_PTR},{BYTE $1})dnl
-define({SET_32_BIT_MODE},    BITS   32 )dnl
-define({_ALIGN},{ALIGN    $1})dnl
+define({SET_16_BIT_MODE},{BITS   16})dnl
+define({SET_32_BIT_MODE},{BITS   32})dnl
+define({_ALIGN},{ALIGN    $1})dnl   
 define({DSS},{DB})dnl
