@@ -1169,7 +1169,7 @@ CODE_HEADER({SWAP},{SWAP})
         POP     AX
         _2PUSH
 ;
-CODE_HEADER({DUP},{DUPE})
+CODE_HEADER({DUP},{LDUP})
         POP     AX
         PUSH    AX
         _PUSH
@@ -1556,9 +1556,9 @@ HEADER({SPACE},{SPACE},{DOCOL})
         DC      SEMIS
 ;
 HEADER({-DUP},{DDUP},{DOCOL})
-        DC      DUPE
+        DC      LDUP
         _0BRANCH(DDUP1) ;{ IF}
-        DC      DUPE    ;{ENDIF}
+        DC      LDUP    ;{ENDIF}
 DDUP1   DC      SEMIS
 ;
 HEADER({TRAVERSE},{TRAV},{DOCOL})
@@ -1660,7 +1660,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
 HEADER({COMPILE},{COMP},{DOCOL})
         DC      QCOMP
         DC      FROMR
-        DC      DUPE
+        DC      LDUP
         DC      CELLP
         DC      TOR
         DC      FETCH
@@ -1731,14 +1731,14 @@ DODOE:  LEA     BP,[BP-CELLS(1)]
         _PUSH
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
-        DC      DUPE
+        DC      LDUP
         DC      ONEP
         DC      SWAP
         DC      CFET
         DC      SEMIS
 ;
 HEADER({-TRAILING},{DTRAI},{DOCOL})
-        DC      DUPE
+        DC      LDUP
         DC      ZERO
         DC      XDO     ;{DO}
 DTRA1   DC      OVER
@@ -1761,7 +1761,7 @@ DTRA3   _LOOP(DTRA1)    ;{ LOOP}
 HEADER_SGQ({(.")},{PDOTQ},{DOCOL})
         DC      RR
         DC      COUNT
-        DC      DUPE
+        DC      LDUP
         DC      ONEP
         DC      FROMR
         DC      PLUS
@@ -1776,13 +1776,13 @@ HEADER_SGQ({."},{DOTQ},{DOCOL},1)
         _0BRANCH(DOTQ1) ;{ IF}
         DC      COMP
         DC      PDOTQ
-        DC      WORDS
+        DC      LWORD
         DC      HERE
         DC      CFET
         DC      ONEP
         DC      ALLOT
         _BRANCH(DOTQ2)  ;{ ELSE}
-DOTQ1   DC      WORDS
+DOTQ1   DC      LWORD
         DC      HERE
         DC      COUNT
         DC      LTYPE   ;{ ENDIF}
@@ -1835,7 +1835,7 @@ CODE_HEADER({FILL},{FILL})
         REP     STOSB   ;{STORE BYTE}
         _NEXT
 ;
-HEADER({ERASE},{ERASEE},{DOCOL})
+HEADER({ERASE},{LERASE},{DOCOL})
         DC      ZERO
         DC      FILL
         DC      SEMIS
@@ -1860,7 +1860,7 @@ HEADER({PAD},{PAD},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-HEADER({WORD},{WORDS},{DOCOL})
+HEADER({WORD},{LWORD},{DOCOL})
         DC      BLK
         DC      FETCH
         _0BRANCH(WORD1) ;{ IF}
@@ -1895,7 +1895,7 @@ WORD2   DC      LIN
         PAGE
 HEADER({(NUMBER)},{PNUMB},{DOCOL})
 PNUM1   DC      ONEP    ;{ BEGIN}
-        DC      DUPE
+        DC      LDUP
         DC      TOR
         DC      CFET
         DC      BASE
@@ -1928,24 +1928,24 @@ HEADER({NUMBER},{NUMB},{DOCOL})
         DC      ZERO
         DC      ZERO
         DC      ROT
-        DC      DUPE
+        DC      LDUP
         DC      ONEP
         DC      CFET
         DC      LIT,2DH
         DC      EQUAL
-        DC      DUPE
+        DC      LDUP
         DC      TOR
         DC      PLUS
         DC      LIT,-1
 NUMB1   DC      DPL     ;{ BEGIN}
         DC      STORE
         DC      PNUMB
-        DC      DUPE
+        DC      LDUP
         DC      CFET
         DC      BLS
         DC      LSUB
         _0BRANCH(NUMB2) ;{ WHILE}
-        DC      DUPE
+        DC      LDUP
         DC      CFET
         DC      LIT,2EH
         DC      LSUB
@@ -1961,13 +1961,13 @@ NUMB3   DC      SEMIS
         PAGE
 HEADER({-FIND},{DFIND},{DOCOL})
         DC      BLS
-        DC      WORDS
+        DC      LWORD
         DC      HERE
         DC      CONT
         DC      FETCH
         DC      FETCH
         DC      PFIND
-        DC      DUPE
+        DC      LDUP
         DC      ZEQU
         _0BRANCH(DFIN1) ;{IF}
         DC      DROP
@@ -2009,7 +2009,7 @@ HEADER({ID.},{IDDOT},{DOCOL})
         DC      LIT,20H
         DC      LIT,5FH
         DC      FILL
-        DC      DUPE
+        DC      LDUP
         DC      PFA
         DC      LFA
         DC      OVER
@@ -2043,14 +2043,14 @@ HEADER({CREATE},{CREAT},{DOCOL})
         DC      MESS
         DC      SPACE   ;{ENDIF}
 CREA1   DC      HERE
-        DC      DUPE
+        DC      LDUP
         DC      CFET
         DC      WIDTHE
         DC      FETCH
         DC      MIN
         DC      ONEP
         DC      ALLOT
-        DC      DUPE
+        DC      LDUP
         DC      LIT,0A0H
         DC      TOGGL
         DC      HERE
@@ -2188,7 +2188,7 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
 ;
 HEADER({(},{PAREN},{DOCOL},1)
         DC      LIT,')'
-        DC      WORDS
+        DC      LWORD
         DC      SEMIS
         PAGE
 HEADER({QUIT},{QUIT},{DOCOL})
@@ -2311,12 +2311,12 @@ HEADER({D+-},{DPM},{DOCOL})
 DPM1    DC      SEMIS
 ;
 HEADER({ABS},{LABS},{DOCOL})
-        DC      DUPE
+        DC      LDUP
         DC      PM
         DC      SEMIS
 ;
 HEADER({DABS},{DABS},{DOCOL})
-        DC      DUPE
+        DC      LDUP
         DC      DPM
         DC      SEMIS
 ;
@@ -2384,7 +2384,7 @@ HEADER({/},{SLASH},{DOCOL})
         DC      DROP
         DC      SEMIS
 ;
-HEADER({MOD},{MODD},{DOCOL})
+HEADER({MOD},{LMOD},{DOCOL})
         DC      SLMOD
         DC      DROP
         DC      SEMIS
@@ -2497,11 +2497,11 @@ HEADER({#BUFF},{NOBUF},{DOCON})
 ;
 HEADER({+BUF},{PBUF},{DOCOL})
         DC      LIT,(KBBUF+2*CW)
-        DC      PLUS,DUPE
+        DC      PLUS,LDUP
         DC      LIMIT,EQUAL
         _0BRANCH(PBUF1)
         DC      DROP,FIRST
-PBUF1   DC      DUPE,PREV
+PBUF1   DC      LDUP,PREV
         DC      FETCH,LSUB
         DC      SEMIS
 ;
@@ -2516,14 +2516,14 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
 HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
-        DC      LSUB,ERASEE
+        DC      LSUB,LERASE
         DC      SEMIS
         PAGE
 ;
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
         DC      USE
-        DC      FETCH,DUPE
+        DC      FETCH,LDUP
         DC      TOR
 BUFF1   DC      PBUF
         _0BRANCH(BUFF1)
@@ -2546,24 +2546,24 @@ HEADER({BLOCK},{BLOCK},{DOCOL})
         DC      OFSET
         DC      FETCH,PLUS
         DC      TOR,PREV
-        DC      FETCH,DUPE
+        DC      FETCH,LDUP
         DC      FETCH,RR
         DC      LSUB
-        DC      DUPE,PLUS
+        DC      LDUP,PLUS
         _0BRANCH(BLOC1)
 BLOC2   DC      PBUF,ZEQU
         _0BRANCH(BLOC3)
         DC      DROP,RR
-        DC      BUFFE,DUPE
+        DC      BUFFE,LDUP
         DC      RR,ONE
         DC      RSLW
         DC      LCELL,LSUB
-BLOC3   DC      DUPE,FETCH
+BLOC3   DC      LDUP,FETCH
         DC      RR,LSUB
-        DC      DUPE,PLUS
+        DC      LDUP,PLUS
         DC      ZEQU
         _0BRANCH(BLOC2)
-        DC      DUPE,PREV
+        DC      LDUP,PREV
         DC      STORE
 BLOC1   DC      FROMR,DROP
         DC      CELLP,SEMIS
@@ -2600,7 +2600,7 @@ HEADER({-->},{ARROW},{DOCOL},1)
         DC      BLK
         DC      FETCH
         DC      OVER
-        DC      MODD
+        DC      LMOD
         DC      LSUB
         DC      BLK
         DC      PSTOR
@@ -2692,7 +2692,7 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;{ All I/O goes through the modern (unix-borrowed)}
 ;{ file I/O.    }
 HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      DUPE, LOUT, PSTOR
+        DC      LDUP, LOUT, PSTOR
         DC      TOR, TOR
         DC      LIT,04000H ;{ Write file or device }
         DC      ONE     ;{ Handle}
@@ -2702,7 +2702,7 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      SEMIS
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
-        DC      DUPE,LIT,LF,EQUAL
+        DC      LDUP,LIT,LF,EQUAL
         _0BRANCH(EMIT1)
         DC      LIT,ACR,EMIT
         DC      ZERO,LOUT,STORE
@@ -2800,7 +2800,7 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      SEMIS
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
-        DC      DUPE,LIT,LF,EQUAL
+        DC      LDUP,LIT,LF,EQUAL
         _0BRANCH(EMIT1)
         DC      LIT,ACR,EMIT
         DC      ZERO,LOUT,STORE
@@ -2812,7 +2812,7 @@ EMIT1:
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      ZERO    ; filedescriptor 0 for standard input.
         DC      ROT
-        DC      DUPE, TOR   ; Remember start of buffer
+        DC      LDUP, TOR   ; Remember start of buffer
         DC      ROT
         DC      LIT, read
         DC      LINOS
@@ -2853,16 +2853,16 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      XDO     ;{ DO                    }
 EXPE1   DC      KEY
-        DC      DUPE
+        DC      LDUP
         DC      RUBOUT
         DC      FETCH
         DC      EQUAL
         _0BRANCH(EXPE2) ;{ IF                    }
         DC      DROP
-        DC      DUPE
+        DC      LDUP
         DC      IDO
         DC      EQUAL
-        DC      DUPE
+        DC      LDUP
         DC      FROMR
         DC      TWO     ;{ Remove last 2 chars }
         DC      LSUB
@@ -2875,7 +2875,7 @@ EXPE1   DC      KEY
 EXPE6   DC      LIT
         DC      BSOUT   ;{ ENDIF                 }
 EXPE7   _BRANCH(EXPE3)  ;{ ELSE                  }
-EXPE2   DC      DUPE
+EXPE2   DC      LDUP
         DC      LIT,0DH
         DC      EQUAL
         _0BRANCH(EXPE4) ;{ IF}
@@ -2884,7 +2884,7 @@ EXPE2   DC      DUPE
         DC      BLS
         DC      ZERO
         _BRANCH(EXPE5)  ;{ ELSE}
-EXPE4   DC      DUPE    ;{ ENDIF}
+EXPE4   DC      LDUP    ;{ ENDIF}
 EXPE5   DC      IDO
         DC      CSTOR
         DC      ZERO
@@ -2973,16 +2973,16 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      XDO     ;{ DO                    }
 EXPE1   DC      KEY
-        DC      DUPE
+        DC      LDUP
         DC      RUBOUT
         DC      FETCH
         DC      EQUAL
         _0BRANCH(EXPE2) ;{ IF                    }
         DC      DROP
-        DC      DUPE
+        DC      LDUP
         DC      IDO
         DC      EQUAL
-        DC      DUPE
+        DC      LDUP
         DC      FROMR
         DC      TWO     ;{ Remove last 2 chars }
         DC      LSUB
@@ -2995,7 +2995,7 @@ EXPE1   DC      KEY
 EXPE6   DC      LIT
         DC      BSOUT   ;{ ENDIF                 }
 EXPE7   _BRANCH(EXPE3)  ;{ ELSE                  }
-EXPE2   DC      DUPE
+EXPE2   DC      LDUP
         DC      LIT,0DH
         DC      EQUAL
         _0BRANCH(EXPE4) ;{ IF}
@@ -3004,7 +3004,7 @@ EXPE2   DC      DUPE
         DC      BLS
         DC      ZERO
         _BRANCH(EXPE5)  ;{ ELSE}
-EXPE4   DC      DUPE    ;{ ENDIF}
+EXPE4   DC      LDUP    ;{ ENDIF}
 EXPE5   DC      IDO
         DC      CSTOR
         DC      ZERO
@@ -3036,7 +3036,7 @@ TYPE3:       DC      SEMIS
 HEADER({EMIT},{EMIT},{DOCOL})
              DC      ONE,LOUT,PSTOR
              DC      LIT, 07FH, LAND
-             DC      DUPE,LIT,LF,EQUAL
+             DC      LDUP,LIT,LF,EQUAL
              _0BRANCH(EMIT1)
              DC      LIT,ACR,PEMIT
              DC      ZERO,LOUT,STORE
@@ -3147,7 +3147,7 @@ HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      ZERO
         DC      LIT, open
         DC      LINOS
-        DC      DUPE, BHAN, STORE
+        DC      LDUP, BHAN, STORE
         DC      ZERO, MIN      ; 0/-errno
         DC      DERR, STORE
         DC      SEMIS
@@ -3170,7 +3170,7 @@ HEADER({R/W},{RSLW},{DOCOL})
         DC      LIT, lseek
         DC      LINOS
         DC      ZERO, MIN      ; 0/-errno
-        DC      DUPE, DERR, STORE
+        DC      LDUP, DERR, STORE
         _0BRANCH( RSLW1 )
         DC      FROMR, DROP
         _BRANCH( RSLW2 )
@@ -3400,9 +3400,9 @@ HEADER({R/W},{RSLW},{DOCOL})
         DC      RBLK
         _BRANCH(RSLW2)
 RSLW1:  DC      WBLK
-RSLW2:  DC      DUPE, DSKERR, STORE
+RSLW2:  DC      LDUP, DSKERR, STORE
 
-        DC      ONE, LAND, DUPE
+        DC      ONE, LAND, LDUP
         _0BRANCH(RSLW4)
 ;{        DC      ZERO,   PREV,   FETCH,     STORE   ;This  buffer}
                                                    ;{ is no good!}
@@ -3434,13 +3434,13 @@ HEADER({FORGET},{FORG},{DOCOL})
         DC      LIT,18H
         DC      QERR
         DC      TICK
-        DC      DUPE
+        DC      LDUP
         DC      FENCE
         DC      FETCH
         DC      LESS
         DC      LIT,15H
         DC      QERR
-        DC      DUPE
+        DC      LDUP
         DC      NFA
         DC      LDP
         DC      STORE
@@ -3485,7 +3485,7 @@ HEADER({DO},{DO},{DOCOL},1)
         DC      THREE   ;{ Magic number}
         DC      SEMIS
 ;
-HEADER({LOOP},{LOOPC},{DOCOL},1)
+HEADER({LOOP},{LLOOP},{DOCOL},1)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
         DC      COMP
@@ -3509,7 +3509,7 @@ HEADER({UNTIL},{UNTIL},{DOCOL},1)
         DC      BACK
         DC      SEMIS
 ;
-HEADER({END},{ENDD},{DOCOL},1)
+HEADER({END},{LEND},{DOCOL},1)
         DC      UNTIL
         DC      SEMIS
         PAGE
@@ -3532,7 +3532,7 @@ HEADER({REPEAT},{REPEA},{DOCOL},1)
         DC      ENDIFF
         DC      SEMIS
 ;
-HEADER({IF},{IFF},{DOCOL},1)
+HEADER({IF},{LIF},{DOCOL},1)
         DC      COMP
         DC      ZBRAN
         DC      HERE
@@ -3541,7 +3541,7 @@ HEADER({IF},{IFF},{DOCOL},1)
         DC      TWO     ;{ Magic number           }
         DC      SEMIS
         PAGE
-HEADER({ELSE},{ELSEE},{DOCOL},1)
+HEADER({ELSE},{LELSE},{DOCOL},1)
         DC      TWO     ;{ Magic number }
         DC      QPAIR
         DC      COMP
@@ -3556,11 +3556,11 @@ HEADER({ELSE},{ELSEE},{DOCOL},1)
         DC      SEMIS
 ;
 HEADER({WHILE},{WHILE},{DOCOL},1)
-        DC      IFF
+        DC      LIF
         DC      TWOP        ;{ Magic number           }
         DC      SEMIS
         PAGE
-HEADER({SPACES},{SPACS},{DOCOL})
+HEADER({SPACES},{SPACES},{DOCOL})
         DC      ZERO
         DC      MAX
         DC      DDUP
@@ -3632,7 +3632,7 @@ HEADER({D.R},{DDOTR},{DOCOL})
         DC      FROMR
         DC      OVER
         DC      LSUB
-        DC      SPACS
+        DC      SPACES
         DC      LTYPE
         DC      SEMIS
 ;
@@ -3681,14 +3681,14 @@ VLIS1   DC      LOUT    ;{BEGIN}
         DC      ZERO
         DC      LOUT
         DC      STORE   ;{ENDIF}
-VLIS2   DC      DUPE
+VLIS2   DC      LDUP
         DC      IDDOT
         DC      SPACE
         DC      SPACE
         DC      PFA
         DC      LFA
         DC      FETCH
-        DC      DUPE
+        DC      LDUP
         DC      ZEQU
         DC      QTERM
         DC      LOR
@@ -3707,9 +3707,9 @@ HEADER({BYE},{BYE},{DOCOL})
 });_END___1__({ _HOSTED_LINUX_1_})
 
         PAGE
-HEADER({LIST},{LISTC},{DOCOL})
+HEADER({LIST},{LLIST},{DOCOL})
         DC      DECA
-        DC      CR,DUPE
+        DC      CR,LDUP
         DC      SCR,STORE
         DC      PDOTQ
         _STRING({SCR # })
@@ -3753,7 +3753,7 @@ HEADER({TRIAD},{TRIAD},{DOCOL})
         DC      OVER,PLUS
         DC      SWAP,XDO
 TRIA1   DC      CR,IDO
-        DC      LISTC
+        DC      LLIST
         DC      QTERM   ;{ ?TERMINAL}
         _0BRANCH(TRIA2)
         DC      LLEAV   ;{LEAVE}
