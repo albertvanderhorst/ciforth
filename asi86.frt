@@ -25,21 +25,23 @@
 2        ' W, CFA   100 COMMAER W,    ( obligatory word     )
 ( Bits in TALLY  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
-(               10 Any register       20 Other,indexing               )
-
+( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
+(               10 Register op        20 Memory op                    )
+(               40 D0                 80 [BP]                         )
 ( Only valid for 16 bits real mode  A0JUL04 AvdH )
 20 0700 0s T!
- 0100 0s 0 8 xFAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] [BP] [BX]
+ 0100 0s 0 8 xFAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] -- [BX]
+A0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 12 0700 0s T!
  0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
 11 0700 0s T!
  0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 
-020 C000 0s 0000 0s xFIR      D0|
+060 C000 0s 0000 0s xFIR      D0|
 224 C000 0s 4000 0s xFIR      DB|
 228 C000 0s 8000 0s xFIR      DW|
 010 C000 0s C000 0s xFIR      R|
-208 C700 0s C600 0s xFIR |MEM ( Overrules D0| [BP] )
+208 C700 0s 0600 0s xFIR      MEM| ( Overrules D0| [BP] )
 
 02 3800 0s T!
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
@@ -79,19 +81,19 @@
 22 C700 T!  1000 18FF 2 2FAMILY, CALLFARO, JMPFARO,
 
 ( --------- no fixup operands ----------)
-01 0100 0s 0000 0s xFIR B'|
-02 0100 0s 0100 0s xFIR W'|
-08 01 T!    02 A0 2 1FAMILY, MOVTA, MOVFA,
-0400 01 T!
+01 20100 0s 0000 0s xFIR B'|
+02 20100 0s 0100 0s xFIR W'|
+08 201 T!    02 A0 2 1FAMILY, MOVTA, MOVFA,
+0400 201 T!
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
-00 01 A8 1PI TESTI|A,
-00 01 T!  02 A4 6 1FAMILY, MOVS, CMPS, -- STOS, LODS, SCAS,
+00 201 A8 1PI TESTI|A,
+00 201 T!  02 A4 6 1FAMILY, MOVS, CMPS, -- STOS, LODS, SCAS,
 
 ( --------- special fixups ----------)
 
-00 0100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
-00 0E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
-40 0F 70 1PI J,
+00 10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
+00 10E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
+40 10F 70 1PI J,
 
 00 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
 00 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
@@ -137,3 +139,4 @@
 (        JMPO, D0| [BX]                                                 )
 (    ;                                                                  )
 ( ############## 8086 ASSEMBLER POST ################################## )
+CODE JAN MOV|SG, T| ES| R| AX| C;
