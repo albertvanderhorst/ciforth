@@ -1052,9 +1052,9 @@ CODE_HEADER({LIT},{LIT})
 worddoc( {MISC},{EXECUTE},{execute},{addr -},{ISO,FIG,L0},
 {Execute the definition whose forthdefi({dictionary entry address})
 is given by forthvar({addr}) .
-_VERBOSE_({The forthdefi({dictionary entry address})
+_VERBOSE_({{The forthdefi({dictionary entry address})
 serves as an execution token. forthdefi({>CFA}) is gives the code field,
-but this has offset 0.})
+but this has offset 0.}})
 },{{'},{>CFA}},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
@@ -1412,13 +1412,12 @@ HEADER({?BLANK},{QBL},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
-{Parse the forthdefi({current input stream})
-for a character and leave its address and the character.
-Advance the input pointer to the next character.
-If at the end of the end of the input stream,
-leave the end and a zero.
-_VERBOSE_({As it goes with string constants, you may not
-alter its content, nor assume anything is appended.})},
+{Parse the forthdefi({current input stream}) for a character
+and leave its address and the character. If at of the end of
+the input stream, leave the a pointer past the end and a zero.
+Advance the input pointer to the next character. _VERBOSE_({{As
+it goes with string constants, you may not alter its content,
+nor assume anything is appended.}})}, 
 {{BLK},{WORD},{IN}},
 {{IN[] A   EMIT TIB @ 5 + = .},{A{}_T_} },
 enddoc)
@@ -1436,14 +1435,16 @@ INBRS1:
 INBRS2:
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{(WORD)},{m_parse},{del ---sc},{CI L0},
-{Parse the forthdefi({current input stream})
-for a word, i.e. observing forthcode({?BLANK}) .
-Skip leading delimiters then advance the input pointer to
-past the next delimiter or past the end of the input stream.
-Leave the word found as a string constant.
-_VERBOSE_({As it goes with string constants, you may not
-alter its content, nor assume anything is appended.})},
+worddocsafe( {PARSING},{(WORD)},{m_parse},{--- sc},{CI L0},
+{Parse the forthdefi({current input stream}) for a word, i.e.
+observing forthcode({?BLANK}) . Skip leading delimiters then
+advance the input pointer to past the next delimiter or past
+the end of the input stream. Leave the word found as a string
+constant forthvar({sc}) . _VERBOSE_({As it goes with string
+constants, you may not alter its content, nor assume anything
+is appended. Note that this is more deserving of the name
+``WORD'' than what is in the ISO standard, cf. forthsamp({:
+LINE LINEFEED WORD ;}). })}, 
 {{BLK},{WORD},{IN}},
 {{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
@@ -1467,9 +1468,9 @@ PWORD2A:
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{(PARSE)},{paren_word},{ --- addr3 },{},
-{Scan the current input stream for the character forthsamp({ch}) .
-Return forthsamp({addr3}): the address of the first such character
+worddocsafe( {PARSING~},{(PARSE)},{paren_word},{ ch --- addr },{},
+{Scan the current input stream for the character forthvar({ch}) .
+Return forthvar({addr}): the address of the first such character
 or an address just past the end of the current input stream if its
 is not there.
 _VERBOSE_({So no leading delimiters are skipped.})},
@@ -1509,9 +1510,8 @@ or changing only the third cell.
 The third cell has the alias
 _CIF_IN_({forthsamp({IN}) .})
 _ISO_IN_({forthsamp({>IN}) .})
-_VERBOSE_({Words like forthsamp({BLK SOURCE})
-and forthsamp({SOURCE-ID}) are secondary,
-and return their output by ``second-guessing'' forthsamp({SRC}) .})},
+_VERBOSE_({{Words like forthsamp({>IN BLK SOURCE SOURCE-ID}) are secondary,
+and return their output by ``second-guessing'' forthsamp({SRC}) .}})},
 {{BLK},{SOURCE-ID}},
 {{SRC @ TIB @ = .},{_T_}},
 enddoc)
@@ -1852,7 +1852,7 @@ CODE_HEADER({0<},{ZLESS})
 ZLESS1: _PUSH
 ;
 worddoc( {OPERATOR},{+},{plus},{n1 n2 --- sum},{ISO,FIG,L0},
-{Leave the sum of forthsamp({n1+n2}) .},{{-},{*},{/},{MOD}},
+{Leave the sum of forthvar({n1}) and forthvar({n2}) .},{{-},{*},{/},{MOD}},
 { { 0A BASE !  240 204 + .},{444} },
 {}, enddoc)
 CODE_HEADER({+},{PLUS})
@@ -2845,7 +2845,8 @@ HEADER({C,},{CCOMM},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{ISO,FIG,L0},
-{Leave the difference of forthsamp({n1-n2}) .},{{NEGATE},{+},{*},{/},{MOD}},
+{Leave the difference of forthvar({n1}) and forthvar({n2}) .},
+{{NEGATE},{+},{*},{/},{MOD}},
 { { 0A BASE !  240 204 - .},{36} },
 {}, enddoc)
 CODE_HEADER({-},{LSUB})
@@ -3192,7 +3193,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
 ;
 });_END_({_SECURITY_})
 ;
-worddoc( {PARSING},{[},{left_bracket},{},{ISO,I,L1},
+worddoc( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,L1},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
@@ -3206,7 +3207,7 @@ HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {PARSING},{]},{righ_bracket},{},{ISO,L1},
+worddoc( {PARSING},{]},{righ_bracket},{},{ISO,FIG,L1},
 {Resume compilation, to the completion of a colon-definition.},
 {{[}},
 {{." Via ["},{Via [}},
@@ -3421,18 +3422,16 @@ SQUO2:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
-worddocsafe( {OUTPUT},{."},{dot_quote},{},{I,L0},
+worddocsafe( {OUTPUT},{."},{dot_quote},{},{ISO,FIG,I,L0},
 {Used in the form:
   forthsamp({." cccc"})
-Compiles an in-line string forthsamp({cccc}) (delimited by the trailing ") with
-an execution proceedure to transmit the text to the selected output
-device.
-If executed outside a definition, forthcode({."}) will immediately print the text
-until the final ".
+In a definition it compiles an in-line string forthsamp({cccc}) (as if the denotation forthcode({"cccc"}) was used) 
+followed by forthcode({TYPE}) .
+In ciforth forthcode({."}) will behave the same in interpret mode.
 In ciforth the number of characters has no limit and has always an effect
 on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
-_VERBOSE_({We want forthsamp({." cccc"}) replace by forthsamp({"cccc" $.}).})},
+_VERBOSE_({We want forthsamp({." cccc"}) replaced by forthsamp({"cccc" $.}).})},
 {{OUT}},
 {{: GS1 ." the end" ; GS1 },{the end}},
 enddoc)
@@ -3449,11 +3448,9 @@ DOTQ2:
         DC      SEMIS   ;{ THEN}
 ;
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
-{Used in the form:
-  forthsamp({.( cccc)})
-Display the string forthsamp({cccc}) (delimited by the trailing forthkey({}).
-In ciforth the number of characters has no limit.
-_VERBOSE_({We want forthsamp({.( cccc)}) replace by forthsamp({"cccc" $.}).})},
+{ In ciforth this is an alias for ." , except that the string is closed with forthkey({{)}}).
+In ISO programs you may only use this word while interpreting.
+_VERBOSE_({We want forthsamp({.( cccc)}) replaced by the equivalent forthsamp({"cccc" $.}).})},
 {{OUT},{."}},
 {{.( the end)},{the end}},
 enddoc)
@@ -3463,7 +3460,7 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LTYPE
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{SET-SRC},{set_source},{sc -- },{I},
+worddocsafe( {PARSING},{SET-SRC},{set_source},{sc -- },{},
 {Make the string constant forthvar({sc}) the current input
 stream. This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
@@ -3636,12 +3633,12 @@ worddoc( {PARSING},{WORD},{newword},{c ---addr},{ISO,FIG,L0},
 {Parse the forthsamp({current input stream}) using forthvar({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input stream.
-Leave at forthvar({addr}) as a counted string a copy of the string,
+Leave at forthvar({addr}) a copy of the string,
 that was surrounded by forthvar({c}) in the input stream.
+This is an oldfashioned string to be fetched by forthcode({COUNT}) , not forthcode({$@}) .
 In ciforth the character string is positioned
 at the dictionary buffer forthcode({HERE}) .
-forthcode({WORD})
-leaves the character count in the first byte, the characters, and
+forthcode({WORD}) leaves the character count in the first byte, the characters, and
 ends with two or more blanks.
 If forthcode({BLK}) is zero text is taken from the terminal input buffer,
 otherwise from the disc block stored in forthcode({BLK}) .},
@@ -3678,8 +3675,11 @@ IWORD2:
         DC      SEMIS
 ;
 worddoc( {PARSING},{^%},{control_follows}, {--- c},{CI},
-{Leave forthvar({c}) the control version of the non blank char that follows.
-Skip remaining non-blank characters.},
+{
+Leave forthvar({c}) the control version of the 
+first character of the following word.
+dnl non blank char that follows. Skip remaining non-blank characters.
+},
 {},
 {{^: HELL .},{8 },
 {^: X  .},{18 },
@@ -3689,11 +3689,11 @@ HEADER({^:},{CTF},{DOCOL}, , B_IMMED)
         DC       PWORD, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
-worddoc( {PARSING},{CHAR},{char}, {--- c},{ISO},
+worddoc( {PARSING},{CHAR},{char}, {--- c},{ISO,I},
 {Parse a word and
-leave forthvar({c}) the first non blank char of that word
+leave forthvar({c}) the first non blank char of that word in the 
 input stream. In ciforth this word works also in compiled mode.},
-{},
+{{DEN&},{CHAR}},
 {{CHAR HELL .},{48 },
 {CHAR X  .},{58 },
 {: GS1 CHAR HELLO ; GS1 . },{48 },
@@ -3706,7 +3706,8 @@ HEADER({CHAR},{LCHAR},{DOCOL}, , B_IMMED)
 worddocsafe( {PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
 {A compiling word. Parse a word.  Add the run time behaviour:
 leave forthvar({c}), the first non blank char of that word in the
-input stream.},
+input stream. In ciforth this word works also in interpret mode.},
+{{DEN&},{CHAR}},
 {},
 {{: GS1 [CHAR] HELLO ; GS1 HEX . },{48 },
 {: GS2 [CHAR] X ; GS2 HEX .},{58 }}, enddoc)
@@ -4285,7 +4286,7 @@ worddoc( {PARSING},{INTERPRET},{interpret},{},{},
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in forthcode({CONTEXT}) and forthcode({CURRENT}) respectively.
-Failing that the first character is considered a word and it is looked
+Failing that a string consisting of the first character is looked
 up in the forthcode({DENOTATION}) wordlist.
 If it is not found at all, an error message " ?" will be given.
 _VERBOSE_({
@@ -4473,12 +4474,14 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      FORTH
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{(},{paren},{},{ISO,I,L0},
-{Used in the form:
-forthsamp({( cccc)})
-Ignore a comment that will be delimited by a right
-parenthesis on the same line. May occur during execution or in a
-colon-definition. A blank after the leading parenthesis is required.},
+worddocsafe( {PARSING},{(},{paren},{},{ISO,FIG,I,L0},
+{{{{Used in the form: forthsamp({( cccc)}). Ignore a comment that
+will be delimited by a right parenthesis that must be in the
+same input source, i.e. on the same line for terminal input, or
+in the same string, block or file, when that is the input. It
+is an immediate word{{}}_VERBOSE_({{, so colon definitions can
+be commented too}}).
+A blank after the word forthcode({{(}}) is required.}}}},
 {{\}},
 {{( Nothing to be seen) 8374 .},{8374} },
 enddoc)
@@ -4494,7 +4497,8 @@ worddocsafe( {PARSING},{\},{backslash},{},{ISO,I,L0},
 forthsamp({\ cccc})
 Ignore a comment that will be delimited by the end of the current line.
 May occur during execution or in a
-colon-definition. A blank after the leading parenthesis is required.},
+colon-definition. 
+A blank after the word forthcode({\}) is required.},
 {{(}},
 {{\ Nothing to be seen 8374 .
 },{} },
@@ -4732,9 +4736,9 @@ MAX1:   DC      DROP
         DC      SEMIS
 ;
 worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
-{Perform a forthsamp({logical shift }) of the bits of
+{Perform a forthsamp({{logical {{shift}} }}) of the bits of
 forthvar({u1}) to the left by forthvar({n}) places.
-_VERBOSE_({ Put zero into the places uncovered by the shift.}) },
+_VERBOSE_({{Put zero into the places uncovered by the {{shift}}.}}) },
 {{RSHIFT},{2*}},
 {{1 2 LSHIFT .},{4}},
 enddoc)
@@ -4745,9 +4749,9 @@ CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
         _PUSH
 ;
 worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
-{Perform a forthsamp({logical shift}) of the bits of
+{Perform a forthsamp({{logical {{shift}}}}) of the bits of
 forthvar({u1}) to the right by forthvar({n}) places.
-_VERBOSE_({ Put zero into the places uncovered by the shift.}) },
+_VERBOSE_({{Put zero into the places uncovered by the {{shift}}.}}) },
 {{LSHIFT},{2/}},
 {{4 2 RSHIFT .},{1}},
 enddoc)
@@ -4804,11 +4808,13 @@ CODE_HEADER({SM/REM},{MSLAS})
 ;
 _LOAD_({
 worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
-{An arithmetical shift right for a two complement machine.
-> This is the same as forthsamp({S>D 2 FM/MOD SWAP DROP}).
-It is not the same as forthsamp({2 /}), nor is it the same as
-forthsamp({1 RSHIFT}).
-_VERBOSE_({This confusing word should never be used.})},
+{Perform an arithmetical {{shift}} right.
+The bit pattern of forthvar({n1}) is shifted to the right, except that 
+the left most bit (``sign bit'') remains the same.
+_VERBOSE_({{ This is the same as forthsamp({S>D 2 FM/MOD SWAP
+DROP}). It is not the same as forthsamp({2 /}), nor is it the
+same as forthsamp({1 RSHIFT}). This confusing word should never
+be used.}})}, 
 {{2*} },
 {
 {2 2/ . },{1},
@@ -4822,9 +4828,9 @@ HEADER({2/},{TWOSL},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {SUPERFLUOUS},{2*},{two_star},{n1 --- n2},{ISO},
-{An arithmetical shift left for a two complement machine.
-This is only by accident the same as forthsamp({2 *}).
-This is only by accident the same as forthsamp({1 LSHIFT}).
+{Perform an arithmetical {{shift}} left.
+The bit pattern of forthvar({n1}) is shifted to the left, 
+with a result indentical to forthsamp({1 LSHIFT}).
 _VERBOSE_({This word should not be used.})},
 {{2/} },
 {
@@ -4880,8 +4886,9 @@ FMMOD1:
 FMMOD2:
         DC      SEMIS
 ;
-worddocsafe( {OPERATOR},{*},{star},{n1 n2 --- prod},{ISO,FIG,L0},
-{Leave the signed product of two signed numbers.},
+worddocsafe( {OPERATOR},{*},{star},{n1 n2 --- n3},{ISO,FIG,L0},
+{Leave the signed product forthvar({n3}) of two signed numbers
+forthvar({n1}) and forthvar({n2}) .}, 
 {{+},{-},{/},{MOD}},
 {
   {DECIMAL 24 204 * .},{4896} },
@@ -4894,7 +4901,7 @@ HEADER({*},{STAR},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{ISO,FIG,L0},
-{Leave the remainder and signed quotient of forthsamp({n1/n2}) .
+{Leave the remainder and signed quotient of forthvar({n1}) and forthvar({n2}) .
 The remainder has the sign of the dividend
 (forthdefi({symmetric division})). },
 {{*/MOD},{*/},{SM/REM}},
@@ -4913,7 +4920,7 @@ HEADER({/MOD},{SLMOD},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OPERATOR},{/},{slash},{n1 n2 --- quot},{ISO,FIG,L0},
-{Leave the signed quotient of forthsamp({n1/n2})
+{Leave the signed quotient of forthvar({n1}) and forthvar({n2}) .
 (forthdefi({symmetric division})). },
 {{+},{-},{*},{MOD},{*/MOD}},
 {
@@ -4930,7 +4937,7 @@ HEADER({/},{SLASH},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG,L0},
-{Leave the remainder of forthsamp({n1/n2}) , with the same sign
+{Leave the remainder of forthsamp({n1}) divided by forthvar({n2}) , with the same sign
 as forthvar({n1}) (forthdefi({symmetric division})).},
 {{+},{-},{*},{/},MOD,{*/MOD}},
 {
@@ -5800,11 +5807,15 @@ STTERM_B:
 
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
-{Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthref({revectoring}) it
-_VERBOSE_(and the usual redirection or forthsamp({tee})-ing by Linux).
-forthcode({OUT}) is not observed.},{{EMIT},{OUT}},
+{Transmit forthvar({count}) characters from forthvar({addr}) to
+the output device. All terminal I/O goes through this word. It
+is high level so terminal I/O can be redirected, by
+forthdefi({revectoring}) it _VERBOSE_({{and the usual
+redirection or forthsamp({tee})-ing by Linux}}). In this
+ciforth strings may contain embedded forthkey({LF}) 's with the
+effect of a new line at that point in the output, however in
+that case forthcode({OUT}) is not observed. }, 
+{{EMIT},{OUT}},
 {{HERE 41 C, 42 C, 2 TYPE},{AB}},
 enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
@@ -5939,8 +5950,9 @@ HEADER({MS},{MS},{DOCOL})
 _HOSTED_LINUX_({
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ascii character forthvar({c}) to the output device.
-All terminal I/O goes through forthcode({TYPE}).
-forthcode({OUT}) is not observed.},{{TYPE},{OUT}},
+For this ciforth all terminal I/O goes through forthcode({TYPE}).
+In this ciforth forthcode({EMIT}) maintains forthcode({OUT}).},
+{{TYPE},{OUT}},
 { {&z EMIT},{z} },
 enddoc)
 HEADER({EMIT},{EMIT},{DOCOL})
@@ -6224,7 +6236,7 @@ TYPE3:       DC      SEMIS
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ascii character forthvar({c}) to the terminal.
 All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthref({revectoring}) it.
+I/O can be redirected, by forthdefi({revectoring}) it.
 forthcode({OUT}) is incremented for each character output and reset for
 a carriage return.
 },{{TYPE},{OUT}}, {}, enddoc)
@@ -7502,9 +7514,13 @@ DIGS1:  DC      DIG     ;{BEGIN}
         _0BRANCH(DIGS1) ;{UNTIL}
         DC      SEMIS
 ;
-worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{FIG},
-{Print a signed double number forthvar({d}) right aligned in a field forthvar({n}) characters
-wide.},{{OUT},{D.}},
+worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{ISO,FIG},
+{Print a signed double number forthvar({d}) right aligned in a
+field forthvar({n}) characters wide. Enlarge the field, if
+needed. _VERBOSE_({{By giving a field length of 0, it is ignored.}}).
+
+}, 
+{{OUT},{D.}},
 {{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}},
 enddoc)
 HEADER({D.R},{DDOTR},{DOCOL})
@@ -7536,7 +7552,7 @@ HEADER({.R},{DOTR},{DOCOL})
         DC      DDOTR
         DC      SEMIS
 ;
-worddoc( {OUTPUT},{D.},{d_dot},{d ---},{L1},
+worddoc( {OUTPUT},{D.},{d_dot},{d ---},{ISO,FIG,L1},
 {Print a signed double number forthvar({d}),
 according to the current forthcode({BASE}) . A blank follows.
 },{{OUT},{.},{D.R}},
@@ -7571,7 +7587,7 @@ HEADER({?},{QUES},{DOCOL})
         DC      DOT
         DC      SEMIS
 ;
-worddocsafe( {OUTPUT},{U.},{u_dot},{u ---},{},
+worddocsafe( {OUTPUT},{U.},{u_dot},{u ---},{ISO},
 {Print a number from a unsigned _BITS_ bit value,
 converted according to the numeric forthcode({BASE}) .
 A trailing blanks
@@ -8094,10 +8110,14 @@ allow to build arbitray precision from them in forthdefi({high level}) code.},
 worddocchapter({OPERATOR},{ },
 {The wordset forthsamp({OPERATOR}) contains the familiar operators for addition, multiplication etc.
 The result of the operation is always
-an integer number, so division can't be precise. The combination of
-forthcode({/}) and forthcode({MOD}) (remainder) is such that you can get the
-original back: forthsamp({n m /   m *  n m MOD   +}) allways has the value
-forthsamp({m}) . This is true for all Forth's.
+an integer number, so division can't be precise. 
+
+Divisions involving negative numbers have an interpretation problem.
+In any case we want the combination of forthcode({/}) and
+forthcode({MOD}) (remainder) to be such that you can get the
+original forthsamp({n}) back from the two values left by
+forthsamp({n m MOD m n /}) by performing forthsamp({m * +}) .
+This is true for all Forth's. 
 On ciforth the forthcode({/}) is a forthdefi({symmetric division}), i.e.
 forthsamp({-n m /}) give the same result as forthsamp({n m /}), but negated.
 The forgeoing rule now has the consequence that forthsamp({MOD n m})
@@ -8117,12 +8137,14 @@ to the terminal and such. For disk I/O: forthxref({STORAGE}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing, i.e.
-it gets a word from the input stream and interprets or compiles it,
-advacing the forthcode({IN}) pointer. The wordset forthsamp({PARSING}) contains
-the words used by this interpreter and other words that consume characters
-from the input stream. In this way the outer interpreter need not be very smart,
-because its capabilities can be extended by new words based on those
-building blocks.},
+it gets a word from the input stream and interprets or compiles
+it, advancing 
+the _CIF_IN({forthcode({IN})}) _ISO_IN({forthcode({>IN})}) dnl
+pointer. The wordset forthsamp({PARSING}) contains the words
+used by this interpreter and other words that consume
+characters from the input stream. In this way the outer
+interpreter need not be very smart, because its capabilities
+can be extended by new words based on those building blocks.}, 
 {},{},{},{})
 worddocchapter({SCREEN},{ },
 {Most of the mass storage is used for forthdefi({screen})'s that

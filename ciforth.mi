@@ -222,6 +222,8 @@ A user variable.
 Where there is mention of a standard or a model,
 it means that the word actually complies to the standard or the model,
 not that some word of that name is present.
+_VERBOSE_({Words marked with forthsamp({ISO,FIG,L0}) will behave identically
+over all but the whole spectre of Forth's.}) 
 
 Unless otherwise noted, all references to numbers are for _BITS_ bit
 signed integers. For _BITS16_({32})_BITS32_({64}) signed numbers, the

@@ -569,8 +569,8 @@ because there is no redirection.})
 For this reason character output forthcode({CR}), forthcode({EMIT}) and 
 forthcode({TYPE}) all go through a common word that can be changed.
 _LINUX_N_({For this ciforth it is forthcode({TYPE}) }).
-Because this is defined in high level code it can be revectored by a 
-method that works in all versions of ciforth.
+Because this is defined in high level code it can temporarily be replaced
+by other code. 
 As an example we replace forthcode({TYPE}) by forthcode({MYTYPE}) .
 forthbreak
 forthsamp({' MYTYPE >PFA @ ' TYPE >PFA !})
@@ -580,6 +580,7 @@ forthbreak
 forthsamp({' TYPE >BODY 1 CELLS - ' TYPE >PFA !})
 Be careful not to define forthcode({MYTYPE}) in terms of forthcode({TYPE}) , as a
 recursive tangle will result.
+This method works in all versions of ciforth an is called forthdefi({revectoring}) .
 
 A similar technique is not so useful on the input side, 
 because keys entered during EXPECT are subject to correction
