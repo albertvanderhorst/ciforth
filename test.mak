@@ -8,7 +8,11 @@ MASK=FF
 PREFIX=0
 TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
 
-%.ps:%.dvi  ; dvips -ta4 $< -o$@
+%.ps:%.dvi  ;
+	 texindex  $(@:%.ps=%.??)
+	 dvips -ta4 $< -o$@
+#        dvips -A -r -i             -S10 $< -oA$@
+#        dvips -B -i -T 1.8cm,0.0cm -S10 $< -oB$@
 
 %.ps : asgen.frt %.frt ps.frt ; \
     ( \
