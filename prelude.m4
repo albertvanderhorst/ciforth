@@ -18,21 +18,9 @@ dnl This means a separate pass (we do not want this!)
 dnl Note that there is no attempt to quote the paremeters.
 dnl If you try to make Forth words with { } your coat is sold.
 changequote({,})dnl
-dnl We want usage like this
-dnl for define({_USEDOS______________} _yes)
-dnl we would have this input
-dnl ; ________________________________ _USEDOS______________________________( {
-dnl anything but curls
-dnl }; _END__________________________________________________________________
-dnl And have output like this
-dnl ; ________________________________ _USEDOS______________________________( 
-dnl (OMMITTED)           
-dnl ; _END__________________________________________________________________
-dnl for define({_USEDOS______________} _yes)
-dnl This file should be included and later some definitions redefined.
-dnl _1_ is later to be replace by 40 _.
-define({_END___1__},  
-_______1__ {$1})dnl
+dnl Indicate that a large part of conditional assembly ends here
+define({_END___1__}, )dnl obsolete version
+define({_END_}, )dnl preferred version
 dnl _yes and  _no are expanded during definition time and generate 
 dnl define({aap},$1) or define({aap},)
 define({_yes},{${}1})
@@ -197,15 +185,14 @@ dnl ############## GENERATION OF DOCUMENTATION ##############################
 dnl The m4 system separates the doc and code onto different channels
 dnl such that the output is code, separation message, documentation.
 
+define( {_SUPPRESSED}, )dnl
 dnl Switch the system to generate assembler source
 define( {_GENERATE_CODE}, {
-define( {_SUPPRESSED}, {;CODE SUPPRESSED:})dnl
 divert(1)dnl
 })
 
 dnl Switch the system to generate documentation 
 define( {_GENERATE_DOC}, {
-define( {_SUPPRESSED}, {;DOC SUPPRESSED:})dnl
 divert(3)dnl
 })
 

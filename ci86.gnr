@@ -94,13 +94,13 @@ US      EQU     100H     ;{ USER VARIABLE SPACE}
 _BITS16_1_({ RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER} })
 _BITS32_1_({ RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
 ;
-;____1_____ _EQULAYOUT_1_({
+_EQULAYOUT_1_({
 EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
-;____1_____ _HIGH_BUF_1_({
+_HIGH_BUF_1_({
 BUF1    EQU     EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
 });_END___1__({ _HIGH_BUF_1_})
-;____1_____ _LOW_BUF_1_({
+_LOW_BUF_1_({
 STRUSA  EQU     EM-US         ;{ User area at end }
 });_END___1__({ _LOW_BUF_1_})
 
@@ -110,7 +110,7 @@ INITR0  EQU     STRUSA         ;{ Grows down}
 INITS0  EQU     STRTIB          ;{ Growns down}
 });_END___1__({ _EQULAYOUT_1_})
 
-;____1_____ _CLASSIC_1_({
+_CLASSIC_1_({
 DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 });_END___1__({_CLASSIC_1_})
 
@@ -154,7 +154,7 @@ SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
 ;{ Names starting in A_ are linear, physical (32 bit), absolute addresses }
 RSTSIZE     EQU     10000H  ;{ For real mode stack. }
@@ -198,14 +198,14 @@ GDTLEN EQU GDTSIZE-1      ; {Intel peculiarity.}
 BOOTOFFSET EQU 0
 });_END___1__({ _SWITCH_1_})
 
-;____1_____ _LINUX_N_1_({
+_LINUX_N_1_({
 include(constant.m4)
 SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
 RAWIO           EQU     (ECHO | ICANON)
         global  _start        ; Entry point
 });_END___1__({_LINUX_N_1_})
 
-;____1_____ _LINUX_C_1_({
+_LINUX_C_1_({
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init
         global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
@@ -224,7 +224,7 @@ RAWIO           EQU     (ECHO | ICANON)
     _ABSOLUTELOAD_1_({ ORG     M4_ORG})
 ORG0:
 
-;____1_____ _BOOTFD__1_({
+_BOOTFD__1_({
         JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -315,7 +315,7 @@ BEGIN1: CALL    READSECTOR
         JMP     ENDBOOT
 });_END___1__({ _BOOTFD__1_})
 
-;____1_____ _BOOTHD__1_({
+_BOOTHD__1_({
         JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -388,7 +388,7 @@ BOOT:
 });_END___1__({ _BOOTHD__1_})
 
 ELSE3:
-;____1_____ _ABSOLUTELOAD_1_({
+_ABSOLUTELOAD_1_({
 ;{ Apparently we may have to move the code, e.g. if started from MSDOS.}
 ;{ Prepare return to MSDOS using the original code segment.}
         MOV     AX,CS
@@ -405,7 +405,7 @@ HERE1:  POP     BX
         JMP ENDBOOT     ; {Skip booting }
 });_END___1__({ _ABSOLUTELOAD_1_})
 
-;____1_____ _BOOTED_1_({
+_BOOTED_1_({
 ; Debug code, could be dispensed with in an ideal world.
 DISPLAYCR:
         MOV     AL,ACR
@@ -439,7 +439,7 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         RET
 });_END___1__({ _BOOTED_1_})
 
-;____1_____ _ABSOLUTELOAD_1_({
+_ABSOLUTELOAD_1_({
 ;{ Returns to DOS, provided we started from dos as a .COM.}
 ;{ Use far jump restoring CS to .COM value. }
 RETDOS:
@@ -464,7 +464,7 @@ ORIG:                         ; {Accommodate also .exe files} }))
 ;                       MOVE CODE TO ITS PLACE (still real mode)
 ; ########################################################################################
 
-;____1____ _ABSOLUTELOAD_1_({
+_ABSOLUTELOAD_1_({
 ; {  Take care of the situation where booting code is actually started up by  }
 ; {  MSDOS. This is no problem as long as the code is moved to where it would }
 ; {  be if booted. If the code is at its place, nothing really happens here.  }
@@ -497,7 +497,7 @@ HERE5:
 ; ########################################################################################
 ;                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
 ; ########################################################################################
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
         JMP    PROTECT
 GDTLOAD DW     GDTLEN
         DD     A_GDT
@@ -571,7 +571,7 @@ _ENDCOMMENT
         LGDT    [GDTLOAD]
 });_END___1__({ _SWITCH_1_})
 
-;____1_____ _BOOTED_1_({
+_BOOTED_1_({
         JMP     ENDREADJUST
         _NEW_ORG(01FEH)
         ;{ Signature. Last piece of boot sector. }
@@ -579,7 +579,7 @@ _ENDCOMMENT
 ENDREADJUST:
 });_END___1__({ _BOOTED_1_})
 
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
 ;{ Remember: we are now in the real mode for a protected model.}
 ;{ Make sure we are in the switch segment, such that we can switch.}
         MOV   BX,CS      ;{ Reality.}
@@ -598,7 +598,7 @@ HERE3:  POP   BX         ;{ Reality.}
 
 _BITS16_1_({THERE4:})
 
-;____1_____ _BITS32_1_({
+_BITS32_1_({
 ;{ 32 bit protected mode is no good unless the A20 address line works.}
 ;{ The following tedious code is copied from the nuni startup code}
 ;{ for linux. }
@@ -624,13 +624,13 @@ _BITS32_1_({include(width32.m4) })
 ;{ The following had to wait until width32.m4 had been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
        
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
         CLI     ;{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
         MOV     AX,GDT_SS
         MOV     SS,AX
 REP1:
-;____1_____ _BITS32_1_({
+_BITS32_1_({
         INC AX                  ;{ Wait until a20 works(!)}
         MOV [M4_LOADADDRESS],AX
         CMP AX,[100000H + M4_LOADADDRESS] ; { 2^20 beyond}
@@ -642,11 +642,11 @@ REP1:
 ;                       FORTH GLUE CODE (optional, except for the jump)
 ; ########################################################################################
 
-;____1_____ _HOSTED_LINUX_1_({
+_HOSTED_LINUX_1_({
         section forth progbits write exec alloc
 });_END___1__({ _HOSTED_LINUX_1_})
 
-;____1_____ _LINUX_C_1_({
+_LINUX_C_1_({
 SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
 RETURN_LINUX:
         MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
@@ -670,7 +670,7 @@ ENDIF1:
 
 });_END___1__({_LINUX_C_1_})
 
-;____1_____ _LINUX_N_1_({
+_LINUX_N_1_({
 figforth:
 _start:
 });_END___1__({_LINUX_N_1_})
@@ -754,7 +754,7 @@ _COMMENT
 
 ------------------------------------------------------------
 _ENDCOMMENT
-;____1_____ _OLDDEBUG_1_({
+_OLDDEBUG_1_({
         PAGE
 _COMMENT
              DEBUG SUPPORT
@@ -829,7 +829,7 @@ TNEXT3: LODSW           ;{ AX <- (IP)}
         JMP     SHORT   NEXT1
 });_END___1__({_OLDDEBUG_1_ })
         PAGE
-;____1_____ _NEWDEBUG_1_({
+_NEWDEBUG_1_({
 DISPLAYSI:
         _SWITCH_1_({JMPHERE_FROM_FORTH})
         SET_16_BIT_MODE
@@ -856,7 +856,7 @@ DISPLAYSI:
 DPUSH:  PUSH    DX
 APUSH:  PUSH    AX
 
-;____1_____ _OLDDEBUG_1_({
+_OLDDEBUG_1_({
 _COMMENT
 
     Patch the next 3 locations ( using a DBUG monitor ) with a
@@ -971,16 +971,16 @@ USINI:
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
         DC      _VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
-;____1_____ _LINUX_C_1_({
+_LINUX_C_1_({
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_LINUX_C_1_})
-;____1_____ _LINUX_N_1_({
+_LINUX_N_1_({
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_LINUX_N_1_})
-;____1_____ _RWFILE_1_({
+_RWFILE_1_({
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_RWFILE_1_})
-;____1_____ _CLASSIC_1_({
+_CLASSIC_1_({
 _COMMENT
 ;{ This will steer clear of a forth executable, provided it is}
 ;{ the first file on the floppy. }
@@ -993,7 +993,7 @@ _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_CLASSIC_1_})
-;____1_____ _RWFD_1_({
+_RWFD_1_({
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
 ;{ within the forth system itself. }
@@ -1003,7 +1003,7 @@ _ENDCOMMENT
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
         DC      (SECSTRT+((RELATIVE_WRT_ORIG(TEXTEND)-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
 });_END___1__({_RWFD_1_})
-;____1_____ _RWHD_1_({
+_RWHD_1_({
 ;{ This will reserve place for the system itself, on the first part of a }
 ;{ hard disk. No problem to just reserve whole memory.}
         DC      64      ;{ Kbyte.}
@@ -1014,18 +1014,18 @@ _ENDCOMMENT
 ;{       during cold start.}
 ;{       The name is 32 bits in base 36.}
 ;
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
 ; We either switch to prot, run linux (always prot) or run real mode
 ; Be careful that these classes are mutually exclusive and cover all.
 CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END___1__({ _SWITCH_1_})
-;____1_____ _HOSTED_LINUX_1_({
+_HOSTED_LINUX_1_({
 CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END___1__({ _HOSTED_LINUX_1_})
-;____1_____ _REAL_1_({
+_REAL_1_({
 CPUNM:  DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END___1__({ _REAL_1_})
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
 ; {Swap the following with DP to allocate in conventional memory.}
          DC     A_LOWDP ; {LOW-DP        14}
 ; {Leave space to start conventional programs}
@@ -1363,7 +1363,7 @@ CODE_HEADER({2!},{TSTOR})
         _NEXT
 ;
 CODE_HEADER({L@},{LFET})
-;____1_____ _BITS32_1_({
+_BITS32_1_({
         POP     BX      ;MEM LOC
         POP     AX      ;SEG REG VAL
         MOV     DX,10H
@@ -1372,7 +1372,7 @@ CODE_HEADER({L@},{LFET})
         MOV     AX,[AX]
         _PUSH
 });_END___1__({ _BITS32_1_})
-;____1_____ _BITS16_1_({
+_BITS16_1_({
         POP     BX      ;MEM LOC
         POP     CX      ;SEG REG VAL
         _SWITCH_1_({JMPHERE_FROM_PROT})
@@ -1386,7 +1386,7 @@ CODE_HEADER({L@},{LFET})
 });_END___1__({ _BITS16_1_})
 ;
 CODE_HEADER({L!},{LSTORE})
-;____1_____ _BITS32_1_({
+_BITS32_1_({
         POP     BX      ;MEM LOC
         POP     AX      ;SEG REG VAL
         MOV     DX,10H
@@ -1396,7 +1396,7 @@ CODE_HEADER({L!},{LSTORE})
         MOV     [AX],BX
         _NEXT
 });_END___1__({ _BITS32_1_})
-;____1_____ _BITS16_1_({
+_BITS16_1_({
         POP     BX
         POP     CX
         POP     DX
@@ -1425,7 +1425,7 @@ DOCOL:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
         LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
-;____1_____ _SWITCH_1_({
+_SWITCH_1_({
         _SWITCH_1_({JMPHERE_FROM_FORTH})
         ;{ Allow interrupts to happen.}
         _SWITCH_1_({JMPHERE_FROM_OS})
@@ -1485,12 +1485,12 @@ HEADER({BL},{BLS},{DOCON})
 HEADER({C/L},{CSLL},{DOCON})
         DC      64
 ;
-;____1_____ _HIGH_BUF_1_({
+_HIGH_BUF_1_({
 HEADER({FIRST},{FIRST},{DOCON})
         DC      BUF1
 });_END___1__({ _HIGH_BUF_1_})
 ;
-;____1_____ _LOW_BUF_1_({
+_LOW_BUF_1_({
         _ALIGN  2       ; Otherwise INT 13 hangs when filling
         ; in into the lba block as a buffer address.
 HEADER({FIRST},{FIRST},{DOVAR})
@@ -1734,6 +1734,7 @@ HEADER({PFA},{PFA},{DOCOL})
         DC      SEMIS
         PAGE
         ;{ At line     LINE ~1500}
+
 HEADER({!CSP},{SCSP},{DOCOL})
         DC      SPFET
         DC      LCSP
@@ -2372,7 +2373,7 @@ HEADER({WARM},{WARM},{DOCOL})
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
 _COMMENT
-;____1_____ _HOSTED_MSDOS_1_({
+_HOSTED_MSDOS_1_({
         PUSH    DS
         MOV     AX,0
         MOV     DS,AX           ;{TO VECTOR AREA}
@@ -2407,13 +2408,13 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      FETCH
         DC      LIT,_VOC_LATEST(FORTH)
         DC      STORE
-;____1_____ _RWFILE_1_({
+_RWFILE_1_({
         DC      BLINI
 });_END___1__({_RWFILE_1_})
-;____1_____ _LINUX_C_1_({
+_LINUX_C_1_({
         DC      BLINI
 });_END___1__({_LINUX_C_1_})
-;____1_____ _LINUX_N_1_({
+_LINUX_N_1_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
@@ -2810,7 +2811,7 @@ CODE_HEADER({BDOS},{BDOS})
         PUSH     DI     ;{ i.e. flags }
         _NEXT
 
-;____1_____ _HOSTED_LINUX_1_({
+_HOSTED_LINUX_1_({
 ;{ Generic call on LINUX }
 CODE_HEADER({LINOS},{LINOS})
         POP     AX        ; Function number
@@ -2831,7 +2832,7 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;{------------------------------------}
 ;{       SYSTEM DEPENDANT CHAR I/O}
 ;{------------------------------------}
-;____1_____ _MODERN_1_({
+_MODERN_1_({
 ;{ All I/O goes through the modern (unix-borrowed)}
 ;{ file I/O.    }
 HEADER({TYPE},{LTYPE},{DOCOL})
@@ -2894,7 +2895,7 @@ HEADER({?TERMINAL},{QTERM},DOCOL)
 ;
 
 });_END___1__({_MODERN_1_})
-;____1_____ _LINUX_C_1_({
+_LINUX_C_1_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
@@ -2924,7 +2925,7 @@ CODE_HEADER({?TERMINAL},{QTERM})
         _NEXT
 ;
 });_END___1__({_LINUX_C_1_})
-;____1_____ _LINUX_N_1_({
+_LINUX_N_1_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
@@ -3015,7 +3016,7 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
         DC      SEMIS
 ;
 });_END___1__({_LINUX_N_1_})
-;____1_____ _CLASSIC_1_({
+_CLASSIC_1_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
 ;{ code definitions, but this way they are available}
@@ -3139,7 +3140,7 @@ CSTAT   PROC    NEAR
 STATRT: RET
 _ENDP CSTAT   ENDP
 });_END___1__({_CLASSIC_1_})
-;____1_____ _USEBIOS_1_({
+_USEBIOS_1_({
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
@@ -3241,7 +3242,7 @@ HEADER({POUT},{POUT},{DOCOL})
 ;{       SYSTEM DEPENDANT DISK I/O}
 ;{------------------------------------}
 
-;____1_____ _RWFILE_1_({
+_RWFILE_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
         _STRING({BLOCKS.BLK})
         _RESB(20)               ;{ Allow for some path}
@@ -3307,7 +3308,7 @@ RSLW2:  DC      TOR
         DC      SEMIS
 
 });_END___1__({_RWFILE_1_})
-;____1_____ _LINUX_N_1_({
+_LINUX_N_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
         _STRING({BLOCKS.BLK})
         DB      0       ; { Easier on linux}
@@ -3369,7 +3370,7 @@ RSLW4:  DC      LINOS
 RSLW2:  DC      SEMIS
 
 });_END___1__({_LINUX_N_1_})
-;____1_____ _LINUX_C_1_({
+_LINUX_C_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
         _STRING({BLOCKS.BLK})
         _RESB(20)               ;{ Allow for some path}
@@ -3400,7 +3401,7 @@ CODE_HEADER({R/W},{RSLW})
         _NEXT
 
 });_END___1__({_LINUX_C_1_})
-;____1_____ _CLASSIC_1_({
+_CLASSIC_1_({
 ;
 WERR    DB      'DISK WRITE ERROR  $'
 RERR    DB      'DISK READ ERROR   $'
@@ -3457,7 +3458,7 @@ HEADER({R/W},{RSLW},{DOCOL})
 RSLW1:  DC      WBLK
 RSLW2:  DC      SEMIS
 });_END___1__({_CLASSIC_1_})
-;____1_____ _USEBIOS_1_({
+_USEBIOS_1_({
 ;
 HEADER({DRIVE},{DRIVE},{DOVAR})
       DC  0
@@ -3472,7 +3473,7 @@ HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DC  0
 });_END___1__({_USEBIOS_1_})
 ;
-;____1_____ _RWFD_1_({
+_RWFD_1_({
 ;{  (Command, address, sec# -- )}
 HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, SPT*HEADS, SLMOD   ;{ Juggle #sec, #head, #track}
@@ -3516,7 +3517,7 @@ RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;{This  buffer}
 RSLW5:  DC      SEMIS
 ;
 });_END___1__({ _RWFD_1_})
-;____1_____ _RWHD_1_({
+_RWHD_1_({
 ;{ Warning : if this LBA is used apart from by R/W}
 ;{ the fields marked default must be restored.}
 HEADER({LBAPAR},{LBA},{DOVAR})
@@ -3867,12 +3868,12 @@ VLIS2:  DC      LDUP
         DC      DROP
         DC      SEMIS
 ;
-;____1_____ _NORMAL_BYE_1_({
+_NORMAL_BYE_1_({
 HEADER({BYE},{BYE},{DOCOL})
         DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
 ;{ EXIT TO PC-DOS}
 });_END___1__({ _NORMAL_BYE_1_})
-;____1_____ _ABSOLUTELOAD_1_({
+_ABSOLUTELOAD_1_({
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
         _SWITCH_1_({JMPHERE_FROM_FORTH})
@@ -3880,7 +3881,7 @@ RETDOSV: JMP 0:0        ; {Filled in during boot}
         _BITS32_1_({SET_32_BIT_MODE})
 
 });_END___1__({ _ABSOLUTELOAD_1_})
-;____1_____ _HOSTED_LINUX_1_({
+_HOSTED_LINUX_1_({
 HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
@@ -3947,7 +3948,7 @@ HEADER({.CPU},{DOTCPU},{DOCOL})
         DC      BASE,STORE
         DC      LIT,CELLS(12),PORIG ;
         DC      TFET
-;____1_____ _BITS32_1_({
+_BITS32_1_({
         DC      LIT, 10000H, STAR, PLUS, ZERO
 });_END___1__({ _BITS32_1_})
         DC      DDOT
@@ -4010,7 +4011,7 @@ MAT4:   MOV     AX,SI   ;{NEW CURSOR ADDR}
         MOV     SI,DI   ;{GET BACK UP}
         _2PUSH          ;{ BYE..BYE}
         PAGE
-;____1_____ _DIRECTMAPPED_1_({
+_DIRECTMAPPED_1_({
 ;
 HEADER({LOW-DP},{LOWDP},{DOUSE})
         DC      CELLS(14)
@@ -4024,7 +4025,7 @@ HEADER({LOW-EM},{LOWEM},{DOUSE})
 HEADER({TASK},{TASK},{DOCOL})
         DC      SEMIS
 ;
-;____1_____ _EQULAYOUT_1_({
+_EQULAYOUT_1_({
 TEXTEND  EQU     $       ; {Show end of dictionary.}
 INITDP   EQU     M4_INITDP ;{Where we want new words.}
 });_END___1__({ _EQULAYOUT_1_})
@@ -4044,7 +4045,7 @@ used for:
 
 _ENDCOMMENT
 
-;____1_____ _HOSTED_LINUX_1_({
+_HOSTED_LINUX_1_({
 ;       This is the proper way to do it.
 ;       No memory addresses should be arrived at through equates.
 ;       However now we must teach the linker to keep the
