@@ -1047,7 +1047,7 @@ _start:
 });_END_({_LINUX_N_})
 COLD_ENTRY:
         CLD                     ;{ DIR = INC}
-_LINUX_N_(
+_HOSTED_LINUX_(
 {MOV     _CELL_PTR[USINI+_CELLS(31)],SPO ;{Remember ARGS.}
 })
         MOV     {AX},DS
@@ -1802,12 +1802,9 @@ USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
         DC      _DEA(ENV) ;{       INIT (VOC-LINK) 10}
-_LINUX_C_({
+_HOSTED_LINUX_({
         DC      0       ;{ INIT (OFFSET) }
-});_END_({_LINUX_C_})
-_LINUX_N_({
-        DC      0       ;{ INIT (OFFSET) }
-});_END_({_LINUX_N_})
+});_END_({_HOSTED_LINUX_})
 _RWFILE_({
         DC      0       ;{ INIT (OFFSET) }
 });_END_({_RWFILE_})
@@ -3241,7 +3238,7 @@ worddoc( {OPERATINGSYSTEM},{ARGS},{arguments},{--- addr},{},
 { Return the addr of forthcode({ARGS}) a user variable that
 contains a system dependant pointer to any arguments that are
 passed from the operating system to ciforth during startup.
-_LINUX_N_({{
+_HOSTED_LINUX_({{
 In this ciforth it points to an area with the argument count,
 followed by a a null ended array of arguments strings,
 then by a null ended array of environment strings.
@@ -5399,7 +5396,7 @@ forthsamp({DROP 0}), execution and signon are suppressed.}}) },
 enddoc)
 HEADER({OPTIONS},{OPTIONS},{DOCOL})
 ;       Execute option.
-_LINUX_N_(
+_HOSTED_LINUX_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) ; {No options}  })
 _PC_(
@@ -5413,7 +5410,7 @@ OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
         _0BRANCH(OPT4) ; {No options}  })
         DC      FETCH
         DC      LDUP
-        DC      LIT, _PC_({0FDH}) _LINUX_N_({0FFH}), LAND
+        DC      LIT, _PC_({0FDH}) _HOSTED_LINUX_({0FFH}) , LAND
         DC      LIT, '-', UNEQ
         _0BRANCH(OPT3)
         DC      LIT, 3, LDUP, ERROR
@@ -7461,6 +7458,20 @@ CODE_HEADER({TYPE},{LTYPE},DOCOL)
         LEA     ESP,[ESP+_CELLS(2)]    ; remove input
         _NEXT
 ;
+worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
+{This is an alias for forthcode({TYPE}) .
+However it is used for all error message, so via this word
+error output can be redirected, by
+forthdefi({revectoring}) it.
+},
+,
+dnl This test assumes a redirection of error out to standard out.
+{{HERE 41 C, 42 C, 2 ETYPE},{AB}},
+enddoc)
+HEADER({ETYPE},{ETYPE},{DOCOL})
+        DC      LTYPE
+        DC      SEMIS
+;
 });_END_({_LINUX_C_})
 _LINUX_N_({
 ;{ All I/O goes through the modern device (Unix-standard)}
@@ -8007,6 +8018,8 @@ HEADER({?DISK-ERROR},{QDSKER},{DOCOL})
         DC      LIT, 8, QERR
         DC      SEMIS
 ;
+});_END_({_BLOCKSINFILE_})
+_BLOCKSBYFILEWS_({
 worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{n ---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
@@ -8097,7 +8110,7 @@ RSLW2:
         DC      QDSKER
         DC      SEMIS
 ;
-});_END_({_BLOCKSINFILE_})
+});_END_({_BLOCKSBYFILEWS_})
 worddoc( {OPERATINGSYSTEM},{SHELL},{shell},{---addr},{},
 {Leave the address forthvar({addr}) of a counted string,
 the name of a file that contains the command interpreter,
@@ -8186,10 +8199,11 @@ LOADEXEC:   DW  0       ; {The 0 are filled in at boot with DS.}
 COMBUF:  _RESB(CW+256)  ;{One cell for high level string manipulation.}
 });_END_({_MODERN_})
 _LINUX_C_({
-worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{---},{},
+worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{n ---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
-to the blocks in this file. The handle to use it is
+to the blocks in this file, with access code forthvar({n}) .
+The handle to use it is
 hidden in the c-code. forthcode({DISK-ERROR}) reflects whether the mapping was
 successful. Reinstall forthcode({WARNING}) as appropriate!
 _VERBOSE_({{
@@ -8199,13 +8213,15 @@ because forthcode({WARNING}) no longer is maintained properly.
 We could import it to C , but there is no end to that.}})
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-INIT},{BLINI})
+        POP     CX
         MOV     AX,[_VAR_FIELD(BLFL)]
         MOV     BX,_VAR_FIELD(BLFL)+CW
         PUSH    BX
         PUSH    AX
+        PUSH    CX
         CALL    c_block_init
         MOV     [_VAR_FIELD(DERR)],AX
-        LEA     ESP,[ESP+_CELLS(2)]    ; remove input
+        LEA     ESP,[ESP+_CELLS(3)]    ; remove input
         _NEXT
 ;
 worddoc( {BLOCKS},{BLOCK-EXIT},{block_exit},{---},{},
@@ -9729,7 +9745,7 @@ program.}}) },
 worddocchapter({INPUT},{ },
 {The wordset forthsamp({INPUT}) contains words to get input from the terminal
 and such.
-forthxref({FILES}) for disk I/O.
+_FILES_({forthxref({FILES}) for disk I/O.})
 forthxref({BLOCKS}) for access of blocks. },
 {},{},{},{}, {}, enddoc)
 worddocchapter({JUGGLING},{ },
@@ -9811,8 +9827,8 @@ forthxref({MULTIPLYING}).})},
  {},{},{},{}, {}, enddoc)
 worddocchapter({OUTPUT},{ }, {The wordset forthsamp({OUTPUT})
 contains words to output to the terminal and such.
-forthxref({FILES}) for disk I/O. forthxref({BLOCKS}) for
-blocks.},
+_FILES_({forthxref({FILES}) for disk I/O.})
+forthxref({BLOCKS}) for blocks.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
