@@ -1267,19 +1267,20 @@ DP0:
 
 define({_LINKOLD},0)dnl
 worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
-{Used in the form: .
-forthsamp({' nnnn})
-Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
-This also serves as an execution token.
+{Used in the form: forthexample({' nnnn})
+In interpret mode it
+leaves the forthdefi({execution token}) (equivalent to the
+dictionary entry address) of dictionary word forthsamp({nnnn}).
 If the word is not found after a search of
-forthcode({SEARCH-ORDER}) and forthcode({CURRENT}) , an appropriate error message is given.
-This word is intended for interpret mode,  but in ciforth it works as
-well in compilation mode _VERBOSE_({{, because it is considered a denotation. So
-' and the word following is a unit that behaves
-as a constant.}})
-It is recommended that this word is not postponed. _VERBOSE_({{Use explicit
-parsing and searching instead.}})},
-{{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
+forthcode({SEARCH-ORDER}) an appropriate error message is
+given. In ciforth it can be used in compilation mode too, it
+then compiles the address as a literal. It is recommended that
+for non-portable code forthcode({'}) is used as a
+forthdefi({denotation}) and that it is never postponed. (Use a
+combination of forthcode({WORD}) and forthcode({FIND}) _VERBOSE_({or
+any form of explicit parsing and searching })
+instead.)},
+{{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1},
 { : AAPE 1 2 ; 'AAPE EXECUTE  'AAPE ID. . .},{AAPE 2 1},
 {'APEEE },{'APEEE ?  ciforth ERROR # 11 : WORD IS NOT FOUND},
@@ -1878,11 +1879,13 @@ enddoc)
 HEADER({RESULT},{RESULT},{DOVAR}, )
         DC 0
 ;
-worddoc( {DICTIONARY~},{MATCHING-WORDS},{matching_words},{sc addr2 --- sc addr2},{},
+worddoc( {DICTIONARY~},{MATCHING-WORDS},{matching_words},{sc dea --- sc dea},{},
 {Intended to cooperate with forthcode({FOR-WORDS}) . Compares
 the string constant forthvar({sc}) with the dea
-forthvar({addr2}). If it is a match, it returns into
-forthcode({RESULT}) this forthdefi({DEA}) and it exits
+forthvar({dea}).
+If it is a match taking into account denotations,
+it returns into
+forthcode({RESULT}) this forthvar({dea}) and it exits
 prematurely from forthcode({FOR-WORDS}).},
 {{FIND}},
 {{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl
@@ -1947,7 +1950,7 @@ INBRS1:
 INBRS2:
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{(WORD)},{m_parse},{--- sc},{CI L0},
+worddocsafe( {PARSING},{(WORD)},{paren_word},{--- sc},{CI L0},
 {Parse the forthdefi({current input source}) for a word, i.e.
 observing forthcode({?BLANK}) . Skip leading delimiters then
 advance the input pointer to past the next delimiter or past
@@ -2313,7 +2316,7 @@ CODE_HEADER({EXIT},{EXIT})
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
 ;
-worddocsafe( {CONTROL},{(;)},{semicolon_s},{},{},
+worddocsafe( {CONTROL~},{(;)},{paren_semicolon},{},{},
 { This is a synonym for forthcode({EXIT}). It is the run-time
 word compiled at the end of a colon-definition which returns
 execution to the calling proceedure. Stop interpretation of the
@@ -3582,10 +3585,12 @@ HEADER({LATEST},{LATEST},{DOCOL})
 ;
 worddoc( {DICTIONARY~},{>CFA},{to_code_field_address},{dea --- cfa},{},
 {Given a dictionary entry addres forthvar({dea}) return its
-forthdefi({code field address}) forthvar({cfa}) : the address
-that is compiled within high level definitions. It serves as an
-execution token as well. In ciforth this is actually the same
-as the forthdefi({DEA}) .},
+forthdefi({code field address}) forthvar({cfa}). By jumping
+indirectly via this address the definition forthvar({dea}) is
+executed. This is the address that is compiled within high
+level definitions, so it serves as an execution token.
+_VERBOSE_({ In ciforth it has offset 0, so it is actually the
+same as the forthdefi({DEA})}).},
 {{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
@@ -3686,11 +3691,13 @@ HEADER({>BODY},{TOBODY},{DOCOL})
 ;
 worddoc( {DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
 {Convert the data field forthvar({addr}) of a definition
-created with a forthcode({CREATE}) / forthcode({DOES>})
-construct to its forthvar({dea}). Where forthcode({>BODY})
-keeps working after revectoring, forthcode({BODY>}) does not.
-_VERBOSE_({{ There is some logic to this, because the DEA to
-which the body belongs is no longer unique.}})
+created
+with a forthcode({CREATE}) / forthcode({DOES>}) construct to
+its forthvar({dea}). Where forthcode({>BODY}) keeps working
+after forthdefi({revectoring}) , forthcode({BODY>}) does not.
+_VERBOSE_({{ There is some logic to this, because the
+forthdefi({DEA}) to which the body belongs is no longer
+unique.}})
 },
 {{'},{>BODY}},
 {{ CREATE QAQ HERE BODY> ID.},{QAQ}},
@@ -3710,12 +3717,12 @@ HEADER({CFA>},{CTOD},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>WID},{to_w_i_d},{dea1 --- dea2},{},
-{Given the dictionary entry addres forthvar({dea1}) of a
-vocabulary return the address forthvar({dea2}) of its
-forthdefi({WID}), a dummy DEA that serves as the start of a
+worddoc( {DICTIONARY~},{>WID},{to_w_i_d},{dea --- wid},{},
+{Given the dictionary entry addres forthvar({dea}) of a
+vocabulary return its
+forthdefi({WID}) forthvar({wid}), a dummy DEA that serves as the start of a
 dictionary search. },
-{{VOCABULARY},{>CFA}},
+{{VOCABULARY},{>CFA},{(FIND)}},
 {{: APE ; ' FORTH >WID >LFA @ ID.},{APE}},
 enddoc)
 HEADER({>WID},{TWID},{DOCOL})
@@ -4551,7 +4558,7 @@ TONUM9:
 ;
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
-{ Look the string up forthvar({sc}) in the dictionary observing
+{ Look up the string forthvar({sc}) in the dictionary observing
 the the current search order. If found, leave the dictionary
 entry address forthvar({dea}) of the first entry found, else
 leave a nil pointer.},
@@ -4610,16 +4617,16 @@ FIND1:               ;{THEN THEN}
         DC      SEMIS
 ;
 worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},
-{sc dea1 --- sc dea2},{},
-{Search down from the forthdefi({DEA}) forthvar({dea}) for a
+{sc wid --- sc dea},{},
+{Search down from the forthdefi({WID}) forthvar({wid}) for a
 word with name forthvar({sc}).
-This DEA can be a forthdefi({WID}). _VERBOSE_({A forthdefi({WID}) is
+_VERBOSE_({A forthdefi({WID}) is
 mostly a dummy forthdefi({DEA}) found in the
 data field of a
-vocabulary, or the content of forthcode({DENOTATION}) or
+vocabulary, fetched from forthcode({CURRENT}) or
 forthcode({SEARCH-ORDER}) }). Leave the dictionary entry address
-forthvar({dea2}) of the first entry found, else leave a nil
-pointer. Do not consume the string forthvar({sc})_VERBOSE_({{,
+forthvar({dea}) of the first entry found, else leave a zero.
+Do not consume the string forthvar({sc})_VERBOSE_({{,
 as this is a repetitive action}}). },
 {{FIND},{FOUND},{>WID}},
 { { : BONOBO ; "BONOBO" CURRENT @ (FIND) ' BONOBO = .},{_T_},
@@ -4756,8 +4763,8 @@ HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea ---},{},
 {Print a definition's name from its dictionary entry address.
-Dummy entries are ignored. },
-{{'},{>DFA},{>NFA}},
+For dummy entries print nothing. },
+{{'},{>FFA},{>NFA}},
 { { : GORILLA ; ' GORILLA ID.},{GORILLA} },
 enddoc)
 HEADER({ID.},{IDDOT},{DOCOL})
@@ -5035,7 +5042,7 @@ the immediate bit in its header is set.
 This method allows definitions to handle unusual compiling
 situations, rather than build them into the fundamental compiler.
 The user may force compilation of an immediate definition by
-preceding it with forthcode({[COMPILE]}) .},{},
+preceding it with forthcode({POSTPONE}) .},{},
 { { : GS1 &Z EMIT ; IMMEDIATE : GS2 GS1 ;},{Z}},
 enddoc)
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
@@ -8489,18 +8496,21 @@ RSLW4:
 ;
 _LOAD_({
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
-{Used in the form: .
-forthcode({[']}) forthsamp({nnnn})
-Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
-This also serves as an execution token.
-As a compiler directive, executes in a colon-definition to
-compile the address as a literal. If the word is not found
-after a search of forthcode({SEARCH-ORDER}) and
-forthcode({CURRENT}), an appropriate error message is given.
-This word is intended for compilation mode, using it in interpret
-mode in ciforth is harmless, but useless.
-It is recommended this word is not used at all, and certainly
-not postponed (Use forthcode({FOUND}) .).},
+{Used in the form:
+forthexample({['] nnnn})
+In compilation mode it leaves the
+forthdefi({execution token}) (equivalent to the dictionary
+entry address) of dictionary word forthsamp({nnnn}). So as a
+compiler directive it compiles the address as a literal. If the
+word is not found after a search of
+forthcode({SEARCH-ORDER}) an appropriate error message is
+given. In ciforth this word is just an alias for forthcode({'}) ,
+so it can be used in interpret mode too. It is recommended that
+for non-portable code the
+forthdefi({denotation}) forthcode({'}) is used instead, and
+that is is never postponed. (Use a combination of
+forthcode({WORD}) and forthcode({FIND})
+). },
 {{FOUND},{'},{EXECUTE}} ,
 {{ : APE 1 2 ; : GS1 ['] APE ; GS1 EXECUTE  GS1 ID. . .},{APE 2 1}},
 enddoc)
@@ -8509,12 +8519,13 @@ HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 ;
 });_END_({_LOAD_})
 worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{addr wid --
-addr },{}, {Forget all words whose DEA is greater (later defined) than
+addr },{}, {Remove all words whose DEA is greater (later defined) than
 forthvar({addr}) from a wordlist given by
 forthvar({wid}) . Leave forthvar({addr}) (as
 forthcode({FORGET-VOC}) is intended to be used with
-forthcode({FOR-VOCS})) . If any whole vocabulary is forgotten,
-the search order is reset to forthsamp({ONLY FORTH}). },
+forthcode({FOR-VOCS})) . If any whole vocabulary is removed,
+the search order is reset to forthsamp({ONLY FORTH}). The space
+freed is not recovered.},
 {{FORGET}},
 {
 {!CSP VOCABULARY APE dnl
@@ -8560,8 +8571,8 @@ worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
 {Executed in the form:
                forthcode({FORGET}) forthvar({cccc})
 Deletes definition named forthvar({cccc}) from the dictionary
-with all entries physically following it.
-},
+with all entries physically following it. Recover the space
+that was in use.},
 {{FENCE},{FORGET-VOC}},
 {
 {: GO ; HERE : CH ; : GI ; FORGET CH LATEST ID. },{GO},
@@ -9236,7 +9247,8 @@ worddoc( {DICTIONARY},{WORDS},{words},{},{ISO},
 {List the names of the definitions in the topmost word list of the
 search order.
 dnl A break as per forthcode({KEY?}) will terminate the listing.
-}, {},
+},
+{{SEARCH-ORDER}},
 {
 {VOCABULARY JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q ' GO >LFA ;},{},
@@ -9595,15 +9607,16 @@ forthcode({CREATE}) and forthcode({DOES>}) .
 },
 {},{},{},{}, {}, enddoc)
 worddocchapter({DICTIONARY},{ },
-{The wordset forthsamp({DICTIONARY}) contains words that at a lower level than
-the wordset forthsamp({DEFINING}) concern the memory area that
-is allocated to the dictionary. They may add data to the dictionary at the expense
-of the free space, one cell or one byte at a time, or allocate a buffer at once.
-The dictionary space may also be shrunk, and the words that were there are lost.
-The forthdefi({dictionary entry address}) or forthdefi({DEA})
-represents a word. It is the lowest address of a record with
-fields. Words to access those fields also belong to this
-wordset.},
+{The wordset forthsamp({DICTIONARY}) contains words that at a
+lower level than the wordset forthsamp({DEFINING}) concern the
+memory area that is allocated to the dictionary. They may add
+data to the dictionary at the expense of the free space, one
+cell or one byte at a time, or allocate a buffer at once. The
+dictionary space may also be shrunk, and the words that were
+there are lost. The forthdefi({dictionary entry address}) or
+forthdefi({DEA}) represents a word. It is the lowest address of
+a record with fields. Words to access those fields also belong
+to this wordset.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DOUBLE},{ },
 {The wordset forthsamp({DOUBLE}) contains words that manipulate forthdefi({double})'s.
