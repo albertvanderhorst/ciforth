@@ -4,11 +4,11 @@
 SYNOPSIS
 lina -- 32 bit ISO (ANSI)forth for linux
 forth.lab -- contains blocks used as a library
-toblocks.c fromblock.c -- convert block file to/from text file
+toblock.c fromblock.c -- convert block file to/from text file
 
 DESCRIPTION
-`lina' is the linux version of the generic 86 figForth generated from
-ci86.gnr beta version 3.275.
+`lina' is the linux version of the generic 86 Forth generated from
+ci86.gnr version 4.0
 
 SYSTEM REQUIREMENT
 The binary distribution `lina' runs without modification on any i86 linux.
@@ -52,6 +52,5 @@ Copyright Dutch Forth Workshop Foundation by GPL.
 Author Albert van der Horst.
 
 CAVEAT
-This is a beta release.
 forth.lab is generic and parts are configured to not load
 on lina. In particular not the nice screen editor.
