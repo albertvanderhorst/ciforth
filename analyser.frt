@@ -5,6 +5,7 @@
 \ INCLUDE asi586.frt
 
 REQUIRE BOUNDS
+
 HEX
 \ Data design : >FFA leavers the flag field that is considered
 \ an area of 4 bytes. >FFA 3 + gives the stack effect nibbles:
@@ -104,10 +105,10 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ Get the pops and pushes from DEA which must be a code definition.
 : ANALYSE-CODE >CFA @ DUP >NA COUNT-PPS ;
 
-\ For DEA find the stack effect and fill it in.
+\ For DEA return the stack effect BYTE.
 \ It must be a code definition.
-: FILL-SE-CODE DUP ANALYSE-CODE
-  #POPS @ 1+   #PUSHES @ 1+   SE:2>1   SWAP !SE ;
+: FIND-SE-CODE ANALYSE-CODE
+  #POPS @ 1+   #PUSHES @ 1+   SE:2>1   ;
 
 \ Irritating exceptions
 0FF '?DUP !SE
@@ -150,11 +151,18 @@ IMASK    ' (?DO) >FFA  OR!      IMASK    ' LIT >FFA    OR!
 
 \ ---------------------------------------------------------------------------
 
+\ Maybe this part belogns in the .lab file.
+
+'TASK >CFA @ CONSTANT DOCOL
+'FORTH >CFA @ CONSTANT DODOES
+
+\ ---------------------------------------------------------------------------
+
 \ Inspect POINTER and XT. If the xt is of a type followed by inline
 \ code advance pointer appropriately. Inspect new POINTER and XT.
 : ?INLINE? >R
    R@ >FFA @ IMASK AND IF
-    R@ 'LIT = IF CELL+ ELSE DUP @ + ALIGNED THEN
+    R@ 'LIT = IF CELL+ ELSE $@ + ALIGNED THEN
    THEN R> ;
 
 \ To a stack effect BYTE apply a CHAIN of high level code.
@@ -162,9 +170,24 @@ IMASK    ' (?DO) >FFA  OR!      IMASK    ' LIT >FFA    OR!
 : ANALYSE-CHAIN
         BEGIN @+ DUP '(;) <> WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
 
-\ For DEA find the stack effect and fill it in.
+\ For DEA return the stack effect BYTE.
 \ It must be a high level definition
-: FILL-SE-HIGH 11 OVER >DFA @ ANALYSE-CHAIN SWAP !SE ;
+: FIND-SE-DOCOL 11 SWAP >DFA @ ANALYSE-CHAIN ;
+
+\ For DEA return the stack effect BYTE.
+\ It must be a ``CREATE .. DOES>'' definition
+: FIND-SE-DODOES 12 SWAP >DFA @ @ ANALYSE-CHAIN ;
+
+\ For DEA return the stack effect BYTE.
+\ It can be any definition.
+: FIND-SE-ANY DUP >CFA @ DOCOL = IF FIND-SE-DOCOL ELSE
+              DUP >CFA @ DODOES = IF FIND-SE-DODOES ELSE
+              FIND-SE-CODE THEN THEN ;
+
+
+\ For DEA find the stack effect and fill it in.
+\ It can be any definition.
+: FILL-SE DUP FIND-SE-ANY SWAP !SE ;
 
 13 '(NUMBER) !SE
 DECIMAL
