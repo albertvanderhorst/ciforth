@@ -100,6 +100,8 @@ HEX
 ( How MANY bytes is the valid part of the postit/ valid part of fixup ) 
 ( Bits may be up outside this part and are useful for forcing consistency ) 
 : >CNT >BODY CELL+ CELL+ CELL+ @ ;
+( Dissassembly routine for commaer, kicks in of >CNT is zero. )
+: >DIS >BODY CELL+ CELL+ CELL+ CELL+ @ ;
 ( Accept a MASK with a bit up for each commaer, a MASK indicating       )
 ( which bits are missing from postitted, and the INSTRUCTION )
 ( Assemble an 1..3 byte instruction and post what is missing.)
@@ -165,8 +167,8 @@ HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
 : CHECK30 DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK32 CHECK30 TALLY OR! ;
 ( Build with the LENGTH to comma the ADDRESS that is executing the comm )
-( and a MASK with the bit for this commaer.                             )
-: COMMAER <BUILDS  , , DUP , ,
+( and a MASK with the bit for this commaer, and a disassembly routine   )
+: COMMAER <BUILDS  , , DUP , , ,
 DOES> [ HERE TEMP ! ] @+ BOOKKEEPING   @ EXECUTE ;
 IS-A IS-COMMA
 
@@ -313,7 +315,7 @@ HEX
     !TALLY
     % DUP BEGIN
         SHOW-STEP
-     OVER DISS CELL+ @ - UNTIL DROP DROP
+     OVER DISS CELL+ @ - OVER VOCEND? OR UNTIL DROP DROP
 ;
 
 0 VARIABLE POINTER
@@ -382,10 +384,13 @@ HERE POINTER !
     ID.
 ;
 : .DISS' DISS @+ SWAP DO
-    I @ DUP IS-COMMA IF
+    I @ DUP IS-COMMA 0= IF
+        ID.
+    ELSE DUP >CNT  IF
        .COMMA       ( DEA -- )
     ELSE
-        ID.
+       POINTER @ OVER >DIS EXECUTE POINTER !
+    THEN
     THEN
  0 CELL+ +LOOP CR ;
 
