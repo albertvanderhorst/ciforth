@@ -71,7 +71,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  MSG # 6 : DISK RANGE ?
  MSG # 7 : FULL STACK
  MSG # 8 : DISC ERROR !
- MSG # 9 : UNKNOWN
+ MSG # 9 : UNRESOLVED FORWARD REFERENCE
  MSG # 10 : UNKNOWN
  MSG # 11 : UNKNOWN
  MSG # 12 : UNKNOWN
@@ -130,7 +130,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
   -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
  ( MAINTENANCE )  100 LOAD 32 LOAD
 ( HEX CHAR DUMP)  6 LOAD 30 LOAD 7 LOAD 39 LOAD ( i.a. editor)
- ( STRING )       36 LOAD 37 LOAD
+( STRINGS      )  35 LOAD 36 LOAD 37 LOAD
  ( EDITOR )       101 105 THRU 107 LOAD 106 LOAD
  ( CP/M READ WRITE LOAD    15 LOAD 18 LOAD 21 LOAD 21: BUGS)
  ( KRAKER )        10 LOAD
@@ -226,7 +226,9 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
   : -dq CELL+ DUP COUNT CR &. EMIT &" EMIT BL EMIT
      TYPE &" EMIT BL EMIT  COUNT + ;
                              CFOF (.") BY -dq
-
+  : -sq CELL+ DUP COUNT CR &" EMIT BL EMIT
+      TYPE &" EMIT BL EMIT  COUNT + ;
+                             CFOF ($) BY -sq
   : -do CR ." DO " CELL+ ;     CFOF (DO) BY -do
   : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
   : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
@@ -236,8 +238,6 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
   : -pc CR ." ;CODE plus code (suppressed)"
     DROP ' TASK ; ( Destroy deecompile pointer !)
       CFOF (;CODE) BY -pc
-
-
  ( DISK IO SCREEN 15 SCHRIJVEN >1< VERSIE #1)
  <HEX  0 VARIABLE FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
  : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
@@ -558,25 +558,11 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
    ' PEMIT CFA ' EMIT !
    KRAAK-FROM
    aux @ ' EMIT ! ;
- : A0 ;
- : A1 A0 A0 ;   : A2 A1 A1 ;    : A3 A2 A2 ;
- : A4 A3 A3 ;   : A5 A4 A4 ;    : A6 A5 A5 ;
- : A7 A6 A6 ;   : A8 A7 A7 ;    : A9 A8 A8 ;
- : AA A9 A9 ;
-
-: TEST 0 DO AA LOOP ;
-: Q 0 DO 10000 TEST LOOP ;
-
-
-
-
-
-
-
-
 ( Elementary string: $@ $! $+! $C+     A0apr03-AH)
 ( All this should probably be low level )
- : $@ COUNT ;     : $. TYPE ;  : C+! >R R @ + R> ! ;
+ : $@ COUNT ;
+ : $. TYPE ;
+ : C+! >R R C@ + R> C! ;
  : $! ( address, count,string -.)
    OVER OVER C! 1+ SWAP CMOVE     ;
  : $C+ ( C,$-. append the character to the string $ )
@@ -584,10 +570,24 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : $+!  ( $T,$C,$-. Append $C char's from $T to $)
     DUP C@ >R ( Keep old length )  2DUP C+! ( Adjust length)
     1 + R> + SWAP CMOVE  ;
+
+
+
+
+( PARSING  & STRINGS                   A0apr03-AH)
 ( HANDY & Preparation for ANSI-fication)
-: PARSE WORD HERE $@ ;
+: PARSE WORD HERE $@ ;     : ($) R $@ DUP 1+ R> + >R ;
+
 : S" &" PARSE 2DUP ( fig: already HERE) 1+ ALLOT DROP ;
+
+: C" COMPILE ($) &" WORD HERE C@ 1+ ALLOT ; IMMEDIATE
+
 : STRING <BUILDS S" DROP DROP DOES> $@ ;
+
+: " STATE @ IF [COMPILE] C" ELSE S" THEN ; IMMEDIATE
+
+
+
 
 
  ( STRING MANIPULATIONS : $I $S A0APR04-AH) ( HORRIBLE!)
@@ -638,10 +638,10 @@ THEN ;
 ;    HEX>
 
 
-
-
-
-
+?32
+HEX
+-100000 10 +ORIGIN +!
+FLUSH COLD
 
 
 
@@ -766,21 +766,21 @@ CODE HLT HLT, C;
 : PATCH-BIOS ' NEW-BIOS ' BIOS CFA ! ;
 : PATCH PATCH-BIOS SWITCH ;
 KRAAKER
+ : A0 ;
+ : A1 A0 A0 ;   : A2 A1 A1 ;    : A3 A2 A2 ;
+ : A4 A3 A3 ;   : A5 A4 A4 ;    : A6 A5 A5 ;
+ : A7 A6 A6 ;   : A8 A7 A7 ;    : A9 A8 A8 ;
+ : AA A9 A9 ;
 
-' NEW-BIOS 30 DUMP ' NEW-DOCOL 30 DUMP 48 EDIT
-40BB :                            58A2 CF40 5A|X..@Z|
-40C0 : 595B 5F56 550F 20C0 480F 22C0 FB97 CD00 |Y[_VU. .H.".....
-40D0 : 9C5F 96FA 0F20 C040 0F22 C05D 5896 5053 |._... .@.".]X.PS
+: TEST 0 DO AA LOOP ;
+: Q 0 DO 10000 TEST LOOP ;
 
-4043 :        0F20 C048 0F22 C0FB FA0F 20C0 40|. .H.".... .@|
-4050 : 0F22 C08D 6EFE 8976 008D 7502 AD89 C789 |."..n..v..u.....
-4060 : FBFF 2582 41B0 3540 5A06 A804 8627 444F |..%.A.5@Z....'DO
 
-' NEW-BIOS 30 DUMP
-44E1 :   58A2 EE44 5A59 5B5F 5655 FB97 CD10 9C|X..DZY[_VU.....|
-44F0 : 5F96 FA5D 5896 5053 5152 57AD 89C7 89FB |_..]X.PSQRW.....
-4500 : FF25 8348 4CD4 D444 0A45 F481 D802 4511 |.%.HL..D.E....E.
-4510 : 45E9 A730 8A50 4154 4348 2D42 494F D30B |E..0.PATCH-BIO..
+
+
+
+
+
 
 
 
@@ -2879,11 +2879,11 @@ MEISJES JOPIE     NO-SEX .rel
 
 
 ( Main screen for parser AH&CH                        A0oct03  )
- 181 187 THRU
 ( Create a forward definition, one that patches its own
   call with a cfa that is in its data field. Then goes on
   with that definition. )
- : FORWARD <BUILDS 0 , DOES> @ R> 1 CELLS - DUP >R  ! ;
+: FORWARD <BUILDS 0 , DOES> @ DUP 0= 9 ?ERROR
+   R> 1 CELLS - DUP >R  ! ;
 ( : DOIT HERE IN @ COMPILE ' ! IN ! COMPILE : ;   )
 : :R  IN @ >R [COMPILE] : R> IN !
 HERE CFA -FIND 0= 0 ?ERROR DROP CELL+ ! ; IMMEDIATE
@@ -2891,41 +2891,41 @@ FORWARD FAC
 :R FAC   DUP 0= IF DROP 1 ELSE DUP 1 - FAC * THEN ;
 ^ 4 FAC ^ ." 4! IS " .
 
+( Make sure you did 40 LOAD to increase the return stack. )
+ 181 188 THRU
 
-
-
-( BNF PARSER                                   ch&ch )
-0 VARIABLE SUCCESS  : IM IMMEDIATE ;
+( BNF PARSER NON-IM COMPILING WORDS CALLED BY IM WORDS AH&CH)
+0 VARIABLE SUCCESS
 : POP COMPILE R> ;    : PUSH COMPILE >R ;
 : SUC@ COMPILE  SUCCESS COMPILE @ ;
 : SUC! COMPILE 1 COMPILE SUCCESS COMPILE ! ;
-: EXIT COMPILE ;S ; IM    : EXIT R> DROP ;
-
-: <PTS COMPILE IN COMPILE @ PUSH COMPILE DP COMPILE @ PUSH ;
-: PTS> POP COMPILE DROP POP COMPILE DROP ;
-: BT> POP COMPILE DP COMPILE ! POP COMPILE IN COMPILE ! ;
-
-: <BNF  SUC@ [COMPILE] IF
-<PTS [COMPILE] ELSE COMPILE EXIT [COMPILE] THEN ;
-: BNF>  SUC@ [COMPILE] IF PTS>
-[COMPILE] ELSE BT> [COMPILE] THEN ;
-
+: EXIT R> DROP ;
+: % SP@ H. TIB @ IN @ TYPE SPACE SUCCESS ? CR ; : % COMPILE  % ;
+ CODE  POPSP MOV, W| T| SP'| DB| [BP] 0 B,
+ LEA, BP'| DB| [BP] 0 CELL+ B, NEXT C;
+: <PTS COMPILE SP@ PUSH
+       COMPILE DP COMPILE @ PUSH
+       COMPILE IN COMPILE @ PUSH ;
+: BT> POP COMPILE IN COMPILE !
+      POP COMPILE DP COMPILE !
+      COMPILE POPSP ;
+: PTS> POP COMPILE DROP  POP COMPILE DROP  POP COMPILE DROP ;
 ( compile-only words called by immediate words   )
 ( Fake an embedded colon definition, i.e. an `EXIT' between
   `<FAKE' and `FAKE>' must return after `FAKE>' )
-( Bracket an optional part, i.e. its success depends on what is
-  before it. The part must balance the return stack. )
 : <FAKE COMPILE LIT HERE 0 , COMPILE >R ;
 : FAKE>  COMPILE R> COMPILE DROP  HERE SWAP ! ;
 
-( Embed a BNF definition in the current one, i.e.
-<<BNF ... BNF>>  is equivalent to xxx with xxx defined
-by BNF: xxx ... ;BNF )
-: <<BNF <FAKE <BNF ;
-: BNF>> BNF> FAKE> ;
 
+( Bracket an optional part, i.e. its success depends on what is
+  before it. The part must balance the return stack. )
 : <OPT  SUC@ PUSH ;
 : OPT>  POP COMPILE SUCCESS COMPILE ! ;
+
+
+
+
+
 ( hANDLING OF SINGLE CHARACTERS )
 
 : @TOKEN  IN @ TIB @ + C@ ;
@@ -2943,88 +2943,88 @@ ELSE       DROP THEN ;
 
 
 ( bnf PARSER TOKENS                                     )
-
-
+( Skip blanks and handle comment )
+FORWARD COMMENT
 : SKIP-BLANKS TIB @ IN @ + BEGIN DUP C@ BL = WHILE
   1+ 1 IN +! REPEAT DROP ;
-: +KEYWORD ( f ) IF C@ IN +! ELSE DROP THEN ;
+: +KEYWORD ( VS f -) IF C@ IN +! ELSE DROP THEN ;
 : =KEYWORD  ( VS -) SUCCESS @ IF DUP
 IN @ TIB @ + SWAP 255 SWAP $@ ^ MATCH ^ DROP DUP SUCCESS !
 +KEYWORD ELSE DROP THEN ;
 : KEYWORD <BUILDS BL WORD HERE C@ 1+ ALLOT
-DOES> SKIP-BLANKS =KEYWORD ;
+DOES> COMMENT =KEYWORD ;
 
 
 
 
 
+( BNF PARSER                                   ch&ch )
+: `IF [COMPILE] IF ;            : `BEGIN [COMPILE] BEGIN ;
+: `ELSE [COMPILE] ELSE ;        : `WHILE [COMPILE] WHILE ;
+: `THEN [COMPILE] THEN ;        : `REPEAT [COMPILE] REPEAT ;
+: `EXIT COMPILE ;S ;
 
+: <BNF  SUC@ `IF <PTS `ELSE `EXIT `THEN ;
+: BNF>  SUC@ `IF PTS> `ELSE BT> `THEN ;
 
-
-
-
-
-
-
-
-
-
-
-
-
+( Embed a BNF definition in the current one, i.e.
+<<BNF ... BNF>>  is equivalent to xxx with xxx defined
+by BNF: xxx ... ;BNF )
+: <<BNF <FAKE <BNF ;
+: BNF>> BNF> FAKE> ;
 
 
 ( THE { } round_bracket_pair and [ ] definitions )
-: | SUC@ [COMPILE] IF PTS> COMPILE EXIT
-[COMPILE] ELSE BT> <PTS SUC! [COMPILE] THEN ; IM
-: BNF: [COMPILE] : SMUDGE <BNF SUC! ;
-: ;BNF BNF> SMUDGE [COMPILE] ; ; IMMEDIATE
+( Start a BNF definition, must have been declared by FORWARD )
+: BNF:   [COMPILE] :R   COMPILE COMMENT   <BNF   SUC!   ;
+: ;BNF   BNF>   [COMPILE] ;   ; IMMEDIATE
+
+: | SUC@ `IF PTS> `EXIT `ELSE BT> <PTS SUC! `THEN ;
+IMMEDIATE
 : (( <<BNF ;  IMMEDIATE
 : )) BNF>> ;  IMMEDIATE
 : [ <OPT <<BNF ;  IMMEDIATE
 : ] BNF>> OPT> ;  IMMEDIATE
-: {  <OPT [COMPILE] BEGIN SUC@ [COMPILE] WHILE <<BNF ;
-IMMEDIATE
-: } BNF>> [COMPILE] REPEAT OPT> ; IMMEDIATE
-
+: {  <OPT `BEGIN SUC@ `WHILE <<BNF ; IMMEDIATE
+: } BNF>> `REPEAT OPT> ; IMMEDIATE
 
 
 
 ( Examples and tests )
-: AUX1 'A' [ 'B' | 'C' ] ;
+ :R COMMENT  SKIP-BLANKS  ;
+FORWARD AUX1 BNF: AUX1 'A' [ 'B' | 'C' ] ;BNF
 : RUN[ 1 SUCCESS ! AUX1 SUCCESS ? ;
-: AUX2 'A' { 'B' 'C' } ;
-: RUN{ 1 SUCCESS ! AUX2 SUCCESS ? ;
-
-BNF: <CHAR>  @TOKEN DUP &) = >R DUP &( = >R 0=   R> R> OR OR
+: RUN{ 1 SUCCESS ! 'A' { 'B' 'C' } SUCCESS ? ;
+FORWARD <CHAR>
+BNF: <CHAR> @TOKEN DUP &) = >R DUP &( = >R 0=   R> R> OR OR
     0= DUP SUCCESS !      +TOKEN ;BNF
-BNF: <S>  '(' <S> ')' <S> | <CHAR> <S> | ;BNF
-: AUX3 <S> <EOL> ;
+( This requires an enormous return stack ! )
+FORWARD <S>   BNF: <S>  '(' <S> ')' <S> | <CHAR> <S> | ;BNF
+FORWARD AUX3 BNF: AUX3 <S>  <EOL>  ;BNF
 : RUN() 1 SUCCESS ! AUX3 SUCCESS @
-IF ." ok" ELSE ." NOK"  THEN ;
+IF -1 IN +! ." ok" ELSE ." NOK"  THEN ;
 
-BNF: "KEY"  'K' 'E' 'Y' ;BNF
+FORWARD "KEY" BNF: "KEY" 'K' 'E' 'Y' ;BNF
 : RUNKEY 1 SUCCESS ! "KEY" SUCCESS ? ;
 
+( Push the string matched by the current terminal symbol on
+ the data stack  bnf: iets  app nooot mies PUSH" ;bnf
+ pushes what is matched by iets )
+: PUSH" R>   R TIB @ +   IN @ R -  ROT >R ;
+( Add the string on the stack to the output )
+: POP" >R HERE R CMOVE R> ALLOT BL C, ;
+( Add the symbol matched to the output )
+: .SYMBOL COMPILE PUSH" COMPILE POP" ; IMMEDIATE
+FORWARD STATEMENT    FORWARD IDENTIFIER
+BNF: IDENTIFIER { 'A' | 'B' | 'C' } .SYMBOL ;BNF
+BNF: STATEMENT IDENTIFIER COMMENT '+' IDENTIFIER  " F+" POP"
+| '(' STATEMENT COMMENT ')'  ;BNF
+: PS HERE 1 SUCCESS ! STATEMENT SUCCESS ?  HERE OVER - TYPE ;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+PS ABA + BABAA
+." NOW COME THE FREAKS"
+( PS (A+B)     )
 
 
 
