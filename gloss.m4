@@ -14,7 +14,7 @@ define({quote},{{{$1}}})
 define({worddoccommon},{
 divert(9)dnl
 @node $8, _next$3(), _prev(), MyTop()
-@subsection $8
+@subsection {$2}ifelse({$2},{'},{ (This addition because texinfo won't accept a single {quote}) })
 @pindex $2
 
 @noindent
