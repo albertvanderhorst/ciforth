@@ -1222,53 +1222,6 @@ and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
 HEADER({SOURCE},{SOURC},{DOUSE})
         DC      CELLS(27)       ;{ And 28 and 29.}
 ;              
-worddoc({PARSING},{ENCLOSE},{enclose},{addr1 c --- addr1 n1 n2 n3},{},
-{The text scanning primitive used by forthcode({WORD}) . From the text address
-addr1 and an ascii delimiting character forthvar({c}) , is determined the byte
-offset to the first non-delimiter character forthvar({n1}) , the offset to the
-first delimiter after the text forthvar({n2}) , and the offset to the first
-character not included.
-This proceedure will not process past an ascii "null", treating it
-as an unconditional delimiter.},{})
-CODE_HEADER({ENCLOSE},{ENCL})
-        POP     AX      ;{S1 - TERMINATOR CHAR}
-        POP     BX      ;{S2 - TEXT ADDR}
-        PUSH    BX      ;{ADDR - BACK TO STACK ( IT RHYMES )}
-        MOV     AH,0    ;{ZERO}
-        MOV     DX,-1   ;{CHAR OFFSET COUNTER}
-        DEC     BX      ;{ADDR -1}
-;
-;{   SCAN TO FIRST NON-TERMINATOR CHARACTER}
-ENCL1:  INC     BX      ;{ADDR+1}
-        INC     DX      ;{COUNT+1}
-        CMP     AL,[BX]
-        JZ      ENCL1   ;{WAIT FOR NON-TERMINATOR}
-        PUSH    DX      ;{OFFSET TO 1ST TEXT CHAR}
-        CMP     AH,[BX] ;{NULL CHAR?}
-        JNZ     ENCL2   ;{NO}
-;
-;{  FOUND NULL BEFORE 1ST NON-TERM CHAR}
-        MOV     AX,DX   ;{COPY COUNTER}
-        INC     DX      ;{ +1}
-        _2PUSH
-;
-;{   FOUND FIRST TEXT CHAR - COUNT THE CHARS}
-ENCL2:  INC     BX      ;{ ADDR+1}
-        INC     DX      ;{COUNT+1}
-        CMP     AL,[BX] ;{TERMINATOR CHAR?}
-        JZ      ENCL4   ;{YES}
-        CMP     AH,[BX] ;{NULL CHAR?}
-        JNZ     ENCL2   ;{NO, LOOP AGAIN}
-;
-;{   FOUND NULL AT END OF TEXT}
-ENCL3:  MOV     AX,DX   ;{COUNTERS ARE EQUAL}
-        _2PUSH
-;
-;{   FOUND TERMINATOR CHARACTER}
-ENCL4:  MOV     AX,DX
-        INC     AX      ;{COUNT+1}
-        _2PUSH
-;
 worddoc({OUTPUT},{CR},{cr},{},{L0},
 {Transmit a carriage return and line feed to the selected output
 device.},{{OUT}})
@@ -2749,38 +2702,11 @@ otherwise from the disc block stored in forthcode({BLK}) .},
 {{: GS2 BL WORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
 {HEX : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ},{2 Q}})
 HEADER({WORD},{LWORD},{DOCOL})
-        DC      BLK
-        DC      FETCH
-        _0BRANCH(WORD1) ;{ IF}
-        DC      BLK
-        DC      FETCH
-        DC      BLOCK
-        DC      LIN
-        DC      FETCH
-        DC      PLUS
-        DC      SWAP
-        DC      ENCL
-        DC      HERE
-        DC      LIT,22H
-        DC      BLANK
-        DC      LIN
-        DC      PSTOR
-        DC      OVER
-        DC      LSUB
-        DC      TOR
-        DC      RR
-        DC      HERE
-        DC      CSTOR
-        DC      PLUS
-        DC      HERE
-        DC      ONEP
-        DC      FROMR
-        DC      LCMOVE
-        DC      HERE
-        _BRANCH(WORD2)  ;{ ELSE}
-WORD1:  DC      AWORD
-;        DC      DOTS
-WORD2:  
+;        DC      SOURC, FETCH
+;        DC      SOURC, CELLP, FETCH
+;        DC      SOURC, CELLP, CELLP, FETCH
+;        DC      DOTS, DROP, DROP, DROP
+        DC      AWORD
         DC      SEMIS
 ;
 worddoc({PARSING},{&:},{char_follows}, {--- c},{CI},
@@ -2964,7 +2890,7 @@ ERRO1:  DC      HERE
         DC      DDUP
         _0BRANCH(ERRO2) ;{ IF}
         DC      DOT
-        DC      LIN,FETCH
+        DC      LIN,FETCH, SOURC, FETCH, LSUB
         DC      DOT    ;{ENDIF}
 ERRO2:  DC      QUIT
 ;
@@ -3710,7 +3636,7 @@ transferred automatically to disc should its buffer be required for
 storage of a different block.},{{BLOCK},{SCREEN}})
 HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV, FETCH
-        DC      LDUP, CELLP
+        DC      LDUP, CELLP,CELLP
         DC      SWAP, FETCH 
         DC      ZERO
         DC      RSLW
@@ -3746,7 +3672,7 @@ BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
         DC      STALEST,STORE
         DC      RR,STORE
         DC      RR,PREV, STORE,
-        DC      FROMR, CELLP
+        DC      FROMR, CELLP, CELLP
         DC      SEMIS
 ;
 worddoc({STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
@@ -3777,6 +3703,7 @@ BLOC2:  DC      PBUF,ZEQU
         DC      RR,ONE
         DC      RSLW
         DC      LCELL,LSUB
+        DC      LCELL,LSUB
 BLOC3:  DC      LDUP,FETCH
         DC      RR,LSUB
         DC      LDUP,PLUS
@@ -3785,7 +3712,7 @@ BLOC3:  DC      LDUP,FETCH
         DC      LDUP,PREV
         DC      STORE
 BLOC1:  DC      FROMR,DROP
-        DC      CELLP,SEMIS
+        DC      CELLP,CELLP,SEMIS
 ;
 worddoc({STORAGE},{FLUSH},{flush},{},{ISO FIG L0},
 {Transfer the content of each UPDATE d block buffer to disk.
@@ -3800,6 +3727,57 @@ FLUS1:  DC      ZERO,BUFFE
         _LOOP(FLUS1)
         DC      SEMIS
 ;
+worddoc({STORAGE},{SAVE},{save},{ --- },{L0},
+{Save the content of forthcode({SOURCE}) on the return stack
+prior to changing the forthdefi({current input source}). 
+This must be balanced by a RESTORE in the same definition.}
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}})
+HEADER({SAVE},{SAVE},{DOCOL})
+        DC      FROMR
+        DC      SOURC, TFET
+        DC      LIN, FETCH
+        DC      TOR, TOR, TOR
+        DC      TOR
+        DC SEMIS
+;
+worddoc({STORAGE},{RESTORE},{restore},{ --- },{L0},
+{This must follow a forthcode({SAVE}) in the same definition.
+Restore the content of forthcode({SOURCE}) from the return stack
+thusly restoring the forthdefi({current input source}) to what
+it was when the forthcode({SAVE}) was executed.
+},
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}})
+HEADER({RESTORE},{RESTO},{DOCOL})
+        DC      FROMR
+        DC      FROMR, FROMR, FROMR
+        DC      LIN, STORE
+        DC      SOURC, TSTOR
+        DC      TOR
+        DC SEMIS
+;
+worddoc({STORAGE},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO L0},
+{Get a complete specification of the input source stream.
+For ciforth this is the content of forthcode({SOURCE}).
+ciforth needs 3 cells, and is always able to forthcode({RESTORE}) an input
+saved like this. },
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}})
+HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
+        DC      SOURC, TFET
+        DC      LIN, FETCH
+        DC      LIT, 3
+        DC SEMIS
+;
+worddoc({STORAGE},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3--- f},{ISO L0},
+{Restore the input source stream from what was saved by SAVE-INPUT .
+ciforth is always able to restore the input across different 
+input sources, as long as the input to be restored is not exhausted.},
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}})
+HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
+        DC      DROP
+        DC      LIN, STORE
+        DC      SOURC, TSTOR
+        DC SEMIS
+;
 worddoc({SCREEN},{LOAD},{load},{n ---},{L0},
 {Interrupt the current input stream in order to
 interpret screen forthvar({n}) .
@@ -3807,18 +3785,17 @@ At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input stream.},
 {{-->},{QUIT},{;S}})
 HEADER({LOAD},{LOAD},{DOCOL})
-        DC      BLK
-        DC      FETCH,TOR
-        DC      LIN,FETCH
-        DC      TOR,ZERO
-        DC      LIN,STORE
+        DC      BLK, FETCH, TOR
+        DC      SAVE
         DC      BSCR,STAR
         DC      BLK,STORE       ;{BLK <- SCR * B/SCR}
+        DC      BLK, FETCH, BLOCK
+        DC      LDUP, SOURC, STORE
+        DC      LDUP, LIN, STORE
+        DC      LIT, KBBUF, PLUS, SOURC, CELLP, STORE
         DC      INTER   ;{INTERPRET FROM OTHER}
-SCREEN: DC      FROMR,LIN
-        DC      STORE
-        DC      FROMR,BLK
-        DC      STORE
+SCREEN: DC      RESTO
+        DC      FROMR, BLK, STORE
         DC      SEMIS
 ;
 worddocsafe({SCREEN},{-->},{next_screen},{},{P,L0},
