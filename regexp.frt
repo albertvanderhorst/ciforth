@@ -63,6 +63,9 @@ INCLUDE defer.frt
 \ For a CHAR-SET ; convert it into its complementary set.
 : INVERT-SET MAX-SET 0 DO DUP I + DUP C@ INVERT SWAP C! LOOP  0 SWAP CLEAR-BIT ;
 
+\ Copy CHARSET 1 over CHARSET 2.
+: COPY-SET MAX-SET MOVE ;
+
 \ For CHAR and CHARSET return "it BELONGS to the charset".
 : IN-CHAR-SET   BIT? ;
 
@@ -93,7 +96,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 
 \ Example of another set definition
 \ &d CHAR-SET \d   &9 1+ &0 DO I | LOOP   DROP
-\ &D CHAR-SET \D   \d OVER MAX-SET CMOVE  INVERT-SET
+\ &D CHAR-SET \D   \d OVER MAX-SET MOVE  INVERT-SET
 
 '| HIDDEN
 
@@ -260,6 +263,10 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
     REPEAT
     2SWAP 2DROP TRUE ;
 
+\ For CP and EP, return CP EP and TRUE.
+\ Instead of ``FORTRACK'' if we want no sync.
+: FORTRACK-DUMMY TRUE ;
+
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "the strings HAS been used up".
 \ (Note: this is an end-check, to be done only when the expression ends with '$'.)
@@ -388,10 +395,11 @@ ELSE NORMAL-CHARS $C+ THEN ;
 \ For EP (pointing between [ and ] ) add one item to ``SET-MATCHED''.
 \ Leave EP pointing after the item.
 : ADD[]-1  DUP C@
+    DUP &. = IF DROP \. SET-MATCHED OR-SET! 1+ ELSE
     DUP &\ = IF DROP ESCAPE[] ELSE
     OVER 1+ C@ &- = IF DROP SET-RANGE ELSE
     SET-MATCHED SET-BIT 1+
-    THEN THEN
+    THEN THEN THEN
 ;
 
 \ Build up the set between [ and ] into ``SET-MATCHED''.
@@ -404,6 +412,12 @@ ELSE NORMAL-CHARS $C+ THEN ;
 \ EP points after the intial [ , leave IT pointing after the closing ].
 : PARSE[]
     DUP C@ &^ = IF 1+ (PARSE[]) SET-MATCHED INVERT-SET ELSE (PARSE[]) THEN
+    HARVEST-SET-MATCHED  ;
+
+\ Compile a set denoted by a \.
+\ EP points after the intial \ , leave IT pointing after the set indicating character.
+: PARSE\
+    C@+ GET-CHAR-SET SET-MATCHED MAX-SET MOVE
     HARVEST-SET-MATCHED  ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
@@ -447,19 +461,22 @@ VARIABLE RE-EXPR-END
 : ADD+   MAKE-HOLE 'ADVANCE+ SWAP ! ;
 : ADD?   MAKE-HOLE 'ADVANCE? SWAP ! ;
 
+\ Add sets, see also PARSE[] and PARSE\ .
+: ADD.   'ADVANCE-CHAR RE, \. RE-SET, ;
+
 \ Add specialties, more like markers.
 : ADD<   'CHECK< RE, ;
 : ADD>   'CHECK> RE, ;
 : ADD(   'HANDLE() RE, ALLOCATE( RE, ;
 : ADD)   'HANDLE() RE, ALLOCATE) RE, ;
-: ADD.   'ADVANCE-CHAR RE, \. RE-SET, ;
 : ADD^   -1 CELLS RE-FILLED +! ;
 : ADD$   'CHECK$ RE, ;
 
 30 SET COMMAND-SET     COMMAND-SET !SET
 
 : | COMMAND-SET 2SET+! ;    \ Shorthand, about to be hidden.
-&. 'ADD. | &[ 'PARSE[] |
+\ Parse thingies do an extra increment on the EP pointer.
+&[ 'PARSE[] | &\ 'PARSE\ | &. 'ADD. |
 &< 'ADD< |   &> 'ADD> | &( 'ADD( | &) 'ADD) |
 &* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
 &^ 'ADD^ |   &$ 'ADD$ |

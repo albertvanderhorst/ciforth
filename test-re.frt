@@ -2,7 +2,7 @@
 VARIABLE OLDIN : !OLDIN IN @ OLDIN ! ; !OLDIN
 : test IF CR "The following failed: " TYPE OLDIN @ IN @ OVER - TYPE CR THEN !OLDIN ;
 \ Verbose
-\  : test CR IF "The following failed: " ELSE "The following suceeded: " THEN TYPE
+\     : test CR IF "The following failed: " ELSE "The following suceeded: " THEN TYPE
 \     OLDIN @ IN @ OVER - TYPE CR !OLDIN ;
 
 : match 0= test ;
@@ -11,8 +11,8 @@ VARIABLE OLDIN : !OLDIN IN @ OLDIN ! ; !OLDIN
 \ No syncs  --------------------------
 \ Simple matches
 "" "^" RE-MATCH match
-\ "A" "^" RE-MATCH match
-\ "" "^A" RE-MATCH match
+"A" "^" RE-MATCH match
+"" "^A" RE-MATCH nomatch
 "A" "^A" RE-MATCH match
 "AB" "^A" RE-MATCH match
 "AB" "^AB" RE-MATCH match
@@ -53,9 +53,9 @@ VARIABLE OLDIN : !OLDIN IN @ OLDIN ! ; !OLDIN
 
 \ Up front sync --------------------------
 \ Simple matches
-\ "" "" RE-MATCH match
-\ "A" "" RE-MATCH match
-\ "" "A" RE-MATCH match
+"" "" RE-MATCH match
+"A" "" RE-MATCH match
+"" "A" RE-MATCH nomatch
 "A" "A" RE-MATCH match
 "AB" "A" RE-MATCH match
 "AB" "AB" RE-MATCH match
@@ -76,7 +76,7 @@ VARIABLE OLDIN : !OLDIN IN @ OLDIN ! ; !OLDIN
 "ABACAD" "A*BA*CA*D" RE-MATCH match
 "ABACAD" "A*BA*DA*DA*" RE-MATCH    nomatch
 
-\ "" "A+" RE-MATCH    nomatch
+"" "A+" RE-MATCH    nomatch
 "A" "A+" RE-MATCH match
 "AB" "A+" RE-MATCH match
 "AB" "A+C" RE-MATCH    nomatch
@@ -191,14 +191,15 @@ ESCAPE$ "^[\n\r\b\t\e]*$" RE-MATCH match
 ESCAPE$ "^[\n\r\b\e]*$" RE-MATCH nomatch
 
 "nrbte" "^[\n\r\b\t\e]*$" RE-MATCH nomatch
-"n" "^[\n\r\b\t\e]*$" RE-MATCH nomatch
-"r" "^[\n\r\b\t\e]*$" RE-MATCH nomatch
-"b" "^[\n\r\b\t\e]*$" RE-MATCH nomatch
-"t" "^[\n\r\b\t\e]*$" RE-MATCH nomatch
-"e" "^[\n\r\b\t\e]*$" RE-MATCH nomatch
+"n" "^[\n\r\b\t\e]" RE-MATCH nomatch
+"r" "^[\n\r\b\t\e]" RE-MATCH nomatch
+"b" "^[\n\r\b\t\e]" RE-MATCH nomatch
+"t" "^[\n\r\b\t\e]" RE-MATCH nomatch
+"e" "^[\n\r\b\t\e]" RE-MATCH nomatch
 
 "nrbte" "^[^\n\r\b\t\e]*$" RE-MATCH match
 
+"|" "." RE-MATCH match
 "ABCDE" "...." RE-MATCH match
 "ABCDE" "....." RE-MATCH match
 "ABCDE" "......" RE-MATCH nomatch
@@ -206,5 +207,11 @@ ESCAPE$ "....." RE-MATCH nomatch
 
 ESCAPE$ "^[^A]*$" RE-MATCH match
 
-\ "ABCDE" "[^.]" RE-MATCH nomatch
+"ABCDE" "[^.]" RE-MATCH nomatch
 ESCAPE$ "[^.]" RE-MATCH match
+
+"A" "\w" RE-MATCH match
+"ABCDE" "^\w*$" RE-MATCH match
+" " "\w" RE-MATCH nomatch
+" " "[\w]" RE-MATCH nomatch
+" " "[^\w]" RE-MATCH match
