@@ -9,7 +9,7 @@
 
 REQUIRE $
       : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
-\      : \D ;            IMMEDIATE : ^^ !CSP DUP CRACK-CHAIN ?CSP ;
+\ : \D ; IMMEDIATE   : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
 
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
@@ -105,14 +105,13 @@ VARIABLE MIN-DEPTH
 : COMBINE-VD    SE:1>2 SWAP 1- NEGATE VD +! REMEMBER-DEPTH 1- VD +! ;
 
 \ ---------------------------------------------------------------------
-\ For DEA return "we ARE still in the annihilatable code", i.e.
-\ we have no stack side effects that kill this.
-\ At this point ``VD'' contains the current stack depth, which
-\ we want to go below zero.
+\ For DEA return "it CAN be part of annihilatable code",
+\ as far as its stack & side effects are concerned.
+\ FIXME rename to ANNILABLE?
 : STILL-ANNIL? DUP NS!?   SWAP SE@ NO-GOOD 0= AND ;
 
 \ We are at a stable point, i.e. we consumed all the extra stuff,
-\ that is placed in the annihilation chain. Then more.
+\ that is placed in the annihilation chain. Maybe even more.
 : ANNIL-STABLE?   VD @ MIN-DEPTH @ =  VD @ 1 <  AND ;
 
 \ For DEA : adding it would result in a not yet stable sequence.
@@ -120,16 +119,24 @@ VARIABLE MIN-DEPTH
 \ possibility for optimisation.
 : ANNILLING? DUP STILL-ANNIL? IF SE@ COMBINE-VD ANNIL-STABLE? 0= ELSE DROP 0 THEN ;
 
-\ Try the annihilate the start of SEQUENCE. If it works compile
-\ equivalent code and return the remaining SEQUENCE, else 0.
-: ANNIHILATE-SEQ !OPT-START !MIN-DEPTH
+\ Investigate the start of SEQUENCE. Return the ADDRESS
+\ to which it can be annihilated, else 0.
+: (ANNIHILATE-SEQ)
     BEGIN
         NEXT-PARSE OVER STILL-ANNIL? AND 0= IF 2DROP 0 EXIT THEN
-  ANNILLING?  WHILE REPEAT
-ANNIL-STABLE? IF
+        ( As yet mysterious code to do a recursion)
+  ANNILLING?  WHILE REPEAT ;
+
+\ Compile ``DROP'' equivalent to the annihilated code.
+: COMPILE-DROPS
 \     -1 PROGRESS OR!
     VD @ NEGATE 0 ?DO POSTPONE DROP LOOP
-ELSE DROP 0 THEN ;
+;
+
+\ Try to annihilate the start of SEQUENCE. If it works compile
+\ equivalent code and return the remaining SEQUENCE, else 0.
+: ANNIHILATE-SEQ !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
+    ANNIL-STABLE? IF COMPILE-DROPS ELSE DROP 0 THEN ;
 
 \ Recompile the start of SEQUENCE . Leave remaining SEQUENCE.
 \ It may be an annihilatable part  or just an item.
