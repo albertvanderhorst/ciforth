@@ -1269,11 +1269,11 @@ HEADER({RESULT},{RESULT},{DOVAR}, )
         DC 0
 ;
 worddocsafe( {DICTIONARY},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}, {},
-{Intended to cooperate with forthcode({FOR-WORDS}) .
-Compares the string constant forthsamp({sc}) with the dea forthvar({addr2}).
-If it is a match, it
-returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely
-from forthcode({FOR-WORDS}).},
+{Intended to cooperate with forthcode({FOR-WORDS}) . Compares
+the string constant forthsamp({sc}) with the dea
+forthvar({addr2}). If it is a match, it returns into
+forthcode({RESULT}) this forthdefi({dea}) and it exits
+prematurely from forthcode({FOR-WORDS}).}, 
 {{FIND}},
 {{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl
 "MATCHING-WORDS" ' MATCHING-WORDS GS1 .},{_T_}},
@@ -6479,8 +6479,12 @@ HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{L0},
-{Transmit forthvar({n}) ascii blanks to the output device.},{{SPACE},{OUT}}, 
-{}, 
+{If forthvar({n}) is greater or equal to zero, display as much
+spaces. },{{SPACE},{OUT}}, 
+{
+{41 EMIT 0 SPACES 41 EMIT},{AA},
+{41 EMIT 3 SPACES 41 EMIT},{A   A}
+}, 
 enddoc)
 HEADER({SPACES},{SPACES},{DOCOL})
         DC      ZERO
@@ -6491,7 +6495,8 @@ HEADER({SPACES},{SPACES},{DOCOL})
         DC      XDO     ;{DO}
 SPAX2:  DC      SPACE
         _LOOP(SPAX2)    ;{LOOP}
-SPAX1:  DC      SEMIS
+SPAX1:  
+DC      SEMIS
 ;
 worddoc( {FORMATTING},{<#},{less_number_sign},{},{ISO,L0},
 {Setup for pictured numeric output formatting using the words:
@@ -6587,9 +6592,11 @@ DIGS1:  DC      DIG     ;{BEGIN}
         _0BRANCH(DIGS1) ;{UNTIL}
         DC      SEMIS
 ;
-worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{},
+worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{FIG},
 {Print a signed double number forthvar({d}) right aligned in a field forthvar({n}) characters
-wide.},{{OUT},{D.}}, {}, enddoc)
+wide.},{{OUT},{D.}}, 
+{{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}}, 
+enddoc)
 HEADER({D.R},{DDOTR},{DOCOL})
         DC      TOR
         DC      SWAP
@@ -6609,7 +6616,9 @@ HEADER({D.R},{DDOTR},{DOCOL})
 ;
 worddocsafe( {OUTPUT},{.R},{dot_r},{n1 n2 ---},{},
 {Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
-following blank is printed.},{{OUT},{.}}, {}, enddoc)
+following blank is printed.},{{OUT},{.}}, 
+{{-12 41 EMIT 5 .R 41 EMIT},{A  -12A}}, 
+enddoc)
 HEADER({.R},{DOTR},{DOCOL})
         DC      TOR
         DC      STOD
@@ -6621,7 +6630,8 @@ worddoc( {OUTPUT},{D.},{d_dot},{d ---},{L1},
 {Print a signed double number forthvar({d}),
 according to the current forthcode({BASE}) . A blank follows.
 },{{OUT},{.},{D.R}},
-{}, enddoc)
+{{-12. D. 41 EMIT},{-12 A}}, 
+enddoc)
 HEADER({D.},{DDOT},{DOCOL})
         DC      ZERO
         DC      DDOTR
@@ -6631,8 +6641,10 @@ HEADER({D.},{DDOT},{DOCOL})
 worddocsafe( {OUTPUT},{.},{dot},{n ---},{L0},
 {Print a number from a signed _BITS_ bit two's complement value,
 converted according to the numeric forthcode({BASE}) .
-A trailing blanks follows.},
-{{OUT},{U.},{.R},{D.R},{D.}}, {}, enddoc)
+A blanks follows.},
+{{OUT},{U.},{.R},{D.R},{D.}}, 
+{{-12 41 EMIT . 41 EMIT},{A-12 A}}, 
+enddoc)
 HEADER({.},{DOT},{DOCOL})
         DC      STOD
         DC      DDOT
@@ -6641,7 +6653,9 @@ HEADER({.},{DOT},{DOCOL})
 worddoc( {OUTPUT},{?},{question},{addr --},{L0},
 {Print the value contained at the address in free format according to
 the current base.},
-{{OUT},{.}}, {}, enddoc)
+{{OUT},{.}}, 
+{{-12 PAD ! 41 EMIT PAD ? DROP 41 EMIT},{A-12 A}}, 
+enddoc)
 HEADER({?},{QUES},{DOCOL})
         DC      FETCH
         DC      DOT
@@ -6652,7 +6666,12 @@ worddocsafe( {OUTPUT},{U.},{u_dot},{u ---},{L0},
 converted according to the numeric forthcode({BASE}) .
 A trailing blanks
 follows.},
-{{OUT},{.},{.R},{D.R},{D.}}, {}, enddoc)
+{{OUT},{.},{.R},{D.R},{D.}}, 
+_BITS32_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
+{-1 41 EMIT U. 41 EMIT},{AFFFFFFFF A}},})
+_BITS16_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
+{-1 41 EMIT U. 41 EMIT},{AFFFF A}},})
+enddoc)
 HEADER({U.},{UDOT},{DOCOL})
         DC      ZERO
         DC      DDOT
@@ -6666,7 +6685,9 @@ execute forthvar({xt})
 the forthdefi({dea}) of those words.         forthvar({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
-{{FOR-VOCS},{EXECUTE}}, {}, enddoc)
+{{FOR-VOCS},{EXECUTE}}, 
+{{( See MATCHING-WORDS)},{}}, 
+enddoc)
 HEADER({FOR-WORDS},{FORW},{DOCOL})
         DC      SWAP
         DC      TOR
@@ -6692,7 +6713,12 @@ worddoc( {DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt ---},{},
  with as data the forthdefi({dea}) of those words. forthvar({xt})
 must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
 },
-{{FOR-WORDS},{EXECUTE}}, {}, enddoc)
+{{FOR-WORDS},{EXECUTE}}, 
+{
+{ VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
+{JOHN FORTH}
+},
+enddoc)
 HEADER({FOR-VOCS},{FORV},{DOCOL})
         DC      TOR
         DC      VOCL
@@ -6717,7 +6743,13 @@ FORV1:  DC      FROMR
 worddoc( {DICTIONARY},{WORDS},{words},{},{},
 {List the names of the definitions in the context vocabulary.
 dnl A break as per forthcode({?TERMINAL}) will terminate the listing.
-}, {}, {}, enddoc)
+}, {}, 
+{
+{VOCABULARY JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
+{: Q ' GO >LFA ;},{},
+{: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
+}, 
+enddoc)
 HEADER({WORDS},{WORDS},{DOCOL})
         DC      CSLL
         DC      LOUT
@@ -6731,7 +6763,9 @@ HEADER({WORDS},{WORDS},{DOCOL})
 _NORMAL_BYE_({
 worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment MSDOS.
-},{{COLD}}, {}, enddoc)
+},{{COLD}}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({BYE},{BYE},{DOCOL})
         DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
 ;{ EXIT TO PC-DOS}
@@ -6740,7 +6774,9 @@ _ABSOLUTELOAD_({
 worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {_PROTECTED_({Switch back to real mode.})
 Return to the host environment MSDOS.
-},{{COLD}}, {}, enddoc)
+},{{COLD}}, 
+{{( Interactive)},{}},
+enddoc)
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -6751,7 +6787,9 @@ RETDOSV: JMP 0:0        ; {Filled in during boot}
 _HOSTED_LINUX_({
 worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment Linux.
-},{{COLD}}, {}, enddoc)
+},{{COLD}}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
@@ -6760,7 +6798,9 @@ HEADER({BYE},{BYE},{DOCOL})
 worddoc( {SCREEN},{LIST},{list},{n ---},{L0},
 {Display the ascii text of screen forthvar({n}) on the selected output device.
 forthcode({SCR}) contains the screen number during and after this process.},
-{}, {}, enddoc)
+{}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({LIST},{LLIST},{DOCOL})
         DC      DECA
         DC      CR,LDUP
@@ -6782,9 +6822,12 @@ LIST2:  _LOOP(LIST1)
         DC      CR,SEMIS
 ;
 worddoc( {SCREEN},{INDEX},{index},{from to --},{},
-{Print the first line of each screen over the range forthvar({from}) , forthvar({to}) . This is
-used to view the comment lines of an area of text on disc screens.},
-{{LIST}}, {}, enddoc)
+{Print the first line of each screen over the range
+forthvar({from}) , forthvar({to}) . This is used to view the
+comment lines of an area of text on disc screens.}, 
+{{LIST}}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({INDEX},{INDEX},{DOCOL})
         DC      LIT,FF
         DC      EMIT,CR
@@ -6800,6 +6843,11 @@ INDE1:  DC      CR,IDO
 INDE2:  _LOOP(INDE1)
         DC      SEMIS
 ;
+worddoc( {STACKS},{DOTS},{dots},{from to --},{},
+{Print the stack, in the current base.}, 
+{{LIST}}, 
+{{SP! 1 2 3 .S},{S: 1 2 3}}, 
+enddoc)
 HEADER({.S},{DOTS},{DOCOL})
         DC      CR
         _STRINGINLINE({S: })
@@ -6812,12 +6860,15 @@ DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
 DOC1:    DC DROP, DROP
         DC SEMIS
 ;
+_LOAD_({
 worddoc( {SCREEN},{TRIAD},{triad},{scr --},{},
 {Display on the selected output device the three screens which
 include that numbered forthvar({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
 reference line at the bottom taken from line 15 of screen 4.},
-{{MESSAGE}}, {}, enddoc)
+{{MESSAGE}}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({TRIAD},{TRIAD},{DOCOL})
         DC      LIT,FF
         DC      EMIT
@@ -6836,11 +6887,16 @@ TRIA1:  DC      CR,IDO
 TRIA2:  _LOOP(TRIA1)    ;{THEN}
         DC      CR
         DC      SEMIS
+;       
 ; This word is not even fig!
 worddoc( {MISC},{.CPU},{dot_cpu},{---},{},
 {Print the name of the CPU processor present in the boot up
 parameters. Using the bizar convention of a base-36 number.},
-{{ABORT},{COLD}}, {}, enddoc)
+{{ABORT},{COLD}}, 
+_PROTECTED_({{{.CPU},{80386}},})
+_REAL_({{{.CPU},{8086}},})
+{}, 
+enddoc)
 HEADER({.CPU},{DOTCPU},{DOCOL})
 ;{ PRINT CPU TYPE (8088)}
         DC      BASE,FETCH
@@ -6855,6 +6911,7 @@ _BITS32_({
         DC      BASE,STORE
         DC      SEMIS
 ;
+});_END_({_LOAD_})
 _DIRECTMAPPED_({
 ;
 worddoc( {MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
@@ -6876,7 +6933,9 @@ HEADER({LOW-EM},{LOWEM},{DOUSE}, CELLS(15))
 ;{**** LAST DICTIONARY WORD ****}
 worddoc( {MISC},{TASK},{task},{},{},
 {A no-operation word which marks the boundary between
-the forth system and applications. },{{COLD}}, {}, enddoc)
+the forth system and applications. },{{COLD}}, 
+{{!CSP TASK ?CSP},{}}, 
+enddoc)
 HEADER({TASK},{TASK},{DOCOL})
         DC      SEMIS
 ;
