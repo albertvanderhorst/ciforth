@@ -1,5 +1,5 @@
 ;{               ciforth : a generic I86 ISO FORTH by HCC FIG}
-
+define({_END_},{$1})
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
@@ -6240,7 +6240,7 @@ HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
 });_END_({_LOAD_})
 _PC_({
 ;{ Generic call on BIOS. A boon for experimenters.}
-worddoc( {OPERATINGSYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{}
+worddoc( {OPERATINGSYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt forthsamp({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contain
 forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
@@ -6352,7 +6352,7 @@ behalf of this registers are saved and restored in
 forthcode({REG-SET}) . Unadorned calls to real interrupts are
 only available as forthcode({BIOS31}) .})
 },{{BDOSN}},
-{{23 X X X X 28 BDOSN . DROP .},{0 23}},
+{{23 X X X X 28 BIOSN . DROP .},{0 23}},
 enddoc)
 
 _NORMAL_BIOS_({
@@ -6498,7 +6498,7 @@ contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
 of the processors flag register. This draws upon all facilities made
 available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
 only if it is started from MSDOS.})
-},{{BIOS}}, {}, enddoc)
+},{{BIOS},{BDOSN}}, {}, enddoc)
 _NORMAL_BIOS_({
 CODE_HEADER({BDOS},{BDOS})
         POP     DX
@@ -6752,7 +6752,6 @@ PACCEP1:
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 ;
-_PC_({
 _HOSTED_DPMI_({
 worddoc( {STORAGE~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
 {A constant that leaves the address of a disk buffer used by
@@ -6763,7 +6762,7 @@ file i/o words.
 enddoc)
 HEADER({RWBUF},{RWBUF},{DOCON}, 8000H)
 ;
-worddoc( {~INPUT},{READ-FILE}, {read_file}, {addr n1 fd --- n2 u1 }, {ISO}
+worddoc( {STORAGE},{READ-FILE}, {read_file}, {addr n1 fd --- n2 u1 }, {ISO}
 {Read forthvar({n}) characters to forthvar({addr}) from current
 position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters succesfully read,
@@ -6787,7 +6786,7 @@ RFILE1:
 RFILE2:
         DC      SEMIS
 ;
-worddoc( {~INPUT},{WRITE-FILE}, {write_file}, {addr n fd --- u1 }, {ISO}
+worddoc( {STORAGE},{WRITE-FILE}, {write_file}, {addr n fd --- u1 }, {ISO}
 {Write forthvar({n}) characters from addr to the file that is
 open at forthvar({fd}) , starting at its current position.
 forthvar({u1}) is 0 for success, positive for a short read of
@@ -6812,25 +6811,45 @@ WFILE1:
 WFILE2:
         DC      SEMIS
 ;
+
 });_END_({ _HOSTED_DPMI_})
 _HOSTED_MSDOS_({
+worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{d c b a ---ar fl},{},
+{Do a call of ``BDOS'' interrupt (21H) with forthvar({d c b a }) in
+registers forthvar({ DX CX BX AX }). Upon return those registers
+contains forthvar({ar }) and forthvar({fl}) is the content
+of the processors carry register.  0 indicates no error, 1 indicates an error, probably
+with more information present in forthvar({ar }).
+This draws upon all facilities made
+available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
+only if it is started from MSDOS.})
+_VERBOSE_({{This is intended to replace the obsolescent BDOS , that has the
+parameters backwards, and returns too many useless parameters. }})
+},
+{{BIOSN},{BDOS}},
+{},
+enddoc)
 HEADER({BDOSN},{BDOSN},{DOCOL})
         DC      LIT, 21H, BIOSN
         DC      SEMIS
 ;
-worddoc( {~INPUT},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO}
+worddoc( {STORAGE},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
 and a result code into forthvar({ior}). The latter is the MSDOS
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
-{{( No test yet)}},
+{
+{345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345},
+{"hello.frt" 0 OPEN-FILE . DUP 0 > . },{0 _T_},
+{CLOSE-FILE .},{0}
+},
 enddoc)
 HEADER({OPEN-FILE},{OPEN},{DOCOL})
         DC      TOR
         DC      PAD, SSTOR
-        DC      PAD, SFET
-        DC      OVER, PLUS, ZERO, SWAP, CSTOR ; Zero ended
+        DC      ZERO, PAD, CHAPP ; {Unix requires a c-string.}
+        DC      PAD, CELLP
         DC      X, X
         DC      LIT, open, FROMR, PLUS, BDOSN
         _0BRANCH({OFILE1})
@@ -6841,114 +6860,12 @@ OFILE1:
 OFILE2:
         DC      SEMIS
 ;
-;
-worddoc( {~INPUT},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO}
-{Delete the file with name forthvar({sc}). Return
-a result code into forthvar({ior}). The latter is the MSDOS
-error code negated, to be inspected using forthcode({MESSAGE}). },
-{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
-{{( No test yet)}},
-enddoc)
-HEADER({DELETE-FILE},{DELETE},{DOCOL})
-        DC      X, X
-        DC      ROT
-        DC      LIT, delete, BDOSN
-        _0BRANCH({DFILE1})
-        DC      NEGATE
-        _BRANCH({DFILE2})
-DFILE1:
-        DC      DROP, ZERO
-DFILE2:
-        DC      SEMIS
-;
-worddoc( {~INPUT},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO}
-{Create a file with name forthvar({sc}) and file access method
-forthvar({fam}). If it already exists, it is truncated to zero length.
-Return a file handle into forthvar({fileid})
-and a result code into forthvar({ior}). The latter is the MSDOS
-error code negated, to be inspected using forthcode({MESSAGE}). },
-{{R/W}},
-{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
-{{( No test yet)}},
-enddoc)
-HEADER({CREATE-FILE},{CREATEF},{DOCOL})
-        DC      TOR
-        DC      PAD, SSTOR
-        DC      PAD, SFET
-        DC      OVER, PLUS, ZERO, SWAP, CSTOR ; Zero ended
-        DC      X, X
-        DC      LIT, create, FROMR, PLUS, BDOSN
-        _0BRANCH({CRFILE1})
-        DC      NEGATE, LDUP
-        _BRANCH({CRFILE2})
-CRFILE1:
-        DC      ZERO
-CRFILE2:
-        DC      SEMIS
-;
-worddoc( {~INPUT},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO}
-{Read forthvar({n}) characters to forthvar({addr}) from current
-position of the file that is open at forthvar({fd}) .
-forthvar({n2}) is the number of characters succesfully read,
-this may be zero. forthvar({ior}) is 0 for success, or otherwise
-the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
-{{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R/W}},
-{{( No test yet)}},
-enddoc)
-HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      LIT, read, BDOSN
-        _0BRANCH({RFILE1})
-        DC      NEGATE, ZERO, SWAP
-        _BRANCH({RFILE2})
-RFILE1:
-        DC      ZERO
-RFILE2:
-        DC      SEMIS
-;
-worddoc( {~INPUT},{REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO}
-{Position the file that is open at forthvar({fd}) at position
-forthvar({ud}).
-forthvar({ior}) is 0 for success, or otherwise
-the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
-{{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
-{{( No test yet)}},
-enddoc)
-HEADER({POSITION-FILE},{PFILE},{DOCOL})
-        DC      LIT, lseek, BDOSN
-        _0BRANCH({PFILE1})
-        DC      NEGATE
-        _BRANCH({PFILE2})
-PFILE1:
-        DC      DROP, ZERO
-PFILE2:
-        DC      SEMIS
-;
-worddoc( {~INPUT},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO}
-{Write forthvar({n}) characters from addr to the file that is
-open at forthvar({fd}) , starting at its current position.
-forthvar({u1}) is 0 for success, positive for a short read of
-forthvar({u1}) characters, or otherwise the MSDOS error code
-negated, to be inspected using forthcode({MESSAGE}).
-},
-{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R/W}},
-{{( No test yet)}},
-enddoc)
-HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      LIT, write, BDOSN
-        _0BRANCH({WFILE1})
-        DC      NEGATE
-        _BRANCH({WFILE2})
-WFILE1:
-        DC      DROP, ZERO
-WFILE2:
-        DC      SEMIS
-;
-worddoc( {~INPUT},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO}
+worddoc( {STORAGE},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO},
 {Close the file with file handle in forthvar({fileid}). Return
 a result code into forthvar({ior}). The latter is the MSDOS
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
-{{( No test yet)}},
+{{." See OPEN-FILE"},{See OPEN-FILE}},
 enddoc)
 HEADER({CLOSE-FILE},{CLOSE},{DOCOL})
         DC      TOR
@@ -6962,9 +6879,160 @@ CFILE1:
         DC      DROP, ZERO
 CFILE2:
         DC      SEMIS
-});_END_({ _HOSTED_MSDOS_})
+;
+worddoc( {STORAGE},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO},
+{Create a file with name forthvar({sc}) and file access method
+forthvar({fam}). If it already exists, it is truncated to zero length.
+Return a file handle into forthvar({fileid})
+and a result code into forthvar({ior}). The latter is the MSDOS
+error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
+{CLOSE-FILE .},{0}},
+enddoc)
+HEADER({CREATE-FILE},{CREATEF},{DOCOL})
+        DC      TOR
+        DC      PAD, SSTOR
+        DC      ZERO, PAD, CHAPP ; {Unix requires a c-string.}
+        DC      PAD, CELLP
+        DC      FROMR, X
+        DC      LIT, create, BDOSN
+        _0BRANCH({CRFILE1})
+        DC      NEGATE, LDUP
+        _BRANCH({CRFILE2})
+CRFILE1:
+        DC      ZERO
+CRFILE2:
+        DC      SEMIS
+;
+worddoc( {STORAGE},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
+{Delete the file with name forthvar({sc}). Return
+a result code into forthvar({ior}). The latter is the MSDOS
+error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{"AAP" CREATE-FILE . CLOSE-FILE .},{0 0},
+{"AAP" 0 DELETE-FILE . },{0 },
+{345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345}},
+enddoc)
+HEADER({DELETE-FILE},{DELETE},{DOCOL})
+        DC      PAD, SSTOR
+        DC      ZERO, PAD, CHAPP ; {Unix requires a c-string.}
+        DC      PAD, CELLP
+        DC      X, X
+        DC      LIT, delete, BDOSN
+        _0BRANCH({DFILE1})
+        DC      NEGATE
+        _BRANCH({DFILE2})
+DFILE1:
+        DC      DROP, ZERO
+DFILE2:
+        DC      SEMIS
+;
+worddoc( {STORAGE},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO},
+{Read forthvar({n}) characters to forthvar({addr}) from current
+position of the file that is open at forthvar({fd}) .
+forthvar({n2}) is the number of characters succesfully read,
+this may be zero. forthvar({ior}) is 0 for success, or otherwise
+the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R/W}},
+{
+{ "hello.frt" 0 OPEN-FILE . DUP 0 > . },{0 _T_},
+{PAD 1024 ROT READ-FILE . PAD SWAP TYPE },{0 ." Hello world!"},
+{CLOSE-FILE .},{0}
+},
+enddoc)
+HEADER({READ-FILE},{RFILE},{DOCOL})
+        DC      LIT, read, BDOSN
+        _0BRANCH({RFILE1})
+        DC      NEGATE, ZERO, SWAP
+        _BRANCH({RFILE2})
+RFILE1:
+        DC      ZERO
+RFILE2:
+        DC      SEMIS
+;
+worddoc( {STORAGE}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
+{Position the file that is open at forthvar({fd}) at position
+forthvar({ud}).
+forthvar({ior}) is 0 for success, or otherwise
+the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
+{
+{ "hello.frt" 0 OPEN-FILE . CONSTANT FD },{0 },
+{5. FD REPOSITION-FILE .},{0},
+{PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 llo world!"},
+{FD CLOSE-FILE .},{0}
+},
+enddoc)
+HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
+        DC      LIT, lseek, BDOSN
+        _0BRANCH({PFILE1})
+        DC      NEGATE
+        _BRANCH({PFILE2})
+PFILE1:
+        DC      DROP, ZERO
+PFILE2:
+        DC      SEMIS
+;
+worddoc( {STORAGE},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
+{Write forthvar({n}) characters from addr to the file that is
+open at forthvar({fd}) , starting at its current position.
+forthvar({u1}) is 0 for success, positive for a short read of
+forthvar({u1}) characters, or otherwise the MSDOS error code
+negated, to be inspected using forthcode({MESSAGE}).
+},
+{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R/W}},
+{
+{ "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE-FILE . . },{0 18},
+{FD CLOSE-FILE .},{0}
+},
+enddoc)
+HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      LIT, write, BDOSN
+        _0BRANCH({WFILE1})
+        DC      NEGATE
+        _BRANCH({WFILE2})
+WFILE1:
+        DC      DROP, ZERO
+WFILE2:
+        DC      SEMIS
+;
+worddoc( {STORAGE},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
+{Save the string constant forthsamp({sc2} as a new file with
+the name forthsamp({sc1}) ) . Any errors are thrown. },
+{{GET-FILE},{OPEN-FILE},{THROW}},
+{{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
+enddoc)
+HEADER({PUT-FILE},{PUTFILE},DOCOL)
+        DC      CREATEF, THROW
+        DC      LDUP, TOR
+        DC      WFILE, THROW
+        DC      FROMR, THROW
+        DC      SEMIS
+;
+worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
+{Get the content of the file with name forthsamp({sc1});
+leave it as a string forthsamp({sc2}). Any errors are thrown. },
+{{PUT-FILE},{OPEN-FILE},{THROW}},
+{{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
+enddoc)
+HEADER({GET-FILE},{GETFILE},DOCOL)
+        DC      HERE, TOR
+        DC      LIT, _BITS16_(10000)_BITS32_(10000000), ALLOT
+        DC      RR, SSTOR, ZERO, RR, CHAPP ; {Unix requires a c-string.}
+        _STRINGINLINE({FiLeBuF})        ; {Magic number.}
+        DC      RR, SPTOR
+        DC      FROMR, SFET, OVER, PLUS, TOR
+        DC      OPEN, THROW
+        DC      LDUP, RR, LIT,  _BITS16_(9000)_BITS32_(9999000)
+        DC      ROT, RFILE, THROW
+        DC      CLOSE, THROW
+        DC      FROMR, PLUS, LDP, STORE
+        DC      SEMIS
+;
 
-});_END_({ _PC_})
+});_END_({ _HOSTED_MSDOS_})
 
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the terminal input stream such as to
@@ -7705,10 +7773,9 @@ i.e. the mass storage words no longer work, and will result in
 error messages.
 },{{BLOCK},{LIST},{LOAD}},
 {
-{EMPTY-BUFFERS BLOCK-EXIT},{},
-{0 WARNING ! -1F MESSAGE}, {MSG # -1F},
+{EMPTY-BUFFERS BLOCK-EXIT -1F MESSAGE}, {MSG # -31},
 { CR DISK-ERROR @ 0= 0= . BLOCK-INIT},{_T_},
-{1 WARNING ! -20 MESSAGE}, {( -b This_option_is_available )},
+{1 0 .LINE}, { LICENSE }
 },
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
@@ -7794,7 +7861,7 @@ leave it as a string forthsamp({sc2}) .
 {{BLOCK},{?LINUX-ERROR}},
 {{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
 enddoc)
-HEADER({GET-FILE},{GFILE},DOCOL)
+HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      HERE, TOR, LIT, 10000000, ALLOT
         DC      RR, SSTOR, ZERO, RR, CHAPP ; {Unix requires a c-string.}
         _STRINGINLINE({FiLeBuF})        ; {Magic number.}
@@ -7816,7 +7883,7 @@ the name forthsamp({sc1}) ) . },
 {{BLOCK},{?LINUX-ERROR}},
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
-HEADER({PUT-FILE},{PFILE},DOCOL)
+HEADER({PUT-FILE},{PUTFILE},DOCOL)
         DC      PAD, SSTOR, ZERO, PAD, CHAPP ; {Unix requires a c-string.}
         DC      TOR, TOR
         DC      PAD, CELLP
@@ -7836,7 +7903,7 @@ forthsamp({i*x}). },
 enddoc)
 HEADER({INCLUDED},{INCLUD},DOCOL)
         DC      HERE, TOR
-        DC      LIT, GFILE, CATCH
+        DC      LIT, GETFILE, CATCH
         DC      LDUP
         _0BRANCH(INCLUD1)
         DC      FROMR, LDP, STORE
