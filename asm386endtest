@@ -1,21 +1,22 @@
 
 
-# FILES      Preferred name      PURPOSE
-# as1        prelude1            For the generation of testset 1 (before assembler)
-# as2        postlude1           For the generation of testset 1 (after assembler)
-# as3        test1               Testset 1, i.e. interpreting the raw output of SHOW-ALL
-#                                Can be run with prelude1
-# as4        assembly1           An assembly test file with official opcodes
-# as5        temp1               Raw output of test1
-# as6a       hex1                The raw data whose disassembly would be assembly1
-# as6        test2               Testset 2, i.e. interpreting official assembly1
-# as7        assembly2           The output after assembly + disassmbly of assembly1
-# as8        temp2               Raw output of test2
-# as9        hex2                The raw data whose disassembly would be assembly2
-# as10       assdiff             The difference between assembly1 and assembly2 
-# as11        hexdiff             The difference between hex1 and hex2 
+# Preferred name      PURPOSE
+# prelude1            For the generation of testset 1 (before assembler)
+# postlude1           For the generation of testset 1 (after assembler)
+# test1               Testset 1, i.e. interpreting the raw output of SHOW-ALL
+#                                Can be run with prelude1/postlude1
+# assembly1           An assembly test file with official opcodes
+# temp1               Raw output of test1
+# hex1                The raw data whose disassembly would be assembly1
+# test2               Testset 2, i.e. interpreting official assembly1
+# assembly2           The output after assembly + disassmbly of assembly1
+# temp2               Raw output of test2
+# hex2                The raw data whose disassembly would be assembly2
+# assdiff             The difference between assembly1 and assembly2 
+# hexdiff             The difference between hex1 and hex2 
 
-cat >/tmp/as1<<\%%
+
+cat >/tmp/prelude1<<\%%
 ( ( )
 8 LOAD
 ( ( )
@@ -26,13 +27,13 @@ cat >/tmp/as1<<\%%
  122 SEED !
 %%
 
-cat >/tmp/as2<<\%%
+cat >/tmp/postlude1<<\%%
 ( Install a disassembly shower that insert random data for the commaers. )
 ( and preceede each line with a random number )
 : .DISS-RAND 
 RAND 0 8 D.R SPACE
 DISS @+ SWAP DO
-    I @ DUP IS-COMMA IF RAND . THEN ID.
+    I @ DUP IS-COMMA IF RAND U. THEN ID.
  0 CELL+ +LOOP CR ;
 ' .DISS-RAND CFA 'DISS !
 
@@ -40,7 +41,7 @@ DISS @+ SWAP DO
 ( Now get Linux to snip and sort this and feed it to the next part)
 BYE 
 %%
-cat >/tmp/as3<<\%%
+cat >/tmp/test1<<\%%
 !TALLY 
 HEX
 10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
@@ -48,72 +49,80 @@ HERE
 ' C, CFA  % SIB,, >DATA !
 %%
 
-cat /tmp/as1 asgen.frt asi586.frt /tmp/as2 |
+cat /tmp/prelude1 asgen.frt asi586.frt /tmp/postlude1 |
 lina |
 sed '1,/TEST STARTS HERE/d' |
 sed '/TEST STOPS HERE/,$d' |
 sort |
 sed 's/^.........//g'|
 grep -v '^~'|
-cat >>/tmp/as3
+grep -v 'D0. .*[5D] SIB,,' |
+cat >>/tmp/test1
 
-cat >>/tmp/as3<<\%%
+cat >>/tmp/test1<<\%%
 ." TEST STARTS HERE" HERE 2DUP OVER - DUMP 
 ." TEST MIDDLE HERE" CR DIS-RANGE CR ." TEST STOPS HERE"
 BYE
 %%
 
-
-cat /tmp/as1 asgen.frt asi586.frt /tmp/as3 |
+echo aap
+cat /tmp/prelude1 asgen.frt asi586.frt /tmp/test1 |
 lina |
 sed '1,/TEST STARTS HERE/d' |
 sed '/TEST STOPS HERE/,$d' |
-tee /tmp/as5 |
-sed '1,/TEST MIDDLE HERE/d' > /tmp/as4 
+tee /tmp/temp1 |
+sed '1,/TEST MIDDLE HERE/d' |
+cat > /tmp/assembly1  
 
-cat /tmp/as5 | 
+# Do not need these anymore, or so we hope
+echo this is wrong
+grep  '^\['      /tmp/assembly1     
+grep  '\[MEM'    /tmp/assembly1  
+echo this was wrong
+
+cat /tmp/temp1 | 
  sed '/TEST MIDDLE HERE/,$d' |
  sed 's/^[0-9A-F \.]*: /DB /' |
  sed 's/ |.*$//'             |
  sed 's/ \(..\)\(..\)/,0x\1,0x\2/g'   |
- sed 's/DB,/ DB /' >/tmp/as6a
+ sed 's/DB,/ DB /' >/tmp/hex1
 
 
 
-cat >/tmp/as6<<\%%
+cat >/tmp/test2<<\%%
 !TALLY 
 HEX
 10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
 HERE
 %%
 
-cat /tmp/as4 >> /tmp/as6
+cat /tmp/assembly1 >> /tmp/test2
 
-cat >>/tmp/as6<<\%%
+cat >>/tmp/test2<<\%%
 ." TEST STARTS HERE" HERE 2DUP OVER - DUMP 
 ." TEST MIDDLE HERE" CR DIS-RANGE CR ." TEST STOPS HERE"
 BYE
 %%
 
 
-cat /tmp/as1 asgen.frt asi586.frt /tmp/as6 |
+cat /tmp/prelude1 asgen.frt asi586.frt /tmp/test2 |
 lina |
 sed '1,/TEST STARTS HERE/d' |
 sed '/TEST STOPS HERE/,$d' |
-tee /tmp/as8 |
-sed '1,/TEST MIDDLE HERE/d' > /tmp/as7 
+tee /tmp/temp2 |
+sed '1,/TEST MIDDLE HERE/d' > /tmp/assembly2 
 
-cat /tmp/as8 | 
+cat /tmp/temp2 | 
  sed '/TEST MIDDLE HERE/,$d' |
  sed 's/^[0-9A-F \.]*: /DB /' |
  sed 's/ |.*$//'             |
  sed 's/ \(..\)\(..\)/,0x\1,0x\2/g'   |
- sed 's/DB,/ DB /' >/tmp/as9
+ sed 's/DB,/ DB /' >/tmp/hex2
 
-echo Now this should be empty >/tmp/as10
-diff -w /tmp/as6 /tmp/as7 >>/tmp/as10
-diff -w /tmp/as6a /tmp/as9 >>/tmp/as11
+echo Now this should be empty >/tmp/assdiff
+diff -w /tmp/test2 /tmp/assembly2 >>/tmp/assdiff
+diff -w /tmp/hex1 /tmp/hex2 >>/tmp/hexdiff
 
-# generates as9.o
-nasm /tmp/as9 -felf
-objdump --all-headers /tmp/as9.o --disassemble >as9.cmp
+# generates hex2.o
+nasm /tmp/hex2 -felf
+objdump --all-headers /tmp/hex2.o --disassemble >/tmp/hex2.cmp
