@@ -964,8 +964,8 @@ _HOSTED_DPMI_({
 });_END_({_HOSTED_DPMI_})
         CLD                     ;{ DIR = INC}
         _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
-        MOV     SPO,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
-        MOV     RPO,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
+        MOV     SPO,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
+        MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    ;{RETURN STACK}
         MOV     HIP,_OFFSET CLD1  ;{ (IP) <-}
         _NEXT
 ;
@@ -1691,10 +1691,10 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;
 USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRUSA  ;{ INIT (U0) user area of the main task 1}
-        DC      BSIN    ;{ RUBOUT: get rid of latest char 2}
-        DC      INITS0  ;{ INIT (S0)         3}
-        DC      INITR0  ;{ INIT (R0)         4}
-        DC      STRTIB  ;{ INIT (TIB)        5}
+        DC      INITS0  ;{ INIT (S0)         2}
+        DC      INITR0  ;{ INIT (R0)         3}
+        DC      STRTIB  ;{ INIT (TIB)        4}
+        DC      BSIN    ;{ RUBOUT: get rid of latest char 5}
         DC      0       ;{ AVAILABLE         6}
         DC      1       ;{ INIT (WARNING)     7}
         DC      INITDP  ;{      INIT (FENCE)  8}
@@ -2139,15 +2139,13 @@ before forthsamp({n1}) was pushed.},
 {{DSP@}},
 {{  1 2 3 DEPTH .},{3} },
 enddoc)
-CODE_HEADER({DEPTH},{DEPTH})
-        MOV     BX,_CELL_PTR[USINI]
-        MOV     BX,_CELL_PTR[BX] ;{User pointer for current task.}
-        MOV     AX,[BX+_CELLS(3)]
-        MOV     DX,SPO   ;{ (S1) <- (SP)}
-        SUB     AX,DX
-        SAR     AX,1
-        _BITS32_({SAR     AX,1})
-        _PUSH
+HEADER({DEPTH},{DEPTH},{DOCOL})
+        DC      SZERO, FETCH
+        DC      SPFET
+        DC      LSUB
+        DC      LIT, CW, SLASH
+        DC      ONEM
+        DC      SEMIS
 ;
 });_END_({_LOAD_})
 worddocsafe( {STACKS},{RSP@},{r_s_p_fetch},{--- addr},{},
@@ -2864,6 +2862,27 @@ This is dependant on which task is running.},
 enddoc)
 HEADER({U0},{UZERO},{DOUSE}, _CELLS(1))
 ;
+worddoc( {STACKS},{S0},{s_zero},{--- addr},{U},
+{A user variable that contains the initial value for the data stack
+pointer.},{{DSP!}},
+{{." See DSP@"},{See DSP@}},
+enddoc)
+HEADER({S0},{SZERO},{DOUSE}, _CELLS(2))
+;
+worddoc( {STACKS},{R0},{r_zero},{--- addr},{U},
+{A user variable containing the initial location of the return stack. },
+{{RSP!}},
+{{." See RSP@"},{See RSP@}},
+enddoc)
+HEADER({R0},{RZERO},{DOUSE}, _CELLS(3))
+;
+worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{ISO,FIG,U},
+{A user variable containing the address of the terminal input buffer.},
+{{QUIT}},
+{{." See SRC"},{See SRC}},
+enddoc)
+HEADER({TIB},{TIB},{DOUSE}, _CELLS(4))
+;
 worddoc( {INPUT},{RUBOUT},{rub_out},{--- c},{},
 {A user variable, leaving the key code that must delete the
 last character from the input buffer.
@@ -2872,28 +2891,7 @@ editing is left to the host operating system.})
 },{{USER}},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(2))
-;
-worddoc( {STACKS},{S0},{s_zero},{--- addr},{U},
-{A user variable that contains the initial value for the data stack
-pointer.},{{DSP!}},
-{{." See DSP@"},{See DSP@}},
-enddoc)
-HEADER({S0},{SZERO},{DOUSE}, _CELLS(3))
-;
-worddoc( {STACKS},{R0},{r_zero},{--- addr},{U},
-{A user variable containing the initial location of the return stack. },
-{{RSP!}},
-{{." See RSP@"},{See RSP@}},
-enddoc)
-HEADER({R0},{RZERO},{DOUSE}, _CELLS(4))
-;
-worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{ISO,FIG,U},
-{A user variable containing the address of the terminal input buffer.},
-{{QUIT}},
-{{." See SRC"},{See SRC}},
-enddoc)
-HEADER({TIB},{TIB},{DOUSE}, _CELLS(5))
+HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(5))
 ;
 worddoc( {ERRORS},{WARNING},{warning},{--- addr},{FIG,U},
 {A user variable containing a value controlling messages. If it
@@ -3140,7 +3138,7 @@ least 8. },
 {{FOUND},{VOCABULARY},{CURRENT}},
 {{SEARCH-ORDER @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({SEARCH-ORDER},{SEARCH},{DOUSE}, _CELLS(37))
+HEADER({SEARCH-ORDER},{SEARCH},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
 ;      IMPORTANT
 ;     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE
 ;     IN ADDITION TO THE ONE FOR SEARCH
@@ -6015,13 +6013,6 @@ until a forthcode({UNLOCK}) occurs.},
 { {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
     PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{-1 _T_} },
 enddoc)
-HEADER({LOCK1},{LLOCK1},{DOCOL})
-        DC      BLOCK
-        DC      LIT, CW, LSUB
-;       DC      LIT, -2, SWAP, PSTORE
-        DC      LIT, 1, SWAP, PSTORE
-        DC      SEMIS
-;
 HEADER({LOCK},{LLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
@@ -6041,11 +6032,6 @@ Unlocking without a previous lock may lead to a crash.
  PREV @ CELL+ @ . 1 UNLOCK PREV @ CELL+ @ .},{-1 1} },
 },
 enddoc)
-HEADER({UNLOCK1},{LUNLOCK1},{DOCOL})
-        DC      BLOCK
-        DC      LIT, CW, LSUB
-        DC      LIT, -1, SWAP, PSTORE
-        DC      SEMIS
 HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
