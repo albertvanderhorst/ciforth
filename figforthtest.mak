@@ -154,3 +154,7 @@ test.mak        \
 
 aszip : $(RELEASEASSEMBLER) ; echo as$(VERSION) $+ | xargs zip
 
+msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
+    make mslinks ; \
+    echo ms$(VERSION) $+ |xargs zip
+    
