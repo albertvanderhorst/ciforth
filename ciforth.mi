@@ -169,7 +169,7 @@ include(manual.mi)
 
 The editor for editing screens is a very simple screen editor.
 For editing files from within thisforth you just use Your Favorite
-Editor. forthxref({Getting Started}).
+Editor. forthxref({Manual}).
 
 The editor becomes available after forthsamp({REQUIRE EDITOR})
 and is invoked by  forthsamp({<number> EDIT}) or forthcode({E-S})
