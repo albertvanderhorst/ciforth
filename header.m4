@@ -18,7 +18,8 @@ define({_STRINGINLINE},
 {DC      SKIP
          DC      len({$1})
 SB{}_sc: DSS      _quoted}({{$1}})
-{       DC      LIT, SB{}_sc
+{       _ALIGNED_({_ALIGN 4})
+        DC      LIT, SB{}_sc
         DC      LIT, len({$1})
 define({_sc},{incr}(_sc))dnl })dnl
 dnl
@@ -41,7 +42,9 @@ ifelse(0,len({$1}),,
 ;  *   {{$1}}   *
 ;  ********_star(len({$1}))
 ;
+_ALIGNED_({    _ALIGN 4},{dnl})
 N_$2:   {_STRING}({{$1}}))
+_ALIGNED_({    _ALIGN 4},{dnl})
 ifelse(0,len($2),,$2:)dnl
         DC    ifelse(0,len($3),0H,$3)
         DC    ifelse(0,len($4),$ + _CELLS(PH_OFFSET-D_HOFFSET),$4)
