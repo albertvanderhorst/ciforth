@@ -43,14 +43,11 @@ BEGIN DUP ID. >N DUP 0= UNTIL DROP ;
 \ Merge LINK1 and LINK2, leave merged LINK.
 : MERGE   *< IF SWAP THEN   DUP >R (MERGE) R> ;
 
-\ Cut LINK in two return remaining ULINK and SLINK (first part in ascending order)
-: SNIP DUP >R
+\ Cut ULINK in two. Return SLINK (first part in ascending order)
+\ and remaining ULINK.
+: SNIP DUP
       BEGIN DUP >N  DUP IF ?? *< ELSE 0 THEN WHILE SWAP DROP REPEAT
-      >R   0 SWAP LINK!
-      R> R> ;
-
-\ For UNLINK leave SLINKP SLINKP UNLINK  or SLINKP 0 .
-: SNIP2   SNIP SWAP 1 SWAP DUP IF SNIP SWAP 1 SWAP THEN ;
+      >R   0 SWAP LINK! R> ;
 
 \ Keep on merging as long as the top of the stack contains
 \ two SLINKP 's of the same level. Shrinking the stack.
@@ -65,11 +62,11 @@ BEGIN DUP ID. >N DUP 0= UNTIL DROP ;
 : SHRINK DROP BEGIN OVER WHILE SWAP DROP MERGE REPEAT ;
 
 \ Expand UNLINK into ZERO SLINKP .... SLINKP
-: EXPAND    0 SWAP BEGIN SNIP2
-    >R TRY-MERGES R> DUP WHILE REPEAT DROP ;
+: EXPAND   BEGIN SNIP >R 1 TRY-MERGES R> DUP WHILE REPEAT DROP ;
 
 \ For linked LIST , leave a sorted LIST1.
-: MERGE-SORT EXPAND SHRINK SWAP DROP ;
+\ The zero is merely an end-sentinel.
+: MERGE-SORT 0 SWAP EXPAND SHRINK SWAP DROP ;
 
 \ Sort the WORDLIST
 : SORT-WID CELL+ DUP >N MERGE-SORT SWAP LINK! ;
