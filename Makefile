@@ -199,7 +199,7 @@ $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ 
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
     $(LINUXFORTHS) $(OTHERTARGETS)
 
-clean: ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS)
+clean: ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy
 cleanother:  rm -f $(OTHERTARGETS)
 
 #msdos32.zip doesn't work yet.
@@ -260,7 +260,7 @@ hdboot: ci86.alonehd.bin
 figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 
-zip : $(RELEASECONTENT) ; echo ci86g$(VERSION) $+ | xargs zip
+zip : $(RELEASECONTENT) ; echo ciforth-$(VERSION).zip $+ | xargs zip
 
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply forth.lab
