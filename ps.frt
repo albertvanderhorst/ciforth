@@ -1,12 +1,21 @@
 ( $Id: )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( Generate postscript data sheet. )
+( Instructions to compare with, last byte 0..FF )
 DECIMAL
+0 VARIABLE PREFIX 
+( Mask to compare with, contains valid bytes of PREFIX )
+255 VARIABLE MASK
+0 VARIABLE TITLE 255 ALLOT
+STRING DEFAULT QUICK REFERENCE PAGE FOR 8086 ASSEMBLER" 
+DEFAULT TITLE $!
 : PRELUDE
   ." SNIP TILL HERE" CR
   ." %!" CR
   ." /Helvetica findfont 10 scalefont setfont " CR
   ." 60 60 translate /wt 60 def /ht 23 def " CR
+;
+: FRAME
   9 0 DO 
     I . ." wt mul 0 ht mul moveto 0 ht 32 mul rlineto stroke" CR 
   LOOP
@@ -19,14 +28,15 @@ DECIMAL
   LOOP
   32 0 DO 
     I . ." .3 add wt mul ht 32.3 mul moveto" CR 
-    ." -15 " I . ." .5 add ht mul 5 sub moveto" CR 
-    HEX &( EMIT 8 31 I - * 2 .R &) EMIT ." show" CR DECIMAL
+    ." -35 " I . ." .5 add ht mul 5 sub moveto" CR 
+    HEX &( EMIT PREFIX @ 256 * 31 I - 8 * + 6 .R &) EMIT 
+    ." show" CR DECIMAL
   LOOP
 ;
 : POSTLUDE 
   ." 0 wt mul 33 ht mul moveto " CR 
   ." /Times-Roman findfont 14 scalefont setfont" CR 
-  ." (QUICK REFERENCE PAGE FOR 8086 ASSEMBLER) show" CR
+    &( EMIT   TITLE $@ $. &) EMIT  ." show" CR
   ." /Times-Roman findfont 6 scalefont setfont" CR 
   ." 6.5 wt mul -12 moveto " CR 
   ." (By Albert van der Horst DFW Holland) show" CR
@@ -38,17 +48,22 @@ DECIMAL
    . ." .15 add wt mul " . ." .5 add ht mul 5 sub moveto " CR                   
    &( EMIT ID. &) EMIT ." show" CR
 ;       
+
+
+0 VARIABLE INCREMENT
 : OPCODES
+  MASK @ 1+ 256 / INCREMENT !
   256 0 DO 
-    DUP >MASK I AND  OVER >INST XOR $FF AND 0= IF
-       DUP I OPCODE                                       
-    THEN
+    DUP >INST   PREFIX @ INCREMENT @ I * +  XOR ( -- diff) 
+    MASK @ AND           
+    OVER >MASK AND
+    0= IF DUP I OPCODE THEN
   LOOP
   DROP
 ;
 
 : QUICK-REFERENCE
-    PRELUDE
+    FRAME
     !DISS   !TALLY
     STARTVOC BEGIN
         DUP IS-PI IF

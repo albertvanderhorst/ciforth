@@ -4,6 +4,24 @@
 # Just to jot down small tests not wanted in the makefile
 # and any other commands.
 
+MASK=FF
+PREFIX=0
+TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
+
+%.ps : asgen.frt %.frt ps.frt ; \
+    ( \
+        echo 8 LOAD; \
+        cat $+ ;\
+        echo 'PRELUDE' ;\
+        echo 'HEX $(MASK) MASK ! $(PREFIX) PREFIX ! DECIMAL ' ;\
+        echo ' STRING NEW $(TITLE)"   NEW TITLE $$!' ;\
+        echo ' QUICK-REFERENCE BYE' \
+    )|\
+    lina |\
+    sed '1,/SNIP TILL HERE/d' |\
+    sed '/SI[MB]/d' |\
+    sed '/OK/d' >p$(PREFIX).$@
+
 do : fig86.msdos.msm
 		diff -w fig86.msdos.msm orig/FORTH > masm.dif ||true
 		more masm.dif
@@ -80,16 +98,34 @@ lina2 : fig86.lina.s ; gcc $+ -l 2>aap
 fig86.lina.s :
 
 quickref.ps : asgen.frt asi86.frt ps.frt ; \
-    (echo 8 LOAD; cat $+; echo QUICK-REFERENCE BYE)|\
+    (echo 8 LOAD; cat $+; echo PRELUDE QUICK-REFERENCE BYE)|\
     lina |\
     sed '1,/SNIP TILL HERE/d' |\
     grep -v OK >$@
 
 qr8080.ps : asgen.frt as80.frt ps.frt ; \
-    (echo 8 LOAD; cat $+; echo QUICK-REFERENCE BYE)|\
+    (echo 8 LOAD; cat $+; echo PRELUDE QUICK-REFERENCE BYE)|\
     lina |\
     sed '1,/SNIP TILL HERE/d' |\
     grep -v OK >$@
+
+MASK=FF
+PREFIX=0
+TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
+
+qr80386.ps : asgen.frt asi586.frt ps.frt ; \
+    ( \
+        echo 8 LOAD; \
+        cat $+ ;\
+        echo 'PRELUDE' ;\
+        echo 'HEX $(MASK) MASK ! $(PREFIX) PREFIX ! DECIMAL ' ;\
+        echo ' STRING NEW $(TITLE)"   NEW TITLE $$!' ;\
+        echo ' QUICK-REFERENCE BYE' \
+    )|\
+    lina |\
+    sed '1,/SNIP TILL HERE/d' |\
+    sed '/SI[MB]/d' |\
+    sed '/OK/d' >$@
 
 testas86: asgen.frt asi86.frt testset8086 ; \
     (echo 8 LOAD; cat $+)|\
