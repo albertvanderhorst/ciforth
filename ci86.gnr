@@ -277,7 +277,6 @@ BOOTOFFSET EQU 0
 
 _HOSTED_LINUX_({
 include(constant.m4)
-SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
 RAWIO           EQU     (ECHO _OR_ ICANON)
         global  _start        ; Entry point. dnl
 _LINUX_C_({Called from c. Remainder c-routines to be called from here.})

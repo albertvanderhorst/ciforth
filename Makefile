@@ -68,7 +68,7 @@ BINTARGETS= msdos alone
 # subsequently run
 LINUXFORTHS= ciforthc lina
 # Auxiliary targets. Because of GNU make bug, keep constant.m4.
-OTHERTARGETS= BLOCKS.BLK toblock fromblock # constant.m4
+OTHERTARGETS= BLOCKS.BLK toblock fromblock constant.m4
 # C-sources with various aims.
 CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= ciforth stealconstant
@@ -156,6 +156,7 @@ TEMPFILE=/tmp/ciforthscratch
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
 ci86.%.asm : %.cfg nasm.m4 ci86.gnr
+	make constant.m4
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
@@ -260,6 +261,8 @@ lina.zip : $(RELEASELINA) ; zip lina$(VERSION) $+
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
+ci86.lina.o : ci86.lina.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
+
 ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
 # The tricky `link.script' has been dispensed with.
@@ -272,16 +275,17 @@ ciforthc : ciforth.o ci86.linux.o
 # Linux native forth
 lina : ci86.lina.o ; ld $+ -o $@
 
-# Error in GNU make. This dependancy is not seen.
+# This dependancy is problematic.
 # Do `make constant.m4' explicitly beforehand.
-ci86.alone.asm : constant.m4
+# Because otherwise `constant.m4' is counted into the ``$+'' set.b
+# ci86.alone.asm : constant.m4
 
 # Convenience under linux. Steal the definitions of constants from c include's.
-constant.m4 : stealconstant.c ;  \
-    cc -E -I/usr/include/asm $+ | \
-    m4 prelude.m4 - | \
-    sed -e '/Split here for doc/,$$d' | \
-    sed -e 's/\<\(0[^x][0-9]*\>\)/\1Q/' >$@
+stealconstant: stealconstant.c ;  \
+    cc -I/usr/include/asm $+ -o stealconstant
+
+# Convenience under linux. Steal the definitions of constants from c include's.
+constant.m4 : stealconstant ; $+ >$@
 
 # Add termporary stuff for testing, if needed.
 include test.mak

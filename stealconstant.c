@@ -1,4 +1,3 @@
-divert(-1)dnl
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/times.h>
@@ -16,56 +15,52 @@ divert(-1)dnl
 
 /*****************************************************************************/
 /*                                                                           */
-/*  This is really a weird c-source. It is only intended to be pushed        */
-/*  through the c-preprocessor, then through M4 that does the actually       */
-/*  stealing. The result is a list of EQU's to be included in the main       */
-/*  assembly source.                                                         */
+/*  This c-source is only intended to be print a number of EUQATES           */
+/*  in form that is palatable for the assemblers used in generating          */
+/*  ciforth.                                                                 */
 /*                                                                           */
 /*****************************************************************************/
 
-/* Templates for editing:
-steal({%}{@},%@)
-steal({%}{@},__NR_%@)
- */
+#define STEAL(A,B)   printf("%s   EQU   0x%x\n", A, B );
 
-define({steal}, {{$1}      EQU     $2})
-divert{}dnl
-; ------------------------------------------------------------
-;   Start of constants stolen from C.
-; ------------------------------------------------------------
-steal({S}{EEK_SET},SEEK_SET)
-steal({T}{CGETS},TCGETS)
-steal({T}{CSETS},TCSETS)
-steal({E}{CHO},ECHO)
-steal({E}{AGAIN},EAGAIN)
-steal({E}{INTR},EINTR)
-steal({E}{PIPE},EPIPE)
-steal({V}{MIN},VMIN)
-steal({V}{TIME},VTIME)
-steal({I}{CANON},ICANON)
-steal({O}{_RDWR},O_RDWR)
-steal({O}{_RDONLY},O_RDONLY)
-steal({O}{_WRONLY},O_WRONLY)
-steal({O}{_CREAT},O_CREAT)
-steal({O}{_NONBLOCK},O_NONBLOCK)
+int main()
+{
+        STEAL("SEEK_SET",SEEK_SET)
+        STEAL("TCGETS",TCGETS)
+        STEAL("TCSETS",TCSETS)
+        STEAL("ECHO",ECHO)
+        STEAL("EAGAIN",EAGAIN)
+        STEAL("EINTR",EINTR)
+        STEAL("EPIPE",EPIPE)
+        STEAL("VMIN",VMIN)
+        STEAL("VTIME",VTIME)
+        STEAL("ICANON",ICANON)
+        STEAL("O_RDWR",O_RDWR)
+        STEAL("O_RDONLY",O_RDONLY)
+        STEAL("O_WRONLY",O_WRONLY)
+        STEAL("O_CREAT",O_CREAT)
+        STEAL("O_NONBLOCK",O_NONBLOCK)
+        STEAL("SIZE_TERMIO",sizeof(struct termios))
 
-; Numbers of system calls. See "Linux kernel Internals" Appendix A.
-; By M.Beck, H. Boehme e.a. Addison Wesley.
-; The system calls themselves are extensively documented in chapter
-; 2 of the man pages, e.g. "man 2 exit"
-steal({e}{xit},__NR_exit)
-steal({o}{pen},__NR_open)
-steal({c}{lose},__NR_close)
-steal({c}{hdir},__NR_chdir)
-steal({r}{ead},__NR_read)
-steal({s}{elect},__NR_select)
-steal({_}{newselect},__NR__newselect)
-steal({w}{rite},__NR_write)
-steal({i}{octl},__NR_ioctl)
-steal({l}{seek},__NR_lseek)
-steal({e}{xecve},__NR_execve)
-steal({f}{ork},__NR_fork)
-steal({w}{aitpid},__NR_waitpid)
-; ------------------------------------------------------------
-;   End of constants stolen from C.
-; ------------------------------------------------------------
+printf(";{ Numbers of system calls. See \"Linux kernel Internals\" Appendix A. }\n");
+printf(";{ By M.Beck, H. Boehme e.a. Addison Wesley.                         }\n");
+printf(";{ The system calls themselves are extensively documented in chapter }\n");
+printf(";{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
+        STEAL("exit",__NR_exit)
+        STEAL("open",__NR_open)
+        STEAL("close",__NR_close)
+        STEAL("chdir",__NR_chdir)
+        STEAL("read",__NR_read)
+        STEAL("select",__NR_select)
+        STEAL("_newselect",__NR__newselect)
+        STEAL("write",__NR_write)
+        STEAL("ioctl",__NR_ioctl)
+        STEAL("lseek",__NR_lseek)
+        STEAL("execve",__NR_execve)
+        STEAL("fork",__NR_fork)
+        STEAL("waitpid",__NR_waitpid)
+printf(";{ ------------------------------------------------------------      }\n");
+printf(";{   End of constants stolen from C.                                 }\n");
+printf(";{ ------------------------------------------------------------      }\n");
+        exit(0);
+}
