@@ -11,6 +11,7 @@
 REQUIRE TRUE
 INCLUDE set.frt
 INCLUDE bits.frt
+INCLUDE defer.frt
 
 \ Regular expressions in Forth.
 \ This package handles only simple regular expressions and replacements.
@@ -174,8 +175,13 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
-: (MATCH) BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
-   DROP R>   DUP @ 0= ;
+\D DEFER .Zm DEFER .RE-C
+: (MATCH)
+\D CR "MATCHING: " TYPE OVER .Zm " With" TYPE CR DUP .RE-C
+BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
+   DROP R>   DUP @ 0=
+\D DUP IF "MATCH" ELSE "FAILED" THEN CR TYPE
+;
 
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
@@ -476,3 +482,5 @@ CREATE STRING-COPY MAX-RE ALLOT
 : RE-MATCH RE-BUILD
     STRING-COPY $! 0 STRING-COPY $C+ STRING-COPY $@ DROP RE-COMPILED
     (MATCH) >R 2DROP R> ;
+
+\D INCLUDE x
