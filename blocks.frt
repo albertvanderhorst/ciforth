@@ -1574,7 +1574,7 @@ hard disk. Done by a Forth booted from another floppy.)
  KEY DROP 0 0 0 0 13 BIOS  80 0 0 0 13 BIOS
   HD-OFFSET 0 DO
     RW-BUFFER I 1 R/W   I WRITE-BLOCK 1 AND .
-  LOOP ;
+  LOOP ; : COPY-FLOPPY-V 4 * BL# 2 + ! COPY-FLOPPY ;
 : RESTORE-BLOCKS SAFE 100 0 DO
    RW-BUFFER I OFFSET @ + 1 R/W
    I HD-OFFSET + WRITE-BLOCK 1 AND .

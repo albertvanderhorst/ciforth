@@ -17,6 +17,9 @@ dnl MASM has an unreasonable quirk to reserve memory
 define({_RESB},
         DB      $1 DUP (?))dnl
 dnl
+dnl Assembly Pointer
+define({_AP_}, {$})dnl
+dnl
 dnl Second and later uses of ORG shift the program counter
 define({_NEW_ORG},
         ORG    $1)dnl

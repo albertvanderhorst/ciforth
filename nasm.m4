@@ -39,7 +39,10 @@ define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
 dnl
 dnl NASM doesnot allow to shift the program counter with ORG
-define({_NEW_ORG},{RESB    $1-($-$$)})dnl
+define({_NEW_ORG},{RESB    $1-(_AP_-$$)})dnl
+dnl
+dnl Assembly Pointer
+define({_AP_}, {$})dnl
 dnl
 dnl NASM uses c-operators such as | and &
 define({_OR_},{|})

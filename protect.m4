@@ -6,12 +6,12 @@ _BITS32_( {define({IDENTIFY_PROT},{IDENTIFY_32})})
 dnl NOTE: $+..+CW is the address of the next instruction in the
 dnl protected mode code segment. the offset makes it relative w.r.t. switch segment.
 define({SAVE_SP},{
-        MOV     _CELL_PTR[SPSAVE],STACKPOINTER
+        MOV     _CELL_PTR[SPSAVE],SPO
         AND     AX,AX
-        MOV     STACKPOINTER,AX})dnl
+        MOV     SPO,AX})dnl
 dnl Switch from protected mode stay at the same place.
 define({JMPHERE_FROM_PROT},{
-        JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
+        JMP     GDT_SWITCH: _AP_+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
         DEC AL
         MOV CR0,EAX            ;set real mode
@@ -33,14 +33,14 @@ define({JMPHERE_FROM_REAL},{
         INC AL
         MOV CR0,EAX            ;set protected mode
         SET_16_BIT_MODE
-        JMP    GDT_CS:$+5
+        JMP    GDT_CS: _AP_+5
         _BITS32_({SET_32_BIT_MODE})
         MOV     AX,GDT_DS
         MOV     DS,AX
         MOV     ES,AX
         MOV     SS,AX})dnl
 define({RESTORE_SP},{
-        MOV     STACKPOINTER,_CELL_PTR[SPSAVE]})dnl
+        MOV     SPO,_CELL_PTR[SPSAVE]})dnl
 dnl Do everything to setup going to Forth.
 define({JMPHERE_FROM_OS},{
         CLI
