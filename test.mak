@@ -159,7 +159,7 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     make mslinks ; \
     echo ms$(VERSION) $+ |xargs zip
 
-%.doc : %.asm ;
+%.rawdoc : %.asm ;
 
 %.info : prelude.m4 postlude.m4 manual.m4 figforth.mi menu.mi intro.mi manual.mi %.mi ;
 	cp $(@:%.info=%.mi) gloss.mi
@@ -168,7 +168,7 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 	rm gloss.mi
 
 # Sort the raw information and add the wordset headers
-%.mig : wordset.mig %.doc ;
+%.mig : wordset.mig %.rawdoc ;
 	cat $+ | ssort -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s >$@
 
 %.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+| sed -e 's/@ /@@/g')| m4 > $@
@@ -179,12 +179,13 @@ wordset.mi : wordset.m4 wordset.mig gloss.mi
 	(echo 'changequote({,})' ; m4 wordset.m4)|m4 >$@
 
 # For tex we do not need to use the safe macro's
-figforth.dvi :  prelude.m4 postlude.m4 manual.m4 gloss.m4 figforth.mi intro.mi manual.mi gloss.mig ; \
-       ( cat prelude.m4 postlude.m4 ; (sed -e s'/worddocsafe/worddoc/g' <gloss.mig|m4 gloss.m4  -)|\
+%.tex :  prelude.m4 postlude.m4 manual.m4 gloss.m4 figforth.mi intro.mi manual.mi menu.mi %.mi;
+	cp $(@:%.tex=%.mi) gloss.mi
+	make wordset.mi
+	( cat prelude.m4 postlude.m4 ; (sed -e s'/worddocsafe/worddoc/g' <gloss.mig|m4 gloss.m4  -)|\
 	   sed -e 's/@ /@@/g')| m4 > gloss.mi;\
-       m4 figforth.mi >figforth.tex;\
-       tex figforth.tex;\
-      rm gloss.mi
+	m4 figforth.mi >$@
+#       rm gloss.mi wordset.mi
 
 gloss.html : prelude.m4 postlude.m4 glosshtml.m4 gloss.mig ; \
        cat gloss.mig                    |\

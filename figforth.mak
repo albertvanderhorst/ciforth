@@ -8,8 +8,30 @@
 #.SUFFIXES:
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
-# constant.m4 is missing, it is not a real source file.
+# Applicable suffixes : * are generated files 
+# + are generated files if they are mentionned on the next line
+#
+#* .dvi .tex .ps : as usual (See TeX)
+#+ .texinfo : texinfo
+#   menu.texinfo gloss.texinfo 
+#* .asm : input file for `nasm' assembler
+#* .BLK : contains blocks usable by Forth
+# .frt : text file : contains blocks in an \n separated stream
+#* .msm : input file for `MASM' and `tasm' assembler
+#* .s : input file for `gas' assembler  Experimental
+#* .pres : file to be pre-processed generating .s Experimental
+#* .bin : a binary image without header (useful i.a. for msdos .com)
+#* .gas : input file for `gas' assembler
+#* .rawdoc : unsorted glossary items from the generic source.
+#+ .m4 : m4 macro's possibly including other macro's
+#   except constant.m4 
+# .cfg : m4 macro's generating files ( fig86.%.x + %.cfg -> fig86.%.y)
+# .mi : files that after processed by m4 give a .texinfo file
+# .mig : Currently in use for the wordset, which is a .mi file (WRONG!)
 # It could be, but it has been stolen.
+
+# ALL FILES STARTING IN ``fig86'' BUT BUT ``fig86.gnr'' ARE GENERATED
+                                       
 INGREDIENTS = \
 gas.m4          \
 header.m4        \
@@ -98,21 +120,21 @@ TEMPFILE=/tmp/figforthscratch
 fig86.%.asm : %.cfg nasm.m4 fig86.gnr
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.doc) 
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
 	rm $(TEMPFILE)
 
 fig86.%.msm : %.cfg masm.m4 fig86.gnr ; \
 	m4 $+ >$(TEMPFILE) ; \
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@ ; \
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.doc) 
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
 	rm $(TEMPFILE)
 
-fig86.%.ps  : %.cfg gas.m4  fig86.gnr ; m4 $+ >$@
+fig86.%pres  : %.cfg gas.m4  fig86.gnr ; m4 $+ >$@
 fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
 
 # gas needs extra transformations that m4 cannot handle.
 # In particular the order of operands.
-%.s : %.ps ; sed -f transforms <$+ >$@
+%.s : %pres ; sed -f transforms <$+ >$@
 
 .PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks
 # Default target for convenience
@@ -210,4 +232,4 @@ lina.asm : fig86.alone.asm ; cp $+ $@
 constant.m4 : stealconstant.c ; cc -E $+ | m4 prelude.m4 - >$@
 
 # Add termporary stuff for testing, if needed.
-#include test.mak
+include test.mak
