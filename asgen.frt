@@ -196,6 +196,7 @@ HEX
 
 ( The first data field for a postit/fixup contains instruction bits,    )
 ( for a commaer it contains the xt of the coma action                   )
+( for a data fixup it contains the position of the bits                 )
 : >DATA  %>BODY  ;
 ( Work on TALLY-BI etc.      Effects  for posits fixups and commaers.   )
 (                                          |||    |||       |||         )
@@ -429,8 +430,9 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 ;
 
 ( ------------- DISASSEMBLERS ------------------------------------------------)
-VARIABLE POINTER
-HERE POINTER !
+
+( Contains the position that is being disassembled                      )
+VARIABLE POINTER       HERE POINTER !
 
 ( Get the valid part of the INSTRUCTION under examination               )
 : INSTRUCTION  ISS @ @   ISL @   FIRSTBYTES ;
@@ -500,6 +502,12 @@ HERE POINTER !
    THEN
 ;
 
+( Print a disassembly for the data-fixup DEA.                           )
+: .DFI
+    INSTRUCTION   OVER >BI @ AND   OVER >DATA @ RSHIFT   U.
+    %ID.                         ( DEA -- )
+;
+
 ( Print a standard disassembly for the commaer DEA.                     )
 : .COMMA-STANDARD
     POINTER @ @ OVER >CNT @ FIRSTBYTES U.
@@ -516,7 +524,14 @@ HERE POINTER !
 
 ( Print the disassembly `DISS'                                          )
 : .DISS   DISS @+ SWAP DO
-    I @ DUP IS-COMMA 0= IF   %~ID.   ELSE   .COMMA   THEN
+    I @
+    DUP IS-COMMA IF
+        .COMMA
+    ELSE DUP IS-DFI IF
+        .DFI
+    ELSE
+        %~ID.
+    THEN THEN
  0 CELL+ +LOOP
 ;
 
