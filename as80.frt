@@ -1,4 +1,4 @@
-
+;
 
 ( First cell : contains bits down for each COMMAER still needed)
 ( Second cell contains bits up to be filled by FIX| )
@@ -11,7 +11,8 @@
 : !TALLY -1 TALLY ! -1 TALLY CELL+ ! ;
 : ?TALLY TALLY @ -1 - 26 ?ERROR
          TALLY CELL+ @ -1 - 27 ?ERROR ;
-: POST, ?TALLY @+ , @+ TALLY CELL+ ! @ TALLY ! ;
+(   Based on PFA of a postit POST into tally and leave the INSTRUCTION  )
+: POST, ?TALLY @+ SWAP @+ TALLY CELL+ ! @ TALLY ! ;
 ( Correct dictionary to have an instruction of N bytes, after
 ( post allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
@@ -23,25 +24,26 @@
 HEX
 0 VARIABLE TEMP
 : 1PI <BUILDS  , FFFFFF00 OR , INVERT , CHECK1
-DOES> [ HERE TEMP ! ] <POST POST, 1 CORRECT ;
+DOES> [ HERE TEMP ! ] <POST POST, , 1 CORRECT ;
 (   Return for DEA : it IS of type 1PI                                  )
 : IS-1PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
 : 2PI <BUILDS  , FFFF0000 OR , INVERT , CHECK1 DOES>
-DOES> [ HERE TEMP ! ] <POST POST, 2 CORRECT ;
+DOES> [ HERE TEMP ! ] <POST POST, , 2 CORRECT ;
 : IS-2PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
 : 3PI <BUILDS  , FF000000 OR , INVERT , CHECK1 DOES>
-DOES> [ HERE TEMP ! ] <POST POST, 3 CORRECT ;
+DOES> [ HERE TEMP ! ] <POST POST, , 3 CORRECT ;
 : IS-3PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
 DECIMAL
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @    2DUP AND 28 ?ERROR   OR R> ! ;
 : AND! >R R @ 2DUP OR -1 - 29 ?ERROR   AND R> ! ;
+(   Based on PFA of a fixup fix into tally and leave the FIXUi  )
+: FIX| @+ SWAP @+ TALLY CELL+ OR! @ TALLY AND! ;
+
 ( Accept a MASK with a bit up for each commaer, a MASK indicating
 ( which bits are fixupped, and the FIXUP )
-: FIX| @+ ISS @ OR! @+ TALLY CELL+ OR! @ TALLY AND! ;
-
 ( One size fits all. )
-: xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ;
+: xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ISS @ OR! ;
 : IS-xFI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
 
 : CHECK DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
@@ -116,40 +118,28 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 : IF, JC, HOLDPLACE ;  ( ZR| Y| )
 : ELSE, JMP HOLDPLACE ;           : BEGIN, HERE ;
 : UNTIL, IF, DROP ;                  : WHILE, IF, ;
-: REPEAT, SWAP JMP X,  THEN ;
+: REPEAT, SWAP JMP X,  THEN, ;
 
-
-
-' ASSEMBLER CONSTANT A
-( A 10 DUMP                       )
-
-( A CELL+ CELL+ @ 10 DUMP )
-A 2 + CELL+ @ CONSTANT B
-( B @ PFA LFA DUP H. 10 DUMP )
-: QQ PFA LFA @ ;
-: RR QQ DUP 10 DUMP ;
 (   Given a DEA, return the next DEA)
 : >NEXT% PFA LFA @ ;
 : % [COMPILE] ' NFA ;
-( The DEA is in fact not a dea, leave it IS the endmarker             )
+( The DEA is in fact not a dea, leave: it IS the endmarker             )
 : DICTEND? @ $FFFF AND $A081 = ;
 : %EXECUTE PFA CFA EXECUTE ;
-B H.
 ( Execute the DEA with as data the                                        )
 ( NAMEFIELD that is given plus for all other words in                     )
-the same vocabulary., leaving that CFA
+the same vocabulary., 
 : FOR-REMAINING-AS
 BEGIN
 2DUP SWAP %EXECUTE
  >NEXT%
 DUP DICTEND? UNTIL
-DROP
+DROP DROP 
 ;
-(   Execute the DEA with as data each time                              )
-(   the namefield of the assembler vocabulary.                          )
+( Execute the DEA with as data each time                              )
+( the namefield of the assembler vocabulary.                          )
 ( a dea can be found using % )
-: FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS DROP
-;
+: FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS ;
 % ID. FOR-ALL-AS
 
 % LXI IS-1PI ." LXI: " . CR
@@ -161,8 +151,55 @@ DROP
 ( print name if tos is a fixup )
 : PIFFIX DUP IS-xFI IF ID. CR ELSE DROP THEN ;
 
+
+( %MYSELF %EXECUTE in a definition is the same as recurse)
+: %MYSELF LATEST [COMPILE] LITERAL ; IMMEDIATE
+
 ." There comes the posts"
  % PIFPOST FOR-ALL-AS
 ." There comes the fixs"
 %  PIFFIX FOR-ALL-AS
+: >BODY PFA CELL+ ;
+: >INST >BODY @ ;
+: >MASK >BODY CELL+ @ ;
+: >COMMA >BODY CELL+ CELL+ @ ;
+(   The FIRST set is contained in the SECOND set, leaving IT            )
+: CONTAINED-IN OVER AND = ;
+% MOV >INST  H.
+% MOV >MASK  H.
+% MOV >COMMA H.
+: DOIT 
+ DUP IS-xFI IF 
+DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.) 
+CONTAINED-IN IF 
+DUP >BODY FIX| DROP   
+ID. 
+ELSE DROP THEN 
+ELSE DROP THEN ;
+% MOV >MASK TALLY !
+% MOV >COMMA TALLY CELL+ !
+% DOIT % MOV FOR-REMAINING-AS
+% LXI >MASK TALLY !
+% LXI >COMMA TALLY CELL+ !
+% DOIT % LXI FOR-REMAINING-AS DROP DROP
 
+(   : DO-INST                                                           )
+(      DUP >INST POST, DROP                                             )
+(      DUP ID.                                                          )
+(      [ % DOIT ] LITERAL SWAP FOR-REMAINING-AS                         )
+(   ;                                                                   )
+
+( Reconstruct from DEA an instruction with fixups. )
+: DO-INST 
+    !TALLY                                                              
+    DUP >BODY POST, DROP   
+    DUP ID.                       
+    [ % DOIT ] LITERAL SWAP FOR-REMAINING-AS  CR 
+;
+: ONLY-DO-INST
+   DUP IS-1PI IF DO-INST ELSE DROP THEN
+;  
+    % MOV DO-INST                                                       
+    % LXI DO-INST                                                       
+
+% ONLY-DO-INST FOR-ALL-AS
