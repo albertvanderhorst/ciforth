@@ -3321,13 +3321,15 @@ input stream.},
 HEADER({[CHAR]},{BCHAR},{DOCOL}, _VAR_FIELD({LCHAR}), B_IMMED)
 ;
 worddocsafe({FORMATTING},{(NUMBER)},{paren_number},{ --- d1},{},
-{Convert the ascii text at the current input stream with regard to forthcode({BASE}) .
-The
-new value is accumulated into double number forthvar({d1}) , being left.
-The only non-digit acceptable is a decimal point, that signifies that
-the input is to be considered as a double.
-If the first unconvertable digit is not a blank, this is an error. },
-{{NUMBER},{?BLANK}}, {}, enddoc)
+{Convert the ascii text at the current input stream with regard
+to forthcode({BASE}) . The new value is accumulated into double
+number forthvar({d1}) , being left. The only non-digit
+acceptable is a decimal point, that signifies that the input is
+to be considered as a double. If the first unconvertable digit
+is not a blank, this is an error. }, 
+{{NUMBER},{?BLANK}}, 
+{{ (NUMBER) 1324 D.},{1324} },
+}, enddoc)
 HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, ZERO
         DC      ZERO, DPL, STORE
@@ -3361,27 +3363,29 @@ NPNUM3:                 ; {THEN THEN}
         _0BRANCH(NPNUM1)
         DC      SEMIS
 ;
-
 worddoc({FORMATTING},{NUMBER},{number},{ ---  s/d},{},
-{Convert characters from the current input stream
-into a number, and compile or execute this number.
-If the string contains a
-decimal point it is a double else a single integer number.
-If numeric conversion is
-not possible, an error message will be given.},{{BASE},{(NUMBER)}}, {}, enddoc)
+{Convert characters from the current input stream into a number,
+and compile or execute this number. If the string contains a
+decimal point it is a double else a single integer number. If
+numeric conversion is not possible, an error message will be
+given.}, 
+{{BASE},{(NUMBER)}}, 
+{{ (NUMBER) 1324 D.},{1324} },
+enddoc)
 HEADER({NUMBER},{NUMB},{DOCOL})
 LNUMB:  DC      PNUMB, SDLITE
         DC      SEMIS
 ;
 ;
 worddocsafe({DICTIONARY},{FIND%},{find_following},{"name" --- dea},{},
-{Parse a blank-delimited string from the current input stream and
-look the string up according to forthcode({(FIND)}) .
-If found, and it is not a denotation,
-leave the dictionary entry
+{Parse a blank-delimited string from the current input stream
+and look the string up according to forthcode({(FIND)}) . If
+found, and it is not a denotation, leave the dictionary entry
 address forthsamp({dea}) of the first entry found, else leave a
-nil pointer.},
-{}, {}, enddoc)
+nil pointer.}, 
+{}, 
+{ { : BONOBO ; FIND: BONOBO ' BONOBO = .},{_T_} }, 
+enddoc)
 HEADER({FIND:},{DDFIND},{DOCOL})
         DC      PWORD, PFIND
         DC      LDUP, TFFA, FETCH,
@@ -3397,7 +3401,9 @@ forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
 for a matching entry. If found, leave the dictionary entry
 address forthsamp({dea}) of the first entry found, else leave a
 nil pointer.},
-{}, {}, enddoc)
+{FIND:}, 
+{ { : BONOBO ; "BONOBO" (FIND) ' BONOBO = .},{_T_} }, 
+enddoc)
 HEADER({(FIND)},{PFIND},{DOCOL})
         DC      ZERO, RESULT, STORE
         DC      CONT, FETCH
@@ -3420,19 +3426,29 @@ worddocsafe({INIT},{(ABORT)},{paren_abort},{},{},
 {Executes after an error when forthcode({WARNING}) is -1. This word normally
 executes forthcode({ABORT}), but may be altered (with care) to a user's
 alternative proceedure forthvar({AP}) as follows:
-forthsamp({ 'O AP 'O (ABORT) >PFA !}).
-},{}, {}, enddoc)
+forthsamp({ ' AP >PFA @ ' (ABORT) >PFA !}).
+},{}, 
+{{ : AP 7831 QUIT ; ' AP >PFA @ ' (ABORT) >PFA ! dnl
+-1 WARNING ! 1 ERROR 
+0 WARNING ! .},{7831} }, 
+enddoc)
 HEADER({(ABORT)},{PABOR},{DOCOL})
         DC      ABORT
         DC      SEMIS
 ;
 worddoc({ERRORS},{ERROR},{error},{line --- in blk},{},
-{Execute error notification and restart of system. forthcode({WARNING}) is first
-examined. If 1, the text of line forthvar({n}) , relative to screen 4 of drive O
-is printed. This line number may be positive or negative, and beyond
-just screen 4. If forthcode({WARNING}) is zero, forthvar({n}) is just printed as a message number
-(non disc installation). If forthcode({WARNING}) is -l, the definition forthcode({(ABORT)}) is
-executed, normally a warm start via forthcode({QUIT}) .},{QERROR}, {}, enddoc)
+{Execute error notification and restart of system.
+forthcode({WARNING}) is first examined. If 1, the text of line
+forthvar({n}) , relative to screen 4 is printed. This
+line number may be positive or negative, and beyond just screen
+4. If forthcode({WARNING}) is zero, forthvar({n}) is just
+printed as a message number (non disc installation). If
+forthcode({WARNING}) is -l, the definition forthcode({(ABORT)})
+is executed, normally a warm start via forthcode({QUIT}) .}, 
+{QERROR}, 
+{ {12 ERROR},{12 ERROR ? MSG # 12},
+ {CR},{} },
+enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
         DC      WARN
 ;{ If you leave the following line out, the test for POSTPONE fails!!}
@@ -3465,7 +3481,9 @@ ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
 ;
 worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
 {Print a definition's name from its dictionary entry address.},
-{{'},{>PFA},{>NFA}}, {}, enddoc)
+{{'},{>PFA},{>NFA}}, 
+{ { : GORILLA ; ' GORILLA ID.},{GORILLA} }, 
+enddoc)
 HEADER({ID.},{IDDOT},{DOCOL})
         DC      TNFA
         DC      FETCH
@@ -3487,7 +3505,7 @@ point to the area owned by this header, i.e. immediately following the
 completed header. It leaves the header momentarily unfindable,
 until forthcode({SMUDGE}) is executed.},
 {{CREATE}},
-{},
+{{"FRED" (CREATE) SMUDGE ' FRED LATEST = .},{_T_}},
 enddoc)
 HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LDUP
@@ -3578,14 +3596,17 @@ POSTP1:
         DC      COMMA
         DC      SEMIS
 ;
-worddoc({COMPILING},{LITERAL},{literal},{n --- (compiling)},{P,C2,L0},
-{If compiling, then compile the stack value forthvar({n}) as a 16 bit literal.
-This definition is immediate so that it will execute during a colon
-definition. The intended use is:
+worddoc({COMPILING},{LITERAL},{literal},{n --- (compiling)},{ISO,P,C2,L0},
+{If compiling, then compile the stack value forthvar({n}) as a
+16 bit literal. This definition is immediate so that it will
+execute during a colon definition. The intended use is: 
      forthsamp({: xxx    [ calculate ]  LITERAL  ;})
 Compilation is suspended for the compile time calculation of a
-value.
-Compilation is resumed and forthcode({LITERAL}) compiles this value.},{}, {}, enddoc)
+value. Compilation is resumed and forthcode({LITERAL}) compiles
+this value.},
+{{LIT},{LITERAL}}, 
+{ {: GS3 [ 45 ] LITERAL EMIT ; GS3},{E} }, 
+enddoc)
 HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
@@ -3594,12 +3615,14 @@ HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
         DC      LIT
         DC      COMMA   ;{ENDIF}
 LITE1:  DC      SEMIS
-        PAGE
 ;
 worddoc({COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{P},
-{If compiling, compile a stack double number into a literal. Later
-execution of the definition containing the literal will push it to
-the stack. If executing, the number will remain on the stack.},{}, {}, enddoc)
+{If compiling, compile a stack double number into a literal.
+Later execution of the definition containing the literal will
+push it to the stack. If executing, the number will remain on
+the stack.},{{LITERAL}{LIT}}, 
+{ {: GS3 [ 0.46 ] DLITERAL DROP EMIT ; GS3},{F} }, 
+enddoc) 
 HEADER({DLITERAL},{DLITE},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
@@ -3611,12 +3634,17 @@ DLIT1:  DC      SEMIS
 ;
 ;
 worddoc({COMPILING},{SDLITERAL},{sdliteral},{d --- s/d (executing) d --- (compiling)},{P},
-{If compiling, compile a stack double number into a literal
-or double literal, depending on whether forthcode({DPL}) contains a nil pointer
-or points into the input.
-Later
-execution of the definition containing the literal will push it to
-the stack. If executing, the number will remain on the stack.},{}, {}, enddoc)
+{If compiling, compile a stack double number into a literal or
+double literal, depending on whether forthcode({DPL}) contains a
+nil pointer or points into the input. Later execution of the
+definition containing the literal will push it to the stack. If
+executing, the number will remain on the stack.},
+{{SLITERAL},{DLITERAL}},
+{
+{: GS1 [ 0.46 ] SDLITERAL DROP EMIT ; GS1},{F} }, 
+{: GS3 [ 45 ] SDLITERAL EMIT ; GS3},{E} }, 
+}, 
+enddoc) 
 HEADER({SDLITERAL},{SDLITE},{DOCOL}, , B_IMMED)
         DC      DPL
         DC      FETCH
@@ -3628,9 +3656,14 @@ SDLIT1:
 SDLIT2:
         DC      SEMIS
 ;
+_SECURITY_({
 worddoc({SECURITY},{?STACK},{question_stack},{},{},
-{Issue an error message is the stack is out of bounds.},
-{{?ERROR}}, {}, enddoc)
+{Issue an error message if the stack is out of bounds.},
+{{?ERROR}}, 
+{{ SP! ?STACK},{},
+{0 WARNING !  DROP ?STACK},{RNING !  DROP ?STACK? MSG # 1 },
+ {CR},{} },
+enddoc)
 HEADER({?STACK},{QSTAC},{DOCOL})
         DC      SPFET
         DC      SZERO
@@ -3648,26 +3681,27 @@ HEADER({?STACK},{QSTAC},{DOCOL})
         DC      QERR
         DC      SEMIS
         PAGE
+});_END_({_SECURITY_})
 ;
 worddoc({PARSING},{INTERPRET},{interpret},{},{},
-{Repeatedly fetch
-the next text word in the input stream and
-execute it (forthcode({STATE}) is 1)
-or compile it (forthcode({STATE}) is 1).
-If
-the word name cannot be found after a search of forthcode({CONTEXT}) and then
-forthcode({CURRENT}), it is considered as a forthdefi({denotation}) of ,
-a number, a double number, a character or a string.
-If it is also not a denotation, an error message " ?" will be given.
-Denotations are
-handled respectively by the words forthcode({DENO0}) ...
-forthcode({DEN9}) forthcode({DEN&}) and forthcode({DEN"}) of the
+{Repeatedly fetch the next text word in the input stream and
+execute it (forthcode({STATE}) is not 1) or compile it
+(forthcode({STATE}) is 1). If the word name cannot be found
+after a search of forthcode({CONTEXT}) and then
+forthcode({CURRENT}), it is considered as a
+forthdefi({denotation}) of , a number, a double number, a
+character or a string. If it is also not a denotation, an error
+message " ?" will be given. Denotations are handled respectively
+by the words forthcode({DENO0}) ... forthcode({DEN9})
+forthcode({DEN&}) and forthcode({DEN"}) of the
 forthcode({DENOTATION}) wordlist, depending on the first
-character.
-A number is converted according to the current base.
-If a decimal point is found as part of a number, the number value that
-is left is a double number, otherwise a single number.
-},{{WORD},{NUMBER},{BLK},{DPL}}, {}, enddoc)
+character. A number is converted according to the current base.
+If a decimal point is found as part of a number, the number
+value that is left is a double number, otherwise a single
+number. }, 
+{{WORD},{NUMBER},{BLK},{DPL}}, 
+{{( No test)},{}}, 
+enddoc)
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:
         DC      PWORD
@@ -3710,7 +3744,9 @@ the precedence bit in its header is set.
 This method allows definitions to handle unusual compiling
 situations, rather than build them into the fundamental compiler.
 The user may force compilation of an immediate definition by
-preceeding it with forthcode({[COMPILE]}) .},{}, {}, enddoc)
+preceeding it with forthcode({[COMPILE]}) .},{}, 
+{ { : GS1 &Z EMIT ; IMMEDIATE : GS2 GS1 ;},{Z}},
+enddoc)
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
         DC      LATES
         DC      TFFA
@@ -3721,26 +3757,31 @@ HEADER({IMMEDIATE},{IMMED},{DOCOL})
 worddoc({DEFINING},{VOCABULARY},{vocabulary},{},{E,L},
 {A defining word used in the form:
             forthcode({VOCABULARY}) forthvar({cccc})
-to create a vocabulary definition forthvar({cccc}) . Subsequent use of forthvar({cccc}) will
-make it the forthcode({CONTEXT}) vocabulary which is searched first by forthcode({INTERPRET}) .
-The sequence forthvar({cccc}) forthcode({DEFINITIONS}) also make forthvar({cccc}) the forthcode({CURRENT})
-vocabulary into which new definitions are placed.
+to create a vocabulary definition forthvar({cccc}) . Subsequent
+use of forthvar({cccc}) will make it the forthcode({CONTEXT})
+vocabulary which is searched first by forthcode({INTERPRET}) .
+The sequence forthvar({cccc}) forthcode({DEFINITIONS}) also make
+forthvar({cccc}) the forthcode({CURRENT}) vocabulary into which
+new definitions are placed. 
 
-A vocabulary 's data content field contains at first the dovoc pointer, then
-follows its forthdefi({body}) .
-The body contains a dummy dea (forthdefi({DDEA})) with a name " " (blank) ,
-a dummy link field (forthcode({DLFA}))
-that points to the dea of the first word of the vocabulary.
-Actually executing the vocabulary means storing its DDEA into forthcode({CONTEXT}) .
-Then follows the vocabulary link field address ( forthdefi({VLFA}) )
-The VLFA points to the VLFA of the next vocabulary or 0 for the end.
+A vocabulary 's data content field contains at first the dovoc
+pointer, then follows its forthdefi({body}) . The body contains
+a dummy dea (forthdefi({DDEA})) with a name " " (blank) , a
+dummy link field (forthcode({DLFA})) that points to the dea of
+the first word of the vocabulary. Actually executing the
+vocabulary means storing its DDEA into forthcode({CONTEXT}) .
+Then follows the vocabulary link field address (
+forthdefi({VLFA}) ) The VLFA points to the VLFA of the next
+vocabulary or 0 for the end. 
 
-In fig-FORTH, cccc will be so chained as to include all definitions
-of the vocabulary in which forthvar({cccc}) is itself defined. All vocabularys
-ultimately chain to Forth.
-By convention, vocabulary names are to be
-declared forthcode({IMMEDIATE}) .},
-{{VOC-LINK}}, {}, enddoc)
+In fig-FORTH, cccc will be so chained as to include all
+definitions of the vocabulary in which forthvar({cccc}) is
+itself defined. All vocabularys ultimately chain to Forth. By
+convention, vocabulary names are to be declared
+forthcode({IMMEDIATE}) .}, 
+{{VOC-LINK}}, 
+{{( Via FORTH)},{}},
+enddoc)
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      CREATE
         DC      HERE
@@ -3772,12 +3813,16 @@ DOVOC:
 ;{   appended to the 'FORTH' vocabulary.}
 ;
 worddoc({VOCABULARIES},{FORTH},{forth},{},{P,L1},
-{The name of the primary vocabulary.
-Execution makes forthcode({FORTH}) the forthcode({CONTEXT}) vocabulary. Until additional user
-vocabularies are defined, new user definitions become a part of
-forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during the creation of
-a colon-definition, to select this vocabulary at compile time.},
-{{VOCABULARY}}, {}, enddoc)
+{The name of the primary vocabulary. Execution makes
+forthcode({FORTH}) the forthcode({CONTEXT}) vocabulary. Until
+additional user vocabularies are defined, new user definitions
+become a part of forthcode({FORTH}) . forthcode({FORTH}) is
+immediate, so it will execute during the creation of a
+colon-definition, to select this vocabulary at compile time.}, 
+{{VOCABULARY}}, 
+{ { VOCABULARY JOHN JOHN ' FORTH >DDEA CONTEXT @ = .},{0},
+  { FORTH ' FORTH >DDEA CONTEXT @ = .},[_T_} },
+enddoc)
 HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
