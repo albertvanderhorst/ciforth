@@ -3808,10 +3808,11 @@ CODE_HEADER({$I},{SINDEX})
         POP     AX      ;{ char}
         POP     CX      ;{ count}
         POP     DI      ;{ addr}
+        OR      DI,DI   ;{Clear zero flag.}
         CLD             ;{ INC DIRECTION}
         REPNZ     SCASB   ;{ Compare BYTE}
         JZ      SINDEX1
-        XOR     DI,DI    ;{Remainder is already 0}
+        XOR     DI,DI    ;{Not found: 0}
         INC     DI
 SINDEX1:
         DEC     DI
@@ -3829,8 +3830,10 @@ _VERBOSE_({{Both forthvar({sc1}) and forthvar({sc2}) may be
 empty strings (i.e. their count is zero), if forthvar({ch}) is
 the last or first character in forthvar({sc}) .}}) },
 {{$I},{CORA}},
-{{ 132 "ORANG" OVER >R &N $I R> - . .},{3 132},
-{ 132 "ORANG" &Z $I 0= . .},{_T_ 132}},
+{{ 132 "ORANG" &O $S . DROP TYPE . },{0 RANG132},
+{ "ORANG OETAN" BL $S TYPE TYPE },{ORANGOETAN},
+{ "ORANG" &G $S TYPE 0 . TYPE },{ORAN0 },
+{ 132 "ORANG" &Z $S TYPE . . .},{ORANG0 0 132 }},
 enddoc)
 CODE_HEADER({$S},{SSPLIT})
 ;{       MOV    ES,BX   ; ES <- DS}
@@ -3839,29 +3842,22 @@ CODE_HEADER({$S},{SSPLIT})
         POP     CX      ;{ count}
         MOV     BX,CX
         POP     DI      ;{ addr}
+        OR      DI,DI   ;{Clear zero flag.}
         MOV     DX,DI   ;{ Copy}
         CLD             ;{ INC DIRECTION}
         REPNZ     SCASB   ;{ Compare BYTE}
         JZ      SSPLIT1
 ; {Not present.}
-        XOR     AX,AX    ;{Remainder is already 0}
-        PUSH    AX
-        PUSH    AX
-        PUSH    DX
-        PUSH    BX
+        PUSH    CX   ;{ Nill pointer.}
         JMP SSPLIT2
 SSPLIT1:
         PUSH    DI
-        MOV     AX,DX
-        ADD     AX,BX
-        SUB     AX,DI
-        PUSH    AX
-        PUSH    DX
-        MOV     AX,DI
-        SUB     AX,DX
-        DEC     AX      ;{Delimiter is not part of first string.}
-        PUSH    AX
+        SUB     BX,CX
+        DEC     BX      ;{Delimiter is not part of first string.}
 SSPLIT2:
+        PUSH    CX   ;{Remaining length}
+        PUSH    DX   ;{Start of first string.}
+        PUSH    BX   ;{Skipped length.}
         _NEXT
 ;
 worddoc( {MEMORY},{ERASE},{erase},{addr n --},{ISO},
@@ -6327,7 +6323,7 @@ PACCEP1:
         DC      TSWAP, LIT, REMAIND, TSTOR
         DC      SEMIS
 
-REMAIND:        DC      0,0
+REMAIND:        DC      0, STRTIB
 
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO FIG L0},
 {Leave the ascii value of the next terminal key struck.},
