@@ -179,7 +179,7 @@ CELLS STRING-TABLE + ! ;
 \ For ADDRESS containing a start end pair, return the STRING represented.
 : SE@-STRING 2@ SWAP OVER - ;
 \ For INDEX create a "word" that returns the matched string with that index.
-: CREATE\ CREATE 1+ 2 * CELLS STRING-TABLE + , DOES> @ SE@-STRING ;
+: CREATE\ CREATE 1+ STRING[] , DOES> @ SE@-STRING ;
 
 \ &9 1+ &0 DO   &\ PAD C!   I PAD 1+ C!   PAD 2 POSTFIX CREATE\ LOOP
 0 CREATE\ \0    1 CREATE\ \1    2 CREATE\ \2    3 CREATE\ \3   4 CREATE\ \4
@@ -572,7 +572,7 @@ CREATE STRING-COPY MAX-RE CELLS ALLOT
 
 \ CP points to a '\#' escape. Add the matched substring indicated by '#'
 \ to the replaced string. Leave CP pointing after the escape.
-: DO-ESCAPE 1+ C@+ &0 - STRING[] SE@-STRING STRING-COPY $+! ;
+: DO-ESCAPE 1+ C@+ &0 - 1+ STRING[] SE@-STRING STRING-COPY $+! ;
 
 \ For the range to CP2 from CP1 : "It STARTS with a substring escape"
 : ESCAPE? 2DUP - 1 > >R         \ At least two char's
