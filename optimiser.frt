@@ -11,11 +11,6 @@ REQUIRE $
   : \D POSTPONE \ ; IMMEDIATE
 \  : \D ;            IMMEDIATE
 
-HEX
-\ ----------------------    ( From analyser.frt)
-100 CONSTANT FMASK-HO    \ This definition has been high level optimised.
-200 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
-DECIMAL
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
@@ -23,8 +18,9 @@ DECIMAL
 \ For a parse ADDRESS return an incremented parse ADDRESS, its
 \ CONTENT and a go on FLAG.
 : NEXT-PARSE
-   @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF CELL+ THEN
-\   R@ CFA> 'SKIP = IF @+ + ALIGNED THEN
+   @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF
+       R@ CFA> 'SKIP = IF @+ + ALIGNED ELSE CELL+ THEN
+   THEN
    R@
 \D   R@ CFA> ID.
    R> '(;) <> ;
@@ -199,7 +195,7 @@ VARIABLE CURRENT-DEA
 \D : test 1 SWAP 3 2 SWAP ;
 \D 'test OPTIMISE-O
 \D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
-\D : test1 1 2 + 3 4 * OR ;
+\D : test1 1 2 + 3 4 AND OR ;
 \D 'test1 OPTIMISE-O
 \D "EXPECT `` F '' :" CR TYPE CRACK test1
 \D : test2 1 2 SWAP ;
