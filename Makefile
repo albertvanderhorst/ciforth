@@ -27,6 +27,7 @@ CSRC= figforth toblock fromblock stealconstant
 
 RELEASECONTENT = \
 fig86.gnr        \
+BLOCKS.BLK       \
 $(INGREDIENTS)   \
 $(TARGETS:%=%.cfg) \
 $(CSRC:%=%.c)    \
@@ -63,7 +64,7 @@ fig86.$(s).bin :
 # Put include type of dependancies here
 $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
-all: $(TARGETS:%=fig86.%.bin) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
+all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.bin) 
 
 clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) figforth
 
@@ -76,6 +77,16 @@ boot: fig86.alone.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 	mformat -k a: 
 	mcopy $+ a:forth.com
+
+# Use this if screen boundaries are off by a sector.
+filler: 
+	mcopy filler.frt a:filler.frt
+
+moreboot: BLOCKS.BLK fig86.alone.bin  
+	mcopy BLOCKS.BLK a:
+	mcopy fig86.msdos.bin	   a:msdos.com
+                           
+BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
