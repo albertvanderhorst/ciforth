@@ -22,10 +22,16 @@ SB{}_sc: DSS      _quoted}({{$1}})
         DC      LIT, len({$1})
 define({_sc},{incr}(_sc))dnl })dnl
 dnl             
-dnl _LINKOLD is a m4 variable that generates numbers in sequence.
+dnl _VOCLINKOLD is a m4 variable that generates a chain of vocabularies.
+define({_VOCLINKOLD},0)dnl
+define(_VOCLINK, 
+        {DC      DOVOC
+        DC      _VOCLINKOLD{}define({_VOCLINKOLD},_LINKOLD)dnl
+})dnl
 dnl We lay down a nice square around the definition as a tribute to Thomas Newman
 dnl _star(x) generates x stars
 define({_star},{ifelse}(0,$1,,{*{_star}({decr}($1))}))
+dnl _LINKOLD is a m4 variable that generates numbers in sequence.
 define({_LINKOLD},0)dnl
 dnl Lay down a header with forth name $1, assembler name $2 and code field $3
 dnl and data field $4, flag field $5, link field $6.
@@ -49,6 +55,7 @@ $6)
 dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
+dnl Remember! The assembler names denote the code field.
 dnl The link etc. field of the word with assembler name $1
 define({_DEA},{$1-_CELLS(C_HOFFSET)})dnl
 define({_LINK_FIELD},{($1+_CELLS(L_HOFFSET-C_HOFFSET))})dnl
