@@ -4,6 +4,14 @@ A forth user is well aware of how the memory of his
 computer is organised. He allocates it for certain purposes,
 and frees it again at will.
 
+The last-in first-out buffer that remembers data for us is called
+the forthdefi({data stack}) or sometimes forthdefi({computation stack}).
+There are other stacks around, 
+but if there is no confusion it is often called just the forthdefi({stack}).
+Every stack is in fact a buffer and needs also a forthdefi({stack pointer})dnl
+to keep track of how far it has been filled. 
+It is just the address where the last data item has been stored in the buffer.
+
 The forthdefi({dictionary}) is the part of the memory where the forthcode({words}) are
 (forthpxref({DICTIONARY})).
 It owns a part of the dictionary, starting with its name and
@@ -18,6 +26,26 @@ Apart from the name a word contains data and executable code,
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}) . Its code is called 
 forthdefi({high level}) code.
+
+A high level word, one defined by forthcode({:}) , is just a 
+sequence of addresses of other words. The forthdefi({inner interpreter})dnl
+takes care to execute these words in sequence.
+It acts by fetching the address pointed by forthvar({IP}) , storing
+this value in register forthvar({W}) . It then jumps to the address
+pointed to by the address pointed to by forthvar({W}) . forthvar({W}) dnl
+points to the code field of a definition which contains the address of
+the code which executes for that definition. This usage of indirect
+threaded code is a major contributor to the power, portability, and
+extensibility of Forth. 
+
+If the inner interpret must execute another high level word, 
+while it is interpreting, it must remember the old value of 
+forthvar({IP}), and this so called forthdefi({nesting}) could go several 
+levels deep. 
+Keeping this on the data stack would interfere with the data the
+words are expecting, so they are kept on a separate stack, the
+forthdefi({return stack}). 
+The usage of two stacks is another hall mark of Forth.
 
 A word that generates a new entry in the dictionary is called a 
 forthdefi({defining word}) forthxref({DEFINING}).
@@ -43,17 +71,13 @@ Sometimes we use data of two cells, a forthdefi({double}) .
 The high-order cell are most accessable on the stack and if stored in 
 memory, it is highest.
 
-A so called high level word, one defined by forthcode({:}) , is just a 
-sequence of addresses of other words. The forthdefi({inner interpreter})dnl
-takes care to execute these words in sequence.
-It acts by fetching the address pointed by forthvar({IP}) , storing
-this value in register forthvar({W}) . It then jumps to the address
-pointed to by the address pointed to by forthvar({W}) . forthvar({W}) dnl
-points to the code field of a definition which contains the address of
-the code which executes for that definition. This usage of indirect
-threaded code is a major contributor to the power, portability, and
-extensibility of Forth. 
-
+The code for a high level word can be typed in from the terminal,
+but it can also fed into Forth by redirection from a file, or
+you can forthdefi({load}) it from the file forthfile({BLOCKS.BLK}) .
+This file is divided into forthdefi({screen})'s , consisting of 
+16 lines of 64 characters.
+To forthdefi({load}) such a screen has the same effect as
+typing its content from the terminal.
 @section Portability
 If you build your words from the words defined in the ISO standard,
 and are otherwise careful, your programs may run on other systems that
@@ -240,7 +264,7 @@ play an important role because they
 convert your computer into a standard Forth stack computer. 
 It is clear that although you can define words by other words,
 you will hit a lowest level.
-The forthdefi({code words}) as these lowest level programs are called,
+The forthdefi({code word})'s as these lowest level programs are called,
 execute machine code directly, if you invoke them from 
 the terminal or from some other definition.
 The other definitions, called forthdefi({high level}) code, 
@@ -265,8 +289,9 @@ must be available in a
 "Forth stack computer" according to the ISO standard. 
 They comprise the bulk of
 the system, enabling you to execute and compile from the terminal,
-execute and add definitions 
-by forthdefi({loading}) code from disk etc.
+execute and 
+forthdefi({load}) code from disk to add definitions 
+etc.
 Deviations from standards are ill advised, 
 so you probably want to leave this area alone.
 Again these words are perfectly normal dictionary entries. 
@@ -375,10 +400,10 @@ where a forthdefi({dictionary entry address}) would be more correct.
 That they happen to be the same is no reason to confuse two completely different concepts.})
 forthitem
 The link field. This is one cell. 
-A pointer to such a field is called a forthdefi({link field address}) .
+A pointer to such a field is called a forthdefi({link field address}) before this one.
 It contains the 
 dictionary entry address of the last word that was 
-defined in the same            forthdefi({vocabulary}).
+defined in the same            forthdefi({vocabulary}) before this one.
 forthitem
 The code field. This is one cell. 
 A pointer to such a field is called a forthdefi({code field address}) .
@@ -510,8 +535,9 @@ But if you are careful you can change the system on the fly.
 
 
 @subsection  Terminal I/O and vectoring.
-It is usefull to be able to change the behaviour of I/O words that 
-they put their output to a different channel, such as output to the 
+It is usefull to be able to change the behaviour of I/O words such 
+that they put their output to a different channel.
+For instance they must output to the 
 printer instead of to the console.
 In general this is called forthdefi({vectoring}).
 Remember that in normal Forth system, 
@@ -533,7 +559,7 @@ If you have a forthdefi({code word}) that outputs like forthcode({TYPE}),
 you can copy the content of its 
 forthdefi({code field address}) to the code field addres of forthcode({TYPE}).
 
-A similar technique cannot be used on the input side, 
+A similar technique is not so useful on the input side, 
 because keys entered during EXPECT are subject to correction
 until <RET> has been pressed.
 _HOSTED_LINUX_({On this linux ciforth forthcode({EXPECT}) is left to the

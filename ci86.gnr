@@ -3000,7 +3000,7 @@ HEADER({FORTH},{FORTH},{DODOE},1)
 worddoc({VOCABULARIES},{DEFINITIONS},{definitions},{},{L1},{
 Used in the form:
            forthvar({cccc}) forthcode({DEFINITIONS})
-Set the forthcode({CURRENT}) vocabulary to the forthvar({CONTEXT}) vocabulary. In the
+Set the forthcode({CURRENT}) vocabulary to the forthcode({CONTEXT}) vocabulary. In the
 example, executing vocabulary name forthvar({cccc}) made it the forthcode({CONTEXT})
 vocabulary and executing forthcode({DEFINITIONS}) made both specify vocabulary
 forthvar({cccc}) .},{{VOCABULARY}})
@@ -5613,7 +5613,7 @@ depending on conditions.
 },{},{},{},{})
 worddocchapter({DEFINING},{ },
 {The wordset forthvar({DEFINING}) contains words that add new entries
-to the dictionary. A number of such forthdefi({defining}) words
+to the dictionary. A number of such forthdefi({defining word})'s 
 are predefined, but there is
 also the possibility to make new defining words, using
 forthcode({<BUILDS}) and forthcode({DOES>}) .
@@ -5669,17 +5669,19 @@ worddocchapter({LOGIC},{ },
 {The wordset forthvar({LOGIC}) contains logic operators and
 comparison operators.
 A comparison operators (such as forthcode({=}) ) delivers a
-logical forthdefi({flag}), 1 for true, 0 for false, representing a
+forthdefi({logical flag}), 1 for true, 0 for false, representing a
 condition (such as that two numbers are equal).
 The logical operators ( forthcode({AND}) etc.)
-work on all _BITS_, one by one.
+work on all _BITS_ bits, one by one.
 In this way they are useful for mask operations, as well
 as for combining conditions
-represented as flags. But beware that forthcode({IF}) only cares whether
-the top of the stack is non-zero, such that to
-forthcode({IF}) forthcode({-}) can mean non-equal.
-Such conditions cannot be directly
-combined using logical operators, but forthsamp({0= 0=}) can help.},
+represented as flag's. 
+But beware that forthcode({IF}) only cares whether
+the top of the stack is non-zero, such that 
+forthcode({-}) can mean non-equal to forthcode({IF}). 
+Such conditions (often named just forthdefi({flag})'s)
+cannot be directly combined using logical operators, 
+but forthsamp({0= 0=}) can help.},
 {},{},{},{})
 worddocchapter({MEMORY},{ },
 {The wordset forthvar({MEMORY}) contains words to fetch and

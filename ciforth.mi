@@ -10,7 +10,7 @@ dnl @smallbook
 A common intel/computer intelligence/CH+ forth.
 
 For the configuration:
-forthitemize @bullet
+forthitemize 
 forthitem            
 experimental version fig86gnrversion
 forthitem             
