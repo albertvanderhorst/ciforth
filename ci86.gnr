@@ -65,7 +65,7 @@ _ENDCOMMENT
 	PAGE
 FIGREL	EQU	2	; FIG RELEASE #
 FIGREV	EQU	0	; FIG REVISION #
-USRVER  EQU     'C'-'0' ; USER VERSION NUMBER, a digit now
+USRVER  EQU     34      ; USER VERSION NUMBER, a digit now
 ;
 ;       PROTECTION
 PMASK   EQU     0FFH    ; Allow to access only 256 blocks from OFFSET
@@ -107,8 +107,9 @@ SPB     EQU     KBBUF/BPS
 ;
 ; PHYSICAL DISK PARAMETERS
 ; (not needed for MODERN)
+; (not needed for BOOTHD)
 ;
-; Disk parameters:
+; Disk parameters: 
 ; HD drive 3" 
 TRKS    EQU     80    ;Number of tracks
 SPT     EQU     18    ;Sectors/track
@@ -144,8 +145,6 @@ _ENDCOMMENT
 	PAGE
 	CSEG    SEGMENT PARA PUBLIC 'CODE'
 	ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
-define( {}, _no({$0}) )dnl       
-
 ;____1_____ _BOOTFD__1_({
 	  ORG     0H
 ORG0:   JMP     SHORT BOOT
@@ -202,7 +201,7 @@ ELSE1:
 	MOV     AL,'F'
 	CALL    DISPLAY
 	CLI                     ; Disallow interrups until stack ready
-	MOV     AX,CS
+	MOV     AX,CS           ; Will do for now (real mode)
 	MOV     DS,AX
 	MOV     SS,AX
 	MOV     ES,AX
@@ -360,7 +359,7 @@ ELSE1:
 	MOV     AL,'F'
 	CALL    DISPLAY
 	CLI                     ; Disallow interrups until stack ready
-	MOV     AX,CS
+	MOV     AX,CS           ; Will do for now (real mode)
 	MOV     DS,AX
 	MOV     SS,AX
 	MOV     ES,AX
@@ -418,6 +417,9 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
 });_END___1__({ _HOSTED__1_})
 
 ORIG:
+;____1_____ _PROTECTED_1_({
+  	TO_PROTECTED    ;   "
+});_END___1__({ _PROTECTED_1_})
 	NOP
 	JMP	LCLD     ;VECTOR TO COLD START
 	NOP
@@ -458,7 +460,9 @@ _COMMENT
 	    SS      ibid
  
 	    ES      Temporary segment register only used by
-		    a few words.
+		    a few words. However it MUST remain equal to
+                    DS, such that string primitives can be used
+                    with impunity.
 
 ---------------------------------------------------------- 
 _ENDCOMMENT
@@ -624,7 +628,7 @@ XLOO1:	ADD	[BP],BX	; INDEX = INDEX + INCR
 ;  END OF `DO' LOOP
 	ADD	BP,_BYTE CELLS(2)  ; ADJ RETURN STACK
 	LEA	SI,[SI+CELL]       ; BYPASS BRANCH OFFSET
-	JMP SHORT     NEXT
+	JMP     NEXT
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
 	POP	BX	; GET LOOP VALUE
@@ -727,8 +731,8 @@ DIGI2:	SUB	AX,AX	;FALSE FLAG
 	JMP	APUSH
 	PAGE
 CODE_HEADER({(FIND)},{PFIND})
-	MOV	AX,DS
-	MOV	ES,AX	;ES = DS
+;       MOV     AX,DS
+;       MOV	ES,AX	;ES = DS
 	POP	BX	;NFA
 	POP	CX	;STRING ADDR
 ;
@@ -825,8 +829,8 @@ CODE_HEADER({CMOVE},{LCMOVE})
 	POP	CX	;COUNT
 	POP	DI	;DEST
 	POP	SI	;SOURCE
-	MOV	AX,DS
-	MOV	ES,AX	;ES <- DS
+;       MOV	AX,DS
+;       MOV	ES,AX	;ES <- DS
 	REP	MOVSB	;THAT'S THE MOVE
 	MOV	SI,BX	;GET BACK IP
 	JMP	NEXT
@@ -1068,6 +1072,8 @@ HEADER({:},{COLON},{DOCOL},1)
 DOCOL:	LEA     BP,[BP-CELL]
 	MOV	[BP],SI	;R1 <- (IP)
   	LEA     SI,[DI+CELL]  ;(IP) <- (PFA)
+  	TO_REAL         ; Nought unless using protected mode.
+  	TO_PROTECTED    ;   "
 	JMP	NEXT
 ;
 HEADER({;},{SEMI},{DOCOL},1)
@@ -1578,8 +1584,8 @@ CODE_HEADER({FILL},{FILL})
 	POP	AX	; FILL CHAR
 	POP	CX	; FILL COUNT
 	POP	DI	; BEGIN ADDR
-	MOV	BX,DS
-	MOV	ES,BX	; ES <- DS
+;       MOV	BX,DS
+;       MOV	ES,BX	; ES <- DS
 	CLD		; INC DIRECTION
 	REP	STOSB	;STORE BYTE
 	JMP	NEXT
@@ -1739,8 +1745,7 @@ ERRO1	DC	HERE
 	DC	COUNT
 	DC	TYPES
 	DC	PDOTQ
-	DB	2
-	DB	'? '
+	_STRING({? })
 	DC	MESS
 	DC	SPSTO
 ;
@@ -1956,8 +1961,7 @@ QUIT1	DC	RPSTO	;BEGIN
 	DC	ZEQU
 	_0BRANCH(QUIT2) ;IF
 	DC	PDOTQ
-	DB	2
-	DB	'OK'	;ENDIF
+	_STRING({OK})   ;ENDIF
 QUIT2	_BRANCH(QUIT1)  ;AGAIN
 ;
 HEADER({ABORT},{ABORT},{DOCOL})
@@ -1967,9 +1971,15 @@ HEADER({ABORT},{ABORT},{DOCOL})
 	DC	CR
 	DC	DOTCPU
 	DC	PDOTQ
+
+_COMMENT
+;       If this is there it is an official release
 	DB	22
 	DB	'IBM-PC Fig-Forth '
 	DB	FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
+_ENDCOMMENT
+;       If this is there it is a beta release
+	_STRING({IBM-PC $RCSfile$ $Revision$ })
 	DC	FORTH
 	DC	DEFIN
 	DC	QUIT
@@ -1988,6 +1998,8 @@ HEADER({WARM},{WARM},{DOCOL})
 ;	COLD START VECTOR COMES HERE
 ;
 LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
+;____1_____ _HOSTED__1_({
+        PUSH    DS
 	MOV	AX,0
 	MOV	DS,AX		;TO VECTOR AREA
 	MOV	BX,08CH
@@ -1996,10 +2008,8 @@ LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
 	INC	BX
 	INC	BX
 	MOV	[BX],CS
-	MOV	AX,CS
-	MOV	DS,AX		; SET DATA SEG
-	MOV	SS,AX		; SET STACK SEGMENT
-	MOV	ES,AX		; SET EXTRA SEG
+        POP     DS
+});_END___1__({ _HOSTED__1_})
 	CLD			; DIR = INC
 	MOV	SP,_WORD_PTR[USINI+CELLS(3)]    ;PARAM. STACK
 	MOV	BP,_WORD_PTR[USINI+CELLS(4)]    ;RETURN STACK
@@ -2182,8 +2192,7 @@ HEADER({MESSAGE},{MESS},{DOCOL})
 	DC	SPACE	;ENDIF
 MESS2	_BRANCH(MESS3)  ;ELSE
 MESS1	DC	PDOTQ
-	DB	6
-	DB	'MSG # '
+	_STRING({MSG # })
 	DC	DOT	;ENDIF
 MESS3	DC	SEMIS
 	PAGE
@@ -2359,14 +2368,22 @@ CODE_HEADER({BIOS},{BIOS})
 	POP     AX      
 	PUSH     SI      ; Save Forth registers. NEEDED? 
 	PUSH     BP      
+        XCHG    SI,AX   ; Save AX in (already free) SI
+  	TO_REAL         ; Nought unless using protected mode.
+        XCHG    SI,AX   
 RQBIOS: INT(0)          ; Request number to be overwritten.
+	PUSHF      ; Save status into DI 
+	POP     DI      
+        XCHG    SI,AX   ; Save AX in (still free) SI     
+  	TO_PROTECTED    
+        XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
 	POP	SI	;INTERPRETER PNTR
 	PUSH     AX      
 	PUSH     BX      
 	PUSH     CX      
 	PUSH     DX      
-	PUSHF      ; Sometimes status is returned into flags!
+	PUSH     DI     ; i.e. flags 
 	JMP     NEXT    ;
 ; SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!
 
@@ -2674,7 +2691,7 @@ HEADER({POUT},{POUT},{DOCOL})
 
 ;____1_____ _MODERN_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
-	DB      10,"BLOCKS.FRT"
+	_STRING({BLOCKS.FRT})
 	_RESB(20)               ; Allow for some path
 ;
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
@@ -3195,15 +3212,19 @@ VLIS2	DC	DUPE
 	DC	SEMIS
 ;
 CODE_HEADER({BYE},{BYE})
+;____1_____ _HOSTED__1_({
 ; EXIT TO PC-DOS
 	INT	27H	;I'M HISTORY
+});_END___1__({ _HOSTED__1_})
+CYCLE:  _0BRANCH(CYCLE) ;PREVENT DISASTERS
+ 
 	PAGE
 HEADER({LIST},{LISTC},{DOCOL})
 	DC      DECA
 	DC	CR,DUPE
 	DC	SCR,STORE
 	DC	PDOTQ
-	DB	6,'SCR # '
+	_STRING({SCR # })
 	DC	DOT
 	DC	LIT,10H
 	DC	ZERO,XDO
