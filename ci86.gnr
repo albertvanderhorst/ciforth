@@ -4587,7 +4587,14 @@ HEADER({QUIT},{QUIT},{DOCOL})
 QUIT1:  DC      RZERO   ;{BEGIN}
         DC      FETCH
         DC      RPSTO
+        _LINUX_N_({DC      LIT})
         DC      QUERY
+_LINUX_N_({
+        DC      CATCH
+        _0BRANCH(OKAY)
+        DC      BYE     ; {Nothing else can be done!}
+OKAY:
+});_END_({_LINUX_N_})
         DC      INTER
 NOOPS:  DC      STATE  ;{ This code may be patched.}
         DC      FETCH  ;{ This code may be patched.}
@@ -5927,8 +5934,8 @@ HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      ROT
         DC      ROT
         DC      LIT, read
-        DC      LINOS
-        DC      ONE, LSUB, ZERO, MAX ; Position of CR (or 0 for failure)
+        DC      LINOS, LDUP, QLERR
+        DC      ONE, LSUB ; Position of CR
         DC      SEMIS
 ; Alternative: if no terminal, this is copied over above code during boot.
 ; Note: copying down in memory has no problems with overlap.
@@ -5974,7 +5981,9 @@ HEADER({KEY},{KEY},{DOCOL})
         DC      ZERO, SPFET     ; Expect single key on stack
         DC      ZERO            ; Standard input
         DC      SWAP, ONE       ; Buffer and length
-        DC      LIT, read, LINOS, DROP ; Retain char, drop count/error
+        DC      LIT, read, LINOS
+        DC      LDUP, QLERR
+        DC      ZEQU, LIT, -EPIPE, LAND, QLERR ; {Presumably end of pipe.}
         DC      ONE, LIT, RAWIO, STTERM       ; Toggle back
         DC      SEMIS
 ;
@@ -6448,6 +6457,7 @@ _PC({ { dnl We are in _RWFILE_ a fortiori in _PC_ already
 }, })
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
+        DC      FLUSH
         DC      LIT, 03E00H    ;{ Close file }
         DC      ZERO, WARN, STORE
         DC      BHAN, FETCH
@@ -6626,6 +6636,7 @@ error messages.
 },
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
+        DC      FLUSH
         DC      ZERO, WARN, STORE
         DC      BHAN, FETCH
         DC      ZERO,ZERO

@@ -7,7 +7,7 @@ divert(-1)dnl
 #include <string.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <termios.h> 
+#include <termios.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <fcntl.h>
@@ -23,7 +23,7 @@ divert(-1)dnl
 /*                                                                           */
 /*****************************************************************************/
 
-/* Templates for editing: 
+/* Templates for editing:
 steal({%}{@},%@)
 steal({%}{@},__NR_%@)
  */
@@ -38,6 +38,7 @@ steal({T}{CGETS},TCGETS)
 steal({T}{CSETS},TCSETS)
 steal({E}{CHO},ECHO)
 steal({E}{AGAIN},EAGAIN)
+steal({E}{PIPE},EPIPE)
 steal({V}{MIN},VMIN)
 steal({V}{TIME},VTIME)
 steal({I}{CANON},ICANON)
