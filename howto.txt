@@ -1,0 +1,26 @@
+( $ Id: )
+( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+
+How to create a floppy booting into ciforth
+
+make allboot
+
+How to create a hard disk booting into ciforth:
+2001 aug 29
+
+How to create an official decompilation :
+2001 aug 30
+
+How to save blocks from the first chunk to floppy:
+has been renamed to BACKUP-BLOCKS (was SAVE-BLOCKS)
+2001 sep 1
+
+How to do the Johns Hopkins univerity test
+lina <tsuite.frt
+Is now incorporated into test.mak
+
+How to find the search ORDER
+REQUIRE ORDER
+
+How to save a ssystem
+REQUIRE SAVE-SYSTEM
