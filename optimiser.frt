@@ -356,23 +356,25 @@ DROP 0 THEN ;
     DROP SWAP DROP
     REPEAT + ;
 
-\ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
-\ The order to be compiled is A-B C-D B-C .
-: GET-PIECES   DUP  FIND-SWAPPABLE ( B D) >R DUP VD @ 2 * CELLS + R> ;
+\ Get from SEQUENCE four boundaries, delineating 3 areas. Return B C D.
+\ The order to be compiled is C-D B-C .
+: GET-PIECES   FIND-SWAPPABLE ( B D) >R DUP VD @ 2 * CELLS + R> ;
 
 \ Inspect B C D and report into ``PROGRESS'' whether there is any
 \ optimisation by swapping. For that B-C and C-D must be both non-empty.
 \ Leave B C D.
 : ?PROGRESS?  >R 2DUP <> R> SWAP  >R 2DUP <> R>   AND   PROGRESS OR! ;
 
-\ For addresses A B C D compile A-B ordinary sequence, C-D no stack side
+\ For addresses B C D compile A-B ordinary sequence, C-D no stack side
 \ effect sequence, B-C postponable constants sequence
-: COMPILE-PIECES ( C) OVER >R   2SWAP   ( B) DUP >R
-    HL-RANGE,  HL-RANGE,   R> R> HL-RANGE, ;
+: COMPILE-PIECES ( C) OVER >R
+    OVER - PAD $!
+    DUP R>   OVER -   PAD $+!
+    PAD $@ >R SWAP R> MOVE ;
 
 \ Reorder a SEQUENCE to delay constants as much as possible.
-\ Return rearragned SEQUENCE.
-: REORDER HERE SWAP
+\ Return rearranged SEQUENCE (which is in fact the same address.)
+: REORDER DUP
     BEGIN GET-PIECES ?PROGRESS? DUP >R COMPILE-PIECES R> DUP ?NOT-EXIT 0= UNTIL DROP
 POSTPONE (;)  ;
 
