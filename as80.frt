@@ -13,10 +13,11 @@
 : AT-REST? TALLY @ -1 =   TALLY CELL+ @ -1 = AND ;
 : ?TALLY AT-REST? 0= 26 ?ERROR ;
 (   Based on PFA of a postit POST into tally and leave the INSTRUCTION  )
-: POST, ?TALLY @+ SWAP @+ TALLY CELL+ ! @ TALLY ! ;
+: POST, ?TALLY DUP CELL+ @+ TALLY CELL+ ! @ TALLY ! ;
 ( Correct dictionary to have an instruction of N bytes, after
 ( `POST,' allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
+: DO-POST <POST POST, DUP @ , 3 CELLS + @ CORRECT ;
 : INVERT -1 XOR ;
 HEX
 0 VARIABLE TEMP ( Should be passed via the stack )
@@ -30,7 +31,7 @@ HEX
 ( Assemble an 1..3 byte instruction and post what is missing.)
 ( The last masks are for convenience in disassembly                     )
 : 1PI <BUILDS  , INVERT , INVERT , 1 , CHECK1
-DOES> [ HERE TEMP ! ] <POST POST, , 1 CORRECT ;
+DOES> [ HERE TEMP ! ] DO-POST ;
 ( Return for DEA : it IS of type 1PI                                  )
 IS-A IS-1PI
 : 2PI <BUILDS  , INVERT , INVERT , 2 , CHECK1 DOES>
