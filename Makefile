@@ -173,6 +173,8 @@ mslinks :
 	ln -sf fig86.lina.asm lina.asm
 	ln -sf fig86.linux.asm linux.asm
 	ln -sf fig86.msdos.msm msdos.msm
+	ln -sf fig86.msdos.asm forth32.asm
+	ln -sf fig86.msdos.bin forth32.com
 	ln -sf fig86.alone.asm alone.asm
 	ln -sf figdocadd.txt figdocad.txt
 	ln -sf stealconstant.c stealcon.c
