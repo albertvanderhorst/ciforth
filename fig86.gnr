@@ -68,6 +68,7 @@ FIGREV	EQU	0	;{ FIG REVISION #}
 USRVER  EQU     34      ;{ USER VERSION NUMBER, a digit now}
 ;
 ;{       PROTECTION}
+CW      EQU     M4_CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
 PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}
 ;
 ;{	ASCII CHARACTER EQUIVALENTS}
@@ -246,7 +247,8 @@ BEGIN1: CALL    READSECTOR
 	MOV     AL,'W'
 	CALL    DISPLAY
 	CALL    DISPLAYCR
-	JMP     ORIG
+_REAL_1_({        JMP     BOOTUP})
+_PROTECTED_1_({        JMP     PROTECT})
 ENDLD:  DW      INITDP
 ;{       Read the sector with number in CX (Counting from 0)}
 ;{       Leave into CX the incremented sec# }
@@ -396,7 +398,8 @@ ELSE1:
 	MOV     AL,'W'
 	CALL    DISPLAY
 	CALL    DISPLAYCR
-	JMP     ORIG
+_REAL_1_({        JMP     BOOTUP})
+_PROTECTED_1_({        JMP     PROTECT})
 DISPLAYCR:
 	MOV     AL,ACR
 	CALL    DISPLAY
@@ -436,9 +439,10 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 
 ;____1_____ _HOSTED__1_({
 	ORG	100H	;{ Required start of .COM program.}
+        JMP     BOOTUP
 });_END___1__({ _HOSTED__1_})
 
-ORIG:
+PROTECT:
 ;____1_____ _PROTECTED_1_({
 ;{CODE-SEGMENT  10 * CONSTANT CODE-START                          }
 	MOV     AX,GDT_SEGMENT ;{ GDT segment}
@@ -490,21 +494,15 @@ include(width32.m4)
 ;{************************}
 
 	JMPHERE_FROM_REAL
-	 JMP     SAME3
+	 JMP     BOOTUP
 GDTLOAD DW     GDTLEN
 	DD     GDT 
 
-SAME3:
 });_END___1__({ _PROTECTED_1_})
 
 ;{ The following is not known until the final width m4 final has been included.}
-CW      EQU     CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
 
-	NOP
-	JMP	LCLD     ;{VECTOR TO COLD START}
-	NOP
-	JMP	WRM	;{ VECTOR TO WARM START}
 ;
 _COMMENT
    FORTH REGISTERS
@@ -762,7 +760,20 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{	Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
-
+BOOTUP:
+        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
+        _BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
+        _BITS32_1_({NOP })
+	JMP	LCLD     ;{VECTOR TO COLD START}
+        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
+        _BITS32_1_({NOP         ; or to 8 bytes for 32 bits code  })
+        _BITS32_1_({NOP })
+	JMP	WRM	;{ VECTOR TO WARM START}
+	DB	FIGREL	;{ FIG RELEASE #}
+	DB	FIGREV	;{ FIG REVISION #}
+	DB	USRVER	;{ USER REVISION #}
+	DB	0EH	;{ VERSION ATTRIBUTES}
+        _BITS32_1_({DC 0   ; Fill version info up to two cells. })
 USINI:
         DC	_LINK_FIELD(TASK) ;{ FIRST DEFINITION 0 }
   	DC	STRUSA	;{ INIT (U0) USER AREA POINTER 1}
@@ -818,8 +829,6 @@ CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
 ;____1_____ _REAL_1_({
 CPUNM   DC      5H,0B328H       ;{ '8088'     12 13 }
 });_END___1__({ _REAL_1_})
-	DC      FIGREL + FIGREV *100H  ;{ FIG RELEASE + REVISION 12}
-       DC      USRVER  + 0EH*100H      ;{ USER REVISION + VERSION ATTRIBUTES 13}
 
 ;{	<<<<< end of data used by cold start >>>>>}
 	_RESB(US-CELLS(13))        ;{ All user can be initialised.}
@@ -3463,7 +3472,7 @@ HEADER({.CPU},{DOTCPU},{DOCOL})
 	DC	BASE,FETCH
 	DC	LIT,36
 	DC	BASE,STORE
-	DC	LIT,CELLS(25),PORIG ; 
+	DC	LIT,CELLS(12),PORIG ; 
 	DC	TFET
 ;____1_____ _BITS32_1_({
         DC      LIT, 10000H, STAR, PLUS, ZERO
