@@ -36,6 +36,11 @@ _USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
 _CLASSIC_({define({_KEY_BY_KEY_}, _yes )})
 _BITS32_({define({_PROTECTED_}, _yes)})
 
+dnl Other consequences
+_BITS32_({define({M4_RTS}, 10000H)})
+dnl _BITS32_({define({M4_NBUF}, 16 )}) NOT YET!
+dnl _BITS32_({define({M4_MAXWORDLIST}, 16 )}) NOT YET!
+
 dnl Consequences with exceptions
 dnl switch back and forth between protected and real mode.
 _PC_({_PROTECTED_({define({_SWITCH_}, _yes)})})
@@ -49,6 +54,8 @@ _SWITCH_({include(protect.m4)})
 _SWITCH_({define({_LOW_BUF_}, _yes)})
 _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
+dnl after the real memorya plus the high memory.
+_SWITCH_({_BITS32_({define({M4_INITDP},{110000H})})})
 _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})

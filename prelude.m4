@@ -47,6 +47,7 @@ define({_ABSOLUTELOAD_},_no)dnl
 dnl Work around a deficiency in nasm : an ORG requires a numeric argument
 define({M4_BIOSBOOT},{07C00H})
 dnl Default size of a header. Changes if there are text addresses.
+dnl You can introduce extra fields in the headers.
 define({M4_HS},{5})
 dnl Have code to switch ourselves to protected mode, e.g. after booting.
 dnl Move forth up such thar ORG agrees with LOADADDRESS.
@@ -146,10 +147,8 @@ dnl
 dnl B Rely on WINDOWS / OS/2 to start the program.
 define( {_HOSTED_DPMI_}, _no)dnl
 dnl
-dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
-dnl
-dnl The offset of the errors in the Library Addressable by Block file.
-define( {M4_ERRORSCREEN}, 32)dnl
+dnl ############## FEATURES ##########################################
+dnl    Features that stand on their own, mostly independant
 dnl
 dnl Include all loadable extensions, that are present in the source.
 dnl Alternatively, see this as a marking for words to be moved out.
@@ -166,7 +165,7 @@ define( {_SECURITY_}, _yes)dnl
 dnl
 dnl Source fields mean that there is a field in the header for a pointer
 dnl to the source. It is not (yet) used in the kernel in any way.
-define( {_SOURCEFIELD_}, _no)dnl
+define( {_SOURCEFIELD_}, _yes)dnl
 dnl
 dnl Keep the old debugging facility with place for breakpoints
 define( {_OLDDEBUG_}, _no)dnl
@@ -174,11 +173,32 @@ dnl
 dnl Keep the new debugging facility that allow to print IP (register SI)
 define( {_NEWDEBUG_}, _no)dnl
 dnl
+dnl ############## SIZES #############################################
+dnl
+dnl The offset of the errors in the Library Addressable by Block file.
+define( {M4_ERRORSCREEN}, 32)dnl
+dnl
 dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
 define({M4_EM},10000H)
 dnl
 dnl The maximum number of wordsets that can be in the search order.
 define({M4_MAXWORDLIST},8)
+dnl
+dnl The size of the return stack plus tib.
+define({M4_RTS}, 0100H)
+dnl
+dnl The size of the user area in cells.
+define({M4_US}, 40H)
+dnl
+dnl The number of blocks cached in memory.
+define({M4_NBUF}, 8 )
+dnl
+dnl Where the dictionary starts normally the current pc after
+dnl the dictionary, but some 32 bit systems may need to skip
+dnl the 1 Mbyte lowest space.
+define({M4_INITDP},{_AP_})
+dnl
+dnl ##################################################################
 dnl
 dnl Applicable if 'BOOTSECTRK = _yes'
 dnl Make a boot floppy that is DOS compatible.
@@ -209,11 +229,6 @@ dnl
 dnl The fields in the dictionary headers are aligned to a cell boundary.
 define( {_ALIGNED_}, _no)dnl
 dnl
-dnl    FEATURES THAT NEED SELDOM CHANGES
-dnl
-dnl Where the dictionary starts for 32 bit systems.
-dnl (Is automatically overwritten for 16 bits systems.
-define({M4_INITDP},{110000H})
 
 dnl ############## USER CHOICES END #########################################
 

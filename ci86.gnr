@@ -101,16 +101,16 @@ USRVER  EQU     0      ;{ USER VERSION NUMBER, a digit now}
 ;
 ;{      VERY ELEMENTARY .}
 CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.}
-ERRORSCREEN EQU     M4_ERRORSCREEN    ;{ Size of a cell in Forth, not in the bootcode.}
+ERRORSCREEN EQU     M4_ERRORSCREEN    ;{ Screen where the error messages start.}
 ;
 ;{      MEMORY LAYOUT.}
 ;{ These values can be changed at this single place. }
-NBUF    EQU     8      ;{ NO. OF BUFFERS AKA SCREENS }
-KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
-US      EQU     40H*CW     ;{ USER VARIABLE SPACE}
-EM      EQU     M4_EM    ;{Where the memory ends w.r.t. ORIG.}
-_BITS16_({RTS     EQU     0100H    ;{ RETURN STACK & TERM BUFFER} })
-_BITS32_({RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
+;{ They can also be changed at the m4 configuration level.}
+NBUF    EQU     M4_NBUF   ; {No. of buffers aka screens }
+KBBUF   EQU     1024      ; {Data bytes per disk buffer}
+US      EQU     M4_US*CW  ; {User variable space}
+EM      EQU     M4_EM     ; {Where the memory ends w.r.t. ORIG.}
+RTS     EQU     M4_RTS    ; {Return stack & terminal input buffer} })
 ;
 _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}})
 ;
