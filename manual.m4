@@ -32,6 +32,5 @@ define({forthexample},
 @cartouche $1
 @end cartouche
 @end example})dnl
-include(names.m4)
 divert(0)dnl
 
