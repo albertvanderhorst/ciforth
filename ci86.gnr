@@ -512,7 +512,6 @@ include(width32.m4)
 
 	section forth progbits write exec alloc
 figforth:
-;       ORG     M4_ORIG 
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
@@ -521,11 +520,9 @@ figforth:
         LEA     ECX,[ESP+CELLS(1)]
         XOR     EAX,EAX
         CMP     EAX,_CELL_PTR[ECX]
-        JNZ     ENDIF1          ; Warm
-        call    print_cold
+        JNZ     ENDIF1          
 	JMP     BOOTUP                  ; Cold start
 ENDIF1: 
-        call    print_hot
         JMP     BOOTUP+CELLS(2)         ; Warm start
 
 RETURN_LINUX:
@@ -2210,8 +2207,6 @@ WRM1	DC	WARM
 ;
 HEADER({WARM},{WARM},{DOCOL})
 	DC	MTBUF
-        DC      LIT, 'Q', EMIT
-        DC      LIT, 'R', EMIT
 	DC	ABORT
 ;
 ;{	COLD START VECTOR COMES HERE}
@@ -2254,6 +2249,9 @@ HEADER({COLD},{COLD},{DOCOL})
 ;____1_____ _MODERN_1_({
 	DC      BLINI           ;{ Can abort!}
 });_END___1__({_MODERN_1_})
+;____1_____ _LINUX_C_1_({
+	DC      BLINI           
+});_END___1__({_LINUX_C_1_})
 	DC	ABORT
 	PAGE
 CODE_HEADER({S->D},{STOD})
@@ -3531,7 +3529,8 @@ CODE_HEADER({BYE},{BYE})
 ;____1_____ _HOSTED_LINUX_1_({
 	JMP     RETURN_LINUX    
 });_END___1__({ _HOSTED_LINUX_1_})
- 
+        HLT     ; Wait for reset
+
 	PAGE
 HEADER({LIST},{LISTC},{DOCOL})
 	DC      DECA

@@ -11,16 +11,7 @@
 #include <setjmp.h>
 #include <fcntl.h>
 #include <errno.h>
- 
-void print_cold( void )
-{
-    printf("COLD COLD COLD\n");
-}
 
-void print_hot( void )
-{
-    printf("HOT HOT HOT\n");
-}
 /* Entry point of figforth. */
 
 /* The offset into the boot parameters. */
@@ -36,10 +27,10 @@ extern void figforth( BOOT_OFFSET offset, int argc, char **argv );
 /* public declarations */ 
 typedef struct tty      
 { 
-    int fd; 
-    struct termios org; 
-    struct termios now; 
-    int device;
+    int fd;               /* A file descriptor, presumably a tty */
+    struct termios org;   /* Data of `fd', to be restored afterwards */
+    struct termios now;   /* Used to mangle while changing `fd' */
+    int is_a_tty;         /* `fd' is associated with a tty */
 } TTY;  
  
 
@@ -65,7 +56,7 @@ DISPLAYSI(unsigned int x)
 
 void tty_set(TTY *ptty) 
 {
-  if (!ptty->device)
+  if (!ptty->is_a_tty)
     return;
   if (tcsetattr (ptty->fd, TCSADRAIN, &ptty->now) < 0)
     tty_error ("unable to set tty state");
@@ -73,7 +64,7 @@ void tty_set(TTY *ptty)
 
 void tty_restore(TTY *ptty) 
 {				/* write termio struct */
-  if (!ptty->device)
+  if (!ptty->is_a_tty)
     return;
   if (tcsetattr(ptty->fd, TCSADRAIN, &ptty->org) < 0)
     tty_error("unable to restore tty state");
@@ -82,18 +73,26 @@ void tty_restore(TTY *ptty)
 void tty_init(int fd, TTY *ptty) 
 {				/* fill-in tty struct */
   ptty->fd = fd;
-  ptty->device = tcgetattr(ptty->fd, &ptty->org) >= 0 &&
+  ptty->is_a_tty = tcgetattr(ptty->fd, &ptty->org) >= 0 &&
 		 tcgetattr(ptty->fd, &ptty->now) >= 0;
+}
+
+/* Disabling these special char's is only useful when                        */
+/* making a full screen editor.                                              */
+void tty_disable( TTY *ptty) 
+{
+  if (!ptty->is_a_tty) return;
+
   /* disable some special characters */
-/*ptty->now.c_cc[VINTR] = _POSIX_VDISABLE;                               */
-/*ptty->now.c_cc[VQUIT] = _POSIX_VDISABLE;                               */
-/*ptty->now.c_cc[VSUSP] = _POSIX_VDISABLE;                               */
+/*ptty->now.c_cc[VINTR] = _POSIX_VDISABLE;   ^C                          */
+/*ptty->now.c_cc[VQUIT] = _POSIX_VDISABLE;   ^\                          */
+/*ptty->now.c_cc[VSUSP] = _POSIX_VDISABLE;   ^S/^Q                       */
   tty_set(ptty);
 }
 
 void tty_echo(TTY *ptty) 
 {
-  if (!ptty->device)
+  if (!ptty->is_a_tty)
     return;
   ptty->now.c_lflag |= ECHO;
   tty_set(ptty);
@@ -101,7 +100,7 @@ void tty_echo(TTY *ptty)
 
 void tty_noecho(TTY *ptty) 
 {
-  if (!ptty->device)
+  if (!ptty->is_a_tty)
     return;
   ptty->now.c_lflag &= ~ECHO;
   tty_set(ptty);
@@ -109,7 +108,7 @@ void tty_noecho(TTY *ptty)
 
 void tty_keymode(TTY *ptty) 
 {
-  if (!ptty->device)
+  if (!ptty->is_a_tty)
     return;
   ptty->now.c_lflag &= ~ICANON;
   ptty->now.c_cc[VMIN] = 1;
@@ -119,9 +118,10 @@ void tty_keymode(TTY *ptty)
 
 void tty_linemode(TTY *ptty) 
 {
-  if (!ptty->device)
+  if (!ptty->is_a_tty)
     return;
   ptty->now.c_lflag |= ICANON;
+
 /* VMIN, VTIME are overloaded and should really be restored ... */
   ptty->now.c_cc[VMIN] = ptty->org.c_cc[VMIN];
   ptty->now.c_cc[VTIME] = ptty->org.c_cc[VTIME];
@@ -144,11 +144,11 @@ void break_int( int ignore )
 
 /* To be executed on SIGQUIT (Normally ^\) */
 /* and on SIGSEGV (Normally invalid address) */
-jmp_buf restart_forth;
+sigjmp_buf restart_forth;
 void break_quit( int signum )
 {
   signal(signum, break_quit);
-  longjmp(restart_forth, WARM );
+  siglongjmp(restart_forth, WARM );
 }
 
 TTY std_in;
@@ -196,7 +196,6 @@ int c_key( void )
   int i;
   tty_keymode(&std_in);                                                       
   i=read(0, &key, 1);
-  if ( 1!=i) {fprintf(stderr,"oei oei\n"); /* exit(1);*/}                           
   return key;                 
 }
 
@@ -285,21 +284,17 @@ int c_system(int count, char command[])
 int main (int argc, char *argv[])
 {
   BOOT_OFFSET bootmode = COLD;
-  /* The ^C is worthless because it is ony recognized while waiting */
-  signal(SIGINT, SIG_IGN);
+/*signal(SIGINT, SIG_IGN);                                                   */
   /* Convenient interrupting of long loops */
-  signal(SIGQUIT, break_quit);
+  signal(SIGQUIT, break_quit);                                                 
   /* Restart when inspecting non existing memory */
   signal(SIGSEGV, break_quit);
 
   tty_init(0, &std_in);                                                       
-  if ( !std_in.device ) {printf("oei oei nodevice\n");/*exit(1);*/}
 
   for(;;)
-  if ( !setjmp(restart_forth) )
+  if ( !sigsetjmp(restart_forth,1) )
   {
-       printf(!bootmode?"ICY":"STEAMY");
-       printf(bootmode==COLD?"icy":bootmode==WARM?"hot":"UNKNOWN");
       figforth( bootmode, argc, argv);
       break;
   }
