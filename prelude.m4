@@ -139,7 +139,7 @@ dnl
 dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.
 dnl
 dnl Applicable if 'SWITCH = _yes'
-dnl The absolute position where the code is loaded, i.e. agrees with ORG.
+dnl The physical address where the code is loaded, i.e. agrees with ORG.
 dnl For 'BOOTED = _yes' : this is naturally M4_BIOSBOOT
 dnl For 'HOSTED_MSDOS = _yes' : it is made true by moving code. 
 define({M4_LOADADDRESS},M4_BIOSBOOT)dnl No quotes, must be numeric!
@@ -149,11 +149,13 @@ dnl The position with respect to the start of the Forth code segment
 dnl where the code is to be compiled.
 define({M4_ORG},M4_BIOSBOOT)dnl No quotes, must be numeric!
 dnl
-dnl    FEATURES THAT NEED SELDOM CHANGES
 dnl Applicable if 'SWITCH = _yes'
-dnl The position relative to ORG where the switch segment start.
-dnl 0H: this maximizes the amount of code able to communicate with the BIOS
-define({M4_SWITCHORG},0H)
+dnl The physical address where the switch segment starts.
+dnl If this is equal to M4_LOADADDRESS , while M4_ORG is zero :
+dnl   This maximizes the amount of code able to communicate with the BIOS
+define({M4_SWITCHORG},M4_BIOSBOOT)dnl
+dnl
+dnl    FEATURES THAT NEED SELDOM CHANGES
 dnl
 dnl Where the dictionary starts for 32 bit systems.
 dnl (Is automatically overwritten for 16 bits systems.0

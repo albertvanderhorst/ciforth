@@ -30,7 +30,6 @@ _BOOTED_1_({define({_ABSOLUTELOAD_1_},_yes)})
 _BOOTED_1_({define({_USEBIOS_1_},_yes)})
 _SWITCH_1_({define({_ABSOLUTELOAD_1_},_yes)})
 _ABSOLUTELOAD_1_({define({_NORMAL_BYE_1_},_no)})
-_ABSOLUTELOAD_1_({define({M4_ORG}, M4_LOADADDRESS) })
 _HOSTED_LINUX_1_({define( {_EQULAYOUT_1_}, _no )})
 _MODERN_1_({define({_RWFILE_1_},_yes)})
 dnl Detectable error situations. Terminate.
