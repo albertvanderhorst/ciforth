@@ -2664,11 +2664,11 @@ CODE_HEADER({BIOS},{BIOS})
         PUSH     BP
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
         JMPHERE_FROM_PROT
-        XCHG    SI,AX
+        XCHG    {SI},{AX}
 RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         PUSHF      ;{ Save status into DI }
-        POP     DI
-        XCHG    SI,AX   ;{ Save AX in (still free) SI     }
+        POP     {DI}
+        XCHG    {SI},{AX}  ;{ Save AX in (still free) SI     }
         JMPHERE_FROM_REAL
         XCHG    SI,AX
         POP     BP      ;{ Restore Forth registers. NEEDED? }
@@ -2692,12 +2692,13 @@ CODE_HEADER({BDOS},{BDOS})
         PUSH     BP
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
         JMPHERE_FROM_PROT
-        XCHG    SI,AX
+        XCHG    {SI},{AX}
         INT     21H
         PUSHF      ;{ Save status into DI }
-        POP     DI
-        XCHG    SI,AX   ;{ Save AX in (still free) SI     }
+        POP     {DI} ;{ Not EDI! }
+        XCHG    {SI},{AX}   ;{ Save AX in (still free) SI     }
         JMPHERE_FROM_REAL
+;        XCHG    {SI},{AX}   ; This is more correct actually.
         XCHG    SI,AX
         POP     BP      ;{ Restore Forth registers. NEEDED? }
         POP     SI      ;{INTERPRETER PNTR}
@@ -3906,7 +3907,7 @@ HEADER({TASK},{TASK},{DOCOL})
 ;
 ;____1_____ _EQULAYOUT_1_({
 TEXTEND  EQU     $       ;{SHOW END OF DICTIONARY}
-INITDP   EQU     $       ;{SHOW END OF DICTIONARY}
+INITDP   EQU     M4_INITDP ;{SHOW END OF DICTIONARY}
 });_END___1__({ _EQULAYOUT_1_})
 
 _COMMENT 

@@ -46,17 +46,17 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
            THIS IS A WARNING ONLY.
  THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
-( Commands aplicable to 32 bit mode )
+( Commands aplicable to 32 bit mode A0MAY25 )
   HEX
- : LC@ SWAP 10 * + 7C00 - C@ ;
- : LC! SWAP 10 * + 7C00 - C! ;
+ 0 CONSTANT CS_START
+ : LC@ SWAP 10 * + CS_START - C@ ;
+ : LC! SWAP 10 * + CS_START - C! ;
  : VV B800 0 ;   17 VARIABLE BLUE
 : VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 81 + LC! 2 +LOOP ;
  : HORIZONTAL-FRAME 82 1 DO BLUE @ VV A00 + I + LC! 2 +LOOP ;
  : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  DECIMAL
-
 
 
 
@@ -1710,8 +1710,8 @@ GET-S ROUTE EXITING  AT-END BLACK ;
 :  EDIT SCR ! E-S ;
 : E-R 3 MODE EDIT ;
 DECIMAL
- ( Finding the next word)
- : BL? VA L@ $FF AND BL = ;
+ ( Finding the next word A0MAY25 )
+ : BL? VA LC@ $FF AND BL = ;
 : BOUNDARY? BL? 0= OVER 1 - BL? AND ;
 : >SEARCH BEGIN 1 + DUP BOUNDARY? UNTIL  ;
 : <SEARCH BEGIN 1 - DUP BOUNDARY? UNTIL  ;
@@ -1790,18 +1790,18 @@ DECIMAL
 
 
 
-         9 1 DO I J ! 5 SPACES ( eerst wat spaties)
+         9 1 DO I J
 
-
-
-
-
-
-
-
-
-
-
+! 5 SPACES
+A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST
+  0 COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
+TASK  MSG # 4 : ISN'T UNIQUE  OK
+112 EDIT
+112 EDIT
+112 EDIT
+( eerst
+wat
+spaties)
 
 
 
@@ -4093,5 +4093,5 @@ DECIMAL  getit
 
 
 
-( Last line, preserve !! Must be line 4096) 
+( Last line, preserve !! Must be line 4096)
 
