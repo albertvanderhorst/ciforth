@@ -1898,7 +1898,7 @@ or at the end of the current input source if it isn't
 there. The character is consumed.
 _VERBOSE_({{As it goes with string constants, you may not alter
 its content, nor assume anything is appended.}})
-_VERBOSE_({So no leading delimiters are skipped.})}
+_VERBOSE_({So no leading delimiters are skipped.})
 _VERBOSE_({The difference with an ISO forthsamp({PARSE}) is that
 ISO considers control characters a match for a blank.})},
 {{WORD},{WORD}},
@@ -3800,7 +3800,7 @@ That is, when forthsamp({nnnn}) is executed, it does so by
 jumping to the code after forthsamp({nnnn}) .
 Because of intimate relation to the
 assembler, it is present in loadable form in the screens file
-forthfile({BLOCKS.BLK}) .},
+forthfile({forth.lab}) .},
 {{(;CODE)},{LOAD},{:}},
 {{." Not present"},{Not present} },
 enddoc)
@@ -4933,7 +4933,7 @@ immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.
 This word makes only sense in combination with the words that
 belong to it. So it is present in loadable form in the screens
-file forthfile({BLOCKS.BLK}) .},
+file forthfile({forth.lab}) .},
 {{VOCABULARY},{LOAD}},
 {{( No test) },{}},
 enddoc)
@@ -7193,12 +7193,12 @@ worddoc( {STORAGE},{BLOCK-FILE},{block_file},{---addr},{},
 the name of a file in which blocks are (to be) allocated.
 The name may contain a path and be at most}
 _FILENAMELENGHT_M4_ {characters long.
-The default name is forthsamp({BLOCKS.BLK}) .
+The default name is forthsamp({forth.lab}) .
 },{{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}},
-{{BLOCK-FILE $@ TYPE},{BLOCKS.BLK}},
+{{BLOCK-FILE $@ TYPE},{forth.lab}},
 enddoc)
 HEADER({BLOCK-FILE},{BLFL},{DOVAR}, )
-        _STRING({BLOCKS.BLK})
+        _STRING({forth.lab})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
 worddoc( {STORAGE},{BLOCK-HANDLE},{block_handle},{---n},{},
 {Leave a file handle in forthvar({n}) .
@@ -9132,7 +9132,7 @@ worddocchapter({STORAGE},{ },
 {The wordset forthsamp({STORAGE}) contains words to input and output
 to the mass storage, in this ciforth _BOOTSECTRK_({ to the disk, by sector and track, })
 _BOOTLBA_({to the hard disk}) _HOSTED_({to the file
-forthfile({BLOCKS.BLK}) , and to other files}).
+forthfile({forth.lab}) , and to other files}).
 They are underlying the forthsamp({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STRING},{ },

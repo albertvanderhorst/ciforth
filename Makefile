@@ -68,7 +68,7 @@ BINTARGETS= msdos alone
 # subsequently run
 LINUXFORTHS= ciforthc lina
 # Auxiliary targets. Because of GNU make bug, keep constant.m4.
-OTHERTARGETS= BLOCKS.BLK toblock fromblock constant.m4
+OTHERTARGETS= forth.lab toblock fromblock constant.m4
 # C-sources with various aims.
 CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= ciforth stealconstant
@@ -139,7 +139,7 @@ ci86.lina.texinfo \
 linarelease.txt  \
 ci86.lina.asm      \
 lina      \
-BLOCKS.BLK       \
+forth.lab       \
 $(CSRCAUX:%=%.c)    \
 wc            \
 # That's all folks!
@@ -212,11 +212,11 @@ boot: ci86.alone.bin
 # The Forth gets its information from the boot sector,
 # that is filled in with care.
 # The option BOOTSECTRK must be installed into alonetr.m4.
-trboot: ci86.alonetr.bin lina BLOCKS.BLK
+trboot: ci86.alonetr.bin lina forth.lab
 	rm fdimage
 	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
 	     \"fdimage\" PUT-FILE BYE | lina
-	cat BLOCKS.BLK >>fdimage
+	cat forth.lab >>fdimage
 	cp fdimage /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp fdimage /dev/fd0H1440
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
@@ -232,13 +232,13 @@ filler: ci86.alone.bin lina filler.frt
 	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
-moreboot: BLOCKS.BLK ci86.alone.bin  ci86.msdos.bin
-	mcopy BLOCKS.BLK a:
+moreboot: forth.lab ci86.alone.bin  ci86.msdos.bin
+	mcopy forth.lab a:
 	mcopy ci86.msdos.bin      a:msdos.com
 
 allboot: boot filler moreboot
 
-BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
+forth.lab : toblock blocks.frt ; toblock <blocks.frt >$@
 
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
@@ -252,7 +252,7 @@ figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 zip : $(RELEASECONTENT) ; echo ci86g$(VERSION) $+ | xargs zip
 
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
-# Compiling a simple c-program may be too much, so supply BLOCKS.BLK
+# Compiling a simple c-program may be too much, so supply forth.lab
 msdos.zip : $(RELEASECONTENT) mslinks ;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/ ci86\./ /g' |\

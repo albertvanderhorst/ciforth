@@ -31,10 +31,10 @@ testclean: ; rm $(TESTTARGETS)
     sed '/SI[MB]/d' |\
     sed '/OK/d' >p$(PREFIX).$@
 
-qr8080.ps  : lina BLOCKS.BLK ; make as80.ps ; mv p0.as80.ps $@
-qr8086.ps  : lina BLOCKS.BLK ; make asi86.ps ; mv p0.asi86.ps $@
-p0.asi586.ps  : lina BLOCKS.BLK  ; make asi586.ps PREFIX=0 MASK=FF
-p0F.asi586.ps : lina BLOCKS.BLK  ; make asi586.ps PREFIX=0F MASK=FFFF
+qr8080.ps  : lina forth.lab ; make as80.ps ; mv p0.as80.ps $@
+qr8086.ps  : lina forth.lab ; make asi86.ps ; mv p0.asi86.ps $@
+p0.asi586.ps  : lina forth.lab  ; make asi586.ps PREFIX=0 MASK=FF
+p0F.asi586.ps : lina forth.lab  ; make asi586.ps PREFIX=0F MASK=FFFF
 
 do : ci86.msdos.msm
 		diff -w ci86.msdos.msm orig/FORTH > masm.dif ||true
@@ -63,7 +63,7 @@ copy:
 		cp ci86.msdos2.msm  $(cd)/../test/msdos2.msm
 		cp ci86.msdos3.msm  $(cd)/../test/msdos3.msm
 		cp ci86.alone.msm  $(cd)/../test/alone.msm
-		cp BLOCKS.BLK       $(cd)/../test/BLOCKS.BLK
+		cp forth.lab       $(cd)/../test/forth.lab
 		cp genboot.bat      $(cd)/../test/genboot.bat
 
 cmp: ci86.msdos.bin ci86.alone.bin ciforth lina
@@ -240,7 +240,7 @@ TESTMSDOS= \
 test.m4 \
 ci86.msdos.rawtest
 
-testlina : $(TESTLINA) ci86.lina.rawtest lina BLOCKS.BLK ;
+testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab ;
 	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
@@ -250,7 +250,7 @@ testlina : $(TESTLINA) ci86.lina.rawtest lina BLOCKS.BLK ;
 	diff tsuite.out testresults
 #       rm $(TEMPFILE)
 
-testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc BLOCKS.BLK ;
+testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;
 	m4 $(TESTLINUX)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
