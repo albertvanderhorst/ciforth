@@ -66,6 +66,10 @@ _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
 
+define({_BLOCKSBYFILEWS_}, _no)
+_BLOCKSINFILE_({ define({_BLOCKSBYFILEWS_}, _yes)})
+_LINUX_C_({ define({_BLOCKSBYFILEWS_}, _no)})
+
 _PC_({define({_MSDOS_BYE_}, _yes)})
 _ABSOLUTELOAD_({define({_CLEANUP_BYE_}, _yes)})
 _HOSTED_DPMI_({define({_CLEANUP_BYE_}, _yes)})
