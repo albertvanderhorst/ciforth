@@ -27,7 +27,7 @@ define({_x},len({$1}))dnl
 ;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
-N_$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
+N_$2:     DB   80H+len({$1})
 ifelse(1,_x, , 
 {         DSS      }_quoted({substr({$1},0,eval(_x-1))})
 )dnl    
@@ -36,16 +36,16 @@ ifelse(1,2, ,
 {         DB       }_quoted({substr({$1},eval(_x-1),1)})+80H
 )dnl
          DC    N_$2
-         DC    0
+         DC    0{}ifelse(1,$4,+40H,)
          DC    _LINKOLD
 $2:      DC     $3
          undefine({_x})dnl
 define({_LINKOLD},{$2-3*CW})dnl
 })dnl
 define({HEADER_NULL},{
-N_$2:            DB      0C1H,80H
+N_$2:            DB      081H,80H
          DC    N_$2
-         DC    0
+         DC    40H
          DC    _LINKOLD
 $2:             DC      $3
 define({_LINKOLD},{$2-3*CW})dnl

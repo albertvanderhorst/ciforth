@@ -1,5 +1,5 @@
          9 1 DO I J ! 5 SPACES ( eerst wat spaties)
-                9 1 DO 9 J @ - I BORD @ EMIT SPACE LOOP CR
+                9 1 DO 9 J @1 - I BORD @ EMIT SPACE LOOP CR
 
 
 
@@ -136,7 +136,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( KRAKER )        10 LOAD
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
- ( ASSEMBLER 80x86 SAVE-BLOCKS)  120 LOAD   97 98 THRU
+ ( ASSEMBLER 80x86 SAVE-BLOCKS)  ;S 120 LOAD   97 98 THRU
  : \ 0 WORD ;  IMMEDIATE
  2 LIST    : TASK ;
  ( OLD:  NEW SYSTEM      23 LOAD   )

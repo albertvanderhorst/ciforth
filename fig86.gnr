@@ -97,7 +97,7 @@ _BITS32_({ RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
 _EQULAYOUT_({
 EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
 _HIGH_BUF_({
-BUF1    EQU     EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
+BUF1    EQU     EM-(KBBUF+2*M4_CELLWIDTH)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
 });_END_({ _HIGH_BUF_})
 _LOW_BUF_({
@@ -1130,7 +1130,7 @@ MAT1:  MOV     DI,CX   ;{GET ADDR}
         MOV     AL,[BX] ;{GET WORD LENGTH}
         MOV     DL,AL   ;{SAVE WORD LENGTH}
         XOR     AL,[DI]
-        AND     AL,3FH  ;{CHECK LENGTHS AND SMUDGE BIT.}
+        AND     AL,1FH  ;{CHECK LENGTHS.}
         JNZ     MAT5   ;{LENGTHS DIFFER}
 
 ;
@@ -2157,8 +2157,7 @@ worddoc({DICTIONARY},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return the
 flag field.},{{'},{>NFA}})
 HEADER({>FFA},{TFFA},{DOCOL})
-        DC      TNFA
-        DC      FETCH
+        DC      CELLP
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
@@ -2306,7 +2305,7 @@ worddoc({PARSING},{]},{righ_bracket},{},{L1},
 {Resume compilation, to the completion of a colon-definition.},
 {{[}})
 HEADER({]},{RBRAC},{DOCOL})
-        DC      LIT,0C0H
+        DC      LIT,040H
         DC      STATE
         DC      STORE
         DC      SEMIS
@@ -2365,7 +2364,7 @@ the machine code following forthvar({cccc}) .
 That is, when forthvar({nnnn}) is executed, it does so by jumping to the code
 after forthvar({nnnn}) . An existing defining word must exist in forthvar({cc}) prior to
 forthcode({;CODE}) .},{(;CODE)})
-; <CODE HAS BEEN MOVED TO BLOCKS.BLK> 
+;{ The word ;CODE has been moved to BLOCKS.BLK>} 
 ;
 worddoc({DEFINING},{<BUILDS},{builds},{},{C,L0},
 {Used within a colon-definition:
