@@ -4087,8 +4087,8 @@ DPM1:
 ;
 worddoc({OPERATOR},{MIN},{min},{n1 n2 --- min},{L0},
 {Leave the smaller of two numbers.},{{MAX}}, 
-{{ 204 420 MIN .},{204},
- { -204 -420 MIN .},{-420} },
+{{ 204 240 MIN .},{204},
+ { -204 -240 MIN .},{-240} },
 enddoc)
 HEADER({MIN},{MIN},{DOCOL})
         DC      TDUP
@@ -4100,8 +4100,8 @@ MIN1:   DC      DROP
 ;
 worddoc({OPERATOR},{MAX},{max},{n1 n2 --- max},{L0},
 {Leave the greater of two numbers.},{{MIN}}, 
-{{ 204 420 MAX .},{420},
- { -204 -420 MAX .},{-204} },
+{{ 204 240 MAX .},{240},
+ { -204 -240 MAX .},{-204} },
 enddoc)
 HEADER({MAX},{MAX},{DOCOL})
         DC      TDUP
@@ -4111,7 +4111,7 @@ HEADER({MAX},{MAX},{DOCOL})
 MAX1:   DC      DROP
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{},
+worddoc({MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{ISO},
 {A mixed magnitude math operation which leaves the double
 number forthvar({d}) : the signed product of two signed number
 forthvar({n1}) and forthvar({n2}) .}, 
@@ -4134,7 +4134,7 @@ HEADER({M*},{MSTAR},{DOCOL})
 DPM2:   
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{SM/REM},{m_slash},{d n1 --- n2 n3},{},
+worddoc({MULTIPLYING},{SM/REM},{m_slash},{d n1 --- n2 n3},{ISO},
 {A mixed magnitude math operator which leaves the signed
 remainder forthvar({n2}) and signed quotient forthvar({n3})
 from a double number dividend forthvar({d}) and divisor
@@ -4173,17 +4173,31 @@ PM3:
         DC      SWAP
         DC      SEMIS
 ;
-worddocsafe({OPERATOR},{*},{star},{n1 n2 --- prod},{L0},
+worddocsafe({OPERATOR},{*},{star},{n1 n2 --- prod},{ISO,FIG,L0},
 {Leave the signed product of two signed numbers.},
-{{+},{-},{/},{MOD}}, {}, enddoc)
+{{+},{-},{/},{MOD}}, 
+{
+  {DECIMAL 24 204 * .},{4896} },
+  {DECIMAL -24 204 * .},{-4896} }
+}, 
+enddoc)
 HEADER({*},{STAR},{DOCOL})
         DC      MSTAR
         DC      DROP
         DC      SEMIS
 ;
-worddoc({OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{L0},
-{Leave the remainder and signed quotient of forthvar({n1/n2}) . The remainder has
-the sign of the dividend.},{{*/MOD},{*/},{M/MOD}}, {}, enddoc)
+worddoc({OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{ISO,FIG,L0},
+{Leave the remainder and signed quotient of forthvar({n1/n2}) .
+The remainder has the sign of the dividend
+(forthdefi({symmetric division}). }, 
+{{*/MOD},{*/},{M/MOD}}, 
+{
+{  7  3 /MOD . . },{2   1},        
+{  7 -3 /MOD . . },{-2   1},       
+{ -7  3 /MOD . . },{-2  -1},      
+{ -7 -3 /MOD . . },{2  -1}       
+}, 
+enddoc)
 HEADER({/MOD},{SLMOD},{DOCOL})
         DC      TOR
         DC      STOD
@@ -4191,29 +4205,51 @@ HEADER({/MOD},{SLMOD},{DOCOL})
         DC      MSLAS
         DC      SEMIS
 ;
-worddoc({OPERATOR},{/},{slash},{n1 n2 --- quot},{L0},
-{Leave the signed quotient of forthvar({n1/n2}) .
-It the result is interpreted as logical value, it means forthvar({n1}) is not equal
-to forthvar({n2}) },
-{{+},{-},{*},{MOD},{*/MOD}}, {}, enddoc)
+worddoc({OPERATOR},{/},{slash},{n1 n2 --- quot},{ISO,FIG,L0},
+{Leave the signed quotient of forthvar({n1/n2})
+(forthdefi({symmetric division}). }, 
+{{+},{-},{*},{MOD},{*/MOD}}, 
+{
+{  7  3 / . },{2  },        
+{  7 -3 / . },{-2 },       
+{ -7  3 / . },{-2 },      
+{ -7 -3 / . },{2  }       
+}, 
+enddoc)
 HEADER({/},{SLASH},{DOCOL})
         DC      SLMOD
         DC      SWAP
         DC      DROP
         DC      SEMIS
 ;
-worddoc({OPERATOR},{MOD},{mod},{n1 n2 --- mod},{L0},
-{Leave the remainder of forthvar({n1/n2}) , with the same sign as forthvar({n1}) .},
-{{+},{-},{*},{/},MOD,{*/MOD}}, {}, enddoc)
+worddoc({OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG,L0},
+{Leave the remainder of forthvar({n1/n2}) , with the same sign
+as forthvar({n1}) (forthdefi({symmetric division}).}, 
+{{+},{-},{*},{/},MOD,{*/MOD}}, 
+{
+{  7  3 MOD . },{1},        
+{  7 -3 MOD . },{1},       
+{ -7  3 MOD . },{-1},      
+{ -7 -3 MOD . },{-1}       
+}, 
+enddoc)
 HEADER({MOD},{LMOD},{DOCOL})
         DC      SLMOD
         DC      DROP
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{L0},
-{Leave the quotient forthvar({n5}) and remainder forthvar({n4}) of the operation forthvar({n1*n2/n3}) A
-31 bit intermediate product is used as for forthcode({*/}) .},
-{{*/},{/MOD}}, {}, enddoc)
+worddoc({MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG,L0},
+{Leave the quotient forthvar({n5}) and remainder forthvar({n4})
+of the operation forthvar({n1*n2/n3}) A double precision  
+intermediate product is used as for forthcode({*/}) (forthdefi({symmetric division}).},
+{{*/},{/MOD}},                                           
+{                                                        
+{ 7 2 3   */MOD . . },{4  2 },                               
+{ 7 2 -3  */MOD . . },{-4 2 },                                                                            
+{ -7 2 3  */MOD . . },{-4 -2 },    
+{ -7 2 -3 */MOD . . },{4 -2 }
+}, 
+enddoc)
 HEADER({*/MOD},{SSMOD},{DOCOL})
         DC      TOR
         DC      MSTAR
@@ -4221,22 +4257,38 @@ HEADER({*/MOD},{SSMOD},{DOCOL})
         DC      MSLAS
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{L0},
-{Leave the ratio forthvar({n4 = n1*n2/n3}) where all are signed numbers.
-Retention of an intermediate 31 bit product permits greater accuracy
-than would. be available with the sequence:
+worddoc({MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{ISO,FIG,L0},
+{Leave the ratio forthvar({n4 = n1*n2/n3}) where all are signed
+numbers(forthdefi({symmetric division}). Retention of a double
+precision intermediate product permits greater accuracy than
+would be available with the sequence: 
       forthsamp({n1 n2 * n3 /})
-},{{*/MOD},{/MOD}}, {}, enddoc)
+},
+{{*/MOD},{/MOD}}, 
+{
+{ 7 2 3   */ . },{4 },                    
+{ 7 2 -3  */ . },{-4 },                                                                            
+{ -7 2 3  */ . },{-4 },    
+{ -7 2 -3 */ . },{4 },    
+}, enddoc)
 HEADER({*/},{SSLA},{DOCOL})
         DC      SSMOD
         DC      SWAP
         DC      DROP
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{},
-{An unsigned mixed magnitude math operation which leaves a double
-quotient forthvar({ud4}) and remainder forthvar({u3}) , from a double dividend forthvar({ud1}) and single
-divisor forthvar({u2}) .},{{/MOD},{SM/REM},{M*}}, {}, enddoc)
+worddoc({MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{CIF,FIG},
+{An unsigned mixed magnitude math operation which leaves a
+double quotient forthvar({ud4}) and remainder forthvar({u3}) ,
+from a double dividend forthvar({ud1}) and single divisor
+forthvar({u2}) .}, 
+{{UM/MOD},{SM/REM},{M*}}, 
+{
+{-1. -1 M/MOD D. .},{100000001 0},
+{ 8888812.34 100 M/MOD D. .},{8888812 34},
+{DECIMAL 12.34 100 M/MOD D. .},{12 34},
+}, 
+enddoc)
 HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      TOR
         DC      ZERO
@@ -4250,9 +4302,10 @@ HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe({SCREEN},{(LINE)},{paren_line},{n1 n2 --- addr count},{},
-{Convert the line number forthcode({n1}) and the screen forthvar({n2}) to the disc buffer
-address containing the data. A count of 64 indicates the full line
-text length.},{{-LINE}}, {}, enddoc)
+{Convert the line number forthcode({n1}) and the screen
+forthvar({n2}) to the disc buffer address containing the data.
+A count of 64 indicates the full line text length.},{{-LINE}}, 
+{}, enddoc)
 HEADER({(LINE)},{PLINE},{DOCOL})
         DC      TOR
         DC      LIT,64
