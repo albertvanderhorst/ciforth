@@ -690,7 +690,7 @@ _COMMENT
                     across FORTH words.
 
      W      BX      Working register.  When entering a word
-                    via its code field the CFA is passed in BX.
+                    via its code field the CFAO is passed in BX.
 
     SP      SP      Parameter stack pointer.  Must be preserved
                     across FORTH words.
@@ -735,7 +735,7 @@ _COMMENT
   NAME        =  Address of name
   (NAME)      =  Contents of name
 
-  CFA         =  CODE FIELD: a pointer
+  CFAO         =  CODE FIELD: a pointer
   LFA         =  LINK FIELD: a pointer
   NFA         =  NAME FIELD: a variable number of chars
   PFA         =  PARAMETER FIELD: a variable nuber of au
@@ -889,7 +889,7 @@ worddoc({MISC},{EXECUTE},{execute},{addr -},{},
 is given by forthvar({addr}) .
 _VERBOSE_({The DEA serves as an execution token.})
 },{{'},{CFA}},
-{{ ' BL EXECUTE .},{32}})
+{{ 'O BL EXECUTE .},{32}})
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
@@ -2159,28 +2159,37 @@ HEADER({LATEST},{LATES},{DOCOL})
 worddoc({DICTIONARY},{CFA},{cfa},{pfa --- cfa},{},
 {Given a dictionary entry addres return the code field address
 field address.
-_VERBOSE_({In fact we want to get rid of the CFA altogether,
-so there is no point in changing CFA to >CFA }) },
+_VERBOSE_({In fact we want to get rid of the CFAO altogether, }) },
 {{'},{PFA}})
 HEADER({CFA},{CFA},{DOCOL})
         DC      LCELL
         DC      LSUB
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{NFA},{name_field_address},{pfa --- nfa},{},
-{Convert the parameter field address of a definition to its name
+worddoc({DICTIONARY},{CFAO},{cfa},{deao --- cfa},{},
+{Given an old dictionary entry addres (pfa) return the code field address
+field address.
+_VERBOSE_({In fact we want to get rid of the CFAO altogether, }) },
+{{'},{PFA}})
+HEADER({CFAO},{CFAO},{DOCOL})
+        DC      LCELL
+        DC      LSUB
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{NFAO},{name_field_address},{pfa --- nfa},{},
+{Convert the parameter field address (deaold) of a definition to its name
 field.},{{'},{PFA}})
-HEADER({NFA},{NFA},{DOCOL})
+HEADER({NFAO},{NFAO},{DOCOL})
         DC      LIT,1+CELLS(2)
         DC      LSUB
         DC      LIT,-1
         DC      TRAV
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{PFA},{parameter_field_address},{nfa --- pfa},{},
+worddoc({DICTIONARY},{P>N},{parameter_field_address},{nfa --- pfa},{},
 {Convert the name field address of a compiled definition to its
 parameter field address.},{{'},{CFA},{LFA},{NFA}})
-HEADER({PFA},{PFA},{DOCOL})
+HEADER({P>N},{PTON},{DOCOL})
         DC      ONE
         DC      TRAV
         DC      LIT,1+CELLS(2)
@@ -2422,7 +2431,7 @@ multidimensional arrays, and compiler generation.},{})
 HEADER({DOES>},{DOES},{DOCOL})
         DC      FROMR
         DC      LATES
-        DC      PFA
+        DC      TPFA
         DC      STORE
         DC      PSCOD
 DODOE:  LEA     BP,[BP-CELLS(1)]
@@ -2762,7 +2771,7 @@ worddocsafe({INIT},{(ABORT)},{paren_abort},{},{},
 {Executes after an error when forthcode({WARNING}) is -1. This word normally
 executes forthcode({ABORT}), but may be altered (with care) to a user's
 alternative proceedure forthvar({AP}) as follows:
-forthsamp({ ' AP ' (ABORT) >PFA !}).
+forthsamp({ 'O AP 'O (ABORT) >PFA !}).
 },{})
 HEADER({(ABORT)},{PABOR},{DOCOL})
         DC      ABORT
@@ -4841,6 +4850,25 @@ HEADER({'},{TICK},{DOCOL},1)
         DC      LITER
         DC      SEMIS
 ;
+worddocsafe({DICTIONARY},{'O},{tick},{--- addr},{P,L0},
+{Used in the form: .
+forthcode({'O}) forthcode({nnnn})
+Leaves the parameter field address, dea old style,
+of dictionary word forthvar({nnnn}).
+As a compiler directive, executes in a colon-definition to compile
+the address as a literal. If the word is not found after a search of
+forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
+{{CFA},{>LFA},{NFA},{PFA}} )
+HEADER({'O},{TICKO},{DOCOL},1)
+        DC      DFIND
+        DC      ZEQU
+        DC      ZERO
+        DC      QERR
+        DC      DROP
+        DC      TPFA
+        DC      LITER
+        DC      SEMIS
+;
 worddoc({DICTIONARY},{FORGET-VOC},{forget_voc},{n1 addr -- n1 },{},
 {Forget all words below forthvar({n1}) from the vocabulary
 whose VLFA is given by forthvar({addr}) . Leave n1 as this word is
@@ -4898,7 +4926,6 @@ HEADER({FORGET},{FORG},{DOCOL})
         DC      LIT,15H
         DC      QERR
         DC      LDUP
-        DC      NFA
         DC      LIT,FORGV
         DC      FORV
         DC      DROP

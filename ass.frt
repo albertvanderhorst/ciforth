@@ -71,7 +71,7 @@ SUBSI, IL6, CMPSI,
 								
 ( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND) 
 HEX VOCABULARY ASSEMBLER IMMEDIATE                              
-' ASSEMBLER CFA ' ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS ) 
+ 'O ASSEMBLER CFAO 'O ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS ) 
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE        
 : C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE          
 : NEXT                                                          

@@ -101,11 +101,11 @@
 ( ------------- UTILITIES, SYSTEM DEPENDANT ----------------------------) 
 VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
-: % [COMPILE] ' NFA ;   ( Return the DEA from "word". )
+: % [COMPILE] 'O NFAO ;   ( Return the DEA from "word". )
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
-: %>BODY PFA CELL+ ; ( From DEA to the DATA field of a created word )
-: %BODY> 0 CELL+ - NFA ; ( Reverse of above)
-: %>CODE PFA CFA CELL+ ; ( From DEA to the DOES> pointer )
+: %>BODY P>N CELL+ ; ( From DEA to the DATA field of a created word )
+: %BODY> 0 CELL+ - NFAO ; ( Reverse of above)
+: %>CODE P>N CFAO CELL+ ; ( From DEA to the DOES> pointer )
 ( Leave for DEA : it IS to be ignored. This is used for supressing the  )
 ( bare bones of the sib mechanism in i586.                              )
 : IGNORE? 1+ C@ &~ = ;
@@ -116,7 +116,7 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( As (>NEXT%} but skip holes, i.e. words with names starting in ``-''   )
 : >NEXT% BEGIN  (>NEXT%) DUP 1+ C@ &- - UNTIL ;
 ( Leave the first DEA of the assembler vocabulary.                      )
-: STARTVOC ' ASSEMBLER 2 +  CELL+ @ ;
+: STARTVOC 'O ASSEMBLER 2 +  CELL+ @ ;
 
 ( Build: for "word" remember type -- creation class -- exemplified by   )
 ( DOES> address of the code to be executed.                             )
@@ -279,7 +279,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 : .DISS-AUX DISS @+ SWAP DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
-' .DISS-AUX CFA   VARIABLE 'DISS  ( Can be redefined to generate testsets)
+ 'O .DISS-AUX CFAO   VARIABLE 'DISS  ( Can be redefined to generate testsets)
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
 : DISS- 0 CELL+ MINUS DISS +! ; ( Discard last item of `DISS' )
@@ -516,12 +516,12 @@ HERE POINTER !
     BEGIN (DISASSEMBLE) CR POINTER @ OVER < 0= UNTIL
     DROP
 ;
-(   : M| ' xxx  REJECT M| ;  To forbid M| xxx  in combination      )
+(   : M| 'O xxx  REJECT M| ;  To forbid M| xxx  in combination      )
 ( xxx must be PI or FI not FIR )
-: REJECT> NFA DUP >BI ISS @ @ AND SWAP >DATA @ = 27 ?ERROR ;
+: REJECT> NFAO DUP >BI ISS @ @ AND SWAP >DATA @ = 27 ?ERROR ;
 
 ( ************************* )
-' ASSEMBLER CFA ' ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
+ 'O ASSEMBLER CFAO 'O ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
 : C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER

@@ -113,13 +113,13 @@ CR ." EXPECT 0 : " S" AAPAA" CHAR C $I .
 \ worddoc( {VECTORS},{VECTOR},{},{---},{},
 \ { A define word that can be used to create an execution vector
 \ forthvar({V}) . forthvar({V}) initially does nothing. After
-\ forthsample({VECTOR V ' W CFA ' V !}) forthvar({V}) has the execution
+\ forthsample({VECTOR V 'O W CFAO 'O V !}) forthvar({V}) has the execution
 \ behaviour of forthvar({W}) . },
 \ {{}})
 : VECTOR [COMPILE] : COMPILE NOOP [COMPILE] ; ;
 
 5 ?TEST
-VECTOR Q    : JAN 1 2 3 ;   ' JAN CFA    ' Q   ! 
+VECTOR Q    : JAN 1 2 3 ;   'O JAN CFAO    'O Q   ! 
 CR ." EXPECT 3 2 1 :"  Q . . . 
 FORGET Q 
 

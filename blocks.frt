@@ -163,9 +163,9 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : T,  ( N--. Put N in select table)
      SELTOP @ !  0 CELL+ SELTOP +!  ;
  : CFOF ( --N Get cfa of word following )
-    [COMPILE] ' CFA ;
+    [COMPILE] 'O CFAO ;
  : C->P CELL+ ; ( N--N Converteer cfa naar pfa )
- : ID.. C->P NFA ID. ; ( cfa--. Print a words name )
+ : ID.. C->P NFAO ID. ; ( cfa--. Print a words name )
  : ID.+ DUP @ ID.. CELL+ ; ( dip -- dip' Print a words name )
  : SEL@    ( N--M,F F="value N present in table" )
     ( if F then M is vector address else M=N)
@@ -176,10 +176,10 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : <> - 0= 0= ;   33 LOAD -->
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
    HERE VARIABLE LIM  : H.. BASE @ >R HEX . R> BASE ! ;
- : (KRAAK) ( CFA--. Decompile a word from its CFA )
+ : (KRAAK) ( CFA--. Decompile a word from its CFAO )
     DUP NEXTN LIM ! ( Get an absolute limit)
-    DUP @ SEL@ IF ( Is content of CFA known?)
-       EXECUTE ( Assuming CFA also on stack)
+    DUP @ SEL@ IF ( Is content of CFAO known?)
+       EXECUTE ( Assuming CFAO also on stack)
     ELSE
        CR DROP DUP DUP @ 0 CELL+ - = IF
            ." Code definition : " ELSE ." Can't handle : "
@@ -188,10 +188,10 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
-      C->P NFA C@ $40 AND ;
+      C->P NFAO C@ $40 AND ;
  : ?Q ?TERMINAL IF QUIT THEN ; ( NOODREM) -->
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
- : BY ( CFA--. the CFA word is decompiled using : )
+ : BY ( CFA--. the CFAO word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
  ( Example of a defining word decompilation)
  ( It is done by examples of the defined words )
@@ -236,7 +236,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
   : -cm ID.+ ID.+ ;            CFOF COMPILE BY -cm
   ( DIRTY TRICK FOLLOWING :)
   : -pc CR ." ;CODE plus code (suppressed)"
-    DROP ' TASK ; ( Destroy deecompile pointer !)
+    DROP 'O TASK ; ( Destroy deecompile pointer !)
       CFOF (;CODE) BY -pc
  ( DISK IO SCREEN 15 SCHRIJVEN >1< VERSIE #1)
  <HEX  0 VARIABLE FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
@@ -370,7 +370,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  <HEX
  : NEW-SYSTEM   ( Generates a new FORTH system, )
                 ( using the CP/M SAVE command)
-      LATEST PFA NFA 10C ! ( Define new topmost word)
+      LATEST P>N NFAO 10C ! ( Define new topmost word)
       ( Initial value for VOC-LINK and FENCE:)
       HERE DUP 11C ! 11E !
       HERE 100 / DECIMAL CR
@@ -527,8 +527,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
 
  CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
- : NEXTN ( CFA--NFA Get the NFA of the word defined)
-   C->P NFA LATEST             ( after the CFA one)
+ : NEXTN ( CFA--NFA Get the NFAO of the word defined)
+   C->P NFAO LATEST             ( after the CFAO one)
    2DUP = IF
      DROP DROP HERE  ( No following word)
    ELSE
@@ -540,7 +540,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
    ENDIF
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTN PFA CFA ;
+   NEXTN P>N CFAO ;
 
  CR ." KRAAKER"
  : KRAAK-FROM ( .--. Kraak, starting with following word)
@@ -554,10 +554,10 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  0 VARIABLE aux
  : PEMIT $7F AND 5 BDOS DROP ;
  : TO-LP-KRAAK-FROM
-   ' EMIT @ aux !
-   ' PEMIT CFA ' EMIT !
+   'O EMIT @ aux !
+   'O PEMIT CFAO 'O EMIT !
    KRAAK-FROM
-   aux @ ' EMIT ! ;
+   aux @ 'O EMIT ! ;
 ( Elementary string: $@ $! $+! $C+     A0apr03-AH)
 ( All this should probably be low level )
  : $@ COUNT ;
@@ -744,9 +744,9 @@ CODE NEW-DOCOL
   MOV, W| F| SI'| DB| [BP] 0 B,
   LEA, SI'| DB| [DI] 2 B,
  NEXT C; DECIMAL
- : A0 ; ' A0 2 - @ CONSTANT 'DOCOL
-CODE X JMP,  ' NEW-DOCOL 'DOCOL 3 + - , C;
- CODE SWITCH  ' X 'DOCOL  CP, CP, CP, DROP DROP
+ : A0 ; 'O A0 2 - @ CONSTANT 'DOCOL
+CODE X JMP,  'O NEW-DOCOL 'DOCOL 3 + - , C;
+ CODE SWITCH  'O X 'DOCOL  CP, CP, CP, DROP DROP
 CLI,  ( TO-PROT, MOVXI, AX| DATA-SEGMENT MEM,
  MOVSW, T| DS| R| AX|  MOVSW, T| ES| R| AX|  MOVSW, T|
 SS| R| AX| ) NEXT C;  DECIMAL
@@ -763,7 +763,7 @@ POPX, BP|  POPX, AX|  XCHGX, SI|  ( RESTORE FORTH REGISTERS)
 PUSHX, AX|    PUSHX, BX|    PUSHX, CX|    PUSHX, DX|  PUSHX, DI|
  NEXT C;
 CODE HLT HLT, C;
-: PATCH-BIOS ' NEW-BIOS ' BIOS CFA ! ;
+: PATCH-BIOS 'O NEW-BIOS 'O BIOS CFAO ! ;
 : PATCH PATCH-BIOS SWITCH ;
 KRAAKER
  : A0 ;
@@ -840,7 +840,7 @@ SET FILES
 IF FILES SET+! ELSE DROP THEN ;
 : ?HTML-SET META-HTML ?IN-SET ;
 ( CREATE NAME-BUFFER 256 ALLOT  )
-: PAR-TO-DATA CELL+ ; ( GO FROM PFA TO WHERE DOES> IS)
+: PAR-TO-DATA CELL+ ; ( GO FROM P>N TO WHERE DOES> IS)
 : NAME-TO-SET ( SS -- 0/SET)
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
@@ -1184,14 +1184,14 @@ until run-time, when the system crashes mysteriously.
 
 CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
-' ASSEMBLER CFA ' ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS )
+ 'O ASSEMBLER CFAO 'O ;CODE 8 + !  ( PATCH ;CODE IN NUCLEUS )
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
 : C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
 4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
 2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
-6 CONSTANT M    6 CONSTANT SP     ' ;S 0B + @ CONSTANT (NEXT)
+6 CONSTANT M    6 CONSTANT SP     'O ;S 0B + @ CONSTANT (NEXT)
 : 1MI <BUILDS C, DOES> C@ C, ;  : 2MI <BUILDS C, DOES> C@ + C, ;
  : 3MI <BUILDS C, DOES> C@ SWAP 8* +  C, ;
 : 4MI <BUILDS C, DOES> C@ C, C, ;
@@ -1936,7 +1936,7 @@ FORTH DEFINITIONS
 
 ( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
 VOCABULARY ASSEMBLER IMMEDIATE
-' ASSEMBLER CFA ' ;CODE 4 CELLS + !    ( PATCH ;CODE IN NUCLEUS)
+ 'O ASSEMBLER CFAO 'O ;CODE 4 CELLS + ! ( PATCH IN NUCLEUS)
  0 VARIABLE ISS ( Instruction start )
 : X, , ;    ( Cell size du jour)
 : MEM, X, ;
@@ -2162,7 +2162,7 @@ DECIMAL
  <HEX
  : NEW-SYSTEM   ( Generates a new FORTH system, )
                 ( using the CP/M SAVE command)
-      LATEST PFA NFA 10C ! ( Define new topmost word)
+      LATEST P>N NFAO 10C ! ( Define new topmost word)
       ( Initial value for VOC-LINK and FENCE:)
       HERE DUP 11C ! 11E !
       HERE 100 / DECIMAL CR
@@ -2319,8 +2319,8 @@ DECIMAL
 
 
  CR ." KRAAKER"
- : NEXTN ( CFA--NFA Get the NFA of the word defined)
-   C->P NFA LATEST             ( after the CFA one)
+ : NEXTN ( CFA--NFA Get the NFAO of the word defined)
+   C->P NFAO LATEST             ( after the CFAO one)
    2DUP = IF
      DROP DROP HERE  ( No following word)
    ELSE
@@ -2332,7 +2332,7 @@ DECIMAL
    ENDIF
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTN PFA CFA ;
+   NEXTN P>N CFAO ;
 
 ( SAVE-SYSTEM )  HEX
  8049000 CONSTANT SM 
@@ -2393,7 +2393,7 @@ DECIMAL
  : CN   ( defines a characterization )
          0 VARIABLE ; ( later misschien net vocabje)
   CN AMBIGUOUS  CN BLOCKED  CN UNKNOWN
- : ID..   NFA ID. ;
+ : ID..   NFAO ID. ;
  : .CHAR  DUP MAP[] [char] @ ( N-- Print char'n)
    DUP IF
      DUP ID.. @ AMB = IF ." #" . ELSE DROP THEN
@@ -2433,14 +2433,14 @@ DECIMAL
 CR  ." #40 FROBOZZ AMATEUR ADVENTURER >5< 84/6/27"
  : HERE: ( Defining word:makes a name for the current place)
    CURPOS @ MAP[] [char] @ 0= IF
-      0 VARIABLE LATEST PFA CURPOS @ C-CONNECT
+      0 VARIABLE LATEST P>N CURPOS @ C-CONNECT
       FILL-IN ( The last position connection)
    ELSE
       CR ." This place already been characterized" QUIT
    THEN ;
  : TEXT ." N  NE E  SE S  SW W  NW U  D  " ;
- : .DIR 1+ 3 * ' TEXT + 3 TYPE ;
- : SEND-DIR 1+ 3 * ' TEXT + 3 PTYPE ;
+ : .DIR 1+ 3 * 'O TEXT + 3 TYPE ;
+ : SEND-DIR 1+ 3 * 'O TEXT + 3 PTYPE ;
  : EXIT?  ( Print current exits)
    CURPOS @ MAP[] 10 0 DO
      DUP I [dir] C@
@@ -2495,7 +2495,7 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
      -->
 
  CR  ." #44 FROBOZZ AMATEUR ADVENTURER >9< 84/5/27"
- : MYSELF LATEST PFA CFA , ; IMMEDIATE
+ : MYSELF LATEST P>N CFAO , ; IMMEDIATE
  : (IDENT)  ( n1 n1 -- Identify locations n1 and n2)
    ?SWAP 2DUP REPLACE SWAP ( Destination location on top)
    10 0 DO ( For all directions do)
@@ -2543,9 +2543,9 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  : bl BLOCKED! ; : ex EXIT? ; : wh WHERE? ; -->
 
  CR  ." #47 FROBOZZ AMATEUR ADVENTURER >11< 84/6/12 "
- : SEND-NAME  NFA COUNT 127 AND PTYPE ;
+ : SEND-NAME  NFAO COUNT 127 AND PTYPE ;
  : DROP! DUP @ IF DUP KILL! THEN
-     DUP CURPOS @ C-CONNECT   ' DROP SEND-NAME 32 PEMIT
+     DUP CURPOS @ C-CONNECT   'O DROP SEND-NAME 32 PEMIT
      SEND-NAME ECR WAIT ;
  : MARK-AUX ( N-- Marks the exits from N)
    MAP[] DUP [dist] C@ 1+ ( Get the marking on top)
@@ -2606,7 +2606,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
   : L-U-U  ( --M Lists incorrect,find length to first UNKNOWN)
      INIT-AUX   0 UNK M-D  UNK (M-U-F) ;
         -->
-   C->P NFA LATEST             ( after the CFA one)
+   C->P NFAO LATEST             ( after the CFAO one)
    2DUP = IF
               ( from place #K to #J in direction D)
               ( Leaves -1 if nothing found)
@@ -2760,7 +2760,7 @@ SET FILES
 IF FILES SET+! ELSE DROP THEN ;
 : ?HTML-SET META-HTML ?IN-SET ;
 ( CREATE NAME-BUFFER 256 ALLOT  )
-: PAR-TO-DATA CELL+ ; ( GO FROM PFA TO WHERE DOES> IS)
+: PAR-TO-DATA CELL+ ; ( GO FROM P>N TO WHERE DOES> IS)
 : IS-SET-NAME ( SS -- 1)
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
@@ -2884,9 +2884,9 @@ MEISJES JOPIE     NO-SEX .rel
   with that definition. )
 : FORWARD <BUILDS 0 , DOES> @ DUP 0= 9 ?ERROR
    R> 1 CELLS - DUP >R  ! ;
-( : DOIT HERE IN @ COMPILE ' ! IN ! COMPILE : ;   )
+( : DOIT HERE IN @ COMPILE 'O ! IN ! COMPILE : ;   )
 : :R  IN @ >R [COMPILE] : R> IN !
-HERE CFA -FIND SWAP DROP IF CELL+ ! THEN ; IMMEDIATE
+HERE CFAO -FIND SWAP DROP IF CELL+ ! THEN ; IMMEDIATE
 FORWARD FAC
 :R FAC   DUP 0= IF DROP 1 ELSE DUP 1 - FAC * THEN ;
 ^ 4 FAC ^ ." 4! IS " .
@@ -3119,14 +3119,14 @@ R> DROP R> DROP ;
   THEN ;
 
 ( WORDS and VOCS )
-: WORDS ' ID. CFA FOR-WORDS ;
+: WORDS 'O ID. CFAO FOR-WORDS ;
 
-: .VOC 2 CELLS - 2 - NFA ID. ;
-: VOCS ' .VOC CFA FOR-VOCS ;
+: .VOC 2 CELLS - 2 - NFAO ID. ;
+: VOCS 'O .VOC CFAO FOR-VOCS ;
 
 (   Up til LIMIT forget in all vocabularies.        )
-: FORGET [COMPILE] ' NFA DUP H.
-    ' FORGET-VOC CFA FOR-VOCS DROP ;
+: FORGET [COMPILE] 'O NFAO DUP H.
+    'O FORGET-VOC CFAO FOR-VOCS DROP ;
 
 
 
@@ -3151,10 +3151,10 @@ DEFINITIONS
 
 
 AAP
-' PIET   VOC-LINK @  FORGET-VOC
-' TASK VOC-LINK @  FORGET-VOC
+ 'O PIET   VOC-LINK @  FORGET-VOC
+ 'O TASK VOC-LINK @  FORGET-VOC
 
-' .VOC CFA FOR-VOCS
+ 'O .VOC CFAO FOR-VOCS
 FORTH
 
 

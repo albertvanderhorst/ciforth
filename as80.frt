@@ -3,11 +3,11 @@
 ( ############## 8080 ASSEMBLER PROPER ################################ )
 ASSEMBLER DEFINITIONS
 ( Note the decompiler hits them in the reverse order                    )
-( ' CNT      BA BY DATA                                                )
-  0 1        0 100 ' C, CFA   COMMAER IB, ( immediate byte data)
-  0 0 CELL+  0 200 ' ,  CFA   COMMAER IX, ( immediate data : cell)
-  0 0 CELL+  0 400 ' ,  CFA   COMMAER X,  ( immediate data : address)
-  0 1        0 800 ' C, CFA   COMMAER P,  ( port number ; byte     )
+( 'O CNT      BA BY DATA                                                )
+  0 1        0 100 'O C, CFAO   COMMAER IB, ( immediate byte data)
+  0 0 CELL+  0 200 'O ,  CFAO   COMMAER IX, ( immediate data : cell)
+  0 0 CELL+  0 400 'O ,  CFAO   COMMAER X,  ( immediate data : address)
+  0 1        0 800 'O C, CFAO   COMMAER P,  ( port number ; byte     )
 
 00 00 00 T!
  08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
@@ -46,7 +46,7 @@ ASSEMBLER DEFINITIONS
 00 0400 138 T! 02 C2 2 1FAMILY, JC, CC, ( ZR| Y| T, )
 00 00 00 00 1PI NOP       00 00 00 C9 1PI RET       00 00 00 76 1PI HLT
 ( ############## 8080 ASSEMBLER PROPER END ############################ )
-' ;S 0B + @ CONSTANT (NEXT)
+ 'O ;S 0B + @ CONSTANT (NEXT)
 : NEXT JMP (NEXT) X, ;
 : PSH1 JMP (NEXT) 1 - X, ;
 : PSH2 JMP (NEXT) 2 - X, ;
@@ -59,6 +59,6 @@ ASSEMBLER DEFINITIONS
 
     ." COMES JAN"                                                          
         CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                          
-(       ' JAN HERE DIS-RANGE                                            )
-(   ' JAN CFA @ D-F-A DDD DDD DDD                                       )
+(       'O JAN HERE DIS-RANGE                                            )
+(   'O JAN CFAO @ D-F-A DDD DDD DDD                                       )
 
