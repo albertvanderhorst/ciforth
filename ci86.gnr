@@ -1154,37 +1154,39 @@ HEADER({RECURSE}, {RECURSE}, {DOCOL}, ,{B_IMMED})
         DC      SEMIS
 ;
 });_END_({_LOAD_})
+worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2,L0},
+{The run-time proceedure to unconditionally branch. An in-line
+offset is added to the interpretive pointer forthcode({IP}) to
+branch ahead or back. forthcode({BRANCH}) is compiled by
+forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT})
+.},
+{{0BRANCH}},
+{{ : GS1 1 BRANCH [ 0 CELL+ , ] BL BL ; GS1 . . },
+{20 1}},
+enddoc)
+HEADER({BRANCH},{BRAN}, {_VAR_FIELD(SKIP)})
+;
 worddoc( {CONTROL},{SKIP},{skip},{},{C2,L0},
 {Skip over an area in memory, where the length is given in the next cell.
+This length doesn't include the length cell, so it is compatible with
+forthcode({$@}) .
 _VERBOSE_({Internal, used for nested compilation. })},
 {{BRANCH}},
 {{ : GS1 1 SKIP [ 0 CELL+ , ] BL BL ; GS1 . .},
 {20 1}},
 enddoc)
 CODE_HEADER({SKIP},{SKIP})
-        ADD     SI,[SI]
+BRAN1:  ADD     SI,[SI]
         LEA     SI,[SI+_CELLS(1)]
         _NEXT
-;
-worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2,L0},
-{The run-time proceedure to unconditionally branch. An in-line offset
-is added to the interpretive pointer forthcode({IP}) to branch ahead or back.
-forthcode({BRANCH}) is compiled by forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT}) .},
-{{0BRANCH}},
-{{ : GS1 1 BRANCH [ 0 CELL+ CELL+ , ] BL BL ; GS1 . .},
-{20 1}},
-enddoc)
-CODE_HEADER({BRANCH},{BRAN})
-BRAN1:  ADD     SI,[SI]
-        _NEXT    ;{ JUMP TO OFFSET}
 ;
 worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C2},
 {The run-time proceedure to conditionally branch. If forthvar({f}) is false
 (zero), the following in-line parameter is added to the interpretive
 pointer to branch ahead or back. Compiled by forthcode({IF}) , forthcode({UNTIL}) , and forthcode({WHILE}) .
 },{{BRANCH}},
-{{ : GS1 1 0 0BRANCH [ 0 CELL+ CELL+ , ] BL BL ; GS1 . .}, {20 1},
-{ : GS2 1 1 0BRANCH [ 0 CELL+ CELL+ , ] BL BL ; GS2 . .}, {20 20}},
+{{ : GS1 1 0 0BRANCH [ 0 CELL+ , ] BL BL ; GS1 . .}, {20 1},
+{ : GS2 1 1 0BRANCH [ 0 CELL+ , ] BL BL ; GS2 . .}, {20 20}},
 enddoc)
 CODE_HEADER({0BRANCH},{ZBRAN})
         POP     AX      ;{ GET STACK VALUE}
@@ -1228,7 +1230,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
         MOV     BX,_CELL_PTR[SI]
-        LEA     BX,[SI+BX] ;{Make absolute}
+        LEA     BX,[SI+BX+_CELLS(1)] ;{Make absolute}
         LEA     SI,[SI+_CELLS(1)]
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     AX      ;{ LIMIT VALUE}
@@ -1246,7 +1248,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
         MOV     BX,_CELL_PTR[SI]  ; {Get inline relative target.}
-        LEA     BX,[SI+BX] ;{Make absolute}
+        LEA     BX,[SI+BX+_CELLS(1)] ;{Make absolute}
         LEA     SI,[SI+_CELLS(1)]
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     AX      ;{ LIMIT VALUE}
@@ -7244,6 +7246,7 @@ POSTPONE BRANCH BACK) }) })},
 enddoc)
 HEADER({BACK)},{BACKP},{DOCOL})
         DC      HERE
+        DC      CELLP
         DC      LSUB
         DC      COMMA
         DC      SEMIS
@@ -7276,6 +7279,7 @@ enddoc)
 HEADER({FORWARD)},{FORWARDP},{DOCOL})
         DC      HERE
         DC      OVER
+        DC      CELLP
         DC      LSUB
         DC      SWAP
         DC      STORE

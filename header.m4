@@ -64,19 +64,19 @@ define({_VAR_FIELD},{($1+_CELLS(PH_OFFSET-C_HOFFSET))})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
-        DC      $1-$})dnl
+        DC      $1-$-CW})dnl
 define({_BRANCH},dnl
 {DC      BRAN
-        DC      $1-$})dnl
+        DC      $1-$-CW})dnl
 define({_DO},dnl
 {DC     XDO
-        DC      $1-$})dnl
+        DC      $1-$-CW})dnl
 define({_QDO},dnl
 {DC     XQDO
-        DC      $1-$})dnl
+        DC      $1-$-CW})dnl
 define({_LOOP},dnl
 {DC     XLOOP
-        DC      $1-$})dnl
+        DC      $1-$-CW})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
 {HEADER({$1},
