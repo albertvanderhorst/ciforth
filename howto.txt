@@ -56,17 +56,17 @@ How to create a distribution :
    rm VERSION
 
    Release generic version, official
-   make zip VERSION=4v0
-   Result in ci86g4v0.zip
+   make zip VERSION=4.0
+   Result in ciforth-4.0.tar.gz (not yet)
 
    Release generic version, beta
    make zip VERSION=3d286
-   Result in ci86g3d286.zip
+   Result in ciforth-3d286.tar.gz (not yet)
 
    Release Linux version, official
-   make lina.zip VERSION=4v0
-   Result in lina4v0.zip
+   make lina.zip VERSION=4.0
+   Result in lina-4.0.tar.gz
 
    Release Linux version, beta
    make lina.zip VERSION=3d286
-   Result in lina3d286.zip
+   Result in lina-3d286.tar.gz
