@@ -238,19 +238,6 @@ BOOT:
         JZ  ELSE3
         JMP ENDBOOT     ; {Skip booting if started from MSDOS}
 ELSE3:
-        ; {WE WANT TO GET RID OF THIS HERE. WHY NOT LOAD DIRECTLY TO}
-        ; {BOOTADDRESS+BPS?) BUT THEN READING FAILS. It says}
-        ; {DF04000020 0005 ad infinitum}.
-        ;{ Adjust code segment address without leaving the ball}
-        ;{ Generating machine code is actually simpler than}
-        ;{ beating the assembler. After 10 attempts I gave up}
-        ;{ This is a simple straightforward intersegment jump}
-;{       JMP FAR BOOTADDRESS+ELSE1}
-         DB      0EAH
-         DW      ELSE1
-         DW     REALSEGMENT
-ELSE1:
-;{MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE}
         MOV     AL,'F'
         CALL    DISPLAY
         CLI                     ;{ Disallow interrups until stack ready}
@@ -268,9 +255,11 @@ ELSE1:
         ;{ The first file copied to a freshly formatted floppy will}
         ;{ be at SECSTRT (See also genboot.bat)}
         MOV     CX,SECSTRT      ; {Counting from zero}
+        MOV     AX,REALSEGMENT  
+        MOV     ES,AX
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
-        INC     CX
+        INC     CX 
         ADD     BX,BPS
         JB      RETRY
         CMP     BX,INITDP-$$
@@ -280,8 +269,8 @@ BEGIN1: CALL    READSECTOR
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
-;{       Read the sector with number in CX (Counting from 0)}
-;{       Leave into CX the incremented sec# }
+;{       Read the sector with number in CX (Counting from 0) to ES:BX.}
+;{       Keep BX, CX  }
 READSECTOR:
         PUSH    CX
         PUSH    BX
@@ -440,11 +429,24 @@ ENDBOOT:
 });_END___1__({ _HOSTED_MSDOS_1_})
 
 ;____1_____ _BOOTED_1_({
-_SWITCH_1_({        JMP     PROTECT})
-        _NEW_ORG(01FEH)
-        ;{ Signature. Last piece of boot sector. }
-        DB         055H, 0AAH
 
+        ;{ Adjust code segment address without leaving the ball}
+        ;{ Generating machine code is actually simpler than}
+        ;{ beating the assembler. After 10 attempts I gave up}
+        ;{ This is a simple straightforward intersegment jump}
+;{       JMP FAR BOOTADDRESS+ELSE1}
+       DB      0EAH
+       DW      ELSE1
+       DW     REALSEGMENT
+ELSE1:
+        CLI                     ;{ Disallow interrups until stack ready}
+        MOV     AX,CS           ;{ Will do for now (real mode)}
+        MOV     DS,AX
+        MOV     SS,AX
+        MOV     ES,AX
+        MOV     STACKPOINTER,0H
+        STI                     ;{ Allow interrupts}
+_SWITCH_1_({        JMP     PROTECT})
 });_END___1__({ _BOOTED_1_})
 
 ; ########################################################################################
@@ -548,6 +550,14 @@ ENDIF1:
 figforth:
 _start:
 });_END___1__({_LINUX_N_1_})
+
+;____1_____ _BOOTED_1_({
+        JMP     ENDREADJUST
+        _NEW_ORG(01FEH)
+        ;{ Signature. Last piece of boot sector. }
+        DB         055H, 0AAH
+ENDREADJUST:
+});_END___1__({ _BOOTED_1_})
 
         JMP     BOOTUP                  ; Cold start
 
