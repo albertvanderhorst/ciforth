@@ -105,7 +105,8 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 : ANALYSE-CODE >CFA @ DUP >NA COUNT-PPS ;
 
 \ For DEA find the stack effect and fill it in.
-: FILL-SE DUP ANALYSE-CODE
+\ It must be a code definition.
+: FILL-SE-CODE DUP ANALYSE-CODE
   #POPS @ 1+   #PUSHES @ 1+   SE:2>1   SWAP !SE ;
 
 \ Irritating exceptions
@@ -132,6 +133,38 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 
 \ Add to a BYTE the stack effect of DEA. Result a new BYTE.
 : ADD-SE    SE@   COMBINE-BYTES ;
+
+\ ---------------------------------------------------------------------------
+
+\ MAYBE THIS PART BELONGS IN optimiser.frt
+
+\ Like +! but ors.
+: OR!  DUP @ ROT OR SWAP ! ;
+
+80 CONSTANT IMASK   \ Data is following in line.
+
+IMASK    ' SKIP >FFA OR!        IMASK    ' BRANCH >FFA OR!
+IMASK    ' 0BRANCH >FFA OR!     IMASK    ' (LOOP) >FFA OR!
+IMASK    ' (+LOOP) >FFA OR!     IMASK    ' (DO) >FFA   OR!
+IMASK    ' (?DO) >FFA  OR!      IMASK    ' LIT >FFA    OR!
+
+\ ---------------------------------------------------------------------------
+
+\ Inspect POINTER and XT. If the xt is of a type followed by inline
+\ code advance pointer appropriately. Inspect new POINTER and XT.
+: ?INLINE? >R
+   R@ >FFA @ IMASK AND IF
+    R@ 'LIT = IF CELL+ ELSE DUP @ + ALIGNED THEN
+   THEN R> ;
+
+\ To a stack effect BYTE apply a CHAIN of high level code.
+\ Return the resulting stack effect BYTE.
+: ANALYSE-CHAIN
+        BEGIN @+ DUP '(;) <> WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
+
+\ For DEA find the stack effect and fill it in.
+\ It must be a high level definition
+: FILL-SE-HIGH 11 OVER >DFA @ ANALYSE-CHAIN SWAP !SE ;
 
 13 '(NUMBER) !SE
 DECIMAL
