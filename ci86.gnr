@@ -334,7 +334,7 @@ BOOTLBA:  DB      10H, 0
 HDREAD:
         MOV     AX,REALSEGMENT
         MOV     DS,AX
-        MOV     SI,BOOTLBA     ; {DS:SI absolute address of lba.}
+        MOV     SI,RELATIVE_WRT_ORIG(BOOTLBA) ; {DS:SI absolute address of lba.}
         MOV     AX,4200H  ;{   Read extended                                }
         MOV     DX,0080H  ;{   Disk C                                 }
         INT     13H
@@ -960,7 +960,7 @@ _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_CLASSIC_1_})
-;____1_____ _USEBIOS_1_({
+;____1_____ _RWFD_1_({
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
 ;{ within the forth system itself. }
@@ -969,12 +969,12 @@ _ENDCOMMENT
 ;       You need a filler file of one sector,
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
         DC      (SECSTRT+((RELATIVE_WRT_ORIG(TEXTEND)-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
-});_END___1__({_USEBIOS_1_})
-;____1_____ _BOOTHD__1_({
+});_END___1__({_RWFD_1_})
+;____1_____ _RWHD_1_({
 ;{ This will reserve place for the system itself, on the first part of a }
 ;{ hard disk. No problem to just reserve whole memory.}
         DC      64      ;{ Kbyte.}
-});_END___1__({_BOOTHD__1_})
+});_END___1__({_RWHD_1_})
 ;
 ;
 ;{      The following is the CPU's name, printed}
@@ -3484,29 +3484,17 @@ HEADER({LBAPAR},{LBA},{DOVAR})
 
 ;{ Reads/ writes the block such as in LBA}
 CODE_HEADER({RBLK},{RBLK})
-        POP     AX
-        PUSH    SI      ;{PRESERVE INTERPRETER POINTER}
-        MOV     SI,AX
-        PUSH    BP      ;{RETURN POINTER}
         MOV     BX,4200H
-        MOV     DX,0080H  ;{   Disk C                                 }
-        _SWITCH_1_({JMPHERE_FROM_FORTH})
-        XCHG    BX,AX
-        INT     13H
-        PUSHF           ;{ REMEMBER STATUS}
-        POP     BX
-        _SWITCH_1_({JMPHERE_FROM_OS})
-        POP     BP      ;{RETURN STACK}
-        POP     SI      ;{INTERPRETER PNTR}
-        PUSH    BX      ;{ REMEMBER STATUS}
-        _NEXT
+        JMP    RWBLK
 ;
 CODE_HEADER({WBLK},{WBLK})
+        MOV     BX,4300H
+RWBLK:
         POP     AX
         PUSH    SI      ;{PRESERVE INTERPRETER POINTER}
+        _SWITCH_1_({ADD     AX, M4_SWITCHOFFSET })
         MOV     SI,AX
         PUSH    BP      ;{RETURN POINTER}
-        MOV     BX,4300H
         MOV     DX,0080H  ;{   Disk C                                 }
         _SWITCH_1_({JMPHERE_FROM_FORTH})
         XCHG    BX,AX
@@ -3521,16 +3509,16 @@ CODE_HEADER({WBLK},{WBLK})
 
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
-         _SWITCH_1_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         DC      TOR
         DC      LIT, SPB, STAR  ;{ Sector number}
         DC      SWAP
 ;       On a big endian machine the following code is 32 bit clean.
 ;       The 2 m.s. bytes are overwritten by the next store.
-        DC      LBA, LIT, 4, PLUS, STORE
+         _SWITCH_1_({DC   LIT, M4_SWITCHOFFSET, PLUS })
+        DC      LBA, LIT, 4, PLUS, STORE   ; { Address }
         DC      LIT, REALSEGMENT,
         DC      LBA, LIT, 6, PLUS, STORE
-        DC      LBA, LIT, 8, PLUS, STORE
+        DC      LBA, LIT, 8, PLUS, STORE   
         DC      LBA
         DC      RR
         _0BRANCH(RSLW1)
