@@ -705,7 +705,7 @@ in the file forthfile({asgen.frt}). For other error forthxpref(({Errors})
 
 forthitemize
 forthitem
-forthsamp({ERR # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE})
+forthsamp({ciforth ERROR # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE})
 
 You left holes in the instruction before the current one, i.e.
 one or more fixups like forthcode({X|}) are missing. Or you forget
@@ -714,14 +714,14 @@ _VERBOSE_({With forthcode({SHOW:}) you can see what completions of your opcode
 are legal.})
 
 forthitem
-forthsamp({ERR # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY})
+forthsamp({ciforth ERROR # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY})
 
 The instruction you try to assemble would have been legal, if Intel
 had not made an exception just for this combination. This situation
 is handled by special code, to issue just this error.
 
 forthitem
-forthsamp({ERR # 28 : AS: UNEXPECTED FIXUP/COMMAER})
+forthsamp({ciforth ERROR # 28 : AS: UNEXPECTED FIXUP/COMMAER})
 
 You try to complete an opcode by fixup's (like forthcode({X|}))
 or commaers (like forthcode({OW,}) ) in a way that conflicts
@@ -733,7 +733,7 @@ _VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opco
 or with a DI| operand.})
 
 forthitem
- forthsamp({ERR # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER})
+ forthsamp({ciforth ERROR # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER})
 
 You try to complete an opcode by fixup's (like forthcode({X|})
 ) or commaers (like forthcode({OW,}) ) in a way that conflicts
@@ -745,14 +745,14 @@ _VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opco
 or with a DI| operand.})
 
 forthitem
-forthsamp({ERR # 30 : AS: COMMAERS IN WRONG ORDER})
+forthsamp({ciforth ERROR # 30 : AS: COMMAERS IN WRONG ORDER})
 
 The opcode requires more than one data item to be commaed in, such as
 immediate data and an address. However you put them in the wrong order.
 Use forthcode({SHOW:}) .
 
 forthitem
- forthsamp({ERR # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK})
+ forthsamp({ciforth ERROR # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK})
 
 This signals an internal inconsistency in the assembler itself.
 If you are using an assembler supplied with ciforth, you can report
@@ -764,7 +764,7 @@ of the area were it is supposed to fill bits in. The latter
 are specified separately by a mask.
 
 forthitem
- forthsamp({ERR # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT})
+ forthsamp({ciforth ERROR # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT})
 
 The total instruction with opcode, fixups and data is ``bad''.
 Somewhere there are parts that are conflicting. This may be another
