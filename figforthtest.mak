@@ -28,6 +28,11 @@ TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
     sed '/SI[MB]/d' |\
     sed '/OK/d' >p$(PREFIX).$@
 
+qr8080.ps  : lina BLOCKS.BLK ; make as80.ps ; mv p0.as80.ps $@ 
+qr8086.ps  : lina BLOCKS.BLK ; make asi86.ps ; mv p0.asi86.ps $@     
+p0.asi586.ps  : lina BLOCKS.BLK  ; make asi586.ps PREFIX=0 MASK=FF
+p0F.asi586.ps : lina BLOCKS.BLK  ; make asi586.ps PREFIX=0F MASK=FFFF
+
 do : fig86.msdos.msm
 		diff -w fig86.msdos.msm orig/FORTH > masm.dif ||true
 		more masm.dif
