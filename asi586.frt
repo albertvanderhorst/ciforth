@@ -214,10 +214,20 @@
 
 ' (SIB),, CFA   % SIB,, >DATA !   ( Not available during  generation)
 
-( Disassemble the sib byte from ADDRESS. Leave INCREMENTED address.     )
-: DIS-SIB POINTER ! [ % ~SIB, ] LITERAL F-D POINTER @ ;
+( Disassemble the sib byte where the disassembler sits now.             )
+( [ `F-D' takes care itself of incrementing the disassembly pointer. ]  )
+: DIS-SIB [ % ~SIB, ] LITERAL F-D ;
 ( Disassembler was not available while creating the commaer. )
 ' DIS-SIB CFA   % SIB,, >DIS !    0   % SIB,, >CNT !   
+
+( Redefine some fixups, such that the use may say                       )
+( "[AX" instead of " ~SIB| SIB,, [AX"                                   )
+( Note that the disassembly is made to look like this.                  )
+: [AX   ~SIB| SIB,, [AX ;       : [SP   ~SIB| SIB,, [SP ;     
+: [CX   ~SIB| SIB,, [CX ;       : [BP   ~SIB| SIB,, [BP ;     
+: [DX   ~SIB| SIB,, [DX ;       : [SI   ~SIB| SIB,, [SI ;     
+: [BX   ~SIB| SIB,, [BX ;       : [DI   ~SIB| SIB,, [DI ;     
+: [..   ~SIB| SIB,, [.. ; 
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may always want to use these instead of (RB,)

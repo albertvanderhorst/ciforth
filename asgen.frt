@@ -452,25 +452,24 @@ HERE POINTER !
    THEN
 ;
 
-( Print the disassembly for the DEA , it must be a comma-er   )
-: .COMMA
+( Print a standard disassembly for the commaer DEA.                     )
+: .COMMA-STANDARD
     POINTER @ @ OVER >CNT @ FIRSTBYTES U.
     DUP >CNT @ POINTER +!
-    ID.
+    %ID.                         ( DEA -- )
 ;
+
+( Print the disassembly for the commaer DEA, advancing `POINTER' past   )
+( the comma-content                                                     )
+: .COMMA   DUP >CNT @ IF   .COMMA-STANDARD   ELSE   >DIS @ EXECUTE   THEN ;
+
 ( Print the DEA but with suppression, i.e. ignore those starting in '~' )
 : %~ID. DUP IGNORE? IF DROP ELSE %ID. THEN  ;
+
+( Print the disassembly `DISS'                                          )
 : .DISS' DISS @+ SWAP DO
-    I @ DUP IS-COMMA 0= IF
-        %~ID. 
-    ELSE DUP >CNT @ IF
-       .COMMA       ( DEA -- )
-    ELSE
-       POINTER @ OVER >DIS @ EXECUTE POINTER !
-    THEN
-    THEN
+    I @ DUP IS-COMMA 0= IF   %~ID.   ELSE   .COMMA   THEN
  0 CELL+ +LOOP 
- DISS CELL+ @ IGNORE? 0= IF CR THEN ( Probably a sub instruction)
 ;
 
 ( Dissassemble one instruction from `POINTER'. )
@@ -487,7 +486,7 @@ HERE POINTER !
       R> DROP
       .DISS'
     ELSE
-      R> COUNT . POINTER ! ."  C," CR
+      R> COUNT . POINTER ! ."  C," 
     THEN
 ;
 
@@ -502,10 +501,11 @@ HERE POINTER !
 : DDD (DISASSEMBLE) ;
 
 ( Dissassemble one instruction from ADDRESS. )
-: D-F-A POINTER ! (DISASSEMBLE) ;
+: D-F-A POINTER ! (DISASSEMBLE) CR ;
+( Dissassemble one instruction from address ONE to address TWO. )
 : DIS-RANGE
     SWAP POINTER !
-    BEGIN (DISASSEMBLE) POINTER @ OVER < 0= UNTIL
+    BEGIN (DISASSEMBLE) CR POINTER @ OVER < 0= UNTIL
     DROP
 ;
 (   : M| ' xxx  REJECT M| ;  To forbid M| xxx  in combination      )
