@@ -1,9 +1,11 @@
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 # $Id$
-Test report of generic figforth for Intel 86 family.
+Test report of generic forth's for Intel 86 family.
+First part for ISO forth's, in the appendix some figforth's.
+
 Summary
 This is a test report for 12 out of a zillion Forths that can be
-generated from fig86.gnr
+generated from fig86.gnr and ci86.gnr .
 This is not a professional regression test.
 I know that. Please be forgiving.
 
@@ -97,9 +99,14 @@ FAILED TESTS ARE PRECEEDED with -.
 
 This test is for the ISO ciforth , version 3.###
 
+ONLY THE LATEST VERSION OF lina IS TESTED.
+The latest versions of other configurations are trustworthy, because
+the changes only relate to the general part.
+                                                                      )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   176  lina.cfg         lina          BCDEFHKMOPR
+hosted_linux linux_native   179  lina.cfg         lina          BCDEFHKMOPR
+                            176  lina.cfg         lina          BCDEFHKMOPR
                             154  lina.cfg         lina          J
                             153  lina.cfg         lina          BCDEFHKMOPR
                             135                                 BCDEFHKMOP
