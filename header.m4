@@ -13,7 +13,7 @@ define({_dbquoted},"{$1}")dnl
 define({_sgquoted},'{$1}')dnl
 define({_quoted},{ifelse( -1, index({$1},"),{_dbquoted},{_sgquoted})}({{$1}}))
 define({_STRING},{
-        DB      _quoted}({{$1}}))dnl
+        DB      len({$1}),_quoted}({{$1}}))dnl
 dnl             
 dnl _LINKOLD is a m4 variable that generates numbers in sequence.
 dnl We lay down a nice square around the definition as a tribute to Thomas Newman
@@ -73,15 +73,6 @@ define({_LINK_FIELD},_$1)dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({_VOC_LATEST}, $1+6)
 define({CODE_HEADER},{HEADER({$1},{$2},{$+2})})dnl
-define({TO_PROTECTED},{
-         CLI
-	 MOV EAX,CR0
-	 INC AL  
-	 MOV CR0,EAX            ;set protected mode
-})dnl
-define({TO_REAL},{
-	 MOV EAX,CR0
-	 DEC AL  
-	 MOV CR0,EAX            ;set real mode
-         STI
-})dnl
+define({TO_PROTECTED},{})dnl
+define({TO_REAL},{})dnl
+
