@@ -8,8 +8,8 @@
 \ have been filled in in the flag fields.
 
 REQUIRE $
-\   : \D POSTPONE \ ; IMMEDIATE
-  : \D ;            IMMEDIATE
+  : \D POSTPONE \ ; IMMEDIATE
+\  : \D ;            IMMEDIATE
 
 HEX
 \ ----------------------    ( From analyser.frt)
@@ -28,12 +28,6 @@ DECIMAL
    R@
 \D   R@ CFA> ID.
    R> '(;) <> ;
-
-\ For DEA : it IS high-level.
-: HIGH-LEVEL? >CFA @ DOCOL = ;
-
-\ For DEA: it IS B-optimisable.
-: B-INLINABLE?   DUP >FFA @   FMASK-HOB AND   0=   SWAP HIGH-LEVEL? AND ;
 
 \ Like +! but ors.
 : OR!  DUP @ ROT OR SWAP ! ;
@@ -63,7 +57,7 @@ VARIABLE OPT-START
 
 \ Combine a STACKEFFECTBYTE into ``CSC''.
 \ ``-'' works here because both nibbles have offset 1!
-: COMBINE-SE    SE:1>2 SWAP -   CSC +! ;
+: COMBINE-CSC    SE:1>2 SWAP -   CSC +! ;
 
 \ Execute at compile time the optimisable code we have collected from
 \ ``OPT-START''
@@ -95,7 +89,7 @@ VARIABLE OPT-START
 \ instead of them. "Cash the optimisation check."
 : CASH
     OPT-START @ HERE <> IF
-        !CSP EXECUTE-DURING-COMPILE THROW-AWAY ^ COMPILE-CONSTANTS ?CSP
+        !CSP EXECUTE-DURING-COMPILE THROW-AWAY COMPILE-CONSTANTS ?CSP
     THEN
 ;
 
@@ -111,10 +105,10 @@ VARIABLE CURRENT-DEA
 \ Return a new BEGIN for the code to be moved, mostly the old ``END''.
 :  ?OPT-FOLD?
     CURRENT-DEA @ DUP CAN-FOLD?
-    IF ^
-        SE@ COMBINE-SE               ( DEA -- )
+    IF
+        SE@ COMBINE-CSC               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
-    ELSE ^
+    ELSE
         DROP CASH  ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
         !OPT-START
@@ -143,17 +137,17 @@ VARIABLE CURRENT-DEA
 \ Leave END.
 : FOLD-BODY
         CURRENT-DEA !
-        CR &E EMIT ^ ?OPT-EXEC?
-        CR &F EMIT ^ ?OPT-FOLD?
+        ?OPT-EXEC?
+        ?OPT-FOLD?
 ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
 : (FOLD)
-    BEGIN DUP CR &N EMIT ^
+    BEGIN DUP
         NEXT-PARSE
     WHILE  FOLD-BODY
-    REPEAT CR &L EMIT ^ DROP DROP DROP
+    REPEAT DROP DROP DROP
 ;
 
 \ Copy the DEA's high level code to ``HERE'' ,  possibly folding it.
@@ -172,7 +166,7 @@ VARIABLE CURRENT-DEA
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
-: (EXPAND) BEGIN DUP NEXT-PARSE ^ WHILE FOLD-HIGH/LOW REPEAT 2DROP DROP ;
+: (EXPAND) BEGIN DUP NEXT-PARSE WHILE FOLD-HIGH/LOW REPEAT 2DROP DROP ;
 
 \ Expand each constituent of DEA to ``HERE'' ,  possibly folding it.
 \ Leave a POINTER to the equivalent optimised code.
@@ -198,9 +192,9 @@ VARIABLE CURRENT-DEA
 : OPTIMISE-O
     DUP H-OPTIMISABLE? IF
         DUP >DFA @ BEGIN NEXT-PARSE WHILE RECURSE REPEAT 2DROP
-        DUP FILL-SE   DUP FILL-OB   DUP OPT-EXPAND
+        DUP OPT-EXPAND
     THEN
-    !OPTIMISED ;
+    DUP ?FILL-SE?   DUP FILL-OB   !OPTIMISED ;
 
 \D : test 1 SWAP 3 2 SWAP ;
 \D 'test OPTIMISE-O
@@ -214,7 +208,7 @@ VARIABLE CURRENT-DEA
 \D : test3 1 2 'SWAP EXECUTE ;
 \D 'test3 OPTIMISE-O
 \D "EXPECT `` 1 2 SWAP '' :" CR TYPE CRACK test3
-\D 'test3 OPTIMISE-O
+\D 'test3 OPT-FOLD
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test3
 \D : A0 1 ;
 \D : A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
