@@ -1,4 +1,4 @@
-( $Id: )
+( $Id$)
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( Generate postscript data sheet. )
 ( Instructions to compare with, last byte 0..FF )
@@ -55,6 +55,7 @@ DECIMAL
   ." showpage" CR 
 ;
 
+( Print the DEA at place N in the opcode map )
 : OPCODE
    8 /MOD 31 SWAP - SWAP
    . ." .15 add wt mul " . ." .5 add ht mul 5 sub moveto " CR                   
@@ -63,13 +64,21 @@ DECIMAL
 
 
 0 VARIABLE INCREMENT
+( For DEA and N : this dea FITS in box n )
+: MATCH?
+    INCREMENT @ * PREFIX @ + ( Opcode)
+    OVER >DATA @ XOR ( Difference)
+    SWAP >BI @ INVERT AND ( Valid bits)
+    MASK @ AND ( Relevant byte)
+    0=
+;  
+
+
+( Fill in a box of the opcode wherever DEA fits.                        )
 : OPCODES
   MASK @ 1+ 256 / INCREMENT !
   256 0 DO 
-    DUP >INST   PREFIX @ INCREMENT @ I * +  XOR ( -- diff) 
-    MASK @ AND           
-    OVER >MASK AND
-    0= IF DUP I OPCODE THEN
+    DUP I MATCH? IF DUP I OPCODE THEN
   LOOP
   DROP
 ;
