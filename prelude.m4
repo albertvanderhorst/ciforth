@@ -18,6 +18,7 @@ dnl This means a separate pass (we do not want this!)
 dnl Note that there is no attempt to quote the paremeters.
 dnl If you try to make Forth words with { } your coat is sold.
 changequote({,})dnl
+changecom{}dnl no braindamaged comment with #
 dnl Indicate that a large part of conditional assembly ends here
 define({_END_}, )dnl obsolete version
 define({_END_}, )dnl preferred version
