@@ -390,9 +390,15 @@ With SHOW: LODS, you can see what the operands look like.
 
 
 You want to know what a POSIT/FIXUP code does. Look it up in the table,
-on the first line you have an Intel opcode. For example you have CALLFARO,
-That is at the line with CALL, . So the combination of operands for CALLFARO,
+on the first line you have an Intel opcode. For example you have CALLFAROI,
+That is at the line with CALL, . So the combination of operands for CALLFAROI,
 are to be found in the description for CALL in the Intel manuals.
+
+Note. Some things are ugly. LDS, should be L|DS, . I would replace
+MOV|FA, by STA, and MOV|TA, by LDA, . But that would make the cross
+referenecing more problematic.
+Note. The meaning of the operands for JMP and JMPFAR are totally
+different. So my suffices are different.
 
 Table 1. Opcode cross reference.
 
@@ -413,7 +419,7 @@ forthitem BT, BTI,
 forthitem BTC, BTCI,
 forthitem BTR, BTRI,
 forthitem BTS, BTSI,
-forthitem CALL, CALLFAR, CALLFARO, CALLO,
+forthitem CALL, CALLFAR, CALLFAROI, CALLO,
 forthitem CBW,
 forthitem CLC,
 forthitem CLD,
@@ -444,7 +450,7 @@ forthitem IN|D, IN|P,
 forthitem IRET,
 forthitem J, J|X, (Intel Jcc)
 forthitem JCXZ,
-forthitem JMP, JMPFAR, JMPFARO, JMPO, JMPS,
+forthitem JMP, JMPFAR, JMPFAROI, JMPO, JMPS,
 forthitem LAHF,
 forthitem LAR,
 forthitem LDS,
@@ -463,11 +469,11 @@ forthitem LOOP, LOOPNZ, LOOPZ,
 forthitem LSL,
 forthitem LSS,
 forthitem LTR,
-forthitem MOV, MOVI, MOVI|BR, MOVI|XR,
+forthitem MOV, MOV|CD, MOV|FA, MOV|SG, MOV|TA,
+forthitem MOVI, MOVI|BR, MOVI|XR,
 forthitem MOVS,
 forthitem MOVSX|B, MOVSX|W,
 forthitem MOVZX|B, MOVZX|W,
-forthitem MOV|CD, MOV|FA, MOV|SG, MOV|TA,
 forthitem MUL|AD,
 forthitem NEG,
 forthitem NOT,
@@ -522,8 +528,9 @@ forthitem ~SIB,
 @table @var
 forthitem I       : Immediate operand
 forthitem SI      : Sign extended immediate operand
-forthitem FAR     : Far (sometimes combined with O)
-forthitem O       : Operand i.e. indirect (sometimes combined with FAR)
+forthitem FAR     : Far (sometimes combined with OI)
+forthitem O       : Operand
+forthitem OI      : Operand indirect
 @end table
 
 
