@@ -6295,7 +6295,7 @@ HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
 });_END_({_LOAD_})
 _PC_({
 ;{ Generic call on BIOS. A boon for experimenters.}
-worddoc( {OPERATINGSYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},
+worddoc( {OPERATINGSYSTEM},{BIOSO},{bios},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt forthsamp({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contain
 forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
@@ -6306,12 +6306,12 @@ interrupt 31H function 0300H. In behalf of this registers are
 saved and restored in forthcode({REG-SET}) . Unadorned calls to
 real interrupts are only available as forthcode({BIOS31}) .})
 _VERBOSE_({ forthsamp({1 AND}) leaves a zero if the call was successful.})
-},{{BDOS}}, {}, enddoc)
+},{{BDOSO}}, {}, enddoc)
 _NORMAL_BIOS_({
 ;{ Because there is no such thing as a variable interrupt:}
 ;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
 ;{ BEWARE OF THE SOFTWARE POLICE!}
-CODE_HEADER({BIOS},{BIOS})
+CODE_HEADER({BIOSO},{BIOSO})
         POP     AX      ;{ Function code}
         ;{ Once we are more acknowledgable, put segment overwrite here.}
         MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
@@ -6342,7 +6342,7 @@ _SWITCH_({SPSAVE: DC       0H})
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 });_END_({_NORMAL_BIOS_})
 _SIMULATE_BIOS_({
-CODE_HEADER({BIOS},{BIOS})
+CODE_HEADER({BIOSO},{BIOSO})
 ; Adapted from Allen Wyatt, Advanced Assembly language, QUE
 ; from pmtest.asm.
 
@@ -6483,10 +6483,12 @@ worddoc( {STORAGE},{REG-SET},{register_set},{--- addr},{},
 cross-mode interrupt handling. _VERBOSE_({ This structure is
 defined by the DPMI specifications for use with interrupt 31H
 function 0300H.}) The layout is as forthvar({DI SI BP BX DX CX
-AX Flags ES DS FS GS IP CS SP SS}) _VERBOSE_( {For the general
+AX Flags ES DS FS GS IP CS SP SS
+_HOSTED_DPMI_({and startup selectors : CS ES SS}).
+}) _VERBOSE_( {For the general
 registers this agrees with the forthsamp({PUSH_ALL}) instruction.})
 },
-{{BIOS}},
+{{BIOSO}},
 dnl Expect a reasonable value for the data segment.
 {{REG-SET 24 + @ 0FFFF AND 1000 3000 WITHIN .},{_T_} },
 enddoc)
@@ -6547,16 +6549,16 @@ RQBIOS: INT(31H)          ;{ Request number to be overwritten.}
         PUSHF
         _NEXT
 });_END_({_SIMULATE_BIOS_})
-worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
+worddoc( {OPERATINGSYSTEM},{BDOSO},{bdos},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthsamp({a b c d}) in
 registers forthsamp({AX BX CX DX}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
 of the processors flag register. This draws upon all facilities made
 available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
-only if it is started from MSDOS.})
-},{{BIOS},{BDOSN}}, {}, enddoc)
+only if it is started from MSDOS.}). This is obsolescent, use forthcode({BDOSN}) .
+},{{BIOSO},{BDOSN}}, {}, enddoc)
 _NORMAL_BIOS_({
-CODE_HEADER({BDOS},{BDOS})
+CODE_HEADER({BDOSO},{BDOSO})
         POP     DX
         POP     CX
         POP     BX
@@ -6582,9 +6584,9 @@ CODE_HEADER({BDOS},{BDOS})
         _NEXT
 });_END_({_NORMAL_BIOS_})
 _SIMULATE_BIOS_({
-HEADER({BDOS},{BDOS},{DOCOL})
+HEADER({BDOSO},{BDOSO},{DOCOL})
         DC      LIT,  21H
-        DC      BIOS
+        DC      BIOSO
         DC      SEMIS
 });_END_({_SIMULATE_BIOS_})
 });_END_({ _PC_})
@@ -6766,10 +6768,10 @@ with more information present in forthvar({ar }).
 This draws upon all facilities made
 available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
 only if it is started from MSDOS.})
-_VERBOSE_({{This is intended to replace the obsolescent BDOS , that has the
+_VERBOSE_({{This is intended to replace the obsolescent BDOSO , that has the
 parameters backwards, and returns too many useless parameters. }})
 },
-{{BIOSN},{BDOS}},
+{{BIOSN},{BDOSO}},
 {},
 enddoc)
 HEADER({BDOSN},{BDOSN},{DOCOL})
@@ -6816,8 +6818,8 @@ only is useful to be passed to DPMI. }})
 _HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_DPMI_({
-{{"AAP" ZEN REG-SET 34 + @ SWAP},{},
-{2DUP L@ FF AND EMIT SPACE 3 + L@ .},{A 0}}
+{{: G3 "AAP" ZEN REG-SET 34 + @ SWAP 2 + L@ FF AND ;},{},
+{G3 EMIT },{P}}
 })
 ,
 enddoc)
@@ -7008,8 +7010,26 @@ RFILE2:
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
 HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      READ    ;{FIXME replace by multi-buffer loop.}
+        DC      ZERO, LIT, RC, STORE, TOR
+RFIL1:
+        DC      TDUP, LIT, 8000H, MIN
+        DC      RR, READ
+        DC      LDUP
+        _0BRANCH({RFIL2})
+        DC      RDROP, TOR, TDROP, FROMR, EXIT
+RFIL2:
+        DC      DROP
+        DC      LIT, RC, PSTORE
+        DC      LIT, 8000H, LSUB, LDUP
+        DC      ZERO, GREAT
+        _0BRANCH({RFIL3})
+        DC      SWAP, LIT, 8000H, PLUS, SWAP
+        _BRANCH({RFIL1})
+RFIL3:
+        DC      TDROP, RDROP
+        DC      LIT, RC, FETCH, ZERO
         DC      SEMIS
+RC:     DC      0
 });_END_({ _HOSTED_DPMI_})
 ;
 worddoc( {STORAGE}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
@@ -7090,7 +7110,22 @@ WFILE2:
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
 HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      WRITE   ;{FIXME replace by multi-buffer loop.}
+        DC      TOR             ;>R
+WFIL1:                          ;BEGIN
+        DC      TDUP, LIT, 8000H ;   2DUP 8000 MIN R@ ^ WRITE-FILE
+        DC      MIN, RR, WRITE
+        DC      LDUP             ;   DUP
+        _0BRANCH({WFIL2})        ; IF RDROP >R 2DROP R> EXIT
+        DC      RDROP, TOR, TDROP, TOR, EXIT
+WFIL2:                           ; THEN DROP
+        DC      DROP, LIT, 8000H, LSUB      ; 8000 -
+        DC      LDUP, ZERO, GREAT      ; 8000 - DUP 0 >
+        _0BRANCH({WFIL3})        ; WHILE
+        DC      SWAP, LIT, 8000H ; SWAP 8000
+        DC      PLUS, SWAP       ; + SWAP
+        _BRANCH({WFIL1})         ; REPEAT
+WFIL3:
+        DC      TDROP, RDROP, ZERO ; 2DROP RDROP 0
         DC      SEMIS
 });_END_({ _HOSTED_DPMI_})
 ;
@@ -7255,36 +7290,6 @@ are the same as with forthcode({ACCEPT}).
 { "see (ACCEPT)" TYPE},{see (ACCEPT)}
 },
 enddoc)
-_HOSTED_DPMI_({
-; FIXME use RW_BUFFER for copying around in HOSTED_DPMI.
-HEADER({REFILL-TIB},{REFTIB},{DOCOL})
-        DC      LIT,03F00H ;{ Read file or device }
-        DC      ZERO     ;{ Handle}
-        DC      REMAIND, FETCH, TOR
-;{ MSDOS cannot handle a 32 bits address: use the buffer.}
-        DC      LIT, 0200H
-        DC       LIT, EXPECTBUF
-        DC      BDOS, ONE, LAND
-        DC      LIT, 6, QERR
-        DC      DROP, DROP, DROP ;{ Leave count}
-;{ Copy the buffer.}
-        DC      LDUP, TOR
-        DC      LIT, Save_DS_PR, FETCH, LIT, EXPECTBUF
-        DC      FROMR
-        DC      ZERO, TIB, FETCH, RR, PLUS
-        DC      ROT
-        DC      FMOVE
-        DC      LDUP, ZEQU
-        _0BRANCH(PACCEP3)
-        DC      ZERO, REMAIND, STORE
-        DC      LIT, -32, LAND, THROW ; {Presumably end of pipe.}
-PACCEP3:
-        DC      TIB, FETCH, SWAP, FROMR, PLUS
-        DC      REMAIND, TSTOR
-        DC      SEMIS
-EXPECTBUF:  _RESB( 0200H )
-;
-});_END_({ _HOSTED_DPMI_})
 _NO_DPMI_({
 HEADER({REFILL-TIB},{REFTIB},{DOCOL})
 _BITS16_({      DC      TIB, FETCH, REMAIND, FETCH, PLUS},{dnl})
@@ -7704,7 +7709,7 @@ by a BIOS call.
 },{{EMIT}}, {}, enddoc)
 HEADER({(EMIT)},{PEMIT},{DOCOL})
              DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
-             DC      LIT, 0010H, BIOS
+             DC      LIT, 0010H, BIOSO
              DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 ;
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
@@ -7728,7 +7733,7 @@ worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ascii value of the next terminal key struck.},{}, {}, enddoc)
 HEADER({KEY},{KEY},{DOCOL})
              DC         LIT, 1000H, ZERO, ZERO, ZERO
-             DC         LIT, 0016H, BIOS
+             DC         LIT, 0016H, BIOSO
              DC         DROP,DROP,DROP,DROP
              DC         LIT, 00FFH, LAND, SEMIS
 ;
@@ -7739,7 +7744,7 @@ A true flag indicates actuation. },
 {{KEY},{ACCEPT}}, {}, enddoc)
 HEADER({KEY?},{KEYQ},{DOCOL})
              DC      LIT, 01100H, ZERO, ZERO, ZERO
-             DC      LIT, 016H, BIOS
+             DC      LIT, 016H, BIOSO
              DC      LIT, 040H, LAND, ZEQU, TOR
              DC      DROP, DROP, DROP, DROP
              DC      FROMR, SEMIS
@@ -7750,7 +7755,7 @@ by a BIOS call. forthcode({OUT}) is not observed.
 },{{EMIT}}, {}, enddoc)
 HEADER({POUT},{POUT},{DOCOL})
              DC      ZERO, ZERO, ZERO
-             DC      LIT, 0017H, BIOS
+             DC      LIT, 0017H, BIOSO
              DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
@@ -8234,7 +8239,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, 8, LSHIFT
         DC      LIT, LFDRIVE, CFET
         DC      LOR   ;{ High, low -- reg DX. }
-        DC      LIT, 13H, BIOS
+        DC      LIT, 13H, BIOSO
         DC      ONE, LAND, DERR, PSTORE
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
@@ -9149,7 +9154,6 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 },{{COLD},{EXIT-CODE}},
 {{." interactive"},{interactive}},
 enddoc)
-;{Works for DPMI too. If it was high level and called BIOS, it would not.}
 CODE_HEADER({BYE},{BYE})
         MOV     AL,[_VAR_FIELD(XCODE)]
         MOV     AH,4CH
