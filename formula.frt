@@ -49,25 +49,25 @@ CODE TICKS  0F C, 31 C, 50 C, 52 C, NEXT C;
 
 DECIMAL
 
-\ worddoc( {FORMULA},{TICKS/SEC},{ticks_per_second},{ --- d},{},
+\ worddoc( {FORMULA},{TICKS-PER-SECOND},{ticks_per_second},{ --- d},{},
 \ {Leave the number of ticks per sec, i.e. for a Pentium 90
 \ this is 90,000,000. This is a configuration item, but it
 \ should be made automatic.
 \ },
 \ {{TICKS}})
-90,000,000 CONSTANT  TICKS/SEC
+90,000,000 CONSTANT  TICKS-PER-SECOND
 
-\ worddoc(  {EVENT},{PASSED},{passed},{d ---},{},
+\ worddoc(  {EVENT},{PAST?},{past_question},{d ---},{},
 \ {The time forthvar({d}) indicating a tick count, is in the past.
 \ },
 \ {{TICKS}})
-: PASSED DNEGATE TICKS D+ SWAP DROP 0< 0= ;
+: PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 
 \ worddoc(  {EVENT},{EARLIER},{earlier},{d1 d2 --- f},{},
 \ {The time forthvar({d1}) indicating a tick count, is earlier
 \  or at the same time than the time forthvar({d2}) .
 \ },
-\ {{TICKS},{PASSED}})
+\ {{TICKS},{PAST?}})
 : EARLIER  DNEGATE D+ -1. D+ SWAP DROP ;
 
 \D CR ." TICKS EXPECT -1 :" TICKS TICKS EARLIER .
@@ -208,7 +208,7 @@ VARIABLE EMPTIED 0 EMPTIED !
 \D 17. 3 INSERT-EVENT 18. 4 INSERT-EVENT
 \D CR ." EXPECT 5 14 16 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
 \D FORGET T
-  
+
 \ worddoc( {EVENT},{SET-EVENT},{set_event},{ d --- n},{},
 \ {Put an event forthvar({d}) into the event table.
 \ This may fail, if the event table is full.
@@ -234,13 +234,13 @@ VARIABLE EMPTIED 0 EMPTIED !
 \ {{EVENT[]},{EMPTIED},{FILLED}})
 : GET-EVENT #FULL 0= IF
         -1
-    ELSE EMPTIED @ EVENT[] 2@ PASSED IF
+    ELSE EMPTIED @ EVENT[] 2@ PAST? IF
        EMPTIED @   1 EMPTIED +!
     ELSE
        -1
     THEN THEN  ;
 
-\D !EVENT 123 
+\D !EVENT 123
 \D CR ." EXPECT 0 1 1 123 :" 123  10. SET-EVENT . 30. SET-EVENT . 20. SET-EVENT . .
 \D CR ." EXPECT 0 1 2 -1 :"   GET-EVENT . GET-EVENT . GET-EVENT . GET-EVENT .
 \D CR ." EXPECT 3 3 -1 :" 40. SET-EVENT . GET-EVENT . GET-EVENT .
@@ -255,8 +255,8 @@ VARIABLE EMPTIED 0 EMPTIED !
 \ },
 \ {{}})
 : NS TICKS ROT
-    TICKS/SEC 1,000,000,000 */ S>D D+
-    BEGIN 2DUP PASSED UNTIL 2DROP ;
+    TICKS-PER-SECOND 1,000,000,000 */ S>D D+
+    BEGIN 2DUP PAST? UNTIL 2DROP ;
 
 ." NS EXPECT 1 [ delay of approximately 1 second ] 2 :" 2 1 . 1,000,000,000 NS .
 
