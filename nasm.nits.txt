@@ -60,6 +60,13 @@ I like this a lot better. The syntax is more symmetric. It is more of
 an assembly variable than something to do with preprocessing.
 Probably it is easier to implement.
 This really bites me!
+7.
+If there is an error, there will be no listing.
+Young lad, in my days listings were almost exclusively used to
+carefully analyse the errors and then submit a new version with 
+all the errors removed (and got a listing back two days later with
+some errors all the same.) Anyway, I think having a listing is
+extremely useful with errors, nothing to be suppressed.
 
 I think NASM is an 
 excellent piece of work, the dream assembler for i86,
@@ -69,7 +76,11 @@ work that has gone into it.
 
 Please do not drop the comprehensive list of assembler instructions.
 It is indispensible in an assembler, and it is an invaluable piece
-of information in its own right.
+of information in its own right. I can understand maintaining it is
+a chore. Maybe there is a way to generate it from the source, such
+that synchronisation is guaranteed, and is it slightly easier to get the
+descriptions right.
+
 
 Albert.
 
