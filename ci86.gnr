@@ -1167,7 +1167,7 @@ This word is intended for interpret mode,  but in ciforth it works as
 well in compilation mode _VERBOSE_({{, because it is considered a denotation. So
 ' and the word following is a unit that behaves
 as a constant.}})
-It is recommended that this word is not postponed. _VERBOSE({{Use explicit
+It is recommended that this word is not postponed. _VERBOSE_({{Use explicit
 parsing and searching instead.}})},
 {{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1},
@@ -5164,9 +5164,9 @@ _LINUX_N_({
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
         ;{ Not a terminal. Cannot set the terminal, get rid of "OK".}
-        DC      LIT, TDROP    ;{ STTERM becomes 2DROP.}
-        DC      LIT, STTERM
-        DC      LIT, _CELLS(3), LCMOVE ; {Patch.}
+;        DC      LIT, TDROP    ;{ STTERM becomes 2DROP.}
+;        DC      LIT, STTERM
+;        DC      LIT, _CELLS(3), LCMOVE ; {Patch.}
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
@@ -6515,7 +6515,7 @@ a string constant.
 It doesn't contain the forthkey({LF}),
 but the buffer still does and after forthcode({1+}) the string
 contains forthkey({LF}).
-_VERBOSE({{This is lighter on the system and sometimes easier
+_VERBOSE_({{This is lighter on the system and sometimes easier
 to use than forthcode({ACCEPT})
 Text is probably present in the buffer address contained in
 forthcode({TIB @}), but not necessarily at the beginning. }})
@@ -7002,7 +7002,7 @@ worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 until a forthkey({RET)}) from the input terminal, and leave it as
 a string constant. It doesn't contain a trailing forthkey({LF}).
 But possibly a trailing forthkey({RET}) (0DH).
-_VERBOSE({{This is lighter on the system and sometimes easier
+_VERBOSE_({{This is lighter on the system and sometimes easier
 to use than forthcode({ACCEPT})
 Text is probably present in the buffer address contained in
 forthcode({TIB @}), but not necessarily at the beginning. }})
@@ -8413,13 +8413,15 @@ HEADER({U.},{UDOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt dea --x1...xn},{},
-{For the word with the forthdefi({dictionary entry address}) forthvar({dea})
-and all that are linked from that word
+worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt wid --x1...xn},{},
+{For all words from a word list identified by
+forthvar({wid})
 execute forthsamp({xt})
  with as data forthsamp({x1..xn}) plus
 the forthdefi({DEA}) of those words.         forthsamp({xt})
-must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
+must have the stack diagram forthsamp({x1..xn dea --- x1..xn}).
+_VERBOSE_({{Note that you can use the DEA of any word as a WID
+and the remainder of the word list will be searched.}})
 },
 {{FOR-VOCS},{EXECUTE}},
 {{( See MATCHING-WORDS)},{}},
