@@ -14,17 +14,17 @@
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
 ( right order                                                           )
-0 2        00 01000000 'O W, CFAO COMMAER OW,    ( obligatory word     )
-0 0 CELL+  00   800000 'O ,  CFAO COMMAER (RX,) ( cell relative to IP )
-0 1        00   400000 'O C, CFAO COMMAER (RB,) ( byte relative to IP )
-0 2        00   200000 'O W, CFAO COMMAER SG,   (  Segment: WORD      )
-0 1        00   100000 'O C, CFAO COMMAER P,    ( port number ; byte     )
-0 1        00   080000 'O C, CFAO COMMAER IS,    ( Single -obl-  byte )
-0 0 CELL+  02   040000 'O ,  CFAO COMMAER IX,   ( immediate data : cell)
-0 1        01   040000 'O C, CFAO COMMAER IB,   ( immediate byte data)
-0 0 CELL+  08   020000 'O ,  CFAO COMMAER X,    ( immediate data : address/offset )
-0 1        04   020000 'O C, CFAO COMMAER B,    ( immediate byte : address/offset )
-0 1        00   010000 'O C, CFAO COMMAER SIB,,   ( Most bizarre     )
+0 2        00 01000000 ' W, >CFA COMMAER OW,    ( obligatory word     )
+0 0 CELL+  00   800000 ' ,  >CFA COMMAER (RX,) ( cell relative to IP )
+0 1        00   400000 ' C, >CFA COMMAER (RB,) ( byte relative to IP )
+0 2        00   200000 ' W, >CFA COMMAER SG,   (  Segment: WORD      )
+0 1        00   100000 ' C, >CFA COMMAER P,    ( port number ; byte     )
+0 1        00   080000 ' C, >CFA COMMAER IS,    ( Single -obl-  byte )
+0 0 CELL+  02   040000 ' ,  >CFA COMMAER IX,   ( immediate data : cell)
+0 1        01   040000 ' C, >CFA COMMAER IB,   ( immediate byte data)
+0 0 CELL+  08   020000 ' ,  >CFA COMMAER X,    ( immediate data : address/offset )
+0 1        04   020000 ' C, >CFA COMMAER B,    ( immediate byte : address/offset )
+0 1        00   010000 ' C, >CFA COMMAER SIB,,   ( Most bizarre     )
 
 
 ( #################### TO BE PHASED OUT ############################### )
@@ -221,7 +221,7 @@ A0 0 0720 0s 0600 0s xFIR16 [BP]'  ( Fits in the hole, safe inconsistency check)
 
 ( Handle a `sib' bytes as an instruction-within-an-instruction )
 ( This is really straightforward, we say the sib commaer is a sib       )
-( instruction. as per -- error checking omitted -- " 10000 'O ~SIB, CFAO  )
+( instruction. as per -- error checking omitted -- " 10000 ' ~SIB, >CFA )
 ( COMMAER SIB,,"                                                        )
 ( All the rest is to nest the state in this recursive situation:        )
 ( 900 are the bad bits conflicting with ~SIB,                           )
@@ -231,13 +231,13 @@ A0 0 0720 0s 0600 0s xFIR16 [BP]'  ( Fits in the hole, safe inconsistency check)
     ~SIB,   
     TALLY-BY ! 900 INVERT AND TALLY-BA @ OR TALLY-BA ! ;
 
- 'O (SIB),, CFAO   % SIB,, >DATA !   ( Not available during  generation)
+ ' (SIB),, >CFA   % SIB,, >DATA !   ( Not available during  generation)
 
 ( Disassemble the sib byte where the disassembler sits now.             )
 ( [ `F-D' takes care itself of incrementing the disassembly pointer. ]  )
 : DIS-SIB [ % ~SIB, ] LITERAL F-D ;
 ( Disassembler was not available while creating the commaer. )
- 'O DIS-SIB CFAO   % SIB,, >DIS !    0   % SIB,, >CNT !   
+ ' DIS-SIB >CFA   % SIB,, >DIS !    0   % SIB,, >CNT !   
 
 ( Redefine some fixups, such that the user may say                      )
 ( "[AX" instead of " ~SIB| SIB,, [AX"                                   )
