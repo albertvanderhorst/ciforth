@@ -175,7 +175,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
-: (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT CELL- TRUE ;
+: (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT DROP CELL- TRUE ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ as long as the character agrees with the matcher at the expression,
@@ -328,7 +328,7 @@ VARIABLE RE-FILLED
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
 : HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF
-        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ ^ WORDS RE$,   !NORMAL-CHARS
+        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ RE$,   !NORMAL-CHARS
     THEN
 ;
 
@@ -464,3 +464,12 @@ CREATE (RE-EXPR) 1000 ALLOT
 \ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
 : BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE DUP @ 0= UNTIL DROP EXIT-BUILD ;
+
+\ Null-ended copy fo the string in which we try to match.
+CREATE STRING-COPY 1000 ALLOT
+
+\ For STRING and regular expression STRING:
+\ "there IS a match". \0 ..\9 have been filled in.
+: RE-MATCH BUILD-RE
+    STRING-COPY $! 0 STRING-COPY $C+ STRING-COPY $@ DROP RE-COMPILED
+    (MATCH) >R 2DROP R> ;
