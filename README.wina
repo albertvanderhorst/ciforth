@@ -1,0 +1,110 @@
+CIFORTH CUSTOMIZATION FOR DPMI ("windows").
+
+COPYRIGHT (c) 2000-2002 Albert van der Horst , THE NETHERLANDS
+                   LICENSE
+This program is free software; you can redistribute it and/or
+modify it under the terms of version 2 of the GNU General
+Public License as published by the Free Software Foundation.
+
+DESCRIPTION
+Forth is a tool for evolutionary programming. This is the
+binary distribution of wina 4.0.0, a stable release. wina is
+the Windows native (API-independant) version of ciforth (common Intel
+Forth), an interpret environment and compiler for Forth. It is
+(large and by) compliant with the ISO Forth standard; the CORE
+wordset is fully implemented. The small, classic, indirect
+threaded kernel contains the essential, i.a. file access and
+exceptions. Its power is multiplied by an extensive source
+library, that add i.a. a decompiler and integrated 386
+assembler. It is fully self contained; if you want to
+understand a compiler in all details, this is your best, if not
+only, choice. ciforth sports a very high documentation to
+binary proportion.
+
+Unpack in the directory where you want to use it by :
+    pkunzip wina4d0.zip
+
+Now you can use wina interactively by :
+    wina
+
+You can compile a program `monkey.frt' to an executable `monkey.exe':
+    wina -c monkey.frt
+
+The Forth word defined latest in `monkey.frt' is the entry point.
+The library contains facilities to access arguments passed to
+a program.
+
+RELEASE CONTENT
+COPYING         Copyright notice
+README.win      This file
+WINA.ASM        Source
+WINA.COM        Forth interpreter compiler
+WINA.TEX        Doc source
+WINA.HTM        Usable reference documentation
+WINA.PDF        Half usable documentation
+WINA.PS         Usable documentation
+FORTH.LAB       Source library
+
+The latest version can be fetched from
+    http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
+This contains also the generic system that is recommended over
+`WINA.ASM' if you want to make extensive change.
+
+DOCUMENTATION I
+The documentation is in industry standard PostScript.
+However on the poor windows platforms you may have a hard
+time using it. The best option is a print shop.
+
+Alternatively,
+you can order a printed manual by sending a request to
+albert@spenarnc.xs4all.nl
+Include a valid e-mail address, and preferably a phone number.
+Shipping costs (especially oversee) may vary.
+
+ALL PRINTED MANUALS WILL BE DISTINGUISED WORKS OF ART. THEY ARE
+NUMBERED AND THEY HAVE ON THE BACK OF THE FRONT PAGE A HAND
+WRITTEN FORTUNE COOKIE FROM A LARGE COLLECTION, SOME ORIGINAL
+BY THE AUTHOR. EACH MANUAL IS ALSO DEDICATED TO YOU PERSONNALY
+AND SIGNED BY THE AUTHOR OF WINA/ciforth (*BEFORE* he got famous)
+
+If you have access to a Linux system you may
+print the manual (>150 pages) by :
+    lpr ci86.wina.ps
+or view it:
+    gv ci86.wina.ps
+
+DOCUMENTATION II
+The documentation is also supplied in the proprietary .pdf
+format. This is usable, but the referencing is wrong. The ubiquitous
+Acrobat reader can be used to view it.
+This documentation may go away, for example if Adobe forces me to
+use their tools to generate it. This documentation is generated
+by a sophisticated system that probably cannot be integrated with such
+a tool. Alternatively, if Adobe plays nice, the Open Source Community
+may be able to fix the problems with the index in the free tool I
+use now.
+
+DOCUMENTATION III
+Viewing the file ``WINA.HTML'' with a html viewer,
+gives a reference extract but with more cross links.
+This is only intended to be used while using the system, it
+contains no information about installation or tutorial material.
+
+INSTALLATION
+Installation is easy because it involves just one library file
+besides the executable.
+1. Place the library file where you want and configure the executable
+to refer to its place as an absolute path.
+2. If commands like DIR don't work, configure the executable to
+refer to the absolute path of the command interpreter ("COMMAND.COM").
+3. Place the executable some where in the path, or drag it to you desktop.
+This is explained in more detail in the documentation.
+Alternatively you can place wina.bat in your path with the content
+   \MY\PATH\FOR\WINA /L \MY\PATH\FOR\FORTH.LAB
+This doesn't help with the command interpreter.
+
+A simple manual installation is superior to an automatic installation
+that would never work acrross all the targeted platforms.
+This Forth worked on windows version I never used or even heard of!
+And of course even the simplest manual installation weeds out the wimps.
+(Forth is not for wimps.)
