@@ -20,6 +20,7 @@ OK })
 This means you type the command forthsamp({HELLO}) while you
 are in thisforth. As soon as you leave thisforth, this command
 is gone.
+_HOSTED_({
 forthbreak
 In order to make a stand alone program to say hello you have to
 save the source to a file, such as forthfile({hello.frt}).
@@ -32,7 +33,9 @@ forthbreak
 (That is forthkey({c}) for compile.)
 The result is a file _HOSTED_LINUX_({forthfile({hello})}) _PC_({forthfile({HELLO.EXE})}).
 For the compiler to run you must have the library correctly
-installed. If that failed, or anything else fails, you will
+installed.
+})
+If that failed, or anything else fails, you will
 get a message with at least forthsamp({ ciforth ERROR ###})
 and hopefully some more or less helpful text as well.
 The forthsamp({###}) is an error number. forthxref({Errors}) Section Explanations.
