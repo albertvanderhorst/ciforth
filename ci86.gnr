@@ -778,16 +778,21 @@ THERE4:
 _HOSTED_DPMI_({
 
 ; Required start of .COM program.
-    ORG     100H
+        ORG     100H
 ORIG:                         ; Accommodate also .exe files
-            MOV     BX, (((100H + TEXTEND-ORIG)-1)|0FFFFH)/10H+1 ;{Leave at least 64K.}
-            MOV     AH,4Ah              ;Modify memory allocation
-            INT     21h
+        MOV     BX, (((100H + TEXTEND-ORIG)-1)|0FFFFH)/10H+1 ;{Leave at least 64K.}
+        MOV     AH,4Ah              ;Modify memory allocation
+        INT     21h
 
 ; These are real mode descriptors !
-            MOV     _CELL_PTR[SaveCS],CS           ; Once and for all
-            MOV     _CELL_PTR[SaveDS],DS
-            MOV     _CELL_PTR[SaveES],ES           ; Still pointing to PSP (!?)
+        MOV     _CELL_PTR[SaveCS],CS           ; Once and for all
+        MOV     _CELL_PTR[SaveDS],DS
+        MOV     _CELL_PTR[SaveES],ES           ; Still pointing to PSP (!?)
+_PC_(
+{;{Must be done before switching to protected mode.}
+        MOV     AX, _CELL_PTR[ES:2CH]
+        MOV     _CELL_PTR[USINI+_CELLS(31)],AX   ;{Remember ENV pointer.}
+})
 ;
 ; Check to see if DPMI is available, and make the switch if it is
 ; If one is, the stat info is stored.
@@ -1032,9 +1037,9 @@ _start:
 });_END_({_LINUX_N_})
 COLD_ENTRY:
         CLD                     ;{ DIR = INC}
-        _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
-;{This one seems to crash DPMI systems.}
-;;;;;;;;_PC_({MOV     _CELL_PTR[USINI+_CELLS(31)],81H}) ;{Remember ARGS.}
+_LINUX_N_(
+{MOV     _CELL_PTR[USINI+_CELLS(31)],SPO ;{Remember ARGS.}
+})
         MOV     {AX},DS
         MOV     SS,{AX}           ;{Atomic with next instruction.}
         MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
@@ -3219,6 +3224,12 @@ In this ciforth it points to an area with the argument count,
 followed by a a null ended array of arguments strings,
 then by a null ended array of environment strings.
 }});_END_({_LINUX_N_})
+_PC_({
+In this ciforth it contains the real segment of the ``environment-block''
+_HOSTED_DPMI_({,which is real hard to come by in protected mode}).
+_VERBOSE_({The arguments passed to the program, ``command tail''
+is available as a forthdefi({brain damaged string}) at address 80H.})
+});_END_({_PC_})
 ,
 {{SYSTEM}},
 {{." Interactive"},{Interactive}},
@@ -3730,9 +3741,13 @@ HEADER({!CSP},{SCSP},{DOCOL})
 ;
 });_END_({_SECURITY_})
 worddoc( {ERRORS},{?ERROR},{question_error},{f n --},{},
-{  Throw exception with number forthsamp({n}) , if the boolean flag is true.
-All kernel error handling goes through this words, allowing to
-catch e.g. disk errors.
+{
+If the boolean flag is true. forthdefi({signal}) an error with
+number forthsamp({n}). This means that an exception is thrown,
+but it is remembered that this is the original place where the
+exception originated. All error signalled by the kernel go
+through this word, allowing to catch e.g. disk errors. Also the
+errors signalled using forthcode({?ERRUR}) do.
 },
 {ERROR},
 {{0 12 ?ERROR},{},
@@ -3750,6 +3765,23 @@ HEADER({?ERROR},{QERR},{DOCOL})
 QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
 ;
+worddoc( {ERRORS},{?ERRUR},{query_error_Unix},{n ---},{},
+{Handle the possible
+error forthsamp({n}) in Unix fashion. If it zero or positive, this means okay.
+If it is negative, its value identificaties an error condition. This error
+is signalled, meaning the error forthvar({errno}) is displayed and the word
+is aborted.
+},{{?ERROR}},
+{
+{0 ?ERRUR 1 ?ERRUR},{},
+{0 WARNING ! -20 ?ERRUR },
+{ARNING ! -20 ?ERRUR ? MSG # -32 },
+{CR},{},
+},
+enddoc)
+HEADER({?ERRUR},{QERRUR},{DOCOL})
+        DC      ZERO, MIN, LDUP, QERR
+        DC      SEMIS
 ;
 _SECURITY_({
 worddoc( {SECURITY},{?DELIM},{question_delimiter},{},{},
@@ -6598,7 +6630,7 @@ forthsamp({ret}) is the return value of the call. If it is negative, it
 is mostly an error, such as known by forthsamp({errno}) . This makes
 available all facilities present in Linux, except those with 4 or 5 parameters
 that are handled by forthcode({LINOS5}) .
-},{{?LINUX-ERROR}},
+},{{?ERRUR}},
 {{1 "CHIMP" 4 LINOS .},{CHIMP5}},
 enddoc)
 CODE_HEADER({LINOS},{LINOS})
@@ -6615,7 +6647,7 @@ system call (man 2) with parameters forthsamp({p1 p2 p3 p4 p5}).
 forthsamp({ret}) is the return value of the call. If it is negative, it
 is mostly an error, such as known by forthsamp({errno}) . This makes
 available forthemph({all}) facilities present in Linux.
-},{{?LINUX-ERROR}},
+},{{?ERRUR}},
 {{1 "CHIMP" 0 0 4 LINOS5 .},{CHIMP5}},
 enddoc)
 CODE_HEADER({LINOS5},{LINOS5})
@@ -6632,22 +6664,6 @@ CODE_HEADER({LINOS5},{LINOS5})
         LEA     RPO,[RPO+_CELLS(1)]
         _PUSH     ; Positive means okay. Negative means -errno.
 ;
-worddoc( {OPERATINGSYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
-{Handle the error forthsamp({errno}) by interpreting it as returned from a
-Linux system call. If it is negative, error forthvar({errno}) is displayed and the word
-is aborted.
-},{{?ERROR}},
-{
-{0 ?LINUX-ERROR 1 ?LINUX-ERROR},{},
-{0 WARNING ! -20 ?LINUX-ERROR },
-{ ! -20 ?LINUX-ERROR ? MSG # -32},
-{CR},{},
-},
-enddoc)
-HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
-        DC      ZERO, MIN, LDUP, QERR
-        DC      SEMIS
-;
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
 { Wait for forthvar({n1}) miliseconds. },
 {{KEY?}},
@@ -6660,7 +6676,7 @@ HEADER({MS},{MS},{DOCOL})
         DC      ZERO, ZERO
         DC      LIT, TV
         DC      LIT, _newselect, LINOS5
-        DC      QLERR
+        DC      QERRUR
         DC      SEMIS
 TV:     _RESB( 8 )
 ;
@@ -6806,7 +6822,7 @@ HEADER({RWBUF},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
 });_END_({ _HOSTED_LINUX_})
 ;
-worddoc( {STORAGE~},{ZEN},{zren},{sc --- addr},{},
+worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
 {Leaves an address that contains a zero-ended equivalent of forthvar({sc}).
 The same buffer is reused, such that this word is not reentrant.
 _VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
@@ -6814,7 +6830,7 @@ to MSDOS. In fact this is forthcode({RW-BUFFER}) }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
-{{OPEN-FILE}},
+{{OPEN-FILE},{BIOSN},{BDOSN}},
 _HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_DPMI_({
@@ -6851,7 +6867,7 @@ HEADER({ZEN},{ZEN}, {DOCOL})
         DC      SEMIS
 });_END_({ _HOSTED_DPMI_})
 ;
-worddoc( {STORAGE},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
+worddoc( {FILES},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
 and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
@@ -6885,7 +6901,7 @@ OFILE2:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
-worddoc( {STORAGE},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO},
+worddoc( {FILES},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO},
 {Close the file with file handle in forthvar({fileid}). Return
 a result code into forthvar({ior}). The latter is the MSDOS
 error code negated, to be inspected using forthcode({MESSAGE}). },
@@ -6911,7 +6927,7 @@ CFILE2:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
-worddoc( {STORAGE},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
+worddoc( {FILES},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
 {_MODERN_({ Create a file with name forthvar({sc}) and
 properties forthvar({u}), for normal files this is just 0.
 _VERBOSE_({The meaning is to be found in the MSDOS programmers
@@ -6948,7 +6964,7 @@ CRFILE2:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
-worddoc( {STORAGE},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
+worddoc( {FILES},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
 {Delete the file with name forthvar({sc}). Return
 a result code into forthvar({ior}). The latter is the MSDOS
 error code negated, to be inspected using forthcode({MESSAGE}). },
@@ -6976,7 +6992,7 @@ DFILE2:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
-worddoc( {STORAGE},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO},
+worddoc( {FILES},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO},
 {Read forthvar({n}) characters to forthvar({addr}) from current
 position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters succesfully read,
@@ -7032,7 +7048,7 @@ RFIL3:
 RC:     DC      0
 });_END_({ _HOSTED_DPMI_})
 ;
-worddoc( {STORAGE}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
+worddoc( {FILES}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
 {Position the file that is open at forthvar({fd}) at position
 forthvar({ud}).
 forthvar({ior}) is 0 for success, or otherwise
@@ -7069,7 +7085,7 @@ PFILE2:
         DC      SEMIS
 });_END_({_MODERN_})
 ;
-worddoc( {STORAGE},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
+worddoc( {FILES},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
 {Write forthvar({n}) characters from forthvar({addr}) to the file that is
 open at forthvar({fd}) , starting at its current position.
 forthvar({u1}) is 0 for success,
@@ -7130,7 +7146,7 @@ WFIL3:
 });_END_({ _HOSTED_DPMI_})
 ;
 _HOSTED_DPMI_({
-worddoc( {STORAGE},{READ}, {read}, {addr n1 fd --- n2 ior }, {ISO},
+worddoc( {FILES},{READ}, {read}, {addr n1 fd --- n2 ior }, {ISO},
 {As forthcode({READ-FILE}) , but can handle only 32K.
 },
 {{READ-FILE}},
@@ -7155,7 +7171,7 @@ READ1:
 READ2:
         DC      SEMIS
 ;
-worddoc( {STORAGE},{WRITE}, {write},{addr n fd --- u1 }, {ISO},
+worddoc( {FILES},{WRITE}, {write},{addr n fd --- u1 }, {ISO},
 {As forthcode({WRITE-FILE}) , but can handle only 32K.
 },
 {{RW-BUFFER}},
@@ -7179,7 +7195,7 @@ WRITE2:
         DC      SEMIS
 ;
 });_END_({ _HOSTED_DPMI_})
-worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
+worddoc( {FILES},{GET-FILE},{get_file},{sc1 --- sc2},{},
 {Get the content of the file with name forthsamp({sc1});
 leave it as a string forthsamp({sc2}). Any errors are thrown. },
 {{PUT-FILE},{OPEN-FILE},{THROW}},
@@ -7197,7 +7213,7 @@ HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      TDUP, PLUS, LDP, STORE        ;{ No allocation if it fails.}
         DC      SEMIS
 ;
-worddoc( {STORAGE},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
+worddoc( {FILES},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
 {Save the string constant forthsamp({sc2} as a new file with
 the name forthsamp({sc1}) ) . Any errors are thrown. },
 {{GET-FILE},{OPEN-FILE},{THROW}},
@@ -7211,7 +7227,7 @@ HEADER({PUT-FILE},{PUTFILE},DOCOL)
         DC      FROMR, CFILE, THROW
         DC      SEMIS
 ;
-worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
+worddoc( {FILES},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
 {Interpret the content of the file with name forthsamp({sc1})
 as if it was typed from the console, leaving result
 forthsamp({i*x}). },
@@ -7257,15 +7273,9 @@ HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      TIB, FETCH, RR, PLUS
         DC      LIT, RTS/2, RR, LSUB
         DC      ZERO, RFILE
-_LINUX_N_(
-{        DC      QLERR})
-_PC_(
-{        DC      ZERO, MIN, LDUP, QERR})
+        DC      QERRUR
         DC      LDUP, ZEQU, LIT, -EPIPE, LAND ; {Presumably end of pipe.}
-_LINUX_N_(
-{        DC      QLERR})
-_PC_(
-{        DC      ZERO, MIN, LDUP, QERR})
+        DC      QERRUR
         DC      TIB, FETCH, SWAP, FROMR, PLUS
         DC      REMAIND, TSTOR
         DC      SEMIS
@@ -7486,8 +7496,8 @@ HEADER({KEY},{KEY},{DOCOL})
         DC      ZERO            ; Standard input
         DC      SWAP, ONE       ; Buffer and length
         DC      LIT, read, LINOS
-        DC      LDUP, QLERR
-        DC      ZEQU, LIT, -EPIPE, LAND, QLERR ; {Presumably end of pipe.}
+        DC      LDUP, QERRUR
+        DC      ZEQU, LIT, -EPIPE, LAND, QERRUR ; {Presumably end of pipe.}
         DC      ONE, LIT, RAWIO, STTERM       ; Toggle back
         DC      SEMIS
 ;
@@ -7508,7 +7518,7 @@ HEADER({KEY?},{KEYQ},{DOCOL})
         DC      LIT, TV, TSTOR ;{ Time out of zero. See MS.}
         DC      LIT, TV
         DC      LIT, _newselect, LINOS5
-        DC      LDUP,  QLERR
+        DC      LDUP,  QERRUR
         DC      NEGATE        ; {1 -> flag.}
         DC      ZERO, LIT, RAWIO, STTERM
         DC      SEMIS
@@ -7557,7 +7567,7 @@ HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(4)+7
         DC      CSTOR
         DC      ZERO, LIT, TCSETS, TERMIO
-        DC      LIT, ioctl, LINOS, QLERR
+        DC      LIT, ioctl, LINOS, QERRUR
         DC      SEMIS
 ;
 });_END_({_LINUX_N_})
@@ -8000,20 +8010,20 @@ _LINUX_N_({
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
 {Have the operating system execute the command contained
 in the string forthsamp({sc1}).
-},{{BLOCK},{?LINUX-ERROR}},
+},{{BLOCK},{?ERRUR}},
 {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}},
 enddoc)
 HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
         DC      ZERO, ZERO, ZERO, LIT, fork, LINOS
-        DC      LDUP, QLERR
+        DC      LDUP, QERRUR
         DC      LDUP, ZEQU
         _0BRANCH(SYSTEM1)
         DC      LIT, SHELL, LIT, SYSARGS
 ;  Get environment vector
         DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
         DC      LIT, execve, LINOS
-        DC      LIT, -127, QLERR, BYE
+        DC      LIT, -127, QERRUR, BYE
 SYSTEM1:
         DC      LDUP
         DC      LIT, STATUS, ZERO, LIT, waitpid, LINOS
@@ -8023,7 +8033,7 @@ SYSTEM1:
         DC      DROP
         _0BRANCH(SYSTEM1)
 SYSTEM2:
-        DC      QLERR
+        DC      QERRUR
         DC      TDROP
         DC      SEMIS
 ;
@@ -9552,7 +9562,7 @@ variables that are passed from an operating system to a program.}})
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
 {The wordset forthsamp({INPUT}) contains words to get input from the terminal
-and such. For disk I/O: forthxref({STORAGE}) },
+and such. For disk I/O: forthxref({FILES}) forthxref({STORAGE}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({JUGGLING},{ },
 {The wordset forthsamp({JUGGLING}) contains words that change the lifo-buffer.
@@ -9625,7 +9635,7 @@ forthxref({MULTIPLYING}).})},
 {},{},{},{}, {}, enddoc)
 worddocchapter({OUTPUT},{ },
 {The wordset forthsamp({OUTPUT}) contains words to output
-to the terminal and such. For disk I/O: forthxref({STORAGE}) },
+to the terminal and such. For disk I/O: forthxref({FILES}) forthxref({STORAGE}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
@@ -9672,11 +9682,20 @@ forthdefi({stack pointer})'s can be altered.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STORAGE},{ },
 {The wordset forthsamp({STORAGE}) contains words to input and output
-to the mass storage, in this ciforth _BOOTSECTRK_({ to the disk, by sector and track, })
-_BOOTLBA_({to the hard disk}) _HOSTED_({to the file
-forthfile({forth.lab}) , and to other files}).
+to the mass storage, mainly using blocks.
+ In this ciforth blocks reside
+_BOOTSECTRK_({ on the disk, by sector and track, })
+_BOOTLBA_({on the hard disk}) _HOSTED_({in the file, named
+forthfile({forth.lab}) by default. }).
 They are underlying the forthsamp({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
+_FILES_({
+worddocchapter({FILES},{ },
+{The wordset forthsamp({FILES}) contains words to input and output
+to files, or load words from files.
+They are underlying the forthsamp({STORAGE}) facilities.},
+{},{},{},{}, {}, enddoc)
+});_END_({_FILES_})
 worddocchapter({STRING},{ },
 {The wordset forthsamp({STRING}) contains words that manipulate
 strings of characters.
