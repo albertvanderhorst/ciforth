@@ -153,23 +153,20 @@ SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 
-;____1____ _ABSOLUTELOAD_1_({
-LOADADDRESS     EQU     M4_LOADADDRESS
-});_END___1__({_ABSOLUTELOAD_1_})
 ;____1_____ _SWITCH_1_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
 SANDBOXSIZE     EQU     10000H   ; { For stack items while switching modes.}
 GDTSIZE         EQU     8000H   ; { For GDT-table.}
-SWITCHSEGMENT     EQU     (LOADADDRESS-M4_SWITCHORG)/10H ;{ @ DS and CS for real code }
-; {The absolute address that agrees with ORG.}
-; {It may be that code has to be repositioned to make this true.}
-M4_SWITCHOFFSET EQU  (M4_SWITCHORG-M4_ORG)
+M4_FORTHORG     EQU     M4_LOADADDRESS - M4_ORG ; { Start of Forth CS = SS = ES . }
+SWITCHSEGMENT     EQU     M4_SWITCHORG/10H ;{ @ DS and CS for real code }
+; {Add this to go from GDT_CS addresses to GDT_SWITCH addresses.}
+M4_SWITCHOFFSET EQU  ( M4_FORTHORG - M4_SWITCHORG)
 DS_SANDBOX      EQU     SWITCHSEGMENT + SEGSIZE ;{ @ Harmless place for the stack.}
 GDT_SEGMENT     EQU     DS_SANDBOX + SANDBOXSIZE/10H       ;{ @ General descriptor table.}
 ;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen and }
 ;{ must be a multiple of 08H }
-GDT_SWITCH       EQU    (LOADADDRESS-M4_SWITCHORG)/10H  ;{ @% Switching segment }
+GDT_SWITCH       EQU    SWITCHSEGMENT  ;{ % Switching segment, must be same for switching to work! }
 GDT_CS EQU 10H  ;{ % The protected mode code segment }
 ; { This choice is a relic. If switched from protected mode }
 ; { the real mode code then uses data from the sandbox.}
@@ -464,7 +461,7 @@ HERE6:  POP     AX                 ; { Calculate address of the first byte to mo
         MOV     SI,AX           ; {Relocatable address, w.r.t code segment.}
         MOV     AX,CS
         MOV     DS,AX
-        MOV     AX, (LOADADDRESS-M4_ORG)/10H ; Destination segment
+        MOV     AX, M4_FORTHORG/10H ; Destination segment
         MOV     ES, AX
         MOV     DI, TEXTEND-1 
         REPNZ
@@ -520,7 +517,7 @@ PROTECT:
         MOV     DI,GDT_DS
         MOV     AX,0FFFFH
         STOSW
-        MOV     EAX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
+        MOV     EAX,M4_FORTHORG
         STOSW           ; {Only 16 bits}
         SHR     EAX,8
         ADD     AX,9200H
@@ -531,7 +528,7 @@ PROTECT:
         MOV     DI,GDT_CS
         MOV     AX,0FFFFH
         STOSW
-        MOV     EAX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
+        MOV     EAX,M4_FORTHORG
         STOSW           ; {Only 16 bits}
         SHR     EAX,8
         ADD     AX,9A00H
@@ -592,8 +589,8 @@ BMASK   EQU     BLOCKS_IN_USE_MASK
 REP1:
 ;____1_____ _BITS32_1_({
         INC AX                  ;{ Wait until a20 works(!)}
-        MOV [LOADADDRESS],AX
-        CMP AX,[100000H + LOADADDRESS] ; { 2^20 beyond}
+        MOV [M4_LOADADDRESS],AX
+        CMP AX,[100000H + M4_LOADADDRESS] ; { 2^20 beyond}
         JE REP1  
 });_END___1__({ _BITS32_1_})
 });_END___1__({ _SWITCH_1_})
