@@ -43,6 +43,8 @@ steal({V}{TIME},VTIME)
 steal({I}{CANON},ICANON)
 steal({O}{_RDWR},O_RDWR)
 steal({O}{_RDONLY},O_RDONLY)
+steal({O}{_WRONLY},O_WRONLY)
+steal({O}{_CREAT},O_CREAT)
 steal({O}{_NONBLOCK},O_NONBLOCK)
 
 ; Numbers of system calls. See "Linux kernel Internals" Appendix A.
