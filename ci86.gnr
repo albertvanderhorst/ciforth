@@ -145,7 +145,6 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
-BSCR    EQU     1024            ;{Bytes per editing screen, ISO.}
 ;
 ;{ PHYSICAL DISK PARAMETERS}
 ;{ (not needed for MODERN)}
@@ -5275,9 +5274,10 @@ HEADER({STALEST},{STALEST},{DOVAR}, )
         DC BUF1
 ;
 worddoc( {STORAGE~},{PREV},{prev},{---- addr},{},
-{A variable containing the address of the disc buffer most recently
-referenced. The forthcode({UPDATE}) command marks this buffer to be
-later written to disc.},{{BLOCK}},
+{A variable containing the address of the disc buffer (not its
+content field!) most recently referenced. The
+forthcode({UPDATE}) command marks this buffer to be
+written to disc.},{{BUFFER}},
 { { STALEST @ FIRST LIMIT WITHIN .},{_T_} },
 enddoc)
 HEADER({PREV},{PREV},{DOVAR}, )
@@ -5346,15 +5346,18 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         PAGE
 ;
 worddoc( {STORAGE~},{BUFFER},{buffer},{n --- addr},{ISO FIG},
-{Find the next memory buffer, assigning it to block
-forthvar({n}) . If the contents of the buffer is marked as
-updated, it is written to the disc. In ciforth this is never
-needed, because updated blocks are written immediately. The
-block is not read from the disc. The address forthvar({addr})
-left is the field within the buffer to be used for data
-storage. In ciforth blocks can be locked, and locked buffers
-are skipped in this process. If all buffers were locked, the
-system freezes.},
+{Prepare a free memory buffer, assigning it to block
+forthvar({n}) and leave its address forthvar({addr}). In
+ciforth blocks can be locked, and locked buffers are skipped in
+this process. The contents of the buffer that is due to be
+used, is written to the disc, if it was marked as updated. In
+ciforth this is never needed, because updated blocks are
+written immediately. The block is not read from the disc. The
+buffer layout is as follows: a cell with the block number, a
+cell with the lock count and the content.
+_VERBOSE_({{An update flag would somehow be multiplexed with the
+lock count, but it is not needed in ciforth.}})
+If all buffers were locked, the system freezes.},
 {{BLOCK},{STALEST},{PREV},{#BUFF}},
 {{!CSP 1 BUFFER FIRST LIMIT WITHIN . ?CSP},{_T_}},
 enddoc)
@@ -5370,7 +5373,7 @@ BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
 ;{ Here the buffer would be written, if it weren't already.}
         DC      RR,STORE
         DC      RR,PREV, STORE
-        DC      FROMR, CELLP, CELLP
+        DC      FROMR
         DC      SEMIS
 ;
 worddoc( {STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
@@ -5401,13 +5404,11 @@ BLOC2:  DC      PBUF,ZEQU
         _0BRANCH(BLOC3)
         DC      DROP,RR
         DC      BUFFE,LDUP
+        DC      CELLP, CELLP    ;{ Content address.}
         DC      RR,ONE
         DC      RSLW
-        DC      LCELL,LSUB
-        DC      LCELL,LSUB
 BLOC3:  DC      LDUP,FETCH
         DC      RR,LSUB
-        DC      LDUP,PLUS
         DC      ZEQU
         _0BRANCH(BLOC2)
         DC      LDUP,PREV
@@ -5507,6 +5508,7 @@ HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
 });_END_({_LOAD_})
 worddoc( {STORAGE},{LOCK},{lock},{ n --- },{CI},
 {Lock the block forthvar({n}).
+Multiple locks are possible, and require multiple unlocks.
 _VERBOSE_({{Probably, because it
 is to become the forthdefi({current input source}).}})
 The result is that its buffer will not be reclaimed
@@ -5518,14 +5520,16 @@ enddoc)
 HEADER({LOCK},{LLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
-        DC      ONE, SWAP, STORE
+        DC      ONE, SWAP, PSTORE
         DC      SEMIS
 ;
 worddoc( {STORAGE},{UNLOCK},{unlock},{ n --- },{CI},
 {Unlock the block forthvar({n})
 _VERBOSE_({{Probably, because it
 is no longer the forthdefi({current input source.})}})
-The result is that its buffer can again be reclaimed.},
+The result is that its buffer can again be reclaimed.
+Unlocking without a previous lock is may lead to a crash.
+},
 {{LOCK},{#BUFF}},
 {
 {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
@@ -5535,7 +5539,7 @@ enddoc)
 HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
-        DC      ZERO, SWAP, STORE
+        DC      LIT, -1, SWAP, PSTORE
         DC      SEMIS
 ;
 worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG,L0},
