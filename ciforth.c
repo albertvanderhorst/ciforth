@@ -78,7 +78,7 @@ void tty_init(int fd, TTY *ptty)
 {                               /* fill-in tty struct */
   ptty->fd = fd;
   ptty->is_a_tty = tcgetattr(ptty->fd, &ptty->org) >= 0 &&
-		 tcgetattr(ptty->fd, &ptty->now) >= 0;
+                 tcgetattr(ptty->fd, &ptty->now) >= 0;
 }
 
 /* Disabling these special char's is only useful when                        */
@@ -234,8 +234,8 @@ int c_expec(int count, char buffer[])
       /* We got to read by chars, to be able to stop */
       for(i=0; i<count-1; i++)  /* One char spare */
       {
-	  if ( 0==read(0,buffer+i,1) || '\n' == buffer[i] )
-	      break;
+          if ( 0==read(0,buffer+i,1) || '\n' == buffer[i] )
+              break;
       }
       buffer[i] = 0;
   }
@@ -273,10 +273,10 @@ int c_rslw(int control, int block, void *pmem )
     off_t where = block * KBBUF;
 
     return
-	 block_fid <= 0 ? -1 :
-	 where != lseek( block_fid, where, SEEK_SET ) ? errno :
-	 KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
-	 0 ;
+         block_fid <= 0 ? -1 :
+         where != lseek( block_fid, where, SEEK_SET ) ? errno :
+         KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
+         0 ;
 }
 
 /* Perform ANSI Forth 'SYSTEM' */
@@ -307,16 +307,17 @@ void c_debug(void ***pdea)
     printf("%p ",pdea);
     printf("%p ",dea);
     printf("%p ",nfa);
-    if ( 0x08100000 < (int)nfa && (int)nfa <0x08200000 )
+/*  if ( 0x08100000 < (int)nfa && (int)nfa <0x08200000 )                     */
+    if ( nfa )
     {
-	len = *nfa++;
-	pc = (char *)nfa;
-	if (len<32)
-	{
-	    printf("%d ",len);
-	    for (i=0; i<len; i++)
-		printf("%c", *pc++);
-	}
+        len = *nfa++;
+        pc = (char *)nfa;
+        if (len<32)
+        {
+            printf("%d ",len);
+            for (i=0; i<len; i++)
+                printf("%c", *pc++);
+        }
     }
     printf("\n");
 }
@@ -341,7 +342,7 @@ int main (int argc, char *argv[])
   }
   else
   {
-	bootmode = WARM;
+        bootmode = WARM;
   }
   tty_restore(&std_in);
 }
