@@ -54,11 +54,16 @@
 (  sib:       0100 no ..             0200 [AX +8*| DI]               )
 (  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
 (  segment    1000 no ..             2000 ES| ..                        )
-(  test/debug 4000 no ..             8000 CR0 ..DB0
+( test/debug 40000 no ..            80000 CR0 ..DB0
 
 ( Names *ending* in primes BP|' -- not BP'| the prime registers -- are  )
 ( only valid for 16 bits real mode, in combination with an address      )
 ( overwite. Use W, L, and end the line in TALLY! to defeat checks.      )
+
+( Like xFIR but without any checks and unfindable for the disassembler  )
+( Use for 16 bit mode instructions.                                     )
+: xFIR16   CHECK31 <BUILDS , , , , DOES> FIXUP< ;
+: xFAMILY|R16   0 DO   DUP >R T@ R> xFIR16  OVER + LOOP DROP DROP ;
 
 0200 3800 0s T!'
  0800 0s 0 8 xFAMILY|R AX] CX] DX] BX] 0] BP] SI] DI]
@@ -70,8 +75,9 @@
 020240 10700 0s 0500 0s xFIR' [MEM  ( Fits in the hole, safe inconsistency check)
 
 0120 0700 0s T!'
-( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
-( A0 0720 0s 0600 0s xFIR' [BP]'  ( Fits in the hole, safe inconsistency check)
+  0100 0s 0 8 
+    xFAMILY|R16 [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
+A0 0 0720 0s 0600 0s xFIR16 [BP]'  ( Fits in the hole, safe inconsistency check)
  0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX]
 010120 0700 0s 0400 0s xFIR' ~SIB|   ( Fits in the hole, requires also ~SIB, )
 0001A0 0700 0s 0500 0s xFIR' [BP]   ( Fits in the hole, safe inconsistency check)
@@ -81,12 +87,12 @@
  0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 0112 0700 0s T!'
  0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
-000160 C000 0s 0000 0s xFIR'      D0|
-020124 C000 0s 4000 0s xFIR'      DB|
-020128 C000 0s 8000 0s xFIR'      DW|
-000110 C000 0s C000 0s xFIR'      R|
-( 020008 C700 0s 0600 0s xFIR'      MEM|' ( Overrules D0| [BP]')
-020108 C700 0s 0500 0s xFIR'      MEM| ( Overrules D0| [BP] )
+0160 000000 C000 0s 0000 0s xFIR      D0|
+0124 020000 C000 0s 4000 0s xFIR      DB|
+0128 020000 C000 0s 8000 0s xFIR      DW|
+0110 000000 C000 0s C000 0s xFIR      R|
+0008 020000 C700 0s 0600 0s xFIR16    MEM|' ( Overrules D0| [BP]')
+0108 020000 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )
 
 041101 0 3800 0s T!
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
@@ -97,10 +103,10 @@
  0800 0s 0000 0s 5 xFAMILY|R CR0| -- CR2| CR3| CR4|                 ( 3)
  0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
 
+0000 0 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
+040401 0 01 0s 0 0s xFIR B|
+040402 0 01 0s 1 0s xFIR X|
 ( MODERNIZED TILL HERE )
-0000 0002 0s T!'   0002 0s 0 0s 2 xFAMILY|R F| T|
-0401 0001 0s 0 0s xFIR' B|
-0402 0001 0s 1 0s xFIR' X|
 
 ( --------- These must be found last -------)
 0600 1FF 00 1PI' ~SIB,
@@ -218,12 +224,12 @@
 ( instruction. as per -- error checking omitted -- " 10000 ' ~SIB, CFA  )
 ( COMMAER SIB,,"                                                        )
 ( All the rest is to nest the state in this recursive situation:        )
-( Leaving the 100 bit on would flag [.X+ +.* .X] as errors )
+( 900 are the bad bits conflicting with ~SIB,                           )
 ( Leaving BY would flag commaers to be done after the sib byte as errors)
 : (SIB),,   
     TALLY-BA @   TALLY-BY @   !TALLY      ( . -- state1 state2 )
     ~SIB,   
-    TALLY-BY ! 100 INVERT AND TALLY-BA @ OR TALLY-BA ! ;
+    TALLY-BY ! 900 INVERT AND TALLY-BA @ OR TALLY-BA ! ;
 
 ' (SIB),, CFA   % SIB,, >DATA !   ( Not available during  generation)
 
