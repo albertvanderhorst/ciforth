@@ -68,8 +68,8 @@ BINTARGETS= mina alone
 # subsequently run
 LINUXFORTHS= ciforthc lina
 # Auxiliary targets. Because of GNU make bug, keep constant.m4.
-OTHERTARGETS= forth.lab toblock fromblock constant.m4
-# C-sources with various aims.
+OTHERTARGETS= forth.lab forth.lab.lina forth.lab.wina toblock fromblock constant.m4 namescooked.m4
+# C-sources with various aims. FIXME: start with .c names.
 CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= ciforth stealconstant
 CSRC= $(CSRCAUX) $(CSRCFORTH)
@@ -87,8 +87,7 @@ rational.mi  \
 # Documentation files and archives
 DOC = \
 COPYING   \
-release.txt      \
-fig86gnr.txt       \
+README.ciforth      \
 testreport.txt     \
 cfg.zip  \
 $(SRCMI) \
@@ -105,6 +104,7 @@ figdoc.zip    \
 EXAMPLES = \
 ci86.alone.asm  \
 ci86.mina.msm  \
+ci86.wina.asm  \
 ci86.linux.asm  \
 ci86.lina.asm  \
 ci86.alonehd.asm  \
@@ -127,7 +127,7 @@ genboot.bat      \
 $(EXAMPLES)     \
 wc            \
 errors.linux.txt \
-errors.msdos.txt \
+errors.dos.txt \
 # That's all folks!
 
 # 4.0 ### Version : an official release 4.0
@@ -145,10 +145,9 @@ ci86.lina.texinfo \
 ci86.lina.asm      \
 lina      \
 lina.1    \
-forth.lab       \
+forth.lab     \
 $(CSRCAUX:%=%.c)    \
 wc            \
-# linarelease.txt  \ replaced by README.lina
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
@@ -235,11 +234,11 @@ boot: ci86.alone.bin
 # The Forth gets its information from the boot sector,
 # that is filled in with care.
 # The option BOOTSECTRK must be installed into alonetr.m4.
-trboot: ci86.alonetr.bin lina forth.lab
+trboot: ci86.alonetr.bin lina forth.lab.wina
 	rm fdimage || true
 	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
 	     \"fdimage\" PUT-FILE BYE | lina
-	cat forth.lab >>fdimage
+	cat forth.lab.wina >>fdimage
 	cp fdimage /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp fdimage /dev/fd0H1440
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
@@ -252,11 +251,11 @@ filler: ci86.alone.bin lina filler.frt
 	# Have forth calculate whether we need the filler sector
 	# Use the exit command to return 1 or 0
 	(filesize=`cat ci86.alone.bin |wc -c`; \
-	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
-	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
+	x=`echo $$filesize 1 - 512 / 1 + 2 MOD . | lina`; \
+	if [ 0 = $$x ] ; then mcopy filler.frt a:filler.frt ;fi)
 
-moreboot: forth.lab ci86.alone.bin  ci86.mina.bin
-	mcopy forth.lab a:
+moreboot: forth.lab.wina ci86.alone.bin  ci86.mina.bin
+	mcopy forth.lab.wina a:forth.lab
 	mcopy ci86.mina.bin      a:mina.com
 
 allboot: boot filler moreboot
@@ -278,13 +277,13 @@ hdboot: ci86.alonehd.bin
 figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 
-zip : $(RELEASECONTENT) ; echo ciforth-$(VERSION).zip $+ | xargs zip
+zip : $(RELEASECONTENT) ; echo ciforth-$(VERSION).tar.gz $+ | xargs tar -cvzf
 
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply forth.lab
 msdos.zip : $(RELEASECONTENT) mslinks ;\
-	ln -sf forth.lab forth.lab.dos;\
-    echo fg$(VERSION) $(RELEASECONTENT) |\
+	ln -sf forth.lab.wina forth.lab ;\
+    echo fg$(VERSION) $(RELEASECONTENT) forth.lab |\
     sed -e's/ ci86\./ /g' |\
     sed -e's/ gnr / ci86.gnr /g' |\
     xargs zip -k
@@ -294,13 +293,17 @@ mslinks :
 	ln -sf ci86.lina.asm lina.asm
 	ln -sf ci86.linux.asm linux.asm
 	ln -sf ci86.mina.msm mina.msm
+	ln -sf ci86.wina.asm wina.asm
 	ln -sf ci86.mina.asm forth32.asm
 	ln -sf ci86.mina.bin forth32.com
 	ln -sf ci86.alone.asm alone.asm
 	ln -sf ci86.alonehd.asm alonehd.asm
 
+
+forth.lab : forth.lab.lina ;
+	ln -sf forth.lab.lina forth.lab
+
 lina.zip : $(RELEASELINA) ;
-	ln -sf forth.lab forth.lab.linux
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
 	(cd ..; ln -s ci86 lina-$(VERSION))
 	(cd ..; tar -czvf ci86/lina-$(VERSION).tar.gz `cat ci86/MANIFEST`)
