@@ -314,7 +314,7 @@ VARIABLE RE-FILLED
 : RE,   RE-FILLED @ ! 1 CELLS RE-FILLED +! ;
 
 \ Add STRINGCONSTANT to the ``RE-EXPR''
-: RE$,   DUP >R RE-FILLED @ $!   RE-FILLED @ CELL+ R@ + ALIGNED RE-FILLED ! ;
+: RE$,   DUP >R RE-FILLED @ $!   RE-FILLED @ CELL+ R> + ALIGNED RE-FILLED ! ;
 
 \ Add CHARSET to the ``RE-EXPR''.
 : RE-SET,   RE-FILLED @ MAX-SET MOVE   MAX-SET RE-FILLED +! ;
@@ -328,10 +328,9 @@ VARIABLE RE-FILLED
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
 : HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF
-        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ RE$,   !NORMAL-CHARS
+        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ ^ WORDS RE$,   !NORMAL-CHARS
     THEN
 ;
-: HARVEST-NORMAL-CHARS ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
@@ -412,7 +411,7 @@ CREATE (RE-EXPR) 1000 ALLOT
 : INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED ;
 
 \ Everything to be harvested after a build.
-: EXIT-BUILD   HARVEST-NORMAL-CHARS   ;
+: EXIT-BUILD   HARVEST-NORMAL-CHARS 0 RE, ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
@@ -464,4 +463,4 @@ CREATE (RE-EXPR) 1000 ALLOT
 
 \ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
-: BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE C@ 0= UNTIL DROP INIT-BUILD ;
+: BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE DUP @ 0= UNTIL DROP EXIT-BUILD ;
