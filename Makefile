@@ -197,7 +197,7 @@ clean : ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARG
 #msdos32.zip soesn't work yet.
 release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
 
-# The following must be run as root.
+# You may need to run the following run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
 # then creating a dos file system in accordance with the boot sector,
 # then copying the forth system to exact the first available cluster.
@@ -206,6 +206,18 @@ boot: ci86.alone.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 	mformat -k a:
 	mcopy $+ a:forth.com
+
+# You may need to run the following run as root.
+# Make a raw boot floppy with no respect for DOS.
+# The Forth gets its information from the boot sector,
+# that is filled in with care.
+# The option BOOTSECTRK must be installed into alonetr.m4.
+trboot: ci86.alonetr.bin lina BLOCKS.BLK
+	rm fdimage
+	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
+	     \"fdimage\" PUT-FILE BYE | lina
+	cat BLOCKS.BLK >>fdimage
+	cp fdimage /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp fdimage /dev/fd0H1440
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 
