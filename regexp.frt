@@ -267,7 +267,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the end of a word"
-: CHECK< OVER STARTPOINTER @ = 0= DUP IF DROP OVER 1- C@ \w IN-CHAR-SET THEN >R
+: CHECK> OVER STARTPOINTER @ = 0= DUP IF DROP OVER 1- C@ \w IN-CHAR-SET THEN >R
          OVER C@ DUP IF \w IN-CHAR-SET THEN 0=  R> AND ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
@@ -320,7 +320,7 @@ VARIABLE RE-FILLED
 : RE-SET,   RE-FILLED @ MAX-SET MOVE   MAX-SET RE-FILLED +! ;
 
 \ Make a hole in the ``RE-EXPR'' for a quantifier, and leave IT.
-: MAKE-HOLE   MAX-SET >R  RE-FILLED @ R@ -
+: MAKE-HOLE   MAX-SET CELL+ >R  RE-FILLED @ R@ -
     DUP DUP CELL+ R> MOVE
     1 CELLS RE-FILLED +! ;
 
@@ -436,9 +436,9 @@ CREATE (RE-EXPR) 1000 ALLOT
 \ - - - - - - - - - - - - - - - - - - - - - - - -
 
 \ Patch up the previous single character match with a quantifier.
-: ADD*   MAKE-HOLE 'ADVANCE* ! ;
-: ADD+   MAKE-HOLE 'ADVANCE+ ! ;
-: ADD?   MAKE-HOLE 'ADVANCE? ! ;
+: ADD*   MAKE-HOLE 'ADVANCE* SWAP ! ;
+: ADD+   MAKE-HOLE 'ADVANCE+ SWAP ! ;
+: ADD?   MAKE-HOLE 'ADVANCE? SWAP ! ;
 
 \ Add specialties, more like markers.
 : ADD<   'CHECK< RE, ;
@@ -446,10 +446,11 @@ CREATE (RE-EXPR) 1000 ALLOT
 : ADD(   'HANDLE() RE, ALLOCATE( RE, ;
 : ADD)   'HANDLE() RE, ALLOCATE) RE, ;
 
-: | OVER 2 SET+! ;
-SET COMMAND-SET     COMMAND-SET !SET
-&[ 'PARSE-CHAR-SET |   &< 'ADD< |   &> 'ADD> |
-&( 'ADD( |   &) 'ADD) | &* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
+30 SET COMMAND-SET     COMMAND-SET !SET
+
+: | COMMAND-SET 2SET+! ;    \ Shorthand, about to be hidden.
+&[ 'PARSE-CHAR-SET |   &< 'ADD< |   &> 'ADD> | &( 'ADD( | &) 'ADD) |
+&* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
 '| HIDDEN
 
 \ Execute the command that belongs to the abnormal CHARACTER.
@@ -459,7 +460,7 @@ SET COMMAND-SET     COMMAND-SET !SET
 
 \ Parse one element of regular EXPRESSION .
 \ Leave EXPRESSION incremented past parsed part.
-: BUILD-RE-ONE    NORMAL-CHAR? IF ADD-TO-NORMAL ELSE DO-ABNORMAL THEN ;
+: BUILD-RE-ONE    NORMAL-CHAR? DUP IF ADD-TO-NORMAL ELSE DROP C@+ DO-ABNORMAL THEN ;
 
 \ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
