@@ -131,8 +131,7 @@ tty_linemode (struct tty *ptty)
 
 /* ************************************************************************** */
 
-int 
-keyq (int fd)
+int keyq (int fd)
 {
   fd_set rfds;
   fd_set afds;
@@ -151,12 +150,6 @@ keyq (int fd)
     return 1;
   return 0;
 }				/* no input */
-
-int 
-tty_keyq (struct tty *ptty)
-{
-  return (keyq (ptty->fd));
-}
 
 void (*figforth)() = 0x8050000;
 
@@ -181,17 +174,56 @@ qkey (void)
     return buf;			/* only one */
 }
 
-void EMIT (int ch)
+int QTERMINAL(void)
+{
+  fd_set rfds;
+  struct timeval tv; 
+
+  /* Zero timeout, must be set each time! */
+  /* A Linux peculiarity.                 */
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+
+  FD_ZERO(&rfds);
+  FD_SET(0, &rfds);    /* From standard input */
+  select(1, &rfds, NULL, NULL, &tv); 
+
+  return FD_ISSET(0, &rfds);     
+}
+ 
+int KEY( void )
+{
+  char key;
+  int i;
+  tty_keymode (&std_in);                                                       
+  i=read (0, &key, 1);
+  if ( 1!=i) {fprintf(stderr,"oei oei\n"); exit(1);}
+  return key;                 
+}
+
+void EMIT(int ch)
 {
   fputc (ch, stdout);
   fflush (stdout);
 }
 
-void 
-type (int count, char *addr)
+void TYPE(int count, char *buffer)
 {
-  fwrite (addr, 1, count, stdout);
+  write (1, buffer, count);
   fflush (stdout);
+}
+
+int EXPECT(int count, char *buffer)
+{
+  int i;
+  if ( count <= 0 ) return 0;
+
+  i= read(0, buffer, count);
+  buffer[--i]=0;  /* Eat the cr. */
+
+  printf(" Har there, we have a total of %d chars\n", i);
+  printf(" It looks like **%s**\n", buffer);
+  return i;     /* Ignored by fig-Forth, use it and you have ANSI ACCEPT */
 }
 
 /* Perform ANSI Forth 'SYSTEM' */
@@ -207,6 +239,7 @@ int SYSTEM(int count, char command[])
 
   strncpy( buffer, command, count);
   buffer[count]=0;
+  buffer[count-1]=0;
   return system (buffer);
 }
 
@@ -214,17 +247,16 @@ typedef int FUNC ();		/* array with I/O functions */
 
 FUNC *call[256] =
 {
-  0,                      /* eForth itself */
+  QTERMINAL,                    /*  0   */
   qkey,				/*  1   */
   EMIT,				/*  2   */
-  0,                            /*  3   */
-  type,				/*  4   */
-  SYSTEM,                       /*  5   */
-/* REMAINDER NOT USED IN EFORTH */
+  KEY,                          /*  3   */
+  TYPE,				/*  4   */
+  EXPECT,                       /*  5   */
+  SYSTEM,                       /*  6   */
 };
 
-int 
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
   FILE *in;
   if ((in = fopen ("fig86.linux.bin", "rb")) == NULL)
@@ -234,9 +266,8 @@ main (int argc, char *argv[])
     }
   fread ((char *) figforth, 1, 1000000, in);
   fclose (in);
-  tty_init (0, &std_in);
-  tty_keymode (&std_in);
-  tty_noecho (&std_in);
+  tty_init (0, &std_in);                                                       
+/*tty_noecho (&std_in);                                                      */
   figforth (argc, argv, &call);
-  tty_restore (&std_in);
+  tty_restore (&std_in);                                                       
 }
