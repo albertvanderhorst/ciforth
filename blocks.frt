@@ -926,6 +926,22 @@ REQUIRE OLD:
    'NEW-THRU >DFA @   'THRU >DFA ! ;
 : NO-DEBUG   'OK RESTORED   'THRU RESTORED ;
 : ^ .S ;
+( CASE-INSENSITIVE CASE-SENSITIVE ) \ AvdH A2oct24
+REQUIRE RESTORED HEX
+\ Characters ONE and TWO are equal, ignoring case.
+: C=-IGNORE DUP >R   XOR DUP 0= IF 0= ELSE
+     20 <> IF 0 ELSE
+     R@ 20 OR &a &z 1+ WITHIN THEN THEN  RDROP ;
+\ ( sc1 sc2 -- f) f means equal (0) or not. No lexicography.
+: CORA-IGNORE 0 DO   OVER I + C@   OVER I + C@   C=-IGNORE 0=
+    IF   2DROP -1 UNLOOP EXIT   THEN LOOP   2DROP 0 ;
+\ Caseinsensitive version of (MATCH)
+: (MATCH)-IGNORE   >R R@ >FFA @ 3 AND 0= DUP IF   DROP R@ >NFA
+@ @ OVER -   DUP 0< R@ >FFA @ 8 AND AND 0=   AND 0= DUP IF
+DROP OVER R@ >NFA @ $@ CORA-IGNORE 0=   THEN THEN   R> SWAP ;
+\ Install matchers
+: CASE-INSENSITIVE   '(MATCH)-IGNORE >DFA @ '(MATCH) >DFA ! ;
+: CASE-SENSITIVE '(MATCH) RESTORED ; DECIMAL
 ( DUMP ) REQUIRE B.  <HEX \ AvdH A1oct02
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
  : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP

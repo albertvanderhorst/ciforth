@@ -418,7 +418,9 @@ Despite the fact that thisforth contains only one state-smart word besides
  forthcode({SLITERAL})  (that word is forthcode({."}) )
 which is about politically correct,
 as a consequence all denotations and some other words like
- forthcode({CHAR}) turn out to be state smart as a design consequence.
+ forthcode({[CHAR]}) and forthcode({[']}) 
+(but not forthcode({CHAR}) and forthcode({'}))
+turn out to be state smart as a design consequence.
 This is used freely in the libraries of ciforth; it is
 the right of a system developer to do so. The library is not
 a supposedly ISO-conforming program, so don't

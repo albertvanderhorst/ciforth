@@ -58,6 +58,12 @@ A constant is created in this way, by the defining word forthcode({CONSTANT}) :
 forthexample({127 CONSTANT MONKEY   12 .
 12 OK})
 
+You may get forthsamp({ constant ? ciforth ERROR # 12 : NOT RECOGNIZED }).
+That is because you didn't type in what I said.
+thisforth is case sensitive.
+If you want to change that consult the section "Common problems".
+(forthpxref({Errors})).
+
 This must not be read like:
 forthbreak()
  a number, two programs and again a number etc.... ,

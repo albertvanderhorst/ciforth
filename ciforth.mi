@@ -11,7 +11,7 @@ dnl @smallbook
 @title ciforth manual
 A close-to-ISO/common intel/computer intelligence/CH+ forth.
 
-This is a standard-ISO Forth
+This is a standard-ISO Forth (mostly, see the section portability)
 for the configuration called thisforth:
 forthitemize
 forthitem
@@ -95,6 +95,7 @@ fit the Forth to the description or vice versa})
 
 These are the features:
 
+All ciforth's are forthdefi({case sensitive}).
 This is version ci86gnrversion.
 _PROTECTED_({It is running in protected mode.}) dnl
 _REAL_({It is running in real mode.}) dnl
@@ -259,6 +260,65 @@ forthcode({THROW}) or, preferably, forthcode({?ERROR}) and use
 an error number with an applicable message.
 However, unless yours is a quick and dirty program, you are encouraged to
 use some other unique error number.
+@section Common problems
+_HOSTED_({
+_PC_({
+@subsection "DIR" SYSTEM doesn't work
+It is problematic for ciforth to find the command interpreter on a DOS or
+Windows system.
+Instead of inspecting environment variables that may or may not be set correctly,
+ciforth contains a string forthcode({SHELL}) , that contains the name of the
+command interpreter, with as a default forthfile({/COMMAND.COM}).
+If this is not correct you may change it as appropriate by e.g.
+forthsamp({S" C:/WINDOWS/SYSTEM/COMMAND.COM" SHELL $! })
+})
+@subsection Error 11 or 12 caused by lower case.
+If you type a standard word like forthcode({words}) in lower case,
+it will not be recognised, resulting in error 11.
+Similarly forthcode({' words}) results in error 12.
+This is because thisforth is forthdefi({case sensitive}), i.e.
+the difference between lower and upper case is significant
+_VERBOSE_({ and only words that match in this respect too
+are found in the dictionary}).
+
+After forthsamp({1 LOAD}) or if started up using forthsamp({lina -r})
+you have forthcode({REQUIRED}) available.
+You may now issue forthsamp({  "CASE-INSENSITIVE" REQUIRED }) and switch the system
+into case-insensitivity and back by issuing the words forthcode({CASE-INSENSITIVE}) and
+forthcode({CASE-SENSITIVE}).
+
+Case insensitivity applies to the words looked up in the dictionary,
+not to hex digits.
+
+@subsection Error 8 at startup
+If you get an error 8 at startup, as soon as you try to forthcode({LOAD}) or forthcode({LIST}) a screen
+or use an option,
+this is because you cannot access the
+library file. It may not be there, or it may not be at the expected place.
+ciforth contains a string forthcode({BLOCK-FILE}) , that contains the name of the
+library file interpreter, with as a default forthfile({forth.lab}).
+If this is not correct you may change it as appropriate by e.g.
+_PC_({ forthsamp({S" C:/FORTH/forth.lab" BLOCK-FILE $! })})
+_HOSTED_LINUX_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
+
+_PC_({{If you have run ciforth without this message
+before, the problem is most probably caused by
+a crash of ciforth that has left the file open.
+You are the victim of file sharing under DOS/Windows.
+The remedy is to restart Windows.}})
+@subsection Error 8 while editing a screen
+If after editing a screen, you get error 8, the screen has not been written
+to disk, because you have no write
+access for the library file.
+You must issue forthcode({DEVELOP}) which reopens the library file in READ_WRITE
+mode. Normally this should be part of loading the forthcode({EDITOR}) .
+_HOSTED_LINUX_({ It may be of course that you don't have privilege to write
+to the file. As non-privileged user you cannot edit the the system-wide library file.
+})
+You may always edit and use a private copy of the library file, by the forthsamp({-l}) option.
+forthxref({Manual}) for how opttions work. _VERBOSE_({The forthsamp({-l}) option itself works only if at least the
+official library file has been correctly installed.})
+})
 @section Error explanations
 This section shows the explanation of the errors in ascending order.
 In actual situations sometimes you may not see the part after the semi colon.
@@ -369,18 +429,32 @@ looks like a number, e.g. forthsamp({25WAP}) .
 Be aware that denotations may mask regular words.
 If the forthcode({DENOTATION}) vocabulary is on top of the search order,
 you get this message if you type forthcode({2SWAP}) .
+Note that hex digits must be typed in uppercase, even if
+forthcode({"CASE-SENSITIVE"}) is in effect.
+This error may be caused by using lower case where upper case is
+required for ISO standard words.
+See the section "Common problems" in this chapter if you want
+to make ciforth case insensitive.
 
 forthitem
  forthsamp({ciforth ERROR # 11 : WORD IS NOT FOUND})
 
 The string printed was not found in the dictionary.
 This error is detected by forthcode({'}) (tick).
+This may be caused by using lower case where upper case is
+required for ISO standard words.
+See the section "Common problems" in this chapter if you want
+to make ciforth case insensitive.
 
 forthitem
  forthsamp({ciforth ERROR # 12 : NOT RECOGNIZED})
 
 The string printed was not found in the dictionary, nor
 does it match a number, or some other denotation.
+This may be caused by using lower case where upper case is
+required for ISO standard words or for hex digits.
+See the section "Common problems" in this chapter if you want
+to make ciforth case insensitive.
 
 forthitem
  forthsamp({ciforth ERROR # 13 : ERROR, NO FURTHER INFORMATION})
@@ -485,47 +559,6 @@ forthenditemize
 forthxref({ASSEMBLER}), for errors generated by the assembler.
 These have numbers that are all higher than the general errors.
 
-@section Common problems
-_HOSTED_({
-_PC_({
-@subsection "DIR" SYSTEM doesn't work
-It is problematic for ciforth to find the command interpreter on a DOS or
-Windows system.
-Instead of inspecting environment variables that may or may not be set correctly,
-ciforth contains a string forthcode({SHELL}) , that contains the name of the
-command interpreter, with as a default forthfile({/COMMAND.COM}).
-If this is not correct you may change it as appropriate by e.g.
-forthsamp({S" C:/WINDOWS/SYSTEM/COMMAND.COM" SHELL $! })
-})
-@subsection Error 8 at startup
-If you get an error 8 at startup, as soon as you try to forthcode({LOAD}) or forthcode({LIST}) a screen
-or use an option,
-this is because you cannot access the
-library file. It may not be there, or it may not be at the expected place.
-ciforth contains a string forthcode({BLOCK-FILE}) , that contains the name of the
-library file interpreter, with as a default forthfile({forth.lab}).
-If this is not correct you may change it as appropriate by e.g.
-_PC_({ forthsamp({S" C:/FORTH/forth.lab" BLOCK-FILE $! })})
-_HOSTED_LINUX_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
-
-_PC_({{If you have run ciforth without this message
-before, the problem is most probably caused by
-a crash of ciforth that has left the file open.
-You are the victim of file sharing under DOS/Windows.
-The remedy is to restart Windows.}})
-@subsection Error 8 while editing a screen
-If after editing a screen, you get error 8, the screen has not been written
-to disk, because you have no write
-access for the library file.
-You must issue forthcode({DEVELOP}) which reopens the library file in READ_WRITE
-mode. Normally this should be part of loading the forthcode({EDITOR}) .
-_HOSTED_LINUX_({ It may be of course that you don't have privilege to write
-to the file. As non-privileged user you cannot edit the the system-wide library file.
-})
-You may always edit and use a private copy of the library file, by the forthsamp({-l}) option.
-forthxref({Manual}) for how opttions work. _VERBOSE_({The forthsamp({-l}) option itself works only if at least the
-official library file has been correctly installed.})
-})
 @node Documentation,Glossary,Errors,top
 @chapter  Documentation summary
 
@@ -682,7 +715,9 @@ Use the glossary index to find the glossary description of each word.
 @printindex fn
 @node Concept Index,,,Top
 @unnumbered Concept Index
-The first reference is where the concept is explained.
+Mostly the first reference is where the concept is explained.
+But sometimes in introductory and tutorial sections
+an explanation sometimes was considered too distracting.
 @printindex cp
 @summarycontents
 @contents

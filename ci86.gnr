@@ -1546,9 +1546,10 @@ define({_LINKOLD},FORTH)dnl
 worddoc( {WORDLISTS},{DENOTATION},{denotation},{},{CI},
 {The name of the forthcode({DENOTATION}) vocabulary. The
 associated forthdefi({word list}) contains prefix words, called
-forthdefi({denotation}) definitions. If a word is not found in
-the current search order, FORTH will lookup its prefix in this
-word list _VERBOSE_({{, such as to find numbers and strings}}).
+forthdefi({denotation}) definitions. In ciforth all words of
+forthcode({DENOTATION}) belong to the minimum search order
+_VERBOSE)({, such that number, strings and other denotations
+are still available after forthcode({ONLY})}).
 If found the parse pointer is moved back to immediately after
 the prefix, and the corresponding denotation definition
 executed. This word list must be used with care as a
@@ -1931,10 +1932,11 @@ HEADER({(MATCH)},{PMATCH},{DOCOL})
         DC      RR, TNFA, FETCH, FETCH
         DC      OVER, LSUB
 ;
-; The following three lines take care of denotations.
+; The following four lines take care of denotations.
+        DC      LDUP, ZLESS  ;{Ignorable length difference.}
         DC      RR, TFFA, FETCH, LIT, B_DENOT, LAND ;{Get flag.}
-        DC      OVER, ZLESS, LAND  ;{Ignorable length difference.}
-        DC      ZEQU, LAND
+        DC      LAND  ;{Denotation applicable. }
+        DC      ZEQU, LAND ;{This AND is actually an OR.}
 ;
         DC      ZEQU
         DC      LDUP
