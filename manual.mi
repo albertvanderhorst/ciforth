@@ -25,7 +25,7 @@ sometimes called a machine word). For an Pentium processor this is
 32 bit, for the older Intel 8086 it is 16 bit.
 The pendant in Forth is called a forthdefi({cell}) and its size
 may deviate from the processor you are running on.
-For this ciforth it is _BITS16_({16})_BITS32_({32}).
+For this ciforth it is _BITS_,
 It applies to the data remembered in the data stack, and the 
 return addresses on the return stack.
 memory accesses forthcode({@@}) and forthcode({!}) , the size of forthcode({VARIABLE})s

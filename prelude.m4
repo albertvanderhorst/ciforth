@@ -148,6 +148,9 @@ dnl If this is equal to M4_LOADADDRESS , while M4_ORG is zero :
 dnl   This maximizes the amount of code able to communicate with the BIOS
 define({M4_SWITCHORG},M4_BIOSBOOT)dnl
 dnl
+dnl Retain information in the documentation that is redundant but illustrative.
+define({_VERBOSE_},_yes)
+dnl
 dnl    FEATURES THAT NEED SELDOM CHANGES
 dnl
 dnl Where the dictionary starts for 32 bit systems.

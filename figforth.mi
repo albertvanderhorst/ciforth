@@ -7,7 +7,7 @@ dnl @smallbook
 
 @titlepage
 @title fig-Forth Manual
-A _BITS16_({16})_BITS32_({32})-bits _BOOTED_({standalone}) Forth _HOSTED_LINUX_({running under Linux})_HOSTED_MSDOS_({running under MSDOS})
+A _BITS_-bits _BOOTED_({standalone}) Forth _HOSTED_LINUX_({running under Linux})_HOSTED_MSDOS_({running under MSDOS})
 @author Albert van der Horst 
 Dutch Forth Workshop
 
@@ -101,8 +101,11 @@ include(manual.mi)
 
 @node Glossary,top,Manual,top
 @chapter Glossary
-Wherever it says 16 bits read single precision number or "cell".
-Wherever it says 32 bits read double precision number.
+Wherever it says                 
+single precision number or forthdefi({cell}) _BITS_ bits is meant.
+Wherever it says 
+ forthdefi({double}) or ``double precision number'' a 
+_BITS16_({32})_BITS32_({64}) bits number is meant.
 
 forthcode({X}) must be understood that there is no actual definition with name forthvar({X}). 
 In the assembler listing it has label NULL.
@@ -123,16 +126,16 @@ forthitem b
 forthitem c      
 7 bit ascii character (hi 9 bits zero)
 forthitem d      
-32 bit signed double integer: most significant portion with sign
+_BITS16_({32})_BITS32_({64}) bit signed double integer: most significant portion with sign
 on top of stack.
 forthitem f      
 boolean flag. 0=false, non-zero=true
 forthitem ff     
 boolean false flag=0
 forthitem n      
-16 bit signed integer number
+_BITS_ bit signed integer number
 forthitem u      
-16 bit unsigned integer
+_BITS_ bit unsigned integer
 forthitem tf     
 boolean true flag=non-zero
 @end table 
@@ -157,12 +160,11 @@ forthitem U
 A user variable.
 @end table 
 
-Unless otherwise noted, all references to numbers are for 16 bit signed
-integers. On 8 bit data bus computers, the high byte of a number is on top
-of the stack, with the sign in the leftmost bit. For 32 bit signed double
-numbers, the most significant part (with the sign) is on top.
+Unless otherwise noted, all references to numbers are for _BITS_ bit
+signed integers. For _BITS16_({32})_BITS32_({64}) signed numbers, the
+most significant part (with the sign) is on top. 
 
-All arithmetic is implicitly 16 bit signed integer math, with error and
+All arithmetic is implicitly _BITS_ bit signed integer math, with error and
 under-flow indication unspecified.
 
 -- present but not documented

@@ -874,7 +874,7 @@ _NEWDEBUG_({ CALL    DISPLAYSI})
         PAGE
 ;
 ;{       Dictionary starts here.}
-worddoc({NUMBERS},{LIT},{lit},{--- n},{C2,L0},{
+worddoc({COMPILING},{LIT},{lit},{--- n},{C2,L0},{
 Within a colon-definition, forthcode({LIT}) is compiled followed by a 
 16 bit literal number given during compilation. Later execution of
 forthcode({LIT}) causes the contents of this next dictionary address to be pushed
@@ -1078,7 +1078,7 @@ _SWITCH_({
 ;{      <<<<< end of data used by cold start >>>>>}
         _RESB(US-($ - USINI))        ;{ All user can be initialised.}
 ;
-worddoc({NUMBERS},{DIGIT},{digit},{c n1 --- n2 tf (ok) c n1 --- ff (bad)},{},{
+worddoc({FORMATTING},{DIGIT},{digit},{c n1 --- n2 tf (ok) c n1 --- ff (bad)},{},{
 Converts the ascii character forthvar({c}) (using base forthvar({n1}) ) to its binary
 equivalent forthvar({n2}) , accompanied by a true flag. If the conversion is
 invalid, leaves only a false flag.},{})
@@ -1572,7 +1572,7 @@ forthcode({';'}) or forthcode({';CODE'}) .
 The compiling process is done by the text interpreter as long as
 forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
 set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
-set (P) are executed rather than being compiled.},{} )
+set (P) are executed rather than being compiled.},{})
 HEADER({:},{COLON},{DOCOL},1)
         DC      QEXEC
         DC      SCSP
@@ -1836,13 +1836,13 @@ dependent.},{})
 HEADER({STATE},{STATE},{DOUSE})
         DC      CELLS(18)
 ;
-worddoc({NUMBERS},{BASE},{base},{--- addr},{U,L0},{
+worddoc({FORMATTING},{BASE},{base},{--- addr},{U,L0},{
 A user variable containing the current number base used for input
 and output conversion.},{{DECIMAL},{HEX},{<#}})
 HEADER({BASE},{BASE},{DOUSE})
         DC      CELLS(19)
 ;
-worddoc({NUMBERS},{DPL},{d_p_l},{---- addr},{U,L0},{
+worddoc({FORMATTING},{DPL},{d_p_l},{---- addr},{U,L0},{
 A user variable containing the number of digits to the right of the
 decimal on double integer input. It may also be used hold output
 column location of a decimal point, in user generated formating. The
@@ -1850,7 +1850,7 @@ default value on single number input is -1.},{{<#},{FLD},{HLD}})
 HEADER({DPL},{DPL},{DOUSE})
         DC      CELLS(20)
 ;
-worddoc({NUMBERS},{FLD},{f_l_d},{--- addr},{U},{
+worddoc({FORMATTING},{FLD},{f_l_d},{--- addr},{U},{
 A user variable for control of number output field width. Presently
 unused in fig-FORTH.},{})
 HEADER({FLD},{LFLD},{DOUSE})
@@ -1868,7 +1868,7 @@ or other file related function.},{})
 HEADER({R#},{RNUM},{DOUSE})
         DC      CELLS(23)
 ;
-worddoc({NUMBERS},{HLD},{hld},{--- addr},{L0},{
+worddoc({FORMATTING},{HLD},{hld},{--- addr},{L0},{
 A user variable that holds the address of the latest character of
 text during numeric output conversion.},{{<#},{DPL},{FLD}})
 HEADER({HLD},{HLD},{DOUSE})
@@ -2216,7 +2216,7 @@ HEADER({SMUDGE},{SMUDG},{DOCOL})
         DC      TOGGL
         DC      SEMIS
 ;
-worddoc({NUMBERS},{HEX},{hex},{},{L0},{
+worddoc({FORMATTING},{HEX},{hex},{},{L0},{
 Set the numeric conversion forthcode({BASE}) for hexadecimal (base 16) input-output.},
 {{DECIMAL}})
 HEADER({HEX},{HEX},{DOCOL})
@@ -2225,7 +2225,7 @@ HEADER({HEX},{HEX},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc({NUMBERS},{DECIMAL},{decimal},{},{L0},{
+worddoc({FORMATTING},{DECIMAL},{decimal},{},{L0},{
 Set the numeric conversion forthcode({BASE}) for decimal input-output.},{{HEX}})
 HEADER({DECIMAL},{DECA},{DOCOL})
         DC      LIT,10
@@ -2520,7 +2520,7 @@ WORD2:  DC      LIN
         DC      LCMOVE
         DC      SEMIS
 ;
-worddocsafe({NUMBERS},{(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},{
+worddocsafe({FORMATTING},{(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},{
 Convert the ascii text beginning at forthvar({addr1+l}) with regard to forthcode({BASE}) . The
 new value is accumulated into double number forthvar({d1}) , being left as double number 
 forthvar({d2}) .
@@ -2556,7 +2556,7 @@ PNUM3:  DC      FROMR
 PNUM2:  DC      FROMR
         DC      SEMIS
 ;
-worddoc({NUMBERS},{NUMBER},{number},{addr --- d},{},{
+worddoc({FORMATTING},{NUMBER},{number},{addr --- d},{},{
 Convert a character string left at forthvar({addr}) with a preceeding count, to
 a signed double number forthvar({d}) , using the current numeric base. If a
 decimal point is encountered in the text, its position will be
@@ -2620,7 +2620,7 @@ HEADER({-FIND},{DFIND},{DOCOL})
         DC      PFIND   ;{ENDIF}
 DFIN1:  DC      SEMIS
 ;
-worddocsafe({ERRORS},{(ABORT)},{paren_abort},{},{},{
+worddocsafe({INIT},{(ABORT)},{paren_abort},{},{},{
 Executes after an error when forthcode({WARNING}) is -1. This word normally
 executes forthcode({ABORT}), but may be altered (with care) to a user's
 alternative proceedure forthvar({AP}) as follows: 
@@ -2750,7 +2750,7 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
         DC      COMMA
         DC      SEMIS
 ;
-worddoc({NUMBERS},{LITERAL},{literal},{n --- (compiling)},{P,C2,L0},{
+worddoc({COMPILING},{LITERAL},{literal},{n --- (compiling)},{P,C2,L0},{
 If compiling, then compile the stack value forthvar({n}) as a 16 bit literal.
 This definition is immediate so that it will execute during a colon
 definition. The intended use is:
@@ -2768,7 +2768,7 @@ HEADER({LITERAL},{LITER},{DOCOL},1)
 LITE1:  DC      SEMIS
         PAGE
 ;
-worddoc({NUMBERS},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{P},{},{
+worddoc({COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{P},{
 If compiling, compile a stack double number into a literal. Later
 execution of the definition containing the literal will push it to
 the stack. If executing, the number will remain on the stack.},{})
@@ -3066,7 +3066,7 @@ CODE_HEADER({S->D},{STOD})
         DEC     AX      ;{NEG}
 STOD1:  _2PUSH
 ;
-worddoc({NUMBERS},{+-},{plus_minus},{n1 n2 --- n3},{},{
+worddoc({FORMATTING},{+-},{plus_minus},{n1 n2 --- n3},{},{
 Apply the sign of forthvar({n2}) to forthvar({n1}) , which is left as forthvar({n3}) .},
 {{SIGN},{#S},{<#},{D+-}})
 HEADER({+-},{PM},{DOCOL})
@@ -3075,7 +3075,7 @@ HEADER({+-},{PM},{DOCOL})
         DC      MINUS   ;{ENDIF}
 PM1:    DC      SEMIS
 ;
-worddoc({NUMBERS},{D+-},{d_plus_minus},{d1 n --- d2},{},{
+worddoc({FORMATTING},{D+-},{d_plus_minus},{d1 n --- d2},{},{
 Apply the sign of forthvar({n}) to the double number forthvar({d1}) , leaving it as forthvar({d2}) .}
 ,{{SIGN},{#S},{<#},{+-}})
 HEADER({D+-},{DPM},{DOCOL})
@@ -3162,7 +3162,7 @@ HEADER({*},{STAR},{DOCOL})
         DC      DROP
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{/MOD},{slash_mod},{n1 n2 --- rem quot},{L0},{
+worddoc({OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{L0},{
 Leave the remainder and signed quotient of forthvar({n1/n2}) . The remainder has
 the sign of the dividend.},{{*/MOD},{*/},{M/MOD}}) 
 HEADER({/MOD},{SLMOD},{DOCOL})
@@ -4711,7 +4711,7 @@ SPAX2:  DC      SPACE
         _LOOP(SPAX2)    ;{LOOP}
 SPAX1:  DC      SEMIS
 ;
-worddoc({NUMBERS},{<#},{less_number_sign},{},{L0},{
+worddoc({FORMATTING},{<#},{less_number_sign},{},{L0},{
 Setup for pictured numeric output formatting using the words:
    forthcode({<#}) forthcode({#}) forthcode({#S}) forthcode({SIGN}) forthcode({#>})
 The conversion is done on a double number producing
@@ -4722,7 +4722,7 @@ HEADER({<#},{BDIGS},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc({NUMBERS},{#>},{number_sign_greater},{d --- addr count},{L0},{
+worddoc({FORMATTING},{#>},{number_sign_greater},{d --- addr count},{L0},{
 Terminates numeric output conversion by dropping forthvar({d}), leaving the text
 address and character count suitable for forthcode({TYPE}).},{})
 HEADER({#>},{EDIGS},{DOCOL})
@@ -4735,7 +4735,7 @@ HEADER({#>},{EDIGS},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc({NUMBERS},{SIGN},{sign},{n d --- d},{L0},{
+worddoc({FORMATTING},{SIGN},{sign},{n d --- d},{L0},{
 Stores an ascii "-" sign just before a converted numeric output
 string in the text output buffer when forthvar({n}) is negative. forthvar({n}) is discarded
 but double number forthvar({d}) is maintained. Must be used between forthcode({<#}) and forthcode({#>}) .},
@@ -4748,7 +4748,7 @@ HEADER({SIGN},{SIGN},{DOCOL})
         DC      HOLD    ;{ENDIF}
 SIGN1:  DC      SEMIS
 ;
-worddoc({NUMBERS},{#},{number_sign},{d1 --- d2},{L0},{
+worddoc({FORMATTING},{#},{number_sign},{d1 --- d2},{L0},{
 Generate from a double number forthvar({d1}), the next ascii character which is
 placed in an output string. Result forthvar({d2}) is the quotient after division
 by forthcode({BASE}), and is maintained for further processing. Used between forthcode({<#}) 
@@ -4769,7 +4769,7 @@ DIG1:   DC      LIT,30H
         DC      HOLD
         DC      SEMIS
 ;
-worddoc({NUMBERS},{#S},{number_sign_s},{d1 --- d2},{L0},{
+worddoc({FORMATTING},{#S},{number_sign_s},{d1 --- d2},{L0},{
 Generates ascii text in the text output buffer, by the use of forthcode({#}),
 until a zero double number forthvar({n2}) results.
 Used between forthcode({<#}) and forthcode({#>}).},{})

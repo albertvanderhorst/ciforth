@@ -56,7 +56,7 @@ worddocchapter({LOGIC},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({MEMORY},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({MISC},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({MULTIPLYING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({NUMBERS},{ },{CONTENT},{NEW CHAPTER },{},{},{})
+worddocchapter({FORMATTING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({OPERATOR},{ },
 {The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc. 
 The result of the operation is always
@@ -99,7 +99,7 @@ worddocchapterend({LOGIC},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
 worddocchapterend({MEMORY},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
 worddocchapterend({MISC},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
 worddocchapterend({MULTIPLYING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({NUMBERS},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
+worddocchapterend({FORMATTING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
 worddocchapterend({OPERATOR},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
 worddocchapterend({OUTPUT},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
 worddocchapterend({PARSING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
