@@ -93,6 +93,7 @@
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
 : @- 0 CELL+ - >R R @ R>  ; 
 ( CHAR - CONSTANT &-     CHAR ~ CONSTANT &~                             )
+  45 CONSTANT &-     126 CONSTANT &~                             
 1 VARIABLE TABLE 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in )
 ( memory! Not as printed on a big endian machine! )
@@ -101,22 +102,22 @@
 ( ------------- UTILITIES, SYSTEM DEPENDANT ----------------------------) 
 VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
-: % [COMPILE] 'O NFAO ;   ( Return the DEA from "word". )
+: % [COMPILE] ' ;   ( Return the DEA from "word". )
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
-: %>BODY N>P CELL+ ; ( From DEA to the DATA field of a created word )
+: %>BODY >PFA CELL+ ; ( From DEA to the DATA field of a created word )
 : %BODY> 0 CELL+ - NFAO ; ( Reverse of above)
-: %>CODE N>P CFAO CELL+ ; ( From DEA to the DOES> pointer )
+: %>CODE >PFA ; ( From DEA to the DOES> pointer )
 ( Leave for DEA : it IS to be ignored. This is used for supressing the  )
 ( bare bones of the sib mechanism in i586.                              )
-: IGNORE? 1+ C@ &~ = ;
+: IGNORE? >NFA @ 1+ C@ &~ = ;
 
 : (>NEXT%) >LFA @ ; ( Given a DEA, return the next DEA. )
 ( For a DEA as returned from (>NEXT%} : it IS the end, not a real dea.  )
-: VOCEND? @ FFFF AND A081 = ;
+: VOCEND? >NFA @ FFFF AND A081 = ;
 ( As (>NEXT%} but skip holes, i.e. words with names starting in ``-''   )
-: >NEXT% BEGIN  (>NEXT%) DUP 1+ C@ &- - UNTIL ;
+: >NEXT% BEGIN  (>NEXT%) DUP >NFA @ 1+ C@ &- - UNTIL ;
 ( Leave the first DEA of the assembler vocabulary.                      )
-: STARTVOC 'O ASSEMBLER 2 +  CELL+ @ ;
+: STARTVOC ' ASSEMBLER >DFA >LFA @ ;
 
 ( Build: for "word" remember type -- creation class -- exemplified by   )
 ( DOES> address of the code to be executed.                             )
@@ -279,7 +280,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 : .DISS-AUX DISS @+ SWAP DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
- 'O .DISS-AUX CFAO   VARIABLE 'DISS  ( Can be redefined to generate testsets)
+ ' .DISS-AUX CFA   VARIABLE 'DISS  ( Can be redefined to generate testsets)
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
 : DISS- 0 CELL+ MINUS DISS +! ; ( Discard last item of `DISS' )
@@ -516,12 +517,14 @@ HERE POINTER !
     BEGIN (DISASSEMBLE) CR POINTER @ OVER < 0= UNTIL
     DROP
 ;
-(   : M| 'O xxx  REJECT M| ;  To forbid M| xxx  in combination      )
+(   : M| ' xxx  REJECT M| ;  To forbid M| xxx  in combination      )
 ( xxx must be PI or FI not FIR )
-: REJECT> NFAO DUP >BI ISS @ @ AND SWAP >DATA @ = 27 ?ERROR ;
+: REJECT> DUP >BI ISS @ @ AND SWAP >DATA @ = 27 ?ERROR ;
 
 ( ************************* )
- 'O ASSEMBLER CFAO 'O ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
+: ;CODE
+?CSP   COMPILE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
+; IMMEDIATE
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
 : C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
