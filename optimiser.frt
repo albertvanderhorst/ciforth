@@ -60,39 +60,42 @@ VARIABLE OPT-START
     '(;) HERE !     \ To prevent too many crashes while testing.
 ;
 
+
+\ Recompile the code from BEGIN END. Leave END as the new begin.
+: >HERE SWAP 2DUP -  HL-CODE, ;
+
 \ Optimisation is over. Run the optimisable code and compile constants
-\ instead.
-: TERMINATE-EXECUTE-REPLACE
+\ instead of them. "Cash the optimisation check."
+: CASH
     OPT-START @ HERE <> IF   ." TER"
         EXECUTE-DURING-COMPILE THROW-AWAY COMPILE-CONSTANTS
     THEN
 ;
 
-
-
-VARIABLE AAP
-\ For DEA : handle its optimisation or the cashing and restart of
-\ the optimisation.
+\ For BEGIN END DEA : if ``DEA'' allows it, add to optimisation,
+\ else cash it and restart it. BEGIN START is the code copied.
+\ (Mostly ``DEA"" plus inline belonging to it.)
+\ Return a new BEGIN for the code to be moved, mostly the old ``END''.
 :  OPT/NOOPT
     DUP CAN-COMBINE?
-    DUP 0= AAP !
-    IF
-        SE@ COMBINE-SE
-    ELSE
-        DROP TERMINATE-EXECUTE-REPLACE
-    THEN ;
+    IF ^
+        SE@ COMBINE-SE               ( DEA -- )
+        >HERE                        ( BEGIN END -- BEGIN' )
+^   ELSE ^
+        DROP CASH  ( DEA -- )
+        >HERE                        ( BEGIN END -- BEGIN' )
+        !OPT-START
+^   THEN ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
 : EXPAND
     !OPT-START
-    BEGIN DUP >R
+    BEGIN DUP
         NEXT-PARSE
     WHILE
         OPT/NOOPT
-        R> 2DUP -  HL-CODE,      \ HERE H.
-        AAP @ IF !OPT-START THEN
-    REPEAT 2DROP RDROP
-    TERMINATE-EXECUTE-REPLACE   POSTPONE (;)
+    REPEAT DROP 2DROP
+    CASH   POSTPONE (;)
 ;
 
 \ Optimise DEA regards folding.
