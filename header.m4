@@ -31,7 +31,7 @@ define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
-_$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
+N_$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
 ifelse(1,_x, , 
 {         DSS      }"{_z}"
 )dnl
@@ -41,7 +41,7 @@ $2:      DC     $3
          undefine({_x})dnl
          undefine({_y})dnl
          undefine({_z})dnl
-define({_LINKOLD},{_$2})dnl
+define({_LINKOLD},{N_$2})dnl
 })dnl
 dnl
 dnl Similar to HEADER but uses single quotes. instead of doubles. 
@@ -76,7 +76,7 @@ define({_LINKOLD},{_$2})dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl The link etc. field of the word with assembler name $1
-define({_NAME_FIELD},_$1)dnl
+define({_NAME_FIELD},N_$1)dnl
 define({_LINK_FIELD},($1-CW))dnl
 define({_CODE_FIELD},$1)dnl
 define({_PARAMETER_FIELD},($1+CW))dnl
