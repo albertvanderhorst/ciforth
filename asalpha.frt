@@ -64,19 +64,37 @@ ASSEMBLER DEFINITIONS  HEX
 ( ***************************** 4.2 LOAD/STORE ************************ )
 
 ( DEC calls this a memory instruction format.                           )
-00,0004 0 NORMAL-MASK  T!
+0 0 NORMAL-MASK  T!
 BI: 01.0 BI: 28.0 8 4FAMILY, LDL, LDQ, LDL_L, LDQ_L, STL, STQ, STL_C, STQ_C,
 BI: 01.0 BI: 08.0 8 4FAMILY, --   --    LDBU, --     LDWU, STW, STB, --
 02,0004 0 NORMAL-MASK  T!      \ Like above, however requires AMASK 0
 BI: 01.0 BI: 08.0 8 4FAMILY, LDA, LDAH, --    LDQ_U, --    --   --   STQ_U,
 
-( ********************************************************************* )
+( ***************************** 21 bits displacement ****************** )
 
+20,0000 0 001F,FFFF 0 DFI D21|
+
+( ***************************** 4.3 CONTROL *************************** )
+
+( DEC calls this a branch instruction format.                           )
+8 0 NORMAL-MASK  T!
+BI: 01.0 BI: 38.0 8 4FAMILY, BLBC, BEQ, BLT, BLE, BLBS, BNE, BGE, BGT,
+BI: 04.0 BI: 30.0 2 4FAMILY, BR, BRS,
+
+0 0 0000,3FFF 0 DFI h#|        \ 14 bits hint
+
+0 0 3FF,3FFF T!
+BI: 00.200 BI: 1A.000 4 4FAMILY, JMP, JSR, RET, JSR_COROUTINE,
+
+( ********************************************************************* )
 00 00 NORMAL-MASK T!
 BI: 1.0 BI: 0.0 8 4FAMILY, CALL_PAL OPC01 OPC02 OPC03 OPC04 OPC05 OPC06 OPC07
 
-20,0000 0 001F,FFFF 0 DFI D21|    ( 21 bits displacement)
+( ********************************************************************* )
 80,0000 0 03FF,FFFF 0 DFI N25|    ( 26 bits number built in)
+( ********************************************************************* )
+
+
 ( ---------------------------------------test -----------------         )
 
 \   Toggle the bit that governs showing uninteresting instructions in the disassembly.
@@ -93,22 +111,21 @@ BI: 1.0 BI: 0.0 8 4FAMILY, CALL_PAL OPC01 OPC02 OPC03 OPC04 OPC05 OPC06 OPC07
 : SHOW-ALL   TOGGLE-TRIM SHOW-ALL TOGGLE-TRIM ;
 
 
-
-: NEXT CHECK26 ;
-    ." COMES JAN" CR
-        CODE JAN ADDQ, a30| R| b30| c30| NEXT ENDCODE
-
-'JAN >CFA @ DDD DROP
-
-        CODE KEES ADDQ, a30| #| 1E b#| c30| NEXT ENDCODE
-'KEES >CFA @ DDD DROP
-
-        CODE PIET LDA, a30| 0AAAA D16| NEXT ENDCODE
-'PIET  >CFA @ DDD DROP
-        CODE PIET LDA, a30| b30| NEXT ENDCODE
-'PIET  >CFA @ DDD DROP
-        "Expect ERROR" TYPE CR
-        CODE PIET LDA, a30| b30| 0AAAA D16| NEXT ENDCODE
-'PIET  >CFA @ DDD DROP
+\ : NEXT CHECK26 ;
+\     ." COMES JAN" CR
+\         CODE JAN ADDQ, a30| R| b30| c30| NEXT ENDCODE
+\
+\ 'JAN >CFA @ DDD DROP
+\
+\         CODE KEES ADDQ, a30| #| 1E b#| c30| NEXT ENDCODE
+\ 'KEES >CFA @ DDD DROP
+\
+\         CODE PIET LDA, a30| 0AAAA D16| NEXT ENDCODE
+\ 'PIET  >CFA @ DDD DROP
+\         CODE PIET LDA, a30| b30| NEXT ENDCODE
+\ 'PIET  >CFA @ DDD DROP
+\         "Expect ERROR" TYPE CR
+\         CODE PIET LDA, a30| b30| 0AAAA D16| NEXT ENDCODE
+\ 'PIET  >CFA @ DDD DROP
 
 PREVIOUS DEFINITIONS
