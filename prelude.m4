@@ -127,6 +127,9 @@ define( {_HOSTED_LINUX_}, _no)dnl
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl
+dnl Multi tasking, i.e. PAUSE etc.
+define( {_TASK_}, _no)dnl
+dnl
 dnl Keep the old debugging facility with place for breakpoints
 define( {_OLDDEBUG_}, _no)dnl
 dnl
