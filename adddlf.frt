@@ -1,7 +1,7 @@
 \ Copyright (2003): Albert van der Horst by GNU Public License
 \ $Id$
 
-: \D POSTPONE \ ;  IMMEDIATE
+: \D ( POSTPONE \ ) ;  IMMEDIATE
 
 \ Facility for filling in double link fields in Forth
 
@@ -63,20 +63,8 @@ REQUIRE COMPARE
 : MATCH2   >R 2DUP R@ >NFA @ $@ COMPARE R> SWAP ;
 
 
-\ First word
-\ : FIND2
-\     DUP >R          \ Keep backtrack possibility.
-\     BEGIN
-\     DUP WHILE           \ Attempt near link
-\     MATCH2 DUP 0  WHILE DROP   \ Ready if lower
-\
-\     >XFA @
-\     DUP IF MATCH2 THEN     \ Attempt far link
-\     DUP 0= WHILE           \ A match, then ready.
-\     REPEAT
-\     RDROP
-\
-\ ;
+\ Like ``MATCH2'', only takes a null dea, and returns null then.
+: MATCH3 DUP IF MATCH2 ELSE 0 THEN ;
 
 '2DROP '?PAIRS 3 CELLS MOVE
 
@@ -85,26 +73,25 @@ REQUIRE COMPARE
 \ dea2 is where the search stops, a match, mismatch or zero.
 : FIND2-a
     BEGIN
-    DUP WHILE
-    MATCH2 0 > WHILE
-        DUP >R >XFA @ DUP IF MATCH2 ELSE 0 THEN
-        0< IF
-                DUP .S ID. "REJECTED " TYPE DROP R>
-                >LFA @
+    MATCH3 0 > WHILE
+        DUP >R >XFA @
+        MATCH3 0< IF
+\D              DUP .S ID. "REJECTED " TYPE
+                DROP R> >LFA @
         ELSE
-                DUP .S DUP IF ID. "OKAY " TYPE ELSE DROP "ATEND" TYPE THEN RDROP
+\D              DUP .S DUP IF ID. "OKAY " TYPE ELSE DROP "ATEND" TYPE THEN
+                RDROP
         THEN
     REPEAT
-THEN
 ;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
-: FIND2-b DUP IF MATCH2 IF DROP 0 THEN THEN   >R 2DROP R> ;
+: FIND2-b   MATCH3 IF DROP 0 THEN   >R 2DROP R> ;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
 : FIND2   FIND2-a FIND2-b ;
 
 DO-DEBUG
-'FORTH FILL-XFA
-"DROP" 'FORTH >WID >LFA @ FIND2   ID. CR
-"POPE" 'FORTH >WID >LFA @ FIND2   . CR
-"!" 'FORTH >WID >LFA @ FIND2      ID. CR
-"~~~~" 'FORTH >WID >LFA @ FIND2   . CR
+\D 'FORTH FILL-XFA
+\D "DROP" 'FORTH >WID >LFA @ FIND2   ID. CR
+\D "POPE" 'FORTH >WID >LFA @ FIND2   . CR
+\D "!" 'FORTH >WID >LFA @ FIND2      ID. CR
+\D "~~~~" 'FORTH >WID >LFA @ FIND2   . CR
