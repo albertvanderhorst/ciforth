@@ -68,8 +68,11 @@ define({_LINKOLD},{_$2})dnl
 })
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
-dnl The link field of the word with assembler name $1
-define({_LINK_FIELD},_$1)dnl
+dnl The link etc. field of the word with assembler name $1
+define({_NAME_FIELD},_$1)dnl
+define({_LINK_FIELD},($1-CW))dnl
+define({_CODE_FIELD},$1)dnl
+define({_PARAMETER_FIELD},($1-CW))dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN

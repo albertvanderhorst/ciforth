@@ -29,7 +29,7 @@ dnl for define({_USEDOS______________} _yes)
 dnl This file should be included and later some definitions redefined.
 dnl _1_ is later to be replace by 40 _.
 define({_no}, 
-{NOT IMPLEMENTED:})dnl
+{;CODE SUPPRESSED:})dnl
 define({_END___1__},  
 _______1__ {$1})dnl
 define({_yes},{${}1})
@@ -61,6 +61,10 @@ dnl Use DOS for I/O. Possibility of redirection.
 dnl File based, no obsolete MSDOS features.
 define( {_MODERN_1_}, _no({$0}) )dnl
 dnl
+dnl Use LINUX for I/O. Possibility of redirection. 
+dnl File based.
+define( {_LINUXIO_1_}, _no({$0}) )dnl
+dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl Boot sector present for use on PC. _USEBIOS_ required.
@@ -73,6 +77,9 @@ define( {_BOOTHD__1_}, _no({$0}) )dnl
 dnl
 dnl Use BIOS for I/O. No redirection but possible stand alone.
 define( {_HOSTED__1_}, _no({$0}) )dnl       
+dnl
+dnl Use LINUX for I/O. Redirection possible.
+define( {_LINUXHOSTED_1_}, _no({$0}) )dnl       
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl

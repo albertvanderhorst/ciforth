@@ -85,12 +85,16 @@ FF	EQU	0CH	;{ FORM FEED}
 ;
 ;{	MEMORY + I/O CONSTANTS}
 ;
-EM	EQU	10000H  ;{ END OF MEMORY + 1}
+EM	EQU	M4_EM   ;{ END OF MEMORY + 1}
 NBUF	EQU	2	;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF	EQU	1024    ;{DATA BYTES PER DISK BUFFER}
 US	EQU	100H     ;{ USER VARIABLE SPACE}
 RTS	EQU	0A0H	;{ RETURN STACK & TERM BUFFER}
 ;
+;____1_____ _LINUXHOSTED_1_({
+BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
+STRUSA  EQU     BUF1-US         ;{ User area}
+});_END___1__({ _LINUXHOSTED_1_})
 ;____1_____ _REAL_1_({
 BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
@@ -500,6 +504,12 @@ GDTLOAD DW     GDTLEN
 
 });_END___1__({ _PROTECTED_1_})
 
+;____1_____ _LINUXHOSTED_1_({
+include(width32.m4)       
+	ORG	M4_ORIG 
+        JMP     BOOTUP
+});_END___1__({ _LINUXHOSTED_1_})
+
 ;{ The following is not known until the final width m4 final has been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
 
@@ -775,7 +785,7 @@ BOOTUP:
 	DB	0EH	;{ VERSION ATTRIBUTES}
         _BITS32_1_({DC 0   ; Fill version info up to two cells. })
 USINI:
-        DC	_LINK_FIELD(TASK) ;{ FIRST DEFINITION 0 }
+        DC	_NAME_FIELD(TASK) ;{ FIRST DEFINITION 0 }
   	DC	STRUSA	;{ INIT (U0) USER AREA POINTER 1}
 	DC	BSIN	;{ RUBOUT: get rid of latest char 2}
 	DC 	INITS0	;{ INIT (S0)         3}
@@ -786,6 +796,9 @@ USINI:
 	DC	INITDP	;{	INIT (FENCE)  8}
 	DC	INITDP  ;{	INIT (DP)     9}
 	DC	_VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
+;____1_____ _LINUXIO_1_({
+	DC      0       ;{ INIT (OFFSET) }
+});_END___1__({_LINUXIO_1_})
 ;____1_____ _MODERN_1_({
 	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
@@ -1291,6 +1304,12 @@ HEADER({C/L},{CSLL},{DOCON})
 HEADER({FIRST},{FIRST},{DOCON})
 	DC	BUF1
 });_END___1__({ _REAL_1_})
+;
+;____1_____ _LINUXHOSTED_1_({
+HEADER({FIRST},{FIRST},{DOCON})
+	DC	BUF1
+});_END___1__({ _LINUXHOSTED_1_})
+;
 ;____1_____ _PROTECTED_1_({
 HEADER({FIRST},{FIRST},{DOVAR})
 BUF1    EQU     FIRST+CW
@@ -1694,7 +1713,7 @@ HEADER_SGQ({(.")},{PDOTQ},{DOCOL})
 	DC	FROMR
 	DC	PLUS
 	DC	TOR
-	DC	TYPES
+	DC	LTYPE
 	DC	SEMIS
 ;
 HEADER_SGQ({."},{DOTQ},{DOCOL},1)
@@ -1713,7 +1732,7 @@ HEADER_SGQ({."},{DOTQ},{DOCOL},1)
 DOTQ1	DC	WORDS
 	DC	HERE
 	DC	COUNT
-	DC	TYPES	;{ ENDIF}
+	DC	LTYPE   ;{ ENDIF}
 DOTQ2	DC	SEMIS
 	PAGE
 HEADER({QUERY},{QUERY},{DOCOL})
@@ -1916,7 +1935,7 @@ HEADER({ERROR},{ERROR},{DOCOL})
 	DC	PABOR	;{ENDIF}
 ERRO1	DC	HERE
 	DC	COUNT
-	DC	TYPES
+	DC	LTYPE
 	DC	PDOTQ
 	_STRING({? })
 	DC	MESS
@@ -1952,7 +1971,7 @@ HEADER({ID.},{IDDOT},{DOCOL})
 	DC      ONE
 	DC      LSUB
 	DC      TDUP
-	DC	TYPES
+	DC	LTYPE
 	DC      PLUS
 	DC      CFET
 	DC      LIT,07FH
@@ -2104,7 +2123,7 @@ DOVOC	DC	TWOP    ; i.e. Skip ' ' name.
 HEADER({FORTH},{FORTH},{DODOE},1)
 	DC	DOVOC
 	DB      80H+1, " "+80H  ; Dummy name field 
-	DC	_LINK_FIELD(TASK)
+	DC	_NAME_FIELD(TASK)
 	DC	0	;{ END OF VOCABULARY LIST}
 ;
 HEADER({DEFINITIONS},{DEFIN},{DOCOL})
@@ -2350,7 +2369,7 @@ HEADER({(LINE)},{PLINE},{DOCOL})
 HEADER({.LINE},{DLINE},{DOCOL})
 	DC	PLINE
 	DC	DTRAI
-	DC	TYPES
+	DC	LTYPE
 	DC	SEMIS
 ;
 HEADER({MESSAGE},{MESS},{DOCOL})
@@ -2599,7 +2618,7 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;____1_____ _MODERN_1_({
 ;{ All I/O goes through the modern (unix-borrowed)}
 ;{ file I/O.    }
-HEADER({TYPE},{TYPES},{DOCOL})
+HEADER({TYPE},{LTYPE},{DOCOL})
 	DC      DUPE, LOUT, PSTOR
 	DC      TOR, TOR
 	DC      LIT,04000H ;{ Write file or device }
@@ -2615,7 +2634,7 @@ HEADER({EMIT},{EMIT},{DOCOL})
 	DC      LIT,ACR,EMIT
 	DC      ZERO,LOUT,STORE
 EMIT1:  
-	DC	SPFET, ONE, TYPES
+	DC	SPFET, ONE, LTYPE
 	DC      DROP
 	DC	SEMIS
 ;
@@ -2647,6 +2666,28 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
 ;
 
 });_END___1__({_MODERN_1_})
+;____1_____ _LINUXIO_1_({
+;{ All I/O goes through the modern device (unix-standard)}
+;{ device I/O. Code fields are filled in during bootup. }
+HEADER({TYPE},{LTYPE},{0})
+;
+HEADER({EMIT},{EMIT},{DOCOL})      
+	DC      DUPE,LIT,LF,EQUAL
+	_0BRANCH(EMIT1)
+	DC      LIT,ACR,EMIT
+	DC      ZERO,LOUT,STORE
+EMIT1:  
+	DC	SPFET, ONE, LTYPE
+	DC      DROP
+	DC	SEMIS
+;
+ HEADER({EXPECT},{EXPEC},{0})
+;
+HEADER({KEY},{KEY},{0})
+;
+HEADER({?TERMINAL},{QTERM},{0})
+
+});_END___1__({_LINUXIO_1_})
 ;____1_____ _USEDOS_1_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
@@ -2711,7 +2752,7 @@ CI	PROC	NEAR
 	RET
 _ENDP CI      ENDP
 ;
-HEADER({TYPE},{TYPES},{DOCOL})
+HEADER({TYPE},{LTYPE},{DOCOL})
 	DC	DDUP
 	_0BRANCH(TYPE1) ;{ IF}
 	DC	OVER
@@ -2827,7 +2868,7 @@ HEADER({KEY},{KEY},{DOCOL})
 	     DC         DROP,DROP,DROP,DROP
 	     DC         LIT, 00FFH, LAND, SEMIS
 
-HEADER({TYPE},{TYPES},{DOCOL})
+HEADER({TYPE},{LTYPE},{DOCOL})
 	     DC      DDUP
 	     _0BRANCH(TYPE1)
 	     DC      OVER,   PLUS
@@ -2934,6 +2975,67 @@ RSLW2:  DC      TOR
 	DC      SEMIS
 
 });_END___1__({_MODERN_1_})
+;____1_____ _LINUXIO_1_({
+HEADER({BLOCK-FILE},{BLFL},{DOVAR})
+	_STRING({BLOCKS.FRT})
+	_RESB(20)               ;{ Allow for some path}
+;
+HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
+	DC      0
+;
+HEADER({DISK-ERR},{DERR},{DOCOL})
+	DC      ONE, LAND
+	DC      LIT, 08H, QERR
+	DC	SEMIS
+;
+HEADER({BLOCK-INIT},{BLINI},{DOCOL})
+	DC      LIT, 03D02H    ;{ Open file for read/write}
+	DC      ZERO,ZERO
+	DC      BLFL
+	DC      COUNT, OVER, PLUS
+	DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
+	DC	BDOS, DERR
+	DC      DROP, DROP, DROP
+	DC      BHAN, STORE
+	DC	SEMIS
+;
+HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
+	DC      LIT, 03E00H    ;{ Open file for read/write}
+	DC      BHAN, FETCH
+	DC      ZERO, ZERO
+	DC	BDOS, DERR
+	DC      DROP, DROP, DROP, DROP
+	DC	SEMIS
+;
+;{       Block #, Handle}
+HEADER({SEEK},{SEEK},{DOCOL})
+	DC      SWAP, TOR, TOR
+	DC      LIT, 04200H     ;{ Seek from start}
+	DC      FROMR           ;{ Handle}
+	DC      FROMR, BBUF, USTAR
+	DC      SWAP    ;{ L.S. ON TOP}
+	DC	BDOS, DERR
+	DC      DROP, DROP, DROP, DROP
+	DC      SEMIS
+;
+;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
+HEADER({R/W},{RSLW},{DOCOL})
+	_0BRANCH(RSLW1) 
+	DC	LIT, 03F00H     ;{ Disk read }
+	_BRANCH(RSLW2) 
+RSLW1	DC      LIT, 04000H     ;{ Disk write}
+RSLW2:  DC      TOR 
+	DC      BHAN, FETCH, SEEK ;{ That's done}
+	DC      FROMR, SWAP, TOR
+	DC      BHAN, FETCH
+	DC      BBUF
+	DC      FROMR           ;{ ADDR}
+	DC	BDOS, DERR
+	DC      DROP, DROP, DROP
+	DC      BBUF, LSUB, DERR
+	DC      SEMIS
+
+});_END___1__({_LINUXIO_1_})
 ;____1_____ _USEDOS_1_({
 ;
 WERR	DB  	'DISK WRITE ERROR  $'
@@ -3347,7 +3449,7 @@ HEADER({D.R},{DDOTR},{DOCOL})
 	DC	OVER
 	DC	LSUB
 	DC	SPACS
-	DC	TYPES
+	DC	LTYPE
 	DC	SEMIS
 ;
 HEADER({.R},{DOTR},{DOCOL})

@@ -6,7 +6,7 @@
 # one of the $(TARGETS) Forth's.
 
 .SUFFIXES:
-.SUFFIXES:.com.asm.m4.v
+.SUFFIXES:.bin.asm.m4.v.o.c
 
 INGREDIENTS = \
 default.m4       \
@@ -40,25 +40,25 @@ VERSION=0A
 
 # The kinds of Forth's that can be made.
 # Different assemblers should generate equivalent Forth's.
-TARGETS= msdos alone
+TARGETS= msdos alone linux
 
-# Define NASM as *the* assembler generating com files.
-%.com:%.asm
+# Define NASM as *the* assembler generating bin files.
+%.bin:%.asm
 	nasm -fbin $< -o $@ -l $*.lst 
 
 # msdos.m4 and alone.m4 are present (at least via RCS)
-# allow to generate fig86.msdos.com etc.
+# allow to generate fig86.msdos.bin etc.
 fig86.%.asm : %.m4 nasm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%.msm : %.m4 masm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%     : %.m4         fig86.gnr ; m4 $+ >$@
 
 # Default target for convenience
-fig86.$(s).com :
+fig86.$(s).bin :
 
 # Put include type of dependancies here
 alone.m4 msdos.m4 : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
-all: $(TARGETS:%=fig86.%.com) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
+all: $(TARGETS:%=fig86.%.bin) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
 clean : ; rm $(TARGETS:%=fig86.%.*)  
 
@@ -67,7 +67,7 @@ clean : ; rm $(TARGETS:%=fig86.%.*)
 # then creating a dos file system in accordance with the boot sector,
 # then copying the forth system to exact the first available cluster.
 # The option BOOTFD must be installed into alone.m4.
-boot: fig86.alone.com  
+boot: fig86.alone.bin  
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 	mformat -k a: 
 	mcopy $+ a:forth.com
@@ -75,7 +75,7 @@ boot: fig86.alone.com
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
 # The option BOOTHD must be installed into alone.m4.
-hdboot: fig86.alone.com  
+hdboot: fig86.alone.bin  
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 
 # ZIP targets
@@ -85,6 +85,8 @@ alone.asm : fig86.alone.asm ; cp $+ $@
 zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
+
+figforth : figforth.c ; $(CC) $(CFLAGS) $+ -o $@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
