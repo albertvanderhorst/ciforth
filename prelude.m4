@@ -48,8 +48,11 @@ dnl
 dnl Run the forth in real mode.
 define( {_REAL_1_}, _no({$0}) )dnl       
 dnl
-dnl Run the forth in protected mode.
+dnl Run the forth in protected mode, in fact mucho invisible.
 define( {_PROTECTED_1_}, _no({$0}) )dnl       
+dnl
+dnl Run the forth in protected mode, but take care of booting etc.
+define( {_NATIVE_1_}, _no({$0}) )dnl       
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl

@@ -92,13 +92,13 @@ US	EQU	100H     ;{ USER VARIABLE SPACE}
 RTS	EQU	0A0H	;{ RETURN STACK & TERM BUFFER}
 ;
 ;____1_____ _EQULAYOUT_1_({
-;____1_____ _REAL_1_({
+;____1_____ _HIGH_BUF_1_({
 BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
-});_END___1__({ _REAL_1_})
-;____1_____ _PROTECTED_1_({
+});_END___1__({ _HIGH_BUF_1_})
+;____1_____ _LOW_BUF_1_({
 STRUSA  EQU     EM-US         ;{ User area at end }
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _LOW_BUF_1_})
 
 STRTIB  EQU     STRUSA-RTS      ;{ Start return stack area}
 				;{ Under this : data stack}
@@ -152,7 +152,7 @@ _ENDCOMMENT
 
 ;{ Segments}
 REALSEGMENT     EQU     BOOTADDRESS/10H ;{ All real code executes here}
-;____1_____ _PROTECTED_1_({
+;____1_____ _NATIVE_1_({
 CS_COMMON       EQU     REALSEGMENT     ;{ Protected overlapping segment with same}
 DS_16           EQU     1800H           ;{ Real mode may dabble here}
 DS_32           EQU     1800H           ;{ Real mode may dabble here}
@@ -166,7 +166,7 @@ IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
 GDTLEN EQU 7FFFH 
 GDT EQU 28000H 
 GDT_SEGMENT EQU GDT/10H
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _NATIVE_1_})
 
 	PAGE
 	CSEG    SEGMENT PARA PUBLIC 'CODE'
@@ -251,7 +251,7 @@ BEGIN1: CALL    READSECTOR
 	CALL    DISPLAY
 	CALL    DISPLAYCR
 _REAL_1_({        JMP     BOOTUP})
-_PROTECTED_1_({        JMP     PROTECT})
+_NATIVE_1_({        JMP     PROTECT})
 ENDLD:  DW      INITDP
 ;{       Read the sector with number in CX (Counting from 0)}
 ;{       Leave into CX the incremented sec# }
@@ -402,7 +402,7 @@ ELSE1:
 	CALL    DISPLAY
 	CALL    DISPLAYCR
 _REAL_1_({        JMP     BOOTUP})
-_PROTECTED_1_({        JMP     PROTECT})
+_NATIVE_1_({        JMP     PROTECT})
 DISPLAYCR:
 	MOV     AL,ACR
 	CALL    DISPLAY
@@ -446,7 +446,7 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 });_END___1__({ _HOSTED_MSDOS_1_})
 
 PROTECT:
-;____1_____ _PROTECTED_1_({
+;____1_____ _NATIVE_1_({
 ;{CODE-SEGMENT  10 * CONSTANT CODE-START                          }
 	MOV     AX,GDT_SEGMENT ;{ GDT segment}
 	MOV     ES,AX
@@ -501,7 +501,7 @@ include(width32.m4)
 GDTLOAD DW     GDTLEN
 	DD     GDT 
 
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _NATIVE_1_})
 
 ;____1_____ _HOSTED_LINUX_1_({
 include(width32.m4)       
@@ -864,9 +864,9 @@ _ENDCOMMENT
 ;{       during cold start.}
 ;{       The name is 32 bits in base 36.}
 ;
-;____1_____ _PROTECTED_1_({
+;____1_____ _NATIVE_1_({
 CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _NATIVE_1_})
 ;____1_____ _HOSTED_LINUX_1_({
 CPUNM   DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END___1__({ _HOSTED_LINUX_1_})
@@ -1272,10 +1272,10 @@ DOCOL:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;{R1 <- (IP)}
 	LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
-;____1_____ _PROTECTED_1_({
+;____1_____ _NATIVE_1_({
 	JMPHERE_FROM_PROT
 	JMPHERE_FROM_REAL
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _NATIVE_1_})
 	_NEXT                            
 ;
 HEADER({;},{SEMI},{DOCOL},1)
@@ -1331,21 +1331,16 @@ HEADER({BL},{BLS},{DOCON})
 HEADER({C/L},{CSLL},{DOCON})
 	DC	64
 ;
-;____1_____ _REAL_1_({
+;____1_____ _HIGH_BUF_1_({
 HEADER({FIRST},{FIRST},{DOCON})
 	DC	BUF1
-});_END___1__({ _REAL_1_})
+});_END___1__({ _HIGH_BUF_1_})
 ;
-;____1_____ _HOSTED_LINUX_1_({
-HEADER({FIRST},{FIRST},{DOCON})
-	DC	BUF1
-});_END___1__({ _HOSTED_LINUX_1_})
-;
-;____1_____ _PROTECTED_1_({
+;____1_____ _LOW_BUF_1_({
 HEADER({FIRST},{FIRST},{DOVAR})
 BUF1    EQU     FIRST+CW
 	RESB    (KBBUF+2*CW)*NBUF       
-});_END___1__({ _PROTECTED_1_})
+});_END___1__({ _LOW_BUF_1_})
 ;
 ;{ THE END OF THE BUFFERS}
 HEADER({LIMIT},{LIMIT},{DOCON})
@@ -2689,7 +2684,7 @@ CODE_HEADER({KEY},{KEY})
 	DC         DROP,DROP,DROP,DROP
 	DC         LIT, 00FFH, LAND, SEMIS
 ;
-CODE_HEADER({?TERMINAL},{QTERM})
+HEADER({?TERMINAL},{QTERM},DOCOL)
 	DC      LIT,0B00H 
 	DC      ZERO,ZERO,ZERO
 	DC      BDOS, DROP ;{ ignore error }
