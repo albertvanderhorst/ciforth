@@ -81,7 +81,7 @@ REQUIRE $
 \ For NUMBER1 and NUMBER2 : "``NUMBER!'' IS greater or equal."
 : >= < 0= ;
 
-\ ----------------------    ----------------------     ----------------------
+\ ----------------------    keeping track of the stack ----------------------
 
 
 \ The virtual stack depth, maintained while parsing.
@@ -136,7 +136,7 @@ VARIABLE MIN-DEPTH
 \ Remember : both nibbles have offset 1!
 : COMBINE-VD    SE:1>2 SWAP 1- NEGATE VD +! REMEMBER-DEPTH 1- VD +! ;
 
-\ ---------------------------------------------------------------------
+\ ----------------------    Keeping track of branching ----------------------
 
 \ In the following a GAP is a pair START END with START inclusive and END
 \ exclusive.
@@ -166,12 +166,23 @@ HERE SWAP !
 \ For a SEQUENCE fill the ``BRANCHES'' set.
 : FILL-BRANCHES !BRANCHES BEGIN DUP FILL-ONE-BRANCH NEXT-PARSE WHILE DROP REPEAT 2DROP ;
 
-\ For a GAP : it IS forbidden, i.e. there is some branch from outside to inside
-\ the gap.
-: FORBIDDEN-GAP? SWAP CELL+ SWAP \ You may jump to the start of a gap!
+\ BRANCH and TARGET is free with respect to GAP, i.e. this jump is either
+\ totally outside or totally inside the GAP.
+: FREE-WRT?
+    >R 2DUP = IF 2DROP DROP RDROP 0 EXIT THEN R> \ You may jump to the start of a gap always!
+    >R >R
+    SWAP R> R> 2DUP >R >R WITHIN              \ BRANCH inside
+    SWAP R> R> WITHIN  \ Target Inside
+    =                        \ Same
+;
+
+\ For a GAP : it IS forbidden, i.e. there is some branch crossing the gap boundary.
+: FORBIDDEN-GAP?
 BRANCHES @+ SWAP ?DO
-    2DUP I @ ROT ROT WITHIN 0= IF 2DUP I @ >TARGET ROT ROT WITHIN IF 2DROP 0. LEAVE THEN THEN
+    I @ DUP >TARGET 2OVER FREE-WRT? IF 2DROP 0. LEAVE THEN
 0 CELL+ +LOOP OR 0= ;
+
+\ ----------------------    Annihilaton ----------------------
 
 \ For DEA return "it CAN be part of annihilatable code",
 \ as far as its stack & side effects are concerned.
@@ -304,7 +315,7 @@ THEN RDROP ;
 
 \ We are at an stable point. i.e. we consumed all the constants,
 \ we may have replaced ourselves. Or we can't swap anyway.
-: STABLE? VD @ MIN-DEPTH @ = MIN-DEPTH 1 < OR ;
+: STABLE? VD @ MIN-DEPTH @ = ( VD @ 1 < AND) ;
 
 \ For DEA : adding it would result in a not yet stable sequence.
 \ Otherwise the optimisation is known to end here or there is no optimisation.
