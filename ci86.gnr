@@ -86,9 +86,18 @@ LF      EQU     0AH     ;{ LINE FEED, USED INTERNALLY AS}
                         ;{ LINE ENDER}
 FF      EQU     0CH     ;{ FORM FEED}
 ;
+;{      HEADER RELATED EQUATES}
+B_DUMMY   EQU     01H     ;{ dea is dummy, from vocabulary link}
+B_INVIS   EQU     02H     ;{ dea is invisible, "smudged".}
+C_HOFFSET EQU     3       ;{ Offsets of code field in cells, w.r.t. dea}
+F_HOFFSET EQU     1       ;{ Same for flag field}
+L_HOFFSET EQU     2       ;{ Same for link field}
+N_HOFFSET EQU     0       ;{ Same for name field}
+P_HOFFSET EQU     4       ;{ Same for parameter field}
+;
 ;{      MEMORY + I/O CONSTANTS}
 ;
-NBUF    EQU     2       ;{ NO. OF BUFFERS AKA SCREENS }
+NBUF    EQU     8       ;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
 US      EQU     100H     ;{ USER VARIABLE SPACE}
 _BITS16_({ RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER} })
@@ -1133,6 +1142,10 @@ from forthcode({FOR-WORDS}).},
 {{FIND}})
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      TOR
+        DC      RR, TFFA, FETCH
+        DC      LIT, B_INVIS | B_DUMMY
+        DC      LAND, ZEQU
+        _0BRANCH(MATS2)
         DC      LDUP
         DC      RR, TNFA, FETCH, CFET
         DC      EQUAL   ;{ Compare counts.}
@@ -1671,7 +1684,7 @@ HEADER({CONSTANT},{CON},{DOCOL})
         DC      SMUDG
         DC      COMMA
         DC      PSCOD
-DOCON:  MOV     AX,[BX+CELLS(1)] ;{GET DATA FROM PFA}
+DOCON:  MOV     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
 ;
 worddoc({DEFINING},{VARIABLE},{variable},{},{NISO,E,LU},
@@ -1684,7 +1697,7 @@ so that a fetch or store may access this location.},{{USER},{CONSTANT}})
 HEADER({VARIABLE},{VAR},{DOCOL})
         DC      CON
         DC      PSCOD
-DOVAR:  LEA     AX,[BX+CELLS(1)] ;{(AX) <- PFA}
+DOVAR:  LEA     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
 worddoc({DEFINING},{USER},{user},{n ---},{L0},
@@ -1700,7 +1713,7 @@ particular variable. In ciforth the forthsamp({UP}) is fixed.
 HEADER({USER},{USER},{DOCOL})
         DC      CON
         DC      PSCOD
-DOUSE:  MOV     BX,[BX+CELLS(1)] ;{PFA  }
+DOUSE:  MOV     BX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
@@ -2201,7 +2214,7 @@ worddoc({DICTIONARY},{C>D},{parameter_field_address},{cfa --- dea},{},
 {Convert the code field address of a compiled definition to its
 dea address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({C>D},{CTOD},{DOCOL})
-        DC      LIT,CELLS(3)
+        DC      LIT,CELLS(C_HOFFSET)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2209,40 +2222,40 @@ worddoc({DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
 name field.},{{'},{>CFA}})
 HEADER({>NFA},{TNFA},{DOCOL})
+        DC      LIT,CELLS(N_HOFFSET)
+        DC      PLUS
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return the
 flag field.},{{'},{>NFA}})
 HEADER({>FFA},{TFFA},{DOCOL})
-        DC      CELLP
+        DC      LIT, CELLS(F_HOFFSET)
+        DC      PLUS
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
 {Given a dictionary entry addres return the
 link field address.},{{'},{>LFA}})
 HEADER({>LFA},{TLFA},{DOCOL})
-        DC      CELLP
-        DC      CELLP
+        DC      LIT, CELLS(L_HOFFSET)
+        DC      PLUS
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
 {Given a dictionary entry addres return the
 code field address.},{{'},{>CFA}})
 HEADER({>CFA},{TCFA},{DOCOL})
-        DC      CELLP
-        DC      CELLP
-        DC      CELLP
+        DC      LIT, CELLS(C_HOFFSET)
+        DC      PLUS
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
 parameter field address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({>PFA},{TPFA},{DOCOL})
-        DC      CELLP
-        DC      CELLP
-        DC      CELLP
-        DC      CELLP
+        DC      LIT, CELLS(P_HOFFSET)
+        DC      PLUS
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>DFA},{cfa},{dea --- cfa},{},
@@ -2458,8 +2471,8 @@ HEADER({DOES>},{DOES},{DOCOL})
         DC      PSCOD
 DODOE:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-        MOV     SI,[BX+CELLS(1)] ;{NEW IP }
-        LEA     AX,[BX+2*CELLS(1)]
+        MOV     SI,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        LEA     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET+1))]
         _PUSH
 ;
 worddoc({STRING},{COUNT},{count},{addr1 --- addr2 n},{L0},
@@ -2903,6 +2916,8 @@ worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
 HEADER({ID.},{IDDOT},{DOCOL})
         DC      TNFA
         DC      FETCH
+        DC      DDUP
+        _0BRANCH(IDDOT1)
         DC      COUNT
         DC      LIT,1FH
         DC      LAND
@@ -2918,6 +2933,7 @@ HEADER({ID.},{IDDOT},{DOCOL})
         DC      SPACE
         DC      SPACE
         DC      SPACE
+IDDOT1:
         DC      SEMIS
 ;
 worddoc({DEFINING},{CREATE},{create},{},{},
@@ -3138,8 +3154,8 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      COMMA    
         DC      VOCL
         DC      STORE
-        DC      LIT, DUMMY, COMMA   ;{ Dummy name field}
-        DC      ZERO, COMMA         ;{ Dummy flag field}
+        DC      ZERO, COMMA   ;{ Dummy name field}
+        DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
         DC      CURR
         DC      FETCH
         DC      TLFA
@@ -3152,7 +3168,6 @@ DOVOC:
         DC      STORE
         DC      SEMIS
         PAGE
-DUMMY:  DB      81H,0A0H ;{ Skippable dummy name field.}
 ;
 ;{   The link to task is a cold start value only.}
 ;{   It is updated each time a definition is}
@@ -3167,8 +3182,8 @@ a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
 HEADER({FORTH},{FORTH},{DODOE},1)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
-        DC      DUMMY   ;{ Dummy name field}
-        DC      0       ;{ Dummy flag field}
+        DC      0       ;{ Dummy name field}
+        DC      B_DUMMY ;{ Dummy flag field}
         DC      _DEA(TASK)
 ;
 worddoc({VOCABULARIES},{ASSEMBLER},{forth},{},{P,L1},
@@ -3665,8 +3680,11 @@ in this process.
 If the contents of the buffer is marked as updated, it is written to
 the disc. In ciforth this is never needed, because updated blocks are 
 written immediately.
-The block is not read from the disc. The address left is the
-first cell within the buffer for data storage.},{{BLOCK},{STALEST},{PREV}})
+The block is not read from the disc.
+ The address left is the
+field within the buffer to be used 
+for data storage.},
+{{BLOCK},{STALEST},{PREV}})
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
         DC      STALEST, FETCH

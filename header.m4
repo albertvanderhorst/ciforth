@@ -33,16 +33,16 @@ N_$2:   _STRING({$1})
         DC    _LINKOLD
 $2:     DC     $3
          undefine({_x})dnl
-define({_LINKOLD},{$2-3*CW})dnl
+define({_LINKOLD},{$2-CELLS(C_HOFFSET)})dnl
 })dnl
 dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl The link etc. field of the word with assembler name $1
-define({_DEA},$1-CW*3)dnl
-define({_LINK_FIELD},($1-CW))dnl
+define({_DEA},{$1-CELLS(C_HOFFSET)})dnl
+define({_LINK_FIELD},{($1+CELLS(L_HOFFSET-C_HOFFSET))})dnl
 define({_CODE_FIELD},$1)dnl
-define({_PARAMETER_FIELD},($1+CW))dnl
+define({_PARAMETER_FIELD},{($1+CELLS(P_HOFFSET-C_HOFFSET))})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
@@ -58,7 +58,7 @@ define({CODE_HEADER},{HEADER({$1},{$2},{$+CW})})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPFAR},{DB    0EAH})dnl
-define({CELLS},(CW*$1))dnl
+define({CELLS},(CW*($1)))dnl
 #
 # Start of Intel dependant code part
 # The 32 bit version may be used in the postlude to redefine
