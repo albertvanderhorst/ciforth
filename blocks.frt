@@ -110,7 +110,7 @@ for ISO, that in my opinion should never be loaded.
 
 
 \
-( DEADBEEF leading_hex_digit) REQUIRE CONFIG \ AvdH A1oct13
+( DEADBEEF leading_hex_digit) CF: \ AvdH A1oct13
 \ Are denotations starting with "Z" already known?
 "Z" 'DENOTATION >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
 \ Apparently not, so:
@@ -158,7 +158,7 @@ DROP   CURRENT !
 
 
 
-( COMPARE BOUNDS ALIGN UNUSED ) \ AvdH A1oct04
+( COMPARE BOUNDS ALIGN UNUSED ) CF: \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
      MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
@@ -166,11 +166,11 @@ DROP   CURRENT !
 : BOUNDS   OVER + SWAP ;
 
 : UNUSED DSP@ HERE - ;
-REQUIRE CONFIG
 "ALIGNED" PRESENT? ?LEAVE-BLOCK
 \ ISO
 : ALIGNED    1-   0 CELL+ 1- OR   1+ ;
 : ALIGN   DP @   ALIGNED   DP ! ;
+
 
 
 \
@@ -287,7 +287,7 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 : IN-SET? $@ SWAP ?DO
    DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 ( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE ) \ AvdH A3apr25
-
+REQUIRE @+
 ( Build a bag "x" with X items. )
 : BAG   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !BAG   DUP CELL+ SWAP ! ;   ( Make the BAG empty )
@@ -542,7 +542,7 @@ CREATE BASE' 0 ,
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
 
 
-(  ALIAS @+ HIDE INCLUDE IVAR ) REQUIRE CONFIG \ A3apr25
+(  ALIAS @+ HIDE INCLUDE IVAR ) CF: \ A3apr25
 
 : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
 
@@ -575,7 +575,7 @@ IMMEDIATE
 
 
 ( MS@ TICKS TICKS-PER-SECOND ) \ AvdH A2oct21
-REQUIRE CONFIG   REQUIRE +THRU
+CF:   REQUIRE +THRU
 1 2 +THRU
 
 TICKS
@@ -753,7 +753,7 @@ REQUIRE T[
 ( ARGC ARG[] SHIFT-ARGS SRC>EXEC ) \ AvdH A3mar20
 
 
-REQUIRE CONFIG   REQUIRE +THRU
+CF:   REQUIRE +THRU
 
 1 4 +THRU
 
@@ -830,7 +830,7 @@ DECIMAL
 
 
 
-( GET-ENV ) REQUIRE CONFIG ?LI \ AvdH A3mar20
+( GET-ENV ) CF: ?LI \ AvdH A3mar20
 \ This must be defined on MS-DOS too
 
 REQUIRE Z$@   REQUIRE COMPARE   REQUIRE ENV
@@ -847,7 +847,7 @@ REQUIRE Z$@   REQUIRE COMPARE   REQUIRE ENV
 
 
 ( SAVE-SYSTEM TURNKEY ) \ AvdH
-REQUIRE CONFIG   REQUIRE +THRU
+CF:   REQUIRE +THRU
 1 3 +THRU
 
 
@@ -894,7 +894,7 @@ VARIABLE HEAD-DP  \ Fill in pointer
 : EXEHEADER   0 HEAD-DP !  5A4D W,   0 W,   SIZE  200 / W,
     0 W,   10 W,   10 W,   10 W,   SIZE 10 - 10 / W,   10 W,
     HERE   0 W,   100 W,   -10 W,  SIZE W,  0  W, ;
-( SAVE-SYSTEM TURNKEY ) REQUIRE CONFIG ?PC HEX \ AvdH
+( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH
 
 \ Fill in checksum at the required POSITION in the header.
 : CHECKSUM   HEAD-DP !
@@ -926,7 +926,7 @@ HEX   10000 CONSTANT RTS     40 CELLS CONSTANT US
 
 
 \
-( THREAD-PET KILL-PET PAUSE-PET ) REQUIRE CONFIG ?LI \ A2nov16
+( THREAD-PET KILL-PET PAUSE-PET ) CF: ?LI \ A2nov16
 REQUIRE CVA   HEX
 \ Exit a thread. Indeed this is exit().
 : EXIT-PET 0 _ _ 1 LINOS ;
@@ -1150,7 +1150,7 @@ DROP OVER R@ >NFA @ $@ CORA-IGNORE 0=   THEN THEN   R> SWAP ;
 
 
 
-( SUPER-QUAD SQ CONDENSED ) REQUIRE CONFIG ?PC
+( SUPER-QUAD SQ CONDENSED ) CF: ?PC
 REQUIRE VIDEO-MODE
 VARIABLE L
  : CONDENSED 34 VIDEO-MODE ;
@@ -1198,26 +1198,10 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
-( SEE KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
-REQUIRE +THRU   REQUIRE ALIAS   REQUIRE @+
-: BLOB DROP ; \ For DEPTH: print blob in correct color.
-: H.. BASE @ >R HEX 0 .R R> BASE ! ;
-: B.. H.. ;
-
-1 8 +THRU
-: SEE   CRACK ;
-: KRAAK CRACK ;
-
-\ Crack, starting with "name"
- : CRACK-FROM HEAD'
-    BEGIN NEXTDEA DUP LATEST < WHILE DUP CRACKED REPEAT DROP ;
-
-
-
-( ?IM ?DN ?CD NEXTDEA DEA?   cracker0) \ AvdH A3apr25
+( ?IM ?DN ?CD NEXTDEA DEA?   cracker_aux) \ AvdH A3apr25
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
-\ For the DEA: it IS a code word.
+\ For the DEA: it IS a plain code word.
 : ?CD   DUP >CFA @ SWAP >PHA = ;
 \ For DEA : leave next earlier DEA in current.
 : NEXTDEA CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ DUP 0= IF
@@ -1228,6 +1212,22 @@ REQUIRE +THRU   REQUIRE ALIAS   REQUIRE @+
 
 
 
+
+
+( SEE KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
+REQUIRE +THRU   REQUIRE ALIAS   REQUIRE @+
+REQUIRE NEXTDEA
+: BLOB DROP ; \ For DEPTH: print blob in correct color.
+: H.. BASE @ >R HEX 0 .R R> BASE ! ;
+: B.. H.. ;
+
+1 7 +THRU
+: SEE   CRACK ;
+: KRAAK CRACK ;
+
+\ Crack, starting with "name"
+ : CRACK-FROM HEAD'
+    BEGIN NEXTDEA DUP LATEST < WHILE DUP CRACKED REPEAT DROP ;
 
 
 ( cracker1 ) \ AvdH A3apr25
@@ -1358,8 +1358,8 @@ VOCABULARY ASSEMBLER IMMEDIATE
 
 
 
-( ASSEMBLERi86-HIGH )  \ AvdH A0oct17
-REQUIRE CONFIG ?32
+( ASSEMBLERi86-HIGH ) CF: ?32 \ AvdH A0oct17
+
 REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
 REQUIRE SWAP-DP
 
@@ -1374,8 +1374,8 @@ PREVIOUS DEFINITIONS
 
 
 
-( ASSEMBLERi86 )  \ AvdH A0oct17
-REQUIRE CONFIG
+( ASSEMBLERi86 )  CF: \ AvdH A0oct17
+
 REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
 
 "ASSEMBLERi86" PRESENT? ?LEAVE-BLOCK
@@ -1726,7 +1726,7 @@ DECIMAL
 
 
 
-( LOCATED LOCATE .SOURCEFIELD ) REQUIRE CONFIG \ AvdH A1sep26
+( LOCATED LOCATE .SOURCEFIELD ) CF: \ AvdH A1sep26
 ">SFA" PRESENT? 0= ?LEAVE-BLOCK
 \ Interpret a SOURCEFIELD heuristically.
 : .SOURCEFIELD
@@ -1742,7 +1742,7 @@ DECIMAL
 
 
 
-( OS-IMPORT cdED ) REQUIRE CONFIG \ AvdH A2feb05
+( OS-IMPORT cdED ) CF: \ AvdH A2feb05
 "SYSTEM" PRESENT? 0= ?LEAVE-BLOCK   REQUIRE +THRU
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
@@ -1760,7 +1760,7 @@ CREATE cmdbuf 1000 ALLOT
 
 ( cat echo diff grep list ls make man rm cd cp ee l )
 \ Unix like commands
-REQUIRE CONFIG   REQUIRE +THRU
+CF:   REQUIRE +THRU
 1 2 +THRU
 
 
@@ -1822,7 +1822,7 @@ REQUIRE OS-IMPORT
 
 
 
-( EDITOR ) REQUIRE CONFIG   ?PC    \ AvdH A1oct05
+( EDITOR ) CF:   ?PC    \ AvdH A1oct05
 REQUIRE IVAR   REQUIRE +THRU
 REQUIRE VIDEO-MODE   REQUIRE $
   1 12 +THRU
@@ -2078,7 +2078,7 @@ HEX
 
 
 DECIMAL
-( FARDUMP ) REQUIRE CONFIG ?PC \ AvdH A1oct
+( FARDUMP ) CF: ?PC \ AvdH A1oct
 <HEX
 :  FARDUMP   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
@@ -2094,7 +2094,7 @@ DECIMAL
     10 +LOOP CR DROP
 ;    HEX>
 
-( FREE-BLOCK REFRESH ) REQUIRE CONFIG   ?LI   \ AvdH A1oct03
+( FREE-BLOCK REFRESH ) CF:   ?LI   \ AvdH A1oct03
 \ Return the first BLOCK not written yet.
 : FREE-BLOCK
     1 BEGIN DUP 'BLOCK CATCH 0= WHILE DROP 1+ REPEAT DROP ;
@@ -2174,7 +2174,7 @@ DECIMAL
 
 
 
-( --hd_LBA utils_for_stand_alone_disk ) REQUIRE CONFIG ?PC ?16
+( --hd_LBA utils_for_stand_alone_disk ) CF: ?PC ?16
 REQUIRE ASSEMBLERi86   REQUIRE DISK-INIT   REQUIRE +THRU
 ( backup and restore a stand alone hard disk system to floppy )
 ( run from a booted floppy system )
@@ -2238,7 +2238,7 @@ DECIMAL
 \ (a 32-bit number) and 1400K following to the floppy.
 : BACKUP>FLOPPY  SWAP-FLOPPY
   1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
-( --hd_LBA BACKUP-KERNEL BACKUP-BLOCKS ) REQUIRE CONFIG ?PC ?16
+( --hd_LBA BACKUP-KERNEL BACKUP-BLOCKS ) CF: ?PC ?16
 REQUIRE --hd_LBA
 \ Prompt for floppy created with ``BACKUP>FLOPPY''
 \ Restore to hard disk ``DBS'' 1400 K from floppy.
@@ -2254,7 +2254,7 @@ REQUIRE --hd_LBA
 
 
 
-( INSTALL-KERNEL RESTORE-BLOCKS ) REQUIRE CONFIG ?PC ?16
+( INSTALL-KERNEL RESTORE-BLOCKS ) CF: ?PC ?16
 REQUIRE --hd_LBA
 
 \ Copy the kernel (first 64K of ``DBS'') from raw floppy.
@@ -2270,7 +2270,7 @@ REQUIRE --hd_LBA
 
 
 
-( SECTORS/TRACK #HEADS ) REQUIRE CONFIG \ AvdH A1oct10
+( SECTORS/TRACK #HEADS ) CF: \ AvdH A1oct10
 1 2 +THRU
 EXIT
 Get information directly after booting aboot the hard disk
@@ -2318,7 +2318,7 @@ DECIMAL
 
 
 
-( INSTALL-FORTH-ON-HD ) REQUIRE CONFIG ?32 \ AvdH A1oct11
+( INSTALL-FORTH-ON-HD ) CF: ?32 \ AvdH A1oct11
 REQUIRE +THRU   REQUIRE NEW-IF
 \ Elective and configuration screen
 \ Define and overrule this for manual installation
@@ -2430,7 +2430,7 @@ CREATE buffer SIZE-FORTH B/BUF * ALLOT
 : INSTALL-FORTH-ON-HD  DRIVE @ 0 WARNING ! READ-FORTH
 buffer PATCH-MEM PATCH-NEW-FORTH PATCH-THIS-FORTH WRITE-FORTH
 EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
-( --hd_driver_standalone_) REQUIRE CONFIG ?PC ?32 ?HD HEX
+( --hd_driver_standalone_) CF: ?PC ?32 ?HD HEX
 
   1 8 +THRU
 

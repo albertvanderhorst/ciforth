@@ -21,60 +21,16 @@
 \ The analyser must be in two parts, one that needs the assembler, one that doesn't.
 
 CREATE task
-INCLUDE asgen.frt
-INCLUDE asi586.frt
-
-\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
-
-                                HEX
-
-\ ------------------------------------------------
-\ Set BITS of mask in ADDRESS.
-: OR!U >R R@ @ OR R> ! ;
-
-\ Reset BITS of mask in ADDRESS.
-: AND!U >R INVERT R@ @ AND R> ! ;
-\ ------------------------------------------------
-10 CONSTANT FMASK-IL    \ Data is following in line.
-20 CONSTANT FMASK-HO    \ This definition has been high level optimised.
-40 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
-80 CONSTANT FMASK-DUP   \ This is a duplicator, i.e. stack items consumed
-                        \ are put back unchanged.
-
-0FF00 CONSTANT FMASK
-
-\ If 0 the side effects are absent.
-100 CONSTANT FMASK-N@    \ No input side effects. "No fetches."
-200 CONSTANT FMASK-N!    \ No output side effects. "No stores."
-400 CONSTANT FMASK-ST    \ No stack side effects.
-                        \ "No absolute stack reference or return stack."
-800 CONSTANT FMASK-FDI   \ This definition has the `EDI'' register free. "No loop"
-
-FMASK-N@ FMASK-N! OR FMASK-FDI OR CONSTANT FMASK-ES \ No side effects except stack.
-FMASK-ES FMASK-ST OR CONSTANT FMASK-NS \ No side effects at all.
-
-\ ------------------------------------------------
-
-\ From FLAGS POPS PUSHES compose a flag field content and return IT.
-: COMPOSE-FLAGS 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR ;
-
-\ Fill FLAGS POPS PUSHES in into DEA's flag field.
-\ Leave hidden, immediate etc. alone.
-: !FLAGS >R COMPOSE-FLAGS R> >FFA OR!U ;
-
-\ ------------------------------------------------
-
-DECIMAL
 
 REQUIRE BOUNDS
 REQUIRE BAG
 REQUIRE IN-BAG?
 REQUIRE ?CD
 
-\ ------------------ assembler stuff here -----------------------------------
-
-\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
-
+INCLUDE analyserconfig.frt
+INCLUDE asgen.frt
+INCLUDE asi586.frt
+INCLUDE analyseras.frt
                                 HEX
 
 \ Set of duplicators.
@@ -84,158 +40,7 @@ CREATE DUPS  HERE 0 ,
 HERE SWAP !
 
 \ Mark all duplicators as such.
-: MARK-DUP  DUPS @+ SWAP ?DO   FMASK-DUP I @ >FFA OR!U   0 CELL+ +LOOP ;
-
-ASSEMBLER
-CREATE POPS  HERE 0 ,
-' POP,       ,          ' POPF,      ,
-' POP|DS,    ,          ' POP|ES,    ,          ' POP|FS,    ,
-' POP|GS,    ,          ' POP|SS,    ,          ' POP|X,     ,
-HERE SWAP !
-
-CREATE PUSHES  HERE 0 ,
-' PUSH,      ,          ' PUSHF,     ,          ' PUSHI|B,   ,
-' PUSHI|X,   ,                                  ' PUSH|CS,   ,
-' PUSH|DS,   ,          ' PUSH|ES,   ,          ' PUSH|FS,   ,
-' PUSH|GS,   ,          ' PUSH|SS,   ,
-' PUSH|X,    ,
-HERE SWAP !
-
-\ Instruction that have an input side effect.
-\ Two operand instructions are handled directly, via ``T|'' ``F|''
-CREATE FETCHES HERE 0 ,
-' MOV|TA,    ,          ' LODS,      ,
-' SCAS,      ,          ' CMPS,      ,          ' MOVS,      ,
-' OUTS,      ,          ' INS,       ,          ' OUT|D,     ,
-' IN|D,      ,          ' OUT|P,     ,          ' IN|P,      ,
-' SCAS,      ,          ' INT,       ,
-HERE SWAP !
-
-\ Instruction that have an output side effect.
-\ Two operand instructions are handled directly, via ``T|'' ``F|''
-CREATE STORES HERE 0 ,
-' MOV|FA,    ,                                  ' STOS,      ,
-                                                ' MOVS,      ,
-' OUTS,      ,          ' INS,       ,          ' OUT|D,     ,
-' IN|D,      ,          ' OUT|P,     ,          ' IN|P,      ,
-                        ' INT,       ,
-HERE SWAP !
-
-
-\ Instruction that use EDI. Normally this is not done.
-\ But some (string) operations require it.
-CREATE EDIERS HERE 0 ,
-                                                ' STOS,      ,
-' SCAS,      ,          ' CMPS,      ,          ' MOVS,      ,
-HERE SWAP !
-
-\ Bookkeeping for pops and pushes.
-VARIABLE #POPS          VARIABLE #PUSHES
-: !PP    0 #POPS !    0 #PUSHES ! ;
-
-\ After a call to ``(DISASSEMBLE)'' return the OPCODE.
-: OPCODE    DISS CELL+ @ ;
-
-\ Add the bookkeeping of pops and pushes for the latest instruction
-\ dissassembled.
-: COUNT-PP
-    OPCODE POPS IN-BAG? #PUSHES @ IF #PUSHES +! ELSE NEGATE #POPS +! THEN
-    OPCODE PUSHES IN-BAG? NEGATE #PUSHES +!   ;
-
-\ Bookkeeping for input and output side effects.
-VARIABLE PROTO-FMASK
-
-\ Initialise to "no side effects". Innocent until proven guilty.
-: !FMASK FMASK-NS PROTO-FMASK ! ;
-
-\ A forth flag has all bit set. Hence the idiom ``FLAG MASK AND''
-\ instead of FLAG IF MASK ELSE 0 THEN''. Also note that in Stallman
-\ convention a capitalised verb means a (forth) flag.
-
-\ Add to FLAGS if instruction IS storing, the no output side effects flag.
-\ Return the new FLAGS. (So those are the flags to become invalid.)
-: IS-STORING       FMASK-N! AND    OR ;
-
-\ Add to FLAGS if instruction IS looping, i.e. it uses register IDE.
-\ Return the new FLAGS. (So those are the flags to become invalid.)
-: IS-LOOPING       FMASK-FDI AND    OR ;
-
-\ Add to FLAGS if instruction IS fetching, the no input side effects flag.
-\ Return the new FLAGS. (So those are the flags to become invalid.)
-: IS-FETCHING   FMASK-N@ AND    OR ;
-
-\ Look whether we have the current disassembled instruction forces us to
-\ revise the flag mask.
-: REVISE-FMASK
-    0
-    OPCODE STORES IN-BAG? IS-STORING
-    OPCODE FETCHES IN-BAG? IS-FETCHING
-    OPCODE EDIERS IN-BAG?  IS-LOOPING
-    'R| DISS IN-BAG? 0= IF
-        'T| DISS IN-BAG?   IS-FETCHING
-        'F| DISS IN-BAG?   IS-STORING
-        \ Memory (non-move) operations always fetch!
-        'F| DISS IN-BAG?    'MOV, OPCODE <>    AND  IS-FETCHING
-    THEN
-    \ Overrule : operations on the return stack don't count.
-    '[BP] DISS IN-BAG? IF DROP 0 THEN
-    PROTO-FMASK AND!U
-;
-
-\ Accumulate information for an assembler definition from address ONE to
-\ address TWO.
-\ Count pushes and pops among the instructions.
-\ Find out about `no input side effect' and `no output side effect'.
-: ACCUMULATE-AS-INFO
-    SWAP
-    !PP !FMASK
-    BEGIN 2DUP > WHILE
-        (DISASSEMBLE) ^M EMIT   COUNT-PP   REVISE-FMASK
-    REPEAT
-    2DROP
-;
-
-
-\ Define a ``NEXT'' sequence. It must have the exact code that is in
-\ the kernel.
-: NEXT  LODS, X'|   JMPO, D0| [AX] ;
-
-PREVIOUS
-
-\ The sequence of bytes that forms next, as a string.
-\ (This means you can $@ it.)
-CREATE NEXT-IDENTIFICATION 0 , NEXT
-HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
-\ \D ." Expect NEXT-IDENTIFICATION to contain NEXT :" CR
-\ \D : DUMP-STRING
-\ \D     OVER H. SPACE DUP H. DUMP ;
-\ \D  NEXT-IDENTIFICATION $@ DUMP-STRING
-
-\ For some code at ADDRESS, find the start ADDRESS of its ``NEXT''.
-: >NA   BEGIN DUP NEXT-IDENTIFICATION $@ CORA WHILE 1+ REPEAT ;
-
-\ Get the pops and pushes from DEA which must be a code definition.
-\ Get also its side effect mask.
-: ANALYSE-CODE >CFA @ DUP >NA ACCUMULATE-AS-INFO ;
-
-\ For DEA fill in the stack effect byte and the side effect mask.
-\ It must be a code definition.
-: FILL-FLAG-CODE   >R   R@ ANALYSE-CODE
-    PROTO-FMASK @ #POPS @ #PUSHES @ R> !FLAGS ;
-
-DECIMAL
-
-\ ------------------------------------------------
-
-'TASK >CFA @ CONSTANT DOCOL
-'FORTH >CFA @ CONSTANT DODOES
-'BASE  >CFA @ CONSTANT DOUSER
-VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
-'BL >CFA @ CONSTANT DOCON
-
-\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
-
-                                HEX
+: MARK-DUP  DUPS DO-BAG   FMASK-DUP I @ >FFA OR!U   LOOP-BAG ;
 
 \ ------------------------ DATA DESIGN ----------------------------------
 \ >FFA leaves the flag field that is considered an area of 4 bytes.
@@ -249,8 +54,6 @@ VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
 \ 0 = unknown , 0FH = variable.
 \ A ``STACK EFFECT'' is a pair (input nibble, output nibble) with the above encoding.
 \ A ``pure stack effect'' is a pair (depth popped, depth pushed).
-
-
 
 \ ----------------------
 \ For DEA : it IS a real (non-dummy) header.
@@ -270,31 +73,6 @@ VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
 
 \ Combine the STACK EFFECT into one BYTE.
 : SE:2>1 0F AND SWAP 4 LSHIFT OR ;
-
-\ Irritating exceptions filled in by hand. Filling in the stack effect
-\ (although it could be found automatically), prevents changes.
-0FF '?DUP !SE
-0FF 'EXECUTE !SE
-0                     1  0 'FOR-VOCS  !FLAGS  \ Despite an execute this is known
-0                     2  0 'FOR-WORDS !FLAGS
-FMASK-NS FMASK-IL OR  0  1 'LIT       !FLAGS
-FMASK-NS FMASK-IL OR  0  0 'SKIP      !FLAGS
-FMASK-NS FMASK-IL OR  0  0 'BRANCH    !FLAGS
-FMASK-NS FMASK-IL OR  1  0 '0BRANCH   !FLAGS
-FMASK-ES FMASK-IL OR  0  0 '(LOOP)    !FLAGS
-FMASK-ES FMASK-IL OR  1  0 '(+LOOP)   !FLAGS
-FMASK-ES FMASK-IL OR  2  0 '(DO)      !FLAGS
-FMASK-ES FMASK-IL OR  2  0 '(?DO)     !FLAGS
-FMASK-ES              0  0 'LEAVE     !FLAGS
-FMASK-ES              0  0 'EXIT      !FLAGS
-FMASK-ES              0  1 'DSP@      !FLAGS
-FMASK-ES              0  1 'DEPTH     !FLAGS
-FMASK-ES              0  0 '.S    !FLAGS
-FMASK-ES              1  0 '>R    !FLAGS
-FMASK-ES              0  1 'R@    !FLAGS
-FMASK-ES              0  1 'I     !FLAGS
-FMASK-ES              0  1 'R>    !FLAGS
-FMASK-ES              0  0 'RDROP !FLAGS
 
 \ FILL IN EVERYTHING
 \ Add to an existing pure STACK EFFECT the pure STACK EFFECT.
@@ -461,41 +239,32 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE-ANY _   THEN   DROP ;
 \ Fill in everything.
 : FILL-ALL MARK-DUP (FILL-ALL) ;
 
-DECIMAL
-
-\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
-
-                                HEX
-\ Debugging aids for analyser.frt. Print the information added to flag fields.
-
-REQUIRE CRACK
-
-\ Type the interpretation of a stack effect NIBBLE.
-: .SE/2 DUP 0 = IF "unknown" TYPE ELSE DUP 0F = IF "variable" TYPE
-ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
-
-\ Type the stack effect BYTE.
-: .SE   SE:1>2 "( " TYPE SWAP .SE/2 "-- " TYPE .SE/2 &) EMIT ;
-
-\ For DEA type its optimisation and other properties.
-: OPT? >FFA @
-    CR "Optim. bits etc.: " TYPE
-    DUP FMASK     AND 0= IF "No optimisations " TYPE THEN
-    DUP FMASK-N@  AND IF "No fetches " TYPE THEN
-    DUP FMASK-N!  AND IF "No stores " TYPE THEN
-    DUP FMASK-ST  AND IF "No depth " TYPE THEN
-    DUP FMASK-IL  AND IF "In line data " TYPE THEN
-    DUP FMASK-HO  AND IF "Been optimised " TYPE THEN
-    DUP FMASK-HOB AND IF "Cannot be optimised " TYPE THEN
-    DUP FMASK-FDI AND IF "Loop index is available " TYPE THEN
-    DUP FMASK-DUP AND IF "A duplicator" TYPE THEN
-    DROP
-;
-
-\ For DEA type its stack effect.
-: SE?   SE@ .SE ;
-
-\ For DEA type everything.
-: .DE DUP SE? DUP CRACKED OPT? ;
+\ Irritating exceptions filled in by hand. Filling in the stack effect
+\ (although it could be found automatically), prevents changes by ``FILL-ALL''.
+0FF '?DUP !SE
+0FF 'EXECUTE !SE
+0                     1  0 'FOR-VOCS  !FLAGS  \ Despite an execute this is known
+0                     2  0 'FOR-WORDS !FLAGS
+FMASK-NS FMASK-IL OR  0  1 'LIT       !FLAGS
+FMASK-NS FMASK-IL OR  0  0 'SKIP      !FLAGS
+FMASK-NS FMASK-IL OR  0  0 'BRANCH    !FLAGS
+FMASK-NS FMASK-IL OR  1  0 '0BRANCH   !FLAGS
+FMASK-ES FMASK-IL OR  0  0 '(LOOP)    !FLAGS
+FMASK-ES FMASK-IL OR  1  0 '(+LOOP)   !FLAGS
+FMASK-ES FMASK-IL OR  2  0 '(DO)      !FLAGS
+FMASK-ES FMASK-IL OR  2  0 '(?DO)     !FLAGS
+FMASK-ES              0  0 'LEAVE     !FLAGS
+FMASK-ES              0  0 'EXIT      !FLAGS
+FMASK-ES              0  1 'DSP@      !FLAGS
+FMASK-ES              0  1 'DEPTH     !FLAGS
+FMASK-ES              0  0 '.S    !FLAGS
+FMASK-ES              1  0 '>R    !FLAGS
+FMASK-ES              0  1 'R@    !FLAGS
+FMASK-ES              0  1 'I     !FLAGS
+FMASK-ES              0  1 'R>    !FLAGS
+FMASK-ES              0  0 'RDROP !FLAGS
 
 DECIMAL
+
+INCLUDE analyserdebug.frt
+

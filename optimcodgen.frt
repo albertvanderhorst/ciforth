@@ -57,7 +57,7 @@ DECIMAL
 : HIGH-LEVEL? >CFA @ DOCOL = ;
 
 \ Leave an incremented ADDRESS and the CONTENT.
-'$@ ALIAS @+
+REQUIRE @+
 
 \ For DEA: it IS A-optimisable.
 : A-OPTIMISABLE?   >FFA @   AO-MASK AND   0=   ;
