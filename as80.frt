@@ -261,12 +261,12 @@ HERE POINTER !
 : dis-1PI
     DUP IS-1PI IF
     AT-REST? IF
-    DUP >MASK POINTER @ @ ^ AND FF AND OVER >INST ^ = IF
+    DUP >MASK POINTER @ @ AND FF AND OVER >INST = IF
         DUP >BODY POST, DROP
         DUP +DISS
         POINTER @ 1+ NEW-POINTER !
-        DUP ID.
-        ." BINGA"
+(       DUP ID.                                                         )
+(       ." BINGA"                                                       )
     THEN
     THEN
     THEN
@@ -276,12 +276,12 @@ HERE POINTER !
 : dis-2PI
     DUP IS-2PI IF
     AT-REST? IF
-    DUP >MASK POINTER @ @ ^ AND FFFF AND OVER >INST ^ = IF
+    DUP >MASK POINTER @ @ AND FFFF AND OVER >INST = IF
         DUP >BODY POST, DROP
         DUP +DISS
 ( distrubr dis-dix        2 POINTER +!)
-        DUP ID.
-        ." BINGA"
+(       DUP ID.                                                         )
+(       ." BINGA"                                                       )
     THEN
     THEN
     THEN
@@ -289,15 +289,41 @@ HERE POINTER !
 : dis-xFI
    DUP IS-xFI IF
    DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
-   DUP >INST  POINTER @ @ ^ TALLY CELL+ @ INVERT ^ AND ^ = IF
+   DUP >INST  POINTER @ @ TALLY CELL+ @ INVERT AND = IF
        DUP >BODY FIX| DROP
        DUP +DISS
-        DUP ID.
-        ." BINGU"
+(       DUP ID.                                                         )
+(       ." BINGU"                                                       )
    THEN
    THEN
    THEN
 ;
+
+: dis-COMMA
+   DUP IS-COMMA IF
+   DUP >BODY @ TALLY @ INVERT CONTAINED-IN IF
+       DUP >BODY @ TALLY OR!
+       DUP +DISS
+(       DUP ID.                                                         )
+(       ." BINGIIIIIIIIIIIII"                                           )
+   THEN
+   THEN
+;
+
+
+( Print the DEA in an appropriate way, it must be a comma-er   )
+: .COMMA 
+    NEW-POINTER @ @ .
+    DUP >BODY CELL+ CELL+ @ NEW-POINTER +!
+    ID.
+;
+: .DISS' DISS DUP @ SWAP CELL+ DO
+    I @ DUP IS-COMMA IF 
+       .COMMA       ( DEA -- )
+    ELSE 
+        ID.
+    THEN 
+ 0 CELL+ +LOOP CR ;
 
 ( If the disassembly contains something: `AT-REST?' means
 ( we have gone full cycle rest->postits->fixups->commaers               )
@@ -306,25 +332,24 @@ HERE POINTER !
 ( Dissassemble one instruction from ADDRESS. )
 ( Leave `POINTER' pointing after that instruction. )
 : DOIT2
-    POINTER !
     -DISS
     !TALLY
     START
     BEGIN
-        dis-1PI dis-xFI ( DIS-COMMA )
+        dis-1PI dis-xFI  dis-COMMA 
         >NEXT%
 (       DUP ID.                                                         )
     DUP DICTEND? RESULT? OR UNTIL
     DROP
     RESULT? IF
+      .DISS' 
       NEW-POINTER @ POINTER !
-    ELSE
-(     -DISS                                                             )
     THEN
 ;
 
+: D-F-A POINTER ! DOIT2 ;
+
 ." COMES JAN"
     CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        )
-' JAN CFA @ DOIT2 .DISS
-POINTER @ DOIT2   .DISS
+' JAN CFA @ D-F-A DOIT2 DOIT2 
 
