@@ -5,8 +5,8 @@
 # into a diversity of Intel 86 assembly sources, and further into
 # one of the $(TARGETS) Forth's.
 
-.SUFFIXES:
-.SUFFIXES:.bin.asm.m4.v.o.c
+#.SUFFIXES:
+#.SUFFIXES:.bin.asm.m4.v.o.c
 
 INGREDIENTS = \
 default.m4       \
@@ -58,11 +58,11 @@ default : figforth
 fig86.$(s).bin :
 
 # Put include type of dependancies here
-alone.m4 msdos.m4 : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
+alone.m4 msdos.m4 linux.m4 : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
 all: $(TARGETS:%=fig86.%.bin) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
-clean : ; rm $(TARGETS:%=fig86.%.*)  rm $(CSRCS:%=%.o) figforth
+clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) figforth
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
@@ -90,7 +90,14 @@ releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
 
 fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
-figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -o $@
+#  Do a static prelink to prevent that the whole free dictionary space ends
+#  up in the executable 
+fig86.static.o : fig86.linux.o ; ld -Tlink.script -r -o $@
+
+# This linking must be static, but a .5M executable is better than
+# a 64 M executable.
+figforth : figforth.c fig86.static.o ; cc figforth.c -Wl,-Tlink.script -lc -static -o $@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
+

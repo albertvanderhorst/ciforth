@@ -1,4 +1,4 @@
-S;{               HCC FIG generic 8086 FORTH}
+;{               HCC FIG generic 8086 FORTH}
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
@@ -2678,7 +2678,7 @@ CODE_HEADER({KEY},{KEY})
 	DC         DROP,DROP,DROP,DROP
 	DC         LIT, 00FFH, LAND, SEMIS
 ;
-HEADER({?TERMINAL},{QTERM},{DOCOL})
+CODE_HEADER({?TERMINAL},{QTERM})
 	DC      LIT,0B00H 
 	DC      ZERO,ZERO,ZERO
 	DC      BDOS, DROP ;{ ignore error }
@@ -3714,15 +3714,17 @@ FORTHSIZE       EQU     $-figforth
 ;____1_____ _LINUXHOSTED_1_({
 ;       This is the proper way to do it.
 ;       No memory addresses should be arrived at through equates.
-	section dictionary nobits write exec alloc
+;       However there is no way to teach the linker to keep the
+;       two sections together. So we are going to write all those
+;       zero bits in the output file.
+         section dictionary nobits write exec alloc             
 
-INITDP:                 ; It may be that it is not consecutive with TASK
-			; But that presents no problem.
+INITDP:                 ;  It may be that it is not consecutive with TASK
+			;  And that is a hell of a problem.
 	BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF  
-	RESB    FORTHSIZE - RTS - US - BUFFERSIZE      
-	RESB    EM-FORTHSIZE -(KBBUF+2*CW)*NBUF  
+	RESB    EM - FORTHSIZE - RTS - US - BUFFERSIZE       
 INITS0:                         ;{ Growns down}
-STRTIB: RESB     RTS             ;{ Start return stack area}
+STRTIB: RESB     RTS            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
 STRUSA: RESB    US              ;{ User area}
 BUF1:   RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}

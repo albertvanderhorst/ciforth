@@ -49,7 +49,11 @@ tty_warning (char *s)
   fprintf (stderr, "\n\nwarning: %s, (%s)\n", s, sys_errlist[errno]);
   fflush (stderr);
 }
-
+unsigned int y = figforth;
+DISPLAYSI(unsigned int x)
+{
+    printf("%08x\n", x-y);
+}
 /* ****************************************************************************
  * tty_init(), tty_set(), tty_restore()  : 
  *     primitive functions to encapsulate terminal state changes. Any
@@ -222,6 +226,8 @@ void c_emit(int ch)
 /* TYPE */
 void c_type(int count, char buffer[])
 {
+  unsigned x = buffer;
+  printf("Trying to type %d %x\n", x-y );
   write (1, buffer, count);
   fflush (stdout);
 }
