@@ -245,7 +245,7 @@ MAXCHUNK        EQU    1024 *100000H /CHUNKSIZE
 _HOSTED_DPMI_({
 ;{DPMI segment defines.}
 ;{We can't aim for better than level privilege level 3.}
-IDENTIFY_TOGGLE EQU 040H   ;{ The Big (and Granularity, not yet) bits are complemented}
+BITS32_TOGGLE EQU 040H   ;{ The Big (and Granularity, not yet) bits are complemented}
                             ;{ on switching to 32 bits mode in 6th byte.}
 CODE_TOGGLE EQU 08H   ;{ Toggle between code and data, in the 5th byte.}
 });_END_({_HOSTED_DPMI_})
@@ -804,7 +804,7 @@ ORIG:                         ; Accommodate also .exe files
             JC      ERRMSG              ;Could not allocate
 
 Plunge:     MOV     ES,AX
-            MOV     AX, _BITS16_(0) _BITS32_(1)
+            MOV     AX, 0       ; Windows 3.11 +w32s : 1 doesn't work here.
             _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
 ; {From here to where the assembler switches to protected mode,}
 ; {code must be 16/32 bit independant.}
@@ -820,6 +820,10 @@ VerNum      DW      0000
 MemNeeded   DW      0000
 DPMIentry   DW      0000,0000
 Scratch     _RESB(8)
+LINAD_HIGH:   DW     0000
+LINAD_LOW:    DW     0000
+MEM_HANDLESI: DW     0000
+MEM_HANDLEDI: DW     0000
 
 ;Error-- called from diverse places.
            MOV     AL, BL ; {Use the infamous errorlevel.}
@@ -833,20 +837,78 @@ EMsgS      EQU     $-EMsg
 
 ; If we reach this point, we are operating in protected mode
 DPMISUCCESS:
-; -------------- Alias descriptors for CS and DS --------
-            MOV     AX,000AH            ;{Alias for LDT descriptor.}
-            MOV     BX,CS
+; -------------- First and for all: save --------
+            MOV     _CELL_PTR[Save_CS_PR],CS
+            MOV     _CELL_PTR[Save_DS_PR],DS
+            MOV     _CELL_PTR[Save_ES_PR],ES
+; -------------- Get a new segment for our Forth --------
+            MOV     AX,0000H            ;{A new selector.}
+            MOV     CX,1
             INT     31H
             MOV     BL,4
+            MOV     FS,AX
+            JC      ERRMSG
+
+            MOV     AX,0501H            ;{Allocate memory}
+            MOV     BX, EM/10000H
+            MOV     CX, EM & 0FFFFH
+            INT     31H
+            MOV     [LINAD_HIGH],BX
+            MOV     [LINAD_LOW],CX
+            MOV     [MEM_HANDLESI],SI
+            MOV     [MEM_HANDLEDI],DI
+            MOV     BL,4
             MOV     CX,AX
-            JC      ERRMSG             ;{Could not allocate.}
+            JC      ERRMSG
+
+            LEA     DI,[Scratch]
+            MOV     AX,000BH            ;{Get Description.}
+            MOV     BX,FS
+            INT     31H
+            MOV     BL,6
+ERRMSG2:    JC      ERRMSG
+            MOV     AL,[DI+6]
+            AND     AL, ~ BITS32_TOGGLE ;{Make sure it is 16 bits.}
+            ADD     AL, (EM-1)/10000H
+            MOV     [DI+6],AL
+            MOV     AX, (EM-1) & 0FFFFH
+            MOV     [DI], AX
+            MOV     AX, [LINAD_LOW]
+            MOV     [DI+2], AX
+            MOV     AX, [LINAD_HIGH]
+            MOV     [DI+4], AL
+            MOV     [DI+7], AH
+
+            MOV     AX,000CH            ;{Set Description.}
+            MOV     BX,FS
+            INT     31H
+            MOV     BL,7
+            JC      ERRMSG2
+
+; -------------- Copy Forth to the new segment --------
+            MOV     CX, EM
+            XOR     DI, DI      ;{dest}
+            XOR     SI, SI      ;{dest}
+            PUSH    ES
+            PUSH    FS
+            POP     ES
+            REP     MOVSB
+            POP     ES
+
+; -------------- Alias descriptors for CS --------
+            MOV     AX,000AH            ;{Alias for LDT descriptor.}
+            MOV     BX,FS
+            INT     31H
+            MOV     BL,5
+            MOV     CX,AX
+            JC      ERRMSG2             ;{Could not allocate.}
 
             MOV     AX,000AH            ;{Alias for LDT descriptor.}
-            MOV     BX,CS
+            MOV     BX,FS
             INT     31H
             MOV     BL,5
             MOV     DX,AX
-ERRMSG2:    JC      ERRMSG             ;{Could not allocate.}
+            JC      ERRMSG2             ;{Could not allocate.}
 
 ; -------------- Get new segments, possibly 32 bits --------
 ; Throughout this section : CX is an alias for CS , DX for DS.
@@ -858,7 +920,7 @@ ERRMSG2:    JC      ERRMSG             ;{Could not allocate.}
             MOV     BL,6
             JC      ERRMSG2
             MOV     AL,[DI+6]
-_BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
+_BITS32_({  XOR     AL, BITS32_TOGGLE },{dnl})
             MOV     [DI+6],AL
             MOV     AL,[DI+5]
             XOR     AL, CODE_TOGGLE
@@ -867,21 +929,21 @@ _BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
             MOV     BX,CX
             INT     31H
             MOV     BL,7
-            JC      ERRMSG2
+ERRMSG3:    JC      ERRMSG2
 
             MOV     AX,000BH            ;{Get Description.}
             MOV     BX,DX
             INT     31H
             MOV     BL,8
-            JC      ERRMSG2
+            JC      ERRMSG3
             MOV     AL,[DI+6]
-_BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
+_BITS32_({  XOR     AL, BITS32_TOGGLE },{dnl})
             MOV     [DI+6],AL
             MOV     AX,000CH            ;{Set Description.}
             MOV     BX,DX
             INT     31H
             MOV     BL,9
-            JC      ERRMSG2
+            JC      ERRMSG3
 
 ; -------------- Use the alias descriptors for CS and DS --------
             PUSH    CX    ; {Corrected code segment}
@@ -1677,7 +1739,7 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{      Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
-;        DC      WARM_ENTRY FIXME 
+;        DC      WARM_ENTRY FIXME
 ;        DC      COLD_ENTRY
 USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRUSA  ;{ INIT (U0) user area of the main task 1}
@@ -1995,9 +2057,9 @@ CODE_HEADER({CMOVE},{LCMOVE})
         _NEXT
 ;
 worddoc( {MEMORY},{MOVE},{move},{from to count --},{},
-{Move the forthsamp({count})
-bytes beginning at address forthsamp({from}) to
-address forthsamp({to}), such that the destination area contains
+{Move the forthvar({count})
+bytes beginning at address forthvar({from}) to
+address forthvar({to}), such that the destination area contains
 what the source area contained, regardless of overlaps.
 As the Intel 86-family is byte-addressing there are
 no restrictions. },
@@ -2026,6 +2088,48 @@ MOVE2:
         MOV     HIP,BX   ;{GET BACK }
         _NEXT
 ;
+worddoc( {MEMORY},{FARMOVE},{far_move},{farfrom farto count --},{},
+{Move forthvar({count})
+bytes beginning at segment address pair forthvar({farfrom}) to
+segment
+address pair forthvar({farto}). Segments that are zero are replaced by
+the defaults, data segment for source, extra segment for destination.
+Copying is done from low to high
+offset, so there may be memory
+propagating. _VERBOSE_({This is not easily seen
+from the descriptors{}_PROTECTED_({{, particularly not so in
+protected mode}}).})
+As the Intel 86-family is byte-addressing there are
+no restrictions.
+},
+{{MOVE},{CMOVE}},
+{{." No test"},{No test} },
+enddoc)
+CODE_HEADER({FARMOVE},{FMOVE})
+        CLD             ;{direction}
+        MOV     AX,HIP   ;{save }
+        MOV     BX,DS    ;{save }
+        POP     CX      ;{count}
+        POP     DI      ;{dest}
+        POP     DX
+        AND     DX,DX
+        JZ      FARMV1
+        MOV     ES,DX
+FARMV1:
+        POP     SI      ;{source}
+        POP     DX
+        PUSH    DS
+        PUSH    BX      ;{ES in fact.}
+        AND     DX,DX
+        JZ      FARMV2
+        MOV     DS,DX
+FARMV2:
+        REP     MOVSB
+        MOV     HIP,AX   ;{retore }
+        POP     ES
+        POP     DS
+        _NEXT
+;
 worddoc( {MULTIPLYING},{UM*},{u_start},{u1 u2 --- ud},{ISO},
 {A mixed magnitude math operation which leaves the double number
 forthvar({ud}) : the unsigned product of two unsigned numbers
@@ -2043,7 +2147,7 @@ CODE_HEADER({UM*},{USTAR})
 ;
 worddoc( {MULTIPLYING},{UM/MOD},{u_slash},{ud u1 --- u2 u3},{ISO},
 {Leave the unsigned remainder forthvar({u2}) and unsigned
-quotient forthsamp({u3}) from the unsigned double dividend
+quotient forthvar({u3}) from the unsigned double dividend
 forthvar({ud}) and unsigned divisor forthvar({u1}) .},
 {{UM*},{SM/REM},{/}},
 {
@@ -2059,7 +2163,7 @@ CODE_HEADER({UM/MOD},{USLAS})
 ;
 worddoc( {LOGIC},{AND},{and},{n1 n2 --- n2},{ISO,FIG,L0},
 {Leave the bitwise logical and of forthvar({n1}) and
-forthvar({n2}) as forthsamp({n3}) .},
+forthvar({n2}) as forthvar({n3}) .},
 {{XOR},{OR}},
 { { 2 BASE !  11110000 11001100 AND .},{11000000} },
 enddoc)
@@ -2092,7 +2196,7 @@ CODE_HEADER({XOR},{LXOR})
         _PUSH
 ;
 worddoc( {LOGIC},{INVERT},{INVERT},{n1 --- n2},{L1},
-{Invert all bits of forthvar({n1}) leaving forthsamp({n3}) .},
+{Invert all bits of forthvar({n1}) leaving forthvar({n3}) .},
 {{AND},{OR}},
 { { 2 BASE ! 11101101 INVERT 11111111 AND .},{10010} },
 enddoc)
@@ -2125,7 +2229,7 @@ CODE_HEADER({DSP!},{SPSTO})
 _LOAD_({
 worddoc( {STACKS},{DEPTH},,{--- n1},{ISO},
 {Leave into forthvar({n1}) the number of items on the data stack,
-before forthsamp({n1}) was pushed.},
+before forthvar({n1}) was pushed.},
 {{DSP@}},
 {{  1 2 3 DEPTH .},{3} },
 enddoc)
@@ -6288,6 +6392,12 @@ SaveIP:     DW      0000
 SaveCS:     DW      0000
 SaveSP:     DW      0000
 SaveSS:     DW      0000
+_HOSTED_DPMI_({
+;
+Save_CS_PR: DW    0000
+Save_DS_PR: DW    0000
+Save_ES_PR: DW    0000
+});_END_({ _HOSTED_DPMI_})
 ;
 worddoc( {OPERATINGSYSTEM},{BIOS31},{bios31},{a b c d di---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt 31H, directly from
@@ -6500,6 +6610,12 @@ HEADER({TYPE},{LTYPE},{DOCOL})
 _BITS32_({; MSDOS cannot handle a 32 bits address: copy the buffer.})
 _BITS32_({        DC      LIT, TYPEBUF, RR, LCMOVE })
 _BITS32_({        DC      LIT, TYPEBUF })
+_HOSTED_DPMI_({
+        _HOSTED_DPMI_({DW      ZERO, SWAP, LIT, Save_DS_PR, FETCH, })
+        DC      LIT, TYPEBUF, RR
+        DC      FMOVE
+        DC      LIT, TYPEBUF
+});_END_({ _HOSTED_DPMI_})
         DC      TOR     ; { Buffer address.}
         DC      LIT,04000H ;{ Write file or device }
         DC      ONE     ;{ Handle}
@@ -6509,6 +6625,7 @@ _BITS32_({        DC      LIT, TYPEBUF })
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 _BITS32_({TYPEBUF:  _RESB(0400H) })
+_HOSTED_DPMI_({TYPEBUF:  _RESB(0400H) })
 ;
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({RET})
