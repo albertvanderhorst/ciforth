@@ -8,29 +8,33 @@ Copyright: GPL, inasfar not public domain by FIG
 Archive: fig86g2d116.zip
 
 All generic FIG86 forths have version number 2.
-Preliminary releases derive their version id, in this case as 2.106, from
+Preliminary releases derive their version id, in this case as 2.116, from
 the RCS version of the generic source file `fig86.gnr' 
 Stable versions will use the regular fig numbering. 
 
 Release :
-Version 2d116 is archived into fig86g2d116.zip and consists of
+Version 2d147 is archived into fig86g2d147.zip and consists of
+
+The source.
+Makefile        : Make a runnable Forth but also targets for building floppies.
+fig86.gnr       : Generic source, word documentation and wordset documentation. 
+figforth.c      : C-source that complements assembler on Linux.
+
+*.cfg           : Each of these cfg-files stand for some system.
+*release.txt   *: A corresponding *release.txt refer to such system.
 
 Documentation
 COPYING         : the conditions under which you are allowed to use all this
 release.txt     : this text
-figdoc.zip      : general figForth documentation and glossary
-figdocadd.txt  *: deviations from the above, plus concretisations for fig86.gnr
-fig86gnr.txt    : documentation applicable to all versions about genericity
+figforth.mi     : Main documentation, and framework
+intro.mi        : Beginners introduction to Forth
+manual.mi       : User manual (Glossary is generated from fig86.gnr) 
+rational.mi     : Installation and other expert level info
+figdocadd.txt   : Additions still to be moved to rational.mi
 
-Source
-Makefile        : Make a runnable Forth but also targets for building floppies.
-fig86.gnr       : generic source
-figforth.c      : C-source that complements assembler on Linux.
-
-*.cfg           : Each of these cfg-files stand for some system.
-*release.txt   *: if a corresponding *release.txt is present, its intention
-                  is that for that system reading of fig86gnr.txt is no
-                  longer essential. It remains fruitful. 
+assembler.txt   : INACCURATE! About the internal assember and 
+                  the separate assembler project.
+editor.txt      : The built in assembler for MSDOS or standalone configurations.
 
 Derived sources. For an msdos archive `fig86.' is ommitted.
 This is for your convenience, you could have generated them.
@@ -52,7 +56,8 @@ alonehd.cfg     : 32 bit protected mode, boots from hard disk, uses BIOS for IO
 cfg.zip         : More .cfg files that make sense. If available.
 
 Auxiliary files.
-The m4 files are used transparently by the Makefile.
+These m4 files are used transparently by the Makefile for making 
+different .asm files with the corresponding . rawdoc files.
 prelude.m4      : Sets defaults. Show configuration options.
 postlude.m4     : Makes sure everything is consistent. 
 gas.m4          : Included for using gas (experimental, only half way).
@@ -62,16 +67,28 @@ header.m4       : Handles the headers. Approximately set threading type.
 width16.m4      : Handles 16 bits code.
 width32.m4      : Handles 32 bits code.
 protect.m4      : Handles switching between real and protected mode.
+
+These m4 files are used transparently by the Makefile for making 
+documentation files from the .mi files and one .rawdoc file.
+The above m4 are also needed still.
+gloss.m4        : Layout of glossary section in texinfo
+glosshtml.m4    : Layout of glossary section in html
+indexhtml.m4    : Sorted index for html
+manual.m4       : Generate texinfo markups
+menu.m4         : Generate the wordset menu
+names.m4        : Names in the documentation for easy change.
+wordset.m4      : Generate texinfo chapters linkage.
+
 link.script     : Links a hybrid c/assembler version on Linux.
 genboot.bat     : Generate a bootable floppy on an MSDOS system
 toblock.c       : Convert a text file to blocks.
 fromblock.c    *: Convert from blocks to a text file.
 stealconstant.c*: Converted to constant.m4 with Linux symbolic constants.
 
-
-Example Forth sources.
+System Forth sources. Example Forth sources.
 blocks.frt      : Source for editor assembler decompiler etc. Normal archives.
-BLOCKS.BLK      : Same but in block format, supplied in MSDOS archive instead of blocks.frt
+BLOCKS.BLK      : Generated from blocks.frt b ut in block format,
+                  Supplied in MSDOS archive instead of blocks.frt 
 wc              : Featuring lina as a script language.
 
 The files marked *: have names too long for plain MSDOS. These names are
