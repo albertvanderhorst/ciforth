@@ -391,7 +391,7 @@ worddoc({?CSP},{question_c_s_p},{},{},{
         forthvar({CSP}) .},{})
 
 
-worddoc({ERROR},{question_error},{f n --},{},{
+worddoc({?ERROR},{question_error},{f n --},{},{
        Issue an error message number forthcode({n}) , if the boolean flag is true.},{})
 
 
