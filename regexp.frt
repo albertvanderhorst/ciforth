@@ -10,10 +10,13 @@
 REQUIRE @+
 REQUIRE TRUE
 REQUIRE WITHIN
+REQUIRE 2R>
+REQUIRE BOUNDS
 
 INCLUDE set.frt
 INCLUDE bits.frt
 INCLUDE defer.frt
+INCLUDE stringloops.frt
 
 \ Regular expressions in Forth.
 \ This package handles only simple regular expressions and replacements.
@@ -55,8 +58,8 @@ INCLUDE defer.frt
 
 \ Allocate a char set and leave a POINTER to it.
 : ALLOT-CHAR-SET   HERE MAX-SET 0 DO 0 C, LOOP ;
-\ Note that ``ASCII'' null must be excluded from every char-set!
-\ Algorithms rely on it.
+\ Note that ``ASCII'' null is excluded from every char-set!
+\ The algorithm relied on it, but probably no longer.
 \ For an identifying CHAR create an as yet empty char set with "NAME"
 \ and add it to ``CHAR-SET-SET''.
 \ Leave a POINTER to the set (to fill it in).
@@ -172,8 +175,10 @@ DUP 1 AND 0= ABORT" ) where ( expected, inproper nesting, user error" ;
 \D DUP 0 10 WITHIN 0= ABORT" substring index out of range, system error"
 CELLS STRING-TABLE + ! ;
 
+\ For ADDRESS containing a start end pair, return the STRING represented.
+: SE@-STRING 2@ SWAP OVER - ;
 \ For INDEX create a "word" that returns the matched string with that index.
-: CREATE\ CREATE 1+ 2 * CELLS STRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
+: CREATE\ CREATE 1+ 2 * CELLS STRING-TABLE + , DOES> @ SE@-STRING ;
 
 \ &9 1+ &0 DO   &\ PAD C!   I PAD 1+ C!   PAD 2 POSTFIX CREATE\ LOOP
 0 CREATE\ \0    1 CREATE\ \1    2 CREATE\ \2    3 CREATE\ \3   4 CREATE\ \4
@@ -345,13 +350,13 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ ---------------------------------------------------------------------------
 
 \ The compiled expression.
-CREATE RE-COMPILED MAX-RE ALLOT
+CREATE RE-COMPILED MAX-RE CELLS ALLOT
 
 \ Regular expressions are parsed using a simple recursive descent
 \ parser.
 
 \ Build up a string to be matched simply.
-CREATE NORMAL-CHARS MAX-RE ALLOT
+CREATE NORMAL-CHARS MAX-RE CELLS ALLOT
 : !NORMAL-CHARS   0 NORMAL-CHARS ! ;
 
 \ To where is the compiled expression filled.
@@ -531,8 +536,8 @@ VARIABLE RE-EXPR-END
 : RE-BUILD INIT-BUILD OVER + BEGIN RE-BUILD-ONE UNTIL 2DROP EXIT-BUILD
    RE-COMPILED ;
 
-\ Copy the STRING to ``STRING-COPY'' zero-ending at both ends.
-\ Return a POINTER to the zero ended string.
+\ Prepare the STRING to be matched.
+\ Return a POINTER to the start of the string.
 : STRING-BUILD OVER +   OVER STRING-TABLE 2! ;
 
 \ For STRING and regular expression STRING:
@@ -540,16 +545,50 @@ VARIABLE RE-EXPR-END
 : RE-MATCH RE-BUILD >R STRING-BUILD R> (MATCH) >R 2DROP R> ;
 
 \ Return remaining STRING of ``STRING-COPY'' after substring INDEX.
-: REMAINDER STRING[] CELL+ @   0 STRING[] CELL+ @ OVER - ;
+: REMAINING STRING[] CELL+ @   1 STRING[] CELL+ @ OVER - ;
 
-\ Replace substring INDEX with a hole of LENGTH.
-: MAKE-OF-SIZE   DUP >R DUP STRING[] @ R@ + SWAP REMAINDER   >R SWAP R> MOVE
-  R> STRING-TABLE CELL+ +! ;
+\ Return STRING before the matched string.
+: BEFORE\0   0 STRING[] @   1 STRING[] @   OVER - ;
 
-\ Replace STRING for substring INDEX.
-: (RE-REPLACE) 2DUP SWAP MAKE-OF-SIZE   2* CELLS STRING-TABLE + @ SWAP MOVE ;
+\ Return STRING after the matched string.
+: AFTER\0   1 STRING[] CELL+ @  0 STRING[] CELL+ @   OVER - ;
 
-\ Replace all substrings with STRING1 STRING2 .. STRINGN
-: RE-REPLACE  ALLOCATOR @ 2/ 1- 1 DO (RE-REPLACE) -1 +LOOP ;
+\ \ -----------------------------------------------------------------
+\ \     Only used for awk-like facilities.
+\ \ -----------------------------------------------------------------
+\ \
+\ \ \ Replace substring INDEX with a hole of LENGTH.
+\ \ : MAKE-OF-SIZE   DUP >R DUP STRING[] @ R@ + SWAP REMAINDER   >R SWAP R> MOVE
+\ \   R> STRING-TABLE CELL+ +! ;
+\ \
+\ \ \ Replace STRING for substring INDEX.
+\ \ : (RE-REPLACE) 2DUP SWAP MAKE-OF-SIZE   2* CELLS STRING-TABLE + @ SWAP MOVE ;
+\ \
+\ \ \ Replace all substrings with STRING1 STRING2 .. STRINGN
+\ \ : RE-REPLACE  ALLOCATOR @ 2/ 1- 1 DO (RE-REPLACE) -1 +LOOP ;
 
+CREATE STRING-COPY MAX-RE CELLS ALLOT
+
+\ CP points to a '\#' escape. Add the matched substring indicated by '#'
+\ to the replaced string. Leave CP pointing after the escape.
+: DO-ESCAPE 1+ C@+ &0 - STRING[] SE@-STRING STRING-COPY $+! ;
+
+\ For the range to CP2 from CP1 : "It STARTS with a substring escape"
+: ESCAPE? 2DUP - 1 > >R         \ At least two char's
+          DUP C@+ &\ = >R       \ First char '\'
+          C@ &0 &9 1+ WITHIN >R \ Second char a digit.
+          2DROP
+          R> R> R> AND AND ;
+
+\ For a range to CP2 from CP1 add the first item to ``STRING-COPY''.
+\ Leave CP2 and an incremented CP1.
+: DO-ONE-CHAR 2DUP ESCAPE? IF DO-ESCAPE ELSE C@+ STRING-COPY $C+ THEN ;
+
+\ Use the replacement STRING to replace the matched part for a recent call
+\ of ``RE-MATCH''.
+: RE-REPLACE
+    BEFORE\0 STRING-COPY $!
+    BOUNDS BEGIN 2DUP > WHILE DO-ONE-CHAR REPEAT 2DROP
+    AFTER\0 STRING-COPY $+!
+    STRING-COPY $@ ;
 \D INCLUDE debug-re.frt
