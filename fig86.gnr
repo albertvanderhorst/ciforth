@@ -486,17 +486,18 @@ ORIG:
 ;************************
 OPTIONAL_SWITCH_TO_32MODE
 ;************************
-	  JMPFAR 
-	  DW      SAME3
-	  DW     CS_32
+	 JMP     SAME3
+;         JMPFAR         ;32BIT 
+;         DW      LCLD   ;32BIT 
+	  DW     CS_32   ;32BIT 
 GDTLOAD DW     GDTLEN
 	DD     GDT 
 
 SAME3:
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+;        MOV     AX,DS_32 ;32BIT 
+;        MOV     DS,AX    ;32BIT 
+;        MOV     ES,AX    ;32BIT 
+;        MOV     SS,AX    ;32BIT 
 });_END___1__({ _PROTECTED_1_})
 	NOP
 	JMP	LCLD     ;VECTOR TO COLD START
@@ -645,12 +646,13 @@ BREAK:  JMP	SHORT	TNEXT3	;CONT WITH PROGRAM
 ;
 TNEXT2:	POP	AX
 	POPF
-TNEXT3:	LODSW            ; AX <- (IP)
+TNEXT3:	LODSW           ; AX <- (IP)
 	MOV	BX,AX
 	JMP	SHORT	NEXT1
 	PAGE
+_COMMENT
 DISPLAYSI:
-	JMPHERE_FROM_32(CODESEGMENT) 
+	JMPHERE_FROM_PROT
 	TO_REAL         ; Nought unless using protected mode.
 	BITS    16
 	MOV     AX,SI   
@@ -662,13 +664,10 @@ DISPLAYSI:
 	MOV     AH,10H
 	INT     16H
 	TO_PROTECTED    
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+	JMPHERE_FROM_REAL
 	RET
-DPUSH:	PUSH	DX
+_ENDCOMMENT
+DPUSH:  PUSH    DX
 APUSH:	PUSH	AX
 _COMMENT
 
@@ -676,7 +675,7 @@ _COMMENT
     `JMP TNEXT' for tracing through high level FORTH words. 
 
 _ENDCOMMENT
-NEXT:	LODSW            ;AX <- (IP)
+NEXT:	LODSW		;AX <- (IP)
 ;
 NEXT1:	MOV	DI,AX   ; (W) <- (IP)
 ;       CALL    DISPLAYSI
@@ -686,7 +685,7 @@ NEXT1:	MOV	DI,AX   ; (W) <- (IP)
 ;       Dictionary starts here.
 DP0:
 CODE_HEADER({LIT},{LIT})
-	LODSW            ; AX <- LITERAL
+	LODSW		; AX <- LITERAL
 	JMP SHORT     APUSH   ; TO TOP OF STACK
 ;
 CODE_HEADER({EXECUTE},{EXEC})
@@ -787,7 +786,7 @@ _ENDCOMMENT
 UP	DC	STRUSA	; USER AREA POINTER 1
 	DC      0       ; (Unused)          2
 	DC 	INITS0	; INIT (S0)         3
-	DC 	INITR0	; INIT (R0)         4
+        DC 	INITR0	; INIT (R0)         4
 	DC 	STRTIB  ; INIT (TIB)        5
 	DC	32	; INIT (WIDTH)      6
 	DC	0	; INIT (WARNING)      7
@@ -805,7 +804,7 @@ UP	DC	STRUSA	; USER AREA POINTER 1
 CPUNM   DC      5H,0B328H       ; '8088'     25 26 
 	DC      FIGREL + FIGREV *100H  ; FIG RELEASE + REVISION 27
        DC      USRVER  + 0EH*100H      ; USER REVISION + VERSION ATTRIBUTES 28
-LAINI:  DC	_LINK_FIELD(TASK) ; LAST WORD 29 
+LAINI:  DC	_LINK_FIELD(TASK) ; LAST CELL 29 
 	DC	BSIN	; RUBOUT: get rid of latest char 30
 ;
 CODE_HEADER({DIGIT},{DIGIT})
@@ -1141,18 +1140,14 @@ CODE_HEADER({2!},{TSTOR})
 CODE_HEADER({L@},{LFET})
 	POP	BX	;MEM LOC
 	POP	CX	;SEG REG VAL
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL         
 	MOV	DX,DS
 	MOV	DS,CX
 	MOV	BX,[BX]
 	MOV	DS,DX
-	TO_PROTECTED         
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+	TO_PROTECTED
+        JMPHERE_FROM_REAL
 	PUSH    BX
 	JMP	NEXT
 ;
@@ -1167,7 +1162,7 @@ CODE_HEADER({L@},{LFET})
 CODE_HEADER({L!},{LSTORE})
 	POP	BX
 	POP	CX
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL
 	MOV	DX,DS
 	MOV	DS,CX
@@ -1175,11 +1170,7 @@ CODE_HEADER({L!},{LSTORE})
 	MOV	[BX],AX
 	MOV	DS,DX
 	TO_PROTECTED
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+        JMPHERE_FROM_REAL
 	JMP	NEXT
 	PAGE
 	; At line     LINE ~1000
@@ -1198,14 +1189,10 @@ DOCOL:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;R1 <- (IP)
 	LEA     SI,[DI+CELLS(1)]  ;(IP) <- (PFA)
 ;____1_____ _PROTECTED_1_({
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL         
 	TO_PROTECTED    
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+        JMPHERE_FROM_REAL
 });_END___1__({ _PROTECTED_1_})
 	JMP	NEXT
 ;
@@ -1248,7 +1235,7 @@ CODE_HEADER({1},{ONE})
 	MOV	AX,1
 	JMP	APUSH
 ;
-CODE_HEADER({2},{TWO})   ; Needed also CELLS(1)
+CODE_HEADER({2},{TWO})   ; Needed also CELLS
 	MOV	AX,2
 	JMP	APUSH
 ;
@@ -2340,7 +2327,7 @@ CODE_HEADER({PC@},{PCFET})
 ; FETCH CHARACTER (BYTE) FROM PORT
 	POP	DX	; PORT ADDR
 	IN	AL,{DX}   ; BYTE INPUT
-	SUB     AH,AH
+	SUB	AH,AH
 	JMP	APUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
@@ -2502,7 +2489,7 @@ CODE_HEADER({BIOS},{BIOS})
 	PUSH     SI      ; Save Forth registers. NEEDED? 
 	PUSH     BP      
 	XCHG    SI,AX   ; Save AX in (already free) SI
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL         ; Nought unless using protected mode.
 	XCHG    SI,AX   
 RQBIOS: INT(0)          ; Request number to be overwritten.
@@ -2510,11 +2497,7 @@ RQBIOS: INT(0)          ; Request number to be overwritten.
 	POP     DI      
 	XCHG    SI,AX   ; Save AX in (still free) SI     
 	TO_PROTECTED    
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+        JMPHERE_FROM_REAL
 	XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
 	POP	SI	;INTERPRETER PNTR
@@ -2536,19 +2519,15 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     SI      ; Save Forth registers. NEEDED? 
 	PUSH     BP      
 	XCHG    SI,AX   ; Save AX in (already free) SI
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL         ; Nought unless using protected mode.
 	XCHG    SI,AX   
-	INT     21H
+        INT     21H          
 	PUSHF      ; Save status into DI 
 	POP     DI      
 	XCHG    SI,AX   ; Save AX in (still free) SI     
 	TO_PROTECTED    
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+        JMPHERE_FROM_REAL
 	XCHG    SI,AX   
 	POP	BP	; Restore Forth registers. NEEDED? 
 	POP	SI	;INTERPRETER PNTR
@@ -2557,7 +2536,7 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     CX      
 	PUSH     DX      
 	PUSH     DI     ; i.e. flags 
-	JMP     NEXT 
+	JMP     NEXT    
 
 	     ; SVGA-modus 43*132 char's
 HEADER({SMALL},{SMALL},{DOCOL})
@@ -2642,7 +2621,7 @@ EXPE1	DC	KEY
 	DC	EQUAL                           
 	DC	DUPE                            
 	DC	FROMR                           
-	DC	TWO     ; Dubious if CELLS(1)   
+	DC	TWO     ; Remove last 2 chars 
 	DC	LSUB                            
 	DC	PLUS                            
 	DC	TOR                             
@@ -2762,7 +2741,7 @@ EXPE1	DC	KEY
 	DC	EQUAL                           
 	DC	DUPE                            
 	DC	FROMR                           
-	DC	TWO     ; Magic number    
+	DC	TWO     ; Remove last 2 chars 
 	DC	LSUB                            
 	DC	PLUS                            
 	DC	TOR                             
@@ -3041,18 +3020,14 @@ CODE_HEADER({RBLK},{RBLK})
 	PUSH	BP	;RETURN POINTER
 	MOV     BX,4200H       
 	MOV     DX,0080H  ;   Disk C                                 
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ; REMEMBER STATUS
 	POP     BX
 	TO_PROTECTED
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+        JMPHERE_FROM_REAL
 	POP	BP	;RETURN STACK
 	POP	SI	;INTERPRETER PNTR
 	PUSH    BX      ; REMEMBER STATUS
@@ -3065,18 +3040,14 @@ CODE_HEADER({WBLK},{WBLK})
 	PUSH	BP	;RETURN POINTER
 	MOV     BX,4300H       
 	MOV     DX,0080H  ;   Disk C                                 
-	JMPHERE_FROM_32(CODESEGMENT) 
+        JMPHERE_FROM_PROT
 	TO_REAL
 	XCHG    BX,AX
 	INT     13H
 	PUSHF           ; REMEMBER STATUS
 	POP     BX
 	TO_PROTECTED
-	JMPHERE_FROM_16(CS_32) 
-	MOV     AX,DS_32 
-	MOV     DS,AX
-	MOV     ES,AX
-	MOV     SS,AX
+        JMPHERE_FROM_REAL
 	POP	BP	;RETURN STACK
 	POP	SI	;INTERPRETER PNTR
 	PUSH    BX
@@ -3159,7 +3130,7 @@ HEADER({BEGIN},{BEGIN},{DOCOL},1)
 ;
 HEADER({ENDIF},{ENDIFF},{DOCOL},1)
 	DC	QCOMP
-	DC	TWO     ; Magic number    
+	DC	TWO     ; Magic number
 	DC	QPAIR
 	DC	HERE
 	DC	OVER
@@ -3176,11 +3147,11 @@ HEADER({DO},{DO},{DOCOL},1)
 	DC	COMP
 	DC	XDO
 	DC	HERE
-	DC	THREE
+	DC	THREE   ; Magic number
 	DC	SEMIS
 ;
 HEADER({LOOP},{LOOPC},{DOCOL},1)
-	DC	THREE
+	DC	THREE   ; Magic number
 	DC	QPAIR
 	DC	COMP
 	DC	XLOOP
@@ -3188,7 +3159,7 @@ HEADER({LOOP},{LOOPC},{DOCOL},1)
 	DC	SEMIS
 	PAGE
 HEADER({+LOOP},{PLOOP},{DOCOL},1)
-	DC	THREE
+	DC	THREE   ; Magic number
 	DC	QPAIR
 	DC	COMP
 	DC	XPLOO
@@ -3221,7 +3192,7 @@ HEADER({REPEAT},{REPEA},{DOCOL},1)
 	DC	AGAIN
 	DC	FROMR
 	DC	FROMR
-	DC	LCELL
+	DC	TWO     ; Magic number
 	DC	LSUB
 	DC	ENDIFF
 	DC	SEMIS
@@ -3232,11 +3203,11 @@ HEADER({IF},{IFF},{DOCOL},1)
 	DC      HERE
 	DC	ZERO
 	DC	COMMA
-	DC	TWO     ; Magic number        
+	DC	TWO     ; Magic number           
 	DC	SEMIS
 	PAGE
 HEADER({ELSE},{ELSEE},{DOCOL},1)
-	DC	TWO     ; Magic number        
+	DC	TWO     ; Magic number 
 	DC	QPAIR
 	DC	COMP
 	DC	BRAN
@@ -3244,14 +3215,14 @@ HEADER({ELSE},{ELSEE},{DOCOL},1)
 	DC	ZERO
 	DC	COMMA
 	DC	SWAP
-	DC	TWO     ; Magic number        
+	DC	TWO     ; Magic number           
 	DC	ENDIFF
-	DC	TWO     ; Magic number        
+	DC	TWO     ; Magic number           
 	DC	SEMIS
 ;
 HEADER({WHILE},{WHILE},{DOCOL},1)
 	DC	IFF
-	DC	CELLP         ; Dubious    
+	DC	TWOP        ; Magic number           
 	DC	SEMIS
 	PAGE
 HEADER({SPACES},{SPACS},{DOCOL})
