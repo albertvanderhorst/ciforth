@@ -1291,7 +1291,7 @@ DP0:
 ; that in turn links to 0.
 
 define({_LINKOLD},0)dnl
-worddocsafe( {DENOTATIONS},{'},{tick_denotation},{--- addr},{ISO,FIG,I,L0},
+worddocsafe( {DENOTATIONS},{Prefix__TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: forthexample({' nnnn
 'nnnn})
 In interpret mode it
@@ -1326,7 +1326,7 @@ HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LITER
         DC      SEMIS
 ;
-worddoc( {DENOTATIONS},{DEN&},{char_follows}, {--- c},{CI},
+worddoc( {DENOTATIONS},{Prefix_&},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
 Skip another blank character.},
 {},
@@ -1343,7 +1343,7 @@ HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
 ;
-worddoc( {DENOTATIONS},{DEN^},{control_follows}, {--- b},{CI},
+worddoc( {DENOTATIONS},{Prefix_^},{control_follows}, {--- b},{CI},
 {Leave forthvar({b}) the control character value of the char that follows
 _VERBOSE_({{i.e. forthsamp({^A}) results in 1 and so on}}).
 Skip another blank character.},
@@ -1362,7 +1362,7 @@ HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
 ;
-worddocsafe( {DENOTATIONS},{DEN0},{den_zero}, {--- s/d},{CI},
+worddocsafe( {DENOTATIONS},{Prefix_0},{den_zero}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with
 forthkey({0}) . Similar words are present for all decimal and hex digits.
 _VERBOSE_({{ ISO compatibility would demand that denotators for
@@ -1393,7 +1393,7 @@ HEADER({D},{DEND},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({E},{DENE},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({F},{DENF},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 ;
-worddoc( {DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
+worddoc( {DENOTATIONS},{Prefix_-},{den_minus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
 {},
 {{-48 .},{-48 },
@@ -1402,7 +1402,7 @@ HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
         DC      PNUMB, DNEGA, SDLITE
         DC      SEMIS
 ;
-worddoc({DENOTATIONS},{DEN+},{den_plus}, {--- s/d},{CI},
+worddoc({DENOTATIONS},{Prefix_+},{den_plus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({+}) .},
 {},
 {{+48 .},{48 },
@@ -1411,7 +1411,7 @@ HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      PNUMB, SDLITE
         DC      SEMIS
 ;
-worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
+worddocsafe( {DENOTATIONS},{Prefix_"},{den_quote}, {--- sc},{CI},
 {Leave a forthkey({"}) delimited string. A forthkey({"}) can
 be embedded in a string by doubling it.
 },
@@ -2886,7 +2886,7 @@ CODE_HEADER({0},{ZERO})
         XOR     AX,AX
         _PUSH
 ;
-worddoc( {SUPERFLUOUS},{1},{one},{--- 1},{},
+worddoc( {SUPERFLUOUS},{Number_1},{one},{--- 1},{},
 {Leave the number 1. },{{CONSTANT}},
 {{1 .},{1}},
 enddoc)
@@ -2894,7 +2894,7 @@ CODE_HEADER({1},{ONE})
         MOV     AX,1
         _PUSH
 ;
-worddoc( {SUPERFLUOUS},{2},{two},{--- 2},{},
+worddoc( {SUPERFLUOUS},{Number_2},{two},{--- 2},{},
 {Leave the number 2. },{{CONSTANT}},
 {{2 .},{2}},
 enddoc)
@@ -4476,7 +4476,7 @@ Because this is so confusing,
 it is recommended that
 one never compiles or postpones forthcode({CHAR}).
 },
-{{DEN&},{[CHAR]},{'}},
+{{Prefix_&},{[CHAR]},{'}},
 {{CHAR HELL .},{48 },
 {CHAR X  .},{58 },
 {: GS1 CHAR ; GS1 HELLO . },{48 },
@@ -4490,7 +4490,7 @@ worddocsafe( {PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
 {A compiling word. Parse a word.  Add the run time behaviour:
 leave forthvar({c}), the first non blank char of that word in the
 input source. In ciforth this word works also in interpret mode.},
-{{DEN&},{CHAR}},
+{{Prefix_&},{CHAR}},
 {},
 {{: GS1 [CHAR] HELLO ; GS1 HEX . },{48 },
 {: GS2 [CHAR] X ; GS2 HEX .},{58 }}, enddoc)
@@ -4855,7 +4855,7 @@ in compile mode.
 },
 {{?ERROR}},
 {{ 0 WARNING ! 1  ABORT" APE" }, {WARNING ! 1 ABORT" ? ciforth ERROR # 17 },
-{: GS1 0 ABORT" APE" 123 ; GS1 .},{123},
+{CR : GS1 0 ABORT" APE" 123 ; GS1 .},{123},
 dnl The warm start message is filtered away!
 {: GS2 1 ABORT" APE" 123 ; GS2 .},{APE}
 },
@@ -4978,7 +4978,7 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}). },
 : IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1},
 { POSTPONE NON-EXISTING }, {STPONE NON-EXISTING ?  ciforth ERROR # 15},
 dnl This must not find 7 in the DENOTATION wordlist
-{POSTPONE 7F89 .}, {POSTPONE 7F89 ? ciforth ERROR # 15}
+{CR POSTPONE 7F89 .}, {CR POSTPONE 7F89 ? ciforth ERROR # 15}
 },
 enddoc)
 HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
@@ -9827,9 +9827,9 @@ These words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant.
 They reside in a special vocabulary, called forthcode({DENOTATION}).
 To make a distinction with the same words in other wordlists,
-the names of denotations are prepended with ``DEN'' in the
+the names of denotations are prepended with ``Prefix_'' in the
 documentation. Actual names in the dictionary do not contain
-the prefix. Apart from forthcode({DEN0}) , the vocabulary
+the prefix. Apart from forthcode({Prefix_0}) , the vocabulary
 contains entries for all hex digits forthsamp({{{{1-9,A-F}}}}).
 Like forthcode({NUMBER}) always did, all denotations behave
 identical in interpret and compile mode and they cannot be

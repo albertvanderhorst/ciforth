@@ -16,6 +16,7 @@ divert(9)dnl
 @node $8, _next$3(), _prev(), MyTop()
 @subsection {$2}ifelse({$2},{'},{ (This addition because texinfo won't accept a single {quote}) })
 @pindex $2
+@findex $2
 
 @noindent
 Name: @code{{{{{{$2}}}}}}

@@ -89,7 +89,6 @@ DOC = \
 COPYING   \
 README.ciforth      \
 testreport.txt     \
-cfg.zip  \
 $(SRCMI) \
 # That's all folks!
 
@@ -300,8 +299,8 @@ forth.lab : forth.lab.lina ;
 
 lina.zip : $(RELEASELINA) ;
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	(cd ..; ln -s ci86 lina-$(VERSION))
-	(cd ..; tar -czvf ci86/lina-$(VERSION).tar.gz `cat ci86/MANIFEST`)
+	(cd ..; ln -s ciforth lina-$(VERSION))
+	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
 	(cd ..; rm lina-$(VERSION))
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
