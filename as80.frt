@@ -40,6 +40,7 @@ IS-A IS-2PI
 : 3PI <BUILDS  , INVERT , INVERT , 3 , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 3 CORRECT ;
 IS-A IS-3PI
+: IS-PI  >R R IS-1PI R IS-2PI R IS-3PI OR OR R> DROP ;
 DECIMAL
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @    2DUP AND 28 ?ERROR   OR R> ! ;
@@ -177,7 +178,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( assembling and add the fixup/posti/commaer to the disassembly struct. )
 ( Leave the DEA.                                                        )
 : DIS-PI
-    0   OVER IS-1PI OR   OVER IS-2PI OR   OVER IS-3PI OR   IF
+    DUP IS-PI IF
     AT-REST? IF
         DUP >BODY POST, DROP
         DUP +DISS
@@ -257,7 +258,7 @@ HERE POINTER !
 ( disassembly struct.
 ( Leave the DEA.                                                        )
 : dis-1PI
-    0   OVER IS-1PI OR   OVER IS-2PI OR   OVER IS-3PI OR   IF
+    DUP IS-PI IF
     AT-REST? IF
     DUP >MASK OVER >IMASK AND POINTER @ @ AND OVER >INST = IF
         DUP >BODY POST, DROP
