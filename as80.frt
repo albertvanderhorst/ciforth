@@ -1,7 +1,7 @@
 ( $Id$)
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( ############## 8080 ASSEMBLER PROPER ################################ )
-ASSEMBLER DEFINITIONS
+ASSEMBLER DEFINITIONS  HEX
 ( Note the decompiler hits them in the reverse order                    )
 ( ' CNT      BA BY DATA                                                )
   0 1        0 100 ' C, >CFA   COMMAER IB, ( immediate byte data)
@@ -57,8 +57,8 @@ ASSEMBLER DEFINITIONS
 : UNTIL, IF, DROP ;                  : WHILE, IF, ;
 : REPEAT, SWAP JMP X,  THEN, ;
 
-
+PREVIOUS DEFINITIONS
     ." COMES JAN"
-        CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;
-        ' JAN >CFA @ HERE DIS-RANGE
-    ' JAN @ D-F-A DDD DDD DDD
+     CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT ENDCODE
+    'JAN >CFA @ HERE D-R
+    'JAN >CFA @ DDD DDD DDD
