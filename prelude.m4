@@ -214,7 +214,7 @@ dnl Redefine ``worddoc'' to make sure it lands in the documentation part
 define({worddoc},
 {_GENERATE_DOC{}dnl}
 {{worddoc({$1},{$2},{$3},{$4},{$5},{$6},{$7})}}
-{_GENERATE_CODE}
+{_GENERATE_CODE{}dnl}
 )dnl
 
 define({worddocsafe},
@@ -227,8 +227,8 @@ dnl Same for ``worddocchapter''
 define({worddocchapter},
 {_GENERATE_DOC{}dnl}
 {{worddocchapter({$1},{ },{$3},{$4},{$5},{$6},{$7})}}
-{{worddocchapterend({$1},{~},{CONTENT},{},{},{},{})}}
-{_GENERATE_CODE}
+{{worddocchapterend({$1},{~~~~~~~~~~},{CONTENT},{},{},{},{})}}
+{_GENERATE_CODE{}dnl}
 )dnl
 
 divert(-1){}dnl
