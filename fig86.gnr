@@ -576,10 +576,9 @@ _COMMENT
 
 _ENDCOMMENT
 NEXT:	LODSW		;AX <- (IP)
-	MOV	BX,AX
 ;
-NEXT1:	MOV	DI,BX   ; (W) <- (IP)
-	JMP     _WORD_PTR[BX]    ; TO `CFA'
+NEXT1:	MOV	DI,AX   ; (W) <- (IP)
+	JMP     _WORD_PTR[DI]    ; TO `CFA'
 	PAGE
 ;
 ;       Dictionary starts here.
@@ -589,11 +588,11 @@ CODE_HEADER({LIT},{LIT})
 	JMP SHORT     APUSH   ; TO TOP OF STACK
 ;
 CODE_HEADER({EXECUTE},{EXEC})
-	POP     BX      ; GET CFA
-	JMP SHORT     NEXT1   ; EXECUTE NEXT
-;
-CODE_HEADER({BRANCH},{BRAN})
-BRAN1:	ADD	SI,[SI]
+	POP     DI      ; GET CFA
+	JMP     _WORD_PTR[DI]    
+;                                 
+CODE_HEADER({BRANCH},{BRAN})      
+BRAN1:	ADD     SI,[SI]           
 	JMP SHORT     NEXT    ; JUMP TO OFFSET
 ;
 CODE_HEADER({0BRANCH},{ZBRAN})
