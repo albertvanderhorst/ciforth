@@ -4,12 +4,15 @@ VOCABULARY ASSEMBLER IMMEDIATE
 ( A subsequent `ID.' must print the name of that word      )
 : % [COMPILE] ' NFA ;
 : >BODY PFA CELL+ ; ( From DEA to the DATA field of `X' *FOR A <BUILDS WORD!!*)
+: INVERT -1 XOR ;
 
 1 VARIABLE TABLE 1 , ( I TABLE + @ yields $100^x )
 ( Rotate X by I bytes right  leaving X')
 : ROTRIGHT TABLE + @ U* OR ;
 : & CURRENT @ @ ID. ; ." TESTING STUFF: &"
-( First cell : contains bits down for each COMMAER still needed)
+( First cell : l.s. byte 4 pairs of bits that are mutually exclusive )
+( remainder contains bits down for each COMMAER still needed )
+( The actual commaer must match bits in l.s. byte, if indicated      )
 ( Second cell contains bits up to be filled by TALLY:| )
  0 VARIABLE TALLY 0 CELL+ ALLOT  ( 4 BYTES FOR COMMAER 4 FOR INSTRUCTION)
  0 VARIABLE PRO-TALLY 0 CELL+ ALLOT  ( Prototype for TALLY)
@@ -23,15 +26,16 @@ VOCABULARY ASSEMBLER IMMEDIATE
 ( The first 8 bits of the TALLY need not be consumed. )
 HEX
 : AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
+: INCONSISTENT? TALLY @ INVERT DUP 2 * AND ;
 DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
+: CHECK32 INCONSISTENT? 32 ?ERROR ;
 ( Based on DATAFIELD of a postit, tally it)
 : TALLY:, CELL+ @+ TALLY CELL+ ! @+ TALLY ! @ ISL ! ;
 ( Correct dictionary to have an instruction of N bytes, after           )
 ( `,' allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
-: DO-POST CHECK26 !POST DUP TALLY:, @ , ISL @ CORRECT ;
-: INVERT -1 XOR ;
+: DO-POST CHECK26 CHECK32 !POST DUP TALLY:, @ , ISL @ CORRECT ;
 HEX
 0 VARIABLE TEMP ( Should be passed via the stack )
 ( Build a word that tests whether it of same type as stored )
@@ -63,11 +67,12 @@ DOES> [ HERE TEMP ! ] DO-POST ;
 IS-A IS-3PI
 : IS-PI  >R R IS-1PI R IS-2PI R IS-3PI OR OR R> DROP ;
 DECIMAL
-: CHECK28 2DUP AND -256 AND 28 ?ERROR ;
+: CHECK28 2DUP AND 28 ?ERROR ;
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @  CHECK28 OR R> ! ;
-( And DATA into ADDRESS. If bits were already down its wrong.)
-: CHECK29 2DUP OR -1 - 29 ?ERROR   ;
+( And DATA into ADDRESS. If bits - not from ls byte - were              )
+( already down its wrong.                                               )
+: CHECK29 2DUP OR 255 OR INVERT 29 ?ERROR   ;
 : AND! >R R @ CHECK29 AND R> ! ;
 (   Based on PFA of a fixup fix into tally)
 : TALLY:| CELL+ @+ TALLY CELL+ OR! @ TALLY AND! ;
@@ -236,6 +241,7 @@ HEX
         RESULT
         >NEXT%
 (       DUP ID.                                                         )
+        INCONSISTENT? IF BACKTRACK THEN
         BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
     DUP VOCEND? UNTIL DROP
 ;
@@ -334,13 +340,14 @@ HERE POINTER !
     BEGIN (DISASSEMBLE) POINTER @ OVER < 0= UNTIL
     DROP
 ;
-: REJECT NFA DUP >MASK ISS @ @ AND SWAP >INST = 27 ?ERROR ;
-(   : M| ' M'|  REJECT M| ;  To forbid M| M'| in combination      )
+(   : M| ' xxx  REJECT M| ;  To forbid M| xxx  in combination      )
+( xxx must be PI or FI not FIR )
+: REJECT> NFA DUP >MASK ISS @ @ AND SWAP >INST = 27 ?ERROR ;
 
 ( ************************* )
 ' ASSEMBLER CFA ' ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
-: C; CURRENT @ CONTEXT ! ?EXEC CHECK26 SMUDGE ; IMMEDIATE
+: C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
 
