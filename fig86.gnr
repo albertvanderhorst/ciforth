@@ -517,7 +517,7 @@ RAWIO           EQU     (ECHO | ICANON)
         extern  c_rslw, c_block_exit, c_block_init
 });_END___1__({_LINUX_C_1_})
 
-        global  figforth        ; Called from c. Remainder c-routines to be called from here.
+        global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
 
         section forth progbits write exec alloc
 figforth:
@@ -546,6 +546,7 @@ SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
 });_END___1__({_LINUX_C_1_})
 
 ;____1_____ _LINUX_N_1_({
+_start:
         JMP     BOOTUP                  ; Cold start
 });_END___1__({_LINUX_N_1_})
 
@@ -2736,11 +2737,6 @@ CODE_HEADER({TYPE},{LTYPE})
         _NEXT
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
-        DC      DUPE,LIT,LF,EQUAL
-        _0BRANCH(EMIT1)
-        DC      LIT,ACR,EMIT
-        DC      ZERO,LOUT,STORE
-EMIT1:
         DC      SPFET, ONE, LTYPE
         DC      DROP
         DC      SEMIS
