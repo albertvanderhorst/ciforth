@@ -10,7 +10,7 @@ dnl @smallbook
 A close-to-ISO/common intel/computer intelligence/CH+ forth.
 
 This is a standard-ISO Forth
-for the configuration:
+for the configuration called thisforth:
 forthitemize
 forthitem
 version ci86gnrversion
@@ -56,26 +56,26 @@ dnl @end iftex
 @node Top, Gentle Introduction, Glossary,
 @chapter Overview
 Forth is an interactive programming system.
-ciforth is a
-Forth that can be generated in many different version
+ciforth is a family of
+Forth's that can be generated in many different version
 for many different operation systems.
 It is sufficiently close to the ISO standard to run most programs intended
 to be portable. It deviates where less used features where
 objectionable to implement forthcref({Portability})
 
 This file documents what you as a user needs to know for using this
-particular version of ciforth once it is installed on your system.
+particular version of ciforth called ``thisforth'' once it is installed on your system.
 
 ciforth consists of three files:
 forthitemize
 forthitem
 _BOOTED_({A booting floppy or hard disk}) dnl
-_HOSTED_DPMI_({ciforth.com})_HOSTED_MSDOS_({ciforth.com})dnl
+_HOSTED_DPMI_({wina.com})_HOSTED_MSDOS_({mina.com})dnl
 _LINUX_N_({lina})_LINUX_C_({ciforthc})  : the program
 _BOOTED_({_RESPECTDOS_({If you inspect a booting floppy from MSDOS you discover that you can
-see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})})
+see the  files {ciforth}.com and ciforth.blk. You can even start the program from MSDOS})})
 forthitem
-ciforth.ps ciforth.html : the documentation
+{ciforth}.ps {ciforth}.html : the documentation
 forthitem
 forth.lab: source library for auxiliary programs
 forthenditemize
@@ -134,7 +134,7 @@ be interested in.
 * Manual::         User manual
 _PC_({* Editor::         The full screen editor})dnl
 * Assembler::      The assemblers
-* Errors::  What means forthsamp({ciforth ERR ###})?
+* Errors::  What means forthsamp({ ERR ###})?
 * Documentation::  Some references
 * Glossary::       Description of Forth words
 * Glossary Index:: Find a Forth words in the glossary
@@ -168,8 +168,8 @@ include(manual.mi)
 @chapter Editor
 
 The editor for editing screens is a very simple screen editor.
-For editing files from within ciforth you just use Your Favorite
-Editor. forthxref({Integration}).
+For editing files from within thisforth you just use Your Favorite
+Editor. forthxref({Getting Started}).
 
 The editor becomes available after forthsamp({REQUIRE EDITOR})
 and is invoked by  forthsamp({<number> EDIT}) or forthcode({E-S})
@@ -230,7 +230,9 @@ But this is not always possible, such is the nature of error
 situations.
 If in the following an explanation is missing, this means that the
 error is given for reference only; the error cannot be generated
-by your ciforth. For example for a version without
+by your thisforth, but maybe by
+other version of ciforth or even a differently configured thisforth.
+For example for a version without
 security you will never see error 1. If it says ``not used'', this
 means it is not used by any ciforth.
 You may issue errors yourself at your discretion using
@@ -367,7 +369,9 @@ forthitem
 Not used.
 
 forthitem
-forthsamp({ERR # 16 : (this error messages is not in use)})
+forthsamp({ERR # 16 : SYSTEM HAS ABORTED })
+
+Not used.
 
 forthitem
 forthsamp({ERR # 17 : COMPILATION ONLY, USE IN DEFINITION})

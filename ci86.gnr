@@ -9076,7 +9076,7 @@ DIGS1:  DC      DIG     ;{BEGIN}
         _0BRANCH(DIGS1) ;{UNTIL}
         DC      SEMIS
 ;
-worddoc( {OUTPUT},{(D.R)},{paren_d_dot_r},{d n ---sc},{ISO,FIG},
+worddocsafe( {OUTPUT},{(D.R)},{paren_d_dot_r},{d n ---sc},{ISO,FIG},
 {Format a signed double number forthvar({d}) right aligned in a
 field forthvar({n}) characters wide to the string forthvar({sc}).
 Enlarge the field, if

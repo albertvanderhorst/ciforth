@@ -2,7 +2,7 @@
 
 @subsection Hello world!
 
-Type forthsamp({ciforth}) to get into your interactive Forth system.
+Type forthsamp({thisforth}) to get into your interactive Forth system.
 You will see a signon message.
 While sitting in your interactive Forth doing a ``hello world'' is easy:
 forthexample({"Hello world!" TYPE
@@ -16,7 +16,7 @@ HELLO
 Hello world!
 OK })
 This means you type the command forthsamp({HELLO}) while you
-are in ciforth. As soon as you leave ciforth, this command
+are in thisforth. As soon as you leave thisforth, this command
 is gone.
 forthbreak
 In order to make a stand alone program to say hello you have to
@@ -25,13 +25,13 @@ It just contains the definition we typed earlier:
 forthexample({ : HELLO "Hello world!" TYPE CR ;})
 Now build the program by
 forthbreak
-ciforth -c hello.frt
+thisforth -c hello.frt
 forthbreak
 (That is forthkey({c}) for compile.)
 The result is a file forthfile({hello}) forthfile({HELLO.EXE}).
 For the compiler to run you must have the library correctly
 installed. If that failed, or anything else fails, you will
-get a message with at least forthsamp({ ciforth ERR ###})
+get a message with at least forthsamp({ ERR ###})
 and hopefully some more or less helpful text as well.
 The forthsamp({###}) is an error number forthxref({Errors}).
 
@@ -39,22 +39,22 @@ Note for the old hands. Indeed the quoted strings are not ISO.
 They surely are a Forth-like extension. Read up on denotations,
 and the definition of forthcode({"}) .
 
-In ciforth you never have to worry about those quoted strings,
+In thisforth you never have to worry about those quoted strings,
 they are allocated in the dictionary and are permanent.
 
 @subsection The library.
 
 If you want to run a program written on some other Forth, it
-may use facilities that are not available in ciforth's kernel,
+may use facilities that are not available in thisforth's kernel,
 but they may be available in the library.
 A library is a store with facilities, available on demand.
 Forth as such doesn't have a library mechanism,
-but ciforth does.
+but thisforth does.
 
-ciforth uses the forthdefi({blocks}) as a library
+thisforth uses the forthdefi({blocks}) as a library
 by addition of the word forthcode({REQUIRED}) and a convention.
 Starting with forthsamp({lina -r}) or most any option you have this
-facility available. If you are already in ciforth, you can
+facility available. If you are already in thisforth, you can
 type forthcode({1 LOAD}) .
 _VERBOSE_({ The extension of forthsamp({.lab}) in
 forthfile({forth.lab}) means Library Addressable by Block.})
@@ -79,7 +79,7 @@ off with forthcode({NO-DEBUG}) .
 If you try to forthcode({INCLUDE}) a program, you may
 get errors like ``xxx? ERR # 12 : NOT RECOGNIZED'' .
 forthxref({Errors}).
-Apparently, ciforth doesn't know about forthcode({xxx}),
+Apparently, thisforth doesn't know about forthcode({xxx}),
 but after forthsamp({"xxx" REQUIRED}) maybe
 it does. You may try again.
 
@@ -107,7 +107,7 @@ ERATOSTHENES SIEVE -- PRIMES LESS THAN 10 000
 
 If you want to try things out, or write a program -- as
 opposed to just running a ready made program -- you best
-start up ciforth by forthsamp({lina -e}) .
+start up thisforth by forthsamp({lina -e}) .
 That is forthkey({e}) for elective. That name means
 that you can configure this to suit your particular
 needs. We will come back to that later.
@@ -148,15 +148,15 @@ were in a terminal window.
  })_END_({_HOSTED_}).
 forthendenumerate
  _HOSTED_({
-Because your ciforth is ``hosted'', meaning that it is started from
+Because this ciforth is ``hosted'', meaning that it is started from
 an operating system, you can develop in a convenient way.
-Start ciforth in a window, and use a separate window to start your
-editor. Try out things in ciforth. If they work, paste the code into
+Start thisforth in a window, and use a separate window to start your
+editor. Try out things in thisforth. If they work, paste the code into
 your editor. If a word works, but its source has scrolled off the screen,
 you can recover the source using forthcode({CRACK}) .
 If you have constructed a part or all of your program,
 you can save it from your editor to a file. Then by the command
-forthsamp({INCLUDE <file-name> }) load the program in ciforth
+forthsamp({INCLUDE <file-name> }) load the program in thisforth
 and do some further testing.
 
 You are not obliged to work with separate windows.
@@ -169,7 +169,7 @@ _HOSTED_LINUX_({forthsamp({"vi" OS-IMPORT vi})}).
 you can start editing a file in the same way as from
 _PC_({a DOS window or plain DOS})_HOSTED_LINUX_({the shell}).
 Of course you now have to switch between editing a file
-and ciforth. But at least you need not set up your Forth again,
+and thisforth. But at least you need not set up your Forth again,
 until your testing causes your Forth to crash.
  })_END_({_HOSTED_}).
 
@@ -193,7 +193,7 @@ It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 This structure is called a forthdefi({dictionary entry}).
 Its address is called a forthdefi({dictionary entry address})
-or forthdefi({dea}). In ciforth this address is used for external
+or forthdefi({dea}). In ciforth's this address is used for external
 reference in a consistent way. For example it is used as the
 forthdefi({execution token}) of a word in the ISO sense.
 A word can be executed by typing its name.
@@ -214,7 +214,7 @@ created by the use of forthcode({VOCABULARY}), and
 by executing the vocabulary word the associated
 word list is pushed
 to the front of the search order.
-In fact in ciforth every dea can serve as a WID. It defines a
+In fact in ciforth's every dea can serve as a WID. It defines a
 wordlist consisting of itself and all earlier words in the same
 vocabulary.
 If needed you can
@@ -333,7 +333,7 @@ The error system uses forthcode({CATCH}) and forthcode({THROW}) in a conforming 
 However the codes are not assigned according to the table
 in the standard. Instead positive numbers are ciforth errors
 and documentated in this manual.
-ciforth errors identify a problem more precisely than the
+ciforth's errors identify a problem more precisely than the
 standard allows. An error condition that is not detected
 has no number assigned to it.
 Negative numbers are identical
@@ -361,18 +361,19 @@ read, not changed.
 }) dnl
 forthitem
 This is not strictly non-conforming, but worth mentionning here.
-Despite the fact that ciforth contains only one state-smart word,
-( forthcode({SLITERAL}) ) which is about politically correct,
+Despite the fact that thisforth contains only one state-smart word besides
+ forthcode({SLITERAL})  (that is forthcode({."}) )
+which is about politically correct,
 as a consequence all denotations and some other words like
  forthcode({CHAR}) turn out to be state smart as a design consequence.
 This is used freely in the libraries of ciforth; it is
 the right of a system developper to do so. The library is not
 a supposedly ISO-conforming program, so don't
 complain about non-portability. The libraries tend to rely on
-ciforth-specific -- but hopefully documented -- behaviour anyway.
+ciforth-specific and thisforth-specific -- but hopefully documented -- behaviour anyway.
 forthendenumerate
 
-Here we will explain how you must read the glossary of ciforth,
+Here we will explain how you must read the glossary of thisforth,
 in relation to terminology in the ISO standard.
 
 Whenever the glossary specifies under which conditions a word may
@@ -388,7 +389,7 @@ Whenever we explicitly mention ciforth in a sentence that appears
 in a glossary entry,
 the behaviour may not apply to other ISO standard systems.
 This is called forthdefi({ciforth specific behaviour})
-If it mentions ``this ciforth'', you cannot even trust that
+If it mentions ``this ciforth'' or ``thisforth'', you cannot even trust that
 behaviour to be the same on other ciforth systems.
 Often this is called an ``implementation defined'' behaviour in the standard.
 Indeed we are obliged to specify this behaviour in our glossary,
@@ -401,7 +402,7 @@ forthbreak
 On this ciforth forthcodeni({OUT}) is set to zero whenever forthcodeni({CR}) is executed.
 
 The bottom line is that you never want to write code where
-ciforth may crash.
+thisforth may crash.
 And that if you want your code to run on some other system,
 you do not want to rely on forthdefi({ciforth specific behaviour}).
 If you couldn't get around that,
@@ -454,7 +455,7 @@ forthitem
 Adjust
 version information (if needed)
 forthitem
-Copy your ciforth to a new file using forthcode({PUT-FILE}) .
+Copy your thisforth to a new file using forthcode({PUT-FILE}) .
 The difficult part is to get the system specific header right.
 Add to the header the area from forthcode({BM}) to forthcode({HERE}).
 forthendenumerate
@@ -517,7 +518,7 @@ each time a Forth task, or Forth itself, is started.
 The bootup area itself is not changed, but the variables in the user
 area are.
 By having several user area's, and switching between them,
-ciforth can support multitasking.
+ciforth could support multitasking.
 When you have made extensions to your system, like for instance you
 have loaded an editor, you can make these permanent by updating the
 initial values in the boot-area and saving the result to disk as an
@@ -576,7 +577,7 @@ the system, enabling you to execute and compile from the terminal,
 execute and
 forthdefi({load}) code from disk to add definitions
 etc.
-Deviations from standards are ill advised,
+Changes here will result in deviations from the standard,
 so you probably want to leave this area alone.
 Again these words are perfectly normal dictionary entries.
 _VERBOSE_({The technique described for the next section,
@@ -612,9 +613,11 @@ The boundary between categories are vague. A system tools is
 contrary to a user tool, a larger set of cooperating words.
 A text editor and machine code assembler are the first tools
 normally available.
-An editor is
-not part of ciforth as delivered, but an assembler is available via
-screen 120. It automatically loads the proper _BITS_-bits version.
+An assembler is
+not part of ciforth as delivered, but it
+is available after forthsamp({REQUIRE ASEMBLERi86}).
+It automatically loads the proper _BITS_-bits version.
+You can load a more elaborate assembler. forthxref(Assembler)
 They are among the first candidates to be integrated into
 your system by SAVE-SYSTEM .
 _PC_({ We are including a sample editor, that is quite handy})
@@ -624,7 +627,7 @@ Even without tools, code can be
 tested by piping it into Forth, then commanding Forth to
 look to the console, as follows :
 forthbreak
-forthsamp({(echo 8 LOAD; cat pascal.frt - )| ciforth })
+forthsamp({(echo 8 LOAD; cat pascal.frt - )| thisforth })
 forthbreak
 Primitive and preliminary as this may seem,
 it has been used for quite substantial developments like the
@@ -642,7 +645,7 @@ forthsamp({"mysrc.frt" INCLUDED})
 Forth assemblers are available in forthfile({forth.lab}) .
 They are loaded in accordance with the system that is run.
 
-It is essential that you regard ciforth as just a way to get started
+It is essential that you regard thisforth as just a way to get started
 with Forth.
 Forth is an extensible language, and you can set it to your hand.
 But that also means that you must not hesitate to throw
@@ -685,8 +688,8 @@ We will divide the dictionary in entries.
 A forthdefi({dictionary entry}) is a part of the dictionary that
 belongs to a specific word.
 A forthdefi({dictionary entry address}), abbreviated
-forthdefi({DEA}) is a pointer to a dictionary entry. In this
-ciforth it is the lowest addres of the entry, where the code
+forthdefi({DEA}) is a pointer to a dictionary entry. In
+thisforth it is the lowest addres of the entry, where the code
 field is.
 
 
@@ -849,7 +852,7 @@ It is comprised of
 an integral number of buffers, each forthcode({B/BUF}) bytes plus two cells.
 forthcode({B/BUF}) is the number of bytes read from the disc in one go{}_VERBOSE_({,
 originally thought of as one sector}).
-In ciforth forthcode({B/BUF}) is always the size of one screen according to ISO :
+In ciforth's forthcode({B/BUF}) is always the size of one screen according to ISO :
 1024 bytes.
 The constant forthcode({FIRST}) has the value of the address of the start of the first
 buffer.
@@ -914,7 +917,7 @@ _BOOTED_({On a standalone system the need for this is high,
 because there is no redirection.})
 For this reason character output forthcode({CR}), forthcode({EMIT}) and
 forthcode({TYPE}) all go through a common word that can be changed.
-_LINUX_N_({For this ciforth it is forthcode({TYPE}) }).
+_LINUX_N_({For thisforth it is forthcode({TYPE}) }).
 Because this is defined in high level code it can temporarily be replaced
 by other code.
 As an example we replace forthcode({TYPE}) by forthcode({MYTYPE}) .
@@ -926,13 +929,13 @@ forthbreak
 forthsamp({' TYPE >PHA ' TYPE >DFA !})
 Be careful not to define forthcode({MYTYPE}) in terms of forthcode({TYPE}) , as a
 recursive tangle will result.
-This method works in all versions of ciforth an is called forthdefi({revectoring}) .
+This method works in all versions of ciforth and is called forthdefi({revectoring}) .
 
 A similar technique is not so useful on the input side,
 because keys entered during EXPECT are subject to correction
 until <RET> has been pressed.
-_HOSTED_LINUX_({On this linux ciforth forthcode({EXPECT}) is left to the
-operating system, such that inputting to ciforth has the same
+_HOSTED_LINUX_({On thisforth forthcode({EXPECT}) is left to the
+operating system, such that inputting to thisforth has the same
 look and feel as other input.
 Text can be pasted in with the mouse, etc.
 Consequently forthcode({RUBOUT}) is not used.
@@ -960,8 +963,6 @@ a first parameter that is a one-letter option, the corresponding
 screen is to be executed. _VERBOSE_({So forthsamp({-a}) or forthsamp({-A}) is
 equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
  forthsamp({-Z}) is equivalent to forthsamp({26 LOAD}).})
-_PC_({{The interpretation of command line options is not yet implemented
-for this version of ciforth.}})
 _HOSTED_LINUX_({
 @subsection options
 ciforth is a primitive system, and can interpret just one option on the
@@ -970,7 +971,7 @@ ciforth returns with error code 3.
 However the option forthsamp({-e}) can bootstrap it into
 more sophisticated behaviour. See also forthsamp({-l}) .
 
-The following options can be passed to ciforth on the command line:
+The following options can be passed to thisforth on the command line:
 
 forthitemize
 
@@ -1083,7 +1084,7 @@ forthsamp({alias lina='lina -l $HOME/lib/forth.lab'}).
 Note that the forthsamp({-l}) option hides itself, such that
 such an alias can be used completely identical to the original
 with respect to all options, including forthsamp({-l}).
-Analysing arguments passed to ciforth in your programs remains
+Analysing arguments passed to thisforth in your programs remains
 completely the same.
 
 @subsection Turnkey applications.
