@@ -1312,7 +1312,7 @@ that
 for non-portable code forthcode({'}) is used in its
 forthdefi({denotation}) form _VERBOSE_({without the space}).
 },
-{{[']},{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
+{{[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
 dnl Make sure to use the DENOTATION ' not the FORTH '
 {{ : X EXECUTE ; : [[ ALSO POSTPONE DENOTATION ; : ]] PREVIOUS ;},{},
 { [[ : QPE 1 2 ; ' QPE X  ' QPE ID. . . 'QPE ID. ]]},{QPE 2 1 QPE},
@@ -3338,7 +3338,7 @@ The corresponding wordlists are searched for definitions during
 interpretation. It may contain up to M4_MAXWORDLIST WID 's in
 this ciforth, while the ISO Search-Order wordset requires a capacity of at
 least 8. },
-{{FOUND},{VOCABULARY},{CURRENT}},
+{{PRESENT},{VOCABULARY},{CURRENT}},
 {{SEARCH-ORDER @ ' FORTH >WID = .},{_T_}},
 enddoc)
 HEADER({SEARCH-ORDER},{SEARCH},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
@@ -4631,8 +4631,11 @@ worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
 { Look up the string forthvar({sc}) in the dictionary observing
 the current search order. If found, leave the dictionary
 entry address forthvar({dea}) of the first entry found, else
-leave a forthdefin({nil pointer}).},
-{{SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
+leave a forthdefin({nil pointer}). If the first part of the string
+matches a forthdefi({denotation}) word, that word is found, whether
+the denotation is correct or not.
+},
+{{PRESENT}, {SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is found as a misspelled number!
 { 243 "1ONNOBO" FOUND 0= . .},{0 243},
@@ -4655,6 +4658,32 @@ FOUND3: DC      RDROP
         DC      SWAP,DROP,SWAP,DROP
         DC      SEMIS
 ;
+worddoc( {DICTIONARY},{PRESENT},{present},{sc --- dea},{},
+{ If the string forthvar({sc}) is present as a word name in the
+current search order, return its forthvar({dea}), else leave a
+forthdefi({nil pointer}). For a a forthdefi({denotation}) word, the
+name must match forthvar({sc}) exactly.},
+{{FOUND}, {SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
+{ { 123 : BONOBO ; "BONOBO" PRESENT ' BONOBO = . .},{_T_ 123},
+dnl 1ONNOBO is not present though it is a misspelled number
+{ 243 "1ONNOBO" PRESENT 0= . .},{-1 243},
+{ 541 "MYBONOBO" PRESENT . .},{0 541}
+},
+enddoc)
+HEADER({PRESENT},{PRESENT},{DOCOL})
+        DC      LDUP, TOR
+        DC      FOUND
+        DC      LDUP
+        _0BRANCH(PRES1)
+        DC      LDUP
+        DC      TNFA, FETCH, FETCH ; { Get precise length.}
+        DC      RR, EQUAL
+        DC      LAND
+PRES1:
+        DC      RDROP
+        DC      SEMIS
+;
+
 worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO},
 {For the forthdefi({old fashioned string}) _VERBOSE_({{(stored with a
 preceding character count)}}) at forthvar({addr}) find a Forth
@@ -4663,16 +4692,17 @@ Return its
 execution token forthsamp({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
-{{SEARCH-ORDER},{FOUND},{(FIND)}},
+{{SEARCH-ORDER},{PRESENT},{(FIND)}},
 {
 { : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
 { IMMEDIATE 142 FIND: BONOBO . ' BONOBO = . .},{1 _T_ 142},
-{ 153 FIND: GONNOBO . HERE - ABS 30 U< . .},{0 _T_ 153},
+dnl don't find the next, though it is a denotation
+{ 153 FIND: BONNOBO . HERE - ABS 30 U< . .},{0 _T_ 153},
 },
 enddoc)
 HEADER({FIND},{FIND},{DOCOL})
-        DC      LDUP, COUNT, FOUND
+        DC      LDUP, COUNT, PRESENT
         DC      LDUP
         _0BRANCH(FIND1) ;{IF}
         DC      SWAP, DROP ; {The address.}
@@ -4698,7 +4728,7 @@ forthcode({SEARCH-ORDER}) }}). Leave the dictionary entry address
 forthvar({dea}) of the first entry found, else leave a zero.
 Do not consume the string forthvar({sc})_VERBOSE_({{,
 as this is a repetitive action}}). },
-{{FIND},{FOUND},{>WID}},
+{{FIND},{PRESENT},{>WID}},
 { { : BONOBO ; "BONOBO" CURRENT @ (FIND) ' BONOBO = .},{_T_},
  {TYPE},{BONOBO} },
 enddoc)
@@ -4877,11 +4907,8 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      ZEQU
         DC      LIT, 5, QERR
         DC      TDUP
-        DC      FOUND
+        DC      PRESENT
         DC      LDUP
-        _0BRANCH(CREA1) ;{IF}
-        DC      LDUP, TFFA, FETCH
-        DC      LIT, B_DENOT, LAND, ZEQU
         _0BRANCH(CREA1) ;{IF}
         DC      TNFA, FETCH, SFET, ETYPE
         DC      LIT,4
@@ -4923,14 +4950,17 @@ that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary when forthsamp({xxx}) executes, rather than at
 compile time.},{{POSTPONE}},
 { {: MY-IF [COMPILE] IF ; IMMEDIATE dnl
- : JAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 JAN 1 JAN},{2 1} },
+ : JAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 JAN 1 JAN},{2 1},
+{ [COMPILE] NON-EXISTING },
+{MPILE] NON-EXISTING ?  ciforth ERROR # 16},
+},
 enddoc)
 HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      LPWORD
-        DC      FOUND
+        DC      PRESENT
         DC      LDUP
         DC      ZEQU
-        DC      ZERO, QERR
+        DC      LIT, 16, QERR
         DC      TCFA
         DC      COMMA
         DC      SEMIS
@@ -4946,15 +4976,18 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}). },
 {
 {!CSP : GS1 POSTPONE BL ; : GS2 [ GS1 ] ; GS2 .},{20},
 {: MY-IF POSTPONE IF ; IMMEDIATE dnl
-: IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1}
-},
+: IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1},
+{ POSTPONE NON-EXISTING }, {STPONE NON-EXISTING ?  ciforth ERROR # 15},
+dnl This must not find 7 in the DENOTATION wordlist
+{POSTPONE 7F89 .}, {POSTPONE 7F89 ? ciforth ERROR # 15}
+},          
 enddoc)
 HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         DC      LPWORD
-        DC      FOUND
+        DC      PRESENT
         DC      LDUP
         DC      ZEQU
-        DC      ZERO, QERR
+        DC      LIT, 15, QERR
         DC      LDUP, TFFA, FETCH
         DC      LIT, B_IMMED, LAND, ZEQU
         _0BRANCH(POSTP1)
@@ -8638,15 +8671,9 @@ forthdefi({denotation}) form _VERBOSE_({without the space}).
 },
 enddoc)
 HEADER({'},{ITICK},{DOCOL} )
-        DC      LPWORD, LDUP, TOR
-        DC      FOUND
-        DC      LDUP
-        _0BRANCH(TICK1)
-        DC      LDUP, TNFA, FETCH, FETCH ; { Get precise length.}
-        DC      RR, EQUAL
-TICK1:
-        DC      RDROP
-        DC      ZEQU, LIT, 11, QERR
+        DC      LPWORD, PRESENT
+        DC      LDUP, ZEQU
+        DC      LIT, 11, QERR
         DC      SEMIS
 ;
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},

@@ -18,15 +18,15 @@ License along with this program; if not, write to the
 ( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
 \ For LINE and WORD sc's : line CONTAINS word.
-: CONTAINS   0 PAD !   BL PAD $C+   PAD $+!   BL PAD $C+
-    0 ROT ROT   PAD @ - OVER + SWAP
-    DO   I PAD $@ CORA   0= IF DROP -1 LEAVE THEN   LOOP ;
+CREATE pad 80 ALLOT    : CONTAINS   0 pad !   BL pad $C+
+pad $+!   BL pad $C+   pad @ - OVER + SWAP
+    DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
 \ Find WORD in the block library and load it.
 : FIND&LOAD     256 ERRSCR @ 4 +
 DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 2DROP ;
-\ For WORD sc: it IS found but not an abbreviation/denotation.
-: PRESENT? DUP >R FOUND DUP IF >NFA @ @ R@ = THEN RDROP ;
+\ For WORD sc: it IS found unabbreviated.
+: PRESENT? PRESENT 0= 0= ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
@@ -96,7 +96,7 @@ REQ EDITOR   REQ OOPS                         OK  EXIT
 : TASK ;   ( 'REQ HIDDEN)     OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD  REQUIRE CONFIG   ?LI
-REQUIRE ARGV   REQUIRE CTYPE
+REQUIRE ARGV   REQUIRE Z$@
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
 : DOIT   ARGV CELL+ CELL+
     BEGIN $@   DUP WHILE

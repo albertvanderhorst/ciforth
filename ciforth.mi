@@ -472,12 +472,14 @@ floppy this must be done in a Forth that boots from floppy.})
 forthitem
  forthsamp({ciforth ERROR # 15 : CANNOT FIND WORD TO BE POSTPONED})
 
-Not used.
+The word following POSTPONE must be postponed, but it can't be found in the
+search order.
 
 forthitem
-forthsamp({ciforth ERROR # 16 : SYSTEM HAS ABORTED })
+ forthsamp({ciforth ERROR # 16 : CANNOT FIND WORD TO BE COMPILED})
 
-Not used.
+The word following [COMPILE] must be postponed, but it can't be found in the
+search order.
 
 forthitem
 forthsamp({ciforth ERROR # 17 : COMPILATION ONLY, USE IN DEFINITION})
