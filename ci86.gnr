@@ -1296,7 +1296,7 @@ forthcode({CURRENT}) whenever you want to add a denotation.},
 enddoc)
 HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      0       ;{ END OF VOCABULARY LIST}
+        DC      _DEA(FORTH)     ;{ END OF VOCABULARY LIST}
 HEADER( , , ,0, B_DUMMY, _ENDOFDENOTATIONS_)
 ;
 worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
@@ -1313,7 +1313,7 @@ FORTH DEFINITIONS ; GS1},{CORE}},
 enddoc)
 HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      0       ;{ END OF VOCABULARY LIST}
+        DC      _DEA(DENOT)       ;{ END OF VOCABULARY LIST}
 HEADER( , , ,0, B_DUMMY, _ENDOFENVIRONMENTS_)
 ;
 worddoc( {MISC},{NOOP},{no_operation},{},{},
@@ -1537,7 +1537,7 @@ or modify the boot-up parameters, prior to saving a customised
 boot image. It will also change the initialisation by
 forthcode({COLD}). },
 {{(ABORT)},{USER}},
-{{0A 0 CELL+ * +ORIGIN @ ' FORTH = .}, {_T_}},
+{{0A 0 CELL+ * +ORIGIN @ ' ENVIRONMENT = .}, {_T_}},
 enddoc)
 HEADER({+ORIGIN},{PORIG},{DOCOL})
         DC      LIT
@@ -1572,7 +1572,7 @@ USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      1       ;{ INIT (WARNING)     7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
-        DC      _DEA(FORTH) ;{       INIT (VOC-LINK) 10}
+        DC      _DEA(ENV) ;{       INIT (VOC-LINK) 10}
 _LINUX_C_({
         DC      0       ;{ INIT (OFFSET) }
 });_END_({_LINUX_C_})
@@ -2821,7 +2821,7 @@ forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
 linked by these fields to allow forthcode({FORGET}) to find all
 vocabularies.})},
 {{VOCABULARY}},
-{{VOC-LINK @ ' FORTH = .},{_T_}},
+{{VOC-LINK @ ' ENVIRONMENT = .},{_T_}},
 enddoc)
 HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 ;
@@ -3434,7 +3434,8 @@ worddoc( {DICTIONARY~},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the link to the next vocabulary.
 },{{VOCABULARY},{>CFA},{>WID}},
-{{VOCABULARY APE ' APE >VFA @  ' FORTH = .},{_T_}},
+{{VOCABULARY APE VOCABULARY MONKEY dnl
+'MONKEY >VFA @  ' APE = .},{_T_}},
 enddoc)
 HEADER({>VFA},{TVFA},{DOCOL})
         DC      TOBODY
@@ -8363,7 +8364,7 @@ must have the stack diagram forthsamp({x1..xn dea --- x1..xn})
 {{FOR-WORDS},{EXECUTE}},
 {
 { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
-{JOHN FORTH},
+{JOHN ENVIRONMENT DENOTATION FORTH},
 {FORTH DEFINITIONS},{}
 },
 enddoc)
