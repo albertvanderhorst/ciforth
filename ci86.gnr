@@ -629,6 +629,7 @@ _COMMENT
 
 ------------------------------------------------------------
 _ENDCOMMENT
+;____1_____ _OLDDEBUG_1_({
         PAGE
 _COMMENT
              DEBUG SUPPORT
@@ -701,8 +702,9 @@ TNEXT2: POP     AX
 TNEXT3: LODSW           ;{ AX <- (IP)}
         MOV     BX,AX
         JMP     SHORT   NEXT1
+});_END___1__({_OLDDEBUG_1_ })
         PAGE
-_COMMENT
+;____1_____ _NEWDEBUG_1_({
 DISPLAYSI:
         JMPHERE_FROM_PROT
         BITS    16
@@ -724,17 +726,23 @@ DISPLAYSI:
         POP    BP
         POP    SI
         RET
-_ENDCOMMENT
+});_END___1__({_NEWDEBUG_1_ })
+
 DPUSH:  PUSH    DX
 APUSH:  PUSH    AX
+
+;____1_____ _OLDDEBUG_1_({
 _COMMENT
 
     Patch the next 3 locations ( using a DBUG monitor ) with a
     `JMP TNEXT' for tracing through high level FORTH words.
 
 _ENDCOMMENT
+});_END___1__({_OLDDEBUG_1_ })
+
+;{ In 32 bit versions there may be no jumps at all to NEXT}
+;{ The label NEXT1 is rarely relevant (for _OLDDEBUG_1_) }
 NEXT:   LODSW           ;{AX <- (IP)}
-;
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
 ;        CALL    DISPLAYSI
         JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
@@ -744,7 +752,7 @@ NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
 DP0:
 CODE_HEADER({LIT},{LIT})
         LODSW           ;{ AX <- LITERAL}
-        JMP SHORT     APUSH   ;{ TO TOP OF STACK}
+        _PUSH          ;{ TO TOP OF STACK}
 ;
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
@@ -800,7 +808,7 @@ CODE_HEADER({(DO)},{XDO})
         PAGE
 CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
-        JMP     APUSH   ;{ TO PARAMETER STACK}
+        _PUSH          ;{ TO PARAMETER STACK}
 ;
 HEADER({+ORIGIN},{PORIG},{DOCOL})
         DC      LIT
@@ -909,10 +917,10 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
         SUB     DX,DX   ;{ZERO}
         MOV     DL,AL   ;{NEW BINARY NUMBER}
         MOV     AL,1    ;{TRUE FLAG}
-        JMP     DPUSH   ;{ADD TO STACK}
+        _2PUSH          ;{ADD TO STACK}
 ;{   NUMBER ERROR}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
-        JMP     APUSH
+        _PUSH          
         PAGE
 CODE_HEADER({(FIND)},{PFIND})
 ;{       MOV     AX,DS}
@@ -943,7 +951,7 @@ PFIN2:  INC     BX
         PUSH    BX      ;{ (S3) <- PFA}
         MOV     AX,1    ;{TRUE VALUE}
         SUB     DH,DH
-        JMP     DPUSH
+        _2PUSH
 ;
 ;{   NO NAME MATCH - TRY ANOTHER}
 ;
@@ -960,7 +968,7 @@ PFIN6:  MOV     BX,[BX] ;{ GET LINK FIELD ADDR}
         OR      BX,BX   ;{ START OF DICT ( 0 )}
         JNZ     PFIN1   ;{ NO , LOOK MORE}
         MOV     AX,0    ;{ FALSE FLAG}
-        JMP     APUSH   ;{ DONE ( NO MATCH FOUND )}
+        _PUSH          ;{ DONE ( NO MATCH FOUND )}
         PAGE
 CODE_HEADER({ENCLOSE},{ENCL})
         POP     AX      ;{S1 - TERMINATOR CHAR}
@@ -982,7 +990,7 @@ ENCL1:  INC     BX      ;{ADDR+1}
 ;{  FOUND NULL BEFORE 1ST NON-TERM CHAR}
         MOV     AX,DX   ;{COPY COUNTER}
         INC     DX      ;{ +1}
-        JMP     DPUSH
+        _2PUSH
 ;
 ;{   FOUND FIRST TEXT CHAR - COUNT THE CHARS}
 ENCL2:  INC     BX      ;{ ADDR+1}
@@ -994,12 +1002,12 @@ ENCL2:  INC     BX      ;{ ADDR+1}
 ;
 ;{   FOUND NULL AT END OF TEXT}
 ENCL3:  MOV     AX,DX   ;{COUNTERS ARE EQUAL}
-        JMP     DPUSH
+        _2PUSH
 ;
 ;{   FOUND TERMINATOR CHARACTER}
 ENCL4:  MOV     AX,DX
         INC     AX      ;{COUNT+1}
-        JMP     DPUSH
+        _2PUSH
         PAGE
         ;{ At line     LINE ~500}
 HEADER({CR},{CR},{DOCOL})
@@ -1024,7 +1032,7 @@ CODE_HEADER({U*},{USTAR})
         POP     BX
         MUL     BX      ;{UNSIGNED}
         XCHG    AX,DX   ;{AX NOW = MSW}
-        JMP     DPUSH   ;{STORE DOUBLE CELL}
+        _2PUSH          ;{STORE DOUBLE CELL}
 ;
 CODE_HEADER({U/},{USLAS})
         POP     BX      ;{DIVISOR}
@@ -1033,34 +1041,34 @@ CODE_HEADER({U/},{USLAS})
         CMP     DX,BX   ;{DICIDE BY 0?}
         JNB     DZERO   ;{ ERROR - ZERO DIVIDE}
         DIV     BX      ;{16 BIT DIVIDE}
-        JMP     DPUSH   ;{STORE QUOT/REM}
+        _2PUSH          ;{STORE QUOT/REM}
 ;
 ;{      DIVIDE BY ZERO ERROR - SHOW MAX NUMBERS}
 DZERO:  MOV     AX,-1
         MOV     DX,AX
-        JMP     DPUSH   ;{STORE QUOT/REM}
+        _2PUSH          ;{STORE QUOT/REM}
         PAGE
 CODE_HEADER({AND},{LAND})
         POP     AX
         POP     BX
         AND     AX,BX
-        JMP     APUSH
+        _PUSH          
 ;
 CODE_HEADER({OR},{LOR})
         POP     AX      ;{ (S1) <- (S1) OR (S2)}
         POP     BX
         OR      AX,BX
-        JMP     APUSH
+        _PUSH          
 ;
 CODE_HEADER({XOR},{LXOR})
         POP     AX      ;{ (S1) <- (S1) XOR (S2)}
         POP     BX
         XOR     AX,BX
-        JMP     APUSH
+        _PUSH          
         PAGE
 CODE_HEADER({SP@},{SPFET})
         MOV     AX,STACKPOINTER   ;{ (S1) <- (SP)}
-        JMP     APUSH
+        _PUSH          
 ;
 CODE_HEADER({SP!},{SPSTO})
         MOV     BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
@@ -1069,7 +1077,7 @@ CODE_HEADER({SP!},{SPSTO})
 ;
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
         MOV     AX,BP   ;{RETURN STACK ADDR}
-        JMP     APUSH
+        _PUSH          
 ;
 CODE_HEADER({RP!},{RPSTO})
         MOV     BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
@@ -1096,7 +1104,7 @@ CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
         MOV     AX,[BP] ;{ GET RETURN STACK VALUE}
         LEA     BP,[BP+CELLS(1)]
-        JMP     APUSH
+        _PUSH          
 ;
 HEADER({R},{RR},{IDO+CELLS(1)})
         PAGE
@@ -1106,7 +1114,7 @@ CODE_HEADER({0=},{ZEQU})
         MOV     AX,1    ;{TRUE}
         JZ      ZEQU1   ;{IT'S 0}
         DEC     AX      ;{FALSE}
-ZEQU1:  JMP     APUSH
+ZEQU1:  _PUSH          
 ;
 CODE_HEADER({0<},{ZLESS})
         POP     AX
@@ -1114,13 +1122,13 @@ CODE_HEADER({0<},{ZLESS})
         MOV     AX,1    ;{TRUE}
         JS      ZLESS1
         DEC     AX      ;{FALSE}
-ZLESS1: JMP     APUSH
+ZLESS1: _PUSH          
 ;
 CODE_HEADER({+},{PLUS})
         POP     AX      ;{(S1) <- (S1) + (S2)}
         POP     BX
         ADD     AX,BX
-        JMP     APUSH
+        _PUSH          
         PAGE
 CODE_HEADER({D+},{DPLUS})
         POP     AX      ;{ YHW}
@@ -1129,12 +1137,12 @@ CODE_HEADER({D+},{DPLUS})
         POP     CX      ;{ XLW}
         ADD     DX,CX   ;{ SLW}
         ADC     AX,BX   ;{ SHW}
-        JMP     DPUSH
+        _2PUSH
 ;
 CODE_HEADER({MINUS},{MINUS})
         POP     AX
         NEG     AX
-        JMP     APUSH
+        _PUSH          
 ;
 CODE_HEADER({DMINUS},{DMINU})
         POP     BX
@@ -1143,14 +1151,14 @@ CODE_HEADER({DMINUS},{DMINU})
         MOV     DX,AX
         SUB     DX,CX   ;{ MAKE 2'S COMPLEMENT}
         SBB     AX,BX   ;{ HIGH CELL}
-        JMP     DPUSH
+        _2PUSH
         PAGE
 ;
 CODE_HEADER({OVER},{OVER})
         POP     DX
         POP     AX
         PUSH    AX
-        JMP     DPUSH
+        _2PUSH
 ;
 CODE_HEADER({DROP},{DROP})
         POP     AX
@@ -1159,19 +1167,19 @@ CODE_HEADER({DROP},{DROP})
 CODE_HEADER({SWAP},{SWAP})
         POP     DX
         POP     AX
-        JMP     DPUSH
+        _2PUSH
 ;
 CODE_HEADER({DUP},{DUPE})
         POP     AX
         PUSH    AX
-        JMP     APUSH
+        _PUSH          
         PAGE
 CODE_HEADER({2DUP},{TDUP})
         POP     AX
         POP     DX
         PUSH    DX
         PUSH    AX
-        JMP     DPUSH
+        _2PUSH
 ;
 CODE_HEADER({+!},{PSTOR})
         POP     BX      ;{ADDRESS}
@@ -1188,19 +1196,19 @@ CODE_HEADER({TOGGLE},{TOGGL})
 CODE_HEADER({@},{FETCH})
         POP     BX
         MOV     AX,[BX]
-        JMP     APUSH
+        _PUSH          
         PAGE
 CODE_HEADER({C@},{CFET})
         POP     BX
         XOR     AX,AX
         MOV     AL,[BX]
-        JMP     APUSH
+        _PUSH          
 ;
 CODE_HEADER({2@},{TFET})
         POP     BX      ;{ADDR}
         MOV     AX,[BX] ;{MSW}
         MOV     DX,[CELLS(1)+BX]        ;{LSW}
-        JMP     DPUSH
+        _2PUSH
 ;
 CODE_HEADER({!},{STORE})
         POP     BX      ;{ADDR}
@@ -1232,7 +1240,7 @@ CODE_HEADER({L@},{LFET})
         SUB     AX, BOOTADDRESS
 
         MOV     AX,[AX]
-        JMP     APUSH
+        _PUSH          
 });_END___1__({ _BITS32_1_})
 ;____1_____ _BITS16_1_({
         POP     BX      ;MEM LOC
@@ -1309,13 +1317,13 @@ HEADER({CONSTANT},{CON},{DOCOL})
         DC      COMMA
         DC      PSCOD
 DOCON:  MOV     AX,[BX+CELLS(1)] ;{GET DATA FROM PFA}
-        JMP     APUSH
+        _PUSH          
 ;{               }
 HEADER({VARIABLE},{VAR},{DOCOL})
         DC      CON
         DC      PSCOD
 DOVAR:  LEA     AX,[BX+CELLS(1)] ;{(AX) <- PFA}
-        JMP     APUSH
+        _PUSH          
 ;
 HEADER({USER},{USER},{DOCOL})
         DC      CON
@@ -1323,23 +1331,23 @@ HEADER({USER},{USER},{DOCOL})
 DOUSE:  MOV     BX,[BX+CELLS(1)] ;{PFA  }
         MOV     DI,[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
-        JMP     APUSH
+        _PUSH          
         PAGE
 CODE_HEADER({0},{ZERO})
         XOR     AX,AX
-        JMP     APUSH
+        _PUSH
 ;
 CODE_HEADER({1},{ONE})
         MOV     AX,1
-        JMP     APUSH
+        _PUSH
 ;
 CODE_HEADER({2},{TWO})   ;{ Needed also CELLS}
         MOV     AX,2
-        JMP     APUSH
+        _PUSH
 ;
 CODE_HEADER({3},{THREE})
         MOV     AX,3
-        JMP     APUSH
+        _PUSH
 ;
 HEADER({BL},{BLS},{DOCON})
 ;{      THIS IS ONLY A SPAC}
@@ -1457,18 +1465,18 @@ HEADER({BLK},{BLK},{DOUSE})
 CODE_HEADER({1+},{ONEP})
         POP     AX
         INC     AX
-        JMP     APUSH
+        _PUSH
 ;
 CODE_HEADER({2+},{TWOP})
         POP     AX
         ADD     AX,2
-        JMP     APUSH
+        _PUSH
 ;
 ;
 CODE_HEADER({CELL+},{CELLP})
         POP     AX
         ADD     AX,CW
-        JMP     APUSH
+        _PUSH
 ;
 HEADER({HERE},{HERE},{DOCOL})
         DC      LDP
@@ -1498,7 +1506,7 @@ CODE_HEADER({-},{LSUB})
         POP     DX      ;{S1}
         POP     AX
         SUB     AX,DX
-        JMP     APUSH   ;{S1 = S2 - S1}
+        _PUSH   ;{S1 = S2 - S1}
 ;
 HEADER({=},{EQUAL},{DOCOL})
         DC      LSUB
@@ -1516,7 +1524,7 @@ LES1:   OR      AX,AX   ;{TEST SIGN BIT}
         MOV     AX,0    ;{ASSUME FALSE}
         JNS     LES2    ;{NOT LESS THAN}
         INC     AX      ;{TRUE (1)}
-LES2:   JMP     APUSH
+LES2:   _PUSH
 ;
 HEADER({U<},{ULESS},{DOCOL})
         DC      TDUP
@@ -1538,7 +1546,7 @@ CODE_HEADER({ROT},{ROT})
         POP     BX      ;{S2}
         POP     AX      ;{S3}
         PUSH    BX
-        JMP     DPUSH
+        _2PUSH
 ;
 HEADER({SPACE},{SPACE},{DOCOL})
         DC      BLS
@@ -1718,7 +1726,7 @@ DODOE:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
         MOV     SI,[BX+CELLS(1)] ;{NEW IP }
         LEA     AX,[BX+2*CELLS(1)]
-        JMP     APUSH
+        _PUSH
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
         DC      DUPE
@@ -2286,7 +2294,7 @@ CODE_HEADER({S->D},{STOD})
         OR      DX,DX
         JNS     STOD1   ;{POS}
         DEC     AX      ;{NEG}
-STOD1:  JMP     DPUSH
+STOD1:  _2PUSH
 ;
 HEADER({+-},{PM},{DOCOL})
         DC      ZLESS
@@ -2451,7 +2459,7 @@ CODE_HEADER({PC@},{PCFET})
         POP     DX      ;{ PORT ADDR}
         XOR     AX,AX
         IN      AL,{DX}   ;{ BYTE INPUT}
-        JMP     APUSH
+        _PUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
 ;{ STORE CHARACTER (BYTE) AT PORT}
@@ -2464,7 +2472,7 @@ CODE_HEADER({P@},{PFET})
 ;{ FETCH WORD FROM PORT}
         POP     DX      ;{PORT ADDR}
         IN      AX,{DX}   ;{WORD INPUT}
-        JMP     APUSH
+        _PUSH
 ;
 CODE_HEADER({P!},{PSTO})
 ;{ STORE WORD AT PORT}
@@ -2657,6 +2665,7 @@ CODE_HEADER({BDOS},{BDOS})
         PUSH     DI     ;{ i.e. flags }
         _NEXT
 
+;____1_____ _HOSTED_LINUX_1_({
 ;{ Generic call on LINUX }
 CODE_HEADER({LINOS},{LINOS})
         POP     AX        ; Function number
@@ -2664,7 +2673,8 @@ CODE_HEADER({LINOS},{LINOS})
         POP     CX        ; Second parameter, if any
         POP     BX        ; First parameter.
         INT     80H
-        JMP     APUSH     ; Positive means okay. Negative means -errno.
+        _PUSH     ; Positive means okay. Negative means -errno.
+});_END___1__({ _HOSTED_LINUX_1_})
 
              ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
@@ -2887,7 +2897,7 @@ EXPE3   DC      EMIT
 CODE_HEADER({KEY},{KEY})
         CALL    CI      ;{CONSOLE INPUT}
         MOV     AH,0    ;{MAKE 16 BITS}
-        JMP     APUSH   ;{SAVE KEY VALUE}
+        _PUSH   ;{SAVE KEY VALUE}
 CI      PROC    NEAR
         MOV     AH,0    ;{ READ CHAR FUNCTION}
         INT     16H
@@ -2943,7 +2953,7 @@ PQTER:  CALL    CSTAT   ;{TEST FOR KEY}
         JZ      PQTER1  ;{NO}
         MOV     AL,1    ;{TRUE = CHAR FOUND}
 PQTER1: MOV     AH,0    ;{MAKE 16 BITS}
-        JMP     APUSH   ;{SAVE STATUS}
+        _PUSH   ;{SAVE STATUS}
 ;
 CSTAT   PROC    NEAR
         PUSH    DX
@@ -3817,7 +3827,7 @@ MAT4:   MOV     AX,SI   ;{NEW CURSOR ADDR}
         POP     SI      ;{GET STARTING ADDR}
         SUB     AX,SI   ;{COMPUTE CURSOR OFFSET}
         MOV     SI,DI   ;{GET BACK UP}
-        JMP     DPUSH   ;{ BYE..BYE}
+        _2PUSH          ;{ BYE..BYE}
         PAGE
 ;
 ;{**** LAST DICTIONARY WORD ****}
