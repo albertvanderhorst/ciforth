@@ -2767,6 +2767,12 @@ a Forth definition. The code field contains the address of the words
 parameter field. },{})
 HEADER({CREATE},{CREAT},{DOCOL})
         DC      DFIND
+        DC      HERE
+        DC      ONEP
+        DC      CFET
+        DC      ZEQU
+        DC      LIT,5
+        DC      QERR
         _0BRANCH(CREA1) ;{IF}
         DC      DROP
         DC      NFA
