@@ -4883,9 +4883,8 @@ worddoc( {INIT},{OK},{ok},{},{ISO,FIG},
 a line. Default it prints okay only for an interactive session
 in interpret forthcode({STATE}). },
 {{QUIT},{COLD}},
-{{OK ( Gives OK unless interpreted from stream) },{ },
-{: GS1 STATE @ 1 STATE ! OK STATE ! ; GS1},{}
- },
+{{OK ( Gives OK unless interpreted from stream)},{},
+{: GS1 STATE @ 1 STATE ! OK STATE ! ; GS1},{}},
 enddoc)
 HEADER({OK},{OK},{DOCOL})
         DC      STATE
@@ -4938,18 +4937,20 @@ _ENDCOMMENT
 ;{      BY control BREAK.}
 WRM:
 _BOOTED_({
+SET_16_BIT_MODE         ;{Pops back at next _SWITCH_}
 ;{Without this clearing of the disk status, the system hangs too.}
-        XOR     AX,AX
+        XOR     {AX},{AX}
         MOV     DL, DRIVE
         INT     13H     ;{Reset floppy disk system.}
-        XOR     AX,AX
+        XOR     {AX},{AX}
         MOV     DL, 80H
         INT     13H     ;{Reset hard disk system.}
 ;{Without this clearing of the keyboard status, the system hangs at}
 ;{the next call of KEY (INT 10H function 0EH)}
-        XOR     AX,AX
-        MOV     DS,AX
-        MOV     [417H],AX
+        XOR     {AX},{AX}
+        MOV     DS,{AX}
+        MOV     [417H],{AX}
+;        MOV     [496H],{AX} ;{This should improve things, but doesn't.}
 });_END_({ _BOOTED_})
         _SWITCH_({JMPHERE_FROM_OS})
         MOV     SI,_OFFSET WRM1
