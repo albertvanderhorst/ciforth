@@ -2032,7 +2032,13 @@ field.
 forthvar({addr1}) is the address of either the length byte or the last letter.
 If forthvar({n})=1, the motion is toward hi memory; if forthvar({n})=-l, the motion is
 toward low memory. The forthvar({addr2}) resulting is address of the other end
-of the name.},{{NFA},{PFA}})
+of the name.
+_ALIGNED({
+"The last letter" must be understood as
+the last byte of the cell containing the actual last letter, the byte 
+with the 8th bit up.  forthsamp({-1 TRAVERSE})
+works for pointers at an arbitrary position in the last cell.
+}) },{{NFA},{PFA}})
 HEADER({TRAVERSE},{TRAV},{DOCOL})
         DC      SWAP
 TRAV1:  DC      OVER    ;{BEGIN}
@@ -3388,12 +3394,14 @@ BUFF2:  DC      RR,STORE
         DC      CELLP,SEMIS
 ;
 worddoc({STORAGE},{BLOCK},{block},{n --- addr},{L0},{
-Leave the memory address of the block buffer containing block forthvar({n}) . If
-the block is not already in memory, it is transferred from disc to
+Leave the memory address of the block buffer containing block forthvar({n}),
+which is the physical disk block forthsamp({OFFSET+n}).
+If the block is not already in memory, it is transferred from disc to
 which ever buffer was least recently written. If the block occupying
 that buffer has been marked as updated, it is rewritten to disc
-before block forthvar({n}) is read into the buffer.},
-{{BUFFER},{R/W}, {UPDATE},{FLUSH}})
+before block forthvar({n}) is read into the buffer.
+In this experimental version PMASK restricts the number of blocks to 0FFH.},
+{{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}})
 HEADER({BLOCK},{BLOCK},{DOCOL})
         DC      LIT, PMASK, LAND
         DC      OFSET
@@ -4096,9 +4104,10 @@ HEADER({SEEK},{SEEK},{DOCOL})
 worddoc({},{R/W},{read_slash_write},{addr blk f --},{},{
 The fig-FORTH standard disc read-write linkage. forthvar({addr}) specifies the
 source or destination block buffer, forthvar({blk}) is the sequential number of
-the referenced block; and forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l read.
+the referenced physical block; and forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l read.
 forthcode({R/W}) determines the location on mass storage, performs the read-write
-and performs any error checking.},{{BLOCK}})
+and performs any error checking. It gives unrestricted access to the disk, allowing to write 
+bootcode. },{{BLOCK}})
 HEADER({R/W},{RSLW},{DOCOL})
         _0BRANCH(RSLW1)
         DC      LIT, 03F00H     ;{ Disk read }

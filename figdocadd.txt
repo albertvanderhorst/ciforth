@@ -1,135 +1,13 @@
 # $Id$
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 
-Addendum at figdoc.txt
+At 2000:nov:11 this documentation was burned down in favour
+of the generated user information for ciforth.
+It is still obtainable as the latest branch of figdoc.txt 1.3.
 
 
-                 3.0  MODEL ORGANIZATION
-
-The figures are approximate. Double them for 32 bit systems; this
-applies to memory sizes mentionned in all sections.
-
-                   3.1  MODEL OVER-VIEW
-
-This separation was not accurate for most of the fig systems
-and it is not accurate here. In particular the bootup parameters
-are not up front as CP/M and MSDOS require a 100H byte reserved
-area there. It could be followed to the letter in Linux but this
-has no merit.
-
-                 3.2  MODEL DETAILS
-
-  Boot-up Parameters
-
-Read 17 cells for 34 bytes.
-In fig.gnr the bootup parameters are more or less the data field of the
-+ORIGIN word. 
-Executing +ORIGIN leaves a pointer in this area but after the jump vectors
-and the release numbers. They are not used and in fact superfluous. 
-Bootup parameters with positive offset from +ORIGIN are one to one with user
-variables. Their indices have not changed, but there is now a bootup
-parameter for each and every user variable. A system with other boot
-parameters can now be generated in an even more portable fashion by using
-phrase like "7 CELLS +ORIGIN". 
-
- Installation Dependent Code
-
-KEY EMIT ?TERMINAL and CR are indeed different for different I/O models.
-However the bracketed versions (KEY) are not necessarily (in fact never)
-there. This part of the documentation was inaccurate or ignored by the
-original IBM/PC implementer. 
-Underneath the I/O model has improved. TYPE and EXPECT are drawn into
-the I/O model dependant part. If at all possible CR and EMIT used TYPE
-such that TYPE becomes a natural vectoring point. Similarly KEY 
-tries to use EXPECT, but mostly this is not possible because EXPECT doesnot
-return before the user hits the Enter key.
-
-Where possible installation dependant code is using a generic call to the
-operating system in particular MSDOS BIOS or LINOS. This mostly results in
-the installation dependant code to be high level. 
-
-    High-level Definitions
-
-This is inaccurate. The procedure of changing the high level code cannot
-be done because FENCE prohibits this.
-
-RAM workspace.
-
-There is no longer a reason to put up with a 16-bit system less than 64K. 32
-bits system are set at 64Mbyte but this is arbitrary and could be set much
-higher or lower without consequences for system load or whatever. 
-Before long we will put the dictionary space on I86-Linux to 4G minus
-something and forget about this issue forver. 
-
-                 4.0  INSTALLATION
-
-         fig-FORTH VARIABLE NAME FIELD
-
-They were very proud at the time that names could be any length.
-They felt obliged however to introduce the WIDTH/TRAVERSE to allow 
-upwards compatibility with systems that stored only the first few (three)
-characters of a word. This has become a major pain now. See the screens
-for the $____ and $__ words that are absolutely unportable.
-
-                5.0  MEMORY MAP         
-
-I set the number of disk buffers at 2, the minimum possible. Even a floppy
-is fast enough that working with blocks from memory has no merits. It is
-dangerous because during testing you never know what was saved and what not.
-The mass storage is easily the most crappy part of the fig model. What
-little advantage it had, is no longer applicable. Interestingly this block
-system is copied verbatim into ANS. 
-32 bits systems can enlarge the dictionary by redefining the stacks and the
-terminal input buffer positions. The block buffers are in the way. So I put
-them in the dictionary space. In fact the block buffers have become the 
-data field of FIRST.
-
-Despite all the talk about user variables, I am not aware that a multi-user
-fig forth existed, ever. The above block policy is not compatible with 
-multi-user (but the actual code is not worse than it ever was, and you can
-rebuilt it with 1000 block buffers if you like.)
-
-Rubout is best left to the EXPECT code. Remember, a Linux itself knows the
-rubout key for any of its 500+ known terminal types and isn't it nice in
-MSDOS that F3 gets the previous command back for you? 
-If EXPECT builds up a line from separate key strokes, and if you ever want
-to change the rubout key, just change the RUBOUT user variable. 
-Patching the applicable bootup parameter doesnot help anymore, because it is
-merely an initialisation for RUBOUT. 
-
-             6.0  DOCUMENTATION SUMMARY
-
-You bet this is utterly and totally out of date.
 
 Addendum at glossary.txt
-
-Wherever it says 16 bits read single precision number or "cell".
-Wherever it says 32 bits read double precision number.
-
-DR0 and DR1 are absent. There is only one consecutive mass storage area, be
-it a disk or a file. 
-OFFSET applies to this storage area and is observed whenever BLOCKS are
-used. (Moreover PMASK restricts the number of blocks to 0FFH in experimental
-versions.)
-R/W allows to access the whole area. It also can be used for
-the area screened off by OFFSET, e.g. to make a bootable disk.
-
-TRAVERSE :
-In an aligned version "the last letter" must be understood as
-the last byte of the word containing the actual last letter, the byte 
-with the 8th bit up. 32 and 64 bit implementations have -1 TRAVERSE
-work for pointers at an arbitrary position in the last word.
-
-X
-It must be understood that there is no actual definition with name X.
-In the assembler listing it has label NULL.
-
-Errata in glossary.txt.
-While I fixed typos, I didn't want to fix real errors without notice.
-(AH).
-
-In UNTIL and WHILE :
-(0BRANCH) is mentionned where 0BRANCH is ment.
 
 
 IMPLEMENTATION NOTES FOR lina

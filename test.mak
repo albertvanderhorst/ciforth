@@ -170,9 +170,10 @@ SRCMI= \
 figforth.mi \
 intro.mi    \
 manual.mi   \
+rational.mi  \
 # That's all folks!
 
-fig86.%.info : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
+fig86.%.info : %.cfg $(SRCMI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.info=%.mi) )|m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.info=%.cfg) manual.m4 figforth.mi)|\
 	  m4 | makeinfo
@@ -187,7 +188,7 @@ fig86.%.info : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 menu.texinfo : menu.m4 wordset.mig ; m4 $+ >$@
 
 # For tex we do not need to use the safe macro's
-fig86.%.tex : %.cfg $(MI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
+fig86.%.tex : %.cfg $(SRCMI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.tex=%.mi) )|m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
 	   m4 > $@

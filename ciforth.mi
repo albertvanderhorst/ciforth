@@ -1,4 +1,7 @@
 \input texinfo
+@macro figforth
+fig-Forth
+@end macro
 @setfilename figforthversion
 @settitle fig-FORTH 3.0 manual
 @setchapternewpage odd
@@ -22,29 +25,98 @@ Dutch Forth Workshop
 Copyright @copyright{{}} 2000 Dutch Forth Workshop
 
 Permission is granted to copy with attribution.
+Program is protected by the GNU Public License.
 
 @node Top, Introduction, Glossary, 
 
 @ifinfo 
-This file documents generic fig-forth
-3.0 for MSDOS with nasm compiler
-32 bits protected mode and 
-modern file i/o.
+example of stuff that only appears in info
 @end ifinfo
+@page
+@chapter Overview
+This file documents what a user needs to know for using ciforth. 
+ciforth consists of three files:
+forthitemize
+forthitem
+_BOOTED_1_({A booting floppy or hard disk})dnl
+_HOSTED_MSDOS_1_({forth.com})_HOSTED_LINUX_1_({lina}) : the program
+forthitem
+ciforth.ps ciforth.html : the documentation
+forthitem
+ciforth.blk : source for auxiliary programs
+forthenditemize
+_BOOTED_1_({If you inspect a booting floppy from MSDOS you discover that you can 
+see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})dnl
+These files are generated together by the generic system fig86.gnr.
+The documentation only applies to the ciforth with which it goes.
+
+These are the features, if they do not fit your Forth
+get a new version. forthxref({Rationale & legalese}).
+
+Forth is an interactive programming system. 
+This is the reference documentation for using the
+particular version of ciforth once it 
+is installed on your system. 
+It features the following :
+
+_PROTECTED_1_({It is running in protected mode.
+})
+_REAL_1_({It is running in real mode.
+})
+_BOOTED_1_({It is a standalone Forth,
+})dnl
+_BOOTHD__1_({booting directly from a hard disk
+})dnl
+_BOOTFD__1_({booting from a floppy disk
+})dnl
+_HOSTED_LINUX_1_({running under Linux
+})dnl
+_HOSTED_MSDOS_1_({running under MSDOS
+})dnl
+define( {_USEBIOS_1_}, { Use BIOS for I/O. No redirection but possible stand alone.
+})dnl
+_RWHD_1_({Blocks are on a raw hard disk})dnl
+_RWFD_1_({Blocks are on a raw floppy disk})dnl
+_RWFILE_1_({Blocks are allocated in files in files})dnl
+_CLASSIC_1_({ Rely partly on DOS for I/O, partly on the BIOS.})dnl
+_MODERN_1_({ Use DOS for I/O, and uses no obsolete MSDOS features. })dnl
+_BITS16_1_({A number has a precision of 16 bits
+})dnl
+_BITS32_1_({A number has a precision of 32 bits
+})dnl
+_LINUX_C_1_({C-routines for I/O
+})dnl
+_LINUX_N_1_({Calls linux system from assembler
+})dnl
+
 @menu 
-* Introduction::   Introduction to Forth and this Forth
-* Manual::	   Reference manual 
+* General introduction:: Introduction to Forth and this Forth
+* Rationale & legalese:: For experts. You don't want to read this.
+* Manual::	   User manual 
 * Glossary::  	   Description of Forth words
 @end menu
 
-@node Introduction, Manual, top, top
+@node Introduction, Rationale & legalese, top, top
 @chapter Introduction
 include(intro.mi)
-@node Manual, Glossary, Introduction, top
-@chapter Manual
 
-@node Glossary, top ,Manual,top
+@node Rationale & legalese, Manual, Introduction, top
+@chapter  Rationale & legalese
+include(rational.mi)
+
+@node Manual, Rationale & legalese, Glossary, top
+@chapter Manual
+include(manual.mi)
+
+@node Glossary, top Manual ,Manual,top
 @chapter Glossary
+Wherever it says 16 bits read single precision number or "cell".
+Wherever it says 32 bits read double precision number.
+
+forthcode({X}) must be understood that there is no actual definition with name forthvar({X}). 
+In the assembler listing it has label NULL.
+
 include(menu.texinfo)
 include(wordset.mi)
 @bye
+
