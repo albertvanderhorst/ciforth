@@ -103,8 +103,9 @@ a user manual.
 @menu 
 * Gentle Introduction:: For newbies to Forth. You don't want to read this.
 * Rationale & legalese:: For experts. You don't want to read this.
-* Manual::	   User manual 
-* Glossary::  	   Description of Forth words
+* Manual::         User manual 
+* Documentation::  Some references
+* Glossary::       Description of Forth words
 * Glossary Index:: Find a Forth words in the glossary
 * Forth Word Index:: All references to Forth words
 * Concept Index::
@@ -123,7 +124,28 @@ include(rational.mi)
 @chapter Manual
 include(manual.mi)
 
-@node Glossary,top,Manual,top
+@node Documentation, Glossary, Manual, top
+@chapter  Documentation summary
+
+You bet this is utterly and totally out of date.
+
+The following manuals are in print: 
+
+Caltech FORTH Manual, an advanced manual with internal details of Forth. Has
+Some implementation peculiarities. Approx. $6.50 from the Caltech Book
+Store, Pasadena, CA. 
+
+Kitt Peak Forth Primer, $20.00 postpaid from the Forth Interest Group, P. O.
+Box 1105, San Carlos, CA 94070. 
+
+microFORTH Primer, $15.00 Forth, Inc. 
+815 Manhattan Ave. Manhattan Beach, CA 90266
+
+
+Forth Dimensions, newsletter of the Forth Interest Group, $5.00 for 6 issues
+including membership. F-I-G. P.O. Box 1105, San Carlos, CA. 94070 
+
+@node Glossary,top,Documentation,top
 @chapter Glossary
 Wherever it says                 
 single precision number or forthdefi({cell}) _BITS_ bits is meant.
@@ -153,7 +175,7 @@ forthitem d
 _BITS16_({32})_BITS32_({64}) bit signed double integer: most significant portion with sign
 on top of stack.
 forthitem f      
-boolean flag. 0=false, non-zero=true
+boolean forthdefi({flag}) . 0=false, non-zero=true 
 forthitem ff     
 boolean false flag=0
 forthitem n      
@@ -174,6 +196,10 @@ May only be used within a colon definition. A digit indicates number
 of memory addresses used, if other than one. 
 forthitem E      
 Intended for execution only.
+forthitem FIG      
+Belongs to the FIG model
+forthitem ISO      
+Belongs to ISO standard
 forthitem L0     
 Level Zero definition of FORTH-78
 forthitem L1     
@@ -184,15 +210,16 @@ forthitem U
 A user variable.
 @end table 
 
+Where there is mention of a standard or a model,
+it means that the word actually complies to the standard or the model,
+not that some word of that name is present.
+
 Unless otherwise noted, all references to numbers are for _BITS_ bit
 signed integers. For _BITS16_({32})_BITS32_({64}) signed numbers, the
 most significant part (with the sign) is on top. 
 
 All arithmetic is implicitly _BITS_ bit signed integer math, with error and
 under-flow indication unspecified.
-
--- present but not documented
-FLUSH CURRENT 2DUP RP@ U.
 
 include(menu.texinfo)
 include(wordset.mi)
