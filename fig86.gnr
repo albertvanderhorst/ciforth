@@ -4015,7 +4015,6 @@ Transmit forthvar({count}) characters from forthvar({addr}) to the
 terminal.
 In this ciforth all terminal I/O goes through forthcode({EMIT}), so
 forthcode({OUT}) is observed.},{{EMIT},{OUT}})
-{{EMIT},{OUT}})
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      DDUP
         _0BRANCH(TYPE1) ;{ IF}
@@ -4050,7 +4049,7 @@ PEMIT   DC      $+CELLS(1)
         POP     AX      ;{GET CHAR}
         CMP     AL,LF   ;{ Precede ^J with ^M}
         JNE     PEMIT1
-        MOV     [_PARAMETER_FIELD(LOUT)],0H
+        MOV     _CELL_PTR[_PARAMETER_FIELD(LOUT)],0H
         MOV     AL,ACR
         CALL    CHO
         MOV     AL,LF
@@ -4486,7 +4485,7 @@ drive used for mass storage. This is in MSDOS coding,
 The drive may be switched but this should only be 
 attempted after forthcode({EMPTY-BUFFERS}) .},
 {{BLOCK},{FLUSH}})
-HEADER({DRIVE},{DRIVE},{DOVAR})
+HEADER({DRIVE},{LDRIVE},{DOVAR})
       DC  0
 ;
 WERR    DB      'DISK WRITE ERROR  $'
@@ -4501,7 +4500,7 @@ SBLK    PROC    NEAR
         MOV     CX,SPB
         MUL     CX   ;{SEC #}
         MOV     DX,AX
-        MOV     AL,DRIVE    ;{SELECT DR A}
+        MOV     AL,[_PARAMETER_FIELD(LDRIVE)]    ;{SELECT DR A}
         POP     BX      ;{TRANSFER ADDR}
         PUSH    DI      ;{GET THAT RETURN BACK}
         RET
@@ -4648,22 +4647,42 @@ RSLW5:  DC      SEMIS
 ;
 });_END_({ _RWFD_})
 _RWHD_({
+
 ;{ Warning : if this LBA is used apart from by R/W}
 ;{ the fields marked default must be restored.}
+worddoc({STORAGE},{LBAPAR},{l_b_a_params},{--},{},
+{ A data structure used by R/W , that also must be filled in for disk
+operations forthcode({RBLK}) and forthcode({WBLK}) . Do not touch the
+first 16-bits word. The second word is the number of sectors to be
+transferred. The third and fourth word contain a long real pointer
+where the data comes from or goes to. The fourth word and fifth word
+is as 32 bit counter for the sector on the disc. If a 2 Terabyte disk
+is not enough this can be extended into the sixth and seventh word.
+Word 1,2,4 6 and 7 must be restored to their previous value after
+calling forthcode({RBLK}) and forthcode({WLBK}) so as not to interfere
+with forthcode({R/W}). }, 
+{{R/W},{BLOCK},{OFFSET}})
 HEADER({LBAPAR},{LBA},{DOVAR})
         DB      10H, 0      ;{ default    }
         DW      SPB         ;{ default    }
         DW      0           ;{ to be filled with offset}
-        DW      SWITCHSEGMENT ;{ default segment}
+        DW      _SWITCH_({SWITCHSEGMENT})0H ;{ default segment}
         ;{ At a hard disk we just read sector from sector 1        }
         DD      0       ;{ sector number}
         DD      0       ;{ M.S. 32 BITS default}
 
-;{ Reads/ writes the block such as in LBA}
+worddoc({STORAGE},{RBLK},{read_block},{--},{},{
+Perform a disk read operation using a properly filled in LBA structure
+in forthcode({LBAPAR}). } 
+{{R/W},{WBLK}})
 CODE_HEADER({RBLK},{RBLK})
         MOV     BX,4200H
         JMP    RWBLK
 ;
+worddoc({STORAGE},{WBLK},{write_block},{--},{},{
+Perform a disk write operation using a properly filled in LBA
+structure in forthcode({LBAPAR}). } 
+{{R/W},{RBLK}})
 CODE_HEADER({WBLK},{WBLK})
         MOV     BX,4300H
 RWBLK:
@@ -4684,18 +4703,34 @@ RWBLK:
         PUSH    BX
         _NEXT
 
+worddoc({STORAGE},{R/W},{read_slash_write},{addr blk f --},{},{
+The figforth standard disc read-write linkage. forthvar({addr})
+specifies the source or destination block buffer, forthvar({blk}) is
+the sequential number of the referenced physical block; and
+forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
+read. forthcode({R/W}) determines the location on mass storage,
+performs the read-write and aborts with an error message for failures.
+This function uses ``LBA'' : Logical Block Addressing and may
+not work on elderly hard disks. 
+_BITS_({Where blk is at most 64K the largest addressable disk is 
+64M , you can get around this by filling in forthcode({LBAPAR}) and then calling
+ forthcode({RBLK}) or forthcode({WBLK}) })
+forthcode({DISK-ERROR}) contains the status of the latest operation,
+bit 1 (carry flag) indicates an error.
+}, 
+{{BLOCK},{DISK-ERROR},{RBLK},{WBLK}})
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
         DC      TOR
         DC      LIT, SPB, STAR  ;{ Sector number}
         DC      SWAP
-;       On a big endian machine the following code is 32 bit clean.
+;       On a big endian machine the following code is 16/32 bit clean.
 ;       The 2 m.s. bytes are overwritten by the next store.
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS })
         DC      LBA, LIT, 4, PLUS, STORE   ; { Address }
-        DC      LIT, SWITCHSEGMENT
+        DC      LIT, _SWITCH_({SWITCHSEGMENT})0H 
         DC      LBA, LIT, 6, PLUS, STORE
-        DC      LBA, LIT, 8, PLUS, STORE
+        DC      LBA, LIT, 8, PLUS, STORE ; { Sector number. }
         DC      LBA
         DC      RR
         _0BRANCH(RSLW1)
