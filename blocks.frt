@@ -14,14 +14,14 @@
 
 
 
-( ?16 ?32 ?LI ?PC ?LEAVE-BLOCK INCLUDED ) \ AvdH A1sep28
+( ?16 ?32 ?LI ?PC ?LEAVE-BLOCK INCLUDE ) \ AvdH A1sep28
   : ^ .S ;     : IVAR CREATE , ;
 
 : ?LEAVE-BLOCK IF SRC CELL+ @ IN ! THEN ;
 : ?16 0 CELL+ 2 <> ?LEAVE-BLOCK ;
 : ?32 0 CELL+ 4 <> ?LEAVE-BLOCK ;
-: ?PC "BIOS" PRESENT? 0= ?LEAVE-BLOCK ;
-: ?LI "LINOS" PRESENT? 0= ?LEAVE-BLOCK ;
+: ?PC [ "BIOS" PRESENT? 0=  ] LITERAL ?LEAVE-BLOCK ;
+: ?LI [ "LINOS" PRESENT? 0= ] LITERAL ?LEAVE-BLOCK ;
 3 LOAD ?16  ( Remainder applicable to 16-bit only )
 : LC@ L@ FF AND ;
 : LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
@@ -75,7 +75,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  MSG # 10 : DENOTATION IS NOT BLANK DELIMITED
  MSG # 11 : WORD IS NOT FOUND
  MSG # 12 : NOT RECOGNIZED
- MSG # 13 : UNKNOWN
+ MSG # 13 : ERROR, NO FURTHER INFORMATION
  MSG # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY
  ( CIFORTH $Revision$ ADAPTED BY AvdH HCCFIG HOLLAND)
  ( ERROR MESSAGES   )
@@ -606,17 +606,17 @@ string else 0. It is assumed del cannot be a valid addr )
 \      SWAP OVER - 1 - ( Length after delimiter)
 \      R> 1+ SWAP
 \   ELSE ( DROP 0) 0 THEN  2SWAP ;
-(  -LEADING                   89jul16-AH )
+\ ( -LEADING $@= (MENV) GET-ENV ) \ AvdH A1sep30
+REQUIRE COMPARE
  : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
     BEGIN                        ( heading blanks )
       OVER C@ BL = OVER 0= 0=  AND
     WHILE
       1 - SWAP 1 + SWAP
     REPEAT  ;
- : COMPARE ( ISO) ROT 2DUP SWAP - >R
-     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
  : $@=  ( S1 S2 --F string at address S1 equal to other one)
    >R $@ R> $@ COMPARE ;
+REQUIRE Z$@   REQUIRE ENV
 \ For VAR and ENVZSTRING leeave STRING or CONTENT and GOON.
 : (MENV) DUP 0= IF DROP 2DROP 0. 0 ELSE Z$@ &= $S 2SWAP >R >R
 2OVER COMPARE IF RDROP RDROP 1 ELSE 2DROP R> R> 0 THEN THEN ;
@@ -1871,7 +1871,7 @@ PAD CELL+ HERE HERE 12 LINOS ?LINUX-ERROR ;
 : cd (WORD) cdED ;
 
 ( cat echo grep list ls make man rm   ee l ) \ AvdH A1sep26
-REQUIRE 32-bit ?LI   REQUIRE OS-IMPORT
+REQUIRE ?LI ?LI   REQUIRE OS-IMPORT
 "cat    "   OS-IMPORT cat
 "echo   "   OS-IMPORT echo
 "grep   "   OS-IMPORT grep
@@ -2334,7 +2334,7 @@ DECIMAL
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-( SAVE-SYSTEM TURNKEY )  REQUIRE 32-bit ?LI HEX \ AvdH A1sep24
+( SAVE-SYSTEM TURNKEY )  REQUIRE ?LI  ?LI HEX \ AvdH A1sep24
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -2350,7 +2350,7 @@ DECIMAL
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
-( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE 32-bit ?LI \ A1sep25
+( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE ?LI  ?LI \ A1sep25
 \ Return the NUMBER of arguments passed by Linux
 : ARGC ARGS @ @ ;
 
@@ -3110,7 +3110,7 @@ REQUIRE make
 \ Make the following defining word postfix for one definition
 \ The name must be a string constant on the stack
 \ Use only while compiling, or you crash the system
-: POSTFIX ?COMP '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
+: POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
 
 
 
