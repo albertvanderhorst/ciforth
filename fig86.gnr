@@ -1161,7 +1161,7 @@ CODE_HEADER({(DO)},{XDO})
         XCHG    BP,STACKPOINTER   ;{ GET PARAMETER STACK}
         _NEXT
 ;
-worddocsafe( {CONTROL},{(QDO)},{paren_question_do},{},{C},
+worddocsafe( {CONTROL},{(?DO)},{paren_question_do},{},{C},
 {The run-time proceedure compiled by forthcode({?DO}) which
 prepares the return stack, where the looping bookkeeping is kept.},{{?DO}}, 
 {{( See ?DO)},{}},
@@ -6770,7 +6770,7 @@ HEADER({(BACK},{PBACK},{DOCOL})
         DC      HERE
         DC      SEMIS
 ;
-worddocsafe( {CONTROL},{BACKP)},{back_paren},{addr --},{},
+worddocsafe( {CONTROL},{BACK)},{back_paren},{addr --},{},
 {Complete a backward branch by compiling an offset from
 forthcode({HERE}) to forthsamp({addr}), left there by
 forthcode({(BACK)}) . _VERBOSE_({Usage is forthsamp({ (BACK ..
@@ -7752,6 +7752,12 @@ words that introduced a forthdefi({denotation}), i.e. a generalisation of
 forthcode({NUMBER}) . These words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant.
 They reside in a special vocabulary, called forthcode({DENOTATIONS}).},
+{},{},{},{}, {}, enddoc)
+worddocchapter({ENVIRONMENTS},{ },
+{The wordset forthvar({ENVIRONMENT}) contain words for all environment 
+queries that are recognized. By executing they leave the information
+such as is required for each of these queries. 
+Except for the true flag at the end.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
 {The wordset forthvar({INPUT}) contains words to get input from the terminal
