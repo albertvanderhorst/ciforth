@@ -3385,8 +3385,11 @@ HEADER({ERROR},{ERROR},{DOCOL})
         DC      ZLESS
         _0BRANCH(ERRO1) ;{IF}
         DC      PABOR   ;{ENDIF}
-ERRO1:  DC      HERE
-        DC      COUNT
+ERRO1:  DC      LIN, FETCH, LDUP
+        _ISO_IN_({DC    SOURC, FETCH, PLUS})
+        DC      LIT, 20, LSUB
+        DC      SOURC, FETCH, MAX
+        DC      SWAP,OVER, LSUB
         DC      LTYPE
         _STRINGINLINE({? })
         DC      LTYPE
@@ -3398,7 +3401,8 @@ ERRO1:  DC      HERE
         DC      DOT
         DC      LIN,FETCH, SOURC, FETCH, LSUB
         DC      DOT    ;{ENDIF}
-ERRO2:  DC      QUIT
+ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
+        DC      QUIT
 ;
 worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
 {Print a definition's name from its dictionary entry address.},
@@ -4364,16 +4368,29 @@ HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc({SCREEN},{LOAD},{load},{n ---},{L0},
+worddoc({SCREEN},{LOAD},,{n ---},{L0},
 {Interrupt the current input stream in order to
 interpret screen forthvar({n}) .
 At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input stream.},
 {{-->},{QUIT},{EXIT}}, {}, enddoc)
 HEADER({LOAD},{LOAD},{DOCOL})
+        DC      LDUP, THRU
+        DC      SEMIS
+;
+worddoc({SCREEN},{THRU},,{n1 n2---},{L0},
+{Interrupt the current input stream in order to
+interpret screen forthvar({n1}) through forthvar({n2})
+(inclusive).
+At the end of the screens, barring errors or forced changes,
+it continues with the interrupted input stream.},
+{{-->},{QUIT},{EXIT}}, {}, enddoc)
+HEADER({THRU},{THRU},{DOCOL})
         DC      BLK, FETCH, TOR
         DC      SAVE
-        DC      BLK,STORE       ;{BLK <- SCR * B/SCR}
+        DC      ONEP, SWAP, XDO
+THRU1:
+        DC      IDO,BLK,STORE
         DC      BLK, FETCH, BLOCK
         DC      LDUP, LIN, STORE
         DC      LIT, KBBUF
@@ -4386,7 +4403,8 @@ _ISO_IN_({       DC     SOURC, FETCH, NEGATE, LDUP
         DC      LLOCK
         DC      INTER   ;{INTERPRET FROM OTHER}
         DC      LUNLOCK
-SCREEN: DC      RESTO
+        _LOOP({THRU1})
+        DC      RESTO
         DC      FROMR, BLK, STORE
         DC      SEMIS
 ;
@@ -6598,7 +6616,7 @@ worddocchapter({STORAGE},{ },
 to the mass storage, in this ciforth _BOOTFD_({ to the hard disk})
 _BOOTHD_({to the hard disk}) _HOSTED_({to the file
 forthfile({BLOCKS.BLK})}).
-They are the underlying the forthvar({SCREEN}) facilities.},
+They are underlying the forthvar({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STRING},{ },
 {The wordset forthvar({STRING}) contains words that manipulate

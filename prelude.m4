@@ -229,7 +229,9 @@ define( {_GENERATE_TEST},
 dnl Redefine ``worddoc'' to make sure it lands in the documentation part
 define({worddoc},
 {_GENERATE_DOC{}dnl}
-{{worddoc({$1},{$2},{$3},{$4},{$5},{$6},{$7})}}
+{{worddoc({$1},{$2},
+} ifelse(0,len({$3}),translit({{{$2}}},{A-Z},{a-z}),{{{$3}}}){,
+{$4},{$5},{$6},{$7})}}
 {_GENERATE_TEST{}dnl}
 {{wordtest({$2},{$8})}}
 {_GENERATE_CODE{}dnl}
