@@ -1,10 +1,10 @@
 #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
 lina <<% | tail -n$#
-( Environmental dependancies : )
-( This is a fig Forth Program using only standard fig Words)
-( plus LINOS (par1, par2, par3, function# -- result/error )
-( The following words are not ANSI : none (any more))
-( 1 is used for a true flag)
+\ ( Environmental dependancies : )
+\ ( This is a fig Forth Program using only standard fig Words)
+\ ( plus LINOS (par1, par2, par3, function# -- result/error )
+\ ( The following words are not ANSI : none (any more))
+\ ( 1 is used for a true flag)
 
 9 CONSTANT TAB
 10 CONSTANT LF
@@ -35,6 +35,7 @@ CREATE BUFFER SIZE ALLOT
 0 CONSTANT O_RDONLY 
 
 VARIABLE HANDLE
+: COUNT-FILE BEGIN HANDLE @ BUFFER SIZE READ LINOS DUP 0 >
 WHILE COUNT-BUFFER REPEAT DROP ;
 
 : ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
@@ -43,10 +44,12 @@ WHILE COUNT-BUFFER REPEAT DROP ;
 : STILL-FILES HERE C@  ( -- flag ) ;  ( Count <>0 means more files)
 : OPEN-FILE BL WORD STILL-FILES ( [filename-at-here] -- handle/-1 )
     IF HERE COUNT TYPE HERE OPEN-LINUX ELSE -1 THEN  HANDLE ! ;
-
 : TREAT-FILE ZERO-COUNT COUNT-FILE SHOW-COUNT ;
+: CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?LINUX-ERROR ;
 
 : DO-FILE BEGIN OPEN-FILE STILL-FILES WHILE TREAT-FILE CLOSE-FILE REPEAT BYE ;
+
+CR
 DO-FILE $*
 %
 
