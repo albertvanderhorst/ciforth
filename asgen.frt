@@ -98,14 +98,14 @@ CREATE TABLE 1 , 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 : ROTLEFT TABLE + @ UM* OR ;   ( aqa " 8 * LSHIFT" on bigendian. )
 
 ( ------------- UTILITIES, SYSTEM DEPENDANT ----------------------------)
-VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
+VOCABULARY ASSEMBLER IMMEDIATE   ASSEMBLER DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
 ( Return the DEA from "word". )
 ALSO DENOTATION : % POSTPONE ' ; PREVIOUS
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
 : %>BODY >CFA >BODY ; ( From DEA to the DATA field of a created word )
 : %BODY> BODY> CFA> ; ( Reverse of above)
-: %>CODE >PHA ; ( From DEA to the DOES> pointer for a ``DOES>'' word )
+: %>DOES >DFA @ ; ( From DEA to the DOES> pointer for a ``DOES>'' word )
 ( Leave for DEA : it IS to be ignored. This is used for supressing the  )
 ( bare bones of the sib mechanism in i586.                              )
 : IGNORE? >NFA @ CELL+ C@ &~ = ;
@@ -118,13 +118,14 @@ ALSO DENOTATION : % POSTPONE ' ; PREVIOUS
 ( Leave the first DEA of the assembler vocabulary.                      )
 : STARTVOC ' ASSEMBLER >WID >LFA @ ;
 
-( Build: for "word" remember type -- creation class -- exemplified by   )
-( DOES> address of the code to be executed.                             )
-( Execution: Leave for DEA : it IS of same type. )
-: IS-A CREATE 0 ( To be patched) , DOES> @ SWAP %>CODE @ = ;
+( Build: allocate place to remember a DOES> address of a `CREATE'd word )
+( Leave that ADDRESS  to be filled in by ``REMEMBER''                   )
+( Execution: Leave for DEA : it IS of same type as the remembered DOES> )
+: IS-A CREATE HERE 1 CELLS ALLOT DOES> @ SWAP %>DOES @ = ;
 ( Patch up the data field of a preceeding word defined by `IS-A'        )
-( To be called when sitting at the address wanted                       )
-: REMEMBER HERE LATEST (>NEXT%) %>BODY ! ; IMMEDIATE
+( To be called when sitting at the DOES> address                        )
+( The !CSP is needed to prevent a silly error message                   )
+: REMEMBER HERE SWAP ! !CSP ; IMMEDIATE
 
 ( Also needed : ?ERROR                                                  )
 (   `` : ?ERROR DROP DROP ; '' defeats all checks.                      )
@@ -159,9 +160,12 @@ DECIMAL
 ( replaced by NULL definitions.                                         )
 : CHECK26 AT-REST? 0= 26 ?ERROR ;  ( Error at postit time )
 : CHECK32 BAD? 32 ?ERROR ; ( Always an error )
-( Generate error for fixup, if for the BI, some of the the     )
-( BITS would stick out it. Leave MASK and BITS . Programming error!     )
+( Generate error for fixup, if for the BI, some of the BITS would       )
+( stick out it. Leave MASK and BITS . Programming error!                )
 : CHECK31 2DUP SWAP CONTAINED-IN 0= 31 ?ERROR ;
+( Generate error for ``FIXUP-DATA'' , if the BI and the LEN             )
+( are not compatible. Leave BI and LEN . Programming error!             )
+: CHECK31A 2DUP OVER >R RSHIFT OVER LSHIFT 1 OR R> <> 31 ?ERROR ;
 ( Generate error for postit, if for the inverted BI , some of the the   )
 ( BITS would stick out it. Leave MASK and BITS . Programming error!     )
 : CHECK33 2DUP SWAP INVERT CONTAINED-IN 0= 31 ?ERROR ;
@@ -207,20 +211,31 @@ HEX
 : POSTIT   CHECK26   !POSTIT  HERE ISS !
     @+ ,   TALLY:,   CORRECT,- ;
 ( Define an instruction by BA BY BI and the OPCODE                      )
-( The `BI' information is what is left to be filled in cf. fixups       )
+( For 1 2 3 and 4 byte opcodes.                                         )
 IS-A IS-1PI : 1PI  CHECK33 CREATE , , , , 1 , DOES> REMEMBER POSTIT ;
 IS-A IS-2PI : 2PI  CHECK33 CREATE , , , , 2 , DOES> REMEMBER POSTIT ;
 IS-A IS-3PI : 3PI  CHECK33 CREATE , , , , 3 , DOES> REMEMBER POSTIT ;
-: IS-PI  >R R@ IS-1PI R@ IS-2PI R@ IS-3PI OR OR R> DROP ;
+IS-A IS-4PI : 4PI  CHECK33 CREATE , , , , 4 , DOES> REMEMBER POSTIT ;
+( For DEA : it REPRESENTS some kind of opcode.                          )
+: IS-PI  >R 0
+    R@ IS-1PI OR  R@ IS-2PI OR  R@ IS-3PI OR   R@ IS-4PI OR
+R> DROP ;
 
 ( Bookkeeping for a fixup using a pointer to the BIBYBA information,    )
 ( can fake a fixup in disassembling too.                                )
 : TALLY:|   @+ TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;
 ( Fix up the instruction using a pointer to DATA. )
 : FIXUP>   @+ ISS @ OR!   TALLY:|   CHECK32 ;
-( Define an fixup by BA BY BI and the FIXUP bits )
+( Define a fixup by BA BY BI and the FIXUP bits )
 ( One size fits all, because of the or character of the operations. )
 IS-A IS-xFI   : xFI   CHECK31 CREATE , , , , DOES> REMEMBER FIXUP> ;
+
+( Fix up the instruction using DATA and a pointer to the bit POSITION. )
+: FIXUP-DATA >R @+ R> SWAP LSHIFT ISS @ OR! TALLY:| CHECK32 ;
+( Define a data fixup by BA BY BI, and LEN the bit position.            )
+( At assembly time: expect DATA that is shifted before use              )
+( One size fits all, because of the or character of the operations.     )
+IS-A IS-DFI  : DFI   CHECK31A CREATE , , , , DOES> REMEMBER FIXUP-DATA ;
 
 ( Rotate the MASK etc from a fixup-from-reverse into a NEW mask fit )
 ( for using from the start of the instruction. We know the length!  )
@@ -249,13 +264,15 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 : T! PRO-TALLY !+ !+ !+ DROP ;
 ( Get the data from the tally prototype back BA BY BI )
 : T@ PRO-TALLY 3 CELLS +  @- @- @- DROP ;
-( Add INCREMENT to the OPCODE a NUMBER of times generate as much        )
-( instructions                                                          )
+( Add INCREMENT to the OPCODE a NUMBER of times, and generate as much   )
+( instructions, all with the same BI-BA-BY from ``PRO-TALLY''           )
+( For each assembler defining word there is a corresponding family word )
 : 1FAMILY,    0 DO   DUP >R T@ R> 1PI   OVER + LOOP DROP DROP ;
 : 2FAMILY,    0 DO   DUP >R T@ R> 2PI   OVER + LOOP DROP DROP ;
 : 3FAMILY,    0 DO   DUP >R T@ R> 3PI   OVER + LOOP DROP DROP ;
+: 4FAMILY,    0 DO   DUP >R T@ R> 4PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
-: xFAMILY|R 0 DO DUP >R T@ R> xFIR OVER + LOOP DROP DROP ;
+: xFAMILY|R   0 DO   DUP >R T@ R> xFIR  OVER + LOOP DROP DROP ;
 
 ( ############### PART II DISASSEMBLER #################################### )
 
@@ -535,4 +552,4 @@ HERE POINTER !
 : ;CODE
     ?CSP   POSTPONE (;CODE)   POSTPONE [   POSTPONE ASSEMBLER
 ; IMMEDIATE
-ASSEMBLER DEFINITIONS
+PREVIOUS DEFINITIONS
