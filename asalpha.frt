@@ -130,16 +130,19 @@ ASSEMBLER DEFINITIONS  HEX
 ( Have ``bz|'' and ``R|'' fixed in the instruction. )
 20,0000 0 F3I-MASK  NO-b 'R| >BI @ XOR  T!
     BI: 0.01 BI: 1C.30 NO-b 'R| >DATA @ OR  4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
-( Resolve conflict with ``FTOIT,'' by disallowing ``az|'' )
-' CTPOP, 0400 !BAD
+\ ( Resolve conflict with ``FTOIT,'' by disallowing ``az|'' )
+\ ' CTPOP, 0400 !BAD
 
 ( ***************************** 4.13 MULTIMEDIA *********************** )
 
+80,0000 0 F3I-MASK BI: 1C.31 4PI PERR,
+80,0000 0 F3I-MASK NO-a T!
+    BI: 0.01 BI: 1C.34 NO-a 4 4FAMILY, UNPKBW, UNPKBL, PKWB, PKLB,
 80,0000 0 F3I-MASK T!
-    BI: 0.01 BI: 1C.31 0F 4FAMILY, PERR, -- -- UNPKBW, UNPKBL, PKWB, PKLB,
-    MINSB8, MINSW4, MINUB8, MINUW4, MAXUB8, MAXUW4, MAXSB8, MAXSW4,
-( Resolve conflict with ``FTOIS,'' )
-' MINSB8, 0400 !BAD
+    BI: 0.01 BI: 1C.38
+    8 4FAMILY, MINSB8, MINSW4, MINUB8, MINUW4, MAXUB8, MAXUW4, MAXSB8, MAXSW4,
+\ ( Resolve conflict with ``FTOIS,'' )
+\ ' MINSB8, 0400 !BAD
 
 ( ***************************** 4.5 LOGIC ***************************** )
 
@@ -206,31 +209,31 @@ ASSEMBLER DEFINITIONS  HEX
 8,40A4 0 F3F-MASK NO-a T!
     BI: 0.020   BI: 14.00A  NO-a 2 4FAMILY, SQRTF, SQRTG,
 
-40A4 0 F3F-MASK          BI: 15.01E 4PI CVTDG,
+40A4 0 001F,F81F         BI: 15.01E NO-a 4PI CVTDG,
 
-40A4 0 F3F-MASK          BI: 15.02C 4PI CVTGF,
-40A4 0 F3F-MASK          BI: 15.02D 4PI CVTGD,
-4064 0 F3F-MASK          BI: 15.02F 4PI CVTGQ,
+40A4 0 001F,F81F         BI: 15.02C NO-a 4PI CVTGF,
+40A4 0 001F,F81F         BI: 15.02D NO-a 4PI CVTGD,
+4064 0 001F,F81F         BI: 15.02F NO-a 4PI CVTGQ,
 
-40A4 0 03FF,181F         BI: 15.03E 4PI CVTQG,
-40A4 0 03FF,181F         BI: 15.03C 4PI CVTQF,
+40A4 0 001F,181F         BI: 15.03E NO-a 4PI CVTQG,
+40A4 0 001F,181F         BI: 15.03C NO-a 4PI CVTQF,
 
-4094 0 F3F-MASK          BI: 16.02C 4PI CVTTS,
-4054 0 F3F-MASK          BI: 16.02F 4PI CVTTQ,
+4094 0 001F,F81F         BI: 16.02C NO-a 4PI CVTTS,
+4054 0 001F,F81F         BI: 16.02F NO-a 4PI CVTTQ,
 
-1,0000,4094 0 F3F-MASK          BI: 16.03C 4PI CVTQS,
-1,0000,4094 0 F3F-MASK          BI: 16.03E 4PI CVTQT,
+1,0000,4094 0 001F,F81F         BI: 16.03C NO-a 4PI CVTQS,
+1,0000,4094 0 001F,F81F         BI: 16.03E NO-a 4PI CVTQT,
 
 ( These instructions are irregular!                                     )
-4,0000,4094 0 03FF,001F          BI: 16.2AC 4PI CVTST,
-4,0000,4094 0 03FF,001F          BI: 16.6AC 4PI CVTST/S,
+4,0000,4094 0 001F,001F          BI: 16.2AC NO-a 4PI CVTST,
+4,0000,4094 0 001F,001F          BI: 16.6AC NO-a 4PI CVTST/S,
 
 4084 0 03FF,001F T!
     BI: 0.001 BI: 17.020 3 4FAMILY, CPYS, CPYSE, CPYSN,
 
-        4044 0 03FF,001F BI: 17.010 4PI CVTLQ,
+4044 0 03FF,001F BI: 17.010 4PI CVTLQ,
 ( Mark this instruction as VAX floating for trap modifiers.             )
-4064 0 03FF,E01F BI: 17.030 4PI CVTQL,
+4064 0 001F,E01F BI: 17.030 4PI CVTQL,
 \ 10,0000,4044 0 03FF,E01F BI: 17.030 4PI CVTQL,
 
 4084 0 03FF,001F T!
@@ -238,12 +241,11 @@ ASSEMBLER DEFINITIONS  HEX
         FCMOVLE, FCMOVGT,
     BI: 0.001 BI: 17.024 2 4FAMILY, MT_FPCR, MF_FPCR,
 
-8,4054 0 F3F-MASK T!
-    BI: 0.010 BI: 14.004 3 4FAMILY, ITOFS, ITOFF, ITOFT,
+8,4054 0 03E0,001F T!
+    BI: 0.010 BI: 14.004 NO-b 3 4FAMILY, ITOFS, ITOFF, ITOFT,
 
-( Fixed ``az|'' in the instruction, disallow ``bz|''. See ``CTPOP''     )
-8,5054 0 F3F-MASK NO-a T!
-    BI: 0.008 BI: 1C.030  NO-a 2 4FAMILY, FTOIT, FTOIS,
+8,5054 0 03E0,001F T!
+    BI: 0.008 BI: 1C.070  NO-b 2 4FAMILY, FTOIT, FTOIS,
 
 ( **************************** Misc Opr ******************************  )
 
@@ -326,25 +328,5 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 
 : SHOW:   TOGGLE-TRIM SHOW: TOGGLE-TRIM ;
 : SHOW-ALL   TOGGLE-TRIM SHOW-ALL TOGGLE-TRIM ;
-
-
-
-
-\ : NEXT CHECK26 ;
-\     ." COMES JAN" CR
-\         CODE JAN ADDQ, a30| R| b30| c30| NEXT ENDCODE
-\
-\ 'JAN >CFA @ DDD DROP
-\
-\         CODE KEES ADDQ, a30| #| 1E b#| c30| NEXT ENDCODE
-\ 'KEES >CFA @ DDD DROP
-\
-\         CODE PIET LDA, a30| 0AAAA D16| NEXT ENDCODE
-\ 'PIET  >CFA @ DDD DROP
-\         CODE PIET LDA, a30| b30| NEXT ENDCODE
-\ 'PIET  >CFA @ DDD DROP
-\         "Expect ERROR" TYPE CR
-\         CODE PIET LDA, a30| b30| 0AAAA D16| NEXT ENDCODE
-\ 'PIET  >CFA @ DDD DROP
 
 PREVIOUS DEFINITIONS
