@@ -1986,7 +1986,7 @@ set (P) are executed rather than being compiled.},{},
 {{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
 enddoc)
 HEADER({:},{COLON},{DOCOL}, , B_IMMED)
-        DC      QEXEC
+        _SECURITY_({DC      QEXEC})
         DC      SCSP
         DC      CURR
         DC      FETCH
@@ -2392,14 +2392,12 @@ Unused in the kernel of ciforth.},
 enddoc)
 HEADER({FLD},{LFLD},{DOUSE}, CELLS(21))
 ;
-_SECURITY_({
 worddoc( {SECURITY},{CSP},{c_s_p},{---- addr},{U},
 {A user variable temporarily storing the stack pointer position, for
 compilation error checking.},{},
 {{1256 CSP ! CSP @ .},{1256}},
 enddoc)
 HEADER({CSP},{LCSP},{DOUSE}, CELLS(22))
-});_END_({_SECURITY_})
 ;
 worddoc( {SCREEN},{R#},{r_hash},{--- addr},{U},
 {A user variable which may contain the location of an editing cursor,
@@ -2753,7 +2751,6 @@ HEADER({>VFA},{TVFA},{DOCOL})
         DC      TOBODY
         DC      SEMIS
 ;
-_SECURITY_({
 worddoc( {SECURITY},{!CSP},{store_c_s_p},{},{},
 {Save the stack position in forthcode({CSP}). Used as part of the compiler
 security.},{},
@@ -2764,7 +2761,6 @@ HEADER({!CSP},{SCSP},{DOCOL})
         DC      LCSP
         DC      STORE
         DC      SEMIS
-});_END_({_SECURITY_})
 ;
 worddoc( {ERRORS},{?ERROR},{question_error},{f n --},{},
 {  Issue an error message number forthcode({n}) , if the boolean flag is true.},
@@ -2781,6 +2777,23 @@ HEADER({?ERROR},{QERR},{DOCOL})
 QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
 ;
+;
+worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
+{Issue error message if stack position differs from value saved in
+forthvar({CSP}) .},{},
+{{!CSP ?CSP},{},
+{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? MSG # 14 },
+ {CR},{} },
+enddoc)
+HEADER({?CSP},{QCSP},{DOCOL})
+        DC      SPFET
+        DC      LCSP
+        DC      FETCH
+        DC      LSUB
+        DC      LIT,14H
+        DC      QERR
+        DC      SEMIS
+;      
 _SECURITY_({
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}},
@@ -2818,22 +2831,6 @@ enddoc)
 HEADER({?PAIRS},{QPAIR},{DOCOL})
         DC      LSUB
         DC      LIT,13H
-        DC      QERR
-        DC      SEMIS
-;
-worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
-{Issue error message if stack position differs from value saved in
-forthvar({CSP}) .},{},
-{{!CSP ?CSP},{},
-{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? MSG # 14 },
- {CR},{} },
-enddoc)
-HEADER({?CSP},{QCSP},{DOCOL})
-        DC      SPFET
-        DC      LCSP
-        DC      FETCH
-        DC      LSUB
-        DC      LIT,14H
         DC      QERR
         DC      SEMIS
 ;
@@ -3717,7 +3714,8 @@ INTE3:
         DC      TCFA
         DC      COMMA
                         ;{THEN}
-INTE4:  DC      QSTAC
+INTE4:  
+        _SECURITY_({DC      QSTAC})
         _BRANCH(INTE1)  ;{AGAIN}
 INTE8:  DC      DROP, DROP
         DC      SEMIS
@@ -3913,7 +3911,7 @@ enddoc)
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SPSTO
         DC      DECA
-        DC      QSTAC   ;{ IT DID TO & INCL THIS}
+        _SECURITY_({DC      QSTAC})
         DC      CR
         DC      DOTCPU
 
@@ -4711,7 +4709,7 @@ current input stream is not from a block, a crash will ensue. },
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
-        DC      QLOAD
+        _SECURITY_({DC      QLOAD})
         DC      BLK, FETCH
         DC      LDUP, LUNLOCK
         DC      ONEP
@@ -6223,9 +6221,8 @@ for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) al
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
 error checking.},{}, {}, enddoc)
 HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
-        DC      QCOMP
         DC      PBACK
-        DC      ONE
+        _SECURITY_({DC      QCOMP, ONE})
         DC      SEMIS
 ;
 worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{P,CO,L0},
@@ -6242,7 +6239,7 @@ at forthvar({addr}) . forthvar({n}) is used for error tests.},
 {}, 
 enddoc)
 HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
-        DC      QCOMP, TWO, QPAIR
+        _SECURITY_({DC      QCOMP, TWO, QPAIR})
         DC      FORWARDP
         DC      SEMIS
 ;
@@ -6273,7 +6270,7 @@ dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4},
 
 HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      LIT, XDO, COMMA, PBACK
-        DC      LIT,3    ;{ Magic number}
+        _SECURITY_({DC      LIT,3    ;{ Magic number}})
         DC      SEMIS
 ;
 worddoc( {CONTROL},{LOOP},{loop},{addr n --- (compiling)},{P,C2,L0},
@@ -6295,7 +6292,7 @@ forthvar({DO}) . forthvar({n}) is used for error testing.},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
 HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
-        DC      LIT, 3, QPAIR
+        _SECURITY_({DC      LIT, 3, QPAIR})
         DC      LIT, XLOOP, COMMA, BACKP
         DC      SEMIS
 ;
@@ -6321,7 +6318,7 @@ checking.},{},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
 enddoc)
 HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
-        DC      LIT, 3, QPAIR
+        _SECURITY_({DC      LIT, 3, QPAIR})
         DC      LIT, XPLOO, COMMA, BACKP
         DC      SEMIS
 ;
@@ -6339,7 +6336,7 @@ forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error tests.},{}, 
 {}, enddoc)
 HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
-        DC      ONE, QPAIR
+        _SECURITY_({DC      ONE, QPAIR})
         DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 ;
@@ -6354,7 +6351,7 @@ There is no effect on the stack. Execution cannot leave this loop
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},{}, {}, enddoc)
 HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
-        DC      ONE, QPAIR
+        _SECURITY_({DC      ONE, QPAIR})
         DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 ;
@@ -6370,10 +6367,9 @@ addr. forthvar({n}) is used for error testing.},{{WHILE}},
 {},
 enddoc) 
 HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
-        DC      QCOMP
-        DC      LIT, 4, QPAIR ; {Matches WHILE ?}
+        _SECURITY_({DC      QCOMP, LIT, 4, QPAIR ; {Matches WHILE ?}})
         DC      TOR    ; { WHILE handled later. }
-        DC      ONE, QPAIR   ; {Matches BEGIN ?}
+        _SECURITY_({DC      ONE, QPAIR   ; {Matches BEGIN ?}})
         DC      LIT, BRAN, COMMA, BACKP
         DC      FROMR
         DC      FORWARDP ;{ WHILE target. }
@@ -6401,7 +6397,7 @@ resolution of the offset and error testing.},{},
 enddoc) 
 HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
-        DC      TWO     ;{ Magic number           }
+        _SECURITY_({DC      TWO     ;{ Magic number}})
         DC      SEMIS
 ;
 worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},{P,C2,L0},
@@ -6422,11 +6418,11 @@ forthcode({HERE}) and storing at forthvar({addr1}) .},
 {}, 
 enddoc)
 HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
-        DC      QCOMP, TWO, QPAIR
+        _SECURITY_({DC      QCOMP, TWO, QPAIR})
         DC      LIT, BRAN, COMMA, PFORWARD
         DC      SWAP
         DC      FORWARDP
-        DC      TWO     ;{ Magic number           }
+        _SECURITY_({DC      TWO     ;{ Magic number}})
         DC      SEMIS
 ;
 worddoc( {CONTROL},{WHILE},{while},
@@ -6450,7 +6446,7 @@ forthcode({REPEAT}) .},
 enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
-        DC      LIT, 4 ;{ Magic number           }
+        _SECURITY_({DC      LIT, 4 ;{ Magic number}})
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{L0},
