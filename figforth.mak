@@ -8,10 +8,10 @@
 #.SUFFIXES:
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
-# Of the following constant.m4 is not a real source file.
+# constant.m4 is missing, it is not a real source file.
 # It could be, but it has been stolen.
 INGREDIENTS = \
-constant.m4      \
+gas.m4          \
 header.m4        \
 postlude.m4      \
 prelude.m4       \
@@ -33,19 +33,20 @@ LINUXFORTHS= figforth lina
 OTHERTARGETS= BLOCKS.BLK toblock fromblock
 # C-sources with various aims.
 CSRCAUX= toblock fromblock stealconstant
-CSRCFORTH= figforth toblock fromblock stealconstant
+CSRCFORTH= figforth stealconstant
 CSRC= $(CSRCAUX) $(CSRCFORTH)
 
 RELEASECONTENT = \
 COPYING          \
 fig86.gnr        \
-BLOCKS.BLK       \
+blocks.frt       \
 $(INGREDIENTS)   \
 $(ASSEMBLERS:%=%.m4) \
 $(TARGETS:%=%.cfg) \
 $(CSRC:%=%.c)    \
 Makefile         \
 release.txt      \
+figdocadd.txt \
 fig86gnr.txt       \
 fig86.alone.asm  \
 fig86.msdos.msm  \
@@ -53,6 +54,7 @@ fig86.linux.asm  \
 fig86.lina.asm  \
 genboot.bat      \
 link.script    \
+figdoc.zip    \
 # That's all folks!
 
 # r## revision 2.## a beta release
@@ -87,7 +89,7 @@ fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
 # In particular the order of operands.
 %.s : %.ps ; sed -f transforms <$+ >$@
 
-.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip
+.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks
 # Default target for convenience
 default : figforth
 fig86.$(s).bin :
@@ -111,13 +113,15 @@ boot: fig86.alone.bin
 	mformat -k a: 
 	mcopy $+ a:forth.com
 
+filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
+
 # Figforth calculates whether the screen boundaries are off by a sector.
 # You can copy the filler by hand if this calculation fails, e.g. 5" floppies.
 # The symptom is 8 LIST show the electives screen half and half of some other screen.
-filler: fig86.alone.bin lina
+filler: fig86.alone.bin lina filler.frt
 	rm -f wc # Use the official `wc' command
 	# Have forth calculate whether we need the filler sector
-        # Use the exit command to return 1 or 0
+	# Use the exit command to return 1 or 0
 	(filesize=`cat fig86.alone.bin |wc -c`; \
 	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
@@ -125,7 +129,7 @@ filler: fig86.alone.bin lina
 moreboot: BLOCKS.BLK fig86.alone.bin  fig86.msdos.bin	   
 	mcopy BLOCKS.BLK a: 
 	mcopy fig86.msdos.bin	   a:msdos.com
-                          
+	                  
 allboot: boot filler moreboot
 
 BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
@@ -136,13 +140,27 @@ BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 hdboot: fig86.alone.bin  
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440 
 
-# ZIP targets
-msdos.msm : fig86.msdos.msm ; cp $+ $@
-alone.asm : fig86.alone.asm ; cp $+ $@
-
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 
-zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
+zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip 
+
+# For msdos truncate all file stems to 8 char's and loose prefix `fig86.'
+msdoszip : $(RELEASECONTENT) mslinks ;\
+    echo fg$(VERSION) $(RELEASECONTENT) |\
+    sed -e's/\<fig86\.//g' |\
+    sed -e's/\<gnr\>/fig86.gnr/' |\
+    sed -e's/ \([^ .]\{1,8\}\)[^ .]*\./ \1./g' |\
+    xargs zip 
+
+# More messy things in behalf of msdos
+mslinks : 
+	ln -sf fromblock.c frombloc.c  
+	ln -sf fig86.lina.asm lina.asm 
+	ln -sf fig86.linux.asm linux.asm 
+	ln -sf fig86.msdos.msm msdos.msm 
+	ln -sf fig86.alone.asm alone.asm 
+	ln -sf figdocadd.txt figdocad.txt
+	ln -sf stealconstant.c stealcon.c
 
 lina.zip : $(RELEASELINA) ; zip lina$(VERSION) $+
 
@@ -152,7 +170,8 @@ fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
 # This linking must be static, because `link.script' is tricky enough.
 # but a .5M executable is better than a 64 M executable.
-figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@ 
+figforth : figforth.c fig86.linux.o link.script
+	$(CC) $(CFLAGS) figforth.c fig86.linux.o -static -Wl,-Tlink.script -o $@ 
 
 # Linux native forth
 lina : fig86.lina.o ; ld $+ -o $@
