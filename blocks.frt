@@ -134,6 +134,7 @@ CR 2 LIST
 ( STRINGS      )  35 LOAD 36 LOAD
  ( EDITOR ) 109 LOAD         EXIT
  ( KRAKER )       10 16 THRU
+ ( BACKUP        77 81 THRU   )
  ( ASSEMBLER 80x86 SAVE-BLOCKS) 120 LOAD   97 98 THRU
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
@@ -141,7 +142,6 @@ CR 2 LIST
  ( FIG:  SAVE-SYSTEM      23 LOAD   )
 : TASK ;
 ( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD )
-
  ." QUADRUPLE ARITHMETIC 08-02-84 "
  : ADC ( n1,n2-n,c  add, leave sum and carry)
     0 SWAP 0 D+ ;
@@ -1230,85 +1230,85 @@ EXIT
 
 
 
-CR ." SIMPLE PROFILER AH   85FEB15" HEX
-LABEL NEXT2      ( REPLACES NEXT!)
-   B LDAX   B INX   A L MOV
-   B LDAX   B INX   A H MOV   (NEXT) 6 + JMP C;
-   (NEXT) 3 + JMP C;
-CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
-   C3 A MVI  (NEXT) STA
-   NEXT2 H LXI    (NEXT) 1+ SHLD     NEXT C;
+( SAVE CURRENT chunk TO CHUNK N      A1may16 AH&CH)  HEX
+SYS  0800,0000 B/BUF / CONSTANT CHUNK-SIZE  ( BLOCKS PER CHUNK)
+: CURRENT-CHUNK OFFSET @ CHUNK-SIZE / -6 +ORIGIN OVER SWAP C! ;
+( -- offset and bl# where to patch OFFSET )
+: OFFSET-/MOD 'OFFSET >DFA @ +ORIGIN 7C00 - B/BUF /MOD ;
+: CHECK CURRENT-CHUNK = 0D ?ERROR ;
+: PATCH-CHUNK
+     OFFSET-/MOD >R DROP
+     RW-BUFFER  CURRENT-CHUNK CHUNK-SIZE * R@ + 1 R/W
+     CHUNK-SIZE * DUP 40 + OFFSET-/MOD DROP RW-BUFFER + !
+     RW-BUFFER  SWAP R> + 0 R/W
+; DECIMAL
+
+
+
+
+( Second part: wipe a part of the disk A1may3 AH)
+: WIPE-BUFFER RW-BUFFER B/BUF &v FILL ;
+: WRITE-BUFFER RW-BUFFER SWAP OFFSET @ + 64 - 0 R/W ;
+: CHECK-RANGE 589 64 + CHUNK-SIZE WITHIN 0= 13 ?ERROR ;
+: SHOW DUP 100 MOD 0= IF . ^M EMIT ELSE DROP THEN ;
+: WIPE-RANGE  DUP CHECK-RANGE SWAP DUP 1- CHECK-RANGE SWAP
+    WIPE-BUFFER
+    DO I SHOW I WRITE-BUFFER LOOP ;
+HEX 130,3BBF CONSTANT LAST-BLOCK DECIMAL
+CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
+: doit  CHUNK-SIZE 589 64 + CR WIPE-RANGE ;
+: WIPE-HD WIPE-BUFFER FIRST-BLOCK
+     BEGIN RW-BUFFER OVER 0 R/W DISK-ERROR 1 AND 0= WHILE
+        DUP SHOW 1+ REPEAT DROP ;
+
+
+( Part 3 : write current chunk to fresh part of disk A1may3 AH)
+ 240 LOAD
+: FREE? RW-BUFFER SWAP 1 R/W
+DISK-ERROR 1 AND   RW-BUFFER (FREE?)   OR ;
+: NON-FREE? FREE? INVERT ;
+: FIRST-FREE  ( -- FIRST FREE BLOCK IN BACKUP AREA)
+FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
+: FNTB ( First free in current chunk)
+  OFFSET @ 64 - CHUNK-SIZE OVER + 'NON-FREE? BIN-SEARCH 1+ ;
+: SAVE-COMMENT 200 BLOCK FIRST-FREE 0 R/W ;
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- ( STREAM READ ROUTINES CP/M 85/012/08  AH )
- : F_READ ( B,N-N2 Tries to read N char's to buffer B)
-          ( N2 is number actually read, 0 for EOF)
-      ( NOT  YET: NOW IT IS FILLED WITH ^Z, NOTHING RETURNED )
-  BEGIN
-     SWAP GET-CHAR
-     OVER C! 1+ SWAP 1 -
-     DUP 0=
-  UNTIL
- ;
- : F_WRITE ( B,N-N2 Tries to write N char's from buffer B)
-      ( N2 is the number actually written to disk )
-      ( NOT  YET: NOW IT IS UNCLEAR, NOTHING RETURNED )
-   TO-DISK
- ;
-
- ( DISC IO SCREEN 15 GENERAL  >1<   85/12/08 AH )
- <HEX
- 0A0D IVAR CRLF    1A IVAR CTRLZ
- : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
-
- : FILL-FCB 22 WORD
-    1+ HERE  COUNT ROT SWAP CMOVE  ;
-
- : SET-DMA  1A BDOS DROP ;
-
-
-
-
-
-
+( Part 4 : write current chunk to fresh part of disk A1may8 AH)
+HEX
+: BLMOVE 0 DO  ( as MOVE for blocks.)
+  SWAP RW-BUFFER OVER 1 R/W 1+   SWAP RW-BUFFER OVER 0 R/W 1+
+  DUP SHOW KEY? IF UNLOOP EXIT THEN  LOOP . . ;
+: BLMOVE-FAST  ( as MOVE for blocks, ONLY MULTIPLES OF 64K.)
+ 1<>64 0 DO
+         SWAP RW-BUFFER OVER 1 R/W 40 +
+         SWAP RW-BUFFER OVER 0 R/W 40 +
+         DUP SHOW KEY? IF UNLOOP EXIT THEN
+40 +LOOP . . 1<>64 ;
+: BACKUP ( BACKUP THE CURRENT CHUNK TO PRISTINE DISK )
+   OFFSET @ 40 - FNTB OVER - FIRST-FREE SWAP BLMOVE-FAST ;
+: SAVE-CHUNK DUP CHECK
+ CURRENT-CHUNK CHUNK-SIZE * OVER CHUNK-SIZE * CHUNK-SIZE
+BLMOVE-FAST PATCH-CHUNK ; DECIMAL
+( Part 4 : write current chunk to fresh part of disk A1may8 AH)
+( Inspect physical disk BLOCK )
+: ASCII? DUP BL 7F WITHIN SWAP ^J = OR ;
+( SC contains all ``ASCII'' )
+: ALL-ASCII? OVER + SWAP DO I C@ DUP ASCII? 0=
+IF DROP UNLOOP 0 EXIT THEN 0= IF UNLOOP -1 EXIT THEN LOOP -1 ;
+: INSPECT RW-BUFFER SWAP 1 R/W
+  RW-BUFFER B/BUF 2DUP
+ ALL-ASCII? IF TYPE ELSE DROP 100 DUMP THEN ;
+: I-INSPECT
+BEGIN KEY >R
+R@ ^E = IF 1 - THEN R@ ^X = IF 1 + THEN
+R@ ^R = IF 8 - THEN R@ ^C = IF 8 + THEN
+DUP . DUP INSPECT R> &Q = UNTIL ;
+DECIMAL  PREVIOUS
 
  ( DISC IO SCREEN 16 WRITE    >1<   85/12/08 AH )
  0 IVAR DISK-BUFFER-W 100 ALLOT
@@ -3102,21 +3102,21 @@ PS ABA + BABAA
 
 
 
-( Up til LIMIT forget the vocabulary whose DEA is given. )
-(   Leave LIMIT    )
-: FORGET-VOC
-  2DUP SWAP U< IF ( contains something)
-      SWAP >R
-      >DDEA  ( start with dictionary entry)
-      DUP
- BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R@  DUP H. U<  UNTIL
-        CR DUP H. DUP ID.
-          SWAP  >LFA !
-    R>
-  ELSE       ( contains nothing)
-     [COMPILE]  FORTH  DEFINITIONS
-     >VFA @ VOC-LINK ! (  unlink)
-  THEN ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ( A free stack )
 : STACK CREATE HERE CELL+ , CELLS ALLOT DOES> ;
@@ -3149,6 +3149,7 @@ PS ABA + BABAA
 : IP-DEBUG BEGIN POP $@ SWAP PUSH DUP ID. EXECUTE AGAIN ;
 : DEBUG: (WORD) FOUND >DFA @ PUSH IP-DEBUG POP DROP ;
 
+
 ( Test screens                                      )
 
 VOCABULARY AAP
@@ -3163,14 +3164,6 @@ AAP
 
  '.VOC >CFA FOR-VOCS
 FORTH
-
-
-
-
-
-
-
-
 
 
 
@@ -3205,41 +3198,41 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
+\ CHUNK 4.3 20001jun08 AH
+\   Screen 32 and 7 behind FENCE
+\   $ and DUMP
+\   Start of this chunk : 1083151
 
 
 
 
-             `
-quityes899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES18
-MES1899 PRIMES1899 PRIMES1899
-PRIMES1899 PRIMES1899 PRIMES1899
-1899 PRIMES1899 PRIMES1899 PRI
-MES1899 PRIMES1899 PRIMES1899 PRI
-9 PRIMES1899
-RIMES1899 PRI
-ES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 P
-899 PRIMES189
-THE BYTE BENCHMARK LASTED  7.650mS OK
 
-( high level ACCEPT )
-\ ``REMAINDER' describes the unused part of ``TIB''.
-CREATE REMAINDER 0 , 0 ,
-\ ``REMAINDER'' DOESN'T contain a full line
-: NO-LF REMAINDER 2@ LF $I 0= ;
-\ The STRINGCONSTANT is moved to the bottom of ``TIB''
-: TO-BOTTOM TIB SWAP MOVE ;
-: REM-TO-BOT TO-BOTTOM TIB REMAINDER CELL+ ! ;
-\ The empty part of ``TIB'' is refilled.
-: REFILL-TIB REMAINDER @ >R TIB R@ + #TIB R@ -
-  ACCEPT ( THROW) TIB SWAP R> + REMAINDER 2! ;
-\ `REMAINDER'' holds a full line. Move that line to the bottom
-( of ``TIB'') : SPLIT-OFF NO-LF 13 ?ERROR REMAINDER 2@ LF $S
-2SWAP REMAINDER 2! ; : ACC \ This is a ISO ACCEPT
-  NO-LF IF REMAINDER 2@ REM-TO-BOT REFILL-TIB THEN SPLIT-OFF
-  2SWAP ROT MIN MOVE ;
-( Test screen for 201 )
-10 CONSTANT #TIB    CREATE TIB #TIB ALLOT
-     &4 CONSTANT LF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3367,22 +3360,6 @@ DECIMAL
 
 -1 CELL+ LOAD 120 LOAD 100 LOAD 97 98 THRU DECIMAL
 207 208 THRU
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3797,22 +3774,6 @@ R> R> R> Z ! Y ! X !
 : tak 3SWAP 1+ kat NIP NIP NIP ;
 'tak >DFA @ 'tak' >DFA ! ( Solve forward reference)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ( Mini editor by retyping, Usage ME) <HEX
 : EL LINE C/L 1 - BLANK ;
 : GL PAD C/L  ACCEPT C/L 1- MIN >R LINE PAD SWAP R> MOVE ;
@@ -3821,6 +3782,22 @@ R> R> R> Z ! Y ! X !
 : ME SCR ! OEPS 10 0 DO I EL I GL LOOP ;
 
 HEX>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3909,6 +3886,22 @@ VARIABLE COMP \ Execution token of comparison word.
     REPEAT
 IMIN @ ;
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
+( Patch the low system to accomodate save system. A1may04 AH )
+( Returns the FIRST free cell in the low area. )  HEX
+: FIND-EXIT >DFA @
+BEGIN DUP @ 'EXIT <> WHILE CELL+ REPEAT CELL+ ;
+( Use CONTENT to patch up the bootup parameters of the DEA )
+: PATCH >DFA @ +ORIGIN ! ;
+\ 100000 DUP 'DP PATCH 'FENCE PATCH   A0000 'LOW-EM PATCH
+\ 'TASK FIND-EXIT 'LOW-DP PATCH   ( Reset to 28400 come time.)
+-1 BUFFER CONSTANT RW-BUFFER -1 LOCK ( get a locked buffer)
+( Write 1k from ADDRESS to BLOCK)
+: WRITE-1K   SWAP RW-BUFFER 400 CMOVE   RW-BUFFER SWAP 0 R/W ;
+( Convert block NR relative to chunk to ABSOLUTE )
+: >ABS OFFSET @ + 40 - ;
+: SAVE-SYSTEM 40 0 DO 7C00 400 I * + I >ABS WRITE-1K LOOP ;
+DECIMAL
+
 ( Binair zoeken, commentaar ) EXIT
 ( BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES )
 Gebruikt een orakel met het execution token `COMP'.
@@ -3941,66 +3934,98 @@ VARIABLE IMAX \ Als IX 'COMP EXECUTE waar is,
         THEN
     REPEAT
 IMIN @ ;
+( Alternative for COLD A1may04 AH)  HEX
+DP @ LOW-DP @  DP ! LOW-DP ! \ Compile to low memory.
+VOCABULARY SYS    SYS DEFINITIONS
+: NEW-COLD
+EMPTY-BUFFERS   FIRST STALEST !   FIRST PREV !
+'SYS 'FORTH >WID >LFA !
+0 CELLS +ORIGIN DUP CELL+ @  40 CELLS CMOVE   ABORT ;
+DP @ LOW-DP @  DP ! LOW-DP ! \ Compile to high memory.
+'NEW-COLD 'COLD 3 CELLS CMOVE
+PREVIOUS DEFINITIONS
+DECIMAL
+( This has been loaded since chunk 0.5 and must not be
+reloaded.)
+
+
+
+( Redefine R/W to accomdate larger addresses. A1may05AH)
+ DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+: (FREE?) B/BUF 0 DO DUP I + C@ &v - IF UNLOOP DROP 0 EXIT THEN
+   LOOP DROP -1 ;       8,F000 CONSTANT RW-BUFFER
+: 1<>64 LBAPAR 2 + 82 TOGGLE ;
 
 
 
 
+( All: address block -- addres' block' And : SIZE 64K)
+: READ++   1<>64 DUP RW-BUFFER SWAP 1 R/W
+OVER RW-BUFFER SWAP 1,0000 MOVE   40,0001,0000. D+ 1<>64 ;
+: WRITE++  1<>64 OVER RW-BUFFER 1,0000 MOVE
+  DUP RW-BUFFER SWAP 0 R/W 40,0001,0000. D+ 1<>64 ;
+
+DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
+( Redefine R/W to accomdate larger addresses. A1may05AH)
+DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+: MUD? B/BUF - (FREE?) ;  ( limit -- loaded/stored empty block)
+( All: address block -- addres' block' )
+: LOAD-MID BEGIN OVER A,0000 < WHILE READ++ REPEAT ;
+: LOAD-HIGH BEGIN OVER B/BUF - MUD? 0= WHILE READ++ REPEAT ;
+( Load and store all of the system, 9,0000 .. A,000 is scratch)
+: LOAD-ALL
+2,7C00 OFFSET @ 40 +  LOAD-MID  ( Skip kernel, stack)
+SWAP DROP 10,0000 SWAP LOAD-HIGH   2DROP ;
+DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS  SYS
+: STORE-MID BEGIN OVER A,0000 < WHILE WRITE++ REPEAT ;
+: STORE-HIGH BEGIN OVER HERE < WHILE WRITE++ REPEAT ;
+: STORE-ALL  ( Store to next chunk, inc. kernel, stack )
+0,7C00 OFFSET @ 40 - STORE-MID
+SWAP DROP 10,0000 SWAP STORE-HIGH 2DROP ;  DECIMAL
+( Get source in core, edit to core 2001MAY11 AH) DECIMAL
+SYS
+CREATE CIFORTH HERE 0 ,
+HERE OFFSET @ LOAD-HIGH 2DROP
+589 B/BUF * DUP ALLOT SWAP !  \ Patch length
+: WBLK' B/BUF * CIFORTH CELL+ +  B/BUF MOVE ;
+: RBLK' B/BUF * CIFORTH CELL+ +  SWAP B/BUF MOVE ;
+HEX \ Redefine R/W to accomodate blocks in SOURCE
+: BLOCK' >R   PREV   @   DUP   @   R@   -
+0BRANCH [ 5C , ] +BUF   0=
+0BRANCH [ 24 , ] DROP   R@   BUFFER   DUP   CELL+   CELL+
+R@   NOOP RBLK' DUP  @   R@   -   0=
+0BRANCH [ -50 , ] DUP   PREV   !   RDROP   CELL+   CELL+   ;
+: UPDATE' PREV @ DUP CELL+ CELL+ SWAP @ WBLK' ;
+' UPDATE' ' UPDATE 3 CELLS MOVE
+' BLOCK' ' BLOCK 3 CELLS MOVE
+( Redefine R/W to accomdate larger addresses. A1may05AH)
+ONLY FORTH 249 LOAD
+ONLY FORTH 250 LOAD ONLY FORTH
+ DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+: NEW-COLD
+EMPTY-BUFFERS   FIRST STALEST !   FIRST PREV !
+0 CELLS +ORIGIN DUP CELL+ @  40 CELLS CMOVE
+1<>64 LOAD-ALL (ABORT) ;
+'NEW-COLD 'COLD 3 CELLS MOVE
+DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
+: SAVE-SYSTEM
+   U0 @   0 +ORIGIN   40 CELLS CMOVE ( Save user variables)
+   STORE-ALL ;
 
 
 
+( Redefine R/W to accomdate larger addresses. A1may05AH)
+DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
+: ABORT-NEW
+S0   @   DSP!   DECIMAL   ?STACK
+CR .CPU "ciforth stand alone " TYPE
+-8 +ORIGIN
+COUNT 0. D.R &c EMIT COUNT 0. D.R &. EMIT COUNT 0. D.R BL EMIT
+DROP CR
+ONLY POSTPONE FORTH DEFINITIONS QUIT ;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-123 THROW
-
-
-
-
-
-
-
-
-
-
+'ABORT-NEW 'ABORT  3 CELLS MOVE
+DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 
 
 
@@ -4035,38 +4060,6 @@ DECIMAL  getit
     0 SWAP 1 read LINOS SWAP DROP
     1 RAWIO tc
 ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-( Trying to implement SYSTEM )
-: CV OVER + 1 - 0 SWAP C! ;
-  CREATE COMMAND 256 ALLOT
-  "-c " CV "sh " CV CREATE ARG[] , , COMMAND CELL+ , 0 ,
-"/bin/sh " CV CONSTANT SHELL
-: SYSTEM COMMAND $! 0 COMMAND $C+
-     0 0 0 2 LINOS DUP ?LINUX-ERROR
-     0= IF SHELL ARG[] ENV 11 LINOS ?LINUX-ERROR THEN
-;
-
-
-
-
-
-
 
 
 
