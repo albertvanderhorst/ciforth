@@ -33,13 +33,22 @@
 # ALL FILES STARTING IN ``fig86'' BUT BUT ``fig86.gnr'' ARE GENERATED
 
 INGREDIENTS = \
-gas.m4          \
 header.m4        \
 postlude.m4      \
 prelude.m4       \
 protect.m4       \
 width16.m4       \
 width32.m4       \
+# That's all folks!
+
+DOCTRANSFORMS = \
+gloss.m4        \
+glosshtml.m4    \
+indexhtml.m4    \
+manual.m4       \
+menu.m4         \
+names.m4        \
+wordset.m4      \
 # That's all folks!
 
 # Different assemblers should generate equivalent Forth's.
@@ -58,15 +67,32 @@ CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= figforth stealconstant
 CSRC= $(CSRCAUX) $(CSRCFORTH)
 
+# Texinfo files still to be processed by m4.
+SRCMI= \
+figforth.mi \
+intro.mi    \
+manual.mi   \
+rational.mi  \
+# That's all folks!
+
 # Documentation files and archives
 DOC = \
 COPYING          \
+assembler.txt    \
+editor.txt     \
 release.txt      \
-figdoc.zip    \
 figdocadd.txt \
 fig86gnr.txt       \
 testreport.txt     \
 cfg.zip         \
+$(SRCMI) \
+# That's all folks!
+
+# The following must be updated on the website, whenever
+# any typo's are fixed. Unfortunately, is has become a separate
+# maintenance chore, and is in effect a separate project.
+DOCOLD = \
+figdoc.zip    \
 # That's all folks!
 
 # These files can easily be generated, if you have linux.
@@ -80,12 +106,14 @@ fig86.alonehd.asm  \
 
 RELEASECONTENT = \
 fig86.gnr        \
+$(CSRC:%=%.c)    \
+$(TARGETS:%=%.cfg) \
 $(DOC)           \
+Makefile         \
+test.mak        \
 $(INGREDIENTS)   \
 $(ASSEMBLERS:%=%.m4) \
-$(TARGETS:%=%.cfg) \
-$(CSRC:%=%.c)    \
-Makefile         \
+$(DOCTRANSFORMS) \
 blocks.frt       \
 genboot.bat      \
 link.script    \
