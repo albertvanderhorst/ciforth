@@ -14,7 +14,8 @@ s/\<REP\>/ REP\
 s/^\([^# ]*[    ]*[^\.]\<[A-Z][A-Z]*\>\)\([^,#]*\),\([^#]*\)/\1 \3,\2/
 s/\$/./
 s/\<ORG\>/. =/
-s/section \([a-z][a-z]*\) /section \1#/
+s/nobits write exec alloc/,"wx",@nobits/
+s/progbits write exec alloc/,"awx"/
 s/.BYTE *\"\(.\)\"/.BYTE   '\1'/
 s/\"\(.\)\"+/'\1'+/
 # General registers
@@ -29,8 +30,8 @@ s/\<DH\>/%DH/g
 s/\<DX\>/%DX/g
 s/\([^"]\)\<ESP\>/\1%ESP/g
 # GNU want indirect jumps this way.
-s/\<JMP[        ]\(\[%E[A-Z][A-Z]\]\)/JMP       *\1/g
-s/\<JMP[ ]*\[\(%[A-Z][A-Z][A-Z]\)\]/JMP *\1/g
+s/\<JMP[        ]\(\[%E[A-Z][A-Z]\]\)/JMP       *(\1)/g
+s/\<JMP[ ]*\[\(%[A-Z][A-Z][A-Z]\)\]/JMP *(\1)/g
 s/\[\(%[A-Z][A-Z][A-Z]\)\]/0(\1)/g
 s/\[\([^%]*\)\]/*(\1)/g
 s/LEA[  ]*\[\(%[A-Z][A-Z][A-Z]\)+\(%[A-Z][A-Z][A-Z]\)\]/LEA       (\1,\2)/g
