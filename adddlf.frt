@@ -62,25 +62,30 @@ REQUIRE COMPARE
 \ unlike the old (MATCH)
 : MATCH2   >R 2DUP R@ >NFA @ $@ COMPARE R> SWAP ;
 
-
-\ Like ``MATCH2'', only takes a null dea, and returns null then.
-: MATCH3 DUP IF MATCH2 ELSE 0 THEN ;
+\ Like ``MATCH2'', also accepts a null dea, and returns null then.
+\ And skips silently over dummy entries.
+: MATCH3
+\ BEGIN DUP WHILE DUP >FFA @ 1 AND WHILE >LFA @ REPEAT  THEN
+    DUP IF MATCH2 ELSE 0 THEN ;
 
 '2DROP '?PAIRS 3 CELLS MOVE
 
 
 \ For NAME DEA, return NAME DEA2
 \ dea2 is where the search stops, a match, mismatch or zero.
+\ At all line endings the stack contains NAME DEAx
 : FIND2-a
     BEGIN
-    MATCH3 0 > WHILE
-        DUP >R >XFA @
-        MATCH3 0< IF
-\D              DUP .S ID. "REJECTED " TYPE
-                DROP R> >LFA @
+    MATCH3 0 > WHILE  \ While lexographically lower
+        DUP >R >XFA @  \ Attempt far link, but keep backtrackpointer
+        MATCH3 0< IF   \ Far link is lexicgraphically higher?
+\D              DUP .S ID. "FAR LINK REJECTED: NAME TOO LOW " TYPE
+                DROP R> >LFA @    \ Backtrack
         ELSE
-\D              DUP .S DUP IF ID. "OKAY " TYPE ELSE DROP "ATEND" TYPE THEN
-                RDROP
+\D              DUP .S DUP IF ID. " FOLLOWING FAR LINK " TYPE
+\D      ELSE
+\D              DROP " AT END OF LIST (null) " TYPE THEN
+                RDROP          \ Drop backtrack pointer
         THEN
     REPEAT
 ;
