@@ -690,40 +690,41 @@ CREATE P
 \ by a ``LIT''
 \ The replacement code must not be longer, such that it can always be copied
 \ into a gap. It is padded with noop's.
+\ If a real noop is needed use ``NOP1''
+'NOOP ALIAS NOP1        \ The same, except for the xt.
 
     'ALIGN-NOOPS ALIAS |                         \ Convenience alias.
     : ]L ] POSTPONE LITERAL ; IMMEDIATE \ Convenience alias.
 
 : (MATCH-TABLE)                         |
 \ `` MATCH-TABLE'' points here :
-'P  EXECUTE             | P                       |       \ Execute optimisation
-'P  + 'P  +             | 'P  'P  + +             |       \ Associativity optimisation
-'P  + 'P  -             | 'P  'P  - +             |
-'P  - 'P  +             | 'P  'P  - -             |
-'P  - 'P  -             | 'P  'P  + -             |
-'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP |       \ Invalid if last drop removed!
-'P  OR 'P  OR           | 'P  'P  OR OR           |
-'P  AND 'P  AND         | 'P  'P  AND AND         |
-'P  XOR 'P  XOR         | 'P  'P  XOR XOR         |
-[ 0 ]L +                | NOOP                    |       \ Shortcut evalutions
-[ 0 ]L -                | NOOP                    |
-[ 0 ]L M* DROP          | DROP 0                  |
-[ 0 ]L OR               | NOOP                    |
-[ 0 ]L AND              | DROP 0                  |
-[ 0 ]L XOR              | NOOP                    |
-[ 1 ]L M* DROP          | NOOP                    |
-[ 1 ]L /                | NOOP                    |
-[ -1 ]L M* DROP         | NEGATE                  |
-[ -1 ]L /               | NEGATE                  |
-[ -1 ]L OR              | DROP -1                 |
-[ -1 ]L AND             | NOOP                    |
-[ -1 ]L XOR             | INVERT                  |
-'P  LSHIFT 'P  LSHIFT   | 'P  'P  + LSHIFT        |       \ Distributivity optimisation
-'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT        |
+'P  EXECUTE             | P                        |       \ Execute optimisation
+'P  + 'P  +             | 'P  'P  + +              |       \ Associativity optimisation
+'P  + 'P  -             | 'P  'P  - +              |
+'P  - 'P  +             | 'P  'P  - -              |
+'P  - 'P  -             | 'P  'P  + -              |
+'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP  |       \ Invalid if last drop removed!
+'P  OR 'P  OR           | 'P  'P  OR OR            |
+'P  AND 'P  AND         | 'P  'P  AND AND          |
+'P  XOR 'P  XOR         | 'P  'P  XOR XOR          |
+[ 0 ]L +                | NOOP                     |       \ Shortcut evalutions
+[ 0 ]L -                | NOOP                     |
+[ 0 ]L M* DROP          | DROP 0                   |
+[ 0 ]L OR               | NOOP                     |
+[ 0 ]L AND              | DROP 0                   |
+[ 0 ]L XOR              | NOOP                     |
+[ 1 ]L M* DROP          | NOOP                     |
+[ 1 ]L /                | NOOP                     |
+[ -1 ]L M* DROP         | NEGATE                   |
+[ -1 ]L /               | NEGATE                   |
+[ -1 ]L OR              | DROP -1                  |
+[ -1 ]L AND             | NOOP                     |
+[ -1 ]L XOR             | INVERT                   |
+'P  LSHIFT 'P  LSHIFT   | 'P  'P  + LSHIFT         |       \ Distributivity optimisation
+'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT         |
+[ 0 ]L 0BRANCH [ 'P , ] | NOP1 NOP1 BRANCH [ 'P , ] |       \ Branch optimisation
+[ -1 ]L 0BRANCH [ 'P , ] | NOOP                    |
 ;
-( [ 0 ]L 0BRANCH          | BRANCH                  |                     )
-( [ 1 ]L 0BRANCH          | NOOP                    |                     )
-( BRANCH [ 0 ]L           | NOOP                    |                     )
 
 \ Optimalisation of this table is thoroughly forbidden!
 FMASK-HOB '(MATCH-TABLE) >FFA OR!
@@ -783,7 +784,7 @@ STRIDE SET PEES
 \ Leave the END of the replaced string (where matching must continue.)
 : COPY-MATCH   >R   OVER R@ MOVE
     !PEES DUP R@ BOUNDS DO I ?PEE? 0 CELL+ +LOOP
-    R> +
+    R> + -1 PROGRESS !
 ;
 
 \ For SEQUENCE : copy its first item to ``HERE'' possibly
@@ -791,8 +792,8 @@ STRIDE SET PEES
 \ Leave sequence BEGIN' of what is still to be handled.
 :  MATCH-ONE
         DUP ?MM DUP 0= IF   2DROP NEXT-ITEM   ELSE
-        >R OVER R@ OVER + FORBIDDEN-GAP? IF RDROP DROP NEXT-ITEM ELSE R>
-            COPY-MATCH -1 PROGRESS !
+        >R OVER R@ OVER + FORBIDDEN-GAP? 1 > IF RDROP DROP NEXT-ITEM ELSE R>
+            COPY-MATCH
         THEN THEN
 ;
 
