@@ -3941,14 +3941,14 @@ _CLASSIC_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
 ;{ code definitions, but this way they are available}
-;{ to be called from code.}
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{L0},{
-Transfer characters from the terminal to address, until a "return"
-or the count of characters have been received. One or more nulls are
-added at the end of the text.
-Receive characters 
-key by forthcode({KEY}) and observe forthcode({RUBOUT}) . 
-},{})
+;{ to be called from code. And the high level words can be revectored }
+worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},{
+Transfer characters from the terminal to address forthvar({addr}) ,
+until a "return" or a number of forthvar({count}) characters have been
+received. One or more nulls are added at the end of the text. Receive
+characters key by key using forthcode({KEY}). Observe
+forthcode({RUBOUT}). },
+{{KEY},{?TERMINAL}})
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
@@ -3998,7 +3998,7 @@ EXPE3:  DC      EMIT
         DC      DROP
         DC      SEMIS
 ;
-worddoc({INPUT},{KEY},{key},{--- c},{L0},{
+worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},{
 Leave the ascii value of the next terminal key struck.},{})
 CODE_HEADER({KEY},{KEY})
         CALL    CI      ;{CONSOLE INPUT}
@@ -4010,6 +4010,12 @@ CI      PROC    NEAR
         RET
 _ENDP CI      ENDP
 ;
+worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},{
+Transmit forthvar({count}) characters from forthvar({addr}) to the 
+terminal.
+In this ciforth all terminal I/O goes through forthcode({EMIT}), so
+forthcode({OUT}) is observed.},{{EMIT},{OUT}})
+{{EMIT},{OUT}})
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      DDUP
         _0BRANCH(TYPE1) ;{ IF}
@@ -4027,9 +4033,15 @@ TYPE2:  DC      IDO
 TYPE1:  DC      DROP    ;{ ENDIF}
 TYPE3:  DC      SEMIS
 ;
-worddoc({OUTPUT},{EMIT},{emit},{c ---},{L0},{
-Transmit ascii character forthvar({c}) to the output device. 
-forthcode({OUT}) is (is that true?) incremented for each character output.},{{OUT}})
+worddoc({OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},{
+Transmit ascii character forthvar({c}) to the terminal.
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthdfn({revectoring}) it. 
+forthcode({OUT}) is incremented for each character output and reset for 
+a carriage return.
+Note that in this ciforth (``classical FIG'') terminal I/O mainly 
+uses BDOS, where disk I/O uses the BIOS.
+},{{TYPE},{OUT}})
 HEADER({EMIT},{EMIT},{DOCOL})
         DC      PEMIT
         DC      ONE,LOUT
@@ -4038,6 +4050,7 @@ PEMIT   DC      $+CELLS(1)
         POP     AX      ;{GET CHAR}
         CMP     AL,LF   ;{ Precede ^J with ^M}
         JNE     PEMIT1
+        MOV     [_PARAMETER_FIELD(LOUT)],0H
         MOV     AL,ACR
         CALL    CHO
         MOV     AL,LF
@@ -4055,10 +4068,11 @@ CHO     PROC    NEAR
         RET
 _ENDP CHO     ENDP
 ;
-worddoc({INPUT},{?TERMINAL},{question_terminal},{--- f},{},{
+worddoc({INPUT},{?TERMINAL},{question_terminal},{--- f},{FIG},{
 Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
-A true flag indicates actuation. },{})
+A true flag indicates actuation. },
+{{KEY},{EXPECT}})
 CODE_HEADER({?TERMINAL},{QTERM})
         JMP     PQTER
 PQTER:  CALL    CSTAT   ;{TEST FOR KEY}
@@ -4078,13 +4092,13 @@ STATRT: RET
 _ENDP CSTAT   ENDP
 });_END_({_CLASSIC_})
 _USEBIOS_({
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{L0},{
-Transfer characters from the terminal to address, until a "return"
-or the count of characters have been received. 
-Receive characters 
-key by forthcode({KEY}) and observe forthcode({RUBOUT}) . 
-One or more nulls are
-added at the end of the text.},{})
+worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},{
+Transfer characters from the terminal to address forthvar({addr}) ,
+until a "return" or a number of forthvar({count}) characters have been
+received. Receive characters key by forthcode({KEY}) and observe
+forthcode({RUBOUT}) . One or more nulls are added at the end of the
+text. Uses ``BIOS''. }, 
+{{KEY},{?TERMINAL}}) 
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER
         DC      PLUS
@@ -4134,14 +4148,20 @@ EXPE3:  DC      EMIT
         DC      DROP
         DC      SEMIS
 ;
-worddoc({INPUT},{KEY},{key},{--- c},{L0},{
+worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},{
 Leave the ascii value of the next terminal key struck.},{})
 HEADER({KEY},{KEY},{DOCOL})
              DC         LIT, 1000H, ZERO, ZERO, ZERO
              DC         LIT, 0016H, BIOS
              DC         DROP,DROP,DROP,DROP
              DC         LIT, 00FFH, LAND, SEMIS
-
+;
+worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},{
+Transmit count characters from forthvar({addr}) to the output device.
+forthcode({OUT}) is incremented for each character output.
+In this ciforth all terminal I/O goes through forthcode({EMIT}), so
+forthcode({OUT}) is observed.
+},{{EMIT},{OUT}})
 HEADER({TYPE},{LTYPE},{DOCOL})
              DC      DDUP
              _0BRANCH(TYPE1)
@@ -4153,9 +4173,13 @@ TYPE2:       DC      IDO,    CFET,    EMIT
 TYPE1:       DC      DROP
 TYPE3:       DC      SEMIS
 ;{            }
-worddoc({OUTPUT},{EMIT},{emit},{c ---},{L0},{
-Transmit ascii character forthvar({c}) to the output device. 
-forthcode({OUT}) is (is that true?) incremented for each character output.},{{OUT}})
+worddoc({OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},{
+Transmit ascii character forthvar({c}) to the terminal.
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthref({revectoring}) it. 
+forthcode({OUT}) is incremented for each character output and reset for 
+a carriage return.
+},{{TYPE},{OUT}})
 HEADER({EMIT},{EMIT},{DOCOL})
              DC      ONE,LOUT,PSTOR
              DC      LIT, 07FH, LAND
@@ -4166,6 +4190,10 @@ HEADER({EMIT},{EMIT},{DOCOL})
 EMIT1:       DC      PEMIT
              DC      SEMIS
 ;{            }
+worddocsafe({OUTPUT},{(EMIT)},{paren_emit},{c ---},{},{
+Just transmit ascii character forthvar({c}) to the terminal 
+by a BIOS call. 
+},{{EMIT}})
 HEADER({(EMIT)},{PEMIT},{DOCOL})
              DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
              DC      LIT, 0010H, BIOS
@@ -4175,7 +4203,8 @@ HEADER({(EMIT)},{PEMIT},{DOCOL})
 worddoc({INPUT},{?TERMINAL},{question_terminal},{--- f},{},{
 Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
-A true flag indicates actuation. },{})
+A true flag indicates actuation. },
+{{KEY},{EXPECT}})
 HEADER({?TERMINAL},{QTERM},{DOCOL})
              DC      LIT, 01100H, ZERO, ZERO, ZERO
              DC      LIT, 016H, BIOS
@@ -4184,6 +4213,10 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
              DC      FROMR, SEMIS
 
              ;{ Output to PRN }
+worddocsafe({OUTPUT},{(EMIT)},{paren_emit},{c ---},{},{
+Just transmit ascii character forthvar({c}) to the printer 
+by a BIOS call. forthcode({OUT}) is not observed.
+},{{EMIT}})
 HEADER({POUT},{POUT},{DOCOL})
              DC      ZERO, ZERO, ZERO
              DC      LIT, 0017H, BIOS
