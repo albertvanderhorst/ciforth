@@ -2,6 +2,8 @@
 
 ( $Id$)
 
+: \D ;
+
 '$@ ALIAS @+
 REQUIRE TRUE
 
@@ -48,6 +50,9 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 \ Set BIT in BITSET
 : SET-BIT SWAP 8 /MOD SWAP BIT-MASK >R DUP C@ R> OR SWAP C! ;
 
+\ Clear  BIT in BITSET
+: CLEAR-BIT SWAP 8 /MOD SWAP BIT-MASK INVERT >R DUP C@ R> AND SWAP C! ;
+
 \ For BIT in BITSET , return "it IS set".
 : BIT? SWAP 8 /MOD SWAP BIT-MASK >R DUP C@ R> AND 0= 0= ;
 
@@ -60,19 +65,24 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 \ The charset is denotated by this character preceeded by '\' e.g. \s.
 100 SET CHAR-SET-SET     CHAR-SET-SET SET!
 
-\ For an identifying CHAR add an as yet empty set to ``CHAR-SET-SET''.
+\ Allocate a char set and leave a POINTER to it.
+: ALLOT-CHAR-SET   HERE 1 C,  MAX-SET 1 - 0 DO 0 C, LOOP
+\ Note that ``ASCII'' null must be excluded from every char-set!
+\ Algorithms rely on it.
+\ For an identifying CHAR create an as yet empty char set with "NAME"
+\ and add it to ``CHAR-SET-SET''.
 \ Leave a POINTER to the set (to fill it in).
-: CHAR-SET CREATE HERE CHAR-SET-SET 2SET+!   HERE MAX-SET 0 DO 0 C, LOOP  DOES> ;
+: CHAR-SET CREATE HERE CHAR-SET-SET 2SET+!  ALLOT-CHAR-SET DOES> ;
 \ For a CHAR-SET ; convert it into its complementary set.
-: INVERT-SET MAX-SET 1+ 0 DO I OVER + DUP C@ INVERT SWAP C! LOOP   DROP ;
+: INVERT-SET MAX-SET 1+ 0 DO I OVER + DUP C@ INVERT SWAP C! LOOP  0 SWAP CLEAR-BIT ;
 
-\ -----------------------------------------------------------------------
+\ ------------------------------------------
 \                  char sets, actual part
-\ -----------------------------------------------------------------------
+\ ------------------------------------------
 
 REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Forth.
 
-&w CHAR-SET \w   256 0 DO I IS-BLANK? 0= IF I | THEN LOOP DROP
+&w CHAR-SET \w   256 1 DO I IS-BLANK? 0= IF I | THEN LOOP DROP
 
 \ Example of another set definition
 \ &d CHAR-SET \d   &9 1+ &0 DO I | LOOP   DROP
@@ -83,10 +93,12 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ -----------------------------------------------------------------------
 \                  escape table
 \ -----------------------------------------------------------------------
+\ To SET add an escape CHAR and the escape CODE. Leave SET .
 : | ROT DUP >R 2SET! R> ;    \ Shorthand, about to be hidden.
+
 \ This contains alternatingly an escaped character, and its ASCII meaning.
 100 SET ESCAPE-TABLE     ESCAPE-TABLE SET!
-&n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |
+&n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |   DROP
 
 \ For CHARACTER return the ``ASCII'' VALUE it represents, when escaped.
 : GET-ESCAPE ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ _ THEN DROP ;
@@ -107,10 +119,11 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ atom = 'ADVANCE( <term>+ <endsentinel>
 
 CREATE RE-PATTERN MAX-RE CELLS ALLOT
+Backup from ADDRESS one cell. Leave decremented ADDRESS.
 : CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
-: MATCH BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- 0 EXIT THEN REPEAT CELL- 1 ;
+: (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT CELL- TRUE;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the character matches the charset at the expression,
@@ -148,11 +161,41 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ return CHARPOINTER ann EXPRESSIONPOINTER incremented past the match,
 \ else return BTP and EP. Plus "there IS a match".
 : BACKTRACK
-    >R BEGIN MATCH 0= WHILE
-        OVER R@ = IF RDROP 0 EXIT THEN
+    >R BEGIN (MATCH) 0= WHILE
+        OVER R@ = IF RDROP FALSE EXIT THEN
+        \ WARNING: 1 - will go wrong if there is a larger gap between backtrackpoints
+        \ i.e. when ADVANCE( is there that would use larger leaps than ADVANCE-CHAR.
         SWAP 1 - SWAP
     REPEAT
-    RDROP 1 ;
+    RDROP TRUE ;
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ if there is match between cp and the end of string with the ep,
+\ return CHARPOINTER and EXPRESSIONPOINTER incremented past the match,
+\ else return CP and EP. Plus "there IS a match".
+\ (Note: this is the syncronisation, to be done when the expression does
+\ *not* start with `^'.
+: FORTRACK
+    BEGIN (MATCH) 0= WHILE
+        SWAP 1 + SWAP
+        OVER C@ 0= IF FALSE EXIT THEN
+    REPEAT
+    RDROP TRUE ;
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ return CHARPOINTER and EXPRESSIONPOINTER plus "the strings HAS been used up".
+\ (Note: this is an end-check, to be done only when the expression ends with '$'.)
+: CHECK$
+\D DUP @ 0= ABORT" CHECK$ compiled not at end of expression, system error"
+    OVER C@ 0= ;
+
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ Remember this as the start or end of a substring.
+\ Leave CHARPOINTER and leave the EXPRESSIONPOINTER after the substring number.
+\ Plus "yeah, it IS okay"
+\ In case you wonder, because the offset is known, during backtracking just
+\ the last (and final) position is remembered.
+: HANDLE() @+ >R   OVER R> REMEMBER() TRUE ;
 
 \ if the following match xt (at ``EXPRESSIONPOINTER'' ) works out,
 \ with the modifier ( * + ? ) ,
@@ -162,4 +205,4 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
     @+ EXECUTE DROP
     R> BACKTRACK ;
 : ADVANCE* OVER >R   (ADVANCE*) R> BRACKTRACK ;
-: ADVANCE+ @+ EXECUTE >R R@ IF ADVANCE* DROP THEN R> ;
+: ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
