@@ -2,10 +2,10 @@
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 GENERAL.
 
-Date: 2000 june 21
+Date: See RCS-ID  
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl
 Copyright: GPL, inasfar not public domain by FIG
-Archive: fig86g2d105.zip
+Archive: fig86g2d112.zip
 
 All generic FIG86 forths have version number 2.
 Preliminary releases derive their version id, in this case as 2.106, from
@@ -13,7 +13,7 @@ the RCS version of the generic source file `fig86.gnr'
 Stable versions will use the regular fig numbering. 
 
 Release :
-Version 2d105 is archived into fig86g2d105.zip and consists of
+Version 2d112 is archived into fig86g2d112.zip and consists of
 
 Documentation
 COPYING         : the conditions under which you are allowed to use all this
@@ -24,7 +24,7 @@ fig86gnr.txt    : documentation applicable to all versions about genericity
 
 Source
 Makefile        : Make a runnable Forth but also targets for building floppies.
-forth.gnr       : generic source
+fig86.gnr       : generic source
 figforth.c      : C-source that complements assembler on Linux.
 
 *.cfg           : Each of these cfg-files stand for some system.
