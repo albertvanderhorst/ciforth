@@ -87,12 +87,12 @@ CREATE FileContent 2 CELLS ALLOT
 \ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
 \ As a side effect set the proper font for printing screens.
 : ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
-    ." moveto " C/L 3 / . ." M (SCR #"
+    ." moveto " C/L 3 / . ." MM (SCR #"
     DUP . ." ) TitleF show BodyFl" CR #Screens + ;
 
 \ Output at POSITION a NUMBER lines. Return it was EMPTY.
 : MultLine >R
-      2DUP .COORDINATE ." moveto 1 M " CR
+      2DUP .COORDINATE ." moveto 1 MM " CR
       R> 0 DO PrintLine LOOP
 ;
 
@@ -124,11 +124,9 @@ CREATE FileContent 2 CELLS ALLOT
 \ from the ``DVIps'' output and from ``prsc'' output.
 : FixupDVIps
 "TeXDict begin
-    { TeXDict begin bop }
-    { eop end }
+%% /eop { eop end } def   %% This doesn't work.
+{ TeXDict begin bop }
 end
-
-/eop exch def
 /bop exch def
 
 " TYPE ;
@@ -215,16 +213,16 @@ ForthDict begin
 /K         { -2 CW mul add exch moveto (+) show } def
 /L         { CW mul add exch moveto show } def
 /T         { moveto show } def
-/M         { CW mul 0 rmoveto } def
+/MM         { CW mul 0 rmoveto } def
 /Centre    { dup stringwidth pop 2 div neg 0 rmoveto } def
 /StartPage { /SavedPage save def
   1 100 div dup scale
-  0 setgray TitleF 2500 80700 moveto show 32 M show
+  0 setgray TitleF 2500 80700 moveto show 32 MM show
   BodyFs 0 setgray CW setlinewidth 1 setlinejoin } def
-/EndPage   {showpage SavedPage restore } def
-{ ForthDict begin StartPage } {EndPage end } % Only ones to be exported
+/EndPage   {showpage SavedPage restore end } def
+{ ForthDict begin StartPage }  % Only one to be exported
 end  % ForthDict
-/EndPage exch def   /StartPage exch def
+/StartPage exch def
 %%EndProlog
 " TYPE ;
 
@@ -282,8 +280,8 @@ end  % ForthDict
 ;
 
     0 CurrentPage !
-\     Header              \ Select this if it must be independantly pri
-    FixupDVIps          \ Select this if it is an appendix to a DVIps
+\     Header              \ Select this if it must be independantly printed.
+    FixupDVIps          \ Select this if it is an appendix to a DVIps output
     PreLude
     OutputScreens
     OutputFile
