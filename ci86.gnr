@@ -1120,16 +1120,6 @@ dnl Note how the following is to pass through m4
    {RPO}   RPO      Return stack pointer.  Must be preserved across
                     FORTH words.
 
-            AX      General register.  Used to pass data from
-                    FORTH words, see label APUSH or macro {_APUSH}
-
-            DX      General register.  Used to pass more data from
-                    FORTH words, see label DPUSH or macro {_DPUSH}
-
-            BX      General purpose register.
-
-            CX      General purpose register.
-
             CS      Segment register. Must be preserved
                     across FORTH words.
 
@@ -1141,6 +1131,18 @@ dnl Note how the following is to pass through m4
                     a few words. However it MUST remain equal to
                     DS, such that string primitives can be used
                     with impunity.
+
+The remaining registers are free to use.
+Within assembler words WOR can be used too,
+as it has served its purpose.
+
+Here are some  useful code sequences.
+For next:
+        _NEXT
+For push single and next:
+        _PUSH
+For push double and next:
+        _2PUSH
 
 ----------------------------------------------------------
 _ENDCOMMENT
@@ -1157,24 +1159,26 @@ _COMMENT
   NAME        =  Address of name
   (NAME)      =  Contents of name
 
+  DEA         =  DICTIONARY ENTRY ADDRESS
+                 fields have fixed offsets from DEA
   CFA         =  CODE FIELD ADDRESS : a pointer to executable code
   DFA         =  DATA FIELD ADDRESS : a pointer to
                         data/high level code/ DOES> pointer
   FFA         =  FLAG FIELD ADDRESS: contains flags
-  LFA         =  LINK FIELD ADDRESS: a pointer
-  NFA         =  NAME FIELD ADDRESS: a pointer to a variable number of chars
-  PHA         =  POST HEADER ADDRESS
+  LFA         =  LINK FIELD ADDRESS: a pointer to the next DEA
+  NFA         =  NAME FIELD ADDRESS: a pointer to a name buffer
+  _SOURCEFIELD_({SFA         =  SOURCE FIELD ADDRESS: a pointer into source code})
+  PHA         =  POST HEADER ADDRESS: Afterall fields
 
   S1          =  Parameter stack - 1st cell
   S2          =  Parameter stack - 2nd cell
   R1          =  Return stack    - 1st cell
   R2          =  Return stack    - 2nd cell
 
-  LSB         =  Least significant bit
-  MSB         =  Most  significant bit
   LB          =  Low byte
   HB          =  High byte
-  LW          =  Low  cell
+  LC          =  Low  cell
+  HC          =  High cell
 
 ------------------------------------------------------------
 _ENDCOMMENT
@@ -1282,7 +1286,7 @@ _OLDDEBUG_({ _COMMENT
     Patch the code from NEXT:  ( using a debugger ) with a
     `JMP TNEXT' for tracing through high level FORTH words.
 _ENDCOMMENT });_END_({_OLDDEBUG_ })
-;{ In 32 bit versions there may be no jumps to NEXT at all }
+;{ In modern versions there may be no jumps to NEXT at all }
 ;{ The label NEXT1 is rarely relevant (for _OLDDEBUG_) }
 DPUSH:  PUSH    DX      ;{ Fall through.}
 APUSH:  PUSH    AX
@@ -1303,10 +1307,10 @@ _PC_({_NEWDEBUG_({ CALL    DISPLAYSI})})
 
 DP0:
 ; Vocabularies all end in a link to 0.
-; Only the word ONLY links to the DENOTATION wordlist,
-; that in turn links to 0.
-
+; (Except ONLY that links to the DENOTATION wordlist,
+; that in turn links to 0.)
 define({_LINKOLD},0)dnl
+;
 worddocsafe( {DENOTATIONS},{Prefix__TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: forthexample({'nnnn})
 In interpret mode it
@@ -1820,7 +1824,7 @@ _HEADER({UNLOOP},{UNLOOP}, {DOCOL}, ,{B_IMMED})
         DC      LIT, RDROP, COMMA
         DC      SEMIS
 ;
-worddoc( {INIT},{+ORIGIN},{plus_origin},{n --- addr},{},
+worddoc( {INITIALISATIONS},{+ORIGIN},{plus_origin},{n --- addr},{},
 {Leave the memory address relative by forthvar({n}) bytes to
 the area from which the user variables are initialised, so one
 can access or modify the boot-up parameters. During run time
@@ -2494,12 +2498,12 @@ double numbers forthvar({d1}) and forthvar({d2}) .},
   { DECIMAL  -240. -204. D+ D.},{-444} },
 enddoc)
 CODE_HEADER({D+},{DPLUS})
-        POP     AX      ;{ YHW}
-        POP     DX      ;{ YLW}
-        POP     BX      ;{ XHW}
-        POP     CX      ;{ XLW}
-        ADD     DX,CX   ;{ SLW}
-        ADC     AX,BX   ;{ SHW}
+        POP     AX      ;{ YHC}
+        POP     DX      ;{ YLC}
+        POP     BX      ;{ XHC}
+        POP     CX      ;{ XLC}
+        ADD     DX,CX   ;{ SLC}
+        ADC     AX,BX   ;{ SHC}
         _2PUSH
 ;
 worddoc( {OPERATOR},{NEGATE},{negate},{n1 --- n2},{ISO,FIG,L0},
@@ -2909,7 +2913,7 @@ _VERBOSE_({{Presumably it is to be dropped at some time, or it is a place holder
 {{DEPTH _ DEPTH SWAP DROP - .},{-2}},
 enddoc)
 CODE_HEADER({_},{X})
-        _PUSH ;{Whatever happens to be in }AX{, i.e. the dea of ``_''.}
+        _PUSH ;{Whatever happens to be in }WOR{, i.e. the dea of ``_''.}
 ;
 worddoc( {SUPERFLUOUS},{0},{zero},{--- 0},{},
 {Leave the number 0. },{{CONSTANT}},
@@ -5398,7 +5402,7 @@ _HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
         DC      TDROP
         DC      SEMIS
 ;
-worddoc( {INIT},{QUIT},{quit},{},{ISO,FIG},
+worddoc( {INITIALISATIONS},{QUIT},{quit},{},{ISO,FIG},
 {Restart the interpreter. Clear the return stack, stop
 compilation, and return control to the operators terminal,
 or to the redirected input stream.
@@ -5431,7 +5435,7 @@ OKAY:
         _BRANCH(QUIT1)  ;{AGAIN}
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
-worddoc( {INIT},{OK},{ok},{},{ISO,FIG},
+worddoc( {INITIALISATIONS},{OK},{ok},{},{ISO,FIG},
 {Takes care of printing the okay-message, after interpreting
 a line. Default it prints ``OK'' only for an interactive session
 in interpret forthcode({STATE}). },
@@ -5450,24 +5454,19 @@ _HEADER({OK},{OK},{DOCOL})
 OK2:
         DC      SEMIS
 ;
-worddoc( {INIT},{ABORT},{abort},{},{ISO,FIG,L0},
-{Restart the system. In addition and before the actions of
-forthcode({QUIT}), clear also the data stack and reset the
-search order, reset the exception mechanism and set
-the numeric base to default.
-_VERBOSE_({{As required by ISO it is silent. This may be confusing
+worddoc( {INITIALISATIONS},{ABORT},{abort},{},{ISO,FIG,L0},
+{Restart the interpreter. In addition and before the actions of
+forthcode({QUIT}), clear also the data stack and
+reset the exception mechanism.
+_VERBOSE_({{This word is silent. This may be confusing
 at times, because you can't tell the difference between a word
 that is still busy or that has aborted.}})
-},{{WARM}},
+},{{WARM},{INIT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({ABORT},{ABORT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
         DC      ZERO, HANDLER, STORE
-        DC      DECA
-        DC      ONLY
-        DC      FORTH
-        DC      DEFIN
         DC      QUIT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
@@ -5497,21 +5496,21 @@ SET_16_BIT_MODE         ;{Pops back at next _SWITCH_}
         MOV     HIP,_OFFSET WRM1
         _NEXT                   ;{Hope stacks are still okay.}
 ;
-worddoc( {INIT},{WARM},{warm},{},{FIG L0},
-{Perform a so called "warm" start. In addition and before the
-actions of forthcode({ABORT}), discard blocks; they may not be
-written back to mass storage. Display the sign on message.
+worddoc( {INITIALISATIONS},{WARM},{warm},{},{FIG L0},
+{Perform a so called "warm" start.
+Reinitialise the system as per forthcode({INIT}).
+Show the signon message and restart via forthcode({ABORT}) .
 },{{ABORT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({WARM},{WARM},{DOCOL})
-WRM1:   DC      MTBUF
+WRM1:   DC      INIT
         DC      SIGNON
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
 _HOSTED_({
-worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
+worddoc( {INITIALISATIONS},{OPTIONS},{options},{f1 -- f2},{FIG L0},
 {Handle command line options, i.e. execute the screen
 corresponding to the option letter. Accept and return a flag
 forthvar({f}) whether the signon message must be
@@ -5552,40 +5551,29 @@ OPT4:
         DC      DROP
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 });_END_({_HOSTED_})
-
-worddoc( {INIT},{COLD},{cold},{},{FIG},
-{Reinitialise the system. Clear all block buffers. Reinitialise
-all user variables to their boot up values values, i.a. the
-stacks and the forthdefin({dictionary pointer}) . _BLOCKSINFILE_({Opens the
-file that contains the blocks.}) Restart via forthcode({ABORT}) .
+;
+worddoc( {INITIALISATIONS},{COLD},{cold},{},{FIG},
+{Initialise all user variables to their boot up values values,
+i.a. the stacks and the forthdefin({dictionary pointer}) .
+Initialise (or reinitialise) the system as per forthcode({INIT}).
+Handle command line options, if any.
+Show signon message and restart via forthcode({ABORT}) .
 May be called from the terminal to remove application
 programs and restart, as long as there are no
 new vocabularies with definitions.
 _HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
 _BOOTED_({But it is better to reboot.})
-},{{WARM},{BLOCK},{LIST}},
+},{{WARM},{INIT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({COLD},{COLD},{DOCOL})
 CLD1:                           ;{Used by cold start for HIP.}
-        DC      ZERO, HANDLER, STORE
-        DC      MTBUF
-        DC      FIRST
-        DC      STALEST,STORE
-        DC      FIRST
-        DC      PREV,STORE
 ;{ Fill user area for single task.}
-        DC      LIT, USINI
+        DC      LIT, USINI      ;{ Fails if SP/RP are not usable!}
         DC      LIT, USINI+_CELLS(1), FETCH
         DC      LIT, US
         DC      LCMOVE
-_BLOCKSINFILE_({
-        DC      LIT, 0, BLINI  ;{Default, don't write in the library file!}
-});_END_({_BLOCKSINFILE_})
-        DC      DECA    ; {FIXME has to go done by ABORT anyway.}
-        DC      ONLY    ; {FIXME has to go done by ABORT anyway.}
-        DC      FORTH   ; {FIXME has to go done by ABORT anyway.}
-        DC      DEFIN   ; {FIXME has to go done by ABORT anyway.}
+        DC      INIT
         DC      ONE            ; {Sign on wanted.}
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
@@ -5603,9 +5591,36 @@ _HOSTED_(
         _0BRANCH(COLD5)
         DC      SIGNON    ; {Suppressed for scripting! Or any options.}
 COLD5:
-        DC      ABORT
-        DC      BYE     ; {In case of turnkey programs.}
+        DC      ABORT   ; {In case of turnkey programs: application}
+        DC      BYE
         DC      SEMIS   ; {Unnecessary, but helpful for decompilation.}
+;
+worddoc( {INITIALISATIONS},{INIT},{init},{},{FIG},
+{Initialise or reinitialise the system.
+Reset the data stack, the wordlists, the number base and the
+exception mechanism.
+Initialise the block mechanism.
+Any blocks that have not yet been
+written back to mass storage are discarded.
+_BLOCKSINFILE_({I.e. open the file that contains the blocks, in read-only mode.})
+_VERBOSE_({{After forthcode({INIT}) we have the following situation.
+The search order contains the forthcode({FORTH}) words,
+plus forthcode({ONLY}) with i.a. number handling.
+Definitions are added to the forthcode({FORTH}) forthdefi({vocabulary}).
+The number base is decimal.   }}).
+},{{WARM},{COLD},{FORTH},{BLOCK-INIT},{BASE},{S0}},
+{{( No test)},{}},
+enddoc)
+_HEADER({INIT},{INIT},{DOCOL})
+        DC      SZERO, FETCH, SPSTO
+        DC      ZERO, HANDLER, STORE
+        DC      DECA
+        DC      ONLY, FORTH, DEFIN
+_BLOCKSINFILE_({
+        DC      LIT, 0, BLINI  ;{Default, open library file read-only!}
+});_END_({_BLOCKSINFILE_})
+        DC      MTBUF
+        DC      SEMIS
 ;
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
 {Sign extend a single number to form a double number.},{},
@@ -6178,6 +6193,8 @@ _HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
         DC      LSUB,LERASE
+        DC      FIRST, STALEST, STORE
+        DC      FIRST, PREV, STORE
         DC      SEMIS
         PAGE
 ;
@@ -9879,8 +9896,8 @@ This requires some double precision operators to be present in the Forth core.
 forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
 },
 {},{},{},{}, {}, enddoc)
-worddocchapter({INIT},{ },
-{The wordset forthsamp({INIT}) contains words to initialise,
+worddocchapter({INITIALISATIONS},{ },
+{The wordset forthsamp({INITIALISATIONS}) contains words to initialise,
 reinitialise or configure Forth.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DENOTATIONS},{ },

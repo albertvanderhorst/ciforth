@@ -10,7 +10,6 @@
 
 REQUIRE COMPARE
 
-VOCABULARY AAP AAP DEFINITIONS
 
 \ Contains an execution token with the effect:
 \ For ELEM1 and ELEM2, return ELEM1 and ELEM2 plus "elem1 IS lower".
@@ -75,6 +74,7 @@ VARIABLE *>N
 
 \ ------------- DEBUG and OLD ----------------
 \ VOCABULARY AAP AAP DEFINITIONS
+\ VOCABULARY AAP AAP DEFINITIONS
 : K ;
 : C ;
 : B ;
@@ -89,6 +89,9 @@ VARIABLE *>N
 : QL ;
 : RB ;
 : PK ;
+
+'>LFA *>N !
+'NAMES< *< !
 
 : .CHAIN   BEGIN DUP ID. >N DUP 0= UNTIL DROP ;
 : ?? OVER ID. DUP ID. CR ;
