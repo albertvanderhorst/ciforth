@@ -2131,7 +2131,7 @@ HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
 CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
 RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
- : R/W-BLOCK  ASSEMBLER
+ : R\W-BLOCK  ASSEMBLER
   OS:, POP|X, AX|   OS:, ADD, W| R| AX'| AX|
   OS:, MOVFA, W1| BL# W,   PUSH|X, SI|
   MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
@@ -2140,8 +2140,8 @@ RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
  XCHG|AX, BX| INT, 13 B, PUSHF, POP|X, BX|
  TO-PROT, GDT_DS COPY-SEG
   POP|X, SI|   PUSH|X, BX|  NEXT ; PREVIOUS
-CODE READ-BLOCK 4200 R/W-BLOCK  C;
-CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
+CODE READ-BLOCK 4200 R\W-BLOCK  C;
+CODE WRITE-BLOCK 4300 R\W-BLOCK  C;     DECIMAL
 \ --hd_LBA (HWD) (HRD) (FRD) (FWD) \ ?16 ?PC HEX
 ?16 ?PC
 
@@ -2150,12 +2150,12 @@ CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
 ( Read the default buffer from hard disk at 32-bit POSITION)
 : (HRD) SWAP READ-BLOCK 1 AND . ;
 DECIMAL
-( As R/W but relative, counting from ``OFFSET''. )
-: RELR/W SWAP OFFSET @ + SWAP R/W ;
+( As R\W but relative, counting from ``OFFSET''. )
+: RELR\W SWAP OFFSET @ + SWAP R\W ;
 ( Read absolute BLOCK from floppy into default buffer.)
-: (FRD) RW-BUFFER SWAP 1 R/W ;
+: (FRD) RW-BUFFER SWAP 1 R\W ;
 ( Write absolute BLOCK to floppy from default buffer.)
-: (FWD) RW-BUFFER SWAP 0 R/W ;
+: (FWD) RW-BUFFER SWAP 0 R\W ;
 
 
 ( --hd_LBA SWAP-FLOPPY ) ?PC ?16 \ AvdH A1oct07
@@ -2186,7 +2186,7 @@ REQUIRE --hd_LBA
 
 \ Copy the BLOCKS (#BLOCKS at 64K of ``DBS'') to BLOCKS.BLK.
 : BACKUP-BLOCKS
-#BLOCKS 0 DO I 64 + S>D (HRD) RW-BUFFER I 0 RELR/W LOOP ;
+#BLOCKS 0 DO I 64 + S>D (HRD) RW-BUFFER I 0 RELR\W LOOP ;
 
 
 
@@ -2198,7 +2198,7 @@ REQUIRE --hd_LBA
 
 \ Copy the BLOCKS (#BLOCKS at 64K of ``DBS'') from BLOCKS.BLK.
 : RESTORE-BLOCKS
-#BLOCKS 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
+#BLOCKS 0 DO RW-BUFFER I 1 RELR\W I 64 + S>D (HWD) LOOP ;
 
 
 
@@ -2382,7 +2382,7 @@ EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
 
 
 
-( 250 Redefine R/W to accomdate larger addresses. A1may05AH)
+( 250 Redefine R\W to accomdate larger addresses. A1may05AH)
 VOCABULARY SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
 ( 247 248 ) THRU HEX
@@ -2398,7 +2398,7 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
    STORE-ALL ;
 PREVIOUS
 
-( 247: Redefine R/W to accomdate larger addresses. A1aug05AH)
+( 247: Redefine R\W to accomdate larger addresses. A1aug05AH)
 HEX
 ( The screen BUFFER is apparently virgin)
 : (FREE?) B/BUF 0 DO DUP I + C@ &v - IF UNLOOP DROP 0 EXIT THEN
@@ -2408,10 +2408,10 @@ HEX
 : 1<>64 LBAPAR 2 + 82 TOGGLE ;
 
 ( All: address block -- addres' block' And : SIZE 64K)
-: READ++   1<>64 DUP RW-BUFFER SWAP 1 R/W
+: READ++   1<>64 DUP RW-BUFFER SWAP 1 R\W
 OVER RW-BUFFER SWAP 1,0000 MOVE   40,0001,0000. D+ 1<>64 ;
 : WRITE++  1<>64 OVER RW-BUFFER 1,0000 MOVE
-  DUP RW-BUFFER SWAP 0 R/W 40,0001,0000. D+ 1<>64 ;
+  DUP RW-BUFFER SWAP 0 R\W 40,0001,0000. D+ 1<>64 ;
 
 DECIMAL
 ( 248: Words to load and store a system A1aug31 AH)
@@ -2440,15 +2440,15 @@ CHUNK-START  CHUNK-SIZE / -6 +ORIGIN OVER SWAP C! ;
 : CHECK CURRENT-CHUNK = 0D ?ERROR ;
 : PATCH-CHUNK
      OFFSET-/MOD >R DROP
-     RW-BUFFER  CURRENT-CHUNK CHUNK-SIZE * R@ + 1 R/W
+     RW-BUFFER  CURRENT-CHUNK CHUNK-SIZE * R@ + 1 R\W
      CHUNK-SIZE * DUP 40 + OFFSET-/MOD DROP RW-BUFFER + !
-     RW-BUFFER  SWAP R> + 0 R/W
+     RW-BUFFER  SWAP R> + 0 R\W
 ; DECIMAL
 
 
 ( hd_driver2 WIPE-HD )  ?PC ?32 \ AH A1may3
 : WIPE-BUFFER RW-BUFFER B/BUF &v FILL ;
-: WRITE-BUFFER RW-BUFFER SWAP OFFSET @ + 64 - 0 R/W ;
+: WRITE-BUFFER RW-BUFFER SWAP OFFSET @ + 64 - 0 R\W ;
 : CHECK-RANGE 589 64 + CHUNK-SIZE WITHIN 0= 13 ?ERROR ;
 : SHOW DUP 100 MOD 0= IF . ^M EMIT ELSE DROP THEN ;
 : WIPE-RANGE  DUP CHECK-RANGE SWAP DUP 1- CHECK-RANGE SWAP
@@ -2458,20 +2458,20 @@ HEX 130,3BBF CONSTANT LAST-BLOCK DECIMAL
 CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
 : doit  CHUNK-SIZE 589 64 + CR WIPE-RANGE ;
 : WIPE-HD WIPE-BUFFER FIRST-BLOCK
-     BEGIN RW-BUFFER OVER 0 R/W DISK-ERROR 1 AND 0= WHILE
+     BEGIN RW-BUFFER OVER 0 R\W DISK-ERROR 1 AND 0= WHILE
         DUP SHOW 1+ REPEAT DROP ;
 
 
 ( hd_driver3 FIRST-FREE ) ?PC ?32 \ AH A1may3
 REQUIRE BIN-SEARCH
-: FREE? RW-BUFFER SWAP 1 R/W
+: FREE? RW-BUFFER SWAP 1 R\W
 DISK-ERROR 1 AND   RW-BUFFER (FREE?)   OR ;
 : NON-FREE? FREE? INVERT ;
 : FIRST-FREE  ( -- FIRST FREE BLOCK IN BACKUP AREA)
 FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
 : FNTB ( First free in current chunk)
   CHUNK-START CHUNK-SIZE OVER + 'NON-FREE? BIN-SEARCH 1+ ;
-: SAVE-COMMENT 200 BLOCK FIRST-FREE 0 R/W ;
+: SAVE-COMMENT 200 BLOCK FIRST-FREE 0 R\W ;
 
 
 
@@ -2481,12 +2481,12 @@ FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
 ( hd_driver4 BLMOVE BLMOVE-FAST BACKUP ) ?PC ?32 \ AH A1sep01
 HEX
 : BLMOVE 0 DO  ( as MOVE for blocks.)
-  SWAP RW-BUFFER OVER 1 R/W 1+   SWAP RW-BUFFER OVER 0 R/W 1+
+  SWAP RW-BUFFER OVER 1 R\W 1+   SWAP RW-BUFFER OVER 0 R\W 1+
   DUP SHOW KEY? IF UNLOOP EXIT THEN  LOOP . . ;
 : BLMOVE-FAST  ( as MOVE for blocks, ONLY MULTIPLES OF 64K.)
  1<>64 0 DO
-         SWAP RW-BUFFER OVER 1 R/W 40 +
-         SWAP RW-BUFFER OVER 0 R/W 40 +
+         SWAP RW-BUFFER OVER 1 R\W 40 +
+         SWAP RW-BUFFER OVER 0 R\W 40 +
          DUP SHOW KEY? IF UNLOOP EXIT THEN
 40 +LOOP . . 1<>64 ;
 : BACKUP ( BACKUP THE CURRENT CHUNK TO PRISTINE DISK )
@@ -2499,7 +2499,7 @@ BLMOVE-FAST PATCH-CHUNK ; DECIMAL
 ( SC contains all ``ASCII'' )
 : ALL-ASCII? OVER + SWAP DO I C@ DUP ASCII? 0=
 IF DROP UNLOOP 0 EXIT THEN 0= IF UNLOOP -1 EXIT THEN LOOP -1 ;
-: INSPECT RW-BUFFER SWAP 1 R/W
+: INSPECT RW-BUFFER SWAP 1 R\W
   RW-BUFFER B/BUF 2DUP
  ALL-ASCII? IF TYPE ELSE DROP 100 DUMP THEN ;
 : I-INSPECT
@@ -2558,7 +2558,7 @@ This contains examples and benchmarks.
         THEN
      LOOP ;
 
-( ERATOSTHENES by_multiple_batches ) \ AvdH A1oct04
+( ERATOSTHENES SIEVE by_multiple_batches ) \ AvdH A1oct04
 ( Adaptations from CP/M : VARIABLE )
 REQUIRE +THRU
 1 5 +THRU
@@ -2920,27 +2920,27 @@ VARIABLE B
 IF  CR B . I . OVER I + SZ DUMP   DUP I + SZ DUMP  ?TERMINATE
 THEN   SZ +LOOP 2DROP ;
 ( Compare block FROM to FROM1 over RANGE )
-: read SWAP 1 R/W ;   : write SWAP 0 R/W ;
+: read SWAP 1 R\W ;   : write SWAP 0 R\W ;
 : CRB     0 DO I 10 .R ^M EMIT
 I B ! OVER I + RWBUF0 read DUP I + RWBUF1 read
 RWBUF0 RWBUF1 CB LOOP 2DROP ;
 ( Restore FROM length RANGE to booting )
 : restore 0 DO DUP I + RWBUF0 read I RWBUF0 write LOOP ;
-( R/W-floppy ) ?PC ?32 HEX
+( R\W-floppy ) ?PC ?32 HEX
 ( must only be used for low buffers.) 2 CONSTANT SEC/BLK
 : SEC-RW  ( function address bl# -- )
 24 /MOD   SWAP   12 /MOD   >R   SWAP   100 *   +   1+
 R>   100 *   0 +   13 ^ BIOS   1
 AND   DISK-ERROR   +!   DROP DROP DROP DROP ;
 \ : SEC-RW CR . . . ;
-: R/W-floppy       0 DISK-ERROR ! ^
+: R\W-floppy       0 DISK-ERROR ! ^
 0BRANCH [ 10 , ] 201  BRANCH  [ 8 , ] 301  ^
 SWAP SEC/BLK * SEC/BLK OVER + SWAP
 DO SWAP   ^ 2DUP   I   SEC-RW   200 +   ^ SWAP
 LOOP DROP   DROP   DISK-ERROR   @   ?DUP
 0BRANCH [ 38 , ] 0< 0BRANCH [ 10 , ] 9
 BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
-;  : R-floppy 1 R/W-floppy ;  : W-floppy 0 R/W-floppy ;
+;  : R-floppy 1 R\W-floppy ;  : W-floppy 0 R\W-floppy ;
 
 ( backup restore ) ?PC ?32 \ AvdH A1sep01 208
 \ Copy the currently booted chunk to free space on the hd,
@@ -2974,7 +2974,7 @@ reloaded.)
 I guess that only screen 248 should be used from now on.
 
 
-( Redefine R/W to accomdate larger addresses. A1aug05AH)
+( Redefine R\W to accomdate larger addresses. A1aug05AH)
 HEX
 ( The screen BUFFER is apparently virgin)
 : (FREE?) B/BUF 0 DO DUP I + C@ &v - IF UNLOOP DROP 0 EXIT THEN
@@ -2984,10 +2984,10 @@ HEX
 : 1<>64 LBAPAR 2 + 82 TOGGLE ;
 
 ( All: address block -- addres' block' And : SIZE 64K)
-: READ++   1<>64 DUP RW-BUFFER SWAP 1 R/W
+: READ++   1<>64 DUP RW-BUFFER SWAP 1 R\W
 OVER RW-BUFFER SWAP 1,0000 MOVE   40,0001,0000. D+ 1<>64 ;
 : WRITE++  1<>64 OVER RW-BUFFER 1,0000 MOVE
-  DUP RW-BUFFER SWAP 0 R/W 40,0001,0000. D+ 1<>64 ;
+  DUP RW-BUFFER SWAP 0 R\W 40,0001,0000. D+ 1<>64 ;
 
 DECIMAL
 ( Words to load and store a system A1aug31 AH)
@@ -3013,7 +3013,7 @@ HERE OFFSET @ LOAD-HIGH 2DROP
 589 B/BUF * DUP ALLOT SWAP !  \ Patch length
 : WBLK' B/BUF * CIFORTH CELL+ +  B/BUF MOVE ;
 : RBLK' B/BUF * CIFORTH CELL+ +  SWAP B/BUF MOVE ;
-HEX \ Redefine R/W to accomodate blocks in SOURCE
+HEX \ Redefine R\W to accomodate blocks in SOURCE
 : BLOCK' >R   PREV   @   DUP   @   R@   -
 0BRANCH [ 5C , ] +BUF   0=
 0BRANCH [ 24 , ] DROP   R@   BUFFER   DUP   CELL+   CELL+
@@ -3022,7 +3022,7 @@ R@   NOOP RBLK' DUP  @   R@   -   0=
 : UPDATE' PREV @ DUP CELL+ CELL+ SWAP @ WBLK' ;
 ' UPDATE' ' UPDATE 3 CELLS MOVE
 ' BLOCK' ' BLOCK 3 CELLS MOVE
-( Redefine R/W to accomodate larger addresses. A1may05AH)
+( Redefine R\W to accomodate larger addresses. A1may05AH)
 VOCABULARY SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
 247 248 THRU HEX
@@ -3038,7 +3038,7 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
    STORE-ALL ;
 PREVIOUS
 
-( Redefine R/W to accomdate larger addresses. A1may05AH)
+( Redefine R\W to accomdate larger addresses. A1may05AH)
 DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS HEX
 : ABORT-NEW
 S0   @   DSP!   DECIMAL   ?STACK
@@ -3327,8 +3327,8 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
   PUSHF,
   NEXT C;            DECIMAL
 ( TEST OF HARD DISK ) ?16 HEX
-CODE READ-BLOCK2 4200 R/W-BLOCK  C;  ( D - . )
- CODE WRITE-BLOCK2 4300 R/W-BLOCK  C; ( D - . )
+CODE READ-BLOCK2 4200 R\W-BLOCK  C;  ( D - . )
+ CODE WRITE-BLOCK2 4300 R\W-BLOCK  C; ( D - . )
 DECIMAL : TEST  0.
   BEGIN  CR 2DUP D.
          2000. D+ ( SKIP 1 MEG)
@@ -3347,7 +3347,7 @@ ALIGN 0 IVAR RW-BUFFER B/BUF ALLOT
 0 IVAR PARAM-BLOCK -2 ALLOT 10 C, 0 C,
 2 , ( 2 sectors/block) RW-BUFFER , 7C0 ,
 HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
- : R/W-BLOCK  ASSEMBLER  ( MACRO: OPCODE -- . )
+ : R\W-BLOCK  ASSEMBLER  ( MACRO: OPCODE -- . )
   POP|X, BX|    POP|X, AX|
   ADD, W| AX'| R| AX|  MOVFA, W1| BL# W, XCHG|AX, BX|
   ADC, W| AX'| R| AX|  MOVFA, W1| BL# 2 + W,
