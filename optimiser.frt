@@ -8,8 +8,8 @@
 \ have been filled in in the flag fields.
 
 REQUIRE $
-  : \D POSTPONE \ ; IMMEDIATE
-\  : \D ;            IMMEDIATE
+      : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
+\      : \D ;            IMMEDIATE : ^^ !CSP DUP CRACK-CHAIN ?CSP ;
 
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
@@ -22,7 +22,7 @@ REQUIRE $
        R@ CFA> 'SKIP = IF @+ + ALIGNED ELSE CELL+ THEN
    THEN
    R@
-\D   R@ CFA> ID.
+\  R@ CFA> ID.          \ For desperado debugging.
    R> '(;) <> ;
 
 \ Like +! but ors.
@@ -172,31 +172,32 @@ CREATE P
 \ by a ``LIT''
     'ALIGN-NOOPS ALIAS |                         \ Convenience alias.
     : ]L ] POSTPONE LITERAL ; IMMEDIATE \ Convenience alias.
+
 : (MATCH-TABLE)                         |
 \ `` MATCH-TABLE'' points here :
-'P  EXECUTE     | P                     |       \ Execute optimisation
-'P  + 'P  +     | 'P  'P  + +           |       \ Associativity optimisation
-'P  + 'P  -     | 'P  'P  - +           |
-'P  - 'P  +     | 'P  'P  SWAP - +      |
-'P  - 'P  -     | 'P  'P  + -           |
-'P  * 'P  *     | 'P  'P  * *           |
-'P  OR 'P  OR   | 'P  'P  OR OR         |
-'P  AND 'P  AND | 'P  'P  AND AND       |
-'P  XOR 'P  XOR | 'P  'P  XOR XOR       |
-[ 0 ]L +        |                       |       \ Shortcut evalutions
-[ 0 ]L *        | DROP 0                |
-[ 0 ]L OR       |                       |
-[ 0 ]L AND      | DROP 0                |
-[ 0 ]L XOR      |                       |
-[ 1 ]L *        |                       |
-[ 1 ]L /        |                       |
-[ -1 ]L *       | NEGATE                |
-[ -1 ]L /       | NEGATE                |
-[ -1 ]L OR      | DROP -1               |
-[ -1 ]L AND     |                       |
-[ -1 ]L XOR     | INVERT                |
-'P  LSHIFT 'P  LSHIFT | 'P  'P  + LSHIFT       |       \ Distributivity optimisation
-'P  RSHIFT 'P  RSHIFT | 'P  'P  + RSHIFT       |
+'P  EXECUTE             | P                       |       \ Execute optimisation
+'P  + 'P  +             | 'P  'P  + +             |       \ Associativity optimisation
+'P  + 'P  -             | 'P  'P  - +             |
+'P  - 'P  +             | 'P  'P  SWAP - +        |
+'P  - 'P  -             | 'P  'P  + -             |
+'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP |
+'P  OR 'P  OR           | 'P  'P  OR OR           |
+'P  AND 'P  AND         | 'P  'P  AND AND         |
+'P  XOR 'P  XOR         | 'P  'P  XOR XOR         |
+[ 0 ]L +                | NOOP                    |       \ Shortcut evalutions
+[ 0 ]L M* DROP          | DROP 0                  |
+[ 0 ]L OR               | NOOP                    |
+[ 0 ]L AND              | DROP 0                  |
+[ 0 ]L XOR              | NOOP                    |
+[ 1 ]L M* DROP          | NOOP                    |
+[ 1 ]L /                | NOOP                    |
+[ -1 ]L M* DROP         | NEGATE                  |
+[ -1 ]L /               | NEGATE                  |
+[ -1 ]L OR              | DROP -1                 |
+[ -1 ]L AND             | NOOP                    |
+[ -1 ]L XOR             | INVERT                  |
+'P  LSHIFT 'P  LSHIFT   | 'P  'P  + LSHIFT        |       \ Distributivity optimisation
+'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT        |
 ;
 
 FMASK-SP 'EXECUTE >FFA OR!
@@ -303,8 +304,8 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
-: OPT-EXPAND   >DFA DUP @
-    BEGIN !PROGRESS EXPAND OPTIMISE PROGRESS @ WHILE REPEAT
+: OPT-EXPAND   >DFA DUP @  ^^
+    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ PROGRESS @ WHILE REPEAT
 SWAP ! ;
 
 \ For DEA remember that it has been optimised
@@ -325,7 +326,7 @@ SWAP ! ;
 \D : test 1 SWAP 3 2 SWAP ;
 \D 'test OPTIMISE-O
 \D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
-\D : test1 1 2 + 3 4 AND OR ;
+\D : test1 1 2 + 3 4 * OR ;
 \D 'test1 OPTIMISE-O
 \D "EXPECT `` F '' :" CR TYPE CRACK test1
 \D : test2 1 2 SWAP ;
@@ -333,8 +334,6 @@ SWAP ! ;
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test2
 \D : test3 1 2 'SWAP EXECUTE ;
 \D 'test3 OPTIMISE-O
-\D "EXPECT `` 1 2 SWAP '' :" CR TYPE CRACK test3
-\D 'test3 OPT-FOLD
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test3
 \D : A0 1 ;
 \D : A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
