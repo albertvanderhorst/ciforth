@@ -542,7 +542,8 @@ DZERO:	MOV	AX,-1
 	MOV	SP,[6+BX]        ;RESET PARAM STACK POINTER
 	JMP	NEXT
 ;
- 	HEADER({RP@},{RPAT},{$+2	;(S1) <- (RP)})
+        ;(S1) <- (RP)
+ 	HEADER({RP@},{RPAT},{$+2})
 	MOV	AX,BP	;RETURN STACK ADDR
 	JMP	APUSH
 ;
@@ -667,7 +668,7 @@ ZLESS1:	JMP	APUSH
 	XOR	[BX],AL	;
 	JMP	NEXT
 ;
- 	HEADER({@},{FETCH},{    $+2})
+ 	HEADER({@},{FETCH},{$+2})
 	POP	BX
 	MOV	AX,[BX]
 	JMP	APUSH
