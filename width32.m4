@@ -16,5 +16,4 @@ define({SI},{ESI})dnl
 define({BP},{EBP})dnl
 define({STACKPOINTER},{ESP})dnl
 define({LODSW},{LODSD})dnl
-define({W},{EAX})dnl
-
+define({WR},{EAX})dnl
