@@ -31,9 +31,14 @@
 : AnswerQuestion$ "Answer the question for :" ;
 : NoGoodEeh1$   " So the question is no good after all, eh?" ;
 : NoGoodEeh2$   "I leave it at that." ;
+: PossibleExisting$ "It is possible that on of the existing questions helps" ;
+: AnyGoodQuestion$ "Would one of those questions help" ;
+: GiveIdentification$ "Give the number that is before the question you think is best" ;
+: ThatIsNoGood$  "That is not one of those numbers." ;
 : AreYouSure1$  "Maybe the answer to the question :" ;
-: AreYouSure2$  "is not " ;
-: AreYouSure3$  "Are you sure " ;
+: AreYouSure2$  "for a " ;
+: AreYouSure2a$  "is not " ;
+: AreYouSure3$  "To be sure I ask it again." ;
 : GotLeft1$      "There are left : " ;
 : GotLeft2$      "" ;
 : GoOn$         "Care for another round?" ;

@@ -40,8 +40,8 @@ REQUIRE COMPARE
 
 \ #################### DATABASE #######################################
 
-\   : \D ; \ Debug
-  : \D POSTPONE \ ; IMMEDIATE
+\     : \D ; \ Debug
+    : \D POSTPONE \ ; IMMEDIATE
 
 \ File format :
 \    number of diagnoses  ND
@@ -572,7 +572,6 @@ DATABASE CONSULTING STRATEGY
         >R 2DROP  R@ CONFIRM-ANSWERS R>
     THEN
 ;
-\D ." Test OK interactively for not found." CR
 
 \ For two diagnoses D1 and D2, tell whether there IS some
 \ question in the database to make a distinction between them.
@@ -588,9 +587,37 @@ DATABASE CONSULTING STRATEGY
 \D ." ?DIST Expect 1 0 : " 0 1 ?DISTINGHUISABLE . DEPTH . CR
 \D ." ?DIST Expect 1 0 : " 1 0 ?DISTINGHUISABLE . DEPTH . CR
 
-\ For DIAGNOSIS1 and DIAGNOSIS2 select an existing QUESTION that
-\ will make a distinction between the two.
-: SELECT-EXISTING 2DROP NONE ;
+\ For the QUESTION : it MAKES sense to ask it for the current outcome.
+: ?SELECTABLE DUP ?POSED 0=   SWAP   QUESTION-QUALITY REAL-BAD <> AND ;
+\D ." ?SELECTABLE Expect 0 0 : " 0 ?SELECTABLE . DEPTH .
+
+\ Print a QUESTION with an identification for selection.
+: PRINT-FOR-SELECT DUP 3 .R 5 SPACES   QUESTIONS 2@ TYPE   CR ;
+
+\ Accept a number from the terminal and return IT.
+\ If not a valid number return NONE.
+: GET-NUMBER 0. (ACCEPT) >NUMBER  IF 2DROP DROP NONE ELSE 2DROP THEN ;
+
+\ For the QUESTION : it IS validated as a selectable question.
+: VALID? DUP 0 #QUESTIONS @ WITHIN  SWAP ?SELECTABLE AND ;
+
+\ Return the question the user selects.
+: GET-EXISTING
+    BEGIN CR CR GiveIdentification$ TYPE CR GET-NUMBER VALID? 0= DUP WHILE
+       DROP ThatIsNoGood$ TYPE CR
+    REPEAT
+;
+
+
+: #SELECTABLE 0 #QUESTIONS @ 0 DO I ?SELECTABLE IF 1+ THEN LOOP ;
+
+\ For DIAGNOSIS1 and DIAGNOSIS2 return an existing QUESTION that
+\ will make a distinction between the two. Or NONE.
+: SELECT-EXISTING 2DROP
+    CR PossibleExisting$ TYPE CR CR
+    #QUESTIONS @ 0 DO I ?SELECTABLE IF I PRINT-FOR-SELECT THEN LOOP
+    CR CR AnyGoodQuestion$ GET-ANSWER A_YES = IF GET-EXISTING ELSE NONE THEN
+;
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new question that will
 \ make a distinction between the two. Return IT.
@@ -605,7 +632,7 @@ DATABASE CONSULTING STRATEGY
 : GENERATE-QUESTION
      NeedQuestion1$ TYPE CR      NeedQuestion2$ TYPE CR
      OVER DIAGNOSES 2@ TYPE CR   DUP DIAGNOSES 2@ TYPE CR
-     2DUP  SELECT-EXISTING
+     #SELECTABLE 0 > IF 2DUP SELECT-EXISTING ELSE NONE THEN
      DUP NONE = IF DROP 2DUP NEW-QUESTION THEN
      >R 2DROP R>
 ;

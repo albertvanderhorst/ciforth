@@ -46,10 +46,17 @@ EXPERIMENT.
 : AnswerQuestion$ "Beantwoord de vraag voor :" ;
 : NoGoodEeh1$   "Dus de vraag is eigenlijk toch niet goed, he?" ;
 : NoGoodEeh2$   "Ik laat het er maar bij." ;
+: PossibleExisting$
+"Misschien is een van de vragen die ik al ken daar goed voor.
+Ik laat ze zien.
+" ;
+: AnyGoodQuestion$ "Is een van die vragen geschikt" ;
+: GiveIdentification$ "Geef het nummer dat voor de beste vraag staat" ;
+: ThatIsNoGood$  "Dat nummer staat er niet bij" ;
 : AreYouSure1$  "De meeste mensen beantwoorden de vraag :" ;
 : AreYouSure2$  "voor een " ;
 : AreYouSure2a$  " *niet* met " ;
-: AreYouSure3$  
+: AreYouSure3$
 "Voor de zekerheid vraag ik het nog een keer.
 Je mag bij twijfel ook onbekend (of ?) zeggen."
 ;
