@@ -1357,8 +1357,8 @@ forthdefi({DEA}) is an execution token in portable code.)}})},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
 CODE_HEADER({EXECUTE},{EXEC})
-        POP     WOR      ;{ GET CFA}
-        JMP     _CELL_PTR[WOR]
+        POP     WOR      ;{ GET XT}
+        JMP     _CELL_PTR[WOR + _CELLS(C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;
 _LOAD_({
 worddoc( {CONTROL},{RECURSE},,{(varies)},{ISO},
@@ -4471,15 +4471,17 @@ ABQ4:
 ;
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea ---},{},
-{Print a definition's name from its dictionary entry address.},
+{Print a definition's name from its dictionary entry address.
+Dummy entries are ignored. },
 {{'},{>DFA},{>NFA}},
 { { : GORILLA ; ' GORILLA ID.},{GORILLA} },
 enddoc)
 HEADER({ID.},{IDDOT},{DOCOL})
+        DC      LDUP, TFFA
+        DC      FETCH, LIT, B_DUMMY, LXOR
+        _0BRANCH(IDDOT1)
         DC      TNFA
         DC      FETCH
-        DC      QDUP
-        _0BRANCH(IDDOT1)
         DC      SFET
         DC      LTYPE
         DC      SPACE
@@ -4733,11 +4735,9 @@ INTE3B:                  ;{THEN }
         DC      LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) ;{IF}
-        DC      TCFA
         DC      EXEC
         _BRANCH(INTE4) ;{IF}
 INTE3:
-        DC      TCFA
         DC      COMMA
                         ;{THEN}
 INTE4:
@@ -4808,7 +4808,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      ZERO, COMMA   ;{ Dummy data field}
         DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
         DC      LIT, FORTH, COMMA ;{Links to the word FORTH}
-;        DC      ZERO, COMMA   ;{ Dummy name field}
+
         DC      DOES
 DOVOC:
         DC      ALSO
