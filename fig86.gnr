@@ -2688,8 +2688,51 @@ HEADER({PAD},{PAD},{DOCOL})
         DC      LIT,84
         DC      PLUS
         DC      SEMIS
+;       
+worddoc({PARSING},{AWORD},{newword},{c ---addr},{ISO L0},
+{Parse the forthsamp({current input stream}) using forthsamp({c}) for a delimiter.
+Skip leading delimiters then advance the input pointer to past
+the next delimiter or past the end of the input stream.
+Leave at forthsamp({addr}) as a counted string a copy of the string,
+that was surrounded by forthsamp({c}) in the input stream. 
+In ciforth the character string is positioned 
+at the dictionary buffer forthcode({HERE}) . 
+forthcode({WORD})
+leaves the character count in the first byte, the characters, and
+ends with two or more blanks. 
+If forthcode({BLK}) is zero text is taken from the terminal input buffer,
+otherwise from the disc block stored in forthcode({BLK}) .},
+{{BLK} ,{IN}},
+{{: GS2 BL WORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
+{HEX : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ},{2 Q}})
+HEADER({AWORD},{AWORD},{DOCOL})
+        DC      LDUP, LBL, EQUAL
+        _0BRANCH(AWORD1)
+        DC      DROP
+        DC      SOURC, CELLP, TFET
+        DC      PWORD
+        DC      LDUP, LIN, STORE
+;        DC      DOTS
+        _BRANCH(AWORD2)
+AWORD1:
+        DC      SOURC, CELLP, TFET
+        DC      PPARS
+        DC      LIN, FETCH, ONEP ;{ Better check for a blank, FIXME}
+        DC      SWAP
+        DC      LDUP, ONEP, LIN, STORE
+;        DC      DOTS
+AWORD2:
+        DC      OVER, LSUB
+        DC      HERE
+        DC      LIT,22H
+        DC      BLANK
+        DC      HERE
+        DC      SSTORBD     ; {FIXME}
+        DC      HERE
+;        DC      DOTS
+        DC      SEMIS
 ;
-worddoc({PARSING},{WORD},{word},{c ---addr},{ISO L0},
+worddoc({PARSING},{WORD},{word},{c ---addr},{CI L0},
 {Parse the input stream using forthsamp({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input stream.
@@ -2735,19 +2778,33 @@ HEADER({WORD},{LWORD},{DOCOL})
         DC      LCMOVE
         DC      HERE
         _BRANCH(WORD2)  ;{ ELSE}
-WORD1:  DC      DROP    ; { BL who wants that blank? }
-        DC      SOURC, CELLP
-        DC      TFET,PWORD
-        DC      LDUP, LIN, STORE
-        DC      OVER, LSUB
-        DC      HERE
-        DC      LIT,22H
-        DC      BLANK
-        DC      HERE
-        DC      SSTORBD     ; {FIXME}
-        DC      HERE
+WORD1:  DC      AWORD
 ;        DC      DOTS
 WORD2:  
+        DC      SEMIS
+;
+worddoc({PARSING},{&:},{char_follows}, {--- c},{CI},
+{Leave forthvar({c}) the non blank char that follows.
+Skip remaining non-blank characters.},
+{{}},
+{{&: HELL HEX .},{48 },
+{&: X  HEX .},{58 }},
+{{: GS1 &: HELLO ; GS1 HEX .] },{48 },
+{: GS1 &: X ; GS1 HEX .},{58 }})
+HEADER({&:},{CHF},{DOCOL}, 1)
+        DC       LBL, LWORD, ONEP, CFET, LITER
+        DC      SEMIS
+;
+worddoc({PARSING},{^:},{control_follows}, {--- c},{CI},
+{Leave forthvar({c}) the control version of the non blank char that follows.
+Skip remaining non-blank characters.},
+{{}},
+{{^: HELL HEX .},{8 },
+{^: X  HEX .},{18 }},
+{{: GS1 ^: HELLO ; GS1 HEX .] },{8 },
+{: GS1 ^: X ; GS1 HEX .},{18 }})
+HEADER({^:},{CTF},{DOCOL}, 1)
+        DC       LBL, LWORD, ONEP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
@@ -2758,7 +2815,7 @@ input stream.},
 {{CHAR HELLO HEX .},{48 },
 {CHAR X  HEX .},{58 }})
 HEADER({CHAR},{LCHAR},{DOCOL})
-        DC       LBL, LWORD, ONEP, CFET
+        DC      CHF
         DC      SEMIS
 ;
 worddocsafe({PARSING},{[CHAR]},{ bracket_char_bracket}, {--- c},{ISO I},
@@ -2769,7 +2826,7 @@ input stream.},
 {{: GS1 [CHAR] HELLO ; GS1 HEX .] },{48 },
 {: GS1 [CHAR] X ; GS1 HEX .},{58 }})
 HEADER({[CHAR]},{BCHAR},{DOCOL},1)
-        DC      LCHAR, LITER
+        DC      CHF
         DC      SEMIS
 ;
 worddocsafe({FORMATTING},{(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},
