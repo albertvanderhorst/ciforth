@@ -176,17 +176,16 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ bla bla + return "there IS a match"
 : (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT DROP CELL- TRUE ;
 
-\ START OF TESTED FOR COMPILATION ONLY AREA
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ as long as the character agrees with the matcher at the expression,
 \ advance it.
-\ Return CHARPOINTER advanced and EXPRESSIONPOINTER advanced past the matcher.
+\ Return CHARPOINTER advanced and EXPRESSIONPOINTER .
     \ From ONE TWO THREE FOUR leave THREE and TWO
     : KEEP32 DROP >R >R DROP R> R> SWAP ;
     \ From ONE TWO THREE FOUR leave ONE and FOUR
     : KEEP14 >R DROP DROP R> ;
-: (ADVANCE*)   @+ >R BEGIN 2DUP R@ EXECUTE WHILE KEEP32 REPEAT KEEP14 RDROP ;
+: (ADVANCE*)   DUP @ >R BEGIN 2DUP R@ EXECUTE WHILE KEEP32 REPEAT KEEP14 RDROP ;
 
 \ This would benefit from locals :
 \ : (ADVANCE*) @+ LOCAL MATCHER   LOCAL EP   LOCAL CP
@@ -231,7 +230,6 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ In a regular expression buffer this xt must be followed by a char-set.
 : ADVANCE-CHAR  OVER C@ OVER BIT? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
 
-\ END OF TESTED FOR COMPILATION ONLY AREA
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the char sequence at charpointer matches the string variable at the
@@ -289,12 +287,13 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
 \ In a regular expression buffer each of those xt must be followed by the
 \ xt of ADVANCE-CHAR.
-: ADVANCE? OVER >R @+ EXECUTE DROP R> BACKTRACK ;
-: ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
 : ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
+: ADVANCE? OVER >R @+ EXECUTE DROP R> BACKTRACK ;
 
 
 \ END OF TESTED FOR COMPILATION ONLY AREA
+: ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
+
 \ ---------------------------------------------------------------------------
 \                    building the regexp
 \ ---------------------------------------------------------------------------
