@@ -5129,6 +5129,38 @@ HEADER({WARM},{WARM},{DOCOL})
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
+_LINUX_N_({
+worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
+{Handle command line options. This is primarily a vector point
+to suppress the handling of options during cold boot, in behalf of
+turnkey applications. Accept and return an flag forthvar({f}) whether the signon
+message must be displayed.
+},{{COLD}},
+{{( No test)},{}},
+enddoc)
+HEADER({OPTIONS},{OPTIONS},{DOCOL})
+;       Execute option.
+        DC      ARGS, FETCH, CELLP, CELLP, FETCH
+        DC      LDUP
+        _0BRANCH(COLD4) ; {No options}
+        DC      FETCH
+        DC      LDUP, LIT, 0FFH, LAND
+        DC      LIT, '-', UNEQ
+        _0BRANCH(COLD3)
+        DC      LIT, 3, LDUP, MESS, CR ; {Fatal, but can't use ERROR.}
+; { I can't help it. May god have mercy with me. }
+; { I use 'ONE' instead of 'LIT, exit,' to save one cell.}
+        DC      ZERO, ZERO, ONE, LINOS ; {Exit with error 3.}
+COLD3:
+        DC      LIT, 8, RSHIFT
+        DC      LIT, 1FH, LAND
+        DC      LOAD
+        DC      ZERO, SWAP ;{ Sign on suppressed.}
+COLD4:
+        DC      DROP
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
+});_END_({_LINUX_N_})
+
 ;{      COLD START VECTOR COMES HERE}
 ;
 LCLD:    MOV     LIP,_OFFSET CLD1  ;{ (IP) <-}
@@ -5187,26 +5219,7 @@ _LINUX_N_({
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
-COLD1:
-;       Execute option.
-        DC      ARGS, FETCH, CELLP, CELLP, FETCH
-        DC      LDUP
-        _0BRANCH(COLD4) ; {No options}
-        DC      FETCH
-        DC      LDUP, LIT, 0FFH, LAND
-        DC      LIT, '-', UNEQ
-        _0BRANCH(COLD3)
-        DC      LIT, 3, LDUP, MESS, CR ; {Fatal, but can't use ERROR.}
-; { I can't help it. May god have mercy with me. }
-; { I use 'ONE' instead of 'LIT, exit,' to save one cell.}
-        DC      ZERO, ZERO, ONE, LINOS ; {Exit with error 3.}
-COLD3:
-        DC      LIT, 8, RSHIFT
-        DC      LIT, 1FH, LAND
-        DC      LOAD
-        DC      ZERO, SWAP ;{ Sign on suppressed.}
-COLD4:
-        DC      DROP
+COLD1:  DC      OPTIONS
         _0BRANCH(COLD5)
 });_END_({_LINUX_N_})
         DC      SIGNON    ; {Suppressed for scripting! Or any options.}
