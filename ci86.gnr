@@ -1137,14 +1137,14 @@ DP0:
 
 worddoc( {WORDLISTS},{FORTH},{forth},{},{ISO,FIG,I,L1},
 {The name of the primary vocabulary. Execution adds
-forthcode({FORTH}) to the forthcode({SEARCH}) forthsamp({word}) list.
+forthcode({FORTH}) to the forthcode({SEARCH-ORDER}) forthsamp({word}) list.
 Until additional user word list 's are created, new user definitions
 become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this forthdefi({word list}) at compile time.},
 {{VOCABULARY}},
-{ { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH @ = .},{0},
-  { FORTH ' FORTH >WID SEARCH @ = .},{_T_} },
+{ { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH-ORDER @ = .},{0},
+  { FORTH ' FORTH >WID SEARCH-ORDER @ = .},{_T_} },
 enddoc)
 dnl Force a pointer to the denotations in FORTH 's link field.
 define({_LINKOLD}, DENOTBODY )dnl
@@ -1160,7 +1160,7 @@ forthsamp({' nnnn})
 Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 If the word is not found after a search of
-forthcode({SEARCH}) and forthcode({CURRENT}) , an appropriate error message is given.
+forthcode({SEARCH-ORDER}) and forthcode({CURRENT}) , an appropriate error message is given.
 This word is intended for interpret mode,  but in ciforth it works as
 well in compilation mode _VERBOSE_({{, because it is considered a denotation. So
 ' and the word following is a unit that behaves
@@ -1288,6 +1288,53 @@ HEADER({CORE},{CORE},{DOCOL})
         DC      ZERO    ;{ Not (fully) present.}
         DC      SEMIS
 ;
+worddoc({ENVIRONMENTS},{CPU},{cpu}, {--- d},{CI},
+{An environment query returning the cpu-type to be printed as a
+base-36 number. },
+{{ENVIRONMENT?}},
+_BITS32_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 80386}},})
+_REAL_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 8088}},})
+enddoc)
+HEADER({CPU},{CPU},{DOCOL})
+_PROTECTED_({
+       _BITS32_({DC      LIT, 0CD1856H, ZERO})      ;{ '80386'}
+       _BITS16_({DC      LIT, 1856H, LIT, 0CDH})    ;{ '80386'}
+});_END_({ _PROTECTED_})
+_REAL_({
+       DC      5H,0B328H       ;{ '8088'     }
+})
+        DC      SEMIS
+;
+worddoc({ENVIRONMENTS},{VERSION},{version}, {--- sc},{CI},
+{An environment query giving the version of this Forth as string constant.
+},
+{{ENVIRONMENT?}},
+dnl Expect nothing to be typed, because the testing filters out RCS stuff.
+{{"VERSION" ENVIRONMENT? . CR TYPE },{_T_ }},
+enddoc)
+HEADER({VERSION},{VERSION},{DOCOL})
+_COMMENT
+;{       If this is there it is an official release}
+        DC      SKIP
+        DC      22
+IBMPC:  DB      'IBM-PC ciforth'
+        DB      FIGREL+40H,ADOT,FIGREV+30H,ADOT,USRVER+30H
+        DC      LIT, IBMPC, LIT, 22
+_ENDCOMMENT
+;{       If this is there it is a beta release}
+        _STRINGINLINE({beta $RCSfile$ $Revision$ })
+        DC      SEMIS
+;
+worddoc({ENVIRONMENTS},{NAME},{name}, {--- sc},{CI},
+{An environment query giving the name of this Forth as string constant.
+},
+{{ENVIRONMENT?}},
+{{"NAME" ENVIRONMENT? . TYPE },{_T_ ciforth}},
+enddoc)
+HEADER({NAME},{NAME},{DOCOL})
+        _STRINGINLINE({ciforth})
+        DC      SEMIS
+;
 dnl Remember the top of the environment chain.
 define({_STARTOFENVIRONMENTS_},_LINKOLD)dnl
 dnl Reset the link chain at this to start the FORTH wordlist.
@@ -1303,7 +1350,7 @@ word list _VERBOSE_({{, such as to find numbers and strings}}).
 If found the parse pointer is moved back to immediately after
 the prefix, and the corresponding denotation definition
 executed. This word list must be used with care as a
-forthcode({SEARCH}) word list; and only as a
+forthcode({SEARCH-ORDER}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add a denotation.
 _VERBOSE_({{The word forthcode({FORTH}) is hidden by the word
 forthcode({F}). Use forthsample({{ONLY FORTH}}) to regain
@@ -1325,12 +1372,12 @@ worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
 contains environment queries. The names of words
 present in forthcode({ENVIRONMENT}) are recognized by
 forthcode({ENVIRONMENT?}). This word list is not intended to
-be used as a forthcode({SEARCH}) word list; and only as a
+be used as a forthcode({SEARCH-ORDER}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add an environment
 query.},
 {{VOCABULARY}},
 {{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
-FORTH DEFINITIONS ; GS1},{CORE}},
+FORTH DEFINITIONS ; GS1},{NAME}},
 enddoc)
 HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
         DC      DOVOC
@@ -1628,26 +1675,8 @@ _RWHD_({
         DC      64      ;{ Kbyte.}
 });_END_({_RWHD_})
 ;
-;
-;{      The following is the CPU's name, printed}
-;{       during cold start.}
-;{       The name is 32 bits in base 36.}
-;
-; We either switch to prot, run linux (always prot) or run real mode,
-; or run under DPMI (Windows)
-; Be careful that these classes are mutually exclusive and cover all.
-_HOSTED_LINUX_({
-CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END_({ _HOSTED_LINUX_})
-_SWITCH_({
-CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END_({ _SWITCH_})
-_HOSTED_DPMI_({
-CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END_({ _HOSTED_DPMI_})
-_REAL_({
-CPUNM:  DC      5H,0B328H       ;{ '8088'     12 13 }
-});_END_({ _REAL_})
+        DC      0       ;{ AVAILABLE         12 (Was CPU)}
+        DC      0       ;{ AVAILABLE         13}
         DC      0, STRTIB       ;{REMAINDER   14 15 }
 _SWITCH_({
 ; {Swap the following with DP to allocate in conventional memory.}
@@ -3000,7 +3029,7 @@ link field of the WID and the next definition. _VERBOSE_({It is
 the forthdefi({compilation word list}) in the sens of the ISO
 standard.})
 },
-{{VOCABULARY},{SEARCH}},
+{{VOCABULARY},{SEARCH-ORDER}},
 {{CURRENT @ ' FORTH >WID = .},{_T_}},
 enddoc)
 HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(34))
@@ -3017,7 +3046,7 @@ HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
 ;      IMPORTANT
 ; REQUIRES ONE MORE CELL!
 ;
-worddoc( {WORDLISTS},{SEARCH},{search},{--- addr},{FIG,U,L0},
+worddoc( {WORDLISTS},{SEARCH-ORDER},{search_order},{--- addr},{FIG,U,L0},
 { The current search order is a zero ended row of WID 's found
 at an area in the user space forthvar({addr}) . The
 corresponding wordlists are searched for definitions during
@@ -3025,9 +3054,9 @@ interpretation. At most M4_MAXWORDLIST WID 's are present in
 this ciforth, while the ISO Search-Order wordset requires at
 least 8. },
 {{FOUND},{VOCABULARY},{CURRENT}},
-{{SEARCH @ ' FORTH >WID = .},{_T_}},
+{{SEARCH-ORDER @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({SEARCH},{SEARCH},{DOUSE}, _CELLS(37))
+HEADER({SEARCH-ORDER},{SEARCH},{DOUSE}, _CELLS(37))
 ;      IMPORTANT
 ;     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE
 ;     IN ADDITION TO THE ONE FOR SEARCH
@@ -3676,7 +3705,7 @@ worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{ISO,FIG,I,C,L0},
   forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
 Stop compilation and terminate a new defining word
 forthsamp({cccc}) by compiling forthcode({(;CODE)}). Set
-forthcode({ASSEMBLER}) to the top of the forthcode({SEARCH})
+forthcode({ASSEMBLER}) to the top of the forthcode({SEARCH-ORDER})
 order. Start assembling to machine code the following
 mnemonics.
 
@@ -4273,7 +4302,7 @@ worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
 the the current search order. If found, leave the dictionary
 entry address forthvar({dea}) of the first entry found, else
 leave a nil pointer.},
-{{SEARCH}, {FIND}, {(FIND)},{VOCABULARY}},
+{{SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl BONNOBO is found as a wrong hex number!
 { 243 "BONNOBO" FOUND 0= . .},{0 243},
@@ -4304,7 +4333,7 @@ Return its
 execution token forthsamp({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
-{{SEARCH},{FOUND},{(FIND)}},
+{{SEARCH-ORDER},{FOUND},{(FIND)}},
 {
 { : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
@@ -4335,7 +4364,7 @@ This DEA can be a forthdefi({WID}). _VERBOSE_({A forthdefi({WID}) is
 mostly a dummy forthdefi({DEA}) found in the
 data field of a
 vocabulary, or the content of forthcode({DENOTATION}) or
-forthcode({SEARCH}) }). Leave the dictionary entry address
+forthcode({SEARCH-ORDER}) }). Leave the dictionary entry address
 forthvar({dea2}) of the first entry found, else leave a nil
 pointer. Do not consume the string forthvar({sc})_VERBOSE_({{,
 as this is a repetitive action}}). },
@@ -4466,7 +4495,7 @@ enddoc)
 HEADER({(ABORT")},{PABORTQ},{DOCOL})
         DC      ROT
         _0BRANCH(PABQ1) ;{IF}
-        DC      LTYPE, ABORT
+        DC      LTYPE, SIGNON, ABORT
         _BRANCH(PABQ2) ;{ELSE}
 PABQ1:  DC       TDROP
 PABQ2:   DC      SEMIS
@@ -4724,12 +4753,12 @@ worddoc( {PARSING},{INTERPRET},{interpret},{},{},
 {Repeatedly fetch the next text word in the input source and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
-up in the vocabularies of forthcode({SEARCH}) . Failing that a
+up in the vocabularies of forthcode({SEARCH-ORDER}) . Failing that a
 string consisting of the first character is looked up in the
 forthcode({DENOTATION}) wordlist. If it is not found at all, it
 is an forthcode({ERROR}).
 _VERBOSE_({ If the word name cannot be found after a search of
-forthcode({SEARCH}), it is considered as a
+forthcode({SEARCH-ORDER}), it is considered as a
 forthdefi({denotation}) of a number, a double number, a
 character or a string or whatever. Denotations are handled
 respectively by the words forthcode({0}) ... forthcode({F})
@@ -4798,7 +4827,7 @@ forthsamp({cccc}) . It will create a forthdefi({word list})in
 the ISO sense. Subsequent use of forthsamp({cccc}) will push
 this word list (the word list forthdefi({associated with})
 forthsamp({cccc}))
-to the top of the search order in forthcode({SEARCH}). So
+to the top of the search order in forthcode({SEARCH-ORDER}). So
 vocabulary which is searched first by forthcode({INTERPRET}) .
 
 A vocabulary 's data content field contains at first the dovoc
@@ -4813,7 +4842,7 @@ empty fields, except for the link field (forthdefi({DLFA}))
 that points to the dea of the first word of the vocabulary
 or a zero pointer if empty.
 Executing the vocabulary means pushing its WID on top of the
-forthcode({SEARCH}) order. In ciforth when there can be at most
+forthcode({SEARCH-ORDER}) order. In ciforth when there can be at most
 M4_MAXWORDLIST word list 's in the search order, the oldest one
 gets lost.
 By convention, vocabulary names are to be declared
@@ -4851,7 +4880,7 @@ DOVOC:
 worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{NISO,FIG,I,L1},
 {The name of the vocabulary to make machine code definitions.
 In ciforth execution it pushes the associated word list to the
-top of the forthcode({SEARCH}) stack. (For ISO-compliance it
+top of the forthcode({SEARCH-ORDER}) stack. (For ISO-compliance it
 would replace the top of the stack.) forthcode({ASSEMBLER}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.
@@ -4867,11 +4896,11 @@ worddoc( {WORDLISTS},{DEFINITIONS},{definitions},{},{ISO},
            forthsamp({cccc DEFINITIONS})
 Make
 the top most
-forthcode({SEARCH}) word list, the compilation, i.e.
+forthcode({SEARCH-ORDER}) word list, the compilation, i.e.
 forthcode({CURRENT}) word list.
 In the example, executing
 vocabulary name forthsamp({cccc}) add it to the top of the
-forthcode({SEARCH}) order and executing
+forthcode({SEARCH-ORDER}) order and executing
 forthcode({DEFINITIONS}) will result in new definitions added to
 forthsamp({cccc}) .},
 {{VOCABULARY}},
@@ -4890,14 +4919,14 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ALSO},{also},{},{ISO},
-{Duplicate the topmost forthdefi({wid}) in the SEARCH order stack.
+{Duplicate the topmost forthdefi({wid}) in the SEARCH-ORDER order stack.
 If there were already M4_MAXWORDLIST wid 's,
 ciforth looses the last one,
 This is not counting
 the forthcode({ONLY}) search order.},
 {{VOCABULARY}},
 {
-  { VOCABULARY JOHN ALSO ' JOHN >WID SEARCH ! DEFINITIONS dnl
+  { VOCABULARY JOHN ALSO ' JOHN >WID SEARCH-ORDER ! DEFINITIONS dnl
   : ORAN ; ' FORTH >WID >LFA @ ' ORAN = .},{0},
   {' JOHN >WID >LFA @ ' ORAN = .},{_T_},
   {FORTH DEFINITIONS},{}
@@ -4913,7 +4942,7 @@ HEADER({ALSO},{ALSO},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{PREVIOUS},{PREVIOUS},{},{ISO},
-{Pop the topmost forthdefi({wid}) from the forthcode({SEARCH}) order stack.
+{Pop the topmost forthdefi({wid}) from the forthcode({SEARCH-ORDER}) order stack.
 If empty stil the forthcode({ONLY}) search order is left.},
 {{VOCABULARY}},
 {
@@ -4928,7 +4957,7 @@ HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
-{Make the forthcode({SEARCH}) order stack empty.
+{Make the forthcode({SEARCH-ORDER}) order stack empty.
 The word forthcode({FORTH}) can still be found,
 such that one can regain control.
 },
@@ -4979,8 +5008,9 @@ HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
 ;
 worddoc( {INIT},{QUIT},{quit},{},{ISO,FIG},
 {Restart the interpreter. Clear the return stack, stop
-compilation, and return control to the operators terminal. This
-means forthcode({ACCEPT}) user input to forthcode({TIB}) , and
+compilation, and return control to the operators terminal,
+or to the redirected input stream.
+This means forthcode({ACCEPT}) user input to forthcode({TIB}) , and
 then forthcode({INTERPRET}) with forthcode({TIB}) as a
 forthcode({SOURCE}) .
 No
@@ -5032,7 +5062,9 @@ worddoc( {INIT},{ABORT},{abort},{},{ISO,FIG,L0},
 {Restart the system. In addition and before the actions of
 forthcode({QUIT}), clear also the data stack and reset the
 search order and numeric base to default.
-Print a startup message with the version number.
+_VERBOSE_({{As required by ISO it is silent. This may be confusing
+at times, because you can't tell the difference between a word
+that is still busy or that has aborted.}})
 },{{WARM}},
 {{( No test)},{}},
 enddoc)
@@ -5040,23 +5072,6 @@ HEADER({ABORT},{ABORT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
         DC      DECA
         _SECURITY_({DC      QSTAC})
-        DC      CR
-_LOAD_({
-        DC      DOTCPU
-});_END_({_LOAD_})
-
-_COMMENT
-;{       If this is there it is an official release}
-        DC      SKIP
-        DC      22
-IBMPC:  DB      'IBM-PC ciforth'
-        DB      FIGREL+40H,ADOT,FIGREV+30H,ADOT,USRVER+30H
-        DC      LIT, IBMPC, LIT, 22
-_ENDCOMMENT
-;{       If this is there it is a beta release}
-        _STRINGINLINE({ciforth beta $RCSfile$ $Revision$ })
-        DC      LTYPE
-        DC      CR
         DC      ONLY
         DC      FORTH
         DC      DEFIN
@@ -5092,12 +5107,13 @@ WRM1:   DC      WARM
 worddoc( {INIT},{WARM},{warm},{},{FIG L0},
 {Perform a so called "warm" start. In addition and before the
 actions of forthcode({ABORT}), discard blocks; they may not be
-written back to mass storage.
+written back to mass storage. Display the sign on message.
 },{{ABORT}},
 {{( No test)},{}},
 enddoc)
 HEADER({WARM},{WARM},{DOCOL})
         DC      MTBUF
+        DC      SIGNON
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
@@ -5152,8 +5168,11 @@ _LINUX_N_({
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
-COLD1:
+        _BRANCH(COLD2)
 });_END_({_LINUX_N_})
+COLD1:
+        DC      SIGNON    ; {Suppressed for scripting!}
+COLD2:
 _BLOCKSINFILE_({
         DC      BLINI
 });_END_({_BLOCKSINFILE_})
@@ -6423,11 +6442,11 @@ PACCEP2:
         _BRANCH(PACCEP2)
 PACCEP1:
 ;        DC      SPLOFF
-        DC      REMAIND             ; go
-        DC      TFET                     ; go
-        DC      LIT, ALF, SINDEX          ; go
-        DC      ZEQU                     ; go
-        DC      LIT, 13, QERR            ; go
+;;;;;;;;DC      REMAIND             ; go
+;;;;;;;;DC      TFET                     ; go
+;;;;;;;;DC      LIT, ALF, SINDEX          ; go
+;;;;;;;;DC      ZEQU                     ; go
+;;;;;;;;DC      LIT, 13, QERR            ; go
         DC      REMAIND, TFET
         DC      LIT, ALF, SSPLIT
         DC      TSWAP, REMAIND, TSTOR
@@ -6435,7 +6454,7 @@ PACCEP1:
         DC      SEMIS
 
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
-{Accept characters from the current input stream such as to
+{Accept characters from the terminal input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
 forthkey({RET}). If the input is redirected (such that reading
 after forthkey({RET}) cannot be prevented)
@@ -6710,7 +6729,7 @@ HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB(SIZE_TERMIO)     ; Filled induring cold boot.
 ;
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
-{Accept characters from the current input stream such as to
+{Accept characters from the terminal input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
 forthkey({RET}). If the input is redirected (such that reading
 after forthkey({RET}) cannot be prevented)
@@ -7735,7 +7754,7 @@ Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to
 compile the address as a literal. If the word is not found
-after a search of forthcode({SEARCH}) and
+after a search of forthcode({SEARCH-ORDER}) and
 forthcode({CURRENT}), an appropriate error message is given.
 This word is intended for compilation mode, using it in interpret
 mode in ciforth is harmless, but useless.
@@ -8634,31 +8653,31 @@ TRIA2:  _LOOP(TRIA1)    ;{THEN}
 TRIA9:
         DC      CR
         DC      SEMIS
+});_END_({_LOAD_})
 ;
 ; This word is not even fig!
-worddoc( {MISC},{.CPU},{dot_cpu},{---},{},
-{Print the name of the CPU processor present in the boot up
-parameters. Using the bizar convention of a base-36 number.},
+worddocsafe( {MISC},{.SIGNON},{dot_cpu},{---},{},
+{Print a message identifying the version of this Forth.
+_VERBOSE_({{ The name of the CPU processor present in the boot
+up parameters is printed using the bizar convention of a
+base-36 number. This is a tribute to those FIG-pioneers.}}) },
 {{ABORT},{COLD}},
-_PROTECTED_({{{.CPU},{80386}},})
-_REAL_({{{.CPU},{8088}},})
-{},
+{{." Interactive"},{Interactive}},
+{{COLD}},
 enddoc)
-HEADER({.CPU},{DOTCPU},{DOCOL})
+HEADER({.SIGNON},{SIGNON},{DOCOL})
 ;{ PRINT CPU TYPE (8088)}
+        DC      CR
         DC      BASE,FETCH
-        DC      LIT,36
+        DC      LIT,36, BASE,STORE
+        DC      CPU, DDOT
         DC      BASE,STORE
-        DC      LIT,_CELLS(12),PORIG ;
-        DC      TFET
-_BITS32_({
-        DC      LIT, 10000H, STAR, PLUS, ZERO
-});_END_({ _BITS32_})
-        DC      DDOT
-        DC      BASE,STORE
+;
+        DC      NAME, LTYPE, SPACE
+        DC      VERSION, LTYPE, SPACE
+        DC      CR
         DC      SEMIS
 ;
-});_END_({_LOAD_})
 _DIRECTMAPPED_({
 ;
 worddoc( {MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
@@ -8849,10 +8868,14 @@ identical in interpret and compile mode and they cannot be
 postponed. },
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
-{The wordset forthsamp({ENVIRONMENT}) contain words for all environment
-queries that are recognized. By executing they leave the information
+{The wordset forthsamp({ENVIRONMENT}) contain words for all Forth
+environment queries that are recognized.
+By executing they leave the information
 such as is required for each of these queries.
-Except for the true flag at the end.},
+Except for the true flag at the end.
+_VERBOSE_({{Note that these are not environment
+variables that are passed from an operating system to a program.}})
+},
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
 {The wordset forthsamp({INPUT}) contains words to get input from the terminal
