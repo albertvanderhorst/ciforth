@@ -98,13 +98,13 @@ TEMPFILE=/tmp/figforthscratch
 fig86.%.asm : %.cfg nasm.m4 fig86.gnr
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$@.doc
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.doc) 
 	rm $(TEMPFILE)
 
 fig86.%.msm : %.cfg masm.m4 fig86.gnr ; \
 	m4 $+ >$(TEMPFILE) ; \
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@ ; \
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$@.doc
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.doc) 
 	rm $(TEMPFILE)
 
 fig86.%.ps  : %.cfg gas.m4  fig86.gnr ; m4 $+ >$@
