@@ -145,6 +145,7 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
+BSCR    EQU     1024            ;{Bytes per editing screen, ISO.}
 ;
 ;{ PHYSICAL DISK PARAMETERS}
 ;{ (not needed for MODERN)}
@@ -5154,10 +5155,13 @@ line (without the trailing new line). },
 },
 enddoc)
 HEADER({(LINE)},{PLINE},{DOCOL})
-        DC      BBUF, STAR
-        DC      SWAP, LIT,64, STAR
+        DC      TOR
+        DC      LIT,64
+        DC      MSTAR
+        DC      BBUF
+        DC      FMSLAS
+        DC      FROMR ;{ This blocks, so is screens.}
         DC      PLUS
-        DC      BBUF, SLMOD
         DC      BLOCK
         DC      PLUS
         DC      LIT,63  ;{ Leave off the '\n'.}
@@ -5363,8 +5367,9 @@ BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
         DC      LDUP, CELLP, FETCH, ZEQU ;{ Skip locked buffers.}
         _0BRANCH(BUFF1)
         DC      STALEST,STORE
+;{ Here the buffer would be written, if it weren't already.}
         DC      RR,STORE
-        DC      RR,PREV, STORE,
+        DC      RR,PREV, STORE
         DC      FROMR, CELLP, CELLP
         DC      SEMIS
 ;
@@ -5391,7 +5396,6 @@ _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
         DC      FETCH,LDUP
         DC      FETCH,RR
         DC      LSUB
-        DC      LDUP,PLUS
         _0BRANCH(BLOC1)
 BLOC2:  DC      PBUF,ZEQU
         _0BRANCH(BLOC3)
