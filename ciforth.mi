@@ -1,5 +1,5 @@
 \input texinfo
-@setfilename figforthversion
+@setfilename thisfilename
 dnl @smallbook
 @afourpaper
 @settitle ciforth manual
@@ -12,7 +12,7 @@ A common intel/computer intelligence/CH+ forth.
 For the configuration:
 forthitemize
 forthitem
-experimental version fig86gnrversion
+experimental version ci86gnrversion
 forthitem
 _BITS_-bits _REAL_({real mode })_PROTECTED_({protected mode })
 forthitem
@@ -97,6 +97,7 @@ _LINUX_N_({It calls linux system from Forth directly.}) dnl
 _SECURITY_({It has compiler security, sacrificing some bizar ISO
 compatibity.}) dnl
 _CIF_IN_({It doesn't use forthcode({>IN}) in the way prescribed by ISO.}) dnl
+_FEWBLOCKS_({The number of blocks limited to 256}) dnl
 dnl define( {_ISO_IN_}, _yes)dnl
 It is indirect threaded.
 

@@ -52,10 +52,16 @@ names.m4        \
 wordset.m4      \
 # That's all folks!
 
+# Normally tools are not supplied with the release.
+# But this is a tool not otherwise available.
+TOOLS=  \
+ssort   \
+# That's all folks!
+
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= msdos alone linux lina alonehd
+TARGETS= msdos alone linux lina alonehd msdos32
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= msdos alone
 # If this makefile runs under Linux, the following forth's can be made and
@@ -71,6 +77,7 @@ CSRC= $(CSRCAUX) $(CSRCFORTH)
 # Texinfo files still to be processed by m4.
 SRCMI= \
 ciforth.mi \
+cifgen.mi \
 intro.mi    \
 manual.mi   \
 rational.mi  \
@@ -114,15 +121,15 @@ test.mak        \
 $(INGREDIENTS)   \
 $(ASSEMBLERS:%=%.m4) \
 $(DOCTRANSFORMS) \
+$(TOOLS)        \
 blocks.frt       \
 genboot.bat      \
-link.script    \
 $(EXAMPLES)     \
 wc            \
 # That's all folks!
 
-# r## revision 2.## a beta release
-# #d# 2.#.# stable release, e.g. 0d1
+# 3v1 ### Version : an official release 3.1
+# 3d154  Release of a revision, so beta, the revision number is 3.154
 VERSION=test  # Because normally VERSION is passed via the command line.
 
 RELEASELINA = \
@@ -187,7 +194,7 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
 clean : ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
 
 #msdos32.zip soesn't work yet.
-release : figdoc.zip zip msdos.zip lina.zip # as.zip
+release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
@@ -234,7 +241,7 @@ zip : $(RELEASECONTENT) ; echo ci86g$(VERSION) $+ | xargs zip
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply BLOCKS.BLK
 msdos.zip : $(RELEASECONTENT) mslinks ;\
-    echo FG$(VERSION) $(RELEASECONTENT) |\
+    echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/ ci86\./ /g' |\
     sed -e's/ gnr / ci86.gnr /g' |\
     xargs zip -k
