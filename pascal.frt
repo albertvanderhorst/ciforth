@@ -29,6 +29,11 @@ FORWARD program-component
 FORWARD program-heading
 FORWARD record-type
 FORWARD set-type 
+FORWARD simple-statement 
+FORWARD skip-keyword 
+FORWARD statement   
+FORWARD statement-sequence   
+FORWARD structured-statement 
 FORWARD structured-type 
 FORWARD type-definition
 FORWARD type-definition-part
@@ -40,7 +45,7 @@ FORWARD variable-declaration-part
 
 \ An atom is a constant, a variable (accessed) or a function (called)
 \ The dot_name determines which of the three. list only with function.
-BNF: atom 
+BNF: atom    skip-keyword
     identifier [ '(' list ')' ]    
     { `[' expression { `,' expression } `]' 
        | `.' identifier 
@@ -49,10 +54,8 @@ BNF: atom
      } ;BNF
 BNF: array-type `array' `[' ordinal-type { `;' ordinal-type } `]' `of' type-denoter ;BNF
 
-BNF: block { label-declaration-part | constant-definition-part | type-definition-part | variable-declaration-part 
-        | function-declaration-part } 
-        compound-statement ;BNF
-
+BNF: block { label-declaration-part | constant-definition-part | type-definition-part | variable-declaration-part | function-declaration-part } compound-statement ;BNF
+BNF: compound-statement   `begin' statement-sequence `end' ;BNF
 BNF: constant-definition   identifier `=' expression ;BNF
 BNF: constant-definition-part   `const' constant-definition `;' { constant-definition `;' } ;BNF
 BNF: expression   `(' expression   `)' | atom { operator atom } | number ;BNF
@@ -60,7 +63,7 @@ BNF: file-type     0 SUCCESS ! ;BNF    \ CAN'T DEAL BEHIND THAT
 BNF: formal-parameter-list [ `var' | `function' | `procedure' | ] identifier-list [ `:' identifier ] ;BNF  
 BNF: formal-parameters `(' formal-parameter-list { `;' formal-parameter-list } `)' ;BNF
 BNF: function-declaration-part   function-heading block `;' ;BNF
-BNF: function-heading   [ `function' | `procedure' ] identifier [ formal-parameters ] [ `:' identifier ] `;' ;BNF
+BNF: function-heading   ( `function' | `procedure' ) identifier [ formal-parameters ] [ `:' identifier ] `;' ;BNF
 BNF: identifier-list   identifier { `,' identifier } ;BNF
 BNF: label-declaration-part   `label' digit-sequence { `,' digit-sequence } `;' ;BNF
 BNF: list   expression { `,' expression } ;BNF
@@ -73,6 +76,13 @@ BNF: operator-relational   `=' | `<>' | `<' | `<=' | `>=' | `>' | `in' ;BNF
 BNF: ordinal-type identifier | `(' identifier-list `)' | expression `..' expression ;BNF
 BNF: program-heading `program' identifier [ `(' identifier-list `)' ] ;BNF
 BNF: program program-heading `;' block ;BNF
+\ Here an atom must be a function call. For an assigment types must be compatible.
+BNF: simple-statement    atom [ `:=' expression ] | `goto' digit-sequence | ;BNF
+\ This one is to try to match a keyword and than fail
+BNF: skip-keyword ( `end' ) SUCCESS @ 0= SUCCESS ! ;BNF
+BNF: statement   [ digit-sequence `:' ] ( simple-statement | structured-statement ) ;BNF
+BNF: statement-sequence   statement { `;' statement } ;BNF
+BNF: structured-statement 0 SUCCESS ! ;BNF    \ CAN'T DEAL BEHIND THAT
 BNF: type-definition   identifier `=' type-denoter ;BNF
 BNF: type-definition-part   `type' type-definition { `;' type-definition } `;' ;BNF
 BNF: type-denoter   structured-type | pointer-type | ordinal-type ;BNF
