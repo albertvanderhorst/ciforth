@@ -4,9 +4,8 @@ A forth user is well aware of how the memory of his
 computer is organised. He allocates it for certain purposes,
 and frees it again at will.
 
-The forthdefi({dictionary}) 
-is the part of the memory where the forthcode({words}) are
-(forthpxref({DICTIONARY}).
+The forthdefi({dictionary}) is the part of the memory where the forthcode({words}) are
+(forthpxref({DICTIONARY})).
 It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 This structure is called a forthdefi({dictionary entry}) .
@@ -28,8 +27,8 @@ may deviate from the processor you are running on.
 For this ciforth it is _BITS_,
 It applies to the data remembered in the data stack, and the 
 return addresses on the return stack.
-memory accesses forthcode({@@}) and forthcode({!}) , the size of forthcode({VARIABLE})s
-and forthcode({CONSTANT})s.
+memory accesses forthcode({@@}) and forthcode({!}) , the size of forthcode({VARIABLE})' s
+and forthcode({CONSTANT})' s.
 In Forth a cell has no hair. It is interpreted by you as a
 signed integer, a bit-map, a memory address or an unsigned number.
 The operator forthcode({+}) can be used to add numbers, to set a bit in 
@@ -51,6 +50,48 @@ the code which executes for that definition. This usage of indirect
 threaded code is a major contributor to the power, portability, and
 extensibility of Forth. 
 
+@section Portability
+If you build your words from the words defined in the ISO standard,
+and are otherwise careful, your programs may run on other systems that
+are ISO standard. 
+
+Here we will explain how you must read the glossary of ciforth,
+in relation to terminology in the ISO standard.
+
+Whenever the glossary specifies under which conditions a word ``may
+crash'', then you will see the euphemism ``ambiguous condition'' in
+the ISO standard. 
+
+For example: 
+forthbreak
+If forthcodeni({HOLD}) is used not between 
+forthcodeni({<#}) and forthcodeni({#>}) ciforth may crash.
+
+Whenever we explicitly mention ciforth in a sentence that appears
+in a glossary entry,
+the behaviour may not apply to other ISO standard systems.
+This is called forthdefi({ciforth specific behaviour})
+If it mentions ``this ciforth'', you cannot even trust that
+behaviour to be the same on other ciforth systems.
+Often this is called an ``implementation defined'' behaviour in the standard.
+Indeed we are obliged to specifiy this behaviour in our glossary,
+or we don't comply to the standard. 
+The behaviour of the other system may very well be a crash.
+In that case the standard probably defines this an ``ambigous condition''.
+
+For example: 
+forthbreak
+On this ciforth forthcodeni({OUT}) is set to zero whenever forthcodeni({CR}) is executed.
+
+The bottom line is that you never want to write code where 
+ciforth may crash. 
+And that if you want your code to run on some other system,
+you do not want to rely on forthdefi({ciforth specific behaviour}). 
+If you couldn't get around that, 
+you must keep the specific code separate. 
+That part has to be checked carefully against the documentation
+of any other system, 
+where you want your code to run on.
 @section Saving a new system
 
 In combination with the change of the boot-up parameters at
@@ -121,137 +162,177 @@ Machine code definitions
 forthitem
 Installation dependant code
 forthitem
-High level utility definitions
+High level standard definitions
 forthitem
-High level definitions 
+High level user definitions 
 forthitem
 System tools (optional)
 forthitem
 RAM memory workspace 
 forthenditemize
 
-                 3.2  MODEL DETAILS
-The fig-FORTH model deviates a bit from the usual loading method of Forth.
-Existing systems load about 2k bytes in object form and then self-compile
-the resident system (6 to 8 k bytes). This technique allows customization
-within the high level portion, but is impractical for new implementors. 
+@subsection Boot-up Parameters
 
-Our model has 4 to 5 k bytes written as assembler listings. The remainder
-may be compiled typing in the Forth high-level source, by more assembly
-source, or by disc compilation. 
-This method enhances transportability, although the larger portion in
-assembly code entails more effort. About 8k bytes of memory is used plus 2
-to 8k for workspace. 
+The boot-up area contains initial 
+values for the registers needed for the Forth engine, 
+like stack pointers, the pointers to the special memory area's, 
+and the very important dictionary pointer forthcode({DP}) 
+that determines the boundary between the dictionary and free space.
 
-                 3.0  MODEL ORGANIZATION
-
-The figures are approximate. Double them for 32 bit systems; this
-applies to memory sizes mentionned in all sections.
-
-                   3.1  MODEL OVER-VIEW
-
-
-  Boot-up Parameters
-
-This area consists of 34 bytes containing a jump to the cold start, jump to
-the warm re-start and initial values for user variables and registers. These
-values are altered as you make permanent extensions to your installation. 
-
-++++++++++++++++++++++++++
-
-Read 17 cells for 34 bytes.
-In fig.gnr the bootup parameters are more or less the data field of the
+Instead they are copied to a separate area the forthdefi({user area}) ,
+each time a Forth task, or Forth itself, is started.
+The bootup area itself is not changed, but the variables in this area are.
+By having several user area's, and switching between them,
+ciforth can support multitasking.
+When you have made extensions to your system, like for instance you
+have loaded an editor, you can make these permanent by updating the
+initial vvalues in the boot-area and saving the result to disk as an
+executable program. 
+The boot-area extends from forthcode({+ORIGIN}) 0100H bytes
+upward. This is the image for the forthdefi({user area}).
+It also extends 4 CELLS downwards, containing machine code for two 
+jumps, to the warm and the cold start, ans a version number.
+So in ciforth the bootup parameters are more or less the data field of the
 +ORIGIN word. 
 Executing +ORIGIN leaves a pointer in this area but after the jump vectors
-and the release numbers. They are not used and in fact superfluous. 
-Bootup parameters with positive offset from +ORIGIN are one to one with user
-variables. Their indices have not changed, but there is now a bootup
-parameter for each and every user variable. A system with other boot
-parameters can now be generated in an even more portable fashion by using
-phrase like "7 CELLS +ORIGIN". 
+and the release numbers. 
 
- Installation Dependent Code
+@subsection                     Installation Dependent Code
 
-KEY EMIT ?TERMINAL and CR are indeed different for different I/O models.
-However the bracketed versions (KEY) are not necessarily (in fact never)
-there. This part of the documentation was inaccurate or ignored by the
-original IBM/PC implementer. 
+forthcode({KEY}) forthcode({EMIT}) forthcode({?TERMINAL}) forthcode({CR}) and 
+forthcode({R/W}) are indeed different for different I/O models.
+This is of little concern to you as a user, 
+because these are perfectly normal dictionary entries. 
+There will however be more differences between the different configurations for 
+ciforth for these words than habitually.
+
+@subsection                      Machine Code Definitions
+
+The machine executable code definitions
+play an important role because they
+convert your computer into a standard Forth stack computer. 
+It is clear that although you can define words by other words,
+you will hit a lowest level.
+The code words as these lowest level programs are called,
+execute machine code directly, if you invoke them from 
+the terminal or from some other definition.
+The other definitions, called forthdefi({high level}) code, 
+consist of a
+sequence
+of the machine executable code words. 
+The Forth forthdefi({inner interpreter}) takes care that 
+these code words are executed in turn.
+
+In the assembler source (if you care to look at it)
+you will see that they are interspersed with the 
+high level Forth definitions. 
+In fact it is quite common to decide to rewrite a code definition in high level
+Forth, or the other way around.
+
+Again code words are perfectly normal dictionary entries. 
+@subsection                      High-level Standard Definitions
+
+The high level standard definitions add all 
+the colon-definitions, user variables, constants, and variables that
+must be available in a 
+"Forth stack computer" according to the ISO standard. 
+They comprise the bulk of
+the system, enabling you to execute and compile from the terminal,
+execute and add definitions 
+by forthdefi({loading}) code from disk etc.
+Deviations from standards are ill advised, 
+so you probably want to leave this area alone.
+Again these words are perfectly normal dictionary entries. 
+_VERBOSE_({The technique described for the next section, 
+forget and recompile,
+is not always possible here because of circular references.
+That is in fact no problem with an assembler listing, 
+but it is if you load Forth code.})
+
+Again standard definitions words are perfectly normal dictionary entries. 
+@subsection                    user definitions
+
+The user definitions 
+contain primarily definitions involving user interaction:
+compiling aids, finding, forgetting, listing, and number formating. 
+Some of these are fixed by the ISO standard too.
+These definitions are placed above the standard definitions to
+facilitate modification. 
+That is you may forthcode({FORGET}) part of
+the high-level and re-compile altered definitions from disc. 
+This applies even to the ISO standard words.
+Again these words are perfectly normal dictionary entries. 
+Before long we plan to have these definitions added to the 
+system exclusively by loading from disk.
+
+Again user definitions words are perfectly normal dictionary entries. 
+@subsection                    System Tools
+
+A text editor and machine code assembler are the first tools 
+normally available. 
+They are not part of ciforth as delivered,
+but they are among the first candidates to be integrated into 
+your system. 
+Please note how the boundary 
+_PC_({ We are
+including a sample editor, that is quite handy})
+_LINUX_({Development in Linux uses the there available editors.
+Code is tested by piping it into Forth, then commanding Forth to
+look to the console, as follows :
+forthbreak
+forthsamp({(echo 8 LOAD; cat pascal.frt - )| ciforth })
+forthbreak
+Primitive and preliminary as this may seem, 
+it has been used for quite substantial developments like the 
+80386 assembler.})
+386 and a 8086 
+Forth assemblers are available in forthfile({BLOCKS.BLK}) .
+They are loaded in accordance with the system that is run.
+
+It is essential that you regard ciforth as just a way to get started
+with Forth. 
+Forth is an extensible language, and you can set it to your hand.
+But that also means that you must not hesitate to throw
+away parts of the system you don't like, and rebuilt them
+even in conflict with standards. 
+_VERBOSE_(
+{Additions and changes must be planned and
+tested at the usual Forth high level.
+Later you can rewrite them as code words.})
+
+Again words belonging to tools are perfectly normal dictionary entries. 
+@subsection                    RAM Workspace
+The RAM workspace contains the compilation space for the dictionary,
+_HIGH_BUF_(disc buffers,}) the computation and return stacks, the user area,
+and the terminal input buffer, 
+_VERBOSE_({From the figforthuser manual
+forthquotation
+For a single user system, at least 2k bytes must be available above the
+compiled system (the dictionary). A 16k byte total system is most typical. 
+forthendquotation})
+It is indeed possible to do useful work, 
+like factoring numbers of a few hundred digits, in a workspace of 2k bytes.
+More typical a workspace is several megabytes to over hundred megabytes.
+
+_BITS16_({There is no longer a reason to put up with a 16-bit system less than 64K.})
+_BITS32_({32 bits system are set at 64Mbyte but this is arbitrary and could be set much
+higher or lower without consequences for system load or whatever. 
+Before long we will put the dictionary space on I86-Linux to 4G minus
+something and forget about this issue forver. })
+
+_VERBOSE_(
+{The boundary between this area and the previous one is pretty sharp, 
+it is where forthcode({DP}) points.
+The other areas are not clearly separated at all.
+But even this boundary constantly changes as you add and forget definitions.})
+@subsection                    crap
 Underneath the I/O model has improved. TYPE and EXPECT are drawn into
 the I/O model dependant part. If at all possible CR and EMIT used TYPE
 such that TYPE becomes a natural vectoring point. Similarly KEY 
 tries to use EXPECT, but mostly this is not possible because EXPECT doesnot
 return before the user hits the Enter key.
 
-Where possible installation dependant code is using a generic call to the
-operating system in particular MSDOS BIOS or LINOS. This mostly results in
-the installation dependant code to be high level. 
-
-The false urban legend that one could forthcode({FORGET}) 
-has been replaced by an accurate description of forthcode({TASK}).
-
-  Machine Code Definitions
-
-This area consists of about 600 to 800 bytes of machine executable code in
-the form of Forth word definitions. Its purpose is to convert your computer
-into a standard Forth stack computer. Above this code, the balance of Forth
-contains a pseudo-code compiled of "execution-addresses" which are sequences
-of the machine address of the "code-fields" of other Forth definitions. All
-execution ultimately refers to the machine code definitions. 
-
-
-  High-level Utility Definitions
-
-These are colon-definitions, user variables, constants, and variables that
-allow you to control the "Forth stack computer". They comprise the bulk of
-the system, enabling you to execute and compile from the terminal. 
-If disc storage (or a RAM simulation of disc)  is available, you may also execute and compile from this facility. Changes in the high-level area are infrequent. They may be made thru the assembler source listings.
-
-
-
-    An alternate version of R/W is included that simulates disc storage in
-    RAM. If you have over 16 k bytes this is practical for startup and
-    limited operation with cassette. 
-
-
-High-level Definitions
-
-The next section contains about 30 definitions involving user interaction:
-compiling aids, finding, forgetting, listing, and number formating. These
-definitions are placed above the installation dependent code to facilitate
-modification. That is, once your full system is up, you may FORGET part of
-the high-level and re-compile altered definitions from disc. 
-
-
-System Tools
-
-A text editor and machine code assembler are normally resident. We are
-including a sample editor and hope to provide Forth assemblers. 
-The editor is compiled from the terminal the first time, and then used to
-place the editor and assembler source code on disc. 
-
-It is essential that you regard the assembly listing as just a way to get
-Forth installed on your system. Additions and changes must be planned and
-tested at the usual Forth high level and then the assembly routines updated. 
-Forth work planned and executed only at an assembly level tends to be
-non-portable, and confusing. 
-
-RAM Workspace
-
-For a single user system, at least 2k bytes must be available above the
-compiled system (the dictionary). A 16k byte total system is most typical. 
-
-The RAM workspace contains the computation and return stacks, user area,
-terminal input buffer, disc buffer and compilation space for the dictionary. 
-
-RAM workspace.
-
-There is no longer a reason to put up with a 16-bit system less than 64K. 32
-bits system are set at 64Mbyte but this is arbitrary and could be set much
-higher or lower without consequences for system load or whatever. 
-Before long we will put the dictionary space on I86-Linux to 4G minus
-something and forget about this issue forver. 
-
-         fig-FORTH VARIABLE NAME FIELD
+@section         fig-FORTH VARIABLE NAME FIELD
 
 A major FIG innovation in this model, is the introduction of variable length
 definition names in compiled dictionary entries. 
@@ -288,8 +369,6 @@ Remember that -FIND uses BL WORD to bring the next text to HERE with the
 count preceeding. All that is necessary, is to limit by WIDTH and toggle the
 proper delimiting bits. 
 
-         fig-FORTH VARIABLE NAME FIELD
-
 They were very proud at the time that names could be any length.
 They felt obliged however to introduce the WIDTH/TRAVERSE to allow 
 upwards compatibility with systems that stored only the first few (three)
@@ -297,7 +376,7 @@ characters of a word. This has become a major pain now. See the screens
 for the $____ and $__ words that are absolutely unportable.
 
 
-                5.0  MEMORY MAP         
+@section  MEMORY MAP         
 
 The following memory map is broadly used. 
 Specific installations may require alterations but you may forfeit functions
@@ -363,27 +442,6 @@ MSDOS that F3 gets the previous command back for you?
 If EXPECT builds up a line from separate key strokes, and if you ever want
 to change the rubout key, just change the RUBOUT user variable. 
 
-
-             6.0  DOCUMENTATION SUMMARY
-
-
-You bet this is utterly and totally out of date.
-
-The following manuals are in print: 
-
-Caltech FORTH Manual, an advanced manual with internal details of Forth. Has
-Some implementation peculiarities. Approx. $6.50 from the Caltech Book
-Store, Pasadena, CA. 
-
-Kitt Peak Forth Primer, 520.00 postpaid from the Forth Interest Group, P. O.
-Box 1105, San Carlos, CA 94070. 
-
-microFORTH Primer, $15.00 Forth, Inc. 
-815 Manhattan Ave. Manhattan Beach, CA 90266
-
-
-Forth Dimensions, newsletter of the Forth Interest Group, $5.00 for 6 issues
-including membership. F-I-G. P.O. Box 1105, San Carlos, CA. 94070 
 
 CUSTOMISING
 
