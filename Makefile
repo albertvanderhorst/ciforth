@@ -81,7 +81,6 @@ COPYING          \
 assembler.txt    \
 editor.txt     \
 release.txt      \
-figdocadd.txt \
 fig86gnr.txt       \
 testreport.txt     \
 cfg.zip         \
@@ -89,7 +88,7 @@ $(SRCMI) \
 # That's all folks!
 
 # The following must be updated on the website, whenever
-# any typo's are fixed. Unfortunately, is has become a separate
+# any typo's are fixed. Unfortunately, it has become a separate
 # maintenance chore, and is in effect a separate project.
 DOCOLD = \
 figdoc.zip    \
@@ -127,10 +126,10 @@ VERSION=test  # Because normally VERSION is passed via the command line.
 
 RELEASELINA = \
 COPYING          \
+fig86.lina.html \
+fig86.lina.texinfo \
 linarelease.txt  \
-figdoc.zip    \
-figdocadd.txt \
-lina.asm      \
+fig86.lina.asm      \
 lina          \
 BLOCKS.BLK       \
 $(CSRCAUX:%=%.c)    \
@@ -165,7 +164,8 @@ fig86.%     : %.cfg         fig86.gnr ; m4 $+ >$@
 # In particular the order of operands.
 %.s : %pres ; sed -f transforms <$+ >$@
 
-.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks
+.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release
+
 # Default target for convenience
 default : figforth
 fig86.$(s).bin :
@@ -178,6 +178,9 @@ all: $(TARGETS:%=fig86.%.asm) $(TARGETS:%=fig86.%.msm) $(BINTARGETS:%=fig86.%.bi
     $(LINUXFORTHS) $(OTHERTARGETS)
 
 clean : ; rm -f $(TARGETS:%=fig86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
+
+#msdos32.zip soesn't work yet.
+release : figdoc.zip zip msdos.zip lina.zip as.zip 
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
@@ -216,13 +219,14 @@ BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 hdboot: fig86.alonehd.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 
+figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
 
 zip : $(RELEASECONTENT) ; echo fig86g$(VERSION) $+ | xargs zip
 
 # For msdos truncate all file stems to 8 char's and loose prefix `fig86.'
 # Compiling a simple c-program may be too much, so supply BLOCKS.BLK
-msdoszip : $(RELEASECONTENT) mslinks ;\
+msdos.zip : $(RELEASECONTENT) mslinks ;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/ fig86\./ /g' |\
     sed -e's/ gnr / fig86.gnr /g' |\

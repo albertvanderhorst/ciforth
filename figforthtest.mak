@@ -162,7 +162,7 @@ test.mak        \
 # That's all folks!
 # testset386a    (fails)
 
-aszip : $(RELEASEASSEMBLER) ; echo as$(VERSION) $+ | xargs zip
+as.zip : $(RELEASEASSEMBLER) ; echo as$(VERSION) $+ | xargs zip
 
 msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     make mslinks ; \
@@ -210,11 +210,11 @@ fig86.%.info : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 names
 	#rm wordset.mi
 
 # For tex we do not need to use the safe macro's
-fig86.%.tex : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 namescooked.m4
-	m4 menu.m4 $(@:%.tex=%.mig) > menu.texinfo
-	m4 wordset.m4 $(@:%.tex=%.mim)  $(@:%.tex=%.mig) |m4 >wordset.mi
+fig86.%.texinfo : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 namescooked.m4
+	m4 menu.m4 $(@:%.texinfo=%.mig) > menu.texinfo
+	m4 wordset.m4 $(@:%.texinfo=%.mim)  $(@:%.texinfo=%.mig) |m4 >wordset.mi
 	( \
-	    echo "define(figforthversion,$@)" ; \
-	    cat $(@:fig86.%.tex=%.cfg) manual.m4 namescooked.m4 figforth.mi \
+	    echo "define(figforthversion,$(@:%.texinfo=%.info))" ; \
+	    cat $(@:fig86.%.texinfo=%.cfg) manual.m4 namescooked.m4 figforth.mi \
 	)| tee spy | m4 > $@
 	#rm wordset.mi menu.texinfo
