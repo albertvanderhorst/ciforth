@@ -1,7 +1,5 @@
 dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl Once and for all. 
-changequote({,})dnl
 dnl
 define({_HEADER_ASM},{;
 ; NASM version of FIG FORTH created by M4 from generic listing.
@@ -31,3 +29,9 @@ define({_COMMENT}, %if 0
 )dnl
 define({_ENDCOMMENT}, %endif
 )dnl
+define({_0BRANCH},dnl
+DW      ZBRAN
+        DW      $1-$)dnl
+define({_BRANCH},dnl
+DW      BRAN
+        DW      $1-$)dnl
