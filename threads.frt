@@ -45,7 +45,7 @@ HEX
 \  - the first parameter matters
 \  - the second parameter is indeed the stack of the child
 \  - the third parameter matters not
-: CLONE _ ( 100 OR) DSP@ 400 - _ 78 LINOS DUP ?ERRUR ;
+: CLONE 100 DSP@ 400 - _ 78 LINOS DUP ?ERRUR ;
 
 \ Keep item ONE and TWO on the data stack while
 \ switching the stack frame to new return stack POINTER.
