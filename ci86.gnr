@@ -1113,44 +1113,6 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
 ;{   NUMBER ERROR}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
         _PUSH
-        PAGE
-worddocsafe({DICTIONARY},{MATCH-WORD},{match_word},{addr1 addr2 --- f )}, {},
-{Compares the string variable addr1 with the name field address forthvar({addr2}).
-Returns flag forthsamp({f}) indicating whether there is a a match. 
-If no match is found, a boolean false is left.},{{FIND}})
-CODE_HEADER({MATCH-WORD},{MATCHW})
-;{       MOV     AX,DS}
-;{       MOV    ES,AX   ;ES = DS}
-        POP     BX      ;{NFA}
-        MOV     BX,_CELL_PTR[BX]
-        POP     CX      ;{STRING ADDR}
-;
-;{  SEARCH LOOP}
-MAT1:  MOV     DI,CX   ;{GET ADDR}
-        MOV     AL,[BX] ;{GET WORD LENGTH}
-        MOV     DL,AL   ;{SAVE WORD LENGTH}
-        XOR     AL,[DI]
-        AND     AL,1FH  ;{CHECK LENGTHS.}
-        JNZ     MAT5   ;{LENGTHS DIFFER}
-
-;
-;{   LENGTHS MATCH - CHECK EACH CHARACTER IN NAME}
-MAT2:  INC     BX
-        INC     DI      ;{ NEXT CHAR OF NAME}
-        MOV     AL,[BX]
-        XOR     AL,[DI] ;{COMPARE NAMES}
-        ADD     AL,AL   ;{THIS WILL BE TEST BIT 8}
-        JNZ     MAT5   ;{NO MATCH}
-        TEST    _BYTE_PTR[BX],080H;{Last char of NFA?.}
-        JZ      MAT2   
-;
-;{   FOUND END OF NAME (BIT 8 SET) - A MATCH}
-        MOV     AX,1    ;{TRUE VALUE}
-        JMP     SHORT MAT6
-MAT5:
-        XOR     AX,AX
-MAT6: 
-        _PUSH
 ;
 worddoc({STORAGE},{RESULT},{result},{--- addr},{},
 {A variable containing the address of the result of searching 
@@ -1165,28 +1127,13 @@ If it is a a match, it
 returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely 
 from forthcode({FOR-WORDS}).},
 {{FIND}})
-HEADER({MATCHING-WORDS0},{MATCHING0},{DOCOL})
-        DC      TDUP, MATCHW
-        _0BRANCH(MATS1)
-        DC      FROMR, FROMR, DROP, ZERO, TOR, TOR ;{FORCE END}
-        DC      LDUP, RESULT, STORE
-MATS1:  DC      DROP
-        DC      SEMIS
-;
-worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1 )}, {},
-{Intended to cooperate with forthcode({FOR-WORDS}) .
-Compares the string variable forthsamp({addr1}) with the dea forthvar({addr2}).
-If it is a a match, it 
-returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely 
-from forthcode({FOR-WORDS}).},
-{{FIND}})
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      OVER, CFET
-        DC      OVER, TNFA, FETCH, CFET, LIT, 1FH, LAND
+        DC      OVER, TNFA, FETCH, CFET
         DC      EQUAL
         _0BRANCH(MATS2)
         DC      OVER, ONEP
-        DC      OVER, TNFA, FETCH, COUNT, LIT, 1FH, LAND
+        DC      OVER, TNFA, FETCH, COUNT
         DC      CORA, ZEQU
         _0BRANCH(MATS2)
         DC      FROMR, FROMR, DROP, ZERO, TOR, TOR ;{FORCE END}
@@ -2871,9 +2818,6 @@ CREA1:  DC      HERE
         DC      CFET
         DC      ONEP
         DC      ALLOT
-        DC      LDUP
-        DC      LIT,080H
-        DC      TOGGL
         DC      HERE,TOR
         DC      COMMA   ; {Name field.}
         DC      ZERO,COMMA ; {Flag field.}
@@ -4129,8 +4073,6 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      XDO     ;{ DO}
 TYPE2:  DC      IDO
         DC      CFET
-        DC      LIT,7FH
-        DC      LAND    ;{STRIP 80H FROM LAST CHAR}
         DC      EMIT
         _LOOP(TYPE2)    ;{ LOOP}
         _BRANCH(TYPE3)  ;{ ELSE}
