@@ -712,3 +712,143 @@ look and feel as other input.
 Text can be pasted in with the mouse, etc.
 Consequently forthcode({RUBOUT}) is not used.
 }).
+
+
+@section Libraries
+
+In ciforth there is no notion of object (i.e. compiled) libraries,
+only of source libraries.
+A Forth library is a block file adorned with one convention.
+This is that the words defined in a screen are
+mentionned on the first line of that screen,
+the forthdefi({index line}).
+This is of course quite established as a habit.
+The word forthcode({REQUIRED}) takes a string and loads the
+first screen where that name occurs in the index line. For
+convenience also forthcode({REQUIRE}) is there that looks ahead
+in the input stream.
+These words are not in the kernel but are in screen 17, that
+corresponds to the forthsamp({-r}) option.
+
+Screen 0 and screen 1 to 26 are reserved. When a Forth is started up with
+a first parameter that is a one-letter option, the corresponding
+screen is to be executed. _VERBOSE_({So forthsamp({-a}) or forthsamp({-A}) is
+equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
+ forthsamp({-Z}) is equivalent to forthsamp({26 LOAD}).})
+_PC_({{The interpretation of command line options is not yet implemented
+for this version of ciforth.}})
+_HOSTED_LINUX_({
+@subsection options
+ciforth is a primitive system, and can interpret just one option on the
+command line. If the first argument is not starting with forthkey({-})
+ciforth returns with error code 3.
+However the option forthsamp({-e}) can bootstrap it into
+more sophisticated behaviour. See also forthsamp({-l}) .
+
+The following options can be passed to ciforth on the command line:
+
+forthitemize
+
+forthitem
+forthsamp({-c name})
+
+Compile the file forthfile({name}) to an executable binary. The name of the binary
+is forthfile({name}) without the leading forthsamp({.frt}) or else forthfile({a.out}) .
+Upon invokation of the binary the word defined latest is executed , then Forth goes
+ forthcode({BYE}) .
+_VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
+Also forthcode({REQUIRED}) is made available.
+
+forthitem
+forthsamp({-e})
+
+Load the elective screen, screen 5. This is most useful after forthsamp({-l}).
+But system wide default preferences
+can be installed there. _VERBOSE_({{In a preference screen you just put
+commands you want to be executed after Forth starts up, such as }
+forthsamp({"fortune -f /usr/lib/forthcookies" SYSTEM}).})
+
+forthitem
+forthsamp({-f forthcode})
+
+Execute the forthsamp({forthcode}) in the order present.
+Options such as in this list are available on the remainder of the line, but they
+must be invoked with two slashes instead of one, and having more letters is allowed
+but ignored.
+_VERBOSE_({{So }forthsamp({--compile}){ instead of }forthsamp({-c})}).
+forthsamp({--library}) behaves slighly different than
+forthsamp({-l}). The library is switched, taken effect for the
+remainder of forthsamp({forthcode}), but no shifting is done of
+the arguments.
+
+forthitem
+forthsamp({-h})
+
+Print overview of options.
+
+forthitem
+forthsamp({-l name})
+
+Use a library forthsamp({name}) .
+Restart Forth with as a block file forthfile({name}) and as options the remainder
+of the line shifted, such that
+forthsamp({-l name}) disappears and the next option becomes the first.
+
+forthitem
+forthsamp({-o})
+
+Import operating system commands. Some often used commands like
+forthsamp({ls more cat cd echo make }) can be typed to Forth as if it where a shell.
+     forthcode({OS-IMPORT})  is available to add to this list.
+
+forthitem
+forthsamp({-r})
+
+Make sure forthcode({REQUIRED}) is available.
+
+forthitem
+forthsamp({-s script})
+
+Load the file forthfile({script}) , but ignore its first line.
+This is intended to be used for scripts, i.e. a piece of code to be
+interpreted rather than compiled.
+_VERBOSE_({{The first line is probably}
+forthsamp({#!lina -s}){ or some such as }
+forthsamp({#!lina -l /usr/lib/forth/cgi/forthlib.blk -s}).})
+In a script forthcode({REQUIRED}) is available and
+you can use standard in and standard out.
+
+forthitem
+forthsamp({-v})
+
+Print version and copy right information.
+
+forthenditemize
+
+The remaining screens are available for options to be added at a later time,
+or for user defined options in a private library.
+
+@subsection Private libraries
+
+Working with source in files is quite comfortable using the default block library, especially
+if sufficient tools have been added to it. In principle all ISO words should be
+made available via forthcode({REQUIRED}) .
+
+In order to customize the forth library, you have to copy the default
+forthfile({/usr/lib/ciforth/forthlib.blk}) to your home directory, preferably to a lib
+subdirectory. Most shells allow you to redefine commands, such as e.g. in bash:
+
+forthsamp({alias lina='lina -l $HOME/lib/forthlib.blk'}).
+
+Note that the forthsamp({-l}) option hides itself, such that
+such an alias can be used completely identical to the original
+with respect to all options, including forthsamp({-l}).
+Analysing arguments passed to ciforth in your programs remains
+completely the same.
+
+@subsection Turnkey applications.
+A turnkey application should always attempt to close the library file that is default
+opened in forthcode({COLD}) , by executing forthcode({BLOCK-EXIT}).
+Errors never lead to throws and can be safely ignored.
+
+})
