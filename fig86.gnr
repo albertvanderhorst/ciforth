@@ -4468,7 +4468,10 @@ worddoc({STORAGE},{UPDATE},{update},{},{L0},
 {Marks the most recently referenced block (pointed to by
 forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
-storage of a different block.},{{BLOCK},{SCREEN}}, {}, enddoc)
+storage of a different block.},{{BLOCK},{SCREEN}}, 
+{{!CSP 1 BLOCK DROP UPDATE ?CSP},{} },
+}, 
+enddoc)
 HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV, FETCH
         DC      LDUP, CELLP,CELLP
@@ -4478,10 +4481,13 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      SEMIS
 ;
 worddoc({STORAGE},{EMPTY-BUFFERS},{empty_buffers},{},{ISO FIG L0},
-{Mark all block-buffers as empty, not necessarily affecting the
-contents. Updated blocks are not written to the disc. This is also an
-initialization proceedure before first use of the
-disc.},{{FLUSH},{BLOCK},{SCREEN}}, {}, enddoc)
+{Mark all block-buffers as empty. Updated blocks are not
+written to the disc. This is an initialization proceedure
+before first use of the disc. _VERBOSE_({The usage as an
+``undo'' is unfeasible in ciforth.}) }, 
+{{FLUSH},{BLOCK},{SCREEN},{UPDATE}}, 
+{{!CSP EMPTY-BUFFERS ?CSP},{}}, 
+enddoc)
 HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
@@ -4490,17 +4496,19 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         PAGE
 ;
 worddoc({STORAGE},{BUFFER},{buffer},{n --- addr},{ISO FIG},
-{Obtain the next memory buffer, assigning it to block forthvar({n}) .
-In ciforth blocks can be locked, and locked buffers are skipped
-in this process.
-If the contents of the buffer is marked as updated, it is written to
-the disc. In ciforth this is never needed, because updated blocks are
-written immediately.
-The block is not read from the disc.
- The address left is the
-field within the buffer to be used
-for data storage.},
-{{BLOCK},{STALEST},{PREV}}, {}, enddoc)
+{Find the next memory buffer, assigning it to block
+forthvar({n}) . In ciforth blocks can be locked, and locked
+buffers are skipped in this process. If the contents of the
+buffer is marked as updated, it is written to the disc. In
+ciforth this is never needed, because updated blocks are
+written immediately. The block is not read from the disc. The
+address forthsamp({addr}) 
+left is the field within the buffer to be used for data
+storage. BUG: if all buffers were already locked, the system
+freezes.}, 
+{{BLOCK},{STALEST},{PREV}}, 
+{{!CSP 1 BUFFER FIRST LIMIT WITHIN . ?CSP},{_T_}},
+enddoc)
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
         DC      STALEST, FETCH
@@ -4516,17 +4524,20 @@ BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
         DC      SEMIS
 ;
 worddoc({STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
-{Leave forthsamp({addr}) a pointer to the content field of the
-disc buffer containing block forthvar({n}), which is the
-physical disk block forthsamp({OFFSET+n}). If the block is not
-already in memory, it is transferred from disc to which ever
-buffer was least recently written. If the block occupying that
-buffer has been marked as updated, it is rewritten to disc
-before block forthvar({n}) is read into the buffer. In ciforth
-this cannot happen, because updates are written immediately.
+{Leave forthsamp({addr}) the disc buffer containing block
+forthvar({n}), which is the physical disk block
+forthsamp({OFFSET+n}). The address left is the field within the
+buffer to be used for data storage. If the block is not already
+in memory, it is transferred from disc to which ever buffer was
+least recently written. If the block occupying that buffer has
+been marked as updated, it is rewritten to disc before block
+forthvar({n}) is read into the buffer. In ciforth this cannot
+happen, because updates are written immediately.
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0FFH.})}, 
-{{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}}, {}, enddoc)
+{{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}}, 
+{{!CSP 1 BLOCK FIRST LIMIT WITHIN . ?CSP},{_T_} },
+enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
         DC      OFSET
@@ -4559,20 +4570,30 @@ worddoc({STORAGE},{FLUSH},{flush},{},{ISO FIG L0},
 {Transfer the content of each UPDATE d block buffer to disk.
 They are no longer associated with a block and their content is
 no longer available.
-},{{EMPTY-BUFFERS},{BLOCK},{SCREEN}}, {}, enddoc)
-HEADER({FLUSH},{FLUSH},{DOCOL})
-        DC      NOBUF,ONEP
-        DC      ZERO,XDO
-FLUS1:  DC      ZERO,BUFFE
-        DC      DROP
-        _LOOP(FLUS1)
+},{{EMPTY-BUFFERS},{BLOCK},{SCREEN}}, 
+{{1 BLOCK DROP PREV @ @ 0= . FLUSH PREV @ @ 0= .},{0 _T_} },
+}, 
+enddoc)
+HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
+
+; Unlock all buffers
+        DC      LIMIT
+        DC      FIRST, CELLP
+        DC      XDO
+FLUS1:  DC      ZERO, IDO, STORE
+        DC      LIT,(KBBUF+2*CW)
+        DC      PLOOP
+        DC      (FLUS1-$)
         DC      SEMIS
 ;
 worddoc({STORAGE},{SAVE},{save},{ --- },{L0},
 {Save the content of forthcode({SOURCE}) on the return stack
 prior to changing the forthdefi({current input source}).
 This must be balanced by a RESTORE in the same definition.},
-{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, {}, enddoc)
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, 
+{{!CSP : GS1 SAVE 0 IN ! RESTORE ; GS1 34 . ?CSP},{34} },
+}, 
+enddoc)
 HEADER({SAVE},{SAVE},{DOCOL})
         DC      FROMR
         DC      SOURC, TFET
@@ -4587,7 +4608,9 @@ Restore the content of forthcode({SOURCE}) from the return stack
 thusly restoring the forthdefi({current input source}) to what
 it was when the forthcode({SAVE}) was executed.
 },
-{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, {}, enddoc)
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, 
+{{( Via SAVE)},{}},
+enddoc)
 HEADER({RESTORE},{RESTO},{DOCOL})
         DC      FROMR
         DC      FROMR, FROMR, FROMR
@@ -4597,11 +4620,15 @@ HEADER({RESTORE},{RESTO},{DOCOL})
         DC SEMIS
 ;
 worddoc({STORAGE},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO L0},
-{Get a complete specification of the input source stream.
-For ciforth this is the content of forthcode({SOURCE}).
-ciforth needs 3 cells, and is always able to forthcode({RESTORE}) an input
-saved like this. },
-{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, {}, enddoc)
+{Get a complete specification of the input source stream. For
+ciforth this is the content of forthcode({SOURCE}). ciforth
+needs 3 cells, and is always able to forthcode({RESTORE}) an
+input saved like this. _VERBOSE_({This doesn't make this
+definition of any use at the application level.}) }, 
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, 
+{{!CSP : GS1 SAVE-INPUT 0 IN ! RESTORE-INPUT ; dnl
+    GS1 34 . ?CSP},{34} },
+enddoc)
 HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
         DC      SOURC, TFET
         DC      LIN, FETCH
@@ -4614,7 +4641,9 @@ ciforth is always able to restore the input across different
 input sources, as long as the input to be restored is not exhausted.
 This has the effect of chaining, and doesn't effect the return from nested calls
 be it interpreting, loading or evaluating. },
-{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, {}, enddoc)
+{{RESTORE},{RESTORE-INPUT},{SAVE-INPUT}}, 
+{{( Via SAVE-INPUT)},{}},
+enddoc)
 HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC      DROP
         DC      LIN, STORE
@@ -4627,7 +4656,10 @@ _VERBOSE_({Probably, because it
 is to become the current input stream.})
 The result is that its buffer will not be reclaimed
 until a forthcode({UNLOCK}) occurs.},
-{}, {}, enddoc)
+{{BLOCK},{UNLOCK}}, 
+{ {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
+    PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{1 _T_} }, 
+enddoc)
 HEADER({LOCK},{LLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
@@ -4639,7 +4671,12 @@ worddoc({STORAGE},{UNLOCK},{unlock},{ n --- },{CI},
 _VERBOSE_({Probably, because it
 is no longer the current input stream.})
 The result is that its buffer can again be reclaimed.},
-{{UNLOCK}}, {}, enddoc)
+{{UNLOCK}}, 
+{ 
+{EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
+ PREV @ CELL+ @ . 1 UNLOCK PREV @ CELL+ @ 0= .},{1 _T_} }, 
+}, 
+enddoc)
 HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
