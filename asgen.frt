@@ -276,9 +276,10 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 ( ------------- DATA STRUCTURES -----------------------------------------) 
 12 SET DISS          ( A row of dea's representing a disassembly. )
 : !DISS DISS !SET ;
-: .DISS DISS @+ SWAP DO
+: .DISS-AUX DISS @+ SWAP DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
+' .DISS-AUX CFA   VARIABLE 'DISS  ( Can be redefined to generate testsets)
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
 : DISS- 0 CELL+ MINUS DISS +! ; ( Discard last item of `DISS' )
@@ -354,7 +355,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 ( If present, print a result and continue searching for a new last item )
 : RESULT
     RESULT? IF
-        .DISS
+        'DISS @ EXECUTE
         DISS-
         REBUILD
     THEN
@@ -467,7 +468,7 @@ HERE POINTER !
 : %~ID. DUP IGNORE? IF DROP ELSE %ID. THEN  ;
 
 ( Print the disassembly `DISS'                                          )
-: .DISS' DISS @+ SWAP DO
+: .DISS   DISS @+ SWAP DO
     I @ DUP IS-COMMA 0= IF   %~ID.   ELSE   .COMMA   THEN
  0 CELL+ +LOOP 
 ;
@@ -480,11 +481,11 @@ HERE POINTER !
     STARTVOC BEGIN
         DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
         >NEXT%
-(       DUP ID. ." : " .DISS                                            )
+(       DUP ID. ." : "  'DISS @ EXECUTE                                 )
     DUP VOCEND? RESULT? OR UNTIL DROP
     RESULT? IF
       R> DROP
-      .DISS'
+      .DISS
     ELSE
       R> COUNT . POINTER ! ."  C," 
     THEN

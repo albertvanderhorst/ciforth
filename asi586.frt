@@ -26,6 +26,8 @@
 0 1        04   020000 ' C, CFA COMMAER B,    ( immediate byte : address/offset )
 0 1        00   010000 ' C, CFA COMMAER SIB,,   ( Most bizarre     )
 
+
+( #################### TO BE PHASED OUT ############################### )
 ( The `INCONSISTENCY-PAIRS' is a remnant from the time BY and BA where  )
 ( in one byte. It is now used to run assemblers that have still the     )
 ( old conventions. It identifies the `BA' part.                         )
@@ -41,7 +43,9 @@
 : 2PI' >R >R SPLIT R> R> 2PI ;
 : 3PI' >R >R SPLIT R> R> 3PI ;
 : xFIR' >R >R SPLIT R> R> xFIR ;
+( #################### TO BE PHASED OUT  END ########################## )
 
+( Meaning of the bits in TALLY-BA :                                     )
 ( Inconsistent:  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
@@ -50,7 +54,9 @@
 (  sib:       0100 no ..             0200 [AX +8*| DI]               )
 (  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
 (  segment    1000 no ..             2000 ES| ..                        )
-( Only valid for 16 bits real mode, in combination with an address      )
+
+( Names *ending* in primes BP|' -- not BP'| the prime registers -- are  )
+( only valid for 16 bits real mode, in combination with an address      )
 ( overwite. Use W, L, and end the line in TALLY! to defeat checks.      )
 
 0200 3800 0s T!'
@@ -60,7 +66,7 @@
 0200 10700 0s T!'
  0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP -- [SI [DI
 000280 10700 0s 0500 0s xFIR' [BP   ( Fits in the hole, safe inconsistency check)
-020240 10700 0s 0500 0s xFIR' [..   ( Fits in the hole, safe inconsistency check)
+020240 10700 0s 0500 0s xFIR' [MEM  ( Fits in the hole, safe inconsistency check)
 
 0120 0700 0s T!'
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
@@ -92,7 +98,7 @@
 2000 18 T!'   01 06 2 1FAMILY, PUSH|SG, POP|SG,
 0000 0002 0s T!'   0002 0s 0 0s 2 xFAMILY|R F| T|
 0401 0001 0s 0 0s xFIR' B|
-0402 0001 0s 1 0s xFIR' W|
+0402 0001 0s 1 0s xFIR' X|
 ( --------- two fixup operands ----------)
 1000 FF03 T!'
  0008 0000 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
@@ -202,10 +208,11 @@
 ( ############## HANDLING THE SIB BYTE ################################ )
 
 ( Handle a `sib' bytes as an instruction-within-an-instruction )
-( This is really straightforward, we say the sib commaer is a sib )
-( as per -- error checking omitted -- " 10000 ' ~SIB, CFA COMMAER SIB,," )
-( All the rest is to nest the state in this recursive situation )
-( Leaving this bit on would flag [.X+ +.* .X] as errors )
+( This is really straightforward, we say the sib commaer is a sib       )
+( instruction. as per -- error checking omitted -- " 10000 ' ~SIB, CFA  )
+( COMMAER SIB,,"                                                        )
+( All the rest is to nest the state in this recursive situation:        )
+( Leaving the 100 bit on would flag [.X+ +.* .X] as errors )
 ( Leaving BY would flag commaers to be done after the sib byte as errors)
 : (SIB),,   
     TALLY-BA @   TALLY-BY @   !TALLY      ( . -- state1 state2 )
@@ -220,27 +227,19 @@
 ( Disassembler was not available while creating the commaer. )
 ' DIS-SIB CFA   % SIB,, >DIS !    0   % SIB,, >CNT !   
 
-( Redefine some fixups, such that the use may say                       )
+( Redefine some fixups, such that the user may say                      )
 ( "[AX" instead of " ~SIB| SIB,, [AX"                                   )
-( Note that the disassembly is made to look like this.                  )
+( Note that the disassembly is made to look like the same. The ~SIB|    )
+( and the ~SIB, inside the SIB,, are print-suppressed.                  )
 : [AX   ~SIB| SIB,, [AX ;       : [SP   ~SIB| SIB,, [SP ;     
 : [CX   ~SIB| SIB,, [CX ;       : [BP   ~SIB| SIB,, [BP ;     
 : [DX   ~SIB| SIB,, [DX ;       : [SI   ~SIB| SIB,, [SI ;     
 : [BX   ~SIB| SIB,, [BX ;       : [DI   ~SIB| SIB,, [DI ;     
-: [..   ~SIB| SIB,, [.. ; 
+: [MEM  ~SIB| SIB,, [MEM ; 
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
-( You may always want to use these instead of (RB,)
+( You may want to use these always instead of (RB,)
     : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;
-    : RW, ISS @ - (RW,) ;      : RL, ISS @ - (RL,) ;
-(   : D0|  ' [BP] REJECT D0|  ;                                         )
-(   : [BP] ' D0|  REJECT [BP] ;                                         )
-(   : R| ' LES, REJECT ' LDS REJECT R| ;                                )
  ASSEMBLER DEFINITIONS
-(   : NEXT                                                              )
-(        LODS, W1|                                                      )
-(        MOV, W| F| AX'| R| BX|                                         )
-(        JMPO, D0| [BX]                                                 )
-(    ;                                                                  )
 ( ############## 8086 ASSEMBLER POST ################################## )
-CODE JAN MOV|SG, T| ES| R| AX| C;
+
