@@ -1,15 +1,16 @@
 worddocchapter({COMPILING},{ },
 {The wordset forthvar({COMPILING}) contains words that compile
-forthxref({IMMEDIATE}) words. 
+forthxref({IMMEDIATE}) words and numbers.
 You need special precautions because these words would execute during
-compilation.},
+compilation. Numbers are compiled forthdefi({in line}) , behind a word that fetches
+them.},
 {},{},{},{})
 worddocchapter({CONTROL},{ },
 {The wordset forthvar({CONTROL}) contains words that influence the control flow
 of a program, i.e. the sequence in which commands are executed in compiled words.
 With control words you can have actions performed repeatedly, or 
 depending on conditions.
-},{NEW CHAPTER },{},{},{})
+},{},{},{},{})
 worddocchapter({DEFINING},{ },
 {The wordset forthvar({DEFINING}) contains words that add new entries
 to the dictionary. A number of such forthdefi({defining}) words
@@ -22,27 +23,27 @@ worddocchapter({DICTIONARY},{ },
 {The wordset forthvar({DICTIONARY}) contains words that at a lower level than
 the wordset forthvar({DEFINING}) concern the memory area that
 is allocated to the dictionary. They may add data to the dictionary at the expense 
-of the free space one cell or one byte at a time, or allocate a buffer at once.
+of the free space, one cell or one byte at a time, or allocate a buffer at once.
 The dictionary space may also be shrunk, and the words that were there are lost.
 The forthdefi({dictionary entry}) of a word is represented by its lowest address. Based on that
 an entry may considered a record with fields. Words to access those fields also belong 
 to this wordset.},
-{NEW CHAPTER },{},{},{})
+{},{},{},{})
 worddocchapter({DOUBLE},{ },
 {The wordset forthvar({DOUBLE}) contains words that manipulate forthdefi({double})'s.
 _BITS32_({In this 32 Forth you would never need double's if it weren't
 for the NUMBER formatting wordset that uses them exclusively.})},
-{NEW CHAPTER },{},{},{})
+{},{},{},{})
 worddocchapter({ERRORS},{ },
 {The wordset forthvar({ERRORS}) contains words to handle errors.},
-{NEW CHAPTER },{},{},{})
+{},{},{},{})
 worddocchapter({INIT},{ },
 {The wordset forthvar({INIT}) contains words to initialise or reinitialise Forth.},
-{NEW CHAPTER },{},{},{})
+{},{},{},{})
 worddocchapter({INPUT},{ },
 {The wordset forthvar({INPUT}) contains words to get input from the terminal
 and such. For disk I/O: forthxref({STORAGE}) },
-{CONTENT},{NEW CHAPTER },{},{},{})
+{},{},{},{})
 worddocchapter({JUGGLING},{ },
 {The wordset forthvar({JUGGLING}) contains words that change the lifo-buffer.
 The necessity for this arise, because the data you want to feed to a program 
@@ -51,12 +52,53 @@ It also possible that  you need the same data twice, because you have to feed
 it to two different program's.
 Design your program such that you need them as little as possible,
 because they are confusing.},
-{NEW CHAPTER },{},{},{})
-worddocchapter({LOGIC},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({MEMORY},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({MISC},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({MULTIPLYING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({FORMATTING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
+{},{},{},{})
+worddocchapter({LOGIC},{ },
+{The wordset forthvar({LOGIC}) contains logic operators and
+comparison operators.
+A comparison operators (such as forthcode({=}) ) delivers a 
+logical forthdefi({flag}), 1 for true, 0 for false, representing a  
+condition (such as that two numbers are equal).
+The logical operators ( forthcode({AND}) etc.) 
+work on all _BITS_, one by one.
+In this way they are useful for mask operations, as well
+as for combining conditions 
+represented as flags. But beware that forthcode({IF}) only cares whether   
+the top of the stack is non-zero, such that to 
+forthcode({IF}) forthcode({-}) can mean non-equal. 
+Such conditions cannot be directly
+combined using logical operators, but forthsamp({0= 0=}) can help.},
+{},{},{},{})
+worddocchapter({MEMORY},{ },
+{The wordset forthvar({MEMORY}) contains words to fetch and 
+store numbers from forthdefi({double})s, forthdefi({cell})s or bytes in memory.
+There are also words to copy blocks of memory or fill them, and words that
+fetch a forthdefi({cell}), operate on it and store it back.},
+{},{},{},{})
+worddocchapter({MISC},{ },
+{The wordset forthvar({MISC}) contains words that defy categorisation.},
+{},{},{},{})
+worddocchapter({MULTIPLYING},{ },
+{The _BITS32_(original) 16 bits Forth's have problems with scaling (forthpxref({OPERATOR})).
+Operators with intermediate results of double precision solve this and are
+present in the forthvar({MULTIPLYING}) wordset. _BITS32_({In this 32-bit Forth
+you will have less need, but scaling remain tricky.}).
+Formatting is done with forthdefi({double})'s exclusively, and relies 
+on this wordset. Operators with mixed precision and unsigned operators
+allow to build arbitray precision from them in forthdefi({high level}) code.},
+{},{},{},{})
+worddocchapter({FORMATTING},{ },
+{The wordset forthvar({FORMATTING}) generates formatted output for 
+numbers, i.e. printing the digits in a field with a certain width,
+possibly with sign etc.
+This is possible in any forthdefi({number base}). (Normally base 10 is used,
+which means that digits are found as a remainder by dividing by 10).
+Formatting in Forth is always based on forthdefi({double}) numbers.
+Single numbers are handled by converting them to forthdefi({double}) first.
+This requires some double precision operators to be present in the Forth core. 
+forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
+},
+{},{},{},{})
 worddocchapter({OPERATOR},{ },
 {The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc. 
 The result of the operation is always
@@ -75,38 +117,49 @@ _BITS16_({Having a mere 3000 for the number range can easily lead to
 overflow in intermediate results during scaling: a multiplication
 followed by a division. note({1},{For example forthsamp({: ADD10% 110
 * 100 / ;})}). There are special operators to get around that.
-forthxref({MULTIPLYERS}).})},
-{NEW CHAPTER },{},{},{})
-worddocchapter({OUTPUT},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({PARSING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({SCREEN},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({SECURITY},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({STACKS},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({STORAGE},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({STRING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({SUPERFLUOUS},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({VOCABULARIES},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapterend({COMPILING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({CONTROL},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({DEFINING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({DICTIONARY},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({DOUBLE},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({ERRORS},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({INIT},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({INPUT},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({JUGGLING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({LOGIC},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({MEMORY},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({MISC},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({MULTIPLYING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({FORMATTING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({OPERATOR},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({OUTPUT},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({PARSING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({SCREEN},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({SECURITY},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({STACKS},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({STORAGE},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({STRING},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({SUPERFLUOUS},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
-worddocchapterend({VOCABULARIES},{~},{CONTENT},{NEW CHAPTER END },{},{},{})
+forthxref({MULTIPLYING}).})},
+{},{},{},{})
+worddocchapter({OUTPUT},{ },
+{The wordset forthvar({OUTPUT}) contains words to output 
+to the terminal and such. For disk I/O: forthxref({STORAGE}) },
+{},{},{},{})
+worddocchapter({PARSING},{ },
+{The forthdefi({outer interpreter}) is responsible for parsing, i.e.
+it gets a word from the input stream and interprets or compiles it,
+advacing the forthcode({IN}) pointer. The wordset forthvar({PARSING}) contains
+the words used by this interpreter and other words that consume characters
+from the input stream. In this way the outer interpreter need not be very smart,
+because its capabilities can be extended by new words based on those 
+building blocks.},
+{},{},{},{})
+worddocchapter({SCREEN},{ },{CONTENT},{},{},{},{})
+worddocchapter({SECURITY},{ },{CONTENT},{},{},{},{})
+worddocchapter({STACKS},{ },{CONTENT},{},{},{},{})
+worddocchapter({STORAGE},{ },{CONTENT},{},{},{},{})
+worddocchapter({STRING},{ },{CONTENT},{},{},{},{})
+worddocchapter({SUPERFLUOUS},{ },{CONTENT},{},{},{},{})
+worddocchapter({VOCABULARIES},{ },{CONTENT},{},{},{},{})
+worddocchapterend({COMPILING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({CONTROL},{~},{CONTENT},{},{},{},{})
+worddocchapterend({DEFINING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({DICTIONARY},{~},{CONTENT},{},{},{},{})
+worddocchapterend({DOUBLE},{~},{CONTENT},{},{},{},{})
+worddocchapterend({ERRORS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({INIT},{~},{CONTENT},{},{},{},{})
+worddocchapterend({INPUT},{~},{CONTENT},{},{},{},{})
+worddocchapterend({JUGGLING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({LOGIC},{~},{CONTENT},{},{},{},{})
+worddocchapterend({MEMORY},{~},{CONTENT},{},{},{},{})
+worddocchapterend({MISC},{~},{CONTENT},{},{},{},{})
+worddocchapterend({MULTIPLYING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({FORMATTING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({OPERATOR},{~},{CONTENT},{},{},{},{})
+worddocchapterend({OUTPUT},{~},{CONTENT},{},{},{},{})
+worddocchapterend({PARSING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SCREEN},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SECURITY},{~},{CONTENT},{},{},{},{})
+worddocchapterend({STACKS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({STORAGE},{~},{CONTENT},{},{},{},{})
+worddocchapterend({STRING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SUPERFLUOUS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({VOCABULARIES},{~},{CONTENT},{},{},{},{})
