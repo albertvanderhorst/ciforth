@@ -219,10 +219,22 @@ int c_expec(int count, char buffer[])
   int i;
   if ( count <= 0 ) return 0;
 
-  tty_linemode(&std_in);                                                       
-  i= read(0, buffer, count);
-  buffer[--i]=0;  /* Eat the cr. */
-
+  if (std_in.is_a_tty)
+  {
+      tty_linemode(&std_in);                                                       
+      i= read(0, buffer, count);
+      buffer[--i]=0;  /* Eat the cr. */
+  }
+  else
+  {
+      /* We got to read by chars, to be able to stop */
+      for(i=0; i<count-1; i++)  /* One char spare */
+      {
+          if ( 0==read(0,buffer+i,1) || '\n' == buffer[i] )
+              break;
+      }
+      buffer[i] = 0;
+  }
   return i;     /* Ignored by fig-Forth, use it and you have ANSI ACCEPT */
 }
 
