@@ -2369,7 +2369,7 @@ to the string variable at address forthsamp({addr}).},
 {{$@},{$!},{$+!}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -  dnl
 $@ PAD $! HERE 1 - C@ PAD $C+ PAD $@ TYPE},{A99}}, enddoc)
-HEADER({$C+},{SCPLUS},{DOCOL})
+HEADER({$C+},{CHAPP},{DOCOL})
         DC   LDUP, TOR
         DC   LDUP, FETCH, PLUS, CELLP, CSTOR
         DC   ONE, FROMR, PSTORE
@@ -2677,6 +2677,21 @@ enddoc)
 HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
 ;
 });_END_({_LOAD_})
+worddoc( {OPERATING-SYSTEM},{ARGS},{arguments},{--- addr},{},
+{This is a system dependant pointer to any arguments
+that is passed from the operating system to ciforth 
+during startup.
+_LINUX_N_({
+In this ciforth it is an array fo three pointers,
+to the programs name, to a null ended array of arguments,
+and to a null ended array of environment strings.
+});_END_({_LINUX_N_})
+},
+{{SYSTEM}},
+{{." Interactive"},{Interactive}},
+enddoc)
+HEADER({ARGS},{ARGS},{DOUSE}, _CELLS(31))
+;
 ;{========== END USER VARIABLES =============;}
 ;
 worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
@@ -2713,7 +2728,7 @@ _BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
 _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
 ; ))))
-CODE_HEADER({CELLS},{L_CELLS})
+CODE_HEADER({CELLS},{LCELLS})
         POP     AX
         LEA     AX,[AX*4]
         _PUSH
@@ -4412,6 +4427,7 @@ _HOSTED_MSDOS_({
 });_END_({ _HOSTED_MSDOS_})
 _ENDCOMMENT
         CLD                     ;{ DIR = INC}
+        MOV     _CELL_PTR[USINI+_CELLS(31)],STACKPOINTER ;{Remember ARGS.}
         MOV     STACKPOINTER,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
         MOV     BP,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
         _NEXT
@@ -5256,7 +5272,7 @@ HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
         PAGE
 ;
 _PC_({
-worddoc( {SYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},
+worddoc( {OPERATING-SYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt forthvar({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contains
 forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
@@ -5296,7 +5312,7 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
 _SWITCH_({SPSAVE: DC       0H})
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
-worddoc( {SYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
+worddoc( {OPERATING-SYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthsamp({a b c d}) in
 registers forthsamp({AX BX CX DX}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
@@ -5331,7 +5347,7 @@ CODE_HEADER({BDOS},{BDOS})
         _NEXT
 });_END_({ _PC_})
 _HOSTED_LINUX_({
-worddoc( {SYSTEM},{LINOS},{linos},{p1 p2 p3 n---ret},{},
+worddoc( {OPERATING-SYSTEM},{LINOS},{linos},{p1 p2 p3 n---ret},{},
 { Do a Linux
 system call (man 2) with parameters forthsamp({p1 p2 p3}).
 forthvar({ret}) is the return value of the call. If it is negative, it
@@ -5348,7 +5364,7 @@ CODE_HEADER({LINOS},{LINOS})
         INT     80H        ;{ Generic call on LINUX }
         _PUSH     ; Positive means okay. Negative means -errno.
 ;       
-worddoc( {SYSTEM},{LINOS5},{linos5},{p1 p2 p3 p4 p5 n---ret},{},
+worddoc( {OPERATING-SYSTEM},{LINOS5},{linos5},{p1 p2 p3 p4 p5 n---ret},{},
 { Do a Linux
 system call (man 2) with parameters forthsamp({p1 p2 p3 p4 p5}).
 forthvar({ret}) is the return value of the call. If it is negative, it
@@ -5515,7 +5531,7 @@ _LINUX_N_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
-worddoc( {SYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
+worddoc( {OPERATING-SYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
 {Handle the error forthvar({errno}) by interpreting it as returned from a
 Linux system call. If it is negative error forthvar({-n}) is displayed and the word
 is aborted.
@@ -5723,7 +5739,7 @@ HEADER({KEY?},{KEYQ},{DOCOL})
 RFDS:   _RESB   128     ;{32 channels maximum.}
 TV:     _RESB   8
 ;
-worddoc( {SYSTEM},{MS},{millisecond},{n1 ---},{ISO},
+worddoc( {OPERATING-SYSTEM},{MS},{millisecond},{n1 ---},{ISO},
 { Wait for forthsamp({n1}) miliseconds. },
 {{KEY?}},
 {{ 123 10 MS . },{123}},
@@ -6227,22 +6243,16 @@ Leave it as a string forthsamp({sc2}) .
 enddoc)
 HEADER({GET-FILE},{GFILE},DOCOL)
         DC      HERE, TOR, LIT, 10000000, ALLOT
-        DC      RR, SSTOR, ZERO, RR, SCPLUS ; {Unix requires a c-string.}
+        DC      RR, SSTOR, ZERO, RR, CHAPP ; {Unix requires a c-string.}
         _STRINGINLINE({FiLeBuF})        ; {Magic number.}
         DC      RR, SPTOR
-;  R@ $! 0 R@ $C+  "FiLeBuF" R@ $+!
         DC      FROMR, SFET, OVER, PLUS, TOR
-;  R> $@ OVER + >R
         DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
         DC      LDUP, QLERR 
-;  O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR 
         DC      LDUP, RR, LIT,  9999000, LIT, read, LINOS 
         DC      LDUP, QLERR, TOR
-;   DUP R@ 9999000 READ LINOS DUP ?LINUX-ERROR >R
         DC      ZERO,ZERO, LIT, close, LINOS, QLERR
-;  0 0 CLOSE LINOS ?LINUX-ERROR 
         DC      FROMR, FROMR, SWAP
-;  R> R> SWAP ;
         DC      SEMIS
 ;
 worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
@@ -6254,10 +6264,34 @@ forthsamp({i*x}). },
 enddoc)
 HEADER({INCLUDED},{INCLUD},DOCOL)
         DC      GFILE
-; GET-FILE
         DC      SAVE, PEVAL, INTER, RESTO
-; SAVE (EVAL) INTERPRET RESTORE ;
         DC      SEMIS
+;
+worddoc( {OPERATING-SYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
+{Have the operating system execute the command contained 
+in the string forthsamp({sc1}).
+},{{BLOCK},{?LINUX-ERROR}},
+{{"cat hello.frt" SYSTEM},{." Hello world!"}},
+enddoc)
+HEADER({SYSTEM},{SYSTEM},{DOCOL})
+        DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
+        DC      ZERO, ZERO, ZERO, LIT, fork, LINOS
+        DC      LDUP, QLERR
+        DC      ZEQU
+        _0BRANCH(SYSTEM1)
+        DC      LIT, SHELL, LIT, SYSARGS
+;  Get environment vector
+        DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
+        DC      LIT, execve, LINOS
+        DC      LIT, 64, PLUS, MESS, BYE  
+SYSTEM1: 
+        DC      SEMIS
+;
+SHELL:   DB      "/bin/sh",0
+SYSARG1: DB      "sh", 0
+SYSARG2: DB      "-c", 0
+COMBUF:  _RESB(256)
+SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + _CELLS(1), 0
 ;
 worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
@@ -7429,7 +7463,7 @@ HEADER({WORDS},{WORDS},{DOCOL})
         DC      SEMIS
 ;
 _NORMAL_BYE_({
-worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
+worddoc( {OPERATING-SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment MSDOS.
 },{{COLD}}, 
 {{." interactive"},{interactive}},
@@ -7439,7 +7473,7 @@ HEADER({BYE},{BYE},{DOCOL})
 ;{ EXIT TO PC-DOS}
 });_END_({ _NORMAL_BYE_})
 _ABSOLUTELOAD_({
-worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
+worddoc( {OPERATING-SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {_PROTECTED_({Switch back to real mode.})
 Return to the host environment MSDOS.
 },{{COLD}}, 
@@ -7453,7 +7487,7 @@ RETDOSV: JMP 0:0        ; {Filled in during boot}
 
 });_END_({ _ABSOLUTELOAD_})
 _HOSTED_LINUX_({
-worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
+worddoc( {OPERATING-SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment Linux.
 },{{COLD}}, 
 {{." interactive"},{interactive}},
@@ -7916,8 +7950,8 @@ because they are equivalent to small sequences of code.
 _VERBOSE_({Traditionally one hoped to speed Forth up by coding these words
 directly})},
 {},{},{},{}, {}, enddoc)
-worddocchapter({SYSTEM},{ },
-{The wordset forthvar({SYSTEM}) contains words that call the underlying operating
+worddocchapter({OPERATING-SYSTEM},{ },
+{The wordset forthvar({OPERATING-SYSTEM}) contains words that call the underlying operating
 system or functions available in the BIOS-rom.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({VOCABULARIES},{ },

@@ -58,6 +58,8 @@ steal({_}{newselect},__NR__newselect)
 steal({w}{rite},__NR_write)
 steal({i}{octl},__NR_ioctl)
 steal({l}{seek},__NR_lseek)
+steal({e}{xecve},__NR_execve)
+steal({f}{ork},__NR_fork)
 ; ------------------------------------------------------------
 ;   End of constants stolen from C.
 ; ------------------------------------------------------------
