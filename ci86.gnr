@@ -415,13 +415,15 @@ ENDBOOT:
         ORG     100H    ;{ Required start of .COM program.}
 });_END___1__({ _HOSTED_MSDOS_1_})
 
+_COMMENT
 ;____1_____ _BOOTED_1_({
 
 ;{ Remember: our model assumes that all segments the same (small model, or }
 ;{ .com program) ). Now make sure the CS agrees with the absolute addresses}
 ;{ used in Forth. Make other segments the same.                            }
 ;{In fact the following is needed and works only if booted code is started }
-;{ by MSDOS. Otherwise the codesegment is already correct. }
+;{ by MSDOS [ Or for booted code, the load address is not the boot address,}
+;{ but that is bizar].}
 ;{ Protected mode requires this very temporarily, until GDTLOAD is filled.}
         CALL  HERE1
 HERE1:  POP   AX         ;{ Reality.}
@@ -447,22 +449,27 @@ HERE2:
         MOV     STACKPOINTER,0H
         STI                     ;{ Allow interrupts}
 });_END___1__({ _BOOTED_1_})
+_ENDCOMMENT
 
 ; ########################################################################################
 ;                       MOVE CODE TO ITS PLACE (still real mode)
 ; ########################################################################################
 
 ;____1____ _SWITCH_1_({
-; {Move code down to where it belongs.}
+; {Move code up to where it belongs.}
 ; {This should do the job because everything else is assembled }
 ; {as if everything is where it belongs. (Sound logical, isn't it?)}
         STD     ; Start at the end going back.
-        ; Remember CS/DS are true, such that CS:TEXTEND really points there.
         MOV     CX,TEXTEND-HERE5 ; Amount to move
-        MOV     SI,TEXTEND-1     ; First byte to move
-        MOV     AX, LOADADDRESS/10H ; Destination segment
+        CALL  HERE6
+HERE6:  POP     AX                 ; { Calculate address of the first byte to move}
+        ADD     AX,TEXTEND-HERE6-1     
+        MOV     SI,AX           ; {Relocatable address, w.r.t code segment.}
+        MOV     AX,CS           
+        MOV     DS,AX
+        MOV     AX, (LOADADDRESS-M4_ORG)/10H ; Destination segment
         MOV     ES, AX
-        MOV     DI,SI           ;
+        MOV     DI, TEXTEND-1     
         REPNZ
         MOVSB
         PUSH    ES    ; {Corrected code segment}
@@ -525,7 +532,7 @@ PROTECT:
         MOV     DI,GDT_CS
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
+        MOV     EAX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
         STOSW           ; {Only 16 bits}
         SHR     EAX,8
         ADD     AX,9A00H
@@ -544,7 +551,7 @@ PROTECT:
         PUSH AX     ; {Correct code segment}
         SUB AX,BX      ;{ Discrepancy between dream and reality}
         MOV CX,10h     ;{ How much units would that be for the IP?}
-        XOR DX,DX
+        CWD
         MUL CX
         CALL  HERE3
 HERE3:  POP   BX         ;{ Reality.}
