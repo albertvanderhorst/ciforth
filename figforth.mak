@@ -109,7 +109,7 @@ fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@ 
 
 # Convenience under linux. Steal the definitions of constants from c include's.
-constant.m4 : stealconstant.c ; cc -E $+ | grep '^define' >$@
+constant.m4 : stealconstant.c ; cc -E $+ | m4 prelude.m4 - >$@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
