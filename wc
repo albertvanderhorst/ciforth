@@ -35,19 +35,29 @@ CREATE BUFFER SIZE ALLOT
 0 CONSTANT O_RDONLY
 
 VARIABLE HANDLE
-: COUNT-FILE BEGIN HANDLE @ BUFFER SIZE READ LINOS DUP 0 >
-WHILE COUNT-BUFFER REPEAT DROP ;
+: COUNT-FILE
+    BEGIN
+        HANDLE @ BUFFER SIZE READ LINOS DUP ?LINUX-ERROR
+    DUP 0 > WHILE
+        COUNT-BUFFER
+    REPEAT DROP ;
 
 : ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
-( c-name -- handle/err )
-: OPEN-LINUX ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR ;
-: STILL-FILES HERE C@  ( -- flag ) ;  ( Count <>0 means more files)
-: OPEN-FILE BL WORD STILL-FILES ( [filename-at-here] -- handle/-1 )
-    IF HERE COUNT TYPE HERE OPEN-LINUX ELSE -1 THEN  HANDLE ! ;
-: TREAT-FILE ZERO-COUNT COUNT-FILE SHOW-COUNT ;
+: STILL-FILES C@  ; ( string variable -- flag )( Length <>0 means more files)
+( c-name -- ) ( Open file with the specified name, c-name must be modifiable)
+: OPEN-FILE ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR HANDLE ! ;
+( [filename-at-here] -- handle/-1 )
+: TREAT-FILE ZERO-COUNT COUNT-FILE COUNT TYPE SHOW-COUNT ;
 : CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?LINUX-ERROR ;
 
-: DO-FILE BEGIN OPEN-FILE STILL-FILES WHILE TREAT-FILE CLOSE-FILE REPEAT BYE ;
+: DO-FILE
+    BEGIN
+        BL WORD
+    DUP STILL-FILES WHILE
+        DUP OPEN-FILE TREAT-FILE CLOSE-FILE
+    REPEAT BYE ;
+
+0 WARNING !
 
 CR
 DO-FILE $*
@@ -58,4 +68,4 @@ DO-FILE $*
 #
 # Note that we need to go BYE in DO-FILE otherwhise we get a spurious new
 # line. Furthermore we need ``|tail -n<number of file>'' otherwise there will
-# be a lot of OK's.
+# be a spurious startup message.
