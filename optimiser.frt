@@ -8,6 +8,8 @@
 \ have been filled in in the flag fields.
 
 REQUIRE $
+\   : \D POSTPONE \ ; IMMEDIATE
+  : \D ;            IMMEDIATE
 
 \ For DEA : it HAS no side effects, input or output.
 : NS?   >FFA @ FMASK-NS AND FMASK-NS = ;
@@ -17,7 +19,6 @@ VARIABLE CSC
 
 \ From WHERE do we have optimisable code. (Ends at ``HERE'')
 VARIABLE OPT-START
-
 
 : !OPT-START   HERE OPT-START !   0 CSC ! ;
 
@@ -29,15 +30,12 @@ VARIABLE OPT-START
 
 \ For STACKEFFECTBYTE : we CAN still optimise, because we know we have
 \ sufficiantly constant stack cells.
-: STILL-OPTIMISE   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSC @ > 0=  AND ;
+: ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSC @ > 0=  AND ;
 
 
 \ Combine a STACKEFFECTBYTE into ``CSC''.
 \ ``-'' works here because both nibbles have offset 1!
 : COMBINE-SE    SE:1>2 SWAP -   CSC +! ;
-
-\ Combine DEA's effect into the current state, return "we CAN optimise"
-: CAN-COMBINE?   NS? OVER SE@ STILL-OPTIMISE AND ;
 
 \ Execute at compile time the ``NONAME'' word: the optimisable code we have collected from
 \ ``OPT-START''
@@ -72,29 +70,54 @@ VARIABLE OPT-START
     THEN
 ;
 
+\ Combining the effect of DEA into the current state, return
+\ "the folding optimisation still HOLDS".
+: CAN-FOLD?   NS? OVER SE@ ENOUGH-POPS AND ;
+
 \ For BEGIN END DEA : if ``DEA'' allows it, add to optimisation,
-\ else cash it and restart it. BEGIN START is the code copied.
+\ else cash it and restart it. ``BEGIN'' ``START'' is the code copied.
 \ (Mostly ``DEA"" plus inline belonging to it.)
 \ Return a new BEGIN for the code to be moved, mostly the old ``END''.
-:  OPT/NOOPT
-    DUP CAN-COMBINE?
-    IF ^
+:  ?OPT-FOLD?
+    DUP CAN-FOLD?
+    IF
         SE@ COMBINE-SE               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
-^   ELSE ^
+    ELSE
         DROP CASH  ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
         !OPT-START
-^   THEN ;
+    THEN ;
+
+\ FIXME : all special optimisations must be tried only if the
+\ the special optimisations flag is on, not always.
+
+\ FIXME : the stack effect is no good, not uniform.
+
+\ FIXME : the folowing is the proper criterion for the exec optimisation.
+\ Combining the effect of DEA into the current state, return
+\ "the ``EXECUTE'' optimisation IS possible"
+: CAN-EXEC?   'EXECUTE = CSC @ 0 > AND ;
+
+\ For DEA : if ``DEA'' is ``EXECUTE'' try the execute optimisation.
+\ It is assumed that the FOLD optimisation already is tried, such
+\ that cashing has been done.
+:  ?OPT-EXEC?
+    ' EXECUTE ^ =   HERE 3 CELLS - @ 'LIT ^ = AND IF
+        "HUURAH, EXECUTING" TYPE
+         HERE 2 CELLS - @  -3 CELLS ALLOT ,
+         !OPT-START
+    THEN ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
 : EXPAND
     !OPT-START
     BEGIN DUP
         NEXT-PARSE
-    WHILE
-        OPT/NOOPT
-    REPEAT DROP 2DROP
+    WHILE >R
+        R@ ?OPT-FOLD?
+        ^ R@ ?OPT-EXEC? ^
+    RDROP REPEAT DROP DROP DROP
     CASH   POSTPONE (;)
 ;
 
@@ -109,3 +132,8 @@ VARIABLE OPT-START
 \D : test2 1 2 SWAP ;
 \D 'test2 OPT-FOLD
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test2
+\D : test3 1 2 'SWAP EXECUTE ;
+\D 'test3 OPT-FOLD
+\D "EXPECT `` 1 2 SWAP '' :" CR TYPE CRACK test3
+\D 'test3 OPT-FOLD
+\D "EXPECT `` 2 1 '' :" CR TYPE CRACK test3
