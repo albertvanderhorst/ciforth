@@ -2198,7 +2198,7 @@ buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
 },{{BLOCK},{LIMIT}},
-{{LIMIT FIRST - B/BUF @ /MOD DROP #BUF = .},{_T_}},
+{{LIMIT FIRST - B/BUF @ /MOD DROP #BUFF = .},{_T_}},
 enddoc)
 HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB    (KBBUF+2*CW)*NBUF
@@ -4305,14 +4305,15 @@ worddocsafe({SCREEN},{(LINE)},{paren_line},{n1 n2 --- addr count},{},
 {Convert the line number forthcode({n1}) and the screen
 forthvar({n2}) to the disc buffer address containing the data.
 A count of 64 indicates the full line text length.},{{-LINE}}, 
-{}, enddoc)
+{ 
+{1 2 (LINE) TYPE}, { I have a beautiful disclaimer,}
+},
+enddoc)
 HEADER({(LINE)},{PLINE},{DOCOL})
-        DC      TOR
-        DC      LIT,64
-        DC      BBUF
-        DC      SSMOD
-        DC      FROMR
+        DC      BBUF, STAR
+        DC      SWAP, LIT,64, STAR
         DC      PLUS
+        DC      BBUF, SLMOD
         DC      BLOCK
         DC      PLUS
         DC      LIT,64
@@ -4323,7 +4324,11 @@ worddoc({SCREEN},{.LINE},{dot_line},{line scr --},{},
 line and screen number. _VERBOSE_(
 {Trailing blanks are suppressed,
 which leads to a tremendous speed advantage on modern glass tty's.})},
-{{C/L}}, {}, enddoc)
+{{C/L}}, 
+{
+{1 2 .LINE}, { I have a beautiful disclaimer,}
+}, 
+enddoc)
 HEADER({.LINE},{DLINE},{DOCOL})
         DC      PLINE
         DC      DTRAI
@@ -4331,12 +4336,20 @@ HEADER({.LINE},{DLINE},{DOCOL})
         DC      SEMIS
 ;
 worddoc({ERRORS},{MESSAGE},{message},{n --},{},
-{Print on the selected output device the text of line forthvar({n}) relative to
-screen 4 of drive 0. forthvar({n}) may be positive or negative. forthcode({MESSAGE}) may be
-used to print incidental text such as report headers. If forthcode({WARNING}) is
-zero, the message will simply be printed as a number (disc
-unavailable).},{},
-{{0 WARNING ! 12 MESSAGE},{MSG # 12 }},
+{Print on the selected output device the text of line
+forthvar({n}) relative to screen 4. forthvar({n}) may be
+positive or negative. forthcode({MESSAGE}) may be used to print
+incidental text such as report headers. If forthcode({WARNING})
+is zero, the message will simply be printed as a number (disc
+unavailable).
+If WARNING is not 1 and there are disk problems:
+Because ERROR uses MESSAGE , nothing will be printed in case
+of disk errors, not even that there is a disk error.
+}, 
+{{ERROR}},
+{
+{1 WARNING ! -1F MESSAGE}, { I have a beautiful disclaimer,},
+{0 WARNING ! 12 MESSAGE},{MSG # 12 }},
 enddoc)
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      WARN
@@ -4353,10 +4366,13 @@ MESS1:  _STRINGINLINE({MSG # })
         DC      DOT     ;{ENDIF}
 MESS3:  DC      SEMIS
 ;
+_PC_({
 worddocsafe({MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
 forthvar({port}). A port address is always 16 bits .},
-{{PC!},{P@},{P!},{@}}, {}, enddoc)
+{{PC!},{P@},{P!},{@}}, 
+{{No test)},{}},
+enddoc)
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
         POP     DX      ;{ PORT ADDR}
@@ -4368,7 +4384,9 @@ worddoc({MEMORY},{PC!},{port_char_store},{b port --- },{},
 {Store a byte forthvar({b}) to the port address
 forthvar({port}).
 A port address is always 16 bits .},
-{{PC@},{P!},{P@},{!}}, {}, enddoc)
+{{PC@},{P!},{P@},{!}}, 
+{{No test)},{}},
+enddoc)
 CODE_HEADER({PC!},{PCSTO})
         POP     DX      ;{PORT ADDR}
         POP     AX      ;{DATA}
@@ -4378,7 +4396,9 @@ CODE_HEADER({PC!},{PCSTO})
 worddocsafe({MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
 forthvar({port}). A port address is always 16 bits .},
-{{P!},{PC@},{PC!},{@}}, {}, enddoc)
+{{P!},{PC@},{PC!},{@}}, 
+{{No test)},{}},
+enddoc)
 CODE_HEADER({P@},{PFET})
         POP     DX      ;{PORT ADDR}
         IN      AX,{DX}  ;{WORD INPUT}
@@ -4387,38 +4407,53 @@ CODE_HEADER({P@},{PFET})
 worddoc({MEMORY},{P!},{port_store},{n port --- },{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
 forthvar({port}) .},
-{{P@},{PC!},{PC@},{!}}, {}, enddoc)
+{{P@},{PC!},{PC@},{!}}, 
+{{No test)},{}},
+enddoc)
 CODE_HEADER({P!},{PSTO})
         POP     DX      ;{PORT ADDR}
         POP     AX      ;{DATA}
         OUT     {DX},AX   ;{WORD OUTPUT}
         _NEXT
 ;
+});_END_({_PC_})
 worddoc({STORAGE},{STALEST},{stalest},{--- addr},{},
 {A variable containing the address of the oldest
 block buffer, the first candidate to be claimed if a new
-one is needed.},{{BLOCK}}, {}, enddoc)
+one is needed.},{{BLOCK}}, 
+{ { STALEST @ FIRST LIMIT WITHIN .},{_T_} }, 
+enddoc)
 HEADER({STALEST},{STALEST},{DOVAR}, )
         DC BUF1
 ;
 worddoc({STORAGE},{PREV},{prev},{---- addr},{},
 {A variable containing the address of the disc buffer most recently
 referenced. The forthcode({UPDATE}) command marks this buffer to be
-later written to disc.},{{BLOCK}}, {}, enddoc)
+later written to disc.},{{BLOCK}}, 
+{ { STALEST @ FIRST LIMIT WITHIN .},{_T_} }, 
+enddoc)
 HEADER({PREV},{PREV},{DOVAR}, )
         DC      BUF1
 ;
 worddoc({STORAGE},{#BUFF},{hash_buf},{--- c},{},
 {A constant that leaves the number of block buffers.
 },
-{{BLOCK}}, {}, enddoc)
+{{BLOCK}}, 
+{{#BUFF 100 U< .},{_T_} }, 
+enddoc)
 HEADER({#BUFF},{NOBUF},{DOCON}, NBUF)
 ;
 worddoc({STORAGE},{+BUF},{plus_buf},{add1 --- addr2 f},{FIG},
 {Advance the disc buffer address forthvar({addr1}) to the address of
 the next buffer forthvar({addr2}) . Boolean forthvar({f}) is false
 when forthvar({addr2}) is the buffer presently pointed to by variable
-forthcode({PREV})},{{BLOCK}}, {}, enddoc)
+forthcode({PREV}). 
+},{{BLOCK}}, 
+{
+{ PREV @ DUP +BUF DROP DUP PREV ! FIRST LIMIT WITHIN .},{_T_}, 
+{ +BUF . DUP FIRST LIMIT WITHIN .},{0 _T_}, 
+{ +BUF 0= . DUP FIRST LIMIT WITHIN .},{0 _T_}, 
+}, enddoc)
 HEADER({+BUF},{PBUF},{DOCOL})
         DC      LIT,(KBBUF+2*CW)
         DC      PLUS,LDUP
@@ -4481,15 +4516,16 @@ BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
         DC      SEMIS
 ;
 worddoc({STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
-{Leave the memory address of the block buffer containing block forthvar({n}),
-which is the physical disk block forthsamp({OFFSET+n}).
-If the block is not already in memory, it is transferred from disc to
-which ever buffer was least recently written. If the block occupying
-that buffer has been marked as updated, it is rewritten to disc
-before block forthvar({n}) is read into the buffer.
-In ciforth this cannot happen, because updates are written
-immediately.
-_FEWBLOCKS_({In this experimental version forthsamp({PMASK}) restricts the number of blocks to 0FFH.})},
+{Leave forthsamp({addr}) a pointer to the content field of the
+disc buffer containing block forthvar({n}), which is the
+physical disk block forthsamp({OFFSET+n}). If the block is not
+already in memory, it is transferred from disc to which ever
+buffer was least recently written. If the block occupying that
+buffer has been marked as updated, it is rewritten to disc
+before block forthvar({n}) is read into the buffer. In ciforth
+this cannot happen, because updates are written immediately.
+_FEWBLOCKS_({In this experimental version forthsamp({PMASK})
+restricts the number of blocks to 0FFH.})}, 
 {{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}}, {}, enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
