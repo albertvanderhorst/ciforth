@@ -18,7 +18,7 @@ divert(9)dnl
 @pindex $2
 
 @noindent
-Name: $2
+Name: @code{{{{{{$2}}}}}}
 
 @noindent
 ifelse($4,,
