@@ -42,6 +42,8 @@ dnl    Block buffer are allocated somewhere high
 define( {_HIGH_BUF_1_}, _yes({$0}) )dnl       
 dnl    Block buffer are allocated in the dictionary
 define( {_LOW_BUF_1_}, _no({$0}) )dnl       
+dnl    Booting directly into forth, from floppy or hard disk.
+define({_BOOTED_1_},_no)dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
@@ -51,8 +53,8 @@ dnl
 dnl Run the forth in protected mode, in fact mucho invisible.
 define( {_PROTECTED_1_}, _no({$0}) )dnl       
 dnl
-dnl Run the forth in protected mode, but take care of booting etc.
-define( {_NATIVE_1_}, _no({$0}) )dnl       
+dnl Have code to switch ourselves to protected mode, e.g. after booting.
+define( {_SWITCH_1_}, _no({$0}) )dnl       
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl

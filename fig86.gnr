@@ -63,6 +63,9 @@ credit notice:
                San Carlos, Ca.  94070
 _ENDCOMMENT
         PAGE
+; ########################################################################################
+;                       PREPARATION (no code)
+; ########################################################################################
 FIGREL  EQU     2       ;{ FIG RELEASE #}
 FIGREV  EQU     0       ;{ FIG REVISION #}
 USRVER  EQU     34      ;{ USER VERSION NUMBER, a digit now}
@@ -152,7 +155,7 @@ _ENDCOMMENT
 
 ;{ Segments}
 REALSEGMENT     EQU     BOOTADDRESS/10H ;{ All real code executes here}
-;____1_____ _NATIVE_1_({
+;____1_____ _SWITCH_1_({
 CS_COMMON       EQU     REALSEGMENT     ;{ Protected overlapping segment with same}
 DS_16           EQU     1800H           ;{ Real mode may dabble here}
 DS_32           EQU     1800H           ;{ Real mode may dabble here}
@@ -166,9 +169,25 @@ IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
 GDTLEN EQU 7FFFH
 GDT EQU 28000H
 GDT_SEGMENT EQU GDT/10H
-});_END___1__({ _NATIVE_1_})
+});_END___1__({ _SWITCH_1_})
+
+;____1_____ _LINUX_N_1_({
+include(constant.m4)
+SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
+RAWIO           EQU     (ECHO | ICANON)
+        global  _start        ; Entry point
+});_END___1__({_LINUX_N_1_})
+
+;____1_____ _LINUX_C_1_({
+        extern  c_type,c_expec,c_key,c_qterm
+        extern  c_rslw, c_block_exit, c_block_init
+        global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
+});_END___1__({_LINUX_C_1_})
 
         PAGE
+; ########################################################################################
+;                       BOOTCODE    (optional, always real mode)
+; ########################################################################################
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
 ;____1_____ _BOOTFD__1_({
@@ -213,7 +232,9 @@ BOOT:
         CALL    DISPLAY
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
-        JNZ  ELSE1
+        JZ  ELSE3
+        JMP ENDBOOT     ; {Skip booting if started from MSDOS}
+ELSE3:
         ;{ Adjust code segment address without leaving the ball}
         ;{ Generating machine code is actually simpler than}
         ;{ beating the assembler. After 10 attempts I gave up}
@@ -250,8 +271,7 @@ BEGIN1: CALL    READSECTOR
         MOV     AL,'W'
         CALL    DISPLAY
         CALL    DISPLAYCR
-_REAL_1_({        JMP     BOOTUP})
-_NATIVE_1_({        JMP     PROTECT})
+        JMP     ENDBOOT
 ENDLD:  DW      INITDP
 ;{       Read the sector with number in CX (Counting from 0)}
 ;{       Leave into CX the incremented sec# }
@@ -277,41 +297,6 @@ READSECTOR:
         POP     CX
         INC     CX
         RET
-
-DISPLAYCR:
-        MOV     AL,ACR
-        CALL    DISPLAY
-        MOV     AL,LF
-        JMP DISPLAY
-
-DISPLAYPC:      POP     AX
-        PUSH    AX
-DISPLAYW:       PUSH    AX              ;{ Display AX in hex }
-        MOV     AL,AH
-        CALL    DISPLAYHEX
-        POP     AX
-        ;{ CALL DISPLAYHEX ; RET}
-DISPLAYHEX:     PUSH    AX              ;{ Display AL in hex }
-        MOV     CL,4
-        SAR     AL,CL
-        CALL    DISPLAYHD
-        POP     AX
-        ;{ CALL DISPLAYHD ; RET}
-DISPLAYHD:      AND     AL,0FH          ;{ Display AL as one hex digit}
-        DAA
-        MOV     AH,AL
-        MOV     CL,5
-        SHR     AH,CL
-        ADC     AL,30H
-        ;{ CALL DISPLAY ; RET}
-DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
-        MOV     AH,0EH
-        INT(10H)
-        RET
-
-        _NEW_ORG(01FEH)
-        ;{ Signature. }
-        DB         055H, 0AAH
 
 });_END___1__({ _BOOTFD__1_})
 
@@ -372,7 +357,9 @@ BOOT:
         CALL    DISPLAY
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
-        JNZ  ELSE1
+        JZ  ELSE3
+        JMP ENDBOOT     ; {Skip booting if started from MSDOS}
+ELSE3:
         ;{ Adjust code segment address without leaving the ball}
         ;{ Generating machine code is actually simpler than}
         ;{ beating the assembler. After 10 attempts I gave up}
@@ -401,8 +388,11 @@ ELSE1:
         MOV     AL,'W'
         CALL    DISPLAY
         CALL    DISPLAYCR
-_REAL_1_({        JMP     BOOTUP})
-_NATIVE_1_({        JMP     PROTECT})
+        JMP     ENDBOOT
+});_END___1__({ _BOOTHD__1_})
+
+;____1_____ _BOOTED_1_({
+; Debug code, could be dispensed with in an ideal world.
 DISPLAYCR:
         MOV     AL,ACR
         CALL    DISPLAY
@@ -434,19 +424,31 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         INT(10H)
         RET
 
-        _NEW_ORG(01FEH)
-        ;{ Signature. }
-        DB         055H, 0AAH
+ENDBOOT:                        
+});_END___1__({ _BOOTED_1_})
 
-});_END___1__({ _BOOTHD__1_})
-
+; ########################################################################################
+;                       READJUST CODE SEGMENT REGISTER (still real mode)
+; ########################################################################################
 ;____1_____ _HOSTED_MSDOS_1_({
         ORG     100H    ;{ Required start of .COM program.}
         JMP     BOOTUP
 });_END___1__({ _HOSTED_MSDOS_1_})
 
+;____1_____ _BOOTED_1_({
+_REAL_1_({        JMP     BOOTUP})
+_SWITCH_1_({        JMP     PROTECT})
+        _NEW_ORG(01FEH)
+        ;{ Signature. Last piece of boot sector. }
+        DB         055H, 0AAH
+
+});_END___1__({ _BOOTED_1_})
+
+; ########################################################################################
+;                       SWITCH TO PROTECTED MODE/32 BITS (optional) 
+; ########################################################################################
 PROTECT:
-;____1_____ _NATIVE_1_({
+;____1_____ _SWITCH_1_({
 ;{CODE-SEGMENT  10 * CONSTANT CODE-START                          }
         MOV     AX,GDT_SEGMENT ;{ GDT segment}
         MOV     ES,AX
@@ -490,38 +492,34 @@ PROTECT:
         MOV     AX,REALSEGMENT
         MOV     ES,AX
         LGDT    [GDTLOAD]
+});_END___1__({ _SWITCH_1_})
+
+
 ;{************************}
 ;____1_____ _BITS32_1_({
 include(width32.m4)
 });_END___1__({ _BITS32_1_})
-;{************************}
+;{ The following had to wait until width32.m4 had been included.}
+BMASK   EQU     BLOCKS_IN_USE_MASK
 
+;{************************}
+;____1_____ _SWITCH_1_({
         JMPHERE_FROM_REAL
          JMP     BOOTUP
 GDTLOAD DW     GDTLEN
         DD     GDT
+});_END___1__({ _SWITCH_1_})
 
-});_END___1__({ _NATIVE_1_})
+; ########################################################################################
+;                       FORTH GLUE CODE (optional)
+; ########################################################################################
 
 ;____1_____ _HOSTED_LINUX_1_({
-include(width32.m4)
-
-;____1_____ _LINUX_N_1_({
-include(constant.m4)
-SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
-RAWIO           EQU     (ECHO | ICANON)
-});_END___1__({_LINUX_N_1_})
-
-;____1_____ _LINUX_C_1_({
-        extern  c_type,c_expec,c_key,c_qterm
-        extern  c_rslw, c_block_exit, c_block_init
-});_END___1__({_LINUX_C_1_})
-
-        global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
-
         section forth progbits write exec alloc
-figforth:
+});_END___1__({ _HOSTED_LINUX_1_})
+
 ;____1_____ _LINUX_C_1_({
+figforth:
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
@@ -546,15 +544,15 @@ SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
 });_END___1__({_LINUX_C_1_})
 
 ;____1_____ _LINUX_N_1_({
+figforth:
 _start:
         JMP     BOOTUP                  ; Cold start
 });_END___1__({_LINUX_N_1_})
 
-});_END___1__({ _HOSTED_LINUX_1_})
 
-;{ The following is not known until the final width m4 final has been included.}
-BMASK   EQU     BLOCKS_IN_USE_MASK
-
+; ########################################################################################
+;                       FORTH ITSELF (entry point : BOOTUP)
+; ########################################################################################
 ;
 _COMMENT
    FORTH REGISTERS
@@ -889,9 +887,11 @@ _ENDCOMMENT
 ;{       during cold start.}
 ;{       The name is 32 bits in base 36.}
 ;
-;____1_____ _NATIVE_1_({
+;____1_____ _SWITCH_1_({
+; We either switch to prot, run linux (always prot) or run real mode
+; Be careful that these classes are mutually exclusive and cover all.
 CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
-});_END___1__({ _NATIVE_1_})
+});_END___1__({ _SWITCH_1_})
 ;____1_____ _HOSTED_LINUX_1_({
 CPUNM:  DC      0CDH,1856H       ;{ '80386'     12 13 }
 });_END___1__({ _HOSTED_LINUX_1_})
@@ -1297,10 +1297,10 @@ DOCOL:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
         LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
-;____1_____ _NATIVE_1_({
+;____1_____ _SWITCH_1_({
         JMPHERE_FROM_PROT
         JMPHERE_FROM_REAL
-});_END___1__({ _NATIVE_1_})
+});_END___1__({ _SWITCH_1_})
         _NEXT
 ;
 HEADER({;},{SEMI},{DOCOL},1)
@@ -2733,7 +2733,7 @@ EMIT1:
         DC      PLUS, ZERO, SWAP, CSTOR
         DC      SEMIS
 ;
-CODE_HEADER({KEY},{KEY})
+HEADER({KEY},{KEY},{DOCOL})
         DC         LIT, 1000H, ZERO, ZERO, ZERO
         DC         LIT, 0016H, BIOS
         DC         DROP,DROP,DROP,DROP
