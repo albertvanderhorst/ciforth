@@ -107,8 +107,7 @@ VARIABLE MIN-DEPTH
 \ ---------------------------------------------------------------------
 \ For DEA return "it CAN be part of annihilatable code",
 \ as far as its stack & side effects are concerned.
-\ FIXME rename to ANNILABLE?
-: STILL-ANNIL? DUP NS!?   SWAP SE@ NO-GOOD 0= AND ;
+: ANNILABLE? DUP NS!?   SWAP SE@ NO-GOOD 0= AND ;
 
 \ We are at a stable point, i.e. we consumed all the extra stuff,
 \ that is placed in the annihilation chain. Maybe even more.
@@ -117,15 +116,20 @@ VARIABLE MIN-DEPTH
 \ For DEA : adding it would result in a not yet stable sequence.
 \ Otherwise the optimisation is known to end here with or without
 \ possibility for optimisation.
-: ANNILLING? DUP STILL-ANNIL? IF SE@ COMBINE-VD ANNIL-STABLE? 0= ELSE DROP 0 THEN ;
+: ANNILLING? DUP ANNILABLE? IF SE@ COMBINE-VD ANNIL-STABLE? 0= ELSE DROP 0 THEN ;
 
 \ Investigate the start of SEQUENCE. Return the ADDRESS
 \ to which it can be annihilated, else 0.
 : (ANNIHILATE-SEQ)
-    BEGIN
-        NEXT-PARSE OVER STILL-ANNIL? AND 0= IF 2DROP 0 EXIT THEN
-        ( As yet mysterious code to do a recursion)
-  ANNILLING?  WHILE REPEAT ;
+    BEGIN ^ &S EMIT
+        NEXT-PARSE OVER ANNILABLE? AND 0= IF 2DROP 0 EXIT THEN
+\         DUP 'BRANCH = IF DROP @+ + RECURSE EXIT THEN  problems if jump to (;)
+        DUP '0BRANCH = IF
+            SE@ COMBINE-VD
+            ^ &1 EMIT DUP VD @ >R RECURSE R> VD !
+            SWAP 1 CELLS - @+ + ^ &2 EMIT RECURSE OVER ^ &C EMIT <> IF DROP 0 THEN
+        EXIT THEN
+    ANNILLING?  WHILE REPEAT ;
 
 \ Compile ``DROP'' equivalent to the annihilated code.
 : COMPILE-DROPS
