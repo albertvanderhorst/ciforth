@@ -132,3 +132,26 @@ is much more to do before we go protected.
 +ORIGIN is from now on associated with the initial values for the user
 variables, not with some vague origin of the program.
 So 0 +origin tells you were this area starts.
+
+2.30..2.32
+More and more of the increments are replaced by LEA .. +-CELL .
+There was problem with LOAD-GDT , after execution it crashed.
+However this had only to do with the oversight that in my own assembler
+the way to execute NEXT had to change too.
+The usage of the register BP is restricted to the return stack. This is
+cleaner, because BP uses the stack segment. If in the future the stack
+segment is made separate, we do need to change the code for e.g. user
+variables. This has been checked, but no places were found were this was 
+a problem.
+
+2.34
+I don't want to introduce a real.m4. It should not be necessary. I see that
+the DS SS and ES are reassigned in LCLD. This is better left to the boot
+code. When hosted by MSDOS these values are filled in perfectly, thank you.
+I have changed the filosofy regards to ES. In general it MUST remain equal
+to DS, such that string primitives can be used with impunity. 
+Makefile enriched with protect.m4
+Cautious introduction of protected mode (using the inherited invisible
+parts of real mode) succeeds resulting in
+version
+2.35

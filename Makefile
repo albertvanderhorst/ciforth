@@ -21,6 +21,9 @@ msdos.m4         \
 masm.m4          \
 nasm.m4          \
 header.m4        \
+protect.m4       \
+width16.m4       \
+width32.m4       \
 genboot.bat      \
 # That's all folks!
 
@@ -46,7 +49,7 @@ fig86.$(s).com :
 
 # Put include type of dependancies here
 msdos.m4 : default.m4 header.m4 ; co $@
-alone.m4 : default.m4 header.m4 ; co $@ 
+alone.m4 : default.m4 header.m4 protect.m4 ; co $@ 
 
 all: $(TARGETS:%=fig86.%.com) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
