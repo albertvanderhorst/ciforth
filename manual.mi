@@ -397,6 +397,10 @@ The forthcode({>IN}) that is there is a fake, that can only be
 read, not changed.
 }) dnl
 forthitem
+Vocabularies are wordlists with a name. However they push the wordlist
+to the search order, instead of replacing the topmost one.
+In this sense forthcode({FORTH}) and forthcode({ASSEMBLER}) words are not strictly conforming.
+forthitem
 This is not strictly non-conforming, but worth mentioning here.
 Despite the fact that thisforth contains only one state-smart word besides
  forthcode({SLITERAL})  (that is forthcode({."}) )
