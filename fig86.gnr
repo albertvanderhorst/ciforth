@@ -1,24 +1,16 @@
 ;               HCC FIG generic 8086 FORTH
 ; $Id$
 ; Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-; NASM listing: Make some MASM directives harmless up front.
-%macro IGNORE1 1+ ; One or more parameters
-%endmacro
-%define IGNORE   ; no parameters
-%define CSEG IGNORE1
-%define ASSUME IGNORE1
-%define PROC IGNORE1
-%define OFFSET IGNORE
-; `comment x' is replace by `%if 0' constructions.
+;
         PAGE  66,106
  TITLE   GENERIC FORTH FOR 8086 $Revision$
-%if 0 
+_COMMENT 
               FIG-FORTH
    implemented by:  Charlie Krajewski
                     205 ( BIG ) Blue Rd.
 		    Middletown, CT  06457
 
-        NASM assembler version by:
+        This generic version by:
                 Albert van der Horst
                 HCC Forth user group
                 The Netherlands
@@ -67,7 +59,7 @@ credit notice:
                FORTH Interest Group
                P.O. Box 1105
                San Carlos, Ca.  94070
-%endif
+_ENDCOMMENT
 	PAGE
 FIGREL	EQU	1	; FIG RELEASE #
 FIGREV	EQU	0	;FIG REVISION #
@@ -143,7 +135,7 @@ ORIG	PROC	FAR	; SEE PG 5-31, MACRO ASSEMBLER
 UP	DW	INITR0	; USER AREA POINTER
 RPP	DW	INITR0	; RETURNS STACK POINTER
 	PAGE
-%if 0
+_COMMENT
    FORTH REGISTERS
 
    FORTH   8088     FORTH PRESERVATION RULES
@@ -181,9 +173,9 @@ RPP	DW	INITR0	; RETURNS STACK POINTER
                     a few words.
 
 ---------------------------------------------------------- 
-%endif
+_ENDCOMMENT
 	PAGE
-%if 0 
+_COMMENT 
 ---------------------------------------------
 
    COMMENT CONVENTIONS
@@ -213,9 +205,9 @@ RPP	DW	INITR0	; RETURNS STACK POINTER
   LW          =  Low  word
 
 ------------------------------------------------------------ 
-%endif
+_ENDCOMMENT
 	PAGE
-%if 0 
+_COMMENT 
              DEBUG SUPPORT
 
 THIS ROUTINE WILL ALLOW YOU TO STEP THRU FORTH PROGRAMS
@@ -248,7 +240,7 @@ NOTE:	THE ABOVE ADDRESSES CAN'T POINT TO A
        	X = DON'T CARE
 
 ----------------------------------------------------- 
-%endif
+_ENDCOMMENT
 
 BIP	DW	0	; BREAKPOINT START ADDRESS
 BIPE	DW	0	; BREAKPOINT END ADDR
@@ -289,13 +281,13 @@ TNEXT3:	LODSW		; AX <- (IP)
 	PAGE
 DPUSH:	PUSH	DX
 APUSH:	PUSH	AX
-%if 0
+_COMMENT
 
 	Patch the next 3 locations
 ( using a DBUG monitor )
 with a `JMP TNEXT' for tracing through
 high level FORTH words.
-%endif
+_ENDCOMMENT
 NEXT:	LODSW		;AX <- (IP)
 	MOV	BX,AX
 ;
@@ -4094,7 +4086,7 @@ DOTCPU	DW	DOCOL
 	DW	BASE,STORE
 	DW	SEMIS
 	PAGE
-%if 0 
+_COMMENT 
 
             CODE LEVEL "MATCH" DEFINITIONS
 
@@ -4106,7 +4098,7 @@ DOTCPU	DW	DOCOL
  This version of MATCH will handle string lengths
       up to 65535 bytes in length.
 
-%endif
+_ENDCOMMENT
 	DB	85H	; MATCH
 	DB	'MATC'
 	DB	'H'+80H
@@ -4167,7 +4159,7 @@ TASK	DW	DOCOL
 ;
 INITDP	EQU	$	;SHOW END OF DICTIONARY
 ;
-%if 0 
+_COMMENT 
 
 The remaining memory ( up to 'EM' ) is 
 used for:
@@ -4180,13 +4172,13 @@ used for:
 	6. DISK BUFFERS
 
 
-%endif
+_ENDCOMMENT
 					
 	RESB    EM-($-$$)    ; Make EM The last location.
  CSEG    ENDS
 _ENDP  ORIG    ENDP
 	PAGE
-%if 0 
+_COMMENT 
 
   MISC. NOTES AND SCATTERED THOUGHTS
 
@@ -4226,7 +4218,7 @@ _ENDP  ORIG    ENDP
 
 - <Ctrl-Break> will vector to WARM start ( Label WRM: )
 
-%endif
+_ENDCOMMENT
 
 	END	ORIG
 
