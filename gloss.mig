@@ -1,0 +1,32 @@
+{define({MyTop},{Glossary})}
+worddoc({[COMPILE]},{bracket_compile_bracket},{},{p,C},{
+        Used in a colon-definition in form:
+                         forthsamp({:  xxx    [COMPILE]   FORTH   ;})
+        forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
+        that would otherwise execute during compilation. The above example
+        will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
+        compile time.},{})
+
+
+worddoc({XOR},{XOR},{nl  n2  ---  xor},{L1},{
+        Leave the bitwise logical exclusive or of two values.},{})
+
+
+worddoc({WORD},{WORD},{c  ---},{L0},{
+        Read the next text characters from the input stream being
+        interpreted, until a delimiter forthvar({c}) is found, storing the packed
+        character string beginning at the dictionary buffer forthcode({HERE}) . forthcode({WORD}) 
+        leaves the character count in the first byte, the characters, and
+        ends with two or more blanks. Leading occurrences of forthvar({c}) are ignored.
+        If forthcode({BLK}) is zero text is taken from the terminal input buffer,
+        otherwise from the disc block stored in forthcode({BLK}) .},
+        {{BLK} ,{IN}})
+
+
+worddoc({X},{X},{},{},{
+        This is pseudonym for the "null" or dictionary entry for a name of
+        one character of ascii null. It is the execution proceedure to
+        terminate interpretation of a line of text from the terminal or
+        within a disc buffer, as both buffers always have a null at the
+        end.},{})
+

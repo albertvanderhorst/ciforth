@@ -1,0 +1,48 @@
+include(manual.m4)dnl
+\input texinfo
+@setfilename figforth.info
+@settitle fig-FORTH 3.0 manual
+@setchapternewpage odd
+@ifinfo 
+This file documents generic fig-forth
+3.0 for MSDOS with nasm compiler
+32 bits protected mode and 
+modern file i/o.
+@end ifinfo
+
+@titlepage
+@title fig-Forth Manual
+@author Albert van der Horst Dutch Forth Workshop
+@end titlepage
+
+
+@page
+@c @vskip Opt plus 1fill
+Copyright @copyright{{}} 2000 Dutch Forth Workshop
+
+Permission is granted to copy with attribution.
+
+@node Top, Introduction, Glossary, 
+
+@ifinfo 
+This file documents generic fig-forth
+3.0 for MSDOS with nasm compiler
+32 bits protected mode and 
+modern file i/o.
+@end ifinfo
+@menu 
+* Introduction::   Introduction to Forth and this Forth
+* Manual::	   Reference manual 
+* Glossary::  	   Description of Forth words
+@end menu
+
+@node Introduction, Manual, top, top
+@chapter Introduction
+include(intro.mi)
+@node Manual, Glossary, Introduction, top
+@chapter Manual
+
+@node Glossary, top ,Manual,top
+@chapter Glossary
+include(gloss.mi)
+@bye
