@@ -22,6 +22,13 @@ _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIO
 })
 _FEWBLOCKS_({forthitem
 number of blocks limited to 256})
+_SECURITY_({forthitem
+contains security words })
+_LOAD_({forthitem
+kernel contains of ISO CORE set})
+_SOURCEFIELD_({forthitem
+headers with source fields})
+
 forthenditemize
 
 @author Albert van der Horst
@@ -100,6 +107,9 @@ _SECURITY_({It has compiler security, sacrificing some bizar ISO
 compatibity.}) dnl
 _CIF_IN_({It doesn't use forthcode({>IN}) in the way prescribed by ISO.}) dnl
 _FEWBLOCKS_({The number of blocks limited to 256}) dnl
+_LOAD_({It contains loadable words, i.e. all of ISO CORE, more than is needed
+for a self contained kernel. })dnl
+_SOURCEFIELD_({It contains a field in the header to point to source })
 dnl define( {_ISO_IN_}, _yes)dnl
 It is indirect threaded.
 
