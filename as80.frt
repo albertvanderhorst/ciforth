@@ -342,4 +342,6 @@ HERE POINTER !
     ' JAN HERE DIS-RANGE
 ' JAN CFA @ D-F-A DDD DDD DDD 
 
+: REJECT NFA DUP >MASK ISS @ @ AND SWAP >INST = 27 ?ERROR ;
+(   : M| ' M'|  REJECT M| ;  To forbid M| M'| in combination      )
 
