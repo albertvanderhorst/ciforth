@@ -473,12 +473,12 @@ HERE POINTER !
  0 CELL+ +LOOP 
 ;
 
-( Dissassemble one instruction from `POINTER'. )
+( Dissassemble one instruction from `POINTER' starting at DEA. )
 ( Based on what is currently left in `TALLY!' )
 ( Leave `POINTER' pointing after that instruction. )
 : ((DISASSEMBLE)) 
     POINTER @ >R
-    STARTVOC BEGIN
+    ( startdea -- ) BEGIN
         DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
         >NEXT%
 (       DUP ID. ." : "  'DISS @ EXECUTE                                 )
@@ -487,17 +487,18 @@ HERE POINTER !
       R> DROP
       .DISS
     ELSE
-      R> COUNT . POINTER ! ."  C," 
+      R> COUNT . POINTER ! ."  C, " 
     THEN
 ;
 
-( As `((DISASSEMBLE}}' but starting with a clean slate.)
-: (DISASSEMBLE) !DISS !TALLY ((DISASSEMBLE)) ;
+( As `((DISASSEMBLE}}' but starting with a clean slate and looking in  )
+( the whole dictionary.                                                )
+: (DISASSEMBLE) !DISS !TALLY STARTVOC ((DISASSEMBLE)) ;
 
 ( Forced dissassembly of one instruction from `POINTER'. )
 ( Force interpretation as DEA instruction. )
 ( This is useful for instructions otherwise hidden in the dictionary. )
-: F-D  !DISS   !TALLY   DIS-PI DROP   ((DISASSEMBLE)) ;
+: F-D  !DISS   !TALLY   ((DISASSEMBLE)) ;
 
 : DDD (DISASSEMBLE) ;
 
