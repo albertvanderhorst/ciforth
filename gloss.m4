@@ -25,7 +25,8 @@ ifelse($4,,
 
 Attributes: $5
 
-Description: $6
+Description: 
+$6
 
 ifelse(len({$7}),0,, {See also: forall({forthsamp},$7)})dnl
     {define({_prev},{$8})dnl}
