@@ -6812,6 +6812,7 @@ HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RWBUF, SSTOR
         DC      ZERO, RWBUF, CHAPP
         DC      RWBUF, CELLP
+         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      SEMIS
 });_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
@@ -6857,7 +6858,7 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {CLOSE-FILE .},{0}
 },
 enddoc)
-HEADER({OPEN-FILE},{OPEN},{DOCOL})
+HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, X, X
         DC      LIT, open, FROMR, PLUS, BDOSN
         _0BRANCH({OFILE1})
@@ -6875,7 +6876,7 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{." See OPEN-FILE"},{See OPEN-FILE}},
 enddoc)
-HEADER({CLOSE-FILE},{CLOSE},{DOCOL})
+HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      TOR, X, X, FROMR
         DC      LIT, close, BDOSN
         _0BRANCH({CFILE1})
@@ -7044,12 +7045,12 @@ enddoc)
 HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      TDUP, SCOMMA, DROP
         DC      LIT, 'F'+(100H*('i'+100H*('L'+100H*'e'))), COMMA ;{Magic number.}
-        DC      ZERO, OPEN, THROW, TOR
+        DC      ZERO, OFILE, THROW, TOR
         DC      HERE
         DC      LIT, _BITS16_(10000)_BITS32_(10000000), ALLOT
         DC      LDUP, LIT, _BITS16_(9000)_BITS32_(9999000)
         DC      RR, RFILE, THROW
-        DC      FROMR, CLOSE, THROW
+        DC      FROMR, CFILE, THROW
         DC      TDUP, PLUS, LDP, STORE        ;{ No allocation if it fails.}
         DC      SEMIS
 ;
@@ -7063,7 +7064,7 @@ HEADER({PUT-FILE},{PUTFILE},DOCOL)
         DC      ZERO, CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
-        DC      FROMR, CLOSE, THROW
+        DC      FROMR, CFILE, THROW
         DC      SEMIS
 ;
 
@@ -7785,14 +7786,10 @@ to the blocks in this file, using forthsamp({BLOCK-HANDLE}) to acces it.
 {{( Via MESSAGE)},{}},
 enddoc)
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
-        DC      BLFL
-        DC      SFET, OVER, PLUS
-        DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      X, X
-        DC      LIT, 03D02H    ;{ Open file for read/write}
-        DC      BDOSN
-        DC      ONE, LAND, ONE, LXOR ;{ 0 if disk problems. }
+        DC      BLFL, SFET
+        DC      LIT, 02H    ;{ read/write}
+        DC      OFILE
+        DC      ZEQU, NEGATE  ;{ 0 if disk problems, 1 if not.}
         DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
         DC      LWARN, STORE
         DC      BHAN, STORE
@@ -7812,15 +7809,12 @@ error messages.
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      FLUSH
-        DC      LIT, 03E00H    ;{ Close file }
-        DC      ZERO
-        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      LWARN, STORE
         DC      BHAN, FETCH
-        DC      ZERO, ZERO
-        DC      BDOS, QDSKER
-        DC      DROP, DROP, DROP, DROP
-        DC      LIT, -1, BHAN, STORE
+        DC      CFILE
+        DC      ZERO, LWARN, FETCH, MIN
+        DC      LWARN, STORE            ;{ Affect WARNING only if it was 1.}
+        DC      LIT, -1, BHAN, STORE    ;{Regardless of close errors.}
+        DC      ZEQU, ZEQU, QDSKER
         DC      SEMIS
 ;
 worddoc( {STORAGE~},{SEEK},{seek},{n---},{},
@@ -7829,15 +7823,12 @@ Position the file pointer at block forthvar({n})
 in behalf of subsequent reads and writes.
 },{{BLOCK},{LIST},{LOAD}}, {}, enddoc)
 HEADER({SEEK},{SEEK},{DOCOL})
+        DC      BBUF
+        _BITS16_({DC      USTAR})
+        _BITS32_({DC      STAR, LIT, 10000H, SLMOD})
         DC      BHAN, FETCH
-        DC      SWAP, TOR, TOR
-        DC      LIT, 04200H     ;{ Seek from start}
-        DC      FROMR           ;{ Handle}
-        DC      FROMR, BBUF
-        _BITS16_({DC      USTAR,SWAP})    ;{ L.S. ON TOP}
-        _BITS32_({DC      STAR, LIT, 10000H, SLMOD,SWAP})    ;{ L.S. ON TOP}
-        DC      BDOS, QDSKER
-        DC      DROP, DROP, DROP, DROP
+        DC      PFILE           ;{ Disk position.}
+        DC      ZEQU, ZEQU, QDSKER
         DC      SEMIS
 ;
 worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
