@@ -293,4 +293,17 @@ This version is released with label RLEASE3.
 Plain LOAD_ADDRESS eliminated. M4_LOADADDRESS has precise meaning
 see logboek.txt and m4 files.
 =============================================================================
+2.121
+All documentation (from FIG) is incorporated in the source.
+2.139
+All remaining and new words documented in source.
+2.147
+The three classic Fig bugs have been solved:
+ * Forgetting half of a vocabulary
+ * Redefining the NULL word 
+ * Loading a screen with some 8th bit char's
+2.148
+All necessary files are now in the release.
+
+=============================================================================
 
