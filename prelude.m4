@@ -223,4 +223,7 @@ define({worddocsafe},
 {_GENERATE_CODE{}dnl}
 )dnl
 
+define({worddocchapterend},{dnl})dnl ignore those
+define({worddocchapter},,{dnl})dnl ignore those
+
 divert(-1){}dnl

@@ -121,7 +121,7 @@ TEMPFILE=/tmp/figforthscratch
 fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr 
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
-	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
+	(sed $(TEMPFILE) -e '1,/Split here for doc/d' ; cat wordset.mig )>$(@:%.asm=%.rawdoc)
 	rm $(TEMPFILE)
 
 fig86.%.msm fig86.%.rawdoc : %.cfg masm.m4 fig86.gnr ; \

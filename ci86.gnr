@@ -5519,6 +5519,222 @@ _ENDCOMMENT
 
 ;{ Define the entry point, not valid for auto booting.}
         END     ORIG
+worddocchapter({COMPILING},{ },
+{The wordset forthvar({COMPILING}) contains words that compile
+forthxref({IMMEDIATE}) words and numbers.
+You need special precautions because these words would execute during
+compilation. Numbers are compiled forthdefi({in line}) , behind a word that fetches
+them.},
+{},{},{},{})
+worddocchapter({CONTROL},{ },
+{The wordset forthvar({CONTROL}) contains words that influence the control flow
+of a program, i.e. the sequence in which commands are executed in compiled words.
+With control words you can have actions performed repeatedly, or 
+depending on conditions.
+},{},{},{},{})
+worddocchapter({DEFINING},{ },
+{The wordset forthvar({DEFINING}) contains words that add new entries
+to the dictionary. A number of such forthdefi({defining}) words
+are predefined, but there is 
+also the possibility to make new defining words, using 
+forthcode({<BUILDS}) and forthcode({DOES>}) .
+},
+{},{},{},{})
+worddocchapter({DICTIONARY},{ },
+{The wordset forthvar({DICTIONARY}) contains words that at a lower level than
+the wordset forthvar({DEFINING}) concern the memory area that
+is allocated to the dictionary. They may add data to the dictionary at the expense 
+of the free space, one cell or one byte at a time, or allocate a buffer at once.
+The dictionary space may also be shrunk, and the words that were there are lost.
+The forthdefi({dictionary entry}) of a word is represented by its lowest address. Based on that
+an entry may considered a record with fields. Words to access those fields also belong 
+to this wordset.},
+{},{},{},{})
+worddocchapter({DOUBLE},{ },
+{The wordset forthvar({DOUBLE}) contains words that manipulate forthdefi({double})'s.
+_BITS32_({In this 32 Forth you would never need double's if it weren't
+for the NUMBER formatting wordset that uses them exclusively.})},
+{},{},{},{})
+worddocchapter({ERRORS},{ },
+{The wordset forthvar({ERRORS}) contains words to handle errors.},
+{},{},{},{})
+worddocchapter({FORMATTING},{ },
+{The wordset forthvar({FORMATTING}) generates formatted output for 
+numbers, i.e. printing the digits in a field with a certain width,
+possibly with sign etc.
+This is possible in any forthdefi({number base}). (Normally base 10 is used,
+which means that digits are found as a remainder by dividing by 10).
+Formatting in Forth is always based on forthdefi({double}) numbers.
+Single numbers are handled by converting them to forthdefi({double}) first.
+This requires some double precision operators to be present in the Forth core. 
+forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
+},
+{},{},{},{})
+worddocchapter({INIT},{ },
+{The wordset forthvar({INIT}) contains words to initialise or reinitialise Forth.},
+{},{},{},{})
+worddocchapter({INPUT},{ },
+{The wordset forthvar({INPUT}) contains words to get input from the terminal
+and such. For disk I/O: forthxref({STORAGE}) },
+{},{},{},{})
+worddocchapter({JUGGLING},{ },
+{The wordset forthvar({JUGGLING}) contains words that change the lifo-buffer.
+The necessity for this arise, because the data you want to feed to a program 
+is not directly accessible, i.e. on top of the stack.
+It also possible that  you need the same data twice, because you have to feed
+it to two different program's.
+Design your program such that you need them as little as possible,
+because they are confusing.},
+{},{},{},{})
+worddocchapter({LOGIC},{ },
+{The wordset forthvar({LOGIC}) contains logic operators and
+comparison operators.
+A comparison operators (such as forthcode({=}) ) delivers a 
+logical forthdefi({flag}), 1 for true, 0 for false, representing a  
+condition (such as that two numbers are equal).
+The logical operators ( forthcode({AND}) etc.) 
+work on all _BITS_, one by one.
+In this way they are useful for mask operations, as well
+as for combining conditions 
+represented as flags. But beware that forthcode({IF}) only cares whether   
+the top of the stack is non-zero, such that to 
+forthcode({IF}) forthcode({-}) can mean non-equal. 
+Such conditions cannot be directly
+combined using logical operators, but forthsamp({0= 0=}) can help.},
+{},{},{},{})
+worddocchapter({MEMORY},{ },
+{The wordset forthvar({MEMORY}) contains words to fetch and 
+store numbers from forthdefi({double})s, forthdefi({cell})s or bytes in memory.
+There are also words to copy blocks of memory or fill them, and words that
+fetch a forthdefi({cell}), operate on it and store it back.},
+{},{},{},{})
+worddocchapter({MISC},{ },
+{The wordset forthvar({MISC}) contains words that defy categorisation.},
+{},{},{},{})
+worddocchapter({MULTIPLYING},{ },
+{The _BITS32_(original) 16 bits Forth's have problems with scaling (forthpxref({OPERATOR})).
+Operators with intermediate results of double precision solve this and are
+present in the forthvar({MULTIPLYING}) wordset. _BITS32_({In this 32-bit Forth
+you will have less need, but scaling remain tricky.}).
+Formatting is done with forthdefi({double})'s exclusively, and relies 
+on this wordset. Operators with mixed precision and unsigned operators
+allow to build arbitray precision from them in forthdefi({high level}) code.},
+{},{},{},{})
+worddocchapter({OPERATOR},{ },
+{The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc. 
+The result of the operation is always
+an integer number, so division can't be precise. The combination of
+forthcode({/}) and forthcode({MOD}) (remainder) is such that you can get the 
+original back: forthsamp({n m /   m *  n m MOD   +}) allways has the value 
+forthvar({m}) . This is true for all Forth's.
+On ciforth the forthcode({/}) is a forthdefi({symmetric division}), i.e. 
+forthsamp({-n m /}) give the same result as forthsamp({n m /}), but negated.
+The forgeoing rule now has the consequence that forthsamp({MOD n m}) 
+has forthvar({2m-1}) possible outcomes instead of forthvar({m}) .
+This is very worrysome for mathematicians, who stick to the rule that 
+forthsamp({MOD n m}) gives a result in the range forthvar({0 ... m-1})
+(forthdefi({floored division})).
+_BITS16_({Having a mere 3000 for the number range can easily lead to
+overflow in intermediate results during scaling: a multiplication
+followed by a division. note({1},{For example forthsamp({: ADD10% 110
+* 100 / ;})}). There are special operators to get around that.
+forthxref({MULTIPLYING}).})},
+{},{},{},{})
+worddocchapter({OUTPUT},{ },
+{The wordset forthvar({OUTPUT}) contains words to output 
+to the terminal and such. For disk I/O: forthxref({STORAGE}) },
+{},{},{},{})
+worddocchapter({PARSING},{ },
+{The forthdefi({outer interpreter}) is responsible for parsing, i.e.
+it gets a word from the input stream and interprets or compiles it,
+advacing the forthcode({IN}) pointer. The wordset forthvar({PARSING}) contains
+the words used by this interpreter and other words that consume characters
+from the input stream. In this way the outer interpreter need not be very smart,
+because its capabilities can be extended by new words based on those 
+building blocks.},
+{},{},{},{})
+worddocchapter({SCREEN},{ },
+{Most of the mass storage is used for forthdefi({screen})'s that
+have 16 lines of 64 characters. They are used for source code
+and documentation. 
+Each screen is a whole number of forthcode({BLOCK})'s, 
+in our case it is one block. 
+The forthvar({SCREEN}) wordset contains facilities to view screens,
+and forthdefi({load}) them, that is compiling them and thus extending
+the base system. 
+A system is customized by loading source screens, possibly one of
+these extension is a text editor for screens.}, 
+{},{},{},{})
+worddocchapter({SECURITY},{ },
+{The wordset forthvar({SECURITY}) contains words that are used by control
+words to abort with an error message if the control structure is not
+correct. _VERBOSE_({Some say that this is not Forth-like.})
+You only need to know them if want to extend the 
+forthvar({CONTROL}) wordset.}, 
+{},{},{},{})
+worddocchapter({STACKS},{ },
+{The wordset forthvar({STACKS}) contains words related to the
+forthdefi({data stack}) and forthdefi({return stack}). 
+Words can be moved between both stacks. 
+Stacks can be reinitialised and the value used to initialise the
+forthdefi({stack pointer})'s can be altered.},
+{},{},{},{})
+worddocchapter({STORAGE},{ },
+{The wordset forthvar({STORAGE}) contains words to input and output
+to the mass storage, in this ciforth _BOOTFD_({ to the hard disk})
+_BOOTHD_({to the hard disk}) _HOSTED_({to the file
+forthfile({BLOCKS.BLK})}). 
+They are the underlying the forthvar({SCREEN}) facilities.}, 
+{},{},{},{})
+worddocchapter({STRING},{ },
+{The wordset forthvar({STRING}) contains words that manipulate 
+strings of characters.},
+{},{},{},{})
+worddocchapter({SUPERFLUOUS},{ },
+{The wordset forthvar({ SUPERFLUOUS}) contains words that are superfluous,
+because they are equivalent to small sequences of code.
+_VERBOSE_({Traditionally one hoped to speed Forth up by coding these words
+directly})},
+{},{},{},{})
+worddocchapter({SYSTEM},{ },
+{The wordset forthvar({SYSTEM}) contains words that call the underlying operating
+system or functions available in the BIOS-rom.},
+{},{},{},{})
+worddocchapter({VOCABULARIES},{ },
+{The dictionary is subdivided in non-overlapping subsets:
+the forthdefi({vocabulary})'s. forthxref({DICTIONARY}). 
+They are created by the defining word
+forthcode({VOCABULARY}) and filled by defining words while that
+vocabulary is forthcode({CURRENT}) . They regulate how words are
+found, different vocabularies can have words with the same names.
+The wordset forthvar({VOCABULARIES}) contains words that manipulate 
+those vocabularies.},
+{},{},{},{})
+worddocchapterend({COMPILING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({CONTROL},{~},{CONTENT},{},{},{},{})
+worddocchapterend({DEFINING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({DICTIONARY},{~},{CONTENT},{},{},{},{})
+worddocchapterend({DOUBLE},{~},{CONTENT},{},{},{},{})
+worddocchapterend({ERRORS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({INIT},{~},{CONTENT},{},{},{},{})
+worddocchapterend({INPUT},{~},{CONTENT},{},{},{},{})
+worddocchapterend({JUGGLING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({LOGIC},{~},{CONTENT},{},{},{},{})
+worddocchapterend({MEMORY},{~},{CONTENT},{},{},{},{})
+worddocchapterend({MISC},{~},{CONTENT},{},{},{},{})
+worddocchapterend({MULTIPLYING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({FORMATTING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({OPERATOR},{~},{CONTENT},{},{},{},{})
+worddocchapterend({OUTPUT},{~},{CONTENT},{},{},{},{})
+worddocchapterend({PARSING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SCREEN},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SECURITY},{~},{CONTENT},{},{},{},{})
+worddocchapterend({STACKS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({STORAGE},{~},{CONTENT},{},{},{},{})
+worddocchapterend({STRING},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SUPERFLUOUS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SYSTEM},{~},{CONTENT},{},{},{},{})
+worddocchapterend({VOCABULARIES},{~},{CONTENT},{},{},{},{})
 divert(2)dnl m4 generates code on channel 1, documentation on 3
 ; Split here for documentation
 _GENERATE_CODE 

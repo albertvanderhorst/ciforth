@@ -189,7 +189,7 @@ fig86.%.info : %.cfg $(SRCMI) fig86.%.mi menu.texinfo manual.m4 wordset.m4
 	rm wordset.mi
 
 # Sort the raw information and add the wordset headers
-%.mig : wordset.mig %.rawdoc ;
+%.mig : %.rawdoc ;
 	cat $+ | ssort -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s |\
 	sed -e 's/@/@@/g' >$@
 
