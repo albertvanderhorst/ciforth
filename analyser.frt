@@ -11,20 +11,32 @@ HEX
 \ high nibble : input:  1-- 0E depth popped +1
 \ low nibble : output: 0 = unknown , 1-- 0E depth pushed +1
 \ 0 = unknown , 0FH = variable.
-\
+\ A ``STACK EFFECT'' is a pair (input nibble, output nibble) with the above encoding.
+\ A ``pure stack effect'' is a pair (depth popped, depth pushed).
 
 \ A set : #elements , #elemets cells .
 
 \ Fill in the STACK effect into the flag field of DEA.
 : !SE >FFA 3 + C! ;
 
+\ For DEA return its stack effect BYTE.
+: SE@ >FFA 3 + C@ ;
+
 \ Type the interpretation of a stack effect NIBBLE.
 : .SE/2 DUP 0 = IF "unknown" TYPE ELSE DUP 0F = IF "variable" TYPE
 ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
 
+\ Split a BYTE into a STACK EFFECT .
+: SE:1>2 DUP 4 RSHIFT SWAP 0F AND ;
 
-\ Type the stack effect of DEA.
-: .SE >FFA 3 + C@ DUP 4 RSHIFT .SE/2 " -- " TYPE 0F AND .SE/2 ;
+\ Combine the STACK EFFECT into one BYTE.
+: SE:2>1 0F AND SWAP 4 LSHIFT OR ;
+
+\ Type the stack effect BYTE.
+: .SE   SE:1>2 "( " TYPE SWAP .SE/2 "-- " TYPE .SE/2 &) EMIT ;
+
+\ For DEA type its stack effect.
+: SE?   SE@ .SE ;
 
 \ For VALUE and SET : value IS present in set.
 : IN-SET? $@ CELLS BOUNDS
@@ -57,12 +69,10 @@ VARIABLE #POPS          VARIABLE #PUSHES
     DUP POPS IN-SET? NEGATE #POPS +!
     PUSHES IN-SET? NEGATE #PUSHES +!   ;
 
-\ Count pushes and pops among the instrructions from address ONE to
+\ Count pushes and pops among the instructions from address ONE to
 \ address TWO.
 : COUNT-PPS !PP
-    SWAP POINTER !
-    BEGIN (DISASSEMBLE) ^M EMIT COUNT-PP POINTER @ OVER < 0= UNTIL
-    DROP
+    SWAP   BEGIN (DISASSEMBLE) ^M EMIT COUNT-PP 2DUP > 0= UNTIL   2DROP
 ;
 
 PREVIOUS
@@ -91,18 +101,37 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 : >NA   BEGIN DUP NEXT-IDENTIFICATION $@ CORA WHILE 1+ REPEAT ;
 
 
-\ Get the pops and pushes from DEA m which must be a code definition.
+\ Get the pops and pushes from DEA which must be a code definition.
 : ANALYSE-CODE >CFA @ DUP >NA COUNT-PPS ;
 
 \ For DEA find the stack effect and fill it in.
 : FILL-SE DUP ANALYSE-CODE
-  #POPS @ 1+ 4 LSHIFT #PUSHES @ 1+ OR SWAP !SE ;
+  #POPS @ 1+   #PUSHES @ 1+   SE:2>1   SWAP !SE ;
 
 \ Irritating exceptions
-2F '?DUP !SE
-3F 'DIGIT !SE
+0FF '?DUP !SE
+0FF 'DIGIT !SE
 
 \ FILL IN EVERYTHING
+\ Add to an existing pure STACK EFFECT the pure STACK EFFECT. Return the combined
+\ pure STACK EFFECT.
+: COMBINE-PSE >R - DUP 0< IF - 0 THEN R> + ;
+
+\ Combine two STACK EFFECT's. Return the resulting STACK EFFECT.
+: COMBINE-SE
+    1- >R 1- >R 1- >R 1 - >R
+    R> R> R> R> COMBINE-PSE
+    1+ >R 1+ >R
+    R> R>
+;
+\ Combine stack effect bytes ONE and TWO. Result a NEW byte.
+: COMBINE-BYTES
+    2DUP 0= SWAP 0= OR IF 2DROP 0 ELSE
+    2DUP 0FF = SWAP 0FF = OR IF 2DROP 0FF ELSE
+    >R SE:1>2 R> SE:1>2 COMBINE-SE SE:2>1 THEN THEN ;
+
+\ Add to a BYTE the stack effect of DEA. Result a new BYTE.
+: ADD-SE    SE@   COMBINE-BYTES ;
 
 13 '(NUMBER) !SE
 DECIMAL
