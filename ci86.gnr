@@ -1141,6 +1141,47 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
 MATS2:  DC      DROP
         DC      SEMIS
 ;
+worddoc({PARSING},{?BLANK)},{query_blank},{ch --- f },{},
+{For the character forthsamp({ch}) return whether this is 
+considered to be white space into the flag forthsamp({f}) .
+At least the space, the tab and the carraige return and line
+feed characters are white space.},
+{{BL},{SPACE}},
+{{HEX 20 ?BLANK . 41 ?BLANK .},{1 0}})
+HEADER({?BLANK},{QBL},{DOCOL})
+        DC      LBL, ONEP, LESS
+        DC      SEMIS
+;
+worddocsafe({PARSING},{(WORD)},{paren_word},{addr1 addr2 --- addr3 addr4},{},
+{Scan the area between forthsamp({addr1}) and 
+forthsamp({addr2}) (non-inclusive) for blank delimited word.
+Return forthsamp({addr3}): the address of the first non-blank 
+at or after forthsamp({addr2}), but not past forthvar({addr2}) .
+Return forthsamp({addr4}): the address of the first blank 
+at or after forthsamp({addr3}), but not past forthvar({addr2}) .
+_VERBOSE_({So if forthsamp({addr2}) equals forthvar({addr3}) 
+the parse area is exhausted.})
+The function IS-BLANK decides what is a blank.},
+{{WORD}},
+{{ HEX 20 C, 41 C, 20 C, HERE 3 - HERE (WORD) HERE - . HERE - .},{-1 -2 }})
+HEADER({(WORD)},{PWORD},{DOCOL})
+        DC TOR  
+PWORD1: DC LDUP, RR, LSUB
+        _0BRANCH(PWORD1A)
+        DC LDUP, CFET, QBL
+        _0BRANCH(PWORD1A)
+        DC ONEP
+        _BRANCH(PWORD1)
+PWORD1A: DC LDUP
+PWORD2: DC LDUP, RR, LSUB
+        _0BRANCH(PWORD2A)
+        DC LDUP, CFET, QBL, ZEQU
+        _0BRANCH(PWORD2A)
+        DC ONEP
+        _BRANCH(PWORD2)
+PWORD2A: DC FROMR, DROP
+        DC SEMIS
+;
 worddoc({PARSING},{ENCLOSE},{enclose},{addr1 c --- addr1 n1 n2 n3},{},
 {The text scanning primitive used by forthcode({WORD}) . From the text address
 addr1 and an ascii delimiting character forthvar({c}) , is determined the byte
@@ -2695,14 +2736,16 @@ NUMB2:  DC      DROP
         DC      DMINU   ;{ ENDIF}
 NUMB3:  DC      SEMIS
 ;
-worddoc({DICTIONARY},{--FIND},{minus_find},{--- dea tf (found) --- ff (not found)},{},
-{Accepts the next text word (delimited by blanks) in the input stream
-to forthcode({HERE}) , and searches the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
+HEADER({--FIND},{DDFIND},{DOCOL})
+        DC      LBL, LWORD, DFIND
+        DC SEMIS
+;
+worddoc({DICTIONARY},{-FIND},{minus_find},{addr --- dea tf (found) --- ff (not found)},{},
+{For the counted string at forthsamp({addr}) 
+search the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
 for a matching entry. If found, the dictionary entry address and a boolean true is left.
 Otherwise, only a boolean false is left.},{})
-HEADER({--FIND},{DFIND},{DOCOL})
-        DC      LBL
-        DC      LWORD
+HEADER({-FIND},{DFIND},{DOCOL})
         DC      ZERO, RESULT, STORE
         DC      CONT
         DC      FETCH
@@ -2754,15 +2797,12 @@ ERRO1:  DC      HERE
         _STRING({? })
         DC      MESS
         DC      SPSTO
-;
-;{      CHANGE FROM FIG MODEL}
-;{      DC LIN,FETCH,BLK,FETCH}
-;
         DC      BLK,FETCH
         DC      DDUP
         _0BRANCH(ERRO2) ;{ IF}
+        DC      DOT
         DC      LIN,FETCH
-        DC      SWAP    ;{ENDIF}
+        DC      DOT    ;{ENDIF}
 ERRO2:  DC      QUIT
 ;
 worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
@@ -2794,6 +2834,8 @@ by such words as forthcode({CODE}) and forthcode({CONSTANT}) to create a diction
 a Forth definition. The code field contains the address of the words
 parameter field. },{})
 HEADER({CREATE},{CREAT},{DOCOL})
+        DC      LBL
+        DC      LWORD
         DC      DFIND
         DC      HERE
         DC      ONEP
@@ -2835,6 +2877,8 @@ that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
 compile time.},{COMPILE})
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
+        DC      LBL
+        DC      LWORD
         DC      DFIND
         DC      ZEQU
         DC      ZERO
@@ -2911,9 +2955,12 @@ That also failing, an error message echoing the name with a " ?"
 will be given.
 },{{WORD},{NUMBER}})
 HEADER({INTERPRET},{INTER},{DOCOL})
-INTE1:  DC      DFIND   ;{BEGIN}
+INTE1:  
+        DC      LBL
+        DC      LWORD
         DC      HERE, ONEP, CFET
         _0BRANCH(INTE8) ;{WHILE}
+        DC      DFIND   ;{BEGIN}
         _0BRANCH(INTE2) ;{IF}
         DC      LDUP, TFFA, CFET
         DC      STATE
@@ -2939,7 +2986,8 @@ INTE6:  DC      DROP
         DC      LITER   ;{ENDIF}
 INTE7:  DC      QSTAC   ;{ENDIF}
 INTE5:  _BRANCH(INTE1)  ;{AGAIN}
-INTE8:  DC      SEMIS
+INTE8:  DC      DROP
+        DC      SEMIS
 ;
 worddoc({DICTIONARY},{IMMEDIATE},{immediate},{},{},
 {Mark the most recently made definition so that when encountered at
@@ -4806,6 +4854,8 @@ the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
 {{CFA},{>LFA},{>NFA},{>PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
+        DC      LBL
+        DC      LWORD
         DC      DFIND
         DC      ZEQU
         DC      ZERO
