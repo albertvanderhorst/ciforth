@@ -39,6 +39,9 @@ HEX
 
 FMASK-N@ FMASK-N! OR CONSTANT FMASK-NS \ No side effects.
 
+\ Fill optimisations BITS in into DEA.
+: !OB   >FFA >R    R@ @ FMASK-NS INVERT AND   OR  R> ! ;
+
 \ A set : #how far filled, data. See asgen.frt
 
 \ Fill in the STACK effect into the flag field of DEA.
@@ -89,7 +92,7 @@ CREATE FETCHES HERE 0 ,
 ' SCAS,      ,          ' CMPS,      ,          ' MOVS,      ,
 ' OUTS,      ,          ' INS,       ,          ' OUT|D,     ,
 ' IN|D,      ,          ' OUT|P,     ,          ' IN|P,      ,
-' SCAS,      ,
+' SCAS,      ,          ' INT,       ,
 HERE SWAP !
 
 \ Instruction that have an output side effect.
@@ -99,7 +102,7 @@ CREATE STORES HERE 0 ,
                                                 ' MOVS,      ,
 ' OUTS,      ,          ' INS,       ,          ' OUT|D,     ,
 ' IN|D,      ,          ' OUT|P,     ,          ' IN|P,      ,
-
+                        ' INT,       ,
 HERE SWAP !
 
 \ Bookkeeping for pops and pushes.
@@ -142,6 +145,8 @@ VARIABLE PROTO-FMASK
         \ Memory (non-move) operations always fetch!
         'F| DISS IN-SET?    'MOV, OPCODE <>    AND  IS-FETCHING
     THEN
+    \ Overrule : operations on the return stack don't count.
+    '[BP] DISS IN-SET? IF DROP 0 THEN
     PROTO-FMASK AND!U
 ;
 
@@ -199,8 +204,15 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ Irritating exceptions
 0FF '?DUP !SE
 0FF 'EXECUTE !SE
-021 'FOR-VOCS !SE       \ Despite an execute this is known
+021 'FOR-VOCS !SE     \ Despite an execute this is known
 031 'FOR-WORDS !SE
+012 'LIT !SE          FMASK-NS 'LIT !OB
+01100,0000 FMASK-NS OR FMASK-IL OR 'BRANCH >FFA !
+02100,0000 FMASK-NS OR FMASK-IL OR '0BRANCH >FFA !
+01100,0000 FMASK-NS OR FMASK-IL OR '(LOOP) >FFA !
+02100,0000 FMASK-NS OR FMASK-IL OR '(+LOOP) >FFA !
+03100,0000 FMASK-NS OR FMASK-IL OR '(DO) >FFA !
+03100,0000 FMASK-NS OR FMASK-IL OR '(?DO) >FFA !
 
 \ FILL IN EVERYTHING
 \ Add to an existing pure STACK EFFECT the pure STACK EFFECT. Return the combined
@@ -226,10 +238,8 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ ---------------------------------------------------------------------------
 
 \ MAYBE THIS PART BELONGS IN optimiser.frt
-FMASK-IL    ' SKIP >FFA OR!U        FMASK-IL    ' BRANCH >FFA OR!U
-FMASK-IL    ' 0BRANCH >FFA OR!U     FMASK-IL    ' (LOOP) >FFA OR!U
-FMASK-IL    ' (+LOOP) >FFA OR!U     FMASK-IL    ' (DO) >FFA   OR!U
-FMASK-IL    ' (?DO) >FFA  OR!U      FMASK-IL    ' LIT >FFA    OR!U
+FMASK-IL    ' SKIP >FFA OR!U
+FMASK-IL    ' LIT >FFA    OR!U
 
 
 \ ---------------------------------------------------------------------------
@@ -292,9 +302,8 @@ HERE SWAP !
         DUP FIND-SE-ANY SWAP !SE _
     THEN DROP ;
 
-\ The number of entries with unknown stack effect.
+\ Keep track of the number of entries with something unknown.
 VARIABLE #UNKNOWNS
-
 : !UNKNOWNS 0 #UNKNOWNS ! ;
 
 \ For DEA fill in the stack effect if it is not yet known.
@@ -350,9 +359,6 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
        >FFA @
     THEN THEN ;
 
-\ Fill optimisations BITS in into DEA.
-: !OB   >FFA >R    R@ @ FMASK-NS INVERT AND   OR  R> ! ;
-
 \ For DEA find the optimisation bits and fill it in.
 \ It can be any definition.
 \ Dummy headers are ignored.
@@ -360,11 +366,6 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
     DUP >FFA @ 1 AND 0= IF \ Ignore dummy headers
         DUP FIND-OB-ANY SWAP !OB _
     THEN DROP ;
-
-\ The number of entries with unknown stack effect.
-VARIABLE #UNKNOWNS
-
-: !UNKNOWNS 0 #UNKNOWNS ! ;
 
 \ For DEA fill in the opt bits and remember if there was a change.
 : ?FILL-OB?   ( DUP ID. CR)
@@ -380,6 +381,7 @@ VARIABLE #UNKNOWNS
 : (FILL-ALL-OB)   !UNKNOWNS   'TASK FILL-OB-WID   'ENVIRONMENT >WID FILL-OB-WID ;
 
 \ Go on until the number of unknown stack effects no longer changes.
+\ ``FILL-ALL-SE'' must be done before or this fails.
 : FILL-ALL-OB 0 BEGIN (FILL-ALL-OB) #UNKNOWNS @ SWAP OVER = UNTIL DROP ;
 
 
