@@ -590,6 +590,22 @@ DECIMAL
 
 
 
+( !CSP for as long it is missing )       \ AvdH 03dec18
+
+: !CSP DSP@ ;
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( $ ESC SI SO hex_numbers_denotation ) \ AvdH A1apr15
 'DENOTATION >WID CURRENT !
 \ DEFINITIONS PREVIOUS doesn't work because DEF.. is
@@ -1454,10 +1470,11 @@ make decompile pointer point to exit!)
 : -pl CR 1 BLOB ." +LOOP " CELL+ CELL+ ;   ' (+LOOP) BY -pl
 
 
-( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
+( --assembler ASSEMBLER CODE END-CODE C; )  \ AvdH A3dec18
 VOCABULARY ASSEMBLER IMMEDIATE
+REQUIRE !CSP
 \ ISO standard words.
-: CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER DSP@  ;
+: CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER !CSP  ;
 : ;CODE
 ?CSP   POSTPONE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
 ; IMMEDIATE
@@ -1469,24 +1486,23 @@ VOCABULARY ASSEMBLER IMMEDIATE
 
 
 
+( ASSEMBLERi86-HIGH ) CF: ?32                  \ AvdH A3dec18
 
-( ASSEMBLERi86-HIGH ) CF: ?32 \ AvdH A0oct17
-
-REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
 REQUIRE SWAP-DP
 
-"ASSEMBLERi86" PRESENT? ?LEAVE-BLOCK
-: ASSEMBLERi86 ;
-
-ASSEMBLER DEFINITIONS
 SWAP-DP
-2 DUP +THRU
+REQUIRE ASSEMBLERi86
 SWAP-DP
-PREVIOUS DEFINITIONS
 
 
 
-( ASSEMBLERi86 )  CF: \ AvdH A0oct17
+
+
+
+
+
+
+( ASSEMBLERi86 )  CF:                      \ AvdH A3dec18
 
 REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
 
@@ -1494,26 +1510,26 @@ REQUIRE ASSEMBLER  REQUIRE IVAR   REQUIRE +THRU
 : ASSEMBLERi86 ;
 
 ASSEMBLER DEFINITIONS
-1 DUP +THRU
+
+ REQUIRE  ASSEMBLER-GENERIC
+ REQUIRE   ASSEMBLER-CODES-i86
+ REQUIRE   ASSEMBLER-MACROS-i86
+\ 10 11 DUP +THRU  ( test )
+
 PREVIOUS DEFINITIONS
 
+( ASSEMBLER-GENERIC )                          \ AvdH A3dec18
 
-
-
-
-
-( --assembleri86_body )  \ AvdH A0oct03
-
-
-
-
+REQUIRE +THRU
 
  1 4 HEX +THRU  DECIMAL ( Common code , prelude)
- DECIMAL 12 DUP +THRU ( protected mode 16/32)
 
- 5 9 HEX +THRU  DECIMAL ( Macro's, postlude)
 
-\ 10 11 DUP +THRU  ( test )
+
+
+
+
+
 
 
 
@@ -1571,6 +1587,22 @@ PREVIOUS DEFINITIONS
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+( ASSEMBLER-MACROS-i86 )                       \ AvdH A3dec18
+
+REQUIRE +THRU
+
+ 1 4 HEX +THRU  DECIMAL ( Common code , prelude)
 
 
 
@@ -1646,7 +1678,11 @@ PREVIOUS DEFINITIONS
 
 
 
-( spare_2 )
+( ASSEMBLER-TEST-i86 )                       \ AvdH A3dec18
+
+REQUIRE +THRU
+
+ 1 2 HEX +THRU  DECIMAL
 
 
 
@@ -1658,10 +1694,6 @@ PREVIOUS DEFINITIONS
 
 
 
-
-
-
-\
 ( --assembler_test_1 TEST-NEXT ) \ A2oct21 AvdH
 ( Tests applicable always )
   CODE TEST-NEXT NEXT  END-CODE
@@ -1678,8 +1710,8 @@ PREVIOUS DEFINITIONS
 
 
 \
-( --assembler_test_2 TEST-JUMP ) \ A2oct21 AvdH
-?32  ( Test applicable to 32 bit mode)
+( --assembler_test_2 TEST-JUMP ) ?32        \ AvdH A3dec18
+( Test applicable to 32 bit mode)
 
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT END-CODE
 
@@ -1694,15 +1726,15 @@ DECIMAL
 
 
 
-( --assembler_i86_electives ) \ A2oct21 AvdH
+( ASSEMBLER-CODES-i86 )  \ AvdH                 \ AvdH A3dec18
 
-1 2 HEX +THRU DECIMAL ( Load either 16 or 32 bit stuff)
-3 6 HEX +THRU  DECIMAL ( 8086 level instructions )
-7 8 HEX +THRU DECIMAL ( 80386 level instructions )
+REQUIRE +THRU
 
+1 8 HEX +THRU DECIMAL
 
-
-
+( 1 2 Load either 16 or 32 bit stuff)
+( 3 6 8086 level instructions )
+( 7 8 80386 level instructions )
 
 
 
@@ -3872,7 +3904,7 @@ Some of them did work on FIG though.
   R> R> 2M+ DROP .S ;
 ( ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"                  )
 HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER DSP@ ; IMMEDIATE
+: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
 ASSEMBLER DEFINITIONS ( ;CODE see screen3 )
 : C; PREVIOUS ?EXEC ?CSP ; IMMEDIATE
 : LABEL ?EXEC 0 IVAR SMUDGE -2 ALLOT [COMPILE] ASSEMBLER

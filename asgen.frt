@@ -91,6 +91,7 @@
 
 ( ############### PART I ASSEMBLER #################################### )
 ( MAYBE NOT PRESENT UTILITIES                                           )
+REQUIRE !CSP         \ To counter design error to eliminate it.
 REQUIRE @+ ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
 : !+ >R R@ ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
@@ -129,8 +130,8 @@ DENOTATION : % POSTPONE ' ; PREVIOUS
 : IS-A CREATE HERE 1 CELLS ALLOT DOES> @ SWAP %>DOES @ = ;
 ( Patch up the data field of a preceeding word defined by `IS-A'        )
 ( To be called when sitting at the DOES> address                        )
-( The DSP@ / ?CSP detects stack changes. Now split it into 2 checks.    )
-: REMEMBER ?CSP HERE SWAP ! DSP@ ; IMMEDIATE
+( The !CSP / ?CSP detects stack changes. Now split it into 2 checks.    )
+: REMEMBER ?CSP HERE SWAP ! !CSP ; IMMEDIATE
 
 ( Also needed : ?ERROR                                                  )
 (   `` : ?ERROR DROP DROP ; '' defeats all checks.                      )
@@ -659,7 +660,7 @@ ASSEMBLER
 ( Define "word" using assembly instructions up till END-CODE )
 ( One could put a ``SMUDGE'' in both. )
 : CODE
-    ?EXEC (WORD) (CREATE) POSTPONE ASSEMBLER !TALLY DSP@
+    ?EXEC (WORD) (CREATE) POSTPONE ASSEMBLER !TALLY !CSP
 ; IMMEDIATE
 
 ( Like ``DOES>'' but assembly code follows, closed by END-CODE )
