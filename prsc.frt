@@ -9,7 +9,7 @@ REQUIRE ^
 \ Any POSITION is in PostScript coordinates.
 \ Any SCREEN is the number of a screen.
 
-\ ################# DATA ##########################################
+\ ################# TYPES #########################################
 
 \ A coordinate pair.
 : COORDINATE CREATE , , ;
@@ -17,14 +17,13 @@ REQUIRE ^
 \ Print a coordinate pair
 : .COORDINATE  SPACE SWAP . . ;
 
+\ ################# PostScript EQU's ##############################
+
 \ Number of screens to put in a column
 5 CONSTANT #Screens
 
 \ Number of lines to put in a column (assembler file.)
 117 CONSTANT #Lines
-
-\ Page number, through goiing
-VARIABLE CurrentPage
 
 \ upper left coordinates of top screen of left column
 2500 76961 COORDINATE LeftColumn
@@ -35,8 +34,6 @@ VARIABLE CurrentPage
 \ Stride between screens, vertical
 15229 CONSTANT NextScreen
 
-\ Position of screen number w.r.t. screen
-\ Position of first line w.r.t. screen
 \ Stride between lines, vertical
 CREATE LineStride -902 ,
 \ Leave relative vector to next line position
@@ -45,14 +42,11 @@ CREATE LineStride -902 ,
 \ Relative position of screen's lower right corner
 28000 11640 COORDINATE ScreenSize
 
-\ Line width
-\ Font size of screens content characters
-\ Font size of screen number and header
+\ ################# TOOLS #########################################
+\ The kind of things that culd be useful for other programs.
 
-\ File name for the screens file.
-: ScreensName   ARGV 3 CELLS + @ Z$@ ;
-\ File name of the assembler source.
-: AssemblerName   ARGV 4 CELLS + @ Z$@ ;
+\ For argument NUMBER (counting from one) : return as a string.
+: ARG$  2 + CELLS   ARGV +   @ Z$@ ;
 
 : PrintWithEscapes  OVER + SWAP ?DO
     I C@
@@ -62,8 +56,32 @@ CREATE LineStride -902 ,
     EMIT
 LOOP ;
 
+\ ################# DATA ##########################################
+
+\ Appendix letter, A..Z.
+VARIABLE CurrentAppendix    &@ CurrentAppendix !  \ Increment before use
+: .Appendix    CurrentAppendix @ EMIT ;
+
+\ Page number, through going, may be starting at the end of the file
+\ to which we are going to append.
+VARIABLE CurrentPage
+
+\ Print the PAGE number in behalf of viewers as PostScript comment.
+: PSPagePragma
+    1 CurrentPage +!
+    ." %%Page: "   .Appendix &- EMIT .   CurrentPage  @ . CR
+;
+
+\ The NAME of the current file.
+CREATE FileName 2 CELLS ALLOT
+
 \ Get the next LINE from the screens .
 CREATE FileContent 2 CELLS ALLOT
+
+\ Get a file with NAME.
+: GetNextFile
+    2DUP FileName 2!   GET-FILE FileContent 2!   1 CurrentAppendix +! ;
+
 : Line   FileContent 2@  OVER IF ^J $S   2SWAP FileContent 2! THEN ;
 
 \ Output the next line from the screens to position, first place to next line.
@@ -99,24 +117,24 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output a screen at POSITION unless empty. Return it was EMPTY.
 : OneScreen    16 MultLine DrawBorder ;
 
-\ Print the PAGE number in behalf of viewers as PostScript comment.
-: PrintPageNumber
-    1 CurrentPage +!
-    ." %%Page: " TYPE . CurrentPage  @ . CR
+\ Print the header of page NUMBER .
+: PageHeader
+    DUP PSPagePragma
+    ." (" 4 .R ." ) (Appendix " .Appendix &. EMIT SPACE
+    FileName 2@ TYPE ." ) exch StartPage " CR
 ;
 
 \ Output a SCREEN and following at PAGE in two columns of screens.
 \ Leave incremented SCREEN and PAGE and indication we MUST stop.
 : NextPage
-      DUP "A-" PrintPageNumber
-      DUP ." (" 4 .R ." ) (Appendix A. forth.lab) exch StartPage " CR 1+ >R
-      LeftColumn 2@ ScreenNumber
-      LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
-      RightColumn 2@ ScreenNumber
-      RightColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
-      ." EndPage " CR
-      R>
-      FileContent @ 0=
+    DUP PageHeader 1+ >R
+    LeftColumn 2@ ScreenNumber
+    LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
+    RightColumn 2@ ScreenNumber
+    RightColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
+    ." EndPage " CR
+    R>
+    FileContent @ 0=
 ;
 
 \ Output some PostScript code to fixup the use of dictionary by ``DVIps''
@@ -234,9 +252,9 @@ end  % ForthDict
 " TYPE ;
 
 
-\ Output the screens.
+\ Output file given by NAME , in the next appendix, printed as screens.
 : OutputScreens
-    ScreensName GET-FILE FileContent 2!
+    GetNextFile
     0 1  BEGIN NextPage UNTIL
     1- PostLude DROP
 ;
@@ -253,27 +271,27 @@ end  % ForthDict
 : OneColumn   #Lines MultLine ;
 
 : DrawBar RightColumn 2@
-        NextLine 3 * - .COORDINATE ." CW sub moveto " CR
-        0 NextLine #Lines 6 + * .COORDINATE
-        ." CW sub rlineto CW 10 div setlinewidth .5 setgray stroke 0 setgray" CR
+    NextLine 3 * - .COORDINATE ." CW sub moveto " CR
+    0 NextLine #Lines 6 + * .COORDINATE
+    ." CW sub rlineto CW 10 div setlinewidth .5 setgray stroke 0 setgray" CR
 ;
 
 \ Output a PAGE in two columns.
 \ Leave incremented PAGE and indication we MUST stop.
 : NextPageSrc
-      DUP "B-" PrintPageNumber
-      DUP ." (" 4 .R ." ) (Appendix B. assembler) exch StartPage " CR 1+ >R
-      LeftColumn 2@ OneColumn
-      DrawBar
-      RightColumn 2@ OneColumn
-      ." EndPage " CR
-      R>
-      FileContent @ 0=
+    DUP PageHeader 1+ >R
+    LeftColumn 2@ OneColumn
+    DrawBar
+    RightColumn 2@ OneColumn
+    ." EndPage " CR
+    R>
+    FileContent @ 0=
 ;
 
-\ Output the file.
+\ Output the .
+\ Output the file given by NAME in the next appendix in two columns.
 : OutputFile
-    AssemblerName GET-FILE FileContent 2!
+    GetNextFile
     Interlude
     1 BEGIN NextPageSrc UNTIL
     1- PostLude DROP
@@ -283,5 +301,5 @@ end  % ForthDict
 \     Header              \ Select this if it must be independantly printed.
     FixupDVIps          \ Select this if it is an appendix to a DVIps output
     PreLude
-    OutputScreens
-    OutputFile
+    1 ARG$ OutputScreens
+    2 ARG$ OutputFile
