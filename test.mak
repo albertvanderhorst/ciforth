@@ -174,13 +174,6 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 # but they can't go through a common texinfo file, because of the restrictions
 # of info regarding names. (which would spoil tex-output unecessarily.)
 
-# Macro building blocks for texinfo files.
-SRCMI= \
-figforth.mi \
-intro.mi    \
-manual.mi   \
-rational.mi  \
-# That's all folks!
 
 # Sort the raw information and add the wordset chapter ends
 # A .mig file has its @ duplicated!
