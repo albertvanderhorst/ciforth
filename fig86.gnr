@@ -65,7 +65,10 @@ _ENDCOMMENT
 	PAGE
 FIGREL	EQU	2	; FIG RELEASE #
 FIGREV	EQU	0	; FIG REVISION #
-USRVER  EQU     'A'-'0' ; USER VERSION NUMBER, a digit now
+USRVER  EQU     'C'-'0' ; USER VERSION NUMBER, a digit now
+;
+;       PROTECTION
+PMASK   EQU     0FFH    ; Allow to access only 256 blocks from OFFSET
 ;
 ;	ASCII CHARACTER EQUIVALENTS
 ;
@@ -334,7 +337,7 @@ HUGESECS      DD         000H
 	DB    "           "
 	DB    "FAT12   "
 
-BOOTLPA:  DB      10H, 0
+BOOTLBA:  DB      10H, 0
         DW      (INITDP-$$)/BPS      ; ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.
         DW      BPS             ; OFFSET AND SEGMENT
 	DW      BOOTADDRESS/10H
@@ -345,7 +348,7 @@ BOOTLPA:  DB      10H, 0
 HDREAD:
 	MOV     AX,4200H  ;   Read extended                                
 	MOV     DX,0080H  ;   Disk C                                 
-	MOV     SI,BOOTLPA
+	MOV     SI,BOOTLBA
         INT     13H
 
         RET
@@ -480,14 +483,19 @@ _ENDCOMMENT
 ; So for now just the classic, swap disk after booting.
 	DW      0       ; INIT (OFFSET) 
 });_END___1__({_USEDOS_1_})
-;____1_____ _USEBIOS_1_({
+;____1_____ _BOOTFD__1_({
 ; This will reserve place for dos information, such that the floppy
 ; can be accessed from DOS and makes sure blocks are not allocated
 ; within the forth system itself. 
 ; (X-1)/S+1 rounds up to whole `S', and yes both parts separately.
         DW      (SECSTRT-1)/SPB+1 + (INITDP-$$-1)/KBBUF+1 
                         ; INIT (OFFSET) 
-});_END___1__({_USEBIOS_1_})
+});_END___1__({_BOOTFD__1_})
+;____1_____ _BOOTHD__1_({
+; This will reserve place for the system itself, on the first part of a 
+; hard disk. No problem to just reserve whole memory.
+        DW      64      ; Kbyte.
+});_END___1__({_BOOTHD__1_})
         DW      0       ; (Unused) 
         DW      0       ; (Unused) 
 	DW 	INITS0	; INIT (S0)
@@ -2302,6 +2310,7 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
 ;
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ; NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER
+        DW      LIT, PMASK, LAND
 	DW      USE
 	DW	FETCH,DUPE
 	DW	TOR
@@ -2322,6 +2331,7 @@ BUFF2	DW	RR,STORE
 	DW	TWOP,SEMIS
 	PAGE
 HEADER({BLOCK},{BLOCK},{DOCOL})
+        DW      LIT, PMASK, LAND
 	DW      OFSET
 	DW	FETCH,PLUS
 	DW	TOR,PREV
@@ -2845,7 +2855,9 @@ HEADER({SEC/BLK},{SPBLK},{DOCON}) ;# SECTORS/BLOCK
 ;
 HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DW  0
+});_END___1__({_USEBIOS_1_})
 ;
+;____1_____ _BOOTFD__1_({
 ;  (Command, address, sec# -- )
 HEADER({SEC-RW},{SECRW},{DOCOL})
 	DW      LIT, SPT*HEADS, SLMOD   ; Juggle #sec, #head, #track
@@ -2887,7 +2899,72 @@ RSLW4:  DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
 	DW      QERR
 RSLW5:  DW      SEMIS
 ;
-});_END___1__({_USEBIOS_1_})
+});_END___1__({ _BOOTFD__1_})
+;____1_____ _BOOTHD__1_({
+; Warning : if this LBA is used apart from by R/W
+; the fields marked default must be restored.
+HEADER({LBAPAR},{LBA},{DOVAR})
+        DB      10H, 0      ; default    
+        DW      SPB         ; default    
+        DW      0           ; to be filled with offset
+	DW      BOOTADDRESS/10H ; default
+	; At a hard disk we just read sector from sector 1        
+        DD      0       ; sector number
+        DD      0       ; M.S. 32 BITS default
+
+; Reads/ writes the block such as in LBA
+HEADER({RBLK},{RBLK},{$+2})
+        POP     AX     
+	PUSH	SI	;PRESERVE INTERPRETER POINTER
+	MOV     SI,AX  
+	PUSH	BP	;RETURN POINTER
+	MOV     AX,4200H       
+	MOV     DX,0080H  ;   Disk C                                 
+        INT     13H
+	POP	BP	;RETURN STACK
+	POP	SI	;INTERPRETER PNTR
+	PUSHF           ; REMEMBER STATUS
+	JMP	NEXT
+;
+HEADER({WBLK},{WBLK},{$+2})
+        POP     AX     
+	PUSH	SI	;PRESERVE INTERPRETER POINTER
+	MOV     SI,AX  
+	PUSH	BP	;RETURN POINTER
+	MOV     AX,4300H       
+	MOV     DX,0080H  ;   Disk C                                 
+        INT     13H
+	POP	BP	;RETURN STACK
+	POP	SI	;INTERPRETER PNTR
+	PUSHF           ; REMEMBER STATUS
+	JMP	NEXT
+
+;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
+HEADER({R/W},{RSLW},{DOCOL})
+        DW      TOR
+	DW      LIT, SPB, STAR  ; Sector number
+        DW      LBA, LIT, 8, PLUS, STORE  
+        DW      LBA, LIT, 4, PLUS, STORE  
+        DW      LBA
+        DW      RR
+	_0BRANCH(RSLW1)
+	DW      RBLK
+	_BRANCH(RSLW2)
+RSLW1:  DW      WBLK
+RSLW2:  DW      DUPE, DSKERR, STORE
+
+        DW      ONE, LAND, DUPE
+	_0BRANCH(RSLW4)
+;        DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
+						   ; is no good!
+RSLW4:  
+        ; Handle error
+	DW      LIT,    9   ;Write error
+        DW      FROMR, LSUB ; 1 less: read error
+	DW      QERR
+        DW      SEMIS
+;
+});_END___1__({ _BOOTHD__1_})
 	PAGE
 	; At line     LINE ~3500
 HEADER({'},{TICK},{DOCOL},1)
