@@ -13,7 +13,7 @@ define({_OFFSET})dnl Ignore this design error altogether.
 define({PAGE},;)dnl Turn PAGE into comment.
 define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
-define({_WORD_PTR},)dnl Ignore 'WORD PTR' altogether. 
+define({_WORD_PTR}, WORD)dnl Make it specify SIZE only.
 dnl
 dnl Specification of the length of an operand,
 dnl needed to get exactly the same code as MASM.
