@@ -130,27 +130,27 @@ REQUIRE SET
 
 100 SET TASK-TABLE   TASK-TABLE !SET
 VARIABLE TASK-POINTER
-\ Add this frame and make it current.
-TASK-TABLE @ TASK-POINTER !   _ TASK-TABLE SET+!
 
-: NEXT-TASK   TASK-POINTER @ CELL+
-DUP TASK-TABLE @ = IF DROP TASK-TABLE CELL+ THEN
-TASK-POINTER ! ;
+\ Make first task current.
+: SET-FIRST-TASK TASK-TABLE CELL+ TASK-POINTER ! ;
 
-: LAST-TASK TASK-TABLE @ 0 CELL+ - ;
+\ Add this task and make it current.
+_ TASK-TABLE SET+!     SET-FIRST-TASK
+
+\ Switch to next task, only administration.
+: NEXT-TASK   TASK-POINTER @ CELL+ TASK-POINTER !
+    TASK-POINTER @ TASK-TABLE @ = IF SET-FIRST-TASK THEN ;
 
 \ Switch from current task to next one.
 : PAUSE
-DSP@ >R
-    RSP@ TASK-POINTER @ !
-        NEXT-TASK
-    TASK-POINTER @  @ RSP!
-R> DSP! ;
+    DSP@ >R RSP@ TASK-POINTER @ !
+    NEXT-TASK
+    TASK-POINTER @  @ RSP! R> DSP! ;
 
-\ Exit: remove current task task, then chain to first one.
+\ Exit: remove current task, then chain to first one.
 : EXIT-COT  TASK-POINTER @ TASK-TABLE SET-REMOVE
-TASK-TABLE CELL+ DUP TASK-POINTER ! @
-DUMP-IT RSP! R> DSP! DUMP-IT ;
+    SET-FIRST-TASK
+    TASK-POINTER @ @ RSP! R> DSP! ;
 
 \ Contrary to PET threads this one prepares a return stack frame,
 \ then switches return stacks.
