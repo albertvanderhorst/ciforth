@@ -1,5 +1,5 @@
 #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
-lina <<% | tail -n$#
+lina <<%
 \ ( Environmental dependancies : )
 \ ( This is a ISO Forth Program using only standard ISO Words)
 \ ( plus LINOS (par1, par2, par3, function# -- result/error )
@@ -20,14 +20,14 @@ VARIABLE C
 : SHOW-COUNT SPACE L @ . W @ . C @ . CR ;
 
 100000 CONSTANT SIZE
-CREATE BUFFER SIZE ALLOT
+CREATE Buffer SIZE ALLOT
 : AT-WORD-START IS-BLANK  LAST-WAS-BLANK @ 0= AND ; ( char -- flag)
 ( All four  : ( char -- char )
 : COUNT-L LF OVER = IF 1 L +! THEN ;
 : COUNT-W DUP AT-WORD-START IF 1 W +! THEN DUP IS-BLANK LAST-WAS-BLANK ! ;
 : COUNT-C 1 C +! ;
 : COUNT-CHAR COUNT-C COUNT-W COUNT-L ;
-: COUNT-BUFFER BUFFER SWAP OVER + SWAP DO I C@ COUNT-CHAR DROP LOOP ; ( len-)
+: COUNT-BUFFER Buffer SWAP OVER + SWAP DO I C@ COUNT-CHAR DROP LOOP ; ( len-)
 
 5 CONSTANT OPEN
 3 CONSTANT READ
@@ -37,7 +37,7 @@ CREATE BUFFER SIZE ALLOT
 VARIABLE HANDLE
 : COUNT-FILE
     BEGIN
-        HANDLE @ BUFFER SIZE READ LINOS DUP ?LINUX-ERROR
+        HANDLE @ Buffer SIZE READ LINOS DUP ?LINUX-ERROR
     DUP 0 > WHILE
         COUNT-BUFFER
     REPEAT DROP ;
@@ -55,17 +55,17 @@ VARIABLE HANDLE
         BL WORD
     DUP STILL-FILES WHILE
         DUP OPEN-FILE TREAT-FILE CLOSE-FILE
-    REPEAT BYE ;
+    REPEAT ;
 
 0 WARNING !
 
-CR
 DO-FILE $*
+
+BYE
 %
 
 # The remainder is interpreted by the shell as a here document,
 # but forth has long gone bye.
 #
-# Note that we need to go BYE in DO-FILE otherwhise we get a spurious new
-# line. Furthermore we need ``|tail -n<number of file>'' otherwise there will
-# be a spurious startup message.
+# Note that because the input is not from a terminal messages are suppressed.
+# In principle BYE is not needed, because Forth ends on the end of input.
