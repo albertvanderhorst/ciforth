@@ -174,6 +174,7 @@ DECIMAL
 HEX
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @  CHECK28 OR R> ! ;
+: OR!U >R R @  OR R> ! ; ( Or DATA into ADDRESS. Unchecked.)
 ( Reset bits of DATA into ADDRESS. If bits were already down it's wrong )
 : AND! >R INVERT R @ CHECK29 AND R> ! ;
 
@@ -189,7 +190,7 @@ HEX
 (                                          |||    |||       |||         )
 : >BI %>BODY CELL+ ;                     ( OR!    AND!      --        )
 : >BY %>BODY 2 CELLS + ;                 ( OR!    OR!       AND!      )
-: >BA %>BODY  3 CELLS + ;                ( OR!    OR!       OR!       )
+: >BA %>BODY  3 CELLS + ;                ( OR!U   OR!U      OR!U      )
 : >CNT %>BODY 4 CELLS + ;   ( `HERE' advances with count )
 : >DIS %>BODY 5 CELLS + ;   ( disassembler only for COMMA)
 
@@ -211,7 +212,7 @@ IS-A IS-3PI : 3PI  CHECK33 <BUILDS , , , , 3 , DOES> REMEMBER POSTIT ;
 
 ( Bookkeeping for a fixup using a pointer to the BIBYBA information,    )
 ( can fake a fixup in disassembling too.                                )
-: TALLY:|   @+ TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR! ;  
+: TALLY:|   @+ TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;  
 ( Fix up the instruction using a pointer to DATA. )
 : FIXUP>   @+ ISS @ OR!   TALLY:|   CHECK32 ;
 ( Define an fixup by BA BY BI and the FIXUP bits )
@@ -223,7 +224,7 @@ IS-A IS-xFI   : xFI   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP> ;
 : CORRECT-R 0 CELL+ ISL @ - ROTLEFT ;
 ( Bookkeeping for a fixup-from-reverse using a pointer to the BIBYBA    )
 ( information, can fake a fixup in disassembling too.                   )
-: TALLY:|R  @+ CORRECT-R TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR! ; 
+: TALLY:|R  @+ CORRECT-R TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ; 
 ( Fix up the instruction from reverse using a pointer to DATA. )
 : FIXUP<   @+ CORRECT-R ISS @ OR!   TALLY:|R  CHECK32 ;
 ( Define a fixup-from-reverse by BA BY BI and the FIXUP bits )
@@ -232,7 +233,7 @@ IS-A IS-xFIR   : xFIR   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP< ;
 
 ( Bookkeeping for a commaer using a pointer to the BIBYBA information.  )
 ( Not used by the disassembler.                                         )
-: TALLY:,, CELL+   @+ CHECK30 TALLY-BY AND!   @ TALLY-BA OR! ;   
+: TALLY:,, CELL+   @+ CHECK30 TALLY-BY AND!   @ TALLY-BA OR!U ;  
 : COMMA @+ >R  TALLY:,,  CHECK32   R> EXECUTE ;
 ( Build with an disassembly ROUTINE, with the LENGTH to comma, the BA   )
 ( BY information and the ADDRESS that is executing the commaer          )
@@ -252,16 +253,6 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 : 3FAMILY,    0 DO   DUP >R T@ R> 3PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
 : xFAMILY|R   0 DO   DUP >R T@ R> xFIR  OVER + LOOP DROP DROP ;
-
-( The `INCONSISTENCY-PAIRS' is a remnant from the time BY and BA where  )
-( in one byte. It is now used to run assemblers that have still the     )
-( old conventions. It identifies the `BA' part.                         )
-FF VARIABLE INCONSISTENCY-PAIRS 
-( As `T!' but has BABY BI information, multiplexed as per               )
-( `INCONSISTENSY-PAIRS'                                                 )
-: T!' >R >R 
-    R INCONSISTENCY-PAIRS @ AND 
-    R> INCONSISTENCY-PAIRS @ INVERT AND R> T! ;
 
 ( ############### PART II DISASSEMBLER #################################### )
 
@@ -450,8 +441,10 @@ HERE POINTER !
 : DIS-COMMA
    DUP IS-COMMA IF
    DUP >BY @ TALLY-BY @ CONTAINED-IN IF
+   DUP >BA @  COMPATIBLE? IF
        DUP >BI TALLY:,,     
        DUP +DISS
+   THEN
    THEN
    THEN
 ;
