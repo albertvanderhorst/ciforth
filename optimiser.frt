@@ -192,12 +192,14 @@ CREATE OPTIMISE-O
 \ For all elements of DEA attempt a ``OPTIMISE-O'' .
 \ Leave a flag indicating that the DEA itself is b-optimisable.
 : OPTIMISE-O1 DUP H-OPTIMISABLE? IF
-    -1 >R
-    >DFA @ BEGIN NEXT-PARSE WHILE
-    CFA> DUP OPTIMISE-O
-    DUP FILL-SE    DUP FILL-OB
-    B-INLINABLE? R> AND >R REPEAT
-    2DROP R>  \D .S
+        -1 >R
+        DUP
+        >DFA @ BEGIN NEXT-PARSE WHILE
+        CFA> DUP OPTIMISE-O
+        B-INLINABLE? R> AND >R REPEAT
+        2DROP
+        DUP FILL-SE    FILL-OB
+        R>  DROP 1 \D .S
     ELSE
        DROP 0  \D .S
     THEN
