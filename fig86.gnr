@@ -2757,38 +2757,6 @@ RSLW4:  DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
 	DW      QERR
 RSLW5:  DW      SEMIS
 ;
-_COMMENT
-; R/W can be done without a loop, if blocks
-; do not go over track boundaries.
-;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
-HEADER({R/W},{RSLW},{DOCOL})
-	DW      ZERO, DSKERR, STORE
-	DW      SWAP, TOR
-RSLW0:  
-	_0BRANCH(RSLW1)
-	DW      LIT, 0200H      ; Read (AH) #(AL) sectors 
-	_BRANCH(RSLW2)
-RSLW1:  DW      LIT, 0300H      ; Write (AH) #(AL) sectors 
-RSLW2:  DW      SPBLK, PLUS     ; Specify AL
-	DW      SWAP            ; BX : address
-	DW      FROMR, SPBLK, STAR ; sector # 
-	DW      SECRW
-	DW      LIT, BPS, PLUS
-	_LOOP(RSLW0)
-	DW      DROP, FROMR, DROP
-	DW      DSKERR, FETCH,     DDUP
-	_0BRANCH(RSLW5)              ;OK
-	DW      ZLESS
-	_0BRANCH(RSLW3)
-	DW      LIT,    9                       ;Write error
-	_BRANCH(RSLW4)
-RSLW3:  DW      LIT,    8                       ;Read error
-RSLW4:  DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
-						   ; is no good!
-	DW      QERR
-RSLW5:  DW      SEMIS
-;
-_ENDCOMMENT
 });_END___1__({_USEBIOS_1_})
 	PAGE
 	; At line     LINE ~3500
