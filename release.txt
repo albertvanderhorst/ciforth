@@ -5,15 +5,15 @@ GENERAL.
 Date: See RCS-ID  
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl
 Copyright: GPL, inasfar not public domain by FIG
-Archive: fig86g2d116.zip
+Archive: fig86g2d148.zip
 
 All generic FIG86 forths have version number 2.
-Preliminary releases derive their version id, in this case as 2.116, from
+Preliminary releases derive their version id, in this case as 2.148, from
 the RCS version of the generic source file `fig86.gnr' 
 Stable versions will use the regular fig numbering. 
 
 Release :
-Version 2d147 is archived into fig86g2d147.zip and consists of
+Version 2d148 is archived into fig86g2d148.zip and consists of
 
 The source.
 Makefile        : Make a runnable Forth but also targets for building floppies.
