@@ -15,6 +15,16 @@ It looks as if sometimes K' fails. But not for a freshly booted system.
 If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
+Stable version 4.0.5  Suse and XP
+
+MEASURE-PRIME on the Celeron works flawlessly now. (The reason it failed
+was not the lack of instruction 0F 31.). MEASURE-PRIME on MSDOS fails to
+the effect that TICK 's is not implemented on MSDOS (yet).
+
+Stable version 4.0.4  Suse and XP
+This stable version was used internally because it had improvements related
+to timing, and was never officially released and tested.
+
 Stable version 4.0.3  Suse and XP
 The XP version failed the MEASURE-PRIME because it was a Celeron
 system without the clock count instruction 0F 31 .
@@ -139,6 +149,7 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
+hosted_linux linux_native   4.0.5 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.3 lina.cfg        lina          BCDEFHKMOPR
                             4.0.1 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0  lina.cfg         lina          BCDEFHKMOPR
@@ -150,9 +161,12 @@ hosted_linux linux_native   4.0  lina.cfg         lina          BCDEFHKMOPR
                             154  lina.cfg         lina          J
                             153  lina.cfg         lina          BCDEFHKMOPR
                             135                                 BCDEFHKMOP
+dpmi ("windows" 32 XP )     4.0.5 wina.cfg        WINA.COM      ABCDEFGKLMOPR
 dpmi ("windows" 32)         4.0.1 wina.cfg        WINA.COM      BCDEFGLMOR
                             4.0  wina.cfg         WINA.COM      BCDEFGLMOR
                             275  wina.cfg         WINA.COM      BCDEFGLMOR
+hostedmsdos real  modern    4.0.5 mina.cfg        mina.com      II B CDE-FG K' LMNOPR
+(tested on dosemu 1.0.2.0)
 hostedmsdos real  modern    4.0.1 mina.cfg        mina.com      II B CDEG K' O P R
                             4.0  mina.cfg         mina.com      II B CDEG K' O P R
                             275  mina.cfg         mina.com      II B CDEG K' O P R

@@ -116,22 +116,27 @@ ci86.alonehd.asm  \
 ci86.alonetr.asm  \
 # That's all folks!
 
+# Note that the generated file ``namescooked.m4'' is included,
+# because it require RCS to generate.
 RELEASECONTENT = \
 ci86.gnr        \
-$(CSRC:%=%.c)    \
-$(TARGETS:%=%.cfg) \
-$(DOC)     \
-Makefile         \
+$(CSRC:%=%.c)   \
+$(TARGETS:%=%.cfg)      \
+$(DOC)          \
+namescooked.m4  \
+Makefile        \
 test.mak        \
-$(INGREDIENTS)   \
-$(ASSEMBLERS:%=%.m4) \
-$(DOCTRANSFORMS) \
+tsuite.frt      \
+$(INGREDIENTS)  \
+$(ASSEMBLERS:%=%.m4)    \
+$(DOCTRANSFORMS)        \
 $(TOOLS)        \
-blocks.frt       \
+transforms      \
+blocks.frt      \
 options.frt     \
-genboot.bat      \
+genboot.bat     \
 $(EXAMPLES)     \
-wc            \
+wc              \
 errors.linux.txt \
 errors.dos.txt \
 # That's all folks!
@@ -146,6 +151,7 @@ COPYING   \
 README.lina \
 ci86.lina.info \
 ci86.lina.html \
+ci86.lina.pdf \
 ci86.lina.ps \
 ci86.lina.texinfo \
 ci86.lina.asm      \
@@ -186,12 +192,16 @@ ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr ; \
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.msm=%.rawtest)
 	rm $(TEMPFILE)
 
-ci86.%pres  : %.cfg gas.m4  ci86.gnr ; cat $+ | m4 >$@
-ci86.%     : %.cfg       ci86.gnr ; cat $+ | m4 >$@
 
 # gas needs extra transformations that m4 cannot handle.
 # In particular the order of operands.
-%.s : %pres ; sed -f transforms <$+ >$@
+ci86.%.pres  : %.cfg VERSION gas.m4  ci86.gnr ; cat $+ | m4 >$@
+
+ci86.%.s : ci86.%.pres transforms
+	sed $< -e '/Split here for doc/,$$d' | sed -f transforms >$@
+	sed $< -e '1,/Split here for doc/d' | \
+	sed -e '/Split here for test/,$$d' >$(@:%.s=%.rawdoc)
+	sed $< -e '1,/Split here for test/d' >$(@:%.s=%.rawtest)
 
 .PRECIOUS: ci86.%.rawdoc
 
@@ -330,6 +340,9 @@ ciforthc : ciforth.o ci86.linux.o
 
 # Linux native forth
 lina : ci86.lina.o ; ld $+ -o $@
+
+# Linux native forth by gnu tools
+glina : ci86.lina.s ; as $+; ld a.out -o $@
 
 # This dependancy is problematic.
 # Do `make constant.m4' explicitly beforehand.

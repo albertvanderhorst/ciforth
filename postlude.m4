@@ -104,6 +104,8 @@ _HOSTED_DPMI_({ _HOSTED_MSDOS_({errprint({You must choose either hosting by dos 
 })m4exit(1008)})})
 _SOURCEFIELD_({ _LOAD_(, {errprint({You must have BLK to use source fields, hence require loadables.
 })m4exit(1009)})})
+_HOSTED_({_RESPECTDOS_( {errprint({Respecting dos makes no sense for a hosted system.
+})m4exit(1010)})})
 dnl immediate consequences
 _SOURCEFIELD_({define({M4_HS},{6})})
 _BITS32_({define({M4_CELLWIDTH}, 4)})
@@ -114,4 +116,5 @@ _BITS32_({define({_PUSH}, {_PUSH32})})
 _BITS32_({define({_2PUSH}, {_2PUSH32})})
 dnl LEAVE THIS! THE BOOT CODE IS ALWAYS 16 BITS.
 include(width16.m4)
+include(namescooked.m4)
 divert{}dnl

@@ -174,23 +174,23 @@ DROP   CURRENT !
 
 
 
-( COMPARE BOUNDS ALIGN UNUSED ) CF: \ AvdH A1oct04
+( COMPARE $= BOUNDS ALIGN UNUSED ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
      MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
+\ For STRING1 and STRING2 : "they ARE equal".
+: $= ROT OVER = IF CORA 0 = ELSE DROP DROP DROP 0 THEN ;
 \ In general use
 : BOUNDS   OVER + SWAP ;
 
 : UNUSED DSP@ HERE - ;
+REQUIRE CONFIG
 "ALIGNED" PRESENT? ?LEAVE-BLOCK
 \ ISO
 : ALIGNED    1-   0 CELL+ 1- OR   1+ ;
 : ALIGN   DP @   ALIGNED   DP ! ;
-
-
-
 \
-( --manifest TRUE FALSE NULL NULL$ NONE ) \ AvdH A1oct15
+( --manifest TRUE FALSE NULL NULL$ NONE R/O W/O R/W ) \ AvdH
 \ Define some manifest constants.
 -1 CONSTANT TRUE       \ Flag
 0 CONSTANT FALSE       \ Flag
@@ -199,9 +199,9 @@ DROP   CURRENT !
 -1 CONSTANT NONE       \ Invalid index, where valid is pos.
 
 
-
-
-
+0 CONSTANT R/O
+1 CONSTANT W/O
+2 CONSTANT R/W
 
 
 
@@ -286,8 +286,8 @@ DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 
 
 \
-( SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
-
+( @+ SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
+'$@ ALIAS @+    ( Obsoleted by bags)
 ( Build a set "x" with X items. )
 : SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
@@ -302,23 +302,24 @@ DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 ( For VALUE and SET : value IS present in set.)
 : IN-SET? $@ SWAP ?DO
    DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
-( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE ) \ AvdH A3apr25
+( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE BAG-HOLE BAG-INSERT )
 REQUIRE @+
-( Build a bag "x" with X items. )
+( Build a bag with X items. )
+: BUILD-BAG   HERE CELL+ , CELLS ALLOT ;
+( Create a bag "x" with X items. )
 : BAG   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !BAG   DUP CELL+ SWAP ! ;   ( Make the BAG empty )
 : BAG?   @+ = 0= ;   ( For the BAG : it IS non-empty )
 : BAG+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Push ITEM to the BAG )
 : BAG@- 0 CELL+ NEGATE OVER +! @ @ ;   ( From BAG: pop ITEM )
-( Remove entry at ADDRESS from BAG. )
-: BAG-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE
-    -1 CELLS R> +! ;
-
-
-
-
-
-( DO-BAG LOOP-BAG .BAG BAG-WHERE IN-BAG? BAG- ) \ AvdH A3apr25
+: BAG-REMOVE    ( Remove entry at ADDRESS from BAG. )
+>R   DUP CELL+ SWAP  OVER R@ @ SWAP -   MOVE -1   CELLS R> +! ;
+: BAG-HOLE      ( Make hole at ADDRESS in BAG. )
+>R   DUP CELL+   OVER R@ @ SWAP -   MOVE   0 CELL+ R> +! ;
+( Insert VALUE at ADDRESS in BAG. )
+: BAG-INSERT   OVER SWAP BAG-HOLE   ! ;
+( |BAG| DO-BAG .BAG BAG-WHERE IN-BAG? BAG- SET+ SET- ) \ AvdH
+: |BAG|   @+ SWAP - 0 CELL+ / ; ( For BAG : NUMBER of items )
 \ Loop over a bag, see ``.BAG'' for an example.
 : DO-BAG  POSTPONE @+ POSTPONE SWAP POSTPONE ?DO ; IMMEDIATE
 : LOOP-BAG 0 CELL+ POSTPONE LITERAL POSTPONE +LOOP ; IMMEDIATE
@@ -330,9 +331,56 @@ REQUIRE @+
 : IN-BAG? BAG-WHERE 0= 0= ;
 ( Remove VALUE from BAG. )
 : BAG-   DUP >R   BAG-WHERE   R> BAG-REMOVE ;
-( Add VALUE to bag, used as a SET, i.e. no duplicates.)
+( Add/remove VALUE to bag, used as a SET, i.e. no duplicates.)
 : SET+   2DUP IN-BAG? IF 2DROP ELSE BAG+! THEN ;
-(   : BAG+ BAG+! ;    : SET- BAG- ;                           )
+: SET-   2DUP IN-BAG? IF BAG- ELSE 2DROP THEN ;
+( F: auxiliary_for_struct ) \ AH A4jun16
+4096 CONSTANT LEN
+CREATE NAME$ 128  ALLOT         \ The name of the struct.
+CREATE CRS$ LEN ALLOT  : !CRS$ 0 CRS$ ! ; \ Generate struct
+CREATE DOES>$ LEN ALLOT   \ Generate fields/methods.
+\ Add STRING and the name of the current struct to CRS$.
+: +NAME$   CRS$ $+!    NAME$ $@ CRS$ $+!   BL CRS$ $C+ ;
+VARIABLE LAST-IN         VARIABLE start
+: RLI IN @ LAST-IN ! ; \ Remember last value of ``IN''.
+: GLI >R LAST-IN @ IN @  R> - OVER - ; \ Input since RLI trim.
+: itoa 0 <# #S BL HOLD #> ; \ Transform an INT to a STRING.
+\ Add the first part of a definition of a field to DOES>$.
+: F:   " : " DOES>$ $+! (WORD) DOES>$ $+!   RLI
+  HERE start @ - itoa DOES>$ $+!   " ^" DOES>$ $+!
+  NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
+
+( struct endstruct ) \ AH A4jun16
+REQUIRE F:
+\ Add the create part and does part to respective strings.
+: FDOES>  7 ( length of " FDOES>") GLI CRS$ $+!
+    &; (PARSE) 1+ DOES>$ $+! ;
+\ Defining word for the struct. Defer actual creation.
+: struct   (WORD) NAME$ $!   !CRS$   "VARIABLE ^" +NAME$
+  CRS$ $@ EVALUATE   HERE start !   !CRS$  ": CREATE-" +NAME$
+  " HERE >R " CRS$ $+!   "" DOES>$ $! ;
+\ Create fields and a defining words for the struct.
+: endstruct ?EXEC   start @ HERE - ALLOT   " R> ;" CRS$ $+!
+  CRS$ $@ EVALUATE   DOES>$ $@ EVALUATE
+   !CRS$ ": " +NAME$   " CREATE CREATE-" +NAME$
+   " ^" +NAME$   " !  DOES> ^" +NAME$   " ! ; " CRS$ $+!
+   CRS$ $@ EVALUATE ; IMMEDIATE
+
+( :NONAME CASE MARKER )
+REQUIRE POSTFIX
+: :NONAME "NONAME" POSTFIX : LATEST DUP HIDDEN !CSP ; \ ISO
+
+\ ISO
+: CASE 0 ; IMMEDIATE
+: OF   POSTPONE OVER POSTPONE =
+    POSTPONE IF POSTPONE DROP ; IMMEDIATE
+: ENDOF POSTPONE ELSE ; IMMEDIATE
+: ENDCASE POSTPONE DROP BEGIN DUP WHILE POSTPONE THEN REPEAT
+  DROP ; IMMEDIATE
+
+\ ISO
+: MARKER  CREATE   DOES>   BODY>   'FORGET-VOC FOR-VOCS
+  >NFA @ DP ! ;
 
 ( BIN-SEARCH binary_search_by stack ) \ AvdH
 ( nmin nmax xt -- nres )
@@ -478,7 +526,7 @@ REQUIRE COMPARE         REQUIRE MERGE-SORT
 \ Don't use it on FORTH : it links through DENOTATIONS .
 : SORT-VOC >WID SORT-WID ;
 
-( CRC-MORE CRC )CF: ?32 \ AvdH
+( CRC-MORE CRC ) CF: ?32 \ AvdH
 REQUIRE BOUNDS   REQUIRE NEW-IF    HEX
 \ Well the polynomial
 EDB8,8320 CONSTANT CRC32_POLYNOMIAL
@@ -622,22 +670,22 @@ DECIMAL
 
 
 
-( $ ESC SI SO hex_numbers_denotation ) \ AvdH A1apr15
-'DENOTATION >WID CURRENT !
+( PREFIX $-PREFIX #-PREFIX  ESC ) \ AvdH A1apr15
+
+\ Make latest word findable as a prefix.
+: PREFIX   LATEST >FFA 8 TOGGLE ;
 \ DEFINITIONS PREVIOUS doesn't work because DEF.. is
 \ found in the DENOTATION wordlist (!)
+'DENOTATION >WID CURRENT !
+\ Define $ as a prefix for hex.
 : $ BASE @ >R HEX (NUMBER) R> BASE ! POSTPONE SDLITERAL ;
-12 LATEST >FFA !
+PREFIX IMMEDIATE
+\ Define # as a prefix for decimal.
+: # BASE @ >R DECIMAL (NUMBER) R> BASE ! POSTPONE SDLITERAL ;
+PREFIX IMMEDIATE
 DEFINITIONS
 
-\ Some constants
-$1B CONSTANT ESC    $0F CONSTANT SI   $0E CONSTANT SO
-
-
-
-
-
-
+$1B CONSTANT ESC
 ( +THRU ) \ AvdH A1oct05
 \ Load current block plus N1 to current block plus N2.
 : +THRU   SRC @ 2 CELLS - @ >R
@@ -686,22 +734,22 @@ CREATE BASE' 0 ,
 : INCLUDE (WORD) INCLUDED ;
 
 
-( SLITERAL PARSE STRING $. $? Elementary_string) \ AvdH A10ct08
-
+( SLITERAL PARSE SCAN-WORD DOC $. $? ."$" ) \ AvdH
+REQUIRE 2>R
 \ ISO
 : SLITERAL POSTPONE SKIP $, POSTPONE LITERAL POSTPONE $@ ;
 IMMEDIATE
 \ ISO
 : PARSE (PARSE) ;
-
-\ Other words
- : $. TYPE ;
- : $? $@ $. ;
-
-
-: STRING CREATE &" (PARSE) $, DROP DOES> $@ ;
-
-
+: ((WORD)) (WORD) DUP 0= 13 ?ERROR ;
+\ Skip words until and including STRING.
+: SCAN-WORD 2>R BEGIN BEGIN ((WORD)) R@ <> WHILE DROP REPEAT
+   2R@ CORA WHILE REPEAT RDROP RDROP ;
+: DOC "ENDDOC" SCAN-WORD ;  \ Skip till "ENDDOC".
+ : $. TYPE ;  \ Print a STRING constant.
+ : $? $@ $. ;  \ Print a string at ADDRESS.
+\ Print STRING, as a quoted string, reconsumable.
+: ."$" BEGIN &" $S &" EMIT TYPE &" EMIT OVER 0= UNTIL 2DROP ;
 ( MS@ TICKS TICKS-PER-SECOND ) \ AvdH A2oct21
 CF:   REQUIRE +THRU
 1 2 +THRU
@@ -1984,7 +2032,7 @@ REQUIRE OS-IMPORT
 
 ( EDITOR ) CF:   ?PC    \ AvdH A1oct05
 REQUIRE IVAR   REQUIRE +THRU
-REQUIRE VIDEO-MODE   REQUIRE $
+REQUIRE VIDEO-MODE   REQUIRE PREFIX
   1 12 +THRU
 
 
@@ -2366,8 +2414,8 @@ RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
   POP|X, SI|   PUSH|X, BX|  NEXT ; PREVIOUS
 CODE READ-BLOCK 4200 R\W-BLOCK  END-CODE
 CODE WRITE-BLOCK 4300 R\W-BLOCK  END-CODE     DECIMAL
-\ --hd_LBA (HWD) (HRD) (FRD) (FWD) \ ?16 ?PC HEX
-?16 ?PC
+\ --hd_LBA (HWD) (HRD) (FRD) (FWD) \ CF: ?16 ?PC HEX
+ CF: ?16 ?PC
 
 ( Write the default buffer to hard disk at 32-bit POSITION)
 : (HWD) SWAP WRITE-BLOCK 1 AND . ;

@@ -493,9 +493,9 @@ The usage of forthmacro({divert()}) can best be explained with an example in thi
 
 forthexample(
 {{define(_lbracket_parents_rbracket_,
-_lbracket_{divert(3)dnl}
+_lbracket__lbracket_divert(3)dnl_rbracket_
 $}{2
-{divert(6)dnl}
+_lbracket_divert(6)dnl_rbracket_
 $}{3
 _rbracket_)}})
 
@@ -757,14 +757,20 @@ respectively.
 
 This generic version -if suitably built- runs on industry standard hardware
 ("PC's") : standalone, under Linux and under MSDOS/MSWINDOWS.
-To build, you need a version of forthprog({nasm}) , forthprog({TASM.EXE}) or forthprog({MASM.EXE}) on your system. I
-recommend forthprog({nasm}) , it is an open source assembler and available on different
-platforms, at least MSDOS and Unix. It solves a lot of the design errors I
-find in the Intel ways of forthprog({MASM.EXE}) . It generates a binary without a linker.
+To build, you need a version of forthprog({nasm}) , forthprog({TASM.EXE}) or forthprog({MASM.EXE}) on your system.
+I recommend forthprog({nasm}) , it is an open source assembler and available on different
+platforms, at least MSDOS and Unix.
+It solves a lot of the design errors I
+find in the Intel ways of forthprog({MASM.EXE}) .
+It is easier to use than the GNU forthprog({as}) because it adheres more
+to the Intel syntax.
+It generates a binary without a linker.
 On the opposite side, e.g. Borland's forthprog({TASM.EXE}) you can buy nowadays only as part
 of a giant C++ package.
 If you want to use the generic possibilities you will need a Unix system
-with all of its tools. I use GNU-Linux (RedHat) and do the makes and version
+with all of its tools.
+I have successfully used GNU-Linux (RedHat andS Suse) to
+ do the makes and version
 control on that. If you want your bootable floppies made from Linux to be
 MSDOS-compatible you need mtools.
 
@@ -858,8 +864,14 @@ size. Be careful.
 With respect to the assembler you can choose between forthprog({nasm}) and forthprog({MASM.EXE}) , with
 file extension forthfile({.asm}) and forthfile({.msm}) respectively.
 The forthvar({.msm}) are acceptable by
-TASM.EXE too. You can generate an equivalent forthfile({.s}) file, but this is
+NASM.EXE too.
+You can generate an equivalent forthfile({.s}) file, but this is
 experimental and doesn't lead to a working forth.
+_VERBOSE_({{
+I have reported problems in generating a forth using the Intel 86,
+GNU tools. Whether or not the problems could have been overcome
+at the time, at least from kernels 2.4.x on, GNU tools should be
+able to generate a Forth.}})
 
 With respect to the I/O (words like forthcodeni({EXPECT})
 forthcodeni({R\W}) ) you can choose between three on MSDOS. (
@@ -1150,7 +1162,7 @@ in e.g. WORDS.
 @subsection Linux application notes lina version
 The lina version is based on a single assembler source, built without
 trickery and binary-portable across Linux Intel (all systems were it has
-been tried work : 1.2.13 .. 2.0.13). No run time c-libraries, no compile time
+been tried work : 1.2.13 .. 2.4.20). No run time c-libraries, no compile time
 c-libraries, no libraries at all. It is built directly on the solid rock
 of the system calls by ignoring a taboo c-programmers suffer from.
 forthexample({

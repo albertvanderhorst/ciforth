@@ -18,7 +18,7 @@ define({_STRINGINLINE},
 {DC      SKIP
          DC      len({$1})
 SB{}_sc: DSS      _quoted}({{$1}})
-{       _ALIGNED_({_ALIGN 4})
+{       _ALIGNED_({_ALIGN(4)})
         DC      LIT, SB{}_sc
         DC      LIT, len({$1})
 define({_sc},{incr}(_sc))dnl })dnl
@@ -42,12 +42,12 @@ ifelse(0,len({$1}),,
 ;  *   {{$1}}   *
 ;  ********_star(len({$1}))
 ;
-_ALIGNED_({    _ALIGN 4},{dnl})
+_ALIGNED_({    _ALIGN(4)},{dnl})
 N_$2:   {_STRING}({{$1}}))
-_ALIGNED_({    _ALIGN 4},{dnl})
+_ALIGNED_({    _ALIGN(4)},{dnl})
 ifelse(0,len($2),,$2:)dnl
         DC    ifelse(0,len($3),0H,$3)
-        DC    ifelse(0,len($4),$ + _CELLS(PH_OFFSET-D_HOFFSET),$4)
+        DC    ifelse(0,len($4),_AP_ + _CELLS(PH_OFFSET-D_HOFFSET),$4)
         DC    ifelse(0,len($5),0H,$5)
         DC    ifelse(0,len({$6}),dnl Only link in if there is no explicit link.
 {_LINKOLD{}define({_LINKOLD},{$2-_CELLS(C_HOFFSET)})},dnl
@@ -67,25 +67,25 @@ define({_VAR_FIELD},{($1+_CELLS(PH_OFFSET-C_HOFFSET))})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
-        DC      $1-$-CW})dnl
+        DC      $1-_AP_-CW})dnl
 define({_BRANCH},dnl
 {DC      BRAN
-        DC      $1-$-CW})dnl
+        DC      $1-_AP_-CW})dnl
 define({_DO},dnl
 {DC     XDO
-        DC      $1-$-CW})dnl
+        DC      $1-_AP_-CW})dnl
 define({_QDO},dnl
 {DC     XQDO
-        DC      $1-$-CW})dnl
+        DC      $1-_AP_-CW})dnl
 define({_LOOP},dnl
 {DC     XLOOP
-        DC      $1-$-CW})dnl
+        DC      $1-_AP_-CW})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
 {_HEADER({$1},
 {$2},
-{$+_CELLS(PH_OFFSET-C_HOFFSET)},
-{$+_CELLS(PH_OFFSET-D_HOFFSET)},
+{_AP_+_CELLS(PH_OFFSET-C_HOFFSET)},
+{_AP_+_CELLS(PH_OFFSET-D_HOFFSET)},
 $5)})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl

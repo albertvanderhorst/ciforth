@@ -97,9 +97,16 @@ From then on 4.0.2 can no longer be patched.
 How to move a sticky tag to a new branch:
 In this example from 4.15.2.5 to 4.15.3.1
 
-cvs tag -d rel-4-0-patches ci86.gnr
-cvs update -r4.15.3 ci86.gnr
-cvs tag rel-4-0-patches ci86.gnr
+Just use rcs to do this:
+ln -s $CVSROOT/ciforth RCS
+NEWBRANCH=4.15.3.1.
+co -l -rrel-4-0-patches $f
+cvs diff $f     # check : no diffs
+ci -f -r$NEWBRANCH $f
+rcs -Nrel-4-0-patches $f
+rcs -Nrel-4-0-patches:$NEWBRANCH $f
+rm RCS
+cvs diff $f     # check : no diffs
 
 2003 oct 13
 
@@ -110,3 +117,11 @@ But also copies the file to where it can find it.
 cp lina.info /usr/share/info
 install-info --entry='* lina :: a simple Linux native Forth implementation' \
              lina.info /usr/share/info/dir
+
+2004 sep 16
+How to make an xp distro for Simtel
+        make a normal windows distribution
+        update the README.xp file
+        make an executable with the correct default shell, by editing the asm file
+        copy the distribution to wna4x0x#
+        replace executable and README.wina in the a copy of the distro

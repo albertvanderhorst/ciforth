@@ -1,8 +1,9 @@
 s/;\([^'"]*\)$/#\1/
 s/^\([^'"]*\);\(.*$\)/\1#\2/
-s/
-//
+s/^\([^'"]*'[^']*'[^']*\);\(.*$\)/\1#\2/
+s/\r//
 s/\([0-9][0-9A-F]*\)H/0x\1/g
+s/\<\([0-7][0-7][0-7]\)Q\>/0\1/g
 s/\<EQU\>/=/
 s/\<DW\>/ .WORD /
 s/\<DB\>/ .BYTE /
@@ -11,40 +12,35 @@ s/\<REP\>/ REP\
         /
 # Reverse the order of the operands of an instruction
 # Not of .SOMETHING !
-s/^\([^# ]*[    ]*[^\.]\<[A-Z][A-Z]*\>\)\([^,#]*\),\([^#]*\)/\1 \3,\2/
-s/\$/./
+s/^\([^# ]*[    ]*[^\.]\<[A-Z][A-Z]*\>\)\([^,#]*\),\([^#]*\)/\1 \3,\2 /
 s/\<ORG\>/. =/
-s/nobits write exec alloc/,"wx",@nobits/
-s/progbits write exec alloc/,"awx"/
 s/.BYTE *\"\(.\)\"/.BYTE   '\1'/
 s/\"\(.\)\"+/'\1'+/
+s/\(\".*\)\\\(.*\"\)/\1\\\\\2/
 # General registers
-s/\<AL\>/%AL/g
-s/\<AH\>/%AH/g
-s/\<BL\>/%BL/g
-s/\<BH\>/%BH/g
-s/\<CL\>/%CL/g
-s/\<CH\>/%CH/g
-s/\<DL\>/%DL/g
-s/\<DH\>/%DH/g
-s/\<DX\>/%DX/g
-s/\([^"]\)\<ESP\>/\1%ESP/g
-# GNU want indirect jumps this way.
-s/\<JMP[        ]\(\[%E[A-Z][A-Z]\]\)/JMP       *(\1)/g
-s/\<JMP[ ]*\[\(%[A-Z][A-Z][A-Z]\)\]/JMP *(\1)/g
-s/\[\(%[A-Z][A-Z][A-Z]\)\]/0(\1)/g
-s/\[\([^%]*\)\]/*(\1)/g
+s/\(^[^"#]*\)\<AL\>/\1%AL/g
+s/\(^[^"#]*\)\<AH\>/\1%AH/g
+s/\(^[^"#]*\)\<BL\>/\1%BL/g
+s/\(^[^"#]*\)\<BH\>/\1%BH/g
+s/\(^[^"#]*\)\<CL\>/\1%CL/g
+s/\(^[^"#]*\)\<CH\>/\1%CH/g
+s/\(^[^"#]*\)\<DL\>/\1%DL/g
+s/\(^[^"#]*\)\<DH\>/\1%DH/g
+s/\(^[^"#]*\)\<DX\>/\1%DX/g
+s/\(^[^"#]*\)\<ESP\>/\1%ESP/g
+s/\(^[^"#]*\)\[\(%[A-Z][A-Z][A-Z]\)\]/\10(\2)/g
+s/\(^[^"#]*\)\[\([^%]*\)\]/\1*(\2)/g
 s/LEA[  ]*\[\(%[A-Z][A-Z][A-Z]\)+\(%[A-Z][A-Z][A-Z]\)\]/LEA       (\1,\2)/g
-# Replace a '-string with at no embedded " by a "-string with escaped ".
+# Replace a '-string with no embedded " by a "-string.
 s/\.ASCII *'\([^'"]*\)'/.ASCII  "\1"/g
 # Replace a '-string with 1 embedded " by a "-string with escaped ".
 s/\.ASCII *'\([^'"]*\)"\([^']*\)'/.ASCII  "\1\\"\2"/g
 s/^\([^#]* *\*\) BYTE /\1 /
-# Change a MOV of an indirection 
+# Change a MOV of an indirection
 s/MOV  *[0\*]\((\)/MOV     \1/g
 # A second operand starting with *( is always indirect
 s/, *\*(/,(/g
-# Change a MOV of an apparent direct data. 
+# Change a MOV of an apparent direct data.
 # This just happens to work because of the content of the assembler files.
 s/MOV  *\([-0-9][^(]\)/MOV     $\1/g
 s/INT  *\([0-9][^(]\)/INT     $\1/g
@@ -52,8 +48,9 @@ s/INT  *\([0-9][^(]\)/INT     $\1/g
 s/^\([^#]*\) BYTE /\1 /
 s/^\([^#]*\) LONG /\1 /
 s/\[\(\<.*\>\)+\(\<[0-9x]*\>\)\]/\1+\2/g
-s/\[\(%[A-Z][A-Z][A-Z]\)+\(.*\)\]/\2(\1)/g
-s/\[\(%[A-Z][A-Z][A-Z]\)-\(.*\)\]/(-\2)(\1)/g
-s/\([^`]\)\[\(\<[A-Z][A-Z0-9]*\>\)\]/\1\2/g
-s/".""/".\\""/
-s/"(.")"/"(.\\")"/
+s/\[\(%[A-Z][A-Z][A-Z]\) *+ *\(.*\)\]/\2(\1)/g
+s/\[\(%[A-Z][A-Z][A-Z]\) *- *\(.*\)\]/(-\2)(\1)/g
+s/^\([^"#]\)\[\(\<[A-Z][A-Z0-9]*\>\)\]/\1\2/g
+# GNU want indirect jumps this way.
+s/\<\(JMP[ ]*\)(/\1*(/g
+s/\<\(JMP[ ]*\)0(/\1*(/g

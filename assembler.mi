@@ -1,6 +1,26 @@
 dnl $ Id: $
 dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public License
 
+The assembler is described in this manual,
+because it is not feasable to use it from the description in the source.
+
+
+@menu
+* A2:: Introduction
+* A3:: Reliability
+* A4:: Principle of operation
+* A5:: The 8080 assembler
+* A6:: Opcode sheets
+* A7:: Details about the 80386 instructions
+* A8:: 16 and 32 bits code and segments
+* A9:: Difference with the built in assembler
+* AA:: A rant about redundancy
+* AB:: Reference opcodes
+* AC:: The dreaded SIB byte
+* AE:: An incomplete and irregular guide to the instruction mnemonics.
+* AF:: Assembler Errors
+@end menu
+@node A2, A3, AF, Assembler
 @section Introduction
 
 Via forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html}) you
@@ -30,18 +50,22 @@ forthfile({as80.frt})  : 8080 assembler, requires forthfile({asgen.frt})
 forthbreak
 forthfile({asi86.frt})  : 8086 assembler, requires forthfile({asgen.frt})
 forthbreak
-forthfile({asi586.frt}) : 80386 assembler, requires forthfile({asgen.frt})
+forthfile({asi386.frt}) : 80386 assembler, requires forthfile({asgen.frt})
+forthbreak
+forthfile({asalpha.frt}) : DEC Alpha assembler, requires forthfile({asgen.frt})
+forthbreak
+forthfile({asi6809.frt}) : 6809 assembler, requires forthfile({asgen.frt})
 forthbreak
 forthfile({ps.frt})     : generate opcode sheets
 forthbreak
-forthfile({p0.asi586.ps}) : first byte opcode for asi586 assembler
+forthfile({p0.asi386.ps}) : first byte opcode for asi386 assembler
 forthbreak
-forthfile({p0F.asi586.ps}) : two byte opcode for same that start with 0F.
+forthfile({p0F.asi386.ps}) : two byte opcode for same that start with 0F.
 forthbreak
 forthfile({test.mak}) : makefile, i.e. with targets for opcode sheets.
 forthbreak
 
-De forthfile({asi586.frt}) (containing the full 80386 instruction set) is in
+De forthfile({asi386.frt}) (containing the full 80386 instruction set) is in
 many respects non-compliant to Intel syntax. The instruction
 mnemonics are redesigned in behalf of reverse engineering.
 There is a one to one correspondence between mnemonics and
@@ -70,9 +94,10 @@ comma-ers are even mostly different. You have to resort to that
 old game, reading the source.
 
 
+@node A3, A4, A2, Assembler
 @section Reliability
 
-I skimped on write up. I didn't skimp on testing, at least not for forthfile({asi586.frt}).
+I skimped on write up. I didn't skimp on testing, at least not for forthfile({asi386.frt}).
 It is tested in this way:
 
 forthenumerate
@@ -104,6 +129,7 @@ practical for the Alpha with 32K register combinations per
 instruction.
 
 
+@node A4, A5, A3, Assembler
 @section Principle of operation
 
 In making an assembler for the Pentium it turns out that
@@ -141,7 +167,8 @@ FIXUP phase:
 forthcode({X|}) or forthcode({B|}) fits in one of the holes left.
 forthitem
 COMMA phase:
-forthcode({IX,}) or forthcode({X,}) add addresses and immediate data.
+forthcode({IL,}) or forthcode({L,}) add addresses (or offsets)
+and immediate data.
 forthenditemize
 
 Doesn't that lay a burden on the programmer? Yes.
@@ -165,6 +192,7 @@ a increment for the opcodes. These are defined as a group by a single execution 
 word. For each group there is one opportunity to get the opcode wrong; formerly that
 was for each opcode.
 
+@node A5, A6, A4, Assembler
 @section The 8080 assembler
 
 The 8080 assembler doesn't take less place than Cassady's . (You bet that the postit-fixup principle pays  off for
@@ -188,13 +216,14 @@ instructions where missing. This became apparent as soon as I printed the
 opcode sheets.
 For me this means turning ``jump conditional'' into a family.
 
+@node A6, A7, A5, Assembler
 @section Opcode sheets
 
 Using forthfile({test.mak}) (on a linux computer in lina) you can generate opcode sheets
-by  "make asi586.ps". For the opcode sheets featuring a n-byte prefix you must
+by  "make asi386.ps". For the opcode sheets featuring a n-byte prefix you must
 pass the forthsamp({PREFIX}) to make and a forthsamp({MASK}) that covers the prefix and the byte opcode, e.g.
-forthsamp({make asi586.ps MASK=FFFF PREFIX=0F})
-The opcode sheets forthfile({p0.asi586.ps}) and forthfile({p0F.asi586.ps}) are already made and can be
+forthsamp({make asi386.ps MASK=FFFF PREFIX=0F})
+The opcode sheets forthfile({p0.asi386.ps}) and forthfile({p0F.asi386.ps}) are already made and can be
 printed on a PostScript printer or viewed with e.g. forthsamp({gv}).
 
 Compare the opcode sheets with Intel's to get an overview of what I have done
@@ -215,6 +244,7 @@ type forthsamp({SHOW: IMUL|AD,}) You can also type
 forthcode({SHOW-ALL,}) but that takes a lot of time and is more
 intended for test purposes.
 
+@node A7, A8, A6, Assembler
 _VERBOSE_({
 
 @section Details about the 80386 instructions
@@ -250,10 +280,14 @@ assembler. These can be overruled with forthcode({ AS:, }) dnl
 applying to forthcode({DX|}) and forthcode({MEM|}) and with
 forthcode({ OS:, }) applying to tdata required where there is
 an I suffix.
+The commaers always reveal their true width.
+It is either forthcode({IW,}) or forthcode({IL,}) .
 forthitem
 Width fixups determine the data width : forthcode({X|})
 (xell or natural data width 16/32 ) or forthcode({B|}) ( 8 bit) unless
 implied.
+Offset fixups determine the offset or address width : forthcode({XO|})
+(xell or natural data width 16/32 ) or forthcode({BO|}) ( 8 bit) or forthcode({ZO|}) .
 forthitem
 Instruction ending in forthkey({I}) have an immediate data field after all
 fixups. This can be either forthcode({X,}) (xell or natural data
@@ -269,7 +303,7 @@ the programmer should carefully insert forthcode({W,}) or
 forthcode({L,}) whatever appropriate.
 forthitem
 With r/m you can
-have offsets (for forthcode({DB|}) and forthcode({DX|}) ) that
+have offsets (for forthcode({BO|}) and forthcode({XO|}) ) that
 must be assembled using forthcode({B,}) or forthcode({X,}) but
 mind the previous point.
 forthitem
@@ -327,42 +361,67 @@ Disassemble the address offsets and immediate data, in accordance with
 the instruction. Length is determined from fixups and prefix bytes.
 The result must agree with the instruction in the first place.
 forthendenumerate
-
-
-@section Using 16 bits code in the 32 bit assembler
-
-In general X refers to Xell. So in 16 bit mode or with a 16 bit prefix
-AX is to mean the Intel forthcode({AX}) instead of what is normal:
-forthcode({EAX}) .
-It is thus possible to insert a patch of 16 bit code in 32 bit code
-all with the 32 bit assembler. This can be necessary in system
-programming. Just use forthsamp({MOV, AX'| R| BX|}) and in 16 bit mode it refers
-to 16 bit registers.
-
-If an address overwrite suffix applies, the indexing fixups ending in
-a prime must be used, e.g. forthsamp({[BX+SI]'}) instead of
-forthcode({[AX]}) for code running in a default 32 bit environment.
-(Otherwise use the 8086 assembler) But during system programming only
-the programmer knows what is going on, so some error messages are
-suppressed.
-
-While using 16 bits code, whenever you get error messages and
-you are sure you know better than the assembler, put
-forthcode({!TALLY}) before the word that gives the error
-messages, and they will be suppressed.
-
-@section This assembler is not yet integrated in the generic Forth
-
-In the generic Forth automatically a 32 bit assembler is loaded
-if the Forth itself is 32 bits and a 16 bit assembler for the
-16 bit forths. Adding the extra complexity to run the 16 bit
-assembler on a 32 bit system would be the drip that overflows
-the bucket. This is no restriction for what code can be
-generated. forthemph({The built in assembler has no error
-checking and may have bugs the very extensively tested})
-forthfile({asi586.frt}) forthemph({has not.})
  });_END_({_VERBOSE_})
 
+@node A8, A9, A7, Assembler
+@section 16 and 32 bits code and segments
+
+Note that the handling of segments and mixing thereof changed around
+ciforth version 4.0.5.
+Contrary to the old situation,
+commaers are checked correctly in the presence of prefixes
+and you have never to overrule error-checking.
+
+In fixup X is used to mean Xell, or the natural word length.
+This is 16 bits for 16 bits segments and 32 bits for 32 bits segments.
+Likewise in PostIt-FixUp AX means Intel's forthcode({AX}) for 16 bits
+segments and forthcode({EAX}) for 32 bits segments.
+
+In comma-ing, you must always select the proper one, xell-wide commaers
+always contain either forthkey({W}) or forthkey({L}) .
+
+After the directive forthcode({BITS-16}) code is generated for and checked
+against a 16 bit segment.
+After the directive forthcode({BITS-32}) code is generated for and checked
+against a 32 bit segment.
+
+In a 16 bits segments the following commaers must be used:
+ forthcode({W,}) forthcode({IW,}) forthcode({(RW,)}) and forthcode({RW,}) .
+In a 32 bits segments the following commaers must be used:
+ forthcode({L,}) forthcode({IL,}) forthcode({(RL,)}) and forthcode({RL,}) .
+
+The prefix forthcode({OS:}) switches forthcode({IW,}) to forthcode({IL,}) and vice versa.
+The prefix forthcode({AS:}) switches forthcode({W,}) to forthcode({L,}) and vice versa.
+
+While mixing modes,
+whenever you get error messages and
+you are sure you know better than the assembler,
+put forthcode({!TALLY}) before the word that gives the error
+messages,
+and they will be suppressed.
+Proper use of the BITS-xx directives should make this unnecessary.
+
+@node A9, AA, A8, Assembler
+@section Difference with the built in assembler
+
+From within ciforth one can load an assembler from the installed LAB
+library by the command forthcode({REQUIRE ASSEMBLERi86 }).
+Automatically a 32 bit assembler is loaded
+if the Forth itself is 32 bits and a 16 bit assembler for the
+16 bit forths.
+This is a simplified version with much less error checking and
+no provisions for 16/32 bit mixing.
+In the future this assembler should be fully compatible
+with the large file-based one regarding mnemonics.
+
+forthemph({Consequently you cannot (yet) take a debugged program and run it
+through the LAB assembler. })
+
+forthemph({The built in assembler has no error
+checking and may have bugs the very extensively tested})
+forthfile({asi386.frt}) forthemph({has not.})
+
+@node AA, AB, A9, Assembler
 _VERBOSE_({
 
 @section A rant about redundancy
@@ -392,11 +451,11 @@ prefer your fixups in alphabetic order. (A nice rule for those
 Code Standard Police out there?).
 
 And yes forthsamp({ES: OS:
-MOV, X| T| DI'| SIB|, DX| [BP +8* AX] FFFFF800 X,}) though
+MOV, X| T| DI'| SIB|, XO| [BP +8* AX] FFFFF800 X,}) though
 being correct, and in a logical order, looks still bad, because
 it forthemph({is}) bad in the sense that the Pentium design got
 overboard in complication. (This example is from the built-in assembler,
-the one in forthfile({asi586.frt}) redefines forthcode({[BP}) c.s. to get rid of the forthcode({SIB|,}) instruction.)
+the one in forthfile({asi386.frt}) redefines forthcode({[BP}) c.s. to get rid of the forthcode({SIB|,}) instruction.)
 forthbreak
 First remark: lets assume this is
 32 bit code,(because otherwise there
@@ -410,7 +469,7 @@ in forthcode({X|}) .
 Then the first forthcode({X|}) changes its meaning to 16 bit, because
 of the forthcode({OS:}) prefix.
 forthitem
-The forthcode({X}) in forthcode({DX|}) and in forthcode({X,}) must
+The forthcode({X}) in forthcode({XO|}) and in forthcode({X,}) must
 agree and are 32 bits because you are in a 32 bits segment and this
 cannot be overridden.
 forthitem
@@ -427,10 +486,11 @@ but
 inconvenience.
  });_END_({_VERBOSE_})
 
+@node AB, AC, AA, Assembler
 _VERBOSE_({
 @section Reference opcodes
 
-Table one contains all the opcodes used in forthfile({asi586.frt}) in alphabetic order,
+Table one contains all the opcodes used in forthfile({asi386.frt}) in alphabetic order,
 with forthkey({|}) sorted before any letter.
 All opcodes on the first position are the same as Intel opcodes.
 
@@ -597,12 +657,13 @@ forthitem OI      : Operand indirect
  });_END_({_VERBOSE_})
 
 
+@node AC, AE, AB, Assembler
 @section The dreaded SIB byte
 
 If you ask for the operands of a memory instruction (one of the
 simple one is LGDT, ) instead of all the sib (forthdefi({scaled index byte}))
 possibilities you see.
-forthsamp({LGDT, DB| ~SIB| 14 SIB,, 18, B,})
+forthsamp({LGDT, BO| ~SIB| 14 SIB,, 18, B,})
 This loads the general description table from an address
 described by a sib-byte of 14.
 
@@ -615,7 +676,7 @@ forthsamp({SHOW: ~SIB,})
 For the curious:
 
 Explanation of
-forthsamp({LGDT, DB| ~SIB| 10 SIB,, 14, B,})
+forthsamp({LGDT, BO| ~SIB| 10 SIB,, 14, B,})
 This way of specifying a sib-byte
 would be perfectly legal, had I not hidden those words.
 It shows what is going on: the instruction is completed by ~SIB|
@@ -626,17 +687,7 @@ This specifies in fact a one byte opcode with three fields
 examplified by forthsamp({[AX +2* SI})] (and
 again you might say forthsamp({+2* SI] [AX}) with the same meaning.)
 
-@section A last caveat
-
-There is no way to communicate to the assembler whether the current
-instructions are supposed to be executed in 16 or 32 bit mode. This
-means that if you use the address overwrite prefix forthcode({AS:,}) dnl
-and/or primed fixups forthcode({ [BX]' }) and/or run your code in 16
-bit mode, you must be very careful.
-As long as you stay away from the above, you can be sure that
-valid instructions are correctly assembled and executed as you
-specified and invalid instructions are rejected.
-
+@node AE, AF, AC, Assembler
 _VERBOSE_({
 @section An incomplete and irregular guide to the instruction mnemonics.
 
@@ -649,7 +700,7 @@ not explained in table 1.
 So beware!
 
 Note that some of the instruction are Pentium and as yet
-not present in the forthfile(asi586.frt) (which should still be called forthfile(asi386.frt)).
+not present in the forthfile(asi386.frt) (which should still be called forthfile(asi386.frt)).
 
 Never use an instruction that end in a ' (such as forthcode({ [BP+IS]'
 }) except in case of address size overwrites forthemph({and}) you know
@@ -706,7 +757,7 @@ forthbreak
 WRMSR: Write to Model Specific Register
 forthbreak
 forthbreak
-Suffices of the opcode
+Suffices of the opcode, i.e. part of the opcode word.
 forthbreak
 |ALL : All
 forthbreak
@@ -751,13 +802,15 @@ F| : From (primed or special register)
 forthbreak
 V| : Variable number
 forthbreak
+Items in Commaers.
 forthbreak
-OB : Obligatory byte
+OB, : Obligatory byte
 forthbreak
-OW : Obligatory word (=16bits)
+OW, : Obligatory word (=16bits)
 forthbreak
  });_END_({_VERBOSE_})
 
+@node AF, A2, AE, Assembler
 @section  Assembler Errors
 
 Errors are identified by a number. They are globally unique, so

@@ -84,8 +84,9 @@ cmp: ci86.mina.bin ci86.alone.bin ciforth lina
 		cmp lina cmp/lina
 		cmp ciforth cmp/ciforth
 
+# Not all of these segments are present always.
 strip : lina
-	strip lina -s -R .bss -R .comment
+	strip lina -s -R .bss -R .comment -R .data -R .text
 
 copy1: $(TARGETS:%=ci86.%.bin)
 		mount /mnt/dosa
@@ -239,18 +240,15 @@ namescooked.m4 : names.m4 ci86.gnr ; \
 
 # Make the worddoc macro's into glossary html items to our liking
 ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
-	ssort $(@:%.html=%.mig) -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s |\
-	m4 indexhtml.m4 - > $@
 	cat $(@:%.html=%.mig)|\
 	sed -e 's/@@/@/g'               |\
 	sed -e s'/worddocsafe/worddoc/g'  |\
 	sed -e 's/</\&lt\;/g'   > temp.html
 	( \
-	    cat namescooked.m4 indexhtml.m4 ; \
+	    cat indexhtml.m4 ; \
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
-	)| m4 |\
-	sed -e 's/thisforth/$(@:ci86.%.html=%)/g' > $@
-	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html >> $@
+	)| m4 > $@
+	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 temp.html >> $@
 
 %.info : %.texinfo  ; makeinfo --no-split $< -o $@
 
@@ -259,6 +257,7 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 menu.
 	m4 menu.m4 $(@:%.texinfo=%.mig) > menu.texinfo
 	m4 wordset.m4 $(@:%.texinfo=%.mim)  $(@:%.texinfo=%.mig) |m4 >wordset.mi
 	echo 'define({thisfilename},{$@})' >>namescooked.m4
+	echo 'define({thisforth},{$(@:ci86.%.texinfo=%)})'>>namescooked.m4
 	( \
 	    cat $(@:ci86.%.texinfo=%.cfg) manual.m4 namescooked.m4 ciforth.mi \
 	)| tee spy | m4 |\

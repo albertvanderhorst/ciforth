@@ -268,8 +268,7 @@ A_SWITCH        EQU     M4_SWITCHORG
 A_RST       EQU     A_SWITCH + 10000H
 A_GDT             EQU     A_RST + RSTSIZE
 A_IDT             EQU     A_GDT + GDTSIZE  ; { reserved but not yet used. }
-;A_LOWDP         EQU     A_IDT + IDTSIZE ; { Must become this. }
- A_LOWDP         EQU     A_GDT + IDTSIZE
+A_LOWDP         EQU     A_IDT + IDTSIZE ; { Must become this. }
 
 ;{ @ Real mode place for the stack.}
 ;{ This is such that after switching to real mode an isolated }
@@ -284,8 +283,6 @@ M4_SWITCHOFFSET EQU  ( A_FORTH0 - M4_SWITCHORG)
 ;{ Switching sometimes restricts these to a particular value.}
 GDT_SWITCH       EQU    SWITCHSEGMENT  ;{ % Switching segment, must be same for switching to work! }
 GDT_CS EQU 10H  ;{ % The protected mode code segment }
-GDT_SS16 EQU 10H  ;{ % To access the real mode stack segment from protected. }
-; { In fact we set the DS immediately after switching.}
 GDT_SS         EQU     SS_RST ;{ % The protected mode data segment}
 GDT_DS         EQU     SS_RST ;{ % The protected mode data segment}
 GDT_SEGMENT    EQU     A_GDT/10H       ;{ @ General descriptor table.}
@@ -320,8 +317,9 @@ lseek   EQU     4200H
 });_END_({ _PC_})
 
 _HOSTED_LINUX_({
-        section forth progbits write exec alloc
+        _SECTION_({forth})
         PAGE
+ORIG:
 });_END_({ _HOSTED_LINUX_})
 
 ; ########################################################################################
@@ -336,20 +334,9 @@ _HOSTED_LINUX_({
     _ABSOLUTELOAD_({ ORG     M4_ORG})
     _BOOTED_(_REAL_({ORG     100H
 ORIG:                         ; {Accommodate also .exe files} }))
-; {Do a double precision shift to find number of paragraphs. }
-    MOV     BX, [DPA]
-    MOV     CL,4
-    SHR     BX,CL
-    MOV     AX, [DPA+2]
-    MOV     CL,12
-    SHL     AX,CL
-    OR      BX,AX
-    INC     BX
-    MOV     AH,4Ah  ;Modify memory allocation to what is needed.
-    INT     21h
-ORG0:
 
 _BOOTSECTRK_({
+ORIG:
         JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -387,7 +374,7 @@ READSECTOR:
         DIV     CH
         MOV     DH,AH   ;{ Head number}
         MOV     CH,AL   ;{ Only small disks <256 cylinders}
-;       MOV     DL,DRIVE                                            *
+        MOV     DL,DRIVE
         MOV     AX,0201H   ;{ Read absolute one sector}
         INT(13H)                 ;{BIOS disk access.}
         POP     BX
@@ -407,6 +394,7 @@ RETRY:
         MOV     AL,' '
         CALL DISPLAY
 BOOT:
+        MOV     DL, 80H          ; {Hard disk, default.}
         MOV     AL, [LMEDIA]
         CMP     AL, 0F8H        ; {Fixed disk.}
         JZ     ENDIF1A
@@ -447,7 +435,7 @@ BEGIN1: CALL    READSECTOR
         MOV     AL, [LHEADS]     ;{Copy from boot sector to Forth.}
         MOV     [LFHEADS],AL
         MOV     AL, [LSPT]
-        MOV     [LFSPT],AL,
+        MOV     [LFSPT],AL
         MOV     AL, 0
         MOV     [LFDRIVE], DL
 
@@ -691,21 +679,7 @@ PROTECT:
         STOSW
         MOV     AX,IDENTIFY_16
         STOSW
-_COMMENT
-;{ The protected mode view of the real stack segment. }
-;{ GDT_SS16 is arbitrary.}
-        MOV     BX,GDT_SS16
-        MOV     DI,BX
-        MOV     AX,0FFFFH
-        STOSW
-        MOV     EAX,A_RST
-        STOSW           ; {Only 16 bits}
-        SHR     EAX,8
-        ADD     AX,IDENTIFY_RW
-        STOSW
-        MOV     AX,IDENTIFY_16
-        STOSW
-_ENDCOMMENT
+;
 ;{ GDT_DS/GDT_SS to an extent be chosen arbitrarily,}
 ;{ The real mode view of GDT_SS is valid, isolated and reserved for real stack.}
 ;{ DS is reset after switching anyway.}
@@ -819,6 +793,18 @@ _MODERN_({
 });_END_({_MODERN_})
 
 _HOSTED_DPMI_({
+; {Do a double precision shift to find number of paragraphs. }
+    MOV     BX, [DPA]
+    MOV     CL,4
+    SHR     BX,CL
+    MOV     AX, [DPA+2]
+    MOV     CL,12
+    SHL     AX,CL
+    OR      BX,AX
+    OR      BX, 0FFFH   ;{Minimum is 64 K for RW-BUFFER .}.
+    INC     BX
+    MOV     AH,4Ah  ;Modify memory allocation to what is needed.
+    INT     21h
 ;
 ; Check to see if DPMI is available, and make the switch if it is
 ; If one is, the stat info is stored.
@@ -1089,7 +1075,7 @@ _THREADS_({
 
 });_END_({_THREADS_})
 _HOSTED_LINUX_(
-{MOV     _CELL_PTR[USINI+_CELLS(31)],SPO ;{Remember ARGS.}
+{       MOV     _CELL_PTR[USINI+_CELLS(31)],SPO ;{Remember ARGS.}
 })dnl
         MOV     {AX},DS
         MOV     SS,{AX}           ;{Atomic with next instruction.}
@@ -1332,7 +1318,7 @@ Furthermore it is recommended
 that for non-portable code forthcode({'}) is used in its
 forthdefi({denotation}) form _VERBOSE_({{without the space.
 Note that if you separate by a space, the ISO-conforming version of
- forthcode({'}) is found}}).
+ }forthcode({'}){ is found}}).
 },
 {{CONTEXT}, {[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
 dnl Make sure to use the DENOTATION ' not the FORTH '
@@ -1367,7 +1353,7 @@ _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
 ;
 worddoc( {DENOTATIONS},{Prefix_^},{control_follows}, {--- b},{CI},
 {Leave forthvar({b}) the control character value of the char that follows
-_VERBOSE_({{i.e. forthsamp({^A}) results in 1 and so on}}).
+_VERBOSE_({{i.e. }forthsamp({^A}){ results in 1 and so on}}).
 Skip another blank character.},
 {},
 {{^C .},{3 },
@@ -1585,8 +1571,8 @@ the prefix, and the corresponding denotation definition
 executed. This word list must be used with care as a
 forthcode({CONTEXT}) word list; and only as a
 forthcode({CURRENT}) word list whenever you want to add a denotation.
-_VERBOSE_({{The word forthcode({FORTH}) is hidden by the word
-forthcode({F}). Use forthsamp({{ONLY FORTH}}) to regain
+_VERBOSE_({{The word }forthcode({FORTH}){ is hidden by the word
+}forthkey({F}){. Use }forthsamp({{ONLY FORTH}}){ to regain
 control.}})
 },
 {{VOCABULARY}},
@@ -1647,9 +1633,9 @@ CODE_HEADER({LIT},{LIT})
 worddoc( {MISC},{EXECUTE},{execute},{xt ---},{ISO,FIG,L0},
 {Execute the definition whose forthdefi({execution token}) is
 given by forthvar({xt}) . _VERBOSE_({{The
-forthdefi({code field address}) serves as an execution token.
+}forthdefi({code field address}){ serves as an execution token.
 (It even has offset 0, but one should not assume that a
-forthdefi({DEA}) is an execution token in portable code.)}})},
+}forthdefi({DEA}){ is an execution token in portable code.)}})},
 {{'},{>CFA}},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
@@ -1695,7 +1681,7 @@ CODE_HEADER({SKIP},{SKIP})
 BRAN1:  LODSW
 _ALIGNED_({
         DEC     AX
-        OR      AL, M4_CELLWIDTH - 1
+        OR      AL, _OFFSET M4_CELLWIDTH - 1
         INC     AX
 },{dnl});_END_({_ALIGNED_})
         ADD     HIP,AX
@@ -1911,7 +1897,7 @@ _SWITCH_({
 ; {Leave space to start conventional programs}
          DC     80000H          ; {LOW-EM        17}
 });_END_({ _SWITCH_})
-        _RESB(US-($ - USINI))        ;{ All user can be initialised.}
+        _RESB(US-(_AP_ - USINI))        ;{ All user can be initialised.}
 ;
 ;{      <<<<< end of data used by cold start >>>>>}
 worddoc( {FORMATTING~},{DIGIT},{digit},{c n1 --- n2 true (ok) c n1 --- x false (bad)},{},
@@ -1925,18 +1911,18 @@ enddoc)
 CODE_HEADER({DIGIT},{DIGIT})
         POP     DX      ;{NUMBER BASE}
         POP     AX      ;{ASCII DIGIT}
-        SUB     AL,'0'
+        SUB     AL,_OFFSET '0'
         JB      DIGI2   ;{NUMBER ERROR}
-        CMP     AL,9
+        CMP     AL,_OFFSET 9
         JBE     DIGI1   ;{NUMBER = 0 THRU 9}
-        SUB     AL,7
-        CMP     AL,10   ;{NUMBER 'A' THRU 'Z'?}
+        SUB     AL,_OFFSET 7
+        CMP     AL,_OFFSET 10   ;{NUMBER 'A' THRU 'Z'?}
         JB      DIGI2   ;{NO}
 DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
         JAE     DIGI2   ;{NUMBER ERROR}
         SUB     DX,DX   ;{ZERO}
         MOV     DL,AL   ;{NEW BINARY NUMBER}
-        MOV     AL,1    ;{TRUE FLAG}
+        MOV     AL,_OFFSET 1    ;{TRUE FLAG}
         NEG     AX
         _2PUSH          ;{ADD TO STACK}
 ;{   NUMBER ERROR}
@@ -2007,7 +1993,7 @@ _HEADER({IN[]},{INBRS},{DOCOL})
         _BRANCH(INBRS2)
 INBRS1:
         DC      LDUP
-        _ISO_IN_({DC      SRC, FETCH, PLUS ;{ Make IN >IN.}})
+        _ISO_IN_({ DC      SRC, FETCH, PLUS ;{ Make IN >IN.}})
         DC      CFET
         DC      ONE, LIN, PSTORE
 INBRS2:
@@ -2049,10 +2035,10 @@ Return forthvar({sc}): a string from the current position in the
 input stream, ending before the first such character,
 or at the end of the current input source if it isn't
 there. The character is consumed.
-_VERBOSE_({{As it goes with forthdefin({string constant})s, you may not alter
+_VERBOSE_({{As it goes with }forthdefin({string constant}){s, you may not alter
 its content, nor assume anything is appended.}})
 _VERBOSE_({{So no leading delimiters are skipped.}})
-_VERBOSE_({{The difference with an ISO forthsamp({PARSE}) is that
+_VERBOSE_({{The difference with an ISO }forthsamp({PARSE}){ is that
 ISO considers control characters a match for a blank.}})},
 {{WORD},{(WORD)}},
 {{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
@@ -2082,8 +2068,8 @@ or changing only the third cell.
 The third cell has the alias
 _CIF_IN_({forthsamp({IN}) .})
 _ISO_IN_({forthsamp({>IN}) .})
-_VERBOSE_({{Words like forthsamp({>IN BLK SOURCE SOURCE-ID}) are secondary,
-and return their output by ``second-guessing'' forthsamp({SRC}) .}})},
+_VERBOSE_({{Words like }forthsamp({>IN BLK SOURCE SOURCE-ID}){ are secondary,
+and return their output by ``second-guessing'' }forthsamp({SRC}){ .}})},
 {{BLK},{SOURCE-ID}},
 {{SRC @ TIB @ 8000 OVER + WITHIN .},{_T_} },
 enddoc)
@@ -2115,7 +2101,7 @@ GS1 .},{4}},
 enddoc)
 _HEADER({>IN},{IIN},{DOCOL})
         DC      LIN, FETCH
-_CIF_IN_({DC      SRC, FETCH, LSUB     })
+        _CIF_IN_({DC      SRC, FETCH, LSUB     })
         DC      PIIN, STORE
         DC      PIIN
         DC      SEMIS
@@ -2880,7 +2866,7 @@ executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
 particular variable. In ciforth the forthsamp({UP}) is fixed.
 },
-{{VARIABLE},{+ORIGIN}},
+{{VARIABLE},{+ORIGIN},{CONTEXT},{>DFA}},
 {{ 0 USER APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 _HEADER({USER},{USER},{DOCOL})
@@ -3022,7 +3008,7 @@ _HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 });_END_({ _HIGH_BUF_})
 ;
 _LOW_BUF_({
-        _ALIGN  2       ; Otherwise INT 13 hangs when filling
+        _ALIGN(2)       ; Otherwise INT 13 hangs when filling
         ; in into the lba block as a buffer address.
         DB      0       ;{Padding the odd # of bytes in the name FIRST.}
 worddoc( {BLOCKS~},{FIRST},{first},{--- n},{},
@@ -3060,7 +3046,7 @@ in use by Forth.
 },{{DP},{EM}},
 {{." No test"},{No test} },
 enddoc)
-_HEADER({BM},{LBM},{DOCON}, ORG0)
+_HEADER({BM},{LBM},{DOCON}, ORIG)
 ;
 worddoc( {BLOCKS},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
@@ -3150,7 +3136,7 @@ worddoc( {WORDLISTS~},{VOC-LINK},{voc_link},{--- addr},{U},
 {A user variable containing the forthdefi({dictionary entry
 address}) of the word most recently created by
 forthcode({VOCABULARY}) . _VERBOSE_({{All vocabulary names are
-linked by these fields to allow forthcode({FORGET}) to find all
+linked by these fields to allow }forthcode({FORGET}){ to find all
 vocabularies.}})},
 {{VOCABULARY},{FOR-VOCS}},
 {{VOC-LINK @ ' ENVIRONMENT = .},{_T_}},
@@ -3304,7 +3290,7 @@ In this ciforth it contains the real segment descriptor of the
 ``environment-block''_HOSTED_DPMI_({,which is real hard to come
 by in protected mode}).
 _VERBOSE_({{The arguments passed to the program, ``command tail''
-is available as a forthdefi({brain damaged string}) at address 80H.}})
+is available as a }forthdefi({brain damaged string}){ at address 80H.}})
 }})
 },
 {{SYSTEM}},
@@ -3331,7 +3317,7 @@ new words will be added.
 It is
 the forthdefi({compilation word list}) in the sense of the ISO
 standard.
-_VERBOSE_({{The WID has the structure of a forthdefi({dictionary entry}).
+_VERBOSE_({{The WID has the structure of a }forthdefi({dictionary entry}){.
 This allows to link in a new word between the
 link field of the WID and the next definition.}})
 },
@@ -3361,8 +3347,12 @@ The corresponding wordlists are searched in that order for definitions during
 interpretation.
 It may contain up to M4_MAXWORDLIST WID 's in
 this ciforth, while the ISO Search-Order wordset requires a capacity of at
-least 8. },
-{{PRESENT},{VOCABULARY},{CURRENT}},
+least 8.
+forthcode({CONTEXT}) is the last user variable at offset 37 ,
+such that new user variables may be allocated using offsets of
+37+M4_MAXWORDLIST and up.
+},
+{{PRESENT},{VOCABULARY},{CURRENT},{USER}},
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
 _HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
@@ -3465,7 +3455,7 @@ CODE_HEADER({ALIGNED}, {ALIGNED}, {DOCOL})
 _ALIGNED_({
         POP     AX
         DEC     AX
-        OR      AX, _CELLS(1)-1
+        OR      AX, _OFFSET _CELLS(1)-1
         INC     AX
         PUSH    AX
 },{dnl});_END_({_ALIGNED_})
@@ -3661,7 +3651,7 @@ indirectly via this address the definition forthvar({dea}) is
 executed. This is the address that is compiled within high
 level definitions, so it serves as an execution token.
 _VERBOSE_({{In ciforth it has offset 0, so it is actually the
-same as the forthdefi({DEA})}}).},
+same as the }forthdefi({DEA}){}}).},
 {{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
@@ -3767,7 +3757,7 @@ with a forthcode({CREATE}) / forthcode({DOES>}) construct to
 its forthvar({dea}). Where forthcode({>BODY}) keeps working
 after forthdefi({revectoring}) , forthcode({BODY>}) does not.
 _VERBOSE_({{ There is some logic to this, because the
-forthdefi({DEA}) to which the body belongs is no longer
+}forthdefi({DEA}){ to which the body belongs is no longer
 unique.}})
 },
 {{'},{>BODY}},
@@ -4184,7 +4174,7 @@ In ciforth the number of characters has no limit.
 In ciforth forthcode({."}) always has an effect
 on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
-_VERBOSE_({{We recommend that forthsamp({." cccc"}) is replaced by forthsamp({"cccc" TYPE}).}})
+_VERBOSE_({{We recommend that }forthsamp({." cccc"}){ is replaced by }forthsamp({"cccc" TYPE}){.}})
 )},
 {{OUT}},
 {{." the end" },{the end},
@@ -4206,9 +4196,9 @@ DOTQ2:
 ;
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
 { In ciforth this is an alias for ." , except that the string is closed with forthkey({{)}})
-_VERBOSE_({{instead of parsed as per forthcode({"}) }}).
+_VERBOSE_({{instead of parsed as per }forthcode({"}){ }}).
 In ISO programs you may only use this word while interpreting.
-_VERBOSE_({{We recommend that forthsamp({.( cccc)}) is replaced by forthsamp({"cccc" TYPE}).}})
+_VERBOSE_({{We recommend that }forthsamp({.( cccc)}){ is replaced by }forthsamp({"cccc" TYPE}){.}})
 },
 {{OUT},{."}},
 {{.( the end)},{the end}},
@@ -4225,7 +4215,7 @@ forthdefi({current input source}). This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
 called forthcode({SET-SRC}). _VERBOSE_({{In practice this word
 is almost always followed by a call to
-forthcode({INTERPRET}).}})},
+}forthcode({INTERPRET}){.}})},
 {{EVALUATE},{INTERPRET}},
 {{ "1 2 3 . CR" SET-SRC . . .},{3},
 { . . },{2 1} },
@@ -4286,8 +4276,8 @@ from forthvar({addr1}) is less (unsigned) than the one from forthvar({addr2}),
 and 1 if it is greater.
 If all forthsamp({len}) bytes are equal, return
 zero.
-_VERBOSE_({{This is an abbreviation of forthcode({COMPARE-AREA}).
-It would have been named forthsamp({COMPARE}) ,
+_VERBOSE_({{This is an abbreviation of }forthcode({COMPARE-AREA}){.
+It would have been named }forthsamp({COMPARE}){ ,
 if that were not taken by ISO.}})
 },
 {},
@@ -4345,9 +4335,9 @@ after and before forthvar({c}) into forthvar({sc1}) and
 forthvar({sc2}) respectively. If the character is not present
 forthvar({sc1}) is a null string _VERBOSE_({{(its address is
 zero)}}) and forthvar({sc2}) is the original string.
-_VERBOSE_({{Both forthvar({sc1}) and forthvar({sc2}) may be
-empty strings (i.e. their count is zero), if forthvar({c}) is
-the last or first character in forthvar({sc}) .}}) },
+_VERBOSE_({{Both }forthvar({sc1}){ and }forthvar({sc2}){ may be
+empty strings (i.e. their count is zero), if }forthvar({c}){ is
+the last or first character in }forthvar({sc}){ .}}) },
 {{$I},{CORA}},
 {{ 132 "ORANG" &O $S . DROP TYPE . },{0 RANG132},
 { "ORANG OETAN" BL $S TYPE TYPE },{ORANGOETAN},
@@ -4598,8 +4588,8 @@ forthvar({u2}) is the number of unconverted characters in the
 string. If forthvar({ud2}) overflows, in ciforth
 forthvar({ud2}) will be incorrect, but no crash will result.
 _VERBOSE_({{Both
-forthkey({-}) and forthkey({+}) are considered unconvertible
-character's by forthsamp({>NUMBER}) .}})
+}forthkey({-}){ and }forthkey({+}){ are considered unconvertible
+character's by }forthsamp({>NUMBER}){ .}})
 },
 {{NUMBER},{DIGIT}},
 {
@@ -4729,11 +4719,11 @@ worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},
 {sc wid --- sc dea},{},
 {Search down from the forthdefi({WID}) forthvar({wid}) for a
 word with name forthvar({sc}).
-_VERBOSE_({{A forthdefi({WID}) is
-mostly a dummy forthdefi({DEA}) found in the
+_VERBOSE_({{A }forthdefi({WID}){ is
+mostly a dummy }forthdefi({DEA}){ found in the
 data field of a
-vocabulary, fetched from forthcode({CURRENT}) or
-forthcode({CONTEXT}) }}). Leave the dictionary entry address
+vocabulary, fetched from }forthcode({CURRENT}){ or an other wid in the
+}forthdefi({search order}){ }}). Leave the dictionary entry address
 forthvar({dea}) of the first entry found, else leave a zero.
 Do not consume the string forthvar({sc})_VERBOSE_({{,
 as this is a repetitive action}}). },
@@ -4905,7 +4895,8 @@ returns its address into forthvar({dea}).
 The code field and data field both point to the area owned by this
 header, i.e. immediately following the completed header _VERBOSE_({{as
 appropriate for a low level (assembler) definition}}).
-The flag and link fields are intialised to zero _VERBOSE_({{, so not forthcode({HIDDEN})}}).
+The flag and link fields are intialised to 
+zero _VERBOSE_({{, so not }forthcode({HIDDEN}){}}).
 The name forthvar({sc}) is layed down in the dictionary and filled in
 into the name field.
 _SOURCEFIELD_({{The source field is filled in to best possibility.}})
@@ -5044,9 +5035,9 @@ worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}
 {If compiling, then compile the stack value forthvar({n}) as a
 _BITS_ bit literal.
 _VERBOSE_({{The intended use is:
-     forthsamp({: xxx    [ calculate ]  LITERAL  ;})
+     }forthsamp({: xxx    [ calculate ]  LITERAL  ;}){
 Compilation is suspended for the compile time calculation of a
-value. Compilation is resumed and forthcode({LITERAL}) compiles
+value. Compilation is resumed and }forthcode({LITERAL}){ compiles
 this value.}}) Later execution of the definition containing the literal will
 push it to the stack. If executing in ciforth, the number will just remain on
 the stack.},
@@ -5362,7 +5353,7 @@ _HEADER({ONLY},{ONLY}, {DODOE}, , B_IMMED)
 _HEADER( , , ,0, B_DUMMY, _STARTOFONLY_)
 ;
 worddocsafe( {PARSING},{(},{paren},{},{ISO,FIG,I,L0},
-{{{{Used in the form: forthsamp({( cccc)}). Ignore a comment that
+{{{{Used in the form: forthsamp({{( cccc)}}). Ignore a comment that
 will be delimited by a right parenthesis that must be in the
 same input source, i.e. on the same line for terminal input, or
 in the same string, block or file, when that is the input. It
@@ -5400,12 +5391,11 @@ worddoc( {INITIALISATIONS},{QUIT},{quit},{},{ISO,FIG},
 {Restart the interpreter. Clear the return stack, stop
 compilation, and return control to the operators terminal,
 or to the redirected input stream.
-This means forthcode({ACCEPT}) user input to forthcode({TIB}) , and
-then forthcode({INTERPRET}) with forthcode({TIB}) as a
-forthcode({SOURCE}) .
-No
-message is given.},
-{{ABORT}},
+This means forthcode({(ACCEPT)}) user input to somewhere in the
+terminal input buffer, and
+then forthcode({INTERPRET}) with that as a forthcode({SOURCE}) .
+No message is given.},
+{{TIB},{ABORT}},
 {{1243 QUIT
   . },{1243} },
 enddoc)
@@ -5415,14 +5405,7 @@ QUIT1:                  ;{BEGIN}
         DC      RZERO
         DC      FETCH
         DC      RPSTO
-        _HOSTED_({DC      LIT})
         DC      PACCEP
-_HOSTED_({
-        DC      CATCH
-        _0BRANCH(OKAY)
-        DC      BYE     ; {Nothing else can be done!}
-OKAY:
-});_END_({_HOSTED_})
         DC       SETSRC
         DC      INTER
         DC      OK
@@ -5509,9 +5492,9 @@ worddoc( {INITIALISATIONS},{OPTIONS},{options},{f1 -- f2},{FIG L0},
 corresponding to the option letter. Accept and return a flag
 forthvar({f}) whether the signon message must be
 displayed._VERBOSE_({{ By redefining this as a
-forthsamp({NOOP}), the handling of options during cold boot is
+}forthsamp({NOOP}){, the handling of options during cold boot is
 suppressed, useful for turnkey applications. By redefining as
-forthsamp({DROP 0}), execution and signon are suppressed.}}) },
+}forthsamp({DROP 0}){, execution and signon are suppressed.}}) },
 {{COLD}},
 {{( No test)},{}},
 enddoc)
@@ -5628,7 +5611,8 @@ CODE_HEADER({S>D},{STOD})
         OR      DX,DX
         JNS     STOD1   ;{POS}
         DEC     AX      ;{NEG}
-STOD1:  _2PUSH
+STOD1:
+        _2PUSH
 ;
 worddoc( {OPERATOR},{ABS},{abs},{n --- u},{ISO,FIG,L0},
 {Leave the absolute value of forthvar({n}) as forthvar({u}) .},
@@ -5758,9 +5742,9 @@ worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
 {Perform an arithmetical {{shift}} right.
 The bit pattern of forthvar({n1}) is shifted to the right, except that
 the left most bit (``sign bit'') remains the same.
-_VERBOSE_({{ This is the same as forthsamp({S>D 2 FM/MOD SWAP
-DROP}). It is not the same as forthsamp({2 /}), nor is it the
-same as forthsamp({1 RSHIFT}). This confusing word should never
+_VERBOSE_({{ This is the same as }forthsamp({S>D 2 FM/MOD SWAP
+DROP}){. It is not the same as }forthsamp({2 /}){ , nor is it the
+same as }forthsamp({1 RSHIFT}){. This confusing word should never
 be used.}})},
 {{2*} },
 {
@@ -5905,8 +5889,8 @@ forthsamp({n4}) of the operation forthsamp({n1*n2/n3}) (using forthdefi({symmetr
 A double precision
 intermediate product is used giving correct results, unless
 forthvar({n4}) or forthvar({n5}) overflows.
-_VERBOSE_({{ forthsamp({n1 n2 * n3 /}) gives an incorrect answer
-as soon as forthsamp({n1 n2 *}) overflows.}})
+_VERBOSE_({{ }forthsamp({n1 n2 * n3 /}){ gives an incorrect answer
+as soon as }forthsamp({n1 n2 *}){ overflows.}})
 },
 {{*/},{/MOD}},
 {
@@ -6252,7 +6236,7 @@ in memory, it is transferred from disc to a new buffer allocated
 by forthcode({(BUFFER)}) .
 _VERBOSE_({{Blocks are generally
 used to contain source code to be interpreted
-by forthcode({LOAD}). They can be equally useful to contain
+by }forthcode({LOAD}){. They can be equally useful to contain
 other data, e.g. for implementing a database. }})
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0FFH.})},
@@ -6292,7 +6276,7 @@ _HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
 FLUS1:  DC      ZERO, IDO, STORE
         DC      LIT,(KBBUF+2*CW)
         DC      PLOOP
-        DC      (FLUS1-$)
+        DC      (FLUS1-_AP_)
 FLUS2:
         DC      SEMIS
 ;
@@ -6334,7 +6318,7 @@ worddoc( {BLOCKS~},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
 ciforth this is the content of forthcode({SRC}). ciforth needs
 3 cells, and is always able to forthcode({RESTORE}) an input
 saved like this. _VERBOSE_({{In practice the use of
-forthcode({SAVE-INPUT}) should be restricted to restoring input
+}forthcode({SAVE-INPUT}){ should be restricted to restoring input
 of the same stream.
 }}) },
 {{RESTORE},{RESTORE-INPUT}},
@@ -6373,7 +6357,7 @@ worddoc( {SCREEN},{LOCK},{lock},{ n ---},{CI},
 {Lock the block forthvar({n}).
 Multiple locks are possible, and require multiple unlocks.
 _VERBOSE_({{Probably, because it
-is to become the forthdefi({current input source}).}})
+is to become the }forthdefi({current input source}){.}})
 The result is that its buffer will not be reclaimed
 until an forthcode({UNLOCK}) occurs.},
 {{BLOCK},{UNLOCK},{#BUFF}},
@@ -6389,7 +6373,7 @@ _HEADER({LOCK},{LLOCK},{DOCOL})
 worddoc( {SCREEN},{UNLOCK},{unlock},{ n ---},{CI},
 {Unlock the block forthvar({n}).
 _VERBOSE_({{Probably, because it
-is no longer the forthdefi({current input source}).}})
+is no longer the }forthdefi({current input source}){.}})
 The result is that its buffer can again be reclaimed.
 Unlocking without a previous lock may lead to a crash.
 },
@@ -6516,7 +6500,7 @@ unadorned interrupt, which is in this case protected mode,
 interrupt 31H function 0300H. In behalf of this registers are
 saved and restored in forthcode({REG-SET}) . Unadorned calls to
 real interrupts are only available as forthcode({BIOS31}) .})
-_VERBOSE_({{ forthsamp({1 AND}) leaves a zero if the call was successful.}})
+_VERBOSE_({{ }forthsamp({1 AND}){ leaves a zero if the call was successful.}})
 },{{BDOSO}}, {}, enddoc)
 _NORMAL_BIOS_({
 ;{ Because there is no such thing as a variable interrupt:}
@@ -6605,7 +6589,7 @@ forthvar({a b c d}) in registers forthsamp({AX BX CX DX}).
 Return as a result the content of register forthsamp({AX}) into forthvar({ar}).
 forthvar({fl}) contains the flag register.
 If the carry flag is set, it is presumably a
-failed operation. _VERBOSE_({{For other conventions you have to resort to forthcode({BIOSO}) .}})
+failed operation. _VERBOSE_({{For other conventions you have to resort to }forthcode({BIOSO}){ .}})
 In general forthvar({ar}) then contains some error
 code. _HOSTED_DPMI_({{
 This word performs calls only
@@ -6613,14 +6597,14 @@ as related to a real mode interface. Under DPMI we have to do
 this via a special call to the unadorned interrupt, which is in
 this case protected mode, interrupt 31H function 0300H. In
 behalf of this registers are saved and restored in
-forthcode({REG-SET}) . forthcode({BIOS31}) is the only direct interrupt
+}forthcode({REG-SET}){ . forthcode({BIOS31}) is the only direct interrupt
 call available.
 If you want selectors forthvar({DS}) or
 forthvar({ES}) different from the Forth segment, or any
 register different from the default, you must fill that in in
 the forthcode({REG-SET}) structure. If your BIOS call destroys
 registers, in particular forthvar({DS}) or forthvar({ES}) you
-must take care to restore them to forthcode({REG-SET}) .
+must take care to restore them to }forthcode({REG-SET}){ .
 }})
 },{{BDOSN}},
 {{23 &A _ _ 200 21 BIOSN 1 AND . DROP .},{A0 23}},
@@ -6740,8 +6724,8 @@ with forthsamp({a b c d di}) in registers
 forthsamp({AX BX CX DX DI}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
 content of the processors flag register. _VERBOSE_({{
-forthsamp({1 AND}) leaves a zero if the call was successful.}})
- _VERBOSE_({{The word forthcode({BIOS}) simulates
+}forthsamp({1 AND}){ leaves a zero if the call was successful.}})
+ _VERBOSE_({{The word }forthcode({BIOS}){ simulates
 a real mode interrupt; that is what you usually want.}})
 },{{BIOS},{BDOS}}, {}, enddoc)
 ; Wanted here is a generic call on BIOS. A boon for experimenters.
@@ -6875,7 +6859,7 @@ it wraps after 100 seconds, and has a resolution on 10 mS.
 {{MS}},
 {{ DECIMAL MS@ 100 MS MS@ SWAP - 10 / 8 12  WITHIN . },{-1}},
 enddoc)
-HEADER({MS@},{MSFET},{DOCOL})
+_HEADER({MS@},{MSFET},{DOCOL})
         DC      LIT,   2C00H, X, X, X
         DC      LIT,    21H,  BIOSO, DROP
         DC      TOR, TDROP, DROP, FROMR
@@ -6888,7 +6872,7 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 {{KEY?},{MS@}},
 {{ 123 10 MS . },{123}},
 enddoc)
-HEADER({MS},{MS},{DOCOL})
+_HEADER({MS},{MS},{DOCOL})
         DC      MSFET, PLUS, LIT, 100000, TOR
 LMS0:   DC      LDUP,  MSFET
         DC      LSUB, RR, PLUS
@@ -6922,9 +6906,9 @@ worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ASCII value of the next terminal key struck.},
 {{ACCEPT},{KEY?}}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
-        DC      X, X, X, LIT, 1000H
-        DC      LIT, 0016H, BIOSN
-        DC      DROP
+        DC      LIT, 1000H, X, X, X,
+        DC      LIT, 0016H, BIOSO
+        DC      TDROP, TDROP
         DC      LIT, 00FFH, LAND, SEMIS
 ;
 worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
@@ -6958,9 +6942,9 @@ But possibly a trailing forthkey({RET}) (0DH).
 The
 editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE_({{This is lighter on the system and sometimes easier
-to use than forthcode({ACCEPT}).
+to use than }forthcode({ACCEPT}){.
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning. }})
+}forthcode({TIB @}){, but not necessarily at the beginning. }})
 },
 {{KEY},{KEY?},{ACCEPT}},
 {
@@ -6999,7 +6983,7 @@ Return as a result the content of register forthsamp({AX}) into forthvar({ar}).
 forthvar({fl}) contains the flag register.
 If the carry flag is set, it is presumably a
 failed operation.
-_VERBOSE_({{For other conventions you have to resort to forthcode({BIOSO}) .}})
+_VERBOSE_({{For other conventions you have to resort to }forthcode({BIOSO}){ .}})
 So 0 indicates no error, 1 indicates an error, probably
 with more information present in forthvar({ar }).
 This draws upon all facilities made
@@ -7054,7 +7038,7 @@ worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
 {Leaves an address that contains a zero-ended (c-type) equivalent of forthvar({sc}).
 The same buffer is reused, such that this word is not reentrant.
 _VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
-to the operating system. In fact this is forthcode({RW-BUFFER}) . }})
+to the operating system. In fact this is }forthcode({RW-BUFFER}){ . }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
@@ -7569,9 +7553,9 @@ It doesn't contain the forthkey({LF}),
 but the buffer still does and after forthcode({1+}) the string
 contains forthkey({LF}).
 _VERBOSE_({{This is lighter on the system and sometimes easier
-to use than forthcode({ACCEPT})
+to use than }forthcode({ACCEPT}){
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning. }})
+}forthcode({TIB @}){, but not necessarily at the beginning. }})
 },
 {{ACCEPT},{EVALUATE}},
 {{." interactive"},{interactive}},
@@ -7678,7 +7662,7 @@ It doesn't contain any line ending, but the buffer still does
 and after forthcode({1+}) the string ends in a forthkey({LF}).
 The editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE_({{This is lighter on the system and sometimes easier
-to use than forthcode({ACCEPT}) }})
+to use than }forthcode({ACCEPT}){ }})
 },
 {{KEY},{KEY?},{ACCEPT}},
 {
@@ -7763,7 +7747,7 @@ _HEADER({KEY?},{KEYQ},{DOCOL})
         DC      NEGATE        ; {1 -> flag.}
         DC      ZERO, LIT, RAWIO, STTERM
         DC      SEMIS
-        _ALIGN  4
+        _ALIGN(4)
 RFDS:   _RESB(128)     ;{32 channels maximum.}
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
@@ -7771,7 +7755,7 @@ worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
 forthdefi({revectoring}) it _VERBOSE_({{and the usual
-redirection or forthsamp({tee})-ing by Linux}}). In this
+redirection or }forthsamp({tee}){-ing by Linux}}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output, however in
 that case forthcode({OUT}) is not observed. },
@@ -7991,10 +7975,9 @@ worddocsafe( {OUTPUT},{(EMIT)},{paren_emit},{c ---},{},
 by a BIOS call.
 },{{EMIT}}, {}, enddoc)
 _HEADER({(EMIT)},{PEMIT},{DOCOL})
-        DC      TOR, X, X, X, FROMR
-        DC      LIT, 0E00H, PLUS
-        DC      LIT, 0010H, BIOSN
-        DC      TDROP           ;{Ignore errors.}
+        DC      LIT, 0E00H, PLUS, X, X, X
+        DC      LIT, 0010H, BIOSO
+        DC      TDROP, TDROP, DROP    ;{Ignore errors.}
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
@@ -8017,9 +8000,9 @@ EMIT1:       DC      PEMIT
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ASCII value of the next terminal key struck.},{}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
-        DC      X, X, X, LIT, 1000H
-        DC      LIT, 0016H, BIOSN
-        DC      DROP
+        DC      LIT, 1000H, X, X, X
+        DC      LIT, 0016H, BIOSO
+        DC      TDROP, TDROP
         DC      LIT, 00FFH, LAND
         DC      SEMIS
 ;
@@ -8043,6 +8026,9 @@ _HEADER({POUT},{POUT},{DOCOL})
         DC      TOR, X, X, X, FROMR
         DC      LIT, 0017H, BIOSN
         DC      TDROP           ;{Ignore errors.}
+        DC      X, X, X
+        DC      LIT, 0017H, BIOSO
+        DC      DROP, TDROP, TDROP           ;{Ignore errors.}
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
@@ -8072,9 +8058,9 @@ until a forthkey({RET)}) from the input terminal, and leave it as
 a forthdefin({string constant}). It doesn't contain a trailing forthkey({LF}).
 But possibly a trailing forthkey({RET}) (0DH).
 _VERBOSE_({{This is lighter on the system and sometimes easier
-to use than forthcode({ACCEPT})
+to use than }forthcode({ACCEPT}){
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning. }})
+}forthcode({TIB @}){, but not necessarily at the beginning. }})
 Editing is done locally observing forthcode({RUBOUT}) .
 },
 {{ACCEPT},{EVALUATE}},
@@ -8145,7 +8131,7 @@ EXPE8:
 ;{------------------------------------}
 ;{       SYSTEM DEPENDANT DISK I/O}
 ;{------------------------------------}
-define({_FILENAMELENGTH_M4_},_BITS16_(32)_BITS32_(256))
+define({_FILENAMELENGTH_M4_},_BITS16_(30)_BITS32_(252))
 worddoc( {BLOCKS},{DISK-ERROR},{disk_error},{--- addr},{},
 {_PC_({
 Leave the address forthvar({addr}) of a variable containing
@@ -8154,7 +8140,7 @@ closing the block file.
 One means an
 error and and zero means okay.
 _VERBOSE_({{Beware that if error messages are loaded from disk,
-this may clear forthcode({DISK-ERROR}) }})})
+this may clear }forthcode({DISK-ERROR}){ }})})
 dnl _HOSTED_LINUX_({ This is just a flag, indicating there was an error. }).
 _HOSTED_LINUX_({ This flag is not used, errors are thrown. }).
 },
@@ -8315,7 +8301,7 @@ _HEADER({SHELL},{SHELL},{DOVAR}, )
 {        _STRING({/bin/sh})})
         _PC_(
 {        _STRING({C:\COMMAND.COM})})
-        _RESB(_FILENAMELENGTH_M4_)               ;{ Allow for some path}
+        _RESB(_FILENAMELENGTH_M4_-9)               ;{ Allow for some path}
 _PC_({  _RESB(100H)     ; Double serve as stack at start up. })
 ;
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc ---},{ISO},
@@ -8353,8 +8339,9 @@ SYSTEM2:
         DC      TDROP
         DC      SEMIS
 ;
-STATUS   DC     0
-SYSARG2: DB      "-c", 0
+STATUS:  DC     0
+SYSARG2: DSS     "-c"
+         DB      0
 COMBUF:  _RESB(CW+256)  ;{One cell for high level string manipulation.}
 SYSARGS: DC   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 ;
@@ -8400,7 +8387,7 @@ successful. Reinstall forthcode({WARNING}) as appropriate!
 _VERBOSE_({{
 This word is executed by c-code outside of Forth.
 This handling from c is problematic,
-because forthcode({WARNING}) no longer is maintained properly.
+because }forthcode({WARNING}){ no longer is maintained properly.
 We could import it to C , but there is no end to that.}})
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-INIT},{BLINI})
@@ -8423,7 +8410,7 @@ errors. Reinstall forthcode({WARNING}) as appropriate!
 _VERBOSE_({{
 This word is executed by c-code outside of Forth.
 This handling from c is problematic,
-because forthcode({WARNING}) no longer is maintained properly.
+because }forthcode({WARNING}){ no longer is maintained properly.
 We could import it to C , but there is no end to that.}})
 },{{BLOCK},{LIST},{LOAD},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-EXIT},{BLEXI})
@@ -8468,7 +8455,7 @@ _HEADER({DRIVE},{LDRIVE},{DOVAR}, )
 LFDRIVE DB      DRIVE                   ; {To be used by Forth.}
 LFSPT   DB      SPT
 LFHEADS DB      HEADS
-        _ALIGNED_({_ALIGN 4})
+        _ALIGNED_({_ALIGN(4)})
 ;
 });_END_({ _RWSECTRK_})
 _CLASSIC_({
@@ -8595,10 +8582,9 @@ _HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, 8, LSHIFT
         DC      LIT, LFDRIVE, CFET
         DC      LOR   ;{ High, low -- reg DX. }
-        DC      SWAP, TSWAP, SWAP ;{ ABCD -> DCBA}
-        DC      LIT, 13H, BIOSN, ONE, LAND
-        DC      DERR, PSTORE
-        DC      DROP
+        DC      LIT, 13H, DOTS, BIOSO,
+        DC      ONE, LAND, DERR, PSTORE
+        DC      TDROP, TDROP
         DC      SEMIS
 ;
 worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk n ---},{FIG},
@@ -8715,8 +8701,8 @@ performs the read-write and aborts with an error message for failures.
 This function uses ``LBA'' : Logical Block Addressing and may
 not work on elderly hard disks.
 _BITS16_({{Where blk is at most 64K the largest addressable disk is
-64M , you can get around this by filling in forthcode({LBAPAR}) and then calling
- forthcode({RBLK}) or forthcode({WBLK}) }})
+64M , you can get around this by filling in }forthcode({LBAPAR}){ and then calling
+ forthcode({RBLK}) or }forthcode({WBLK}){ }})
 forthcode({DISK-ERROR}) contains the status of the latest operation,
 bit 1 (carry flag) indicates an error.
 },
@@ -8905,7 +8891,7 @@ worddocsafe( {CONTROL~},{BACK)},{back_paren},{addr ---},{},
 {Complete a backward branch by compiling an offset from
 forthcode({HERE}) to forthvar({addr}), left there by
 forthcode({{{{{(BACK}}}}}) . _VERBOSE_({{Usage is
-forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) }})},
+}forthsamp({ (BACK .. POSTPONE BRANCH BACK) }){ }})},
 {{LOOP},{UNTIL}},
 {{( See (BACK )},{}},
 enddoc)
@@ -8920,7 +8906,7 @@ worddocsafe( {CONTROL~},{(FORWARD},{paren_forward},{--- addr},{},
 {Start a forward branch by leaving the address that must be
 backpatched with an offset into forthvar({addr}).
 _VERBOSE_({{Usage is
-forthsamp({ POSTPONE BRANCH (FORWARD .. FORWARD) }) }})},
+}forthsamp({ POSTPONE BRANCH (FORWARD .. FORWARD) }){ }})},
 {{IF}},
 {
 {: GS1 2 BRANCH [ (FORWARD ] 4 [ FORWARD) ] 6 ; GS1 . .},
@@ -8936,8 +8922,8 @@ _HEADER({(FORWARD},{PFORWARD},{DOCOL})
 worddocsafe( {CONTROL~},{FORWARD)},{forward_paren},{addr ---},{},
 {Complete a forward branch by backpatching an offset from
 forthcode({HERE}) into forthvar({addr}), left there by forthcode({{{{{(FORWARD}}}}}) .
-_VERBOSE_({{Usage is forthsamp({POSTPONE
-BRANCH (FORWARD .. FORWARD) }) }})
+_VERBOSE_({{Usage is }forthsamp({POSTPONE
+BRANCH (FORWARD .. FORWARD) }){ }})
 },
 {{LOOP},{UNTIL}},
 {{( See (FORWARD)},{}},
@@ -9748,7 +9734,7 @@ TRIA9:
 worddocsafe( {MISC},{.SIGNON},{dot_cpu},{---},{},
 {Print a message identifying the version of this Forth.
 _VERBOSE_({{ The name of the processor known from the environment
-query forthcode({CPU}) is printed using the bizarre convention of a
+query }forthcode({CPU}){ is printed using the bizarre convention of a
 base-36 number. This is a tribute to those FIG-pioneers.}}) },
 {{ABORT},{COLD}},
 {{." Interactive"},{Interactive}},
@@ -9772,7 +9758,7 @@ _DIRECTMAPPED_({
 worddoc( {MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
 {A user variable leaving the lowest address that is free in the lowest
 1 Mbyte of physical memory. This variable can be swapped with DP to
-compile into this area. Great care must be taken to skip those areas
+compile into this area. This takes care to skip those areas
 below 1M that are used, for GDT, real time stack and such.
 },{{LOW-EM}}, {}, enddoc)
 _HEADER({LOW-DP},{LOWDP},{DOUSE}, _CELLS(16))
@@ -9823,7 +9809,7 @@ _HOSTED_LINUX_({
 ;       two sections together.
 
 FORTHSIZE       EQU     _AP_ - _start
-         section dictionary nobits write exec alloc
+        _SECTION_NOBITS_({dictionary})
 
 INITDP:                 ;  It may be that it is not consecutive with TASK.
                         ;  Because of bad linking, resulting in a unusable Forth.
@@ -10058,7 +10044,7 @@ negative numbers. (forthdefi({floored division})). _BITS16_(
 {Having a mere 30000 for the number range can easily
 lead to overflow in intermediate results during
 forthdefi({scaling}): a multiplication followed by a division.
-_VERBOSE_({{For example forthsamp({: ADD10% 110 * 100 / ;})}}).
+_VERBOSE_({{For example }forthsamp({: ADD10% 110 * 100 / ;}){}}).
 There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
  {},{},{},{}, {}, enddoc)
@@ -10098,7 +10084,7 @@ forthsamp({CONTROL}) wordset.
 _NO_SECURITY_({{This version of ciforth contains no security, so the remainder
 of the chapter is empty.
 _VERBOSE_({{You may want to ask your implementor to supply a secure version.
-forthxref({Rationale & legalese}).}})
+}forthxref({Rationale & legalese}){.}})
 }})
 },
 {},{},{},{}, {}, enddoc)
@@ -10116,7 +10102,7 @@ The wordset forthsamp({BLOCKS}) contains words to input and
 output to this mass storage. In this ciforth blocks reside
 _RWSECTRK_({{ on the disk, by sector and track, }}) _BOOTLBA_({
 on the hard disk}) _HOSTED_({{in a file, by default
-named forthfile({forth.lab}). }}). Most blocks are used for the
+named }forthfile({forth.lab}){. }}). Most blocks are used for the
 forthsamp({SCREEN}) facility, where each block contains source
 code.
 },

@@ -8,7 +8,9 @@ Public License as published by the Free Software Foundation.
 
 
 Forth is a tool for evolutionary programming. This is the
-binary distribution of lina 4.0.0, a stable release. lina is
+binary distribution of lina 4.0, a stable release. Without notice
+it applies to all updates 4.0.#.
+lina is
 the Linux native (= c-less) version of ciforth (common Intel
 Forth), an interpret environment and compiler for Forth. It is
 (large and by) compliant with the ISO Forth standard; the CORE
@@ -22,7 +24,7 @@ only, choice. ciforth sports the highest documentation to
 binary proportion in the EDP industry, barring m4 on Coherent.
 
 Unpack in the directory where you want to use it by :
-    tar fxz lina-4.0.gz
+    tar fxz lina-4.0.0.gz
 
 Now you can use lina by :
     lina

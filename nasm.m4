@@ -73,4 +73,7 @@ define({SET_16_BIT_MODE},{BITS   16})dnl
 define({SET_32_BIT_MODE},{BITS   32})dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
+dnl A nobits section takes no place in the object file.
+define({_SECTION_},{section $1 progbits write exec alloc})
+define({_SECTION_NOBITS_},{section $1 nobits write exec alloc})
 divert{}dnl

@@ -931,9 +931,9 @@ For this ciforth the number of disk buffers is configured
 at M4_NBUF . The minimum possible is approximately 8 because nesting and locking
 requires that much blocks available at the same time.
 
-The user area is configured at
-M4_US cells, most of it unused. There is no
-word to add user variables.
+The user area is configured to contain M4_US cells, most of it unused.
+User variables can be added by the word forthcode({USER}) , but you have
+to keep track yourself which offset in the user area can be used.
 _HIGH_BUF_({ The user area is just under the disc
 buffers. So it ends at forthcode({FIRST}) . }) _LOW_BUF_({ The
 user area is at the upper bound of RAM memory. So it ends at
@@ -1156,23 +1156,24 @@ forthsamp({-r})
 
 Make sure forthcode({REQUIRED}) is available.
 
+_HOSTED_LINUX_({
 forthitem
 forthsamp({-s script})
 
 Load the file forthfile({script}) , but ignore its first line.
 This is intended to be used for scripts, i.e. a piece of code to be
 interpreted rather than compiled.
-_HOSTED_LINUX_({_VERBOSE_({{The first line is probably}
+_VERBOSE_({{The first line is probably}
 forthsamp({#!lina -s}){ or some such as }
-forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})})
+forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})
 In a script forthcode({REQUIRED}) is available and
 you can use standard in and standard out.
-
+})
 forthitem
 forthsamp({-t sourcefile})
 
-Try to load the file forthfile({script}) automatically, by possibly unsafe means. 
-Report facilities that were required. 
+Try to load the file forthfile({script}) automatically, by possibly unsafe means.
+Report facilities that were required.
 This is a first step in a porting activity.
 _VERBOSE_({Redefinition messages are issued on the error channel that
 can be redirected to /dev/nul leaving the report.})

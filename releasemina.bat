@@ -29,7 +29,7 @@ make VERSION=$version clean
 make forth.lab.wina
 ln -sf forth.lab.wina forth.lab
 make VERSION=$version $s.asm
-make $m.test
+make test$m
 mv $s.asm $m.asm
 make VERSION=$version $s.bin
 mv $s.bin $m.com
