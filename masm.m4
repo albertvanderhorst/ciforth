@@ -1,6 +1,10 @@
 dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 changequote({,})dnl
+dnl
+define({_HEADER_ASM},{;
+; MASM/TASM version of FIG FORTH created by M4 from generic listing.
+;})dnl
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl 
 dnl

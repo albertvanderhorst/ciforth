@@ -4,6 +4,7 @@
 ;
         PAGE  66,106
  TITLE   GENERIC FORTH FOR 8086 $Revision$
+ _HEADER_ASM
 _COMMENT 
               FIG-FORTH
    implemented by:  Charlie Krajewski
