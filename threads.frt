@@ -152,16 +152,16 @@ _ TASK-TABLE SET+!     SET-FIRST-TASK
     SET-FIRST-TASK
     TASK-POINTER @ @ RSP! R> DSP! ;
 
+: !- 0 CELL+ - DUP >R ! R> ;
 \ Contrary to PET threads this one prepares a return stack frame,
 \ then switches return stacks.
-: THREAD CREATE R0 @ 3 CELLS - , S0 @ , CVA ALLOT DOES>
->R
-R@ CELL+ @   R@ @   !
->DFA @       R@ @ CELL+   !
-'EXIT-COT >DFA @   R@ @ CELL+ CELL+ !
-R> @ TASK-TABLE SET+! ;
+: THREAD CREATE R0 @ , S0 @ , CVA ALLOT DOES>
+DUP @ >R ( return stack pointer)
+CELL+ @   SWAP >DFA @   'EXIT-COT >DFA @  ( stack frame )
+R> !- !- !-  TASK-TABLE SET+! ;
 
 100 THREAD COOS
 : jantje "we gaan naar Rome" TYPE CR ;
 
 'jantje COOS
+." EXPECT : we gaan naar Rome : " PAUSE

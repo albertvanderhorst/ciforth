@@ -10,7 +10,7 @@
  : UNRESOLVED FORWARD REFERENCE
  : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION
  : WORD IS NOT FOUND
- : NOT RECOGNIZED
+ : NOT RECOGNIZED ( Try lina -h)
  : ERROR, NO FURTHER INFORMATION
  : SAVE/RESTORE MUST RUN FROM FLOPPY
  : CANNOT FIND WORD TO BE POSTPONED
@@ -271,7 +271,7 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 
 \
 ( @+ SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
-'$@ ALIAS @+
+REQUIRE ALIAS    '$@ ALIAS @+
 ( Build a set "x" with X items. )
 : SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
@@ -862,6 +862,70 @@ VARIABLE HEAD-DP  \ Fill in pointer
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
 
+( CVA  aux_for_threads ) \ AvdH A2jul5
+HEX   10000 CONSTANT RTS     40 CELLS CONSTANT US
+
+\ Clone the stack frame to ``RTS'' lower in memory.
+\ This area extends up to ``R0 @ US + '' .
+\ The Forth is left running in the new area.
+: CVA  DSP@   DUP RTS -   U0 @ DSP@ - US +   MOVE
+       DSP@ RTS - DSP!    RSP@ RTS - RSP!
+       4 -1 DO   RTS NEGATE U0 I CELLS +   +!   LOOP ;
+
+
+
+
+
+
+
+( THREAD-PET KILL-PET PAUSE-PET ) REQUIRE CONFIG ?LI \ A2nov16
+REQUIRE CVA   HEX
+\ Exit a thread. Indeed this is exit().
+: EXIT-PET 0 _ _ 1 LINOS ;
+\ Do a preemptive pause. ( more or less 1 MS )
+: PAUSE-PET 0 0 1000 0 DSP@ 8E LINOS5 DROP ;
+
+\ Create a thread with dictionary SPACE. Execute XT in thread.
+: THREAD-PET CREATE S0 @ 2 CELLS - , R0 @ , 0 , CVA ALLOT
+    DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
+    112 R@ @ _ 78 LINOS DUP 0< IF THROW THEN
+    DUP IF ( Mother) R> 2 CELLS + !
+    ELSE ( Child) DROP RSP! EXECUTE EXIT-PET THEN ;
+\ Kill a THREAD-PET , preemptively. Throw errors.
+: KILL-PET >BODY 2 CELLS + @ 9 _ 25 LINOS ?ERRUR ;
+DECIMAL
+( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH A2jul5
+REQUIRE SET
+100 SET TASK-TABLE   VARIABLE TASK-POINTER
+: THIS TASK-POINTER @ ;
+\ Make first task current.
+: SET-FIRST-TASK TASK-TABLE CELL+ TASK-POINTER ! ;
+
+\ Add running task and make it current.
+TASK-TABLE !SET   _ TASK-TABLE SET+!   SET-FIRST-TASK
+
+\ Switch to next task, only administration.
+: NEXT-TASK   THIS CELL+ TASK-POINTER !
+    THIS TASK-TABLE @ = IF SET-FIRST-TASK THEN ;
+\ Switch from current task to next one.
+: PAUSE-COT
+    DSP@ >R RSP@ THIS !   NEXT-TASK   THIS @ RSP! R> DSP! ;
+( EXIT-COT THREAD-COT ) HEX \ AvdH A2jul5
+REQUIRE TASK-TABLE   REQUIRE CVA
+
+\ Exit: remove current task, then chain to first one.
+: EXIT-COT  THIS TASK-TABLE SET-REMOVE
+    SET-FIRST-TASK   THIS @ RSP! R> DSP! ;
+
+\ Create a thread with dictionary SPACE. Execute XT in thread.
+: THREAD-COT   CREATE R0 @ 3 CELLS - , S0 @ , CVA ALLOT
+    DOES> >R
+    R@ CELL+ @          R@ @   !
+    >DFA @              R@ @ CELL+   !
+    'EXIT-COT >DFA @    R@ @ CELL+ CELL+ !
+    R> @ TASK-TABLE SET+! ;
+
+\
 ( NESTED-COMPILE ) \ AvdH A2oct28
 
 \ Isolate the latest word from the dictionary. Leave its DEA.

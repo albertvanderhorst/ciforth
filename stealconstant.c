@@ -13,7 +13,7 @@
 #include <setjmp.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <ioctls.h>
+#include <asm/ioctls.h>
 
 /*****************************************************************************/
 /*                                                                           */

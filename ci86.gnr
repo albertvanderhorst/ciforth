@@ -111,10 +111,13 @@ ERRORSCREEN EQU     M4_ERRORSCREEN    ;{ Screen where the error messages start.}
 ;{ They can also be changed at the m4 configuration level.}
 NBUF    EQU     M4_NBUF   ; {No. of buffers aka screens }
 KBBUF   EQU     1024      ; {Data bytes per disk buffer}
-US      EQU     M4_US*CW  ; {User variable space}
+US      EQU     M4_US*CW  ; {User variable space, eats into next data stack, if any.}
 EM      EQU     M4_EM     ; {Where the memory ends w.r.t. ORIG.}
 EMP     EQU     (EM-1)/1000H+1 ; {Number of pages.}
-RTS     EQU     M4_RTS    ; {Return stack & terminal input buffer}
+TAS     EQU     M4_RTS    ; {Size of unitialised area per task.}
+RTS     EQU     TAS    ; {Return stack & terminal input buffer}
+STACKSIZE   EQU TAS/4  ; {For both stacks. }
+TIBSIZE     EQU TAS/2  ; {TIB size. }
 ;
 _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}})
 ;
@@ -155,7 +158,7 @@ _LOW_BUF_({
 STRUSA  EQU     EM-US         ;{ User area at end }
 });_END_({ _LOW_BUF_})
 
-STRTIB  EQU     STRUSA-RTS      ;{ Start return stack area}
+STRTIB  EQU     STRUSA-TAS      ;{ Start return stack area}
                                 ;{ Under this : data stack}
 INITR0  EQU     STRUSA         ;{ Grows down}
 INITS0  EQU     STRTIB          ;{ Grows down}
@@ -1070,9 +1073,22 @@ _start:
 });_END_({_LINUX_N_})
 COLD_ENTRY:
         CLD                     ;{ DIR = INC}
+_THREADS_({
+        MOV     EAX, _CELL_PTR[USINI+_CELLS(1)]
+        MOV     EDI, EAX
+        OR      EDI, STACKSIZE-1    ;Requires it is power of 2.
+        INC     EDI
+        SUB     EDI,EAX
+        ADD     LONG[USINI+(CW*(0))], EDI
+        ADD     LONG[USINI+(CW*(1))], EDI
+        ADD     LONG[USINI+(CW*(2))], EDI
+        ADD     LONG[USINI+(CW*(3))], EDI
+        ADD     LONG[USINI+(CW*(4))], EDI
+
+});_END_({_THREADS_})
 _HOSTED_LINUX_(
 {MOV     _CELL_PTR[USINI+_CELLS(31)],SPO ;{Remember ARGS.}
-})
+})dnl
         MOV     {AX},DS
         MOV     SS,{AX}           ;{Atomic with next instruction.}
         MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
@@ -1817,12 +1833,13 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{      Initialisation block for user variables through DOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
-;        DC      WARM_ENTRY FIXME
-;        DC      COLD_ENTRY
+        DC      WARM_ENTRY ;{ FIXME : This address is an entry point for exceptions.}
+        DC      COLD_ENTRY
 USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRUSA  ;{ INIT (U0) user area of the main task 1}
         DC      INITS0  ;{ INIT (S0)         2}
-        DC      INITR0  ;{ INIT (R0)         3}
+        DC      INITR0 - _CELLS(1)
+                        ;{ INIT (R0)         3}
         DC      STRTIB  ;{ INIT (TIB)        4}
         DC      BSIN    ;{ RUBOUT: get rid of latest char 5}
         DC      0       ;{ AVAILABLE         6}
@@ -2864,7 +2881,13 @@ HEADER({USER},{USER},{DOCOL})
         DC      LCONST
         DC      PSCOD
 DOUSE:  MOV     BX,[WOR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
-        MOV     DI,_CELL_PTR[USINI]
+_THREADS_(
+{       MOV     DI, BP
+        OR      EDI, STACKSIZE-1  ;Requires it is power of 2.
+        INC     DI
+},
+{        MOV     DI,_CELL_PTR[USINI]
+})dnl _END_({_THREADS_})
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
 ;
@@ -7408,7 +7431,7 @@ _PC_({define({EPIPE},{32})dnl})
 HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      REMAIND, FETCH, TOR
         DC      TIB, FETCH, RR, PLUS
-        DC      LIT, RTS/2, RR, LSUB
+        DC      LIT, TIBSIZE, RR, LSUB
         DC      ZERO, RFILE
         DC      QERRUR
         DC      LDUP, ZEQU, LIT, -EPIPE, LAND ; {Presumably end of pipe.}
@@ -7443,7 +7466,7 @@ _BITS16_({      DC      TIB, FETCH, REMAIND, FETCH, PLUS},{dnl})
 _BITS32_( {;{ MSDOS cannot handle a 32 bits address: use the buffer.}})
 _BITS32_( {     DC   LIT, EXPECTBUF },{dnl})
 _SWITCH_({        DC   LIT, M4_SWITCHOFFSET, PLUS, },{dnl})
-_BITS16_({        DC      LIT, RTS/2, REMAIND, FETCH, LSUB},{dnl})
+_BITS16_({        DC      LIT, TIBSIZE, REMAIND, FETCH, LSUB},{dnl})
 _BITS32_( {     DC   LIT, 0200H},{dnl})
         DC      ZERO     ;{ Handle}
         DC      RFILE, LIT, 6, QERR
@@ -7488,7 +7511,7 @@ HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      TIB
         DC      FETCH
         DC      LDUP
-        DC      LIT,RTS/2
+        DC      LIT,TIBSIZE
         DC      ACCEP
 ; Keep the next line in for debugging ACCEPT for MSDOS.
 ;        DC      LIT, 41H, EMIT, TDUP, LTYPE, LIT, 41H, EMIT
@@ -7977,7 +8000,7 @@ enddoc)
 HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      TIB
         DC      FETCH
-        DC      LIT,RTS/2
+        DC      LIT,TIBSIZE
         DC      TDUP
 ; { Old fig code of EXPECT :}
              DC      OVER
@@ -8253,7 +8276,7 @@ HEADER({SYSTEM},{SYSTEM},{DOCOL})
         _STRINGINLINE({X /c })  ;{X contains BD string count.}
         DC      RR, SSTOR
         DC      RR, SADD, LIT, ACR, RR, CHAPP
-        DC      FROMR, SFET, ONEM, SWAP, CSTOR ;{Fill in (BD) count at X.}
+        DC      FROMR, SFET, ONEM, ONEM, SWAP, CSTOR ;{Fill in (BD) count at X.}
 _HOSTED_DPMI_(
 {       DC      ZERO, LIT, COMBUF + CW
         DC      LIT, Save_DS_PR, FETCH, OVER
@@ -9707,11 +9730,24 @@ INITDP:                 ;  It may be that it is not consecutive with TASK.
                         ;  Because of bad linking, resulting in a unusable Forth.
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
-       _RESB( EM - FORTHSIZE - RTS - US - BUFFERSIZE )
-INITS0:                         ;{ Grows down}
-STRTIB: _RESB( RTS )            ;{ Start return stack area}
+_THREADS_(
+{       _RESB( EM - FORTHSIZE - TAS - STACKSIZE - US - BUFFERSIZE )}
+); _END_({_THREADS_})
+dnl {       _RESB( EM - FORTHSIZE - TAS - US - BUFFERSIZE )}
+; { The following framework may be repeated for more tasks.}
+; { It is floating, i.e. it may be shifted up and down, in order}
+; { to have INITR0 at a STACKSIZE boundary. }
+INITR1:                         ; Return stack for next task
+        _RESB( US )             ;{  For next task, if present. }
+        _RESB( STACKSIZE - US )   ;{ Data stack, only limited if more tasks present.}
+INITS0:                         ;{ Grows down.}
+STRTIB: _RESB( TIBSIZE )    ;{ Terminal input buffer.}
+        _RESB( STACKSIZE )      ;{ Return stack, grows down.}
 INITR0:                         ;{ Grows down}
 STRUSA: _RESB( US )             ;{ User area}
+_THREADS_(
+{        _RESB( STACKSIZE )            ;{ Possibly the framework is shifted up by this.}
+})dnl _END_({_THREADS_})
 BUF1:   _RESB( BUFFERSIZE )     ;{ FIRST DISK BUFFER}
 ACTUAL_EM:  ;{ Differs from EM if code is relocated.}
 });_END_({ _HOSTED_LINUX_})
