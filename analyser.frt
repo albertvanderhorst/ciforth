@@ -21,6 +21,7 @@ REQUIRE BOUNDS
 'FORTH >CFA @ CONSTANT DODOES
 'BASE  >CFA @ CONSTANT DOUSER
 'RESULT >CFA @ CONSTANT DOVAR
+'BL >CFA @ CONSTANT DOCON
 
 \ ---------------------------------------------------------------------------
 HEX
@@ -79,15 +80,38 @@ CREATE PUSHES  HERE 0 ,
 ' PUSH|X,    ,
 HERE SWAP !
 
+\ Instruction that have an input side effect.
+\ Two operand instructions are handled directly, via ``T|'' ``F|''
+CREATE FETCHES HERE 0 ,
+' MOV|TA,    ,          ' LODS,      ,
+' SCAS,      ,          ' CMPS,      ,          ' MOVS,      ,
+' OUTS,      ,          ' INS,       ,          ' OUT|D,     ,
+' IN|D,      ,          ' OUT|P,     ,          ' IN|P,      ,
+' SCAS,      ,
+HERE SWAP !
+
+\ Instruction that have an output side effect.
+\ Two operand instructions are handled directly, via ``T|'' ``F|''
+CREATE STORES HERE 0 ,
+' MOV|FA,    ,                                  ' STOS,      ,
+                                                ' MOVS,      ,
+' OUTS,      ,          ' INS,       ,          ' OUT|D,     ,
+' IN|D,      ,          ' OUT|P,     ,          ' IN|P,      ,
+
+HERE SWAP !
+
 \ Bookkeeping for pops and pushes.
 VARIABLE #POPS          VARIABLE #PUSHES
 : !PP    0 #POPS !    0 #PUSHES ! ;
 
+\ After a call to ``(DISASSEMBLE)'' return the OPCODE.
+: OPCODE    DISS CELL+ @ ;
+
 \ Add the bookkeeping of pops and pushes for the latest instruction
 \ dissassembled.
-: COUNT-PP DISS CELL+ @
-    DUP POPS IN-SET? #PUSHES @ IF #PUSHES +! ELSE NEGATE #POPS +! THEN
-    PUSHES IN-SET? NEGATE #PUSHES +!   ;
+: COUNT-PP
+    OPCODE POPS IN-SET? #PUSHES @ IF #PUSHES +! ELSE NEGATE #POPS +! THEN
+    OPCODE PUSHES IN-SET? NEGATE #PUSHES +!   ;
 
 \ Bookkeeping for input and output side effects.
 VARIABLE PROTO-FMASK
@@ -95,19 +119,26 @@ VARIABLE PROTO-FMASK
 \ Initialise to "no side effects". Innocent until proven guilty.
 : !FMASK FMASK-N@ FMASK-N! OR PROTO-FMASK ! ;
 
+\ Add to FLAGS if instruction IS storing, the no output side effects flag.
+\ Return the new FLAGS. (So those are the flags to become invalid.)
+: IS-STORING       FMASK-N! AND    OR ;
+
+\ Add to FLAGS if instruction IS fetching, the no input side effects flag.
+\ Return the new FLAGS. (So those are the flags to become invalid.)
 \ Look whether we have the current disassembled instruction forces us to
+: IS-FETCHING   FMASK-N@ AND    OR ;
 \ revise the flag mask.
 \ A forth flag has all bit set. Hence the idiom ``FLAG MASK AND''
 \ instead of FLAG IF MASK ELSE 0 THEN''.
 : REVISE-FMASK
     0
-    'MOV|TA, DISS IN-SET? FMASK-N@ AND    OR
-    'MOV|FA, DISS IN-SET? FMASK-N! AND    OR
+    OPCODE STORES IN-SET? IS-STORING
+    OPCODE FETCHES IN-SET? IS-FETCHING
     'R| DISS IN-SET? 0= IF
-        'T| DISS IN-SET? FMASK-N@ AND   OR
-        'F| DISS IN-SET? FMASK-N! AND   OR
+        'T| DISS IN-SET?   IS-FETCHING
+        'F| DISS IN-SET?   IS-STORING
         \ Memory (non-move) operations always fetch!
-        'F| DISS IN-SET? 'MOV, DISS IN-SET? 0= AND  FMASK-N@ AND   OR
+        'F| DISS IN-SET?    'MOV, OPCODE <>    AND  IS-FETCHING
     THEN
     PROTO-FMASK AND!U
 ;
@@ -119,9 +150,9 @@ VARIABLE PROTO-FMASK
 : ACCUMULATE-AS-INFO
     SWAP
     !PP !FMASK
-    BEGIN
+    BEGIN 2DUP > WHILE
         (DISASSEMBLE) ^M EMIT   COUNT-PP   REVISE-FMASK
-    2DUP > 0= UNTIL
+    REPEAT
     2DROP
 ;
 
@@ -233,11 +264,21 @@ HERE SWAP !
 : FIND-SE-DODOES 12 SWAP >DFA @ @ ANALYSE-CHAIN ;
 
 \ For DEA return the stack effect BYTE.
+\ It can be any code definition.
+\ Fill in the side effect bits.
+: FIND-SE-ANY-CODE
+    DUP >CFA @ >R
+    R@ DOCON =   R@ DOVAR =   R> DOUSER =    OR OR
+    IF >FFA FMASK-N@ FMASK-N! OR SWAP OR!U   12 ELSE
+        FIND-SE-CODE  \ Normal code definition.
+    THEN ;
+
+\ For DEA return the stack effect BYTE.
 \ It can be any definition.
 : FIND-SE-ANY
     DUP >CFA @ DOCOL = IF FIND-SE-DOCOL ELSE
     DUP >CFA @ DODOES = IF FIND-SE-DODOES ELSE
-    FIND-SE-CODE
+    FIND-SE-ANY-CODE
     THEN THEN ;
 
 \ For DEA find the stack effect and fill it in.
