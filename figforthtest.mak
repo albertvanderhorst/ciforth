@@ -204,8 +204,7 @@ fig86.%.html : %.cfg glosshtml.m4 indexhtml.m4 fig86.%.mig namescooked.m4
 	sed -e s'/worddocsafe/worddoc/g'  |\
 	sed -e 's/</\&lt\;/g'             > temp.html
 	( \
-	    echo "define(fig86gnrversion,`rlog -r -h -N fig86.gnr|grep head|sed -e s/head://` )" ; \
-	    cat indexhtml.m4 ; \
+	    cat namescooked.m4 indexhtml.m4 ; \
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
 	)| m4 > $@
 	m4 $(@:fig86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html >> $@
@@ -222,7 +221,6 @@ fig86.%.tex : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 namesc
 	m4 menu.m4 $(@:%.tex=%.mig) > menu.texinfo
 	m4 wordset.m4 $(@:%.tex=%.mim)  $(@:%.tex=%.mig) |m4 >wordset.mi
 	( \
-	    echo "define(fig86gnrversion,`rlog -r -h -N fig86.gnr|grep head|sed -e s/head://` )" ; \
 	    echo "define(figforthversion,$@)" ; \
 	    cat $(@:fig86.%.tex=%.cfg) manual.m4 namescooked.m4 figforth.mi \
 	)| tee spy | m4 > $@
