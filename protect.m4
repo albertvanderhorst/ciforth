@@ -27,11 +27,14 @@ define({TO_REAL},{
 })dnl
 define({JMPHERE_FROM_PROT},{
 	TO_REAL
-        MOV     AX,REALSEGMENT
-        MOV     DS,AX
-        MOV     ES,AX
-        MOV     SS,AX
+dnl The curly brackets prevent AX to be expanded to EAX
+        BITS 16
+        MOV     {AX},REALSEGMENT
+        MOV     DS,{AX}
+        MOV     ES,{AX}
+        MOV     SS,{AX}
         STI
+        _BITS32_1_({BITS 32})
 })dnl
 define({JMPHERE_FROM_REAL},{
 	TO_PROTECTED    
