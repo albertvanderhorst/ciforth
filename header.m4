@@ -1,8 +1,7 @@
 dnl  $Id$  M4 file to handle the develish FIG headers.
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Once and for all. 
-changequote({,})dnl
-changecom{}dnl
+changecom(_M4_COMMENT,_M4_ENDCOMMENT)dnl
 dnl
 dnl _STRING : Lay down a string in memory.
 dnl Take care of embedded double quotes by using single quotes.
