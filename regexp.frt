@@ -3,7 +3,7 @@
 ( $Id$)
 
 : \D POSTPONE \ ; IMMEDIATE
-
+\ : \D ;
 '$@ ALIAS @+
 'COUNT ALIAS C@+
 : CELL/ 2 RSHIFT ;   \ From #addres to #cell.
@@ -81,7 +81,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 0 CHAR-SET \\     &. | &\ | &^ | &$ | &+ | &? | &* | &[ | &] | &< | &> | &( | &) |  DROP
 
 \ For CHAR : "it IS special".
-: SPECIAL?   \\ BIT? ;
+: SPECIAL?   \\ IN-CHAR-SET   ;
 
 \ The empty set
 0 CHAR-SET \EMPTY DROP
@@ -109,10 +109,10 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ This contains alternatingly an escaped character, and its ASCII meaning.
 100 SET ESCAPE-TABLE     ESCAPE-TABLE !SET
 ESCAPE-TABLE &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |
-\ The char's from \\ represent themselves when escaped.
-&. &. | &\ &\ | &^ &^ | &$ &$ | &+ &+ | &? &? | &* &* |
-&[ &[ | &] &] | &< &< | &> &> | &( &( | &) &) |
+\ The special char's from \\ represent themselves when escaped.
+MAX-SET 8 * 0 DO I SPECIAL? IF I DUP | THEN LOOP
 DROP
+'| HIDDEN
 
 \ For CHARACTER return the ``ASCII'' VALUE it represents, when escaped.
 \ else zero. Do not find at odd positions.
@@ -120,7 +120,6 @@ DROP
     ESCAPE-TABLE WHERE-IN-SET DUP IF
          DUP ESCAPE-TABLE - CELL/ 1 AND IF CELL+ @ ELSE DROP 0 THEN
     THEN ;
-'| HIDDEN
 
 \ -----------------------------------------------------------------------
 \                  matched substrings
@@ -256,17 +255,17 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ (Note: this is the syncronisation, to be done when the expression does
 \ *not* start with `^'.
 : FORTRACK
-    BEGIN (MATCH) 0= WHILE
-        SWAP 1 + SWAP
+    BEGIN 2DUP (MATCH) 0= WHILE
+        2DROP SWAP 1 + SWAP
         OVER C@ 0= IF FALSE EXIT THEN
     REPEAT
-    TRUE ;
+    2SWAP 2DROP TRUE ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "the strings HAS been used up".
 \ (Note: this is an end-check, to be done only when the expression ends with '$'.)
 : CHECK$
-\D DUP @ 0= ABORT" CHECK$ compiled not at end of expression, system error"
+\D DUP @ ABORT" CHECK$ compiled not at end of expression, system error"
     OVER C@ 0= ;
 
 \ Where the matched part of the string starts.
@@ -302,8 +301,9 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ END OF TESTED FOR COMPILATION ONLY AREA
 : ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
 : ADVANCE+ OVER >R   (ADVANCE*)
-    OVER R@ = IF RDROP FALSE EXIT THEN
-    OVER R@ 1+ = IF RDROP TRUE EXIT THEN
+    \ For 0 or 1 char matches no backtracking.
+    \ 1 char match is a + match. 0 char match is not.
+    OVER R@ 2 + < IF OVER R> 1+ = EXIT THEN
     R> BACKTRACK ;
 
 \ ---------------------------------------------------------------------------
@@ -419,7 +419,7 @@ CREATE (RE-EXPR) MAX-RE ALLOT
 : FIRST-PASS >R (RE-EXPR) R@ MOVE   0 (RE-EXPR) R> + C!   (RE-EXPR) ;
 
 \ Everything to be initialised for a build.
-: INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED ;
+: INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   'FORTRACK RE, ;
 
 \ Everything to be harvested after a build.
 : EXIT-BUILD   HARVEST-NORMAL-CHARS 0 RE, ;
@@ -429,7 +429,7 @@ CREATE (RE-EXPR) MAX-RE ALLOT
 \ For EP and CHAR : EP plus "it IS one of ^ $ without its special meaning".
 \ ``EP'' points after ``CHAR'' in the re, and is of course needed to
 \ determine this.
-: ^$? DUP &^ = IF DROP (RE-EXPR) 1+ OVER 0= ELSE
+: ^$? DUP &^ = IF DROP (RE-EXPR) 1+ OVER <> ELSE
     &$ = IF DUP C@ 0= 0= ELSE FALSE THEN THEN ;
 
 \ If the character at EP is to be treated normally, return incremented EP plus IT,
@@ -456,6 +456,8 @@ CREATE (RE-EXPR) MAX-RE ALLOT
 : ADD(   'HANDLE() RE, ALLOCATE( RE, ;
 : ADD)   'HANDLE() RE, ALLOCATE) RE, ;
 : ADD.   'ADVANCE-CHAR RE, \. RE-SET, ;
+: ADD^   -1 CELLS RE-FILLED +! ;
+: ADD$   'CHECK$ RE, ;
 
 30 SET COMMAND-SET     COMMAND-SET !SET
 
@@ -463,12 +465,13 @@ CREATE (RE-EXPR) MAX-RE ALLOT
 &. 'ADD. | &[ 'PARSE[] |
 &< 'ADD< |   &> 'ADD> | &( 'ADD( | &) 'ADD) |
 &* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
+&^ 'ADD^ |   &$ 'ADD$ |
 '| HIDDEN
 
 \ Execute the command that belongs to the abnormal CHARACTER.
 : DO-ABNORMAL COMMAND-SET WHERE-IN-SET
              DUP 0= ABORT" Illegal escaped char for command, system error"
-             CELL+ @ EXECUTE ;
+             HARVEST-NORMAL-CHARS CELL+ @ EXECUTE ;
 
 \ Parse one element of regular EXPRESSION .
 \ Leave EXPRESSION incremented past parsed part.
