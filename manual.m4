@@ -27,6 +27,7 @@ define({forthcode},{@code{{$1}}
 define({forthdefi},{@dfn{{$1}}
 @cindex $1
 })
+define({forthdefin},{@dfn{{$1}}})
 define({forthunderline},{$1})
 define({forthxref},{@xref{{$1}},})
 define({forthpxref},{@pxref{{$1}}})
