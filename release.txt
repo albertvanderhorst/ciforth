@@ -2,18 +2,18 @@
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 GENERAL.
 
-Date: 2000 may 12
+Date: 2000 june 21
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl
 Copyright: GPL, inasfar not public domain by FIG
-Archive: not yet
+Archive: fig86g2d105.zip
 
 All generic FIG86 forths have version number 2.
-Preliminary releases derive their version id, in this case as 2.105, from
+Preliminary releases derive their version id, in this case as 2.106, from
 the RCS version of the generic source file `fig86.gnr' 
 Stable versions will use the regular fig numbering. 
 
 Release :
-Version 2d105  consists of
+Version 2d105 is archived into fig86g2d105.zip and consists of
 
 Documentation
 COPYING         : the conditions under which you are allowed to use all this
@@ -33,22 +33,23 @@ figforth.c      : C-source that complements assembler on Linux.
                   longer essential. It remains fruitful. 
 
 Derived sources. For an msdos archive `fig86.' is ommitted.
-fig86.alone.asm : nasm source for bootable system using BIOS i/o 16bit protected
+This is for your convenience, you could have generated them.
+fig86.alone.asm : nasm source for fd-bootable system using BIOS i/o 16bit protected
+fig86.alonehd.asm : nasm source for hd-bootable system using BIOS i/o 32bit 
 fig86.msdos.msm : MASM/TASM source for hosted system using modern MSDOS i/o
 fig86.lina.asm  : nasm source for native linux version. 
 fig86.linux.asm : nasm source for linux version with I/O in c.
 
 These files are example configurations that can be used out of
 the box via the Makefile. 
-The first four generate the `Derived files' from the previous section.
+The first five generate the `Derived files' from the previous section.
 alone.cfg       : 16 bit protected mode, boots from floppy, uses BIOS for IO
 msdos.cfg       : 16 bit real mode, hosted by MSDOS, blocks in files.
 linux.cfg       : 32 bit protected mode, hosted by linux, links with figforth.c
 lina.cfg        : 32 bit protected mode, hosted by linux, direct system calls. 
-!!alonehd.cfg     : 32 bit protected mode, boots from hard disk, uses BIOS
-for IO
+alonehd.cfg     : 32 bit protected mode, boots from hard disk, uses BIOS for IO
 
-!!cfg.zip         : More .cfg files that make sense.
+cfg.zip         : More .cfg files that make sense. If available.
 
 Auxiliary files.
 The m4 files are used transparently by the Makefile.
