@@ -72,7 +72,7 @@ USRVER  EQU     34      ;{ USER VERSION NUMBER, a digit now}
 ;
 ;{       PROTECTION}
 CW      EQU     M4_CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
-PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}
+_FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}})
 ;
 ;{      ASCII CHARACTER EQUIVALENTS}
 ;
@@ -3119,12 +3119,6 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      FETCH
         DC      LIT,_VOC_LATEST(FORTH)
         DC      STORE
-_RWFILE_({
-        DC      BLINI
-});_END_({_RWFILE_})
-_LINUX_C_({
-        DC      BLINI
-});_END_({_LINUX_C_})
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
@@ -3138,8 +3132,10 @@ _LINUX_N_({
         DC      LIT, EXPEC_B-EXPEC_A
         DC      LCMOVE
 COLD1:
-        DC      BLINI
 });_END_({_LINUX_N_})
+_BLOCKSINFILE_({
+        DC      BLINI
+});_END_({_BLOCKSINFILE_})
         DC      ABORT
 ;
         PAGE
@@ -3500,10 +3496,10 @@ If the block is not already in memory, it is transferred from disc to
 which ever buffer was least recently written. If the block occupying
 that buffer has been marked as updated, it is rewritten to disc
 before block forthvar({n}) is read into the buffer.
-In this experimental version PMASK restricts the number of blocks to 0FFH.},
+_FEWBLOCKS_({In this experimental version forthsamp({PMASK}) restricts the number of blocks to 0FFH.})},
 {{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}})
 HEADER({BLOCK},{BLOCK},{DOCOL})
-        DC      LIT, PMASK, LAND
+_FEWBLOCKS_({        DC      LIT, PMASK, LAND})
         DC      OFSET
         DC      FETCH,PLUS
         DC      TOR,PREV
@@ -3581,6 +3577,7 @@ HEADER({-->},{ARROW},{DOCOL},1)
         DC      SEMIS
         PAGE
 ;
+_PC_({
 worddoc({SYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},{
 Do a call of ``BIOS'' interrupt forthvar({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contains
@@ -3654,9 +3651,9 @@ CODE_HEADER({BDOS},{BDOS})
         PUSH     DX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
-
+});_END_({ _PC_})
 _HOSTED_LINUX_({
-worddoc({SYSTEM},{LINOS},{bios},{p1 p2 p3 n---ret},{},{ Do a Linux
+worddoc({SYSTEM},{LINOS},{linos},{p1 p2 p3 n---ret},{},{ Do a Linux
 system call (man 2) with parameters forthsamp({p1 p2 p3}).
 forthvar({ret}) is the return value of the call. If it is negative, it
 is mostly an error, such as known by forthvar({errno}) . This makes
@@ -3671,12 +3668,14 @@ CODE_HEADER({LINOS},{LINOS})
         _PUSH     ; Positive means okay. Negative means -errno.
 });_END_({ _HOSTED_LINUX_})
 
+_PC_({
              ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
              DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
              DC      LIT, 0010H, BIOS
              DC      DROP, DROP, DROP, DROP, DROP, SEMIS
              ;{                          ^ MUST BE 4FH}
+});_END_({_PC_})
         PAGE
 ;{------------------------------------}
 ;{       SYSTEM DEPENDANT CHAR I/O}
@@ -3823,7 +3822,8 @@ HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
         DC      SEMIS
 ;
 worddoc({INPUT},{TERMIO},{termio},{--- addr},{},{
-Leave the address of the terminal description.
+Leave the address of the terminal description, this has the layout of
+a the c-structure forthsamp({termio}) .
 },{{SET-TERM}})
 HEADER({TERMIO},{TERMIO},{DOVAR})
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
@@ -4228,7 +4228,7 @@ HEADER({POUT},{POUT},{DOCOL})
 ;{       SYSTEM DEPENDANT DISK I/O}
 ;{------------------------------------}
 define({_FILENAMELENGHT_M4_},_BITS16_(30)_BITS32_(254))
-_RWFILE_({
+_BLOCKSINFILE_({
 worddoc({STORAGE},{BLOCK-FILE},{block_file},{---addr},{},{
 Leave the address forthvar({addr}) of a counted string, 
 the name of a file in which blocks are (to be) allocated.
@@ -4239,20 +4239,22 @@ The default name is forthvar({BLOCKS.BLK}) .
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
         _STRING({BLOCKS.BLK})
         _RESB(_FILENAMELENGHT_M4_-9)               ;{ Allow for some path}
-;
 worddoc({STORAGE},{BLOCK-HANDLE},{block_handle},{---n},{},{
 Leave a file handle in forthvar({n}) . 
-If it is -1, there is no block file open,
+If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
 },{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT}})
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
         DC      -1
 ;
-worddoc({STORAGE},{DISK-ERROR},{disk_error},{u---},{},{
+});_END_({_BLOCKSINFILE_})
+;
+_RWFILE_({
+worddoc({STORAGE},{DISK-ERR},{disk_error},{u---},{},{
 Interpret forthvar({u}) as the status of a disk i/o BDOS call.
 Report an error if it contains an error condition.
 },{{BLOCK-FILE},{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}})
-HEADER({DISK-ERROR},{DERR},{DOCOL})
+HEADER({DISK-ERR},{DERR},{DOCOL})
         DC      ONE, LAND
         DC      LIT, 08H, QERR
         DC      SEMIS
@@ -4260,7 +4262,7 @@ HEADER({DISK-ERROR},{DERR},{DOCOL})
 worddoc({STORAGE},{BLOCK-INIT},{block_init},{---},{},{
 Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer
-to the blocks in this file, using BLOCK-HANDLE to acces it.
+to the blocks in this file, using forthvar({BLOCK-HANDLE}) to acces it.
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT}})
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      LIT, 03D02H    ;{ Open file for read/write}
@@ -4314,8 +4316,8 @@ specifies the source or destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write and performs any error checking. It gives
-unrestricted access to the disk, allowing to write bootcode. }, 
+performs the read-write and aborts on errors. 
+}, 
 {{BLOCK}})
 HEADER({R/W},{RSLW},{DOCOL})
         _0BRANCH(RSLW1)
@@ -4336,18 +4338,23 @@ RSLW2:  DC      TOR
 
 });_END_({_RWFILE_})
 _LINUX_N_({
-HEADER({BLOCK-FILE},{BLFL},{DOVAR})
-        _STRING({BLOCKS.BLK})
-        DB      0       ; { Easier on linux}
-        _RESB(19)               ;{ Allow for some path}
-;
-HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
-        DC      0
-;
+worddoc({STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},{
+Leave the address addr of a variable containing the 
+latest disk error in opening, using or closing the block file.
+Negative means an error 
+(the Unix forthsamp({errno}) and zero means okay.)
+},{{SET-TERM}})
 HEADER({DISK-ERROR},{DERR},{DOVAR})
-        DC      0
+        DC      -1
 ;
+worddoc({STORAGE},{BLOCK-INIT},{block_init},{---},{},{
+Map the blocks on the block file forthcode({BLOCK-FILE}),
+i.e. the mass storage words refer
+to the blocks in this file, using forthcode({BLOCK-HANDLE}) to acces it.
+If successful, forthcode({WARNING}) is reinitialised to use disk messages.
+},{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}})
 HEADER({BLOCK-INIT},{BLINI},DOCOL)
+        DC      ZERO, BLFL, COUNT, PLUS, STORE ; {Unix requires a c-string.}
         DC      BLFL, ONEP
         DC      LIT, O_RDWR
         DC      ZERO
@@ -4359,6 +4366,12 @@ HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      ZEQU, WARN, STORE
         DC      SEMIS
 ;
+worddoc({STORAGE},{BLOCK-EXIT},{block_exit},{---},{},{
+A block file must have been opened by forthcode({BLOCK-INIT}) .
+Close the currently open block file forthcode({BLOCK-HANDLE}),
+i.e. the mass storage words no longer work, and will result in 
+error messages. 
+},{{BLOCK},{LIST},{LOAD},{DISK-ERROR}})
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
         DC      ZERO, WARN, STORE
         DC      BHAN, FETCH
@@ -4369,6 +4382,14 @@ HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
         DC      DERR, STORE
         DC      SEMIS
 ;
+worddoc({STORAGE},{R/W},{read_slash_write},{addr blk f --},{},{
+The fig-FORTH standard disc read-write linkage. forthvar({addr})
+specifies the source or destination block buffer, forthvar({blk}) is
+the sequential number of the referenced physical block; and
+forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
+read. forthcode({R/W}) determines the location on mass storage,
+performs the read-write and aborts on errors.}, 
+{{BLOCK}})
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
         DC      TOR
@@ -4394,7 +4415,9 @@ RSLW3:
 RSLW4:  DC      LINOS
         DC      ZERO, MIN      ; 0/-errno
         DC      DERR, STORE
-RSLW2:  DC      SEMIS
+RSLW2:  DC      DERR, FETCH
+        DC      LIT, 08H, QERR
+        DC      SEMIS
 
 });_END_({_LINUX_N_})
 _LINUX_C_({
@@ -4426,6 +4449,7 @@ CODE_HEADER({R/W},{RSLW})
         MOV     [_PARAMETER_FIELD(DERR)],AX
         LEA     ESP,[ESP+CELLS(3)]    ; remove input
         _NEXT
+
 
 });_END_({_LINUX_C_})
 _CLASSIC_({

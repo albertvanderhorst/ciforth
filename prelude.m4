@@ -51,6 +51,10 @@ define({_PC_}, _no)
 dnl Normally no code needed switch between modes.
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPHERE_FROM_PROT},{})dnl
+dnl This is an experimental version, restricted to 255 blocks.
+define({_FEWBLOCKS_}, _yes)
+dnl Blocks are allocated in a file.
+define({_BLOCKSINFILE_}, _no)
 dnl
 dnl ############## USER CHOICES #############################################
 dnl

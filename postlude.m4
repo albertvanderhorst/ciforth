@@ -21,6 +21,7 @@ _BOOTHD_({define({_RWHD_}, _yes)})
 _BOOTED_({define({_PC_}, _yes)})
 _HOSTED_MSDOS_({define({_PC_}, _yes)})
 _HOSTED_LINUX_({ define( {_BITS32_}, _yes)})
+_HOSTED_LINUX_({ define({_BLOCKSINFILE_}, _yes)})
 _PC_({define({_DIRECTMAPPED_}, _yes)})
 _PC_({define({_NORMAL_BYE_}, _yes)})
 dnl switch back and forth between protected and real mode.
@@ -34,6 +35,7 @@ _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 _ABSOLUTELOAD_({define({_NORMAL_BYE_}, _no)})
 _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
+_RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
 dnl Detectable error situations. Terminate.
 _RWFD_({ _RWHD_({errprint({Mass storage cannot be at the same time from floppy and hard disk.
 })m4exit(1000)})})
