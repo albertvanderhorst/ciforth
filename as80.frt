@@ -1,4 +1,5 @@
 
+
 ( First cell : contains bits down for each COMMAER still needed)
 ( Second cell contains bits up to be filled by FIX| )
  0 VARIABLE TALLY 0 CELL+ ALLOT  ( 4 BYTES FOR COMMAER 4 FOR INSTRUCTION)
@@ -102,9 +103,61 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 : NEXT JMP (NEXT) X, ;
 : PSH1 JMP (NEXT) 1 - X, ;
 : PSH2 JMP (NEXT) 2 - X, ;
-: THEN HERE SWAP ! ;         : HOLDPLACE HERE 0 X, ;
-: IF JC, HOLDPLACE ;  ( ZR| Y| )
-: ELSE JMP HOLDPLACE ;           : BEGIN HERE ;
-: UNTIL IF DROP ;                  : WHILE IF ;
-: REPEAT SWAP JMP X,  THEN ;
-;S
+: THEN, HERE SWAP ! ;         : HOLDPLACE HERE 0 X, ;
+: IF, JC, HOLDPLACE ;  ( ZR| Y| )
+: ELSE, JMP HOLDPLACE ;           : BEGIN, HERE ;
+: UNTIL, IF, DROP ;                  : WHILE, IF, ;
+: REPEAT, SWAP JMP X,  THEN ;
+
+
+
+' ASSEMBLER CONSTANT A
+( A 10 DUMP                       )
+
+( A CELL+ CELL+ @ 10 DUMP )
+A 2 + CELL+ @ CONSTANT B
+( B @ PFA LFA DUP H. 10 DUMP )
+: QQ PFA LFA @ ;
+: RR QQ DUP 10 DUMP ;
+: >NEXT% PFA LFA @ ;
+: % [COMPILE] ' NFA ;
+: %EXECUTE PFA CFA EXECUTE ;
+B H.
+( Execute the DEA with as data the                                        )
+( NAMEFIELD that is given plus for all other words in                     )
+the same vocabulary., leaving that CFA
+: FOR-REMAINING-AS
+BEGIN
+2DUP SWAP %EXECUTE
+ >NEXT%
+DUP @ $FFFF AND $A081 = UNTIL
+DROP
+;
+(   Execute the DEA with as data each time                              )
+(   the namefield of the assembler vocabulary.                          )
+( a dea can be found using % )
+: FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS DROP 
+;
+% ID. FOR-ALL-AS
+0 0 0 1PI SAMPLE
+
+( For the PFA , return it IS a posit.)
+: POSTIT? @  ' SAMPLE @ = ;
+' SAMPLE POSTIT? ." SAMPLE: " . CR
+' LXI POSTIT? ." LXI: " . CR
+' B| POSTIT? ." B|: " . CR
+0 0 0 xFI SAMPLE
+: FIXUP? @  ' SAMPLE @ = ;
+' SAMPLE FIXUP? ." SAMPLE: " . CR
+' LXI FIXUP? ." LXI: " . CR
+' B| FIXUP? ." B|: " . CR
+( print name if tos is a postit )
+: PIFPOST DUP PFA POSTIT? IF ID. CR ELSE DROP THEN ;
+( print name if tos is a fixup )
+: PIFFIX DUP PFA FIXUP? IF ID. CR ELSE DROP THEN ;
+
+." There comes the posts"
+ ' PIFPOST CFA FOR-ALL-AS 
+." There comes the posts"
+ ' PIFFIX CFA FOR-ALL-AS 
+
