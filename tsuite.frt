@@ -1,5 +1,5 @@
 \ AH This is based on something from MHX.
-\ Modifications have to do with where Hayce moves the interpret 
+\ Modifications have to do with where Hayce moves the interpret
 \ pointer to the iend of the input buffer
 \ The jump out of a BEGIN loop, is refused whit _SECURITY op yes.
 24 LOAD
@@ -52,8 +52,8 @@ CREATE ACTUAL-RESULTS 20 CELLS ALLOT
    THEN ;
 
 : TESTING       \ ( -- ) TALKING COMMENT.
-   POSTPONE \   
-   VERBOSE @ IF SOURCE TYPE CR THEN 
+   POSTPONE \
+   VERBOSE @ IF SOURCE TYPE CR THEN
 ;
 
 \ (C) 1993 JOHNS HOPKINS UNIVERSITY / APPLIED PHYSICS LABORATORY
@@ -1008,8 +1008,10 @@ CREATE ABUF 80 CHARS ALLOT
    ABUF SWAP TYPE [CHAR] " EMIT CR
 ;
 
+." YOU SHOULD SEE THE FOLLOWING LINE ANOTHER TIME AFTER RECEIVED:" CR
+." THIS IS AN INPUT LINE FOLLOWING IN THE SOURCE" CR
 { ACCEPT-TEST -> }
-
+THIS IS AN INPUT LINE FOLLOWING IN THE SOURCE
 \ ------------------------------------------------------------------------
 TESTING DICTIONARY SEARCH RULES
 
@@ -1019,4 +1021,3 @@ TESTING DICTIONARY SEARCH RULES
 
 TESTING FINISHED
 BYE
-
