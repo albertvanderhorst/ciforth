@@ -21,7 +21,10 @@ REQUIRE $
 : SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
 : SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
 : SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
-: .SET   @+ SWAP DO I ? 0 CELL+ +LOOP ;   ( Print non-empty SET )
+: .SET   @+ SWAP ?DO I ? 0 CELL+ +LOOP ;   ( Print non-empty SET )
+\ Remove entry at ADDRESS from SET.
+: SET-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE   -1 CELLS R> +! ;
+
 \ For VALUE and SET : value IS present in set.
 : IN-SET? $@ SWAP
  DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
@@ -154,7 +157,8 @@ HERE SWAP !
 
 \ For a GAP : it IS forbidden, i.e. there is some branch from outside to inside
 \ the gap.
-: FORBIDDEN-GAP? BRANCHES @+ SWAP DO
+: FORBIDDEN-GAP? SWAP CELL+ SWAP \ You may jump to the start of a gap!
+BRANCHES @+ SWAP DO
     2DUP I @ ROT ROT WITHIN 0= IF 2DUP I @ >TARGET ROT ROT WITHIN IF 2DROP 0. LEAVE THEN THEN
 0 CELL+ +LOOP OR 0= ;
 
@@ -198,9 +202,41 @@ HERE SWAP !
 : ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
     DUP 0<> ANNIL-STABLE? AND ;
 
+
+\ For GAP and ADDRESS of entry in branches, adjust the branch,
+\ if it jumps from left over the gap.
+: ADJUST-FROM-LEFT 2DROP DROP ;
+
+\ For GAP and ADDRESS of entry in branches, adjust the branch,
+\ if it jumps from right over the gap.
+: ADJUST-FROM-RIGHT 2DROP DROP ;
+
+\ The set of branches that is marked for elimination from the set ``BRANCHES''.
+50 SET MARKED-BRANCHES
+: !MARKED-BRANCHES  MARKED-BRANCHES !SET ;
+
+\ For GAP and ADDRESS of entry in branches, if the branch is in the gap.
+\ mark it for elimination from the table.
+\ We can't remove them from the set right away because things get entangled.
+: ELIMINATE-BRANCH-IN-GAP   >R R@ @ ROT ROT WITHIN IF R@ MARKED-BRANCHES SET+! THEN RDROP ;
+
+\ Delete from ``BRANCHES'' what is marked for elimination.
+: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ SWAP ?DO
+    I @ BRANCHES SET-REMOVE
+0 CELL+ +LOOP ;
+
+\ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
+: ADJUST-BRANCHES BRANCHES @+ SWAP DO
+    2DUP I ADJUST-FROM-LEFT
+    2DUP I ADJUST-FROM-RIGHT
+    2DUP I ELIMINATE-BRANCH-IN-GAP
+0 CELL+ +LOOP 2DROP ;
+
 \ Do something with START END and number of equivalent drops.
 \ Return the new position of END (where we have to go on optimising.).
-: ANNIHILATE-GAP DUP >R " Between " SWAP TYPE H. " and " TYPE H.
+: ANNIHILATE-GAP
+    2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES
+DUP >R " Between " TYPE SWAP H. " and " TYPE H.
 " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR R> ;
 
 \ Investigate the start of SEQUENCE. If it can be anihilated do it.
