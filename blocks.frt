@@ -59,9 +59,9 @@ REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
 : MY-OPTIONS DROP 0 ;  \ No options, no sign on.
 'MY-OPTIONS DUP 'OPTIONS 3 CELLS MOVE  HIDDEN
 FILE-NAME $@ INCLUDED
-LATEST CONSTANT XXX
-: DOIT [ XXX , ] BYE ;
 LATEST   FILE-NAME $@ SRC>EXEC   TURNKEY
+
+
 ( -d This_option_is_available )
 
 
@@ -87,7 +87,7 @@ REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
 REQ $.   REQ ^
 \ REQ REFRESH ( temporaryly)
 REQ CRACK    REQ LOCATE
-REQ EDITOR REQ OOPS                         OK  EXIT
+REQ EDITOR DEVELOP   REQ OOPS                         OK  EXIT
  ( BACKUP        250 LOAD   77 81 THRU )
 ( REQ ASSEMBLERi86 )
 ( REQ DEADBEEF )
@@ -192,10 +192,10 @@ DOIT    COMMAND-BUFFER $@
 \
 ( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
 CREATE task
-1 LOAD   REQUIRE SHIFT-ARGS
+1 LOAD   REQUIRE SHIFT-ARGS   REQUIRE ARG[]
 \ Install other library
 : SWITCH-LIBS   BLOCK-EXIT
-    ARGV 2 CELLS + @ Z$@ BLOCK-FILE $!
+    2 ARG[] BLOCK-FILE $!
     BLOCK-INIT
     SHIFT-ARGS   SHIFT-ARGS
     'task 'FORTH FORGET-VOC COLD ;
@@ -976,7 +976,7 @@ THEN
 
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
 VARIABLE FAR-DP         \ Alternative DP
-DSP@ HERE + 2 / ALIGNED FAR-DP !
+DSP@ 1 RSHIFT HERE 1 RSHIFT + ALIGNED FAR-DP !
 \ Use alternative dictionary area or back.
 : SWAP-DP   DP @ FAR-DP @   DP ! FAR-DP ! ;
 \ Remove all words from the scratch area.
@@ -1121,18 +1121,18 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 ( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?PC \ AvdH A1nov24
 REQUIRE -LEADING \   REQUIRE ENV   REQUIRE COMPARE
 HEX
+\ From a STRING remove the first word. Leave the rest STRING.
+: DROP-WORD   -LEADING BL $S 2DROP ;
 \ Find argument INDEX, counting from one. Return as a STRING.
-: ARG[]   81 COUNT >R >R
-   BEGIN R> R> -LEADING BL $S 2SWAP >R >R   ROT 1- DUP WHILE
-      ROT DROP ROT DROP   REPEAT RDROP RDROP ;
-\ Shift the arguments, so as to remove argument 1.
-: SHIFT-ARGS  81 COUNT   -LEADING BL $S 2DROP   81 $!-BD ;
+: ARG[]   >R 80 COUNT   R@ 1 < 0D ?ERROR
+    R> 1 ?DO DROP-WORD LOOP   -LEADING BL $S 2SWAP 2DROP ;
+\ Shift the arguments, so as to remove argument 1. Keep cr!
+: SHIFT-ARGS  80 COUNT   DROP-WORD  80 $!-BD
+   ^M 80 COUNT + C! ;
 \ Linux versions kept for reference
 ( Find a STRING in the environment, -its VALUE or NULL string)
 \ : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
-: GET-ENV TRUE ABORT" GET-ENV not implemented for MSDOS, yet" ;
-
-
+: GET-ENV 1 ABORT" GET-ENV not implemented for MSDOS, yet" ;
 DECIMAL
 ( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?PC \ AvdH A1nov24
 REQUIRE -LEADING \   REQUIRE ENV   REQUIRE COMPARE

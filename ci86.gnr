@@ -5371,20 +5371,14 @@ _LINUX_N_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) ; {No options}  })
 _PC_(
-{        DC      LIT, 80H
-        DC      X
-OPT0:
-        DC      DROP
-        DC      COUNT
-        DC      OVER, CFET, LBL, UNEQ
-        _0BRANCH(OPT0) ; {Skip blanks.}
-        _0BRANCH(OPT4) ; {No options}
+{        DC      LIT, 81H
 OPT1:
         DC      LDUP, CFET, LBL, EQUAL
-        _0BRANCH(OPT2)
+        _0BRANCH(OPT2)            ; {Skip blanks.}
         DC      ONEP
         _BRANCH(OPT1)
-OPT2:                           })
+OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
+        _0BRANCH(OPT4) ; {No options}  })
         DC      FETCH
         DC      LDUP
         DC      LIT, _PC_({0FDH}) _LINUX_N_({0FFH}), LAND
@@ -5451,8 +5445,8 @@ _HOSTED_(
         _0BRANCH(COLD5)
         DC      SIGNON    ; {Suppressed for scripting! Or any options.}
 COLD5:
-        DC      LIT, BYE, TOR ; {In case of turnkey programs.}
         DC      ABORT
+        DC      BYE     ; {In case of turnkey programs.}
         DC      SEMIS   ; {Unnecessary, but helpful for decompilation.}
 ;
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
