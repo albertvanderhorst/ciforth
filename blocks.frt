@@ -127,7 +127,7 @@ DOIT    COMMAND-BUFFER $@
 
 \
 ( -h :_help,_show_options ) \ AvdH A1oct04
-.SIGNON   1 26 INDEX   OK BYE
+.SIGNON   1 31 INDEX   OK BYE
 
 
 
@@ -207,7 +207,7 @@ SWITCH-LIBS
 
 \
 ( -m/--/--help/--version :_Help_and_version_information )
-1 26 INDEX   OK         \ Help
+1 31 INDEX   OK         \ Help
 22 LOAD
 
 
@@ -303,7 +303,7 @@ SWITCH-LIBS
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-DROP  1 LOAD    REQUIRE CTYPE   REQUIRE OLD:
+DROP  1 LOAD    REQUIRE OLD:   REQUIRE ARGV   REQUIRE CTYPE
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT SCRIPT-NAME
 \ This error handler may be overwritten by the script.
 : MY-ERROR    DECIMAL
