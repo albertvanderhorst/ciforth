@@ -3,7 +3,7 @@ dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 SET_32_BIT_MODE         ; Assembler directive
 define({CELL_M4},LONG)dnl
 define({CELLWIDTH},4)dnl
-define({LCELL},{LIT, CW})dnl
+define({LCELL},{{LIT, CW}})dnl
 define({DC},{DD})dnl
 define({AX},{EAX})dnl
 define({BX},{EBX})dnl
