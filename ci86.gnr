@@ -1145,7 +1145,7 @@ MAT1:  MOV     DI,CX   ;{GET ADDR}
         MOV     AL,[BX] ;{GET WORD LENGTH}
         MOV     DL,AL   ;{SAVE WORD LENGTH}
         XOR     AL,[DI]
-        AND     AL,3FH  ;{CHECK LENGTHS}
+        AND     AL,3FH  ;{CHECK LENGTHS AND SMUDGE BIT.}
         JNZ     MAT5   ;{LENGTHS DIFFER}
 
 ;
@@ -2124,34 +2124,8 @@ HEADER({-DUP},{DDUP},{DOCOL})
         DC      LDUP    ;{ENDIF}
 DDUP1:  DC      SEMIS
 ;
-worddoc({DICTIONARY},{TRAVERSE},{traverse},{addr1 n --- addr2},{},
-{Move across the name field of a fig-FORTH variable length name
-field.
-forthvar({addr1}) is the address of either the length byte or the last letter.
-If forthvar({n})=1, the motion is toward hi memory; if forthvar({n})=-l, the motion is
-toward low memory. The forthvar({addr2}) resulting is address of the other end
-of the name.
-_ALIGNED_({
-"The last letter" must be understood as
-the last byte of the cell containing the actual last letter, the byte
-with the 8th bit up.  forthsamp({-1 TRAVERSE})
-works for pointers at an arbitrary position in the last cell.
-}) },{{>NFA},{>PFA}})
-HEADER({TRAVERSE},{TRAV},{DOCOL})
-        DC      SWAP
-TRAV1:  DC      OVER    ;{BEGIN}
-        DC      PLUS
-        DC      LIT,7FH
-        DC      OVER
-        DC      CFET
-        DC      LESS
-        _0BRANCH(TRAV1) ;{UNTIL}
-        DC      SWAP
-        DC      DROP
-        DC      SEMIS
-;
 worddoc({VOCABULARIES},{LATEST},{latest},{--- addr},{},
-{Leave the name field address ( forthdefi({NFA}) )
+{Leave the dictionary entry address ( forthsamp({dea}) )
 of the topmost word in the forthcode({CURRENT})
 vocabulary.},{{VOCABULARY}})
 HEADER({LATEST},{LATES},{DOCOL})
@@ -2161,11 +2135,12 @@ HEADER({LATEST},{LATES},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{P>N},{parameter_field_address},{nfa --- pfa},{},
-{Convert the parameter field address of a compiled definition to its
-name field address.},{{'},{>CFA},{>LFA},{>NFA}})
-HEADER({P>N},{PTON},{DOCOL})
-        DC      LIT,CELLS(3)
+worddoc({DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
+{Convert the data field forthsamp({addr}) 
+of a definition created with a forthcode({DOES>}) 
+construct to it dea.},{{'},{>CFA},{>LFA},{>NFA}})
+HEADER({BODY>},{BODYF},{DOCOL})
+        DC      LIT,CELLS(4)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2347,7 +2322,7 @@ from being found during dictionary searches, until compiling is
 completed without error.},{{IMMEDIATE}})
 HEADER({SMUDGE},{SMUDG},{DOCOL})
         DC      LATES
-        DC      FETCH
+        DC      TFFA
         DC      LIT,20H
         DC      TOGGL
         DC      SEMIS
@@ -2730,12 +2705,12 @@ NUMB2:  DC      DROP
         DC      DMINU   ;{ ENDIF}
 NUMB3:  DC      SEMIS
 ;
-worddoc({DICTIONARY},{-FIND},{minus_find},{--- dea b tf (found) --- ff (not found)},{},
+worddoc({DICTIONARY},{--FIND},{minus_find},{--- dea tf (found) --- ff (not found)},{},
 {Accepts the next text word (delimited by blanks) in the input stream
 to forthcode({HERE}) , and searches the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
-for a matching entry. If found, the dictionary entry address, its length byte, and a boolean true is left.
-Otherwise, only a boolean false is left.},{{(FIND)}})
-HEADER({-FIND},{DFIND},{DOCOL})
+for a matching entry. If found, the dictionary entry address and a boolean true is left.
+Otherwise, only a boolean false is left.},{})
+HEADER({--FIND},{DFIND},{DOCOL})
         DC      BLS
         DC      LWORD
         DC      ZERO, RESULT, STORE
@@ -2756,7 +2731,6 @@ DFIN2:  DC      ZERO ; { Not found.}
         _BRANCH(DFIN3)
 DFIN1:                          ; { Found.}
         DC      RESULT,FETCH
-        DC      LDUP, FETCH, CFET
         DC      ONE
 DFIN3:                          
         DC      SEMIS
@@ -2839,7 +2813,6 @@ HEADER({CREATE},{CREAT},{DOCOL})
         DC      LIT,5
         DC      QERR
         _0BRANCH(CREA1) ;{IF}
-        DC      DROP
         DC      IDDOT
         DC      LIT,4
         DC      MESS
@@ -2850,7 +2823,7 @@ CREA1:  DC      HERE
         DC      ONEP
         DC      ALLOT
         DC      LDUP
-        DC      LIT,0A0H
+        DC      LIT,080H
         DC      TOGGL
         DC      HERE
         DC      ONE
@@ -2869,6 +2842,7 @@ CREA1:  DC      HERE
         DC      HERE
         DC      CELLP
         DC      COMMA   ; {Code field.}
+        DC      SMUDG
         DC      SEMIS
         PAGE
 worddoc({COMPILING},{[COMPILE]},{bracket_compile},{},{p,C},
@@ -2883,7 +2857,6 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
         DC      ZEQU
         DC      ZERO
         DC      QERR
-        DC      DROP
         DC      TCFA
         DC      COMMA
         DC      SEMIS
@@ -2958,6 +2931,7 @@ will be given.
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  DC      DFIND   ;{BEGIN}
         _0BRANCH(INTE2) ;{IF}
+        DC      LDUP, TFFA, CFET
         DC      STATE
         DC      FETCH
         DC      LESS
@@ -2992,7 +2966,7 @@ The user may force compilation of an immediate definition by
 preceeding it with forthcode({[COMPILE]}) .},{})
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
         DC      LATES
-        DC      FETCH
+        DC      TFFA
         DC      LIT,40H
         DC      TOGGL
         DC      SEMIS
@@ -3008,7 +2982,7 @@ vocabulary into which new definitions are placed.
 A vocabulary parameter field contains at first the dovoc pointer, then 
 follows its data field. This
 contains a dummy dea (forthdefi({DDEA})) with a name " " (blank) ,
-a dummy link field (forthcode({DLFA})) and
+a dummy link field (forthcode({DLFA})) 
 that points to the dea
 of the first word of the vocabulary.
 Actually executing the vocabulary means storing its DDEA into forthcode({CONTEXT}) .
@@ -3024,8 +2998,7 @@ declared forthcode({IMMEDIATE}) .},
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      BUILD
         DC      HERE
-        DC      LCELL,LSUB ;{ Skip over dovoc.}
-        DC      PTON       ;{ Future VOC-LINK.}
+        DC      BODYF       ;{ Future VOC-LINK.}
         DC      LIT, DUMMY, COMMA   ; Dummy name field
         DC      CURR
         DC      FETCH
@@ -4850,26 +4823,6 @@ HEADER({'},{TICK},{DOCOL},1)
         DC      ZEQU
         DC      ZERO
         DC      QERR
-        DC      DROP
-        DC      LITER
-        DC      SEMIS
-;
-worddocsafe({DICTIONARY},{'O},{tick},{--- addr},{P,L0},
-{Used in the form: .
-forthcode({'O}) forthcode({nnnn})
-Leaves the parameter field address, dea old style,
-of dictionary word forthvar({nnnn}).
-As a compiler directive, executes in a colon-definition to compile
-the address as a literal. If the word is not found after a search of
-forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
-{{>CFA},{>LFA},{>NFA},{>PFA}} )
-HEADER({'O},{TICKO},{DOCOL},1)
-        DC      DFIND
-        DC      ZEQU
-        DC      ZERO
-        DC      QERR
-        DC      DROP
-        DC      TPFA
         DC      LITER
         DC      SEMIS
 ;
