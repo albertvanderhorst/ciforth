@@ -3317,7 +3317,7 @@ _HOSTED_LINUX_({Opens the file that contains the blocks.})
 HEADER({COLD},{COLD},{DOCOL})
         DC      MTBUF
         DC      FIRST
-        DC      USE,STORE
+        DC      STALEST,STORE
         DC      FIRST
         DC      PREV,STORE
         DC      LIT, USINI
@@ -3609,10 +3609,11 @@ CODE_HEADER({P!},{PSTO})
         OUT     {DX},AX   ;{WORD OUTPUT}
         _NEXT
 ;
-worddoc({STORAGE},{USE},{use},{--- addr},{},
-{A variable containing the address of the block buffer to use next,
-as the least recently written.},{{BLOCK}})
-HEADER({USE},{USE},{DOVAR})
+worddoc({STORAGE},{STALEST},{stalest},{--- addr},{},
+{A variable containing the address of the oldest  
+block buffer, the first candidate to be claimed if a new  
+one is needed.},{{BLOCK}})
+HEADER({STALEST},{STALEST},{DOVAR})
         DC BUF1
 ;
 worddoc({STORAGE},{PREV},{prev},{---- addr},{},
@@ -3651,12 +3652,12 @@ forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
 storage of a different block.},{{BLOCK},{SCREEN}})
 HEADER({UPDATE},{UPDAT},{DOCOL})
-        DC      PREV
-        DC      FETCH,FETCH
-        DC      LIT,BMASK
-        DC      LOR
-        DC      PREV,FETCH
-        DC      STORE,SEMIS
+        DC      PREV, FETCH
+        DC      LDUP, CELLP
+        DC      SWAP, FETCH 
+        DC      ZERO
+        DC      RSLW
+        DC      SEMIS
 ;
 worddoc({STORAGE},{EMPTY-BUFFERS},{empty_buffers},{},{ISO FIG L0},
 {Mark all block-buffers as empty, not necessarily affecting the
@@ -3678,27 +3679,18 @@ If the contents of the buffer is marked as updated, it is written to
 the disc. In ciforth this is never needed, because updated blocks are 
 written immediately.
 The block is not read from the disc. The address left is the
-first cell within the buffer for data storage.},{{BLOCK},{USE},{PREV}})
+first cell within the buffer for data storage.},{{BLOCK},{STALEST},{PREV}})
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
-        DC      USE
-        DC      FETCH,LDUP
-        DC      TOR
-BUFF1:  DC      PBUF
+        DC      STALEST, FETCH
+        DC      LDUP, TOR
+BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
         _0BRANCH(BUFF1)
-        DC      USE,STORE
-        DC      RR,FETCH
-        DC      LIT, BMASK, LAND
-        _0BRANCH(BUFF2)
-        DC      RR,CELLP
-        DC      RR,FETCH
-        DC      LIT, BMASK-1, LAND
-        DC      ZERO
-        DC      RSLW
-BUFF2:  DC      RR,STORE
-        DC      RR,PREV
-        DC      STORE,FROMR
-        DC      CELLP,SEMIS
+        DC      STALEST,STORE
+        DC      RR,STORE
+        DC      RR,PREV, STORE,
+        DC      FROMR, CELLP
+        DC      SEMIS
 ;
 worddoc({STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
 {Leave the memory address of the block buffer containing block forthvar({n}),
