@@ -96,7 +96,8 @@ F_HOFFSET EQU     1       ;{ Same for flag field}
 L_HOFFSET EQU     2       ;{ Same for link field}
 N_HOFFSET EQU     0       ;{ Same for name field}
 P_HOFFSET EQU     4       ;{ Same for parameter field}
-D_HOFFSET EQU     5       ;{ Start of data area for DOES> word.}
+D_HOFFSET EQU     5       ;{ Start of data area.}
+B_HOFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
 ;
 ;{      MEMORY + I/O CONSTANTS}
 ;
@@ -1840,8 +1841,8 @@ HEADER({:},{COLON},{DOCOL}, , B_IMMED)
         DC      FETCH
         DC      CONT
         DC      STORE
-        DC      CREAT
-        DC      HERE, CELLP, COMMA
+        DC      PWORD
+        DC      PCREAT
         DC      RBRAC
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-CELLS(1)]
@@ -1873,10 +1874,11 @@ worddoc({DEFINING},{CONSTANT},{constant},{n ---},{L0},
 to create word forthvar({cccc}) , with its parameter field containing forthcode({n}) . When
 forthvar({cccc}) is later executed, it will push the value of forthcode({n}) to the stack.},
 {{VARIABLE}}, {}, enddoc)
-HEADER({CONSTANT},{CON},{DOCOL})
-        DC      CREAT
+HEADER({CONSTANT},{CONST},{DOCOL})
+        DC      PWORD
+        DC      PCREAT
         DC      SMUDG
-        DC      COMMA
+        DC      LATES, TPFA, STORE
         DC      PSCOD
 DOCON:  MOV     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
@@ -1889,8 +1891,8 @@ parameter field initialized to forthvar({n}) . When forthvar({cccc}) is later ex
 address of its parameter field (containing forthvar({n}) ) is left on the stack,
 so that a fetch or store may access this location.},{{USER},{CONSTANT}}, {}, enddoc)
 HEADER({VARIABLE},{VAR},{DOCOL})
-        DC      CREAT
-        DC      HERE, CELLP, COMMA
+        DC      PWORD
+        DC      PCREAT
         DC      SMUDG
         DC      COMMA
         DC      PSCOD
@@ -1908,7 +1910,7 @@ base address on the stack as the storage address of that
 particular variable. In ciforth the forthsamp({UP}) is fixed.
 },{{VARIABLE},{+ORIGIN}}, {}, enddoc)
 HEADER({USER},{USER},{DOCOL})
-        DC      CON
+        DC      CONST
         DC      PSCOD
 DOUSE:  MOV     BX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
@@ -2363,7 +2365,7 @@ worddoc({DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
 of a definition created with a forthcode({DOES>}) dnl
 construct to its forthsamp({dea}) .},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
 HEADER({BODY>},{BODYF},{DOCOL})
-        DC      LIT,CELLS(5)
+        DC      LIT,CELLS(B_HOFFSET)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2373,7 +2375,7 @@ of a definition created with a forthcode({DOES>})dnl
 construct, return its  data field forthsamp({addr}).},
 {{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
 HEADER({>BODY},{TOBODY},{DOCOL})
-        DC      LIT,CELLS(5)
+        DC      LIT,CELLS(B_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2606,28 +2608,35 @@ after forthvar({nnnn}) . An existing defining word must exist in forthvar({cc}) 
 forthcode({;CODE}) .},{(;CODE)}, {}, enddoc)
 ;{ The word ;CODE has been moved to BLOCKS.BLK>}
 ;
-worddoc({DEFINING},{<BUILDS},{builds},{},{C,L0},
-{Used within a colon-definition:
-         forthexample({: cccc  <BUILDS  ... DOES>     ...    ;})
-Each time forthvar({cccc}) is executed, forthcode({<BUILDS}) defines a new word with a
-high-level execution proceedure. Executing forthvar({cccc}) in the form:
-            forthsamp({cccc nnnn})
-uses forthcode({<BUILDS}) to create a dictionary entry for forthvar({nnnn}) with a call to
-the forthcode({DOES>}) part for forthvar({nnnn}) . When forthvar({nnnn}) is later executed, it has the
-address of its parameter area on the stack and executes the words
-after forthcode({DOES>}) in forthvar({cccc}) . forthcode({<BUILDS}) and forthcode({DOES>}) allow runtime proceedures to
-written in high-level rather than in assembler code (as required by
-forthcode({;CODE}) ). },{}, {}, enddoc)
-HEADER({<BUILDS},{BUILD},{DOCOL})
-        DC      ZERO
-        DC      CON
-        DC      SEMIS
+worddoc({DEFINING},{CREATE},{create},{},{},
+{A defining word used in the form:
+     forthsamp({CREATE cccc})
+Later execution of forthsamp({cccc}) returns its data field, i.e.
+the value of forthcode({HERE}) immediately 
+after executing forthcode({CREATE}) .
+_VERBOSE({Space in this data field has yet to 
+be allocated and the execution action can be changed.})
+ciforth is byte aligned, so no extra measures are needed.},
+{{DOES>},{;CODE},{ALLOT},{,},{C,}}, {}, enddoc)
+HEADER({CREATE},{CREATE},{DOCOL})
+        DC      PWORD
+        DC      PCREAT
+        DC      LIT, HLNOOP, COMMA
+        DC      SMUDG
+        DC      PSCOD
+DODOE:  LEA     BP,[BP-CELLS(1)]
+        MOV     [BP],SI ;{R1 <- (IP)}
+        MOV     SI,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        LEA     AX,[SI+CELLS(1)]
+        MOV     SI,[SI]
+        _PUSH
+HLNOOP: DC      SEMIS
 ;
 worddoc({DEFINING},{DOES>},{does},{},{L0},
 {A word which defines the run-time action within a high-level
 defining word. forthcode({DOES>}) alters the code field and first parameter of
 the new word to execute the sequence of compiled word addresses
-following forthcode({DOES>}) . Used in combination with forthcode({<BUILDS}) . When the forthcode({DOES>})
+following forthcode({DOES>}) . Used in combination with forthcode({CREATE}) . When the forthcode({DOES>})
 part executes it begins with the address of the first parameter of
 the new word on the stack. This allows interpretation using this
 area or its contents. Typical uses include the Forth assembler,
@@ -2636,14 +2645,9 @@ HEADER({DOES>},{DOES},{DOCOL})
         DC      FROMR
         DC      LATES
         DC      TPFA
+        DC      FETCH  
         DC      STORE
-        DC      PSCOD
-DODOE:  LEA     BP,[BP-CELLS(1)]
-        MOV     [BP],SI ;{R1 <- (IP)}
-        MOV     SI,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{NEW IP }
-        LEA     AX,[SI+CELLS(1)]
-        MOV     SI,[SI]
-        _PUSH
+        DC      SEMIS
 ;
 worddoc({STRING},{COUNT},{count},{addr1 --- addr2 n},{L0},
 {Leave the byte address forthvar({addr2}) and byte count forthvar({n}) of a message text
@@ -2978,7 +2982,7 @@ HEADER({(FIND)},{PFIND},{DOCOL})
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
         DC      DROP, ONE
-        DC      LIT, _DEA(DENOT) + CELLS(D_HOFFSET  + 2)
+        DC      LIT, _DEA(DENOT) + CELLS(B_HOFFSET  + 1)
         DC      LIT, MATCHING, SWAP, FORW
 DFIN1:
         DC      DROP, DROP
@@ -3039,14 +3043,14 @@ HEADER({ID.},{IDDOT},{DOCOL})
 IDDOT1:
         DC      SEMIS
 ;
-worddoc({DEFINING},{CREATE},{create},{},{},
-{A defining word used in the form:
-     forthcode({CREATE}) forthvar({cccc})
-by such words as forthcode({CODE}) and forthcode({CONSTANT}) to create a dictionary header for
-a Forth definition. The code field contains the address of the words
-parameter field. },{}, {}, enddoc)
-HEADER({CREATE},{CREAT},{DOCOL})
-        DC      PWORD
+worddoc({DEFINING},{(CREATE)},{paren_create},{sc --},{},
+{This is the basis for all defining words. used in the form:
+A well defined header is created with the string constant forthsamp({sc}) 
+as the namefield. It is linked into the CURRENT vocabulary.
+The code field and parameter field both 
+point to the area owned by this header, i.e. immediately following the
+completed header. },{}, {}, enddoc)
+HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LDUP
         DC      ZEQU
         DC      LIT,5
@@ -3070,17 +3074,17 @@ CREA1:  DC      DROP
         DC      ZERO,COMMA ; {Flag field.}
         DC      LATES
         DC      COMMA   ; {Link field.}
-        DC      FROMR
+        DC      RR
         DC      CURR
         DC      FETCH
         DC      TLFA
         DC      STORE
-        DC      HERE
-        DC      CELLP
-        DC      COMMA   ; {Code field.}
+        DC      FROMR, LIT, CELLS(D_HOFFSET), PLUS
+        DC      LDUP, COMMA   ; {Code field.}
+        DC      COMMA         ; {Parameter field.}
         DC      SMUDG
         DC      SEMIS
-        PAGE
+;
 worddoc({COMPILING},{[COMPILE]},{bracket_compile},{},{p,C},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [COMPILE]   FORTH   ;})
@@ -3259,7 +3263,7 @@ By convention, vocabulary names are to be
 declared forthcode({IMMEDIATE}) .},
 {{VOC-LINK}}, {}, enddoc)
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
-        DC      BUILD
+        DC      CREATE
         DC      HERE
         DC      BODYF    ;{ Link this DEA into VOC-LINK chain.}
         DC      VOCL
@@ -5984,7 +5988,7 @@ worddocchapter({DEFINING},{ },
 to the dictionary. A number of such forthdefi({defining word})'s
 are predefined, but there is
 also the possibility to make new defining words, using
-forthcode({<BUILDS}) and forthcode({DOES>}) .
+forthcode({CREATE}) and forthcode({DOES>}) .
 },
 {},{},{},{}, {}, enddoc)
 worddocchapter({DICTIONARY},{ },
