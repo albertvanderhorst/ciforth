@@ -4,7 +4,13 @@
 \ This code does the folding such as descibed in the optimiser section of
 \ the generic ciforth documentation.
 
+\ It assumes the stack effect bytes and the optimisation properties
+\ have been filled in in the flag fields.
+
 REQUIRE $
+
+\ For DEA : it HAS no side effects, input or output.
+: NS?   >FFA @ FMASK-NS AND FMASK-NS = ;
 
 \ How MANY stack cells on top contain a compile time constant?
 VARIABLE CSC
@@ -73,23 +79,25 @@ CREATE BUFFER 16 ALLOT
     THEN
 ;
 
-\ Copy the range START END to the dictionary.
-: COPY-WORD-INLINE OVER HL-CODE, ;
 
-\ For DEA : it HAS no side effects, input or output.
-: NS?   >FFA FMASK-NS AND FMASK-NS = ;
+\ Add DEA to the optimisation chain, if possible. Leave it WAS possible.
+:  ?TREAT-NS? DUP NS? IF TREAT-NS ELSE DROP 0 THEN ;
 
-\ Copy the SEQUENCE of high level code to ``HERE'' expanding it and
-\ possibly folding it.
+\ For DEA : handle its optimisation or the cashing and restart of
+\ the optimisation.
+:  OPT/NOOPT    ?TREAT-NS? 0= IF TERMINATE-EXECUTE-REPLACE THEN ;
+
+\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
 : EXPAND
     !OPT-START
     BEGIN DUP >R
         NEXT-PARSE
     WHILE
-        DUP
-NS? DUP IF SWAP TREAT-NS AND THEN
-        0= IF TERMINATE-EXECUTE-REPLACE THEN
-        DUP R> OVER - HL-CODE,
-    REPEAT 2DROP RDROP
-    POSTPONE (;)
+^       OPT/NOOPT
+^       R> 2DUP -  ^ HL-CODE,      HERE H.
+^   REPEAT 2DROP RDROP
+    TERMINATE-EXECUTE-REPLACE   POSTPONE (;)
 ;
+
+\ Optimise DEA regards folding.
+: OPT-FOLD  >DFA DUP HERE    OVER @ EXPAND   SWAP ! ;
