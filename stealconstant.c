@@ -1,3 +1,5 @@
+/* $Id$                   */
+/* Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License */
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/times.h>
@@ -21,48 +23,56 @@
 /*                                                                           */
 /*****************************************************************************/
 
+/* Steal the information what value B has, leave it in A */
 #define STEAL(A,B)   printf("%s   EQU   0x%x\n", A, B );
+
+/* Have a A that has the same value than in C. */
+#define STEALNAME(A)   STEAL( #A, A)
+
+/* Have a A that has the number of system call B */
+#define STEALSYS(A)   STEAL( #A, __NR_##A)
 
 int main()
 {
-        STEAL("SEEK_SET",SEEK_SET)
-        STEAL("TCGETS",TCGETS)
-        STEAL("TCSETS",TCSETS)
-        STEAL("ECHO",ECHO)
-        STEAL("EAGAIN",EAGAIN)
-        STEAL("EINTR",EINTR)
-        STEAL("EPIPE",EPIPE)
-        STEAL("VMIN",VMIN)
-        STEAL("VTIME",VTIME)
-        STEAL("ICANON",ICANON)
-        STEAL("O_RDWR",O_RDWR)
-        STEAL("O_RDONLY",O_RDONLY)
-        STEAL("O_WRONLY",O_WRONLY)
-        STEAL("O_CREAT",O_CREAT)
-        STEAL("O_NONBLOCK",O_NONBLOCK)
+        STEALNAME(SEEK_SET)
+        STEALNAME(TCGETS)
+        STEALNAME(TCSETS)
+        STEALNAME(ECHO)
+        STEALNAME(EAGAIN)
+        STEALNAME(EINTR)
+        STEALNAME(EPIPE)
+        STEALNAME(VMIN)
+        STEALNAME(VTIME)
+        STEALNAME(ICANON)
+        STEALNAME(O_RDWR)
+        STEALNAME(O_RDONLY)
+        STEALNAME(O_WRONLY)
+        STEALNAME(O_CREAT)
+        STEALNAME(O_NONBLOCK)
+
         STEAL("SIZE_TERMIO",sizeof(struct termios))
 
 printf(";{ Numbers of system calls. See \"Linux kernel Internals\" Appendix A. }\n");
 printf(";{ By M.Beck, H. Boehme e.a. Addison Wesley.                         }\n");
 printf(";{ The system calls themselves are extensively documented in chapter }\n");
 printf(";{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
-        STEAL("exit",__NR_exit)
-        STEAL("open",__NR_open)
-        STEAL("close",__NR_close)
-        STEAL("creat",__NR_creat)
-        STEAL("unlink",__NR_unlink)
-        STEAL("chdir",__NR_chdir)
-        STEAL("read",__NR_read)
-        STEAL("select",__NR_select)
-        STEAL("_newselect",__NR__newselect)
-        STEAL("write",__NR_write)
-        STEAL("ioctl",__NR_ioctl)
-        STEAL("ioperm",__NR_ioperm)
-        STEAL("iopl",__NR_iopl)
-        STEAL("lseek",__NR_lseek)
-        STEAL("execve",__NR_execve)
-        STEAL("fork",__NR_fork)
-        STEAL("waitpid",__NR_waitpid)
+        STEALSYS(exit)
+        STEALSYS(open)
+        STEALSYS(close)
+        STEALSYS(creat)
+        STEALSYS(unlink)
+        STEALSYS(chdir)
+        STEALSYS(read)
+        STEALSYS(select)
+        STEALSYS(_newselect)
+        STEALSYS(write)
+        STEALSYS(ioctl)
+        STEALSYS(ioperm)
+        STEALSYS(iopl)
+        STEALSYS(lseek)
+        STEALSYS(execve)
+        STEALSYS(fork)
+        STEALSYS(waitpid)
 printf(";{ ------------------------------------------------------------      }\n");
 printf(";{   End of constants stolen from C.                                 }\n");
 printf(";{ ------------------------------------------------------------      }\n");
