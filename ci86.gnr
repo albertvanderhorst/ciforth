@@ -4671,7 +4671,7 @@ HEADER({LBAPAR},{LBA},{DOVAR})
         DB      10H, 0      ;{ default    }
         DW      SPB         ;{ default    }
         DW      0           ;{ to be filled with offset}
-        DW      _SWITCH_({SWITCHSEGMENT})0H ;{ default segment}
+        DW      _SWITCH_({SWITCHSEGMENT}) ;{ default segment}
         ;{ At a hard disk we just read sector from sector 1        }
         DD      0       ;{ sector number}
         DD      0       ;{ M.S. 32 BITS default}
@@ -4733,7 +4733,7 @@ HEADER({R/W},{RSLW},{DOCOL})
 ;       The 2 m.s. bytes are overwritten by the next store.
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS })
         DC      LBA, LIT, 4, PLUS, STORE   ; { Address }
-        DC      LIT, _SWITCH_({SWITCHSEGMENT})0H
+        DC      LIT, _SWITCH_({SWITCHSEGMENT})
         DC      LBA, LIT, 6, PLUS, STORE
         DC      LBA, LIT, 8, PLUS, STORE ; { Sector number. }
         DC      LBA
