@@ -7868,7 +7868,7 @@ error and and zero means okay.})
 _VERBOSE_({Beware that if error messages are loaded from disk,
 this may clear forthcode({DISK-ERROR}) })
 },
-{{BLOCK}}},
+{{BLOCK}},
 {{." See BLOCK-EXIT"},{See BLOCK-EXIT}},
 enddoc)
 HEADER({DISK-ERROR},{DERR},{DOVAR}, )
