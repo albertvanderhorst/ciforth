@@ -1,19 +1,19 @@
-( 0 screen is not loadable )
-\ All definitions that have a Source Field Addres of zero
-\ belong to the kernel
+COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
+                   LICENSE
+This program is free software; you can redistribute it and/or
+modify it under the terms of version 2 the GNU General Public
+License as published by the Free Software Foundation.
 
+This program is distributed in the hope that it will be
+useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-
-
-
-
-
-
-
-
-
-
-
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the
+            Free Software Foundation, Inc.,
+   59 Temple Place, Suite 330, Boston, MA 02111, USA.
 ( -a This_option_is_available )
 
 
@@ -260,7 +260,7 @@ REQ CONFIG
 REQ L-S ( MAINTENANCE )
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
 REQ $.   REQ ^
-REQ EDITOR
+REQ EDITOR REQ OOPS
 \ REQ REFRESH ( temporaryly)
 REQ CRACK    REQ LOCATE
  ( BACKUP        250 LOAD   77 81 THRU )
@@ -433,9 +433,8 @@ REQUIRE ?LEAVE-BLOCK
 COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License as
-published by the Free Software Foundation; either version 2 of
-the License, or (at your option) any later version.
+modify it under the terms of version 2 the GNU General Public
+License as published by the Free Software Foundation.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -446,6 +445,7 @@ You should have received a copy of the GNU General Public
 License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
+
 ( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
 \ For LINE and WORD sc's : line CONTAINS word.
@@ -478,7 +478,7 @@ License along with this program; if not, write to the
 
 
 
-( CONFIG ?LEAVE-BLOCK ?16 ?32 ?LI ?PC ?MS ?HD ) \ AvdH A1oct05
+( CONFIG ?LEAVE-BLOCK ?16 ?32 ?LI ?PC ?MS ?FD ?HD ) \ A1oct05
 
 
 : ?LEAVE-BLOCK IF SRC CELL+ @ IN ! THEN ;
@@ -490,7 +490,7 @@ License along with this program; if not, write to the
  "BDOS"   PRESENT? 0=   CONFIG ?MS
  "LINOS"  PRESENT? 0=   CONFIG ?LI
  "LBAPAR" PRESENT? 0=   CONFIG ?HD
-
+ "SEC-RW" PRESENT? 0=   CONFIG ?FD
 
 
 
@@ -750,7 +750,7 @@ CREATE BASE' 0 ,
 : STRING CREATE &" PARSE $, DROP DOES> $@ ;
 
 
-( TIME MEASURE ELAPSED ) REQUIRE CONFIG ?32 \ AvdH A1oct05
+( TIME ELAPSED ) REQUIRE CONFIG ?32 \ AvdH A1oct05
 REQUIRE ASSEMBLER HEX
 \  CODE TIME 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
 CODE TIME 0F C, 31 C, 50 C, 52 C, NEXT C;
@@ -767,21 +767,21 @@ CODE TIME 0F C, 31 C, 50 C, 52 C, NEXT C;
 
 
 ( MEASURE test_for_TIME ) REQUIRE CONFIG ?32 \ AvdH A1oct05
- : TASK ; REQUIRE DO-PRIME-ISO
+ : TASK ;
+REQUIRE DO-PRIME-ISO    REQUIRE TIME    REQUIRE  NEW-IF
+REQUIRE POSTFIX
 
+: MEASURE
+  TIME DO-PRIME-ISO DROP ELAPSED
+  CR  ." THE ISO BYTE BENCHMARK LASTED " .mS  ;
 
-
-
-
-
-
-
-
-
-
- : MEASURE TIME DO-PRIME-ISO DROP ELAPSED ;
   MEASURE
-CR  ." THE ISO BYTE BENCHMARK LASTED " .mS
+
+CR ." FORGET MEASURE Y/N" KEY &Y =  IF
+  "TASK" POSTFIX FORGET
+THEN
+
+
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
 VARIABLE FAR-DP         \ Alternative DP
 DSP@ HERE + 2 / ALIGNED FAR-DP !
@@ -815,6 +815,7 @@ REQUIRE SWAP-DP
 
 
 ( NEW-IF interpreting__control_words ) \ AvdH A1oct04
+: NEW-IF ;
 REQUIRE T[
 : IF           T] POSTPONE IF                    ; IMMEDIATE
 : DO           T] POSTPONE DO                    ; IMMEDIATE
@@ -825,7 +826,6 @@ REQUIRE T[
 : +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
 : REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
 : UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
-
 
 
 
@@ -894,22 +894,6 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
-( SUPER-QUAD SQ CONDENSED ) REQUIRE CONFIG ?PC
-REQUIRE VIDEO-MODE
-VARIABLE L
- : CONDENSED 34 VIDEO-MODE ;
- :  HEADER  CR DUP 2 + SWAP
-    DO 3  SPACES ." SCR #" I 4 .R 54  SPACES LOOP ;
- : 1LINE  L @ OVER (LINE)  TYPE
-   L @ 2 .R SPACE  L @ 16 + SWAP (LINE)  TYPE CR ;
-  : SUPER-DUPE
-    2 /MOD SWAP DROP 2 *
-    DUP HEADER CR
-    16 0 DO  I L ! DUP 1LINE
-    LOOP  ;
- : SUPER-QUAD CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
- : SQ SUPER-QUAD ;
-
 ( **************ciforth tools*********************************)
 
 
@@ -942,6 +926,38 @@ VARIABLE L
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
+( OOPS EDIT: ) \ AvdH A1oct12
+
+"EDIT" PRESENT? 0= ?LEAVE-BLOCK
+
+\ edit the following word
+: EDIT: (WORD) FOUND >SFA @  1 MAX 255 MIN EDIT ;
+
+\ edit the latest word, the one with the bug
+: OOPS LATEST >SFA @ EDIT ;
+
+
+
+
+
+
+
+( SUPER-QUAD SQ CONDENSED ) REQUIRE CONFIG ?PC
+REQUIRE VIDEO-MODE
+VARIABLE L
+ : CONDENSED 34 VIDEO-MODE ;
+ :  HEADER  CR DUP 2 + SWAP
+    DO 3  SPACES ." SCR #" I 4 .R 54  SPACES LOOP ;
+ : 1LINE  L @ OVER (LINE)  TYPE
+   L @ 2 .R SPACE  L @ 16 + SWAP (LINE)  TYPE CR ;
+  : SUPER-DUPE
+    2 /MOD SWAP DROP 2 *
+    DUP HEADER CR
+    16 0 DO  I L ! DUP 1LINE
+    LOOP  ;
+ : SUPER-QUAD CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
+ : SQ SUPER-QUAD ;
+
 ( FOR-BLOCKS SHOW-BLOCK .B Testing_of_block ) \ AvdH A1oct09
 REQUIRE H.
 : FOR-BLOCKS >R PREV @
@@ -1410,14 +1426,14 @@ DECIMAL
 ">SFA" PRESENT? 0= ?LEAVE-BLOCK
 \ Interpret a SOURCEFIELD heuristically.
 : .SOURCEFIELD
+    DUP 0 = IF "Belongs to the kernel" TYPE CR ELSE
     DUP 1000 < IF LIST ELSE
     DUP TIB @ 40000 WITHIN IF "Typed in" TYPE CR ELSE
-    50 - 200 TYPE THEN THEN ;
+    50 - 200 TYPE THEN THEN THEN ;
 \ Show the screen or text how SC is defined
 : LOCATED FOUND DUP 0= 11 ?ERROR >SFA @ .SOURCEFIELD ;
 \ Idem but string from input.
 : LOCATE (WORD) LOCATED ;
-
 
 
 
@@ -1742,23 +1758,23 @@ HEX>
 
 
 
-( --install_hd for_stand_alone_disk ) REQUIRE ?PC   ?PC ?16
+( --hd_LBA utils_for_stand_alone_disk ) REQUIRE ?PC   ?PC ?16
 REQUIRE CONFIG   REQUIRE ASSEMBLER   REQUIRE BIOSI
-
+REQUIRE +THRU
 ( backup and restore a stand alone hard disk system to floppy )
 ( run from a booted floppy system )
-: --install_hd ;
+( this is for a 16 bit system, because the assembly assumes )
+( so. If you have a 32 bit system, there are easier ways.   )
+: --hd_LBA ;
 256 CONSTANT #BLOCKS
-1 6 +THRU DECIMAL
+1 5 +THRU DECIMAL
 
 
 
 
 
 
-
-
-( READ-BLOCK WRITE-BLOCK RW-BUFFER hd_via_LBA ) ?16 ?PC HEX
+( --hd_LBA READ-BLOCK WRITE-BLOCK RW-BUFFER ) ?16 ?PC HEX
 HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
 CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
@@ -1774,7 +1790,7 @@ RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
   POPX, SI|   PUSHX, BX|  NEXT ; PREVIOUS
 CODE READ-BLOCK 4200 R/W-BLOCK  C;
 CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
-\ (HWD) (HRD) (FRD) (FWD) Acces_hd_via_LBA ?16 ?PC HEX
+\ --hd_LBA (HWD) (HRD) (FRD) (FWD) \ ?16 ?PC HEX
 ?16 ?PC
 
 ( Write the default buffer to hard disk at 32-bit POSITION)
@@ -1790,7 +1806,7 @@ DECIMAL
 : (FWD) RW-BUFFER SWAP 0 R/W ;
 
 
-( SWAP-FLOPPY ) ?PC ?16 \ AvdH A1oct07
+( --hd_LBA SWAP-FLOPPY ) ?PC ?16 \ AvdH A1oct07
 ?PC ?16
 DECIMAL
 ( Prompt for floppy change, plus whatever needed.)
@@ -1806,8 +1822,8 @@ DECIMAL
 \ (a 32-bit number) and 1400K following to the floppy.
 : BACKUP>FLOPPY  SWAP-FLOPPY
   1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
-( BACKUP-KERNEL BACKUP-BLOCKS ) REQUIRE CONFIG   ?PC ?16
-REQUIRE --install_hd
+( --hd_LBA BACKUP-KERNEL BACKUP-BLOCKS ) REQUIRE CONFIG ?PC ?16
+REQUIRE --hd_LBA
 \ Prompt for floppy created with ``BACKUP>FLOPPY''
 \ Restore to hard disk ``DBS'' 1400 K from floppy.
 : RESTORE<FLOPPY SWAP-FLOPPY
@@ -1822,15 +1838,31 @@ REQUIRE --install_hd
 
 
 
+( INSTALL-KERNEL RESTORE-BLOCKS ) REQUIRE CONFIG ?PC ?16
+REQUIRE --hd_LBA
+
+\ Copy the kernel (first 64K of ``DBS'') from raw floppy.
+: INSTALL-KERNEL SWAP-FLOPPY 64 0 DO I (FRD) I S>D (HWD) LOOP ;
+
+\ Copy the BLOCKS (#BLOCKS at 64K of ``DBS'') from BLOCKS.BLK.
+: RESTORE-BLOCKS
+#BLOCKS 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
+
+
+
+
+
+
+
 ( SECTORS/TRACK #HEADS ) REQUIRE CONFIG \ AvdH A1oct10
-
 1 2 +THRU
-
-
-
-
-
-
+EXIT
+Get information directly after booting aboot the hard disk
+The BIOS puts this in the real memory area, and it is
+no longer available if e.g. from DOS sufficiently large
+programs have been run.
+Directly after a Forth has booted, it is safe,
+of course.
 
 
 
@@ -1870,15 +1902,31 @@ DECIMAL
 
 
 
-( INSTALL-KERNEL RESTORE-BLOCKS ) REQUIRE CONFIG   ?PC ?16
-REQUIRE --install_hd
+( INSTALL-FORTH-ON-HD ) REQUIRE CONFIG \ AvdH A1oct11
+REQUIRE +THRU
+\ Elective and configuration screen
 
-\ Copy the kernel (first 64K of ``DBS'') from raw floppy.
-: INSTALL-KERNEL SWAP-FLOPPY 64 0 DO I (FRD) I S>D (HWD) LOOP ;
+CREATE #BLOCKS 256 ,
+HEX F8 CONSTANT MEDIA-ID \ For hard disk.
 
-\ Copy the BLOCKS (#BLOCKS at 64K of ``DBS'') from BLOCKS.BLK.
-: RESTORE-BLOCKS
-#BLOCKS 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
+1 5 +THRU
+
+INSTALL-FORTH-ON-HD
+EXIT
+Re-installs a sector and track ciforth to a hard disk (or
+floppy). This is a user utility, so it can be run for other
+type ciforth's. But then it only explains to the user what is
+going on.
+
+( --disclaimer_INSTALL_FORTH_ON_HD ) ?HD \ AvdH A1oct11
+
+\ This utility is intended for sectors & track installations
+\ so for floppy compatible hard disks.
+
+." This is the wrong utility for your Forth ." CR
+." Try INSTALL-KERNEL and RESTORE-BLOCKS instead." CR
+
+QUIT
 
 
 
@@ -1886,6 +1934,70 @@ REQUIRE --install_hd
 
 
 
+( --disclaimer_INSTALL_FORTH_ON_HD ) ?FD \ AvdH A1oct11
+: stop? KEY &Y <>  IF
+   ." ABONDANNED! " CR QUIT
+THEN ;
+CR
+." You are about to install Forth on your hard disk" CR
+." making it unusable for any other purpose." CR
+." No dual boot system, no partition or even a master" CR
+." boot record will remain, and on some computers e.g. " CR
+." Compaq some data will be permanently lost." CR
+." Go on at your own risk. No guarantees." CR CR
+." GO ON ??   Y/N" CR
+
+stop?
+CR ." Analysing..." CR
+
+( --disclaimer_INSTALL_FORTH_ON_HD ) ?FD \ AvdH A1oct11
+REQUIRE #HEADS    REQUIRE B. DECIMAL
+CR ." The number of heads on your hard disk is reported: "
+#HEADS DUP . B. &H EMIT
+CR ." The number of sectors/track is reported: "
+SECTORS/TRACK DUP . B. &H EMIT
+CR CR ." Do you believe this? Y/N" CR
+
+stop?
+
+
+
+
+
+
+
+( PATCH-NEW-FORTH PATCH-THIS-FORTH ) ?FD ?32 \ AvdH A1oct12
+REQUIRE #HEADS HEX
+\ The SIZE of Forth (kernel +blocks) in blocks.
+: SIZE-FORTH   OFFSET @   #BLOCKS @  + ;
+\ What we need then
+CREATE buffer SIZE-FORTH B/BUF * ALLOT
+\ Now patch into the boot record the hard disk dimensions
+\ And into the access definition of this Forth
+: PATCH-NEW-FORTH   \ Overlapping 32 bits stores, big endian!
+   MEDIA-ID          buffer 15 + C!
+   SECTORS/TRACK     buffer 18 + !     \ Actually 16 bit
+   #HEADS            buffer 1A + ! ;   \ Actually 16 bit
+: PATCH-THIS-FORTH   \ This Forth now accesses hard disk
+   80                DRIVE C!
+   SECTORS/TRACK     DRIVE 1+ C!
+   #HEADS            DRIVE 2 + C! ;
+( INSTALL-FORTH-ON-HD ) ?FD \ AvdH A1oct11
+: show ^M EMIT ." BLOCK" 4 .R 5 SPACES ;
+\ Read into BUFFER absolute block NUMBER , leave NEXT buffer.
+: read+ OFFSET @ -   BLOCK     OVER B/BUF MOVE   B/BUF + ;
+\ Cannot read directly into the buffer because it is above 1 Mb
+: READ-FORTH  buffer SIZE-FORTH 0 DO I show I read+ LOOP DROP ;
+\ Cannot write directly into the buffer because it is above 1 M
+: write+   OFFSET @ - BUFFER CELL+ CELL+   OVER SWAP   B/BUF
+   MOVE     UPDATE B/BUF + ;
+: WRITE-FORTH
+   buffer SIZE-FORTH 0 DO I show I write+ LOOP DROP ;
+: ready ." Press the reset button, to boot your new FORTH"
+    CR ;
+: INSTALL-FORTH-ON-HD  DRIVE @ 0 WARNING ! READ-FORTH
+PATCH-NEW-FORTH PATCH-THIS-FORTH WRITE-FORTH
+EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
 ( --hd_driver_standalone_) REQUIRE CONFIG ?PC ?32 ?HD HEX
 
   1 8 +THRU
@@ -2081,8 +2193,8 @@ This contains examples and benchmarks.
 ( ERATOSTHENES by_multiple_batches ) \ AvdH A1oct04
 ( Adaptations from CP/M : VARIABLE )
 REQUIRE +THRU
-
 1 5 +THRU
+
 
 
 
@@ -2911,7 +3023,7 @@ Some of them did work on FIG though.
      1F WIDTH ! HEX>
   $1B CONSTANT ESC    $0F CONSTANT SI   $0E CONSTANT SO
 ( --BNF_parser ) \ AH&CH A0oct03
-
+REQUIRE +THRU
 
 
 
@@ -3982,147 +4094,3 @@ problems, CP/M dependant tricks and knowledge.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-( Last line 4096)
