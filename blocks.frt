@@ -3902,23 +3902,38 @@ VARIABLE COMP \ Execution token of comparison word.
     REPEAT
 IMIN @ ;
 \  HIDE IMIN   HIDE IMAX   HIDE COMP
+( Binair zoeken, commentaar ) EXIT
+( BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES )
+Gebruikt een orakel met het execution token `COMP'.
+`COMP' heeft het stack effect ( IT -- flag) , waar
+vlag typisch betekent dat IT kleiner of gelijk een
+bepaalde waarde is. `COMP' moet WAAR teruggeven
+voor `IMIN' en afnemen tussen `IMIN' en `IMAX', en
+het moet voor alle waarden tot en met IMAX
+aangeroepen mogen worden. BIN-SEARCH vindt de
+laatste index `IT' tussen `IMIN' en `IMAX'
+(inclusief) waarvoor `COMP' WAAR teruggeeft.
+Voorbeeld: -100 100 ' 0< BIN-SEARCH . 
+-1 OK
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\ BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES
+VARIABLE COMP \ Execution token van het "Orakel"
+VARIABLE IMIN \ IMIN 'COMP EXECUTE is altijd waar.
+VARIABLE IMAX \ Als IX 'COMP EXECUTE waar is,
+              \ dan ook voor IY mits IY > IX
+: BIN-SEARCH   COMP !  IMAX ! IMIN !
+    BEGIN     \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ ;
 
 
 
