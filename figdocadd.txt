@@ -1,25 +1,6 @@
 # $Id$
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 
-At 2000:nov:11 this documentation was burned down in favour
+At 2000:dec:3 this documentation was burned down in favour
 of the generated user information for ciforth.
 It is still obtainable as the latest branch of figdoc.txt 1.3.
-
-
-
-Addendum at glossary.txt
-
-
-IMPLEMENTATION NOTES FOR lina
-
-Blocks are allocated in a file called BLOCKS.BLK This name can be changed in
-listing and also during run time. 
-BLOCKS.BLK can be changed into an editable file and back by
-cat BLOCKS.BLK | fromblocks > blocks.frt
-cat blocks.frt | toblocks > BLOCKS.BLK
-The user variable EM still is the end of the memory. 
-The M4_EM in the configuration files is such that it designates the relative
-size, from the relocatable start. Consequently it is not the same as the
-user variable. (The relocatable start is some 128 Mbyte into the memory space.).
-
-
