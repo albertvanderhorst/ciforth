@@ -240,6 +240,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ;
 
 0 VARIABLE POINTER
+0 VARIABLE NEW-POINTER
 HERE POINTER !
 ( Disassemble the instruction at `POINTER' and accumulated into         )
 ( `DISS'. `POINTER' has advanced to the commadata                       )
@@ -263,7 +264,7 @@ HERE POINTER !
     DUP >MASK POINTER @ @ ^ AND FF AND OVER >INST ^ = IF
         DUP >BODY POST, DROP
         DUP +DISS
-( distrubr dis-dix        1 POINTER +!)
+        POINTER @ 1+ NEW-POINTER !
         DUP ID.
         ." BINGA"
     THEN
@@ -315,8 +316,15 @@ HERE POINTER !
 (       DUP ID.                                                         )
     DUP DICTEND? RESULT? OR UNTIL
     DROP
+    RESULT? IF
+      NEW-POINTER @ POINTER !
+    ELSE
+(     -DISS                                                             )
+    THEN
 ;
 
 ." COMES JAN"
     CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        )
-' JAN CFA @ DOIT2
+' JAN CFA @ DOIT2 .DISS
+POINTER @ DOIT2   .DISS
+
