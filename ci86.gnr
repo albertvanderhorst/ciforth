@@ -1088,23 +1088,10 @@ XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
         LEA     SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
         _NEXT
 ;
-worddoc({CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{P,C2,L0},
-{Used in a colon-definition in the form:
-forthsamp({DO ... n1 +LOOP})
-At run-time, forthcode({+LOOP}) selectively controls branching
-back to the corresponding forthcode({DO}) based on forthvar({n1}) , the loop index and the
-loop limit. The signed increment forthvar({n1}) is added to the index and the
-total compared to the limit.
-The branch back to forthcode({DO}) occurs until the new index is equal to or
-greater than the limit (forthvar({n1>0})), or until the new index is equal to or
-less than the limit (forthvar({n1<0})). Upon exiting the loop, the parameters
-are discarded and execution continues ahead.
-
-At compile time, forthcode({+LOOP}) compiles the run-time word forthcode({(+LOOP)}) and the
-branch offset computed from forthcode({HERE}) to the address left on the stack by
-forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{}, 
-{ { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
-  { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
+worddocsafe({CONTROL},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
+{The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
+index by n and tests for loop completion.},{{+LOOP}}, 
+{{." Via +LOOP"},{Via +LOOP}},
 enddoc)
 CODE_HEADER({(+LOOP)},{XPLOO})
         POP     BX      ;{ GET LOOP VALUE}
@@ -1126,8 +1113,8 @@ CODE_HEADER({(DO)},{XDO})
         _NEXT
 ;
 worddoc({CONTROL},{I},{i},{--- n},{C,L0},
-{Used within a do-loop to copy the loop index to the stack. Other use
-is implementation dependent.},{{R}}, 
+{Used within a do-loop to copy the loop index to the stack.},
+{{DO},{LOOP},{+LOOP}}, 
 { { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
@@ -1146,7 +1133,7 @@ One can access or modify the boot-up parameters, prior to saving a
 customised boot image, or to change the initialisation by forthcode({COLD}).
 },
 {{(ABORT)},{USER}}, 
-{{0A 0 CELL+ * +ORIGIN @ ' FORTH = .}, {1}},
+{{0A 0 CELL+ * +ORIGIN @ ' FORTH = .}, {_T_}},
 enddoc)
 HEADER({+ORIGIN},{PORIG},{DOCOL})
         DC      LIT
@@ -1275,7 +1262,9 @@ DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
 ;
 worddoc({STORAGE},{RESULT},{result},{--- addr},{},
 {A variable containing the address of the result of searching
-in one vocabulary chain.},{{BLOCK}}, {}, enddoc)
+in one vocabulary chain.},{{BLOCK}}, 
+{{." Via MATCHING-WORD"},{Via MATCHING-WORD}}, 
+enddoc)
 HEADER({RESULT},{RESULT},{DOVAR}, )
         DC 0
 ;
@@ -1287,7 +1276,7 @@ returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely
 from forthcode({FOR-WORDS}).},
 {{FIND}}, 
 {{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl 
-"MATCHING-WORDS" ' MATCHING-WORDS GS1 .},{1}}, 
+"MATCHING-WORDS" ' MATCHING-WORDS GS1 .},{_T_}}, 
 enddoc)
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      TOR
@@ -1309,13 +1298,13 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
 MATS2:  DC      FROMR, DROP
         DC      SEMIS
 ;
-worddoc({PARSING},{?BLANK)},{query_blank},{ch --- f },{},
+worddoc({PARSING},{?BLANK},{query_blank},{ch --- f },{},
 {For the character forthsamp({ch}) return whether this is
 considered to be white space into the flag forthsamp({f}) .
 At least the space, ascii null, the tab and the carriage return and line
 feed characters are white space.},
 {{BL},{SPACE}},
-{{HEX 20 ?BLANK . 41 ?BLANK .},{1 0}}, enddoc)
+{{HEX 20 ?BLANK . 41 ?BLANK .},{_T_ 0}}, enddoc)
 HEADER({?BLANK},{QBL},{DOCOL})
         DC      LBL, ONEP, LESS
         DC      SEMIS
@@ -1329,7 +1318,7 @@ leave the end and a zero.
 _VERBOSE_({As it goes with string constants, you may not
 alter its content, nor assume anything is appended.})},
 {{BLK},{WORD},{IN}},
-{{IN[] A EMIT TIB @ 5 + = .},{A1} },
+{{IN[] A EMIT TIB @ 5 + = .},{A-1} },
 enddoc)
 HEADER({IN[]},{INBRS},{DOCOL})
         DC      SOURC, CELLP, TFET
@@ -1413,7 +1402,8 @@ _VERBOSE_({Words like forthsamp({BLK}) and
 forthsamp({SOURCE-ID}) are secondary,
 and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
 {{BLK},{SOURCE-ID}},
-{{SOURCE @ TIB @ = .},{1}}, enddoc)
+{{SOURCE @ TIB @ = .},{_T_}}, 
+enddoc)
 HEADER({SOURCE},{SOURC},{DOUSE}, CELLS(27))      ;{ And 28 and 29.}
 ;
 worddoc({OUTPUT},{CR},{cr},{},{L0},
@@ -1546,7 +1536,7 @@ CODE_HEADER({SP@},{SPFET})
 worddoc({STACKS},{SP!},{s_p_store},{},{},
 {Initialize the stack pointer from forthcode({S0}) .},
 {{SP@}}, 
-{{  1 2 3 SP! SP@ S0 @ = .},{1} },
+{{  1 2 3 SP! SP@ S0 @ = .},{_T_} },
 enddoc)
 CODE_HEADER({SP!},{SPSTO})
         MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
@@ -1555,10 +1545,9 @@ CODE_HEADER({SP!},{SPSTO})
 ;
 worddocsafe({STACKS},{RP@},{r_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the current return
-stack position, i.e. pointing the current topmost value.
-},
-{{R0},{RP!}}, 
-{{: GS1 1 >R  RP@  @  . R> ; GS1},{1}},
+stack position, i.e. pointing the current topmost value.},
+{{R0},{RP!}},           
+{ {: GS1 1 >R  RP@  @  . R> ; GS1},{1} },
 enddoc)
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
         MOV     AX,BP   ;{RETURN STACK ADDR}
@@ -1568,7 +1557,7 @@ worddoc({STACKS},{RP!},{r_p_store},{},{},
 {Initialize the return stack
 pointer from user variable forthcode({R0}) .},
 {{RP@}}, 
-{}, 
+{{." No test"},{No test} },
 enddoc)
 CODE_HEADER({RP!},{RPSTO})
         MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
@@ -1592,20 +1581,24 @@ CODE_HEADER({EXIT},{SEMIS})
         _NEXT
 ;
 worddoc({CONTROL},{LEAVE},{leave},{},{C,L0},
-{Force termination of a do-loop at the next opportunity by setting
-the loop limit equal to the current value of the index. The index
-itself remains unchanged, and execution proceeds normally until forthcode({LOOP})
-or forthcode({+LOOP}) is encountered.},{}, {}, enddoc)
+{Force termination of a do-loop at the next opportunity by
+setting the loop limit equal to the current value of the index.
+The index itself remains unchanged, and execution proceeds
+normally until forthcode({LOOP}) or forthcode({+LOOP}) is
+encountered.},{}, 
+{ {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3 4} },
+enddoc)
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
         MOV     AX,[BP] ;{GET INDEX}
         MOV     [BP+CELLS(1)],AX        ;{STORE IT AT LIMIT}
         _NEXT
-        PAGE
 ;
 worddoc({STACKS},{>R},{to_r},{n ---},{C,L0},
 {Remove a number from the computation stack and place as the most
 accessable on the return stack. Use should be balanced with forthcode({R>}) in
-the same definition.},{{R}}, {}, enddoc)
+the same definition.},{{R}}, 
+{ {: GS1 1 2 3 >R . R . R> . . ; GS1},{2 3 3 1} },
+enddoc)
 CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
         POP     BX      ;{GET STACK PARAMETER}
         LEA     BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
@@ -1614,36 +1607,47 @@ CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
 ;
 worddoc({STACKS},{R>},{r_from},{--- n},{L0},
 {Remove the top value from the return stack and leave it on the
-computation stack. },{{>R},{R}}, {}, enddoc)
+computation stack. },{{>R},{R}}, 
+{{." Via >R"},{Via >R}},
+enddoc)
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
         MOV     AX,[BP] ;{ GET RETURN STACK VALUE}
         LEA     BP,[BP+CELLS(1)]
         _PUSH
 ;
 worddoc({STACKS},{R},{r},{--- n},{},
-{Copy the top of the return stack to the computation stack.},{{>R}}, {}, enddoc)
+{Copy the top of the return stack to the computation stack.},{{>R}}, 
+{{." Via >R"},{Via >R}},
+enddoc)
 HEADER({R},{RR},{_VAR_FIELD(IDO)})
 ;
 worddoc({LOGIC},{0=},{zero_equals},{n --- f},{L0},
 {Leave a true flag forthvar({f}) is the number forthvar({n}) is equal to zero, otherwise leave a
-false flag.},{{=}}, {}, enddoc)
+false flag.},{{=}}, 
+{ {0 0= .},{_T_},
+  {  1 0= .},{0},
+  {  -1 0= .},{0} },
+enddoc)
 CODE_HEADER({0=},{ZEQU})
-        POP     BX
-        XOR     AX,AX    ;{FALSE}
-        OR      BX,BX   ;{DO TEST}
-        JNZ      ZEQU1   ;{IT'S NOT 0}
-        INC     AX       ;{TRUE}
-ZEQU1:  _PUSH
+        POP     AX
+        NEG     AX
+        CMC
+        SBB     AX,AX
+        _PUSH
 ;
 worddoc({LOGIC},{0<},{zero_less},{n --- f},{L0},
 {Leave a true flag if the number is less than zero (negative),
-otherwise leave a false flag.},{{<}}, {}, enddoc)
+otherwise leave a false flag.},{{<}}, 
+{ {0 0< .}, {0},
+  {  1 0< .}, {0},
+  {  -1 0< .}, {_T_} },
+enddoc)
 CODE_HEADER({0<},{ZLESS})
         POP     AX
         OR      AX,AX   ;{SET FLAGS}
-        MOV     AX,1    ;{TRUE}
-        JS      ZLESS1
-        DEC     AX      ;{FALSE}
+        MOV     AX,0    ;{FALSE}
+        JNS     ZLESS1
+        DEC     AX      ;{TRUE}
 ZLESS1: _PUSH
 ;
 worddoc({OPERATOR},{+},{plus},{n1 n2 --- sum},{L0},
@@ -1808,8 +1812,8 @@ to forthsamp({n3}) (non-inclusive).
 This works for signed as well as unsigned numbers.
 Shorthand for: forthsamp({OVER - >R - R> U<}) },
 {{<},{U<}},
-{{ 1 1 3 WITHIN .},{1},
-{ 2 1 3 WITHIN .},{1},
+{{ 1 1 3 WITHIN .},{_T_},
+{ 2 1 3 WITHIN .},{_T_},
 { 3 1 3 WITHIN .},{0},
 { 4 1 3 WITHIN .},{0}}, enddoc)
 HEADER({WITHIN},{WITHIN}, {DOCOL})
@@ -2081,8 +2085,10 @@ HEADER({C/L},{CSLL},{DOCON}, 64)
 _HIGH_BUF_({
 worddoc({STORAGE},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
-buffer.
-},{{BLOCK},{LIMIT}}, {}, enddoc)
+buffer.},
+{{BLOCK},{LIMIT}}, 
+{}, 
+enddoc)
 HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 });_END_({ _HIGH_BUF_})
 ;
@@ -2095,7 +2101,7 @@ buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
 },{{BLOCK},{LIMIT}}, 
-{{LIMIT @ FIRST @ B/BUF @ /MOD DROP #BUF = .},{1}}, 
+{{LIMIT @ FIRST @ B/BUF @ /MOD DROP #BUF = .},{_T_}}, 
 enddoc)
 HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB    (KBBUF+2*CW)*NBUF
@@ -2141,7 +2147,7 @@ for reference only. What is taken into account by user variables is
 the initialisation variable at forthdefi({+ORIGIN}) with offset zero.
 This is dependant on which task is running.},
 {{USER},{+ORIGIN}}, 
-{{U0 @ 0 +ORIGIN @ = .},{1}},
+{{U0 @ 0 +ORIGIN @ = .},{_T_}},
 enddoc)
 HEADER({U0},{UZERO},{DOUSE}, CELLS(1))
 ;
@@ -2197,7 +2203,7 @@ worddoc({DICTIONARY},{DP},{d_P},{---- addr},{U,L},
 {A user variable, the dictionary pointer, which contains the address
 of the next free memory above the dictionary. The value may be read
 by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{}, 
-{{HERE DP @ = .},{1}},
+{{HERE DP @ = .},{_T_}},
 enddoc)
 HEADER({DP},{LDP},{DOUSE}, CELLS(9))
 ;
@@ -2379,32 +2385,35 @@ HEADER({=},{EQUAL},{DOCOL})
 ;
 worddoc({LOGIC},{<},{less_than},{n1 n2 --- f},{L0},
 {Leave a true flag if forthvar({n1}) is less than forthvar({n2}) ;otherwise leave a false
-flag.},{{=},{>},{0<}}, {}, enddoc)
+flag.},{{=},{>},{0<}}, 
+{{1 2 < .},{_T_},
+ {-1 -2 < .},{0},
+ {0 -1 < .},{0},
+ {1 1 < .},{0} },
+enddoc)
 CODE_HEADER({<},{LESS})
         POP     DX      ;{S1}
-        POP     AX      ;{S2}
-        MOV     BX,DX
-        XOR     BX,AX   ;{TEST FOR EQUAL SIGNS}
-        JS      LES1    ;{SIGNS ARE NOT THE SAME}
-        SUB     AX,DX
-LES1:   OR      AX,AX   ;{TEST SIGN BIT}
-        MOV     AX,0    ;{ASSUME FALSE}
-        JNS     LES2    ;{NOT LESS THAN}
-        INC     AX      ;{TRUE (1)}
-LES2:   _PUSH
+        POP     BX      ;{S2}
+        XOR     AX,AX   ;{0 dEFAULT RESULT}
+        CMP     BX,DX
+        JNL     LES1    
+        DEC     AX
+LES1:   _PUSH
 ;
 worddoc({LOGIC},{U<},{u_less_than},{u1 u2 --- f},{L0},
 {Leave a true flag if forthvar({u1}) is less than forthvar({u2}) ; otherwise leave a false
-flag.(Interpreted as unsigned numbers).},{{<}}, {}, enddoc)
-HEADER({U<},{ULESS},{DOCOL})
-        DC      TDUP
-        DC      LXOR,ZLESS
-        _0BRANCH(ULES1) ;{IF}
-        DC      DROP,ZLESS
-        DC      ZEQU
-        _BRANCH(ULES2)
-ULES1:  DC      LSUB,ZLESS      ;{ELSE}
-ULES2:  DC      SEMIS           ;{ENDIF}
+flag.(Interpreted as unsigned numbers).},{{<}}, 
+{{1 2 U< .},{_T_},
+ {-1 -2 U< .},{0},
+ {0 -1 U< .},{_T_},
+ {1 1 U< .},{0} },
+enddoc)
+CODE_HEADER({U<},{ULESS},{DOCOL})
+        POP     AX
+        POP     DX
+        SUB     DX,AX
+        SBB     AX,AX
+        _PUSH
 ;
 worddoc({LOGIC},{>},{greater_than},{n1 n2 --- f},{L0},
 {Leave a true flag if forthvar({n1}) is greater than forthvar({n2}) ; otherwise a false flag.},
@@ -5428,8 +5437,12 @@ stack.
 When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
 the following address forthvar({addr}) and forthvar({n}) for later error checking.},
 {{I},{LOOP},{+LOOP},{LEAVE}}, 
-{ { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA} },
+{ { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA},
+  {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{1} },
 enddoc)
+dnl ISO VIOLATION : 
+dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4}, 
+
 HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      COMP
         DC      XDO
@@ -5461,9 +5474,24 @@ HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      BACK
         DC      SEMIS
 ;
-worddocsafe({CONTROL},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
-{The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
-index by n and tests for loop completion.},{{+LOOP}}, {}, enddoc)
+worddoc({CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{P,C2,L0},
+{Used in a colon-definition in the form:
+forthsamp({DO ... n1 +LOOP})
+At run-time, forthcode({+LOOP}) selectively controls branching
+back to the corresponding forthcode({DO}) based on forthvar({n1}) , the loop index and the
+loop limit. The signed increment forthvar({n1}) is added to the index and the
+total compared to the limit.
+The branch back to forthcode({DO}) occurs until the new index is equal to or
+greater than the limit (forthvar({n1>0})), or until the new index is equal to or
+less than the limit (forthvar({n1<0})). Upon exiting the loop, the parameters
+are discarded and execution continues ahead.
+
+At compile time, forthcode({+LOOP}) compiles the run-time word forthcode({(+LOOP)}) and the
+branch offset computed from forthcode({HERE}) to the address left on the stack by
+forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{}, 
+{ { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
+  { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
+enddoc)
 HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
