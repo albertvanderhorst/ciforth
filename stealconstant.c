@@ -57,6 +57,7 @@ printf(";{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEAL("_newselect",__NR__newselect)
         STEAL("write",__NR_write)
         STEAL("ioctl",__NR_ioctl)
+        STEAL("ioperm",__NR_ioperm)
         STEAL("lseek",__NR_lseek)
         STEAL("execve",__NR_execve)
         STEAL("fork",__NR_fork)
