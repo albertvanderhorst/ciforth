@@ -882,11 +882,20 @@ CODE_HEADER({LIT},{LIT})
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
-;{                                 }
+;
+worddoc({CONTROL},{BRANCH},{branch},{},{C2,L0},{
+The run-time proceedure to unconditionally branch. An in-line offset
+is added to the interpretive pointer forthcode({IP}) to branch ahead or back.
+forthcode({BRANCH}) is compiled by forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT}) .},{})
 CODE_HEADER({BRANCH},{BRAN})
 BRAN1:  ADD     SI,[SI]
         _NEXT    ;{ JUMP TO OFFSET}
 ;
+worddoc({CONTROL},{0BRANCH},{zero_branch},{f ---},{C2},{
+The run-time proceedure to conditionally branch. If forthvar({f}) is false
+(zero), the following in-line parameter is added to the interpretive
+pointer to branch ahead or back. Compiled by forthcode({IF}) , forthcode({UNTIL}) , and forthcode({WHILE}) .
+},{})
 CODE_HEADER({0BRANCH},{ZBRAN})
         POP     AX      ;{ GET STACK VALUE}
         OR      AX,AX   ;{ ZERO?}
@@ -903,8 +912,10 @@ NOP1:   DC      $+CELLS(1)
 NOP2:   DC      $+CELLS(1)
         JMP SHORT     NEXT
 ;
-
-;
+worddocsafe({CONTROL},{(LOOP)},{paren_loop},{},{C2},{
+The run-time proceedure compiled by LOOP which increments the loop
+index and tests for loop completion.
+},{{LOOP}})
 CODE_HEADER({(LOOP)},{XLOOP})
         MOV     BX,1    ;{ INCREMENT}
 XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
@@ -918,10 +929,28 @@ XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
         LEA     SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
         _NEXT
 ;
+worddoc({CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{P,C2,L0},{
+Used in a colon-definition in the form:
+forthsamp({DO ... n1 +LOOP})
+At run-time, forthcode({+LOOP}) selectively controls branching
+back to the corresponding forthcode({DO}) based on forthvar({n1}) , the loop index and the
+loop limit. The signed increment forthvar({n1}) is added to the index and the
+total compared to the limit.
+The branch back to forthcode({DO}) occurs until the new index is equal to or
+greater than the limit (forthvar({n1>0})), or until the new index is equal to or
+less than the limit (forthvar({n1<0})). Upon exiting the loop, the parameters
+are discarded and execution continues ahead.
+
+At compile time, forthcode({+LOOP}) compiles the run-time word forthcode({(+LOOP)}) and the
+branch offset computed from forthcode({HERE}) to the address left on the stack by
+forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{})
 CODE_HEADER({(+LOOP)},{XPLOO})
         POP     BX      ;{ GET LOOP VALUE}
         JMP SHORT     XLOO1
 ;
+worddocsafe({CONTROL},{(DO)},{paren_do},{},{C},{
+The run-time proceedure compiled by forthcode({DO}) which moves the loop control
+parameters to the return stack.},{{DO}})
 CODE_HEADER({(DO)},{XDO})
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     AX      ;{ LIMIT VALUE}
@@ -930,7 +959,10 @@ CODE_HEADER({(DO)},{XDO})
         PUSH    DX
         XCHG    BP,STACKPOINTER   ;{ GET PARAMETER STACK}
         _NEXT
-        PAGE
+;
+worddoc({CONTROL},{I},{i},{--- n},{C,L0},{
+Used within a do-loop to copy the loop index to the stack. Other use
+is implementation dependent.},{{R}})
 CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
         _PUSH          ;{ TO PARAMETER STACK}
@@ -1034,6 +1066,10 @@ _SWITCH_1_({
 ;{      <<<<< end of data used by cold start >>>>>}
         _RESB(US-($ - USINI))        ;{ All user can be initialised.}
 ;
+worddoc({NUMBER},{DIGIT},{digit},{c n1 --- n2 tf (ok) c n1 --- ff (bad)},{},{
+Converts the ascii character forthvar({c}) (using base forthvar({n1}) ) to its binary
+equivalent forthvar({n2}) , accompanied by a true flag. If the conversion is
+invalid, leaves only a false flag.},{})
 CODE_HEADER({DIGIT},{DIGIT})
         POP     DX      ;{NUMBER BASE}
         POP     AX      ;{ASCII DIGIT}
@@ -1054,6 +1090,12 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
         _PUSH
         PAGE
+worddocsafe({DICTIONARY},{(FIND)},{paren_find},{addr1 addr2 --- pfa b tf (ok)
+addr1 addr2 .--- ff (bad)},{},{
+Searches the dictionary starting at the name field address forthvar({addr2}),
+matching to the text at forthvar({addr1}). Returns parameter field address,
+length byte of name field and boolean true for a good match. If no
+match is found, only a boolean false is left.},{{FIND}})
 CODE_HEADER({(FIND)},{PFIND})
 ;{       MOV     AX,DS}
 ;{       MOV    ES,AX   ;ES = DS}
@@ -1159,6 +1201,10 @@ CODE_HEADER({CMOVE},{LCMOVE})
         MOV     SI,BX   ;{GET BACK IP}
         _NEXT
 ;
+worddoc({MULTIPLYING},{U*},{u_start},{u1 u2 --- ud},{},{
+A mixed magnitude math operation which leaves the double number
+ forthvar({d}) : the unsigned product of two unsigned numbers
+ forthvar({n1}) and forthvar({n2}) .},{{U/}, {M*}.{*}})
 CODE_HEADER({U*},{USTAR})
         POP     AX
         POP     BX
@@ -1166,6 +1212,9 @@ CODE_HEADER({U*},{USTAR})
         XCHG    AX,DX   ;{AX NOW = MSW}
         _2PUSH          ;{STORE DOUBLE CELL}
 ;
+worddoc({MULTIPLYING},{U/},{u_slash},{ud u1 --- u2 u3},{},{
+Leave the unsigned remainder forthvar({u2}) and unsigned quotient forthvar({u3}) from the
+unsigned double dividend forthvar({ud}) and unsigned divisor forthvar({u1}) .},{{U*},{M/},{/}})
 CODE_HEADER({U/},{USLAS})
         POP     BX      ;{DIVISOR}
         POP     DX      ;{MSW OF DIVIDEND}
@@ -1179,19 +1228,25 @@ CODE_HEADER({U/},{USLAS})
 DZERO:  MOV     AX,-1
         MOV     DX,AX
         _2PUSH          ;{STORE QUOT/REM}
-        PAGE
+;
+worddoc({LOGIC},{AND},{and},{n1 n2 --- n2},{L0},{
+Leave the bitwise logical and of forthvar({n1}) and forthvar({n2}) as forthvar({n3}) .},{{XOR},{OR}})
 CODE_HEADER({AND},{LAND})
         POP     AX
         POP     BX
         AND     AX,BX
         _PUSH
 ;
+worddoc({LOGIC},{OR},{or},{n1 n2 --- or},{L0},{
+Leave the bit-wise logical or of two l6 bit values.},{{AND},{XOR}})
 CODE_HEADER({OR},{LOR})
         POP     AX      ;{ (S1) <- (S1) OR (S2)}
         POP     BX
         OR      AX,BX
         _PUSH
 ;
+worddoc({LOGIC},{XOR},{xor},{nl n2 --- xor},{L1},{
+Leave the bitwise logical exclusive or of two values.},{{AND},{OR}})
 CODE_HEADER({XOR},{LXOR})
         POP     AX      ;{ (S1) <- (S1) XOR (S2)}
         POP     BX
@@ -1215,12 +1270,21 @@ CODE_HEADER({RP!},{RPSTO})
         MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
         MOV     BP,[BX+CELLS(4)]        ;{RESET RETURN STACK PTR}
         _NEXT
-        PAGE
+;
+worddoc({SCREEN},{;S},{semicolon_s},{},{P,L0},{
+Stop interpretation of a screen.
+forthcode({;S}) is also the run-time word compiled at the end of a
+colon-definition which returns execution to the calling proceedure.},{})
 CODE_HEADER({;S},{SEMIS})
         MOV     SI,[BP] ;{(IP) <- (R1)}
         LEA     BP,[BP+CELLS(1)]
         _NEXT
 ;
+worddoc({CONTROL},{LEAVE},{leave},{},{C,L0},{
+Force termination of a do-loop at the next opportunity by setting
+the loop limit equal to the current value of the index. The index
+itself remains unchanged, and execution proceeds normally until forthcode({LOOP}) 
+or forthcode({+LOOP}) is encountered.},{})
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
         MOV     AX,[BP] ;{GET INDEX}
         MOV     [BP+CELLS(1)],AX        ;{STORE IT AT LIMIT}
@@ -1239,7 +1303,10 @@ CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
         _PUSH
 ;
 HEADER({R},{RR},{IDO+CELLS(1)})
-        PAGE
+;
+worddoc({LOGIC},{0=},{zero_equals},{n --- f},{L0},{
+Leave a true flag forthvar({f}) is the number forthvar({n}) is equal to zero, otherwise leave a
+false flag.},{{=}})               
 CODE_HEADER({0=},{ZEQU})
         POP     AX
         OR      AX,AX   ;{DO TEST}
@@ -1248,6 +1315,9 @@ CODE_HEADER({0=},{ZEQU})
         DEC     AX      ;{FALSE}
 ZEQU1:  _PUSH
 ;
+worddoc({LOGIC},{0<},{zero_less},{n --- f},{L0},{
+Leave a true flag if the number is less than zero (negative),
+otherwise leave a false flag.},{{<}})
 CODE_HEADER({0<},{ZLESS})
         POP     AX
         OR      AX,AX   ;{SET FLAGS}
@@ -1256,12 +1326,16 @@ CODE_HEADER({0<},{ZLESS})
         DEC     AX      ;{FALSE}
 ZLESS1: _PUSH
 ;
+worddoc({OPERATOR},{+},{plus},{n1 n2 --- sum},{L0},{
+Leave the sum of forthvar({n1+n2}) .},{{-},{*},{/},{MOD}})
 CODE_HEADER({+},{PLUS})
         POP     AX      ;{(S1) <- (S1) + (S2)}
         POP     BX
         ADD     AX,BX
         _PUSH
-        PAGE
+;
+worddoc({DOUBLE},{D+},{d_plus},{d1 d2 --- dsum},{},{
+Leave the double number sum of two double numbers.},{{DMINUS},{+}})
 CODE_HEADER({D+},{DPLUS})
         POP     AX      ;{ YHW}
         POP     DX      ;{ YLW}
@@ -1271,11 +1345,18 @@ CODE_HEADER({D+},{DPLUS})
         ADC     AX,BX   ;{ SHW}
         _2PUSH
 ;
+worddoc({OPERATOR},{MINUS},{minus},{n1 --- n2},{L0},{
+Leave the two's complement of a number, i.e.
+ forthvar({n2}) is forthvar({-n1})
+},{{-}})                       
 CODE_HEADER({MINUS},{MINUS})
         POP     AX
         NEG     AX
         _PUSH
 ;
+worddoc({DOUBLE},{DMINUS},{d_minus},{d1 --- d2},{},{
+Leave the double number two's complement of a double number, i.e.
+ forthvar({d2}) is forthvar({-d1}) },{{D+}})
 CODE_HEADER({DMINUS},{DMINU})
         POP     BX
         POP     CX
@@ -1342,6 +1423,8 @@ CODE_HEADER({2@},{TFET})
         MOV     DX,[BX+CELLS(1)]        ;{LSW}
         _2PUSH
 ;
+worddoc({MEMORY},{!},{store},{n addr ---},{L0},{
+Store 16 bits of n at address.},{})
 CODE_HEADER({!},{STORE})
         POP     BX      ;{ADDR}
         POP     AX      ;{DATA}
@@ -1411,6 +1494,16 @@ _BITS16_1_({
         PAGE
         ;{ At line     LINE ~1000}
 ;
+worddoc({DEFINING},{:},{colon},{},{P,E,L0},{
+Used in the form called a colon-definition:
+forthexample({: cccc     ...     ;})
+Creates a dictionary entry defining forthvar({cccc}) as equivalent to the
+following sequence of Forth word definitions '...' until the next
+forthcode({';'}) or forthcode({';CODE'}) .
+The compiling process is done by the text interpreter as long as
+forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
+set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
+set (P) are executed rather than being compiled.},{} )
 HEADER({:},{COLON},{DOCOL},1)
         DC      QEXEC
         DC      SCSP
@@ -1432,6 +1525,9 @@ _SWITCH_1_({
 });_END___1__({ _SWITCH_1_})
         _NEXT
 ;
+worddoc({DEFINING},{;},{semicolon},{},{P,C,L0},{
+Terminate a colon-definition and stop further compilation. Compiles
+the run-time forthcode({;S}) .},{})
 HEADER({;},{SEMI},{DOCOL},1)
         DC      QCSP
         DC      COMP
@@ -1508,6 +1604,12 @@ HEADER({EM},{LEM},{DOCON})
 HEADER({B/BUF},{BBUF},{DOCON})
         DC      KBBUF
 ;
+worddoc({SCREEN},{B/SCR},{bytes_per_screen},{--- n},{},{
+This constant leaves the number of blocks per editing screen. 
+An editing screen is 1024 bytes organized as 16 lines of
+64 characters each.
+In fact forthcode({B/SCR}) is 1, and so screens correspond one to one with
+blocks. },{{BLOCK}})
 HEADER({B/SCR},{BSCR},{DOCON})
         DC      400H/KBBUF
 ;
@@ -1535,12 +1637,22 @@ HEADER({TIB},{TIB},{DOUSE})
 HEADER({WIDTH},{WIDTHE},{DOUSE})
         DC      CELLS(6)
 ;
+worddoc({ERROR},{WARNING},{warning},{--- addr},{U},{
+A user variable containing a value controlling messages. If = 1 disc
+is present, and screen 4 of drive 0 is the base location for
+messages. If = 0, no disc is present and messages will be presented
+by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure.
+},{{MESSAGE},{ERROR}})
 HEADER({WARNING},{WARN},{DOUSE})
         DC      CELLS(7)
 ;
 HEADER({FENCE},{FENCE},{DOUSE})
         DC      CELLS(8)
 ;
+worddoc({DICTIONARY},{DP},{d_P},{---- addr},{U,L},{
+A user variable, the dictionary pointer, which contains the address
+of the next free memory above the dictionary. The value may be read
+by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{})
 HEADER({DP},{LDP},{DOUSE})
         DC      CELLS(9)
 ;
@@ -1551,7 +1663,10 @@ HEADER({OFFSET},{OFSET},{DOUSE})
         DC      CELLS(11)
 ;
 ;{ End of user variables with fixed place.}
-        PAGE
+;
+worddoc({SCREEN},{SCR},{s_c_r},{--- addr},{U},{
+A user variable containing the screen number most recently reference
+by forthcode({LIST}) .},{{BLOCK}})
 HEADER({SCR},{SCR},{DOUSE})
         DC      CELLS(14)
 ;
@@ -1573,6 +1688,9 @@ HEADER({DPL},{DPL},{DOUSE})
 HEADER({FLD},{LFLD},{DOUSE})
         DC      CELLS(21)
 ;
+worddoc({SECURITY},{CSP},{c_s_p},{---- addr},{U},{
+A user variable temporarily storing the stack pointer position, for
+compilation error checking.},{})
 HEADER({CSP},{LCSP},{DOUSE})
         DC      CELLS(22)
 ;
@@ -1609,11 +1727,17 @@ CODE_HEADER({CELL+},{CELLP})
         ADD     AX,CW
         _PUSH
 ;
+worddoc({DICTIONARY},{HERE},{here},{--- addr},{L0},{
+Leave the address of the next available dictionary location.},{{DP}} })
 HEADER({HERE},{HERE},{DOCOL})
         DC      LDP
         DC      FETCH
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{ALLOT},{allot},{n ---},{L0},{
+Add the signed number to the dictionary pointer forthcode({DP}) . May be used to
+reserve dictionary space or re-origin memory. As the Pentium is a byte-addressable
+machine forthvar({n}) counts bytes. },{{CELL+}})
 HEADER({ALLOT},{ALLOT},{DOCOL})
         DC      LDP
         DC      PSTOR
@@ -1633,17 +1757,24 @@ HEADER({C,},{CCOMM},{DOCOL})
         DC      ALLOT
         DC      SEMIS
 ;
+worddoc({OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{L0},{
+Leave the difference of forthvar({n1-n2}) .},{{MINUS},{+},{*},{/},{MOD}})
 CODE_HEADER({-},{LSUB})
         POP     DX      ;{S1}
         POP     AX
         SUB     AX,DX
         _PUSH   ;{S1 = S2 - S1}
 ;
+worddoc({LOGIC},{=},{equals},{n1 n2 --- f},{L0},{
+Leave a true flag if forthvar({n1=n2}) ; otherwise leave a false flag.},{{<},{>},{0=},{-}})
 HEADER({=},{EQUAL},{DOCOL})
         DC      LSUB
         DC      ZEQU
         DC      SEMIS
 ;
+worddoc({LOGIC},{<},{less_than},{n1 n2 --- f},{L0},{
+Leave a true flag if n1 is less than n2; otherwise leave a false
+flag.},{{=},{>},{0<}})                     
 CODE_HEADER({<},{LESS})
         POP     DX      ;{S1}
         POP     AX      ;{S2}
@@ -1667,6 +1798,8 @@ HEADER({U<},{ULESS},{DOCOL})
 ULES1:  DC      LSUB,ZLESS      ;{ELSE}
 ULES2:  DC      SEMIS           ;{ENDIF}
 ;
+worddoc({LOGIC},{>},{greater_than},{n1 n2 --- f},{L0},{
+Leave a true flag if forthvar({n1}) is greater than forthvar({n2}) ; otherwise a false flag.},{{>},{=},{0<}})
 HEADER({>},{GREAT},{DOCOL})
         DC      SWAP
         DC      LESS
@@ -1709,16 +1842,25 @@ HEADER({LATEST},{LATES},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{LFA},{link_field_address},{pfa --- lfa},{},{
+Convert the parameter field address of a dictionary definition to
+its link field address.},{{'},{PFA}})
 HEADER({LFA},{LFA},{DOCOL})
         DC      LIT,CELLS(2)
         DC      LSUB
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{CFA},{cfa},{pfa --- cfa},{},{
+Convert the parameter field address of a definition to its code
+field address.},{{'},{PFA}})
 HEADER({CFA},{CFA},{DOCOL})
         DC      LCELL
         DC      LSUB
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{NFA},{name_field_address},{pfa --- nfa},{},{
+Convert the parameter field address of a definition to its name
+field.},{{'},{PFA}})
 HEADER({NFA},{NFA},{DOCOL})
         DC      LIT,1+CELLS(2)
         DC      LSUB
@@ -1726,6 +1868,9 @@ HEADER({NFA},{NFA},{DOCOL})
         DC      TRAV
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{PFA},{parameter_field_address},{nfa --- pfa},{},{
+Convert the name field address of a compiled definition to its
+parameter field address.},{{'},{CFA},{LFA},{NFA}})
 HEADER({PFA},{PFA},{DOCOL})
         DC      ONE
         DC      TRAV
@@ -1735,12 +1880,17 @@ HEADER({PFA},{PFA},{DOCOL})
         PAGE
         ;{ At line     LINE ~1500}
 
+worddoc({SECURITY},{!CSP},{store_c_s_p},{},{},{
+Save the stack position in forthcode({CSP}). Used as part of the compiler
+security.},{})
 HEADER({!CSP},{SCSP},{DOCOL})
         DC      SPFET
         DC      LCSP
         DC      STORE
         DC      SEMIS
 ;
+worddoc({ERROR},{?ERROR},{question_error},{f n --},{},{
+  Issue an error message number forthcode({n}) , if the boolean flag is true.},{ERROR})
 HEADER({?ERROR},{QERR},{DOCOL})
         DC      SWAP
         _0BRANCH(QERR1) ;{IF}
@@ -1770,6 +1920,9 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
         DC      QERR
         DC      SEMIS
 ;
+worddoc({SECURITY},{?CSP},{question_c_s_p},{},{},{
+Issue error message if stack position differs from value saved in
+forthvar({CSP}) .},{})
 HEADER({?CSP},{QCSP},{DOCOL})
         DC      SPFET
         DC      LCSP
@@ -1787,6 +1940,12 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      QERR
         DC      SEMIS
         PAGE
+worddoc({COMPILING},{COMPILE},{compile},{},{C2},{
+When the word containing forthcode({COMPILE}) executes, the execution address of
+the word following forthcode({COMPILE}) is copied (compiled) into the dictionary.
+This allows specific compilation situations to be handled in
+addition to simply compiling an execution address (which the
+interpreter already does).},{[COMPILE]})
 HEADER({COMPILE},{COMP},{DOCOL})
         DC      QCOMP
         DC      FROMR
@@ -1827,6 +1986,10 @@ HEADER({DECIMAL},{DECA},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
+worddocsafe({DEFINING},{(;CODE)},{paren_semicolon_code},{},{C},{
+The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
+field of the most recently defined word to point to the following
+machine code sequence.},{{;CODE}})
 HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      FROMR
         DC      LATES
@@ -1835,6 +1998,20 @@ HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
+worddoc({DEFINING},{;CODE},{semicolon_code},{},{P,C,L0},{
+Used in the form:
+  forthsamp({: cccc .... ;CODE})
+assembly mnemonics Stop compilation and terminate a new defining
+word forthvar({cccc}) by compiling forthcode({(;CODE)}). Set the forthcode({CONTEXT}) vocabulary to
+forthcode({ASSEMBLER}) , assembling to machine code the following mnemonics.
+
+When forthvar({cccc}) later executes in the form:
+                     forthsamp({cccc nnnn})
+the word forthvar({nnnn}) will be created with its execution proceedure given by
+the machine code following forthvar({cccc}) .
+That is, when forthvar({nnnn}) is executed, it does so by jumping to the code
+after forthvar({nnnn}) . An existing defining word must exist in forthvar({cc}) prior to
+forthcode({;CODE}) .},{(;CODE)})
 HEADER({;CODE},{SEMIC},{DOCOL},1)
         DC      QCSP
         DC      COMP
@@ -1843,6 +2020,19 @@ HEADER({;CODE},{SEMIC},{DOCOL},1)
 SEMI1:  DC      NOOP    ;{ ( ASSEMBLER )}
         DC      SEMIS
 ;
+worddoc({DEFINING},{BUILDS},{builds},{},{C,L0},{
+This word is called "smaller_sign_BUILDS" but the html chokes over that name.
+Used within a colon-definition:
+         forthexample({: cccc  BUILDS  ... DOES>     ...    ;})
+Each time forthvar({cccc}) is executed, forthcode({BUILDS}) defines a new word with a
+high-level execution proceedure. Executing forthvar({cccc}) in the form:
+            forthsamp({cccc nnnn}) 
+uses forthcode({BUILDS}) to create a dictionary entry for forthvar({nnnn}) with a call to
+the forthcode({DOES>}) part for forthvar({nnnn}) . When forthvar({nnnn}) is later executed, it has the
+address of its parameter area on the stack and executes the words
+after forthcode({DOES>}) in forthvar({cccc}) . forthcode({BUILDS}) and forthcode({DOES>}) allow runtime proceedures to
+written in high-level rather than in assembler code (as required by
+forthcode({;CODE}) ). },{})
 HEADER({<BUILDS},{BUILD},{DOCOL})
         DC      ZERO
         DC      CON
@@ -1888,6 +2078,9 @@ DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
         DC      SEMIS
         PAGE
         ;{ At line     LINE ~2000}
+worddocsafe({PARSING},{(.")},{paren_dot_quote},{},{C+},{
+The run-time proceedure, compiled by forthcode({."}) which transmits the
+following in-line text to the selected output device.},{{."}}) 
 HEADER_SGQ({(.")},{PDOTQ},{DOCOL})
         DC      RR
         DC      COUNT
@@ -2022,7 +2215,12 @@ WORD2:  DC      LIN
         DC      FROMR
         DC      LCMOVE
         DC      SEMIS
-        PAGE
+;
+worddocsafe({NUMBER},{(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},{
+Convert the ascii text beginning at forthvar({addr1+l}) with regard to forthcode({BASE}) . The
+new value is accumulated into double number forthvar({d1}) , being left as double number 
+forthvar({d2}) .
+ forthvar({addr2}) is the address of the first unconvertable digit.},{{NUMBER}})
 HEADER({(NUMBER)},{PNUMB},{DOCOL})
 PNUM1:  DC      ONEP    ;{ BEGIN}
         DC      LDUP
@@ -2053,7 +2251,13 @@ PNUM3:  DC      FROMR
         _BRANCH(PNUM1)  ;{ REPEAT}
 PNUM2:  DC      FROMR
         DC      SEMIS
-        PAGE
+;
+worddoc({NUMBER},{NUMBER},{number},{addr --- d},{},{
+Convert a character string left at forthvar({addr}) with a preceeding count, to
+a signed double number forthvar({d}) , using the current numeric base. If a
+decimal point is encountered in the text, its position will be
+given in forthcode({DPL}) , but no other effect occurs. If numeric conversion is
+not possible, an error message will be given.},{{BASE}})
 HEADER({NUMBER},{NUMB},{DOCOL})
         DC      ZERO
         DC      ZERO
@@ -2088,7 +2292,13 @@ NUMB2:  DC      DROP
         _0BRANCH(NUMB3) ;{ IF}
         DC      DMINU   ;{ ENDIF}
 NUMB3:  DC      SEMIS
-        PAGE
+;
+worddoc({DICTIONARY},{-FIND},{minus_find},{--- pfa b tf (found) --- ff (not found)},{},{
+Accepts the next text word (delimited by blanks) in the input stream
+to forthcode({HERE}) , and searches the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
+for a matching entry. If found, the dictionary entry's parameter
+field address, its length byte, and a boolean true is left.
+Otherwise, only a boolean false is left.},{{(FIND)}})
 HEADER({-FIND},{DFIND},{DOCOL})
         DC      BLS
         DC      LWORD
@@ -2106,10 +2316,26 @@ HEADER({-FIND},{DFIND},{DOCOL})
         DC      PFIND   ;{ENDIF}
 DFIN1:  DC      SEMIS
 ;
+worddocsafe({ERROR},{(ABORT)},{paren_abort},{},{},{
+Executes after an error when forthcode({WARNING}) is -1. This word normally
+executes forthcode({ABORT}), but may be altered (with care) to a user's
+alternative proceedure forthvar({AP}) as follows: 
+forthsamp({ ' forthvar({AP}) CFA   ' (ABORT) !})
+},{})
 HEADER({(ABORT)},{PABOR},{DOCOL})
         DC      ABORT
         DC      SEMIS
 ;
+worddoc({ERROR},{ERROR},{error},{line --- in blk},{},{
+Execute error notification and restart of system. forthcode({WARNING}) is first
+examined. If 1, the text of line forthvar({n}) , relative to screen 4 of drive O
+is printed. This line number may be positive or negative, and beyond
+just screen 4. If forthcode({WARNING}) is zero, forthvar({n}) is just printed as a message number
+(non disc installation). If forthcode({WARNING}) is -l, the definition forthcode({(ABORT)}) is
+executed, which executes the system forthcode({ABORT}) . The user may cautiously
+modify this execution by altering forthcode({(ABORT)}) .
+fig-FORTH saves the contents of forthcode({IN}) and forthcode({BLK}) to assist in determining
+the location of the error. Final action is execution of forthcode({QUIT}) .},{QERROR})
 HEADER({ERROR},{ERROR},{DOCOL})
         DC      WARN
         DC      FETCH
@@ -2198,6 +2424,13 @@ CREA1:  DC      HERE
         DC      COMMA
         DC      SEMIS
         PAGE
+worddoc({COMPILING},{[COMPILE]},{bracket_compile},{},{p,C},{
+Used in a colon-definition in form:
+forthexample({:  xxx    [COMPILE]   FORTH   ;})
+forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
+that would otherwise execute during compilation. The above example
+will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
+compile time.},{COMPILE})
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
         DC      DFIND
         DC      ZEQU
@@ -2316,6 +2549,12 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
+worddocsafe({PARSING},{(},{paren},{},{P,L0},{
+Used in the form:
+forthsamp({( cccc)})
+Ignore a comment that will be delimited by a right
+parenthesis on the same line. May occur during execution or in a
+colon-definition. A blank after the leading parenthesis is required.},{})
 HEADER({(},{PAREN},{DOCOL},1)
         DC      LIT,')'
         DC      LWORD
@@ -2338,6 +2577,10 @@ QUIT1:  DC      RPSTO   ;{BEGIN}
         _STRING({OK})   ;{ENDIF}
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
 ;
+worddoc({ERROR},{ABORT},{abort},{},{L0},{
+Clear the stacks and enter the execution state. Return control to
+the operators terminal, printing a message appropriate to the
+installation.},{})
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SPSTO
         DC      DECA
@@ -2432,6 +2675,8 @@ COLD1:
         DC      ABORT
 ;
         PAGE
+worddoc({DOUBLE},{S->D},{s_to_d},{n --- d},{},{
+Sign extend a single number to form a double number.},{})
 CODE_HEADER({S->D},{STOD})
         POP     DX      ;{S1}
         SUB     AX,AX
@@ -2452,16 +2697,22 @@ HEADER({D+-},{DPM},{DOCOL})
         DC      DMINU   ;{ENDIF}
 DPM1:   DC      SEMIS
 ;
+worddoc({OPERATOR},{ABS},{abs},{n --- u},{L0},{
+Leave the absolute value of forthvar({n}) as forthvar({u}) .},{})
 HEADER({ABS},{LABS},{DOCOL})
         DC      LDUP
         DC      PM
         DC      SEMIS
 ;
+worddoc({DOUBLE},{DABS},{d_abs},{d --- ud},{},{
+Leave the absolute value forthvar({ud}) of a double number.},{{DMINUS}})
 HEADER({DABS},{DABS},{DOCOL})
         DC      LDUP
         DC      DPM
         DC      SEMIS
 ;
+worddoc({OPERATOR},{MIN},{min},{n1 n2 --- min},{L0},{
+Leave the smaller of two numbers.},{{MAX}})
 HEADER({MIN},{MIN},{DOCOL})
         DC      TDUP
         DC      GREAT
@@ -2470,6 +2721,8 @@ HEADER({MIN},{MIN},{DOCOL})
 MIN1:   DC      DROP
         DC      SEMIS
 ;
+worddoc({OPERATOR},{MAX},{max},{n1 n2 --- max},{L0},{
+Leave the greater of two numbers.},{{MIN}})
 HEADER({MAX},{MAX},{DOCOL})
         DC      TDUP
         DC      LESS
@@ -2477,7 +2730,10 @@ HEADER({MAX},{MAX},{DOCOL})
         DC      SWAP    ;{ENDIF}
 MAX1:   DC      DROP
         DC      SEMIS
-        PAGE
+;
+worddoc({MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{},{
+A mixed magnitude math operation which leaves the double number
+ forthvar({d}) : the signed product of two signed number forthvar({n1}) and forthvar({n2}) .},{{M/MOD},{M/},{*}})
 HEADER({M*},{MSTAR},{DOCOL})
         DC      TDUP
         DC      LXOR
@@ -2490,6 +2746,10 @@ HEADER({M*},{MSTAR},{DOCOL})
         DC      DPM
         DC      SEMIS
 ;
+worddoc({MULTIPLYING},{M/},{m_slash},{d n1 --- n2 n3},{},{
+A mixed magnitude math operator which leaves the signed remainder forthvar({n2}) 
+and signed quotient forthvar({n3}) from a double number dividend forthvar({d}) and divisor forthvar({n1}) .
+The remainder takes its sign from the dividend.},{{M/MOD},{/},{M*}})
 HEADER({M/},{MSLAS},{DOCOL})
         DC      OVER
         DC      TOR
@@ -2508,11 +2768,16 @@ HEADER({M/},{MSLAS},{DOCOL})
         DC      SWAP
         DC      SEMIS
 ;
+worddocsafe({OPERATOR},{*},{star},{n1 n2 --- prod},{L0},{
+Leave the signed product of two signed numbers.},{{+},{-},{/},{MOD}})
 HEADER({*},{STAR},{DOCOL})
         DC      MSTAR
         DC      DROP
         DC      SEMIS
 ;
+worddoc({MULTIPLYING},{/MOD},{slash_mod},{n1 n2 --- rem quot},{L0},{
+Leave the remainder and signed quotient of forthvar({n1/n2}) . The remainder has
+the sign of the dividend.},{{*/MOD},{*/},{M/MOD}}) 
 HEADER({/MOD},{SLMOD},{DOCOL})
         DC      TOR
         DC      STOD
@@ -2520,17 +2785,27 @@ HEADER({/MOD},{SLMOD},{DOCOL})
         DC      MSLAS
         DC      SEMIS
 ;
+worddoc({OPERATOR},{/},{slash},{n1 n2 --- quot},{L0},{
+Leave the signed quotient of forthvar({n1/n2}) .
+It the result is interpreted as logical value, it means forthvar({n1}) si not equal
+to forthvar({n2}) },{{+},{-},{*},{MOD},{*/MOD}})
 HEADER({/},{SLASH},{DOCOL})
         DC      SLMOD
         DC      SWAP
         DC      DROP
         DC      SEMIS
 ;
+worddoc({OPERATOR},{MOD},{mod},{n1 n2 --- mod},{L0},{
+Leave the remainder of forthvar({n1/n2}) , with the same sign as forthvar({n1}) .},
+{{+},{-},{*},{/},MOD,{*/MOD}})
 HEADER({MOD},{LMOD},{DOCOL})
         DC      SLMOD
         DC      DROP
         DC      SEMIS
 ;
+worddoc({MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{L0},{
+Leave the quotient forthvar({n5}) and remainder forthvar({n4}) of the operation forthvar({n1*n2/n3}) A
+31 bit intermediate product is used as for forthcode({*/}) .},{{*/},{/MOD}})
 HEADER({*/MOD},{SSMOD},{DOCOL})
         DC      TOR
         DC      MSTAR
@@ -2538,12 +2813,22 @@ HEADER({*/MOD},{SSMOD},{DOCOL})
         DC      MSLAS
         DC      SEMIS
 ;
+worddoc({MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{L0},{
+Leave the ratio forthvar({n4 = n1*n2/n3}) where all are signed numbers.
+Retention of an intermediate 31 bit product permits greater accuracy
+than would. be available with the sequence:
+      forthsamp({n1 n2 * n3 /})
+},{{*/MOD},{/MOD}})                          
 HEADER({*/},{SSLA},{DOCOL})
         DC      SSMOD
         DC      SWAP
         DC      DROP
         DC      SEMIS
 ;
+worddoc({MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{},{
+An unsigned mixed magnitude math operation which leaves a double
+quotient forthvar({ud4}) and remainder forthvar({u3}) , from a double dividend forthvar({ud1}) and single
+divisor forthvar({u2}) .},{{/MOD},{M/},{M*}})  
 HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      TOR
         DC      ZERO
@@ -2555,7 +2840,11 @@ HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      USLAS
         DC      FROMR
         DC      SEMIS
-        PAGE
+;
+worddocsafe({SCREEN},{(LINE)},{paren_line},{n1 n2 --- addr count},{},{
+Convert the line number forthcode({n1}) and the screen forthvar({n2}) to the disc buffer
+address containing the data. A count of 64 indicates the full line
+text length.},{{-LINE}})
 HEADER({(LINE)},{PLINE},{DOCOL})
         DC      TOR
         DC      LIT,64
@@ -2570,12 +2859,22 @@ HEADER({(LINE)},{PLINE},{DOCOL})
         DC      LIT,64
         DC      SEMIS
 ;
+worddoc({SCREEN},{.LINE},{dot_line},{line scr --},{},{
+Print on the terminal device, a line of text from the disc by its
+line and screen number. Trailing blanks are suppressed,
+which leads to a tremendous speed advantage on modern glass tty's. },{})
 HEADER({.LINE},{DLINE},{DOCOL})
         DC      PLINE
         DC      DTRAI
         DC      LTYPE
         DC      SEMIS
 ;
+worddoc({ERROR},{MESSAGE},{message},{n --},{},{
+Print on the selected output device the text of line forthvar({n}) relative to
+screen 4 of drive 0. forthvar({n}) may be positive or negative. forthcode({MESSAGE}) may be
+used to print incidental text such as report headers. If forthcode({WARNING}) is
+zero, the message will simply be printed as a number (disc
+unavailable).},{})
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      WARN
         DC      FETCH
@@ -2718,6 +3017,10 @@ FLUS1:  DC      ZERO,BUFFE
         _LOOP(FLUS1)
         DC      SEMIS
 ;
+worddoc({SCREEN},{LOAD},{load},{n ---},{L0},{
+Begin interpretation of screen forthvar({n}) .
+Loading will terminate at the end of the screen or at forthcode({;S}) .},
+{{-->}})
 HEADER({LOAD},{LOAD},{DOCOL})
         DC      BLK
         DC      FETCH,TOR
@@ -2732,7 +3035,9 @@ SCREEN: DC      FROMR,LIN
         DC      FROMR,BLK
         DC      STORE
         DC      SEMIS
-        PAGE
+;
+worddocsafe({SCREEN},{-->},{next_screen},{},{P,L0},{
+Continue interpretation with the next disc screen.},{{LOAD}})
 HEADER({-->},{ARROW},{DOCOL},1)
         DC      QLOAD
         DC      ZERO
@@ -3588,6 +3893,14 @@ RSLW4:
 });_END___1__({ _RWHD_1_})
         PAGE
         ;{ At line     LINE ~3500}
+worddocsafe({DICTIONARY},{'},{tick},{--- addr},{P,L0},{
+Used in the form: .
+forthcode({'}) forthcode({nnnn})
+Leaves the parameter field address of dictionary word forthvar({nnnn}).
+As a compiler directive, executes in a colon-definition to compile
+the address as a literal. If the word is not found after a search of
+forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
+{{CFA},{LFA},{NFA},{PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
         DC      DFIND
         DC      ZEQU
@@ -3650,6 +3963,25 @@ HEADER({THEN},{THEN},{DOCOL},1)
         DC      ENDIFF
         DC      SEMIS
 ;
+worddoc({CONTROL},{DO},{do},{n1 n2 --- (execute)
+addr n --- (compile)},{P,C2,L0},{
+Occurs in a colon-definition in form:
+    forthsamp({DO ... LOOP})
+
+At run time, forthcode({DO}) begins a sequence with repetitive execution
+controlled by a loop limit forthvar({n1}) and an index with initial value forthvar({n2}) . forthcode({DO})
+removes these from the stack. Upon reaching forthcode({LOOP}) the index is
+incremented by one.
+Until the new index equals or exceeds the limit, execution loops
+back to just after forthcode({DO}) ; otherwise the loop parameters are discarded
+and execution continues ahead. Both forthvar({n1}) and forthvar({n2}) are determined at
+run-time and may be the result of other operations.
+Within a loop forthcode({I}) will copy the current value of the index to the
+stack. 
+
+When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
+the following address forthvar({addr}) and forthvar({n}) for later error checking.},
+{{I},{LOOP},{+LOOP},{LEAVE}})
 HEADER({DO},{DO},{DOCOL},1)
         DC      COMP
         DC      XDO
@@ -3657,6 +3989,18 @@ HEADER({DO},{DO},{DOCOL},1)
         DC      THREE   ;{ Magic number}
         DC      SEMIS
 ;
+worddoc({CONTROL},{LOOP},{loop},{addr n --- (compiling)},{P,C2,L0},{
+Occurs in a colon-definition in form:
+               forthsamp({DO ... LOOP})
+At run-time, forthcode({LOOP}) selectively controls branching back to the
+corresponding forthcode({DO}) based on the loop index and limit. The loop index
+is incremented by one and compared to the limit. The branch back to
+forthcode({DO}) occurs until the index equals or exceeds the limit;
+at that time, the parameters are discarded and execution continues
+ahead.
+
+At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
+offset to forthvar({DO}) . forthvar({n}) is used for error testing.},{})
 HEADER({LOOP},{LLOOP},{DOCOL},1)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
@@ -3664,7 +4008,10 @@ HEADER({LOOP},{LLOOP},{DOCOL},1)
         DC      XLOOP
         DC      BACK
         DC      SEMIS
-        PAGE
+;
+worddocsafe({CONTROL},{(+LOOP)},{paren_plus_loop},{n ---},{C2},{
+The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
+index by n and tests for loop completion.},{{+LOOP}})
 HEADER({+LOOP},{PLOOP},{DOCOL},1)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
@@ -3749,6 +4096,9 @@ HEADER({<#},{BDIGS},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
+worddoc({NUMBER},{#>},{number_sign_greater},{d --- addr count},{L0},{
+Terminates numeric output conversion by dropping forthvar({d}), leaving the text
+address and character count suitable for forthcode({TYPE}).},{})
 HEADER({#>},{EDIGS},{DOCOL})
         DC      DROP
         DC      DROP
@@ -3767,6 +4117,11 @@ HEADER({SIGN},{SIGN},{DOCOL})
         DC      HOLD    ;{ENDIF}
 SIGN1:  DC      SEMIS
 ;
+worddoc({NUMBER},{#},{number_sign},{d1 --- d2},{L0},{
+Generate from a double number forthvar({d1}), the next ascii character which is
+placed in an output string. Result forthvar({d2}) is the quotient after division
+by forthcode({BASE}), and is maintained for further processing. Used between forthcode({<#}) 
+and forthcode({#>}).},{{#S}} ) 
 HEADER({#},{DIG},{DOCOL})
         DC      BASE
         DC      FETCH
@@ -3783,6 +4138,10 @@ DIG1:   DC      LIT,30H
         DC      HOLD
         DC      SEMIS
 ;
+worddoc({NUMBER},{#S},{number_sign_s},{d1 --- d2},{L0},{
+Generates ascii text in the text output buffer, by the use of forthcode({#}),
+until a zero double number forthvar({n2}) results.
+Used between forthcode({<#}) and forthcode({#>}).},{})
 HEADER({#S},{DIGS},{DOCOL})
 DIGS1:  DC      DIG     ;{BEGIN}
         DC      OVER
@@ -3886,7 +4245,10 @@ HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
 });_END___1__({ _HOSTED_LINUX_1_})
-        PAGE
+;
+worddoc({SCREEN},{LIST},{list},{n ---},{L0},{
+Display the ascii text of screen forthvar({n}) on the selected output device.
+forthcode({SCR}) contains the screen number during and after this process.},{})
 HEADER({LIST},{LLIST},{DOCOL})
         DC      DECA
         DC      CR,LDUP
@@ -3907,6 +4269,9 @@ LIST1:  DC      CR,IDO
 LIST2:  _LOOP(LIST1)
         DC      CR,SEMIS
 ;
+worddoc({SCREEN},{INDEX},{index},{from to --},{},{
+Print the first line of each screen over the range forthvar({from}) , forthvar({to}) . This is
+used to view the comment lines of an area of text on disc screens.},{{LIST}}} })
 HEADER({INDEX},{INDEX},{DOCOL})
         DC      LIT,FF
         DC      EMIT,CR
@@ -3921,7 +4286,12 @@ INDE1:  DC      CR,IDO
         DC      LLEAV
 INDE2:  _LOOP(INDE1)
         DC      SEMIS
-        PAGE
+;
+worddoc({SCREEN},{TRIAD},{triad},{scr --},{},{
+Display on the selected output device the three screens which
+include that numbered forthvar({scr}) , beginning with a screen evenly divisible
+by three. Output is suitable for source text records, and includes a
+reference line at the bottom taken from line 15 of screen 4.},{{MESSAGE}})
 HEADER({TRIAD},{TRIAD},{DOCOL})
         DC      LIT,FF
         DC      EMIT
