@@ -191,12 +191,16 @@ rational.mi  \
 %.mim : gloss.m4 %.mig ; ( cat $(@:fig86.%.mim=%.cfg) ; m4 $+ )| m4 > $@
 
 # Make the worddoc macro's into glossary html items to our liking
-fig86.%.html : %.cfg glosshtml.m4 fig86.%.mig
+fig86.%.html : %.cfg glosshtml.m4 indexhtml.m4 fig86.%.mig
+	ssort $(@:%.html=%.mig) -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s |\
+	m4 indexhtml.m4 - > $@
 	cat $(@:%.html=%.mig)|\
 	sed -e 's/@@/@/g'                 |\
 	sed -e s'/worddocsafe/worddoc/g'  |\
-	sed -e 's/</\&lt\;/g'             |\
-	m4 $(@:fig86.%.html=%.cfg) glosshtml.m4 - > $@
+	sed -e 's/</\&lt\;/g'             > temp.html
+	ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s |\
+	m4 indexhtml.m4 - > $@
+	m4 $(@:fig86.%.html=%.cfg) glosshtml.m4 temp.html >> $@
 
 fig86.%.info : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
 	m4 menu.m4 $(@:%.info=%.mig) > menu.texinfo
@@ -212,3 +216,5 @@ fig86.%.tex : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
 	   tee spy | m4 > $@
 	#rm wordset.mi menu.texinfo
+
+#       (echo 'define(figforthversion,`rlog -r -h -N fig86.gnr|grep head|sed -e /head://` )' ; \
