@@ -2625,7 +2625,7 @@ enddoc)
 HEADER({?DUP},{QDUP},{DOCOL})
         DC      LDUP
         _0BRANCH(QDUP1) ;{ IF}
-        DC      LDUP    ;{ENDIF}
+        DC      LDUP    ;{THEN}
 QDUP1:  DC      SEMIS
 ;
 worddoc( {VOCABULARIES},{LATEST},{latest},{--- addr},{},
@@ -2778,7 +2778,7 @@ HEADER({?ERROR},{QERR},{DOCOL})
         _0BRANCH(QERR1) ;{IF}
         DC      ERROR
         _BRANCH(QERR2)  ;{ELSE}
-QERR1:  DC      DROP    ;{ENDIF}
+QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
 ;
 _SECURITY_({
@@ -3033,7 +3033,7 @@ DTRA1:  DC      OVER
         DC      LLEAV
         _BRANCH(DTRA3)  ;{ ELSE}
 DTRA2:  DC      ONE
-        DC      LSUB    ;{ ENDIF}
+        DC      LSUB    ;{ THEN}
 DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
         DC      SEMIS
 ;
@@ -3063,7 +3063,7 @@ HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
 DOTQ1:                 
         DC      LTYPE
 DOTQ2:                 
-        DC      SEMIS   ;{ ENDIF}
+        DC      SEMIS   ;{ THEN}
 ;
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{P,L0},
 {Used in the form:
@@ -3372,7 +3372,7 @@ HEADER({FIND:},{DDFIND},{DOCOL})
         DC      LIT, B_DENOT, LAND
         _0BRANCH(DDFIND1) ;{IF}
         DC      DROP, ZERO
-DDFIND1:               ;{ENDIF}
+DDFIND1:               ;{THEN}
         DC SEMIS
 ;
 worddocsafe( {DICTIONARY},{(FIND)},{paren_find},{sc --- dea},{},
@@ -3439,7 +3439,7 @@ HEADER({ERROR},{ERROR},{DOCOL})
         DC      FETCH
         DC      ZLESS
         _0BRANCH(ERRO1) ;{IF}
-        DC      PABOR   ;{ENDIF}
+        DC      PABOR   ;{THEN}
 ERRO1:  DC      LIN, FETCH, LDUP
         _ISO_IN_({DC    SOURC, FETCH, PLUS})
         DC      LIT, 20, LSUB
@@ -3455,7 +3455,7 @@ ERRO1:  DC      LIN, FETCH, LDUP
         _0BRANCH(ERRO2) ;{ IF}
         DC      DOT
         DC      LIN,FETCH, SOURC, FETCH, LSUB
-        DC      DOT    ;{ENDIF}
+        DC      DOT    ;{THEN}
 ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
 ;
@@ -3502,7 +3502,7 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      IDDOT
         DC      LIT,4
         DC      MESS
-        DC      SPACE   ;{ENDIF}
+        DC      SPACE   ;{THEN}
         DC      ZERO
 CREA1:  DC      DROP
         DC      SCOMMA
@@ -3596,7 +3596,7 @@ HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
         DC      FETCH
         _0BRANCH(LITE1) ;{IF}
         DC      LIT, LIT, COMMA
-        DC      COMMA   ;{ENDIF}
+        DC      COMMA   ;{THEN}
 LITE1:  DC      SEMIS
 ;
 worddoc( {COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{P},
@@ -3612,7 +3612,7 @@ HEADER({DLITERAL},{DLITE},{DOCOL}, , B_IMMED)
         _0BRANCH(DLIT1) ;{ IF}
         DC      SWAP
         DC      LITER
-        DC      LITER   ;{ ENDIF}
+        DC      LITER   ;{ THEN}
 DLIT1:  DC      SEMIS
 ;
 ;
@@ -3705,7 +3705,7 @@ INTE1:
         _BRANCH(INTE4A)  ;{ELSE}
 INTE3A:
         DC      FROMR, DROP
-                        ;{ENDIF}
+                        ;{THEN}
 INTE4A:
         DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
@@ -3716,7 +3716,7 @@ INTE4A:
 INTE3:
         DC      TCFA
         DC      COMMA
-                        ;{ENDIF}
+                        ;{THEN}
 INTE4:  DC      QSTAC
         _BRANCH(INTE1)  ;{AGAIN}
 INTE8:  DC      DROP, DROP
@@ -3897,7 +3897,7 @@ QUIT1:  DC      RPSTO   ;{BEGIN}
         DC      FETCH
         DC      ZEQU
         _0BRANCH(QUIT2) ;{IF}
-        _STRINGINLINE({OK})   ;{ENDIF}
+        _STRINGINLINE({OK})   ;{THEN}
         DC      LTYPE
         DC      CR
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
@@ -4048,7 +4048,7 @@ HEADER({ABS},{LABS},{DOCOL})
         DC      LDUP
         DC      ZLESS
         _0BRANCH(PM1)   ;{IF}
-        DC      NEGATE   ;{ENDIF}
+        DC      NEGATE   ;{THEN}
 PM1:
         DC      SEMIS
 ;
@@ -4064,7 +4064,7 @@ HEADER({DABS},{DABS},{DOCOL})
         DC      LDUP
         DC      ZLESS
         _0BRANCH(DPM1)  ;{IF}
-        DC      DNEGA   ;{ENDIF}
+        DC      DNEGA   ;{THEN}
 DPM1:
         DC      SEMIS
 ;
@@ -4077,7 +4077,7 @@ HEADER({MIN},{MIN},{DOCOL})
         DC      TDUP
         DC      GREAT
         _0BRANCH(MIN1)  ;{IF}
-        DC      SWAP    ;{ENDIF}
+        DC      SWAP    ;{THEN}
 MIN1:   DC      DROP
         DC      SEMIS
 ;
@@ -4090,7 +4090,7 @@ HEADER({MAX},{MAX},{DOCOL})
         DC      TDUP
         DC      LESS
         _0BRANCH(MAX1)  ;{IF}
-        DC      SWAP    ;{ENDIF}
+        DC      SWAP    ;{THEN}
 MAX1:   DC      DROP
         DC      SEMIS
 ;
@@ -4113,7 +4113,7 @@ HEADER({M*},{MSTAR},{DOCOL})
         DC      FROMR
         DC      ZLESS
         _0BRANCH(DPM2)  ;{IF}
-        DC      DNEGA   ;{ENDIF}
+        DC      DNEGA   ;{THEN}
 DPM2:
         DC      SEMIS
 ;
@@ -4145,13 +4145,13 @@ HEADER({SM/REM},{MSLAS},{DOCOL})
         DC      LXOR
         DC      ZLESS
         _0BRANCH(PM2)   ;{IF}
-        DC      NEGATE   ;{ENDIF}
+        DC      NEGATE   ;{THEN}
 PM2:
         DC      SWAP
         DC      FROMR
         DC      ZLESS
         _0BRANCH(PM3)   ;{IF}
-        DC      NEGATE   ;{ENDIF}
+        DC      NEGATE   ;{THEN}
 PM3:
         DC      SWAP
         DC      SEMIS
@@ -4342,11 +4342,11 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         _0BRANCH(MESS2) ;{IF}
         DC      LIT,4
         DC      DLINE
-        DC      SPACE   ;{ENDIF}
+        DC      SPACE   ;{THEN}
 MESS2:  _BRANCH(MESS3)  ;{ELSE}
 MESS1:  _STRINGINLINE({MSG # })
         DC      LTYPE
-        DC      DOT     ;{ENDIF}
+        DC      DOT     ;{THEN}
 MESS3:  DC      SEMIS
 ;
 _PC_({
@@ -5243,7 +5243,7 @@ EXPE1:  DC      KEY
         DC      BELL
         _BRANCH(EXPE7)  ;{ ELSE                  }
 EXPE6:  DC      LIT
-        DC      BSOUT   ;{ ENDIF                 }
+        DC      BSOUT   ;{ THEN                 }
 EXPE7:  _BRANCH(EXPE3)  ;{ ELSE                  }
 EXPE2:  DC      LDUP
         DC      LIT,0DH
@@ -5254,13 +5254,13 @@ EXPE2:  DC      LDUP
         DC      LBL
         DC      ZERO
         _BRANCH(EXPE5)  ;{ ELSE}
-EXPE4:  DC      LDUP    ;{ ENDIF}
+EXPE4:  DC      LDUP    ;{ THEN}
 EXPE5:  DC      IDO
         DC      CSTOR
         DC      ZERO
         DC      IDO
         DC      ONEP
-        DC      STORE   ;{ ENDIF}
+        DC      STORE   ;{ THEN}
 EXPE3:  DC      EMIT
         _LOOP(EXPE1)    ;{ LOOP}
         DC      DROP
@@ -5295,7 +5295,7 @@ TYPE2:  DC      IDO
         DC      EMIT
         _LOOP(TYPE2)    ;{ LOOP}
         _BRANCH(TYPE3)  ;{ ELSE}
-TYPE1:  DC      DROP    ;{ ENDIF}
+TYPE1:  DC      DROP    ;{ THEN}
 TYPE3:  DC      SEMIS
 ;
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
@@ -5390,7 +5390,7 @@ EXPE1:  DC      KEY
         DC      BELL
         _BRANCH(EXPE7)  ;{ ELSE                  }
 EXPE6:  DC      LIT
-        DC      BSOUT   ;{ ENDIF                 }
+        DC      BSOUT   ;{ THEN                 }
 EXPE7:  _BRANCH(EXPE3)  ;{ ELSE                  }
 EXPE2:  DC      LDUP
         DC      LIT,0DH
@@ -5401,13 +5401,13 @@ EXPE2:  DC      LDUP
         DC      LBL
         DC      ZERO
         _BRANCH(EXPE5)  ;{ ELSE}
-EXPE4:  DC      LDUP    ;{ ENDIF}
+EXPE4:  DC      LDUP    ;{ THEN}
 EXPE5:  DC      IDO
         DC      CSTOR
         DC      ZERO
         DC      IDO
         DC      ONEP
-        DC      STORE   ;{ ENDIF}
+        DC      STORE   ;{ THEN}
 EXPE3:  DC      EMIT
         _LOOP(EXPE1)    ;{ LOOP}
         DC      DROP
@@ -6146,14 +6146,66 @@ HEADER({FORGET},{FORG},{DOCOL})
         DC      TNFA, FETCH, LDP, STORE
         DC      SEMIS
 ;
-worddoc( {CONTROL},{BACK},{back},{addr --},{},
-{Calculate the backward branch offset from forthcode({HERE}) to forthvar({addr}) and compile
-into the next available dictionary memory address.},
-{{LOOP},{UNTIL}}, {}, enddoc)
-HEADER({BACK},{BACK},{DOCOL})
+worddoc( {CONTROL},{(BACK},{paren_back},{ -- addr},{},
+{Start a backward branch by leaving the target address
+forthcode({HERE}) into forthsamp({addr}). _VERBOSE_({Usage is
+forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) })},
+{{LOOP},{UNTIL}}, 
+{
+{: GS1 -1 [ (BACK ] 1+ DUP . 
+DUP 0BRANCH [ BACK) ] ; GS1 .},
+{0 1 1}
+}, 
+enddoc)
+HEADER({(BACK},{PBACK},{DOCOL})
+        DC      HERE
+        DC      SEMIS
+;
+worddoc( {CONTROL},{BACKP)},{back_paren},{addr --},{},
+{Complete a backward branch by compiling an offset from
+forthcode({HERE}) to forthsamp({addr}), left there by
+forthcode({(BACK)}) . _VERBOSE_({Usage is forthsamp({ (BACK ..
+POSTPONE BRANCH BACK) }) })}, 
+{{LOOP},{UNTIL}}, 
+{{( See (BACK )},{}}, 
+enddoc)
+HEADER({BACK)},{BACKP},{DOCOL})
         DC      HERE
         DC      LSUB
         DC      COMMA
+        DC      SEMIS
+;
+worddoc( {CONTROL},{(FORWARD},{paren_forward},{ -- addr},{},
+{Start a forward branch by leaving the address that must be
+backpatched with an offset into forthsamp({addr}).
+_VERBOSE_({Usage is forthsamp({ POSTPONE BRANCH (FORWARD ..
+FORWARD) }) })}, 
+{{LOOP},{UNTIL}}, 
+{
+{: GS1 2 BRANCH [ (FORWARD ] 4 [ FORWARD) ] 6 ; GS1 . .},
+{6 2}
+}, 
+enddoc)
+HEADER({(FORWARD},{PFORWARD},{DOCOL})
+        DC      HERE
+        DC      ZERO
+        DC      COMMA
+        DC      SEMIS
+;
+worddoc( {CONTROL},{FORWARD)},{forward_paren},{addr --},{},
+{Complete a forward branch by backpatching an offset from
+forthcode({HERE}) into forthsamp({addr}), left there by
+forthcode({(FORWARD)}) . _VERBOSE_({Usage is forthsamp({
+POSTPONE BRANCH (FORWARD .. FORWARD) }) })}, 
+{{LOOP},{UNTIL}}, 
+{{( See (FORWARD)},{}}, 
+enddoc)
+HEADER({FORWARD)},{FORWARDP},{DOCOL})
+        DC      HERE
+        DC      OVER
+        DC      LSUB
+        DC      SWAP
+        DC      STORE
         DC      SEMIS
 ;
 worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{P,L0},
@@ -6172,37 +6224,26 @@ At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) f
 error checking.},{}, {}, enddoc)
 HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         DC      QCOMP
-        DC      HERE
+        DC      PBACK
         DC      ONE
         DC      SEMIS
 ;
-worddoc( {CONTROL},{ENDIF},{endif},{addr n --- (compile)},{P,CO,L0},
+worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{P,CO,L0},
 {Occurs in a colon-definition in form:
- forthsamp({IF ... ENDIF})                                                                                                                   x
- forthsamp({IF ... ELSE ... ENDIF})
-At run-time, forthcode({ENDIF}) serves only as the destination of a forward
-branch from forthcode({IF}) or forthcode({ELSE}) . It marks the conclusion of the conditional
-structure. forthcode({THEN}) is another name for forthcode({ENDIF}) . Both names are supported
-in fig-FORTH.
-
-At compile-time, forthcode({ENDIF}) computes the forward branch offset from forthvar({addr})
-to forthcode({HERE}) and stores it at forthvar({addr}) . forthvar({n}) is used for error tests.},
-{{IF},{ELSE}}, {}, enddoc)
-HEADER({ENDIF},{LENDIF},{DOCOL}, , B_IMMED)
-        DC      QCOMP
-        DC      TWO     ;{ Magic number}
-        DC      QPAIR
-        DC      HERE
-        DC      OVER
-        DC      LSUB
-        DC      SWAP
-        DC      STORE
-        DC      SEMIS
-;
-worddoc( {CONTROL},{THEN},{then},{},{P,CO,L O},
-{An alias for forthcode({ENDIF}) .},{}, {}, enddoc)
+ forthsamp({IF ... THEN})                                                                                                                   x
+ forthsamp({IF ... ELSE ... THEN})
+At run-time, forthcode({THEN}) serves only as the destination
+of a forward branch from forthcode({IF}) or forthcode({ELSE}) .
+It marks the conclusion of the conditional structure. At
+compile-time, forthcode({THEN}) computes the forward branch
+offset from forthvar({addr}) to forthcode({HERE}) and stores it
+at forthvar({addr}) . forthvar({n}) is used for error tests.},
+{{IF},{ELSE}}, 
+{}, 
+enddoc)
 HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
-        DC      LENDIF
+        DC      QCOMP, TWO, QPAIR
+        DC      FORWARDP
         DC      SEMIS
 ;
 worddoc( {CONTROL},{DO},{do},{n1 n2 --- (execute)
@@ -6231,82 +6272,75 @@ dnl ISO VIOLATION :
 dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4},
 
 HEADER({DO},{DO},{DOCOL}, , B_IMMED)
-        DC      LIT, XDO, COMMA
-        DC      HERE
+        DC      LIT, XDO, COMMA, PBACK
         DC      LIT,3    ;{ Magic number}
         DC      SEMIS
 ;
 worddoc( {CONTROL},{LOOP},{loop},{addr n --- (compiling)},{P,C2,L0},
 {Occurs in a colon-definition in form:
                forthsamp({DO ... LOOP})
-At run-time, forthcode({LOOP}) selectively controls branching back to the
-corresponding forthcode({DO}) based on the loop index and limit. The loop index
-is incremented by one and compared to the limit. The branch back to
-forthcode({DO}) occurs until the index equals or exceeds the limit;
-at that time, the parameters are discarded and execution continues
-ahead.
+At run-time, forthcode({LOOP}) selectively controls branching
+back to the corresponding forthcode({DO}) based on the loop
+index and limit. The loop index is incremented by one and
+compared to the limit. The branch back to forthcode({DO})
+occurs until the index equals or exceeds the limit; at that
+time, the parameters are discarded and execution continues
+ahead. 
 
-At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
-offset to forthvar({DO}) . forthvar({n}) is used for error testing.},
+At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)})
+and uses forthvar({addr}) to calculate an offset to
+forthvar({DO}) . forthvar({n}) is used for error testing.}, 
 {},
 { { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
 HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
-        DC      LIT,3    ;{ Magic number}
-        DC      QPAIR
-        DC      LIT, XLOOP, COMMA
-        DC      BACK
+        DC      LIT, 3, QPAIR
+        DC      LIT, XLOOP, COMMA, BACKP
         DC      SEMIS
 ;
 worddoc( {CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{P,C2,L0},
 {Used in a colon-definition in the form:
-forthsamp({DO ... n1 +LOOP})
+    forthsamp({DO ... n1 +LOOP})
 At run-time, forthcode({+LOOP}) selectively controls branching
-back to the corresponding forthcode({DO}) based on forthvar({n1}) , the loop index and the
-loop limit. The signed increment forthvar({n1}) is added to the index and the
-total compared to the limit.
-The branch back to forthcode({DO}) occurs until the new index is equal to or
-greater than the limit (forthvar({n1>0})), or until the new index is equal to or
-less than the limit (forthvar({n1<0})). Upon exiting the loop, the parameters
-are discarded and execution continues ahead.
+back to the corresponding forthcode({DO}) based on
+forthvar({n1}) , the loop index and the loop limit. The signed
+increment forthvar({n1}) is added to the index and the total
+compared to the limit. The branch back to forthcode({DO})
+occurs until the new index is equal to or greater than the
+limit (forthvar({n1>0})), or until the new index is equal to or
+less than the limit (forthvar({n1<0})). Upon exiting the loop,
+the parameters are discarded and execution continues ahead. 
 
-At compile time, forthcode({+LOOP}) compiles the run-time word forthcode({(+LOOP)}) and the
-branch offset computed from forthcode({HERE}) to the address left on the stack by
-forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.},{},
+At compile time, forthcode({+LOOP}) compiles the run-time word
+forthcode({(+LOOP)}) and the branch offset computed from
+forthcode({HERE}) to the address left on the stack by
+forthcode({DO}) . forthvar({n2}) is used for compile tine error
+checking.},{}, 
 { { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
 enddoc)
 HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
-        DC      LIT, 3    ;{ Magic number}
-        DC      QPAIR
-        DC      LIT, XPLOO, COMMA
-        DC      BACK
+        DC      LIT, 3, QPAIR
+        DC      LIT, XPLOO, COMMA, BACKP
         DC      SEMIS
 ;
 worddoc( {CONTROL},{UNTIL},{until},{f --- (run-time)
  addr n --- (compile)},{P,C2,L0},
 {Occurs within a colon-definition in the form:
               forthsamp({BEGIN ... UNTIL})
-At run-time, forthcode({UNTIL}) controls the conditional branch back to the
-corresponding forthcode({BEGIN})  If f is false, execution returns to just after
-forthcode({BEGIN}) .
-if true, execution continues ahead.
+At run-time, forthcode({UNTIL}) controls the conditional branch
+back to the corresponding forthcode({BEGIN}) If f is false,
+execution returns to just after forthcode({BEGIN}) . if true,
+execution continues ahead. 
 
-At compile-time, forthcode({UNTIL}) compiles forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for error tests.},{}, {}, enddoc)
+At compile-time, forthcode({UNTIL}) compiles
+forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
+addr. forthvar({n}) is used for error tests.},{}, 
+{}, enddoc)
 HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
-        DC      ONE
-        DC      QPAIR
-        DC      LIT, ZBRAN, COMMA
-        DC      BACK
-        DC      SEMIS
-;
-worddoc( {CONTROL},{END},{end},{},{P,C2,L0},
-{This is an 'alias' or duplicate definition for forthcode({UNTIL}) .},
-{{BEGIN}}, {}, enddoc)
-HEADER({END},{LEND},{DOCOL}, , B_IMMED)
-        DC      UNTIL
+        DC      ONE, QPAIR
+        DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 ;
 worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{P,C2,L0},
@@ -6320,99 +6354,102 @@ There is no effect on the stack. Execution cannot leave this loop
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},{}, {}, enddoc)
 HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
-        DC      ONE
-        DC      QPAIR
-        DC      LIT, BRAN, COMMA
-        DC      BACK
+        DC      ONE, QPAIR
+        DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 ;
 worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{P,C2},
 {Used within a colon-definition in the form:
-                 forthsamp({BEGIN ... WHILE ... REPEAT})
-At run-time, forthcode({REPEAT}) forces an unconditional branch back to just
-after the corresponding forthcode({BEGIN}) .
+    forthsamp({BEGIN ... WHILE ... REPEAT})
+At run-time, forthcode({REPEAT}) forces an unconditional branch
+back to just after the corresponding forthcode({BEGIN}) . 
 
-At compile-time, forthcode({REPEAT}) compiles forthcode({BRANCH}) and the offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for error testing.},{{WHILE}}, {}, enddoc)
+At compile-time, forthcode({REPEAT}) compiles
+forthcode({BRANCH}) and the offset from forthcode({HERE}) to
+addr. forthvar({n}) is used for error testing.},{{WHILE}}, 
+{},
+enddoc) 
 HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
         DC      QCOMP
-        DC      TOR
-        DC      TOR
-        DC      AGAIN
+        DC      LIT, 4, QPAIR ; {Matches WHILE ?}
+        DC      TOR    ; { WHILE handled later. }
+        DC      ONE, QPAIR   ; {Matches BEGIN ?}
+        DC      LIT, BRAN, COMMA, BACKP
         DC      FROMR
-        DC      FROMR
-        DC      LIT, 4, QPAIR
-        DC      HERE
-        DC      OVER
-        DC      LSUB
-        DC      SWAP
-        DC      STORE
+        DC      FORWARDP ;{ WHILE target. }
         DC      SEMIS
 ;
-worddoc( {CONTROL},{IF},{if},{f --- (run-time) / --- addr n (compile)},{P,C2,L0},
+worddoc( {CONTROL},{IF},{if},
+{f --- (run-time) / --- addr n (compile)},{P,C2,L0},
 {Occurs is a colon-definition in form:
-      forthsamp({IF (tp) ...  ENDIF}) or
-      forthsamp({IF (tp) ... ELSE (fp) ... ENDIF})
-At run-time, forthcode({IF}) selects execution based on a boolean flag. If forthvar({f}) is
-true (non-zero), execution continues ahead thru the true part. If forthvar({f})
-is false (zero), execution skips till just after forthcode({ELSE}) to execute
-the false part. After either part, execution resumes after forthcode({ENDIF}) .
-forthcode({ELSE}) and its false part are optional.; if missing, false execution
-skips to just after forthcode({ENDIF}) .
+      forthsamp({IF (tp) ...  THEN}) or
+      forthsamp({IF (tp) ... ELSE (fp) ... THEN})
+At run-time, forthcode({IF}) selects execution based on a
+boolean flag. If forthvar({f}) is true (non-zero), execution
+continues ahead thru the true part. If forthvar({f}) is false
+(zero), execution skips till just after forthcode({ELSE}) to
+execute the false part. After either part, execution resumes
+after forthcode({THEN}).
+forthcode({ELSE}) and its false part are optional.; if missing,
+false execution skips to just after forthcode({THEN}) . 
 
-At compile-time forthcode({IF}) compiles forthcode({0BRANCH}) and reserves space for an offset
-at forthvar({addr}) . forthvar({addr}) and forthvar({n}) are used later for resolution of the offset and
-error testing.},{}, {}, enddoc)
+At compile-time forthcode({IF}) compiles forthcode({0BRANCH})
+and reserves space for an offset at forthvar({addr}) .
+forthvar({addr}) and forthvar({n}) are used later for
+resolution of the offset and error testing.},{}, 
+{}, 
+enddoc) 
 HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
-        DC      LIT, ZBRAN, COMMA
-        DC      HERE
-        DC      ZERO
-        DC      COMMA
+        DC      LIT, ZBRAN, COMMA, PFORWARD
         DC      TWO     ;{ Magic number           }
         DC      SEMIS
 ;
 worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},{P,C2,L0},
 {Occurs within a colon-definition in the form:
-               forthexample({IF ... ELSE ... ENDIF})
-At run-time, forthcode({ELSE}) executes after the true part following forthcode({IF}) . forthcode({ELSE})
-forces execution to skip over the following false part and resumes
-execution after the forthcode({ENDIF}) . It has no stack effect.
+               forthexample({IF ... ELSE ... THEN})
+At run-time, forthcode({ELSE}) executes after the true part
+following forthcode({IF}) . forthcode({ELSE}) forces execution
+to skip over the following false part and resumes execution
+after the forthcode({THEN}) . It has no stack effect. 
 
-At compile-time forthcode({ELSE}) emplaces forthcode({BRANCH}) reserving a branch offset,
-leaves the address forthvar({addr2}) and forthvar({n2}) for error testing. forthcode({ELSE}) also
-resolves the pending forward branch from forthcode({IF}) by calculating the
-offset from forthvar({addr1}) to forthcode({HERE}) and storing at forthvar({addr1}) .},
-{}, {}, enddoc)
+At compile-time forthcode({ELSE}) emplaces forthcode({BRANCH})
+reserving a branch offset, leaves the address forthvar({addr2})
+and forthvar({n2}) for error testing. forthcode({ELSE}) also
+resolves the pending forward branch from forthcode({IF}) by
+calculating the offset from forthvar({addr1}) to
+forthcode({HERE}) and storing at forthvar({addr1}) .}, 
+{}, 
+{}, 
+enddoc)
 HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
-        DC      TWO     ;{ Magic number }
-        DC      QPAIR
-        DC      LIT, BRAN, COMMA
-        DC      HERE
-        DC      ZERO
-        DC      COMMA
+        DC      QCOMP, TWO, QPAIR
+        DC      LIT, BRAN, COMMA, PFORWARD
         DC      SWAP
-        DC      TWO     ;{ Magic number           }
-        DC      LENDIF
+        DC      FORWARDP
         DC      TWO     ;{ Magic number           }
         DC      SEMIS
 ;
-worddoc( {CONTROL},{WHILE},{while},{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{p,C2},
+worddoc( {CONTROL},{WHILE},{while},
+{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{p,C2},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
-At run-time, forthcode({WHILE}) selects conditional execution based on boolean
-flag forthvar({f}) . If forthvar({f}) is true (non-zero), forthcode({WHILE}) continues execution of the
-true part thru to forthcode({REPEAT}) , which then branches back to forthcode({BEGIN}) . If forthvar({f}) is
-false (zero), execution skips to just after forthcode({REPEAT}) , exiting the
-structure.
+At run-time, forthcode({WHILE}) selects conditional execution
+based on boolean flag forthvar({f}) . If forthvar({f}) is true
+(non-zero), forthcode({WHILE}) continues execution of the true
+part thru to forthcode({REPEAT}) , which then branches back to
+forthcode({BEGIN}) . If forthvar({f}) is false (zero),
+execution skips to just after forthcode({REPEAT}) , exiting the
+structure. 
 
-At compile time, forthcode({WHILE}) emplaces forthcode({0BRANCH}) and leaves forthvar({ad2}) of the
-reserved offset. The stack values will be resolved by forthcode({REPEAT}) .},
-{}, {}, enddoc)
+At compile time, forthcode({WHILE}) emplaces
+forthcode({0BRANCH}) and leaves forthvar({ad2}) of the reserved
+offset. The stack values will be resolved by
+forthcode({REPEAT}) .}, 
+{}, 
+{}, 
+enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
-        DC      LIT, ZBRAN, COMMA
-        DC      HERE
-        DC      ZERO
-        DC      COMMA
+        DC      LIT, ZBRAN, COMMA, PFORWARD
         DC      LIT, 4 ;{ Magic number           }
         DC      SEMIS
 ;
@@ -6474,7 +6511,7 @@ HEADER({SIGN},{SIGN},{DOCOL})
         DC      ZLESS
         _0BRANCH(SIGN1) ;{IF}
         DC      LIT,2DH
-        DC      HOLD    ;{ENDIF}
+        DC      HOLD    ;{THEN}
 SIGN1:  DC      SEMIS
 ;
 worddoc( {FORMATTING},{#},{number_sign},{d1 --- d2},{L0},
@@ -6498,7 +6535,7 @@ HEADER({#},{DIG},{DOCOL})
         DC      LESS
         _0BRANCH(DIG1)  ;{IF}
         DC      LIT,7
-        DC      PLUS    ;{ENDIF}
+        DC      PLUS    ;{THEN}
 DIG1:   DC      LIT,30H
         DC      PLUS
         DC      HOLD
@@ -6769,7 +6806,7 @@ TRIA1:  DC      CR,IDO
         DC      QTERM   ;{ ?TERMINAL}
         _0BRANCH(TRIA2)
         DC      LLEAV   ;{LEAVE}
-TRIA2:  _LOOP(TRIA1)    ;{ENDIF}
+TRIA2:  _LOOP(TRIA1)    ;{THEN}
         DC      CR
         DC      SEMIS
 ; This word is not even fig!
@@ -7108,3 +7145,4 @@ found, different vocabularies can have words with the same names.
 The wordset forthvar({VOCABULARIES}) contains words that manipulate
 those vocabularies.},
 {},{},{},{})
+
