@@ -126,6 +126,38 @@ CURRENT @   'DENOTATION >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'DENOTATION >WID CURRENT ! instead of DEFINITIONS
+( NIP PICK TUCK ) \ AvdH A1oct22
+\ Obscure stack manipulations.
+: NIP SWAP DROP ;
+: PICK 1+ CELLS DSP@ + @ ;
+: TUCK SWAP OVER ;
+
+
+
+
+
+
+
+
+
+
+
+( 2>R 2R> 2R@ ) \ AvdH A1oct22
+
+
+
+
+
+\ Double return stack manipulations
+: 2>R POSTPONE SWAP POSTPONE >R POSTPONE >R ; IMMEDIATE
+: 2R> POSTPONE R>  POSTPONE R> POSTPONE SWAP  ;  IMMEDIATE
+: 2R@ POSTPONE 2R> POSTPONE 2DUP POSTPONE 2>R ; IMMEDIATE
+
+
+
+
+
+
 ( COMPARE BOUNDS ALIGN ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
@@ -174,6 +206,38 @@ REQUIRE CONFIG
 
 
 \
+( [IF] ] [ELSE] [THEN] [DEFINED] [UNDEFINED] ) \ AvdH A2oct22
+REQUIRE COMPARE
+\ From ANSI manual.
+: SKIPPING
+1 BEGIN (WORD) DUP WHILE
+   2DUP "[IF]" COMPARE 0= IF 2DROP 1+ ELSE
+   2DUP "[ELSE]" COMPARE 0= IF 2DROP 1- DUP IF 1+ THEN ELSE
+        "[THEN]" COMPARE 0= IF 1- THEN THEN THEN
+   ?DUP 0= IF EXIT THEN
+REPEAT 2DROP DROP ;
+: [IF] 0= IF SKIPPING THEN ; IMMEDIATE
+: [ELSE] SKIPPING ; IMMEDIATE
+: [THEN] ; IMMEDIATE
+
+: [DEFINED] (WORD) PRESENT? ;
+: [UNDEFINED] [DEFINED] 0= ;
+( VALUE TO FROM ) \ AvdH A1oct22
+
+
+VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
+: FROM 0 TO-MESSAGE ! ;
+\ISO
+: TO 1 TO-MESSAGE ! ;
+\ ISO
+: VALUE CREATE , DOES> TO-MESSAGE @ IF ! ELSE @ THEN
+    0 TO-MESSAGE ! ;
+
+
+
+
+
+
 ( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
 \ Print all vocabularies names in existence.
 : .VOCS 'ID. FOR-VOCS ;
@@ -190,70 +254,54 @@ REQUIRE CONFIG
 
 
 \
+( @+ SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
+'$@ ALIAS @+
+( Build a set "x" with X items. )
+: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
+: !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
+: SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
+: SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
+: .SET   @+ SWAP ?DO I ? 0 CELL+ +LOOP ;   ( Print SET )
+( Retract from SET in same order. Leave ITEM. Use after !SET )
+: SET+@   DUP >R @ @ 0 CELL+ R> +! ;
+( Remove entry at ADDRESS from SET. )
+: SET-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE
+    -1 CELLS R> +! ;
+( For VALUE and SET : value IS present in set.)
+: IN-SET? $@ SWAP ?DO
+   DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 ( BIN-SEARCH binary_search_by stack ) \ AvdH
 ( nmin nmax xt -- nres )
-\ SOS `IMIN'  \ IMIN 'COMP EXECUTE is always TRUE
-\ TOS `IMAX'  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
+\ See description in next screen.
+\
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    >R
     BEGIN       \ Loop variant IMAX - IMIN
-        2DUP ( .S) <> WHILE
-        OVER 1+   OVER   + 2/  ( -- ihalf )
+        2DUP  <> WHILE
+        2DUP + 2/  ( -- ihalf )
         DUP R@ EXECUTE IF
-           SWAP   ROT DROP \ Replace IMIN
+           1+  SWAP ROT DROP \ Replace IMIN
         ELSE
-           1-     SWAP DROP \ Replace IMAX
+           SWAP DROP \ Replace IMAX
         THEN
     REPEAT
-DROP RDROP 1+ ;
-( BIN-SEARCH binary_search_variables ) \ AvdH
-VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
-VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
-VARIABLE COMP \ Execution token of comparison word.
-: BIN-SEARCH    COMP !  IMAX ! IMIN !
-    BEGIN       \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ ( .S) <> WHILE
-        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-        DUP COMP @ EXECUTE IF
-           ( ihalf) IMIN !
-        ELSE
-           ( ihalf) 1- IMAX !
-        THEN
-    REPEAT
-IMIN @ 1+ ; ( diagram is same than previous screen )
-\  HIDE IMIN   HIDE IMAX   HIDE COMP
+DROP RDROP ;
 ( binary_search_description )
 EXIT
 ( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
 Uses a comparison routine with execution token `COMP'
 `COMP' must have the stack diagram ( IT -- flag) , where flag
 typically means that IT compares lower or equal to some fixed
-value. It should be TRUE for `IMIN' and monotonic towards
-`IMIN' and `IMAX' . Finds the first index `IT' between `IMIN'
+value. It may be  TRUE , FALSE or undefined for `IMIN' , but
+it must be monotonic down in the range [IMIN,IMAX), i.e.
+if IMIN<=IX<=IY<IMAX then if IX COMP gives false, IY COMP
+cannot give true.
+
+BIN-SEARCH finds the first index `IT' between `IMIN'
 and `IMAX' (exclusive) for which `COMP' returns false.
-or else ``IMAX''
-An empty range is allowed.
-
-
-
-
-
-( binary_search_test )
-REQUIRE BIN-SEARCH
-: <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
-." EXPECT 100:" .
-CREATE XXX 123 , 64 , 32 , 12
-\ Find first number < 40
-
-
-
-
-
-
-
-
-
-
+or else ``IMAX''.
+An empty range is possible, (`IMIN' and `IMAX' are equal.)
+See also  binary_search_test in the examples section.
 ( EXCHANGE PAIR[] --qsort-auxiliary ) \ AvdH A2apr22
 
 \ Exchange the content at ADDR1 and ADDR2 over a fixed LENGTH.
@@ -2430,6 +2478,38 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
      INIT-T INIT-P 2 .P BATCH1
      THOUSANDS @ 1
      ?DO I MILS !  1 MANTISSA !  NEWLINE I 500 * BATCH LOOP ;
+( BIN-SEARCH binary_search_variables ) \ AvdH
+VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    COMP !  IMAX ! IMIN !
+    BEGIN       \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ ( .S) <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ 1+ ; ( This example with variables works the same as )
+( the stack version in utilities.)
+( binary_search_test )
+REQUIRE BIN-SEARCH
+: <100 100 < ;
+"Expect 100, a few times plus 99 101 :" TYPE
+-1000 +1000 '<100 BIN-SEARCH .
++90 +110 '<100 BIN-SEARCH .
++90 +111 '<100 BIN-SEARCH .
++91 +110 '<100 BIN-SEARCH .
++99 +101 '<100 BIN-SEARCH .
++99 +100 '<100 BIN-SEARCH .
++100 +101 '<100 BIN-SEARCH .
++100 +100 '<100 BIN-SEARCH .
++99 +99 '<100 BIN-SEARCH .
++101 +101 '<100 BIN-SEARCH .
+
+
 ( tak1 )
 VARIABLE X      VARIABLE Y      VARIABLE Z
 
