@@ -770,10 +770,11 @@ USINI:
 _COMMENT
 ;{ This will steer clear of a forth executable, provided it is}
 ;{ the first file on the floppy. }
+;{ (X-1)/S+1 rounds up to whole `S', this is used several times. }
 ;{ The 2 is rounding plus the extra sector in .EXE files.}
 ;{ However it deviates much from the classic model and requires}
 ;{ that the disk parameters are available (not only for USEBIOS)}
-	DC      (INITDP-$$-1)/KBBUF+1 
+	DC      (INITDP-$$-1)/KBBUF+1 ; +1 for EXE 
 _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
 	DC      0       ;{ INIT (OFFSET) }
@@ -782,9 +783,11 @@ _ENDCOMMENT
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
 ;{ within the forth system itself. }
-;{ (X-1)/S+1 rounds up to whole `S', and yes both parts separately.}
-	DC      (SECSTRT-1)/SPB+1 + (INITDP-$$-1)/KBBUF+1 
-			;{ INIT (OFFSET) }
+;{ BPS subtracted because SECSTRT corresponds with one sector into source. }
+;{ Round up both parts separately.}
+;       You need a filler file of one sector, 
+;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive). 
+	DC      (SECSTRT+((INITDP-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
 });_END___1__({_BOOTFD__1_})
 ;____1_____ _BOOTHD__1_({
 ;{ This will reserve place for the system itself, on the first part of a }
@@ -1302,7 +1305,7 @@ HEADER({B/SCR},{BSCR},{DOCON})
 ;{ All user variables are initialised }
 ;{ with the values from USINI.}
 ;{ The implementation relies on the initialisation of }
-;{ those with numbers (6..16H), so change in concord with USINI.}
+;{ those with numbers (3..11), so change in concord with USINI.}
 HEADER({S0},{SZERO},{DOUSE})
 	DC	CELLS(3) 
 ;
@@ -1505,7 +1508,7 @@ HEADER({CFA},{CFA},{DOCOL})
 HEADER({NFA},{NFA},{DOCOL})
 	DC	LIT,1+CELLS(2)
 	DC	LSUB
-	DC	LIT,0FFFFH
+	DC	LIT,-1
 	DC	TRAV
 	DC	SEMIS
 ;
@@ -2062,12 +2065,11 @@ HEADER({IMMEDIATE},{IMMED},{DOCOL})
 ;
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
 	DC	BUILD
-	DC	LIT
-	DC	0A081H
-	DC	COMMA
+	DC	LIT, 80H+1, CCOMM    ; Dummy name field 
+	DC	LIT, " "+80H, CCOMM
 	DC	CURR
 	DC	FETCH
-	DC	CFA
+        DC      LIT, 2, LSUB ; Skip backwards over dummy name field.
 	DC	COMMA
 	DC	HERE
 	DC	VOCL
@@ -2076,7 +2078,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
 	DC	VOCL
 	DC	STORE
 	DC	DOES
-DOVOC	DC	CELLP
+DOVOC	DC	TWOP    ; i.e. Skip ' ' name.
 	DC	CONT
 	DC	STORE
 	DC	SEMIS
@@ -2088,7 +2090,7 @@ DOVOC	DC	CELLP
 ;
 HEADER({FORTH},{FORTH},{DODOE},1)
 	DC	DOVOC
-	DC	0A081H
+	DB      80H+1, " "+80H  ; Dummy name field 
 	DC	_LINK_FIELD(TASK)
 	DC	0	;{ END OF VOCABULARY LIST}
 ;
