@@ -1853,10 +1853,10 @@ HEADER({DP},{LDP},{DOUSE})
         DC      CELLS(9)
 ;
 worddoc({VOCABULARIES},{VOC-LINK},{voc_link},{--- addr},{U},{
-A user variable containing the address of a field in the definition
-of the most recently created vocabulary. All vocabulary names are
+A user variable containing the address of the VLFA in the word
+most recently created by forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
 linked by these fields to allow control for forthcode({FORGET}) ting thru multiple
-vocabularies.},{{VOCABULARY}})
+vocabularies.})},{{VOCABULARY}})
 HEADER({VOC-LINK},{VOCL},{DOUSE})
         DC      CELLS(10)
 ;
@@ -2126,7 +2126,8 @@ TRAV1:  DC      OVER    ;{BEGIN}
         DC      SEMIS
 ;
 worddoc({VOCABULARIES},{LATEST},{latest},{--- addr},{},{
-Leave the name field address of the topmost word in the forthcode({CURRENT}) 
+Leave the name field address ( forthdefi({NFA}) )
+of the topmost word in the forthcode({CURRENT}) 
 vocabulary.},{{VOCABULARY}})
 HEADER({LATEST},{LATES},{DOCOL})
         DC      CURR
@@ -2943,10 +2944,19 @@ make it the forthcode({CONTEXT}) vocabulary which is searched first by forthcode
 The sequence forthvar({cccc}) forthcode({DEFINITIONS}) also make forthvar({cccc}) the forthcode({CURRENT}) 
 vocabulary into which new definitions are placed.
 
+A vocabulary parameter field 
+contains a dummy name field (forthcode({DFNA})) with a name " " (blank) ,
+a dummy link field (forthcode({DLFA})) and 
+the vocabulary link field address ( forthdefi({VLFA}) ).
+Actually executing the vocabulary means storing its DLFA into forthcode({CONTEXT}) .
+The VLFA points to the VLFA of the next vocabulary or 0 for the end.
+
 In fig-FORTH, cccc will be so chained as to include all definitions
 of the vocabulary in which forthvar({cccc}) is itself defined. All vocabularys
-ultimately chain to Forth. By convention, vocabulary names are to be
-declared forthcode({IMMEDIATE}) .},{{VOC-LINK}})
+ultimately chain to Forth. 
+By convention, vocabulary names are to be
+declared forthcode({IMMEDIATE}) .},
+{{VOC-LINK}})
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      BUILD
         DC      LIT, 80H+1, CCOMM    ; Dummy name field
@@ -3017,7 +3027,7 @@ HEADER({QUIT},{QUIT},{DOCOL})
         DC      BLK
         DC      STORE
         DC      LBRAC
-QUIT1:  DC      SPSTO   ;{BEGIN}
+QUIT1:  DC      RPSTO   ;{BEGIN}
         DC      CR
         DC      QUERY
         DC      INTER
@@ -4034,7 +4044,7 @@ TYPE3:  DC      SEMIS
 worddoc({OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},{
 Transmit ascii character forthvar({c}) to the terminal.
 All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthdfn({revectoring}) it. 
+I/O can be redirected, by forthdefi({revectoring}) it. 
 forthcode({OUT}) is incremented for each character output and reset for 
 a carriage return.
 Note that in this ciforth (``classical FIG'') terminal I/O mainly 
@@ -5634,7 +5644,7 @@ This is very worrysome for mathematicians, who stick to the rule that
 forthsamp({MOD n m}) gives a result in the range forthvar({0 ... m-1})
 (forthdefi({floored division})).
 _BITS16_({Having a mere 3000 for the number range can easily lead to
-overflow in intermediate results during forthdfn({scaling:}) a multiplication
+overflow in intermediate results during forthdefi({scaling:}) a multiplication
 followed by a division. _VERBOSE_({ For example forthsamp({: ADD10% 110
 * 100 / ;})}). There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
