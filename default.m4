@@ -25,11 +25,28 @@ dnl mark here your preferences
 dnl Note that there is no attempt to quote the paremeters.
 dnl If you try to make Forth words with { } your coat is sold.
 dnl
-dnl Use DOS for I/O. Possibility of redirection.
-define( {_USEDOS_1_}, _no({$0}) )dnl
+dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl Use BIOS for I/O. No redirection but possible stand alone.
 define( {_USEBIOS_1_}, _no({$0}) )dnl       
+dnl
+dnl Use DOS for I/O. Possibility of redirection.
+define( {_USEDOS_1_}, _no({$0}) )dnl
+dnl
+dnl Use DOS for I/O. Possibility of redirection. 
+dnl File based, no obsolete MSDOS features.
+define( {_MODERN_1_}, _no({$0}) )dnl
+dnl
+dnl    CHOOSE ONE OF THE FOLLOWING
+dnl
+dnl Boot sector present for use on PC. _USEBIOS_ required.
+dnl May run under MSDOS as well.
+define( {_BOOTED__1_}, _no({$0}) )dnl       
+dnl
+dnl Use BIOS for I/O. No redirection but possible stand alone.
+define( {_HOSTED__1_}, _no({$0}) )dnl       
+dnl
+dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl
 dnl Keep old FIG features like WIDTH ENCLOSE
 define( {_OLDFIG__1_}, _no({$0}) )dnl       
