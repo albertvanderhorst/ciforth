@@ -2,9 +2,10 @@
 \ $Id$}
 \ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 
+\ :  ?TEST 1+ 0 DO 0 WORD LOOP ;
 : ?TEST DROP ;
 
-\ worddoc(  {ISO},{CHAR},{--- c},{ISO},
+\ worddoc(  {ISO},{CHAR},{},{--- c},{ISO},
 \ {Parse a word and 
 \ leave forthvar({c}) the first non blank char of that word 
 \ input stream.},
@@ -109,7 +110,7 @@ CR ." EXPECT 2 : " S" AAPAA" OVER OVER CHAR P $I ROT - . DROP
 CR ." EXPECT 0 : " S" AAPAA" CHAR C $I .
 
 
-\ worddoc( {VECTORS},{VECTOR},{vector},{---},{},
+\ worddoc( {VECTORS},{VECTOR},{},{---},{},
 \ { A define word that can be used to create an execution vector
 \ forthvar({V}) . forthvar({V}) initially does nothing. After
 \ forthsample({VECTOR V ' W CFA ' V !}) forthvar({V}) has the execution
@@ -122,7 +123,7 @@ VECTOR Q    : JAN 1 2 3 ;   ' JAN CFA    ' Q   !
 CR ." EXPECT 3 2 1 :"  Q . . . 
 FORGET Q 
 
-\ worddoc(  {STRING},{COMPARE-AREA},{compare_area},{addr1 addr2 n--- f},{},{
+\ worddoc(  {STRING},{COMPARE-AREA},{},{addr1 addr2 n--- f},{},{
 \ Compare two memory area's with length forthvar({n}) and starting
 \ at forthvar({addr1}) and forthvar({addr2}) .
 \ Return forthvar({f}) the difference between
@@ -190,7 +191,7 @@ DECIMAL
 \ {{TICKS}})
 : PASSED DMINUS TICKS D+ SWAP DROP 0< 0= ;
 
-\ worddoc(  {EVENT},{EARLIER},{earlier},{d1 d2 ---},{},
+\ worddoc(  {EVENT},{EARLIER},{earlier},{d1 d2 --- f},{},
 \ {The time forthvar({d1}) indicating a tick count, is earlier
 \  or at the same time than the time forthvar({d2}) .
 \ },
@@ -268,7 +269,7 @@ MAXEVENT 8 ARRAY EVENT[]
 \ pointers are equal it means the table is totally empty.},
 \ {{EVENT[]},{EMPTIED},{FILLED}})
 : #EMPTY   EMPTIED @   FILLED @ -  
-    -1 OVER < IF MAXEVENT + THEN ;
+    1 OVER > IF MAXEVENT + THEN ;
 
 \ worddoc( {EVENT},{#FULL},{amount_full},{ --- n},{},
 \ {Gives the lenght of the filled part of the event table.
@@ -277,8 +278,8 @@ MAXEVENT 8 ARRAY EVENT[]
 : #FULL   FILLED @   EMPTIED @ -  
     DUP 0< IF MAXEVENT + THEN ;
 
-1 ?TEST
-." EXPECT 1 " MAXEVENT 1 - . ." 123 :" 123 #FULL . #EMPTY . .
+1 ?TEST       !EVENT
+." EXPECT 0 " MAXEVENT . ." 123 :" 123 #FULL . #EMPTY . .
 
 \ worddoc( {EVENT},{FIND-EVENT},{find_event},{ d --- n},{},
 \ {Find the place where forthvar({d}) is to be put into the event table,
@@ -353,7 +354,7 @@ FORGET T
     #EMPTY 1 = IF 2DROP -1 ELSE
         2DUP FIND-EVENT >R
         2DUP R EVENT[] 2@ D= IF
-            2DROP R> ( Event already present)
+            2DROP R> \ Event already present
         ELSE
             R INSERT-EVENT R> 
         THEN 
@@ -376,11 +377,94 @@ FORGET T
 
 3 ?TEST
 !EVENT 123
-." EXPECT 0 1 2 123 :" 123  10. SET-EVENT . 30. SET-EVENT . 20. SET-EVENT . .
+." EXPECT 0 1 1 123 :" 123  10. SET-EVENT . 30. SET-EVENT . 20. SET-EVENT . .
 ." EXPECT 0 1 2 -1 :"   GET-EVENT . GET-EVENT . GET-EVENT . GET-EVENT .
 ." EXPECT 3 3 -1 :" 40. SET-EVENT . GET-EVENT . GET-EVENT .
 ." EXPECT 20 123 :" 1 EVENT[] 2@ D. .
 
 ^
+\ worddoc({TIME},{NS},{@},{n ---},{},
+\ {Wait forthvar({n}) nanoseconds.
+\ This is a busy wait
+\ _VERBOSE({, it blocks the system and should typically
+\ be used for delays of a microsecond or so}).
+\ },
+\ {{}})
+: NS TICKS ROT
+    TICKS/SEC 1000000000 */ S->D D+ 
+    BEGIN 2DUP PASSED UNTIL 2DROP ;
 
+." EXPECT 1 [ delay of approximately 1 second ] 2 :" 2 1 1000000000 NS . . 
+
+\ worddoc( {FORMULA},{GOLD-PORT},{},{ --- port},{},
+\ {Leave the forthvar({addr}) of printer port to be used by the
+\ gold tingel tangel. This is a configuration item, and it 
+\ cannot be made automatic.
+\ },
+\ {{TICKS}})
+HEX 0 408 L@ CONSTANT GOLD-PORT
+." EXPECT 378 :" GOLD-PORT HEX . DECIMAL
+
+13 ?TEST
+CR ." Do not yet supply power to the gold tingel!"
+CR ." Connect the gold tingel to the parallel port."
+CR ." The red LED should light up for 1 sec" 
+CR ." Press a key"   KEY   DROP 
+1 GOLD-PORT PC!   1000000000 NS   0 GOLD-PORT PC!   
+CR ." The yellow LED should light up for 1 sec" 
+CR ." Press a key"   KEY   DROP 
+2 GOLD-PORT PC!   1000000000 NS   0 GOLD-PORT PC!   
+CR ." Press a key"   KEY   DROP 
+CR ." The green LED should light up for 1 sec" 
+4 GOLD-PORT PC!   1000000000 NS   0 GOLD-PORT PC!   
+CR ." IF IT FAILED, REBOOT AND PRESS THE ICON NEW HARDWARE"
+CR ." IF IT PERSISTS, REINSTALL WINDOWS MILLENIUM"
+CR ." Press a key"   KEY   DROP 
+
+\ worddoc( {GOLD},{GOLD-LATCH},{},{ --- port},{},
+\ {Leave the forthvar({addr}) of a variable that latches the 
+\ output to the forthcode({GOLD-PORT}). _VERBOSE_({ It remembers the
+\ bits set in the port, that we don't know, but don't want to change})
+\ },
+\ {{}})
+0 VARIABLE GOLD-LATCH 
+
+\ worddoc( {GOLD},{GOLD-CLOCK},{},{f --- },{},
+\ {Shift one bit of data into the forthcode({GOLD-PORT}) .
+\ 0 if forthvar({f}) contains 0 else 1.
+\ data sits in
+\ bit 1 and is clocked on the rising edge of bit 2 }, 
+\ {{}})
+: GOLD-CLOCK
+    DUP IF 1 ELSE 0 THEN GOLD-PORT PC!    1000 NS
+        IF 3 ELSE 2 THEN GOLD-PORT PC!    1000 NS
+;
+
+7 ?TEST
+CR ." Supply power to the gold tingel. "
+CR ." Expect all relais to release and then attract one by one"
+CR ." Press a key"   KEY   DROP 
+: DOIT 
+    40 0 DO 0 GOLD-CLOCK 
+    1 GOLD-CLOCK 
+    40 0 DO 100000000 NS 0 GOLD-CLOCK LOOP ;
+DOIT FORGET DOIT
+
+\ worddoc( {GOLD},{SET-GOLD-BYTE},{},{c -- },{},
+\ {Transfer 8  bit of data from forthvar({c}) 
+\ to the gold tingel, starting with the l.s. bit.
+\ This is an auxiliary word for forthcode({SET-GOLD}). }, 
+\ {{GOLD-PORT}})
+: SET-GOLD-BYTE    8 0 DO 1 AND GOLD-CLOCK 2 / LOOP ;
+
+\ worddoc( {GOLD},{SET-GOLD},{},{addr -- },{},
+\ {Transfer 40 bit of data from address forthvar({addr}) 
+\ to the gold tingel, starting with the l.s. bit of the l.s.
+\ byte. The last bit shifted agrees with musical note C2. }, 
+\ {{GOLD-PORT}})
+: SET-GOLD   5 OVER + SWAP DO I C@ SET-GOLD-BYTE LOOP ;
+
+CR ." EXPECT THE LOWEST C (C2) "
+PAD 5 ERASE  HEX 80   PAD 4 + !   PAD SET-GOLD
+PAD 5 ERASE  70000000 NS          PAD SET-GOLD
 
