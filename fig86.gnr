@@ -506,9 +506,9 @@ GDTLOAD DW     GDTLEN
 ;____1_____ _HOSTED_LINUX_1_({
 include(width32.m4)       
 	global  figforth        ; Called from c. Remainder c-routines to be called from here.
-        extern  c_type,c_expec,c_key,c_qterm
-        extern  c_rslw, c_block_exit, c_block_init
-        extern  print_cold , print_hot
+	extern  c_type,c_expec,c_key,c_qterm
+	extern  c_rslw, c_block_exit, c_block_init
+	extern  print_cold , print_hot
 
 	section forth progbits write exec alloc
 figforth:
@@ -517,13 +517,13 @@ figforth:
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
-        LEA     ECX,[ESP+CELLS(1)]
-        XOR     EAX,EAX
-        CMP     EAX,_CELL_PTR[ECX]
-        JNZ     ENDIF1          
+	LEA     ECX,[ESP+CELLS(1)]
+	XOR     EAX,EAX
+	CMP     EAX,_CELL_PTR[ECX]
+	JNZ     ENDIF1          
 	JMP     BOOTUP                  ; Cold start
 ENDIF1: 
-        JMP     BOOTUP+CELLS(2)         ; Warm start
+	JMP     BOOTUP+CELLS(2)         ; Warm start
 
 RETURN_LINUX:
 	MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
@@ -824,6 +824,9 @@ USINI:
 ;____1_____ _LINUX_C_1_({
 	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_LINUX_C_1_})
+;____1_____ _LINUX_N_1_({
+	DC      0       ;{ INIT (OFFSET) }
+});_END___1__({_LINUX_N_1_})
 ;____1_____ _MODERN_1_({
 	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
@@ -2252,6 +2255,9 @@ HEADER({COLD},{COLD},{DOCOL})
 ;____1_____ _LINUX_C_1_({
 	DC      BLINI           
 });_END___1__({_LINUX_C_1_})
+;____1_____ _LINUX_N_1_({
+	DC      BLINI           
+});_END___1__({_LINUX_N_1_})
 	DC	ABORT
 	PAGE
 CODE_HEADER({S->D},{STOD})
@@ -2631,6 +2637,15 @@ CODE_HEADER({BDOS},{BDOS})
 	PUSH     DI     ;{ i.e. flags }
 	_NEXT                            
 
+;{ Generic call on LINUX }
+CODE_HEADER({LINOS},{LINOS})
+	POP     AX        ; Function number
+	POP     DX        ; Third parameter, if any
+	POP     CX        ; Second parameter, if any
+	POP     BX        ; First parameter.
+	INT     80H          
+	JMP     APUSH     ; Positive means okay. Negative means -errno.                    
+
 	     ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
 	     DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
@@ -2727,6 +2742,41 @@ CODE_HEADER({?TERMINAL},{QTERM})
 	_NEXT
 ;
 });_END___1__({_LINUX_C_1_})
+;____1_____ _LINUX_N_1_({
+;{ All I/O goes through the modern device (unix-standard)}
+;{ device I/O. Code fields are filled in during bootup. }
+;{ Lower case labels starting with "c_.." are c-supplied facilities.}
+CODE_HEADER({TYPE},{LTYPE})
+	CALL	c_type                  
+	LEA     ESP,[ESP+CELLS(2)]    ; remove input
+	_NEXT
+;
+HEADER({EMIT},{EMIT},{DOCOL})      
+	DC      DUPE,LIT,LF,EQUAL
+	_0BRANCH(EMIT1)
+	DC      LIT,ACR,EMIT
+	DC      ZERO,LOUT,STORE
+EMIT1:  
+	DC	SPFET, ONE, LTYPE
+	DC      DROP
+	DC	SEMIS
+;
+CODE_HEADER({EXPECT},{EXPEC})
+	CALL	c_expec               
+	LEA     ESP,[ESP+CELLS(2)]    ; remove input
+	_NEXT
+;
+CODE_HEADER({KEY},{KEY})
+	CALL	c_key
+	PUSH	EAX
+	_NEXT
+;
+CODE_HEADER({?TERMINAL},{QTERM})
+	CALL	c_qterm
+	PUSH	EAX
+	_NEXT
+;
+});_END___1__({_LINUX_N_1_})
 ;____1_____ _USEDOS_1_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
@@ -3014,6 +3064,46 @@ RSLW2:  DC      TOR
 	DC      SEMIS
 
 });_END___1__({_MODERN_1_})
+;____1_____ _LINUX_N_1_({
+HEADER({BLOCK-FILE},{BLFL},{DOVAR})
+	_STRING({BLOCKS.FRT})
+	DB      0       ; { Easier on linux}
+	_RESB(19)               ;{ Allow for some path}
+;
+HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
+	DC      0
+;
+HEADER({DISK-ERROR},{DERR},{DOVAR})
+	DC      0
+;
+HEADER({BLOCK-INIT},{BLINI},DOCOL)
+	DC      BLFL, ONEP
+	DC      LIT, M4_O_RDWR
+	DC      ZERO
+	DC      LIT, M4_open
+	DC      LINOS
+	DC      DUPE, BHAN, STORE
+	DC      ZERO, MIN      ; 0/-errno
+        DC      DERR, STORE
+	DC      SEMIS
+;
+HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
+	DC      BHAN, FETCH
+	DC      ZERO,ZERO
+	DC      LIT, M4_close
+	DC      LINOS
+	DC      ZERO, MIN      ; 0/-errno
+        DC      DERR, STORE
+	DC      SEMIS
+;
+;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
+CODE_HEADER({R/W},{RSLW})
+	CALL c_rslw
+	MOV     [_PARAMETER_FIELD(DERR)],AX
+	LEA     ESP,[ESP+CELLS(3)]    ; remove input
+	_NEXT
+
+});_END___1__({_LINUX_N_1_})
 ;____1_____ _LINUX_C_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
 	_STRING({BLOCKS.FRT})
@@ -3023,26 +3113,26 @@ HEADER({DISK-ERROR},{DERR},{DOVAR})
 	DC      0
 ;
 CODE_HEADER({BLOCK-INIT},{BLINI})
-        XOR     AX,AX
-        MOV     AL,[_PARAMETER_FIELD(BLFL)]
-        MOV     BX,_PARAMETER_FIELD(BLFL)+1
-        PUSH    BX
-        PUSH    AX
-        CALL    c_block_init
-        MOV     [_PARAMETER_FIELD(DERR)],AX
+	XOR     AX,AX
+	MOV     AL,[_PARAMETER_FIELD(BLFL)]
+	MOV     BX,_PARAMETER_FIELD(BLFL)+1
+	PUSH    BX
+	PUSH    AX
+	CALL    c_block_init
+	MOV     [_PARAMETER_FIELD(DERR)],AX
 	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-        _NEXT
+	_NEXT
 ;
 CODE_HEADER({BLOCK-EXIT},{BLEXI})
-        CALL    c_block_exit
-        _NEXT
+	CALL    c_block_exit
+	_NEXT
 ;
 ;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 CODE_HEADER({R/W},{RSLW})
-        CALL c_rslw
-        MOV     [_PARAMETER_FIELD(DERR)],AX
+	CALL c_rslw
+	MOV     [_PARAMETER_FIELD(DERR)],AX
 	LEA     ESP,[ESP+CELLS(3)]    ; remove input
-        _NEXT
+	_NEXT
 
 });_END___1__({_LINUX_C_1_})
 ;____1_____ _USEDOS_1_({
@@ -3529,7 +3619,7 @@ CODE_HEADER({BYE},{BYE})
 ;____1_____ _HOSTED_LINUX_1_({
 	JMP     RETURN_LINUX    
 });_END___1__({ _HOSTED_LINUX_1_})
-        HLT     ; Wait for reset
+	HLT     ; Wait for reset
 
 	PAGE
 HEADER({LIST},{LISTC},{DOCOL})
@@ -3673,7 +3763,7 @@ INITDP	EQU	$	;{SHOW END OF DICTIONARY}
 ;       zero bits in the output file.
 
 FORTHSIZE       EQU     $-figforth
-         section dictionary nobits write exec alloc             
+	 section dictionary nobits write exec alloc             
 
 INITDP:                 ;  It may be that it is not consecutive with TASK
 			;  And that is a hell of a problem.

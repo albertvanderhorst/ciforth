@@ -8,7 +8,10 @@
 #.SUFFIXES:
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
+# Of the following constant.m4 is not a real source file.
+# It could be, but it has been stolen.
 INGREDIENTS = \
+constant.m4      \
 header.m4        \
 postlude.m4      \
 prelude.m4       \
@@ -19,8 +22,8 @@ width32.m4       \
 
 # The kinds of Forth's that can be made
 # Different assemblers should generate equivalent Forth's.
-TARGETS= msdos alone linux
-CSRC= figforth toblock fromblock
+TARGETS= msdos alone linux lina
+CSRC= figforth toblock fromblock stealconstant
 
 RELEASECONTENT = \
 fig86.gnr        \
@@ -58,7 +61,7 @@ default : figforth
 fig86.$(s).bin :
 
 # Put include type of dependancies here
-alone.cfg msdos.cfg linux.cfg : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
+$(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
 
 all: $(TARGETS:%=fig86.%.bin) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
@@ -86,13 +89,16 @@ alone.asm : fig86.alone.asm ; cp $+ $@
 
 zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
 
-releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
+releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
-fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
+fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
 # This linking must be static, because `link.script' is tricky enough.
 # but a .5M executable is better than a 64 M executable.
 figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@ 
+
+# Convenience under linux. Steal the definitions of constants from c include's.
+constant.m4 : stealconstant.c ; cc -E $+ | grep '^define' >$@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
