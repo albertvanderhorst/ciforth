@@ -975,7 +975,7 @@ CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
         _PUSH          ;{ TO PARAMETER STACK}
 ;
-worddoc({BOOTING},{+ORIGIN},{plus_origin},{n --- addr},{},{
+worddoc({INIT},{+ORIGIN},{plus_origin},{n --- addr},{},{
 Leave the memory address relative by forthvar({n}) bytes 
 to the area from which the user variables are initialised, 
 so one can access or modify the boot-up parameters. },{{(ABORT)},{USER}})
@@ -1203,7 +1203,7 @@ ENCL4:  MOV     AX,DX
         INC     AX      ;{COUNT+1}
         _2PUSH
 ;
-worddoc({},{CR},{cr},{},{L0},{
+worddoc({OUTPUT},{CR},{cr},{},{L0},{
 Transmit a carriage return and line feed to the selected output
 device.},{{OUT}})
 HEADER({CR},{CR},{DOCOL})
@@ -1850,7 +1850,7 @@ default value on single number input is -1.},{{<#},{FLD},{HLD}})
 HEADER({DPL},{DPL},{DOUSE})
         DC      CELLS(20)
 ;
-worddoc({},{FLD},{f_l_d},{--- addr},{U},{
+worddoc({NUMBER},{FLD},{f_l_d},{--- addr},{U},{
 A user variable for control of number output field width. Presently
 unused in fig-FORTH.},{})
 HEADER({FLD},{LFLD},{DOUSE})
@@ -2926,7 +2926,7 @@ HEADER({(},{PAREN},{DOCOL},1)
         DC      LWORD
         DC      SEMIS
 ;
-worddoc({PARSING},{QUIT},{quit},{},{},{
+worddoc({INIT},{QUIT},{quit},{},{},{
 Clear the return stack, stop compilation, and return control to the
 operators terminal. No message is given.},{})
 HEADER({QUIT},{QUIT},{DOCOL})
@@ -3005,7 +3005,7 @@ _ENDCOMMENT
 ;
 CLD1:   DC      COLD
 ;
-worddoc({},{COLD},{cold},{},{},{
+worddoc({INIT},{COLD},{cold},{},{},{
 The cold start proceedure to adjust all user variables to their intial values, i.a.
 the stacks and the dictionary pointers.
 Restart via forthcode({ABORT}) .
@@ -3311,7 +3311,7 @@ as the least recently written.},{{BLOCK}})
 HEADER({USE},{USE},{DOVAR})
         DC BUF1
 ;
-worddoc({},{PREV},{prev},{---- addr},{},{
+worddoc({STORAGE},{PREV},{prev},{---- addr},{},{
 A variable containing the address of the disc buffer most recently
 referenced. The forthcode({UPDATE}) command marks this buffer to be later written
 to disc.},{{BLOCK}})
@@ -3348,7 +3348,7 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV,FETCH
         DC      STORE,SEMIS
 ;
-worddoc({UPDATE},{EMPTY-BUFFERS},{empty_buffers},{},{L0},{
+worddoc({STORAGE},{EMPTY-BUFFERS},{empty_buffers},{},{L0},{
 Mark all block-buffers as empty, not necessarily affecting the
 contents.
 Updated blocks are not written to the disc. This is also an
@@ -4726,7 +4726,7 @@ HEADER({#>},{EDIGS},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc({},{SIGN},{sign},{n d --- d},{L0},{
+worddoc({NUMBER},{SIGN},{sign},{n d --- d},{L0},{
 Stores an ascii "-" sign just before a converted numeric output
 string in the text output buffer when forthvar({n}) is negative. forthvar({n}) is discarded
 but double number forthvar({d}) is maintained. Must be used between forthcode({<#}) and forthcode({#>}) .},
@@ -5132,3 +5132,7 @@ _ENDCOMMENT
 
 ;{ Define the entry point, not valid for auto booting.}
         END     ORIG
+divert(2)dnl m4 generates code on channel 1, documentation on 3
+; Split here for documentation
+_GENERATE_CODE 
+
