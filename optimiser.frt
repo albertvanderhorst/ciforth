@@ -17,6 +17,12 @@ REQUIRE $
 \ Store a LOW HIGH range with hl-code in the dictionary.
 : HL-RANGE, OVER - HL-CODE, ;
 
+\ Recompile the code from BEGIN END. Leave END as the new begin.
+: >HERE SWAP 2DUP -  HL-CODE, ;
+
+\ Make the code from BEGIN END empty, by leaving END END.
+: EMPTY>  SWAP DROP DUP ;
+
 \ For POINTER : it POINTS not yet to an ``EXIT''.
 : ?NOT-EXIT   @ '(;) = 0= ;
 \ For POINTER : it POINTS not yet to a ``NOOP''.
@@ -46,9 +52,6 @@ REQUIRE $
 \ ----------------------    ----------------------     ----------------------
 
 
-\ For DEA : it HAS no side effects, input or output.
-: NS?   >FFA @ FMASK-NS AND FMASK-NS = ;
-
 \ The virtual stack depth, maintained while parsing.
 VARIABLE VD
 
@@ -71,12 +74,21 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ this stackeffect the virtual stack doesn't underflow.
 : ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- VD @ > 0=  AND ;
 
-\ ---------------------------------------------------------------------
-\ INCLUDE nss.frt
+\ For DEA FLAG : all optimisations required by flag ARE allowed there.
+\ The meaning of the st flag is reversed, this is a design error to
+\ be fixed in analsyer.frt
+: ALLOWED?   >R   >FFA @ FMASK-ST XOR  R@ AND   R> = ;
 
 \ For DEA : it HAS no side effects regards stack.
-: NSST?   >FFA @ FMASK-ST AND FMASK-ST = ;
+: NSST?   FMASK-ST ALLOWED? ;
 
+\ For DEA : it HAS no side effects regards store (or stack.)
+: NS!? FMASK-N! FMASK-ST OR   ALLOWED? ;
+
+\ For DEA : it HAS no side effects, input or output (or stack).
+: NS?   FMASK-NS ALLOWED? ;
+
+\ Move to analyser.frt    FIXME!
 FMASK-ST '.S >FFA OR!
 FMASK-ST 'DEPTH >FFA OR!
 
@@ -92,12 +104,51 @@ VARIABLE MIN-DEPTH
 \ Remember : both nibbles have offset 1!
 : COMBINE-VD    SE:1>2 SWAP 1- NEGATE VD +! REMEMBER-DEPTH 1- VD +! ;
 
+\ ---------------------------------------------------------------------
+\ For DEA return "we ARE still in the annihilatable code", i.e.
+\ we have no stack side effects that kill this.
+\ At this point ``VD'' contains the current stack depth, which
+\ we want to go below zero.
+: STILL-ANNIL? DUP NS!?   SWAP SE@ NO-GOOD 0= AND ;
+
+\ We are at a stable point, i.e. we consumed all the extra stuff,
+\ that is placed in the annihilation chain. Then more.
+: ANNIL-STABLE?   VD @ MIN-DEPTH @ =  VD @ 1 <  AND ;
+
+\ For DEA : adding it would result in a not yet stable sequence.
+\ Otherwise the optimisation is known to end here with or without
+\ possibility for optimisation.
+: ANNILLING? DUP STILL-ANNIL? IF SE@ COMBINE-VD ANNIL-STABLE? 0= ELSE DROP 0 THEN ;
+
+\ Try the annihilate the start of SEQUENCE. If it works compile
+\ equivalent code and return the remaining SEQUENCE, else 0.
+: ANNIHILATE-SEQ !OPT-START !MIN-DEPTH
+    BEGIN
+        NEXT-PARSE OVER STILL-ANNIL? AND 0= IF 2DROP 0 EXIT THEN
+  ANNILLING?  WHILE REPEAT
+ANNIL-STABLE? IF
+\     -1 PROGRESS OR!
+    VD @ NEGATE 0 ?DO POSTPONE DROP LOOP
+ELSE DROP 0 THEN ;
+
+\ Recompile the start of SEQUENCE . Leave remaining SEQUENCE.
+\ It may be an annihilatable part  or just an item.
+: ANNIHILATE-ONE DUP ANNIHILATE-SEQ DUP IF SWAP DROP ELSE
+      DROP DUP NEXT-ITEM >HERE THEN ;
+
+\ Annihilate as much as possible from SEQUENCE.
+\ Return recompiled SEQUENCE.
+: ANNIHILATE HERE SWAP
+    BEGIN ANNIHILATE-ONE DUP ?NOT-EXIT 0= UNTIL DROP
+POSTPONE (;)  ;
+\ ---------------------------------------------------------------------
+
 \ For DEA we are still in the swappable code, i.e. we don't dig below
 \ the constant stack entries, and we have no stack side effects that kill.
 \ At this point ``VD'' contains the remaining stack depth, i.e. the
 \ number of constants not touched by the swappable code. Those can be
 \ placed after the swappable code.
-: STILL-SWAPPING? DUP NSST? 0= SWAP SE@ ENOUGH-POPS AND ;
+: STILL-SWAPPING? DUP NSST? SWAP SE@ ENOUGH-POPS AND ;
 
 \ We are at an stable point. i.e. we consumed all the constants,
 \ we may have replaced ourselves. Or we can't swap anyway.
@@ -176,12 +227,6 @@ POSTPONE (;)  ;
 ;
 \ WHAT ABOU
 \ HERE BEGIN DUP R@ <> WHILE 'LIT SWAP -! -! REPEAT DROP
-
-\ Recompile the code from BEGIN END. Leave END as the new begin.
-: >HERE SWAP 2DUP -  HL-CODE, ;
-
-\ Make the code from BEGIN END empty, by leaving END END.
-: EMPTY>  SWAP DROP DUP ;
 
 \ Optimisation is over. Run the optimisable code and compile constants
 \ instead of them. "Cash the optimisation check."
@@ -407,7 +452,8 @@ STRIDE SET PEES
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
 : OPT-EXPAND   >DFA DUP @  ^^
-    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER ^^ PROGRESS @ WHILE REPEAT
+    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER ^^ ANNIHILATE ^^
+PROGRESS @ WHILE REPEAT
 SWAP ! ;
 
 \ For DEA remember that it has been optimised
