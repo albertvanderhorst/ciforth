@@ -20,21 +20,15 @@ and this is made known to the user of the derived system.
 
 @section                         Rationale 
 
-What you find here is a Forth for the Intel 86. It is a figforth
-as of old.Complying in detail with the Fig glossary, which is available 
-in electronicfrom for the first time in history.
-The motivation for having this type of Forth available follows from its
-characteristics. It is available as an assembler source, and it is an
-indirect threaded Forth. 
-An assembler source has distinct advantages for getting started from
-nothing. An engineer might balk at the description of how to use a meta
-compiler, but feels at ease with a (much larger) assembler manual.
-Although speed is currently in fashion, using subroutine threaded Forth's
-with optimisers, indirect threading is the preferred choice for some
-applications. I did this work, because I needed it. 
-I have also the firm belief that an optimiser on an indirect threaded system
-has more information to work with and can ultimately outperform any
-other system in speed.
+This Forth is meant to be simple.
+What you find here is a Forth for the Intel 86. 
+You need just the executable to work. 
+You choose the format you prefer for the documentation. 
+They all have the same content.
+You can use the example
+file with blocks, 
+you have the assembler source for your Forth,
+but you can ignore both.
 
 @section                         Source
 In practice the GPL 
@@ -43,26 +37,43 @@ In practice the GPL
 They may be
 further reproduced and distributed subject to the following conditions:
 
-The three file comprising it must be kept together and in particular 
+The three files comprising it must be kept together and in particular 
 the reference section with the World Wide Web sites.
-
 
 This Forth builts on figforth.
 It is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
 that is available via taygeta.
 
-You still can obtain the original version
- that is public domain according to the following statement:
+You still can obtain the original figforth
+that is public domain according to the following statement:
 
+forthquotation
 All publications of the Forth Interest Group are public domain. They may be
 further reproduced and distributed by inclusion of this credit notice: 
 
 This publication has been made available by the Forth Interest Group, 
 
               P. O. Box 1105,  San Carlos, Ca 94070
+forthendquotation
 
-albert@@spenarnc.xs4all.nl     http://home.hccnet.nl/a.w.m.van.der.horst
+The generic system that created this ciforth
+are at forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/fig86gnr.html}).
+If you have the generic system, 
+you can see how you can contact the author in its documentation.
+Otherwise in case of question about this ciforth, contact the person or
+organisation that generated it for you.
 
+forthemph({Important:})
+forthbreak If you just want to use a Forth, 
+you most certainly do not want the generic system.
+Great effort is expended in making sure that this 
+manual contains all that you need, and nothing that might
+confuse you. The generic system on the contrary contains lots
+that you don't need, and is confusing as hell.
+
+If you are interested in subjects like history of Forth, 
+the rationale behind the design and such you might want to read the 
+manual for the generic Forth.
 @section Generic Configuration Manual
 
 This information will in due time be removed to a separate 
