@@ -734,23 +734,22 @@ _COMMENT
 
   NAME        =  Address of name
   (NAME)      =  Contents of name
-  ((NAME))    =  Indirect contents
 
-  CFA         =  Address of CODE FIELD
-  LFA         =  Address of LINK FIELD
-  NFA         =  Address of NAME FIELD
-  PFA         =  Address of PARAMETER FIELD
+  CFA         =  CODE FIELD: a pointer
+  LFA         =  LINK FIELD: a pointer
+  NFA         =  NAME FIELD: a variable number of chars
+  PFA         =  PARAMETER FIELD: a variable nuber of au
 
-  S1          =  Parameter stack - 1st word
-  S2          =  Parameter stack - 2nd word
-  R1          =  Return stack    - 1st word
-  R2          =  Return stack    - 2nd word
+  S1          =  Parameter stack - 1st cell
+  S2          =  Parameter stack - 2nd cell
+  R1          =  Return stack    - 1st cell
+  R2          =  Return stack    - 2nd cell
 
   LSB         =  Least significant bit
   MSB         =  Most  significant bit
   LB          =  Low byte
   HB          =  High byte
-  LW          =  Low  word
+  LW          =  Low  cell
 
 ------------------------------------------------------------
 _ENDCOMMENT
@@ -2152,14 +2151,6 @@ HEADER({LATEST},{LATES},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{LFA},{link_field_address},{pfa --- lfa},{},
-{Convert the parameter field address of a dictionary definition to
-its link field address.},{{'},{PFA}})
-HEADER({LFA},{LFA},{DOCOL})
-        DC      LIT,CELLS(2)
-        DC      LSUB
-        DC      SEMIS
-;
 worddoc({DICTIONARY},{CFA},{cfa},{pfa --- cfa},{},
 {Convert the parameter field address of a definition to its code
 field address.},{{'},{PFA}})
@@ -2182,6 +2173,42 @@ worddoc({DICTIONARY},{PFA},{parameter_field_address},{nfa --- pfa},{},
 {Convert the name field address of a compiled definition to its
 parameter field address.},{{'},{CFA},{LFA},{NFA}})
 HEADER({PFA},{PFA},{DOCOL})
+        DC      ONE
+        DC      TRAV
+        DC      LIT,1+CELLS(2)
+        DC      PLUS
+        DC      SEMIS
+        PAGE
+;
+worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
+{Given a dictionary entry addres return the
+link field address.},{{'},{LFA}})
+HEADER({>LFA},{TLFA},{DOCOL})
+        DC      ONE
+        DC      TRAV
+        DC      LIT,1
+        DC      PLUS
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
+{Given a dictionary entry addres return the
+code field address.},{{'},{CFA}})
+HEADER({>CFA},{TCFA},{DOCOL})
+        DC      PFA
+        DC      LCELL
+        DC      LSUB
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
+{Given a dictionary entry addres return the
+name field.},{{'},{NFA}})
+HEADER({>NFA},{TNFA},{DOCOL})
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
+{Given a dictionary entry addres return the
+parameter field address.},{{'},{CFA},{>LFA},{NFA}})
+HEADER({>PFA},{TPFA},{DOCOL})
         DC      ONE
         DC      TRAV
         DC      LIT,1+CELLS(2)
@@ -2965,9 +2992,10 @@ The sequence forthvar({cccc}) forthcode({DEFINITIONS}) also make forthvar({cccc}
 vocabulary into which new definitions are placed.
 
 A vocabulary parameter field contains at first the dovoc pointer, then it
-contains a dummy name field (forthcode({DFNA})) with a name " " (blank) ,
+contains a dummy dea (forthdefi({DDEA})) with a name " " (blank) ,
 a dummy link field (forthcode({DLFA})) and
-the vocabulary link field address ( forthdefi({VLFA}) ).
+the vocabulary link field address ( forthdefi({VLFA}) ) that points to the dea
+of the first word of the vocabulary.
 Actually executing the vocabulary means storing its DLFA into forthcode({CONTEXT}) .
 The VLFA points to the VLFA of the next vocabulary or 0 for the end.
 
@@ -2992,7 +3020,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      VOCL
         DC      STORE
         DC      DOES
-DOVOC:  DC      TWOP    ; i.e. Skip ' ' name.
+DOVOC:  DC      TLFA     ; i.e. Skip ' ' name.
         DC      CONT
         DC      STORE
         DC      SEMIS
@@ -4793,7 +4821,7 @@ Leaves the parameter field address of dictionary word forthvar({nnnn}).
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
-{{CFA},{LFA},{NFA},{PFA}} )
+{{CFA},{>LFA},{NFA},{PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
         DC      DFIND
         DC      ZEQU
@@ -4823,18 +4851,16 @@ FORGV1: ; { Forget part of contents.}
         DC      SWAP
         DC      TOR
         DC      LIT,2+CELLS(1)
-        DC      LSUB    ; { TOS is now phantom NFA.}
+        DC      LSUB    ; { TOS is now phantom dea.}
         DC      LDUP
 FORGV3:
-        DC      PFA
-        DC      LFA
-        DC      FETCH
+        DC      TLFA,FETCH    ; {Next voc}
         DC      LDUP
         DC      RR
         DC      ULESS
         _0BRANCH(FORGV3)
         DC      SWAP
-        DC      TWOP    ; { Skip over " "-name.}
+        DC      TLFA    ; { Skip over " "-name.}
         DC      STORE
         DC      FROMR
 FORGV2: DC      SEMIS
@@ -5276,8 +5302,7 @@ HEADER({FOR-WORDS},{FORW},{DOCOL})
 FORW1:  DC      FROMR
         DC      RR
         DC      OVER
-        DC      PFA
-        DC      LFA
+        DC      TLFA
         DC      FETCH
         DC      TOR
         DC      EXEC

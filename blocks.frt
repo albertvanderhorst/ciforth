@@ -533,8 +533,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
      DROP DROP HERE  ( No following word)
    ELSE
      BEGIN
-        2DUP PFA LFA @ <> WHILE
-        PFA LFA @
+        2DUP >LFA @ <> WHILE
+        >LFA @
      REPEAT
      SWAP DROP ( The CFA)
    ENDIF
@@ -2325,8 +2325,8 @@ DECIMAL
      DROP DROP HERE  ( No following word)
    ELSE
      BEGIN
-        2DUP PFA LFA @ <> WHILE
-        PFA LFA @
+        2DUP >LFA @ <> WHILE
+        >LFA @
      REPEAT
      SWAP DROP ( The CFA)
    ENDIF
@@ -3090,7 +3090,7 @@ PS ABA + BABAA
 ( with as data the `NFA' of those words.            )
 : FOR-WORDS
 >R CONTEXT @ @ >R
-    BEGIN   R> R OVER PFA LFA @ >R EXECUTE
+    BEGIN   R> R OVER >LFA @ >R EXECUTE
     R 0= UNTIL
 R> DROP R> DROP ;
 ( For all vocabularies execute WORD with as data    )
@@ -3112,7 +3112,7 @@ R> DROP R> DROP ;
       SWAP >R
       2 CELL+ -     ( start with phantom nfa )
       DUP
- BEGIN CR DUP ID. PFA  LFA  @  DUP  DUP H. R  DUP H. U<  UNTIL
+ BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R  DUP H. U<  UNTIL
         CR DUP H. DUP ID.
           SWAP  2 + !
     R>

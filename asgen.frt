@@ -110,7 +110,7 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( bare bones of the sib mechanism in i586.                              )
 : IGNORE? 1+ C@ &~ = ;
 
-: (>NEXT%) PFA LFA @ ; ( Given a DEA, return the next DEA. )
+: (>NEXT%) >LFA @ ; ( Given a DEA, return the next DEA. )
 ( For a DEA as returned from (>NEXT%} : it IS the end, not a real dea.  )
 : VOCEND? @ FFFF AND A081 = ;
 ( As (>NEXT%} but skip holes, i.e. words with names starting in ``-''   )
