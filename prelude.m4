@@ -55,6 +55,8 @@ dnl Move forth up such thar ORG agrees with LOADADDRESS.
 define( {_SWITCH_1_}, _no({$0}) )dnl       
 dnl Have a normal return to MSDOS (without jumping to a CS-corrector)
 define({_NORMAL_BYE_1_}, _no )
+dnl Work on a PC, as a PC. Not Linux.
+define({_PC_1_}, _no )
 dnl Normally no code needed switch between modes.
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPHERE_FROM_PROT},{})dnl

@@ -161,11 +161,11 @@ LOADADDRESS     EQU     M4_LOADADDRESS
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
 SANDBOXSIZE     EQU     1000H   ; { For stack items while switching modes.}
 GDTSIZE         EQU     8000H   ; { For GDT-table.}
-REALSEGMENT     EQU     (BOOTADDRESS-M4_SWITCHORG)/10H ;{ @ DS and CS for real code }
+SWITCHSEGMENT     EQU     (LOADADDRESS-M4_SWITCHORG)/10H ;{ @ DS and CS for real code }
 ; {The absolute address that agrees with ORG.}
 ; {It may be that code has to be repositioned to make this true.}
 M4_SWITCHOFFSET EQU  (M4_SWITCHORG-M4_ORG)
-DS_SANDBOX      EQU     REALSEGMENT + SEGSIZE ;{ @ Harmless place for the stack.}
+DS_SANDBOX      EQU     SWITCHSEGMENT + SEGSIZE ;{ @ Harmless place for the stack.}
 GDT_SEGMENT     EQU     DS_SANDBOX + SANDBOXSIZE/10H       ;{ @ General descriptor table.}
 ;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen and }
 ;{ must be a multiple of 08H }
@@ -326,13 +326,13 @@ HUGESECS      DD         000H
 BOOTLBA:  DB      10H, 0
         DW      (RELATIVE_WRT_ORIG(TEXTEND))/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
         DW      BPS             ;{ OFFSET AND SEGMENT}
-        DW      REALSEGMENT
+        DW      SWITCHSEGMENT
         ;{ At a hard disk we just read sector from sector 1        }
         DD      1       ;{ Start}
         DD      0       ;{ M.S. 32 BITS}
 
 HDREAD:
-        MOV     AX,REALSEGMENT
+        MOV     AX,SWITCHSEGMENT
         MOV     DS,AX
         MOV     SI,RELATIVE_WRT_ORIG(BOOTLBA) ; {DS:SI absolute address of lba.}
         MOV     AX,4200H  ;{   Read extended                                }
@@ -381,7 +381,7 @@ ELSE3:
         CALL    HERE1
 HERE1:  POP     BX
         MOV     CX,BX
-        ADD     BX,RETDOSV-HERE1        ;{ Independant of load address.}
+        ADD     BX,RETDOSV-HERE1+1        ;{ Independant of load address.}
         ADD     CX,RETDOS-HERE1
         MOV     [BX],CX
         INC     BX
@@ -1308,8 +1308,6 @@ CODE_HEADER({L@},{LFET})
         MOV     DX,10H
         MUL     DX
         ADD     AX,BX
-        SUB     AX, BOOTADDRESS
-
         MOV     AX,[AX]
         _PUSH
 });_END___1__({ _BITS32_1_})
@@ -1333,8 +1331,6 @@ CODE_HEADER({L!},{LSTORE})
         MOV     DX,10H
         MUL     DX
         ADD     AX,BX
-        SUB     AX, BOOTADDRESS
-
         POP     BX
         MOV     [AX],BX
         _NEXT
@@ -3455,7 +3451,7 @@ HEADER({LBAPAR},{LBA},{DOVAR})
         DB      10H, 0      ;{ default    }
         DW      SPB         ;{ default    }
         DW      0           ;{ to be filled with offset}
-        DW      REALSEGMENT ;{ default segment}
+        DW      SWITCHSEGMENT ;{ default segment}
         ;{ At a hard disk we just read sector from sector 1        }
         DD      0       ;{ sector number}
         DD      0       ;{ M.S. 32 BITS default}
@@ -3494,7 +3490,7 @@ HEADER({R/W},{RSLW},{DOCOL})
 ;       The 2 m.s. bytes are overwritten by the next store.
          _SWITCH_1_({DC   LIT, M4_SWITCHOFFSET, PLUS })
         DC      LBA, LIT, 4, PLUS, STORE   ; { Address }
-        DC      LIT, REALSEGMENT,
+        DC      LIT, SWITCHSEGMENT
         DC      LBA, LIT, 6, PLUS, STORE
         DC      LBA, LIT, 8, PLUS, STORE
         DC      LBA
@@ -3808,9 +3804,7 @@ HEADER({BYE},{BYE},{DOCOL})
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
         _SWITCH_1_({JMPHERE_FROM_PROT})
-        JMPFAR
-RETDOSV: DW     0       ; {Filled in during boot}
-        DW      0
+RETDOSV: JMP 0:0        ; {Filled in during boot}
         _BITS32_1_({SET_32_BIT_MODE})
 
 });_END___1__({ _ABSOLUTELOAD_1_})
