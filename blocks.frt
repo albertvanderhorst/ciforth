@@ -112,7 +112,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 
  <HEX ( DEBUG SCR#7 )
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
- : CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
+ : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
        [CHAR] | EMIT ;
  : BYTES 0 DO
             DUP I + C@ B.
@@ -123,7 +123,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
     DO
         CR I H. ." : "
         I 0F AND DUP 5 2 */ SPACES 10 SWAP -
-        I   OVER BYTES   OVER CHARS   DROP DROP
+        I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
  ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 3.43    AH"
@@ -598,7 +598,7 @@ OVER 0= IF DROP DROP DROP 0 ELSE  DUP >R
      DUP I C@ = IF DROP I LEAVE THEN
    LOOP R> OVER = IF DROP 0 THEN  ( Tricky)
 THEN ;
- : 2SWAP  >R ROT ROT R> ROT ROT ;
+
  : $S ( cs, del -- cs2 , cs1 )  ( Splits the text at the del )
    ( in two, if not present, cs2 is a null string )
    >R OVER OVER R> $I  DUP IF
@@ -1610,7 +1610,7 @@ HEX : TEXT HERE C/L 1+ BLANK WORD PAD C/L 1+ CMOVE ;
 (   : THRU 1+ SWAP DO ." LOADING " I . I LOAD LOOP ;  )
 : L-S SCR @ LIST ; : LO-S SCR @ LOAD ;
 : C-S SWAP BLOCK SWAP BLOCK B/BUF CMOVE UPDATE FLUSH ;
-: LIST BASE @ 10 - 25 ?ERROR LIST ;  : CELLS 0 CELL+ * ;
+: LIST BASE @ 10 - 25 ?ERROR LIST ;  
 ?MS : BIOSI BIOS DROP DROP DROP DROP DROP ;  ( Ignore result)
 : MODE 0 0 0 16 BIOSI ;
 : DISK-INIT 0 0 0 0 19 BIOSI ;
@@ -3101,7 +3101,7 @@ R> DROP R> DROP ;
 R> DROP R> DROP ;
 
 : H. BASE @ >R HEX . R> BASE ! ;
-: CELLS 0 CELL+ * ;
+
 ( Up til LIMIT forget the vocabulary whose DEA is given. )
 (   Leave LIMIT    )
 : FORGET-VOC

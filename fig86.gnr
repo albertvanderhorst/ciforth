@@ -1122,6 +1122,25 @@ CODE_HEADER({I},{IDO})
         MOV     AX,[BP] ;{ GET INDEX VALUE}
         _PUSH          ;{ TO PARAMETER STACK}
 ;
+worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{C,L0},
+{Discard the loop parameters. Must be 
+used when the regular end of the 
+loop is by-passed.},
+{{DO},{LOOP},{+LOOP},{(BACK},{(FORWARD}},
+{
+{ : GS1 DO I . I 3 = IF UNLOOP EXIT THEN LOOP ; 10 0 GS1},
+{0 1 2 3},
+dnl This only words for SECURITY off.
+dnl { : GS2 DO I . I 3 - 0BRANCH [ (FORWARD SWAP ] LOOP  EXIT dnl
+dnl [ FORWARD) ] UNLOOP ; 10 0 GS2},
+dnl {0 1 2 3},
+},
+enddoc)
+HEADER({UNLOOP},{UNLOOP}, {DOCOL}, , {B_IMMED})
+        DC      LIT, RDROP, COMMA
+        DC      LIT, RDROP, COMMA
+        DC      SEMIS
+;
 worddoc( {INIT},{+ORIGIN},{plus_origin},{n --- addr},{},
 {Leave the memory address relative by forthvar({n}) bytes
 to the area from which the user variables are initialised,
@@ -1628,6 +1647,14 @@ CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
         LEA     BP,[BP+CELLS(1)]
         _PUSH
 ;
+worddoc( {STACKS},{RDROP},{r_drop},{---} ,{CIG},
+{Remove the top value from the return stack.},{{>R},{R},{R>}},
+{{." Via >R"},{Via >R}},
+enddoc)
+CODE_HEADER({RDROP},{RDROP})      ;{(S1) <- (R1)}
+        LEA     BP,[BP+CELLS(1)]
+        _NEXT
+;
 worddoc( {STACKS},{R},{r},{--- n},{},
 {Copy the top of the return stack to the computation stack.},{{>R}},
 {{." Via >R"},{Via >R}},
@@ -1753,7 +1780,7 @@ CODE_HEADER({2DROP},{TDROP})
         POP     AX
         _NEXT
 ;
-worddoc( {JUGGLING},{SWAP},{swap},{nl n2 --- n2 n1},{L0},
+worddoc( {JUGGLING},{SWAP},{swap},{n1 n2 --- n2 n1},{L0},
 {Exchange the top two values on the stack.},{{ROT}},
 {{SP! 1 2 3 4 SWAP .S },{
 S: 1 2 4 3} },
@@ -1785,6 +1812,37 @@ CODE_HEADER({2DUP},{TDUP})
         PUSH    AX
         _2PUSH
 ;
+worddoc( {JUGGLING},{2SWAP},{two_swap},{d1 d2 --- d2 d1},{L0},
+{Exchange the top doubles on the stack.},{{ROT}},
+{{SP! 1 2 3 4 2SWAP .S },{
+S: 3 4 1 2} },
+enddoc)
+CODE_HEADER({2SWAP},{TSWAP})
+        POP     BX
+        POP     CX
+        POP     AX
+        POP     DX
+        PUSH     CX
+        PUSH     BX
+        _2PUSH
+;
+worddoc( {JUGGLING},{2OVER},{two_over},{d1 d2 --- d1 d2 d1},{ISO},
+{Copy the second stack double, placing it as the new top.},
+{{2DUP}},
+{{SP! 1 2 3 4 2OVER .S},{
+S: 1 2 3 4 1 2 } },
+enddoc)
+CODE_HEADER({2OVER},{TOVER})
+        POP     BX
+        POP     CX
+        POP     AX
+        POP     DX
+        PUSH     DX
+        PUSH     AX
+        PUSH     CX
+        PUSH     BX
+        _2PUSH
+;       
 worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{L0},
 { Add forthvar({n}) to the value at the
 address.},{{TOGGLE},{!}},
@@ -2473,6 +2531,62 @@ CODE_HEADER({CELL+},{CELLP})
         POP     AX
         ADD     AX,CW
         _PUSH
+;
+worddoc( {MEMORY},{CELLS},{cells},{n1 --- n2},{ISO},
+{Return the equivalent of forthvar({n1}) cells in bytes:
+forthvar({n2}). _VERBOSE_({This is invaluable for writing portable
+code. Many of the screens of ciforth run on both 16 and 32 bits
+systems, thanks to this.})
+},{{CELL+}},
+_BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
+_BITS16_({{{2 CELL+ .},{4}},})dnl expanded before worddoc is!
+enddoc)
+; ))))
+CODE_HEADER({CELLS},{LCELLS})
+        POP     AX
+        LEA     AX,[AX*4]
+        _PUSH
+;
+worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
+{Advance the memory pointer forthvar({n1}) by one character to
+forthvar({n2}). In ciforth this means one byte. Bytes are the
+address units ISO is talking about. _VERBOSE_({Unfortunately
+the ISO standard confounds characters and bytes.}) 
+},{(CELL+}},
+{{123 CHAR+ .},{124}},}},
+enddoc)
+HEADER({CHAR+}, {CHARP}, {_VAR_FIELD(ONEP)})
+;
+worddoc( {MEMORY},{CHARS},{chars},{n1 --- n2},{ISO},
+{Return the equivalent of forthvar({n1}) chars in bytes:
+forthvar({n2}). In ciforth this is a noop.
+_VERBOSE_({Unfortunately
+the ISO standard confounds characters and bytes.}) 
+},{(CELL+}},
+{{123 CHARS .},{123}},}},
+enddoc)
+HEADER({CHARS}, {CHARS}, {DOCOL}, , {B_IMMED})
+        DC      SEMIS
+;
+worddoc( {MEMORY},{ALIGN},{align},{ --- },{ISO},
+{Make sure that forthcode({HERE}) is forthdefi({aligned}) by advancing
+it if necessary.
+In ciforth this is a noop.
+},{(ALIGNED},
+{{( See ALIGNED)},{}},
+enddoc)
+HEADER({ALIGN}, {LALIGN}, {DOCOL}, , {B_IMMED})
+        DC      SEMIS
+;
+worddoc( {MEMORY},{ALIGNED},{aligned},{ad1 --- ad2},{ISO},
+{Make sure that forthsamp({ad1}) is forthdefi({aligned}) by advancing
+it if necessary to forthsamp({ad2}).
+In ciforth this is a noop.
+},{(ALIGNED},
+{{HERE 1 ALLOT ALIGN 123 , 1+ ALIGNED @ .},{123}},
+enddoc)
+HEADER({ALIGNED}, {ALIGNED}, {DOCOL}, , {B_IMMED})
+        DC      SEMIS
 ;
 worddoc( {DICTIONARY},{HERE},{here},{--- addr},{ISO,L0},
 {Leave the address forthsamp({addr}) of the next available
@@ -3553,9 +3667,9 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}), for other
 words it is similiar to forthsamp({COMPILE SOME-WORD}).},
 {COMPILE},
 {
-{!CSP : TEST POSTPONE BL ; TEST .},{20},
+{!CSP : GS1 POSTPONE BL ; : GS2 [ GS1 ] ; GS2 .},{20},
 {: MY-IF POSTPONE IF ; IMMEDIATE dnl
- : IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1}
+: IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1}
 },
 enddoc)
 HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
@@ -3565,8 +3679,8 @@ HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         DC      ZEQU
         DC      ZERO
         DC      QERR
-        DC      TCFA
-        DC      LDUP, TFFA, LIT, B_IMMED, LAND, ZEQU
+        DC      LDUP, TFFA, FETCH
+        DC      LIT, B_IMMED, LAND, ZEQU
         _0BRANCH(POSTP1)
          DC      LIT, LIT, COMMA
          DC      COMMA
@@ -4092,6 +4206,32 @@ HEADER({MAX},{MAX},{DOCOL})
 MAX1:   DC      DROP
         DC      SEMIS
 ;
+worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
+{Perform a forthsamp({logical shift }) of the bits of
+forthsamp({u1}) to the left by forthsamp({n}) places.
+_VERBOSE({ Put zero into the places uncovered by the shift.}) }, 
+{{*},{/}},
+{{1 2 LSHIFT .},{4}},
+enddoc)
+CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
+        POP     CX
+        POP     AX
+        SHL     AX,CL
+        _PUSH
+;       
+worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
+{Perform a forthsamp({logical shift}) of the bits of
+forthsamp({u1}) to the right by forthsamp({n}) places.
+_VERBOSE({ Put zero into the places uncovered by the shift.}) }, 
+{{*},{/}},
+{{4 2 RSHIFT .},{1}},
+enddoc)
+CODE_HEADER({RSHIFT},{RSHIFT},{DOCOL})
+        POP     CX
+        POP     AX
+        SHR     AX,CL
+        _PUSH
+;       
 worddoc( {MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{ISO},
 {A mixed magnitude math operation which leaves the double
 number forthvar({d}) : the signed product of two signed number
@@ -4130,28 +4270,44 @@ dividend.})},
 { -7 S>D -3 SM/REM . . },{2  -1}
 },
 enddoc)
-HEADER({SM/REM},{MSLAS},{DOCOL})
+CODE_HEADER({SM/REM},{MSLAS})
+        POP     BX      ;{DIVISOR}
+        POP     DX      ;{MSW OF DIVIDEND}
+        POP     AX      ;{LSW OF DIVIDEND}
+        IDIV     BX      ;{16 BIT DIVIDE}
+        _2PUSH          ;{STORE QUOT/REM}
+;
+;
+worddoc( {MULTIPLYING},{FM/MOD},{floored_slash},{d n1 --- n2 n3},{ISO},
+{A mixed magnitude math operator which leaves the signed
+remainder forthvar({n2}) and signed quotient forthvar({n3})
+from a double number dividend forthvar({d}) and divisor
+forthvar({n1}). This is floored division{}_VERBOSE_({, i.e.
+the remainder takes its sign from the
+divisor.})},
+{{SM/REM}, {M/MOD},{/},{M*}},
+{
+{  7 S>D  3 FM/MOD . . },{2   1},
+{  7 S>D -3 FM/MOD . . },{-3   -2},
+{ -7 S>D  3 FM/MOD . . },{-3  2},
+{ -7 S>D -3 FM/MOD . .     6 S>D -3 FM/MOD . .},
+{2  -1 -2   0} 
+},
+enddoc)
+HEADER({FM/MOD},{FMSLAS},{DOCOL})
+        DC      LDUP, TOR
+        DC      TDUP, LXOR, TOR
+        DC      MSLAS
+        DC      FROMR, ZLESS
+        _0BRANCH(FMMOD1)
         DC      OVER
-        DC      TOR
-        DC      TOR
-        DC      DABS
-        DC      RR
-        DC      LABS
-        DC      USLAS
-        DC      FROMR
-        DC      RR
-        DC      LXOR
-        DC      ZLESS
-        _0BRANCH(PM2)   ;{IF}
-        DC      NEGATE   ;{THEN}
-PM2:
-        DC      SWAP
-        DC      FROMR
-        DC      ZLESS
-        _0BRANCH(PM3)   ;{IF}
-        DC      NEGATE   ;{THEN}
-PM3:
-        DC      SWAP
+        _0BRANCH(FMMOD1)
+        DC      ONE, LSUB
+        DC      SWAP, FROMR, PLUS, SWAP
+        _BRANCH(FMMOD2)
+FMMOD1:
+        DC      FROMR, DROP
+FMMOD2:
         DC      SEMIS
 ;
 worddocsafe( {OPERATOR},{*},{star},{n1 n2 --- prod},{ISO,FIG,L0},
@@ -4171,7 +4327,7 @@ worddoc( {OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{ISO,FIG,L0},
 {Leave the remainder and signed quotient of forthvar({n1/n2}) .
 The remainder has the sign of the dividend
 (forthdefi({symmetric division}). },
-{{*/MOD},{*/},{M/MOD}},
+{{*/MOD},{*/},{SM/REM}},
 {
 {  7  3 /MOD . . },{2   1},
 {  7 -3 /MOD . . },{-2   1},
@@ -6121,7 +6277,7 @@ if the forthcode({CURRENT}) and forthcode({CONTEXT}) vocabularies are not curren
 {{FENCE}}, 
 {
 {: GO ; HERE : CH ; : GI ; FORGET CH LATEST ID. },{GO},
-{HERE ?PAIRS},{},
+{HERE - .},{0},
 }, 
 enddoc)
 HEADER({FORGET},{FORG},{DOCOL})
