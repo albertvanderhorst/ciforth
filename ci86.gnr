@@ -87,7 +87,7 @@ FF	EQU	0CH	; FORM FEED
 EM	EQU	10000H  ; END OF MEMORY + 1
 NBUF	EQU	2	; NO. OF BUFFERS AKA SCREENS 
 KBBUF	EQU	1024    ;DATA BYTES PER DISK BUFFER
-US	EQU	40H	; USER VARIABLE SPACE
+US	EQU	100H     ; USER VARIABLE SPACE
 RTS	EQU	0A0H	; RETURN STACK & TERM BUFFER
 ;
 CO	EQU	KBBUF+4		; DISK BUFFER + 4 BYTES
@@ -184,7 +184,6 @@ RETRY:
 	MOV     AL,' '
 	CALL DISPLAY
 BOOT:   
-;       CALL DUMPREGS
 	MOV     AL,'D'
 	CALL    DISPLAY
 	MOV AX,CS
@@ -251,29 +250,6 @@ READSECTOR:
 	POPF
 	POP     CX
 	INC     CX
-	RET
-DUMPREGS:
-	CALL    DISPLAYPC
-	CALL    DISPLAYCR
-	MOV     AX,CS
-	CALL    DISPLAYW
-	CALL    DISPLAYCR
-	MOV     AX,DS
-	CALL    DISPLAYW
-	CALL    DISPLAYCR
-	MOV     AX,ES
-	CALL    DISPLAYW
-	CALL    DISPLAYCR
-	MOV     AX,SS
-	CALL    DISPLAYW
-	CALL    DISPLAYCR
-	MOV     AX,SI
-	CALL    DISPLAYW
-	CALL    DISPLAYCR
-	MOV     AX,DI
-	CALL    DISPLAYW
-	CALL    DISPLAYCR
-;MYSELF: JMP MYSELF    ; Put in if you really want to see them
 	RET
 	
 DISPLAYCR:
@@ -366,7 +342,6 @@ RETRY:
 	MOV     AL,' '
 	CALL DISPLAY
 BOOT:   
-;       CALL DUMPREGS
 	MOV     AL,'D'
 	CALL    DISPLAY
 	MOV AX,CS
@@ -448,75 +423,6 @@ ORIG:
 	NOP
 	JMP	WRM	; VECTOR TO WARM START
 ;
-; This are is accessed trough three incompatible means:
-;        1 label
-;        2 hard coded offset with respect to orig
-;        3 Idem but through PORIG.
-; Note also LAINI could be without harm a 
-	DB	FIGREL	; FIG RELEASE #
-	DB	FIGREV	; FIG REVISION #
-	DB	USRVER	; USER REVISION #
-	DB	0EH	; VERSION ATTRIBUTES
-LAINI:  DC	_LINK_FIELD(TASK) ; LAST WORD
-	DC	BSIN	; BACKSPACE
-	DC	STRUSA  ; INIT (UP)
-;
-;	Initialisation block for user variables through VOC-LINK
-;       <<<<< must be in same order as user variables >>>>>
-;       If the assembler used supports it, we better just initialise
-;       the UP area directly. A COLD start cannot be used to get
-;       the system under control, only to remove user programs.
-;
-USINI:
-;____1_____ _MODERN_1_({
-	DC      0       ; INIT (OFFSET) 
-});_END___1__({_MODERN_1_})
-;____1_____ _USEDOS_1_({
-_COMMENT
-; This will steer clear of a forth executable, provided it is
-; the first file on the floppy. 
-; The 2 is rounding plus the extra sector in .EXE files.
-; However it deviates much from the classic model and requires
-; that the disk parameters are available (not only for USEBIOS)
-	DC      (INITDP-$$-1)/KBBUF+1 
-_ENDCOMMENT
-; So for now just the classic, swap disk after booting.
-	DC      0       ; INIT (OFFSET) 
-});_END___1__({_USEDOS_1_})
-;____1_____ _BOOTFD__1_({
-; This will reserve place for dos information, such that the floppy
-; can be accessed from DOS and makes sure blocks are not allocated
-; within the forth system itself. 
-; (X-1)/S+1 rounds up to whole `S', and yes both parts separately.
-	DC      (SECSTRT-1)/SPB+1 + (INITDP-$$-1)/KBBUF+1 
-			; INIT (OFFSET) 
-});_END___1__({_BOOTFD__1_})
-;____1_____ _BOOTHD__1_({
-; This will reserve place for the system itself, on the first part of a 
-; hard disk. No problem to just reserve whole memory.
-	DC      64      ; Kbyte.
-});_END___1__({_BOOTHD__1_})
-	DC      0       ; (Unused) 
-	DC      0       ; (Unused) 
-	DC 	INITS0	; INIT (S0)
-	DC 	INITR0	; INIT (R0)
-	DC 	STRTIB  ; INIT (TIB)
-	DC	32	; INIT (WIDTH)
-	DC	0	; INIT (WARNING)
-	DC	INITDP	;	INIT (FENCE)
-	DC	INITDP  ;	INIT (DP)
-	DC	_VOC_LATEST(FORTH) ;       INIT (VOC-LINK)
-	;
-;	<<<<< end of data used by cold start >>>>>
-;
-;	The following is the CPU's name, printed
-;       during cold start.
-;       The name is 32 bits in base 36.
-;
-CPUNM   DC      5H,0B328H       ; '8088'
-UP	DC	INITR0	; USER AREA POINTER
-RPP	DC	INITR0	; RETURN STACK POINTER
-	PAGE
 _COMMENT
    FORTH REGISTERS
 
@@ -699,6 +605,16 @@ CODE_HEADER({0BRANCH},{ZBRAN})
 	INC 	SI
 	JMP SHORT     NEXT
 	PAGE
+HEADER({NOOP},{NOOP},{$+4})
+;	DEBUG STUFF
+NOP0	DC	$+CELL
+	JMP SHORT     NEXT
+NOP1	DC 	$+CELL
+	JMP SHORT     NEXT
+NOP2	DC	$+CELL
+	JMP SHORT     NEXT
+;
+
 ;
 CODE_HEADER({(LOOP)},{XLOOP})
 	MOV	BX,1	; INCREMENT
@@ -712,15 +628,6 @@ XLOO1:	ADD	[BP],BX	; INDEX = INDEX + INCR
 	ADD	BP,_BYTE CELLS(2)  ; ADJ RETURN STACK
 	INC	SI	; BYPASS BRANCH OFFSET
 	INC	SI
-	JMP SHORT     NEXT
-;
-HEADER({NOOP},{NOOP},{$+4})
-;	DEBUG STUFF
-NOP0	DC	$+CELL
-	JMP SHORT     NEXT
-NOP1	DC 	$+CELL
-	JMP SHORT     NEXT
-NOP2	DC	$+CELL
 	JMP SHORT     NEXT
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
@@ -739,6 +646,69 @@ CODE_HEADER({(DO)},{XDO})
 CODE_HEADER({I},{IDO})
 	MOV	AX,[BP]	; GET INDEX VALUE
 	JMP	APUSH	; TO PARAMETER STACK
+;
+HEADER({+ORIGIN},{PORIG},{DOCOL})
+	DC	LIT
+	DC	USINI
+	DC	PLUS
+	DC	SEMIS
+;
+;
+;	Initialisation block for user variables through VOC-LINK
+;       <<<<< must be in same order as user variables >>>>>
+;
+USINI:
+;____1_____ _MODERN_1_({
+	DC      0       ; INIT (OFFSET) 
+});_END___1__({_MODERN_1_})
+;____1_____ _USEDOS_1_({
+_COMMENT
+; This will steer clear of a forth executable, provided it is
+; the first file on the floppy. 
+; The 2 is rounding plus the extra sector in .EXE files.
+; However it deviates much from the classic model and requires
+; that the disk parameters are available (not only for USEBIOS)
+	DC      (INITDP-$$-1)/KBBUF+1 
+_ENDCOMMENT
+; So for now just the classic, swap disk after booting.
+	DC      0       ; INIT (OFFSET) 
+});_END___1__({_USEDOS_1_})
+;____1_____ _BOOTFD__1_({
+; This will reserve place for dos information, such that the floppy
+; can be accessed from DOS and makes sure blocks are not allocated
+; within the forth system itself. 
+; (X-1)/S+1 rounds up to whole `S', and yes both parts separately.
+	DC      (SECSTRT-1)/SPB+1 + (INITDP-$$-1)/KBBUF+1 
+			; INIT (OFFSET) 
+});_END___1__({_BOOTFD__1_})
+;____1_____ _BOOTHD__1_({
+; This will reserve place for the system itself, on the first part of a 
+; hard disk. No problem to just reserve whole memory.
+	DC      64      ; Kbyte.
+});_END___1__({_BOOTHD__1_})
+UP	DC	STRUSA	; USER AREA POINTER 1
+	DC      0       ; (Unused)          2
+	DC 	INITS0	; INIT (S0)         3
+RPP     DC 	INITR0	; INIT (R0)         4
+	DC 	STRTIB  ; INIT (TIB)        5
+	DC	32	; INIT (WIDTH)      6
+	DC	0	; INIT (WARNING)      7
+	DC	INITDP	;	INIT (FENCE)  8
+	DC	INITDP  ;	INIT (DP)     9
+	DC	_VOC_LATEST(FORTH) ;       INIT (VOC-LINK) 10
+	;
+        _RESB(CELLS(14))        ; User variables up to 24 in use
+;	<<<<< end of data used by cold start >>>>>
+;
+;	The following is the CPU's name, printed
+;       during cold start.
+;       The name is 32 bits in base 36.
+;
+CPUNM   DC      5H,0B328H       ; '8088'     25 26 
+	DC      FIGREL + FIGREV *100H  ; FIG RELEASE + REVISION 27
+       DC      USRVER  + 0EH*100H      ; USER REVISION + VERSION ATTRIBUTES 28
+LAINI:  DC	_LINK_FIELD(TASK) ; LAST WORD 29 
+	DC	BSIN	; RUBOUT: get rid of latest char 30
 ;
 CODE_HEADER({DIGIT},{DIGIT})
 	POP	DX	;NUMBER BASE
@@ -1184,16 +1154,12 @@ HEADER({B/BUF},{BBUF},{DOCON})
 HEADER({B/SCR},{BSCR},{DOCON})
 	DC	400H/KBBUF
 ;
-HEADER({+ORIGIN},{PORIG},{DOCOL})
-	DC	LIT
-	DC	ORIG
-	DC	PLUS
-	DC	SEMIS
 	PAGE
 ;
-; The following user variables are initialised 
+; All user variables are initialised 
 ; with the values from USINI.
-; Their numbers (6..16H) are fixed.
+; The implementation relies on the initialisation of 
+; those with numbers (6..16H), so change in concord with USINI.
 HEADER({S0},{SZERO},{DOUSE})
 	DC	CELLS(3) 
 ;
@@ -1261,6 +1227,9 @@ HEADER({R#},{RNUM},{DOUSE})
 ;
 HEADER({HLD},{HLD},{DOUSE})
 	DC	CELLS(24)
+;
+HEADER({RUBOUT},{RUBOUT},{DOUSE})
+	DC	CELLS(30)
 ;
 ;========== END USER VARIABLES =============;
 	PAGE
@@ -2048,11 +2017,11 @@ LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
 	MOV	[BX],CS
 	MOV	AX,CS
 	MOV	DS,AX		; SET DATA SEG
-	MOV	SP,_WORD_PTR[USINI]    ;PARAM. STACK
 	MOV	SS,AX		; SET STACK SEGMENT
 	MOV	ES,AX		; SET EXTRA SEG
 	CLD			; DIR = INC
-	MOV	BP,[RPP]          ; RETURN STACK
+	MOV	SP,_WORD_PTR[USINI+CELLS(3)]    ;PARAM. STACK
+	MOV	BP,_WORD_PTR[USINI+CELLS(4)]    ;RETURN STACK
 	JMP	NEXT
 ;
 CLD1	DC	COLD
@@ -2066,7 +2035,7 @@ HEADER({COLD},{COLD},{DOCOL})
 	DC	LIT, USINI   
 	DC	LIT,UP
 	DC	FETCH
-	DC	LIT,16H
+	DC	LIT,US
 	DC	LCMOVE
 	DC	LIT,LAINI
 	DC	FETCH
@@ -2509,9 +2478,8 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
 	DC	XDO	; DO                    
 EXPE1	DC	KEY                             
 	DC	DUPE                            
-	DC	LIT,0EH  ; RUBOUT : should be USER variable.
-	DC	PORIG                           
-	DC	FETCH                           
+	DC	RUBOUT 
+        DC      FETCH
 	DC	EQUAL                           
 	_0BRANCH(EXPE2) ; IF                    
 	DC	DROP                            
@@ -2630,9 +2598,8 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
 	DC	XDO	; DO                    
 EXPE1	DC	KEY                             
 	DC	DUPE                            
-	DC	LIT,0EH  ; RUBOUT : should be USER variable.
-	DC	PORIG                           
-	DC	FETCH                           
+	DC	RUBOUT 
+        DC      FETCH
 	DC	EQUAL                           
 	_0BRANCH(EXPE2) ; IF                    
 	DC	DROP                            
@@ -3310,7 +3277,7 @@ HEADER({.CPU},{DOTCPU},{DOCOL})
 	DC	BASE,FETCH
 	DC	LIT,36
 	DC	BASE,STORE
-	DC	LIT,CPUNM-ORIG,PORIG ; 
+	DC	LIT,CPUNM-USINI,PORIG ; 
 	DC	TFET
 	DC	DDOT
 	DC	BASE,STORE
