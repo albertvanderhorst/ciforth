@@ -370,7 +370,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  <HEX
  : NEW-SYSTEM   ( Generates a new FORTH system, )
                 ( using the CP/M SAVE command)
-      LATEST P>N NFAO 10C ! ( Define new topmost word)
+      LATEST N>P NFAO 10C ! ( Define new topmost word)
       ( Initial value for VOC-LINK and FENCE:)
       HERE DUP 11C ! 11E !
       HERE 100 / DECIMAL CR
@@ -540,7 +540,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
    ENDIF
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTN P>N CFAO ;
+   NEXTN N>P CFAO ;
 
  CR ." KRAAKER"
  : KRAAK-FROM ( .--. Kraak, starting with following word)
@@ -840,7 +840,7 @@ SET FILES
 IF FILES SET+! ELSE DROP THEN ;
 : ?HTML-SET META-HTML ?IN-SET ;
 ( CREATE NAME-BUFFER 256 ALLOT  )
-: PAR-TO-DATA CELL+ ; ( GO FROM P>N TO WHERE DOES> IS)
+: PAR-TO-DATA CELL+ ; ( GO FROM N>P TO WHERE DOES> IS)
 : NAME-TO-SET ( SS -- 0/SET)
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
@@ -2162,7 +2162,7 @@ DECIMAL
  <HEX
  : NEW-SYSTEM   ( Generates a new FORTH system, )
                 ( using the CP/M SAVE command)
-      LATEST P>N NFAO 10C ! ( Define new topmost word)
+      LATEST N>P NFAO 10C ! ( Define new topmost word)
       ( Initial value for VOC-LINK and FENCE:)
       HERE DUP 11C ! 11E !
       HERE 100 / DECIMAL CR
@@ -2332,7 +2332,7 @@ DECIMAL
    ENDIF
  ;
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
-   NEXTN P>N CFAO ;
+   NEXTN N>P CFAO ;
 
 ( SAVE-SYSTEM )  HEX
  8049000 CONSTANT SM 
@@ -2433,7 +2433,7 @@ DECIMAL
 CR  ." #40 FROBOZZ AMATEUR ADVENTURER >5< 84/6/27"
  : HERE: ( Defining word:makes a name for the current place)
    CURPOS @ MAP[] [char] @ 0= IF
-      0 VARIABLE LATEST P>N CURPOS @ C-CONNECT
+      0 VARIABLE LATEST N>P CURPOS @ C-CONNECT
       FILL-IN ( The last position connection)
    ELSE
       CR ." This place already been characterized" QUIT
@@ -2495,7 +2495,7 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
      -->
 
  CR  ." #44 FROBOZZ AMATEUR ADVENTURER >9< 84/5/27"
- : MYSELF LATEST P>N CFAO , ; IMMEDIATE
+ : MYSELF LATEST N>P CFAO , ; IMMEDIATE
  : (IDENT)  ( n1 n1 -- Identify locations n1 and n2)
    ?SWAP 2DUP REPLACE SWAP ( Destination location on top)
    10 0 DO ( For all directions do)
@@ -2760,7 +2760,7 @@ SET FILES
 IF FILES SET+! ELSE DROP THEN ;
 : ?HTML-SET META-HTML ?IN-SET ;
 ( CREATE NAME-BUFFER 256 ALLOT  )
-: PAR-TO-DATA CELL+ ; ( GO FROM P>N TO WHERE DOES> IS)
+: PAR-TO-DATA CELL+ ; ( GO FROM N>P TO WHERE DOES> IS)
 : IS-SET-NAME ( SS -- 1)
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
@@ -3114,19 +3114,19 @@ R> DROP R> DROP ;
       DUP
  BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R  DUP H. U<  UNTIL
         CR DUP H. DUP ID.
-          SWAP  2 + !
+          SWAP  >LFA !
     R>
   THEN ;
 
 ( WORDS and VOCS )
-: WORDS 'O ID. CFAO FOR-WORDS ;
+: WORDS ' ID. >CFA FOR-WORDS ;
 
-: .VOC 2 CELLS - 2 - NFAO ID. ;
-: VOCS 'O .VOC CFAO FOR-VOCS ;
+: .VOC 2 CELLS - 2 - N>P ID. ;
+: VOCS ' .VOC >CFA FOR-VOCS ;
 
 (   Up til LIMIT forget in all vocabularies.        )
-: FORGET [COMPILE] 'O NFAO DUP H.
-    'O FORGET-VOC CFAO FOR-VOCS DROP ;
+: FORGET [COMPILE] ' DUP H.
+    ' FORGET-VOC >CFA FOR-VOCS DROP ;
 
 
 
@@ -3151,10 +3151,10 @@ DEFINITIONS
 
 
 AAP
- 'O PIET   VOC-LINK @  FORGET-VOC
- 'O TASK VOC-LINK @  FORGET-VOC
+ ' PIET   VOC-LINK @  FORGET-VOC
+ ' TASK VOC-LINK @  FORGET-VOC
 
- 'O .VOC CFAO FOR-VOCS
+ ' .VOC >CFA FOR-VOCS
 FORTH
 
 

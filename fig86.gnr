@@ -888,7 +888,7 @@ worddoc({MISC},{EXECUTE},{execute},{addr -},{},
 {Execute the definition whose forthdefi({dictionary entry address})
 is given by forthvar({addr}) .
 _VERBOSE_({The DEA serves as an execution token.})
-},{{'},{CFA}},
+},{{'},{>CFA}},
 {{ 'O BL EXECUTE .},{32}})
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
@@ -2131,7 +2131,7 @@ _ALIGNED_({
 the last byte of the cell containing the actual last letter, the byte
 with the 8th bit up.  forthsamp({-1 TRAVERSE})
 works for pointers at an arbitrary position in the last cell.
-}) },{{NFA},{PFA}})
+}) },{{>NFA},{>PFA}})
 HEADER({TRAVERSE},{TRAV},{DOCOL})
         DC      SWAP
 TRAV1:  DC      OVER    ;{BEGIN}
@@ -2156,21 +2156,11 @@ HEADER({LATEST},{LATES},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{CFA},{cfa},{pfa --- cfa},{},
-{Given a dictionary entry addres return the code field address
-field address.
-_VERBOSE_({In fact we want to get rid of the CFAO altogether, }) },
-{{'},{PFA}})
-HEADER({CFA},{CFA},{DOCOL})
-        DC      LCELL
-        DC      LSUB
-        DC      SEMIS
-;
 worddoc({DICTIONARY},{CFAO},{cfa},{deao --- cfa},{},
 {Given an old dictionary entry addres (pfa) return the code field address
 field address.
 _VERBOSE_({In fact we want to get rid of the CFAO altogether, }) },
-{{'},{PFA}})
+{{'},{>PFA}})
 HEADER({CFAO},{CFAO},{DOCOL})
         DC      LCELL
         DC      LSUB
@@ -2178,7 +2168,7 @@ HEADER({CFAO},{CFAO},{DOCOL})
 ;
 worddoc({DICTIONARY},{NFAO},{name_field_address},{pfa --- nfa},{},
 {Convert the parameter field address (deaold) of a definition to its name
-field.},{{'},{PFA}})
+field.},{{'},{>PFA}})
 HEADER({NFAO},{NFAO},{DOCOL})
         DC      LIT,1+CELLS(2)
         DC      LSUB
@@ -2186,10 +2176,10 @@ HEADER({NFAO},{NFAO},{DOCOL})
         DC      TRAV
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{P>N},{parameter_field_address},{nfa --- pfa},{},
+worddoc({DICTIONARY},{N>P},{parameter_field_address},{nfa --- pfa},{},
 {Convert the name field address of a compiled definition to its
-parameter field address.},{{'},{CFA},{LFA},{NFA}})
-HEADER({P>N},{PTON},{DOCOL})
+parameter field address.},{{'},{>CFA},{>LFA},{>NFA}})
+HEADER({N>P},{NTOP},{DOCOL})
         DC      ONE
         DC      TRAV
         DC      LIT,1+CELLS(2)
@@ -2197,9 +2187,19 @@ HEADER({P>N},{PTON},{DOCOL})
         DC      SEMIS
         PAGE
 ;
+worddoc({DICTIONARY},{P>N},{parameter_field_address},{nfa --- pfa},{},
+{Convert the parameter field address of a compiled definition to its
+name field address.},{{'},{>CFA},{>LFA},{>NFA}})
+HEADER({P>N},{PTON},{DOCOL})
+        DC      LIT,1+CELLS(2)
+        DC      LSUB
+        DC      LIT,-1
+        DC      TRAV
+        DC      SEMIS
+;
 worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
 {Given a dictionary entry addres return the
-link field address.},{{'},{LFA}})
+link field address.},{{'},{>LFA}})
 HEADER({>LFA},{TLFA},{DOCOL})
         DC      ONE
         DC      TRAV
@@ -2209,7 +2209,7 @@ HEADER({>LFA},{TLFA},{DOCOL})
 ;
 worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
 {Given a dictionary entry addres return the
-code field address.},{{'},{CFA}})
+code field address.},{{'},{>CFA}})
 HEADER({>CFA},{TCFA},{DOCOL})
         DC      ONE
         DC      TRAV
@@ -2217,15 +2217,34 @@ HEADER({>CFA},{TCFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{>DFA},{cfa},{dea --- cfa},{},
+{Given the dictionary entry addres of a vocabulary
+return the
+address of the dummy dea.
+},{{VOCABULARY},{>CFA}})
+HEADER({>DFA},{TDFA},{DOCOL})
+        DC      TPFA
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
+{Given the dictionary entry addres of a vocabulary
+return the
+address of the link to the next vocabulary.
+},{{VOCABULARY},{>CFA}})
+HEADER({>VFA},{TVFA},{DOCOL})
+        DC      TPFA    ;{Dummy dea.}
+        DC      TPFA    ;{Its parameter field.}
+        DC      SEMIS
+;
 worddoc({DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
-name field.},{{'},{NFA}})
+name field.},{{'},{>NFA}})
 HEADER({>NFA},{TNFA},{DOCOL})
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
-parameter field address.},{{'},{CFA},{>LFA},{NFA}})
+parameter field address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({>PFA},{TPFA},{DOCOL})
         DC      ONE
         DC      TRAV
@@ -2808,9 +2827,10 @@ ERRO1:  DC      HERE
         DC      SWAP    ;{ENDIF}
 ERRO2:  DC      QUIT
 ;
-worddoc({DICTIONARY},{ID.},{i_d_dot},{addr --},{},
-{Print a definition's name from its name field address.},{{'},{PFA},{NFA}})
+worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
+{Print a definition's name from its dictionary entry address.},{{'},{>PFA},{>NFA}})
 HEADER({ID.},{IDDOT},{DOCOL})
+        DC      TNFA
         DC      COUNT
         DC      LIT,1FH
         DC      LAND
@@ -2844,7 +2864,6 @@ HEADER({CREATE},{CREAT},{DOCOL})
         DC      QERR
         _0BRANCH(CREA1) ;{IF}
         DC      DROP
-;        DC      >NFA  fixme
         DC      IDDOT
         DC      LIT,4
         DC      MESS
@@ -3031,7 +3050,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      LIT, " "+80H, CCOMM
         DC      CURR
         DC      FETCH
-        DC      COMMA    ; {DLFA points to NFA of CURRENT}
+        DC      COMMA    ; { Points to DLFA of current vocabulary.}
         DC      HERE
         DC      VOCL
         DC      FETCH
@@ -4839,14 +4858,13 @@ Leaves the parameter field address of dictionary word forthvar({nnnn}).
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
-{{CFA},{>LFA},{NFA},{PFA}} )
+{{CFA},{>LFA},{>NFA},{>PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
         DC      DFIND
         DC      ZEQU
         DC      ZERO
         DC      QERR
         DC      DROP
-        DC      TPFA
         DC      LITER
         DC      SEMIS
 ;
@@ -4858,7 +4876,7 @@ of dictionary word forthvar({nnnn}).
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
-{{CFA},{>LFA},{NFA},{PFA}} )
+{{>CFA},{>LFA},{>NFA},{>PFA}} )
 HEADER({'O},{TICKO},{DOCOL},1)
         DC      DFIND
         DC      ZEQU
@@ -5244,7 +5262,8 @@ DIG1:   DC      LIT,30H
         DC      SEMIS
 ;
 worddoc({FORMATTING},{#S},{number_sign_s},{d1 --- d2},{L0},
-{Generates ascii text in the text output buffer, by the use of forthcode({#}),
+{Generates ascii text in the text output buffer, 
+by the use of (sharp) dnl forthvar({#}),
 until a zero double number forthvar({n2}) results.
 Used between forthcode({<#}) and forthcode({#>}).},{})
 HEADER({#S},{DIGS},{DOCOL})
@@ -5328,7 +5347,7 @@ worddoc({DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt dea --},{},
 and all that are linked from that word
 execute forthvar({xt})   
  with as data forthvar({x1..xn}) plus
-the forthcode({NFA}) of those words.         forthvar({xt})
+the forthdefi({dea}) of those words.         forthvar({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
 {{FOR-VOCS},{EXECUTE}})
