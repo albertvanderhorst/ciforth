@@ -93,10 +93,15 @@ dnl
 dnl A Use BIOS for I/O. No redirection but possible stand alone.
 define( {_USEBIOS_}, _no)dnl
 dnl A1 In addition choose either
-dnl A1 Hard disk I/O
-define({_RWHD_},_no)
-dnl A1 Floppy disk I/O
-define({_RWFD_},_no)
+dnl A1 Hard disk I/O by LBA
+define({_RWLBA_},_no)
+dnl alias for the time being. DO NOT USE AN ALIAS IN THE CONFIGURATION.
+define({_RWHD_},{_RWLBA_({$1},{$2})})
+dnl A1 Access disk by sector, head and track, aka floppy disk I/O.
+dnl    Used for old hard disk too.
+define({_RWSECTRK_},_no)
+dnl alias for the time being. DO NOT USE AN ALIAS IN THE CONFIGURATION.
+define({_RWFD_},{_RWSECTRK_({$1},{$2})})
 dnl A1 Blocks in files
 define({_RWFILE_},_no)
 dnl
@@ -119,13 +124,18 @@ dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl     See remarks of previous group.
 dnl
-dnl A Boot sector present for use on PC. _USEBIOS_ & RWFD required.
+dnl A Boot sector present for use on PC. _USEBIOS_ & RWSECTRK required.
 dnl May run under MSDOS as well. Boot from floppy.
-define( {_BOOTFD_}, _no)dnl
+dnl Or in the floppy fashion from old hard disks.
+define( {_BOOTSECTRK_}, _no)dnl
+dnl alias for the time being. DO NOT USE AN ALIAS IN THE CONFIGURATION.
+define({_BOOTFD_},{_BOOTSECTRK_({$1},{$2})})
 dnl
-dnl A Boot sector present for use on PC. _USEBIOS_ & RWHD required.
+dnl A Boot sector present for use on PC. _USEBIOS_ & RWLBA required.
 dnl May run under MSDOS as well. Boot from hard disk.
-define( {_BOOTHD_}, _no)dnl
+define( {_BOOTLBA_}, _no)dnl
+dnl alias for the time being. DO NOT USE AN ALIAS IN THE CONFIGURATION.
+define({_BOOTHD_},{_BOOTLBA_({$1},{$2})})
 dnl
 dnl A Rely on MSDOS to start the program.
 define( {_HOSTED_MSDOS_}, _no)dnl
@@ -166,6 +176,10 @@ define({M4_EM},10000H)
 dnl
 dnl The maximum number of wordsets that can be in the search order.
 define({M4_MAXWORDLIST},8)
+dnl
+dnl Applicable if 'BOOTSECTRK = _yes'
+dnl Make a boot floppy that is DOS compatible.
+define({_RESPECTDOS_}, _yes )
 dnl
 dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.
 dnl

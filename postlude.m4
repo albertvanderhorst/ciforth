@@ -12,7 +12,7 @@ dnl normally A requiries with an exception for C.
 
 dnl Combinations
 _BOOTFD_({define({_BOOTED_}, _yes)})
-_BOOTHD_({define({_BOOTED_}, _yes)})
+_BOOTLBA_({define({_BOOTED_}, _yes)})
 _LINUX_N_({ define( {_HOSTED_LINUX_}, _yes)})
 _LINUX_C_({ define( {_HOSTED_LINUX_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
@@ -20,8 +20,8 @@ _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 
 dnl Hard consequences
 _REAL_({define({_BITS16_}, _yes)})
-_BOOTFD_({define({_RWFD_}, _yes)})
-_BOOTHD_({define({_RWHD_}, _yes)})
+_BOOTSECTRK_({define({_RWSECTRK_}, _yes)})
+_BOOTLBA_({define({_RWLBA_}, _yes)})
 _BOOTED_({define({_PC_}, _yes)})
 _HOSTED_DPMI_({define({_PC_}, _yes)})
 _HOSTED_MSDOS_({define({_PC_}, _yes)})
@@ -53,13 +53,15 @@ _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
 dnl Defines that directly regulate source inclusions, without depending defines.
 _PC_({define({_NORMAL_BYE_}, _yes)}) dnl default
 _ABSOLUTELOAD_({define({_NORMAL_BYE_}, _no)}) dnl exception
+define({_NO_RESPECTDOS_}, _yes)}) dnl default
+_RESPECTDOS_({define({_NO_RESPECTDOS_}, _no)})}) dnl exception
 define({_NO_SECURITY_}, _yes)}) dnl default
 _SECURITY_({define({_NO_SECURITY_}, _no)})}) dnl exception
 define({_CIF_IN_}, _yes)})
 _ISO_IN_({define({_CIF_IN_}, _no)})})
 
 dnl Detectable error situations. Terminate.
-_RWFD_({ _RWHD_({errprint({Mass storage cannot be at the same time from floppy and hard disk.
+_RWSECTRK_({ _RWLBA_({errprint({LBA disk access conflicts with access by sectors and tracks.
 })m4exit(1000)})})
 _BOOTED_({_HOSTED_LINUX_({errprint({Cannot boot into a Linux hosted Forth.
 })m4exit(1001)})})
