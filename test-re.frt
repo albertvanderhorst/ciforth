@@ -1,9 +1,9 @@
 \ INCLUDE regexp.frt
 VARIABLE OLDIN : !OLDIN IN @ OLDIN ! ; !OLDIN
-\     : test IF CR "The following failed: " TYPE OLDIN @ IN @ OVER - TYPE CR THEN !OLDIN ;
+: test IF CR "The following failed: " TYPE OLDIN @ IN @ OVER - TYPE CR THEN !OLDIN ;
 \ Verbose
-: test CR IF "Test failed: " ELSE "Test suceeded: " THEN TYPE
-OLDIN @ IN @ OVER - TYPE CR !OLDIN ;
+\     : test CR IF "Test failed: " ELSE "Test suceeded: " THEN TYPE
+\     OLDIN @ IN @ OVER - TYPE CR !OLDIN ;
 : \ POSTPONE \ !OLDIN ; IMMEDIATE
 : match 0= test ;
 : nomatch test ;
