@@ -94,7 +94,7 @@ ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
 : SE?   SE@ .SE ;
 
 \ For DEA type everything.
-: .DE DUP SE? DUP (KRAAK) OPT? ;
+: .DE DUP SE? DUP CRACKED OPT? ;
 
 \ For VALUE and SET : value IS present in set.
 : IN-SET? $@ SWAP
