@@ -32,9 +32,12 @@ LINUXFORTHS= figforth lina
 # Auxiliary targets
 OTHERTARGETS= BLOCKS.BLK toblock fromblock
 # C-sources with various aims.
-CSRC= figforth toblock fromblock stealconstant
+CSRCAUX= toblock fromblock stealconstant
+CSRCFORTH= figforth toblock fromblock stealconstant
+CSRC= $(CSRCAUX) $(CSRCFORTH)
 
 RELEASECONTENT = \
+COPYING          \
 fig86.gnr        \
 BLOCKS.BLK       \
 $(INGREDIENTS)   \
@@ -43,7 +46,7 @@ $(TARGETS:%=%.cfg) \
 $(CSRC:%=%.c)    \
 Makefile         \
 release.txt      \
-readme.txt       \
+fig86gnr.txt       \
 fig86.alone.asm  \
 fig86.msdos.msm  \
 fig86.linux.asm  \
@@ -52,8 +55,21 @@ genboot.bat      \
 link.script    \
 # That's all folks!
 
-# Letter versions are beta!
-VERSION=0A
+# r## revision 2.## a beta release
+# #d# 2.#.# stable release, e.g. 0d1
+VERSION=test  # Because normally VERSION is passed via the command line.
+
+RELEASELINA = \
+COPYING          \
+linarelease.txt  \
+figdoc.zip    \
+figdocadd.txt \
+lina.asm      \
+lina          \
+BLOCKS.BLK       \
+$(CSRCAUX:%=%.c)    \
+wc              \
+# That's all folks!
 
 
 # Define NASM as *the* assembler generating bin files.
@@ -123,7 +139,11 @@ hdboot: fig86.alone.bin
 msdos.msm : fig86.msdos.msm ; cp $+ $@
 alone.asm : fig86.alone.asm ; cp $+ $@
 
+figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
+
 zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
+
+lina.zip : $(RELEASELINA) ; zip lina$(VERSION) $+
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
@@ -135,9 +155,10 @@ figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.scri
 
 # Linux native forth
 lina : fig86.lina.o ; ld $+ -o $@
+lina.asm : fig86.alone.asm ; cp $+ $@
 
 # Convenience under linux. Steal the definitions of constants from c include's.
 constant.m4 : stealconstant.c ; cc -E $+ | m4 prelude.m4 - >$@
 
 # Add termporary stuff for testing, if needed.
-include test.mak
+#include test.mak
