@@ -117,7 +117,8 @@ comply to it. Still by restricting yourself to the definitions marked
 as ISO in the glossary, it is quite possible to write an application
 that will run on any ISO-compliant system.
 
-Using a stack you can always interrupt your work and continue.
+Because of the way Forth remembers numbers
+you can always interrupt your work and continue.
 For example
 forthexample({: TEST
 1 2 + [ 3 4 * . ]

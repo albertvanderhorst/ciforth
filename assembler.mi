@@ -3,10 +3,8 @@ dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public Li
 
 @section Introduction
 
-You find here a couple of assemblers, to complement the generic ciForth system.
+You find here a couple of assemblers, to complement the generic ciforth system.
 They are based on the postit/fixup principle.
-
-prototype : still present in the forth.lab ("blocks"), usable and cleaned up
 
 _BOOTED_({{On this stand alone version of ciforth, you only
 have the assembler in blocks, but they are not documented
@@ -14,29 +12,30 @@ separately. So you have to keep up with this description. These
 files are not part of this distribution, maybe you but they are
 available at my site, see chapter 3.) }})
 
+forthbreak
+prototype : still present in the forth.lab ("blocks"), usable and cleaned up
+forthbreak
+forthfile({ass.frt})  : the 80-line 8086 assembler (no error detection)
+forthbreak
+forthfile({asgen.frt}) : generic part of postit/fixup assembler
+forthbreak
+forthfile({as80.frt})  : 8080 assembler, requires forthfile({asgen.frt})
+forthbreak
+forthfile({asi86.frt})  : 8086 assembler, requires forthfile({asgen.frt})
+forthbreak
+forthfile({asi586.frt}) : 80386 assembler, requires forthfile({asgen.frt})
+forthbreak
+forthfile({ps.frt})     : generate opcode sheets
+forthbreak
+forthfile({p0.asi586.ps}) : first byte opcode for asi586 assembler
+forthbreak
+forthfile({p0F.asi586.ps}) : two byte opcode for same that start with 0F.
+forthbreak
+forthfile({test.mak}) : makefile, i.e. with targets for opcode sheets.
+forthbreak
 
-forthbreak
-ass.frt  : the 80-line 8086 assembler (no error detection)
-forthbreak
-asgen.frt : generic part of postit/fixup assembler
-forthbreak
-as80.frt  : 8080 assembler, requires asgen.frt
-forthbreak
-asi86.frt  : 8086 assembler, requires asgen.frt
-forthbreak
-asi586.frt : 80386 assembler, requires asgen.frt
-forthbreak
-ps.frt     : generate opcode sheets
-forthbreak
-p0.asi586.ps : first byte opcode for asi586 assembler
-forthbreak
-p0F.asi586.ps : two byte opcode for same that start with 0F.
-forthbreak
-test.mak : makefile, i.e. with targets for opcode sheats.
-forthbreak
 
-
-De asi586.frt (containing the full 80386 instruction set) is in
+De forthfile({asi586.frt}) (containing the full 80386 instruction set) is in
 many respects non-compliant to Intel syntax. The instruction
 mnemonics are redesigned in behalf of reverse engineering.
 There is a one to one correspondence between mnemonics and
@@ -61,13 +60,13 @@ Now for the bad news. The assembler in the Library Addressable
 by Blocks (block file) hasn't any of those feature. It is
 intended for incidental use, to speed up a crucial word. Worse
 yet, the opcodes are not always the same as used here, and the
-commaers are even mostly different. You have to resort to that
+comma-ers are even mostly different. You have to resort to that
 old game, reading the source.
 
 
 @section Reliability
 
-I skimped on write up. I didn't skimp on testing, at least not for asi586.frt.
+I skimped on write up. I didn't skimp on testing, at least not for forthfile({asi586.frt}).
 It is tested in this way:
 
 forthenumerate
@@ -77,7 +76,7 @@ instruction assembled that is not in this set.)
 
 forthitem They are assembled.
 
-forthitem They are dissasembled again, must come out the same.
+forthitem They are disassembled again, must come out the same.
 
 forthitem They are disassembled by a different tool (GNU's objdump),
 and the output is compared with 3. This has been done manually,
@@ -87,12 +86,12 @@ forthendenumerate
 This leaves room for a defect of the following type:
 A valid instruction is rejected or has been totally overlooked.
 
-But opcode maps reveal their terra incognita relentlessly. So I
-am quite confident to promise a bottle of good Irish wisky to
+But opcode maps reveal their Terra incognita relentlessly. So I
+am quite confident to promise a bottle of good Irish whiskey to
 the first one to come up with a defect in this assembler.
 
 The full set of instructions, with all operand combinations sit
-in a file for reference. This is all barring the 256-way SIB
+in a file for reference. This is all barring the 256-way forthsamp({SIB})
 construction and prefixes, or combinations thereof. This would
 explode this approach to beyond Terabytes. It is also not
 practical for the Alpha with 32K register combinations per
@@ -101,36 +100,43 @@ instruction.
 
 @section Principle of operation
 
-
-
 In making an assembler for the Pentium it turns out that
 the in-between-step of creation defining words for each type
 of assembly gets in the way. There are just too many of them.
 
-MASM heavily overloads the instruction, in particular MOV .
-One time I criticised Intel because they had an unpleasant to use
-instruction set with MOV MVR and MVI for move instructions. In
+MASM heavily overloads the instruction, in particular forthsamp({MOV}) .
+Once I use to criticise Intel because they had an unpleasant to use
+instruction set with forthsamp({MOV}) forthsamp({MVR}) and forthsamp({MVI}) for move instructions. In
 hindsight that was not too bad and I am returning to that.
 (I mean they are really different instructions, it might have been
 better if they weren't. But an assembler must live up to the truth.)
-Where the intel folks really go overboard is with the disambiguation of
-essentially ambigous constructs, by things as `OFFSET' `BYTE POINTER'
-`ASSUME' . You can no longer find out what the instruction means by itself.
+Where the Intel folks really go overboard is with the disambiguation of
+essentially ambiguous constructs, by things as forthsamp({OFFSET}) forthsamp({BYTE POINTER})
+ forthsamp({ASSUME}) . You can no longer find out what the instruction means by itself.
+forthbreak
 The simplest example is
 forthexample({        INC [BX]})
 Are we to increment the byte or the word at BX? ( Intel's solution : forthsamp({INC BYTE POINTER BX}))
 Contrarily here we adapt the rule : if an instruction doesn't determine the operand
-size (some do, like LEA), then a size fixup is needed ( X| or B|).
+size (some do, like forthcode({LEA,}) ), then a size fixup is needed (
+ forthsamp({X|}) or forthsamp({B|}) ). forthbreak
+In this assembler this looks like
+forthexample({        INC, B| D0 [BX] })
+This is completely unambiguous.
 
-This is an example of how this assembler works:
+These are the phases in which this assembler handles an instruction:
 
+forthitemize
+forthitem
 POSTIT phase:
-
-MOV, assembles a two byte instruction with holes.
-
-FIXUP phase
-
-X| or B| fits in one of the holes left.
+forthcode({MOV,}) assembles a two byte instruction with holes.
+forthitem
+FIXUP phase:
+forthcode({X|}) or forthcode({B|}) fits in one of the holes left.
+forthitem
+COMMA phase:
+forthcode({IX,}) or forthcode({X,}) add addresses and immediate data.
+forthenditemize
 
 Doesn't that lay a burden on the programmer? Yes.
 He has to know exactly what he is doing.
@@ -142,71 +148,83 @@ An advantage is that you are more
 aware of what instructions are there.
 Because you see the duplicates.
 
-Now if you are serious, you have to study the asgen.frt and
-as80.frt sources. You better get your feet wet with as80.frt
-before you attack the Pentium. The way SIB is handled is so
-brilliant, that sometimes I don't understand it myself.
+Now if you are serious, you have to study the forthfile({asgen.frt}) and
+forthfile({as80.frt}) sources. You better get your feet wet with forthfile({as80.frt})
+before you attack the Pentium. The way forthsamp({SIB}) is handled is so
+clever, that sometimes I don't understand it myself.
+
+Another invention in this assembler is the forthdefi({family}) of instructions.
+Assembler instructions are grouped into families with identical fixups, and
+a increment for the opcodes. These are defined as a group by a single execution of a defining
+word. For each group there is one opportunity to get the opcode wrong; formerly that
+was for each opcode.
 
 @section The 8080 assembler
 
-The 8080 assemblerdoesn't take less place than CASSADY's . (You bet that pays the postit-fixup principle pays  off for
+The 8080 assembler doesn't take less place than Cassady's . (You bet that the postit-fixup principle pays  off for
 the Pentium, but not for the 8080.) But... The regularities are much
 more apparent. It is much more difficult to make a mistake with the
-code for the ADD and ADI instructions. And there is information there
+code for the forthsamp({ADD}) and forthsamp({ADI}) instructions. And there is information there
 to the point that it allows to make a disassembler that is independant
 of the instruction information, one that will work for the 8086, look
 at the pop family.
 First I had
-forthexample({38 C1 02 4 1FAMILY, POP -- PUSH RST      ( B'|)})
+forthexample({ 38 C1 02 4 1FAMILY, POP -- PUSH RST      ( B'|) })
 (cause I started from an existing assembler.)
-But of course RST (the restart instruction) has nothing to do
-with registers, so it gets a separate line.
+But of course forthcode({RST}) (the restart instruction) has nothing
+to
+do
+with registers, so it gets a separated out. Then the exception, represented
+by the hole forthsamp({--}) disappears.
 The bottom line is : the assembler proper now takes 22 lines of code.
-Furthermore the `call conditional' and `return conditional'
-instructions where missing.
-For me this means turning `jump conditional' into a family.
+Furthermore the ``call conditional'' and ``return conditional''
+instructions where missing. This became apparent as soon as I printed the
+opcode sheets.
+For me this means turning ``jump conditional'' into a family.
 
 @section Opcode sheets
 
-Using test.mak (on a linux computer in lina) you can generate opcode sheets
+Using forthfile({test.mak}) (on a linux computer in lina) you can generate opcode sheets
 by  "make asi586.ps". For the opcode sheets featuring a n-byte prefix you must
-pass the PREFIX to make and a MASK that covers the prefix and the byte opcode, e.g.
+pass the forthsamp({PREFIX}) to make and a forthsamp({MASK}) that covers the prefix and the byte opcode, e.g.
 forthsamp({make asi586.ps MASK=FFFF PREFIX=0F})
-The opcode sheets p0.asi586.ps and p0F.asi586.ps are already made and can be
-printed on a postscript printer or viewed with e.g. 'gv'.
+The opcode sheets forthfile({p0.asi586.ps}) and forthfile({p0F.asi586.ps}) are already made and can be
+printed on a PostScript printer or viewed with e.g. forthsamp({gv}).
 
 Compare the opcode sheets with Intel's to get an overview of what I have done
-to the instruction set. In essence I have reengineered it to make it reverse
+to the instruction set. In essence I have re-engineered it to make it reverse
 assemblable, i.e. from a disassembly you can regenerate the machine code.
-This is NOT true for Intels instruction set, e.g. Intel has the same opcode for
+This is forthemph({not}) true for Intel's instruction set, e.g. Intel has the same opcode for
 forthsamp({MOV, X| T| AX'| R| BX| })     and forthsamp({MOV, X| F| BX'| R| AX|})
 and, as of this writing,
- GNU's objdump gives the same disassembly for both imul's despite the difference
+ GNU's objdump gives the same disassembly for both forthsamp({IMUL})s despite the difference
 between a 32*32 > 64 and a 32*32 > 32 operation:
-forthsamp({IMUL|AD, X| R| BX|})              or forthsamp({IMUL, AX'| R| BX|})
+forthsamp({IMUL|AD, X| R| BX|})    or forthsamp({IMUL, AX'| R| BX|})
 
-To get a reminder of what instructions there are type forthcode({SHOW-OPCODES}) .
-If you are a bit familiar with the opcodes you are almost there. For if you want to
-know what the precides instruction format of e.g. forthsamp({IMUL|AD,}) just type
-forthsamp({SHOW: IMUL|AD,})
-You can also type forthcode({SHOW-ALL,}) but that takes a lot of time and is more intended for
-test purposes.
+To get a reminder of what instructions there are type
+forthcode({SHOW-OPCODES}) . If you are a bit familiar with the
+opcodes you are almost there. For if you want to know what the
+precise instruction format of e.g. forthcode({IMUL|AD,}) just
+type forthsamp({SHOW: IMUL|AD,}) You can also type
+forthcode({SHOW-ALL,}) but that takes a lot of time and is more
+intended for test purposes.
+
+_VERBOSE_({
 
 @section Details about the 80386 instructions
 
-
-Read the introductory comment of asgen.frt for how the assembler
-keeps track of the state, using the BI BY BA tallies.
+Read the introductory comment of forthfile({asgen.frt}) for how the assembler
+keeps track of the state, using the forthcode({BI}) forthcode({BY}) forthcode({BA}) tallies.
 forthenumerate
 forthitem
-A word ending in , reserves place in the dictionary.
+A word ending in forthkey({{,}}) reserves place in the dictionary.
 It stand for one assembler instruction.
 The start of the instruction is kept and there is a bitfield (the tally) for
 all bits that belong to the instruction, if only mentally. These bits are
 put as comment in front of the instruction and they are considered filled
 in. They also imply the instruction length.
 forthitem
-A word ending in | is a fixup, it and's in some bits
+A word ending in forthkey({|}) is a fixup, it forthcode({OR})s in some bits
 in an already assembled instruction. Again there is a mask in front
 of fixups and in using the fixup these bits are considered to be filled
 in. A fixup cannot touch data before the start of the latest instruction.
@@ -215,44 +233,54 @@ Families can be constructed from instructions or fixups with the
 same tally bit field, provided they differ by a fixed increment. If
 data or addresses following differ this is unwise.
 forthitem
-The part before a possible | in an instruction -- but exluding an
+The part before a possible forthkey({|}) in an instruction -- but excluding an
 optional trailing I -- is the opcode. Opcodes define indeed a same action.
 forthitem
-The part after | in an instruction may be considered a built in
-fixup where irregularity forbids to use a real fixup.
-A X stands for xell or natural data width. This is 16 bit for a
-16 bit assembler and 32 bit for a 32 bit assembler. These can be
-overruled with AS:, applying to DX| and MEM| and with OS:, applying to
-data required where there is an I suffix.
-6 Width fixups determine the data width : X|
-(xell or natural data width 16/32 ) or B| ( 8 bit) unless implied.
+The part after forthkey({|}) in an instruction may be
+considered a built in fixup where irregularity forbids to use a
+real fixup. A X stands for xell or natural data width. This is
+16 bit for a 16 bit assembler and 32 bit for a 32 bit
+assembler. These can be overruled with forthcode({ AS:, }) dnl
+applying to forthcode({DX|}) and forthcode({MEM|}) and with
+forthcode({ OS:, }) applying to tdata required where there is
+an I suffix.
 forthitem
-Instruction ending in I have an immediate data field after all
-fixups. This can be either X, (xell or natural data width) or
-B, W, L, ( 8 16 32 bit).
+Width fixups determine the data width : forthcode({X|})
+(xell or natural data width 16/32 ) or forthcode({B|}) ( 8 bit) unless
+implied.
+forthitem
+Instruction ending in forthkey({I}) have an immediate data field after all
+fixups. This can be either forthcode({X,}) (xell or natural data
+width)
+or
+forthcode({B,}) forthcode({W,}) forthcode({L,}) ( 8 16 32 bit).
 If there are width fixups they should correspond with the data.
-forthitem * Instructions ending in |SEG builtin fixup (segments) require SEG,
-(which is always 16 bits).
-C If X, cannot be used caused by width overrules, the programmer should
-carefully insert W, or L, whatever appropriate.
 forthitem
-with r/m can have offsets (for DB| and DX| ) that must
-be assembled using B, or X, but mind the previous point.
+Instructions ending in forthsamp({|SEG}) builtin fixup
+(segments) require forthcode({SEG,}) (which is always 16 bits).
+If forthcode({X,}) cannot be used caused by width overrules,
+the programmer should carefully insert forthcode({W,}) or
+forthcode({L,}) whatever appropriate.
+forthitem
+With r/m you can
+have offsets (for forthcode({DB|}) and forthcode({DX|}) ) that
+must be assembled using forthcode({B,}) or forthcode({X,}) but
+mind the previous point.
 forthitem
 Instruction with r/m can have a register instead of memory indicated
-by the normal fixups AX| etc.
+by the normal fixups forthcode({AX|}) etc.
 forthitem
 If instructions with r/m have another register, that one is indicated
-by primed registers AX'| Or if an instruction can handle two general
-registers, the one that cannot be replace by a memory reference gets a prime.
+by a prime such as forthcode({AX'|}). Or if an instruction can handle two general
+registers, the one that cannot be replaced by a memory reference gets a prime.
 forthitem
-Unless T| F| (to/from) present a primed register is the modifiable one,
-else T| F| refer to the primed register. The primed register is the one
-that cannot be replace by a memory reference.
+Unless forthcode({T|}) forthcode({F|}) (to/from) are present, a primed register is the modifiable one,
+else forthcode({T|}) forthcode({F|}) refer to the primed register. The primed register is the one
+that cannot be replaced by a memory reference.
 forthitem
 At the start of an instruction the mask of the previous instruction
 plus fixup should add up non-overlappingly to a full field.
-Offsets and immediate data should have been commaed in in that order.
+Offsets and immediate data should have been comma-ed in in that order.
 forthitem
 A fixup or instruction
 is mightier than an other one
@@ -260,145 +288,172 @@ if its mask contains all the bits of that other one.
 The second fixup or instruction
 shall then not be used.
 forthitem
-Instructions ending in :, are prefixes and are considered in their own
+Instructions ending in forthsamp({ :, }) are prefixes and are considered in their own
 right. They have no fixups.
 forthitem
 The Scaled Index Byte is handled in the following way:
-The fixup SIB| closes the previous instruction (i.e.
+The fixup forthcode({SIB|}) closes the previous instruction (i.e.
 fill up its bit field), but possible immediate data and offsets are kept.
-Then SIB, starts a new instruction.
-forthitem The SET, instruction unfortunately requires a duplicate of the
-O| etc. fixups of the J, and J|X, instructions.
-* Some single byte instructions require X'| and B'| instead of X| and B|
-that are used for the ubiquitous instructions with r/m.
+Then forthcode({SIB,}) starts a new instruction.
+forthitem The forthcode({SET,}) instruction unfortunately requires a duplicate of the
+O| etc. fixups of the forthcode({J,}) and forthcode({J|X,}) instructions.
 forthitem
-Hand disambling can be done as follows.
+Some single byte instructions require forthcode({X'|}) and
+forthcode({B'|}) instead of forthcode({X|}) and forthcode({B|}) dnl
+that are used for the ubiquitous instructions with r/m.
+forthendenumerate
 
-  I Find the mightiest instruction that agrees with the data at the
-    program counter. Tally the bits. The instructions length follows from
-    the instruction. As does the presence of address offsets and immediate
-    data. The dictionary may b eorganized such that the mightiest
-    instruction is always found first.
+Hand disassembling can be done as follows.
 
-  II Find the mightiest fixup that agrees with untallied bits.
-
-  III If not all bits have been tallied go to II
-
-  IV Disassemble the address offsets and immediate data, in accordance
-     with the instruction. Length is determined from fixups and prefix
-     bytes.
-
+forthenumerate
+forthitem
+Find the mightiest instruction that agrees with the data at the
+program counter. Tally the bits. The instructions length follows from
+the instruction. As does the presence of address offsets and immediate
+data. The dictionary may be organized such that the mightiest
+instruction is always found first.
+forthitem
+Find the mightiest fixup that agrees with untallied bits.
+forthitem
+If not all bits have been tallied go to 2
+forthitem
+Disassemble the address offsets and immediate data, in accordance with
+the instruction. Length is determined from fixups and prefix bytes.
 The result must agree with the instruction in the first place.
 forthendenumerate
+
 
 @section Using 16 bits code in the 32 bit assembler
 
 In general X refers to Xell. So in 16 bit mode or with a 16 bit prefix
-AX is to mean the Intel AX instead of what is normal EAX.
+AX is to mean the Intel forthcode({AX}) instead of what is normal:
+forthcode({EAX}) .
 It is thus possible to insert a patch of 16 bit code in 32 bit code
 all with the 32 bit assembler. This can be necessary in system
 programming. Just use forthsamp({MOV, AX'| R| BX|}) and in 16 bit mode it refers
 to 16 bit registers.
 
 If an address overwrite suffix applies, the indexing fixups ending in
-a prime must be used, e.g. [BX+SI]' instead of [AX] for code running
-in a default 32 bit environment. (Otherwise use the 8086 assembler)
-But during system programming only the programmer knows what is going on,
-so some error messages are suppressed.
+a prime must be used, e.g. forthsamp({[BX+SI]'}) instead of
+forthcode({[AX]}) for code running in a default 32 bit environment.
+(Otherwise use the 8086 assembler) But during system programming only
+the programmer knows what is going on, so some error messages are
+suppressed.
 
-While using 16 bits code, whenever you get error messages and you
-are sure you know better than the assembler, put !TALLY before the
-word that gives the error messages.
+While using 16 bits code, whenever you get error messages and
+you are sure you know better than the assembler, put
+forthcode({!TALLY}) before the word that gives the error
+messages, and they will be suppressed.
 
 @section This assembler is not yet integrated in the generic Forth
 
-In the generic Forth automatically a 32 bit assembler is loaded if the
-Forth itself is 32 bits and a 16 bit assembler for the 16 bit forths.
-Adding the extra complexity to run the 16 bit assembler on a 32 bit
-system would be the drip that overflows the bucket. This is no
-restriction for what code can be generated.
-THE BUILT IN ASSEMBLER HAS NO ERROR CHECKING AND MAY HAVE ERRORS
-THAT THE VERY EXTENSIVELY TESTED "asi586.frt" HAS NOT.
+In the generic Forth automatically a 32 bit assembler is loaded
+if the Forth itself is 32 bits and a 16 bit assembler for the
+16 bit forths. Adding the extra complexity to run the 16 bit
+assembler on a 32 bit system would be the drip that overflows
+the bucket. This is no restriction for what code can be
+generated. forthemph({The built in assembler has no error
+checking and may have bugs the very extensively tested})
+forthfile({asi586.frt}) forthemph({has not.})
+ });_END_({_VERBOSE_})
+
+_VERBOSE_({
 
 @section A rant about redundancy
 
-You could complian about redundancy in postit-fixuo assemblers.
-But there is an advantage to that, it helps detect invalid combinations
-of instructions parts. They look bad at first sight.
-What about
-
-forthsamp({MOV, B| T| [BX+SI] R| AX|})
-
-MOV, needs two operands
-but there is no primary operand in sight. [BX+SI] would not qualify.
-and not even BX| because the primary operand should be
-marked with a prime.
-forthsamp({MOV, X| T| BX| AX|})
-looks bad because you know BX| and AX| work on the same bit fields,
-so it easy to remember you need the prime.
-T| and F| refer to the primary operands, so gone is the endless confusion
-about what is the destination of the move.
-forthsamp({MOV, X| T| BX'| R| AL})| looks bad , because AL| could not possibly qualify
-as an X register.
-forthsamp({MOV, X| T| BX'| AX|}) looks bad , because soon you will adopt the habit
-that one of the 8 main register always must be preceeded with T| F| or R|.
-
-forthsamp({MOV, X| T| BX'| R| AX|}) looks right but you still can code
-forthsamp({MOV, AX| BX'| R| T| X|})
-if you prefer your fixups in alphabetic order. (A nice rule for those
+You could complain about redundancy in postit-fixup assemblers.
+But there is an advantage to that, it helps detect invalid
+combinations of instructions parts. They look bad at first
+sight. What about forthbreak forthsamp({MOV, B| T| [BX+SI] R|
+AX|}) forthbreak forthsamp({MOV,}) needs two operands but there
+is no primary operand in sight. forthcode({[BX+SI]}) would not
+qualify. and not even forthcode({BX|}) because the primary
+operand should be marked with a prime. forthbreak
+forthsamp({MOV, X| T| BX| AX|}) looks bad because you know
+forthcode({BX|}) and forthcode({AX|}) work on the same bit
+fields, so it easy to remember you need the prime.
+forthcode({T|}) and forthcode({F|}) refer to the primary
+operands, so gone is the endless confusion about what is the
+destination of the move. forthbreak forthsamp({MOV, X| T| BX'|
+R| AL})| looks bad , because forthcode({AL|}) could not
+possibly qualify as an X register. forthbreak forthsamp({MOV,
+X| T| BX'| AX|}) looks bad , because soon you will adopt the
+habit that one of the 8 main register always must be preceeded
+with forthfile({T|}) forthcode({F|}) or forthcode({R|}) .
+forthbreak forthsamp({MOV, X| T| BX'| R| AX|}) looks right but
+you still can code forthsamp({MOV, AX| BX'| R| T| X|}) if you
+prefer your fixups in alphabetic order. (A nice rule for those
 Code Standard Police out there?).
-And yes
-forthsamp({ES: OS: MOV, X| T| DI'| sib|, DX| [BP +8* AX] FFFFF800 X,})
-though being correct, and in a logical order,
-looks still bad, because it *is* bad in the sense that the Pentium design
-got overboard in complication.
-First remark lets assume this is
+
+And yes forthsamp({ES: OS:
+MOV, X| T| DI'| sib|, DX| [BP +8* AX] FFFFF800 X,}) though
+being correct, and in a logical order, looks still bad, because
+it forthemph({is}) bad in the sense that the Pentium design got
+overboard in complication. (This example is from the built-in assembler,
+the one in forthfile({asi586.frt}) redefines forthcode({[BP}) c.s. to get rid of the forthcode({sib|,}) instruction.)
+forthbreak
+First remark: lets assume this is
 32 bit code,(because otherwise there
-would not be a sib, sure?)
+would not be a forthcode({sib,}) sure?)
+forthbreak
 There are 3 sizes involved :
-The size of the data transported this is always the X as in X|.
-Then the first X| changes its meaning to 16 bit, because of the OS:
-prefix.
-The X in DX| and in X, must agree and are 32 bits because you are in
-a 32 bits segment and this cannot be overridden.
-The offset (in +AX]) is counted in 64 bits, a strange array fro fetching
-the DI but anyway.
+forthitemize
+forthitem
+The size of the data transported this is always the forthsamp({X}) as
+in forthcode({X|}) .
+Then the first forthcode({X|}) changes its meaning to 16 bit, because
+of the forthcode({OS:}) prefix.
+forthitem
+The forthcode({X}) in forthcode({DX|}) and in forthcode({X,}) must
+agree and are 32 bits because you are in a 32 bits segment and this
+cannot be overridden.
+forthitem
+The offset (in forthsamp({+AX]}) ) is counted in 64 bits, a strange
+array for fetching the forthsamp({DI}) but anyway.
+forthenditemize
 And .. by the way the data is placed in the extra segment.
 Add a bit of awareness of the cost of the instructions in execution time
 and take care of the difference between the Pentium processors MMX en III
 and what not and you will see that assembly program is not for the faint
-of heart. The ASSUME of the MASM assembler buys you nothing, but
+of heart. The forthsamp({ASSUME}) of the MASM assembler buys you
+nothing,
+but
 inconvenience.
+ });_END_({_VERBOSE_})
 
+_VERBOSE_({
 @section Reference opcodes
 
-Table one contains all the opcodes used in ai586.frt in alphabetic order,
-with '|' sorted before any letter.
+Table one contains all the opcodes used in forthfile({asi586.frt}) in alphabetic order,
+with forthkey({|}) sorted before any letter.
 All opcodes on the first position are the same as Intel opcodes.
 
 You can use it in two ways.
 
-
-You want the opcode for some known intel opcode.
+You want the opcode for some known Intel opcode.
+forthbreak
 Look it up in the first column. One of the opcodes on that
 line is what you want. To
 pick the right one, consider the extension that are explained
-in table 2. Exception: PUSHI is not on the line with PUSH.
+in table 2. Exception: forthsamp({PUSHI}) is not on the line with forthsamp({PUSH}) .
 Some times you have to trim built in size designators, e.g. you
-look up LODSW but you are stuck at LODS, so that's it.
-With SHOW: LODS, you can see what the operands look like.
-
-
+look up forthsamp({LODSW}) but you are stuck at forthcode({LODS}) , so that's it.
+With forthsamp({ SHOW: LODS, }) you can see what the operands look like.
+forthbreak
 You want to know what a POSIT/FIXUP code does. Look it up in the table,
-on the first line you have an Intel opcode. For example you have CALLFAROI,
-That is at the line with CALL, . So the combination of operands for CALLFAROI,
-are to be found in the description for CALL in the Intel manuals.
+on the first word on the line you should recognize an Intel opcode. For example you have
+forthcode({ CALLFAROI, })
+That is at the line with forthcode({CALL,}) . So the
+combination of operands for forthcode({CALLFAROI,}) are to be
+found in the description for forthsamp({CALL}) in the Intel
+manuals.
 
-Note. Some things are ugly. LDS, should be L|DS, . I would replace
-MOV|FA, by STA, and MOV|TA, by LDA, . But that would make the cross
-referenecing more problematic.
-Note. The meaning of the operands for JMP and JMPFAR are totally
-different. So my suffices are different.
+Note. Some things are ugly. forthcode({LDS,}) should be
+forthcode({L|DS,}) . I would replace forthcode({MOV|FA,}) by
+forthcode({STA,}) and forthcode({MOV|TA,}) by forthcode({LDA, }) . But
+that would make the cross referencing more problematic. Note. The
+meaning of the operands for forthsamp({JMP}) and forthsamp({JMPFAR})
+are totally different. So my suffices are different.
 
 Table 1. Opcode cross reference.
 
@@ -533,6 +588,7 @@ forthitem O       : Operand
 forthitem OI      : Operand indirect
 @end table
 
+ });_END_({_VERBOSE_})
 
 
 @section The dreaded SIB byte
@@ -540,11 +596,11 @@ forthitem OI      : Operand indirect
 If you ask for the operands of a memory instruction (one of the
 simple one is LGDT, ) instead of all the sib possibilities you
 see.
-forthsamp({LGDT, DB| ~SIB| 10 SIB,, 14, B,})
+forthsamp({LGDT, DB| ~SIB| 14 SIB,, 18, B,})
 This loads the general description table from an address
-described by a sib-byte of 10.
+described by a sib-byte of 14.
 
-The forthsamp({~SIB| 10 SIB,,}) may be replaced by any sib-specification of
+The forthsamp({~SIB| 14 SIB,,}) may be replaced by any sib-specification of
 the kind forthsamp({[AX +2* SI]}).
 You can ask for a reminder of the 256 possibilities by
 forthsamp({SHOW: ~SIB,})
@@ -557,28 +613,30 @@ forthsamp({LGDT, DB| ~SIB| 10 SIB,, 14, B,})
 This way of specifying a sib-byte
 would be perfectly legal, had I not hidden those words.
 It shows what is going on: the instruction is completed by ~SIB|
-telling the assembler that a commaer SIB,, is required.
+telling the assembler that a comma-er forthcode({SIB,,}) is required.
 
-Instead of the commaer we use a ~SIB, instruction.
+Instead of the comma-er we use a forthcode({~SIB,}) instruction.
 This specifies in fact a one byte opcode with three fields
 examplified by forthsamp({[AX +2* SI})] (and
 again you might say forthsamp({+2* SI] [AX}) with the same meaning.)
 
 @section A last caveat
 
-There is no way to communicate to the assembler whether the
-current instructions are supposed to be executed in 16 or 32
-bit mode. This means that if you use the address overwrite
-prefix (AS:,) and/or primed fixups ( [BX+SI]' ) and/or run your
-code in 16 bit mode, you must be very careful.
+There is no way to communicate to the assembler whether the current
+instructions are supposed to be executed in 16 or 32 bit mode. This
+means that if you use the address overwrite prefix forthcode({AS:,}) dnl
+and/or primed fixups forthcode({ [BX]' }) and/or run your code in 16
+bit mode, you must be very careful.
 As long as you stay away from the above, you can be sure that
 valid instructions are correctly assembled and executed as you
 specified and invalid instructions are rejected.
 
+_VERBOSE_({
 @section An incomplete and irregular guide to the instruction mnemonics.
 
-The following is an attempted overview of the suffixes and fixup's used. It may be of some help for using the assembler because it gives some idea
-of some of the names.
+The following is an attempted overview of the suffixes and fixup's
+used. It may be of some help for using the assembler because it gives
+some idea of some of the names.
 It is not checked in a long time and was inaccurate and incomplete in the first place.
 You may also find names that are only used in the block files and
 not explained in table 1.
@@ -587,9 +645,9 @@ So beware!
 Note that some of the instruction are Pentium and as yet
 not present in the forthfile(asi586.frt) (which should still be called forthfile(asi386.frt)).
 
-Never use an instruction that end in a ' (such as [BP+IS]' ) except
-in case of address size overwrites *and* you know what you are
-doing.
+Never use an instruction that end in a ' (such as forthcode({ [BP+IS]'
+}) except in case of address size overwrites forthemph({and}) you know
+what you are doing.
 
 Some instructions
 forthbreak
@@ -692,6 +750,7 @@ OB : Obligatory byte
 forthbreak
 OW : Obligatory word (=16bits)
 forthbreak
+ });_END_({_VERBOSE_})
 
 @section  Assembler Errors
 
@@ -701,7 +760,7 @@ or errors returned from operating system calls.
 _VERBOSE_({Of course the error numbers are given in decimal, always.})
 
 The errors whose message starts with forthsamp({AS:}) are used by the PostIt FixUp assembler
-in the file forthfile({asgen.frt}). For other error forthxpref(({Errors})
+in the file forthfile({asgen.frt}). forthxref({Errors}) for other errors.
 
 forthitemize
 forthitem
@@ -724,22 +783,22 @@ forthitem
 forthsamp({ciforth ERROR # 28 : AS: UNEXPECTED FIXUP/COMMAER})
 
 You try to complete an opcode by fixup's (like forthcode({X|}))
-or commaers (like forthcode({OW,}) ) in a way that conflicts
-with what you specified earlier. So the fixup/commaer word at
+or comma-ers (like forthcode({OW,}) ) in a way that conflicts
+with what you specified earlier. So the fixup/comma-er word at
 which this error is detected conflicts with either the opcode,
-or one of the other fixup/commaer's.
+or one of the other fixups/comma-ers.
 dnl FIXME This explanation is the same as the following.
 _VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode
-or with a DI| operand.})
+or with a forthcode({DI|}) operand.})
 
 forthitem
  forthsamp({ciforth ERROR # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER})
 
-You try to complete an opcode by fixup's (like forthcode({X|})
-) or commaers (like forthcode({OW,}) ) in a way that conflicts
-with what you specified earlier. So the fixup/commaer word at
+You try to complete an opcode by fixup's (like forthcode({X|})  dnl
+) or comma-ers (like forthcode({OW,}) ) in a way that conflicts
+with what you specified earlier. So the fixup/comma-er word at
 which this error is detected conflicts with either the opcode,
-or one of other fixup/commaer's.
+or one of other fixups/comma-ers.
 dnl FIXME This explanation is the same as the previous.
 _VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode
 or with a DI| operand.})
@@ -747,7 +806,7 @@ or with a DI| operand.})
 forthitem
 forthsamp({ciforth ERROR # 30 : AS: COMMAERS IN WRONG ORDER})
 
-The opcode requires more than one data item to be commaed in, such as
+The opcode requires more than one data item to be comma-ed in, such as
 immediate data and an address. However you put them in the wrong order.
 Use forthcode({SHOW:}) .
 
