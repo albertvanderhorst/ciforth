@@ -194,7 +194,9 @@ namescooked.m4 : names.m4 ci86.gnr ; \
 	echo "define({ci86gnrversion}, {beta `rlog -r -h -N ci86.gnr|grep head|sed -e s/head://`})dnl" >>$@
 
 # Make the worddoc macro's into glossary paragraphs to our liking
-%.mim : gloss.m4 %.mig ; ( cat $(@:ci86.%.mim=%.cfg) ; m4 $+ )| m4 > $@
+%.mim : gloss.m4 %.mig ; \
+    ( cat $(@:ci86.%.mim=%.cfg) ; m4 $+ )| m4 |\
+    sed -e '/Split here for documentation/,$$d' > $@
 
 # Make the worddoc macro's into glossary html items to our liking
 ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
@@ -221,6 +223,7 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4
 	( \
 	    cat $(@:ci86.%.texinfo=%.cfg) manual.m4 namescooked.m4 ciforth.mi \
 	)| tee spy | m4 |\
+	sed -e '/Split here for documentation/,$$d' |\
 	sed -e 's/thisforth/$(@:ci86.%.texinfo=%)/g' > $@
 	rm wordset.mi menu.texinfo
 
