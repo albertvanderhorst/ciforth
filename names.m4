@@ -1,6 +1,7 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl $Id$
 divert(-1)
+include(VERSION)
 dnl Macros later we want some nice formatting
 define({figforth},fig-Forth)
 dnl define({ciforth},fig-Forth)

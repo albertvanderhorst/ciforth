@@ -191,7 +191,8 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
-	echo "define({ci86gnrversion}, {beta `rlog -r -h -N ci86.gnr|grep head|sed -e s/head://`})dnl" >>$@
+	echo "define({ci86gnrversion}, ifelse(M4_VERSION,,{M4_VERSION}, \
+{beta `rlog -r -h -N ci86.gnr|grep head|sed -e s/head://`}))dnl" >>$@
 
 # Make the worddoc macro's into glossary paragraphs to our liking
 %.mim : gloss.m4 %.mig ; \
@@ -216,7 +217,7 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 %.info : %.texinfo  ; makeinfo --no-split $< -o $@
 
 # For tex we do not need to use the safe macro's
-ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4
+ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 menu.m4 namescooked.m4
 	m4 menu.m4 $(@:%.texinfo=%.mig) > menu.texinfo
 	m4 wordset.m4 $(@:%.texinfo=%.mim)  $(@:%.texinfo=%.mig) |m4 >wordset.mi
 	echo 'define({thisfilename},{$@})' >>namescooked.m4
@@ -225,7 +226,7 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4
 	)| tee spy | m4 |\
 	sed -e '/Split here for documentation/,$$d' |\
 	sed -e 's/thisforth/$(@:ci86.%.texinfo=%)/g' > $@
-	rm wordset.mi menu.texinfo
+#        rm wordset.mi menu.texinfo
 
 cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
 	m4 lina.cfg manual.m4 namescooked.m4 cifgen.mi |\
@@ -241,7 +242,9 @@ TESTLINUX= \
 test.m4 \
 ci86.linux.rawtest
 
-testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab ;
+# No output expected, except for an official version (VERSION=A.B.C)
+# The version number shows up in the diff.
+testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab tsuite.frt ;
 	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
