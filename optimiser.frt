@@ -15,6 +15,9 @@ REQUIRE SET
 
 500 CONSTANT MAX-SET       \ Default set size.
 
+\ Throw codes used :
+\ 4002 annihilation chain breaks down
+
 ( ------------ DEBUGGING ------------------------------------- )
 : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
 \ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
@@ -482,35 +485,39 @@ EXPAND-SPECIAL ;
 \ that is placed in the annihilation chain. Maybe even more.
 : ANNIL-STABLE?   VD @ MIN-DEPTH @ =  VD @ 1 <  AND ;
 
-\ For DEA : adding it would result in a not yet stable sequence.
-\ Otherwise the optimisation is known to end here with or without
-\ possibility for optimisation.
-: ANNILLING? DUP ANNILABLE? IF SE@ COMBINE-VD ANNIL-STABLE? 0= ELSE DROP 0 THEN ;
-
 \ For ADDRESS and XT : it IS a branch going backwards.
 : BACK-BRANCH?  IS-A-BRANCH IF 1 CELLS - @ 0 < ELSE DROP 0 THEN ;
 
+\ Replace an ADDRESS after a branch code by: the branch TARGET.
+: PASTBRANCH>TARGET   1 CELLS - >TARGET ;
+
+\ If FLAG , do a throw to indicate we can't optimise.
+: KAPUT??   4002 ?ERROR ;
+
 \ Investigate the start of SEQUENCE. Return the ADDRESS
-\ to which it can be annihilated, else 0.
+\ to which it can be annihilated, else throw.
 : (ANNIHILATE-SEQ)
-    BEGIN
-        NEXT-PARSE OVER ANNILABLE? AND 0= IF 2DROP 0 EXIT THEN
-        2DUP BACK-BRANCH? IF 2DROP 0 EXIT THEN
-        DUP 'BRANCH = IF SWAP 1 CELLS - @+ + SWAP THEN
-        DUP '0BRANCH = IF
-            SE@ COMBINE-VD
-            DUP VD @ >R RECURSE VD @ R> VD ! >R
-            SWAP 1 CELLS - @+ + RECURSE
-            OVER <>
-            R> VD @ <> OR IF DROP 0 THEN
-        EXIT THEN
-    ANNILLING?  WHILE REPEAT ;
+    NEXT-PARSE 0= KAPUT??
+    DUP ANNILABLE? 0= KAPUT??
+    2DUP BACK-BRANCH? KAPUT??
+    DUP 'BRANCH = IF SWAP PASTBRANCH>TARGET SWAP THEN
+    DUP '0BRANCH = IF
+        SE@ COMBINE-VD
+        DUP VD @ >R RECURSE VD @ R> VD ! >R
+        SWAP PASTBRANCH>TARGET RECURSE
+        OVER <>
+        R> VD @ <> OR KAPUT??
+    EXIT THEN
+    SE@ COMBINE-VD
+    ANNIL-STABLE? IF EXIT THEN
+    RECURSE
+;
 
 \ Investigate the start of SEQUENCE. Leave END of that
 \ sequence plus a FLAG whether it can be annihilated
 \ without considering jumps into the middle of this code.
-: ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
-    DUP 0<> ANNIL-STABLE? AND ;
+: ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH
+    '(ANNIHILATE-SEQ) CATCH  4002 <> ;
 
 \ For GAP and virtual depth calculate ``GAP-OFFSET'' such as used
 \ in ``CORRECT-GAP'' .
