@@ -9,6 +9,7 @@ is the part of the memory where the forthcode({words}) are
 (forthpxref({DICTIONARY}).
 It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
+This structure is called a forthdefi({dictionary entry}) .
 A word can be executed by typing its name. 
 Each word in the dictionary belongs to precisely one forthdefi({vocabulary}) .
 Apart from the name a word contains data and executable code,
@@ -35,7 +36,7 @@ The operator forthcode({+}) can be used to add numbers, to set a bit in
 a bitmap or advance a pointer a couple of bytes.
 In accordance with this there are no errors such as overflow given.   
 
-Sometimes we use data of two cells.
+Sometimes we use data of two cells, a forthdefi({double}) .
 The high-order cell are most accessable on the stack and if stored in 
 memory, it is highest.
 

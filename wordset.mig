@@ -1,18 +1,82 @@
-worddocchapter({COMPILING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({CONTROL},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({DEFINING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({DICTIONARY},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({DOUBLE},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({ERRORS},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({INIT},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({INPUT},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({JUGGLING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
+worddocchapter({COMPILING},{ },
+{The wordset forthvar({COMPILING}) contains words that compile
+forthxref({IMMEDIATE}) words. 
+You need special precautions because these words would execute during
+compilation.},
+{},{},{},{})
+worddocchapter({CONTROL},{ },
+{The wordset forthvar({CONTROL}) contains words that influence the control flow
+of a program, i.e. the sequence in which commands are executed in compiled words.
+With control words you can have actions performed repeatedly, or 
+depending on conditions.
+},{NEW CHAPTER },{},{},{})
+worddocchapter({DEFINING},{ },
+{The wordset forthvar({DEFINING}) contains words that add new entries
+to the dictionary. A number of such forthdefi({defining}) words
+are predefined, but there is 
+also the possibility to make new defining words, using 
+forthcode({<BUILDS}) and forthcode({DOES>}) .
+},
+{},{},{},{})
+worddocchapter({DICTIONARY},{ },
+{The wordset forthvar({DICTIONARY}) contains words that at a lower level than
+the wordset forthvar({DEFINING}) concern the memory area that
+is allocated to the dictionary. They may add data to the dictionary at the expense 
+of the free space one cell or one byte at a time, or allocate a buffer at once.
+The dictionary space may also be shrunk, and the words that were there are lost.
+The forthxref({dictionary entry}) of a word is represented by its lowest address. Based on that
+an entry may considered a record with fields. Words to access those fields also belong 
+to this wordset.},
+{NEW CHAPTER },{},{},{})
+worddocchapter({DOUBLE},{ },
+{The wordset forthvar({DOUBLE}) contains words that manipulate forthxref({double})'s.
+_BITS32_({In this 32 Forth you would never need double's if it weren't
+for the NUMBER formatting wordset that uses them exclusively.})},
+{NEW CHAPTER },{},{},{})
+worddocchapter({ERRORS},{ },
+{The wordset forthvar({ERRORS}) contains words to handle errors.},
+{NEW CHAPTER },{},{},{})
+worddocchapter({INIT},{ },
+{The wordset forthvar({INIT}) contains words to initialise or reinitialise Forth.},
+{NEW CHAPTER },{},{},{})
+worddocchapter({INPUT},{ },
+{The wordset forthvar({INPUT}) contains words to get input from the terminal
+and such. For disk I/O: forthxref({STORAGE}) },
+{CONTENT},{NEW CHAPTER },{},{},{})
+worddocchapter({JUGGLING},{ },
+{The wordset forthvar({JUGGLING}) contains words that change the lifo-buffer.
+The necessity for this arise, because the data you want to feed to a program 
+is not directly accessible, i.e. on top of the stack.
+It also possible that  you need the same data twice, because you have to feed
+it to two different program's.
+Design your program such that you need them as little as possible,
+because they are confusing.},
+{NEW CHAPTER },{},{},{})
 worddocchapter({LOGIC},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({MEMORY},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({MISC},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({MULTIPLYING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({NUMBERS},{ },{CONTENT},{NEW CHAPTER },{},{},{})
-worddocchapter({OPERATOR},{ },{CONTENT},{NEW CHAPTER },{},{},{})
+worddocchapter({OPERATOR},{ },
+{The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc. 
+The result of the operation is always
+an integer number, so division can't be precise. The combination of
+forthcode({/}) and forthcode({MOD}) (remainder) is such that you can get the 
+original back: forthsamp({n m /   m *  n m MOD   +}) allways has the value 
+forthvar({m}) . This is true for all Forth's.
+On ciforth the forthcode({/}) is a forthdefi({symmetric division}), i.e. 
+forthsamp({-n m /}) give the same result as forthsamp({n m /}), but negated.
+The forgeoing rule now has the consequence that forthsamp({MOD n m}) 
+has forthvar({2m-1}) possible outcomes instead of forthvar({m}) .
+This is very worrysome for mathematicians, who stick to the rule that 
+forthsamp({MOD n m}) gives a result in the range forthvar({0 ... m-1})
+(forthdefi({floored division})).
+_BITS16_({Having a mere 3000 for the number range can easily lead to
+overflow in intermediate results during scaling: a multiplication
+followed by a division. note({1},{For example forthsamp({: ADD10% 110
+* 100 / ;})}). There are special operators to get around that.
+forthxref({MULTIPLYERS}).})},
+{NEW CHAPTER },{},{},{})
 worddocchapter({OUTPUT},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({PARSING},{ },{CONTENT},{NEW CHAPTER },{},{},{})
 worddocchapter({SCREEN},{ },{CONTENT},{NEW CHAPTER },{},{},{})

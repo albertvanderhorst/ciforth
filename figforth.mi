@@ -43,7 +43,7 @@ particular version of ciforth once it is installed on your system.
 ciforth consists of three files:
 forthitemize
 forthitem
-_BOOTED_({A booting floppy or hard disk})dnl
+_BOOTED_({A booting floppy or hard disk})
 _HOSTED_MSDOS_({forth.com})_HOSTED_LINUX_({lina}) : the program
 _BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can 
 see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})
@@ -56,40 +56,28 @@ forthenditemize
 These files are generated together by the generic system fig86.gnr.
 The documentation only applies to the ciforth with which it goes.
 
-If your Forth doesn\'t fit description below get a new version.
+If your Forth doesn't fit description below get a new version.
 forthxref({Rationale & legalese}). 
 
 These are the features:, 
 
-_PROTECTED_({It is running in protected mode.
-})
-_REAL_({It is running in real mode.
-})
-_BOOTED_({It is a standalone Forth,
-})dnl
-_BOOTHD_({booting directly from a hard disk
-})dnl
-_BOOTFD_({booting from a floppy disk
-})dnl
-_HOSTED_LINUX_({running under Linux
-})dnl
-_HOSTED_MSDOS_({running under MSDOS
-})dnl
-define( {_USEBIOS_}, { Use BIOS for I/O. No redirection but possible stand alone.
-})dnl
+_PROTECTED_({It is running in protected mode.})dnl
+_REAL_({It is running in real mode.})dnl
+_BOOTED_({It is a standalone Forth, })dnl
+_BOOTHD_({booting directly from a hard disk.})dnl
+_BOOTFD_({booting from a floppy disk.})dnl
+_HOSTED_LINUX_({running under Linux.})dnl
+_HOSTED_MSDOS_({running under MSDOS.})dnl
+_USEBIOS_({It is using BIOS for I/O. No redirection of I/O is possible.})dnl
 _RWHD_({Blocks are on a raw hard disk})dnl
 _RWFD_({Blocks are on a raw floppy disk})dnl
 _RWFILE_({Blocks are allocated in files in files})dnl
 _CLASSIC_({ Rely partly on DOS for I/O, partly on the BIOS.})dnl
-_MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features. })dnl
-_BITS16_({A number has a precision of 16 bits
-})dnl
-_BITS32_({A number has a precision of 32 bits
-})dnl
-_LINUX_C_({C-routines for I/O
-})dnl
-_LINUX_N_({Calls linux system from assembler
-})dnl
+_MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features.})dnl
+_BITS16_({A number has a precision of 16 bits.})dnl
+_BITS32_({A number has a precision of 32 bits.})dnl
+_LINUX_C_({It uses C-routines for I/O.})dnl
+_LINUX_N_({It calls linux system from Forth directly.})dnl
 It is indirect threaded.
 
 @menu 

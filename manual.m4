@@ -18,6 +18,7 @@ define({forthquotation},{{@quotation}})
 define({forthendquotation},{{@end quotation}})
 define({forthitem},{{@item}})
 define({forthbullet},{{@bullet}})
+define({note},{$2})
 dnl define({a},{{@a}}) define({enda},{{@end a}})
 define({forthexample},
 {@example 
