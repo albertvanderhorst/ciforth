@@ -1634,7 +1634,7 @@ a fresh set of user variables, for multi-asking. One can access
 or modify the boot-up parameters, prior to saving a customised
 boot image. It will also change the initialisation by
 forthcode({COLD}). },
-{{(ABORT)},{USER}},
+{{USER}},
 {{0A 0 CELL+ * +ORIGIN @ ' ENVIRONMENT = .}, {_T_}},
 enddoc)
 HEADER({+ORIGIN},{PORIG},{DOCOL})
@@ -1709,8 +1709,7 @@ _RWHD_({
         DC      64      ;{ Kbyte.}
 });_END_({_RWHD_})
 ;
-        DC      0       ;{ AVAILABLE         12 (Was CPU)}
-        DC      0       ;{ AVAILABLE         13}
+        DC      0, 0            ;{ WHERE             12 13 }
         DC      0, STRTIB       ;{REMAINDER   14 15 }
 _SWITCH_({
 ; {Swap the following with DP to allocate in conventional memory.}
@@ -2748,7 +2747,7 @@ _ALIGNED_({ DC LALIGN}, {dnl})
 ;
 worddoc( {SCREEN},{C/L},{char_per_line},{--- c},{},
 {A constant that leaves the number of characters on a line of a
-standard screen: 64. },
+standard screen: 64. The last character of each line is a forthkey({LF}). },
 {{LIST},{LINE}},
 {{C/L .},{40}},
 enddoc)
@@ -2862,8 +2861,11 @@ worddoc( {ERRORS},{WARNING},{warning},{--- addr},{FIG,U},
 {A user variable containing a value controlling messages. If it
 is 1, a screen system is present, and screen 4 is the base
 location for messages. If it is 0, no such screen system is
-present and messages will be presented by number. If it is -1,
-execute forthcode({(ABORT)}) for a user specified proceedure.
+present and messages will be presented by number.
+If forthcode({WARNING}) is set to 0 and there are disk
+problems: nothing will be printed in case of disk errors, not
+even that there is a disk error ( because forthcode({ERROR})
+uses forthcode({MESSAGE}) ).
 },
 {{MESSAGE},{ERROR}},
 {{." See MESSAGE"},{See MESSAGE}},
@@ -2911,6 +2913,19 @@ enddoc)
 HEADER({OFFSET},{LOFFSET},{DOUSE}, _CELLS(11))
 ;
 ;{ End of user variables with fixed place.}
+;
+;
+worddoc( {ERRORS},{WHERE},{where},{--- addr},{U},
+{A user variable pair which contains the start of the source and the
+character position of the last error that was thrown by
+forthcode({?ERROR}) _VERBOSE_({,so not of exceptions thrown}).
+The contents of forthcode({WHERE}) is interpreted by
+forthcode({ERROR}) if the corresponding exception was never
+caught. },
+{{THROW},{CATCH} },
+{{"1 12 ?ERROR" 2DUP 'EVALUATE CATCH DROP 2DROP + WHERE 2@ DROP = .},{_T_}},
+enddoc)
+HEADER({WHERE},{LWHERE},{DOUSE}, _CELLS(12))    ; { Occupies two CELLS! }
 ;
 worddoc( {SCREEN},{SCR},{s_c_r},{--- addr},{U},
 {A user variable containing the screen number most recently reference
@@ -3553,7 +3568,10 @@ enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
         DC      SWAP
         _0BRANCH(QERR1) ;{IF}
-        DC      ERROR
+        DC      LIN, FETCH
+        DC      SRC, FETCH
+        DC      LWHERE, TSTOR
+        DC      THROW
         _BRANCH(QERR2)  ;{ELSE}
 QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
@@ -4407,62 +4425,27 @@ HEADER({(FIND)},{PFIND},{DOCOL})
         DC      RESULT,FETCH
         DC      SEMIS
 ;
-worddocsafe( {INIT},{(ABORT)},{paren_abort},{},{},
-{Executes after an error when forthcode({WARNING}) is -1. This word normally
-executes forthcode({ABORT}), but may be altered to a customized
-alternative proceedure forthsamp({AP}) as follows:
-forthsamp({ ' AP >DFA @ ' (ABORT) >DFA !}).
-},{},
-{{ : AP 7831 QUIT ; ' AP >DFA @ ' (ABORT) >DFA ! dnl
--1 WARNING ! 1 ERROR
-0 WARNING ! .},{7831} },
-enddoc)
-HEADER({(ABORT)},{PABOR},{DOCOL})
-        DC      ABORT
-        DC      SEMIS
-;
-worddoc( {ERRORS},{ERROR},{error},{n --- in blk},{},
-{Execute a notification that an uncaught exception or
-error with number forthvar({n}) has occurred,
-then restart the interpreter by executing forthcode({QUIT}) .
-forthcode({WARNING}) is first examined. If 1, the text of line
-forthvar({n}) , relative to screen 4 is printed. This
-line number may be positive or negative, and beyond just screen
-4. If forthcode({WARNING}) is zero, forthvar({n}) is just
-printed as a message number (non disc installation). If
-forthcode({WARNING}) is -1, the user modifiable
-definition forthcode({(ABORT)}) is executed.},
-{?ERROR},
-{ {12 ERROR},{12 ERROR ? MSG # 12},
+worddoc( {ERRORS},{ERROR},{error},{n --- },{},
+{Notify the user that an uncaught exception or
+error with number forthvar({n}) has occurred.
+The word that caused it is found using forthcode({WHERE}) and displayed .
+Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a description
+ of the error.
+This word is executed by forthcode({CATCH}) before restarting the interpreter
+and can be revectored to give more elaborate diagnostics. },
+{{?ERROR},{WARNING}},
+{ {SCR @ DUP WHERE 2! 12 ERROR},{? MSG # 12},
  {CR},{} },
 enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
-        DC      LWARN
-        DC      FETCH
-        DC      ZLESS
-        _0BRANCH(ERRO1) ;{IF}
-        DC      PABOR   ;{THEN}
-ERRO1:  DC      LIN, FETCH, LDUP
-        _ISO_IN_({DC    SRC, FETCH, PLUS})
-        DC      LIT, 20, LSUB
-        DC      SRC, FETCH, MAX
+        DC      LWHERE, TFET
+        DC      OVER, LIT, 20, LSUB
+        DC      MAX
         DC      SWAP,OVER, LSUB
         DC      LTYPE
         DC      LIT, '?', EMIT
         DC      SPACE
         DC      MESS
-        DC      SZERO, FETCH, SPSTO
-_LOAD_({
-        DC      BLK,FETCH
-        DC      QDUP
-        _0BRANCH(ERRO2) ;{ IF}
-        DC      DOT
-        DC      LIN,FETCH, SRC, FETCH, LSUB
-        DC      DOT    ;{THEN}
-ERRO2:
-});_END_({_LOAD_})
-        DC      MTBUF  ;{ A (too) crude way to remove locks}
-        DC      QUIT
         DC      SEMIS
 ;
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
@@ -4495,10 +4478,11 @@ worddoc( {ERRORS},{THROW},{throw},{... tc --- ... / ... tc},{ISO},
 executing under control of a forthcode({CATCH}) , see
 forthcode({CATCH}) for the effect of a non-zero
 forthsamp({tc}). If we are executing not under control of a
-forthcode({CATCH}), a non-zero forthsamp({tc}) aborts as if by
-forthsamp({tc ERROR}) .},
-{{CATCH},{QUIT},{HANDLER}},
-{{: GS1 1 2 3 12 THROW ; GS1 }, { 2 3 12 THROW ; GS1 ? MSG # 12},
+forthcode({CATCH}), a non-zero forthsamp({tc}) aborts.
+},
+{{CATCH},{QUIT},{HANDLER},{?ERROR}},
+{{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
+{ 2 3 12 THROW ; GS1 ? MSG # 12},
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
@@ -4507,6 +4491,9 @@ HEADER({THROW},{THROW},{DOCOL})
         DC      HANDLER, FETCH, ZEQU
         _0BRANCH(THROW2)
         DC      ERROR
+        DC      MTBUF  ;{ A (too) crude way to remove locks}
+        DC      SZERO, FETCH, SPSTO
+        DC      QUIT
 THROW2:
         DC      HANDLER, FETCH, RPSTO
         DC      FROMR, HANDLER, STORE
@@ -5645,17 +5632,30 @@ HEADER({.LINE},{DLINE},{DOCOL})
         DC      LTYPE
         DC      SEMIS
 ;
+;
+worddoc( {},{ERRSCR},{error-screen},{--- addr},{},
+{A variable containing the address of the number of the screen
+from which messages are offset. Messages
+correspond with lines and the offset
+may be positive or negative.
+forthsamp({0 MESSAGE}) prints the first line of this screen.
+_VERBOSE_({Traditionally this was screen 4, but the negative
+Unix error numbers makes this unattractive.})
+},{{C/L},{MESSAGE}},
+{{ERRSCR ?},{4}},
+enddoc)
+HEADER({ERRSCR},{ERRSCR},{DOVAR}, )
+        DC 4
+;
 worddoc( {ERRORS},{MESSAGE},{message},{n --},{},
 {Print on the selected output device the text of line
-forthvar({n}) relative to screen 4. forthvar({n}) may be
-positive or negative. forthcode({MESSAGE}) may be used to print
-incidental text such as report headers.
+forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
+positive or negative and beyond just screen forthcode({ERRSCR}).
+forthcode({MESSAGE}) is generally used to print error and
+warning messages.
 If forthcode({WARNING}) is zero, the message will simply be
 printed as a number (disc unavailable).
-If forthcode({WARNING}) is not 1 and there are disk problems:
-because forthcode({ERROR}) uses forthcode({MESSAGE}) , nothing
-will be printed in case of disk errors, not even that there is
-a disk error. },
+},
 {{ERROR}},
 {
 {1 WARNING ! -20 MESSAGE}, {( -b This_option_is_available )},
@@ -5665,7 +5665,7 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         DC      LWARN
         DC      FETCH
         _0BRANCH(MESS1) ;{IF}
-        DC      LIT,4
+        DC      ERRSCR, FETCH
         DC      DLINE
         DC      SPACE   ;{THEN}
         _BRANCH(MESS2)  ;{ELSE}
@@ -6377,7 +6377,7 @@ is aborted.
 },
 enddoc)
 HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
-        DC      ZERO, MIN, THROW
+        DC      ZERO, MIN, LDUP, QERR
         DC      SEMIS
 ;
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
