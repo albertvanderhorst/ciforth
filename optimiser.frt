@@ -98,7 +98,7 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 
 \ Combining the effect of DEA into the current state, return
 \ "the folding optimisation still HOLDS".
-: CAN-FOLD?   NS? OVER SE@ ENOUGH-POPS AND ;
+: CAN-FOLD?   DUP NS? SWAP SE@ ENOUGH-POPS AND ;
 
 \ For BEGIN END DEA : if DEA allows it, add to optimisation,
 \ else cash it and restart it. ``BEGIN'' ``END'' is the code copied.
@@ -158,8 +158,9 @@ DECIMAL
 10 CONSTANT STRIDE       \ # of cells between entries in MATCH-TABLE
 
 \ Add as many noops to the dictionary to have it aligned at an stride*cell
-\ boundary.
-: ALIGN-NOOPS   ALIGN  BEGIN HERE STRIDE CELLS MOD WHILE POSTPONE NOOP REPEAT ;
+\ boundary. Add at least one.
+\ This assumes an alligned high level Forth.
+: ALIGN-NOOPS   BEGIN   POSTPONE NOOP   HERE STRIDE CELLS MOD WHILE   REPEAT ;
 IMMEDIATE
 
 \ Place holder
@@ -188,7 +189,7 @@ CREATE P
 'P  + 'P  -             | 'P  'P  - +             |
 'P  - 'P  +             | 'P  'P  SWAP - +        |
 'P  - 'P  -             | 'P  'P  + -             |
-'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP |
+'P  M* DROP 'P  M* DROP | 'P  'P  M* DROP M* DROP |       \ Invalid if last drop removed!
 'P  OR 'P  OR           | 'P  'P  OR OR           |
 'P  AND 'P  AND         | 'P  'P  AND AND         |
 'P  XOR 'P  XOR         | 'P  'P  XOR XOR         |
@@ -217,7 +218,7 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 '| HIDDEN       ']L HIDDEN
 
 \ Here is your table
-' (MATCH-TABLE) >DFA @ STRIDE CELLS /MOD SWAP 0<> - STRIDE CELLS *
+' (MATCH-TABLE) >DFA @ CELL+   STRIDE CELLS /MOD   SWAP 0<> -   STRIDE CELLS *
 CONSTANT MATCH-TABLE
 
 \ \ Portability note.
