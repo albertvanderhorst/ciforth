@@ -35,6 +35,8 @@ dnl    Block buffer are allocated in the dictionary
 define( {_LOW_BUF_}, _no)dnl
 dnl    Booting directly into forth, from floppy or hard disk.
 define({_BOOTED_},_no)dnl
+dnl    Started by an operating system. 
+define({_HOSTED_},_no)dnl
 dnl    The 32 bit mode uses no paging for access to memory.
 define({_DIRECTMAPPED_},_no)dnl
 dnl    The code must be load at an absolute address.
