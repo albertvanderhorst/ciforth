@@ -1322,15 +1322,7 @@ dnl Make sure to use the DENOTATION ' not the FORTH '
 },
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      LPWORD, LDUP, TOR
-        DC      FOUND
-        DC      LDUP
-        _0BRANCH(TICK1)
-        DC      LDUP, TNFA, FETCH, FETCH ; { Get precise length.}
-        DC      RR, EQUAL
-TICK1:
-        DC      RDROP
-        DC      ZEQU, LIT, 11, QERR
+        DC      ITICK
         DC      LITER
         DC      SEMIS
 ;
@@ -4489,7 +4481,7 @@ one never compiles or postpones forthcode({CHAR}).
 {: GS2 CHAR ; GS2 X .},{58 }},
 enddoc)
 HEADER({CHAR},{LCHAR},{DOCOL})
-        DC      LPWORD, DROP, CFET, LITER
+        DC      LPWORD, DROP, CFET
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
@@ -4500,7 +4492,9 @@ input source. In ciforth this word works also in interpret mode.},
 {},
 {{: GS1 [CHAR] HELLO ; GS1 HEX . },{48 },
 {: GS2 [CHAR] X ; GS2 HEX .},{58 }}, enddoc)
-HEADER({[CHAR]},{BCHAR},{DOCOL}, _VAR_FIELD({LCHAR}), B_IMMED)
+HEADER({[CHAR]},{BCHAR},{DOCOL}, , B_IMMED)
+        DC      LCHAR, LITER
+        DC      SEMIS
 ;
 worddocsafe( {FORMATTING~},{(NUMBER)},{paren_number},{ --- d1},{},
 {Convert the ASCII text at the
@@ -8641,7 +8635,17 @@ forthdefi({denotation}) form _VERBOSE_({without the space}).
 {' QPEEE },{' QPEEE ?  ciforth ERROR # 11 : WORD IS NOT FOUND},
 },
 enddoc)
-HEADER({'},{ITICK},{DOCOL}, _VAR_FIELD({TICK}), )
+HEADER({'},{ITICK},{DOCOL} )
+        DC      LPWORD, LDUP, TOR
+        DC      FOUND
+        DC      LDUP
+        _0BRANCH(TICK1)
+        DC      LDUP, TNFA, FETCH, FETCH ; { Get precise length.}
+        DC      RR, EQUAL
+TICK1:
+        DC      RDROP
+        DC      ZEQU, LIT, 11, QERR
+        DC      SEMIS
 ;
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
 {Used in the form:

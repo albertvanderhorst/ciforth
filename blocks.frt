@@ -158,19 +158,19 @@ DROP   CURRENT !
 
 
 
-( COMPARE BOUNDS ALIGN ) \ AvdH A1oct04
+( COMPARE BOUNDS ALIGN UNUSED ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
      MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
 \ In general use
 : BOUNDS   OVER + SWAP ;
 
+: UNUSED DSP@ HERE - ;
 REQUIRE CONFIG
 "ALIGNED" PRESENT? ?LEAVE-BLOCK
 \ ISO
 : ALIGNED    1-   0 CELL+ 1- OR   1+ ;
 : ALIGN   DP @   ALIGNED   DP ! ;
-
 
 
 \
@@ -190,6 +190,22 @@ REQUIRE CONFIG
 
 
 \
+( U> 0> U.R ) \ AvdH A2oct23
+
+
+
+: U> SWAP U< ;
+: 0> 0 > ;
+: U.R 0 SWAP D.R ;
+
+
+
+
+
+
+
+
+
 ( DEFER IS ) \ AvdH A2apr22
 
 \ Default action for not filled in deferred word.
@@ -227,7 +243,7 @@ REPEAT 2DROP DROP ;
 
 VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 : FROM 0 TO-MESSAGE ! ;
-\ISO
+\ ISO
 : TO 1 TO-MESSAGE ! ;
 \ ISO
 : VALUE CREATE , DOES> TO-MESSAGE @ IF ! ELSE @ THEN
@@ -510,17 +526,17 @@ CREATE BASE' 0 ,
 : INCLUDE (WORD) INCLUDED ;
 
 
-( STRING $. $? Elementary_string) \ AvdH A10ct08
+( SLITERAL PARSE STRING $. $? Elementary_string) \ AvdH A10ct08
 
+\ ISO
+: SLITERAL POSTPONE SKIP $, POSTPONE LITERAL POSTPONE $@ ;
+IMMEDIATE
+\ ISO
+: PARSE (PARSE) ;
+
+\ Other words
  : $. TYPE ;
-
-
-
-
-
-
-
-
+ : $? $@ $. ;
 
 
 : STRING CREATE &" (PARSE) $, DROP DOES> $@ ;
@@ -1173,11 +1189,11 @@ PREVIOUS DEFINITIONS
 
 
  1 4 HEX +THRU  DECIMAL ( Common code , prelude)
- DECIMAL 10 DUP +THRU ( protected mode 16/32)
+ DECIMAL 12 DUP +THRU ( protected mode 16/32)
 
- 5 9 HEX +THRU  DECIMAL ( Common code, postlude)
+ 5 9 HEX +THRU  DECIMAL ( Macro's, postlude)
 
-
+\ 10 11 DUP +THRU  ( test )
 
 
 
@@ -1185,7 +1201,7 @@ PREVIOUS DEFINITIONS
 ( --assembler_postit_fixup_1 ) \ A2oct21 AvdH
  0 IVAR ISS ( Instruction start )
 : X, , ;    ( Cell size du jour)
-: MEM, X, ;
+
 : DAT, X, ;
 : REL, ISS @ - X, ;
 : B, C, ;
@@ -1246,7 +1262,39 @@ PREVIOUS DEFINITIONS
 
 
 
-( --assembler_macros_1 NEXT PUSH PUSH1 ) \ A2oct21 AvdH
+( --assembler_macros_1 TO-PROT, TO-REAL, ) \ A2oct21 AvdH
+
+: GET-CR0   MOV|CD, F| CR0| R| AX| ;
+: PUT-CR0   MOV|CD, T| CR0| R| AX| ;
+: TO-PROT,  GET-CR0  INC|X, AX|  PUT-CR0 ;
+: TO-REAL,  GET-CR0  DEC|X, AX|  PUT-CR0 ;
+: COPY-SEG  MOVXI, AX| ( DAT -- ) W,   MOVSW, T| DS| R| AX|
+            MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
+
+
+
+
+
+
+
+
+( --assembler_macros_2 NOP, CP, ) \ A2oct21 AvdH
+: NOP, XCHG|AX, AX| ;
+: CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+( --assembler_macros_3 NEXT PUSH PUSH1 ) \ A2oct21 AvdH
 
 : NEXT
      LODS, W1|
@@ -1262,15 +1310,15 @@ PREVIOUS DEFINITIONS
 
 
 
-( --assembler_macros_2 TO-PROT, TO-REAL, ) \ A2oct21 AvdH
+( --assembler_macros_4 TO-PROT, TO-REAL, ) \ A2oct21 AvdH
 \ These macro's are useful for protected mode under MSDOS
 \ or for stand alone booting systems.
  7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
  10 CONSTANT GDT_CS
 : JMP-PROT, JMPFAR, HERE 4 + , GDT_CS W, ;
 : JMP-REAL, JMPFAR, HERE 4 + SWITCH_DS 10 * - , SWITCH_DS W, ;
-: TO-REAL, JMP-REAL,  TO-REAL, ;
-: TO-PROT,  TO-PROT, JMP-PROT, ;
+: REAL, JMP-REAL,  TO-REAL, ;
+: PROT,  TO-PROT, JMP-PROT, ;
 
 
 
@@ -1278,12 +1326,12 @@ PREVIOUS DEFINITIONS
 
 
 
-( --assembler_test_1 TEST-NEXT ) \ A2oct21 AvdH
-( Tests applicable always )
-  CODE TEST-NEXT NEXT  C;
-  " Testing next " TYPE
-  TEST-NEXT
-  " next Tested " TYPE
+( spare_2 )
+
+
+
+
+
 
 
 
@@ -1294,12 +1342,12 @@ PREVIOUS DEFINITIONS
 
 
 \
-( spare_2 )
-
-
-
-
-
+( --assembler_test_1 TEST-NEXT ) \ A2oct21 AvdH
+( Tests applicable always )
+  CODE TEST-NEXT NEXT  C;
+  " Testing next " TYPE
+  TEST-NEXT
+  " next Tested " TYPE
 
 
 
@@ -1330,7 +1378,7 @@ DECIMAL
 
 1 2 HEX +THRU DECIMAL ( Load either 16 or 32 bit stuff)
 3 6 HEX +THRU  DECIMAL ( 8086 level instructions )
-7 10 HEX +THRU DECIMAL ( 80386 level instructions )
+7 8 HEX +THRU DECIMAL ( 80386 level instructions )
 
 
 
@@ -1449,8 +1497,8 @@ DECIMAL
 2 6C 2 1FAMILY, INS, OUTS,   C8 1PI ENTER,   C9 1PI LEAVE,
 1 F02 2 2FAMILY, LAR, LSL,
 06 0F 2PI CLTS,    C0 20 0F 3PI MOV|CD,
-1 0 4 2FAMILY| CR0| ILL| CR1| CR2|
-1 0 8 2FAMILY| DR0| DR1| DR2| DR3| ILL| ILL| DR6| DR7|
+1 0 4 2FAMILY| CR0| ~~~1 CR1| CR2|
+1 0 8 2FAMILY| DR0| DR1| DR2| DR3| ~~~2 ~~~3 DR6| DR7|
 80 0F 2PI J|X,         ( FFF08C) 00 90 0F 3PI SET,
 100 0 2 1FAMILY| Y'| N'|
 200 0 8 1FAMILY| O'| C'| Z'| CZ'| S'| P'| L'| LE'|
@@ -1459,46 +1507,14 @@ DECIMAL
 800 A30F 4 3FAMILY, BT, BTS, BTR, BTC,
 800 A40F 2 3FAMILY, SHLDI, SHRDI,
 800 A50F 2 3FAMILY, SHLD|C, SHRD|C,
-1   B20F 4 3FAMILY, LSS, HOLE LFS, LGS,
+1   B20F 4 3FAMILY, LSS, ~~~4 LFS, LGS,
 800 B60F 2 3FAMILY, MOVZX|B, MOVSX|B,
 800 B70F 2 3FAMILY, MOVZX|W, MOVSX|W,
 
 1 A80F 2 2FAMILY, PUSH|GS, POP|GS,
 800 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,
 800 20BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI,
-800 000F0F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, HOLE LMSW,
-
-
-
-( --assembler_macros_1' TO-PROT, TO-REAL, ) \ A2oct21 AvdH
-
-: GET-CR0   MOV|CD, F| CR0| R| AX| ;
-: PUT-CR0   MOV|CD, T| CR0| R| AX| ;
-: TO-PROT,  GET-CR0  INC|X, AX|  PUT-CR0 ;
-: TO-REAL,  GET-CR0  DEC|X, AX|  PUT-CR0 ;
-: COPY-SEG  MOVXI, AX| ( DAT -- ) W,   MOVSW, T| DS| R| AX|
-            MOVSW, T| ES| R| AX|   MOVSW, T| SS| R| AX|  ;
-
-
-
-
-
-
-
-
-( --assembler_macros_2' NOP, CP, ) \ A2oct21 AvdH
-: NOP, XCHG|AX, AX| ;
-: CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
-
-
-
-
-
-
-
-
-
-
+800 000F0F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, ~~~5 LMSW,
 
 
 
