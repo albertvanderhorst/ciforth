@@ -4826,7 +4826,7 @@ HEADER({(LINE)},{PLINE},{DOCOL})
         DC      BBUF, SLMOD
         DC      BLOCK
         DC      PLUS
-        DC      LIT,64
+        DC      LIT,63  ;{ Leave off the '\n'.}
         DC      SEMIS
 ;
 worddoc( {SCREEN},{.LINE},{dot_line},{line scr --},{},
@@ -7425,31 +7425,23 @@ HEADER({BYE},{BYE},{DOCOL})
 ;
 worddoc( {SCREEN},{LIST},{list},{n ---},{L0},
 {Display the ascii text of screen forthvar({n}) on the selected output device.
+The number of the screen is always printed in decimal.
 forthcode({SCR}) contains the screen number during and after this process.},
 {}, 
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({LIST},{LLIST},{DOCOL})
-        DC      DECA
-        DC      CR,LDUP
         DC      SCR,STORE
         _STRINGINLINE({SCR # })
         DC      LTYPE
-        DC      DOT
-        DC      LIT,10H
-        DC      ZERO
-        _DO(LIST9)
-LIST1:  DC      CR,IDO
-        DC      LIT,3
-        DC      DOTR,SPACE
-        DC      IDO,SCR
-        DC      FETCH,DLINE
-        DC      KEYQ   ;{ KEY?}
-        _0BRANCH(LIST2)
-        DC      LLEAV
-LIST2:  _LOOP(LIST1)
-LIST9:
-        DC      CR,SEMIS
+        DC      BASE, FETCH
+        DC      DECA
+        DC      SCR, FETCH, DOT
+        DC      BASE, STORE
+        DC      SCR, FETCH, BLOCK
+        DC      LIT,1024
+        DC      CR, LTYPE
+        DC      SEMIS
 ;
 worddoc( {SCREEN},{INDEX},{index},{from to --},{},
 {Print the first line of each screen over the range

@@ -19,7 +19,8 @@ main(char **argv, int argc)
         if ( 64 == count)
         {
             int i;
-            while( ' ' == buffer[count-1] ) count -= 1;
+            /* Get rid of '\n' always. */
+            do{ count -= 1; } while( ' ' == buffer[count-1] );
             for(i=0; i<count; i++) putchar(buffer[i]);
             putchar('\n');
             count = 0;

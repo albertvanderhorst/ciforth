@@ -201,7 +201,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
            ." Code definition : " ELSE ." Can't handle : "
        THEN ID.. CR
     THEN ;  : B.. H.. ;
- : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
+: KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
       C>D >FFA C@ 4 AND ;
@@ -344,7 +344,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
       DUP C@ "LF" = IF 1+ ?EMPTY THEN ( SKIP OVER LF)
       DUP C@ SWAP              ( GET CHAR, POINTER ON TOP)
       OVER ^Z =
-       IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
+      IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
     POINTER-R !  ;
 
  -->
@@ -580,7 +580,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 
 
 
-: C"  HERE POSTPONE " 
+: C"  HERE POSTPONE "
     DUP @ SWAP CELL+ 1 - C! ( Make it brain damaged)
     POSTPONE DROP POSTPONE 1+ ; IMMEDIATE
 
@@ -760,8 +760,8 @@ PUSHX, SI|   PUSHX, BP| ( TO-REAL,) STI, XCHGX, DI|
   XCHGX, SI| ( FREE AX)  CLI,  ( TO-PROT,)
   ( NOW ALL REGISTERS ARE TIED UP EXCEPT ax| [!])
 POPX, BP|  POPX, AX|  XCHGX, SI|  ( RESTORE FORTH REGISTERS)
-PUSHX, AX|    PUSHX, BX|    PUSHX, CX|    PUSHX, DX|  PUSHX, DI|
- NEXT C;
+PUSHX, AX|    PUSHX, BX|    PUSHX, CX|    PUSHX, DX|
+PUSHX, DI|    NEXT C;
 CODE HLT HLT, C;
 : PATCH-BIOS ' NEW-BIOS >PFA ' BIOS >CFA ! ;
 : PATCH PATCH-BIOS SWITCH ;
@@ -1368,7 +1368,7 @@ CODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
       DUP C@ "LF" = IF 1+ ?EMPTY THEN ( SKIP OVER LF)
       DUP C@ SWAP              ( GET CHAR, POINTER ON TOP)
       OVER ^Z =
-       IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
+      IF 1 EOF ! ELSE 1+ THEN ( INCREMENT POINTER UNLESS AT ^Z)
     POINTER-R !  ;
 
  -->
@@ -1490,9 +1490,10 @@ CR  ." THE BYTE BENCHMARK LASTED " .mS
  8 0 4 1FAMILY| ES| CS| SS| DS|    1 6 2 1FAMILY, PUSHS, POPS,
  8 26 4 1FAMILY, ES:, CS:, SS:, DS:,
  8 27 4 1FAMILY, DAA, DAS, AAA, AAS,
- 1 0 2 1FAMILY| B1| W1|   08 04 8 1FAMILY, ADDAI, ORAI, ADCAI,
-SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
- 1 0 2 1FAMILY| Y| N|   2 0 8 1FAMILY| O| C| Z| CZ| S| P| L| LE|
+ 1 0 2 1FAMILY| B1| W1|    08 04 8 1FAMILY, ADDAI, ORAI, ADCAI,
+  SBBAI, ANDAI, SUBAI, XORAI, CMPAI,
+ 2 A0 2 1FAMILY, MOVTA, MOVFA,
+1 0 2 1FAMILY| Y| N|   2 0 8 1FAMILY| O| C| Z| CZ| S| P| L| LE|
  70 1PI J,  ( As in J, L| Y| <CALC> S, )
  1 0 8 1FAMILY| AX| CX| DX| BX| SP| BP| SI| DI|
  08 40 4 1FAMILY, INCX, DECX, PUSHX, POPX,    90 1PI XCHGX,
@@ -1501,13 +1502,12 @@ SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
  1 0 8 1FAMILY| AL| CL| DL| BL| AH| CH| DH| BH|
 
 
-
 ( 8086 ASSEMBLER OPCODES PART 1, A0jul05 AvdH HCCFIG HOLLAND)
 1 0 2 2FAMILY| B| W|   2 0 2 2FAMILY| F| T|
 8 0 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
 2 84 2 2FAMILY, TEST, XCHG,   0 88 2PI MOV,
 ( 00FD) 0 8C 2PI MOVSW,   ( 00FE) 0 8D 2PI LEA,
-( IRR,egular)  ( FF) 9A 1PI CALLFAR,  ( FE) A8 1PI TESTAI, ( FF)
+( IRR,egular) ( FF) 9A 1PI CALLFAR,  ( FE) A8 1PI TESTAI, ( FF)
  1 98 8 1FAMILY, CBW, CWD, IR2, WAIT, PUSHF, POPF, SAHF, LAHF,
 ( FE) 2 A4 6 1FAMILY, MOVS, CMPS, IR3, STOS, LODS, SCAS,
 08 B0 2 1FAMILY, MOVRI, MOVXI,
@@ -1521,9 +1521,9 @@ SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
 ( 8086 ASSEMBLER OPCODES PART 2, A0jul05 AvdH HCCFIG HOLLAND)
 1 F0 6 1FAMILY, LOCK, ILL, REP, REPZ, HLT, CMC,
 1 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)
-800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI, CMPI,
- 800 83 8 2FAMILY, ADDSI, IL3, ADCSI, SBBSI, IL4, SUBSI, IL5,
-CMPSI,   2 0 2 2FAMILY| 1| V|
+800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI,
+ CMPI, 800 83 8 2FAMILY, ADDSI, IL3, ADCSI, SBBSI, IL4, SUBSI,
+ IL5, CMPSI,   2 0 2 2FAMILY| 1| V|
 800 D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, IL6, RAR,
 800 10F6 6 2FAMILY, NOT, NEG, MUL, IMUL, DIV, IDIV,
 00 F6 2PI TESTI, 800 FE 2 2FAMILY, INC, DEC,
@@ -1610,7 +1610,7 @@ HEX : TEXT HERE C/L 1+ BLANK WORD PAD C/L 1+ CMOVE ;
 (   : THRU 1+ SWAP DO ." LOADING " I . I LOAD LOOP ;  )
 : L-S SCR @ LIST ; : LO-S SCR @ LOAD ;
 : C-S SWAP BLOCK SWAP BLOCK B/BUF CMOVE UPDATE FLUSH ;
-: LIST BASE @ 10 - 25 ?ERROR LIST ;  
+: LIST BASE @ 10 - 25 ?ERROR LIST ;
 ?MS : BIOSI BIOS DROP DROP DROP DROP DROP ;  ( Ignore result)
 : MODE 0 0 0 16 BIOSI ;
 : DISK-INIT 0 0 0 0 19 BIOSI ;
@@ -2456,12 +2456,12 @@ CR  ." #41 FROBOZZ AMATEUR ADVENTURER >6< 84/4/9 "
       CURPOS @ CLEAR! ( Throw away)
       OLDPOS @ SWAP LASTMOVE C@ P-CONNECT
     THEN ;
-  : HERE! @ DUP AUX! DUP CURPOS ! ; ( Use: TROLL HERE! )
-  : ALSO! AMB OVER ! CURPOS @ MAP[] [char] ! ; ( Use:MAZE ALSO!)
-  : BACKK    OLDPOS @ CURPOS !  ;
-  : BLOCKED! BLO AUX! BACKK ;
-  : AMB!     AMB AUX! ;
-  : KILL! DUP @ MAP[] [char] 0 SWAP !  0 SWAP ! ;   -->
+ : HERE! @ DUP AUX! DUP CURPOS ! ; ( Use: TROLL HERE! )
+ : ALSO! AMB OVER ! CURPOS @ MAP[] [char] ! ; ( Use:MAZE ALSO!)
+ : BACKK    OLDPOS @ CURPOS !  ;
+ : BLOCKED! BLO AUX! BACKK ;
+ : AMB!     AMB AUX! ;
+ : KILL! DUP @ MAP[] [char] 0 SWAP !  0 SWAP ! ;   -->
  CR  ." #42 FROBOZZ AMATEUR ADVENTURER >7< 84/6/28"
  : P?    ( P -- Dumps a place)
    CR ." PLACE# FL AU " TEXT ." CHAR"  CR
@@ -2672,7 +2672,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
  CR  ." #55 FROBOZZ INTELLIGENT ENQUIRER >19< 84/5/27 "
 
- : COMPARE-TEXTS ( T--F Leaves flag indicating whether one of th
+ : COMPARE-TEXTS ( T--F Leaves flag indicating whether one )
        ( from the array of pointers T has arrived)
    0 SWAP ( Start with no flag)
    DUP @ ?DUP IF
@@ -2694,8 +2694,8 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
            CR ." Please do by hand! " CR QUIT
         THEN ;
  : TRY-HERE ( investigates all exits of the current position)
-    ( If it discovers blocked exits, it will take care of that,)
-    ( Special cases are left to the adventurer himself)
+ ( If it discovers blocked exits, it will take care of that,)
+ ( Special cases are left to the adventurer himself)
    CURPOS @ MAP[] 0 [dir] 10 0 DO
      DUP I + C@ UNK = IF
         I SEND-DIR ECR WAIT ( try this direction)
@@ -2878,7 +2878,7 @@ EXIT NOT YET
 
 
 
-( Main screen for parser AH&CH                        A0oct03  )
+( Main screen for parser AH&CH                        A0oct03 )
 ( Create a forward definition, one that patches its own
   call with a cfa that is in its data field. Then goes on
   with that definition. )
@@ -3201,12 +3201,12 @@ FORTH
 
 
              `
-quityes899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES189
-MES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 P
-1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIM
+quityes899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES18
+MES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899
+1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRI
 9 PRIMES1899
 RIMES1899 PRI
-ES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PR
+ES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 PRIMES1899 P
 899 PRIMES189
 THE BYTE BENCHMARK LASTED  7.650mS OK
 
@@ -4079,11 +4079,11 @@ DECIMAL  getit
 
 
 ( <ud><a><u> --- <ud2><a2><u> )
-: >NUMBER     
-    2DUP + >R                              
+: >NUMBER
+    2DUP + >R
     0 ?DO
         DUP .S
-        C@ BASE @ DIGIT        ( a2 is address first          )
+        C@ BASE @ DIGIT        ( a2 is address first       )
           0= IF LEAVE   ( if unconvertible digit.          )
           THEN
         SWAP >R

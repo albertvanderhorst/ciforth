@@ -4,9 +4,14 @@
 #include <string.h>
 
 #define CPL 64
-void error(char *progname, char *message)
+int line = 0;
+char *progname;
+
+void error(char *message)
 {
-    fprintf(stderr, "Error in program %s\n   %s\n",progname,message);
+    fprintf(stderr, "Error in program %s\n"
+        "    at input line %d\n"
+        "   %s\n", progname, line, message);
     exit(1);
 }
 
@@ -19,13 +24,17 @@ int main( int argc , char **argv )
     char buffer[CPL+3];  
     int ch;
 
+    progname = argv[0];
+
     while(NULL != fgets(buffer, CPL+3, stdin))
     {
+        line += 1;
         count = strlen(buffer);
-        if ( CPL+1 < count ) error(argv[0],"line too long");
+        if ( CPL < count ) error("line too long");
         buffer[--count] = '\000';  /* Remove '\n' */
-        for(i=0; i<CPL; i++) 
+        for(i=0; i<CPL-1; i++) 
             putchar(i<count?buffer[i]:' ');
+        putchar('\n');
     }
     return 0;
 }
