@@ -21,7 +21,7 @@
 HEX
 0 VARIABLE TEMP ( Should be passed via the stack )
 ( Build a word that tests whether it of same type as stored )
-( in `TEMP'. Execution: Leave for DEA : it IS of same type ) 
+( in `TEMP'. Execution: Leave for DEA : it IS of same type )
 : IS-A <BUILDS TEMP @ , DOES> @ SWAP PFA CFA CELL+ @ = ;
 ( Generate error if data for postit defining word was inconsistent)
 : CHECK1 HERE 3 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
@@ -49,22 +49,15 @@ DECIMAL
 ( which bits are fixupped, and the FIXUP )
 ( One size fits all. )
 : xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ISS @ OR! ;
-IS-A IS-xFI 
+IS-A IS-xFI
 
 : CHECK DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK TALLY OR! ;
 ( Build with the LENGTH to comma the ADDRESS that is executint the comm )
 ( and a MASK with the bit for this commaer.                             )
-: COMMAER <BUILDS  SWAP , , , 
+: COMMAER <BUILDS  SWAP , , ,
 DOES> [ HERE TEMP ! ] @+ BOOKKEEPING   @ EXECUTE ;
-IS-A IS-COMMA 
-
-( The increasing order means that a decompiler hits them in the         )
-( right order                                                           )
-1        1   ' C, CFA   COMMAER IB, ( immediate byte data)
-0 CELL+  2   ' ,  CFA   COMMAER IX, ( immediate data : cell)
-0 CELL+  4   ' ,  CFA   COMMAER X,  ( immediate data : address)
-1        8   ' C, CFA   COMMAER P,  ( port number ; byte     )
+IS-A IS-COMMA
 
 ( Fill in the tally prototype with COMMAMASK and INSTRUCTIONMASK )
 : T! PRO-TALLY CELL+ ! PRO-TALLY ! ;
@@ -87,6 +80,14 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
 CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
+
+( The increasing order means that a decompiler hits them in the         )
+( right order                                                           )
+1        1   ' C, CFA   COMMAER IB, ( immediate byte data)
+0 CELL+  2   ' ,  CFA   COMMAER IX, ( immediate data : cell)
+0 CELL+  4   ' ,  CFA   COMMAER X,  ( immediate data : address)
+1        8   ' C, CFA   COMMAER P,  ( port number ; byte     )
+
 00 FF 00 1PI NOP       00 FF C9 1PI RET       00 FF 76 1PI HLT
 00 FF T! 08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
 00 FF T! 08 E3 4 1FAMILY, XTHL XCHG DI EI
@@ -143,11 +144,11 @@ BEGIN
 2DUP SWAP %EXECUTE
  >NEXT%
 DUP DICTEND? UNTIL
-DROP DROP 
+DROP DROP
 ;
 ( Leave the first DEA of the assembler vocabulary.                    )
 : START ' ASSEMBLER 2 +  CELL+ @ ;
-( Execute the DEA with as data each time                              ) 
+( Execute the DEA with as data each time                              )
 ( the namefield of the assembler vocabulary.                          )
 ( a dea can be found using % )
 : FOR-ALL-AS START FOR-REMAINING-AS ;
@@ -191,8 +192,8 @@ DISS 10 DUMP
 DISS .SET
 
 : -DISS DISS -SET ;
-: .DISS DISS DUP @ SWAP CELL+ DO 
-    I @ DUP IS-COMMA IF I DISS - . THEN ID. 
+: .DISS DISS DUP @ SWAP CELL+ DO
+    I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
 : +DISS DISS SET+! ;
 87654 +DISS
@@ -201,50 +202,89 @@ DISS .SET
 
 ." TO HIER?"
 ^
-: DO-FIX 
-    DUP IS-xFI IF 
-        DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.) 
-        CONTAINED-IN IF 
-            DUP >BODY FIX| DROP   
-            +DISS 
-        ELSE DROP THEN 
+: DO-FIX
+    DUP IS-xFI IF
+        DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.)
+        CONTAINED-IN IF
+            DUP >BODY FIX| DROP
+            +DISS
+        ELSE DROP THEN
     ELSE DUP IS-COMMA IF
         DROP
-    ELSE 
-        DROP 
+    ELSE
+        DROP
     THEN THEN ;
 % MOV >MASK TALLY !
 % MOV >COMMA TALLY CELL+ !
-% DO-FIX % MOV FOR-REMAINING-AS                                     
+% DO-FIX % MOV FOR-REMAINING-AS
 % LXI >MASK TALLY !
 % LXI >COMMA TALLY CELL+ !
 (   % DO-FIX % LXI FOR-REMAINING-AS                                     )
 
 ( Reconstruct from DEA an instruction with fixups. )
-: DO-INST 
-    !TALLY                                                              
-    DUP >BODY POST, DROP   
-    DUP +DISS       
-    [ % DO-FIX ] LITERAL SWAP FOR-REMAINING-AS  
+: DO-INST
+    !TALLY
+    DUP >BODY POST, DROP
+    DUP +DISS
+    [ % DO-FIX ] LITERAL SWAP FOR-REMAINING-AS
     .DISS
     -DISS
-;  
+;
 : ONLY-DO-INST
    DUP IS-1PI IF DO-INST ELSE DROP THEN
-;  
-    % MOV DO-INST                                                       
-    % LXI DO-INST                                                       
-    
+;
+    % MOV DO-INST
+    % LXI DO-INST
 
 
-    % ONLY-DO-INST FOR-ALL-AS                                           
 
-: DOIT
-    -DISS START +DISS
-    DISS @ 1 CELLS - @
-    BEGIN
-        DUP ID.
-    >NEXT% DUP DICTEND? UNTIL
-    DROP 
+    % ONLY-DO-INST FOR-ALL-AS
+
+: BACKTRACK
+    AT-REST? IF
+        .DISS
+        !TALLY
+(       DISS @ 1 CELLS - @                                                  )
+    THEN
 ;
 
+( These dissassemblers are quite similar:
+  If the precondition is fullfilled it does the reassuring
+  actions toward the tally as with assembling and add the 
+  fixup/posti/commaer to the disassembly struct.  )
+: DIS-1PI
+    AT-REST? IF
+        DUP >BODY POST, DROP
+        DUP +DISS
+        BACKTRACK                                                   
+    THEN
+;      
+
+: DIS-xFI
+   DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
+       DUP >BODY FIX| DROP
+       DUP +DISS
+   BACKTRACK                                                         
+   THEN
+;          
+: DIS-COMMA
+   DUP >BODY @ TALLY @ INVERT CONTAINED-IN IF
+       DUP >BODY @ TALLY OR!
+       DUP +DISS
+       BACKTRACK                                                         
+   THEN
+;          
+: DOIT
+    -DISS 
+    !TALLY
+    START 
+    BEGIN ^
+        DUP IS-1PI   IF DUP ID. DIS-1PI THEN 
+        DUP IS-xFI   IF DUP ID. DIS-xFI THEN 
+        DUP IS-COMMA IF DUP ID. DIS-COMMA THEN 
+    >NEXT% DUP DICTEND? UNTIL
+    DROP
+;
+
+." COMES JAN"
+(   CODE JAN MOV B| M'| LXI BC| 1223 IX, NEXT C;                        )
