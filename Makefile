@@ -156,11 +156,11 @@ ci86.%.asm : %.cfg nasm.m4 ci86.gnr
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
-ci86.%.msm ci86.%.rawdoc ci86.%.rawtest : %.cfg masm.m4 ci86.gnr ; \
+ci86.%.msm : %.cfg masm.m4 ci86.gnr ; \
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
-	sed -e '/Split here for test/,$$d' >$(@:%.asm=%.rawdoc)
+	sed -e '/Split here for test/,$$d' >$(@:%.msm=%.rawdoc)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
@@ -255,10 +255,12 @@ releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
 ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
-# This linking must be static, because `link.script' is tricky enough.
-# but a .5M executable is better than a 64 M executable.
-ciforthc : ciforth.c ci86.linux.o link.script
-	$(CC) $(CFLAGS) ciforth.c ci86.linux.o -static -Wl,-Tlink.script -Wl,-M -o $@
+# The tricky `link.script' has been dispensed with.
+# However, now we need _fini and _init in ciforth.c and
+# there are a few elf sections (.bss) that are mapped in the
+# dictionary. But works.
+ciforthc : ciforth.o ci86.linux.o
+	 ld -static /usr/lib/gcrt1.o $+ -lc  -o ciforthc
 
 # Linux native forth
 lina : ci86.lina.o ; ld $+ -o $@

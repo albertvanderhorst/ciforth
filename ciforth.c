@@ -6,17 +6,21 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/stat.h>
-#include <termios.h> 
+#include <termios.h>
 #include <signal.h>
 #include <setjmp.h>
 #include <fcntl.h>
 #include <errno.h>
 
-/* Entry point of figforth. */
+/* Entry point of ciforth. */
+
+/* To make linking possible. Anybody know where this is hanging out? */
+void _fini(void) {return;}
+void _init(void) {return;}
 
 /* The offset into the boot parameters. */
 typedef enum { COLD = 0, WARM = 4 } BOOT_OFFSET;
-extern void figforth( BOOT_OFFSET offset, int argc, char **argv ); 
+extern void ciforth( BOOT_OFFSET offset, int argc, char **argv );
 
 /* The maximum size of a Forth command passed to the OS */
 #define MAX_COMMAND 2000
@@ -24,15 +28,15 @@ extern void figforth( BOOT_OFFSET offset, int argc, char **argv );
 /* The size of a Forth block aka screen */
 #define KBBUF 1024
 
-/* public declarations */ 
-typedef struct tty      
-{ 
+/* public declarations */
+typedef struct tty
+{
     int fd;               /* A file descriptor, presumably a tty */
     struct termios org;   /* Data of `fd', to be restored afterwards */
     struct termios now;   /* Used to mangle while changing `fd' */
     int is_a_tty;         /* `fd' is associated with a tty */
-} TTY;  
- 
+} TTY;
+
 
 void tty_error(char *s)
 {
@@ -40,21 +44,21 @@ void tty_error(char *s)
   fflush(stderr);
 }
 
-void tty_warning(char *s) 
+void tty_warning(char *s)
 {
   fprintf(stderr, "\n\nwarning: %s, (%s)\n", s, sys_errlist[errno]);
   fflush(stderr);
 }
 
-/* In behalf of debugging                                                   
+/* In behalf of debugging
 DISPLAYSI(unsigned int x)
 {
-    static unsigned int y = figforth;
+    static unsigned int y = ciforth;
     printf("%08x\n", x-y);
 }
 */
 
-void tty_set(TTY *ptty) 
+void tty_set(TTY *ptty)
 {
   if (!ptty->is_a_tty)
     return;
@@ -62,7 +66,7 @@ void tty_set(TTY *ptty)
     tty_error ("unable to set tty state");
 }
 
-void tty_restore(TTY *ptty) 
+void tty_restore(TTY *ptty)
 {                               /* write termio struct */
   if (!ptty->is_a_tty)
     return;
@@ -70,16 +74,16 @@ void tty_restore(TTY *ptty)
     tty_error("unable to restore tty state");
 }
 
-void tty_init(int fd, TTY *ptty) 
+void tty_init(int fd, TTY *ptty)
 {                               /* fill-in tty struct */
   ptty->fd = fd;
   ptty->is_a_tty = tcgetattr(ptty->fd, &ptty->org) >= 0 &&
-                 tcgetattr(ptty->fd, &ptty->now) >= 0;
+		 tcgetattr(ptty->fd, &ptty->now) >= 0;
 }
 
 /* Disabling these special char's is only useful when                        */
 /* making a full screen editor.                                              */
-void tty_disable( TTY *ptty) 
+void tty_disable( TTY *ptty)
 {
   if (!ptty->is_a_tty) return;
 
@@ -90,7 +94,7 @@ void tty_disable( TTY *ptty)
   tty_set(ptty);
 }
 
-void tty_echo(TTY *ptty) 
+void tty_echo(TTY *ptty)
 {
   if (!ptty->is_a_tty)
     return;
@@ -98,7 +102,7 @@ void tty_echo(TTY *ptty)
   tty_set(ptty);
 }
 
-void tty_noecho(TTY *ptty) 
+void tty_noecho(TTY *ptty)
 {
   if (!ptty->is_a_tty)
     return;
@@ -106,7 +110,7 @@ void tty_noecho(TTY *ptty)
   tty_set(ptty);
 }
 
-void tty_keymode(TTY *ptty) 
+void tty_keymode(TTY *ptty)
 {
   if (!ptty->is_a_tty)
     return;
@@ -116,7 +120,7 @@ void tty_keymode(TTY *ptty)
   tty_set(ptty);
 }
 
-void tty_linemode(TTY *ptty) 
+void tty_linemode(TTY *ptty)
 {
   if (!ptty->is_a_tty)
     return;
@@ -171,12 +175,12 @@ int c_qterm(void)
 
 /* ?TERMINAL */
 /* The "any key" is the break key. */
-int c_qterm(void) 
+int c_qterm(void)
 {
   fd_set rfds;
-  struct timeval tv; 
+  struct timeval tv;
 
-  tty_keymode(&std_in);                                                       
+  tty_keymode(&std_in);
   /* Zero timeout, must be set each time! */
   /* A Linux peculiarity.                 */
   tv.tv_sec = 0;
@@ -184,19 +188,19 @@ int c_qterm(void)
 
   FD_ZERO(&rfds);
   FD_SET(0, &rfds);    /* From standard input */
-  select(1, &rfds, NULL, NULL, &tv); 
+  select(1, &rfds, NULL, NULL, &tv);
 
-  return FD_ISSET(0, &rfds);     
+  return FD_ISSET(0, &rfds);
 }
- 
+
 /* KEY */
 int c_key( void )
 {
   char key;
   int i;
-  tty_keymode(&std_in);                                                       
+  tty_keymode(&std_in);
   i=read(0, &key, 1);
-  return key;                 
+  return key;
 }
 
 /* EMIT */
@@ -221,7 +225,7 @@ int c_expec(int count, char buffer[])
 
   if (std_in.is_a_tty)
   {
-      tty_linemode(&std_in);                                                       
+      tty_linemode(&std_in);
       i= read(0, buffer, count);
       buffer[--i]=0;  /* Eat the cr. */
   }
@@ -230,8 +234,8 @@ int c_expec(int count, char buffer[])
       /* We got to read by chars, to be able to stop */
       for(i=0; i<count-1; i++)  /* One char spare */
       {
-          if ( 0==read(0,buffer+i,1) || '\n' == buffer[i] )
-              break;
+	  if ( 0==read(0,buffer+i,1) || '\n' == buffer[i] )
+	      break;
       }
       buffer[i] = 0;
   }
@@ -253,7 +257,7 @@ int c_block_init( int count, char filename[] )
   block_fid = open( zname, O_RDWR );
 
   return block_fid > 0 ? 0 : errno;
-}       
+}
 
 /* Close block file earlier opened with c_block_init */
 int c_block_exit( void )
@@ -265,14 +269,14 @@ int c_block_exit( void )
 int c_rslw(int control, int block, void *pmem )
 {
     /* Did you now the real signature of `read' ? */
-    ssize_t(*rslw)(int, void *, size_t ) = control? read: write ;           
+    ssize_t(*rslw)(int, void *, size_t ) = control? read: write ;
     off_t where = block * KBBUF;
 
-    return 
-         block_fid <= 0 ? -1 :
-         where != lseek( block_fid, where, SEEK_SET ) ? errno :
-         KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
-         0 ;
+    return
+	 block_fid <= 0 ? -1 :
+	 where != lseek( block_fid, where, SEEK_SET ) ? errno :
+	 KBBUF != (*rslw)( block_fid, pmem, KBBUF )   ? errno :
+	 0 ;
 }
 
 /* Perform ANSI Forth 'SYSTEM' */
@@ -295,26 +299,26 @@ int c_system(int count, char command[])
 void c_debug(void ***pdea)
 {
     void **dea = *pdea;
-    long *nfa = *(int **)(dea+4);                                     
+    long *nfa = *(int **)(dea+4);
     char *pc;
     int len;
-    int i;                                                             
+    int i;
 
     printf("%p ",pdea);
     printf("%p ",dea);
     printf("%p ",nfa);
     if ( 0x08100000 < (int)nfa && (int)nfa <0x08200000 )
     {
-        len = *nfa++; 
-        pc = (char *)nfa;
-        if (len<32) 
-        {
-            printf("%d ",len);
-            for (i=0; i<len; i++)                                              
-                printf("%c", *pc++);                                                
-        }
-    }                                                                  
-    printf("\n");                                                     
+	len = *nfa++;
+	pc = (char *)nfa;
+	if (len<32)
+	{
+	    printf("%d ",len);
+	    for (i=0; i<len; i++)
+		printf("%c", *pc++);
+	}
+    }
+    printf("\n");
 }
 
 int main (int argc, char *argv[])
@@ -323,21 +327,21 @@ int main (int argc, char *argv[])
 /*printf("Hello world\n");exit(0);                                           */
 /*signal(SIGINT, SIG_IGN);                                                   */
   /* Convenient interrupting of long loops */
-  signal(SIGQUIT, break_quit);                                                 
+  signal(SIGQUIT, break_quit);
   /* Restart when inspecting non existing memory */
   signal(SIGSEGV, break_quit);
 
-  tty_init(0, &std_in);                                                       
+  tty_init(0, &std_in);
 
   for(;;)
   if ( !sigsetjmp(restart_forth,1) )
   {
-      figforth( bootmode, argc, argv);
+      ciforth( bootmode, argc, argv);
       break;
   }
-  else 
+  else
   {
-        bootmode = WARM;
+	bootmode = WARM;
   }
-  tty_restore(&std_in);                                                       
+  tty_restore(&std_in);
 }

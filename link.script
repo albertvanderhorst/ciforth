@@ -1,24 +1,2 @@
-SECTIONS {
-    .init 0x080480b4 : { *(.init) }                                                       
-    .text           : { *(.text           )  }                                                      
-    .fini           : { *(.fini       )  }     
-    .rodata         : { *(.rodata     )  }     
-    __libc_atexit   : { *(__libc_atexit )  }   
-    .data           : { *(.data       )  }     
-    .ctors          : { *(.ctors      )  }     
-    .dtors          : { *(.dtors      )  }     
-    .got            : { *(.got        )  }     
-    .bss            : { *(.bss        )  }     
-    .got.plt          : { *(.got.plt)  }
-    COMMON          : { *(COMMON)  }
-    forth      0x8100000      : { *(forth       )  }     
-    dictionary      : { *(dictionary  )  }     
 
-}
-
-
-
-
-
-
-
+No longer necessary as per 3.154
