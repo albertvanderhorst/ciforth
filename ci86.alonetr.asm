@@ -16,11 +16,11 @@
 ; documentation (texinfo, ps, html.)
 ; WITHOUT THE DOCUMENTATION: GIVE UP! GET THE REAL THING!
 ; You have a configured system, if there are NO curly brackets on the next line.
-;                          
+;
 ;
 ; Configuration of this particular version:
-; 32 -bits protected mode 
-; standalone  
+; 32 -bits protected mode
+; standalone
 ; Normally ciforth doesn't observe ISO >IN.
 ; Contains :
 ; (there may be no items here.)
@@ -112,8 +112,8 @@ ERRORSCREEN EQU     48    ; Screen where the error messages start.
 ;
 ;      MEMORY LAYOUT.
 ; Normally this is specified at the m4 configuration level.
-; For a configured system these values can be changed at this single place. 
-NBUF    EQU     8    ; No. of buffers, or screens 
+; For a configured system these values can be changed at this single place.
+NBUF    EQU     8    ; No. of buffers, or screens
 KBBUF   EQU     1024      ; Data bytes per disk buffer
 US      EQU     40H*CW  ; User variable space
 EM      EQU     400000H     ; Where the memory ends w.r.t. ORIG.
@@ -126,8 +126,8 @@ RTS     EQU     10000H    ; Return stack & terminal input buffer
 ;
 ABL     EQU     ' '     ; SPACE
 ACR     EQU     0DH     ; CR
-ASO     EQU     '['     ; SQUARE BRACKET OPEN 
-ASC     EQU     ']'     ; SQUARE BRACKET CLOSE 
+ASO     EQU     '['     ; SQUARE BRACKET OPEN
+ASC     EQU     ']'     ; SQUARE BRACKET CLOSE
 ADOT    EQU     '.'     ; PERIOD
 ALF      EQU     0AH     ; LINE FEED, USED INTERNALLY AS
                         ; LINE ENDER
@@ -147,20 +147,20 @@ F_HOFFSET EQU     2       ; Same for flag field
 L_HOFFSET EQU     3       ; Same for link field
 N_HOFFSET EQU     4       ; Same for name field
 S_HOFFSET EQU     5       ; Same for source field
-PH_OFFSET EQU     6   ; Past header field: Start of data area. 
+PH_OFFSET EQU     6   ; Past header field: Start of data area.
 BD_OFFSET EQU     6+1 ; Start of BODY for CREATEd word.
 ;
 
-; 
+;
 
-STRUSA  EQU     EM-US         ; User area at end 
-; 
+STRUSA  EQU     EM-US         ; User area at end
+;
 
 STRTIB  EQU     STRUSA-RTS      ; Start return stack area
                                 ; Under this : data stack
 INITR0  EQU     STRUSA         ; Grows down
 INITS0  EQU     STRTIB          ; Grows down
- ;  
+ ;
 
 ;
 
@@ -179,21 +179,21 @@ SPB     EQU     KBBUF/BPS
 
 ; PHYSICAL DISK PARAMETERS
 ;
-; Disk parameters: 
-; FD drive 3" 
+; Disk parameters:
+; FD drive 3"
 TRKS    EQU     80    ;Number of tracks
 SPT     EQU     18    ;Sectors/track
-HEADS   EQU     2     ;Number of heads 
+HEADS   EQU     2     ;Number of heads
 NFAT    EQU     2     ; Number of FATS
 SECROOT EQU     0EH   ; Sectors for root directory entry.
 SECFAT  EQU     9     ; Sectors per FAT
 MEDIA   EQU    0F0H   ; Descriptor byte. Used for selecting between A: and C:.
 
 %if 0
-; FD drive 5" 
+; FD drive 5"
 TRKS    EQU     80      ;Number of tracks
 SPT     EQU     15      ;Sectors/track
-HEADS   EQU     2       ;Number of heads 
+HEADS   EQU     2       ;Number of heads
 NFAT    EQU     2       ; Number of FATS
 SECROOT EQU     ?       ; Sectors for root directory entry.
 SECFAT  EQU     7       ; Sectors per FAT
@@ -201,11 +201,11 @@ MEDIA   EQU    0F0H     ; Descriptor byte. Used for selecting between A: and C:.
 %endif
 
 %if 0
-; Hard drive 
-;This works supposedly with all reasonably modern drives. 
+; Hard drive
+;This works supposedly with all reasonably modern drives.
 TRKS    EQU     1       ;Number of tracks, dummy
 SPT     EQU     63      ;Sectors/track
-HEADS   EQU     255     ;Number of heads 
+HEADS   EQU     255     ;Number of heads
 NFAT    EQU     2       ; Number of FATS
 SECROOT EQU     0       ; Sectors for root directory entry, dummy.
 SECFAT  EQU     0       ; Sectors per FAT, dummy
@@ -215,7 +215,7 @@ MEDIA   EQU    0F8H     ; Descriptor byte. Used for selecting between A: and C:.
 ; Bios specific equates.
 BOOTADDRESS     EQU     07C00H ; PC jumps to 0:7C00 to boot
         ; Skip boot sector,fats and root dir and first sector of file.
- ; 
+ ;
 
 ; The disk needs not to be recognized by MSDOS
 ; Usable for generating a bootable floppy simple.
@@ -228,35 +228,36 @@ SECSTRT EQU     1
 
 ;
 
-; Segments   @ Valid in real mode % Valid in protected mode 
-; Names starting in A_ are linear, physical (32 bit), absolute addresses 
-RSTSIZE     EQU     10000H  ; For real mode stack. 
+; Segments   @ Valid in real mode % Valid in protected mode
+; Names starting in A_ are linear, physical (32 bit), absolute addresses
+RSTSIZE     EQU     10000H  ; For real mode stack.
 GDTSIZE         EQU     8000H   ; For GDT-table.
-IDTSIZE         EQU     0800H   ; For IDT-table. Not yet used. 
-A_FORTH0     EQU     07C00H - 07C00H ;  Physical address of Forth's CS:0 = SS:0 = ES:0 . 
+IDTSIZE         EQU     0800H   ; For IDT-table.
+A_FORTH0     EQU     07C00H - 07C00H ;  Physical address of Forth's CS:0 = SS:0 = ES:0 .
 
 A_SWITCH        EQU     07C00H
 A_RST       EQU     A_SWITCH + 10000H
 A_GDT             EQU     A_RST + RSTSIZE
-A_IDT             EQU     A_GDT + GDTSIZE  ;  reserved but not yet used. 
-A_LOWDP         EQU     A_IDT + IDTSIZE ;  Must become this. 
+A_IDT             EQU     A_GDT + GDTSIZE
+A_LOWDP         EQU     A_IDT + IDTSIZE
 
 ; @ Real mode place for the stack.
-; This is such that after switching to real mode an isolated 
-; Stack is available 
+; This is such that after switching to real mode an isolated
+; Stack is available
 SS_RST      EQU     A_RST/10H ;
-SWITCHSEGMENT     EQU     A_SWITCH/10H ; @ DS and CS for real code 
+SWITCHSEGMENT     EQU     A_SWITCH/10H ; @ DS and CS for real code
 ; Add this to go from GDT_CS addresses to GDT_SWITCH addresses.
 M4_SWITCHOFFSET EQU  ( A_FORTH0 - 07C00H)
 
-; The GDT_.. are offsets in the GDT table. They can be arbitrarily chosen 
-; as far as the GDT goes as long as they are a multiple of 08H 
+; The GDT_.. are offsets in the GDT table. They can be arbitrarily chosen
+; as far as the GDT goes as long as they are a multiple of 08H
 ; Switching sometimes restricts these to a particular value.
-GDT_SWITCH       EQU    SWITCHSEGMENT  ; % Switching segment, must be same for switching to work! 
-GDT_CS EQU 10H  ; % The protected mode code segment 
+GDT_SWITCH       EQU    SWITCHSEGMENT  ; % Switching segment, must be same for switching to work!
+GDT_CS EQU 10H  ; % The protected mode code segment
 GDT_SS         EQU     SS_RST ; % The protected mode data segment
 GDT_DS         EQU     SS_RST ; % The protected mode data segment
 GDT_SEGMENT    EQU     A_GDT/10H       ; @ General descriptor table.
+IDT_SEGMENT    EQU     A_IDT/10H       ; @ Interrupt descriptor table.
 
 IDENTIFY_16 EQU 008FH   ; Identification of 16 bit data/code segment, byte 6
 IDENTIFY_32 EQU 00CFH   ; Identification of 32 bit data/code segment, byte 6
@@ -265,10 +266,11 @@ IDENTIFY_XR  EQU 9A00H  ; Identification of a code segment, execute read, byte 5
 IDENTIFY_RW  EQU 9200H  ; Identification of a data segment, read write, byte 5
 
 GDTLEN EQU GDTSIZE-1      ; Intel peculiarity.
+IDTLEN EQU IDTSIZE-1      ; Intel peculiarity.
 BOOTOFFSET EQU 0
-; 
+;
 
-; 
+;
 
 create  EQU     3C00H
 open    EQU     3D00H
@@ -277,21 +279,21 @@ read    EQU     3F00H
 write   EQU     4000H
 delete  EQU     4100H
 lseek   EQU     4200H
-; 
+;
 
-; 
+;
 
 ; ########################################################################################
 ;                      BOOTCODE    (optional, always real mode)
 ; ########################################################################################
 
 ; All bootcode must be relocatable and its memory references absolute.
-; Not for the sake of booting, but to allow MSDOS to start the program too. 
+; Not for the sake of booting, but to allow MSDOS to start the program too.
 
         ;    SEGMENT PARA PUBLIC 'CODE'
         ; CS:;,DS:;,SS:;,ES:;
      ORG     07C00H
-    
+
 
 
 ORIG:
@@ -318,7 +320,7 @@ HUGESECS      DD         000H
         DB    "FAT12   "
 
 ;       Read the sector with number in CX (Counting from 0) to ES:BX.
-;       Keep BX, CX  
+;       Keep BX, CX
 READSECTOR:
         PUSH    CX
         PUSH    BX
@@ -398,9 +400,9 @@ BEGIN1: CALL    READSECTOR
         MOV     [LFDRIVE], DL
 
         JMP     ENDBOOT
- ;  
+ ;
 
-; 
+;
 
 ; Debug code, could be dispensed with in an ideal world.
 DISPLAYCR:
@@ -411,12 +413,12 @@ DISPLAYCR:
 
 DISPLAYPC:      POP     AX
         PUSH    AX
-DISPLAYW:       PUSH    AX              ; Display AX in hex 
+DISPLAYW:       PUSH    AX              ; Display AX in hex
         MOV     AL,AH
         CALL    DISPLAYHEX
         POP     AX
         ; CALL DISPLAYHEX ; RET
-DISPLAYHEX:     PUSH    AX              ; Display AL in hex 
+DISPLAYHEX:     PUSH    AX              ; Display AL in hex
         MOV     CL,4
         SAR     AL,CL
         CALL    DISPLAYHD
@@ -433,13 +435,13 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
         MOV     AH,0EH
         INT(10H)
         RET
-GETKEY: MOV     AH, 01H       ; If CARRY, a key sits in AL. 
+GETKEY: MOV     AH, 01H       ; If CARRY, a key sits in AL.
         INT(16H)
         JNB     ENDIF1
-        MOV     AH, 00H       ; Consume the key. 
+        MOV     AH, 00H       ; Consume the key.
         INT(16H)
 ENDIF1:  RET
-; 
+;
 NOBOOT:         ; Skip till here if not booting.
 
 
@@ -459,7 +461,7 @@ HERE1:  POP     BX
         JMP ENDBOOT     ;
 
 ; Returns to DOS, provided we started from dos as a .COM.
-; Use far jump restoring CS to .COM value. 
+; Use far jump restoring CS to .COM value.
 RETDOS:
         MOV     AX,CS
         MOV     DS,AX
@@ -468,7 +470,7 @@ RETDOS:
         MOV     AH,4CH
         INT     21H    ; Only works if cs is the same as while starting.
 
-; 
+;
 ENDBOOT:
 
 ; ########################################################################################
@@ -480,9 +482,9 @@ ENDBOOT:
 ;                       MOVE CODE TO ITS PLACE (still real mode)
 ; ########################################################################################
 
-;   Take care of the situation where booting code is actually started up by  
-;   MSDOS. This is no problem as long as the code is moved to where it would 
-;   be if booted. If the code is at its place, nothing really happens here.  
+;   Take care of the situation where booting code is actually started up by
+;   MSDOS. This is no problem as long as the code is moved to where it would
+;   be if booted. If the code is at its place, nothing really happens here.
 ;   Furthermore all protected code started by MSDOS must be at an absolute address.
         STD     ; Start at the end going back.
         MOV     CX,TEXTEND-HERE5 ; Amount to move
@@ -516,21 +518,43 @@ HERE5:
         JMP    PROTECT
 GDTLOAD DW     GDTLEN
         DD     A_GDT
+IDTLOAD DW     IDTLEN
+        DD     A_IDT
 PROTECT:
-;Prepare. Remember STOSW uses ES:DI                              
+;Erase GDT_SEGMENT
+        MOV     AX,GDT_SEGMENT
+        MOV     ES,AX
+        MOV     DI,0
+        MOV     AL,0
+        MOV     CX,GDTSIZE
+        REP STOSB
+;Copy addresses from interrupt area to IDT_SEGMENT
+        MOV     AX,IDT_SEGMENT
+        MOV     ES,AX
+        MOV     CX,IDTSIZE/8
+        MOV     SI,0
+        MOV     DI,0
+REP2:
+        LODSD   ;{Interrupt vector.}
+        STOSD
+        MOV     EAX, IDENTIFY_INT
+        STOSD
+        DEC     CX
+        JNZ     REP2
+;Note STOSW uses ES:DI
         MOV     AX,GDT_SEGMENT ; GDT segment
         MOV     ES,AX
         MOV     DI,0
         MOV     AX,GDTLEN
         STOSW
-; The switch segment.         
+; The switch segment.
 ; Switch between real and (16-bit) protected mode is done,
 ; while using this segment (Relocatable code only).
 ; GDT_SWITCH can to an extent be chosen arbitrarily,
-; as long as here we ensure that the real mode address  
-; is equal to the protected mode address. 
+; as long as here we ensure that the real mode address
+; is equal to the protected mode address.
 ; You can only switch while staying at the same physical address
-; when you are currently executing in the range GDT_SWITCH:[0:FFFFH] 
+; when you are currently executing in the range GDT_SWITCH:[0:FFFFH]
         MOV     BX,GDT_SWITCH
         MOV     DI,BX
         MOV     AX,0FFFFH
@@ -546,7 +570,7 @@ PROTECT:
 ; GDT_DS/GDT_SS to an extent be chosen arbitrarily,
 ; The real mode view of GDT_SS is valid, isolated and reserved for real stack.
 ; DS is reset after switching anyway.
-; Accommodate a 24 bit start address, a maximal limit, large pages. 
+; Accommodate a 24 bit start address, a maximal limit, large pages.
         MOV     DI,GDT_SS ;Identical to GDT_DS
         MOV     AX,0FFFFH
         STOSW
@@ -557,7 +581,7 @@ PROTECT:
         STOSW
         MOV     AX,IDENTIFY_32
         STOSW
-; PREPARE-CS 16/32 BITS                                                   
+; PREPARE-CS 16/32 BITS
         MOV     DI,GDT_CS
         MOV     AX,0FFFFH
         STOSW
@@ -570,16 +594,17 @@ PROTECT:
         STOSW
 
         LGDT    [GDTLOAD]
-; 
+;       LIDT    [IDTLOAD]
+;
 
-; 
+;
 
         JMP     ENDREADJUST
         RESB    01FEH-($-$$)
-        ; Signature. Last piece of boot sector. 
+        ; Signature. Last piece of boot sector.
         DB         055H, 0AAH
 ENDREADJUST:
-; 
+;
 
 
 ; Remember: we are now in the real mode for a protected model.
@@ -603,7 +628,7 @@ HERE3:  POP   BX         ; Reality.
 
 ; 32 bit protected mode is no good unless the A20 address line works.
 ; The following tedious code is copied from the nuni startup code
-; for linux. 
+; for linux.
 KB_WAIT:
         IN AL,64H
         AND AL,2
@@ -616,8 +641,8 @@ THERE4:
         CALL KB_WAIT
         MOV AL,0DFH
         OUT 060H,AL
- ;  
-; 
+ ;
+;
 ; ########################################################################################
 ;                       PREPARE FOR USING DPMI (OPTIONAL)
 ; ########################################################################################
@@ -631,16 +656,16 @@ THERE4:
 BITS   32         ; Assembler directive
 
 ;************************
- 
+
 
         CLI     ; Wait for stacks to be setup.
-        
+
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
         BITS   16
         JMP    GDT_CS: $+5
-        BITS   32 
+        BITS   32
         MOV     EAX,GDT_DS
         MOV     DS,EAX
         MOV     ES,EAX
@@ -656,8 +681,8 @@ REP1:
         JMP PASTTEST
 TESTVALUE: DD   0
 PASTTEST:
- ;  
-; 
+ ;
+;
 
 ; ########################################################################################
 ;                       FORTH GLUE CODE (optional, except for the jump)
@@ -675,7 +700,7 @@ COLD_ENTRY:
         MOV     EBP, LONG[USINI+(CW*(3))]    ;RETURN STACK
         MOV     ESI, CLD1  ; (IP) <-
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 CLD1:   DD      COLD    ;  This is a piece of headerless high level code.
 ;
@@ -759,15 +784,15 @@ CLD1:   DD      COLD    ;  This is a piece of headerless high level code.
 
 ------------------------------------------------------------
 %endif
-; 
+;
         ;
 
-; 
-; 
 ;
-; 
-; In 32 bit versions there may be no jumps to NEXT at all 
-; The label NEXT1 is rarely relevant (for _OLDDEBUG_) 
+;
+;
+;
+; In 32 bit versions there may be no jumps to NEXT at all
+; The label NEXT1 is rarely relevant (for _OLDDEBUG_)
 DPUSH:  PUSH    EDX      ; Fall through.
 APUSH:  PUSH    EAX
 NEXT:
@@ -1183,7 +1208,7 @@ N_FORTH:   DD      5
 FORTH:        DD    DODOE
         DD    $ + (CW*(PH_OFFSET-D_HOFFSET))
         DD    B_IMMED
-        DD    DENOTBODY 
+        DD    DENOTBODY
         DD    N_FORTH
     DD    0
 
@@ -1238,7 +1263,7 @@ LCPU:        DD    DOCOL
 
        DD      LIT, 0CD1856H, ZERO       ; '80386'
            ; '80386'
-; 
+;
 
         DD      SEMIS
 ;
@@ -1341,7 +1366,7 @@ DENOT:        DD    DODOE
     DD    0
 
         DD      DOVOC
-        DD      FORTH-(CW*(C_HOFFSET))     ; NEXT VOCABULARY 
+        DD      FORTH-(CW*(C_HOFFSET))     ; NEXT VOCABULARY
 DENOTBODY:
 
     ALIGN     4
@@ -1370,7 +1395,7 @@ ENV:        DD    DODOE
     DD    0
 
         DD      DOVOC
-        DD      DENOT-(CW*(C_HOFFSET))       ; NEXT VOCABULARY 
+        DD      DENOT-(CW*(C_HOFFSET))       ; NEXT VOCABULARY
 
     ALIGN     4
         DD    0H
@@ -1398,9 +1423,9 @@ NOOP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
     DD    0
 
        LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
-; 
+;
 ;
 
 ;  ***********
@@ -1504,7 +1529,7 @@ BRAN1:  LODSD
 ;
         ADD     ESI,EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***************
@@ -1527,7 +1552,7 @@ ZBRAN:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         JZ      BRAN1   ; YES, BRANCH
         LEA     ESI,[ESI+(CW*(1))]
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 ;
 
@@ -1557,7 +1582,7 @@ XLOO1:  ADD     [EBP],EBX ; INDEX = INDEX + INCR
         LEA     EBP,[EBP+(CW*(3))]  ; ADJ RETURN STACK
         LEA     ESI,[ESI+(CW*(1))]       ; BYPASS BRANCH OFFSET
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***************
@@ -1606,7 +1631,7 @@ XDO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         XCHG    EBP,ESP   ; GET PARAMETER STACK
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -1636,10 +1661,10 @@ XQDO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         XCHG    EBP,ESP   ; GET PARAMETER STACK
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 QXDO1:  MOV     ESI,EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -1746,21 +1771,21 @@ DPA:    DD      INITDP  ;      INIT (DP)     9
 ;
 
 
-        DD      40H     ; INIT (OFFSET) 
+        DD      40H     ; INIT (OFFSET)
 ;
- ; 
+ ;
 
 ;
 ;
 ;
-        DD      0, 0            ; WHERE             12 13 
-        DD      0, STRTIB       ;REMAINDER   14 15 
+        DD      0, 0            ; WHERE             12 13
+        DD      0, STRTIB       ;REMAINDER   14 15
 
 ; Swap the following with DP to allocate in conventional memory.
          DD     TEXTEND         ; LOW-DP        16
 ; Leave space to start conventional programs
          DD     80000H          ; LOW-EM        17
-; 
+;
         RESB    US-($ - USINI)        ; All user can be initialised.
 ;
 ;      <<<<< end of data used by cold start >>>>>
@@ -1804,7 +1829,7 @@ DIGI2:  SUB     EAX,EAX   ;FALSE FLAG
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***************
@@ -1836,7 +1861,7 @@ PMATCH:        DD    DOCOL
 ; The following four lines take care of denotations.
         DD      LDUP, ZLESS  ;Ignorable length difference.
         DD      RR, TFFA, FETCH, LIT, B_DENOT, LAND ;Get flag.
-        DD      LAND  ;Denotation applicable. 
+        DD      LAND  ;Denotation applicable.
         DD      ZEQU, LAND ;This AND is actually an OR.
 ;
         DD      ZEQU
@@ -1893,7 +1918,7 @@ INBRS:        DD    DOCOL
         DD      INBRS2-$-CW
 INBRS1:
         DD      LDUP
-        
+
         DD      CFET
         DD      ONE, LIN, PSTORE
 INBRS2:
@@ -1930,7 +1955,7 @@ PWORD1: DD      DROP
         DD      PWORD1-$-CW
 
         DD      OVER, LSUB
-        
+
         DD      SEMIS
 ;
 
@@ -1951,13 +1976,13 @@ PPARS:        DD    DOCOL
 
         DD      SRC, CELLP, TFET
         DD      OVER, LSUB
-        
+
         DD      ROT, SSPLIT, TSWAP
         DD      ZEQU
         DD      ZBRAN
         DD      PPARS8-$-CW
         DD      DROP, SRC, CELLP, FETCH
-PPARS8: 
+PPARS8:
         DD      LIN, STORE
         DD SEMIS
 ;
@@ -2017,7 +2042,7 @@ IIN:        DD    DOCOL
     DD    0
 
         DD      LIN, FETCH
-DD      SRC, FETCH, LSUB     
+DD      SRC, FETCH, LSUB
         DD      PIIN, STORE
         DD      PIIN
         DD      SEMIS
@@ -2061,14 +2086,14 @@ LCMOVE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
     DD    0
 
         CLD             ;direction
-        MOV     EBX,ESI   ;save 
+        MOV     EBX,ESI   ;save
         POP     ECX      ;count
         POP     EDI      ;dest
         POP     ESI      ;source
         REP     MOVSB
-        MOV     ESI,EBX   ;get back 
+        MOV     ESI,EBX   ;get back
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2086,7 +2111,7 @@ LMOVE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         DD    N_LMOVE
     DD    0
 
-        MOV     EBX,ESI   ;SAVE 
+        MOV     EBX,ESI   ;SAVE
         POP     ECX      ;count
         POP     EDI      ;dest
         POP     ESI      ;source
@@ -2102,9 +2127,9 @@ MOVE1:  STD
 MOVE2:
         REP     MOVSB   ;THAT'S THE MOVE
         CLD             ;INC DIRECTION
-        MOV     ESI,EBX   ;GET BACK 
+        MOV     ESI,EBX   ;GET BACK
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***************
@@ -2123,8 +2148,8 @@ FMOVE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
     DD    0
 
         CLD             ;direction
-        MOV     EAX,ESI   ;save 
-        MOV     EBX,DS    ;save 
+        MOV     EAX,ESI   ;save
+        MOV     EBX,DS    ;save
         POP     ECX      ;count
         POP     EDI      ;dest
         POP     EDX
@@ -2141,11 +2166,11 @@ FARMV1:
         MOV     DS,EDX
 FARMV2:
         REP     MOVSB
-        MOV     ESI,EAX   ;restore 
+        MOV     ESI,EAX   ;restore
         POP     ES
         POP     DS
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***********
@@ -2218,7 +2243,7 @@ LAND:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         AND     EAX,EBX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2241,7 +2266,7 @@ LOR:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         OR      EAX,EBX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***********
@@ -2264,7 +2289,7 @@ LXOR:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         XOR     EAX,EBX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **************
@@ -2286,7 +2311,7 @@ INVERT:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         NOT     EAX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2307,7 +2332,7 @@ SPFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     EAX,ESP   ; (S1) <- (SP)
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2328,7 +2353,7 @@ SPSTO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX
         MOV     ESP,EAX        ;RESET PARAM STACK POINTER
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 
@@ -2373,7 +2398,7 @@ RPFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
       ;(S1) <- (RP)
         PUSH    EBP
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2393,7 +2418,7 @@ RPSTO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
 
         POP     EBP
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2414,7 +2439,7 @@ EXIT:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     ESI,[EBP] ;(IP) <- (R1)
         LEA     EBP,[EBP+(CW*(1))]
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2434,7 +2459,7 @@ CO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
 
         XCHG    ESI,[EBP]
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***********
@@ -2492,7 +2517,7 @@ TOR:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         LEA     EBP,[EBP - (CW*(1))]    ;MOVE RETURN STACK DOWN
         MOV     [EBP],EBX ;ADD TO RETURN STACK
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2514,7 +2539,7 @@ FROMR:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         LEA     EBP,[EBP + (CW*(1))]
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -2534,7 +2559,7 @@ RDROP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
       ;(S1) <- (R1)
         LEA     EBP,[EBP+(CW*(1))]
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2575,7 +2600,7 @@ ZEQU:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         SBB     EAX,EAX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2600,7 +2625,7 @@ ZLESS:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         DEC     EAX      ;TRUE
 ZLESS1: PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -2623,7 +2648,7 @@ PLUS:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         ADD     EAX,EBX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2650,7 +2675,7 @@ DPLUS:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **************
@@ -2672,7 +2697,7 @@ NEGATE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         NEG     EAX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***************
@@ -2699,7 +2724,7 @@ DNEGA:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
         ;
 ;
 
@@ -2724,7 +2749,7 @@ OVER:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2744,7 +2769,7 @@ DROP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
 
         POP     EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -2765,7 +2790,7 @@ TDROP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX
         POP     EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2788,7 +2813,7 @@ SWAP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***********
@@ -2810,7 +2835,7 @@ LDUP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EAX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -2835,7 +2860,7 @@ TDUP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -2862,7 +2887,7 @@ TSWAP:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -2891,7 +2916,7 @@ TOVER:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2913,7 +2938,7 @@ PSTORE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX      ;INCREMENT
         ADD     [EBX],EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **************
@@ -2935,7 +2960,7 @@ TOGGL:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EBX      ;ADDR
         XOR     [EBX],EAX ;
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -2957,7 +2982,7 @@ FETCH:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     EAX,[EBX]
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -2980,7 +3005,7 @@ CFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     AL,[EBX]
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -3004,7 +3029,7 @@ TFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -3026,7 +3051,7 @@ STORE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX      ;DATA
         MOV     [EBX],EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -3048,7 +3073,7 @@ CSTOR:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX      ;DATA
         MOV     [EBX],AL
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -3072,7 +3097,7 @@ TSTOR:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX      ;LSW
         MOV     [EBX+(CW*(1))],EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **************
@@ -3120,7 +3145,7 @@ LFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     DS,EDX
         PUSH    EBX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -3146,7 +3171,7 @@ LSTORE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     [EBX],EDX
         MOV     DS,EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 ;
 
@@ -3176,12 +3201,12 @@ DOCOL:  LEA     EBP,[EBP - (CW*(1))]  ;Push HIP
          MOV     ESI,[EAX+(CW*(D_HOFFSET - C_HOFFSET))]  ;(IP) <- (PFA)
 ;        CALL    DISPLAYSI
 
-        
-        
+
+
         MOV      LONG[SPSAVE],ESP
         AND     EAX,EAX
         MOV     ESP,EAX
-        
+
         JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
         DEC AL
@@ -3194,24 +3219,24 @@ DOCOL:  LEA     EBP,[EBP - (CW*(1))]  ;Push HIP
         MOV     SS,AX
         STI
         ; Allow interrupts to happen.
-        
+
         CLI
-        
+
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
         BITS   16
         JMP    GDT_CS: $+5
-        BITS   32 
+        BITS   32
         MOV     EAX,GDT_DS
         MOV     DS,EAX
         MOV     ES,EAX
         MOV     SS,EAX
-        
+
         MOV     ESP, LONG[SPSAVE]
-; 
+;
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -3258,7 +3283,7 @@ LCONST:        DD    DOCOL
 DOCON:  MOV     EAX,[EAX+(CW*((D_HOFFSET-C_HOFFSET)))] ;GET DATA FROM PFA
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ****************
@@ -3283,7 +3308,7 @@ VAR:        DD    DOCOL
 DOVAR:  MOV     EAX,[EAX+(CW*((D_HOFFSET-C_HOFFSET)))] ;(AX) <- PFA
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -3303,12 +3328,12 @@ USER:        DD    DOCOL
 
         DD      LCONST
         DD      PSCOD
-DOUSE:  MOV     EBX,[EAX+(CW*((D_HOFFSET-C_HOFFSET)))] ;PFA  
+DOUSE:  MOV     EBX,[EAX+(CW*((D_HOFFSET-C_HOFFSET)))] ;PFA
         MOV     EDI, LONG[USINI]
         LEA     EAX,[EBX+EDI]      ;ADDR OF VARIABLE
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 ;
 
@@ -3350,7 +3375,7 @@ ZERO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         XOR     EAX,EAX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -3371,7 +3396,7 @@ ONE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     EAX,1
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -3392,7 +3417,7 @@ TWO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     EAX,2
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -3549,7 +3574,7 @@ CSLL:        DD    DOCON
     DD    0
 
 ;
-; 
+;
 ;
 
         ALIGN      2       ; Otherwise INT 13 hangs when filling
@@ -3571,8 +3596,8 @@ FIRST:        DD    DOVAR
         DD    N_FIRST
     DD    0
 
-BUF1:   RESB    (KBBUF+2*CW)*NBUF 
-; 
+BUF1:   RESB    (KBBUF+2*CW)*NBUF
+;
 ;
 
 ;  *************
@@ -3590,7 +3615,7 @@ LIMIT:        DD    DOCON
         DD    N_LIMIT
     DD    0
 
-; THE END  OF THE MEMORY 
+; THE END  OF THE MEMORY
 
 ;  **********
 ;  *   EM   *
@@ -3642,9 +3667,9 @@ BBUF:        DD    DOCON
     DD    0
 
 ;
-; All user variables are initialised 
+; All user variables are initialised
 ; with the values from USINI.
-; The implementation relies on the initialisation of 
+; The implementation relies on the initialisation of
 ; those with numbers (1..11), so change in concord with USINI.
 
 ;  **********
@@ -3834,7 +3859,7 @@ LWHERE:        DD    DOUSE
         DD    LOFFSET-(CW*(C_HOFFSET))
         DD    N_LWHERE
     DD    0
-    ;  Occupies two CELLS! 
+    ;  Occupies two CELLS!
 ;
 
 ;  ***********
@@ -4193,7 +4218,7 @@ LCELLS:        DD    DOCOL
         DD    N_LCELLS
     DD    0
 
-        DD       TWO 
+        DD       TWO
         DD      LSHIFT
         DD      SEMIS
 ;
@@ -4279,7 +4304,7 @@ ALIGNED:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EAX
 ;
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -4432,7 +4457,7 @@ LESS:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         DEC     EAX
 LES1:   PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -4456,7 +4481,7 @@ ULESS:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         SBB     EAX,EAX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *********
@@ -4522,7 +4547,7 @@ ROT:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -5188,12 +5213,12 @@ CREATE:        DD    DOCOL
         DD      PSCOD
 DODOE:  LEA     EBP,[EBP - (CW*(1))] ;Push HIP.
         MOV     [EBP],ESI
-        MOV     ESI,[EAX+(CW*((D_HOFFSET-C_HOFFSET)))] ;NEW IP 
+        MOV     ESI,[EAX+(CW*((D_HOFFSET-C_HOFFSET)))] ;NEW IP
         LEA     EAX,[ESI+(CW*(1))]
         MOV     ESI,[ESI]
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 HLNOOP: DD      SEMIS
 ;
 
@@ -5421,7 +5446,7 @@ FILL:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         CLD             ; INC DIRECTION
         REP     STOSB   ;STORE BYTE
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ************
@@ -5456,7 +5481,7 @@ CORA3:
         MOV     ESI,EDX  ;Restore
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -5489,7 +5514,7 @@ SINDEX1:
         DEC     EDI
         PUSH    EDI
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -5530,7 +5555,7 @@ SSPLIT2:
         PUSH    EDX   ;Start of first string.
         PUSH    EBX   ;Skipped length.
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  *************
@@ -5992,7 +6017,7 @@ SB3: DB      "? ciforth ERROR # "
         DD      BASE, FETCH
         DD      DECA
         DD      OVER
-        DD      STOD, ZERO, PDDOTR      ;This is about (.) 
+        DD      STOD, ZERO, PDDOTR      ;This is about (.)
         DD      ETYPE
         DD      BASE, STORE
         DD      MESS
@@ -6403,7 +6428,7 @@ INTE1:
         DD      INTE3B-$-CW ;IF
         DD      OVER, TNFA, FETCH, FETCH
         DD      RR, PLUS, LIN, STORE  ;Skip over prefix.
-INTE3B:                  ;THEN 
+INTE3B:                  ;THEN
         DD      RDROP           ; Drop old parse pointer.
         DD      LIT, B_IMMED, LAND
         DD      STATE, FETCH, ZEQU, LOR
@@ -6475,7 +6500,7 @@ VOCAB:        DD    DOCOL
         DD      DOES
 DOVOC:
         DD      ALSO
-        DD      CELLP   ; Make it a WID. 
+        DD      CELLP   ; Make it a WID.
         DD      CONTEXT
         DD      STORE
         DD      SEMIS
@@ -6642,7 +6667,7 @@ QUIT1:                  ;BEGIN
         DD      RZERO
         DD      FETCH
         DD      RPSTO
-        
+
         DD      PACCEP
 ;
         DD       SETSRC
@@ -6730,21 +6755,21 @@ BITS   16         ;Pops back at next _SWITCH_
         MOV     DS,AX
         MOV     [417H],AX
 ;        MOV     [496H],AX ;This should improve things, but doesn't.
-; 
-        
+;
+
         CLI
-        
+
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
         BITS   16
         JMP    GDT_CS: $+5
-        BITS   32 
+        BITS   32
         MOV     EAX,GDT_DS
         MOV     DS,EAX
         MOV     ES,EAX
         MOV     SS,EAX
-        
+
         MOV     ESP, LONG[SPSAVE]
         MOV     ESI, WRM1
         LODSD                 ; NEXT
@@ -6842,7 +6867,7 @@ STOD:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
 STOD1:  PUSH    EDX
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***********
@@ -6961,7 +6986,7 @@ LSHIFT:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         SHL     EAX,CL
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **************
@@ -6984,7 +7009,7 @@ RSHIFT:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         SHR     EAX,CL
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -7379,7 +7404,7 @@ PCFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         IN      AL,DX  ; BYTE INPUT
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***********
@@ -7401,7 +7426,7 @@ PCSTO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX      ;DATA
         OUT     DX,AL   ; BYTE OUTPUT
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -7423,7 +7448,7 @@ PFET:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         IN      EAX,DX  ;WORD INPUT
         PUSH    EAX
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  **********
@@ -7445,7 +7470,7 @@ PSTO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EAX      ;DATA
         OUT     DX,EAX   ;WORD OUTPUT
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 
 ;  ***************
@@ -7602,7 +7627,7 @@ BUFFER3:
     DD       DROP
 ; Just allocate the stalest buffer.
     DD       STALEST,   FETCH, TOR
-; Remember the next stalest buffer. 
+; Remember the next stalest buffer.
     DD       RR
 BUFFER2:
     DD       PBUF, OVER, CELLP, FETCH,
@@ -7963,15 +7988,15 @@ BIOSO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     ECX
         POP     EBX
         POP     EAX
-        PUSH     ESI      ; Save Forth registers. NEEDED? 
+        PUSH     ESI      ; Save Forth registers. NEEDED?
         PUSH     EBP
         XCHG    ESI,EAX   ; Save AX in (already free) SI
-        
-        
+
+
         MOV      LONG[SPSAVE],ESP
         AND     EAX,EAX
         MOV     ESP,EAX
-        
+
         JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
         DEC AL
@@ -7985,34 +8010,34 @@ BIOSO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         STI
         XCHG    SI,AX
 RQBIOS:  INT(0)          ; Request number to be overwritten.
-        PUSHF      ; Save status into DI 
+        PUSHF      ; Save status into DI
         POP     DI
-        XCHG    SI,AX ; Save AX in (still free) SI     
-        
+        XCHG    SI,AX ; Save AX in (still free) SI
+
         CLI
-        
+
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
         BITS   16
         JMP    GDT_CS: $+5
-        BITS   32 
+        BITS   32
         MOV     EAX,GDT_DS
         MOV     DS,EAX
         MOV     ES,EAX
         MOV     SS,EAX
-        
+
         MOV     ESP, LONG[SPSAVE]
         XCHG    ESI,EAX
-        POP     EBP      ; Restore Forth registers. NEEDED? 
+        POP     EBP      ; Restore Forth registers. NEEDED?
         POP     ESI
         PUSH     EAX
         PUSH     EBX
         PUSH     ECX
         PUSH     EDX
-        PUSH     EDI     ; i.e. flags 
+        PUSH     EDI     ; i.e. flags
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 SPSAVE: DD       0H
 ; SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!
 ;
@@ -8046,15 +8071,15 @@ BIOSN:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     EBX
         POP     ECX
         POP     EDX
-        PUSH     ESI      ; Save Forth registers. NEEDED? 
+        PUSH     ESI      ; Save Forth registers. NEEDED?
         PUSH     EBP
         XCHG    ESI,EAX   ; Save AX in (already free) SI
-        
-        
+
+
         MOV      LONG[SPSAVE],ESP
         AND     EAX,EAX
         MOV     ESP,EAX
-        
+
         JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
         DEC AL
@@ -8068,31 +8093,31 @@ BIOSN:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         STI
         XCHG    SI,AX
 RQBIOSN:  INT(0)          ; Request number to be overwritten.
-        PUSHF      ; Save status into DI 
+        PUSHF      ; Save status into DI
         POP     DI
-        XCHG    SI,AX ; Save AX in (still free) SI     
-        
+        XCHG    SI,AX ; Save AX in (still free) SI
+
         CLI
-        
+
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
         BITS   16
         JMP    GDT_CS: $+5
-        BITS   32 
+        BITS   32
         MOV     EAX,GDT_DS
         MOV     DS,EAX
         MOV     ES,EAX
         MOV     SS,EAX
-        
+
         MOV     ESP, LONG[SPSAVE]
         XCHG    ESI,EAX
-        POP     EBP      ; Restore Forth registers. NEEDED? 
+        POP     EBP      ; Restore Forth registers. NEEDED?
         POP     ESI
         PUSH     EAX
-        PUSH     EDI     ; i.e. flags 
+        PUSH     EDI     ; i.e. flags
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ; SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!
 ;
 ;
@@ -8117,15 +8142,15 @@ BDOSO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         POP     ECX
         POP     EBX
         POP     EAX
-        PUSH     ESI      ; Save Forth registers. NEEDED? 
+        PUSH     ESI      ; Save Forth registers. NEEDED?
         PUSH     EBP
         XCHG    ESI,EAX   ; Save AX in (already free) SI
-        
-        
+
+
         MOV      LONG[SPSAVE],ESP
         AND     EAX,EAX
         MOV     ESP,EAX
-        
+
         JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
         DEC AL
@@ -8139,38 +8164,38 @@ BDOSO:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         STI
         XCHG    SI,AX
         INT     21H
-        PUSHF      ; Save status into DI 
-        POP     DI; Not EDI! 
-        XCHG    SI,AX  ; Save AX in (still free) SI     
-        
+        PUSHF      ; Save status into DI
+        POP     DI; Not EDI!
+        XCHG    SI,AX  ; Save AX in (still free) SI
+
         CLI
-        
+
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
         BITS   16
         JMP    GDT_CS: $+5
-        BITS   32 
+        BITS   32
         MOV     EAX,GDT_DS
         MOV     DS,EAX
         MOV     ES,EAX
         MOV     SS,EAX
-        
+
         MOV     ESP, LONG[SPSAVE]
         XCHG    ESI,EAX
-        POP     EBP      ; Restore Forth registers. NEEDED? 
+        POP     EBP      ; Restore Forth registers. NEEDED?
         POP     ESI
         PUSH     EAX
         PUSH     EBX
         PUSH     ECX
         PUSH     EDX
-        PUSH     EDI     ; i.e. flags 
+        PUSH     EDI     ; i.e. flags
         LODSD                 ; NEXT
-        JMP      LONG[EAX]   
+        JMP      LONG[EAX]
 ;
 ;
-; 
-; 
+;
+;
 
 
 ;  ***********
@@ -8220,7 +8245,7 @@ LMS0:   DD      LDUP,  MSFET
         DD      LMS0-$-CW
         DD      RDROP, DROP
         DD      SEMIS
-; 
+;
         ;
 ;------------------------------------
 ;       SYSTEM DEPENDANT CHAR I/O
@@ -8454,27 +8479,27 @@ EXPE1:       DD      KEY
              DD      FETCH
              DD      EQUAL
              DD      ZBRAN
-        DD      EXPE2-$-CW ; IF                    
+        DD      EXPE2-$-CW ; IF
              DD      DROP
              DD      LDUP
              DD      IDO
              DD      EQUAL
              DD      LDUP
              DD      FROMR
-             DD      TWO     ; Remove last 2 chars 
+             DD      TWO     ; Remove last 2 chars
              DD      LSUB
              DD      PLUS
              DD      TOR
              DD      ZBRAN
-        DD      EXPE6-$-CW ; IF                    
+        DD      EXPE6-$-CW ; IF
              DD      LIT
              DD      BELL
              DD      BRAN
-        DD      EXPE7-$-CW  ; ELSE                  
+        DD      EXPE7-$-CW  ; ELSE
 EXPE6:       DD      LIT
-             DD      BSOUT   ; THEN                 
+             DD      BSOUT   ; THEN
 EXPE7:       DD      BRAN
-        DD      EXPE3-$-CW  ; ELSE                  
+        DD      EXPE3-$-CW  ; ELSE
 EXPE2:       DD      LDUP
              DD      LIT,0DH
              DD      EQUAL
@@ -8504,7 +8529,7 @@ EXPE8:
         DD      TIB, FETCH, SWAP, OVER, LSUB
         DD      SEMIS
 ;
- ; 
+ ;
 
         ;
 ;------------------------------------
@@ -8547,11 +8572,11 @@ SHELL:        DD    DOVAR
         DD    N_SHELL
     DD    0
 
-         
+
                 DD      14
         DB      "C:\COMMAND.COM"
         RESB    256                ; Allow for some path
-  RESB    100H     ; Double serve as stack at start up. 
+  RESB    100H     ; Double serve as stack at start up.
 ;
 
 ;
@@ -8579,7 +8604,7 @@ LFSPT   DB      SPT
 LFHEADS DB      HEADS
         ALIGN     4
 ;
-; 
+;
 ;
 
 ;
@@ -8625,12 +8650,12 @@ SECRW:        DD    DOCOL
         DD      RR, LIT, 8, RSHIFT, LIT, 6, LSHIFT ; Bit 8, 9 of cyl
         DD      ROT, ONEP, LOR         ; Compose and in place.
         DD      FROMR, LIT, 8, LSHIFT     ;Bits 0..7 of #cyl.
-        DD      LOR   ; High, low -- reg CX. 
+        DD      LOR   ; High, low -- reg CX.
         DD      SWAP
         DD      LIT, 8, LSHIFT
         DD      LIT, LFDRIVE, CFET
-        DD      LOR   ; High, low -- reg DX. 
-        DD      LIT, 13H, DOTS, BIOSO,
+        DD      LOR   ; High, low -- reg DX.
+        DD      LIT, 13H, BIOSO
         DD      ONE, LAND, DERR, PSTORE
         DD      TDROP, TDROP
         DD      SEMIS
@@ -8656,10 +8681,10 @@ RSLW:        DD    DOCOL
         DD      ZERO, DERR, STORE
         DD      ZBRAN
         DD      RSLW1-$-CW
-        DD      LIT, 0201H      ; Read (AH) one (AL) sector 
+        DD      LIT, 0201H      ; Read (AH) one (AL) sector
         DD      BRAN
         DD      RSLW2-$-CW
-RSLW1:  DD      LIT, 0301H      ; Write (AH) one (AL) sector 
+RSLW1:  DD      LIT, 0301H      ; Write (AH) one (AL) sector
 RSLW2:  DD      SWAP
         DD      SPBLK,  STAR
         DD      SPBLK,  OVER, PLUS
@@ -8687,11 +8712,11 @@ RSLW9:
 RSLW3:  DD      LIT,    8   ;Read error
 RSLW4:  DD      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
                                                    ; is no good!
-        DD      QERR    ;  8 or 9. 
+        DD      QERR    ;  8 or 9.
 RSLW5:  DD      SEMIS
 ;
-; 
-; 
+;
+;
 ;
 
 
@@ -8703,7 +8728,7 @@ RSLW5:  DD      SEMIS
 N_ITICK:   DD      1
         DB      "'"
     ALIGN     4
-ITICK:        DD    DOCOL 
+ITICK:        DD    DOCOL
         DD    $ + (CW*(PH_OFFSET-D_HOFFSET))
         DD    0H
         DD    RSLW-(CW*(C_HOFFSET))
@@ -9076,7 +9101,7 @@ REPEA:        DD    DOCOL
         DD      ONE, QPAIR   ; Matches BEGIN ?
         DD      LIT, BRAN, COMMA, BACKP
         DD      QCOMP, LIT, 4, QPAIR ; Matches WHILE ?
-        DD      FORWARDP ; WHILE target. 
+        DD      FORWARDP ; WHILE target.
         DD      SEMIS
 ;
 
@@ -9138,7 +9163,7 @@ LWHILE:        DD    DOCOL
         DD    N_LWHILE
     DD    0
 
-        DD      TOR    ;  Save backward target. 
+        DD      TOR    ;  Save backward target.
         DD      TOR
         DD      LIT, ZBRAN, COMMA, PFORWARD
         DD      LIT, 4 ; Magic number
@@ -9554,7 +9579,7 @@ WORDS:        DD    DOCOL
         DD      FORW
         DD      SEMIS
 ;
-; 
+;
 
 
 ;  ***********
@@ -9574,12 +9599,12 @@ BYE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
 
 ; EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.
         MOV     EBX,[(XCODE+(CW*(PH_OFFSET-C_HOFFSET)))]
-        
-        
+
+
         MOV      LONG[SPSAVE],ESP
         AND     EAX,EAX
         MOV     ESP,EAX
-        
+
         JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
         DEC AL
@@ -9592,9 +9617,9 @@ BYE:        DD    $+(CW*(PH_OFFSET-C_HOFFSET))
         MOV     SS,AX
         STI
 RETDOSV: JMP 0:0        ; Filled in during boot
-        BITS   32 
+        BITS   32
 
-; 
+;
 
 ;  *****************
 ;  *   EXIT-CODE   *
@@ -9613,7 +9638,7 @@ XCODE:        DD    DOVAR
 
         DD      0
 ;
-; 
+;
 ;
 
 ;  ************
@@ -9851,7 +9876,7 @@ LOWEM:        DD    DOUSE
     DD    0
 
 ;
-; 
+;
 ;
 ;**** LAST DICTIONARY WORD ****
 
@@ -9876,7 +9901,7 @@ TASK:        DD    DOCOL
 TEXTEND  EQU     $       ; Show end of dictionary.
 INITDP   EQU     110000H ;Where we want new words.
 ACTUAL_EM EQU    EM  ; Different for relocatable code only.
- ;  
+ ;
 
 %if 0
 
@@ -9893,7 +9918,7 @@ used for:
 
 %endif
 
-; 
+;
 ;
 
  ;    ENDS
@@ -9905,7 +9930,7 @@ used for:
 - Remember that all the FORTH words in this version are
   upper case letters.  Use <CAPS LOCK> when in FORTH.
 
-; 
+;
 
 - Subscribe to FORTH Dimensions.  It is a valuable source
   of system and application ideas.  Talking with fellow
@@ -9941,7 +9966,3 @@ used for:
 
 
 ;
-
-
-
-
