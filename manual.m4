@@ -39,9 +39,13 @@ dnl define({a},{{@a}}) define({enda},{{@end a}})
 dnl be careful, an example always occupies whole lines.
 define({forthexample},
 {@example
-@cartouche 
-$1
+@iftex 
+@cartouche $1
 @end cartouche
+@end iftex
+@ifinfo 
+$1
+@end ifinfo
 @end example})dnl
 divert(0)dnl
 
