@@ -23,8 +23,11 @@ fig86.%.msm : %.m4 masm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%     : %.m4         fig86.gnr ; m4 $+ >$@
 
 # Default target for convenience
+fig86.alone.com :
 
-fig86.msdos.com :
+# Put include type of dependancies here
+msdos.m4 : default.m4 header.m4 ; touch $@
+alone.m4 : default.m4 header.m4 ; touch $@ 
 
 all: $(TARGETS:%=fig86.%.com) $(TARGETS:%=fig86.%.msm)
 
