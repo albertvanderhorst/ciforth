@@ -1,3 +1,4 @@
+divert(-1)dnl
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/times.h>
@@ -11,22 +12,43 @@
 #include <setjmp.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <ioctls.h>
 
 /*****************************************************************************/
 /*                                                                           */
 /*  This is really a weird c-source. It is only intended to be pushed        */
-/*  through the c-preprocessor. The resulting define's are used by M4.       */
-/*  To be safe, only the define lines are retained, by using grep.           */
+/*  through the c-preprocessor, then through M4 that does the actually       */
+/*  stealing. The result is a list of EQU's to be included in the main       */
+/*  assembly source.                                                         */
 /*                                                                           */
 /*****************************************************************************/
 
-define({M4_SEEK_SET},SEEK_SET)
-define({M4_O_RDWR},O_RDWR)
+steal({M4_@},@)
 
-define({M4_@},__NR_@)
-define({M4_open},__NR_open)
-define({M4_close},__NR_close)
-define({M4_read},__NR_read)
-define({M4_write},__NR_write)
-define({M4_lseek},__NR_lseek)
+steal({M4_@},__NR_@)
 
+define({steal}, {{$1}      EQU     $2})
+divert{}dnl
+; ------------------------------------------------------------
+;   Start of constants stolen from C.
+; ------------------------------------------------------------
+steal({S}{EEK_SET},SEEK_SET)
+steal({T}{CGETS},TCGETS)
+steal({T}{CSETS},TCSETS)
+steal({E}{CHO},ECHO)
+steal({V}{MIN},VMIN)
+steal({V}{TIME},VTIME)
+steal({I}{CANON},ICANON)
+steal({O}{_RDWR},O_RDWR)
+
+steal({e}{xit},__NR_exit)
+steal({o}{pen},__NR_open)
+steal({c}{lose},__NR_close)
+steal({r}{ead},__NR_read)
+steal({w}{rite},__NR_write)
+steal({i}{octl},__NR_ioctl)
+steal({l}{seek},__NR_lseek)
+
+; ------------------------------------------------------------
+;   End of constants stolen from C.
+; ------------------------------------------------------------
