@@ -1889,9 +1889,7 @@ HEADER({COLD},{COLD},{DOCOL})
 	DW	USE,STORE
 	DW	FIRST
 	DW	PREV,STORE
-;____1_____ _USEDOS_1_({
-	DW	DRZER
-});_END___1__({_USEDOS_1_})
+        DW      ZERO, OFSET,STORE
 	DW	LIT, USINI   
 	DW	LIT,UP
 	DW	FETCH
@@ -2280,7 +2278,8 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;____1_____ _MODERN_1_({
 ; All I/O goes through the modern (unix-borrowed)
 ; file I/O.    
-HEADER({TYPE1},{TYPES1},{DOCOL})
+HEADER({TYPE},{TYPES},{DOCOL})
+        DW      DUPE, LOUT, PSTOR
         DW      TOR, TOR
         DW      LIT,04000H ; Write file or device 
 	DW      ONE     ; Handle
@@ -2289,12 +2288,17 @@ HEADER({TYPE1},{TYPES1},{DOCOL})
         DW      DROP, DROP, DROP, DROP
         DW      SEMIS
 ;
-HEADER({EMIT1},{EMIT1},{DOCOL})      
+HEADER({EMIT},{EMIT},{DOCOL})      
+        DW      DUPE,LIT,LF,EQUAL
+        _0BRANCH(EMIT1)
+        DW      LIT,ACR,EMIT
+        DW      ZERO,LOUT,STORE
+EMIT1:  
 	DW	SPFET, ONE, TYPES
         DW      DROP
 	DW	SEMIS
 ;
- HEADER({EXPECT1},{EXPEC1},{DOCOL})
+ HEADER({EXPECT},{EXPEC},{DOCOL})
         DW      OVER 
         DW      TOR, TOR
         DW      LIT,03F00H ; Write file or device 
@@ -2306,7 +2310,7 @@ HEADER({EMIT1},{EMIT1},{DOCOL})
         DW      PLUS, ZERO, SWAP, CSTOR
         DW      SEMIS
 ;
-HEADER({KEY1},{KEY1},{$+2})
+HEADER({KEY},{KEY},{$+2})
         DW      LIT,0800H 
         DW      ZERO,ZERO,ZERO
         DW      BDOS, DROP ; ignore error 
@@ -2314,7 +2318,7 @@ HEADER({KEY1},{KEY1},{$+2})
         DW      LIT, 0FFH, LAND
         DW      SEMIS
 ;
-HEADER({?TERMINAL1},{QTERM1},{DOCOL})
+HEADER({?TERMINAL},{QTERM},{DOCOL})
         DW      LIT,0B00H 
         DW      ZERO,ZERO,ZERO
         DW      BDOS, DROP ; ignore error 
@@ -2551,11 +2555,67 @@ HEADER({POUT},{POUT},{DOCOL})
 ;       SYSTEM DEPENDANT DISK I/O
 ;------------------------------------
 
-;____1_____ _USEDOS_1_({
-HEADER({DR0},{DRZER},{DOCOL})
-        DW      ZERO
-	DW	OFSET,STORE
+;____1_____ _MODERN_1_({
+HEADER({BLOCK-FILE},{BLFL},{DOVAR})
+        DB      10,"BLOCKS.FRT"
+        RESB    20              ; Allow for some path
+;
+HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
+;
+HEADER({DISK-ERR},{DERR},{DOCOL})
+        DW      ONE, LAND
+        DW      LIT, 21H, QERR
 	DW	SEMIS
+;
+HEADER({BLOCK-INIT},{BLINI},{DOCOL})
+        DW      LIT, 03D02H    ; Open file for read/write
+        DW      ZERO,ZERO
+        DW      BLFL
+        DW      COUNT, OVER, PLUS
+        DW      ZERO, SWAP, CSTOR  ; Zero ended as required
+	DW	BDOS, DERR
+        DW      DROP, DROP, DROP
+        DW      BHAN, STORE
+	DW	SEMIS
+;
+HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
+        DW      LIT, 03E00H    ; Open file for read/write
+        DW      BHAN, FETCH
+        DW      ZERO, ZERO
+	DW	BDOS, DERR
+        DW      DROP, DROP, DROP, DROP
+	DW	SEMIS
+;
+;       Block #, Handle
+HEADER({SEEK},{SEEK},{DOCOL})
+        DW      SWAP, TOR, TOR
+        DW      LIT, 04200      ; Seek from start
+        DW      FROMR           ; Handle
+        DW      FROMR, LIT, KBBUF, USTAR
+        DW      SWAP    ; L.S. ON TOP
+	DW	BDOS, DERR
+        DW      DROP, DROP, DROP, DROP
+        DW      SEMIS
+;
+;	( ADDR  BLK#  FLAG (0=W, 1=R) --- )
+HEADER({R/W},{RSLW},{DOCOL})
+	_0BRANCH(RSLW1) 
+	DW	LIT, 03F00H     ; Disk read 
+	_BRANCH(RSLW2) 
+RSLW1	DW      LIT, 04000H     ; Disk write
+RSLW2:  DW      TOR 
+        DW      BHAN, FETCH, SEEK ; That's done
+        DW      FROMR, SWAP, TOR
+        DW      BHAN, FETCH
+        DW      LIT, KBBUF
+        DW      FROMR           ; ADDR
+	DW	BDOS, DERR
+;       DW      DROP, DROP, DROP, DROP
+        DW      DROP, DROP, DROP, DOT
+        DW      SEMIS
+
+});_END___1__({_MODERN_1_})
+;____1_____ _USEDOS_1_({
 ;
 WERR	DB  	'DISK WRITE ERROR  $'
 RERR	DB  	'DISK READ ERROR   $'
