@@ -4,6 +4,6 @@ divert(-1)
 include(default.m4)
 define( {_USEBIOS_1_}, _yes )dnl
 include(header.m4)
-divert
+divert{}dnl
 
 
