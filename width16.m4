@@ -6,5 +6,5 @@ define({LCELL},TWO)dnl
 define({DC},DW)dnl
 define({SPO},{SP})dnl
 define({RPO},{BP})dnl
-define({LIP},{SI})dnl
+define({HIP},{SI})dnl
 define({WOR},{BX})dnl
