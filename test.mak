@@ -71,6 +71,9 @@ cmp: ci86.msdos.bin ci86.alone.bin ciforth lina
 		cmp lina cmp/lina
 		cmp ciforth cmp/ciforth
 
+strip : lina
+	strip lina -s -R .bss -R .comment
+
 copy1: $(TARGETS:%=ci86.%.bin)
 		mount /mnt/dosa
 		cp ci86.alone.bin  /mnt/dosa/alone.com
