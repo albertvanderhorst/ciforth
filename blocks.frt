@@ -256,15 +256,15 @@ SWITCH-LIBS
 
 ( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
 .SIGNON CR 27 LIST  28 LOAD    : REQ REQUIRE ;
-REQ ?16
+REQ CONFIG
 REQ L-S ( MAINTENANCE )
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
-REQ $.   REQ C"   REQ ^
+REQ $.   REQ ^
 REQ EDITOR
-REQ REFRESH ( temporaryly)
+\ REQ REFRESH ( temporaryly)
 REQ CRACK    REQ LOCATE
  ( BACKUP        250 LOAD   77 81 THRU )
-( REQ assembler386_electives )  ( SAVE-BLOCKS 97 98 THRU )
+( REQ ASSEMBLER )
 
 
 
@@ -457,8 +457,8 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 : FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
  1000 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 2DROP ;
-\ For WORD sc: it IS found not as a denotation.
-: PRESENT? DUP >R FOUND DUP IF >NFA @ @ R> = ELSE RDROP THEN ;
+\ For WORD sc: it IS found but not a built-in denotation.
+: PRESENT? FOUND 'FORTH U< 0= ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
@@ -510,7 +510,8 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 
 
 
- ." DEFINE $ FOR HEX NUMBERS A1APR15 ALBERT VAN DER HORST"
+( hex_numbers: $ ESC SI SO ) \ AvdH A1oct05
+REQUIRE <HEX
  'DENOTATION >BODY CELL+ CURRENT ! ( DEFINITIONS won't work!)
  : $ BASE @ >R HEX (NUMBER) R> BASE ! POSTPONE SDLITERAL ;
  12 LATEST >FFA !  DEFINITIONS
@@ -526,25 +527,25 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
  <HEX 1B CONSTANT ESC    0F CONSTANT SI   0E CONSTANT SO HEX>
 
 
- ." 84NOV25 Initialize STAR-printer AH "  <HEX
- : PEMIT 7F AND 5 BDOS DROP ;
- : PCR   0D PEMIT   0A PEMIT ;
- : INIT-STAR ( N--. N is lines per pages)
-    ESC PEMIT "@ PEMIT ESC PEMIT "C PEMIT ( TOS) PEMIT ;
- : CONDENSED  ESC PEMIT "P PEMIT "3 PEMIT ;
- : EMPHASIZED ESC PEMIT  "E PEMIT ;
- : DOUBLE ESC PEMIT "G PEMIT ;
- : BOLD EMPHASIZED DOUBLE ;
- ( 137 CH/L !    60 LN/P !     0 PAUSE ! )
-  : PSPACES  ( 1/0 print N-1 spaces)
-    0 DO 20 PEMIT LOOP ;
-  : PTYPE  ( ADDRESS,LENGTH -- . PRINT LENGTH CHAR AT ADDRESS)
-          ?DUP IF
-          OVER + SWAP DO I C@ PEMIT LOOP THEN ;
-  : P."  "" WORD COUNT PTYPE ;       34 LOAD
- ( SUPER-QUAD SQ )  REQUIRE CONFIG   ?PC
-   VARIABLE L
- : CONDENSED 34 MODE ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( SUPER-QUAD SQ ) REQUIRE CONFIG ?PC
+REQUIRE VIDEO-MODE
+VARIABLE L
+ : CONDENSED 34 VIDEO-MODE ;
  :  HEADER  CR DUP 2 + SWAP
     DO 3  SPACES ." SCR #" I 4 .R 54  SPACES LOOP ;
  : 1LINE  L @ OVER (LINE)  TYPE
@@ -556,7 +557,6 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
     LOOP  ;
  : SUPER-QUAD CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
  : SQ SUPER-QUAD ;
-
 
 ( Elementary string: $. remains      A1mar15-AH)
 ( All this should probably be low level )
@@ -574,16 +574,16 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 
 
 
-( PARSE C" STRING ) \ A0apr03-AH)
+( PARSE STRING ) \ A0apr03-AH)
 ( HANDY & Preparation for ANSI-fication)
 : PARSE WORD COUNT ;     \ Halfway ISO
 
 
-\ ISO
-: C"  HERE [ DENOTATION ] POSTPONE " [ PREVIOUS ]
-    DUP @ SWAP CELL+ 1 - C! ( Make it brain damaged)
-    POSTPONE DROP POSTPONE CELL+ POSTPONE 1- ;
- IMMEDIATE
+
+
+
+
+
 
 
 
@@ -622,20 +622,20 @@ REQUIRE COMPARE
 
 
 
-( DUMP2 )  REQUIRE CONFIG  ?PC \ AvdH A1oct
-:  DUMP2   ( SEG ADDRESS AMOUNT - ..)
-    OVER + SWAP FFF0 AND
-    DO
-        CR DUP H. I H. ." : "
-        I
-        10 0 DO
-            2DUP I + L@ B.
-            I 2 MOD IF SPACE THEN
-        LOOP  [CHAR] | EMIT
-        10 0 DO 2DUP I + L@ FF AND TO-PRINT EMIT LOOP
-        [CHAR] | EMIT DROP
-    10 +LOOP CR DROP
-;    HEX>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ?32
@@ -702,7 +702,7 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
   POPX, SI|
   PUSHF,
   NEXT C;            DECIMAL
-( EXPERIMENT: SWITCH TO PROTECTED MODE AND BACK )
+( Experiment: switch to protected mode and back )
   90 LOAD 41 42 THRU HEX     LOAD-GDT
 CODE TO-PROT1
   CLI, PUSHS, DS|  TO-PROT,
@@ -718,7 +718,7 @@ CODE TO-PROT1
 
 
 
-( SWITCH TO PROTECTED MODE AND BACK TIMING TEST )
+( Switch to protected mode and back timing test )
 CODE TO-PROT2
   CLI, TO-PROT,
     JMPFAR, HERE 4 + MEM, CS-32 SEG,
@@ -734,7 +734,7 @@ CODE TO-PROT3
 : Q2 0 DO 10000 TEST2 LOOP ;
 : Q3 0 DO 10000 TEST3 LOOP ;
 
-( SWITCH TO PROTECTED MODE AND BACK REPLACEMENT FOR DOCOL )
+( Switch to protected mode and back replacement for DOCOL )
   90 LOAD 41 42 THRU HEX     LOAD-GDT
 CODE NEW-DOCOL
  (  JMPFAR, HERE 6 + MEM, 0 , CODE-SEGMENT SEG, )
@@ -750,7 +750,7 @@ CODE X JMP,  ' NEW-DOCOL >DFA 'DOCOL 3 + - , C;
 CLI,  ( TO-PROT, MOVXI, AX| DATA-SEGMENT MEM,
  MOVSW, T| DS| R| AX|  MOVSW, T| ES| R| AX|  MOVSW, T|
 SS| R| AX| ) NEXT C;  DECIMAL
-( SWITCH TO PROTECTED MODE AND BACK REPLACEMENT FOR DOCOL )
+( Switch to protected mode and back replacement for DOCOL )
 CODE NEW-BIOS
   POPX, AX|   MOVFA, B| HERE 0 ,    ( PATCH THE INTERRUPT #)
   POPX, DX|  POPX, CX|  POPX, BX|  POPX, DI|
@@ -1550,33 +1550,33 @@ CR  ." THE ISO BYTE BENCHMARK LASTED " .mS
 
 
 
-( Basic block manipulapions ) HEX ( Assumes assembler )
-?16 ?PC HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
-CONSTANT RW-BUFFER
-CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
-RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
- : R/W-BLOCK  ASSEMBLER
-  OS:, POPX, AX|   OS:, ADD, W| R| AX'| AX|
-  OS:, MOVFA, W1| BL# W,   PUSHX, SI|
-  MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK SWITCH_DS 10 * -  W,
-  TO-REAL, SWITCH_DS COPY-SEG
- XCHGX, BX| INT, 13 B, PUSHF, POPX, BX|
- TO-PROT, GDT_DS COPY-SEG
-  POPX, SI|   PUSHX, BX|  NEXT ; PREVIOUS
-CODE READ-BLOCK 4200 R/W-BLOCK  C;
-CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
-?16 ?PC HEX ( copy a hd system, present on a floppy to the
-hard disk. Done by a Forth booted from another floppy.)
-( Prompt for floppy change, plus whatever needed.)
-: SWAP-FLOPPY   0 WARNING !
-  "Swap floppy and press a key" TYPE   KEY &Q = IF ABORT THEN
-  EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
-( Write the default buffer to hard disk at 32-bit POSITION)
-: (HWD) SWAP WRITE-BLOCK 1 AND . ;
-( Read the default buffer from hard disk at 32-bit POSITION)
-: (HRD) SWAP READ-BLOCK 1 AND . ;
-DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1598,22 +1598,22 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
   POPX, SI|
   PUSHF,
   NEXT C;            DECIMAL
-( BASIC STYLE mini_editor L-S C-S - FORTH DIM iii/2 @ SHAPIN)
-HEX : TEXT HERE C/L 1+ BLANK WORD PAD C/L 1+ CMOVE ;
-: LINE DUP FFF0 AND 17 ?ERROR SCR @ (LINE) DROP ;
-: -MOVE LINE C/L 1- ( leave \n) CMOVE UPDATE ;
-: P 1 TEXT PAD 1+ SWAP -MOVE ; DECIMAL
-( Usage : to change line 1 of screen 3 )
-( 3 SCR ! 1 P <CONTENT> )
-: CLEAN BLOCK B/BUF OVER + SWAP DO
-  I C@ 0= IF BL I C! THEN  LOOP ;
-(   : THRU 1+ SWAP DO ." LOADING " I . I LOAD LOOP ;  )
-: L-S SCR @ LIST ; : LO-S SCR @ LOAD ;
-: C-S SWAP BLOCK SWAP BLOCK B/BUF CMOVE UPDATE FLUSH ;
-: LIST' BASE @ 10 - 25 ?ERROR LIST ;  : LIST LIST' ;
-?PC : BIOSI BIOS DROP DROP DROP DROP DROP ;  ( Ignore result)
-: MODE 0 0 0 16 BIOSI ;
-: DISK-INIT 0 0 0 0 19 BIOSI ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -3038,9 +3038,9 @@ PS ABA + BABAA
 
 
 
-( Cludge to get things loadable on Linux )
-: MODE ;    : BIOS ;   : BDOS ;
-8 LOAD
+
+
+
 
 
 
@@ -3134,14 +3134,6 @@ REQUIRE make
 
 
 
-( .WID .VOCS ORDER ) \ AvdH A1sep25
-\ Print all vocabularies names in existence.
-: .VOCS 'ID. FOR-VOCS ;
-\ Print a voc's name from the WID)
-: .WID 0 CELL+ - BODY> ID. ;
-\ Print the current search order by vocabulary names
-: ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
-2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 
 
 
@@ -3150,20 +3142,13 @@ REQUIRE make
 
 
 
-( Test screens                                      )
-
-VOCABULARY AAP
-AAP
-DEFINITIONS
-: JAN ; : PIET ; : KLAAS ;
 
 
-AAP
- 'PIET   VOC-LINK @  FORGET-VOC
- 'TASK VOC-LINK @  FORGET-VOC
 
- '.VOC >CFA FOR-VOCS
-FORTH
+
+
+
+
 
 
  ." QUADRUPLE ARITHMETIC 08-02-84 "
@@ -3216,7 +3201,6 @@ DROP KEY DROP .S ;
 
 BLK ?
 "BLK ?" EVALUATE
-
 
 
 
@@ -3326,21 +3310,21 @@ DECIMAL
 1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
 
 
-?PC ?16
-\ Prompt for floppy created with ``BACKUP>FLOPPY''
-\ Restore to hard disk ``DBS'' 1400 K from floppy.
-: RESTORE<FLOPPY  SWAP-FLOPPY
-1400 0 DO I (FRD) 2DUP I S>D D+ (HWD) LOOP 2DROP ;
-\ Copy the kernel (first 64K of ``DBS'' to raw floppy.
-: BACKUP-KERNEL  SWAP-FLOPPY 64 0 DO I S>D (HRD) I (FWD) LOOP ;
-\ Copy the BLOCKS (256K at 64K of ``DBS'') to BLOCKS.BLK.
-: BACKUP-BLOCKS
-256 0 DO I 64 + S>D (HRD) RW-BUFFER I 0 RELR/W LOOP ;
-\ Copy the kernel (first 64K of ``DBS'') from raw floppy.
-: RESTORE-KERNEL SWAP-FLOPPY 64 0 DO I (FRD) I S>D (HWD) LOOP ;
-\ Copy the BLOCKS (256K at 64K of ``DBS'') from BLOCKS.BLK.
-: RESTORE-BLOCKS
-256 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ?PC ?32 ( backup restore A1sep01 AH)
 \ Copy the currently booted chunk to free space on the hd,
@@ -3358,8 +3342,6 @@ DECIMAL
 
 
 
--1 CELL+ LOAD 277 LOAD 100 LOAD 97 98 THRU DECIMAL
-207 208 THRU
 
 
 
@@ -3774,14 +3756,7 @@ DECIMAL
 
 
 
-( Mini editor by retyping, Usage ME) <HEX
-: EL LINE C/L 1 - BLANK ;
-: GL PAD C/L  ACCEPT C/L 1- MIN >R LINE PAD SWAP R> MOVE ;
-: OEPS SCR @ LIST "PROCEED?" $. KEY 20 OR
-  &y <> 2000 ?ERROR  "GO" $. CR ;
-: ME SCR ! OEPS 10 0 DO I EL I GL LOOP ;
 
-HEX>
 
 
 
@@ -3806,14 +3781,6 @@ HEX>
 
 
 
-( Binary search, comment ) EXIT
-( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-Uses a comparison routine with execution token `COMP' `COMP'
-must have the stack diagram ( IT -- flag) , where flag
-typically means that IT compares lower or equal to some fixed
-value. It should be TRUE for `IMIN' and decreasing in between
-`IMIN' and `IMAX' . Finds the last index `IT' between `IMIN'
-and `IMAX' (inclusive) for which `COMP' returns true.
 
 
 
@@ -3822,27 +3789,6 @@ and `IMAX' (inclusive) for which `COMP' returns true.
 
 
 
-( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
-VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
-VARIABLE COMP \ Execution token of comparison word.
-: BIN-SEARCH    COMP !  IMAX ! IMIN !
-    BEGIN       \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ ( .S) <> WHILE
-        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-        DUP COMP @ EXECUTE IF
-           ( ihalf) IMIN !
-        ELSE
-           ( ihalf) 1- IMAX !
-        THEN
-    REPEAT
-IMIN @ ;
-\  HIDE IMIN   HIDE IMAX   HIDE COMP
-( Binary search, comment, Test )
-: <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
-." EXPECT 99:" .
-CREATE XXX 123 , 64 , 32 , 12
-\ Find first number < 40
 
 
 
@@ -3854,9 +3800,6 @@ CREATE XXX 123 , 64 , 32 , 12
 
 
 
-( Solution)
-: CC CELLS XXX + @ 40 < 0= ;
-0 3 'CC BIN-SEARCH 1+ CELLS XXX + @
 
 
 
@@ -3870,22 +3813,6 @@ CREATE XXX 123 , 64 , 32 , 12
 
 
 
-( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
-VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
-VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
-VARIABLE COMP \ Execution token of comparison word.
-: BIN-SEARCH    COMP !  IMAX ! IMIN !
-    BEGIN       \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ <> WHILE
-        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-        DUP COMP @ EXECUTE IF
-           ( ihalf) IMIN !
-        ELSE
-           ( ihalf) 1- IMAX !
-        THEN
-    REPEAT
-IMIN @ ;
-\  HIDE IMIN   HIDE IMAX   HIDE COMP
 
 
 
@@ -3902,38 +3829,96 @@ IMIN @ ;
 
 
 
-( Binair zoeken, commentaar ) EXIT
-( BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES )
-Gebruikt een orakel met het execution token `COMP'.
-`COMP' heeft het stack effect ( IT -- flag) , waar
-vlag typisch betekent dat IT kleiner of gelijk een
-bepaalde waarde is. `COMP' moet WAAR teruggeven
-voor `IMIN' en afnemen tussen `IMIN' en `IMAX', en
-het moet voor alle waarden tot en met IMAX
-aangeroepen mogen worden. BIN-SEARCH vindt de
-laatste index `IT' tussen `IMIN' en `IMAX'
-(inclusief) waarvoor `COMP' WAAR teruggeeft.
-Voorbeeld: -100 100 ' 0< BIN-SEARCH .
--1 OK
 
 
 
-\ BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES
-VARIABLE COMP \ Execution token van het "Orakel"
-VARIABLE IMIN \ IMIN 'COMP EXECUTE is altijd waar.
-VARIABLE IMAX \ Als IX 'COMP EXECUTE waar is,
-              \ dan ook voor IY mits IY > IX
-: BIN-SEARCH   COMP !  IMAX ! IMIN !
-    BEGIN     \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ <> WHILE
-        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-        DUP COMP @ EXECUTE IF
-           ( ihalf) IMIN !
-        ELSE
-           ( ihalf) 1- IMAX !
-        THEN
-    REPEAT
-IMIN @ ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( Alternative for COLD A1may04 AH)  HEX
 DP @ LOW-DP @  DP ! LOW-DP ! \ Compile to low memory.
 VOCABULARY SYS    SYS DEFINITIONS
@@ -4028,72 +4013,7 @@ ONLY POSTPONE FORTH DEFINITIONS QUIT ;
 DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 
 
-
-
-( This has the effect as ?ERROR )
-( But counting back from 100 )
-: LINUX-ERROR 100 OVER - ?ERROR ;
-: IOCTL 54 LINOS LINUX-ERROR ;
-0 IVAR TERMIO 60 ALLOT
-HEX 5401 CONSTANT TCGETS
-HEX 5402 CONSTANT TCSETS
-8 2 OR CONSTANT RAWIO
-: getit 0 TCGETS TERMIO IOCTL ;
-: setit 0 TCSETS TERMIO IOCTL ;
-( Set the terminal length to len and toggle the )
-( raw byte with b )  ( len b -- )
-: tc TERMIO 3 CELLS + SWAP TOGGLE
-    TERMIO 4 CELLS + 1 + 6 + C!
-     setit ;
-DECIMAL  getit
-3 CONSTANT read
-( expect one key and retain it.)
-: KEY2 1 RAWIO tc
-     0 DSP@
-    0 SWAP 1 read LINOS DROP
-     1 RAWIO tc
-;
-( expect zero keys and retain the count.)
-: KEY?2
-    0 RAWIO tc
-    0 DSP@
-    0 SWAP 1 read LINOS SWAP DROP
-    1 RAWIO tc
-;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-( A reverse engineering BLK and SOURCE-ID )
-: BLK'
-    IN @ FIRST LIMIT WITHIN
-    SRC 2@ - 1024 = AND
-    IF SRC @ 2 CELLS - @ ELSE 0 THEN
-    BLK !
-    BLK
-;   BLK' ?   " BLK' ?" EVALUATE
-: SOURCE-ID
-   SRC @
-   DUP TIB @ = IF DROP 0 ELSE
-   DUP 7 - "FiLeBuF" CORA IF ( Leave it) ELSE
-   DROP -1 THEN THEN ;
-SOURCE-ID ? "SOURCE-ID ?" EVALUATE
-
-( Last line, preserve !! Must be line 4096)
+( Last line, preserve !! Must be line 4016)
 ( **************ISO language extension ***********************)
 
 
@@ -4102,6 +4022,22 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 
 
 
+
+
+
+
+
+
+
+
+( ORDER .WID .VOCS ) \ AvdH A1sep25
+\ Print all vocabularies names in existence.
+: .VOCS 'ID. FOR-VOCS ;
+\ Print a voc's name from the WID)
+: .WID 0 CELL+ - BODY> ID. ;
+\ Print the current search order by vocabulary names
+: ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
+2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 
 
 
@@ -4128,9 +4064,9 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 
 ( +THRU ) \ AvdH A1oct05
 \ Load current block plus N1 to current block plus N2.
-: +THRU   SRC @ 2 CELLS - @ >R    R@ + SWAP   R> + SWAP
+: +THRU   SRC @ 2 CELLS - @   OFFSET @ -   >R
+    R@ + SWAP   R> + SWAP
     THRU ;
-
 
 
 
@@ -4156,16 +4092,13 @@ CREATE BASE' 0 ,
  : B.  S>D 2 (DH.) TYPE ; ( print BYTE in hex )
 
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
- : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
- : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
-(  ALIAS HIDE INCLUDE ^ IVAR ) \ AvdH A1oct05
+
+
+(  ALIAS HIDE INCLUDE ^ IVAR ) REQUIRE CONFIG \ AvdH A1oct05
 
  : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
 
  : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
-
-: INCLUDE (WORD) INCLUDED ;
-
 
 
 
@@ -4174,6 +4107,9 @@ CREATE BASE' 0 ,
 
 : ^ .S ;
 
+"INCLUDED" PRESENT? 0= ?LEAVE-BLOCK
+
+: INCLUDE (WORD) INCLUDED ;
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
 VARIABLE FAR-DP         \ Alternative DP
 DSP@ HERE + 2 / ALIGNED FAR-DP !
@@ -4302,6 +4238,70 @@ REQUIRE Z$@   REQUIRE ENV
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+\ SOS `IMIN'  \ IMIN 'COMP EXECUTE is always TRUE
+\ TOS `IMAX'  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    >R
+    BEGIN       \ Loop variant IMAX - IMIN
+        2DUP ( .S) <> WHILE
+        OVER 1+   OVER   + 2/  ( -- ihalf )
+        DUP R@ EXECUTE IF
+           SWAP   ROT DROP \ Replace IMIN
+        ELSE
+           1-     SWAP DROP \ Replace IMAX
+        THEN
+    REPEAT
+DROP RDROP ;
+
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+VARIABLE IMIN  \ IMIN 'COMP EXECUTE is always TRUE
+VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
+VARIABLE COMP \ Execution token of comparison word.
+: BIN-SEARCH    COMP !  IMAX ! IMIN !
+    BEGIN       \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ ( .S) <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ ;
+\  HIDE IMIN   HIDE IMAX   HIDE COMP
+( Binary search, comment ) EXIT
+( BIN-SEARCH    : n IMIN, n IMAX, xt COMP -- n IRES )
+Uses a comparison routine with execution token `COMP' `COMP'
+must have the stack diagram ( IT -- flag) , where flag
+typically means that IT compares lower or equal to some fixed
+value. It should be TRUE for `IMIN' and decreasing in between
+`IMIN' and `IMAX' . Finds the last index `IT' between `IMIN'
+and `IMAX' (inclusive) for which `COMP' returns true.
+
+
+
+
+
+
+
+
+( Binary search, Test )
+: <100 100 < ;  -1000 +1000 '<100 BIN-SEARCH
+." EXPECT 99:" .
+CREATE XXX 123 , 64 , 32 , 12
+\ Find first number < 40
+
+
+
+
+
+
+
+
+
+
+
 ( SEE CRACK KRAAK KRAKER ) \ AvdH A1oct04
 REQUIRE +THRU
 1 7 +THRU
@@ -4442,7 +4442,7 @@ VOCABULARY ASSEMBLER IMMEDIATE
 ASSEMBLER DEFINITIONS
 REQUIRE IVAR   REQUIRE +THRU
  1 4 HEX +THRU  DECIMAL ( Common code , prelude)
- DECIMAL 10 DUP +THRU ( PROTECTED MODE 16/32)
+ DECIMAL 10 DUP +THRU ( protected mode 16/32)
 
  5 9 HEX +THRU  DECIMAL ( Common code, postlude)
 PREVIOUS DEFINITIONS
@@ -4478,7 +4478,7 @@ PREVIOUS DEFINITIONS
 : 2FI CREATE C, C, DOES> 2 + <FIX FIX| FIX| DROP ;
 : 3FI CREATE C, C, C, DOES> 3 + <FIX FIX| FIX| FIX| DROP ;
 
-( PROTECTED MODE  SWITCHING a0jun20        AvdH HCCFIG HOLLAND)
+( Protected mode  switching a0jun20        AvdH HCCFIG HOLLAND)
 : SPLIT 0 100 UM/MOD ; ( To handle two bytes at once )
 : SPLIT2 SPLIT SPLIT ; ( To handle three bytes at once )
 ( INCREMENT, OPCODE , COUNT -- )
@@ -4494,7 +4494,7 @@ PREVIOUS DEFINITIONS
 
 
 
-
+( spare )
 
 
 
@@ -4574,7 +4574,7 @@ IMMEDIATE
 
 
 
-( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
+( Protected mode  switching macros A0JUL03 AvdH HCCFIG HOLLAND)
 ?32  ( Test applicable to 32 bit mode)
 
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
@@ -4606,7 +4606,7 @@ DECIMAL
 
 
 
-( 16 BITS PROTECTED MODE A0jul04  AvdH HCCFIG HOLLAND)  ?16
+( 16 bits protected mode A0jul04  AvdH HCCFIG HOLLAND)  ?16
 ( C7) 6 1FI MEM|  ( OVERRULES D0| BP| )
 ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]
 [SI] [DI] [BP] [BX]
@@ -4622,7 +4622,7 @@ DECIMAL
 ( F8) 04 1FI +0|'
 ( C0) 40 0 4 1FAMILY| +1*| +2*| +4*| +8*|
 
-( 32 BITS PROTECTED MODE A0jul04  AvdH HCCFIG HOLLAND)  ?32
+( 32 bits protected mode A0jul04  AvdH HCCFIG HOLLAND)  ?32
 ( FF) C4 1FI MEM| ( MEM| MEM, OVERRULES D0| SIB| SIB, BP| )
 ( 07) 05 1PI MEM, ( REQUIRED AFTER MEM|)
 ( COMBINES WITH D0| DB| DX| )
@@ -4686,7 +4686,7 @@ DECIMAL
 
 
 
-
+( spare )
 
 
 
@@ -4718,7 +4718,7 @@ DECIMAL
 80 0F 2PI J|X,         ( FFF08C) 00 90 0F 3PI SET,
 100 0 2 1FAMILY| Y'| N'|
 200 0 8 1FAMILY| O'| C'| Z'| CZ'| S'| P'| L'| LE'|
-
+( 80386_instructions_PUSH..LMSW )
 1 0FA0 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
 800 FA300 4 3FAMILY, BT, BTS, BTR, BTC,
 800 FA400 2 3FAMILY, SHLDI, SHRDI,
@@ -4734,7 +4734,8 @@ DECIMAL
 
 
 
-( LOCATED LOCATE .SOURCEFIELD ) \ AvdH A1sep26
+( LOCATED LOCATE .SOURCEFIELD ) REQUIRE CONFIG \ AvdH A1sep26
+">SFA" PRESENT? 0= ?LEAVE-BLOCK
 \ Interpret a SOURCEFIELD heuristically.
 : .SOURCEFIELD
     DUP 1000 < IF LIST ELSE
@@ -4744,7 +4745,6 @@ DECIMAL
 : LOCATED FOUND DUP 0= 11 ?ERROR >SFA @ .SOURCEFIELD ;
 \ Idem but string from input.
 : LOCATE (WORD) LOCATED ;
-
 
 
 
@@ -4782,7 +4782,7 @@ REQUIRE OS-IMPORT       ?LI
 "l      "   OS-IMPORT l
 ""          OS-IMPORT !!
 
-( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
+( protected mode  switching MACROS a0JUL03 AvdH HCCFIG HOLLAND)
 
 : GET-CR0   MOV|CD, F| CR0| R| AX| ;
 : PUT-CR0   MOV|CD, T| CR0| R| AX| ;
@@ -4798,7 +4798,7 @@ REQUIRE OS-IMPORT       ?LI
 
 
 
-( PROTECTED MODE  SWITCHING MACROS a0JUL03 AvdH HCCFIG HOLLAND)
+( protected mode  switching macros a0JUL03 AvdH HCCFIG HOLLAND)
 : NOP, XCHGX, AX| ;
 : CP, MOVTA, B| SWAP DUP , 1 + MOVFA, SWAP DUP , 1 + ;
 
@@ -4815,9 +4815,9 @@ REQUIRE OS-IMPORT       ?LI
 
 
 ( EDITOR ) REQUIRE CONFIG   ?PC    \ AvdH A1oct05
-
+REQUIRE IVAR   REQUIRE +THRU
+REQUIRE VIDEO-MODE   REQUIRE $
   1 9 +THRU
-
 
 
 
@@ -4846,7 +4846,6 @@ DECIMAL
 
 
 
-
 ( 32_bit_editor_stuff ) ?32 \ A1oct05
   HEX 0 CONSTANT CS_START
  : LC@ SWAP 10 * + CS_START - C@ ;
@@ -4862,7 +4861,8 @@ DECIMAL
 
 
 
-( MINI EDITOR FOR MSDOS ) HEX
+
+( Screen_access ) HEX
 B800 CONSTANT VID   050 CONSTANT VW   19 CONSTANT VH
 VH VW * CONSTANT VL
 : A-L SCR @ (LINE) ;
@@ -4960,7 +4960,7 @@ DECIMAL
 THEN THEN THEN THEN ;
 ( DISPATCHER )    HEX
 : AT-END VH 1 - VW * CURSOR ! SET ;
-: DEBUG CURSOR @ AT-END ^ CURSOR ! ;
+: DEBUG CURSOR @ AT-END .S CURSOR ! ;
 : EXITING KEY 51 - IF PUT-S THEN ;
 : ROUTE BEGIN KEY
 PRINT DELSTORING
@@ -4972,8 +4972,168 @@ ESC = UNTIL ;
 1 I-MODE ! FRAME 0 CURSOR ! SET   PG
 GET-S ROUTE EXITING  AT-END BLACK ;
 :  EDIT SCR ! E-S ;
-: E-R 3 MODE EDIT ;
+: E-R 3 VIDEO-MODE EDIT ;
 DECIMAL  ( Attempts at comamnd line editor)
+( P ME Mini_editors ) \ AvdH A1oct05
+( FORTH DIM iii/2 @ SHAPIN)
+( Usage : to change line 1 of screen 3 )
+( 3 SCR ! 1 P <CONTENT> )
+HEX : TEXT HERE C/L 1+ BLANK WORD PAD C/L 1+ CMOVE ;
+: LINE DUP FFF0 AND 17 ?ERROR SCR @ (LINE) DROP ;
+: -MOVE LINE C/L 1- ( leave \n) CMOVE UPDATE ;
+: P 1 TEXT PAD 1+ SWAP -MOVE ; DECIMAL
+( Mini editor by retyping, Usage ME) <HEX
+: EL LINE C/L 1 - BLANK ;
+: GL PAD C/L  ACCEPT C/L 1- MIN >R LINE PAD SWAP R> MOVE ;
+: OEPS SCR @ LIST "PROCEED?" TYPE KEY 20 OR
+  &y <> 2000 ?ERROR  "GO" TYPE CR ;
+: ME SCR ! OEPS 10 0 DO I EL I GL LOOP ;
+
+HEX>
+( CLEAN LO-S L-S C-S Handy_screen_tools ) \ AvdH A1oct05
+
+
+
+
+
+
+: CLEAN BLOCK B/BUF OVER + SWAP DO
+  I C@ 0= IF BL I C! THEN  LOOP ;
+
+: L-S SCR @ LIST ;
+: LO-S SCR @ LOAD ;
+: C-S SWAP BLOCK SWAP BLOCK B/BUF CMOVE UPDATE FLUSH ;
+: LIST' BASE @ 10 - 25 ?ERROR LIST ;
+: LIST LIST' ;
+
+( BIOSI VIDEO-MODE DISK-INIT ) ?PC \ AvdH A1oct05
+
+
+
+
+: BIOSI BIOS DROP DROP DROP DROP DROP ;  ( Ignore result)
+: VIDEO-MODE 0 0 0 16 BIOSI ;
+: DISK-INIT 0 0 0 0 19 BIOSI ;
+
+
+
+
+
+
+
+
+( DUMP2 ) REQUIRE CONFIG ?PC \ AvdH A1oct
+<HEX
+:  DUMP2   ( SEG ADDRESS AMOUNT - ..)
+    OVER + SWAP FFF0 AND
+    DO
+        CR DUP H. I H. ." : "
+        I
+        10 0 DO
+            2DUP I + L@ B.
+            I 2 MOD IF SPACE THEN
+        LOOP  [CHAR] | EMIT
+        10 0 DO 2DUP I + L@ FF AND TO-PRINT EMIT LOOP
+        [CHAR] | EMIT DROP
+    10 +LOOP CR DROP
+;    HEX>
+
+( **************communication with stand alone hd ************)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( Backup_from_hd_to_floppy )
+REQUIRE CONFIG   REQUIRE ASSEMBLER   REQUIRE BIOSI
+
+( copy a hd system, present on a floppy to the
+hard disk. Done by a Forth booted from another floppy.)
+
+1 5 +THRU DECIMAL
+
+
+
+
+
+
+
+
+
+( READ-BLOCK WRITE-BLOCK Acces_hd_via_LBA ) ?16 ?PC HEX
+HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
+CONSTANT RW-BUFFER
+CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
+RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
+ : R/W-BLOCK  ASSEMBLER
+  OS:, POPX, AX|   OS:, ADD, W| R| AX'| AX|
+  OS:, MOVFA, W1| BL# W,   PUSHX, SI|
+  MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
+  MOVXI, SI| PARAM-BLOCK SWITCH_DS 10 * -  W,
+  TO-REAL, SWITCH_DS COPY-SEG
+ XCHGX, BX| INT, 13 B, PUSHF, POPX, BX|
+ TO-PROT, GDT_DS COPY-SEG
+  POPX, SI|   PUSHX, BX|  NEXT ; PREVIOUS
+CODE READ-BLOCK 4200 R/W-BLOCK  C;
+CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
+\ (HWD) (HRD) Acces_hd_via_LBA ?16 ?PC HEX
+
+
+( Prompt for floppy change, plus whatever needed.)
+: SWAP-FLOPPY   0 WARNING !
+  "Swap floppy and press a key" TYPE   KEY &Q = IF ABORT THEN
+  EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
+( Write the default buffer to hard disk at 32-bit POSITION)
+: (HWD) SWAP WRITE-BLOCK 1 AND . ;
+( Read the default buffer from hard disk at 32-bit POSITION)
+: (HRD) SWAP READ-BLOCK 1 AND . ;
+DECIMAL
+
+
+
+
+( BACKUP-KERNEL BACKUP-BLOCKS ) ?PC ?16
+REQUIRE SWAP-FLOPPY   REQUIRE (HRD)   REQUIRE (FWD)
+\ Prompt for floppy created with ``BACKUP>FLOPPY''
+\ Restore to hard disk ``DBS'' 1400 K from floppy.
+: RESTORE<FLOPPY  SWAP-FLOPPY
+1400 0 DO I (FRD) 2DUP I S>D D+ (HWD) LOOP 2DROP ;
+\ Copy the kernel (first 64K of ``DBS'' to raw floppy.
+: BACKUP-KERNEL  SWAP-FLOPPY 64 0 DO I S>D (HRD) I (FWD) LOOP ;
+\ Copy the BLOCKS (256K at 64K of ``DBS'') to BLOCKS.BLK.
+: BACKUP-BLOCKS
+256 0 DO I 64 + S>D (HRD) RW-BUFFER I 0 RELR/W LOOP ;
+
+
+
+
+
+( RESTORE<FLOPPY RESTORE-KERNEL RESTORE-BLOCKS ) ?PC ?16
+REQUIRE SWAP-FLOPPY   REQUIRE (FRD)   REQUIRE (HWD)
+
+
+
+
+
+
+
+
+\ Copy the kernel (first 64K of ``DBS'') from raw floppy.
+: RESTORE-KERNEL SWAP-FLOPPY 64 0 DO I (FRD) I S>D (HWD) LOOP ;
+\ Copy the BLOCKS (256K at 64K of ``DBS'') from BLOCKS.BLK.
+: RESTORE-BLOCKS
+256 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
+
 ( **************Working ciforth examples *********************)
 
 
@@ -5294,6 +5454,102 @@ R> R> R> Z ! Y ! X !
 : tak 3SWAP 1+ kat NIP NIP NIP ;
 'tak >DFA @ 'tak' >DFA ! ( Solve forward reference)
 
+( Binair zoeken, commentaar ) EXIT
+( BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES )
+Gebruikt een orakel met het execution token `COMP'.
+`COMP' heeft het stack effect ( IT -- flag) , waar
+vlag typisch betekent dat IT kleiner of gelijk een
+bepaalde waarde is. `COMP' moet WAAR teruggeven
+voor `IMIN' en afnemen tussen `IMIN' en `IMAX', en
+het moet voor alle waarden tot en met IMAX
+aangeroepen mogen worden. BIN-SEARCH vindt de
+laatste index `IT' tussen `IMIN' en `IMAX'
+(inclusief) waarvoor `COMP' WAAR teruggeeft.
+Voorbeeld: -100 100 ' 0< BIN-SEARCH .
+-1 OK
+
+
+
+\ BIN-SEARCH : n IMIN, n IMAX, xt COMP -- n IRES
+VARIABLE COMP \ Execution token van het "Orakel"
+VARIABLE IMIN \ IMIN 'COMP EXECUTE is altijd waar.
+VARIABLE IMAX \ Als IX 'COMP EXECUTE waar is,
+              \ dan ook voor IY mits IY > IX
+: BIN-SEARCH   COMP !  IMAX ! IMIN !
+    BEGIN     \ Loop variant IMAX - IMIN
+        IMIN @ IMAX @ <> WHILE
+        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+        DUP COMP @ EXECUTE IF
+           ( ihalf) IMIN !
+        ELSE
+           ( ihalf) 1- IMAX !
+        THEN
+    REPEAT
+IMIN @ ;
+
+( ************** ciforth attempts *************************** )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( This has the effect as ?ERROR ) ?LI
+( But counting back from 100 )
+: LINUX-ERROR 100 OVER - ?ERROR ;
+: IOCTL 54 LINOS LINUX-ERROR ;
+0 IVAR TERMIO 60 ALLOT
+HEX 5401 CONSTANT TCGETS
+HEX 5402 CONSTANT TCSETS
+8 2 OR CONSTANT RAWIO
+: getit 0 TCGETS TERMIO IOCTL ;
+: setit 0 TCSETS TERMIO IOCTL ;
+( Set the terminal length to len and toggle the )
+( raw byte with b )  ( len b -- )
+: tc TERMIO 3 CELLS + SWAP TOGGLE
+    TERMIO 4 CELLS + 1 + 6 + C!
+     setit ;
+DECIMAL  getit
+?LI
+3 CONSTANT read
+( expect one key and retain it.)
+: KEY2 1 RAWIO tc
+     0 DSP@
+    0 SWAP 1 read LINOS DROP
+     1 RAWIO tc
+;
+( expect zero keys and retain the count.)
+: KEY?2
+    0 RAWIO tc
+    0 DSP@
+    0 SWAP 1 read LINOS SWAP DROP
+    1 RAWIO tc
+;
+
+( A reverse engineering BLK and SOURCE-ID )
+: BLK'
+    IN @ FIRST LIMIT WITHIN
+    SRC 2@ - 1024 = AND
+    IF SRC @ 2 CELLS - @ ELSE 0 THEN
+    BLK !
+    BLK
+;   BLK' ?   " BLK' ?" EVALUATE
+: SOURCE-ID
+   SRC @
+   DUP TIB @ = IF DROP 0 ELSE
+   DUP 7 - "FiLeBuF" CORA IF ( Leave it) ELSE
+   DROP -1 THEN THEN ;
+SOURCE-ID ? "SOURCE-ID ?" EVALUATE
+
+
 ( **************Non working CP/M examples  *******************)
 
 
@@ -5613,3 +5869,20 @@ until run-time, when the system crashes mysteriously.
 
 
     HEX>
+
+ ." 84NOV25 Initialize STAR-printer AH "  <HEX
+ : PEMIT 7F AND 5 BDOS DROP ;
+ : PCR   0D PEMIT   0A PEMIT ;
+ : INIT-STAR ( N--. N is lines per pages)
+    ESC PEMIT "@ PEMIT ESC PEMIT "C PEMIT ( TOS) PEMIT ;
+ : CONDENSED  ESC PEMIT "P PEMIT "3 PEMIT ;
+ : EMPHASIZED ESC PEMIT  "E PEMIT ;
+ : DOUBLE ESC PEMIT "G PEMIT ;
+ : BOLD EMPHASIZED DOUBLE ;
+ ( 137 CH/L !    60 LN/P !     0 PAUSE ! )
+  : PSPACES  ( 1/0 print N-1 spaces)
+    0 DO 20 PEMIT LOOP ;
+  : PTYPE  ( ADDRESS,LENGTH -- . PRINT LENGTH CHAR AT ADDRESS)
+          ?DUP IF
+          OVER + SWAP DO I C@ PEMIT LOOP THEN ;
+  : P."  "" WORD COUNT PTYPE ;       34 LOAD
