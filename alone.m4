@@ -5,6 +5,7 @@ include(default.m4)
 define( {_USEBIOS_1_}, _yes )dnl
 define( {_BOOTFD__1_}, _yes )dnl       
 define( {_PROTECTED_1_}, _yes )dnl       
+define( {_REAL_1_}, _no )dnl       
 define( {_BITS32_1_}, _no )dnl       
 include(header.m4)
 _PROTECTED_1_({include(protect.m4)})
