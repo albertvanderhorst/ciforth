@@ -3053,9 +3053,9 @@ RSLW5:  DC      SEMIS
 ;{ the fields marked default must be restored.}
 HEADER({LBAPAR},{LBA},{DOVAR})
 	DB      10H, 0      ;{ default    }
-	DC      SPB         ;{ default    }
-	DC      0           ;{ to be filled with offset}
-	DC      REALSEGMENT ;{ default segment}
+	DW      SPB         ;{ default    }
+	DW      0           ;{ to be filled with offset}
+	DW      REALSEGMENT ;{ default segment}
 	;{ At a hard disk we just read sector from sector 1        }
 	DD      0       ;{ sector number}
 	DD      0       ;{ M.S. 32 BITS default}
@@ -3101,8 +3101,13 @@ CODE_HEADER({WBLK},{WBLK})
 HEADER({R/W},{RSLW},{DOCOL})
 	DC      TOR
 	DC      LIT, SPB, STAR  ;{ Sector number}
-	DC      LBA, LIT, 8, PLUS, STORE  
+        DC      SWAP
+;       On a big endian machine the following code is 32 bit clean.
+;       The 2 m.s. bytes are overwritten by the next store.
 	DC      LBA, LIT, 4, PLUS, STORE  
+        DC      LIT, REALSEGMENT, 
+	DC      LBA, LIT, 6, PLUS, STORE  
+	DC      LBA, LIT, 8, PLUS, STORE  
 	DC      LBA
 	DC      RR
 	_0BRANCH(RSLW1)
