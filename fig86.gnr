@@ -4344,7 +4344,7 @@ Leave the address addr of a variable containing the
 latest disk error in opening, using or closing the block file.
 Negative means an error 
 (the Unix forthsamp({errno}) and zero means okay.)
-},{{SET-TERM}})
+},{{BLOCK},{LINUX-ERROR}})
 HEADER({DISK-ERROR},{DERR},{DOVAR})
         DC      -1
 ;
@@ -4473,8 +4473,21 @@ CODE_HEADER({R/W},{RSLW})
 
 
 });_END_({_LINUX_C_})
-
 _CLASSIC_({
+; This the mass storage I/O that looks most like FIG.
+; It may not be pretty but it surely is the smallest.
+;
+;
+worddoc({STORAGE},{DRIVE},{drive},{--- addr},{},
+{Leave the address addr of a variable containing the 
+drive used for mass storage. This is in MSDOS coding,
+0 is floppy A: , 1 is floppy B:, 80H is drive C:,
+81H is drive D: and so forth.
+The drive may be switched but this should only be 
+attempted after forthcode({EMPTY-BUFFERS}) .},
+{{BLOCK},{FLUSH}})
+HEADER({DRIVE},{DRIVE},{DOVAR})
+      DC  0
 ;
 WERR    DB      'DISK WRITE ERROR  $'
 RERR    DB      'DISK READ ERROR   $'
@@ -4494,6 +4507,9 @@ SBLK    PROC    NEAR
         RET
 _ENDP SBLK    ENDP
 ;
+worddoc({STORAGE},{RBLK},{read_block},{addr blk --},{},{
+forthvar({1 R/W}) is an abbreviation for forthvar({RBLK}).
+},{{R/W}})
 CODE_HEADER({RBLK},{RBLK})
         CALL    SBLK
         PUSH    SI      ;{PRESERVE INTERPRETER POINTER}
@@ -4503,6 +4519,9 @@ CODE_HEADER({RBLK},{RBLK})
         LEA     DX,[RERR]
         JMP     DERR
 ;
+worddoc({STORAGE},{WBLK},{write_block},{addr blk --},{},{
+forthvar({0 R/W}) is an abbreviation for forthvar({WBLK}).
+},{{R/W}})
 CODE_HEADER({WBLK},{WBLK})
         CALL    SBLK
         PUSH    SI
@@ -4510,18 +4529,34 @@ CODE_HEADER({WBLK},{WBLK})
         INT     26H
         JNC     DOK
         LEA     DX,[WERR]
-DERR:   PUSH    AX
-        MOV     AH,9    ;{STRING WRITE FNCN}
+;
+;{ Error exit for both RBLK and WBLK }
+DERR:   PUSH    AX      ; DX contains message.
+        MOV     AH,9    ;{String write fncn, obsolete for ages}
         INT     21H
         POP     AX      ;{ERROR CODE IN AX}
-;{  WRITE ERROR MESSAGE HERE}
 ;
+;{ Okay exit for both RBLK and WBLK }
 DOK:    POPF            ;{POP FLAGS}
         POP     BP      ;{RETURN STACK}
         POP     SI      ;{INTERPRETER PNTR}
         _NEXT
 ;
-;
+worddoc({STORAGE},{R/W},{read_slash_write},{addr blk f --},{},{
+The figforth standard disc read-write linkage. forthvar({addr})
+specifies the source or destination block buffer, forthvar({blk}) is
+the sequential number of the referenced physical block; and
+forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
+read. forthcode({R/W}) determines the location on mass storage,
+performs the read-write. This version of ciforthh features the
+most classic 
+mass storage. Blocks are counted sequentially from 0 
+on the drive with MSDOS code in forthcode({DRIVE}),
+so forthcode({R/W}) can be used to write boot code.
+Errors are handled by writing directly to the console
+after they are detected.
+}, 
+{{BLOCK},{DRIVE}})
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
          _SWITCH_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
@@ -4533,20 +4568,32 @@ RSLW2:  DC      SEMIS
 });_END_({_CLASSIC_})
 _USEBIOS_({
 ;
-HEADER({DRIVE},{DRIVE},{DOVAR})
-      DC  0
-;
-HEADER({RECORD},{REC},{DOVAR})
-      DC  0
-;
+worddoc({STORAGE},{SEC/BLK},{sectors_per_block},{--- c},{},{
+This constant leaves the number of sectors per block. _VERBOSE_(
+The original idea was that a sector forthemph({is}) a block. In
+fact SEC/BLK is set such that B/SRC is one, as is required for ISO.) 
+},{{BLOCK},{B/SCR}})
 HEADER({SEC/BLK},{SPBLK},{DOCON}) ;{# SECTORS/BLOCK}
         DC      SPB
 ;
+worddoc({STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},{
+Leave the address addr of a variable containing the 
+latest disk error in opening, using or closing the block file.
+One means an error and and zero means okay.
+},{{BLOCK},{R/W}})
 HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DC  0
 });_END_({_USEBIOS_})
 ;
 _RWFD_({
+worddoc({STORAGE},{SEC-RW},{sector_read_write},{com addr blk --},{},{
+Performs the forthcode({BIOS}) function forthvar({com}) , for 
+a single sector
+forthvar({blk}) either a read to forthvar({addr}) or write from
+forthvar({addr}) . 
+Disk errors are stored in 
+forthcode({DISK-ERROR}).}, 
+{{BLOCK},{R/W}})
 ;{  (Command, address, sec# -- )}
 HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, SPT*HEADS, SLMOD   ;{ Juggle #sec, #head, #track}
@@ -4558,6 +4605,16 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
+worddoc({STORAGE},{R/W},{read_slash_write},{addr blk f --},{},{
+The figforth standard disc read-write linkage. forthvar({addr})
+specifies the source or destination block buffer, forthvar({blk}) is
+the sequential number of the referenced physical block; and
+forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
+read. forthcode({R/W}) determines the location on mass storage,
+performs the read-write and aborts with an error message for failures.
+forthcode({DISK-ERROR}) contains an error count for the latest operation.
+}, 
+{{BLOCK},{DISK-ERROR},{SECRW}})
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
          _SWITCH_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
@@ -5409,4 +5466,5 @@ _ENDCOMMENT
 divert(2)dnl m4 generates code on channel 1, documentation on 3
 ; Split here for documentation
 _GENERATE_CODE 
+
 
