@@ -26,9 +26,11 @@ s/\<CL\>/%CL/g
 s/\<CH\>/%CH/g
 s/\<DL\>/%DL/g
 s/\<DH\>/%DH/g
+s/\<DX\>/%DX/g
 s/\([^"]\)\<ESP\>/\1%ESP/g
 # GNU want indirect jumps this way.
-s/\<JMP[        ]*LONG\[\(%E[A-Z][A-Z]\)\]/JMP       *\1/g
+s/\<JMP[        ]\(\[%E[A-Z][A-Z]\]\)/JMP       *\1/g
+s/\<JMP[ ]*\[\(%[A-Z][A-Z][A-Z]\)\]/JMP *\1/g
 s/\[\(%[A-Z][A-Z][A-Z]\)\]/0(\1)/g
 s/\[\([^%]*\)\]/*(\1)/g
 s/LEA[  ]*\[\(%[A-Z][A-Z][A-Z]\)+\(%[A-Z][A-Z][A-Z]\)\]/LEA       (\1,\2)/g
@@ -39,6 +41,8 @@ s/\.ASCII *'\([^'"]*\)"\([^']*\)'/.ASCII  "\1\\"\2"/g
 s/^\([^#]* *\*\) BYTE /\1 /
 # Change a MOV of an indirection 
 s/MOV  *[0\*]\((\)/MOV     \1/g
+# A second operand starting with *( is always indirect
+s/, *\*(/,(/g
 # Change a MOV of an apparent direct data. 
 # This just happens to work because of the content of the assembler files.
 s/MOV  *\([-0-9][^(]\)/MOV     $\1/g

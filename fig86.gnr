@@ -784,7 +784,7 @@ CODE_HEADER({(LOOP)},{XLOOP})
         MOV     BX,1    ;{ INCREMENT}
 XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
         MOV     AX,[BP] ;{ GET NEW INDEX}
-        SUB     AX,[CELLS(1)+BP]        ;{ COMPARE WITH LIMIT}
+        SUB     AX,[BP+CELLS(1)]        ;{ COMPARE WITH LIMIT}
         XOR     AX,BX   ;{ TEST SIGN}
         JS      BRAN1   ;{ KEEP LOOPING}
 ;
@@ -1072,7 +1072,7 @@ CODE_HEADER({SP@},{SPFET})
 ;
 CODE_HEADER({SP!},{SPSTO})
         MOV     BX,[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
-        MOV     STACKPOINTER,[CELLS(3)+BX]        ;{RESET PARAM STACK POINTER}
+        MOV     STACKPOINTER,[BX+CELLS(3)]        ;{RESET PARAM STACK POINTER}
         _NEXT
 ;
 CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
@@ -1081,7 +1081,7 @@ CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
 ;
 CODE_HEADER({RP!},{RPSTO})
         MOV     BX,[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
-        MOV     BP,[CELLS(4)+BX]        ;{RESET RETURN STACK PTR}
+        MOV     BP,[BX+CELLS(4)]        ;{RESET RETURN STACK PTR}
         _NEXT
         PAGE
 CODE_HEADER({;S},{SEMIS})
@@ -1091,7 +1091,7 @@ CODE_HEADER({;S},{SEMIS})
 ;
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
         MOV     AX,[BP] ;{GET INDEX}
-        MOV     [CELLS(1)+BP],AX        ;{STORE IT AT LIMIT}
+        MOV     [BP+CELLS(1)],AX        ;{STORE IT AT LIMIT}
         _NEXT
         PAGE
 ;
@@ -1207,7 +1207,7 @@ CODE_HEADER({C@},{CFET})
 CODE_HEADER({2@},{TFET})
         POP     BX      ;{ADDR}
         MOV     AX,[BX] ;{MSW}
-        MOV     DX,[CELLS(1)+BX]        ;{LSW}
+        MOV     DX,[BX+CELLS(1)]        ;{LSW}
         _2PUSH
 ;
 CODE_HEADER({!},{STORE})
@@ -1227,7 +1227,7 @@ CODE_HEADER({2!},{TSTOR})
         POP     AX      ;{MSW}
         MOV     [BX],AX
         POP     AX      ;{LSW}
-        MOV     [CELLS(1)+BX],AX
+        MOV     [BX+CELLS(1)],AX
         _NEXT
 ;
 CODE_HEADER({L@},{LFET})
@@ -2286,11 +2286,11 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
-        DC      LIT, STTERM_A 
-        DC      LIT, _PARAMETER_FIELD(STTERM) 
+        DC      LIT, STTERM_A
+        DC      LIT, _PARAMETER_FIELD(STTERM)
         DC      LIT, STTERM_B-STTERM_A
         DC      LCMOVE
-        DC      LIT, EXPEC_A 
+        DC      LIT, EXPEC_A
         DC      LIT, _PARAMETER_FIELD(EXPEC)
         DC      LIT, EXPEC_B-EXPEC_A
         DC      LCMOVE
@@ -2803,11 +2803,11 @@ HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      LIT, ioctl, LINOS, QLERR
         DC      SEMIS
 ; Alternative: if no terminal, this is copied over above code during boot
-STTERM_A:       
+STTERM_A:
         DC      DROP, DROP
         DC      SEMIS
 STTERM_B:
-        
+
 ;
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
@@ -2834,7 +2834,7 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      SEMIS
         _RESB    CELLS(4)        ; Room for patching
 ; Alternative: if no terminal, this is copied over above code during boot
-EXPEC_A:     
+EXPEC_A:
         DC      OVER, OVER, ONEP, LERASE
         DC      OVER, PLUS, SWAP     ; Bounds
         DC      XDO
