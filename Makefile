@@ -183,8 +183,9 @@ ci86.%     : %.cfg       ci86.gnr ; m4 $+ >$@
 # In particular the order of operands.
 %.s : %pres ; sed -f transforms <$+ >$@
 
-.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release
+.PRECIOUS: ci86.%.rawdoc
 
+.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release
 # Default target for convenience
 default : lina
 ci86.$(s).bin :
