@@ -5,9 +5,15 @@
 \ tokens. You can get the dea from an execution token.
 \ Also ' is assumed to give an execution token.
 
+
+\ This file assumes in Forth all stack effects have been filled in,
+\ and some special properties and optimisation bits.
+
+\ List here: FMASK-IL
+
 REQUIRE ALIAS
-\ : \D POSTPONE \ ; IMMEDIATE
-: \D ;            IMMEDIATE
+  : \D POSTPONE \ ; IMMEDIATE
+\ : \D ;            IMMEDIATE
 \D REQUIRE DUMP
 \D : DUMP-STRING
 \D     OVER H. SPACE DUP H. DUMP ;
@@ -23,23 +29,22 @@ HEX
 
 10 CONSTANT RMASK   \ Return stack anomalies
 20 CONSTANT WMASK   \ Working register used within code.
-80 CONSTANT IMASK   \ Data is following in line.
 
 100 CONSTANT BR-MASK  \ Definition has been B-optimised.
 
 \ The following mask must be carefully reconsidered if any new
 \ flags appear in the above.
-RMASK WMASK IMASK OR OR CONSTANT AO-MASK
-RMASK WMASK IMASK OR OR CONSTANT BO-MASK
+RMASK WMASK FMASK-IL OR OR CONSTANT AO-MASK
+RMASK WMASK FMASK-IL OR OR CONSTANT BO-MASK
 DECIMAL
 
-\D IMASK    ' BRANCH >FFA OR!
-\D IMASK    ' 0BRANCH >FFA OR!
-\D IMASK    ' (LOOP) >FFA OR!
-\D IMASK    ' (+LOOP) >FFA OR!
-\D IMASK    ' (DO) >FFA   OR!
-\D IMASK    ' (?DO) >FFA  OR!
-\D IMASK    ' LIT >FFA    OR!
+\D FMASK-IL    ' BRANCH >FFA OR!
+\D FMASK-IL    ' 0BRANCH >FFA OR!
+\D FMASK-IL    ' (LOOP) >FFA OR!
+\D FMASK-IL    ' (+LOOP) >FFA OR!
+\D FMASK-IL    ' (DO) >FFA   OR!
+\D FMASK-IL    ' (?DO) >FFA  OR!
+\D FMASK-IL    ' LIT >FFA    OR!
 \D \ Just block optimisation here, because we are not ready for
 \D \ all out optimisation :
 \D AO-MASK  ' I >FFA      OR!
@@ -64,15 +69,17 @@ DECIMAL
 \ For a parse ADDRESS return an incremented parse ADDRESS, its
 \ CONTENT and a go on FLAG.
 : NEXT-PARSE
-   @+ >R   R@ CFA> >FFA @ IMASK AND IF CELL+ THEN
-   R@ CFA> 'SKIP = IF @+ + ALIGNED THEN
+   @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF CELL+ THEN
+\   R@ CFA> 'SKIP = IF @+ + ALIGNED THEN
    R@
 \D   R@ CFA> ID.
    R> '(;) <> ;
 
 \ For some hl-code at ADDRESS, return the ADDRESS where (;) sits.
 : >SA   BEGIN NEXT-PARSE SWAP DROP 0= UNTIL ;
-\D : JAN 14 BEGIN 12 WHILE "AAA" TYPE REPEAT 18 ;
+\ Doesn't worl anymore after the optimisalisation, very puzzling.
+\ \D : JAN 14 BEGIN 12 WHILE "AAA" TYPE REPEAT 18 ;
+\D : JAN 14 BEGIN 12 WHILE &A EMIT REPEAT 18 ;   \ Alternative test.
 \D 'JAN CFA> >DFA @ >SA
 
 \ Fetch the hl code from XT , return it as a Forth STRING.
@@ -146,12 +153,6 @@ DECIMAL
 \D : A1 A0 A0 ;   : A2 A1 A1 ;    : A3 A2 A2 ;
 \D : A4 A3 A3 ;   : A5 A4 A4 ;    : A6 A5 A5 ;
 \D : A7 A6 A6 ;   : A8 A7 A7 ;    : A9 A8 A8 ;
-\D
-\D : B0 A9 A9 ;
-\D : B1 B0 B0 ;   : B2 B1 B1 ;    : B3 B2 B2 ;
-\D : B4 B3 B3 ;   : B5 B4 B4 ;    : B6 B5 B5 ;
-\D : B7 B6 B6 ;   : B8 B7 B7 ;    : B9 B8 B8 ;
-\D : BA B9 B9 ;
 \D
 \D : TEST 0 DO BA LOOP ;
 \D : Q 0 DO 10000 TEST I . LOOP ;
