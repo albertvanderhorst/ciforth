@@ -1482,7 +1482,14 @@ IBMPC:  DB      'IBM-PC ciforth'
         DC      LIT, IBMPC, LIT, 22
 _ENDCOMMENT
 ;{       If this is there it is a beta release}
-        _STRINGINLINE({beta $RCSfile$ $Revision$ })
+; Before M4_VERSION
+define({M4_VERSION2}, ifelse( index(M4_VERSION,v), -1,
+{{{beta $RCSfile$ $Revision$}}},
+translit(M4_VERSION,{v},{.})))dnl
+; After M4_VERSION2
+; After dumpdef({M4_VERSION2})
+        _STRINGINLINE( M4_VERSION2)
+undefine({M4_VERSION2})dnl
         DC      SEMIS
 ;
 worddoc({ENVIRONMENTS},{NAME},{name}, {--- sc},{CI},
@@ -4139,8 +4146,9 @@ _VERBOSE_({{We recommend that forthsamp({." cccc"}) is replaced by forthsamp({"c
 )},
 {{OUT}},
 {{." the end" },{the end},
-{: GS1 ." ""the end"" he said" ; GS1 },{"the end" he said},
-{: GS1 ." the end" ; GS1 },{the end}},
+{: GS1 ." the end" ; GS1 },{the end},
+{: GS2 ." ""the end"" he said" ; GS2 },{"the end" he said}
+},
 enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      DENQ
@@ -4960,8 +4968,8 @@ definition containing the literal will push it to the stack. If
 executing, the number will remain on the stack.},
 {{SLITERAL},{DLITERAL}},
 {
-{: GS1 [ 0.46 ] SDLITERAL DROP EMIT ; GS1},{F},
-{: GS3 [ 45 ] SDLITERAL EMIT ; GS3},{E},
+{: GS1 [ 45 0 ] SDLITERAL EMIT ; GS1},{E},
+{: GS2 [ 0.46 ] SDLITERAL DROP EMIT ; GS2},{F},
 },
 enddoc)
 HEADER({SDLITERAL},{SDLITE},{DOCOL}, , B_IMMED)
@@ -5892,7 +5900,7 @@ If forthcode({WARNING}) is zero (disc unavailable), the message will simply be i
 },
 {{ERROR}},
 {
-{1 WARNING ! -190 MESSAGE}, {( -w This_option_is_available )},
+{1 WARNING ! -190 MESSAGE}, {( -w :_This_option_is_available )},
 {1 WARNING ! HEX 12 MESSAGE},{ : EXECUTION ONLY },
 {0 WARNING ! HEX 12 MESSAGE},{}
 },
