@@ -32,8 +32,6 @@ REQUIRE $
 \ Fill from ADDRESS to END a number of cells with CONTENT.
 : WFILL   ROT ROT SWAP ?DO DUP I !   0 CELL+ +LOOP DROP ;
 
-: <= > 0= ;
-
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
@@ -76,6 +74,9 @@ REQUIRE $
 
 \ For a soft FLAG, returns a FORTH flag (-1/0)
 : 0<>   0= 0= ;
+
+\ For NUMBER1 and NUMBER2 : "``NUMBER!'' IS smaller or equal."
+: <= > 0= ;
 
 \ ----------------------    ----------------------     ----------------------
 
@@ -182,12 +183,15 @@ BRANCHES @+ SWAP DO
 \ possibility for optimisation.
 : ANNILLING? DUP ANNILABLE? IF SE@ COMBINE-VD ANNIL-STABLE? 0= ELSE DROP 0 THEN ;
 
+\ For ADDRESS and XT : it IS a branch going backwards.
+: BACK-BRANCH?  IS-A-BRANCH IF 1 CELLS - @ 0 < ELSE DROP 0 THEN ;
+
 \ Investigate the start of SEQUENCE. Return the ADDRESS
 \ to which it can be annihilated, else 0.
 : (ANNIHILATE-SEQ)
     BEGIN
         NEXT-PARSE OVER ANNILABLE? AND 0= IF 2DROP 0 EXIT THEN
-        DUP 'BRANCH = IF DUP CELL+ @ 0 < IF 2DROP 0 EXIT THEN THEN
+        2DUP BACK-BRANCH? IF 2DROP 0 EXIT THEN
         DUP 'BRANCH = IF SWAP 1 CELLS - @+ + SWAP THEN
         DUP '0BRANCH = IF
             SE@ COMBINE-VD
