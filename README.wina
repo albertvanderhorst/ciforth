@@ -93,15 +93,20 @@ contains no information about installation or tutorial material.
 INSTALLATION
 Installation is easy because it involves just one library file
 besides the executable.
-1. Place the library file where you want and configure the executable
-to refer to its place as an absolute path.
-2. If commands like DIR don't work, configure the executable to
+The executable contains its own configuration information.
+All this is explained in detail in the documentation.
+
+1. If commands like DIR don't work, reconfigure the executable to
 refer to the absolute path of the command interpreter ("COMMAND.COM").
-3. Place the executable some where in the path, or drag it to you desktop.
-This is explained in more detail in the documentation.
+    "C:\DOS\COMMAND.COM" SHELL $!
+Save the changed executable.
+    "WINA.EXE" SAVE-SYSTEM
+2. Use the /I option to do an official install:
+    wina      -I <binary-path> <library-path>
+If you prefer, you can do this manually, step by step.
 Alternatively you can place wina.bat in your path with the content
    \MY\PATH\FOR\WINA /L \MY\PATH\FOR\FORTH.LAB
-This doesn't help with the command interpreter.
+3 Place the executable some where in the path, or drag it to your desktop.
 
 A simple manual installation is superior to an automatic installation
 that would never work acrross all the targeted platforms.

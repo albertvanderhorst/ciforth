@@ -837,7 +837,7 @@ _HOSTED_DPMI_({
 
 Plunge:     MOV     ES,AX
 ;{Setting this bit, doesn't mean you arrive in a 32 bit segment!}
-            MOV     AX, _BITS16_(0)_BITS32_(1)
+            MOV     AX, _BITS16_(0) _BITS32_(1)
             _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
 ; {From here to where the assembler switches to protected mode,}
 ; {code must be 16/32 bit independant.}
@@ -2414,7 +2414,7 @@ CODE_HEADER({RDROP},{RDROP})      ;{(S1) <- (R1)}
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
 ;
-worddocsafe( {STACKS},{R},{r_fetch},{--- n},{ISO},
+worddocsafe( {STACKS},{R@},{r_fetch},{--- n},{ISO},
 {Copy the top of the return stack to the data stack.},{{>R},{<R}},
 {{." Via >R"},{Via >R}},
 enddoc)
@@ -3383,7 +3383,7 @@ _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
 ;
 HEADER({CELLS},{LCELLS},{DOCOL})
-        DC      _BITS16_({ONE})_BITS32_({TWO})
+        DC      _BITS16_({ONE}) _BITS32_({TWO})
         DC      LSHIFT
         DC      SEMIS
 ;
@@ -4910,7 +4910,8 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      PRESENT
         DC      LDUP
         _0BRANCH(CREA1) ;{IF}
-        DC      TNFA, FETCH, SFET, ETYPE
+        DC      TNFA, FETCH, SFET
+        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
         DC      LIT,4
         DC      MESS
         DC      X       ;{THEN}
