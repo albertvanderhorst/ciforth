@@ -70,3 +70,10 @@ How to create a distribution :
    Release Linux version, beta
    make lina.zip VERSION=3d286
    Result in lina-3d286.tar.gz
+
+   Release mina / wina
+   Use
+   releasemina.bat 4d0
+   releasemina.bat 3d275
+   releasewina.bat 4d0
+   releasewina.bat 3d275
