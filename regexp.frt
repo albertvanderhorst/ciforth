@@ -2,7 +2,7 @@
 
 ( $Id$)
 
-: \D ;
+: \D POSTPONE \ ; IMMEDIATE
 
 '$@ ALIAS @+
 'COUNT ALIAS C@+
@@ -203,9 +203,10 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 \ if there is match between btp and cp with the ep,
 \ return CHARPOINTER ann EXPRESSIONPOINTER incremented past the match,
 \ else return BTP and EP. Plus "there IS a match".
-: BACKTRACK
-    >R BEGIN (MATCH) 0= WHILE
-        OVER R@ = IF RDROP FALSE EXIT THEN
+: BACKTRACK \D ^ RSP@ H.
+    >R BEGIN
+        OVER R@ < IF RDROP FALSE EXIT THEN
+        (MATCH) 0= WHILE
         \ WARNING: 1 - will go wrong if there is a larger gap between backtrackpoints
         \ i.e. when ADVANCE( is there that would use larger leaps than ADVANCE-CHAR.
         SWAP 1 - SWAP
@@ -300,7 +301,10 @@ BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
 
 \ END OF TESTED FOR COMPILATION ONLY AREA
 : ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
-: ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
+: ADVANCE+ OVER >R   (ADVANCE*)
+    OVER R@ = IF RDROP FALSE EXIT THEN
+    OVER R@ 1+ = IF RDROP TRUE EXIT THEN
+    R> BACKTRACK ;
 
 \ ---------------------------------------------------------------------------
 \                    building the regexp
@@ -483,4 +487,4 @@ CREATE STRING-COPY MAX-RE ALLOT
     STRING-COPY $! 0 STRING-COPY $C+ STRING-COPY $@ DROP RE-COMPILED
     (MATCH) >R 2DROP R> ;
 
-\D INCLUDE x
+\D INCLUDE debug-re.frt
