@@ -66,7 +66,7 @@ INDICES= cp fn ky pg tp vr
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= lina wina mina alone linux alonehd msdos32
+TARGETS= lina wina mina alone linux alonehd msdos32 alonetr
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
@@ -112,6 +112,7 @@ ci86.wina.asm  \
 ci86.linux.asm  \
 ci86.lina.asm  \
 ci86.alonehd.asm  \
+ci86.alonetr.asm  \
 # That's all folks!
 
 RELEASECONTENT = \

@@ -462,7 +462,7 @@ REQUIRE COMPARE         REQUIRE MERGE-SORT
 \ Don't use it on FORTH : it links through DENOTATIONS .
 : SORT-VOC >WID SORT-WID ;
 
-( CRC-MORE CRC ) ?32 \ AvdH
+( CRC-MORE CRC )CF: ?32 \ AvdH
 REQUIRE BOUNDS   REQUIRE NEW-IF    HEX
 \ Well the polynomial
 EDB8,8320 CONSTANT CRC32_POLYNOMIAL
@@ -542,7 +542,7 @@ REQUIRE +THRU
 
 
 
-( TIME&DATE ) ?LI \ AH A30610
+( TIME&DATE ) CF: ?LI \ AH A30610
 : SSE   0 0 0 13 LINOS ; ( Seconds since epoch: 1970/1/1)
 : |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
 CREATE TABLE ( start of month within leap period) 0
@@ -558,7 +558,7 @@ CREATE TABLE ( start of month within leap period) 0
 : SPLIT-OFF-DATE  1461 /MOD >R SPLIT-LEAP   R> 4 * + 1970 + ;
 \ Return current  SEC MIN HOUR DAY MONTH YEAR
 : TIME&DATE   SSE   SPLIT-OFF-TIME   SPLIT-OFF-DATE ;
-( TIME&DATE ) ?PC \ AH A30612
+( TIME&DATE ) CF: ?PC \ AH A30612
 
 HEX
 
@@ -718,7 +718,7 @@ DECIMAL TICKS DNEGATE 1000 MS TICKS D+ DROP
 \ For a TIME in ticks: it IS in the past.
 : PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 : MS@ TICKS TICKS-PER-SECOND 1000 / M/MOD DROP SWAP DROP ;
-( MS@ TICKS TICKS-PER-SECOND ) ?PC ?32 \ AvdH A2oct21
+( MS@ TICKS TICKS-PER-SECOND ) CF: ?PC ?32 \ AvdH A2oct21
 \ The idea is to use the timer ticks on the pc.
 \ Until then the following works for 486 and better.
 REQUIRE ASSEMBLERi86 HEX
@@ -878,7 +878,7 @@ CF:   REQUIRE +THRU
 
 
 
-( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV ) ?LI \ AvdH A3mar20
+( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV ) CF: ?LI \ AvdH A3mar20
 REQUIRE Z$@   REQUIRE COMPARE
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
@@ -894,7 +894,7 @@ REQUIRE Z$@   REQUIRE COMPARE
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
 
-( SRC>EXEC   ) ?LI \ AvdH A3mar20
+( SRC>EXEC   ) CF: ?LI \ AvdH A3mar20
 
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
@@ -910,7 +910,7 @@ REQUIRE Z$@   REQUIRE COMPARE
 
 
 
-( ARG$ ARGC ARG[] SHIFT-ARGS ) ?PC \ AvdH A3mar25
+( ARG$ ARGC ARG[] SHIFT-ARGS ) CF: ?PC \ AvdH A3mar25
 HEX    REQUIRE DROP-WORD
 \ Return argument STRING for (prot) DOS.
 : ARG$   80 COUNT -LEADING -TRAILING ;
@@ -926,7 +926,7 @@ HEX    REQUIRE DROP-WORD
 : SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
 DECIMAL
 
-( SRC>EXEC ) ?PC                \ AvdH A3mar20
+( SRC>EXEC ) CF: ?PC                \ AvdH A3mar20
 HEX
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   PAD $!   PAD $@ + 4 - >R
@@ -974,7 +974,7 @@ CF:   REQUIRE +THRU
 
 
 
-( SAVE-SYSTEM TURNKEY ) ?LI HEX \ AvdH
+( SAVE-SYSTEM TURNKEY ) CF: ?LI HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -990,7 +990,7 @@ CF:   REQUIRE +THRU
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
-( --save_system_turnkey ) ?PC HEX \ AvdH
+( --save_system_turnkey ) CF: ?PC HEX \ AvdH
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer
 
@@ -1166,7 +1166,7 @@ DECIMAL
 
 
 
-( GET-SEL PUT-SEL NEW-SEL handle_DPMI_selectors) ?WI \ A1nov02
+( GET-SEL PUT-SEL NEW-SEL handle_DPMI_selec) CF: ?WI \ A1nov02
 HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 \ Get the content of the DESCRIPTOR into the BUFFER
 : GET-DES >R >R 0B R> 0 0 R> BIOS31+ 4DROP ;
@@ -1710,7 +1710,7 @@ REQUIRE +THRU
 
 
 \
-( --assembler_test_2 TEST-JUMP ) ?32        \ AvdH A3dec18
+( --assembler_test_2 TEST-JUMP ) CF: ?32        \ AvdH A3dec18
 ( Test applicable to 32 bit mode)
 
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT END-CODE
@@ -1742,7 +1742,7 @@ REQUIRE +THRU
 
 
 
-( --assembler_i86_fixups_1 ) ?16 \ A2oct21 AvdH
+( --assembler_i86_fixups_1 ) CF: ?16 \ A2oct21 AvdH
 ( C7) 6 1FI MEM|  ( OVERRULES D0| BP| )
 ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]
 [SI] [DI] [BP] [BX]
@@ -1758,7 +1758,7 @@ REQUIRE +THRU
 ( F8) 04 1FI +0|'
 ( C0) 40 0 4 1FAMILY| +1*| +2*| +4*| +8*|
 
-( --assembler_i86_fixups_1 ) ?32 \ A2oct21 AvdH
+( --assembler_i86_fixups_1 ) CF: ?32 \ A2oct21 AvdH
 ( FF) C4 1FI MEM| ( MEM| MEM, OVERRULES D0| SIB| SIB, BP| )
 ( 07) 05 1PI MEM, ( REQUIRED AFTER MEM|)
 ( COMBINES WITH D0| DB| DX| )
@@ -1918,7 +1918,7 @@ CF:   REQUIRE +THRU
 
 
 
-( cat cp echo diff grep list ls make man rm   ee l unix) ?LI
+( cat cp echo diff grep list ls make man rm  ee l unix) CF: ?LI
 REQUIRE OS-IMPORT ( and cdED )          \ AvdH A30325
 "cat    "   OS-IMPORT cat
 : cd (WORD) cdED ;      \ Change directory to "SC"
@@ -1934,7 +1934,7 @@ REQUIRE OS-IMPORT ( and cdED )          \ AvdH A30325
 "ee     "   OS-IMPORT ee  \ My favorite editor ee
 "l      "   OS-IMPORT l   \ Very short personal command
 ""          OS-IMPORT !!
-( cat cd cp echo edit list ls rm   ee l unix) ?PC \ AvdH A30325
+( cat cd cp echo edit list ls rm ee l unix) CF: ?PC \ AvdH A30325
 REQUIRE OS-IMPORT
 "TYPE   "   OS-IMPORT cat
 "ECHO   "   OS-IMPORT echo
@@ -1950,7 +1950,7 @@ REQUIRE OS-IMPORT
 
 ""          OS-IMPORT !!
 "A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
-( type ECHO MORE list DIR COPY DEL CD edit ) ?PC  \ AvdH A30325
+( type ECHO MORE list DIR COPY DEL CD edit ) CF: ?PC  \ AvdH A30325
 REQUIRE OS-IMPORT
 "TYPE   "   OS-IMPORT type
 "ECHO   "   OS-IMPORT ECHO
@@ -1982,7 +1982,7 @@ DEVELOP
 
 
 
-( protected_editor_stuff ) ?WI \ AvdH A1nov01
+( protected_editor_stuff ) CF: ?WI \ AvdH A1nov01
 REQUIRE NEW-SEL  HEX
 NEW-SEL CONSTANT VID
 VID PAD GET-SEL
@@ -1998,7 +1998,7 @@ DECIMAL
 
 
 
-( 16_bit_editor_stuff ) ?16 \ A1oct05
+( 16_bit_editor_stuff ) CF: ?16 \ A1oct05
 "VID" PRESENT? ?LEAVE-BLOCK  \ Already protected mode
 HEX
 B800 CONSTANT VID
@@ -2014,7 +2014,7 @@ DECIMAL
 
 
 
-( 32_bit_editor_stuff ) ?32 \ A1oct05
+( 32_bit_editor_stuff ) CF: ?32 \ A1oct05
 "VID" PRESENT? ?LEAVE-BLOCK  \ Already protected mode
 HEX
 B800 CONSTANT VID
@@ -2206,7 +2206,7 @@ HEX>
 : LIST' BASE @ 10 - 25 ?ERROR LIST ;
 : LIST LIST' ;
 
-( BIOSI VIDEO-MODE DISK-INIT ) ?PC \ AvdH A1oct05
+( BIOSI VIDEO-MODE DISK-INIT ) CF: ?PC \ AvdH A1oct05
 HEX
 
 
@@ -2254,7 +2254,7 @@ DECIMAL
 
 
 
-( SET-MEMORY TEST-MEMORY MEM-SIZE ) ?PC ?32 \ AvdH A1oct17
+( SET-MEMORY TEST-MEMORY MEM-SIZE ) CF: ?PC ?32 \ AvdH A1oct17
 DECIMAL  123456789 CONSTANT MAGIC  HEX
 HERE MAGIC , 10,0000 - CONSTANT MM
 VARIABLE (MEM-SIZE)   1000 (MEM-SIZE) ! \ Megabytes
@@ -2334,7 +2334,7 @@ REQUIRE ASSEMBLERi86   REQUIRE DISK-INIT   REQUIRE +THRU
 
 
 
-( --hd_LBA READ-BLOCK WRITE-BLOCK RW-BUFFER ) ?16 ?PC HEX
+( --hd_LBA READ-BLOCK WRITE-BLOCK RW-BUFFER ) CF: ?16 ?PC HEX
 HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
 CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
@@ -2366,7 +2366,7 @@ DECIMAL
 : (FWD) RW-BUFFER SWAP 0 R\W ;
 
 
-( --hd_LBA SWAP-FLOPPY ) ?PC ?16 \ AvdH A1oct07
+( --hd_LBA SWAP-FLOPPY ) CF: ?PC ?16 \ AvdH A1oct07
 ?PC ?16
 DECIMAL
 ( Prompt for floppy change, plus whatever needed.)
@@ -2430,7 +2430,7 @@ of course.
 
 
 
-( SECTORS/TRACK #HEADS ) ?16 ?PC \ AvdH A1oct10
+( SECTORS/TRACK #HEADS ) CF: ?16 ?PC \ AvdH A1oct10
 HEX
 \ See Ralph Brown's table 03196
 \ Far address of interrupt 41
@@ -2446,7 +2446,7 @@ DECIMAL
 
 
 
-( SECTORS/TRACK #HEADS ) ?32 ?PC \ AvdH A1oct10
+( SECTORS/TRACK #HEADS ) CF: ?32 ?PC \ AvdH A1oct10
 HEX
 \ See Ralph Brown's table 03196
 \ Address of interrupt 41
@@ -2478,7 +2478,7 @@ floppy). This is a user utility, so it can be run for other
 type ciforth's. But then it only explains to the user what is
 going wrong.
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) ?HD \ AvdH A1oct11
+( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?HD \ AvdH A1oct11
 
 \ This utility is intended for sectors & track installations
 \ so for floppy compatible hard disks.
@@ -2494,7 +2494,7 @@ QUIT
 
 
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) ?FD \ AvdH A1oct11
+( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
 : stop? KEY &Y <>  IF
    ." ABONDANNED! " CR QUIT
 THEN ;
@@ -2510,7 +2510,7 @@ CR
 stop?
 CR ." Analysing..." CR
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) ?FD \ AvdH A1oct11
+( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
 REQUIRE #HEADS    REQUIRE B. DECIMAL
 CR ." The number of heads on your hard disk is reported: "
 #HEADS DUP . B. &H EMIT
@@ -2526,7 +2526,7 @@ CR ." Analysing..." CR
 
 
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) ?FD ?32 \ AvdH A1oct17
+( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD ?32 \ AvdH A1oct17
 REQUIRE MEM-SIZE   REQUIRE B.   REQUIRE NEW-IF
 DECIMAL
 CR ." The amount of Megabytes on your system is probed as: "
@@ -2542,7 +2542,7 @@ HEX
 : PATCH-MEM BM -  \ Addres to which start of buffer corresponds
  5 0 DO MEM-SIZE 14 LSHIFT EM - OVER I CELLS + +ORIGIN +!
 LOOP  MEM-SIZE 14 LSHIFT SWAP 'EM >DFA + ! ;
-( PATCH-NEW-FORTH PATCH-THIS-FORTH ) ?FD ?32 \ AvdH A1oct12
+( PATCH-NEW-FORTH PATCH-THIS-FORTH ) CF: ?FD ?32 \ AvdH A1oct12
 REQUIRE #HEADS HEX
 \ The SIZE of Forth (kernel +blocks) in blocks.
 : SIZE-FORTH   OFFSET @   #BLOCKS @  + ;
@@ -2558,7 +2558,7 @@ CREATE buffer SIZE-FORTH B/BUF * ALLOT
    80                DRIVE C!
    SECTORS/TRACK     DRIVE 1+ C!
    #HEADS            DRIVE 2 + C! ;
-( INSTALL-FORTH-ON-HD ) ?FD \ AvdH A1oct11
+( INSTALL-FORTH-ON-HD ) CF: ?FD \ AvdH A1oct11
 : show ^M EMIT ." BLOCK" 4 .R 5 SPACES ;
 \ Read into BUFFER absolute block NUMBER , leave NEXT buffer.
 : read+ OFFSET @ -   BLOCK     OVER B/BUF MOVE   B/BUF + ;
@@ -2638,7 +2638,7 @@ SWAP DROP 10,0000 SWAP LOAD-HIGH   2DROP ;
 : STORE-ALL  ( Store to next chunk, inc. kernel, stack )
 0,7C00 OFFSET @ 40 - STORE-MID
 SWAP DROP 10,0000 SWAP STORE-HIGH 2DROP ;  DECIMAL
-( hd_driver1 PATCH-CHUNK ) ?PC ?32 HEX \ AH&CH A1sep01
+( hd_driver1 PATCH-CHUNK ) CF: ?PC ?32 HEX \ AH&CH A1sep01
 SYS  0800,0000 B/BUF / CONSTANT CHUNK-SIZE  ( BLOCKS PER CHUNK)
 : CHUNK-START  OFFSET @ 40 - ;
 : CURRENT-CHUNK
@@ -2654,7 +2654,7 @@ CHUNK-START  CHUNK-SIZE / -6 +ORIGIN OVER SWAP C! ;
 ; DECIMAL
 
 
-( hd_driver2 WIPE-HD )  ?PC ?32 \ AH A1may3
+( hd_driver2 WIPE-HD )  CF: ?PC ?32 \ AH A1may3
 : WIPE-BUFFER RW-BUFFER B/BUF &v FILL ;
 : WRITE-BUFFER RW-BUFFER SWAP OFFSET @ + 64 - 0 R\W ;
 : CHECK-RANGE 589 64 + CHUNK-SIZE WITHIN 0= 13 ?ERROR ;
@@ -2670,7 +2670,7 @@ CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
       DUP SHOW 1+ REPEAT DROP ;
 
 
-( hd_driver3 FIRST-FREE ) ?PC ?32 \ AH A1may3
+( hd_driver3 FIRST-FREE ) CF: ?PC ?32 \ AH A1may3
 REQUIRE BIN-SEARCH
 : FREE? RW-BUFFER SWAP 1 R\W
 DISK-ERROR 1 AND   RW-BUFFER (FREE?)   OR ;
@@ -2686,7 +2686,7 @@ FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
 
 
 
-( hd_driver4 BLMOVE BLMOVE-FAST BACKUP ) ?PC ?32 \ AH A1sep01
+( hd_driver4 BLMOVE BLMOVE-FAST BACKUP ) CF: ?PC ?32 \ AH A1sep01
 HEX
 : BLMOVE 0 DO  ( as MOVE for blocks.)
   SWAP RW-BUFFER OVER 1 R\W 1+   SWAP RW-BUFFER OVER 0 R\W 1+
@@ -2702,7 +2702,7 @@ HEX
 : SAVE-CHUNK DUP CHECK
  CURRENT-CHUNK CHUNK-SIZE * OVER CHUNK-SIZE * CHUNK-SIZE
 BLMOVE-FAST PATCH-CHUNK ; DECIMAL
-( hd_driver5 I-INSPECT AH) ?PC ?32 HEX \ AH A1sep01
+( hd_driver5 I-INSPECT AH) CF: ?PC ?32 HEX \ AH A1sep01
 : ASCII? DUP BL 7F WITHIN SWAP ^J = OR ;
 ( SC contains all ``ASCII'' )
 : ALL-ASCII? OVER + SWAP DO I C@ DUP ASCII? 0=
@@ -3150,7 +3150,7 @@ IMIN @ ;
 
 
 
-( CRB compare_blocks_content ) ?32 ?PC HEX
+( CRB compare_blocks_content ) CF: ?32 ?PC HEX
 B/BUF 10 / CONSTANT SZ
 VARIABLE B
 : ?TERMINATE KEY 20 OR &q = IF QUIT THEN ;
@@ -3166,7 +3166,7 @@ I B ! OVER I + RWBUF0 read DUP I + RWBUF1 read
 RWBUF0 RWBUF1 CB LOOP 2DROP ;
 ( Restore FROM length RANGE to booting )
 : restore 0 DO DUP I + RWBUF0 read I RWBUF0 write LOOP ;
-( R\W-floppy ) ?PC ?32 HEX
+( R\W-floppy ) CF: ?PC ?32 HEX
 ( must only be used for low buffers.) 2 CONSTANT SEC/BLK
 : SEC-RW  ( function address bl# -- )
 24 /MOD   SWAP   12 /MOD   >R   SWAP   100 *   +   1+
@@ -3182,7 +3182,7 @@ LOOP DROP   DROP   DISK-ERROR   @   ?DUP
 BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
 ;  : R-floppy 1 R\W-floppy ;  : W-floppy 0 R\W-floppy ;
 
-( backup restore ) ?PC ?32 \ AvdH A1sep01 208
+( backup restore ) CF: ?PC ?32 \ AvdH A1sep01 208
 \ Copy the currently booted chunk to free space on the hd,
 \ flanked by comment blocks (block 200, fill beforehand).
 : backup SAVE-COMMENT BACKUP SAVE-COMMENT ;
@@ -3342,7 +3342,7 @@ THEN ;
     SWAP OVER - 1 - ( Length after delimiter)
     R> 1+ SWAP
  ELSE ( DROP 0) 0 THEN  2SWAP ;
-( This has the effect as ?ERROR ) ?LI
+( This has the effect as ?ERROR ) CF: ?LI
 ( But counting back from 100 )
 : LINUX-ERROR 100 OVER - ?ERROR ;
 : IOCTL 54 LINOS LINUX-ERROR ;
@@ -3406,7 +3406,7 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 : .SYSS   .ES .DS .FS .GS CR   .IP .CS .SP .SS .PSW CR   ;
 : .ALL .REGS .SYSS ;
 
-( Experiment with DPMI testing jumps to 32 bit code. ) ?WI
+( Experiment with DPMI testing jumps to 32 bit code. ) CF: ?WI
 REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE PC
 PC GET-ALIAS CONSTANT NEW       \ Create a new segment that
 NEW PAD GET-SEL                 \ differs from current code
@@ -3566,7 +3566,7 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
   POP|X, SI|
   PUSHF,
   NEXT END-CODE            DECIMAL
-( TEST OF HARD DISK ) ?16 HEX
+( TEST OF HARD DISK ) CF: ?16 HEX
 CODE READ-BLOCK2 4200 R\W-BLOCK  END-CODE  ( D - . )
  CODE WRITE-BLOCK2 4300 R\W-BLOCK  END-CODE ( D - . )
 DECIMAL : TEST  0.
@@ -3598,7 +3598,7 @@ HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
   INT, 13 B, PUSHF, POP|X, BX| TO-PROT,
   POP|X, SI|   PUSH|X, BX|  NEXT ;
 DECIMAL
-( Experimenting ALLOC-MEM Get_sludges_of_memory) ?WI
+( Experimenting ALLOC-MEM Get_sludges_of_memory) CF: ?WI
 REQUIRE ASSEMBLERi86 HEX
 CODE BIOS31SI
   LEA, BP'| DB| [BP] -2 B,     MOV, W| F| SI'| DB| [BP] 0 B,
@@ -3614,7 +3614,7 @@ NEXT END-CODE
 : ALLOC-MEM   0501 SWAP ROT 0 0 0   BIOS31SI+
   >R >R DROP >R >R DROP R> R> R> R> ;
 DECIMAL
-( Experiment with DPMI testing jumps to 32 bit code. ) ?WI
+( Experiment with DPMI testing jumps to 32 bit code. ) CF: ?WI
 REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE ALLOC-MEM
 REQUIRE PC   REQUIRE SEL-DUMP HEX
 10.0000 ALLOC-MEM CREATE HANDLE , ,
@@ -3630,7 +3630,7 @@ JMPFAR, HERE 4 + , NEW32 ,
 PUSH|X, AX|
 JMPFAR, HERE 6 + , 0 , PC ,
 NEXT END-CODE                                DECIMAL
-( Experimenting Get_a_32_bit_code_segment) ?WI HEX
+( Experimenting Get_a_32_bit_code_segment) CF: ?WI HEX
 : MOVEIT   NEW32 LES   0 0 FFF0 MOVE   LES DROP ;
 : GETIT   NEW32 PAD GET-SEL    PAD TOGGLE-CODE
    NEW32 PAD PUT-SEL ;
@@ -3646,7 +3646,7 @@ NEXT END-CODE
 DECIMAL
 
 
-( Experimenting Use_a_32_bit_code_segment) ?WI HEX
+( Experimenting Use_a_32_bit_code_segment) CF: ?WI HEX
 CODE CRASH2  POPS, ES|
   POP|X, DI|   POP|X, DX|  POP|X, CX|  POP|X, BX|   POP|X, AX|
   JMPFAR, HERE 4 + , NEW32 ,
@@ -4270,7 +4270,7 @@ THEN ;
 
 
 
-( WRITE-FILE READ-FILE --large_buffers ) ?WI \ AvdH
+( WRITE-FILE READ-FILE --large_buffers ) CF: ?WI \ AvdH
 REQUIRE OLD:
 \ ISO WRITE-FILE : Chop into 32 K chunks for using WRITE
 : WRITE-FILE >R
@@ -4286,7 +4286,7 @@ VARIABLE RC
 
 
 
-( WRITE-FILE READ-FILE --large_buffers ) ?WI \ AvdH
+( WRITE-FILE READ-FILE --large_buffers ) CF: ?WI \ AvdH
 : READ-FILE 0 RC ! >R
     BEGIN 2DUP 8000 MAX R@ OLD: READ-FILE
     DUP IF RDROP >R 2DROP R> EXIT THEN DROP
