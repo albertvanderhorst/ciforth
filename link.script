@@ -9,12 +9,11 @@ SECTIONS {
     .dtors          : { *(.dtors      )  }     
     .got            : { *(.got        )  }     
     .bss            : { *(.bss        )  }     
-    .note           : { *(.note       )  }     
-    .comment        : { *(.comment    )  }     
-    .stab           : { *(.stab       )  }     
-    .stabstr        : { *(.stabstr    )  }     
-    forth      0x8100000      : { *(forth       )  
-                                  *(dictionary  )  }     
+    .got.plt          : { *(.got.plt)  }
+    COMMON          : { *(COMMON)  }
+    forth      0x8100000      : { *(forth       )  }     
+    dictionary      : { *(dictionary  )  }     
+
 }
 
 

@@ -207,7 +207,7 @@ RAWIO           EQU     (ECHO | ICANON)
 
 _LINUX_C_({
         extern  c_type,c_expec,c_key,c_qterm
-        extern  c_rslw, c_block_exit, c_block_init
+        extern  c_rslw, c_block_exit, c_block_init, c_debug
         global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
 });_END_({_LINUX_C_})
 
@@ -862,7 +862,11 @@ _ENDCOMMENT });_END_({_OLDDEBUG_ })
 ;{ The label NEXT1 is rarely relevant (for _OLDDEBUG_) }
 DPUSH:  PUSH    DX      ;{ Fall through.}
 APUSH:  PUSH    AX
-NEXT:   LODSW           ;{AX <- (IP)}
+NEXT:   
+;        PUSH    SI
+;        CALL    c_debug
+;        POP     SI
+        LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     BX,AX   ;{ (W) <- (IP)}
 _NEWDEBUG_({ CALL    DISPLAYSI})
         JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
@@ -4008,25 +4012,24 @@ _LINUX_C_({
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
 worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthref({revectoring}) it.
+All terminal I/O goes through this word. 
 forthcode({OUT}) is not observed.},{{EMIT},{OUT}})
-HEADER({TYPE},{LTYPE},DOCOL)
-        DC      $+CELLS(1) ; { Turns this code word into high level.}
+CODE_HEADER({TYPE},{LTYPE},DOCOL)
         CALL    c_type
         LEA     ESP,[ESP+CELLS(2)]    ; remove input
         _NEXT
 ;
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
+worddoc({INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) ,
 until a "return" or a number of forthvar({count}) characters have been
 received. Rely on the operating system for input editing. One or more
 nulls are added at the end of the text.
 },{{KEY},{?TERMINAL}})
 ;
-CODE_HEADER({EXPECT},{EXPEC})
+CODE_HEADER({ACCEPT},{ACCEP})
         CALL    c_expec
         LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        PUSH    EAX
         _NEXT
 ;
 worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},
@@ -5549,8 +5552,6 @@ HEADER({VLIST},{VLIST},{DOCOL})
         DC      LIT, IDDOT
         DC      CONT
         DC      FETCH
-        DC      TLFA
-        DC      FETCH
         DC      FORW
         DC      SEMIS
 ;
@@ -5730,7 +5731,7 @@ _HOSTED_LINUX_({
 ;       However now we must teach the linker to keep the
 ;       two sections together.
 
-FORTHSIZE       EQU     $-figforth
+FORTHSIZE       EQU     $-ORG0
          section dictionary nobits write exec alloc
 
 INITDP:                 ;  It may be that it is not consecutive with TASK
