@@ -2015,8 +2015,7 @@ the run-time forthcode({EXIT}) .},{},
 enddoc)
 HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      QCSP
-        DC      COMP
-        DC      SEMIS
+        DC      LIT, SEMIS, COMMA
         DC      SMUDG
         DC      LBRAC
         DC      SEMIS
@@ -2852,27 +2851,6 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      SEMIS
 ;
 });_END_({_SECURITY_})
-worddoc( {COMPILING},{COMPILE},{compile},{},{C2},
-{When the word containing forthcode({COMPILE}) executes, the execution address of
-the word following forthcode({COMPILE}) is copied (compiled) into the dictionary.
-This allows specific compilation situations to be handled in
-addition to simply compiling an execution address (which the
-interpreter already does).},
-{[COMPILE]},
-{
-{!CSP : GS1 COMPILE BL ; ?CSP IMMEDIATE dnl
- !CSP : GS2 GS1 ; ?CSP GS2 .},{20}
-},
-enddoc)
-HEADER({COMPILE},{COMP},{DOCOL})
-        DC      QCOMP
-        DC      FROMR
-        DC      LDUP
-        DC      CELLP
-        DC      TOR
-        DC      FETCH
-        DC      COMMA
-        DC      SEMIS
 ;
 worddoc( {PARSING},{[},{left_bracket},{},{ISO,P,L1},
 {Used in a colon-definition in form:
@@ -3080,10 +3058,12 @@ HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(DOTQ1) ;{ IF}
-        DC      COMP
-DOTQ1:                  ;{ ENDIF}
+        DC      LIT, LTYPE, COMMA
+        _BRANCH(DOTQ2) 
+DOTQ1:                 
         DC      LTYPE
-        DC      SEMIS
+DOTQ2:                 
+        DC      SEMIS   ;{ ENDIF}
 ;
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{P,L0},
 {Used in the form:
@@ -3589,11 +3569,15 @@ HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         DC      ZERO
         DC      QERR
         DC      TCFA
-        DC      LDUP, TFFA, LIT, B_IMMED, LAND
+        DC      LDUP, TFFA, LIT, B_IMMED, LAND, ZEQU
         _0BRANCH(POSTP1)
-        DC      COMP, COMP
+         DC      LIT, LIT, COMMA
+         DC      COMMA
+         DC      LIT, COMMA, COMMA
+        _BRANCH(POSTP2)
 POSTP1:
-        DC      COMMA
+         DC      COMMA
+POSTP2:
         DC      SEMIS
 ;
 worddoc( {COMPILING},{LITERAL},{literal},{n --- (compiling)},{ISO,P,C2,L0},
@@ -3611,8 +3595,7 @@ HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(LITE1) ;{IF}
-        DC      COMP
-        DC      LIT
+        DC      LIT, LIT, COMMA
         DC      COMMA   ;{ENDIF}
 LITE1:  DC      SEMIS
 ;
@@ -6248,8 +6231,7 @@ dnl ISO VIOLATION :
 dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4},
 
 HEADER({DO},{DO},{DOCOL}, , B_IMMED)
-        DC      COMP
-        DC      XDO
+        DC      LIT, XDO, COMMA
         DC      HERE
         DC      LIT,3    ;{ Magic number}
         DC      SEMIS
@@ -6273,8 +6255,7 @@ enddoc)
 HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      LIT,3    ;{ Magic number}
         DC      QPAIR
-        DC      COMP
-        DC      XLOOP
+        DC      LIT, XLOOP, COMMA
         DC      BACK
         DC      SEMIS
 ;
@@ -6299,8 +6280,7 @@ enddoc)
 HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      LIT, 3    ;{ Magic number}
         DC      QPAIR
-        DC      COMP
-        DC      XPLOO
+        DC      LIT, XPLOO, COMMA
         DC      BACK
         DC      SEMIS
 ;
@@ -6318,8 +6298,7 @@ addr. forthvar({n}) is used for error tests.},{}, {}, enddoc)
 HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         DC      ONE
         DC      QPAIR
-        DC      COMP
-        DC      ZBRAN
+        DC      LIT, ZBRAN, COMMA
         DC      BACK
         DC      SEMIS
 ;
@@ -6343,8 +6322,7 @@ addr. forthvar({n}) is used for compile-time error checking.},{}, {}, enddoc)
 HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         DC      ONE
         DC      QPAIR
-        DC      COMP
-        DC      BRAN
+        DC      LIT, BRAN, COMMA
         DC      BACK
         DC      SEMIS
 ;
@@ -6357,14 +6335,18 @@ after the corresponding forthcode({BEGIN}) .
 At compile-time, forthcode({REPEAT}) compiles forthcode({BRANCH}) and the offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error testing.},{{WHILE}}, {}, enddoc)
 HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
+        DC      QCOMP
         DC      TOR
         DC      TOR
         DC      AGAIN
         DC      FROMR
         DC      FROMR
-        DC      TWO     ;{ Magic number}
+        DC      LIT, 4, QPAIR
+        DC      HERE
+        DC      OVER
         DC      LSUB
-        DC      LENDIF
+        DC      SWAP
+        DC      STORE
         DC      SEMIS
 ;
 worddoc( {CONTROL},{IF},{if},{f --- (run-time) / --- addr n (compile)},{P,C2,L0},
@@ -6382,8 +6364,7 @@ At compile-time forthcode({IF}) compiles forthcode({0BRANCH}) and reserves space
 at forthvar({addr}) . forthvar({addr}) and forthvar({n}) are used later for resolution of the offset and
 error testing.},{}, {}, enddoc)
 HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
-        DC      COMP
-        DC      ZBRAN
+        DC      LIT, ZBRAN, COMMA
         DC      HERE
         DC      ZERO
         DC      COMMA
@@ -6405,8 +6386,7 @@ offset from forthvar({addr1}) to forthcode({HERE}) and storing at forthvar({addr
 HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      TWO     ;{ Magic number }
         DC      QPAIR
-        DC      COMP
-        DC      BRAN
+        DC      LIT, BRAN, COMMA
         DC      HERE
         DC      ZERO
         DC      COMMA
@@ -6429,8 +6409,11 @@ At compile time, forthcode({WHILE}) emplaces forthcode({0BRANCH}) and leaves for
 reserved offset. The stack values will be resolved by forthcode({REPEAT}) .},
 {}, {}, enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
-        DC      LIF
-        DC      LIT, 2, PLUS ;{ Magic number           }
+        DC      LIT, ZBRAN, COMMA
+        DC      HERE
+        DC      ZERO
+        DC      COMMA
+        DC      LIT, 4 ;{ Magic number           }
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{L0},
