@@ -25,7 +25,7 @@ HEX
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  DECIMAL
 : LEAVE-BLOCK BLK @ IF SRC CELL+ @ IN ! THEN ;
-FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
+FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI S0 @ DSP!
 : ?16 ;         : ?32 LEAVE-BLOCK ;
 : ?MS MSMS 0= IF LEAVE-BLOCK THEN ;
 : ?LI LILI 0= IF LEAVE-BLOCK THEN ;
@@ -58,7 +58,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  DECIMAL
 : LEAVE-BLOCK BLK @ IF SRC CELL+ @ IN ! THEN ;
-FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
+FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI S0 @ DSP!
 : ?32 ;         : ?16 LEAVE-BLOCK ;
 : ?MS MSMS 0= IF LEAVE-BLOCK THEN ;
 : ?LI LILI 0= IF LEAVE-BLOCK THEN ;
@@ -2070,7 +2070,7 @@ CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
 ( CODE TEST-MORE TO-REAL,   TO-PROT, NEXT C;               )
 ( CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,)
 ( GDT_DS COPY-SEG   NEXT C;                                  )
-RP@ 100 DUMP SP@ 100 DUMP
+RSP@ 100 DUMP DSP@ 100 DUMP
 
 
 
@@ -2302,7 +2302,7 @@ DECIMAL
  ( CP/M CONVERT    80 LOAD   )
  WARNING 1 TOGGLE
  2 LIST    : TASK ;
-: LOAD SP@ >R LOAD R> SP@ ?PAIRS ;
+: LOAD DSP@ >R LOAD R> DSP@ ?PAIRS ;
 
 
 
@@ -2899,11 +2899,11 @@ FORWARD FAC
 : POP POSTPONE R> ;    : PUSH POSTPONE >R ;
 : SUC@ POSTPONE  SUCCESS POSTPONE @ ;
 : SUC! POSTPONE 1 POSTPONE SUCCESS POSTPONE ! ;
-: EXIT R> DROP ;     : % SP@ H. TIB @ IN @ TYPE
+: EXIT R> DROP ;     : % DSP@ H. TIB @ IN @ TYPE
 SPACE SUCCESS ? CR ; : % POSTPONE  % ;
  CODE  POPSP MOV, W| T| SP'| DB| [BP] 0 B,
  LEA, BP'| DB| [BP] 0 CELL+ B, NEXT C;
-: <PTS POSTPONE SP@ PUSH
+: <PTS POSTPONE DSP@ PUSH
        POSTPONE DP POSTPONE @ PUSH
        POSTPONE IN POSTPONE @ PUSH ;
 : BT> POP POSTPONE IN POSTPONE !
@@ -3997,6 +3997,7 @@ THE BYTE BENCHMARK LASTED  7.650mS OK
 
 
 
+
 ( This has the effect as ?ERROR )
 ( But counting back from 100 )
 : LINUX-ERROR 100 OVER - ?ERROR ;
@@ -4014,28 +4015,19 @@ HEX 5402 CONSTANT TCSETS
      setit ;
 DECIMAL  getit
 3 CONSTANT read
-
 ( expect one key and retain it.)
 : KEY2 1 RAWIO tc
-     0 SP@
+     0 DSP@
     0 SWAP 1 read LINOS DROP
      1 RAWIO tc
 ;
 ( expect zero keys and retain the count.)
 : KEY?2
     0 RAWIO tc
-    0 SP@
+    0 DSP@
     0 SWAP 1 read LINOS SWAP DROP
     1 RAWIO tc
 ;
-
-
-
-
-
-
-
-
 
 
 ( Trying to implement SYSTEM )
@@ -4054,43 +4046,51 @@ DECIMAL  getit
 
 
 
+( CATCH and THROW)
+ VARIABLE HANDLER
+: CATCH
+    DSP@ CELL+ >R    
+\    SAVE
+    HANDLER @ >R    
+    RSP@ HANDLER !
+    EXECUTE
+    R> HANDLER !    
+\    RDROP RDROP RDROP 
+    RDROP 0 ;
 
 
 
 
 
+( CATCH and THROW)
+: THROW
+?DUP IF
+   HANDLER @ 0= IF ERROR THEN
+   HANDLER @ RSP! 
+   R> HANDLER ! 
+\   RESTORE
+   R> SWAP >R ( Keep throw code)
+   DSP! 
+   R>
+   THEN ;
+: T12 12 THROW ;
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-( last block with BLK')
+( A reverse engineering BLK and SOURCE-ID )
 : BLK'
     IN @ FIRST LIMIT WITHIN
     SRC 2@ - 1024 = AND
     IF SRC @ 2 CELLS - @ ELSE 0 THEN
     BLK !
     BLK
-;
- BLK' ? BLKP ?
-
-" BLK' ?" EVALUATE
-" BLKP ?" EVALUATE
-
-
-
+;   BLK' ?   " BLK' ?" EVALUATE
+: SOURCE-ID 
+   SRC @ 
+   DUP TIB @ = IF DROP 0 ELSE
+   DUP 7 - "FiLeBuF" CORA IF ( Leave it) ELSE
+   DROP -1 THEN THEN ;
+SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 
 ( Last line, preserve !! Must be line 4096)

@@ -877,7 +877,7 @@ DPUSH:  PUSH    DX      ;{ Fall through.}
 APUSH:  PUSH    AX
 NEXT:
 _LINUX_C_({
-_NEWDEBUG_({ 
+_NEWDEBUG_({
          PUSH    SI
          CALL    c_debug
          POP     SI
@@ -991,7 +991,7 @@ This vocabulary contains one-letter words, called
 If a word is not found in the current search order,
 the word containing its first letter is looked up in this
 vocabulary.
-If found the parse pointer is moved back to after this first 
+If found the parse pointer is moved back to after this first
 letter of the word, and the corresponding denotation definition
 executed.
 This vocabulary is not intended to be used as a forthcode({CONTEXT})
@@ -1067,7 +1067,7 @@ worddoc( {CONTROL},{RECURSE},,{---},{ISO},
 {Do a recursive call of the definition being compiled.},
 {{:}},
 {
-{: GI6 DUP IF DUP >R 1 - RECURSE R> . THEN ;},{}, 
+{: GI6 DUP IF DUP >R 1 - RECURSE R> . THEN ;},{},
 {3 GI6 .}, {1 2 3 0},
 },
 enddoc)
@@ -1145,7 +1145,7 @@ CODE_HEADER({(+LOOP)},{XPLOO})
 ;
 worddocsafe( {CONTROL},{(DO)},{paren_do},{},{C},
 {The run-time proceedure compiled by forthcode({DO}) which
-prepares the return stack, where the looping bookkeeping is kept.},{{DO}}, 
+prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
 {{( See DO)},{}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
@@ -1163,7 +1163,7 @@ CODE_HEADER({(DO)},{XDO})
 ;
 worddocsafe( {CONTROL},{(?DO)},{paren_question_do},{},{C},
 {The run-time proceedure compiled by forthcode({?DO}) which
-prepares the return stack, where the looping bookkeeping is kept.},{{?DO}}, 
+prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 {{( See ?DO)},{}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
@@ -1180,7 +1180,7 @@ CODE_HEADER({(?DO)},{XQDO})
         PUSH    DX
         XCHG    BP,STACKPOINTER   ;{ GET PARAMETER STACK}
         _NEXT
-QXDO1:  MOV     SI,BX 
+QXDO1:  MOV     SI,BX
         _NEXT
 ;
 worddoc( {CONTROL},{I},{i},{--- n},{C,L0},
@@ -1195,7 +1195,7 @@ CODE_HEADER({I},{IDO})
 ;
 worddoc( {CONTROL},{J}, ,{--- n},{C,L0},
 {Used within a nested do-loop to copy the loop index of the
-outer do-loop to the stack.}, 
+outer do-loop to the stack.},
 {{DO},{LOOP},{+LOOP}},
 { { : GS1 DO 1 0 DO J . LOOP LOOP ; 2 -2 GS1},{-2 -1 0 1},
   { : GS2 DO 1 0 DO J . LOOP LOOP ; 4 0 GS2},{0 1 2 3} },
@@ -1205,8 +1205,8 @@ CODE_HEADER({J},{JDO})
         _PUSH          ;{ TO PARAMETER STACK}
 ;
 worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{C,L0},
-{Discard the loop parameters. Must be 
-used when the regular end of the 
+{Discard the loop parameters. Must be
+used when the regular end of the
 loop is by-passed.},
 {{DO},{LOOP},{+LOOP},{(BACK},{(FORWARD}},
 {
@@ -1375,7 +1375,7 @@ worddocsafe( {DICTIONARY},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}
 the string constant forthsamp({sc}) with the dea
 forthvar({addr2}). If it is a match, it returns into
 forthcode({RESULT}) this forthdefi({dea}) and it exits
-prematurely from forthcode({FOR-WORDS}).}, 
+prematurely from forthcode({FOR-WORDS}).},
 {{FIND}},
 {{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl
 "MATCHING-WORDS" ' MATCHING-WORDS GS1 .},{_T_}},
@@ -1509,7 +1509,7 @@ or changing only the third cell.
 The third cell has the alias
 _CIF_IN_({forthsamp({IN}) .})
 _ISO_IN_({forthsamp({>IN}) .})
-_VERBOSE_({Words like forthsamp({BLK SOURCE}) 
+_VERBOSE_({Words like forthsamp({BLK SOURCE})
 and forthsamp({SOURCE-ID}) are secondary,
 and return their output by ``second-guessing'' forthsamp({SRC}) .})},
 {{BLK},{SOURCE-ID}},
@@ -1536,7 +1536,7 @@ within the current input text buffer (terminal or disc) from
 which the next text will be accepted. All parsing words use and
 move the value of forthcode({IN}). The variable
 forthcode({>IN}) is not actually used and its content must be
-fetched immediately.}, 
+fetched immediately.},
 {{(>IN)},{IN}},
 {{: GS1 >IN @ ; QUIT
 GS1 .},{4}},
@@ -1545,7 +1545,7 @@ HEADER({>IN},{IIN},{DOCOL})
         DC      LIN, FETCH
 _CIF_IN_({DC      SRC, FETCH, LSUB     })
         DC      PIIN, STORE
-        DC      PIIN 
+        DC      PIIN
         DC      SEMIS
 ;
 });_END_({_LOAD_})
@@ -1569,7 +1569,7 @@ worddoc( {MEMORY},{CMOVE},{cmove},{from to count --},{},
 from forthvar({to}) address forthvar({to}) . The contents of
 address from is moved first proceeding toward high memory, such
 that memory propagation occurrs. As the intel 86-family is
-byte-addressing there are no restrictions. }, 
+byte-addressing there are no restrictions. },
 {},
 { {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 CMOVE dnl
 PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
@@ -1581,18 +1581,18 @@ CODE_HEADER({CMOVE},{LCMOVE})
         POP     CX      ;{count}
         POP     DI      ;{dest}
         POP     SI      ;{source}
-        REP     MOVSB   
+        REP     MOVSB
         MOV     SI,BX   ;{get back IP}
         _NEXT
 ;
 worddoc( {MEMORY},{MOVE},{move},{from to count --},{},
-{Move the forthsamp({count}) 
+{Move the forthsamp({count})
 bytes beginning at address from forthvar({to})
-address forthvar({to}), such that the destination area contains 
+address forthvar({to}), such that the destination area contains
 what the source area contained, regardless of overlaps.
 As the Pentintel 86-family is byte-addressing there are
 no restrictions. },
-{},               
+{},
 { {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 MOVE dnl
 PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
 {PAD DUP 1+ 2 MOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAB} },
@@ -1701,63 +1701,62 @@ CODE_HEADER({INVERT},{INVER})
         DEC     AX
         _PUSH
 ;
-worddocsafe( {STACKS},{SP@},{s_p_fetch},{--- addr},{},
+worddocsafe( {STACKS},{DSP@},{d_s_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the stack position,
-as it was before forthcode({SP@}) was executed.
+as it was before forthcode({DSP@}) was executed.
 },
-{{S0},{SP!}},
-{ {1  2  SP@  @  . . . },{2 2 1} },
+{{S0},{DSP!}},
+{ {1  2  DSP@  @  . . . },{2 2 1} },
 enddoc)
-CODE_HEADER({SP@},{SPFET})
+CODE_HEADER({DSP@},{SPFET})
         MOV     AX,STACKPOINTER   ;{ (S1) <- (SP)}
         _PUSH
 ;
-worddoc( {STACKS},{SP!},{s_p_store},{},{},
-{Initialize the stack pointer from forthcode({S0}) .},
-{{SP@}},
-{{  1 2 3 SP! SP@ S0 @ = .},{_T_} },
+worddoc( {STACKS},{DSP!},{d_s_p_store},{addr --- },{},
+{Initialize the stack pointer from forthsamp({addr}) .},
+{{DSP@}},
+{{  1 2 3 S0 @ DSP! DSP@ S0 @ = .},{_T_} },
 enddoc)
-CODE_HEADER({SP!},{SPSTO})
-        MOV     BX,_CELL_PTR[USINI]   
-        MOV     STACKPOINTER,[BX+_CELLS(3)]        ;{RESET PARAM STACK POINTER}
+CODE_HEADER({DSP!},{SPSTO})
+        POP     AX
+        MOV     STACKPOINTER,AX        ;{RESET PARAM STACK POINTER}
         _NEXT
 ;
 _LOAD_({
 worddoc( {STACKS},{DEPTH},,{--- n1},{ISO},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthcode({n1}) was pushed.},
-{{SP@}},
+{{DSP@}},
 {{  1 2 3 DEPTH .},{3} },
 enddoc)
 CODE_HEADER({DEPTH},{DEPTH})
-        MOV     AX,_CELL_PTR[USINI]   
+        MOV     AX,_CELL_PTR[USINI]
         MOV     AX,_CELL_PTR[AX] ;{User pointer for current task.}
-        MOV     AX,[AX+_CELLS(3)]        
+        MOV     AX,[AX+_CELLS(3)]
         MOV     DX,STACKPOINTER   ;{ (S1) <- (SP)}
         SUB     AX,DX
         SAR     AX,2
         _PUSH
 ;
 });_END_({_LOAD_})
-worddocsafe( {STACKS},{RP@},{r_p_fetch},{--- addr},{},
+worddocsafe( {STACKS},{RSP@},{r_s_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the current return
 stack position, i.e. pointing the current topmost value.},
-{{R0},{RP!}},
-{ {: GS1 1 >R  RP@  @  . R> ; GS1},{1} },
+{{R0},{RSP!}},
+{ {: GS1 1 >R  RSP@  @  . R> ; GS1},{1} },
 enddoc)
-CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
-        MOV     AX,BP   ;{RETURN STACK ADDR}
-        _PUSH
+CODE_HEADER({RSP@},{RPFET})      ;{(S1) <- (RP)}
+        PUSH    BP
+        _NEXT
 ;
-worddoc( {STACKS},{RP!},{r_p_store},{},{},
+worddoc( {STACKS},{RSP!},{r_s_p_store},{addr ---},{},
 {Initialize the return stack
-pointer from user variable forthcode({R0}) .},
-{{RP@}},
+pointer from forthsamp({addr}).},
+{{RSP@}},
 {{." No test"},{No test} },
 enddoc)
-CODE_HEADER({RP!},{RPSTO})
-        MOV     BX,_CELL_PTR[USINI]   
-        MOV     BP,[BX+_CELLS(4)]        ;{RESET RETURN STACK PTR}
+CODE_HEADER({RSP!},{RPSTO})
+        POP     BP
         _NEXT
 ;
 worddoc( {CONTROL},{EXIT},{semicolon_s},{},{ISO},
@@ -1767,7 +1766,7 @@ forthcode({R>}) or forthcode({DO}) forthcode({LOOP}) . In
 ciforth it can also be used to stop interpretation from a
 string, block or file. forthcode({EXIT}) is also the run-time
 word compiled at the end of a colon-definition which returns
-execution to the calling proceedure.}, 
+execution to the calling proceedure.},
 {},
 { {: GS1 1 EXIT 2 ; GS1 .},{1} },
 enddoc)
@@ -1779,7 +1778,7 @@ CODE_HEADER({EXIT},{SEMIS})
 worddoc( {CONTROL},{LEAVE},{leave},{},{ISO},
 {Termination a do-loop by branching to directly behind the
 end of a loop started by forthsamp({DO}) or forthsamp({?DO}) .
-So after the 
+So after the
 forthcode({LOOP}) or forthcode({+LOOP}) that corresponds.},{},
 { {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3} },
 enddoc)
@@ -1910,7 +1909,7 @@ CODE_HEADER({DNEGATE},{DNEGA})
 worddoc( {JUGGLING},{OVER},{over},{nl n2 --- nl n2 n1},{L0},
 {Copy the second stack value, placing it as the new top.},
 {{DUP}},
-{{SP! 1 2 3 4 OVER .S},{
+{{S0 @ DSP! 1 2 3 4 OVER .S},{
 S: 1 2 3 4 3} },
 enddoc)
 CODE_HEADER({OVER},{OVER})
@@ -1922,7 +1921,7 @@ CODE_HEADER({OVER},{OVER})
 worddoc( {JUGGLING},{DROP},{drop},{n ---},{L0},
 {Drop the number from the stack.},
 {{DUP}},
-{{SP! 1 2 3 4 DROP .S},{
+{{S0 @ DSP! 1 2 3 4 DROP .S},{
 S: 1 2 3} },
 enddoc)
 CODE_HEADER({DROP},{DROP})
@@ -1934,7 +1933,7 @@ worddoc( {JUGGLING},{2DROP},{two_drop},{n1 n2 ---},{L0},
 numbers (or double number)
  from the stack.},
 {{DROP},{2DUP}},
-{{SP! 1 2 3 4 2DROP .S},{
+{{S0 @ DSP! 1 2 3 4 2DROP .S},{
 S: 1 2} },
 enddoc)
 CODE_HEADER({2DROP},{TDROP})
@@ -1944,7 +1943,7 @@ CODE_HEADER({2DROP},{TDROP})
 ;
 worddoc( {JUGGLING},{SWAP},{swap},{n1 n2 --- n2 n1},{L0},
 {Exchange the top two values on the stack.},{{ROT}},
-{{SP! 1 2 3 4 SWAP .S },{
+{{S0 @ DSP! 1 2 3 4 SWAP .S },{
 S: 1 2 4 3} },
 enddoc)
 CODE_HEADER({SWAP},{SWAP})
@@ -1954,7 +1953,7 @@ CODE_HEADER({SWAP},{SWAP})
 ;
 worddoc( {JUGGLING},{DUP},{dup},{n --- n n},{L0},
 {Duplicate the value on the stack.},{{OVER}},
-{{SP! 1 2 3 4 DUP .S},{
+{{S0 @ DSP! 1 2 3 4 DUP .S},{
 S: 1 2 3 4 4} },
 enddoc)
 CODE_HEADER({DUP},{LDUP})
@@ -1964,7 +1963,7 @@ CODE_HEADER({DUP},{LDUP})
 ;
 worddoc( {JUGGLING},{2DUP},{two_dup},{d --- d d},{L0},
 {Duplicate the double number on the stack.},{{OVER}},
-{{SP! 1 2 3 4 2DUP .S},{
+{{S0 @ DSP! 1 2 3 4 2DUP .S},{
 S: 1 2 3 4 3 4} },
 enddoc)
 CODE_HEADER({2DUP},{TDUP})
@@ -1976,7 +1975,7 @@ CODE_HEADER({2DUP},{TDUP})
 ;
 worddoc( {JUGGLING},{2SWAP},{two_swap},{d1 d2 --- d2 d1},{L0},
 {Exchange the top doubles on the stack.},{{ROT}},
-{{SP! 1 2 3 4 2SWAP .S },{
+{{S0 @ DSP! 1 2 3 4 2SWAP .S },{
 S: 3 4 1 2} },
 enddoc)
 CODE_HEADER({2SWAP},{TSWAP})
@@ -1991,7 +1990,7 @@ CODE_HEADER({2SWAP},{TSWAP})
 worddoc( {JUGGLING},{2OVER},{two_over},{d1 d2 --- d1 d2 d1},{ISO},
 {Copy the second stack double, placing it as the new top.},
 {{2DUP}},
-{{SP! 1 2 3 4 2OVER .S},{
+{{S0 @ DSP! 1 2 3 4 2OVER .S},{
 S: 1 2 3 4 1 2 } },
 enddoc)
 CODE_HEADER({2OVER},{TOVER})
@@ -2004,7 +2003,7 @@ CODE_HEADER({2OVER},{TOVER})
         PUSH     CX
         PUSH     BX
         _2PUSH
-;       
+;
 worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{L0},
 { Add forthvar({n}) to the value at the
 address.},{{TOGGLE},{!}},
@@ -2201,7 +2200,7 @@ following sequence of Forth word definitions '...' until the next
 forthcode({';'}) or forthcode({';CODE'}). The word is added as the latest
 into the forthcode({CURRENT}) vocabulary.
 The compiling process is done by the text interpreter as long as
-forthcode({STATE}) is non-zero. 
+forthcode({STATE}) is non-zero.
 Words with the immediate bit
 set (P) are executed rather than being compiled.},{},
 {{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
@@ -2289,7 +2288,7 @@ HEADER({USER},{USER},{DOCOL})
         DC      CONST
         DC      PSCOD
 DOUSE:  MOV     BX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
-        MOV     DI,_CELL_PTR[USINI]   
+        MOV     DI,_CELL_PTR[USINI]
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
 ;
@@ -2477,15 +2476,15 @@ HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(2))
 ;
 worddoc( {STACKS},{S0},{s_zero},{--- addr},{U},
 {A user variable that contains the initial value for the data stack
-pointer.},{{SP!}},
-{{." See SP@"},{See SP@}},
+pointer.},{{DSP!}},
+{{." See DSP@"},{See DSP@}},
 enddoc)
 HEADER({S0},{SZERO},{DOUSE}, _CELLS(3))
 ;
 worddoc( {STACKS},{R0},{r_zero},{--- addr},{U},
 {A user variable containing the initial location of the return stack. },
-{{RP!}},
-{{." See RP@"},{See RP@}},
+{{RSP!}},
+{{." See RSP@"},{See RSP@}},
 enddoc)
 HEADER({R0},{RZERO},{DOUSE}, _CELLS(4))
 ;
@@ -2644,7 +2643,7 @@ enddoc)
 HEADER({OUT},{LOUT},{DOUSE}, _CELLS(25))
 ;
 worddocsafe( {STORAGE},{(BLK)},{paren_blk},{--- addr},{},
-{If the standard word forthcode({BLK}) is used, this variable 
+{If the standard word forthcode({BLK}) is used, this variable
 reflects the state of the current input source.
 It indicates the block number being interpreted, or
 zero, if input is being taken from the terminal input buffer.
@@ -2666,7 +2665,7 @@ HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
 ;
 _LOAD_({
 worddocsafe( {INPUT},{(>IN)},{paren_iso_in},{--- addr},{},
-{If the standard word forthcode({>IN}) is used, this variable 
+{If the standard word forthcode({>IN}) is used, this variable
 contains the offset from the start
 within the current input
 text buffer (terminal or disc) from which the next text will be
@@ -2679,7 +2678,7 @@ HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
 });_END_({_LOAD_})
 worddoc( {OPERATINGSYSTEM},{ARGS},{arguments},{--- addr},{},
 {This is a system dependant pointer to any arguments
-that is passed from the operating system to ciforth 
+that is passed from the operating system to ciforth
 during startup.
 _LINUX_N_({
 In this ciforth it is an array fo three pointers,
@@ -2691,6 +2690,19 @@ and to a null ended array of environment strings.
 {{." Interactive"},{Interactive}},
 enddoc)
 HEADER({ARGS},{ARGS},{DOUSE}, _CELLS(31))
+;
+worddoc( {ERROR},{HANDLER},{handler},{--- addr},{},
+{A user variable address containing a pointer to the
+last exception intercepting frame activated by forthcode({CATCH}) .
+This point into the return stack.
+If there is a forthcode({THROW}), the return stack
+is restored from forthcode({HANDLER}) effecting a multiple level return.
+It is called a frame because more things are stored, such as the
+position of the data stack top, and the previous value of forthsamp({HANDLER})},
+{{CATCH},THROW}},
+{{." See CATCH"},{See CATCH}},
+enddoc)
+HEADER({HANDLER},{HANDLER},{DOUSE}, _CELLS(32))
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -2737,7 +2749,7 @@ worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
 {Advance the memory pointer forthvar({n1}) by one character to
 forthvar({n2}). In ciforth this means one byte. Bytes are the
 address units ISO is talking about. _VERBOSE_({Unfortunately
-the ISO standard confounds characters and bytes.}) 
+the ISO standard confounds characters and bytes.})
 },{{CELL+}},
 {{123 CHAR+ .},{124}},}},
 enddoc)
@@ -2747,7 +2759,7 @@ worddoc( {MEMORY},{CHARS},{chars},{n1 --- n2},{ISO},
 {Return the equivalent of forthvar({n1}) chars in bytes:
 forthvar({n2}). In ciforth this is a noop.
 _VERBOSE_({Unfortunately
-the ISO standard confounds characters and bytes.}) 
+the ISO standard confounds characters and bytes.})
 },{{CELLS}},
 {{123 CHARS .},{123}},}},
 enddoc)
@@ -2890,7 +2902,7 @@ HEADER({>},{GREAT},{DOCOL})
 worddoc( {JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{L0},
 {Rotate the top three values on the stack, bringing the third to the
 top.},{{SWAP}},
-{{SP! 1 2 3 4 ROT .S},{
+{{S0 @ DSP! 1 2 3 4 ROT .S},{
 S: 1 3 4 2} },
 enddoc)
 CODE_HEADER({ROT},{ROT})
@@ -2915,9 +2927,9 @@ worddoc( {JUGGLING},{?DUP},{question_dupe},
 usually used to copy a value just before forthcode({IF}) , to
 eliminate the need for an forthcode({ELSE}) part to drop
 it.},{{DUP}},
-{{SP! 1 2 3 4 ?DUP .S},{
+{{S0 @ DSP!  1 2 3 4 ?DUP .S},{
 S: 1 2 3 4 4},
-{SP! 1 2 3 0 ?DUP .S},{
+{S0 @ DSP! 1 2 3 0 ?DUP .S},{
 S: 1 2 3 0} },
 enddoc)
 HEADER({?DUP},{QDUP},{DOCOL})
@@ -3093,7 +3105,7 @@ HEADER({?CSP},{QCSP},{DOCOL})
         DC      LIT,14H
         DC      QERR
         DC      SEMIS
-;      
+;
 _SECURITY_({
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}},
@@ -3317,7 +3329,7 @@ enddoc)
 HEADER({-TRAILING},{DTRAI},{DOCOL})
         DC      LDUP
         DC      ZERO
-        _DO(DTRA4) 
+        _DO(DTRA4)
 DTRA1:  DC      OVER
         DC      OVER
         DC      PLUS
@@ -3342,7 +3354,7 @@ Leaves an in-line string forthsamp({cccc}) (delimited by the
 trailing forthkey({"})) as a constant string forthsamp({addr1
 n}) . In ciforth the number of characters has no limit and
 using forthsamp({S"}) has always an effect on
-forthcode({HERE}), even during interpretation. 
+forthcode({HERE}), even during interpretation.
 },{{"}},
 {{S" NUKES  " 41 EMIT TYPE 41 EMIT},{ANUKES  A},
 {: GS1 S" NUKES  " 41 EMIT TYPE 41 EMIT ; GS1},{ANUKES  A},
@@ -3382,10 +3394,10 @@ HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      FETCH
         _0BRANCH(DOTQ1) ;{ IF}
         DC      LIT, LTYPE, COMMA
-        _BRANCH(DOTQ2) 
-DOTQ1:                 
+        _BRANCH(DOTQ2)
+DOTQ1:
         DC      LTYPE
-DOTQ2:                 
+DOTQ2:
         DC      SEMIS   ;{ THEN}
 ;
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
@@ -3431,7 +3443,7 @@ input stream.},
 {
 {"865" EVALUATE .},{865},
 {"8655 1+" EVALUATE .},{8656},
-{": GS1 856 ;" EVALUATE GS1 .},{856} 
+{": GS1 856 ;" EVALUATE GS1 .},{856}
 },
 enddoc)
 HEADER({EVALUATE}, {EVALUATE},{DOCOL})
@@ -3585,7 +3597,7 @@ otherwise from the disc block stored in forthcode({BLK}) .},
 {{: GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
 { : GS3 5A WORD COUNT DUP . TYPE ; GS3 ZZZQQZ},{2 QQ}
-}, 
+},
 enddoc)
 HEADER({WORD},{IWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
@@ -3601,7 +3613,7 @@ IWORD3:  DC      INBRS, RR, EQUAL
 IWORD4:
         DC      DROP
         DC      LIT, -1, LIN, PSTORE ;{ Backtrace to first non-delimiter.}
-        DC      FROMR, PPARS      
+        DC      FROMR, PPARS
 ;        DC      DOTS
 IWORD2:
         DC      HERE
@@ -3701,7 +3713,7 @@ given.},
 {{ (NUMBER) 1324 D.},{1324} },
 enddoc)
 HEADER({NUMBER},{NUMB},{DOCOL})
-LNUMB:  
+LNUMB:
         DC      LIT, -1, LIN, PSTORE
         DC      PNUMB, SDLITE
         DC      SEMIS
@@ -3724,7 +3736,7 @@ forthsamp({u2}) is the number of unconverted characters in the
 string. If forthsamp({ud2}) overflows, ciforth only
 forthsamp({ud2}) will be incorrect. _VERBOSE({Both
 forthkey({-}) and forthkey({+}) are considered unconvertible
-character's by forthvar({>NUMBER}) .}) 
+character's by forthvar({>NUMBER}) .})
 },
 {{NUMBER},{DIGIT}},
 {
@@ -3735,7 +3747,7 @@ HEADER({>NUMBER},{TONUMB},{DOCOL})
         DC      TDUP, PLUS, TOR     ;{ End available on return stack.}
         DC      ZERO
         _QDO(TONUM9)
-TONUM1:  
+TONUM1:
         DC      LDUP, CFET, BASE, FETCH, DIGIT
         DC      ZEQU
         _0BRANCH(TONUM4) ;{ IF}
@@ -3754,7 +3766,7 @@ TONUM4:
         DC      DPLUS
         DC      FROMR, ONEP     ; {Address back.}
         _LOOP(TONUM1)
-TONUM9:                 
+TONUM9:
         DC      FROMR
         DC      OVER, LSUB
         DC      SEMIS
@@ -3819,15 +3831,17 @@ HEADER({(ABORT)},{PABOR},{DOCOL})
         DC      ABORT
         DC      SEMIS
 ;
-worddoc( {ERRORS},{ERROR},{error},{line --- in blk},{},
-{Execute error notification and restart of system.
+worddoc( {ERRORS},{ERROR},{error},{n --- in blk},{},
+{Execute a notification that error forthsamp({n}) has occurred,
+then restart the interpreter by executing forthcode({QUIT}) .
 forthcode({WARNING}) is first examined. If 1, the text of line
 forthvar({n}) , relative to screen 4 is printed. This
 line number may be positive or negative, and beyond just screen
 4. If forthcode({WARNING}) is zero, forthvar({n}) is just
 printed as a message number (non disc installation). If
-forthcode({WARNING}) is -l, the definition forthcode({(ABORT)})
-is executed, normally a warm start via forthcode({QUIT}) .},
+forthcode({WARNING}) is -1, the user modifiable
+definition forthcode({(ABORT)})
+is executed.},
 {QERROR},
 { {12 ERROR},{12 ERROR ? MSG # 12},
  {CR},{} },
@@ -3847,7 +3861,7 @@ ERRO1:  DC      LIN, FETCH, LDUP
         _STRINGINLINE({? })
         DC      LTYPE
         DC      MESS
-        DC      SPSTO
+        DC      SZERO, FETCH, SPSTO
         DC      BLK,FETCH
         DC      QDUP
         _0BRANCH(ERRO2) ;{ IF}
@@ -3857,11 +3871,76 @@ ERRO1:  DC      LIN, FETCH, LDUP
 ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
 ;
+worddoc( {ERROR},{CATCH},{catch},{... xt --- ... tc },{ISO},
+{Execute forthsamp({xt}). If it executes successfully, i.e. no
+forthcode({THROW}) is executed by forthcode({xt}), leave a zero
+into forthcode({tc}) in addition to any stack effect
+forthcode({xt}) itself might have. Otherwise in forthsamp({tc})
+the non-zero throw code is left, and the stack depth is
+restored. The values of the parameters for forthcode({xt})
+could have been modified. _VERBOSE({In general, there is
+nothing useful that can be done with those stack items.}) Since
+the stack depth is known, the application may forthcode({DROP})
+those items.},
+{{THROW},{QUIT},{HANDLER}},
+{{' NOOP CATCH .},{0},
+{: GS1 1 2 3 12 THROW ; 33 ' GS1 CATCH 44 . . .},{44 12 33}
+},
+enddoc)
+HEADER({CATCH},{CATCH},{DOCOL})
+;   DSP@ CELL+ >R
+        DC      SPFET, CELLP, TOR
+;   HANDLER @ >R
+        DC      HANDLER, FETCH, TOR
+;   RSP@ HANDLER !
+        DC      RPFET, HANDLER, STORE
+;   EXECUTE
+        DC      EXEC
+;   R> HANDLER !
+        DC      FROMR, HANDLER, STORE
+;   RDROP 0 ;
+        DC      RDROP, ZERO
+        DC      SEMIS
+;
+worddoc( {ERROR},{THROW},{throw},{... tc --- ... / ... tc},{ISO},
+{If forthsamp({tc}) is zero, it is merely discarded. If we are
+executing under control of a forthcode({CATCH}) , see
+forthcode({CATCH}) for the effect of a non-zero
+forthsamp({tc}). If we are executing not under control of a
+forthcode({CATCH}), a non-zero forthsamp({tc}) aborts as if by
+forthsamp({tc ERROR}) .},
+{{CATCH},{QUIT},{HANDLER}},
+{{: GS1 1 2 3 12 THROW ; GS1 }, { 2 3 12 THROW ; GS1 ? MSG # 12}, 
+ {CR},{} },
+enddoc)
+HEADER({THROW},{THROW},{DOCOL})
+;    ?DUP IF
+        DC      QDUP
+        _0BRANCH(THROW1)
+;   HANDLER @ 0= IF ERROR THEN
+        DC      HANDLER, FETCH, ZEQU
+        _0BRANCH(THROW2)
+        DC      ERROR
+THROW2:
+;   HANDLER @ RSP!
+        DC      HANDLER, FETCH, RPSTO
+;   R> HANDLER !
+        DC      FROMR, HANDLER, STORE
+;   R> SWAP >R ( Keep throw code)
+        DC      FROMR, SWAP, TOR
+;   DSP!
+        DC      SPSTO
+;   R>
+        DC      FROMR
+;   THEN ;
+THROW1:
+        DC      SEMIS
+;
 _LOAD_({
 worddocsafe( {ERRORS},{(ABORT")},{paren_abort_quote},{line --- in blk},{},
 {The run time action of forthcode({ABORT"}) .},
 {},
-{{( See abort_quote)},{}}, 
+{{( See abort_quote)},{}},
 enddoc)
 HEADER({(ABORT")},{PABORTQ},{DOCOL})
         DC      ROT
@@ -3875,10 +3954,10 @@ worddocsafe( {ERRORS},{ABORT"},{abort_quote},{line --- in blk},{},
 {Usage is forthsamp({: <SOME> ... ABORT" <message>" ... ;}). If
 ABORT" finds a non-zero on the stack, the
 forthsamp({<message>}) is displayed and an forthcode({ABORT})
-is executed. 
+is executed.
 Otherwise proceed with the words
-after forthsamp({<message>}). In ciforth it is also allowed to 
-use forthcode({ABORT"}) in interpret mode.  
+after forthsamp({<message>}). In ciforth it is also allowed to
+use forthcode({ABORT"}) in interpret mode.
 },
 {{?ERROR}},
 {{ 0  ABORT" APE" 123 .},{123},
@@ -3894,10 +3973,10 @@ HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
         DC      FETCH
         _0BRANCH(ABQ3) ;{ IF}
         DC      LIT, PABORTQ, COMMA
-        _BRANCH(ABQ4) 
-ABQ3:                 
+        _BRANCH(ABQ4)
+ABQ3:
         DC      PABORTQ
-ABQ4:                 
+ABQ4:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
@@ -4085,7 +4164,7 @@ _SECURITY_({
 worddoc( {SECURITY},{?STACK},{question_stack},{},{},
 {Issue an error message if the stack is out of bounds.},
 {{?ERROR}},
-{{ SP! ?STACK},{},
+{{ S0 @ DSP! ?STACK},{},
 {0 WARNING ! : GS1 DROP ?STACK ;},{},
 dnl Do not use the part of TIB that is corrupted!
  {                               GS1},{      GS1 ? MSG # 1 },
@@ -4113,11 +4192,11 @@ HEADER({?STACK},{QSTAC},{DOCOL})
 worddoc( {PARSING},{INTERPRET},{interpret},{},{},
 {Repeatedly fetch the next text word in the input stream and
 execute it (forthcode({STATE}) is not 1) or compile it
-(forthcode({STATE}) is 1). A word is blank-delimited and looked 
+(forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in forthcode({CONTEXT}) and forthcode({CURRENT}) respectively.
-Failing that the first character is considered a word and it is looked 
+Failing that the first character is considered a word and it is looked
 up in the forthcode({DENOTATION}) wordlist.
-If it is not found at all, an error message " ?" will be given. 
+If it is not found at all, an error message " ?" will be given.
 _VERBOSE({
 If the word name cannot be found
 after a search of forthcode({CONTEXT}) and then
@@ -4126,7 +4205,7 @@ forthdefi({denotation}) of a number, a double number, a
 character or a string or whatever.
 Denotations are handled respectively
 by the words forthcode({0}) ... forthcode({F})
-forthcode({&}) forthcode({"}) and any other word 
+forthcode({&}) forthcode({"}) and any other word
 of the
 forthcode({DENOTATION}) wordlist, depending on the first
 character. A number is converted according to the current base.
@@ -4167,7 +4246,7 @@ INTE3:
         DC      TCFA
         DC      COMMA
                         ;{THEN}
-INTE4:  
+INTE4:
         _SECURITY_({DC      QSTAC})
         _BRANCH(INTE1)  ;{AGAIN}
 INTE8:  DC      DROP, DROP
@@ -4340,7 +4419,9 @@ message is given.},
 enddoc)
 HEADER({QUIT},{QUIT},{DOCOL})
         DC      LBRAC
-QUIT1:  DC      RPSTO   ;{BEGIN}
+QUIT1:  DC      RZERO   ;{BEGIN}
+        DC      FETCH
+        DC      RPSTO
         DC      QUERY
         DC      INTER
         DC      STATE
@@ -4361,7 +4442,7 @@ Print a startup message with the version number.
 {{( No test)},{}},
 enddoc)
 HEADER({ABORT},{ABORT},{DOCOL})
-        DC      SPSTO
+        DC      SZERO, FETCH, SPSTO
         DC      DECA
         _SECURITY_({DC      QSTAC})
         DC      CR
@@ -4548,7 +4629,7 @@ MAX1:   DC      DROP
 worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
 {Perform a forthsamp({logical shift }) of the bits of
 forthsamp({u1}) to the left by forthsamp({n}) places.
-_VERBOSE({ Put zero into the places uncovered by the shift.}) }, 
+_VERBOSE({ Put zero into the places uncovered by the shift.}) },
 {{RSHIFT},{2*}},
 {{1 2 LSHIFT .},{4}},
 enddoc)
@@ -4557,11 +4638,11 @@ CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
         POP     AX
         SHL     AX,CL
         _PUSH
-;       
+;
 worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
 {Perform a forthsamp({logical shift}) of the bits of
 forthsamp({u1}) to the right by forthsamp({n}) places.
-_VERBOSE({ Put zero into the places uncovered by the shift.}) }, 
+_VERBOSE({ Put zero into the places uncovered by the shift.}) },
 {{LSHIFT},{2/}},
 {{4 2 RSHIFT .},{1}},
 enddoc)
@@ -4570,7 +4651,7 @@ CODE_HEADER({RSHIFT},{RSHIFT},{DOCOL})
         POP     AX
         SHR     AX,CL
         _PUSH
-;       
+;
 worddoc( {MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{ISO},
 {A mixed magnitude math operation which leaves the double
 number forthvar({d}) : the signed product of two signed number
@@ -4619,9 +4700,9 @@ CODE_HEADER({SM/REM},{MSLAS})
 _LOAD_({
 worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
 {An arithmetical shift right for a two complement machine.
-This is the same as forthsamp({2 SM/REM SWAP DROP}). 
+This is the same as forthsamp({2 SM/REM SWAP DROP}).
 It is not the same as forthsamp({2 /}), nor is it the same as
-forthsamp({1 RSHIFT}). 
+forthsamp({1 RSHIFT}).
 _VERBOSE_({This confusing word should never be used.})},
 {{2*} },
 {
@@ -4631,13 +4712,13 @@ _VERBOSE_({This confusing word should never be used.})},
 enddoc)
 HEADER({2/},{TWOSL},{DOCOL})
         DC      STOD, TWO, MSLAS
-        DC      SWAP, DROP 
+        DC      SWAP, DROP
         DC      SEMIS
 ;
 worddoc( {SUPERFLUOUS},{2*},{two_star},{n1 --- n2},{ISO},
 {An arithmetical shift left for a two complement machine.
-This is only by accident the same as forthsamp({2 *}). 
-This is only by accident the same as forthsamp({1 LSHIFT}). 
+This is only by accident the same as forthsamp({2 *}).
+This is only by accident the same as forthsamp({1 LSHIFT}).
 _VERBOSE_({This word should not be used.})},
 {{2/} },
 {
@@ -4674,7 +4755,7 @@ the remainder takes its sign from the divisor.})},
 {  7 S>D -3 FM/MOD . . },{-3   -2},
 { -7 S>D  3 FM/MOD . . },{-3  2},
 { -7 S>D -3 FM/MOD . .     6 S>D -3 FM/MOD . .},
-{2  -1 -2   0} 
+{2  -1 -2   0}
 },
 enddoc)
 HEADER({FM/MOD},{FMSLAS},{DOCOL})
@@ -4762,7 +4843,7 @@ worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG,L
 {Leave the quotient forthvar({n5}) and remainder forthvar({n4})
 of the operation forthvar({n1*n2/n3}) A double precision
 intermediate product is used as for forthcode({*/})
-(forthdefi({symmetric division})).}, {{*/},{/MOD}}, 
+(forthdefi({symmetric division})).}, {{*/},{/MOD}},
 {
 { 7 2 3   */MOD . . },{4  2 },
 { 7 2 -3  */MOD . . },{-4 2 },
@@ -5255,7 +5336,7 @@ number being interpreted, or zero, if input is being taken from
 the terminal input buffer. Changing the content at
 forthsamp({addr}) has no effect, and its content must be
 fetched before the forthdefi({current input source}) has
-changed.}, 
+changed.},
 {{BLOCK},{TIB}},
 {{BLK @ .},{0}},
 enddoc)
@@ -5386,7 +5467,7 @@ CODE_HEADER({LINOS},{LINOS})
         POP     BX        ; First parameter.
         INT     80H        ;{ Generic call on LINUX }
         _PUSH     ; Positive means okay. Negative means -errno.
-;       
+;
 worddoc( {OPERATINGSYSTEM},{LINOS5},{linos5},{p1 p2 p3 p4 p5 n---ret},{},
 { Do a Linux
 system call (man 2) with parameters forthsamp({p1 p2 p3 p4 p5}).
@@ -5750,9 +5831,9 @@ HEADER({KEY?},{KEYQ},{DOCOL})
         DC      LIT, RFDS   ;{ Waiting for input }
         DC      ONE, OVER, STORE ;{ Waiting for standard in.}
         DC      ZERO, ZERO  ;{ Not output, not events.}
-        DC      ZERO, ZERO  
+        DC      ZERO, ZERO
         DC      LIT, TV, TSTOR ;{ Time out of zero.}
-        DC      LIT, TV     
+        DC      LIT, TV
         DC      LIT, _newselect, LINOS5
         DC      LDUP,  QLERR
         DC      NEGATE        ; {1 -> flag.}
@@ -5769,10 +5850,10 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
 enddoc)
 HEADER({MS},{MS},{DOCOL})
         DC      LIT, 1000, SLMOD
-        DC      LIT, TV, TSTOR 
-        DC      ZERO, ZERO  
-        DC      ZERO, ZERO  
-        DC      LIT, TV     
+        DC      LIT, TV, TSTOR
+        DC      ZERO, ZERO
+        DC      ZERO, ZERO
+        DC      LIT, TV
         DC      LIT, _newselect, LINOS5
         DC      QLERR
         DC      SEMIS
@@ -5913,7 +5994,7 @@ TYPE2:  DC      IDO
         DC      CFET
         DC      EMIT
         _LOOP(TYPE2)    ;{ LOOP}
-TYPE4:  
+TYPE4:
         _BRANCH(TYPE3)  ;{ ELSE}
 TYPE1:  DC      DROP    ;{ THEN}
 TYPE3:  DC      SEMIS
@@ -6057,7 +6138,7 @@ HEADER({TYPE},{LTYPE},{DOCOL})
 TYPE2:       DC      IDO,    CFET,    EMIT
              _LOOP(TYPE2)
              _BRANCH(TYPE3)
-TYPE4:       
+TYPE4:
 TYPE1:       DC      DROP
 TYPE3:       DC      SEMIS
 ;{            }
@@ -6271,8 +6352,8 @@ HEADER({GET-FILE},{GFILE},DOCOL)
         DC      RR, SPTOR
         DC      FROMR, SFET, OVER, PLUS, TOR
         DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
-        DC      LDUP, QLERR 
-        DC      LDUP, RR, LIT,  9999000, LIT, read, LINOS 
+        DC      LDUP, QLERR
+        DC      LDUP, RR, LIT,  9999000, LIT, read, LINOS
         DC      LDUP, QLERR, TOR
         DC      ZERO,ZERO, LIT, close, LINOS, QLERR
         DC      FROMR, FROMR, SWAP
@@ -6292,7 +6373,7 @@ HEADER({INCLUDED},{INCLUD},DOCOL)
         DC      SEMIS
 ;
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
-{Have the operating system execute the command contained 
+{Have the operating system execute the command contained
 in the string forthsamp({sc1}).
 },{{BLOCK},{?LINUX-ERROR}},
 {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}},
@@ -6307,8 +6388,8 @@ HEADER({SYSTEM},{SYSTEM},{DOCOL})
 ;  Get environment vector
         DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
         DC      LIT, execve, LINOS
-        DC      LIT, 64, PLUS, MESS, BYE  
-SYSTEM1: 
+        DC      LIT, 64, PLUS, MESS, BYE
+SYSTEM1:
         DC      SEMIS
 ;
 SHELL:   DB      "/bin/sh",0
@@ -6764,10 +6845,10 @@ This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to
 compile the address as a literal. If the word is not found
 after a search of forthcode({CONTEXT}) and forthcode({CURRENT}),
-an appropriate error message is given. 
-This word is intended for compilation mode,  
+an appropriate error message is given.
+This word is intended for compilation mode,
 but in ciforth it works as well in interpret mode.
-It is recommended this word is not postponed.}, 
+It is recommended this word is not postponed.},
 {{'}, {CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
 {{ : APE 1 2 ; : GS1 ['] APE ; GS1 EXECUTE  GS1 ID. . .},{APE 2 1}},
 enddoc)
@@ -6827,11 +6908,11 @@ worddoc( {DICTIONARY},{FORGET},{forget},{},{E,L0},
  Deletes definition named forthvar({cccc}) from the dictionary with all entries
 physically following it. In fig-FORTH, an error message will occur
 if the forthcode({CURRENT}) and forthcode({CONTEXT}) vocabularies are not currently the same.},
-{{FENCE}}, 
+{{FENCE}},
 {
 {: GO ; HERE : CH ; : GI ; FORGET CH LATEST ID. },{GO},
 {HERE - .},{0},
-}, 
+},
 enddoc)
 HEADER({FORGET},{FORG},{DOCOL})
         DC      CURR
@@ -6857,12 +6938,12 @@ worddocsafe( {CONTROL},{(BACK},{paren_back},{ -- addr},{},
 {Start a backward branch by leaving the target address
 forthcode({HERE}) into forthsamp({addr}). _VERBOSE_({Usage is
 forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) })},
-{{LOOP},{UNTIL}}, 
+{{LOOP},{UNTIL}},
 {
-{: GS1 -1 [ (BACK ] 1+ DUP . 
+{: GS1 -1 [ (BACK ] 1+ DUP .
 DUP 0BRANCH [ BACK) ] ; GS1 .},
 {0 1 1}
-}, 
+},
 enddoc)
 HEADER({(BACK},{PBACK},{DOCOL})
         DC      HERE
@@ -6872,9 +6953,9 @@ worddocsafe( {CONTROL},{BACK)},{back_paren},{addr --},{},
 {Complete a backward branch by compiling an offset from
 forthcode({HERE}) to forthsamp({addr}), left there by
 forthcode({(BACK)}) . _VERBOSE_({Usage is forthsamp({ (BACK ..
-POSTPONE BRANCH BACK) }) })}, 
-{{LOOP},{UNTIL}}, 
-{{( See (BACK )},{}}, 
+POSTPONE BRANCH BACK) }) })},
+{{LOOP},{UNTIL}},
+{{( See (BACK )},{}},
 enddoc)
 HEADER({BACK)},{BACKP},{DOCOL})
         DC      HERE
@@ -6886,12 +6967,12 @@ worddocsafe( {CONTROL},{(FORWARD},{paren_forward},{ -- addr},{},
 {Start a forward branch by leaving the address that must be
 backpatched with an offset into forthsamp({addr}).
 _VERBOSE_({Usage is forthsamp({ POSTPONE BRANCH (FORWARD ..
-FORWARD) }) })}, 
-{{LOOP},{UNTIL}}, 
+FORWARD) }) })},
+{{LOOP},{UNTIL}},
 {
 {: GS1 2 BRANCH [ (FORWARD ] 4 [ FORWARD) ] 6 ; GS1 . .},
 {6 2}
-}, 
+},
 enddoc)
 HEADER({(FORWARD},{PFORWARD},{DOCOL})
         DC      HERE
@@ -6903,9 +6984,9 @@ worddocsafe( {CONTROL},{FORWARD)},{forward_paren},{addr --},{},
 {Complete a forward branch by backpatching an offset from
 forthcode({HERE}) into forthsamp({addr}), left there by
 forthcode({(FORWARD)}) . _VERBOSE_({Usage is forthsamp({
-POSTPONE BRANCH (FORWARD .. FORWARD) }) })}, 
-{{LOOP},{UNTIL}}, 
-{{( See (FORWARD)},{}}, 
+POSTPONE BRANCH (FORWARD .. FORWARD) }) })},
+{{LOOP},{UNTIL}},
+{{( See (FORWARD)},{}},
 enddoc)
 HEADER({FORWARD)},{FORWARDP},{DOCOL})
         DC      HERE
@@ -6929,7 +7010,7 @@ for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) al
 
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
 error checking.},{},
-{{( See AGAIN WHILE)},{}}, 
+{{( See AGAIN WHILE)},{}},
 enddoc)
 HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         DC      PBACK
@@ -6946,8 +7027,8 @@ It marks the conclusion of the conditional structure. At
 compile-time, forthcode({THEN}) computes the forward branch
 offset from forthvar({addr}) to forthcode({HERE}) and stores it
 at forthvar({addr}) . forthvar({n}) is used for error tests.},
-{{IF},{ELSE}}, 
-{{( See IF ELSE)},{}}, 
+{{IF},{ELSE}},
+{{( See IF ELSE)},{}},
 enddoc)
 HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, TWO, QPAIR})
@@ -7007,11 +7088,11 @@ index and limit. The loop index is incremented by one and
 compared to the limit. The branch back to forthcode({DO})
 occurs until the index equals or exceeds the limit; at that
 time, the parameters are discarded and execution continues
-ahead. 
+ahead.
 
 At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)})
 and uses forthvar({addr}) to calculate an offset to
-forthvar({DO}) . forthvar({n}) is used for error testing.}, 
+forthvar({DO}) . forthvar({n}) is used for error testing.},
 {},
 { { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
@@ -7033,13 +7114,13 @@ compared to the limit. The branch back to forthcode({DO})
 occurs until the new index is equal to or greater than the
 limit (forthvar({n1>0})), or until the new index is equal to or
 less than the limit (forthvar({n1<0})). Upon exiting the loop,
-the parameters are discarded and execution continues ahead. 
+the parameters are discarded and execution continues ahead.
 
 At compile time, forthcode({+LOOP}) compiles the run-time word
 forthcode({(+LOOP)}) and the branch offset computed from
 forthcode({HERE}) to the address left on the stack by
 forthcode({DO}) . forthvar({n2}) is used for compile tine error
-checking.},{}, 
+checking.},{},
 { { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
 enddoc)
@@ -7056,16 +7137,16 @@ worddoc( {CONTROL},{UNTIL},{until},{f --- (run-time)
 At run-time, forthcode({UNTIL}) controls the conditional branch
 back to the corresponding forthcode({BEGIN}) If f is false,
 execution returns to just after forthcode({BEGIN}) . if true,
-execution continues ahead. 
+execution continues ahead.
 
 At compile-time, forthcode({UNTIL}) compiles
 forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error tests.},
-{{BEGIN}}, 
+{{BEGIN}},
 {
 {: GI4 BEGIN DUP . 1+ DUP 5 > UNTIL ; 3 GI4 .},{3 4 5 6},
-{8 GI4 .},{8 9} 
-}, 
+{8 GI4 .},{8 9}
+},
 enddoc)
 HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      ONE, QPAIR})
@@ -7081,11 +7162,11 @@ There is no effect on the stack. Execution cannot leave this loop
 except for forthcode({EXIT}).
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},
-{{BEGIN}}, 
+{{BEGIN}},
 {
 { : GCE2 BEGIN DUP . 1 - DUP 0= IF EXIT THEN AGAIN ; 3 GCE2},
 {3 2 1}
-}, 
+},
 enddoc)
 HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      ONE, QPAIR})
@@ -7096,16 +7177,16 @@ worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{ISO,FIG,I,C2},
 {Used within a colon-definition in the form:
     forthsamp({BEGIN ... WHILE ... REPEAT})
 At run-time, forthcode({REPEAT}) forces an unconditional branch
-back to just after the corresponding forthcode({BEGIN}) . 
+back to just after the corresponding forthcode({BEGIN}) .
 
 At compile-time, forthcode({REPEAT}) compiles
 forthcode({BRANCH}) and the offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for error testing.},{{WHILE}}, 
+addr. forthvar({n}) is used for error testing.},{{WHILE}},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
 {0 1 2 3 4}
 },
-enddoc) 
+enddoc)
 HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, LIT, 4, QPAIR ; {Matches WHILE ?}})
         DC      TOR    ; { WHILE handled later. }
@@ -7128,18 +7209,18 @@ continues ahead thru the true part. If forthvar({f}) is false
 execute the false part. After either part, execution resumes
 after forthcode({THEN}).
 forthcode({ELSE}) and its false part are optional.; if missing,
-false execution skips to just after forthcode({THEN}) . 
+false execution skips to just after forthcode({THEN}) .
 
 At compile-time forthcode({IF}) compiles forthcode({0BRANCH})
 and reserves space for an offset at forthvar({addr}) .
 forthvar({addr}) and forthvar({n}) are used later for
-resolution of the offset and error testing.},{}, 
+resolution of the offset and error testing.},{},
 {
 { : GI1 IF 123 THEN ; 234 1 GI1 . .},{123 234},
 {  234 -1 GI1 . .},{123 234},
 {  234 0 GI1 .},{234},
-}, 
-enddoc) 
+},
+enddoc)
 HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
         _SECURITY_({DC      TWO     ;{ Magic number}})
@@ -7152,19 +7233,19 @@ worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},
 At run-time, forthcode({ELSE}) executes after the true part
 following forthcode({IF}) . forthcode({ELSE}) forces execution
 to skip over the following false part and resumes execution
-after the forthcode({THEN}) . It has no stack effect. 
+after the forthcode({THEN}) . It has no stack effect.
 
 At compile-time forthcode({ELSE}) emplaces forthcode({BRANCH})
 reserving a branch offset, leaves the address forthvar({addr2})
 and forthvar({n2}) for error testing. forthcode({ELSE}) also
 resolves the pending forward branch from forthcode({IF}) by
 calculating the offset from forthvar({addr1}) to
-forthcode({HERE}) and storing at forthvar({addr1}) .}, 
-{}, 
+forthcode({HERE}) and storing at forthvar({addr1}) .},
+{},
 {
-{: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234}, 
+{: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234},
 {1 GI2 .},{123}
-}, 
+},
 enddoc)
 HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, TWO, QPAIR})
@@ -7184,18 +7265,18 @@ based on boolean flag forthvar({f}) . If forthvar({f}) is true
 part thru to forthcode({REPEAT}) , which then branches back to
 forthcode({BEGIN}) . If forthvar({f}) is false (zero),
 execution skips to just after forthcode({REPEAT}) , exiting the
-structure. 
+structure.
 
 At compile time, forthcode({WHILE}) emplaces
 forthcode({0BRANCH}) and leaves forthvar({ad2}) of the reserved
 offset. The stack values will be resolved by
-Forthcode({REPEAT}) .}, 
-{{BEGIN}}, 
+Forthcode({REPEAT}) .},
+{{BEGIN}},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . DUP 1+ REPEAT ; 0 GI3 .},
 {0 1 2 3 4},
 {6 GI3 .},{6}
-}, 
+},
 enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
@@ -7204,11 +7285,11 @@ HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
 ;
 worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{L0},
 {If forthvar({n}) is greater or equal to zero, display as much
-spaces. },{{SPACE},{OUT}}, 
+spaces. },{{SPACE},{OUT}},
 {
 {41 EMIT 0 SPACES 41 EMIT},{AA},
 {41 EMIT 3 SPACES 41 EMIT},{A   A}
-}, 
+},
 enddoc)
 HEADER({SPACES},{SPACES},{DOCOL})
         DC      ZERO
@@ -7219,7 +7300,7 @@ HEADER({SPACES},{SPACES},{DOCOL})
         _DO(SPAX1)
 SPAX2:  DC      SPACE
         _LOOP(SPAX2)    ;{LOOP}
-SPAX1:  
+SPAX1:
 DC      SEMIS
 ;
 worddoc( {FORMATTING},{<#},{less_number_sign},{},{ISO,L0},
@@ -7318,8 +7399,8 @@ DIGS1:  DC      DIG     ;{BEGIN}
 ;
 worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{FIG},
 {Print a signed double number forthvar({d}) right aligned in a field forthvar({n}) characters
-wide.},{{OUT},{D.}}, 
-{{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}}, 
+wide.},{{OUT},{D.}},
+{{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}},
 enddoc)
 HEADER({D.R},{DDOTR},{DOCOL})
         DC      TOR
@@ -7340,8 +7421,8 @@ HEADER({D.R},{DDOTR},{DOCOL})
 ;
 worddocsafe( {OUTPUT},{.R},{dot_r},{n1 n2 ---},{},
 {Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
-following blank is printed.},{{OUT},{.}}, 
-{{-12 41 EMIT 5 .R 41 EMIT},{A  -12A}}, 
+following blank is printed.},{{OUT},{.}},
+{{-12 41 EMIT 5 .R 41 EMIT},{A  -12A}},
 enddoc)
 HEADER({.R},{DOTR},{DOCOL})
         DC      TOR
@@ -7354,7 +7435,7 @@ worddoc( {OUTPUT},{D.},{d_dot},{d ---},{L1},
 {Print a signed double number forthvar({d}),
 according to the current forthcode({BASE}) . A blank follows.
 },{{OUT},{.},{D.R}},
-{{-12. D. 41 EMIT},{-12 A}}, 
+{{-12. D. 41 EMIT},{-12 A}},
 enddoc)
 HEADER({D.},{DDOT},{DOCOL})
         DC      ZERO
@@ -7366,8 +7447,8 @@ worddocsafe( {OUTPUT},{.},{dot},{n ---},{L0},
 {Print a number from a signed _BITS_ bit two's complement value,
 converted according to the numeric forthcode({BASE}) .
 A blanks follows.},
-{{OUT},{U.},{.R},{D.R},{D.}}, 
-{{-12 41 EMIT . 41 EMIT},{A-12 A}}, 
+{{OUT},{U.},{.R},{D.R},{D.}},
+{{-12 41 EMIT . 41 EMIT},{A-12 A}},
 enddoc)
 HEADER({.},{DOT},{DOCOL})
         DC      STOD
@@ -7377,8 +7458,8 @@ HEADER({.},{DOT},{DOCOL})
 worddoc( {OUTPUT},{?},{question},{addr --},{L0},
 {Print the value contained at the address in free format according to
 the current base.},
-{{OUT},{.}}, 
-{{-12 PAD ! 41 EMIT PAD ? DROP 41 EMIT},{A-12 A}}, 
+{{OUT},{.}},
+{{-12 PAD ! 41 EMIT PAD ? DROP 41 EMIT},{A-12 A}},
 enddoc)
 HEADER({?},{QUES},{DOCOL})
         DC      FETCH
@@ -7390,7 +7471,7 @@ worddocsafe( {OUTPUT},{U.},{u_dot},{u ---},{L0},
 converted according to the numeric forthcode({BASE}) .
 A trailing blanks
 follows.},
-{{OUT},{.},{.R},{D.R},{D.}}, 
+{{OUT},{.},{.R},{D.R},{D.}},
 _BITS32_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
 {-1 41 EMIT U. 41 EMIT},{AFFFFFFFF A}},})
 _BITS16_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
@@ -7409,8 +7490,8 @@ execute forthvar({xt})
 the forthdefi({dea}) of those words.         forthvar({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
-{{FOR-VOCS},{EXECUTE}}, 
-{{( See MATCHING-WORDS)},{}}, 
+{{FOR-VOCS},{EXECUTE}},
+{{( See MATCHING-WORDS)},{}},
 enddoc)
 HEADER({FOR-WORDS},{FORW},{DOCOL})
         DC      SWAP
@@ -7437,7 +7518,7 @@ worddoc( {DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
  with as data the forthdefi({dea}) of those words. forthvar({xt})
 must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
 },
-{{FOR-WORDS},{EXECUTE}}, 
+{{FOR-WORDS},{EXECUTE}},
 {
 { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
 {JOHN FORTH},
@@ -7468,13 +7549,13 @@ FORV1:  DC      FROMR
 worddoc( {DICTIONARY},{WORDS},{words},{},{},
 {List the names of the definitions in the context vocabulary.
 dnl A break as per forthcode({KEY?}) will terminate the listing.
-}, {}, 
+}, {},
 {
 {VOCABULARY JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q ' GO >LFA ;},{},
 {: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
 {FORTH DEFINITIONS},{}
-}, 
+},
 enddoc)
 HEADER({WORDS},{WORDS},{DOCOL})
         DC      CSLL
@@ -7489,7 +7570,7 @@ HEADER({WORDS},{WORDS},{DOCOL})
 _NORMAL_BYE_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment MSDOS.
-},{{COLD}}, 
+},{{COLD}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({BYE},{BYE},{DOCOL})
@@ -7500,7 +7581,7 @@ _ABSOLUTELOAD_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 {_PROTECTED_({Switch back to real mode.})
 Return to the host environment MSDOS.
-},{{COLD}}, 
+},{{COLD}},
 {{." interactive"},{interactive}},
 enddoc)
 CODE_HEADER({BYE},{BYE})
@@ -7513,7 +7594,7 @@ RETDOSV: JMP 0:0        ; {Filled in during boot}
 _HOSTED_LINUX_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment Linux.
-},{{COLD}}, 
+},{{COLD}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({BYE},{BYE},{DOCOL})
@@ -7525,7 +7606,7 @@ worddoc( {SCREEN},{LIST},{list},{n ---},{L0},
 {Display the ascii text of screen forthvar({n}) on the selected output device.
 The number of the screen is always printed in decimal.
 forthcode({SCR}) contains the screen number during and after this process.},
-{}, 
+{},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({LIST},{LLIST},{DOCOL})
@@ -7544,8 +7625,8 @@ HEADER({LIST},{LLIST},{DOCOL})
 worddoc( {SCREEN},{INDEX},{index},{from to --},{},
 {Print the first line of each screen over the range
 forthvar({from}) , forthvar({to}) . This is used to view the
-comment lines of an area of text on disc screens.}, 
-{{LIST}}, 
+comment lines of an area of text on disc screens.},
+{{LIST}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({INDEX},{INDEX},{DOCOL})
@@ -7565,9 +7646,9 @@ INDE9:
         DC      SEMIS
 ;
 worddoc( {STACKS},{DOTS},{dots},{from to --},{},
-{Print the stack, in the current base.}, 
-{{LIST}}, 
-{{SP! 1 2 3 .S},{S: 1 2 3}}, 
+{Print the stack, in the current base.},
+{{LIST}},
+{{S0 @ DSP! 1 2 3 .S},{S: 1 2 3}},
 enddoc)
 HEADER({.S},{DOTS},{DOCOL})
         DC      CR
@@ -7582,11 +7663,11 @@ DOC1:    DC DROP, DROP
         DC SEMIS
 ;
 worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},( addr n -- i*x t/f ),{ISO},
-{If the string forthsamp({addr n}) 
-is a known environment 
+{If the string forthsamp({addr n})
+is a known environment
 attribute, leave into forthsamp({i*x}) the information about that attribute and
 a true flag, else leave a false flag.
-In fact the flag indicates whether the words is present in the 
+In fact the flag indicates whether the words is present in the
 forthcode({ENVIRONMENT}) vocabulary and forthsamp({i*x}) is what is left
 by the word if executed.
 },
@@ -7606,7 +7687,7 @@ HEADER({ENVIRONMENT?},{ENVQ},{DOCOL})
         DC      LIT, -1
         _BRANCH(ENVQ2)
 ENVQ1:  DC      DROP, ZERO
-ENVQ2:  
+ENVQ2:
         DC      SEMIS
 ;
 _LOAD_({
@@ -7615,7 +7696,7 @@ worddoc( {SCREEN},{TRIAD},{triad},{scr --},{},
 include that numbered forthvar({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
 reference line at the bottom taken from line 15 of screen 4.},
-{{MESSAGE}}, 
+{{MESSAGE}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({TRIAD},{TRIAD},{DOCOL})
@@ -7631,22 +7712,22 @@ HEADER({TRIAD},{TRIAD},{DOCOL})
         _DO(TRIA9)
 TRIA1:  DC      CR,IDO
         DC      LLIST
-        DC      KEYQ   
+        DC      KEYQ
         _0BRANCH(TRIA2)
         DC      LLEAV   ;{LEAVE}
 TRIA2:  _LOOP(TRIA1)    ;{THEN}
 TRIA9:
         DC      CR
         DC      SEMIS
-;       
+;
 ; This word is not even fig!
 worddoc( {MISC},{.CPU},{dot_cpu},{---},{},
 {Print the name of the CPU processor present in the boot up
 parameters. Using the bizar convention of a base-36 number.},
-{{ABORT},{COLD}}, 
+{{ABORT},{COLD}},
 _PROTECTED_({{{.CPU},{80386}},})
 _REAL_({{{.CPU},{8086}},})
-{}, 
+{},
 enddoc)
 HEADER({.CPU},{DOTCPU},{DOCOL})
 ;{ PRINT CPU TYPE (8088)}
@@ -7684,8 +7765,8 @@ HEADER({LOW-EM},{LOWEM},{DOUSE}, _CELLS(15))
 ;{**** LAST DICTIONARY WORD ****}
 worddoc( {MISC},{TASK},{task},{},{},
 {A no-operation word which marks the boundary between
-the forth system and applications. },{{COLD}}, 
-{{!CSP TASK ?CSP},{}}, 
+the forth system and applications. },{{COLD}},
+{{!CSP TASK ?CSP},{}},
 enddoc)
 HEADER({TASK},{TASK},{DOCOL})
         DC      SEMIS
@@ -7844,9 +7925,9 @@ forthcode({NUMBER}) . These words parse input and leave a constant
 They reside in a special vocabulary, called forthcode({DENOTATIONS}).},
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
-{The wordset forthvar({ENVIRONMENT}) contain words for all environment 
+{The wordset forthvar({ENVIRONMENT}) contain words for all environment
 queries that are recognized. By executing they leave the information
-such as is required for each of these queries. 
+such as is required for each of these queries.
 Except for the true flag at the end.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
@@ -7988,4 +8069,3 @@ found, different vocabularies can have words with the same names.
 The wordset forthvar({VOCABULARIES}) contains words that manipulate
 those vocabularies.},
 {},{},{},{})
-
