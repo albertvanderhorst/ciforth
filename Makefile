@@ -76,8 +76,9 @@ CSRC= $(CSRCAUX) $(CSRCFORTH)
 
 # Texinfo files still to be processed by m4.
 SRCMI= \
-ciforth.mi \
+assembler.mi    \
 cifgen.mi \
+ciforth.mi \
 intro.mi    \
 manual.mi   \
 rational.mi  \
@@ -86,8 +87,6 @@ rational.mi  \
 # Documentation files and archives
 DOC = \
 COPYING   \
-assembler.txt    \
-editor.txt     \
 release.txt      \
 fig86gnr.txt       \
 testreport.txt     \
