@@ -1,4 +1,3 @@
-8 LOAD
 \               Formula music translation program.
 \ $Id$}
 \ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
@@ -6,15 +5,11 @@
 : ?TEST DROP ;
 
 \ worddoc( {ISO},{CHAR},{--- c},{ISO},
-\ {Leave forthvar({c}) the first non blank char in the 
+\ {Parse a word and 
+\ leave forthvar({c}) the first non blank char of that word 
 \ input stream.},
 \ {{}})
 : CHAR BL WORD HERE 1+ C@ ;
-\ TIB @ IN @ +   
-\ BEGIN DUP C@ BL = WHILE 1+ REPEAT 
-\ DUP C@ SWAP
-\ 1+ TIB @ - IN ! 
-\ ;
 
 : CHARS ;
 
@@ -164,4 +159,34 @@ C;
 ." EXPECT 0 1 :" TICKS DMINUS TICKS D+ . 0FFFF U< . 
 
 DECIMAL 
+
+\ worddoc({FORMULA},{TICKS/SEC},{ticks_per_second},{ --- d},{},
+\ {Leave the number of ticks per sec, i.e. for a Pentium 90 
+\ this is 90,000,000. This is a configuration item, but it 
+\ should be made automatic.
+\ },
+
+\ {{TICKS}})
+90000000 CONSTANT  TICKS/SEC
+
+\ worddoc( {EVENT},{PASSED},{passed},{d ---},{},
+\ {The time forthvar({d}) indicating a tick count, is in the past.
+\ },
+\ {{TICKS}})
+: PASSED DMINUS TICKS D+ SWAP DROP 0= ;
+
+\ worddoc( {EVENT},{EARLIER},{EARLIER},{d1 d2 ---},{},
+\ {The time forthvar({d1}) indicating a tick count, is earlier
+\  then the time forthvar({d2}) .
+\ },
+\ {{TICKS}})
+: EARLIER  DMINUS D+ SWAP DROP ;
+
+2 ?TEST
+." EXPECT -1 :" TICKS TICKS EARLIER . 
+." EXPECT 0 :" TICKS TICKS ROT >R ROT R> EARLIER .
+
+
+
+
 
