@@ -1,20 +1,10 @@
 \ Fix up the analyser with information about what are duplicators.
 
-REQUIRE ALIAS
-
 HEX  1B CONSTANT ESC DECIMAL
 
-'COUNT ALIAS C@+
-
-HEX  1B C
 CREATE ESCAPE-COLOR
-1B C, &[ C, HERE _ C, _ C, &; C, HERE _ C, _ C, &; C, &1 C, &m C,
+ESC C, &[ C, HERE _ C, _ C, &; C, HERE _ C, _ C, &; C, &1 C, &m C,
 CONSTANT ESCAPE-FORE   CONSTANT ESCAPE-BACK
-
-\ This character doesn't belong to a word, just shows the stack effect.
-\ FE CONSTANT SHOWING-CHAR
-DECIMAL
-
 
 : SEND-COLOR-ESCAPE ESCAPE-COLOR 10 TYPE ;
 
@@ -53,8 +43,8 @@ DECIMAL
 
 \ Print text in white, not bold.
 \ This is sufficient to overrule coloring.
-\ HEX : default-white    black white 1B EMIT &[ EMIT &m EMIT ; DECIMAL
 "0m" COLOR-ESCAPE default-white
+\ Print text with foreground and background colors swapped.
 "7m" COLOR-ESCAPE reverse
 
 CREATE RENDER-TABLE    \ Colors in relation to stack effect.
@@ -84,7 +74,7 @@ CREATE RENDER-TABLE    \ Colors in relation to stack effect.
 \ version, such that yellow looks as light brown.)
 : COLORED-BLOB    SELECT-COLOR   reverse   BL EMIT ;
 
-\ Print the name observing colors.
+\ For DEA print the name using colors showing the stack effect.
 : COLOR-ID.
    DUP >FFA @ 1 AND IF DROP EXIT THEN
    DUP SE SWAP SELECT-COLOR >R
@@ -105,53 +95,17 @@ CREATE RENDER-TABLE    \ Colors in relation to stack effect.
 \ Install the behaviour of DEA into the behaviour of DEA.
 : REVECTOR 3 CELLS MOVE ;
 
-\ Print the name of a DEA in the old uncolored fashion.
-: OLD-ID.   OLD: ID. ;
+\ Have an indication of N outputs or inputs on the stack.
+: X-BLOB 1 +  COLORED-BLOB default-white ;
 
-\ Eliminate space after the old ``ID.'' .
-: BACK-ID. ^H EMIT ^H EMIT ^H EMIT ;
-
-\ Plain decompilation of item at ADDRESS. Leave incremented ADDRES.
-: ITEM   DUP @ ID. CELL+ CELL+ ;
-
-\ Plain decompilation of control item at ADDRESS. Leave incremented ADDRES.
-\ (These have an offset following inline.)
-: C-ITEM ITEM CELL+ ;
-
-\ Have an indication of one output on the stack.
-: 1-OUTPUT 1 COLORED-BLOB default-white SPACE ;
-
-\ Print CONSTANT colored.
-: COLOR-H..   H. 1-OUTPUT ;
-
-\ Replacement for ``-dea'' decompiler
-: -dea-new    CELL+ DUP @ &' EMIT OLD-ID. BACK-ID. 1-OUTPUT CELL+ ;
-
-\ Replacement for ``-br' decompiler
-: -br-new     DUP @ ID. ." [ " -con ." , ] " ( -target) ;
-
+\ Revector to have colors.
 : DO-COLOR
-   'COLOR-ID.   'ID.    REVECTOR \ Install it.
-   'COLOR-H..   'H..    REVECTOR \ Print literals colored
-   'ITEM        '-dea   REVECTOR \ Print 'SOME colored
-   'C-ITEM      '-do    REVECTOR \ Print
-   'C-ITEM      '-qdo   REVECTOR \  controls
-   'C-ITEM      '-lo    REVECTOR \  more primitive
-   'C-ITEM      '-pl    REVECTOR \  but colored.
-   '-br-new     '-0br   REVECTOR \ Print stack effect
-   '-br-new     '-br    REVECTOR \  of branching.
+   'COLOR-ID.   'ID.    REVECTOR
+   'X-BLOB   'BLOB    REVECTOR
 ;
 
+\ No more colors.
 : NO-COLOR
-   'ID.    RESTORED
-   'H..    RESTORED
-   '-dea   RESTORED
-   '-do    RESTORED
-   '-qdo   RESTORED
-   '-lo    RESTORED
-   '-pl    RESTORED
-   '-0br   RESTORED
-   '-br    RESTORED
+   'COLOR-ID. RESTORED
+   'X-BLOB RESTORED
 ;
-"Jetz kommen die Kamelen" TYPE
-default-white    DECIMAL

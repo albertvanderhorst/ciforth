@@ -4523,20 +4523,17 @@ _HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, DPL, STORE
 NPNUM1:  DC      INBRS   ;{ BEGIN}
         DC      LDUP, LIT, ADOT, EQUAL
-        _0BRANCH(NPNUM2A) ;{ IF}
-        DC      DROP, DPL, STORE, ZERO
-        _BRANCH(NPNUM3) ;{ ELSE}
-NPNUM2A:
-        DC      LDUP, LIT, ',', EQUAL
-        _0BRANCH(NPNUM2) ;{ IF}
-        DC      TDROP, ZERO
-        _BRANCH(NPNUM3) ;{ ELSE}
+        _0BRANCH(NPNUM2) ;{ case 1 }
+        DC      DROP, DPL, STORE
+        _BRANCH(NPNUM1) ;{ continue }
 NPNUM2:
-        DC      LDUP, QBL
-        _0BRANCH(NPNUM4) ;{ IF}
-        DC      DROP, DROP, ONE
-        _BRANCH(NPNUM3) ;{ ELSE}
-NPNUM4:
+        DC      LDUP, LIT, ',', EQUAL
+        _0BRANCH(NPNUM3) ;{ case 2 }
+        DC      TDROP
+        _BRANCH(NPNUM1) ;{ continue }
+NPNUM3:
+        DC      LDUP, QBL, ZEQU
+        _0BRANCH(NPNUM5)  ;{ while }
         DC      SWAP, DROP
         DC      BASE, FETCH, DIGIT
         DC      ZEQU
@@ -4552,9 +4549,9 @@ NPNUM4:
         DC      FETCH
         DC      USTAR
         DC      DPLUS
-        DC      ZERO
-NPNUM3:                 ; {THEN THEN}
-        _0BRANCH(NPNUM1)
+        _BRANCH(NPNUM1) ;{ repeat }
+NPNUM5:
+        DC      TDROP
         DC      SEMIS
 ;
 worddoc( {FORMATTING~},{NUMBER},{number},{ ---  s/d},{},

@@ -1,4 +1,4 @@
- ciforth lab  $Revision$ (c) Albert van der Horst
+,ciforth lab  $Revision$ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -1168,7 +1168,8 @@ DROP KEY DROP .S ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
 ( SEE KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
 REQUIRE +THRU   REQUIRE ALIAS
-: H.. BASE @ >R HEX . R> BASE ! ;
+: BLOB DROP ; \ For DEPTH: print blob in correct color.
+: H.. BASE @ >R HEX 0 .R R> BASE ! ;
 : B.. H.. ;
 
 1 8 +THRU
@@ -1181,7 +1182,6 @@ REQUIRE +THRU   REQUIRE ALIAS
 
 
 
-
 ( cracker0_inspectors )                 \ AvdH A3apr22
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
@@ -1191,9 +1191,9 @@ REQUIRE +THRU   REQUIRE ALIAS
 : NEXTDEA CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ DUP 0= IF
 2DROP 2DROP 0 EXIT THEN <> WHILE >LFA @ REPEAT SWAP DROP ;
 \ For ADDRESS : it IS a proper `dea'
-'' ALIAS HEAD'         \ If dea is intended rather than xt.
 : DEA? NEXTDEA 0= 0= ;
-
+'' ALIAS HEAD'         \ If dea is intended rather than xt.
+'$@ ALIAS @+
 
 \ Emergency
  : ?Q KEY? ABORT" Aborted by user" ;
@@ -1220,8 +1220,9 @@ REQUIRE +THRU   REQUIRE ALIAS
  : CFOF HEAD' >CFA @ ;
 
 : ID.. CFA> ID. ; ( cfa--. Print a words name )
-: ID.+ $@ ID.. ; ( dip -- dip' Print a words name )
-'ID. ALIAS ID.-PLAIN  \ Prevents coloring
+: ID.+ @+ ID.. ; ( dip -- dip' Print a words name )
+\ Print name of DEA, plainly.
+: ID.-PLAIN  >NFA @ @+ TYPE ;
 
 \ For DEA: it IS a header (heuristically).
  : HEAD? DUP >DFA @ SWAP  >PHA = ;
@@ -1229,7 +1230,6 @@ REQUIRE +THRU   REQUIRE ALIAS
 
  : BY ( XT --. the CFA word is decompiled using : )
    T, ' T, ; ( a word from the input stream )
-
 ( cracker3 ) \ AvdH A0MAR30
  : CRACKED ( DEA--. Decompile a word from its DEA)
    \ Is it known as a mini cracker?
@@ -1247,16 +1247,16 @@ REQUIRE +THRU   REQUIRE ALIAS
 : CRACK-CHAIN CR BEGIN ?Q DUP @ LIT (;) <>
     WHILE ITEM REPEAT DROP ;
 ( cracker4_types_by_low_level_code ) \ AvdH A3apr23
+\ For all -words: 1/1 pointer before and after execution.
 
 
  ( It is done by examples of the defined words )
- : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
+ : -co DUP CFA> >DFA @ CR H.. ."  CONSTANT " ID.. CR ;
       CFOF BL BY -co
- : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
+ : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ."  ) VARIABLE "
     ID.. CR ;              CFOF STALEST BY -va
  : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
       CFOF FENCE BY -us
-
 
 
 
@@ -1280,13 +1280,13 @@ make decompile pointer point to exit!)
       CFOF FORTH BY -dd
 ( cracker6_inline )     \ AvdH A3apr23
 
-( for all -words: 1/1 pointer before afd after execution)
-    : -con CELL+ DUP @ H.. CELL+ ;
-    : -dea CELL+ DUP @ &' EMIT ID.. CELL+ ;
-: -lit DUP CELL+ @ DEA? IF -dea ELSE -con THEN ;
+    : -con @+ H.. 1 BLOB ;
+    : -dea @+ &' EMIT ID.-PLAIN 1 BLOB ;
+: -lit CELL+ DUP @ DEA? IF -dea ELSE -con THEN SPACE ;
 ' LIT BY -lit
-: -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
-    ."  ] DLITERAL " $@ + 4 CELLS + ;   ' SKIP BY -sk
+: -sk CELL+ CR ." [ " &" EMIT DUP @+ TYPE &" EMIT
+    ."  ] DLITERAL " @+ + 4 CELLS + ;   ' SKIP BY -sk
+
 
 
 
@@ -1298,17 +1298,17 @@ make decompile pointer point to exit!)
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 \ Print the name of ADDRESS , if it is a dea.
 : .DEA? DUP DEA? IF ID.-PLAIN ELSE DROP ." ? " THEN ;
-: -target DUP ( IP -- IP ,print comment about current jump)
-." ( between " TARGET DUP 0 CELL+ - @ .DEA? @ .DEA? ." ) " ;
-: -0br CR ." 0BRANCH [ " -con ." , ] " -target ;
-' 0BRANCH BY -0br
-: -br  CR ." BRANCH  [ " -con ." , ] " -target ;
-' BRANCH BY -br
+( IP -- IP ,print comment about current jump)
+: -target DUP ." ( between " TARGET DUP 0 CELL+ - @ .DEA? SPACE
+    @ .DEA? ."  ) " ;
+: -br  CR @+ ID. ." [ " @+ H.. ."  , ] " -target ;
+' BRANCH BY -br         ' 0BRANCH BY -br
 
-: -do CR ." DO " CELL+ CELL+ ;          ' (DO) BY -do
-: -qdo CR ." ?DO " CELL+ CELL+ ;        ' (?DO) BY -qdo
-: -lo CR ." LOOP " CELL+ CELL+ ;        ' (LOOP) BY -lo
-: -pl CR ." +LOOP " CELL+ CELL+ ;       ' (+LOOP) BY -pl
+: -do CR 2 BLOB ." DO " CELL+ CELL+ ;      ' (DO) BY -do
+: -qdo CR 2 BLOB ." ?DO " CELL+ CELL+ ;    ' (?DO) BY -qdo
+: -lo CR ." LOOP " CELL+ CELL+ ;           ' (LOOP) BY -lo
+: -pl CR 1 BLOB ." +LOOP " CELL+ CELL+ ;   ' (+LOOP) BY -pl
+
 
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
 VOCABULARY ASSEMBLER IMMEDIATE
