@@ -1303,7 +1303,7 @@ _PC_({_NEWDEBUG_({ CALL    DISPLAYSI})})
 
 DP0:
 ; Vocabularies all end in a link to 0.
-; Only the word FORTH links to the DENOTATION wordlist,
+; Only the word ONLY links to the DENOTATION wordlist,
 ; that in turn links to 0.
 
 define({_LINKOLD},0)dnl
@@ -1457,6 +1457,10 @@ _ALIGNED_({ DC LALIGN}, {dnl})
 ;
 dnl Remember the top of the denotation chain.
 define({_STARTOFDENOTATION_},_LINKOLD)dnl
+;
+dnl Reset the link chain at this to start the ONLY wordlist.
+define({_LINKOLD},0)dnl
+;
 worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
 {The name of the primary vocabulary. Execution pushes the
 forthcode({FORTH}) forthdefi({WID})
@@ -1477,8 +1481,11 @@ define({_LINKOLD}, DENOTBODY )dnl
 ; It links to the DENOTATION vocabulary.
 _HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      0       ;{ END OF VOCABULARY LIST}
+        DC      _DEA(ONLY)       ;{ NEXT VOCABULARY }
 _HEADER( , , ,0, B_DUMMY,_DEA(TASK))
+;
+dnl Remember the top of the ONLY vocabulary.
+define({_STARTOFONLY_},_LINKOLD)dnl
 ;
 dnl Reset the link chain at this to start the ENVIRONMENT wordlist.
 define({_LINKOLD},0)dnl
@@ -1556,9 +1563,10 @@ _HEADER({SUPPLIER},{SUPPLIER},{DOCOL})
 ;
 dnl Remember the top of the environment chain.
 define({_STARTOFENVIRONMENTS_},_LINKOLD)dnl
-dnl Reset the link chain at this to start the FORTH wordlist.
-dnl out of the normal search.
-define({_LINKOLD},FORTH)dnl
+;
+dnl The following words belong to the FORTH wordlist.
+dnl Reset the link chain.
+define({_LINKOLD},0)dnl
 ;
 worddoc( {WORDLISTS},{DENOTATION},{denotation},{},{CI},
 {The name of the forthcode({DENOTATION}) vocabulary. The
@@ -1578,12 +1586,12 @@ control.}})
 },
 {{VOCABULARY}},
 {{: AUX1 [COMPILE] DENOTATION DEFINITIONS ;},{},
-{: AUX2 [COMPILE] FORTH DEFINITIONS ;},{},
+{: AUX2 PREVIOUS DEFINITIONS ;},{},
 {: GS1 AUX1 LATEST ID. AUX2 ; GS1},{"}},
 enddoc)
 _HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      _DEA(FORTH)     ;{ NEXT VOCABULARY }
+        DC      0       ;{ END OF VOCABULARY LIST}
 DENOTBODY:
 _HEADER( , , ,0, B_DUMMY, _STARTOFDENOTATION_)
 ;
@@ -1602,7 +1610,7 @@ FORTH DEFINITIONS ; GS1},{SUPPLIER}},
 enddoc)
 _HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      _DEA(DENOT)       ;{ NEXT VOCABULARY }
+        DC      _DEA(FORTH)       ;{ NEXT VOCABULARY }
 _HEADER( , , ,0, B_DUMMY, _STARTOFENVIRONMENTS_)
 ;
 worddoc( {MISC},{NOOP},{no_operation},{},{},
@@ -3361,10 +3369,10 @@ least 8. },
 {{PRESENT},{VOCABULARY},{CURRENT}},
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-_HEADER({CONTEXT},{SEARCH},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
+_HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
 ;      IMPORTANT
 ;     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE
-;     IN ADDITION TO THE ONE FOR SEARCH
+;     IN ADDITION TO THE ONE FOR CONTEXT ITSELF.
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -4648,13 +4656,13 @@ dnl 1ONNOBO is found as a misspelled number!
 },
 enddoc)
 _HEADER({FOUND},{FOUND},{DOCOL})
-        DC      SEARCH, TOR
+        DC      CONTEXT, TOR
 FOUND1: DC      RR, FETCH
 ;        DC      DOTS
         DC      PFIND, LDUP, ZEQU
         _0BRANCH(FOUND3)
         DC      DROP
-        DC      RR, FETCH, LIT, FORTH, LSUB ;{Was this ONLY?}
+        DC      RR, FETCH, LIT, ONLY, TWID, LSUB
         _0BRANCH(FOUND2)
         DC      FROMR, CELLP, TOR
         _BRANCH(FOUND1)
@@ -5245,7 +5253,7 @@ _HEADER({VOCABULARY},{VOCAB},{DOCOL})
 DOVOC:
         DC      ALSO
         DC      CELLP   ;{ Make it a WID. }
-        DC      SEARCH
+        DC      CONTEXT
         DC      STORE
         DC      SEMIS
         PAGE
@@ -5289,7 +5297,7 @@ forthsamp({cccc}) .},
 },
 enddoc)
 _HEADER({DEFINITIONS},{DEFIN},{DOCOL})
-        DC      SEARCH
+        DC      CONTEXT
         DC      FETCH
         DC      CURR
         DC      STORE
@@ -5310,11 +5318,11 @@ the forthcode({ONLY}) search order.},
 },
 enddoc)
 _HEADER({ALSO},{ALSO},{DOCOL})
-        DC      SEARCH, LDUP, CELLP
+        DC      CONTEXT, LDUP, CELLP
         DC      LIT, _CELLS(M4_MAXWORDLIST-1)
         DC      LMOVE
-        DC      LIT, FORTH  ;{End sentinel for array of word lists.}
-        DC      SEARCH, LIT, _CELLS(M4_MAXWORDLIST), PLUS
+        DC      LIT, ONLY, TWID ;{End sentinel for array of word lists.}
+        DC      CONTEXT, LIT, _CELLS(M4_MAXWORDLIST), PLUS
         DC      STORE ;{Trim sets of wordset.}
         DC      SEMIS
 ;
@@ -5328,28 +5336,32 @@ If empty still the forthcode({ONLY}) search order is left.},
 },
 enddoc)
 _HEADER({PREVIOUS},{PREVI},{DOCOL})
-        DC      SEARCH, LDUP, CELLP, SWAP
+        DC      CONTEXT, LDUP, CELLP, SWAP
         DC      LIT, _CELLS(M4_MAXWORDLIST)
         DC      LMOVE
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
-{Make forthcode({CONTEXT}), the search order stack empty, leaving the minimum search order ,
-which is approximately the forthcode({DENOTATION}) word list plus the word forthcode({FORTH}).
+{This is in fact a forthcode({VOCABULARY}).
+Executing it, pushes the wid of the minimum search order to the
+forthcode({CONTEXT}).
+It is effectively made empty,
+leaving the minimum search order,
+because forthcode({(FIND)}) stops when finding forthcode({ONLY}).
+The minimum search order is the word forthcode({FORTH}) plus the
+forthcode({DENOTATION}) word list.
 By using forthcode({FORTH}) one can regain control.
 },
 {{VOCABULARY}},
 {
-  {: test ONLY WORDS POSTPONE FORTH ; test},
+  {: test POSTPONE ONLY WORDS POSTPONE FORTH ; test},
 {FORTH "   +   -   F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0   ^   &   '}
 },
 enddoc)
-_HEADER({ONLY},{ONLY},{DOCOL})
-        DC      LIT, FORTH, SEARCH, STORE
-        DC      SEARCH, LDUP, CELLP
-        DC      LIT, _CELLS(M4_MAXWORDLIST-1)
-        DC      LCMOVE
-        DC      SEMIS
+_HEADER({ONLY},{ONLY}, {DODOE}, , B_IMMED)
+        DC      DOVOC
+        DC      _DEA(DENOT)       ;{ NEXT VOCABULARY }
+_HEADER( , , ,0, B_DUMMY, _STARTOFONLY_)
 ;
 worddocsafe( {PARSING},{(},{paren},{},{ISO,FIG,I,L0},
 {{{{Used in the form: forthsamp({( cccc)}). Ignore a comment that
@@ -9440,7 +9452,7 @@ must have the stack diagram forthsamp({x1..xn dea --- x1..xn})
 {{FOR-WORDS},{EXECUTE}},
 {
 { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
-{JOHN ENVIRONMENT DENOTATION FORTH},
+{JOHN ENVIRONMENT FORTH ONLY DENOTATION },
 {FORTH DEFINITIONS},{}
 },
 enddoc)
@@ -9481,7 +9493,7 @@ _HEADER({WORDS},{WORDS},{DOCOL})
         DC      LOUT
         DC      STORE
         DC      LIT, IDDOT
-        DC      SEARCH
+        DC      CONTEXT
         DC      FETCH
         DC      FORW
         DC      SEMIS
@@ -10072,7 +10084,7 @@ system or functions available in the BIOS-rom.},
 worddocchapter({WORDLISTS},{ },
 {The dictionary is subdivided in non-overlapping subsets: the
 forthdefi({word list})'s (forthpxref({DICTIONARY})).
-_VERBOSE_({{There is one exception: the DENOTATION wordlist is also part of the FORTH word list.  }})
+_VERBOSE_({{There is one exception: the DENOTATION wordlist is also part of the ONLY word list.  }})
  They are created by the defining word
 forthcode({VOCABULARY}) and filled by defining words while that
 vocabulary is forthcode({CURRENT}) . They regulate how words

@@ -6,7 +6,7 @@ Do a regression test on lina :
 and
     lina -e | tee aap
 Within Forth :
-    CRACK-FROM FORTH BYE
+    CRACK-FROM DENOTATION BYE
 
 Then
    sed -f blabla <aap >qqq

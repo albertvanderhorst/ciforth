@@ -259,10 +259,10 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 : .VOCS 'ID. FOR-VOCS ;
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
-: CONTEXT SEARCH-ORDER ;
+: SEARCH-ORDER CONTEXT ;  \ For backward compatibility.
 \ Print the current search order by vocabulary names
-: ORDER CONTEXT BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
-2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
+: ORDER CONTEXT BEGIN $@ DUP .WID 'ONLY >WID = UNTIL
+DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 \ This is a BUFFER compatible with FIG-Forth.
 : BUFFER   (BUFFER) CELL+ CELL+ ;
 
