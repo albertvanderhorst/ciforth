@@ -2726,7 +2726,7 @@ to the high level code for a colon-definition, and to the
  forthcode({DOES>}) pointer for a word build using forthcode({CREATE}) .
 In all these cases it directly follows the header.},
 {'},{>CFA},{>LFA},{>NFA}}, 
-{ (CREATE) APE SMUDGE HERE ' APE >PFA @ = .},{_T_}},
+{{ "APE" (CREATE) SMUDGE HERE ' APE >PFA @ = .},{_T_}},
 enddoc)
 HEADER({>PFA},{TPFA},{DOCOL})
         DC      LIT, CELLS(D_HOFFSET)
@@ -2874,21 +2874,25 @@ HEADER({COMPILE},{COMP},{DOCOL})
         DC      COMMA
         DC      SEMIS
 ;
-worddoc({PARSING},{[},{left_bracket},{},{P,L1},
+worddoc({PARSING},{[},{left_bracket},{},{ISO,P,L1},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
 This allows calculation or compilation exceptions before resuming
-compilation with forthcode({]})},{{LITERAL} ,{]}}, {}, enddoc)
+compilation with forthcode({]})},{{LITERAL} ,{]}}, 
+{{!CSP : GS1 LIT [ 12398 , ] ; ?CSP GS1 .},{12398}},
+enddoc)
 HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      ZERO
         DC      STATE
         DC      STORE
         DC      SEMIS
 ;
-worddoc({PARSING},{]},{righ_bracket},{},{L1},
+worddoc({PARSING},{]},{righ_bracket},{},{ISO,L1},
 {Resume compilation, to the completion of a colon-definition.},
-{{[}}, {}, enddoc)
+{{[}}, 
+{{." Via ["},{Via [}},
+enddoc)
 HEADER({]},{RBRAC},{DOCOL})
         DC      ONE
         DC      STATE
@@ -2899,7 +2903,11 @@ worddoc({DICTIONARY},{SMUDGE},{smudge},{},{},
 {Used during word definition to toggle the "smudge bit" in a
 definitions' name field. This prevents an uncompleted definition
 from being found during dictionary searches, until compiling is
-completed without error.},{{IMMEDIATE}}, {}, enddoc)
+completed without error.},
+{{IMMEDIATE}}, 
+dnl NOTE: a word starting with e.g. C would be a denotation.
+{{"ZXJEP" 2DUP (CREATE) 2DUP (FIND) . SMUDGE 2DUP (FIND) 0= .},{0 0} }, 
+enddoc)
 HEADER({SMUDGE},{SMUDG},{DOCOL})
         DC      LATES
         DC      TFFA
@@ -2909,7 +2917,9 @@ HEADER({SMUDGE},{SMUDG},{DOCOL})
 ;
 worddoc({FORMATTING},{HEX},{hex},{},{L0},
 {Set the numeric conversion forthcode({BASE}) for hexadecimal (base 16) input-output.},
-{{DECIMAL}}, {}, enddoc)
+{{DECIMAL}}, 
+{{HEX BASE @ DECIMAL .},{16}}, 
+enddoc)
 HEADER({HEX},{HEX},{DOCOL})
         DC      LIT,16
         DC      BASE
@@ -2918,7 +2928,9 @@ HEADER({HEX},{HEX},{DOCOL})
 ;
 worddoc({FORMATTING},{DECIMAL},{decimal},{},{L0},
 {Set the numeric conversion forthcode({BASE}) for decimal input-output.},
-{{HEX}}, {}, enddoc)
+{{HEX}}, 
+{{." Via BASE"},{Via BASE}},
+enddoc)
 HEADER({DECIMAL},{DECA},{DOCOL})
         DC      LIT,10
         DC      BASE
@@ -2928,7 +2940,9 @@ HEADER({DECIMAL},{DECA},{DOCOL})
 worddocsafe({DEFINING},{(;CODE)},{paren_semicolon_code},{},{C},
 {The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
 field of the most recently defined word to point to the following
-machine code sequence.},{{;CODE}}, {}, enddoc)
+machine code sequence.},{{;CODE}}, 
+{{." No test"},{No test} },
+enddoc)
 HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      FROMR
         DC      LATES
@@ -2940,8 +2954,9 @@ worddoc({DEFINING},{;CODE},{semicolon_code},{},{P,C,L0},
 {Used in the form:
   forthsamp({: cccc .... ;CODE})
 assembly mnemonics Stop compilation and terminate a new defining
-word forthvar({cccc}) by compiling forthcode({(;CODE)}). Set the forthcode({CONTEXT}) vocabulary to
-forthcode({ASSEMBLER}) , assembling to machine code the following mnemonics.
+word forthvar({cccc}) by compiling forthcode({(;CODE)}). Set the
+forthcode({CONTEXT}) vocabulary to forthcode({ASSEMBLER}) ,
+assembling to machine code the following mnemonics. 
 
 When forthvar({cccc}) later executes in the form:
                      forthsamp({cccc nnnn})
@@ -2949,7 +2964,9 @@ the word forthvar({nnnn}) will be created with its execution proceedure given by
 the machine code following forthvar({cccc}) .
 That is, when forthvar({nnnn}) is executed, it does so by jumping to the code
 after forthvar({nnnn}) . An existing defining word must exist in forthvar({cc}) prior to
-forthcode({;CODE}) .},{(;CODE)}, {}, enddoc)
+forthcode({;CODE}) .},{(;CODE)}, 
+{{." Not present"},{Not present} },
+enddoc)
 ;{ The word ;CODE has been moved to BLOCKS.BLK>}
 ;
 worddoc({DEFINING},{CREATE},{create},{},{},
@@ -2961,7 +2978,9 @@ after executing forthcode({CREATE}) .
 _VERBOSE({Space in this data field has yet to 
 be allocated and the execution action can be changed.})
 ciforth is byte aligned, so no extra measures are needed.},
-{{DOES>},{;CODE},{ALLOT},{,},{C,}}, {}, enddoc)
+{{DOES>},{;CODE},{ALLOT},{,},{C,}}, 
+{{ CREATE ZWY LATEST ID.},{ZWY}},
+enddoc)
 HEADER({CREATE},{CREATE},{DOCOL})
         DC      PWORD
         DC      PCREAT
@@ -2978,13 +2997,19 @@ HLNOOP: DC      SEMIS
 ;
 worddoc({DEFINING},{DOES>},{does},{},{L0},
 {A word which defines the run-time action within a high-level
-defining word. forthcode({DOES>}) alters the code field and first parameter of
-the new word to execute the sequence of compiled word addresses
-following forthcode({DOES>}) . Used in combination with forthcode({CREATE}) . When the forthcode({DOES>})
-part executes it begins with the address of the first parameter of
-the new word on the stack. This allows interpretation using this
-area or its contents. Typical uses include the Forth assembler,
-multidimensional arrays, and compiler generation.},{}, {}, enddoc)
+defining word. forthcode({DOES>}) alters the code field and
+first parameter of the new word to execute the sequence of
+compiled word addresses following forthcode({DOES>}) . Used in
+combination with forthcode({CREATE}) . When the
+forthcode({DOES>}) part executes it begins with the address of
+the first parameter of the new word on the stack. This allows
+interpretation using this area or its contents. Typical uses
+include the Forth assembler, multidimensional arrays, and
+compiler generation.},
+{}, 
+{{ !CSP : GS1 DOES> @ 1 + ;  : GS2 DOES> @ 2 + ; dnl
+  CREATE MARY 0 , GS1 MARY . GS2 MARY . ?CSP},{1 2} },
+enddoc) 
 HEADER({DOES>},{DOES},{DOCOL})
         DC      FROMR
         DC      LATES
