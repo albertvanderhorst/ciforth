@@ -46,7 +46,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
            THIS IS A WARNING ONLY.
  THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
-( ?16 ?32 ?LI ?PC Commands applicable to 32-bit A1sep24 )
+( ?16 ?32 ?LI ?PC Commands applicable to 32-bit ) \ A1sep24
   : ^ .S ;     : IVAR CREATE , ;   CREATE 32-bit
   HEX 0 CONSTANT CS_START
  : LC@ SWAP 10 * + CS_START - C@ ;
@@ -958,12 +958,11 @@ MEISJES JOPIE
 1-1-HTML VR OF WIL JE HAAR VRIENTJE" MEISJES JONGENS
 1-1-HTML RV OF WIL JE ZIJN VRIENDIN" JONGENS MEISJES
 NO-SEX .rel   MEISJES .set   FILES du$
-( RAND EDN 1991JAN21, pg 151 ) HEX
+( RAND ) HEX \ EDN 1991JAN21, pg 151
 
- 0 IVAR SEED
-
+VARIABLE SEED
 ( . -- . ) ( Use the nanosecond counter to start)
-: RANDOMIZE DROP TIME SEED ! ;
+: RANDOMIZE TIME DROP SEED ! ;
 
 ( -- N  Leave a random number )
 : RAND SEED @ 107465 * 234567 + DUP SEED ! ;
@@ -974,22 +973,23 @@ NO-SEX .rel   MEISJES .set   FILES du$
 : @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
 ( RANDOM-SWAP ( R N -- )
 ( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+RANDOMIZE
+( T] T[ new-IF_etc. ) \ AvdH A1sep25
+\ Allocate an arrea for a temporary compilation.
+: NONAME [ 1000 ALLOT ] ;
+\ Go compiling : remember HERE and STATE.
+: T] STATE @ 0= IF HERE 'NONAME >DFA @ DP !  THEN STATE @ ] ;
+\ Restore HERE and STATE.
+: T[ 0= IF POSTPONE (;) DP ! POSTPONE [ NONAME THEN ; IMMEDIATE
+: IF           T] POSTPONE IF                    ; IMMEDIATE
+: DO           T] POSTPONE DO                    ; IMMEDIATE
+: ?DO          T] POSTPONE ?DO                   ; IMMEDIATE
+: BEGIN        T] POSTPONE BEGIN                 ; IMMEDIATE
+: THEN            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
+: LOOP            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
+: +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
+: REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
+: UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
 
 
 
@@ -1422,10 +1422,10 @@ DECIMAL  PREVIOUS
         THEN
      LOOP ;
 
-( Using the internal timer for testing A0JUN28 AH) ?32 HEX
+( TIME MEASURE ELAPSED ) ?32 \ AvdH A1sep25
+120 LOAD HEX
 \  CODE TIME 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
 CODE TIME 0F C, 31 C, 50 C, 52 C, NEXT C;
-
 
  DECIMAL
  ." What is the speed of your Pentium (in Mhz)?"
@@ -1918,7 +1918,8 @@ REQUIRE OS-IMPORT
 
 
 
-( GENERAL PROTECTED MODE 16/32 ASSEMBLER ELECTIVES 0AJUL03 AH )
+( ASSEMBLER CODE C; )  \ electives AvdH A0JUL03
+"?16" PRESENT? 0=  "ASSEMBLER" PRESENT? OR ?LEAVE-BLOCK
 VOCABULARY ASSEMBLER IMMEDIATE
 : CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER !CSP  ;
 : ;CODE
@@ -1932,7 +1933,6 @@ ASSEMBLER DEFINITIONS
 
  125 129 HEX THRU  DECIMAL ( Common code, postlude)
 PREVIOUS DEFINITIONS
-
 
 ( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND)
 
