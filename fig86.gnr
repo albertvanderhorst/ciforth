@@ -3430,14 +3430,14 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LTYPE
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{SET-SRC},{paren_eval},{sc -- },{I},
+worddocsafe( {PARSING},{SET-SRC},{set_source},{sc -- },{I},
 {Make the string constant forthsamp({sc}) the current input
 stream. This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
 called forthcode({SET-SRC}). _VERBOSE_({ In practice this word
 is almost always followed by a call to forthcode({INTERPRET}).})},
 {{EVALUATE},{INTERPRET}},
-{{ "1 2 3 ." SET-SRC . . .},{3 OK}},
+{{ "1 2 3 . CR" SET-SRC . . .},{3}},
 enddoc)
 HEADER({SET-SRC},{SETSRC},{DOCOL})
         DC      OVER, PLUS
@@ -3789,31 +3789,67 @@ TONUM9:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
-worddocsafe( {DICTIONARY},{FIND%},{find_following},{"name" --- dea},{},
-{Parse a blank-delimited string from the current input stream
-and look the string up according to forthcode({(FIND)}) . If
-found, and it is not a denotation, leave the dictionary entry
-address forthsamp({dea}) of the first entry found, else leave a
-nil pointer.},
-{},
-{ { : BONOBO ; FIND: BONOBO ' BONOBO = .},{_T_} },
+worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
+{ Look the string up forthsamp({sc}) according to
+forthcode({(FIND)}) . If found, and it is not a denotation,
+leave the dictionary entry address forthsamp({dea}) of the
+first entry found, else leave a nil pointer.}, 
+{{FIND},{VOCABULARY}},
+{ { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
+{ 243 "BONNOBO" FOUND . .},{0 243},
+{ 541 "MYBONOBO" FOUND . .},{0 541}
+},
 enddoc)
-HEADER({FIND:},{DDFIND},{DOCOL})
-        DC      PWORD, PFIND
+HEADER({FOUND},{FOUND},{DOCOL})
+        DC      PFIND
+        DC      LDUP
+        _0BRANCH(FOUND1) ;{IF}
         DC      LDUP, TFFA, FETCH,
         DC      LIT, B_DENOT, LAND
-        _0BRANCH(DDFIND1) ;{IF}
+        _0BRANCH(FOUND1) ;{IF}
         DC      DROP, ZERO
-DDFIND1:               ;{THEN}
+FOUND1:               ;{THEN THEN}
         DC SEMIS
+;
+worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{},
+{For the (old fashioned) string _VERBOSE_({(stored with a
+preceeding character count)}) at forthsamp({addr}) find a Forth
+word with that name in the forthcode({CONTEXT}) and then
+forthcode({CURRENT}) vocabularies and return its execution
+token forthsamp({xt}). If the word is immediate, also return 1,
+otherwise also return -1. If it is not found, leave the original 
+forthsamp({addr}) and a zero. }, 
+{{FOUND},{(FIND)}},
+{
+{ : FIND: BL WORD FIND ; dnl
+123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
+{ IMMEDIATE 142 FIND: BONOBO . ' BONOBO = . .},{1 _T_ 142},
+{ 153 FIND: BONNOBO . HERE - ABS 30 U< . .},{0 _T_ 153},
+},
+enddoc)
+HEADER({FIND},{FIND},{DOCOL})
+        DC      LDUP, COUNT, FOUND
+        DC      LDUP
+        _0BRANCH(FIND1) ;{IF}
+        DC      SWAP, DROP ; {The address.}
+        DC      LDUP, TFFA, FETCH,
+        DC      LIT, B_IMMED, LAND
+        DC      LIT, -1, SWAP
+        _0BRANCH(FIND1) ;{IF}
+        DC      NEGATE
+FIND1:               ;{THEN THEN}
+        DC      SEMIS
 ;
 worddocsafe( {DICTIONARY},{(FIND)},{paren_find},{sc --- dea},{},
 {For the string constant forthsamp({sc}) search the
-forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
-for a matching entry. If found, leave the dictionary entry
+forthcode({CONTEXT}) and then forthcode({CURRENT}) 
+and forthcode({DENOTATION}) vocabularies
+for a matching entry. _VERBOSE)({A denotation matches if the first
+letter is correct.}).
+If found, leave the dictionary entry
 address forthsamp({dea}) of the first entry found, else leave a
 nil pointer.},
-{FIND:},
+{{FIND}},
 { { : BONOBO ; "BONOBO" (FIND) ' BONOBO = .},{_T_} },
 enddoc)
 HEADER({(FIND)},{PFIND},{DOCOL})
@@ -4418,7 +4454,8 @@ Ignore a comment that will be delimited by the end of the current line.
 May occur during execution or in a
 colon-definition. A blank after the leading parenthesis is required.},
 {{(}},
-{{\ Nothing to be seen 8374 .},{OK} },
+{{\ Nothing to be seen 8374 .
+},{} },
 enddoc)
 HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
         DC      LIT,LF
@@ -4441,8 +4478,8 @@ QUIT1:  DC      RZERO   ;{BEGIN}
         DC      RPSTO
         DC      QUERY
         DC      INTER
-        DC      STATE
-        DC      FETCH
+NOOPS:  DC      STATE  ;{ This code may be patched.}
+        DC      FETCH  ;{ This code may be patched.}
         DC      ZEQU
         _0BRANCH(QUIT2) ;{IF}
         _STRINGINLINE({OK})   ;{THEN}
@@ -4562,6 +4599,10 @@ _LINUX_N_({
         DC      LIT, _VAR_FIELD(ACCEP)
         DC      LIT, ACCEP_B-ACCEP_A
         DC      LCMOVE
+        DC      LIT,NOOP  ; {Suppress OK for pipes.}
+        DC      LIT,NOOPS, STORE
+        DC      LIT,ONE
+        DC      LIT,NOOPS+_CELLS(1), STORE
 COLD1:
 });_END_({_LINUX_N_})
 _BLOCKSINFILE_({
@@ -5829,7 +5870,7 @@ dnl HENCE THE CRITICAL LAYOUT WITH RESPECT TO CR'S
 {
 {CR KEY},{},
  {G
-  EMIT CR},{OK
+  EMIT CR},{
 G},
 {CR KEY},{},
  {G EMIT CR},{G}
