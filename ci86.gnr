@@ -6910,8 +6910,8 @@ worddoc( {STORAGE},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
 a result code into forthvar({ior}). The latter is the MSDOS
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
-{{"AAP" CREATE-FILE . CLOSE-FILE .},{0 0},
-{"AAP" 0 DELETE-FILE . },{0 },
+{{"AAP" 0 CREATE-FILE . CLOSE-FILE .},{0 0},
+{"AAP" DELETE-FILE . },{0 },
 {345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345}},
 enddoc)
 HEADER({DELETE-FILE},{DELETE},{DOCOL})
@@ -6936,9 +6936,9 @@ this may be zero. forthvar({ior}) is 0 for success, or otherwise
 the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R/W}},
 {
-{ "hello.frt" 0 OPEN-FILE . DUP 0 > . },{0 _T_},
-{PAD 1024 ROT READ-FILE . PAD SWAP TYPE },{0 ." Hello world!"},
-{CLOSE-FILE .},{0}
+{ "hello.frt" 0 OPEN-FILE . CONSTANT FD FD 0 > . },{0 _T_},
+{PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 ." Hello world!"},
+{FD CLOSE-FILE .},{0}
 },
 enddoc)
 HEADER({READ-FILE},{RFILE},{DOCOL})
@@ -6984,7 +6984,7 @@ negated, to be inspected using forthcode({MESSAGE}).
 {{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R/W}},
 {
 { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE . . },{0 18},
+{"."" Hello world!""" FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
@@ -6998,19 +6998,6 @@ WFILE1:
 WFILE2:
         DC      SEMIS
 ;
-worddoc( {STORAGE},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
-{Save the string constant forthsamp({sc2} as a new file with
-the name forthsamp({sc1}) ) . Any errors are thrown. },
-{{GET-FILE},{OPEN-FILE},{THROW}},
-{{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
-enddoc)
-HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      CREATEF, THROW
-        DC      LDUP, TOR
-        DC      WFILE, THROW
-        DC      FROMR, THROW
-        DC      SEMIS
-;
 worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
 {Get the content of the file with name forthsamp({sc1});
 leave it as a string forthsamp({sc2}). Any errors are thrown. },
@@ -7018,20 +7005,30 @@ leave it as a string forthsamp({sc2}). Any errors are thrown. },
 {{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
 enddoc)
 HEADER({GET-FILE},{GETFILE},DOCOL)
-        DC      HERE, TOR
+        DC      TDUP, SCOMMA, DROP
+        DC      LIT, 'F'+(100H*('i'+100H*('L'+100H*'e'))), COMMA ;{Magic number.}
+        DC      ZERO, OPEN, THROW, LDUP, TOR
+        DC      HERE
         DC      LIT, _BITS16_(10000)_BITS32_(10000000), ALLOT
-        DC      RR, SSTOR, ZERO, RR, CHAPP ; {Unix requires a c-string.}
-        _STRINGINLINE({FiLeBuF})        ; {Magic number.}
-        DC      RR, SPTOR
-        DC      FROMR, SFET, OVER, PLUS, TOR
-        DC      OPEN, THROW
-        DC      LDUP, RR, LIT,  _BITS16_(9000)_BITS32_(9999000)
-        DC      ROT, RFILE, THROW
-        DC      CLOSE, THROW
-        DC      FROMR, PLUS, LDP, STORE
+        DC      LDUP, LIT, _BITS16_(9000)_BITS32_(9999000)
+        DC      RR, RFILE, THROW
+        DC      FROMR, CLOSE, THROW
+        DC      TDUP, PLUS, LDP, STORE        ;{ No allocation if it fails.}
         DC      SEMIS
 ;
-
+worddoc( {STORAGE},{PUT-FILE},{put_file},{sc1 sc2 --- },{},
+{Save the string constant forthsamp({sc2} as a new file with
+the name forthsamp({sc1}) ) . Any errors are thrown. },
+{{GET-FILE},{OPEN-FILE},{THROW}},
+{{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
+enddoc)
+HEADER({PUT-FILE},{PUTFILE},DOCOL)
+        DC      ZERO, CREATEF, THROW
+        DC      LDUP, TOR
+        DC      WFILE, THROW
+        DC      FROMR, CLOSE, THROW
+        DC      SEMIS
+;
 });_END_({ _HOSTED_MSDOS_})
 
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
