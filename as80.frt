@@ -46,7 +46,8 @@ ASSEMBLER DEFINITIONS
 00 0400 138 T! 02 C2 2 1FAMILY, JC, CC, ( ZR| Y| T, )
 00 00 00 00 1PI NOP       00 00 00 C9 1PI RET       00 00 00 76 1PI HLT
 ( ############## 8080 ASSEMBLER PROPER END ############################ )
- ' NOP >PHA CONSTANT (NEXT)
+ ( Assume a NOOP written low level code.)
+' NOOP >DFA @ CONSTANT (NEXT)
 : NEXT JMP (NEXT) X, ;
 : PSH1 JMP (NEXT) 1 - X, ;
 : PSH2 JMP (NEXT) 2 - X, ;
