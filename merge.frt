@@ -1,46 +1,58 @@
+
+\ Merging linked lists.
+\ Nomenclature :
+\   LIST    The head of a linked list that ends in a null pointer (0)
+\   SLIST   The head of a linked list that is sorted.
+\   ULIST   The head of a linked list that is unsorted.
+\   SLISTP  The head of a linked list that is sorted, plus the level.
+\   ELEM    An element of a linked list, at the same time the head of
+\            the remainder of the list.
+
 REQUIRE COMPARE
 
 VOCABULARY AAP AAP DEFINITIONS
 
-\ For LINK1 and LINK2, return LINK1 and LINK2 plus "link1 IS lower".
+\ Contains an execution token with the effect:
+\ For ELEM1 and ELEM2, return ELEM1 and ELEM2 plus "elem1 IS lower".
 VARIABLE *<
 : LL< *< @ EXECUTE ;
 
-\ For ELEMENT return POINTER to next element of list.
+\ Contains an execution token with the effect:
+\ For ELEM return POINTER to next element of list.
 VARIABLE *>N
 
-\ For ELEMENT return next ELEMENT of list.
+\ For ELEM return next ELEM of list.
 : >N   *>N @ EXECUTE @ ;
-\ For LIST and ELEMENT, hang the list off the element.
+\ For LIST and ELEM , hang the list off the element.
 : LINK! *>N @ EXECUTE ! ;
 
-\ For LINK1 ( > ) LINK2 return LINK1 LINK2' advanced but still link1 > link2'
+\ For LIST1 ( > ) LIST2 return LIST1 LIST2' advanced but still list1 > list2'
 : FIND-END BEGIN DUP >R >N DUP IF LL< 0= ELSE 0 THEN WHILE RDROP REPEAT DROP R> ;
 
-\ Merge LINK1 ( > ) LINK2.
+\ Merge LIST1 ( > ) LIST2.
 : (MERGE)
     BEGIN FIND-END DUP >R  DUP >N >R
         LINK! R> R> OVER 0= UNTIL 2DROP ;
 
-\ Merge LINK1 and LINK2, leave merged LINK.
+\ Merge LIST1 and LIST2, leave merged LIST.
 : MERGE   LL< IF SWAP THEN   DUP >R (MERGE) R> ;
 
-\ Cut ULINK in two. Return SLINK (first part in ascending order)
-\ and remaining ULINK.
+\ Cut ULIST in two. Return SLIST (first part in ascending order)
+\ and remaining ULIST.
 : SNIP DUP
       BEGIN DUP >N  DUP IF LL< ELSE 0 THEN WHILE SWAP DROP REPEAT
       >R   0 SWAP LINK! R> ;
 
 \ Keep on merging as long as the top of the stack contains
-\ two slinkp 's of the same level. Shrinking the stack.
-\ One loop goes from LINK1 LEVEl1 and LINK2P LEVEL1 to LINK3 LEVEL (level1+1). .
+\ two slistp 's of the same level. Shrinking the stack.
+\ One loop goes from LIST1 LEVEL1 and LIST2 LEVEL1 to LIST3 LEVEL (level1+1). .
 : TRY-MERGES  BEGIN >R  OVER R@ = WHILE SWAP DROP MERGE R> 1+ REPEAT R> ;
 
 \ Keep on merging as long as the top of the stack contains
-\ two slinkp 's , i.e no end-sentinel. Shrinking the stack to one slink.
+\ two slistp 's , i.e no end-sentinel. Shrinking the stack to one slist.
 : SHRINK DROP BEGIN OVER WHILE SWAP DROP MERGE REPEAT ;
 
-\ Expand zero ulink into zero slinkp .... slinkp
+\ Expand zero, ulist into zero slistp .... slistp
 : EXPAND   BEGIN SNIP >R 1 TRY-MERGES R> DUP WHILE REPEAT DROP ;
 
 \ For compare XT, next XT, linked LIST , leave a sorted LIST1.
@@ -54,9 +66,9 @@ VARIABLE *>N
     : GET-NAME >NFA @ $@   ;  \ Aux. For EL, return NAME.
 : NAMES< DUP >R OVER GET-NAME    R> GET-NAME    COMPARE 0 < ;
 
-\ Sort the WORDLIST. This head of the list is not touched or inspected
-\ during sorting (expect for the link field) , so it may be a dummy.
-: SORT-WID DUP >LFA @ 'NAMES< '>LFA MERGE-SORT SWAP LINK! ;
+\ Sort the WORDLIST. This head of the list doesn't take part in the
+\ sorting (expect for the link field) , so it may be a dummy.
+: SORT-WID >LFA DUP >R   @ 'NAMES< '>LFA MERGE-SORT   R> ! ;
 
 \ Sort the vocabulary given its vocabulary XT.
 : SORT-VOC >WID SORT-WID ;
