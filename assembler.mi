@@ -450,7 +450,7 @@ forthitem IN|D, IN|P,
 forthitem IRET,
 forthitem J, J|X, (Intel Jcc)
 forthitem JCXZ,
-forthitem JMP, JMPFAR, JMPFAROI, JMPO, JMPS,
+forthitem JMP, {JMPFAR,} JMPFAROI, JMPO, JMPS,
 forthitem LAHF,
 forthitem LAR,
 forthitem LDS,
