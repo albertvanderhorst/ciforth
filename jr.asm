@@ -1,16 +1,21 @@
+; $Log $
+; $Id$  
   
  ORG  07c00h             ; This means we'll have to trim the
  			;    binary with dd or something. Well worth it.
  			;    After   as   and   objcopy -O binary   do
  			;    dd < a.out > whatever bs=512 skip=62
   
+A_GDT             EQU     27C00H
  BITS 16
 _start:
   
  cli	;
   
  mov si        ,gdt_entries  ; copy initial GDT descriptors to  x2000
- mov di        ,02008h  ;       skip and thus allocate entry 0
+ mov di        ,0008h  ;       skip and thus allocate entry 0
+ mov    ax, A_GDT/10H
+ mov ES,AX
  mov bx,di 
  add bx,0100h  
 for_128_duals:                  ; move 256 bytes
@@ -20,8 +25,10 @@ for_128_duals:                  ; move 256 bytes
  	add si,BYTE 2 
  	cmp di,bx 
  jnz for_128_duals
- 				;       assuming es=0 and ss makes sense.
- 				;       My P166 BIOS allows this. YMMV.
+ 				;  assuming ds=0 
+ 				;  This must be true while booting, allthough nowhere
+                                ;  guaranteed, but otherwise booting software would be difficult
+                                ; to write.
   
  lgdt [initial_gdtr]              ; This is one reason for the .org 07c00
   
