@@ -14,6 +14,10 @@
 \ 101. Internet interface.
 \ 102. Logging of answer vectors for disapproval.
 
+REQUIRE Z$@
+REQUIRE -LEADING
+REQUIRE COMPARE
+
 \ #################### CONFIGURATION ##################################
 
 \ Leave a FRACTION (numerator/denominator) that decides whether
@@ -27,8 +31,8 @@
 
 \ #################### DATABASE #######################################
 
-\ : \D ; \ Debug
-: \D POSTPONE \ ; IMMEDIATE
+  : \D ; \ Debug
+\ : \D POSTPONE \ ; IMMEDIATE
 
 \ File format :
 \    number of diagnoses  ND
@@ -52,6 +56,9 @@
 
 "dstring.frt" INCLUDED
 
+: VOCABULARY CREATE DOES> DROP ;
+: PREVIOUS ;
+
 VOCABULARY DATABASE
 DATABASE DEFINITIONS
 
@@ -73,21 +80,22 @@ VARIABLE #QUESTIONS \ Number of questions
 : GET-NUMBERS 0 DO BL $S DUP 0= 1002 ?ERROR atoi , LOOP 2DROP ;
 
 \ The DISTANCE in address units between question for different diagnosis
-: STRIDE #QUESTIONS @ SPARE + CELLS ;
+VARIABLE STRIDE
 \ Create from a STRING an array of answers ``MAX-DIAGNOSIS'' by ``MAX-QUESTIONS''
 \ The answers for the same question are together on one line.
 \ Leave REMAINDER.
 \ The created word turns an DIAGNOSIS and QUESTION into an ADDRESS.
 : ANSWER-ARRAY
 CREATE #DIAGNOSES @ 0 DO ^J $S #QUESTIONS @ GET-NUMBERS SPARE CELLS ALLOT LOOP
-       STRIDE SPARE * ALLOT
-DOES> ROT STRIDE * + SWAP CELLS + ;
+       STRIDE @ SPARE * ALLOT
+DOES> ROT STRIDE @ * + SWAP CELLS + ;
 
 
 "database" GET-FILE
 
     ^J $S atoi    DUP #DIAGNOSES !  $ARRAY DIAGNOSES
     ^J $S atoi    DUP #QUESTIONS !  $ARRAY QUESTIONS
+    #QUESTIONS @ SPARE + CELLS STRIDE !
 
     ^J $S CR TYPE   \ Show potential problems.
 
@@ -104,18 +112,20 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 2DROP
 \D CR ." Expect 0 : " DEPTH . CR
 \D 0 0 YESSES ." YESSES Expect 0 0 : " ? DEPTH .  CR
-\D 0 0 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
-\D 1 0 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
-\D 1 1 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
-\D ." Expect a digagnosis : " 0 DIAGNOSES 2@ TYPE CR
+\D 0 0 NOES   ." NOES   Expect 2 0 : " ? DEPTH .  CR
+\D 1 0 NOES   ." NOES   Expect 0 0 : " ? DEPTH .  CR
+\D 1 1 NOES   ." NOES   Expect 2 0 : " ? DEPTH .  CR
+\D ." Expect a diagnosis : " 0 DIAGNOSES 2@ TYPE CR
 \D ." Expect a question : " 0 QUESTIONS 2@ TYPE CR
 \D ." Expect 0 : " DEPTH .  CR
 
 \ Upper limits for arrays
 #DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
 #QUESTIONS @ SPARE + CONSTANT MAX-QUESTIONS
-
-38 LOAD \ For -LEADING and COMPARE
+\D : .QUESTION CR DUP . DUP 0 #QUESTIONS @ WITHIN 0= ABORT" QUESTION OUT  OF BOUNDS"
+   DUP QUESTIONS 2@ TYPE CR ;
+\D : .DIAGNOSIS CR DUP . DUP 0 #DIAGNOSES @ WITHIN 0= ABORT" DIAGNOSIS OUT  OF BOUNDS"
+   DUP DIAGNOSES 2@ TYPE CR ;
 
 \ For a STRING return a STRING without leading spaces.
 \D "   X ? " -LEADING ." Expect |X ? |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
@@ -124,7 +134,7 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 : CLEAN-STRING -LEADING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN -TRAILING ;
 
 \D " How ? " CLEAN-STRING
-\D ." Expect |How |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
+\D ." Expect |How|0 : " &| EMIT TYPE &| EMIT DEPTH . CR
 
 \ Convert a STRING VARIABLE to lower case.
 : $TO-LOWER $@ OVER + SWAP DO I C@ &A &Z 1+ WITHIN IF 32 I +! THEN LOOP ;
@@ -134,7 +144,7 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 : ADD-DIAGNOSIS CLEAN-STRING $, DUP $TO-LOWER $@
     #DIAGNOSES @ DIAGNOSES 2! #DIAGNOSES @ 1 #DIAGNOSES +! ;
 \D " Ape" ADD-DIAGNOSIS
-\D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|2 0 " &| EMIT TYPE &| EMIT . DEPTH . CR
+\D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|2 0 :" &| EMIT TYPE &| EMIT . DEPTH . CR
 \D -1 #DIAGNOSES +!
 
 \ Add STRING as a QUESTION.
@@ -224,10 +234,10 @@ INTERACTION DEFINITIONS
 ;
 
 \ Print a STRING as a question.
-: .QUESTION CR 4 SPACES TYPE SPACE &? EMIT CR ;
+: POSE-QUESTION CR 4 SPACES TYPE SPACE &? EMIT CR ;
 
 \ For a question STRING get an ANSWER.
-: (GET-ANSWER) .QUESTION (ACCEPT) TO-ANSWER ;
+: (GET-ANSWER) POSE-QUESTION (ACCEPT) TO-ANSWER ;
 
 \ Disapprove ANSWER , tell user so.
 : DISAPPROVE DROP NotAnAnswer$ TYPE ;
@@ -277,7 +287,7 @@ MAX-QUESTIONS ARRAY ANSWER-VECTOR
 \ For QUESTION return: it is has BEEN posed.
 : ?POSED ANSWER-VECTOR @ A_NONE <> ;
 \D ." !ANSWER-VECTOR Expect 0 0 : " !ANSWER-VECTOR 0 ?POSED . DEPTH . CR
-\D ." After PREVIOUS Expect DATABASE STRATEGY FORTH : " ORDER CR
+\ \D ." After PREVIOUS Expect DATABASE STRATEGY FORTH : " ORDER CR
 PREVIOUS
 
 VOCABULARY STRATEGY
@@ -340,6 +350,7 @@ DATABASE
 \ Accumulate the answer of QUESTION for DIAGNOSIS into the variables above.
 : ACCUMULATE
        DUP ?EXCLUDED IF 2DROP EXIT THEN
+       SWAP     \ All databases use [ D, Q ]
        2DUP NOES @ >R YESSES @ R>
        2DUP + 0=        IF 2DROP 1 C_UNKNOWN +! EXIT THEN
        2DUP APPARENT?   IF 2DROP 1 C_YES +! EXIT THEN
@@ -383,7 +394,7 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
 \D A_NONE ?AMBIGUOUS ." Expect -1 0 : " . DEPTH . CR
 \D A_NO ?AMBIGUOUS ." Expect 0 0 : " . DEPTH . CR
 
-\ Return for QUESTION and DIAGNOSIS what the answer is according
+\ Return for DIAGNOSIS and QUESTION what the answer is according
 \ to the database. All ambiguous answers are mapped to ``A_NONE''.
 : ANSWER-FOR
        2DUP NOES @ >R YESSES @ R>
@@ -392,18 +403,19 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
        SWAP APPARENT?   IF A_NO EXIT THEN
        A_NONE ;
 \D 0 0 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO  . DEPTH . CR
-\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 0 0 0 : " . A_YES . DEPTH . CR
-\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
+\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 0 0 0 : " . A_YES . DEPTH . CR
+\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
 \D 1 1 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
 
 \ Eliminate, if uncompatible with ANSWER to QUESTION, a DIAGNOSIS.
 \ The diagnosis was not yet excluded and the answer is unambiguous.
 : ELIMINATE-ONE
+\D      ." ELIMINATING" .DIAGNOSIS SWAP .QUESTION SWAP
         DUP >R
-        ANSWER-FOR DUP ?AMBIGUOUS IF
+        SWAP ANSWER-FOR DUP ?AMBIGUOUS IF
             2DROP
-        ELSE
-            <> IF 1 R@ EXCLUSIONS ! -1 POSSIBILITIES +! THEN
+        ELSE ^
+            <> IF ." EXCLUDED!" 1 R@ EXCLUSIONS ! -1 POSSIBILITIES +! THEN
         THEN
         RDROP
 ;
@@ -474,8 +486,8 @@ DATABASE CONSULTING STRATEGY
         I ANSWER-VECTOR @   DUP I ANSWER-FOR CONFLICTING? IF
             AreYouSure1$  TYPE CR  AreYouSure2$
             I ANSWER-VECTOR @ A_YES = IF Yes$ ELSE No$ THEN TYPE CR
-            AreYouSure3$  .QUESTION A_YES <> IF
-                I .QUESTION DUP I ANSWER-VECTOR !
+            AreYouSure3$  POSE-QUESTION A_YES <> IF
+                I POSE-QUESTION DUP I ANSWER-VECTOR !
                 ( DUP ?AMBIGUOUS 0= IF I OVER EXCLUDE-MORE THEN ) DROP
             THEN
         THEN
@@ -488,7 +500,7 @@ DATABASE CONSULTING STRATEGY
 \ Always the DIAGNOSIS is returned.
 : NEW-DIAGNOSIS
     DumbEeh$ TYPE CR
-    PleaseLearn$ .QUESTION (ACCEPT)
+    PleaseLearn$ POSE-QUESTION (ACCEPT)
     2DUP FIND-DIAGNOSIS DUP -1 = IF
         DROP ADD-DIAGNOSIS
     ELSE  \ Should be an exceptional case
@@ -542,7 +554,7 @@ DATABASE CONSULTING STRATEGY
     DUP R@ SWAP ANSWER-VECTOR !
     R@ A_YES = IF SWAP NOES 2 SWAP +! ELSE
     R@ A_NO = IF SWAP YESSES 2 SWAP +! ELSE
-    DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
+    2DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
     THEN THEN RDROP
 ;
 
@@ -552,8 +564,9 @@ DATABASE CONSULTING STRATEGY
 \ Of course we need only inspect those not excluded, (except in the
 \ case of wrong answers that were corrected afterwards.)
 : ELIMINATE-AMBIGUITY
+\D  .DIAGNOSIS
     #DIAGNOSES @ 0 DO
-       DUP I <>   I ?EXCLUDED 0= AND   OVER I ?DISTINGHUISABLE AND
+       DUP I <>   I ?EXCLUDED 0= AND   OVER I ?DISTINGHUISABLE 0= AND
        IF I OVER (EL-AM) THEN
     LOOP DROP ;
 
@@ -569,7 +582,7 @@ DATABASE CONSULTING STRATEGY
   #DIAGNOSES @ 0 DO I ?EXCLUDED 0= IF
       I 3 .R SPACE I DIAGNOSES 2@ DUP >R TYPE 15 R> - SPACES
       #QUESTIONS @ 0 DO I ?POSED 0= IF
-          I J YESSES @ 3 .R I J NOES @ 3 .R
+          J I YESSES @ 3 .R J I NOES @ 3 .R
       THEN LOOP CR
   THEN LOOP
   "______________________________________________" TYPE CR
@@ -590,18 +603,25 @@ DATABASE CONSULTING STRATEGY
 
 \ For a DIAGNOSIS and INDEX add the PAIR to the
 \ ``YES'' and ``NOES' arrays.
-: ADDIT >R >R 2DUP YESSES R> SWAP +! NOES R> SWAP +! ;
+: ADDIT >R >R 2DUP YESSES R> SWAP ^ +! NOES R> SWAP ^ +! ;
 \D ." ADDIT Expect 0 5 0 : " 0 0 0 3 ADDIT  0 0 YESSES ? 0 0 NOES ? DEPTH . CR
 \D ." ADDIT Expect 7 2 0 : " 1 1 7 0 ADDIT  1 1 YESSES ? 1 1 NOES ? DEPTH . CR
 
 \ Add the answer vector for the OUTCOME diagnosis to the database
 : ADD-ANSWERS
     #QUESTIONS @ 0 DO
-        DUP I   I ANSWER-VECTOR @ ADDABLE   ADDIT
+        DUP I I ANSWER-VECTOR @ ^ ADDABLE   ^ ADDIT
     LOOP DROP
 ;
-\D !ANSWER-VECTOR A_NO 1 ANSWER-VECTOR ! 0 ADD-ANSWERS
-\D ." ADD-A Expect 0 4 0 : " 0 1 YESSES ? 0 1 NOES ? DEPTH . CR
+\D !ANSWER-VECTOR PRINTTABLE
+\D A_YES 0 ANSWER-VECTOR ! A_NO 1 ANSWER-VECTOR ! 0 ADD-ANSWERS
+\D ." For diagnosis 0 we add yes no to the database."
+\D PRINTTABLE
+\D !ANSWER-VECTOR PRINTTABLE
+\D A_NO 0 ANSWER-VECTOR ! A_YES 1 ANSWER-VECTOR ! 1 ADD-ANSWERS
+\D ." For diagnosis 1 we add 'no yes' to the database."
+\D !ANSWER-VECTOR PRINTTABLE A_NO 0 ANSWER-VECTOR ! A_YES 1 ANSWER-VECTOR ! 1 ADD-ANSWERS
+\D ." ADD-A Expect 2 2 0 : " 0 1 YESSES ? 0 1 NOES ? DEPTH . CR
 \D ." ADD-A Expect 7 2 0 : " 1 1 YESSES ? 1 1 NOES ? DEPTH . CR
 
 : INIT ( Nothing, the database have been read in) ;
@@ -618,12 +638,12 @@ DATABASE CONSULTING STRATEGY
 ;
 
 : ONE-DIAGNOSIS
-    !EXCLUSIONS !ANSWER-VECTOR  #QUESTIONS @ POSSIBILITIES !
+    !EXCLUSIONS !ANSWER-VECTOR  #DIAGNOSES @ POSSIBILITIES !
     PRINTTABLE
     INTERROGATION
     POSE-DIAGNOSIS DUP -1 = IF DROP NEW-DIAGNOSIS THEN
     DUP ELIMINATE-AMBIGUITY ADD-ANSWERS
-    !ANSWER-VECTOR PRINTTABLE
+    !ANSWER-VECTOR PRINTTABLE  DROP
 ;
 
 D-MAIN DEFINITIONS
