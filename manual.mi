@@ -1,0 +1,330 @@
+
+@section Concepts
+
+A forth user is well aware of how the memory of his 
+computer is organised. He allocates it for certain purposes,
+and frees it again at will.
+
+The forthdefi({dictionary}) 
+is the part of the memory where the forthcode({words}) are
+(forthxrefp({DICTIONARY})
+It owns a part of the dictionary, starting with its name and
+ending where the name of the next word starts.
+A word can be executed by typing its name. 
+Apart from the name a word contains data and executable code,
+(interpreted or not) and linking information 
+(forthxrefp({VOCABULARY}).
+
+A word that generates a new entry in the dictionary is called a 
+forthdefi({defining word}). forthxref({DEFININING}).
+
+
+
+@section Memory organization
+
+A running ciforth has 3 distinct memory areas. 
+
+They occur sequentially from low memory to high. 
+forthitemize
+forthitem
+The dictionary, 
+forthitem
+Memory, available for dictionary and stacks.
+Its lowest part is used as a scratch area
+forthitem
+Stacks{}_HIGH_BUF_1_({, disk block buffers}) and terminal
+input buffer. 
+forthitem
+forthenditemize
+
+_LOW_BUF_1_({The disk block buffers are allocated in the dictionary,
+because otherwise they would not be accessable to the BIOS})
+
+The program as residing on disk may contain startup code , but that is
+of no concern for the usage. 
+
+The dictionary area is the only part that is initialised,
+the other parts are just allocated.
+Logically the Forth system consists of these 7 parts.
+forthitemize forthbullet
+forthitem
+Boot-up parameters 
+forthitem
+Machine code definitions 
+forthitem
+Installation dependant code
+forthitem
+High level utility definitions
+forthitem
+High level definitions 
+forthitem
+System tools (optional)
+forthitem
+RAM memory workspace 
+forthenditemize
+
+                 3.2  MODEL DETAILS
+The fig-FORTH model deviates a bit from the usual loading method of Forth.
+Existing systems load about 2k bytes in object form and then self-compile
+the resident system (6 to 8 k bytes). This technique allows customization
+within the high level portion, but is impractical for new implementors. 
+
+Our model has 4 to 5 k bytes written as assembler listings. The remainder
+may be compiled typing in the Forth high-level source, by more assembly
+source, or by disc compilation. 
+This method enhances transportability, although the larger portion in
+assembly code entails more effort. About 8k bytes of memory is used plus 2
+to 8k for workspace. 
+
+                 3.0  MODEL ORGANIZATION
+
+The figures are approximate. Double them for 32 bit systems; this
+applies to memory sizes mentionned in all sections.
+
+                   3.1  MODEL OVER-VIEW
+
+
+  Boot-up Parameters
+
+This area consists of 34 bytes containing a jump to the cold start, jump to
+the warm re-start and initial values for user variables and registers. These
+values are altered as you make permanent extensions to your installation. 
+
+++++++++++++++++++++++++++
+
+Read 17 cells for 34 bytes.
+In fig.gnr the bootup parameters are more or less the data field of the
++ORIGIN word. 
+Executing +ORIGIN leaves a pointer in this area but after the jump vectors
+and the release numbers. They are not used and in fact superfluous. 
+Bootup parameters with positive offset from +ORIGIN are one to one with user
+variables. Their indices have not changed, but there is now a bootup
+parameter for each and every user variable. A system with other boot
+parameters can now be generated in an even more portable fashion by using
+phrase like "7 CELLS +ORIGIN". 
+
+ Installation Dependent Code
+
+KEY EMIT ?TERMINAL and CR are indeed different for different I/O models.
+However the bracketed versions (KEY) are not necessarily (in fact never)
+there. This part of the documentation was inaccurate or ignored by the
+original IBM/PC implementer. 
+Underneath the I/O model has improved. TYPE and EXPECT are drawn into
+the I/O model dependant part. If at all possible CR and EMIT used TYPE
+such that TYPE becomes a natural vectoring point. Similarly KEY 
+tries to use EXPECT, but mostly this is not possible because EXPECT doesnot
+return before the user hits the Enter key.
+
+Where possible installation dependant code is using a generic call to the
+operating system in particular MSDOS BIOS or LINOS. This mostly results in
+the installation dependant code to be high level. 
+
+The false urban legend that one could forthcode({FORGET}) 
+has been replaced by an accurate description of forthcode({TASK}).
+
+  Machine Code Definitions
+
+This area consists of about 600 to 800 bytes of machine executable code in
+the form of Forth word definitions. Its purpose is to convert your computer
+into a standard Forth stack computer. Above this code, the balance of Forth
+contains a pseudo-code compiled of "execution-addresses" which are sequences
+of the machine address of the "code-fields" of other Forth definitions. All
+execution ultimately refers to the machine code definitions. 
+
+
+  High-level Utility Definitions
+
+These are colon-definitions, user variables, constants, and variables that
+allow you to control the "Forth stack computer". They comprise the bulk of
+the system, enabling you to execute and compile from the terminal. 
+If disc storage (or a RAM simulation of disc)  is available, you may also execute and compile from this facility. Changes in the high-level area are infrequent. They may be made thru the assembler source listings.
+
+
+
+    An alternate version of R/W is included that simulates disc storage in
+    RAM. If you have over 16 k bytes this is practical for startup and
+    limited operation with cassette. 
+
+
+High-level Definitions
+
+The next section contains about 30 definitions involving user interaction:
+compiling aids, finding, forgetting, listing, and number formating. These
+definitions are placed above the installation dependent code to facilitate
+modification. That is, once your full system is up, you may FORGET part of
+the high-level and re-compile altered definitions from disc. 
+
+
+System Tools
+
+A text editor and machine code assembler are normally resident. We are
+including a sample editor and hope to provide Forth assemblers. 
+The editor is compiled from the terminal the first time, and then used to
+place the editor and assembler source code on disc. 
+
+It is essential that you regard the assembly listing as just a way to get
+Forth installed on your system. Additions and changes must be planned and
+tested at the usual Forth high level and then the assembly routines updated. 
+Forth work planned and executed only at an assembly level tends to be
+non-portable, and confusing. 
+
+RAM Workspace
+
+For a single user system, at least 2k bytes must be available above the
+compiled system (the dictionary). A 16k byte total system is most typical. 
+
+The RAM workspace contains the computation and return stacks, user area,
+terminal input buffer, disc buffer and compilation space for the dictionary. 
+
+RAM workspace.
+
+There is no longer a reason to put up with a 16-bit system less than 64K. 32
+bits system are set at 64Mbyte but this is arbitrary and could be set much
+higher or lower without consequences for system load or whatever. 
+Before long we will put the dictionary space on I86-Linux to 4G minus
+something and forget about this issue forver. 
+
+         fig-FORTH VARIABLE NAME FIELD
+
+A major FIG innovation in this model, is the introduction of variable length
+definition names in compiled dictionary entries. 
+Previous methods only saved three letters and the character count.
+
+The user may select the letter count saved, up to the full natural length.
+See the glossary definition for WIDTH. 
+
+
+In this model, the following conventions have been established.
+
+forthenumerate
+forthitem
+The first byte of the name field has the natural character count in the
+low 5 bits. 
+forthitem
+The sixth bit = 1 when smudged, and will prevent a match by (FIND). 
+forthitem
+The seventh bit = 1 for IMMEDIATE definitions; it is called the
+precedence bit. 
+forthitem
+The eighth or sign bit is always = 1. 
+forthitem
+The following bytes contain the names' letters, up to the value in WIDTH. 
+forthitem
+In the byte containing the last letter saved, the sign bit = 1. 
+forthitem
+In word addressing computer, a name may be padded with a blank to a word
+boundary. 
+forthendenumerate
+
+The above methods are implemented in CREATE.
+Remember that -FIND uses BL WORD to bring the next text to HERE with the
+count preceeding. All that is necessary, is to limit by WIDTH and toggle the
+proper delimiting bits. 
+
+         fig-FORTH VARIABLE NAME FIELD
+
+They were very proud at the time that names could be any length.
+They felt obliged however to introduce the WIDTH/TRAVERSE to allow 
+upwards compatibility with systems that stored only the first few (three)
+characters of a word. This has become a major pain now. See the screens
+for the $____ and $__ words that are absolutely unportable.
+
+
+                5.0  MEMORY MAP         
+
+The following memory map is broadly used. 
+Specific installations may require alterations but you may forfeit functions
+in future FIG offerings. 
+
+The disc buffer area is at the upper bound of RAM memory. It is comprised of
+an integral number of buffers, each B/BUF+4 bytes. 
+B/BUF is the number of bytes read from the disc, usually one sector. B/BUF
+must be a power of two (64, 128, 256, 512 or 1024). 
+The constant FIRST has the value of the address of the start of the first
+buffer. 
+LIMIT has the value of the first address beyond the top buffer. The distance
+between FIRST and LIMIT must be N*(B/BUF+4) bytes. 
+This N must be two or more. 
+
+I set the number of disk buffers at 2, the minimum possible. Even a floppy
+is fast enough that working with blocks from memory has no merits. It is
+dangerous because during testing you never know what was saved and what not.
+The mass storage is easily the most crappy part of the fig model. What
+little advantage it had, is no longer applicable. Interestingly this block
+system is copied verbatim into ANS. 
+32 bits systems can enlarge the dictionary by redefining the stacks and the
+terminal input buffer positions. The block buffers are in the way. So I put
+them in the dictionary space. In fact the block buffers have become the 
+data field of FIRST.
+
+Constant B/SCR has the value of the number of buffers per screen; 
+i.e. 1024 / B/BUF. 
+
+The user area must be at least 34 bytes; 48 is more appropriate. In a 
+multi-user system, each user has his own user area, for his copy of system 
+variables. This method allows reentrant use of the Forth vocabulary. 
+
+The terminal input buffer is decimal 80 bytes (the hex 50 in QUERY) plus 2
+at the end. If a different value is desired, change the limit in QUERY. A
+parameter in the boot-up literals locates the address of this area for TIB.
+The backspace character is also in the boot-up origin parameters. It is
+universally expected that "rubout" is the backspace. 
+
+The return stack grows downward from the user area toward the terminal
+buffer. Forty-eight bytes are sufficient. The origin is in R0 (R-zero) and
+is loaded from a boot-up literal. 
+
+The computation stack grows downward from the terminal buffer toward the
+dictionary which grows upward. The origin of the stack is is in variable S0
+(S-zero) and is loaded from a boot-up literal. 
+
+After a cold start, the user variables contain the addresses of the above
+memory assignments. 
+An advanced user may relocate while the system is running. A newcomer should
+alter the startup literals and execute COLD. The word +ORIGIN is provided
+for this purpose. +ORIGIN gives the address byte or word relative to the
+origin depending on the computer addressing method. 
+
+Despite all the talk about user variables, I am not aware that a multi-user
+fig forth existed, ever. The above block policy is not compatible with 
+multi-user (but the actual code is not worse than it ever was, and you can
+rebuilt it with 1000 block buffers if you like.)
+
+Rubout is best left to the EXPECT code. Remember, a Linux itself knows the
+rubout key for any of its 500+ known terminal types and isn't it nice in
+MSDOS that F3 gets the previous command back for you? 
+If EXPECT builds up a line from separate key strokes, and if you ever want
+to change the rubout key, just change the RUBOUT user variable. 
+
+
+             6.0  DOCUMENTATION SUMMARY
+
+
+You bet this is utterly and totally out of date.
+
+The following manuals are in print: 
+
+Caltech FORTH Manual, an advanced manual with internal details of Forth. Has
+Some implementation peculiarities. Approx. $6.50 from the Caltech Book
+Store, Pasadena, CA. 
+
+Kitt Peak Forth Primer, 520.00 postpaid from the Forth Interest Group, P. O.
+Box 1105, San Carlos, CA 94070. 
+
+microFORTH Primer, $15.00 Forth, Inc. 
+815 Manhattan Ave. Manhattan Beach, CA 90266
+
+
+Forth Dimensions, newsletter of the Forth Interest Group, $5.00 for 6 issues
+including membership. F-I-G. P.O. Box 1105, San Carlos, CA. 94070 
+
+CUSTOMISING
+
+The name USER reflects that more than one user could use the dictionary
+and users could share the background storage, provided certain precautions
+are taken. About this you can forget.
+What you can do is, store back you user variables in the boot-up 
+parameters as follows
+ forthsamp({USVA @   ' USVA @   +ORIGIN !})
+where forthvar({USVA}) is the user variable which value you want to keep.
+
