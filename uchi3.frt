@@ -14,7 +14,7 @@
 \ In good Unix style, the name fo the program and
 \ usage is printed.
 : MY-ERROR
-    " : FATAL! " TYPE CR
+    DECIMAL . SPACE ARGV @ CTYPE ": FATAL ERROR" TYPE CR
     "Usage: " TYPE CR
     ARGV @ CTYPE " <integer1> <integer2> <integer3>" TYPE CR
     BYE ;
@@ -22,10 +22,8 @@
 \ Install it as the handler for uncaught exceptions.
 \ No way one could use the ``uchi1'' program
 \ to fire up a Forth interpreter and hose Linux.
-: INSTALL-ERROR
-    -1 WARNING !
-    ' MY-ERROR >DFA @   ' (ABORT) >DFA !
-;
+-1 WARNING !
+' MY-ERROR >DFA @   ' (ABORT) >DFA !
 
 \ Create an array of LEN elements of size STRIDE .
 \ Run time: For an INDEX leave the ADDRESS of the element
@@ -54,7 +52,7 @@ MAX-LINES 2 CELLS ARRAY LINES
 \ Analyse a string CONSTANT and save at a new
 \ position in the ``LINES'' array
 : SAVE-LINE
-    ^: I $S     \ Split at ^I
+    ^I $S     \ Split at ^I
     LINE# @ SAVE-AT-POS
     1 LINE# +!
 ;
@@ -109,7 +107,7 @@ MAX-LINES 2 CELLS ARRAY LINES
 
 : PRINT-FULL
             LINES @+ $@ TYPE
-            ^: I EMIT
+            ^I EMIT
 \D          &| EMIT     \ Show we are not reflecting input
             @ $@ TYPE
 ;
@@ -122,7 +120,7 @@ MAX-LINES 2 CELLS ARRAY LINES
           I LINES @ I 1- LINES @ $@= IF
                CR I PRINT-FULL
           ELSE
-                ^: I EMIT   I PRINT-HALF
+                ^I EMIT   I PRINT-HALF
           THEN
 
         LOOP
@@ -133,9 +131,16 @@ MAX-LINES 2 CELLS ARRAY LINES
     BEGIN
         GET-RECORD
     WHILE
-\D        LINE# ? ^: M EMIT
+\D        LINE# ? ^M EMIT
         MOVE-IN-POSITION
     REPEAT
 ;
-: main INSTALL-ERROR GET-ALL PUT-ALL BYE ;
-' main "uchi3" TURNKEY
+
+
+: main
+    -41 THROW
+    ' GET-ALL CATCH
+    DUP -32 = IF DROP 0 THEN \ EPIPE is not an error
+    THROW       \ All other errors
+    PUT-ALL BYE ;
+\ ' main "uchi3" TURNKEY
