@@ -6,6 +6,8 @@
 
 '$@ ALIAS @+
 REQUIRE TRUE
+INCLUDE set.frt
+INCLUDE bits.frt
 
 \ Regular expressions in Forth.
 \ This package handles only simple regular expressions and replacements.
@@ -34,41 +36,16 @@ REQUIRE TRUE
 128 8 / CONSTANT MAX-SET \ # chars in a charset. (So no char's > 0x80 !)
 
 \ -----------------------------------------------------------------------
-\                      Bit sets
-\ -----------------------------------------------------------------------
-REQUIRE NEW-DO
-\ REQUIRE 2SET+!
-: 2SET+! >R SWAP R@ SET+! R> SET+! ;
-\ REQUIRE WHERE-IN-SET
-
-( For VALUE and SET return the POSITION of value in set, or a null. )
-: WHERE-IN-SET $@ SWAP ?DO
-   DUP I @ = IF DROP I UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
-
-
-CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
-: BIT-MASK   CHARS BIT-MASK-TABLE + C@ ;
-
-\ Set BIT in BITSET
-: SET-BIT SWAP 8 /MOD SWAP BIT-MASK >R DUP C@ R> OR SWAP C! ;
-
-\ Clear  BIT in BITSET
-: CLEAR-BIT SWAP 8 /MOD SWAP BIT-MASK INVERT >R DUP C@ R> AND SWAP C! ;
-
-\ For BIT in BITSET , return "it IS set".
-: BIT? SWAP 8 /MOD SWAP BIT-MASK >R DUP C@ R> AND 0= 0= ;
-
-\ -----------------------------------------------------------------------
 \                  char sets, generic part
 \ -----------------------------------------------------------------------
 : |  OVER SET-BIT ; \ Shorthand, about to be hidden.
 
 \ This contains alternatingly a character, and a pointer to a charset.
 \ The charset is denotated by this character preceeded by '\' e.g. \s.
-100 SET CHAR-SET-SET     CHAR-SET-SET SET!
+100 SET CHAR-SET-SET     CHAR-SET-SET !SET
 
 \ Allocate a char set and leave a POINTER to it.
-: ALLOT-CHAR-SET   HERE 1 C,  MAX-SET 1 - 0 DO 0 C, LOOP
+: ALLOT-CHAR-SET   HERE MAX-SET 0 DO 0 C, LOOP ;
 \ Note that ``ASCII'' null must be excluded from every char-set!
 \ Algorithms rely on it.
 \ For an identifying CHAR create an as yet empty char set with "NAME"
@@ -82,7 +59,7 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 : IN-CHAR-SET   BIT? ;
 
 \ Add CHARSET1 to CHARSET2 .
-: OR-SET! MAX-SET 0 DO OVER I + C@ OVER I + C@ OR OVER I + C! LOOP ;
+: OR-SET! MAX-SET 0 DO OVER I + C@ OVER I + C@ OR OVER I + C! LOOP 2DROP ;
 
 \ ------------------------------------------
 \                  char sets, actual part
@@ -93,7 +70,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ Passing a 0 makes a char-set unfindable in ``CHAR-SET-SET''.
 
 \ The set of characters to be escaped.
-0 CHAR-SET \\     \ | ^ | $ | + | ? | * | [ | ] | < | > | ( | ) |  DROP
+0 CHAR-SET \\     &\ | &^ | &$ | &+ | &? | &* | &[ | &] | &< | &> | &( | &) |  DROP
 
 \ For CHAR : "it IS special".
 : SPECIAL?   \\ BIT? ;
@@ -101,7 +78,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ The set matched by .
 0 CHAR-SET \.  ^J | INVERT-SET
 
-&w CHAR-SET \w   256 1 DO I IS-BLANK? 0= IF I | THEN LOOP DROP
+&w CHAR-SET \w   256 1 DO I ?BLANK 0= IF I | THEN LOOP DROP
 
 \ Example of another set definition
 \ &d CHAR-SET \d   &9 1+ &0 DO I | LOOP   DROP
@@ -116,17 +93,18 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \                  escape table
 \ -----------------------------------------------------------------------
 \ To SET add an escape CHAR and the escape CODE. Leave SET .
-: | ROT DUP >R 2SET! R> ;    \ Shorthand, about to be hidden.
+: | ROT DUP >R 2SET+! R> ;    \ Shorthand, about to be hidden.
 
 \ This contains alternatingly an escaped character, and its ASCII meaning.
-100 SET ESCAPE-TABLE     ESCAPE-TABLE SET!
-&n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |   DROP
+100 SET ESCAPE-TABLE     ESCAPE-TABLE !SET
+ESCAPE-TABLE &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |   DROP
 
 \ For CHARACTER return the ``ASCII'' VALUE it represents, when escaped.
-: GET-ESCAPE ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ _ THEN DROP ;
+: GET-ESCAPE DUP &a &z 1+ WITHIN 0= IF DROP 0 EXIT THEN
+    ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ THEN ;
 '| HIDDEN
 
-
+EXIT
 \ -----------------------------------------------------------------------
 \                  matched substrings
 \ -----------------------------------------------------------------------
@@ -228,7 +206,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ The xt's need not do a match, they can do an operation that
 \ never fails, such as remembering a pointer.
 
-
+EXIT
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the character matches the charset at the expression,
 \ advance both past the match, else leave them as is.
@@ -350,7 +328,7 @@ ELSE NORMAL-CHARS $+! THEN ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
-: GET-CHAR-SET CHAR-SET-SET WHERE-IN-SET?
+: GET-CHAR-SET CHAR-SET-SET WHERE-IN-SET
              DUP 0= ABORT" Illegal escaped char set, user error"
              CELL+ @ ;
 
@@ -440,13 +418,13 @@ CREATE (RE-EXPR) 1000 ALLOT
 : ADD)   'HANDLE() RE, ALLOCATE) RE, ;
 
 : | OVER 2 SET+! ;
-SET COMMAND-SET     COMMAND-SET SET!
+SET COMMAND-SET     COMMAND-SET !SET
 &[ 'PARSE-CHAR-SET |   &< 'ADD< |   &> 'ADD> |
 &( 'ADD( |   &) 'ADD) | &* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
 '| HIDDEN
 
 \ Execute the command that belongs to the abnormal CHARACTER.
-: DO-ABNORMAL COMMAND-SET WHERE-IN-SET?
+: DO-ABNORMAL COMMAND-SET WHERE-IN-SET
              DUP 0= ABORT" Illegal escaped char for command, system error"
              CELL+ @ EXECUTE ;
 
@@ -456,4 +434,4 @@ SET COMMAND-SET     COMMAND-SET SET!
 
 \ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
-; BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE C@ 0= UNTIL DROP INIT-BUILD ;
+: BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE C@ 0= UNTIL DROP INIT-BUILD ;
