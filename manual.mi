@@ -654,7 +654,7 @@ user area is at the upper bound of RAM memory. So it ends at
 forthcode({EM}) . })
 
 The terminal input buffer  and the return stack share an area of
-_BITS16_(0A0H)_BITS32_(010000H) bytes.
+M4_RTS bytes.
 The lower half is intended for the terminal input buffer, and the higher part
 is used for the return stack, growing down from the end.
 The initial stackpointer is in variable forthcode({R0}).
