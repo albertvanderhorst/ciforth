@@ -32,6 +32,8 @@ REQUIRE $
 \ Fill from ADDRESS to END a number of cells with CONTENT.
 : WFILL   ROT ROT SWAP ?DO DUP I !   0 CELL+ +LOOP DROP ;
 
+: <= > 0= ;
+
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
@@ -144,8 +146,8 @@ HERE SWAP !
 50 SET BRANCHES
 : !BRANCHES   BRANCHES !SET ;
 
-\ For a POSITION where a branch offset is stored, find the target.
-: >TARGET   $@ + ;
+\ For a POSITION of a branch offset, find the target.
+: >TARGET   @+ + ;
 
 \ For START if there is some branch at ADDRESS add it to ``BRANCHES''
 : FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
@@ -180,6 +182,7 @@ BRANCHES @+ SWAP DO
 : (ANNIHILATE-SEQ)
     BEGIN
         NEXT-PARSE OVER ANNILABLE? AND 0= IF 2DROP 0 EXIT THEN
+        DUP 'BRANCH = IF DUP CELL+ @ 0 < IF 2DROP 0 EXIT THEN THEN
         DUP 'BRANCH = IF SWAP 1 CELLS - @+ + SWAP THEN
         DUP '0BRANCH = IF
             SE@ COMBINE-VD
@@ -202,14 +205,25 @@ BRANCHES @+ SWAP DO
 : ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
     DUP 0<> ANNIL-STABLE? AND ;
 
+\ The offset over which the gap is shifted shut, generally negative.
+VARIABLE ANNIL-OFFSET
+\ Form START and END of gap and virtual depth calculate ``ANNIL-OFFSET''.
+: CALCULATE-ANNIL-OFFSET - VD @ CELLS - ANNIL-OFFSET ! ;
 
-\ For GAP and ADDRESS of entry in branches, adjust the branch,
-\ if it jumps from left over the gap.
-: ADJUST-FROM-LEFT 2DROP DROP ;
+\ Adjust a branch offset at POSITION by ``ANNIL-OFFSET''.
+: APPLY-OFFSET   ANNIL-OFFSET @ SWAP +! ;
 
-\ For GAP and ADDRESS of entry in branches, adjust the branch,
-\ if it jumps from right over the gap.
-: ADJUST-FROM-RIGHT 2DROP DROP ;
+\ For GAP and POSITION of a branch offset, adjust if it jumps from left
+\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
+: ADJUST-BRANCH-FROM-LEFT    >R   R@ >TARGET <=   SWAP R@ >   AND IF
+    R@ APPLY-OFFSET
+THEN RDROP ;
+
+\ For GAP and POSITION of a branch offset, adjust if it jumps from right
+\ over the gap. ``ANNIL-OFFSET'' must have been filled in.
+: ADJUST-BRANCH-FROM-RIGHT    >R   R@ <   SWAP R@ >TARGET >   AND IF
+    R@ APPLY-OFFSET
+THEN RDROP ;
 
 \ The set of branches that is marked for elimination from the set ``BRANCHES''.
 50 SET MARKED-BRANCHES
@@ -218,7 +232,9 @@ BRANCHES @+ SWAP DO
 \ For GAP and ADDRESS of entry in branches, if the branch is in the gap.
 \ mark it for elimination from the table.
 \ We can't remove them from the set right away because things get entangled.
-: ELIMINATE-BRANCH-IN-GAP   >R R@ @ ROT ROT WITHIN IF R@ MARKED-BRANCHES SET+! THEN RDROP ;
+: ELIMINATE-BRANCH-IN-GAP   >R R@ @ ROT ROT WITHIN IF
+    R@ MARKED-BRANCHES SET+!
+THEN RDROP ;
 
 \ Delete from ``BRANCHES'' what is marked for elimination.
 : DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ SWAP ?DO
@@ -227,14 +243,15 @@ BRANCHES @+ SWAP DO
 
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
 : ADJUST-BRANCHES BRANCHES @+ SWAP DO
-    2DUP I ADJUST-FROM-LEFT
-    2DUP I ADJUST-FROM-RIGHT
+    2DUP I @ ADJUST-BRANCH-FROM-LEFT
+\   2DUP I @ ADJUST-BRANCH-FROM-RIGHT   has not been tested because ANNIHILATE crashes for back jumps.
     2DUP I ELIMINATE-BRANCH-IN-GAP
 0 CELL+ +LOOP 2DROP ;
 
 \ Do something with START END and number of equivalent drops.
 \ Return the new position of END (where we have to go on optimising.).
 : ANNIHILATE-GAP
+    2DUP CALCULATE-ANNIL-OFFSET
     2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES
 DUP >R " Between " TYPE SWAP H. " and " TYPE H.
 " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR R> ;
