@@ -1205,12 +1205,17 @@ alter its content, nor assume anything is appended.})},
 {{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
 {HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}})
 HEADER({MY-WORD},{MWORDN},{DOCOL})
-MWORDN1: DC INBRS, QBL
+MWORDN1: DC INBRS
+        DC OVER, SOURC, CELLP, FETCH, LSUB
+        _0BRANCH(MWORDN1B)
+        DC QBL
         _0BRANCH(MWORDN1A)
         DC DROP
         _BRANCH(MWORDN1)
+MWORDN1B: 
+        DC DROP
 MWORDN1A: 
-MWORDN2: DC INBRS, QBL, ZEQU
+MWORDN2: DC INBRS, QBL, ZEQU  
         _0BRANCH(MWORDN2A)
         DC DROP
         _BRANCH(MWORDN2)
@@ -2774,17 +2779,18 @@ otherwise from the disc block stored in forthcode({BLK}) .},
 HEADER({WORD},{AWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(AWORD1)
-        DC      DROP
-        DC      SOURC, CELLP, TFET
-        DC      PWORD
-        DC      LDUP, LIN, STORE
-        DC      OVER, LSUB
+         DC      DROP
+;         DC      SOURC, CELLP, TFET
+;         DC      PWORD
+;         DC      LDUP, LIN, STORE
+;        DC      OVER, LSUB
+         DC      MWORDN
 ;        DC      DOTS
         _BRANCH(AWORD2)
 AWORD1:
         DC      SOURC, CELLP, TFET
         DC      PPARS
-        DC      LIN, FETCH, ONEP ;{ Better check for a blank, FIXME}
+        DC      LIN, FETCH
         DC      SWAP
         DC      LDUP, ONEP, LIN, STORE
         DC      OVER, LSUB
