@@ -158,6 +158,14 @@ BNF:  `'''   skip '''                ;BNF
 BNF:  `('    skip '('                ;BNF
 BNF:  `)'    skip ')'                ;BNF
 BNF:  `^'    skip '^'                ;BNF
+BNF:  `='    skip '='                ;BNF
+BNF:  `<'    skip '<'                ;BNF
+BNF:  `>'    skip '>'                ;BNF
+BNF:  `-'    skip '-'                ;BNF
+BNF:  `#'    skip '#'                ;BNF
+BNF:  `*'    skip '*'                ;BNF
+BNF:  `/'    skip '/'                ;BNF
+BNF:  `e'    skip [ 'e' | 'E' ]      ;BNF
 
 BNF:  `**'   skip '*' '*'            ;BNF
 BNF:  `<>'   skip '<' '>'            ;BNF
@@ -169,17 +177,6 @@ BNF:  `><'   skip '>' '<'            ;BNF
 BNF:  `=>'   skip '=' '>'            ;BNF
 
 TEST ." EXPECT 1 2:" 1 SUCCESS ! `=>' =>2 SUCCESS ? . ^
-
-BNF:  `='    skip '='                ;BNF
-BNF:  `<'    skip '<'                ;BNF
-BNF:  `>'    skip '>'                ;BNF
-             
-BNF:  `-'    skip '-'                ;BNF
-BNF:  `#'    skip '#'                ;BNF
-BNF:  `*'    skip '*'                ;BNF
-BNF:  `/'    skip '/'                ;BNF
-BNF:  `e'    skip [ 'e' | 'E' ]      ;BNF
-
 
 ( ---------- The keywords -------------------------------------------- )
 KEYWORD  `and'        and
