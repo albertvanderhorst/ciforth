@@ -4090,8 +4090,8 @@ HEADER({COUNT},{COUNT},{DOCOL})
 ;
 worddoc( {STRING},{-TRAILING},{dash_trailing},{sc1 --- sc2},{ISO},
 {Trim the forthdefin({string constant}) forthvar({sc1}) so as not to contain
-trailing blanks and leave it as forthvar({sc2}) . },
-{},
+trailing blank space and leave it as forthvar({sc2}) . },
+{{?BLANK}},
 {{ "    NUKES   " -TRAILING 41 EMIT TYPE 41 EMIT},{A   NUKESA}},
 enddoc)
 HEADER({-TRAILING},{DTRAI},{DOCOL})
@@ -4104,8 +4104,8 @@ DTRA1:  DC      OVER
         DC      ONE
         DC      LSUB
         DC      CFET
-        DC      LBL
-        DC      LSUB
+        DC      QBL
+        DC      ZEQU
         _0BRANCH(DTRA2) ;{IF}
         DC      LLEAV
 DTRA2:  DC      ONE
