@@ -63,9 +63,12 @@ HEX
 ( Return: instruction IS complete, or not started)
 ( All of the `TALLY' except the first 8 bits must have been filled up.  )
 : AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
+: BADPAIRS? INVERT DUP 2 * AND AA AND ; ( For N: it CONTAINS badpairs)
 ( Return : there IS an inconsistency, i.e. even and subsequent ) 
-( odd bit in the l.s. `TALLY' byte are both up. ) 
-: INCONSISTENT? TALLY @ INVERT DUP 2 * AND AA AND ;
+( odd bit in the inverted `TALLY' byte are both up. ) 
+: INCONSISTENT? TALLY @ BADPAIRS? ; 
+( For the `>COMMA' FIELD return : there would not BE an inconsistency   )
+: COMPATIBLE? TALLY @ AND BADPAIRS? 0= ; 
 DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
 : CHECK32 INCONSISTENT? 32 ?ERROR ;
@@ -336,8 +339,10 @@ HERE POINTER !
    DUP IS-xFI IF
    DUP >MASK   TALLY CELL+ @ INVERT   CONTAINED-IN IF
    DUP >MASK   INSTRUCTION AND   OVER >INST = IF
+   DUP >COMMA  COMPATIBLE? IF
        DUP >BODY TALLY:|
        DUP +DISS
+   THEN
    THEN
    THEN
    THEN
@@ -346,8 +351,10 @@ HERE POINTER !
    DUP IS-xFIR IF     
    DUP >MASK CORRECT-I   TALLY CELL+ @ INVERT   CONTAINED-IN IF
    DUP >MASK CORRECT-I   INSTRUCTION AND   OVER >INST CORRECT-I = IF
+   DUP >COMMA  COMPATIBLE? IF
        DUP >BODY TALLY:|R
        DUP +DISS
+   THEN
    THEN
    THEN
    THEN
@@ -384,7 +391,7 @@ HERE POINTER !
     STARTVOC BEGIN
         dis-PI dis-xFI dis-xFIR dis-COMMA
         >NEXT%
-(       DUP ID.                                                         )
+(       DUP ID. ." : " .DISS                                            )
     DUP VOCEND? RESULT? OR UNTIL DROP
     RESULT? IF
       R> DROP
