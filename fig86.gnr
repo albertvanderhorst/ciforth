@@ -3435,12 +3435,9 @@ input stream.},
 },
 enddoc)
 HEADER({EVALUATE}, {EVALUATE},{DOCOL})
-        DC      BLK, FETCH, TOR
         DC      SAVE
-        DC      ZERO, BLK, STORE
         DC      PEVAL, INTER
         DC      RESTO
-        DC      FROMR, BLK, STORE
         DC      SEMIS
 
 worddoc( {PARSING},{QUERY},,{},{ISO},
@@ -4342,9 +4339,6 @@ message is given.},
   . },{1243} },
 enddoc)
 HEADER({QUIT},{QUIT},{DOCOL})
-        DC      ZERO
-        DC      BLK
-        DC      STORE
         DC      LBRAC
 QUIT1:  DC      RPSTO   ;{BEGIN}
         DC      QUERY
@@ -5234,12 +5228,10 @@ it continues with the interrupted input stream.},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({THRU},{THRU},{DOCOL})
-        DC      BLK, FETCH, TOR
         DC      SAVE
         DC      ONEP, SWAP
         _DO(THRU2)
 THRU1:
-        DC      IDO, BLK,STORE
         DC      IDO, LLOCK
         DC      IDO, BLOCK
         DC      LIT, KBBUF
@@ -5249,7 +5241,6 @@ THRU1:
         _LOOP({THRU1})
 THRU2:
         DC      RESTO
-        DC      FROMR, BLK, STORE
         DC      SEMIS
 ;
 _LOAD_({
@@ -5269,20 +5260,16 @@ changed.},
 {{BLK @ .},{0}},
 enddoc)
 HEADER({BLK},{BLK},{DOCOL})
-;    IN @ FIRST LIMIT WITHIN
         DC      LIN, FETCH
         DC      FIRST, LIMIT, WITHIN
-;    SRC 2@ - 1024 = AND
         DC      SRC, TFET, LSUB
         DC      LIT, 1024, EQUAL, LAND
-;    IF SRC @ 2 CELLS - @ ELSE 0 THEN
         _0BRANCH(BLK1)
         DC      SRC, FETCH, TWO, LCELLS, LSUB, FETCH
         _BRANCH(BLK2)
 BLK1:
         DC      ZERO
 BLK2:
-;    BLK ! BLK
         DC      PBLK, STORE
         DC      PBLK
         DC      SEMIS
@@ -6289,6 +6276,7 @@ HEADER({GET-FILE},{GFILE},DOCOL)
         DC      LDUP, QLERR, TOR
         DC      ZERO,ZERO, LIT, close, LINOS, QLERR
         DC      FROMR, FROMR, SWAP
+        DC      TDUP, PLUS, LDP, STORE
         DC      SEMIS
 ;
 worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
