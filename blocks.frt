@@ -898,18 +898,18 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 REQUIRE OLD:
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
-
-\ An alternative ``THRU'' that display's the first index line.
-: NEW-THRU  0 OVER (LINE) TYPE CR OLD: THRU ;
+\ Print index line of SCREEN .
+: .INDEX-LINE  0 SWAP (LINE) -TRAILING TYPE ;
+\ An alternative ``THRU'' that displays first and last index.
+: NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
+  OLD: THRU ;
 
 \ Install and de-install the alternative ``OK''
 : DO-DEBUG
    'NEW-OK >DFA @   'OK >DFA !
    'NEW-THRU >DFA @   'THRU >DFA ! ;
 : NO-DEBUG   'OK RESTORED   'THRU RESTORED ;
-
 : ^ .S ;
-
 ( DUMP ) REQUIRE B.  <HEX \ AvdH A1oct02
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
  : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
@@ -1062,7 +1062,7 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
  : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
         CFOF BL @ BY -co
  : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
-    ID.. CR ;              CFOF RESULT @ BY -va
+    ID.. CR ;              CFOF STALEST @ BY -va
  : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE @ BY -us
 ( Crack item at POINTER. Leave incremented POINTER , GOON flag)

@@ -1915,49 +1915,39 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
         _PUSH
 ;
-worddoc( {DICTIONARY~},{RESULT},{result},{--- addr},{},
-{A variable containing the address of the result of searching
-in one word list chain.},{{BLOCK}},
-{{." Via MATCHING-WORD"},{Via MATCHING-WORD}},
-enddoc)
-HEADER({RESULT},{RESULT},{DOVAR}, )
-        DC 0
-;
-worddoc( {DICTIONARY~},{MATCHING-WORDS},{matching_words},{sc dea --- sc dea},{},
+worddocsafe( {DICTIONARY~},{(MATCH)},{paren_match},{sc dea --- sc dea ff},{},
 {Intended to cooperate with forthcode({FOR-WORDS}) . Compares
 the forthdefin({string constant}) forthvar({sc}) with the dea
 forthvar({dea}).
-If it is a match taking into account denotations,
-it returns into
-forthcode({RESULT}) this forthvar({dea}) and it exits
-prematurely from forthcode({FOR-WORDS}).},
+Returns into forthvar({ff}) a flag indicating that
+it is a match taking into account denotations.},
 {{FIND}},
-{{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl
-"MATCHING-WORDS" ' MATCHING-WORDS GS1 . 2DROP},{_T_}},
+{ { "TASK" 'TASK (MATCH) . ID. TYPE },{_T_ TASK TASK },
+{ "BLAST" 'TASK (MATCH) . ID. TYPE },{0 TASK BLAST } },
 enddoc)
-HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
+HEADER({(MATCH)},{PMATCH},{DOCOL})
         DC      TOR
         DC      RR, TFFA, FETCH
         DC      LIT, B_INVIS _OR_ B_DUMMY, LAND ;{Get flags.}
         DC      ZEQU
+        DC      LDUP
         _0BRANCH(MATS2)
-;       DC      RR, IDDOT
+        DC      DROP
         DC      RR, TNFA, FETCH, FETCH
         DC      OVER, LSUB
+;
+; The following three lines take care of denotations.
         DC      RR, TFFA, FETCH, LIT, B_DENOT, LAND ;{Get flag.}
         DC      OVER, ZLESS, LAND  ;{Ignorable length difference.}
         DC      ZEQU, LAND
+;
         DC      ZEQU
+        DC      LDUP
         _0BRANCH(MATS2)
-        DC      OVER
+        DC      DROP, OVER
         DC      RR, TNFA, FETCH, SFET
         DC      CORA, ZEQU  ;{ Compare equals.}
-        _0BRANCH(MATS2)
-        DC      FROMR, FROMR
-        DC      RDROP, ZERO, TOR ;{FORCE END}
-        DC      TOR, TOR
-        DC      RR, RESULT, STORE
-MATS2:  DC      RDROP
+MATS2:  DC      FROMR, SWAP
         DC      SEMIS
 ;
 worddoc( {PARSING},{?BLANK},{query_blank},{c --- ff },{},
@@ -4714,9 +4704,14 @@ as this is a repetitive action}}). },
  {TYPE},{BONOBO} },
 enddoc)
 HEADER({(FIND)},{PFIND},{DOCOL})
-        DC      ZERO, RESULT, STORE
-        DC      LIT, MATCHING, SWAP, FORW
-        DC      RESULT,FETCH
+PFIND0:
+        DC      LDUP
+        _0BRANCH(PFIND1)
+        DC      PMATCH, ZEQU
+        _0BRANCH(PFIND1)
+        DC     TLFA, FETCH
+        _BRANCH(PFIND0)
+PFIND1:
         DC      SEMIS
 ;
 worddoc( {ERRORS},{ERROR},{error},{n ---},{},
