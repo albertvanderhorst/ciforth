@@ -27,7 +27,7 @@ REQUIRE $
 
 \ For VALUE and SET : value IS present in set.
 : IN-SET? $@ SWAP
- DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
+ ?DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 
 \ Fill from ADDRESS to END a number of cells with CONTENT.
 : WFILL   ROT ROT SWAP ?DO DUP I !   0 CELL+ +LOOP DROP ;
@@ -169,7 +169,7 @@ HERE SWAP !
 \ For a GAP : it IS forbidden, i.e. there is some branch from outside to inside
 \ the gap.
 : FORBIDDEN-GAP? SWAP CELL+ SWAP \ You may jump to the start of a gap!
-BRANCHES @+ SWAP DO
+BRANCHES @+ SWAP ?DO
     2DUP I @ ROT ROT WITHIN 0= IF 2DUP I @ >TARGET ROT ROT WITHIN IF 2DROP 0. LEAVE THEN THEN
 0 CELL+ +LOOP OR 0= ;
 
@@ -241,12 +241,12 @@ THEN RDROP ;
 
 \ Delete from ``BRANCHES'' what is marked for elimination.
 \ Must go back because otherwise the we would disturb the later addresses.
-: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ 1 CELLS - ?DO
-    I @ BRANCHES SET-REMOVE
+: DELETE-MARKED-BRANCHES MARKED-BRANCHES @+ ?DO
+    I 1 CELLS - @ BRANCHES SET-REMOVE
 -1 CELLS +LOOP ;
 
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
-: ADJUST-BRANCHES BRANCHES @+ SWAP DO
+: ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES @+ SWAP ?DO
     2DUP I @ ADJUST-BRANCH-FROM-LEFT
     2DUP I @ ADJUST-BRANCH-FROM-RIGHT
     2DUP I ELIMINATE-BRANCH-IN-GAP
@@ -256,12 +256,12 @@ THEN RDROP ;
 : SHIFT-GAP-SHUT
     DUP END-OF-SEQUENCE OVER - >R   DUP ANNIL-OFFSET @ +  R>   MOVE ;
 
-\ For START of gap, fill with ``DROP''.
+\ Fill the gap at START with ``DROP'' s.
 : FILL-WITH-DROPS   DUP VD @ NEGATE CELLS +   'DROP   WFILL ;
 
-\ For START of gap, Move all branches that are greater to reflect
-\ the position they have after closing the gap.
-: MOVE-BRANCHES   BRANCHES @+ SWAP DO
+\ Correct the branch-addresses higher than the START of a gap,
+\ to reflect the position they have after closing the gap.
+: MOVE-BRANCHES   BRANCHES @+ SWAP ?DO
     DUP I @ < IF ANNIL-OFFSET @   I +! THEN
 0 CELL+ +LOOP DROP ;
 
@@ -273,8 +273,8 @@ THEN RDROP ;
     2DUP CALCULATE-ANNIL-OFFSET
     2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES
     DUP >R
-\ " Between " TYPE SWAP H. " and " TYPE H.
-\ " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
+    2DUP " Between " TYPE SWAP H. " and " TYPE H.
+    " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
     SHIFT-GAP-SHUT   DUP MOVE-BRANCHES   FILL-WITH-DROPS
     R>
 ;
