@@ -1,5 +1,4 @@
 #!lina -s
-
 \ Output a block file with name in ARG1 in a nice PostScript format.
 
 REQUIRE ARGV
@@ -19,24 +18,24 @@ REQUIRE ^
 : .COORDINATE  SPACE SWAP . . ;
 
 \ Number of screens to put in a column
-5 CONSTANT #SCREENS
+5 CONSTANT #Screens
 
 \ upper left coordinates of top screen of left column
-2500 79342 COORDINATE LeftColumn
+2500 76961 COORDINATE LeftColumn
 
 \ upper left coordinates of top screen of right column
-31550 79342 COORDINATE RightColumn
+31550 76961 COORDINATE RightColumn
 
 \ Stride between screens, vertical
-15700 CONSTANT NextScreen
+15229 CONSTANT NextScreen
 
 \ Position of screen number w.r.t. screen
 \ Position of first line w.r.t. screen
 \ Stride between lines, vertical
--930 CONSTANT NextLine
+-902 CONSTANT NextLine
 
 \ Relative position of screen's lower right corner
-28000 12000 COORDINATE ScreenSize
+28000 11640 COORDINATE ScreenSize
 
 \ Line width
 \ Font size of screens content characters
@@ -54,7 +53,7 @@ LOOP ;
 
 \ Get the next LINE from the screens .
 CREATE FileContent 2 CELLS ALLOT
-: Line   FileContent 2@   ^J $S   2SWAP FileContent 2! ;
+: Line   FileContent 2@  ^J $S   2SWAP FileContent 2! ;
 
 \ Output the next line from the screens to position, first place to next line.
 : PrintLine &( EMIT   Line PrintWithEscapes   &) EMIT
@@ -66,13 +65,17 @@ CREATE FileContent 2 CELLS ALLOT
 \ Return the screen WAS empty.
 
 \ Draw a border around the screen at POSITION .
-: DrawBorder .COORDINATE ."  moveto "
+: DrawBorder ".5 setgray" TYPE CR
+    .COORDINATE ."  moveto "
     C/L 1 +          . ." CW mul 0 rlineto "
     NextLine         . ." 16.5 mul 0 exch rlineto "
-    C/L 1 + NEGATE   . ." CW mul 0 rlineto "
-                       ." closepath CW setlinewidth stroke " CR
+    C/L 1 + NEGATE   . ." CW mul 0 rlineto " CR
+                       ." closepath CW setlinewidth .5 setgray stroke 0 setgray" CR
 ;
-\ Print the screen number of the screen at POSITION .
+\ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
+: ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
+    ." moveto " C/L 3 / . ." M (SCR #"
+    DUP . ." ) TitleF show BodyF" CR #Screens + ;
 
 \ Output a screen at POSITION unless empty. Return it was EMPTY.
 : OneScreen
@@ -83,7 +86,18 @@ CREATE FileContent 2 CELLS ALLOT
 
 \ Print the PAGE number and the file name on top.
 
-\ Output two columns of screens, starting at SCREEN .
+\ Output a SCREEN and following at PAGE in two columns of screens.
+\ Leave incremented SCREEN and PAGE and indication we MUST stop.
+: NextPage
+      DUP &( EMIT 4 .R ") (Appendix A. forth.lab) exch StartPage " TYPE CR 1+ >R
+      LeftColumn 2@ ScreenNumber
+      LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
+      RightColumn 2@ ScreenNumber
+      RightColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
+      "EndPage " TYPE CR
+      R>
+      1
+;
 
 \ Output the prelude : PostScript code.
 : PreLude
@@ -91,7 +105,7 @@ CREATE FileContent 2 CELLS ALLOT
 %%Title: blocks.frt
 %%Creator: nenscript v1.13++ (US version) 24-November-1992
 %%For: albert
-%%CreationDate: Mon Oct  8 22:23:07 2001
+%%CreationDate:
 %%DocumentFonts: Courier Courier-Bold
 %%Pages: (atend)
 %%EndComments
@@ -156,14 +170,14 @@ CREATE FileContent 2 CELLS ALLOT
 /#copies 1 def
 /BodyF { 679 /Courier /Courier-Latin1 ChgFnt } def
 /CW BodyF ( ) stringwidth pop def
-/Titlef {  1000 /Courier-Bold /Courier-Bold-Latin1 ChgFnt } def
+/TitleF {  1000 /Courier-Bold /Courier-Bold-Latin1 ChgFnt } def
 /K         { -2 CW mul add exch moveto (+) show } def
 /L         { CW mul add exch moveto show } def
 /T         { moveto show } def
 /M         { CW mul 0 rmoveto } def
 /Centre    { dup stringwidth pop 2 div neg 0 rmoveto } def
 /StartPage { /SavedPage save def
-  0 setgray Titlef 2500 80700 moveto show 8 M (Mon Oct  8 22:23:07 2001) show 8 M show
+  0 setgray TitleF 2500 80700 moveto show 32 M show
   BodyF 0 setgray CW setlinewidth 1 setlinejoin } def
 /EndPage   {showpage SavedPage restore } def
 %%EndProlog
@@ -181,8 +195,7 @@ CREATE FileContent 2 CELLS ALLOT
 : OutputScreens
     FileName GET-FILE FileContent 2!
     PreLude
-       LeftColumn 2@ #SCREENS 0 DO 2DUP OneScreen NextScreen - LOOP
-       RightColumn 2@ #SCREENS 0 DO 2DUP OneScreen NextScreen - LOOP
+    0 1  BEGIN NextPage UNTIL  2DROP
     PostLude
 ;
 
