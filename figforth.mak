@@ -185,7 +185,7 @@ BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
 # Like above. However there is no attempt to have MSDOS reading from
 # the hard disk succeed.
 # The option BOOTHD must be installed into alone.m4.
-hdboot: fig86.alone.bin
+hdboot: fig86.alonehd.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
@@ -211,6 +211,7 @@ mslinks :
 	ln -sf fig86.msdos.asm forth32.asm
 	ln -sf fig86.msdos.bin forth32.com
 	ln -sf fig86.alone.asm alone.asm
+	ln -sf fig86.alonehd.asm alonehd.asm
 	ln -sf figdocadd.txt figdocad.txt
 	ln -sf stealconstant.c stealcon.c
 
@@ -223,7 +224,7 @@ fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 # This linking must be static, because `link.script' is tricky enough.
 # but a .5M executable is better than a 64 M executable.
 figforth : figforth.c fig86.linux.o link.script
-	$(CC) $(CFLAGS) figforth.c fig86.linux.o -static -Wl,-Tlink.script -o $@
+	$(CC) $(CFLAGS) figforth.c fig86.linux.o -static -Wl,-Tlink.script -Wl,-M -o $@
 
 # Linux native forth
 lina : fig86.lina.o ; ld $+ -o $@
