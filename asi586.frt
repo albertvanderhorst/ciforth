@@ -66,7 +66,7 @@
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
 ( A0 0720 0s 0600 0s xFIR' [BP]'  ( Fits in the hole, safe inconsistency check)
  0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX]
-010120 0700 0s 0400 0s xFIR' SIB|   ( Fits in the hole, requires also SIB, )
+010120 0700 0s 0400 0s xFIR' ~SIB|   ( Fits in the hole, requires also ~SIB, )
 0001A0 0700 0s 0500 0s xFIR' [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
@@ -85,7 +85,7 @@
 0102 3800 0s T!'
  0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 
-0600 1FF 00 1PI' SIB,
+0600 1FF 00 1PI' ~SIB,
 
 ( --------- 0F must be found last -------)
 2100 1800 0s T!'   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
@@ -203,19 +203,19 @@
 
 ( Handle a `sib' bytes as an instruction-within-an-instruction )
 ( This is really straightforward, we say the sib commaer is a sib )
-( as per -- error checking omitted -- " 10000 ' SIB, CFA COMMAER SIB,," )
+( as per -- error checking omitted -- " 10000 ' ~SIB, CFA COMMAER SIB,," )
 ( All the rest is to nest the state in this recursive situation )
 ( Leaving this bit on would flag [.X+ +.* .X] as errors )
 ( Leaving BY would flag commaers to be done after the sib byte as errors)
 : (SIB),,   
     TALLY-BA @   TALLY-BY @   !TALLY      ( . -- state1 state2 )
-    SIB,   
+    ~SIB,   
     TALLY-BY ! 100 INVERT AND TALLY-BA @ OR TALLY-BA ! ;
 
 ' (SIB),, CFA   % SIB,, >DATA !   ( Not available during  generation)
 
 ( Disassemble the sib byte from ADDRESS. Leave INCREMENTED address.     )
-: DIS-SIB POINTER ! [ % SIB, ] LITERAL F-D POINTER @ ;
+: DIS-SIB POINTER ! [ % ~SIB, ] LITERAL F-D POINTER @ ;
 ( Disassembler was not available while creating the commaer. )
 ' DIS-SIB CFA   % SIB,, >DIS !    0   % SIB,, >CNT !   
 

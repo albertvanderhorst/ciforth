@@ -92,7 +92,7 @@
 : !+ >R R ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
 : @- 0 CELL+ - >R R @ R>  ; 
-( CHAR - CONSTANT &-                                                    )
+( CHAR - CONSTANT &-     CHAR ~ CONSTANT &~                             )
 1 VARIABLE TABLE 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in )
 ( memory! Not as printed on a big endian machine! )
@@ -106,6 +106,9 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 : %>BODY PFA CELL+ ; ( From DEA to the DATA field of a created word )
 : %BODY> 0 CELL+ - NFA ; ( Reverse of above)
 : %>CODE PFA CFA CELL+ ; ( From DEA to the DOES> pointer )
+( Leave for DEA : it IS to be ignored. This is used for supressing the  )
+( bare bones of the sib mechanism in i586.                              )
+: IGNORE? 1+ C@ &~ = ;
 
 : (>NEXT%) PFA LFA @ ; ( Given a DEA, return the next DEA. )
 ( For a DEA as returned from (>NEXT%} : it IS the end, not a real dea.  )
@@ -455,16 +458,20 @@ HERE POINTER !
     DUP >CNT @ POINTER +!
     ID.
 ;
+( Print the DEA but with suppression, i.e. ignore those starting in '~' )
+: %~ID. DUP IGNORE? IF DROP ELSE %ID. THEN  ;
 : .DISS' DISS @+ SWAP DO
     I @ DUP IS-COMMA 0= IF
-        ID.
+        %~ID. 
     ELSE DUP >CNT @ IF
        .COMMA       ( DEA -- )
     ELSE
        POINTER @ OVER >DIS @ EXECUTE POINTER !
     THEN
     THEN
- 0 CELL+ +LOOP CR ;
+ 0 CELL+ +LOOP 
+ DISS CELL+ @ IGNORE? 0= IF CR THEN ( Probably a sub instruction)
+;
 
 ( Dissassemble one instruction from `POINTER'. )
 ( Based on what is currently left in `TALLY!' )
