@@ -2192,7 +2192,7 @@ enddoc)
         _NEXT
 });_END_({ _BITS16_})
 ;
-worddoc( {DEFINING},{:},{colon},{},{I,E,L0},
+worddoc( {DEFINING},{:},{colon},{},{E,L0},
 {Used in the form called a colon-definition:
 forthexample({: cccc     ...     ;})
 Creates a dictionary entry defining forthvar({cccc}) as equivalent to the
@@ -2205,8 +2205,7 @@ Words with the immediate bit
 set (P) are executed rather than being compiled.},{},
 {{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
 enddoc)
-HEADER({:},{COLON},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      QEXEC})
+HEADER({:},{COLON},{DOCOL})
         DC      SCSP
         DC      PWORD
         DC      PCREAT
@@ -7186,17 +7185,17 @@ worddoc( {CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{I,
 At run-time, forthcode({+LOOP}) selectively controls branching
 back to the corresponding forthcode({DO}) based on
 forthvar({n1}) , the loop index and the loop limit. The signed
-increment forthvar({n1}) is added to the index and the total
+increment forthsamp({n1}) is added to the index and the total
 compared to the limit. The branch back to forthcode({DO})
 occurs until the new index is equal to or greater than the
-limit (forthvar({n1>0})), or until the new index is equal to or
-less than the limit (forthvar({n1<0})). Upon exiting the loop,
+limit (forthsamp({n1>0})), or until the new index is equal to or
+less than the limit (forthsamp({n1<0})). Upon exiting the loop,
 the parameters are discarded and execution continues ahead.
 
 At compile time, forthcode({+LOOP}) compiles the run-time word
 forthcode({(+LOOP)}) and the branch offset computed from
 forthcode({HERE}) to the address left on the stack by
-forthcode({DO}) . forthvar({n2}) is used for compile tine error
+forthcode({DO}) . forthsamp({n2}) is used for compile tine error
 checking.},{},
 { { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
@@ -7218,7 +7217,7 @@ execution continues ahead.
 
 At compile-time, forthcode({UNTIL}) compiles
 forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for error tests.},
+addr. forthsamp({n}) is used for error tests.},
 {{BEGIN}},
 {
 {: GI4 BEGIN DUP . 1+ DUP 5 > UNTIL ; 3 GI4 .},{3 4 5 6},
@@ -7238,7 +7237,7 @@ forthcode({BEGIN}) .
 There is no effect on the stack. Execution cannot leave this loop
 except for forthcode({EXIT}).
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for compile-time error checking.},
+addr. forthsamp({n}) is used for compile-time error checking.},
 {{BEGIN}},
 {
 { : GCE2 BEGIN DUP . 1 - DUP 0= IF EXIT THEN AGAIN ; 3 GCE2},
@@ -7250,7 +7249,7 @@ HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 ;
-worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{ISO,FIG,I,C2},
+worddoc( {CONTROL},{REPEAT},{repeat},{addr1 n1 addr2 n2--- (compiling)},{ISO,FIG,I,C2},
 {Used within a colon-definition in the form:
     forthsamp({BEGIN ... WHILE ... REPEAT})
 At run-time, forthcode({REPEAT}) forces an unconditional branch
@@ -7258,18 +7257,18 @@ back to just after the corresponding forthcode({BEGIN}) .
 
 At compile-time, forthcode({REPEAT}) compiles
 forthcode({BRANCH}) and the offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for error testing.},{{WHILE}},
-{
+forthsamp({addr2}) . Then it fills in another branch offset at
+forthsamp({addr1}) left there by forthcode({WHILE}) .
+forthsamp({n1 n2}) is used for error testing.}, 
+{{WHILE}},{
 { : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
 {0 1 2 3 4}
 },
 enddoc)
 HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      QCOMP, LIT, 4, QPAIR ; {Matches WHILE ?}})
-        DC      TOR    ; { WHILE handled later. }
         _SECURITY_({DC      ONE, QPAIR   ; {Matches BEGIN ?}})
         DC      LIT, BRAN, COMMA, BACKP
-        DC      FROMR
+        _SECURITY_({DC      QCOMP, LIT, 4, QPAIR ; {Matches WHILE ?}})
         DC      FORWARDP ;{ WHILE target. }
         DC      SEMIS
 ;
@@ -7280,8 +7279,8 @@ worddoc( {CONTROL},{IF},{if},
       forthsamp({IF (tp) ...  THEN}) or
       forthsamp({IF (tp) ... ELSE (fp) ... THEN})
 At run-time, forthcode({IF}) selects execution based on a
-boolean flag. If forthvar({f}) is true (non-zero), execution
-continues ahead thru the true part. If forthvar({f}) is false
+boolean flag. If forthsamp({f}) is true (non-zero), execution
+continues ahead thru the true part. If forthsamp({f}) is false
 (zero), execution skips till just after forthcode({ELSE}) to
 execute the false part. After either part, execution resumes
 after forthcode({THEN}).
@@ -7289,8 +7288,8 @@ forthcode({ELSE}) and its false part are optional.; if missing,
 false execution skips to just after forthcode({THEN}) .
 
 At compile-time forthcode({IF}) compiles forthcode({0BRANCH})
-and reserves space for an offset at forthvar({addr}) .
-forthvar({addr}) and forthvar({n}) are used later for
+and reserves space for an offset at forthsamp({addr}) .
+forthsamp({addr}) and forthsamp({n}) are used later for
 resolution of the offset and error testing.},{},
 {
 { : GI1 IF 123 THEN ; 234 1 GI1 . .},{123 234},
@@ -7313,11 +7312,11 @@ to skip over the following false part and resumes execution
 after the forthcode({THEN}) . It has no stack effect.
 
 At compile-time forthcode({ELSE}) emplaces forthcode({BRANCH})
-reserving a branch offset, leaves the address forthvar({addr2})
-and forthvar({n2}) for error testing. forthcode({ELSE}) also
+reserving a branch offset, leaves the address forthsamp({addr2})
+and forthsamp({n2}) for error testing. forthcode({ELSE}) also
 resolves the pending forward branch from forthcode({IF}) by
-calculating the offset from forthvar({addr1}) to
-forthcode({HERE}) and storing at forthvar({addr1}) .},
+calculating the offset from forthsamp({addr1}) to
+forthcode({HERE}) and storing at forthsamp({addr1}) .},
 {},
 {
 {: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234},
@@ -7333,21 +7332,24 @@ HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{WHILE},{while},
-{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{ISO,FIG,I,C2},
+{f --- (run-time) / ad1 nl --- ad2 n1 ad1 n2(compile-time)},
+{ISO,FIG,I,C2},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
 At run-time, forthcode({WHILE}) selects conditional execution
-based on boolean flag forthvar({f}) . If forthvar({f}) is true
+based on boolean flag forthsamp({f}) . If forthsamp({f}) is true
 (non-zero), forthcode({WHILE}) continues execution of the true
 part thru to forthcode({REPEAT}) , which then branches back to
-forthcode({BEGIN}) . If forthvar({f}) is false (zero),
+forthcode({BEGIN}) . If forthsamp({f}) is false (zero),
 execution skips to just after forthcode({REPEAT}) , exiting the
 structure.
 
 At compile time, forthcode({WHILE}) emplaces
-forthcode({0BRANCH}) and leaves forthvar({ad2}) of the reserved
-offset. The stack values will be resolved by
-Forthcode({REPEAT}) .},
+forthcode({0BRANCH}) and tuck leaves forthsamp({ad2}) of the reserved
+offset under the forthsamp({ad1}) left there by BEGIN.
+The stack values will be resolved by
+Forthcode({REPEAT}) . forthsamp({n1}) and forthsamp({n2}) provide checks for compiler security.
+},
 {{BEGIN}},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . DUP 1+ REPEAT ; 0 GI3 .},
@@ -7356,12 +7358,16 @@ Forthcode({REPEAT}) .},
 },
 enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
+        DC      TOR    ; { Save backward target. }
+        _SECURITY_({DC      TOR})
         DC      LIT, ZBRAN, COMMA, PFORWARD
         _SECURITY_({DC      LIT, 4 ;{ Magic number}})
+        _SECURITY_({DC      FROMR})
+        DC      FROMR
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{L0},
-{If forthvar({n}) is greater or equal to zero, display as much
+{If forthsamp({n}) is greater or equal to zero, display as much
 spaces. },{{SPACE},{OUT}},
 {
 {41 EMIT 0 SPACES 41 EMIT},{AA},
@@ -7397,7 +7403,7 @@ HEADER({<#},{BDIGS},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {FORMATTING},{#>},{number_sign_greater},{d --- addr count},{ISO,L0},
-{Terminates numeric output conversion by dropping forthvar({d}), leaving the text
+{Terminates numeric output conversion by dropping forthsamp({d}), leaving the text
 address and character count suitable for forthcode({TYPE}).},
 {{<#}},
 {{( Via <#)},{}},
@@ -7414,7 +7420,7 @@ HEADER({#>},{EDIGS},{DOCOL})
 ;
 worddoc( {FORMATTING},{SIGN},{sign},{n --- },{ISO},
 {Stores an ascii "-" sign just before a converted numeric output
-string in the text output buffer when forthvar({n}) is negative.
+string in the text output buffer when forthsamp({n}) is negative.
 Must be used between forthcode({<#}) and
 forthcode({#>}) .},
 {{+-},{D+-}},
@@ -7429,9 +7435,9 @@ HEADER({SIGN},{SIGN},{DOCOL})
 SIGN1:  DC      SEMIS
 ;
 worddoc( {FORMATTING},{#},{number_sign},{d1 --- d2},{L0},
-{Generate from a double number forthvar({d1}), the next ascii
+{Generate from a double number forthsamp({d1}), the next ascii
 character which is placed in an output string. Result
-forthvar({d2}) is the quotient after division by
+forthsamp({d2}) is the quotient after division by
 forthcode({BASE}), and is maintained for further processing.
 Used between forthcode({<#}) and forthcode({#>}).},
 {{#S}},
@@ -7457,8 +7463,8 @@ DIG1:   DC      LIT,30H
 ;
 worddoc( {FORMATTING},{#S},{number_sign_s},{d1 --- d2},{L0},
 {Generates ascii text in the text output buffer,
-by the use of (sharp) dnl forthvar({#}),
-until a zero double number forthvar({n2}) results.
+by the use of (sharp) dnl forthcode({#}),
+until a zero double number forthsamp({n2}) results.
 Used between forthcode({<#}) and forthcode({#>}).},{},
 {
 {!CSP 1.23 <# #S #> TYPE ?CSP},{123},
@@ -7475,7 +7481,7 @@ DIGS1:  DC      DIG     ;{BEGIN}
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{FIG},
-{Print a signed double number forthvar({d}) right aligned in a field forthvar({n}) characters
+{Print a signed double number forthsamp({d}) right aligned in a field forthsamp({n}) characters
 wide.},{{OUT},{D.}},
 {{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}},
 enddoc)
@@ -7497,7 +7503,7 @@ HEADER({D.R},{DDOTR},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {OUTPUT},{.R},{dot_r},{n1 n2 ---},{},
-{Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
+{Print the number n1 right aligned in a field whose width is forthsamp({n2}) . No
 following blank is printed.},{{OUT},{.}},
 {{-12 41 EMIT 5 .R 41 EMIT},{A  -12A}},
 enddoc)
@@ -7509,7 +7515,7 @@ HEADER({.R},{DOTR},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{D.},{d_dot},{d ---},{L1},
-{Print a signed double number forthvar({d}),
+{Print a signed double number forthsamp({d}),
 according to the current forthcode({BASE}) . A blank follows.
 },{{OUT},{.},{D.R}},
 {{-12. D. 41 EMIT},{-12 A}},
@@ -7562,9 +7568,9 @@ HEADER({U.},{UDOT},{DOCOL})
 worddoc( {DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt dea --x1...xn},{},
 {For the word with the forthdefi({dictionary entry address}) forthsamp({dea})
 and all that are linked from that word
-execute forthvar({xt})
- with as data forthvar({x1..xn}) plus
-the forthdefi({dea}) of those words.         forthvar({xt})
+execute forthsamp({xt})
+ with as data forthsamp({x1..xn}) plus
+the forthdefi({dea}) of those words.         forthsamp({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
 {{FOR-VOCS},{EXECUTE}},
@@ -7591,8 +7597,8 @@ FORW1:  DC      FROMR
         DC      SEMIS
 ;
 worddoc( {DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
-{For all vocabularies execute forthvar({xt})
- with as data the forthdefi({dea}) of those words. forthvar({xt})
+{For all vocabularies execute forthsamp({xt})
+ with as data the forthdefi({dea}) of those words. forthsamp({xt})
 must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}},
@@ -7680,7 +7686,7 @@ HEADER({BYE},{BYE},{DOCOL})
 });_END_({ _HOSTED_LINUX_})
 ;
 worddoc( {SCREEN},{LIST},{list},{n ---},{L0},
-{Display the ascii text of screen forthvar({n}) on the selected output device.
+{Display the ascii text of screen forthsamp({n}) on the selected output device.
 The number of the screen is always printed in decimal.
 forthcode({SCR}) contains the screen number during and after this process.},
 {},
@@ -7701,7 +7707,7 @@ HEADER({LIST},{LLIST},{DOCOL})
 ;
 worddoc( {SCREEN},{INDEX},{index},{from to --},{},
 {Print the first line of each screen over the range
-forthvar({from}) , forthvar({to}) . This is used to view the
+forthsamp({from}) , forthsamp({to}) . This is used to view the
 comment lines of an area of text on disc screens.},
 {{LIST}},
 {{." interactive"},{interactive}},
@@ -7770,7 +7776,7 @@ ENVQ2:
 _LOAD_({
 worddoc( {SCREEN},{TRIAD},{triad},{scr --},{},
 {Display on the selected output device the three screens which
-include that numbered forthvar({scr}) , beginning with a screen evenly divisible
+include that numbered forthsamp({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
 reference line at the bottom taken from line 15 of screen 4.},
 {{MESSAGE}},
@@ -7941,20 +7947,20 @@ _ENDCOMMENT
 ;{ Define the entry point, not valid for auto booting.}
         END     ORIG
 worddocchapter({COMPILING},{ },
-{The wordset forthvar({COMPILING}) contains words that compile
+{The wordset forthsamp({COMPILING}) contains words that compile
 forthxref({IMMEDIATE}) words and numbers.
 You need special precautions because these words would execute during
 compilation. Numbers are compiled forthdefi({in line}) , behind a word that fetches
 them.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({CONTROL},{ },
-{The wordset forthvar({CONTROL}) contains words that influence the control flow
+{The wordset forthsamp({CONTROL}) contains words that influence the control flow
 of a program, i.e. the sequence in which commands are executed in compiled words.
 With control words you can have actions performed repeatedly, or
 depending on conditions.
 },{},{},{},{}, {}, enddoc)
 worddocchapter({DEFINING},{ },
-{The wordset forthvar({DEFINING}) contains words that add new entries
+{The wordset forthsamp({DEFINING}) contains words that add new entries
 to the dictionary. A number of such forthdefi({defining word})'s
 are predefined, but there is
 also the possibility to make new defining words, using
@@ -7962,8 +7968,8 @@ forthcode({CREATE}) and forthcode({DOES>}) .
 },
 {},{},{},{}, {}, enddoc)
 worddocchapter({DICTIONARY},{ },
-{The wordset forthvar({DICTIONARY}) contains words that at a lower level than
-the wordset forthvar({DEFINING}) concern the memory area that
+{The wordset forthsamp({DICTIONARY}) contains words that at a lower level than
+the wordset forthsamp({DEFINING}) concern the memory area that
 is allocated to the dictionary. They may add data to the dictionary at the expense
 of the free space, one cell or one byte at a time, or allocate a buffer at once.
 The dictionary space may also be shrunk, and the words that were there are lost.
@@ -7972,15 +7978,15 @@ an entry may considered a record with fields. Words to access those fields also 
 to this wordset.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DOUBLE},{ },
-{The wordset forthvar({DOUBLE}) contains words that manipulate forthdefi({double})'s.
+{The wordset forthsamp({DOUBLE}) contains words that manipulate forthdefi({double})'s.
 _BITS32_({In this 32 Forth you would never need double's if it weren't
 for the NUMBER formatting wordset that uses them exclusively.})},
 {},{},{},{}, {}, enddoc)
 worddocchapter({ERRORS},{ },
-{The wordset forthvar({ERRORS}) contains words to handle errors.},
+{The wordset forthsamp({ERRORS}) contains words to handle errors.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({FORMATTING},{ },
-{The wordset forthvar({FORMATTING}) generates formatted output for
+{The wordset forthsamp({FORMATTING}) generates formatted output for
 numbers, i.e. printing the digits in a field with a certain width,
 possibly with sign etc.
 This is possible in any forthdefi({number base}). (Normally base 10 is used,
@@ -7992,27 +7998,27 @@ forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
 },
 {},{},{},{}, {}, enddoc)
 worddocchapter({INIT},{ },
-{The wordset forthvar({INIT}) contains words to initialise or reinitialise Forth.},
+{The wordset forthsamp({INIT}) contains words to initialise or reinitialise Forth.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DENOTATIONS},{ },
-{The wordset forthvar({DENOTATIONS}) contains one letter
+{The wordset forthsamp({DENOTATIONS}) contains one letter
 words that introduced a forthdefi({denotation}), i.e. a generalisation of
 forthcode({NUMBER}) . These words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant.
 They reside in a special vocabulary, called forthcode({DENOTATIONS}).},
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
-{The wordset forthvar({ENVIRONMENT}) contain words for all environment
+{The wordset forthsamp({ENVIRONMENT}) contain words for all environment
 queries that are recognized. By executing they leave the information
 such as is required for each of these queries.
 Except for the true flag at the end.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
-{The wordset forthvar({INPUT}) contains words to get input from the terminal
+{The wordset forthsamp({INPUT}) contains words to get input from the terminal
 and such. For disk I/O: forthxref({STORAGE}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({JUGGLING},{ },
-{The wordset forthvar({JUGGLING}) contains words that change the lifo-buffer.
+{The wordset forthsamp({JUGGLING}) contains words that change the lifo-buffer.
 The necessity for this arise, because the data you want to feed to a program
 is not directly accessible, i.e. on top of the stack.
 It also possible that  you need the same data twice, because you have to feed
@@ -8021,7 +8027,7 @@ Design your program such that you need them as little as possible,
 because they are confusing.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({LOGIC},{ },
-{The wordset forthvar({LOGIC}) contains logic operators and
+{The wordset forthsamp({LOGIC}) contains logic operators and
 comparison operators.
 A comparison operators (such as forthcode({=}) ) delivers a
 forthdefi({logical flag}), 1 for true, 0 for false, representing a
@@ -8039,36 +8045,36 @@ cannot be directly combined using logical operators,
 but forthsamp({0= 0=}) can help.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({MEMORY},{ },
-{The wordset forthvar({MEMORY}) contains words to fetch and
+{The wordset forthsamp({MEMORY}) contains words to fetch and
 store numbers from forthdefi({double})s, forthdefi({cell})s or bytes in memory.
 There are also words to copy blocks of memory or fill them, and words that
 fetch a forthdefi({cell}), operate on it and store it back.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({MISC},{ },
-{The wordset forthvar({MISC}) contains words that defy categorisation.},
+{The wordset forthsamp({MISC}) contains words that defy categorisation.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({MULTIPLYING},{ },
 {The _BITS32_(original) 16 bits Forth's have problems with scaling (forthpxref({OPERATOR})).
 Operators with intermediate results of double precision solve this and are
-present in the forthvar({MULTIPLYING}) wordset. _BITS32_({In this 32-bit Forth
+present in the forthsamp({MULTIPLYING}) wordset. _BITS32_({In this 32-bit Forth
 you will have less need, but scaling remain tricky.}).
 Formatting is done with forthdefi({double})'s exclusively, and relies
 on this wordset. Operators with mixed precision and unsigned operators
 allow to build arbitray precision from them in forthdefi({high level}) code.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({OPERATOR},{ },
-{The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc.
+{The wordset forthsamp({OPERATOR}) contains the familiar operators for addition, multiplication etc.
 The result of the operation is always
 an integer number, so division can't be precise. The combination of
 forthcode({/}) and forthcode({MOD}) (remainder) is such that you can get the
 original back: forthsamp({n m /   m *  n m MOD   +}) allways has the value
-forthvar({m}) . This is true for all Forth's.
+forthsamp({m}) . This is true for all Forth's.
 On ciforth the forthcode({/}) is a forthdefi({symmetric division}), i.e.
 forthsamp({-n m /}) give the same result as forthsamp({n m /}), but negated.
 The forgeoing rule now has the consequence that forthsamp({MOD n m})
-has forthvar({2m-1}) possible outcomes instead of forthvar({m}) .
+has forthsamp({2m-1}) possible outcomes instead of forthsamp({m}) .
 This is very worrysome for mathematicians, who stick to the rule that
-forthsamp({MOD n m}) gives a result in the range forthvar({0 ... m-1})
+forthsamp({MOD n m}) gives a result in the range forthsamp({0 ... m-1})
 (forthdefi({floored division})).
 _BITS16_({Having a mere 3000 for the number range can easily lead to
 overflow in intermediate results during forthdefi({scaling:}) a multiplication
@@ -8077,13 +8083,13 @@ followed by a division. _VERBOSE_({ For example forthsamp({: ADD10% 110
 forthxref({MULTIPLYING}).})},
 {},{},{},{}, {}, enddoc)
 worddocchapter({OUTPUT},{ },
-{The wordset forthvar({OUTPUT}) contains words to output
+{The wordset forthsamp({OUTPUT}) contains words to output
 to the terminal and such. For disk I/O: forthxref({STORAGE}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing, i.e.
 it gets a word from the input stream and interprets or compiles it,
-advacing the forthcode({IN}) pointer. The wordset forthvar({PARSING}) contains
+advacing the forthcode({IN}) pointer. The wordset forthsamp({PARSING}) contains
 the words used by this interpreter and other words that consume characters
 from the input stream. In this way the outer interpreter need not be very smart,
 because its capabilities can be extended by new words based on those
@@ -8095,45 +8101,45 @@ have 16 lines of 64 characters. They are used for source code
 and documentation.
 Each screen is a whole number of forthcode({BLOCK})'s,
 in our case it is one block.
-The forthvar({SCREEN}) wordset contains facilities to view screens,
+The forthsamp({SCREEN}) wordset contains facilities to view screens,
 and forthdefi({load}) them, that is compiling them and thus extending
 the base system.
 A system is customized by loading source screens, possibly one of
 these extension is a text editor for screens.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({SECURITY},{ },
-{The wordset forthvar({SECURITY}) contains words that are used by control
+{The wordset forthsamp({SECURITY}) contains words that are used by control
 words to abort with an error message if the control structure is not
 correct. _VERBOSE_({Some say that this is not Forth-like.})
 You only need to know them if want to extend the
-forthvar({CONTROL}) wordset.},
+forthsamp({CONTROL}) wordset.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STACKS},{ },
-{The wordset forthvar({STACKS}) contains words related to the
+{The wordset forthsamp({STACKS}) contains words related to the
 forthdefi({data stack}) and forthdefi({return stack}).
 Words can be moved between both stacks.
 Stacks can be reinitialised and the value used to initialise the
 forthdefi({stack pointer})'s can be altered.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STORAGE},{ },
-{The wordset forthvar({STORAGE}) contains words to input and output
+{The wordset forthsamp({STORAGE}) contains words to input and output
 to the mass storage, in this ciforth _BOOTFD_({ to the hard disk})
 _BOOTHD_({to the hard disk}) _HOSTED_({to the file
 forthfile({BLOCKS.BLK})}).
-They are underlying the forthvar({SCREEN}) facilities.},
+They are underlying the forthsamp({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STRING},{ },
-{The wordset forthvar({STRING}) contains words that manipulate
+{The wordset forthsamp({STRING}) contains words that manipulate
 strings of characters.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({SUPERFLUOUS},{ },
-{The wordset forthvar({ SUPERFLUOUS}) contains words that are superfluous,
+{The wordset forthsamp({ SUPERFLUOUS}) contains words that are superfluous,
 because they are equivalent to small sequences of code.
 _VERBOSE_({Traditionally one hoped to speed Forth up by coding these words
 directly})},
 {},{},{},{}, {}, enddoc)
 worddocchapter({OPERATINGSYSTEM},{ },
-{The wordset forthvar({OPERATINGSYSTEM}) contains words that call the underlying operating
+{The wordset forthsamp({OPERATINGSYSTEM}) contains words that call the underlying operating
 system or functions available in the BIOS-rom.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({VOCABULARIES},{ },
@@ -8143,6 +8149,6 @@ They are created by the defining word
 forthcode({VOCABULARY}) and filled by defining words while that
 vocabulary is forthcode({CURRENT}) . They regulate how words are
 found, different vocabularies can have words with the same names.
-The wordset forthvar({VOCABULARIES}) contains words that manipulate
+The wordset forthsamp({VOCABULARIES}) contains words that manipulate
 those vocabularies.},
 {},{},{},{})
