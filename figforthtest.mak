@@ -8,6 +8,7 @@ MASK=FF
 PREFIX=0
 TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
 
+
 %.ps : asgen.frt %.frt ps.frt ; \
     ( \
         echo 8 LOAD; \
@@ -97,41 +98,11 @@ lina2 : fig86.lina.s ; gcc $+ -l 2>aap
 
 fig86.lina.s :
 
-quickref.ps : asgen.frt asi86.frt ps.frt ; \
-    (echo 8 LOAD; cat $+; echo PRELUDE QUICK-REFERENCE BYE)|\
-    lina |\
-    sed '1,/SNIP TILL HERE/d' |\
-    grep -v OK >$@
-
-qr8080.ps : asgen.frt as80.frt ps.frt ; \
-    (echo 8 LOAD; cat $+; echo PRELUDE QUICK-REFERENCE BYE)|\
-    lina |\
-    sed '1,/SNIP TILL HERE/d' |\
-    grep -v OK >$@
-
-MASK=FF
-PREFIX=0
-TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
-
-qr80386.ps : asgen.frt asi586.frt ps.frt ; \
-    ( \
-        echo 8 LOAD; \
-        cat $+ ;\
-        echo 'PRELUDE' ;\
-        echo 'HEX $(MASK) MASK ! $(PREFIX) PREFIX ! DECIMAL ' ;\
-        echo ' STRING NEW $(TITLE)"   NEW TITLE $$!' ;\
-        echo ' QUICK-REFERENCE BYE' \
-    )|\
-    lina |\
-    sed '1,/SNIP TILL HERE/d' |\
-    sed '/SI[MB]/d' |\
-    sed '/OK/d' >$@
-
 testas86: asgen.frt asi86.frt testset8086 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F][^:]*://' >$@       ;\
+    sed 's/^[0-9A-F \.]*://' >$@       ;\
     diff -w $@ testset8086 >$@.diff ;\
     diff $@.diff testresults
 

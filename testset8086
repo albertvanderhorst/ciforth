@@ -48,70 +48,70 @@ RET+, 8 W,
 JMPFAR, 8 X, C SG, 
 CALLFAR, 8 X, C SG, 
 INT, 8 IB, 
-SAR, V| W| MEM| 14 X, 
-SAR, V| W| R| DI| 
-SAR, V| W| R| SI| 
-SAR, V| W| R| BP| 
-SAR, V| W| R| SP| 
-SAR, V| W| R| BX| 
-SAR, V| W| R| DX| 
-SAR, V| W| R| CX| 
-SAR, V| W| R| AX| 
-SAR, V| W| DW| [BP] 18 X, 
-SAR, V| W| DW| [BX] 18 X, 
-SAR, V| W| DW| [DI] 18 X, 
-SAR, V| W| DW| [SI] 18 X, 
-SAR, V| W| DW| [BP+DI] 18 X, 
-SAR, V| W| DW| [BP+SI] 18 X, 
-SAR, V| W| DW| [BX+DI] 18 X, 
-SAR, V| W| DW| [BX+SI] 18 X, 
-SAR, V| W| DB| [BP] 18 B, 
-SAR, V| W| DB| [BX] 18 B, 
-SAR, V| W| DB| [DI] 18 B, 
-SAR, V| W| DB| [SI] 18 B, 
-SAR, V| W| DB| [BP+DI] 18 B, 
-SAR, V| W| DB| [BP+SI] 18 B, 
-SAR, V| W| DB| [BX+DI] 18 B, 
-SAR, V| W| DB| [BX+SI] 18 B, 
-SAR, V| W| D0| [BX] 
-SAR, V| W| D0| [DI] 
-SAR, V| W| D0| [SI] 
-SAR, V| W| D0| [BP+DI] 
-SAR, V| W| D0| [BP+SI] 
-SAR, V| W| D0| [BX+DI] 
-SAR, V| W| D0| [BX+SI] 
-SAR, V| B| MEM| 14 X, 
-SAR, V| B| R| BH| 
-SAR, V| B| R| DH| 
-SAR, V| B| R| CH| 
-SAR, V| B| R| AH| 
-SAR, V| B| R| BL| 
-SAR, V| B| R| DL| 
-SAR, V| B| R| CL| 
-SAR, V| B| R| AL| 
-SAR, V| B| DW| [BP] 18 X, 
-SAR, V| B| DW| [BX] 18 X, 
-SAR, V| B| DW| [DI] 18 X, 
-SAR, V| B| DW| [SI] 18 X, 
-SAR, V| B| DW| [BP+DI] 18 X, 
-SAR, V| B| DW| [BP+SI] 18 X, 
-SAR, V| B| DW| [BX+DI] 18 X, 
-SAR, V| B| DW| [BX+SI] 18 X, 
-SAR, V| B| DB| [BP] 18 B, 
-SAR, V| B| DB| [BX] 18 B, 
-SAR, V| B| DB| [DI] 18 B, 
-SAR, V| B| DB| [SI] 18 B, 
-SAR, V| B| DB| [BP+DI] 18 B, 
-SAR, V| B| DB| [BP+SI] 18 B, 
-SAR, V| B| DB| [BX+DI] 18 B, 
-SAR, V| B| DB| [BX+SI] 18 B, 
-SAR, V| B| D0| [BX] 
-SAR, V| B| D0| [DI] 
-SAR, V| B| D0| [SI] 
-SAR, V| B| D0| [BP+DI] 
-SAR, V| B| D0| [BP+SI] 
-SAR, V| B| D0| [BX+DI] 
-SAR, V| B| D0| [BX+SI] 
+SAR, V| W| MEM| 14 X, 18 IS, 
+SAR, V| W| R| DI| 18 IS, 
+SAR, V| W| R| SI| 18 IS, 
+SAR, V| W| R| BP| 18 IS, 
+SAR, V| W| R| SP| 18 IS, 
+SAR, V| W| R| BX| 18 IS, 
+SAR, V| W| R| DX| 18 IS, 
+SAR, V| W| R| CX| 18 IS, 
+SAR, V| W| R| AX| 18 IS, 
+SAR, V| W| DW| [BP] 18 X, 1C IS, 
+SAR, V| W| DW| [BX] 18 X, 1C IS, 
+SAR, V| W| DW| [DI] 18 X, 1C IS, 
+SAR, V| W| DW| [SI] 18 X, 1C IS, 
+SAR, V| W| DW| [BP+DI] 18 X, 1C IS, 
+SAR, V| W| DW| [BP+SI] 18 X, 1C IS, 
+SAR, V| W| DW| [BX+DI] 18 X, 1C IS, 
+SAR, V| W| DW| [BX+SI] 18 X, 1C IS, 
+SAR, V| W| DB| [BP] 18 B, 1C IS, 
+SAR, V| W| DB| [BX] 18 B, 1C IS, 
+SAR, V| W| DB| [DI] 18 B, 1C IS, 
+SAR, V| W| DB| [SI] 18 B, 1C IS, 
+SAR, V| W| DB| [BP+DI] 18 B, 1C IS, 
+SAR, V| W| DB| [BP+SI] 18 B, 1C IS, 
+SAR, V| W| DB| [BX+DI] 18 B, 1C IS, 
+SAR, V| W| DB| [BX+SI] 18 B, 1C IS, 
+SAR, V| W| D0| [BX] 18 IS, 
+SAR, V| W| D0| [DI] 18 IS, 
+SAR, V| W| D0| [SI] 18 IS, 
+SAR, V| W| D0| [BP+DI] 18 IS, 
+SAR, V| W| D0| [BP+SI] 18 IS, 
+SAR, V| W| D0| [BX+DI] 18 IS, 
+SAR, V| W| D0| [BX+SI] 18 IS, 
+SAR, V| B| MEM| 14 X, 18 IS, 
+SAR, V| B| R| BH| 18 IS, 
+SAR, V| B| R| DH| 18 IS, 
+SAR, V| B| R| CH| 18 IS, 
+SAR, V| B| R| AH| 18 IS, 
+SAR, V| B| R| BL| 18 IS, 
+SAR, V| B| R| DL| 18 IS, 
+SAR, V| B| R| CL| 18 IS, 
+SAR, V| B| R| AL| 18 IS, 
+SAR, V| B| DW| [BP] 18 X, 1C IS, 
+SAR, V| B| DW| [BX] 18 X, 1C IS, 
+SAR, V| B| DW| [DI] 18 X, 1C IS, 
+SAR, V| B| DW| [SI] 18 X, 1C IS, 
+SAR, V| B| DW| [BP+DI] 18 X, 1C IS, 
+SAR, V| B| DW| [BP+SI] 18 X, 1C IS, 
+SAR, V| B| DW| [BX+DI] 18 X, 1C IS, 
+SAR, V| B| DW| [BX+SI] 18 X, 1C IS, 
+SAR, V| B| DB| [BP] 18 B, 1C IS, 
+SAR, V| B| DB| [BX] 18 B, 1C IS, 
+SAR, V| B| DB| [DI] 18 B, 1C IS, 
+SAR, V| B| DB| [SI] 18 B, 1C IS, 
+SAR, V| B| DB| [BP+DI] 18 B, 1C IS, 
+SAR, V| B| DB| [BP+SI] 18 B, 1C IS, 
+SAR, V| B| DB| [BX+DI] 18 B, 1C IS, 
+SAR, V| B| DB| [BX+SI] 18 B, 1C IS, 
+SAR, V| B| D0| [BX] 18 IS, 
+SAR, V| B| D0| [DI] 18 IS, 
+SAR, V| B| D0| [SI] 18 IS, 
+SAR, V| B| D0| [BP+DI] 18 IS, 
+SAR, V| B| D0| [BP+SI] 18 IS, 
+SAR, V| B| D0| [BX+DI] 18 IS, 
+SAR, V| B| D0| [BX+SI] 18 IS, 
 SAR, 1| W| MEM| 14 X, 
 SAR, 1| W| R| DI| 
 SAR, 1| W| R| SI| 
@@ -176,70 +176,70 @@ SAR, 1| B| D0| [BP+DI]
 SAR, 1| B| D0| [BP+SI] 
 SAR, 1| B| D0| [BX+DI] 
 SAR, 1| B| D0| [BX+SI] 
-SAL, V| W| MEM| 14 X, 
-SAL, V| W| R| DI| 
-SAL, V| W| R| SI| 
-SAL, V| W| R| BP| 
-SAL, V| W| R| SP| 
-SAL, V| W| R| BX| 
-SAL, V| W| R| DX| 
-SAL, V| W| R| CX| 
-SAL, V| W| R| AX| 
-SAL, V| W| DW| [BP] 18 X, 
-SAL, V| W| DW| [BX] 18 X, 
-SAL, V| W| DW| [DI] 18 X, 
-SAL, V| W| DW| [SI] 18 X, 
-SAL, V| W| DW| [BP+DI] 18 X, 
-SAL, V| W| DW| [BP+SI] 18 X, 
-SAL, V| W| DW| [BX+DI] 18 X, 
-SAL, V| W| DW| [BX+SI] 18 X, 
-SAL, V| W| DB| [BP] 18 B, 
-SAL, V| W| DB| [BX] 18 B, 
-SAL, V| W| DB| [DI] 18 B, 
-SAL, V| W| DB| [SI] 18 B, 
-SAL, V| W| DB| [BP+DI] 18 B, 
-SAL, V| W| DB| [BP+SI] 18 B, 
-SAL, V| W| DB| [BX+DI] 18 B, 
-SAL, V| W| DB| [BX+SI] 18 B, 
-SAL, V| W| D0| [BX] 
-SAL, V| W| D0| [DI] 
-SAL, V| W| D0| [SI] 
-SAL, V| W| D0| [BP+DI] 
-SAL, V| W| D0| [BP+SI] 
-SAL, V| W| D0| [BX+DI] 
-SAL, V| W| D0| [BX+SI] 
-SAL, V| B| MEM| 14 X, 
-SAL, V| B| R| BH| 
-SAL, V| B| R| DH| 
-SAL, V| B| R| CH| 
-SAL, V| B| R| AH| 
-SAL, V| B| R| BL| 
-SAL, V| B| R| DL| 
-SAL, V| B| R| CL| 
-SAL, V| B| R| AL| 
-SAL, V| B| DW| [BP] 18 X, 
-SAL, V| B| DW| [BX] 18 X, 
-SAL, V| B| DW| [DI] 18 X, 
-SAL, V| B| DW| [SI] 18 X, 
-SAL, V| B| DW| [BP+DI] 18 X, 
-SAL, V| B| DW| [BP+SI] 18 X, 
-SAL, V| B| DW| [BX+DI] 18 X, 
-SAL, V| B| DW| [BX+SI] 18 X, 
-SAL, V| B| DB| [BP] 18 B, 
-SAL, V| B| DB| [BX] 18 B, 
-SAL, V| B| DB| [DI] 18 B, 
-SAL, V| B| DB| [SI] 18 B, 
-SAL, V| B| DB| [BP+DI] 18 B, 
-SAL, V| B| DB| [BP+SI] 18 B, 
-SAL, V| B| DB| [BX+DI] 18 B, 
-SAL, V| B| DB| [BX+SI] 18 B, 
-SAL, V| B| D0| [BX] 
-SAL, V| B| D0| [DI] 
-SAL, V| B| D0| [SI] 
-SAL, V| B| D0| [BP+DI] 
-SAL, V| B| D0| [BP+SI] 
-SAL, V| B| D0| [BX+DI] 
-SAL, V| B| D0| [BX+SI] 
+SAL, V| W| MEM| 14 X, 18 IS, 
+SAL, V| W| R| DI| 18 IS, 
+SAL, V| W| R| SI| 18 IS, 
+SAL, V| W| R| BP| 18 IS, 
+SAL, V| W| R| SP| 18 IS, 
+SAL, V| W| R| BX| 18 IS, 
+SAL, V| W| R| DX| 18 IS, 
+SAL, V| W| R| CX| 18 IS, 
+SAL, V| W| R| AX| 18 IS, 
+SAL, V| W| DW| [BP] 18 X, 1C IS, 
+SAL, V| W| DW| [BX] 18 X, 1C IS, 
+SAL, V| W| DW| [DI] 18 X, 1C IS, 
+SAL, V| W| DW| [SI] 18 X, 1C IS, 
+SAL, V| W| DW| [BP+DI] 18 X, 1C IS, 
+SAL, V| W| DW| [BP+SI] 18 X, 1C IS, 
+SAL, V| W| DW| [BX+DI] 18 X, 1C IS, 
+SAL, V| W| DW| [BX+SI] 18 X, 1C IS, 
+SAL, V| W| DB| [BP] 18 B, 1C IS, 
+SAL, V| W| DB| [BX] 18 B, 1C IS, 
+SAL, V| W| DB| [DI] 18 B, 1C IS, 
+SAL, V| W| DB| [SI] 18 B, 1C IS, 
+SAL, V| W| DB| [BP+DI] 18 B, 1C IS, 
+SAL, V| W| DB| [BP+SI] 18 B, 1C IS, 
+SAL, V| W| DB| [BX+DI] 18 B, 1C IS, 
+SAL, V| W| DB| [BX+SI] 18 B, 1C IS, 
+SAL, V| W| D0| [BX] 18 IS, 
+SAL, V| W| D0| [DI] 18 IS, 
+SAL, V| W| D0| [SI] 18 IS, 
+SAL, V| W| D0| [BP+DI] 18 IS, 
+SAL, V| W| D0| [BP+SI] 18 IS, 
+SAL, V| W| D0| [BX+DI] 18 IS, 
+SAL, V| W| D0| [BX+SI] 18 IS, 
+SAL, V| B| MEM| 14 X, 18 IS, 
+SAL, V| B| R| BH| 18 IS, 
+SAL, V| B| R| DH| 18 IS, 
+SAL, V| B| R| CH| 18 IS, 
+SAL, V| B| R| AH| 18 IS, 
+SAL, V| B| R| BL| 18 IS, 
+SAL, V| B| R| DL| 18 IS, 
+SAL, V| B| R| CL| 18 IS, 
+SAL, V| B| R| AL| 18 IS, 
+SAL, V| B| DW| [BP] 18 X, 1C IS, 
+SAL, V| B| DW| [BX] 18 X, 1C IS, 
+SAL, V| B| DW| [DI] 18 X, 1C IS, 
+SAL, V| B| DW| [SI] 18 X, 1C IS, 
+SAL, V| B| DW| [BP+DI] 18 X, 1C IS, 
+SAL, V| B| DW| [BP+SI] 18 X, 1C IS, 
+SAL, V| B| DW| [BX+DI] 18 X, 1C IS, 
+SAL, V| B| DW| [BX+SI] 18 X, 1C IS, 
+SAL, V| B| DB| [BP] 18 B, 1C IS, 
+SAL, V| B| DB| [BX] 18 B, 1C IS, 
+SAL, V| B| DB| [DI] 18 B, 1C IS, 
+SAL, V| B| DB| [SI] 18 B, 1C IS, 
+SAL, V| B| DB| [BP+DI] 18 B, 1C IS, 
+SAL, V| B| DB| [BP+SI] 18 B, 1C IS, 
+SAL, V| B| DB| [BX+DI] 18 B, 1C IS, 
+SAL, V| B| DB| [BX+SI] 18 B, 1C IS, 
+SAL, V| B| D0| [BX] 18 IS, 
+SAL, V| B| D0| [DI] 18 IS, 
+SAL, V| B| D0| [SI] 18 IS, 
+SAL, V| B| D0| [BP+DI] 18 IS, 
+SAL, V| B| D0| [BP+SI] 18 IS, 
+SAL, V| B| D0| [BX+DI] 18 IS, 
+SAL, V| B| D0| [BX+SI] 18 IS, 
 SAL, 1| W| MEM| 14 X, 
 SAL, 1| W| R| DI| 
 SAL, 1| W| R| SI| 
@@ -304,70 +304,70 @@ SAL, 1| B| D0| [BP+DI]
 SAL, 1| B| D0| [BP+SI] 
 SAL, 1| B| D0| [BX+DI] 
 SAL, 1| B| D0| [BX+SI] 
-SHR, V| W| MEM| 14 X, 
-SHR, V| W| R| DI| 
-SHR, V| W| R| SI| 
-SHR, V| W| R| BP| 
-SHR, V| W| R| SP| 
-SHR, V| W| R| BX| 
-SHR, V| W| R| DX| 
-SHR, V| W| R| CX| 
-SHR, V| W| R| AX| 
-SHR, V| W| DW| [BP] 18 X, 
-SHR, V| W| DW| [BX] 18 X, 
-SHR, V| W| DW| [DI] 18 X, 
-SHR, V| W| DW| [SI] 18 X, 
-SHR, V| W| DW| [BP+DI] 18 X, 
-SHR, V| W| DW| [BP+SI] 18 X, 
-SHR, V| W| DW| [BX+DI] 18 X, 
-SHR, V| W| DW| [BX+SI] 18 X, 
-SHR, V| W| DB| [BP] 18 B, 
-SHR, V| W| DB| [BX] 18 B, 
-SHR, V| W| DB| [DI] 18 B, 
-SHR, V| W| DB| [SI] 18 B, 
-SHR, V| W| DB| [BP+DI] 18 B, 
-SHR, V| W| DB| [BP+SI] 18 B, 
-SHR, V| W| DB| [BX+DI] 18 B, 
-SHR, V| W| DB| [BX+SI] 18 B, 
-SHR, V| W| D0| [BX] 
-SHR, V| W| D0| [DI] 
-SHR, V| W| D0| [SI] 
-SHR, V| W| D0| [BP+DI] 
-SHR, V| W| D0| [BP+SI] 
-SHR, V| W| D0| [BX+DI] 
-SHR, V| W| D0| [BX+SI] 
-SHR, V| B| MEM| 14 X, 
-SHR, V| B| R| BH| 
-SHR, V| B| R| DH| 
-SHR, V| B| R| CH| 
-SHR, V| B| R| AH| 
-SHR, V| B| R| BL| 
-SHR, V| B| R| DL| 
-SHR, V| B| R| CL| 
-SHR, V| B| R| AL| 
-SHR, V| B| DW| [BP] 18 X, 
-SHR, V| B| DW| [BX] 18 X, 
-SHR, V| B| DW| [DI] 18 X, 
-SHR, V| B| DW| [SI] 18 X, 
-SHR, V| B| DW| [BP+DI] 18 X, 
-SHR, V| B| DW| [BP+SI] 18 X, 
-SHR, V| B| DW| [BX+DI] 18 X, 
-SHR, V| B| DW| [BX+SI] 18 X, 
-SHR, V| B| DB| [BP] 18 B, 
-SHR, V| B| DB| [BX] 18 B, 
-SHR, V| B| DB| [DI] 18 B, 
-SHR, V| B| DB| [SI] 18 B, 
-SHR, V| B| DB| [BP+DI] 18 B, 
-SHR, V| B| DB| [BP+SI] 18 B, 
-SHR, V| B| DB| [BX+DI] 18 B, 
-SHR, V| B| DB| [BX+SI] 18 B, 
-SHR, V| B| D0| [BX] 
-SHR, V| B| D0| [DI] 
-SHR, V| B| D0| [SI] 
-SHR, V| B| D0| [BP+DI] 
-SHR, V| B| D0| [BP+SI] 
-SHR, V| B| D0| [BX+DI] 
-SHR, V| B| D0| [BX+SI] 
+SHR, V| W| MEM| 14 X, 18 IS, 
+SHR, V| W| R| DI| 18 IS, 
+SHR, V| W| R| SI| 18 IS, 
+SHR, V| W| R| BP| 18 IS, 
+SHR, V| W| R| SP| 18 IS, 
+SHR, V| W| R| BX| 18 IS, 
+SHR, V| W| R| DX| 18 IS, 
+SHR, V| W| R| CX| 18 IS, 
+SHR, V| W| R| AX| 18 IS, 
+SHR, V| W| DW| [BP] 18 X, 1C IS, 
+SHR, V| W| DW| [BX] 18 X, 1C IS, 
+SHR, V| W| DW| [DI] 18 X, 1C IS, 
+SHR, V| W| DW| [SI] 18 X, 1C IS, 
+SHR, V| W| DW| [BP+DI] 18 X, 1C IS, 
+SHR, V| W| DW| [BP+SI] 18 X, 1C IS, 
+SHR, V| W| DW| [BX+DI] 18 X, 1C IS, 
+SHR, V| W| DW| [BX+SI] 18 X, 1C IS, 
+SHR, V| W| DB| [BP] 18 B, 1C IS, 
+SHR, V| W| DB| [BX] 18 B, 1C IS, 
+SHR, V| W| DB| [DI] 18 B, 1C IS, 
+SHR, V| W| DB| [SI] 18 B, 1C IS, 
+SHR, V| W| DB| [BP+DI] 18 B, 1C IS, 
+SHR, V| W| DB| [BP+SI] 18 B, 1C IS, 
+SHR, V| W| DB| [BX+DI] 18 B, 1C IS, 
+SHR, V| W| DB| [BX+SI] 18 B, 1C IS, 
+SHR, V| W| D0| [BX] 18 IS, 
+SHR, V| W| D0| [DI] 18 IS, 
+SHR, V| W| D0| [SI] 18 IS, 
+SHR, V| W| D0| [BP+DI] 18 IS, 
+SHR, V| W| D0| [BP+SI] 18 IS, 
+SHR, V| W| D0| [BX+DI] 18 IS, 
+SHR, V| W| D0| [BX+SI] 18 IS, 
+SHR, V| B| MEM| 14 X, 18 IS, 
+SHR, V| B| R| BH| 18 IS, 
+SHR, V| B| R| DH| 18 IS, 
+SHR, V| B| R| CH| 18 IS, 
+SHR, V| B| R| AH| 18 IS, 
+SHR, V| B| R| BL| 18 IS, 
+SHR, V| B| R| DL| 18 IS, 
+SHR, V| B| R| CL| 18 IS, 
+SHR, V| B| R| AL| 18 IS, 
+SHR, V| B| DW| [BP] 18 X, 1C IS, 
+SHR, V| B| DW| [BX] 18 X, 1C IS, 
+SHR, V| B| DW| [DI] 18 X, 1C IS, 
+SHR, V| B| DW| [SI] 18 X, 1C IS, 
+SHR, V| B| DW| [BP+DI] 18 X, 1C IS, 
+SHR, V| B| DW| [BP+SI] 18 X, 1C IS, 
+SHR, V| B| DW| [BX+DI] 18 X, 1C IS, 
+SHR, V| B| DW| [BX+SI] 18 X, 1C IS, 
+SHR, V| B| DB| [BP] 18 B, 1C IS, 
+SHR, V| B| DB| [BX] 18 B, 1C IS, 
+SHR, V| B| DB| [DI] 18 B, 1C IS, 
+SHR, V| B| DB| [SI] 18 B, 1C IS, 
+SHR, V| B| DB| [BP+DI] 18 B, 1C IS, 
+SHR, V| B| DB| [BP+SI] 18 B, 1C IS, 
+SHR, V| B| DB| [BX+DI] 18 B, 1C IS, 
+SHR, V| B| DB| [BX+SI] 18 B, 1C IS, 
+SHR, V| B| D0| [BX] 18 IS, 
+SHR, V| B| D0| [DI] 18 IS, 
+SHR, V| B| D0| [SI] 18 IS, 
+SHR, V| B| D0| [BP+DI] 18 IS, 
+SHR, V| B| D0| [BP+SI] 18 IS, 
+SHR, V| B| D0| [BX+DI] 18 IS, 
+SHR, V| B| D0| [BX+SI] 18 IS, 
 SHR, 1| W| MEM| 14 X, 
 SHR, 1| W| R| DI| 
 SHR, 1| W| R| SI| 
@@ -432,70 +432,70 @@ SHR, 1| B| D0| [BP+DI]
 SHR, 1| B| D0| [BP+SI] 
 SHR, 1| B| D0| [BX+DI] 
 SHR, 1| B| D0| [BX+SI] 
-SHL, V| W| MEM| 14 X, 
-SHL, V| W| R| DI| 
-SHL, V| W| R| SI| 
-SHL, V| W| R| BP| 
-SHL, V| W| R| SP| 
-SHL, V| W| R| BX| 
-SHL, V| W| R| DX| 
-SHL, V| W| R| CX| 
-SHL, V| W| R| AX| 
-SHL, V| W| DW| [BP] 18 X, 
-SHL, V| W| DW| [BX] 18 X, 
-SHL, V| W| DW| [DI] 18 X, 
-SHL, V| W| DW| [SI] 18 X, 
-SHL, V| W| DW| [BP+DI] 18 X, 
-SHL, V| W| DW| [BP+SI] 18 X, 
-SHL, V| W| DW| [BX+DI] 18 X, 
-SHL, V| W| DW| [BX+SI] 18 X, 
-SHL, V| W| DB| [BP] 18 B, 
-SHL, V| W| DB| [BX] 18 B, 
-SHL, V| W| DB| [DI] 18 B, 
-SHL, V| W| DB| [SI] 18 B, 
-SHL, V| W| DB| [BP+DI] 18 B, 
-SHL, V| W| DB| [BP+SI] 18 B, 
-SHL, V| W| DB| [BX+DI] 18 B, 
-SHL, V| W| DB| [BX+SI] 18 B, 
-SHL, V| W| D0| [BX] 
-SHL, V| W| D0| [DI] 
-SHL, V| W| D0| [SI] 
-SHL, V| W| D0| [BP+DI] 
-SHL, V| W| D0| [BP+SI] 
-SHL, V| W| D0| [BX+DI] 
-SHL, V| W| D0| [BX+SI] 
-SHL, V| B| MEM| 14 X, 
-SHL, V| B| R| BH| 
-SHL, V| B| R| DH| 
-SHL, V| B| R| CH| 
-SHL, V| B| R| AH| 
-SHL, V| B| R| BL| 
-SHL, V| B| R| DL| 
-SHL, V| B| R| CL| 
-SHL, V| B| R| AL| 
-SHL, V| B| DW| [BP] 18 X, 
-SHL, V| B| DW| [BX] 18 X, 
-SHL, V| B| DW| [DI] 18 X, 
-SHL, V| B| DW| [SI] 18 X, 
-SHL, V| B| DW| [BP+DI] 18 X, 
-SHL, V| B| DW| [BP+SI] 18 X, 
-SHL, V| B| DW| [BX+DI] 18 X, 
-SHL, V| B| DW| [BX+SI] 18 X, 
-SHL, V| B| DB| [BP] 18 B, 
-SHL, V| B| DB| [BX] 18 B, 
-SHL, V| B| DB| [DI] 18 B, 
-SHL, V| B| DB| [SI] 18 B, 
-SHL, V| B| DB| [BP+DI] 18 B, 
-SHL, V| B| DB| [BP+SI] 18 B, 
-SHL, V| B| DB| [BX+DI] 18 B, 
-SHL, V| B| DB| [BX+SI] 18 B, 
-SHL, V| B| D0| [BX] 
-SHL, V| B| D0| [DI] 
-SHL, V| B| D0| [SI] 
-SHL, V| B| D0| [BP+DI] 
-SHL, V| B| D0| [BP+SI] 
-SHL, V| B| D0| [BX+DI] 
-SHL, V| B| D0| [BX+SI] 
+SHL, V| W| MEM| 14 X, 18 IS, 
+SHL, V| W| R| DI| 18 IS, 
+SHL, V| W| R| SI| 18 IS, 
+SHL, V| W| R| BP| 18 IS, 
+SHL, V| W| R| SP| 18 IS, 
+SHL, V| W| R| BX| 18 IS, 
+SHL, V| W| R| DX| 18 IS, 
+SHL, V| W| R| CX| 18 IS, 
+SHL, V| W| R| AX| 18 IS, 
+SHL, V| W| DW| [BP] 18 X, 1C IS, 
+SHL, V| W| DW| [BX] 18 X, 1C IS, 
+SHL, V| W| DW| [DI] 18 X, 1C IS, 
+SHL, V| W| DW| [SI] 18 X, 1C IS, 
+SHL, V| W| DW| [BP+DI] 18 X, 1C IS, 
+SHL, V| W| DW| [BP+SI] 18 X, 1C IS, 
+SHL, V| W| DW| [BX+DI] 18 X, 1C IS, 
+SHL, V| W| DW| [BX+SI] 18 X, 1C IS, 
+SHL, V| W| DB| [BP] 18 B, 1C IS, 
+SHL, V| W| DB| [BX] 18 B, 1C IS, 
+SHL, V| W| DB| [DI] 18 B, 1C IS, 
+SHL, V| W| DB| [SI] 18 B, 1C IS, 
+SHL, V| W| DB| [BP+DI] 18 B, 1C IS, 
+SHL, V| W| DB| [BP+SI] 18 B, 1C IS, 
+SHL, V| W| DB| [BX+DI] 18 B, 1C IS, 
+SHL, V| W| DB| [BX+SI] 18 B, 1C IS, 
+SHL, V| W| D0| [BX] 18 IS, 
+SHL, V| W| D0| [DI] 18 IS, 
+SHL, V| W| D0| [SI] 18 IS, 
+SHL, V| W| D0| [BP+DI] 18 IS, 
+SHL, V| W| D0| [BP+SI] 18 IS, 
+SHL, V| W| D0| [BX+DI] 18 IS, 
+SHL, V| W| D0| [BX+SI] 18 IS, 
+SHL, V| B| MEM| 14 X, 18 IS, 
+SHL, V| B| R| BH| 18 IS, 
+SHL, V| B| R| DH| 18 IS, 
+SHL, V| B| R| CH| 18 IS, 
+SHL, V| B| R| AH| 18 IS, 
+SHL, V| B| R| BL| 18 IS, 
+SHL, V| B| R| DL| 18 IS, 
+SHL, V| B| R| CL| 18 IS, 
+SHL, V| B| R| AL| 18 IS, 
+SHL, V| B| DW| [BP] 18 X, 1C IS, 
+SHL, V| B| DW| [BX] 18 X, 1C IS, 
+SHL, V| B| DW| [DI] 18 X, 1C IS, 
+SHL, V| B| DW| [SI] 18 X, 1C IS, 
+SHL, V| B| DW| [BP+DI] 18 X, 1C IS, 
+SHL, V| B| DW| [BP+SI] 18 X, 1C IS, 
+SHL, V| B| DW| [BX+DI] 18 X, 1C IS, 
+SHL, V| B| DW| [BX+SI] 18 X, 1C IS, 
+SHL, V| B| DB| [BP] 18 B, 1C IS, 
+SHL, V| B| DB| [BX] 18 B, 1C IS, 
+SHL, V| B| DB| [DI] 18 B, 1C IS, 
+SHL, V| B| DB| [SI] 18 B, 1C IS, 
+SHL, V| B| DB| [BP+DI] 18 B, 1C IS, 
+SHL, V| B| DB| [BP+SI] 18 B, 1C IS, 
+SHL, V| B| DB| [BX+DI] 18 B, 1C IS, 
+SHL, V| B| DB| [BX+SI] 18 B, 1C IS, 
+SHL, V| B| D0| [BX] 18 IS, 
+SHL, V| B| D0| [DI] 18 IS, 
+SHL, V| B| D0| [SI] 18 IS, 
+SHL, V| B| D0| [BP+DI] 18 IS, 
+SHL, V| B| D0| [BP+SI] 18 IS, 
+SHL, V| B| D0| [BX+DI] 18 IS, 
+SHL, V| B| D0| [BX+SI] 18 IS, 
 SHL, 1| W| MEM| 14 X, 
 SHL, 1| W| R| DI| 
 SHL, 1| W| R| SI| 
@@ -560,70 +560,70 @@ SHL, 1| B| D0| [BP+DI]
 SHL, 1| B| D0| [BP+SI] 
 SHL, 1| B| D0| [BX+DI] 
 SHL, 1| B| D0| [BX+SI] 
-RCR, V| W| MEM| 14 X, 
-RCR, V| W| R| DI| 
-RCR, V| W| R| SI| 
-RCR, V| W| R| BP| 
-RCR, V| W| R| SP| 
-RCR, V| W| R| BX| 
-RCR, V| W| R| DX| 
-RCR, V| W| R| CX| 
-RCR, V| W| R| AX| 
-RCR, V| W| DW| [BP] 18 X, 
-RCR, V| W| DW| [BX] 18 X, 
-RCR, V| W| DW| [DI] 18 X, 
-RCR, V| W| DW| [SI] 18 X, 
-RCR, V| W| DW| [BP+DI] 18 X, 
-RCR, V| W| DW| [BP+SI] 18 X, 
-RCR, V| W| DW| [BX+DI] 18 X, 
-RCR, V| W| DW| [BX+SI] 18 X, 
-RCR, V| W| DB| [BP] 18 B, 
-RCR, V| W| DB| [BX] 18 B, 
-RCR, V| W| DB| [DI] 18 B, 
-RCR, V| W| DB| [SI] 18 B, 
-RCR, V| W| DB| [BP+DI] 18 B, 
-RCR, V| W| DB| [BP+SI] 18 B, 
-RCR, V| W| DB| [BX+DI] 18 B, 
-RCR, V| W| DB| [BX+SI] 18 B, 
-RCR, V| W| D0| [BX] 
-RCR, V| W| D0| [DI] 
-RCR, V| W| D0| [SI] 
-RCR, V| W| D0| [BP+DI] 
-RCR, V| W| D0| [BP+SI] 
-RCR, V| W| D0| [BX+DI] 
-RCR, V| W| D0| [BX+SI] 
-RCR, V| B| MEM| 14 X, 
-RCR, V| B| R| BH| 
-RCR, V| B| R| DH| 
-RCR, V| B| R| CH| 
-RCR, V| B| R| AH| 
-RCR, V| B| R| BL| 
-RCR, V| B| R| DL| 
-RCR, V| B| R| CL| 
-RCR, V| B| R| AL| 
-RCR, V| B| DW| [BP] 18 X, 
-RCR, V| B| DW| [BX] 18 X, 
-RCR, V| B| DW| [DI] 18 X, 
-RCR, V| B| DW| [SI] 18 X, 
-RCR, V| B| DW| [BP+DI] 18 X, 
-RCR, V| B| DW| [BP+SI] 18 X, 
-RCR, V| B| DW| [BX+DI] 18 X, 
-RCR, V| B| DW| [BX+SI] 18 X, 
-RCR, V| B| DB| [BP] 18 B, 
-RCR, V| B| DB| [BX] 18 B, 
-RCR, V| B| DB| [DI] 18 B, 
-RCR, V| B| DB| [SI] 18 B, 
-RCR, V| B| DB| [BP+DI] 18 B, 
-RCR, V| B| DB| [BP+SI] 18 B, 
-RCR, V| B| DB| [BX+DI] 18 B, 
-RCR, V| B| DB| [BX+SI] 18 B, 
-RCR, V| B| D0| [BX] 
-RCR, V| B| D0| [DI] 
-RCR, V| B| D0| [SI] 
-RCR, V| B| D0| [BP+DI] 
-RCR, V| B| D0| [BP+SI] 
-RCR, V| B| D0| [BX+DI] 
-RCR, V| B| D0| [BX+SI] 
+RCR, V| W| MEM| 14 X, 18 IS, 
+RCR, V| W| R| DI| 18 IS, 
+RCR, V| W| R| SI| 18 IS, 
+RCR, V| W| R| BP| 18 IS, 
+RCR, V| W| R| SP| 18 IS, 
+RCR, V| W| R| BX| 18 IS, 
+RCR, V| W| R| DX| 18 IS, 
+RCR, V| W| R| CX| 18 IS, 
+RCR, V| W| R| AX| 18 IS, 
+RCR, V| W| DW| [BP] 18 X, 1C IS, 
+RCR, V| W| DW| [BX] 18 X, 1C IS, 
+RCR, V| W| DW| [DI] 18 X, 1C IS, 
+RCR, V| W| DW| [SI] 18 X, 1C IS, 
+RCR, V| W| DW| [BP+DI] 18 X, 1C IS, 
+RCR, V| W| DW| [BP+SI] 18 X, 1C IS, 
+RCR, V| W| DW| [BX+DI] 18 X, 1C IS, 
+RCR, V| W| DW| [BX+SI] 18 X, 1C IS, 
+RCR, V| W| DB| [BP] 18 B, 1C IS, 
+RCR, V| W| DB| [BX] 18 B, 1C IS, 
+RCR, V| W| DB| [DI] 18 B, 1C IS, 
+RCR, V| W| DB| [SI] 18 B, 1C IS, 
+RCR, V| W| DB| [BP+DI] 18 B, 1C IS, 
+RCR, V| W| DB| [BP+SI] 18 B, 1C IS, 
+RCR, V| W| DB| [BX+DI] 18 B, 1C IS, 
+RCR, V| W| DB| [BX+SI] 18 B, 1C IS, 
+RCR, V| W| D0| [BX] 18 IS, 
+RCR, V| W| D0| [DI] 18 IS, 
+RCR, V| W| D0| [SI] 18 IS, 
+RCR, V| W| D0| [BP+DI] 18 IS, 
+RCR, V| W| D0| [BP+SI] 18 IS, 
+RCR, V| W| D0| [BX+DI] 18 IS, 
+RCR, V| W| D0| [BX+SI] 18 IS, 
+RCR, V| B| MEM| 14 X, 18 IS, 
+RCR, V| B| R| BH| 18 IS, 
+RCR, V| B| R| DH| 18 IS, 
+RCR, V| B| R| CH| 18 IS, 
+RCR, V| B| R| AH| 18 IS, 
+RCR, V| B| R| BL| 18 IS, 
+RCR, V| B| R| DL| 18 IS, 
+RCR, V| B| R| CL| 18 IS, 
+RCR, V| B| R| AL| 18 IS, 
+RCR, V| B| DW| [BP] 18 X, 1C IS, 
+RCR, V| B| DW| [BX] 18 X, 1C IS, 
+RCR, V| B| DW| [DI] 18 X, 1C IS, 
+RCR, V| B| DW| [SI] 18 X, 1C IS, 
+RCR, V| B| DW| [BP+DI] 18 X, 1C IS, 
+RCR, V| B| DW| [BP+SI] 18 X, 1C IS, 
+RCR, V| B| DW| [BX+DI] 18 X, 1C IS, 
+RCR, V| B| DW| [BX+SI] 18 X, 1C IS, 
+RCR, V| B| DB| [BP] 18 B, 1C IS, 
+RCR, V| B| DB| [BX] 18 B, 1C IS, 
+RCR, V| B| DB| [DI] 18 B, 1C IS, 
+RCR, V| B| DB| [SI] 18 B, 1C IS, 
+RCR, V| B| DB| [BP+DI] 18 B, 1C IS, 
+RCR, V| B| DB| [BP+SI] 18 B, 1C IS, 
+RCR, V| B| DB| [BX+DI] 18 B, 1C IS, 
+RCR, V| B| DB| [BX+SI] 18 B, 1C IS, 
+RCR, V| B| D0| [BX] 18 IS, 
+RCR, V| B| D0| [DI] 18 IS, 
+RCR, V| B| D0| [SI] 18 IS, 
+RCR, V| B| D0| [BP+DI] 18 IS, 
+RCR, V| B| D0| [BP+SI] 18 IS, 
+RCR, V| B| D0| [BX+DI] 18 IS, 
+RCR, V| B| D0| [BX+SI] 18 IS, 
 RCR, 1| W| MEM| 14 X, 
 RCR, 1| W| R| DI| 
 RCR, 1| W| R| SI| 
@@ -688,70 +688,70 @@ RCR, 1| B| D0| [BP+DI]
 RCR, 1| B| D0| [BP+SI] 
 RCR, 1| B| D0| [BX+DI] 
 RCR, 1| B| D0| [BX+SI] 
-RCL, V| W| MEM| 14 X, 
-RCL, V| W| R| DI| 
-RCL, V| W| R| SI| 
-RCL, V| W| R| BP| 
-RCL, V| W| R| SP| 
-RCL, V| W| R| BX| 
-RCL, V| W| R| DX| 
-RCL, V| W| R| CX| 
-RCL, V| W| R| AX| 
-RCL, V| W| DW| [BP] 18 X, 
-RCL, V| W| DW| [BX] 18 X, 
-RCL, V| W| DW| [DI] 18 X, 
-RCL, V| W| DW| [SI] 18 X, 
-RCL, V| W| DW| [BP+DI] 18 X, 
-RCL, V| W| DW| [BP+SI] 18 X, 
-RCL, V| W| DW| [BX+DI] 18 X, 
-RCL, V| W| DW| [BX+SI] 18 X, 
-RCL, V| W| DB| [BP] 18 B, 
-RCL, V| W| DB| [BX] 18 B, 
-RCL, V| W| DB| [DI] 18 B, 
-RCL, V| W| DB| [SI] 18 B, 
-RCL, V| W| DB| [BP+DI] 18 B, 
-RCL, V| W| DB| [BP+SI] 18 B, 
-RCL, V| W| DB| [BX+DI] 18 B, 
-RCL, V| W| DB| [BX+SI] 18 B, 
-RCL, V| W| D0| [BX] 
-RCL, V| W| D0| [DI] 
-RCL, V| W| D0| [SI] 
-RCL, V| W| D0| [BP+DI] 
-RCL, V| W| D0| [BP+SI] 
-RCL, V| W| D0| [BX+DI] 
-RCL, V| W| D0| [BX+SI] 
-RCL, V| B| MEM| 14 X, 
-RCL, V| B| R| BH| 
-RCL, V| B| R| DH| 
-RCL, V| B| R| CH| 
-RCL, V| B| R| AH| 
-RCL, V| B| R| BL| 
-RCL, V| B| R| DL| 
-RCL, V| B| R| CL| 
-RCL, V| B| R| AL| 
-RCL, V| B| DW| [BP] 18 X, 
-RCL, V| B| DW| [BX] 18 X, 
-RCL, V| B| DW| [DI] 18 X, 
-RCL, V| B| DW| [SI] 18 X, 
-RCL, V| B| DW| [BP+DI] 18 X, 
-RCL, V| B| DW| [BP+SI] 18 X, 
-RCL, V| B| DW| [BX+DI] 18 X, 
-RCL, V| B| DW| [BX+SI] 18 X, 
-RCL, V| B| DB| [BP] 18 B, 
-RCL, V| B| DB| [BX] 18 B, 
-RCL, V| B| DB| [DI] 18 B, 
-RCL, V| B| DB| [SI] 18 B, 
-RCL, V| B| DB| [BP+DI] 18 B, 
-RCL, V| B| DB| [BP+SI] 18 B, 
-RCL, V| B| DB| [BX+DI] 18 B, 
-RCL, V| B| DB| [BX+SI] 18 B, 
-RCL, V| B| D0| [BX] 
-RCL, V| B| D0| [DI] 
-RCL, V| B| D0| [SI] 
-RCL, V| B| D0| [BP+DI] 
-RCL, V| B| D0| [BP+SI] 
-RCL, V| B| D0| [BX+DI] 
-RCL, V| B| D0| [BX+SI] 
+RCL, V| W| MEM| 14 X, 18 IS, 
+RCL, V| W| R| DI| 18 IS, 
+RCL, V| W| R| SI| 18 IS, 
+RCL, V| W| R| BP| 18 IS, 
+RCL, V| W| R| SP| 18 IS, 
+RCL, V| W| R| BX| 18 IS, 
+RCL, V| W| R| DX| 18 IS, 
+RCL, V| W| R| CX| 18 IS, 
+RCL, V| W| R| AX| 18 IS, 
+RCL, V| W| DW| [BP] 18 X, 1C IS, 
+RCL, V| W| DW| [BX] 18 X, 1C IS, 
+RCL, V| W| DW| [DI] 18 X, 1C IS, 
+RCL, V| W| DW| [SI] 18 X, 1C IS, 
+RCL, V| W| DW| [BP+DI] 18 X, 1C IS, 
+RCL, V| W| DW| [BP+SI] 18 X, 1C IS, 
+RCL, V| W| DW| [BX+DI] 18 X, 1C IS, 
+RCL, V| W| DW| [BX+SI] 18 X, 1C IS, 
+RCL, V| W| DB| [BP] 18 B, 1C IS, 
+RCL, V| W| DB| [BX] 18 B, 1C IS, 
+RCL, V| W| DB| [DI] 18 B, 1C IS, 
+RCL, V| W| DB| [SI] 18 B, 1C IS, 
+RCL, V| W| DB| [BP+DI] 18 B, 1C IS, 
+RCL, V| W| DB| [BP+SI] 18 B, 1C IS, 
+RCL, V| W| DB| [BX+DI] 18 B, 1C IS, 
+RCL, V| W| DB| [BX+SI] 18 B, 1C IS, 
+RCL, V| W| D0| [BX] 18 IS, 
+RCL, V| W| D0| [DI] 18 IS, 
+RCL, V| W| D0| [SI] 18 IS, 
+RCL, V| W| D0| [BP+DI] 18 IS, 
+RCL, V| W| D0| [BP+SI] 18 IS, 
+RCL, V| W| D0| [BX+DI] 18 IS, 
+RCL, V| W| D0| [BX+SI] 18 IS, 
+RCL, V| B| MEM| 14 X, 18 IS, 
+RCL, V| B| R| BH| 18 IS, 
+RCL, V| B| R| DH| 18 IS, 
+RCL, V| B| R| CH| 18 IS, 
+RCL, V| B| R| AH| 18 IS, 
+RCL, V| B| R| BL| 18 IS, 
+RCL, V| B| R| DL| 18 IS, 
+RCL, V| B| R| CL| 18 IS, 
+RCL, V| B| R| AL| 18 IS, 
+RCL, V| B| DW| [BP] 18 X, 1C IS, 
+RCL, V| B| DW| [BX] 18 X, 1C IS, 
+RCL, V| B| DW| [DI] 18 X, 1C IS, 
+RCL, V| B| DW| [SI] 18 X, 1C IS, 
+RCL, V| B| DW| [BP+DI] 18 X, 1C IS, 
+RCL, V| B| DW| [BP+SI] 18 X, 1C IS, 
+RCL, V| B| DW| [BX+DI] 18 X, 1C IS, 
+RCL, V| B| DW| [BX+SI] 18 X, 1C IS, 
+RCL, V| B| DB| [BP] 18 B, 1C IS, 
+RCL, V| B| DB| [BX] 18 B, 1C IS, 
+RCL, V| B| DB| [DI] 18 B, 1C IS, 
+RCL, V| B| DB| [SI] 18 B, 1C IS, 
+RCL, V| B| DB| [BP+DI] 18 B, 1C IS, 
+RCL, V| B| DB| [BP+SI] 18 B, 1C IS, 
+RCL, V| B| DB| [BX+DI] 18 B, 1C IS, 
+RCL, V| B| DB| [BX+SI] 18 B, 1C IS, 
+RCL, V| B| D0| [BX] 18 IS, 
+RCL, V| B| D0| [DI] 18 IS, 
+RCL, V| B| D0| [SI] 18 IS, 
+RCL, V| B| D0| [BP+DI] 18 IS, 
+RCL, V| B| D0| [BP+SI] 18 IS, 
+RCL, V| B| D0| [BX+DI] 18 IS, 
+RCL, V| B| D0| [BX+SI] 18 IS, 
 RCL, 1| W| MEM| 14 X, 
 RCL, 1| W| R| DI| 
 RCL, 1| W| R| SI| 
@@ -816,70 +816,70 @@ RCL, 1| B| D0| [BP+DI]
 RCL, 1| B| D0| [BP+SI] 
 RCL, 1| B| D0| [BX+DI] 
 RCL, 1| B| D0| [BX+SI] 
-ROR, V| W| MEM| 14 X, 
-ROR, V| W| R| DI| 
-ROR, V| W| R| SI| 
-ROR, V| W| R| BP| 
-ROR, V| W| R| SP| 
-ROR, V| W| R| BX| 
-ROR, V| W| R| DX| 
-ROR, V| W| R| CX| 
-ROR, V| W| R| AX| 
-ROR, V| W| DW| [BP] 18 X, 
-ROR, V| W| DW| [BX] 18 X, 
-ROR, V| W| DW| [DI] 18 X, 
-ROR, V| W| DW| [SI] 18 X, 
-ROR, V| W| DW| [BP+DI] 18 X, 
-ROR, V| W| DW| [BP+SI] 18 X, 
-ROR, V| W| DW| [BX+DI] 18 X, 
-ROR, V| W| DW| [BX+SI] 18 X, 
-ROR, V| W| DB| [BP] 18 B, 
-ROR, V| W| DB| [BX] 18 B, 
-ROR, V| W| DB| [DI] 18 B, 
-ROR, V| W| DB| [SI] 18 B, 
-ROR, V| W| DB| [BP+DI] 18 B, 
-ROR, V| W| DB| [BP+SI] 18 B, 
-ROR, V| W| DB| [BX+DI] 18 B, 
-ROR, V| W| DB| [BX+SI] 18 B, 
-ROR, V| W| D0| [BX] 
-ROR, V| W| D0| [DI] 
-ROR, V| W| D0| [SI] 
-ROR, V| W| D0| [BP+DI] 
-ROR, V| W| D0| [BP+SI] 
-ROR, V| W| D0| [BX+DI] 
-ROR, V| W| D0| [BX+SI] 
-ROR, V| B| MEM| 14 X, 
-ROR, V| B| R| BH| 
-ROR, V| B| R| DH| 
-ROR, V| B| R| CH| 
-ROR, V| B| R| AH| 
-ROR, V| B| R| BL| 
-ROR, V| B| R| DL| 
-ROR, V| B| R| CL| 
-ROR, V| B| R| AL| 
-ROR, V| B| DW| [BP] 18 X, 
-ROR, V| B| DW| [BX] 18 X, 
-ROR, V| B| DW| [DI] 18 X, 
-ROR, V| B| DW| [SI] 18 X, 
-ROR, V| B| DW| [BP+DI] 18 X, 
-ROR, V| B| DW| [BP+SI] 18 X, 
-ROR, V| B| DW| [BX+DI] 18 X, 
-ROR, V| B| DW| [BX+SI] 18 X, 
-ROR, V| B| DB| [BP] 18 B, 
-ROR, V| B| DB| [BX] 18 B, 
-ROR, V| B| DB| [DI] 18 B, 
-ROR, V| B| DB| [SI] 18 B, 
-ROR, V| B| DB| [BP+DI] 18 B, 
-ROR, V| B| DB| [BP+SI] 18 B, 
-ROR, V| B| DB| [BX+DI] 18 B, 
-ROR, V| B| DB| [BX+SI] 18 B, 
-ROR, V| B| D0| [BX] 
-ROR, V| B| D0| [DI] 
-ROR, V| B| D0| [SI] 
-ROR, V| B| D0| [BP+DI] 
-ROR, V| B| D0| [BP+SI] 
-ROR, V| B| D0| [BX+DI] 
-ROR, V| B| D0| [BX+SI] 
+ROR, V| W| MEM| 14 X, 18 IS, 
+ROR, V| W| R| DI| 18 IS, 
+ROR, V| W| R| SI| 18 IS, 
+ROR, V| W| R| BP| 18 IS, 
+ROR, V| W| R| SP| 18 IS, 
+ROR, V| W| R| BX| 18 IS, 
+ROR, V| W| R| DX| 18 IS, 
+ROR, V| W| R| CX| 18 IS, 
+ROR, V| W| R| AX| 18 IS, 
+ROR, V| W| DW| [BP] 18 X, 1C IS, 
+ROR, V| W| DW| [BX] 18 X, 1C IS, 
+ROR, V| W| DW| [DI] 18 X, 1C IS, 
+ROR, V| W| DW| [SI] 18 X, 1C IS, 
+ROR, V| W| DW| [BP+DI] 18 X, 1C IS, 
+ROR, V| W| DW| [BP+SI] 18 X, 1C IS, 
+ROR, V| W| DW| [BX+DI] 18 X, 1C IS, 
+ROR, V| W| DW| [BX+SI] 18 X, 1C IS, 
+ROR, V| W| DB| [BP] 18 B, 1C IS, 
+ROR, V| W| DB| [BX] 18 B, 1C IS, 
+ROR, V| W| DB| [DI] 18 B, 1C IS, 
+ROR, V| W| DB| [SI] 18 B, 1C IS, 
+ROR, V| W| DB| [BP+DI] 18 B, 1C IS, 
+ROR, V| W| DB| [BP+SI] 18 B, 1C IS, 
+ROR, V| W| DB| [BX+DI] 18 B, 1C IS, 
+ROR, V| W| DB| [BX+SI] 18 B, 1C IS, 
+ROR, V| W| D0| [BX] 18 IS, 
+ROR, V| W| D0| [DI] 18 IS, 
+ROR, V| W| D0| [SI] 18 IS, 
+ROR, V| W| D0| [BP+DI] 18 IS, 
+ROR, V| W| D0| [BP+SI] 18 IS, 
+ROR, V| W| D0| [BX+DI] 18 IS, 
+ROR, V| W| D0| [BX+SI] 18 IS, 
+ROR, V| B| MEM| 14 X, 18 IS, 
+ROR, V| B| R| BH| 18 IS, 
+ROR, V| B| R| DH| 18 IS, 
+ROR, V| B| R| CH| 18 IS, 
+ROR, V| B| R| AH| 18 IS, 
+ROR, V| B| R| BL| 18 IS, 
+ROR, V| B| R| DL| 18 IS, 
+ROR, V| B| R| CL| 18 IS, 
+ROR, V| B| R| AL| 18 IS, 
+ROR, V| B| DW| [BP] 18 X, 1C IS, 
+ROR, V| B| DW| [BX] 18 X, 1C IS, 
+ROR, V| B| DW| [DI] 18 X, 1C IS, 
+ROR, V| B| DW| [SI] 18 X, 1C IS, 
+ROR, V| B| DW| [BP+DI] 18 X, 1C IS, 
+ROR, V| B| DW| [BP+SI] 18 X, 1C IS, 
+ROR, V| B| DW| [BX+DI] 18 X, 1C IS, 
+ROR, V| B| DW| [BX+SI] 18 X, 1C IS, 
+ROR, V| B| DB| [BP] 18 B, 1C IS, 
+ROR, V| B| DB| [BX] 18 B, 1C IS, 
+ROR, V| B| DB| [DI] 18 B, 1C IS, 
+ROR, V| B| DB| [SI] 18 B, 1C IS, 
+ROR, V| B| DB| [BP+DI] 18 B, 1C IS, 
+ROR, V| B| DB| [BP+SI] 18 B, 1C IS, 
+ROR, V| B| DB| [BX+DI] 18 B, 1C IS, 
+ROR, V| B| DB| [BX+SI] 18 B, 1C IS, 
+ROR, V| B| D0| [BX] 18 IS, 
+ROR, V| B| D0| [DI] 18 IS, 
+ROR, V| B| D0| [SI] 18 IS, 
+ROR, V| B| D0| [BP+DI] 18 IS, 
+ROR, V| B| D0| [BP+SI] 18 IS, 
+ROR, V| B| D0| [BX+DI] 18 IS, 
+ROR, V| B| D0| [BX+SI] 18 IS, 
 ROR, 1| W| MEM| 14 X, 
 ROR, 1| W| R| DI| 
 ROR, 1| W| R| SI| 
@@ -944,70 +944,70 @@ ROR, 1| B| D0| [BP+DI]
 ROR, 1| B| D0| [BP+SI] 
 ROR, 1| B| D0| [BX+DI] 
 ROR, 1| B| D0| [BX+SI] 
-ROL, V| W| MEM| 14 X, 
-ROL, V| W| R| DI| 
-ROL, V| W| R| SI| 
-ROL, V| W| R| BP| 
-ROL, V| W| R| SP| 
-ROL, V| W| R| BX| 
-ROL, V| W| R| DX| 
-ROL, V| W| R| CX| 
-ROL, V| W| R| AX| 
-ROL, V| W| DW| [BP] 18 X, 
-ROL, V| W| DW| [BX] 18 X, 
-ROL, V| W| DW| [DI] 18 X, 
-ROL, V| W| DW| [SI] 18 X, 
-ROL, V| W| DW| [BP+DI] 18 X, 
-ROL, V| W| DW| [BP+SI] 18 X, 
-ROL, V| W| DW| [BX+DI] 18 X, 
-ROL, V| W| DW| [BX+SI] 18 X, 
-ROL, V| W| DB| [BP] 18 B, 
-ROL, V| W| DB| [BX] 18 B, 
-ROL, V| W| DB| [DI] 18 B, 
-ROL, V| W| DB| [SI] 18 B, 
-ROL, V| W| DB| [BP+DI] 18 B, 
-ROL, V| W| DB| [BP+SI] 18 B, 
-ROL, V| W| DB| [BX+DI] 18 B, 
-ROL, V| W| DB| [BX+SI] 18 B, 
-ROL, V| W| D0| [BX] 
-ROL, V| W| D0| [DI] 
-ROL, V| W| D0| [SI] 
-ROL, V| W| D0| [BP+DI] 
-ROL, V| W| D0| [BP+SI] 
-ROL, V| W| D0| [BX+DI] 
-ROL, V| W| D0| [BX+SI] 
-ROL, V| B| MEM| 14 X, 
-ROL, V| B| R| BH| 
-ROL, V| B| R| DH| 
-ROL, V| B| R| CH| 
-ROL, V| B| R| AH| 
-ROL, V| B| R| BL| 
-ROL, V| B| R| DL| 
-ROL, V| B| R| CL| 
-ROL, V| B| R| AL| 
-ROL, V| B| DW| [BP] 18 X, 
-ROL, V| B| DW| [BX] 18 X, 
-ROL, V| B| DW| [DI] 18 X, 
-ROL, V| B| DW| [SI] 18 X, 
-ROL, V| B| DW| [BP+DI] 18 X, 
-ROL, V| B| DW| [BP+SI] 18 X, 
-ROL, V| B| DW| [BX+DI] 18 X, 
-ROL, V| B| DW| [BX+SI] 18 X, 
-ROL, V| B| DB| [BP] 18 B, 
-ROL, V| B| DB| [BX] 18 B, 
-ROL, V| B| DB| [DI] 18 B, 
-ROL, V| B| DB| [SI] 18 B, 
-ROL, V| B| DB| [BP+DI] 18 B, 
-ROL, V| B| DB| [BP+SI] 18 B, 
-ROL, V| B| DB| [BX+DI] 18 B, 
-ROL, V| B| DB| [BX+SI] 18 B, 
-ROL, V| B| D0| [BX] 
-ROL, V| B| D0| [DI] 
-ROL, V| B| D0| [SI] 
-ROL, V| B| D0| [BP+DI] 
-ROL, V| B| D0| [BP+SI] 
-ROL, V| B| D0| [BX+DI] 
-ROL, V| B| D0| [BX+SI] 
+ROL, V| W| MEM| 14 X, 18 IS, 
+ROL, V| W| R| DI| 18 IS, 
+ROL, V| W| R| SI| 18 IS, 
+ROL, V| W| R| BP| 18 IS, 
+ROL, V| W| R| SP| 18 IS, 
+ROL, V| W| R| BX| 18 IS, 
+ROL, V| W| R| DX| 18 IS, 
+ROL, V| W| R| CX| 18 IS, 
+ROL, V| W| R| AX| 18 IS, 
+ROL, V| W| DW| [BP] 18 X, 1C IS, 
+ROL, V| W| DW| [BX] 18 X, 1C IS, 
+ROL, V| W| DW| [DI] 18 X, 1C IS, 
+ROL, V| W| DW| [SI] 18 X, 1C IS, 
+ROL, V| W| DW| [BP+DI] 18 X, 1C IS, 
+ROL, V| W| DW| [BP+SI] 18 X, 1C IS, 
+ROL, V| W| DW| [BX+DI] 18 X, 1C IS, 
+ROL, V| W| DW| [BX+SI] 18 X, 1C IS, 
+ROL, V| W| DB| [BP] 18 B, 1C IS, 
+ROL, V| W| DB| [BX] 18 B, 1C IS, 
+ROL, V| W| DB| [DI] 18 B, 1C IS, 
+ROL, V| W| DB| [SI] 18 B, 1C IS, 
+ROL, V| W| DB| [BP+DI] 18 B, 1C IS, 
+ROL, V| W| DB| [BP+SI] 18 B, 1C IS, 
+ROL, V| W| DB| [BX+DI] 18 B, 1C IS, 
+ROL, V| W| DB| [BX+SI] 18 B, 1C IS, 
+ROL, V| W| D0| [BX] 18 IS, 
+ROL, V| W| D0| [DI] 18 IS, 
+ROL, V| W| D0| [SI] 18 IS, 
+ROL, V| W| D0| [BP+DI] 18 IS, 
+ROL, V| W| D0| [BP+SI] 18 IS, 
+ROL, V| W| D0| [BX+DI] 18 IS, 
+ROL, V| W| D0| [BX+SI] 18 IS, 
+ROL, V| B| MEM| 14 X, 18 IS, 
+ROL, V| B| R| BH| 18 IS, 
+ROL, V| B| R| DH| 18 IS, 
+ROL, V| B| R| CH| 18 IS, 
+ROL, V| B| R| AH| 18 IS, 
+ROL, V| B| R| BL| 18 IS, 
+ROL, V| B| R| DL| 18 IS, 
+ROL, V| B| R| CL| 18 IS, 
+ROL, V| B| R| AL| 18 IS, 
+ROL, V| B| DW| [BP] 18 X, 1C IS, 
+ROL, V| B| DW| [BX] 18 X, 1C IS, 
+ROL, V| B| DW| [DI] 18 X, 1C IS, 
+ROL, V| B| DW| [SI] 18 X, 1C IS, 
+ROL, V| B| DW| [BP+DI] 18 X, 1C IS, 
+ROL, V| B| DW| [BP+SI] 18 X, 1C IS, 
+ROL, V| B| DW| [BX+DI] 18 X, 1C IS, 
+ROL, V| B| DW| [BX+SI] 18 X, 1C IS, 
+ROL, V| B| DB| [BP] 18 B, 1C IS, 
+ROL, V| B| DB| [BX] 18 B, 1C IS, 
+ROL, V| B| DB| [DI] 18 B, 1C IS, 
+ROL, V| B| DB| [SI] 18 B, 1C IS, 
+ROL, V| B| DB| [BP+DI] 18 B, 1C IS, 
+ROL, V| B| DB| [BP+SI] 18 B, 1C IS, 
+ROL, V| B| DB| [BX+DI] 18 B, 1C IS, 
+ROL, V| B| DB| [BX+SI] 18 B, 1C IS, 
+ROL, V| B| D0| [BX] 18 IS, 
+ROL, V| B| D0| [DI] 18 IS, 
+ROL, V| B| D0| [SI] 18 IS, 
+ROL, V| B| D0| [BP+DI] 18 IS, 
+ROL, V| B| D0| [BP+SI] 18 IS, 
+ROL, V| B| D0| [BX+DI] 18 IS, 
+ROL, V| B| D0| [BX+SI] 18 IS, 
 ROL, 1| W| MEM| 14 X, 
 ROL, 1| W| R| DI| 
 ROL, 1| W| R| SI| 
@@ -2144,166 +2144,166 @@ NOT, B| D0| [BP+DI]
 NOT, B| D0| [BP+SI] 
 NOT, B| D0| [BX+DI] 
 NOT, B| D0| [BX+SI] 
-CMPSI, MEM| C X, 10 IB, 
-CMPSI, R| DI| 10 IB, 
-CMPSI, R| SI| 10 IB, 
-CMPSI, R| BP| 10 IB, 
-CMPSI, R| SP| 10 IB, 
-CMPSI, R| BX| 10 IB, 
-CMPSI, R| DX| 10 IB, 
-CMPSI, R| CX| 10 IB, 
-CMPSI, R| AX| 10 IB, 
-CMPSI, DW| [BP] 10 X, 14 IB, 
-CMPSI, DW| [BX] 10 X, 14 IB, 
-CMPSI, DW| [DI] 10 X, 14 IB, 
-CMPSI, DW| [SI] 10 X, 14 IB, 
-CMPSI, DW| [BP+DI] 10 X, 14 IB, 
-CMPSI, DW| [BP+SI] 10 X, 14 IB, 
-CMPSI, DW| [BX+DI] 10 X, 14 IB, 
-CMPSI, DW| [BX+SI] 10 X, 14 IB, 
-CMPSI, DB| [BP] 10 B, 14 IB, 
-CMPSI, DB| [BX] 10 B, 14 IB, 
-CMPSI, DB| [DI] 10 B, 14 IB, 
-CMPSI, DB| [SI] 10 B, 14 IB, 
-CMPSI, DB| [BP+DI] 10 B, 14 IB, 
-CMPSI, DB| [BP+SI] 10 B, 14 IB, 
-CMPSI, DB| [BX+DI] 10 B, 14 IB, 
-CMPSI, DB| [BX+SI] 10 B, 14 IB, 
-CMPSI, D0| [BX] 10 IB, 
-CMPSI, D0| [DI] 10 IB, 
-CMPSI, D0| [SI] 10 IB, 
-CMPSI, D0| [BP+DI] 10 IB, 
-CMPSI, D0| [BP+SI] 10 IB, 
-CMPSI, D0| [BX+DI] 10 IB, 
-CMPSI, D0| [BX+SI] 10 IB, 
-SUBSI, MEM| C X, 10 IB, 
-SUBSI, R| BH| 10 IB, 
-SUBSI, R| DH| 10 IB, 
-SUBSI, R| CH| 10 IB, 
-SUBSI, R| AH| 10 IB, 
-SUBSI, R| BL| 10 IB, 
-SUBSI, R| DL| 10 IB, 
-SUBSI, R| CL| 10 IB, 
-SUBSI, R| AL| 10 IB, 
-SUBSI, DW| [BP] 10 X, 14 IB, 
-SUBSI, DW| [BX] 10 X, 14 IB, 
-SUBSI, DW| [DI] 10 X, 14 IB, 
-SUBSI, DW| [SI] 10 X, 14 IB, 
-SUBSI, DW| [BP+DI] 10 X, 14 IB, 
-SUBSI, DW| [BP+SI] 10 X, 14 IB, 
-SUBSI, DW| [BX+DI] 10 X, 14 IB, 
-SUBSI, DW| [BX+SI] 10 X, 14 IB, 
-SUBSI, DB| [BP] 10 B, 14 IB, 
-SUBSI, DB| [BX] 10 B, 14 IB, 
-SUBSI, DB| [DI] 10 B, 14 IB, 
-SUBSI, DB| [SI] 10 B, 14 IB, 
-SUBSI, DB| [BP+DI] 10 B, 14 IB, 
-SUBSI, DB| [BP+SI] 10 B, 14 IB, 
-SUBSI, DB| [BX+DI] 10 B, 14 IB, 
-SUBSI, DB| [BX+SI] 10 B, 14 IB, 
-SUBSI, D0| [BX] 10 IB, 
-SUBSI, D0| [DI] 10 IB, 
-SUBSI, D0| [SI] 10 IB, 
-SUBSI, D0| [BP+DI] 10 IB, 
-SUBSI, D0| [BP+SI] 10 IB, 
-SUBSI, D0| [BX+DI] 10 IB, 
-SUBSI, D0| [BX+SI] 10 IB, 
-SBBSI, MEM| C X, 10 IB, 
-SBBSI, R| BH| 10 IB, 
-SBBSI, R| DH| 10 IB, 
-SBBSI, R| CH| 10 IB, 
-SBBSI, R| AH| 10 IB, 
-SBBSI, R| BL| 10 IB, 
-SBBSI, R| DL| 10 IB, 
-SBBSI, R| CL| 10 IB, 
-SBBSI, R| AL| 10 IB, 
-SBBSI, DW| [BP] 10 X, 14 IB, 
-SBBSI, DW| [BX] 10 X, 14 IB, 
-SBBSI, DW| [DI] 10 X, 14 IB, 
-SBBSI, DW| [SI] 10 X, 14 IB, 
-SBBSI, DW| [BP+DI] 10 X, 14 IB, 
-SBBSI, DW| [BP+SI] 10 X, 14 IB, 
-SBBSI, DW| [BX+DI] 10 X, 14 IB, 
-SBBSI, DW| [BX+SI] 10 X, 14 IB, 
-SBBSI, DB| [BP] 10 B, 14 IB, 
-SBBSI, DB| [BX] 10 B, 14 IB, 
-SBBSI, DB| [DI] 10 B, 14 IB, 
-SBBSI, DB| [SI] 10 B, 14 IB, 
-SBBSI, DB| [BP+DI] 10 B, 14 IB, 
-SBBSI, DB| [BP+SI] 10 B, 14 IB, 
-SBBSI, DB| [BX+DI] 10 B, 14 IB, 
-SBBSI, DB| [BX+SI] 10 B, 14 IB, 
-SBBSI, D0| [BX] 10 IB, 
-SBBSI, D0| [DI] 10 IB, 
-SBBSI, D0| [SI] 10 IB, 
-SBBSI, D0| [BP+DI] 10 IB, 
-SBBSI, D0| [BP+SI] 10 IB, 
-SBBSI, D0| [BX+DI] 10 IB, 
-SBBSI, D0| [BX+SI] 10 IB, 
-ADCSI, MEM| C X, 10 IB, 
-ADCSI, R| BH| 10 IB, 
-ADCSI, R| DH| 10 IB, 
-ADCSI, R| CH| 10 IB, 
-ADCSI, R| AH| 10 IB, 
-ADCSI, R| BL| 10 IB, 
-ADCSI, R| DL| 10 IB, 
-ADCSI, R| CL| 10 IB, 
-ADCSI, R| AL| 10 IB, 
-ADCSI, DW| [BP] 10 X, 14 IB, 
-ADCSI, DW| [BX] 10 X, 14 IB, 
-ADCSI, DW| [DI] 10 X, 14 IB, 
-ADCSI, DW| [SI] 10 X, 14 IB, 
-ADCSI, DW| [BP+DI] 10 X, 14 IB, 
-ADCSI, DW| [BP+SI] 10 X, 14 IB, 
-ADCSI, DW| [BX+DI] 10 X, 14 IB, 
-ADCSI, DW| [BX+SI] 10 X, 14 IB, 
-ADCSI, DB| [BP] 10 B, 14 IB, 
-ADCSI, DB| [BX] 10 B, 14 IB, 
-ADCSI, DB| [DI] 10 B, 14 IB, 
-ADCSI, DB| [SI] 10 B, 14 IB, 
-ADCSI, DB| [BP+DI] 10 B, 14 IB, 
-ADCSI, DB| [BP+SI] 10 B, 14 IB, 
-ADCSI, DB| [BX+DI] 10 B, 14 IB, 
-ADCSI, DB| [BX+SI] 10 B, 14 IB, 
-ADCSI, D0| [BX] 10 IB, 
-ADCSI, D0| [DI] 10 IB, 
-ADCSI, D0| [SI] 10 IB, 
-ADCSI, D0| [BP+DI] 10 IB, 
-ADCSI, D0| [BP+SI] 10 IB, 
-ADCSI, D0| [BX+DI] 10 IB, 
-ADCSI, D0| [BX+SI] 10 IB, 
-ADDSI, MEM| C X, 10 IB, 
-ADDSI, R| BH| 10 IB, 
-ADDSI, R| DH| 10 IB, 
-ADDSI, R| CH| 10 IB, 
-ADDSI, R| AH| 10 IB, 
-ADDSI, R| BL| 10 IB, 
-ADDSI, R| DL| 10 IB, 
-ADDSI, R| CL| 10 IB, 
-ADDSI, R| AL| 10 IB, 
-ADDSI, DW| [BP] 10 X, 14 IB, 
-ADDSI, DW| [BX] 10 X, 14 IB, 
-ADDSI, DW| [DI] 10 X, 14 IB, 
-ADDSI, DW| [SI] 10 X, 14 IB, 
-ADDSI, DW| [BP+DI] 10 X, 14 IB, 
-ADDSI, DW| [BP+SI] 10 X, 14 IB, 
-ADDSI, DW| [BX+DI] 10 X, 14 IB, 
-ADDSI, DW| [BX+SI] 10 X, 14 IB, 
-ADDSI, DB| [BP] 10 B, 14 IB, 
-ADDSI, DB| [BX] 10 B, 14 IB, 
-ADDSI, DB| [DI] 10 B, 14 IB, 
-ADDSI, DB| [SI] 10 B, 14 IB, 
-ADDSI, DB| [BP+DI] 10 B, 14 IB, 
-ADDSI, DB| [BP+SI] 10 B, 14 IB, 
-ADDSI, DB| [BX+DI] 10 B, 14 IB, 
-ADDSI, DB| [BX+SI] 10 B, 14 IB, 
-ADDSI, D0| [BX] 10 IB, 
-ADDSI, D0| [DI] 10 IB, 
-ADDSI, D0| [SI] 10 IB, 
-ADDSI, D0| [BP+DI] 10 IB, 
-ADDSI, D0| [BP+SI] 10 IB, 
-ADDSI, D0| [BX+DI] 10 IB, 
-ADDSI, D0| [BX+SI] 10 IB, 
+CMPSI, MEM| C X, 10 IS, 
+CMPSI, R| DI| 10 IS, 
+CMPSI, R| SI| 10 IS, 
+CMPSI, R| BP| 10 IS, 
+CMPSI, R| SP| 10 IS, 
+CMPSI, R| BX| 10 IS, 
+CMPSI, R| DX| 10 IS, 
+CMPSI, R| CX| 10 IS, 
+CMPSI, R| AX| 10 IS, 
+CMPSI, DW| [BP] 10 X, 14 IS, 
+CMPSI, DW| [BX] 10 X, 14 IS, 
+CMPSI, DW| [DI] 10 X, 14 IS, 
+CMPSI, DW| [SI] 10 X, 14 IS, 
+CMPSI, DW| [BP+DI] 10 X, 14 IS, 
+CMPSI, DW| [BP+SI] 10 X, 14 IS, 
+CMPSI, DW| [BX+DI] 10 X, 14 IS, 
+CMPSI, DW| [BX+SI] 10 X, 14 IS, 
+CMPSI, DB| [BP] 10 B, 14 IS, 
+CMPSI, DB| [BX] 10 B, 14 IS, 
+CMPSI, DB| [DI] 10 B, 14 IS, 
+CMPSI, DB| [SI] 10 B, 14 IS, 
+CMPSI, DB| [BP+DI] 10 B, 14 IS, 
+CMPSI, DB| [BP+SI] 10 B, 14 IS, 
+CMPSI, DB| [BX+DI] 10 B, 14 IS, 
+CMPSI, DB| [BX+SI] 10 B, 14 IS, 
+CMPSI, D0| [BX] 10 IS, 
+CMPSI, D0| [DI] 10 IS, 
+CMPSI, D0| [SI] 10 IS, 
+CMPSI, D0| [BP+DI] 10 IS, 
+CMPSI, D0| [BP+SI] 10 IS, 
+CMPSI, D0| [BX+DI] 10 IS, 
+CMPSI, D0| [BX+SI] 10 IS, 
+SUBSI, MEM| C X, 10 IS, 
+SUBSI, R| DI| 10 IS, 
+SUBSI, R| SI| 10 IS, 
+SUBSI, R| BP| 10 IS, 
+SUBSI, R| SP| 10 IS, 
+SUBSI, R| BX| 10 IS, 
+SUBSI, R| DX| 10 IS, 
+SUBSI, R| CX| 10 IS, 
+SUBSI, R| AX| 10 IS, 
+SUBSI, DW| [BP] 10 X, 14 IS, 
+SUBSI, DW| [BX] 10 X, 14 IS, 
+SUBSI, DW| [DI] 10 X, 14 IS, 
+SUBSI, DW| [SI] 10 X, 14 IS, 
+SUBSI, DW| [BP+DI] 10 X, 14 IS, 
+SUBSI, DW| [BP+SI] 10 X, 14 IS, 
+SUBSI, DW| [BX+DI] 10 X, 14 IS, 
+SUBSI, DW| [BX+SI] 10 X, 14 IS, 
+SUBSI, DB| [BP] 10 B, 14 IS, 
+SUBSI, DB| [BX] 10 B, 14 IS, 
+SUBSI, DB| [DI] 10 B, 14 IS, 
+SUBSI, DB| [SI] 10 B, 14 IS, 
+SUBSI, DB| [BP+DI] 10 B, 14 IS, 
+SUBSI, DB| [BP+SI] 10 B, 14 IS, 
+SUBSI, DB| [BX+DI] 10 B, 14 IS, 
+SUBSI, DB| [BX+SI] 10 B, 14 IS, 
+SUBSI, D0| [BX] 10 IS, 
+SUBSI, D0| [DI] 10 IS, 
+SUBSI, D0| [SI] 10 IS, 
+SUBSI, D0| [BP+DI] 10 IS, 
+SUBSI, D0| [BP+SI] 10 IS, 
+SUBSI, D0| [BX+DI] 10 IS, 
+SUBSI, D0| [BX+SI] 10 IS, 
+SBBSI, MEM| C X, 10 IS, 
+SBBSI, R| DI| 10 IS, 
+SBBSI, R| SI| 10 IS, 
+SBBSI, R| BP| 10 IS, 
+SBBSI, R| SP| 10 IS, 
+SBBSI, R| BX| 10 IS, 
+SBBSI, R| DX| 10 IS, 
+SBBSI, R| CX| 10 IS, 
+SBBSI, R| AX| 10 IS, 
+SBBSI, DW| [BP] 10 X, 14 IS, 
+SBBSI, DW| [BX] 10 X, 14 IS, 
+SBBSI, DW| [DI] 10 X, 14 IS, 
+SBBSI, DW| [SI] 10 X, 14 IS, 
+SBBSI, DW| [BP+DI] 10 X, 14 IS, 
+SBBSI, DW| [BP+SI] 10 X, 14 IS, 
+SBBSI, DW| [BX+DI] 10 X, 14 IS, 
+SBBSI, DW| [BX+SI] 10 X, 14 IS, 
+SBBSI, DB| [BP] 10 B, 14 IS, 
+SBBSI, DB| [BX] 10 B, 14 IS, 
+SBBSI, DB| [DI] 10 B, 14 IS, 
+SBBSI, DB| [SI] 10 B, 14 IS, 
+SBBSI, DB| [BP+DI] 10 B, 14 IS, 
+SBBSI, DB| [BP+SI] 10 B, 14 IS, 
+SBBSI, DB| [BX+DI] 10 B, 14 IS, 
+SBBSI, DB| [BX+SI] 10 B, 14 IS, 
+SBBSI, D0| [BX] 10 IS, 
+SBBSI, D0| [DI] 10 IS, 
+SBBSI, D0| [SI] 10 IS, 
+SBBSI, D0| [BP+DI] 10 IS, 
+SBBSI, D0| [BP+SI] 10 IS, 
+SBBSI, D0| [BX+DI] 10 IS, 
+SBBSI, D0| [BX+SI] 10 IS, 
+ADCSI, MEM| C X, 10 IS, 
+ADCSI, R| DI| 10 IS, 
+ADCSI, R| SI| 10 IS, 
+ADCSI, R| BP| 10 IS, 
+ADCSI, R| SP| 10 IS, 
+ADCSI, R| BX| 10 IS, 
+ADCSI, R| DX| 10 IS, 
+ADCSI, R| CX| 10 IS, 
+ADCSI, R| AX| 10 IS, 
+ADCSI, DW| [BP] 10 X, 14 IS, 
+ADCSI, DW| [BX] 10 X, 14 IS, 
+ADCSI, DW| [DI] 10 X, 14 IS, 
+ADCSI, DW| [SI] 10 X, 14 IS, 
+ADCSI, DW| [BP+DI] 10 X, 14 IS, 
+ADCSI, DW| [BP+SI] 10 X, 14 IS, 
+ADCSI, DW| [BX+DI] 10 X, 14 IS, 
+ADCSI, DW| [BX+SI] 10 X, 14 IS, 
+ADCSI, DB| [BP] 10 B, 14 IS, 
+ADCSI, DB| [BX] 10 B, 14 IS, 
+ADCSI, DB| [DI] 10 B, 14 IS, 
+ADCSI, DB| [SI] 10 B, 14 IS, 
+ADCSI, DB| [BP+DI] 10 B, 14 IS, 
+ADCSI, DB| [BP+SI] 10 B, 14 IS, 
+ADCSI, DB| [BX+DI] 10 B, 14 IS, 
+ADCSI, DB| [BX+SI] 10 B, 14 IS, 
+ADCSI, D0| [BX] 10 IS, 
+ADCSI, D0| [DI] 10 IS, 
+ADCSI, D0| [SI] 10 IS, 
+ADCSI, D0| [BP+DI] 10 IS, 
+ADCSI, D0| [BP+SI] 10 IS, 
+ADCSI, D0| [BX+DI] 10 IS, 
+ADCSI, D0| [BX+SI] 10 IS, 
+ADDSI, MEM| C X, 10 IS, 
+ADDSI, R| DI| 10 IS, 
+ADDSI, R| SI| 10 IS, 
+ADDSI, R| BP| 10 IS, 
+ADDSI, R| SP| 10 IS, 
+ADDSI, R| BX| 10 IS, 
+ADDSI, R| DX| 10 IS, 
+ADDSI, R| CX| 10 IS, 
+ADDSI, R| AX| 10 IS, 
+ADDSI, DW| [BP] 10 X, 14 IS, 
+ADDSI, DW| [BX] 10 X, 14 IS, 
+ADDSI, DW| [DI] 10 X, 14 IS, 
+ADDSI, DW| [SI] 10 X, 14 IS, 
+ADDSI, DW| [BP+DI] 10 X, 14 IS, 
+ADDSI, DW| [BP+SI] 10 X, 14 IS, 
+ADDSI, DW| [BX+DI] 10 X, 14 IS, 
+ADDSI, DW| [BX+SI] 10 X, 14 IS, 
+ADDSI, DB| [BP] 10 B, 14 IS, 
+ADDSI, DB| [BX] 10 B, 14 IS, 
+ADDSI, DB| [DI] 10 B, 14 IS, 
+ADDSI, DB| [SI] 10 B, 14 IS, 
+ADDSI, DB| [BP+DI] 10 B, 14 IS, 
+ADDSI, DB| [BP+SI] 10 B, 14 IS, 
+ADDSI, DB| [BX+DI] 10 B, 14 IS, 
+ADDSI, DB| [BX+SI] 10 B, 14 IS, 
+ADDSI, D0| [BX] 10 IS, 
+ADDSI, D0| [DI] 10 IS, 
+ADDSI, D0| [SI] 10 IS, 
+ADDSI, D0| [BP+DI] 10 IS, 
+ADDSI, D0| [BP+SI] 10 IS, 
+ADDSI, D0| [BX+DI] 10 IS, 
+ADDSI, D0| [BX+SI] 10 IS, 
 CMPI, W| MEM| 10 X, 14 IX, 
 CMPI, W| R| DI| 14 IX, 
 CMPI, W| R| SI| 14 IX, 
