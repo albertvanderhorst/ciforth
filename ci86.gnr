@@ -1535,7 +1535,7 @@ CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
 ;
 worddoc({STACKS},{R},{r},{--- n},{},
 {Copy the top of the return stack to the computation stack.},{{>R}}, {}, enddoc)
-HEADER({R},{RR},{IDO+CELLS(1)})
+HEADER({R},{RR},{IDO+CELLS(2)})
 ;
 worddoc({LOGIC},{0=},{zero_equals},{n --- f},{L0},
 {Leave a true flag forthvar({f}) is the number forthvar({n}) is equal to zero, otherwise leave a
