@@ -18,8 +18,8 @@ define({worddoc},{
 divert(9)dnl
 <P>
 <HR><A NAME="$2"></A>
-<H1>
-$2</H1>
+<H2>
+$2</H2>
 <P>
 
 STACKEFFECT: $4
@@ -29,7 +29,8 @@ DESCRIPTION:
 <P>
 $6
 <P>
-
+<A HREF="#GLOSSARY INDEX">GLOSSARY INDEX</A>
+<P>
 SEE ALSO: forthcode($1) forall({forthcode},$7)
 divert(6)dnl
 <LI>
@@ -54,12 +55,13 @@ ifelse(len({$7}),0,,{
 SEE ALSO: forall({forthcode},$7)})
 divert(6)dnl
 <P>
+<A NAME="$1INDEX"></A>
 WORDSET $1
 <LI>
 <A HREF="#$1">OVERVIEW OF $1</A></LI>
 divert(9)dnl
 })dnl
-dnl ----------------------- worddocchapter -----------------------------
+dnl ----------------------- worddocchapterend  -----------------------------
 define({worddocchapterend},{dnl})dnl
 divert(0)dnl
 <HTML>
@@ -68,9 +70,6 @@ dnl<META HTTP-EQUIV="Content-Type" CONTENT="text/html"; charset="iso-8859-1">
    <TITLE>Fig-Forth 3.0 Manual</TITLE>
 </HEAD>
 <BODY>
-
-<H1>
-GLOSSARY</H1>
 
 divert(5)dnl
 </PRE>
