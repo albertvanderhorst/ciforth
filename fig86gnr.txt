@@ -98,6 +98,7 @@ By specifying what you want in a configuration file you can generate a host
 of assembler listings. This is as simple as replacing "yes" with "no" in
 configuration files.
 See the examples msdos.cfg and alone.cfg and the Makefile. 
+You can find out what the options are by inspecting prelude.m4. 
 
 With respect to the assembler you can choose between NASM and MASM, with
 file extension .asm and .msm respectively. The .msm are acceptable by
@@ -106,26 +107,27 @@ experimental and doesn't lead to a working forth.
 
 With respect to the I/O (words like EXPECT R/W) you can choose between
 three on MSDOS.
-You can use dos (_USE_DOS_) in the classic way as with the original. This
+You can use dos (_CLASSIC_) in the classic way as with the original. This
 means that the floppy is used directly without regard for directory
-structures.
+structures. This uses calls that are declared obsolete.
 You can use dos in a modern way. (_MODERN_). This allocates block in the
 file with name BLOCKS.FRT. This name is available in the string BLOCK-FILE
-for you to change, also at run time. No (as of 2000) obsolete MSDOS calls
-are used. 
-You can use the BIOS (_USE_BIOS_) No MSDOS interrupts are required. 
+for you to change, also at run time. No (as of 2000 ) obsolete MSDOS calls
+are used (Checked against MS-DOS programmers reference "covers through
+version 6" ISBN 1-55615-546-8) 
+You can use the BIOS (_USEBIOS_) No MSDOS interrupts are required. 
 
 With repect to I/O on linux you can choose between c-based and native.
 The c-based version may be portable to other I86 unices. The native version
-is of course not. All linux versions have their blocks in a file. (Accessing
+of course not. All linux versions have their blocks in a file. (Accessing
 a floppy in the classic way is perfectly possible -- and implementing it would
 be a perfectly pointless exercise.)
 
-With respect to the hosting you can choose between _HOSTED_ and _BOOTED_. A
-hosted version relies on MSDOS or Linux to get the program started. (It may
-or may not use MSDOS for I/O, once started.). 
-A _BOOTED_ version contains a boot sector, such that you you can make a
-standalone version that boots from floppy or hard disk.
+With respect to the hosting you can choose between _HOSTED_ (HOSTED_LINUX or
+HOSTED_MSDOS) and _BOOTED_. (BOOTDF OR BOOTHD). A hosted version relies on
+MSDOS or Linux to get the program started. (It may or may not use MSDOS for
+I/O, once started.). A _BOOTED_ version contains a boot sector, such that
+you you can make a standalone version that boots from floppy or hard disk. 
 A _BOOTED_ version may very well be startable from plain DOS. 
 
 Of course a _BOOTED_ version that tries to use MSDOS I/O (or Linux) crashes
@@ -135,6 +137,17 @@ You have a choice between 16 or 32 protected mode and real mode.
 Of course on Linux real mode is not an option, (but you could run the
 MSDOS emulator). Protected mode Forths on MSDOS cannot be started from
 virtual real mode, e.g. they will not run in a "DOS box" in Windows.
+
+If you manage to specify conflicting options the preprocessor (m4) breaks
+off and you can find the exit code in postlude.m4. Than you can reason back
+why this is a conflict. For example error 1000 indicates floppy and hard
+disk i/o at the same time. From postlude.m4 you see that RWFD and RWHD are
+on at the same time. RWHD is turned on because you wanted to boot from hard
+disk or you specified it yourself in the first place. Etc. 
+
+postlude.m4 does you another favor. It derives logical consequences, such
+as once you decide for a REAL mode Forth, it must be BITS16 and you need
+not specify that. In particular LINUX_N or LINUX_C says it all.
 
 Level 2 customization.
 You are on your own here.
@@ -240,7 +253,7 @@ in e.g. VLIST.
 Linux application notes lina version
 The lina version is based on a single assembler source, built without
 trickery and binary-portable accross Linux Intel (all systems were it has
-been tried work : 1.2.13 ..2.013). No run time c-libraries, no compile time
+been tried work : 1.2.13 .. 2.0.13). No run time c-libraries, no compile time
 c-libraries, no libraries at all. It is built directly on the solid rock
 of the system calls by ignoring a taboo c-programmers suffer from.
 "
@@ -251,6 +264,8 @@ It is less than 12 K and the dictionary space is set at 64 Mbyte.
 
 
 Bugs
+See the separate test report for an indication of which and how far 
+versions have been tested.
 1. 
    Linux version.
    Once you have used a SIGQUIT to interrupt a loop, BYE no longer works.
@@ -263,3 +278,11 @@ Bugs
    More a misfeature. The negative error numbers of Linux system calls
    can be handled by negative offset's from screen 4. Now an offset
    of 64 is added. (The messages have not been filled in anyway.).
+4.
+  If the 32 bit protected mode booting Forth is started from MSDOS, (it can,
+  and it works), or more in general any booting version, BYE leaves the
+  system hanging sometimes. I now believe that it has little to do with 
+  the 32 bit, and if running on a clean undisturbed MSDOS system gives
+  not problems.
+  MSDOS 3.3 is not even aware of the existence of protected mode.
+  So it cannot be a trick of Bill to hamper Linux or some such.
