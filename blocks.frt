@@ -2334,38 +2334,38 @@ DECIMAL
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTN PFA CFA ;
 
- CR ." KRAAKER"
- : KRAAK-FROM ( .--. Kraak, starting with following word)
-   CFOF
-   BEGIN
-      DUP NEXTN HERE < WHILE
-      NEXTC DUP (KRAAK)
-   REPEAT
-   DROP
- ;
- 0 VARIABLE aux
- : PEMIT $7F AND 5 BDOS DROP ;
- : TO-LP-KRAAK-FROM
-   ' EMIT @ aux !
-   ' PEMIT CFA ' EMIT !
-   KRAAK-FROM
-   aux @ ' EMIT ! ;
- : A0 ;
- : A1 A0 A0 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
- : A1 A1 A1 ;
+( SAVE-SYSTEM )  HEX
+ 8049000 CONSTANT SM 
+ : SAVE-SYSTEM  
+ HERE SM -    SM 20 + ! ( File size)
+ HERE BM -    SM 44 + ! ( Dict size)
+ HERE FENCE !
+ U0 @   0 +ORIGIN   100   CMOVE
+ LATEST 0 +ORIGIN ! 
+ BLOCK-FILE $@ PAD $! BLOCK-EXIT ( Save blockfile)
+ " lina.new" BLOCK-FILE $! BLOCK-INIT 0 WARNING !
+ PAD $@ BLOCK-FILE $! ( Right blockfile in image!)
+ BLOCK-HANDLE @   SM    HERE SM -   
+ 4 LINOS DUP ?LINUX-ERROR BLOCK-EXIT BLOCK-INIT
+  DROP ;
+
+
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
  CR ." #36 FROBOZZ AMATEUR ADVENTURER >1< 84/4/5 "
  ( DIRECTIONS )
  0 CONSTANT N  1 CONSTANT NE
