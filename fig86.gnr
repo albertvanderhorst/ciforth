@@ -1280,10 +1280,10 @@ CODE_HEADER({XOR},{LXOR})
         XOR     AX,BX
         _PUSH
 ;
-worddocsafe({STACKS},{SP@ },{s_p_fetch},{--- addr},{},{
+worddocsafe({STACKS},{SP@},{s_p_fetch},{--- addr},{},{
 Return the address forthvar({addr}) of the stack position, 
-as it was before forthcode({SP@ }) was executed.
-  (e.g.  forthsamp({1  2  SP@   @   ...})     would
+as it was before forthcode({SP@}) was executed.
+  (e.g.  forthsamp({1  2  SP@  @  ...})     would
    type forthsamp({2  2   1}) )},{{S0},{SP!}})
 CODE_HEADER({SP@},{SPFET})
         MOV     AX,STACKPOINTER   ;{ (S1) <- (SP)}
@@ -1466,17 +1466,17 @@ CODE_HEADER({TOGGLE},{TOGGL})
         XOR     [BX],AX ;
         _NEXT
 ;
-worddocsafe({MEMORY},{@ },{fetch},{addr --- n},{L0},{
-Leave the 16 bit contents of forthvar({addr}) .},{{!},{C@ },{2@ }})
+worddocsafe({MEMORY},{@},{fetch},{addr --- n},{L0},{
+Leave the 16 bit contents of forthvar({addr}) .},{{!},{C@},{2@}})
 CODE_HEADER({@},{FETCH})
         POP     BX
         MOV     AX,[BX]
         _PUSH
 ;
-worddocsafe({MEMORY},{C@ },{c_fetch},{addr --- b},{},{
+worddocsafe({MEMORY},{C@},{c_fetch},{addr --- b},{},{
 Leave the 8 bit contents of memory address. On word addressing
 computers, further specification is needed regarding byte
-addressing.},{{C!},{@ },{2@ }})
+addressing.},{{C!},{@},{2@}})
 CODE_HEADER({C@},{CFET})
         POP     BX
         XOR     AX,AX
@@ -1490,7 +1490,7 @@ CODE_HEADER({2@},{TFET})
         _2PUSH
 ;
 worddoc({MEMORY},{!},{store},{n addr ---},{L0},{
-Store 16 bits of n at address.},{{@ },{C!},{2!}})
+Store 16 bits of n at address.},{{@},{C!},{2!}})
 CODE_HEADER({!},{STORE})
         POP     BX      ;{ADDR}
         POP     AX      ;{DATA}
@@ -1499,7 +1499,7 @@ CODE_HEADER({!},{STORE})
 ;
 worddoc({MEMORY},{C!},{c_store},{b addr ---},{},{
 Store 8 bits at forthvar({addr}) . On word addressing computers, further
-specification is necessary regarding byte addressing.},{{C@ },{!}})
+specification is necessary regarding byte addressing.},{{C@},{!}})
 CODE_HEADER({C!},{CSTOR})
         POP     BX      ;{ADDR}
         POP     AX      ;{DATA}
