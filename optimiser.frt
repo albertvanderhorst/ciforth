@@ -11,6 +11,13 @@ REQUIRE $
 REQUIRE SWAP-DP
 REQUIRE SET
 
+( ------------ PORTABILITY --------------------------------- )
+
+\ It is assumed that all addresses are postive, so < etc. is used for
+\ comparison of addresses with impunity. For 16 bit Forths unsigned
+\ comparison may have to be carefully introduced.
+
+
 ( ------------ COMFIGURATION --------------------------------- )
 
 500 CONSTANT MAX-SET       \ Default set size.
@@ -494,6 +501,34 @@ EXPAND-SPECIAL ;
 \ If FLAG , do a throw to indicate we can't optimise.
 : KAPUT??   4002 ?ERROR ;
 
+\ The highest address inspected during annihilation and the corresponding
+\ stack depth.
+VARIABLE MAX-ANNIL   VARIABLE MAX-ANNIL-DEPTH
+: !MAX-ANNIL  0 MAX-ANNIL ! ;
+
+\ Post current annil POINTER and virtual depth to ``MAX-ANNIL''.
+: POST-ANNIL MAX-ANNIL ! VD @ MAX-ANNIL-DEPTH ! ;
+
+\ Swap the current POINTER and virtual depth with the ``MAX-ANNIL'', leave the
+\ old ``MAX-ANNIL'' address.
+: SWAP-ANNIL  MAX-ANNIL @ MAX-ANNIL-DEPTH @ D>R POST-ANNIL DR> VD ! ;
+
+\ Compare annihilation POINTER and current vd with the maximums above.
+\ If they were not filled in, do that now. Return pointer WHERE and
+\ "we MUST go on, because ``MAX-ANNIL'' is higher.''
+: MUST-HIGHER?
+    MAX-ANNIL @ 0= IF DUP POST-ANNIL 0 ELSE
+    DUP MAX-ANNIL @ = IF VD @ MAX-ANNIL-DEPTH @ <> KAPUT?? 0 ELSE
+    DUP MAX-ANNIL @
+      > IF SWAP-ANNIL THEN -1
+\   <
+    THEN THEN ;
+
+
+\ For POINTER in the current situation, return WHERE to go on,
+\ and "we MUST go on".
+: FINISHED? MUST-HIGHER? 0= ANNIL-STABLE? AND ;
+
 \ Investigate the start of SEQUENCE. Return the ADDRESS
 \ to which it can be annihilated, else throw.
 : (ANNIHILATE-SEQ)
@@ -501,22 +536,19 @@ EXPAND-SPECIAL ;
     DUP ANNILABLE? 0= KAPUT??
     2DUP BACK-BRANCH? KAPUT??
     DUP 'BRANCH = IF SWAP PASTBRANCH>TARGET SWAP THEN
-    DUP '0BRANCH = IF
-        SE@ COMBINE-VD
-        DUP VD @ >R RECURSE VD @ R> VD ! >R
-        SWAP PASTBRANCH>TARGET RECURSE
-        OVER <>
-        R> VD @ <> OR KAPUT??
-    EXIT THEN
-    SE@ COMBINE-VD
-    ANNIL-STABLE? IF EXIT THEN
-    RECURSE
+    DUP SE@ COMBINE-VD
+    '0BRANCH = IF
+        VD @
+        OVER PASTBRANCH>TARGET FINISHED? 0= IF RECURSE THEN DROP
+        VD !
+    THEN
+    FINISHED? 0= IF RECURSE THEN
 ;
 
 \ Investigate the start of SEQUENCE. Leave END of that
 \ sequence plus a FLAG whether it can be annihilated
 \ without considering jumps into the middle of this code.
-: ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH
+: ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH !MAX-ANNIL
     '(ANNIHILATE-SEQ) CATCH  4002 <> ;
 
 \ For GAP and virtual depth calculate ``GAP-OFFSET'' such as used
