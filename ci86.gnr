@@ -948,7 +948,7 @@ ciforth:
         XOR     EAX,EAX
         CMP     EAX,_CELL_PTR[ECX]
         JZ     ENDIF1
-        JMP     BOOTUP+_CELLS(2)         ; Warm start
+        JMP     WRM         ; Warm start
 ENDIF1:
 
 });_END_({_LINUX_C_})
@@ -958,7 +958,19 @@ ciforth:
 _start:
 });_END_({_LINUX_N_})
 
-        JMP     BOOTUP                  ; Cold start
+_HOSTED_DPMI_({
+            MOV     AL,10
+            JMP      ERRMSG2
+});_END_({_HOSTED_DPMI_})
+        CLD                     ;{ DIR = INC}
+        _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
+        MOV     SPO,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
+        MOV     RPO,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
+        MOV     LIP,_OFFSET CLD1  ;{ (IP) <-}
+        _NEXT
+;
+CLD1:   DC      COLD    ; { This is a piece of headerless high level code.}
+;
 ; ########################################################################################
 ;                       FORTH ITSELF (entry point : BOOTUP)
 ; ########################################################################################
@@ -1511,7 +1523,7 @@ CODE_HEADER({SKIP},{SKIP})
 BRAN1:  LODSW
 _ALIGNED_({
         DEC     AX
-        OR      AL,_BITS16_(1)_BITS32_(3)
+        OR      AL, M4_CELLWIDTH - 1
         INC     AX
 },{dnl});_END_({_ALIGNED_})
         ADD     LIP,AX
@@ -1661,20 +1673,6 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{      Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
-BOOTUP:
-        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
-        _BITS32_({NOP         ; or to 8 bytes for 32 bits code  })
-        _BITS32_({NOP })
-        JMP     LCLD     ;{VECTOR TO COLD START}
-        NOP                    ; Fills jump to 4 bytes (for 16 bits code)
-        _BITS32_({NOP         ; or to 8 bytes for 32 bits code  })
-        _BITS32_({NOP })
-        JMP     WRM     ;{ VECTOR TO WARM START}
-        DB      FIGREL  ;{ FIG RELEASE #}
-        DB      FIGREV  ;{ FIG REVISION #}
-        DB      USRVER  ;{ USER REVISION #}
-        DB      0EH     ;{ VERSION ATTRIBUTES}
-        _BITS32_({DC 0   ; Fill version info up to two cells. })
 USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRUSA  ;{ INIT (U0) user area of the main task 1}
         DC      BSIN    ;{ RUBOUT: get rid of latest char 2}
@@ -2129,7 +2127,8 @@ CODE_HEADER({DEPTH},{DEPTH})
         MOV     AX,[BX+_CELLS(3)]
         MOV     DX,SPO   ;{ (S1) <- (SP)}
         SUB     AX,DX
-        SAR     AX, _BITS32_(2) _BITS16_(1)
+        SAR     AX,1
+        _BITS32_({SAR     AX,1})
         _PUSH
 ;
 });_END_({_LOAD_})
@@ -3061,9 +3060,9 @@ HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
 ;
 });_END_({_LOAD_})
 worddoc( {OPERATINGSYSTEM},{ARGS},{arguments},{--- addr},{},
-{This is a system dependant pointer to any arguments
-that is passed from the operating system to ciforth
-during startup.}
+{ Return the addr of forthcode({ARGS}) a user variable that
+contains a system dependant pointer to any arguments that are
+passed from the operating system to ciforth during startup.}
 _LINUX_N_({{
 In this ciforth it points to an area with the argument count,
 followed by a a null ended array of arguments strings,
@@ -3166,7 +3165,8 @@ enddoc)
 ;
 CODE_HEADER({CELLS},{LCELLS})
         POP     AX
-        SHL     AX, _BITS32_(2) _BITS16_(1)
+        SHL     AX,1
+        _BITS32_({SHL     AX,1})
         _PUSH
 ;
 worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
@@ -5138,7 +5138,7 @@ SET_16_BIT_MODE         ;{Pops back at next _SWITCH_}
 });_END_({ _BOOTED_})
         _SWITCH_({JMPHERE_FROM_OS})
         MOV     LIP,_OFFSET WRM1
-        JMP     SETUPST         ;{Use cold stacks. Till ABORT .}
+        _NEXT                   ;{Hope stacks are still okay.}
 ;
 WRM1:   DC      WARM
 ;
@@ -5187,22 +5187,6 @@ COLD4:
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 });_END_({_LINUX_N_})
 
-;{      COLD START VECTOR COMES HERE}
-;
-LCLD:    MOV     LIP,_OFFSET CLD1  ;{ (IP) <-}
-_HOSTED_DPMI_({
-            MOV     AL,10
-            JMP      ERRMSG2
-});_END_({_HOSTED_DPMI_})
-        CLD                     ;{ DIR = INC}
-        MOV     _CELL_PTR[USINI+_CELLS(31)],SPO ;{Remember ARGS.}
-SETUPST:
-        MOV     SPO,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
-        MOV     RPO,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
-        _NEXT
-;
-CLD1:   DC      COLD
-;
 worddoc( {INIT},{COLD},{cold},{},{FIG},
 {Reinitialise the system. Clear all block buffers.
 Reinitialise all user variables to their boot up values
@@ -9073,8 +9057,8 @@ has forthsamp({2m-1}) possible outcomes instead of forthsamp({m}) .
 This is very worrysome for mathematicians, who stick to the rule that
 forthsamp({MOD n m}) gives a result in the range forthsamp({0 ... m-1})
 (forthdefi({floored division})).
-_BITS16_({Having a mere 3000 for the number range can easily lead to
-overflow in intermediate results during forthdefi({scaling:}) a multiplication
+_BITS16_({Having a mere 30000 for the number range can easily lead to
+overflow in intermediate results during forthdefi({scaling}): a multiplication
 followed by a division. _VERBOSE_({ For example forthsamp({: ADD10% 110
 * 100 / ;})}). There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
