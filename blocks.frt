@@ -446,13 +446,12 @@ You should have received a copy of the GNU General Public
 License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
-( COMPARE PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
+( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
- : COMPARE ( ISO) ROT 2DUP SWAP - >R
-     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
 \ For LINE and WORD sc's : line CONTAINS word.
-: CONTAINS   PAD $! BEGIN BL $S PAD $@ COMPARE 0= DUP >R 0=
-OVER AND WHILE RDROP REPEAT 2DROP R> ;
+: CONTAINS   0 PAD ! BL PAD $C+ PAD $+! BL PAD $C+
+    0 ROT ROT   PAD @ - OVER + SWAP
+    DO   I PAD $@ CORA   0= IF DROP -1 LEAVE THEN   LOOP ;
 \ Find WORD in the block library and load it.
 : FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
  1000 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
@@ -462,6 +461,7 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
+
 ( ************** configuration *******************************)
 
 
@@ -4030,6 +4030,22 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 
 
 
+( COMPARE ) \ AvdH A1oct04
+\ ISO
+ : COMPARE ROT 2DUP SWAP - >R
+     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
+
+
+
+
+
+
+
+
+
+
+
+
 ( ORDER .WID .VOCS ) \ AvdH A1sep25
 \ Print all vocabularies names in existence.
 : .VOCS 'ID. FOR-VOCS ;
@@ -4064,7 +4080,7 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 
 ( +THRU ) \ AvdH A1oct05
 \ Load current block plus N1 to current block plus N2.
-: +THRU   SRC @ 2 CELLS - @   OFFSET @ -   >R
+: +THRU   SRC @ 2 CELLS - @ >R
     R@ + SWAP   R> + SWAP
     THRU ;
 
@@ -4175,7 +4191,7 @@ REQUIRE T[
 \ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
 : C$.S BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
 ( SHIFT-ARGS GET-ENV ) REQUIRE CONFIG  ?LI \ AvdH A1oct05
-REQUIRE Z$@   REQUIRE ENV
+REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 \ Return POINTER behind the end-0 of the environment.
 : ENV0 ENV BEGIN $@ WHILE REPEAT ;
 
