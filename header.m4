@@ -35,22 +35,24 @@ dnl Rather mysterious: without the dummy ifelse it just doesn;t work
 ifelse(1,2, , 
 {         DB       }_quoted({substr({$1},eval(_x-1),1)})+80H
 )dnl
+         DC    N_$2
          DC    _LINKOLD
 $2:      DC     $3
          undefine({_x})dnl
-define({_LINKOLD},{N_$2})dnl
+define({_LINKOLD},{$2-2*CW})dnl
 })dnl
 define({HEADER_NULL},{
 N_$2:            DB      0C1H,80H
-                DC      _LINKOLD
+         DC    N_$2
+         DC    _LINKOLD
 $2:             DC      $3
-define({_LINKOLD},{N_$2})dnl
+define({_LINKOLD},{$2-2*CW})dnl
 })
 dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl The link etc. field of the word with assembler name $1
-define({_DEA},N_$1)dnl
+define({_DEA},$1-CW*2)dnl
 define({_LINK_FIELD},($1-CW))dnl
 define({_CODE_FIELD},$1)dnl
 define({_PARAMETER_FIELD},($1+CW))dnl

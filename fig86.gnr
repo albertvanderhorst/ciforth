@@ -850,7 +850,20 @@ DISPLAYSI:
         POP    BP
         POP    SI
         RET
+;
 });_END_({_NEWDEBUG_ })
+
+HEADER({^},{DOTS},{DOCOL})
+        DC      CR, PDOTQ
+        _STRING({S: })
+        DC      SPFET, SZERO, FETCH, 
+DOC2:   DC      OVER, OVER,  EQUAL, ZEQU 
+        _0BRANCH(DOC1) 
+        DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
+        _BRANCH(DOC2)
+DOC1    DC DROP, DROP 
+        DC SEMIS
+;
 
 DPUSH:  PUSH    DX
 APUSH:  PUSH    AX
@@ -889,7 +902,7 @@ worddoc({MISC},{EXECUTE},{execute},{addr -},{},
 is given by forthvar({addr}) .
 _VERBOSE_({The DEA serves as an execution token.})
 },{{'},{>CFA}},
-{{ 'O BL EXECUTE .},{32}})
+{{ ' BL >CFA EXECUTE .},{32}})
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
@@ -920,11 +933,11 @@ worddoc({MISC},{NOOP},{no_operation},{},{},
 HEADER({NOOP},{NOOP},{$+4})
 ;{      DEBUG STUFF}
 NOP0:   DC      $+CELLS(1)
-        JMP SHORT     NEXT
+        JMP NEXT
 NOP1:   DC      $+CELLS(1)
-        JMP SHORT     NEXT
+        JMP NEXT
 NOP2:   DC      $+CELLS(1)
-        JMP SHORT     NEXT
+        JMP NEXT
 ;
 worddocsafe({CONTROL},{(LOOP)},{paren_loop},{},{C2},
 {The run-time proceedure compiled by LOOP which increments the loop
@@ -1123,6 +1136,7 @@ CODE_HEADER({MATCH-WORD},{MATCHW})
 ;{       MOV     AX,DS}
 ;{       MOV    ES,AX   ;ES = DS}
         POP     BX      ;{NFA}
+        MOV     BX,_CELL_PTR[BX]
         POP     CX      ;{STRING ADDR}
 ;
 ;{  SEARCH LOOP}
@@ -2170,20 +2184,18 @@ worddoc({DICTIONARY},{NFAO},{name_field_address},{pfa --- nfa},{},
 {Convert the parameter field address (deaold) of a definition to its name
 field.},{{'},{>PFA}})
 HEADER({NFAO},{NFAO},{DOCOL})
-        DC      LIT,1+CELLS(2)
+        DC      LIT,CELLS(2)
         DC      LSUB
-        DC      LIT,-1
-        DC      TRAV
+        DC      FETCH
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{N>P},{parameter_field_address},{nfa --- pfa},{},
 {Convert the name field address of a compiled definition to its
 parameter field address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({N>P},{NTOP},{DOCOL})
-        DC      ONE
-        DC      TRAV
-        DC      LIT,1+CELLS(2)
-        DC      PLUS
+        DC      CELLP
+        DC      CELLP
+        DC      CELLP
         DC      SEMIS
         PAGE
 ;
@@ -2191,50 +2203,8 @@ worddoc({DICTIONARY},{P>N},{parameter_field_address},{nfa --- pfa},{},
 {Convert the parameter field address of a compiled definition to its
 name field address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({P>N},{PTON},{DOCOL})
-        DC      LIT,1+CELLS(2)
+        DC      LIT,CELLS(3)
         DC      LSUB
-        DC      LIT,-1
-        DC      TRAV
-        DC      SEMIS
-;
-worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
-{Given a dictionary entry addres return the
-link field address.},{{'},{>LFA}})
-HEADER({>LFA},{TLFA},{DOCOL})
-        DC      ONE
-        DC      TRAV
-        DC      LIT,1
-        DC      PLUS
-        DC      SEMIS
-;
-worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
-{Given a dictionary entry addres return the
-code field address.},{{'},{>CFA}})
-HEADER({>CFA},{TCFA},{DOCOL})
-        DC      ONE
-        DC      TRAV
-        DC      LIT,1+CELLS(1)
-        DC      PLUS
-        DC      SEMIS
-;
-worddoc({DICTIONARY},{>DFA},{cfa},{dea --- cfa},{},
-{Given the dictionary entry addres of a vocabulary
-return the
-address of the dummy dea.
-},{{VOCABULARY},{>CFA}})
-HEADER({>DFA},{TDFA},{DOCOL})
-        DC      TPFA
-        DC      CELLP   ;{Skip over DOVOC.}
-        DC      SEMIS
-;
-worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
-{Given the dictionary entry addres of a vocabulary
-return the
-address of the link to the next vocabulary.
-},{{VOCABULARY},{>CFA}})
-HEADER({>VFA},{TVFA},{DOCOL})
-        DC      TPFA    ;{Dummy dea.}
-        DC      TPFA    ;{Its parameter field.}
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
@@ -2243,18 +2213,49 @@ name field.},{{'},{>NFA}})
 HEADER({>NFA},{TNFA},{DOCOL})
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
+{Given a dictionary entry addres return the
+link field address.},{{'},{>LFA}})
+HEADER({>LFA},{TLFA},{DOCOL})
+        DC      CELLP
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
+{Given a dictionary entry addres return the
+code field address.},{{'},{>CFA}})
+HEADER({>CFA},{TCFA},{DOCOL})
+        DC      CELLP
+        DC      CELLP
+        DC      SEMIS
+;
 worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
 parameter field address.},{{'},{>CFA},{>LFA},{>NFA}})
 HEADER({>PFA},{TPFA},{DOCOL})
-        DC      ONE
-        DC      TRAV
-        DC      LIT,1+CELLS(2)
-        DC      PLUS
+        DC      CELLP
+        DC      CELLP
+        DC      CELLP
         DC      SEMIS
-        PAGE
-        ;{ At line     LINE ~1500}
-
+;
+worddoc({DICTIONARY},{>DFA},{cfa},{dea --- cfa},{},
+{Given the dictionary entry addres of a vocabulary
+return the address of the dummy dea.
+},{{VOCABULARY},{>CFA}})
+HEADER({>DFA},{TDFA},{DOCOL})
+        DC      TPFA
+        DC      CELLP   ;{Skip over DOVOC.}
+        DC      SEMIS
+;
+worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
+{Given the dictionary entry addres of a vocabulary
+return the address of the link to the next vocabulary.
+},{{VOCABULARY},{>CFA}})
+HEADER({>VFA},{TVFA},{DOCOL})
+        DC      CELLP
+        DC      TPFA    ;{Dummy dea.}
+        DC      CELLP,CELLP ; {Skip dummy nfa and lfa}
+        DC      SEMIS
+;
 worddoc({SECURITY},{!CSP},{store_c_s_p},{},{},
 {Save the stack position in forthcode({CSP}). Used as part of the compiler
 security.},{})
@@ -2832,6 +2833,7 @@ worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
 {Print a definition's name from its dictionary entry address.},{{'},{>PFA},{>NFA}})
 HEADER({ID.},{IDDOT},{DOCOL})
         DC      TNFA
+        DC      FETCH
         DC      COUNT
         DC      LIT,1FH
         DC      LAND
@@ -2885,15 +2887,18 @@ CREA1:  DC      HERE
         DC      LSUB
         DC      LIT,80H
         DC      TOGGL
+        DC      HERE,TOR
+        DC      COMMA   ; {Name field.}
         DC      LATES
-        DC      COMMA
+        DC      COMMA   ; {Link field.}
+        DC      HERE,FROMR
         DC      CURR
         DC      FETCH
         DC      TLFA
         DC      STORE
         DC      HERE
         DC      CELLP
-        DC      COMMA
+        DC      COMMA   ; {Code field.}
         DC      SEMIS
         PAGE
 worddoc({COMPILING},{[COMPILE]},{bracket_compile},{},{p,C},
@@ -3050,8 +3055,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      HERE
         DC      LCELL,LSUB ;{ Skip over dovoc.}
         DC      PTON       ;{ Future VOC-LINK.}
-        DC      LIT, 80H+1, CCOMM    ; Dummy name field
-        DC      LIT, " "+80H, CCOMM
+        DC      ZERO, COMMA   ; Dummy name field
         DC      CURR
         DC      FETCH
         DC      COMMA    ; { Points to DLFA of current vocabulary.}
@@ -3078,7 +3082,7 @@ forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during 
 a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
 HEADER({FORTH},{FORTH},{DODOE},1)
         DC      DOVOC
-        DB      80H+1, " "+80H  ; Dummy name field
+        DC      0 ; Dummy name field
         DC      _DEA(TASK)
         DC      0       ;{ END OF VOCABULARY LIST}
 ;
@@ -3135,7 +3139,7 @@ terminal, printing a startup message with the version number.
 },{{WARM}})
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SPSTO
-        DC      DECA
+        DC      HEX
         DC      QSTAC   ;{ IT DID TO & INCL THIS}
         DC      CR
         DC      DOTCPU
