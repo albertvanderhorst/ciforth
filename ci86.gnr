@@ -1869,7 +1869,7 @@ HEADER({DP},{LDP},{DOUSE})
         DC      CELLS(9)
 ;
 worddoc({VOCABULARIES},{VOC-LINK},{voc_link},{--- addr},{U},
-{A user variable containing the address of the DLFA in the word
+{A user variable containing the address of the VLFA in the word
 most recently created by forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
 linked by these fields to allow control for forthcode({FORGET}) ting thru multiple
 vocabularies.})},{{VOCABULARY}})
@@ -1898,14 +1898,18 @@ HEADER({SCR},{SCR},{DOUSE})
         DC      CELLS(14)
 ;
 worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{U,L0},
-{A user variable containing a pointer to the vocabulary within which
+{A user variable containing a pointer to data field of 
+a vocabulary within that contains a dummy dea with which the
 dictionary searches will first begin.},{{VOCABULARY},{CURRENT}})
 HEADER({CONTEXT},{CONT},{DOUSE})
         DC      CELLS(16)
 ;
 worddoc({VOCABULARIES},{CURRENT},{current},{--- addr},{U,L0},
-{A user variable containing a pointer to the vocabulary to which
-new words will be added.},{{VOCABULARY},{CONTEXT}})
+{A user variable containing a pointer to data field of 
+a vocabulary to 
+new words will be added. 
+This is done by linking them in between the link field of the 
+dummy dea and the next definition.},{{VOCABULARY},{CONTEXT}})
 HEADER({CURRENT},{CURR},{DOUSE})
         DC      CELLS(17)
 ;
@@ -2148,6 +2152,7 @@ vocabulary.},{{VOCABULARY}})
 HEADER({LATEST},{LATES},{DOCOL})
         DC      CURR
         DC      FETCH
+        DC      TLFA
         DC      FETCH
         DC      SEMIS
 ;
@@ -2732,6 +2737,7 @@ HEADER({-FIND},{DFIND},{DOCOL})
         DC      HERE
         DC      CONT
         DC      FETCH
+        DC      TLFA
         DC      FETCH
         DC      LIT, MATCHING, SWAP, FORW, DROP
         DC      RESULT, FETCH, ZEQU
@@ -2852,6 +2858,7 @@ CREA1:  DC      HERE
         DC      COMMA
         DC      CURR
         DC      FETCH
+        DC      TLFA
         DC      STORE
         DC      HERE
         DC      CELLP
@@ -2991,12 +2998,14 @@ make it the forthcode({CONTEXT}) vocabulary which is searched first by forthcode
 The sequence forthvar({cccc}) forthcode({DEFINITIONS}) also make forthvar({cccc}) the forthcode({CURRENT})
 vocabulary into which new definitions are placed.
 
-A vocabulary parameter field contains at first the dovoc pointer, then it
+A vocabulary parameter field contains at first the dovoc pointer, then 
+follows its data field. This
 contains a dummy dea (forthdefi({DDEA})) with a name " " (blank) ,
 a dummy link field (forthcode({DLFA})) and
-the vocabulary link field address ( forthdefi({VLFA}) ) that points to the dea
+that points to the dea
 of the first word of the vocabulary.
-Actually executing the vocabulary means storing its DLFA into forthcode({CONTEXT}) .
+Actually executing the vocabulary means storing its DDEA into forthcode({CONTEXT}) .
+Then follows the vocabulary link field address ( forthdefi({VLFA}) ) 
 The VLFA points to the VLFA of the next vocabulary or 0 for the end.
 
 In fig-FORTH, cccc will be so chained as to include all definitions
@@ -3011,7 +3020,6 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      LIT, " "+80H, CCOMM
         DC      CURR
         DC      FETCH
-        DC      LIT, 2, LSUB ; Skip backwards over dummy name field.
         DC      COMMA    ; {DLFA points to NFA of CURRENT}
         DC      HERE
         DC      VOCL
@@ -3020,8 +3028,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      VOCL
         DC      STORE
         DC      DOES
-DOVOC:  DC      TLFA     ; i.e. Skip ' ' name.
-        DC      CONT
+DOVOC:  DC      CONT
         DC      STORE
         DC      SEMIS
         PAGE
@@ -5352,6 +5359,7 @@ HEADER({VLIST},{VLIST},{DOCOL})
         DC      LIT, IDDOT
         DC      CONT
         DC      FETCH
+        DC      TLFA
         DC      FETCH
         DC      FORW
         DC      SEMIS
