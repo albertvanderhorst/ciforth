@@ -32,8 +32,8 @@
 10 CONSTANT LF
 13 CONSTANT \r  ( The name CR is taken )
 
-\ : TEST 0 WORD ;
-: TEST CR ." TESTING " LATEST ID. ;
+\   : TEST 0 WORD ;                                                      
+  : TEST CR ." TESTING " LATEST ID. ; IMMEDIATE                        
 
 ( ---------- Some categories of symbols ------------------------------- )
 
@@ -139,7 +139,7 @@ TEST ." EXPECT 1:" 1 SUCCESS ! skip  { somecomment} {more{_1} SUCCESS ? ^
 ( Scan an identifier )
 BNF: identifier   skip letter-symbol { ident-symbol } ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 identifier  Sp_2 SUCCESS ? . ^
-BNF: digit-sequence   skip digit-symbol { digit-symbol } ;BNF
+BNF: digit-sequence  digit-symbol { digit-symbol } ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 digit-sequence 0234 SUCCESS ? . ^
 BNF: character-string skip ''' { string-symbol | ''' ''' } ''' ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 character-string 'ape''ape' SUCCESS ? . ^
@@ -280,9 +280,9 @@ BNF: `and_then'  `and' `then' ;BNF
    ELSE DROP ." FAILED" THEN ;
 
 ( Adorn the ;BNF word with a debug report. )
-: ;BNF 
-    LATEST [COMPILE] LITERAL COMPILE END-REPORT [COMPILE] ;BNF
-; IMMEDIATE
+TEST : ;BNF 
+TEST     LATEST [COMPILE] LITERAL COMPILE END-REPORT [COMPILE] ;BNF
+TEST ; IMMEDIATE
 
 ( Prints what we are going to parse and the name of the executing       )
 ( word from its PARAMETER field. Intended to run at the start of a bnf. )
@@ -290,10 +290,10 @@ BNF: `and_then'  `and' `then' ;BNF
     ."  trying to match |" TIB @ IN @ + 20 TYPE ." ...  at "  IN ? ; 
 
 ( Adorn the BNF: word with a debug report. )
-: BNF: 
-    [COMPILE] BNF:
-    LATEST [COMPILE] LITERAL COMPILE START-REPORT 
-; IMMEDIATE
+TEST : BNF: 
+TEST     [COMPILE] BNF:
+TEST     LATEST [COMPILE] LITERAL COMPILE START-REPORT 
+TEST ; IMMEDIATE
 
 ( ################# Simple renames ####################################### )
 ( This must be done at the last minute, because it hides the Forth      )
