@@ -2632,7 +2632,9 @@ QDUP1:  DC      SEMIS
 worddoc({VOCABULARIES},{LATEST},{latest},{--- addr},{},
 {Leave the dictionary entry address ( forthsamp({dea}) )
 of the topmost word in the forthcode({CURRENT})
-vocabulary.},{{VOCABULARY}}, {}, enddoc)
+vocabulary.},{{VOCABULARY}}, 
+{{: APE ;  LATEST ID.},{APE}},
+enddoc)
 HEADER({LATEST},{LATES},{DOCOL})
         DC      CURR
         DC      FETCH
@@ -2640,28 +2642,35 @@ HEADER({LATEST},{LATES},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
-{Convert the data field forthsamp({addr})
-of a definition created with a forthcode({DOES>}) dnl
-construct to its forthsamp({dea}) .},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
-HEADER({BODY>},{BODYF},{DOCOL})
-        DC      LIT,CELLS(B_HOFFSET)
-        DC      LSUB
-        DC      SEMIS
-;
 worddoc({DICTIONARY},{>BODY},{to_body},{dea --- addr},{},
 {Given the dictionary entry addres
 of a definition created with a forthcode({DOES>})dnl
 construct, return its  data field forthsamp({addr}).},
-{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
+{{'},{>CFA},{>LFA},{>NFA}}, 
+{{ CREATE Q 12346 ,  ' Q >BODY @ .},{12346}}, 
+enddoc)
 HEADER({>BODY},{TOBODY},{DOCOL})
         DC      LIT,CELLS(B_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
+worddoc({DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
+{Convert the data field forthsamp({addr})
+of a definition created with a forthcode({DOES>}) dnl
+construct to its forthsamp({dea}) .},
+{{'},{>CFA},{>LFA},{>NFA}}, 
+{{ CREATE QAQ HERE BODY> ID.},{QAQ}}, 
+enddoc)
+HEADER({BODY>},{BODYF},{DOCOL})
+        DC      LIT,CELLS(B_HOFFSET)
+        DC      LSUB
+        DC      SEMIS
+;      
 worddoc({DICTIONARY},{C>D},{parameter_field_address},{cfa --- dea},{},
-{Convert the code field address of a compiled definition to its
-dea address.},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
+{Convert the code field address of a definition to its
+dea address.},{{'},{>CFA},{>LFA},{>NFA}}, 
+{{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
+enddoc)
 HEADER({C>D},{CTOD},{DOCOL})
         DC      LIT,CELLS(C_HOFFSET)
         DC      LSUB
@@ -2669,7 +2678,9 @@ HEADER({C>D},{CTOD},{DOCOL})
 ;
 worddoc({DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
-name field.},{{'},{>CFA}}, {}, enddoc)
+name field.},{{'},{>CFA}}, 
+{{ ' WORDS >NFA @ $@ TYPE},{WORDS}}, 
+enddoc)
 HEADER({>NFA},{TNFA},{DOCOL})
         DC      LIT,CELLS(N_HOFFSET)
         DC      PLUS
@@ -2677,7 +2688,9 @@ HEADER({>NFA},{TNFA},{DOCOL})
 ;
 worddoc({DICTIONARY},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return the
-flag field.},{{'},{>NFA}}, {}, enddoc)
+flag field.},{{'},{>NFA}}, 
+{{"FRED" (CREATE) SMUDGE ' FRED >FFA DUP @ . SMUDGE @ .},{0 2}},
+enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
         DC      LIT, CELLS(F_HOFFSET)
         DC      PLUS
@@ -2685,7 +2698,9 @@ HEADER({>FFA},{TFFA},{DOCOL})
 ;
 worddoc({DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
 {Given a dictionary entry addres return the
-link field address.},{{'},{>LFA}}, {}, enddoc)
+link field address.},{{'},{>LFA}}, 
+{{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}}, 
+enddoc)
 HEADER({>LFA},{TLFA},{DOCOL})
         DC      LIT, CELLS(L_HOFFSET)
         DC      PLUS
@@ -2693,7 +2708,12 @@ HEADER({>LFA},{TLFA},{DOCOL})
 ;
 worddoc({DICTIONARY},{>CFA},{to_code_field_address},{dea --- cfa},{},
 {Given a dictionary entry addres return the
-code field address.},{{'},{>CFA}}, {}, enddoc)
+code field address : the address that is compiled within high level 
+definitions. It serves as an execution token as well.
+In ciforth this is actually the same as the dea.},
+{{'},{>CFA}}, 
+{{' WORD  DUP >CFA = .},{_T_}}, 
+enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
         DC      LIT, CELLS(C_HOFFSET)
         DC      PLUS
@@ -3336,7 +3356,11 @@ worddocsafe({DEFINING},{(CREATE)},{paren_create},{sc --},{},
 as the namefield. It is linked into the CURRENT vocabulary.
 The code field and data field both 
 point to the area owned by this header, i.e. immediately following the
-completed header. },{}, {}, enddoc)
+completed header. It leaves the header momentarily unfindable,
+until forthcode({SMUDGE}) is executed.},
+{{CREATE}}, 
+{}, 
+enddoc)
 HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LDUP
         DC      ZEQU
