@@ -285,7 +285,7 @@ INTERACTION DEFINITIONS
 
 \ For a question STRING get an ANSWER. ``A_NONE'' is not accepted.
 : GET-ANSWER
-    BEGIN 2DUP (GET-ANSWER) DUP 3 = WHILE DISAPPROVE REPEAT >R 2DROP R>
+    BEGIN 2DUP (GET-ANSWER) DUP A_NONE = WHILE DISAPPROVE REPEAT >R 2DROP R>
 ;
 
 PREVIOUS DEFINITIONS
@@ -646,11 +646,12 @@ DATABASE CONSULTING STRATEGY
     ELSE DROP NONE THEN ^
 ;
 
-\ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new question that will
-\ make a distinction between the two. Return IT.
+\ For GUESSED diagnosis and CORRECT diagnosis ask for a new
+\ question that will make a distinction between the two. Return
+\ IT.
 : NEW-QUESTION
     QuerySepar1$ TYPE CR      QuerySepar2$ TYPE CR
-     SWAP DIAGNOSES 2@ TYPE CR   DIAGNOSES 2@ TYPE CR ( d1 d2 --)
+     DIAGNOSES 2@ TYPE CR   DIAGNOSES 2@ TYPE CR ( d1 d2 --)
     QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION
     #QUESTIONS @ 1- ;
 
