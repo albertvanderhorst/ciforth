@@ -2621,7 +2621,7 @@ worddoc( {SCREEN},{SCR},{s_c_r},{--- addr},{U},
 by forthcode({LIST}) .},{{BLOCK}},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({SCR},{SCR},{DOUSE}, _CELLS(13))
+HEADER({SCR},{SCR},{DOUSE}, _CELLS(33))
 ;
 worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
 {A user variable containing the compilation state. A non-zero value
@@ -2767,7 +2767,7 @@ standard.})
 {{VOCABULARY},{SEARCH}},
 {{CURRENT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(33))
+HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(34))
 ;
 worddoc( {WORDLISTS},{SEARCH},{search},{--- addr},{FIG,U,L0},
 { The current search order is a zero ended row of WID 's found
@@ -2779,7 +2779,7 @@ least 8. },
 {{FOUND},{VOCABULARY},{CURRENT}},
 {{SEARCH @ ' FORTH >WID = .},{_T_}},
 enddoc)
-HEADER({SEARCH},{SEARCH},{DOUSE}, _CELLS(34))
+HEADER({SEARCH},{SEARCH},{DOUSE}, _CELLS(35))
 ;
 ;      IMPORTANT
 ;     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE
