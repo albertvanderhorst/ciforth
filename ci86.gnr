@@ -5709,31 +5709,6 @@ found, different vocabularies can have words with the same names.
 The wordset forthvar({VOCABULARIES}) contains words that manipulate 
 those vocabularies.},
 {},{},{},{})
-worddocchapterend({COMPILING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({CONTROL},{~},{CONTENT},{},{},{},{})
-worddocchapterend({DEFINING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({DICTIONARY},{~},{CONTENT},{},{},{},{})
-worddocchapterend({DOUBLE},{~},{CONTENT},{},{},{},{})
-worddocchapterend({ERRORS},{~},{CONTENT},{},{},{},{})
-worddocchapterend({INIT},{~},{CONTENT},{},{},{},{})
-worddocchapterend({INPUT},{~},{CONTENT},{},{},{},{})
-worddocchapterend({JUGGLING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({LOGIC},{~},{CONTENT},{},{},{},{})
-worddocchapterend({MEMORY},{~},{CONTENT},{},{},{},{})
-worddocchapterend({MISC},{~},{CONTENT},{},{},{},{})
-worddocchapterend({MULTIPLYING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({FORMATTING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({OPERATOR},{~},{CONTENT},{},{},{},{})
-worddocchapterend({OUTPUT},{~},{CONTENT},{},{},{},{})
-worddocchapterend({PARSING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({SCREEN},{~},{CONTENT},{},{},{},{})
-worddocchapterend({SECURITY},{~},{CONTENT},{},{},{},{})
-worddocchapterend({STACKS},{~},{CONTENT},{},{},{},{})
-worddocchapterend({STORAGE},{~},{CONTENT},{},{},{},{})
-worddocchapterend({STRING},{~},{CONTENT},{},{},{},{})
-worddocchapterend({SUPERFLUOUS},{~},{CONTENT},{},{},{},{})
-worddocchapterend({SYSTEM},{~},{CONTENT},{},{},{},{})
-worddocchapterend({VOCABULARIES},{~},{CONTENT},{},{},{},{})
 divert(2)dnl m4 generates code on channel 1, documentation on 3
 ; Split here for documentation
 _GENERATE_CODE 
