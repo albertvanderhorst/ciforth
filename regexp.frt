@@ -104,7 +104,6 @@ ESCAPE-TABLE &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |   DROP
     ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ THEN ;
 '| HIDDEN
 
-EXIT
 \ -----------------------------------------------------------------------
 \                  matched substrings
 \ -----------------------------------------------------------------------
@@ -114,7 +113,7 @@ CREATE SUBSTRING-TABLE 20 CELLS ALLOT
 \ To where has the table been used (during expression parsing).
 VARIABLE ALLOCATOR
 \ Initialise ALLOCATOR
-: ALLOCATOR! 2 ALLOCATOR ! ;
+: !ALLOCATOR 2 ALLOCATOR ! ;
 \ Return a new ALLOCATOR index, and increment it.
 : ALLOCATOR++
     ALLOCATOR @ DUP 11 = ABORT" Too many substrings with ( ), max 9, user error"
@@ -124,7 +123,7 @@ VARIABLE ALLOCATOR
 : ALLOCATE( ALLOCATOR++
 DUP 1 AND ABORT" ( where ) expected, inproper nesting, user error" ;
 \ Return a new INDEX for a ')'.
-: ALLOCATE( ALLOCATOR++
+: ALLOCATE) ALLOCATOR++
 DUP 1 AND 0= ABORT" ) where ( expected, inproper nesting, user error" ;
 
 \ Remember CHARPOINTER as the substring with INDEX.
@@ -133,13 +132,14 @@ DUP 1 AND 0= ABORT" ) where ( expected, inproper nesting, user error" ;
 CELLS SUBSTRING-TABLE + ! ;
 
 \ For INDEX create a "word" that returns the matched string with that index.
-: CREATE\ 2 * CELLS SUBTRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
+: CREATE\ CREATE 2 * CELLS SUBSTRING-TABLE + , DOES> @ 2@ SWAP OVER - ;
 
 \ &9 1+ &0 DO   &\ PAD C!   I PAD 1+ C!   PAD 2 POSTFIX CREATE\ LOOP
 0 CREATE\ \0    1 CREATE\ \1    2 CREATE\ \2    3 CREATE\ \3   4 CREATE\ \4
 5 CREATE\ \5    6 CREATE\ \6    7 CREATE\ \7    8 CREATE\ \8   9 CREATE\ \9
 
 \ -----------------------------------------------------------------------
+\ START OF TESTED FOR COMPILATION ONLY AREA
 
 \ The compiled pattern.
 \ It contains xt's, strings and charsets in a sequential format, i.e.
@@ -158,7 +158,7 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
-: (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT CELL- TRUE;
+: (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT CELL- TRUE ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ as long as the character agrees with the matcher at the expression,
@@ -188,9 +188,9 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
     REPEAT
     RDROP TRUE ;
 
-\-----------------------------------------------------------------
+\ ----------------------------------------------------------------
 \           xt's that may be present in a compiled expression
-\-----------------------------------------------------------------
+\ -----------------------------------------------------------------
 
 \ All of those xt's accept a charpointer and an expressionpointer.
 \ The char pointer points into the string to be matched that must be
@@ -206,7 +206,6 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ The xt's need not do a match, they can do an operation that
 \ never fails, such as remembering a pointer.
 
-EXIT
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the character matches the charset at the expression,
 \ advance both past the match, else leave them as is.
@@ -241,6 +240,9 @@ EXIT
 \D DUP @ 0= ABORT" CHECK$ compiled not at end of expression, system error"
     OVER C@ 0= ;
 
+\ Where the matched part of the string starts.
+: STARTPOINTER    SUBSTRING-TABLE @ ;
+
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the start of a word"
 : CHECK< OVER STARTPOINTER @ = DUP 0= IF DROP OVER 1- C@ \w IN-CHAR-SET 0= THEN >R
@@ -250,9 +252,6 @@ EXIT
 \ return CHARPOINTER and EXPRESSIONPOINTER plus "we ARE at the end of a word"
 : CHECK< OVER STARTPOINTER @ = 0= DUP IF DROP OVER 1- C@ \w IN-CHAR-SET THEN >R
          OVER C@ DUP IF \w IN-CHAR-SET THEN 0=  R> AND ;
-
-\D DUP @ 0= ABORT" CHECK$ compiled not at end of expression, system error"
-    OVER C@ 0= ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ Remember this as the start or end of a substring.
@@ -273,9 +272,13 @@ EXIT
 : ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
 
 
+\ END OF TESTED FOR COMPILATION ONLY AREA
 \ ---------------------------------------------------------------------------
 \                    building the regexp
 \ ---------------------------------------------------------------------------
+
+\ The compiled expression.
+CREATE RE-COMPILED 1000 ALLOT
 
 \ Regular expressions are parsed using a simple recursive descent
 \ parser.
@@ -287,23 +290,27 @@ CREATE NORMAL-CHARS 1000 ALLOT
 \ To where is the compiled expression filled.
 VARIABLE RE-FILLED
 
+\ Initialise ``RE-FILLED
+: !RE-FILLED RE-COMPILED RE-FILLED ! ;
+
 \ Add ITEM to the ``RE-EXPR''
 : RE,   RE-FILLED @ ! 1 CELLS RE-FILLED +! ;
 
 \ Add STRINGCONSTANT to the ``RE-EXPR''
-: RE$,   DUP >R RE-FILLED $!   RE-FILLED @ CELL+ R@ + ALIGNED RE-FILLED ! ;
+: RE$,   DUP >R RE-FILLED @ $!   RE-FILLED @ CELL+ R@ + ALIGNED RE-FILLED ! ;
 
 \ Add CHARSET to the ``RE-EXPR''.
-: RE-SET,   RE-FILLED MAX-SET MOVE   MAX-SET RE-FILLED +! ;
+: RE-SET,   RE-FILLED @ MAX-SET MOVE   MAX-SET RE-FILLED +! ;
 
 \ Make a hole in the ``RE-EXPR'' for a quantifier, and leave IT.
-: MAKE-HOLE   MAX-SET CELL+ >R  RE-FILLED R@ -  DUP CELL+ R> MOVE
+: MAKE-HOLE   MAX-SET >R  RE-FILLED @ R@ -
+    DUP DUP CELL+ R> MOVE
     1 CELLS RE-FILLED +! ;
 
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
 : HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF
-        'MATCH-NORMAL RE,   NORMAL-CHARS $@ RE$,   NORMAL-CHARS!
+        'ADVANCE-EXACT RE,   NORMAL-CHARS $@ RE$,   NORMAL-CHARS!
     THEN
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
@@ -316,14 +323,14 @@ CREATE SET-MATCHED ALLOT-CHAR-SET
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
 : HARVEST-SET-MATCHED SET-MATCHED @ IF
-    'MATCH-SET RE,   SET-MATCHED RE-SET,  SET-MATCHED!
+    'ADVANCE-CHAR RE,   SET-MATCHED RE-SET,  SET-MATCHED!
 THEN
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 \ For EP and CHAR : add the char to the simple match, or make it
 \ a single character set, whatever is needed. Leave EP.
 : ADD-TO-NORMAL OVER C@ QUANTIFIER? IF
-    HARVEST-NORMAL-CHARS 'MATCH-SET RE, RE-FILLED \EMPTY RE-SET, SWAP SET-BIT
+    HARVEST-NORMAL-CHARS 'ADVANCE-CHAR RE, RE-FILLED \EMPTY RE-SET, SWAP SET-BIT
 ELSE NORMAL-CHARS $+! THEN ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
@@ -373,7 +380,6 @@ ELSE NORMAL-CHARS $+! THEN ;
     HARVEST-SET-MATCHED
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
-CREATE (RE-EXPR) 1000 ALLOT
 \ Transform the EXPRESSION string. Copy it to the ``(RE-EXPR)'' buffer,
 \ (NOT YET) meanwhile normalising it, i.e. a character has a special meaning, iff
 \ it is preceeded by '\' (NOT YET). Also make it zero ended.
