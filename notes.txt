@@ -194,3 +194,7 @@ works for NASM.
 Removed and a slightly working version of linux.
 
 2.58 The first version of linux figforth. It is directly linked.
+
+2.66 A stable version of linux figforth with mass stoarage and all.
+Handles interrupts.
+
