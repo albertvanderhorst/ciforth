@@ -13,7 +13,7 @@
 (   \ is not known by figforth, it can be used with impunity outside    )
 (   of  definitions because it only results in "\ MSG #0", but          )
 (   anyway:                                                             )
-: \ 0 WORD ;
+: \ 0 WORD ; IMMEDIATE
 
 ( Run as follows:                                                       )
 \   #! /bin/sh
@@ -32,6 +32,7 @@
 10 CONSTANT LF
 13 CONSTANT \r  ( The name CR is taken )
 
+\ : TEST 0 WORD ;
 : TEST CR ." TESTING " LATEST ID. ;
 
 ( ---------- Some categories of symbols ------------------------------- )
@@ -86,37 +87,62 @@ TEST ." EXPECT 1:" &{ IS-COMMENT . ^
 
 (    For the CHARACTER supplied, return it IS valid in a string.        )
 : IS-STRING
-    DUP &} = 0= >R
+    DUP &' = 0= >R
     DUP 0= >R
     DROP
     R> R> OR ;
 
 TEST ." EXPECT 1:" &{ IS-STRING . ^
 
+(    For the CHARACTER supplied, return it IS valid throughout.        )
+: IS-ANY ( I.e. non zero ) ;
+
+TEST ." EXPECT 1:" &' IS-ANY . ^
+
 (  For the above categories scan a single character.                    )
 BNF: blank-symbol    @TOKEN IS-BLANK DUP SUCCESS ! +TOKEN ;BNF
 BNF: letter-symbol   @TOKEN IS-LETTER DUP SUCCESS ! +TOKEN ;BNF
 BNF: digit-symbol    @TOKEN IS-DIGIT DUP SUCCESS ! +TOKEN ;BNF
 BNF: ident-symbol    @TOKEN IS-IDENT DUP SUCCESS ! +TOKEN ;BNF
-BNF: comment-symbol   @TOKEN IS-COMMENT DUP SUCCESS ! +TOKEN ;BNF
+BNF: string-symbol   @TOKEN IS-STRING DUP SUCCESS ! +TOKEN ;BNF
+BNF: any-symbol      @TOKEN IS-ANY DUP SUCCESS ! +TOKEN ;BNF
+BNF: comment-symbol  @TOKEN IS-COMMENT DUP SUCCESS ! +TOKEN ;BNF
 TEST ." EXPECT 1:" 1 SUCCESS ! comment-symbol @ SUCCESS ? ^
 
+( ------------------- Without syntactic meaning ----------------------- )
 (   Scan blank space.                                                   )
 BNF: blank   blank-symbol { blank-symbol } ;BNF
 TEST ." EXPECT 0 1:" 1 SUCCESS ! blank 1 SUCCESS ? . ^
 (   Scan comment.                                                       )
-BNF: comment   '{' { comment-symbol } '}' [ 'CR' ] ;BNF
+( Advance POINTER to point at a bracket or after the end, return IT     )
+: SKIP-TILL-) BEGIN DUP C@   DUP 0= >R &) = R> OR 0= WHILE 1+ REPEAT ;
+( Parse a star-bracket pair                                             )
+: SKIP-TILL-*) 
+    SUCCESS @ 0= IF EXIT THEN 
+    TIB @ IN @ +
+    BEGIN SKIP-TILL-)
+        DUP C@ 0= IF 0 SUCCESS ! TIB @ - IN ! EXIT THEN
+        DUP 1 - C@ &* = IF 1 SUCCESS ! 1 + TIB @ - IN ! EXIT THEN
+    1+ AGAIN ;
+TEST ." EXPECT 1 1:"  1 SUCCESS ! SKIP-TILL-*)   * )S ABCD*)1 . SUCCESS ? ^
+
+BNF: comment   '{' { comment-symbol } '}' [ 'CR' ] 
+              | '(' '*' SKIP-TILL-*) [ 'CR' ]        ;BNF
 TEST ." EXPECT 1:" 1 SUCCESS ! comment {fred} SUCCESS ? ^
+TEST ." EXPECT 1:" 1 SUCCESS ! comment (*fred*) SUCCESS ? ^
+
 (  Skip anything that has no semantics.                                 )
 (  This name is special, it resolves a forward reference, used in       )
 (  KEYWORD .                                                            )
-BNF: skip   { blank | comment } ;BNF
+BNF: skip   {  blank | comment } ;BNF
 TEST ." EXPECT 1:" 1 SUCCESS ! skip  { somecomment} {more{_1} SUCCESS ? ^
+( Scan an identifier )
 BNF: identifier   skip letter-symbol { ident-symbol } ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 identifier  Sp_2 SUCCESS ? . ^
 BNF: digit-sequence   skip digit-symbol { digit-symbol } ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 digit-sequence 0234 SUCCESS ? . ^
-
+BNF: character-string skip ''' { string-symbol | ''' ''' } ''' ;BNF
+TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 character-string 'ape''ape' SUCCESS ? . ^
 
 ( ---------- Some special symbols ------------------------------------ )
 
@@ -219,12 +245,11 @@ TEST ." EXPECT 1:" 1 SUCCESS ! `with'    {follows with} with SUCCESS @ 0= 0= . ^
 BNF: `or_else'   `or' `else'  ;BNF
 BNF: `and_then'  `and' `then' ;BNF
 
-BNF: character-string ''' { ident-symbol | ''' ''' } ''' ;BNF
 
 
 ( ################# Input table ####################################### )
 
-1000000 CONSTANT SIZE 
+1000000 CONSTANT SIZE
 0 VARIABLE FILE-BUFFER SIZE ALLOT
 
 5 CONSTANT OPEN
@@ -237,16 +262,16 @@ BNF: character-string ''' { ident-symbol | ''' ''' } ''' ;BNF
 " paranoia.pas" FILE-NAME $! 0 FILE-NAME $C+
 
 ( Convert the STRING variable naar een Unix ZERO-ENDED-STRING )
-: ZERO-ENDED COUNT OVER + 0 SWAP C! ; 
+: ZERO-ENDED COUNT OVER + 0 SWAP C! ;
 
 ( Open the file from `FILE-NAME' such that `HANDLE' becomes available )
-: OPEN-LINUX FILE-NAME ZERO-ENDED O_RDONLY 0 OPEN LINOS 
-    DUP ?LINUX-ERROR HANDLE ! ; 
+: OPEN-LINUX FILE-NAME ZERO-ENDED O_RDONLY 0 OPEN LINOS
+    DUP ?LINUX-ERROR HANDLE ! ;
 
 ( Turn `FILE-BUFFER' into a good input buffer, zero ended               )
 (   containing the file,                                                )
-: READ-FILE HANDLE @ FILE-BUFFER SIZE READ LINOS 
-    DUP ?LINUX-ERROR   DUP SIZE = 201 ?ERROR 
+: READ-FILE HANDLE @ FILE-BUFFER SIZE READ LINOS
+    DUP ?LINUX-ERROR   DUP SIZE = 201 ?ERROR
     FILE-BUFFER + 0 SWAP !     ;
 
 ( Close the file again )
@@ -263,5 +288,10 @@ BNF: character-string ''' { ident-symbol | ''' ''' } ''' ;BNF
 : )   [COMPILE] )) ;  IMMEDIATE
 : digit COMPILE digit-symbol ; IMMEDIATE
 : letter COMPILE letter-symbol ; IMMEDIATE
+
+: ;BNF LATEST
+    COMPILE CR COMPILE SUCCESS COMPILE ? 
+    [COMPILE] LITERAL COMPILE ID. [COMPILE] ;BNF
+; IMMEDIATE
 
 
