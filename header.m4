@@ -2,6 +2,7 @@ dnl  $Id$  M4 file to handle the develish FIG headers.
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Once and for all. 
 changequote({,})dnl
+changecom{}dnl
 dnl
 dnl
 dnl _STRING : Lay down a string in memory.
