@@ -706,9 +706,9 @@ _HOSTED_MSDOS_({
         PUSH    DS
         MOV     AX,0
         MOV     DS,AX
-        LEA     AX,[WRM]
+        LEA     AX,[WARM_ENTRY]
         LEA     BX,[4*23H]
-        MOV     [BX],AX         ;{Jump to WRM on <CTRL-BREAK>}
+        MOV     [BX],AX         ;{Jump to WARM_ENTRY on <CTRL-BREAK>}
         INC     BX
         INC     BX
         MOV     AX,CS
@@ -940,7 +940,7 @@ ciforth:
         XOR     EAX,EAX
         CMP     EAX,_CELL_PTR[ECX]
         JZ     ENDIF1
-        JMP     WRM         ; Warm start
+        JMP     WARM_ENTRY         ; Warm start
 ENDIF1:
 
 });_END_({_LINUX_C_})
@@ -949,7 +949,7 @@ _LINUX_N_({
 ciforth:
 _start:
 });_END_({_LINUX_N_})
-
+COLD_ENTRY:
         CLD                     ;{ DIR = INC}
         _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
         MOV     SPO,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
@@ -1677,6 +1677,8 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{      Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
+;        DC      WARM_ENTRY FIXME 
+;        DC      COLD_ENTRY
 USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRUSA  ;{ INIT (U0) user area of the main task 1}
         DC      INITS0  ;{ INIT (S0)         2}
@@ -1684,7 +1686,7 @@ USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRTIB  ;{ INIT (TIB)        4}
         DC      BSIN    ;{ RUBOUT: get rid of latest char 5}
         DC      0       ;{ AVAILABLE         6}
-        DC      0       ;{ INIT (WARNING)     7}
+        DC      1       ;{ INIT (WARNING)     7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
         DC      _DEA(ENV) ;{       INIT (VOC-LINK) 10}
@@ -5131,6 +5133,7 @@ that is still busy or that has aborted.}})
 enddoc)
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
+;        _SECURITY_({DC      QSTAC})  FIXME belongs here
         DC      DECA
         _SECURITY_({DC      QSTAC})
         DC      ONLY
@@ -5142,9 +5145,11 @@ HEADER({ABORT},{ABORT},{DOCOL})
 ;{      WARM START VECTOR COMES HERE}
 ;{      For booting code we enter here, real mode and using the switchsegment.}
 ;{      BY control BREAK.}
-WRM:
+WARM_ENTRY:
 _BOOTED_({
 SET_16_BIT_MODE         ;{Pops back at next _SWITCH_}
+        MOV     SPO,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
+        MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    ;{RETURN STACK}
 ;{Without this clearing of the disk status, the system hangs too.}
         XOR     {AX},{AX}
         MOV     DL, DRIVE
@@ -5181,9 +5186,11 @@ HEADER({WARM},{WARM},{DOCOL})
 _LINUX_N_({
 worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
 {Handle command line options. This is primarily a vector point
-to suppress the handling of options during cold boot, in behalf of
-turnkey applications. Accept and return an flag forthvar({f}) whether the signon
-message must be displayed.
+to suppress the handling of options during cold boot, in behalf
+of turnkey applications. Accept and return a flag
+forthvar({f}) whether the signon message must be
+displayed._VERBOSE({Simply replace by a forthcode({NOOP}) if
+options must be suppressed.})
 },{{COLD}},
 {{( No test)},{}},
 enddoc)
@@ -5238,10 +5245,10 @@ HEADER({COLD},{COLD},{DOCOL})
 _BLOCKSINFILE_({
         DC      BLINI
 });_END_({_BLOCKSINFILE_})
-        DC      DECA
-        DC      ONLY
-        DC      FORTH
-        DC      DEFIN
+        DC      DECA    ; {FIXME has to go done by ABORT anyway.}
+        DC      ONLY    ; {FIXME has to go done by ABORT anyway.}
+        DC      FORTH   ; {FIXME has to go done by ABORT anyway.}
+        DC      DEFIN   ; {FIXME has to go done by ABORT anyway.}
 _LINUX_N_({
         DC      ONE            ; {Sign on wanted.}
         DC      ZERO, LIT, TCGETS, TERMIO
@@ -5695,6 +5702,8 @@ current forthcode({BASE}).
 {1 WARNING ! -190 MESSAGE}, {( -g This_option_is_available )},
 {0 WARNING ! HEX 12 MESSAGE},{MSG # 18 }},
 enddoc)
+; FIXME the message number should be printed regardless.
+; FIXME always print a cr after the message.
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      LWARN
         DC      FETCH
@@ -7320,7 +7329,7 @@ RSLW2:  DC      TOR
         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS, QDSKER
         DC      DROP, DROP, DROP
-        DC      BBUF, LSUB, QDSKER
+        DC      BBUF, EQUAL, ZEQU, QDSKER
         DC      SEMIS
 ;
 });_END_({_RWFILE_})
@@ -8919,6 +8928,8 @@ _HOSTED_MSDOS_({
   need to run EXE2BIN ( Chap 10, DOS 2.0 ) to get enough
   disk space.  Once you are satisfied with what you have,
   then by all means take that extra memory.
+
+- <Ctrl-Break> will vector to WARM start ( Label WARM_ENTRY: )
 });_END_({ _HOSTED_MSDOS_})
 
 - Subscribe to FORTH Dimensions.  It is a valuable source
@@ -8926,8 +8937,6 @@ _HOSTED_MSDOS_({
   FORTH programmers is sure to stir up some exciting ideas.
   Consider joining a FIG chapter.  See the back of FORTH
   Dimensions for more info.
-
-- <Ctrl-Break> will vector to WARM start ( Label WRM: )
 
 _ENDCOMMENT
 
