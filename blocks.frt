@@ -126,8 +126,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;    HEX>
-" SYSTEM ELECTIVE $RCSfile$ $Revision$"
-TYPE CR 2 LIST
+." SYSTEM ELECTIVE $RCSfile$ $Revision$"
+CR 2 LIST
   -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
@@ -2334,38 +2334,38 @@ DECIMAL
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-( SAVE-SYSTEM )  HEX
+( SAVE-SYSTEM TURNKEY )  HEX
+\ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
- : FIND-ELF BM BEGIN DUP @ MAGIC @ <> WHILE
- 1 CELLS - REPEAT ; FIND-ELF CONSTANT SM
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
+\ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
- : SAVE-SYSTEM ( sc -- )
-  HERE HERE-AT-STARTUP - DUP
-  SM 20 + +!      SM 44 + +! ( File&Dict size)
-   U0 @   0 +ORIGIN   40 CELLS  MOVE ( Save user variables)
-   SM    HERE  SM - 2SWAP ( name) PUT-FILE ;
-: TURNKEY  ( dea sc -- ) ROT
->DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
-: ARGC ARGS @ @ ;  : ARGV ARGS @ CELL+ ;
-: ENV ARGS @ $@ 1+ CELLS + ;
-: Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;  : CTYPE Z$@ $. ;
-: .C$ BEGIN $@ DUP WHILE CR CTYPE REPEAT DROP DROP ;
-5 CONSTANT OPEN
-3 CONSTANT READ
-6 CONSTANT CLOSE
-0 CONSTANT O_RDONLY
-: GET-FILE              ( <a><u> --- i*x )
-   HERE >R   10000000 ALLOT
-   R@ $! 0 R@ $C+  "FiLeBuF" R@ $+!
-   R> $@ OVER + >R
-   O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR
-   DUP R@ 9999000 READ LINOS DUP ?LINUX-ERROR >R
-   0 0 CLOSE LINOS ?LINUX-ERROR
-   R> R> SWAP 2DUP + DP !;
-: INCLUDED
-  GET-FILE
-  SAVE (EVAL) INTERPRET RESTORE ;
+\ Save the system in a file with NAME .
+ : SAVE-SYSTEM
+\ Increment the file and dictionary sizes
+  HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+\ Now write it. Consume NAME here.
+   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
+\ Save a system to do SOMETHING in a file with NAME .
+: TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
+( ARGx Z$@ CTYPE C$. )
+\ Return the NUMBER of arguments passed by Linux
+: ARGC ARGS @ @ ;
 
+\ Return the argument VECTOR passed by Linux
+: ARGV ARGS @ CELL+ ;
+\ Return the environment POINTER passed by Linux
+: ENV ARGS @ $@ 1+ CELLS + ;
+
+\ For a CSTRING (pointer to zero ended chars) return a STRING.
+: Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
+
+\ Print a CSTRING.
+: CTYPE Z$@ TYPE ;
+\ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
+: C$. BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
  CR ." #36 FROBOZZ AMATEUR ADVENTURER >1< 84/4/5 "
  ( DIRECTIONS )
  0 CONSTANT N  1 CONSTANT NE
