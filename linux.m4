@@ -6,7 +6,9 @@ define( {_LINUXIO_1_}, _yes )dnl
 define( {_LINUXHOSTED_1_}, _yes )dnl       
 define({M4_ORIG},8050000H) 
 define({M4_EM},(M4_ORIG+10000H)) 
+define({M4_EM},(10000H)) 
 dnl define( {_PROTECTED_1_}, _no )dnl       
+define( {_EQULAYOUT_1_}, _no )dnl       
 define( {_BITS32_1_}, _yes )dnl       
 define(M4_CELLWIDTH,4)dnl       
 dnl This stuf must go into postlude. Too disturbing for Joe user.
