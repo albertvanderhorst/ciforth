@@ -204,7 +204,7 @@ CREATE task
 \ Must all be done in one go!
 SWITCH-LIBS
 
-
+FORGET SWITCH-LIBS
 
 ( -m This_option_is_available )
 
@@ -670,6 +670,22 @@ RANDOMIZE
 
 
 
+( $ ESC SI SO hex_numbers_denotation ) \ AvdH A1apr15
+'DENOTATION >WID CURRENT !
+\ DEFINITIONS PREVIOUS doesn't work because DEF.. is
+\ found in the DENOTATION wordlist (!)
+: $ BASE @ >R HEX (NUMBER) R> BASE ! POSTPONE SDLITERAL ;
+12 LATEST >FFA !
+DEFINITIONS
+
+\ Some constants
+$1B CONSTANT ESC    $0F CONSTANT SI   $0E CONSTANT SO
+
+
+
+
+
+
 ( +THRU ) \ AvdH A1oct05
 \ Load current block plus N1 to current block plus N2.
 : +THRU   SRC @ 2 CELLS - @ >R
@@ -878,7 +894,7 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
-( SUPER-QUAD SQ ) REQUIRE CONFIG ?PC
+( SUPER-QUAD SQ CONDENSED ) REQUIRE CONFIG ?PC
 REQUIRE VIDEO-MODE
 VARIABLE L
  : CONDENSED 34 VIDEO-MODE ;
@@ -1758,26 +1774,13 @@ RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
   POPX, SI|   PUSHX, BX|  NEXT ; PREVIOUS
 CODE READ-BLOCK 4200 R/W-BLOCK  C;
 CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
-\ (HWD) (HRD) SWAP-FLOPPY Acces_hd_via_LBA ?16 ?PC HEX
+\ (HWD) (HRD) (FRD) (FWD) Acces_hd_via_LBA ?16 ?PC HEX
 ?16 ?PC
 
-( Prompt for floppy change, plus whatever needed.)
-: SWAP-FLOPPY   0 WARNING !
-  "Swap floppy and press a key" TYPE   KEY &Q = IF ABORT THEN
-  EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
 ( Write the default buffer to hard disk at 32-bit POSITION)
 : (HWD) SWAP WRITE-BLOCK 1 AND . ;
 ( Read the default buffer from hard disk at 32-bit POSITION)
 : (HRD) SWAP READ-BLOCK 1 AND . ;
-DECIMAL
-
-
-
-
-\ (FRD) (FWD) ) ?PC ?16 \ AvdH A1oct07
-?PC ?16
-( copy a hd system, was written to a floppy to the
-hard disk. Done by a Forth booted from another floppy.)
 DECIMAL
 ( As R/W but relative, counting from ``OFFSET''. )
 : RELR/W SWAP OFFSET @ + SWAP R/W ;
@@ -1785,11 +1788,24 @@ DECIMAL
 : (FRD) RW-BUFFER SWAP 1 R/W ;
 ( Write absolute BLOCK to floppy from default buffer.)
 : (FWD) RW-BUFFER SWAP 0 R/W ;
+
+
+( SWAP-FLOPPY ) ?PC ?16 \ AvdH A1oct07
+?PC ?16
+DECIMAL
+( Prompt for floppy change, plus whatever needed.)
+: SWAP-FLOPPY   0 WARNING !
+  "Swap floppy and press a key" TYPE
+  KEY &Q = IF ABORT THEN   0 '(FRD) CATCH DROP
+  EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
+
+\ copy a hd system, was written to a floppy to the
+\  hard disk. Done by a Forth booted from another floppy.)
 \ DBS : default boot system, first 1400 K of hd.
 \ Prompt for empty floppy. Save from hard disk BLOCK
 \ (a 32-bit number) and 1400K following to the floppy.
 : BACKUP>FLOPPY  SWAP-FLOPPY
-1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
+  1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
 ( BACKUP-KERNEL BACKUP-BLOCKS ) REQUIRE CONFIG   ?PC ?16
 REQUIRE --install_hd
 \ Prompt for floppy created with ``BACKUP>FLOPPY''
@@ -1803,6 +1819,54 @@ REQUIRE --install_hd
 \ Copy the BLOCKS (#BLOCKS at 64K of ``DBS'') to BLOCKS.BLK.
 : BACKUP-BLOCKS
 #BLOCKS 0 DO I 64 + S>D (HRD) RW-BUFFER I 0 RELR/W LOOP ;
+
+
+
+( SECTORS/TRACK #HEADS ) REQUIRE CONFIG \ AvdH A1oct10
+
+1 2 +THRU
+
+
+
+
+
+
+
+
+
+
+
+
+
+( SECTORS/TRACK #HEADS ) ?16 ?PC \ AvdH A1oct10
+HEX
+\ See Ralph Brown's table 03196
+\ Far address of interrupt 41
+: (int41) 0 041 4 * ;
+\ Far address of HD 1 table.
+: (hd1) (int41) CELL+ L@ (int41) L@ ;
+\ Number of heads on hard disk one.
+(hd1) 2 + L@ 0FF AND CONSTANT #HEADS
+\ Sectors per track for hard disk one.
+(hd1) 0E + L@ 0FF AND CONSTANT SECTORS/TRACK
+DECIMAL
+
+
+
+
+( SECTORS/TRACK #HEADS ) ?32 ?PC \ AvdH A1oct10
+HEX
+\ See Ralph Brown's table 03196
+\ Address of interrupt 41
+: (int41) 041 4 * ;
+\ Address of HD 1 table.
+: (hd1) (int41) @ FFFF AND (int41) @ 10 RSHIFT 4 LSHIFT + ;
+\ Number of heads on hard disk one.
+(hd1) 2 + C@ CONSTANT #HEADS
+\ Sectors per track for hard disk one.
+(hd1) 0E + C@ CONSTANT SECTORS/TRACK
+DECIMAL
+
 
 
 
@@ -3406,38 +3470,6 @@ problems, CP/M dependant tricks and knowledge.
           ?DUP IF
           OVER + SWAP DO I C@ PEMIT LOOP THEN ;
   : P."  "" WORD COUNT PTYPE ;       34 LOAD
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
