@@ -202,6 +202,14 @@ SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
 });_END_({_RWFD_})
+_BOOTHD_({
+;{ The first gigabyte of the disk is divided chunks, }
+;{ the size of the core memory to alternately boot from, as a backup.}
+CHUNKSIZE       EQU     80H * 100000H ;{ 128 Mb. }
+;{Size in sectors. }
+MAXCHUNK        EQU    1024 *100000H /CHUNKSIZE
+});_END_({_BOOTHD_})
+
 _HOSTED_DPMI_({
 ;{DPMI segment defines.}
 ;{ The Big and Granularity bits are complemented}
@@ -394,10 +402,12 @@ HUGESECS      DD         000H
         DB    "RAW     "
 
 BOOTLBA:  DB      10H, 0
-        DW      (RELATIVE_WRT_ORIG(TEXTEND))/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
+;{ Rounds down, we already have 1 sec. For HD always load 64K.}
+;{ Bootstrap for ci has to reside in this first part.}
+        DW      0FFFFH/BPS
         DW      BPS             ;{ OFFSET AND SEGMENT}
         DW      SWITCHSEGMENT
-        ;{ At a hard disk we just read sector from sector 1        }
+STARTSECTOR: ;{ HD Start sector, do be choosen by key press.}
         DD      1       ;{ Start}
         DD      0       ;{ M.S. 32 BITS}
 
@@ -434,7 +444,21 @@ BOOT:
         MOV     DL,80            ;{Drive 80 (hd C:)}
         INT(13H)                 ;{BIOS disk read function}
         JB      RETRY
-        CALL    HDREAD
+        CALL    GETKEY
+        JNB     ENDIF
+        PUSH    AX
+        CALL    DISPLAY
+        POP    AX
+        SUB     AL, '0'
+        JB     ENDIF
+        CMP     AL, MAXCHUNK
+        JNB     ENDIF
+        AND     EAX, 0FFH
+        MOV     ECX, CHUNKSIZE/BPS
+        MUL     ECX
+        INC     EAX
+        MOV     [STARTSECTOR],EAX
+ENDIF:  CALL    HDREAD
         JB      RETRY
         MOV     AL,'{W}'
         CALL    DISPLAY
@@ -474,7 +498,12 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         MOV     AH,0EH
         INT(10H)
         RET
-
+GETKEY: MOV     AH, 01H       ;{ If CARRY, a key sits in AL. }
+        INT(16H)
+        JNB     ENDIF1
+        MOV     AH, 00H       ;{ Consume the key. }
+        INT(16H)
+ENDIF1:  RET
 });_END_({ _BOOTED_})
 NOBOOT:         ; {Skip till here if not booting.}
 
@@ -1364,7 +1393,9 @@ _ALIGNED_({
         OR      AL,3
         INC     AX
 },{dnl});_END_({_ALIGNED_})
-        LEA     LIP,[LIP+AX+_CELLS(1)]
+        _BITS32_({LEA     LIP,[LIP+AX+_CELLS(1)]},{dnl})
+        _BITS16_({LEA     LIP,[LIP+_CELLS(1)]},{dnl})
+        _BITS16_({ADD     LIP,AX},{dnl})
         _NEXT
 ;
 worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C2},
@@ -2666,7 +2697,7 @@ to allow the BIOS to access it.
 {{LIMIT FIRST - B/BUF 2 CELLS + /MOD DROP #BUFF = .},{_T_}},
 enddoc)
 HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
-BUF1:   _RESB    (KBBUF+2*CW)*NBUF
+BUF1:   _RESB( (KBBUF+2*CW)*NBUF )
 });_END_({ _LOW_BUF_})
 ;
 worddoc( {STORAGE~},{LIMIT},{limit},{---- n},{},
@@ -6208,7 +6239,7 @@ HEADER({MS},{MS},{DOCOL})
         DC      LIT, _newselect, LINOS5
         DC      QLERR
         DC      SEMIS
-TV:     _RESB   8
+TV:     _RESB( 8 )
 ;
 });_END_({ _HOSTED_LINUX_})
 _PC_({
@@ -6281,7 +6312,7 @@ _BITS32_({        DC      LIT, TYPEBUF })
         DC      BDOS, DROP ;{ ignore error }
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
-_BITS32_({TYPEBUF:  _RESB    0400H })
+_BITS32_({TYPEBUF:  _RESB(0400H) })
 ;
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({RET})
@@ -6382,7 +6413,7 @@ PACCEP3:
         DC      TIB, FETCH, SWAP, FROMR, PLUS
         DC      REMAIND, TSTOR
         DC      SEMIS
-_BITS32_({EXPECTBUF:  _RESB    0200H },{dnl})
+_BITS32_({EXPECTBUF:  _RESB( 0200H ) },{dnl})
 ;
 });_END_({_MODERN_})
 _LINUX_C_({
@@ -6578,7 +6609,7 @@ HEADER({KEY?},{KEYQ},{DOCOL})
         DC      ZERO, LIT, RAWIO, STTERM
         DC      SEMIS
         _ALIGN  4
-RFDS:   _RESB   128     ;{32 channels maximum.}
+RFDS:   _RESB(128)     ;{32 channels maximum.}
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
@@ -6607,7 +6638,7 @@ a c-structure forthsamp({termio}) .
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({TERMIO},{TERMIO},{DOVAR}, )
-        _RESB    SIZE_TERMIO     ; Filled induring cold boot.
+        _RESB(SIZE_TERMIO)     ; Filled induring cold boot.
 ;
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the current input stream such as to
@@ -6720,7 +6751,7 @@ HEADER({EMIT},{EMIT},{DOCOL})
         DC      PEMIT
         DC      ONE,LOUT
         DC      PSTORE,SEMIS
-PEMIT   DC      $+_CELLS(1)
+PEMIT   DC      _AP_ +_CELLS(1)
         POP     AX      ;{GET CHAR}
         CMP     AL,ALF   ;{ Precede ^J with ^M}
         JNE     PEMIT1
@@ -8569,7 +8600,7 @@ HEADER({TASK},{TASK},{DOCOL})
         DC      SEMIS
 ;
 _EQULAYOUT_({
-TEXTEND  EQU     $       ; {Show end of dictionary.}
+TEXTEND  EQU     _AP_       ; {Show end of dictionary.}
 INITDP   EQU     M4_INITDP ;{Where we want new words.}
 ACTUAL_EM EQU    EM  ;{ Different for relocatable code only.}
 });_END_({ _EQULAYOUT_})
@@ -8595,19 +8626,19 @@ _HOSTED_LINUX_({
 ;       However now we must teach the linker to keep the
 ;       two sections together.
 
-FORTHSIZE       EQU     $-ORG0
+FORTHSIZE       EQU     _AP_ - ORG0
          section dictionary nobits write exec alloc
 
 INITDP:                 ;  It may be that it is not consecutive with TASK
                         ;  And that is a hell of a problem.
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
-       _RESB    EM - FORTHSIZE - RTS - US - BUFFERSIZE
+       _RESB( EM - FORTHSIZE - RTS - US - BUFFERSIZE )
 INITS0:                         ;{ Growns down}
-STRTIB: _RESB     RTS            ;{ Start return stack area}
+STRTIB: _RESB( RTS )            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
-STRUSA: _RESB    US              ;{ User area}
-BUF1:   _RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
+STRUSA: _RESB( US )             ;{ User area}
+BUF1:   _RESB( BUFFERSIZE )     ;{ FIRST DISK BUFFER}
 ACTUAL_EM:  ;{ Differs from EM if code is relocated.}
 });_END_({ _HOSTED_LINUX_})
 ;
