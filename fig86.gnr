@@ -91,7 +91,8 @@ FF      EQU     0CH     ;{ FORM FEED}
 NBUF    EQU     2       ;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
 US      EQU     100H     ;{ USER VARIABLE SPACE}
-RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER}
+_BITS16_1_({ RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER} })
+_BITS32_1_({ RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
 ;
 ;____1_____ _EQULAYOUT_1_({
 EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
@@ -1919,7 +1920,7 @@ DOTQ2:  DC      SEMIS
 HEADER({QUERY},{QUERY},{DOCOL})
         DC      TIB
         DC      FETCH
-        DC      LIT,50H
+        DC      LIT,RTS/2
         DC      EXPEC
         DC      ZERO
         DC      LIN
