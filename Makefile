@@ -98,7 +98,7 @@ filler: fig86.alone.bin
         # Use the exit command to return 1 or 0
 	(filesize=`cat $+|wc -c`; \
 	echo $$filesize 1 - 512 MOD 1 + 2 MOD 0 0 1 LINOS | figforth>/dev/null; \
-	if [ 1 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
+	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
 moreboot: BLOCKS.BLK fig86.alone.bin  
 	mcopy BLOCKS.BLK a:
