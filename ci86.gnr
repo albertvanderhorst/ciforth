@@ -1887,13 +1887,13 @@ _SWITCH_({
         _RESB(US-($ - USINI))        ;{ All user can be initialised.}
 ;
 ;{      <<<<< end of data used by cold start >>>>>}
-worddoc( {FORMATTING~},{DIGIT},{digit},{c n1 --- n2 true (ok) c n1 --- false (bad)},{},
+worddoc( {FORMATTING~},{DIGIT},{digit},{c n1 --- n2 true (ok) c n1 --- x false (bad)},{},
 {Converts the ASCII character forthvar({c}) (using base forthvar({n1}) ) to its binary
 equivalent forthvar({n2}) , accompanied by a true flag. If the conversion is
-invalid, leaves only a false flag.},{},
-{ {31 0A DIGIT . .},{1 1},
-  {41 0A DIGIT .},{0},
-  {41 10 DIGIT . .},{1 A} },
+invalid, leaves only a don't care value and a false flag.},{},
+{ {31 0A DIGIT . .},{_T_ 1},
+  {41 0A DIGIT . DROP},{0},
+  {41 10 DIGIT . .},{_T_ A} },
 enddoc)
 CODE_HEADER({DIGIT},{DIGIT})
         POP     DX      ;{NUMBER BASE}
@@ -1910,10 +1910,11 @@ DIGI1:  CMP     AL,DL   ;{ COMPARE NUMBER TO BASE}
         SUB     DX,DX   ;{ZERO}
         MOV     DL,AL   ;{NEW BINARY NUMBER}
         MOV     AL,1    ;{TRUE FLAG}
+        NEG     AX
         _2PUSH          ;{ADD TO STACK}
 ;{   NUMBER ERROR}
 DIGI2:  SUB     AX,AX   ;{FALSE FLAG}
-        _PUSH
+        _2PUSH
 ;
 worddocsafe( {DICTIONARY~},{(MATCH)},{paren_match},{sc dea --- sc dea ff},{},
 {Intended to cooperate with forthcode({FOR-WORDS}) . Compares
@@ -4607,6 +4608,7 @@ TONUM1:
         DC      LDUP, CFET, BASE, FETCH, DIGIT
         DC      ZEQU
         _0BRANCH(TONUM4) ;{ IF}
+        DC      DROP
         DC      LLEAV
 TONUM4:
         DC      SWAP, TOR ; {Address out of the way.}
@@ -4782,7 +4784,7 @@ that this exception has occurred and starts Forth anew.
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
-        DC      QDUP
+        DC      LDUP
         _0BRANCH(THROW1)
         DC      HANDLER, FETCH, ZEQU
         _0BRANCH(THROW2)
@@ -4796,7 +4798,9 @@ THROW2:
         DC      FROMR, SWAP, TOR
         DC      SPSTO
         DC      FROMR
+        DC      X
 THROW1:
+        DC      DROP
         DC      SEMIS
 ;
 _LOAD_({
@@ -6235,7 +6239,7 @@ thusly restoring the forthdefi({current input source}) to what
 it was when the forthcode({SAVE}) was executed.
 },
 {{RESTORE-INPUT},{SAVE-INPUT}},
-{{( Via SAVE)},{}},
+{{( Via SAVE-INPUT)},{}},
 enddoc)
 HEADER({RESTORE},{RESTO},{DOCOL})
         DC      FROMR
@@ -6256,7 +6260,7 @@ of the same stream.
 }}) },
 {{RESTORE},{RESTORE-INPUT}},
 {{!CSP : GS1 SAVE-INPUT 0 IN ! RESTORE-INPUT ; dnl
-    GS1 34 . ?CSP},{34} },
+    34 GS1 . . ?CSP},{-1 34} },
 enddoc)
 HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
         DC      SRC, TFET
@@ -6264,14 +6268,15 @@ HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
         DC      LIT, 3
         DC SEMIS
 ;
-worddoc( {BLOCKS~},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3---},{ISO},
+worddoc( {BLOCKS~},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3---f},{ISO},
 {Restore the input source stream from what was saved by
 SAVE-INPUT .
 ciforth is always able to restore the input across
 different input sources, as long as the input to be restored was
 not exhausted. This has the effect of chaining, and doesn't
-effect the return from nested calls be it interpreting, loading
-or evaluating. _VERBOSE_({{The input source abandoned will
+affect the return from nested calls be it interpreting, loading
+or evaluating. ciforth always returns a true into forthvar({f}).
+_VERBOSE_({{The input source abandoned will
 never be closed properly, so use should be restricted to the same
 input source. }}) },
 {{RESTORE},{SAVE-INPUT}},
@@ -6281,6 +6286,7 @@ HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC      DROP
         DC      LIN, STORE
         DC      SRC, TSTOR
+        DC      LIT, -1
         DC SEMIS
 ;
 });_END_({_LOAD_})
@@ -9122,10 +9128,8 @@ enddoc)
 HEADER({SPACES},{SPACES},{DOCOL})
         DC      ZERO
         DC      MAX
-        DC      QDUP
-        _0BRANCH(SPAX1)
         DC      ZERO
-        _DO(SPAX1)
+        _QDO(SPAX1)
 SPAX2:  DC      SPACE
         _LOOP(SPAX2)    ;{LOOP}
 SPAX1:
