@@ -153,10 +153,10 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 : FIND&LOAD
  256 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
  2DROP ;
-\ For WORD sc: leave WORD, + it IS found not as a denotation.
-: PRESENT? 2DUP FOUND DUP IF >NFA @ $@ 2OVER COMPARE 0= THEN ;
+\ For WORD sc: it IS found not as a denotation.
+: PRESENT? DUP >R FOUND DUP IF >NFA @ @ R> = ELSE RDROP THEN ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
-: REQUIRED PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
+: REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
  CR ." A1MAY17  FORTH KRAKER >1<  ALBERT VAN DER HORST "
  CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
@@ -1854,29 +1854,29 @@ DECIMAL
 
 
 
+( OS-IMPORT ) \ AvdH A1sep25
+CREATE cmdbuf 1000 ALLOT
+: OS-IMPORT ( sc "name-forth"  -- )
+     CREATE , ,
+     DOES>
+     2@ cmdbuf $!       \ Command
+     BL cmdbuf $C+     \ Append a blank
+     ^J (PARSE) cmdbuf $+! \ Append rest of line
+     cmdbuf $@ SYSTEM   \ Execute
+;
 
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( ls cat echo rm list ) REQUIRE 32-bit ?LI \ AvdH A1sep25
+REQUIRE OS-IMPORT
+"ls     "   OS-IMPORT ls
+"cat    "   OS-IMPORT cat
+"echo   "   OS-IMPORT echo
+"rm  -i "   OS-IMPORT rm
+"list   "   OS-IMPORT list
 
 
 
@@ -2350,7 +2350,7 @@ DECIMAL
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
-?LI ( ARGx Z$@ CTYPE C$. )
+( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE 32-bit ?LI \ A1sep25
 \ Return the NUMBER of arguments passed by Linux
 : ARGC ARGS @ @ ;
 
@@ -2365,7 +2365,7 @@ DECIMAL
 \ Print a CSTRING.
 : CTYPE Z$@ TYPE ;
 \ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
-: C$. BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
+: C$.S BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
  CR ." #36 FROBOZZ AMATEUR ADVENTURER >1< 84/4/5 "
  ( DIRECTIONS )
  0 CONSTANT N  1 CONSTANT NE
