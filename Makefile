@@ -130,6 +130,7 @@ wc            \
 # 3v1 ### Version : an official release 3.1
 # 3d154  Release of a revision, so beta, the revision number is 3.154
 VERSION=test  # Because normally VERSION is passed via the command line.
+DATE=2030     # To get the newest version
 
 RELEASELINA = \
 COPYING   \
