@@ -91,9 +91,10 @@ $2:     DW     $3
         undefine({_w})dnl
 })
 define({HEADER_NULL},{
-                DB      0C1H,80H
+_$2:            DB      0C1H,80H
                 DW      _LINKOLD
-NULL:           DW      DOCOL
+$2:             DW      $3
+define({_LINKOLD},{_$2})dnl
 })
 dnl
 
