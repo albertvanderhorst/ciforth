@@ -1171,8 +1171,7 @@ BOOTUP:
         DB      USRVER  ;{ USER REVISION #}
         DB      0EH     ;{ VERSION ATTRIBUTES}
         _BITS32_({DC 0   ; Fill version info up to two cells. })
-USINI:
-        DC      _DEA(TASK) ;{ FIRST DEFINITION 0 }
+USINI:  DC      STRUSA  ;{ User area currently in use.}
         DC      STRUSA  ;{ INIT (U0) USER AREA POINTER 1}
         DC      BSIN    ;{ RUBOUT: get rid of latest char 2}
         DC      INITS0  ;{ INIT (S0)         3}
@@ -1629,11 +1628,11 @@ worddoc({LOGIC},{0=},{zero_equals},{n --- f},{L0},
 {Leave a true flag forthvar({f}) is the number forthvar({n}) is equal to zero, otherwise leave a
 false flag.},{{=}}, {}, enddoc)
 CODE_HEADER({0=},{ZEQU})
-        POP     AX
-        OR      AX,AX   ;{DO TEST}
-        MOV     AX,1    ;{TRUE}
-        JZ      ZEQU1   ;{IT'S 0}
-        DEC     AX      ;{FALSE}
+        POP     BX
+        XOR     AX,AX    ;{FALSE}
+        OR      BX,BX   ;{DO TEST}
+        JNZ      ZEQU1   ;{IT'S NOT 0}
+        INC     AX       ;{TRUE}
 ZEQU1:  _PUSH
 ;
 worddoc({LOGIC},{0<},{zero_less},{n --- f},{L0},
@@ -2074,7 +2073,9 @@ HEADER({$,},{SCOMMA},{DOCOL})
 worddoc({SCREEN},{C/L},{char_per_line},{--- c},{},
 {A constant that leaves the number of characters on a line of a
 standard screen. },
-{{LIST},{LINE}}, {}, enddoc)
+{{LIST},{LINE}}, 
+{{C/L .},{40}}, 
+enddoc)
 HEADER({C/L},{CSLL},{DOCON}, 64)
 ;
 _HIGH_BUF_({
@@ -2093,7 +2094,9 @@ worddoc({STORAGE},{FIRST},{first},{--- n},{},
 buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
-},{{BLOCK},{LIMIT}}, {}, enddoc)
+},{{BLOCK},{LIMIT}}, 
+{{LIMIT @ FIRST @ B/BUF @ /MOD DROP #BUF = .},{1}}, 
+enddoc)
 HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB    (KBBUF+2*CW)*NBUF
 });_END_({ _LOW_BUF_})
@@ -2102,13 +2105,17 @@ worddoc({STORAGE},{LIMIT},{limit},{---- n},{},
 {A constant leaving the address just above the highest memory
 available for a disc buffer.
 _HIGH_BUF_({Actually this is the highest system memory.})
-},{{BLOCK},{FIRST}}, {}, enddoc)
+},{{BLOCK},{FIRST}}, 
+{{." See FIRST"},{See FIRST}}, 
+enddoc)
 HEADER({LIMIT},{LIMIT},{DOCON}, BUF1+(KBBUF+2*CW)*NBUF)
 ;{ THE END  OF THE MEMORY }
 worddoc({MEMORY},{EM},{end_memory},{---- addr},{},
 {A constant leaving the address just above the highest memory
 in use by Forth.
-},{{DP},{BM}}, {}, enddoc)
+},{{DP},{BM}}, 
+{{." See FIRST"},{See FIRST}}, 
+enddoc)
 HEADER({EM},{LEM},{DOCON}, EM)
 ;
 worddoc({MEMORY},{BM},{begin_memory},{---- addr},{},
@@ -2119,7 +2126,9 @@ HEADER({BM},{LBM},{DOCON}, ORG0)
 ;
 worddoc({STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
-count read from disc by forthcode({BLOCK}) .},{{B/SCR}}, {}, enddoc)
+count read from disc by forthcode({BLOCK}) .},{{B/SCR}}, 
+{{B/BUF .},{400}}, 
+enddoc)
 HEADER({B/BUF},{BBUF},{DOCON}, KBBUF)
 ;
 ;{ All user variables are initialised }
@@ -2129,8 +2138,11 @@ HEADER({B/BUF},{BBUF},{DOCON}, KBBUF)
 worddoc({MISC},{U0},{u_zero},{--- addr},{},
 {A user variable, leaving the start address of the user area. This is
 for reference only. What is taken into account by user variables is
-the corresponding initialisation variable.
-},{{USER},{+ORIGIN}}, {}, enddoc)
+the initialisation variable at forthdefi({+ORIGIN}) with offset zero.
+This is dependant on which task is running.},
+{{USER},{+ORIGIN}}, 
+{{U0 @ 0 +ORIGIN @ = .},{1}},
+enddoc)
 HEADER({U0},{UZERO},{DOUSE}, CELLS(1))
 ;
 worddoc({INPUT},{RUBOUT},{rub_out},{--- c},{},
@@ -2138,20 +2150,29 @@ worddoc({INPUT},{RUBOUT},{rub_out},{--- c},{},
 last character from the input buffer.
 _HOSTED_(In this ciforth it is not used, as the terminal input
 editing is left to the host operating system.)
-},{{USER}}, {}, enddoc)
+},{{USER}}, 
+{{." interactive"},{interactive}},
+enddoc)
 HEADER({RUBOUT},{RUBOUT},{DOUSE}, CELLS(2))
 ;
 worddoc({STACKS},{S0},{s_zero},{--- addr},{U},
 {A user variable that contains the initial value for the data stack
-pointer.},{{SP!}}, {}, enddoc)
+pointer.},{{SP!}}, 
+{{." See SP@"},{See SP@}}, 
+enddoc)
 HEADER({S0},{SZERO},{DOUSE}, CELLS(3))
 ;
 worddoc({STACKS},{R0},{r_zero},{--- addr},{U},
-{A user variable containing the initial location of the return stack. },{{RP!}}, {}, enddoc)
+{A user variable containing the initial location of the return stack. },
+{{RP!}}, 
+{{." See RP@"},{See RP@}}, 
+enddoc)
 HEADER({R0},{RZERO},{DOUSE}, CELLS(4))
 ;
 worddoc({INPUT},{TIB},{t_i_b},{--- addr},{U},
-{A user variable containing the address of the terminal input buffer.},{}, {}, enddoc)
+{A user variable containing the address of the terminal input buffer.},{}, 
+{{." See SOURCE"},{See SOURCE}}, 
+enddoc)
 HEADER({TIB},{TIB},{DOUSE}, CELLS(5))
 ;
 worddoc({ERRORS},{WARNING},{warning},{--- addr},{U},
@@ -2159,19 +2180,25 @@ worddoc({ERRORS},{WARNING},{warning},{--- addr},{U},
 is present, and screen 4 of drive 0 is the base location for
 messages. If = 0, no disc is present and messages will be presented
 by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure.
-},{{MESSAGE},{ERROR}}, {}, enddoc)
+},{{MESSAGE},{ERROR}}, 
+{{." See MESSAGE"},{See MESSAGE}}, 
+enddoc)
 HEADER({WARNING},{WARN},{DOUSE}, CELLS(7))
 ;
 worddoc({DICTIONARY},{FENCE},{fence},{---  addr},{U},
 {A user variable containing an address below which forthcode({FORGET}) ting is
 trapped. To forget below this point the user must alter the contents
-of forthcode({FENCE}) .},{}, {}, enddoc)
+of forthcode({FENCE}) .},{}, 
+{{." interactive"},{interactive}},
+enddoc)
 HEADER({FENCE},{FENCE},{DOUSE}, CELLS(8))
 ;
 worddoc({DICTIONARY},{DP},{d_P},{---- addr},{U,L},
 {A user variable, the dictionary pointer, which contains the address
 of the next free memory above the dictionary. The value may be read
-by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{}, {}, enddoc)
+by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{}, 
+{{HERE DP @ = .},{1}},
+enddoc)
 HEADER({DP},{LDP},{DOUSE}, CELLS(9))
 ;
 worddoc({VOCABULARIES},{VOC-LINK},{voc_link},{--- addr},{U},
@@ -3507,10 +3534,10 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      STALEST,STORE
         DC      FIRST
         DC      PREV,STORE
+;{ Fill user area for single task.}
         DC      LIT, USINI
-        DC      LIT,USINI+CELLS(1)
-        DC      FETCH
-        DC      LIT,US
+        DC      LIT, USINI+CELLS(1), FETCH
+        DC      LIT, US       
         DC      LCMOVE
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
@@ -3743,7 +3770,9 @@ worddoc({ERRORS},{MESSAGE},{message},{n --},{},
 screen 4 of drive 0. forthvar({n}) may be positive or negative. forthcode({MESSAGE}) may be
 used to print incidental text such as report headers. If forthcode({WARNING}) is
 zero, the message will simply be printed as a number (disc
-unavailable).},{}, {}, enddoc)
+unavailable).},{}, 
+{{0 WARNING ! 12 MESSAGE},{MSG # 12 }}, 
+enddoc)
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      WARN
         DC      FETCH
