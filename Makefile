@@ -134,19 +134,24 @@ DATE=2030     # To get the newest version
 
 RELEASELINA = \
 COPYING   \
+README.lina \
+ci86.lina.info \
 ci86.lina.html \
+ci86.lina.ps \
 ci86.lina.texinfo \
-linarelease.txt  \
 ci86.lina.asm      \
 lina      \
+lina.1    \
 forth.lab       \
 $(CSRCAUX:%=%.c)    \
 wc            \
+# linarelease.txt  \ replaced by README.lina
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
 
 # Try to work with old files.
+%.c:RCS/%.c,v ; co -d$(DATE) $<
 %:RCS/%,v ; co -d$(DATE) $<
 ci86.gnr:RCS/ci86.gnr,v ; co -d$(DATE) $<
 
@@ -200,7 +205,11 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
     $(LINUXFORTHS) $(OTHERTARGETS)
 
 clean: ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy
-cleanother:  rm -f $(OTHERTARGETS)
+cleanall: clean  testclean ; \
+    rcsclean ; \
+    rm -f $(OTHERTARGETS) ; \
+    rm -f *.aux *.cp *.cps *.fn *.fns *.ky *.kys *.log *.pg *.pgs *.ps *.toc *.tp *.tps *.vr *.vrs
+
 
 #msdos32.zip doesn't work yet.
 release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
@@ -280,7 +289,11 @@ mslinks :
 	ln -sf ci86.alone.asm alone.asm
 	ln -sf ci86.alonehd.asm alonehd.asm
 
-lina.zip : $(RELEASELINA) ; zip lina$(VERSION) $+
+lina.zip : $(RELEASELINA) ;
+	  ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
+	  (cd ..; ln -s ci86 lina-$(VERSION))
+	  (cd ..; tar -czvf ci86/lina-$(VERSION).tar.gz `cat ci86/MANIFEST`)
+	  (cd ..; rm lina-$(VERSION))
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
