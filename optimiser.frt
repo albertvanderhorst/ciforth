@@ -92,6 +92,9 @@ R> R> REPEAT 2DROP ;
 
 \ ----------------------    MISCELLANEOUS
 
+\ For DEA : it IS high-level.
+: HIGH-LEVEL? >CFA @ DOCOL = ;
+
 \ For an ITEM in a high level word, return the next ITEM.
 \ So it skips also ``ITEM'' 's inline data.
 : NEXT-ITEM NEXT-PARSE 2DROP ;
@@ -151,24 +154,7 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ For DEA : it HAS no side effects, input or output (or stack).
 : NS?   FMASK-NS ALLOWED? ;
 
-\ Move to analyser.frt    FIXME!
-: FMASK-ST! FMASK-NS INVERT SWAP >FFA AND! ;
-\ '.S FMASK-ST!
-\ 'DEPTH FMASK-ST!
-
 \ The return stack is not handled in any way.   FIXME!
-'>R FMASK-ST!
-'R> FMASK-ST!
-'R@ FMASK-ST!
-'I  FMASK-ST!
-'RDROP FMASK-ST!
-\ The following control words interfere with the optimiser FIXME!
-'EXIT FMASK-ST!
-'LEAVE FMASK-ST!
-'(LOOP)  FMASK-ST!
-'(+LOOP) FMASK-ST!
-'(DO)    FMASK-ST!
-'(?DO)   FMASK-ST!
 
 \ The minimum step depth we have encountered.
 VARIABLE MIN-DEPTH

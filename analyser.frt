@@ -1,6 +1,22 @@
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( $Id$)
 
+\ Adds to the flag fields of Forth words with the stack effect and
+\ optimisation data. See DATA DESIGN.
+
+\ Assumptions made by the analyser:
+\   1. In low level code pushes and pops are never by-passed with branches.
+\   2. In low level code POP|ALL, and PUSH|ALL, are not used at all.
+\   3. Variable stack effect is filled manually.
+\   4. Once the stack effect has been filled in, it isn't touched.
+\      This way a prefilled stack effect overrules the automated search.
+\   5. In the same way optimisation bits can be overruled,
+\        but only for code words.
+\
+\ Convention: ?xxx? works only have effect if needed.
+
+\ ---------------- TO DO ---------------------------
+\ The analyser must be in two parts, one that needs the assembler, one that doesn't.
 
 \ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
 \ INCLUDE asgen.frt
@@ -29,10 +45,10 @@ VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
 
 \ ---------------------------------------------------------------------------
 HEX
-\ Data design : >FFA leavers the flag field that is considered
-\ an area of 4 bytes.
+\ ------------------------ DATA DESIGN ----------------------------------
+\ >FFA leaves the flag field that is considered an area of 4 bytes.
 \ >FFA 0 + gives the dummy, invisible, immediate and denotation bits.
-\ bits 4..7 available for just anything.
+\ bits 4..7 are available and used here.
 \ >FFA 1 + : any bits set open up an optimisation opportunity.
 \ >FFA 2 + reserved for the return stack effect nibbles.
 \ >FFA 3 + gives the data stack effect nibbles:
@@ -46,7 +62,6 @@ HEX
 0FF00 CONSTANT FMASK
 
 \ ----------------------    ( From analyser.frt)
-01 CONSTANT FMASK-DUM   \ Dummy header, not to be executed.
 10 CONSTANT FMASK-IL    \ Data is following in line.
 20 CONSTANT FMASK-HO    \ This definition has been high level optimised.
 40 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
@@ -56,10 +71,12 @@ HEX
 \ If 0 the side effects are absent.
 100 CONSTANT FMASK-N@    \ No input side effects. "No fetches."
 200 CONSTANT FMASK-N!    \ No output side effects. "No stores."
-400 CONSTANT FMASK-ST    \ No stack side effects. "No absolute stack reference."
+400 CONSTANT FMASK-ST    \ No stack side effects.
+                        \ "No absolute stack reference or return stack."
 800 CONSTANT FMASK-FDI   \ This definition has the `EDI'' register free. "No loop"
 
-FMASK-N@ FMASK-N! OR FMASK-ST OR FMASK-FDI OR CONSTANT FMASK-NS \ No side effects.
+FMASK-N@ FMASK-N! OR FMASK-FDI OR CONSTANT FMASK-ES \ No side effects except stack.
+FMASK-ES FMASK-ST OR CONSTANT FMASK-NS \ No side effects at all.
 
 \ For DEA : it IS a real (non-dummy) header.
 : REAL? >FFA @ 1 AND 0= ;
@@ -67,9 +84,7 @@ FMASK-N@ FMASK-N! OR FMASK-ST OR FMASK-FDI OR CONSTANT FMASK-NS \ No side effect
 \ Fill optimisations BITS in into DEA.
 : !OB   >FFA >R    R@ @ FMASK INVERT AND   OR  R> ! ;
 
-\ A set : #how far filled, data. See asgen.frt
-
-\ Fill in the STACK effect into the flag field of DEA.
+\ Fill in the stack effect BYTE into the flag field of DEA.
 : !SE >FFA 3 + C! ;
 
 \ For DEA return its stack effect BYTE.
@@ -120,14 +135,14 @@ HERE SWAP !
 
 ASSEMBLER
 CREATE POPS  HERE 0 ,
-' POP,       ,          ' POPF,      ,          ' POP|ALL,   ,
+' POP,       ,          ' POPF,      ,
 ' POP|DS,    ,          ' POP|ES,    ,          ' POP|FS,    ,
 ' POP|GS,    ,          ' POP|SS,    ,          ' POP|X,     ,
 HERE SWAP !
 
 CREATE PUSHES  HERE 0 ,
 ' PUSH,      ,          ' PUSHF,     ,          ' PUSHI|B,   ,
-' PUSHI|X,   ,          ' PUSH|ALL,  ,          ' PUSH|CS,   ,
+' PUSHI|X,   ,                                  ' PUSH|CS,   ,
 ' PUSH|DS,   ,          ' PUSH|ES,   ,          ' PUSH|FS,   ,
 ' PUSH|GS,   ,          ' PUSH|SS,   ,
 ' PUSH|X,    ,
@@ -231,9 +246,6 @@ PREVIOUS
 \ the kernel.
 : NEXT  ASSEMBLER  LODS, X'|   JMPO, D0| [AX] ; PREVIOUS
 
-\ For DEA : it IS high-level.
-: HIGH-LEVEL? >CFA @ DOCOL = ;
-
 \ The sequence of bytes that forms next, as a string.
 \ (This means you can $@ it.)
 CREATE NEXT-IDENTIFICATION 0 , NEXT
@@ -246,40 +258,43 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ For some code at ADDRESS, find the start ADDRESS of its ``NEXT''.
 : >NA   BEGIN DUP NEXT-IDENTIFICATION $@ CORA WHILE 1+ REPEAT ;
 
-
 \ Get the pops and pushes from DEA which must be a code definition.
 \ Get also its side effect mask.
 : ANALYSE-CODE >CFA @ DUP >NA ACCUMULATE-AS-INFO ;
 
-\ For DEA return the stack effect BYTE and the side effect mask.
-\ It must be a code definition.
-: (FIND-SE-CODE) ANALYSE-CODE
-  #POPS @ 1+   #PUSHES @ 1+   SE:2>1  PROTO-FMASK @ ;
-
 \ --------------- DIRTY FIXME ------------------------------
-\ For DEA return the stack effect BYTE.
-\ FIll in the side effect mask.
+\ For DEA fill in the stack effect byte and the side effect mask.
 \ It must be a code definition.
-: FIND-SE-CODE DUP ANALYSE-CODE   PROTO-FMASK @ SWAP >FFA OR!U
-  #POPS @ 1+   #PUSHES @ 1+   SE:2>1 ;
+: FILL-FLAG-CODE   >R   R@ ANALYSE-CODE   PROTO-FMASK @   R@ >FFA   OR!U
+  #POPS @ 1+   #PUSHES @ 1+   SE:2>1   R> !SE ;
 
 \ Fill FLAGS POPS PUSHES in into DEA's flag field.
-: !FLAGS >FFA >R 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR R> ! ;
+: !FLAGS >R 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR R> >FFA ! ;
 
-\ Irritating exceptions
+\ Irritating exceptions filled in by hand. Filling in the stack effect
+\ (although it could be found automatically), prevents changes.
 0FF '?DUP !SE
 0FF 'EXECUTE !SE
-0                    1 0 'FOR-VOCS  !FLAGS  \ Despite an execute this is known
-0                    2 0 'FOR-WORDS !FLAGS
-FMASK-N! FMASK-N@ OR 0 1 'DSP@      !FLAGS
-FMASK-NS FMASK-IL OR 0 1 'LIT       !FLAGS
-FMASK-NS FMASK-IL OR 0 0 'SKIP      !FLAGS
-FMASK-NS FMASK-IL OR 0 0 'BRANCH    !FLAGS
-FMASK-NS FMASK-IL OR 1 0 '0BRANCH   !FLAGS
-FMASK-NS FMASK-IL OR 0 0 '(LOOP)    !FLAGS
-FMASK-NS FMASK-IL OR 1 0 '(+LOOP)   !FLAGS
-FMASK-NS FMASK-IL OR 2 0 '(DO)      !FLAGS
-FMASK-NS FMASK-IL OR 2 0 '(?DO)     !FLAGS
+0                     1  0 'FOR-VOCS  !FLAGS  \ Despite an execute this is known
+0                     2  0 'FOR-WORDS !FLAGS
+FMASK-NS FMASK-IL OR  0  1 'LIT       !FLAGS
+FMASK-NS FMASK-IL OR  0  0 'SKIP      !FLAGS
+FMASK-NS FMASK-IL OR  0  0 'BRANCH    !FLAGS
+FMASK-NS FMASK-IL OR  1  0 '0BRANCH   !FLAGS
+FMASK-ES FMASK-IL OR  0  0 '(LOOP)    !FLAGS
+FMASK-ES FMASK-IL OR  1  0 '(+LOOP)   !FLAGS
+FMASK-ES FMASK-IL OR  2  0 '(DO)      !FLAGS
+FMASK-ES FMASK-IL OR  2  0 '(?DO)     !FLAGS
+FMASK-ES              0  0 'LEAVE     !FLAGS
+FMASK-ES              0  0 'EXIT      !FLAGS
+FMASK-ES              0  1 'DSP@      !FLAGS
+FMASK-ES              0  1 'DEPTH     !FLAGS
+FMASK-ES              0  0 '.S    !FLAGS
+FMASK-ES              1  0 '>R    !FLAGS
+FMASK-ES              0  1 'R@    !FLAGS
+FMASK-ES              0  1 'I     !FLAGS
+FMASK-ES              0  1 'R>    !FLAGS
+FMASK-ES              0  0 'RDROP !FLAGS
 
 \ FILL IN EVERYTHING
 \ Add to an existing pure STACK EFFECT the pure STACK EFFECT.
@@ -328,39 +343,33 @@ HERE SWAP !
 : ANALYSE-CHAIN
         BEGIN @+ ( DUP ID.) DUP CHAIN? WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
 
-\ For DEA return the stack effect BYTE.
+\ For DEA fill in the stack effect byte.
 \ It must be a high level definition
-: FIND-SE-DOCOL 11 SWAP >DFA @ ANALYSE-CHAIN ;
+: FILL-SE-DOCOL   >R   11   R@ >DFA @   ANALYSE-CHAIN   R> !SE ;
 
-\ For DEA return the stack effect BYTE.
+\ For DEA fill in the stack effect byte.
 \ It must be a ``CREATE .. DOES>'' definition
-: FIND-SE-DODOES 12 SWAP >DFA @ @ ANALYSE-CHAIN ;
+: FILL-SE-DODOES   >R   12   R@ >DFA @ @   ANALYSE-CHAIN   R> !SE ;
 
-\ For DEA return the stack effect BYTE.
+\ For DEA fill in the stack effect byte and the side effect bits.
 \ It can be any code definition.
-\ Fill in the side effect bits.
-: FIND-SE-ANY-CODE
+: FILL-ANY-CODE
     DUP >CFA @ >R
     R@ DOCON =   R@ DOVAR =   R> DOUSER =    OR OR
-    IF >FFA FMASK-NS SWAP OR!U   12 ELSE
-        FIND-SE-CODE  \ Normal code definition.
+    IF >R FMASK-NS 0 1 R> !FLAGS
+    ELSE
+        FILL-FLAG-CODE  \ Normal code definition.
     THEN ;
 
-\ For DEA return the stack effect BYTE.
+\ For DEA find the stack effect and fill it in.
+\ For code definitions also fill in the optimisation flags.
 \ It can be any definition.
-: FIND-SE-ANY
-    DUP >CFA @ DOCOL = IF FIND-SE-DOCOL ELSE
-    DUP >CFA @ DODOES = IF FIND-SE-DODOES ELSE
-    FIND-SE-ANY-CODE
+: FILL-SE-ANY
+    DUP >CFA @ DOCOL = IF FILL-SE-DOCOL ELSE
+    DUP >CFA @ DODOES = IF FILL-SE-DODOES ELSE
+    FILL-ANY-CODE
     THEN THEN ;
 
-\ For DEA find the stack effect and fill it in.
-\ It can be any definition.
-\ Dummy headers are ignored.
-: FILL-SE
-    DUP REAL? IF
-        DUP FIND-SE-ANY SWAP !SE _
-    THEN DROP ;
 
 \ Keep track of the number of entries with something unknown.
 VARIABLE #UNKNOWNS      VARIABLE PROGRESS
@@ -368,10 +377,8 @@ VARIABLE #UNKNOWNS      VARIABLE PROGRESS
 
 \ For DEA fill in the stack effect if it is not yet known.
 : ?FILL-SE?   \ DUP ID. \ CR
-DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
+DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE-ANY _   THEN   DROP ;
 
-\ For a WID fill in all stack effects.
-: FILL-SE-WID   DUP ID.   >WID '?FILL-SE? SWAP FOR-WORDS ;
 
 \ Inspect POINTER and XT. If the xt is of a type followed by inline
 \ code advance pointer to next high level code.
@@ -414,23 +421,23 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
 \ For DEA find the optimisation bits and fill it in.
 \ It can be any definition.
 \ Dummy headers are ignored.
-: FILL-OB
-    DUP REAL? IF
-        DUP FIND-OB-ANY SWAP !OB _
-    THEN DROP ;
+: (FILL-OB) DUP FIND-OB-ANY SWAP !OB ;
 
 \ For DEA fill in the opt bits and remember if there was a change.
-: ?FILL-OB?   \ DUP ID. \ CR
-    DUP >FFA @ >R   DUP FILL-OB    >FFA @ R> <> PROGRESS OR!U ;
-
-\ For a WID fill in all optimisation bits.
-: FILL-OB-WID DUP ID. >WID '?FILL-OB? SWAP FOR-WORDS ;
+: FILL-OB   \ DUP ID. \ CR
+    DUP >FFA @ >R   DUP (FILL-OB)    >FFA @ R> <> PROGRESS OR!U ;
 
 \ General part
 
+\ For a DEA fill in the flag field.
+: ?FILL?   DUP REAL? IF DUP FILL-OB  ?FILL-SE? _ THEN DROP ;
+
+\ For all words belonging to WID fill in the whole flag field..
+: FILL-WID DUP ID. >WID '?FILL? SWAP FOR-WORDS ;
+
 \ Sweep once through all vocabularies filling in flag fields.
 \ Keep track of progress.
-: (FILL-ONCE)  !UNKNOWNS   'FILL-SE-WID FOR-VOCS 'FILL-OB-WID FOR-VOCS ;
+: (FILL-ONCE)  !UNKNOWNS   'FILL-WID FOR-VOCS ;
 
 \ Go on filling flag fields until the number of unknown stack effects no longer changes.
 : (FILL-ALL) 0 BEGIN (FILL-ONCE) DUP .
