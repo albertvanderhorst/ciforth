@@ -22,8 +22,8 @@ REQUIRE TRUE
 \ Auxiliary string: compiled expression.
 \ Contains a mix of ``charclass'' enums, counts and ``CHAR''.
 \ All three types are subtypes of ``VARIABLE''.
-VARIABLE *Separators::patternE;
-VARIABLE Separators::lenpatternE;  \ Its allocated length, used for safety
+1000 CONSTANT lenpatternE
+CREATE patternE lenpatternE CHARS ALLOT
 
 \ Points at where the next fields start in the buffer
 \ Stored outside of recursively called routines
@@ -37,7 +37,10 @@ CREATE seppositionE 1000 CELLS ALLOT
 
 \ ``maxfield'' is the length of this array
 \ it indicates where the one and only record starts and ends
-HERE CONSTANT maxfield
+VARIABLE maxfield
+
+\ Return the CONTENT of ``maxfield'' and bump it by one.
+: maxfield++ maxfield @ 1 maxfield +! ;
 
 VARIABLE  fieldpointer
 
@@ -82,78 +85,57 @@ VARIABLE         limitE
 \                                                                           */
 \ ***************************************************************************/
 
-\ void Separators::compileE(STRING s )
-\ {
+: !++ OVER C! 1+ ;
+
+: compileE ( STRING s )
 \    CHAR c;
-\
-\    \ Pointer into compiled string
-\    VARIABLE* ep = patternE;
+    patternE
 \    \ Pointers into source string
-\    STRING sp = s;        \ ``nextchar'' fails if declared CHAR *
 \
 \    VARIABLE *lastep;   \ Points to a character class that could be closed
 \    \ Counts the members of a class (between [ ])  == #members +1 (!!)
 \    VARIABLE cclcnt;
 \
 \    \ Initialize the separator counter
-\    maxfield = 0;
+     0 maxfield !
+     0 lastep !
 \
 \    \ The '^' at the beginning has a special meaning (see manual)
-\    if ( '^'!=s[0] )  *ep++ = CSYNC;
-\
-\    while (c = nextchar(sp))
-\    {
-\       assert( ep<patternE+lenpatternE );
-\
-\       switch (c)
-\       {
-\       case '.':
-\          lastep = ep;   \ Candidate for closure, leads to CSYNC
-\          *ep++ = CANY;
-\          break;
-\
-\       case '*':
-\          if (!lastep) cerr<<"No expression for closure : "<<s<<amen;
-\
-\          if ( CANY != *lastep )
-\             *lastep |= CLOS;
-\          else
-\             *lastep = CSYNC;    \ Special case
-\
-\          lastep = NULL;         \ Case closed
-\          break;
-\
-\       case '$':
-\          lastep = NULL;         \ Do not allow e.g. A$*
-\          *ep++ = CEOF;
-\          *ep++ = ++maxfield;
-\          break;
-\
-\       case '^':
-\          if ( sp != s+1 )
-\             cerr<<"'^' only allowed at start of expression:"<<s<<amen;
-\          lastep = NULL;         \ Do not allow e.g. A^*
-\          *ep++ = CEOF;
-\          *ep++ = 0;
-\          break;
-\
-\       case '[':
-\          lastep = ep;   \ Candidate for closure
-\          *ep++ = *sp=='^'? CSETC: CSET;   \ May later be CLOS-ed
-\          *ep++ = 0;                     \ Going to contain class-count
-\          if ( *sp=='^' ) sp += 1;  \ Consume '^': negator, not a character
-\
+     OVER C@ &^ = IF CSYNC !++ THEN
+
+     BEGIN OVER C@ DUP WHILE
+
+        OVER patternE lenpatternE + < 0= 1023 AND THROW
+        DUP &. = IF
+           DUP lastep !   CANY !++
+        ELSE DUP &* = IF
+            lastep @ 0= 1024 AND THROW
+\           ssort specific :
+\             lastep C@ CANY <> IF CLOS lastep TOGGLE ELSE CSYNC LASTEP ! THEN
+            lastep CLOS TOGGLE   0 lastep !
+        ELSE DUP &$ = IF DROP
+\           ssort specific, normally this would be accepted at the end only
+           0 lastep !   CEOF !++   maxfield++ !++
+        ELSE DUP &^ = IF DROP
+           OVER patternE 1+ <> 1025 AND THROW
+           0 lastep !   CEOF !++   0 !++
+        ELSE DUP &[ = IF DROP
+            DUP lastep !
+           \ Consume '^' if it is a negator, not a character
+           OVER C@ &^ = IF SWAP 1+ SWAP CSETC ELSE CSET THEN
+           !++
+           0 !++
 \          \ Put characters in set, at least one. So do{ }while.
-\          c = nextchar(sp);
-\          cclcnt = 1;    \ One extra count!
-\          do {
-\             *ep++ = c;
-\             cclcnt++;
+           OVER C@ 1 >R
+           BEGIN
+              !++
+              R> 1+ >R
 \             assert( ep<patternE+lenpatternE );
-\          } while ((c = nextchar(sp)) != ']');
-\          lastep[1] = cclcnt;
-\          break;
-\
+              SWAP NEXTCHAR DUP &[ <> WHILE
+              >R SWAP R>
+           REPEAT
+           R> lastep @ 1+ C!
+\         ELSE DUP &@ = IF DROP  \ ssort specific
 \       case '@':
 \          c = nextchar(sp);
 \          lastep = NULL;        \ No closure possible
@@ -166,32 +148,28 @@ VARIABLE         limitE
 \          *ep++ = ++maxfield;
 \          break;
 \
-\       case '\\':
-\          c = *sp++;            \ Do not use nextchar! No nested esapes!
-\          if (c=='\000' ) cerr<<"Expect a character after escape: "<<s<<amen;
-\          \ Treat as normal character : fall through to default
-\
-\       default:
-\          lastep = ep;   \ Candidate for closure
-\          *ep++ = CCHAR;
-\          *ep++ = c;
-\          break;
-\       }
-\    }
-\
-\    \ Add default field marker if none found as yet
-\    if ( 0==maxfield )
-\    {
-\       *ep++ = CEOF;
-\       *ep++ = ++maxfield;
-\    }
-\
-\    \ End of input string: close compiled expression
+          ELSE DUP &\ = IF DROP
+             OVER C@
+             DUP 0= 1026 AND THROW
+             >R
+             DUP lastep !
+             CCHAR !++
+             R> !++
+          ELSE >R
+             DUP lastep !
+             CCHAR !++
+             R> !++
+          THENS
+      REPEAT DROP
+     \ Add default field marker if none found as yet
+      maxfield @ 0= IF
+         CEOF SWAP !+
+         maxfield++ !++
 \    assert( ep<patternE+lenpatternE );
-\    *ep++ = CEND;
-\ }
-\
-
+     \ End of input string: close compiled expression
+      CEND !++
+      2DROP
+;
 
 \ ***************************************************************************/
 \                                                                           */
@@ -378,9 +356,8 @@ VARIABLE         limitE
              BEGIN
                 \ Adaption for 3 param matchE
                 2DUP RECURSE IF RDROP 2DROP TRUE EXIT THEN
-                SWAP 1-
-                R@ OVER < WHILE
-                SWAP
+                OVER R@ > WHILE
+                SWAP 1- SWAP
              REPEAT
              2DROP RDROP FALSE EXIT
          THEN
