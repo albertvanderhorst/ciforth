@@ -20,7 +20,7 @@ width32.m4       \
 # The kinds of Forth's that can be made
 # Different assemblers should generate equivalent Forth's.
 TARGETS= msdos alone linux
-CSRC= figforth 
+CSRC= figforth toblock fromblock
 
 RELEASECONTENT = \
 fig86.gnr        \
@@ -30,12 +30,13 @@ $(CSRC:%=%.c)    \
 Makefile         \
 release.txt      \
 readme.txt       \
-alone.asm        \
-msdos.msm        \
-linux.asm        \
+fig86.alone.asm  \
+fig86.msdos.msm  \
+fig86.linux.asm  \
 masm.m4          \
 nasm.m4          \
 genboot.bat      \
+link.script    \
 # That's all folks!
 
 # Letter versions are beta!
@@ -89,14 +90,9 @@ releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
 
 fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
-#  Do a static prelink to prevent that the whole free dictionary space ends
-#  up in the executable. This doesnot work. Bloody ld.
-fig86.static.o : fig86.linux.o ; ld -Tlink.script -r -o $@
-
-# This linking must be static, but a .5M executable is better than
-# a 64 M executable.
+# This linking must be static, because `link.script' is tricky enough.
+# but a .5M executable is better than a 64 M executable.
 figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@ 
 
 # Add termporary stuff for testing, if needed.
 include test.mak
-
