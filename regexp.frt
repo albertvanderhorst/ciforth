@@ -87,6 +87,8 @@ VARIABLE         limitE
 
 : !++ OVER C! 1+ ;
 
+VARIABLE lastep
+
 : compileE ( STRING s )
 \    CHAR c;
     patternE
@@ -131,7 +133,8 @@ VARIABLE         limitE
               !++
               R> 1+ >R
 \             assert( ep<patternE+lenpatternE );
-              SWAP NEXTCHAR DUP &[ <> WHILE
+\             SWAP NEXTCHAR DUP &[ <> WHILE
+              SWAP COUNT DUP &] <> WHILE
               >R SWAP R>
            REPEAT
            R> lastep @ 1+ C!
@@ -159,15 +162,18 @@ VARIABLE         limitE
              DUP lastep !
              CCHAR !++
              R> !++
-          THENS
+          THEN THEN THEN THEN THEN
       REPEAT DROP
      \ Add default field marker if none found as yet
       maxfield @ 0= IF
-         CEOF SWAP !+
-         maxfield++ !++
+         CEOF !++ SWAP
+         maxfield++ !++ SWAP
+     THEN
 \    assert( ep<patternE+lenpatternE );
      \ End of input string: close compiled expression
+
       CEND !++
+
       2DROP
 ;
 
