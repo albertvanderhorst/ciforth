@@ -2589,7 +2589,7 @@ HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
 ;       Block #, Handle
 HEADER({SEEK},{SEEK},{DOCOL})
         DW      SWAP, TOR, TOR
-        DW      LIT, 04200      ; Seek from start
+        DW      LIT, 04200H     ; Seek from start
         DW      FROMR           ; Handle
         DW      FROMR, LIT, KBBUF, USTAR
         DW      SWAP    ; L.S. ON TOP
@@ -2610,8 +2610,8 @@ RSLW2:  DW      TOR
         DW      LIT, KBBUF
         DW      FROMR           ; ADDR
 	DW	BDOS, DERR
-;       DW      DROP, DROP, DROP, DROP
-        DW      DROP, DROP, DROP, DOT
+        DW      DROP, DROP, DROP
+        DW      LIT, KBBUF, LSUB, DERR
         DW      SEMIS
 
 });_END___1__({_MODERN_1_})
