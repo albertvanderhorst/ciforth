@@ -300,8 +300,9 @@ IS-A  IS-COMMA   : COMMAER CREATE  , 0 , , , , , DOES> REMEMBER COMMA ;
 ( ------------- ASSEMBLER, SUPER DEFINING WORDS ----------------------)
 
 CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
-( Fill in the tally prototype with BA BY BI information )
 : T! PRO-TALLY !+ !+ !+ DROP ;
+( Fill in the tally prototype with BA BY, reversed BI information )
+: T!R   REVERSE-BYTES T! ;
 ( Get the data from the tally prototype back BA BY BI )
 : T@ PRO-TALLY 3 CELLS +  @- @- @- DROP ;
 ( Add INCREMENT to the OPCODE a NUMBER of times, and generate as much   )
@@ -313,9 +314,7 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 : 3FAMILY,    0 DO   DUP >R T@ R> 3PI   OVER + LOOP DROP DROP ;
 : 4FAMILY,    0 DO   DUP >R T@ R> 4PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
-: xFAMILY|R   0 DO   DUP >R T@ R> REVERSE-BYTES SWAP REVERSE-BYTES SWAP
-    FIR   OVER + LOOP DROP DROP ;
-: FAMILY|R   0 DO   DUP >R T@ R> FIR   OVER + LOOP DROP DROP ;
+: FAMILY|R    0 DO   DUP >R T@ REVERSE-BYTES  R> FIR   OVER + LOOP DROP DROP ;
 : xFAMILY|F   0 DO   DUP >R T@ R> DFI   OVER + LOOP DROP DROP ;
 
 ( ############### PART II DISASSEMBLER #################################### )

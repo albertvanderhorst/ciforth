@@ -19,7 +19,7 @@ ASSEMBLER DEFINITIONS  HEX
   0 1        00 04 ' C, >CFA   COMMAER DO, ( direct page offset )
 \ Indexing is handled as an instruction within an instruction.
 \ It is an Index byte, similar to the SIB of Intel.
-  _ 0        00 08 ' C, >CFA   COMMAER SIB,, ( index byte, cff. sib)
+  _ 0        00 08 ' C, >CFA   COMMAER IB,, ( index byte, cff. sib)
   0 2        00 10 ' W, >CFA   COMMAER E,  ( extended address )
   _ 0        00 20 ' C, >CFA   COMMAER STACK, ( what to push or pop)
 
@@ -38,33 +38,33 @@ ASSEMBLER DEFINITIONS  HEX
 
 
 ( --------------- Handling of the index byte. ------------------------- )
-    80 00 9F00,0000 T!
-0100,0000 1000,0000 10 xFAMILY|R ,-10 ,-F ,-E ,-D ,-C ,-B ,-A ,-9 ,-8 ,-7 ,-6 ,-5 ,-4 ,-3 ,-2 ,-1
-0100,0000 0000,0000 10 xFAMILY|R ,0 ,1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,A ,B ,C ,D ,E ,F
-80 0 6000,0000 T!       2000,0000 0 4 xFAMILY|R X Y U S
+    80 00 9F T!R
+01 10 10 FAMILY|R ,-10 ,-F ,-E ,-D ,-C ,-B ,-A ,-9 ,-8 ,-7 ,-6 ,-5 ,-4 ,-3 ,-2 ,-1
+01 00 10 FAMILY|R ,0 ,1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,A ,B ,C ,D ,E ,F
+80 0 60 T!R       20 0 4 FAMILY|R X Y U S
 280 02 FF 9F FIR [##]
-    80 00 9F00,0000 T!
-0100,0000 8000,0000 07 xFAMILY|R ,R+ ,R++ ,-R ,--R ,R B,R A,R
-0100,0000 9100,0000 06 xFAMILY|R [,R++] -- [,--R] [,R] [B,R] [A,R]
-1000,0000 8B00,0000 02 xFAMILY|R D,R [D,R]
+    80 00 9F T!R
+01 80 07 FAMILY|R ,R+ ,R++ ,-R ,--R ,R B,R A,R
+01 91 06 FAMILY|R [,R++] -- [,--R] [,R] [B,R] [A,R]
+10 8B 02 FAMILY|R D,R [D,R]
 
 \ The don't care bits translate to underscores
-180 02 9F00,0000 T!     1000,0000 8800,0000 02 xFAMILY|R #,R [#,R]
-280 02 9F00,0000 T!     1000,0000 8900,0000 02 xFAMILY|R ##,R [##,R]
-    180 02 FF00,0000 T!
-2000,0000 8C00,0000 04 xFAMILY|R #,PCR  #,PCR_  #,PCR__  #,PCR___
-2000,0000 9C00,0000 04 xFAMILY|R [#,PCR] [#,PCR]_  [#,PCR]__ [#,PCR]___
-    280 02 FF00,0000 T!
-2000,0000 8D00,0000 04 xFAMILY|R ##,PCR  ##,PCR_  ##,PCR__  ##,PCR___
-2000,0000 9D00,0000 04 xFAMILY|R [##,PCR] [##,PCR]_  [##,PCR]__ [##,PCR]___
+180 02 9F T!R     10 88 02 FAMILY|R #,R [#,R]
+280 02 9F T!R     10 89 02 FAMILY|R ##,R [##,R]
+    180 02 FF T!R
+20 8C 04 FAMILY|R #,PCR  #,PCR_  #,PCR__  #,PCR___
+20 9C 04 FAMILY|R [#,PCR] [#,PCR]_  [#,PCR]__ [#,PCR]___
+    280 02 FF T!R
+20 8D 04 FAMILY|R ##,PCR  ##,PCR_  ##,PCR__  ##,PCR___
+20 9D 04 FAMILY|R [##,PCR] [##,PCR]_  [##,PCR]__ [##,PCR]___
 
 \ The last instruction to be found in disassemby
-80 0 FF 00 1PI ~SIB,        ' ~SIB, % SIB,, >DATA !
+80 0 FF 00 1PI ~IB,        ' ~IB, % IB,, >DATA !
 ( Redefine [] ,  such that the user may say                             )
-( "[]" instead of " [] ~SIB, [X"                                        )
+( "[]" instead of " [] ~IB, [X"                                        )
 ( Note that the disassembly is made to look like the same.              )
-( The ~SIB, are print-suppressed.                                       )
-: []   [] SIB,, ;
+( The ~IB, are print-suppressed.                                       )
+: []   [] IB,, ;
 
 ( ---- Exchanges, has a slot to prevent too many matches.-------------- )
 50 0 F000 T!    1000 8000 4 xFAMILY| =>A =>B =>CCR =>DPR
@@ -101,8 +101,8 @@ ASSEMBLER DEFINITIONS  HEX
 4000 8F10 2 2FAMILY, STY, STS,
 
 \ Branches, control flow
-    0151 0 0F00,0000 T!
-0100,0000 0000 10 xFAMILY|R Y| N| U>| U<=| U>=| U<| =| <>| VC| VS| 0>=| 0<| >=| <| >| <=|
+    0151 0 0F T!R
+01 00 10 FAMILY|R Y| N| U>| U<=| U>=| U<| =| <>| VC| VS| 0>=| 0<| >=| <| >| <=|
 29 00 30 4E 1PI JMP,
 2A 00 30 8D 1PI JSR,
 20 01 00 16 1PI LBRA,           20 01 00 17 1PI LBRS,
@@ -136,13 +136,13 @@ ASSEMBLER DEFINITIONS  HEX
    2DROP ;
 ' DIS-STACK    % STACK, >DIS !
 
- ' ~SIB,   % SIB,, >DATA !   ( Fill in deferred data creation action  )
+ ' ~IB,   % IB,, >DATA !   ( Fill in deferred data creation action  )
 ( Disassemble the sib byte where the disassembler sits now.             )
 ( [ `FORCED-DISASSEMBLY' takes care itself of incrementing the          )
 (   disassembly pointer. ]                                              )
-: DIS-SIB [ % ~SIB, ] LITERAL FORCED-DISASSEMBLY ;
+: DIS-IB [ % ~IB, ] LITERAL FORCED-DISASSEMBLY ;
 ( Fill in deferred disassembler action.                                 )
-' DIS-SIB    % SIB,, >DIS !
+' DIS-IB    % IB,, >DIS !
 
 \ None of the essential
 : LSL,   ASL, ;         \ Do not use an alias, then the disassembler will use it! l
