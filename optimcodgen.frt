@@ -6,10 +6,11 @@
 \ Also ' is assumed to give an execution token.
 
 REQUIRE ALIAS
-REQUIRE ASSEMBLERi86
 \ : \D POSTPONE \ ; IMMEDIATE
 : \D ;            IMMEDIATE
 \D REQUIRE DUMP
+\D : DUMP-STRING
+\D     OVER H. SPACE DUP H. DUMP ;
 
 \ Like +! but ors.
 : OR!  DUP @ ROT OR SWAP ! ;
@@ -46,39 +47,9 @@ DECIMAL
 
 \ ______________________________________________________________________
 
-\ Define a ``NEXT'' sequence. It must have the exact code that is in
-\ the kernel.
-: NEXT  ASSEMBLER  LODS, W1|   JMPO, D0| [AX] ; PREVIOUS
-
-\ The common content of all high level definitions.
-\ Catch before ``NEXT'' is optimised!
-'NEXT @ CONSTANT DOCOL
 
 \ For DEA : it IS high-level.
 : HIGH-LEVEL? >CFA @ DOCOL = ;
-
-\ The sequence of bytes that forms next, as a string.
-\ (This means you can $@ it.)
-CREATE NEXT-IDENTIFICATION 0 , NEXT
-HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
-\D ." Expect NEXT-IDENTIFICATION to contain NEXT :" CR
-\D : DUMP-STRING
-\D     OVER H. SPACE DUP H. DUMP ;
-\D  NEXT-IDENTIFICATION $@ DUMP-STRING
-
-\ For some code at ADDRESS, find the start ADDRESS of its ``NEXT''.
-: >NA   BEGIN DUP NEXT-IDENTIFICATION $@ CORA WHILE 1+ REPEAT ;
-
-\D ." Expect 1 :" 'DROP >CFA @ DUP >NA SWAP - . CR
-
-\ Fetch the code from XT , return it as a Forth STRING.
-: CODE@  @ DUP >NA OVER - ;
-
-\ Store a STRING with code in the dictionary.
-: CODE, HERE OVER ALLOT SWAP CMOVE ;
-
-\D ." Expect POP AX instruction :" CR
-\D 'DROP CODE@ DUMP-STRING
 
 \ Leave an incremented ADDRESS and the CONTENT.
 '$@ ALIAS @+
@@ -94,69 +65,21 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ CONTENT and a go on FLAG.
 : NEXT-PARSE
    @+ >R   R@ CFA> >FFA @ IMASK AND IF CELL+ THEN
+   R@ CFA> 'SKIP = IF @+ + ALIGNED THEN
    R@
 \D   R@ CFA> ID.
    R> '(;) <> ;
 
-\ For all elements of DEA attempt a a ``OPTIMISE-A'' .
-\ Leave a flag indicating that the DEA itself is a-optimisable.
-: OPTIMISE-A1 DUP HIGH-LEVEL? IF
-    -1 >R
-    >DFA @ BEGIN NEXT-PARSE WHILE
-    CFA> DUP OPTIMISE-A
-    A-OPTIMISABLE? R> AND >R REPEAT
-    2DROP R>  \D .S
-    ELSE
-       DROP 0  \D .S
-    THEN
-;
-
-\ Concatenate the code of all elements of DEA , turning it into
-\ a code definition. This must be allowed or we crash.
-: OPTIMISE-A2 DUP >R HERE >R
-    >DFA @
-    BEGIN $@ DUP '(;) <> WHILE CODE@ HERE OVER ALLOT SWAP CMOVE REPEAT
-    2DROP NEXT
-    R> R> >CFA ! ;
-
-\ Resolve OPTIMISE-A
-: (OPTIMISE-A)
-    DUP OPTIMISE-A1 IF OPTIMISE-A2 _ THEN DROP ;
-'(OPTIMISE-A) >DFA @   'OPTIMISE-A >DFA !
-
-\D : OOPS NOOP NOOP NOOP ;
-\D ." Expect no crash:" 'OOPS OPTIMISE-A OOPS ." no crash"
-
-\D 'OOPS CODE@ DUMP-STRING
-
-\D \ -------------- sample code --------------------------
-\D \ This is the code we seek to optimise.
-\D ( AA : Nesting_benchmark )
-\D : A0 ;
-\D : A1 A0 A0 ;   : A2 A1 A1 ;    : A3 A2 A2 ;
-\D : A4 A3 A3 ;   : A5 A4 A4 ;    : A6 A5 A5 ;
-\D : A7 A6 A6 ;   : A8 A7 A7 ;    : A9 A8 A8 ;
-\D
-\D : B0 A9 A9 ;
-\D : B1 B0 B0 ;   : B2 B1 B1 ;    : B3 B2 B2 ;
-\D : B4 B3 B3 ;   : B5 B4 B4 ;    : B6 B5 B5 ;
-\D : B7 B6 B6 ;   : B8 B7 B7 ;    : B9 B8 B8 ;
-\D : BA B9 B9 ;
-\D
-\D : TEST 0 DO BA LOOP ;
-\D : Q 0 DO 10000 TEST I . LOOP ;
-\D \ -------------- end of sample code --------------------------
-\D 'Q OPTIMISE-A
-\D ." Expect  0 1 2 3 4 :" 5 Q CR
-
 \ For some hl-code at ADDRESS, return the ADDRESS where (;) sits.
-: >SA   BEGIN DUP @ '(;) <> WHILE CELL+ REPEAT ;
+: >SA   BEGIN NEXT-PARSE SWAP DROP 0= UNTIL ;
+\D : JAN 14 BEGIN 12 WHILE "AAA" TYPE REPEAT 18 ;
+\D 'JAN CFA> >DFA @ >SA
 
 \ Fetch the hl code from XT , return it as a Forth STRING.
 : HL-CODE@  CFA> >DFA @ DUP >SA OVER - ;
 
 \ Store a STRING with hl-code in the dictionary.
-'CODE, ALIAS HL-CODE,
+: HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
 
 \ For DEA: it IS B-optimisable.
 : B-INLINABLE?   DUP >FFA @   BO-MASK AND   0=   SWAP HIGH-LEVEL? AND ;
@@ -236,3 +159,18 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \D ( 'BA OPTIMISE-B)
 \D  'Q OPTIMISE-B
 \D ." Expect  0 1 2 3 4 :" 5 Q CR
+EXIT
+
+\D \ -------------- sample code --------------------------
+\D \ This is the code we seek to optimise. ( Nesting_benchmark )
+\D : A0A CELL+ ;   : A0B 1- ;
+\D : A0 A0A A0B ;   ( 3 + )
+\D : A1 A0 A0 ;   : A2 A1 A1 ;    : A3 A2 A2 ;
+\D : A4 A3 A3 ;   : A5 A4 A4 ;    : A6 A5 A5 ;
+\D : A7 A6 A6 ;   : A8 A7 A7 ;    : A9 A8 A8 ;
+\D
+\D : B0 A9 A9 ;   ( 3072 + )
+\D
+\D : TEST 1000 0 DO ' B0 I DROP EXECUTE LOOP ; ( 3,072,000 + )
+\D : Q 4 >R BEGIN TEST R> 1- DUP WHILE >R REPEAT RDROP ; ( 12,216,000 + )
+\D \ -------------- end of sample code --------------------------
