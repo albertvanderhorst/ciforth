@@ -1,8 +1,6 @@
-\               clone1.frt : an example of clonding in Forth
+\              An example of cloning in Forth
 \  $Id$
 \  Copyright (2002): Albert van der Horst by GNU Public License
-
-VARIABLE APIE
 
 HEX
 \ Originally returnstacksize, doing double duty as tib size.
@@ -74,6 +72,7 @@ HEX
 \ Transport the 2 items on the stack via the return stack.
 DOES> 0 OVER ! >R >R
 SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone LINOS DUP 0< IF THROW THEN
+\ Don't use the return stack until child has been set up.
 DUP IF RDROP R> BEGIN DUP @ UNTIL ! ELSE R> R>
 \ Install return stack
 DUP [ 0 CELL+ ] LITERAL + @ RSP! \ CELL+ is high level!
