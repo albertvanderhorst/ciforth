@@ -92,11 +92,11 @@ B_INVIS   EQU     02H     ;{ dea is invisible, "smudged".}
 B_IMMED   EQU     04H     ;{ dea is a immediate.}
 B_DENOT   EQU     08H     ;{ dea is a denotation.}
 C_HOFFSET EQU     3       ;{ Offsets of code field in cells, w.r.t. dea}
+D_HOFFSET EQU     4       ;{ Same for data field}
 F_HOFFSET EQU     1       ;{ Same for flag field}
 L_HOFFSET EQU     2       ;{ Same for link field}
 N_HOFFSET EQU     0       ;{ Same for name field}
-P_HOFFSET EQU     4       ;{ Same for parameter field}
-D_HOFFSET EQU     5       ;{ Start of data area.}
+DC_HOFFSET EQU     5       ;{ Start of data area (content).}
 B_HOFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
 ;
 ;{      MEMORY + I/O CONSTANTS}
@@ -1848,7 +1848,7 @@ HEADER({:},{COLON},{DOCOL}, , B_IMMED)
 DOCOL:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
 ;        LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
-         MOV     SI,[BX+CELLS(P_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
+         MOV     SI,[BX+CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -1871,7 +1871,7 @@ HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
 worddoc({DEFINING},{CONSTANT},{constant},{n ---},{L0},
 {A defining word used in the form:
     forthvar({n}) forthcode({CONSTANT}) forthvar({cccc})
-to create word forthvar({cccc}) , with its parameter field containing forthcode({n}) . When
+to create word forthvar({cccc}) , with its data field containing forthcode({n}) . When
 forthvar({cccc}) is later executed, it will push the value of forthcode({n}) to the stack.},
 {{VARIABLE}}, {}, enddoc)
 HEADER({CONSTANT},{CONST},{DOCOL})
@@ -1880,15 +1880,16 @@ HEADER({CONSTANT},{CONST},{DOCOL})
         DC      SMUDG
         DC      LATES, TPFA, STORE
         DC      PSCOD
-DOCON:  MOV     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
+DOCON:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
 ;
 worddoc({DEFINING},{VARIABLE},{variable},{},{NISO,E,LU},
 {A defining word used in the form:
                  forthsamp({n VARIABLE cccc})
 When forthcode({VARIABLE}) is executed, it creates the definition forthvar({cccc}) with its
-parameter field initialized to forthvar({n}) . When forthvar({cccc}) is later executed, the
-address of its parameter field (containing forthvar({n}) ) is left on the stack,
+data field pointing to a data location that is initialized to forthvar({n}) . 
+When forthvar({cccc}) is later executed, the
+content of its data field (containing forthvar({n}) ) is left on the stack,
 so that a fetch or store may access this location.},{{USER},{CONSTANT}}, {}, enddoc)
 HEADER({VARIABLE},{VAR},{DOCOL})
         DC      PWORD
@@ -1896,14 +1897,14 @@ HEADER({VARIABLE},{VAR},{DOCOL})
         DC      SMUDG
         DC      COMMA
         DC      PSCOD
-DOVAR:  MOV     AX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
+DOVAR:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
 worddoc({DEFINING},{USER},{user},{n ---},{L0},
 {A defining word used in the form:
                forthsamp({n USER cccc})
 which creates a user variable forthvar({cccc}) .
-The parameter field of forthvar({cccc}) contains forthvar({n}) as a fixed offset relative to
+The data field of forthvar({cccc}) contains forthvar({n}) as a fixed offset relative to
 the user pointer register forthsamp({UP}) for this user variable. When forthvar({cccc}) is
 later executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
@@ -1912,7 +1913,7 @@ particular variable. In ciforth the forthsamp({UP}) is fixed.
 HEADER({USER},{USER},{DOCOL})
         DC      CONST
         DC      PSCOD
-DOUSE:  MOV     BX,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{PFA  }
+DOUSE:  MOV     BX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
@@ -2421,9 +2422,9 @@ HEADER({>CFA},{TCFA},{DOCOL})
 ;
 worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
-parameter field address.},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
+data field address.},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
 HEADER({>PFA},{TPFA},{DOCOL})
-        DC      LIT, CELLS(P_HOFFSET)
+        DC      LIT, CELLS(D_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2559,7 +2560,7 @@ completed without error.},{{IMMEDIATE}}, {}, enddoc)
 HEADER({SMUDGE},{SMUDG},{DOCOL})
         DC      LATES
         DC      TFFA
-        DC      LIT,20H
+        DC      LIT,B_INVIS
         DC      TOGGL
         DC      SEMIS
 ;
@@ -2626,7 +2627,7 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      PSCOD
 DODOE:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-        MOV     SI,[BX+CELLS((P_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        MOV     SI,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
         LEA     AX,[SI+CELLS(1)]
         MOV     SI,[SI]
         _PUSH
@@ -3047,7 +3048,7 @@ worddoc({DEFINING},{(CREATE)},{paren_create},{sc --},{},
 {This is the basis for all defining words. used in the form:
 A well defined header is created with the string constant forthsamp({sc}) 
 as the namefield. It is linked into the CURRENT vocabulary.
-The code field and parameter field both 
+The code field and data field both 
 point to the area owned by this header, i.e. immediately following the
 completed header. },{}, {}, enddoc)
 HEADER({(CREATE)},{PCREAT},{DOCOL})
@@ -3070,19 +3071,22 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
 CREA1:  DC      DROP
         DC      SCOMMA
         DC      HERE,TOR
+
         DC      COMMA   ; {Name field.}
-        DC      ZERO,COMMA ; {Flag field.}
-        DC      LATES
-        DC      COMMA   ; {Link field.}
-        DC      RR
-        DC      CURR
-        DC      FETCH
-        DC      TLFA
-        DC      STORE
-        DC      FROMR, LIT, CELLS(D_HOFFSET), PLUS
-        DC      LDUP, COMMA   ; {Code field.}
+
+        DC      LIT, B_INVIS, COMMA ; {Flag field.}
+
+        DC      CURR, FETCH, TLFA
+        DC      LDUP, FETCH, COMMA   ; {Link field.}
+        DC      RR, SWAP, STORE
+
+        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
+        DC      COMMA   ; {Code field.}
+
+        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
         DC      COMMA         ; {Parameter field.}
-        DC      SMUDG
+
+        DC      FROMR, DROP
         DC      SEMIS
 ;
 worddoc({COMPILING},{[COMPILE]},{bracket_compile},{},{p,C},
@@ -3246,12 +3250,11 @@ make it the forthcode({CONTEXT}) vocabulary which is searched first by forthcode
 The sequence forthvar({cccc}) forthcode({DEFINITIONS}) also make forthvar({cccc}) the forthcode({CURRENT})
 vocabulary into which new definitions are placed.
 
-A vocabulary parameter field contains at first the dovoc pointer, then
-follows its data field. This
-contains a dummy dea (forthdefi({DDEA})) with a name " " (blank) ,
+A vocabulary 's data content field contains at first the dovoc pointer, then
+follows its forthdefi({body}) . 
+The body contains a dummy dea (forthdefi({DDEA})) with a name " " (blank) ,
 a dummy link field (forthcode({DLFA}))
-that points to the dea
-of the first word of the vocabulary.
+that points to the dea of the first word of the vocabulary.
 Actually executing the vocabulary means storing its DDEA into forthcode({CONTEXT}) .
 Then follows the vocabulary link field address ( forthdefi({VLFA}) )
 The VLFA points to the VLFA of the next vocabulary or 0 for the end.
@@ -5176,11 +5179,12 @@ RSLW4:
 worddocsafe({DICTIONARY},{'},{tick},{--- addr},{P,L0},
 {Used in the form: .
 forthcode({'}) forthcode({nnnn})
-Leaves the parameter field address of dictionary word forthvar({nnnn}).
+Leaves the dictionary entry address of dictionary word forthvar({nnnn}).
+This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
-{{CFA},{>LFA},{>NFA},{>PFA}} , {}, enddoc)
+{{CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} , {}, enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED)
         DC      PWORD
         DC      PFIND
