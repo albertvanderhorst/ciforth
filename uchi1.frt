@@ -2,8 +2,8 @@
 \  see <url:http://www.lib.uchicago.edu/keith/crisis/benchmarks/tak/>
 \  Tod Olson <ta-olson@uchicago.edu>
 \
-8 LOAD              \ The usual
-146 LOAD            \ Linux system access ARGC ARGV TURNKEY
+REQUIRE ARGC
+REQUIRE ARG[]
 
 \ Print an error message and return to the OS
 \ In good Unix style, the name fo the program and
@@ -11,13 +11,11 @@
 : MY-ERROR
     " : FATAL! " TYPE CR
     "Usage: " TYPE CR
-    ARGV @ CTYPE " <integer1> <integer2> <integer3>" TYPE CR
+    0 ARG[] TYPE " <integer1> <integer2> <integer3>" TYPE CR
     BYE ;
 
 \ Install it as the handler for uncaught exceptions.
-\ No way one could use the ``uchi1'' program
-\ to fire up a Forth interpreter and hose Linux.
-\ -1 WARNING !     ' MY-ERROR >PFA @     ' (ABORT) >PFA !
+0 WARNING !     'MY-ERROR 'ERROR 3 CELLS MOVE
 
 \ Wel here you have it.
 \ The example program with poor mans recursion
@@ -39,7 +37,7 @@ VARIABLE X      VARIABLE Y      VARIABLE Z
 
 \ Return command line argument number INDEX as a DOUBLE
 : GET-ARGUMENT-NUMBER
-    >R 0. ARGV R@ CELLS + @ 23    \ Prepare arg for >NUMBER
+    >R 0. R@ ARG[] DROP 23    \ Prepare arg for >NUMBER
     >NUMBER  DROP
     \ If the inconvertable digit was not the end of the
     \ c-string, we have a trouble spot.
@@ -61,5 +59,3 @@ VARIABLE X      VARIABLE Y      VARIABLE Z
 
 \ Guess what? The main program.
 : main get-args tak . CR BYE ;
-
-' main "uchi1" TURNKEY
