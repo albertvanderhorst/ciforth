@@ -191,14 +191,14 @@ DOIT    COMMAND-BUFFER $@
 
 \
 ( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
-CREATE task
+HERE \ To be FORGOTTEN
 1 LOAD   REQUIRE SHIFT-ARGS
-\ Install other library
+\ Install other library, then forget all from ADDRESS up.
 : SWITCH-LIBS   BLOCK-EXIT
     ARGV 2 CELLS + @ Z$@ BLOCK-FILE $!
     BLOCK-INIT
     SHIFT-ARGS   SHIFT-ARGS
-    'task 'FORTH FORGET-VOC COLD ;
+    FORGOTTEN COLD ;
 
 \ Must all be done in one go!
 SWITCH-LIBS
@@ -862,13 +862,13 @@ CREATE BASE' 0 ,
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
 
 
-(  ALIAS HIDE INCLUDE IVAR ) REQUIRE CONFIG \ AvdH A1oct05
+(  ALIAS HIDE IVAR FORGET INCLUDE ) REQUIRE CONFIG \ AvdH
 
 : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
 
 : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
 
-\ : FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
+: FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
 : IVAR CREATE , ;
 
 
@@ -971,7 +971,7 @@ REQUIRE POSTFIX
   MEASURE-PRIME
 
 CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY &Y =  IF
-  "TASK" POSTFIX FORGET
+  'TASK FORGOTTEN
 THEN
 
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
@@ -1158,7 +1158,7 @@ REQUIRE CONFIG   REQUIRE +THRU
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
 \ Save the system in a file with NAME .
- : SAVE-SYSTEM
+ : SAVE-SYSTEM   HERE FORGOTTEN
 \ Increment the file and dictionary sizes
   HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
@@ -2066,7 +2066,7 @@ LOOP DROP R> + ^J SWAP 2DROP ;
 0 IVAR CURSOR
  : CURL CURSOR @ VW / ; : CP CURSOR @ VW MOD  ;
  : BIOS-CURSOR CURSOR @ VW /MOD 100 * + ;
-: SET BIOS-CURSOR X 0 200 10 BIOSN 2DROP ;
+: SET BIOS-CURSOR _ 0 200 10 BIOSN 2DROP ;
 : MOVE-CURSOR   ( WORD STAR)
 DUP ^D = IF  1 ELSE   DUP ^E = IF 0 VW - ELSE
 DUP ^I = IF  8 ELSE   DUP ^M = IF VW CP - ELSE
@@ -2180,9 +2180,9 @@ HEX
 
 
 : BIOSI SWAP 2SWAP SWAP BIOSN 2DROP ;  ( Ignore result)
-: VIDEO-MODE  >R X X X R> 10 BIOSN 2DROP ;
+: VIDEO-MODE  >R _ _ _ R> 10 BIOSN 2DROP ;
 \ Reset DISK (C: 80 D: 81 A: 0 B: 1 etc.)
-: DISK-INIT   X X 0 13 BIOSN 2DROP  ;
+: DISK-INIT   _ _ 0 13 BIOSN 2DROP  ;
 
 
 

@@ -23,10 +23,10 @@ HEX : XX ; CR
 divert(4)dnl
 testing $1
 forall2({onetest},$2)
-S[ ] 
+S[ ]
 divert(2)dnl
 .S CR
-FORGET XX  })
+'XX FORGOTTEN })
 divert(1)dnl
 CR
 divert(3)dnl
