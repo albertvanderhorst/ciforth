@@ -213,8 +213,8 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
  ( It is done by examples of the defined words )
  : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
         CFOF BL @ BY -co
- : -va DUP CFA> >DFA @ @ CR H.. ." VARIABLE " ID.. CR ;
-        CFOF RESULT @ BY -va
+ : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
+    ID.. CR ;              CFOF RESULT @ BY -va
  : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE @ BY -us
  : ITEM ( 1/1 Desinterpret next item, increments pointer)

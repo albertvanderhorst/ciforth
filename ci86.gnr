@@ -90,8 +90,15 @@ FIGREL  EQU     4       ;{ FIG RELEASE #}
 FIGREV  EQU     0       ;{ FIG REVISION #}
 USRVER  EQU     0      ;{ USER VERSION NUMBER, a digit now}
 ;
-;{       PROTECTION}
-CW      EQU     M4_CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
+;{      MEMORY LAYOUT.}
+;{ These values can be changed at this single place. }
+NBUF    EQU     8      ;{ NO. OF BUFFERS AKA SCREENS }
+KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
+US      EQU     100H     ;{ USER VARIABLE SPACE}
+EM      EQU     M4_EM    ;{Where the memory ends w.r.t. ORIG.}
+_BITS16_({RTS     EQU     0100H    ;{ RETURN STACK & TERM BUFFER} })
+_BITS32_({RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
+;
 _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}})
 ;
 ;{      ASCII CHARACTER EQUIVALENTS}
@@ -99,12 +106,12 @@ _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFF
 ABL     EQU     20H     ;{ SPACE}
 ACR     EQU     0DH     ;{ CR}
 ADOT    EQU     2EH     ;{ PERIOD}
+ALF      EQU     0AH     ;{ LINE FEED, USED INTERNALLY AS}
+                        ;{ LINE ENDER}
+AFF      EQU     0CH     ;{ FORM FEED}
 BELL    EQU     07H     ;{ ^G}
 BSIN    EQU     08H     ;{ INPUT DELETE CHARACTER}
 BSOUT   EQU     08H     ;{ OUTPUT BACKSPACE ( ^H )}
-LF      EQU     0AH     ;{ LINE FEED, USED INTERNALLY AS}
-                        ;{ LINE ENDER}
-FF      EQU     0CH     ;{ FORM FEED}
 ;
 ;{      HEADER RELATED EQUATES}
 B_DUMMY   EQU     01H     ;{ dea is dummy, from vocabulary link}
@@ -118,15 +125,6 @@ L_HOFFSET EQU     3       ;{ Same for link field}
 N_HOFFSET EQU     4       ;{ Same for name field}
 PH_OFFSET EQU     5       ;{ Past header field: Start of data area. }
 BD_OFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
-;
-;{      MEMORY + I/O CONSTANTS}
-;{ These values can be changed at this single place. }
-NBUF    EQU     8      ;{ NO. OF BUFFERS AKA SCREENS }
-KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
-US      EQU     100H     ;{ USER VARIABLE SPACE}
-EM      EQU     M4_EM    ;{Where the memory ends w.r.t. ORIG.}
-_BITS16_({ RTS     EQU     0100H    ;{ RETURN STACK & TERM BUFFER} })
-_BITS32_({ RTS     EQU  10000H    ;{ RETURN STACK & TERM BUFFER} })
 ;
 _EQULAYOUT_({
 _HIGH_BUF_({
@@ -149,6 +147,7 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
+CW      EQU     M4_CELLWIDTH    ;{ Size of a cell in Forth, not in the bootcode.}
 ;
 _RWHD_({
 ;{ PHYSICAL DISK PARAMETERS}
@@ -440,7 +439,7 @@ _BOOTED_({
 DISPLAYCR:
         MOV     AL,ACR
         CALL    DISPLAY
-        MOV     AL,LF
+        MOV     AL,ALF
         JMP DISPLAY
 
 DISPLAYPC:      POP     AX
@@ -683,34 +682,25 @@ ORIG:                         ; Accommodate also .exe files
 ;
 ; Check to see if DPMI is available, and make the switch if it is
             CALL    ChkDPMI             ;See if host is present
-            MOV     BX,'0'
+            MOV     BX,'1'
             JC      ERRMSG              ;Not there
 
             MOV     AX,0                ;In case no memory needed
             MOV     BX,[MemNeeded]        ;Get number of paragraphs needed by host
-            CMP     BL,'0'                ;Any allocation needed?
+            CMP     BL,0                ;Any allocation needed?
             JE      Plunge              ;No, so continue
             MOV     AH,48h              ;Allocate memory
             INT     21h
-            MOV     BL,'1'
+            MOV     BL,'2'
             JC      ERRMSG              ;Could not allocate
 
 Plunge:     MOV     ES,AX
-            MOV     AX,0                ;Indicate 16-bit application
+            MOV     AX,_BITS16_(0)_BITS32_(1)
             _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
-            MOV     BL,'2'
-            JC      ERRMSG              ;Error--still in real mode
+            MOV     BL,'3'
+            JNC     DPMISUCCESS
 
-; If we reach this point, we are operating in protected mode
-
-            PUSH    DS                  ; Throw away PSP, for now
-            POP     ES
-            JMP     BOOTUP
-
-; The error number is patched!
-EMsg       DB      'ciforth DPMI : ERROR #',13,10
-EMsgS      EQU     $-EMsg
-
+;Error--still in real mode fallen through, or called from diverse places.
 ERRMSG:    LEA     SI, [EMsg]
            MOV    _BYTE_PTR[SI+21], BL
            MOV     AX,4000H
@@ -720,6 +710,10 @@ ERRMSG:    LEA     SI, [EMsg]
            INT     21H
            MOV     AX,4C00H
            INT     21H
+
+; The error number is patched!
+EMsg       DB      'ciforth DPMI : ERROR #',ACR,ALF
+EMsgS      EQU     $-EMsg
 
 ; The following routine checks to see if a DPMI master program is installed.
 ; If one is not, the carry flag is set on return
@@ -753,6 +747,10 @@ ELSE1:
 
 NotThere:   STC
 Done:       RET
+
+
+; If we reach this point, we are operating in protected mode
+DPMISUCCESS:
 
 ; ######################### DPMI END ###############################################################
 
@@ -819,7 +817,7 @@ _COMMENT
 
    FORTH   8088     FORTH PRESERVATION RULES
    -----   ----     ----- ------------ -----
-    IP      SI      Interpreter pointer.  Must be preserved
+    {IP}      SI      Interpreter pointer.  Must be preserved
                     across FORTH words.
 
     {WR}      AX      Working register.  When entering a word
@@ -1755,7 +1753,7 @@ of the next line, if needed the display is scrolled.})},{{OUT}},
 B}},
 enddoc)
 HEADER({CR},{CR},{DOCOL})
-        DC      LIT,LF
+        DC      LIT,ALF
         DC      EMIT
         DC      ZERO, LOUT, STORE
         DC      SEMIS
@@ -1893,8 +1891,7 @@ worddoc( {LOGIC},{INVERT},{INVERT},{n1 --- n2},{L1},
 enddoc)
 CODE_HEADER({INVERT},{INVER})
         POP     AX      ;{ (S1) <- (S1) XOR (S2)}
-        NEG     AX
-        DEC     AX
+        NOT     AX
         _PUSH
 ;
 worddocsafe( {STACKS},{DSP@},{d_s_p_fetch},{--- addr},{},
@@ -2318,84 +2315,49 @@ HEADER({WITHIN},{WITHIN}, {DOCOL})
         DC      ULESS
         DC      SEMIS
 ;
-_PC_({
+_LOAD_({
+worddocsafe( {MEMORY},{L@},{long_fetch},{u addr --- n},{},
+{Leave the _BITS_ bit contents of forthsamp({u:addr}),
+_BITS16_({ the real mode segment plus offset
+forthsamp({addr}).}) _BITS32_({ the offset forthsamp({addr}) at
+selector forthsamp({u}) .}) },
+{{L!},{@},{C@},{2@}},
+{{." No test"},{No test} },
+enddoc)
 CODE_HEADER({L@},{LFET})
-_BITS32_({
-worddocsafe( {MEMORY},{L@},{long_fetch},{rseg addr --- n},{},
-{Leave the _BITS_ bit contents of forthsamp({rseg:addr}),
-interpreted as if it was a real mode segment plus offset addres.
-This only works if the data segment is mapped directly (not paged) from
-physical address 0H . },
-{{L!},{@},{C@},{2@}},
-{{." No test"},{No test} },
-enddoc)
-        POP     BX      ;MEM LOC
-        POP     AX      ;SEG REG VAL
-        MOV     DX,10H
-        MUL     DX
-        ADD     AX,BX
-        MOV     AX,[AX]
-        _PUSH
-});_END_({ _BITS32_})
-_BITS16_({
-worddocsafe( {MEMORY},{L@},{long_fetch},{rseg addr --- n},{},
-{Leave the _BITS_ bit contents of forthsamp({rseg:addr}),
-the real mode segment plus offset addres.},
-{{L!},{@},{C@},{2@}},
-{{." No test"},{No test} },
-enddoc)
         POP     BX      ;MEM LOC
         POP     CX      ;SEG REG VAL
-        _SWITCH_({JMPHERE_FROM_PROT})
+_BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
         MOV     DX,DS   ;{ Leave this for real mode code.}
         MOV     DS,CX
         MOV     BX,[BX]
         MOV     DS,DX
-        _SWITCH_({JMPHERE_FROM_REAL})
+_BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
         PUSH    BX
         _NEXT
-});_END_({ _BITS16_})
 ;
+worddoc( {MEMORY},{L!},{long_store},{n u addr --- },{},
+{Store _BITS_ bits of forthvar({n}) at address
+forthsamp({u:addr}),
+_BITS16_({ the real mode segment plus offset
+forthsamp({addr}).}) _BITS32_({ the offset forthsamp({addr}) at
+selector forthsamp({u}) .}) },
+{{L@},{!},{C!},{2!}},
+{{." No test"},{No test} },
+enddoc)
 CODE_HEADER({L!},{LSTORE})
-_BITS32_({
-worddoc( {MEMORY},{L!},{long_store},{n nseg addr --- },{},
-{Store _BITS_ bits of forthvar({n}) at address
-forthsamp({rseg:addr}),
-interpreted as if it was a real mode segment plus offset addres.
-This only works if the data segment is mapped directly (not paged) from
-physical address 0H . },{{L@},{!},{C!},{2!}},
-{{." No test"},{No test} },
-enddoc)
-        POP     BX      ;MEM LOC
-        POP     AX      ;SEG REG VAL
-        MOV     DX,10H
-        MUL     DX
-        ADD     AX,BX
-        POP     BX
-        MOV     [AX],BX
-        _NEXT
-});_END_({ _BITS32_})
-_BITS16_({
-worddoc( {MEMORY},{L!},{long_store},{n nseg addr --- },{},
-{Store _BITS_ bits of forthvar({n}) at address
-forthsamp({rseg:addr}),
-a real mode segment plus offset addres.
-},{{L@},{!},{C!},{2!}},
-{{." No test"},{No test} },
-enddoc)
         POP     BX
         POP     CX
         POP     DX
-        _SWITCH_({JMPHERE_FROM_PROT})
+_BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
         MOV     AX,DS
         MOV     DS,CX
         MOV     [BX],DX
         MOV     DS,AX
-        _SWITCH_({JMPHERE_FROM_REAL})
+_BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
         _NEXT
-});_END_({ _BITS16_})
 ;
-});_END_({_PC_})
+});_END_({_LOAD_})
 worddoc( {DEFINING},{:},{colon},{},{ISO,FIG,E,L0},
 {Used in the form called a colon-definition:
 forthexample({: cccc     ...     ;})
@@ -2640,7 +2602,7 @@ in use by Forth.
 },{{DP},{BM}},
 {{." See FIRST"},{See FIRST}},
 enddoc)
-HEADER({EM},{LEM},{DOCON}, EM)
+HEADER({EM},{LEM},{DOCON}, ACTUAL_EM)
 ;
 worddoc( {MEMORY},{BM},{begin_memory},{---- addr},{},
 {A constant leaving the address of the lowest memory
@@ -4805,7 +4767,7 @@ A blank after the word forthcode({\}) is required.},
 },{} },
 enddoc)
 HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
-        DC      LIT,LF
+        DC      LIT,ALF
         DC      PPARS
         DC      TDROP
         DC      SEMIS
@@ -4841,7 +4803,7 @@ NOOPS:  DC      STATE  ;{ This code may be patched.}
         DC      FETCH  ;{ This code may be patched.}
         DC      ZEQU
         _0BRANCH(QUIT2) ;{IF}
-        _STRINGINLINE({OK})   ;{THEN}
+        _STRINGINLINE({ OK})   ;{THEN}
         DC      LTYPE
         DC      CR
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
@@ -5399,7 +5361,7 @@ worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
 forthsamp({port}). A port address is always 16 bits .},
 {{PC!},{P@},{P!},{@}},
-{{(No test)},{}},
+{{( No test)},{}},
 enddoc)
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
@@ -5413,7 +5375,7 @@ worddoc( {MEMORY},{PC!},{port_char_store},{b port --- },{},
 forthsamp({port}).
 A port address is always 16 bits .},
 {{PC@},{P!},{P@},{!}},
-{{(No test)},{}},
+{{( No test)},{}},
 enddoc)
 CODE_HEADER({PC!},{PCSTO})
         POP     DX      ;{PORT ADDR}
@@ -5425,7 +5387,7 @@ worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
 forthsamp({port}). A port address is always 16 bits .},
 {{P!},{PC@},{PC!},{@}},
-{{(No test)},{}},
+{{( No test)},{}},
 enddoc)
 CODE_HEADER({P@},{PFET})
         POP     DX      ;{PORT ADDR}
@@ -5436,7 +5398,7 @@ worddoc( {MEMORY},{P!},{port_store},{n port --- },{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
 forthsamp({port}) .},
 {{P@},{PC!},{PC@},{!}},
-{{(No test)},{}},
+{{( No test)},{}},
 enddoc)
 CODE_HEADER({P!},{PSTO})
         POP     DX      ;{PORT ADDR}
@@ -6087,7 +6049,7 @@ forthcode({OUT}) is incremented for each character output
 and reset by a LF.
 .},{{OUT}}, {}, enddoc)
 HEADER({EMIT},{EMIT},{DOCOL})
-        DC      LDUP,LIT,LF,EQUAL
+        DC      LDUP,LIT,ALF,EQUAL
         _0BRANCH(EMIT1)
         DC      LIT,ACR,EMIT
         DC      ZERO,LOUT,STORE
@@ -6168,7 +6130,7 @@ PACCEP2:
 ;        DC       LIT, 'a', EMIT
         DC      LIT, REMAIND
         DC      TFET
-        DC      LIT, LF, SINDEX
+        DC      LIT, ALF, SINDEX
         DC      ZEQU
         _0BRANCH(PACCEP1)
 ;        DC      RETOBO
@@ -6183,11 +6145,11 @@ PACCEP1:
 ;        DC      SPLOFF
         DC      LIT, REMAIND             ; go
         DC      TFET                     ; go
-        DC      LIT, LF, SINDEX          ; go
+        DC      LIT, ALF, SINDEX          ; go
         DC      ZEQU                     ; go
         DC      LIT, 13, QERR            ; go
         DC      LIT, REMAIND, TFET
-        DC      LIT, LF, SSPLIT
+        DC      LIT, ALF, SSPLIT
         DC      TSWAP, LIT, REMAIND, TSTOR
         DC      SEMIS
 
@@ -6358,7 +6320,7 @@ PACCEP2:
 ;        DC       LIT, 'a', EMIT
         DC      LIT, REMAIND
         DC      TFET
-        DC      LIT, LF, SINDEX
+        DC      LIT, ALF, SINDEX
         DC      ZEQU
         _0BRANCH(PACCEP1)
 ;        DC      RETOBO
@@ -6373,11 +6335,11 @@ PACCEP1:
 ;        DC      SPLOFF
         DC      LIT, REMAIND             ; go
         DC      TFET                     ; go
-        DC      LIT, LF, SINDEX          ; go
+        DC      LIT, ALF, SINDEX          ; go
         DC      ZEQU                     ; go
         DC      LIT, 13, QERR            ; go
         DC      LIT, REMAIND, TFET
-        DC      LIT, LF, SSPLIT
+        DC      LIT, ALF, SSPLIT
         DC      TSWAP, LIT, REMAIND, TSTOR
         DC      SEMIS
 
@@ -6577,12 +6539,12 @@ HEADER({EMIT},{EMIT},{DOCOL})
         DC      PSTORE,SEMIS
 PEMIT   DC      $+_CELLS(1)
         POP     AX      ;{GET CHAR}
-        CMP     AL,LF   ;{ Precede ^J with ^M}
+        CMP     AL,ALF   ;{ Precede ^J with ^M}
         JNE     PEMIT1
         MOV     _CELL_PTR[_VAR_FIELD(LOUT)],0H
         MOV     AL,ACR
         CALL    CHO
-        MOV     AL,LF
+        MOV     AL,ALF
         ;{ Bizar, without the colon MASM reports error.}
 PEMIT1: CALL    CHO    ;{CHAR OUTPUT}
         _NEXT
@@ -6674,7 +6636,7 @@ a carriage return.
 HEADER({EMIT},{EMIT},{DOCOL})
              DC      ONE,LOUT,PSTORE
              DC      LIT, 07FH, LAND
-             DC      LDUP,LIT,LF,EQUAL
+             DC      LDUP,LIT,ALF,EQUAL
              _0BRANCH(EMIT1)
              DC      LIT,ACR,PEMIT
              DC      ZERO,LOUT,STORE
@@ -8265,7 +8227,7 @@ HEADER({LIST},{LLIST},{DOCOL})
         DC      BASE, STORE
         DC      SCR, FETCH, BLOCK
         DC      LIT,1024
-LLIST1: DC      LIT, LF, SSPLIT
+LLIST1: DC      LIT, ALF, SSPLIT
         DC      CR, LTYPE
         DC      OVER,ZEQU
         _0BRANCH(LLIST1)
@@ -8281,7 +8243,7 @@ comment lines of an area of text on disc screens.},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({INDEX},{INDEX},{DOCOL})
-        DC      LIT,FF
+        DC      LIT,AFF
         DC      EMIT,CR
         DC      ONEP,SWAP
         _DO(INDE9)
@@ -8351,7 +8313,7 @@ reference line at the bottom taken from line 15 of screen 4.},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({TRIAD},{TRIAD},{DOCOL})
-        DC      LIT,FF
+        DC      LIT,AFF
         DC      EMIT
         DC      LIT,3
         DC      SLASH
@@ -8377,7 +8339,7 @@ worddoc( {MISC},{.CPU},{dot_cpu},{---},{},
 parameters. Using the bizar convention of a base-36 number.},
 {{ABORT},{COLD}},
 _PROTECTED_({{{.CPU},{80386}},})
-_REAL_({{{.CPU},{8086}},})
+_REAL_({{{.CPU},{8088}},})
 {},
 enddoc)
 HEADER({.CPU},{DOTCPU},{DOCOL})
@@ -8461,7 +8423,7 @@ STRTIB: _RESB     RTS            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
 STRUSA: _RESB    US              ;{ User area}
 BUF1:   _RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
-; { EM: as a label would point here.}
+ACTUAL_EM:  ;{ Differs from EM if ocde is relocated.}
 });_END_({ _HOSTED_LINUX_})
 ;
 
