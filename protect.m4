@@ -20,13 +20,13 @@ dnl The curly brackets prevent AX to be expanded to EAX
         MOV     {AX},DS_SANDBOX ; {Make stack valid}
         MOV     SS,{AX}
         STI
-        _BITS32_1_({BITS 32})
 })dnl
 define({JMPHERE_FROM_REAL},{
         CLI
 	MOV EAX,CR0
 	INC AL  
 	MOV CR0,EAX            ;set protected mode
+        _BITS32_1_({BITS 32})
         JMPFAR
 	DW      $+4
         DW      GDT_CS   
