@@ -103,8 +103,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : 4?  1+ 4 MOD 0= IF &. HOLD THEN ;
 ( Generate string with hex format of DOUBLE of LEN digits)
  : (DH.) <HEX <# 1- 0 DO # I 4? LOOP # #> HEX> ;
- : DH. 16 (DH.) TYPE ; (  print DOUBLE in hex )
- : H.  S>D 8 (DH.) TYPE ; ( print SINGLE in hex )
+ : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
+ : H.  S>D 2 CELLS (DH.) TYPE ; ( print SINGLE in hex )
  : B.  S>D 2 (DH.) TYPE ; ( print BYTE in hex )
 
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
@@ -203,8 +203,8 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
     THEN ;
 : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
- : ?IM  ( CFA--f tests whether word IMMEDIATE )
-      >FFA @ 4 AND ;
+( For the DEA : it IS immediate / it IS a denotation )
+ : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
  : BY ( DEA --. the CFA word is decompiled using : )
@@ -227,8 +227,9 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
  ( Decompilation of special high level words)
   : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
    BEGIN ?Q DUP @  LIT EXIT <> ( >R DUP LIM @ < R> AND ) WHILE
-        ITEM REPEAT
-   CR DROP ." ;" ?IM IF ."  IMMEDIATE " THEN CR ;
+        ITEM REPEAT   CR DROP ." ;"  DUP
+?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
+CR ;
        CFOF TASK @  BY -hi
  ( for all -words: 1/1 pointer before afd after execution)
  : -lit CELL+ DUP @ H.. CELL+ ;
@@ -237,7 +238,6 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
      CFOF 0BRANCH BY -0br
  : -br  CR ." BRANCH  [ " -lit ." , ] " ;
      CFOF BRANCH BY -br
-
  CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
@@ -510,13 +510,11 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
      THOUSANDS @ 1
      ?DO I MILS !  1 MANTISSA !  NEWLINE I 500 * BATCH LOOP ;
 
- ." DEFINIEER ^. EN  ''.  85JAN06 ALBERT VAN DER HORST"
- <HEX
-  : TOH 30 - DUP 9 > IF 7 - THEN ;
-(    1 WIDTH !
-( : &. ( 0/1 Leaves ASCII character at .  f.i. &A leaves 41H)
-(   HERE 2 + C@ [COMPILE] LITERAL ; IMMEDIATE
-( : ^. ( 0/1 leaves control character at . f.i. ^A leaves 01H)
+ ." DEFINE $ FOR HEX NUMBERS A1APR15 ALBERT VAN DER HORST"
+ DENOTATION DEFINITIONS
+ : $ BASE @ >R (NUMBER) R> BASE ! POSTPONE SDLITERAL ;
+ FORTH DEFINITIONS     12 LATEST >FFA !
+(    1 WIDTH ! : TOH 30 - DUP 9 > IF 7 - THEN ; )
 (   HERE 2 + C@ 1F AND [COMPILE] LITERAL ; IMMEDIATE
 ( : $.. ( 0/1 leaves hex number f.i. $0A leaves 0AH)
 (   HERE 2 + C@ TOH 10 * HERE 3 + C@ TOH + [COMPILE] LITERAL ;
@@ -525,7 +523,9 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
 (    0 HERE 6 + HERE 2 + DO 10 * I C@ TOH + LOOP
 (    [COMPILE] LITERAL ; IMMEDIATE
 (    1F WIDTH ! )
-  1B CONSTANT ESC    0F CONSTANT SI   0E CONSTANT SO HEX>
+ <HEX 1B CONSTANT ESC    0F CONSTANT SI   0E CONSTANT SO HEX>
+
+
  ." 84NOV25 Initialize STAR-printer AH "  <HEX
  : PEMIT 7F AND 5 BDOS DROP ;
  : PCR   0D PEMIT   0A PEMIT ;
@@ -1617,7 +1617,7 @@ HEX : TEXT HERE C/L 1+ BLANK WORD PAD C/L 1+ CMOVE ;
 ( MINI EDITOR FOR MSDOS ) HEX
 B800 CONSTANT VID   050 CONSTANT VW   19 CONSTANT VH
 VH VW * CONSTANT VL
-: A-L SCR @ (LINE) ;
+: A-L SCR @ (LINE) 1- ;
 : VA ( I - VS,VO ) DUP + VID SWAP ;
 : >V SWAP 0 DO  ( $, OFFSET - )
         OVER I + C@ 700 OR   OVER I + VA LC!
