@@ -4514,11 +4514,9 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 _ALIGNED_({ DC      LALIGN},{dnl})
         DC      HERE,TOR
 
-        DC      RR, LIT, _CELLS(PH_OFFSET), PLUS
-        DC      COMMA   ; {Code field.}
+        DC      RR, TPHA, COMMA         ; {Code field.}
 
-        DC      RR, LIT, _CELLS(PH_OFFSET), PLUS
-        DC      COMMA         ; {Parameter field.}
+        DC      RR, TPHA, COMMA         ; {Data field.}
 
         DC      ZERO, COMMA ; {Flag field.}
 
@@ -4790,8 +4788,7 @@ forthcode({IMMEDIATE}) .},
 enddoc)
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      CREATE
-        DC      HERE
-        DC      BODYF    ;{ Link this DEA into VOC-LINK chain.}
+        DC      LATEST   ;{ Link this DEA into VOC-LINK chain.}
         DC      VOCL
         DC      FETCH
         DC      COMMA
@@ -4801,7 +4798,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      ZERO, COMMA   ;{ Dummy data field}
         DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
         DC      LIT, FORTH, COMMA ;{Links to the word FORTH}
-        DC      ZERO, COMMA   ;{ Dummy name field}
+;        DC      ZERO, COMMA   ;{ Dummy name field}
         DC      DOES
 DOVOC:
         DC      ALSO
@@ -6257,7 +6254,7 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
 {{ 123 10 MS . },{123}},
 enddoc)
 HEADER({MS},{MS},{DOCOL})
-        DC      LIT, 1000, SLMOD
+        DC      LIT, 1000, LIT, 1000000, SSMOD ;{ (ms -- us s) }
         DC      LIT, TV, TSTOR
         DC      ZERO, ZERO
         DC      ZERO, ZERO
