@@ -49,14 +49,14 @@ REQUIRE $
 \ For DEA : it HAS no side effects, input or output.
 : NS?   >FFA @ FMASK-NS AND FMASK-NS = ;
 
-\ How MANY stack cells on top contain a compile time constant?
-VARIABLE CSC
+\ The virtual stack depth, maintained while parsing.
+VARIABLE VD
 
 
 \ From WHERE do we have optimisable code. (Ends at ``HERE'')
 VARIABLE OPT-START
 
-: !OPT-START   HERE OPT-START !   0 CSC ! ;
+: !OPT-START   HERE OPT-START !   0 VD ! ;
 
 \ There has been made progress during the last optimisation.
 VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
@@ -69,7 +69,7 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 
 \ For STACKEFFECTBYTE : we KNOW we have enough pops, i.e. after applying
 \ this stackeffect the virtual stack doesn't underflow.
-: ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSC @ > 0=  AND ;
+: ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- VD @ > 0=  AND ;
 
 \ ---------------------------------------------------------------------
 \ INCLUDE nss.frt
@@ -80,40 +80,38 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 FMASK-ST '.S >FFA OR!
 FMASK-ST 'DEPTH >FFA OR!
 
-\ From WHERE do we have optimisable code. (Ends at ``HERE'')
-VARIABLE SWAPPER-START
-
 \ The minimum step depth we have encountered.
 VARIABLE MIN-DEPTH
 
-: REMEMBER-DEPTH CSC @   MIN-DEPTH @   MIN MIN-DEPTH ! ;
+\ Keep a record of how LOW the stack has been.
+: REMEMBER-DEPTH VD @   MIN-DEPTH @   MIN MIN-DEPTH ! ;
 
-: !SWAPPER-START   HERE SWAPPER-START !   CSC @  MIN-DEPTH ! ;
+: !MIN-DEPTH   VD @  MIN-DEPTH ! ;
 
-\ Combine a STACKEFFECTBYTE into ``CSCPP''.
+\ Combine a STACKEFFECTBYTE into ``VD''.
 \ Remember : both nibbles have offset 1!
-: COMBINE-CSC    SE:1>2 SWAP 1- NEGATE CSC +! REMEMBER-DEPTH 1- CSC +! ;
+: COMBINE-VD    SE:1>2 SWAP 1- NEGATE VD +! REMEMBER-DEPTH 1- VD +! ;
 
 \ For DEA we are still in the swappable code, i.e. we don't dig below
 \ the constant stack entries, and we have no stack side effects that kill.
-\ At this point ``CSC'' contains the remaining stack depth, i.e. the
+\ At this point ``VD'' contains the remaining stack depth, i.e. the
 \ number of constants not touched by the swappable code. Those can be
 \ placed after the swappable code.
 : STILL-SWAPPING? DUP NSST? 0= SWAP SE@ ENOUGH-POPS AND ;
 
 \ We are at an stable point. i.e. we consumed all the constants,
 \ we may have replaced ourselves. Or we can't swap anyway.
-: STABLE? CSC @ MIN-DEPTH @ = MIN-DEPTH 1 < OR ;
+: STABLE? VD @ MIN-DEPTH @ = MIN-DEPTH 1 < OR ;
 
 \ For DEA : adding it would result in a not yet stable sequence.
 \ Otherwise the optimisation is known to end here or there is no optimisation.
 : NOT-YET-STABLE?
-DUP STILL-SWAPPING? IF SE@ COMBINE-CSC STABLE? 0= ELSE -1 MIN-DEPTH !
+DUP STILL-SWAPPING? IF SE@ COMBINE-VD STABLE? 0= ELSE -1 MIN-DEPTH !
 DROP 0 THEN ;
 
 \ From ADDRESS collect all code to be executed before (some of the) constants
 \ collected. Leave ADDRESS LENGTH (in address units.)
-: COLLECT-SWAPPER !SWAPPER-START
+: COLLECT-SWAPPER !MIN-DEPTH
     DUP ?NOT-EXIT 0= IF 0 EXIT THEN
     DUP BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
      OVER -   STABLE? AND
@@ -121,7 +119,7 @@ DROP 0 THEN ;
 
 \ Assuming there has been folding, increment SEQUENCE to point past all
 \ constants at its start. Return incrementer SEQUENCE.
-: COUNT-LIT BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 CSC +! REPEAT ;
+: COUNT-LIT BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 VD +! REPEAT ;
 \ For SEQUENCE , return the POINTER to first constant (``LIT'')
 : FIND-LIT BEGIN DUP @ 'LIT <> OVER ?NOT-EXIT AND WHILE NEXT-ITEM  REPEAT ;
 
@@ -138,7 +136,7 @@ DROP 0 THEN ;
 
 \ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
 \ The order to be compiled is A-B C-D B-C .
-: GET-PIECES   DUP  FIND-SWAPPABLE ( B D) >R DUP CSC @ 2 * CELLS + R> ;
+: GET-PIECES   DUP  FIND-SWAPPABLE ( B D) >R DUP VD @ 2 * CELLS + R> ;
 
 \ Inspect B C D and report into ``PROGRESS'' whether there is any
 \ optimisation by swapping. For that B-C and C-D must be both non-empty.
@@ -160,7 +158,7 @@ POSTPONE (;)  ;
 
 \ Execute at compile time the optimisable code we have collected from
 \ ``OPT-START''
-\ The result is supposedly ``CSC'' stack items.
+\ The result is supposedly ``VD'' stack items.
 : EXECUTE-DURING-COMPILE   POSTPONE (;)    OPT-START @ >R ;
 
 \ Throw away the executable code that is to be replaced with optimised code.
@@ -192,7 +190,7 @@ POSTPONE (;)  ;
         !CSP
         EXECUTE-DURING-COMPILE
         THROW-AWAY
-        CSC @ COMPILE-CONSTANTS
+        VD @ COMPILE-CONSTANTS
         ?CSP
     THEN
 ;
@@ -208,7 +206,7 @@ POSTPONE (;)  ;
 :  ?OPT-FOLD?
     DUP CAN-FOLD?
     IF
-        SE@ COMBINE-CSC               ( DEA -- )
+        SE@ COMBINE-VD               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
     ELSE
         DROP ( DUP COLLECT-SWAPPER) CASH  ( DEA -- )
