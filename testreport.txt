@@ -1,0 +1,97 @@
+# Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
+# $Id$
+Test report of generic figforth for Intel 86 family.
+Summary 
+This is a test report for 12 out of a zillion Forths that can be 
+generated from fig86.gnr
+This is not a professional regression test.
+I know that. Please be forgiving.
+
+However, please tell me if any of the following tests fails
+you, where it doesn't fail me.
+It looks as if sometimes K' fails. But not for a freshly booted system.
+If you have observation with regard to this, or even insight, or even
+a fix, I urge you to inform me.
+
+Environment
+GNU/Linux 2.0.34 Redhat 5.1 (Pentium 90) development&test
+GNU/Linux 1.2.13 Slackware (test of lina)
+MSDOS 3.3            (Pentium III "Coppermine")
+MASM 1.0 Copyright IBM 1981  (!)
+nasm 0.98
+
+The following "tests" are defined:
+A Booting
+B make it
+C 8 LIST 8 LOAD
+D (requires A) 25 LOAD 0 PAUSE ! 100 SIEVE 
+E (requires A) KRAAK QUIT                  
+F (r. A) 89 LOAD
+G (r. A) Editing a screen 
+H wc *.asm
+J Binary equivalent than compiled on linux
+K BYE
+L Dos Directory correct
+
+Pass criteria
+A booted OK
+B I made it through make
+C plausible content of 8, everything loads fine, ends in copyright screen
+D primes less then 100000 zip accross the screen
+E plausable decompilation of QUIT
+F timing of Byte benchmarks, must be 7 ms for a 500 Mhz Coppermine
+G Effect of cursor (^E ..) word (^A ^F ^T) (un)delete (^Y ^U)
+H Same as /bin/wc
+J Binaries are equal or
+J' disassembly reveals only gratuitous MASM deviations.
+K successful return to operating system (linux) or
+K' successful return to "operating system" (msdos) 
+L Dos Directory correct
+                                            
+Test are always mentionned if applicable. A failed test is preceeded
+by -. 
+
+The following environments are defined (Only for BOOTFD BOOTHD):
+I Booted from FD or HD
+II Started from MSDOS 
+(Other environments following from the executable itself).
+Notes about ommitted data:
+- all linux versions use NASM  PROTECTED BITS32
+- all booting versions use NASM BIOS
+- the MASM versions all are MSDOS-hosted and real mode 
+
+Description                 Latest Configuration   Executable     Tests
+                            test       file         name           
+hosted_linux linux_native   112    lina.cfg         (lina)        BCDEFHK
+hosted_linux linux_c native        linux.cfg        (figforth)    BCDEFHK
+bootfd real                        alone1.cfg      forth.com      B I  ACDEG                                                 
+                                                                    II  CDEG K'L                                             
+bootfd prot16               114    alone2.cfg      forth.com      B I  ACDEG                                                 
+                            112                                     II  CDEG -K'L                                             
+                            114                                     II  CDEG K'L                                             
+bootfd prot32               114    alone3.cfg      forth.com      B I  ACDEG                                                 
+                            114                                     II  CDE-G K' L                                             
+boothd prot32                      alone4.cfg      no filesystem  B I  ACDEG                                                 
+hostedmsdos MASM bios              msdos1.cfg      msdos.com      B II  CDEG K' L 
+hostedmsdos MASM modern            msdos2.cfg      msdos.com      B II  CDEG K' L 
+hostedmsdos MASM classic           msdos3.cfg      msdos.com      B II  CDEG K' L*
+hostedmsdos MASM modern 32   112   msdos9.cfg      forth.com      B II  CDEF-G -K' 
+
+Version 2.114 apparently in alone3 cannot handle screen deleting lines, otherwise
+reasonable.
+Version 2.102 has been tested most of the time with growing
+modifications for stand alone versions, and later 2.104 for
+msdos_hosted versions. Afterwards 2.105 has been checked in and it was
+checked that the source was equivalent to the one tested. (i.e. after
+removing comment lines the source was the same, or differed at most
+with respect to strings printed.) 
+All MASM version generate real code. 
+
+N.A. : not applicable.
+L* :
+The classic version has been tested after properly setting OFFSET to
+compensate for the fact that the BLOCKS.BLK was not simple dumped on
+the floppy from sector 0. In that case the MSDOS directory would not
+have remained intact. 
+
+
