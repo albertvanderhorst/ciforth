@@ -137,7 +137,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
  ( ASSEMBLER 80x86 SAVE-BLOCKS ) 120 LOAD  97 98 THRU
- ( WARNING 1 TOGGLE          )
+   WARNING 1 TOGGLE
  2 LIST    : TASK ;
  ( OLD:  NEW SYSTEM      23 LOAD   )
  (       STAR PRINTER    31 LOAD   )
@@ -1705,7 +1705,7 @@ WORDING MOVE-CURSOR SET
 ( DEBUG)
 ESC = UNTIL ;
 : E-S  ( EDIT CURRENT SCREEN )
-FRAME 0 CURSOR ! SET   PG
+1 I-MODE ! FRAME 0 CURSOR ! SET   PG
 GET-S ROUTE EXITING  AT-END BLACK ;
 :  EDIT SCR ! E-S ;
 : E-R 3 MODE EDIT ;
@@ -2879,7 +2879,7 @@ MEISJES JOPIE     NO-SEX .rel
 
 
 ( Main screen for parser AH&CH                        A0oct03  )
- 181 184 THRU
+ 181 187 THRU
 ( Create a forward definition, one that patches its own
   call with a cfa that is in its data field. Then goes on
   with that definition. )
@@ -2897,25 +2897,53 @@ FORWARD FAC
 ( BNF PARSER                                   ch&ch )
 0 VARIABLE SUCCESS  : IM IMMEDIATE ;
 : POP COMPILE R> ;    : PUSH COMPILE >R ;
-: SUC@ COMPILE  SUCCESS COMPILE @ ; IM
-: SUC! COMPILE 1 COMPILE SUCCESS COMPILE ! ; IM
-: EXIT COMPILE ;S ; IM
-: <PTS COMPILE IN COMPILE @ PUSH COMPILE DP COMPILE @ PUSH ; IM
-: PTS> POP COMPILE DROP POP COMPILE DROP ; IM
-: BT> POP COMPILE DP COMPILE ! POP COMPILE IN COMPILE ! ;  IM
-: <BNF  SUC@ IF R> <PTS >R ELSE R> DROP THEN ;
-: BNF>  SUC@ IF R> PTS> >R ELSE  R> BT> >R  THEN ;
-: | SUC@ IF R> PTS> DROP ELSE R> BT> <PTS SUC! >R  THEN ;
-: BNF: [COMPILE] : SMUDGE COMPILE <BNF SUC! ;
-: ;BNF COMPILE BNF> SMUDGE [COMPILE] ; ; IMMEDIATE
+: SUC@ COMPILE  SUCCESS COMPILE @ ;
+: SUC! COMPILE 1 COMPILE SUCCESS COMPILE ! ;
+: EXIT COMPILE ;S ; IM    : EXIT R> DROP ;
 
+: <PTS COMPILE IN COMPILE @ PUSH COMPILE DP COMPILE @ PUSH ;
+: PTS> POP COMPILE DROP POP COMPILE DROP ;
+: BT> POP COMPILE DP COMPILE ! POP COMPILE IN COMPILE ! ;
 
-( bnf PARSER TOKENS                                     )
+: <BNF  SUC@ [COMPILE] IF
+<PTS [COMPILE] ELSE COMPILE EXIT [COMPILE] THEN ;
+: BNF>  SUC@ [COMPILE] IF PTS>
+[COMPILE] ELSE BT> [COMPILE] THEN ;
+
+( compile-only words called by immediate words   )
+( Fake an embedded colon definition, i.e. an `EXIT' between
+  `<FAKE' and `FAKE>' must return after `FAKE>' )
+( Bracket an optional part, i.e. its success depends on what is
+  before it. The part must balance the return stack. )
+: <FAKE COMPILE LIT HERE 0 , COMPILE >R ;
+: FAKE>  COMPILE R> COMPILE DROP  HERE SWAP ! ;
+
+( Embed a BNF definition in the current one, i.e.
+<<BNF ... BNF>>  is equivalent to xxx with xxx defined
+by BNF: xxx ... ;BNF )
+: <<BNF <FAKE <BNF ;
+: BNF>> BNF> FAKE> ;
+
+: <OPT  SUC@ PUSH ;
+: OPT>  POP COMPILE SUCCESS COMPILE ! ;
+( hANDLING OF SINGLE CHARACTERS )
+
 : @TOKEN  IN @ TIB @ + C@ ;
 : +TOKEN  ( f ) IF 1 IN +! THEN ;
 : =TOKEN ( n) SUCCESS @ IF @TOKEN = DUP SUCCESS ! +TOKEN
 ELSE       DROP THEN ;
 : TOKEN <BUILDS ( c) C, DOES> ( a) C@ =TOKEN ;
+
+1 WIDTH !
+: '__  HERE 2 + C@ [COMPILE] LITERAL COMPILE =TOKEN ; IMMEDIATE
+31 WIDTH !
+
+0 TOKEN <EOL>    $0A TOKEN 'CR'    BL TOKEN 'BL'
+
+
+
+( bnf PARSER TOKENS                                     )
+
 
 : SKIP-BLANKS TIB @ IN @ + BEGIN DUP C@ BL = WHILE
   1+ 1 IN +! REPEAT DROP ;
@@ -2925,86 +2953,58 @@ IN @ TIB @ + SWAP 255 SWAP $@ ^ MATCH ^ DROP DUP SUCCESS !
 +KEYWORD ELSE DROP THEN ;
 : KEYWORD <BUILDS BL WORD HERE C@ 1+ ALLOT
 DOES> SKIP-BLANKS =KEYWORD ;
-^
-( UNIVERSAL 'X' )
-1 WIDTH !
-: '__  HERE 2 + C@ [COMPILE] LITERAL COMPILE =TOKEN ; IMMEDIATE
-31 WIDTH !
-BNF: <CHAR>  @TOKEN DUP &) = >R DUP &( = >R 0=   R> R> OR OR
-    0= DUP SUCCESS !      +TOKEN ;BNF
-0 TOKEN <EOL>    $0A TOKEN 'CR'    BL TOKEN 'BL'
-BNF: <S>  '(' <S> ')' <S> | <CHAR> <S> | ;BNF
-: PARSE 1 SUCCESS ! <S> <EOL>  SUCCESS @ IF ." ok" ELSE ." NOK"
- THEN ;
-( Bracket an optional part, i.e. its success depends on what is
-  before it. The part must balance the return stack. )
-: <OPT  COMPILE SUCCESS COMPILE @ COMPILE >R ;
-: OPT>  COMPILE R> COMPILE SUCCESS COMPILE ! ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ( THE { } round_bracket_pair and [ ] definitions )
-( Fake an embedded colon definition, i.e. an `EXIT' between
-  `<FAKE' and `FAKE>' must return after `FAKE>' )
-: <FAKE COMPILE LIT HERE 0 , COMPILE >R ;
-: FAKE>  COMPILE R> COMPILE DROP  HERE SWAP ! ;
-: <<BNF <FAKE COMPILE <BNF ;
-: BNF>> COMPILE BNF> FAKE> ;
+: | SUC@ [COMPILE] IF PTS> COMPILE EXIT
+[COMPILE] ELSE BT> <PTS SUC! [COMPILE] THEN ; IM
+: BNF: [COMPILE] : SMUDGE <BNF SUC! ;
+: ;BNF BNF> SMUDGE [COMPILE] ; ; IMMEDIATE
 : (( <<BNF ;  IMMEDIATE
 : )) BNF>> ;  IMMEDIATE
 : [ <OPT <<BNF ;  IMMEDIATE
 : ] BNF>> OPT> ;  IMMEDIATE
-: {  <OPT [COMPILE] BEGIN COMPILE SUCCESS COMPILE @
-[COMPILE] WHILE <<BNF ;  IMMEDIATE
+: {  <OPT [COMPILE] BEGIN SUC@ [COMPILE] WHILE <<BNF ;
+IMMEDIATE
 : } BNF>> [COMPILE] REPEAT OPT> ; IMMEDIATE
-: RUNA 1 SUCCESS ! 'A' [ 'B' | 'C' ] SUCCESS ? ;
-: RUND 1 SUCCESS ! 'A' { 'B' 'C' } SUCCESS ? ;
 
-&( TOKEN '(' &) TOKEN ')'    0 TOKEN <EOL>
+
+
+
+( Examples and tests )
+: AUX1 'A' [ 'B' | 'C' ] ;
+: RUN[ 1 SUCCESS ! AUX1 SUCCESS ? ;
+: AUX2 'A' { 'B' 'C' } ;
+: RUN{ 1 SUCCESS ! AUX2 SUCCESS ? ;
+
+BNF: <CHAR>  @TOKEN DUP &) = >R DUP &( = >R 0=   R> R> OR OR
+    0= DUP SUCCESS !      +TOKEN ;BNF
+BNF: <S>  '(' <S> ')' <S> | <CHAR> <S> | ;BNF
+: AUX3 <S> <EOL> ;
+: RUN() 1 SUCCESS ! AUX3 SUCCESS @
+IF ." ok" ELSE ." NOK"  THEN ;
+
 BNF: "KEY"  'K' 'E' 'Y' ;BNF
-: PARSE 1 SUCCESS ! "KEY" SUCCESS ? ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+: RUNKEY 1 SUCCESS ! "KEY" SUCCESS ? ;
 
 
 
