@@ -47,7 +47,7 @@ than the usual forthprog({sort}), called forthprog({ssort}). The
 @pindex ssort
 particulars of all this depend on the actual configuration chosen. It
 contains in itself some provision such that it can be loaded on
-any of the ciforth systems, independantly of whether they are 16 or 32
+any of the ciforth systems, independently of whether they are 16 or 32
 bits or whether they can or cannot handle direct access of the video memory.
 
 @chapter Non-technical background.
@@ -55,7 +55,7 @@ bits or whether they can or cannot handle direct access of the video memory.
 The Forth's called ciforth are made available through the
 DFW .
 All publications of the DFW are available under GPL, the GNU public license.
-The file COPYING containing the legal expression of these lines must accompagny it.
+The file COPYING containing the legal expression of these lines must accompany it.
 
 This forthsamp({ci86.gnr}) system is protected by GPL.
 This applies to the generic source, the macro files and the Forth
@@ -89,7 +89,7 @@ does not apply.
 forthendquotation
 
 @section Legal matters
-My extensions are GPL-ed or libary GPL-ed.
+My extensions are GPL-ed or library GPL-ed.
 I transferred the copyright to the Dutch Forth Workshop, a foundation that
 supports Forth and defends the GPL.
 The original figforth is public domain and is still available.
@@ -99,7 +99,7 @@ What you find here is a Forth for the Intel 86. It is an ISO
 as of old. Complying in detail with ISO for the CORE wordset at least.
 
 This has bee split off of a similar generic Forth, that is intended
-to be the last of the fig-Forth's. This generic system is mp longer
+to be the last of the fig-Forth's. This generic system is no longer
 maintained, but the last fig-Forth is, in the sense that if there
 ever should be found a bug, it can be fixed. It also features
 the Fig glossary, which is available
@@ -117,9 +117,9 @@ compiler, but feels at ease with a (much larger) assembler manual.
 I do not think that system has much merit, besides that.)
 
 Although speed is currently in fashion, using subroutine threaded Forth's
-with optimisers, indirect threading is the preferred choice for some
+with optimizers, indirect threading is the preferred choice for some
 applications. I did this work, because I needed it.
-I have also the firm belief that an optimiser on an indirect threaded system
+I have also the firm belief that an optimizer on an indirect threaded system
 has more information to work with and can ultimately outperform any
 other system in speed.
 
@@ -159,10 +159,10 @@ made to the general build up of the Forth.
 they will move to an appendix in the next version.)
 
 The rigid subdivision in 7 area's was never adhered to.
-In particular the bootup parameters
-are not up front as CP/M and MSDOS require a 100H byte reserved
+In particular the boot up parameters
+are not up front as CP/M and MS-DOS require a 100H byte reserved
 area there.
-There is mention of forthvar({(KEY)}) being ``implementation dependant code''
+There is mention of forthvar({(KEY)}) being ``implementation dependent code''
 but these were not often present in
 fig implementations.
 This was based on the idea that there was some EPROM with console commands.
@@ -170,12 +170,12 @@ This has been replaces by calls to an operating system, that do not
 comply with a simple function that could be called.
 Here
 the code definitions for forthcode({KEY}) itself
-become implementation dependant code, but often it can written in
+become implementation dependent code, but often it can written in
 high level.
 
 All documentation is now accurate but only claims to describe
 ciforth.
-The forthcode({RUBOUT}) key is a bonafide forthcode({USER}) variable
+The forthcode({RUBOUT}) key is a bona-fide forthcode({USER}) variable
 and now has a name.
 
 DR0 and DR1 are removed. There is only one consecutive mass storage area, be
@@ -183,7 +183,7 @@ it a disk or a file.
 The assumption in using forthcodeni({OFFSET}) was that you have two identical floppy drives
 and no hard disk. That is nowadays extremely unlikely. Instead I put forthcodeni({OFFSET})
 to good use to screen off a part of the floppy that must not be used (such
-as an MSDOS directory or the hard disk part that contains the forth system.)
+as an MS-DOS directory or the hard disk part that contains the forth system.)
 
 forthvar({MOVE MON BLOCK-READ BLOCK-WRITE DLIST}) are not present.
 Altering OUT to influence formatting doesn't work here, nor on
@@ -193,14 +193,14 @@ forthcode({+ORIGIN}) now points to the first user
 variable instead to some not well defined start of the boot image.
 The layout has not changed, so the negative offsets can be used for
 the other data traditionally there.
- Their indices have not changed, but there is now a bootup
+ Their indices have not changed, but there is now a boot-up
 parameter for each and every user variable. A system with other boot
 parameters can now be generated in an even more portable fashion by using
 phrase like forthsamp({7 CELLS +ORIGIN}).
 
-Where possible installation dependant code is using a generic call to the
-operating system in particular MSDOS BIOS or LINOS. This mostly results in
-the installation dependant code to be high level.
+Where possible installation dependent code is using a generic call to the
+operating system in particular MS-DOS BIOS or LINOS. This mostly results in
+the installation dependent code to be high level.
 
 The false urban legend that one could forthcodeni({FORGET}) forthcodeni({TASK})
 has been replaced by an accurate description of forthcodeni({TASK}).
@@ -210,7 +210,7 @@ forthcodeni({FLUSH}) forthcodeni({CURRENT}) forthcodeni({2DUP}) forthcodeni({RP_
 Some non-substantial deviation of the original FIG source have been made
 for good reasons.
 
-The FIG filosofy is that sectors, blocks and screens must be compatible, but
+The FIG philosophy is that sectors, blocks and screens must be compatible, but
 may be all different. The original 8086 FIG had one sector for a block. I
 changed that in having one block for a screen. This is a boon for those
 wanting to ISO-fy the sources.
@@ -245,10 +245,10 @@ ciforth  was in fact the
 figforth for the 8086
 that was put in the framework of this manual.
 By adding a 32 bits macro file, programming
-I/O for Linux, programming I/O  with non-obsolete MSDOS calls
+I/O for Linux, programming I/O  with non-obsolete MS-DOS calls
 and a way to switch to protected mode,
 this figforth came available in all ciforth configurations.
-The rcs version numbers of the generic file fig86.gnr
+The RCS version numbers of the generic file fig86.gnr
 are in the 2-branch and the latest version is available still.
 (The 1-branch was experimental).
 This version has however an manual not split between a generic and
@@ -256,9 +256,9 @@ a user part. But the user part of the manual forthemph({is})
 generated from the generic source.
 
 The second and third
-versions of ciforth (rcs branch 3 and 4)
+versions of ciforth (RCS branch 3 and 4)
 are generated  according to this manual.
-As you see there is little pertinent information about these forth's
+As you see there is little pertinent information about these Forth's
 in this manual.
 All the information you need to use it is in the user manual,
 generated with that version.
@@ -276,14 +276,14 @@ further reproduced and distributed subject to the following conditions:
 The three file comprising it must be kept together and in particular
 the reference section with the World Wide Web sites.
 
-This Forth builts on figforth, for its source see the next section.
+This Forth builds on figforth, for its source see the next section.
 The maintainer can be reached at forthmail({ciforth@@spenarnc.xs4all.nl})
 
 @section Acknowledgment
 ciforth is based on the figforth
 of Charlie Krajewski and Thomas Newman, Hayward, Ca.
 This figforth (as are all figforth's) is public domain.
-It is still available via taygeta. And of course kudo's to FIG.
+It is still available via taygeta. And of course kudos to FIG.
 
 forthurl({ftp://ftp.forth.org/pub/Forth/compilers/native/dos})
 
@@ -301,7 +301,7 @@ forthendquotation
 
 I also want to thank  J. E. Smith, Philadelphia for another fig Intel86
 implementation also still obtainable from
-forthurel({http://www.simtel.net/pub/simtelnet/msdos/forth/fig86.zip})
+forthurl({http://www.simtel.net/pub/simtelnet/msdos/forth/fig86.zip})
 
 This is a fairly good documented FIG Forth for IBM PC, but its
 "Seattle Computer 8086 assembler" format makes it less practical.
@@ -316,13 +316,13 @@ how tools are used, conceptually.
 @section Orthogonality
 The concept of orthogonality is central to this effort.
 Orthogonality means that different aspects of configuration
-(int this case)
-are made independant of each other.
+(in this case)
+are made independent of each other.
 For example, ciforth can be bootable or started by MSDOS,
 it can be assembled by forthprog({nasm}) or by forthprog({MASM.EXE}) .
 @pindex nasm
 @pindex MASM.EXE
-These two choices can be made indepedantly from each other,
+These two choices can be made independently from each other,
 and every combination ought to work.
 Each choice is associated with file with macros for forthprog({m4}) ,
 so ideally if you need to modify how forthprog({nasm})
@@ -337,7 +337,7 @@ it impact at certain places in the source.
 
 @section Metacompilation is outdated
 Meta compilation, the generation of a new version of a Forth system
-by ``simular tools as compilation'', was invented for the cassette based
+by ``similar tools as compilation'', was invented for the cassette based
 computer system of the late seventies.
 There may be a motivation for using metacompilation to generate
 a similar forth for a forthemph({different}) processor or system.
@@ -356,13 +356,13 @@ forthitem
 A facility to remove parts of a running system, that are not needed
 for an application after it has been build. (E.g. the assembler.)
 forthitem
-A facility to optimise some parts of a system. (Then remove the,
-possibly large, optimiser.).
+A facility to optimize some parts of a system. (Then remove the,
+possibly large, optimizer.).
 forthendenumerate
 
 If you have the first facility,
 you can build a powerful Forth from a small kernel and regular source code.
-If you have all of them, you can build a truely,
+If you have all of them, you can build a truly,
 optimal Forth from a small kernel.
 You need not ``a similar tool as compilation'',
 you just need ``compilation'' .
@@ -370,7 +370,7 @@ you just need ``compilation'' .
 The forthcodeni({SAVE-SYSTEM}) facility of course requires
 in depth knowledge of the operating system.
 This doesn't mean it is cumbersome or difficult.
-Under linux we need
+Under Linux we need
 forthexample(
 {HEX
 S" newforth" BLOCK-FILE $!  BLOCK-INIT   ( Abuse block file)
@@ -384,7 +384,7 @@ BLOCK-EXIT
 })
 
 @section How m4 is used.
-The unix macroprocessor forthprog({m4}) is very powerful indeed.
+The Unix macroprocessor forthprog({m4}) is very powerful indeed.
 @pindex m4
 Testimony is that the description of its usage in here
 is longer that its man-pages.
@@ -397,15 +397,15 @@ by the actual parameters.
 In forthprog({m4}) the placeholders are forthsamp({$}{1}) ... forthsamp({$}{9}).
 Parameters can be passed, and any (even multiline)
 text can be given as a parameter, provided it is quoted.
-We will use forthsamp({_lbracket_}) and forthsamp({_rbracket_}) (braces) througout.
+We will use forthsamp({_lbracket_}) and forthsamp({_rbracket_}) (braces) throughout.
 This is convenient, because they are
 not used in a Basic Forth system
 and  they are
 special anyway (e.g. for TeX).
 The use of quotation is very critical at times,
 and the find points are not covered in the following.
-@subsection Customisation
-Simple customisation can be done by forthprog({m4}) as follows:
+@subsection Customization
+Simple customization can be done by forthprog({m4}) as follows:
 
  forthsamp({define(_lbracket_version_rbracket_,2.149)})
 
@@ -435,7 +435,7 @@ numbers by {forthsamp}(_lbracket_0 0 DO ... LOOP_rbracket_) is very useful indee
 Here you see at work, apart from forthmacro({_BITS64_}) , the macro forthmacro({_VERBOSE_})
 that allows (if turned on)
 verbosity that can help understanding but is not always appreciated.
-You alse see forthmacro({forthsamp}) that is in fact
+You also see forthmacro({forthsamp}) that is in fact
 a markup to indicate we have a piece of Forth code there.
 
 Selections can be used to throw out a block of
@@ -446,7 +446,7 @@ as they would only lead to privilege violations.
 The braces are essential here.
 Without it the introduction of a comma somewhere in the text
 results in forthprog({m4}) interpreting the remainder as a second parameter,
-which it wil ignore.
+which it will ignore.
 
 @subsection A postponed markup language.
 Just say forthsamp({forthcode(_lbracket_+LOOP _rbracket_)}) to indicate that you want
@@ -525,14 +525,14 @@ the forthsamp({worddoc}) structures can be sorted by name, or by wordset
 then by name, or in about any way you want.
 Because such a tool didn't exist, I had to write it.
 
-@subsection Analysing forthsamp({worddoc})
+@subsection Analyzing forthsamp({worddoc})
  forthprog({ssort}) captures the structure of a forthsamp({worddoc}) as follows:
 
  forthsamp({^worddoc(_lbracket__comat__rbracket_,_lbracket__comat__rbracket_.*\n$worddoc})
 
 The part between forthsamp({^}) and forthsamp({$}) matches the record.
 The part after the last forthsamp({$})
-is for synchronisation, to make sure the record doesn't end early.
+is for synchronization, to make sure the record doesn't end early.
 This would result in an error ``not according to structure'': the next
 line doesn't start with ``worddoc'' and so it just doesn't match the record
 description.
@@ -576,7 +576,7 @@ _rbracket_);{_END_}(_lbracket_ _HIGH_BUF__rbracket_)  })
 Note how comments are protected from macro expansion by quotation.
 The forthmacro({_END_}) is an adornment. It expands to nothing.
 So it doesn't show up in the output,
-but it helps to keep the generic source organised.
+but it helps to keep the generic source organized.
 
 The forthmacro({worddoc}) macro defines a structure with additional information
 of a word.
@@ -593,7 +593,7 @@ forthitem
 Word name.
 forthitem
 Pronunciation.
-This is a pure textual and pronouncable identification of the word.
+This is a pure textual and pronounceable identification of the word.
 It is also used in forthfile({texinfo}) that doesn't handle special characters well.
 forthitem
 Stack effect.
@@ -620,7 +620,7 @@ forthendenumerate
 forthmacro({worddoc}) are such that a structure starts with forthsamp({worddoc( })  and
 end with a forthsamp({_rbracket_)}) at the end of a line.
 This means that a worddoc
-can be simply skipped if it occurrs in Forth code,
+can be simply skipped if it occurs in Forth code,
 by defining a word forthcode({{worddoc(}}) that reads and ignores source up to the
 end sentinel.
 
@@ -661,7 +661,7 @@ The file suffix is forthfile({.rawdoc}) .
 forthitem
 Sort the forthfile({.rawdoc}) file,
 such that words of a wordset appear together,
-and are preceeded by a wordset documentation.
+and are preceded by a wordset documentation.
 The file suffix is forthfile({.mig}) .
 forthitem
 Generate the glossary documentation from the forthfile({.mig})
@@ -688,7 +688,7 @@ get at the glossary entry immediately.
 forthbreak
 In forthfile({texinfo}) we need to build complicated menu structures, that refer back and forth.
 forthbreak
-This is done by separate passses over the forthfile({.rawdoc})  or forthfile({.mig})
+This is done by separate passes over the forthfile({.rawdoc})  or forthfile({.mig})
 files, with other macro's.
 @chapter off we go
 @section Introduction
@@ -700,7 +700,7 @@ But in this section we will try to summarize the common characteristics.
 It borrows some philosophy from the old figforth.
 It is in fact based on it, and its documentation in first draft
 copied from it.
-The Forths are build from
+The Forth's are build from
 an assembler source, and it is (in general) an
 indirect threaded Forth.
 The motivation for having this type of Forth available follows from its
@@ -711,7 +711,7 @@ An engineer might balk at the description of how to use a meta
 compiler,
 but feels at ease with a (much larger) assembler manual.
 Although speed is currently in fashion, using subroutine threaded Forth's
-with optimisers, indirect threading is the preferred choice for some
+with optimizers, indirect threading is the preferred choice for some
 applications.
 Furthermore the current trend of subroutine threaded Forth's may very
 well be unsuitable for 64-bits processors like the Alpha.
@@ -733,14 +733,14 @@ respectively.
 This generic version -if suitably built- runs on industry standard hardware
 ("PC's") : standalone, under Linux and under MSDOS/MSWINDOWS.
 To build, you need a version of forthprog({nasm}) , forthprog({TASM.EXE}) or forthprog({MASM.EXE}) on your system. I
-recomment forthprog({nasm}) , it is an open source assembler and available on different
+recommend forthprog({nasm}) , it is an open source assembler and available on different
 platforms, at least MSDOS and Unix. It solves a lot of the design errors I
 find in the Intel ways of forthprog({MASM.EXE}) . It generates a binary without a linker.
-On the opposite side, e.g. Borland's forthprog({TASM.EXE}) you can buy nowaday's only as part
+On the opposite side, e.g. Borland's forthprog({TASM.EXE}) you can buy nowadays only as part
 of a giant C++ package.
 If you want to use the generic possibilities you will need a Unix system
 with all of its tools. I use GNU-Linux (RedHat) and do the makes and version
-control on that. If you want your bootable floppies made from linux to be
+control on that. If you want your bootable floppies made from Linux to be
 MSDOS-compatible you need mtools.
 
 @subsection Assembler sources
@@ -771,7 +771,7 @@ executable can be run off hard disk and respects the file system on it.
 It uses the file forthfile({BLOCKS.BLK}) .
 
 @subsection A generic Forth
-As was mentionned before, ciforth has one single source file: the generic forthfile({ci86.gnr}) .
+As was mentioned before, ciforth has one single source file: the generic forthfile({ci86.gnr}) .
 All advantages of assembler source would be gone, if an engineer were
 confronted with conditional compilation and lots of code for other systems
 he doesn't want to learn or assemblers he doesn't want to use.
@@ -791,7 +791,7 @@ forthprog({m4}) files have extension forthvar({.m4}), and control one aspect of 
 as the header layout or the protection mode. You definitely need to know forthprog({m4})
 to use these.
 forthitem
-Assembler files can be customised in the traditional way by adopting
+Assembler files can be customized in the traditional way by adopting
 constants, or commenting in source lines. The assembler files are distinct
 from the one generic source. No forthprog({m4}), you need only cope with the directives
 of your assembler, and will not see any code applicable to other operating
@@ -829,9 +829,9 @@ are used (Checked against MS-DOS programmers reference "covers through
 version 6" ISBN 1-55615-546-8)
 You can use the BIOS forthmacro({_USEBIOS_}) No MSDOS interrupts are required.
 
-With repect to I/O on linux you can choose between c-based and native.
+With respect to I/O on Linux you can choose between c-based and native.
 The c-based version may be portable to other I86 unices. The native version
-of course not. All linux versions have their blocks in a file. (Accessing
+of course not. All Linux versions have their blocks in a file. (Accessing
 a floppy in the classic way is perfectly possible -- and implementing it would
 be a perfectly pointless exercise.)
 
@@ -849,7 +849,7 @@ immediately, so not all versions are useful.
 
 You have a choice between 16 or 32 protected mode and real mode.
 Of course on Linux real mode is not an option, (but you could run the
-MSDOS emulator). Protected mode Forths on MSDOS cannot be started from
+MSDOS emulator). Protected mode Forth's on MSDOS cannot be started from
 virtual real mode, e.g. they will not run in a "DOS box" in Windows.
 
 If you manage to specify conflicting options the preprocessor (forthprog({m4})) breaks
@@ -876,7 +876,7 @@ and it looks like what you want to have, but not quite.
 And of course it doesn't work.
 
 @subsubsection My rants
-The usual customisation in assembler files is possible.
+The usual customization in assembler files is possible.
 If you use other than 3" floppy disks you have to specify the disk
 parameters. Parameters for a 5" HD floppy are present and can be commented
 in.
@@ -903,7 +903,7 @@ I urge you not to do that but to use the generic system.
 The  following words
 are traditionally
 the only portion that need change between different
-installations of the same computer cpu.
+installations of the same computer CPU.
 They cannot come close to the capabilities
 of the generic system,
 and should be used for minor modifications only.
@@ -912,7 +912,7 @@ There are five words that need adaptation:
 
 @table @code
 forthitem KEY
-Push the next ascii value (7 bits) from the terminal keystroke to the
+Push the next ASCII value (7 bits) from the terminal keystroke to the
 computation stack and execute NEXT. High 9 bits are zero. Do not echo
 this character, especially a control character.
 forthitem EMIT
@@ -1038,7 +1038,7 @@ Everything under screen 100 you will find
 more or less working, but maybe not on your system.
 Everything loaded from 8 is used by me on a regular basis and is 16/32 bits
 clean.
-Beware! The full screen editor doesnot work under Linux (protection).
+Beware! The full screen editor does not work under Linux (protection).
 The system doesn't load it under Linux with forthsamp({8 LOAD}) .
 The program forthprog({wc}) is an example of how to use forthprog({lina}) as a scripting language.
 
@@ -1050,12 +1050,12 @@ words to handle about all ``BIOS'' and interrupt 21 calls.
 Linux is better.
 forthcodeni({LINOS}) handles all Linux system calls.
 
-Genericity is acomplished by the Unix tools forthprog({m4}) . I use GNU forthprog({m4}). This is a weird
+Genericity is accomplished by the Unix tools forthprog({m4}) . I use GNU forthprog({m4}). This is a weird
 tool but powerful. Forthers probably like it.
 Some implementation details are hidden in the file forthfile({header.m4}) . In particular
 the way headers are built. I maybe
 want to get rid of the forthcodeni({WIDTH}) and forthcodeni({TRAVERSE})
-peculiarities and you may want to have the headers alligned at word bounds.
+peculiarities and you may want to have the headers aligned at word bounds.
 This is easily done by changes to forthfile({header.m4}) .
 This kind of possibilities were in fact the motivation for this undertaking.
 
@@ -1078,7 +1078,7 @@ The original fig documentation is obtainable via
 This include the pictures.
 
 @subsection Linux application notes ciforthc version
-The linux forth called ciforthc has its i/o based on c. This may seem more
+The Linux forth called ciforthc has its i/o based on c. This may seem more
 portable but it isn't. Where c is very portable on Linux, the way assembler
 is linked with forth is not documented (as far as I can tell, in my version.
 Linux improves overnight, so this may no longer be true.)
@@ -1088,7 +1088,7 @@ maximum reached property", so it is not strictly conforming. This can be
 done at the expense of handling each character separately. (Use forthcodeni({KEY}) to
 implement forthcodeni({EXPECT}) as in the CLASSIC I/O model). This results in loosing
 interruptability. Moreover Linux knows better what the forthcodeni({RUBOUT}) key should be,
-although for your convenenience it is already placed in a user variable and
+although for your convenience it is already placed in a user variable and
 can be easily changed.
 The c-approach allows signals to be handled in a familiar way.
 By using quit, a loop can be interrupted. So ^\ results in a warm start.
@@ -1098,7 +1098,7 @@ in e.g. WORDS.
 
 @subsection Linux application notes lina version
 The lina version is based on a single assembler source, built without
-trickery and binary-portable accross Linux Intel (all systems were it has
+trickery and binary-portable across Linux Intel (all systems were it has
 been tried work : 1.2.13 .. 2.0.13). No run time c-libraries, no compile time
 c-libraries, no libraries at all. It is built directly on the solid rock
 of the system calls by ignoring a taboo c-programmers suffer from.
@@ -1147,10 +1147,10 @@ forthsamp({make release VERSION=forthvar({NNN})})
 
 where forthvar({NNN}) is as appropriate: the RCS version
 number (for ciforth 3d###) for a beta version and the minor
-release numbers for an offical release (ciforth has major
-release 4, because fig 2 istaken, my latest fig is major
+release numbers for an official release (ciforth has major
+release 4, because fig 2 is taken, my latest fig is major
 release 3, so there.)
-Offical releases have the forthkey({d}) replaced with a forthkey({a})
+Official releases have the forthkey({d}) replaced with a forthkey({a})
 And RCS version numbers always run in
 the hundreds, official minor releases are one digit.
 And during started up it tells "ciforth beta ", if it is not official.
@@ -1160,7 +1160,7 @@ a formidable content at that. They are
  forthfile({ci86gNNNN}) and forthfile({fgNNNN.zip.}) The forthsamp({fg}) version features 8+3 file names,
 appropriate for ISO9660 or FAT (MSDOS) file systems.
 @chapter Loose ends
-@section list of safe customisation in the assember.
+@section list of safe customization in the assembler.
 RTS TIB / Return stack area
 
 The block stuff is easily the most crappy part of this system. What
@@ -1198,7 +1198,7 @@ fig forth existed, ever. The above block policy is not compatible with
 multi-user (but the actual code is not worse than it ever was, and you can
 rebuilt it with 1000 block buffers if you like.)
 
-CUSTOMISING
+CUSTOMIZING
 
 The name USER reflects that more than one user could use the dictionary
 and users could share the background storage, provided certain precautions
@@ -1209,7 +1209,7 @@ forthsamp({USVA @   ' USVA @   +ORIGIN !})
 where forthvar({USVA}) is the user variable which value you want to keep.
 
 Underneath the I/O model has improved. TYPE and EXPECT are drawn into
-the I/O model dependant part. If at all possible CR and EMIT used TYPE
+the I/O model dependent part. If at all possible CR and EMIT used TYPE
 such that TYPE becomes a natural vectoring point.
 
 Rubout is best left to the EXPECT code. Remember, a Linux itself knows the
@@ -1232,22 +1232,22 @@ must be defined as an offset to an area,
 that is different for each user: the forthdefi({user area}) .
 forthitem
 Provisions that maintains the integrity of the dictionary.
-Different scratchpads for each user.
+Different scratch pads for each user.
 forthitem
 Different stacks, user area's and terminal input buffer's for each user.
 forthitem
 A means to switch applications.
 forthendenumerate
 
-Almost nothing from this is realised in the figforth model.
+Almost nothing from this is realized in the figforth model.
 In fact only 1, but there is the pointer to that area is
 in the bootup parameters, a design error.
 
 Still forthcode({USER}) variables seem to serve a useful purpose.
-They are initialised during start up,
+They are initialized during start up,
 by changing it one could modify the system.
 This however is only seemingly.
-Because the initialised memory is saved anyway,
+Because the initialized memory is saved anyway,
 the initial values would be stored even if they
 were ordinary variables.
 So we are left with the disadvantage that we have to store them
