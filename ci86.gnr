@@ -2191,6 +2191,7 @@ return the address of the dummy dea.
 },{{VOCABULARY},{>CFA}})
 HEADER({>DFA},{TDFA},{DOCOL})
         DC      TOBODY
+        DC      CELLP ; {Skip vfa link.}
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
@@ -2199,7 +2200,6 @@ return the address of the link to the next vocabulary.
 },{{VOCABULARY},{>CFA}})
 HEADER({>VFA},{TVFA},{DOCOL})
         DC      TOBODY
-        DC      CELLP,CELLP ; {Skip dummy nfa and lfa}
         DC      SEMIS
 ;
 worddoc({SECURITY},{!CSP},{store_c_s_p},{},{},
@@ -2991,20 +2991,21 @@ declared forthcode({IMMEDIATE}) .},
 HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      BUILD
         DC      HERE
-        DC      BODYF       ;{ Future VOC-LINK.}
+        DC      BODYF    ;{ Link this DEA into VOC-LINK chain.}
+        DC      VOCL
+        DC      FETCH
+        DC      COMMA    
+        DC      VOCL
+        DC      STORE
         DC      LIT, DUMMY, COMMA   ; Dummy name field
         DC      CURR
         DC      FETCH
         DC      TLFA
         DC      FETCH
         DC      COMMA    ; { Points to DLFA of current vocabulary.}
-        DC      VOCL
-        DC      FETCH
-        DC      COMMA    ; {VLFA points to VLFA of previous VOC-LINK}
-        DC      VOCL
-        DC      STORE
         DC      DOES
 DOVOC:  
+        DC      CELLP   ;{ Get dummy DEA. }
         DC      CONT
         DC      STORE
         DC      SEMIS
@@ -3023,9 +3024,9 @@ forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during 
 a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
 HEADER({FORTH},{FORTH},{DODOE},1)
         DC      DOVOC
+        DC      0       ;{ END OF VOCABULARY LIST}
         DC      DUMMY; Dummy name field
         DC      _DEA(TASK)
-        DC      0       ;{ END OF VOCABULARY LIST}
 ;
 worddoc({VOCABULARIES},{ASSEMBLER},{forth},{},{P,L1},
 {The name of the primary vocabulary.
