@@ -1858,17 +1858,6 @@ count read from disc by forthcode({BLOCK}) .},{{B/SCR}})
 HEADER({B/BUF},{BBUF},{DOCON})
         DC      KBBUF
 ;
-worddoc({SCREEN},{B/SCR},{bytes_per_screen},{--- n},{},
-{This constant leaves the number of blocks per editing screen.
-An editing screen is 1024 bytes organized as 16 lines of
-64 characters each.
-In fact forthcode({B/SCR}) is 1, and screens correspond one to one with
-blocks. },{{BLOCK}})
-HEADER({B/SCR},{BSCR},{DOCON})
-        DC      400H/KBBUF
-;
-        PAGE
-;
 ;{ All user variables are initialised }
 ;{ with the values from USINI.}
 ;{ The implementation relies on the initialisation of }
@@ -3530,8 +3519,6 @@ HEADER({(LINE)},{PLINE},{DOCOL})
         DC      BBUF
         DC      SSMOD
         DC      FROMR
-        DC      BSCR
-        DC      STAR
         DC      PLUS
         DC      BLOCK
         DC      PLUS
@@ -3809,7 +3796,6 @@ it continues with the interrupted input stream.},
 HEADER({LOAD},{LOAD},{DOCOL})
         DC      BLK, FETCH, TOR
         DC      SAVE
-        DC      BSCR,STAR
         DC      BLK,STORE       ;{BLK <- SCR * B/SCR}
         DC      BLK, FETCH, BLOCK
         DC      LDUP, SOURC, STORE
@@ -3827,12 +3813,7 @@ HEADER({-->},{ARROW},{DOCOL},1)
         DC      ZERO
         DC      LIN
         DC      STORE
-        DC      BSCR
-        DC      BLK
-        DC      FETCH
-        DC      OVER
-        DC      LMOD
-        DC      LSUB
+        DC      ONE
         DC      BLK
         DC      PSTOR
         DC      SEMIS
