@@ -146,43 +146,43 @@ TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 character-string 'ape''ape' SUCCESS ? . ^
 
 ( ---------- Some special symbols ------------------------------------ )
 
-BNF:  `+'    '+'                ;BNF
-BNF:  `?'    '?'                ;BNF
-BNF:  `['    '['                ;BNF
-BNF:  `]'    ']'                ;BNF
-BNF:  `.'    '.'                ;BNF
-BNF:  `,'    ','                ;BNF
-BNF:  `:'    ':'                ;BNF
-BNF:  `;'    ';'                ;BNF
-BNF:  `'''   '''                ;BNF
-BNF:  `('    '('                ;BNF
-BNF:  `)'    ')'                ;BNF
-BNF:  `**'   '*' '*'            ;BNF
-BNF:  `<>'   '<' '>'            ;BNF
-BNF:  `<='   '<' '='            ;BNF
-BNF:  `>='   '>' '='            ;BNF
-BNF:  `:='   ':' '='            ;BNF
-BNF:  `..'   '.' '.'            ;BNF
-BNF:  `><'   '>' '<'            ;BNF
-BNF:  `=>'   '=' '>'            ;BNF
+BNF:  `+'    skip '+'                ;BNF
+BNF:  `?'    skip '?'                ;BNF
+BNF:  `['    skip '['                ;BNF
+BNF:  `]'    skip ']'                ;BNF
+BNF:  `.'    skip '.'                ;BNF
+BNF:  `,'    skip ','                ;BNF
+BNF:  `:'    skip ':'                ;BNF
+BNF:  `;'    skip ';'                ;BNF
+BNF:  `'''   skip '''                ;BNF
+BNF:  `('    skip '('                ;BNF
+BNF:  `)'    skip ')'                ;BNF
+BNF:  `**'   skip '*' '*'            ;BNF
+BNF:  `<>'   skip '<' '>'            ;BNF
+BNF:  `<='   skip '<' '='            ;BNF
+BNF:  `>='   skip '>' '='            ;BNF
+BNF:  `:='   skip ':' '='            ;BNF
+BNF:  `..'   skip '.' '.'            ;BNF
+BNF:  `><'   skip '>' '<'            ;BNF
+BNF:  `=>'   skip '=' '>'            ;BNF
 
 TEST ." EXPECT 1 2:" 1 SUCCESS ! `=>' =>2 SUCCESS ? . ^
 
 (   Where I got it from these are relational operators, even more       )
 (   special                                                             )
-BNF:  `='    '='                ;BNF
-BNF:  `!'    '!'                ;BNF
-BNF:  `!?'   '!' '?'            ;BNF
-BNF:  `!='   '!' '='            ;BNF
-BNF:  `?='   '?' '='            ;BNF
-BNF:  `=?'   '=' '?'            ;BNF
-
+BNF:  `='    skip '='                ;BNF
+BNF:  `!'    skip '!'                ;BNF
+BNF:  `!?'   skip '!' '?'            ;BNF
+BNF:  `!='   skip '!' '='            ;BNF
+BNF:  `?='   skip '?' '='            ;BNF
+BNF:  `=?'   skip '=' '?'            ;BNF
+             
 (  More operators missing from special symbols                          )
-BNF:  `-'    '-'                ;BNF
-BNF:  `#'    '#'                ;BNF
-BNF:  `*'    '*'                ;BNF
-BNF:  `/'    '/'                ;BNF
-BNF:  `e'    [ 'e' | 'E' ]      ;BNF
+BNF:  `-'    skip '-'                ;BNF
+BNF:  `#'    skip '#'                ;BNF
+BNF:  `*'    skip '*'                ;BNF
+BNF:  `/'    skip '/'                ;BNF
+BNF:  `e'    skip [ 'e' | 'E' ]      ;BNF
 
 
 ( ---------- The keywords -------------------------------------------- )
@@ -268,8 +268,8 @@ BNF: `and_then'  `and' `then' ;BNF
 : OPEN-LINUX FILE-NAME ZERO-ENDED O_RDONLY 0 OPEN LINOS
     DUP ?LINUX-ERROR HANDLE ! ;
 
-( Turn `FILE-BUFFER' into a good input buffer, zero ended               )
-(   containing the file,                                                )
+( Turn `FILE-BUFFER' into a good input buffer, zero ended,               )
+(   containing the file.                                                 )
 : READ-FILE HANDLE @ FILE-BUFFER SIZE READ LINOS
     DUP ?LINUX-ERROR   DUP SIZE = 201 ?ERROR
     FILE-BUFFER + 0 SWAP !     ;
@@ -289,9 +289,16 @@ BNF: `and_then'  `and' `then' ;BNF
 : digit COMPILE digit-symbol ; IMMEDIATE
 : letter COMPILE letter-symbol ; IMMEDIATE
 
-: ;BNF LATEST
+: ;BNF 
     COMPILE CR COMPILE SUCCESS COMPILE ? 
-    [COMPILE] LITERAL COMPILE ID. [COMPILE] ;BNF
+    LATEST [COMPILE] LITERAL COMPILE ID. [COMPILE] ;BNF
 ; IMMEDIATE
 
+
+: BNF: 
+    [COMPILE] BNF:
+    COMPILE CR &? [COMPILE] LITERAL COMPILE EMIT 
+    COMPILE IN COMPILE ?
+    LATEST [COMPILE] LITERAL COMPILE ID. 
+; IMMEDIATE
 
