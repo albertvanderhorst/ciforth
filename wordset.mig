@@ -24,12 +24,12 @@ the wordset forthvar({DEFINING}) concern the memory area that
 is allocated to the dictionary. They may add data to the dictionary at the expense 
 of the free space one cell or one byte at a time, or allocate a buffer at once.
 The dictionary space may also be shrunk, and the words that were there are lost.
-The forthxref({dictionary entry}) of a word is represented by its lowest address. Based on that
+The forthdefi({dictionary entry}) of a word is represented by its lowest address. Based on that
 an entry may considered a record with fields. Words to access those fields also belong 
 to this wordset.},
 {NEW CHAPTER },{},{},{})
 worddocchapter({DOUBLE},{ },
-{The wordset forthvar({DOUBLE}) contains words that manipulate forthxref({double})'s.
+{The wordset forthvar({DOUBLE}) contains words that manipulate forthdefi({double})'s.
 _BITS32_({In this 32 Forth you would never need double's if it weren't
 for the NUMBER formatting wordset that uses them exclusively.})},
 {NEW CHAPTER },{},{},{})

@@ -4,12 +4,6 @@ dnl @smallbook
 @afourpaper
 @settitle ciforth manual
 @setchapternewpage odd
-@ifinfo 
-This file documents generic fig-forth
-3.0 for MSDOS with nasm compiler
-32 bits protected mode and 
-modern file i/o.
-@end ifinfo
 
 @titlepage
 @title fig-Forth Manual
@@ -26,10 +20,13 @@ Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
 @end titlepage
 
-
-@ifinfo 
-example of stuff that only appears in info
-@end ifinfo
+dnl 
+dnl @ifinfo 
+dnl example of stuff that only appears in info
+dnl @end ifinfo
+dnl @iftex 
+dnl example of stuff that only appears in tex 
+dnl @end iftex
 @page
 @node Top, General Introduction, Glossary, 
 @chapter Overview
@@ -67,10 +64,10 @@ _BOOTHD_({booting directly from a hard disk.})dnl
 _BOOTFD_({booting from a floppy disk.})dnl
 _HOSTED_LINUX_({running under Linux.})dnl
 _HOSTED_MSDOS_({running under MSDOS.})dnl
-_USEBIOS_({It is using BIOS for I/O. No redirection of I/O is possible.})dnl
-_RWHD_({Blocks are on a raw hard disk})dnl
-_RWFD_({Blocks are on a raw floppy disk})dnl
-_RWFILE_({Blocks are allocated in files in files})dnl
+_USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.})dnl
+_RWHD_({Blocks are on a raw hard disk.})dnl
+_RWFD_({Blocks are on a raw floppy disk.})dnl
+_RWFILE_({Blocks are allocated in files in files.})dnl
 _CLASSIC_({ Rely partly on DOS for I/O, partly on the BIOS.})dnl
 _MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features.})dnl
 _BITS16_({A number has a precision of 16 bits.})dnl
@@ -116,7 +113,6 @@ which input parameters have been placed on the stack. Three dashes "---"
 indicate the execution point; any parameters left on the stack are listed.
 In this notation, the top of the stack is to the right.
 
-
 The symbols include:
 
 @table @var
@@ -161,7 +157,6 @@ forthitem U
 A user variable.
 @end table 
 
-
 Unless otherwise noted, all references to numbers are for 16 bit signed
 integers. On 8 bit data bus computers, the high byte of a number is on top
 of the stack, with the sign in the leftmost bit. For 32 bit signed double
@@ -169,8 +164,6 @@ numbers, the most significant part (with the sign) is on top.
 
 All arithmetic is implicitly 16 bit signed integer math, with error and
 under-flow indication unspecified.
-
-
 
 -- present but not documented
 FLUSH CURRENT 2DUP RP@ U.
@@ -184,7 +177,7 @@ This index finds the glossary description of each word.
 @printindex pg
 @node Forth Word Index,,,Top
 @unnumbered Forth Word Index
-This index contains $emph{{all}} references to a word.
+This index contains @emph{{all}} references to a word.
 Use the glossary index to find the glossary description of each word.
 @printindex fn
 @node Concept Index,,,Top
