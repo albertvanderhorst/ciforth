@@ -75,4 +75,5 @@ define({_VOC_LATEST}, $1+6)
 define({CODE_HEADER},{HEADER({$1},{$2},{$+2})})dnl
 define({TO_PROTECTED},{})dnl
 define({TO_REAL},{})dnl
+define({JMPFAR},{DB    0EAH})dnl
 
