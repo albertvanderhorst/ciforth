@@ -17,9 +17,13 @@ INCLUDE bits.frt
 \ The following aspects are handled:
 \    1. Compiling ^ (begin only)  $  (end only) and special characters + ? * [ ] < >
 \    2. Grouping using ( ) , only for replacement.
+\    4. Ranges and inversion of char set (between [ ] ).
 \    3. Above characters must be escaped if used as is by \ , making \ a special char.
 \    4. Some sets are escaped by \ (\w) , some non-printables are denote by an
 \       escape sequence.
+\ 5. It is an error to escape characters that do no denote blank
+\       space, are not special, nor are denoting a set, However ^ - $
+\       etc. may be escaped where they are not special.
 
 \ Implementation notes:
 \ * Usually regular expressions are compiled into a buffer consisting of
@@ -371,48 +375,53 @@ ELSE NORMAL-CHARS $C+ THEN ;
 
 \ Build up the set between [ and ] into ``SET-MATCHED''.
 \ EP points after the intial [ , leave it pointing after the closing ].
-: PARSE[]    !SET-MATCHED
+: PARSE[]
     DUP C@ &^ = IF 1+ RECURSE SET-MATCHED INVERT-SET ELSE
     BEGIN ADD[]-1 DUP C@ DUP 0= ABORT" Premature end of '[' character set" &] = UNTIL 1+
     THEN ;
 
-\ EP points to a char-set. Add it to the compiled expression.
+\ EP points to a char-set. Put it into the compiled expression.
 \ Leave EP incremented past the char-set.
-: PARSE-CHAR-SET C@+
+: PARSE-CHAR-SET !SET-MATCHED C@+
     DUP &. = IF DROP \. SET-MATCHED MAX-SET MOVE ELSE
     DUP &\ = IF DROP C@+ GET-CHAR-SET SET-MATCHED MAX-SET MOVE ELSE
-    DUP &[ = IF DROP PARSE[]
+    DUP &[ = IF DROP PARSE[] ELSE
+    SET-MATCHED SET-BIT
     THEN THEN THEN
     HARVEST-SET-MATCHED
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
+
+\ A coy of the regular expression string, zero ended.
+CREATE (RE-EXPR) 1000 ALLOT
+
 \ Transform the EXPRESSION string. Copy it to the ``(RE-EXPR)'' buffer,
-\ (NOT YET) meanwhile normalising it, i.e. a character has a special meaning, iff
-\ it is preceeded by '\' (NOT YET). Also make it zero ended.
+\ and make it zero ended.
 \ Leave a pointer to the zero ended EXPRESSION to parse.
 : FIRST-PASS >R (RE-EXPR) R@ MOVE   0 (RE-EXPR) R> + C!   (RE-EXPR) ;
 
 \ Everything to be initialised for a build.
-: INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   RE-EXPR RE-FILLED ! ;
+: INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED ;
 
 \ Everything to be harvested after a build.
-: EXIT-BUILD   HARVEST-NORMAL-CHARS   HARVEST-CHAR-SET ;
+: EXIT-BUILD   HARVEST-NORMAL-CHARS   ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
-\ For EP and CHAR : EP plus "it IS one of ^ $ with its special meaning".
+\ For EP and CHAR : EP plus "it IS one of ^ $ without its special meaning".
 \ ``EP'' points after ``CHAR'' in the re, and is of course needed to
 \ determine this.
-: ^$? DUP &^ = IF DROP RE-PATTERN 1+ OVER = ELSE
-    &$ = IF OVER C@ 0= 0= ELSE FALSE THEN THEN ;
+: ^$? DUP &^ = IF DROP (RE-EXPR) 1+ OVER 0= ELSE
+    &$ = IF DUP C@ 0= 0= ELSE FALSE THEN THEN ;
 
-\ If the character at EP is normal, return incremented EP plus IT,
+\ If the character at EP is to be treated normally, return incremented EP plus IT,
 \ else EP plus FALSE. EP may be incremented past 2 char escapes!
-: NORMAL-CHAR? C@+   DUP SPECIAL? 0= IF EXIT THEN
-                     DUP ^$? IF EXIT THEN
-                     \ Escapes not representing a character, may still represent a set.
-                     &\ = IF C@+ GET-ESCAPE DUP IF EXIT ELSE 1- THEN THEN
-                     1- FALSE ;
+: NORMAL-CHAR? C@+   >R
+                     R@ SPECIAL? 0= IF R> EXIT THEN
+                     R@ ^$? IF R> EXIT THEN
+                     \ Escapes representing a character are okay too.
+                     R@ &\ = IF C@ GET-ESCAPE IF RDROP C@+ GET-ESCAPE EXIT THEN THEN
+                     RDROP 1- FALSE ;
 
 \ - - - - - - - - - - - - - - - - - - - - - - - -
 \ Commands that get executed upon a special character
