@@ -951,7 +951,7 @@ Place a break in your debugger at the end of NEXT,
 just before indirectly jumping via register W to execution. 
 forthsamp({W}) is the Forth name for the register
 holding a code field address. 
-In ciforth this is the Intel 86 register BX.
+In ciforth this is the Intel 86 register AX.
 If your NEXT is inline code, 
 for the moment replace it by a jump.
 Mostly this can be done by inactivating the macro forthmacro({_NEXT32_}) 
