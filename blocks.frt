@@ -734,7 +734,23 @@ CREATE XXX 123 , 64 , 32 , 12
 
 
 
-( STACK PUSH POP ) \ A free stack AvdH A1sep26
+( CRC-MORE CRC ) ?32 \ AvdH
+REQUIRE BOUNDS   REQUIRE NEW-IF    HEX
+\ Well the polynomial
+EDB8,8320 CONSTANT CRC32_POLYNOMIAL
+
+\ Auxiliary table with values for single bytes.
+CREATE CRCTable
+100 0 DO   I 8 0 DO
+    DUP >R   1 RSHIFT   R> 1 AND IF CRC32_POLYNOMIAL XOR THEN
+LOOP ,   LOOP
+\ For initial CRC and BUFFER COUNT pair, leave the updated CRC
+: CRC-MORE   BOUNDS DO  DUP I C@ XOR 0FF AND CELLS CRCTable + @
+   SWAP 8 RSHIFT XOR   LOOP ;
+\ For BUFFER COUNT pair, leave the CRC .
+: CRC   -1 ROT ROT CRC-MORE INVERT ;
+DECIMAL
+( STACK PUSH POP --a_free_stack ) \ AvdH A1sep26
 : STACK CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 100 STACK DEBUG-STACK
 : PUSH DEBUG-STACK @ SWAP OVER ! 1 CELLS +  DEBUG-STACK ! ;
@@ -3102,22 +3118,6 @@ HEX 5402 CONSTANT TCSETS
     TERMIO 4 CELLS + 1 + 6 + C!
      setit ;
 DECIMAL  getit
-( CRC-MORE CRC ) ?32 \ AvdH
-REQUIRE BOUNDS   REQUIRE NEW-IF    HEX
-\ Well the polynomial
-EDB8,8320 CONSTANT CRC32_POLYNOMIAL
-
-\ Auxiliary table with values for single bytes.
-CREATE CRCTable
-100 0 DO   I 8 0 DO
-    DUP >R   1 RSHIFT   R> 1 AND IF CRC32_POLYNOMIAL XOR THEN
-LOOP C,   LOOP
-\ For initial CRC and BUFFER COUNT pair, leave the updated CRC
-: CRC-MORE
-    BOUNDS DO  I C@ CRCTable + @   OVER XOR   XOR   LOOP ;
-\ For BUFFER COUNT pair, leave the CRC .
-: CRC   -1 ROT ROT CRC-MORE ;
-DECIMAL
 (_Testing_of_TERMIO_raw_character_input_)
 ?LI
 3 CONSTANT read
