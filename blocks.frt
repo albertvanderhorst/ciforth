@@ -46,7 +46,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
            THIS IS A WARNING ONLY.
  THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
-( Commands aplicable to 16 bit mode )
+( Commands aplicable to 32 bit mode )
   HEX
  : LC@ SWAP 10 * + 7C00 - C@ ;
  : LC! SWAP 10 * + 7C00 - C! ;
@@ -140,7 +140,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( STAR PRINTER    31 LOAD   )
  ( CP/M CONVERT    80 LOAD   )
  WARNING 1 TOGGLE
- 2 LIST
+ 2 LIST    : TASK ;
 
  ." QUADRUPLE ARITHMETIC 08-02-84 "
  : ADC ( n1,n2-n,c  add, leave sum and carry)
@@ -638,22 +638,22 @@ THEN ;
 ;    HEX>
 
 
-( WRITE THE CURRENT SYSTEM TO HARD DISK ) HEX
-B/BUF SEC/BLK / CONSTANT SEC-LEN
-0 VARIABLE RW-BUFFER B/BUF ALLOT
-0 VARIABLE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
-HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
-( We use the two l.s. bytes of 64 bit number)
-              1 , 0 , 0 , 0 ,
- CODE WRITE-SYSTEM
-  PUSHX, SI|
-  MOVXI, AX| 4300 W,
-  MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,
-  INT, 13  B,
-  POPX, SI|
-  PUSHF,
-  NEXT C;            DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( Experiment with GDT etc.) HEX
 ( 32 K GDT AT 0001.8000 ) 2800 CONSTANT GDT-SEGMENT
 7FFF VARIABLE GDT 2.8000 SWAP , ,
@@ -799,7 +799,7 @@ KRAAKER
 
 
 ( A0apr12 www STRING AND PARSING words )
-FORGET TASK      : TASK ;          36 38 THRU
+FORGET TASK      : TASK ;  &" CONSTANT DLM   36 38 THRU
 : CREATE 0 VARIABLE 0 CELL+ MINUS ALLOT ; ( Like ANSI)
 ( All strings are copied to here, increase if needed)
 CREATE POOL 1000 ALLOT
@@ -823,13 +823,13 @@ IMMEDIATE
 IMMEDIATE
 : duse SET-FOR-ALL CR . END-S-F-A ;
 : SET <BUILDS HERE CELL+ , 100 CELLS ALLOT DOES> ;
-: ?IN-SET 0 ROT ROT SET-FOR-ALL
-  OVER = IF SWAP DROP 1 SWAP THEN END-S-F-A DROP ;
-: ?IN-SET-$ 0 ROT ROT SET-FOR-ALL OVER $= IF SWAP DROP 1 SWAP
+: #IN-SET -1 ROT ROT SET-FOR-ALL
+  OVER = IF SWAP DROP I SWAP THEN END-S-F-A DROP ;
+: ?IN-SET #IN-SET -1 = 0= ;
+: #IN-SET-$ -1 ROT ROT SET-FOR-ALL OVER $= IF SWAP DROP I SWAP
 THEN END-S-F-A DROP ;
+: ?IN-SET-$ #IN-SET-$ -1 = 0= ;
 -->
-
-
 ( A0apr12 www SET words )
 SET META-HTML        ( ALL SETS OFHTML FILES )
 : REGISTER-HTML META-HTML SET+! ;
@@ -841,25 +841,185 @@ IF FILES SET+! ELSE DROP THEN ;
 : ?HTML-SET META-HTML ?IN-SET ;
 ( CREATE NAME-BUFFER 256 ALLOT  )
 : PAR-TO-DATA CELL+ ; ( GO FROM PFA TO WHERE DOES> IS)
-: IS-SET-NAME ( SS -- 1)
+: NAME-TO-SET ( SS -- 0/SET)
  LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
 ELSE 0 THEN ;
 : du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;     -->
-( A0apr12 www SET words )
+( A0apr12 www SET words ) HEX
 : COLLECT-REST ( OF LINE, MAY CONTAIN SPACES ## MEANS EMPTY)
-0 WORD HERE ## $= IF NILL ELSE HERE $@ $SAVE THEN , ;
-: FILE/SET DUP IS-SET-NAME  DUP IF CELL+ ( SKIP TEXT)
+DLM WORD HERE ## $= IF NILL ELSE HERE $@ $SAVE THEN , ;
+: FILE/SET DUP NAME-TO-SET DUP IF CELL+ ( SKIP TEXT)
  SET-FOR-ALL ( DUP COUNT TYPE KEY DROP ) , END-S-F-A DROP
 ELSE DROP DUP REGISTER-FILE , THEN ;
-: COLLECT
-  BEGIN BL PARSE DUP ## $= 0= WHILE  FILE/SET REPEAT
+: COLLECT   BEGIN BL PARSE DUP ## $= 0= WHILE  FILE/SET REPEAT
   DROP ;
+: $LATEST LATEST COUNT 1F AND $SAVE ; ( -- N)
 ( A set of html files with reference)
 : SET-HTML <BUILDS HERE REGISTER-HTML COLLECT-REST
 HERE 0 , COLLECT HERE SWAP ! ( make it a set) DOES> ;
-: RELATION-HTML <BUILDS HERE REGISTER-RELATION
-BL PARSE IS-SET-NAME DUP 5 ?ERROR , BL PARSE ,  DOES> ;
+: #SET CELL+ DUP @ SWAP CELL+ - 0 CELL+ / ;
+: RELATION-HTML <BUILDS HERE REGISTER-RELATION COLLECT-REST
+BL PARSE DUP NAME-TO-SET 0= 18 ?ERROR , BL PARSE ,  DOES> ;
+DECIMAL -->
+( Randomize a set)
+89 LOAD 60 LOAD
+: CHOOSE-FROM-SET DUP #SET CHOOSE 2 + CELLS + ;
+: RANDOMIZE-SET DUP
+CELL+ DUP @ SWAP CELL+ DO
+DUP CHOOSE-FROM-SET I @SWAP
+0 CELL+ +LOOP DROP ;
+
+-->
+
+
+
+
+
+
+
+: $? $@ $. ;
+: WRITE TYPE ;
+: PEEK DUP @ $? CELL+  ;
+: .set CR PEEK SET-FOR-ALL CR $? END-S-F-A ;
+: .rel CR PEEK CR PEEK CR PEEK DROP ;
+
+
+
+
+-->
+
+
+
+
+
+
+( Define the texts used in html)
+STRING A1 <A HREF="  STRING A2 >"    STRING A3 <A/>"
+: CHANGE-IF-LAST   ( 'F S - 'F2 )
+OVER OVER @ = IF SWAP DROP CELL+ ELSE DROP THEN ;
+: NEXT-IN-SET  ( F S -- a/-1 )
+OVER OVER #IN-SET CELL+ SWAP CHANGE-IF-LAST SWAP DROP @ ;
+: REF-SET ( SET FILE -- )
+ CR A1 WRITE OVER CELL+ NEXT-IN-SET $@ WRITE  A2 WRITE
+@ $@ WRITE A3 WRITE ;
+( : DO-FILE META-HTML SET-FOR-ALL
+   OVER OVER CELL+ ?IN-SET-$ IF OVER REF-SET ELSE DROP THEN
+META-RELATION SET-FOR-ALL
+   OVER OVER CELL+ ?IN-SET-$ IF OVER REF-REL ELSE DROP THEN
+END-S-F-A
+DROP ; )
+
+( SHOW RELATION )
+: FILE/SET NAME-TO-SET DUP IF CHOOSE-FROM-SET @ $@ WRITE
+ELSE  DROP ." VAST JOPIE" THEN ;
+: REF-REL ( REL -- )
+CR A1 WRITE DUP CELL+ CELL+ @ FILE/SET
+A2 WRITE @ $@ WRITE A3 WRITE ;
+: DO-FILE
+META-HTML SET-FOR-ALL
+   OVER OVER CELL+ ?IN-SET-$ IF OVER REF-SET ELSE DROP THEN
+END-S-F-A
+META-RELATION SET-FOR-ALL
+   OVER OVER CELL+ @ NAME-TO-SET CELL+ ?IN-SET-$ IF REF-REL
+ELSE DROP THEN
+END-S-F-A
+DROP ;
+: DO-ALL FILES SET-FOR-ALL  DO-FILE END-S-F-A ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SET-HTML JONGENS VOOR EEN ANDERE FORTH FILE"
+JAN   PIET  KLAAS   ##
+SET-HTML MEISJES NOG ZO'N DOM BLONDJE"
+MARIEKE HELMA DORIENTJE ##
+SET-HTML OPIE Zomaar een ander kind"
+JONGENS MEISJES ##  OPIE RANDOMIZE-SET  OPIE .set
+RELATION-HTML O-SEX OF HEB JE LIEVER EEN MEISJE"
+JONGENS MEISJES
+RELATION-HTML A-SEX OF HEB JE LIEVER EEN JONGEN"
+MEISJES JONGENS
+RELATION-HTML NO-SEX OF HEB JE LIEVER EEN JOPIE"
+MEISJES JOPIE     NO-SEX .rel
+;S NOT YET
+1-1-RELATION-HTML VR OF WIL JE HAAR VRIENTJE" MEISJES JOMGENS
+1-1-RELATION-HTML RV OF WIL JE ZIJN VRIENDIN" JOMGENS MEISJES
+
+( RAND EDN 1991JAN21, pg 151 ) HEX
+
+ 0 VARIABLE SEED
+
+( . -- . ) ( Use the nanosecond counter to start)
+: RANDOMIZE DROP TIME SEED ! ;
+
+( -- N  Leave a random number )
+: RAND SEED @ 107465 * 234567 + DUP SEED ! ;
+
+( N -- R Leave a random number < N)
+: CHOOSE RAND U* SWAP DROP ;
+( Swap the number at R with a number 1..N cells away)
+: @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
+( RANDOM-SWAP ( R N -- )
+( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -960,171 +1120,11 @@ BL PARSE IS-SET-NAME DUP 5 ?ERROR , BL PARSE ,  DOES> ;
 
 ( WRITE THE CURRENT SYSTEM TO HARD DISK ) HEX
 B/BUF SEC/BLK / CONSTANT SEC-LEN
-0 VARIABLE RW-BUFFER B/BUF ALLOT
-0 VARIABLE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
-HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
-( We use the two l.s. bytes of 64 bit number)
-              1 , 0 , 0 , 0 ,
- CODE WRITE-SYSTEM
-  PUSHX, SI|
-  MOVXI, AX| 4300 W,
-  MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,
-  INT, 13  B,
-  POPX, SI|
-  PUSHF,
-  NEXT C;            DECIMAL
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 10 CONSTANT LF
-: EXPECT2
-    OVER OVER 1+ ERASE
-    OVER + SWAP DO
-       KEY DUP LF = IF LEAVE ELSE I C! THEN
-    LOOP ;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ : WRITE-SYSTEM HERE 1+ 0 DO
+  I   I SEC/LEN /   1 R/W
+  SEC-LEN +LOOP ;
+
+DECIMAL  (  For 32 bits, but not yet schecked)
 
 
 
@@ -1422,9 +1422,8 @@ LABEL NEXT2      ( REPLACES NEXT!)
 
 
 
-( Using the internal timer for testing ) HEX
- CODE TIME 0F C, 31 C, 90 C, 90 C, 90 C, 90 C,
-  90 C, 90 C, 90 C, 90 C, 90 C, 90 C, 90 C, 90 C,
+( 32 BIT CODE! Using the internal timer for testing ) HEX
+ CODE TIME 0F C, 31 C, ( 90 C, 90 C, 90 C, 90 C, )
 50 C, 52 C,
   AD C, 89 C, C3 C, FF C, 23 C, C;
  CODE TEST-NEXT
@@ -1432,12 +1431,13 @@ LABEL NEXT2      ( REPLACES NEXT!)
  DECIMAL
  : MARK-TIME TIME ;
  : .mS SPACE 0 <# # # # &. HOLD #S #> TYPE ." mS "  ;
- : .ELAPSED DMINUS TIME D+ 500 M/ .mS DROP ;
+ : ELAPSED DMINUS TIME D+ 500 M/ SWAP DROP ;
+ DECIMAL ;S REMOVE THIS LINE IF YOU WANT A TEST
  : TASK ; 24 LOAD
- : BM ." THE BYTE BENCHMARK LASTED "
- CR MARK-TIME DO-PRIME .ELAPSED  ;  ' DO-PRIME H.
- BM FORGET TASK
-
+ : MEASURE TIME 1000 0 DO DO-PRIME LOOP ELAPSED ;
+  MEASURE
+CR  ." THE BYTE BENCHMARK LASTED "  1000 / .mS
+CR ' DO-PRIME H.   FORGET TASK
 ( POSTIT/FIXUP 8086 ASSEMBLER LOAD SCREEN AvdH HCC HOLLAND)
 ASSEMBLER DEFINITIONS HEX
 : 3PI <BUILDS C, C, C, DOES> POST, POST, POST, DROP ;
@@ -2719,7 +2719,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
 
 ( A0apr12 www STRING AND PARSING words )
-FORGET TASK      : TASK ;          36 38 THRU
+FORGET TASK      : TASK ;  &" CONSTANT DLM   36 38 THRU
 : CREATE 0 VARIABLE 0 CELL+ MINUS ALLOT ; ( Like ANSI)
 ( All strings are copied to here, increase if needed)
 CREATE POOL 1000 ALLOT
@@ -2743,61 +2743,69 @@ IMMEDIATE
 IMMEDIATE
 : duse SET-FOR-ALL CR . END-S-F-A ;
 : SET <BUILDS HERE CELL+ , 100 CELLS ALLOT DOES> ;
-: ?IN-SET 0 ROT ROT SET-FOR-ALL
-  OVER = IF SWAP DROP 1 SWAP THEN END-S-F-A DROP ;
-: ?IN-SET-$ 0 ROT ROT SET-FOR-ALL OVER $= IF SWAP DROP 1 SWAP
+: #IN-SET -1 ROT ROT SET-FOR-ALL
+  OVER = IF SWAP DROP I SWAP THEN END-S-F-A DROP ;
+: ?IN-SET #IN-SET -1 = 0= ;
+: #IN-SET-$ -1 ROT ROT SET-FOR-ALL OVER $= IF SWAP DROP I SWAP
 THEN END-S-F-A DROP ;
+: ?IN-SET-$ #IN-SET-$ -1 = 0= ;
 -->
-
-
 ( A0apr12 www SET words )
 SET META-HTML        ( ALL SETS OFHTML FILES )
 : REGISTER-HTML META-HTML SET+! ;
+SET META-RELATION         ( ALL RELATIONS  )
+: REGISTER-RELATION META-RELATION SET+! ;
+SET FILES
+: REGISTER-FILE DUP FILES ?IN-SET-$ 0=
+IF FILES SET+! ELSE DROP THEN ;
 : ?HTML-SET META-HTML ?IN-SET ;
-CREATE NAME-BUFFER 256 ALLOT
+( CREATE NAME-BUFFER 256 ALLOT  )
 : PAR-TO-DATA CELL+ ; ( GO FROM PFA TO WHERE DOES> IS)
-: IS-SET-NAME ( SS -- 1) ( NAME-BUFFER $! ( Needs stored string)
- ( NAME-BUFFER) LATEST (FIND) IF
+: IS-SET-NAME ( SS -- 1)
+ LATEST (FIND) IF
    DROP PAR-TO-DATA DUP ?HTML-SET IF ELSE DROP 0 THEN
 ELSE 0 THEN ;
-
-: du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;
+: du$ SET-FOR-ALL CR $@ TYPE END-S-F-A ;     -->
+( A0apr12 www SET words ) HEX
+: COLLECT-REST ( OF LINE, MAY CONTAIN SPACES ## MEANS EMPTY)
+DLM WORD HERE ## $= IF NILL ELSE HERE $@ $SAVE THEN , ;
+: FILE/SET DUP IS-SET-NAME  DUP IF CELL+ ( SKIP TEXT)
+ SET-FOR-ALL ( DUP COUNT TYPE KEY DROP ) , END-S-F-A DROP
+ELSE DROP DUP REGISTER-FILE , THEN ;
+: COLLECT   BEGIN BL PARSE DUP ## $= 0= WHILE  FILE/SET REPEAT
+  DROP ;
+: $LATEST LATEST COUNT 1F AND $SAVE ; ( -- N)
+( A set of html files with reference)
+: SET-HTML <BUILDS HERE REGISTER-HTML COLLECT-REST
+HERE 0 , COLLECT HERE SWAP ! ( make it a set) DOES> ;
+: #SET CELL+ DUP @ SWAP CELL+ - 0 CELL+ / ;
+: RELATION-HTML <BUILDS HERE REGISTER-RELATION COLLECT-REST
+BL PARSE DUP IS-SET-NAME 0= 18 ?ERROR , BL PARSE ,  DOES> ;
+DECIMAL -->
+( Randomize a set)
+89 LOAD 60 LOAD
+: CHOOSE-FROM-SET DUP #SET CHOOSE 2 + CELLS + ;
+: RANDOM-SET DUP #SET SWAP CELL+
+ DUP @ SWAP CELL+ DO 1 -
+DUP 1 > IF I OVER RANDOM-SWAP THEN
+0 CELL+ +LOOP DROP ;
+: RANDOMIZE-SET DUP
+CELL+ DUP @ SWAP CELL+ DO
+DUP CHOOSE-FROM-SET I ^ @SWAP
+0 CELL+ +LOOP DROP ;
 
 -->
 
 
-( A0apr12 www SET words )
-: COLLECT-REST ( OF LINE, MAY CONTAIN SPACES ## MEANS EMPTY)
-0 WORD HERE ## $= IF NILL ELSE HERE $@ $SAVE THEN , ;
-: FILE/SET DUP IS-SET-NAME  DUP IF
- SET-FOR-ALL ( DUP COUNT TYPE KEY DROP ) , END-S-F-A DROP
-ELSE DROP , THEN ;
-: COLLECT
-  BEGIN BL PARSE DUP ## $= 0= WHILE  FILE/SET REPEAT
-  DROP ;
-( A set of html files with reference)
-: SET-HTML <BUILDS HERE DUP REGISTER-HTML 0 , ( BOTTOM OF SET )
-COLLECT-REST COLLECT HERE SWAP ! ( make it a set) DOES> ;
 
+: $? $@ $. ;
+: WRITE TYPE ;
+: PEEK DUP @ $? CELL+  ;
+: .set CR PEEK SET-FOR-ALL CR $? END-S-F-A ;
+: .rel CR PEEK CR PEEK CR PEEK DROP ;
 
 
 
-0
- 1
-  2
-   3
-    4
-     5
-      6
-       7
-        8
-         9
-          a
-           B
-            C
-             D
-              E
-               F
 
 
 
@@ -2806,165 +2814,53 @@ COLLECT-REST COLLECT HERE SWAP ! ( make it a set) DOES> ;
 
 
 
+( Define the texts used in html)
+STRING A1 <A HREF="
+STRING A2 >"
+STRING A3 <A/>"
+: WRITE TYPE ;
+: NEXT-IN-SET SWAP DROP ;
+: REF-SET ( SET FILE -- )
+ A1 WRITE OVER OVER NEXT-IN-SET @ $@ WRITE  A2 WRITE DROP
+ @ $@ WRITE ;
+: DO-FILE META-HTML SET-FOR-ALL
+OVER OVER ^ ?IN-SET-$ ^ IF OVER REF-SET THEN END-S-F-A DROP ;
+: DO-ALL FILES SET-FOR-ALL  DO-FILE END-S-F-A ;
 
 
 
 
+SET-HTML JONGENS VOOR EEN ANDERE FORTH FILE"
+JAN   PIET  KLAAS   ##
+SET-HTML MEISJES DOM BLONDE"
+MARIEKE HELMA DORIENTJE ##
+SET-HTML OPIE A SET CONTAINING OTHER SETS"
+JONGENS  MEISJES ##    OPIE .set
+RELATION-HTML O-SEX OF HEB JE LIEVER EEN MEISJE"
+JONGENS MEISJES
+RELATION-HTML A-SEX OF HEB JE LIEVER EEN JONGEN"
+MEISJES JONGENS
+RELATION-HTML NO-SEX OF HEB JE LIEVER EEN JOPIE"
+MEISJES JOPIE     NO-SEX .rel
+;S NOT YET
+1-1-RELATION-HTML VR OF WIL JE HAAR VRIENTJE" MEISJES JOMGENS
+1-1-RELATION-HTML RV OF WIL JE ZIJN VRIENDIN" JOMGENS MEISJES
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- CR ." #70 FROBOZZ AMATEUR ADVENTURER >12< 84/4/8"
-  ( ****** START SITUATIE *****************)
-  ZAP
-  UNKNOWN UNK C-CONNECT    BLOCKED BLO C-CONNECT
-  AMBIGUOUS AMB C-CONNECT
-  CHARACTERIZATION WHOUSE
-  WHOUSE NEW-ENTRY C-CONNECT
-  1 CURPOS !
-
-
-
-
-
-
-
-
-." CRC CHECK FOR FIG  85JAN06 ALBERT VAN DER HORST"
-( Adapted from FORTH DIMENSIONS IV-3 )
- : ACCUMULATE ( oldcrc/char -- newcrc )
-   $0100 * XOR
-   8 0 DO
-      DUP 0< IF $4002 XOR DUP + 1+ ELSE DUP + THEN
-   LOOP ;
- : DISPOSE ( crcvalue/adres/len -- newcrcvalue)
-    OVER DUP C@ "( = SWAP 1+ C@ BL = AND OVER 1 = AND IF
-       ( comment; skip it) DROP DROP ") WORD
-    ELSE
-       1+ OVER + SWAP DO I C@ ACCUMULATE LOOP
-    THEN ;
- : MORE ( -- adr f  Leaves flag if there is more in the block)
-    BL WORD HERE DUP C@ 2 < OVER 1+ C@ "! < AND 0=
+ ( STREAM READ ROUTINES CP/M 85/012/08  AH )
+ : F_READ ( B,N-N2 Tries to read N char's to buffer B)
+          ( N2 is number actually read, 0 for EOF)
+      ( NOT  YET: NOW IT IS FILLED WITH ^Z, NOTHING RETURNED )
+  BEGIN
+     SWAP GET-CHAR
+     OVER C! 1+ SWAP 1 -
+     DUP 0=
+  UNTIL
  ;
- ." CRC 2 "
- : VERIFY-BLOCK ( oldcrc/blnr -- newcrc)
-   BLK @ >R IN @ >R   BLK !  0 IN !
-   BEGIN MORE WHILE
-       BL OVER COUNT + C! COUNT DISPOSE
-   REPEAT DROP ( drop the address left by MORE)
-   R> IN ! R> BLK ! ;
- : VERIFY ( scrnr/crc)
-   0 SWAP B/SCR * DUP B/SCR + SWAP DO
-      I VERIFY-BLOCK
-   LOOP
+ : F_WRITE ( B,N-N2 Tries to write N char's from buffer B)
+      ( N2 is the number actually written to disk )
+      ( NOT  YET: NOW IT IS UNCLEAR, NOTHING RETURNED )
+   TO-DISK
  ;
- : VER   SCR @ VERIFY U. ;
-
-
-
-( Test screen)
-     For program exchange, the medium of hard copy is cheap,
-convenient, and machine-independent. Its primary disadvantages
-are the time required for hand-typing the source code and the
-possibility of human error in the process. Even if the screens
-LOAD without error messages, some errors may pass undetected
-until run-time, when the system crashes mysteriously.
 
 
 
@@ -2974,47 +2870,6 @@ until run-time, when the system crashes mysteriously.
 
 
 
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
-HEX VOCABULARY ASSEMBLER IMMEDIATE : 8* DUP + DUP + DUP + ;
-' ASSEMBLER CFA ' ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS )
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE
-: C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE
-: LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
-    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
-4 CONSTANT H    5 CONSTANT L     7 CONSTANT A    6 CONSTANT PSW
-2 CONSTANT D    3 CONSTANT E     0 CONSTANT B    1 CONSTANT C
-6 CONSTANT M    6 CONSTANT SP     ' ;S 0B + @ CONSTANT (NEXT)
-: 1MI <BUILDS C, DOES> C@ C, ;  : 2MI <BUILDS C, DOES> C@ + C, ;
- : 3MI <BUILDS C, DOES> C@ SWAP 8* +  C, ;
-: 4MI <BUILDS C, DOES> C@ C, C, ;
-: 5MI <BUILDS C, DOES> C@ C, , ;  : PSH1 C3 C, (NEXT) 1 - , ;
-: PSH2 C3 C, (NEXT) 2 - , ;       : NEXT C3 C, (NEXT) , ;
- -->
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
-00 1MI NOP     76 1MI HLT     F3 1MI DI     FB 1MI EI
-07 1MI RLC     0F 1MI RRC     17 1MI RAL    1F 1MI RAR
-E9 1MI PCHL    F9 1MI SPHL    E3 1MI XTHL   EB 1MI XCHG
-27 1MI DAA     2F 1MI CMA     37 1MI STC    3F 1MI CMC
-80 2MI ADD     88 2MI ADC     90 2MI SUB    98 2MI SBB
-A0 2MI ANA     A8 2MI XRA     B0 2MI ORA    B8 2MI CMP
-09 3MI DAD     C1 3MI POP     C5 3MI PUSH   02 3MI STAX
-0A 3MI LDAX    04 3MI INR     05 3MI DCR    03 3MI INX
-0B 3MI DCX     C7 3MI RST     D3 4MI OUT    DB 4MI IN
-C6 4MI ADI     CE 4MI ACI     D6 4MI SUI    DE 4MI SBI
-E6 4MI ANI     EE 4MI XRI     F6 4MI ORI    FE 4MI CPI
-22 5MI SHLD    2A 5MI LHLD    32 5MI STA    3A 5MI LDA
-CD 5MI CALL    C3 5MI JMP
-               ( CZ,CNZ,CCY,CNC)  -->
-
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >3<"
-C9 1MI RET                   C2 CONSTANT 0=  D2 CONSTANT CS
-E2 CONSTANT PE  F2 CONSTANT 0<   : NOT 8 + ;
-: MOV 8* 40 + + C, ;   : MVI 8* 6 + C, C, ;   : LXI 8* 1+ C, , ;
-: THEN HERE SWAP ! ;               : IF C, HERE 0 , ;
-: ELSE C3 IF SWAP THEN ;           : BEGIN HERE ;
-: UNTIL C, , ;                     : WHILE IF ;
-: REPEAT SWAP C3 C, , THEN ;
-;S
 
 
 
@@ -3022,14 +2877,159 @@ E2 CONSTANT PE  F2 CONSTANT 0<   : NOT 8 + ;
 
 
 
-CR ." SIMPLE PROFILER AH   85FEB15"
-LABEL NEXT2      ( REPLACES NEXT!)
-   B LDAX   B INX   A L MOV
-   B LDAX   B INX   A H MOV   (NEXT) 6 + JMP C;
-   (NEXT) 3 + JMP C;
- ODE PROFILE  ( PATCHES THE CODE AT NEXT FOR PROFILING)
-   $C3 A MVI  (NEXT) STA
-   NEXT2 H LXI    (NEXT) 1+ SHLD     NEXT C;
+
+( RAND EDN 1991JAN21, pg 151 ) HEX
+
+ 0 VARIABLE SEED
+
+( . -- . ) ( Use the nanosecond counter to start)
+: RANDOMIZE DROP TIME SEED ! ;
+
+( -- N  Leave a random number )
+: RAND SEED @ 107465 * 234567 + DUP SEED ! ;
+
+( N -- R Leave a random number < N)
+: CHOOSE RAND U* SWAP DROP ;
+( Swap the number at R with a number 1..N cells away)
+: @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
+: RANDOM-SWAP ( R N -- )
+ 1 - CHOOSE 1+ CELLS OVER + @SWAP ;  DECIMAL
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+         9 1 DO I J ! 5 SPACES ( eerst wat spaties)
+                9 1 DO 9 J @ - I BORD @ EMIT SPACE LOOP CR
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ ." SYSTEM ELECTIVE CP/M FIGFORTH EXTENSIONS 3.43    AH"
+  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
+ ( MAINTENANCE )  100 LOAD 32 LOAD
+( HEX CHAR DUMP)  6 LOAD 30 LOAD 7 LOAD 39 LOAD ( i.a. editor)
+ ( STRING         36 LOAD 37 LOAD )
+ ( EDITOR )       101 105 THRU 107 LOAD 106 LOAD
+ ( CP/M READ WRITE LOAD    15 LOAD 18 LOAD 21 LOAD 21: BUGS)
+ ( KRAKER )        10 LOAD
+ ( NEW SYSTEM      23 LOAD   )
+ ( CRC             71 LOAD   )
+ ( ASSEMBLER 8080  74 LOAD ) ( 8086 )  96 LOAD
+ ( STAR PRINTER    31 LOAD   )
+ ( CP/M CONVERT    80 LOAD   )
+ WARNING 1 TOGGLE
+ 2 LIST    : TASK ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
