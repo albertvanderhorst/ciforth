@@ -907,66 +907,66 @@ HEADER({&},{DCHAR},{DOCOL}, B_IMMED + B_DENOT)
         DC      SEMIS
 ;
 HEADER({0},{DEN0},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({1},{DEN1},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({2},{DEN2},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({3},{DEN3},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({4},{DEN4},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({5},{DEN5},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({6},{DEN6},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({7},{DEN7},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({8},{DEN8},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({9},{DEN9},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({A},{DENA},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 ;
 HEADER({B},{DENB},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 ;
 HEADER({C},{DENC},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 ;
 HEADER({D},{DEND},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 ;
 HEADER({E},{DENE},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 ;
 HEADER({F},{DENF},{DOCOL}, B_IMMED + B_DENOT)
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 HEADER({-},{DENM},{DOCOL}, B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
-        DC      NPNUMB, DMINU, SDLITE
+        DC      PNUMB, DMINU, SDLITE
         DC      SEMIS
 ;
 HEADER({+},{DENP},{DOCOL}, B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
-        DC      NEWNUMB, SEMIS
+        DC      NUMB, SEMIS
 ;
 dnl Remember the top of the denotation chain.
 define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
@@ -2925,43 +2925,7 @@ HEADER({[CHAR]},{BCHAR},{DOCOL},B_IMMED)
         DC      CHF
         DC      SEMIS
 ;
-worddocsafe({FORMATTING},{(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},
-{Convert the ascii text beginning at forthvar({addr1+l}) with regard to forthcode({BASE}) . The
-new value is accumulated into double number forthvar({d1}) , being left as double number
-forthvar({d2}) .
- forthvar({addr2}) is the address of the first unconvertable digit.},{{NUMBER}})
-HEADER({(NUMBER)},{PNUMB},{DOCOL})
-PNUM1:  DC      ONEP    ;{ BEGIN}
-        DC      LDUP
-        DC      TOR
-        DC      CFET
-        DC      BASE
-        DC      FETCH
-        DC      DIGIT
-        _0BRANCH(PNUM2) ;{ WHILE}
-        DC      SWAP
-        DC      BASE
-        DC      FETCH
-        DC      USTAR
-        DC      DROP
-        DC      ROT
-        DC      BASE
-        DC      FETCH
-        DC      USTAR
-        DC      DPLUS
-        DC      DPL
-        DC      FETCH
-        DC      ONEP
-        _0BRANCH(PNUM3) ;{ IF}
-        DC      ONE
-        DC      DPL
-        DC      PSTOR   ;{ ENDIF}
-PNUM3:  DC      FROMR
-        _BRANCH(PNUM1)  ;{ REPEAT}
-PNUM2:  DC      FROMR
-        DC      SEMIS
-;
-worddocsafe({FORMATTING},{NEW(NUMBER)},{paren_number},{ --- d1},{},
+worddocsafe({FORMATTING},{(NUMBER)},{paren_number},{ --- d1},{},
 {Convert the ascii text at the current input stream with regard to forthcode({BASE}) .
 The
 new value is accumulated into double number forthvar({d1}) , being left.
@@ -2969,7 +2933,7 @@ The only non-digit acceptable is a decimal point, that signifies that
 the input is to be considered as a double.
 If the first unconvertable digit is not a blank, this is an error. },
 {{NUMBER},{?BLANK}})
-HEADER({NEW(NUMBER)},{NPNUMB},{DOCOL})
+HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, ZERO
         DC      ZERO, DPL, STORE
 NPNUM1:  DC      INBRS   ;{ BEGIN}
@@ -3003,51 +2967,26 @@ NPNUM3:                 ; {THEN THEN}
         DC      SEMIS
 ;
 
-HEADER({NEWNUMBER},{NEWNUMB},{DOCOL})
-        DC      NPNUMB, SDLITE
+worddoc({FORMATTING},{NUMBER},{number},{ ---  s/d},{},
+{Convert characters from the current input stream
+into a number, and compile or execute this number.
+If the string contains a 
+decimal point it is a double else a single integer number.
+If numeric conversion is
+not possible, an error message will be given.},{{BASE},{(NUMBER)}})
+HEADER({NUMBER},{NUMB},{DOCOL})
+        DC      PNUMB, SDLITE
         DC      SEMIS
 ;
-worddoc({FORMATTING},{NUMBER},{number},{addr --- d},{},
-{Convert a character string left at forthvar({addr}) with a preceeding count, to
-a signed double number forthvar({d}) , using the current numeric base. If a
-decimal point is encountered in the text, its position will be
-given in forthcode({DPL}) , but no other effect occurs. If numeric conversion is
-not possible, an error message will be given.},{{BASE}})
-HEADER({NUMBER},{NUMB},{DOCOL})
-        DC      ZERO
-        DC      ZERO
-        DC      ROT
-        DC      LDUP
-        DC      ONEP
-        DC      CFET
-        DC      LIT,2DH
-        DC      EQUAL
-        DC      LDUP
-        DC      TOR
-        DC      PLUS
-        DC      LIT,-1
-NUMB1:  DC      DPL     ;{ BEGIN}
-        DC      STORE
-        DC      PNUMB
-        DC      LDUP
-        DC      CFET
-        DC      LBL
-        DC      LSUB
-        _0BRANCH(NUMB2) ;{ WHILE}
-        DC      LDUP
-        DC      CFET
-        DC      LIT,2EH
-        DC      LSUB
-        DC      ZERO
-        DC      QERR
-        DC      ZERO
-        _BRANCH(NUMB1)  ;{ REPEAT}
-NUMB2:  DC      DROP
-        DC      FROMR
-        _0BRANCH(NUMB3) ;{ IF}
-        DC      DMINU   ;{ ENDIF}
-NUMB3:  DC      SEMIS
 ;
+worddoc({DICTIONARY},{FIND:},{paren_find},{"name" --- dea},{},
+{Parse a blank-delimited string from the current input stream and
+look the string up according to forthcode({(FIND)}) .
+If found, and it is not a denotation, 
+leave the dictionary entry
+address forthsamp({dea}) of the first entry found, else leave a
+nil pointer.},
+{})
 HEADER({FIND:},{DDFIND},{DOCOL})
         DC      PWORD, PFIND
         DC      LDUP, TFFA, FETCH,
