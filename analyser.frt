@@ -7,6 +7,7 @@
 \ INCLUDE asi586.frt
 
 REQUIRE BOUNDS
+REQUIRE SET
 
 \ ------------------------------------------------
 \ Set BITS of mask in ADDRESS.
@@ -52,7 +53,7 @@ HEX
 200 CONSTANT FMASK-N!    \ No output side effects. "No stores."
 400 CONSTANT FMASK-ST    \ No stack side effects. "No absolute stack reference."
 
-FMASK-N@ FMASK-N! OR CONSTANT FMASK-NS \ No side effects.
+FMASK-N@ FMASK-N! OR FMASK-ST OR CONSTANT FMASK-NS \ No side effects.
 
 \ Fill optimisations BITS in into DEA.
 : !OB   >FFA >R    R@ @ FMASK INVERT AND   OR  R> ! ;
@@ -84,6 +85,7 @@ ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
     DUP FMASK AND 0= IF "No optimisations " TYPE THEN
     DUP FMASK-N@ AND IF "No fetches " TYPE THEN
     DUP FMASK-N! AND IF "No stores " TYPE THEN
+    DUP FMASK-ST AND IF "No depth " TYPE THEN
     DUP FMASK-IL AND IF "In line data " TYPE THEN
     DUP FMASK-HO AND IF "Been optimised " TYPE THEN
     DUP FMASK-HOB AND IF "Cannot be optimised " TYPE THEN
@@ -95,10 +97,6 @@ ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
 
 \ For DEA type everything.
 : .DE DUP SE? DUP CRACKED OPT? ;
-
-\ For VALUE and SET : value IS present in set.
-: IN-SET? $@ SWAP
- DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 
 ASSEMBLER
 CREATE POPS  HERE 0 ,
@@ -239,6 +237,7 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 0FF 'EXECUTE !SE
 0                    1 0 'FOR-VOCS  !FLAGS  \ Despite an execute this is known
 0                    2 0 'FOR-WORDS !FLAGS
+FMASK-N! FMASK-N@ OR 0 1 'DSP@      !FLAGS
 FMASK-NS FMASK-IL OR 0 1 'LIT       !FLAGS
 FMASK-NS FMASK-IL OR 0 0 'SKIP      !FLAGS
 FMASK-NS FMASK-IL OR 0 0 'BRANCH    !FLAGS
@@ -309,7 +308,7 @@ HERE SWAP !
 : FIND-SE-ANY-CODE
     DUP >CFA @ >R
     R@ DOCON =   R@ DOVAR =   R> DOUSER =    OR OR
-    IF >FFA FMASK-N@ FMASK-N! OR SWAP OR!U   12 ELSE
+    IF >FFA FMASK-NS SWAP OR!U   12 ELSE
         FIND-SE-CODE  \ Normal code definition.
     THEN ;
 
@@ -413,3 +412,6 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
 
 
 DECIMAL
+
+FILL-ALL-SE
+FILL-ALL-OB

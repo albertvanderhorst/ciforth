@@ -9,6 +9,8 @@
 
 REQUIRE $
 REQUIRE SWAP-DP
+REQUIRE SET
+
 ( ------------ COMFIGURATION --------------------------------- )
 
 500 CONSTANT MAX-SET       \ Default set size.
@@ -17,22 +19,7 @@ REQUIRE SWAP-DP
 : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
 \ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
 
-\ REQUIRE SET (not yet)
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
-( Build a set "x" with X items. )
-: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
-: !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
-: SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
-: SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
-: SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
-: .SET   @+ SWAP ?DO I ? 0 CELL+ +LOOP ;   ( Print non-empty SET )
-\ Remove entry at ADDRESS from SET.
-: SET-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE   -1 CELLS R> +! ;
-
-\ For VALUE and SET : value IS present in set.
-: IN-SET? $@ SWAP
- ?DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
-
 \ For a SET print it backwards. Primarily intended as how to loop backwards example.
 : SET-PRINT-BACKWARDS
 @+ SWAP BEGIN 2DUP > WHILE   >R 1 CELLS - >R
@@ -138,10 +125,8 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ this stackeffect the virtual stack doesn't underflow.
 : ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- VD @ > 0=  AND ;
 
-\ For DEA FLAG : all optimisations required by flag ARE allowed there.
-\ The meaning of the st flag is reversed, this is a design error to
-\ be fixed in analsyer.frt
-: ALLOWED?   >R   >FFA @ FMASK-ST XOR  R@ AND   R> = ;
+\ For DEA and FLAG : all optimisations required by flag ARE allowed there.
+: ALLOWED?   >R   >FFA @   R@ AND   R> = ;
 
 \ For DEA : it HAS no side effects regards stack.
 : NSST?   FMASK-ST ALLOWED? ;
@@ -154,8 +139,8 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 
 \ Move to analyser.frt    FIXME!
 : FMASK-ST! FMASK-NS INVERT SWAP >FFA AND! ;
-'.S FMASK-ST!
-'DEPTH FMASK-ST!
+\ '.S FMASK-ST!
+\ 'DEPTH FMASK-ST!
 
 \ The return stack is not handled in any way.   FIXME!
 '>R FMASK-ST!
