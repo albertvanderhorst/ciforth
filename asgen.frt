@@ -102,25 +102,25 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
 : % [COMPILE] ' ;   ( Return the DEA from "word". )
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
-: %>BODY >PFA CELL+ ; ( From DEA to the DATA field of a created word )
-: %BODY> 0 CELL+ - NFAO ; ( Reverse of above)
+: %>BODY >BODY ; ( From DEA to the DATA field of a created word )
+: %BODY> BODY> ; ( Reverse of above)
 : %>CODE >PFA ; ( From DEA to the DOES> pointer )
 ( Leave for DEA : it IS to be ignored. This is used for supressing the  )
 ( bare bones of the sib mechanism in i586.                              )
-: IGNORE? >NFA @ 1+ C@ &~ = ;
+: IGNORE? >NFA @ CELL+ C@ &~ = ;
 
 : (>NEXT%) >LFA @ ; ( Given a DEA, return the next DEA. )
 ( For a DEA as returned from (>NEXT%} : it IS the end, not a real dea.  )
-: VOCEND? >NFA @ FFFF AND A081 = ;
+: VOCEND? >NFA @ 0= ;
 ( As (>NEXT%} but skip holes, i.e. words with names starting in ``-''   )
-: >NEXT% BEGIN  (>NEXT%) DUP >NFA @ 1+ C@ &- - UNTIL ;
+: >NEXT% BEGIN  (>NEXT%) DUP >NFA @ CELL+ C@ &- - UNTIL ;
 ( Leave the first DEA of the assembler vocabulary.                      )
-: STARTVOC ' ASSEMBLER >DFA >LFA @ ;
+: STARTVOC ' ASSEMBLER >DDEA >LFA @ ;
 
 ( Build: for "word" remember type -- creation class -- exemplified by   )
 ( DOES> address of the code to be executed.                             )
 ( Execution: Leave for DEA : it IS of same type. )
-: IS-A <BUILDS 0 ( To be patched) , DOES> @ SWAP %>CODE @ = ;
+: IS-A CREATE 0 ( To be patched) , DOES> @ SWAP %>CODE @ = ;
 ( Patch up the data field of a preceeding word defined by `IS-A'        )
 ( To be called when sitting at the address wanted                       )
 : REMEMBER HERE LATEST (>NEXT%) %>BODY ! ; IMMEDIATE
@@ -167,7 +167,7 @@ DECIMAL
 ( BITS would stick out it. Leave MASK and BITS . Programming error!     )
 ( Generate error on data for postit/fixup, if some BITS to fill in      )
 ( are already in the MASK. Leave BITS and MASK.                         )
-: CHECK28 2DUP AND 28 ?ERROR ;                                          )
+: CHECK28 2DUP AND 28 ?ERROR ;                                          
 ( Generate error on data for commaer, if the BITS to reset are not      )
 ( present in the MASK. Leave BITS and MASK.                             )
 : CHECK29 2DUP OR -1 - 29 ?ERROR   ;
@@ -207,9 +207,9 @@ HEX
     @+ ,   TALLY:,   CORRECT,- ;
 ( Define an instruction by BA BY BI and the OPCODE                      )
 ( The `BI' information is what is left to be filled in cf. fixups       )
-IS-A IS-1PI : 1PI  CHECK33 <BUILDS , , , , 1 , DOES> REMEMBER POSTIT ; 
-IS-A IS-2PI : 2PI  CHECK33 <BUILDS , , , , 2 , DOES> REMEMBER POSTIT ;
-IS-A IS-3PI : 3PI  CHECK33 <BUILDS , , , , 3 , DOES> REMEMBER POSTIT ;
+IS-A IS-1PI : 1PI  CHECK33 CREATE , , , , 1 , DOES> REMEMBER POSTIT ; 
+IS-A IS-2PI : 2PI  CHECK33 CREATE , , , , 2 , DOES> REMEMBER POSTIT ;
+IS-A IS-3PI : 3PI  CHECK33 CREATE , , , , 3 , DOES> REMEMBER POSTIT ;
 : IS-PI  >R R@ IS-1PI R@ IS-2PI R@ IS-3PI OR OR R> DROP ;
 
 ( Bookkeeping for a fixup using a pointer to the BIBYBA information,    )
@@ -219,7 +219,7 @@ IS-A IS-3PI : 3PI  CHECK33 <BUILDS , , , , 3 , DOES> REMEMBER POSTIT ;
 : FIXUP>   @+ ISS @ OR!   TALLY:|   CHECK32 ;
 ( Define an fixup by BA BY BI and the FIXUP bits )
 ( One size fits all, because of the or character of the operations. )
-IS-A IS-xFI   : xFI   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP> ;
+IS-A IS-xFI   : xFI   CHECK31 CREATE , , , , DOES> REMEMBER FIXUP> ;
 
 ( Rotate the MASK etc from a fixup-from-reverse into a NEW mask fit ) 
 ( for using from the start of the instruction. We know the length!  )
@@ -231,7 +231,7 @@ IS-A IS-xFI   : xFI   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP> ;
 : FIXUP<   @+ CORRECT-R ISS @ OR!   TALLY:|R  CHECK32 ;
 ( Define a fixup-from-reverse by BA BY BI and the FIXUP bits )
 ( One size fits all, because of the character of the or-operations. )
-IS-A IS-xFIR   : xFIR   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP< ;
+IS-A IS-xFIR   : xFIR   CHECK31 CREATE , , , , DOES> REMEMBER FIXUP< ;
 
 ( Bookkeeping for a commaer using a pointer to the BIBYBA information.  )
 ( Not used by the disassembler.                                         )
@@ -239,7 +239,7 @@ IS-A IS-xFIR   : xFIR   CHECK31 <BUILDS , , , , DOES> REMEMBER FIXUP< ;
 : COMMA @+ >R  TALLY:,,  CHECK32   R> EXECUTE ;
 ( Build with an disassembly ROUTINE, with the LENGTH to comma, the BA   )
 ( BY information and the ADDRESS that is executing the commaer          )
-IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
+IS-A  IS-COMMA   : COMMAER CREATE  , 0 , , , , , DOES> REMEMBER COMMA ;
 
 ( ------------- ASSEMBLER, SUPER DEFINING WORDS ----------------------) 
 
@@ -266,7 +266,7 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------) 
 ( Build a set "x" with X items. )
-: SET   <BUILDS HERE CELL+ , CELLS ALLOT DOES> ;
+: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
 : SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
 : SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
@@ -522,7 +522,7 @@ HERE POINTER !
 
 ( ************************* )
 : ;CODE
-?CSP   COMPILE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
+?CSP   POSTPONE (;CODE)   POSTPONE [   POSTPONE ASSEMBLER
 ; IMMEDIATE
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
 : C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
