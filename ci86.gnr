@@ -6752,16 +6752,43 @@ PACCEP1:
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 ;
-_HOSTED_DPMI_({
 worddoc( {STORAGE~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
 {A constant that leaves the address of a disk buffer used by
-file i/o words.
+file i/o words._HOSTED_MSDOS_({{It is primarily used for building up
+a zero ended string, such as not to burden pad.}})
+_HOSTED_DPMI_({{It is aliased with a "real" segment, to pass data
+from protected mode to the the DPMI-interface. Therefore it must be 16-bits
+addressable. It occupies 32K from 8000H onwards. }})
 },
-{{READ-FILE}, {WRITE-FILE}},
+{{READ-FILE}, {OPEN-FILE}},
 {{( not yet)},{}},
 enddoc)
+_HOSTED_DPMI_({
 HEADER({RWBUF},{RWBUF},{DOCON}, 8000H)
+});_END_({ _HOSTED_DPMI_})
+_HOSTED_MSDOS_({
+HEADER({RWBUF},{RWBUF},{DOVAR},)
+        _RESB(80H)
+});_END_({ _HOSTED_MSDOS_})
+
+worddoc( {STORAGE~},{ZEN},{zren},{sc --- addr},{},
+{Leaves an address that contains a zero-ended equivalent of forthvar({sc}).
+The same buffer is reused, such that this word is not reentrant.
+_VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
+to MSDOS. In fact this is forthcode({RW-BUFFER}) }})
+_HOSTED_DPMI_({{The result is aliased in the "real" segment, such that this address
+can be passed to DPMI. NOT YET! }})
+},
+{{OPEN-FILE}},
+{{"AAP" ZEN 3 + C@ .},{0}},
+enddoc)
+HEADER({ZEN},{ZEN}, {DOCOL})
+        DC      RWBUF, SSTOR
+        DC      ZERO, RWBUF, CHAPP
+        DC      RWBUF, CELLP
+        DC      SEMIS
 ;
+_HOSTED_DPMI_({
 worddoc( {STORAGE},{READ-FILE}, {read_file}, {addr n1 fd --- n2 u1 }, {ISO}
 {Read forthvar({n}) characters to forthvar({addr}) from current
 position of the file that is open at forthvar({fd}) .
@@ -6846,11 +6873,7 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 },
 enddoc)
 HEADER({OPEN-FILE},{OPEN},{DOCOL})
-        DC      TOR
-        DC      PAD, SSTOR
-        DC      ZERO, PAD, CHAPP ; {Unix requires a c-string.}
-        DC      PAD, CELLP
-        DC      X, X
+        DC      TOR, ZEN, X, X
         DC      LIT, open, FROMR, PLUS, BDOSN
         _0BRANCH({OFILE1})
         DC      NEGATE, LDUP
@@ -6868,9 +6891,7 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {{." See OPEN-FILE"},{See OPEN-FILE}},
 enddoc)
 HEADER({CLOSE-FILE},{CLOSE},{DOCOL})
-        DC      TOR
-        DC      X, X
-        DC      FROMR
+        DC      TOR, X, X, FROMR
         DC      LIT, close, BDOSN
         _0BRANCH({CFILE1})
         DC      NEGATE
@@ -6891,11 +6912,7 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {CLOSE-FILE .},{0}},
 enddoc)
 HEADER({CREATE-FILE},{CREATEF},{DOCOL})
-        DC      TOR
-        DC      PAD, SSTOR
-        DC      ZERO, PAD, CHAPP ; {Unix requires a c-string.}
-        DC      PAD, CELLP
-        DC      FROMR, X
+        DC      TOR, ZEN, FROMR, X
         DC      LIT, create, BDOSN
         _0BRANCH({CRFILE1})
         DC      NEGATE, LDUP
@@ -6915,10 +6932,7 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345}},
 enddoc)
 HEADER({DELETE-FILE},{DELETE},{DOCOL})
-        DC      PAD, SSTOR
-        DC      ZERO, PAD, CHAPP ; {Unix requires a c-string.}
-        DC      PAD, CELLP
-        DC      X, X
+        DC      ZEN, X, X
         DC      LIT, delete, BDOSN
         _0BRANCH({DFILE1})
         DC      NEGATE
