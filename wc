@@ -3,29 +3,24 @@ lina <<% | tail -n$#
 ( Environmental dependancies : )
 ( This is a fig Forth Program using only standard fig Words)
 ( plus LINOS (par1, par2, par3, function# -- result/error )
-( The following words are not ANSI
-( WORD leaves the word at HERE instead of returning an address.)
-( VARIABLE expects an initial value. )
+( The following words are not ANSI : none (any more))
 ( 1 is used for a true flag)
 
 9 CONSTANT TAB
 10 CONSTANT LF
-: IS-BLANK  ( char -- flag)
-  0 ( Innocent until proven guilty)
-  OVER TAB = OR
-  OVER LF = OR
-  OVER BL = OR
-  SWAP DROP ;
+ ( char -- flag)
+\ : IS-BLANK    BL 1+ < ;
+: IS-BLANK ?BLANK ;
 
-0 VARIABLE LAST-WAS-BLANK
-0 VARIABLE L
-0 VARIABLE W
-0 VARIABLE C
-: ZERO-COUNT 0 L !   0 W !   0 C ! 1 LAST-WAS-BLANK ! ;
+VARIABLE LAST-WAS-BLANK
+VARIABLE L
+VARIABLE W
+VARIABLE C
+: ZERO-COUNT 0 L !   0 W !   0 C ! -1 LAST-WAS-BLANK ! ;
 : SHOW-COUNT SPACE L @ . W @ . C @ . CR ;
 
 1000000 CONSTANT SIZE
-0 VARIABLE BUFFER SIZE ALLOT
+CREATE BUFFER SIZE ALLOT
 : AT-WORD-START IS-BLANK  LAST-WAS-BLANK @ 0= AND ; ( char -- flag)
 ( All four  : ( char -- char )
 : COUNT-L LF OVER = IF 1 L +! THEN ;
@@ -39,17 +34,15 @@ lina <<% | tail -n$#
 6 CONSTANT CLOSE 
 0 CONSTANT O_RDONLY 
 
-0 VARIABLE HANDLE
-: COUNT-FILE BEGIN HANDLE @ BUFFER SIZE READ LINOS DUP 0 >
+VARIABLE HANDLE
 WHILE COUNT-BUFFER REPEAT DROP ;
 
 : ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
 ( c-name -- handle/err )
 : OPEN-LINUX ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR ; 
-: STILL-FILES HERE 1+ C@  ( -- flag ) ;
+: STILL-FILES HERE C@  ( -- flag ) ;  ( Count <>0 means more files)
 : OPEN-FILE BL WORD STILL-FILES ( [filename-at-here] -- handle/-1 )
     IF HERE COUNT TYPE HERE OPEN-LINUX ELSE -1 THEN  HANDLE ! ;
-: CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?LINUX-ERROR ;
 
 : TREAT-FILE ZERO-COUNT COUNT-FILE SHOW-COUNT ;
 
