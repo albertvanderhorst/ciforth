@@ -1,4 +1,4 @@
-
+( 0 screen is not loadable )
 \ All definitions that have a Source Field Addres of zero
 \ belong to the kernel
 
@@ -14,54 +14,54 @@
 
 
 
-( ?16 ?32 ?LI ?PC ?LEAVE-BLOCK INCLUDE ) \ AvdH A1sep28
-  : ^ .S ;     : IVAR CREATE , ;
-: INCLUDE (WORD) INCLUDED ;
-: ?LEAVE-BLOCK IF SRC CELL+ @ IN ! THEN ;
-: LEAVER CREATE , DOES> @ ?LEAVE-BLOCK ;
-0 CELL+ 2 <> LEAVER ?16 0 CELL+ 4 <> LEAVER ?32
- "BIOS" PRESENT? 0=  LEAVER ?PC
- "LINOS" PRESENT? 0= LEAVER ?LI
-REQUIRE 32_bit_loaded_from_block_1 ?16
-: LC@ L@ FF AND ;
-: LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
- : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
-: VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 7F + LC! 2 +LOOP ;
- : HORIZONTAL-FRAME 82 1 DO BLUE @ VV A00 + I + LC! 2 +LOOP ;
- : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
- : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
-COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
-           I have a beautiful disclaimer,
-     but this screen is too small to contain it.
-THE FILE COPYING THAT IS SUPPLIED WITH THIS PROGRAM APPLIES.
-AN EXCERPT FOLLOWS. BECAUSE THE PROGRAM IS LICENSED FREE OF
-CHARGE THERE IS NO WARRANTY FOR THE PROGRAM, TO THE EXTENT
-ALLOWED BY APPLICABLE LAW. UNLESS OTHERWISE STATED IN WRITING
-THE PROGRAM IS SUPPLIED "AS IS". IN NO EVENT
-UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
-WILL THE COPYRIGHT OWNER BE LIABLE FOR DAMAGES OF ANY KIND
-RELATED TO USE OF, ABUSE OF OR INABILITY TO USE THIS PROGRAM.
-THIS IS COPYRIGHTED SOFTWARE. YOUR RIGHTS (IN PARTICULAR YOUR
-RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
+( -a This_option_is_available )
 
-           THIS IS A WARNING ONLY.
- THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( -b This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( -c PROGRAM_:_compile_PROGRAM_to_binary ) \ AvdH A1oct02
-28 LOAD    REQUIRE CTYPE   REQUIRE   TURNKEY
+28 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT FILE-NAME
-: EXEC-NAME   FILE-NAME $@ + 4 - ".frt" CORA IF "a.out" ELSE
-    FILE-NAME $@ 4 - THEN ;
-
-: MY-OPTIONS DROP 0 ;
-'MY-OPTIONS 'OPTIONS 3 CELLS MOVE
-FILE-NAME $@ GET-FILE ^J $S 2DROP     \ Line with #!lina
- EVALUATE   LATEST CONSTANT XXX
+: EXEC-NAME   FILE-NAME $@ + 4 - ".frt" CORA
+    IF "a.out" ELSE FILE-NAME $@ 4 - THEN ;
+\ Be economic with disk space
+: INCD'   SWAP-DP GET-FILE SWAP-DP EVALUATE ;
+: INC' (WORD) INCD' ;
+'INCD' DUP 'INCLUDED 3 CELLS MOVE   HIDDEN
+'INC'  DUP 'INCLUDE 3 CELLS MOVE    HIDDEN
+: MY-OPTIONS DROP 0 ;  \ No options, no sign on.
+'MY-OPTIONS DUP 'OPTIONS 3 CELLS MOVE  HIDDEN
+FILE-NAME $@ INCLUDED
+LATEST CONSTANT XXX
 : DOIT [ XXX , ] BYE ;
 LATEST EXEC-NAME   TURNKEY
-  1
-
-
-
  MSG # 0 : CANNOT FIND WORD TO BE POSTPONED
  MSG # 1 : EMPTY STACK
  MSG # 2 : DICTIONARY FULL
@@ -142,6 +142,7 @@ CREATE BASE' 0 ,
 
 
 
+( -i This_option_is_available )
 
 
 
@@ -157,127 +158,126 @@ CREATE BASE' 0 ,
 
 
 
-
- CR ." A1MAY17  FORTH KRAKER >1<  ALBERT VAN DER HORST "
- CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
- : T,  ( N--. Put N in select table)
-     SELTOP @ !  0 CELL+ SELTOP +!  ;
- : CFOF ( --N Get dea of word following )
-    (WORD) FOUND ;
-
- : ID.. CFA> ID. ; ( cfa--. Print a words name )
- : ID.+ $@ ID.. ; ( dip -- dip' Print a words name )
- : SEL@    ( N--M,F F="value N present in table" )
-    ( if F then M is vector address else M=N)
-       0 SWAP ( initialise flag)
-       SELTOP @ SELTAB DO
-           DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
-       0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
-
-  CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
- : (KRAAK) ( DEA--. Decompile a word from its DEA)
-  (  DUP NEXTD >NFA @ LIM ! Get an absolute limit)
-    DUP @ SEL@ IF ( Is content of CFA known?)
-       EXECUTE ( Assuming CFA also on stack)
-    ELSE
-        DROP CR
-        DUP >CFA @ OVER >PHA = IF
-           ." Code definition : " ELSE ." Can't handle : "
-       THEN ID.. CR
-    THEN ;
-: KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
-    (WORD) FOUND DUP 0= 11 ?ERROR (KRAAK) ;
-( For the DEA : it IS immediate / it IS a denotation )
- : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
- : ?Q KEY? IF QUIT THEN ; ( NOODREM)
- CR ." A1MAY17  FORTH KRAKER >2a<  ALBERT VAN DER HORST "
-( DEA--DEA Get the DEA of the word defined after the CFA one)
-: NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
-WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
- : NEXTC NEXTD >CFA ; ( DEA--CFA Like NEXTD, giving CFA)
- : KRAAK-FROM CFOF ( .--. Kraak, starting with following word)
-BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP (KRAAK) REPEAT DROP ;
- VARIABLE LIM
-: H.. BASE @ >R HEX . R> BASE ! ;
-: B.. H.. ;
-( For the NUMBER : it IS a proper `dea' )
-( The <BM is not only optimisation, else `LIT 0' goes wrong.)
-: DEA? DUP BM < IF DROP 0 ELSE
-DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
-
-
- CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
- : BY ( DEA --. the CFA word is decompiled using : )
-   T, CFOF T, ; ( a word from the input stream )
- ( Example of a defining word decompilation)
- ( It is done by examples of the defined words )
- : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
-        CFOF BL @ BY -co
- : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
-    ID.. CR ;              CFOF RESULT @ BY -va
- : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
-        CFOF FENCE @ BY -us
- : ITEM ( 1/1 Desinterpret next item, increments pointer)
-     DUP @ SEL@ ( Something special ?)
-     IF EXECUTE ( The special) ALIGNED ELSE
-        DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
-     THEN ;
- CR ." A0MAR30  FORTH KRAKER >4<  ALBERT VAN DER HORST "
- CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
- ( Decompilation of special high level words)
-  : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
-   BEGIN ?Q DUP @  LIT (;) <> ( >R DUP LIM @ < R> AND ) WHILE
-        ITEM REPEAT   CR DROP ." ;"  DUP
-?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
-CR ;         CFOF TASK @  BY -hi
- ( for all -words: 1/1 pointer before afd after execution)
- : -con CELL+ DUP @ H.. CELL+ ;
- : -dea CELL+ DUP @ &' EMIT ID.. CELL+ ;
- : -lit DUP CELL+ @ DEA? IF -dea ELSE -con THEN ;
-CFOF LIT BY -lit
+( -j This_option_is_available )
 
 
 
- CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
-  : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
-         ."  ] DLITERAL " $@ + 4 CELLS + ;
-                      CFOF SKIP BY -sk
-: -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT TYPE [CHAR] " EMIT
-  BL EMIT $@ + ;                     CFOF ($) BY -sq
-  : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
-  : -qdo CR ." ?DO " CELL+ CELL+ ;   CFOF (?DO) BY -qdo
-  : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
-  : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
 
-  (  : -cm ID.+ ID.+ ;                CFOF COMPILE BY -cm )
-  : -pc CR ." ;CODE plus code (suppressed)"
-  ( DIRTY TRICK FOLLOWING :
-make decompile pointer point to exit!)
-    DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
- CR ." A1MAY17  FORTH KRAKER >7<  ALBERT VAN DER HORST "
- : -dd CFA> ." CREATE DOES> word " ID.. CR ;
-        CFOF FORTH @ BY -dd
-: TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
-: .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
-: -target DUP ( IP -- IP ,print comment about current jump)
-." ( between " TARGET DUP 0 CELL+ - @ .DEA? @ .DEA? ." ) " ;
-: -0br CR ." 0BRANCH [ " -con ." , ] " -target ;
-CFOF 0BRANCH BY -0br
-: -br  CR ." BRANCH  [ " -con ." , ] " -target ;
-CFOF BRANCH BY -br
+
+
+
+
+
+
+
+
+
+
+
+( -k This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( -l This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( -m This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( -n This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( -o This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( -p This_option_is_available )
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 ( -q SYSTEM_PREFERENCES ) \ AvdH A1oct02
-.SIGNON CR 2 LIST  18 LOAD
-  REQUIRE ?32 ( 16/32 BIT DEPENDANCIES)
+.SIGNON CR 27 LIST  28 LOAD
+  REQUIRE ?32   REQUIRE ?PC ( Configuration )
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD
  ( EDITOR ) 109 LOAD
-( KRAKER )       10 16 THRU OK EXIT
+    REQUIRE CRACK EXIT
  ( BACKUP )       250 LOAD   77 81 THRU
  ( ASSEMBLER 80x86 SAVE-BLOCKS) 120 LOAD   97 98 THRU
  ( CRC             71 LOAD   )
@@ -318,6 +318,7 @@ SCRIPT-NAME $@ GET-FILE
 ^J $S 2DROP     \ Line with #!lina
 EVALUATE
 BYE
+( -t This_option_is_available )
 
 
 
@@ -333,8 +334,7 @@ BYE
 
 
 
-
-
+( -u This_option_is_available )
 
 
 
@@ -356,7 +356,7 @@ BYE
 "                 LIBRARY FILE: " TYPE CR
 "$RCSfile$ $Revision$" TYPE CR
 CR
- 2 BLOCK B/BUF TYPE
+28 BLOCK B/BUF TYPE
 BYE
 
 
@@ -366,7 +366,7 @@ BYE
 
 
 
-
+( -w This_option_is_available )
 
 
 
@@ -398,17 +398,7 @@ REQUIRE ?LEAVE-BLOCK
 
 
 
-  ( EXTENDING THE FORTH SYSTEM #1 84/4/12 A.H.)
-( <HEX  OLD EXAMPLE
-(  : NEW-SYSTEM   ( Generates a new FORTH system, )
-(                 ( using the CP/M SAVE command)
-(       LATEST N>P NFAO 10C ! ( Define new topmost word)
-(       ( Initial value for VOC-LINK and FENCE:)
-(       HERE DUP 11C ! 11E !
-(       HERE 100 / DECIMAL CR
-(       CR ." TYPE: SAVE" . ." NEWFORTH.COM"
-(       BYE
-(  ;     HEX>
+( -y This_option_is_available )
 
 
 
@@ -424,6 +414,7 @@ REQUIRE ?LEAVE-BLOCK
 
 
 
+( -z This_option_is_available )
 
 
 
@@ -439,13 +430,22 @@ REQUIRE ?LEAVE-BLOCK
 
 
 
+COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
+        license
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of
+the License, or (at your option) any later version.
 
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
 
-
-
-
-
-
+You should have received a copy of the GNU General Public
+License along with this program; if not, write to the Free
+Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
+MA 02111, USA.
 ( COMPARE PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
  : COMPARE ( ISO) ROT 2DUP SWAP - >R
@@ -454,14 +454,15 @@ REQUIRE ?LEAVE-BLOCK
 : CONTAINS   PAD $! BEGIN BL $S PAD $@ COMPARE 0= DUP >R 0=
 OVER AND WHILE RDROP REPEAT 2DROP R> ;
 \ Find WORD in the block library and load it.
-: FIND&LOAD
- 280 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
- 2DROP ;
+: FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
+ 1000 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
+2DUP ; \  TYPE ." SUCCES " ;
 \ For WORD sc: it IS found not as a denotation.
 : PRESENT? DUP >R FOUND DUP IF >NFA @ @ R> = ELSE RDROP THEN ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
+( ************** configuration *******************************)
 
 
 
@@ -477,23 +478,22 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( ?16 ?32 ?LI ?PC ?LEAVE-BLOCK INCLUDE ) \ AvdH A1sep28
+  : ^ .S ;     : IVAR CREATE , ;
+: INCLUDE (WORD) INCLUDED ;
+: ?LEAVE-BLOCK IF SRC CELL+ @ IN ! THEN ;
+: LEAVER CREATE , DOES> @ ?LEAVE-BLOCK ;
+0 CELL+ 2 <> LEAVER ?16 0 CELL+ 4 <> LEAVER ?32
+ "BIOS" PRESENT? 0=  LEAVER ?PC
+ "LINOS" PRESENT? 0= LEAVER ?LI
+REQUIRE 32_bit_loaded_from_block_1 ?16
+: LC@ L@ FF AND ;
+: LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
+ : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
+: VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 7F + LC! 2 +LOOP ;
+ : HORIZONTAL-FRAME 82 1 DO BLUE @ VV A00 + I + LC! 2 +LOOP ;
+ : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
+ : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
 
 
 
@@ -974,22 +974,22 @@ VARIABLE SEED
 ( RANDOM-SWAP ( R N -- )
 ( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
 RANDOMIZE
-( T] T[ new-IF_etc. ) \ AvdH A1sep25
-\ Allocate an arrea for a temporary compilation.
-: NONAME [ 1000 ALLOT ] ;
-\ Go compiling : remember HERE and STATE.
-: T] STATE @ 0= IF HERE 'NONAME >DFA @ DP !  THEN STATE @ ] ;
-\ Restore HERE and STATE.
-: T[ 0= IF POSTPONE (;) DP ! POSTPONE [ NONAME THEN ; IMMEDIATE
-: IF           T] POSTPONE IF                    ; IMMEDIATE
-: DO           T] POSTPONE DO                    ; IMMEDIATE
-: ?DO          T] POSTPONE ?DO                   ; IMMEDIATE
-: BEGIN        T] POSTPONE BEGIN                 ; IMMEDIATE
-: THEN            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
-: LOOP            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
-: +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
-: REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
-: UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  ( DISK IO SCREEN 17 SCHRIJVEN >1< VERSIE #1)
  <HEX  0 IVAR FCB2   21 ALLOT  ( BUG: 2nd goes wrong)
  : CLEAN-FCB DUP 21 0 FILL  1+ 0B 20 FILL ;
@@ -1102,7 +1102,7 @@ RANDOMIZE
 
     HEX>
 
-( 32_loaded_from_block_1 applicable to 32-bit ) \ A1sep28
+( 32_bit_loaded_from_block_1 ) \ A1sep28
 ?32
   HEX 0 CONSTANT CS_START
  : LC@ SWAP 10 * + CS_START - C@ ;
@@ -4094,6 +4094,230 @@ DECIMAL  getit
 SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 
 ( Last line, preserve !! Must be line 4096)
+( **************ISO language extension ***********************)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( **************Non ISO language extension *******************)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
+VARIABLE FAR-DP         \ Alternative DP
+DSP@ HERE + 2 / ALIGNED FAR-DP !
+\ Use alternative dictionary area or back.
+: SWAP-DP   DP @ FAR-DP @   DP ! FAR-DP ! ;
+
+
+
+
+
+
+
+
+
+
+
+( T] T[ ) \ AvdH A1oct04
+REQUIRE SWAP-DP
+\ Allocate an arrea for a temporary compilation.
+: NONAME [ 1000 ALLOT ] ;
+\ Compile at temporary place : remember old HERE and STATE.
+: T] STATE @ 0= IF SWAP-DP HERE THEN STATE @ ] ;
+\ Execute code at old HERE , restore STATE and dictionary.
+: T[ 0= IF POSTPONE (;) SWAP-DP POSTPONE [ >R THEN ; IMMEDIATE
+
+
+
+
+
+
+
+
+( NEW-IF interpreting__control_words ) \ AvdH A1oct04
+REQUIRE T[
+: IF           T] POSTPONE IF                    ; IMMEDIATE
+: DO           T] POSTPONE DO                    ; IMMEDIATE
+: ?DO          T] POSTPONE ?DO                   ; IMMEDIATE
+: BEGIN        T] POSTPONE BEGIN                 ; IMMEDIATE
+: THEN            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
+: LOOP            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
+: +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
+: REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
+: UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
+
+
+
+
+
+( **************ciforth tools*********************************)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+( CRACK KRAAK KRAKER ) \ AvdH A1oct04
+BLK @ DUP 1 + SWAP 7 + THRU
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ CR ." A1MAY17  FORTH KRAKER >1<  ALBERT VAN DER HORST "
+ CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
+ : T,  ( N--. Put N in select table)
+     SELTOP @ !  0 CELL+ SELTOP +!  ;
+ : CFOF ( --N Get dea of word following )
+    (WORD) FOUND ;
+
+ : ID.. CFA> ID. ; ( cfa--. Print a words name )
+ : ID.+ $@ ID.. ; ( dip -- dip' Print a words name )
+ : SEL@    ( N--M,F F="value N present in table" )
+    ( if F then M is vector address else M=N)
+       0 SWAP ( initialise flag)
+       SELTOP @ SELTAB DO
+           DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
+       0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
+
+  CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
+ : (KRAAK) ( DEA--. Decompile a word from its DEA)
+  (  DUP NEXTD >NFA @ LIM ! Get an absolute limit)
+    DUP @ SEL@ IF ( Is content of CFA known?)
+       EXECUTE ( Assuming CFA also on stack)
+    ELSE
+        DROP CR
+        DUP >CFA @ OVER >PHA = IF
+           ." Code definition : " ELSE ." Can't handle : "
+       THEN ID.. CR
+    THEN ;
+: KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
+    (WORD) FOUND DUP 0= 11 ?ERROR (KRAAK) ;
+( For the DEA : it IS immediate / it IS a denotation )
+ : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
+ : ?Q KEY? IF QUIT THEN ; ( NOODREM)
+ CR ." A1MAY17  FORTH KRAKER >2<  ALBERT VAN DER HORST "
+( DEA--DEA Get the DEA of the word defined after the CFA one)
+: NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
+WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
+ : NEXTC NEXTD >CFA ; ( DEA--CFA Like NEXTD, giving CFA)
+ : KRAAK-FROM CFOF ( .--. Kraak, starting with following word)
+BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP (KRAAK) REPEAT DROP ;
+ VARIABLE LIM
+: H.. BASE @ >R HEX . R> BASE ! ;
+: B.. H.. ;
+( For the NUMBER : it IS a proper `dea' )
+( The <BM is not only optimisation, else `LIT 0' goes wrong.)
+: DEA? DUP BM < IF DROP 0 ELSE
+DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
+
+
+ CR ." A0apr11  FORTH KRAKER >4<  ALBERT VAN DER HORST "
+ : BY ( DEA --. the CFA word is decompiled using : )
+   T, CFOF T, ; ( a word from the input stream )
+ ( Example of a defining word decompilation)
+ ( It is done by examples of the defined words )
+ : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
+        CFOF BL @ BY -co
+ : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
+    ID.. CR ;              CFOF RESULT @ BY -va
+ : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
+        CFOF FENCE @ BY -us
+ : ITEM ( 1/1 Desinterpret next item, increments pointer)
+     DUP @ SEL@ ( Something special ?)
+     IF EXECUTE ( The special) ALIGNED ELSE
+        DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
+     THEN ;
+ CR ." A0MAR30  FORTH KRAKER >5<  ALBERT VAN DER HORST "
+ CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
+ ( Decompilation of special high level words)
+  : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
+   BEGIN ?Q DUP @  LIT (;) <> ( >R DUP LIM @ < R> AND ) WHILE
+        ITEM REPEAT   CR DROP ." ;"  DUP
+?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
+CR ;         CFOF TASK @  BY -hi
+ ( for all -words: 1/1 pointer before afd after execution)
+ : -con CELL+ DUP @ H.. CELL+ ;
+ : -dea CELL+ DUP @ &' EMIT ID.. CELL+ ;
+ : -lit DUP CELL+ @ DEA? IF -dea ELSE -con THEN ;
+CFOF LIT BY -lit
+
+
+
+ CR ." A0APR11  FORTH KRAKER >6<  ALBERT VAN DER HORST "
+  : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
+         ."  ] DLITERAL " $@ + 4 CELLS + ;
+                      CFOF SKIP BY -sk
+: -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT TYPE [CHAR] " EMIT
+  BL EMIT $@ + ;                     CFOF ($) BY -sq
+  : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
+  : -qdo CR ." ?DO " CELL+ CELL+ ;   CFOF (?DO) BY -qdo
+  : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
+  : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
+
+  (  : -cm ID.+ ID.+ ;                CFOF COMPILE BY -cm )
+  : -pc CR ." ;CODE plus code (suppressed)"
+  ( DIRTY TRICK FOLLOWING :
+make decompile pointer point to exit!)
+    DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
+ CR ." A1MAY17  FORTH KRAKER >7<  ALBERT VAN DER HORST "
+ : -dd CFA> ." CREATE DOES> word " ID.. CR ;
+        CFOF FORTH @ BY -dd
+: TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
+: .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
+: -target DUP ( IP -- IP ,print comment about current jump)
+." ( between " TARGET DUP 0 CELL+ - @ .DEA? @ .DEA? ." ) " ;
+: -0br CR ." 0BRANCH [ " -con ." , ] " -target ;
+CFOF 0BRANCH BY -0br
+: -br  CR ." BRANCH  [ " -con ." , ] " -target ;
+CFOF BRANCH BY -br
+
+
+
+
+
 ( **************Working ciforth examples *********************)
 
 
@@ -4425,6 +4649,22 @@ R> R> R> Z ! Y ! X !
 
 
 
+
+
+
+
+
+( EXTENDING THE FORTH SYSTEM #1 84/4/12 A.H.)
+<HEX
+ : NEW-SYSTEM   ( Generates a new FORTH system, )
+                ( using the CP/M SAVE command)
+      LATEST NFA 10C ! ( Define new topmost word)
+      ( Initial value for VOC-LINK and FENCE:)
+      HERE DUP 11C ! 11E !
+      HERE 100 / DECIMAL CR
+      CR ." TYPE: SAVE" . ." NEWFORTH.COM"
+      BYE
+ ;     HEX>
 
 
 
