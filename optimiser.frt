@@ -139,24 +139,144 @@ VARIABLE OPT-START
 \ Leave a POINTER to equivalent optimised code.
 : EXPAND   HERE SWAP    (EXPAND)   CASH   POSTPONE (;)  ;
 
+
 \ ----------------------------------------------------------------
 
-\ Combining the effect of DEA into the current state, return
-\ "the ``EXECUTE'' optimisation IS possible"
-: CAN-EXEC?   'EXECUTE = HERE 2 CELLS - @ 'LIT = AND ;
+\ Belongs in analyser.frt
+HEX
+800 CONSTANT FMASK-SP    \ Special optimisation possible. Pattern.
+DECIMAL
+\ ----------------------------------------------------------------
+\ Add as many noops to the dictionary to have it aligned at an 8-cell
+\ boundary.
+: ALIGN-NOOPS   ALIGN  BEGIN HERE 8 CELLS MOD WHILE POSTPONE NOOP REPEAT ;
+IMMEDIATE
 
-\ For DEA try the execute optimisation.
-\ For BEGIN END: leave sequence BEGIN' END' of what is still to be handled.
+\ Place holder
+CREATE P
+
+\ \ Create the code sequence for a literal with a place holder.
+\ : 'P       ['] LIT COMPILE, ['] P COMPILE, ; IMMEDIATE
+\ This looks more portable, but is it?
+
+\ Create a table of optimisations :
+\    ``8 CELLS'' code pattern    | ``8 CELLS'' optimised replacement |
+\ The first pattern to start with NOOP is the end.
+\ Not intended to be executed, but patterns are to be matched
+\ from this definitions, and pieces to be copied out.
+\ ``P'' is used as a placeholder for a data item to be copied to the
+\ optimised side. Several P's must be replaced in order, even if escaped
+\ by a ``LIT''
+    'ALIGN-NOOPS ALIAS |                         \ Convenience alias.
+    : ]L ] POSTPONE LITERAL ; IMMEDIATE \ Convenience alias.
+: (MATCH-TABLE)                         |
+\ `` MATCH-TABLE'' points here :
+'P  EXECUTE     | P                     |       \ Execute optimisation
+'P  + 'P  +     | 'P  'P  + +           |       \ Associativity optimisation
+'P  + 'P  -     | 'P  'P  - +           |
+'P  - 'P  +     | 'P  'P  SWAP - +      |
+'P  - 'P  -     | 'P  'P  + -           |
+'P  * 'P  *     | 'P  'P  * *           |
+'P  OR 'P  OR   | 'P  'P  OR OR         |
+'P  AND 'P  AND | 'P  'P  AND AND       |
+'P  XOR 'P  XOR | 'P  'P  XOR XOR       |
+[ 0 ]L +        |                       |       \ Shortcut evalutions
+[ 0 ]L *        | DROP 0                |
+[ 0 ]L OR       |                       |
+[ 0 ]L AND      | DROP 0                |
+[ 0 ]L XOR      |                       |
+[ 1 ]L *        |                       |
+[ 1 ]L /        |                       |
+[ -1 ]L *       | NEGATE                |
+[ -1 ]L /       | NEGATE                |
+[ -1 ]L OR      | DROP -1               |
+[ -1 ]L AND     |                       |
+[ -1 ]L XOR     | INVERT                |
+;
+
+\ Optimalisation of this table is thoroughly forbidden!
+FMASK-HOB '(MATCH-TABLE) >FFA OR!
+\ Get rid of those auxiliary words.
+'| HIDDEN       ']L HIDDEN
+
+\ Here is your table
+' (MATCH-TABLE) >DFA @ 8 CELLS 1- OR 1+ CONSTANT MATCH-TABLE
+
+\ \ Portability note.
+\ \ You could have the table like this :
+\ 'LIT , P , '+ ,    'LIT , P , '+ , ALIGN-NOOPS
+\     'LIT , P ,    'LIT , P , '+ , '+ , ALIGN-NOOPS
+\ \ and do POSTPONE's of items. This is still not portable however.
+
+
+\ ----------------------------------------------------------------
+( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
+( Build a set "x" with X items. )
+: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
+: !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
+: SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
+: SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
+: .SET   @+ SWAP DO I . 0 CELL+ +LOOP ;   ( Print non-empty SET )
+: SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
+
+8 SET PEES
+: !PEES PEES !SET ;
+\ ----------------------------------------------------------------
+
+\ From ARRAY fetch element Index. Return IT.
+: [] CELLS + @ ;
+
+\ From ARRAY fetch element ``I''. Return IT.
+\ To be used within a loop
+: [I] POSTPONE I POSTPONE [] ; IMMEDIATE
+
+\ For a SEQUENCE and an ENTRY in ``MATCH-TABLE'' : they MATCH.
+\ As a side effect, remember the place holders.
+: ?MATCH
+    !PEES   8 0 DO
+        DUP [I] 'NOOP = IF -1 LEAVE THEN
+        OVER [I] OVER [I] <> IF
+            DUP [I] 'P = IF
+                OVER [I] PEES SET+!
+            ELSE
+                0 LEAVE
+            THEN
+        THEN
+    LOOP >R 2DROP R>
+;
+
+: ?END-TABLE   @ '(;) ^ = ;
+
+\ Match any entry of the table to SEQUENCE. Return the MATCH or zero if none.
+: ?MM   MATCH-TABLE >R
+    BEGIN    DUP R@ ^ ?MATCH IF DROP R> EXIT THEN
+        R> 16 CELLS + >R R@ ?END-TABLE UNTIL
+    RDROP DROP 0 ;
+
+\ Seen the code SEQUENCE (its begin), return there MAY be a match in the table.
+: CAN-EXEC?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0= 0= ELSE 0 THEN ;
+
+\ Copy MATCH to ``HERE'' filling in the place holders.
+: COPY-CODE
+    !PEES 8 CELLS +
+    BEGIN DUP @ DUP 'P = IF DROP PEES SET+@ THEN
+               DUP 'NOOP <> WHILE , CELL+ REPEAT
+2DROP ;
+
+\ For BEGIN END: try to replace it by an optimisation.
+\ Leave sequence BEGIN' END' of what is still to be handled.
 :  ?MATCH-EXEC?
-    CAN-EXEC? IF
-        HERE 1 CELLS - @  -2 CELLS ALLOT ,
-        EMPTY>
+    OVER CAN-EXEC? IF
+        OVER ?MM DUP IF
+            COPY-CODE
+            EMPTY>
+        _ THEN DROP
     THEN ;
 
 \ Find optimisation patterns in the SEQUENCE of high level code
 \ and perform optimisation while copying to ``HERE'' ,
 \ Do not initialise, or terminate.
-: (MATCH) BEGIN DUP NEXT-PARSE WHILE ?MATCH-EXEC? >HERE REPEAT 2DROP DROP ;
+: (MATCH) BEGIN DUP NEXT-PARSE WHILE DROP ?MATCH-EXEC? >HERE REPEAT 2DROP DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
 : OPTIMISE   HERE SWAP    (MATCH)   POSTPONE (;)  ;
