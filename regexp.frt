@@ -207,9 +207,9 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \D DEFER .Zm DEFER .RE-C
 : (MATCH)
 \D CR "MATCHING: " TYPE OVER .Zm " With" TYPE CR DUP .RE-C
-DUP >R
+2DUP 2>R
 BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
-   DROP R>   DUP @ IF DROP R> FALSE ELSE RDROP TRUE THEN
+   DROP R>   DUP @ IF 2DROP 2R> FALSE ELSE 2R> 2DROP TRUE THEN
 \D DUP IF "MATCH" ELSE "FAILED" THEN CR TYPE
 ;
 
@@ -584,26 +584,30 @@ VARIABLE RE-EXPR-END
 
 CREATE STRING-COPY MAX-RE CELLS ALLOT
 
-\ CP points to a '\#' escape. Add the matched substring indicated by '#'
-\ to the replaced string. Leave CP pointing after the escape.
-: DO-ESCAPE 1+ C@+ &0 - 1+ STRING[] SE@-STRING STRING-COPY $+! ;
+\ CHAR is second of a '\#' escape. Add the matched substring indicated by '#'
+\ to the replaced string.
+: DO-ESCAPE &0 - 1+ STRING[] SE@-STRING STRING-COPY $+! ;
 
-\ For the range to CP2 from CP1 : "It STARTS with a substring escape"
-: ESCAPE? 2DUP - 1 > >R         \ At least two char's
-          DUP C@+ &\ = >R       \ First char '\'
-          C@ &0 &9 1+ WITHIN >R \ Second char a digit.
-          2DROP
-          R> R> R> AND AND ;
-
-\ For a range to CP2 from CP1 add the first item to ``STRING-COPY''.
-\ Leave CP2 and an incremented CP1.
-: DO-ONE-CHAR 2DUP ESCAPE? IF DO-ESCAPE ELSE C@+ STRING-COPY $C+ THEN ;
+\ For a STRING that was preceeded by an escape, handle the escape.
+\ Leave the STRING with one less character.
+: DO-ONE-ESCAPE
+        DUP 0= ABORT" Nothing to escape"
+        SWAP C@+ >R SWAP 1-
+        R@ GET-ESCAPE DUP IF  STRING-COPY $C+ ELSE
+        DROP R@ &0 &9 1+ WITHIN IF R@ DO-ESCAPE ELSE
+        TRUE ABORT" Not a good escape sequence"
+        THEN THEN RDROP ;
 
 \ Use the replacement STRING to replace the matched part for a recent call
-\ of ``RE-MATCH''.
+\ of ``RE-MATCH''. Add the actual REPLACEMENT to ``STRING-COPY''
+: RE-REPLACE>SC
+    BEGIN &\ $S STRING-COPY $+! OVER WHILE DO-ONE-ESCAPE REPEAT 2DROP ;
+
+\ Use the replacement STRING to replace the matched part.
+\ The replacement string can have the \0 ..\9 and the usual character
+\ escapes for control chars (\n), but not for special re-characters (*).
+\ Leave a thusly modified version of the STRING passed to ``RE-MATCH''.
 : RE-REPLACE
-    BEFORE\0 STRING-COPY $!
-    BOUNDS BEGIN 2DUP > WHILE DO-ONE-CHAR REPEAT 2DROP
-    AFTER\0 STRING-COPY $+!
+    BEFORE\0 STRING-COPY $!   RE-REPLACE>SC   AFTER\0 STRING-COPY $+!
     STRING-COPY $@ ;
 \D INCLUDE debug-re.frt

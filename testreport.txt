@@ -16,8 +16,9 @@ If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
 Stable version 4.0.3  Suse and XP
-The XP version failed the MEASURE-PRIME because it was a Celearon
+The XP version failed the MEASURE-PRIME because it was a Celeron
 system without the clock count instruction 0F 31 .
+(Apparently for some other reason because the Celeron has that instruction.)
 
 Stable version 4.0.1  Suse
 

@@ -1,5 +1,5 @@
 ( $ Id: )
-( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+( Copyright{2003}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 
 Do a regression test on lina :
     make testlina
@@ -12,7 +12,13 @@ Then
    sed -f blabla <aap >qqq
    diff qqq officialdecompilation
 If approved :
-    mv officialdecompilation qqq
+    mv qqq officialdecompilation
+
+Do a regression test on wina :
+    make wina.zip
+    make testwina
+    mcopy wina.zip a:
+    mcopy -t testwina.1 testwina.2 a:
 
 How to create a floppy booting into ciforth
 
@@ -94,3 +100,13 @@ In this example from 4.15.2.5 to 4.15.3.1
 cvs tag -d rel-4-0-patches ci86.gnr
 cvs update -r4.15.3 ci86.gnr
 cvs tag rel-4-0-patches ci86.gnr
+
+2003 oct 13
+
+Howto install an info file :
+This inserts a finder for lina into the topmost hierarchy of info.
+But also copies the file to where it can find it.
+
+cp lina.info /usr/share/info
+install-info --entry='* lina :: a simple Linux native Forth implementation' \
+             lina.info /usr/share/info/dir

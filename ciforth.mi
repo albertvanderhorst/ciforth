@@ -517,14 +517,15 @@ forthcode({THEN}) , or forthcode({DO}) and forthcode({LOOP}) )
 })
 
 forthitem
-forthsamp({ciforth ERROR # 20 : DEFINITION NOT FINISHED})
+forthsamp({ciforth ERROR # 20 : STACK UNBALANCE, STRUCTURE UNFINISHED?})
 
 _SECURITY_({
-This error is reported by forthcode({?CSP}). It detects
-stack unbalance between forthcode({:}) and forthcode({;}) .
+This error is reported by forthcode({?CSP}).
+It detects   stack unbalance between forthcode({:}) and forthcode({;}),
+or wherever you choose to use the words forthcode({!CSP}) and forthcode({?CSP}).
 This means there is an error in the compiled code.
-It happens also if you try to use data that is put on the stack before
- forthcode({:}) during compilation.
+This message is given also if during compilation you try to use data
+that is put on the stack before forthcode({:}) .
 Instead of
 
 forthsamp({<generatedata> : name LITERAL .... ;})

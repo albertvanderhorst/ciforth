@@ -18,7 +18,7 @@
  : COMPILATION ONLY, USE IN DEFINITION
  : EXECUTION ONLY
  : CONDITIONALS NOT PAIRED
- : DEFINITION NOT FINISHED
+ : STACK UNBALANCE, STRUCTURE UNFINISHED?
  : IN PROTECTED DICTIONARY
  : USE ONLY WHEN LOADING
  : OFF CURRENT EDITING SCREEN
@@ -999,8 +999,8 @@ CF:   REQUIRE +THRU
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
 \ Save the system in a file with NAME .
  : SAVE-SYSTEM
-\ Increment the file and dictionary sizes
-  HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
+  0 SM 20 + !   0 SM 30 + ! \ Kill sections
+  HERE SM - SM 44 + !  \ Fill in file size = memory size
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL

@@ -230,9 +230,14 @@ ESCAPE$ "[^.]" RE-MATCH match
 " A " "<.>" RE-MATCH match
 " AAP " "<.>" RE-MATCH nomatch
 " AAP " "<...>" RE-MATCH match
+
+\ Start and end of strings with backtracking -------------------
+
 " AAP " "<.*>" RE-MATCH match
 " AAP " "<[A-Z]*>" RE-MATCH match
 " AAP " "<[^P]*>" RE-MATCH nomatch
+"AAP" "AB*A>" RE-MATCH nomatch
+"AA " "AB*A>" RE-MATCH match
 
 \ Grouping   -------------------------
 
@@ -320,6 +325,11 @@ CR \1 TYPE \2 TYPE \3 TYPE \4 TYPE \5 TYPE \6 TYPE \7 TYPE \8 TYPE \9 TYPE
 \  "IHGFEDCBA"
 "ABCDEFGHI" "(A)(B)(C)(D)(E)(F)(G)(H)(I)" RE-MATCH match
 "\9\8\7\6\5\4\3\2\1" RE-REPLACE CR TYPE
+
+\ "A
+\  B"
+"AB" "(A)(B)" RE-MATCH match
+"\1\n\2" RE-REPLACE CR TYPE
 
 \ Precompiled expressions --------------------------------------
 \ "A" "B" "C"
