@@ -139,4 +139,8 @@ listing and also during run time.
 BLOCKS.BLK can be changed into an editable file and back by
 cat BLOCKS.BLK | fromblocks > blocks.frt
 cat blocks.frt | toblocks > BLOCKS.BLK
+The user variable EM still is the end of the memory. 
+The EM in the configuration files is such that it designates the relative
+size, from the relocatable start. Consequently it is not the same as the
+user variable. 
 
