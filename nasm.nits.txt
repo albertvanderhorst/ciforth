@@ -1,5 +1,13 @@
-Nits
+Dear sir,
+For one year now, I have used the nasm assembler intensively and
+to great satisfaction. There are a few comments I have collected
+during this year, that you may want to know about.
+
 I think 1+2 is a glaring ommission, it can be fixed by adding one line.
+I think 3 is a bug, and could be worse than it looks. I suspect
+that it might result in invalid ELF headers. It might be a bug in
+the ELF library though, rather than nasm.
+
 The other remarks are just comments.
 
 1.
@@ -9,20 +17,27 @@ documentation. It is of course crucially important.
 The keyword `comment' lacks from the index.
 (Actually I was looking for multiple line comments, there aren't any. apparently).
 3.
+Declaring a code segment >128 Mbyte is trimmed to 128 mbyte without
+warning, or a warning related to a .bss section, that makes no sense.
+As per :
+         section dictionary nobits write exec alloc
+       RESB        (40000000H) - FORTHSIZE
+
+3.
 Add the following line to the paragraph defining sections (introduction 5.2):
 "
-    A `section' of an assembler program is normally understood as 
+    A `section' of an assembler program is normally understood as
     a part of the program that can be mapped independantly from the
     other parts in memory. The keyword SECTION defines such as section.
     Intel uses the word segment which is large and by the same.
-    Sections are handled by linkers and their names often define the 
+    Sections are handled by linkers and their names often define the
     way it is handled by a linker. This, of course, depends on the
     target a linker is used for.
 "
-This is to stress that nasm behaves as one would expect from 
+This is to stress that nasm behaves as one would expect from
 a mainstream assembler.
 
-4. I would like to see a comprehensive overview of all assembler 
+4. I would like to see a comprehensive overview of all assembler
 directives. E.g. I find it difficult to find out whether there is
 some where a way to communicate what the entry point is towards the linker.
 [I am not arguing that such thing should be present in an assembler.
@@ -35,16 +50,18 @@ According to the cover "Written by the man responsible for the architectural
 definition of the 8086"
 
 You may to want to cite from the book (pg. 122)
-"The ASSUME statement on line 2 is a bit harder to explain. I wish 
+"The ASSUME statement on line 2 is a bit harder to explain. I wish
 I could give you a good reason for having it. I can't.
 "
-There is no doubt, he is really meaning the ASSUME statement 
+There is no doubt, he is really meaning the ASSUME statement
 as such, in general. He then goes on explaining what those people
 that made the assembler require you to put in this statement.
+He went as far to discredit ASSUME as he could, Morse, the inventor
+of the 8086!
 
 6.
 The following is apparently acceptable (critical expression)
-      X EQU $-$$ 
+      X EQU $-$$
 The following is not
       %assign X $-$$
 I think this is a bug because $-$$ is a critical expression all right.
@@ -54,23 +71,22 @@ This is very strange in view of the fact that the sequence
 is accepted allright!
 
 Apparently this is done using a different mechanism.
-Normally assemblers have SET that behave like X, except that 
+Normally assemblers have SET that behave like X, except that
 a redefinition is not an error.
-I like this a lot better. The syntax is more symmetric. It is more of 
+I like this a lot better. The syntax is more symmetric. It is more of
 an assembly variable than something to do with preprocessing.
 Probably it is easier to implement.
 This really bites me!
 7.
 If there is an error, there will be no listing.
 Young lad, in my days listings were almost exclusively used to
-carefully analyse the errors and then submit a new version with 
+carefully analyse the errors and then submit a new version with
 all the errors removed (and got a listing back two days later with
 some errors all the same.) Anyway, I think having a listing is
 extremely useful with errors, nothing to be suppressed.
 
-I think NASM is an 
-excellent piece of work, the dream assembler for i86,
-an assembler like I would have written one.
+I think NASM is an excellent piece of work, the dream assembler
+for i86, an assembler like I would have written one.
 Because I could have written it, I appreciate the enormous amount of
 work that has gone into it.
 
@@ -83,5 +99,3 @@ descriptions right.
 
 
 Albert.
-
-
