@@ -120,7 +120,7 @@ include(intro.mi)
 @chapter  Rationale & legalese
 include(rational.mi)
 
-@node Manual, Glossary, Rationale & legalese, top
+@node Manual, Documentation, Rationale & legalese, top
 @chapter Manual
 include(manual.mi)
 
