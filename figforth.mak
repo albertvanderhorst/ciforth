@@ -118,13 +118,13 @@ filler: fig86.alone.bin
 	# Have forth calculate whether we need the filler sector
         # Use the exit command to return 1 or 0
 	(filesize=`cat $+|wc -c`; \
-	echo $$filesize 1 - 512 MOD 1 + 2 MOD 0 0 1 LINOS | figforth>/dev/null; \
+	echo $$filesize 1 - 512 / 1 + 2 MOD 0 0 1 LINOS | lina>/dev/null; \
 	if [ 0 = $$? ] ; then mcopy filler.frt a:filler.frt ;fi)
 
 moreboot: BLOCKS.BLK fig86.alone.bin  
 	mcopy BLOCKS.BLK a:
 	mcopy fig86.msdos.bin	   a:msdos.com
-			   
+                          
 allboot: boot filler moreboot
 
 BLOCKS.BLK : toblock blocks.frt ; toblock <blocks.frt >$@
