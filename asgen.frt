@@ -103,9 +103,9 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
 : % [COMPILE] 'O NFAO ;   ( Return the DEA from "word". )
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
-: %>BODY P>N CELL+ ; ( From DEA to the DATA field of a created word )
+: %>BODY N>P CELL+ ; ( From DEA to the DATA field of a created word )
 : %BODY> 0 CELL+ - NFAO ; ( Reverse of above)
-: %>CODE P>N CFAO CELL+ ; ( From DEA to the DOES> pointer )
+: %>CODE N>P CFAO CELL+ ; ( From DEA to the DOES> pointer )
 ( Leave for DEA : it IS to be ignored. This is used for supressing the  )
 ( bare bones of the sib mechanism in i586.                              )
 : IGNORE? 1+ C@ &~ = ;
