@@ -247,19 +247,31 @@ VARIABLE C_UNKNOWN  \ The number of questions that never got a definite answer
 VARIABLE C_YES      \ The number of questions that got a yes answer
 VARIABLE C_NO      \ The number of questions that got a no answer
 VARIABLE C_AMB      \ The number of questions that is considered ambiguous
-\ Auxiliary: total number of unambiguous questions
+
+
+\ ##################################################################
+\ NOTE: For the next words answers must have been ``ACCUMULATE''d.
+\ ##################################################################
+
+\ Return the total NUMBER of unambiguous questions
 : C_UNAMB C_YES @ C_NO @ + ;
-\ Auxiliary: total number of questions
-: C_TOTAL C_AMB @ C_UNAMB C_UNKNOWN @   + + ;
+\ Return the total NUMBER of questions of the current focus.
+: C_TOTAL C_UNAMB C_AMB @ + C_UNKNOWN @ + ;
 
 : C_UN_CUR*1000 C_UNKNOWN @ CURIOSITY M* ;
-\ Auxiliary: number unambiguous questions corrected for curiosity
+\ Return the NUMBER of unambiguous questions where we count with.
+\ Unknown questions are counted as unambiguous depending on curiosity.
 : C_UN_CUR C_UN_CUR*1000 1000 M/ ;
 
-\ Indicate unambiguousness : 0. is bad , 1000. is perfect
-: UNAMB C_UNAMB 1000 M*    C_UN_CUR*1000  D+ C_TOTAL M/ ;
-\ Indicate balance         : 0. is bad , 1000. is perfect
+
+\ Return the balance QUALITY. It is a number between 0 and 1000 and
+\ it indicates how good the answers are divided between yes and no.
 : BAL 1000 C_YES @ C_NO @ - ABS 1000 M* C_UNAMB C_UN_CUR + M/ - ;
+
+\ Return the answerability QUALITY. It is a number between 0 and 1000 and
+\ it indicates how definite the answers are. Taking into account curiosity.
+\ Answers must have been ``ACCUMULATE''d.
+: UNAMB C_UNAMB 1000 M*    C_UN_CUR*1000  D+ C_TOTAL M/ ;
 
 \ Reinitalise the answer ballots.
 : !ANSWERS 0 C_UNKNOWN !   0 C_YES !   0 C_NO !   0 C_AMB ! ;
@@ -293,11 +305,9 @@ MAX-QUESTIONS ARRAY BEEN-POSED
 \ For QUESTION return: it is has BEEN posed.
 : ?POSED BEEN-POSED @ ;
 \D ." !BEEN-POSED Expect 0 0 : " !BEEN-POSED 0 ?POSED . DEPTH . CR
-PREVIOUS
-\D ." After PREVIOUS Expect STATEGY FORTH : " ORDER CR
+\D ." After PREVIOUS Expect DATABASE STRATEGY FORTH : " ORDER CR
 
 \ Accumulate the answer of QUESTION for DIAGNOSIS into the variables above.
-DATABASE
 : ACCUMULATE
        DUP ?EXCLUDED IF 2DROP EXIT THEN
        2DUP NOES @ >R YESSES @ R>
@@ -313,15 +323,12 @@ DATABASE
 \D 1 1 ACCUMULATE ." ACCUMULATE Expect 1 3 0 :" C_YES ? C_NO ? DEPTH . CR
 
 \ Evaluates and returns the quality for question number INDEX
-\ for the current focus. It is a number between 0 and 1000. and
-\ it is proportional to the number of diagnoses that can be eliminated
-\ provided the user can answer the question.
+\ for the current focus. It is a number between 0 and 1000.
+\ It is proportional to the number of diagnoses that can be eliminated
+\ provided the user can answer the question. (More or less. )
 : QUESTION-QUALITY
    !ANSWERS   #DIAGNOSES @ 0 DO DUP I ACCUMULATE LOOP DROP
-
-   C_UNAMB 0= IF 0 EXIT THEN  \ No quality at all.
-
-   BAL UNAMB 1000 */
+   C_UNAMB 0= IF 0 ELSE BAL UNAMB 1000 */ THEN
 ;
 \D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 :" . DEPTH . CR
 \D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 :" . DEPTH . CR
