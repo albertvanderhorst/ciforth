@@ -165,7 +165,7 @@ DECIMAL
 \ this is 90,000,000. This is a configuration item, but it 
 \ should be made automatic.
 \ },
-
+\ {{}})
 \ {{TICKS}})
 90000000 CONSTANT  TICKS/SEC
 
@@ -173,20 +173,127 @@ DECIMAL
 \ {The time forthvar({d}) indicating a tick count, is in the past.
 \ },
 \ {{TICKS}})
-: PASSED DMINUS TICKS D+ SWAP DROP 0= ;
+: PASSED DMINUS TICKS D+ SWAP DROP 0< 0= ;
 
-\ worddoc( {EVENT},{EARLIER},{EARLIER},{d1 d2 ---},{},
+\ worddoc( {EVENT},{EARLIER},{earlier},{d1 d2 ---},{},
 \ {The time forthvar({d1}) indicating a tick count, is earlier
 \  then the time forthvar({d2}) .
 \ },
-\ {{TICKS}})
+\ {{TICKS},{PASSED}})
 : EARLIER  DMINUS D+ SWAP DROP ;
 
 2 ?TEST
 ." EXPECT -1 :" TICKS TICKS EARLIER . 
 ." EXPECT 0 :" TICKS TICKS ROT >R ROT R> EARLIER .
 
+\ worddoc({EVENT},{MAXEVENT},{maxevent},{ --- n},{},
+\ {Leave a constant , the number of events that can be scheduled in 
+\ the event table.
+\ },
+\ {{EVENT-TABLE}})
+100000 CONSTANT  MAXEVENT
 
+\ worddoc({MEMORY},{ARRAY},{array},{ n1 n2 --- },{},
+\ {A defining word that generates an array with a lenght forthvar({n1}) 
+\ and a stride (element size) of forthvar({n2}) .
+\ Execution semantics of the defined word is forthsample({ n --- addr})
+\ where forthcode({n}) is the index and forthvar({addr}) is 
+\ the place where array item forthvar({n}) is to be 
+\ },
+\ {{TICK}})
+: ARRAY <BUILDS DUP , * ALLOT DOES> >R R @ * R> + CELL+ ;
+
+\ worddoc({EVENT},{EVENT[]},{event_schedule},{ n --- addr},{},
+\ {Defined by forthcode({ARRAY}) . forthvar({addr}) the place where event forthcode({n}) is to be 
+\ found. An event is a time in ticks. In a parallel array
+\ forthcode({EVENT-DATA[]}) data applicable to this event may be stored.
+\ In principle this is a circular buffer, but it may not be used like
+\ it yet.
+\ },
+\ {{TICK}})
+MAXEVENT 8 ARRAY EVENT[]
+
+1 ?TEST
+." EXPECT 123 :" 123  123. 1 EVENT[] 2! . 
+
+
+\ worddoc({EVENT},{FILLED},{filled},{ --- addr},{},
+\ {A variable indicating the last index of an 
+\ forthcode({EVENT[]}) that belongs to the filled part of the buffer.
+\ The emptied nor the filled part can be empty. 
+\ For this reason the last event of the filled part is not used.
+\ In principle this is a circular buffer, but it may not be used like
+\ it yet.
+\ },
+\ {{EVENT[]},{EMPTIED}})
+1 VARIABLE FILLED
+
+\ worddoc({EVENT},{EMPTIED},{emptied},{ --- addr},{},
+\ {A variable indicating the last index of an 
+\ forthcode({EVENT[]}) that belongs to the emptied part of the buffer.
+\ The emptied nor the filled part can be empty. 
+\ For this reason the last event of the filled part is not used.
+\ In principle this is a circular buffer, but it may not be used like
+\ it yet.
+\ },
+\ {{EVENT[]},{FILLED}})
+0 VARIABLE EMPTIED
+
+\ worddoc({EVENT},{!EVENT},{init_event},{ --- },{},
+\ {Initialise the event table.},
+\ {{EVENT},{EMPTIED},{FILLED}})
+: !EVENT 0 EMPTIED !  1 FILLED ! ;
+
+\ worddoc({EVENT},{#EMPTY},{amount_empty},{ --- n},{},
+\ {Gives the lenght of the emptied part of the event table.}
+\ {{EVENT[]},{EMPTIED},{FILLED}})
+: #EMPTY   EMPTIED @   FILLED @ -  
+    DUP 0< IF MAXEVENT + THEN ;
+
+\ worddoc({EVENT},{#FULL},{amount_full},{ --- n},{},
+\ {Gives the lenght of the filled part of the event table,
+\ this part must not be empty, such that if the two
+\ pointers are equal the table is totally full.
+\ },
+\ {{EVENT[]},{EMPTIED},{FILLED}})
+: #FULL   FILLED @   EMPTIED @ -  
+    DUP 0< IF MAXEVENT + THEN ;
+
+1 ?TEST
+." EXPECT 1 " MAXEVENT 1 - . ." :" 123 #FULL . #EMPTY . 
+
+: FIND-EVENT DROP DROP 1 ;
+: INSERT-EVENT DROP DROP DROP 1 FILLED +! ;
+\ worddoc({EVENT},{SET-EVENT},{set_event},{ d --- n},{},
+\ {Put an event forthvar({d}) into the event table.
+\ This may fail, if the event table is full.
+\ forthvar({n}) is the position where it was put,
+\ and -1 means ``operation has failed''.},
+\ {{EVENT[]},{EMPTIED},{FILLED}})
+: SET-EVENT #EMPTY IF 
+    2DUP FIND-EVENT >R
+    R INSERT-EVENT
+    R> ELSE -1 THEN ;
+
+\ worddoc({EVENT},{GET-EVENT},{get_event},{ --- n},{},
+\ {Attempt to deschedule the first event from the event 
+\ table. The event is descheduled if the current time is 
+\ later, the number of the event is returned into
+\ forthvar({n}) 
+\ and -1 means ``no event is due''.},
+\ {{EVENT[]},{EMPTIED},{FILLED}})
+: GET-EVENT #FULL 0= IF
+        -1
+    ELSE EMPTIED @ EVENT[] 2@ PASSED IF 
+       EMPTIED @   1 EMPTIED +!
+    ELSE 
+       -1 
+    THEN THEN  ;
+
+3 ?TEST
+." EXPECT 1 1 1 123 :" 123  10. SET-EVENT . 20. SET-EVENT . 30. SET-EVENT . .
+0. 0 EVENT[] 2!         0. 1 EVENT[] 2!         0. 2 EVENT[] 2!
+." EXPECT 0 1 2 -1 :"   GET-EVENT . GET-EVENT . GET-EVENT . GET-EVENT .
 
 
 
