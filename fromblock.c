@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
+/* Tabs are not printable, I think. */
+#define isrealprint(a)   (isprint(a) && 9 != a )
+
 main(char **argv, int argc)
 {
     int count = 0;
@@ -10,7 +13,7 @@ main(char **argv, int argc)
 
     while(EOF !=(ch=getchar()))
     {
-        putchar(isprint(ch)?ch:' ');
+        putchar(isrealprint(ch)?ch:' ');
         if ( 64 == ++count)
         {
             putchar('\n');

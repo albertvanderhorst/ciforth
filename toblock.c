@@ -6,7 +6,7 @@
 #define CPL 64
 void error(char *progname, char *message)
 {
-    printf("Error in program %s\n   %s\n",progname,message);
+    fprintf(stderr, "Error in program %s\n   %s\n",progname,message);
     exit(1);
 }
 
