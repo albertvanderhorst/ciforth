@@ -28,6 +28,7 @@ dnl By e.g. _BITS32_({DC LIT, X},{dnl}) can extra blank lines
 dnl be prevented.
 define({_yes},{${}1})
 define({_no},{${}2})
+define({_SUPPRESSED}, )dnl
 dnl
 dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
 dnl     Memory layout is defined using equ's
@@ -156,8 +157,9 @@ dnl Include all loadable extensions, that are present in the source.
 dnl Alternatively, see this as a marking for words to be moved out.
 define( {_LOAD_}, _yes)dnl
 dnl
-dnl Multi tasking, i.e. PAUSE etc.
-define( {_TASK_}, _no)dnl
+dnl Include all file iot words. This is most of the ISO FILES wordset.
+dnl Note that this may not make sense, in particular for a booting system.
+define( {_FILES_}, _no)dnl
 dnl
 dnl ISO >IN (relative position) instead of IN (absolute address)
 define( {_ISO_IN_}, _no)dnl
@@ -236,6 +238,9 @@ dnl ############## USER CHOICES END #########################################
 
 dnl ############## STILL ON WISH LIST ################## IGNORE ##############
 dnl
+dnl Multi tasking, i.e. PAUSE etc.
+define( {_TASK_}, _no)dnl
+dnl
 dnl If undefined, a really minimalistic system results.
 dnl STILL ON WISH LIST
 define( {_MAXIM_}, _no)dnl
@@ -256,7 +261,6 @@ dnl ############## GENERATION OF DOCUMENTATION ##############################
 dnl The m4 system separates the doc and code onto different channels
 dnl such that the output is code, separation message, documentation.
 
-define({_SUPPRESSED}, )dnl
 dnl Switch the system to generate assembler source
 define( {_GENERATE_CODE},
 {divert(1)dnl}

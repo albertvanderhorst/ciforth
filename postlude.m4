@@ -36,6 +36,10 @@ _WIN32_({ define( {_BITS32_}, _yes)})
 _USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
 _CLASSIC_({define({_KEY_BY_KEY_}, _yes )})
 _BITS32_({define({_PROTECTED_}, _yes)})
+;{The following consequences are hard because otherwise you wouldn't have blocks.}
+define({_FILES_}, _no)})
+_MODERN_({define({_FILES_}, _yes)})
+_LINUX_N_({define({_FILES_}, _yes)})
 
 dnl Other consequences
 _BITS32_({define({M4_RTS}, 10000H)})

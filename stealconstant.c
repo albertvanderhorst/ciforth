@@ -49,6 +49,8 @@ printf(";{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEAL("exit",__NR_exit)
         STEAL("open",__NR_open)
         STEAL("close",__NR_close)
+        STEAL("creat",__NR_creat)
+        STEAL("unlink",__NR_unlink)
         STEAL("chdir",__NR_chdir)
         STEAL("read",__NR_read)
         STEAL("select",__NR_select)
