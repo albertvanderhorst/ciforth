@@ -174,7 +174,7 @@ the changes must be ``infinitesimal'' . An infinitesimal change
 has the following properties:
 1. The change must result in theoritically equivalent code
 (what you are supposed to understand by this is, is explained
-in more detail in the following section.
+in more detail in the following section.)
 2. It must pass pass the regression test.
 3. You can't think of a smaller change that would
 pass the regression test again.
@@ -404,8 +404,7 @@ is more symmetric than ``DUP @ R@ PRECEDES''. The code ``ALIGN-DOWN @''
 just disappeared. It makes it easier to
 check against the basic idea of
 qsort.
-It                                     looks like an infinitesimal
-change.
+It looks like an infinitesimal change.
 
 But we needed a defered EXCHANGE.
 This was the code that went into it.
@@ -523,10 +522,47 @@ That is the price we have to pay.
     SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
     ;
 
+This was an infinitesimal change, but a large one.
+It was not possible to make it smaller.
+
 To my surprise and relief the regression test succeeds.
 
-OUR NINETH CHANGE: PARTITIONING IN TWO
+OUR FIFTH CHANGE: PRECEDES USES ADDRESSES
 
+We are now in a position to make the next move towards using
+indices, instead of addresses. That is by passing the addresses
+to PRECEDES instead of the content.
+Although indices are our ultimate goal, we have attained sufficient
+generality at this point that we can sort all the other tables
+described in the introduction. We have attained genericity.
+(Like in STL the standard library for C++.)
+This is a small change, it amounts to eliminating four fetches from
+PARTITION.
+It looks much better, because there same ``things'' are passed to
+PRECEDES and to <--> . This is important, because it makes you forget
+about what type of data is there, the only important thing is the
+manipulation.
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP (<-->)
+            >R CELL+ R> CELL-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    R> DROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+To my surprise and relief the regression test succeeds.
+
+OUR SIXTH CHANGE: PRECEDES USES INDICES
 At last we now can use indicies instead of addresses:
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )

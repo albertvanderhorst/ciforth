@@ -9,7 +9,10 @@ REQUIRE COMPARE
 
 : NOT    0= ;
 
-: DEFER CREATE 0 , DOES> @ EXECUTE ;
+: DEFER-ERROR    -1 13 ?ERROR ;
+
+: DEFER CREATE ' DEFER-ERROR , DOES> @ EXECUTE ;
+
 : IS   (WORD) FOUND >BODY ! ;
 
 \ Exchange the content at ADDRESS1 and ADDRESS2 over a fixed LENGTH.
@@ -18,9 +21,7 @@ REQUIRE COMPARE
 
 \D "Expect aap : " TYPE : aap "aap" TYPE ; DEFER iets 'aap IS iets iets
 
-
-\  Set PRECEDES for different datatypes or sort order.
-DEFER PRECEDES  ' < IS PRECEDES
+DEFER PRECEDES
 
 \  For sorting character strings in increasing order:
 : SPRECEDES         ( addr addr -- flag )
@@ -42,8 +43,8 @@ DEFER (<-->)    ' <--> IS (<-->)
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
     2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP @ R@ @ PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ @ OVER @  PRECEDES WHILE  CELL-  REPEAT
+         SWAP BEGIN  DUP R@ PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER PRECEDES WHILE  CELL-  REPEAT
          2DUP > NOT IF
             \ Do we have a new position for our pivot?
             OVER R@ = IF RDROP DUP >R ELSE
