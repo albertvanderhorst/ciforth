@@ -40,11 +40,17 @@ DEFER (<-->)    ' <--> IS (<-->)
 : CELL-  ( addr -- addr' )  1 CELLS - ;
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  ALIGN-DOWN +  @ >R  ( R: median)
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
-         2DUP > NOT IF  2DUP (<-->)  >R CELL+ R> CELL-  THEN
+         SWAP BEGIN  DUP @ R@ @ PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ @ OVER @  PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP (<-->)
+            >R CELL+ R> CELL-
+        THEN
     2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
     R> DROP                            ( R: )
     SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)

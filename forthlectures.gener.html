@@ -492,26 +492,33 @@ And it dumps core. It crashes.
 (No examples, because I didn't actually try this out. Maybe it doesn't
 even crash nicely.)
 
-OUR EIGHT CHANGE: PARTITIONING IN TWO
+OUR FOURTH CHANGE: ADDRESS ON RETURN STACK
 
 The more precise analysis above shows that there is no choice but
 keeping track where our pivot remains.
+
+The first change we make is to hold the address of the pivot instead
+of the content. Then we must place a @ fetch after each R@ and
+We have to add a test whether the pivot is about to move, and replace
+the top of the return stack with that new address.
 
 The code for this is straightforward, but the algorithm suffers
 in simplicity and speed.
 That is the price we have to pay.
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  ALLIGN-DOWN @ >R  ( R: median)
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
-    2DUP < WHILE
-        \ Do we have a new position for out pivot?
-        OVER R@ = IF RDROP DUP >R THEN
-        DUP  R@ = IF RDROP OVER >R THEN
-        2DUP EXCHANGE
-    REPEAT ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP @ R@ @ PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ @ OVER @  PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP (<-->)
+            >R CELL+ R> CELL-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
     R> DROP                            ( R: )
     SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
     ;
