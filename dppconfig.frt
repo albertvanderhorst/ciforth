@@ -41,10 +41,10 @@
 ( The name of the file containing the language/application              )
 ( customization. The line choosen is the one that is not                )
 ( between Klammern.                                                     )
-    : LANGUAGE-FILE "dpp_dutch_dieren.frt" ;
-(   : LANG-FILE "dpp_english.frt"      ;                                )
+(   : LANGUAGE-FILE "dpp_dutch_dieren.frt" ;                            )
+    : LANGUAGE-FILE "dpp_english.frt"      ;
 
 ( Choose the first line to debug, the second line to not debug.         )
 ( The line choosen is the one that is not between Klammern.             )
-      : \D ;
-(     : \D ^J WORD DROP ; IMMEDIATE                                     )
+(     : \D ;     : ^ .S ;                                      )
+      : \D ^J WORD DROP ; IMMEDIATE       : ^ ;
