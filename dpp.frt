@@ -27,7 +27,8 @@
 
 \ #################### DATABASE #######################################
 
-: \D ; \ Debug
+\ : \D ; \ Debug
+: \D POSTPONE \ ; IMMEDIATE
 
 \ File format :
 \    number of diagnoses  ND
@@ -364,7 +365,7 @@ DATABASE
 
 \ Select the best question still available. Return its INDEX.
 : SELECT-QUESTION -1 0  \ Initial INDEX and QUALITY.
-    #QUESTIONS @ 0 DO I ?POSED 0= IF
+    #QUESTIONS @ 0 DO ^ I ?POSED 0= IF
        DUP I  QUESTION-QUALITY 2DUP < IF >R >R 2DROP R> R> ELSE 2DROP THEN
     THEN LOOP DROP
 ;
@@ -440,13 +441,46 @@ DATABASE CONSULTING STRATEGY
     -1 #DIAGNOSES @ 0 DO I CONFIRM DUP -1 <> IF SWAP DROP LEAVE THEN DROP LOOP
 ;
 
+\ The answer for QUESTION is turned into a corrected ANSWER.
+\ This may led to more exclusions and this must be done before
+\ we ask the user to help us with new questions. (On the other hand
+\ falsely excluded answers are not changed. This is too complicated.)
+\ mAYBE THIS DOESN'T MAKE SENSE BECAUSE WE KNOW THE OUTCOME BUT WE GUESSED
+\ WRONG SO THERE IS NOTHING TO DISCRIMINATE AGAINST.
+\ : EXCLUDE-MORE
+\     DUP ?AMBIGUOUS 0= IF
+\         #DIAGNOSES @ 0 DO OVER I SWAP ANSWER-FOR
+\             DUP ?AMBIGUOUS 0= >R >R OVER R> = R> AND IF
+\                 1 I EXCLUSIONS ! LEAVE
+\             THEN
+\         LOOP
+\    2DROP
+\ ;
+
+
+: CONFLICTING?
+    DUP ?AMBIGUOUS IF 2DROP 0 EXIT THEN
+    OVER ?AMBIGUOUS IF 2DROP 0 EXIT THEN
+    <> ;
+
 \ The current answer vector and the vector for the outcome DIAGNOSES
 \ confirmed by the user are in conflict, because this outcome was apparently
 \ excluded along the way.
 \ Give the user an opportunity to change the answer vector before it is added
 \ to the database.
 \ This helps keeping the database clean from typo's and lousy answering.
-: CONFIRM-ANSWERS ." To be done still" CR DROP ;
+: CONFIRM-ANSWERS
+    #QUESTIONS @ 0 DO
+        I ANSWER-VECTOR @   DUP I ANSWER-FOR CONFLICTING? IF
+            AreYouSure1$  TYPE CR  AreYouSure2$
+            I ANSWER-VECTOR @ A_YES = IF Yes$ ELSE No$ THEN TYPE CR
+            AreYouSure3$  .QUESTION A_YES <> IF
+                I .QUESTION DUP I ANSWER-VECTOR !
+                ( DUP ?AMBIGUOUS 0= IF I OVER EXCLUDE-MORE THEN ) DROP
+            THEN
+        THEN
+    LOOP
+;
 
 \ Ask the user to introduce a new diagnosis, because no diagnosis
 \ known is compatible with his answers. However sometimes the new
@@ -477,7 +511,6 @@ DATABASE CONSULTING STRATEGY
 \D ." ?DIST Expect 0 0 : " 0 0 ?DISTINGHUISABLE . DEPTH . CR
 \D ." ?DIST Expect 1 0 : " 0 1 ?DISTINGHUISABLE . DEPTH . CR
 \D ." ?DIST Expect 1 0 : " 1 0 ?DISTINGHUISABLE . DEPTH . CR
-\D ." ?DIST Expect 0 0 : " 2 0 ?DISTINGHUISABLE . DEPTH . CR
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 select an existing QUESTION that
 \ will make a distinction between the two.
@@ -541,11 +574,66 @@ DATABASE CONSULTING STRATEGY
   THEN LOOP
   "______________________________________________" TYPE CR
 ;
-!EXCLUSIONS
-EXIT
-: ADD-ANSWERS ;
-: CONFIRM_ASNWERS :
-: exclude-more ;
 
-EXIT
+\ Convert an ANSWER to an PAIR of integers to be added to the
+\ ``YES'' and ``NOES' arrays.
+: ADDABLE
+        >R
+        R@ A_YES = IF 2 0 ELSE
+        R@ A_NO =  IF 0 2 ELSE
+        R@ A_AMB = IF 1 1 ELSE
+                      0 0
+        THEN THEN THEN RDROP
+;
+
+\D ." Expect 2 0 0 : " A_YES ADDABLE SWAP . . DEPTH . CR
+
+\ For a DIAGNOSIS and INDEX add the PAIR to the
+\ ``YES'' and ``NOES' arrays.
+: ADDIT >R >R 2DUP YESSES R> SWAP +! NOES R> SWAP +! ;
+\D ." ADDIT Expect 0 5 0 : " 0 0 0 3 ADDIT  0 0 YESSES ? 0 0 NOES ? DEPTH . CR
+\D ." ADDIT Expect 7 2 0 : " 1 1 7 0 ADDIT  1 1 YESSES ? 1 1 NOES ? DEPTH . CR
+
+\ Add the answer vector for the OUTCOME diagnosis to the database
+: ADD-ANSWERS
+    #QUESTIONS @ 0 DO
+        DUP I   I ANSWER-VECTOR @ ADDABLE   ADDIT
+    LOOP DROP
+;
+\D !ANSWER-VECTOR A_NO 1 ANSWER-VECTOR ! 0 ADD-ANSWERS
+\D ." ADD-A Expect 0 4 0 : " 0 1 YESSES ? 0 1 NOES ? DEPTH . CR
+\D ." ADD-A Expect 7 2 0 : " 1 1 YESSES ? 1 1 NOES ? DEPTH . CR
+
+: INIT ( Nothing, the database have been read in) ;
+
+
+\ Ask as many question as makes sense to zoom in onto the diagnosis.
+: INTERROGATION
+    BEGIN ^ SELECT-QUESTION DUP -1 <> POSSIBILITIES @ ^ 1 > AND WHILE
+        ^ GotLeft$ TYPE ^ POSSIBILITIES @ . CR
+        ^ DUP QUESTIONS ^ 2@ ^ GET-ANSWER ^   SWAP
+        2DUP ANSWER-VECTOR !    ELIMINATE
+        PRINTTABLE
+    REPEAT
+;
+
+: ONE-DIAGNOSIS
+    !EXCLUSIONS !ANSWER-VECTOR  #QUESTIONS @ POSSIBILITIES !
+    PRINTTABLE
+    INTERROGATION
+    POSE-DIAGNOSIS DUP -1 = IF DROP NEW-DIAGNOSIS THEN
+    DUP ELIMINATE-AMBIGUITY ADD-ANSWERS
+    !ANSWER-VECTOR PRINTTABLE
+;
+
+D-MAIN DEFINITIONS
+\ Now doit.
+: MAIN
+    INIT
+    Welcome$  TYPE CR Notice1$ TYPE CR Notice2$ TYPE CR CR ?STACK
+    BEGIN ONE-DIAGNOSIS GoOn$ GET-ANSWER A_YES = WHILE REPEAT
+    FINISH
+;
+
 ONLY FORTH DEFINITIONS
+D-MAIN
