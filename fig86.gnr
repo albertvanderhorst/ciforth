@@ -65,7 +65,7 @@ _ENDCOMMENT
 	PAGE
 FIGREL	EQU	2	; FIG RELEASE #
 FIGREV	EQU	0	; FIG REVISION #
-USRVER  EQU     0  	; USER VERSION NUMBER
+USRVER  EQU     'A'-'0' ; USER VERSION NUMBER, a digit now
 ;
 ;	ASCII CHARACTER EQUIVALENTS
 ;
@@ -1661,7 +1661,15 @@ HEADER({ID.},{IDDOT},{DOCOL})
 	DW	COUNT
 	DW	LIT,1FH
 	DW	LAND
+        DW      ONE
+        DW      LSUB
+        DW      TDUP
 	DW	TYPES
+        DW      PLUS
+        DW      CFET
+        DW      LIT,07FH
+        DW      LAND
+        DW      EMIT
 	DW	SPACE
 	DW	SEMIS
 	PAGE
@@ -1849,9 +1857,9 @@ HEADER({ABORT},{ABORT},{DOCOL})
 	DW	CR
 	DW	DOTCPU
 	DW	PDOTQ
-	DB	20
+	DB	22
 	DB	'IBM-PC Fig-Forth '
-	DB	FIGREL+30H,ADOT,FIGREV+30H
+	DB	FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
 	DW	FORTH
 	DW	DEFIN
 	DW	QUIT
@@ -1895,10 +1903,6 @@ HEADER({COLD},{COLD},{DOCOL})
 	DW	USE,STORE
 	DW	FIRST
 	DW	PREV,STORE
-;____1_____ _MODERN_1_({
-	DW      BLINI
-	DW      ZERO, OFSET,STORE
-});_END___1__({_MODERN_1_})
 ;____1_____ _USEDOS_1_({
 _COMMENT
 ; This will steer clear of a forth executable, provided it is
@@ -1932,6 +1936,10 @@ _ENDCOMMENT
 	DW	FETCH
 	DW	LIT,_VOC_LATEST(FORTH)
 	DW	STORE
+;____1_____ _MODERN_1_({
+	DW      BLINI           ; Can abort!
+	DW      ZERO, OFSET,STORE
+});_END___1__({_MODERN_1_})
 	DW	ABORT
 	PAGE
 HEADER({S->D},{STOD},{$+2})
@@ -2589,9 +2597,10 @@ HEADER({POUT},{POUT},{DOCOL})
 ;____1_____ _MODERN_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
 	DB      10,"BLOCKS.FRT"
-	RESB    20              ; Allow for some path
+	_RESB(20)               ; Allow for some path
 ;
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
+        DW      0
 ;
 HEADER({DISK-ERR},{DERR},{DOCOL})
 	DW      ONE, LAND
