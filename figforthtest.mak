@@ -160,7 +160,7 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     echo ms$(VERSION) $+ |xargs zip
 
 %.info : prelude.m4 postlude.m4 manual.m4 figforth.mi intro.mi manual.mi % ;
-	cat $(@:%.info=%.doc) chapter.mi | \
+	cat $(@:%.info=%.doc) wordset.mig | \
         ssort -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s >$(@:%.info=%.mig)
 	make $(@:%.info=%.mi)
 	mv $(@:%.info=%.mi) gloss.mi
