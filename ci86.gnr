@@ -1271,7 +1271,7 @@ worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
 HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LIT,'"'
-        DC      PPARS
+        DC      PARSE
         DC      LIT, SKIP, COMMA
         DC      SCOMMA, SFET
         DC      DLITE
@@ -1856,7 +1856,7 @@ PWORD1: DC      DROP
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
-worddocsafe( {PARSING~},{(PARSE)},{paren_word},{ ch --- sc },{},
+worddoc( {PARSING~},{PARSE},{parse},{ ch --- sc },{ISO},
 {Scan the forthdefi({current input source}) for the character forthvar({ch}) .
 Return forthvar({sc}): a string from the current position in the
 input stream, ending before the first such character,
@@ -1866,16 +1866,16 @@ _VERBOSE_({{As it goes with string constants, you may not alter
 its content, nor assume anything is appended.}})
 _VERBOSE_({So no leading delimiters are skipped.})},
 {{WORD}},
-{{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
-HEADER({(PARSE)},{PPARS},{DOCOL})
+{{ : GS1 5A PARSE . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
+HEADER({PARSE},{PARSE},{DOCOL})
         DC      SRC, CELLP, TFET
         DC      OVER, LSUB
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      ROT, SSPLIT, TSWAP
         DC      ZEQU
-        _0BRANCH(PPARS8)
+        _0BRANCH(PARSE8)
         DC      DROP, SRC, CELLP, FETCH
-PPARS8: _ISO_IN_({DC      SRC, FETCH, LSUB })
+PARSE8: _ISO_IN_({DC      SRC, FETCH, LSUB })
         DC      LIN, STORE
         DC SEMIS
 ;
@@ -3006,7 +3006,7 @@ worddoc( {INPUT},{IN},{in},{--- addr},{},
 {A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted. All parsing words use and move the value of forthcode({IN}) .},
-{{>IN},{WORD},{(WORD)},{NUMBER},{(PARSE)},{IN[]}},
+{{>IN},{WORD},{(WORD)},{NUMBER},{PARSE},{IN[]}},
 {{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
 enddoc)
 HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
@@ -3915,7 +3915,7 @@ _VERBOSE_({We want forthsamp({.( cccc)}) replaced by the equivalent forthsamp({"
 enddoc)
 HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LIT, ')'
-        DC      PPARS
+        DC      PARSE
         DC      LTYPE
         DC      SEMIS
 ;
@@ -4165,7 +4165,7 @@ IWORD3:  DC      INBRS, RR, EQUAL
 IWORD4:
         DC      DROP
         DC      LIT, -1, LIN, PSTORE ;{ Backtrace to first non-delimiter.}
-        DC      FROMR, PPARS
+        DC      FROMR, PARSE
 ;        DC      DOTS
 IWORD2:
         DC      HERE
@@ -5014,7 +5014,7 @@ A blank after the word forthcode({{(}}) is required.}}}},
 enddoc)
 HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      LIT,')'
-        DC      PPARS
+        DC      PARSE
         DC      TDROP
         DC      SEMIS
 ;
@@ -5032,7 +5032,7 @@ A blank after the word forthcode({\}) is required.},
 enddoc)
 HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
         DC      LIT,ALF
-        DC      PPARS
+        DC      PARSE
         DC      TDROP
         DC      SEMIS
 ;
