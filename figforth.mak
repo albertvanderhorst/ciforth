@@ -268,7 +268,11 @@ lina : fig86.lina.o ; ld $+ -o $@
 fig86.alone.asm : constant.m4
 
 # Convenience under linux. Steal the definitions of constants from c include's.
-constant.m4 : stealconstant.c ; cc -E -I/usr/include/asm $+ | m4 prelude.m4 - >$@
+constant.m4 : stealconstant.c ;  \
+    cc -E -I/usr/include/asm $+ | \
+    m4 prelude.m4 - | \
+    sed -e '/Split here for doc/,$$d' | \
+    sed -e 's/\<\(0[^x][0-9]*\>\)/\1Q/' >$@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
