@@ -391,10 +391,10 @@ A dictionary entry has the following fields:
 forthenumerate
 forthitem
 The name field.
-This is of variable length.
+This contains a pointer to a string.
 A pointer to such a field is called a forthdefi({name field address}).
-It starts and ends with a byte with the sign bit (8th bit) up{}_ALIGNED_(, followed
-by padding to the next cell boundary.}).
+The name itself is stored at outside of the dictionary header
+in are gular string, i.e. a one cell count followed by as many characters.
 _VERBOSE_({Unfortunately, forthdefi({name field address}) is often used, 
 where a forthdefi({dictionary entry address}) would be more correct. 
 That they happen to be the same is no reason to confuse two completely different concepts.})
@@ -415,29 +415,23 @@ A pointer to such a field is called a forthdefi({parameter field address}) .
 It contains everything not mentionned above.
 forthendenumerate
 Of these fields two deserve special attention.
-
-The name field need not contain all the letters that 
-belong to the name of the word. 
-The word will be found if the length of the word matches, 
-and the letters that are present agree with the name sought for.
-forthxref({WIDTH}).
 forthitemize
 forthitem
-The first byte of the name field has the natural character count in the
-low 5 bits. 
+The INVISIBLE bit = 1 when forthdefi({smudge})d, and will prevent a 
+match by forthcode({(FIND)}). 
+It is part of the flag field.
 forthitem
-The sixth bit = 1 when forthdefi({smudge})d, and will prevent a 
-match by forthcode({(FIND)})  
-forthitem
-The seventh bit = 1 for IMMEDIATE definitions; it is called the
+The IMMEDIATE bit = 1 for IMMEDIATE definitions; it is called the
  forthdefi({precedence bit}). 
+It is part of the flag field.
 forthitem
-The eighth or sign bit is always = 1. 
+The DUMMY bit =1 for a dictionary header contained in the 
+data of a vocabulary. This indicates that it shoudl not be executed.
+It is part of the flag field.
 forthitem
-The following bytes contain the names' letters, up to the value in 
-forthcode({WIDTH}) at the time of compilation.
-forthitem
-In the byte containing the last letter saved, the sign bit = 1. 
+The DENOTATION bit =1 for a word from the DENOTATION vocabulary.
+This means that it is a one letter word, that can parse all forthdefi({denotations})  
+(numbers) that start with that letter, e.g. 0 .
 _ALIGNED_(
 {forthitem
 After the last letter follow zero bytes uptill the next cell boundary.})
@@ -446,8 +440,6 @@ _VERBOSE_(
 {The above methods are implemented in forthcode({CREATE}) .
 Remember that forthcode({-FIND}) uses forthsamp({BL WORD}) to bring the next text 
 to forthcode({HERE}) with the count preceeding. 
-All that is necessary, is to limit by forthcode({WIDTH}) and toggle the
-proper delimiting bits. 
 forthbreak})
 For a demostration of the (non portable) tricks that are allowed by this,
 see the forthcodeni({$____}) and forthcodeni({$__}) words in forthfile({BLOCKS.BLK}) . 

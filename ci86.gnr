@@ -959,7 +959,7 @@ HEADER({E},{DENE},{DOCOL}, B_IMMED + B_DENOT)
 HEADER({F},{DENF},{DOCOL}, B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-worddoc({DENOTATIONS},{-},{den_minus}, {--- s/d},{CI},
+worddoc({DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
 {},
 {{-48 .},{-48 },
@@ -978,7 +978,7 @@ define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
 dnl Reset the link chain at this point to keep denotations
 dnl out of the normal search.
 define({_LINKOLD},0)dnl
-worddoc({VOCABULARIES},{DENOTATION},{DENOTATION},{},{CI},
+worddoc({VOCABULARIES},{DENOTATION},{denotation},{},{CI},
 {The name of the forthcode({DENOTATION}) vocabulary.
 This vocabulary contains one-letter words, called
  forthdefi({denotation}) definitions.
@@ -1910,12 +1910,12 @@ CODE_HEADER({3},{THREE})
 ;
 worddoc({STRING},{BL},{BL},{--- c},{},
 { A constant that leaves the
-   ascii value for "blank".},{}, {}, enddoc)
+   ascii value for "blank".},{}, {}, enddoc)        
 HEADER({BL},{LBL},{DOCON})
 ;{ THIS IS ONLY A SPAC}
     DC 20H
 ;
-worddoc({STRING},{$@},{string_fetch},{addr --- sc},{},
+worddocsafe({STRING},{$@},{string_fetch},{addr --- sc},{},
 { From address forthsamp({addr}) fetch a string constant forthsamp({sc}) .},
 {{$@},{$!},{$+!},{$C+}},
 {{ HEX 4 , 41 C, 39 C, 45 C, 30 C, HERE 4 CELL+ - $@ TYPE},{A9E0}}, enddoc)
@@ -1932,7 +1932,7 @@ HEADER({$!},{SSTOR},{DOCOL})
         DC TDUP, STORE, CELLP, SWAP, LCMOVE
         DC SEMIS
 ;
-worddoc({STRING},{$!-BD},{string_store},{sc addr --- },{},
+worddoc({STRING},{$!-BD},{string_store_brain_damaged},{sc addr --- },{},
 {Store a string constant forthsamp({sc})
 in the brain damaged
 string variable at address forthsamp({addr}).},
@@ -1966,7 +1966,7 @@ HEADER({$C+},{SCPLUS},{DOCOL})
         DC   ONE, FROMR, PSTOR
         DC SEMIS
 ;
-worddoc({STRING},{$,},{string_comma},{sc --- addr},{},
+worddocsafe({STRING},{$,},{string_comma},{sc --- addr},{},
 {Allocate and store a string constant forthsamp({sc})
 in the vocabulary and leave its address forthsamp({addr}).},
 {{$@},{$!},{}},
@@ -2410,7 +2410,7 @@ HEADER({>LFA},{TLFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
+worddoc({DICTIONARY},{>CFA},{to_code_field_address},{dea --- cfa},{},
 {Given a dictionary entry addres return the
 code field address.},{{'},{>CFA}}, {}, enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
@@ -2426,7 +2426,7 @@ HEADER({>PFA},{TPFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{>DFA},{cfa},{dea --- cfa},{},
+worddoc({DICTIONARY},{>DFA},{to_dummy_dea},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the dummy dea.
 },{{VOCABULARY},{>CFA}}, {}, enddoc)
@@ -2435,7 +2435,7 @@ HEADER({>DFA},{TDFA},{DOCOL})
         DC      CELLP ; {Skip vfa link.}
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
+worddoc({DICTIONARY},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the link to the next vocabulary.
 },{{VOCABULARY},{>CFA}}, {}, enddoc)
@@ -2861,7 +2861,7 @@ AWORD2:
 ;        DC      DOTS
         DC      SEMIS
 ;
-worddoc({PARSING},{&:},{char_follows}, {--- c},{CI},
+worddoc({PARSING},{&%},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
 Skip remaining non-blank characters.},
 {},
@@ -2873,7 +2873,7 @@ HEADER({&:},{CHF},{DOCOL}, B_IMMED)
         DC      PWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
-worddoc({PARSING},{^:},{control_follows}, {--- c},{CI},
+worddoc({PARSING},{^%},{control_follows}, {--- c},{CI},
 {Leave forthvar({c}) the control version of the non blank char that follows.
 Skip remaining non-blank characters.},
 {},
@@ -2896,7 +2896,7 @@ HEADER({CHAR},{LCHAR},{DOCOL})
         DC      CHF
         DC      SEMIS
 ;
-worddocsafe({PARSING},{[CHAR]},{ bracket_char_bracket}, {--- c},{ISO I},
+worddocsafe({PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
 {A compiling word. Parse a word.  Add the run time behaviour:
 leave forthvar({c}), the first non blank char of that word in the
 input stream.},
@@ -2961,7 +2961,7 @@ HEADER({NUMBER},{NUMB},{DOCOL})
         DC      SEMIS
 ;
 ;
-worddoc({DICTIONARY},{FIND:},{paren_find},{"name" --- dea},{},
+worddocsafe({DICTIONARY},{FIND%},{find_following},{"name" --- dea},{},
 {Parse a blank-delimited string from the current input stream and
 look the string up according to forthcode({(FIND)}) .
 If found, and it is not a denotation, 
@@ -3318,7 +3318,7 @@ HEADER({FORTH},{FORTH},{DODOE},B_IMMED)
         DC      B_DUMMY ;{ Dummy flag field}
         DC      _DEA(TASK)
 ;
-worddoc({VOCABULARIES},{ASSEMBLER},{forth},{},{P,L1},
+worddoc({VOCABULARIES},{ASSEMBLER},{assembler},{},{P,L1},
 {The name of the primary vocabulary.
 Execution makes forthcode({ASSEMBLER}) the forthcode({CONTEXT}) vocabulary.
  forthcode({ASSEMBLER}) is immediate, so it will execute during the creation of
