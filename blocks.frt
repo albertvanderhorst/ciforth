@@ -1,4 +1,4 @@
- : ( ciforth lab  $Revision$ (c) Albert van der Horst)
+ : ( ciforth lab  $Revision$ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -549,15 +549,15 @@ REQUIRE T[
 \ This behaviour remains the same if "name" is revectored.
 : OLD:   (WORD) FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R ;
     IMMEDIATE
-
 \ Have the original behaviour of DEA restored.
 : RESTORED   DUP >PHA SWAP >DFA ! ;
 \ Do nothing for one call of ``(WORD)''
-: (WORD)-NEW   '(WORD) RESTORE ;
+: (WORD)-NEW   '(WORD) RESTORED ;
 \ Make the following defining word postfix for one execution.
 \ The name must be a string constant on the stack
 \ Use only while compiling, or you crash the system
 : POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
+\ Example: : :P POSTFIX : !CSP ;
 ( Z$@ CTYPE ) \ A1sep25
 
 
@@ -862,11 +862,11 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
-( SEE CRACK KRAAK KRAKER ) \ AvdH A1oct04
+( SEE KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
 REQUIRE +THRU
 1 7 +THRU
-: SEE   KRAAK ;
-: CRACK KRAAK ;
+: SEE   CRACK ;
+: KRAAK CRACK ;
 
 
 
@@ -895,18 +895,18 @@ REQUIRE +THRU
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
 
 ( cracker2 ) \ AvdH A0MAR30
- : (KRAAK) ( DEA--. Decompile a word from its DEA)
+ : CRACKED ( DEA--. Decompile a word from its DEA)
   (  DUP NEXTD >NFA @ LIM ! Get an absolute limit)
     DUP @ SEL@ IF ( Is content of CFA known?)
-       EXECUTE ( Assuming CFA also on stack)
+      EXECUTE ( Assuming CFA also on stack)
     ELSE
         DROP CR
         DUP >CFA @ OVER >PHA = IF
            ." Code definition : " ELSE ." Can't handle : "
        THEN ID.. CR
     THEN ;
-: KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
-    (WORD) FOUND DUP 0= 11 ?ERROR (KRAAK) ;
+: CRACK  ( Use CRACK "ITEM" to decompile the word ITEM)
+    (WORD) FOUND DUP 0= 11 ?ERROR CRACKED ;
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
@@ -915,8 +915,8 @@ REQUIRE +THRU
 : NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
 WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
  : NEXTC NEXTD >CFA ; ( DEA--CFA Like NEXTD, giving CFA)
- : KRAAK-FROM CFOF ( .--. Kraak, starting with following word)
-BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP (KRAAK) REPEAT DROP ;
+ : CRACK-FROM CFOF ( .--. Kraak, starting with following word)
+BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP CRACKED REPEAT DROP ;
  VARIABLE LIM
 : H.. BASE @ >R HEX . R> BASE ! ;
 : B.. H.. ;
@@ -937,17 +937,17 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
     ID.. CR ;              CFOF RESULT @ BY -va
  : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE @ BY -us
- : ITEM ( 1/1 Desinterpret next item, increments pointer)
-     DUP @ SEL@ ( Something special ?)
+( Crack item at POINTER. Leave incremented POINTER , GOON flag)
+ : ITEM DUP @ SEL@ ( Something special ?)
      IF EXECUTE ( The special) ALIGNED ELSE
         DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
-( cracker5 ) \ AvdH A0MAR30
- CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
+( cracker5 ) \ AvdH A20MAR21
+: CRACK-CHAIN CR BEGIN ?Q DUP @ LIT (;) <>
+( >R DUP LIM @ < R> AND )  WHILE ITEM REPEAT DROP ;
  ( Decompilation of special high level words)
-  : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
-   BEGIN ?Q DUP @  LIT (;) <> ( >R DUP LIM @ < R> AND ) WHILE
-        ITEM REPEAT   CR DROP ." ;"  DUP
+ : -hi CR ." : " DUP DUP ID.. CELL+ @ CRACK-CHAIN
+CR ." ;"  DUP
 ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
 CR ;         CFOF TASK @  BY -hi
  ( for all -words: 1/1 pointer before afd after execution)

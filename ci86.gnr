@@ -9497,18 +9497,13 @@ what is left by the word if executed.
 {{"APE" ENVIRONMENT? .},{0}},
 enddoc)
 HEADER({ENVIRONMENT?},{ENVQ},{DOCOL})
-        DC      ZERO, RESULT, STORE
-        DC      LIT, MATCHING
-        DC      LIT, ENV
-        DC      TWID, FORW, TDROP
-        DC      RESULT, FETCH
+        DC      LIT, ENV, TWID, PFIND
+        DC      TOR, TDROP, FROMR
         DC      LDUP
         _0BRANCH(ENVQ1)
         DC      EXEC
         DC      LIT, -1
-        _BRANCH(ENVQ2)
-ENVQ1:  DC      DROP, ZERO
-ENVQ2:
+ENVQ1:
         DC      SEMIS
 ;
 _LOAD_({
