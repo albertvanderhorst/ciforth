@@ -11,6 +11,35 @@ REQUIRE $
 \   : \D POSTPONE \ ; IMMEDIATE
   : \D ;            IMMEDIATE
 
+HEX
+\ ----------------------    ( From analyser.frt)
+100 CONSTANT FMASK-HO    \ This definition has been high level optimised.
+200 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
+DECIMAL
+\ ----------------------    ( From optimiser.frt)
+\ Store a STRING with hl-code in the dictionary.
+: HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
+
+\ For a parse ADDRESS return an incremented parse ADDRESS, its
+\ CONTENT and a go on FLAG.
+: NEXT-PARSE
+   @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF CELL+ THEN
+\   R@ CFA> 'SKIP = IF @+ + ALIGNED THEN
+   R@
+\D   R@ CFA> ID.
+   R> '(;) <> ;
+
+\ For DEA : it IS high-level.
+: HIGH-LEVEL? >CFA @ DOCOL = ;
+
+\ For DEA: it IS B-optimisable.
+: B-INLINABLE?   DUP >FFA @   FMASK-HOB AND   0=   SWAP HIGH-LEVEL? AND ;
+
+\ Like +! but ors.
+: OR!  DUP @ ROT OR SWAP ! ;
+\ ----------------------    ----------------------     ----------------------
+
+
 \ For DEA : it HAS no side effects, input or output.
 : NS?   >FFA @ FMASK-NS AND FMASK-NS = ;
 
@@ -85,11 +114,11 @@ VARIABLE CURRENT-DEA
     IF ^
         SE@ COMBINE-SE               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
-^   ELSE ^
-        DROP 1 % CASH  ( DEA -- )
-2 %     >HERE                        ( BEGIN END -- BEGIN' )
-3 %     !OPT-START
-4 % THEN ;
+    ELSE ^
+        DROP CASH  ( DEA -- )
+        >HERE                        ( BEGIN END -- BEGIN' )
+        !OPT-START
+    THEN ;
 
 \ FIXME : all special optimisations must be tried only if the
 \ the special optimisations flag is on, not always.
@@ -103,24 +132,60 @@ VARIABLE CURRENT-DEA
 \ For ``CURRENT-DEA'' try the execute optimisation.
 \ For BEGIN END: leave sequence BEGIN' END' of what is still to be handled.
 :  ?OPT-EXEC?
-    CURRENT-DEA @ CAN-EXEC? IF ^
+    CURRENT-DEA @ CAN-EXEC? IF
         CASH
         HERE 1 CELLS - @  -2 CELLS ALLOT ,
         !OPT-START
         EMPTY>
-^   THEN ;
+    THEN ;
 
-\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
-: EXPAND
-    !OPT-START
+\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
+: (EXPAND)
     BEGIN DUP CR &N EMIT ^
         NEXT-PARSE
     WHILE CURRENT-DEA !
         CR &E EMIT ^ ?OPT-EXEC?
         CR &F EMIT ^ ?OPT-FOLD?
     REPEAT CR &L EMIT ^ DROP DROP DROP
+;
+
+\ Copy the SEQUENCE of high level code to ``HERE'' ,  possibly folding it.
+: EXPAND
+    !OPT-START
+    (EXPAND)
     ^ CASH   ^ POSTPONE (;) ^
 ;
+
+\ Try and optimise the DEA with respect to method `B' (HL inlining.)
+\ Reach trough to underlying levels.
+CREATE OPTIMISE-O
+
+\ For all elements of DEA attempt a ``OPTIMISE-O'' .
+\ Leave a flag indicating that the DEA itself is b-optimisable.
+: OPTIMISE-O1 DUP HIGH-LEVEL? OVER >FFA @ FMASK-HO AND 0= AND IF
+    -1 >R
+    >DFA @ BEGIN NEXT-PARSE WHILE
+    CFA> DUP OPTIMISE-O
+    B-INLINABLE? R> AND >R REPEAT
+    2DROP R>  \D .S
+    ELSE
+       DROP 0  \D .S
+    THEN
+;
+
+\ Concatenate the code of all elements of DEA , turning it into
+\ a collapsed HL definition. This must be allowed or we crash.
+: OPTIMISE-O2 DUP >R HERE >R
+    >DFA @ !OPT-START
+    BEGIN NEXT-PARSE ^ WHILE >DFA @ (EXPAND) REPEAT
+    2DROP CASH POSTPONE (;)
+    R> R@ >DFA !
+    FMASK-HO R> >FFA OR! ;
+
+\ Resolve OPTIMISE-O
+: (OPTIMISE-O)
+    DUP OPTIMISE-O1 IF OPTIMISE-O2 _ THEN DROP ;
+'(OPTIMISE-O)   'OPTIMISE-O 3 CELLS MOVE
 
 \ Optimise DEA regards folding.
 : OPT-FOLD  >DFA HERE    OVER @ EXPAND   SWAP ! ;
