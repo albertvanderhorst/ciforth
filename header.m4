@@ -31,8 +31,7 @@ define(_VOCLINK,
 dnl We lay down a nice square around the definition as a tribute to Thomas Newman
 dnl _star(x) generates x stars
 define({_star},{ifelse}(0,$1,,{*{_star}({decr}($1))}))
-dnl _LINKOLD is a m4 variable that generates numbers in sequence.
-define({_LINKOLD},0)dnl
+dnl
 dnl Lay down a header with forth name $1, assembler name $2 and code field $3
 dnl and data field $4, flag field $5, link field $6.
 dnl All except the assembler name are optional.
