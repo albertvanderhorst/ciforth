@@ -146,6 +146,7 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
 ;
+_RWFD_({
 ;{ PHYSICAL DISK PARAMETERS}
 ;{ (not needed for MODERN)}
 ;{ (not needed for BOOTHD)}
@@ -182,6 +183,7 @@ _COMMENT
 SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
+});_END_({_RWFD_})
 
 _SWITCH_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
@@ -943,7 +945,7 @@ It is recommended this word is not postponed.},
 {{ : APE 1 2 ; 'APE EXECUTE  'APE ID. . .},{APE 2 1}},
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      PWORD
+        DC      LPWORD
         DC      FOUND
         DC      LDUP
         DC      ZEQU
@@ -1530,7 +1532,7 @@ LINE LINEFEED WORD ;}). })},
 {{BLK},{WORD},{IN}},
 {{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
-HEADER({(WORD)},{PWORD},{DOCOL})
+HEADER({(WORD)},{LPWORD},{DOCOL})
 PWORD1: DC INBRS
         DC OVER, SRC, CELLP, FETCH, LSUB
         _0BRANCH(PWORD1B)
@@ -2298,7 +2300,7 @@ set (I) are executed rather than being compiled.},{},
 enddoc)
 HEADER({:},{COLON},{DOCOL})
         _SECURITY_({DC      SCSP})
-        DC      PWORD
+        DC      LPWORD
         DC      PCREAT
         _SECURITY_({DC      LATEST, HIDDEN})
         DC      RBRAC
@@ -2335,8 +2337,8 @@ will push the value of forthcode({n}) to the stack.},
 {{VARIABLE}},
 {{12A CONSTANT FRED FRED .},{12A} },
 enddoc)
-HEADER({CONSTANT},{CONST},{DOCOL})
-        DC      PWORD
+HEADER({CONSTANT},{LCONST},{DOCOL})
+        DC      LPWORD
         DC      PCREAT
         DC      LATEST, TDFA, STORE
         DC      PSCOD
@@ -2354,7 +2356,7 @@ so that a fetch or store may access this location.},{{USER},{CONSTANT}},
 {{ VARIABLE APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 HEADER({VARIABLE},{VAR},{DOCOL})
-        DC      PWORD
+        DC      LPWORD
         DC      PCREAT
         DC      ZERO, COMMA
         DC      PSCOD
@@ -2376,7 +2378,7 @@ particular variable. In ciforth the forthsamp({UP}) is fixed.
 {{ 0 USER APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 HEADER({USER},{USER},{DOCOL})
-        DC      CONST
+        DC      LCONST
         DC      PSCOD
 DOUSE:  MOV     BX,[WR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI]
@@ -2600,7 +2602,7 @@ execute forthcode({(ABORT)}) for a user specified proceedure.
 {{MESSAGE},{ERROR}},
 {{." See MESSAGE"},{See MESSAGE}},
 enddoc)
-HEADER({WARNING},{WARN},{DOUSE}, _CELLS(7))
+HEADER({WARNING},{LWARN},{DOUSE}, _CELLS(7))
 ;
 worddoc( {DICTIONARY~},{FENCE},{fence},{---  addr},{FIG,U},
 {A user variable containing an address below which forthcode({FORGET}) ting is
@@ -3445,7 +3447,7 @@ ciforth is byte aligned, so no extra measures are needed.},
 {HERE ZWY = .},{_T_}},
 enddoc)
 HEADER({CREATE},{CREATE},{DOCOL})
-        DC      PWORD
+        DC      LPWORD
         DC      PCREAT
         DC      LIT, HLNOOP, COMMA
         DC      PSCOD
@@ -3785,7 +3787,7 @@ HEADER({WORD},{IWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(IWORD1)
          DC      DROP
-         DC      PWORD
+         DC      LPWORD
         _BRANCH(IWORD2)
 IWORD1: DC      TOR
 IWORD3:  DC      INBRS, RR, EQUAL
@@ -3819,7 +3821,7 @@ input source. In ciforth this word works also in compiled mode.},
 {: GS2 CHAR X ; GS2 .},{58 }},
 enddoc)
 HEADER({CHAR},{LCHAR},{DOCOL}, , B_IMMED)
-        DC      PWORD, DROP, CFET, LITER
+        DC      LPWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
@@ -4056,7 +4058,7 @@ definition forthcode({(ABORT)}) is executed.},
  {CR},{} },
 enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
-        DC      WARN
+        DC      LWARN
         DC      FETCH
         DC      ZLESS
         _0BRANCH(ERRO1) ;{IF}
@@ -4257,7 +4259,7 @@ compile time.},{{POSTPONE}},
  : JAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 JAN 1 JAN},{2 1} },
 enddoc)
 HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
-        DC      PWORD
+        DC      LPWORD
         DC      FOUND
         DC      LDUP
         DC      ZEQU
@@ -4282,7 +4284,7 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}). },
 },
 enddoc)
 HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
-        DC      PWORD
+        DC      LPWORD
         DC      FOUND
         DC      LDUP
         DC      ZEQU
@@ -4416,7 +4418,7 @@ number.})
 enddoc)
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:
-        DC      PWORD
+        DC      LPWORD
         DC      LDUP      ;{ Zero length.}
         _0BRANCH(INTE8) ;{WHILE}
 ;       DC      DOTS
@@ -5229,7 +5231,7 @@ a disk error. },
 {0 WARNING ! 12 MESSAGE},{MSG # 12 }},
 enddoc)
 HEADER({MESSAGE},{MESS},{DOCOL})
-        DC      WARN
+        DC      LWARN
         DC      FETCH
         _0BRANCH(MESS1) ;{IF}
         DC      QDUP
@@ -5791,7 +5793,7 @@ CODE_HEADER({LINOS5},{LINOS5})
 
 _PC_({
              ;{ SVGA-modus 43*132 char's}
-HEADER({SMALL},{SMALL},{DOCOL})
+HEADER({SMALL},{LSMALL},{DOCOL})
              DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
              DC      LIT, 0010H, BIOS
              DC      DROP, DROP, DROP, DROP, DROP, SEMIS
@@ -6535,8 +6537,8 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS
         DC      ONE, LAND, ONE, LXOR ;{ 0 if disk problems. }
-        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      WARN, STORE
+        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      LWARN, STORE
         DC      DROP, DROP, DROP
         DC      BHAN, STORE
         DC      SEMIS
@@ -6561,8 +6563,8 @@ HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      FLUSH
         DC      LIT, 03E00H    ;{ Close file }
         DC      ZERO
-        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      WARN, STORE
+        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      LWARN, STORE
         DC      BHAN, FETCH
         DC      ZERO, ZERO
         DC      BDOS, QDSKER
@@ -6721,8 +6723,8 @@ HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      ZERO, MIN      ; 0/-errno
         DC      LDUP, DERR, STORE
         DC      ZEQU, ONE, LAND  ;{ 0 if disk problems. }
-        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      WARN, STORE
+        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      LWARN, STORE
         DC      SEMIS
 ;
 worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
@@ -6743,8 +6745,8 @@ enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
         DC      FLUSH
         DC      ZERO
-        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
-        DC      WARN, STORE
+        DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      LWARN, STORE
         DC      BHAN, FETCH
         DC      ZERO,ZERO
         DC      LIT, close
@@ -7577,7 +7579,7 @@ provide checks for compiler security.},
 {6 GI3 .},{6}
 },
 enddoc)
-HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
+HEADER({WHILE},{LWHILE},{DOCOL}, , B_IMMED)
         DC      TOR    ; { Save backward target. }
         _SECURITY_({DC      TOR})
         DC      LIT, ZBRAN, COMMA, PFORWARD
