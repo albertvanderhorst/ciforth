@@ -5,20 +5,24 @@ GENERAL.
 Date: See RCS-ID  
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl
 Copyright: GPL, inasfar not public domain by FIG
-Archive: fig86g2d148.zip
+Archive: ci86g3d154.zip
 
-All generic FIG86 forths have version number 2.
-Preliminary releases derive their version id, in this case as 2.148, from
-the RCS version of the generic source file `fig86.gnr' 
-Stable versions will use the regular fig numbering. 
+All generic CI86 forths have version number 3.
+Preliminary releases derive their version id, in this case as 3.154, from
+the RCS version of the generic source file `ci86.gnr' 
+Stable versions will use a regular numbering, that starts with old FIG :
+    1.x (FIG)
+    2.x (my FIG) 
+    3.x CI86
 
 Release :
-Version 2d148 is archived into fig86g2d148.zip and consists of
+RCS version 3.154 is archived into fig86g3d154.zip and consists of
+(this version is named after RCS so it is a beta release)
 
 The source.
 Makefile        : Make a runnable Forth but also targets for building floppies.
-fig86.gnr       : Generic source, word documentation and wordset documentation. 
-figforth.c      : C-source that complements assembler on Linux.
+ci86.gnr       : Generic source, word documentation and wordset documentation. 
+ciforth.c      : C-source that complements assembler on Linux.
 
 *.cfg           : Each of these cfg-files stand for some system.
 *release.txt   *: A corresponding *release.txt refer to such system.
@@ -26,32 +30,34 @@ figforth.c      : C-source that complements assembler on Linux.
 Documentation
 COPYING         : the conditions under which you are allowed to use all this
 release.txt     : this text
-figforth.mi     : Main documentation, and framework
+cifgen.mi       : generic documentation, how to configure.
+ciforth.mi     : Main documentation, and framework
 intro.mi        : Beginners introduction to Forth
-manual.mi       : User manual (Glossary is generated from fig86.gnr) 
+manual.mi       : User manual (Glossary is generated from ci86.gnr) 
 rational.mi     : Installation and other expert level info
-figdocadd.txt   : Additions still to be moved to rational.mi
 
 assembler.txt   : INACCURATE! About the internal assember and 
                   the separate assembler project.
 editor.txt      : The built in assembler for MSDOS or standalone configurations.
 
-Derived sources. For an msdos archive `fig86.' is ommitted.
+Derived sources. For an msdos archive `ci86.' is ommitted.
 This is for your convenience, you could have generated them.
-fig86.alone.asm : nasm source for fd-bootable system using BIOS i/o 16bit protected
-fig86.alonehd.asm : nasm source for hd-bootable system using BIOS i/o 32bit 
-fig86.msdos.msm : MASM/TASM source for hosted system using modern MSDOS i/o
-fig86.lina.asm  : nasm source for native linux version. 
-fig86.linux.asm : nasm source for linux version with I/O in c.
+ci86.alone.asm : nasm source for fd-bootable system using BIOS i/o 16bit protected
+ci86.alonehd.asm : nasm source for hd-bootable system using BIOS i/o 32bit 
+ci86.msdos.msm : MASM/TASM source for hosted system using modern MSDOS i/o
+ci86.lina.asm  : nasm source for native linux version. 
+ci86.linux.asm : nasm source for linux version with I/O in c.
+ci86.msdos32.asm : nasm source for hosted system using modern MSDOS i/o, 32 bit.
 
 These files are example configurations that can be used out of
 the box via the Makefile. 
-The first five generate the `Derived files' from the previous section.
+The first six generate the `Derived files' from the previous section.
 alone.cfg       : 16 bit protected mode, boots from floppy, uses BIOS for IO
 msdos.cfg       : 16 bit real mode, hosted by MSDOS, blocks in files.
-linux.cfg       : 32 bit protected mode, hosted by linux, links with figforth.c
-lina.cfg        : 32 bit protected mode, hosted by linux, direct system calls. 
-alonehd.cfg     : 32 bit protected mode, boots from hard disk, uses BIOS for IO
+linux.cfg       : 32 bit mode, hosted by linux, start up and I/O in c. (64M) 
+lina.cfg        : 32 bit mode, hosted by linux, system calls in assembler.(64M) 
+msdos32.cfg     : 32 bit mode, hosted by MSDOS, blocks in files. (8M)
+alonehd.cfg     : 32 bit mode, boots from hard disk, uses BIOS for IO. (128M)
 
 cfg.zip         : More .cfg files that make sense. If available.
 
@@ -79,7 +85,6 @@ menu.m4         : Generate the wordset menu
 names.m4        : Names in the documentation for easy change.
 wordset.m4      : Generate texinfo chapters linkage.
 
-link.script     : Links a hybrid c/assembler version on Linux.
 genboot.bat     : Generate a bootable floppy on an MSDOS system
 toblock.c       : Convert a text file to blocks.
 fromblock.c    *: Convert from blocks to a text file.
@@ -87,7 +92,7 @@ stealconstant.c*: Converted to constant.m4 with Linux symbolic constants.
 
 System Forth sources. Example Forth sources.
 blocks.frt      : Source for editor assembler decompiler etc. Normal archives.
-BLOCKS.BLK      : Generated from blocks.frt b ut in block format,
+BLOCKS.BLK      : Generated from blocks.frt but in block format,
                   Supplied in MSDOS archive instead of blocks.frt 
 wc              : Featuring lina as a script language.
 
