@@ -6627,15 +6627,6 @@ HEADER({MS},{MS},{DOCOL})
 TV:     _RESB( 8 )
 ;
 });_END_({ _HOSTED_LINUX_})
-_PC_({
-             ;{ SVGA-modus 43*132 char's}
-HEADER({SMALL},{LSMALL},{DOCOL})
-        DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
-        DC      LIT, 0010H, BIOS
-        DC      DROP, DROP, DROP, DROP, DROP
-        DC      SEMIS
-             ;{                          ^ MUST BE 4FH}
-});_END_({_PC_})
         PAGE
 ;{------------------------------------}
 ;{       SYSTEM DEPENDANT CHAR I/O}
@@ -6660,20 +6651,18 @@ worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ascii value of the next terminal key struck.},
 {{ACCEPT},{KEY?}}, {}, enddoc)
 HEADER({KEY},{KEY},{DOCOL})
-        DC         LIT, 1000H, ZERO, ZERO, ZERO
-        DC         LIT, 0016H, BIOS
-        DC         DROP,DROP,DROP,DROP
-        DC         LIT, 00FFH, LAND, SEMIS
+        DC      X, X, X, LIT, 1000H
+        DC      LIT, 0016H, BIOSN
+        DC      DROP
+        DC      LIT, 00FFH, LAND, SEMIS
 ;
 worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
 A true flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
 HEADER({KEY?},{KEYQ},DOCOL)
-        DC      LIT,0B00H
-        DC      ZERO,ZERO,ZERO
-        DC      BDOS, DROP ;{ ignore error }
-        DC      DROP, DROP, DROP
+        DC      X, X, X, LIT, 0B00H
+        DC      BDOSN, DROP ;{ ignore error }
         DC      LIT, 01H, LAND
         DC      SEMIS
 ;
@@ -6709,13 +6698,10 @@ HEADER({TYPE},{LTYPE},{DOCOL})
 _BITS32_({; MSDOS cannot handle a 32 bits address: copy the buffer.})
 _BITS32_({        DC      LIT, TYPEBUF, RR, LCMOVE })
 _BITS32_({        DC      LIT, TYPEBUF })
-        DC      TOR     ; { Buffer address.}
-        DC      LIT,04000H ;{ Write file or device }
-        DC      ONE     ;{ Handle}
-        DC      FROMR, FROMR, SWAP
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      BDOS, DROP ;{ ignore error }
-        DC      DROP, DROP, DROP, DROP
+        DC      FROMR   ;{Get count back.}
+        DC      ONE     ;{ Handle}
+        DC      WFILE, DROP ;{ ignore error }
         DC      SEMIS
 _BITS32_({TYPEBUF:  _RESB(0400H) })
 });_END_({ _NO_DPMI_})
@@ -7086,6 +7072,7 @@ are the same as with forthcode({ACCEPT}).
 },
 enddoc)
 _HOSTED_DPMI_({
+; FIXME use RW_BUFFER for copying around in HOSTED_DPMI.
 HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      LIT,03F00H ;{ Read file or device }
         DC      ZERO     ;{ Handle}
@@ -7116,22 +7103,14 @@ EXPECTBUF:  _RESB( 0200H )
 });_END_({ _HOSTED_DPMI_})
 _NO_DPMI_({
 HEADER({REFILL-TIB},{REFTIB},{DOCOL})
-        DC      LIT,03F00H ;{ Read file or device }
-        DC      ZERO     ;{ Handle}
-        DC      REMAIND, FETCH, TOR
-_BITS16_(
-{        DC      LIT, RTS/2, RR, LSUB
-        DC      TIB, FETCH, RR, PLUS},
-{dnl})
-_BITS32_(
-{;{ MSDOS cannot handle a 32 bits address: use the buffer.}
-        DC      LIT, 0200H
-        DC       LIT, EXPECTBUF },
-{dnl})
+_BITS16_({      DC      TIB, FETCH, REMAIND, FETCH, PLUS},{dnl})
+_BITS32_( {;{ MSDOS cannot handle a 32 bits address: use the buffer.}})
+_BITS32_( {     DC   LIT, EXPECTBUF },{dnl})
 _SWITCH_({        DC   LIT, M4_SWITCHOFFSET, PLUS, },{dnl})
-        DC      BDOS, ONE, LAND
-        DC      LIT, 6, QERR
-        DC      DROP, DROP, DROP ;{ Leave count}
+_BITS16_({        DC      LIT, RTS/2, REMAIND, FETCH, LSUB},{dnl})
+_BITS32_( {     DC   LIT, 0200H},{dnl})
+        DC      ZERO     ;{ Handle}
+        DC      RFILE, LIT, 6, QERR
 _BITS32_(
 {;{ Copy the buffer.}
         DC      LIT, EXPECTBUF, OVER
@@ -7143,7 +7122,7 @@ _BITS32_(
         DC      ZERO, REMAIND, STORE
         DC      LIT, -32, LAND, THROW ; {Presumably end of pipe.}
 PACCEP3:
-        DC      TIB, FETCH, SWAP, FROMR, PLUS
+        DC      TIB, FETCH, SWAP, REMAIND, FETCH, PLUS
         DC      REMAIND, TSTOR
         DC      SEMIS
 _BITS32_({EXPECTBUF:  _RESB( 0200H ) },{dnl})
