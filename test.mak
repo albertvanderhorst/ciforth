@@ -158,8 +158,8 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     make mslinks ; \
     echo ms$(VERSION) $+ |xargs zip
     
-figforth.info : prelude.m4 postlude.m4 manual.m4 figforth.mi intro.mi manual.mi gloss.mig ; \
+figforth.info : prelude.m4 postlude.m4 manual.m4 figforth.mi intro.mi manual.mi gloss.mi ; \
     m4 figforth.mi | makeinfo
 
-%.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+ )| m4 > $@
+%.mi : gloss.m4 %.mig ; ( cat prelude.m4 postlude.m4 ; m4 $+| sed -e 's/@ /@@/g')| m4 > $@
 
