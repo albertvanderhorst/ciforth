@@ -1,4 +1,5 @@
 ;{               ciforth : a generic I86 ISO FORTH by HCC FIG}
+
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
@@ -790,12 +791,12 @@ ORIG:                         ; Accommodate also .exe files
             MOV     [Flag32],BL
             MOV     [ProcType],CL
             MOV     [VerNum],DX
-            MOV     [MemNeeded],SI
             MOV     [DPMIentry+0],DI
             MOV     [DPMIentry+2],ES
+            PUSH    SI                  ;{Allocation.}
 
             MOV     AX,0                ;In case no memory needed
-            MOV     BX,[MemNeeded]        ;Get number of paragraphs needed by host
+            POP     BX                  ;Get number of paragraphs needed by host
             CMP     BL,0                ;Any allocation needed?
             JE      Plunge              ;No, so continue
             MOV     AH,48h              ;Allocate memory
@@ -817,11 +818,7 @@ Plunge:     MOV     ES,AX
 Flag32      DB      00
 ProcType    DB      00
 VerNum      DW      0000
-MemNeeded   DW      0000
 DPMIentry   DW      0000,0000
-Scratch     _RESB(8)
-LINAD_HIGH:   DW     0000
-LINAD_LOW:    DW     0000
 MEM_HANDLESI: DW     0000
 MEM_HANDLEDI: DW     0000
 
@@ -841,20 +838,20 @@ DPMISUCCESS:
             MOV     _CELL_PTR[Save_CS_PR],CS
             MOV     _CELL_PTR[Save_DS_PR],DS
             MOV     _CELL_PTR[Save_ES_PR],ES
-; -------------- Get a new segment for our Forth to FS --------
+; -------------- Get a new segment for our Forth to ES --------
             MOV     AX,0000H            ;{A new selector.}
             MOV     CX,1
             INT     31H
             MOV     BL,4
-            MOV     FS,AX
+            MOV     ES,AX
             JC      ERRMSG
 
             MOV     AX,0501H            ;{Allocate memory}
             MOV     BX, EM/10000H
             MOV     CX, EM & 0FFFFH
             INT     31H
-            MOV     [LINAD_HIGH],BX
-            MOV     [LINAD_LOW],CX
+            PUSH    CX
+            PUSH    BX
             MOV     [MEM_HANDLESI],SI
             MOV     [MEM_HANDLEDI],DI
             MOV     BL,4
@@ -862,15 +859,15 @@ DPMISUCCESS:
             JC      ERRMSG
 
             MOV     AX,0007H            ;{Set base address.}
-            MOV     BX,FS
-            MOV     CX, [LINAD_HIGH]
-            MOV     DX, [LINAD_LOW]
+            MOV     BX,ES
+            POP     CX
+            POP     DX
             INT     31H
             MOV     BL,6
 ERRMSG2:    JC      ERRMSG
 
             MOV     AX,0008H            ;{Set segment limit.}
-            MOV     BX,FS
+            MOV     BX,ES
             MOV     CX, (EM-1)/10000H
             MOV     DX, (EM-1) & 0FFFFH
             INT     31H
@@ -878,33 +875,23 @@ ERRMSG2:    JC      ERRMSG
             JC      ERRMSG2
 
             MOV     AX,0009H            ;{Set acces rights.}
-            MOV     BX,FS
-            MOV     CX, 00F2H ; %0000 0000 1111 0010
+            MOV     BX,ES
+            MOV     CX, 00F2H ; %0000 0000 1111 0010 Wyatt pg.618
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
 
-; -------------- Copy Forth to the new segment FS --------
+; -------------- Copy Forth to the new segment ES --------
             MOV     CX, EM
             XOR     DI, DI      ;{dest}
             XOR     SI, SI      ;{dest}
-            PUSH    ES
-            PUSH    FS
-            POP     ES
             REP     MOVSB
-            POP     ES
 
-; -------------- Alias descriptors for FS --------
-; After this section : CX is an alias for CS , DX for DS.
-            MOV     AX,000AH            ;{Alias for LDT descriptor.}
-            MOV     BX,FS
-            INT     31H
-            MOV     BL,5
-            MOV     CX,AX
-            JC      ERRMSG2             ;{Could not allocate.}
+; -------------- Alias descriptors for ES --------
+; After this section : ES is an alias for CS , DX for DS.
 
             MOV     AX,000AH            ;{Alias for LDT descriptor.}
-            MOV     BX,FS
+            MOV     BX,ES
             INT     31H
             MOV     BL,5
             MOV     DX,AX
@@ -912,19 +899,24 @@ ERRMSG2:    JC      ERRMSG
 
 ; -------------- Fill in the alias descriptors, possibly 32 bits --------
 
-            PUSH    CX
             MOV     AX,0009H            ;{Set acces rights.}
-            MOV     BX,CX
-            MOV     CX, _BITS16_({ 00FAH }); %0000 0000 1111 1010
+            MOV     BX,ES
+            ; %0000 0000 1111 1010  %0100 0000 1111 1010
+            MOV     CX, 00FAH _BITS32_({ | 4000H })
             INT     31H
             MOV     BL,7
             JC      ERRMSG2
-            POP     CX
 
-; DX should be okay as it is.
+            MOV     AX,0009H            ;{Set acces rights.}
+            MOV     BX,DX
+            ; %0000 0000 1111 1010  %0100 0000 1111 1010
+            MOV     CX, 00F2H _BITS32_({ | 4000H })
+            INT     31H
+            MOV     BL,7
+            JC      ERRMSG2
 
 ; -------------- Use the alias descriptors for CS and DS --------
-            PUSH    CX    ; {Corrected code segment}
+            PUSH    ES    ; {Corrected code segment}
             MOV BX, HERE6
             PUSH BX     ; {Correct program counter}
             RETF        ; {Returning to HERE6 now}
