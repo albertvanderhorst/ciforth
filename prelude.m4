@@ -23,9 +23,11 @@ dnl Indicate that a large part of conditional assembly ends here
 define({_END_}, )dnl obsolete version
 define({_END_}, )dnl preferred version
 dnl _yes and  _no are expanded during definition time and generate
-dnl define({aap},$1) or define({aap},)
+dnl define({aap},$1) or define({aap},$2)
+dnl By e.g. _BITS32_({DC LIT, X},{dnl}) can extra blank lines
+dnl be prevented.
 define({_yes},{${}1})
-define({_no},)dnl
+define({_no},{${}2})
 dnl
 dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
 dnl     Memory layout is defined using equ's
@@ -60,6 +62,8 @@ dnl Blocks are allocated in a file.
 define({_BLOCKSINFILE_}, _no)
 dnl Real BIOS is simulated from protected mode.
 define({_SIMULATE_BIOS_}, _no)
+dnl The keyboard input is accepted key by key, Forth supplies editing.
+define({_KEY_BY_KEY_}, _no)
 dnl
 dnl ############## USER CHOICES #############################################
 dnl
