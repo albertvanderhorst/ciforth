@@ -10,12 +10,12 @@ dnl @smallbook
 A common intel/computer intelligence/CH+ forth.
 
 For the configuration:
-forthitemize 
-forthitem            
+forthitemize
+forthitem
 experimental version fig86gnrversion
-forthitem             
+forthitem
 _BITS_-bits _REAL_({real mode })_PROTECTED_({protected mode })
-forthitem 
+forthitem
 _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
 forthitem
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
@@ -24,7 +24,7 @@ _FEWBLOCKS_({forthitem
 number of blocks limited to 256})
 forthenditemize
 
-@author Albert van der Horst 
+@author Albert van der Horst
 Dutch Forth Workshop
 
 
@@ -36,28 +36,28 @@ Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
 @end titlepage
 
-dnl 
-dnl @ifinfo 
+dnl
+dnl @ifinfo
 dnl example of stuff that only appears in info
 dnl @end ifinfo
-dnl @iftex 
-dnl example of stuff that only appears in tex 
+dnl @iftex
+dnl example of stuff that only appears in tex
 dnl @end iftex
 @page
-@node Top, Gentle Introduction, Glossary, 
+@node Top, Gentle Introduction, Glossary,
 @chapter Overview
-Forth is an interactive programming system. 
+Forth is an interactive programming system.
 ciforth is a Forth that can be generated in many different version
 for many different operation systems.
 This file documents what you as a user needs to know for using this
-particular version of ciforth once it is installed on your system. 
+particular version of ciforth once it is installed on your system.
 
 ciforth consists of three files:
 forthitemize
 forthitem
 _BOOTED_({A booting floppy or hard disk}) dnl
-_HOSTED_MSDOS_({forth.com})_HOSTED_LINUX_({lina}) : the program
-_BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can 
+_HOSTED_MSDOS_({ciforth.com})_LINUX_N_({lina})_LINUX_C_({ciforthc})  : the program
+_BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can
 see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})
 forthitem
 ciforth.ps ciforth.html : the documentation
@@ -69,11 +69,11 @@ These files are generated together by the generic system fig86.gnr.
 The documentation only applies to the ciforth with which it goes.
 
 If your Forth doesn't fit the description below get a new version.
-The information below allows an expert to reconstruct how to 
+The information below allows an expert to reconstruct how to
 generate a corresponding version. _VERBOSE_({Not all of it may make
-sense to you. Tell him whether you want to 
+sense to you. Tell him whether you want to
 fit the Forth to the description or vice versa.})
-forthxref({Rationale & legalese}). 
+forthxref({Rationale & legalese}).
 
 These are the features:
 
@@ -94,7 +94,7 @@ _BITS16_({A number has a precision of 16 bits.}) dnl
 _BITS32_({A number has a precision of 32 bits.}) dnl
 _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
-_SECURITY_({It has compiler security, sacrificing some bizar ISO 
+_SECURITY_({It has compiler security, sacrificing some bizar ISO
 compatibity.}) dnl
 _CIF_IN_({It doesn't use forthcode({>IN}) in the way prescribed by ISO.}) dnl
 dnl define( {_ISO_IN_}, _yes)dnl
@@ -104,20 +104,20 @@ It is indirect threaded.
 If you are new to Forth you may want to read the Gentle Introduction,
 otherwise you better skip this. The second chapter you as a user
 don't want to read. In this experimental version it contains a lot of
-installation and configuration information that in fact doesn't belong in 
+installation and configuration information that in fact doesn't belong in
 a user manual.
 @end iftex
 
-@menu 
+@menu
 * Gentle Introduction:: For newbies to Forth. You don't want to read this.
 * Rationale & legalese:: For experts. You don't want to read this.
-* Manual::         User manual 
+* Manual::         User manual
 * Documentation::  Some references
 * Glossary::       Description of Forth words
 * Glossary Index:: Find a Forth words in the glossary
 * Forth Word Index:: All references to Forth words
 * Concept Index::
-dnl* Forth Word Index :: 
+dnl* Forth Word Index ::
 @end menu
 
 @node Gentle Introduction, Rationale & legalese, top, top
@@ -137,28 +137,28 @@ include(manual.mi)
 
 You bet this is utterly and totally out of date.
 
-The following manuals are in print: 
+The following manuals are in print:
 
 Caltech FORTH Manual, an advanced manual with internal details of Forth. Has
 Some implementation peculiarities. Approx. $6.50 from the Caltech Book
-Store, Pasadena, CA. 
+Store, Pasadena, CA.
 
 Kitt Peak Forth Primer, $20.00 postpaid from the Forth Interest Group, P. O.
-Box 1105, San Carlos, CA 94070. 
+Box 1105, San Carlos, CA 94070.
 
-microFORTH Primer, $15.00 Forth, Inc. 
+microFORTH Primer, $15.00 Forth, Inc.
 815 Manhattan Ave. Manhattan Beach, CA 90266
 
 
 Forth Dimensions, newsletter of the Forth Interest Group, $5.00 for 6 issues
-including membership. F-I-G. P.O. Box 1105, San Carlos, CA. 94070 
+including membership. F-I-G. P.O. Box 1105, San Carlos, CA. 94070
 
 @node Glossary,top,Documentation,top
 @chapter Glossary
-Wherever it says                 
+Wherever it says
 single precision number or forthdefi({cell}) _BITS_ bits is meant.
-Wherever it says 
- forthdefi({double}) or ``double precision number'' a 
+Wherever it says
+ forthdefi({double}) or ``double precision number'' a
 _BITS16_({32})_BITS32_({64}) bits number is meant.
 
 The first line of each entry shows a symbolic description of the action of
@@ -170,72 +170,73 @@ In this notation, the top of the stack is to the right.
 The symbols include:
 
 @table @samp
-forthitem addr   
+forthitem addr
 memory address
-forthitem b      
+forthitem b
 8 bit byte (i.e. hi 8 bits zero)
-forthitem c      
+forthitem c
 7 bit ascii character (hi 9 bits zero)
-forthitem d      
+forthitem d
 _BITS16_({32})_BITS32_({64}) bit signed double integer: most significant portion with sign
 on top of stack.
-forthitem f      
-boolean forthdefi({flag}) . 0=false, non-zero=true 
-forthitem ff     
+forthitem f
+boolean forthdefi({flag}) . 0=false, non-zero=true
+forthitem ff
 boolean false flag=0
-forthitem n      
+forthitem n
 _BITS_ bit signed integer number
-forthitem u      
+forthitem u
 _BITS_ bit unsigned integer
 forthitem sc
 A string constant, i.e. two cells, an address and a length.
 Length characters are present at the address.
 _VERBOSE_({They must not be changed.})
-forthitem tf     
+forthitem tf
 boolean true flag=non-zero
-@end table 
+@end table
 
 The capital letters on the right show definition characteristics:
 
 @table @samp
-forthitem B      
+forthitem B
 The word is available only after loading from background storage
-forthitem C      
+forthitem C
 May only be used within a colon definition. A digit indicates number
-of memory addresses used, if other than one. 
-forthitem E      
+of memory addresses used, if other than one.
+forthitem E
 Intended for execution only.
-forthitem FIG      
+forthitem FIG
 Belongs to the FIG model
-forthitem I      
+forthitem I
 Has immediate bit set. Will execute even when compiling.
-forthitem ISO      
+forthitem ISO
 Belongs to ISO standard
-forthitem L0     
+forthitem L0
 Level Zero definition of FORTH-78
-forthitem L1     
+forthitem L1
 Level One definition of FORTH-78
-forthitem NISO      
-Word belongs to ISO standard, but the implementation is not 
+forthitem NISO
+Word belongs to ISO standard, but the implementation is not
 quite conforming.
-forthitem U      
+forthitem U
 A user variable.
-@end table 
+@end table
 
 Where there is mention of a standard or a model,
 it means that the word actually complies to the standard or the model,
 not that some word of that name is present.
 _VERBOSE_({Words marked with forthsamp({ISO,FIG,L0}) will behave identically
-over all but the whole spectre of Forth's.}) 
+over all but the whole spectre of Forth's.})
 
 Unless otherwise noted, all references to numbers are for _BITS_ bit
 signed integers. For _BITS16_({32})_BITS32_({64}) signed numbers, the
-most significant part (with the sign) is on top. 
+most significant part (with the sign) is on top.
 
 All arithmetic is implicitly _BITS_ bit signed integer math, with error and
 under-flow indication unspecified.
 
 include(menu.texinfo)
+undefine({W})
 include(wordset.mi)
 
 @node Glossary Index,,,Top
@@ -254,4 +255,3 @@ The first reference is where the concept is explained.
 @summarycontents
 @contents
 @bye
-
