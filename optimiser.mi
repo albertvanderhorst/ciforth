@@ -25,15 +25,36 @@ Examples are SWAP 2SWAP ROT.
 A duplicator copies an item from the stack.
 Examples are DUP OVER 2DUP.
 
+A sequence  of high level code
+is called stable with respect to branching if there is no
+branching into or out of the sequence.
+
+A sequence  of high level code
+is called stable with respect to the return stack
+if it only pops, what it has pushed itself, and the stack is left
+with the same depth as before.
+
+A sequence is called stable if it is stable with respect to
+anything that is relevant in the contest, mostly with respect to
+everything.
+
+@subsection Notations
+In the following we will denote a stack effects as < N -- M >.
+This means that N items are popped and replaced by M new items.
+So 2DROP has the effect of < 2 -- 0 >.
+Pointy brackets are used to make a distinction with the usual stack effect
+notation.
 @subsection Optimisations
-Optimisations are manipulations on a program source or intermediate code
-to improve the speed of the resulting program.
+Optimisations are manipulations on a program source, intermediate code
+or machine code to improve the speed of the resulting program.
 In other respect the result is inferior. Symbolic debugging --
 one of Forth's strong points -- goes through the drain.
 (The name "optimisation" is a misnomer.)
 
 forthitemize
-forthitem({folding})
+forthitem
+Folding.
+
 Constant folding is a well known technique in optimisation.
 It means that if an operator works on constants the result may be replaced
 by a constant that is calculated at compile time.
@@ -41,22 +62,32 @@ In Forth we generalise this to folding.
 Folding refers to all words that can be replaced by simpler words in case
 they receive constant data on the stack.
 
-forthitem({reordering})
+forthitem
+Reordering.
+
 Reordering is not so much an optimisation per se, but it allows other optimisations
 to kick in. As a rule of thumb constants are moved to the top of the stack, where
 they fall prey to folding.
 Reordering might also eliminate a juggler.
 
-forthitem({Annihilation})
-Annihilation is the elimination of e a whole sequence of operations.
+forthitem
+Anihilation.
+
+Annihilation is the elimination of a whole sequence of operations.
 In Forth sometimes the result of a calculation is dropped.
 Depending on the properties of the calculation,
 the calculation itself can be removed.
 This type of annihilation is related to an annihilator.
+On closer analysis it appears that any ``no store''
+sequence with a < N -- 0 > stack effect
+can be replaced by N times DROP.
+
 Another type is related to conditional branching where the condition is
 known at compile time. Code known to be skipped is removed.
 
-forthitem({Inlining})
+forthitem
+Inlining.
+
 Inlining means replacing a Forth word with its constituents.
 This technique is very important in Forth, more so than
 in other languages, due to the small size of Forth words.
@@ -170,7 +201,7 @@ For a linear chain of calls the stack effect is calculated as follows:
 
 forthitemize
 forthitem
-Start with a effect of ( 0 -- 0 ).
+Start with a effect of < 0 -- 0 >
 forthitem
 For each constituent
 forthbreak
@@ -196,7 +227,7 @@ If the stack effect of a constituent is unknown, the result is
 unknown, overruling any other outcome except variable.
 forthitem
  For a CREATE .. DOES> word the linear chain pointed to by the DOES> pointer is
-analysed. However the stack effect is initialised to ( 0 -- 1) to reflect the
+analysed. However the stack effect is initialised to < 0 -- 1 > to reflect the
 passing of the data pointer to the  DOES> part.
 forthitem
 '<SOME-WORD> EXECUTE has the stack effect of <SOME-WORD> .
@@ -272,7 +303,7 @@ In combination with a duplicator. Again a sequence may be duplicated and the dup
 eliminated. This is not an optimisation, except for the duplication of constants.
 Going the other direction can be an optimisation.
 Two identical sequences with no output side effect can be replaced by one and a duplicator.
-Example: (for a recursive definition with stack effect ( 1 -- 1 ) and no side effects)
+Example: (for a recursive definition with stack effect < 1 -- 1 > and no side effects)
 12 RECURSE OVER RECURSE becomes 12 RECURSE 12 RECURSE  (elimination duplicator)
 forthbreak
 12 RECURSE 12 RECURSE becomes 12 RECURSE DUP. (introducing duplicator)
@@ -302,10 +333,9 @@ manipulations: jugglers, annihilator, duplicators.
 NS-words are amenable to folding:
 forthitemize
 forthitem
-If a NS-sequence has only constant inputs, it may be run at compile time
-and the inputs and sequence by the resulting constant outputs.
+If a NS-sequence has only constant inputs, it may be run at compile time.
+Its inputs and the code sequence may be replaced by the resulting constant outputs.
 Example: After "12 4 3 SWAP * +" is replaced by 24.
-In fact this is equivalent to
 forthitem
 If a NS-sequence has no inputs, it may be run at compile time
 and replaced by the resulting constant outputs.
@@ -313,53 +343,100 @@ The difference with the preceeding example is that the sequence starts
 with 12 instead of *. Any literals are of course NS.
 forthenditemize
 
+On closer inspection the second condition is equivalent to the first.
+It is the more easy one to implement.
 @subsubsection {Associativity.}
-An NS-operator with two inputs and one output can have, in addition,
+An operator with two inputs and one output, so called ``binary operators''
+can have, in addition to NS,
 the property of associativity. This refers to a situation where three
-operands are involved. Examples are OR and + . However forthemphasized(*not* F+) .
-This allows to replace the sequence ``x % y %'' with ``x y % %'' where
+operands are involved. Examples are OR and + . However forthemph({not F+}) .
+In the following we will denote an associative operator by %.
+Associativity allows to replace the sequence ``x % y %'' with ``x y % %'' where
 it may be that ``x y %'' can be folded into a constant.
-Example: ``CELL+ CELL+'' is first inlined to ``8 + 8 +'' then to ``8 8 + +''
-then to ``16 +''.
+Example: (assuming a 64-bit Forth)
+``CELL+ CELL+'' is first inlined to ``8 + 8 +'' then associated to ``8 8 + +''
+then folded to ``16 +''.
+forthbreak
+Note that it is not necessary to look for other patterns, in view of other
+transformation that are done.
+
+@subsubsection {Short circuit evaluation.}
+Another optimisation aplicable to binary NS-operators is short circuit
+evaluation. This is the situation where the result is known, while only
+one of the operands is known, such as ``FFFF AND'' ``FFFF OR'' ``0 +''
+``0 XOR'' and ``0 *''. Some of these operations can be just dropped,
+while in other cases the result is known and the other operand
+(possibly non-constant) can be dropped.
 
 @subsection Optimisation by recursive inlining
 A word is optimized by first optimizing its constituents, then
 inlining the constituents and apply any optimisation
-
 opportunities like folding that open up.
+
 forthbreak
 In more detail we have the following steps:
 forthitemize
-forthitem Check
+forthitem Check.
+
 First of all check whether the item has been optimised already.
 We do in fact a ``depth first'' optimisation, so the words
 lowest in the call hierarchy are optimised first. It is important
 to only attempt optimisation once. This cuts the recursion short.
 forthitem   Recurse
+
 For all constituent words of this definition, do an optimisation, such
 as defined in these steps.
-forthitem Inline
+forthitem Inline.
+
 Build up an executable sequence in the dictionary.
 Inline a constituents word, keeping track of all opportunities to
-optimise. Try to build up a sequence  of NS-words
+optimise.
+
+forthitem Folding
+Try to build up a sequence  of NS-words
 that starts with constants
 and where each word following doesn't consume more inputs than
 are available. Consequently the outputs are available as constants.
-forthitem Breakdown
+(In the example program this can be done at the same time as the inlining.
+Maybe that is unwise.)
+
+forthitem Breakdown.
+
 When a sequence of NS-words breaks down, we have identified a sequence
 that can be run at compile time. This sequence is run, and removed from
 the output sequence. Then the output of the run is compiled, as a
 sequence of constants.
+
+A more sophisticated method guarantees that constants move to the top
+as late as possible, which is favourable for other optimisations.
+In behalf of this, before compiling the sequence of constant,
+the code that follows is inspected.
+If a sequence is found with a < 0 -- 0 > effect, that sequence
+is placed in front of the constants. The sequence need not have any special
+properties, except for the weak ``no stack side effect'' property.
+If a sequence is found with a < N -- 0 > effect and N is smaller than the number of
+constants, a sequence with a < 0 -- 0 > is can be constructed by adding
+N of the constants in front of it. The N constants are added to the output
+sequence, followed by the ``no stack side effect'' sequence and the other,
+very first, constants.
+
 forthitem Special opportunities.
-After each inlining the constituent is checked whether it allows
-special optimisations. Here the likes of the associativity optimisation
-is done, by looking for a ``operand % operand %'' pattern.
-In a fashion similar to the breakdown of a NS-sequence the tail of the sequence
-that is being built up is, is replaced.
-forthitem Replace
+
+After inlining the sequence
+is checked whether it allows
+special optimisations, by comparing it to
+a table of patterns.
+Examples are the associativity optimisation
+with a ``operand % operand %'' pattern, and
+the execute optimisation with a ``literal EXECUTE'' pattern.
+In a fashion similar to the inlining a new sequence is
+built up.
+If there was any improvement, a new folding step must be attempted.
+forthitem Replace.
+
 After inlining is finished, the sequence is now attached to the word
 we are optimizing to replace the original sequence. Maybe the original code is
-kept if no folding took place and the sequence is longer that a certain limit.
+kept if no folding took place and/or the sequence is longer that a certain limit.
 forthitem Mark properties
 The current word is marked as optimised. Its stack effect and its optimization
 classes are derived from its constituents and added to the flags header.
