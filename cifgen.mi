@@ -1,5 +1,5 @@
 \input texinfo
-@setfilename figforthversion
+@setfilename thisfilename
 @afourpaper
 @settitle Generating ciforth's
 @setchapternewpage odd
@@ -33,6 +33,7 @@ It is assumed that you are familiar with Forth and with ciforth
 in particular.
 Linux is used for a development system,
 and the main tool is forthprog({m4}) , the macro preprocessor.
+@pindex m4
 This generates an assembler source
 file and a raw documentation file
 out of the single generic source, controlled by a configuration
@@ -43,6 +44,7 @@ For further processing you need an assembler, such as forthprog({nasm})
 and one or more documentation tools, such as forthprog({info}). The raw
 documentation file can be ordered only by a more sophisticated tool
 than the usual forthprog({sort}), called forthprog({ssort}). The
+@pindex ssort
 particulars of all this depend on the actual configuration chosen. It
 contains in itself some provision such that it can be loaded on
 any of the ciforth systems, independantly of whether they are 16 or 32
@@ -264,10 +266,6 @@ The second version is a ISO compatible system.
 The third version is how I think a Forth should be,
 based on technical criteria and putting all compatibility issues aside.
 
-@section Acknowledgment
-ciforth is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
-that is available via taygeta. And of course kudo's to FIG.
-This work and all of figforth is public domain.
 @section                         Source
 In practice the GPL
  means (note: this is an explanation and has no legal value!)
@@ -278,13 +276,19 @@ further reproduced and distributed subject to the following conditions:
 The three file comprising it must be kept together and in particular
 the reference section with the World Wide Web sites.
 
+This Forth builts on figforth, for its source see the next section.
+The maintainer can be reached at forthmail({ciforth@@spenarnc.xs4all.nl})
 
-This Forth builts on figforth.
-It is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
-that is available via taygeta.
+@section Acknowledgment
+ciforth is based on the figforth
+of Charlie Krajewski and Thomas Newman, Hayward, Ca.
+This figforth (as are all figforth's) is public domain.
+It is still available via taygeta. And of course kudo's to FIG.
 
-You still can obtain the original version
- that is public domain according to the following statement:
+forthurl({ftp://ftp.forth.org/pub/Forth/compilers/native/dos})
+
+This original version is public domain according to the
+following statement:
 
 forthquotation
 All publications of the Forth Interest Group are public domain. They may be
@@ -295,9 +299,12 @@ This publication has been made available by the Forth Interest Group,
               P. O. Box 1105,  San Carlos, Ca 94070
 forthendquotation
 
-The maintainer can be reached at forthmail({ciforth@@spenarnc.xs4all.nl})
-and the latest sources are at
-forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html})
+I also want to thank  J. E. Smith, Philadelphia for another fig Intel86
+implementation also still obtainable from
+forthurel({http://www.simtel.net/pub/simtelnet/msdos/forth/fig86.zip})
+
+This is a fairly good documented FIG Forth for IBM PC, but its
+"Seattle Computer 8086 assembler" format makes it less practical.
 
 @chapter Background.
 If you are a Unix and a Forth guru, you can skip this chapter.
@@ -313,6 +320,8 @@ Orthogonality means that different aspects of configuration
 are made independant of each other.
 For example, ciforth can be bootable or started by MSDOS,
 it can be assembled by forthprog({nasm}) or by forthprog({MASM.EXE}) .
+@pindex nasm
+@pindex MASM.EXE
 These two choices can be made indepedantly from each other,
 and every combination ought to work.
 Each choice is associated with file with macros for forthprog({m4}) ,
@@ -376,6 +385,7 @@ BLOCK-EXIT
 
 @section How m4 is used.
 The unix macroprocessor forthprog({m4}) is very powerful indeed.
+@pindex m4
 Testimony is that the description of its usage in here
 is longer that its man-pages.
 You know
@@ -1049,16 +1059,21 @@ peculiarities and you may want to have the headers alligned at word bounds.
 This is easily done by changes to forthfile({header.m4}) .
 This kind of possibilities were in fact the motivation for this undertaking.
 
-@subsection Web sites.
+@subsection Web sites and availability.
 A newer or improved version may be gotten from
-http://home.hccnet.nl/a.w.m.van.der.horst
+ forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html})
 Nasm is found at
+
+ftp://ftp.us.kernel.org/pub/software/devel/nasm/source/
+
+forthurl({http://www.cryogen.com/Nasm/})
 
 The FIG source this is based on is at
 
-MASM.EXE is available
+MASM.EXE is available from IBM, at least the version 1.0 I used.
+Microsoft seems to distribute later versions.
 
-The original fig documentation is at
+The original fig documentation is obtainable via
  forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/figforth.html})
 This include the pictures.
 
@@ -1122,8 +1137,7 @@ forthitem
 forthcodeni({OUT}) may not be observed in all I/O models. Needs examination.
 forthitem
    More a misfeature. The negative error numbers of Linux system calls
-   can be handled by negative offset's from screen 4. Now an offset
-   of 64 is added. (The messages have not been filled in anyway.).
+   can be handled by negative offset's from screen 4.
 forthendenumerate
 
 @chapter Now: release it!
@@ -1132,17 +1146,18 @@ To release the software use the command
 forthsamp({make release VERSION=forthvar({NNN})})
 
 where forthvar({NNN}) is as appropriate: the RCS version
-number (for ciforth 3.NNN) for a beta version and the minor
+number (for ciforth 3d###) for a beta version and the minor
 release numbers for an offical release (ciforth has major
 release 4, because fig 2 istaken, my latest fig is major
 release 3, so there.)
-How to tell the difference? Well RCS version numbers always run in
-the hundreds, and official minor releases are one digit.
+Offical releases have the forthkey({d}) replaced with a forthkey({a})
+And RCS version numbers always run in
+the hundreds, official minor releases are one digit.
 And during started up it tells "ciforth beta ", if it is not official.
 
 There are basically two zip files with the same contents, and
 a formidable content at that. They are
-ci86gNNNN and FGNNNN.zip. The FG version features 8+3 file names,
+ forthfile({ci86gNNNN}) and forthfile({fgNNNN.zip.}) The forthsamp({fg}) version features 8+3 file names,
 appropriate for ISO9660 or FAT (MSDOS) file systems.
 @chapter Loose ends
 @section list of safe customisation in the assember.
