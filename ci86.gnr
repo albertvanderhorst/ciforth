@@ -1086,7 +1086,7 @@ enddoc)
 CODE_HEADER({SKIP},{SKIP})
         ADD     SI,[SI]
         LEA     SI,[SI+_CELLS(1)]
-        _NEXT    
+        _NEXT
 ;
 worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2,L0},
 {The run-time proceedure to unconditionally branch. An in-line offset
@@ -1370,7 +1370,7 @@ enddoc)
 HEADER({RESULT},{RESULT},{DOVAR}, )
         DC 0
 ;
-worddocsafe( {DICTIONARY},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}, {},
+worddoc( {DICTIONARY~},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}, {},
 {Intended to cooperate with forthcode({FOR-WORDS}) . Compares
 the string constant forthsamp({sc}) with the dea
 forthsamp({addr2}). If it is a match, it returns into
@@ -1824,7 +1824,7 @@ HEADER({R@},{RR},{_VAR_FIELD(IDO)})
 ;
 worddoc( {LOGIC},{0=},{zero_equals},{n --- f},{L0},
 {Leave a true flag forthsamp({f}) is the number forthsamp({n})
-is equal to zero, otherwise leave a false flag.},{{=}}, 
+is equal to zero, otherwise leave a false flag.},{{=}},
 { {0 0= .},{_T_},
   {  1 0= .},{0},
   {  -1 0= .},{0} },
@@ -2192,7 +2192,7 @@ enddoc)
         _NEXT
 });_END_({ _BITS16_})
 ;
-worddoc( {DEFINING},{:},{colon},{},{E,L0},
+worddoc( {DEFINING},{:},{colon},{},{ISO,FIG,E,L0},
 {Used in the form called a colon-definition:
 forthexample({: cccc     ...     ;})
 Creates a dictionary entry defining forthsamp({cccc}) as equivalent to the
@@ -2202,7 +2202,7 @@ into the forthcode({CURRENT}) vocabulary.
 The compiling process is done by the text interpreter as long as
 forthcode({STATE}) is non-zero.
 Words with the immediate bit
-set (P) are executed rather than being compiled.},{},
+set (I) are executed rather than being compiled.},{},
 {{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
 enddoc)
 HEADER({:},{COLON},{DOCOL})
@@ -2222,10 +2222,10 @@ _SWITCH_({
 });_END_({ _SWITCH_})
         _NEXT
 ;
-worddoc( {DEFINING},{;},{semicolon},{},{I,C,L0},
+worddoc( {DEFINING},{;},{semicolon},{},{ISO,FIG,I,C,L0},
 {Terminate a colon-definition and stop further compilation. Compiles
-the run-time forthcode({EXIT}) .},{},
-{{." Via ;"},{Via ;}},
+the run-time forthcode({EXIT}) .},{{:}},
+{{." Via :"},{Via :}},
 enddoc)
 HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      QCSP
@@ -2234,7 +2234,7 @@ HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      LBRAC
         DC      SEMIS
 ;
-worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{L0},
+worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{ISO,FIG,L0},
 {A defining word used in the form:
     forthsamp({n}) forthcode({CONSTANT}) forthsamp({cccc})
 to create word forthsamp({cccc}) , with its data field containing
@@ -2252,7 +2252,7 @@ HEADER({CONSTANT},{CONST},{DOCOL})
 DOCON:  MOV     AX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
 ;
-worddoc( {DEFINING},{VARIABLE},{variable},{},{NISO,E,LU},
+worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,E,LU},
 {A defining word used in the form:
                  forthsamp({VARIABLE cccc})
 When forthcode({VARIABLE}) is executed, it creates the definition forthsamp({cccc}) with its
@@ -2271,16 +2271,18 @@ HEADER({VARIABLE},{VAR},{DOCOL})
 DOVAR:  MOV     AX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
-worddoc( {DEFINING},{USER},{user},{n ---},{L0},
+worddoc( {DEFINING},{USER},{user},{n ---},{ISO,L0},
 {A defining word used in the form:
                forthsamp({n USER cccc})
-which creates a user variable forthsamp({cccc}) .
-The data field of forthsamp({cccc}) contains forthsamp({n}) as a fixed offset relative to
-the user pointer register forthsamp({UP}) for this user variable. When forthsamp({cccc}) is
-later executed, it places the sum of its offset and the user area
+which creates a user variable forthsamp({cccc}) . The data
+field of forthsamp({cccc}) contains forthsamp({n}) as a fixed
+offset relative to the user pointer register forthsamp({UP})
+for this user variable. When forthsamp({cccc}) is later
+executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
 particular variable. In ciforth the forthsamp({UP}) is fixed.
-},{{VARIABLE},{+ORIGIN}},
+},
+{{VARIABLE},{+ORIGIN}},
 {{ 0 USER APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 HEADER({USER},{USER},{DOCOL})
@@ -2503,7 +2505,7 @@ by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure
 enddoc)
 HEADER({WARNING},{WARN},{DOUSE}, _CELLS(7))
 ;
-worddoc( {DICTIONARY},{FENCE},{fence},{---  addr},{U},
+worddoc( {DICTIONARY~},{FENCE},{fence},{---  addr},{FIG,U},
 {A user variable containing an address below which forthcode({FORGET}) ting is
 trapped. To forget below this point the user must alter the contents
 of forthcode({FENCE}) .},{},
@@ -2511,7 +2513,7 @@ of forthcode({FENCE}) .},{},
 enddoc)
 HEADER({FENCE},{FENCE},{DOUSE}, _CELLS(8))
 ;
-worddoc( {DICTIONARY},{DP},{d_P},{---- addr},{U,L},
+worddoc( {DICTIONARY},{DP},{d_P},{---- addr},{FIG,U,L},
 {A user variable, the dictionary pointer, which contains the address
 of the next free memory above the dictionary. The value may be read
 by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{},
@@ -2785,7 +2787,7 @@ enddoc)
 HEADER({ALIGNED}, {ALIGNED}, {DOCOL}, , {B_IMMED})
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{HERE},{here},{--- addr},{ISO,L0},
+worddoc( {DICTIONARY},{HERE},{here},{--- addr},{ISO,FIG,L0},
 {Leave the address forthsamp({addr}) of the next available
 dictionary location.},
 {{DP}},
@@ -2796,7 +2798,7 @@ HEADER({HERE},{HERE},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{ALLOT},{allot},{n ---},{L0},
+worddoc( {DICTIONARY},{ALLOT},{allot},{n ---},{ISO,FIG,L0},
 {Add the signed number to the dictionary pointer forthcode({DP}) . May be used to
 reserve dictionary space or re-origin memory. As the Pentium is a byte-addressable
 machine forthsamp({n}) counts bytes. },{{CELL+}},
@@ -2807,7 +2809,7 @@ HEADER({ALLOT},{ALLOT},{DOCOL})
         DC      PSTORE
         DC      SEMIS
 ;
-worddocsafe( {DICTIONARY},{,},{comma},{n ---},{L0},
+worddocsafe( {DICTIONARY},{,},{comma},{n ---},{ISO,FIG,L0},
 {Store forthsamp({n}) into the next available dictionary memory cell, advancing
 the dictionary pointer.},{{DP},{C,}},
 {{HERE 625 , DUP @ . CELL+ HERE = .},{625 _T_}},
@@ -2819,7 +2821,7 @@ HEADER({,},{COMMA},{DOCOL})
         DC      ALLOT
         DC      SEMIS
 ;
-worddocsafe( {DICTIONARY},{C,},{c_comma},{b ---},{},
+worddocsafe( {DICTIONARY},{C,},{c_comma},{b ---},{ISO,FIG},
 {Store 8 bits of forthcode({b}) into the next available dictionary byte, advancing
 the dictionary pointer. },{{DP},{,}},
 {{HERE 62 C, DUP C@ . 1+ HERE = .},{62 _T_}},
@@ -2965,11 +2967,12 @@ HEADER({LATEST},{LATEST},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>BODY},{to_body},{dea --- addr},{},
-{Given the dictionary entry addres
-of a definition created with a forthcode({DOES>})dnl
-construct, return its  data field forthsamp({addr}).},
-{{'},{>CFA},{>LFA},{>NFA}},
+worddoc( {DICTIONARY},{>BODY},{to_body},{dea --- addr},{ISO},
+{Given the dictionary entry addres forthsamp({dea}) of a
+definition created with a forthcode({CREATE}) /
+forthcode({DOES>}) construct, return its data field
+forthsamp({addr}).}, 
+{{'},{>CFA},{>PFA},{>FFA},{>LFA},{>NFA}},
 {{ CREATE Q 12346 ,  ' Q >BODY @ .},{12346}},
 enddoc)
 HEADER({>BODY},{TOBODY},{DOCOL})
@@ -2979,9 +2982,9 @@ HEADER({>BODY},{TOBODY},{DOCOL})
 ;
 worddoc( {DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
 {Convert the data field forthsamp({addr})
-of a definition created with a forthcode({DOES>}) dnl
-construct to its forthsamp({dea}) .},
-{{'},{>CFA},{>LFA},{>NFA}},
+of a definition created with a forthcode({CREATE}) /
+forthcode({DOES>}) construct to its forthsamp({dea}) .},
+{{'},{>BODY}},
 {{ CREATE QAQ HERE BODY> ID.},{QAQ}},
 enddoc)
 HEADER({BODY>},{BODYF},{DOCOL})
@@ -2989,9 +2992,9 @@ HEADER({BODY>},{BODYF},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{C>D},{parameter_field_address},{cfa --- dea},{},
+worddoc( {DICTIONARY~},{C>D},{parameter_field_address},{cfa --- dea},{},
 {Convert the code field address of a definition to its
-dea address.},{{'},{>CFA},{>LFA},{>NFA}},
+dea address.},{{'},{>CFA}},
 {{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
 enddoc)
 HEADER({C>D},{CTOD},{DOCOL})
@@ -2999,9 +3002,10 @@ HEADER({C>D},{CTOD},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
+worddoc( {DICTIONARY~},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
-name field.},{{'},{>CFA}},
+name field.},
+{{'},{>CFA},{>PFA},{>FFA},{>LFA}},
 {{ ' WORDS >NFA @ $@ TYPE},{WORDS}},
 enddoc)
 HEADER({>NFA},{TNFA},{DOCOL})
@@ -3009,9 +3013,10 @@ HEADER({>NFA},{TNFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>FFA},{to_flag_field_address},{dea --- ffa},{},
+worddoc( {DICTIONARY~},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return the
-flag field.},{{'},{>NFA}},
+flag field.},
+{{'},{>CFA},{>PFA},{>LFA},{>NFA}},
 {{"FRED" (CREATE) SMUDGE ' FRED >FFA DUP @ . SMUDGE @ .},{0 2}},
 enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
@@ -3019,9 +3024,10 @@ HEADER({>FFA},{TFFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>LFA},{to_link_field_address},{dea --- lfa},{},
+worddoc( {DICTIONARY~},{>LFA},{to_link_field_address},{dea --- lfa},{},
 {Given a dictionary entry addres return the
-link field address.},{{'},{>LFA}},
+link field address.},
+{{'},{>CFA},{>PFA},{>FFA},{>NFA}},
 {{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}},
 enddoc)
 HEADER({>LFA},{TLFA},{DOCOL})
@@ -3029,12 +3035,12 @@ HEADER({>LFA},{TLFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>CFA},{to_code_field_address},{dea --- cfa},{},
+worddoc( {DICTIONARY~},{>CFA},{to_code_field_address},{dea --- cfa},{},
 {Given a dictionary entry addres return the
 code field address : the address that is compiled within high level
 definitions. It serves as an execution token as well.
 In ciforth this is actually the same as the dea.},
-{{'},{>CFA}},
+{{'},{>PFA},{>FFA},{>LFA},{>NFA}},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
@@ -3042,13 +3048,13 @@ HEADER({>CFA},{TCFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
+worddoc( {DICTIONARY~},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
 data field address. This points to the code for a code word,
 to the high level code for a colon-definition, and to the
  forthcode({DOES>}) pointer for a word build using forthcode({CREATE}) .
 In all these cases it directly follows the header.},
-{'},{>CFA},{>LFA},{>NFA}},
+{{'},{>CFA},{>FFA},{>LFA},{>NFA}},
 {{ "APE" (CREATE) SMUDGE HERE ' APE >PFA @ = .},{_T_}},
 enddoc)
 HEADER({>PFA},{TPFA},{DOCOL})
@@ -3056,7 +3062,7 @@ HEADER({>PFA},{TPFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>DDEA},{to_dummy_dea},{dea --- cfa},{},
+worddoc( {DICTIONARY~},{>DDEA},{to_dummy_dea},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the dummy dea.
 },{{VOCABULARY},{>CFA}},
@@ -3067,7 +3073,7 @@ HEADER({>DDEA},{TDDEA},{DOCOL})
         DC      CELLP ; {Skip vfa link.}
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
+worddoc( {DICTIONARY~},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the link to the next vocabulary.
 },{{VOCABULARY},{>CFA}},
@@ -3200,7 +3206,7 @@ HEADER({]},{RBRAC},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{SMUDGE},{smudge},{},{},
+worddoc( {DICTIONARY~},{SMUDGE},{smudge},{},{FIG},
 {Used during word definition to toggle the "smudge bit" in a
 definitions' name field. This prevents an uncompleted definition
 from being found during dictionary searches, until compiling is
@@ -3238,7 +3244,7 @@ HEADER({DECIMAL},{DECA},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddocsafe( {DEFINING},{(;CODE)},{paren_semicolon_code},{},{C},
+worddocsafe( {DEFINING~},{(;CODE)},{paren_semicolon_code},{},{C},
 {The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
 field of the most recently defined word to point to the following
 machine code sequence.},{{;CODE}},
@@ -3251,10 +3257,10 @@ HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {DEFINING},{;CODE},{semicolon_code},{},{I,C,L0},
+worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{ISO,FIG,I,C,L0},
 {Used in the form:
-  forthsamp({: cccc .... ;CODE})
-assembly mnemonics Stop compilation and terminate a new defining
+  forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
+Stop compilation and terminate a new defining
 word forthsamp({cccc}) by compiling forthcode({(;CODE)}). Set the
 forthcode({CONTEXT}) vocabulary to forthcode({ASSEMBLER}) ,
 assembling to machine code the following mnemonics.
@@ -3263,12 +3269,14 @@ When forthsamp({cccc}) later executes in the form:
                      forthsamp({cccc nnnn})
 the word forthsamp({nnnn}) will be created with its execution proceedure given by
 the machine code following forthsamp({cccc}) .
-That is, when forthsamp({nnnn}) is executed, it does so by jumping to the code
-after forthsamp({nnnn}) . An existing defining word must exist in forthsamp({cc}) prior to
-forthcode({;CODE}) .},{(;CODE)},
+That is, when forthsamp({nnnn}) is executed, it does so by
+jumping to the code after forthsamp({nnnn}) .
+Because of intimate relation to the
+assembler, it is present in loadable form in the screens file
+forthfile({BLOCKS.BLK}) .},
+{(;CODE)},
 {{." Not present"},{Not present} },
 enddoc)
-;{ The word ;CODE has been moved to BLOCKS.BLK>}
 ;
 worddoc( {DEFINING},{CREATE},{create},{},{},
 {A defining word used in the form:
@@ -3276,11 +3284,23 @@ worddoc( {DEFINING},{CREATE},{create},{},{},
 Later execution of forthsamp({cccc}) returns its data field, i.e.
 the value of forthcode({HERE}) immediately
 after executing forthcode({CREATE}) .
+
+
+It can be the base of a new defining word if used in the form:
+     forthexample({: CREATOR CREATE aaaa DOES> bbbb ;
+CREATOR cccc
+})
+The second line has the effect of creating a word forthsamp({cccc}) .
+Its datastrcuture is build
+by the code forthsamp({aaaa}) and when executing forthsamp({cccc}) , its data field is pushed
+on the stack, then the code forthsamp({bbbb}) is executed.
+
 _VERBOSE_({Space in this data field has yet to
 be allocated and the execution action can be changed.})
 ciforth is byte aligned, so no extra measures are needed.},
 {{DOES>},{;CODE},{ALLOT},{,},{C,}},
-{{ CREATE ZWY LATEST ID.},{ZWY}},
+{{ CREATE ZWY LATEST ID.},{ZWY},
+{HERE ZWY = .},{_T_}},
 enddoc)
 HEADER({CREATE},{CREATE},{DOCOL})
         DC      PWORD
@@ -3297,16 +3317,19 @@ DODOE:  LEA     BP,[BP-_CELLS(1)]
 HLNOOP: DC      SEMIS
 ;
 worddoc( {DEFINING},{DOES>},{does},{},{L0},
-{A word which defines the run-time action within a high-level
-defining word. forthcode({DOES>}) alters the code field and
-first parameter of the new word to execute the sequence of
+{A word which is normally use to specify
+the run-time action within a high-level
+defining word. forthcode({DOES>}) alters the dictionary header
+of the latest word word to execute the sequence of
 compiled word addresses following forthcode({DOES>}) . Used in
 combination with forthcode({CREATE}) . When the
 forthcode({DOES>}) part executes it begins with the address of
-the first parameter of the new word on the stack. This allows
-interpretation using this area or its contents. Typical uses
+the data field of the word on the stack. This allows
+interpretation using this area or its contents.
+_VERBOSE_({ Typical uses
 include the Forth assembler, multidimensional arrays, and
-compiler generation.},
+compiler generation.})
+},
 {},
 {{ !CSP : GS1 DOES> @ 1 + ;  : GS2 DOES> @ 2 + ; dnl
   CREATE MARY 0 , GS1 MARY . GS2 MARY . ?CSP},{1 2} },
@@ -3451,7 +3474,7 @@ _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
         DC      SEMIS
 ;
 worddoc( {PARSING}, {EVALUATE}, , {sc --- ??}, {ISO},
-{Interpret the content of forthsamp({sc}). Afterwards return to 
+{Interpret the content of forthsamp({sc}). Afterwards return to
 the current input stream.},
 {{LOAD},{INCLUDE},{SET-SRC}},
 {
@@ -3582,7 +3605,7 @@ HEADER({HOLD},{HOLD},{DOCOL})
         DC      CSTOR
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{PAD},{pad},{--- addr},{L0},
+worddoc( {DICTIONARY},{PAD},{pad},{--- addr},{ISO,FIG,L0},
 {Leave the address of the text output buffer, which is a fixed offset
 above forthcode({HERE}). The area growing downword from forthcode({PAD}) is used
 for numeric conversion.
@@ -3792,7 +3815,7 @@ worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
 { Look the string up forthsamp({sc}) according to
 forthcode({(FIND)}) . If found, and it is not a denotation,
 leave the dictionary entry address forthsamp({dea}) of the
-first entry found, else leave a nil pointer.}, 
+first entry found, else leave a nil pointer.},
 {{FIND},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 { 243 "BONNOBO" FOUND . .},{0 243},
@@ -3810,14 +3833,14 @@ HEADER({FOUND},{FOUND},{DOCOL})
 FOUND1:               ;{THEN THEN}
         DC SEMIS
 ;
-worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{},
+worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO},
 {For the (old fashioned) string _VERBOSE_({(stored with a
 preceeding character count)}) at forthsamp({addr}) find a Forth
 word with that name in the forthcode({CONTEXT}) and then
 forthcode({CURRENT}) vocabularies and return its execution
 token forthsamp({xt}). If the word is immediate, also return 1,
-otherwise also return -1. If it is not found, leave the original 
-forthsamp({addr}) and a zero. }, 
+otherwise also return -1. If it is not found, leave the original
+forthsamp({addr}) and a zero. },
 {{FOUND},{(FIND)}},
 {
 { : FIND: BL WORD FIND ; dnl
@@ -3839,15 +3862,14 @@ HEADER({FIND},{FIND},{DOCOL})
 FIND1:               ;{THEN THEN}
         DC      SEMIS
 ;
-worddocsafe( {DICTIONARY},{(FIND)},{paren_find},{sc --- dea},{},
+worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},{sc --- dea},{},
 {For the string constant forthsamp({sc}) search the
-forthcode({CONTEXT}) and then forthcode({CURRENT}) 
-and forthcode({DENOTATION}) vocabularies
-for a matching entry. _VERBOSE)({A denotation matches if the first
-letter is correct.}).
-If found, leave the dictionary entry
-address forthsamp({dea}) of the first entry found, else leave a
-nil pointer.},
+forthcode({CONTEXT}) and then forthcode({CURRENT}) and
+forthcode({DENOTATION}) vocabularies for a matching entry.
+_VERBOSE_({A denotation matches if the first letter is
+correct.}). If found, leave the dictionary entry address
+forthsamp({dea}) of the first entry found, else leave a nil
+pointer.}, 
 {{FIND}},
 { { : BONOBO ; "BONOBO" (FIND) ' BONOBO = .},{_T_} },
 enddoc)
@@ -3962,7 +3984,7 @@ forthsamp({tc}). If we are executing not under control of a
 forthcode({CATCH}), a non-zero forthsamp({tc}) aborts as if by
 forthsamp({tc ERROR}) .},
 {{CATCH},{QUIT},{HANDLER}},
-{{: GS1 1 2 3 12 THROW ; GS1 }, { 2 3 12 THROW ; GS1 ? MSG # 12}, 
+{{: GS1 1 2 3 12 THROW ; GS1 }, { 2 3 12 THROW ; GS1 ? MSG # 12},
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
@@ -4032,7 +4054,7 @@ ABQ4:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
-worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea --},{},
+worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea ---},{},
 {Print a definition's name from its dictionary entry address.},
 {{'},{>PFA},{>NFA}},
 { { : GORILLA ; ' GORILLA ID.},{GORILLA} },
@@ -4050,9 +4072,11 @@ HEADER({ID.},{IDDOT},{DOCOL})
 IDDOT1:
         DC      SEMIS
 ;
-worddocsafe( {DEFINING},{(CREATE)},{paren_create},{sc --},{},
+worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc --},{},
 {This is the basis for all defining words.
-as the namefield. It is linked into the CURRENT vocabulary.
+It lays down the string forthsamp({sc}) in the dictionary, then
+creates a dictionary entries with that string
+as the namefield. It is linked into the forthcode({CURRENT}) vocabulary.
 The code field and data field both
 point to the area owned by this header, i.e. immediately following the
 completed header. It leaves the header momentarily unfindable,
@@ -4154,7 +4178,7 @@ POSTP2:
 ;
 worddoc( {COMPILING},{LITERAL},{literal},{d --- d (executing) n --- (compiling)},{ISO,I,C2,L0},
 {If compiling, then compile the stack value forthsamp({n}) as a
-_BITS_ bit literal. 
+_BITS_ bit literal.
 _VERBOSE_({The intended use is:
      forthsamp({: xxx    [ calculate ]  LITERAL  ;})
 Compilation is suspended for the compile time calculation of a
@@ -4322,27 +4346,31 @@ HEADER({IMMEDIATE},{IMMED},{DOCOL})
         DC      TOGGL
         DC      SEMIS
 ;
-worddoc( {DEFINING},{VOCABULARY},{vocabulary},{},{E,L},
-{A defining word used in the form:
-            forthcode({VOCABULARY}) forthsamp({cccc})
-to create a vocabulary definition forthsamp({cccc}) . Subsequent
-use of forthsamp({cccc}) will make it the forthcode({CONTEXT})
-vocabulary which is searched first by forthcode({INTERPRET}) .
-The sequence forthsamp({cccc}) forthcode({DEFINITIONS}) also make
-forthsamp({cccc}) the forthcode({CURRENT}) vocabulary into which
-new definitions are placed.
+worddoc( {DEFINING},{VOCABULARY},{vocabulary},{},{FIG,E,L},
+{A defining word used in the form: forthcode({VOCABULARY})
+forthsamp({cccc}) to create a vocabulary definition
+forthsamp({cccc}) . Subsequent use of forthsamp({cccc}) will
+make it the forthcode({CONTEXT}) vocabulary which is searched
+first by forthcode({INTERPRET}) . The sequence
+forthsamp({cccc}) forthcode({DEFINITIONS}) also make
+forthsamp({cccc}) the forthcode({CURRENT}) vocabulary into
+which new definitions are placed.
 
 A vocabulary 's data content field contains at first the dovoc
-pointer, then follows its forthdefi({body}) . The body contains
-a dummy dea (forthdefi({DDEA})) with a name " " (blank) , a
-dummy link field (forthcode({DLFA})) that points to the dea of
-the first word of the vocabulary. Actually executing the
-vocabulary means storing its DDEA into forthcode({CONTEXT}) .
-Then follows the vocabulary link field address (
+pointer, then follows its forthdefi({body}) .
+The body contains
+the vocabulary link field address (
 forthdefi({VLFA}) ) The VLFA points to the VLFA of the next
 vocabulary or 0 for the end.
 
-In fig-FORTH, cccc will be so chained as to include all
+Then follows
+a dummy dea (forthdefi({DDEA})) with empty names and parameter
+fields and a link field  (forthdefi({DLFA}))
+that points to the dea of
+the first word of the vocabulary. Actually executing the
+vocabulary means storing its DDEA into forthcode({CONTEXT}) .
+
+In ciforth cccc will be so chained as to include all
 definitions of the vocabulary in which forthsamp({cccc}) is
 itself defined. All vocabularys ultimately chain to Forth. By
 convention, vocabulary names are to be declared
@@ -5422,7 +5450,7 @@ BLK2:
 ;
 worddocsafe( {SCREEN},{-->},{next_screen},{},{I,L0},
 {Continue interpretation with the next disc screen. If the
-current input stream is not from a block, a crash will ensue. 
+current input stream is not from a block, a crash will ensue.
 If there is an exception in this new screen, that screen may
 remain locked until a forthcode({QUIT}) .
 },
@@ -5716,7 +5744,7 @@ is aborted.
 },
 enddoc)
 HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
-        DC      ZERO, MIN, THROW  
+        DC      ZERO, MIN, THROW
         DC      SEMIS
 ;
 worddoc( {INPUT},{TERMIO},{termio},{--- addr},{},
@@ -6889,9 +6917,9 @@ RSLW4:
 ;
 });_END_({ _RWHD_})
 ;
-worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{I,L0},
+worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: .
-forthcode({'}) forthcode({nnnn})
+forthsamp({' nnnn})
 Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to compile
@@ -6900,7 +6928,7 @@ forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is 
 This word is intended for interpret mode,  but in ciforth it works as
 well in compilation mode.
 It is recommended this word is not postponed.},
-{{CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
+{{FOUND},{>CFA},{>FFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED)
@@ -6921,21 +6949,21 @@ Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to
 compile the address as a literal. If the word is not found
-after a search of forthcode({CONTEXT}) and forthcode({CURRENT}),
-an appropriate error message is given.
-This word is intended for compilation mode,
-but in ciforth it works as well in interpret mode.
-It is recommended this word is not postponed.},
-{{'}, {CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
+after a search of forthcode({CONTEXT}) and
+forthcode({CURRENT}), an appropriate error message is given.
+This word is intended for compilation mode, but in ciforth it
+works as well in interpret mode. It is recommended this word is
+not postponed (Use forthcode({FOUND}) .).}, 
+{{FOUND},{'},{EXECUTE}} ,
 {{ : APE 1 2 ; : GS1 ['] APE ; GS1 EXECUTE  GS1 ID. . .},{APE 2 1}},
 enddoc)
 dnl An alias header. CFA FFA PFA are the same.
 HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 ;
 });_END_({_LOAD_})
-worddoc( {DICTIONARY},{FORGET-VOC},{forget_voc},{deaw deav -- deaw },{},
+worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{deaw deav -- deaw },{},
 {Forget the words forthsamp({deaw}) and all later words from the
-vocabulary whose dea is given by forthsamp({dea}) . Leave
+vocabulary whose dea is given by forthsamp({deav}) . Leave
 forthsamp({deaw}) (as this word is intended to be used with
 forthcode({FOR-VOCS})) .},
 {{FORGET}},
@@ -6979,11 +7007,11 @@ FORGV1:
         DC      STORE
 FORGV2: DC      SEMIS
 ;
-worddoc( {DICTIONARY},{FORGET},{forget},{},{E,L0},
+worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
 {Executed in the form:
                forthcode({FORGET}) forthsamp({cccc})
  Deletes definition named forthsamp({cccc}) from the dictionary with all entries
-physically following it. In fig-FORTH, an error message will occur
+physically following it. In ciforth, an error message will occur
 if the forthcode({CURRENT}) and forthcode({CONTEXT}) vocabularies are not currently the same.},
 {{FENCE}},
 {
@@ -7096,7 +7124,7 @@ HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
 ;
 worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{ISO,FIG,I,CO,L0},
 {Occurs in a colon-definition in form:
- forthexample({IF ... THEN})    
+ forthexample({IF ... THEN})
  forthexample({IF ... ELSE ... THEN})
 At run-time, forthcode({THEN}) serves only as the destination
 of a forward branch from forthcode({IF}) or forthcode({ELSE}) .
@@ -7117,16 +7145,16 @@ worddoc( {CONTROL},{DO},{do},
 {Occurs in a colon-definition in form: forthsamp({DO ... LOOP})
 At run time, forthcode({DO}) begins a sequence with repetitive
 execution controlled by a loop limit forthsamp({n1}) and an
-index with initial value forthsamp({n2}) . 
-forthcode({DO}) removes 
-these from the stack. Upon reaching forthcode({LOOP}) the 
+index with initial value forthsamp({n2}) .
+forthcode({DO}) removes
+these from the stack. Upon reaching forthcode({LOOP}) the
 index is incremented by one. Until the new index equals or
 exceeds the limit, execution loops back to just after
 forthcode({DO}) ; otherwise the loop parameters are discarded
 and execution continues ahead. Both forthsamp({n1}) and
 forthsamp({n2}) are determined at run-time and may be the result
 of other operations. Within a loop forthcode({I}) will copy the
-current value of the index to the stack. 
+current value of the index to the stack.
 
 When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
 the following address forthsamp({addr}) and forthsamp({n}) for later error checking.},
@@ -7158,20 +7186,20 @@ HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
 ;
 worddoc( {CONTROL},{LOOP},{loop},
 { --- (run) addr n --- (compiling)},{ISO,I,C2,L0},
-{Occurs in a colon-definition in form: 
+{Occurs in a colon-definition in form:
     forthexample({DO ... LOOP})
 At run-time, forthcode({LOOP}) selectively controls branching
 back to the corresponding forthcode({DO}) based on the loop
 index and limit. The loop index is incremented by one and
-compared to the limit. The branch back to 
+compared to the limit. The branch back to
 forthcode({DO}) occurs until the index equals or exceeds the
 limit; at that time, the parameters are discarded and execution
-continues ahead. 
+continues ahead.
 
-At compile-time, forthcode({LOOP}) compiles 
+At compile-time, forthcode({LOOP}) compiles
 forthcode({(LOOP)}) and uses forthsamp({addr}) to calculate an
 offset to forthsamp({DO}) . forthsamp({n2}) is used for compile
-time error checking.}, 
+time error checking.},
 {{+LOOP}},
 { { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
@@ -7236,14 +7264,14 @@ HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
 ;
 worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{FIG,I,C2,L0},
 {Used in a colon-definition in the form:
-    forthexample({BEGIN ... AGAIN}) 
-At run-time, 
+    forthexample({BEGIN ... AGAIN})
+At run-time,
 forthcode({AGAIN}) forces execution to return to corresponding
 forthcode({BEGIN}) . There is no effect on the stack. Execution
 cannot leave this loop except for forthcode({EXIT}). At compile
 time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an
 offset from forthcode({HERE}) to addr. forthsamp({n}) is used
-for compile-time error checking.}, 
+for compile-time error checking.},
 {{BEGIN}},
 {
 { : GCE2 BEGIN DUP . 1 - DUP 0= IF EXIT THEN AGAIN ; 3 GCE2},
@@ -7265,7 +7293,7 @@ At compile-time, forthcode({REPEAT}) compiles
 forthcode({BRANCH}) and the offset from forthcode({HERE}) to
 forthsamp({addr2}) . Then it fills in another branch offset at
 forthsamp({addr1}) left there by forthcode({WHILE}) .
-forthsamp({n1 n2}) is used for error testing.}, 
+forthsamp({n1 n2}) is used for error testing.},
 {{WHILE}},{
 { : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
 {0 1 2 3 4}
@@ -7282,7 +7310,7 @@ worddoc( {CONTROL},{IF},{if},
 {f --- (run-time) / --- addr n (compile)},
 {ISO,FIG,I,C2,L0},
 {Occurs is a colon-definition in form:
-      forthexample({IF (tp) ...  THEN}) 
+      forthexample({IF (tp) ...  THEN})
     or
       forthexample({IF (tp) ... ELSE (fp) ... THEN})
 At run-time, forthcode({IF}) selects execution based on a
@@ -7294,11 +7322,11 @@ after forthcode({THEN}).
 forthcode({ELSE}) and its false part are optional.; if missing,
 false execution skips to just after forthcode({THEN}) .
 
-At compile-time forthcode({IF}) compiles 
+At compile-time forthcode({IF}) compiles
 forthcode({0BRANCH}) and reserves space for an offset at
 forthsamp({addr}) . forthsamp({addr}) and forthsamp({n}) are
 used later for resolution of the offset and error testing.},
-{}, 
+{},
 {
 { : GI1 IF 123 THEN ; 234 1 GI1 . .},{123 234},
 {  234 -1 GI1 . .},{123 234},
@@ -7319,13 +7347,13 @@ following forthcode({IF}) . forthcode({ELSE}) forces execution
 to skip over the following false part and resumes execution
 after the forthcode({THEN}) . It has no stack effect.
 
-At compile-time forthcode({ELSE}) emplaces 
+At compile-time forthcode({ELSE}) emplaces
 forthcode({BRANCH}) reserving a branch offset, leaves the
 address forthsamp({addr2}) and forthsamp({n2}) for error
 testing. forthcode({ELSE}) also resolves the pending forward
 branch from forthcode({IF}) by calculating the offset from
 forthsamp({addr1}) to forthcode({HERE}) and storing at
-forthsamp({addr1}) .}, 
+forthsamp({addr1}) .},
 {},
 {
 {: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234},
@@ -7358,7 +7386,7 @@ forthcode({0BRANCH}) and tuck leaves forthsamp({ad2}) of the
 reserved offset under the forthsamp({ad1}) left there by
 forthcode({BEGIN}) . The stack values will be resolved by
 Forthcode({REPEAT}) . forthsamp({n1}) and forthsamp({n2})
-provide checks for compiler security.}, 
+provide checks for compiler security.},
 {{BEGIN}},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . DUP 1+ REPEAT ; 0 GI3 .},
@@ -7574,7 +7602,7 @@ HEADER({U.},{UDOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt dea --x1...xn},{},
+worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt dea --x1...xn},{},
 {For the word with the forthdefi({dictionary entry address}) forthsamp({dea})
 and all that are linked from that word
 execute forthsamp({xt})
@@ -7605,10 +7633,10 @@ FORW1:  DC      FROMR
         DC      DROP
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
+worddoc( {DICTIONARY~},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
 {For all vocabularies execute forthsamp({xt})
  with as data the forthdefi({dea}) of those words. forthsamp({xt})
-must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
+must have the stack diagram forthsamp({x1..xn dea --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}},
 {
@@ -7638,7 +7666,7 @@ FORV1:  DC      FROMR
         DC      DROP
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{WORDS},{words},{},{},
+worddoc( {DICTIONARY},{WORDS},{words},{},{ISO},
 {List the names of the definitions in the context vocabulary.
 dnl A break as per forthcode({KEY?}) will terminate the listing.
 }, {},
@@ -8014,7 +8042,13 @@ worddocchapter({DENOTATIONS},{ },
 words that introduced a forthdefi({denotation}), i.e. a generalisation of
 forthcode({NUMBER}) . These words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant.
-They reside in a special vocabulary, called forthcode({DENOTATIONS}).},
+They reside in a special vocabulary, called forthcode({DENOTATIONS}).
+Actual names in the dictionary do not contain the prefix ``DEN''.
+Apart from forthcode({DEN0}) , the vocabulary contains entries
+for all hex digits forthsamp({{{1-9,A-F}}}). Like
+forthcode({NUMBER}) always did, all denotations behave
+identical in interpret and compile mode and they cannot be
+postponed. }, 
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
 {The wordset forthsamp({ENVIRONMENT}) contain words for all environment
