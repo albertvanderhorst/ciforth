@@ -2028,17 +2028,19 @@ DOCON:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
 ;
 worddoc({DEFINING},{VARIABLE},{variable},{},{NISO,E,LU},
 {A defining word used in the form:
-                 forthsamp({n VARIABLE cccc})
+                 forthsamp({VARIABLE cccc})
 When forthcode({VARIABLE}) is executed, it creates the definition forthvar({cccc}) with its
-data field pointing to a data location that is initialized to forthvar({n}) . 
+data field pointing to a data location.
 When forthvar({cccc}) is later executed, the
 content of its data field (containing forthvar({n}) ) is left on the stack,
-so that a fetch or store may access this location.},{{USER},{CONSTANT}}, {}, enddoc)
+so that a fetch or store may access this location.},{{USER},{CONSTANT}}, 
+{{ VARIABLE APE 1A34 APE ! APE @ .},{1A34} },
+enddoc)
 HEADER({VARIABLE},{VAR},{DOCOL})
         DC      PWORD
         DC      PCREAT
         DC      SMUDG
-        DC      COMMA
+        DC      ZERO, COMMA
         DC      PSCOD
 DOVAR:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
@@ -2052,7 +2054,9 @@ the user pointer register forthsamp({UP}) for this user variable. When forthvar(
 later executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
 particular variable. In ciforth the forthsamp({UP}) is fixed.
-},{{VARIABLE},{+ORIGIN}}, {}, enddoc)
+},{{VARIABLE},{+ORIGIN}}, 
+{{ 0 USER APE 1A34 APE ! APE @ .},{1A34} },
+enddoc)
 HEADER({USER},{USER},{DOCOL})
         DC      CONST
         DC      PSCOD
