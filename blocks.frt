@@ -94,38 +94,38 @@ LATEST EXEC-NAME   TURNKEY
  MSG # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER
  MSG # 30 : AS: COMMAERS IN WRONG ORDER
  MSG # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK
- (  H. B. DH. ALIAS BASE? HIDE <HEX ) \ AvdH A1oct02
-( MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT )
-CREATE BASE' 0 ,
- : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
- : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
-( Add a . after 4 digits )
- : 4?  1+ 4 MOD 0= IF &, HOLD THEN ;
-( Generate string with hex format of DOUBLE of LEN digits)
- : (DH.) <HEX <# 1- 0 DO # I 4? LOOP # #> HEX> ;
- : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
- : H.  S>D 2 CELLS (DH.) TYPE ; ( print SINGLE in hex )
- : B.  S>D 2 (DH.) TYPE ; ( print BYTE in hex )
+( -f forth_words_to_be_executed_80_chars) \ AvdH A1oct05
+28 LOAD  REQUIRE ?LI   ?LI
+REQUIRE ARGV   REQUIRE CTYPE
+CREATE COMMAND-BUFFER 0 , 1000 ALLOT
+: DOIT   ARGV CELL+ CELL+
+    BEGIN $@   DUP WHILE
+    Z$@ COMMAND-BUFFER $+!   BL COMMAND-BUFFER $C+
+    REPEAT 2DROP ;
+DOIT    COMMAND-BUFFER $@
+\ 'DOIT HIDDEN   COMMAND-BUFFER HIDDEN
+2DUP TYPE EVALUATE
 
- : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
- : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
- : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
-( DUMP ) REQUIRE B.  <HEX \ AvdH A1oct02
- : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
- : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
-       [CHAR] | EMIT ;
- : BYTES 0 DO
-            DUP I + C@ B.
-            I 2 MOD IF SPACE THEN
-        LOOP ;
-:  DUMP   ( 2/0  DUMPS FROM ADDRESS-2 AMOUNT-1 BYTES)
-    OVER + SWAP
-    DO
-        CR I H. ." : "
-        I 0F AND DUP 5 2 */ SPACES 10 SWAP -
-        I   OVER BYTES   OVER .CHARS   DROP DROP
-    10 I 0F AND - +LOOP         CR
-;    HEX>
+
+
+
+
+( -g This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( -h :_help,_show_options ) \ AvdH A1oct04
 .SIGNON   1 26 INDEX   OK BYE
 
@@ -190,19 +190,19 @@ CREATE BASE' 0 ,
 
 
 
-( -l This_option_is_available )
+( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
+CREATE task
+28 LOAD   REQUIRE SHIFT-ARGS
+\ Install other library
+\ Can't be done while interpreting from a block!
+: SWITCH-LIBS   BLOCK-EXIT
+    ARGV 2 CELLS + @ Z$@ BLOCK-FILE $!
+    BLOCK-INIT
+    SHIFT-ARGS   SHIFT-ARGS
+    'task 'FORTH FORGET-VOC COLD ;
 
-
-
-
-
-
-
-
-
-
-
-
+\ Must all be done in one go!
+SWITCH-LIBS
 
 
 
@@ -254,27 +254,11 @@ CREATE BASE' 0 ,
 
 
 
-( -p This_option_is_available )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-( -q SYSTEM_PREFERENCES ) \ AvdH A1oct02
+( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
 .SIGNON CR 27 LIST  28 LOAD
   REQUIRE ?32   REQUIRE ?PC ( Configuration )
  ( MAINTENANCE )  100 LOAD   34 LOAD
-( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
+REQUIRE H. REQUIRE DUMP ( CHAR )  LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD
  ( EDITOR ) 109 LOAD
     REQUIRE CRACK EXIT
@@ -286,6 +270,22 @@ CREATE BASE' 0 ,
  ( FIG:  SAVE-SYSTEM      23 LOAD   )
 : TASK ;
 ( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD ) OK
+( -q This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( -r :_make_require_available ) \ AvdH A1oct04
 .SIGNON   28 LOAD   OK
 
@@ -350,7 +350,7 @@ BYE
 
 
 
-( -v )
+( -v Version_and_copyright_information_)
 "               CPU  NAME  VERSION  " TYPE
  .SIGNON CR
 "                 LIBRARY FILE: " TYPE CR
@@ -456,7 +456,7 @@ OVER AND WHILE RDROP REPEAT 2DROP R> ;
 \ Find WORD in the block library and load it.
 : FIND&LOAD  \ CR ." LOOKING FOR " 2DUP TYPE
  1000 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
-2DUP ; \  TYPE ." SUCCES " ;
+2DROP ;
 \ For WORD sc: it IS found not as a denotation.
 : PRESENT? DUP >R FOUND DUP IF >NFA @ @ R> = ELSE RDROP THEN ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
@@ -606,7 +606,7 @@ string else 0. It is assumed del cannot be a valid addr )
 \      SWAP OVER - 1 - ( Length after delimiter)
 \      R> 1+ SWAP
 \   ELSE ( DROP 0) 0 THEN  2SWAP ;
-\ ( -LEADING $@= (MENV) GET-ENV ) \ AvdH A1sep30
+\ ( -LEADING $@=                ) \ AvdH A1sep30
 REQUIRE COMPARE
  : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
     BEGIN                        ( heading blanks )
@@ -616,12 +616,12 @@ REQUIRE COMPARE
     REPEAT  ;
  : $@=  ( S1 S2 --F string at address S1 equal to other one)
    >R $@ R> $@ COMPARE ;
-REQUIRE Z$@   REQUIRE ENV
-\ For VAR and ENVZSTRING leeave STRING or CONTENT and GOON.
-: (MENV) DUP 0= IF DROP 2DROP 0. 0 ELSE Z$@ &= $S 2SWAP >R >R
-2OVER COMPARE IF RDROP RDROP 1 ELSE 2DROP R> R> 0 THEN THEN ;
-( Find a STRING in the environment, -its VALUE or NULL string)
-: GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
+
+
+
+
+
+
 ?PC  <HEX ( DEBUG SCR#7 )
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
@@ -2334,38 +2334,38 @@ DECIMAL
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-( SAVE-SYSTEM TURNKEY )  REQUIRE ?LI  ?LI HEX \ AvdH A1sep24
-\ The magic number marking the start of an ELF header
- CREATE MAGIC 7F C, &E C, &L C, &F C,
-\ Return the START of the ``ELF'' header.
- : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
-\ Return the VALUE of ``HERE'' when this forth started.
- : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
-\ Save the system in a file with NAME .
- : SAVE-SYSTEM
-\ Increment the file and dictionary sizes
-  HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
-   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
-\ Now write it. Consume NAME here.
-   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
-\ Save a system to do SOMETHING in a file with NAME .
-: TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
-( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE ?LI  ?LI \ A1sep25
-\ Return the NUMBER of arguments passed by Linux
-: ARGC ARGS @ @ ;
 
-\ Return the argument VECTOR passed by Linux
-: ARGV ARGS @ CELL+ ;
-\ Return the environment POINTER passed by Linux
-: ENV ARGS @ $@ 1+ CELLS + ;
 
-\ For a CSTRING (pointer to zero ended chars) return a STRING.
-: Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
 
-\ Print a CSTRING.
-: CTYPE Z$@ TYPE ;
-\ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
-: C$.S BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  CR ." #36 FROBOZZ AMATEUR ADVENTURER >1< 84/4/5 "
  ( DIRECTIONS )
  0 CONSTANT N  1 CONSTANT NE
@@ -4126,6 +4126,22 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 
 
 
+(  H. B. DH. ALIAS BASE? HIDE <HEX ) \ AvdH A1oct02
+( MSG # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT )
+CREATE BASE' 0 ,
+ : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
+ : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
+( Add a . after 4 digits )
+ : 4?  1+ 4 MOD 0= IF &, HOLD THEN ;
+( Generate string with hex format of DOUBLE of LEN digits)
+ : (DH.) <HEX <# 1- 0 DO # I 4? LOOP # #> HEX> ;
+ : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
+ : H.  S>D 2 CELLS (DH.) TYPE ; ( print SINGLE in hex )
+ : B.  S>D 2 (DH.) TYPE ; ( print BYTE in hex )
+
+ : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
+ : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
+ : HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
 VARIABLE FAR-DP         \ Alternative DP
 DSP@ HERE + 2 / ALIGNED FAR-DP !
@@ -4144,10 +4160,10 @@ DSP@ HERE + 2 / ALIGNED FAR-DP !
 
 ( T] T[ ) \ AvdH A1oct04
 REQUIRE SWAP-DP
-\ Allocate an arrea for a temporary compilation.
-: NONAME [ 1000 ALLOT ] ;
+
 \ Compile at temporary place : remember old HERE and STATE.
 : T] STATE @ 0= IF SWAP-DP HERE THEN STATE @ ] ;
+
 \ Execute code at old HERE , restore STATE and dictionary.
 : T[ 0= IF POSTPONE (;) SWAP-DP POSTPONE [ >R THEN ; IMMEDIATE
 
@@ -4174,6 +4190,54 @@ REQUIRE T[
 
 
 
+( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE ?LI  ?LI \ A1sep25
+\ Return the NUMBER of arguments passed by Linux
+: ARGC ARGS @ @ ;
+
+\ Return the argument VECTOR passed by Linux
+: ARGV ARGS @ CELL+ ;
+\ Return the environment POINTER passed by Linux
+: ENV ARGS @ $@ 1+ CELLS + ;
+
+\ For a CSTRING (pointer to zero ended chars) return a STRING.
+: Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
+
+\ Print a CSTRING.
+: CTYPE Z$@ TYPE ;
+\ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
+: C$.S BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
+( SHIFT-ARGS GET-ENV ) REQUIRE ?LI  ?LI \ AvdH A1oct05
+REQUIRE Z$@   REQUIRE ENV
+\ Return POINTER behind the end-0 of the environment.
+: ENV0 ENV BEGIN $@ WHILE REPEAT ;
+
+\ Shift the arguments, so as to remove argument 1.
+: SHIFT-ARGS   -1 ARGS @ +!
+    ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
+
+\ For SC and ENVSTRING leave SC / CONTENT and GOON flag.
+: (MENV)   DUP 0= IF   DROP 2DROP 0. 0   ELSE
+    Z$@ &= $S 2SWAP >R >R 2OVER COMPARE
+    IF   RDROP RDROP 1   ELSE   2DROP R> R> 0   THEN THEN ;
+( Find a STRING in the environment, -its VALUE or NULL string)
+: GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
+
+( SAVE-SYSTEM TURNKEY )  REQUIRE ?LI  ?LI HEX \ AvdH A1sep24
+\ The magic number marking the start of an ELF header
+ CREATE MAGIC 7F C, &E C, &L C, &F C,
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
+\ Return the VALUE of ``HERE'' when this forth started.
+ : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
+\ Save the system in a file with NAME .
+ : SAVE-SYSTEM
+\ Increment the file and dictionary sizes
+  HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+\ Now write it. Consume NAME here.
+   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
+\ Save a system to do SOMETHING in a file with NAME .
+: TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
 ( **************ciforth tools*********************************)
 
 
@@ -4190,6 +4254,22 @@ REQUIRE T[
 
 
 
+( DUMP ) REQUIRE B.  <HEX \ AvdH A1oct02
+ : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
+ : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
+       [CHAR] | EMIT ;
+ : BYTES 0 DO
+            DUP I + C@ B.
+            I 2 MOD IF SPACE THEN
+        LOOP ;
+:  DUMP   ( 2/0  DUMPS FROM ADDRESS-2 AMOUNT-1 BYTES)
+    OVER + SWAP
+    DO
+        CR I H. ." : "
+        I 0F AND DUP 5 2 */ SPACES 10 SWAP -
+        I   OVER BYTES   OVER .CHARS   DROP DROP
+    10 I 0F AND - +LOOP         CR
+;    HEX>
 ( CRACK KRAAK KRAKER ) \ AvdH A1oct04
 BLK @ DUP 1 + SWAP 7 + THRU
 
