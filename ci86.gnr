@@ -102,7 +102,7 @@ TRKS    EQU     80              ;Number of tracks
 SPT     EQU     18              ;Sectors/track
 HEADS   EQU     2               ;Number of heads 
 NFAT    EQU     2       ; Number of FATS
-SECROOT EQU     0E0H    ; Sectors for root directory entry.
+SECROOT EQU     0EH    ; Sectors for root directory entry.
 SECFAT  EQU     9       ; Sectors per FAT
 MEDIA   EQU    0F0H      ; Descriptor byte. Anachronism.
 
@@ -121,7 +121,8 @@ _ENDCOMMENT
 BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
 BPS     EQU     512             ;Bytes/sector, common to all of MSDOS
 SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
-
+        ; Skip boot sector,fats and root dir.
+SECSTRT EQU     1+NFAT*SECFAT + SECROOT            
 
 });_END___1__({_USEBIOS_1_})
 
@@ -138,8 +139,8 @@ ORG0:   JMP     SHORT BOOT
         DB    "DFW--EXP"
 LBPS    DW         BPS
         DB         001H
-RESSECTORS  DW         24H ; later ? : EM/BPS
-        DB         NFAT, 
+RESSECTORS  DW     01H
+        DB         NFAT 
         DW BPS*SECROOT/32
         DW         SPDRV
         DB         MEDIA
@@ -197,11 +198,16 @@ ELSE1:
         MOV     DL,00            ;Drive 0 (floppy 1)
         INT(13H)                 ;BIOS disk read function
         JB      RETRY
-        
-        MOV     CX,1            ; Skip boot sector
+
+        ; Forth sits in the part reserved for system stuff.
+        ; (Assuming an MSDOS floppy with a system.)
+;       MOV     CX,SECSTRT
+        MOV     CX,1
+        MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
         JB      RETRY
         CMP     CX,RESSECTORS
+;       CMP     CX,RESSECTORS+36
         JNE     BEGIN1
         
         MOV     AL,'W'
@@ -213,9 +219,7 @@ BEGIN1: CALL    READSECTOR
 ;       Leave into CX the incremented sec# 
 READSECTOR:
         PUSH    CX
-        MOV     AX,CX
-        MUL     _WORD_PTR[LBPS]
-        MOV     BX,AX    ;BX = transfer address
+        PUSH    BX
         MOV     AX,CX
         XOR     DX,DX
         DIV     _WORD_PTR[LSPT]
@@ -228,6 +232,8 @@ READSECTOR:
         MOV     DL,00            ;Drive 0 (floppy 1)
         MOV     AX,0201H   ; Read absolute one sector
         INT(13H)                 ;BIOS disk read function
+        POP     BX
+        ADD     BX,BPS
         POP     CX
         INC     CX
         RET
@@ -269,14 +275,16 @@ DISPLAYW:       PUSH    AX              ; Display AX in hex
         POP     AX
         ; CALL DISPLAYHEX ; RET
 DISPLAYHEX:     PUSH    AX              ; Display AL in hex 
-        SAR     AL,4
+        MOV     CL,4
+        SAR     AL,CL
         CALL    DISPLAYHD
         POP     AX
         ; CALL DISPLAYHD ; RET
 DISPLAYHD:      AND     AL,0FH          ; Display AL as one hex digit
         DAA
         MOV     AH,AL
-        SHR     AH,5
+        MOV     CL,5
+        SHR     AH,CL
         ADC     AL,30H
         ; CALL DISPLAY ; RET
 DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
@@ -284,8 +292,8 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
         INT(10H)
         RET
         
+        _NEW_ORG(01FEH)
         ; Signature. 
-        RESB    01FEH - ($-$$)
         DB         055H, 0AAH
                  
 });_END___1__({ _BOOTED__1_})
@@ -294,7 +302,7 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
 	ORG	100H	; Required start of .COM program.
 });_END___1__({ _HOSTED__1_})
 
-ORIG	PROC	FAR	; SEE PG 5-31, MACRO ASSEMBLER
+ORIG:
 	NOP
 	JMP	LCLD     ;VECTOR TO COLD START
 	NOP
@@ -1030,7 +1038,7 @@ HEADER({WARNING},{WARN},{DOUSE})
 HEADER({FENCE},{FENCE},{DOUSE})
 	DW	10H
 ;
-HEADER({DP},{DP},{DOUSE})
+HEADER({DP},{LDP},{DOUSE})
 	DW	12H
 ;
 
@@ -1071,7 +1079,7 @@ HEADER({DPL},{DPL},{DOUSE})
 HEADER({FLD},{LFLD},{DOUSE})
 	DW	2AH
 ;
-HEADER({CSP},{CSPP},{DOUSE})
+HEADER({CSP},{LCSP},{DOUSE})
 	DW	2CH
 ;
 HEADER({R#},{RNUM},{DOUSE})
@@ -1093,12 +1101,12 @@ HEADER({2+},{TWOP},{$+2})
 	JMP	APUSH
 ;
 HEADER({HERE},{HERE},{DOCOL})
-	DW	DP
+	DW	LDP
 	DW	FETCH
 	DW	SEMIS
 ;
 HEADER({ALLOT},{ALLOT},{DOCOL})
-	DW	DP
+	DW	LDP
 	DW	PSTOR
 	DW	SEMIS
 ;
@@ -1142,7 +1150,7 @@ LES2:	JMP	APUSH
 ;
 HEADER({U<},{ULESS},{DOCOL})
         DW      TDUP
-	DW	{LXOR},ZLESS
+	DW	LXOR,ZLESS
 	_0BRANCH(ULES1) ;IF
 	DW	DROP,ZLESS
 	DW	ZEQU
@@ -1219,7 +1227,7 @@ HEADER({PFA},{PFA},{DOCOL})
 	; At line     LINE ~1500
 HEADER({!CSP},{SCSP},{DOCOL})
 	DW	SPFET
-	DW	CSPP
+	DW	LCSP
 	DW	STORE
 	DW	SEMIS
 ;
@@ -1254,7 +1262,7 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
 ;
 HEADER({?CSP},{QCSP},{DOCOL})
 	DW	SPFET
-	DW	CSPP
+	DW	LCSP
 	DW	FETCH
 	DW	LSUB
 	DW	LIT,14H
@@ -1937,7 +1945,7 @@ MAX1	DW	DROP
 	PAGE
 HEADER({M*},{MSTAR},{DOCOL})
         DW      TDUP
-	DW	{LXOR}        
+	DW	LXOR       
 	DW	TOR
 	DW	ABS1
 	DW	SWAP
@@ -1957,7 +1965,7 @@ HEADER({M/},{MSLAS},{DOCOL})
 	DW	USLAS
 	DW	FROMR
 	DW	RR
-	DW	{LXOR}
+	DW	LXOR
 	DW	PM
 	DW	SWAP
 	DW	FROMR
@@ -2451,10 +2459,14 @@ TYPE1:       DW      DROP
 TYPE3:       DW      SEMIS
 ;            
 HEADER({EMIT},{EMIT},{DOCOL})
+             DW      ONE,LOUT,PSTOR
              DW      LIT, 07FH, LAND
-             DW      PEMIT
-             DW      ONE,LOUT
-             DW      PSTOR,SEMIS
+             DW      DUPE,LIT,LF,EQUAL
+             _0BRANCH(EMIT1)
+             DW      LIT,ACR,PEMIT
+             DW      ZERO,LOUT,STORE
+EMIT1:       DW      PEMIT
+             DW      SEMIS
 ;            
 HEADER({(EMIT)},{PEMIT},{DOCOL})
              DW      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
@@ -2630,7 +2642,7 @@ HEADER({FORGET},{FORG},{DOCOL})
 	DW	QERR
 	DW	DUPE
 	DW	NFA
-	DW	DP
+	DW	LDP
 	DW	STORE
 	DW	LFA
 	DW	FETCH
@@ -3032,7 +3044,6 @@ used for:
 _ENDCOMMENT
 					
  CSEG    ENDS
-_ENDP  ORIG    ENDP
 	PAGE
 _COMMENT 
 
@@ -3079,5 +3090,6 @@ _COMMENT
 
 _ENDCOMMENT
 
+; Define the entry point, not valid for auto booting.
 	END	ORIG
 
