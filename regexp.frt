@@ -39,7 +39,7 @@ INCLUDE defer.frt
 \   a string is a regular string variable (so with a cell count).
 
 \ Configuration
-1000 CONSTANT MAX-RE     \ # cells in a regular expression.
+1000 CONSTANT MAX-RE     \ # cells in a regular expression and copied expression.
 128 8 / CONSTANT MAX-SET \ # chars in a charset. (So no char's > 0x80 !)
 
 \ -----------------------------------------------------------------------
@@ -135,6 +135,10 @@ CREATE SUBSTRING-TABLE 20 CELLS ALLOT
 VARIABLE ALLOCATOR
 \ Initialise ALLOCATOR
 : !ALLOCATOR 2 ALLOCATOR ! ;
+
+\ Give an error message for unmatched parantheses.
+: ?ALLOCATOR ALLOCATOR @ 1 AND ABORT" Parenthesis ( ) not matched in re, user error" ;
+
 \ Return a new ALLOCATOR index, and increment it.
 : ALLOCATOR++
     ALLOCATOR @ DUP 11 = ABORT" Too many substrings with ( ), max 9, user error"
@@ -436,10 +440,11 @@ VARIABLE RE-EXPR-END
 : REMEMBER-START-RE OVER RE-EXPR-START ! 2DUP + RE-EXPR-END ! ;
 
 \ Everything to be initialised for a build. Take EXPRESSION string, leave IT.
-: INIT-BUILD   REMEMBER-START-RE !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   'FORTRACK RE, ;
+: INIT-BUILD   REMEMBER-START-RE !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   !ALLOCATOR
+    'FORTRACK RE,   'HANDLE() RE, 0 RE, ;
 
 \ Everything to be harvested after a build.
-: EXIT-BUILD   HARVEST-NORMAL-CHARS 0 RE, ;
+: EXIT-BUILD   HARVEST-NORMAL-CHARS   'HANDLE() RE, 1 RE,   0 RE,   ?ALLOCATOR ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
 
@@ -475,7 +480,7 @@ VARIABLE RE-EXPR-END
 : ADD>   'CHECK> RE, ;
 : ADD(   'HANDLE() RE, ALLOCATE( RE, ;
 : ADD)   'HANDLE() RE, ALLOCATE) RE, ;
-: ADD^   -1 CELLS RE-FILLED +! ;
+: ADD^   'FORTRACK-DUMMY RE-COMPILED ! ;
 : ADD$   'CHECK$ RE, ;
 
 30 SET COMMAND-SET     COMMAND-SET !SET
