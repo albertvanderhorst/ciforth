@@ -163,6 +163,37 @@ VARIABLE MIN-DEPTH
 \ Remember : both nibbles have offset 1!
 : COMBINE-VD    SE:1>2 SWAP 1- NEGATE VD +! REMEMBER-DEPTH 1- VD +! ;
 
+\ ----------------------    Special classes of words --------------------
+
+CREATE DROPS  HERE _ ,
+' DROP       ,          ' 2DROP      ,
+HERE SWAP !
+
+CREATE DO'S  HERE _ ,
+' (DO)       ,          ' (?DO)      ,
+HERE SWAP !
+
+CREATE LOOPS  HERE _ ,
+' (LOOP)       ,          ' (+LOOP)      ,
+HERE SWAP !
+
+CREATE SPECIALS  HERE _ ,
+' LEAVE       ,          ' CATCH      ,
+HERE SWAP !
+
+\ For DEA : it IS a trivial annihilator.
+: IS-A-DROP DROPS IN-SET? ;
+
+\ For DEA : it IS the start of a do loop
+: IS-A-DO DO'S IN-SET? ;
+
+\ For DEA : it IS the end of a do loop.
+: IS-A-LOOP LOOPS IN-SET? ;
+
+\ For DEA : it IS special, i.e. it must be treated specially in expanding.
+: IS-A-SPECIAL SPECIALS IN-SET? ;
+
+
 \ ----------------------    Keeping track of branching ----------------------
 
 \ In the following a GAP is a pair START END with START inclusive and END
@@ -170,13 +201,6 @@ VARIABLE MIN-DEPTH
 
 \ For DEA : it IS a branch, i.e. it is followed by a relative control target.
 : IS-A-BRANCH   DUP 'LIT <>   SWAP >FFA @ FMASK-IL AND 0= 0= AND ;
-
-CREATE DROPS  HERE 0 ,
-' DROP       ,          ' 2DROP      ,
-HERE SWAP !
-
-\ For DEA : it IS a trivial annihilator.
-: IS-A-DROP DROPS IN-SET? ;
 
 \ The set of addresses where a branch offset is stored.
 MAX-SET SET BRANCHES
@@ -279,6 +303,63 @@ THEN RDROP ;
 ;
 
 
+\ ----------------------    Special expansions ---------------
+
+\ Code to replace a ``LEAVE'' exection token. Branch is still to be filled in.
+: LEAVE-CODE UNLOOP BRANCH [ _ , ] ;
+
+\ For DEA: it IS a ``LEAVE''.
+: IS-A-LEAVE   'LEAVE = ;
+
+\ \ Expand  the first statement (a ``LEAVE'' ) of SEQUENCE by a branch (plus other code as appropriate.)
+\ : COPY-LEAVE   POSTPONE UNLOOP   POSTPONE BRANCH   HERE BRANCHES SET+!
+\   HERE LEAVES SET+!    _ ,   ;
+
+\ Leave code length. Don't count the (;). It must not be copied.
+'LEAVE-CODE >DFA @   DUP END-OF-SEQUENCE SWAP - 1 CELLS -
+CONSTANT LEAVE-LENGTH
+
+\ Prepare the gap offset for expansion of a ``LEAVE''.
+: SET-LEAVE-OFFSET  LEAVE-LENGTH 1 CELLS - GAP-OFFSET ! ;
+
+\ Expand a leave at SEQUENCE. Return the expanded GAP .
+: ENLARGE-LEAVE-GAP DUP CELL+ CORRECT-GAP ;
+
+\ Fill a gap at ADDRESS with the expansion of a ``LEAVE''.
+: FILL-LEAVE-GAP   'LEAVE-CODE >DFA @   SWAP   LEAVE-LENGTH MOVE ;
+
+\ Transform a ``LEAVE'' gap at start of SEQUENCE.
+\ Return the incremented SEQUENCE.
+: LEAVE-GAP SET-LEAVE-OFFSET ENLARGE-LEAVE-GAP >R FILL-LEAVE-GAP R> ;
+
+\ Increment ADDRESS (part of a sequence) until pointing after a loop
+\ instruction. Return IT.
+: FIND-LOOP BEGIN NEXT-PARSE 0= 13 ?ERROR IS-A-LOOP UNTIL ;
+
+\ Fill in the offset of a leave-replacing branch that ends at SEQUENCE.
+\ (The offset is one cell before this end.)
+: FILL-LEAVE-BRANCH DUP FIND-LOOP OVER - SWAP 1 CELLS - ! ;
+
+\ Expand the ``LEAVE'' at the start of SEQUENCE . Execution remains equivalent.
+\ Return SEQUENCE incremented to after the code expanded.
+: REPLACE-LEAVE-BY-BRANCH LEAVE-GAP DUP FILL-LEAVE-BRANCH
+    DUP 1 CELLS - BRANCHES SET+! ;
+
+\ Try to apply any special expansion to the start of a SEQUENCE .
+\ Always leave the new SEQUENCE be it just after the expansion or bumped
+\ by one item.
+: EXPAND-SPECIAL-ONE
+    DUP @ IS-A-LEAVE IF REPLACE-LEAVE-BY-BRANCH ELSE
+\    DUP @ IS-A-CATCH IF REPLACE-CATCH-BY-BRANCH ELSE
+    NEXT-ITEM
+    THEN
+;
+
+\ Expand some special xt's from SEQUENCE. In partical ``LEAVE''.
+\ Return recompiled SEQUENCE (which is in fact the same address.)
+\ It is required that the ``BRANCHES'' set has been filled.
+: EXPAND-SPECIAL DUP BEGIN DUP ?NOT-EXIT WHILE EXPAND-SPECIAL-ONE REPEAT DROP ;
+
 \ ----------------------    Expansion  ----------------------
 \ the new expansion is supposed to take care of branches.
 
@@ -291,13 +372,16 @@ MAX-SET SET SHIFTS     : !SHIFTS   SHIFTS !SET ;
 \ that replace an exit from a word that is expanded in line.
 MAX-SET SET EXITS     : !EXITS   EXITS !SET ;
 
+\ The set of leaves : places where a branch has to be filled in
+\ that replace a leave from a loop that is expanded in line.
+MAX-SET SET LEAVES     : !LEAVES   LEAVES !SET ;
+
 \ If DEA is a BRANCH remember it in ``BRANCHES''
 : REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES SET+!  THEN ;
 
 \ Copy an ``EXIT'' statement to the output sequence, replacing it by a branch.
-: COPY-EXIT
-HERE CELL+ BRANCHES SET+!   HERE EXITS SET+!
-POSTPONE BRANCH 0 ,   ;
+: COPY-EXIT   HERE EXITS SET+!
+POSTPONE BRANCH   HERE BRANCHES SET+!   _ ,   ;
 
 \ For all the ``EXITS'' remembered, fill in the ``SHIFTS'' caused by expansion
 \ of the ``EXIT''. To be called when ``HERE'' is where the ``EXIT'' must
@@ -322,9 +406,9 @@ HERE OVER +   I @ CELL+ -    I @ CELL+ !   CELL+
 \ Copy a GAP containing a single statement (xt plus possible inline stuff)
 \ to ``HERE'' take into account specialties associated with its DEA.
 \ Leave the END of the gap.
-: COPY-ONE   DUP REMEMBER-BRANCH
-'EXIT = IF SWAP DROP COPY-EXIT ELSE
->HERE THEN ;
+: COPY-ONE >R  R@ REMEMBER-BRANCH
+R@  'EXIT = IF SWAP DROP COPY-EXIT ELSE
+>HERE THEN RDROP ;
 
 \ For a forward branch at ADDRESS do all the corrections found in ``SHIFTS''.
 \ Note that this accumulates changes, and the decision to apply a correction
@@ -370,7 +454,7 @@ BRANCHES @+ SWAP ?DO
 \ For GAP and DEA : expand GAP to ``HERE'' filling in ``SHIFTS''.
 \ Leave the END of the gap.
 : EXPAND-ONE
-    DUP HIGH-LEVEL? IF >DFA @ (EXPAND-ONE) SWAP DROP
+    DUP HIGH-LEVEL? OVER IS-A-SPECIAL 0= AND IF >DFA @ (EXPAND-ONE) SWAP DROP
     ELSE REMEMBER-BRANCH >HERE THEN ;
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
@@ -379,7 +463,8 @@ BRANCHES @+ SWAP ?DO
 
 \ Expand each constituent of SEQUENCE to ``HERE'' .
 \ Leave a POINTER to equivalent linearised code.
-: EXPAND HERE SWAP    !SHIFTS   (EXPAND) POSTPONE (;) CORRECT-BRANCHES ;
+: EXPAND HERE SWAP    !SHIFTS   (EXPAND) POSTPONE (;) CORRECT-BRANCHES
+EXPAND-SPECIAL ;
 
 \ ----------------------    Annihilaton ----------------------
 

@@ -106,6 +106,19 @@ AGAIN ;
 : testJ    (TESTJ) ;
 'testJ SHOW-IT
 
+\ Expansion with LEAVEs present.
+: (TESTK) DO ROT LEAVE SWAP LOOP 2DUP ;
+: testK    (TESTK) ;
+'testK SHOW-IT
+
+\ Interfering LEAVEs and EXITs.
+: (TESTL) DO
+DUP IF LEAVE ELSE EXIT THEN SWAP
+2DUP IF LEAVE ELSE EXIT THEN 2SWAP
+LOOP ROT ;
+: testL    (TESTL) 2OVER ;
+'testL SHOW-IT
+
 \ ---------------------------------------------------------------------------
 
 CR "SPLIT HERE" TYPE CR
@@ -195,4 +208,22 @@ THEN SWAP
 ;
 
 'testJ SHOW-IT
+
+: testK
+DO ROT RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] SWAP LOOP [ R> FORWARD) ] 2DUP
+;
+
+'testK SHOW-IT
+
+: testL DO
+DUP IF RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] ELSE BRANCH [ (FORWARD >R ] THEN SWAP
+2DUP IF RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] ELSE BRANCH [ (FORWARD >R ] THEN 2SWAP
+LOOP
+[ R> R> FORWARD) R> R> FORWARD) >R >R ]
+ROT
+[ R> FORWARD) R> FORWARD) ]
+2OVER
+;
+
+'testL SHOW-IT
 CR
