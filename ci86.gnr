@@ -1159,12 +1159,14 @@ worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
 forthsamp({' nnnn})
 Leaves the dictionary entry address of dictionary word forthsamp({nnnn}).
 This also serves as an execution token.
-As a compiler directive, executes in a colon-definition to compile
-the address as a literal. If the word is not found after a search of
+If the word is not found after a search of
 forthcode({SEARCH}) and forthcode({CURRENT}) , an appropriate error message is given.
 This word is intended for interpret mode,  but in ciforth it works as
-well in compilation mode.
-It is recommended this word is not postponed.},
+well in compilation mode _VERBOSE_({{, because it is considered a denotation. So
+' and the word following is a unit that behaves
+as a constant.}})
+It is recommended that this word is not postponed. _VERBOSE({{Use explicit
+parsing and searching instead.}})},
 {{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
 {{ : APE 1 2 ; 'APE EXECUTE  'APE ID. . .},{APE 2 1}},
@@ -1739,12 +1741,11 @@ HEADER({?BLANK},{QBL},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
-{Parse the forthdefi({current input source}) for a character
-and leave its address and the character. If at of the end of
-the input source, leave the a pointer past the end and a zero.
-Advance the input pointer to the next character. _VERBOSE_({{As
-it goes with string constants, you may not alter its content,
-nor assume anything is appended.}})},
+{Parse the forthdefi({current input source}) leaving the next
+character forthvar({chr}) and its address forthvar({addr}) . If
+at the end of the input source, leave a pointer past the end
+and a zero. Advance the input pointer to the next character.
+},
 {{BLK},{WORD},{IN}},
 {{IN[] A   EMIT TIB @ 8000 OVER + WITHIN .},{A{}_T_} },
 enddoc)
@@ -1795,11 +1796,14 @@ PWORD2A:
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
-worddocsafe( {PARSING~},{(PARSE)},{paren_word},{ ch --- addr },{},
+worddocsafe( {PARSING~},{(PARSE)},{paren_word},{ ch --- sc },{},
 {Scan the forthdefi({current input source}) for the character forthvar({ch}) .
-Return forthvar({addr}): the address of the first such character
-or an address just past the end of the current input source if its
-is not there.
+Return forthvar({sc}): a string from the current position in the
+input stream, ending before the first such character,
+or at the end of the current input source if it isn't
+there. The character is consumed.
+_VERBOSE_({{As it goes with string constants, you may not alter
+its content, nor assume anything is appended.}})
 _VERBOSE_({So no leading delimiters are skipped.})},
 {{WORD}},
 {{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
@@ -1812,7 +1816,7 @@ HEADER({(PARSE)},{PPARS},{DOCOL})
         _0BRANCH(PPARS8)
         DC      DROP, SRC, CELLP, FETCH
 PPARS8: _ISO_IN_({DC      SRC, FETCH, LSUB })
-        DC      SRC, CELLP, CELLP, STORE
+        DC      LIN, STORE
         DC SEMIS
 ;
 worddoc( {PARSING},{SRC},{s_r_c},{addr --- },{},
@@ -4326,16 +4330,16 @@ FIND1:               ;{THEN THEN}
 worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},
 {sc dea1 --- sc dea2},{},
 {Search down from the forthdefi({DEA}) forthvar({dea}) for a
-word with name forthvar({sc}) found and leave its
-forthdefi({DEA}) as forthvar({dea2}) or a nil pointer if not
-found. This DEA can be a forthdefi({WID}). _VERBOSE_({The
-forthvar({dea1}) is mostly the forthdefi({WID}) of a
+word with name forthvar({sc}).
+This DEA can be a forthdefi({WID}). _VERBOSE_({A forthdefi({WID}) is
+mostly a dummy forthdefi({DEA}) found in the
+data field of a
 vocabulary, or the content of forthcode({DENOTATION}) or
 forthcode({SEARCH}) }). Leave the dictionary entry address
 forthvar({dea2}) of the first entry found, else leave a nil
 pointer. Do not consume the string forthvar({sc})_VERBOSE_({{,
 as this is a repetitive action}}). },
-{{FIND},{FOUND}},
+{{FIND},{FOUND},{>WID}},
 { { : BONOBO ; "BONOBO" CURRENT @ (FIND) ' BONOBO = .},{_T_},
  {TYPE},{BONOBO} },
 enddoc)
@@ -5793,8 +5797,8 @@ BLOC1:  DC      RDROP
         DC      SEMIS
 ;
 worddoc( {STORAGE~},{FLUSH},{flush},{},{ISO FIG L0},
-{Make sure that the content of each forthcode({UPDATE}) d block buffer
-has been is transferred to disk.
+{Make sure that the content of all forthcode({UPDATE}) d block buffers
+has been transferred to disk.
 They are no longer associated with a block and their content is
 no longer available.
 },{{EMPTY-BUFFERS},{BLOCK},{SCREEN}},
@@ -7267,18 +7271,29 @@ HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
         DC      ZERO, ZERO, ZERO, LIT, fork, LINOS
         DC      LDUP, QLERR
-        DC      ZEQU
+        DC      LDUP, ZEQU
         _0BRANCH(SYSTEM1)
         DC      LIT, SHELL, LIT, SYSARGS
 ;  Get environment vector
         DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
         DC      LIT, execve, LINOS
-        DC      LIT, 64, PLUS, MESS, BYE
+        DC      LIT, -127, QLERR, BYE
 SYSTEM1:
+        DC      LDUP
+        DC      LIT, STATUS, ZERO, LIT, waitpid, LINOS
+        DC      LDUP
+        DC      LIT, EINTR, EQUAL
+        _BRANCH(SYSTEM2)
+        DC      DROP
+        _0BRANCH(SYSTEM1)
+SYSTEM2:
+        DC      QLERR
+        DC      TDROP
         DC      SEMIS
 ;
+STATUS   DC     0
+SYSARG1:
 SHELL:   DB      "/bin/sh",0
-SYSARG1: DB      "sh", 0
 SYSARG2: DB      "-c", 0
 COMBUF:  _RESB(256)
 SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + _CELLS(1), 0
@@ -8817,15 +8832,19 @@ worddocchapter({INIT},{ },
 reinitialise or configure Forth.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DENOTATIONS},{ },
-{The wordset forthsamp({DENOTATIONS}) contains one letter
-words that introduced a forthdefi({denotation}), i.e. a generalisation of
-forthcode({NUMBER}) . These words parse input and leave a constant
+{The wordset forthsamp({DENOTATIONS}) contains prefixes (mostly one letter
+words) that introduce a forthdefi({denotation}), i.e. a generalisation of
+forthcode({NUMBER}) . Any word starting with the prefix is considered found in the
+dictionary and the prefix word executed.
+These words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant.
 They reside in a special vocabulary, called forthcode({DENOTATIONS}).
-Actual names in the dictionary do not contain the prefix ``DEN''.
-Apart from forthcode({DEN0}) , the vocabulary contains entries
-for all hex digits forthsamp({{{1-9,A-F}}}). Like
-forthcode({NUMBER}) always did, all denotations behave
+To make a distinction with the same words in other wordlists,
+the names of denotations are prepended with ``DEN'' in the
+documentation. Actual names in the dictionary do not contain
+the prefix. Apart from forthcode({DEN0}) , the vocabulary
+contains entries for all hex digits forthsamp({{{{1-9,A-F}}}}).
+Like forthcode({NUMBER}) always did, all denotations behave
 identical in interpret and compile mode and they cannot be
 postponed. },
 {},{},{},{}, {}, enddoc)
