@@ -1613,7 +1613,7 @@ Advance the input pointer to the next character. _VERBOSE_({{As
 it goes with string constants, you may not alter its content,
 nor assume anything is appended.}})},
 {{BLK},{WORD},{IN}},
-{{IN[] A   EMIT TIB @ 5 + = .},{A{}_T_} },
+{{IN[] A   EMIT TIB @ 8000 OVER + WITHIN .},{A{}_T_} },
 enddoc)
 HEADER({IN[]},{INBRS},{DOCOL})
         DC      SRC, CELLP, TFET
@@ -1708,7 +1708,7 @@ _ISO_IN_({forthsamp({>IN}) .})
 _VERBOSE_({{Words like forthsamp({>IN BLK SOURCE SOURCE-ID}) are secondary,
 and return their output by ``second-guessing'' forthsamp({SRC}) .}})},
 {{BLK},{SOURCE-ID}},
-{{SRC @ TIB @ = .},{_T_}},
+{{SRC @ TIB @ 8000 OVER + WITHIN .},{_T_} },
 enddoc)
 HEADER({SRC},{SRC},{DOUSE}, _CELLS(27))      ;{ And 28 and 29.}
 ;
@@ -1717,7 +1717,7 @@ worddoc( {PARSING},{SOURCE},{source},{ --- addr n1},{ISO},
 {Return the address and length of the forthdefi({current input source}) .
 },
 {{SRC},{SOURCE-ID}},
-{{SOURCE DROP TIB @ = .},{_T_}},
+{{SOURCE DROP TIB @ 8000 OVER + WITHIN .},{_T_} },
 enddoc)
 HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      SRC, FETCH
@@ -6182,31 +6182,7 @@ ACCEP4A:  DC      COUNT, ZEQU
         _0BRANCH(ACCEP4A)
         DC      SWAP, LSUB
         DC      SEMIS
-;
-worddoc( {INPUT~},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
-{Transfer characters from the terminal to address forthvar({addr}) , until a "return"
-or a number of forthsamp({count}) characters have been received.
-Rely on the operating system for input editing.
-One or more nulls are
-added at the end of the text.}, {{KEY},{KEY?}}, {}, enddoc)
- HEADER({EXPECT},{EXPEC},{DOCOL})
-_BITS32_({; MSDOS cannot handle a 32 bits address: use the buffer.})
-_BITS32_({        DC      LIT, EXPECTBUF})
-dnl    _BITS16_({        DC      SWAP})
-        _BITS16_({        DC      OVER})
-        DC      TOR, TOR
-        DC      LIT,03F00H ;{ Write file or device }
-        DC      ZERO     ;{ Handle}
-        DC      FROMR, FROMR
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      BDOS, DROP ;{ ignore error }
-        DC      DROP, DROP, DROP ;{ Leave count}
-        DC      TWO, LSUB ;{ Rid of 0D0A}
-_BITS32_({; Copy the buffer.})
-_BITS32_({        DC      TOR, LDUP, LIT, EXPECTBUF, SWAP, RR, LCMOVE, FROMR })
-        DC      PLUS, ZERO, SWAP, CSTOR
-        DC      SEMIS
-_BITS32_({EXPECTBUF:  _RESB    0100H })
+_BITS32_({EXPECTBUF:  _RESB    0100H },{dnl})
 ;
 });_END_({_MODERN_})
 _LINUX_C_({
@@ -6289,7 +6265,7 @@ that excess characters after forthsamp({count}) are ignored.
 The number of characters not
 including the forthkey({RET}) is returned into forthsamp({n}).
 },
-{{(ACCEPT)},{KEY},{KEY?},{EXPECT}},
+{{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
 {
 {PAD 10 ACCEPT},{},
  {GIBBON
@@ -6313,7 +6289,7 @@ editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE({{This is lighter on the system and sometimes easier
 to use than forthcode({ACCEPT}) }})
 },
-{{KEY},{KEY?},{EXPECT}},
+{{KEY},{KEY?},{ACCEPT}},
 {
 {(ACCEPT)},{},
  {GIBBON
@@ -6337,16 +6313,7 @@ PACCEP2:
         DC      SWAP, LMOVE
         DC      TIB, FETCH
         DC      LIT, REMAIND, CELLP, STORE
-;        DC      REFTIB
-        DC      LIT, REMAIND, FETCH, TOR
-        DC      ZERO
-        DC      TIB, FETCH, RR, PLUS
-        DC      LIT, RTS/2, RR, LSUB
-        DC      LIT, read
-        DC      LINOS, LDUP, QLERR
-        DC      LDUP, ZEQU, LIT, -EPIPE, LAND, QLERR ; {Presumably end of pipe.}
-        DC      TIB, FETCH, SWAP, FROMR, PLUS
-        DC      LIT, REMAIND, TSTOR
+        DC      REFTIB
         _BRANCH(PACCEP2)
 PACCEP1:
 ;        DC      SPLOFF
@@ -6443,6 +6410,35 @@ enddoc)
 HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
+worddocsafe( {INPUT~},{(REFILL-TIB)},{refill-tib},{ --- } ,{},
+{Accept characters from the current input stream such as to
+fill up forthcode({TIB}) . Normally this means until a
+forthkey({RET}). If the input is redirected (such that reading
+after forthkey({RET}) cannot be prevented)
+forthsamp({REMAINDER 2@}) contains the first part of
+forthcode({TIB}) that has a left over from the previous read.
+After forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
+the characters ready in the input buffer. All characters are
+retained including the forthkey({RET}). The editing functions
+are the same as with forthcode({ACCEPT}).
+},
+{{ACCEPT},{(ACCEPT)}},
+{
+{( "see (ACCEPT)" TYPE)},{}
+},
+enddoc)
+HEADER({REFILL-TIB},{REFTIB},{DOCOL})
+        DC      LIT, REMAIND, FETCH, TOR
+        DC      ZERO
+        DC      TIB, FETCH, RR, PLUS
+        DC      LIT, RTS/2, RR, LSUB
+        DC      LIT, read
+        DC      LINOS, LDUP, QLERR
+        DC      LDUP, ZEQU, LIT, -EPIPE, LAND, QLERR ; {Presumably end of pipe.}
+        DC      TIB, FETCH, SWAP, FROMR, PLUS
+        DC      LIT, REMAIND, TSTOR
+        DC      SEMIS
+;
 worddoc( {INPUT~},{SET-TERM},{set_term},{len b --- },{},
 {Set the terminal length to forthsamp({len}) and toggle the c_lflag field
 with forthvar({b}) in the termio structure forthcode({TERMIO}) .
@@ -6479,35 +6475,31 @@ HEADER({EMIT},{EMIT},{DOCOL})
 });_END_({_HOSTED_LINUX_})
 ;
 _PC_({
-worddoc( {INPUT},{ACCEPT},,{addr count --- count2 },{NISO FIG L0},
-{Transfer characters from the terminal to address
-forthvar({addr}) , until a
-forthkey({RET})
-"return" or forthsamp({count})
-characters have been received. _VERBOSE_({This early return
-property is an important difference with forthcode({ACCEPT})
-.}) Rely on the operating system for input editing. This is not
-ISO as the number of characters is not stored. And the buffer
-is zeroed up till forthsamp({count}). },
-{{KEY},{KEY?}},
-dnl THE TEST CODE HERE IS PARTLY INPUT FOR ACCEPT
-dnl HENCE THE CRITICAL LAYOUT WITH RESPECT TO CR'S
+worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
+{Transfer at most forthsamp({count}) characters from the
+terminal to address, until a forthkey({RET}) is received.
+_LINUX_({ The simple tty editing functions of Linux are
+observed, i.e. the ``erase'' (delete a character) and ``kill''
+(delete a line) characters. Typically these are the backspace
+key and ^U.}) _PC({The editing functions such as described by
+forthcode({(ACCEPT)}) are observed.}) Note that excess
+characters after forthsamp({count}) are ignored. The number of
+characters not including the forthkey({RET}) is returned into
+forthsamp({n}). },
+{{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
 {
-{CR PAD 10 ACCEPT},{},
+{PAD 10 ACCEPT},{},
  {GIBBON
-  PAD 5 TYPE CR},{GIBBON
-
-GIBBO}
+  . PAD 5 TYPE},{6 GIBBO},
+ {( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)( 1 A)},{},
+ {( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )( 6)},{},
+ {( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)( 1 Z)},{}
 },
 enddoc)
 HEADER({ACCEPT},{ACCEP},{DOCOL})
-        DC      OVER, TOR
-        DC      TDUP, ONEP, LERASE
-        DC      EXPEC
-        DC      FROMR, LDUP
-ACCEP4:  DC      COUNT, ZEQU
-        _0BRANCH(ACCEP4)
-        DC      SWAP, LSUB
+        DC      PACCEP
+        DC      TSWAP, ROT, MIN
+        DC      LDUP, TOR, LMOVE, FROMR
         DC      SEMIS
 ;
 });_END_({_PC_})
@@ -6687,11 +6679,12 @@ TYPE3:       DC      SEMIS
 _KEY_BY_KEY_({
 worddoc( {PARSING},{(ACCEPT)},,{-- sc},{ISO},
 {Input a line
-until a "return") from the operators terminal, and leave it as
+until a forthkey({RET)}) from the input terminal, and leave it as
 a string constant. It doesn't contain a trailing forthkey({LF}).
 But possibly a trailing forthkey({RET}) (0DH).
 Text is probably present in the buffer address contained in
 forthcode({TIB @}), but not necessarily at the beginning.
+Editing is done locally observing forthcode({RUBOUT}) .
 },
 {{ACCEPT},{EVALUATE}},
 {{." interactive"},{interactive}},
@@ -6699,79 +6692,62 @@ enddoc)
 HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      TIB
         DC      FETCH
-        DC      LDUP
         DC      LIT,RTS/2
-        DC      OVER, TOR
-        DC      TDUP, ONEP, LERASE
-        DC      EXPEC
-        DC      FROMR, LDUP
-ACCEP4A:  DC      COUNT, ZEQU
-        _0BRANCH(ACCEP4A)
-        DC      SWAP, LSUB
-; Keep the next line in for debugging ACCEPT for MSDOS.
-;        DC      LIT, 41H, EMIT, TDUP, LTYPE, LIT, 41H, EMIT
-;        DC      DOTS
-        DC      SEMIS
-;
-worddoc( {INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
-{Transfer characters from the terminal to address forthvar({addr}) ,
-until a "return" or a number of forthsamp({count}) characters have been
-received. One or more nulls are added at the end of the text. Receive
-characters key by key using forthcode({KEY}). Observe
-forthcode({RUBOUT}). },
-{{KEY},{KEY?}}, {}, enddoc)
-HEADER({EXPECT},{EXPEC},{DOCOL})
-        DC      OVER
-        DC      PLUS
-        DC      OVER
-        _DO(EXPE8)
-EXPE1:  DC      KEY
-        DC      LDUP
-        DC      RUBOUT
-        DC      FETCH
-        DC      EQUAL
-        _0BRANCH(EXPE2) ;{ IF                    }
-        DC      DROP
-        DC      LDUP
-        DC      IDO
-        DC      EQUAL
-        DC      LDUP
-        DC      FROMR
-        DC      TWO     ;{ Remove last 2 chars }
-        DC      LSUB
-        DC      PLUS
-        DC      TOR
-        _0BRANCH(EXPE6) ;{ IF                    }
-        DC      LIT
-        DC      BELL
-        _BRANCH(EXPE7)  ;{ ELSE                  }
-EXPE6:  DC      LIT
-        DC      BSOUT   ;{ THEN                 }
-EXPE7:  _BRANCH(EXPE3)  ;{ ELSE                  }
-EXPE2:  DC      LDUP
-        DC      LIT,0DH
-        DC      EQUAL
-        _0BRANCH(EXPE4) ;{ IF}
-        ; {Emulate old fashioned LEAVE.}
-        DC      FROMR, RDROP, LDUP, TOR, TOR
-        DC      DROP
-        DC      LBL
-        DC      ZERO
-        _BRANCH(EXPE5)  ;{ ELSE}
-EXPE4:  DC      LDUP    ;{ THEN}
-EXPE5:  DC      IDO
-        DC      CSTOR
-        DC      ZERO
-        DC      IDO
-        DC      ONEP
-        DC      STORE   ;{ THEN}
-EXPE3:  DC      EMIT
-        _LOOP(EXPE1)    ;{ LOOP}
+        DC      TDUP
+;        DC      EXPEC
+             DC      OVER
+             DC      PLUS
+             DC      OVER
+             _DO(EXPE8)
+EXPE1:       DC      KEY
+             DC      LDUP
+             DC      RUBOUT
+             DC      FETCH
+             DC      EQUAL
+             _0BRANCH(EXPE2) ;{ IF                    }
+             DC      DROP
+             DC      LDUP
+             DC      IDO
+             DC      EQUAL
+             DC      LDUP
+             DC      FROMR
+             DC      TWO     ;{ Remove last 2 chars }
+             DC      LSUB
+             DC      PLUS
+             DC      TOR
+             _0BRANCH(EXPE6) ;{ IF                    }
+             DC      LIT
+             DC      BELL
+             _BRANCH(EXPE7)  ;{ ELSE                  }
+EXPE6:       DC      LIT
+             DC      BSOUT   ;{ THEN                 }
+EXPE7:       _BRANCH(EXPE3)  ;{ ELSE                  }
+EXPE2:       DC      LDUP
+             DC      LIT,0DH
+             DC      EQUAL
+             _0BRANCH(EXPE4) ;{ IF}
+             ; {Emulate old fashioned LEAVE.}
+             DC      FROMR, RDROP, LDUP, TOR, TOR
+             DC      DROP
+             DC      LBL
+             DC      ZERO
+             _BRANCH(EXPE5)  ;{ ELSE}
+EXPE4:       DC      LDUP    ;{ THEN}
+EXPE5:       DC      IDO
+             DC      CSTOR
+             DC      ZERO
+             DC      IDO
+             DC      ONEP
+             DC      STORE   ;{ THEN}
+EXPE3:       DC      EMIT
+             _LOOP(EXPE1)    ;{ LOOP}
 EXPE8:
-        DC      DROP
+             DC      DROP
+;        END      EXPEC
+        DC      ZERO, SINDEX
+        DC      TIB, FETCH, SWAP, OVER, LSUB
         DC      SEMIS
 ;
-
 });_END_({_KEY_BY_KEY_})
 
         PAGE
