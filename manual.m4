@@ -4,9 +4,13 @@ divert(-1)
 dnl The result must be @var{xxx} , the amount of braces around varies.
 dnl This was a misinterpretation, forth variables are not meta
 dnl variables, they are samples. Plus that stack diagrams are "samples"
-dnl define({forthvar},{{@samp{$1}}})
-define({forthvar},{{@var{$1}}})
+dnl A pity, you must have left forth variables as forthvar.
+dnl In that way you could have undone the above wrong opinion
+dnl This is wrong, but we can live with it for the moment.
+define({forthvar},{{@samp{$1}}})
+dnl define({forthvar},{{@var{$1}}})
 define({forthfile},{@file{{$1}}})
+define({forthkey},{@kbd{{$1}}})
 define({forthsamp},{@samp{{$1}}})
 define({forthmacro},{@samp{{$1}}})
 define({forthprog},{@code{{$1}}})
