@@ -507,8 +507,6 @@ GDTLOAD DW     GDTLEN
 include(width32.m4)       
 	global  figforth        ; Called from c. Remainder c-routines to be called from here.
 	extern  c_type,c_expec,c_key,c_qterm
-	extern  c_rslw, c_block_exit, c_block_init
-	extern  print_cold , print_hot
 
 	section forth progbits write exec alloc
 figforth:
@@ -3097,11 +3095,31 @@ HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
 	DC      SEMIS
 ;
 ;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
-CODE_HEADER({R/W},{RSLW})
-	CALL c_rslw
-	MOV     [_PARAMETER_FIELD(DERR)],AX
-	LEA     ESP,[ESP+CELLS(3)]    ; remove input
-	_NEXT
+HEADER({R/W},{RSLW},{DOCOL})
+        DC      TOR
+        DC      BBUF, STAR 
+	DC      BHAN, FETCH, SWAP
+        DC      LIT, M4_SEEK_SET
+	DC      LIT, M4_lseek
+        DC      LINOS
+        DC      ZERO, MIN      ; 0/-errno
+        DC      DUPE, DERR, STORE
+        _0BRANCH( RSLW1 )
+        DC      FROMR, DROP
+        _BRANCH( RSLW2 )
+RSLW1:  
+        DC      BHAN, FETCH, SWAP
+        DC      BBUF
+        DC      FROMR
+        _0BRANCH( RSLW3 )
+        DC     LIT, M4_read
+        _BRANCH( RSLW4 )
+RSLW3:  
+        DC      LIT, M4_write
+RSLW4:  DC      LINOS
+        DC      ZERO, MIN      ; 0/-errno
+        DC      DERR, STORE
+RSLW2:  DC      SEMIS
 
 });_END___1__({_LINUX_N_1_})
 ;____1_____ _LINUX_C_1_({
