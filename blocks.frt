@@ -582,12 +582,12 @@ BYE
 0 CELL+ 2 <> CONFIG ?16
 0 CELL+ 4 <> CONFIG ?32
 0 CELL+ 8 <> CONFIG ?64
- "BIOS"   PRESENT? 0=   CONFIG ?PC
- "BDOS"   PRESENT? 0=   CONFIG ?MS
- "LINOS"  PRESENT? 0=   CONFIG ?LI
- "LBAPAR" PRESENT? 0=   CONFIG ?HD
- "SEC-RW" PRESENT? 0=   CONFIG ?FD
-
+ "LINOS"  PRESENT? 0=   CONFIG ?LI   \ Linux
+ "BIOS31" PRESENT? 0=   CONFIG ?WI   \ DPMI ("windows")
+ "BDOS"   PRESENT? 0=   CONFIG ?MS   \ MS-DOS
+ "BIOS"   PRESENT? 0=   CONFIG ?PC   \ Possibly stand alone
+ "LBAPAR" PRESENT? 0=   CONFIG ?HD   \ Hard disk, modern
+ "SEC-RW" PRESENT? 0=   CONFIG ?FD   \ Floppy or hard disk old
 
 \
 ( **************ISO language extension ***********************)
@@ -3054,7 +3054,7 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 : .SYSS   .ES .DS .FS .GS CR   .IP .CS .SP .SS .PSW CR   ;
 : .ALL .REGS .SYSS ;
 
-( DPMI Get some of the selectors via a small code sequence.)
+( PD PE PC Get selectors via a small code sequence.) ?WI
 HEX
 CODE PD PUSHS, DS| NEXT C;
 CODE PE PUSHS, ES| NEXT C;
@@ -3070,6 +3070,70 @@ A PC 0 0 0 DOIT 2DROP DROP CONSTANT PC'
 : TO32 B OVER 0 0 PAD DOIT 2DROP 2DROP
 PAD 6 + C0 TOGGLE C SWAP 0 0 PAD DOIT  2DROP 2DROP ;
 DECIMAL
+( GET-DES     ) ?WI
+HEX
+\ Get the content of the DESCRIPTOR into the BUFFER
+: GET-DES >R >R 0B R> 0 0 R> BIOS31
+    1 AND 0D ?ERROR  2DROP 2DROP ;
+: .PRIV 5 + C@ 5 RSHIFT 3 AND ." PRIVILEGE LEVEL: " . CR ;
+: NOT 0= IF ." NOT " THEN ;
+: .CODE
+DUP 1 AND NOT ." ACCESSED ,"    DUP 2 AND NOT ." READABLE ,"
+DUP 4 AND NOT ." CONFORMING ,"  DUP 8 AND NOT ." PPPPPPPP "
+DROP ;
+: .DATA
+DUP 1 AND NOT ." ACCESSED ,"    DUP 2 AND NOT ." WRITABLE ,"
+DUP 4 AND NOT ." EXPAND DOWN ,"  DUP 8 AND NOT ." PPPPPPPP "
+DROP ;
+DECIMAL
+( .CD )         ?WI
+HEX
+: .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
+." CODE SEGMENT: " R@ .CODE ELSE
+." DATA SEGMENT: " R@ .DATA THEN
+   ELSE ." SOME SORT OF GATE" THEN CR RDROP ;
+: .LIMIT DUP @ 0FFFF AND  OVER 6 + C@ 0F AND  DH.
+   ."  PARAGRAPHS OF " 6 + C@
+80 AND IF ." A 4K PAGE"  ELSE ." ONE BYTE" THEN  CR  ;
+: .BASE >R   R@ 2 + @ 0FFFF AND  R@ 4 + @ 0FF AND
+R@ 6 + @ 0FF00 AND OR   RDROP
+ ." LINEAR BASE ADDRESS : " DH. CR ;
+: .ST 6 + C@ 40 AND IF ." 32-BITS " ELSE ." 16-BITS" THEN
+ CR ;
+: .SEG   DUP .PRIV   DUP .ST   DUP .CD   DUP .BASE   .LIMIT  ;
+DECIMAL
+( GET-SEL PUT-SEL ) ?WI
+HEX
+\ Make the selector DESCRIPTION 32 bits from 16 bits or vv.
+: TOGGLE-32   6 + 40 TOGGLE ;
+\ Make the selector DESCRIPTION code from data or vv.
+: TOGGLE-CODE   5 + 8 TOGGLE ;
+\ For an existing SELECTOR, return an ALIAS
+: GET-ALIAS  0A SWAP 0 0 0 BIOS31 1 AND 0D ?ERROR 2DROP DROP ;
+\ Get a SELECTOR to BUFFER
+: GET-SEL   >R 0B SWAP 0 0 R> BIOS31 1 AND 0D ?ERROR
+2DROP 2DROP ;
+\ Install a SELECTOR from BUFFER
+: PUT-SEL   >R 0C SWAP 0 0 R> BIOS31 1 AND 0D ?ERROR
+2DROP 2DROP ;
+
+DECIMAL
+( Experiment with DPMI testing  the jumps to 32 bit code. )
+PC GET-ALIAS CONSTANT NEW       \ Create a new segment that
+NEW PAD GET-SEL                 \ differs from current code
+PAD TOGGLE-32                   \ segment in being 32 bit.
+PAD TOGGLE-CODE  ( Alias always return data segments )
+NEW PAD PUT-SEL
+
+\ To prove that we can actually use the 32 bits code segment.
+CODE CRASH    \ It doesn't crash. But pushes a 32 bit EAX !
+JMPFAR, HERE 4 + , NEW ,
+PUSH|X, AX|
+JMPFAR, HERE 6 + , 0 , PC ,
+NEXT C;
+\ This pushes return information correct for a 16 bit segment
+CODE CRASH2   AS:, CALLFAR, HERE 4 + , 0 , PC ,   NEXT C;
+
 ( Experiment with GDT etc.) HEX
 ( 32 K GDT AT 0001.8000 ) 2800 CONSTANT GDT-SEGMENT
 7FFF IVAR GDT 2.8000 SWAP , ,
