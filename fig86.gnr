@@ -168,7 +168,7 @@ GDT_CS EQU 10H  ;{ % The protected mode code segment }
 ; { uses data from the sandbox.}
 GDT_DS         EQU     DS_SANDBOX ;{ % The protected mode data segment}
 ; Start addresses belonging to the descriptors.
-CS_START        EQU     BOOTADDRESS
+CS_START        EQU     BOOTADDRESS - M4_ORG
 DS_START        EQU     CS_START ; {Don't want these to be different in prot. mode}
 SWITCH_START    EQU     10H*GDT_SWITCH ;{This relation makes switching possible.}
 
