@@ -1927,7 +1927,7 @@ HEADER({?BLANK},{QBL},{DOCOL})
         DC      LBL, ONEP, LESS
         DC      SEMIS
 ;
-worddoc( {PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
+worddocsafe( {PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
 {Parse the forthdefi({current input source}) leaving the next
 character forthvar({chr}) and its address forthvar({addr}) . If
 at the end of the input source, leave a pointer past the end
@@ -1952,14 +1952,14 @@ INBRS2:
 ;
 worddocsafe( {PARSING},{(WORD)},{paren_word},{--- sc},{CI L0},
 {Parse the forthdefi({current input source}) for a word, i.e.
-observing forthcode({?BLANK}) . Skip leading delimiters then
+blank-delimited as per forthcode({?BLANK}) . Skip leading delimiters then
 advance the input pointer to past the next delimiter or past
 the end of the input source. Leave the word found as a string
-constant forthvar({sc}) . _VERBOSE_({{As it goes with string
+constant forthvar({sc}). _VERBOSE_({{As it goes with string
 constants, you may not alter its content, nor assume anything
 is appended. Note that this is more deserving of the name
-``WORD'' than what is in the ISO standard, cf. forthsamp({:
-LINE LINEFEED WORD ;}). }})},
+``WORD'' than what is in the ISO standard, that can be used to parse lines.
+}})},
 {{BLK},{WORD},{IN}},
 {{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
@@ -1991,7 +1991,7 @@ its content, nor assume anything is appended.}})
 _VERBOSE_({{So no leading delimiters are skipped.}})
 _VERBOSE_({{The difference with an ISO forthsamp({PARSE}) is that
 ISO considers control characters a match for a blank.}})},
-{{WORD},{WORD}},
+{{WORD},{(WORD)}},
 {{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 HEADER({(PARSE)},{PPARS},{DOCOL})
         DC      SRC, CELLP, TFET
@@ -3883,7 +3883,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
 });_END_({_LOAD_})
 });_END_({_SECURITY_})
 ;
-worddoc( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,L1},
+worddocsafe( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,L1},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
@@ -3897,7 +3897,7 @@ HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {PARSING},{]},{righ_bracket},{},{ISO,FIG,L1},
+worddocsafe( {PARSING},{]},{righ_bracket},{},{ISO,FIG,L1},
 {Resume compilation, to the completion of a colon-definition.},
 {{[}},
 {{." Via ["},{Via [}},
@@ -4116,16 +4116,16 @@ worddocsafe( {OUTPUT},{."},{dot_quote},{},{ISO,FIG,I,L0},
   forthsamp({." cccc"})
 In a definition it compiles an in-line string forthsamp({cccc}) (as if the denotation forthcode({"cccc"}) was used)
 followed by forthcode({TYPE}) .
-In ciforth forthcode({."}) will behave the same in interpret mode.
+In ciforth forthcode({."}) behaves the same way in interpret mode.
 In ciforth the number of characters has no limit.
 In ciforth forthcode({."}) always has an effect
 on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
-_VERBOSE_({{We recomment that forthsamp({." cccc"}) is replaced by forthsamp({"cccc" TYPE}).}})
+_VERBOSE_({{We recommend that forthsamp({." cccc"}) is replaced by forthsamp({"cccc" TYPE}).}})
 )},
 {{OUT}},
 {{." the end" },{the end},
-{: GS1 ." ""the end"" he said" ; GS1 },{"the end" he said}},
+{: GS1 ." ""the end"" he said" ; GS1 },{"the end" he said},
 {: GS1 ." the end" ; GS1 },{the end}},
 enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
@@ -4141,10 +4141,11 @@ DOTQ2:
         DC      SEMIS   ;{ THEN}
 ;
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
-{ In ciforth this is an alias for ." , except that the string is closed with forthkey({{)}}).
+{ In ciforth this is an alias for ." , except that the string is closed with forthkey({{)}})
+_VERBOSE_({{instead of parsed as per forthcode({"}) }}).
 In ISO programs you may only use this word while interpreting.
-_VERBOSE_({{We recomment that forthsamp({.( cccc)}) is replaced by forthsamp({"cccc" TYPE}).}})
-)},
+_VERBOSE_({{We recommend that forthsamp({.( cccc)}) is replaced by forthsamp({"cccc" TYPE}).}})
+},
 {{OUT},{."}},
 {{.( the end)},{the end}},
 enddoc)
@@ -4177,7 +4178,7 @@ _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
 ;       DC      DOTS
         DC      SEMIS
 ;
-worddoc( {PARSING}, {EVALUATE}, , {sc --- ??}, {ISO},
+worddoc( {PARSING}, {EVALUATE}, {evaluate}, {sc --- ??}, {ISO},
 {Interpret the content of forthvar({sc}). Afterwards return to
 the forthdefi({current input source}) .},
 {{LOAD},{INCLUDE},{SET-SRC}},
@@ -4379,8 +4380,7 @@ In ciforth the character string is positioned
 at the dictionary buffer forthcode({HERE}) .
 forthcode({WORD}) leaves the character count in the first byte, the characters, and
 ends with two or more blanks.
-If forthcode({BLK}) is zero text is taken from the terminal input buffer,
-otherwise from the disc block stored in forthcode({BLK}) .},
+},
 {{BLK} ,{IN}},
 {{: GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
@@ -4450,7 +4450,7 @@ are just ignored, to improve readability. If the first
 unconvertible digit is not a blank, this is an error. },
 {{NUMBER},{?BLANK}},
 {{ (NUMBER) 1324 D.},{1324} },
-}, enddoc)
+enddoc)
 HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, ZERO
         DC      ZERO, DPL, STORE
@@ -4564,7 +4564,7 @@ TONUM9:
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{FOUND},{found},{sc --- dea},{},
 { Look up the string forthvar({sc}) in the dictionary observing
-the the current search order. If found, leave the dictionary
+the current search order. If found, leave the dictionary
 entry address forthvar({dea}) of the first entry found, else
 leave a nil pointer.},
 {{SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
@@ -4942,8 +4942,8 @@ definition containing the literal will push it to the stack. If
 executing, the number will remain on the stack.},
 {{SLITERAL},{DLITERAL}},
 {
-{: GS1 [ 0.46 ] SDLITERAL DROP EMIT ; GS1},{F} },
-{: GS3 [ 45 ] SDLITERAL EMIT ; GS3},{E} },
+{: GS1 [ 0.46 ] SDLITERAL DROP EMIT ; GS1},{F},
+{: GS3 [ 45 ] SDLITERAL EMIT ; GS3},{E},
 },
 enddoc)
 HEADER({SDLITERAL},{SDLITE},{DOCOL}, , B_IMMED)
@@ -4984,20 +4984,21 @@ HEADER({?STACK},{QSTAC},{DOCOL})
         PAGE
 });_END_({_SECURITY_})
 ;
-worddoc( {PARSING},{INTERPRET},{interpret},{},{},
-{Repeatedly fetch the next text word in the input source and
+worddoc( {PARSING},{INTERPRET},{interpret},{?? --- ??},{},
+{Repeatedly fetch the next text word from the
+forthsamp({current input source}) and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
-up in the vocabularies of forthcode({SEARCH-ORDER}) . Failing that a
-string consisting of the first character is looked up in the
-forthcode({DENOTATION}) wordlist. If it is not found at all, it
+up in the vocabularies of forthcode({SEARCH-ORDER}), failing that in the
+ forthcode({DENOTATION}) wordlist.
+Note that the denotations are also present
+at the end of the forthcode({FORTH}) wordlist. If it is not found at all, it
 is an forthcode({ERROR}).
-_VERBOSE_({{ If the word name cannot be found after a search of
-forthcode({SEARCH-ORDER}), it is considered as a
-forthdefi({denotation}) of a number, a double number, a
-character or a string or whatever. Denotations are handled
-respectively by the words forthcode({0}) ... forthcode({F})
-forthcode({&}) forthcode({"}) and any other word of the
+_VERBOSE_({{A forthdefi({denotation}) is a number, a double number, a
+character or a string etc. Denotations are handled
+respectively by the words
+forthcode({0}) ... forthcode({F}) forthcode({&}) forthcode({"}) and
+any other word of the
 forthcode({DENOTATION}) wordlist, depending on the first
 character. A number is converted according to the current base.
 If a decimal point is found as part of a number, the number
@@ -5529,9 +5530,9 @@ MAX1:   DC      DROP
         DC      SEMIS
 ;
 worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
-{Perform a forthsamp({{logical {{shift}} }}) of the bits of
+{Perform a forthsamp({{logical {{{shift}}} }}) of the bits of
 forthvar({u1}) to the left by forthvar({n}) places.
-_VERBOSE_({{Put zero into the places uncovered by the {{shift}}.}}) },
+_VERBOSE_({{Put zero into the places uncovered by the {{{{{shift}}}}}.}}) },
 {{RSHIFT},{2*}},
 {{1 2 LSHIFT .},{4}},
 enddoc)
@@ -5542,9 +5543,9 @@ CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
         _PUSH
 ;
 worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
-{Perform a forthsamp({{logical {{shift}}}}) of the bits of
+{Perform a forthsamp({{logical {{{shift}}} }}) of the bits of
 forthvar({u1}) to the right by forthvar({n}) places.
-_VERBOSE_({{Put zero into the places uncovered by the {{shift}}.}}) },
+_VERBOSE_({{Put zero into the places uncovered by the {{{{{shift}}}}}.}}) },
 {{LSHIFT},{2/}},
 {{4 2 RSHIFT .},{1}},
 enddoc)
@@ -5684,8 +5685,8 @@ worddocsafe( {OPERATOR},{*},{star},{n1 n2 --- n3},{ISO,FIG,L0},
 forthvar({n1}) and forthvar({n2}) .},
 {{+},{-},{/},{MOD}},
 {
-  {DECIMAL 24 204 * .},{4896} },
-  {DECIMAL -24 204 * .},{-4896} }
+  {DECIMAL 24 204 * .},{4896},
+  {DECIMAL -24 204 * .},{-4896}
 },
 enddoc)
 HEADER({*},{STAR},{DOCOL})
@@ -5750,7 +5751,7 @@ worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG,L
 forthsamp({n4}) of the operation forthsamp({n1*n2/n3}) (using forthdefi({symmetric division})).
 A double precision
 intermediate product is used giving correct results, unless
-forthvar({n4}) or forthvar({n5}) overflow.
+forthvar({n4}) or forthvar({n5}) overflows.
 _VERBOSE_({{ forthsamp({n1 n2 * n3 /}) gives an incorrect answer
 as soon as forthsamp({n1 n2 *}) overflows.}})
 },
@@ -5774,7 +5775,7 @@ worddoc( {MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{ISO,FIG,L0},
 numbers(using forthdefi({symmetric division})).
 A double precision
 intermediate product is used giving correct results, unless
-forthvar({n4}) overflow.
+forthvar({n4}) overflows.
 },
 {{*/MOD},{/MOD}},
 {
@@ -5874,8 +5875,9 @@ If forthcode({WARNING}) is zero (disc unavailable), the message will simply be i
 {{ERROR}},
 {
 {1 WARNING ! -190 MESSAGE}, {( -w This_option_is_available )},
-{1 WARNING ! HEX 12 MESSAGE},{ : EXECUTION ONLY }},
-{0 WARNING ! HEX 12 MESSAGE},{}},
+{1 WARNING ! HEX 12 MESSAGE},{ : EXECUTION ONLY },
+{0 WARNING ! HEX 12 MESSAGE},{}
+},
 enddoc)
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      LWARN
@@ -6011,7 +6013,6 @@ transferred automatically to disc should its buffer be required for
 storage of a different block. In fact the block is transferred
 to disk immediately.},{{BLOCK},{SCREEN}},
 {{BLOCK-EXIT 2 BLOCK-INIT 1 BLOCK DROP UPDATE},{} },
-},
 enddoc)
 HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV, FETCH
@@ -6127,7 +6128,6 @@ They are no longer associated with a block and their content is
 no longer available.
 },{{EMPTY-BUFFERS},{BLOCK},{SCREEN}},
 {{1 BLOCK DROP PREV @ @ 0= . FLUSH PREV @ @ 0= .},{0 _T_} },
-},
 enddoc)
 HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
 
@@ -6148,7 +6148,6 @@ prior to changing the forthdefi({current input source}).
 This must be balanced by a RESTORE in the same definition.},
 {{RESTORE},{SAVE-INPUT}},
 {{!CSP : GS1 SAVE 0 IN ! RESTORE ; GS1 34 . ?CSP},{34} },
-},
 enddoc)
 HEADER({SAVE},{SAVE},{DOCOL})
         DC      FROMR
@@ -6242,7 +6241,6 @@ Unlocking without a previous lock may lead to a crash.
 {
 {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
  PREV @ CELL+ @ . 1 UNLOCK PREV @ CELL+ @ .},{-1 1} },
-},
 enddoc)
 HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      BLOCK
@@ -6646,9 +6644,10 @@ HEADER({BDOSO},{BDOSO},{DOCOL})
 });_END_({_SIMULATE_BIOS_})
 });_END_({ _PC_})
 _HOSTED_LINUX_({
-worddoc( {OPERATINGSYSTEM},{LINOS},{linos},{p1 p2 p3 n---ret},{},
+worddoc( {OPERATINGSYSTEM},{LINOS},{linos},{n1 n2 n3 n---ret},{},
 { Do a Linux
-system call (man 2) with parameters forthsamp({p1 p2 p3}).
+system call forthvar({n})
+(man 2) with parameters forthsamp({n1 n2 n3}).
 forthsamp({ret}) is the return value of the call. If it is negative, it
 is mostly an error, such as known by forthsamp({errno}) . This makes
 available all facilities present in Linux, except those with 4 or 5 parameters
@@ -6664,12 +6663,12 @@ CODE_HEADER({LINOS},{LINOS})
         INT     80H        ;{ Generic call on LINUX }
         _PUSH     ; Positive means okay. Negative means -errno.
 ;
-worddoc( {OPERATINGSYSTEM},{LINOS5},{linos5},{p1 p2 p3 p4 p5 n---ret},{},
-{ Do a Linux
-system call (man 2) with parameters forthsamp({p1 p2 p3 p4 p5}).
-forthsamp({ret}) is the return value of the call. If it is negative, it
-is mostly an error, such as known by forthsamp({errno}) . This makes
-available forthemph({all}) facilities present in Linux.
+worddoc( {OPERATINGSYSTEM},{LINOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
+{ Do a Linux system call forthvar({n}) (man 2) with parameters
+forthsamp({n1 n2 n3 n4 n5}). forthsamp({ret}) is the return
+value of the call. If it is negative, it is mostly an error,
+such as known by forthsamp({errno}) . This makes available
+forthemph({all}) facilities present in Linux.
 },{{?ERRUR}},
 {{1 "CHIMP" 0 0 4 LINOS5 .},{CHIMP5}},
 enddoc)
@@ -6687,8 +6686,8 @@ CODE_HEADER({LINOS5},{LINOS5})
         LEA     RPO,[RPO+_CELLS(1)]
         _PUSH     ; Positive means okay. Negative means -errno.
 ;
-worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
-{ Wait for forthvar({n1}) milliseconds. },
+worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
+{ Wait for forthvar({n}) milliseconds. },
 {{KEY?}},
 {{ 123 10 MS . },{123}},
 enddoc)
@@ -6853,14 +6852,16 @@ HEADER({RWBUF},{RWBUF},{DOVAR},)
 });_END_({ _HOSTED_LINUX_})
 ;
 worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
-{Leaves an address that contains a zero-ended equivalent of forthvar({sc}).
+{Leaves an address that contains a zero-ended (c-type) equivalent of forthvar({sc}).
 The same buffer is reused, such that this word is not reentrant.
 _VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
-to MSDOS. In fact this is forthcode({RW-BUFFER}) }})
+to the operating system. In fact this is forthcode({RW-BUFFER}) . }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
-{{OPEN-FILE},{BIOSN},{BDOSN}},
+_HOSTED_LINUX_({ {{OPEN-FILE},{LINOS},{LINOS5}}, })
+_HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}}, })
+_HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_DPMI_({
@@ -9100,9 +9101,9 @@ worddocsafe( {OUTPUT},{(D.R)},{paren_d_dot_r},{d n ---sc},{ISO,FIG},
 {Format a signed double number forthvar({d}) right aligned in a
 field forthvar({n}) characters wide to the string forthvar({sc}).
 Enlarge the field, if
-needed. _VERBOSE_({{By giving a field length of 0, it is ignored.}}).
+needed. _VERBOSE_({{So a field length of 0 results effectively in free format.}})
 },
-{{OUT},{D.}},
+{{OUT},{D.},{D.R}},
 {{-12. 41 EMIT 5 (D.R) 41 EMIT TYPE},{A  A-12}},
 enddoc)
 HEADER({(D.R)},{PDDOTR},{DOCOL})
@@ -9124,8 +9125,8 @@ HEADER({(D.R)},{PDDOTR},{DOCOL})
 worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{ISO,FIG},
 {Print a signed double number forthvar({d}) right aligned in a
 field forthvar({n}) characters wide. Enlarge the field, if
-needed. _VERBOSE_({{By giving a field length of 0, it is ignored.}}).
-
+needed.
+_VERBOSE_({{So a field length of 0 results effectively in free format.}})
 },
 {{OUT},{D.},{(D.R)}},
 {{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}},
@@ -9136,8 +9137,11 @@ HEADER({D.R},{DDOTR},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {OUTPUT},{.R},{dot_r},{n1 n2 ---},{},
-{Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
-following blank is printed.},
+{Print a signed number forthvar({n1}) right aligned in a
+field forthvar({n2}) characters wide. Enlarge the field, if
+needed.
+_VERBOSE_({{So a field length of 0 results effectively in free format.}})
+},
 {{OUT},{.},{(D.R)}},
 {{-12 41 EMIT 5 .R 41 EMIT},{A  -12A}},
 enddoc)
@@ -9149,9 +9153,10 @@ HEADER({.R},{DOTR},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{D.},{d_dot},{d ---},{ISO,FIG,L1},
-{Print a signed double number forthvar({d}),
-according to the current forthcode({BASE}) . A blank follows.
-},{{OUT},{.},{D.R},{(D.R)}},
+{Print the signed double number forthvar({d}),
+observing the current forthcode({BASE}), followed by a blank.
+},
+{{OUT},{.},{D.R},{(D.R)}},
 {{-12. D. 41 EMIT},{-12 A}},
 enddoc)
 HEADER({D.},{DDOT},{DOCOL})
@@ -9161,9 +9166,9 @@ HEADER({D.},{DDOT},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {OUTPUT},{.},{dot},{n ---},{ISO,FIG,L0},
-{Print a number from a signed _BITS_ bit two's complement value,
-converted according to the numeric forthcode({BASE}) .
-A blanks follows.},
+{Print the number forthvar({n1})
+observing the current forthcode({BASE}), followed by a blank.
+},
 {{OUT},{U.},{.R},{D.R},{D.},{(D.R)}},
 {{-12 41 EMIT . 41 EMIT},{A-12 A}},
 enddoc)
@@ -9173,8 +9178,9 @@ HEADER({.},{DOT},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{?},{question},{addr ---},{ISO,FIG,L0},
-{Print the value contained at the address in free format according to
-the current base.},
+{Print the value contained at the address forthvar({addr})
+observing the current forthcode({BASE}), followed by a blank.
+},
 {{OUT},{.}},
 {{-12 PAD ! 41 EMIT PAD ? 41 EMIT},{A-12 A}},
 enddoc)
@@ -9184,10 +9190,9 @@ HEADER({?},{QUES},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {OUTPUT},{U.},{u_dot},{u ---},{ISO},
-{Print a number from a unsigned _BITS_ bit value,
-converted according to the numeric forthcode({BASE}) .
-A trailing blanks
-follows.},
+{Print the unsigned number forthvar({u})
+observing the current forthcode({BASE}), followed by a blank.
+},
 {{OUT},{.},{.R},{D.R},{D.},{(D.R)}},
 _BITS32_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
 {-1 41 EMIT U. 41 EMIT},{AFFFFFFFF A}},})
@@ -9748,35 +9753,38 @@ Divisions involving negative numbers have an interpretation problem.
 In any case we want the combination of forthcode({/}) and
 forthcode({MOD}) (remainder) to be such that you can get the
 original forthsamp({n}) back from the two values left by
-forthsamp({n m MOD m n /}) by performing forthsamp({m * +}) .
+forthsamp({n m MOD}) and  forthsamp({n m /}) by performing forthsamp({m * +}) .
 This is true for all Forth's.
 On ciforth the forthcode({/}) is a forthdefi({symmetric division}), i.e.
 forthsamp({-n m /}) give the same result as forthsamp({n m /}), but negated.
-The foregoing rule now has the consequence that forthsamp({MOD n m})
-has forthsamp({2m-1}) possible outcomes instead of forthsamp({m}) .
-This is very worrysome for mathematicians, who stick to the rule that
-forthsamp({MOD n m}) gives a result in the range forthsamp({0 ... m-1})
-(forthdefi({floored division})).
-_BITS16_({Having a mere 30000 for the number range can easily lead to
-overflow in intermediate results during forthdefi({scaling}): a multiplication
-followed by a division. _VERBOSE_({{For example forthsamp({: ADD10% 110
-* 100 / ;})}}). There are special operators to get around that.
+The foregoing rule now has the consequence that forthsamp({m MOD})
+has forthsamp({2|m|-1}) possible outcomes instead of forthsamp({|m|}) .
+This is very worrysome for mathematicians, who stick to the
+rule that forthsamp({m MOD}) has forthsamp({|m|}) outcomes:
+forthsamp({0 ... |m|-1}), or forthsamp({-|m|+1 ... 0 }) for
+negative numbers. (forthdefi({floored division})). _BITS16_(
+{Having a mere 30000 for the number range can easily
+lead to overflow in intermediate results during
+forthdefi({scaling}): a multiplication followed by a division.
+_VERBOSE_({{For example forthsamp({: ADD10% 110 * 100 / ;})}}).
+There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
-{},{},{},{}, {}, enddoc)
-worddocchapter({OUTPUT},{ },
-{The wordset forthsamp({OUTPUT}) contains words to output
-to the terminal and such. For disk I/O: forthxref({FILES}) forthxref({BLOCKS}) },
+ {},{},{},{}, {}, enddoc)
+worddocchapter({OUTPUT},{ }, {The wordset forthsamp({OUTPUT})
+contains words to output to the terminal and such.
+forthxref({FILES}) for disk I/O. forthxref({BLOCKS}) for
+blocks.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
-i.e. it gets a word from the forthdefi({current input source})
-and interprets or compiles it, advancing the
-_CIF_IN_({forthcode({IN})}) _ISO_IN_({forthcode({>IN})})
-pointer. The wordset forthsamp({PARSING}) contains the words
-used by this interpreter and other words that consume
-characters from the input source. In this way the outer
-interpreter need not be very smart, because its capabilities
-can be extended by new words based on those building blocks.},
+i.e. it gets a word from the forthdefi( {current input source}
+) and interprets or compiles it, advancing the _CIF_IN_(
+{forthcode({IN})}) _ISO_IN_( {forthcode({>IN})}) pointer. The
+wordset forthsamp({PARSING}) contains the words used by this
+interpreter and other words that consume characters from the
+input source. In this way the outer interpreter need not be
+very smart, because its capabilities can be extended by new
+words based on those building blocks.},
 {},{},{},{})
 worddocchapter({SCREEN},{ },
 {Most of the mass storage is used for forthdefi({screen})'s that
@@ -9811,12 +9819,16 @@ Stacks can be reinitialised and the value used to initialise the
 forthdefi({stack pointer})'s can be altered.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({BLOCKS},{ },
-{The wordset forthsamp({BLOCKS}) contains words to input and
-output to the block mass storage. In this ciforth blocks reside
+{The block mechanism connects to the Forth system a single background
+storage divided in numbered blocks.
+The wordset forthsamp({BLOCKS}) contains words to input and
+output to this mass storage. In this ciforth blocks reside
 _RWSECTRK_({{ on the disk, by sector and track, }}) _BOOTLBA_({
 on the hard disk}) _HOSTED_({{in a file, by default
-named forthfile({forth.lab}). }}). They are underlying the
-forthsamp({SCREEN}) facilities.},
+named forthfile({forth.lab}). }}). Most blocks are used for the
+forthsamp({SCREEN}) facility, where each block contains source
+code.
+},
 {},{},{},{}, {}, enddoc)
 _FILES_({
 worddocchapter({FILES},{ },
