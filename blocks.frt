@@ -1,4 +1,4 @@
-COPYRIGHT (c) 2000-2001 STICHTING DFW , THE NETHERLANDS
+COPYRIGHT (c) 2000-2002 STICHTING DFW , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -14,7 +14,7 @@ License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
-( -a silent_version_of_require)
+( -a :_Make_require_available_silently ) \ AvdH A2jan20
 ( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
 \ For LINE and WORD sc's : line CONTAINS word.
@@ -30,7 +30,7 @@ DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
-( -b This_option_is_available )
+( -b :_This_option_is_available )
 
 
 
@@ -46,7 +46,7 @@ DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 
 
 
-( -c PROGRAM_:_compile_PROGRAM_to_binary ) \ AvdH A1oct02
+( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH A1oct02
 1 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
 REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
 
@@ -62,7 +62,7 @@ FILE-NAME $@ INCLUDED
 LATEST   FILE-NAME $@ SRC>EXEC   TURNKEY
 
 
-( -d This_option_is_available )
+( -d :_This_option_is_available )
 
 
 
@@ -78,7 +78,7 @@ LATEST   FILE-NAME $@ SRC>EXEC   TURNKEY
 
 
 \
-( -e system_electives ) \ AvdH A1oct19
+( -e :_Load_system_electives ) \ AvdH A1oct19
 .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
 
 REQ CONFIG
@@ -94,7 +94,7 @@ REQ EDITOR   REQ OOPS                         OK  EXIT
 
 
 : TASK ;   ( 'REQ HIDDEN)     OK
-( -f forth_words_to_be_executed_80_chars) \ AvdH A1oct05
+( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD  REQUIRE CONFIG   ?LI
 REQUIRE ARGV   REQUIRE CTYPE
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
@@ -110,7 +110,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 \
-( -g This_option_is_available )
+( -g :_This_option_is_available )
 
 
 
@@ -142,7 +142,23 @@ DOIT    COMMAND-BUFFER $@
 
 
 \
-( -i This_option_is_available )
+( -i BIN_INSTALL_PATH LIB_INSTALL_PATH :_Install) \ A1jan20
+CREATE task
+1 LOAD
+REQUIRE SAVE-SYSTEM   REQUIRE ARG[]
+BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
+3 ARG[] BLOCK-FILE $!
+\ Trim back to before ``task''. Save system at binary path.
+: DOIT   'task    DUP 'FORTH FORGET-VOC   >NFA @ DP !
+    2 ARG[] SAVE-SYSTEM   BYE ;
+
+\ Must all be done in one go!
+DOIT
+
+
+
+\
+( -j :_This_option_is_available )
 
 
 
@@ -158,7 +174,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 \
-( -j This_option_is_available )
+( -k :_This_option_is_available )
 
 
 
@@ -174,23 +190,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 \
-( -k This_option_is_available )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\
-( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
+( -l LIBRARY :_LIBRARY_to_be_used_for_blocks ) \ AvdH A1oct05
 CREATE task
 1 LOAD   REQUIRE SHIFT-ARGS   REQUIRE ARG[]
 \ Install other library
@@ -206,7 +206,23 @@ SWITCH-LIBS
 
 
 \
-( -m This_option_is_available )
+( -m/--/--help/--version :_Help_and_version_information )
+1 26 INDEX   OK         \ Help
+22 LOAD
+
+
+
+
+
+
+
+
+
+
+
+
+\
+( -n :_This_option_is_available )
 
 
 
@@ -222,7 +238,7 @@ SWITCH-LIBS
 
 
 \
-( -n This_option_is_available )
+( -o :_This_option_is_available )
 
 
 
@@ -238,23 +254,7 @@ SWITCH-LIBS
 
 
 \
-( -o This_option_is_available )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\
-( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
+( -p :_Load_system_preferences ) \ AvdH A1oct02
 5 LOAD
 
 
@@ -270,7 +270,7 @@ SWITCH-LIBS
 
 
 
-( -q This_option_is_available )
+( -q :_This_option_is_available )
 
 
 
@@ -286,7 +286,7 @@ SWITCH-LIBS
 
 
 \
-( -r :_make_require_available ) \ AvdH A1oct04
+( -r :_Make_require_available ) \ AvdH A1oct04
 .SIGNON   1 LOAD   OK
 
 
@@ -302,7 +302,7 @@ SWITCH-LIBS
 
 
 \
-( -s SCRIPT-FILE_:_interpret_SCRIPT-FILE ) \ AvdH A1oct02
+( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
 DROP  1 LOAD    REQUIRE CTYPE   REQUIRE OLD:
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT SCRIPT-NAME
 \ This error handler may be overwritten by the script.
@@ -318,7 +318,7 @@ SCRIPT-NAME $@ GET-FILE
 ^J $S 2DROP     \ Line with #!lina
 EVALUATE
 BYE
-( -t This_option_is_available )
+( -t :_This_option_is_available )
 
 
 
@@ -334,7 +334,7 @@ BYE
 
 
 \
-( -u This_option_is_available )
+( -u :_This_option_is_available )
 
 
 
@@ -350,10 +350,9 @@ BYE
 
 
 \
-( -v Version_and_copyright_information_)
-"               CPU  NAME  VERSION  " TYPE
- .SIGNON CR
-"                 LIBRARY FILE: " TYPE CR
+( -v :_Version_and_copyright_information_)
+"CPU  NAME  VERSION" TYPE .SIGNON CR
+"LIBRARY FILE: " TYPE
 "$RCSfile$ $Revision$" TYPE CR
 CR
 0 LIST
@@ -365,24 +364,9 @@ BYE
 
 
 
-\
-( -w This_option_is_available )
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 \
-( -x This_option_is_available )
+( -w :_This_option_is_available )
 
 
 
@@ -398,7 +382,7 @@ BYE
 
 
 \
-( -y This_option_is_available )
+( -x :_This_option_is_available )
 
 
 
@@ -414,7 +398,7 @@ BYE
 
 
 \
-( -z This_option_is_available )
+( -y :_This_option_is_available )
 
 
 
@@ -430,7 +414,7 @@ BYE
 
 
 \
-(    This_option_is_available )
+( -z :_This_option_is_available )
 
 
 
@@ -446,7 +430,7 @@ BYE
 
 
 \
-(    This_option_is_available )
+(    :_This_option_is_available )
 
 
 
@@ -462,7 +446,7 @@ BYE
 
 
 \
-(    This_option_is_available )
+(    :_This_option_is_available )
 
 
 
@@ -478,7 +462,7 @@ BYE
 
 
 \
-( -  This_option_is_available )
+(    :_This_option_is_available )
 
 
 
@@ -494,7 +478,23 @@ BYE
 
 
 \
-( -? This_option_is_available )
+( -  :_This_option_is_available )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\
+( -? :_This_option_is_available )
 
 8 LOAD
 
@@ -898,14 +898,14 @@ DROP   CURRENT !
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
      MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
-\ ISO
-: ALIGN   BEGIN HERE 0 CELL+ 1- AND WHILE 0 C, REPEAT ;
 \ In general use
 : BOUNDS   OVER + SWAP ;
 
 
-
-
+"ALIGNED" PRESENT? ?LEAVE-BLOCK
+\ ISO
+: ALIGNED    1-   0 CELL+ 1- OR   1+ ;
+: ALIGN   DP @   ALIGNED   DP ! ;
 
 
 
