@@ -87,14 +87,12 @@
 
 ( ############### PART I ASSEMBLER #################################### )
 ( MAYBE NOT PRESENT UTILITIES                                           )
-: INVERT -1 XOR ;
 : @+ >R R CELL+ R> @ ; ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
 : !+ >R R ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
 : @- 0 CELL+ - >R R @ R>  ; 
 ( CHAR - CONSTANT &-     CHAR ~ CONSTANT &~                             )
-  45 CONSTANT &-     126 CONSTANT &~                             
-1 VARIABLE TABLE 1 , ( x TABLE + @ yields $100^[-x mod 4] )
+CREATE TABLE 1 , 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in )
 ( memory! Not as printed on a big endian machine! )
 : ROTLEFT TABLE + @ UM* OR ;   ( aqa " 8 * LSHIFT" on bigendian. )
@@ -133,19 +131,19 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( ------------- UTILITIES, SYSTEM INDEPENDANT ----------------------------) 
 (   The FIRST bitset is contained in the SECOND one, leaving it IS      )
 : CONTAINED-IN OVER AND = ;
-0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  
+CREATE TABLE 0 , FF , FFFF , FFFFFF , FFFFFFFF ,  
 ( From a MASK leave only SOME first bytes up, return IT ) 
 ( First means lower in memory, this looks different if printed on b.e.) 
 : FIRSTBYTES CELLS TABLE + @ AND ;
 
 ( ------------- ASSEMBLER, BOOKKEEPING ----------------------------) 
 ( The bookkeeping is needed for error detection and disassembly.        )
-0 VARIABLE TALLY-BI  ( Bits that needs fixed up)
-0 VARIABLE TALLY-BY  ( Bits represent a commaer that is to be supplied)
-0 VARIABLE TALLY-BA  ( State bits, bad if two consequitive bits are up)
-0 VARIABLE PREVIOUS ( Previous comma, or zero)
-0 VARIABLE ISS  ( Start of current instruction)
-0 VARIABLE ISL  ( Lenghth of current instruction)
+VARIABLE TALLY-BI  ( Bits that needs fixed up)
+VARIABLE TALLY-BY  ( Bits represent a commaer that is to be supplied)
+VARIABLE TALLY-BA  ( State bits, bad if two consequitive bits are up)
+VARIABLE PREVIOUS ( Previous comma, or zero)
+VARIABLE ISS  ( Start of current instruction)
+VARIABLE ISL  ( Lenghth of current instruction)
 
 ( Initialise ``TALLY''                                                  )
 : !TALLY   0 TALLY-BI !   0 TALLY-BY !   0 TALLY-BA !  0 PREVIOUS ! ;
@@ -245,7 +243,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 
 ( ------------- ASSEMBLER, SUPER DEFINING WORDS ----------------------) 
 
- 0 VARIABLE PRO-TALLY 2 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
+CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 ( Fill in the tally prototype with BA BY BI information )           
 : T! PRO-TALLY !+ !+ !+ DROP ;
 ( Get the data from the tally prototype back BA BY BI )
@@ -280,7 +278,8 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 : .DISS-AUX DISS @+ SWAP DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
- ' .DISS-AUX CFA   VARIABLE 'DISS  ( Can be redefined to generate testsets)
+( ' DISS can be redefined to generate testsets)
+VARIABLE 'DISS    ' .DISS-AUX 'DISS ! 
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
 : DISS- 0 CELL+ NEGATE DISS +! ; ( Discard last item of `DISS' )
@@ -399,7 +398,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 ;
 
 ( ------------- DISASSEMBLERS ------------------------------------------------) 
-0 VARIABLE POINTER
+VARIABLE POINTER
 HERE POINTER !
 
 ( Get the valid part of the INSTRUCTION under examination               )
@@ -527,8 +526,7 @@ HERE POINTER !
 ; IMMEDIATE
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
 : C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
-: LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
-    !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
+ASSEMBLER DEFINITIONS
 
 
 
