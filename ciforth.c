@@ -151,7 +151,7 @@ int keyq (int fd)
   return 0;
 }				/* no input */
 
-void (*figforth)() = 0x8050000;
+/*  void (*figforth)() = 0x8050000;                                          */
 
 /* This is absolutely necessary, but I have no clue. */
 char reservespace[1000000];
@@ -258,16 +258,7 @@ FUNC *call[256] =
 
 int main (int argc, char *argv[])
 {
-  FILE *in;
-  if ((in = fopen ("fig86.linux.bin", "rb")) == NULL)
-    {
-      printf ("Problem opening fig86.linux.bin\n");
-      exit (1);
-    }
-  fread ((char *) figforth, 1, 1000000, in);
-  fclose (in);
   tty_init (0, &std_in);                                                       
-/*tty_noecho (&std_in);                                                      */
-  figforth (argc, argv, &call);
+  _figforth (argc, argv, &call);
   tty_restore (&std_in);                                                       
 }
