@@ -76,10 +76,13 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 \ Leave a POINTER to the set (to fill it in).
 : CHAR-SET CREATE HERE CHAR-SET-SET 2SET+!  ALLOT-CHAR-SET DOES> ;
 \ For a CHAR-SET ; convert it into its complementary set.
-: INVERT-SET MAX-SET 1+ 0 DO I OVER + DUP C@ INVERT SWAP C! LOOP  0 SWAP CLEAR-BIT ;
+: INVERT-SET MAX-SET 0 DO DUP I + DUP C@ INVERT SWAP C! LOOP  0 SWAP CLEAR-BIT ;
 
 \ For CHAR and CHARSET return "it BELONGS to the charset".
 : IN-CHAR-SET   BIT? ;
+
+\ Add CHARSET1 to CHARSET2 .
+: OR-SET! MAX-SET 0 DO OVER I + C@ OVER I + C@ OR OVER I + C! LOOP ;
 
 \ ------------------------------------------
 \                  char sets, actual part
@@ -87,10 +90,16 @@ CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 
 REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Forth.
 
-\ The set of characters to be escaped. Present in CHAR-SET-SET but unfindable.
+\ Passing a 0 makes a char-set unfindable in ``CHAR-SET-SET''.
+
+\ The set of characters to be escaped.
 0 CHAR-SET \\     \ | ^ | $ | + | ? | * | [ | ] | < | > | ( | ) |  DROP
+
 \ For CHAR : "it IS special".
 : SPECIAL?   \\ BIT? ;
+
+\ The set matched by .
+0 CHAR-SET \.  ^J | INVERT-SET
 
 &w CHAR-SET \w   256 1 DO I IS-BLANK? 0= IF I | THEN LOOP DROP
 
@@ -99,6 +108,9 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ &D CHAR-SET \D   \d OVER MAX-SET CMOVE  INVERT-SET
 
 '| HIDDEN
+
+\ For CHAR: "it IS a quantifier".
+: QUANTIFIER? >R R@ &+ = R@ &* = R@ &? = OR OR RDROP ;
 
 \ -----------------------------------------------------------------------
 \                  escape table
@@ -297,12 +309,23 @@ CREATE NORMAL-CHARS 1000 ALLOT
 \ To where is the compiled expression filled.
 VARIABLE RE-FILLED
 
+\ Add ITEM to the ``RE-EXPR''
+: RE,   RE-FILLED @ ! 1 CELLS RE-FILLED +! ;
+
+\ Add STRINGCONSTANT to the ``RE-EXPR''
+: RE$,   DUP >R RE-FILLED $!   RE-FILLED @ CELL+ R@ + ALIGNED RE-FILLED ! ;
+
+\ Add CHARSET to the ``RE-EXPR''.
+: RE-SET,   RE-FILLED MAX-SET MOVE   MAX-SET RE-FILLED +! ;
+
+\ Make a hole in the ``RE-EXPR'' for a quantifier, and leave IT.
+: MAKE-HOLE   MAX-SET CELL+ >R  RE-FILLED R@ -  DUP CELL+ R> MOVE
+    1 CELLS RE-FILLED +! ;
+
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
-: HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF RE-FILLED
-        'MATCH-NORMAL OVER ! CELL+
-        NORMAL-CHARS $@ OVER $!   NORMAL-CHARS @ + ALIGNED
-        RE-FILLED !   NORMAL-CHARS!
+: HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF
+        'MATCH-NORMAL RE,   NORMAL-CHARS $@ RE$,   NORMAL-CHARS!
     THEN
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
@@ -314,23 +337,46 @@ CREATE SET-MATCHED ALLOT-CHAR-SET
 
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
-: HARVEST-SET-MATCHED SET-MATCHED @ IF RE-FILLED
-        'MATCH-SET OVER ! CELL+
-        SET-MATCHED OVER MAX-SET MOVE   MAX-SET +
-        RE-FILLED !   SET-MATCHED!
-    THEN
+: HARVEST-SET-MATCHED SET-MATCHED @ IF
+    'MATCH-SET RE,   SET-MATCHED RE-SET,  SET-MATCHED!
+THEN
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
-\ Add the CHAR to the simple match.
-: ADD-TO-NORMAL NORMAL-CHARS $+! ;
+\ For EP and CHAR : add the char to the simple match, or make it
+\ a single character set, whatever is needed. Leave EP.
+: ADD-TO-NORMAL OVER C@ QUANTIFIER? IF
+    HARVEST-NORMAL-CHARS 'MATCH-SET RE, RE-FILLED \EMPTY RE-SET, SWAP SET-BIT
+ELSE NORMAL-CHARS $+! THEN ;
 
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
+
+: GET-CHAR-SET CHAR-SET-SET WHERE-IN-SET?
+             DUP 0= ABORT" Illegal escaped char set, user error"
+             CELL+ @ ;
+
+\ EP is pointing after an '\' between '[  and ']'. Add the escaped
+\ char (or set) to ``SET-MATCHED''
+: ESCAPE[] C@+
+    DUP GET-ESCAPE DUP IF SET-MATCHED SET-BIT DROP ELSE
+        DROP GET-CHAR-SET SET-MATCHED OR-SET! THEN ;
+
+\ EP is pointing to the first char of a range, between '[' and ']'.
+\ Add the range to the ``SET-MATCHED''
+\ CAN'T HANDLE ESCAPES, BUT WE ARE GOING TO DO THIS BY ELIMINATING
+\ THE ESCAPES IN THE FIRST ROUND BY COPYING THE DATA TO A TEMPORARY
+\ AREA, AND ADDING THE ZERO.
+: SET-RANGE DUP C@ DUP 2+ C@ 1+ SWAP DO I SET-MATCHED SET-BIT LOOP 2DROP 3 + ;
+
 
 \ For EP and the first CHAR of an item (pointing between [ and ] ) add
 \ the item to ``SET-MATCHED''. Leave EP pointing after the item.
-: ADD[]-1
+: ADD[]-1  C@+
+    DUP &\ = IF DROP ESCAPE[] ELSE
+    OVER C@ &- = IF DROP SET-RANGE ELSE
+    SET-MATCHED SET-BIT
+    THEN THEN
+;
 
-here we have left.
 
 \ Build up the set between [ and ] into ``SET-MATCHED''.
 \ EP points after the intial [ , leave it pointing after the closing ].
@@ -343,16 +389,21 @@ here we have left.
 \ Leave EP incremented past the char-set.
 : PARSE-CHAR-SET C@+
     DUP &. = IF DROP \. SET-MATCHED MAX-SET MOVE ELSE
-    DUP &\ = IF DROP C@+ CHAR-SET-SET WHERE-IN-SET?
-             DUP 0= ABORT" Illegal escaped char set, user error"
-             CELL+ @ SET-MATCHED MAX-SET MOVE ELSE
+    DUP &\ = IF DROP C@+ GET-CHAR-SET SET-MATCHED MAX-SET MOVE ELSE
     DUP &[ = IF DROP PARSE[]
     THEN THEN THEN
     HARVEST-SET-MATCHED
 ;
 \    -    -    -   --    -    -   -    -    -   -    -    -   -
+CREATE (RE-EXPR) 1000 ALLOT
+\ Transform the EXPRESSION string. Copy it to the ``(RE-EXPR)'' buffer,
+\ (NOT YET) meanwhile normalising it, i.e. a character has a special meaning, iff
+\ it is preceeded by '\' (NOT YET). Also make it zero ended.
+\ Leave a pointer to the zero ended EXPRESSION to parse.
+: FIRST-PASS >R (RE-EXPR) R@ MOVE   0 (RE-EXPR) R> + C!   (RE-EXPR) ;
+
 \ Everything to be initialised for a build.
-: INIT-BUILD   NORMAL-CHARS!   SET-MATCHED!   RE-EXPR RE-FILLED ! ;
+: INIT-BUILD   FIRST-PASS NORMAL-CHARS!   SET-MATCHED!   RE-EXPR RE-FILLED ! ;
 
 \ Everything to be harvested after a build.
 : EXIT-BUILD   HARVEST-NORMAL-CHARS   HARVEST-CHAR-SET ;
@@ -373,10 +424,36 @@ here we have left.
                      &\ = IF C@+ GET-ESCAPE DUP IF EXIT ELSE 1- THEN THEN
                      1- FALSE ;
 
+\ - - - - - - - - - - - - - - - - - - - - - - - -
+\ Commands that get executed upon a special character
+\ - - - - - - - - - - - - - - - - - - - - - - - -
+
+\ Patch up the previous single character match with a quantifier.
+: ADD*   MAKE-HOLE 'ADVANCE* ! ;
+: ADD+   MAKE-HOLE 'ADVANCE+ ! ;
+: ADD?   MAKE-HOLE 'ADVANCE? ! ;
+
+\ Add specialties, more like markers.
+: ADD<   'CHECK< RE, ;
+: ADD>   'CHECK> RE, ;
+: ADD(   'HANDLE() RE, ALLOCATE( RE, ;
+: ADD)   'HANDLE() RE, ALLOCATE) RE, ;
+
+: | OVER 2 SET+! ;
+SET COMMAND-SET     COMMAND-SET SET!
+&[ 'PARSE-CHAR-SET |   &< 'ADD< |   &> 'ADD> |
+&( 'ADD( |   &) 'ADD) | &* 'ADD* |   &+ 'ADD+ |   &? 'ADD? |
+'| HIDDEN
+
+\ Execute the command that belongs to the abnormal CHARACTER.
+: DO-ABNORMAL COMMAND-SET WHERE-IN-SET?
+             DUP 0= ABORT" Illegal escaped char for command, system error"
+             CELL+ @ EXECUTE ;
+
 \ Parse one element of regular EXPRESSION .
 \ Leave EXPRESSION incremented past parsed part.
-: BUILD-RE-ONE    NORMAL-CHAR? IF ADD-TO-NORMAL ELSE PARSE-CHAR-SET THEN ;
+: BUILD-RE-ONE    NORMAL-CHAR? IF ADD-TO-NORMAL ELSE DO-ABNORMAL THEN ;
 
-\ Parse the zero-ended regular EXPRESSION , put the result in the buffer
+\ Parse the EXPRESSION string, put the result in the buffer
 \ ``RE-PATTERN''.
-; BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE C@ 0= UNTIL DROP ;
+; BUILD-RE INIT-BUILD BEGIN BUILD-RE-ONE C@ 0= UNTIL DROP INIT-BUILD ;
