@@ -303,7 +303,7 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.})
         extern  c_rslw, c_block_exit, c_block_init, c_debug
         global  ciforth
 });_END_({ _HOSTED_LINUX_})
-_HOSTED_MSDOS_({
+_PC_({
 create  EQU     3C00H
 open    EQU     3D00H
 close   EQU     3E00H
@@ -311,7 +311,7 @@ read    EQU     3F00H
 write   EQU     4000H
 delete  EQU     4100H
 lseek   EQU     4200H
-});_END_({ _HOSTED_MSDOS_})
+});_END_({ _PC_})
 
 _HOSTED_LINUX_({
         section forth progbits write exec alloc
@@ -6417,6 +6417,7 @@ CODE_HEADER({BIOSN},{BIOSN})
         MOV     AX,_CELL_PTR[SaveAX]
         PUSH     AX
         MOV     AX,_CELL_PTR[SaveFlags]
+        AND     AX, 1
         PUSH    AX
         _NEXT
 ;
@@ -6527,9 +6528,9 @@ CODE_HEADER({BDOS},{BDOS})
 });_END_({_NORMAL_BIOS_})
 _SIMULATE_BIOS_({
 HEADER({BDOS},{BDOS},{DOCOL})
-        DW      LIT,  21H
-        DW      BIOS
-        DW      SEMIS
+        DC      LIT,  21H
+        DC      BIOS
+        DC      SEMIS
 });_END_({_SIMULATE_BIOS_})
 });_END_({ _PC_})
 _HOSTED_LINUX_({
@@ -6668,16 +6669,16 @@ _HOSTED_DPMI_({
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTORE
         DC      TOR     ; { Count.}
-        DW      ZERO, SWAP, LIT, Save_DS_PR, FETCH
+        DC      ZERO, SWAP, LIT, Save_DS_PR, FETCH
         DC      LIT, TYPEBUF, RR
         DC      FMOVE
-        DC      LIT, TYPEBUF
-        DC      TOR     ; { Buffer address.}
-        DC      LIT,04000H ;{ Write file or device }
+
+        DC      LIT, TYPEBUF, FROMR
         DC      ONE     ;{ Handle}
-        DC      FROMR, FROMR, SWAP
-        DC      BDOS, DROP ;{ ignore error }
-        DC      DROP, DROP, DROP, DROP
+        DC      LIT, write
+
+        DC      BDOSN, DROP ;{ ignore error }
+        DC      DROP
         DC      SEMIS
 ;
 TYPEBUF:  _RESB(0400H)
@@ -6776,8 +6777,8 @@ worddoc( {STORAGE~},{ZEN},{zren},{sc --- addr},{},
 The same buffer is reused, such that this word is not reentrant.
 _VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
 to MSDOS. In fact this is forthcode({RW-BUFFER}) }})
-_HOSTED_DPMI_({{The result is aliased in the "real" segment, such that this address
-can be passed to DPMI. NOT YET! }})
+_HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
+only is useful to be passed to DPMI. }})
 },
 {{OPEN-FILE}},
 {{"AAP" ZEN 3 + C@ .},{0}},
@@ -6807,7 +6808,7 @@ HEADER({READ-FILE},{RFILE},{DOCOL})
         _BRANCH({RFILE2})
 RFILE1:
         DC      TDROP, DROP, TOR, TOR         ; 2DROP DROP >R >R
-        DW      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
+        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
         DC      ZERO, FROMR                   ; 0 R>
         DC      RR, FMOVE, FROMR, ZERO        ; R@ FARMOVE   R> 0
 RFILE2:
@@ -6825,7 +6826,7 @@ negated, to be inspected using forthcode({MESSAGE}).
 enddoc)
 HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      TOR, TOR, ZERO, SWAP    ; >R >R  0 SWAP
-        DW      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
+        DC      LIT, Save_DS_PR, FETCH, RWBUF ; <FAR> RW-BUFFER
         DC      RR, FMOVE        ;  R@ FARMOVE
         DC      LIT, 4000H, FROMR, FROMR       ; 4000 R> R>
         DC      SWAP, RWBUF, BDOS, ONE, LAND        ; SWAP RW-BUFFER BDOS 1 AND
@@ -6840,7 +6841,6 @@ WFILE2:
 ;
 
 });_END_({ _HOSTED_DPMI_})
-_HOSTED_MSDOS_({
 worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{d c b a ---ar fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthvar({d c b a }) in
 registers forthvar({ DX CX BX AX }). Upon return those registers
@@ -6860,6 +6860,7 @@ HEADER({BDOSN},{BDOSN},{DOCOL})
         DC      LIT, 21H, BIOSN
         DC      SEMIS
 ;
+_HOSTED_MSDOS_({
 worddoc( {STORAGE},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
@@ -7763,17 +7764,16 @@ to the blocks in this file, using forthsamp({BLOCK-HANDLE}) to acces it.
 {{( Via MESSAGE)},{}},
 enddoc)
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
-        DC      LIT, 03D02H    ;{ Open file for read/write}
-        DC      ZERO,ZERO
         DC      BLFL
         DC      SFET, OVER, PLUS
         DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
-        DC      BDOS
+        DC      X, X
+        DC      LIT, 03D02H    ;{ Open file for read/write}
+        DC      BDOSN
         DC      ONE, LAND, ONE, LXOR ;{ 0 if disk problems. }
         DC      LWARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
         DC      LWARN, STORE
-        DC      DROP, DROP, DROP
         DC      BHAN, STORE
         DC      SEMIS
 ;
