@@ -55,7 +55,7 @@ particular version of ciforth once it is installed on your system.
 ciforth consists of three files:
 forthitemize
 forthitem
-_BOOTED_({A booting floppy or hard disk})
+_BOOTED_({A booting floppy or hard disk}) dnl
 _HOSTED_MSDOS_({forth.com})_HOSTED_LINUX_({lina}) : the program
 _BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can 
 see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})
@@ -68,28 +68,36 @@ forthenditemize
 These files are generated together by the generic system fig86.gnr.
 The documentation only applies to the ciforth with which it goes.
 
-If your Forth doesn't fit description below get a new version.
+If your Forth doesn't fit the description below get a new version.
+The information below allows an expert to reconstruct how to 
+generate a corresponding version. _VERBOSE_({Not all of it may make
+sense to you. Tell him whether you want to 
+fit the Forth to the description or vice versa.})
 forthxref({Rationale & legalese}). 
 
-These are the features:, 
+These are the features:
 
-_PROTECTED_({It is running in protected mode.})dnl
-_REAL_({It is running in real mode.})dnl
-_BOOTED_({It is a standalone Forth, })dnl
-_BOOTHD_({It is booting directly from a hard disk.})dnl
-_BOOTFD_({It is booting from a floppy disk.})dnl
-_HOSTED_LINUX_({It is running under Linux.})dnl
-_HOSTED_MSDOS_({It is running under MSDOS.})dnl
-_USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.})dnl
-_RWHD_({Blocks are on a raw hard disk.})dnl
-_RWFD_({Blocks are on a raw floppy disk.})dnl
-_RWFILE_({Blocks are allocated in files.})dnl
-_CLASSIC_({ Rely partly on DOS for I/O, partly on the BIOS.})dnl
-_MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features.})dnl
-_BITS16_({A number has a precision of 16 bits.})dnl
-_BITS32_({A number has a precision of 32 bits.})dnl
-_LINUX_C_({It uses C-routines for I/O.})dnl
-_LINUX_N_({It calls linux system from Forth directly.})dnl
+_PROTECTED_({It is running in protected mode.}) dnl
+_REAL_({It is running in real mode.}) dnl
+_BOOTED_({It is a standalone Forth, }) dnl
+_BOOTHD_({It is booting directly from a hard disk.}) dnl
+_BOOTFD_({It is booting from a floppy disk.}) dnl
+_HOSTED_LINUX_({It is running under Linux.}) dnl
+_HOSTED_MSDOS_({It is running under MSDOS.}) dnl
+_USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.}) dnl
+_RWHD_({Blocks are on a raw hard disk.}) dnl
+_RWFD_({Blocks are on a raw floppy disk.}) dnl
+_RWFILE_({Blocks are allocated in files.}) dnl
+_CLASSIC_({ Rely partly on DOS for I/O, partly on the BIOS.}) dnl
+_MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features.}) dnl
+_BITS16_({A number has a precision of 16 bits.}) dnl
+_BITS32_({A number has a precision of 32 bits.}) dnl
+_LINUX_C_({It uses C-routines for I/O.}) dnl
+_LINUX_N_({It calls linux system from Forth directly.}) dnl
+_SECURITY_({It has compiler security, sacrificing some bizar ISO 
+compatibity.}) dnl
+_CIF_IN_({It doesn't use forthcode({>IN}) in the way prescribed by ISO.}) dnl
+dnl define( {_ISO_IN_}, _yes)dnl
 It is indirect threaded.
 
 @iftex
@@ -182,6 +190,10 @@ forthitem n
 _BITS_ bit signed integer number
 forthitem u      
 _BITS_ bit unsigned integer
+forthitem sc
+A string constant, i.e. two cells address and length.
+Length characters are present address.
+_VERBOSE_({They must not be changed.})
 forthitem tf     
 boolean true flag=non-zero
 @end table 

@@ -28,6 +28,8 @@ forthunderline(21 OK) })
 forthcode(+) is a small program with an appropriate name.
 It adds the two numbers that were entered the latest, in this
 case 1 and 2. The result 3 remains, but 1 and 2 are consumed.
+Note that a name can be anything, as long as it doesn't contain
+spaces.
 The program forthcode(*) multiplies the 3 and the 7 and the result is 21.
 The program forthcode(.) prints this results. It could have
 been put on the same line equally easily.
@@ -64,9 +66,11 @@ forthexample({: TEST 1 2 + 7 * ;     12 .
 
 
 In this case not only the name forthvar({TEST}) is consumed, but none of the remaining
-numbers and programs are executed. 
+numbers and programs are executed, up till the semicolon 
+forthcode({;}).
 Instead they form a specification of what forthvar({TEST}) must do.
 After the semicolon life continues as usual.
+Note that forthcode({;}) is a program in itself too.
 
 forthexample({TEST TEST + .
 42 OK})
@@ -89,9 +93,26 @@ fashioned, but simple. You as a user have to deal with only three
 parts/files : this documentation, the executable program, and the
 screen file, a heap of small programs in source form. 
 
-There is an ISO standard for Forth and this Forth doesn't
+There is an ISO standard for Forth and this Forth doesn't fully
 comply to it. Still by restricting yourself to the definitions marked
 as ISO in the glossary, it is quite possible to write an application
 that will run on any ISO-compliant system. 
 
+Using a stack you can always interrupt your work and continue.
+For example
+forthexample({: TEST 
+1 2 + [ 3 4 * . ] 
+12 OK 
+7 * ; 
+OK })
+What happened here is that 
+some one asked you to calculate  ``3 times 4'' while you 
+were busy with our test example. No sweat!
+You switch from compilation mode
+to normal (interpret) mode by forthcode({[}) , and back 
+by forthcode({]}). 
+In the meantime, as long as you leave the stack as you found it,
+you can do anything.
+(This doesn't apply to adding definitions, of course, as you are
+in the process of adding one already.)
 

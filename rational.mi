@@ -7,7 +7,8 @@ The file COPYING containing the legal expression of these lines must accompagny 
 Because Forth is ``programming by extending the language'' the GPL
 could be construed to mean that systems based on ciforth
 always are legally obliged to make the source available. 
-But we consider this ``fair use in the Forth sense''.
+But we consider this ``fair use in the Forth sense'' as
+expressed by the following statement.
 
 In addition to the GPL the DFW states the following:
 
@@ -23,7 +24,7 @@ and this is made known to the user of the derived system.
 This Forth is meant to be simple.
 What you find here is a Forth for the Intel 86. 
 You need just the executable to work. 
-You choose the format you prefer for the documentation. 
+You choose the {format} you prefer for the documentation. 
 They all have the same content.
 You can use the example
 file with blocks, 
@@ -40,28 +41,23 @@ further reproduced and distributed subject to the following conditions:
 The three files comprising it must be kept together and in particular 
 the reference section with the World Wide Web sites.
 
-This Forth builts on figforth.
-It is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
-that is available via taygeta.
-
-You still can obtain the original figforth
-that is public domain according to the following statement:
-
-forthquotation
-All publications of the Forth Interest Group are public domain. They may be
-further reproduced and distributed by inclusion of this credit notice: 
-
-This publication has been made available by the Forth Interest Group, 
-
-              P. O. Box 1105,  San Carlos, Ca 94070
-forthendquotation
 
 The generic system that created this ciforth
-are at forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/fig86gnr.html}).
-If you have the generic system, 
+is found at 
+forthbreak
+forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/cignr.html}).
+
+Once you have the generic system, 
 you can see how you can contact the author in its documentation.
-Otherwise in case of question about this ciforth, contact the person or
+Otherwise in case of questions about this ciforth, contact the person or
 organisation that generated it for you.
+
+This Forth builds on figforth. It is based on the work of
+Charlie Krajewski and Thomas Newman, Hayward, Ca. still
+available via taygeta. The acknowledgements for systems that
+serves as a base, in particular the original figforth, are
+found in the generic documentation, including detailed
+information how these systems can be obtained. 
 
 forthemph({Important:})
 forthbreak If you just want to use a Forth, 
@@ -74,16 +70,12 @@ that you don't need, and is confusing as hell.
 If you are interested in subjects like history of Forth, 
 the rationale behind the design and such you might want to read the 
 manual for the generic Forth.
-@section Generic Configuration Manual
+@section The Generic System this Forth is based on.
 
-This information will in due time be removed to a separate 
-manual.
-A ciforth user will not normally be interested in this.
 The source and executable of this ciforth was generated, out of at
 least dozen's of possibilities, by a generic system. An important goal
 was to generate exactly fitting documentation, that contains only
 relevant information. 
 The original system can be obtained via
-http://home.hccnet.nl/a.w.m.van.der.horst/figforth.html
-
+forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/cignr.html}).
 
