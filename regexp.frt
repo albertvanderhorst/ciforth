@@ -89,6 +89,8 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 
 \ The set of characters to be escaped. Present in CHAR-SET-SET but unfindable.
 0 CHAR-SET \\     \ | ^ | $ | + | ? | * | [ | ] | < | > | ( | ) |  DROP
+\ For CHAR : "it IS special".
+: SPECIAL?   \\ BIT? ;
 
 &w CHAR-SET \w   256 1 DO I IS-BLANK? 0= IF I | THEN LOOP DROP
 
@@ -290,27 +292,72 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 
 \ Build up a string to be matched simply.
 CREATE NORMAL-CHARS 1000 ALLOT
+: NORMAL-CHARS!   0 NORMAL-CHARS ! ;
 
 \ To where is the compiled expression filled.
 VARIABLE RE-FILLED
-
-\ Everything to be initialised for a build.
-: INIT-BUILD   "" NORMAL-CHARS $!   RE-EXPR RE-FILLED ! ;
-
-\ Add the CHAR to the simple match.
-: ADD-TO-NORMAL NORMAL-CHARS $+! ;
 
 \ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
 \ expression.
 : HARVEST-NORMAL-CHARS NORMAL-CHARS @ IF RE-FILLED
         'MATCH-NORMAL OVER ! CELL+
         NORMAL-CHARS $@ OVER $!   NORMAL-CHARS @ + ALIGNED
-        RE-FILLED !
+        RE-FILLED !   NORMAL-CHARS!
     THEN
 ;
+\    -    -    -   --    -    -   -    -    -   -    -    -   -
 
-\ For CHAR : "it IS special".
-: SPECIAL?   \\ BIT? ;
+\ Build up a set to be matched.
+CREATE SET-MATCHED ALLOT-CHAR-SET
+: SET-MATCHED!   SET-MATCHED MAX-SET ERASE   1 SET-MATCHED C! ;
+
+
+\ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
+\ expression.
+: HARVEST-SET-MATCHED SET-MATCHED @ IF RE-FILLED
+        'MATCH-SET OVER ! CELL+
+        SET-MATCHED OVER MAX-SET MOVE   MAX-SET +
+        RE-FILLED !   SET-MATCHED!
+    THEN
+;
+\    -    -    -   --    -    -   -    -    -   -    -    -   -
+\ Add the CHAR to the simple match.
+: ADD-TO-NORMAL NORMAL-CHARS $+! ;
+
+\    -    -    -   --    -    -   -    -    -   -    -    -   -
+
+\ For EP and the first CHAR of an item (pointing between [ and ] ) add
+\ the item to ``SET-MATCHED''. Leave EP pointing after the item.
+: ADD[]-1
+
+here we have left.
+
+\ Build up the set between [ and ] into ``SET-MATCHED''.
+\ EP points after the intial [ , leave it pointing after the closing ].
+: PARSE[]    SET-MATCHED! C@+
+    DUP &^ = IF DROP RECURSE SET-MATCHED INVERT-SET ELSE
+    BEGIN ADD[]-1 C@+ DUP &] = UNTIL
+    THEN ;
+
+\ EP points to a char-set. Add it to the compiled expression.
+\ Leave EP incremented past the char-set.
+: PARSE-CHAR-SET C@+
+    DUP &. = IF DROP \. SET-MATCHED MAX-SET MOVE ELSE
+    DUP &\ = IF DROP C@+ CHAR-SET-SET WHERE-IN-SET?
+             DUP 0= ABORT" Illegal escaped char set, user error"
+             CELL+ @ SET-MATCHED MAX-SET MOVE ELSE
+    DUP &[ = IF DROP PARSE[]
+    THEN THEN THEN
+    HARVEST-SET-MATCHED
+;
+\    -    -    -   --    -    -   -    -    -   -    -    -   -
+\ Everything to be initialised for a build.
+: INIT-BUILD   NORMAL-CHARS!   SET-MATCHED!   RE-EXPR RE-FILLED ! ;
+
+\ Everything to be harvested after a build.
+: EXIT-BUILD   HARVEST-NORMAL-CHARS   HARVEST-CHAR-SET ;
+
+\    -    -    -   --    -    -   -    -    -   -    -    -   -
 
 \ For EP and CHAR : EP plus "it IS one of ^ $ with its special meaning".
 \ ``EP'' points after ``CHAR'' in the re, and is of course needed to
@@ -318,14 +365,12 @@ VARIABLE RE-FILLED
 : ^$? DUP &^ = IF DROP RE-PATTERN 1+ OVER = ELSE
     &$ = IF OVER C@ 0= 0= ELSE FALSE THEN THEN ;
 
-\ Replace CHAR with: the escaped CHAR it represents. However check.
-: GET-ESCAPE-CHECKED   GET-ESCAPE DUP 0= ABORT" Illegal escape" ;
-
 \ If the character at EP is normal, return incremented EP plus IT,
 \ else EP plus FALSE. EP may be incremented past 2 char escapes!
 : NORMAL-CHAR? C@+   DUP SPECIAL? 0= IF EXIT THEN
                      DUP ^$? IF EXIT THEN
-                     &\ = IF C@+ GET-ESCAPE-CHECKED EXIT THEN
+                     \ Escapes not representing a character, may still represent a set.
+                     &\ = IF C@+ GET-ESCAPE DUP IF EXIT ELSE 1- THEN THEN
                      1- FALSE ;
 
 \ Parse one element of regular EXPRESSION .
