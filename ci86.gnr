@@ -762,7 +762,19 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 ;{	Initialisation block for user variables through VOC-LINK}
 ;{       <<<<< must be in same order as user variables >>>>>}
 ;
+
 USINI:
+        DC      0
+UP	DC	STRUSA	;{ INIT (U0) USER AREA POINTER 1}
+	DC	BSIN	;{ RUBOUT: get rid of latest char 2}
+	DC 	INITS0	;{ INIT (S0)         3}
+        DC 	INITR0	;{ INIT (R0)         4}
+	DC 	STRTIB  ;{ INIT (TIB)        5}
+	DC	32	;{ INIT (WIDTH)      6}
+	DC	0	;{ INIT (WARNING)      7}
+	DC	INITDP	;{	INIT (FENCE)  8}
+	DC	INITDP  ;{	INIT (DP)     9}
+	DC	_VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
 ;____1_____ _MODERN_1_({
 	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
@@ -794,18 +806,8 @@ _ENDCOMMENT
 ;{ hard disk. No problem to just reserve whole memory.}
 	DC      64      ;{ Kbyte.}
 });_END___1__({_BOOTHD__1_})
-UP	DC	STRUSA	;{ USER AREA POINTER 1}
-	DC      0       ;{ (Unused)          2}
-	DC 	INITS0	;{ INIT (S0)         3}
-        DC 	INITR0	;{ INIT (R0)         4}
-	DC 	STRTIB  ;{ INIT (TIB)        5}
-	DC	32	;{ INIT (WIDTH)      6}
-	DC	0	;{ INIT (WARNING)      7}
-	DC	INITDP	;{	INIT (FENCE)  8}
-	DC	INITDP  ;{	INIT (DP)     9}
-	DC	_VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
-	;
-	_RESB(CELLS(14))        ;{ User variables up to 24 in use}
+;
+	_RESB(CELLS(13))        ;{ User variables up to 24 in use}
 ;{	<<<<< end of data used by cold start >>>>>}
 ;
 ;{	The following is the CPU's name, printed}
@@ -821,7 +823,6 @@ CPUNM   DC      5H,0B328H       ;{ '8088'     25 26 }
 	DC      FIGREL + FIGREV *100H  ;{ FIG RELEASE + REVISION 27}
        DC      USRVER  + 0EH*100H      ;{ USER REVISION + VERSION ATTRIBUTES 28}
 LAINI:  DC	_LINK_FIELD(TASK) ;{ LAST CELL 29 }
-	DC	BSIN	;{ RUBOUT: get rid of latest char 30}
 ;
 CODE_HEADER({DIGIT},{DIGIT})
 	POP	DX	;{NUMBER BASE}
@@ -1305,7 +1306,13 @@ HEADER({B/SCR},{BSCR},{DOCON})
 ;{ All user variables are initialised }
 ;{ with the values from USINI.}
 ;{ The implementation relies on the initialisation of }
-;{ those with numbers (3..11), so change in concord with USINI.}
+;{ those with numbers (1..11), so change in concord with USINI.}
+HEADER({U0},{UZERO},{DOUSE})
+	DC	CELLS(1) 
+;
+HEADER({RUBOUT},{RUBOUT},{DOUSE})
+	DC	CELLS(2)
+;
 HEADER({S0},{SZERO},{DOUSE})
 	DC	CELLS(3) 
 ;
@@ -1327,13 +1334,13 @@ HEADER({FENCE},{FENCE},{DOUSE})
 HEADER({DP},{LDP},{DOUSE})
 	DC	CELLS(9) 
 ;
-
 HEADER({VOC-LINK},{VOCL},{DOUSE})
 	DC	CELLS(10)
-;{ End of user variables with fixed place.}
-HEADER({BLK},{BLK},{DOUSE})
+;
+HEADER({OFFSET},{OFSET},{DOUSE})
 	DC	CELLS(11)
 ;
+;{ End of user variables with fixed place.}
 	PAGE
 HEADER({IN},{LIN},{DOUSE})
 	DC	CELLS(12)
@@ -1343,9 +1350,6 @@ HEADER({OUT},{LOUT},{DOUSE})
 ;
 HEADER({SCR},{SCR},{DOUSE})
 	DC	CELLS(14)
-;
-HEADER({OFFSET},{OFSET},{DOUSE})
-	DC	CELLS(0)
 ;
 HEADER({CONTEXT},{CONT},{DOUSE})
 	DC	CELLS(16)
@@ -1374,8 +1378,8 @@ HEADER({R#},{RNUM},{DOUSE})
 HEADER({HLD},{HLD},{DOUSE})
 	DC	CELLS(24)
 ;
-HEADER({RUBOUT},{RUBOUT},{DOUSE})
-	DC	CELLS(30)
+HEADER({BLK},{BLK},{DOUSE})
+	DC	CELLS(31)
 ;
 ;{========== END USER VARIABLES =============;}
 	PAGE
