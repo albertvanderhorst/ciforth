@@ -48,81 +48,81 @@ worddoc({!    },{ store},{         n  addr  --- },{                    L0},{
 
 
 worddoc({!CSP   },{},{},{},{
-        Save the stack position in @code{CSP}. Used as part of the compiler
+        Save the stack position in forthcode({CSP}). Used as part of the compiler
         security.   },{})
 
 
 worddoc({# },{},{             d1  ---  d2           },{            L0},{
-        Generate from a double number @var{d1}, the next ascii character which is
-        placed in an output string. Result @var{d2} is the quotient after division
-        by @code{BASE}, and is maintained for further processing. Used between @code{<#} 
-        and @code{#>}. },{ {#S}} ) 
+        Generate from a double number forthvar({d1}), the next ascii character which is
+        placed in an output string. Result forthvar({d2}) is the quotient after division
+        by forthcode({BASE}), and is maintained for further processing. Used between forthcode({<#}) 
+        and forthcode({#>}). },{ {#S}} ) 
 
 
 worddoc({#>  },{ },{          d  ---  addr  count},{              L0},{
-        Terminates numeric output conversion by dropping @var{d}, leaving the text
-        address and character count suitable for @code{TYPE}.},{})
+        Terminates numeric output conversion by dropping forthvar({d}), leaving the text
+        address and character count suitable for forthcode({TYPE}).},{})
 
 
 worddoc({#S },{ },{           d1  ---  d2       },{                L0 },{
-        Generates ascii text in the text output buffer, by the use of @code{#},
-        until a zero double number @var{n2} results.
-        Used between @code{<#} and @code{#>}.},{})
+        Generates ascii text in the text output buffer, by the use of forthcode({#}),
+        until a zero double number forthvar({n2}) results.
+        Used between forthcode({<#}) and forthcode({#>}).},{})
 
 
 worddoc({' },{tick},{            ---  addr     },{                  P,L0   },{
         Used in the form: .
-        @samp{' nnnn}  
-        Leaves the parameter field address of dictionary word @var{nnnn}.
+        forthsamp({' nnnn})  
+        Leaves the parameter field address of dictionary word forthvar({nnnn}).
         As a compiler directive, executes in a colon-definition to compile
         the address as a literal. If the word is not found after a search of
-        @code{CONTEXT} and @code{CURRENT} , an appropriate error message is given.},{})
+        forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},{})
 
 
 worddoc({(},{},{ },{                                              P,L0},{
         Used in the form:
-        @samp{( cccc)}
+        forthsamp({( cccc)})
         Ignore a comment that will be delimited by a right
         parenthesis on the same line. May occur during execution or in a
         colon-definition. A blank after the leading parenthesis is required.},{})
 
 
 worddoc({(.")},{},{},{                                              C+},{
-        The run-time proceedure, compiled by @code{."} which transmits the
+        The run-time proceedure, compiled by forthcode({."}) which transmits the
         following in-line text to the selected output device.},{{."}}) .
 
 
 worddoc({(;CODE)  },{},{},{                                         C},{
-        The run-time proceedure, compiled by @code{;CODE}, that rewrites the code
+        The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
         field of the most recently defined word to point to the following
         machine code sequence. },{{;CODE}})
 
 
 worddoc({(+LOOP)},{},{      n  ---      },{                       C2},{
-        The run-time proceedure compiled by @code{+LOOP}, which increments the loop
+        The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
         index by n and tests for loop completion.},{{+LOOP}})
 
 
 worddoc({(ABORT) },{},{},{},{
-        Executes after an error when @code{WARNING} is -1. This word normally
-        executes @code{ABORT}, but may be altered (with care) to a user's
+        Executes after an error when forthcode({WARNING}) is -1. This word normally
+        executes forthcode({ABORT}), but may be altered (with care) to a user's
         alternative proceedure.},{})
 
 
 worddoc({(DO)  },{},{},{                                           C},{
-        The run-time proceedure compiled by @code{DO} which moves the loop control
+        The run-time proceedure compiled by forthcode({DO}) which moves the loop control
         parameters to the return stack.},{{DO}})
 
 
 worddoc({(FIND)  },{},{addr1 addr2 --- pfa b tf (ok)
         addr1 addr2 .--- ff (bad)                   },{},{
-        Searches the dictionary starting at the name field address @var{addr2},
-        matching to the text at @var{addr1}. Returns parameter field address,
+        Searches the dictionary starting at the name field address forthvar({addr2}),
+        matching to the text at forthvar({addr1}). Returns parameter field address,
         length byte of name field and boolean true for a good match. If no
         match is found, only a boolean false is left.  },{})
 
 worddoc({(LINE) },{},{n1 n2 --- addr count},{ },{
-        Convert the line number @code{n1} and the screen @var{n2} to the disc buffer
+        Convert the line number forthcode({n1}) and the screen forthvar({n2}) to the disc buffer
         address containing the data. A count of 64 indicates the full line
         text length.                             },{})
 
@@ -134,8 +134,8 @@ worddoc({(LOOP)  },{},{                                       },{ C2},{
 
 
 worddoc({(NUMBER) },{},{d1 addr1 --- d2 addr2},{ },{
-        Convert the ascii text beginning at @var{addr1+l} with regard to @code{BASE} . The
-        new value is accumulated into double number @var{d1} , being left as @var{d2} .
+        Convert the ascii text beginning at forthvar({addr1+l}) with regard to forthcode({BASE}) . The
+        new value is accumulated into double number forthvar({d1}) , being left as forthvar({d2}) .
         Addr2 is the address of the first unconvertable digit. },{{NUMBER}})
 
 
@@ -144,68 +144,68 @@ worddoc({*},{},{             n1  n2  ---  prod },{              L0 },{
 
 
 worddoc({*/},{},{            n1  n2  n3  ---  n4 },{            L0},{
-        Leave the ratio @var{n4 = n1*n2/n3} where all are signed numbers.
+        Leave the ratio forthvar({n4 = n1*n2/n3}) where all are signed numbers.
         Retention of an intermediate 31 bit product permits greater accuracy
         than would. be available with the sequence:
-                @samp{n1  n2  *  n3  /}
+                forthsamp({n1  n2  *  n3  /})
 },{})
 
 
 worddoc({*/MOD },{},{n1 n2 n3 --- n4 n5 },{L0},{
-        Leave the quotient @var{n5} and remainder @var{n4} of the operation @var{n1*n2/n3} A
-        31 bit intermediate product is used as for @code{*/} .},{})
+        Leave the quotient forthvar({n5}) and remainder forthvar({n4}) of the operation forthvar({n1*n2/n3}) A
+        31 bit intermediate product is used as for forthcode({*/}) .},{})
 
 
 worddoc({+ },{},{            n1  n2  ---  sum    },{            L0},{
-        Leave the sum of @var{n1+n2} . },{})
+        Leave the sum of forthvar({n1+n2}) . },{})
 
 
 worddoc({+!},{plus-store},{     n  addr  ---        },{             L0},{
-        Add @var{n} to the value at the address.},{})
+        Add forthvar({n}) to the value at the address.},{})
 
 
 worddoc({+-},{},{            n1  n2  ---  n3},{},{
-        Apply the sign of @var{n2} to @var{n1} , which is left as @var{n3} .},{})
+        Apply the sign of forthvar({n2}) to forthvar({n1}) , which is left as forthvar({n3}) .},{})
 
 
 worddoc({+BUF },{},{add1 --- addr2 f},{},{
-        Advance the disc buffer address @var{addr1} to the address of the next
-        buffer @var{addr2} . Boolean @var{f} is false when @var{addr2} is the buffer presently
-        pointed to by variable @code{PREV} },{})
+        Advance the disc buffer address forthvar({addr1}) to the address of the next
+        buffer forthvar({addr2}) . Boolean forthvar({f}) is false when forthvar({addr2}) is the buffer presently
+        pointed to by variable forthcode({PREV}) },{})
 
 
 worddoc({+LOOP },{},{n1 --- (run)   addr n2 --- (compile) },{P,C2,L0},{
         Used in a colon-definition in the form:
-        @code{DO ... n1 +LOOP}
-        At run-time, @code{+LOOP} selectively controls branching
-        back to the corresponding @code{DO} based on @var{n1} , the loop index and the
-        loop limit. The signed increment @var{n1} is added to the index and the
+        forthcode({DO ... n1 +LOOP})
+        At run-time, forthcode({+LOOP}) selectively controls branching
+        back to the corresponding forthcode({DO}) based on forthvar({n1}) , the loop index and the
+        loop limit. The signed increment forthvar({n1}) is added to the index and the
         total compared to the limit.
-        The branch back to @code{DO} occurs until the new index is equal to or
-        greater than the limit (@var{n1>0}), or until the new index is equal to or
-        less than the limit (@var{n1<0}). Upon exiting the loop, the parameters
+        The branch back to forthcode({DO}) occurs until the new index is equal to or
+        greater than the limit (forthvar({n1>0})), or until the new index is equal to or
+        less than the limit (forthvar({n1<0})). Upon exiting the loop, the parameters
         are discarded and execution continues ahead.
 
 
-        At compile time, @code{+LOOP} compiles the run-time word @code{(+LOOP)} and the
-        branch offset computed from @code{HERE} to the address left on the stack by
-        @code{DO} . @var{n2} is used for compile tine error checking.  },{})
+        At compile time, forthcode({+LOOP}) compiles the run-time word forthcode({(+LOOP)}) and the
+        branch offset computed from forthcode({HERE}) to the address left on the stack by
+        forthcode({DO}) . forthvar({n2}) is used for compile tine error checking.  },{})
 
 
 worddoc({+ORIGIN },{},{n --- addr},{},{
-        Leave the memory address relative by @var{n} to the origin parameter area.
-        @var{n} is the minimum address unit, either byte or word. This definition
+        Leave the memory address relative by forthvar({n}) to the origin parameter area.
+        forthvar({n}) is the minimum address unit, either byte or word. This definition
         is used to access or modify the boot-up parameters at the origin
         area.},{})
 
 
 worddoc({,},{comma},{             n  ---           },{                L0},{
-        Store @var{n} into the next available dictionary memory cell, advancing
+        Store forthvar({n}) into the next available dictionary memory cell, advancing
         the dictionary pointer. },{})
 
 
 worddoc({-},{},{             n1  n2  ---  diff              },{ L0},{
-        Leave the difference of @var{n1-n2} .},{})
+        Leave the difference of forthvar({n1-n2}) .},{})
 
         
 worddoc({-->},{next-screen},{},{                                         P,L0},{
@@ -213,38 +213,38 @@ worddoc({-->},{next-screen},{},{                                         P,L0},{
 
 
 worddoc({-DUP },{},{n1 -- n1 (if zero) n1 -- n1 n1 (non-zero) },{L0},{
-        Reproduce @var{n1} only if it is non-zero.
-        This is usually used to copy a value just before @code{IF} , to eliminate
-        the need for an @code{ELSE} part to drop it.},{})
+        Reproduce forthvar({n1}) only if it is non-zero.
+        This is usually used to copy a value just before forthcode({IF}) , to eliminate
+        the need for an forthcode({ELSE}) part to drop it.},{})
 
 
 worddoc({-FIND },{},{--- pfa b tf (found) --- ff (not found)},{},{
         Accepts the next text word (delimited by blanks) in the input stream
-        to @code{HERE} , and searches the @code{CONTEXT} and then @code{CURRENT} vocabularies
+        to forthcode({HERE}) , and searches the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
         for a matching entry. If found, the dictionary entry's parameter
         field address, its length byte, and a boolean true is left.
         Otherwise, only a boolean false is left.},{})
 
 
 worddoc({-TRAILING },{},{addr n1 --- addr n2},{},{
-        Adjusts the character count @var{n1} of a text string beginning address to
+        Adjusts the character count forthvar({n1}) of a text string beginning address to
         suppress the output of trailing blanks. i.e. the characters at
-        @var{addr+n1} to @var{addr+n2} are blanks.},{})
+        forthvar({addr+n1}) to forthvar({addr+n2}) are blanks.},{})
 
 
 worddoc({.},{dot},{             n  ---     },{                       L0},{
         Print a number from a signed l6 bit two's complement value,
-        converted according to the numeric @code{BASE} .
+        converted according to the numeric forthcode({BASE}) .
         A trailing blanks follows.},{})
 
 
 worddoc({."},{ },{                         },{                  P,L0},{
         Used in the form:
-            @code{." cccc"}
+            forthcode({." cccc"})
         Compiles an in-line string cccc (delimited by the trailing ") with
         an execution proceedure to transmit the text to the selected output
         device.
-        If executed outside a definition, @code{."} will immediately print the text
+        If executed outside a definition, forthcode({."}) will immediately print the text
         until the final ". The maximum number of characters may be an
         installation dependent value.},{{(.")}})
 
@@ -255,16 +255,16 @@ worddoc({-LINE },{},{line scr --},{},{
 
 
 worddoc({.R },{ },{          n1  n2  ---            },{
-        Print the number n1 right aligned in a field whose width is @var{n2} . No
+        Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
         following blank is printed.},{})
 
 
 worddoc({/ },{},{            n1  n2  ---  quot  },{              L0},{
-        Leave the signed quotient of @var{n1/n2} .},{})
+        Leave the signed quotient of forthvar({n1/n2}) .},{})
 
 
 worddoc({/MOD},{},{ n1 n2 --- rem quot },{L0},{
-        Leave the remainder and signed quotient of @var{n1/n2} . The remainder has
+        Leave the remainder and signed quotient of forthvar({n1/n2}) . The remainder has
         the sign of the dividend.              },{})
 
 
@@ -284,55 +284,55 @@ worddoc({0=},{},{            n  ---  f                        },{L0},{
 
 
 worddoc({0BRANCH},{},{       f  ---                            },{C2},{
-        The run-time proceedure to conditionally branch. If @var{f} is false
+        The run-time proceedure to conditionally branch. If forthvar({f}) is false
         (zero), the following in-line parameter is added to the interpretive
-        pointer to branch ahead or back. Compiled by @code{IF} , @code{UNTIL} , and @code{WHILE} .
+        pointer to branch ahead or back. Compiled by forthcode({IF}) , forthcode({UNTIL}) , and forthcode({WHILE}) .
 },{})
 
 worddoc({1+},{},{            n1  ---  n2     },{                 L1},{
-        Increment @var{n1} by l.},{})
+        Increment forthvar({n1}) by l.},{})
 
 
 worddoc({2+},{},{            n1  ---  n2},{},{
-        Leave @code{n1} incremented by 2.},{})
+        Leave forthcode({n1}) incremented by 2.},{})
 
 
 worddoc({:},{},{             },{                              P,E,L0},{
         Used in the form called a colon-definition:
-                   @samp{: cccc     ...     ;}
-        Creates a dictionary entry defining @var{cccc} as equivalent to the
+                   forthsamp({: cccc     ...     ;})
+        Creates a dictionary entry defining forthvar({cccc}) as equivalent to the
         following sequence of Forth word definitions '...' until the next
-        @code{';'} or @code{';CODE'} .
+        forthcode({';'}) or forthcode({';CODE'}) .
         The compiling process is done by the text interpreter as long as
-        @code{STATE} is non-zero. Other details are that the @code{CONTEXT} vocabulary is
-        set to the @code{CURRENT} vocabulary and that words with the precedence bit
+        forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
+        set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
         set (P) are executed rather than being compiled.},{})
 
 
 worddoc({;},{},{},{                                           P,C,L0},{
         Terminate a colon-definition and stop further compilation. Compiles
-        the run-time @code{;S} .},{})
+        the run-time forthcode({;S}) .},{})
 
 
 worddoc({;CODE },{},{},{                                      P,C,L0},{
         Used in the form:
-           @samp{: cccc .... ;CODE}
+           forthsamp({: cccc .... ;CODE})
         assembly mnemonics Stop compilation and terminate a new defining
-        word cccc by compiling @code{(;CODE)}. Set the @code{CONTEXT} vocabulary to
-        @code{ASSEMBLER} , assembling to machine code the following mnemonics.
+        word cccc by compiling forthcode({(;CODE)}). Set the forthcode({CONTEXT}) vocabulary to
+        forthcode({ASSEMBLER}) , assembling to machine code the following mnemonics.
 
-        When @var{cccc} later executes in the form:
-                              @code{cccc nnnn}
-        the word @var{nnnn} will be created with its execution proceedure given by
-        the machine code following @var{cccc} .
-        That is, when @var{nnnn} is executed, it does so by jumping to the code
-        after @var{nnnn} . An existing defining word must exist in @var{cc} prior to
-        @code{;CODE} .},{})
+        When forthvar({cccc}) later executes in the form:
+                              forthcode({cccc nnnn})
+        the word forthvar({nnnn}) will be created with its execution proceedure given by
+        the machine code following forthvar({cccc}) .
+        That is, when forthvar({nnnn}) is executed, it does so by jumping to the code
+        after forthvar({nnnn}) . An existing defining word must exist in forthvar({cc}) prior to
+        forthcode({;CODE}) .},{})
 
 
 worddoc({;S},{},{},{                                            P,L0},{
         Stop interpretation of a screen.
-        @code{;S} is also the run-time word compiled at the end of a
+        forthcode({;S}) is also the run-time word compiled at the end of a
         colon-definition which returns execution to the calling proceedure.},{})
 
 
@@ -343,37 +343,37 @@ worddoc({<},{},{             n1  n2  ---  f},{                   L0},{
 
 worddoc({<#},{},{},{                                              L0},{
         Setup for pictured numeric output formatting using the words:
-            @code{<# # #S SIGN #>}
+            forthcode({<# # #S SIGN #>})
         The conversion is done on a double number producing
-        text at @code{PAD} .},{})
+        text at forthcode({PAD}) .},{})
 
 
 worddoc({<BUILDS},{},{},{                                      C,L0},{
         Used within a colon-definition:
                         @samp{: cccc  <BUILDS  ...
                                  DOES>     ...    ; }
-        Each time @var{cccc} is executed, @code{<BUILDS} defines a new word with a
+        Each time forthvar({cccc}) is executed, forthcode({<BUILDS}) defines a new word with a
         high-level execution proceedure. Executing cccc in the form:
-                     @samp{cccc nnnn}
-        uses @code{<BUILDS} to create a dictionary entry for @var{nnnn} with a call to
-        the @code{DOES>} part for @var{nnnn} . When @var{nnnn} is later executed, it has the
+                     forthsamp({cccc nnnn})
+        uses forthcode({<BUILDS}) to create a dictionary entry for forthvar({nnnn}) with a call to
+        the forthcode({DOES>}) part for forthvar({nnnn}) . When forthvar({nnnn}) is later executed, it has the
         address of its parameter area on the stack and executes the words
-        after @code{DOES>} in @var{cccc} . @code{<BUILDS} and @code{DOES>} allow runtime proceedures to
+        after forthcode({DOES>}) in forthvar({cccc}) . forthcode({<BUILDS}) and forthcode({DOES>}) allow runtime proceedures to
         written in high-level rather than in assembler code (as required by
-        @code{;CODE} ).},{})
+        forthcode({;CODE}) ).},{})
 
 
 worddoc({=},{},{             n1  n2  ---  f               },{   L0},{
-        Leave a true flag if @var{n1=n2} ; otherwise leave a false flag.},{})
+        Leave a true flag if forthvar({n1=n2}) ; otherwise leave a false flag.},{})
 
 
 worddoc({>},{},{             n1  n2  ---  f                   },{L0},{
-        Leave a true flag if @var{n1} is greater than @var{n2} ; otherwise a false flag.},{})
+        Leave a true flag if forthvar({n1}) is greater than forthvar({n2}) ; otherwise a false flag.},{})
 
 
 worddoc({>R},{},{            n  ---                         },{C,L0},{
         Remove a number from the computation stack and place as the most
-        accessable on the return stack. Use should be balanced with @var{R>} in
+        accessable on the return stack. Use should be balanced with forthvar({R>}) in
         the same definition.},{})
 
 
@@ -388,11 +388,11 @@ worddoc({?COMP},{},{},{},{
 
 worddoc({?CSP},{},{},{},{
         Issue error message if stack position differs from value saved in
-        @var{CSP} .},{})
+        forthvar({CSP}) .},{})
 
 
 worddoc({ERROR},{  },{f n --},{},{
-       Issue an error message number @code{n} , if the boolean flag is true.},{})
+       Issue an error message number forthcode({n}) , if the boolean flag is true.},{})
 
 
 worddoc({?EXEC },{},{},{},{
@@ -404,7 +404,7 @@ worddoc({?LOADING},{},{},{},{
 
 
 worddoc({?PAIRS },{},{n1 n2 --},{},{
-        Issue an error message if @var{n1} does not equal @var{n2} . The message
+        Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
         indicates that compiled conditionals do not match.},{})
 
 
@@ -419,8 +419,8 @@ worddoc({?TERMINAL },{},{--- f},{},{
         This definition is installation dependent.},{})
 
 
-worddoc({@},{},{           addr  ---  n                       },{L0},{
-        Leave the 16 bit contents of @var{addr} .},{})
+worddoc({forth},({}),{           addr  ---  n                       },{L0},{
+        Leave the 16 bit contents of forthvar({addr}) .},{})
 
 
 worddoc({ABORT  },{},{},{                                         L0},{
@@ -430,34 +430,34 @@ worddoc({ABORT  },{},{},{                                         L0},{
 
 
 worddoc({ABS},{},{           n  ---  u                        },{L0},{
-        Leave the absolute value of @var{n} as @var{u} .},{})
+        Leave the absolute value of forthvar({n}) as forthvar({u}) .},{})
 
 
 worddoc({AGAIN },{},{addr n --- (compiling) },{P,C2,L0},{
         Used in a colon-definition in the form:
-                         @code{BEGIN ... AGAIN}
-        At run-time, @code{AGAIN} forces execution to return to corresponding
-        @code{BEGIN} .
+                         forthcode({BEGIN ... AGAIN})
+        At run-time, forthcode({AGAIN}) forces execution to return to corresponding
+        forthcode({BEGIN}) .
         There is no effect on the stack. Execution cannot leave this loop
-        (unless @code{R>} @code{DROP} is executed one level below).
+        (unless forthcode({R>}) forthcode({DROP}) is executed one level below).
 
-        At compile time, @code{AGAIN} compiles @code{BRANCH} with an offset from @code{HERE} to
-        addr. @var{n} is used for compile-time error checking.},{})
+        At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
+        addr. forthvar({n}) is used for compile-time error checking.},{})
 
 
 worddoc({ALLOT},{},{         n  ---                           },{L0},{
-        Add the signed number to the dictionary pointer @code{DP} . May be used to
-        reserve dictionary space or re-origin memory. @var{n} is with regard to
+        Add the signed number to the dictionary pointer forthcode({DP}) . May be used to
+        reserve dictionary space or re-origin memory. forthvar({n}) is with regard to
         computer address type (byte or word).},{})
 
 
 worddoc({AND},{},{           n1  n2  ---  n2},{                  L0},{
-        Leave the bitwise logical and of @var{n1} and @var{n2} as @var{n3} .},{})
+        Leave the bitwise logical and of forthvar({n1}) and forthvar({n2}) as forthvar({n3}) .},{})
 
 
 worddoc({B/BUF },{},{--- n},{},{
         This constant leaves the number of bytes per disc buffer, the byte
-        count read from disc by @code{BLOCK} .},{})
+        count read from disc by forthcode({BLOCK}) .},{})
 
 
 worddoc({B/SCR },{},{--- n},{},{
@@ -467,7 +467,7 @@ worddoc({B/SCR },{},{--- n},{},{
 
 
 worddoc({BACK },{},{addr --},{},{
-        Calculate the backward branch offset from @code{HERE} to @var{addr} and compile
+        Calculate the backward branch offset from forthcode({HERE}) to forthvar({addr}) and compile
         into the next available dictionary memory address.},{})
 
 
@@ -478,17 +478,17 @@ worddoc({BASE},{ },{         ---  addr              },{        U,L0},{
 
 worddoc({BEGIN        },{},{ ---  addr  n  (compiling)     },{P,L0},{
         Occurs in a colon-definition in form:
-           @code{BEGIN ... UNTIL}
-           @code{BEGIN ... AGAIN}
-           @code{BEGIN ... WHILE ... REPEAT}
-        At run-time, @code{BEGIN} marks the start of a sequence that may be
+           forthcode({BEGIN ... UNTIL})
+           forthcode({BEGIN ... AGAIN})
+           forthcode({BEGIN ... WHILE ... REPEAT})
+        At run-time, forthcode({BEGIN}) marks the start of a sequence that may be
         repetitively executed. It serves as a return point from the
-        corresponding @code{UNTIL} , @code{AGAIN} or @code{REPEAT} 
-        When executing @code{UNTIL}  a return
-        to @code{BEGIN} will occur if the top of the stack is false;
-        for @code{AGAIN} and @code{REPEAT} a return to @code{BEGIN} always occurs.
+        corresponding forthcode({UNTIL}) , forthcode({AGAIN}) or forthcode({REPEAT}) 
+        When executing forthcode({UNTIL})  a return
+        to forthcode({BEGIN}) will occur if the top of the stack is false;
+        for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) always occurs.
 
-        At compile time @code{BEGIN} leaves its return address and @var{n} for compiler
+        At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
         error checking.},{})
 
 
@@ -497,7 +497,7 @@ worddoc({BL},{},{            ---  c},{},{
 
 
 worddoc({BLANKS },{},{addr count --},{},{
-        Fill an area of memory beginning at @var{addr} with blanks.},{})
+        Fill an area of memory beginning at forthvar({addr}) with blanks.},{})
 
 
 worddoc({BLK},{},{           ---  addr                      },{U,L0},{
@@ -523,12 +523,12 @@ worddoc({BLOCK-WRITE},{},{},{},{
 
 worddoc({BRANCH},{},{},{                                       C2,L0},{
         The run-time proceedure to unconditionally branch. An in-line offset
-        is added to the interpretive pointer @code{IP} to branch ahead or back.
-        @code{BRANCH} is compiled by @code{ELSE} , @code{AGAIN} , @code{REPEAT} .},{})
+        is added to the interpretive pointer forthcode({IP}) to branch ahead or back.
+        forthcode({BRANCH}) is compiled by forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT}) .},{})
 
 
 worddoc({BUFFER},{},{ n --- addr},{},{
-        Obtain the next memory buffer, assigning it to block @var{n} . If the
+        Obtain the next memory buffer, assigning it to block forthvar({n}) . If the
         contents of the buffer is marked as updated, it is written to the
         disc The block is not read from the disc.
         The address left is the first cell within the buffer for data
@@ -536,18 +536,18 @@ worddoc({BUFFER},{},{ n --- addr},{},{
 
 
 worddoc({C!},{},{            b  addr  ---},{},{
-        Store 8 bits at @var{addr} . On word addressing computers, further
+        Store 8 bits at forthvar({addr}) . On word addressing computers, further
         specification is necessary regarding byte addressing.},{})
 
 
 worddoc({C,},{},{            b  ---},{},{
-        Store 8 bits of @code{b} into the next available dictionary byte, advancing
+        Store 8 bits of forthcode({b}) into the next available dictionary byte, advancing
         the dictionary pointer. This is only available on byte addressing
         computers, and should be used with caution on byte addressing mini-
         computers.},{})
 
 
-worddoc({C@},{},{            addr  ---  b},{},{
+worddoc({Cforth},({}),{            addr  ---  b},{},{
         Leave the 8 bit contents of memory address. On word addressing
         computers, further specification is needed regarding byte
         addressing.},{})
@@ -567,14 +567,14 @@ worddoc({CMOVE},{},{ from to count --},{},{
 
 worddoc({COLD },{},{},{},{
         The cold start proceedure to adjust the dictionary pointer to
-        the minimum standard and restart via @code{ABORT} .
+        the minimum standard and restart via forthcode({ABORT}) .
         May be called from the terminal to remove application programs and
         restart.},{})
 
 
 worddoc({COMPILE},{},{},{                                         C2},{
-        When the word containing @code{COMPILE} executes, the execution address of
-        the word following @code{COMPILE} is copied (compiled) into the dictionary.
+        When the word containing forthcode({COMPILE}) executes, the execution address of
+        the word following forthcode({COMPILE}) is copied (compiled) into the dictionary.
         This allows specific compilation situations to be handled in
         addition to simply compiling an execution address (which the
         interpreter already does).},{})
@@ -582,9 +582,9 @@ worddoc({COMPILE},{},{},{                                         C2},{
 
 worddoc({CONSTANT},{},{     n  ---},{                           L0},{
         A defining word used in the form:
-                           @var{n} @code{CONSTANT} @var{cccc}
-        to create word @var{cccc} , with its parameter field containing @code{n} . When
-        @var{cccc} is later executed, it will push the value of @code{n} to the stack.},{})
+                           forthvar({n}) forthcode({CONSTANT}) forthvar({cccc})
+        to create word forthvar({cccc}) , with its parameter field containing forthcode({n}) . When
+        forthvar({cccc}) is later executed, it will push the value of forthcode({n}) to the stack.},{})
 
 
 worddoc({CONTEXT },{},{--- addr },{U,L0},{
@@ -593,11 +593,11 @@ worddoc({CONTEXT },{},{--- addr },{U,L0},{
 
 
 worddoc({COUNT },{},{addr1 --- addr2 n },{L0},{
-        Leave the byte address @var{addr2} and byte count @var{n} of a message text
-        beginning at address @var{addr1} . It is presumed that the first byte at
-        @var{addr1} contains the text byte count and the actual text starts with
+        Leave the byte address forthvar({addr2}) and byte count forthvar({n}) of a message text
+        beginning at address forthvar({addr1}) . It is presumed that the first byte at
+        forthvar({addr1}) contains the text byte count and the actual text starts with
         the second byte.
-        Typically @code{COUNT} is followed by @code{TYPE} .},{})
+        Typically forthcode({COUNT}) is followed by forthcode({TYPE}) .},{})
 
 
 worddoc({CR},{},{},{                                              L0              },{
@@ -607,10 +607,10 @@ worddoc({CR},{},{},{                                              L0            
 
 worddoc({CREATE },{},{},{},{             
         A defining word used in the form:
-                           @code{CREATE} @var{cccc} 
-        by such words as @code{CODE} and @code{CONSTANT} to create a dictionary header for
+                           forthcode({CREATE}) forthvar({cccc}) 
+        by such words as forthcode({CODE}) and forthcode({CONSTANT}) to create a dictionary header for
         a Forth definition. The code field contains the address of the words
-        parameter field. The new word is created in the @code{CURRENT} vocabulary.},{})
+        parameter field. The new word is created in the forthcode({CURRENT}) vocabulary.},{})
 
 
 worddoc({CSP},{},{           ----  addr                        },{U},{
@@ -623,46 +623,46 @@ worddoc({D+},{},{ d1 d2 --- dsum},{},{
 
 
 worddoc({D+-},{},{           d1  n  ---  d2},{},{
-        Apply the sign of @var{n} to the double number @var{d1} , leaving it as @var{d2} .},{})
+        Apply the sign of forthvar({n}) to the double number forthvar({d1}) , leaving it as forthvar({d2}) .},{})
 
 
 worddoc({D.},{D-dot},{            d  ---                            },{L1},{
         Print a signed double number from a 32 bit two's complement value.
         The high-order l6 bits are most accessable on the stack. Conversion
-        is performed according to the current @code{BASE} . A blank follows.
+        is performed according to the current forthcode({BASE}) . A blank follows.
         },{})
 
 
 worddoc({D.R},{},{           d  n  ---},{},{
-        Print a signed double number @var{d} right aligned in a field @var{n} characters
+        Print a signed double number forthvar({d}) right aligned in a field forthvar({n}) characters
         wide.},{})
 
 
 worddoc({DABS},{},{ d --- ud},{},{
-        Leave the absolute value @var{ud} of a double number.},{})
+        Leave the absolute value forthvar({ud}) of a double number.},{})
 
 
 worddoc({DECIMAL },{},{},{                                        L0},{
-        Set the numeric conversion @code{BASE} for decimal input-output.},{})
+        Set the numeric conversion forthcode({BASE}) for decimal input-output.},{})
 
 
 worddoc({DEFINITIONS},{},{},{                                    L1},{
         Used in the form:
-                        @var{cccc} @code{DEFINITIONS} 
-        Set the @code{CURRENT} vocabulary to the @var{CONTEXT} vocabulary. In the
-        example, executing vocabulary name @var{cccc} made it the @code{CONTEXT} 
-        vocabulary and executing @code{DEFINITIONS} made both specify vocabulary
-        @var{cccc} .},{})
+                        forthvar({cccc}) forthcode({DEFINITIONS}) 
+        Set the forthcode({CURRENT}) vocabulary to the forthvar({CONTEXT}) vocabulary. In the
+        example, executing vocabulary name forthvar({cccc}) made it the forthcode({CONTEXT}) 
+        vocabulary and executing forthcode({DEFINITIONS}) made both specify vocabulary
+        forthvar({cccc}) .},{})
 
 
 worddoc({DIGIT },{},{c n1 --- n2 tf (ok) c n1 --- ff (bad)},{},{
-        Converts the ascii character @var{c} (using base @var{n1} ) to its binary
-        equivalent @var{n2} , accompanied by a true flag. If the conversion is
+        Converts the ascii character forthvar({c}) (using base forthvar({n1}) ) to its binary
+        equivalent forthvar({n2}) , accompanied by a true flag. If the conversion is
         invalid, leaves only a false flag.},{})
 
 
 worddoc({DLIST},{},{},{},{
-        List the names of the dictionary entries in the @code{CONTEXT} vocabulary.},{})
+        List the names of the dictionary entries in the forthcode({CONTEXT}) vocabulary.},{})
 
 
 worddoc({DLITERAL },{},{d --- d (executing) d --- (compiling) P},{},{
@@ -672,34 +672,34 @@ worddoc({DLITERAL },{},{d --- d (executing) d --- (compiling) P},{},{
 
 
 worddoc({DMINUS},{},{ d1 --- d2},{},{
-        Convert @var{d1} to its double number two's complement.},{})
+        Convert forthvar({d1}) to its double number two's complement.},{})
 
 
 worddoc({DO},{},{ n1 n2 --- (execute)
         addr n --- (compile) },{P,C2,L0},{
         Occurs in a colon-definition in form:
-          @code{DO ... LOOP}
+          forthcode({DO ... LOOP})
 
-        At run time, @code{DO} begins a sequence with repetitive execution
-        controlled by a loop limit @var{n1} and an index with initial value @var{n2} . @code{DO}
-        removes these from the stack. Upon reaching @code{@{LOOP}} the index is
+        At run time, forthcode({DO}) begins a sequence with repetitive execution
+        controlled by a loop limit forthvar({n1}) and an index with initial value forthvar({n2}) . forthcode({DO})
+        removes these from the stack. Upon reaching forthcode({@{LOOP})} the index is
         incremented by one.
         Until the new index equals or exceeds the limit, execution loops
-        back to just after @code{DO} ; otherwise the loop parameters are discarded
-        and execution continues ahead. Both @var{n1} and @var{n2} are determined at
+        back to just after forthcode({DO}) ; otherwise the loop parameters are discarded
+        and execution continues ahead. Both forthvar({n1}) and forthvar({n2}) are determined at
         run-time and may be the result of other operations.
-        Within a loop @code{I} will copy the current value of the index to the
-        stack. See @var{I} , @var{LOOP} , @var{+LOOP} , @var{LEAVE} .
+        Within a loop forthcode({I}) will copy the current value of the index to the
+        stack. See forthvar({I}) , forthvar({LOOP}) , forthvar({+LOOP}) , forthvar({LEAVE}) .
 
-        When compiling within the colon definition, @code{DO} compiles @code{(DO)} , leaves
-        the following address @var{addr} and @var{n} for later error checking.},{})
+        When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
+        the following address forthvar({addr}) and forthvar({n}) for later error checking.},{})
 
 
 worddoc({DOES>},{},{},{                                           L0},{
         A word which defines the run-time action within a high-level
-        defining word. @code{DOES>} alters the code field and first parameter of
+        defining word. forthcode({DOES>}) alters the code field and first parameter of
         the new word to execute the sequence of compiled word addresses
-        following @code{DOES>} . Used in combination with @code{<BUILDS} . When the @code{DOES>} 
+        following forthcode({DOES>}) . Used in combination with forthcode({<BUILDS}) . When the forthcode({DOES>}) 
         part executes it begins with the address of the first parameter of
         the new word on the stack. This allows interpretation using this
         area or its contents. Typical uses include the Forth assembler,
@@ -709,7 +709,7 @@ worddoc({DOES>},{},{},{                                           L0},{
 worddoc({DP},{},{            ----  addr                      },{U,L},{
         A user variable, the dictionary pointer, which contains the address
         of the next free memory above the dictionary. The value may be read
-        by @code{HERE} and altered by @code{ALLOT} .},{})
+        by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{})
 
 
 worddoc({DPL},{},{           ----  addr                     },{U,L0},{
@@ -720,7 +720,7 @@ worddoc({DPL},{},{           ----  addr                     },{U,L0},{
 
 worddoc({DR0 DR1},{},{},{},{
         Installation dependent commands to select disc drives, by presetting
-        @code{OFFSET} . The contents of @code{OFFSET} is added to the block number in @code{BLOCK}
+        forthcode({OFFSET}) . The contents of forthcode({OFFSET}) is added to the block number in forthcode({BLOCK})
         to allow for this selection. Offset is suppressed for error text so
         that is may always originate from drive 0.
         No longer true. Is dismissed.},{})
@@ -730,7 +730,7 @@ worddoc({DROP},{},{},{          n  ---                           },{L0},{
 
 
 worddoc({DUMP},{},{          addr  n  ---                     },{L0},{
-        Print the contents of @var{n} memory locations beginning at addr. Both
+        Print the contents of forthvar({n}) memory locations beginning at addr. Both
         addresses and contents are shown in the current numeric base.},{})
 
 
@@ -740,18 +740,18 @@ worddoc({DUP},{},{           n  ---  n  n                     },{L0},{
                                             .
 worddoc({ELSE},{},{ addr1 n1 --- addr2 n2 (compiling) },{P,C2,L0},{
         Occurs within a colon-definition in the form:
-                         @code{IF ... ELSE ... ENDIF}
-        At run-time, @code{ELSE} executes after the true part following @code{IF} . @code{ELSE}
+                         forthcode({IF ... ELSE ... ENDIF})
+        At run-time, forthcode({ELSE}) executes after the true part following forthcode({IF}) . forthcode({ELSE})
         forces execution to skip over the following false part and resumes
-        execution after the @code{ENDIF} . It has no stack effect.
+        execution after the forthcode({ENDIF}) . It has no stack effect.
 
-        At compile-time @code{ELSE} emplaces @code{BRANCH} reserving a branch offset,
-        leaves the address @var{addr2} and @var{n2} for error testing. @code{ELSE} also
-        resolves the pending forward branch from @code{IF} by calculating the
-        offset from @var{addr1} to @code{HERE} and storing at @var{addr1} .},{})
+        At compile-time forthcode({ELSE}) emplaces forthcode({BRANCH}) reserving a branch offset,
+        leaves the address forthvar({addr2}) and forthvar({n2}) for error testing. forthcode({ELSE}) also
+        resolves the pending forward branch from forthcode({IF}) by calculating the
+        offset from forthvar({addr1}) to forthcode({HERE}) and storing at forthvar({addr1}) .},{})
 
 worddoc({EMIT},{},{       c  ---                            },{L0},{
-        Transmit ascii character @var{c} to the selected output device. @code{OUT} is
+        Transmit ascii character forthvar({c}) to the selected output device. forthcode({OUT}) is
         incremented for each character output.},{})
 
 
@@ -763,46 +763,46 @@ worddoc({EMPTY-BUFFERS },{},{},{L0},{
 
 
 worddoc({ENCLOSE},{},{ addr1 c -- addr1 n1 n2 n3},{},{
-        The text scanning primitive used by @code{WORD} . From the text address
-        addr1 and an ascii delimiting character @var{c} , is determined the byte
-        offset to the first non-delimiter character @var{n1} , the offset to the
-        first delimiter after the text @var{n2} , and the offset to the first
+        The text scanning primitive used by forthcode({WORD}) . From the text address
+        addr1 and an ascii delimiting character forthvar({c}) , is determined the byte
+        offset to the first non-delimiter character forthvar({n1}) , the offset to the
+        first delimiter after the text forthvar({n2}) , and the offset to the first
         character not included.
         This proceedure will not process past an ascii 'null', treating it
         as an unconditional delimiter.},{})
 
 
 worddoc({END},{},{                                        },{P,C2,L0},{
-        This is an 'alias' or duplicate definition for @code{UNTIL} .},{})
+        This is an 'alias' or duplicate definition for forthcode({UNTIL}) .},{})
 
 
 worddoc({ENDIF},{},{         addr  n  ---  (compile)   },{P,CO,L0},{
         Occurs in a colon-definition in form:
-          @samp{IF ... ENDIF}                                                                                                                   x
-          @samp{IF ... ELSE ... ENDIF}
-        At run-time, @code{ENDIF} serves only as the destination of a forward
-        branch from @code{IF} or @code{ELSE} . It marks the conclusion of the conditional
-        structure. @code{THEN} is another name for @code{ENDIF} . Both names are supported
-        in fig-FORTH. See also @code{IF} and @code{ELSE} .
+          forthsamp({IF ... ENDIF})                                                                                                                   x
+          forthsamp({IF ... ELSE ... ENDIF})
+        At run-time, forthcode({ENDIF}) serves only as the destination of a forward
+        branch from forthcode({IF}) or forthcode({ELSE}) . It marks the conclusion of the conditional
+        structure. forthcode({THEN}) is another name for forthcode({ENDIF}) . Both names are supported
+        in fig-FORTH. See also forthcode({IF}) and forthcode({ELSE}) .
 
-        At compile-time, @code{ENDIF} computes the forward branch offset from @var{addr} 
-        to @code{HERE} and stores it at @var{addr} . @var{n} is used for error tests.},{})
+        At compile-time, forthcode({ENDIF}) computes the forward branch offset from forthvar({addr}) 
+        to forthcode({HERE}) and stores it at forthvar({addr}) . forthvar({n}) is used for error tests.},{})
 
 
 worddoc({ERASE},{},{ addr n --},{},{
-        Clear a region of memory to zero from @var{addr} over @var{n} addresses.},{})
+        Clear a region of memory to zero from forthvar({addr}) over forthvar({n}) addresses.},{})
 
 
 worddoc({ERROR},{},{ line --- in blk},{},{
-        Execute error notification and restart of system. @code{WARNING} is first
-        examined. If 1, the text of line @var{n} , relative to screen 4 of drive O
+        Execute error notification and restart of system. forthcode({WARNING}) is first
+        examined. If 1, the text of line forthvar({n}) , relative to screen 4 of drive O
         is printed. This line number may be positive or negative, and beyond
-        just screen 4. If @code{WARNING} is zero, @var{n} is just printed as a message number
-        (non disc installation). If @code{WARNING} is -l, the definition @code{(ABORT)} is
-        executed, which executes the system @code{ABORT} . The user may cautiously
-        modify this execution by altering @code{(ABORT)} .
-        fig-FORTH saves the contents of @code{IN} and @code{BLK} to assist in determining
-        the location of the error. Final action is execution of @code{QUIT} .},{})
+        just screen 4. If forthcode({WARNING}) is zero, forthvar({n}) is just printed as a message number
+        (non disc installation). If forthcode({WARNING}) is -l, the definition forthcode({(ABORT)}) is
+        executed, which executes the system forthcode({ABORT}) . The user may cautiously
+        modify this execution by altering forthcode({(ABORT)}) .
+        fig-FORTH saves the contents of forthcode({IN}) and forthcode({BLK}) to assist in determining
+        the location of the error. Final action is execution of forthcode({QUIT}) .},{})
 
 
 worddoc({EXECUTE},{},{ addr -},{},{
@@ -817,13 +817,13 @@ worddoc({EXPECT},{},{ addr count --- },{L0},{
 
 
 worddoc({FENCE},{},{         ---   addr                        },{U},{
-        A user variable containing an address below which @code{FORGET} ting is
+        A user variable containing an address below which forthcode({FORGET}) ting is
         trapped. To forget below this point the user must alter the contents
-        of @code{FENCE} .},{})
+        of forthcode({FENCE}) .},{})
 
 
 worddoc({FILL},{},{ addr quan b --},{},{
-        Fill memory at the address with the specified quantity of bytes @var{b} .},{})
+        Fill memory at the address with the specified quantity of bytes forthvar({b}) .},{})
 
 
 worddoc({FIRST},{},{ --- n},{},{
@@ -838,17 +838,17 @@ worddoc({FLD},{},{           ---  addr                         },{U},{
 
 worddoc({FORGET},{},{},{                                      E,L0},{
         Executed in the form:
-                        @samp{FORGET cccc}
-  Deletes definition named @code{cccc} from the dictionary with all entries
+                        forthsamp({FORGET cccc})
+  Deletes definition named forthcode({cccc}) from the dictionary with all entries
         physically following it. In fig-FORTH, an error message will occur
-        if the @code{CURRENT} and @code{CONTEXT} vocabularies are not currently the same.},{})
+        if the forthcode({CURRENT}) and forthcode({CONTEXT}) vocabularies are not currently the same.},{})
 
 
 worddoc({FORTH},{},{},{                                         P,L1},{
         The name of the primary vocabulary.
-        Execution makes @code{FORTH} the @code{CONTEXT} vocabulary. Until additional user
+        Execution makes forthcode({FORTH}) the forthcode({CONTEXT}) vocabulary. Until additional user
         vocabularies are defined, new user definitions become a part of
-        @code{FORTH} . @code{FORTH} is immediate, so it will execute during the creation of
+        forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during the creation of
         a colon-definition, to select this vocabulary at compile time. },{})
 
 
@@ -866,9 +866,9 @@ worddoc({HLD},{},{           ---  addr                        },{L0},{
 
 
 worddoc({HOLD},{},{          c  ---                           },{L0},{
-        Used between @code{<#} and @code{#>} to insert an ascii character into a pictured
+        Used between forthcode({<#}) and forthcode({#>}) to insert an ascii character into a pictured
         numeric output string.
-        e.g. @samp{2E HOLD} will place a decimal point.          },{})
+        e.g. forthsamp({2E HOLD}) will place a decimal point.          },{})
 
 
 worddoc({I},{},{             ---  n                         },{C,L0},{
@@ -883,17 +883,17 @@ worddoc({ID.},{},{ addr --                                 },{},{
 worddoc({IF},{},{ f --- (run-time)  -- addr n
           (compile) },{P,C2,L0},{
         Occurs is a colon-definition in form:
-               @samp{IF (tp) ...  ENDIF }
-               @samp{IF (tp) ... ELSE (fp) ... ENDIF}
+               forthsamp({IF (tp) ...  ENDIF })
+               forthsamp({IF (tp) ... ELSE (fp) ... ENDIF})
         At run-time, IF selects execution based on a boolean flag. If f is
         true (non-zero), execution continues ahead thru the true part. If f
-        is false (zero), execution skips till just after @code{ELSE} to execute
-        the false part. After either part, execution resumes after @code{ENDIF} .
-        @code{ELSE} and its false part are optional.; if missing, false execution
-        skips to just after @code{ENDIF} .
+        is false (zero), execution skips till just after forthcode({ELSE}) to execute
+        the false part. After either part, execution resumes after forthcode({ENDIF}) .
+        forthcode({ELSE}) and its false part are optional.; if missing, false execution
+        skips to just after forthcode({ENDIF}) .
 
-        At compile-time @code{IF} compiles @code{0BRANCH} and reserves space for an offset
-        at @var{addr} . @var{addr} and @var{n} are used later for resolution of the offset and
+        At compile-time forthcode({IF}) compiles forthcode({0BRANCH}) and reserves space for an offset
+        at forthvar({addr}) . forthvar({addr}) and forthvar({n}) are used later for resolution of the offset and
         error testing.},{})
 
 
@@ -904,13 +904,13 @@ worddoc({IMMEDIATE},{},{},{},{
         This method allows definitions to handle unusual compiling
         situations, rather. than build them into the fundamental compiler.
         The user may force compilation of an immediate definition by
-        preceeding it with @code{[COMPILE]} .},{})
+        preceeding it with forthcode({[COMPILE]}) .},{})
 
 
 worddoc({IN},{},{            ---  addr                        },{L0},{
         A user variable containing the byte offset within the current input
         text buffer (terminal or disc) from which the next text will be
-        accepted. @code{WORD} uses and moves the value of @code{IN} .},{})
+        accepted. forthcode({WORD}) uses and moves the value of forthcode({IN}) .},{})
 
 
 worddoc({INDEX},{},{ from to --},{},{
@@ -920,12 +920,12 @@ worddoc({INDEX},{},{ from to --},{},{
 
 worddoc({INTERPRET},{},{},{},{
         The outer text interpreter which sequentially executes or compiles
-        text from the input stream (terminal or disc) depending on @code{STATE} . If
-        the word name cannot be found after a search of @code{CONTEXT} and then
-        @code{CURRENT} it is converted to a number according to the current base.
+        text from the input stream (terminal or disc) depending on forthcode({STATE}) . If
+        the word name cannot be found after a search of forthcode({CONTEXT}) and then
+        forthcode({CURRENT}) it is converted to a number according to the current base.
         That also failing, an error message echoing the name with a " ?"
         will be given.
-        Text input will be taken according to the convention for @code{WORD} . If a
+        Text input will be taken according to the convention for forthcode({WORD}) . If a
         decimal point is found as part of a number, a double number value
         will be left. The decimal point has no other purpose than to force
         this action.},{{NUMBER}})
@@ -936,15 +936,15 @@ worddoc({KEY},{},{           ---  c                            },{L0},{
 
 
 worddoc({LATEST},{},{ --- addr},{},{
-        Leave the name field address of the topmost word in the @code{CURRENT} 
+        Leave the name field address of the topmost word in the forthcode({CURRENT}) 
         vocabulary.},{})
 
 
 worddoc({LEAVE},{},{},{                                         C,L0},{
         Force termination of a do-loop at the next opportunity by setting
         the loop limit equal to the current value of the index. The index
-        itself remains unchanged, and execution proceeds normally until @code{LOOP} 
-        or @code{+LOOP} is encountered.},{})
+        itself remains unchanged, and execution proceeds normally until forthcode({LOOP}) 
+        or forthcode({+LOOP}) is encountered.},{})
 
 
 worddoc({LFA},{},{ pfa --- lfa},{},{
@@ -959,45 +959,45 @@ worddoc({LIMIT },{},{---- n},{},{
 
 
 worddoc({LIST},{},{          n  ---                            },{L0},{
-        Display the ascii text of screen @var{n} on the selected output device.
-        @code{SCR} contains the screen number during and after this process.},{})
+        Display the ascii text of screen forthvar({n}) on the selected output device.
+        forthcode({SCR}) contains the screen number during and after this process.},{})
 
 
 worddoc({LIT},{},{           ---  n                        },{C2,L0},{
-        Within a colon-definition, @code{LIT} is automatically compiled before each
+        Within a colon-definition, forthcode({LIT}) is automatically compiled before each
         16 bit literal number encountered in input text. Later execution of
-        @code{LIT} causes the contents of the next dictionary address to be pushed
+        forthcode({LIT}) causes the contents of the next dictionary address to be pushed
         to the stack.},{})
 
 
 worddoc({LITERAL},{},{ n --- (compiling) },{P,C2,L0},{
-        If compiling, then compile the stack value @var{n} as a 16 bit literal.
+        If compiling, then compile the stack value forthvar({n}) as a 16 bit literal.
         This definition is immediate so that it will execute during a colon
         definition. The intended use is:
-              @samp{: xxx    [ calculate ]  LITERAL  ;}
+              forthsamp({: xxx    [ calculate ]  LITERAL  ;})
         Compilation is suspended for the compile time calculation of a
         value.
-        Compilation is resumed and @code{LITERAL} compiles this value.},{})
+        Compilation is resumed and forthcode({LITERAL}) compiles this value.},{})
 
 
 worddoc({LOAD},{},{          n  ---                            },{L0},{
-        Begin interpretation of screen @var{n} .
-        Loading will terminate at the end of the screen or at @code{;S} . },
+        Begin interpretation of screen forthvar({n}) .
+        Loading will terminate at the end of the screen or at forthcode({;S}) . },
 {{;S},{-->} })
 
 
 worddoc({LOOP},{},{          addr  n  ---  (compiling) },{P,C2,L0},{
         Occurs in a colon-definition in form:
-                        @samp{DO ... LOOP}
-        At run-time, @code{LOOP} selectively controls branching back to the
-        corresponding @code{DO} based on the loop index and limit. The loop index
+                        forthsamp({DO ... LOOP})
+        At run-time, forthcode({LOOP}) selectively controls branching back to the
+        corresponding forthcode({DO}) based on the loop index and limit. The loop index
         is incremented by one and compared to the limit. The branch back to
-        @code{DO} occurs until the index equals or exceeds the limit;
+        forthcode({DO}) occurs until the index equals or exceeds the limit;
         at that time, the parameters are discarded and execution continues
         ahead.
 
-        At compile-time, @code{LOOP} compiles @code{(LOOP)} and uses @var{addr} to calculate an
-        offset to @var{DO} . @var{n} is used for error testing.},{})
+        At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
+        offset to forthvar({DO}) . forthvar({n}) is used for error testing.},{})
 
 
 worddoc({M*},{},{            n1  n2  ---  d},{},{
@@ -1006,15 +1006,15 @@ worddoc({M*},{},{            n1  n2  ---  d},{},{
 
 
 worddoc({M/},{},{              d  n1  ---  n2  n3},{},{
-        A mixed magnitude math operator which leaves the signed remainder @var{n2} 
-        and signed quotient @var{n3} from a double number dividend and divisor @var{n1} .
+        A mixed magnitude math operator which leaves the signed remainder forthvar({n2}) 
+        and signed quotient forthvar({n3}) from a double number dividend and divisor forthvar({n1}) .
         The  remainder takes its sign from the dividend.},{})
 
 
 worddoc({M/MOD},{},{ ud1 u2 --- u3 ud4},{},{
         An unsigned mixed magnitude math operation which leaves a double
-        quotient @var{ud4} and remainder @var{u3} , from a double dividend ud1 and single
-        divisor @var{u2} .},{})
+        quotient forthvar({ud4}) and remainder forthvar({u3}) , from a double dividend ud1 and single
+        divisor forthvar({u2}) .},{})
 
 
 worddoc({MAX},{},{           n1  n2  ---  max                },{L0},{
@@ -1022,9 +1022,9 @@ worddoc({MAX},{},{           n1  n2  ---  max                },{L0},{
 
 
 worddoc({MESSAGE},{},{ n --},{},{
-        Print on the selected output device the text of line @var{n} relative to
-        screen 4 of drive 0. @var{n} may be positive or negative. @code{MESSAGE} may be
-        used to print incidental text such as report headers. If @code{WARNING} is
+        Print on the selected output device the text of line forthvar({n}) relative to
+        screen 4 of drive 0. forthvar({n}) may be positive or negative. forthcode({MESSAGE}) may be
+        used to print incidental text such as report headers. If forthcode({WARNING}) is
         zero, the message will simply be printed as a number (disc
         unavailable).},{})
 
@@ -1038,7 +1038,7 @@ worddoc({MINUS},{},{         n1  ---  n2                      },{L0},{
 
 
 worddoc({MOD},{},{           n1  n2  ---  mod                 },{L0},{
-        Leave the remainder of @var{n1/n2} , with the same sign as @var{n1} .},{})
+        Leave the remainder of forthvar({n1/n2}) , with the same sign as forthvar({n1}) .},{})
 
 
 worddoc({MON},{},{},{},{
@@ -1047,23 +1047,23 @@ worddoc({MON},{},{},{},{
 
 
 worddoc({MOVE},{},{ addr1 addr2 n --},{},{
-        Move the contents of @var{n} memory cells (l6 bit contents) beginning at
-        @var{addr1} into @var{n} cells beginning at @var{addr2} .
-        The contents of @var{addr1} is moved first.
+        Move the contents of forthvar({n}) memory cells (l6 bit contents) beginning at
+        forthvar({addr1}) into forthvar({n}) cells beginning at forthvar({addr2}) .
+        The contents of forthvar({addr1}) is moved first.
         This definition is appropriate on on word addressing computers.},{})
 
 
 worddoc({NEXT},{},{},{},{
-        This is the inner interpreter that uses the interpretive pointer @samp{IP} 
+        This is the inner interpreter that uses the interpretive pointer forthsamp({IP}) 
         to execute compiled Forth definitions. It is not directly executed
         but is the return point for all code proceedures. It acts by
-        fetching the address pointed by @samp{IP} , storing this value in register
-        @samp{W} . It then jumps to the address pointed to by the address pointed to
-        by @samp{W} . @samp{W} points to the code field of a definition which contains
+        fetching the address pointed by forthsamp({IP}) , storing this value in register
+        forthsamp({W}) . It then jumps to the address pointed to by the address pointed to
+        by forthsamp({W}) . forthsamp({W}) points to the code field of a definition which contains
         the address of the code which executes for that definition.
         This usage of indirect threaded code is a major contributor to the
-        power, portability, and extensibility of Forth. Locations of @samp{IP} and
-        @samp{W} are computer specific.},{})
+        power, portability, and extensibility of Forth. Locations of forthsamp({IP}) and
+        forthsamp({W}) are computer specific.},{})
 
 
 worddoc({NFA},{},{ pfa --- nfa},{},{
@@ -1075,15 +1075,15 @@ worddoc({NUMBER},{},{        addr   ---   d},{},{
         Convert a character string left at addr with a preceeding count, to
         a signed double number, using the current numeric base. If a
         decimal point is encountered in the text, its position will be
-        given in @code{DPL} , but no other effect occurs. If numeric conversion is
+        given in forthcode({DPL}) , but no other effect occurs. If numeric conversion is
         not possible, an error message will be given.},{})
 
 
 worddoc({OFFSET},{},{         ---   addr                            },{U},{
         A user variable which may contain a block offset to disc drives. The
-        contents of @code{OFFSET} is added to the stack number by @code{BLOCK} . Messages
-        by @code{MESSAGE} are independent of @code{OFFSET} .
-        See @code{BLOCK} @code{DR0} @code{DR1} @code{MESSAGE} .},{})
+        contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) . Messages
+        by forthcode({MESSAGE}) are independent of forthcode({OFFSET}) .
+        See forthcode({BLOCK}) forthcode({DR0}) forthcode({DR1}) forthcode({MESSAGE}) .},{})
 
 
 worddoc({OR},{             n1   n2  --   or                    },{L0},{
@@ -1091,8 +1091,8 @@ worddoc({OR},{             n1   n2  --   or                    },{L0},{
 
 
 worddoc({OUT},{},{            ---  addr                            },{U},{
-        A user variable that contains a value incremented by @code{EMIT} . The user
-        may alter and examine @code{OUT} to control display formating.},{})
+        A user variable that contains a value incremented by forthcode({EMIT}) . The user
+        may alter and examine forthcode({OUT}) to control display formating.},{})
 
 
 worddoc({OVER},{},{ nl n2 --- nl n2 n1 },{L0},{
@@ -1101,7 +1101,7 @@ worddoc({OVER},{},{ nl n2 --- nl n2 n1 },{L0},{
 
 worddoc({PAD},{},{            ---   addr                           },{L0},{
         Leave the address of the text output buffer, which is a fixed offset
-        above @code{HERE} .},{})
+        above forthcode({HERE}) .},{})
 
 
 worddoc({PFA},{},{ nfa --- pfa},{},{
@@ -1110,32 +1110,32 @@ worddoc({PFA},{},{ nfa --- pfa},{},{
 
 
 worddoc({POP},{},{},{},{
-        The code sequence to remove a stack value and return to @code{NEXT} . @code{POP} is
+        The code sequence to remove a stack value and return to forthcode({NEXT}) . forthcode({POP}) is
         not directly executable, but is a Forth re-entry point after machine
         code.},{})
 
 
 worddoc({PREV},{},{ ---- addr},{},{
         A variable containing the address of the disc buffer most recently
-        referenced. The @code{UPDATE} command marks this buffer to be later written
+        referenced. The forthcode({UPDATE}) command marks this buffer to be later written
         to disc.},{})
 
 
 worddoc({PUSH},{},{},{},{
         This code sequence pushes machine registers to the computation stack
-        and returns to @code{NEXT} . It is not directly executable, but is a Forth
+        and returns to forthcode({NEXT}) . It is not directly executable, but is a Forth
         re-entry point after machine code.},{})
 
 
 worddoc({PUT},{},{},{},{
         This code sequence stores machine register contents over the topmost
-        computation stack value and returns to @code{NEXT} . It is not directly
+        computation stack value and returns to forthcode({NEXT}) . It is not directly
         executable, but is a Forth re-entry point after machine code.},{})
 
 
 worddoc({QUERY},{},{},{},{
         Input 80 characters of text (or until a "return") from the operators
-        terminal. Text is positioned at the address contained in @code{TIB} with @code{IN}
+        terminal. Text is positioned at the address contained in forthcode({TIB}) with forthcode({IN})
         set to zero.},{})
 
 
@@ -1154,16 +1154,16 @@ worddoc({R#},{},{              ---  addr                            },{U},{
 
 
 worddoc({R/W},{},{ addr blk f --},{},{
-        The fig-FORTH standard disc read-write linkage. @var{addr} specifies the
-        source or destination block buffer, @var{blk} is the sequential number of
-        the referenced block; and @var{f} is a flag for f=O write and f=l read.
-        @code{R/W} determines the location on mass storage, performs the read-write
+        The fig-FORTH standard disc read-write linkage. forthvar({addr}) specifies the
+        source or destination block buffer, forthvar({blk}) is the sequential number of
+        the referenced block; and forthvar({f}) is a flag for f=O write and f=l read.
+        forthcode({R/W}) determines the location on mass storage, performs the read-write
         and performs any error checking.},{})
 
 
 worddoc({R>},{},{             ---  n                            },{L0},{
         Remove the top value from the return stack and leave it on the
-        computation stack. See @code{>R} @code{R} .},{})
+        computation stack. See forthcode({>R}) forthcode({R}) .},{})
 
 
 worddoc({R0},{},{             ---  addr                          },{U},{
@@ -1173,12 +1173,12 @@ worddoc({R0},{},{             ---  addr                          },{U},{
 
 worddoc({REPEAT},{ },{addr n --- (compiling) },{P,C2},{
         Used within a colon-definition in the form:
-                          @samp{BEGIN ... WHILE ... REPEAT}
-        At run-time, @code{REPEAT} forces an unconditional branch back to just
-        after the corresponding @code{BEGIN} .
+                          forthsamp({BEGIN ... WHILE ... REPEAT})
+        At run-time, forthcode({REPEAT}) forces an unconditional branch back to just
+        after the corresponding forthcode({BEGIN}) .
 
-        At compile-time, @code{REPEAT} compiles @code{BRANCH} and the offset from @code{HERE} to
-        addr. @var{n} is used for error testing.},{})
+        At compile-time, forthcode({REPEAT}) compiles forthcode({BRANCH}) and the offset from forthcode({HERE}) to
+        addr. forthvar({n}) is used for error testing.},{})
 
 
 worddoc({ROT},{ },{nl n2 n3 --- n2 n3 nl },{L0},{
@@ -1188,7 +1188,7 @@ worddoc({ROT},{ },{nl n2 n3 --- n2 n3 nl },{L0},{
 
 worddoc({RP!},{},{},{},{
         A computer dependent proceedure to initialize the return stack
-        pointer from user variable @code{R0} .},{})
+        pointer from user variable forthcode({R0}) .},{})
 
 
 worddoc({S->D},{},{          n  ---  d},{},{
@@ -1202,13 +1202,13 @@ worddoc({S0},{S-zero},{             ---  addr                          },{U},{
 
 worddoc({SCR},{},{           ---   addr                         },{U},{
         A user variable containing the screen number most recently reference
-        by @code{LIST} .},{})
+        by forthcode({LIST}) .},{})
 
 
 worddoc({SIGN},{},{          n  d  ---  d                      },{L0},{
         Stores an ascii "-" sign just before a converted numeric output
-        string in the text output buffer when @var{n} is negative. @var{n} is discarded
-        but double number @var{d} is maintained. Must be used between @code{<#} and @code{#>} .},{})
+        string in the text output buffer when forthvar({n}) is negative. forthvar({n}) is discarded
+        but double number forthvar({d}) is maintained. Must be used between forthcode({<#}) and forthcode({#>}) .},{})
 
 
 worddoc({SMUDGE},{},{},{},{
@@ -1220,14 +1220,14 @@ worddoc({SMUDGE},{},{},{},{
 
 worddoc({SP!},{},{},{},{
         A computer dependent proceedure to initialize the stack pointer from
-        @code{S0} .},{})
+        forthcode({S0}) .},{})
 
 
-worddoc({SP@},{},{ --- addr},{},{
+worddoc({SPforth},({}),{ --- addr},{},{
         A computer dependent proceedure to return the address of the stack
-        position to the top of the stack, as it was before @code{SP@} was executed.
-            (e.g.  @samp{1  2  SP@  @  ...}     would
-            type @samp{2  2   1} )},{})
+        position to the top of the stack, as it was before forthcode({SP@}) was executed.
+            (e.g.  forthsamp({1  2  SP@  @  ...})     would
+            type forthsamp({2  2   1}) )},{})
 
 
 worddoc({SPACE},{},{},{                                            L0},{
@@ -1235,7 +1235,7 @@ worddoc({SPACE},{},{},{                                            L0},{
 
 
 worddoc({SPACES},{},{        n  ---                            },{L0},{
-        Transmit @var{n} ascii blanks to the output device.},{})
+        Transmit forthvar({n}) ascii blanks to the output device.},{})
 
 
 worddoc({STATE},{},{         ---  addr                       },{L0,U},{
@@ -1251,12 +1251,12 @@ worddoc({SWAP},{},{ nl n2 --- n2 n1 },{L0},{
 worddoc({TASK},{},{},{},{
         A no-operation word which can mark the boundary between
         applications.
-        By forgetting @code{TASK} and re-compiling, an application can be discarded
+        By forgetting forthcode({TASK}) and re-compiling, an application can be discarded
         in its entirety. },{})
 
 
 worddoc({THEN},{},{},{                                        P,CO,L O},{
-        An alias for @code{ENDIF} .},{})
+        An alias for forthcode({ENDIF}) .},{})
 
 
 worddoc({TIB},{},{           ---  addr                          },{U},{
@@ -1264,27 +1264,27 @@ worddoc({TIB},{},{           ---  addr                          },{U},{
 
 
 worddoc({TOGGLE},{},{  addr b --},{},{
-        Complement the contents of @var{addr} by the bit pattern @var{b} .},{})
+        Complement the contents of forthvar({addr}) by the bit pattern forthvar({b}) .},{})
 
 
 worddoc({TRAVERSE},{},{ addr1 n --- addr2},{},{
         Move across the name field of a fig-FORTH variable length name
         field.
-        @var{addr1} is the address of either the length byte or the last letter.
-        If @var{n} =1, the motion is toward hi memory; if @var{n} =-l, the motion is
-        toward low memory. The @var{addr2} resulting is address of the other end
+        forthvar({addr1}) is the address of either the length byte or the last letter.
+        If forthvar({n}) =1, the motion is toward hi memory; if forthvar({n}) =-l, the motion is
+        toward low memory. The forthvar({addr2}) resulting is address of the other end
         of the name.},{})
 
 
 worddoc({TRIAD},{},{ scr --},{},{
         Display on the selected output device the three screens which
-        include that numbered @var{scr} , beginning with a screen evenly divisible
+        include that numbered forthvar({scr}) , beginning with a screen evenly divisible
         by three. Output is suitable for source text records, and includes a
         reference line at the bottom taken from line 15 of screen 4.},{})
 
 
 worddoc({TYPE},{},{ addr count --- },{L0},{
-        Transmit count characters from @var{addr} to the selected output device.},{})
+        Transmit count characters from forthvar({addr}) to the selected output device.},{})
 
 
 worddoc({U*},{},{            u1  u2  ---  ud},{},{
@@ -1292,25 +1292,25 @@ worddoc({U*},{},{            u1  u2  ---  ud},{},{
 
 
 worddoc({U/},{},{  ud u1 --- u2 u3},{},{
-        Leave the unsigned remainder @var{u2} and unsigned quotient @var{u3} from the
-        unsigned double dividend @var{ud} and unsigned divisor @var{u1} .},{})
+        Leave the unsigned remainder forthvar({u2}) and unsigned quotient forthvar({u3}) from the
+        unsigned double dividend forthvar({ud}) and unsigned divisor forthvar({u1}) .},{})
 
 
 worddoc({UNTIL},{},{ f --- (run-time)
           addr n --- (compile) },{P,C2,L0},{
         Occurs within a colon-definition in the form:
-                        @samp{BEGIN ... UNTIL}
-        At run-time, @code{UNTIL} controls the conditional branch back to the
-        corresponding @code{BEGIN}  If f is false, execution returns to just after 
-        @code{BEGIN} . 
+                        forthsamp({BEGIN ... UNTIL})
+        At run-time, forthcode({UNTIL}) controls the conditional branch back to the
+        corresponding forthcode({BEGIN})  If f is false, execution returns to just after 
+        forthcode({BEGIN}) . 
         if true, execution continues ahead.
 
-        At compile-time, @code{UNTIL} compiles @code{(0BRANCH)} and an offset from @code{HERE} to
-        addr. @var{n} is used for error tests.},{})
+        At compile-time, forthcode({UNTIL}) compiles forthcode({(0BRANCH)}) and an offset from forthcode({HERE}) to
+        addr. forthvar({n}) is used for error tests.},{})
 
 
 worddoc({UPDATE},{},{},{                                          L0},{
-        Marks the most recently referenced block (pointed to by @code{PREV} ) as
+        Marks the most recently referenced block (pointed to by forthcode({PREV}) ) as
         altered. The block will subsequently be transferred automatically to
         disc should its buffer be required for storage of a different block.},{})
 
@@ -1322,10 +1322,10 @@ worddoc({USE},{},{ --- addr},{},{
 
 worddoc({USER},{},{          n  ---                            },{L0},{
         A defining word used in the form:
-                        @samp{n USER cccc}
-        which creates a user variable @var{cccc} .
-        The parameter field of @var{cccc} contains @var{n} as a fixed offset relative to
-        the user pointer register @samp{UP} for this user variable. When @var{cccc} is
+                        forthsamp({n USER cccc})
+        which creates a user variable forthvar({cccc}) .
+        The parameter field of forthvar({cccc}) contains forthvar({n}) as a fixed offset relative to
+        the user pointer register forthsamp({UP}) for this user variable. When forthvar({cccc}) is
         later executed, it places the sum of its offset and the user area
         base address on the stack as the storage address of that
         particular variable.},{})
@@ -1333,32 +1333,32 @@ worddoc({USER},{},{          n  ---                            },{L0},{
 
 worddoc({VARIABLE},{},{                                     },{E,LU},{
         A defining word used in the form:
-                          @samp{n VARIABLE cccc}
-        When @code{VARIABLE} is executed, it creates the definition @var{cccc} with its
-        parameter field initialized to @var{n} . When @var{cccc} is later executed, the
-        address of its parameter field (containing @var{n} ) is left on the stack,
+                          forthsamp({n VARIABLE cccc})
+        When forthcode({VARIABLE}) is executed, it creates the definition forthvar({cccc}) with its
+        parameter field initialized to forthvar({n}) . When forthvar({cccc}) is later executed, the
+        address of its parameter field (containing forthvar({n}) ) is left on the stack,
         so that a fetch or store may access this location.},{})
 
 
 worddoc({VOC-LINK},{},{ --- addr },{U},{
         A user variable containing the address of a field in the definition
         of the most recently created vocabulary. All vocabulary names are
-        linked by these fields to allow control for @code{FORGET} ting thru multiple
+        linked by these fields to allow control for forthcode({FORGET}) ting thru multiple
         vocabularies.},{})
 
 
 worddoc({VOCABULARY },{},{},{                                   E,L},{
         A defining word used in the form:
-                     @samp{VOCABULARY cccc}
-        to create a vocabulary definition @var{cccc} . Subsequent use of @var{cccc} will
-        make it the @code{CONTEXT} vocabulary which is searched first by @code{INTERPRET} .
-        The sequence @samp{"cccc DEFINITIONS"} will also make cccc the @code{CURRENT} 
+                     forthsamp({VOCABULARY cccc})
+        to create a vocabulary definition forthvar({cccc}) . Subsequent use of forthvar({cccc}) will
+        make it the forthcode({CONTEXT}) vocabulary which is searched first by forthcode({INTERPRET}) .
+        The sequence forthsamp({"cccc DEFINITIONS"}) will also make cccc the forthcode({CURRENT}) 
         vocabulary into which new definitions are placed.
 
         In fig-FORTH, cccc will be so chained as to include all definitions
-        of the vocabulary in which @var{cccc} is itself defined. All vocabularys
+        of the vocabulary in which forthvar({cccc}) is itself defined. All vocabularys
         ultimately chain to Forth. By convention, vocabulary names are to be
-        declared @code{IMMEDIATE} . },{{VOC-LINK} })
+        declared forthcode({IMMEDIATE}) . },{{VOC-LINK} })
 
 
 worddoc({VLIST},{},{},{},{
@@ -1370,40 +1370,40 @@ worddoc({WARNING},{},{       ---  addr                         },{U},{
         A user variable containing a value controlling messages. If = 1 disc
         is present, and screen 4 of drive 0 is the base location for
         messages. If = 0, no disc is present and messages will be presented
-        by number. If = -1, execute @code{(ABORT)} for a user specified proceedure.
+        by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure.
 },{{MESSAGE},{ERROR}})
 
 
 worddoc({WHILE},{},{   f --- (run-time)
             ad1 nl --- ad1 n1 ad2 n2 },{p,C2},{
         Occurs in a colon-definition in the form:
-                  @samp{BEGIN ... WHILE (tp) ... REPEAT}
-        At run-time, @code{WHILE} selects conditional execution based on boolean
-        flag @var{f} . If @var{f} is true (non-zero), @code{WHILE} continues execution of the
-        true part thru to @code{REPEAT} , which then branches back to @code{BEGIN} . If @var{f} is
-        false (zero), execution skips to just after @code{REPEAT} , exiting the
+                  forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
+        At run-time, forthcode({WHILE}) selects conditional execution based on boolean
+        flag forthvar({f}) . If forthvar({f}) is true (non-zero), forthcode({WHILE}) continues execution of the
+        true part thru to forthcode({REPEAT}) , which then branches back to forthcode({BEGIN}) . If forthvar({f}) is
+        false (zero), execution skips to just after forthcode({REPEAT}) , exiting the
         structure.
 
-        At compile time, @code{WHILE} emplaces @code{(0BRANCH)} and leaves @var{ad2} of the
-        reserved offset. The stack values will be resolved by @code{REPEAT} .},{})
+        At compile time, forthcode({WHILE}) emplaces forthcode({(0BRANCH)}) and leaves forthvar({ad2}) of the
+        reserved offset. The stack values will be resolved by forthcode({REPEAT}) .},{})
 
 
 worddoc({WIDTH},{},{         ---  addr                          },{U},{
         In fig-FORTH, a user variable containing the maximum number of
         letters saved in the compilation of a definitions' name. It must be
         1 thru 31, with a default value of 31. The name character count and
-        its natural characters are saved, up to the value in @code{WIDTH} . The
+        its natural characters are saved, up to the value in forthcode({WIDTH}) . The
         value may be changed at any time within the above limits.},{})
 
 
 worddoc({WORD},{},{          c  ---                            },{L0},{
         Read the next text characters from the input stream being
-        interpreted, until a delimiter @var{c} is found, storing the packed
-        character string beginning at the dictionary buffer @code{HERE} . @code{WORD} 
+        interpreted, until a delimiter forthvar({c}) is found, storing the packed
+        character string beginning at the dictionary buffer forthcode({HERE}) . forthcode({WORD}) 
         leaves the character count in the first byte, the characters, and
-        ends with two or more blanks. Leading occurrences of @var{c} are ignored.
-        If @code{BLK} is zero text is taken from the terminal input buffer,
-        otherwise from the disc block stored in @code{BLK} .},
+        ends with two or more blanks. Leading occurrences of forthvar({c}) are ignored.
+        If forthcode({BLK}) is zero text is taken from the terminal input buffer,
+        otherwise from the disc block stored in forthcode({BLK}) .},
         { {BLK} ,{IN} })
 
 
@@ -1421,18 +1421,18 @@ worddoc({XOR},{},{           nl  n2  ---  xor                 },{L1},{
 
 worddoc({[},{},{},{                                               P,L1},{
         Used in a colon-definition in form:
-                           @samp{:  xxx    [  words   ]    more   ;}
-        Suspend compilation. The words after @code{[} are executed, not compiled.
+                           forthsamp({:  xxx    [  words   ]    more   ;})
+        Suspend compilation. The words after forthcode({[}) are executed, not compiled.
         This allows calculation or compilation exceptions before resuming
-        compilation with @code{]} },{{LITERAL} ,{]}})
+        compilation with forthcode({]}) },{{LITERAL} ,{]}})
 
 
 worddoc({[COMPILE]},{},{},{                                       p,C},{
         Used in a colon-definition in form:
-                         @samp{:  xxx    [COMPILE]   FORTH   ;}
-        @code{[COMPILE]} will force the compilation of an immediate definitions,
+                         forthsamp({:  xxx    [COMPILE]   FORTH   ;})
+        forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
         that would otherwise execute during compilation. The above example
-        will select the @code{FORTH} vocabulary then @var{xxx} executes, rather than at
+        will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
         compile time.},{})
 
 
