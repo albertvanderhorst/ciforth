@@ -960,14 +960,12 @@ ERRMSG2:    JC      ERRMSG
             JC      ERRMSG2
 
 ; -------------- Use the alias descriptors for CS and DS --------
-            PUSH    ES    ; {Corrected code segment}
-            MOV BX, HERE6
-            PUSH BX     ; {Correct program counter}
-            RETF        ; {Returning to HERE6 now}
-HERE6:
+            PUSH    ES    ; Corrected code segment
+            MOV     BX, ENDDPMI ; Correct program counter
+            PUSH    BX
             MOV     DS,DX
             MOV     ES,DX
-        JMP  ENDDPMI
+            RETF        ; Returning to ENDDPMI
 
 ; ######################### DPMI CLEAN UP CODE #####################################################
 
@@ -6520,13 +6518,8 @@ CODE_HEADER({BIOSN},{BIOSN})
         POPAD   ;{Get it all back.}
         LEA     RPO,[RPO + _CELLS(1)] ;{Bump return stack. After the pop!}.
         MOV     AX,_CELL_PTR[SaveAX]
-        MOV     DX,_CELL_PTR[SaveFlags]
-          AND     AX, 1
-;         JZ     ELSE3
-;         NEG     DX      ;{Unix convention of negative error numbers.}
-;         NEG     AX      ;{True forth flag.}
-; ELSE3:
-        PUSH    DX
+        PUSH    AX
+        MOV     AX,_CELL_PTR[SaveFlags]
         PUSH    AX
         _NEXT
 ;
