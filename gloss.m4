@@ -1,21 +1,23 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl $Id$
-changequote({,})
-dnl Define a word definition on channel 9 
-dnl   the corresponding menu item on channel 6 
+dnl NOTE IT DOESN'T WORK WITHOUT THE NEW LINE FOR THE RECURSIVE CALL
+dnl TO FORALL. THIS IS RATHER MYSTERIOUS.
+changequote({,})dnl
+define({forall}, {ifelse(len({$2}),0,,
+{$1}({$2}) 
+{forall({$1},{$3},{$4},{$5},{$6},{$7},{$8},{$9},{$10})}
+)})dnl
+dnl Define a word definition on channel 9
+dnl   the corresponding menu item on channel 6
 dnl   and the content including a definition for the second pass on channel 1
 define({quote},{{{$1}}})
-define({seealso}, {ifelse(len({$1}),0,,
-forthcode({$1}) {seealso({$2},{$3},{$4})}
-)})
-dnl {@code{}quote($1) seealso({$2},{$3},{$4})}
 define({worddoccommon},{
 divert(9)dnl
 @node $8, _next$3(), _prev(), MyTop()
 @subsection $8
 @pindex $2
 
-Name: $2 
+Name: $2
 
 ifelse($4,,
 {No stackeffect},
@@ -25,7 +27,7 @@ Attributes: $5
 
 Description: $6
 
-ifelse(len({$7}),0,, {See also: seealso({$7})})dnl
+ifelse(len({$7}),0,, {See also: forall({forthsamp},$7)})dnl
     {define({_prev},{$8})dnl}
     divert(1)dnl
 {{{$8}})dnl
@@ -36,17 +38,17 @@ divert(9)dnl
 })dnl
 define({worddocchapter},
 dnl Another macro call, resolved at yet a higher level
-wordsetnode_$1() 
+wordsetnode_$1()
     {$2}
     {$3}
     {$4}
 {{define({MyTop},{{$1}})dnl}}
-dnl Leave the first half of the first definition (unused) 
+dnl Leave the first half of the first definition (unused)
 {divert(1)dnl}
     {{
 define({{_dummy_}},dnl}}
-dnl Initialise menu channel 
-dnl Normal description comes after the definitions but before the menu's 
+dnl Initialise menu channel
+dnl Normal description comes after the definitions but before the menu's
 dnl and contents.
 {divert(6)dnl}
 {{dnl
@@ -61,15 +63,13 @@ define({worddocsafe},
 {worddoccommon({$1},{$2},{$3},{$4},{$5},{$6},{$7},{$3},{$3})}
 )dnl
 define({worddocchapterend},
-dnl Complete the last half of the last definition empty 
+dnl Complete the last half of the last definition empty
 {divert(1)dnl}
     {{)dnl}}
-dnl Close menu channel 
+dnl Close menu channel
 {divert(6)dnl}
 {{@end menu}}
 {divert}
 {undivert}
 )
 {define({MyTop},{Glossary})dnl}
-
-
