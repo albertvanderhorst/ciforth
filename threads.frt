@@ -123,3 +123,45 @@ REPEAT DROP ;
 \ Send hither and thither characters until an ``ASCII''
 \ End Of Text (ETX or ^D) is pressed.
 : do-it   'do-slave SLAVE   do-master ;
+
+\ -----------------------------
+REQUIRE SET
+
+
+100 SET TASK-TABLE   TASK-TABLE !SET
+VARIABLE TASK-POINTER
+\ Add this frame and make it current.
+TASK-TABLE @ TASK-POINTER !   _ TASK-TABLE SET+!
+
+: NEXT-TASK   TASK-POINTER @ CELL+
+DUP TASK-TABLE @ = IF DROP TASK-TABLE CELL+ THEN
+TASK-POINTER ! ;
+
+: LAST-TASK TASK-TABLE @ 0 CELL+ - ;
+
+\ Switch from current task to next one.
+: PAUSE
+DSP@ >R
+    RSP@ TASK-POINTER @ !
+        NEXT-TASK
+    TASK-POINTER @  @ RSP!
+R> DSP! ;
+
+\ Exit: remove current task task, then chain to first one.
+: EXIT-COT  TASK-POINTER @ TASK-TABLE SET-REMOVE
+TASK-TABLE CELL+ DUP TASK-POINTER ! @
+DUMP-IT RSP! R> DSP! DUMP-IT ;
+
+\ Contrary to PET threads this one prepares a return stack frame,
+\ then switches return stacks.
+: THREAD CREATE R0 @ 3 CELLS - , S0 @ , CVA ALLOT DOES>
+>R
+R@ CELL+ @   R@ @   !
+>DFA @       R@ @ CELL+   !
+'EXIT-COT >DFA @   R@ @ CELL+ CELL+ !
+R> @ TASK-TABLE SET+! ;
+
+100 THREAD COOS
+: jantje "we gaan naar Rome" TYPE CR ;
+
+'jantje COOS
