@@ -6219,6 +6219,46 @@ RSLW2:  DC      TOR
 ;
 });_END_({_RWFILE_})
 _LINUX_N_({
+worddoc( {STORAGE},{GET-FILE},{get_file},{sc1 --- sc2},{},
+{Get the content of the file with name forthsamp({sc1});
+Leave it as a string forthsamp({sc2}) .
+},{{BLOCK},{?LINUX-ERROR}},
+{{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
+enddoc)
+HEADER({GET-FILE},{GFILE},DOCOL)
+        DC      HERE, TOR, LIT, 10000000, ALLOT
+        DC      RR, SSTOR, ZERO, RR, SCPLUS ; {Unix requires a c-string.}
+        _STRINGINLINE({FiLeBuF})        ; {Magic number.}
+        DC      RR, SPTOR
+;  R@ $! 0 R@ $C+  "FiLeBuF" R@ $+!
+        DC      FROMR, SFET, OVER, PLUS, TOR
+;  R> $@ OVER + >R
+        DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
+        DC      LDUP, QLERR 
+;  O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR 
+        DC      LDUP, RR, LIT,  9999000, LIT, read, LINOS 
+        DC      LDUP, QLERR, TOR
+;   DUP R@ 9999000 READ LINOS DUP ?LINUX-ERROR >R
+        DC      ZERO,ZERO, LIT, close, LINOS, QLERR
+;  0 0 CLOSE LINOS ?LINUX-ERROR 
+        DC      FROMR, FROMR, SWAP
+;  R> R> SWAP ;
+        DC      SEMIS
+;
+worddoc( {STORAGE},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
+{Interpret the content of the file with name forthsamp({sc1})
+as if it was typed from the console, leaving result
+forthsamp({i*x}). },
+{{BLOCK},{?LINUX-ERROR}},
+{{"hello.frt" INCLUDED},{Hello world!}},
+enddoc)
+HEADER({INCLUDED},{INCLUD},DOCOL)
+        DC      GFILE
+; GET-FILE
+        DC      SAVE, PEVAL, INTER, RESTO
+; SAVE (EVAL) INTERPRET RESTORE ;
+        DC      SEMIS
+;
 worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
 i.e. the mass storage words refer

@@ -4078,19 +4078,19 @@ DECIMAL  getit
 
 
 
-( <ud><a><u> --- <ud2><a2><u> )
-: >NUMBER
-    2DUP + >R
-    0 ?DO
-        DUP .S
-        C@ BASE @ DIGIT        ( a2 is address first       )
-          0= IF LEAVE   ( if unconvertible digit.          )
-          THEN
-        SWAP >R
-        SWAP BASE @ UM* DROP    ( hi*base::new_digit          )
-        ROT  BASE @ UM* D+      ( lo*base_high::lo*base::lo   )
-        R> 1+                ( increment pointer           )
-    LOOP
-    R> OVER -
-;
+5 CONSTANT OPEN   
+3 CONSTANT READ  
+6 CONSTANT CLOSE 
+0 CONSTANT O_RDONLY 
+: GET-FILE              ( <a><u> --- i*x )
+   HERE >R   10000000 ALLOT
+   R@ $! 0 R@ $C+  "FiLeBuF" R@ $+!
+   R> $@ OVER + >R
+   O_RDONLY 0 OPEN LINOS DUP ?LINUX-ERROR 
+   DUP R@ 9999000 READ LINOS DUP ?LINUX-ERROR >R
+   0 0 CLOSE LINOS ?LINUX-ERROR 
+   R> R> SWAP ;
+: INCLUDED
+  GET-FILE
+  SAVE (EVAL) INTERPRET RESTORE ;
 ( Last line, preserve !! Must be line 4096)
