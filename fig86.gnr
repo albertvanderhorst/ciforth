@@ -1610,7 +1610,7 @@ worddoc({STACKS},{>R},{to_r},{n ---},{C,L0},
 {Remove a number from the computation stack and place as the most
 accessable on the return stack. Use should be balanced with forthcode({R>}) in
 the same definition.},{{R}}, 
-{ {: GS1 1 2 3 >R . R . R> . . ; GS1},{2 3 3 1} },
+{ {: GS1 1 2 3 >R . R@ . R> . . ; GS1},{2 3 3 1} },
 enddoc)
 CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
         POP     BX      ;{GET STACK PARAMETER}
@@ -1632,7 +1632,7 @@ worddoc({STACKS},{R},{r},{--- n},{},
 {Copy the top of the return stack to the computation stack.},{{>R}}, 
 {{." Via >R"},{Via >R}},
 enddoc)
-HEADER({R},{RR},{_VAR_FIELD(IDO)})
+HEADER({R@},{RR},{_VAR_FIELD(IDO)})
 ;
 worddoc({LOGIC},{0=},{zero_equals},{n --- f},{L0},
 {Leave a true flag forthvar({f}) is the number forthvar({n}) is equal to zero, otherwise leave a
@@ -2463,19 +2463,26 @@ CODE_HEADER({1+},{ONEP})
         INC     AX
         _PUSH
 ;
-worddoc({MEMORY},{CELL+},{cell_plus},{n1 --- n2},{},
+worddoc({MEMORY},{CELL+},{cell_plus},{n1 --- n2},{ISO},
 {Advance the memory pointer forthvar({n1}) by one _BITS_ cel to
 forthvar({n2}). _VERBOSE_({This is invaluable for writing portable
 code. Many of the screens of ciforth run on both 16 and 32 bits
 systems, thanks to this.})
-},{}, {}, enddoc)
+},{}, 
+_BITS32_({{{0 CELL+ .},{4}},})dnl expanded before worddoc is!
+_BITS16_({{{0 CELL+ .},{2}},})dnl
+enddoc)
 CODE_HEADER({CELL+},{CELLP})
         POP     AX
         ADD     AX,CW
         _PUSH
 ;
-worddoc({DICTIONARY},{HERE},{here},{--- addr},{L0},
-{Leave the address of the next available dictionary location.},{{DP}}, {}, enddoc)
+worddoc({DICTIONARY},{HERE},{here},{--- addr},{ISO,L0},
+{Leave the address forthsamp({addr}) of the next available
+dictionary location.}, 
+{{DP}}, 
+{{HERE 896 ALLOT HERE SWAP - .},{896}},
+enddoc)
 HEADER({HERE},{HERE},{DOCOL})
         DC      LDP
         DC      FETCH
@@ -2484,7 +2491,9 @@ HEADER({HERE},{HERE},{DOCOL})
 worddoc({DICTIONARY},{ALLOT},{allot},{n ---},{L0},
 {Add the signed number to the dictionary pointer forthcode({DP}) . May be used to
 reserve dictionary space or re-origin memory. As the Pentium is a byte-addressable
-machine forthvar({n}) counts bytes. },{{CELL+}}, {}, enddoc)
+machine forthvar({n}) counts bytes. },{{CELL+}}, 
+{{." Via HERE"},{Via HERE}},
+enddoc)
 HEADER({ALLOT},{ALLOT},{DOCOL})
         DC      LDP
         DC      PSTOR
@@ -2492,7 +2501,9 @@ HEADER({ALLOT},{ALLOT},{DOCOL})
 ;
 worddocsafe({DICTIONARY},{,},{comma},{n ---},{L0},
 {Store forthvar({n}) into the next available dictionary memory cell, advancing
-the dictionary pointer.},{{DP},{C,}}, {}, enddoc)
+the dictionary pointer.},{{DP},{C,}}, 
+{{HERE 625 , DUP @ . CELL+ HERE = .},{625 _T_}},
+enddoc)
 HEADER({,},{COMMA},{DOCOL})
         DC      HERE
         DC      STORE
@@ -2502,7 +2513,9 @@ HEADER({,},{COMMA},{DOCOL})
 ;
 worddocsafe({DICTIONARY},{C,},{c_comma},{b ---},{},
 {Store 8 bits of forthcode({b}) into the next available dictionary byte, advancing
-the dictionary pointer. },{{DP},{,}}, {}, enddoc)
+the dictionary pointer. },{{DP},{,}}, 
+{{HERE 62 C, DUP C@ . 1+ HERE = .},{62 _T_}},
+enddoc)
 HEADER({C,},{CCOMM},{DOCOL})
         DC      HERE
         DC      CSTOR
@@ -2522,13 +2535,16 @@ CODE_HEADER({-},{LSUB})
 ;
 worddoc({LOGIC},{=},{equals},{n1 n2 --- f},{L0},
 {Leave a true flag if forthvar({n1=n2}) ; otherwise leave a false flag.},
-{{<},{>},{0=},{-}}, {}, enddoc)
+{{<},{>},{0=},{-}}, 
+{ { 0A BASE !  240 204 = .},{0},
+  { 240 240 = .},{_T_} },
+enddoc)
 HEADER({=},{EQUAL},{DOCOL})
         DC      LSUB
         DC      ZEQU
         DC      SEMIS
 ;
-worddoc({LOGIC},{<},{less_than},{n1 n2 --- f},{L0},
+worddoc({LOGIC},{<},{less_than},{n1 n2 --- f},{L0,ISO},
 {Leave a true flag if forthvar({n1}) is less than forthvar({n2}) ;otherwise leave a false
 flag.},{{=},{>},{0<}}, 
 {{1 2 < .},{_T_},
@@ -2545,7 +2561,7 @@ CODE_HEADER({<},{LESS})
         DEC     AX
 LES1:   _PUSH
 ;
-worddoc({LOGIC},{U<},{u_less_than},{u1 u2 --- f},{L0},
+worddoc({LOGIC},{U<},{u_less_than},{u1 u2 --- f},{ISO,L0},
 {Leave a true flag if forthvar({u1}) is less than forthvar({u2}) ; otherwise leave a false
 flag.(Interpreted as unsigned numbers).},{{<}}, 
 {{1 2 U< .},{_T_},
@@ -2560,9 +2576,15 @@ CODE_HEADER({U<},{ULESS},{DOCOL})
         SBB     AX,AX
         _PUSH
 ;
-worddoc({LOGIC},{>},{greater_than},{n1 n2 --- f},{L0},
-{Leave a true flag if forthvar({n1}) is greater than forthvar({n2}) ; otherwise a false flag.},
-{{>},{=},{0<}}, {}, enddoc)
+worddoc({LOGIC},{>},{greater_than},{n1 n2 --- f},{ISO,L0},
+{Leave a true flag if forthvar({n1}) is greater than
+forthvar({n2}) ; otherwise a false flag.}, 
+{{>},{=},{0<}}, 
+{{1 2 > .},{0},
+ {-1 -2 > .},{_T_},
+ {0 -1 > .},{_T_},
+ {1 1 > .},{0} },
+enddoc)
 HEADER({>},{GREAT},{DOCOL})
         DC      SWAP
         DC      LESS
@@ -2570,7 +2592,10 @@ HEADER({>},{GREAT},{DOCOL})
 ;
 worddoc({JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{L0},
 {Rotate the top three values on the stack, bringing the third to the
-top.},{{SWAP}}, {}, enddoc)
+top.},{{SWAP}}, 
+{{SP! 1 2 3 4 ROT .S},{
+S: 1 3 4 2} },
+enddoc)
 CODE_HEADER({ROT},{ROT})
         POP     DX      ;{S1}
         POP     BX      ;{S2}
@@ -2579,21 +2604,30 @@ CODE_HEADER({ROT},{ROT})
         _2PUSH
 ;
 worddoc({OUTPUT},{SPACE},{space},{},{L0},
-{Transmit an ascii blank to the output device.},{{EMIT},{OUT}}, {}, enddoc)
+{Transmit an ascii blank to the output device.},{{EMIT},{OUT}}, 
+{{41 EMIT SPACE 41 EMIT},{A A}},
+enddoc)
 HEADER({SPACE},{SPACE},{DOCOL})
         DC      LBL
         DC      EMIT
         DC      SEMIS
-;
-worddoc({JUGGLING},{-DUP},{minus_dup},{n1 --- n1 (if zero) / n1 --- n1 n1 (non-zero)},{L0},
-{Reproduce forthvar({n1}) only if it is non-zero.
-This is usually used to copy a value just before forthcode({IF}) , to eliminate
-the need for an forthcode({ELSE}) part to drop it.},{{DUP}}, {}, enddoc)
-HEADER({-DUP},{DDUP},{DOCOL})
+;                              
+worddoc({JUGGLING},{?DUP},{question_dupe},
+{n1 --- n1 (if zero) / n1 --- n1 n1 (non-zero)},{ISO L0},
+{Reproduce forthvar({n1}) only if it is non-zero. This is
+usually used to copy a value just before forthcode({IF}) , to
+eliminate the need for an forthcode({ELSE}) part to drop
+it.},{{DUP}}, 
+{{SP! 1 2 3 4 ?DUP .S},{
+S: 1 2 3 4 4}, 
+{SP! 1 2 3 0 ?DUP .S},{
+S: 1 2 3 0} },
+enddoc)
+HEADER({?DUP},{QDUP},{DOCOL})
         DC      LDUP
-        _0BRANCH(DDUP1) ;{ IF}
+        _0BRANCH(QDUP1) ;{ IF}
         DC      LDUP    ;{ENDIF}
-DDUP1:  DC      SEMIS
+QDUP1:  DC      SEMIS
 ;
 worddoc({VOCABULARIES},{LATEST},{latest},{--- addr},{},
 {Leave the dictionary entry address ( forthsamp({dea}) )
@@ -3274,7 +3308,7 @@ ERRO1:  DC      HERE
         DC      MESS
         DC      SPSTO
         DC      BLK,FETCH
-        DC      DDUP
+        DC      QDUP
         _0BRANCH(ERRO2) ;{ IF}
         DC      DOT
         DC      LIN,FETCH, SOURC, FETCH, LSUB
@@ -3287,7 +3321,7 @@ worddoc({DICTIONARY},{ID.},{i_d_dot},{dea --},{},
 HEADER({ID.},{IDDOT},{DOCOL})
         DC      TNFA
         DC      FETCH
-        DC      DDUP
+        DC      QDUP
         _0BRANCH(IDDOT1)
         DC      SFET
         DC      LTYPE
@@ -3942,7 +3976,7 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         DC      WARN
         DC      FETCH
         _0BRANCH(MESS1) ;{IF}
-        DC      DDUP
+        DC      QDUP
         _0BRANCH(MESS2) ;{IF}
         DC      LIT,4
         DC      DLINE
@@ -4711,7 +4745,7 @@ terminal.
 In this ciforth all terminal I/O goes through forthcode({EMIT}), so
 forthcode({OUT}) is observed.},{{EMIT},{OUT}}, {}, enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      DDUP
+        DC      QDUP
         _0BRANCH(TYPE1) ;{ IF}
         DC      OVER
         DC      PLUS
@@ -4855,7 +4889,7 @@ In this ciforth all terminal I/O goes through forthcode({EMIT}), so
 forthcode({OUT}) is observed.
 },{{EMIT},{OUT}}, {}, enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
-             DC      DDUP
+             DC      QDUP
              _0BRANCH(TYPE1)
              DC      OVER,   PLUS
              DC      SWAP,   XDO
@@ -5325,7 +5359,7 @@ RSLW0:
         DC      LIT, BPS, PLUS, SWAP
         _LOOP(RSLW0)
         DC      DROP, DROP
-        DC      DSKERR, FETCH,     DDUP
+        DC      DSKERR, FETCH,     QDUP
         _0BRANCH(RSLW5)              ;{OK}
         DC      ZLESS
         _0BRANCH(RSLW3)
@@ -5803,7 +5837,7 @@ worddoc({OUTPUT},{SPACES},{spaces},{n ---},{L0},
 HEADER({SPACES},{SPACES},{DOCOL})
         DC      ZERO
         DC      MAX
-        DC      DDUP
+        DC      QDUP
         _0BRANCH(SPAX1)
         DC      ZERO
         DC      XDO     ;{DO}
@@ -6009,11 +6043,11 @@ FORV1:  DC      FROMR
         DC      DROP
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{VLIST},{vlist},{},{},
+worddoc({DICTIONARY},{WORDS},{words},{},{},
 {List the names of the definitions in the context vocabulary.
 dnl A break as per forthcode({?TERMINAL}) will terminate the listing.
 }, {}, {}, enddoc)
-HEADER({VLIST},{VLIST},{DOCOL})
+HEADER({WORDS},{WORDS},{DOCOL})
         DC      CSLL
         DC      LOUT
         DC      STORE

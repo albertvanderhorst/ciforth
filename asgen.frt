@@ -87,10 +87,10 @@
 
 ( ############### PART I ASSEMBLER #################################### )
 ( MAYBE NOT PRESENT UTILITIES                                           )
-: @+ >R R CELL+ R> @ ; ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
-: !+ >R R ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
+: @+ >R R@ CELL+ R> @ ; ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
+: !+ >R R@ ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
-: @- 0 CELL+ - >R R @ R>  ; 
+: @- 0 CELL+ - >R R@ @ R>  ; 
 ( CHAR - CONSTANT &-     CHAR ~ CONSTANT &~                             )
 CREATE TABLE 1 , 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in )
@@ -175,10 +175,10 @@ DECIMAL
 : CHECK30 DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 HEX
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
-: OR! >R R @  CHECK28 OR R> ! ;
-: OR!U >R R @  OR R> ! ; ( Or DATA into ADDRESS. Unchecked.)
+: OR! >R R@ @  CHECK28 OR R> ! ;
+: OR!U >R R@ @  OR R> ! ; ( Or DATA into ADDRESS. Unchecked.)
 ( Reset bits of DATA into ADDRESS. If bits were already down it's wrong )
-: AND! >R INVERT R @ CHECK29 AND R> ! ;
+: AND! >R INVERT R@ @ CHECK29 AND R> ! ;
 
 ( ------------- ASSEMBLER, DEFINING WORDS    ----------------------------) 
 
@@ -210,7 +210,7 @@ HEX
 IS-A IS-1PI : 1PI  CHECK33 <BUILDS , , , , 1 , DOES> REMEMBER POSTIT ; 
 IS-A IS-2PI : 2PI  CHECK33 <BUILDS , , , , 2 , DOES> REMEMBER POSTIT ;
 IS-A IS-3PI : 3PI  CHECK33 <BUILDS , , , , 3 , DOES> REMEMBER POSTIT ;
-: IS-PI  >R R IS-1PI R IS-2PI R IS-3PI OR OR R> DROP ;
+: IS-PI  >R R@ IS-1PI R@ IS-2PI R@ IS-3PI OR OR R> DROP ;
 
 ( Bookkeeping for a fixup using a pointer to the BIBYBA information,    )
 ( can fake a fixup in disassembling too.                                )

@@ -176,7 +176,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
  : <> - 0= 0= ;   -->
  CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
 :  NONAME >R  
-    R >LFA @ OVER = IF R> RESULT ! ELSE R> DROP THEN ;
+    R@ >LFA @ OVER = IF R> RESULT ! ELSE R> DROP THEN ;
  : NEXTD ( CFA--DEA Get the DEA of the word defined)
    0 RESULT !               ( after the CFA one)
    C>D ' NONAME >CFA LATEST FOR-WORDS DROP
@@ -539,7 +539,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : PSPACES  ( 1/0 print N-1 spaces)
     0 DO 20 PEMIT LOOP ;
   : PTYPE  ( ADDRESS,LENGTH -- . PRINT LENGTH CHAR AT ADDRESS)
-          -DUP IF
+          ?DUP IF
           OVER + SWAP DO I C@ PEMIT LOOP THEN ;
   : P."  "" WORD COUNT PTYPE ;       -->
  ( SUPER-QUAD)  ?MS
@@ -562,7 +562,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 ( All this should probably be low level )
 
  : $. TYPE ;
- : C+! >R R C@ + R> C! ;
+ : C+! >R R@ C@ + R> C! ;
 
 
 
@@ -576,7 +576,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 
 ( PARSING  & STRINGS                   A0apr03-AH)
 ( HANDY & Preparation for ANSI-fication)
-: PARSE WORD COUNT ;     : ($) R $@ DUP CELL+ R> + >R ;
+: PARSE WORD COUNT ;     : ($) R@ $@ DUP CELL+ R> + >R ;
 
 : S" [CHAR] " PARSE PAD $! PAD $@ $, ;
 
@@ -602,7 +602,7 @@ THEN ;
  : $S ( cs, del -- cs2 , cs1 )  ( Splits the text at the del )
    ( in two, if not present, cs2 is a null string )
    >R OVER OVER R> $I  DUP IF
-     >R OVER R SWAP - ( Length before delimiter )
+     >R OVER R@ SWAP - ( Length before delimiter )
      SWAP OVER - 1 - ( Length after delimiter)
      R> 1+ SWAP
   ELSE ( DROP 0) 0 THEN  2SWAP ;
@@ -784,7 +784,7 @@ KRAAKER
 
 ( testing of the block mechanism )
 : FOR-BLOCKS >R PREV @
-    BEGIN DUP R EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
+    BEGIN DUP R@ EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
 : SHOW-BLOCK
     DUP STALEST @ = IF CR ." STALEST:" THEN
     DUP CR H.
@@ -1955,7 +1955,7 @@ ASSEMBLER DEFINITIONS
  0 IVAR IDP
 : <FIX HERE IDP ! ; : IHERE IDP @ ;
 : C|, -1 IDP +! IHERE C@ OR IHERE C! ;  ( c.f. C, )
-: C@+ COUNT ;  : C@- 1 - DUP C@ ; ( : C!+ >R R ! R> 1+ ;)
+: C@+ COUNT ;  : C@- 1 - DUP C@ ; ( : C!+ >R R@ ! R> 1+ ;)
 : POST, C@+ C, ;       : FIX| C@- C|, ;
 
 : 1PI CREATE C, DOES> <POST POST, DROP ;
@@ -2675,7 +2675,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
  : COMPARE-TEXTS ( T--F Leaves flag indicating whether one of th
        ( from the array of pointers T has arrived)
    0 SWAP ( Start with no flag)
-   DUP @ -DUP IF
+   DUP @ ?DUP IF
      0 DO
         DUP I 1+ 2 * + @ REMEMBER =$ IF
            SWAP DROP 1 SWAP LEAVE
@@ -2949,7 +2949,7 @@ ELSE       DROP THEN ;
 FORWARD skip  ( SKIP-BLANKS is possible)
 : +KEYWORD ( len f -) IF IN +! ELSE DROP THEN ;
 : =KEYWORD  ( VS -) SUCCESS @ IF $@ >R R
-IN @ TIB @ + R $= DUP SUCCESS ! R> SWAP +KEYWORD
+IN @ TIB @ + R@ $= DUP SUCCESS ! R> SWAP +KEYWORD
 ELSE DROP THEN ;
 : KEYWORD CREATE BL WORD HERE C@ 1+ ALLOT
 DOES> skip =KEYWORD ;
@@ -3010,9 +3010,9 @@ FORWARD "KEY" BNF: "KEY" 'K' 'E' 'Y' ;BNF
 ( Push the string matched by the current terminal symbol on
  the data stack  bnf: iets  app nooot mies PUSH" ;bnf
  pushes what is matched by iets )
-: PUSH" R>   R TIB @ +   IN @ R -  ROT >R ;
+: PUSH" R>   R@ TIB @ +   IN @ R@ -  ROT >R ;
 ( Add the string on the stack to the output )
-: POP" >R HERE R CMOVE R> ALLOT BL C, ;
+: POP" >R HERE R@ CMOVE R> ALLOT BL C, ;
 ( Add the symbol matched to the output )
 : .SYMBOL COMPILE PUSH" COMPILE POP" ; IMMEDIATE
 FORWARD STATEMENT    FORWARD IDENTIFIER
@@ -3090,14 +3090,14 @@ PS ABA + BABAA
 ( with as data the `NFA' of those words.            )
 : FOR-WORDS
 >R CONTEXT @ @ >R
-    BEGIN   R> R OVER >LFA @ >R EXECUTE
-    R 0= UNTIL
+    BEGIN   R> R@ OVER >LFA @ >R EXECUTE
+    R@ 0= UNTIL
 R> DROP R> DROP ;
 ( For all vocabularies execute WORD with as data    )
 ( the `VLFA' of those words.                        )
 : FOR-VOCS
 >R VOC-LINK @ >R
-    BEGIN R> R   OVER @ >R   EXECUTE     R 0= UNTIL
+    BEGIN R> R@   OVER @ >R   EXECUTE     R@ 0= UNTIL
 R> DROP R> DROP ;
 
 : H. BASE @ >R HEX . R> BASE ! ;
@@ -3109,7 +3109,7 @@ R> DROP R> DROP ;
       SWAP >R
       >DFA CELL+  ( start with dictionary entry)
       DUP
- BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R  DUP H. U<  UNTIL
+ BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R@  DUP H. U<  UNTIL
         CR DUP H. DUP ID.
           SWAP  >LFA !
     R>
