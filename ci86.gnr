@@ -240,13 +240,6 @@ BOOT:
 ELSE3:
         MOV     AL,'F'
         CALL    DISPLAY
-        CLI                     ;{ Disallow interrups until stack ready}
-        MOV     AX,CS           ;{ Will do for now (real mode)}
-        MOV     DS,AX
-        MOV     SS,AX
-        MOV     ES,AX
-        MOV     STACKPOINTER,0H
-        STI                     ;{ Allow interrupts}
         MOV     AH,00   ;{ Reset}
         MOV     DL,00            ;{Drive 0 (floppy 1)}
         INT(13H)                 ;{BIOS disk read function}
@@ -356,13 +349,6 @@ BOOT:
 ELSE3:
         MOV     AL,'F'
         CALL    DISPLAY
-        CLI                     ;{ Disallow interrups until stack ready}
-        MOV     AX,CS           ;{ Will do for now (real mode)}
-        MOV     DS,AX
-        MOV     SS,AX
-        MOV     ES,AX
-        MOV     STACKPOINTER,0H
-        STI                     ;{ Allow interrupts}
         MOV     AH,00   ;{ Reset}
         MOV     DL,80            ;{Drive 80 (hd C:)}
         INT(13H)                 ;{BIOS disk read function}
@@ -420,15 +406,25 @@ ENDBOOT:
 
 ;____1_____ _BOOTED_1_({
 
-        ;{ Adjust code segment address without leaving the ball}
-        ;{ Generating machine code is actually simpler than}
-        ;{ beating the assembler. After 10 attempts I gave up}
-        ;{ This is a simple straightforward intersegment jump}
-;{       JMP FAR BOOTADDRESS+ELSE1}
-       DB      0EAH
-       DW      ELSE1
-       DW     REALSEGMENT
-ELSE1:
+;{ Remember: our model assumes that all segments the same (small model, or } 
+;{ .com program) ). Now make sure the CS agrees with the offsets assumed.  }
+;{ Make other segments the same                                            }
+        CALL  HERE1
+HERE1:  POP   AX         ;{ Reality.}
+        MOV BX, HERE1-$$ ;{ Dream.}
+        SUB AX,BX      ;{ Discrepancy between dream and reality}
+        MOV CX,10h     ;{ How much units would that be for the segment?}
+        XOR DX,DX
+        DIV CX         
+        CMP DX,0
+MYSELF: JNZ MYSELF    ; { If there is a remainder, we cannot correct, so hang.}
+        MOV CX,CS
+        ADD CX,AX    ; 
+        PUSH CX     ; {Corrected code segment}
+        ADD  BX, HERE2-HERE1
+        PUSH BX     ; {Correct program counter}
+        RETF        ; {Returning to here2 now}
+HERE2:
         CLI                     ;{ Disallow interrups until stack ready}
         MOV     AX,CS           ;{ Will do for now (real mode)}
         MOV     DS,AX
@@ -493,9 +489,7 @@ PROTECT:
 
 
 ;{************************}
-;____1_____ _BITS32_1_({
-include(width32.m4)
-});_END___1__({ _BITS32_1_})
+_BITS32_1_({ include(width32.m4) })
 ;{ The following had to wait until width32.m4 had been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
 
@@ -3730,6 +3724,11 @@ VLIS2:  DC      LDUP
 CODE_HEADER({BYE},{BYE})
         INT      27H     ;{I'M HISTORY}
 });_END___1__({ _HOSTED_MSDOS_1_})
+;____1_____ _BOOTED_1_({
+;{ EXIT TO PC-DOS, if run from PC-DOS}
+CODE_HEADER({BYE},{BYE})
+        INT      27H     ;{I'M HISTORY}
+});_END___1__({ _BOOTED_1_})
 ;____1_____ _HOSTED_LINUX_1_({
 HEADER({BYE},{BYE},{DOCOL})
         DC      ZERO, ZERO, ZERO, ONE, LINOS
