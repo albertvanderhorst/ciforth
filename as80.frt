@@ -14,7 +14,7 @@
 : ?TALLY AT-REST? 0= 26 ?ERROR ;
 (   Based on PFA of a postit POST into tally and leave the INSTRUCTION  )
 : POST, ?TALLY DUP CELL+ @+ TALLY CELL+ ! @ TALLY ! ;
-( Correct dictionary to have an instruction of N bytes, after
+( Correct dictionary to have an instruction of N bytes, after           )
 ( `POST,' allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
 : DO-POST <POST POST, DUP @ , 3 CELLS + @ CORRECT ;
@@ -26,7 +26,7 @@ HEX
 : IS-A <BUILDS TEMP @ , DOES> @ SWAP PFA CFA CELL+ @ = ;
 ( Generate error if data for postit defining word was inconsistent)
 : CHECK1 HERE 4 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
-( Accept a MASK with a bit up for each commaer, a MASK indicating
+( Accept a MASK with a bit up for each commaer, a MASK indicating       )
 ( which bits are missing from postitted, and the INSTRUCTION )
 ( Assemble an 1..3 byte instruction and post what is missing.)
 ( The last masks are for convenience in disassembly                     )
@@ -75,7 +75,7 @@ IS-A IS-COMMA
 ( From `TALLY' and the  INSTRUCTION code)
 ( prepare THE THREE CELLS for an instruction )
 : PREPARE >R PRO-TALLY @ PRO-TALLY CELL+ @ R> ;
-( By INCREMENTing the OPCODE a NUMBER of times generate number
+( By INCREMENTing the OPCODE a NUMBER of times generate number          )
 (  instructions)
 : 1FAMILY, 0 DO DUP PREPARE 1PI OVER + LOOP DROP DROP ;
 : 2FAMILY, 0 DO DUP PREPARE 2PI OVER + LOOP DROP DROP ;
@@ -83,15 +83,14 @@ IS-A IS-COMMA
 
 : xFAMILY| 0 DO DUP PREPARE xFI OVER + LOOP DROP DROP ;
 
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG  >3<" HEX
 HEX VOCABULARY ASSEMBLER IMMEDIATE
 ' ASSEMBLER CFA ' ;CODE 4 CELLS + !        ( PATCH ;CODE IN NUCLEUS )
 : CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
 : C; CURRENT @ CONTEXT ! ?EXEC ?TALLY SMUDGE ; IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 
+( ############## 8080 ASSEMBLER PROPER ################################ )
 ( The increasing order means that a decompiler hits them in the         )
 ( right order                                                           )
 1        ' C, CFA   1   COMMAER IB, ( immediate byte data)
@@ -99,31 +98,35 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 0 CELL+  ' ,  CFA   4   COMMAER X,  ( immediate data : address)
 1        ' C, CFA   8   COMMAER P,  ( port number ; byte     )
 
-00 00 T! 08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
-00 00 T! 08 E3 4 1FAMILY, XTHL XCHG DI EI
-00 00 T! 10 E9 2 1FAMILY, PCHL SPHL
-00 00 T! 08 C7 8 1FAMILY, RST0 RST1 RST2 RST3 RST4 RST5 RST6 RST7
+00 00 T! 
+ 08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
+ 08 E3 4 1FAMILY, XTHL XCHG DI EI
+ 10 E9 2 1FAMILY, PCHL SPHL
+ 08 C7 8 1FAMILY, RST0 RST1 RST2 RST3 RST4 RST5 RST6 RST7
 
-00 07 T! 01 00 8 xFAMILY| B| C| D| E| H| L| M| A| ( src)
-00 07 T! 08 80 8 1FAMILY, ADD ADC SUB SBB ANA XRA ORA CMP ( B|)
+00 07 T! 
+ 01 00 8 xFAMILY| B| C| D| E| H| L| M| A| ( src)
+ 08 80 8 1FAMILY, ADD ADC SUB SBB ANA XRA ORA CMP ( B|)
 
-00 30 T! 10 00 4 xFAMILY| BC| DE| HL| SP|
-00 30 T! 01 02 2 1FAMILY, STAX INX               ( BC|)
-00 30 T! 01 09 3 1FAMILY, DAD LDAX DCX           ( BC|)
+00 30 T! 
+ 10 00 4 xFAMILY| BC| DE| HL| SP|
+ 01 02 2 1FAMILY, STAX INX               ( BC|)
+ 01 09 3 1FAMILY, DAD LDAX DCX           ( BC|)
 02 30 01 1PI LXI ( BC| IX,)
 00 30 30 xFI PSW|
 00 30 T! 04 C1 2 1FAMILY, POP PUSH               ( BC|)
-CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( With immediate data )
 08 00 T! 08 D3 2 1FAMILY, OUT IN     ( P,)
 01 00 T! 08 C6 8 1FAMILY, ADI ACI SUI SBI ANI XRI ORI CPI  ( I,)
 
 ( With an address)
-04 00 T! 08 22 4 1FAMILY, SHLD LHLD STA LDA ( X,)
-04 00 T! 08 C3 2 1FAMILY, JMP CALL ( X,)
+04 00 T! 
+ 08 22 4 1FAMILY, SHLD LHLD STA LDA ( X,)
+ 08 C3 2 1FAMILY, JMP CALL ( X,)
 
-00 38 T! 08 00 8 xFAMILY| B'| C'| D'| E'| H'| L'| M'| A'| ( dst)
-00 38 T! 01 04 2 1FAMILY, INR DCR       ( B'|)
+00 38 T! 
+ 08 00 8 xFAMILY| B'| C'| D'| E'| H'| L'| M'| A'| ( dst)
+ 01 04 2 1FAMILY, INR DCR       ( B'|)
 00 3F 40 1PI MOV ( B'| B|)     01 38 06 1PI MVI ( B'| I,)
 
 00 30 T! 10 00 4 xFAMILY| ZR| CY| PE| LS|
@@ -131,6 +134,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 00 38 C0 1PI RC, ( ZR| Y| )
 04 38 T! 02 C2 2 1FAMILY, JC, CC, ( ZR| Y| T, )
 00 00 00 1PI NOP       00 00 C9 1PI RET       00 00 76 1PI HLT
+( ############## 8080 ASSEMBLER PROPER END ############################ )
 ' ;S 0B + @ CONSTANT (NEXT)
 : NEXT JMP (NEXT) X, ;
 : PSH1 JMP (NEXT) 1 - X, ;
@@ -145,7 +149,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 : >NEXT% PFA LFA @ ;
 : % [COMPILE] ' NFA ;
 ( The CONTENT of a linkfield is not a dea, leave: it IS the endmarker   )
-: VOCEND? @ $FFFF AND $A081 = ;
+: VOCEND? @ FFFF AND A081 = ;
 : %EXECUTE PFA CFA EXECUTE ;
 ( Leave the first DEA of the assembler vocabulary.                    )
 : STARTVOC ' ASSEMBLER 2 +  CELL+ @ ;
@@ -225,8 +229,13 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
     REBUILD
 ;
 
+( If the disassembly contains something: `AT-REST?' means               )
+( we have gone full cycle rest->postits->fixups->commaers               )
+( Return: the disassembly CONTAINS a result.                             )
+: RESULT? AT-REST? DISS? AND  ;
+
 : RESULT
-    AT-REST? DISS? AND IF
+    RESULT? IF
         .DISS
         REBUILD
     THEN
@@ -252,7 +261,7 @@ HERE POINTER !
 ( precondition is fullfilled and if the dissassembly fits,              )
 ( it does the reassuring actions toward the tally as with               )
 ( assembling and add the fixup/posti/commaer to the                     )
-( disassembly struct.
+( disassembly struct.                                                   )
 ( Leave the DEA.                                                        )
 : dis-PI
     DUP IS-PI IF
@@ -301,10 +310,6 @@ HERE POINTER !
     THEN 
  0 CELL+ +LOOP CR ;
 
-( If the disassembly contains something: `AT-REST?' means               )
-( we have gone full cycle rest->postits->fixups->commaers               )
-( so the disassembly contains a result. Return THAT.                    )
-: RESULT? AT-REST? DISS? AND  ;
 ( Dissassemble one instruction from ADDRESS. )
 ( Leave `POINTER' pointing after that instruction. )
 : (DISASSEMBLE)
