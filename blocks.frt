@@ -19,7 +19,7 @@ HEX
 : LC@ L@ FF AND ;
 : LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
  : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
-: VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 81 + LC! 2 +LOOP ;
+: VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 7F + LC! 2 +LOOP ;
  : HORIZONTAL-FRAME 82 1 DO BLUE @ VV A00 + I + LC! 2 +LOOP ;
  : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
@@ -52,7 +52,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  : LC@ SWAP 10 * + CS_START - C@ ;
  : LC! SWAP 10 * + CS_START - C! ;
  : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
-: VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 81 + LC! 2 +LOOP ;
+: VERTICAL-FRAME 20 0 DO BLUE @ VV I 50 * + 7F + LC! 2 +LOOP ;
  : HORIZONTAL-FRAME 82 1 DO BLUE @ VV A00 + I + LC! 2 +LOOP ;
  : FRAME 17 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
  : BLACK 7 BLUE ! VERTICAL-FRAME HORIZONTAL-FRAME ;
@@ -158,37 +158,21 @@ TYPE CR 2 LIST
   IF ( carry) R> R> 2M+ 1+ ." C" ELSE
               R> R> 2M+    ." NC" THEN  .S
   R> R> 2M+ DROP .S ;
- CR ." A0MAR30  FORTH KRAKER >1<  ALBERT VAN DER HORST "
- 0 IVAR SELTAB 60 CELLS ALLOT   SELTAB IVAR SELTOP
+ CR ." A1MAY17  FORTH KRAKER >1<  ALBERT VAN DER HORST "
+ CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
  : T,  ( N--. Put N in select table)
      SELTOP @ !  0 CELL+ SELTOP +!  ;
  : CFOF ( --N Get dea of word following )
     (WORD) FOUND ;
 
  : ID.. CFA> ID. ; ( cfa--. Print a words name )
- : ID.+ DUP @ ID.. CELL+ ; ( dip -- dip' Print a words name )
+ : ID.+ $@ ID.. ; ( dip -- dip' Print a words name )
  : SEL@    ( N--M,F F="value N present in table" )
     ( if F then M is vector address else M=N)
        0 SWAP ( initialise flag)
        SELTOP @ SELTAB DO
            DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
-
- CR ." 84NOV24  FORTH KRAKER >1a<  ALBERT VAN DER HORST "
-
-
-
-
-( DEA--DEA Get the DEA of the word defined after the CFA one)
-
-: NEXTD CURRENT @ BEGIN ( CR OVER ID. OVER ID.) 2DUP >LFA @ <>
-WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
-
-
- : NEXTC ( DEA--CFA Like previous definition, giving CFA)
-   NEXTD >CFA ;
-
- VARIABLE LIM   : H.. BASE @ >R HEX . R> BASE ! ;  : B.. H.. ;
 
   CR ." A0MAR30  FORTH KRAKER >2<  ALBERT VAN DER HORST "
  : (KRAAK) ( DEA--. Decompile a word from its DEA)
@@ -206,6 +190,22 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
+ CR ." A1MAY17  FORTH KRAKER >2a<  ALBERT VAN DER HORST "
+( DEA--DEA Get the DEA of the word defined after the CFA one)
+: NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
+WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
+ : NEXTC NEXTD >CFA ; ( DEA--CFA Like NEXTD, giving CFA)
+ : KRAAK-FROM CFOF ( .--. Kraak, starting with following word)
+BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP (KRAAK) REPEAT DROP ;
+ VARIABLE LIM
+: H.. BASE @ >R HEX . R> BASE ! ;
+: B.. H.. ;
+( For the NUMBER : it IS a proper `dea' )
+( The <BM is not only optimisation, else `LIT 0' goes wrong.)
+: DEA? DUP BM @ < IF DROP 0 ELSE
+DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
+
+
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
  : BY ( DEA --. the CFA word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
@@ -229,15 +229,15 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
    BEGIN ?Q DUP @  LIT EXIT <> ( >R DUP LIM @ < R> AND ) WHILE
         ITEM REPEAT   CR DROP ." ;"  DUP
 ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
-CR ;
-       CFOF TASK @  BY -hi
+CR ;         CFOF TASK @  BY -hi
  ( for all -words: 1/1 pointer before afd after execution)
- : -lit CELL+ DUP @ H.. CELL+ ;
-     CFOF LIT BY -lit
- : -0br CR ." 0BRANCH [ " -lit ." , ] " ;
-     CFOF 0BRANCH BY -0br
- : -br  CR ." BRANCH  [ " -lit ." , ] " ;
-     CFOF BRANCH BY -br
+ : -con CELL+ DUP @ H.. CELL+ ;
+ : -dea CELL+ DUP @ &' EMIT ID.. CELL+ ;
+ : -lit DUP CELL+ @ DEA? IF -dea ELSE -con THEN ;
+CFOF LIT BY -lit
+
+
+
  CR ." A0APR11  FORTH KRAKER >5<  ALBERT VAN DER HORST "
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
@@ -254,20 +254,20 @@ CR ;
   ( DIRTY TRICK FOLLOWING :
 make decompile pointer point to exit!)
     DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
- CR ." KRAAKER"
+ CR ." A1MAY17  FORTH KRAKER >7<  ALBERT VAN DER HORST "
  : -dd CFA> ." CREATE DOES> word " ID.. CR ;
         CFOF FORTH @ BY -dd
- : KRAAK-FROM ( .--. Kraak, starting with following word)
-   CFOF
-   BEGIN
-      DUP NEXTD LATEST < WHILE
-      NEXTC DUP (KRAAK)
-   REPEAT DROP ;    EXIT Remainder is broke
- 0 IVAR aux
- : PEMIT $7F AND 5 BDOS DROP ;
- : TO-LP-KRAAK-FROM
-   ' EMIT >CFA >R       ' PEMIT >CFA ' EMIT >DFA !
-   KRAAK-FROM           R> ' EMIT >DFA ! ;
+: TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
+: .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
+: -target DUP ( IP -- IP ,print comment about current jump)
+." ( between " TARGET DUP 0 CELL+ - @ .DEA? @ .DEA? ." ) " ;
+: -0br CR ." 0BRANCH [ " -con ." , ] " -target ;
+CFOF 0BRANCH BY -0br
+: -br  CR ." BRANCH  [ " -con ." , ] " -target ;
+CFOF BRANCH BY -br
+
+
+
 
 
  ( DISK IO SCREEN 17 SCHRIJVEN >1< VERSIE #1)
@@ -1576,7 +1576,7 @@ hard disk. Done by a Forth booted from another floppy.)
 : (HWD) SWAP WRITE-BLOCK 1 AND . ;
 ( Read the default buffer from hard disk at 32-bit POSITION)
 : (HRD) SWAP READ-BLOCK 1 AND . ;
-
+DECIMAL
 
 
 
@@ -3313,34 +3313,34 @@ BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
 ?PC ?16 ( copy a hd system, was written to a floppy to the
 hard disk. Done by a Forth booted from another floppy.)
 DECIMAL
-( As R/W but absolute, counting from zero. )
-: ABSR/W EMPTY-BUFFERS OFFSET @ >R 0 OFFSET ! R/W R> OFFSET ! ;
+( As R/W but relative, counting from ``OFFSET''. )
+: RELR/W SWAP OFFSET @ + SWAP R/W ;
 ( Read absolute BLOCK from floppy into default buffer.)
-: (FRD) RW-BUFFER SWAP 1 ABSR/W ;
+: (FRD) RW-BUFFER SWAP 1 R/W ;
 ( Write absolute BLOCK to floppy from default buffer.)
-: (FWD) RW-BUFFER SWAP 0 ABSR/W ;
+: (FWD) RW-BUFFER SWAP 0 R/W ;
 \ DBS : default boot system, first 1400 K of hd.
 \ Prompt for empty floppy. Save from hard disk BLOCK
 \ (a 32-bit number) and 1400K following to the floppy.
 : BACKUP>FLOPPY  SWAP-FLOPPY
 1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
+
+
+?PC ?16
 \ Prompt for floppy created with ``BACKUP>FLOPPY''
 \ Restore to hard disk ``DBS'' 1400 K from floppy.
 : RESTORE<FLOPPY  SWAP-FLOPPY
 1400 0 DO I (FRD) 2DUP I S>D D+ (HWD) LOOP 2DROP ;
 \ Copy the kernel (first 64K of ``DBS'' to raw floppy.
-: BACKUP-KERNEL   64 0 DO I S>D (HRD) I (FWD) LOOP ;
+: BACKUP-KERNEL  SWAP-FLOPPY 64 0 DO I S>D (HRD) I (FWD) LOOP ;
 \ Copy the BLOCKS (256K at 64K of ``DBS'') to BLOCKS.BLK.
-: BACKUP-BLOCKS   SWAP-FLOPPY
-64 256 OVER + SWAP DO I S>D (HRD) RW-BUFFER I 1 R/W LOOP ;
+: BACKUP-BLOCKS
+256 0 DO I 64 + S>D (HRD) RW-BUFFER I 0 RELR/W LOOP ;
 \ Copy the kernel (first 64K of ``DBS'') from raw floppy.
-: RESTORE-KERNEL 64 0 DO I (FRD) I S>D (HWD) LOOP ;
+: RESTORE-KERNEL SWAP-FLOPPY 64 0 DO I (FRD) I S>D (HWD) LOOP ;
 \ Copy the BLOCKS (256K at 64K of ``DBS'') from BLOCKS.BLK.
 : RESTORE-BLOCKS
-64 256 OVER + SWAP DO RW-BUFFER I 0 R/W I S>D (HWD) LOOP ;
-
-
-
+256 0 DO RW-BUFFER I 1 RELR/W I 64 + S>D (HWD) LOOP ;
 
 ?32 ?PC
 \ Copy the currently booted chunk to free space on the hd,
@@ -3358,8 +3358,8 @@ DECIMAL
 
 
 
-
-
+-1 CELL+ LOAD 120 LOAD 100 LOAD 97 98 THRU DECIMAL
+207 208 THRU
 
 
 
