@@ -9,6 +9,12 @@
 ; For the generic system (to generate ciforth in an other configuration than this one):
 ;     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html
 ;
+; If this is a configured assembly file, it should be accompagnied with configured
+; documentation (texinfo, ps, html.)
+; WITHOUT THE DOCUMENTATION: GIVE UP! GET THE REAL THING!
+; You have a configured system, if there are NO curly brackets on the next line.
+; {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
+;
 ; Configuration of this particular version:
 ; _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })
 ; _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl
@@ -20,10 +26,13 @@ _HOSTED_MSDOS_({running under MSDOS
 }) _LINUX_C_({;  with c-routines for I/O})_LINUX_N_({;  with native forth I/O})
 ; Normally ciforth doesn't observe ISO >IN{}_ISO_IN_({{, but this one does}}).
 ; Contains :
+; (there may be no items here.)
 _SECURITY_({{;        Security words
 }})dnl
 _LOAD_({{;         Loadable words, i.e. all of ISO CORE, more than is needed
 ;           for a self contained kernel.
+}})dnl
+_SOURCEFIELD_({{; A field in the header to point to source
 }})dnl
 _FEWBLOCKS_({{; number of blocks limited to 256
 }})dnl
@@ -1456,7 +1465,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
         LODSW
-        LEA     AX,[LIP+AX] ;{Make absolute}
+        ADD     AX,LIP  ;{Make absolute}
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     BX      ;{ LIMIT VALUE}
         XCHG    RPO,SPO   ;{ GET RETURN STACK}
@@ -1473,7 +1482,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
         LODSW
-        LEA     AX,[LIP+AX] ;{Make absolute}
+        ADD     AX,LIP  ;{Make absolute}
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     BX      ;{ LIMIT VALUE}
         CMP     DX,BX
@@ -1636,7 +1645,7 @@ CPUNM:  DC      5H,0B328H       ;{ '8088'     12 13 }
         DC      0, STRTIB       ;{REMAINDER   14 15 }
 _SWITCH_({
 ; {Swap the following with DP to allocate in conventional memory.}
-         DC     A_LOWDP ; {LOW-DP        16}
+         DC     TEXTEND         ; {LOW-DP        16}
 ; {Leave space to start conventional programs}
          DC     80000H          ; {LOW-EM        17}
 });_END_({ _SWITCH_})
@@ -3545,6 +3554,7 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
         DC      QERR
         DC      SEMIS
 ;
+_LOAD_({
 worddoc( {SECURITY},{?LOADING},{question_loading},{},{},
 {Issue an error message if not loading},{{?ERROR}},
 {{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? MSG # 16 },
@@ -3558,6 +3568,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      QERR
         DC      SEMIS
 ;
+});_END_({_LOAD_})
 });_END_({_SECURITY_})
 ;
 worddoc( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,L1},
@@ -4502,10 +4513,9 @@ string forthvar({sc}) in the dictionary, then creates a
 dictionary entries with that string as the namefield. It is
 linked into the forthcode({CURRENT}) word list. The code field
 and data field both point to the area owned by this header,
-i.e. immediately following the completed header{}_VERBOSE_({{as
+i.e. immediately following the completed header _VERBOSE_({{as
 appriopriate for a low level (assembler) definition}}). The
-flag field is empty{}_VERBOSE_({{, so not forthcode({SMUDGE})
-d}}). },
+flag field is empty _VERBOSE_({{, so not forthcode({SMUDGE}) d}}). },
 {{CREATE}},
 {{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
 enddoc)
@@ -5975,6 +5985,7 @@ HEADER({BLK},{BLK},{DOCOL})
         DC      LIT, 1024, EQUAL, LAND
         _0BRANCH(BLK1)
         DC      SRC, FETCH, TWO, LCELLS, LSUB, FETCH
+        DC      OFSET, FETCH, LSUB
         _BRANCH(BLK2)
 BLK1:
         DC      ZERO
@@ -8633,7 +8644,8 @@ _DIRECTMAPPED_({
 worddoc( {MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
 {A user variable leaving the lowest address that is free in the lowest
 1 Mbyte of physical memory. This variable can be swapped with DP to
-compile into this area.
+compile into this area. Great care must be taken to skip those areas
+below 1M that are used, for GDT, real time stack and such.
 },{{LOW-EM}}, {}, enddoc)
 HEADER({LOW-DP},{LOWDP},{DOUSE}, _CELLS(16))
 ;
@@ -8685,8 +8697,8 @@ _HOSTED_LINUX_({
 FORTHSIZE       EQU     _AP_ - ORG0
          section dictionary nobits write exec alloc
 
-INITDP:                 ;  It may be that it is not consecutive with TASK
-                        ;  And that is a hell of a problem.
+INITDP:                 ;  It may be that it is not consecutive with TASK.
+                        ;  Because of bad linking, resulting in a unusable Forth.
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
        _RESB( EM - FORTHSIZE - RTS - US - BUFFERSIZE )
@@ -8705,8 +8717,13 @@ _COMMENT
 
   MISC. NOTES AND SCATTERED THOUGHTS
 
+- Remember that all the FORTH words in this version are
+  upper case letters.  Use <CAPS LOCK> when in FORTH.
+
+_HOSTED_MSDOS_({
 - This source will assemble on all platforms where NASM is
   available.
+
   On MSDOS the command line is:
   nasm -fbin ci86.asm -o ci86.com
   (There may be exceptions for special configurations.)
@@ -8714,16 +8731,8 @@ _COMMENT
   an an IBM-compatible computer
 
 - In a MODERN version <ctrl> P  will echo all output to the
-  printer. This is not programmed here, but a feature of the OS.
+  printer. This is not programmed here, but a feature of the MSDOS.
   The operating system may make available a command history too.
-
-- Use the installation manual.  Descriptions for all FIG
-  words are given.  Those ERROR messages you get in FORTH
-  correspond to the relative line numbers in blocks
-  4 and 5 of the installation manual's model.
-
-- Remember that all the FORTH words in this version are
-  upper case letters.  Use <CAPS LOCK> when in FORTH.
 
 - Changing variable EM will allow you to create a larger
   dictionary space.  However I suggest you develop and
@@ -8732,10 +8741,7 @@ _COMMENT
   need to run EXE2BIN ( Chap 10, DOS 2.0 ) to get enough
   disk space.  Once you are satisfied with what you have,
   then by all means take that extra memory.
-
-- Reading the section on batch files may speed up your
-  developement.  See the example files that came with
-  the Macro Assembler.
+});_END_({ _HOSTED_MSDOS_})
 
 - Subscribe to FORTH Dimensions.  It is a valuable source
   of system and application ideas.  Talking with fellow
