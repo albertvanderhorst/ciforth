@@ -1690,13 +1690,17 @@ enddoc)
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      TOR
         DC      RR, TFFA, FETCH
-        DC      LIT, B_INVIS _OR_ B_DUMMY
-        DC      LAND, ZEQU
+        DC      LIT, B_INVIS _OR_ B_DUMMY, LAND ;{Get flags.}
+        DC      ZEQU
         _0BRANCH(MATS2)
 ;       DC      RR, IDDOT
         DC      LDUP
         DC      RR, TNFA, FETCH, FETCH
-        DC      EQUAL   ;{ Compare counts.}
+        DC      LSUB
+        DC      RR, TFFA, FETCH, LIT, B_DENOT, LAND ;{Get flag.}
+        DC      OVER, ZLESS, LAND  ;{Ignorable length difference.}
+        DC      ZEQU, LAND
+        DC      ZEQU
         _0BRANCH(MATS2)
         DC      OVER
         DC      RR, TNFA, FETCH, SFET
@@ -3783,7 +3787,7 @@ In ciforth forthcode({."}) will behave the same in interpret mode.
 In ciforth the number of characters has no limit and has always an effect
 on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
-_VERBOSE_({We want forthsamp({." cccc"}) replaced by forthsamp({"cccc" $.}).})},
+_VERBOSE_({We want forthsamp({." cccc"}) replaced by forthsamp({"cccc" TYPE}).})},
 {{OUT}},
 {{: GS1 ." the end" ; GS1 },{the end}},
 enddoc)
@@ -3802,7 +3806,7 @@ DOTQ2:
 worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
 { In ciforth this is an alias for ." , except that the string is closed with forthkey({{)}}).
 In ISO programs you may only use this word while interpreting.
-_VERBOSE_({We want forthsamp({.( cccc)}) replaced by the equivalent forthsamp({"cccc" $.}).})},
+_VERBOSE_({We want forthsamp({.( cccc)}) replaced by the equivalent forthsamp({"cccc" TYPE}).})},
 {{OUT},{."}},
 {{.( the end)},{the end}},
 enddoc)
@@ -4707,7 +4711,8 @@ INTE3A:                  ;{THEN THEN }
         DC      LDUP, TFFA, FETCH
         DC      LDUP, LIT, B_DENOT, LAND ;{Retain copy of flags.}
         _0BRANCH(INTE3B) ;{IF}
-        DC      RR, ONEP, LIN, STORE
+        DC      OVER, TNFA, FETCH, FETCH
+        DC      RR, PLUS, LIN, STORE  ;{Skip over prefix.}
 INTE3B:                  ;{THEN }
         DC      RDROP           ; {Drop old parse pointer.}
         DC      LIT, B_IMMED, LAND
