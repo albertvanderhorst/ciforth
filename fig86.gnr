@@ -216,7 +216,7 @@ ELSE1:
 	MOV     DS,AX
 	MOV     SS,AX
 	MOV     ES,AX
-	MOV     SP,0H
+	MOV     STACKPOINTER,0H
 	STI                     ; Allow interrupts
 	MOV     AH,00   ; Reset
 	MOV     DL,00            ;Drive 0 (floppy 1)
@@ -244,11 +244,11 @@ READSECTOR:
 	PUSH    BX
 	MOV     AX,CX
 	XOR     DX,DX
-	DIV     _WORD_PTR[LSPT]
+	DIV     _CELL_PTR[LSPT]
 	MOV     CL,DL
 	INC     CL      ; Sectors counting from 1!
 	XOR     DX,DX
-	DIV     _WORD_PTR[LHEADS]
+	DIV     _CELL_PTR[LHEADS]
 	MOV     DH,DL   ; Head number
 	MOV     CH,AL   ; Only small disks <256 cylinders
 	MOV     DL,00            ;Drive 0 (floppy 1)
@@ -374,7 +374,7 @@ ELSE1:
 	MOV     DS,AX
 	MOV     SS,AX
 	MOV     ES,AX
-	MOV     SP,0H
+	MOV     STACKPOINTER,0H
 	STI                     ; Allow interrupts
 	MOV     AH,00   ; Reset
 	MOV     DL,80            ;Drive 80 (hd C:)
@@ -483,15 +483,20 @@ ORIG:
 	MOV     ES,AX
 	LGDT    [GDTLOAD]
 	TO_PROTECTED    ;   "
-
-	 JMP     SAME3
-;         JMPFAR 
-;         DW      LCLD
-;         DW     CODESEGMENT
+;************************
+OPTIONAL_SWITCH_TO_32MODE
+;************************
+          JMPFAR 
+          DW      SAME3
+          DW     CS_32
 GDTLOAD DW     GDTLEN
 	DD     GDT 
 
 SAME3:
+	MOV     AX,DS_32 
+	MOV     DS,AX
+	MOV     ES,AX
+	MOV     SS,AX
 });_END___1__({ _PROTECTED_1_})
 	NOP
 	JMP	LCLD     ;VECTOR TO COLD START
@@ -640,7 +645,7 @@ BREAK:  JMP	SHORT	TNEXT3	;CONT WITH PROGRAM
 ;
 TNEXT2:	POP	AX
 	POPF
-TNEXT3:	LODSW           ; AX <- (IP)
+TNEXT3:	LODSW            ; AX <- (IP)
 	MOV	BX,AX
 	JMP	SHORT	NEXT1
 	PAGE
@@ -652,21 +657,21 @@ _COMMENT
     `JMP TNEXT' for tracing through high level FORTH words. 
 
 _ENDCOMMENT
-NEXT:	LODSW		;AX <- (IP)
+NEXT:	LODSW            ;AX <- (IP)
 ;
 NEXT1:	MOV	DI,AX   ; (W) <- (IP)
-	JMP     _WORD_PTR[DI]    ; TO `CFA'
+	JMP     _CELL_PTR[DI]    ; TO `CFA'
 	PAGE
 ;
 ;       Dictionary starts here.
 DP0:
 CODE_HEADER({LIT},{LIT})
-	LODSW		; AX <- LITERAL
+	LODSW            ; AX <- LITERAL
 	JMP SHORT     APUSH   ; TO TOP OF STACK
 ;
 CODE_HEADER({EXECUTE},{EXEC})
 	POP     DI      ; GET CFA
-	JMP     _WORD_PTR[DI]    
+	JMP     _CELL_PTR[DI]    
 ;                                 
 CODE_HEADER({BRANCH},{BRAN})      
 BRAN1:	ADD     SI,[SI]           
@@ -676,16 +681,16 @@ CODE_HEADER({0BRANCH},{ZBRAN})
 	POP	AX	; GET STACK VALUE
 	OR	AX,AX	; ZERO?
 	JZ	BRAN1	; YES, BRANCH
-	LEA	SI,[SI+CELL]
+	LEA	SI,[SI+CELLS(1)]
 	JMP SHORT     NEXT
 	PAGE
 HEADER({NOOP},{NOOP},{$+4})
 ;	DEBUG STUFF
-NOP0	DC	$+CELL
+NOP0	DC	$+CELLS(1)
 	JMP SHORT     NEXT
-NOP1	DC 	$+CELL
+NOP1	DC 	$+CELLS(1)
 	JMP SHORT     NEXT
-NOP2	DC	$+CELL
+NOP2	DC	$+CELLS(1)
 	JMP SHORT     NEXT
 ;
 
@@ -694,13 +699,13 @@ CODE_HEADER({(LOOP)},{XLOOP})
 	MOV	BX,1	; INCREMENT
 XLOO1:	ADD	[BP],BX	; INDEX = INDEX + INCR
 	MOV	AX,[BP]	; GET NEW INDEX
-	SUB	AX,[CELL+BP]        ; COMPARE WITH LIMIT
+	SUB	AX,[CELLS(1)+BP]        ; COMPARE WITH LIMIT
 	XOR	AX,BX	; TEST SIGN
 	JS	BRAN1	; KEEP LOOPING
 ;
 ;  END OF `DO' LOOP
 	ADD	BP,_BYTE CELLS(2)  ; ADJ RETURN STACK
-	LEA	SI,[SI+CELL]       ; BYPASS BRANCH OFFSET
+	LEA	SI,[SI+CELLS(1)]       ; BYPASS BRANCH OFFSET
 	JMP     NEXT
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
@@ -710,10 +715,10 @@ CODE_HEADER({(+LOOP)},{XPLOO})
 CODE_HEADER({(DO)},{XDO})
 	POP	DX	; INITIAL INDEX VALUE
 	POP	AX	; LIMIT VALUE
-	XCHG	BP,SP	; GET RETURN STACK
+	XCHG	BP,STACKPOINTER   ; GET RETURN STACK
 	PUSH	AX
 	PUSH	DX
-	XCHG	BP,SP	; GET PARAMETER STACK
+	XCHG	BP,STACKPOINTER   ; GET PARAMETER STACK
 	JMP	NEXT
 	PAGE
 CODE_HEADER({I},{IDO})
@@ -762,7 +767,7 @@ _ENDCOMMENT
 UP	DC	STRUSA	; USER AREA POINTER 1
 	DC      0       ; (Unused)          2
 	DC 	INITS0	; INIT (S0)         3
-RPP     DC 	INITR0	; INIT (R0)         4
+        DC 	INITR0	; INIT (R0)         4
 	DC 	STRTIB  ; INIT (TIB)        5
 	DC	32	; INIT (WIDTH)      6
 	DC	0	; INIT (WARNING)      7
@@ -913,7 +918,7 @@ CODE_HEADER({U*},{USTAR})
 	POP	BX
 	MUL	BX	;UNSIGNED
 	XCHG	AX,DX	;AX NOW = MSW
-	JMP	DPUSH	;STORE DOUBLE WORD
+	JMP	DPUSH	;STORE DOUBLE CELL
 ;
 CODE_HEADER({U/},{USLAS})
 	POP	BX	;DIVISOR
@@ -948,12 +953,12 @@ CODE_HEADER({XOR},{LXOR})
 	JMP	APUSH
 	PAGE
 CODE_HEADER({SP@},{SPFET})
-	MOV	AX,SP   ; (S1) <- (SP)
+	MOV	AX,STACKPOINTER   ; (S1) <- (SP)
 	JMP	APUSH
 ;
 CODE_HEADER({SP!},{SPSTO})
 	MOV	BX,[UP]   ;USER VAR BASE ADDR
-	MOV	SP,[CELLS(3)+BX]        ;RESET PARAM STACK POINTER
+	MOV	STACKPOINTER,[CELLS(3)+BX]        ;RESET PARAM STACK POINTER
 	JMP	NEXT
 ;
 CODE_HEADER({RP@},{RPFET})      ;(S1) <- (RP)
@@ -967,27 +972,27 @@ CODE_HEADER({RP!},{RPSTO})
 	PAGE
 CODE_HEADER({;S},{SEMIS})
 	MOV	SI,[BP]	;(IP) <- (R1)
-	LEA	BP,[BP+CELL]
+	LEA	BP,[BP+CELLS(1)]
 	JMP	NEXT
 ;
 CODE_HEADER({LEAVE},{LLEAV})  ;LIMIT <- INDEX
 	MOV	AX,[BP]	;GET INDEX
-	MOV	[CELL+BP],AX        ;STORE IT AT LIMIT
+	MOV	[CELLS(1)+BP],AX        ;STORE IT AT LIMIT
 	JMP	NEXT
 	PAGE
 ;
 CODE_HEADER({>R},{TOR})        ; (R1) <- (S1)
 	POP	BX	;GET STACK PARAMETER
-	LEA	BP,[BP-CELL]    ;MOVE RETURN STACK DOWN
+	LEA	BP,[BP-CELLS(1)]    ;MOVE RETURN STACK DOWN
 	MOV	[BP],BX	;ADD TO RETURN STACK
 	JMP	NEXT
 ;
 CODE_HEADER({R>},{FROMR})      ;(S1) <- (R1)
 	MOV	AX,[BP]	; GET RETURN STACK VALUE
-	LEA	BP,[BP+CELL]
+	LEA	BP,[BP+CELLS(1)]
 	JMP	APUSH
 ;
-HEADER({R},{RR},{IDO+CELL})
+HEADER({R},{RR},{IDO+CELLS(1)})
 	PAGE
 CODE_HEADER({0=},{ZEQU})
 	POP	AX
@@ -1031,7 +1036,7 @@ CODE_HEADER({DMINUS},{DMINU})
 	SUB	AX,AX
 	MOV	DX,AX
 	SUB	DX,CX	; MAKE 2'S COMPLEMENT
-	SBB	AX,BX	; HIGH WORD
+	SBB	AX,BX	; HIGH CELL
 	JMP	DPUSH
 	PAGE
 ;
@@ -1088,7 +1093,7 @@ CODE_HEADER({C@},{CFET})
 CODE_HEADER({2@},{TFET})
 	POP	BX	;ADDR
 	MOV	AX,[BX]	;MSW
-	MOV	DX,[CELL+BX]        ;LSW
+	MOV	DX,[CELLS(1)+BX]        ;LSW
 	JMP	DPUSH
 ;
 CODE_HEADER({!},{STORE})
@@ -1108,7 +1113,7 @@ CODE_HEADER({2!},{TSTOR})
 	POP	AX	;MSW
 	MOV	[BX],AX
 	POP	AX	;LSW
-	MOV	[CELL+BX],AX
+	MOV	[CELLS(1)+BX],AX
 	JMP	NEXT
 ;
 ; Do it the old way, via real mode (!)
@@ -1157,9 +1162,9 @@ HEADER({:},{COLON},{DOCOL},1)
 	DC	CREAT
 	DC	RBRAC
 	DC	PSCOD
-DOCOL:	LEA     BP,[BP-CELL]
+DOCOL:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;R1 <- (IP)
-	LEA     SI,[DI+CELL]  ;(IP) <- (PFA)
+	LEA     SI,[DI+CELLS(1)]  ;(IP) <- (PFA)
 ;____1_____ _PROTECTED_1_({
 	JMPFAR
 	DC      SAME1
@@ -1187,20 +1192,20 @@ HEADER({CONSTANT},{CON},{DOCOL})
 	DC	SMUDG
 	DC	COMMA
 	DC	PSCOD
-DOCON:  MOV     AX,[DI+CELL] ;GET DATA FROM PFA
+DOCON:  MOV     AX,[DI+CELLS(1)] ;GET DATA FROM PFA
 	JMP	APUSH
 ;               
 HEADER({VARIABLE},{VAR},{DOCOL})
 	DC      CON
 	DC      PSCOD
-DOVAR:	LEA     AX,[DI+CELL] ;(AX) <- PFA
+DOVAR:	LEA     AX,[DI+CELLS(1)] ;(AX) <- PFA
 	JMP	APUSH
 ;
 HEADER({USER},{USER},{DOCOL})
 	DC	CON
 	DC	PSCOD
 DOUSE:  XOR     BX,BX
-	MOV     BL,[DI+CELL] ;PFA  
+	MOV     BL,[DI+CELLS(1)] ;PFA  
 	MOV	DI,[UP]   ;USER VAR ADDRESS
 	LEA	AX,[BX+DI]	;ADDR OF VARIABLE
 	JMP	APUSH
@@ -1213,7 +1218,7 @@ CODE_HEADER({1},{ONE})
 	MOV	AX,1
 	JMP	APUSH
 ;
-CODE_HEADER({2},{TWO})   ; Needed also CELL
+CODE_HEADER({2},{TWO})   ; Needed also CELLS(1)
 	MOV	AX,2
 	JMP	APUSH
 ;
@@ -1577,10 +1582,10 @@ HEADER({DOES>},{DOES},{DOCOL})
 	DC	PFA
 	DC	STORE
 	DC	PSCOD
-DODOE:	LEA     BP,[BP-CELL]
+DODOE:	LEA     BP,[BP-CELLS(1)]
 	MOV	[BP],SI	;R1 <- (IP)
-	MOV	SI,[DI+CELL] ;NEW IP 
-	LEA     AX,[DI+2*CELL]
+	MOV	SI,[DI+CELLS(1)] ;NEW IP 
+	LEA     AX,[DI+2*CELLS(1)]
 	JMP	APUSH 
 ;
 HEADER({COUNT},{COUNT},{DOCOL})
@@ -2109,8 +2114,8 @@ LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
 	POP     DS
 });_END___1__({ _HOSTED__1_})
 	CLD			; DIR = INC
-	MOV	SP,_WORD_PTR[USINI+CELLS(3)]    ;PARAM. STACK
-	MOV	BP,_WORD_PTR[USINI+CELLS(4)]    ;RETURN STACK
+	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;PARAM. STACK
+	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;RETURN STACK
 	JMP	NEXT
 ;
 CLD1	DC	COLD
@@ -2304,28 +2309,28 @@ MESS3	DC	SEMIS
 CODE_HEADER({PC@},{PCFET})
 ; FETCH CHARACTER (BYTE) FROM PORT
 	POP	DX	; PORT ADDR
-	IN	AL,DX	; BYTE INPUT
-	SUB	AH,AH
+	IN	AL,{DX}   ; BYTE INPUT
+        SUB     AH,AH
 	JMP	APUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
 ; STORE CHARACTER (BYTE) AT PORT
 	POP	DX	;PORT ADDR
 	POP	AX	;DATA
-	OUT	DX,AL	; BYTE OUTPUT
+	OUT	{DX},AL   ; BYTE OUTPUT
 	JMP	NEXT
 ;
 CODE_HEADER({P@},{PFET})
 ; FETCH WORD FROM PORT
 	POP	DX	;PORT ADDR
-	IN	AX,DX	;WORD INPUT
+	IN	AX,{DX}   ;WORD INPUT
 	JMP	APUSH
 ;
 CODE_HEADER({P!},{PSTO})
 ; STORE WORD AT PORT
 	POP	DX	;PORT ADDR
 	POP	AX	;DATA
-	OUT	DX,AX	;WORD OUTPUT
+	OUT	{DX},AX   ;WORD OUTPUT
 	JMP	NEXT
 ;
 HEADER({USE},{USE},{DOVAR})
@@ -2583,7 +2588,7 @@ EXPE1	DC	KEY
 	DC	EQUAL                           
 	DC	DUPE                            
 	DC	FROMR                           
-	DC	TWO     ; Dubious if CELL   
+	DC	TWO     ; Dubious if CELLS(1)   
 	DC	LSUB                            
 	DC	PLUS                            
 	DC	TOR                             
@@ -2646,7 +2651,7 @@ HEADER({EMIT},{EMIT},{DOCOL})
 	DC	PEMIT
 	DC	ONE,LOUT
 	DC	PSTOR,SEMIS
-PEMIT	DC	$+CELL
+PEMIT	DC	$+CELLS(1)
 	POP	AX	;GET CHAR
 	CMP     AL,LF   ; Precede ^J with ^M
 	JNE     PEMIT1
@@ -2703,7 +2708,7 @@ EXPE1	DC	KEY
 	DC	EQUAL                           
 	DC	DUPE                            
 	DC	FROMR                           
-	DC	TWO     ; Dubious if CELL   
+	DC	TWO     ; Magic number    
 	DC	LSUB                            
 	DC	PLUS                            
 	DC	TOR                             
@@ -3088,7 +3093,7 @@ HEADER({BEGIN},{BEGIN},{DOCOL},1)
 ;
 HEADER({ENDIF},{ENDIFF},{DOCOL},1)
 	DC	QCOMP
-	DC	TWO
+	DC	TWO     ; Magic number    
 	DC	QPAIR
 	DC	HERE
 	DC	OVER
@@ -3161,11 +3166,11 @@ HEADER({IF},{IFF},{DOCOL},1)
 	DC      HERE
 	DC	ZERO
 	DC	COMMA
-	DC	TWO     ; Dubious iff cell    
+	DC	TWO     ; Magic number        
 	DC	SEMIS
 	PAGE
 HEADER({ELSE},{ELSEE},{DOCOL},1)
-	DC	TWO     ; Dubious iff cell    
+	DC	TWO     ; Magic number        
 	DC	QPAIR
 	DC	COMP
 	DC	BRAN
@@ -3173,14 +3178,14 @@ HEADER({ELSE},{ELSEE},{DOCOL},1)
 	DC	ZERO
 	DC	COMMA
 	DC	SWAP
-	DC	TWO     ; Dubious iff cell    
+	DC	TWO     ; Magic number        
 	DC	ENDIFF
-	DC	TWO     ; Dubious iff cell    
+	DC	TWO     ; Magic number        
 	DC	SEMIS
 ;
 HEADER({WHILE},{WHILE},{DOCOL},1)
 	DC	IFF
-	DC	TWOP        ; dubious if cell
+	DC	CELLP         ; Dubious    
 	DC	SEMIS
 	PAGE
 HEADER({SPACES},{SPACS},{DOCOL})
