@@ -1,4 +1,4 @@
-s_END_;{              ciforth : a generic I86 ISO FORTH by HCC FIG}
+;{              ciforth : a generic I86 ISO FORTH by HCC FIG}
 
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
@@ -1266,8 +1266,9 @@ DP0:
 ; that in turn links to 0.
 
 define({_LINKOLD},0)dnl
-worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
-{Used in the form: forthexample({' nnnn})
+worddocsafe( {DENOTATIONS},{'},{tick},{--- addr},{ISO,FIG,I,L0},
+{Used in the form: forthexample({' nnnn
+'nnnn})
 In interpret mode it
 leaves the forthdefi({execution token}) (equivalent to the
 dictionary entry address) of dictionary word forthsamp({nnnn}).
@@ -1384,7 +1385,9 @@ HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      SEMIS
 ;
 worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
-{Leave a forthkey({"}) delimited string.},
+{Leave a forthkey({"}) delimited string. A forthkey({"}) can
+be embedded in a string by doubling it.
+},
 {},
 {{"APE" TYPE},{APE},
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}},
@@ -1984,7 +1987,7 @@ PWORD1: DC      DROP
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
-worddocsafe( {PARSING~},{(PARSE)},{paren_parse},{ c --- sc },{},
+worddocsafe( {PARSING},{(PARSE)},{paren_parse},{ c --- sc },{},
 {Scan the forthdefi({current input source}) for the character forthvar({c}) .
 Return forthvar({sc}): a string from the current position in the
 input stream, ending before the first such character,
@@ -3237,8 +3240,9 @@ followed by a a null ended array of arguments strings,
 then by a null ended array of environment strings.
 }})
 _PC_({{
-In this ciforth it contains the real segment of the ``environment-block''
-_HOSTED_DPMI_({,which is real hard to come by in protected mode}).
+In this ciforth it contains the real segment descriptor of the
+``environment-block''_HOSTED_DPMI_({,which is real hard to come
+by in protected mode}).
 _VERBOSE_({{The arguments passed to the program, ``command tail''
 is available as a forthdefi({brain damaged string}) at address 80H.}})
 }})
@@ -4109,7 +4113,9 @@ trailing forthkey({"})) as a constant string forthsamp({addr1
 n}) . In ciforth the number of characters has no limit and
 using forthsamp({S"}) has always an effect on
 forthcode({HERE}), even during interpretation.
-},{{DEN"}},
+In ciforth a forthkey({"}) can be embedded in a string by doubling it.
+In non-portable code denotations are recommended.
+},{{"}},
 {{S" NUKES  " 41 EMIT TYPE 41 EMIT},{ANUKES  A},
 {: GS1 S" NUKES  " 41 EMIT TYPE 41 EMIT ; GS1},{ANUKES  A},
 {S" ""BD  " 41 EMIT TYPE 41 EMIT},{A"BD  A}},
@@ -4377,7 +4383,7 @@ HEADER({PAD},{PAD},{DOCOL})
         DC      SEMIS
 ;
 _LOAD_({
-worddoc( {PARSING},{WORD},{newword},{c ---addr},{ISO,FIG,L0},
+worddoc( {PARSING},{WORD},{word},{c ---addr},{ISO,FIG,L0},
 {Parse the forthsamp({current input source}) using forthvar({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input source.
@@ -4389,7 +4395,7 @@ at the dictionary buffer forthcode({HERE}) .
 forthcode({WORD}) leaves the character count in the first byte, the characters, and
 ends with two or more blanks.
 },
-{{BLK} ,{IN}},
+{{(WORD)},{(PARSE)},{BLK} ,{IN}},
 {{: GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
 { : GS3 5A WORD COUNT DUP . TYPE ; GS3 ZZZQQZ},{2 QQ}
@@ -5418,8 +5424,8 @@ worddoc( {INIT},{COLD},{cold},{},{FIG},
 {Reinitialise the system. Clear all block buffers. Reinitialise
 all user variables to their boot up values values, i.a. the
 stacks and the forthdefin({dictionary pointer}) . _BLOCKSINFILE_({Opens the
-file that contains the blocks.}) Restart via forthcode({ABORT})
-. May be called from the terminal to remove application
+file that contains the blocks.}) Restart via forthcode({ABORT}) .
+May be called from the terminal to remove application
 programs and restart, as long as there are no
 new vocabularies with definitions.
 _HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
@@ -5544,7 +5550,7 @@ MAX1:   DC      DROP
 worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
 {Perform a forthsamp({{logical {{{shift}}} }}) of the bits of
 forthvar({u1}) to the left by forthvar({n}) places.
-_VERBOSE_({{Put zero into the places uncovered by the {{{{{shift}}}}}.}}) },
+_VERBOSE_({{Put zero into the places uncovered by the {{{{shift}}}}.}}) },
 {{RSHIFT},{2*}},
 {{1 2 LSHIFT .},{4}},
 enddoc)
@@ -5557,7 +5563,7 @@ CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
 worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
 {Perform a forthsamp({{logical {{{shift}}} }}) of the bits of
 forthvar({u1}) to the right by forthvar({n}) places.
-_VERBOSE_({{Put zero into the places uncovered by the {{{{{shift}}}}}.}}) },
+_VERBOSE_({{Put zero into the places uncovered by the {{{{shift}}}}.}}) },
 {{LSHIFT},{2/}},
 {{4 2 RSHIFT .},{1}},
 enddoc)
@@ -6456,24 +6462,28 @@ CODE_HEADER({BIOSO},{BIOSO})
 });_END_({_SIMULATE_BIOS_})
 ;{ Generic call on BIOS. A boon for experimenters.}
 worddoc( {OPERATINGSYSTEM},{BIOSN},{biosn},{d c b a i---ar fl},{},
-{Do a call of ``BIOS'' interrupt forthsamp({i}) with
-forthsamp({a b c d}) in registers forthsamp({AX BX CX DX}).
-Return as a result the content of register forthsamp({ar}).
-forthsamp({fl}) is true if the carry flag is set, presumably a
+{Do a call of ``BIOS'' interrupt forthvar({i}) with
+forthvar({a b c d}) in registers forthsamp({AX BX CX DX}).
+Return as a result the content of register forthsamp({AX}) into forthvar({ar}).
+forthvar({fl}) contains the flag register.
+If the carry flag is set, it is presumably a
 failed operation. _VERBOSE_({{For other conventions you have to resort to forthcode({BIOSO}) .}})
 In general forthvar({ar}) then contains some error
-code. _HOSTED_DPMI_({ If you want selectors forthvar({DS}) or
-forthvar({ES}) different from the Forth segment, or any
-register different from the default, you must fill that in in
-the forthcode({REG-SET}) structure. If your BIOS call destroys
-registers, in particular forthvar({DS}) or forthvar({ES}) you
-must take care to restore them. This word performs calls only
+code. _HOSTED_DPMI_({{
+This word performs calls only
 as related to a real mode interface. Under DPMI we have to do
 this via a special call to the unadorned interrupt, which is in
 this case protected mode, interrupt 31H function 0300H. In
 behalf of this registers are saved and restored in
-forthcode({REG-SET}) . Unadorned calls to real interrupts are
-only available as forthcode({BIOS31}) .})
+forthcode({REG-SET}) . forthcode({BIOS31}) is the only direct interrupt
+call available.
+If you want selectors forthvar({DS}) or
+forthvar({ES}) different from the Forth segment, or any
+register different from the default, you must fill that in in
+the forthcode({REG-SET}) structure. If your BIOS call destroys
+registers, in particular forthvar({DS}) or forthvar({ES}) you
+must take care to restore them to forthcode({REG-SET}) .
+}})
 },{{BDOSN}},
 {{23 &A _ _ 200 21 BIOSN 1 AND . DROP .},{A0 23}},
 enddoc)
@@ -6585,14 +6595,14 @@ Save_ES_PR: DW    0000
 ;
 worddoc( {OPERATINGSYSTEM},{BIOS31},{bios31},{a b c d di---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt 31H, directly from
-protected mode. _VERBOSE_({{The word forthcode({BIOS}) simulates
-a real mode interrupt; that is what you usually want.}})
-dnl forthsamp({i})
+protected mode
 with forthsamp({a b c d di}) in registers
 forthsamp({AX BX CX DX DI}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
 content of the processors flag register. _VERBOSE_({{
 forthsamp({1 AND}) leaves a zero if the call was successful.}})
+ _VERBOSE_({{The word forthcode({BIOS}) simulates
+a real mode interrupt; that is what you usually want.}})
 },{{BIOS},{BDOS}}, {}, enddoc)
 ; Wanted here is a generic call on BIOS. A boon for experimenters.
 ;{ Because there is no such thing as a variable interrupt:}
@@ -6620,8 +6630,8 @@ worddoc( {OPERATINGSYSTEM},{BDOSO},{bdos},{a b c d i---ar br cr dr fl},{},
 registers forthsamp({AX BX CX DX}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
 of the processors flag register. This draws upon all facilities made
-available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
-only if it is started from MSDOS.}). This is obsolescent, use forthcode({BDOSN}) .
+available by MSDOS. _BOOTSECTRK_({{This works in this standalone Forth, but
+only if it is started from MSDOS.}}) This is obsolescent, use forthcode({BDOSN}) .
 },{{BIOSO},{BDOSN}}, {}, enddoc)
 _NORMAL_BIOS_({
 CODE_HEADER({BDOSO},{BDOSO})
@@ -6812,13 +6822,17 @@ PACCEP1:
 ;
 worddoc( {OPERATINGSYSTEM},{BDOSN},{bdosn},{d c b a ---ar fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthvar({d c b a }) in
-registers forthvar({ DX CX BX AX }). Upon return those registers
-contains forthvar({ar }) and forthvar({fl}) is the content
-of the processors carry register.  0 indicates no error, 1 indicates an error, probably
+registers forthvar({ DX CX BX AX }).
+Return as a result the content of register forthsamp({AX}) into forthvar({ar}).
+forthvar({fl}) contains the flag register.
+If the carry flag is set, it is presumably a
+failed operation.
+_VERBOSE_({{For other conventions you have to resort to forthcode({BIOSO}) .}})
+So 0 indicates no error, 1 indicates an error, probably
 with more information present in forthvar({ar }).
 This draws upon all facilities made
-available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
-only if it is started from MSDOS.})
+available by MSDOS. _BOOTSECTRK_({{This works in this standalone Forth, but
+only if it is started from MSDOS.}})
 _VERBOSE_({{This is intended to replace the obsolescent BDOSO , that has the
 parameters backwards, and returns too many useless parameters. }})
 },
@@ -7650,12 +7664,11 @@ _PC_({
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthsamp({count}) characters from the
 terminal to address, until a forthkey({RET}) is received.
-_HOSTED_LINUX_({ The simple tty editing functions of Linux are
-observed, i.e. the ``erase'' (delete a character) and ``kill''
-(delete a line) characters. Typically these are the backspace
-key and ^U.}) _PC_({The editing functions such as described by
-forthcode({(ACCEPT)}) are observed.}) Note that excess
-characters after forthsamp({count}) are ignored. The number of
+The backspace key on the standard PC keyboard layout
+is used to delete characters, without involvement of Forth, so
+changing forthcode({RUBOUT}) has no effect. Other editing keys such as
+forthkey({F3}) and cursor keys probably work as usual with a console application.
+Note that excess characters after forthsamp({count}) are ignored. The number of
 characters not including the forthkey({RET}) is returned into
 forthsamp({n}). },
 {{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
@@ -9805,7 +9818,7 @@ very smart, because its capabilities can be extended by new
 words based on those building blocks.},
 {},{},{},{})
 worddocchapter({SCREEN},{ },
-{Most of the mass storage is used for forthdefi({screen})'s that
+{Most of the forthdefin{blocks}) mass storage is used for forthdefi({screen})'s that
 have 16 lines of 64 characters. They are used for source code
 and documentation.
 Each screen is one forthcode({BLOCK}) as required by ISO.

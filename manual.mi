@@ -53,7 +53,7 @@ but thisforth does.
 
 thisforth uses the forthdefi({blocks}) as a library
 by addition of the word forthcode({REQUIRED}) and a convention.
-Starting with forthsamp({lina -r}) or most any option you have this
+Starting with forthsamp({thisforth -r}) or most any option you have this
 facility available. If you are already in thisforth, you can
 type forthsamp({1 LOAD}).
 _VERBOSE_({ The extension of forthsamp({.lab}) in
@@ -108,10 +108,10 @@ ERATOSTHENES SIEVE -- PRIMES LESS THAN 10 000
 
 If you want to try things out, or write a program -- as
 opposed to just running a ready made program -- you best
-start up thisforth by forthsamp({lina -e}).
+_HOSTED_({start up thisforth by forthsamp({thisforth -e}).
 That is forthkey({e}) for elective. That name means
-that you can configure this to suit your particular
-needs.
+that you}) _BOOTED_({do forthsamp({5 LOAD}) immediately. You})
+ can configure this screen 5 to suit your particular needs.
 dnl NEEDED description of adapting the elective screen
 dnl We will come back to that later.
 forthbreak
@@ -166,8 +166,8 @@ You are not obliged to work with separate windows.
 Suppose your favorite editor
 is called _PC_({forthfile({edlin})})_HOSTED_LINUX_({forthfile({vi})}). After
 
-_PC_({forthsamp({ "EDLIN" OS-IMPORT EDLIN })})
-_HOSTED_LINUX_({forthsamp({ "vi" OS-IMPORT vi })}).
+_PC_({forthexample({ "EDLIN" OS-IMPORT EDLIN })})
+_HOSTED_LINUX_({forthexample({ "vi" OS-IMPORT vi })})
 
 you can start editing a file in the same way as from
 _PC_({a DOS window or plain DOS}) _HOSTED_LINUX_({the shell}).
@@ -179,7 +179,7 @@ until your testing causes your Forth to crash.
 @subsection Finding things out.
 If you want to find things out
 you must
-start up thisforth again by forthsamp({lina -e}).
+start up thisforth again by forthsamp({thisforth -e}).
 The sequence
 forthexample(
 {REQUIRE TUCK
@@ -406,7 +406,7 @@ In this sense forthcode({FORTH}) and forthcode({ASSEMBLER}) words are not strict
 forthitem
 This is not strictly non-conforming, but worth mentioning here.
 Despite the fact that thisforth contains only one state-smart word besides
- forthcode({SLITERAL})  (that is forthcode({."}) )
+ forthcode({SLITERAL})  (that word is forthcode({."}) )
 which is about politically correct,
 as a consequence all denotations and some other words like
  forthcode({CHAR}) turn out to be state smart as a design consequence.
@@ -439,7 +439,7 @@ Often this is called an ``implementation defined'' behaviour in the standard.
 Indeed we are obliged to specify this behaviour in our glossary,
 or we don't comply to the standard.
 The behaviour of the other system may very well be a crash.
-In that case the standard probably defines this an ``ambiguous condition''.
+In that case the standard probably declares this an ``ambiguous condition''.
 
 For example:
 forthbreak
@@ -464,9 +464,14 @@ It can be argued that if you don't have that, you ain't have no Forth.
 It is used for two purposes, that are in fact the same.
 Make a customised Forth, like forthemph({you}) want to have it.
 Make a customised environment, like a customer wants to have it.
-Such a ``customised environment'', for example a game, is also
-called a forthdefi({turnkey system}).
-It often hides the normal working of the underlying Forth.
+Such a ``customised environment'', for example a game, is often
+called a forthdefi({turnkey system}) in Forth parlance.
+It hides the normal working of the underlying Forth.
+_HOSTED_({
+In fact this is what in other languages would be called ``just compiling'',
+but compiling in Forth means adding definitions to an interactive Forth.
+In ciforth ``just compiling'' is as easy as in any language
+(forthpxref({Manual}), Hello world!).})
 Of course, whether you have a
 hosted system _HOSTED_LINUX_(like this one) _HOSTED_MSDOS_(like this one) or
 a booted system _BOOTED_(like this one), it is clear that some

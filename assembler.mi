@@ -3,8 +3,15 @@ dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public Li
 
 @section Introduction
 
-You find here a couple of assemblers, to complement the generic ciforth system.
-They are based on the postit/fixup principle.
+Via forthurl({http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html}) you
+can find here a couple of assemblers, to complement the generic
+ciforth system. The assemblers are not part of the thisforth
+package, and must be fetched separately. They are based on the
+postit/fixup principle. The assembler that is present in the
+blocks, is based on the same principle, but is less
+sophisticated, especially regards error detection. If you use
+that one, you can still benefit from this section by the
+background information it gives.
 
 _BOOTED_({{On this stand alone version of ciforth, you only
 have the assembler in blocks, but they are not documented
@@ -33,7 +40,6 @@ forthfile({p0F.asi586.ps}) : two byte opcode for same that start with 0F.
 forthbreak
 forthfile({test.mak}) : makefile, i.e. with targets for opcode sheets.
 forthbreak
-
 
 De forthfile({asi586.frt}) (containing the full 80386 instruction set) is in
 many respects non-compliant to Intel syntax. The instruction
@@ -105,7 +111,7 @@ the in-between-step of creation defining words for each type
 of assembly gets in the way. There are just too many of them.
 
 MASM heavily overloads the instruction, in particular forthsamp({MOV}) .
-Once I use to criticise Intel because they had an unpleasant to use
+Once I used to criticise Intel because they had an unpleasant to use
 instruction set with forthsamp({MOV}) forthsamp({MVR}) and forthsamp({MVI}) for move instructions. In
 hindsight that was not too bad and I am returning to that.
 (I mean they are really different instructions, it might have been

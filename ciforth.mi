@@ -20,7 +20,7 @@ forthitem
 _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
 forthitem
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
-})_HOSTED_DPMI_({running under Windows})dnl
+})_HOSTED_DPMI_({running under DPMI (``Windows'')})dnl
 _BOOTED_({ _RESPECTDOS_({It tries to keep bootfloppy's in MSDOS-compatible format})})
 _FEWBLOCKS_({forthitem
 number of blocks limited to 256})
@@ -80,7 +80,7 @@ forthitem
 forthfile({forth.lab}) : source library for auxiliary programs
 forthenditemize
 
-These files are generated together by a generic systemfrom the file
+These files are generated together by a generic system from the file
 forthfile({fig86.gnr}) .
 The documentation applies to the ciforth with which it goes.
 
@@ -170,11 +170,11 @@ _PC_({
 
 The editor for editing screens is a very simple screen editor.
 For editing files from within thisforth you just use Your Favorite
-Editor. forthxref({Manual}).
+Editor (forthpxref({Manual})).
 
 The editor becomes available after forthsamp({REQUIRE EDITOR})
-and is invoked by  forthsamp({<number> EDIT}) or forthcode({E-S})
-for the current screen at forthcode({SCR}).
+and is invoked by  forthsamp({<number> EDIT}) or forthcode({E-S}) for
+the current screen at forthcode({SCR}).
 
 A screen is copied to the video screen. When you exit, what you
 see within the blue cadre, is copied back into the screen.
@@ -505,7 +505,7 @@ If this is not correct you may change it as appropriate by e.g.
 _PC_({ forthsamp({S" C:/FORTH/forth.lab" BLOCK-FILE $! })})
 _HOSTED_LINUX_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
 
-_PC(_({{f you have run ciforth without this message
+_PC_({{If you have run ciforth without this message
 before, the problem is most probably caused by
 a crash of ciforth that has left the file open.
 You are the victim of file sharing under DOS/Windows.
@@ -592,7 +592,7 @@ it is also used for a _BITS_ entity where it is irrelevant what number it repres
 forthitem sc
 a forthdefi({string constant}), i.e. two cells, an address and a length;
 length characters are present at the address
-_VERBOSE_({They must not be changed.})
+_VERBOSE_({(they must not be changed)})
 forthitem true
 a true forthdefi({Forth flag}): -1.
 forthitem u

@@ -19,9 +19,14 @@ The latest result is used up first, hence the name lifo buffer.
 
 For example:
 
-forthexample({albert@@apple:~/forth/fig86 > lina
+forthexample(
+{_HOSTED_(
+{_HOSTED_LINUX_( {albert@@apple:~/forth/fig86 > thisforth}){}dnl
+_HOSTED_MSDOS_({C:\ciforth>thisforth}){}dnl
+_HOSTED_DPMI_({[After clicking on the thisforth icon]})}){}dnl
+_BOOTED_({[After booting]})
 
-80386 ciforth beta $RCSfile$ $Revision$
+80386 ciforth beta ${R}CSfile: ci86.gnr,v $ ${R}evision: 3.275) $
 
 1 2 + 7 *
  OK
@@ -120,7 +125,7 @@ that will run on any ISO-compliant system.
 Because of the way Forth remembers numbers
 you can always interrupt your work and continue.
 For example
-forthexample({: TEST
+forthexample({: TEST-AGAIN
 1 2 + [ 3 4 * . ]
 12 OK
 7 * ;
