@@ -1,3 +1,4 @@
+undefine({worddoc})
 \input texinfo
 @setfilename thisfilename
 @afourpaper
@@ -22,6 +23,7 @@ Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
 @end titlepage
 
+@node Top, , ,
 @chapter Overview
 forthvar({ci86.gnr}) is a system to generate ciforth in all its
 configuration's.
@@ -453,11 +455,11 @@ Just say forthsamp({forthcode(_lbracket_+LOOP _rbracket_)}) to indicate that you
 formatting as for ``code'' words.
 Later you can decide to use
 forthbreak
- forthsamp({{define}(_lbracket_forthcode _rbracket_,_lbracket__comat_code_lbracket_$}{1_rbracket__rbracket_)})
+ forthsamp({define(_lbracket_forthcode _rbracket_,_lbracket__comat_code_lbracket_$}{1_rbracket__rbracket_)})
 forthbreak
 for forthsamp({texinfo}) or
 forthbreak
-forthsamp({{define}(_lbracket_forthcode _rbracket_,_lbracket_<B>$1</B> _rbracket_)})
+forthsamp({define(_lbracket_forthcode _rbracket_,_lbracket_<B>$1</B> _rbracket_)})
 forthbreak
 for forthsamp({html})
 .
@@ -467,21 +469,21 @@ Some macro calls must be considered to define a structure, in particular
 Suppose we have a list of structures, meaning that the first person is
 a child of the second and third person:
 
-parents({Alice},{Mary},{John})
+parents(_lbracket_Alice_rbracket_,_lbracket_Mary_rbracket_,_lbracket_John_rbracket_)
 
-parents({Fred},{Mary},{Henry})
+parents(_lbracket_Fred_rbracket_,_lbracket_Mary_rbracket_,_lbracket_Henry_rbracket_)
 
-parents({Aayilah},{Sjantil},{Bodaji})
+parents(_lbracket_Aayilah_rbracket_,_lbracket_Sjantil_rbracket_,_lbracket_Bodaji_rbracket_)
 
 ...
 
 With
- forthsamp({{define}({parents},{$}{2})}) we get a list of (you guessed) the mothers.
+ forthsamp({define(_lbracket_parents_rbracket_,_lbracket_$2_rbracket_)}) we get a list of (you guessed) the mothers.
 
 The usage of forthmacro({divert()}) can best be explained with an example in this context.
 
 forthexample(
-{{define}(_lbracket_parents_rbracket_,
+{define(_lbracket_parents_rbracket_,
 _lbracket_{divert(3)dnl}
 $}{2
 {divert(6)dnl}
@@ -621,7 +623,7 @@ forthmacro({worddoc}) are such that a structure starts with forthsamp({worddoc( 
 end with a forthsamp({_rbracket_)}) at the end of a line.
 This means that a worddoc
 can be simply skipped if it occurs in Forth code,
-by defining a word forthcode({{worddoc(}}) that reads and ignores source up to the
+by defining a word forthcode({worddoc(}) that reads and ignores source up to the
 end sentinel.
 
 The forthmacro({worddocchapter}) macro defines a wordset.
@@ -722,9 +724,9 @@ It is unusual for a forth to be configurable as 16 or 32 bit.
 It turned out that the addition of forthcode({CELL+}) goes a long way toward allowing
 utilities like a decompiler to be 16/32 bit clean. In the documentation
 mostly reference to cells can be made. But the macro's
-forthsamp({{_BITS_}})
-forthsamp({{_BIT16_}}) and
-forthsamp({{_BIT32_}})
+forthsamp({_BITS_})
+forthsamp({_BIT16_}) and
+forthsamp({_BIT32_})
 can be used to signify the actual number of bits and parts to refer to 16 and 32 bits only
 respectively.
 
@@ -835,16 +837,16 @@ of course not. All Linux versions have their blocks in a file. (Accessing
 a floppy in the classic way is perfectly possible -- and implementing it would
 be a perfectly pointless exercise.)
 
-With respect to the hosting you can choose between forthmacro({{_HOSTED_}}) ( forthmacro({{_HOSTED_LINUX_}}) or
- forthmacro({{_HOSTED_MSDOS_})}) and forthmacro({{_BOOTED_}}) . ( forthmacro({{_BOOTDF_}}) or forthmacro({{_BOOTHD_}}) ).
+With respect to the hosting you can choose between forthmacro({_HOSTED_}) ( forthmacro({_HOSTED_LINUX_}) or
+ forthmacro({_HOSTED_MSDOS_})) and forthmacro({_BOOTED_}) . ( forthmacro({_BOOTDF_}) or forthmacro({_BOOTHD_}) ).
 A hosted version relies on MSDOS or Linux to get the program started.
 (It may or may not use MSDOS for I/O, once started.).
-A forthmacro({{_BOOTED_}}) version contains a boot sector, such that
+A forthmacro({_BOOTED_}) version contains a boot sector, such that
 you you can make a standalone version that boots from floppy or hard disk.
-A forthmacro({{_BOOTED_}}) version may very well be startable from plain DOS and its files
+A forthmacro({_BOOTED_}) version may very well be startable from plain DOS and its files
 visible from DOS.
 
-Of course a forthmacro({{BOOTED_}}) version that tries to use MSDOS I/O (or Linux) crashes
+Of course a forthmacro({BOOTED_}) version that tries to use MSDOS I/O (or Linux) crashes
 immediately, so not all versions are useful.
 
 You have a choice between 16 or 32 protected mode and real mode.
@@ -856,15 +858,17 @@ If you manage to specify conflicting options the preprocessor (forthprog({m4})) 
 off and you can find the exit code in forthfile({postlude.m4}) . Than you can reason back
 why this is a conflict. For example error 1000 indicates floppy and hard
 disk i/o at the same time.
-From forthfile({postlude.m4}) you see that forthmacro({{_RWFD_}}) and forthmacro({{_RWHD_}}) are
-on at the same time. forthmacro({{_RWHD_}}) is turned on because you wanted to boot from hard
-disk or you specified it yourself in the first place. Etc.
+From forthfile({postlude.m4}) you see that forthmacro({_RWFD_})
+and forthmacro({_RWHD_}) are on at the same time.
+forthmacro({_RWHD_}) is turned on because you wanted to boot
+from hard disk or you specified it yourself in the first place.
+Etc.
 
 forthfile({postlude.m4}) does you another favor. It derives logical consequences, such
-as once you decide for a forthmacro({{_REAL_}}) mode Forth, it must be forthmacro({{_BITS16_}})
+as once you decide for a forthmacro({_REAL_}) mode Forth, it must be forthmacro({_BITS16_})
 and you need not specify
 that_VERBOSE_({ (And yes, we could add a real mode 32 bits Forth, any volunteers?)}).
-In particular forthmacro({{_LINUX_N_}}) or forthmacro({{_LINUX_C_}}) define a whole configuration.
+In particular forthmacro({_LINUX_N_}) or forthmacro({_LINUX_C_}) define a whole configuration.
 
 @subsection Level 2 customization.
 You are on your own here.
@@ -986,7 +990,7 @@ If your NEXT is inline code,
 for the moment replace it by a jump.
 Mostly this can be done by inactivating the macro forthmacro({_NEXT32_})
 through removing the line
-forthsamp({_BITS32_(_lbracket_{define}(_lbracket__NEXT_rbracket_,_lbracket__NEXT32_rbracket_)_rbracket_)})
+forthsamp({_BITS32_(_lbracket_define(_lbracket__NEXT_rbracket_,_lbracket__NEXT32_rbracket_)_rbracket_)})
 from forthfile({postlude.m4}).
 forthitem
 Enter the cold start at the origin.
@@ -1143,7 +1147,7 @@ forthendenumerate
 @chapter Now: release it!
 To release the software use the command
 
-forthsamp({make release VERSION=forthvar({NNN})})
+forthsamp({make release VERSION=NNN})
 
 where forthvar({NNN}) is as appropriate: the RCS version
 number (for ciforth 3d###) for a beta version and the minor
@@ -1268,7 +1272,7 @@ dnl@node Forth Word Index,,,Top
 @unnumbered Forth Word Index
 This index lists forth words.
 @printindex fn
-@node Concept Index,,,Top
+dnl@node Concept Index,,,Top
 @unnumbered Concept Index
 This index lists concepts.
 dnl The first reference is where the concept is explained.
