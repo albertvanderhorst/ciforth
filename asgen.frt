@@ -255,7 +255,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 : 2FAMILY,    0 DO   DUP >R T@ R> 2PI   OVER + LOOP DROP DROP ;
 : 3FAMILY,    0 DO   DUP >R T@ R> 3PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
-: xFAMILY|R   0 DO   DUP >R T@ R> xFIR  OVER + LOOP DROP DROP ;
+: xFAMILY|R 0 DO DUP >R T@ R> xFIR OVER + LOOP DROP DROP ; 
 
 ( ############### PART II DISASSEMBLER #################################### )
 
@@ -375,17 +375,23 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
 
 ( Show all the instructions present in the assembler vocabulary )
 : SHOW-ALL
-    !DISS
-    !TALLY
+    !DISS   !TALLY
     STARTVOC BEGIN
        SHOW-STEP       
     DUP VOCEND? UNTIL DROP
 ;
 
+( Show all the opcodes present in the assembler vocabulary )
+: SHOW-OPCODES
+    !DISS   !TALLY
+    STARTVOC BEGIN
+       DUP IS-PI IF DUP %ID. THEN >NEXT% 
+    DUP VOCEND? UNTIL DROP
+;
+
 ( Show at least all instructions valid for the "OPCODE" given. )
 : SHOW:
-    !DISS
-    !TALLY
+    !DISS   !TALLY
     % DUP BEGIN
         SHOW-STEP
      OVER DISS CELL+ @ - OVER VOCEND? OR UNTIL DROP DROP
@@ -493,7 +499,7 @@ HERE POINTER !
 
 ( As `((DISASSEMBLE}}' but starting with a clean slate and looking in  )
 ( the whole dictionary.                                                )
-: (DISASSEMBLE) !DISS !TALLY STARTVOC ((DISASSEMBLE)) ;
+: (DISASSEMBLE)   !DISS !TALLY STARTVOC ((DISASSEMBLE)) ;
 
 ( Forced dissassembly of one instruction from `POINTER'. )
 ( Force interpretation as DEA instruction. )
@@ -520,6 +526,7 @@ HERE POINTER !
 : C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
 : LABEL ?EXEC 0 VARIABLE SMUDGE -2 ALLOT [COMPILE] ASSEMBLER
     !CSP ; IMMEDIATE     ASSEMBLER DEFINITIONS
+
 
 
 
