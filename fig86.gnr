@@ -998,8 +998,8 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
 {{VOCABULARY}},
-{: GS1 [COMPILE] DENOTATION DEFINITIONS LATEST ID. [COMPILE] dnl
-FORTH ;},{"}},
+{{: GS1 [COMPILE] DENOTATION DEFINITIONS LATEST ID. [COMPILE] dnl
+FORTH DEFINITIONS ; GS1},{"}},
 enddoc)
 HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
@@ -1015,8 +1015,8 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add an environment query.},
 {{VOCABULARY}},
-{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
-FORTH ;},{CORE}},
+{{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
+FORTH DEFINITIONS ; GS1},{CORE}},
 enddoc)
 HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
         DC      DOVOC
@@ -1204,7 +1204,7 @@ CODE_HEADER({J},{JDO})
         MOV     AX,[BP+_CELLS(3)] ;{ GET INDEX VALUE}
         _PUSH          ;{ TO PARAMETER STACK}
 ;
-worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{C,L0},
+worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{ISO,I,C,L0},
 {Discard the loop parameters. Must be
 used when the regular end of the
 loop is by-passed.},
@@ -2494,9 +2494,9 @@ worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{U},
 enddoc)
 HEADER({TIB},{TIB},{DOUSE}, _CELLS(5))
 ;
-worddoc( {ERRORS},{WARNING},{warning},{--- addr},{U},
+worddoc( {ERRORS},{WARNING},{warning},{--- addr},{FIG,U},
 {A user variable containing a value controlling messages. If = 1 disc
-is present, and screen 4 of drive 0 is the base location for
+is present, and screen 4 is the base location for
 messages. If = 0, no disc is present and messages will be presented
 by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure.
 },{{MESSAGE},{ERROR}},
@@ -2691,7 +2691,7 @@ and to a null ended array of environment strings.
 enddoc)
 HEADER({ARGS},{ARGS},{DOUSE}, _CELLS(31))
 ;
-worddoc( {ERROR},{HANDLER},{handler},{--- addr},{},
+worddoc( {ERRORS},{HANDLER},{handler},{--- addr},{},
 {A user variable address containing a pointer to the
 last exception intercepting frame activated by forthcode({CATCH}) .
 This point into the return stack.
@@ -2699,7 +2699,7 @@ If there is a forthcode({THROW}), the return stack
 is restored from forthcode({HANDLER}) effecting a multiple level return.
 It is called a frame because more things are stored, such as the
 position of the data stack top, and the previous value of forthsamp({HANDLER})},
-{{CATCH},THROW}},
+{{CATCH},{THROW}},
 {{." See CATCH"},{See CATCH}},
 enddoc)
 HEADER({HANDLER},{HANDLER},{DOUSE}, _CELLS(32))
@@ -3262,7 +3262,7 @@ worddoc( {DEFINING},{CREATE},{create},{},{},
 Later execution of forthsamp({cccc}) returns its data field, i.e.
 the value of forthcode({HERE}) immediately
 after executing forthcode({CREATE}) .
-_VERBOSE({Space in this data field has yet to
+_VERBOSE_({Space in this data field has yet to
 be allocated and the execution action can be changed.})
 ciforth is byte aligned, so no extra measures are needed.},
 {{DOES>},{;CODE},{ALLOT},{,},{C,}},
@@ -3415,16 +3415,16 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LTYPE
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{(EVAL)},{paren_eval},{sc -- },{I},
+worddocsafe( {PARSING},{SET-SRC},{paren_eval},{sc -- },{I},
 {Make the string constant forthsamp({sc}) the current input
 stream. This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
-called forthcode({(EVAL)}). _VERBOSE({ In practice this word
+called forthcode({SET-SRC}). _VERBOSE_({ In practice this word
 is almost always followed by a call to forthcode({INTERPRET}).})},
 {{EVALUATE},{INTERPRET}},
-{{ "1 2 3 ." (EVAL) . . .},{3 OK}},
+{{ "1 2 3 ." SET-SRC . . .},{3 OK}},
 enddoc)
-HEADER({(EVAL)},{PEVAL},{DOCOL})
+HEADER({SET-SRC},{SETSRC},{DOCOL})
         DC      OVER, PLUS
         DC      SWAP, SRC, TSTOR
         DC      SRC, FETCH
@@ -3437,9 +3437,9 @@ _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
         DC      SEMIS
 ;
 worddoc( {PARSING}, {EVALUATE}, , {sc --- ??}, {ISO},
-{Interpret the content of forthsamp({sc}). Afterwards return the current
-input stream.},
-{{LOAD},{INCLUDE},{(EVAL)}},
+{Interpret the content of forthsamp({sc}). Afterwards return to 
+the current input stream.},
+{{LOAD},{INCLUDE},{SET-SRC}},
 {
 {"865" EVALUATE .},{865},
 {"8655 1+" EVALUATE .},{8656},
@@ -3448,8 +3448,10 @@ input stream.},
 enddoc)
 HEADER({EVALUATE}, {EVALUATE},{DOCOL})
         DC      SAVE
-        DC      PEVAL, INTER
+        DC      SETSRC
+        DC      LIT, INTER, CATCH
         DC      RESTO
+        DC      THROW
         DC      SEMIS
 
 worddoc( {PARSING},{QUERY},,{},{ISO},
@@ -3475,7 +3477,7 @@ HEADER({QUERY},{QUERY},{DOCOL})
 ; Keep the next line in for debugging ACCEPT for MSDOS.
 ;        DC      LIT, 41H, EMIT, TDUP, LTYPE, LIT, 41H, EMIT
 ;        DC      DOTS
-        DC       PEVAL
+        DC       SETSRC
         DC      SEMIS
 ;
 worddoc( {MEMORY},{FILL},{fill},{addr quan b --},{ISO},
@@ -3734,7 +3736,7 @@ first unconverted character or the first character past the end
 of the string if the string was entirely converted.
 forthsamp({u2}) is the number of unconverted characters in the
 string. If forthsamp({ud2}) overflows, ciforth only
-forthsamp({ud2}) will be incorrect. _VERBOSE({Both
+forthsamp({ud2}) will be incorrect. _VERBOSE_({Both
 forthkey({-}) and forthkey({+}) are considered unconvertible
 character's by forthvar({>NUMBER}) .})
 },
@@ -3871,15 +3873,15 @@ ERRO1:  DC      LIN, FETCH, LDUP
 ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
 ;
-worddoc( {ERROR},{CATCH},{catch},{... xt --- ... tc },{ISO},
+worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
 {Execute forthsamp({xt}). If it executes successfully, i.e. no
 forthcode({THROW}) is executed by forthcode({xt}), leave a zero
 into forthcode({tc}) in addition to any stack effect
 forthcode({xt}) itself might have. Otherwise in forthsamp({tc})
 the non-zero throw code is left, and the stack depth is
 restored. The values of the parameters for forthcode({xt})
-could have been modified. _VERBOSE({In general, there is
-nothing useful that can be done with those stack items.}) Since
+could have been modified. _VERBOSE_({{In general, there is
+nothing useful that can be done with those stack items.}}) Since
 the stack depth is known, the application may forthcode({DROP})
 those items.},
 {{THROW},{QUIT},{HANDLER}},
@@ -3902,7 +3904,7 @@ HEADER({CATCH},{CATCH},{DOCOL})
         DC      RDROP, ZERO
         DC      SEMIS
 ;
-worddoc( {ERROR},{THROW},{throw},{... tc --- ... / ... tc},{ISO},
+worddoc( {ERRORS},{THROW},{throw},{... tc --- ... / ... tc},{ISO},
 {If forthsamp({tc}) is zero, it is merely discarded. If we are
 executing under control of a forthcode({CATCH}) , see
 forthcode({CATCH}) for the effect of a non-zero
@@ -4197,7 +4199,7 @@ up in forthcode({CONTEXT}) and forthcode({CURRENT}) respectively.
 Failing that the first character is considered a word and it is looked
 up in the forthcode({DENOTATION}) wordlist.
 If it is not found at all, an error message " ?" will be given.
-_VERBOSE({
+_VERBOSE_({
 If the word name cannot be found
 after a search of forthcode({CONTEXT}) and then
 forthcode({CURRENT}), it is considered as a
@@ -4629,7 +4631,7 @@ MAX1:   DC      DROP
 worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
 {Perform a forthsamp({logical shift }) of the bits of
 forthsamp({u1}) to the left by forthsamp({n}) places.
-_VERBOSE({ Put zero into the places uncovered by the shift.}) },
+_VERBOSE_({ Put zero into the places uncovered by the shift.}) },
 {{RSHIFT},{2*}},
 {{1 2 LSHIFT .},{4}},
 enddoc)
@@ -4642,7 +4644,7 @@ CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
 worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
 {Perform a forthsamp({logical shift}) of the bits of
 forthsamp({u1}) to the right by forthsamp({n}) places.
-_VERBOSE({ Put zero into the places uncovered by the shift.}) },
+_VERBOSE_({ Put zero into the places uncovered by the shift.}) },
 {{LSHIFT},{2/}},
 {{4 2 RSHIFT .},{1}},
 enddoc)
@@ -5316,9 +5318,15 @@ THRU1:
         DC      IDO, LLOCK
         DC      IDO, BLOCK
         DC      LIT, KBBUF
-        DC      PEVAL
-        DC      INTER   ;{INTERPRET FROM OTHER}
+        DC      SETSRC
+        DC      LIT, INTER, CATCH
         DC      IDO, LUNLOCK
+        DC      QDUP
+        _0BRANCH(THRU3)
+        DC      RDROP, RDROP, RDROP; {UNLOOP}.
+        DC      RESTO
+        DC      THROW
+THRU3:
         _LOOP({THRU1})
 THRU2:
         DC      RESTO
@@ -5357,7 +5365,10 @@ BLK2:
 ;
 worddocsafe( {SCREEN},{-->},{next_screen},{},{I,L0},
 {Continue interpretation with the next disc screen. If the
-current input stream is not from a block, a crash will ensue. },
+current input stream is not from a block, a crash will ensue. 
+If there is an exception in this new screen, that screen may
+remain locked until a forthcode({QUIT}) .
+},
 {{LOAD}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -5370,7 +5381,7 @@ HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
         DC      LDUP, BLK, STORE
         DC      BLOCK
         DC      LIT, KBBUF
-        DC      PEVAL
+        DC      SETSRC
         DC      SEMIS
         PAGE
 ;
@@ -5637,20 +5648,18 @@ _LINUX_N_({
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
 worddoc( {OPERATINGSYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
 {Handle the error forthvar({errno}) by interpreting it as returned from a
-Linux system call. If it is negative error forthvar({-n}) is displayed and the word
+Linux system call. If it is negative, error forthvar({n}) is displayed and the word
 is aborted.
 },{{?ERROR}},
 {
 {0 ?LINUX-ERROR 1 ?LINUX-ERROR},{},
 {0 WARNING ! -20 ?LINUX-ERROR },
-{ ! -20 ?LINUX-ERROR ? MSG # 20},
+{ ! -20 ?LINUX-ERROR ? MSG # -20},
 {CR},{},
 },
 enddoc)
 HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
-        DC      LDUP, ZERO, MIN, SWAP ; ( errno -- error flag, errno)
-        DC      LIT, 64, PLUS   ; Project onto SCREEN 4..7.
-        DC      QERR  ; Make errno's count from the top.
+        DC      ZERO, MIN, THROW  
         DC      SEMIS
 ;
 worddoc( {INPUT},{TERMIO},{termio},{--- addr},{},
@@ -5761,7 +5770,7 @@ _LOAD_({
 worddoc( {INPUT},{EXPECT},{expect},{addr count ---},{NISO FIG L0},
 {Transfer characters from the terminal to address
 forthsamp({addr}) , until a "return" or forthsamp({count})
-characters have been received. _VERBOSE({This early return
+characters have been received. _VERBOSE_({This early return
 property is an important difference with forthcode({ACCEPT})
 .}) Rely on the operating system for input editing. This is not
 ISO as the number of characters is not stored. And the buffer
@@ -5877,7 +5886,7 @@ _PC_({
 worddoc( {INPUT},{ACCEPT},,{addr count --- count2 },{NISO FIG L0},
 {Transfer characters from the terminal to address
 forthsamp({addr}) , until a "return" or forthsamp({count})
-characters have been received. _VERBOSE({This early return
+characters have been received. _VERBOSE_({This early return
 property is an important difference with forthcode({ACCEPT})
 .}) Rely on the operating system for input editing. This is not
 ISO as the number of characters is not stored. And the buffer
@@ -6353,7 +6362,8 @@ HEADER({GET-FILE},{GFILE},DOCOL)
         DC      FROMR, SFET, OVER, PLUS, TOR
         DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
         DC      LDUP, QLERR
-        DC      LDUP, RR, LIT,  9999000, LIT, read, LINOS
+        DC      LDUP, RR, LIT,  9999000, LIT
+        DC      read, LINOS
         DC      LDUP, QLERR, TOR
         DC      ZERO,ZERO, LIT, close, LINOS, QLERR
         DC      FROMR, FROMR, SWAP
@@ -6368,8 +6378,17 @@ forthsamp({i*x}). },
 {{"hello.frt" INCLUDED},{Hello world!}},
 enddoc)
 HEADER({INCLUDED},{INCLUD},DOCOL)
-        DC      GFILE
-        DC      SAVE, PEVAL, INTER, RESTO
+        DC      HERE, TOR
+        DC      LIT, GFILE, CATCH
+        DC      LDUP
+        _0BRANCH(INCLUD1)
+        DC      FROMR, LDP, STORE
+        DC      THROW
+        _BRANCH(INCLUD2)
+INCLUD1:
+        DC      RDROP, DROP
+INCLUD2:
+        DC      EVALUATE
         DC      SEMIS
 ;
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
