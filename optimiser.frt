@@ -32,6 +32,15 @@ REQUIRE $
 \ Fill from ADDRESS to END a number of cells with CONTENT.
 : WFILL   ROT ROT SWAP ?DO DUP I !   0 CELL+ +LOOP DROP ;
 
+\ ---------------------- Handling double numbers on return stack -----------------
+
+: D>R POSTPONE >R POSTPONE >R ; IMMEDIATE
+: DR> POSTPONE R> POSTPONE R> ; IMMEDIATE
+: DR@ DR> POSTPONE 2DUP D>R ; IMMEDIATE
+
+: SDSWAP   ROT ;
+: DSSWAP   ROT ROT ;
+
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
@@ -170,9 +179,9 @@ HERE SWAP !
 \ totally outside or totally inside the GAP.
 : FREE-WRT?
     >R 2DUP = IF 2DROP DROP RDROP 0 EXIT THEN R> \ You may jump to the start of a gap always!
-    >R >R
-    SWAP R> R> 2DUP >R >R WITHIN              \ BRANCH inside
-    SWAP R> R> WITHIN  \ Target Inside
+    D>R
+    SWAP DR@ WITHIN              \ BRANCH inside
+    SWAP DR> WITHIN  \ Target Inside
     =                        \ Same
 ;
 
@@ -246,7 +255,7 @@ THEN RDROP ;
 \ For GAP and ADDRESS of entry in branches, if the branch is in the gap.
 \ mark it for elimination from the table.
 \ We can't remove them from the set right away because things get entangled.
-: ELIMINATE-BRANCH-IN-GAP   >R R@ @ ROT ROT WITHIN IF
+: ELIMINATE-BRANCH-IN-GAP   >R   R@ @ DSSWAP WITHIN IF
     R@ MARKED-BRANCHES SET+!
 THEN RDROP ;
 
