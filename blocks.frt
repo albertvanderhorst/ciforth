@@ -3102,20 +3102,20 @@ R> DROP R> DROP ;
 
 : H. BASE @ >R HEX . R> BASE ! ;
 : CELLS 0 CELL+ * ;
-( Up til LIMIT forget the vocabulary whose VLFA is given. )
+( Up til LIMIT forget the vocabulary whose DEA is given. )
 (   Leave LIMIT    )
 : FORGET-VOC
-  2DUP U< IF ( contains nothing)
-     [COMPILE]  FORTH  DEFINITIONS
-     @ VOC-LINK ! (  unlink)
-  ELSE       ( contains something)
+  2DUP SWAP U< IF ( contains something)
       SWAP >R
-      2 CELL+ -     ( start with phantom nfa )
+      >DFA CELL+  ( start with dictionary entry)
       DUP
  BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R  DUP H. U<  UNTIL
         CR DUP H. DUP ID.
           SWAP  >LFA !
     R>
+  ELSE       ( contains nothing)
+     [COMPILE]  FORTH  DEFINITIONS
+     >VFA @ VOC-LINK ! (  unlink)
   THEN ;
 
 ( WORDS and VOCS )

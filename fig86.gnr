@@ -2224,6 +2224,7 @@ address of the dummy dea.
 },{{VOCABULARY},{>CFA}})
 HEADER({>DFA},{TDFA},{DOCOL})
         DC      TPFA
+        DC      CELLP   ;{Skip over DOVOC.}
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>VFA},{cfa},{dea --- cfa},{},
@@ -4891,22 +4892,14 @@ whose dea is given by forthvar({dea}) . Leave n1 as this word is
 intended to be used with forthcode({FOR-VOCS}) .},
 {{FORGET}})
 HEADER({FORGET-VOC},{FORGV},{DOCOL})
-        DC      TVFA
         DC      TDUP
+        DC      SWAP
         DC      ULESS
         _0BRANCH(FORGV1)
-;       { Vocabulary itself is also forgotten.}
-        DC      FORTH
-        DC      DEFIN
-        DC      FETCH     ;{ Unlink by linking next vocabulary.}
-        DC      VOCL
-        DC      STORE
-        _BRANCH(FORGV2)
-FORGV1: ; { Forget part of contents.}
+; { Forget part of contents.}
         DC      SWAP
         DC      TOR
-        DC      LIT,2+CELLS(1)
-        DC      LSUB    ; { TOS is now phantom dea.}
+        DC      TDFA
         DC      LDUP
 FORGV3:
         DC      TLFA,FETCH    ; {Next voc}
@@ -4915,9 +4908,18 @@ FORGV3:
         DC      ULESS
         _0BRANCH(FORGV3)
         DC      SWAP
-        DC      TLFA    ; { Skip over " "-name.}
+        DC      TLFA
         DC      STORE
         DC      FROMR
+        _BRANCH(FORGV2)
+FORGV1: 
+;       { Vocabulary itself is also forgotten.}
+        DC      TVFA
+        DC      FORTH
+        DC      DEFIN
+        DC      FETCH     ;{ Unlink by linking next vocabulary.}
+        DC      VOCL
+        DC      STORE
 FORGV2: DC      SEMIS
 ;
 worddoc({DICTIONARY},{FORGET},{forget},{},{E,L0},
