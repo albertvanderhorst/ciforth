@@ -1247,8 +1247,13 @@ HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
 ;
-worddocsafe( {DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
-{Implements forthcode({NUMBER}) for numbers that start with forthkey({0}) .},
+worddocsafe( {DENOTATIONS},{DEN0},{den_zero}, {--- s/d},{CI},
+{Implements forthcode({NUMBER}) for numbers that start with
+forthkey({0}) . There are those for all decimal and hex digits.
+_VERBOSE_({ ISO compatibility would demand that denotators for
+all capitals are present, but one can always use a leading
+zero.})
+},
 {},
 {{048 .},{48 },
 {: GS1 058 ; GS1 .},{58 }},
@@ -1266,6 +1271,12 @@ HEADER({6},{DEN6},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({7},{DEN7},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({8},{DEN8},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({9},{DEN9},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({A},{DENA},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({B},{DENB},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({C},{DENC},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({D},{DEND},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({E},{DENE},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
+HEADER({F},{DENF},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 ;
 worddoc( {DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
@@ -2823,7 +2834,7 @@ HEADER({BM},{LBM},{DOCON}, ORG0)
 worddoc( {STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
 count read from disc by forthcode({BLOCK}) .
-The ISO standard fixes this to 1024.},{{BUFFER}},
+The ISO standard fixes this to 1024.},{{(BUFFER)}},
 {{B/BUF .},{400}},
 enddoc)
 HEADER({B/BUF},{BBUF},{DOCON}, KBBUF)
@@ -4998,7 +5009,7 @@ such that one can regain control.
 {{VOCABULARY}},
 {
   {: test ONLY WORDS POSTPONE FORTH ; test},
-{FORTH "   +   -   9   8   7   6   5   4   3   2   1   0   ^   &   '}
+{FORTH "   +   -   F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0   ^   &   '}
 },
 enddoc)
 HEADER({ONLY},{ONLY},{DOCOL})
@@ -5601,7 +5612,7 @@ forthvar({n2}) to a string forthvar({sc}) the content of the
 line (without the trailing new line). },
 {{LINE}},
 {
-{1 1B (LINE) TYPE}, { LICENSE }
+{1 0 (LINE) TYPE}, { LICENSE }
 },
 enddoc)
 HEADER({(LINE)},{PLINE},{DOCOL})
@@ -5624,7 +5635,7 @@ line and screen number. _VERBOSE_(
 which leads to a tremendous speed advantage on modern glass tty's.}})},
 {{C/L}},
 {
-{1 1B .LINE}, { LICENSE }
+{1 0 .LINE}, { LICENSE }
 },
 enddoc)
 HEADER({.LINE},{DLINE},{DOCOL})
@@ -5739,7 +5750,7 @@ worddoc( {STORAGE~},{PREV},{prev},{---- addr},{},
 {A variable containing the address of the disc buffer (not its
 content field!) most recently referenced. The
 forthcode({UPDATE}) command marks this buffer to be
-written to disc.},{{BUFFER}},
+written to disc.},{{(BUFFER)}},
 { { STALEST @ FIRST LIMIT WITHIN .},{_T_} },
 enddoc)
 HEADER({PREV},{PREV},{DOVAR}, )
@@ -5772,8 +5783,7 @@ HEADER({+BUF},{PBUF},{DOCOL})
         DC      LIMIT,EQUAL
         _0BRANCH(PBUF1)
         DC      DROP,FIRST
-PBUF1:  DC      LDUP,PREV
-        DC      FETCH,LSUB
+PBUF1:  DC      LDUP, PREV, FETCH, LSUB
         DC      SEMIS
 ;
 worddoc( {STORAGE},{UPDATE},{update},{},{ISO,FIG,L0},
@@ -5809,80 +5819,87 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      SEMIS
         PAGE
 ;
-worddoc( {STORAGE~},{BUFFER},{buffer},{n --- addr},{ISO FIG},
-{Prepare a free memory buffer, assigning it to block
-forthvar({n}) and leave its address forthvar({addr}). In
-ciforth blocks can be locked, and locked buffers are skipped in
-this process. The contents of the buffer that is due to be
-used, is written to the disc, if it was marked as updated. In
-ciforth this is never needed, because updated blocks are
-written immediately. The block is not read from the disc. The
-buffer layout is as follows: a cell with the block number, a
-cell with the lock count and the content.
-_VERBOSE_({{An update flag would somehow be multiplexed with the
-lock count, but it is not needed in ciforth.}})
-If all buffers were locked, forthcode({BUFFER}) freezes the system.},
-{{BLOCK},{STALEST},{PREV},{#BUFF}},
-{{!CSP 1 BUFFER FIRST LIMIT WITHIN . ?CSP},{_T_}},
+worddocsafe({STORAGE~},{(BUFFER)},{paren_buffer},{n --- addr},{},
+{Return the addres forthvar({addr}) of a buffer assigned to
+block forthvar({n}) .
+The buffer layout is as follows: a cell
+with the block number, a cell with the status, and the
+content. The status is negative for locked, zero for free and
+one for present and unlocked.
+The block is not read from the disc. The buffer
+is either one that was already assigned, or else a free buffer.
+If there is none free, the stalest buffer is freed. The
+contents of that buffer is written to the disc, if it was
+marked as updated. In ciforth this is never needed, because
+updated blocks are written immediately. In ciforth blocks can
+be locked, and locked buffers are never freed by
+forthcode({(BUFFER)}) .
+_VERBOSE_({{An update flag would somehow be
+multiplexed with the lock count, but it is not needed in
+ciforth.}}) If all buffers were locked, forthcode({(BUFFER)})
+freezes the system.
+},
+{{BLOCK},{STALEST},{PREV},{#BUFF},{LOCK},{UNLOCK}},
+{{!CSP 1 (BUFFER) FIRST LIMIT WITHIN . ?CSP},{_T_}},
 enddoc)
-HEADER({BUFFER},{BUFFE},{DOCOL})
-;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
-        DC      STALEST, FETCH
-        DC      LDUP, TOR
-BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
-        _0BRANCH(BUFF1)
-        DC      LDUP, CELLP, FETCH, ZEQU ;{ Skip locked buffers.}
-        _0BRANCH(BUFF1)
-        DC      STALEST,STORE
-;{ Here the buffer would be written, if it weren't already.}
-        DC      RR,STORE
-        DC      RR,PREV, STORE
-        DC      FROMR
-        DC      SEMIS
+HEADER({(BUFFER)},{BUFFER},{DOCOL})
+;{ Find the buffer, if it is already here.}
+    DC      PREV, FETCH
+BUFFER1:
+    DC          TOR, RR, FETCH, OVER, EQUAL
+    _0BRANCH(BUFFER3)
+    DC        DROP, FROMR, EXIT
+BUFFER3:
+    DC          FROMR
+    DC      PBUF, ZEQU
+    _0BRANCH(BUFFER1)
+    DC       DROP
+;{ Just allocate the stalest buffer.}
+    DC       STALEST,   FETCH, TOR
+;{ Remember the next stalest buffer. }
+    DC       RR
+BUFFER2:
+    DC       PBUF, OVER, CELLP, FETCH,
+    DC       LIT, -1, GREAT, LAND
+    _0BRANCH(BUFFER2)
+    DC       STALEST, STORE
+;{ Fill in the house keeping.}
+    DC       RR, STORE
+    DC       ZERO, RR, CELLP, STORE
+    DC       RR, PREV, STORE
+    DC       FROMR
+    DC  SEMIS
 ;
+
 worddoc( {STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},
 {Leave forthvar({addr}) the disc buffer containing block
 forthvar({n}), which is the physical disk block
 forthsamp({OFFSET+n}). The address left is the field within the
 buffer to be used for data storage. If the block is not already
-in memory, it is transferred from disc to which ever buffer was
-least recently written. If the block occupying that buffer has
-been marked as updated, it is rewritten to disc before block
-forthvar({n}) is read into the buffer. In ciforth this cannot
-happen, because updates are written immediately.
+in memory, it is transferred from disc to a new buffer allocated
+by forthcode({(BUFFER)}) .
 _VERBOSE_({Blocks are generally
 used to contain source code to be interpreted
 by forthcode({LOAD}). They can be equally useful to contain
 other data, e.g. for implementing a database. })
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0FFH.})},
-{{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH},{LOAD}},
+{{(BUFFER)},{R/W},{OFFSET},{UPDATE},{FLUSH},{LOAD}},
 {{!CSP 1 BLOCK FIRST LIMIT WITHIN . ?CSP},{_T_} },
-{{BUFFER},{B/BUF},{LOAD}},
 enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
-        DC      TOR, PREV
-        DC      FETCH, LDUP
-        DC      FETCH, RR
-        DC      LSUB
-        _0BRANCH(BLOC1)
-BLOC2:  DC      PBUF, ZEQU
-        _0BRANCH(BLOC3)
-        DC      DROP, RR
-        DC      BUFFE, LDUP
-        DC      CELLP, CELLP    ;{ Content address.}
-        DC      RR
+        DC      BUFFER
+        DC      LDUP, CELLP, FETCH, ZEQU
+        _0BRANCH(BLOCK1)
+        DC      LDUP, CELLP, CELLP
+        DC      OVER, FETCH
         DC      LOFFSET,  FETCH, PLUS
         DC      ONE
         DC      RSLW
-BLOC3:  DC      LDUP, FETCH
-        DC      RR, LSUB
-        DC      ZEQU
-        _0BRANCH(BLOC2)
-        DC      LDUP, PREV
-        DC      STORE
-BLOC1:  DC      RDROP
+        DC      ONE, OVER, CELLP, STORE
+BLOCK1:
+        DC      LDUP, PREV, STORE
         DC      CELLP, CELLP
         DC      SEMIS
 ;
@@ -5989,12 +6006,19 @@ The result is that its buffer will not be reclaimed
 until a forthcode({UNLOCK}) occurs.},
 {{BLOCK},{UNLOCK},{#BUFF}},
 { {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
-    PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{1 _T_} },
+    PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{-1 _T_} },
 enddoc)
+HEADER({LOCK1},{LLOCK1},{DOCOL})
+        DC      BLOCK
+        DC      LIT, CW, LSUB
+;       DC      LIT, -2, SWAP, PSTORE
+        DC      LIT, 1, SWAP, PSTORE
+        DC      SEMIS
+;
 HEADER({LOCK},{LLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
-        DC      ONE, SWAP, PSTORE
+        DC      LIT, -2, SWAP, PSTORE
         DC      SEMIS
 ;
 worddoc( {STORAGE},{UNLOCK},{unlock},{ n --- },{CI},
@@ -6007,13 +6031,18 @@ Unlocking without a previous lock may lead to a crash.
 {{LOCK},{#BUFF}},
 {
 {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
- PREV @ CELL+ @ . 1 UNLOCK PREV @ CELL+ @ 0= .},{1 _T_} },
+ PREV @ CELL+ @ . 1 UNLOCK PREV @ CELL+ @ .},{-1 1} },
 },
 enddoc)
-HEADER({UNLOCK},{LUNLOCK},{DOCOL})
+HEADER({UNLOCK1},{LUNLOCK1},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
         DC      LIT, -1, SWAP, PSTORE
+        DC      SEMIS
+HEADER({UNLOCK},{LUNLOCK},{DOCOL})
+        DC      BLOCK
+        DC      LIT, CW, LSUB
+        DC      TWO, SWAP, PSTORE
         DC      SEMIS
 ;
 worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG,L0},
@@ -7231,7 +7260,7 @@ i.e. the mass storage words no longer work, and will result in
 error messages.
 },{{BLOCK},{LIST},{LOAD}},
 {
-{BLOCK-EXIT},{},
+{EMPTY-BUFFERS BLOCK-EXIT},{},
 {0 WARNING ! -1F MESSAGE}, {MSG # -1F},
 { CR DISK-ERROR @ 0= 0= . BLOCK-INIT},{_T_},
 {1 WARNING ! -20 MESSAGE}, {( -b This_option_is_available )},
@@ -7424,11 +7453,11 @@ error messages. If error messages were fetched from disk, they
 no longer are.},
 {{BLOCK},{LIST},{LOAD},{DISK-ERROR},{WARNING}},
 {
-{BLOCK-EXIT},{},
+{EMPTY-BUFFERS BLOCK-EXIT},{},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
  {PTY-BUFFERS 1 BLOCK ? MSG # 8},
 { CR DISK-ERROR @ 0 < . BLOCK-INIT},{_T_},
-{1 1B .LINE}, { LICENSE }
+{1 0 .LINE}, { LICENSE }
 },
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
@@ -7454,8 +7483,8 @@ performs the read or write and records errors, but doesn't abort on them.},
 {{BLOCK},{DISK-ERROR}},
 dnl we can use block 0 for scratch
 {
-{PAD B/BUF 41 FILL PAD 0 0 R/W},{},
-{PAD B/BUF 45 FILL PAD 0 1 R/W},{},
+{PAD B/BUF 41 FILL PAD 1 0 R/W},{},
+{PAD B/BUF 45 FILL PAD 1 1 R/W},{},
 {PAD 23 + 5 TYPE},{AAAAA},
 },
 enddoc)
