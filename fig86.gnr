@@ -88,13 +88,13 @@ FF      EQU     0CH     ;{ FORM FEED}
 ;
 ;{      MEMORY + I/O CONSTANTS}
 ;
-EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
 NBUF    EQU     2       ;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
 US      EQU     100H     ;{ USER VARIABLE SPACE}
 RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER}
 ;
 ;____1_____ _EQULAYOUT_1_({
+EM      EQU     M4_EM   ;{ END OF MEMORY + 1}
 ;____1_____ _HIGH_BUF_1_({
 BUF1    EQU     EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
@@ -265,7 +265,7 @@ BEGIN1: CALL    READSECTOR
         INC     CX
         ADD     BX,BPS
         JB      RETRY
-        CMP     BX,INITDP-$$
+        CMP     BX,TEXTEND-$$
         JB      BEGIN1
 
         MOV     AL,'W'
@@ -321,7 +321,7 @@ HUGESECS      DD         000H
         DB    "RAW     "
 
 BOOTLBA:  DB      10H, 0
-        DW      (INITDP-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
+        DW      (TEXTEND-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
         DW      BPS             ;{ OFFSET AND SEGMENT}
         DW      REALSEGMENT
         ;{ At a hard disk we just read sector from sector 1        }
@@ -892,7 +892,7 @@ _COMMENT
 ;{ The 2 is rounding plus the extra sector in .EXE files.}
 ;{ However it deviates much from the classic model and requires}
 ;{ that the disk parameters are available (not only for USEBIOS)}
-        DC      (INITDP-$$-1)/KBBUF+1 ; +1 for EXE
+        DC      (TEXTEND-$$-1)/KBBUF+1 ; +1 for EXE
 _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
@@ -905,7 +905,7 @@ _ENDCOMMENT
 ;{ Round up both parts separately.}
 ;       You need a filler file of one sector,
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
-        DC      (SECSTRT+((INITDP-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
+        DC      (SECSTRT+((TEXTEND-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
 });_END___1__({_BOOTFD__1_})
 ;____1_____ _BOOTHD__1_({
 ;{ This will reserve place for the system itself, on the first part of a }
@@ -3905,30 +3905,11 @@ HEADER({TASK},{TASK},{DOCOL})
         DC      SEMIS
 ;
 ;____1_____ _EQULAYOUT_1_({
-INITDP  EQU     $       ;{SHOW END OF DICTIONARY}
+TEXTEND  EQU     $       ;{SHOW END OF DICTIONARY}
+INITDP   EQU     $       ;{SHOW END OF DICTIONARY}
 });_END___1__({ _EQULAYOUT_1_})
 
-;____1_____ _HOSTED_LINUX_1_({
-;       This is the proper way to do it.
-;       No memory addresses should be arrived at through equates.
-;       However now we must teach the linker to keep the
-;       two sections together.
-
-FORTHSIZE       EQU     $-figforth
-         section dictionary nobits write exec alloc
-
-INITDP:                 ;  It may be that it is not consecutive with TASK
-                        ;  And that is a hell of a problem.
-        BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
-        _RESB    EM - FORTHSIZE - RTS - US - BUFFERSIZE
-INITS0:                         ;{ Growns down}
-STRTIB: _RESB     RTS            ;{ Start return stack area}
-INITR0:                         ;{ Grows down}
-STRUSA: _RESB    US              ;{ User area}
-BUF1:   _RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
-});_END___1__({ _HOSTED_LINUX_1_})
-;
-_COMMENT
+_COMMENT 
 
 The remaining memory ( up to 'EM' ) is
 used for:
@@ -3942,6 +3923,29 @@ used for:
 
 
 _ENDCOMMENT
+
+;____1_____ _HOSTED_LINUX_1_({
+;       This is the proper way to do it.
+;       No memory addresses should be arrived at through equates.
+;       However now we must teach the linker to keep the
+;       two sections together.
+
+FORTHSIZE       EQU     $-figforth
+         section dictionary nobits write exec alloc
+
+INITDP:                 ;  It may be that it is not consecutive with TASK
+                        ;  And that is a hell of a problem.
+        BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
+
+       _RESB    M4_EM - FORTHSIZE - RTS - US - BUFFERSIZE
+INITS0:                         ;{ Growns down}
+STRTIB: _RESB     RTS            ;{ Start return stack area}
+INITR0:                         ;{ Grows down}
+STRUSA: _RESB    US              ;{ User area}
+BUF1:   _RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
+EM:
+});_END___1__({ _HOSTED_LINUX_1_})
+;
 
  CSEG    ENDS
         PAGE
