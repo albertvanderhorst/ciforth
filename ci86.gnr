@@ -1193,7 +1193,7 @@ INBRS1:
 INBRS2:
         DC      SEMIS
 ;
-worddoc({PARSING},{MY-WORD},{m_word},{ ---sc},{CI L0},
+worddoc({PARSING},{MY-PARSE},{m_parse},{del ---sc},{CI L0},
 {Parse the forthdefi({current input stream})
 for a word, i.e. observing forthcode({?BLANK}) .
 Skip leading delimiters then advance the input pointer to 
@@ -1218,7 +1218,7 @@ MWORDN2A:
         DC OVER, LSUB
         DC      SEMIS
 ;
-worddoc({PARSING},{MY-WORD},{m_word},{del ---sc},{CI L0},
+worddoc({PARSING},{MY-PARSE},{m_parse},{del ---sc},{CI L0},
 {Parse the forthdefi({current input stream})
 with forthsamp({del}) for a delimiter.
 Skip leading delimiters then advance the input pointer to 
@@ -2750,6 +2750,7 @@ HEADER({WORD},{AWORD},{DOCOL})
         DC      SOURC, CELLP, TFET
         DC      PWORD
         DC      LDUP, LIN, STORE
+        DC      OVER, LSUB
 ;        DC      DOTS
         _BRANCH(AWORD2)
 AWORD1:
@@ -2758,9 +2759,9 @@ AWORD1:
         DC      LIN, FETCH, ONEP ;{ Better check for a blank, FIXME}
         DC      SWAP
         DC      LDUP, ONEP, LIN, STORE
+        DC      OVER, LSUB
 ;        DC      DOTS
 AWORD2:
-        DC      OVER, LSUB
         DC      HERE
         DC      LIT,22H
         DC      BLANK
@@ -2768,25 +2769,6 @@ AWORD2:
         DC      SSTORBD     ; {FIXME}
         DC      HERE
 ;        DC      DOTS
-        DC      SEMIS
-;
-worddoc({PARSING},{MWORD},{m_word},{ ---sc},{CI L0},
-{Parse the forthdefi({current input stream})
-for a word, i.e. observing forthcode({?BLANK}) .
-Skip leading delimiters then advance the input pointer to 
-the next delimiter or past the end of the input stream.
-Leave the word found as a string constant.
-_VERBOSE_({As it goes with string constants, you may not
-alter its content, nor assume anything is appended.})},
-{{BLK},{WORD},{IN}},
-{{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
-{HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}})
-HEADER({MWORD},{MWORD},{DOCOL})
-        DC      SOURC, CELLP, TFET
-        DC      PWORD
-        DC      LDUP, LIN, STORE
-;        DC      DOTS
-        DC      OVER, LSUB
         DC      SEMIS
 ;
 worddoc({PARSING},{&:},{char_follows}, {--- c},{CI},
@@ -2798,7 +2780,7 @@ Skip remaining non-blank characters.},
 {{: GS1 &: HELLO ; GS1 HEX .] },{48 },
 {: GS1 &: X ; GS1 HEX .},{58 }})
 HEADER({&:},{CHF},{DOCOL}, 1)
-        DC      MWORD, DROP, CFET, LITER
+        DC      MWORDN, DROP, CFET, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{^:},{control_follows}, {--- c},{CI},
@@ -2810,7 +2792,7 @@ Skip remaining non-blank characters.},
 {{: GS1 ^: HELLO ; GS1 HEX .] },{8 },
 {: GS1 ^: X ; GS1 HEX .},{18 }})
 HEADER({^:},{CTF},{DOCOL}, 1)
-        DC       MWORD, DROP, CFET, LIT, 40H, LSUB, LITER
+        DC       MWORDN, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
 worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
@@ -2913,7 +2895,7 @@ NUMB2:  DC      DROP
 NUMB3:  DC      SEMIS
 ;
 HEADER({--FIND},{DDFIND},{DOCOL})
-        DC      MWORD, PFIND
+        DC      MWORDN, PFIND
         DC SEMIS
 ;
 worddoc({DICTIONARY},{(FIND)},{paren_find},{sc --- dea)},{},
@@ -3049,7 +3031,7 @@ that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
 compile time.},{COMPILE})
 HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
-        DC      MWORD
+        DC      MWORDN
         DC      PFIND
         DC      LDUP
         DC      ZEQU
@@ -3129,6 +3111,7 @@ will be given.
 HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  
         DC      LBL, AWORD, COUNT
+;        DC      MWORDN
         DC      LDUP      ;{ Zero length, regular.}
         _0BRANCH(INTE8) ;{WHILE}
         DC      PFIND   ;{BEGIN}
@@ -5102,7 +5085,7 @@ the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
 {{CFA},{>LFA},{>NFA},{>PFA}} )
 HEADER({'},{TICK},{DOCOL},1)
-        DC      MWORD
+        DC      MWORDN
         DC      PFIND
         DC      LDUP
         DC      ZEQU
