@@ -41,6 +41,9 @@ VARIABLE OPT-START
 
 : !OPT-START   HERE OPT-START !   0 CSC ! ;
 
+\ There has been made progress during the last optimisation.
+VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
+
 \ For STACKEFFECTNIBBLE : it IS no good, because it is unknown or variable.
 : NO-GOOD DUP $F = SWAP 0= OR ;
 
@@ -119,10 +122,10 @@ VARIABLE OPT-START
 
 \ Copy the SEQUENCE DEA of high level code to ``HERE'' ,  possibly folding it.
 \ Leave a POINTER to the equivalent optimised code.
-: FOLD   HERE SWAP    (FOLD)   CASH   POSTPONE (;)  ;
+: FOLD   !OPT-START HERE SWAP    (FOLD)   CASH   POSTPONE (;)  ;
 
 \ Optimise DEA regards folding.
-: OPT-FOLD  !OPT-START   >DFA DUP @ FOLD   SWAP ! ;
+: OPT-FOLD    >DFA DUP @ FOLD   SWAP ! ;
 
 \ For BEGIN END : copy the DEA's high level or low level code to here.
 \ This is assuming only low level code is followed by in line stuff.
@@ -137,7 +140,7 @@ VARIABLE OPT-START
 
 \ Expand each constituent of SEQUENCE to ``HERE'' ,  possibly folding it.
 \ Leave a POINTER to equivalent optimised code.
-: EXPAND   HERE SWAP    (EXPAND)   CASH   POSTPONE (;)  ;
+: EXPAND   !OPT-START HERE SWAP    (EXPAND)   CASH   POSTPONE (;)  ;
 
 
 \ ----------------------------------------------------------------
@@ -240,10 +243,10 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 \ As a side effect, remember the place holders.
 : ?MATCH    !PEES
     8 0 DO
-        DUP [I] 'NOOP ^ = IF SWAP I CELLS + SWAP LEAVE THEN       \ Success
-        DUP [I] 'P ^ = IF
+        DUP [I] 'NOOP = IF SWAP I CELLS + SWAP LEAVE THEN       \ Success
+        DUP [I] 'P = IF
             OVER [I] PEES SET+!
-        ELSE OVER [I] OVER [I] ^ <> IF
+        ELSE OVER [I] OVER [I] <> IF
             2DROP 0 0 LEAVE                                     \ Failure
         THEN THEN
     LOOP
@@ -267,7 +270,7 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
     2DROP 0 0 ;
 
 \ If ITEM is a place holder, replace it by the next placeholder DATA.
-: ?PEE? DUP ID. DUP 'P = IF DROP PEES SET+@ THEN ;
+: ?PEE? DUP 'P = IF DROP PEES SET+@ THEN ;
 
 \ Copy MATCH to ``HERE'' filling in the place holders.
 : COPY-MATCH   !PEES   8 CELLS +
@@ -284,7 +287,7 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 \ Leave sequence BEGIN' of what is still to be handled.
 :  ?MATCH-EXEC?
         DUP ?MM DUP IF
-            COPY-MATCH SWAP DROP
+            COPY-MATCH SWAP DROP    -1 PROGRESS !
         ELSE
              2DROP DUP NEXT-ITEM >HERE
         THEN
@@ -300,7 +303,9 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
-: OPT-EXPAND   !OPT-START   >DFA DUP @ EXPAND OPTIMISE    SWAP ! ;
+: OPT-EXPAND   >DFA DUP @
+    BEGIN !PROGRESS EXPAND OPTIMISE PROGRESS @ WHILE REPEAT
+SWAP ! ;
 
 \ For DEA remember that it has been optimised
 : !OPTIMISED   FMASK-HO SWAP >FFA OR!  ;
