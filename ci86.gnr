@@ -1282,7 +1282,7 @@ parsing and searching instead.}})},
 {{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1},
 { : AAPE 1 2 ; 'AAPE EXECUTE  'AAPE ID. . .},{AAPE 2 1},
-{'APEEE },{'APEEE ?  ERR # 11 : WORD IS NOT FOUND},
+{'APEEE },{'APEEE ?  ciforth ERROR # 11 : WORD IS NOT FOUND},
 {CR},{}
 },
 enddoc)
@@ -3759,7 +3759,7 @@ errors signalled using forthcode({?ERRUR}) do.
 },
 {ERROR},
 {{0 12 ?ERROR},{},
- {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? ERR # 18 },
+ {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? ciforth ERROR # 18 },
  {CR},{} },
 enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
@@ -3783,7 +3783,7 @@ is aborted.
 {
 {0 ?ERRUR 1 ?ERRUR},{},
 {0 WARNING ! -20 ?ERRUR },
-{ARNING ! -20 ?ERRUR ? ERR # -32 },
+{ARNING ! -20 ?ERRUR ? ciforth ERROR # -32 },
 {CR},{},
 },
 enddoc)
@@ -3797,7 +3797,7 @@ worddoc( {SECURITY},{?DELIM},{question_delimiter},{},{},
 delimiter.},{},
 {
 {DECIMAL 0 WARNING !   ?DELIM   },{},
-{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1? ERR # 10 },
+{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1? ciforth ERROR # 10 },
  {CR},{} },
 enddoc)
 HEADER({?DELIM},{QDELIM},{DOCOL})
@@ -3812,7 +3812,7 @@ worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
 {Issue error message if stack position differs from value saved in
 forthsamp({CSP}) .},{},
 {{!CSP ?CSP},{},
-{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? ERR # 20 },
+{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? ciforth ERROR # 20 },
  {CR},{} },
 enddoc)
 HEADER({?CSP},{QCSP},{DOCOL})
@@ -3825,7 +3825,7 @@ HEADER({?CSP},{QCSP},{DOCOL})
 ;
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}},
-{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? ERR # 17 },
+{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? ciforth ERROR # 17 },
  {CR},{} },
 enddoc)
 HEADER({?COMP},{QCOMP},{DOCOL})
@@ -3850,7 +3850,7 @@ worddoc( {SECURITY},{?PAIRS},{question_pairs},{n1 n2 --},{},
 {Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
 indicates that compiled conditionals do not match.},{{?ERROR}},
 {{ 1 1 ?PAIRS},{},
-{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? ERR # 19 },
+{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? ciforth ERROR # 19 },
  {CR},{} },
 {},
 enddoc)
@@ -3862,7 +3862,7 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
 _LOAD_({
 worddoc( {SECURITY},{?LOADING},{question_loading},{},{},
 {Issue an error message if not loading},{{?ERROR}},
-{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? ERR # 22 },
+{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? ciforth ERROR # 22 },
  {CR},{} },
 enddoc)
 HEADER({?LOADING},{QLOAD},{DOCOL})
@@ -4642,7 +4642,7 @@ Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a descript
 This word is executed by forthcode({CATCH}) before restarting the interpreter
 and can be revectored to give more elaborate diagnostics. },
 {{?ERROR},{WARNING}},
-{ {0. WHERE 2! 12 ERROR},{? ERR # 18},
+{ {0. WHERE 2! 12 ERROR},{? ciforth ERROR # 18},
  {CR},{} },
 enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
@@ -4651,7 +4651,7 @@ HEADER({ERROR},{ERROR},{DOCOL})
         DC      MAX
         DC      SWAP,OVER, LSUB
         DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
-        _STRINGINLINE({? ERR # })
+        _STRINGINLINE({? ciforth ERROR # })
         DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
         DC      BASE, FETCH
         DC      DECA
@@ -4692,11 +4692,13 @@ worddoc( {ERRORS},{THROW},{throw},{... tc --- ... / ... tc},{ISO},
 executing under control of a forthcode({CATCH}) , see
 forthcode({CATCH}) for the effect of a non-zero
 forthsamp({tc}). If we are executing not under control of a
-forthcode({CATCH}), a non-zero forthsamp({tc}) aborts.
+forthcode({CATCH}), a non-zero forthsamp({tc}) gives a message to the effect
+that this exception has occurred and starts Forth anew.
+aborts.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR}},
 {{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
-{ 2 3 12 THROW ; GS1 ? ERR # 18},
+{ 2 3 12 THROW ; GS1 ? ciforth ERROR # 18},
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
@@ -4726,7 +4728,8 @@ enddoc)
 HEADER({(ABORT")},{PABORTQ},{DOCOL})
         DC      ROT
         _0BRANCH(PABQ1) ;{IF}
-        DC      LTYPE, SIGNON, ABORT
+        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      SIGNON, ABORT
         _BRANCH(PABQ2) ;{ELSE}
 PABQ1:  DC       TDROP
 PABQ2:   DC      SEMIS
@@ -4736,27 +4739,20 @@ worddocsafe( {ERRORS},{ABORT"},{abort_quote},{f --- },{ISO,I},
 ABORT" finds a non-zero forthvar({f}) on the stack, the
 forthsamp({<message>}) is displayed and an
 forthcode({ABORT}) is executed. Otherwise proceed with the
-words after forthsamp({<message>}). In ciforth it is also
-allowed to use forthcode({ABORT"}) in interpret mode.
+words after forthsamp({<message>}). This word can only be used
+in compile mode.
 },
 {{?ERROR}},
-{{ 0  ABORT" APE" 123 .},{123},
+{{ 0 WARNING ! 1  ABORT" APE" }, {WARNING ! 1 ABORT" ? ciforth ERROR # 17 },
 {: GS1 0 ABORT" APE" 123 ; GS1 .},{123},
 dnl The warm start message is filtered away!
-{ 1  ABORT" APE" },{APE},
 {: GS2 1 ABORT" APE" 123 ; GS2 .},{APE}
 },
 enddoc)
 HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
+        DC      QCOMP
         DC      DENQ
-        DC      STATE
-        DC      FETCH
-        _0BRANCH(ABQ3) ;{ IF}
         DC      LIT, PABORTQ, COMMA
-        _BRANCH(ABQ4)
-ABQ3:
-        DC      PABORTQ
-ABQ4:
         DC      SEMIS
 ;
 });_END_({_LOAD_})
@@ -4959,7 +4955,7 @@ worddoc( {SECURITY},{?STACK},{question_stack},{},{},
 {{ S0 @ DSP! ?STACK},{},
 {0 WARNING ! : GS1 DROP ?STACK ;},{},
 dnl Do not use the part of TIB that is corrupted!
- {                               GS1},{      GS1 ? ERR # 1 },
+ {                               GS1},{      GS1 ? ciforth ERROR # 1 },
  {CR},{} },
 enddoc)
 HEADER({?STACK},{QSTAC},{DOCOL})
@@ -5295,7 +5291,8 @@ OK2:
 worddoc( {INIT},{ABORT},{abort},{},{ISO,FIG,L0},
 {Restart the system. In addition and before the actions of
 forthcode({QUIT}), clear also the data stack and reset the
-search order and numeric base to default.
+search order, reset the exception mechanism and set
+the numeric base to default.
 _VERBOSE_({{As required by ISO it is silent. This may be confusing
 at times, because you can't tell the difference between a word
 that is still busy or that has aborted.}})
@@ -5304,9 +5301,8 @@ that is still busy or that has aborted.}})
 enddoc)
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
-;        _SECURITY_({DC      QSTAC})  FIXME belongs here
+        DC      ZERO, HANDLER, STORE
         DC      DECA
-        _SECURITY_({DC      QSTAC})
         DC      ONLY
         DC      FORTH
         DC      DEFIN
@@ -7985,7 +7981,7 @@ no longer are.},
 {
 {EMPTY-BUFFERS BLOCK-EXIT},{},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
- {PTY-BUFFERS 1 BLOCK ? ERR # 8},
+ {PTY-BUFFERS 1 BLOCK ? ciforth ERROR # 8},
 { CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{_T_},
 {1 0 (LINE) TYPE}, { LICENSE }
 },
