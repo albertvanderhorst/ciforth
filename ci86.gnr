@@ -1,4 +1,4 @@
-;{               ciforth : a generic I86 ISO FORTH by HCC FIG}
+;;{               ciforth : a generic I86 ISO FORTH by HCC FIG}
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
@@ -1168,15 +1168,18 @@ as a constant.}})
 It is recommended that this word is not postponed. _VERBOSE({{Use explicit
 parsing and searching instead.}})},
 {{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
-{{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
-{{ : APE 1 2 ; 'APE EXECUTE  'APE ID. . .},{APE 2 1}},
+{{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1},
+{ : AAPE 1 2 ; 'AAPE EXECUTE  'AAPE ID. . .},{AAPE 2 1},
+{'APEEE },{'APEEE ?  MSG # 11 : WORD IS NOT FOUND},
+{CR},{}
+},
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      LPWORD
+        DC      LPWORD, LDUP, TOR
         DC      FOUND
-        DC      LDUP
-        DC      ZEQU
-        DC      LIT, 11, QERR
+        DC      LDUP, ZEQU, LIT, 11, QERR
+        DC      LDUP, TNFA, FETCH, FETCH ; { Get precise length.}
+        DC      FROMR, EQUAL, ZEQU, LIT, 11, QERR ; { to prevent match for denotation.}
         DC      LITER
         DC      SEMIS
 ;
@@ -4946,8 +4949,8 @@ worddoc( {WORDLISTS},{PREVIOUS},{PREVIOUS},{},{ISO},
 If empty stil the forthcode({ONLY}) search order is left.},
 {{VOCABULARY}},
 {
-  { SEARCH @ VOCABULARY JOHN JOHN DUP SEARCH @ = .},{0},
-  { PREVIOUS SEARCH @ = .},{_T_}
+  { SEARCH-ORDER @ VOCABULARY JOHN JOHN DUP SEARCH-ORDER @ = .},{0},
+  { PREVIOUS SEARCH-ORDER @ = .},{_T_}
 },
 enddoc)
 HEADER({PREVIOUS},{PREVI},{DOCOL})
