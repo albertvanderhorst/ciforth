@@ -45,7 +45,7 @@
 \    Answer type 2
 \    ND answers for question 1
 \ ......
-\    ND answers for question NQ      ^
+\    ND answers for question NQ
 \ ... all answers
 
 
@@ -106,6 +106,9 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 \D 0 0 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
 \D 1 0 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
 \D 1 1 NOES   ." NOES   Expect 1 0 : " ? DEPTH .  CR
+\D ." Expect a digagnosis : " 0 DIAGNOSES 2@ TYPE CR
+\D ." Expect a question : " 0 QUESTIONS 2@ TYPE CR
+\D ." Expect 0 : " DEPTH .  CR
 
 \ Upper limits for arrays
 #DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
@@ -368,7 +371,7 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
 
 \ Eliminate, if uncompatible with ANSWER to QUESTION, a DIAGNOSIS.
 \ The diagnosis was not yet excluded and the answer is unambiguous.
-: ELIMINATE-ONE ^
+: ELIMINATE-ONE
         DUP >R
         ANSWER-FOR DUP ?AMBIGUOUS IF
             2DROP
@@ -391,4 +394,25 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
 \D !EXCLUSIONS
 \D ." Expect 0 : " DEPTH . CR
 
+ONLY FORTH DEFINITIONS
+
+INTERACTION DEFINITIONS
+DATABASE CONSULTING STRATEGY
+\ Ask confirmation of the DIAGNOSIS. Return IT if confirmed else -1.
+: CONFIRM
+    DUP ?EXCLUDED IF DROP -1 EXIT THEN
+    IsIt$ PAD $! DUP DIAGNOSES 2@ PAD $+!
+    PAD $@ GET-ANSWER A_YES = IF SmartEeh$ TYPE ELSE DROP -1 THEN
+;
+
+\ Return the DIAGNOSIS that comes out. Always ask the
+\ user for confirmation, especially if there are more
+\ possibilities. Return -1 for no confirmed diagnosis.
+: POSE-DIAGNOSIS
+    POSSIBILITIES @ DUP 0= IF DROP -1 EXIT THEN
+    1 = IF IThinkIKnow$ ELSE ThereAreSeveral$ THEN TYPE
+    -1 #DIAGNOSES @ 0 DO I CONFIRM DUP -1 <> IF SWAP DROP LEAVE THEN DROP LOOP
+;
+
+EXIT
 ONLY FORTH DEFINITIONS
