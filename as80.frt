@@ -9,30 +9,35 @@
 : <POST HERE ISS !  0 PREVIOUS ! ;
 : @+ >R R CELL+ R> @ ;
 : !TALLY -1 TALLY ! -1 TALLY CELL+ ! ;
-: ?TALLY TALLY @ -1 - 26 ?ERROR
-         TALLY CELL+ @ -1 - 27 ?ERROR ;
+( Return: instruction IS complete, or not started)
+: AT-REST? TALLY @ -1 =   TALLY CELL+ @ -1 = AND ;
+: ?TALLY AT-REST? 0= 26 ?ERROR ;
 (   Based on PFA of a postit POST into tally and leave the INSTRUCTION  )
 : POST, ?TALLY @+ SWAP @+ TALLY CELL+ ! @ TALLY ! ;
 ( Correct dictionary to have an instruction of N bytes, after
-( post allocated a whole cell)
+( `POST,' allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
 : INVERT -1 XOR ;
+HEX
+0 VARIABLE TEMP ( Should be passed via the stack )
+( Build a word that tests whether it of same type as stored )
+( in `TEMP'. Execution: Leave for DEA : it IS of same type ) 
+: IS-A <BUILDS TEMP @ , DOES> @ SWAP PFA CFA CELL+ @ = ;
+( Generate error if data for postit defining word was inconsistent)
+: CHECK1 HERE 3 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
 ( Accept a MASK with a bit up for each commaer, a MASK indicating
 ( which bits are postitted, and the INSTRUCTION )
 ( Assemble an 1..3 byte instruction and post what is missing.)
-: CHECK1 HERE 3 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
-HEX
-0 VARIABLE TEMP
 : 1PI <BUILDS  , FFFFFF00 OR , INVERT , CHECK1
 DOES> [ HERE TEMP ! ] <POST POST, , 1 CORRECT ;
-(   Return for DEA : it IS of type 1PI                                  )
-: IS-1PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
+( Return for DEA : it IS of type 1PI                                  )
+IS-A IS-1PI
 : 2PI <BUILDS  , FFFF0000 OR , INVERT , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 2 CORRECT ;
-: IS-2PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
+IS-A IS-2PI
 : 3PI <BUILDS  , FF000000 OR , INVERT , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 3 CORRECT ;
-: IS-3PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
+IS-A IS-3PI
 DECIMAL
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @    2DUP AND 28 ?ERROR   OR R> ! ;
@@ -44,22 +49,24 @@ DECIMAL
 ( which bits are fixupped, and the FIXUP )
 ( One size fits all. )
 : xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ISS @ OR! ;
-: IS-xFI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
+IS-A IS-xFI 
 
 : CHECK DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK TALLY OR! ;
-( Accept a MASK with the bit for this commaer and the ADDRESS of)
-( what is to be executed to comma. )
-: COMMAER <BUILDS  SWAP , , , DOES> @+ BOOKKEEPING   @ EXECUTE ;
+( Build with the LENGTH to comma the ADDRESS that is executint the comm )
+( and a MASK with the bit for this commaer.                             )
+: COMMAER <BUILDS  SWAP , , , 
+DOES> [ HERE TEMP ! ] @+ BOOKKEEPING   @ EXECUTE ;
+IS-A IS-COMMA 
 
 ( The increasing order means that a decompiler hits them in the         )
 ( right order                                                           )
-1   ' C, CFA   1        COMMAER IB, ( immediate byte data)
-2   ' ,  CFA   0 CELL+  COMMAER IX, ( immediate data : cell)
-4   ' ,  CFA   0 CELL+  COMMAER X,  ( immediate data : address)
-8   ' C, CFA   1        COMMAER P,  ( port number ; byte     )
+1        1   ' C, CFA   COMMAER IB, ( immediate byte data)
+0 CELL+  2   ' ,  CFA   COMMAER IX, ( immediate data : cell)
+0 CELL+  4   ' ,  CFA   COMMAER X,  ( immediate data : address)
+1        8   ' C, CFA   COMMAER P,  ( port number ; byte     )
 
-( Fill in the tally prototype with FIRST and SECOND data )
+( Fill in the tally prototype with COMMAMASK and INSTRUCTIONMASK )
 : T! PRO-TALLY CELL+ ! PRO-TALLY ! ;
 ( From `TALLY' and the  INSTRUCTION code)
 ( prepare THE THREE CELLS for an instruction )
@@ -138,10 +145,12 @@ BEGIN
 DUP DICTEND? UNTIL
 DROP DROP 
 ;
+( Leave the first DEA of the assembler vocabulary.                    )
+: START ' ASSEMBLER 2 +  CELL+ @ ;
 ( Execute the DEA with as data each time                              ) 
 ( the namefield of the assembler vocabulary.                          )
 ( a dea can be found using % )
-: FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS ;
+: FOR-ALL-AS START FOR-REMAINING-AS ;
 % ID. FOR-ALL-AS
 
 % LXI IS-1PI ." LXI: " . CR
@@ -182,7 +191,9 @@ DISS 10 DUMP
 DISS .SET
 
 : -DISS DISS -SET ;
-: .DISS DISS DUP @ SWAP CELL+ DO I @ ID. 0 CELL+ +LOOP CR ;
+: .DISS DISS DUP @ SWAP CELL+ DO 
+    I @ DUP IS-COMMA IF I DISS - . THEN ID. 
+ 0 CELL+ +LOOP CR ;
 : +DISS DISS SET+! ;
 87654 +DISS
 DISS .SET
@@ -191,13 +202,17 @@ DISS .SET
 ." TO HIER?"
 ^
 : DO-FIX 
- DUP IS-xFI IF 
-DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.) 
-CONTAINED-IN IF 
-DUP >BODY FIX| DROP   
-+DISS 
-ELSE DROP THEN 
-ELSE DROP THEN ;
+    DUP IS-xFI IF 
+        DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.) 
+        CONTAINED-IN IF 
+            DUP >BODY FIX| DROP   
+            +DISS 
+        ELSE DROP THEN 
+    ELSE DUP IS-COMMA IF
+        DROP
+    ELSE 
+        DROP 
+    THEN THEN ;
 % MOV >MASK TALLY !
 % MOV >COMMA TALLY CELL+ !
 % DO-FIX % MOV FOR-REMAINING-AS                                     
@@ -223,3 +238,13 @@ ELSE DROP THEN ;
 
 
     % ONLY-DO-INST FOR-ALL-AS                                           
+
+: DOIT
+    -DISS START +DISS
+    DISS @ 1 CELLS - @
+    BEGIN
+        DUP ID.
+    >NEXT% DUP DICTEND? UNTIL
+    DROP 
+;
+
