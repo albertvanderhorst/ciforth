@@ -161,3 +161,21 @@ At least here the GDT has been filled in correctly.
 
 2.38 has also the hard disk and the use of extra segment fixed up.
 And has the label FIRSTWORKINGPROT
+
+2.41 is a 16 bit version. It is a catchup with respect to insights
+gained from trying to make a 32 bit version working.
+Label PROT16A.
+
+2.42 is improved towards the portability for 32 bits.
+It has label PROT16A (with all its companions. I dared not remove the label
+PROT16 I had.) However it cannot handle the hard disk drive from the 
+Forth assembler routines. But then, at least the enabling of the interrupts
+is needed before I expect to be able to read from disk.
+
+2.43 Is a confirmed version that is installed on the harddisk and has saved
+block files. PROT16B
+2.44 improvements towards more portability 16/32
+
+Because BX can index as well as DI can, and it is not associated with ES
+I am using BX as the pointer to the new code field address ("working register")
+(and because I hope this gives an indication why the 32 bit version doesnot work.)
