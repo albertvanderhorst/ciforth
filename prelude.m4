@@ -130,6 +130,12 @@ dnl
 dnl Multi tasking, i.e. PAUSE etc.
 define( {_TASK_}, _no)dnl
 dnl
+dnl ISO >IN (relative position) instead of IN (absolute address)
+define( {_ISO_IN_}, _no)dnl
+dnl
+dnl Security means the protection against wrong control structures.
+define( {_SECURITY_}, _yes)dnl
+dnl
 dnl Keep the old debugging facility with place for breakpoints
 define( {_OLDDEBUG_}, _no)dnl
 dnl

@@ -35,6 +35,10 @@ _ABSOLUTELOAD_({define({_NORMAL_BYE_}, _no)})
 _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
+define({_NO_SECURITY_}, _yes)})
+_SECURITY_({define({_NO_SECURITY_}, _no)})})
+define({_CIF_IN_}, _yes)})
+_ISO_IN_({define({_CIF_IN_}, _no)})})
 dnl Detectable error situations. Terminate.
 _RWFD_({ _RWHD_({errprint({Mass storage cannot be at the same time from floppy and hard disk.
 })m4exit(1000)})})

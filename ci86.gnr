@@ -1318,7 +1318,7 @@ leave the end and a zero.
 _VERBOSE_({As it goes with string constants, you may not
 alter its content, nor assume anything is appended.})},
 {{BLK},{WORD},{IN}},
-{{IN[] A EMIT TIB @ 5 + = .},{A-1} },
+{{IN[] A   EMIT TIB @ 5 + = .},{A-1} },
 enddoc)
 HEADER({IN[]},{INBRS},{DOCOL})
         DC      SOURC, CELLP, TFET
@@ -1327,7 +1327,9 @@ HEADER({IN[]},{INBRS},{DOCOL})
         DC      ZERO
         _BRANCH(INBRS2)
 INBRS1:
-        DC      LDUP, CFET
+        DC      LDUP
+        _ISO_IN_({DC      SOURC, FETCH, PLUS ;{ Make IN >IN.}})
+        DC      CFET
         DC      ONE, LIN, PSTOR
 INBRS2:
         DC      SEMIS
@@ -1360,6 +1362,7 @@ PWORD2: DC INBRS, QBL, ZEQU
         _BRANCH(PWORD2)
 PWORD2A:
         DC OVER, LSUB
+        _ISO_IN_({DC      SWAP, SOURC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
 worddocsafe({PARSING},{(PARSE)},{paren_word},{ --- addr3 },{},
@@ -1375,7 +1378,9 @@ HEADER({(PARSE)},{PPARS},{DOCOL})
         DC TOR
 PPARS1: DC LDUP, RR, LSUB
         _0BRANCH(PPARS2)
-        DC OVER, OVER, CFET, LSUB
+        DC OVER, OVER
+        _ISO_IN_({DC      SOURC, FETCH, PLUS})
+        DC CFET, LSUB
         _0BRANCH(PPARS2)
         DC ONEP
         _BRANCH(PPARS1)
@@ -1386,6 +1391,7 @@ PPARS2: DC SWAP, DROP
         DC      LDUP, LIN, STORE
         DC      INBRS, DROP, DROP
         DC      OVER, LSUB
+        _ISO_IN_({DC      SWAP, SOURC, FETCH, PLUS, SWAP})
         DC SEMIS
 ;
 worddoc({PARSING},{SOURCE},{source},{addr --- },{},
@@ -1393,11 +1399,14 @@ worddoc({PARSING},{SOURCE},{source},{addr --- },{},
 of the current scan specification, allocated in the user area.
 It consists of three cells:
 the lowest and non-inclusive highest address of the parse area
-and a pointer to the next character to be parsed.
+_CIF_IN_({the non-inclusive highest address of the parse area and a pointer to the next character to be parsed.})
+_ISO_IN_({the number of characters and the current index in the parse area.})
 Changing forthsamp({SOURCE}) takes immediate effect,
 and must be atomic, by using forthsamp({RESTORE-INPUT}),
 or changing only the third cell.
-The third cell has the alias forthsamp({IN}) .
+The third cell has the alias 
+_CIF_IN_({forthsamp({IN}) .})
+_ISO_IN_({forthsamp({>IN}) .})
 _VERBOSE_({Words like forthsamp({BLK}) and
 forthsamp({SOURCE-ID}) are secondary,
 and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
@@ -1407,8 +1416,11 @@ enddoc)
 HEADER({SOURCE},{SOURC},{DOUSE}, CELLS(27))      ;{ And 28 and 29.}
 ;
 worddoc({OUTPUT},{CR},{cr},{},{L0},
-{Transmit a carriage return and line feed to the selected output
-device.},{{OUT}}, 
+{Transmit character(s)
+to the terminal, that result in 
+a "carriage return" and a "line feed".
+_VERBOSE_({This means that the cursor is positioned at the start
+of the next line, if needed the display is scrolled.})},{{OUT}}, 
 {{ 41 EMIT CR 42 EMIT},{A 
 B}},
 enddoc)
@@ -2913,20 +2925,23 @@ set to zero.
 HEADER({QUERY},{QUERY},{DOCOL})
         DC      TIB
         DC      FETCH
+        DC      LDUP
         DC      LIT,RTS/2
         DC      ACCEP
 ; Keep the next line in for debugging ACCEPT for MSDOS.
 ;        DC      LIT, 41H, EMIT, TDUP, LTYPE, LIT, 41H, EMIT
-        DC      LDUP
-        DC      TIB
-        DC      FETCH
-        DC      PLUS, ZERO, SWAP, CSTOR ; {Delimiting zero.}
-        DC      ZERO, LIN, STORE
-        DC      TIB, FETCH
-        DC      LDUP, SOURC, STORE
-        DC      LDUP, SOURC, CELLP, CELLP, STORE ; { IN}
-        DC      PLUS, SOURC, CELLP, STORE
+        DC      OVER, PLUS
 ;        DC      DOTS
+        DC      SWAP, SOURC, TSTOR
+;        DC      SOURC, TFET, PLUS
+;        DC      ZERO, SWAP, CSTOR ; {Delimiting zero.}
+        DC      SOURC, FETCH
+        DC      LIN, STORE ; { IN}
+_ISO_IN_({       DC     SOURC, FETCH, NEGATE, LDUP
+        DC     SOURC, CELLP, PSTOR
+        DC     LIN, PSTOR
+})
+;       DC      DOTS
         DC      SEMIS
 ;
 worddoc({MEMORY},{FILL},{fill},{addr quan b --},{},
@@ -3397,6 +3412,7 @@ INTE1:
         DC      LDUP      ;{ Zero length.}
         _0BRANCH(INTE8) ;{WHILE}
 ;       DC      DOTS
+;       DC      TDUP, LTYPE
         DC      OVER, TOR
         DC      PFIND   ;{BEGIN}
         DC      LDUP
@@ -4164,9 +4180,14 @@ HEADER({LOAD},{LOAD},{DOCOL})
         DC      SAVE
         DC      BLK,STORE       ;{BLK <- SCR * B/SCR}
         DC      BLK, FETCH, BLOCK
-        DC      LDUP, SOURC, STORE
         DC      LDUP, LIN, STORE
-        DC      LIT, KBBUF, PLUS, SOURC, CELLP, STORE
+        DC      LIT, KBBUF
+        DC      OVER, PLUS,
+        DC      SWAP, SOURC, TSTOR
+_ISO_IN_({       DC     SOURC, FETCH, NEGATE, LDUP
+        DC     SOURC, CELLP, PSTOR
+        DC     LIN, PSTOR
+})
         DC      LLOCK
         DC      INTER   ;{INTERPRET FROM OTHER}
         DC      LUNLOCK
@@ -4183,9 +4204,15 @@ HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
         DC      PSTOR
         DC      LUNLOCK
         DC      BLK, FETCH, BLOCK
-        DC      LDUP, SOURC, STORE
         DC      LDUP, LIN, STORE
-        DC      LIT, KBBUF, PLUS, SOURC, CELLP, STORE
+        DC      LIT, KBBUF
+        DC      OVER, PLUS,
+        DC      SWAP, SOURC, TSTOR
+_ISO_IN_({
+        DC     SOURC, FETCH, NEGATE, LDUP
+        DC     SOURC, CELLP, PSTOR
+        DC     LIN, PSTOR
+})
         DC      LLOCK
         DC      SEMIS
         PAGE
