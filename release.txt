@@ -5,7 +5,7 @@ GENERAL.
 Date: See RCS-ID  
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl
 Copyright: GPL, inasfar not public domain by FIG
-Archive: fig86g2d112.zip
+Archive: fig86g2d116.zip
 
 All generic FIG86 forths have version number 2.
 Preliminary releases derive their version id, in this case as 2.106, from
@@ -13,7 +13,7 @@ the RCS version of the generic source file `fig86.gnr'
 Stable versions will use the regular fig numbering. 
 
 Release :
-Version 2d112 is archived into fig86g2d112.zip and consists of
+Version 2d116 is archived into fig86g2d116.zip and consists of
 
 Documentation
 COPYING         : the conditions under which you are allowed to use all this
