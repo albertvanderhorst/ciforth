@@ -12,6 +12,10 @@ define({_WORD_PTR},WORD PTR)dnl Sometimes really needed even after introducing [
 define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
 define({_OFFSET},OFFSET)dnl 
 dnl
+dnl
+dnl Second and later uses of ORG shift the program counter 
+define({_NEW_ORG},
+        ORG    $1)dnl
 dnl Handling large blocks of comment
 define({_COMMENT},COMMENT ~
 )dnl

@@ -15,6 +15,10 @@ define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
 define({_WORD_PTR}, WORD)dnl Make it specify SIZE only.
 dnl
+dnl NASM doesnot allow to shift the program counter with ORG
+define({_NEW_ORG},
+        RESB    $1-($-$$))dnl
+dnl
 dnl Specification of the length of an operand,
 dnl needed to get exactly the same code as MASM.
 define({_BYTE},BYTE)dnl Operand has length BYTE.
