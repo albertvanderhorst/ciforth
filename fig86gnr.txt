@@ -11,7 +11,7 @@ from for the first time in history.
 The motivation for having this type of Forth available follows from its
 characteristics. It is available as an assembler source, and it is an
 indirect threaded Forth. 
-An assembler source is a distinct advantage for getting started from
+An assembler source has distinct advantages for getting started from
 nothing. An engineer might balk at the description of how to use a meta
 compiler, but feels at ease with a (much larger) assembler manual.
 Although speed is currently in fashion, using subroutine threaded Forth's
@@ -19,54 +19,93 @@ with optimisers, indirect threading is the preferred choice for some
 applications. I did this work, because I needed it. 
 It is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
 that is available via taygeta. And of course kudo's to FIG.
+The original is public domain. My extensions are GPL-ed or libary GPL-ed.
+I transferred the copyright to the Dutch Forth Workshop, a foundation that
+supports Forth and defends the GPL.
+
+32 bits
+It is unusual for a figforth to be 32 bit.
+It turned out that the addition of CELL+ goes a long way toward allowing
+utilities like a decompiler to be 16/32 bit clean. In the FIG documentation
+about the user variables and +ORIGIN you may read cells where appropriate
+and the documentation applies. 
 
 System requirements
 
-You need a version of nasm , TASM or MASM on your system. I recomment nasm,
-it is an open source assembler and available on different platforms, at
-least MSDOS and Unix. It solves a lot of the design errors I find in the
-Intel ways of MASM.EXE. It generates a binary without a linker.
+This generic version -if suitably built- runs on industry standard hardware
+("PC's") : standalone, under Linux and under MSDOS/MSWINDOWS. 
+To build, you need a version of nasm, TASM or MASM on your system. I
+recomment nasm, it is an open source assembler and available on different
+platforms, at least MSDOS and Unix. It solves a lot of the design errors I
+find in the Intel ways of MASM.EXE. It generates a binary without a linker. 
 On the opposite side, e.g. Borland's TASM you can buy nowaday's only as part
 of a giant C++ package. 
 If you want to use the generic possibilities you will need a Unix system
 with all of its tools. I use GNU-Linux (RedHat) and do the makes and version
-control on that. For making bootable floppies you need mtools. 
+control on that. If you want your bootable floppies made from linux to be
+MSDOS-compatible you need mtools. 
 
 Assembler sources
 
 The following two assembly sources generated are supplied as a service.
-These are in fact just
-examples. You can generate different ones (see next section.) 
-The file alone.asm can be assembled using NASM. It includes a boot sector
-such that it can boot from a standard floppy on a industry standard Intel
-PC. If you have the mtools set (most Linux'es have it) the Makefile shows
-you how to make the floppy. 
+These are in fact just examples. You can generate different ones (see next
+section.) 
+The file alone.asm can be assembled using NASM. It includes a boot
+sector such that it can boot from a standard floppy on a industry standard
+Intel PC. If you have the mtools set (most Linux'es have it) the Makefile
+shows you how to make the floppy. On MSDOS you can use DEBUG. 
 If you run on Linux with
 mtools, "make boot" will do it. 
 The resulting floppy will even be recognized by
 MSDOS, such that you can copy block sources to it. 
 Make "moreboot" will do this from Linux, then you will have BLOCKS.BLK
-available.
-Otherwise on MSDOS (I recommended version
-3.2, the most stable MSDOS ever) adapt the example genboot.asm.
+available. Make "allboot" will do it all, but it needs a working forth
+on Linux for doing some calculations.
+Otherwise on MSDOS (I recommended version 3.3, the most stable MSDOS ever)
+adapt the example genboot.asm. 
 The file msdos.msm can be assembled using TASM and MASM. The resulting Forth
 executable can be run off hard disk and respects the file system on it.
-It uses the file BLOCKS.FRT.
+It uses the file BLOCKS.BLK.
 
 A generic Forth
+This version has one single source file: the generic I86 figForth.
+All advantages of assembler source would be gone, if an engineer were
+confronted with conditional compilation and lots of code for other systems
+he doesn't want to learn or assemblers he doesn't want to use.
+So we proceed in two steps. First a clean assembler source is generated from
+the generic Forth using configuration files. Then the assembler source is
+processed in one of a number of ways, each way familiar to one brand of
+engineers. 
 
+You can customize at a number of levels.
+1. Configuration files have extension .cfg , these are files with m4
+commands. They are intended to use at the highest and easiest level of
+configuration and contain their own simple usage instructions. 
+2. m4 files have extension m4, and control one aspect of genericity, such
+as the header layout or the protection mode. You definitely need to know m4
+to use these.
+3. Assembler files can be customised in the traditional way by adopting
+constants, or commenting in source lines. The assembler files are distinct
+from the one generic source. No m4, you need only cope with the directives
+of your assembler, and will not see any code applicable to other operating
+systems or I/O systems. (It is not commented out, it is just not there.) 
+4. You can adapt the generic source. This is difficult, but gratifying.
+If you manage to ANSI-fy it, the result is multiplied.
+
+Level 1 customization.
 This is assuming you run on Unix.
 By specifying what you want in a configuration file you can generate a host
 of assembler listings. This is as simple as replacing "yes" with "no" in
-configuration files, see the examples msdos.m4 and alone.m4 and the
-Makefile.
+configuration files.
+See the examples msdos.cfg and alone.cfg and the Makefile. 
 
 With respect to the assembler you can choose between NASM and MASM, with
 file extension .asm and .msm respectively. The .msm are acceptable by
-TASM.EXE too.
+TASM.EXE too. You can generate an equivalent .s file, but this is 
+experimental and doesn't lead to a working forth.
 
 With respect to the I/O (words like EXPECT R/W) you can choose between
-three.
+three on MSDOS.
 You can use dos (_USE_DOS_) in the classic way as with the original. This
 means that the floppy is used directly without regard for directory
 structures.
@@ -76,41 +115,60 @@ for you to change, also at run time. No (as of 2000) obsolete MSDOS calls
 are used. 
 You can use the BIOS (_USE_BIOS_) No MSDOS interrupts are required. 
 
-With respect to the hosting you can choose between _HOSTED_ and _BOOTED_.
-A hosted version relies on MSDOS to get the program started. (It may or may
-not use MSDOS for I/O, once started.).
-A _BOOTED_ version contains a boot sector, such that you you can make a
-standalone version that boots from floppy. 
+With repect to I/O on linux you can choose between c-based and native.
+The c-based version may be portable to other I86 unices. The native version
+is of course not. All linux versions have their blocks in a file. (Accessing
+a floppy in the classic way is perfectly possible -- and implementing it would
+be a perfectly pointless exercise.)
 
-Of course a _BOOTED_ version that tries to use MSDOS I/O crashes
+With respect to the hosting you can choose between _HOSTED_ and _BOOTED_. A
+hosted version relies on MSDOS or Linux to get the program started. (It may
+or may not use MSDOS for I/O, once started.). 
+A _BOOTED_ version contains a boot sector, such that you you can make a
+standalone version that boots from floppy or hard disk.
+A _BOOTED_ version may very well be startable from plain DOS. 
+
+Of course a _BOOTED_ version that tries to use MSDOS I/O (or Linux) crashes
 immediately, so not all versions are useful. 
 
-Customisation
+You have a choice between 16 or 32 protected mode and real mode.
+Of course on Linux real mode is not an option, (but you could run the
+MSDOS emulator). Protected mode Forths on MSDOS cannot be started from
+virtual real mode, e.g. they will not run in a "DOS box" in Windows.
+
+Level 2 customization.
+You are on your own here.
+
+Level 3 customization.
 
 The usual customisation in assembler files is possible. 
-If you use other that 3" floppy disks you have to specify the disk
+If you use other than 3" floppy disks you have to specify the disk
 parameters. Parameters for a 5" HD floppy are present and can be commented
 in. 
-If you do not need a DOS-compatible floppy, you can start the image
-immediately after the boot sector, like I do for the hard disk version. 
-You can change the default name of the BLOCK-FILE. 
+If you do not need a DOS-compatible floppy, you can put the image
+immediately after the boot sector. A bootable hard disk version always works
+like that. 
+You can change the default name of the BLOCK-FILE at run time.
 If you want to change the header layout, you will find that the way headers
 are done via MACRO's make it more pleasant to use the generic listing. 
 If you may want you can use this as a starting point for generating a whole
 other Forth (like me).   
 If you want to boot into your 20 Gbyte disk (like me), you probably have a
-version 3.0 super modern LBA BIOS. If you want to use an older system you
-must experiment by using the BIOS word. (You need not resort to assembler
-for experimenting.) 
+version 3.0 super modern LBA BIOS. There is no file system, just 20,000,000
+blocks (and yes a 16 bit system would be inconvenient). If you want to use
+an older system you must experiment by using the BIOS word. (You need not
+resort to assembler for experimenting.) Then you can adapt your assembler 
+listing.
 
 Programs
 In the file BLOCKS.BLK is available a screen editor, assembler, decompiler
 and tools like DUMP. Beware! Some of the tools handle hards disks. There are
 example programs and benchmarks. Everything under screen 100 you will find
-more or less working. Everything loaded from 8 is used by me on a regular
-basis and is 16/32 bits clean. 
-Beware! The full screen editor doesnot work under Linux (protection).
-The assembler may work in 32 bit mode, but it generates 16 bit code!
+more or less working, but maybe not on your system.
+Everything loaded from 8 is used by me on a regular basis and is 16/32 bits
+clean. Beware! The full screen editor doesnot work under Linux (protection).
+The assembler may work in 32 bit mode, but it generates 16 bit code! 
+The program `wc' is an example of how to use lina as a scripting language.
 
 Deviations
 
@@ -157,7 +215,11 @@ MASM.EXE is available
 The original fig documentation is at 
 This include the pictures.
 
-Linux application notes
+Linux application notes figforth version
+The linux forth called figforth has its i/o based on c. This may seem more
+portable but it isn't. Where c is very portable on Linux, the way assembler
+is linked with forth is not documented (as far as I can tell, in my version.
+Linux improves overnight, so this may no longer be true.) 
 The "break key" is implemented as the "any key". This key is lost, as is
 perfectly allowed in the fig model. The EXPECT has not the " return if
 maximum reached property", so it is not strictly conforming. This can be
@@ -166,10 +228,24 @@ implement EXPECT as in the CLASSIC I/O model). This results in loosing
 interruptability. Moreover Linux knows better what the RUBOUT key should be,
 although for your convenenience it is already placed in a user variable and
 can be easily changed. 
+The c-approach allows signals to be handled in a familiar way.
 By using quit, a loop can be interrupted. So ^\ results in a warm start.
 A segmentation fault also results in a warm start. ^C immediately leaves.
 ^S/^Q can be used to hold up output and are not interpreted as a break
 in e.g. VLIST.
+
+Linux application notes lina version
+The lina version is based on a single assembler source, built without
+trickery and binary-portable accross Linux Intel (all systems were it has
+been tried work : 1.2.13 ..2.013). No run time c-libraries, no compile time
+c-libraries, no libraries at all. It is built directly on the solid rock
+of the system calls by ignoring a taboo c-programmers suffer from.
+"
+    nasm -felf lina.asm 
+    ld lina.o -s -o lina
+"
+It is less than 12 K and the dictionary space is set at 64 Mbyte. 
+
 
 Bugs
 1. 
@@ -178,4 +254,9 @@ Bugs
    You can exit the program by "0 0 0 1 LINOS", which is exit(0) in
    c-parlance or by pressing ^C, or by killing it from some other terminal,
    or by just closing the window. 
-
+2.
+   OUT may not be observed in all I/O models. Needs examination.
+3.
+   More a misfeature. The negative error numbers of Linux system calls
+   can be handled by negative offset's from screen 4. Now an offset
+   of 64 is added. (The messages have not been filled in anyway.).
