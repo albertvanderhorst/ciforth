@@ -62,22 +62,25 @@ HEX
 : SWITCH-VARIABLE-AREA RSP! >R S0 @ DSP! R> ;
 
 \ Create: allocate a new stack frame and size dictionary SPACE
-\ Does: use that space to run XT in a thread.
 \ Note: if applicable allocate sufficient dictionary space to use
 \ the area to format numbers (below ``PAD'') and / or ``PAD'' itself.
+\ Does: use that space to run XT in a thread.
+\ The body contains the pid of the linux process of the thread, if running.
 \ NOTE: NOTHING AFTER DOES> CAN BE HIGH LEVEL, BECAUSE THE RETURN STACK
 \ CANNOT BE USED.
-: THREAD CREATE 0 , RSP@ ,  CVA ALLOT
+: THREAD CREATE 0 , R0 @ ,  CVA ALLOT
 \ Split the interpreter pointer (program counter) over two execution paths
 \ with separate data stacks, one original, one temporary.
 \ Transport the 2 items on the stack via the return stack.
 DOES> 0 OVER ! >R >R
 SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone LINOS DUP 0< IF THROW THEN
-\ BFFF,FFFF DSP@ 400 - _ sys_clone LINOS DUP 0< IF THROW THEN
-IF R> R> BEGIN DUP @ UNTIL 2DROP ELSE R> R>
+DUP IF RDROP R> BEGIN DUP @ UNTIL ! ELSE R> R>
 \ Install return stack
 DUP [ 0 CELL+ ] LITERAL + @ RSP! \ CELL+ is high level!
 \ Install data stack trasnporting one item via return stack.
 >R >R S0 @ DSP! R> R> -1 SWAP !
 \ Run and stop
 EXECUTE 0 _ _ 1 LINOS THEN ;
+
+\ Kill the thread via its DEA. Throw errors.
+ : KILL >BODY @ 9 _ 25 LINOS ?ERRUR ;
