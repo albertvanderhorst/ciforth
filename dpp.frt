@@ -1,4 +1,4 @@
-\ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+\ Copyright (2001): Albert van der Horst, HCC FIG Holland by GNU Public License
 \ $Id$
 
 \ Diagnostic program.
@@ -6,7 +6,17 @@
 \ Example question: "Can it fly"
 \ For example diagnose "horse" the answer most users give is probably "no".
 
-\ #################### FILE ###########################################
+\ To be done:
+\ 1. Case insensitive answers
+\ 2. Clean first part of new question, start with upper case etc.
+\ 3. Provide for unreadable database (or handle with THROW).
+\ Not in old version
+\ 101. Internet interface.
+\ 102. Logging of answer vectors for disapproval.
+
+\ #################### DATABASE #######################################
+
+: \D ; \ Debug
 
 \ File format :
 \    number of diagnoses  ND
@@ -27,6 +37,10 @@
 \    ND answers for question NQ      ^
 \ ... all answers
 
+"dstring.frt" INCLUDED
+
+VOCABULARY DATABASE
+DATABASE DEFINITIONS
 
 VARIABLE #DIAGNOSES \ Number of diagnoses
 VARIABLE #QUESTIONS \ Number of questions
@@ -114,6 +128,9 @@ VARIABLE OUTPUT$
         DUP #QUESTIONS @ PUT-NUMBERS MAX-QUESTIONS CELLS +
     LOOP DROP ;
 
+ONLY FORTH DEFINITIONS
+DATABASE
+
 \ Write the database to the file "database2"
 : WRITE-DATABASE
     HERE OUTPUT$ ! 0 , 10,000,000 ALLOT
@@ -126,3 +143,63 @@ VARIABLE OUTPUT$
     0 ?ES     PUT-ANSWERS
     OUTPUT$ @ $@ "database2" PUT-FILE
 ;
+
+\ For INDEX get the diagnostic STRING.
+: DIAG DIAGNOSES 2@ ;
+
+\ For INDEX get the diagnostic STRING.
+: QUES QUESTIONS 2@ ;
+PREVIOUS
+
+\ #################### INTERACTION ####################################
+
+VOCABULARY INTERACTION
+INTERACTION DEFINITIONS
+
+\ Possible values for what we call an answer.
+0 CONSTANT A_YES
+1 CONSTANT A_NO
+2 CONSTANT A_AMB
+3 CONSTANT A_NONE       \ No answer yet.
+
+\ Convert a STRING to an ANSWER.
+: TO-ANSWER 0= IF DROP A_NONE EXIT THEN
+   C@
+   Yes$ DROP C@ OVER = IF DROP A_YES EXIT THEN
+   No$  DROP C@ OVER = IF DROP A_NO  EXIT THEN
+   Amb$ DROP C@ OVER = IF DROP A_AMB EXIT THEN
+   DROP A_NONE
+;
+
+\ Print a STRING as a question.
+: .QUESTION CR 4 SPACES TYPE SPACE &? EMIT CR ;
+
+\ For a question STRING get an ANSWER.
+: (GET-ANSWER) .QUESTION (ACCEPT) TO-ANSWER ;
+
+\ Disapprove ANSWER , tell user so.
+: DISAPPROVE DROP NotAnAnswer$ TYPE ;
+
+\ For a question STRING get an ANSWER. ``A_NONE'' is not accepted.
+: GET-ANSWER
+    BEGIN 2DUP (GET-ANSWER) DUP 3 = WHILE DISAPPROVE REPEAT >R 2DROP R>
+;
+
+\ For a STRING return a clean STRING, without a possible question mark.
+: CLEAN-STRING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN ;
+\D "How ? " CLEAN-STRING ." EXPECT |How | :" &| EMIT TYPE &| EMIT
+
+PREVIOUS DEFINITIONS
+
+VOCABULARY D-MAIN
+D-MAIN DEFINITIONS   DATABASE INTERACTION
+
+\ Exit to linux with whatever ERROR was caught, hopefuly zero.
+: ERROR-BYE NEGATE 0 0 1 LINOS ;
+
+\ Do whatever need to be done if the user wants to stop.
+: FINISH
+     QuerySave$ GET-ANSWER A_NO = IF EXIT THEN
+     Save$ TYPE CR 'WRITE-DATABASE CATCH ERROR-BYE
+;
+ONLY FORTH DEFINITIONS
