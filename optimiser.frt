@@ -192,15 +192,20 @@ CREATE P
 [ -1 ]L OR      | DROP -1               |
 [ -1 ]L AND     |                       |
 [ -1 ]L XOR     | INVERT                |
+'P  LSHIFT 'P  LSHIFT | 'P  'P  + LSHIFT       |       \ Distributivity optimisation
+'P  RSHIFT 'P  RSHIFT | 'P  'P  + RSHIFT       |
 ;
 
+FMASK-SP 'EXECUTE >FFA OR!
+FMASK-SP '+ >FFA OR!
+FMASK-SP '- >FFA OR!
 \ Optimalisation of this table is thoroughly forbidden!
 FMASK-HOB '(MATCH-TABLE) >FFA OR!
 \ Get rid of those auxiliary words.
 '| HIDDEN       ']L HIDDEN
 
 \ Here is your table
-' (MATCH-TABLE) >DFA @ 8 CELLS 1- OR 1+ CONSTANT MATCH-TABLE
+' (MATCH-TABLE) >DFA @ 1- 8 CELLS 1- OR 1+ CONSTANT MATCH-TABLE
 
 \ \ Portability note.
 \ \ You could have the table like this :
@@ -230,53 +235,65 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 \ To be used within a loop
 : [I] POSTPONE I POSTPONE [] ; IMMEDIATE
 
-\ For a SEQUENCE and an ENTRY in ``MATCH-TABLE'' : they MATCH.
+\ For a SEQUENCE and an ENTRY in ``MATCH-TABLE'' :
+\ Return the LIMIT to where matched and the MATCH itself, or two zeros.
 \ As a side effect, remember the place holders.
-: ?MATCH
-    !PEES   8 0 DO
-        DUP [I] 'NOOP = IF -1 LEAVE THEN
-        OVER [I] OVER [I] <> IF
-            DUP [I] 'P = IF
-                OVER [I] PEES SET+!
-            ELSE
-                0 LEAVE
-            THEN
-        THEN
-    LOOP >R 2DROP R>
+: ?MATCH    !PEES
+    8 0 DO
+        DUP [I] 'NOOP ^ = IF SWAP I CELLS + SWAP LEAVE THEN       \ Success
+        DUP [I] 'P ^ = IF
+            OVER [I] PEES SET+!
+        ELSE OVER [I] OVER [I] ^ <> IF
+            2DROP 0 0 LEAVE                                     \ Failure
+        THEN THEN
+    LOOP
 ;
 
-: ?END-TABLE   @ '(;) ^ = ;
+\ For POINTER : it POINTS not yet to an ``EXIT''.
+: ?TILL-EXIT   @ '(;) = 0= ;
+\ For POINTER : it POINTS not yet to a ``NOOP''.
+: ?TILL-NOOP   @ 'NOOP = 0= ;
 
-\ Match any entry of the table to SEQUENCE. Return the MATCH or zero if none.
-: ?MM   MATCH-TABLE >R
-    BEGIN    DUP R@ ^ ?MATCH IF DROP R> EXIT THEN
-        R> 16 CELLS + >R R@ ?END-TABLE UNTIL
-    RDROP DROP 0 ;
+\ This was a typical example of premature optimisation.
+\ \ Seen the code SEQUENCE (its begin), return there MAY be a match in the table.
+\ : OPT-SPECIAL?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0= 0= ELSE
+\     DROP 0 THEN ;
 
-\ Seen the code SEQUENCE (its begin), return there MAY be a match in the table.
-: CAN-EXEC?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0= 0= ELSE 0 THEN ;
+\ Match any entry of the table to SEQUENCE.
+\ Return the LIMIT to where matched and the MATCH itself, else two zeros.
+: ?MM   MATCH-TABLE
+    BEGIN    2DUP ?MATCH DUP IF 2SWAP 2DROP EXIT THEN 2DROP
+        16 CELLS + DUP ?TILL-EXIT WHILE REPEAT
+    2DROP 0 0 ;
+
+\ If ITEM is a place holder, replace it by the next placeholder DATA.
+: ?PEE? DUP ID. DUP 'P = IF DROP PEES SET+@ THEN ;
 
 \ Copy MATCH to ``HERE'' filling in the place holders.
-: COPY-CODE
-    !PEES 8 CELLS +
-    BEGIN DUP @ DUP 'P = IF DROP PEES SET+@ THEN
-               DUP 'NOOP <> WHILE , CELL+ REPEAT
-2DROP ;
+: COPY-MATCH   !PEES   8 CELLS +
+    BEGIN DUP ?TILL-NOOP WHILE DUP @ ?PEE? , CELL+ REPEAT
+    DROP
+;
 
-\ For BEGIN END: try to replace it by an optimisation.
-\ Leave sequence BEGIN' END' of what is still to be handled.
+\ For an ITEM in a high level word, return the next ITEM.
+\ So it skips also ``ITEM'' 's inline data.
+: NEXT-ITEM NEXT-PARSE 2DROP ;
+
+\ For SEQUENCE : copy its first item to ``HERE'' possibly
+\ replacing it by a match optimisation.
+\ Leave sequence BEGIN' of what is still to be handled.
 :  ?MATCH-EXEC?
-    OVER CAN-EXEC? IF
-        OVER ?MM DUP IF
-            COPY-CODE
-            EMPTY>
-        _ THEN DROP
-    THEN ;
+        DUP ?MM DUP IF
+            COPY-MATCH SWAP DROP
+        ELSE
+             2DROP DUP NEXT-ITEM >HERE
+        THEN
+;
 
 \ Find optimisation patterns in the SEQUENCE of high level code
 \ and perform optimisation while copying to ``HERE'' ,
 \ Do not initialise, or terminate.
-: (MATCH) BEGIN DUP NEXT-PARSE WHILE DROP ?MATCH-EXEC? >HERE REPEAT 2DROP DROP ;
+: (MATCH) BEGIN DUP ?TILL-EXIT WHILE ?MATCH-EXEC? REPEAT DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
 : OPTIMISE   HERE SWAP    (MATCH)   POSTPONE (;)  ;
