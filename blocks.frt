@@ -45,7 +45,7 @@ License along with this program; if not, write to the
 
 
 
-\
+
 ( -c PROGRAM_:_compile_PROGRAM_to_binary ) \ AvdH A1oct02
 1 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT FILE-NAME
@@ -80,20 +80,20 @@ LATEST EXEC-NAME   TURNKEY
 \
 ( -e system_electives ) \ AvdH A1oct19
 .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
+: DEVELOP   BLOCK-EXIT 2 BLOCK-INIT ;
 REQ CONFIG
 ( MAINTENANCE ) REQ L-S  REQ DO-DEBUG
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
 REQ $.   REQ ^
 \ REQ REFRESH ( temporaryly)
-REQ CRACK    REQ LOCATE                         EXIT
-REQ EDITOR REQ OOPS
+REQ CRACK    REQ LOCATE
+REQ EDITOR REQ OOPS                             EXIT
  ( BACKUP        250 LOAD   77 81 THRU )
 ( REQ ASSEMBLERi86 )
 ( REQ DEADBEEF )
 
 
 : TASK ;   ( 'REQ HIDDEN)     OK
-
 ( -f forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD  REQUIRE CONFIG   ?LI
 REQUIRE ARGV   REQUIRE CTYPE
@@ -1038,7 +1038,7 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 ( Find a STRING in the environment, -its VALUE or NULL string)
 : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
 
-( SAVE-SYSTEM TURNKEY )  REQUIRE CONFIG  ?LI HEX \ AvdH A1sep24
+( SAVE-SYSTEM TURNKEY ) REQUIRE CONFIG 1 2 +THRU ?LI HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -1054,6 +1054,38 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
+( --save_system_ turnkey ) ?PC HEX \ AvdH
+\ Write an MSDOS ``EXEHEADER'' structure over the PSP.
+VARIABLE HEAD-DP  \ Fill in pointer
+
+\ Add a 16 bit WORD to the header.
+: W, HEAD-DP @ >R   DUP R@ C!   8 RSHIFT R@ 1+ C!
+    R> 2 + HEAD-DP ! ;
+
+\ Return the SIZE of the system, including header,
+: SIZE HERE 10 + 1- 1FF OR 1+ ;  \ 10 byte stack. Whole pages.
+
+\ Fill in ``EXEHEADER'' struct, leave POINTER to where checksum
+\ must be filled in.
+: EXEHEADER   0 HEAD-DP !  5A4D W,   0 W,   SIZE  200 / W,
+    0 W,   10 W,   10 W,   10 W,   SIZE 10 - 10 / W,   10 W,
+    HERE   0 W,   100 W,   -10 W,  SIZE W,  0  W, ;
+( SAVE-SYSTEM TURNKEY ) REQUIRE CONFIG ?PC HEX \ AvdH
+
+\ Fill in checksum at the required POSITION in the header.
+: CHECKSUM   HEAD-DP !
+    0   SIZE 0 DO I @ + 2 +LOOP  NEGATE   W, ;
+: SAVE-PSP   0 PAD 100 CMOVE ;
+: RESTORE-PSP  PAD 0 100 CMOVE ;
+\ Save the system in a file with NAME .
+: SAVE-SYSTEM   10 ALLOT SAVE-PSP ( startup stack)
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+   EXEHEADER CHECKSUM   0 SIZE 2SWAP PUT-FILE   RESTORE-PSP ;
+
+\ Actually this is the same than in Linux.
+\ Save a system to do SOMETHING in a file with NAME .
+: TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
+
 ( PD PE PC PS get_selectors/descriptors ) \ AvdH A1nov02
 REQUIRE ASSEMBLERi86 HEX
 CODE PC PUSHS, CS| NEXT C;
