@@ -77,10 +77,50 @@ SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone LINOS DUP 0< IF THROW THEN
 DUP IF RDROP R> BEGIN DUP @ UNTIL ! ELSE R> R>
 \ Install return stack
 DUP [ 0 CELL+ ] LITERAL + @ RSP! \ CELL+ is high level!
-\ Install data stack trasnporting one item via return stack.
+\ Install data stack transporting two items via return stack.
 >R >R S0 @ DSP! R> R> -1 SWAP !
 \ Run and stop
 EXECUTE 0 _ _ 1 LINOS THEN ;
 
 \ Kill the thread via its DEA. Throw errors.
- : KILL >BODY @ 9 _ 25 LINOS ?ERRUR ;
+: KILL >BODY @ 9 _ 25 LINOS ?ERRUR ;
+
+\ Do a preemptive pause.
+\ In fact wait on nothing with a 10^6 nanoseconds timeout.
+: PAUSE 0 0 1000 0 DSP@ 8E LINOS5 DROP ;
+
+\ Example. From the transputer world.
+
+\ Convert a CHARACTER to uppercase. Return IT.
+: >UPC DUP &a &z 1+ WITHIN IF 20 XOR THEN ;
+
+\ A channel. It is inactive (contains no character) if it is zero.
+: CHANNEL CREATE 0 C, ;
+
+\ Store a CHARACTER to a CHANNEL.
+: CHANNEL-C! BEGIN PAUSE DUP C@ 0= UNTIL C! ;
+
+\ Read from a CHANNEL. Return the CHARACTER.
+: CHANNEL-C@ BEGIN PAUSE DUP C@ UNTIL DUP C@ 0 ROT C! ;
+
+CHANNEL M>S  \ Communication channel from master to slave.
+CHANNEL S>M  \ Communication channel from slave to master.
+
+: do-master
+BEGIN
+    KEY DUP M>S CHANNEL-C! ^D <> WHILE
+    S>M CHANNEL-C@ EMIT
+REPEAT ;
+
+: do-slave
+BEGIN
+    M>S CHANNEL-C@ DUP ^D <> WHILE
+    >UPC S>M CHANNEL-C!
+REPEAT DROP ;
+
+\ This thread need no ``PAD'' or other dictionary space.
+0 THREAD SLAVE
+
+\ Send hither and thither characters until an ``ASCII''
+\ End Of Text (ETX or ^D) is pressed.
+: do-it   'do-slave SLAVE   do-master ;
