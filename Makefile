@@ -108,6 +108,9 @@ fig86.%.o : fig86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 # but a .5M executable is better than a 64 M executable.
 figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@ 
 
+# Linux native forth
+lina : fig86.lina.o ; ld $+ -o $@
+
 # Convenience under linux. Steal the definitions of constants from c include's.
 constant.m4 : stealconstant.c ; cc -E $+ | m4 prelude.m4 - >$@
 
