@@ -23,6 +23,8 @@ REQUIRE ^
 \ Number of lines to put in a column (assembler file.)
 117 CONSTANT #Lines
 
+\ Page number, through goiing
+VARIABLE CurrentPage
 
 \ upper left coordinates of top screen of left column
 2500 76961 COORDINATE LeftColumn
@@ -83,9 +85,10 @@ CREATE FileContent 2 CELLS ALLOT
                        ." closepath CW setlinewidth .5 setgray stroke 0 setgray" CR
 ;
 \ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
+\ As a side effect set the proper font for printing screens.
 : ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
     ." moveto " C/L 3 / . ." M (SCR #"
-    DUP . ." ) TitleF show BodyF" CR #Screens + ;
+    DUP . ." ) TitleF show BodyFl" CR #Screens + ;
 
 \ Output at POSITION a NUMBER lines. Return it was EMPTY.
 : MultLine >R
@@ -96,11 +99,16 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output a screen at POSITION unless empty. Return it was EMPTY.
 : OneScreen    16 MultLine DrawBorder ;
 
-\ Print the PAGE number and the file name on top.
+\ Print the PAGE number in behalf of viewers as PostScript comment.
+: PrintPageNumber
+    1 CurrentPage +!
+    ." %%Page: " TYPE . CurrentPage  @ . CR
+;
 
 \ Output a SCREEN and following at PAGE in two columns of screens.
 \ Leave incremented SCREEN and PAGE and indication we MUST stop.
 : NextPage
+      DUP "A-" PrintPageNumber
       DUP ." (" 4 .R ." ) (Appendix A. forth.lab) exch StartPage " CR 1+ >R
       LeftColumn 2@ ScreenNumber
       LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
@@ -178,10 +186,10 @@ CREATE FileContent 2 CELLS ALLOT
     end
 } def
 
-1 100 div dup scale
 /#copies 1 def
-/BodyF { 679 /Courier /Courier-Latin1 ChgFnt } def
-/CW BodyF ( ) stringwidth pop def
+/BodyFl { 679 /Courier /Courier-Latin1 ChgFnt } def
+/BodyFs { 550 /Courier /Courier-Latin1 ChgFnt } def
+/CW BodyFl ( ) stringwidth pop def
 /TitleF {  1000 /Courier-Bold /Courier-Bold-Latin1 ChgFnt } def
 /K         { -2 CW mul add exch moveto (+) show } def
 /L         { CW mul add exch moveto show } def
@@ -189,8 +197,9 @@ CREATE FileContent 2 CELLS ALLOT
 /M         { CW mul 0 rmoveto } def
 /Centre    { dup stringwidth pop 2 div neg 0 rmoveto } def
 /StartPage { /SavedPage save def
+  1 100 div dup scale
   0 setgray TitleF 2500 80700 moveto show 32 M show
-  BodyF 0 setgray CW setlinewidth 1 setlinejoin } def
+  BodyFs 0 setgray CW setlinewidth 1 setlinejoin } def
 /EndPage   {showpage SavedPage restore } def
 %%EndProlog
 " TYPE ;
@@ -199,7 +208,7 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output the postlude : PostScript code.
 : PostLude
 "%%Trailer
-%%Pages:"  TYPE . CR ;
+%%EOF" TYPE ; CR
 
 
 \ Output the screens.
@@ -212,7 +221,6 @@ CREATE FileContent 2 CELLS ALLOT
 
 : Interlude
 ." %%Appendix B
- /BodyF { 550 /Courier /Courier-Latin1 ChgFnt } def
 %%Endinterlude
 "
 -625 LineStride ! ;
@@ -231,6 +239,7 @@ CREATE FileContent 2 CELLS ALLOT
 \ Output a PAGE in two columns.
 \ Leave incremented SCREEN and PAGE and indication we MUST stop.
 : NextPageSrc
+      DUP "B-" PrintPageNumber
       DUP ." (" 4 .R ." ) (Appendix B. assembler) exch StartPage " CR 1+ >R
       LeftColumn 2@ OneColumn
       DrawBar
@@ -244,10 +253,11 @@ CREATE FileContent 2 CELLS ALLOT
 : OutputFile
     AssemblerName GET-FILE FileContent 2!
     Interlude
-    1 NextPageSrc DROP
+    1 BEGIN NextPageSrc UNTIL
     1- PostLude DROP
 ;
 
+154 CurrentPage !
 
 OutputScreens
 OutputFile
