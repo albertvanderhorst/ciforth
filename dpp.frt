@@ -131,10 +131,10 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 
 \ Add STRING as a diagnosis.
 : ADD-DIAGNOSIS CLEAN-STRING $, DUP $TO-LOWER $@
-    #DIAGNOSES @ DIAGNOSES 2! 1 #DIAGNOSES +! ;
-\ \D " Ape" ADD-DIAGNOSIS
-\ \D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|0 " &| EMIT TYPE &| EMIT DEPTH . CR
-\ \D -1 #DIAGNOSES +!
+    #DIAGNOSES @ DIAGNOSES 2! #DIAGNOSES @ 1 #DIAGNOSES +! ;
+\D " Ape" ADD-DIAGNOSIS
+\D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|2 0 " &| EMIT TYPE &| EMIT . DEPTH . CR
+\D -1 #DIAGNOSES +!
 
 \ Add STRING as a QUESTION.
 : ADD-QUESTION CLEAN-STRING $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
@@ -446,6 +446,81 @@ DATABASE CONSULTING STRATEGY
 \ Give the user an opportunity to change the answer vector before it is added
 \ to the database.
 \ This helps keeping the database clean from typo's and lousy answering.
+: CONFIRM-ANSWERS ." To be done still" CR DROP ;
+
+\ Ask the user to introduce a new diagnosis, because no diagnosis
+\ known is compatible with his answers. However sometimes the new
+\ diagnosis is known already, but the answers are unexpected.
+\ Always the DIAGNOSIS is returned.
+: NEW-DIAGNOSIS
+    DumbEeh$ TYPE CR
+    PleaseLearn$ .QUESTION (ACCEPT)
+    2DUP FIND-DIAGNOSIS DUP -1 = IF
+        DROP ADD-DIAGNOSIS
+    ELSE  \ Should be an exceptional case
+        GotItWrong$ TYPE
+        >R 2DROP  R@ CONFIRM-ANSWERS R>
+    THEN
+;
+\D ." Test OK interactively for not found." CR
+
+\ For two diagnoses D1 and D2, tell whether there IS some
+\ question in the database to make a distinction between them.
+: ?DISTINGHUISABLE 0 >R
+   BEGIN 2DUP R@ ANSWER-FOR SWAP R@ ANSWER-FOR
+       OVER A_NONE <>  OVER A_NONE <> AND >R
+       <> R> AND IF 2DROP RDROP 1 EXIT THEN
+   #DIAGNOSES @ R@ <> WHILE
+       R> 1+ >R
+   REPEAT 2DROP RDROP 0
+;
+\D ." ?DIST Expect 0 0 : " 0 0 ?DISTINGHUISABLE . DEPTH . CR
+\D ." ?DIST Expect 1 0 : " 0 1 ?DISTINGHUISABLE . DEPTH . CR
+\D ." ?DIST Expect 1 0 : " 1 0 ?DISTINGHUISABLE . DEPTH . CR
+\D ." ?DIST Expect 0 0 : " 2 0 ?DISTINGHUISABLE . DEPTH . CR
+
+\ For DIAGNOSIS1 and DIAGNOSIS2 select an existing QUESTION that
+\ will make a distinction between the two.
+: SELECT-EXISTING 2DROP -1 ;
+
+\ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new QUESTION that will
+\ make a distinction between the two.
+: NEW-QUESTION
+    QuerySepar1$ TYPE CR      QuerySepar2$ TYPE CR
+     SWAP DIAGNOSES 2@ TYPE CR   DIAGNOSES 2@ TYPE CR
+    QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION #QUESTIONS @ 1- ;
+
+\ For DIAGNOSIS1 and DIAGNOSIS2 return a QUESTION that will make a
+: GENERATE-QUESTION
+     NeedQuestion1$ TYPE CR      NeedQuestion2$ TYPE CR
+     OVER DIAGNOSES 2@ TYPE CR   P DIAGNOSES 2@ TYPE CR
+     2DUP  SELECT-EXISTING
+     DUP -1 <> IF DROP 2DUP NEW-QUESTION THEN
+     >R 2DROP R>
+;
+EXIT
+
+
+: (EL-AM)
+    2DUP GENERATE-QUESTION
+    etc.
+;
+\ The outcome was the diagnosis INDEX. (Maybe just added.)
+\ Ask the operator for help to make sure this diagnosis can be
+\ distinguished from other diagnoses by some question.
+\ Of course we need only inspect those not excluded, (except in the
+\ case of wrong answers that were corrected afterwards.)
+: ELIMINATE-AMBIGUITY
+    #DIAGNOSES @ 0 DO
+       DUP I <>   I ?EXCLUDED 0= AND   OVER I ?DISTINGHUISABLE AND
+       IF DUP I (EL-AM) THEN
+    LOOP DROP ;
+
+: NEW-QUESTION ;
+: PRINTTABLE ;
+: ADD-ANSWERS ;
+: CONFIRM_ASNWERS :
+: exclude-more ;
 
 EXIT
 ONLY FORTH DEFINITIONS
