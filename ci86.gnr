@@ -4822,7 +4822,9 @@ system call (man 2) with parameters forthsamp({p1 p2 p3}).
 forthvar({ret}) is the return value of the call. If it is negative, it
 is mostly an error, such as known by forthvar({errno}) . This makes
 available forthemph({all}) facilities present in Linux.
-},{{?LINUX-ERROR}}, {}, enddoc)
+},{{?LINUX-ERROR}}, 
+{{1 "CHIMP" 4 LINOS .},{CHIMP5}},
+enddoc)
 CODE_HEADER({LINOS},{LINOS})
         POP     AX        ; Function number
         POP     DX        ; Third parameter, if any
@@ -4943,8 +4945,9 @@ CODE_HEADER({TYPE},{LTYPE},DOCOL)
 ;
 worddoc({INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) ,
-until a "return" or a number of forthvar({count}) characters have been
-received. Rely on the operating system for input editing. One or more
+until a "return" is received. 
+[ NONO THIS IS EXPECT or a number of forthvar({count}) characters have been
+received.] Rely on the operating system for input editing. One or more
 nulls are added at the end of the text.
 },{{KEY},{?TERMINAL}}, {}, enddoc)
 CODE_HEADER({ACCEPT},{ACCEP})
@@ -4978,7 +4981,14 @@ worddoc({SYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
 {Handle the error forthvar({errno}) by interpreting it as returned from a
 Linux system call. If it is negative error forthvar({-n}) is displayed and the word
 is aborted.
-},{{?ERROR}}, {}, enddoc)
+},{{?ERROR}}, 
+{
+{0 ?LINUX-ERROR 1 ?LINUX-ERROR},{}, 
+{0 WARNING ! -20 ?LINUX-ERROR },
+{ ! -20 ?LINUX-ERROR ? MSG # 20}, 
+{CR},{},
+}, 
+enddoc)
 HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
         DC      LDUP, ZERO, MIN, SWAP ; ( errno -- error flag, errno)
         DC      LIT, 64, PLUS   ; Project onto SCREEN 4..7.
@@ -4988,7 +4998,9 @@ HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
 worddoc({INPUT},{TERMIO},{termio},{--- addr},{},
 {Leave the address of the terminal description, this has the layout of
 a the c-structure forthsamp({termio}) .
-},{{SET-TERM}}, {}, enddoc)
+},{{SET-TERM}}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
@@ -4997,7 +5009,9 @@ worddoc({INPUT},{SET-TERM},{set_term},{len b --- },{},
 with forthvar({b}) in the termio structure forthcode({TERMIO}) .
 In particular toggling with 0AH makes that
 the terminal doesn't wait for a <return>.
-},{{SET-TERM}}, {}, enddoc)
+},{{SET-TERM}}, 
+{{( Interactive)},{}},
+enddoc)
 HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      LIT, _VAR_FIELD(TERMIO)+CELLS(3)
         DC      SWAP, TOGGL
@@ -5018,7 +5032,9 @@ worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 All terminal I/O goes through this word. It is high level so terminal
 I/O can be redirected, by forthref({revectoring}) it
 _VERBOSE_(and the usual redirection or forthvar({tee})-ing by Linux).
-forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
+forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, 
+{{HERE 41 C, 42 C, 2 TYPE},{AB}}, 
+enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTOR
         DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
@@ -5028,14 +5044,29 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      SEMIS
 ;
 worddoc({INPUT},{ACCEPT},{accept},{addr count ---},{ISO FIG L0},
-{Transfer characters from the terminal to address, until a "return"
-or the count of characters have been received.
-Rely on the operating system for input editing.
-One or more nulls are added at the end of the text.},
-{{KEY},{?TERMINAL}},
-{{( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)},{dnl{}( 1 A)},
-{( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )},{dnl{}( 6)},
-{( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)},{dnl{}( 1 Z)}}, enddoc)
+{Transfer at most forthsamp({count}) 
+characters from the terminal to address, until a 
+forthkey({return}) is received.
+The simple tty editing functions of Linux are observed, i.e.
+the ``erase'' (delete a character) and ``kill'' (delete a line) characters.
+Typically these are ^H and ^U.
+Note that excess characters after forthsamp({count}) remain in the type ahead
+buffer and will be returned as the next input, or interpreted as a console
+command.},
+{{KEY},{?TERMINAL},{EXPECT}},
+dnl THE ACCEP_A VERSION OF ACCEPT IS TESTED WITH
+dnl THE AUTOMATIC TESTING FACILITY.
+dnl THE DEFAULT CAN ONLY BE TESTING INTERACTIVELY
+dnl BUT THEN, THE COMMAND INTERPRETER DEPENDS ON IT
+{
+{PAD 10 ACCEPT},{},
+ {GIBBON
+  . PAD 5 TYPE},{7 GIBBO},
+ {( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)( 1 A)},{},
+ {( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )( 6)},{},
+ {( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)( 1 Z)},{}
+}, 
+enddoc)
 HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      ZERO    ; filedescriptor 0 for standard input.
         DC      ROT
@@ -5044,28 +5075,52 @@ HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      LINOS
         DC      ONE, LSUB, ZERO, MAX ; Position of CR (or 0 for failure)
         DC      SEMIS
-        _RESB    CELLS(4)        ; Room for patching
-; Alternative: if no terminal, this is copied over above code during boot
+; Alternative: if no terminal, this is copied over above code during boot.
+; Note: copying down in memory has no problems with overlap.
 ACCEP_A:
         DC      OVER, TOR
-        DC      EXPEC
+        DC      OVER, OVER, ONEP, LERASE
+        DC      OVER, PLUS, SWAP     ; Bounds
+        DC      XDO
+ACCEP1: DC      KEY 
+        DC      LDUP, LIT, LF
+        DC      EQUAL
+        _0BRANCH(ACCEP2)
+        DC      DROP
+        DC      LLEAV
+        _BRANCH(ACCEP3)
+ACCEP2: DC      IDO,CSTOR
+ACCEP3: _LOOP(ACCEP1)
         DC      FROMR, LDUP
 ACCEP4:  DC      COUNT, ZEQU
         _0BRANCH(ACCEP4)
         DC      SWAP, LSUB
         DC      SEMIS
 ACCEP_B:
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
-{Transfer characters from the terminal to address, until a "return"
-or the count of characters have been received.
-Rely on the operating system for input editing.
-One or more nulls are added at the end of the text.},
-{{KEY},{?TERMINAL}}, {}, enddoc)
+worddoc({INPUT},{EXPECT},{expect},{addr count ---},{NISO FIG L0},
+{Transfer characters from the terminal to address
+forthsamp({addr}) , until a "return" or forthsamp({count})
+characters have been received. _VERBOSE({This early return
+property is an important difference with forthcode({ACCEPT})
+.}) Rely on the operating system for input editing. This is not
+ISO as the number of characters is not stored. And the buffer
+is zeroed up till forthsamp({count}). }, 
+{{KEY},{?TERMINAL}}, 
+{
+{CR PAD 10 EXPECT},{},
+ {GIBBON 
+  PAD 5 TYPE CR},{GIBBON
+
+GIBBO}
+}, 
+enddoc)
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      OVER, OVER, ONEP, LERASE
         DC      OVER, PLUS, SWAP     ; Bounds
         DC      XDO
-EXPEC1: DC      KEY, LDUP, LIT, LF
+EXPEC1: DC      KEY, 
+        DC      LDUP, EMIT
+        DC      LDUP, LIT, LF
         DC      EQUAL
         _0BRANCH(EXPEC2)
         DC      DROP
