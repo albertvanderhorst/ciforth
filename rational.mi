@@ -1,0 +1,291 @@
+@section                        Legalese
+
+This Forth is called ciforth and is made available through the
+DFW 
+All publications of the DFW are available under GPL, the GNU public license.
+The file COPYING containing the legal expression of these lines must accompagny it.
+
+Because Forth is ``programming by extending the language'' the GPL
+could be construed to mean that systems based on ciforth
+always are legally obliged to make the source available. 
+But we consider this ``fair use in the Forth sense''.
+
+In addition to the GPL the DFW states the following:
+
+The GPL is interpreted in the sense that a system based on ciforth
+and intended to serve a particular purpose, that purpose not being a
+``general purpose Forth system'', is fair use of the system, even if it
+could accomplish everything ciforth could, under the condition that the
+ciforth it is based on is available in accordance to the GPL rules,
+and this is made known to the user of the derived system.
+
+@section                         Rationale 
+
+What you find here is a Forth for the Intel 86. It is a figforth
+as of old.Complying in detail with the Fig glossary, which is available 
+in electronicfrom for the first time in history.
+The motivation for having this type of Forth available follows from its
+characteristics. It is available as an assembler source, and it is an
+indirect threaded Forth. 
+An assembler source has distinct advantages for getting started from
+nothing. An engineer might balk at the description of how to use a meta
+compiler, but feels at ease with a (much larger) assembler manual.
+Although speed is currently in fashion, using subroutine threaded Forth's
+with optimisers, indirect threading is the preferred choice for some
+applications. I did this work, because I needed it. 
+I have also the firm belief that an optimiser on an indirect threaded system
+has more information to work with and can ultimately outperform any
+other system in speed.
+
+@section                         Two stage system
+
+The source and executable of this ciforth was generated, out of at
+least dozen's of possibilities, by a generic system. An important goal
+was to generate exactly fitting documentation, that contains only
+relevant information. 
+The original system can be obtained via
+http://home.hccnet.nl/a.w.m.van.der.horst/figforth.html
+
+@section                         Source
+In practice the GPL 
+ means (note: this is an explanation and has no legal value!)
+
+They may be
+further reproduced and distributed subject to the following conditions:
+
+The three file comprising it must be kept together and in particular 
+the reference section with the World Wide Web sites.
+
+
+This Forth builts on figforth.
+It is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
+that is available via taygeta.
+
+You still can obtain the original version
+ that is public domain according to the following statement:
+
+All publications of the Forth Interest Group are public domain. They may be
+further reproduced and distributed by inclusion of this credit notice: 
+
+This publication has been made available by the Forth Interest Group, 
+
+              P. O. Box 1105,  San Carlos, Ca 94070
+
+albert@@spenarnc.xs4all.nl     http://home.hccnet.nl/a.w.m.van.der.horst
+
+@section                  History                                               
+     
+From the introduction to the figforth installation manual:
+forthquotation
+The figforth implementation project occurred because a key group of Forth
+fanciers wished to make this valuable tool available on a personal computing
+level. In June of 1978, we gathered a team of nine systems level
+programmers, each with a particular target computer. The charter of the
+group was to translate a common model of Forth into assembly language
+listings for each computer. It was agreed that the group's work would be
+distributed in the public domain by FIG. 
+
+We intend that our primary recipients of the Implementation Project be
+computer users groups, libraries, and commercial vendors. 
+We expect that each will further customize for particular computers and
+redistribute. No restrictions are placed on cost, but we expect faithfulness
+to the model. FIG does not intend to distribute machine readable versions,
+as that entails customization, revision, and customer support better
+reserved for commercial vendors. 
+
+Of course, another broad group of recipients of the work is the community of
+personal computer users. We hope that our publications will aid in the use
+of Forth and increase the user expectation of the performance of high level
+computer languages. 
+forthendquotation
+
+@section                 Deviations of the FIG model
+
+This version complies faithfully to the fig model, at least as
+faithfully as is customary. 
+
+The rigid subdivision in 7 area's was never adhered to. 
+In particular the bootup parameters
+are not up front as CP/M and MSDOS require a 100H byte reserved
+area there. 
+There is mention of forthvar({(KEY)}) being ``implementation dependant code''
+but these were not often present in 
+fig implementations. Here the implementation dependant code 
+becomes part of the code definitions, or even of the high level definitions.
+
+All documentation is now accurate but only claims to describe
+ciforth. 
+The forthcode({RUBOUT}) key is a bonafide forthcode({USER}) variable
+and now has a name.
+
+DR0 and DR1 are removed. There is only one consecutive mass storage area, be
+it a disk or a file. 
+forthvar({MOVE MON BLOCK-READ BLOCK-WRITE DLIST}) are not present.
+Altering OUT to influence formatting doesn't work here, nor on 
+any figforth I know off.
+
+Some real errors were fixed 
+
+@section                 Must go to the generic information
+
+ Installation Dependent Code
+
+You may want to use the assembly code of this ciforth to 
+base a new Forth on. If this adversely affects the documentation
+I urge you not to do that but to use the generic system.
+
+The  following words 
+are traditionally 
+the only portion that need change between different
+installations of the same computer cpu. They cannot come close to the capabilities
+of the generic system, and should be used for minor modifications only.
+
+There are five words that need adaptation:
+
+KEY 
+    Push the next ascii value (7 bits) from the terminal keystroke to the
+    computation stack and execute NEXT. High 9 bits are zero. Do not echo
+    this character, especially a control character. 
+
+
+EMIT 
+    Pop the computation stack (16 bit value). Display the low 7 bits on the
+    terminal device, then execute NEXT. Control characters have their
+    natural functions. 
+
+?TERMINAL 
+    For terminals with a break key, wait till released and push to the
+    computation stack 0001 if it was found depressed; otherwise 0000.
+    Execute NEXT. If no break key is available, sense any key depression as
+    a break (sense but don't wait for a key). If both the above are
+    unavailable, simply push 0000 and execute NEXT. 
+
+CR 
+    Execute a terminal carriage return and line feed. Execute NEXT. 
+
+R/W 
+This colon-definition is the standard linkage to your disc. It requests
+the read or write of a disc block, be it raw disk or allocated in a file.
+
+On primitive systems these may be jumps to ROM-code. But generally on i86
+facilities like this are available using forthdefi({INT})'s a kind of traps.
+These observe operating system protocols and are available as high level forth
+code.
+
+@section              Ram disc simulation
+
+If disc is not available, a simulation of BLOCK and BUFFER may be made in
+RAM. The following definitions setup high memory as mass storage. Referenced
+``screens'' are then brought to the ``disc buffer'' area. This is a good method
+to test the start-up program even if disc may be available. 
+
+forthexample({
+HEX  
+4000 CONSTANT LO ( START OF BUFFER AREA ) 
+6800 CONSTANT HI ( 10 SCREEN EQUIVALENT ) 
+: R/W >R ( save boolean ) 
+    B/BUF * LO + DUP 
+    HI > 6 ?ERROR ( range check ) 
+    R> IF ( read ) SWAP ENDIF 
+    B/BUF CMOVE ;
+})   
+
+Insert the code field address of R/W into BLOCK and BUFFER and proceed as if
+testing disc. R/W simulates screens 0 thru 9 when B/BUF is 128, in the
+memory area $4000 thru $6BFF. 
+
+
+             DEBUGGUBG AND INSTALLATION
+
+Let us assume we have an system based on an assembler listing 
+and we want to debug it. 
+
+Here are the sequential steps: 
+forthenumerate
+forthitem
+Familiarize yourself with the model written in Forth, the glossary, and
+specific assembly listings. 
+forthitem
+Edit the assembly listings into your system. Set the fifth
+boot-up parameters (WARNING) to 0000 (warning messages are shown as 
+simple numbers).
+forthitem
+Alter the terminal support code (KEY, EMIT, etc,) to match your system. 
+Observe register protocol specific to your  implementation!
+forthitem
+Place a break in your debugger at the end of NEXT, just before indirectly
+jumping via register W to execution. W is the Forth name for the register
+holding a code field address, and may be differently referenced in your
+listings. 
+forthitem
+Enter the cold start at the origin. Upon the break, check that the
+interpretive pointer IP points within ABORT and W points to SP!. 
+If COLD is a colon-definition, then the IP has been initialized on the way
+to NEXT and your testing will begin in COLD. The purpose of COLD is to
+initialize IP, SP, RP, VP, and some user variables from the start-up
+parameters at the origin. 
+forthitem
+Continue execution one word at a time. 
+Clever individuals could write a simple trace routine to print IP, W, SP, RP
+and the top of the stacks. Run in this single step mode until the greeting
+message is printed. Note that the interpretation is several hundred cycles
+to this stage! 
+forthitem
+Execution errors may be localized by observing the above pointers when a
+crash occurs. 
+forthitem
+After the word QUIT is executed (incrementally), and you can input a
+"return" key and get OK printed, remove the break. 
+You may have some remaining errors, but a reset and examination of the above registers will again localize problems.
+forthitem
+When the system is interpreting from the keyboard, execute EMPTY-BUFFERS
+to clear the disc buffer area. 
+forthitem
+If your disc driver differs from the assembly version, you must create
+your own R/W .
+You may test the disc access by typing: 0
+BLOCK 64 TYPE This should bring block zero from the disc to a buffer and
+type the first 64 characters. 
+If BLOCK (and R/W) doesn't function--happy hunting! 
+forthendenumerate
+
+MULTI-USER
+
+The name USER reflects that more than one user could use the dictionary
+and users could share the background storage, provided certain precautions
+are taken. 
+These precautions are
+forthenumerate
+forthitem 
+Variables that can be different for different users, 
+must be defined as an offset to an area, that is different for
+each user.
+forthitem
+Provisions that maintains the integrity of the dictionary
+forthitem
+Different stacks for each user.
+forthitem
+A means to switch applications.
+forthitem 
+Different scratchpads for each user.
+forthendenumerate
+
+Almost nothing from this is realised in the figforth model.
+In fact only 1, but there is only one area.
+
+Still USER variables seem to serve a useful purpose. 
+They are initialised during start up, 
+by changing it one could modify the system.
+This however is only seemingly.
+Because the initialised memory is saved anyway,
+the initial values would be stored even if they
+were ordinary variables.
+So we are left with the disadvantage that we have to store them
+back before saving the system.
+Remains the advantage that they can be restored by typing forthcode({COLD}) .
+This too is hardly an advantage because with the fast mass storage you would 
+rather type forthcode({BYE}) and forthsamp({forth}) as a much safer way 
+to restart your Forth.
+                                    
+
+
