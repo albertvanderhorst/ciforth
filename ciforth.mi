@@ -20,6 +20,7 @@ _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({run
 forthitem
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })
+_BOOTED_({ _RESPECTDOS_({It tries to keep bootfloppy's in MSDOS-compatible format})})
 _FEWBLOCKS_({forthitem
 number of blocks limited to 256})
 _SECURITY_({forthitem
@@ -65,8 +66,8 @@ forthitem
 _BOOTED_({A booting floppy or hard disk}) dnl
 _HOSTED_DPMI_({ciforth.com})_HOSTED_MSDOS_({ciforth.com})dnl
 _LINUX_N_({lina})_LINUX_C_({ciforthc})  : the program
-_BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can
-see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})
+_BOOTED_({_RESPECTDOS_({If you inspect a booting floppy from MSDOS you discover that you can
+see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})})
 forthitem
 ciforth.ps ciforth.html : the documentation
 forthitem
@@ -96,6 +97,8 @@ _HOSTED_DPMI_({It is running under DPMI (OS/2 or MS-Windows).}) dnl
 _USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.}) dnl
 _RWHD_({Blocks are on a raw hard disk.}) dnl
 _RWFD_({Blocks are on a raw floppy disk.}) dnl
+_BOOTLBA_({Booting from harddisk uses LBA disk access. })
+_BOOTSECTRK_({Booting from harddisk or floppy uses classical disk access by sector and track.})
 _RWFILE_({Blocks are allocated in files.}) dnl
 _CLASSIC_({ Rely partly on DOS for I/O, partly on the BIOS.}) dnl
 _MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features.}) dnl
@@ -103,7 +106,7 @@ _BITS16_({A number has a precision of 16 bits.}) dnl
 _BITS32_({A number has a precision of 32 bits.}) dnl
 _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
-_SECURITY_({It has compiler security, sacrificing some bizar ISO
+_SECURITY_({It has compiler security, sacrificing some bizarre ISO
 compatibity.}) dnl
 _CIF_IN_({It doesn't use forthcode({>IN}) in the way prescribed by ISO.}) dnl
 _FEWBLOCKS_({The number of blocks limited to 256}) dnl
@@ -239,7 +242,7 @@ Where there is mention of a standard or a model,
 it means that the word actually complies to the standard or the model,
 not that some word of that name is present.
 _VERBOSE_({Words marked with forthsamp({ISO,FIG,L0}) will behave identically
-over all but the whole spectre of Forth's.})
+over all but the whole spectra of Forth's.})
 
 Unless otherwise noted, all references to numbers are for _BITS_ bit
 signed integers. For _BITS16_({32})_BITS32_({64}) signed numbers, the
