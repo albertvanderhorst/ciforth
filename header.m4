@@ -20,7 +20,9 @@ dnl We lay down a nice square around the definition as a tribute to Thomas Newma
 dnl _star(x) generates x stars
 define({_star},{ifelse}(0,$1,,{*{_star}({decr}($1))}))
 define({_LINKOLD},0)dnl
-define(HEADER,{
+dnl Lay down a header with forth name $1, assembler name $2 and code field $3
+dnl If $4 is defined, make the word immediate.
+define(HEADER, {dnl
 define({_x},len({$1}))dnl
 define({_y}, {substr({$1},eval(_x-1),1)})dnl
 define({_z}, {substr({$1},0,eval(_x-1))})dnl
@@ -36,8 +38,9 @@ $2:      DW     $3
          undefine({_y})dnl
          undefine({_z})dnl
 define({_LINKOLD},{_$2})dnl
-})
+})dnl
 dnl
+define({_LINK_FIELD},_$1)dnl
 dnl Similar to HEADER but uses single quotes. instead of doubles. 
 dnl Useful if a name has double quotes like PDOT. (Cannot handle a combination of the two)
 define(HEADER_SGQ,{
