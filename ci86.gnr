@@ -2352,6 +2352,20 @@ CODE_HEADER({EXIT},{EXIT})
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
 ;
+worddoc( {CONTROL},{CO},{coroutine},{},{},
+{ Return suspend interpretation of the current definition,
+such that when the caller exits, this definition is resumed.
+The return
+stack must not be engaged, such as between forthcode({>R}) and
+forthcode({R>}) , or forthcode({DO}) and forthcode({LOOP}) .
+},
+{{EXIT}},
+{ {: GS1 2 CO 4 ; : GS2 1 GS1 3 ; GS2 . . . .},{4 3 2 1} },
+enddoc)
+CODE_HEADER({CO},{CO})
+        XCHG    HIP,[RPO]
+        _NEXT
+;
 worddocsafe( {CONTROL~},{(;)},{paren_semicolon},{},{},
 { This is a synonym for forthcode({EXIT}). It is the run-time
 word compiled at the end of a colon-definition which returns

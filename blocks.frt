@@ -542,13 +542,13 @@ REQUIRE T[
 
 
 
-( OLD: RESTORED POSTFIX ) \ AvdH A1sep26
+( OLD: RESTORED POSTFIX ) \ AvdH A2jun12
 \ WARNING: use these facilities only with high level words.
 
 \ Compile the current execution behaviour of "name".
 \ This behaviour remains the same if "name" is revectored.
-: OLD:   (WORD) FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R ;
-    IMMEDIATE
+: OLD:   (WORD) FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R
+    POSTPONE CO ; IMMEDIATE
 \ Have the original behaviour of DEA restored.
 : RESTORED   DUP >PHA SWAP >DFA ! ;
 \ Do nothing for one call of ``(WORD)''
