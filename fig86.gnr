@@ -152,7 +152,7 @@ _COMMENT
 SECSTRT EQU     1
 _ENDCOMMENT
 ;{ END  OF PHYSICAL DISK PARAMETERS}
-
+ 
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
 REALSEGMENT     EQU     BOOTADDRESS/10H ;{ @ All real code executes here}
@@ -418,10 +418,10 @@ ENDBOOT:
 ;{ Remember: our model assumes that all segments the same (small model, or }
 ;{ .com program) ). Now make sure the CS agrees with the absolute addresses}
 ;{ used in Forth. Make other segments the same.                            }
-;{In fact the following is needed and works only if booted real code is started }
-;{ by MSDOS. Otherwise the code is correct. Protected mode doesn't care    }
-;{ about the real mode codesegment anyway. }
-        CALL  HERE1
+;{In fact the following is needed and works only if booted code is started }
+;{ by MSDOS. Otherwise the codesegment is already correct. }
+;{ Protected mode requires this very temporarily, until GDTLOAD is filled.} 
+        CALL  HERE1                                                         
 HERE1:  POP   AX         ;{ Reality.}
         MOV BX, HERE1 ;{ Dream.}
         SUB AX,BX      ;{ Discrepancy between dream and reality}
@@ -448,7 +448,7 @@ HERE2:
 
 
 ; ########################################################################################
-;                       SWITCH TO PROTECTED MODE/32 BITS (optional)
+;                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
 ; ########################################################################################
 ;____1_____ _SWITCH_1_({
         JMP    PROTECT
@@ -502,6 +502,32 @@ PROTECT:
         MOV     ES,AX
         LGDT    [GDTLOAD]
 });_END___1__({ _SWITCH_1_})
+
+;____1_____ _PROTECTED_1_({
+;{ Remember: we are now in the real mode for a protected model.} 
+;{ Make sure we are in the switch segment, such that we can switch.}
+        MOV   BX,CS      ;{ Reality.}
+        MOV AX, GDT_SWITCH ;{ Dream.}
+        PUSH AX     ; {Correct code segment}
+        SUB AX,BX      ;{ Discrepancy between dream and reality}
+        MOV CX,10h     ;{ How much units would that be for the IP?}
+        XOR DX,DX
+        MUL CX         
+        CALL  HERE3
+HERE3:  POP   BX         ;{ Reality.}
+        SUB BX,AX    ; 
+        ADD BX,HERE4-HERE3
+        PUSH BX     ; {Corrected program counter}
+        RETF        ; {Returning to HERE4 now}
+HERE4:
+        CLI                     ;{ Disallow interrups until stack ready}
+        MOV     AX,CS           ;{ Will do for now (real mode)}
+        MOV     DS,AX
+        MOV     SS,AX
+        MOV     ES,AX
+        MOV     STACKPOINTER,0H
+        STI                     ;{ Allow interrupts}
+});_END___1__({ _PROTECTED_1_})
 
 
 ;{************************}
