@@ -20,19 +20,21 @@ dnl _star(x) generates x stars
 define({_star},{ifelse}(0,$1,,{*{_star}({decr}($1))}))
 define({_LINKOLD},0)dnl
 dnl Lay down a header with forth name $1, assembler name $2 and code field $3
-dnl If $4 is defined, make the word immediate.
+dnl and parameter field $4
+dnl If $5 is defined, use that as a flag field.
 define(HEADER, {dnl
-define({_x},len({$1}))dnl
 ;  ********_star(len({$1})) 
 ;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
 N_$2:   _STRING({$1})
         DC    N_$2
-        DC    ifelse(0,len($4),0H,$4) 
+        DC    ifelse(0,len($5),0H,$5) 
         DC    _LINKOLD
 $2:     DC     $3
-         undefine({_x})dnl
+dnl        DC    ifelse(0,len($4),$ + CELLS(1),$4) 
+ifelse(0,len($4),, {
+    DC    $4}) 
 define({_LINKOLD},{$2-CELLS(C_HOFFSET)})dnl
 })dnl
 dnl
@@ -55,6 +57,7 @@ define({_LOOP},dnl
         DC      $1-$})dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},{HEADER({$1},{$2},{$+CW})})dnl
+dnl define({CODE_HEADER},{HEADER({$1},{$2},{$+CELLS(2)},{$+CELLS(1)},$5)})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPFAR},{DB    0EAH})dnl

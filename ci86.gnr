@@ -894,7 +894,7 @@ Skip remaining non-blank characters.},
 {& X  HEX .},{58 },
 {: GS1 & HELLO ; GS1 HEX .] },{48 },
 {: GS1 & X ; GS1 HEX .},{58 }}, enddoc)
-HEADER({&},{DCHAR},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      INBRS, DROP, DROP
         DC      INBRS
         DC      SWAP, DROP
@@ -911,52 +911,52 @@ worddocsafe({DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
 {},
 {{048 .},{48 },
 {: GS1 058 ; GS1 .},{58 }}, enddoc)
-HEADER({0},{DEN0},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({0},{DEN0},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({1},{DEN1},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({1},{DEN1},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({2},{DEN2},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({2},{DEN2},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({3},{DEN3},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({3},{DEN3},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({4},{DEN4},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({4},{DEN4},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({5},{DEN5},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({5},{DEN5},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({6},{DEN6},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({6},{DEN6},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({7},{DEN7},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({7},{DEN7},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({8},{DEN8},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({8},{DEN8},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({9},{DEN9},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({9},{DEN9},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({A},{DENA},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({A},{DENA},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({B},{DENB},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({B},{DENB},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({C},{DENC},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({C},{DENC},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({D},{DEND},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({D},{DEND},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({E},{DENE},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({E},{DENE},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
-HEADER({F},{DENF},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({F},{DENF},{DOCOL}, , B_IMMED + B_DENOT)
         DC      NUMB, SEMIS
 ;
 worddoc({DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
@@ -964,12 +964,12 @@ worddoc({DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {},
 {{-48 .},{-48 },
 {: GS1 -58 ; GS1 .},{-58 }}, enddoc)
-HEADER({-},{DENM},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
         DC      PNUMB, DMINU, SDLITE
         DC      SEMIS
 ;
-HEADER({+},{DENP},{DOCOL}, B_IMMED + B_DENOT)
+HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
         DC      NUMB, SEMIS
 ;
@@ -992,7 +992,7 @@ This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
 to add a denotation.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({DENOTATION},{DENOT},{DODOE},B_IMMED)
+HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -1381,8 +1381,7 @@ forthsamp({SOURCE-ID}) are secondary,
 and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
 {{BLK},{SOURCE-ID}},
 {{ 9 2 SOURCE +! 8 9 . .},{9 9 }}, enddoc)
-HEADER({SOURCE},{SOURC},{DOUSE})
-        DC      CELLS(27)       ;{ And 28 and 29.}
+HEADER({SOURCE},{SOURC},{DOUSE}, CELLS(27))      ;{ And 28 and 29.}
 ;
 worddoc({OUTPUT},{CR},{cr},{},{L0},
 {Transmit a carriage return and line feed to the selected output
@@ -1807,7 +1806,7 @@ The compiling process is done by the text interpreter as long as
 forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
 set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
 set (P) are executed rather than being compiled.},{}, {}, enddoc)
-HEADER({:},{COLON},{DOCOL},B_IMMED)
+HEADER({:},{COLON},{DOCOL}, , B_IMMED)
         DC      QEXEC
         DC      SCSP
         DC      CURR
@@ -1819,7 +1818,8 @@ HEADER({:},{COLON},{DOCOL},B_IMMED)
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-        LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
+         LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
+;        MOV     SI,[BX+CELLS(P_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -1831,7 +1831,7 @@ _SWITCH_({
 worddoc({DEFINING},{;},{semicolon},{},{P,C,L0},
 {Terminate a colon-definition and stop further compilation. Compiles
 the run-time forthcode({;S}) .},{}, {}, enddoc)
-HEADER({;},{SEMI},{DOCOL},B_IMMED)
+HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      QCSP
         DC      COMP
         DC      SEMIS
@@ -1911,9 +1911,7 @@ CODE_HEADER({3},{THREE})
 worddoc({STRING},{BL},{BL},{--- c},{},
 { A constant that leaves the
    ascii value for "blank".},{}, {}, enddoc)        
-HEADER({BL},{LBL},{DOCON})
-;{ THIS IS ONLY A SPAC}
-    DC 20H
+HEADER({BL},{LBL},{DOCON}, ABL)
 ;
 worddocsafe({STRING},{$@},{string_fetch},{addr --- sc},{},
 { From address forthsamp({addr}) fetch a string constant forthsamp({sc}) .},
@@ -1981,16 +1979,14 @@ worddoc({SCREEN},{C/L},{char_per_line},{--- c},{},
 {A constant that leaves the number of characters on a line of a
 standard screen. },
 {{LIST},{LINE}}, {}, enddoc)
-HEADER({C/L},{CSLL},{DOCON})
-        DC      64
+HEADER({C/L},{CSLL},{DOCON}, 64)
 ;
 _HIGH_BUF_({
 worddoc({STORAGE},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.
 },{{BLOCK},{LIMIT}}, {}, enddoc)
-HEADER({FIRST},{FIRST},{DOCON})
-        DC      BUF1
+HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 });_END_({ _HIGH_BUF_})
 ;
 _LOW_BUF_({
@@ -2012,28 +2008,24 @@ worddoc({STORAGE},{LIMIT},{limit},{---- n},{},
 available for a disc buffer.
 _HIGH_BUF_({Actually this is the highest system memory.})
 },{{BLOCK},{FIRST}}, {}, enddoc)
-HEADER({LIMIT},{LIMIT},{DOCON})
-        DC      BUF1+(KBBUF+2*CW)*NBUF
+HEADER({LIMIT},{LIMIT},{DOCON}, BUF1+(KBBUF+2*CW)*NBUF)
 ;{ THE END  OF THE MEMORY }
 worddoc({MEMORY},{EM},{end_memory},{---- addr},{},
 {A constant leaving the address just above the highest memory
 in use by Forth.
 },{{DP},{BM}}, {}, enddoc)
-HEADER({EM},{LEM},{DOCON})
-        DC      EM
+HEADER({EM},{LEM},{DOCON}, EM)
 ;
 worddoc({MEMORY},{BM},{begin_memory},{---- addr},{},
 {A constant leaving the address of the lowest memory
 in use by Forth.
 },{{DP},{EM}}, {}, enddoc)
-HEADER({BM},{LBM},{DOCON})
-        DC      ORG0
+HEADER({BM},{LBM},{DOCON}, ORG0)
 ;
 worddoc({STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
 count read from disc by forthcode({BLOCK}) .},{{B/SCR}}, {}, enddoc)
-HEADER({B/BUF},{BBUF},{DOCON})
-        DC      KBBUF
+HEADER({B/BUF},{BBUF},{DOCON}, KBBUF)
 ;
 ;{ All user variables are initialised }
 ;{ with the values from USINI.}
@@ -2044,8 +2036,7 @@ worddoc({MISC},{U0},{u_zero},{--- addr},{},
 for reference only. What is taken into account by user variables is
 the corresponding initialisation variable.
 },{{USER},{+ORIGIN}}, {}, enddoc)
-HEADER({U0},{UZERO},{DOUSE})
-        DC      CELLS(1)
+HEADER({U0},{UZERO},{DOUSE}, CELLS(1))
 ;
 worddoc({INPUT},{RUBOUT},{rub_out},{--- c},{},
 {A user variable, leaving the key code that must delete the
@@ -2053,24 +2044,20 @@ last character from the input buffer.
 _HOSTED_(In this ciforth it is not used, as the terminal input
 editing is left to the host operating system.)
 },{{USER}}, {}, enddoc)
-HEADER({RUBOUT},{RUBOUT},{DOUSE})
-        DC      CELLS(2)
+HEADER({RUBOUT},{RUBOUT},{DOUSE}, CELLS(2))
 ;
 worddoc({STACKS},{S0},{s_zero},{--- addr},{U},
 {A user variable that contains the initial value for the data stack
 pointer.},{{SP!}}, {}, enddoc)
-HEADER({S0},{SZERO},{DOUSE})
-        DC      CELLS(3)
+HEADER({S0},{SZERO},{DOUSE}, CELLS(3))
 ;
 worddoc({STACKS},{R0},{r_zero},{--- addr},{U},
 {A user variable containing the initial location of the return stack. },{{RP!}}, {}, enddoc)
-HEADER({R0},{RZERO},{DOUSE})
-        DC      CELLS(4)
+HEADER({R0},{RZERO},{DOUSE}, CELLS(4))
 ;
 worddoc({INPUT},{TIB},{t_i_b},{--- addr},{U},
 {A user variable containing the address of the terminal input buffer.},{}, {}, enddoc)
-HEADER({TIB},{TIB},{DOUSE})
-        DC      CELLS(5)
+HEADER({TIB},{TIB},{DOUSE}, CELLS(5))
 ;
 worddoc({ERRORS},{WARNING},{warning},{--- addr},{U},
 {A user variable containing a value controlling messages. If = 1 disc
@@ -2078,30 +2065,26 @@ is present, and screen 4 of drive 0 is the base location for
 messages. If = 0, no disc is present and messages will be presented
 by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure.
 },{{MESSAGE},{ERROR}}, {}, enddoc)
-HEADER({WARNING},{WARN},{DOUSE})
-        DC      CELLS(7)
+HEADER({WARNING},{WARN},{DOUSE}, CELLS(7))
 ;
 worddoc({DICTIONARY},{FENCE},{fence},{---  addr},{U},
 {A user variable containing an address below which forthcode({FORGET}) ting is
 trapped. To forget below this point the user must alter the contents
 of forthcode({FENCE}) .},{}, {}, enddoc)
-HEADER({FENCE},{FENCE},{DOUSE})
-        DC      CELLS(8)
+HEADER({FENCE},{FENCE},{DOUSE}, CELLS(8))
 ;
 worddoc({DICTIONARY},{DP},{d_P},{---- addr},{U,L},
 {A user variable, the dictionary pointer, which contains the address
 of the next free memory above the dictionary. The value may be read
 by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{}, {}, enddoc)
-HEADER({DP},{LDP},{DOUSE})
-        DC      CELLS(9)
+HEADER({DP},{LDP},{DOUSE}, CELLS(9))
 ;
 worddoc({VOCABULARIES},{VOC-LINK},{voc_link},{--- addr},{U},
 {A user variable containing the address of the VLFA in the word
 most recently created by forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
 linked by these fields to allow control for forthcode({FORGET}) ting thru multiple
 vocabularies.})},{{VOCABULARY}}, {}, enddoc)
-HEADER({VOC-LINK},{VOCL},{DOUSE})
-        DC      CELLS(10)
+HEADER({VOC-LINK},{VOCL},{DOUSE}, CELLS(10))
 ;
 worddoc({STORAGE},{OFFSET},{offset},{--- addr},{U},
 {A user variable which may contain a block offset to disc drives,
@@ -2113,23 +2096,20 @@ contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK
  forthvar({R/W}) .
 Messages by forthcode({MESSAGE}) are independent of forthcode({OFFSET}) .},
 {{BLOCK},{MESSAGE} }, {}, enddoc)
-HEADER({OFFSET},{OFSET},{DOUSE})
-        DC      CELLS(11)
+HEADER({OFFSET},{OFSET},{DOUSE}, CELLS(11))
 ;
 ;{ End of user variables with fixed place.}
 ;
 worddoc({SCREEN},{SCR},{s_c_r},{--- addr},{U},
 {A user variable containing the screen number most recently reference
 by forthcode({LIST}) .},{{BLOCK}}, {}, enddoc)
-HEADER({SCR},{SCR},{DOUSE})
-        DC      CELLS(14)
+HEADER({SCR},{SCR},{DOUSE}, CELLS(14))
 ;
 worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{U,L0},
 {A user variable containing a pointer into the data of
 a vocabulary that contains a dummy dea with which the
 dictionary searches will first begin.},{{VOCABULARY},{CURRENT}}, {}, enddoc)
-HEADER({CONTEXT},{CONT},{DOUSE})
-        DC      CELLS(16)
+HEADER({CONTEXT},{CONT},{DOUSE}, CELLS(16))
 ;
 worddoc({VOCABULARIES},{CURRENT},{current},{--- addr},{U,L0},
 {A user variable containing a pointer to data field of
@@ -2137,73 +2117,62 @@ a vocabulary to
 new words will be added.
 This is done by linking them in between the link field of the
 dummy dea and the next definition.},{{VOCABULARY},{CONTEXT}}, {}, enddoc)
-HEADER({CURRENT},{CURR},{DOUSE})
-        DC      CELLS(17)
+HEADER({CURRENT},{CURR},{DOUSE}, CELLS(17))
 ;
 worddoc({PARSING},{STATE},{state},{--- addr},{L0,U},
 {A user variable containing the compilation state. A non-zero value
 indicates compilation. The value itself may be implementation
 dependent.},{}, {}, enddoc)
-HEADER({STATE},{STATE},{DOUSE})
-        DC      CELLS(18)
+HEADER({STATE},{STATE},{DOUSE}, CELLS(18))
 ;
 worddoc({FORMATTING},{BASE},{base},{--- addr},{U,L0},
 {A user variable containing the current number base used for input
 and output conversion.},{{DECIMAL},{HEX},{<#}}, {}, enddoc)
-HEADER({BASE},{BASE},{DOUSE})
-        DC      CELLS(19)
+HEADER({BASE},{BASE},{DOUSE}, CELLS(19))
 ;
 worddoc({FORMATTING},{DPL},{d_p_l},{---- addr},{U,L0},
 {A user variable containing the number of digits to the right of the
 decimal on double integer input. It may also be used hold output
 column location of a decimal point, in user generated formating. The
 default value on single number input is -1.},{{<#},{FLD},{HLD}}, {}, enddoc)
-HEADER({DPL},{DPL},{DOUSE})
-        DC      CELLS(20)
+HEADER({DPL},{DPL},{DOUSE}, CELLS(20))
 ;
 worddoc({FORMATTING},{FLD},{f_l_d},{--- addr},{U},
 {A user variable for control of number output field width. Presently
 unused in fig-FORTH.},{}, {}, enddoc)
-HEADER({FLD},{LFLD},{DOUSE})
-        DC      CELLS(21)
+HEADER({FLD},{LFLD},{DOUSE}, CELLS(21))
 ;
 worddoc({SECURITY},{CSP},{c_s_p},{---- addr},{U},
 {A user variable temporarily storing the stack pointer position, for
 compilation error checking.},{}, {}, enddoc)
-HEADER({CSP},{LCSP},{DOUSE})
-        DC      CELLS(22)
+HEADER({CSP},{LCSP},{DOUSE}, CELLS(22))
 ;
 worddoc({SCREEN},{R#},{r_hash},{--- addr},{U},
 {A user variable which may contain the location of an editing cursor,
 or other file related function.},{}, {}, enddoc)
-HEADER({R#},{RNUM},{DOUSE})
-        DC      CELLS(23)
+HEADER({R#},{RNUM},{DOUSE}, CELLS(23))
 ;
 worddoc({FORMATTING},{HLD},{hld},{--- addr},{L0},
 {A user variable that holds the address of the latest character of
 text during numeric output conversion.},{{<#},{DPL},{FLD}}, {}, enddoc)
-HEADER({HLD},{HLD},{DOUSE})
-        DC      CELLS(24)
+HEADER({HLD},{HLD},{DOUSE}, CELLS(24))
 ;
 worddoc({OUTPUT},{OUT},{OUT},{--- addr},{U},
 {A user variable that reflects the position at the current line of the output
 device where the next character transmitted will appear.
 The first position is zero. },{{EMIT},{TYPE},{CR}}, {}, enddoc)
-HEADER({OUT},{LOUT},{DOUSE})
-        DC      CELLS(25)
+HEADER({OUT},{LOUT},{DOUSE}, CELLS(25))
 ;
 worddoc({STORAGE},{BLK},{blk},{--- addr},{U,L0},
 {A user variable containing the block number being interpreted. If
 zero, input is being taken from the terminal input buffer.},{{BLOCK},{TIB}}, {}, enddoc)
-HEADER({BLK},{BLK},{DOUSE})
-        DC      CELLS(26)
+HEADER({BLK},{BLK},{DOUSE}, CELLS(26))
 ;
 worddoc({INPUT},{IN},{in},{--- addr},{L0},
 {A user variable containing the byte offset within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted. forthcode({WORD}) uses and moves the value of forthcode({IN}) .},{}, {}, enddoc)
-HEADER({IN},{LIN},{DOUSE})
-        DC      CELLS(29)
+HEADER({IN},{LIN},{DOUSE}, CELLS(29))
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -2361,8 +2330,8 @@ HEADER({LATEST},{LATES},{DOCOL})
 ;
 worddoc({DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
 {Convert the data field forthsamp({addr})
-of a definition created with a forthcode({DOES>})
-construct to it dea.},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
+of a definition created with a forthcode({DOES>}) dnl
+construct to its forthsamp({dea}) .},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
 HEADER({BODY>},{BODYF},{DOCOL})
         DC      LIT,CELLS(5)
         DC      LSUB
@@ -2370,8 +2339,8 @@ HEADER({BODY>},{BODYF},{DOCOL})
 ;
 worddoc({DICTIONARY},{>BODY},{to_body},{dea --- addr},{},
 {Given the dictionary entry addres
-of a definition created with a forthcode({DOES>})
-construct return its  data field forthsamp({addr}).},
+of a definition created with a forthcode({DOES>})dnl
+construct, return its  data field forthsamp({addr}).},
 {{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
 HEADER({>BODY},{TOBODY},{DOCOL})
         DC      LIT,CELLS(5)
@@ -2535,7 +2504,7 @@ forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
 This allows calculation or compilation exceptions before resuming
 compilation with forthcode({]})},{{LITERAL} ,{]}}, {}, enddoc)
-HEADER({[},{LBRAC},{DOCOL},B_IMMED)
+HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      ZERO
         DC      STATE
         DC      STORE
@@ -2706,7 +2675,7 @@ device.
 If executed outside a definition, forthcode({."}) will immediately print the text
 until the final ". The maximum number of characters may be an
 installation dependent value.},{{OUT},{(.")}}, {}, enddoc)
-HEADER({."},{DOTQ},{DOCOL},B_IMMED)
+HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      LIT,22H
         DC      STATE
         DC      FETCH
@@ -2869,7 +2838,7 @@ Skip remaining non-blank characters.},
 {&: X  HEX .},{58 },
 {: GS1 &: HELLO ; GS1 HEX .] },{48 },
 {: GS1 &: X ; GS1 HEX .},{58 }}, enddoc)
-HEADER({&:},{CHF},{DOCOL}, B_IMMED)
+HEADER({&:},{CHF},{DOCOL}, , B_IMMED)
         DC      PWORD, DROP, CFET, LITER
         DC      SEMIS
 ;
@@ -2881,7 +2850,7 @@ Skip remaining non-blank characters.},
 {^: X  HEX .},{18 },
 {: GS1 ^: HELLO ; GS1 HEX .] },{8 },
 {: GS1 ^: X ; GS1 HEX .},{18 }}, enddoc)
-HEADER({^:},{CTF},{DOCOL}, B_IMMED)
+HEADER({^:},{CTF},{DOCOL}, , B_IMMED)
         DC       PWORD, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
 ;
@@ -2903,7 +2872,7 @@ input stream.},
 {},
 {{: GS1 [CHAR] HELLO ; GS1 HEX .] },{48 },
 {: GS1 [CHAR] X ; GS1 HEX .},{58 }}, enddoc)
-HEADER({[CHAR]},{BCHAR},{DOCOL},B_IMMED)
+HEADER({[CHAR]},{BCHAR},{DOCOL}, , B_IMMED)
         DC      CHF
         DC      SEMIS
 ;
@@ -3106,7 +3075,7 @@ forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
 that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
 compile time.},{COMPILE}, {}, enddoc)
-HEADER({[COMPILE]},{BCOMP},{DOCOL},B_IMMED)
+HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      PWORD
         DC      PFIND
         DC      LDUP
@@ -3125,7 +3094,7 @@ definition. The intended use is:
 Compilation is suspended for the compile time calculation of a
 value.
 Compilation is resumed and forthcode({LITERAL}) compiles this value.},{}, {}, enddoc)
-HEADER({LITERAL},{LITER},{DOCOL},B_IMMED)
+HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(LITE1) ;{IF}
@@ -3139,7 +3108,7 @@ worddoc({COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)
 {If compiling, compile a stack double number into a literal. Later
 execution of the definition containing the literal will push it to
 the stack. If executing, the number will remain on the stack.},{}, {}, enddoc)
-HEADER({DLITERAL},{DLITE},{DOCOL},B_IMMED)
+HEADER({DLITERAL},{DLITE},{DOCOL}, , B_IMMED)
         DC      STATE
         DC      FETCH
         _0BRANCH(DLIT1) ;{ IF}
@@ -3156,7 +3125,7 @@ or points into the input.
 Later
 execution of the definition containing the literal will push it to
 the stack. If executing, the number will remain on the stack.},{}, {}, enddoc)
-HEADER({SDLITERAL},{SDLITE},{DOCOL},B_IMMED)
+HEADER({SDLITERAL},{SDLITE},{DOCOL}, , B_IMMED)
         DC      DPL
         DC      FETCH
         _0BRANCH(SDLIT1) ;{ IF}
@@ -3311,7 +3280,7 @@ vocabularies are defined, new user definitions become a part of
 forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during the creation of
 a colon-definition, to select this vocabulary at compile time.},
 {{VOCABULARY}}, {}, enddoc)
-HEADER({FORTH},{FORTH},{DODOE},B_IMMED)
+HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
         DC      0       ;{ Dummy name field}
@@ -3346,7 +3315,7 @@ forthsamp({( cccc)})
 Ignore a comment that will be delimited by a right
 parenthesis on the same line. May occur during execution or in a
 colon-definition. A blank after the leading parenthesis is required.},{}, {}, enddoc)
-HEADER({(},{PAREN},{DOCOL},B_IMMED)
+HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      LIT,')'
         DC      PPARS
         DC      DROP, DROP
@@ -3765,9 +3734,7 @@ worddoc({STORAGE},{#BUFF},{hash_buf},{--- c},{},
 {A constant that leaves the number of block buffers.
 },
 {{BLOCK}}, {}, enddoc)
-HEADER({#BUFF},{NOBUF},{DOCON})
-        ;{NO. OF BUFFERS}
-        DC      NBUF
+HEADER({#BUFF},{NOBUF},{DOCON}, NBUF)
 ;
 worddoc({STORAGE},{+BUF},{plus_buf},{add1 --- addr2 f},{FIG},
 {Advance the disc buffer address forthvar({addr1}) to the address of
@@ -3986,7 +3953,7 @@ SCREEN: DC      RESTO
 ;
 worddocsafe({SCREEN},{-->},{next_screen},{},{P,L0},
 {Continue interpretation with the next disc screen.},{{LOAD}}, {}, enddoc)
-HEADER({-->},{ARROW},{DOCOL},B_IMMED)
+HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
         DC      QLOAD
         DC      ONE
         DC      BLK
@@ -5008,8 +4975,7 @@ worddoc({STORAGE},{SEC/BLK},{sectors_per_block},{--- c},{},
 The original idea was that a sector forthemph({is}) a block. In
 fact SEC/BLK is set such that B/SRC is one, as is required for ISO.)
 },{{BLOCK},{B/SCR}}, {}, enddoc)
-HEADER({SEC/BLK},{SPBLK},{DOCON}) ;{# SECTORS/BLOCK}
-        DC      SPB
+HEADER({SEC/BLK},{SPBLK},{DOCON}, SPB)
 ;
 worddoc({STORAGE},{DISK-ERROR},{disk_error},{--- addr},{},
 {Leave the address addr of a variable containing the
@@ -5196,7 +5162,7 @@ As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
 {{CFA},{>LFA},{>NFA},{>PFA}} , {}, enddoc)
-HEADER({'},{TICK},{DOCOL},B_IMMED)
+HEADER({'},{TICK},{DOCOL}, , B_IMMED)
         DC      PWORD
         DC      PFIND
         DC      LDUP
@@ -5294,7 +5260,7 @@ for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) al
 
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
 error checking.},{}, {}, enddoc)
-HEADER({BEGIN},{BEGIN},{DOCOL},B_IMMED)
+HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         DC      QCOMP
         DC      HERE
         DC      ONE
@@ -5312,7 +5278,7 @@ in fig-FORTH.
 At compile-time, forthcode({ENDIF}) computes the forward branch offset from forthvar({addr})
 to forthcode({HERE}) and stores it at forthvar({addr}) . forthvar({n}) is used for error tests.},
 {{IF},{ELSE}}, {}, enddoc)
-HEADER({ENDIF},{LENDIF},{DOCOL},B_IMMED)
+HEADER({ENDIF},{LENDIF},{DOCOL}, , B_IMMED)
         DC      QCOMP
         DC      TWO     ;{ Magic number}
         DC      QPAIR
@@ -5325,7 +5291,7 @@ HEADER({ENDIF},{LENDIF},{DOCOL},B_IMMED)
 ;
 worddoc({CONTROL},{THEN},{then},{},{P,CO,L O},
 {An alias for forthcode({ENDIF}) .},{}, {}, enddoc)
-HEADER({THEN},{THEN},{DOCOL},B_IMMED)
+HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
         DC      LENDIF
         DC      SEMIS
 ;
@@ -5348,7 +5314,7 @@ stack.
 When compiling within the colon definition, forthcode({DO}) compiles forthcode({(DO)}) , leaves
 the following address forthvar({addr}) and forthvar({n}) for later error checking.},
 {{I},{LOOP},{+LOOP},{LEAVE}}, {}, enddoc)
-HEADER({DO},{DO},{DOCOL},B_IMMED)
+HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      COMP
         DC      XDO
         DC      HERE
@@ -5368,7 +5334,7 @@ ahead.
 At compile-time, forthcode({LOOP}) compiles forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
 offset to forthvar({DO}) . forthvar({n}) is used for error testing.},
 {}, {}, enddoc)
-HEADER({LOOP},{LLOOP},{DOCOL},B_IMMED)
+HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
         DC      COMP
@@ -5379,7 +5345,7 @@ HEADER({LOOP},{LLOOP},{DOCOL},B_IMMED)
 worddocsafe({CONTROL},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
 {The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
 index by n and tests for loop completion.},{{+LOOP}}, {}, enddoc)
-HEADER({+LOOP},{PLOOP},{DOCOL},B_IMMED)
+HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      THREE   ;{ Magic number}
         DC      QPAIR
         DC      COMP
@@ -5398,7 +5364,7 @@ if true, execution continues ahead.
 
 At compile-time, forthcode({UNTIL}) compiles forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error tests.},{}, {}, enddoc)
-HEADER({UNTIL},{UNTIL},{DOCOL},B_IMMED)
+HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         DC      ONE
         DC      QPAIR
         DC      COMP
@@ -5409,7 +5375,7 @@ HEADER({UNTIL},{UNTIL},{DOCOL},B_IMMED)
 worddoc({CONTROL},{END},{end},{},{P,C2,L0},
 {This is an 'alias' or duplicate definition for forthcode({UNTIL}) .},
 {{BEGIN}}, {}, enddoc)
-HEADER({END},{LEND},{DOCOL},B_IMMED)
+HEADER({END},{LEND},{DOCOL}, , B_IMMED)
         DC      UNTIL
         DC      SEMIS
 ;
@@ -5423,7 +5389,7 @@ There is no effect on the stack. Execution cannot leave this loop
 
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for compile-time error checking.},{}, {}, enddoc)
-HEADER({AGAIN},{AGAIN},{DOCOL},B_IMMED)
+HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         DC      ONE
         DC      QPAIR
         DC      COMP
@@ -5439,7 +5405,7 @@ after the corresponding forthcode({BEGIN}) .
 
 At compile-time, forthcode({REPEAT}) compiles forthcode({BRANCH}) and the offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error testing.},{{WHILE}}, {}, enddoc)
-HEADER({REPEAT},{REPEA},{DOCOL},B_IMMED)
+HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
         DC      TOR
         DC      TOR
         DC      AGAIN
@@ -5464,7 +5430,7 @@ skips to just after forthcode({ENDIF}) .
 At compile-time forthcode({IF}) compiles forthcode({0BRANCH}) and reserves space for an offset
 at forthvar({addr}) . forthvar({addr}) and forthvar({n}) are used later for resolution of the offset and
 error testing.},{}, {}, enddoc)
-HEADER({IF},{LIF},{DOCOL},B_IMMED)
+HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      COMP
         DC      ZBRAN
         DC      HERE
@@ -5485,7 +5451,7 @@ leaves the address forthvar({addr2}) and forthvar({n2}) for error testing. forth
 resolves the pending forward branch from forthcode({IF}) by calculating the
 offset from forthvar({addr1}) to forthcode({HERE}) and storing at forthvar({addr1}) .},
 {}, {}, enddoc)
-HEADER({ELSE},{LELSE},{DOCOL},B_IMMED)
+HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      TWO     ;{ Magic number }
         DC      QPAIR
         DC      COMP
@@ -5511,7 +5477,7 @@ structure.
 At compile time, forthcode({WHILE}) emplaces forthcode({0BRANCH}) and leaves forthvar({ad2}) of the
 reserved offset. The stack values will be resolved by forthcode({REPEAT}) .},
 {}, {}, enddoc)
-HEADER({WHILE},{WHILE},{DOCOL},B_IMMED)
+HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      LIF
         DC      TWOP        ;{ Magic number           }
         DC      SEMIS
@@ -5874,16 +5840,14 @@ worddoc({MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
 1 Mbyte of physical memory. This variable can be swapped with DP to
 compile into this area.
 },{{LOW-EM}}, {}, enddoc)
-HEADER({LOW-DP},{LOWDP},{DOUSE})
-        DC      CELLS(14)
+HEADER({LOW-DP},{LOWDP},{DOUSE}, CELLS(14))
 ;
 worddoc({MEMORY},{LOW-EM},{low_end_memory},{---- addr},{},
 {A user variable leaving the address just above the highest memory
 usable in the lowest 1 Mbyte of physical memory. This area can be used
 to compile buffers into that must be accessed from real mode.
 },{{DP},{EM}}, {}, enddoc)
-HEADER({LOW-EM},{LOWEM},{DOUSE})
-        DC      CELLS(15)
+HEADER({LOW-EM},{LOWEM},{DOUSE}, CELLS(15))
 ;
 });_END_({ _DIRECTMAPPED_})
 ;
