@@ -183,6 +183,7 @@ rational.mi  \
 # That's all folks!
 
 # Sort the raw information and add the wordset chapter ends
+# A .mig file has its @ duplicated!
 %.mig : %.rawdoc ;
 	ssort $+ -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s |\
 	sed -e 's/@/@@/g' >$@
@@ -198,9 +199,12 @@ fig86.%.html : %.cfg glosshtml.m4 indexhtml.m4 fig86.%.mig
 	sed -e 's/@@/@/g'                 |\
 	sed -e s'/worddocsafe/worddoc/g'  |\
 	sed -e 's/</\&lt\;/g'             > temp.html
-	ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s |\
-	m4 indexhtml.m4 - > $@
-	m4 $(@:fig86.%.html=%.cfg) glosshtml.m4 temp.html >> $@
+	( \
+	    echo "define(fig86gnrversion,`rlog -r -h -N fig86.gnr|grep head|sed -e s/head://` )" ; \
+	    cat indexhtml.m4 ; \
+	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
+	)| m4 > $@
+	m4 $(@:fig86.%.html=%.cfg) glosshtml.m4 names.m4 temp.html >> $@
 
 fig86.%.info : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
 	m4 menu.m4 $(@:%.info=%.mig) > menu.texinfo
@@ -213,8 +217,9 @@ fig86.%.info : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
 fig86.%.tex : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
 	m4 menu.m4 $(@:%.tex=%.mig) > menu.texinfo
 	m4 wordset.m4 $(@:%.tex=%.mim)  $(@:%.tex=%.mig) |m4 >wordset.mi
-	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
-	   tee spy | m4 > $@
+	( \
+	    echo "define(fig86gnrversion,`rlog -r -h -N fig86.gnr|grep head|sed -e s/head://` )" ; \
+	    echo "define(figforthversion,$@)" ; \
+	    cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi \
+	)| tee spy | m4 > $@
 	#rm wordset.mi menu.texinfo
-
-#       (echo 'define(figforthversion,`rlog -r -h -N fig86.gnr|grep head|sed -e /head://` )' ; \
