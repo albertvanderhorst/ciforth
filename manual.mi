@@ -846,7 +846,7 @@ For a code word, it contains machine code.
 The code field of this word points to it too.
 forthitem
 For a word defined by
-forthcode({VARIABLE}), forthcode({USER}), or forthcode({CONSTANT}) dq
+forthcode({VARIABLE}), forthcode({USER}), or forthcode({CONSTANT}) dnl
 it has a width of one cell, and contains data.
 forthitem
 For all forthdefi({colon definition}) the data field address

@@ -1,4 +1,4 @@
-;{               ciforth : a generic I86 ISO FORTH by HCC FIG}
+;{              ciforth : a generic I86 ISO FORTH by HCC FIG}
 define({_END_},{$1})
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
@@ -1335,7 +1335,7 @@ HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
 ;
 worddocsafe( {DENOTATIONS},{DEN0},{den_zero}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with
-forthkey({0}) . There are those for all decimal and hex digits.
+forthkey({0}) . Similar words are present for all decimal and hex digits.
 _VERBOSE_({ ISO compatibility would demand that denotators for
 all capitals are present, but one can always use a leading
 zero.})
@@ -1604,8 +1604,7 @@ worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2,L0},
 {The run-time proceedure to unconditionally branch. An in-line
 offset is added to the interpretive pointer forthcode({IP}) to
 branch ahead or back. forthcode({BRANCH}) is compiled by
-forthcode({ELSE}) , forthcode({AGAIN}) , forthcode({REPEAT})
-.},
+forthcode({ELSE}) forthcode({AGAIN}) forthcode({REPEAT}) .},
 {{0BRANCH}},
 {{ : GS1 1 BRANCH [ 0 CELL+ , ] BL BL ; GS1 . . },
 {20 1}},
@@ -1616,7 +1615,7 @@ worddoc( {CONTROL},{SKIP},{skip},{},{C2,L0},
 {Skip over an area in memory, where the length is given in the next cell.
 This length doesn't include the length cell, so it is compatible with
 forthcode({$@}) .
-_VERBOSE_({Internal, used for nested compilation. })},
+_VERBOSE_({{Internal, used for nested compilation and compiling strings. }})},
 {{BRANCH}},
 {{ : GS1 1 SKIP [ 0 CELL+ , ] BL BL ; GS1 . .},
 {20 1}},
@@ -1734,10 +1733,10 @@ CODE_HEADER({J},{JDO})
         _PUSH          ;{ TO PARAMETER STACK}
 ;
 worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{ISO,I,C,L0},
-{Discard the loop parameters. Must be
-used when the regular end of the
-loop is by-passed.},
-{{DO},{LOOP},{+LOOP},{(BACK},{(FORWARD}},
+{Discard the loop parameters. Must be used when the regular end
+of the loop is by-passed. That means it is not ended via
+forthcode({LOOP}) forthcode({+LOOP}) or forthcode({LEAVE}). },
+{{DO},{LOOP},{+LOOP},{(BACK},{(FORWARD},{EXIT}},
 {
 { : GS1 DO I . I 3 = IF UNLOOP EXIT THEN LOOP ; 10 0 GS1},
 {0 1 2 3},
@@ -2314,7 +2313,7 @@ CODE_HEADER({EXIT},{EXIT})
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
 ;
-worddocsafe( {CONTROL},{{;}},{semicolon_s},{},{},
+worddocsafe( {CONTROL},{(;)},{semicolon_s},{},{},
 { This is a synonym for forthcode({EXIT}). It is the run-time
 word compiled at the end of a colon-definition which returns
 execution to the calling proceedure. Stop interpretation of the
@@ -3947,8 +3946,8 @@ HEADER({DECIMAL},{DECA},{DOCOL})
 worddocsafe( {DEFINING~},{(;CODE)},{paren_semicolon_code},{},{C},
 {The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
 field of the most recently defined word to point to the following
-machine code sequence. _VERBOSE_({{This is not needed for words made by
-forthcode({(CREATE)}) as it defaults to creating assembler words.}})
+machine code sequence. It is used after forthcode({CREATE}) instead of forthcode({DOES>}) if the code following
+is assembler code instead of high level code.
 },
 {{ (CREATE)}, {;CODE}},
 {{." No test"},{No test} },
@@ -3960,14 +3959,14 @@ HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{ISO,FIG,I,C,L0},
+worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{B,ISO,FIG,I,C,L0},
 {Used in the form:
   forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
 Stop compilation and terminate a new defining word
 forthsamp({cccc}) by compiling forthcode({(;CODE)}). Set
-forthcode({ASSEMBLER}) to the top of the forthcode({SEARCH-ORDER})
-order. Start assembling to machine code the following
-mnemonics.
+forthcode({ASSEMBLER}) to the top of the
+forthcode({SEARCH-ORDER}) order. Start assembling to machine
+code the following mnemonics.
 
 When forthsamp({cccc}) later executes in the form:
                      forthsamp({cccc nnnn})
@@ -3988,7 +3987,6 @@ worddoc( {DEFINING},{CREATE},{create},{},{},
 Later execution of forthsamp({cccc}) returns its data field, i.e.
 the value of forthcode({HERE}) immediately
 after executing forthcode({CREATE}) .
-
 
 It can be the base of a new defining word if used in the form:
      forthexample({: CREATOR CREATE aaaa DOES> bbbb ;
@@ -4027,9 +4025,9 @@ compiled word addresses following forthcode({DOES>}) . Used in
 combination with forthcode({CREATE}) . When the
 forthcode({DOES>}) part executes it begins with the address of
 the data field of the word on the stack. This allows
-interpretation using this area or its contents. _VERBOSE_({
+interpretation using this area or its contents. _VERBOSE_({{
 Typical uses include the Forth assembler, multidimensional
-arrays, and compiler generation.})
+arrays, and compiler generation.}})
 },
 {},
 {{ !CSP : GS1 DOES> @ 1 + ;  : GS2 DOES> @ 2 + ; dnl
@@ -4787,7 +4785,7 @@ linked into the forthcode({CURRENT}) word list. The code field
 and data field both point to the area owned by this header,
 i.e. immediately following the completed header _VERBOSE_({{as
 appropriate for a low level (assembler) definition}}). The
-flag field is empty _VERBOSE_({{, so not forthcode({SMUDGE}) d}}). },
+flag field is empty _VERBOSE_({{, so not forthcode({HIDDEN})}}). },
 {{CREATE}},
 {{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
 enddoc)
@@ -4834,7 +4832,7 @@ CREA2:  DC      COMMA  ; {Source field.}
         DC      RDROP
         DC      SEMIS
 ;
-worddoc( {COMPILING},{[COMPILE]},{bracket_compile},{},{I,C},
+worddocsafe( {COMPILING},{[COMPILE]},{bracket_compile},{},{ISO,I,C},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [COMPILE]   FORTH   ;})
 forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
@@ -4854,7 +4852,7 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      COMMA
         DC      SEMIS
 ;
-worddoc( {COMPILING},{POSTPONE},{postpone},{},{I,C},
+worddoc( {COMPILING},{POSTPONE},{postpone},{},{ISO,I,C},
 {Used in a colon-definition in the form:
     forthexample({: xxx POSTPONE SOME-WORD })
 forthcode({POSTPONE}) will postpone the
@@ -4886,7 +4884,7 @@ POSTP1:
 POSTP2:
         DC      SEMIS
 ;
-worddoc( {COMPILING},{LITERAL},{literal},{d --- d (executing) n --- (compiling)},{ISO,I,C2,L0},
+worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}, {ISO,I,C2,L0},
 {If compiling, then compile the stack value forthvar({n}) as a
 _BITS_ bit literal.
 _VERBOSE_({The intended use is:
@@ -5048,14 +5046,14 @@ HEADER({IMMEDIATE},{IMMED},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {DEFINING},{VOCABULARY},{vocabulary},{},{FIG,E,L},
-{A defining word used in the form: forthcode({VOCABULARY})
-forthsamp({cccc}) to create a vocabulary definition
-forthsamp({cccc}) . It will create a forthdefi({word list})in
-the ISO sense. Subsequent use of forthsamp({cccc}) will push
-this word list (the word list forthdefi({associated with})
-forthsamp({cccc}))
-to the top of the search order in forthcode({SEARCH-ORDER}). So
-vocabulary which is searched first by forthcode({INTERPRET}) .
+{A defining word used in the form:
+forthcode({VOCABULARY}) forthsamp({cccc}) to create a
+vocabulary definition forthsamp({cccc}) . It will create a
+forthdefi({word list})in the ISO sense. Subsequent use of
+forthsamp({cccc}) will push this word list (the word list
+forthdefi({associated with}) forthsamp({cccc})) to the top of
+the search order in forthcode({SEARCH-ORDER}). So it will
+searched first by forthcode({INTERPRET}) .
 
 A vocabulary 's data content field contains at first the dovoc
 pointer (like for any forthcode({DOES>}) word) , then follows
@@ -5065,15 +5063,14 @@ of the next vocabulary or 0 for the end.
 
 Then follows a dummy dea that serves as forthdefi({word list
 identifier}) or WID in the sense of the ISO standard. with
-empty fields, except for the link field (forthdefi({DLFA}))
-that points to the dea of the first word of the vocabulary
-or a zero pointer if empty.
-Executing the vocabulary means pushing its WID on top of the
-forthcode({SEARCH-ORDER}) order. In ciforth when there can be at most
-M4_MAXWORDLIST word list 's in the search order, the oldest one
-gets lost.
-By convention, vocabulary names are to be declared
-forthcode({IMMEDIATE}) .},
+empty fields, except for the link field
+(forthdefi({DLFA})) that points to the dea of the first word of
+the vocabulary or a zero pointer if empty. Executing the
+vocabulary means pushing its WID on top of the
+forthcode({SEARCH-ORDER}) order. In ciforth when there can be
+at most M4_MAXWORDLIST word list 's in the search order, the
+oldest one gets lost. The vocabularies generated are
+forthcode({IMMEDIATE}) words.},
 {{VOC-LINK},{DEFINITIONS}},
 {{123 VOCABULARY JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
@@ -8587,7 +8584,7 @@ worddocsafe( {CONTROL~},{(BACK},{paren_back},{--- addr},{},
 {Start a backward branch by leaving the target address
 forthcode({HERE}) into forthvar({addr}). _VERBOSE_({Usage is
 forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) })},
-{{LOOP},{UNTIL}},
+{{BEGIN},{DO}},
 {
 {: GS1 -1 [ (BACK ] 1+ DUP .
 DUP 0BRANCH [ BACK) ] ; GS1 .},
@@ -8618,7 +8615,7 @@ worddocsafe( {CONTROL~},{(FORWARD},{paren_forward},{--- addr},{},
 backpatched with an offset into forthvar({addr}).
 _VERBOSE_({Usage is
 forthsamp({ POSTPONE BRANCH (FORWARD .. FORWARD) }) })},
-{{LOOP},{UNTIL}},
+{{IF}},
 {
 {: GS1 2 BRANCH [ (FORWARD ] 4 [ FORWARD) ] 6 ; GS1 . .},
 {6 2}
@@ -8632,9 +8629,10 @@ HEADER({(FORWARD},{PFORWARD},{DOCOL})
 ;
 worddocsafe( {CONTROL~},{FORWARD)},{forward_paren},{addr ---},{},
 {Complete a forward branch by backpatching an offset from
-forthcode({HERE}) into forthvar({addr}), left there by
-forthcode({(FORWARD)}) . _VERBOSE_({Usage is forthsamp({
-POSTPONE BRANCH (FORWARD .. FORWARD) }) })},
+forthcode({HERE}) into forthvar({addr}), left there by forthcode({{{{{(FORWARD}}}}}) .
+_VERBOSE_({Usage is forthsamp({POSTPONE
+BRANCH (FORWARD .. FORWARD) }) })
+},
 {{LOOP},{UNTIL}},
 {{( See (FORWARD)},{}},
 enddoc)
@@ -8654,7 +8652,7 @@ worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{ISO,FIG,I,L0},
   forthexample({BEGIN ... WHILE ... REPEAT})
 At run-time, forthcode({BEGIN}) marks the start of a sequence that may be
 repetitively executed. It serves as a return point from the
-corresponding forthcode({UNTIL}) , forthcode({AGAIN}) or forthcode({REPEAT})
+corresponding forthcode({UNTIL}) , forthcode({AGAIN}) or forthcode({REPEAT}) .
 When executing forthcode({UNTIL}) a return
 to forthcode({BEGIN}) will occur if the top of the stack is false;
 for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) always occurs.
@@ -8678,7 +8676,7 @@ It marks the conclusion of the conditional structure. At
 compile-time, forthcode({THEN}) computes the forward branch
 offset from forthvar({addr}) to forthcode({HERE}) and stores it
 at forthvar({addr}) . forthvar({n}) is used for error tests.},
-{{IF},{ELSE}},
+{{FORWARD)},{IF},{ELSE}},
 {{( See IF ELSE)},{}},
 enddoc)
 HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
@@ -8764,11 +8762,12 @@ At run-time, forthcode({+LOOP}) selectively controls branching
 back to the corresponding forthcode({DO}) based on
 forthvar({n1}) , the loop index and the loop limit. The signed
 increment forthvar({n1}) is added to the index and the total
-compared to the limit. The branch back to forthcode({DO})
-occurs until the new index is equal to or greater than the
-limit (forthsamp({n1>0})), or until the new index is equal to or
-less than the limit (forthsamp({n1<0})). Upon exiting the loop,
-the parameters are discarded and execution continues ahead.
+compared to the limit.
+The branch back to forthcode({DO}) occurs until the new index
+is equal to or greater than the limit (forthsamp({n1>0})), or
+until the new index is equal to or less than the limit
+(forthsamp({n1<0})). Upon exiting the loop, the parameters are
+discarded and execution continues ahead.
 
 At compile time, forthcode({+LOOP}) compiles the run-time word
 forthcode({(+LOOP)}) and the branch offset computed from
@@ -8808,7 +8807,7 @@ HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 ;
-worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{FIG,I,C2,L0},
+worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{ISO,FIG,I,C2,L0},
 {Used in a colon-definition in the form:
     forthexample({BEGIN ... AGAIN})
 At run-time,
@@ -8874,7 +8873,7 @@ At compile-time forthcode({IF}) compiles
 forthcode({0BRANCH}) and reserves space for an offset at
 forthvar({addr}) . forthvar({addr}) and forthvar({n}) are
 used later for resolution of the offset and error testing.},
-{},
+{{(FORWARD}},
 {
 { : GI1 IF 123 THEN ; 234 1 GI1 . .},{123 234},
 {  234 -1 GI1 . .},{123 234},
@@ -8902,7 +8901,7 @@ testing. forthcode({ELSE}) also resolves the pending forward
 branch from forthcode({IF}) by calculating the offset from
 forthvar({addr1}) to forthcode({HERE}) and storing at
 forthvar({addr1}) .},
-{},
+{{(FORWARD}},
 {
 {: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234},
 {1 GI2 .},{123}
@@ -8917,7 +8916,7 @@ HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{WHILE},{while},
-{f --- (run-time) ad1 nl --- ad2 n1 ad1 n2(compile-time)},
+{f --- (run-time) addr1 nl --- addr2 n1 addr1 n2(compile-time)},
 {ISO,FIG,I,C2},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
@@ -8929,13 +8928,14 @@ forthcode({BEGIN}) . If forthvar({f}) is false (zero),
 execution skips to just after forthcode({REPEAT}) , exiting the
 structure.
 
-At compile time, forthcode({WHILE}) emplaces
-forthcode({0BRANCH}) and tuck leaves forthsamp({ad2}) of the
-reserved offset under the forthsamp({ad1}) left there by
+At compile time, forthcode({WHILE}) compiles
+forthcode({0BRANCH}) and tucks the
+target address forthsamp({addr2})
+under the forthsamp({addr1}) left there by
 forthcode({BEGIN}) . The stack values will be resolved by
 Forthcode({REPEAT}) . forthvar({n1}) and forthvar({n2})
 provide checks for compiler security.},
-{{BEGIN}},
+{{(FORWARD},{BEGIN}},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
 {0 1 2 3 4},

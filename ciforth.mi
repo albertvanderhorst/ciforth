@@ -553,7 +553,7 @@ _BITS16_({32})_BITS32_({64}) bits number is meant.
 dnl symbols is a reserved name in `m4'.
 The first line of each entry shows a symbolic description of the action of
 the proceedure on the parameter stack. The {symbols} indicate the order in
-which input parameters have been placed on the stack. The dashes "---"
+which input parameters have been placed on the stack. The dashes ``---''
 indicate the execution point; any parameters left on the stack are listed.
 In this notation, the top of the stack is to the right.
 
@@ -574,7 +574,8 @@ boolean forthdefi({flag}) . 0=false, non-zero=true
 forthitem ff
 boolean false flag=0
 forthitem n
-_BITS_ bit signed integer number
+_BITS_ bit signed integer number.
+It is also used for a _BITS_ entity where it is irrelevant what number it represents.
 forthitem u
 _BITS_ bit unsigned integer
 forthitem sc

@@ -217,7 +217,7 @@ Read the introductory comment of forthfile({asgen.frt}) for how the assembler
 keeps track of the state, using the forthcode({BI}) forthcode({BY}) forthcode({BA}) tallies.
 forthenumerate
 forthitem
-A word ending in forthkey({{,}}) reserves place in the dictionary.
+A word ending in forthkey({,}) reserves place in the dictionary.
 It stand for one assembler instruction.
 The start of the instruction is kept and there is a bitfield (the tally) for
 all bits that belong to the instruction, if only mentally. These bits are
