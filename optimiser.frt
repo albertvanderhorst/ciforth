@@ -15,8 +15,9 @@ REQUIRE $
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
 
-\ For a parse ADDRESS return an incremented parse ADDRESS, its
-\ CONTENT and a go on FLAG.
+\ For a parse ADDRESS return an INCREMENTED parse address, the
+\ DEA (content of ``ADDRESS'') and a  FLAG : this IS_NOT the
+\ end of definition.
 : NEXT-PARSE
    @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF
        R@ CFA> 'SKIP = IF @+ + ALIGNED ELSE CELL+ THEN
@@ -24,6 +25,10 @@ REQUIRE $
    R@
 \  R@ CFA> ID.          \ For desperado debugging.
    R> '(;) <> ;
+
+\ For an ITEM in a high level word, return the next ITEM.
+\ So it skips also ``ITEM'' 's inline data.
+: NEXT-ITEM NEXT-PARSE 2DROP ;
 
 \ Like +! but ors.
 : OR!  DUP @ ROT OR SWAP ! ;
@@ -39,6 +44,7 @@ REQUIRE $
 
 \ How MANY stack cells on top contain a compile time constant?
 VARIABLE CSC
+
 
 \ From WHERE do we have optimisable code. (Ends at ``HERE'')
 VARIABLE OPT-START
@@ -58,6 +64,62 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ sufficiantly constant stack cells.
 : ENOUGH-POPS   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSC @ > 0=  AND ;
 
+\ ---------------------------------------------------------------------
+\ INCLUDE nss.frt
+
+
+\ For DEA : it HAS no side effects regards stack.
+: NSST?   >FFA @ FMASK-ST AND FMASK-ST = ;
+
+FMASK-ST '.S >FFA OR!
+FMASK-ST 'DEPTH >FFA OR!
+
+\ From WHERE do we have optimisable code. (Ends at ``HERE'')
+VARIABLE SWAPPER-START
+
+\ How MANY stack cells are there on top since the code at ``OPT-START''.
+VARIABLE CSPP
+
+\ The minimum step depth we have encountered.
+VARIABLE MIN-DEPTH
+
+: REMEMBER-DEPTH CSPP @   MIN-DEPTH @   MIN MIN-DEPTH ! ;
+
+: !SWAPPER-START   HERE SWAPPER-START !   CSC @  DUP CSPP !   MIN-DEPTH ! ;
+
+\ For STACKEFFECTBYTE : we CAN still optimise, because we know we have
+\ sufficiantly constant stack cells.
+: ENOUGH-POPS'   DUP SE-GOOD   SWAP 4 RSHIFT 1- CSPP @ > 0=  AND ;
+
+\ Combine a STACKEFFECTBYTE into ``CSCPP''.
+\ Remember : both nibbles have offset 1!
+: COMBINE-CSPP    SE:1>2 SWAP 1- NEGATE CSPP +! REMEMBER-DEPTH 1- CSPP +! ;
+
+\ For DEA we are still in the swappable code, i.e. we don't dig below
+\ the constant stack entries, and we have no stack side effects that kill.
+\ At this point ``CSPP'' contains the remaining stack depth, i.e. the
+\ number of constants not touched by the swappable code. Those can be
+\ placed after the swappable code.
+: STILL-SWAPPING? DUP NSST? 0= SWAP SE@ ENOUGH-POPS' AND ;
+
+\ We are at an unstable point. i.e. somewhere earlier we have replaced one
+\ of the constants, without consuming it afterwards.
+: UNSTABLE? CSPP @ MIN-DEPTH @ <> MIN-DEPTH 0 > AND ;
+
+\ For DEA : executing it would result in a not yet stable sequence.
+: NOT-YET-STABLE?
+DUP STILL-SWAPPING? IF SE@ COMBINE-CSPP UNSTABLE? ELSE -1 MIN-DEPTH !
+DROP 0 THEN ;
+
+\ From ADDRESS collect all code to be executed before (some of the) constants
+\ collected. Leave ADDRESS LENGTH (in address units.)
+: COLLECT-SWAPPER !SWAPPER-START DUP
+     BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
+     OVER -
+     UNSTABLE? IF DROP 0 THEN \ Alles umsonst.
+;
+
+\ ---------------------------------------------------------------------
 \ Combine a STACKEFFECTBYTE into ``CSC''.
 \ ``-'' works here because both nibbles have offset 1!
 : COMBINE-CSC    SE:1>2 SWAP -   CSC +! ;
@@ -70,10 +132,11 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ Throw away the executable code that is to be replaced with optimised code.
 : THROW-AWAY   OPT-START @ DP ! ;
 
-\ Compile ``CSC'' constants instead of the code optimised away.
-\ They sit on the stack now. We need to store backwards to reverse them.
-: COMPILE-CONSTANTS \ CSC @ 0= 13 ?ERROR
-    HERE >R   CSC @ CELLS 2 * ALLOT   HERE >R
+\ Compile a NUMBER of constants instead of the code optimised away.
+\ They sit on the stack now, under ``NUMBER''.
+\ We need to store backwards to reverse them.
+: COMPILE-CONSTANTS \ DUP 0= 13 ?ERROR
+    HERE >R  CELLS 2* ALLOT   HERE >R
     BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
         'LIT R@ !  R@ CELL+ ! REPEAT
     2DROP
@@ -92,7 +155,11 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ instead of them. "Cash the optimisation check."
 : CASH
     OPT-START @ HERE <> IF
-        !CSP EXECUTE-DURING-COMPILE THROW-AWAY COMPILE-CONSTANTS ?CSP
+        !CSP
+        EXECUTE-DURING-COMPILE
+        THROW-AWAY
+        CSC @ COMPILE-CONSTANTS
+        ?CSP
     THEN
 ;
 
@@ -110,7 +177,7 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
         SE@ COMBINE-CSC               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
     ELSE
-        DROP CASH  ( DEA -- )
+        DROP DUP COLLECT-SWAPPER CASH  ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
         !OPT-START
     THEN ;
@@ -194,6 +261,7 @@ CREATE P
 'P  AND 'P  AND         | 'P  'P  AND AND         |
 'P  XOR 'P  XOR         | 'P  'P  XOR XOR         |
 [ 0 ]L +                | NOOP                    |       \ Shortcut evalutions
+[ 0 ]L -                | NOOP                    |
 [ 0 ]L M* DROP          | DROP 0                  |
 [ 0 ]L OR               | NOOP                    |
 [ 0 ]L AND              | DROP 0                  |
@@ -288,10 +356,6 @@ STRIDE SET PEES
     BEGIN DUP ?TILL-NOOP WHILE DUP @ ?PEE? , CELL+ REPEAT
     DROP
 ;
-
-\ For an ITEM in a high level word, return the next ITEM.
-\ So it skips also ``ITEM'' 's inline data.
-: NEXT-ITEM NEXT-PARSE 2DROP ;
 
 \ For SEQUENCE : copy its first item to ``HERE'' possibly
 \ replacing it by a match optimisation.
