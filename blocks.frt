@@ -1,6 +1,6 @@
 
-
-
+\ All definitions that have a Source Field Addres of zero
+\ belong to the kernel
 
 
 
@@ -1838,11 +1838,11 @@ DECIMAL
 
 
 
-
-
-
-
-
+( LOCATED LOCATE ) \ AvdH A1sep26
+\ Show the screen where SC is located
+: LOCATED FOUND DUP 0= 11 ?ERROR >SFA @ LIST ;
+\ Idem but string from input.
+: LOCATE (WORD) LOCATED ;
 
 
 
@@ -1870,19 +1870,19 @@ CREATE cmdbuf 1000 ALLOT
 
 
 
-( ls cat echo rm list ) REQUIRE 32-bit ?LI \ AvdH A1sep25
-REQUIRE OS-IMPORT
-"ls     "   OS-IMPORT ls
+( cat echo grep list ls make man rm   ee l ) \ AvdH A1sep26
+REQUIRE 32-bit ?LI   REQUIRE OS-IMPORT
 "cat    "   OS-IMPORT cat
 "echo   "   OS-IMPORT echo
-"rm  -i "   OS-IMPORT rm
+"grep   "   OS-IMPORT grep
 "list   "   OS-IMPORT list
+"ls     "   OS-IMPORT ls
+"make   "   OS-IMPORT make
+"man    "   OS-IMPORT man
+"rm  -i "   OS-IMPORT rm
 
-
-
-
-
-
+"ee     "   OS-IMPORT ee
+"l      "   OS-IMPORT l
 
 
 
@@ -3086,6 +3086,10 @@ PS ABA + BABAA
 
 
 
+( refresh ) \ AvdH A1sep26
+REQUIRE make
+\ After an edit of `blocks.frt' update the file `BLOCKS.BLK'
+: refresh BLOCK-EXIT "make BLOCKS.BLK" SYSTEM BLOCK-INIT ;
 
 
 
@@ -3098,6 +3102,15 @@ PS ABA + BABAA
 
 
 
+( POSTFIX ) \ AvdH A1sep26
+
+\ Restore the normal behaviour of (WORD)
+: (WORD)-NEW '(WORD) DUP >PHA SWAP >DFA ! ;
+
+\ Make the following defining word postfix for one definition
+\ The name must be a string constant on the stack
+\ Use only while compiling, or you crash the system
+: POSTFIX ?COMP '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
 
 
 
@@ -3105,20 +3118,7 @@ PS ABA + BABAA
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-( A free stack )
+( STACK PUSH POP ) \ A free stack AvdH A1sep26
 : STACK CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 100 STACK DEBUG-STACK
 : PUSH DEBUG-STACK @ SWAP OVER ! 1 CELLS +  DEBUG-STACK ! ;
@@ -3134,14 +3134,14 @@ PS ABA + BABAA
 
 
 
-( WORDS and VOCS )
+( .WID .VOCS ORDER ) \ AvdH A1sep25
 \ Print all vocabularies names in existence.
 : .VOCS 'ID. FOR-VOCS ;
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
 \ Print the current search order by vocabulary names
-: ORDER SEARCH BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT 2DROP ;
-
+: ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
+2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 
 
 
