@@ -1162,12 +1162,91 @@ MATS2:  DC      FROMR, DROP
 worddoc({PARSING},{?BLANK)},{query_blank},{ch --- f },{},
 {For the character forthsamp({ch}) return whether this is 
 considered to be white space into the flag forthsamp({f}) .
-At least the space, the tab and the carraige return and line
+At least the space, ascii null, the tab and the carriage return and line
 feed characters are white space.},
 {{BL},{SPACE}},
 {{HEX 20 ?BLANK . 41 ?BLANK .},{1 0}})
 HEADER({?BLANK},{QBL},{DOCOL})
         DC      LBL, ONEP, LESS
+        DC      SEMIS
+;
+worddoc({PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
+{Parse the forthdefi({current input stream})
+for a character and leave the its address.
+Advance the input pointer to the next character.
+If at the end of the end of the input stream, 
+leave the end and a zero. 
+_VERBOSE_({If the streaAs it goes with string constants, you may not
+alter its content, nor assume anything is appended.})},
+{{BLK},{WORD},{IN}},
+{{},{},
+{},{}})
+HEADER({IN[]},{INBRS},{DOCOL})
+        DC      SOURC, CELLP, TFET
+        DC      OVER, EQUAL
+        _0BRANCH(INBRS1)
+        DC      ZERO
+        _BRANCH(INBRS2)
+INBRS1:
+        DC      LDUP, CFET
+        DC      ONE, LIN, PSTOR
+INBRS2:
+        DC      SEMIS
+;
+worddoc({PARSING},{MY-WORD},{m_word},{ ---sc},{CI L0},
+{Parse the forthdefi({current input stream})
+for a word, i.e. observing forthcode({?BLANK}) .
+Skip leading delimiters then advance the input pointer to 
+past the next delimiter or past the end of the input stream.
+Leave the word found as a string constant.
+_VERBOSE_({As it goes with string constants, you may not
+alter its content, nor assume anything is appended.})},
+{{BLK},{WORD},{IN}},
+{{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
+{HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}})
+HEADER({MY-WORD},{MWORDN},{DOCOL})
+MWORDN1: DC INBRS, QBL
+        _0BRANCH(MWORDN1A)
+        DC DROP
+        _BRANCH(MWORDN1)
+MWORDN1A: 
+MWORDN2: DC INBRS, QBL, ZEQU
+        _0BRANCH(MWORDN2A)
+        DC DROP
+        _BRANCH(MWORDN2)
+MWORDN2A: 
+        DC OVER, LSUB
+        DC      SEMIS
+;
+worddoc({PARSING},{MY-WORD},{m_word},{del ---sc},{CI L0},
+{Parse the forthdefi({current input stream})
+with forthsamp({del}) for a delimiter.
+Skip leading delimiters then advance the input pointer to 
+past the next delimiter or past the end of the input stream.
+Leave the word found as a string constant.
+_VERBOSE_({As it goes with string constants, you may not
+alter its content, nor assume anything is appended.})},
+{{BLK},{WORD},{IN}},
+{{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
+{HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}})
+HEADER({MY-PARSE},{MPARS},{DOCOL})
+        DC      TOR
+MPARS1: DC INBRS, RR, EQUAL
+        _0BRANCH(MPARS1A)
+        DC DROP
+        _BRANCH(MPARS1)
+MPARS1A: 
+
+MPARS2: DC INBRS
+        DC LDUP
+        _0BRANCH(MPARS3A)
+        DC RR, LSUB
+        _0BRANCH(MPARS2A)
+        DC DROP
+        _BRANCH(MPARS2)
+MPARS3A: DC DROP
+MPARS2A: DC FROMR, DROP
+        DC OVER, LSUB
         DC      SEMIS
 ;
 worddocsafe({PARSING},{(WORD)},{paren_word},{addr1 addr2 --- addr3 addr4},{},
@@ -3080,7 +3159,7 @@ INTE6:  DC      DROP
         DC      LITER   ;{ENDIF}
 INTE7:  DC      QSTAC   ;{ENDIF}
 INTE5:  _BRANCH(INTE1)  ;{AGAIN}
-INTE8:  DC      DROP
+INTE8:  DC      DROP, DROP
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{IMMEDIATE},{immediate},{},{},
