@@ -253,7 +253,7 @@ dnl Same for ``worddocchapter''
 define({worddocchapter},
 {_GENERATE_DOC{}dnl}
 {{worddocchapter({$1},{ },{$3},{$4},{$5},{$6},{$7})}}
-{{worddocchapterend({$1},{~~~~~~~~~~},{CONTENT},{},{},{},{})}}
+{{worddocchapterend({$1~},{~~~~~~~~~~},{CONTENT},{},{},{},{})}}
 {_GENERATE_CODE{}dnl}
 )dnl
 
