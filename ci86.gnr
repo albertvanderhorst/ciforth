@@ -953,7 +953,7 @@ HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
 worddocsafe({DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {Leave a forthkey({"}) delimited string.},
 {},
-{{"AAP" TYPE},{AAP},
+{{"APE" TYPE},{APE},
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
 HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
@@ -2344,7 +2344,7 @@ worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{ISO,U,L0},
 {A user variable containing a pointer into the data of
 a vocabulary that contains a dummy dea with which the
 dictionary searches will first begin.},{{VOCABULARY},{CURRENT}}, 
-{{CONTEXT @ ' FORTH >DFA = .},{_T_}},
+{{CONTEXT @ ' FORTH >DDEA = .},{_T_}},
 enddoc)
 HEADER({CONTEXT},{CONT},{DOUSE}, CELLS(16))
 ;
@@ -2355,7 +2355,7 @@ new words will be added.
 This is done by linking them in between the link field of the
 dummy dea and the next definition.},
 {{VOCABULARY},{CONTEXT}}, 
-{{CURRENT @ ' FORTH >DFA = .},{_T_}},
+{{CURRENT @ ' FORTH >DDEA = .},{_T_}},
 enddoc)
 HEADER({CURRENT},{CURR},{DOUSE}, CELLS(17))
 ;
@@ -2721,19 +2721,25 @@ HEADER({>CFA},{TCFA},{DOCOL})
 ;
 worddoc({DICTIONARY},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
-data field address.},{{'},{>CFA},{>LFA},{>NFA}}, {}, enddoc)
+data field address. This points to the code for a code word, 
+to the high level code for a colon-definition, and to the
+ forthcode({DOES>}) pointer for a word build using forthcode({CREATE}) .
+In all these cases it directly follows the header.},
+{'},{>CFA},{>LFA},{>NFA}}, 
+{ (CREATE) APE SMUDGE HERE ' APE >PFA @ = .},{_T_}},
+enddoc)
 HEADER({>PFA},{TPFA},{DOCOL})
         DC      LIT, CELLS(D_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
-worddoc({DICTIONARY},{>DFA},{to_dummy_dea},{dea --- cfa},{},
+worddoc({DICTIONARY},{>DDEA},{to_dummy_dea},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the dummy dea.
 },{{VOCABULARY},{>CFA}}, 
-{{: APE ; ' FORTH >DFA >LFA @ ID.},{APE}},
+{{: APE ; ' FORTH >DDEA >LFA @ ID.},{APE}},
 enddoc)
-HEADER({>DFA},{TDFA},{DOCOL})
+HEADER({>DDEA},{TDDEA},{DOCOL})
         DC      TOBODY
         DC      CELLP ; {Skip vfa link.}
         DC      SEMIS
@@ -2851,8 +2857,12 @@ worddoc({COMPILING},{COMPILE},{compile},{},{C2},
 the word following forthcode({COMPILE}) is copied (compiled) into the dictionary.
 This allows specific compilation situations to be handled in
 addition to simply compiling an execution address (which the
-interpreter already does).},{[COMPILE]}, 
-{}, 
+interpreter already does).},
+{[COMPILE]}, 
+{
+{!CSP : GS1 COMPILE BL ; ?CSP IMMEDIATE dnl
+ !CSP : GS2 GS1 ; ?CSP GS2 .},{20}
+}, 
 enddoc)
 HEADER({COMPILE},{COMP},{DOCOL})
         DC      QCOMP
@@ -3435,7 +3445,10 @@ forthexample({:  xxx    [COMPILE]   FORTH   ;})
 forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
 that would otherwise execute during compilation. The above example
 will select the forthcode({FORTH}) vocabulary then forthvar({xxx}) executes, rather than at
-compile time.},{COMPILE}, {}, enddoc)
+compile time.},{COMPILE}, 
+{ {: MY-IF [COMPILE] IF ; IMMEDIATE dnl
+ : JAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 JAN 1 JAN},{2 1} }, 
+enddoc)
 HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      PWORD
         DC      PFIND
@@ -3444,6 +3457,36 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      ZERO
         DC      QERR
         DC      TCFA
+        DC      COMMA
+        DC      SEMIS
+;
+worddoc({COMPILING},{POSTPONE},{postpone},{},{p,C},
+{Used in a colon-definition in the form: 
+    forthexample({: xxx POSTPONE SOME-WORD })
+forthcode({POSTPONE}) will postpone the
+compilation behaviour of forthcode({SOME-WORD}) to the
+definition being compiled. If SOME-WORD is an immediate word
+this is similar to forthsamp({[COMPILE] SOME-WORD}), for other
+words it is similiar to forthsamp({COMPILE SOME-WORD}).}, 
+{COMPILE}, 
+{
+{!CSP : TEST POSTPONE BL ; TEST .},{20},
+{: MY-IF POSTPONE IF ; IMMEDIATE dnl
+ : IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1} 
+}, 
+enddoc)
+HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
+        DC      PWORD
+        DC      PFIND
+        DC      LDUP
+        DC      ZEQU
+        DC      ZERO
+        DC      QERR
+        DC      TCFA
+        DC      LDUP, TFFA, LIT, B_IMMED, LAND
+        _0BRANCH(POSTP1)
+        DC      COMP, COMP
+POSTP1: 
         DC      COMMA
         DC      SEMIS
 ;
@@ -5531,8 +5574,7 @@ RSLW4:
         DC      SEMIS
 ;
 });_END_({ _RWHD_})
-        PAGE
-        ;{ At line     LINE ~3500}
+;
 worddocsafe({DICTIONARY},{'},{tick},{--- addr},{P,L0},
 {Used in the form: .
 forthcode({'}) forthcode({nnnn})
@@ -5541,7 +5583,9 @@ This also serves as an execution token.
 As a compiler directive, executes in a colon-definition to compile
 the address as a literal. If the word is not found after a search of
 forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},
-{{CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} , {}, enddoc)
+{{CFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} , 
+{{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
+enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED)
         DC      PWORD
         DC      PFIND
@@ -5565,7 +5609,7 @@ HEADER({FORGET-VOC},{FORGV},{DOCOL})
 ; { Forget part of contents.}
         DC      SWAP
         DC      TOR
-        DC      TDFA
+        DC      TDDEA
         DC      LDUP
 FORGV3:
         DC      TLFA,FETCH    ; {Next voc}
