@@ -4,17 +4,30 @@
 
 : ?TEST DROP ;
 
-\ worddoc( {ISO},{CHAR},{--- c},{ISO},
+\ worddoc(  {ISO},{CHAR},{--- c},{ISO},
 \ {Parse a word and 
 \ leave forthvar({c}) the first non blank char of that word 
 \ input stream.},
 \ {{}})
 : CHAR BL WORD HERE 1+ C@ ;
 
-: CHARS ;
-
 1 ?TEST
 CR ." EXPECT |AB| : |" CHAR A EMIT CHAR B EMIT CHAR | EMIT 
+
+: CHARS ;
+: 2DROP DROP DROP ;
+: 2SWAP ROT >R ROT R> ;
+
+: CHARS ;
+1 ?TEST
+CR ." EXPECT 123 124 : |" 124 123 CHARS . . 
+
+1 ?TEST
+CR ." EXPECT 1 2 : " 1 2 3 4 2DROP . . 
+
+: 2SWAP ROT >R ROT R> ;
+1 ?TEST
+CR ." EXPECT 1 2 3 4  : |" 2 1 4 3 2SWAP . . . . 
 
 \ worddocchapter( {STRING},{ },{},{},
 \ { The idea of strings is that a character string (s) is a
@@ -25,17 +38,17 @@ CR ." EXPECT |AB| : |" CHAR A EMIT CHAR B EMIT CHAR | EMIT
 \ forthemph({cell}), than as many characters. Than probably spare room.}, 
 \ {{$@},{@!}},{$@},{$!},{$C+},{$+!},{$I},{$S}})
 
-\ worddoc( {STRING},{$@},{string_fetch},{ s --- sc },{},
+\ worddoc(  {STRING},{$@},{string_fetch},{ s --- sc },{},
 \ {Fetch a constant string forthvar({sc}) from forthvar({s}).},
 \ {{STRING},{$+!},{$F},{$S}})
 : $@   DUP CELL+ SWAP @ ;
 
-\ worddoc( {STRING},{$!},{string_store},{ sc s --- },{},
+\ worddoc(  {STRING},{$!},{string_store},{ sc s --- },{},
 \ {Store a constant string forthvar({sc}) into forthvar({s}).},
 \ {{STRING},{$@},{$+!},{$C+}})
 : $!   OVER OVER ! CELL+ SWAP CMOVE ;
 
-\ worddoc( {STRING},{$+!},{string_append},{ sc s --- },{},
+\ worddoc(  {STRING},{$+!},{string_append},{ sc s --- },{},
 \ { Append a constant string forthvar({sc}) to forthvar({s}).},
 \ {{STRING},{$+}})
 : $+! 
@@ -44,7 +57,7 @@ CR ." EXPECT |AB| : |" CHAR A EMIT CHAR B EMIT CHAR | EMIT
    CELL+   R> CHARS +   SWAP CMOVE
 ;
 
-\ worddoc( {STRING},{$C+},{string_char_append},{ c s --- },{},
+\ worddoc(  {STRING},{$C+},{string_char_append},{ c s --- },{},
 \ {Append a character c to forthdfn({string variable}) s.},
 \ {{STRING},{$+!}})
 : $C+ ( char s -- )
@@ -53,13 +66,13 @@ CR ." EXPECT |AB| : |" CHAR A EMIT CHAR B EMIT CHAR | EMIT
   1 R> +!
 ;
 
-\ worddoc( {STRING},{$.},{string_dot},{ sc --- },{},
+\ worddoc(  {STRING},{$.},{string_dot},{ sc --- },{},
 \ {Output forthdfn({string constant}) forthvar({sc}) to the
 \ terminal.}, 
 \ {{STRING},{$?}})
 : $. TYPE ;
 
-\ worddoc( {STRING},{$?},{string_query},{s --- },{},
+\ worddoc(  {STRING},{$?},{string_query},{s --- },{},
 \ {Output forthdfn({string variable}) 
 \ forthvar({s}) to the terminal.},
 \ {{STRING},{$.},{TYPE}})
@@ -76,10 +89,9 @@ CR ." EXPECT |AAPFREDQ| : |" PAD $? CHAR | EMIT
 CR ." EXPECT |AAPFREDQ| : |" PAD $@ $. CHAR | EMIT
 FORGET PAD
 
-\ worddoc({STRING},{$I},{string_index},{ sc c - addr},{},
+\ worddoc( {STRING},{$I},{string_index},{ sc c - addr},{},
 \ {Find forthvar({addr}), the index of forthvar({c}) in forthvar({sc}).
-\ This is the first place forthvar({c}) is found in the string else 0.
-\ It is assumed del cannot be a valid addr},
+\ This is the first place forthvar({c}) is found in the string else 0.},
 \ {{}})
 : $I 
 OVER 0= IF DROP DROP DROP 0 ELSE  DUP >R
@@ -93,7 +105,7 @@ CR ." EXPECT 2 : " S" AAPAA" OVER OVER CHAR P $I ROT - . DROP
 CR ." EXPECT 0 : " S" AAPAA" CHAR C $I .
 
 
-\ worddoc({VECTORS},{VECTOR},{vector},{---},{},
+\ worddoc( {VECTORS},{VECTOR},{vector},{---},{},
 \ { A define word that can be used to create an execution vector
 \ forthvar({V}) . forthvar({V}) initially does nothing. After
 \ forthsample({VECTOR V ' W CFA ' V !}) forthvar({V}) has the execution
@@ -106,7 +118,7 @@ VECTOR Q    : JAN 1 2 3 ;   ' JAN CFA    ' Q   !
 CR ." EXPECT 3 2 1 :"  Q . . . 
 FORGET Q 
 
-\ worddoc( {STRING},{COMPARE-AREA},{compare_area},{addr1 addr2 n--- f},{},{
+\ worddoc(  {STRING},{COMPARE-AREA},{compare_area},{addr1 addr2 n--- f},{},{
 \ Compare two memory area's with length forthvar({n}) and starting
 \ at forthvar({addr1}) and forthvar({addr2}) .
 \ Return forthvar({f}) the difference between
@@ -125,11 +137,11 @@ S" AAP" S" AAP" ROT DROP COMPARE-AREA
 CR ." EXPECT 0 :"  .
 S" CAP" S" AAP" ROT DROP COMPARE-AREA 
 CR ." EXPECT 2 :"  .
-S" AAP" S" ACP" ROT DROP COMPARE-AREA 
+S" ACP" S" AEP" ROT DROP COMPARE-AREA 
 CR ." EXPECT -2 :" .
 
 
-\ worddoc( {STRING},{$=},{string_equal},{sc1 sc2 --- f},{},{
+\ worddoc(  {STRING},{$=},{string_equal},{sc1 sc2 --- f},{},{
 \ Return forthvar({f}) indicating that the forthdfn({string constant})s
 \ forthvar({sc1}) and forthvar({sc2}) are equal. },
 \ {{}})
@@ -140,11 +152,11 @@ CR ." EXPECT -2 :" .
     THEN ;
 
 3 ?TEST
-S" AAP" S" AAP" $=     CR ." EXPECT 0:" .
-S" CAP" S" AAP" $=     CR ." EXPECT 0:" .
+S" AAP" S" AAP" $=     CR ." EXPECT 1 :" .
+S" CAP" S" AAP" $=     CR ." EXPECT 0 :" .
 S" AAP" S" AAPA" $=    CR ." EXPECT 0 :" .
 
-\ worddoc({TIME},{TICKS},{ticks},{--- d},{},
+\ worddoc( {TIME},{TICKS},{ticks},{--- d},{},
 \ {Return the number of clock cycles since the 
 \ computer was started up. This works only on 
 \ Pentium machines.},
@@ -160,40 +172,43 @@ C;
 
 DECIMAL 
 
-\ worddoc({FORMULA},{TICKS/SEC},{ticks_per_second},{ --- d},{},
+\ worddoc( {FORMULA},{TICKS/SEC},{ticks_per_second},{ --- d},{},
 \ {Leave the number of ticks per sec, i.e. for a Pentium 90 
 \ this is 90,000,000. This is a configuration item, but it 
 \ should be made automatic.
 \ },
-\ {{}})
 \ {{TICKS}})
 90000000 CONSTANT  TICKS/SEC
 
-\ worddoc( {EVENT},{PASSED},{passed},{d ---},{},
+\ worddoc(  {EVENT},{PASSED},{passed},{d ---},{},
 \ {The time forthvar({d}) indicating a tick count, is in the past.
 \ },
 \ {{TICKS}})
 : PASSED DMINUS TICKS D+ SWAP DROP 0< 0= ;
 
-\ worddoc( {EVENT},{EARLIER},{earlier},{d1 d2 ---},{},
+\ worddoc(  {EVENT},{EARLIER},{earlier},{d1 d2 ---},{},
 \ {The time forthvar({d1}) indicating a tick count, is earlier
-\  then the time forthvar({d2}) .
+\  or at the same time than the time forthvar({d2}) .
 \ },
 \ {{TICKS},{PASSED}})
-: EARLIER  DMINUS D+ SWAP DROP ;
+: EARLIER  DMINUS D+ -1. D+ SWAP DROP ;
 
 2 ?TEST
 ." EXPECT -1 :" TICKS TICKS EARLIER . 
 ." EXPECT 0 :" TICKS TICKS ROT >R ROT R> EARLIER .
+." EXPECT -1 -1 :" 0. 0. EARLIER . .1. 1. EARLIER . 
+\ Wrap around, will happen in 64.000 years 
+." EXPECT -1 -1 :" -1. 1. EARLIER . -1. -1. EARLIER . 
+." EXPECT 0 :" 1. -1. EARLIER . 
 
-\ worddoc({EVENT},{MAXEVENT},{maxevent},{ --- n},{},
+\ worddoc( {EVENT},{MAXEVENT},{maxevent},{ --- n},{},
 \ {Leave a constant , the number of events that can be scheduled in 
 \ the event table.
 \ },
 \ {{EVENT-TABLE}})
 100000 CONSTANT  MAXEVENT
 
-\ worddoc({MEMORY},{ARRAY},{array},{ n1 n2 --- },{},
+\ worddoc( {MEMORY},{ARRAY},{array},{ n1 n2 --- },{},
 \ {A defining word that generates an array with a lenght forthvar({n1}) 
 \ and a stride (element size) of forthvar({n2}) .
 \ Execution semantics of the defined word is forthsample({ n --- addr})
@@ -203,7 +218,7 @@ DECIMAL
 \ {{TICK}})
 : ARRAY <BUILDS DUP , * ALLOT DOES> >R R @ * R> + CELL+ ;
 
-\ worddoc({EVENT},{EVENT[]},{event_schedule},{ n --- addr},{},
+\ worddoc( {EVENT},{EVENT[]},{event_schedule},{ n --- addr},{},
 \ {Defined by forthcode({ARRAY}) . forthvar({addr}) the place where event forthcode({n}) is to be 
 \ found. An event is a time in ticks. In a parallel array
 \ forthcode({EVENT-DATA[]}) data applicable to this event may be stored.
@@ -216,8 +231,7 @@ MAXEVENT 8 ARRAY EVENT[]
 1 ?TEST
 ." EXPECT 123 :" 123  123. 1 EVENT[] 2! . 
 
-
-\ worddoc({EVENT},{FILLED},{filled},{ --- addr},{},
+\ worddoc( {EVENT},{FILLED},{filled},{ --- addr},{},
 \ {A variable indicating the last index of an 
 \ forthcode({EVENT[]}) that belongs to the filled part of the buffer.
 \ The emptied nor the filled part can be empty. 
@@ -228,7 +242,7 @@ MAXEVENT 8 ARRAY EVENT[]
 \ {{EVENT[]},{EMPTIED}})
 1 VARIABLE FILLED
 
-\ worddoc({EVENT},{EMPTIED},{emptied},{ --- addr},{},
+\ worddoc( {EVENT},{EMPTIED},{emptied},{ --- addr},{},
 \ {A variable indicating the last index of an 
 \ forthcode({EVENT[]}) that belongs to the emptied part of the buffer.
 \ The emptied nor the filled part can be empty. 
@@ -239,32 +253,53 @@ MAXEVENT 8 ARRAY EVENT[]
 \ {{EVENT[]},{FILLED}})
 0 VARIABLE EMPTIED
 
-\ worddoc({EVENT},{!EVENT},{init_event},{ --- },{},
+\ worddoc( {EVENT},{!EVENT},{init_event},{ --- },{},
 \ {Initialise the event table.},
 \ {{EVENT},{EMPTIED},{FILLED}})
-: !EVENT 0 EMPTIED !  1 FILLED ! ;
+: !EVENT 0 EMPTIED !  0 FILLED ! ;
 
-\ worddoc({EVENT},{#EMPTY},{amount_empty},{ --- n},{},
-\ {Gives the lenght of the emptied part of the event table.}
+\ worddoc( {EVENT},{#EMPTY},{amount_empty},{ --- n},{},
+\ {Gives the lenght of the emptied part of the event table.
+\ this part must not be empty, such that if the two
+\ pointers are equal the table is totally full.},
 \ {{EVENT[]},{EMPTIED},{FILLED}})
 : #EMPTY   EMPTIED @   FILLED @ -  
     DUP 0< IF MAXEVENT + THEN ;
 
-\ worddoc({EVENT},{#FULL},{amount_full},{ --- n},{},
-\ {Gives the lenght of the filled part of the event table,
-\ this part must not be empty, such that if the two
-\ pointers are equal the table is totally full.
+\ worddoc( {EVENT},{#FULL},{amount_full},{ --- n},{},
+\ {Gives the lenght of the filled part of the event table.
 \ },
 \ {{EVENT[]},{EMPTIED},{FILLED}})
 : #FULL   FILLED @   EMPTIED @ -  
     DUP 0< IF MAXEVENT + THEN ;
 
 1 ?TEST
-." EXPECT 1 " MAXEVENT 1 - . ." :" 123 #FULL . #EMPTY . 
+." EXPECT 1 123 " MAXEVENT 1 - . ." :" 123 #FULL . #EMPTY . .
 
-: FIND-EVENT DROP DROP 1 ;
+\ worddoc( {EVENT},{FIND-EVENT},{FIND_event},{ d --- n},{},
+\ {Find the place where forthvar({d}) is to be put into the event table,
+\ such that it remains sorted.},
+\ {{EVENT[]},{INSERT-EVENT},{GET-EVENT},{SET-EVENT}})
+: FIND-EVENT FILLED @ EMPTIED @ >R >R
+    BEGIN 
+        R> R> 2DUP >R >R >
+        ( This IF prevents testing a non-existing table entry)
+        IF 2DUP R 1 - EVENT[] 2@ EARLIER ELSE 0 THEN
+    WHILE  R> 1 - >R 
+    REPEAT 2DROP R> R> DROP ;
+
+1 ?TEST 
+3 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2! 
+: F FIND-EVENT ; ^
+123
+." EXPECT 0 0 1 1 :" 11. F . 12. F . 13. F . 14. F . ^
+." EXPECT 2 2 3 123 :" 15. F . 16. F . 17. F . . ^
+
+BYE
+
+
 : INSERT-EVENT DROP DROP DROP 1 FILLED +! ;
-\ worddoc({EVENT},{SET-EVENT},{set_event},{ d --- n},{},
+\ worddoc( {EVENT},{SET-EVENT},{set_event},{ d --- n},{},
 \ {Put an event forthvar({d}) into the event table.
 \ This may fail, if the event table is full.
 \ forthvar({n}) is the position where it was put,
@@ -275,7 +310,7 @@ MAXEVENT 8 ARRAY EVENT[]
     R INSERT-EVENT
     R> ELSE -1 THEN ;
 
-\ worddoc({EVENT},{GET-EVENT},{get_event},{ --- n},{},
+\ worddoc( {EVENT},{GET-EVENT},{get_event},{ --- n},{},
 \ {Attempt to deschedule the first event from the event 
 \ table. The event is descheduled if the current time is 
 \ later, the number of the event is returned into
