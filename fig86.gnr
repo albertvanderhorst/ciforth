@@ -909,6 +909,65 @@ HEADER({&},{DCHAR},{DOCOL}, B_IMMED + B_DENOT)
 HEADER({0},{DEN0},{DOCOL}, B_IMMED + B_DENOT)
         DC      NEWNUMB, SEMIS
 ;
+HEADER({1},{DEN1},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({2},{DEN2},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({3},{DEN3},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({4},{DEN4},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({5},{DEN5},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({6},{DEN6},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({7},{DEN7},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({8},{DEN8},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({9},{DEN9},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({A},{DENA},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+;
+HEADER({B},{DENB},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+;
+HEADER({C},{DENC},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+;
+HEADER({D},{DEND},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+;
+HEADER({E},{DENE},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+;
+HEADER({F},{DENF},{DOCOL}, B_IMMED + B_DENOT)
+        DC      NEWNUMB, SEMIS
+;
+HEADER({-},{DENM},{DOCOL}, B_IMMED + B_DENOT)
+        DC      ONE, LIN, PSTOR
+        DC      NPNUMB, DMINU, SDLITE
+        DC      SEMIS
+;
+HEADER({+},{DENP},{DOCOL}, B_IMMED + B_DENOT)
+        DC      ONE, LIN, PSTOR
+        DC      NEWNUMB, SEMIS
+;
 dnl Remember the top of the denotation chain.
 define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
 dnl Reset the link chain at this point to keep denotations
@@ -2991,6 +3050,11 @@ NUMB3:  DC      SEMIS
 ;
 HEADER({FIND:},{DDFIND},{DOCOL})
         DC      PWORD, PFIND
+        DC      LDUP, TFFA, FETCH,
+        DC      LIT, B_DENOT, LAND
+        _0BRANCH(DDFIND1) ;{IF}
+        DC      DROP, ZERO
+DDFIND1:               ;{ENDIF}
         DC SEMIS
 ;
 worddoc({DICTIONARY},{(FIND)},{paren_find},{sc --- dea)},{},
@@ -3085,13 +3149,18 @@ HEADER({CREATE},{CREAT},{DOCOL})
         DC      QERR
         DC      TDUP
         DC      PFIND
-        DC      DDUP
+        DC      LDUP
+        _0BRANCH(CREA1) ;{IF}
+        DC      LDUP, TFFA, FETCH,
+        DC      LIT, B_DENOT, LAND, ZEQU
         _0BRANCH(CREA1) ;{IF}
         DC      IDDOT
         DC      LIT,4
         DC      MESS
         DC      SPACE   ;{ENDIF}
-CREA1:  DC      SCOMMA
+        DC      ZERO
+CREA1:  DC      DROP
+        DC      SCOMMA
         DC      HERE,TOR
         DC      COMMA   ; {Name field.}
         DC      ZERO,COMMA ; {Flag field.}
@@ -3221,7 +3290,7 @@ INTE1:
         DC      OVER, TOR
         DC      PFIND   ;{BEGIN}
         DC      LDUP
-        _0BRANCH(INTE2) ;{IF}
+        DC      ZEQU, ZERO, QERR
 ;        DC      LDUP, IDDOT
         DC      LDUP, TFFA, FETCH, LIT, B_DENOT, LAND
         _0BRANCH(INTE3A) ;{IF}
@@ -3231,35 +3300,18 @@ INTE3A:
         DC      FROMR, DROP
                         ;{ENDIF}
 INTE4A:
-;        DC      DOTS
         DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) ;{IF}
         DC      TCFA
         DC      EXEC
-        _BRANCH(INTE4)  ;{ELSE}
+        _BRANCH(INTE4) ;{IF}
 INTE3:
         DC      TCFA
         DC      COMMA
                         ;{ENDIF}
 INTE4:  DC      QSTAC
-        _BRANCH(INTE5)  ;{ELSE}
-INTE2:
-        DC      DROP
-        DC      FROMR, LIN, STORE
-        DC      LBL, AWORD, DROP
-        DC      HERE
-        DC      NUMB
-        DC      DPL
-        DC      FETCH
-        DC      ONEP
-        _0BRANCH(INTE6) ;{IF}
-        DC      DLITE
-        _BRANCH(INTE7)  ;{ELSE}
-INTE6:  DC      DROP
-        DC      LITER   ;{ENDIF}
-INTE7:  DC      QSTAC   ;{ENDIF}
-INTE5:  _BRANCH(INTE1)  ;{AGAIN}
+        _BRANCH(INTE1)  ;{AGAIN}
 INTE8:  DC      DROP, DROP
         DC      SEMIS
 ;
