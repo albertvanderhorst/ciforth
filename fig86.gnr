@@ -167,7 +167,7 @@ DS_SANDBOX      EQU     REALSEGMENT + SEGSIZE ;{ @ Harmless place for the stack.
 GDT_SEGMENT     EQU     DS_SANDBOX + SANDBOXSIZE/10H       ;{ @ General descriptor table.}
 ;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen and }
 ;{ must be a multiple of 08H }
-GDT_SWITCH       EQU    M4_BIOSBOOT/10H  ;{ @% Switching segment }
+GDT_SWITCH       EQU    (LOADADDRESS-M4_SWITCHORG)/10H  ;{ @% Switching segment }
 GDT_CS EQU 10H  ;{ % The protected mode code segment }
 ; { This choice is a relic. If switched from protected mode }
 ; { the real mode code then uses data from the sandbox.}
@@ -259,7 +259,7 @@ ELSE3:
         ;{ The first file copied to a freshly formatted floppy will}
         ;{ be at SECSTRT (See also genboot.bat)}
         MOV     CX,SECSTRT      ; {Counting from zero}
-        MOV     AX,REALSEGMENT
+        MOV     AX,BOOTADDRESS/10H ; {Bootsegment}
         MOV     ES,AX
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
@@ -428,8 +428,8 @@ HERE1:  POP   AX         ;{ Reality.}
         MOV BX, HERE1 ;{ Dream.}
         SUB AX,BX      ;{ Discrepancy between dream and reality}
         MOV CX,10h     ;{ How much units would that be for the segment?}
-        XOR DX,DX
-        DIV CX
+        CWD
+        IDIV CX
         CMP DX,0
 MYSELF: JNZ MYSELF    ; { If there is a remainder, we cannot correct, so hang.}
         MOV CX,CS
@@ -437,7 +437,7 @@ MYSELF: JNZ MYSELF    ; { If there is a remainder, we cannot correct, so hang.}
         PUSH CX     ; {Corrected code segment}
         MOV BX, HERE2
         PUSH BX     ; {Correct program counter}
-        RETF        ; {Returning to here2 now}
+        RETF        ; {Returning to here now}
 HERE2:
         CLI                     ;{ Disallow interrups until stack ready}
         MOV     AX,CS           ;{ Will do for now (real mode)}
@@ -448,6 +448,32 @@ HERE2:
         STI                     ;{ Allow interrupts}
 });_END___1__({ _BOOTED_1_})
 
+; ########################################################################################
+;                       MOVE CODE TO ITS PLACE (still real mode)
+; ########################################################################################
+
+;____1____ _SWITCH_1_({
+; {Move code down to where it belongs.}
+; {This should do the job because everything else is assembled }
+; {as if everything is where it belongs. (Sound logical, isn't it?)}
+        STD     ; Start at the end going back.
+        ; Remember CS/DS are true, such that CS:TEXTEND really points there.
+        MOV     CX,TEXTEND-HERE5 ; Amount to move
+        MOV     SI,TEXTEND-1     ; First byte to move
+        MOV     AX, LOADADDRESS/10H ; Destination segment
+        MOV     ES, AX
+        MOV     DI,SI           ;
+        REPNZ
+        MOVSB
+        PUSH    ES    ; {Corrected code segment}
+        MOV BX, HERE5
+        PUSH BX     ; {Correct program counter}
+        RETF        ; {Returning to here5 now}
+HERE5:
+        MOV     AX,CS
+        MOV     DS,AX
+        CLD     ; {Reset direction to going up.}
+});_END___1__({ _SWITCH_1_})
 
 ; ########################################################################################
 ;                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
@@ -484,13 +510,14 @@ PROTECT:
 ;{ GDT_DS is arbitrary. }
 ;{  The real mode view of GDT_DS would best be a SANDBOX (that is empty).}
 ;{ But for the moment, DS is set after switching anyway.}
+;{ Accomodate a 24 bit start address, a maximal limit, large pages. }
         MOV     DI,GDT_DS
         MOV     AX,0FFFFH
         STOSW
-        MOV     AX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
-        SHL     AX,4
-        STOSW
-        MOV     AX,9200H
+        MOV     EAX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
+        STOSW           ; {Only 16 bits}
+        SHR     EAX,8
+        ADD     AX,9200H
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW
@@ -499,9 +526,9 @@ PROTECT:
         MOV     AX,0FFFFH
         STOSW
         MOV     AX,LOADADDRESS-M4_ORG ;{ Machined to result in zero}.
-        SHL     AX,4
-        STOSW
-        MOV     AX,9A00H
+        STOSW           ; {Only 16 bits}
+        SHR     EAX,8
+        ADD     AX,9A00H
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW
