@@ -207,7 +207,7 @@ fig86.%.info : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 names
 	m4 wordset.m4 $(@:%.info=%.mim)  $(@:%.info=%.mig) |m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.info=%.cfg) manual.m4 namescooked.m4 figforth.mi)|\
 	  m4 | tee spy | makeinfo
-	#rm wordset.mi
+	rm wordset.mi menu.texinfo
 
 # For tex we do not need to use the safe macro's
 fig86.%.texinfo : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 namescooked.m4
@@ -217,4 +217,10 @@ fig86.%.texinfo : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4 na
 	    echo "define(figforthversion,$(@:%.texinfo=%.info))" ; \
 	    cat $(@:fig86.%.texinfo=%.cfg) manual.m4 namescooked.m4 figforth.mi \
 	)| tee spy | m4 > $@
-	#rm wordset.mi menu.texinfo
+	rm wordset.mi menu.texinfo
+
+cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
+	m4 lina.cfg manual.m4 namescooked.m4 cifgen.mi |\
+	sed -e 's/_lbracket_/@{/g'                     |\
+	sed -e 's/_rbracket_/@}/g'                     |\
+	sed -e 's/_comat_/@@/g'                        > $@
