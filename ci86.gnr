@@ -1397,15 +1397,13 @@ _VERBOSE_({Internal, used for nested compilation. })},
 {20 1}},
 enddoc)
 CODE_HEADER({SKIP},{SKIP})
-BRAN1:  MOV     AX,[LIP]
+BRAN1:  LODSW
 _ALIGNED_({
         DEC     AX
-        OR      AL,3
+        OR      AL,_BITS16_(1)_BITS32_(3)
         INC     AX
 },{dnl});_END_({_ALIGNED_})
-        _BITS32_({LEA     LIP,[LIP+AX+_CELLS(1)]},{dnl})
-        _BITS16_({LEA     LIP,[LIP+_CELLS(1)]},{dnl})
-        _BITS16_({ADD     LIP,AX},{dnl})
+        ADD     LIP,AX
         _NEXT
 ;
 worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C2},
@@ -1457,14 +1455,13 @@ prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
 {{( See DO)},{}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
-        MOV     BX,_CELL_PTR[LIP]
-        LEA     BX,[LIP+BX+_CELLS(1)] ;{Make absolute}
-        LEA     LIP,[LIP+_CELLS(1)]
+        LODSW
+        LEA     AX,[LIP+AX] ;{Make absolute}
         POP     DX      ;{ INITIAL INDEX VALUE}
-        POP     AX      ;{ LIMIT VALUE}
+        POP     BX      ;{ LIMIT VALUE}
         XCHG    RPO,SPO   ;{ GET RETURN STACK}
-        PUSH    BX      ;{ Target location.}
-        PUSH    AX
+        PUSH    AX      ;{ Target location.}
+        PUSH    BX
         PUSH    DX
         XCHG    RPO,SPO   ;{ GET PARAMETER STACK}
         _NEXT
@@ -1475,20 +1472,19 @@ prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 {{( See ?DO)},{}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
-        MOV     BX,_CELL_PTR[LIP]  ; {Get inline relative target.}
-        LEA     BX,[LIP+BX+_CELLS(1)] ;{Make absolute}
-        LEA     LIP,[LIP+_CELLS(1)]
+        LODSW
+        LEA     AX,[LIP+AX] ;{Make absolute}
         POP     DX      ;{ INITIAL INDEX VALUE}
-        POP     AX      ;{ LIMIT VALUE}
-        CMP     DX,AX
+        POP     BX      ;{ LIMIT VALUE}
+        CMP     DX,BX
         JZ      QXDO1
         XCHG    RPO,SPO   ;{ GET RETURN STACK}
-        PUSH    BX      ;{ Target location.}
-        PUSH    AX
+        PUSH    AX      ;{ Target location.}
+        PUSH    BX
         PUSH    DX
         XCHG    RPO,SPO   ;{ GET PARAMETER STACK}
         _NEXT
-QXDO1:  MOV     LIP,BX
+QXDO1:  MOV     LIP,AX
         _NEXT
 ;
 worddoc( {CONTROL},{I},{i},{--- n},{ISO,FIG,C,L0},
@@ -2843,8 +2839,8 @@ enddoc)
 HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 ;
 worddoc( {STORAGE~},{OFFSET},{offset},{--- addr},{U},
-{A user variable which may contain a block offset to disc drives,
-such as to free part of it for boot-code.
+{A user variable which contains a block offset to disc drives;
+in this way a part of it is available for boot-code.
 _HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system it is 0.})
 _HOSTED_LINUX_({As blocks are allocated in a file on the host operating system it is 0.})
 The
@@ -5689,7 +5685,8 @@ worddoc( {STORAGE},{UPDATE},{update},{},{ISO,FIG,L0},
 {Marks the most recently referenced block (pointed to by
 forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
-storage of a different block.},{{BLOCK},{SCREEN}},
+storage of a different block. In fact the block is transferred
+to disk immediately.},{{BLOCK},{SCREEN}},
 {{!CSP 1 BLOCK DROP UPDATE ?CSP},{} },
 },
 enddoc)
@@ -5728,7 +5725,7 @@ buffer layout is as follows: a cell with the block number, a
 cell with the lock count and the content.
 _VERBOSE_({{An update flag would somehow be multiplexed with the
 lock count, but it is not needed in ciforth.}})
-If all buffers were locked, the system freezes.},
+If all buffers were locked, forthcode({BUFFER}) freezes the system.},
 {{BLOCK},{STALEST},{PREV},{#BUFF}},
 {{!CSP 1 BUFFER FIRST LIMIT WITHIN . ?CSP},{_T_}},
 enddoc)
@@ -5789,7 +5786,8 @@ BLOC1:  DC      RDROP
         DC      SEMIS
 ;
 worddoc( {STORAGE~},{FLUSH},{flush},{},{ISO FIG L0},
-{Transfer the content of each forthcode({UPDATE}) d block buffer to disk.
+{Make sure that the content of each forthcode({UPDATE}) d block buffer
+has been is transferred to disk.
 They are no longer associated with a block and their content is
 no longer available.
 },{{EMPTY-BUFFERS},{BLOCK},{SCREEN}},
@@ -5845,10 +5843,11 @@ HEADER({RESTORE},{RESTO},{DOCOL})
 _LOAD_({
 worddoc( {STORAGE~},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
 {Get a complete specification of the input source stream. For
-ciforth this is the content of forthcode({SRC}). ciforth
-needs 3 cells, and is always able to forthcode({RESTORE}) an
-input saved like this. _VERBOSE_({This doesn't make this
-definition of any use at the application level.
+ciforth this is the content of forthcode({SRC}). ciforth needs
+3 cells, and is always able to forthcode({RESTORE}) an input
+saved like this. _VERBOSE_({In practice the use of
+forthcode({SAVE-INPUT}) should be restricted to restoring input
+of the same stream.
 }) },
 {{RESTORE},{RESTORE-INPUT}},
 {{!CSP : GS1 SAVE-INPUT 0 IN ! RESTORE-INPUT ; dnl
@@ -5862,12 +5861,14 @@ HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
 ;
 worddoc( {STORAGE~},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3--- f},{ISO},
 {Restore the input source stream from what was saved by
-SAVE-INPUT . ciforth is always able to restore the input across
-different input sources, as long as the input to be restored is
+SAVE-INPUT .
+ciforth is always able to restore the input across
+different input sources, as long as the input to be restored was
 not exhausted. This has the effect of chaining, and doesn't
 effect the return from nested calls be it interpreting, loading
 or evaluating. _VERBOSE_({{The input source abandoned will
-never be closed properly, so don't use it.}}) },
+never be closed properly, so use should be restricted to the same
+input source. }}) },
 {{RESTORE},{SAVE-INPUT}},
 {{( Via SAVE-INPUT)},{}},
 enddoc)
@@ -5900,7 +5901,7 @@ worddoc( {STORAGE},{UNLOCK},{unlock},{ n --- },{CI},
 _VERBOSE_({{Probably, because it
 is no longer the forthdefi({current input source.})}})
 The result is that its buffer can again be reclaimed.
-Unlocking without a previous lock is may lead to a crash.
+Unlocking without a previous lock may lead to a crash.
 },
 {{LOCK},{#BUFF}},
 {
@@ -7331,7 +7332,7 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write and aborts on errors.},
+performs the read-write and records errors.},
 {{BLOCK}},
 dnl we can use block 0 for scratch
 {
@@ -7621,7 +7622,7 @@ HEADER({LBAPAR},{LBA},{DOVAR}, )
 
 worddoc( {STORAGE},{RBLK},{read_block},{--},{},
 {Perform a disk read operation using a properly filled in LBA structure
-in forthcode({LBAPAR}). }
+in forthcode({LBAPAR}). },
 {{R/W},{WBLK}}, {}, enddoc)
 CODE_HEADER({RBLK},{RBLK})
         MOV     BX,4200H
@@ -7629,7 +7630,7 @@ CODE_HEADER({RBLK},{RBLK})
 ;
 worddoc( {STORAGE},{WBLK},{write_block},{--},{},
 {Perform a disk write operation using a properly filled in LBA
-structure in forthcode({LBAPAR}). }
+structure in forthcode({LBAPAR}). },
 {{R/W},{RBLK}}, {}, enddoc)
 CODE_HEADER({WBLK},{WBLK})
         MOV     BX,4300H
@@ -7653,20 +7654,22 @@ RWBLK:
 
 worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
+specifies the source or destination block buffer, It must reside
+in the lowest 1 Mbyte of physical memory.
+forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
 performs the read-write and aborts with an error message for failures.
 This function uses ``LBA'' : Logical Block Addressing and may
 not work on elderly hard disks.
-_BITS_({Where blk is at most 64K the largest addressable disk is
+_BITS16_({{Where blk is at most 64K the largest addressable disk is
 64M , you can get around this by filling in forthcode({LBAPAR}) and then calling
- forthcode({RBLK}) or forthcode({WBLK}) })
+ forthcode({RBLK}) or forthcode({WBLK}) }})
 forthcode({DISK-ERROR}) contains the status of the latest operation,
 bit 1 (carry flag) indicates an error.
 },
-{{BLOCK},{DISK-ERROR},{RBLK},{WBLK}}, {}, enddoc)
+{{BLOCK},{DISK-ERROR},{LBAPAR},{RBLK},{WBLK}}, {}, enddoc)
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
         DC      TOR
