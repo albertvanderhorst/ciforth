@@ -112,6 +112,35 @@ MASM cannot assemble the current source probably, because
 there is a quirk in NASM to be able to use absolute addresses,
 such as needed in creating an offset.
 
+============================== revision log of recent changes ===
+----------------------------
+revision 2.116
+date: 2000/09/26 17:10:59;  author: albert;  state: Exp;  lines: +35 -20
+More cosmetic changes. Eliminating stack setting and stack
+segment loading from the switch code attempted but failed.
+----------------------------
+revision 2.115
+date: 2000/09/26 12:21:22;  author: albert;  state: Exp;  lines: +37 -27
+Identical object to 2.114. But with renames towrds
+the change inphilospohy that the SS reigster remains valid
+across real/protected mode switches
+----------------------------
+revision 2.114
+date: 2000/09/14 14:52:49;  author: albert;  stat: Exp;  lines: +6 -4
+branches:  2.114.1;  2.114.2;
+BYE for Forth's started from MSDOS works, by
+slight cleanup of protected mode switching.
+----------------------------
+revision 2.113
+date: 2000/09/13 11:21:41;  author: albert;  state: Exp;  lines: +22 -14
+branches:  2.113.1;
+The equ-layout of the switching version is now based on
+absolute addresses, not segments.
+It has been tested by verifying that only the binary for ..alone..
+versions differ, and well in the LOW-DP preset value, that was
+previously wrong.
+                                                 
+============================== history of older changes ===
 2.22 OFFSET in its present form must be eleminated from MESSAGE
 Done
 2.23 booting from hard disk possible.
@@ -202,3 +231,66 @@ Handles interrupts.
 Decided to publish now.
 This version will start a BIOS protected mode Forth from MSDOS,
 but cannot return for some reason.
+Reimplemented BYE for protected mode under MSDOS, but it doesn't
+work.
+
+2.101
+Major reorganisation of conditional compilation.
+Editing in 16 bit protected no longer works.
+32 bit booted version can run from MSDOS but not BYE.
+
+2.102
+This version can edit again in 16 bits mode, merge 2.90.1.1.
+
+2.103
+Configuration clean up and final test.
+Only real bug : not setting SS/ES always.
+Further mainly configuration problems.
+8 version tested!
+
+2.104
+Version was destroyed in cold message.
+
+2.105
+This version can again be assembled by MASM ($$ translated).
+ORIG: reintroduced so that on MSDOS a .EXE file can be generated.
+EM reduced to 0FFFEH because MASM chokes otherwise, not entirely unjustified.
+Made sure that if mass storage is not available, no attempts are made
+to read error message from disk.
+
+revision 2.106
+Hard disk i/o works again after protected mode starts at zero.
+This gets released with the label RELEASE1. 
+=============================================================================
+
+revision 2.107
+Dead code removed.
+cs was not filled in correctly in BYE vector for non-booting code.
+
+2.108
+32 bits MSDOS mass storage works
+RWFILE introduced
+filling in return to MSDOS vector is made safer.
+
+2.109
+Jumps used in a regular fashion.
+REALSEGMENT is in reality the switch segment.
+PC_1 defaults to _no like everything.
+
+revision 2.110
+date: 2000/07/05 19:33:39;  author: albert;  state: Exp;  lines: +37 -9
+32 bit protected mode now activates address line 20.
+Without this the first Megabyte mirrors at 0x100000 ,
+This version is released with label RELEASE2
+
+=============================================================================
+2.111
+I/O for 32 bits MSDOS now copies through temporoary buffers.
+Tehe sandbox must have a size of 10000H.
+
+2.112
+This version is released with label RLEASE3.
+Plain LOAD_ADDRESS eliminated. M4_LOADADDRESS has precise meaning
+see logboek.txt and m4 files.
+=============================================================================
+
