@@ -1,4 +1,4 @@
-;{               HCC FIG generic 8086 FORTH}
+S;{               HCC FIG generic 8086 FORTH}
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
@@ -91,10 +91,6 @@ KBBUF	EQU	1024    ;{DATA BYTES PER DISK BUFFER}
 US	EQU	100H     ;{ USER VARIABLE SPACE}
 RTS	EQU	0A0H	;{ RETURN STACK & TERM BUFFER}
 ;
-;____1_____ _LINUXHOSTED_1_({
-BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
-STRUSA  EQU     BUF1-US         ;{ User area}
-});_END___1__({ _LINUXHOSTED_1_})
 ;____1_____ _REAL_1_({
 BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
 STRUSA  EQU     BUF1-US         ;{ User area}
@@ -102,10 +98,13 @@ STRUSA  EQU     BUF1-US         ;{ User area}
 ;____1_____ _PROTECTED_1_({
 STRUSA  EQU     EM-US         ;{ User area at end }
 });_END___1__({ _PROTECTED_1_})
+
+;____1_____ _EQULAYOUT_1_({
 STRTIB  EQU     STRUSA-RTS      ;{ Start return stack area}
 				;{ Under this : data stack}
 INITR0  EQU     STRUSA         ;{ Grows down}
 INITS0  EQU     STRTIB          ;{ Growns down}
+});_END___1__({ _EQULAYOUT_1_})
 
 ;____1_____ _USEDOS_1_({
 DRIVE   EQU     0       ;{ Use floppy A for blocks.}
@@ -506,7 +505,10 @@ GDTLOAD DW     GDTLEN
 
 ;____1_____ _LINUXHOSTED_1_({
 include(width32.m4)       
-        ORG     M4_ORIG 
+        global _figforth        ; Underscore means callable from c.
+        section forth progbits write exec alloc
+_figforth:
+;       ORG     M4_ORIG 
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
@@ -3782,6 +3784,19 @@ HEADER({TASK},{TASK},{DOCOL})
 	DC	SEMIS
 ;
 INITDP	EQU	$	;{SHOW END OF DICTIONARY}
+
+;____1_____ _LINUXHOSTED_1_({
+        FORTHSIZE       EQU  (INITDP-_figforth)
+        BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF  
+        RESB    FORTHSIZE - RTS - US - BUFFERSIZE      
+         section dictionary nobits write exec alloc
+        RESB    EM-FORTHSIZE -(KBBUF+2*CW)*NBUF  
+INITS0:                         ;{ Growns down}
+STRTIB: RESB     RTS             ;{ Start return stack area}
+INITR0:                         ;{ Grows down}
+STRUSA: RESB    US              ;{ User area}
+BUF1:   RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
+});_END___1__({ _LINUXHOSTED_1_})
 ;
 _COMMENT 
 
@@ -3846,4 +3861,4 @@ _COMMENT
 _ENDCOMMENT
 
 ;{ Define the entry point, not valid for auto booting.}
-	END	ORIG
+        END     ORIG
