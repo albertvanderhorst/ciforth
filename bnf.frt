@@ -157,6 +157,8 @@ BNF:  `;'    skip ';'                ;BNF
 BNF:  `'''   skip '''                ;BNF
 BNF:  `('    skip '('                ;BNF
 BNF:  `)'    skip ')'                ;BNF
+BNF:  `^'    skip '^'                ;BNF
+
 BNF:  `**'   skip '*' '*'            ;BNF
 BNF:  `<>'   skip '<' '>'            ;BNF
 BNF:  `<='   skip '<' '='            ;BNF
@@ -168,16 +170,10 @@ BNF:  `=>'   skip '=' '>'            ;BNF
 
 TEST ." EXPECT 1 2:" 1 SUCCESS ! `=>' =>2 SUCCESS ? . ^
 
-(   Where I got it from these are relational operators, even more       )
-(   special                                                             )
 BNF:  `='    skip '='                ;BNF
-BNF:  `!'    skip '!'                ;BNF
-BNF:  `!?'   skip '!' '?'            ;BNF
-BNF:  `!='   skip '!' '='            ;BNF
-BNF:  `?='   skip '?' '='            ;BNF
-BNF:  `=?'   skip '=' '?'            ;BNF
+BNF:  `<'    skip '<'                ;BNF
+BNF:  `>'    skip '>'                ;BNF
              
-(  More operators missing from special symbols                          )
 BNF:  `-'    skip '-'                ;BNF
 BNF:  `#'    skip '#'                ;BNF
 BNF:  `*'    skip '*'                ;BNF
