@@ -40,7 +40,6 @@ $2:      DW     $3
 define({_LINKOLD},{_$2})dnl
 })dnl
 dnl
-define({_LINK_FIELD},_$1)dnl
 dnl Similar to HEADER but uses single quotes. instead of doubles. 
 dnl Useful if a name has double quotes like PDOT. (Cannot handle a combination of the two)
 define(HEADER_SGQ,{
@@ -68,4 +67,9 @@ $2:             DW      $3
 define({_LINKOLD},{_$2})dnl
 })
 dnl
+dnl ------------------ to get dictionaries better under control -------------------------------------
+dnl The link field of the word with assembler name $1
+define({_LINK_FIELD},_$1)dnl
+dnl The field where a pointer to the latest entry of a vocabulary resides.
+define({_VOC_LATEST}, $1+6)
 
