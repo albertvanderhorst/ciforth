@@ -35,7 +35,7 @@ dnl<META HTTP-EQUIV="Content-Type" CONTENT="text/html"; charset="iso-8859-1">
 <BODY>
 
 <H1>
-GLOSSARY OF GENERIC FIGFORTH figforthversion</H1>
+GLOSSARY OF GENERIC FIGFORTH fig86gnrversion</H1>
 
 divert(1)dnl
 <P>
