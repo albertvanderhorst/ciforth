@@ -213,19 +213,16 @@ VARIABLE ANNIL-OFFSET
 \ Form START and END of gap and virtual depth calculate ``ANNIL-OFFSET''.
 : CALCULATE-ANNIL-OFFSET - VD @ CELLS - ANNIL-OFFSET ! ;
 
-\ Adjust a branch offset at POSITION by ``ANNIL-OFFSET''.
-: APPLY-OFFSET   ANNIL-OFFSET @ SWAP +! ;
-
 \ For GAP and POSITION of a branch offset, adjust if it jumps from left
 \ over the gap. ``ANNIL-OFFSET'' must have been filled in.
 : ADJUST-BRANCH-FROM-LEFT    >R   R@ >TARGET <=   SWAP R@ >   AND IF
-    R@ APPLY-OFFSET
+    ANNIL-OFFSET @ R@ +!
 THEN RDROP ;
 
 \ For GAP and POSITION of a branch offset, adjust if it jumps from right
 \ over the gap. ``ANNIL-OFFSET'' must have been filled in.
 : ADJUST-BRANCH-FROM-RIGHT    >R   R@ <   SWAP R@ >TARGET >   AND IF
-    R@ APPLY-OFFSET
+    ANNIL-OFFSET @ NEGATE R@ +!
 THEN RDROP ;
 
 \ The set of branches that is marked for elimination from the set ``BRANCHES''.
