@@ -3672,8 +3672,12 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
 ;
 worddoc({STORAGE},{BUFFER},{buffer},{n --- addr},{ISO FIG},
 {Obtain the next memory buffer, assigning it to block forthvar({n}) .
+In ciforth blocks can be locked, and locked buffers are skipped
+in this process.
 If the contents of the buffer is marked as updated, it is written to
-the disc. The block is not read from the disc. The address left is the
+the disc. In ciforth this is never needed, because updated blocks are 
+written immediately.
+The block is not read from the disc. The address left is the
 first cell within the buffer for data storage.},{{BLOCK},{USE},{PREV}})
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
@@ -3684,12 +3688,12 @@ BUFF1:  DC      PBUF
         _0BRANCH(BUFF1)
         DC      USE,STORE
         DC      RR,FETCH
-        DC      ZLESS
+        DC      LIT, BMASK, LAND
         _0BRANCH(BUFF2)
         DC      RR,CELLP
         DC      RR,FETCH
-        DC      LIT,7FFFH
-        DC      LAND,ZERO
+        DC      LIT, BMASK-1, LAND
+        DC      ZERO
         DC      RSLW
 BUFF2:  DC      RR,STORE
         DC      RR,PREV
@@ -3703,6 +3707,8 @@ If the block is not already in memory, it is transferred from disc to
 which ever buffer was least recently written. If the block occupying
 that buffer has been marked as updated, it is rewritten to disc
 before block forthvar({n}) is read into the buffer.
+In ciforth this cannot happen, because updates are written 
+immediately.
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK}) restricts the number of blocks to 0FFH.})},
 {{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}})
 HEADER({BLOCK},{BLOCK},{DOCOL})
