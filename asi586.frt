@@ -19,7 +19,7 @@
 0 1        ' C, CFA   400000 COMMAER (RB,) ( byte relative to IP )
 0 2        ' W, CFA   200000 COMMAER SG,   (  Segment: WORD      )
 0 1        ' C, CFA   100000 COMMAER P,    ( port number ; byte     )
-0 1        ' C, CFA   080000 COMMAER IS,    ( Sign extended byte )
+0 1        ' C, CFA   080000 COMMAER IS,    ( Single -obl-  byte )
 0 0 CELL+  ' ,  CFA   040002 COMMAER IX,   ( immediate data : cell)
 0 1        ' C, CFA   040001 COMMAER IB,   ( immediate byte data)
 0 0 CELL+  ' ,  CFA   020008 COMMAER X,    ( immediate data : address/offset )
@@ -99,9 +99,12 @@
 1002 FF0000 T! 100 00020F 2 3FAMILY, LAR, LSL, ( 3)
 1002 FF0000 T! 800 00A30F 4 3FAMILY, BT, BTS, BTR, BTC, ( 3)
 1002 FF0000 T! 800 00A50F 2 3FAMILY, SHLD|C, SHRD|C,    ( 3)
+1002 FF0000 T! 100 00BC0F 2 3FAMILY, BSF, BSR,          ( 3)
+081002 FF0000 T! 800 00A40F 2 3FAMILY, SHLDI, SHRDI,    ( 3)
 1022 FF0000 T! 100 00B20F 4 3FAMILY, L|SS, -- L|FS, L|GS, ( 3)
 1501 FF0000 T! 800 00B60F 2 3FAMILY, MOVZX|B, MOVSX|B,  ( 3)
 1502 FF0000 T! 800 00B70F 2 3FAMILY, MOVZX|W, MOVSX|W,  ( 3)
+1002 FF0000 00AF0F 3PI IMUL,                     ( 3)
 ( --------- one fixup operands ----------)
 040000 C701 00C6 2PI MOVI,
 0012 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
@@ -113,14 +116,14 @@
 080002 C700 T!
  0800 0083 8 2FAMILY, ADDSI, -- ADCSI, SBBSI, -- SUBSI, -- CMPSI,
 0000 C701 T!
- 0800 10F6 6 2FAMILY, NOT, NEG, MUL, IMUL, DIV, IDIV,
+ 0800 10F6 6 2FAMILY, NOT, NEG, MUL|AD, IMUL|AD, DIV|AD, IDIV|AD,
  0800 00FE 2 2FAMILY, INC, DEC,
 040000 C701 00F6 2PI TESTI,
 02 C700 008F 2PI POP,
 02 C700 30FE 2PI PUSH,
 02 C700 T!  1000 10FF 2 2FAMILY, CALLO, JMPO,
 22 C700 T!  1000 18FF 2 2FAMILY, CALLFARO, JMPFARO,
-080002 C70000 T!   800 20BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI, ( 3) 
+080002 C70000 T!  080000 20BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI, ( 3) 
 02 C70000 T! ( It says X but in fact W : descriptor mostly - ) ( 3)  
   080000 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,  ( 3) 
 22 C70000 T! ( It says X but in fact memory of different sizes) ( 3)  
@@ -149,10 +152,10 @@
 0100 2C703 T! ( 20000 is a lockin for 1| V|)                   ( 3) 
  0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, SAL, SAR,  ( 3) 
 
-02 3841 0s T!   ( 40 is the lock-in byte for MOV|CD ..CRx| / DRx| ) ( 3)
+02 83801 0s T!   ( 40 is the lock-in byte for MOV|CD ..CRx| / DRx| ) ( 3)
  0800 0s 0000 0s 5 xFAMILY|R CR0| -- CR2| CR3| CR4|                 ( 3)
  0800 0s 0001 0s 8 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
-12 3F4300 C0200F 3PI  MOV|CD,
+12 83F0300 C0200F 3PI  MOV|CD,
 
 800800 50F00 800F 2PI J|X,                                           ( 3)
 0800 0001 0s T!   01 0s 0 2 xFAMILY|R Y'| N'|                          ( 3)

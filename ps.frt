@@ -15,6 +15,18 @@ DEFAULT TITLE $!
   ." /Helvetica findfont 10 scalefont setfont " CR
   ." 60 60 translate /wt 60 def /ht 23 def " CR
 ;
+( Calculate for the N-th line: WHAT number is to printed in the margin )
+HEX
+: SIDENOTE
+   1F SWAP - 8 * ( last byte)
+   MASK @ FFFF = IF 
+       PREFIX @ 100 * +
+   ELSE MASK @ FFFFFF = IF 
+       PREFIX @ 100 /MOD 100 * ROT + SWAP 10000 * +
+   THEN THEN ( Else nothing)
+;
+DECIMAL
+  
 : FRAME
   9 0 DO 
     I . ." wt mul 0 ht mul moveto 0 ht 32 mul rlineto stroke" CR 
@@ -28,8 +40,8 @@ DEFAULT TITLE $!
   LOOP
   32 0 DO 
     I . ." .3 add wt mul ht 32.3 mul moveto" CR 
-    ." -35 " I . ." .5 add ht mul 5 sub moveto" CR 
-    HEX &( EMIT PREFIX @ 256 * 31 I - 8 * + 6 .R &) EMIT 
+    ." -40 " I . ." .5 add ht mul 5 sub moveto" CR 
+    HEX &( EMIT I SIDENOTE 6 .R &) EMIT 
     ." show" CR DECIMAL
   LOOP
 ;

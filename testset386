@@ -2956,262 +2956,262 @@ INC, B| D0| [BX]
 INC, B| D0| [DX] 
 INC, B| D0| [CX] 
 INC, B| D0| [AX] 
-IDIV, W| MEM| 10 X, 
-IDIV, W| SIM| 10 SIMQ, 
-IDIV, W| R| DI| 
-IDIV, W| R| SI| 
-IDIV, W| R| BP| 
-IDIV, W| R| SP| 
-IDIV, W| R| BX| 
-IDIV, W| R| DX| 
-IDIV, W| R| CX| 
-IDIV, W| R| AX| 
-IDIV, W| DW| [DI] 14 X, 
-IDIV, W| DW| [SI] 14 X, 
-IDIV, W| DW| [BP] 14 X, 
-IDIV, W| DW| SIB| 14 SIBQ, 18 X, 
-IDIV, W| DW| [BX] 14 X, 
-IDIV, W| DW| [DX] 14 X, 
-IDIV, W| DW| [CX] 14 X, 
-IDIV, W| DW| [AX] 14 X, 
-IDIV, W| DB| [DI] 14 B, 
-IDIV, W| DB| [SI] 14 B, 
-IDIV, W| DB| [BP] 14 B, 
-IDIV, W| DB| SIB| 14 SIBQ, 18 B, 
-IDIV, W| DB| [BX] 14 B, 
-IDIV, W| DB| [DX] 14 B, 
-IDIV, W| DB| [CX] 14 B, 
-IDIV, W| DB| [AX] 14 B, 
-IDIV, W| D0| [DI] 
-IDIV, W| D0| [SI] 
-IDIV, W| D0| [BX] 
-IDIV, W| D0| [DX] 
-IDIV, W| D0| [CX] 
-IDIV, W| D0| [AX] 
-IDIV, B| MEM| 10 X, 
-IDIV, B| SIM| 10 SIMQ, 
-IDIV, B| R| BH| 
-IDIV, B| R| DH| 
-IDIV, B| R| CH| 
-IDIV, B| R| AH| 
-IDIV, B| R| BL| 
-IDIV, B| R| DL| 
-IDIV, B| R| CL| 
-IDIV, B| R| AL| 
-IDIV, B| DW| [DI] 14 X, 
-IDIV, B| DW| [SI] 14 X, 
-IDIV, B| DW| [BP] 14 X, 
-IDIV, B| DW| SIB| 14 SIBQ, 18 X, 
-IDIV, B| DW| [BX] 14 X, 
-IDIV, B| DW| [DX] 14 X, 
-IDIV, B| DW| [CX] 14 X, 
-IDIV, B| DW| [AX] 14 X, 
-IDIV, B| DB| [DI] 14 B, 
-IDIV, B| DB| [SI] 14 B, 
-IDIV, B| DB| [BP] 14 B, 
-IDIV, B| DB| SIB| 14 SIBQ, 18 B, 
-IDIV, B| DB| [BX] 14 B, 
-IDIV, B| DB| [DX] 14 B, 
-IDIV, B| DB| [CX] 14 B, 
-IDIV, B| DB| [AX] 14 B, 
-IDIV, B| D0| [DI] 
-IDIV, B| D0| [SI] 
-IDIV, B| D0| [BX] 
-IDIV, B| D0| [DX] 
-IDIV, B| D0| [CX] 
-IDIV, B| D0| [AX] 
-DIV, W| MEM| 10 X, 
-DIV, W| SIM| 10 SIMQ, 
-DIV, W| R| DI| 
-DIV, W| R| SI| 
-DIV, W| R| BP| 
-DIV, W| R| SP| 
-DIV, W| R| BX| 
-DIV, W| R| DX| 
-DIV, W| R| CX| 
-DIV, W| R| AX| 
-DIV, W| DW| [DI] 14 X, 
-DIV, W| DW| [SI] 14 X, 
-DIV, W| DW| [BP] 14 X, 
-DIV, W| DW| SIB| 14 SIBQ, 18 X, 
-DIV, W| DW| [BX] 14 X, 
-DIV, W| DW| [DX] 14 X, 
-DIV, W| DW| [CX] 14 X, 
-DIV, W| DW| [AX] 14 X, 
-DIV, W| DB| [DI] 14 B, 
-DIV, W| DB| [SI] 14 B, 
-DIV, W| DB| [BP] 14 B, 
-DIV, W| DB| SIB| 14 SIBQ, 18 B, 
-DIV, W| DB| [BX] 14 B, 
-DIV, W| DB| [DX] 14 B, 
-DIV, W| DB| [CX] 14 B, 
-DIV, W| DB| [AX] 14 B, 
-DIV, W| D0| [DI] 
-DIV, W| D0| [SI] 
-DIV, W| D0| [BX] 
-DIV, W| D0| [DX] 
-DIV, W| D0| [CX] 
-DIV, W| D0| [AX] 
-DIV, B| MEM| 10 X, 
-DIV, B| SIM| 10 SIMQ, 
-DIV, B| R| BH| 
-DIV, B| R| DH| 
-DIV, B| R| CH| 
-DIV, B| R| AH| 
-DIV, B| R| BL| 
-DIV, B| R| DL| 
-DIV, B| R| CL| 
-DIV, B| R| AL| 
-DIV, B| DW| [DI] 14 X, 
-DIV, B| DW| [SI] 14 X, 
-DIV, B| DW| [BP] 14 X, 
-DIV, B| DW| SIB| 14 SIBQ, 18 X, 
-DIV, B| DW| [BX] 14 X, 
-DIV, B| DW| [DX] 14 X, 
-DIV, B| DW| [CX] 14 X, 
-DIV, B| DW| [AX] 14 X, 
-DIV, B| DB| [DI] 14 B, 
-DIV, B| DB| [SI] 14 B, 
-DIV, B| DB| [BP] 14 B, 
-DIV, B| DB| SIB| 14 SIBQ, 18 B, 
-DIV, B| DB| [BX] 14 B, 
-DIV, B| DB| [DX] 14 B, 
-DIV, B| DB| [CX] 14 B, 
-DIV, B| DB| [AX] 14 B, 
-DIV, B| D0| [DI] 
-DIV, B| D0| [SI] 
-DIV, B| D0| [BX] 
-DIV, B| D0| [DX] 
-DIV, B| D0| [CX] 
-DIV, B| D0| [AX] 
-IMUL, W| MEM| 10 X, 
-IMUL, W| SIM| 10 SIMQ, 
-IMUL, W| R| DI| 
-IMUL, W| R| SI| 
-IMUL, W| R| BP| 
-IMUL, W| R| SP| 
-IMUL, W| R| BX| 
-IMUL, W| R| DX| 
-IMUL, W| R| CX| 
-IMUL, W| R| AX| 
-IMUL, W| DW| [DI] 14 X, 
-IMUL, W| DW| [SI] 14 X, 
-IMUL, W| DW| [BP] 14 X, 
-IMUL, W| DW| SIB| 14 SIBQ, 18 X, 
-IMUL, W| DW| [BX] 14 X, 
-IMUL, W| DW| [DX] 14 X, 
-IMUL, W| DW| [CX] 14 X, 
-IMUL, W| DW| [AX] 14 X, 
-IMUL, W| DB| [DI] 14 B, 
-IMUL, W| DB| [SI] 14 B, 
-IMUL, W| DB| [BP] 14 B, 
-IMUL, W| DB| SIB| 14 SIBQ, 18 B, 
-IMUL, W| DB| [BX] 14 B, 
-IMUL, W| DB| [DX] 14 B, 
-IMUL, W| DB| [CX] 14 B, 
-IMUL, W| DB| [AX] 14 B, 
-IMUL, W| D0| [DI] 
-IMUL, W| D0| [SI] 
-IMUL, W| D0| [BX] 
-IMUL, W| D0| [DX] 
-IMUL, W| D0| [CX] 
-IMUL, W| D0| [AX] 
-IMUL, B| MEM| 10 X, 
-IMUL, B| SIM| 10 SIMQ, 
-IMUL, B| R| BH| 
-IMUL, B| R| DH| 
-IMUL, B| R| CH| 
-IMUL, B| R| AH| 
-IMUL, B| R| BL| 
-IMUL, B| R| DL| 
-IMUL, B| R| CL| 
-IMUL, B| R| AL| 
-IMUL, B| DW| [DI] 14 X, 
-IMUL, B| DW| [SI] 14 X, 
-IMUL, B| DW| [BP] 14 X, 
-IMUL, B| DW| SIB| 14 SIBQ, 18 X, 
-IMUL, B| DW| [BX] 14 X, 
-IMUL, B| DW| [DX] 14 X, 
-IMUL, B| DW| [CX] 14 X, 
-IMUL, B| DW| [AX] 14 X, 
-IMUL, B| DB| [DI] 14 B, 
-IMUL, B| DB| [SI] 14 B, 
-IMUL, B| DB| [BP] 14 B, 
-IMUL, B| DB| SIB| 14 SIBQ, 18 B, 
-IMUL, B| DB| [BX] 14 B, 
-IMUL, B| DB| [DX] 14 B, 
-IMUL, B| DB| [CX] 14 B, 
-IMUL, B| DB| [AX] 14 B, 
-IMUL, B| D0| [DI] 
-IMUL, B| D0| [SI] 
-IMUL, B| D0| [BX] 
-IMUL, B| D0| [DX] 
-IMUL, B| D0| [CX] 
-IMUL, B| D0| [AX] 
-MUL, W| MEM| 10 X, 
-MUL, W| SIM| 10 SIMQ, 
-MUL, W| R| DI| 
-MUL, W| R| SI| 
-MUL, W| R| BP| 
-MUL, W| R| SP| 
-MUL, W| R| BX| 
-MUL, W| R| DX| 
-MUL, W| R| CX| 
-MUL, W| R| AX| 
-MUL, W| DW| [DI] 14 X, 
-MUL, W| DW| [SI] 14 X, 
-MUL, W| DW| [BP] 14 X, 
-MUL, W| DW| SIB| 14 SIBQ, 18 X, 
-MUL, W| DW| [BX] 14 X, 
-MUL, W| DW| [DX] 14 X, 
-MUL, W| DW| [CX] 14 X, 
-MUL, W| DW| [AX] 14 X, 
-MUL, W| DB| [DI] 14 B, 
-MUL, W| DB| [SI] 14 B, 
-MUL, W| DB| [BP] 14 B, 
-MUL, W| DB| SIB| 14 SIBQ, 18 B, 
-MUL, W| DB| [BX] 14 B, 
-MUL, W| DB| [DX] 14 B, 
-MUL, W| DB| [CX] 14 B, 
-MUL, W| DB| [AX] 14 B, 
-MUL, W| D0| [DI] 
-MUL, W| D0| [SI] 
-MUL, W| D0| [BX] 
-MUL, W| D0| [DX] 
-MUL, W| D0| [CX] 
-MUL, W| D0| [AX] 
-MUL, B| MEM| 10 X, 
-MUL, B| SIM| 10 SIMQ, 
-MUL, B| R| BH| 
-MUL, B| R| DH| 
-MUL, B| R| CH| 
-MUL, B| R| AH| 
-MUL, B| R| BL| 
-MUL, B| R| DL| 
-MUL, B| R| CL| 
-MUL, B| R| AL| 
-MUL, B| DW| [DI] 14 X, 
-MUL, B| DW| [SI] 14 X, 
-MUL, B| DW| [BP] 14 X, 
-MUL, B| DW| SIB| 14 SIBQ, 18 X, 
-MUL, B| DW| [BX] 14 X, 
-MUL, B| DW| [DX] 14 X, 
-MUL, B| DW| [CX] 14 X, 
-MUL, B| DW| [AX] 14 X, 
-MUL, B| DB| [DI] 14 B, 
-MUL, B| DB| [SI] 14 B, 
-MUL, B| DB| [BP] 14 B, 
-MUL, B| DB| SIB| 14 SIBQ, 18 B, 
-MUL, B| DB| [BX] 14 B, 
-MUL, B| DB| [DX] 14 B, 
-MUL, B| DB| [CX] 14 B, 
-MUL, B| DB| [AX] 14 B, 
-MUL, B| D0| [DI] 
-MUL, B| D0| [SI] 
-MUL, B| D0| [BX] 
-MUL, B| D0| [DX] 
-MUL, B| D0| [CX] 
-MUL, B| D0| [AX] 
+IDIV|AD, W| MEM| 10 X, 
+IDIV|AD, W| SIM| 10 SIMQ, 
+IDIV|AD, W| R| DI| 
+IDIV|AD, W| R| SI| 
+IDIV|AD, W| R| BP| 
+IDIV|AD, W| R| SP| 
+IDIV|AD, W| R| BX| 
+IDIV|AD, W| R| DX| 
+IDIV|AD, W| R| CX| 
+IDIV|AD, W| R| AX| 
+IDIV|AD, W| DW| [DI] 14 X, 
+IDIV|AD, W| DW| [SI] 14 X, 
+IDIV|AD, W| DW| [BP] 14 X, 
+IDIV|AD, W| DW| SIB| 14 SIBQ, 18 X, 
+IDIV|AD, W| DW| [BX] 14 X, 
+IDIV|AD, W| DW| [DX] 14 X, 
+IDIV|AD, W| DW| [CX] 14 X, 
+IDIV|AD, W| DW| [AX] 14 X, 
+IDIV|AD, W| DB| [DI] 14 B, 
+IDIV|AD, W| DB| [SI] 14 B, 
+IDIV|AD, W| DB| [BP] 14 B, 
+IDIV|AD, W| DB| SIB| 14 SIBQ, 18 B, 
+IDIV|AD, W| DB| [BX] 14 B, 
+IDIV|AD, W| DB| [DX] 14 B, 
+IDIV|AD, W| DB| [CX] 14 B, 
+IDIV|AD, W| DB| [AX] 14 B, 
+IDIV|AD, W| D0| [DI] 
+IDIV|AD, W| D0| [SI] 
+IDIV|AD, W| D0| [BX] 
+IDIV|AD, W| D0| [DX] 
+IDIV|AD, W| D0| [CX] 
+IDIV|AD, W| D0| [AX] 
+IDIV|AD, B| MEM| 10 X, 
+IDIV|AD, B| SIM| 10 SIMQ, 
+IDIV|AD, B| R| BH| 
+IDIV|AD, B| R| DH| 
+IDIV|AD, B| R| CH| 
+IDIV|AD, B| R| AH| 
+IDIV|AD, B| R| BL| 
+IDIV|AD, B| R| DL| 
+IDIV|AD, B| R| CL| 
+IDIV|AD, B| R| AL| 
+IDIV|AD, B| DW| [DI] 14 X, 
+IDIV|AD, B| DW| [SI] 14 X, 
+IDIV|AD, B| DW| [BP] 14 X, 
+IDIV|AD, B| DW| SIB| 14 SIBQ, 18 X, 
+IDIV|AD, B| DW| [BX] 14 X, 
+IDIV|AD, B| DW| [DX] 14 X, 
+IDIV|AD, B| DW| [CX] 14 X, 
+IDIV|AD, B| DW| [AX] 14 X, 
+IDIV|AD, B| DB| [DI] 14 B, 
+IDIV|AD, B| DB| [SI] 14 B, 
+IDIV|AD, B| DB| [BP] 14 B, 
+IDIV|AD, B| DB| SIB| 14 SIBQ, 18 B, 
+IDIV|AD, B| DB| [BX] 14 B, 
+IDIV|AD, B| DB| [DX] 14 B, 
+IDIV|AD, B| DB| [CX] 14 B, 
+IDIV|AD, B| DB| [AX] 14 B, 
+IDIV|AD, B| D0| [DI] 
+IDIV|AD, B| D0| [SI] 
+IDIV|AD, B| D0| [BX] 
+IDIV|AD, B| D0| [DX] 
+IDIV|AD, B| D0| [CX] 
+IDIV|AD, B| D0| [AX] 
+DIV|AD, W| MEM| 10 X, 
+DIV|AD, W| SIM| 10 SIMQ, 
+DIV|AD, W| R| DI| 
+DIV|AD, W| R| SI| 
+DIV|AD, W| R| BP| 
+DIV|AD, W| R| SP| 
+DIV|AD, W| R| BX| 
+DIV|AD, W| R| DX| 
+DIV|AD, W| R| CX| 
+DIV|AD, W| R| AX| 
+DIV|AD, W| DW| [DI] 14 X, 
+DIV|AD, W| DW| [SI] 14 X, 
+DIV|AD, W| DW| [BP] 14 X, 
+DIV|AD, W| DW| SIB| 14 SIBQ, 18 X, 
+DIV|AD, W| DW| [BX] 14 X, 
+DIV|AD, W| DW| [DX] 14 X, 
+DIV|AD, W| DW| [CX] 14 X, 
+DIV|AD, W| DW| [AX] 14 X, 
+DIV|AD, W| DB| [DI] 14 B, 
+DIV|AD, W| DB| [SI] 14 B, 
+DIV|AD, W| DB| [BP] 14 B, 
+DIV|AD, W| DB| SIB| 14 SIBQ, 18 B, 
+DIV|AD, W| DB| [BX] 14 B, 
+DIV|AD, W| DB| [DX] 14 B, 
+DIV|AD, W| DB| [CX] 14 B, 
+DIV|AD, W| DB| [AX] 14 B, 
+DIV|AD, W| D0| [DI] 
+DIV|AD, W| D0| [SI] 
+DIV|AD, W| D0| [BX] 
+DIV|AD, W| D0| [DX] 
+DIV|AD, W| D0| [CX] 
+DIV|AD, W| D0| [AX] 
+DIV|AD, B| MEM| 10 X, 
+DIV|AD, B| SIM| 10 SIMQ, 
+DIV|AD, B| R| BH| 
+DIV|AD, B| R| DH| 
+DIV|AD, B| R| CH| 
+DIV|AD, B| R| AH| 
+DIV|AD, B| R| BL| 
+DIV|AD, B| R| DL| 
+DIV|AD, B| R| CL| 
+DIV|AD, B| R| AL| 
+DIV|AD, B| DW| [DI] 14 X, 
+DIV|AD, B| DW| [SI] 14 X, 
+DIV|AD, B| DW| [BP] 14 X, 
+DIV|AD, B| DW| SIB| 14 SIBQ, 18 X, 
+DIV|AD, B| DW| [BX] 14 X, 
+DIV|AD, B| DW| [DX] 14 X, 
+DIV|AD, B| DW| [CX] 14 X, 
+DIV|AD, B| DW| [AX] 14 X, 
+DIV|AD, B| DB| [DI] 14 B, 
+DIV|AD, B| DB| [SI] 14 B, 
+DIV|AD, B| DB| [BP] 14 B, 
+DIV|AD, B| DB| SIB| 14 SIBQ, 18 B, 
+DIV|AD, B| DB| [BX] 14 B, 
+DIV|AD, B| DB| [DX] 14 B, 
+DIV|AD, B| DB| [CX] 14 B, 
+DIV|AD, B| DB| [AX] 14 B, 
+DIV|AD, B| D0| [DI] 
+DIV|AD, B| D0| [SI] 
+DIV|AD, B| D0| [BX] 
+DIV|AD, B| D0| [DX] 
+DIV|AD, B| D0| [CX] 
+DIV|AD, B| D0| [AX] 
+IMUL|AD, W| MEM| 10 X, 
+IMUL|AD, W| SIM| 10 SIMQ, 
+IMUL|AD, W| R| DI| 
+IMUL|AD, W| R| SI| 
+IMUL|AD, W| R| BP| 
+IMUL|AD, W| R| SP| 
+IMUL|AD, W| R| BX| 
+IMUL|AD, W| R| DX| 
+IMUL|AD, W| R| CX| 
+IMUL|AD, W| R| AX| 
+IMUL|AD, W| DW| [DI] 14 X, 
+IMUL|AD, W| DW| [SI] 14 X, 
+IMUL|AD, W| DW| [BP] 14 X, 
+IMUL|AD, W| DW| SIB| 14 SIBQ, 18 X, 
+IMUL|AD, W| DW| [BX] 14 X, 
+IMUL|AD, W| DW| [DX] 14 X, 
+IMUL|AD, W| DW| [CX] 14 X, 
+IMUL|AD, W| DW| [AX] 14 X, 
+IMUL|AD, W| DB| [DI] 14 B, 
+IMUL|AD, W| DB| [SI] 14 B, 
+IMUL|AD, W| DB| [BP] 14 B, 
+IMUL|AD, W| DB| SIB| 14 SIBQ, 18 B, 
+IMUL|AD, W| DB| [BX] 14 B, 
+IMUL|AD, W| DB| [DX] 14 B, 
+IMUL|AD, W| DB| [CX] 14 B, 
+IMUL|AD, W| DB| [AX] 14 B, 
+IMUL|AD, W| D0| [DI] 
+IMUL|AD, W| D0| [SI] 
+IMUL|AD, W| D0| [BX] 
+IMUL|AD, W| D0| [DX] 
+IMUL|AD, W| D0| [CX] 
+IMUL|AD, W| D0| [AX] 
+IMUL|AD, B| MEM| 10 X, 
+IMUL|AD, B| SIM| 10 SIMQ, 
+IMUL|AD, B| R| BH| 
+IMUL|AD, B| R| DH| 
+IMUL|AD, B| R| CH| 
+IMUL|AD, B| R| AH| 
+IMUL|AD, B| R| BL| 
+IMUL|AD, B| R| DL| 
+IMUL|AD, B| R| CL| 
+IMUL|AD, B| R| AL| 
+IMUL|AD, B| DW| [DI] 14 X, 
+IMUL|AD, B| DW| [SI] 14 X, 
+IMUL|AD, B| DW| [BP] 14 X, 
+IMUL|AD, B| DW| SIB| 14 SIBQ, 18 X, 
+IMUL|AD, B| DW| [BX] 14 X, 
+IMUL|AD, B| DW| [DX] 14 X, 
+IMUL|AD, B| DW| [CX] 14 X, 
+IMUL|AD, B| DW| [AX] 14 X, 
+IMUL|AD, B| DB| [DI] 14 B, 
+IMUL|AD, B| DB| [SI] 14 B, 
+IMUL|AD, B| DB| [BP] 14 B, 
+IMUL|AD, B| DB| SIB| 14 SIBQ, 18 B, 
+IMUL|AD, B| DB| [BX] 14 B, 
+IMUL|AD, B| DB| [DX] 14 B, 
+IMUL|AD, B| DB| [CX] 14 B, 
+IMUL|AD, B| DB| [AX] 14 B, 
+IMUL|AD, B| D0| [DI] 
+IMUL|AD, B| D0| [SI] 
+IMUL|AD, B| D0| [BX] 
+IMUL|AD, B| D0| [DX] 
+IMUL|AD, B| D0| [CX] 
+IMUL|AD, B| D0| [AX] 
+MUL|AD, W| MEM| 10 X, 
+MUL|AD, W| SIM| 10 SIMQ, 
+MUL|AD, W| R| DI| 
+MUL|AD, W| R| SI| 
+MUL|AD, W| R| BP| 
+MUL|AD, W| R| SP| 
+MUL|AD, W| R| BX| 
+MUL|AD, W| R| DX| 
+MUL|AD, W| R| CX| 
+MUL|AD, W| R| AX| 
+MUL|AD, W| DW| [DI] 14 X, 
+MUL|AD, W| DW| [SI] 14 X, 
+MUL|AD, W| DW| [BP] 14 X, 
+MUL|AD, W| DW| SIB| 14 SIBQ, 18 X, 
+MUL|AD, W| DW| [BX] 14 X, 
+MUL|AD, W| DW| [DX] 14 X, 
+MUL|AD, W| DW| [CX] 14 X, 
+MUL|AD, W| DW| [AX] 14 X, 
+MUL|AD, W| DB| [DI] 14 B, 
+MUL|AD, W| DB| [SI] 14 B, 
+MUL|AD, W| DB| [BP] 14 B, 
+MUL|AD, W| DB| SIB| 14 SIBQ, 18 B, 
+MUL|AD, W| DB| [BX] 14 B, 
+MUL|AD, W| DB| [DX] 14 B, 
+MUL|AD, W| DB| [CX] 14 B, 
+MUL|AD, W| DB| [AX] 14 B, 
+MUL|AD, W| D0| [DI] 
+MUL|AD, W| D0| [SI] 
+MUL|AD, W| D0| [BX] 
+MUL|AD, W| D0| [DX] 
+MUL|AD, W| D0| [CX] 
+MUL|AD, W| D0| [AX] 
+MUL|AD, B| MEM| 10 X, 
+MUL|AD, B| SIM| 10 SIMQ, 
+MUL|AD, B| R| BH| 
+MUL|AD, B| R| DH| 
+MUL|AD, B| R| CH| 
+MUL|AD, B| R| AH| 
+MUL|AD, B| R| BL| 
+MUL|AD, B| R| DL| 
+MUL|AD, B| R| CL| 
+MUL|AD, B| R| AL| 
+MUL|AD, B| DW| [DI] 14 X, 
+MUL|AD, B| DW| [SI] 14 X, 
+MUL|AD, B| DW| [BP] 14 X, 
+MUL|AD, B| DW| SIB| 14 SIBQ, 18 X, 
+MUL|AD, B| DW| [BX] 14 X, 
+MUL|AD, B| DW| [DX] 14 X, 
+MUL|AD, B| DW| [CX] 14 X, 
+MUL|AD, B| DW| [AX] 14 X, 
+MUL|AD, B| DB| [DI] 14 B, 
+MUL|AD, B| DB| [SI] 14 B, 
+MUL|AD, B| DB| [BP] 14 B, 
+MUL|AD, B| DB| SIB| 14 SIBQ, 18 B, 
+MUL|AD, B| DB| [BX] 14 B, 
+MUL|AD, B| DB| [DX] 14 B, 
+MUL|AD, B| DB| [CX] 14 B, 
+MUL|AD, B| DB| [AX] 14 B, 
+MUL|AD, B| D0| [DI] 
+MUL|AD, B| D0| [SI] 
+MUL|AD, B| D0| [BX] 
+MUL|AD, B| D0| [DX] 
+MUL|AD, B| D0| [CX] 
+MUL|AD, B| D0| [AX] 
 NEG, W| MEM| 10 X, 
 NEG, W| SIM| 10 SIMQ, 
 NEG, W| R| DI| 
@@ -19564,6 +19564,1354 @@ PUSH|SG, DS|
 PUSH|SG, SS| 
 PUSH|SG, CS| 
 PUSH|SG, ES| 
+SHRDI, DI'| MEM| 10 X, 14 IS, 
+SHRDI, DI'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, DI'| R| DI| 14 IS, 
+SHRDI, DI'| R| SI| 14 IS, 
+SHRDI, DI'| R| BP| 14 IS, 
+SHRDI, DI'| R| SP| 14 IS, 
+SHRDI, DI'| R| BX| 14 IS, 
+SHRDI, DI'| R| DX| 14 IS, 
+SHRDI, DI'| R| CX| 14 IS, 
+SHRDI, DI'| R| AX| 14 IS, 
+SHRDI, DI'| DW| [DI] 14 X, 18 IS, 
+SHRDI, DI'| DW| [SI] 14 X, 18 IS, 
+SHRDI, DI'| DW| [BP] 14 X, 18 IS, 
+SHRDI, DI'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, DI'| DW| [BX] 14 X, 18 IS, 
+SHRDI, DI'| DW| [DX] 14 X, 18 IS, 
+SHRDI, DI'| DW| [CX] 14 X, 18 IS, 
+SHRDI, DI'| DW| [AX] 14 X, 18 IS, 
+SHRDI, DI'| DB| [DI] 14 B, 18 IS, 
+SHRDI, DI'| DB| [SI] 14 B, 18 IS, 
+SHRDI, DI'| DB| [BP] 14 B, 18 IS, 
+SHRDI, DI'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, DI'| DB| [BX] 14 B, 18 IS, 
+SHRDI, DI'| DB| [DX] 14 B, 18 IS, 
+SHRDI, DI'| DB| [CX] 14 B, 18 IS, 
+SHRDI, DI'| DB| [AX] 14 B, 18 IS, 
+SHRDI, DI'| D0| [DI] 14 IS, 
+SHRDI, DI'| D0| [SI] 14 IS, 
+SHRDI, DI'| D0| [BX] 14 IS, 
+SHRDI, DI'| D0| [DX] 14 IS, 
+SHRDI, DI'| D0| [CX] 14 IS, 
+SHRDI, DI'| D0| [AX] 14 IS, 
+SHRDI, SI'| MEM| 10 X, 14 IS, 
+SHRDI, SI'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, SI'| R| DI| 14 IS, 
+SHRDI, SI'| R| SI| 14 IS, 
+SHRDI, SI'| R| BP| 14 IS, 
+SHRDI, SI'| R| SP| 14 IS, 
+SHRDI, SI'| R| BX| 14 IS, 
+SHRDI, SI'| R| DX| 14 IS, 
+SHRDI, SI'| R| CX| 14 IS, 
+SHRDI, SI'| R| AX| 14 IS, 
+SHRDI, SI'| DW| [DI] 14 X, 18 IS, 
+SHRDI, SI'| DW| [SI] 14 X, 18 IS, 
+SHRDI, SI'| DW| [BP] 14 X, 18 IS, 
+SHRDI, SI'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, SI'| DW| [BX] 14 X, 18 IS, 
+SHRDI, SI'| DW| [DX] 14 X, 18 IS, 
+SHRDI, SI'| DW| [CX] 14 X, 18 IS, 
+SHRDI, SI'| DW| [AX] 14 X, 18 IS, 
+SHRDI, SI'| DB| [DI] 14 B, 18 IS, 
+SHRDI, SI'| DB| [SI] 14 B, 18 IS, 
+SHRDI, SI'| DB| [BP] 14 B, 18 IS, 
+SHRDI, SI'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, SI'| DB| [BX] 14 B, 18 IS, 
+SHRDI, SI'| DB| [DX] 14 B, 18 IS, 
+SHRDI, SI'| DB| [CX] 14 B, 18 IS, 
+SHRDI, SI'| DB| [AX] 14 B, 18 IS, 
+SHRDI, SI'| D0| [DI] 14 IS, 
+SHRDI, SI'| D0| [SI] 14 IS, 
+SHRDI, SI'| D0| [BX] 14 IS, 
+SHRDI, SI'| D0| [DX] 14 IS, 
+SHRDI, SI'| D0| [CX] 14 IS, 
+SHRDI, SI'| D0| [AX] 14 IS, 
+SHRDI, BP'| MEM| 10 X, 14 IS, 
+SHRDI, BP'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, BP'| R| DI| 14 IS, 
+SHRDI, BP'| R| SI| 14 IS, 
+SHRDI, BP'| R| BP| 14 IS, 
+SHRDI, BP'| R| SP| 14 IS, 
+SHRDI, BP'| R| BX| 14 IS, 
+SHRDI, BP'| R| DX| 14 IS, 
+SHRDI, BP'| R| CX| 14 IS, 
+SHRDI, BP'| R| AX| 14 IS, 
+SHRDI, BP'| DW| [DI] 14 X, 18 IS, 
+SHRDI, BP'| DW| [SI] 14 X, 18 IS, 
+SHRDI, BP'| DW| [BP] 14 X, 18 IS, 
+SHRDI, BP'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, BP'| DW| [BX] 14 X, 18 IS, 
+SHRDI, BP'| DW| [DX] 14 X, 18 IS, 
+SHRDI, BP'| DW| [CX] 14 X, 18 IS, 
+SHRDI, BP'| DW| [AX] 14 X, 18 IS, 
+SHRDI, BP'| DB| [DI] 14 B, 18 IS, 
+SHRDI, BP'| DB| [SI] 14 B, 18 IS, 
+SHRDI, BP'| DB| [BP] 14 B, 18 IS, 
+SHRDI, BP'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, BP'| DB| [BX] 14 B, 18 IS, 
+SHRDI, BP'| DB| [DX] 14 B, 18 IS, 
+SHRDI, BP'| DB| [CX] 14 B, 18 IS, 
+SHRDI, BP'| DB| [AX] 14 B, 18 IS, 
+SHRDI, BP'| D0| [DI] 14 IS, 
+SHRDI, BP'| D0| [SI] 14 IS, 
+SHRDI, BP'| D0| [BX] 14 IS, 
+SHRDI, BP'| D0| [DX] 14 IS, 
+SHRDI, BP'| D0| [CX] 14 IS, 
+SHRDI, BP'| D0| [AX] 14 IS, 
+SHRDI, SP'| MEM| 10 X, 14 IS, 
+SHRDI, SP'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, SP'| R| DI| 14 IS, 
+SHRDI, SP'| R| SI| 14 IS, 
+SHRDI, SP'| R| BP| 14 IS, 
+SHRDI, SP'| R| SP| 14 IS, 
+SHRDI, SP'| R| BX| 14 IS, 
+SHRDI, SP'| R| DX| 14 IS, 
+SHRDI, SP'| R| CX| 14 IS, 
+SHRDI, SP'| R| AX| 14 IS, 
+SHRDI, SP'| DW| [DI] 14 X, 18 IS, 
+SHRDI, SP'| DW| [SI] 14 X, 18 IS, 
+SHRDI, SP'| DW| [BP] 14 X, 18 IS, 
+SHRDI, SP'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, SP'| DW| [BX] 14 X, 18 IS, 
+SHRDI, SP'| DW| [DX] 14 X, 18 IS, 
+SHRDI, SP'| DW| [CX] 14 X, 18 IS, 
+SHRDI, SP'| DW| [AX] 14 X, 18 IS, 
+SHRDI, SP'| DB| [DI] 14 B, 18 IS, 
+SHRDI, SP'| DB| [SI] 14 B, 18 IS, 
+SHRDI, SP'| DB| [BP] 14 B, 18 IS, 
+SHRDI, SP'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, SP'| DB| [BX] 14 B, 18 IS, 
+SHRDI, SP'| DB| [DX] 14 B, 18 IS, 
+SHRDI, SP'| DB| [CX] 14 B, 18 IS, 
+SHRDI, SP'| DB| [AX] 14 B, 18 IS, 
+SHRDI, SP'| D0| [DI] 14 IS, 
+SHRDI, SP'| D0| [SI] 14 IS, 
+SHRDI, SP'| D0| [BX] 14 IS, 
+SHRDI, SP'| D0| [DX] 14 IS, 
+SHRDI, SP'| D0| [CX] 14 IS, 
+SHRDI, SP'| D0| [AX] 14 IS, 
+SHRDI, BX'| MEM| 10 X, 14 IS, 
+SHRDI, BX'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, BX'| R| DI| 14 IS, 
+SHRDI, BX'| R| SI| 14 IS, 
+SHRDI, BX'| R| BP| 14 IS, 
+SHRDI, BX'| R| SP| 14 IS, 
+SHRDI, BX'| R| BX| 14 IS, 
+SHRDI, BX'| R| DX| 14 IS, 
+SHRDI, BX'| R| CX| 14 IS, 
+SHRDI, BX'| R| AX| 14 IS, 
+SHRDI, BX'| DW| [DI] 14 X, 18 IS, 
+SHRDI, BX'| DW| [SI] 14 X, 18 IS, 
+SHRDI, BX'| DW| [BP] 14 X, 18 IS, 
+SHRDI, BX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, BX'| DW| [BX] 14 X, 18 IS, 
+SHRDI, BX'| DW| [DX] 14 X, 18 IS, 
+SHRDI, BX'| DW| [CX] 14 X, 18 IS, 
+SHRDI, BX'| DW| [AX] 14 X, 18 IS, 
+SHRDI, BX'| DB| [DI] 14 B, 18 IS, 
+SHRDI, BX'| DB| [SI] 14 B, 18 IS, 
+SHRDI, BX'| DB| [BP] 14 B, 18 IS, 
+SHRDI, BX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, BX'| DB| [BX] 14 B, 18 IS, 
+SHRDI, BX'| DB| [DX] 14 B, 18 IS, 
+SHRDI, BX'| DB| [CX] 14 B, 18 IS, 
+SHRDI, BX'| DB| [AX] 14 B, 18 IS, 
+SHRDI, BX'| D0| [DI] 14 IS, 
+SHRDI, BX'| D0| [SI] 14 IS, 
+SHRDI, BX'| D0| [BX] 14 IS, 
+SHRDI, BX'| D0| [DX] 14 IS, 
+SHRDI, BX'| D0| [CX] 14 IS, 
+SHRDI, BX'| D0| [AX] 14 IS, 
+SHRDI, DX'| MEM| 10 X, 14 IS, 
+SHRDI, DX'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, DX'| R| DI| 14 IS, 
+SHRDI, DX'| R| SI| 14 IS, 
+SHRDI, DX'| R| BP| 14 IS, 
+SHRDI, DX'| R| SP| 14 IS, 
+SHRDI, DX'| R| BX| 14 IS, 
+SHRDI, DX'| R| DX| 14 IS, 
+SHRDI, DX'| R| CX| 14 IS, 
+SHRDI, DX'| R| AX| 14 IS, 
+SHRDI, DX'| DW| [DI] 14 X, 18 IS, 
+SHRDI, DX'| DW| [SI] 14 X, 18 IS, 
+SHRDI, DX'| DW| [BP] 14 X, 18 IS, 
+SHRDI, DX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, DX'| DW| [BX] 14 X, 18 IS, 
+SHRDI, DX'| DW| [DX] 14 X, 18 IS, 
+SHRDI, DX'| DW| [CX] 14 X, 18 IS, 
+SHRDI, DX'| DW| [AX] 14 X, 18 IS, 
+SHRDI, DX'| DB| [DI] 14 B, 18 IS, 
+SHRDI, DX'| DB| [SI] 14 B, 18 IS, 
+SHRDI, DX'| DB| [BP] 14 B, 18 IS, 
+SHRDI, DX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, DX'| DB| [BX] 14 B, 18 IS, 
+SHRDI, DX'| DB| [DX] 14 B, 18 IS, 
+SHRDI, DX'| DB| [CX] 14 B, 18 IS, 
+SHRDI, DX'| DB| [AX] 14 B, 18 IS, 
+SHRDI, DX'| D0| [DI] 14 IS, 
+SHRDI, DX'| D0| [SI] 14 IS, 
+SHRDI, DX'| D0| [BX] 14 IS, 
+SHRDI, DX'| D0| [DX] 14 IS, 
+SHRDI, DX'| D0| [CX] 14 IS, 
+SHRDI, DX'| D0| [AX] 14 IS, 
+SHRDI, CX'| MEM| 10 X, 14 IS, 
+SHRDI, CX'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, CX'| R| DI| 14 IS, 
+SHRDI, CX'| R| SI| 14 IS, 
+SHRDI, CX'| R| BP| 14 IS, 
+SHRDI, CX'| R| SP| 14 IS, 
+SHRDI, CX'| R| BX| 14 IS, 
+SHRDI, CX'| R| DX| 14 IS, 
+SHRDI, CX'| R| CX| 14 IS, 
+SHRDI, CX'| R| AX| 14 IS, 
+SHRDI, CX'| DW| [DI] 14 X, 18 IS, 
+SHRDI, CX'| DW| [SI] 14 X, 18 IS, 
+SHRDI, CX'| DW| [BP] 14 X, 18 IS, 
+SHRDI, CX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, CX'| DW| [BX] 14 X, 18 IS, 
+SHRDI, CX'| DW| [DX] 14 X, 18 IS, 
+SHRDI, CX'| DW| [CX] 14 X, 18 IS, 
+SHRDI, CX'| DW| [AX] 14 X, 18 IS, 
+SHRDI, CX'| DB| [DI] 14 B, 18 IS, 
+SHRDI, CX'| DB| [SI] 14 B, 18 IS, 
+SHRDI, CX'| DB| [BP] 14 B, 18 IS, 
+SHRDI, CX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, CX'| DB| [BX] 14 B, 18 IS, 
+SHRDI, CX'| DB| [DX] 14 B, 18 IS, 
+SHRDI, CX'| DB| [CX] 14 B, 18 IS, 
+SHRDI, CX'| DB| [AX] 14 B, 18 IS, 
+SHRDI, CX'| D0| [DI] 14 IS, 
+SHRDI, CX'| D0| [SI] 14 IS, 
+SHRDI, CX'| D0| [BX] 14 IS, 
+SHRDI, CX'| D0| [DX] 14 IS, 
+SHRDI, CX'| D0| [CX] 14 IS, 
+SHRDI, CX'| D0| [AX] 14 IS, 
+SHRDI, AX'| MEM| 10 X, 14 IS, 
+SHRDI, AX'| SIM| 10 SIMQ, 14 IS, 
+SHRDI, AX'| R| DI| 14 IS, 
+SHRDI, AX'| R| SI| 14 IS, 
+SHRDI, AX'| R| BP| 14 IS, 
+SHRDI, AX'| R| SP| 14 IS, 
+SHRDI, AX'| R| BX| 14 IS, 
+SHRDI, AX'| R| DX| 14 IS, 
+SHRDI, AX'| R| CX| 14 IS, 
+SHRDI, AX'| R| AX| 14 IS, 
+SHRDI, AX'| DW| [DI] 14 X, 18 IS, 
+SHRDI, AX'| DW| [SI] 14 X, 18 IS, 
+SHRDI, AX'| DW| [BP] 14 X, 18 IS, 
+SHRDI, AX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHRDI, AX'| DW| [BX] 14 X, 18 IS, 
+SHRDI, AX'| DW| [DX] 14 X, 18 IS, 
+SHRDI, AX'| DW| [CX] 14 X, 18 IS, 
+SHRDI, AX'| DW| [AX] 14 X, 18 IS, 
+SHRDI, AX'| DB| [DI] 14 B, 18 IS, 
+SHRDI, AX'| DB| [SI] 14 B, 18 IS, 
+SHRDI, AX'| DB| [BP] 14 B, 18 IS, 
+SHRDI, AX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHRDI, AX'| DB| [BX] 14 B, 18 IS, 
+SHRDI, AX'| DB| [DX] 14 B, 18 IS, 
+SHRDI, AX'| DB| [CX] 14 B, 18 IS, 
+SHRDI, AX'| DB| [AX] 14 B, 18 IS, 
+SHRDI, AX'| D0| [DI] 14 IS, 
+SHRDI, AX'| D0| [SI] 14 IS, 
+SHRDI, AX'| D0| [BX] 14 IS, 
+SHRDI, AX'| D0| [DX] 14 IS, 
+SHRDI, AX'| D0| [CX] 14 IS, 
+SHRDI, AX'| D0| [AX] 14 IS, 
+SHLDI, DI'| MEM| 10 X, 14 IS, 
+SHLDI, DI'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, DI'| R| DI| 14 IS, 
+SHLDI, DI'| R| SI| 14 IS, 
+SHLDI, DI'| R| BP| 14 IS, 
+SHLDI, DI'| R| SP| 14 IS, 
+SHLDI, DI'| R| BX| 14 IS, 
+SHLDI, DI'| R| DX| 14 IS, 
+SHLDI, DI'| R| CX| 14 IS, 
+SHLDI, DI'| R| AX| 14 IS, 
+SHLDI, DI'| DW| [DI] 14 X, 18 IS, 
+SHLDI, DI'| DW| [SI] 14 X, 18 IS, 
+SHLDI, DI'| DW| [BP] 14 X, 18 IS, 
+SHLDI, DI'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, DI'| DW| [BX] 14 X, 18 IS, 
+SHLDI, DI'| DW| [DX] 14 X, 18 IS, 
+SHLDI, DI'| DW| [CX] 14 X, 18 IS, 
+SHLDI, DI'| DW| [AX] 14 X, 18 IS, 
+SHLDI, DI'| DB| [DI] 14 B, 18 IS, 
+SHLDI, DI'| DB| [SI] 14 B, 18 IS, 
+SHLDI, DI'| DB| [BP] 14 B, 18 IS, 
+SHLDI, DI'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, DI'| DB| [BX] 14 B, 18 IS, 
+SHLDI, DI'| DB| [DX] 14 B, 18 IS, 
+SHLDI, DI'| DB| [CX] 14 B, 18 IS, 
+SHLDI, DI'| DB| [AX] 14 B, 18 IS, 
+SHLDI, DI'| D0| [DI] 14 IS, 
+SHLDI, DI'| D0| [SI] 14 IS, 
+SHLDI, DI'| D0| [BX] 14 IS, 
+SHLDI, DI'| D0| [DX] 14 IS, 
+SHLDI, DI'| D0| [CX] 14 IS, 
+SHLDI, DI'| D0| [AX] 14 IS, 
+SHLDI, SI'| MEM| 10 X, 14 IS, 
+SHLDI, SI'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, SI'| R| DI| 14 IS, 
+SHLDI, SI'| R| SI| 14 IS, 
+SHLDI, SI'| R| BP| 14 IS, 
+SHLDI, SI'| R| SP| 14 IS, 
+SHLDI, SI'| R| BX| 14 IS, 
+SHLDI, SI'| R| DX| 14 IS, 
+SHLDI, SI'| R| CX| 14 IS, 
+SHLDI, SI'| R| AX| 14 IS, 
+SHLDI, SI'| DW| [DI] 14 X, 18 IS, 
+SHLDI, SI'| DW| [SI] 14 X, 18 IS, 
+SHLDI, SI'| DW| [BP] 14 X, 18 IS, 
+SHLDI, SI'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, SI'| DW| [BX] 14 X, 18 IS, 
+SHLDI, SI'| DW| [DX] 14 X, 18 IS, 
+SHLDI, SI'| DW| [CX] 14 X, 18 IS, 
+SHLDI, SI'| DW| [AX] 14 X, 18 IS, 
+SHLDI, SI'| DB| [DI] 14 B, 18 IS, 
+SHLDI, SI'| DB| [SI] 14 B, 18 IS, 
+SHLDI, SI'| DB| [BP] 14 B, 18 IS, 
+SHLDI, SI'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, SI'| DB| [BX] 14 B, 18 IS, 
+SHLDI, SI'| DB| [DX] 14 B, 18 IS, 
+SHLDI, SI'| DB| [CX] 14 B, 18 IS, 
+SHLDI, SI'| DB| [AX] 14 B, 18 IS, 
+SHLDI, SI'| D0| [DI] 14 IS, 
+SHLDI, SI'| D0| [SI] 14 IS, 
+SHLDI, SI'| D0| [BX] 14 IS, 
+SHLDI, SI'| D0| [DX] 14 IS, 
+SHLDI, SI'| D0| [CX] 14 IS, 
+SHLDI, SI'| D0| [AX] 14 IS, 
+SHLDI, BP'| MEM| 10 X, 14 IS, 
+SHLDI, BP'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, BP'| R| DI| 14 IS, 
+SHLDI, BP'| R| SI| 14 IS, 
+SHLDI, BP'| R| BP| 14 IS, 
+SHLDI, BP'| R| SP| 14 IS, 
+SHLDI, BP'| R| BX| 14 IS, 
+SHLDI, BP'| R| DX| 14 IS, 
+SHLDI, BP'| R| CX| 14 IS, 
+SHLDI, BP'| R| AX| 14 IS, 
+SHLDI, BP'| DW| [DI] 14 X, 18 IS, 
+SHLDI, BP'| DW| [SI] 14 X, 18 IS, 
+SHLDI, BP'| DW| [BP] 14 X, 18 IS, 
+SHLDI, BP'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, BP'| DW| [BX] 14 X, 18 IS, 
+SHLDI, BP'| DW| [DX] 14 X, 18 IS, 
+SHLDI, BP'| DW| [CX] 14 X, 18 IS, 
+SHLDI, BP'| DW| [AX] 14 X, 18 IS, 
+SHLDI, BP'| DB| [DI] 14 B, 18 IS, 
+SHLDI, BP'| DB| [SI] 14 B, 18 IS, 
+SHLDI, BP'| DB| [BP] 14 B, 18 IS, 
+SHLDI, BP'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, BP'| DB| [BX] 14 B, 18 IS, 
+SHLDI, BP'| DB| [DX] 14 B, 18 IS, 
+SHLDI, BP'| DB| [CX] 14 B, 18 IS, 
+SHLDI, BP'| DB| [AX] 14 B, 18 IS, 
+SHLDI, BP'| D0| [DI] 14 IS, 
+SHLDI, BP'| D0| [SI] 14 IS, 
+SHLDI, BP'| D0| [BX] 14 IS, 
+SHLDI, BP'| D0| [DX] 14 IS, 
+SHLDI, BP'| D0| [CX] 14 IS, 
+SHLDI, BP'| D0| [AX] 14 IS, 
+SHLDI, SP'| MEM| 10 X, 14 IS, 
+SHLDI, SP'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, SP'| R| DI| 14 IS, 
+SHLDI, SP'| R| SI| 14 IS, 
+SHLDI, SP'| R| BP| 14 IS, 
+SHLDI, SP'| R| SP| 14 IS, 
+SHLDI, SP'| R| BX| 14 IS, 
+SHLDI, SP'| R| DX| 14 IS, 
+SHLDI, SP'| R| CX| 14 IS, 
+SHLDI, SP'| R| AX| 14 IS, 
+SHLDI, SP'| DW| [DI] 14 X, 18 IS, 
+SHLDI, SP'| DW| [SI] 14 X, 18 IS, 
+SHLDI, SP'| DW| [BP] 14 X, 18 IS, 
+SHLDI, SP'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, SP'| DW| [BX] 14 X, 18 IS, 
+SHLDI, SP'| DW| [DX] 14 X, 18 IS, 
+SHLDI, SP'| DW| [CX] 14 X, 18 IS, 
+SHLDI, SP'| DW| [AX] 14 X, 18 IS, 
+SHLDI, SP'| DB| [DI] 14 B, 18 IS, 
+SHLDI, SP'| DB| [SI] 14 B, 18 IS, 
+SHLDI, SP'| DB| [BP] 14 B, 18 IS, 
+SHLDI, SP'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, SP'| DB| [BX] 14 B, 18 IS, 
+SHLDI, SP'| DB| [DX] 14 B, 18 IS, 
+SHLDI, SP'| DB| [CX] 14 B, 18 IS, 
+SHLDI, SP'| DB| [AX] 14 B, 18 IS, 
+SHLDI, SP'| D0| [DI] 14 IS, 
+SHLDI, SP'| D0| [SI] 14 IS, 
+SHLDI, SP'| D0| [BX] 14 IS, 
+SHLDI, SP'| D0| [DX] 14 IS, 
+SHLDI, SP'| D0| [CX] 14 IS, 
+SHLDI, SP'| D0| [AX] 14 IS, 
+SHLDI, BX'| MEM| 10 X, 14 IS, 
+SHLDI, BX'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, BX'| R| DI| 14 IS, 
+SHLDI, BX'| R| SI| 14 IS, 
+SHLDI, BX'| R| BP| 14 IS, 
+SHLDI, BX'| R| SP| 14 IS, 
+SHLDI, BX'| R| BX| 14 IS, 
+SHLDI, BX'| R| DX| 14 IS, 
+SHLDI, BX'| R| CX| 14 IS, 
+SHLDI, BX'| R| AX| 14 IS, 
+SHLDI, BX'| DW| [DI] 14 X, 18 IS, 
+SHLDI, BX'| DW| [SI] 14 X, 18 IS, 
+SHLDI, BX'| DW| [BP] 14 X, 18 IS, 
+SHLDI, BX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, BX'| DW| [BX] 14 X, 18 IS, 
+SHLDI, BX'| DW| [DX] 14 X, 18 IS, 
+SHLDI, BX'| DW| [CX] 14 X, 18 IS, 
+SHLDI, BX'| DW| [AX] 14 X, 18 IS, 
+SHLDI, BX'| DB| [DI] 14 B, 18 IS, 
+SHLDI, BX'| DB| [SI] 14 B, 18 IS, 
+SHLDI, BX'| DB| [BP] 14 B, 18 IS, 
+SHLDI, BX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, BX'| DB| [BX] 14 B, 18 IS, 
+SHLDI, BX'| DB| [DX] 14 B, 18 IS, 
+SHLDI, BX'| DB| [CX] 14 B, 18 IS, 
+SHLDI, BX'| DB| [AX] 14 B, 18 IS, 
+SHLDI, BX'| D0| [DI] 14 IS, 
+SHLDI, BX'| D0| [SI] 14 IS, 
+SHLDI, BX'| D0| [BX] 14 IS, 
+SHLDI, BX'| D0| [DX] 14 IS, 
+SHLDI, BX'| D0| [CX] 14 IS, 
+SHLDI, BX'| D0| [AX] 14 IS, 
+SHLDI, DX'| MEM| 10 X, 14 IS, 
+SHLDI, DX'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, DX'| R| DI| 14 IS, 
+SHLDI, DX'| R| SI| 14 IS, 
+SHLDI, DX'| R| BP| 14 IS, 
+SHLDI, DX'| R| SP| 14 IS, 
+SHLDI, DX'| R| BX| 14 IS, 
+SHLDI, DX'| R| DX| 14 IS, 
+SHLDI, DX'| R| CX| 14 IS, 
+SHLDI, DX'| R| AX| 14 IS, 
+SHLDI, DX'| DW| [DI] 14 X, 18 IS, 
+SHLDI, DX'| DW| [SI] 14 X, 18 IS, 
+SHLDI, DX'| DW| [BP] 14 X, 18 IS, 
+SHLDI, DX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, DX'| DW| [BX] 14 X, 18 IS, 
+SHLDI, DX'| DW| [DX] 14 X, 18 IS, 
+SHLDI, DX'| DW| [CX] 14 X, 18 IS, 
+SHLDI, DX'| DW| [AX] 14 X, 18 IS, 
+SHLDI, DX'| DB| [DI] 14 B, 18 IS, 
+SHLDI, DX'| DB| [SI] 14 B, 18 IS, 
+SHLDI, DX'| DB| [BP] 14 B, 18 IS, 
+SHLDI, DX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, DX'| DB| [BX] 14 B, 18 IS, 
+SHLDI, DX'| DB| [DX] 14 B, 18 IS, 
+SHLDI, DX'| DB| [CX] 14 B, 18 IS, 
+SHLDI, DX'| DB| [AX] 14 B, 18 IS, 
+SHLDI, DX'| D0| [DI] 14 IS, 
+SHLDI, DX'| D0| [SI] 14 IS, 
+SHLDI, DX'| D0| [BX] 14 IS, 
+SHLDI, DX'| D0| [DX] 14 IS, 
+SHLDI, DX'| D0| [CX] 14 IS, 
+SHLDI, DX'| D0| [AX] 14 IS, 
+SHLDI, CX'| MEM| 10 X, 14 IS, 
+SHLDI, CX'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, CX'| R| DI| 14 IS, 
+SHLDI, CX'| R| SI| 14 IS, 
+SHLDI, CX'| R| BP| 14 IS, 
+SHLDI, CX'| R| SP| 14 IS, 
+SHLDI, CX'| R| BX| 14 IS, 
+SHLDI, CX'| R| DX| 14 IS, 
+SHLDI, CX'| R| CX| 14 IS, 
+SHLDI, CX'| R| AX| 14 IS, 
+SHLDI, CX'| DW| [DI] 14 X, 18 IS, 
+SHLDI, CX'| DW| [SI] 14 X, 18 IS, 
+SHLDI, CX'| DW| [BP] 14 X, 18 IS, 
+SHLDI, CX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, CX'| DW| [BX] 14 X, 18 IS, 
+SHLDI, CX'| DW| [DX] 14 X, 18 IS, 
+SHLDI, CX'| DW| [CX] 14 X, 18 IS, 
+SHLDI, CX'| DW| [AX] 14 X, 18 IS, 
+SHLDI, CX'| DB| [DI] 14 B, 18 IS, 
+SHLDI, CX'| DB| [SI] 14 B, 18 IS, 
+SHLDI, CX'| DB| [BP] 14 B, 18 IS, 
+SHLDI, CX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, CX'| DB| [BX] 14 B, 18 IS, 
+SHLDI, CX'| DB| [DX] 14 B, 18 IS, 
+SHLDI, CX'| DB| [CX] 14 B, 18 IS, 
+SHLDI, CX'| DB| [AX] 14 B, 18 IS, 
+SHLDI, CX'| D0| [DI] 14 IS, 
+SHLDI, CX'| D0| [SI] 14 IS, 
+SHLDI, CX'| D0| [BX] 14 IS, 
+SHLDI, CX'| D0| [DX] 14 IS, 
+SHLDI, CX'| D0| [CX] 14 IS, 
+SHLDI, CX'| D0| [AX] 14 IS, 
+SHLDI, AX'| MEM| 10 X, 14 IS, 
+SHLDI, AX'| SIM| 10 SIMQ, 14 IS, 
+SHLDI, AX'| R| DI| 14 IS, 
+SHLDI, AX'| R| SI| 14 IS, 
+SHLDI, AX'| R| BP| 14 IS, 
+SHLDI, AX'| R| SP| 14 IS, 
+SHLDI, AX'| R| BX| 14 IS, 
+SHLDI, AX'| R| DX| 14 IS, 
+SHLDI, AX'| R| CX| 14 IS, 
+SHLDI, AX'| R| AX| 14 IS, 
+SHLDI, AX'| DW| [DI] 14 X, 18 IS, 
+SHLDI, AX'| DW| [SI] 14 X, 18 IS, 
+SHLDI, AX'| DW| [BP] 14 X, 18 IS, 
+SHLDI, AX'| DW| SIB| 14 SIBQ, 18 X, 1C IS, 
+SHLDI, AX'| DW| [BX] 14 X, 18 IS, 
+SHLDI, AX'| DW| [DX] 14 X, 18 IS, 
+SHLDI, AX'| DW| [CX] 14 X, 18 IS, 
+SHLDI, AX'| DW| [AX] 14 X, 18 IS, 
+SHLDI, AX'| DB| [DI] 14 B, 18 IS, 
+SHLDI, AX'| DB| [SI] 14 B, 18 IS, 
+SHLDI, AX'| DB| [BP] 14 B, 18 IS, 
+SHLDI, AX'| DB| SIB| 14 SIBQ, 18 B, 1C IS, 
+SHLDI, AX'| DB| [BX] 14 B, 18 IS, 
+SHLDI, AX'| DB| [DX] 14 B, 18 IS, 
+SHLDI, AX'| DB| [CX] 14 B, 18 IS, 
+SHLDI, AX'| DB| [AX] 14 B, 18 IS, 
+SHLDI, AX'| D0| [DI] 14 IS, 
+SHLDI, AX'| D0| [SI] 14 IS, 
+SHLDI, AX'| D0| [BX] 14 IS, 
+SHLDI, AX'| D0| [DX] 14 IS, 
+SHLDI, AX'| D0| [CX] 14 IS, 
+SHLDI, AX'| D0| [AX] 14 IS, 
+BSF, DI'| MEM| 10 X, 
+BSF, DI'| SIM| 10 SIMQ, 
+BSF, DI'| R| DI| 
+BSF, DI'| R| SI| 
+BSF, DI'| R| BP| 
+BSF, DI'| R| SP| 
+BSF, DI'| R| BX| 
+BSF, DI'| R| DX| 
+BSF, DI'| R| CX| 
+BSF, DI'| R| AX| 
+BSF, DI'| DW| [DI] 14 X, 
+BSF, DI'| DW| [SI] 14 X, 
+BSF, DI'| DW| [BP] 14 X, 
+BSF, DI'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, DI'| DW| [BX] 14 X, 
+BSF, DI'| DW| [DX] 14 X, 
+BSF, DI'| DW| [CX] 14 X, 
+BSF, DI'| DW| [AX] 14 X, 
+BSF, DI'| DB| [DI] 14 B, 
+BSF, DI'| DB| [SI] 14 B, 
+BSF, DI'| DB| [BP] 14 B, 
+BSF, DI'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, DI'| DB| [BX] 14 B, 
+BSF, DI'| DB| [DX] 14 B, 
+BSF, DI'| DB| [CX] 14 B, 
+BSF, DI'| DB| [AX] 14 B, 
+BSF, DI'| D0| [DI] 
+BSF, DI'| D0| [SI] 
+BSF, DI'| D0| [BX] 
+BSF, DI'| D0| [DX] 
+BSF, DI'| D0| [CX] 
+BSF, DI'| D0| [AX] 
+BSF, SI'| MEM| 10 X, 
+BSF, SI'| SIM| 10 SIMQ, 
+BSF, SI'| R| DI| 
+BSF, SI'| R| SI| 
+BSF, SI'| R| BP| 
+BSF, SI'| R| SP| 
+BSF, SI'| R| BX| 
+BSF, SI'| R| DX| 
+BSF, SI'| R| CX| 
+BSF, SI'| R| AX| 
+BSF, SI'| DW| [DI] 14 X, 
+BSF, SI'| DW| [SI] 14 X, 
+BSF, SI'| DW| [BP] 14 X, 
+BSF, SI'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, SI'| DW| [BX] 14 X, 
+BSF, SI'| DW| [DX] 14 X, 
+BSF, SI'| DW| [CX] 14 X, 
+BSF, SI'| DW| [AX] 14 X, 
+BSF, SI'| DB| [DI] 14 B, 
+BSF, SI'| DB| [SI] 14 B, 
+BSF, SI'| DB| [BP] 14 B, 
+BSF, SI'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, SI'| DB| [BX] 14 B, 
+BSF, SI'| DB| [DX] 14 B, 
+BSF, SI'| DB| [CX] 14 B, 
+BSF, SI'| DB| [AX] 14 B, 
+BSF, SI'| D0| [DI] 
+BSF, SI'| D0| [SI] 
+BSF, SI'| D0| [BX] 
+BSF, SI'| D0| [DX] 
+BSF, SI'| D0| [CX] 
+BSF, SI'| D0| [AX] 
+BSF, BP'| MEM| 10 X, 
+BSF, BP'| SIM| 10 SIMQ, 
+BSF, BP'| R| DI| 
+BSF, BP'| R| SI| 
+BSF, BP'| R| BP| 
+BSF, BP'| R| SP| 
+BSF, BP'| R| BX| 
+BSF, BP'| R| DX| 
+BSF, BP'| R| CX| 
+BSF, BP'| R| AX| 
+BSF, BP'| DW| [DI] 14 X, 
+BSF, BP'| DW| [SI] 14 X, 
+BSF, BP'| DW| [BP] 14 X, 
+BSF, BP'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, BP'| DW| [BX] 14 X, 
+BSF, BP'| DW| [DX] 14 X, 
+BSF, BP'| DW| [CX] 14 X, 
+BSF, BP'| DW| [AX] 14 X, 
+BSF, BP'| DB| [DI] 14 B, 
+BSF, BP'| DB| [SI] 14 B, 
+BSF, BP'| DB| [BP] 14 B, 
+BSF, BP'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, BP'| DB| [BX] 14 B, 
+BSF, BP'| DB| [DX] 14 B, 
+BSF, BP'| DB| [CX] 14 B, 
+BSF, BP'| DB| [AX] 14 B, 
+BSF, BP'| D0| [DI] 
+BSF, BP'| D0| [SI] 
+BSF, BP'| D0| [BX] 
+BSF, BP'| D0| [DX] 
+BSF, BP'| D0| [CX] 
+BSF, BP'| D0| [AX] 
+BSF, SP'| MEM| 10 X, 
+BSF, SP'| SIM| 10 SIMQ, 
+BSF, SP'| R| DI| 
+BSF, SP'| R| SI| 
+BSF, SP'| R| BP| 
+BSF, SP'| R| SP| 
+BSF, SP'| R| BX| 
+BSF, SP'| R| DX| 
+BSF, SP'| R| CX| 
+BSF, SP'| R| AX| 
+BSF, SP'| DW| [DI] 14 X, 
+BSF, SP'| DW| [SI] 14 X, 
+BSF, SP'| DW| [BP] 14 X, 
+BSF, SP'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, SP'| DW| [BX] 14 X, 
+BSF, SP'| DW| [DX] 14 X, 
+BSF, SP'| DW| [CX] 14 X, 
+BSF, SP'| DW| [AX] 14 X, 
+BSF, SP'| DB| [DI] 14 B, 
+BSF, SP'| DB| [SI] 14 B, 
+BSF, SP'| DB| [BP] 14 B, 
+BSF, SP'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, SP'| DB| [BX] 14 B, 
+BSF, SP'| DB| [DX] 14 B, 
+BSF, SP'| DB| [CX] 14 B, 
+BSF, SP'| DB| [AX] 14 B, 
+BSF, SP'| D0| [DI] 
+BSF, SP'| D0| [SI] 
+BSF, SP'| D0| [BX] 
+BSF, SP'| D0| [DX] 
+BSF, SP'| D0| [CX] 
+BSF, SP'| D0| [AX] 
+BSF, BX'| MEM| 10 X, 
+BSF, BX'| SIM| 10 SIMQ, 
+BSF, BX'| R| DI| 
+BSF, BX'| R| SI| 
+BSF, BX'| R| BP| 
+BSF, BX'| R| SP| 
+BSF, BX'| R| BX| 
+BSF, BX'| R| DX| 
+BSF, BX'| R| CX| 
+BSF, BX'| R| AX| 
+BSF, BX'| DW| [DI] 14 X, 
+BSF, BX'| DW| [SI] 14 X, 
+BSF, BX'| DW| [BP] 14 X, 
+BSF, BX'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, BX'| DW| [BX] 14 X, 
+BSF, BX'| DW| [DX] 14 X, 
+BSF, BX'| DW| [CX] 14 X, 
+BSF, BX'| DW| [AX] 14 X, 
+BSF, BX'| DB| [DI] 14 B, 
+BSF, BX'| DB| [SI] 14 B, 
+BSF, BX'| DB| [BP] 14 B, 
+BSF, BX'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, BX'| DB| [BX] 14 B, 
+BSF, BX'| DB| [DX] 14 B, 
+BSF, BX'| DB| [CX] 14 B, 
+BSF, BX'| DB| [AX] 14 B, 
+BSF, BX'| D0| [DI] 
+BSF, BX'| D0| [SI] 
+BSF, BX'| D0| [BX] 
+BSF, BX'| D0| [DX] 
+BSF, BX'| D0| [CX] 
+BSF, BX'| D0| [AX] 
+BSF, DX'| MEM| 10 X, 
+BSF, DX'| SIM| 10 SIMQ, 
+BSF, DX'| R| DI| 
+BSF, DX'| R| SI| 
+BSF, DX'| R| BP| 
+BSF, DX'| R| SP| 
+BSF, DX'| R| BX| 
+BSF, DX'| R| DX| 
+BSF, DX'| R| CX| 
+BSF, DX'| R| AX| 
+BSF, DX'| DW| [DI] 14 X, 
+BSF, DX'| DW| [SI] 14 X, 
+BSF, DX'| DW| [BP] 14 X, 
+BSF, DX'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, DX'| DW| [BX] 14 X, 
+BSF, DX'| DW| [DX] 14 X, 
+BSF, DX'| DW| [CX] 14 X, 
+BSF, DX'| DW| [AX] 14 X, 
+BSF, DX'| DB| [DI] 14 B, 
+BSF, DX'| DB| [SI] 14 B, 
+BSF, DX'| DB| [BP] 14 B, 
+BSF, DX'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, DX'| DB| [BX] 14 B, 
+BSF, DX'| DB| [DX] 14 B, 
+BSF, DX'| DB| [CX] 14 B, 
+BSF, DX'| DB| [AX] 14 B, 
+BSF, DX'| D0| [DI] 
+BSF, DX'| D0| [SI] 
+BSF, DX'| D0| [BX] 
+BSF, DX'| D0| [DX] 
+BSF, DX'| D0| [CX] 
+BSF, DX'| D0| [AX] 
+BSF, CX'| MEM| 10 X, 
+BSF, CX'| SIM| 10 SIMQ, 
+BSF, CX'| R| DI| 
+BSF, CX'| R| SI| 
+BSF, CX'| R| BP| 
+BSF, CX'| R| SP| 
+BSF, CX'| R| BX| 
+BSF, CX'| R| DX| 
+BSF, CX'| R| CX| 
+BSF, CX'| R| AX| 
+BSF, CX'| DW| [DI] 14 X, 
+BSF, CX'| DW| [SI] 14 X, 
+BSF, CX'| DW| [BP] 14 X, 
+BSF, CX'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, CX'| DW| [BX] 14 X, 
+BSF, CX'| DW| [DX] 14 X, 
+BSF, CX'| DW| [CX] 14 X, 
+BSF, CX'| DW| [AX] 14 X, 
+BSF, CX'| DB| [DI] 14 B, 
+BSF, CX'| DB| [SI] 14 B, 
+BSF, CX'| DB| [BP] 14 B, 
+BSF, CX'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, CX'| DB| [BX] 14 B, 
+BSF, CX'| DB| [DX] 14 B, 
+BSF, CX'| DB| [CX] 14 B, 
+BSF, CX'| DB| [AX] 14 B, 
+BSF, CX'| D0| [DI] 
+BSF, CX'| D0| [SI] 
+BSF, CX'| D0| [BX] 
+BSF, CX'| D0| [DX] 
+BSF, CX'| D0| [CX] 
+BSF, CX'| D0| [AX] 
+BSF, AX'| MEM| 10 X, 
+BSF, AX'| SIM| 10 SIMQ, 
+BSF, AX'| R| DI| 
+BSF, AX'| R| SI| 
+BSF, AX'| R| BP| 
+BSF, AX'| R| SP| 
+BSF, AX'| R| BX| 
+BSF, AX'| R| DX| 
+BSF, AX'| R| CX| 
+BSF, AX'| R| AX| 
+BSF, AX'| DW| [DI] 14 X, 
+BSF, AX'| DW| [SI] 14 X, 
+BSF, AX'| DW| [BP] 14 X, 
+BSF, AX'| DW| SIB| 14 SIBQ, 18 X, 
+BSF, AX'| DW| [BX] 14 X, 
+BSF, AX'| DW| [DX] 14 X, 
+BSF, AX'| DW| [CX] 14 X, 
+BSF, AX'| DW| [AX] 14 X, 
+BSF, AX'| DB| [DI] 14 B, 
+BSF, AX'| DB| [SI] 14 B, 
+BSF, AX'| DB| [BP] 14 B, 
+BSF, AX'| DB| SIB| 14 SIBQ, 18 B, 
+BSF, AX'| DB| [BX] 14 B, 
+BSF, AX'| DB| [DX] 14 B, 
+BSF, AX'| DB| [CX] 14 B, 
+BSF, AX'| DB| [AX] 14 B, 
+BSF, AX'| D0| [DI] 
+BSF, AX'| D0| [SI] 
+BSF, AX'| D0| [BX] 
+BSF, AX'| D0| [DX] 
+BSF, AX'| D0| [CX] 
+BSF, AX'| D0| [AX] 
+BSR, DI'| MEM| 10 X, 
+BSR, DI'| SIM| 10 SIMQ, 
+BSR, DI'| R| DI| 
+BSR, DI'| R| SI| 
+BSR, DI'| R| BP| 
+BSR, DI'| R| SP| 
+BSR, DI'| R| BX| 
+BSR, DI'| R| DX| 
+BSR, DI'| R| CX| 
+BSR, DI'| R| AX| 
+BSR, DI'| DW| [DI] 14 X, 
+BSR, DI'| DW| [SI] 14 X, 
+BSR, DI'| DW| [BP] 14 X, 
+BSR, DI'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, DI'| DW| [BX] 14 X, 
+BSR, DI'| DW| [DX] 14 X, 
+BSR, DI'| DW| [CX] 14 X, 
+BSR, DI'| DW| [AX] 14 X, 
+BSR, DI'| DB| [DI] 14 B, 
+BSR, DI'| DB| [SI] 14 B, 
+BSR, DI'| DB| [BP] 14 B, 
+BSR, DI'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, DI'| DB| [BX] 14 B, 
+BSR, DI'| DB| [DX] 14 B, 
+BSR, DI'| DB| [CX] 14 B, 
+BSR, DI'| DB| [AX] 14 B, 
+BSR, DI'| D0| [DI] 
+BSR, DI'| D0| [SI] 
+BSR, DI'| D0| [BX] 
+BSR, DI'| D0| [DX] 
+BSR, DI'| D0| [CX] 
+BSR, DI'| D0| [AX] 
+BSR, SI'| MEM| 10 X, 
+BSR, SI'| SIM| 10 SIMQ, 
+BSR, SI'| R| DI| 
+BSR, SI'| R| SI| 
+BSR, SI'| R| BP| 
+BSR, SI'| R| SP| 
+BSR, SI'| R| BX| 
+BSR, SI'| R| DX| 
+BSR, SI'| R| CX| 
+BSR, SI'| R| AX| 
+BSR, SI'| DW| [DI] 14 X, 
+BSR, SI'| DW| [SI] 14 X, 
+BSR, SI'| DW| [BP] 14 X, 
+BSR, SI'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, SI'| DW| [BX] 14 X, 
+BSR, SI'| DW| [DX] 14 X, 
+BSR, SI'| DW| [CX] 14 X, 
+BSR, SI'| DW| [AX] 14 X, 
+BSR, SI'| DB| [DI] 14 B, 
+BSR, SI'| DB| [SI] 14 B, 
+BSR, SI'| DB| [BP] 14 B, 
+BSR, SI'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, SI'| DB| [BX] 14 B, 
+BSR, SI'| DB| [DX] 14 B, 
+BSR, SI'| DB| [CX] 14 B, 
+BSR, SI'| DB| [AX] 14 B, 
+BSR, SI'| D0| [DI] 
+BSR, SI'| D0| [SI] 
+BSR, SI'| D0| [BX] 
+BSR, SI'| D0| [DX] 
+BSR, SI'| D0| [CX] 
+BSR, SI'| D0| [AX] 
+BSR, BP'| MEM| 10 X, 
+BSR, BP'| SIM| 10 SIMQ, 
+BSR, BP'| R| DI| 
+BSR, BP'| R| SI| 
+BSR, BP'| R| BP| 
+BSR, BP'| R| SP| 
+BSR, BP'| R| BX| 
+BSR, BP'| R| DX| 
+BSR, BP'| R| CX| 
+BSR, BP'| R| AX| 
+BSR, BP'| DW| [DI] 14 X, 
+BSR, BP'| DW| [SI] 14 X, 
+BSR, BP'| DW| [BP] 14 X, 
+BSR, BP'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, BP'| DW| [BX] 14 X, 
+BSR, BP'| DW| [DX] 14 X, 
+BSR, BP'| DW| [CX] 14 X, 
+BSR, BP'| DW| [AX] 14 X, 
+BSR, BP'| DB| [DI] 14 B, 
+BSR, BP'| DB| [SI] 14 B, 
+BSR, BP'| DB| [BP] 14 B, 
+BSR, BP'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, BP'| DB| [BX] 14 B, 
+BSR, BP'| DB| [DX] 14 B, 
+BSR, BP'| DB| [CX] 14 B, 
+BSR, BP'| DB| [AX] 14 B, 
+BSR, BP'| D0| [DI] 
+BSR, BP'| D0| [SI] 
+BSR, BP'| D0| [BX] 
+BSR, BP'| D0| [DX] 
+BSR, BP'| D0| [CX] 
+BSR, BP'| D0| [AX] 
+BSR, SP'| MEM| 10 X, 
+BSR, SP'| SIM| 10 SIMQ, 
+BSR, SP'| R| DI| 
+BSR, SP'| R| SI| 
+BSR, SP'| R| BP| 
+BSR, SP'| R| SP| 
+BSR, SP'| R| BX| 
+BSR, SP'| R| DX| 
+BSR, SP'| R| CX| 
+BSR, SP'| R| AX| 
+BSR, SP'| DW| [DI] 14 X, 
+BSR, SP'| DW| [SI] 14 X, 
+BSR, SP'| DW| [BP] 14 X, 
+BSR, SP'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, SP'| DW| [BX] 14 X, 
+BSR, SP'| DW| [DX] 14 X, 
+BSR, SP'| DW| [CX] 14 X, 
+BSR, SP'| DW| [AX] 14 X, 
+BSR, SP'| DB| [DI] 14 B, 
+BSR, SP'| DB| [SI] 14 B, 
+BSR, SP'| DB| [BP] 14 B, 
+BSR, SP'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, SP'| DB| [BX] 14 B, 
+BSR, SP'| DB| [DX] 14 B, 
+BSR, SP'| DB| [CX] 14 B, 
+BSR, SP'| DB| [AX] 14 B, 
+BSR, SP'| D0| [DI] 
+BSR, SP'| D0| [SI] 
+BSR, SP'| D0| [BX] 
+BSR, SP'| D0| [DX] 
+BSR, SP'| D0| [CX] 
+BSR, SP'| D0| [AX] 
+BSR, BX'| MEM| 10 X, 
+BSR, BX'| SIM| 10 SIMQ, 
+BSR, BX'| R| DI| 
+BSR, BX'| R| SI| 
+BSR, BX'| R| BP| 
+BSR, BX'| R| SP| 
+BSR, BX'| R| BX| 
+BSR, BX'| R| DX| 
+BSR, BX'| R| CX| 
+BSR, BX'| R| AX| 
+BSR, BX'| DW| [DI] 14 X, 
+BSR, BX'| DW| [SI] 14 X, 
+BSR, BX'| DW| [BP] 14 X, 
+BSR, BX'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, BX'| DW| [BX] 14 X, 
+BSR, BX'| DW| [DX] 14 X, 
+BSR, BX'| DW| [CX] 14 X, 
+BSR, BX'| DW| [AX] 14 X, 
+BSR, BX'| DB| [DI] 14 B, 
+BSR, BX'| DB| [SI] 14 B, 
+BSR, BX'| DB| [BP] 14 B, 
+BSR, BX'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, BX'| DB| [BX] 14 B, 
+BSR, BX'| DB| [DX] 14 B, 
+BSR, BX'| DB| [CX] 14 B, 
+BSR, BX'| DB| [AX] 14 B, 
+BSR, BX'| D0| [DI] 
+BSR, BX'| D0| [SI] 
+BSR, BX'| D0| [BX] 
+BSR, BX'| D0| [DX] 
+BSR, BX'| D0| [CX] 
+BSR, BX'| D0| [AX] 
+BSR, DX'| MEM| 10 X, 
+BSR, DX'| SIM| 10 SIMQ, 
+BSR, DX'| R| DI| 
+BSR, DX'| R| SI| 
+BSR, DX'| R| BP| 
+BSR, DX'| R| SP| 
+BSR, DX'| R| BX| 
+BSR, DX'| R| DX| 
+BSR, DX'| R| CX| 
+BSR, DX'| R| AX| 
+BSR, DX'| DW| [DI] 14 X, 
+BSR, DX'| DW| [SI] 14 X, 
+BSR, DX'| DW| [BP] 14 X, 
+BSR, DX'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, DX'| DW| [BX] 14 X, 
+BSR, DX'| DW| [DX] 14 X, 
+BSR, DX'| DW| [CX] 14 X, 
+BSR, DX'| DW| [AX] 14 X, 
+BSR, DX'| DB| [DI] 14 B, 
+BSR, DX'| DB| [SI] 14 B, 
+BSR, DX'| DB| [BP] 14 B, 
+BSR, DX'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, DX'| DB| [BX] 14 B, 
+BSR, DX'| DB| [DX] 14 B, 
+BSR, DX'| DB| [CX] 14 B, 
+BSR, DX'| DB| [AX] 14 B, 
+BSR, DX'| D0| [DI] 
+BSR, DX'| D0| [SI] 
+BSR, DX'| D0| [BX] 
+BSR, DX'| D0| [DX] 
+BSR, DX'| D0| [CX] 
+BSR, DX'| D0| [AX] 
+BSR, CX'| MEM| 10 X, 
+BSR, CX'| SIM| 10 SIMQ, 
+BSR, CX'| R| DI| 
+BSR, CX'| R| SI| 
+BSR, CX'| R| BP| 
+BSR, CX'| R| SP| 
+BSR, CX'| R| BX| 
+BSR, CX'| R| DX| 
+BSR, CX'| R| CX| 
+BSR, CX'| R| AX| 
+BSR, CX'| DW| [DI] 14 X, 
+BSR, CX'| DW| [SI] 14 X, 
+BSR, CX'| DW| [BP] 14 X, 
+BSR, CX'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, CX'| DW| [BX] 14 X, 
+BSR, CX'| DW| [DX] 14 X, 
+BSR, CX'| DW| [CX] 14 X, 
+BSR, CX'| DW| [AX] 14 X, 
+BSR, CX'| DB| [DI] 14 B, 
+BSR, CX'| DB| [SI] 14 B, 
+BSR, CX'| DB| [BP] 14 B, 
+BSR, CX'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, CX'| DB| [BX] 14 B, 
+BSR, CX'| DB| [DX] 14 B, 
+BSR, CX'| DB| [CX] 14 B, 
+BSR, CX'| DB| [AX] 14 B, 
+BSR, CX'| D0| [DI] 
+BSR, CX'| D0| [SI] 
+BSR, CX'| D0| [BX] 
+BSR, CX'| D0| [DX] 
+BSR, CX'| D0| [CX] 
+BSR, CX'| D0| [AX] 
+BSR, AX'| MEM| 10 X, 
+BSR, AX'| SIM| 10 SIMQ, 
+BSR, AX'| R| DI| 
+BSR, AX'| R| SI| 
+BSR, AX'| R| BP| 
+BSR, AX'| R| SP| 
+BSR, AX'| R| BX| 
+BSR, AX'| R| DX| 
+BSR, AX'| R| CX| 
+BSR, AX'| R| AX| 
+BSR, AX'| DW| [DI] 14 X, 
+BSR, AX'| DW| [SI] 14 X, 
+BSR, AX'| DW| [BP] 14 X, 
+BSR, AX'| DW| SIB| 14 SIBQ, 18 X, 
+BSR, AX'| DW| [BX] 14 X, 
+BSR, AX'| DW| [DX] 14 X, 
+BSR, AX'| DW| [CX] 14 X, 
+BSR, AX'| DW| [AX] 14 X, 
+BSR, AX'| DB| [DI] 14 B, 
+BSR, AX'| DB| [SI] 14 B, 
+BSR, AX'| DB| [BP] 14 B, 
+BSR, AX'| DB| SIB| 14 SIBQ, 18 B, 
+BSR, AX'| DB| [BX] 14 B, 
+BSR, AX'| DB| [DX] 14 B, 
+BSR, AX'| DB| [CX] 14 B, 
+BSR, AX'| DB| [AX] 14 B, 
+BSR, AX'| D0| [DI] 
+BSR, AX'| D0| [SI] 
+BSR, AX'| D0| [BX] 
+BSR, AX'| D0| [DX] 
+BSR, AX'| D0| [CX] 
+BSR, AX'| D0| [AX] 
+IMUL, DI'| MEM| 10 X, 
+IMUL, DI'| SIM| 10 SIMQ, 
+IMUL, DI'| R| DI| 
+IMUL, DI'| R| SI| 
+IMUL, DI'| R| BP| 
+IMUL, DI'| R| SP| 
+IMUL, DI'| R| BX| 
+IMUL, DI'| R| DX| 
+IMUL, DI'| R| CX| 
+IMUL, DI'| R| AX| 
+IMUL, DI'| DW| [DI] 14 X, 
+IMUL, DI'| DW| [SI] 14 X, 
+IMUL, DI'| DW| [BP] 14 X, 
+IMUL, DI'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, DI'| DW| [BX] 14 X, 
+IMUL, DI'| DW| [DX] 14 X, 
+IMUL, DI'| DW| [CX] 14 X, 
+IMUL, DI'| DW| [AX] 14 X, 
+IMUL, DI'| DB| [DI] 14 B, 
+IMUL, DI'| DB| [SI] 14 B, 
+IMUL, DI'| DB| [BP] 14 B, 
+IMUL, DI'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, DI'| DB| [BX] 14 B, 
+IMUL, DI'| DB| [DX] 14 B, 
+IMUL, DI'| DB| [CX] 14 B, 
+IMUL, DI'| DB| [AX] 14 B, 
+IMUL, DI'| D0| [DI] 
+IMUL, DI'| D0| [SI] 
+IMUL, DI'| D0| [BX] 
+IMUL, DI'| D0| [DX] 
+IMUL, DI'| D0| [CX] 
+IMUL, DI'| D0| [AX] 
+IMUL, SI'| MEM| 10 X, 
+IMUL, SI'| SIM| 10 SIMQ, 
+IMUL, SI'| R| DI| 
+IMUL, SI'| R| SI| 
+IMUL, SI'| R| BP| 
+IMUL, SI'| R| SP| 
+IMUL, SI'| R| BX| 
+IMUL, SI'| R| DX| 
+IMUL, SI'| R| CX| 
+IMUL, SI'| R| AX| 
+IMUL, SI'| DW| [DI] 14 X, 
+IMUL, SI'| DW| [SI] 14 X, 
+IMUL, SI'| DW| [BP] 14 X, 
+IMUL, SI'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, SI'| DW| [BX] 14 X, 
+IMUL, SI'| DW| [DX] 14 X, 
+IMUL, SI'| DW| [CX] 14 X, 
+IMUL, SI'| DW| [AX] 14 X, 
+IMUL, SI'| DB| [DI] 14 B, 
+IMUL, SI'| DB| [SI] 14 B, 
+IMUL, SI'| DB| [BP] 14 B, 
+IMUL, SI'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, SI'| DB| [BX] 14 B, 
+IMUL, SI'| DB| [DX] 14 B, 
+IMUL, SI'| DB| [CX] 14 B, 
+IMUL, SI'| DB| [AX] 14 B, 
+IMUL, SI'| D0| [DI] 
+IMUL, SI'| D0| [SI] 
+IMUL, SI'| D0| [BX] 
+IMUL, SI'| D0| [DX] 
+IMUL, SI'| D0| [CX] 
+IMUL, SI'| D0| [AX] 
+IMUL, BP'| MEM| 10 X, 
+IMUL, BP'| SIM| 10 SIMQ, 
+IMUL, BP'| R| DI| 
+IMUL, BP'| R| SI| 
+IMUL, BP'| R| BP| 
+IMUL, BP'| R| SP| 
+IMUL, BP'| R| BX| 
+IMUL, BP'| R| DX| 
+IMUL, BP'| R| CX| 
+IMUL, BP'| R| AX| 
+IMUL, BP'| DW| [DI] 14 X, 
+IMUL, BP'| DW| [SI] 14 X, 
+IMUL, BP'| DW| [BP] 14 X, 
+IMUL, BP'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, BP'| DW| [BX] 14 X, 
+IMUL, BP'| DW| [DX] 14 X, 
+IMUL, BP'| DW| [CX] 14 X, 
+IMUL, BP'| DW| [AX] 14 X, 
+IMUL, BP'| DB| [DI] 14 B, 
+IMUL, BP'| DB| [SI] 14 B, 
+IMUL, BP'| DB| [BP] 14 B, 
+IMUL, BP'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, BP'| DB| [BX] 14 B, 
+IMUL, BP'| DB| [DX] 14 B, 
+IMUL, BP'| DB| [CX] 14 B, 
+IMUL, BP'| DB| [AX] 14 B, 
+IMUL, BP'| D0| [DI] 
+IMUL, BP'| D0| [SI] 
+IMUL, BP'| D0| [BX] 
+IMUL, BP'| D0| [DX] 
+IMUL, BP'| D0| [CX] 
+IMUL, BP'| D0| [AX] 
+IMUL, SP'| MEM| 10 X, 
+IMUL, SP'| SIM| 10 SIMQ, 
+IMUL, SP'| R| DI| 
+IMUL, SP'| R| SI| 
+IMUL, SP'| R| BP| 
+IMUL, SP'| R| SP| 
+IMUL, SP'| R| BX| 
+IMUL, SP'| R| DX| 
+IMUL, SP'| R| CX| 
+IMUL, SP'| R| AX| 
+IMUL, SP'| DW| [DI] 14 X, 
+IMUL, SP'| DW| [SI] 14 X, 
+IMUL, SP'| DW| [BP] 14 X, 
+IMUL, SP'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, SP'| DW| [BX] 14 X, 
+IMUL, SP'| DW| [DX] 14 X, 
+IMUL, SP'| DW| [CX] 14 X, 
+IMUL, SP'| DW| [AX] 14 X, 
+IMUL, SP'| DB| [DI] 14 B, 
+IMUL, SP'| DB| [SI] 14 B, 
+IMUL, SP'| DB| [BP] 14 B, 
+IMUL, SP'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, SP'| DB| [BX] 14 B, 
+IMUL, SP'| DB| [DX] 14 B, 
+IMUL, SP'| DB| [CX] 14 B, 
+IMUL, SP'| DB| [AX] 14 B, 
+IMUL, SP'| D0| [DI] 
+IMUL, SP'| D0| [SI] 
+IMUL, SP'| D0| [BX] 
+IMUL, SP'| D0| [DX] 
+IMUL, SP'| D0| [CX] 
+IMUL, SP'| D0| [AX] 
+IMUL, BX'| MEM| 10 X, 
+IMUL, BX'| SIM| 10 SIMQ, 
+IMUL, BX'| R| DI| 
+IMUL, BX'| R| SI| 
+IMUL, BX'| R| BP| 
+IMUL, BX'| R| SP| 
+IMUL, BX'| R| BX| 
+IMUL, BX'| R| DX| 
+IMUL, BX'| R| CX| 
+IMUL, BX'| R| AX| 
+IMUL, BX'| DW| [DI] 14 X, 
+IMUL, BX'| DW| [SI] 14 X, 
+IMUL, BX'| DW| [BP] 14 X, 
+IMUL, BX'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, BX'| DW| [BX] 14 X, 
+IMUL, BX'| DW| [DX] 14 X, 
+IMUL, BX'| DW| [CX] 14 X, 
+IMUL, BX'| DW| [AX] 14 X, 
+IMUL, BX'| DB| [DI] 14 B, 
+IMUL, BX'| DB| [SI] 14 B, 
+IMUL, BX'| DB| [BP] 14 B, 
+IMUL, BX'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, BX'| DB| [BX] 14 B, 
+IMUL, BX'| DB| [DX] 14 B, 
+IMUL, BX'| DB| [CX] 14 B, 
+IMUL, BX'| DB| [AX] 14 B, 
+IMUL, BX'| D0| [DI] 
+IMUL, BX'| D0| [SI] 
+IMUL, BX'| D0| [BX] 
+IMUL, BX'| D0| [DX] 
+IMUL, BX'| D0| [CX] 
+IMUL, BX'| D0| [AX] 
+IMUL, DX'| MEM| 10 X, 
+IMUL, DX'| SIM| 10 SIMQ, 
+IMUL, DX'| R| DI| 
+IMUL, DX'| R| SI| 
+IMUL, DX'| R| BP| 
+IMUL, DX'| R| SP| 
+IMUL, DX'| R| BX| 
+IMUL, DX'| R| DX| 
+IMUL, DX'| R| CX| 
+IMUL, DX'| R| AX| 
+IMUL, DX'| DW| [DI] 14 X, 
+IMUL, DX'| DW| [SI] 14 X, 
+IMUL, DX'| DW| [BP] 14 X, 
+IMUL, DX'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, DX'| DW| [BX] 14 X, 
+IMUL, DX'| DW| [DX] 14 X, 
+IMUL, DX'| DW| [CX] 14 X, 
+IMUL, DX'| DW| [AX] 14 X, 
+IMUL, DX'| DB| [DI] 14 B, 
+IMUL, DX'| DB| [SI] 14 B, 
+IMUL, DX'| DB| [BP] 14 B, 
+IMUL, DX'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, DX'| DB| [BX] 14 B, 
+IMUL, DX'| DB| [DX] 14 B, 
+IMUL, DX'| DB| [CX] 14 B, 
+IMUL, DX'| DB| [AX] 14 B, 
+IMUL, DX'| D0| [DI] 
+IMUL, DX'| D0| [SI] 
+IMUL, DX'| D0| [BX] 
+IMUL, DX'| D0| [DX] 
+IMUL, DX'| D0| [CX] 
+IMUL, DX'| D0| [AX] 
+IMUL, CX'| MEM| 10 X, 
+IMUL, CX'| SIM| 10 SIMQ, 
+IMUL, CX'| R| DI| 
+IMUL, CX'| R| SI| 
+IMUL, CX'| R| BP| 
+IMUL, CX'| R| SP| 
+IMUL, CX'| R| BX| 
+IMUL, CX'| R| DX| 
+IMUL, CX'| R| CX| 
+IMUL, CX'| R| AX| 
+IMUL, CX'| DW| [DI] 14 X, 
+IMUL, CX'| DW| [SI] 14 X, 
+IMUL, CX'| DW| [BP] 14 X, 
+IMUL, CX'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, CX'| DW| [BX] 14 X, 
+IMUL, CX'| DW| [DX] 14 X, 
+IMUL, CX'| DW| [CX] 14 X, 
+IMUL, CX'| DW| [AX] 14 X, 
+IMUL, CX'| DB| [DI] 14 B, 
+IMUL, CX'| DB| [SI] 14 B, 
+IMUL, CX'| DB| [BP] 14 B, 
+IMUL, CX'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, CX'| DB| [BX] 14 B, 
+IMUL, CX'| DB| [DX] 14 B, 
+IMUL, CX'| DB| [CX] 14 B, 
+IMUL, CX'| DB| [AX] 14 B, 
+IMUL, CX'| D0| [DI] 
+IMUL, CX'| D0| [SI] 
+IMUL, CX'| D0| [BX] 
+IMUL, CX'| D0| [DX] 
+IMUL, CX'| D0| [CX] 
+IMUL, CX'| D0| [AX] 
+IMUL, AX'| MEM| 10 X, 
+IMUL, AX'| SIM| 10 SIMQ, 
+IMUL, AX'| R| DI| 
+IMUL, AX'| R| SI| 
+IMUL, AX'| R| BP| 
+IMUL, AX'| R| SP| 
+IMUL, AX'| R| BX| 
+IMUL, AX'| R| DX| 
+IMUL, AX'| R| CX| 
+IMUL, AX'| R| AX| 
+IMUL, AX'| DW| [DI] 14 X, 
+IMUL, AX'| DW| [SI] 14 X, 
+IMUL, AX'| DW| [BP] 14 X, 
+IMUL, AX'| DW| SIB| 14 SIBQ, 18 X, 
+IMUL, AX'| DW| [BX] 14 X, 
+IMUL, AX'| DW| [DX] 14 X, 
+IMUL, AX'| DW| [CX] 14 X, 
+IMUL, AX'| DW| [AX] 14 X, 
+IMUL, AX'| DB| [DI] 14 B, 
+IMUL, AX'| DB| [SI] 14 B, 
+IMUL, AX'| DB| [BP] 14 B, 
+IMUL, AX'| DB| SIB| 14 SIBQ, 18 B, 
+IMUL, AX'| DB| [BX] 14 B, 
+IMUL, AX'| DB| [DX] 14 B, 
+IMUL, AX'| DB| [CX] 14 B, 
+IMUL, AX'| DB| [AX] 14 B, 
+IMUL, AX'| D0| [DI] 
+IMUL, AX'| D0| [SI] 
+IMUL, AX'| D0| [BX] 
+IMUL, AX'| D0| [DX] 
+IMUL, AX'| D0| [CX] 
+IMUL, AX'| D0| [AX] 
+OK
+IMUL|AD? 
+IMUL|AD? 
+IMUL|AD? 
+IMUL|AD, W| MEM| 10 X, 
+IMUL|AD, W| SIM| 10 SIMQ, 
+IMUL|AD, W| R| DI| 
+IMUL|AD, W| R| SI| 
+IMUL|AD, W| R| BP| 
+IMUL|AD, W| R| SP| 
+IMUL|AD, W| R| BX| 
+IMUL|AD, W| R| DX| 
+IMUL|AD, W| R| CX| 
+IMUL|AD, W| R| AX| 
+IMUL|AD, W| DW| [DI] 14 X, 
+IMUL|AD, W| DW| [SI] 14 X, 
+IMUL|AD, W| DW| [BP] 14 X, 
+IMUL|AD, W| DW| SIB| 14 SIBQ, 18 X, 
+IMUL|AD, W| DW| [BX] 14 X, 
+IMUL|AD, W| DW| [DX] 14 X, 
+IMUL|AD, W| DW| [CX] 14 X, 
+IMUL|AD, W| DW| [AX] 14 X, 
+IMUL|AD, W| DB| [DI] 14 B, 
+IMUL|AD, W| DB| [SI] 14 B, 
+IMUL|AD, W| DB| [BP] 14 B, 
+IMUL|AD, W| DB| SIB| 14 SIBQ, 18 B, 
+IMUL|AD, W| DB| [BX] 14 B, 
+IMUL|AD, W| DB| [DX] 14 B, 
+IMUL|AD, W| DB| [CX] 14 B, 
+IMUL|AD, W| DB| [AX] 14 B, 
+IMUL|AD, W| D0| [DI] 
+IMUL|AD, W| D0| [SI] 
+IMUL|AD, W| D0| [BX] 
+IMUL|AD, W| D0| [DX] 
+IMUL|AD, W| D0| [CX] 
+IMUL|AD, W| D0| [AX] 
+IMUL|AD, B| MEM| 10 X, 
+IMUL|AD, B| SIM| 10 SIMQ, 
+IMUL|AD, B| R| BH| 
+IMUL|AD, B| R| DH| 
+IMUL|AD, B| R| CH| 
+IMUL|AD, B| R| AH| 
+IMUL|AD, B| R| BL| 
+IMUL|AD, B| R| DL| 
+IMUL|AD, B| R| CL| 
+IMUL|AD, B| R| AL| 
+IMUL|AD, B| DW| [DI] 14 X, 
+IMUL|AD, B| DW| [SI] 14 X, 
+IMUL|AD, B| DW| [BP] 14 X, 
+IMUL|AD, B| DW| SIB| 14 SIBQ, 18 X, 
+IMUL|AD, B| DW| [BX] 14 X, 
+IMUL|AD, B| DW| [DX] 14 X, 
+IMUL|AD, B| DW| [CX] 14 X, 
+IMUL|AD, B| DW| [AX] 14 X, 
+IMUL|AD, B| DB| [DI] 14 B, 
+IMUL|AD, B| DB| [SI] 14 B, 
+IMUL|AD, B| DB| [BP] 14 B, 
+IMUL|AD, B| DB| SIB| 14 SIBQ, 18 B, 
+IMUL|AD, B| DB| [BX] 14 B, 
+IMUL|AD, B| DB| [DX] 14 B, 
+IMUL|AD, B| DB| [CX] 14 B, 
+IMUL|AD, B| DB| [AX] 14 B, 
+IMUL|AD, B| D0| [DI] 
+IMUL|AD, B| D0| [SI] 
+IMUL|AD, B| D0| [BX] 
+IMUL|AD, B| D0| [DX] 
+IMUL|AD, B| D0| [CX] 
+IMUL|AD, B| D0| [AX] 
 ." TEST STARTS HERE"
 HERE  
 2DUP OVER - DUMP
