@@ -1,0 +1,148 @@
+.\" $Id$
+.TH LINA "1" "Jan 2002" "ciforth 4.0.0" DFW
+.SH "NAME"
+lina ciforth \- ISO Forth Language And Environment
+.SH "SYNOPSIS"
+\fBlina\fR      [\ \fB\-AEHMRV\fR\ ]
+.br
+\fBlina\fR      \ \fB\-C\fR\ <source>
+.br
+\fBlina\fR      \ \fB\-F\fR\ [ forth code ]
+.br
+\fBlina\fR      \ \fB\-I\fR\ <binary-path> <library-path>
+.br
+\fBlina\fR      \ \fB\-L\fR\ <library> [ params ]
+.br
+\fBlina\fR      \ \fB\-S\fR\ <script> [ params ]
+.SH "DESCRIPTION"
+Forth is a tried and proven
+language
+for evolutionary ("check as you go") programming,
+ideal for rapid prototyping and embedded systems.
+\fBlina\fR is the Linux version of \fBciforth\fR (common Intel Forth), an
+interpreter environment, scripter and compiler for Forth. It is (large
+and by) compliant with the ISO Forth standard; the \fICORE\fR wordset
+is fully implemented. The small, classic, indirect threaded
+kernel contains the essential, i.a. file access and exceptions.
+Its power is multiplied by an extensive source library, that
+add i.a. a decompiler and integrated 386 assembler.
+
+It is simple, fully
+self contained and intended to be customized by you; if you want
+to understand a compiler in all details, this is your best, if
+not only, choice. \fBciforth\fR
+sports the highest documentation to binary proportion in the
+EDP industry, barring \fBm4\fR on \fICoherent\fR. This is largely due to an
+extremely small binary.
+
+.SH "OPTIONS"
+Options are implemented by a simple mechanism through
+the source library, and hence are configurable.
+The first letter after the \- (or DEC-style /)
+determines the option.
+It is case insensitive and further letters are ignored.
+Usually one option only is processed.
+If the interactive interpreter is started, that is indicated.
+
+.TP
+\fB\-A\fR, \fB\-R\fR
+
+Make the word \fIREQUIRE\fR available.
+Then start the interpreter.
+.TP
+\fB\-C\fR \fIfile.frt\fR
+Compile \fIfile.frt\fR to the binary \fIfile\fR.
+.TP
+\fB\-E\fR
+Load the \fBelectives\fR , i.e. tools for interactive development.
+Then start the interpreter.
+.TP
+\fB\-F\fR \fIwords\fR
+Execute the forthcode \fIwords\fR .
+Then start the interpreter.
+.TP
+\fB\-H\fR
+Print help, i.e. the option summary.
+.TP
+\fB\-I\fR \fIbinary-path\fR \fIlibrary-path\fR
+Install the current compiler into \fIbinary-path\fR and the current library into
+\fIlibrary-path\fR.
+This must be fully qualified names, not directories.
+Configure appropriately.
+.TP
+\fB\-L\fR \fIlibrary-path\fR [\fIarguments\fR]
+Close the default library, and open the library at
+\fIlibrary-path\fR. Shift the arguments such as to make the \fB-L\fR
+option invisible.
+Process any other options, then start the interpreter.
+.TP
+\fB\-S\fR \fIscript-path\fR [\fIarguments\fR]
+(Intended to be used in a script with ``\fB#!lina -s\fR'' as the first line.)
+Shift the arguments such as to make the \fB-S\fR option invisible.
+Interpret the file \fIscript-path\fR , ignoring its first line.
+.TP
+\fB\-M\fR, \fB\--\fR, \fB\-\-help\fR, \fB\-\-version\fR
+print help, version and copyright information.
+.TP
+\fB\-V\fR
+print version and copyright information.
+.SH "AVAILABILITY"
+\fBlina\fR is one of the configurations of \fBciforth\fR.
+.br
+The generic system can be fetched from
+.IP
+\fI http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html\fR
+.PP
+MS-DOS, "windows" , stand alone and Alpha Linux
+binary versions are available.
+
+.SH "ENVIRONMENT"
+Configuration is done fully internal.
+
+.SH "FILES"
+\fIforth.lab\fR contains a Forth source library.
+This is configurable at install time.
+
+.SH "SEE ALSO"
+
+\fIlina.info\fR
+documents all language features implemented and
+has a tutorial. Further documentation is beneficial but not
+mandatory.
+\fIlina.html\fR contains only the reference documentation, heavily cross
+referenced.
+.br
+\fI/usr/share/doc/lina/lina.texinfo\fR allows you to generate the documentation
+in html, ps and pdf form.
+.br
+\fI/usr/share/doc/lina/lina.asm\fR and \fIforth.lab\fR are source code and can be viewed.
+.br
+gforth(1)  a fast and portable Forth system.
+.br
+nasm(1) The Netwide Assembler.
+
+.SH "DIAGNOSTICS"
+Uncaught exceptions will show the error number.
+Positive error numbers are \fBciforth\fR-specific and
+explained in the documentation.
+Negative error numbers are OS-specific.
+A mnemonic message is fetched from the library file and displayed,
+if possible.
+
+.SH "DEFECTS"
+Mistakes can easily crash \fBlina\fR.
+
+\fBlina\fR is case sensitive, so ISO words must be entered in upper case.
+
+Linux error numbers are not officially related to messages (a Linux defect).
+A Forth program intended for systems where no Forth library is
+installed must take care of error messages itself.
+
+The library should contain a full complement of the ISO Forth
+language.
+
+.SH "AUTHOR"
+Copyright \(co 2000-2002
+Albert van der Horst \fI albert@spenarnc.xs4all.nl\fR.
+\fBciforth\fR is made available under the GNU Public License:
+quality, but NO warranty.
