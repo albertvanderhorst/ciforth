@@ -1,12 +1,25 @@
-;{               HCC FIG generic 8086 FORTH}
+;{               ciforth : a generic I86 ISO FORTH by HCC FIG}
 ;{ $Id$}
 ;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
+;{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
  TITLE   GENERIC FORTH FOR 8086 $Revision$
+;
+; For the generic system (to generate ciforth in an other configuration than this one):
+;     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html
+;
+; Configuration of this particular version:
+; must become i n c l u d e (config.mi)
+; _BITS_{}-bits _REAL_({real mode })_PROTECTED_({protected mode })
+; _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
+; _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
+}) _LINUX_C_({with c-routines for I/O})_LINUX_N_({with native forth I/O})
+_FEWBLOCKS_({; number of blocks limited to 256})dnl
+;
  _HEADER_ASM
 _COMMENT
-        A generic version of FIG-FORTH for IBM type standard PC's
+        A generic version of ISO FORTH for IBM type standard PC's
                 Albert van der Horst
                 HCC Forth user group
                 The Netherlands
@@ -18,8 +31,6 @@ _COMMENT
                     205 ( BIG ) Blue Rd.
                     Middletown, CT  06457
 
-  This implementation supports only one 64k segment
-
   The listing has been made possible by the
   prior work of:
                Thomas Newman, Hayward, Ca.
@@ -29,29 +40,25 @@ _COMMENT
          Kim_Harris
          George_Flammer
          Robert_D._Villwock ;
- To upgrade, modify, and understand Fig Forth, the
- value of the following book cannot be overstated:
-         Systems Guide to FIG Forth
-         C. H. Ting, PhD
- It is available through MVP.  See any recent issue
- of FORTH Dimensions for their ad. (DIXIT AD MDCCCCLXXX)
+
+ : for tools
+         Richard M. Stallman
+         Linus Torvalds
 
 No one who programs with FORTH can afford to be without:
-  Starting Forth
-  Leo Brodie
-Get it.  Available through FORTH Interest Group.
-Can also be found in many book stores.
-Chapter 3 serves as a guide for the EDITOR that you
-will probably type in from the FIG-Forth installation
-manual.
+  "Starting Forth  by Leo Brodie" and "Thinking Forth by Leo Brodie".
+   Both out of print.
 
-Although there is much to be said for typing in your own
-listing and getting it running, there is much to be said
-not typing in your own listing.  If you feel that 100+
-pages of plinking is nutty, contact me for availability
-of a disc with source & executable files.  Obtainable at
-a bargain basement price, prepare yourself for bargain
-basement support.
+This Forth is a descendant in the 300+ (RCS)- generations from fig-Forth.
+
+For nostalgic reasons the following comment has never been removed:
+   Although there is much to be said for typing in your own
+   listing and getting it running, there is much to be said
+   not typing in your own listing.  If you feel that 100+
+   pages of plinking is nutty, contact me for availability
+   of a disc with source & executable files.  Obtainable at
+   a bargain basement price, prepare yourself for bargain
+   basement support.
 
 All publications of the FORTH Interest Group are public domain.
 They may be further distributed by the inclusion of this
@@ -61,14 +68,16 @@ credit notice:
                FORTH Interest Group
                P.O. Box 1105
                San Carlos, Ca.  94070
+[I feel obliged to keep this last one in (AH). Note that although it is
+based on fig-Forth no stone is left unturned.]
 _ENDCOMMENT
         PAGE
 ; ########################################################################################
 ;                       PREPARATION (no code)
 ; ########################################################################################
-FIGREL  EQU     2       ;{ FIG RELEASE #}
+FIGREL  EQU     4       ;{ FIG RELEASE #}
 FIGREV  EQU     0       ;{ FIG REVISION #}
-USRVER  EQU     34      ;{ USER VERSION NUMBER, a digit now}
+USRVER  EQU     0      ;{ USER VERSION NUMBER, a digit now}
 ;
 ;{       PROTECTION}
 CW      EQU     M4_CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
@@ -6445,7 +6454,9 @@ HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      BDOS
-        DC      ONE, LAND, ONE, LXOR, WARN, STORE
+        DC      ONE, LAND, ONE, LXOR ;{ 0 if disk problems. }
+        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      WARN, STORE
         DC      DROP, DROP, DROP
         DC      BHAN, STORE
         DC      SEMIS
@@ -6469,7 +6480,9 @@ enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      FLUSH
         DC      LIT, 03E00H    ;{ Close file }
-        DC      ZERO, WARN, STORE
+        DC      ZERO
+        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      WARN, STORE
         DC      BHAN, FETCH
         DC      ZERO, ZERO
         DC      BDOS, QDSKER
@@ -6627,7 +6640,8 @@ HEADER({BLOCK-INIT},{BLINI},DOCOL)
         DC      LDUP, BHAN, STORE
         DC      ZERO, MIN      ; 0/-errno
         DC      LDUP, DERR, STORE
-        DC      ZEQU, ONE, LAND
+        DC      ZEQU, ONE, LAND  ;{ 0 if disk problems. }
+        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
         DC      WARN, STORE
         DC      SEMIS
 ;
@@ -6635,8 +6649,9 @@ worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
 {A block file must have been opened by forthcode({BLOCK-INIT}) .
 Close the currently open block file forthcode({BLOCK-HANDLE}),
 i.e. the mass storage words no longer work, and will result in
-error messages.
-},{{BLOCK},{LIST},{LOAD},{DISK-ERROR}},
+error messages. If error messages were fetched from disk, they
+no longer are.},
+{{BLOCK},{LIST},{LOAD},{DISK-ERROR},{WARNING}},
 {
 {BLOCK-EXIT},{},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
@@ -6647,7 +6662,9 @@ error messages.
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},DOCOL)
         DC      FLUSH
-        DC      ZERO, WARN, STORE
+        DC      ZERO
+        DC      WARN, FETCH, MIN ;{ Affect WARNING only if it was 1.}
+        DC      WARN, STORE
         DC      BHAN, FETCH
         DC      ZERO,ZERO
         DC      LIT, close
@@ -6708,9 +6725,12 @@ worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
 i.e. the mass storage words refer
 to the blocks in this file. The handle to use it is
 hidden in the c-code. forthcode({DISK-ERROR}) reflects whether the mapping was
-successful.
-If successful, forthcode({WARNING}) is reinitialised to use disk messages.
-_VERBOSE_({This word is executed by c-code outside of Forth})
+successful. Reinstall forthcode({WARNING}) as appropriate!
+_VERBOSE_({{
+This word is executed by c-code outside of Forth.
+This handling from c is problematic,
+because forthcode({WARNING}) no longer is maintained properly.
+We could import it to C , but there is no end to that.}})
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-INIT},{BLINI})
         XOR     AX,AX
@@ -6727,8 +6747,12 @@ worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
 {A block file must have been opened by forthcode({BLOCK-INIT}) .
 Close the currently open block file,
 i.e. the mass storage words no longer work, and will result in
-error messages.
-_VERBOSE_({This word is executed by c-code outside of Forth})
+errors. Reinstall forthcode({WARNING}) as appropriate!
+_VERBOSE_({{
+This word is executed by c-code outside of Forth.
+This handling from c is problematic,
+because forthcode({WARNING}) no longer is maintained properly.
+We could import it to C , but there is no end to that.}})
 },{{BLOCK},{LIST},{LOAD},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-EXIT},{BLEXI})
         CALL    c_block_exit
