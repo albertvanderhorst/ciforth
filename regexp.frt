@@ -174,7 +174,8 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ bla bla + return "there IS a match"
-: (MATCH) BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- FALSE EXIT THEN REPEAT DROP CELL- TRUE ;
+: (MATCH) BEGIN DUP >R @+ DUP IF EXECUTE  THEN WHILE RDROP REPEAT
+   DROP R>   DUP @ 0= ;
 
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
@@ -185,12 +186,12 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
     : KEEP32 DROP >R >R DROP R> R> SWAP ;
     \ From ONE TWO THREE FOUR leave ONE and FOUR
     : KEEP14 >R DROP DROP R> ;
-: (ADVANCE*)   DUP @ >R BEGIN 2DUP R@ EXECUTE WHILE KEEP32 REPEAT KEEP14 RDROP ;
+: (ADVANCE*)   @+ >R BEGIN 2DUP R@ EXECUTE WHILE KEEP32 REPEAT KEEP14 RDROP ;
 
 \ This would benefit from locals :
-\ : (ADVANCE*) @+ LOCAL MATCHER   LOCAL EP   LOCAL CP
+\ : (ADVANCE*) @+ LOCAL MATCHER   LOCAL EP   LOCAL CP  0 LOCAL EPNEW
 \         BEGIN CP EP MATCHER EXECUTE WHILE DROP TO CP REPEAT
-\         TO EP DROP     CP EP ;
+\         TO EPNEW DROP     CP EPNEW ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER and BACKTRACKPOINTER :
 \ if there is match between btp and cp with the ep,
@@ -214,21 +215,22 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ zero ended. The expressionpointer points into the buffer with
 \ Polish xt's, i.e. xt's to be executed with a pointer to the
 \ data following the xt.
-\ They either leave those as is, and return FALSE, or
-\ If the \ match still stands after the operation intended,
-\ both pointers are bumped passed the characters consumed, and
+\ The character pointer is iether left as is, and return FALSE, or
+\ If the match still stands after the operation intended,
+\ it is bumped past the characters consumed.
+\ The expression pointer is bumped past
 \ data, and possibly more xt's and more data consumed.
 \ The incremented pointers are returned, plus a true flag.
-\ Otherwise the pointers are returned unchanged, plus a false flag.
 \ The xt's need not do a match, they can do an operation that
 \ never fails, such as remembering a pointer.
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the character matches the charset at the expression,
-\ advance both past the match, else leave them as is.
+\ advance charpointer past the match, else leave it as is.
+\ Advanvce the expressionpointer past the charset.
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
 \ In a regular expression buffer this xt must be followed by a char-set.
-: ADVANCE-CHAR  OVER C@ OVER BIT? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
+: ADVANCE-CHAR  OVER C@ OVER BIT? DUP >R IF SWAP CHAR+ SWAP THEN MAX-SET CHARS + R> ;
 
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
@@ -287,12 +289,12 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 \ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
 \ In a regular expression buffer each of those xt must be followed by the
 \ xt of ADVANCE-CHAR.
-: ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
 : ADVANCE? OVER >R @+ EXECUTE DROP R> BACKTRACK ;
 
 
 \ END OF TESTED FOR COMPILATION ONLY AREA
 : ADVANCE* OVER >R   (ADVANCE*) R> BACKTRACK ;
+: ADVANCE+ DUP >R @+ EXECUTE IF DROP R> ADVANCE* ELSE RDROP FALSE THEN ;
 
 \ ---------------------------------------------------------------------------
 \                    building the regexp
