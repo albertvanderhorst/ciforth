@@ -893,14 +893,13 @@ _NEWDEBUG_({ CALL    DISPLAYSI})
 DP0:
 worddoc( {DENOTATIONS},{DEN&},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
-Skip remaining non-blank characters.},
+Skip another blank character.},
 {},
 {{&H .},{48 },
 {&X  .},{58 },
 {: GS1 &H ; GS1 .},{48 },
 {: GS2 &X ; GS2 .},{58 }}, enddoc)
 HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      INBRS, DROP, DROP
         DC      INBRS
         DC      SWAP, DROP
         DC      LDUP, QBL
@@ -939,7 +938,6 @@ worddoc( {DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {{-48 .},{-48 },
 {: GS1 -58 ; GS1 .},{-58 }}, enddoc)
 HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      ONE, LIN, PSTORE
         DC      PNUMB, DNEGA, SDLITE
         DC      SEMIS
 ;
@@ -949,8 +947,8 @@ worddoc({DENOTATIONS},{DEN+},{den_plus}, {--- s/d},{CI},
 {{+48 .},{48 },
 {: GS1 +58 ; GS1 .},{58 }}, enddoc)
 HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      ONE, LIN, PSTORE
-        DC      NUMB, SEMIS
+        DC      PNUMB, SDLITE
+        DC      SEMIS
 ;
 worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {Leave a forthkey({"}) delimited string.},
@@ -958,7 +956,6 @@ worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {{"APE" TYPE},{APE},
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
 HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      ONE, LIN, PSTORE
         DC      LIT,'"'
         DC      PPARS
         DC      LIT, SKIP, COMMA
@@ -971,6 +968,22 @@ define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
 dnl Reset the link chain at this point to keep denotations
 dnl out of the normal search.
 define({_LINKOLD},0)dnl
+;
+worddoc({ENVIRONMENTS},{CORE},{core}, {--- f},{ISO},
+{An environment query whether the CORE wordset is present.},
+{{ENVIRONMENT?}},
+{{"CORE" ENVIRONMENT? . .},{_T_ 0}},
+enddoc)
+HEADER({CORE},{CORE},{DOCOL})
+        DC      ZERO    ;{ Not (fully) present.}
+        DC      SEMIS
+;
+dnl Remember the top of the environment chain.
+define({_ENDOFENVIRONMENTS_},_LINKOLD)dnl
+dnl Reset the link chain at this point to keep environment
+dnl out of the normal search.
+define({_LINKOLD},0)dnl
+;
 worddoc( {VOCABULARIES},{DENOTATION},{denotation},{},{CI},
 {The name of the forthcode({DENOTATION}) vocabulary.
 This vocabulary contains one-letter words, called
@@ -978,8 +991,8 @@ This vocabulary contains one-letter words, called
 If a word is not found in the current search order,
 the word containing its first letter is looked up in this
 vocabulary.
-If found the parse pointer is moved back to the start
-of the word, and the corresponding denotation definition
+If found the parse pointer is moved back to after this first 
+letter of the word, and the corresponding denotation definition
 executed.
 This vocabulary is not intended to be used as a forthcode({CONTEXT})
 vocabulary; and only as a forthcode({CURRENT}) whenever you want
@@ -992,6 +1005,23 @@ HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
 HEADER( , , ,0, B_DUMMY, _ENDOFDENOTATIONS_)
+;
+worddoc( {VOCABULARIES},{ENVIRONMENT},{environment},{},{CI},
+{The name of the forthcode({ENVIRONMENT}) vocabulary.
+This vocabulary contains environment queries.
+The names of words present in forthcode({ENVIRONMENT}) are recognized by
+ forthcode({ENVIRONMENT?}).
+This vocabulary is not intended to be used as a forthcode({CONTEXT})
+vocabulary; and only as a forthcode({CURRENT}) whenever you want
+to add an environment query.},
+{{VOCABULARY}},
+{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
+FORTH ;},{CORE}},
+enddoc)
+HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
+        DC      DOVOC
+        DC      0       ;{ END OF VOCABULARY LIST}
+HEADER( , , ,0, B_DUMMY, _ENDOFENVIRONMENTS_)
 ;
 worddoc( {MISC},{NOOP},{no_operation},{},{},
 {Do nothing. Primarily useful as a placeholder.
@@ -3310,7 +3340,8 @@ SQUO1:  DC      INBRS, LIT, '"', EQUAL
         _BRANCH(SQUO1)
 SQUO2:
         DC      DROP
-        DC      LIT, -2, LIN, PSTORE
+;       Backtrace to before the first non-quote
+        DC      LIT, -1, LIN, PSTORE
         DC      DENQ
         DC      SEMIS
 ;
@@ -3331,7 +3362,6 @@ _VERBOSE_({We want forthsamp({." cccc"}) replace by forthsamp({"cccc" $.}).})},
 {{: GS1 ." the end" ; GS1 },{the end}},
 enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
-        DC      LIT, -1, LIN, PSTORE
         DC      DENQ
         DC      STATE
         DC      FETCH
@@ -3558,7 +3588,7 @@ IWORD3:  DC      INBRS, RR, EQUAL
         _BRANCH(IWORD3)
 IWORD4:
         DC      DROP
-        DC      LIT, -1, LIN, PSTORE
+        DC      LIT, -1, LIN, PSTORE ;{ Backtrace to first non-delimiter.}
         DC      FROMR, PPARS      
 ;        DC      DOTS
 IWORD2:
@@ -3659,7 +3689,9 @@ given.},
 {{ (NUMBER) 1324 D.},{1324} },
 enddoc)
 HEADER({NUMBER},{NUMB},{DOCOL})
-LNUMB:  DC      PNUMB, SDLITE
+LNUMB:  
+        DC      LIT, -1, LIN, PSTORE
+        DC      PNUMB, SDLITE
         DC      SEMIS
 ;
 _LOAD_({
@@ -3845,7 +3877,6 @@ dnl The warm start message is filtered away!
 },
 enddoc)
 HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
-        DC      LIT, -1, LIN, PSTORE
         DC      DENQ
         DC      STATE
         DC      FETCH
@@ -4070,19 +4101,27 @@ HEADER({?STACK},{QSTAC},{DOCOL})
 worddoc( {PARSING},{INTERPRET},{interpret},{},{},
 {Repeatedly fetch the next text word in the input stream and
 execute it (forthcode({STATE}) is not 1) or compile it
-(forthcode({STATE}) is 1). If the word name cannot be found
+(forthcode({STATE}) is 1). A word is blank-delimited and looked 
+up in forthcode({CONTEXT}) and forthcode({CURRENT}) respectively.
+Failing that the first character is considered a word and it is looked 
+up in the forthcode({DENOTATION}) wordlist.
+If it is not found at all, an error message " ?" will be given. 
+_VERBOSE({
+If the word name cannot be found
 after a search of forthcode({CONTEXT}) and then
 forthcode({CURRENT}), it is considered as a
-forthdefi({denotation}) of , a number, a double number, a
-character or a string. If it is also not a denotation, an error
-message " ?" will be given. Denotations are handled respectively
-by the words forthcode({DENO0}) ... forthcode({DEN9})
-forthcode({DEN&}) and forthcode({DEN"}) of the
+forthdefi({denotation}) of a number, a double number, a
+character or a string or whatever.
+Denotations are handled respectively
+by the words forthcode({0}) ... forthcode({F})
+forthcode({&}) forthcode({"}) and any other word 
+of the
 forthcode({DENOTATION}) wordlist, depending on the first
 character. A number is converted according to the current base.
 If a decimal point is found as part of a number, the number
-value that is left is a double number, otherwise a single
-number. },
+value that is left is a double number, otherwise it is a single
+number.})
+},
 {{WORD},{NUMBER},{BLK},{DPL}},
 {{( No test)},{}},
 enddoc)
@@ -4100,7 +4139,7 @@ INTE1:
 ;       DC      LDUP, IDDOT
         DC      LDUP, TFFA, FETCH, LIT, B_DENOT, LAND
         _0BRANCH(INTE3A) ;{IF}
-        DC      FROMR, LIN, STORE
+        DC      FROMR, ONEP, LIN, STORE
         _BRANCH(INTE4A)  ;{ELSE}
 INTE3A:
         DC      FROMR, DROP
@@ -4236,7 +4275,8 @@ forthvar({cccc}) .},
 {
   { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; dnl
   ' FORTH >DDEA >LFA @ ' ORAN = .},{0},
-  {' JOHN >DDEA >LFA @ ' ORAN = .},{_T_} },
+  {' JOHN >DDEA >LFA @ ' ORAN = .},{_T_},
+  {FORTH DEFINITIONS},{}
 },
 enddoc)
 HEADER({DEFINITIONS},{DEFIN},{DOCOL})
@@ -4244,6 +4284,7 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      FETCH
         DC      CURR
         DC      STORE
+        DC      FORTH
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{(},{paren},{},{ISO,I,L0},
@@ -7262,7 +7303,7 @@ HEADER({U.},{UDOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt dea --},{},
+worddoc( {DICTIONARY},{FOR-WORDS},{for_words},{x1...xn xt dea --x1...xn},{},
 {For the word with the forthdefi({dictionary entry address}) forthsamp({dea})
 and all that are linked from that word
 execute forthvar({xt})
@@ -7293,7 +7334,7 @@ FORW1:  DC      FROMR
         DC      DROP
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt ---},{},
+worddoc( {DICTIONARY},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
 {For all vocabularies execute forthvar({xt})
  with as data the forthdefi({dea}) of those words. forthvar({xt})
 must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
@@ -7301,7 +7342,8 @@ must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
 {{FOR-WORDS},{EXECUTE}}, 
 {
 { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
-{JOHN FORTH}
+{JOHN FORTH},
+{FORTH DEFINITIONS},{}
 },
 enddoc)
 HEADER({FOR-VOCS},{FORV},{DOCOL})
@@ -7333,6 +7375,7 @@ dnl A break as per forthcode({KEY?}) will terminate the listing.
 {VOCABULARY JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q ' GO >LFA ;},{},
 {: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
+{FORTH DEFINITIONS},{}
 }, 
 enddoc)
 HEADER({WORDS},{WORDS},{DOCOL})
@@ -7447,6 +7490,34 @@ DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
         _BRANCH(DOC2)
 DOC1:    DC DROP, DROP
         DC SEMIS
+;
+worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},( addr n -- i*x t/f ),{ISO},
+{If the string forthsamp({addr n}) 
+is a known environment 
+attribute, leave into forthsamp({i*x}) the information about that attribute and
+a true flag, else leave a false flag.
+In fact the flag indicates whether the words is present in the 
+forthcode({ENVIRONMENT}) vocabulary and forthsamp({i*x}) is what is left
+by the word if executed.
+},
+{{VOCABULARY}},
+{{"CORE" ENVIRONMENT? . .},{_T_ 0}},
+{{"APE" ENVIRONMENT? .},{0}},
+enddoc)
+HEADER({ENVIRONMENT?},{ENVQ},{DOCOL})
+        DC      ZERO, RESULT, STORE
+        DC      LIT, MATCHING
+        DC      LIT, ENV
+        DC      TDDEA, FORW, TDROP
+        DC      RESULT, FETCH
+        DC      LDUP
+        _0BRANCH(ENVQ1)
+        DC      EXEC
+        DC      LIT, -1
+        _BRANCH(ENVQ2)
+ENVQ1:  DC      DROP, ZERO
+ENVQ2:  
+        DC      SEMIS
 ;
 _LOAD_({
 worddoc( {SCREEN},{TRIAD},{triad},{scr --},{},
