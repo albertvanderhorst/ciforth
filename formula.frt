@@ -7,13 +7,16 @@ REQUIRE ASSEMBLERi86
 REQUIRE NEW-IF
 REQUIRE $.
 
+( Choose the first line to debug, the second line to not debug.         )
+      : \D ;
+(     : \D ^J WORD DROP ; IMMEDIATE                         )
+
 \ :  ?TEST 1+ 0 DO 0 WORD LOOP ;
 : ?TEST DROP ;
 
 
 : D= DNEGATE D+ OR 0= ;
-1 ?TEST
-CR ." EXPECT 1 1 0 123 |"  123 -1. -1. D= . 0. 0. D= . 2. 4. D= . .
+\D CR ." EXPECT 1 1 0 123 |"  123 -1. -1. D= . 0. 0. D= . 2. 4. D= . .
 
 \ worddoc(  {STRING},{$?},{string_query},{s --- },{},
 \ {Output forthdfn({string variable})
@@ -30,10 +33,9 @@ CR ." EXPECT 1 1 0 123 |"  123 -1. -1. D= . 0. 0. D= . 2. 4. D= . .
 : VECTOR [COMPILE] : POSTPONE NOOP [COMPILE] ; ;
 : IS  >DFA SWAP >DFA @ SWAP ! ;
 
-5 ?TEST
-VECTOR Q    : JAN 1 2 3 ;   'JAN 'Q   IS
-CR ." EXPECT 3 2 1 :"  Q . . .
-FORGET Q
+\D VECTOR Q    : JAN 1 2 3 ;   'JAN 'Q   IS
+\D CR ." EXPECT 3 2 1 :"  Q . . .
+\D FORGET Q
 
 \ worddoc( {TIME},{TICKS},{ticks},{--- d},{},
 \ {Return the number of clock cycles since the
@@ -43,8 +45,7 @@ FORGET Q
 HEX
 CODE TICKS  0F C, 31 C, 50 C, 52 C, NEXT C;
 
-1 ?TEST
-CR ." TICKS EXPECT 0 1 :" TICKS DNEGATE TICKS D+ . -1 U< .
+\D CR ." TICKS EXPECT 0 1 :" TICKS DNEGATE TICKS D+ . -1 U< .
 
 DECIMAL
 
@@ -69,13 +70,12 @@ DECIMAL
 \ {{TICKS},{PASSED}})
 : EARLIER  DNEGATE D+ -1. D+ SWAP DROP ;
 
-2 ?TEST
-CR ." TICKS EXPECT -1 :" TICKS TICKS EARLIER .
-CR ." TICKS EXPECT 0 :" TICKS TICKS ROT >R ROT R> EARLIER .
-CR ." TICKS EXPECT -1 -1 :" 0. 0. EARLIER . 1. 1. EARLIER .
-\ Wrap around, will happen in 64,000 years
-CR ." TICKS EXPECT -1 -1 :" -1. 1. EARLIER . -1. -1. EARLIER .
-CR ." TICKS EXPECT 0 :" 1. -1. EARLIER .
+\D CR ." TICKS EXPECT -1 :" TICKS TICKS EARLIER .
+\D CR ." TICKS EXPECT 0 :" TICKS TICKS ROT >R ROT R> EARLIER .
+\D CR ." TICKS EXPECT -1 -1 :" 0. 0. EARLIER . 1. 1. EARLIER .
+\D \ Wrap around, will happen in 64,000 years
+\D CR ." TICKS EXPECT -1 -1 :" -1. 1. EARLIER . -1. -1. EARLIER .
+\D CR ." TICKS EXPECT 0 :" 1. -1. EARLIER .
 
 \ worddoc( {EVENT},{MAXEVENT},{maxevent},{ --- n},{},
 \ {Leave a constant , the number of events that can be scheduled in
@@ -104,8 +104,7 @@ CR ." TICKS EXPECT 0 :" 1. -1. EARLIER .
 \ {{TICK}})
 MAXEVENT 8 ARRAY EVENT[]
 
-1 ?TEST
-." EVENT[] EXPECT 123 :" 123  123. 1 EVENT[] 2! .
+\D CR ." EVENT[] EXPECT 123 :" 123  123. 1 EVENT[] 2! .
 
 \ worddoc( {EVENT},{FILLED},{filled},{ --- addr},{},
 \ {A variable indicating the last index of an
@@ -149,8 +148,7 @@ VARIABLE EMPTIED 0 EMPTIED !
 : #FULL   FILLED @   EMPTIED @ -
     DUP 0< IF MAXEVENT + THEN ;
 
-1 ?TEST       !EVENT
-." EXPECT 0 " MAXEVENT . ." 123 :" 123 #FULL . #EMPTY . .
+\D CR ." EXPECT 0 " MAXEVENT . ." 123 :" 123 #FULL . #EMPTY . .
 
 \ worddoc( {EVENT},{FIND-EVENT},{find_event},{ d --- n},{},
 \ {Find the place where forthvar({d}) is to be put into the event table,
@@ -164,13 +162,12 @@ VARIABLE EMPTIED 0 EMPTIED !
     WHILE  R> 1 - >R
     REPEAT 2DROP R> R> DROP ;
 
-6 ?TEST
-3 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2!
-: F FIND-EVENT ;
-123
-." EXPECT 0 0 1 1 :" 11. F . 12. F . 13. F . 14. F .
-." EXPECT 2 2 3 123 :" 15. F . 16. F . 17. F . .
-FORGET F
+\D 3 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2!
+\D : F FIND-EVENT ;
+\D 123
+\D CR ." EXPECT 0 0 1 1 :" 11. F . 12. F . 13. F . 14. F .
+\D CR ." EXPECT 2 2 3 123 :" 15. F . 16. F . 17. F . .
+\D FORGET F
 
 \ worddoc( {EVENT},{SHIFT-UP-EVENT},{shift_up_event},{ n ---},{},
 \ {Shift the event table open at place forthcode({n}) .},
@@ -183,15 +180,14 @@ FORGET F
       -1 +LOOP ELSE 2DROP THEN
 ;
 
-8 ?TEST
-2 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2!
-17. 3 EVENT[] 2! 18. 4 EVENT[] 2!
-: T EVENT[] 2@ D. ;
-123    1 SHIFT-UP-EVENT
-." EXPECT 3 12 14 14 17 123 :" FILLED ? 0 T 1 T 2 T 3 T .
-123    3 SHIFT-UP-EVENT
-." EXPECT 4 14 14 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
-FORGET T
+\D 2 FILLED !   12. 0 EVENT[] 2!   14. 1 EVENT[] 2!  16. 2 EVENT[] 2!
+\D 17. 3 EVENT[] 2! 18. 4 EVENT[] 2!
+\D : T EVENT[] 2@ D. ;
+\D 123    1 SHIFT-UP-EVENT
+\D CR ." EXPECT 3 12 14 14 17 123 :" FILLED ? 0 T 1 T 2 T 3 T .
+\D 123    3 SHIFT-UP-EVENT
+\D CR ." EXPECT 4 14 14 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
+\D FORGET T
 
 \ worddoc( {EVENT},{INSERT-EVENT},{insert_event},{ d n ---},{},
 \ {Insert the event forthvar({d}) into the event table,
@@ -203,18 +199,16 @@ FORGET T
     EVENT[] 2!
 ;
 
-9 ?TEST
-!EVENT
-: T EVENT[] 2@ D. ;
-123
- 12. 0 INSERT-EVENT 14. 1 INSERT-EVENT  16. 2 INSERT-EVENT
-." EXPECT 3 12 14 16 123 :" FILLED ? 0 T 1 T 2 T .
-123
-17. 3 INSERT-EVENT 18. 4 INSERT-EVENT
-." EXPECT 5 14 16 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
-FORGET T
-
-
+\D !EVENT
+\D : T EVENT[] 2@ D. ;
+\D 123
+\D  12. 0 INSERT-EVENT 14. 1 INSERT-EVENT  16. 2 INSERT-EVENT
+\D CR ." EXPECT 3 12 14 16 123 :" FILLED ? 0 T 1 T 2 T .
+\D 123
+\D 17. 3 INSERT-EVENT 18. 4 INSERT-EVENT
+\D CR ." EXPECT 5 14 16 17 18 123 :" FILLED ? 1 T 2 T 3 T 4 T .
+\D FORGET T
+  
 \ worddoc( {EVENT},{SET-EVENT},{set_event},{ d --- n},{},
 \ {Put an event forthvar({d}) into the event table.
 \ This may fail, if the event table is full.
@@ -246,12 +240,11 @@ FORGET T
        -1
     THEN THEN  ;
 
-3 ?TEST
-!EVENT 123
-." EXPECT 0 1 1 123 :" 123  10. SET-EVENT . 30. SET-EVENT . 20. SET-EVENT . .
-." EXPECT 0 1 2 -1 :"   GET-EVENT . GET-EVENT . GET-EVENT . GET-EVENT .
-." EXPECT 3 3 -1 :" 40. SET-EVENT . GET-EVENT . GET-EVENT .
-." EXPECT 20 123 :" 1 EVENT[] 2@ D. .
+\D !EVENT 123 
+\D CR ." EXPECT 0 1 1 123 :" 123  10. SET-EVENT . 30. SET-EVENT . 20. SET-EVENT . .
+\D CR ." EXPECT 0 1 2 -1 :"   GET-EVENT . GET-EVENT . GET-EVENT . GET-EVENT .
+\D CR ." EXPECT 3 3 -1 :" 40. SET-EVENT . GET-EVENT . GET-EVENT .
+\D CR ." EXPECT 20 123 :" 1 EVENT[] 2@ D. .
 
 .S
 \ worddoc({TIME},{NS},{@},{n ---},{},
@@ -275,29 +268,28 @@ FORGET T
 \ {{TICKS}})
 \ HEX 0 408 L@ CONSTANT GOLD-PORT
 HEX 378 CONSTANT GOLD-PORT
-." EXPECT 378 :" GOLD-PORT HEX .
-." EXPECT 0 :" GOLD-PORT 1 1 65 LINOS DUP .
+\D CR ." EXPECT 378 :" GOLD-PORT HEX .
+\D CR ." EXPECT 0 :" GOLD-PORT 1 1 65 LINOS DUP .
 DUP "You have no permission to write to the port. Become root"
 ROT 0= 0= AND TYPE THROW
 DECIMAL
 
-13 ?TEST
-0 GOLD-PORT PC!
-CR ." Do not yet supply power to the gold tingel!"
-CR ." Connect the gold tingel to the parallel port."
-CR ." No LEDs should be visible now."
-CR ." The green LED (data) should light up for 1 sec"
-CR ." Press a key"   KEY   DROP
-1 GOLD-PORT PC!   1,000,000,000 NS   0 GOLD-PORT PC!
-CR ." The yellow LED (clock) should light up for 1 sec"
-CR ." Press a key"   KEY   DROP
-2 GOLD-PORT PC!   1,000,000,000 NS   0 GOLD-PORT PC!
-CR ." The red LED (strobe) should light up for 1 sec"
-CR ." Press a key"   KEY   DROP
-4 GOLD-PORT PC!   1,000,000,000 NS   0 GOLD-PORT PC!
-CR ." IF IT FAILED, REBOOT AND PRESS THE ICON NEW HARDWARE"
-CR ." IF IT PERSISTS, REINSTALL WINDOWS MILLENIUM"
-CR ." Press a key"   KEY   DROP
+\D 0 GOLD-PORT PC!
+\D CR ." Do not yet supply power to the gold tingel!"
+\D CR ." Connect the gold tingel to the parallel port."
+\D CR ." No LEDs should be visible now."
+\D CR ." The green LED (data) should light up for 1 sec"
+\D CR ." Press a key"   KEY   DROP
+\D 1 GOLD-PORT PC!   1,000,000,000 NS   0 GOLD-PORT PC!
+\D CR ." The yellow LED (clock) should light up for 1 sec"
+\D CR ." Press a key"   KEY   DROP
+\D 2 GOLD-PORT PC!   1,000,000,000 NS   0 GOLD-PORT PC!
+\D CR ." The red LED (strobe) should light up for 1 sec"
+\D CR ." Press a key"   KEY   DROP
+\D 4 GOLD-PORT PC!   1,000,000,000 NS   0 GOLD-PORT PC!
+\D CR ." IF IT FAILED, REBOOT AND PRESS THE ICON NEW HARDWARE"
+\D CR ." IF IT PERSISTS, REINSTALL WINDOWS MILLENIUM"
+\D CR ." Press a key"   KEY   DROP
 
 \ worddoc( {GOLD},{GOLD-LATCH},{},{ --- port},{},
 \ {Leave the forthvar({addr}) of a variable that latches the
@@ -320,10 +312,9 @@ VARIABLE GOLD-LATCH 0 GOLD-LATCH !
 ;
 : CLEAR-GOLD 40 0 DO 0 GOLD-CLOCK  LOOP ;
 
-7 ?TEST
-CR ." Supply power to the gold tingel. "
-CR ." Expect all relais to release and then attract one by one"
-CR ." Press a key"   KEY   DROP
+\D CR ." Supply power to the gold tingel. "
+\D CR ." Expect all relais to release and then attract one by one"
+\D CR ." Press a key"   KEY   DROP
 
 CLEAR-GOLD
 1 GOLD-CLOCK
@@ -336,13 +327,13 @@ CLEAR-GOLD
 \ This is an auxiliary word for forthcode({SET-GOLD}). },
 \ {{GOLD-PORT}})
 : SET-GOLD-BYTE    8 0 DO DUP 1 AND GOLD-CLOCK 2 / LOOP DROP ;
-CR ." EXPECT THE 4 ODD TINGELS ON THE LOW SIDE"
-CR ." Press a key"   KEY   DROP
+\D CR ." EXPECT THE 4 ODD TINGELS ON THE LOW SIDE"
+\D CR ." Press a key"   KEY   DROP
 HEX 55 SET-GOLD-BYTE
-CR ." EXPECT THE 4 EVEN TINGELS ON THE LOW SIDE"
-CR ." Press a key"   KEY   DROP
+\D CR ." EXPECT THE 4 EVEN TINGELS ON THE LOW SIDE"
+\D CR ." Press a key"   KEY   DROP
 HEX AA SET-GOLD-BYTE
-CR ." Press a key"   KEY   DROP
+\D CR ." Press a key"   KEY   DROP
 CLEAR-GOLD
 
 \ worddoc( {GOLD},{SET-GOLD},{},{addr -- },{},
@@ -352,7 +343,7 @@ CLEAR-GOLD
 \ {{GOLD-PORT}})
 : SET-GOLD   5 OVER + SWAP DO I C@ SET-GOLD-BYTE LOOP ;
 
-CR ." EXPECT THE LOWEST C (C2) "
-CR ." Press a key"   KEY   DROP
+\D CR ." EXPECT THE LOWEST C (C2) "
+\D CR ." Press a key"   KEY   DROP
 PAD 5 ERASE  HEX 10   PAD 4 + !   DECIMAL
 PAD SET-GOLD 70,000,000 NS CLEAR-GOLD
