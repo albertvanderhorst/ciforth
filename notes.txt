@@ -198,3 +198,7 @@ Removed and a slightly working version of linux.
 2.66 A stable version of linux figforth with mass stoarage and all.
 Handles interrupts.
 
+2.100 
+Decided to publish now.
+This version will start a BIOS protected mode Forth from MSDOS,
+but cannot return for some reason.
