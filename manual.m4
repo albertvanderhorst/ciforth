@@ -12,6 +12,7 @@ define({forthmacro},{@samp{{$1}}})
 define({forthprog},{@code{{$1}}})
 define({forthcodeni},{@code{{$1}}})
 define({forthbreak},{@*})
+define({forthurl},{@var{{$1}}})
 define({forthemph},{@b{{$1}}})
 dnl There is a problem. Using this and the following
 dnl macro at the end of line, leads to a break.
@@ -38,7 +39,8 @@ dnl define({a},{{@a}}) define({enda},{{@end a}})
 dnl be careful, an example always occupies whole lines.
 define({forthexample},
 {@example
-@cartouche $1
+@cartouche 
+$1
 @end cartouche
 @end example})dnl
 divert(0)dnl
