@@ -8,12 +8,17 @@ define({worddoccommon},{
 divert(9)dnl
 @node $8, next$3(), prev(), MyTop()
 @subsection $8
+@pindex $2
 
-NAME: $2 
+Name: $2 
 
-STACKEFFECT: $4
+ifelse($4,,
+{No stackeffect},
+{Stackeffect: $4})
 
-DESCRIPTION: $6
+Attributes: $5
+
+Description: $6
 
     {define({prev},{$8})dnl}
     divert(1)dnl
