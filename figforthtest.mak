@@ -188,7 +188,7 @@ rational.mi  \
 	sed -e 's/@/@@/g' >$@
 
 # Make the worddoc macro's into glossary paragraphs to our liking
-%.mi : gloss.m4 %.mig ; ( cat $(@:fig86.%.mi=%.cfg) ; m4 $+ )| m4 > $@
+%.mim : gloss.m4 %.mig ; ( cat $(@:fig86.%.mim=%.cfg) ; m4 $+ )| m4 > $@
 
 # Make the worddoc macro's into glossary html items to our liking
 fig86.%.html : %.cfg glosshtml.m4 fig86.%.mig
@@ -198,17 +198,17 @@ fig86.%.html : %.cfg glosshtml.m4 fig86.%.mig
 	sed -e 's/</\&lt\;/g'             |\
 	m4 $(@:fig86.%.html=%.cfg) glosshtml.m4 - > $@
 
-fig86.%.info : %.cfg $(SRCMI) fig86.%.mi fig86.%.mig manual.m4 wordset.m4
+fig86.%.info : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
 	m4 menu.m4 $(@:%.info=%.mig) > menu.texinfo
-	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.info=%.mi) )|m4 >wordset.mi
+	m4 wordset.m4 $(@:%.info=%.mim)  $(@:%.info=%.mig) |m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.info=%.cfg) manual.m4 figforth.mi)|\
 	  m4 | tee spy | makeinfo
-	rm wordset.mi
+	#rm wordset.mi
 
 # For tex we do not need to use the safe macro's
-fig86.%.tex : %.cfg $(SRCMI) fig86.%.mi fig86.%.mig manual.m4 wordset.m4
-	m4 menu.m4 wordset.mig > menu.texinfo
-	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.tex=%.mi) )|m4 >wordset.mi
+fig86.%.tex : %.cfg $(SRCMI) fig86.%.mim fig86.%.mig manual.m4 wordset.m4
+	m4 menu.m4 $(@:%.tex=%.mig) > menu.texinfo
+	m4 wordset.m4 $(@:%.tex=%.mim)  $(@:%.tex=%.mig) |m4 >wordset.mi
 	(echo 'define(figforthversion,$@)' ; cat $(@:fig86.%.tex=%.cfg) manual.m4 figforth.mi)|\
 	   tee spy | m4 > $@
-	rm wordset.mi menu.texinfo
+	#rm wordset.mi menu.texinfo
