@@ -251,6 +251,11 @@ IS-A IS-xFI   : xFI   CHECK31 CREATE-- , , , , DOES> REMEMBER FIXUP> ;
 ( One size fits all, because of the or character of the operations.     )
 IS-A IS-DFI  : DFI   CHECK31A CREATE-- , , , , DOES> REMEMBER FIXUP-DATA ;
 
+( *************** OBSOLESCENT ***********************************       )
+\ Reverses bytes in a WORD. Return IT.
+: REVERSE-BYTES     1 CELLS 0 DO DUP  FF AND SWAP 8 RSHIFT   LOOP
+                    8 CELLS 0 DO SWAP I LSHIFT OR       8 +LOOP ;
+
 ( Rotate the MASK etc from a fixup-from-reverse into a NEW mask fit )
 ( for using from the start of the instruction. We know the length!  )
 : CORRECT-R 0 CELL+ ISL @ - ROTLEFT ;
@@ -261,7 +266,28 @@ IS-A IS-DFI  : DFI   CHECK31A CREATE-- , , , , DOES> REMEMBER FIXUP-DATA ;
 : FIXUP<   @+ CORRECT-R ISS @ OR!   TALLY:|R  CHECK32 ;
 ( Define a fixup-from-reverse by BA BY BI and the FIXUP bits )
 ( One size fits all, because of the character of the or-operations. )
-IS-A IS-xFIR   : xFIR   CHECK31 CREATE-- , , , , DOES> REMEMBER FIXUP< ;
+( bi and fixup are specified that last byte is lsb, such as you read it )
+IS-A IS-FIR   : FIR   CHECK31 CREATE-- REVERSE-BYTES , REVERSE-BYTES , , ,
+    DOES> REMEMBER FIXUP< ;
+
+( *************** PREFERRED NOT YET USED ************************       )
+( If bits were already down it is wrong. For next two words.)
+( Reset bits of DATA into ADDRESS bytewise. )
+: (AND!BYTE) >R 0FF AND INVERT R@ C@ CHECK29 AND R> C! ;
+( Reset bits of DATA byte by byte into ADDRESS )
+: AND!BYTE BEGIN 2DUP (AND!BYTE) SWAP 8 RSHIFT DUP WHILE SWAP 1+ REPEAT 2DROP ;
+( If bits were already up its wrong. for next two words.)
+( Or DATA into ADDRESS bytewise. )
+: (OR!BYTE) >R R@ C@  CHECK28 OR R> C! ;
+( Or DATA byte by byte from behind into ADDRESS )
+: OR!BYTE BEGIN 1- 2DUP (OR!BYTE) SWAP 8 RSHIFT DUP WHILE SWAP REPEAT 2DROP ;
+( Bookkeeping for a fixup-from-reverse using a pointer to the BIBYBA    )
+( information, can fake a fixup in disassembling too.                   )
+: TALLY:|R'  @+ TALLY-BI AND!BYTE   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;
+( Fix up the instruction from reverse using a pointer to DATA. )
+: FIXUP<'   @+ ISS @ ISL @ + OR!BYTE   TALLY:|R'  CHECK32 ;
+
+( *************** END PREFERRED ****************************       )
 
 ( Bookkeeping for a commaer using a pointer to the BIBYBA information.  )
 ( Not used by the disassembler.                                         )
@@ -287,7 +313,9 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 : 3FAMILY,    0 DO   DUP >R T@ R> 3PI   OVER + LOOP DROP DROP ;
 : 4FAMILY,    0 DO   DUP >R T@ R> 4PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
-: xFAMILY|R   0 DO   DUP >R T@ R> xFIR  OVER + LOOP DROP DROP ;
+: xFAMILY|R   0 DO   DUP >R T@ R> REVERSE-BYTES SWAP REVERSE-BYTES SWAP
+    FIR   OVER + LOOP DROP DROP ;
+: FAMILY|R   0 DO   DUP >R T@ R> FIR   OVER + LOOP DROP DROP ;
 : xFAMILY|F   0 DO   DUP >R T@ R> DFI   OVER + LOOP DROP DROP ;
 
 ( ############### PART II DISASSEMBLER #################################### )
@@ -351,8 +379,8 @@ VARIABLE DISS-VECTOR    ['] .DISS-AUX DISS-VECTOR !
    THEN
    THEN
 ;
-: TRY-xFIR
-   DUP IS-xFIR IF
+: TRY-FIR
+   DUP IS-FIR IF
    DUP >BI @ CORRECT-R TALLY-BI @ CONTAINED-IN IF
        DUP >BI TALLY:|R
        DUP +DISS
@@ -373,7 +401,7 @@ VARIABLE DISS-VECTOR    ['] .DISS-AUX DISS-VECTOR !
     !TALLY
     DISS? IF
         DISS @+ SWAP !DISS DO  ( Get bounds before clearing)
-            I @ TRY-PI TRY-xFI TRY-DFI TRY-xFIR TRY-COMMA DROP
+            I @ TRY-PI TRY-xFI TRY-DFI TRY-FIR TRY-COMMA DROP
         0 CELL+ +LOOP
     THEN
 ;
@@ -408,7 +436,7 @@ VARIABLE DISS-VECTOR    ['] .DISS-AUX DISS-VECTOR !
 ( Try to expand the current instruction in `DISS' by looking whether    )
 ( DEA fits. Leave the NEXT dea.                                         )
 : SHOW-STEP
-        TRY-PI TRY-DFI TRY-xFI TRY-xFIR TRY-COMMA
+        TRY-PI TRY-DFI TRY-xFI TRY-FIR TRY-COMMA
         .RESULT
         >NEXT%
 (       DUP ID.                                                         )
@@ -489,8 +517,8 @@ VARIABLE POINTER       HERE POINTER !
    THEN
    THEN
 ;
-: DIS-xFIR
-   DUP IS-xFIR IF
+: DIS-FIR
+   DUP IS-FIR IF
    DUP >BI @ CORRECT-R   TALLY-BI @ CONTAINED-IN IF
    DUP >BI @ CORRECT-R   INSTRUCTION AND   OVER >DATA @ CORRECT-R = IF
    DUP >BA @  COMPATIBLE? IF
@@ -559,7 +587,7 @@ VARIABLE I-ALIGNMENT    1 I-ALIGNMENT !   ( Instruction alignment )
     SWAP
     >R R@ POINTER !
     ( startdea -- ) BEGIN
-        DIS-PI DIS-xFI DIS-DFI DIS-xFIR DIS-COMMA
+        DIS-PI DIS-xFI DIS-DFI DIS-FIR DIS-COMMA
         >NEXT%
 (       DUP ID. ." : "  DISS-VECTOR @ EXECUTE                                 )
     DUP VOCEND? RESULT? OR UNTIL DROP

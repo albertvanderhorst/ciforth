@@ -31,10 +31,10 @@ ASSEMBLER DEFINITIONS  HEX
 \     0000,0100 address: byte offset       0000,0200 cell: address or offset)
 
 \ Adressing modes go here
-46 01 3000,0000 0000,0000 xFIR #|                  45 0 3000,0000 0000,0000 xFIR A|
-4A 04 3000,0000 1000,0000 xFIR DP|                 45 00 3000,0000 1000,0000 xFIR B|
-48 08 3000,0000 2000,0000 xFIR []
-48 10 3000,0000 3000,0000 xFIR E|
+46 01 30 00 FIR #|                  45 00 30 00 FIR A|
+4A 04 30 10 FIR DP|                 45 00 30 10 FIR B|
+48 08 30 20 FIR []
+48 10 30 30 FIR E|
 
 
 ( --------------- Handling of the index byte. ------------------------- )
@@ -42,7 +42,7 @@ ASSEMBLER DEFINITIONS  HEX
 0100,0000 1000,0000 10 xFAMILY|R ,-10 ,-F ,-E ,-D ,-C ,-B ,-A ,-9 ,-8 ,-7 ,-6 ,-5 ,-4 ,-3 ,-2 ,-1
 0100,0000 0000,0000 10 xFAMILY|R ,0 ,1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,A ,B ,C ,D ,E ,F
 80 0 6000,0000 T!       2000,0000 0 4 xFAMILY|R X Y U S
-280 02 FF00,0000 9F00,0000 xFIR [##]
+280 02 FF 9F FIR [##]
     80 00 9F00,0000 T!
 0100,0000 8000,0000 07 xFAMILY|R ,R+ ,R++ ,-R ,--R ,R B,R A,R
 0100,0000 9100,0000 06 xFAMILY|R [,R++] -- [,--R] [,R] [B,R] [A,R]

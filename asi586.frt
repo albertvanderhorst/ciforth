@@ -60,28 +60,28 @@ _ 1 0000 0001 _    COMMAER SIB,, ( An instruction with in an instruction )
  4000,0000 0000 4 xFAMILY|R  +1* +2* +4* +8*
 0200 0 0700,0001 T!
  0100,0000 0000 8 xFAMILY|R [AX [CX [DX [BX [SP -- [SI [DI
-0280 00 0700,0001 0500,0000 xFIR [BP   ( Fits in the hole, safe inconsistency check)
-0240 02 0700,0001 0500,0000 xFIR [MEM  ( Fits in the hole, safe inconsistency check)
+0280 00 0100,0007 05 FIR [BP   ( Fits in the hole, safe inconsistency check)
+0240 02 0100,0007 05 FIR [MEM  ( Fits in the hole, safe inconsistency check)
 
 0120 0 0700,0000 T!
   0100,0000 0000 8
     xFAMILY|R16 [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
 00A0 0000 0720,0000 0600,0000 xFIR16 [BP]'  ( Fits in the hole, safe inconsistency check)
  0100,0000 0000,0000 0004 xFAMILY|R [AX] [CX] [DX] [BX]
-0120 01 0700,0000 0400,0000 xFIR ~SIB|   ( Fits in the hole, requires also ~SIB, )
-01A0 00 0700,0000 0500,0000 xFIR [BP]   ( Fits in the hole, safe inconsistency check)
+0120 01 07 04 FIR ~SIB|   ( Fits in the hole, requires also ~SIB, )
+01A0 00 07 05 FIR [BP]   ( Fits in the hole, safe inconsistency check)
  0100,0000 0600,0000 0002 xFAMILY|R [SI] [DI]
 
 0111 0 0700,0000 T!
  0100,0000 0000 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 0112 0 0700,0000 T!
  0100,0000 0000 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
-0160 00 C000,0000 0000,0000 xFIR      D0|
-0124 02 C000,0000 4000,0000 xFIR      DB|
-0128 02 C000,0000 8000,0000 xFIR      DW|
-0110 00 C000,0000 C000,0000 xFIR      R|
+0160 00 C0 00 FIR      D0|
+0124 02 C0 40 FIR      DB|
+0128 02 C0 80 FIR      DW|
+0110 00 C0 C0 FIR      R|
 0008 02 C700,0000 0600,0000 xFIR16    MEM|' ( Overrules D0| [BP]')
-0108 02 C700,0000 0500,0000 xFIR      MEM| ( Overrules D0| [BP] )
+0108 02 C7 05 FIR      MEM| ( Overrules D0| [BP] )
 
 04,1101 0000 3800,0000 T!
  0800,0000 0000 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
@@ -93,8 +93,8 @@ _ 1 0000 0001 _    COMMAER SIB,, ( An instruction with in an instruction )
  0800,0000 0001,0000 0008 xFAMILY|R DR0| DR1| DR2| DR3| DR4| DR5| DR6| DR7| ( 3)
 
 0000 0000 0002,0000 T!   0002,0000 0,0000 0002 xFAMILY|R F| T|
-04,0401 0000 01,0000 0,0000 xFIR B|
-04,0402 0000 01,0000 1,0000 xFIR X|
+04,0401 0000 0100 0000 FIR B|
+04,0402 0000 0100 0100 FIR X|
 
 ( --------- These must be found last -------)
 0600 0 01FF 0000 1PI ~SIB,
@@ -144,8 +144,8 @@ _ 1 0000 0001 _    COMMAER SIB,, ( An instruction with in an instruction )
   08,0000 00,010F 0007 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,       ( 3)
 
 ( --------- no fixup operands ----------)
-0001 0 0100,0002 0000,0000 xFIR B'|
-0002 0 0100,0002 0100,0000 xFIR X'|
+0001 0 0200,0001 00 FIR B'|
+0002 0 0200,0001 01 FIR X'|
 0008 02 0201 T!    0002 A0 0002 1FAMILY, MOV|TA, MOV|FA,
 0 04 0201 T!
  0008 04 0008 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
@@ -163,7 +163,7 @@ _ 1 0000 0001 _    COMMAER SIB,, ( An instruction with in an instruction )
 
 2102 0 FF02 008C 2PI MOV|SG,
 
-0000 0 0002,0002 00,0000 xFIR 1|   0000 0 0002,0002 02,0000 xFIR V|          ( 3)
+0000 0 0200,0200 0000 FIR 1|   0000 0 0200,0200 0200 FIR V|          ( 3)
 0100 0 2,C703 T! ( 2,0000 is a lockin for 1| V|)                   ( 3)
  0800 00D0 0008 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,  ( 3)
 8,0012 0000 3F,0300 C0,200F 3PI  MOV|CD,  ( 3)

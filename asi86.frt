@@ -5,7 +5,7 @@
  ASSEMBLER DEFINITIONS
 
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
-( The patch ofr the assembler doesn't belong in the generic part        )
+( The patch for the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
 : lsbyte, 0 100 UM/MOD SWAP C, ;
 : W, lsbyte, lsbyte, DROP ;
@@ -38,17 +38,17 @@
 ( Only valid for 16 bits real mode  A0JUL04 AvdH )
 20 0 700 0s T!
  0100 0s 0 8 xFAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] -- [BX]
-A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
+A0 0 07 06 FIR [BP]  ( Fits in the hole, safe incompatibility)
 12 0 0700 0s T!
  0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
 11 0 0700 0s T!
  0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 
-60 000  C000 0s 0000 0s xFIR      D0|
-24 200  C000 0s 4000 0s xFIR      DB|
-28 200  C000 0s 8000 0s xFIR      DW|
-10 000  C000 0s C000 0s xFIR      R|
-08 200  C700 0s 0600 0s xFIR      MEM|
+60 000  C0 00 FIR       D0|
+24 200  C0 40 FIR      DB|
+28 200  C0 80 FIR      DW|
+10 000  C0 C0 FIR      R|
+08 200  C7 06 FIR      MEM|
  ( Overrules D0| [BP] )
 
 02 00 3800 0s T!
@@ -57,8 +57,8 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
 
 00 00 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
-01 00 0001 0s 0 0s xFIR B|
-02 00 0001 0s 1 0s xFIR W|
+01 00 0100 0000 FIR B|
+02 00 0100 0100 FIR W|
 
 ( --------- two fixup operands ----------)
 00 00 FF03 T!
@@ -89,8 +89,8 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 22 00 C700 T!  1000 18FF 2 2FAMILY, CALLFARO, JMPFARO,
 
 ( --------- no fixup operands ----------)
-01 00 20100 0s 0000 0s xFIR B'|
-02 00 20100 0s 0100 0s xFIR W'|
+01 00 02000001 00 FIR B'|
+02 00 02000001 01 FIR W'|
 8 0200 201 T!    02 A0 2 1FAMILY, MOVTA, MOVFA,
 0 0400 201 T!
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
@@ -109,8 +109,9 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 00 00 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
 02 00 DF02 08C 2PI MOV|SG,
 
-00 00 10002 0s 00 0s xFIR 1|
-00 800 10002 0s 02 0s xFIR V|
+00 00  0100,0200 0000 FIR 1|
+00 800 0100,0200 0200 FIR V|
+
 00 0 1C703 T!
 (    0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,         )
  0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, SAL, SAR,
