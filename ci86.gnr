@@ -3809,6 +3809,76 @@ CORA3:
         MOV     SI,DX
         _PUSH
 ;
+worddoc( {STRING},{$I},{string_index},{sc ch -- addr},{},
+{Find the first forthvar({ch}) in the string constant forthvar({sc}) and
+return its forthvar({addr1}) if present.
+Otherwise return a nil pointer (0). },
+{{$S},{CORA}},
+{{ 132 "ORANG" OVER >R &N $I R> - . .},{3 132},
+{ 132 "ORANG" &Z $I 0= . .},{_T_ 132}},
+enddoc)
+CODE_HEADER({$I},{SINDEX})
+;{       MOV    ES,BX   ; ES <- DS}
+;{       MOV    BX,DS}
+        POP     AX      ;{ char}
+        POP     CX      ;{ count}
+        POP     DI      ;{ addr}
+        CLD             ;{ INC DIRECTION}
+        REPNZ     SCASB   ;{ Compare BYTE}
+        JZ      SINDEX1
+        XOR     DI,DI    ;{Remainder is already 0}
+        INC     DI
+SINDEX1:
+        DEC     DI
+        PUSH    DI
+        _NEXT
+;
+worddoc( {STRING},{$S},{string_split},{sc ch -- sc1 sc2},{},
+{Find the first forthvar({ch}) in the string constant
+forthvar({sc}) and split it at that address. Return the strings
+after and before forthvar({ch}) into forthvar({sc1}) and
+forthvar({sc2}) respectively. If the character is not present
+forthvar({sc1}) is a null string _VERBOSE({{(its address is
+zero)}}) and forthvar({sc2}) is the original string.
+_VERBOSE_({{Both forthvar({sc1}) and forthvar({sc2}) may be
+empty strings (i.e. their count is zero), if forthvar({ch}) is
+the last or first character in forthvar({sc}) .}}) },
+{{$I},{CORA}},
+{{ 132 "ORANG" OVER >R &N $I R> - . .},{3 132},
+{ 132 "ORANG" &Z $I 0= . .},{_T_ 132}},
+enddoc)
+CODE_HEADER({$S},{SSPLIT})
+;{       MOV    ES,BX   ; ES <- DS}
+;{       MOV    BX,DS}
+        POP     AX      ;{ char}
+        POP     CX      ;{ count}
+        MOV     BX,CX
+        POP     DI      ;{ addr}
+        MOV     DX,DI   ;{ Copy}
+        CLD             ;{ INC DIRECTION}
+        REPNZ     SCASB   ;{ Compare BYTE}
+        JZ      SSPLIT1
+; {Not present.}
+        XOR     AX,AX    ;{Remainder is already 0}
+        PUSH    AX
+        PUSH    AX
+        PUSH    DX
+        PUSH    BX
+        JMP SSPLIT2
+SSPLIT1:
+        PUSH    DI
+        MOV     AX,DX
+        ADD     AX,BX
+        SUB     AX,DI
+        PUSH    AX
+        PUSH    DX
+        MOV     AX,DI
+        SUB     AX,DX
+        DEC     AX      ;{Delimiter is not part of first string.}
+        PUSH    AX
+SSPLIT2:
+        _NEXT
+;
 worddoc( {MEMORY},{ERASE},{erase},{addr n --},{ISO},
 {Shorthand for forthsamp({0 FILL}).},
 {{BLANK},{FILL}},
@@ -6233,7 +6303,6 @@ HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      SEMIS
 ; Alternative: if no terminal, this is copied over above code during boot.
 ; Note: copying down in memory has no problems with overlap.
-ACCEP_A:
         DC      OVER, TOR
         DC      OVER, OVER, ONEP, LERASE
         DC      OVER, PLUS, SWAP     ; Bounds
@@ -6254,21 +6323,69 @@ ACCEP5:  DC      COUNT, ZEQU
         DC      SWAP, LSUB
         DC      ONE, LSUB
         DC      SEMIS
-ACCEP_B:
 ;
+;{{{HEADER({ACCEPTB},{ACCEPB},{DOCOL})}}}
+ACCEP_A:
+        DC      NOLF
+        _0BRANCH(ACCEPB1)
+        DC      LIT, REMAIND, TFET
+        DC      RETOBO, REFTIB
+ACCEPB1:
+        DC      SPLOFF
+        DC      TSWAP, ROT, MIN
+        DC      LDUP, TOR, LMOVE, FROMR
+        DC      SEMIS
+ACCEP_B:
+
+REMAIND:        DC      0,0
+HEADER({NO-LF},{NOLF},{DOCOL})
+        DC      LIT, REMAIND
+        DC      TFET
+        DC      LIT, LF, SINDEX
+        DC      ZEQU
+        DC      SEMIS
+HEADER({TO-BOTTOM},{TOBO},{DOCOL})
+        DC      TIB, FETCH,
+        DC      SWAP, LMOVE
+        DC      SEMIS
+HEADER({REM-TO-BOTTOM},{RETOBO},{DOCOL})
+        DC      TOBO
+        DC      TIB, FETCH,
+        DC      LIT, REMAIND, CELLP, PSTORE
+        DC      SEMIS
+HEADER({REFILL-TIB},{REFTIB},{DOCOL})
+        DC      LIT, REMAIND, FETCH, TOR
+        DC      ZERO
+        DC      TIB, FETCH, RR, PLUS
+        DC      LIT, RTS/2, RR, LSUB
+        DC      LIT, read
+        DC      LINOS, LDUP, QLERR
+        DC      TIB, FETCH, SWAP, FROMR, PLUS
+        DC      LIT, REMAIND, TSTOR
+        DC      SEMIS
+HEADER({SPLIT-OFF},{SPLOFF},{DOCOL})
+        DC      NOLF, LIT, 13, QERR
+        DC      LIT, REMAIND, TFET
+        DC      LIT, LF, SSPLIT
+        DC      TSWAP, LIT, REMAIND, TSTOR
+        DC SEMIS
+
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO FIG L0},
 {Leave the ascii value of the next terminal key struck.},
 {{ACCEPT},{KEY?}},
 dnl THE TEST CODE HERE IS PARTLY INPUT FOR KEY
 dnl HENCE THE CRITICAL LAYOUT WITH RESPECT TO CR'S
-{
-{CR KEY},{},
- {G
-  EMIT CR},{
-G},
-{CR KEY},{},
- {G EMIT CR},{G}
-},
+dnl KEY has to be patched with the code `` DSP@ 1 ACCEPT DROP ''
+dnl because while redirected the input is buffered in ACCEPT.
+dnl {
+dnl {CR KEY},{},
+dnl  {G
+dnl   EMIT CR},{
+dnl G},
+dnl {CR KEY},{},
+dnl  {G EMIT CR},{G}
+dnl }
+,
 enddoc)
 HEADER({KEY},{KEY},{DOCOL})
         DC      ONE, LIT, RAWIO, STTERM ; Do not wait for CR
@@ -8124,7 +8241,11 @@ HEADER({LIST},{LLIST},{DOCOL})
         DC      BASE, STORE
         DC      SCR, FETCH, BLOCK
         DC      LIT,1024
+LLIST1: DC      LIT, LF, SSPLIT
         DC      CR, LTYPE
+        DC      OVER,ZEQU
+        _0BRANCH(LLIST1)
+        DC      TDROP
         DC      SEMIS
 ;
 worddoc( {SCREEN},{INDEX},{index},{from to --},{},
