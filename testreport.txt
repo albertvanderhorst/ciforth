@@ -63,7 +63,7 @@ E plausable decompilation of QUIT
 F timing of Byte benchmarks, must be 7 ms for a 500 Mhz Coppermine
 G Effect of cursor (^E ..) word (^A ^F ^T) (un)delete (^Y ^U)
 H Same as /bin/wc
-J Binaries are equal or
+J Binaries are equal (apart from version stamp) or
 J' disassembly reveals only gratuitous MASM deviations.
 K successful return to operating system (linux) or
 K' successful return to "operating system" (msdos)
@@ -99,20 +99,25 @@ This test is for the ISO ciforth , version 3.###
 
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   153  lina.cfg         lina          BCDEFHKMOPR
+hosted_linux linux_native   154  lina.cfg         lina          J
+                            153  lina.cfg         lina          BCDEFHKMOPR
                             135                                 BCDEFHKMOP
-hosted_linux linux_c native 153  linux.cfg        (ciforthc)    BCDEFKMPO'R
+hosted_linux linux_c        154  linux.cfg        (ciforthc)    J'
+                            153  linux.cfg        (ciforthc)    BCDEFKMPO'R
 
 bootfd real                 N.A.   alone1.cfg      forth.com       I B -A
                                                                   II B -A
-bootfd prot16               153    alone.cfg       forth.com    B I  ACDEFGR
+bootfd prot16               154    alone.cfg       forth.com    J'
+                            153    alone.cfg       forth.com    B I  ACDEFGR
                                                                   II ACDEFGK'LR
 
 bootfd prot32               153    alone3.cfg      forth.com     B I ABCDEFG R     3)
                                                                   II ABCDEFGK'LR
-boothd prot32               153    alonehd.cfg     no filesystem  ABCDEFGMR
+boothd prot32               154    alonehd.cfg     no filesystem  J'
+            2               153    alonehd.cfg     no filesystem  ABCDEFGMR
 hostedmsdos real  bios      153    msdos1.cfg      msdos.com      II B CDEG K' R
-hostedmsdos real  modern 1) 153    msdos2.cfg      msdos.com      II B CDEG K' -O -P R 2)
+hostedmsdos real  modern 1) 154    msdos2.cfg      msdos.com      J'
+                            153    msdos2.cfg      msdos.com      II B CDEG K' -O -P R 2)
                             153    msdos2.cfg      forth.com      IV B CDEG K' -O -P R
 hostedmsdos classic    N.A.   msdos3.cfg      msdos.com            Not built
 hostedmsdos modern 32  N.A.   msdos9.cfg      forth.com           II BCDEFGK'MLR  3)
