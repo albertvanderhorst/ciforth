@@ -164,8 +164,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
      SELTOP @ !  0 CELL+ SELTOP +!  ;
  : CFOF ( --N Get cfa of word following )
     [COMPILE] ' >CFA ;
- ( : C>D ... ; ( N--N Converteer cfa naar dea )
- : ID.. C>D ID. ; ( cfa--. Print a words name )
+ ( : CFA> ... ; ( N--N Converteer cfa naar dea )
+ : ID.. CFA> ID. ; ( cfa--. Print a words name )
  : ID.+ DUP @ ID.. CELL+ ; ( dip -- dip' Print a words name )
  : SEL@    ( N--M,F F="value N present in table" )
     ( if F then M is vector address else M=N)
@@ -204,18 +204,18 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
 : KRAAK  ( Use KRAAK SOMETHING to decompile the word SOMETHING)
      CFOF (KRAAK) ;
  : ?IM  ( CFA--f tests whether word IMMEDIATE )
-      C>D >FFA C@ 4 AND ;
+      CFA> >FFA C@ 4 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
  CR ." A0apr11  FORTH KRAKER >3<  ALBERT VAN DER HORST "
- : BY ( CFA--. the CFA word is decompiled using : )
+ : BY ( DEA --. the CFA word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
  ( Example of a defining word decompilation)
  ( It is done by examples of the defined words )
- : -co DUP C>D >DFA @ CR H.. ." CONSTANT " ID.. CR ;
+ : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
         CFOF BL @ BY -co
- : -va DUP C>D >DFA @ @ CR H.. ." VARIABLE " ID.. CR ;
+ : -va DUP CFA> >DFA @ @ CR H.. ." VARIABLE " ID.. CR ;
         CFOF RESULT @ BY -va
- : -us DUP C>D >DFA C@ CR B.. ."  USER " ID.. CR ;
+ : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE @ BY -us
  : ITEM ( 1/1 Desinterpret next item, increments pointer)
      DUP @ SEL@ ( Something special ?)
@@ -255,7 +255,7 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
 make decompile pointer point to exit!)
     DROP ' TASK >DFA @ ;             CFOF (;CODE) BY -pc
  CR ." KRAAKER"
- : -dd C>D ." CREATE DOES> word " ID.. CR ;
+ : -dd CFA> ." CREATE DOES> word " ID.. CR ;
         CFOF FORTH @ BY -dd
  : KRAAK-FROM ( .--. Kraak, starting with following word)
    CFOF
@@ -580,7 +580,7 @@ make decompile pointer point to exit!)
 
 
 
-: C"  HERE POSTPONE "
+: C"  HERE DENOTATION POSTPONE " FORTH
     DUP @ SWAP CELL+ 1 - C! ( Make it brain damaged)
     POSTPONE DROP POSTPONE 1+ ; IMMEDIATE
 
@@ -2320,7 +2320,7 @@ DECIMAL
 
  CR ." KRAAKER"
  : NEXTD ( CFA--DEA Get the DEA of the word defined)
-   C>D LATEST             ( after the CFAO one)
+   CFA> LATEST             ( after the CFAO one)
    2DUP = IF
      DROP DROP HERE  ( No following word)
    ELSE
@@ -2608,7 +2608,7 @@ CR  ." #46 FROBOZZ MAGIC COMMUNICATION >10< 84/6/27"
 
  CR ." #51 FROBOZZ AMATEUR ADVENTURER >15< 01/2/20 "
 : FIND-something ( CFA -- )
-   C>D LATEST             ( after the CFAO one)
+   CFA> LATEST             ( after the CFAO one)
    2DUP = IF
               ( from place #K to #J in direction D)
               ( Leaves -1 if nothing found)

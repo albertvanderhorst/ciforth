@@ -1047,13 +1047,13 @@ CODE_HEADER({LIT},{LIT})
         LODSW           ;{ AX <- LITERAL}
         _PUSH          ;{ TO TOP OF STACK}
 ;
-worddoc( {MISC},{EXECUTE},{execute},{addr -},{ISO,FIG,L0},
-{Execute the definition whose forthdefi({dictionary entry address})
-is given by forthvar({addr}) .
-_VERBOSE_({{The forthdefi({dictionary entry address})
-serves as an execution token. Applying forthcode({>CFA}) to a dea
-gives the code field, but this has offset 0.}})
-},{{'},{>CFA}},
+worddoc( {MISC},{EXECUTE},{execute},{xt -},{ISO,FIG,L0},
+{Execute the definition whose forthdefi({execution token}) is
+given by forthvar({xt}) . _VERBOSE_({{The
+forthdefi({code field address}) serves as an execution token.
+(It even has offset 0, but one should not assume that a
+forthdefi({DEA}) is an execution token in portable code.)}})},
+{{'},{>CFA}},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
 CODE_HEADER({EXECUTE},{EXEC})
@@ -2990,7 +2990,7 @@ forthdefi({code field address}) forthvar({cfa}) : the address
 that is compiled within high level definitions. It serves as an
 execution token as well. In ciforth this is actually the same
 as the forthdefi({DEA}) .},
-{{'},{>DFA},{>FFA},{>LFA},{>NFA},{>PHA}},
+{{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>PHA}},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
@@ -3090,20 +3090,21 @@ HEADER({BODY>},{BODYF},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{C>D},{code_to_dea},{cfa --- dea},{},
+worddoc( {DICTIONARY~},{CFA>},{code_field_address_from},{cfa --- dea},{},
 {Convert the code field address of a definition to its
-forthdefi({dictionary entry address}) forthvar({dea}) .},{{'},{>CFA}},
-{{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
+forthdefi({dictionary entry address}) forthvar({dea}).},{{'},{>CFA}},
+{{ : GS1 LIT WORDS ; GS1 CFA> ID.},{WORDS}},
 enddoc)
-HEADER({C>D},{CTOD},{DOCOL})
+HEADER({CFA>},{CTOD},{DOCOL})
         DC      LIT,_CELLS(C_HOFFSET)
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>DDEA},{to_dummy_dea},{dea --- dea},{},
-{Given the dictionary entry addres of a vocabulary
-return the address of the forthdefi({DDEA}), a dummy DEA that
-serves as the start of a dictionary search. },
+worddoc( {DICTIONARY~},{>DDEA},{to_dummy_dea},{dea1 --- dea2},{},
+{Given the dictionary entry addres forthvar({dea1}) of a
+vocabulary return the address forthvar({dea2}) of the
+forthdefi({DDEA}), a dummy DEA that serves as the start of a
+dictionary search. },
 {{VOCABULARY},{>CFA}},
 {{: APE ; ' FORTH >DDEA >LFA @ ID.},{APE}},
 enddoc)
