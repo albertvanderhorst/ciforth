@@ -4975,10 +4975,6 @@ _LINUX_N_({
         DC      LIT, _VAR_FIELD(STTERM)
         DC      LIT, STTERM_B-STTERM_A
         DC      LCMOVE
-        DC      LIT, ACCEP_A
-        DC      LIT, _VAR_FIELD(ACCEP)
-        DC      LIT, ACCEP_B-ACCEP_A
-        DC      LCMOVE
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,NOOPS, STORE
         DC      LIT,ONE
@@ -6274,16 +6270,11 @@ terminal to address, until a forthkey({RET}) is received. The
 simple tty editing functions of Linux are observed, i.e. the
 ``erase'' (delete a character) and ``kill'' (delete a line)
 characters. Typically these are the backspace key and ^U. Note
-that excess characters after forthsamp({count}) remain in the
-type ahead buffer and will be returned as the next input, or
-interpreted as a console command. The number of characters not
+that excess characters after forthsamp({count}) are ignored.
+The number of characters not
 including the forthkey({RET}) is returned into forthsamp({n}).
 },
-{{KEY},{KEY?},{EXPECT}},
-dnl The ACCEP_A version of ACCEPT is tested with
-dnl the automatic testing facility.
-dnl The default can only be testing interactively
-dnl but then, the command interpreter depends on it.
+{{(ACCEPT)},{KEY},{KEY?},{EXPECT}},
 {
 {PAD 10 ACCEPT},{},
  {GIBBON
@@ -6294,48 +6285,37 @@ dnl but then, the command interpreter depends on it.
 },
 enddoc)
 HEADER({ACCEPT},{ACCEP},{DOCOL})
-        DC      ZERO    ; filedescriptor 0 for standard input.
-        DC      ROT
-        DC      ROT
-        DC      LIT, read
-        DC      LINOS, LDUP, QLERR
-        DC      ONE, LSUB ; Position of CR
-        DC      SEMIS
-; Alternative: if no terminal, this is copied over above code during boot.
-; Note: copying down in memory has no problems with overlap.
-        DC      OVER, TOR
-        DC      OVER, OVER, ONEP, LERASE
-        DC      OVER, PLUS, SWAP     ; Bounds
-        _DO(ACCEP4)
-ACCEP1: DC      KEY
-        DC      LDUP, LIT, LF
-        DC      EQUAL
-        _0BRANCH(ACCEP2)
-        DC      DROP
-        DC      LLEAV
-        _BRANCH(ACCEP3)
-ACCEP2: DC      IDO,CSTOR
-ACCEP3: _LOOP(ACCEP1)
-ACCEP4:
-        DC      FROMR, LDUP
-ACCEP5:  DC      COUNT, ZEQU
-        _0BRANCH(ACCEP5)
-        DC      SWAP, LSUB
-        DC      ONE, LSUB
-        DC      SEMIS
-;
-;{{{HEADER({ACCEPTB},{ACCEPB},{DOCOL})}}}
-ACCEP_A:
-        DC      NOLF
-        _0BRANCH(ACCEPB1)
-        DC      LIT, REMAIND, TFET
-        DC      RETOBO, REFTIB
-ACCEPB1:
-        DC      SPLOFF
+        DC      PACCEP
         DC      TSWAP, ROT, MIN
         DC      LDUP, TOR, LMOVE, FROMR
         DC      SEMIS
-ACCEP_B:
+;
+worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
+{Accept characters from the terminal, until a forthkey({RET})
+is received and return the result as a constant string
+forthvar({sc}). It doesn't contain the forthkey({RET}). The
+editing functions are the same as with forthcode({ACCEPT}) .
+_VERBOSE({{This is lighter on the system and sometimes easier
+to use than forthcode({ACCEPT}) }})
+},
+{{KEY},{KEY?},{EXPECT}},
+{
+{(ACCEPT)},{},
+ {GIBBON
+  DUP . TYPE},{6 GIBBON},
+dnl { ." Type an 'A'" (ACCEPT) DUP . TYPE},{1 A)},
+dnl {." Type an 'ABCDEF'" DUP . },{6},
+},
+enddoc)
+HEADER({(ACCEPT)},{PACCEP},{DOCOL})
+PACCEP2:
+        DC      NOLF
+        _0BRANCH(PACCEP1)
+        DC      RETOBO, REFTIB
+        _BRANCH(PACCEP2)
+PACCEP1:
+        DC      SPLOFF
+        DC      SEMIS
 
 REMAIND:        DC      0,0
 HEADER({NO-LF},{NOLF},{DOCOL})
@@ -6344,14 +6324,12 @@ HEADER({NO-LF},{NOLF},{DOCOL})
         DC      LIT, LF, SINDEX
         DC      ZEQU
         DC      SEMIS
-HEADER({TO-BOTTOM},{TOBO},{DOCOL})
-        DC      TIB, FETCH,
-        DC      SWAP, LMOVE
-        DC      SEMIS
 HEADER({REM-TO-BOTTOM},{RETOBO},{DOCOL})
-        DC      TOBO
-        DC      TIB, FETCH,
-        DC      LIT, REMAIND, CELLP, PSTORE
+        DC      LIT, REMAIND, TFET
+        DC      TIB, FETCH
+        DC      SWAP, LMOVE
+        DC      TIB, FETCH
+        DC      LIT, REMAIND, CELLP, STORE
         DC      SEMIS
 HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      LIT, REMAIND, FETCH, TOR
