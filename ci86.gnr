@@ -245,8 +245,9 @@ MAXCHUNK        EQU    1024 *100000H /CHUNKSIZE
 _HOSTED_DPMI_({
 ;{DPMI segment defines.}
 ;{We can't aim for better than level privilege level 3.}
-IDENTIFY_TOGGLE EQU 040H   ;{ The Big and Granularity bits are complemented}
+IDENTIFY_TOGGLE EQU 040H   ;{ The Big (and Granularity, not yet) bits are complemented}
                             ;{ on switching to 32 bits mode in 6th byte.}
+CODE_TOGGLE EQU 08H   ;{ Toggle between code and data, in the 5th byte.}
 });_END_({_HOSTED_DPMI_})
 _SWITCH_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
@@ -832,8 +833,6 @@ EMsgS      EQU     $-EMsg
 
 ; If we reach this point, we are operating in protected mode
 DPMISUCCESS:
-_SUPPRESSED({ DON'T BOTHER WITH THIS FOR THE MOMENT.
-IT MAKES NO SENSE FOR 16 BITS, AND DOESN'T WORK FOR 32 BITS
 ; -------------- Alias descriptors for CS and DS --------
             MOV     AX,000AH            ;{Alias for LDT descriptor.}
             MOV     BX,CS
@@ -849,7 +848,7 @@ IT MAKES NO SENSE FOR 16 BITS, AND DOESN'T WORK FOR 32 BITS
             MOV     DX,AX
 ERRMSG2:    JC      ERRMSG             ;{Could not allocate.}
 
-; -------------- Adapt the segments to 32 bits --------
+; -------------- Get new segments, possibly 32 bits --------
 ; Throughout this section : CX is an alias for CS , DX for DS.
 
             LEA     DI,[Scratch]
@@ -860,9 +859,10 @@ ERRMSG2:    JC      ERRMSG             ;{Could not allocate.}
             JC      ERRMSG2
             MOV     AL,[DI+6]
 _BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
-            MOV     AL,0FAH
-            MOV     [DI+5],AL
             MOV     [DI+6],AL
+            MOV     AL,[DI+5]
+            XOR     AL, CODE_TOGGLE
+            MOV     [DI+5],AL
             MOV     AX,000CH            ;{Set Description.}
             MOV     BX,CX
             INT     31H
@@ -884,16 +884,14 @@ _BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
             JC      ERRMSG2
 
 ; -------------- Use the alias descriptors for CS and DS --------
-THE POINT OF THIS VIRTUOSO DISPLAY, WASTE ANOTHER 64 K OF MEMORY.
-            MOV     ES,CX       ;{CX -> ES -> CS}.
-            ES
-            JMP     SWITCHSEG
-SWITCHSEG:
+            PUSH    CX    ; {Corrected code segment}
+            MOV BX, HERE6
+            PUSH BX     ; {Correct program counter}
+            RETF        ; {Returning to HERE6 now}
+HERE6:
             MOV     DS,DX
-});_END_({_SUPPRESSED})
-            MOV     AX,DS
-            MOV     ES,AX
-            MOV     SS,AX
+            MOV     ES,DX
+            MOV     SS,DX
 ; ######################### DPMI END ###############################################################
 
 });_END_({_HOSTED_DPMI_})
@@ -1686,7 +1684,7 @@ USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      STRTIB  ;{ INIT (TIB)        4}
         DC      BSIN    ;{ RUBOUT: get rid of latest char 5}
         DC      0       ;{ AVAILABLE         6}
-        DC      1       ;{ INIT (WARNING)     7}
+        DC      0       ;{ INIT (WARNING)     7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
         DC      _DEA(ENV) ;{       INIT (VOC-LINK) 10}
@@ -2572,6 +2570,28 @@ _BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
         MOV     [BX],DX
         MOV     DS,AX
 _BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
+        _NEXT
+;
+worddoc( {MEMORY},{LES},{load_extra_segment},{seg --- seg1},{},
+{Change the value of the extra segment register forthvar({ES})
+temporarily to forthvar({seg}) leaving the old value forthvar({seg1}) .
+ The target of the
+the forthcode({MOVE}) and forthcode({CMOVE}) instructions will now
+be in the new extra segment instead of the data segment.
+This word must be used in a definition in pairs such that upon exit
+forthvar({ES}) has its original value.
+Typically used in the form forthsamp({<something> LES BUFFER
+FAR-BUFFER <amount> MOVE LES DROP }). _VERBOSE_({Normally
+forthvar({ES}) is the same as forthvar({DS}) , leaving it
+different may lead to a crash.})
+},
+{{L@},{L!}},
+{{." No test"},{No test} },
+enddoc)
+CODE_HEADER({LES},{LLES})
+        POP     AX
+        PUSH    ES
+        MOV     ES, AX
         _NEXT
 ;
 });_END_({_LOAD_})
@@ -6149,7 +6169,7 @@ Under DPMI we have to do this via a special call to the
 unadorned interrupt, which is in this case protected mode,
 interrupt 31H function 0300H. In behalf of this registers are
 saved and restored in forthcode({REG-SET}) . Unadorned calls to
-real intterupts are only available as forthcode({BIOSP}) .})
+real interrupts are only available as forthcode({BIOS31}) .})
 _VERBOSE_({ forthsamp({1 AND}) leaves a zero if the call was successful.})
 },{{BDOS}}, {}, enddoc)
 _NORMAL_BIOS_({
@@ -6260,8 +6280,8 @@ SaveCS:     DW      0000
 SaveSP:     DW      0000
 SaveSS:     DW      0000
 ;
-worddoc( {OPERATINGSYSTEM},{BIOSP},{biosp},{a b c d di---ar br cr dr fl},{},
-{Do a call of ``BIOS'' interrupt 2FH, directly from
+worddoc( {OPERATINGSYSTEM},{BIOS31},{bios31},{a b c d di---ar br cr dr fl},{},
+{Do a call of ``BIOS'' interrupt 31H, directly from
 protected mode. _VERBOSE_({The word forthcode({BIOS}) simulates
 a real mode interrupt; that is what you usually want.})
 dnl forthsamp({i})
@@ -6278,7 +6298,7 @@ forthsamp({1 AND}) leaves a zero if the call was successful.})
 ; In protected mode with different selectors for code
 ; and data this is dubious. If it turns out to work, this could
 ; be made in a general trap generator.
-CODE_HEADER({BIOSP},{BIOSP})
+CODE_HEADER({BIOS31},{BIOS31})
         POP     DI
         POP     DX
         POP     CX
@@ -6286,13 +6306,9 @@ CODE_HEADER({BIOSP},{BIOSP})
         POP     AX
         PUSH     HIP      ;{ Save Forth registers. NEEDED? }
         PUSH     RPO
-        XCHG    SI,AX   ;{ Save AX in (already free) SI}
-        XCHG    {SI},{AX}
-RQBIOS: INT(2FH)          ;{ Request number to be overwritten.}
+RQBIOS: INT(31)          ;{ Request number to be overwritten.}
         PUSHF      ;{ Save status into DI }
         POP     {DI}
-        XCHG    {SI},{AX} ;{ Save AX in (still free) SI     }
-        XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
         POP     HIP
         PUSH     AX
@@ -6301,8 +6317,6 @@ RQBIOS: INT(2FH)          ;{ Request number to be overwritten.}
         PUSH     DX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
-;{ Not yet self modifying, but we want to. }
-;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 });_END_({_SIMULATE_BIOS_})
 worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BDOS'' interrupt (21H) with forthsamp({a b c d}) in
