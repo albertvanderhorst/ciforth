@@ -2340,17 +2340,16 @@ HEADER({;CODE},{SEMIC},{DOCOL},1)
 SEMI1:  DC      NOOP    ;{ The code field of ASSEMBLER must be patched here. }
         DC      SEMIS
 ;
-worddoc({DEFINING},{BUILDS},{builds},{},{C,L0},{
-This word is called "smaller_sign_BUILDS" but the html chokes over that name.
+worddoc({DEFINING},{<BUILDS},{builds},{},{C,L0},{
 Used within a colon-definition:
-         forthexample({: cccc  BUILDS  ... DOES>     ...    ;})
-Each time forthvar({cccc}) is executed, forthcode({BUILDS}) defines a new word with a
+         forthexample({: cccc  <BUILDS  ... DOES>     ...    ;})
+Each time forthvar({cccc}) is executed, forthcode({<BUILDS}) defines a new word with a
 high-level execution proceedure. Executing forthvar({cccc}) in the form:
             forthsamp({cccc nnnn}) 
-uses forthcode({BUILDS}) to create a dictionary entry for forthvar({nnnn}) with a call to
+uses forthcode({<BUILDS}) to create a dictionary entry for forthvar({nnnn}) with a call to
 the forthcode({DOES>}) part for forthvar({nnnn}) . When forthvar({nnnn}) is later executed, it has the
 address of its parameter area on the stack and executes the words
-after forthcode({DOES>}) in forthvar({cccc}) . forthcode({BUILDS}) and forthcode({DOES>}) allow runtime proceedures to
+after forthcode({DOES>}) in forthvar({cccc}) . forthcode({<BUILDS}) and forthcode({DOES>}) allow runtime proceedures to
 written in high-level rather than in assembler code (as required by
 forthcode({;CODE}) ). },{})
 HEADER({<BUILDS},{BUILD},{DOCOL})
@@ -2362,7 +2361,7 @@ worddoc({DEFINING},{DOES>},{does},{},{L0},{
 A word which defines the run-time action within a high-level
 defining word. forthcode({DOES>}) alters the code field and first parameter of
 the new word to execute the sequence of compiled word addresses
-following forthcode({DOES>}) . Used in combination with forthcode({BUILDS}) . When the forthcode({DOES>}) 
+following forthcode({DOES>}) . Used in combination with forthcode({<BUILDS}) . When the forthcode({DOES>}) 
 part executes it begins with the address of the first parameter of
 the new word on the stack. This allows interpretation using this
 area or its contents. Typical uses include the Forth assembler,
@@ -5635,8 +5634,8 @@ This is very worrysome for mathematicians, who stick to the rule that
 forthsamp({MOD n m}) gives a result in the range forthvar({0 ... m-1})
 (forthdefi({floored division})).
 _BITS16_({Having a mere 3000 for the number range can easily lead to
-overflow in intermediate results during scaling: a multiplication
-followed by a division. note({1},{For example forthsamp({: ADD10% 110
+overflow in intermediate results during forthdfn({scaling:}) a multiplication
+followed by a division. _VERBOSE_({ For example forthsamp({: ADD10% 110
 * 100 / ;})}). There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
 {},{},{},{})
