@@ -29,7 +29,7 @@ License along with this program; if not, write to the
 
 
 
-
+\
 ( -b This_option_is_available )
 
 
@@ -45,7 +45,7 @@ License along with this program; if not, write to the
 
 
 
-
+\
 ( -c PROGRAM_:_compile_PROGRAM_to_binary ) \ AvdH A1oct02
 28 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT FILE-NAME
@@ -109,7 +109,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 
-
+\
 ( -g This_option_is_available )
 
 
@@ -125,7 +125,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 
-
+\
 ( -h :_help,_show_options ) \ AvdH A1oct04
 .SIGNON   1 26 INDEX   OK BYE
 
@@ -141,7 +141,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 
-
+\
 ( -i This_option_is_available )
 
 
@@ -157,7 +157,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 
-
+\
 ( -j This_option_is_available )
 
 
@@ -173,7 +173,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 
-
+\
 ( -k This_option_is_available )
 
 
@@ -189,7 +189,7 @@ DOIT    COMMAND-BUFFER $@
 
 
 
-
+\
 ( -l LIBRARY:_to_be_used_for_blocks ) \ AvdH A1oct05
 CREATE task
 28 LOAD   REQUIRE SHIFT-ARGS
@@ -205,7 +205,7 @@ CREATE task
 SWITCH-LIBS
 
 FORGET SWITCH-LIBS
-
+\
 ( -m This_option_is_available )
 
 
@@ -221,7 +221,7 @@ FORGET SWITCH-LIBS
 
 
 
-
+\
 ( -n This_option_is_available )
 
 
@@ -237,7 +237,7 @@ FORGET SWITCH-LIBS
 
 
 
-
+\
 ( -o This_option_is_available )
 
 
@@ -253,7 +253,7 @@ FORGET SWITCH-LIBS
 
 
 
-
+\
 ( -p SYSTEM_PREFERENCES ) \ AvdH A1oct02
 .SIGNON CR 0 LIST  28 LOAD    : REQ REQUIRE ;
 REQ CONFIG
@@ -285,7 +285,7 @@ OK
 
 
 
-
+\
 ( -r :_make_require_available ) \ AvdH A1oct04
 .SIGNON   28 LOAD   OK
 
@@ -301,17 +301,17 @@ OK
 
 
 
-
+\
 ( -s SCRIPT-FILE_:_interpret_SCRIPT-FILE ) \ AvdH A1oct02
-28 LOAD    REQUIRE CTYPE
+DROP  28 LOAD    REQUIRE CTYPE   REQUIRE OLD:
 ARGV CELL+ CELL+ @ Z$@ $, CONSTANT SCRIPT-NAME
 \ This error handler may be overwritten by the script.
 : MY-ERROR    DECIMAL
-    "In file " TYPE SCRIPT-NAME $@ TYPE " run by " TYPE
-    ARGV @ CTYPE CR
-    "Fatal error : " TYPE
-    DUP 0 32 WITHIN IF MESSAGE ELSE . THEN CR
-    BYE ;
+    "In file " TYPE SCRIPT-NAME $@ TYPE " run by "
+    TYPE ARGV @ CTYPE CR  IN @ 20 - 40 TYPE CR
+    "Fatal error at : " TYPE
+    OLD: ERROR CR CR CR CR ( BYE)
+    ;
 -1 WARNING !     ' MY-ERROR >DFA @     ' ERROR >DFA !
 
 SCRIPT-NAME $@ GET-FILE
@@ -333,7 +333,7 @@ BYE
 
 
 
-
+\
 ( -u This_option_is_available )
 
 
@@ -349,7 +349,7 @@ BYE
 
 
 
-
+\
 ( -v Version_and_copyright_information_)
 "               CPU  NAME  VERSION  " TYPE
  .SIGNON CR
@@ -365,7 +365,7 @@ BYE
 
 
 
-
+\
 ( -w This_option_is_available )
 
 
@@ -381,7 +381,7 @@ BYE
 
 
 
-
+\
 ( -x This_option_is_available )
 
 
@@ -397,7 +397,7 @@ BYE
 
 
 
-
+\
 ( -y This_option_is_available )
 
 
@@ -413,7 +413,7 @@ BYE
 
 
 
-
+\
 ( -z This_option_is_available )
 
 
@@ -429,6 +429,7 @@ BYE
 
 
 
+\
 
 
 
@@ -444,8 +445,7 @@ BYE
 
 
 
-
-
+\
 ( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
 \ This screen must be at a fixed location. To find REQUIRED.
 \ For LINE and WORD sc's : line CONTAINS word.
@@ -461,7 +461,7 @@ BYE
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
 : REQUIRE (WORD) REQUIRED ;
-
+\
 ( ************** configuration *******************************)
 
 
@@ -477,7 +477,7 @@ BYE
 
 
 
-
+\
 ( CONFIG ?LEAVE-BLOCK ?16 ?32 ?LI ?PC ?MS ?FD ?HD ) \ A1oct05
 
 
@@ -493,7 +493,7 @@ BYE
  "SEC-RW" PRESENT? 0=   CONFIG ?FD
 
 
-
+\
 ( **************ISO language extension ***********************)
                     EXIT
 
@@ -509,7 +509,7 @@ for ISO, that in my opinion should never be loaded.
 
 
 
-
+\
 ( DEADBEEF leading_hex_digit) REQUIRE CONFIG \ AvdH A1oct13
 \ Are denotations starting with "Z" already known?
 "Z" 'DENOTATION >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
@@ -541,7 +541,7 @@ DROP   CURRENT !
 
 
 
-
+\
 ( --manifest TRUE FALSE NULL NULL$ NONE ) \ AvdH A1oct15
 \ Define some manifest constants.
 -1 CONSTANT TRUE       \ Flag
@@ -557,7 +557,7 @@ DROP   CURRENT !
 
 
 
-
+\
 ( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
 \ Print all vocabularies names in existence.
 : .VOCS 'ID. FOR-VOCS ;
@@ -573,7 +573,7 @@ DROP   CURRENT !
 
 
 
-
+\
 ( BIN-SEARCH binary_search_by stack ) \ AvdH
 ( nmin nmax xt -- nres )
 \ SOS `IMIN'  \ IMIN 'COMP EXECUTE is always TRUE
@@ -862,7 +862,23 @@ REQUIRE T[
 
 
 
-( POSTFIX ) \ AvdH A1sep26
+( if do ?do begin then loop +loop repeat until ) \ AvdH A1oct04
+\ The same but without the annoying message.
+REQUIRE T[
+: if           T] POSTPONE IF                    ; IMMEDIATE
+: do           T] POSTPONE DO                    ; IMMEDIATE
+: ?do          T] POSTPONE ?DO                   ; IMMEDIATE
+: begin        T] POSTPONE BEGIN                 ; IMMEDIATE
+: then            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
+: loop            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
+: +loop           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
+: repeat          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
+: until           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
+: else            POSTPONE ELSE                  ; IMMEDIATE
+
+
+
+( POSTFIX OLD: ) \ AvdH A1sep26
 
 \ Restore the normal behaviour of ``(WORD)''
 : (WORD)-NEW '(WORD) DUP >PHA SWAP >DFA ! ;
@@ -872,10 +888,10 @@ REQUIRE T[
 \ Use only while compiling, or you crash the system
 : POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
 
-
-
-
-
+\ Compile the current execution behaviour of "name".
+\ This behaviour remains the same if "name" is revectored.
+: OLD:   (WORD) FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R ;
+    IMMEDIATE
 
 
 ( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE CONFIG  ?LI \ A1sep25
@@ -2023,8 +2039,8 @@ HEX F8 CONSTANT MEDIA-ID \ For hard disk.
 \ ?? CONSTANT #HEADS   ?? CONSTANT SECTORS/TRACK
 \ ?? CONSTANT MEM-SIZE
 1 6 +THRU
-EXIT
 INSTALL-FORTH-ON-HD
+EXIT
 Re-installs a sector-and-track ciforth to a hard disk (or
 floppy). This is a user utility, so it can be run for other
 type ciforth's. But then it only explains to the user what is
