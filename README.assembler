@@ -1,0 +1,33 @@
+( $ Id: $ )
+( Copyright{2000,2002}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+
+This is the archive of the assembler to complement the aiforth and
+ciforth Forth implementations.
+See http://home.hccnet.nl/a.w.m.van.der.horst/forthimpl.frt
+
+Sources :
+
+asgen.frt      Generic assembler / disassembler.
+as80.frt       8080 plug in
+asi86.frt      8086 plug in
+asi586.frt     80386 plug in
+asalpha.frt    DEC Alpha plug in
+
+ass.frt        The 8086 prototype of the postit/fixup principle
+               Blocks, extremely compact, hardly documented,
+               no error detection
+
+Test sets:
+testset8080
+testset8086
+testset386
+asm386endtest
+testsetalpha
+test.mak       Makefile to use the testsets
+
+Quick reference cards:
+ps.frt         Source that generates postscript
+qr8080.ps      8080
+qr8086.ps      8086
+p0.asi586.ps   80386 main page
+p0F.asi586.ps  80386 instructions starting with 0F
