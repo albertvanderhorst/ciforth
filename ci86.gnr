@@ -6442,15 +6442,12 @@ _BITS32_({EXPECTBUF:  _RESB( 0200H ) },{dnl})
 _LINUX_C_({
 ;{ Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
-worddoc( {PARSING},{(ACCEPT)},,{-- sc},{ISO},
+worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Input a line
 until a "return") from the operators terminal, and leave it as
 a string constant. It doesn't contain a trailing forthey({LF}).
-Text is probably
-present in the
-buffer
-address contained in forthcode({TIB @}), but not necessarily
-at the beginning.
+Text is probably present in the buffer address contained in
+forthcode({TIB @}), but not necessarily at the beginning.
 },
 {{ACCEPT},{EVALUATE}},
 {{." interactive"},{interactive}},
@@ -6571,11 +6568,6 @@ PACCEP2:
         _BRANCH(PACCEP2)
 PACCEP1:
 ;        DC      SPLOFF
-        DC      REMAIND             ; go
-        DC      TFET                     ; go
-        DC      LIT, ALF, SINDEX          ; go
-        DC      ZEQU                     ; go
-        DC      LIT, 13, QERR            ; go
         DC      REMAIND, TFET
         DC      LIT, ALF, SSPLIT
         DC      TSWAP, REMAIND, TSTOR
@@ -6930,7 +6922,7 @@ TYPE3:       DC      SEMIS
 ;
 });_END_({_USEBIOS_})
 _KEY_BY_KEY_({
-worddoc( {PARSING},{(ACCEPT)},,{-- sc},{ISO},
+worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Input a line
 until a forthkey({RET)}) from the input terminal, and leave it as
 a string constant. It doesn't contain a trailing forthkey({LF}).
