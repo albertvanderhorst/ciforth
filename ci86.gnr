@@ -2250,11 +2250,17 @@ RQBIOS: INT(0)          ; Request number to be overwritten.
 ; Generic call on MSDOS/MS WIndows2000
 ; This works in a standalone Forth (if started from MSDOS).
 HEADER({BDOS},{BDOS},{$ + 2})
-        POP     AX      ; Function code
-        POP     DX      ; Extra data
+        POP     DX        
+        POP     CX      
+        POP     BX      
+        POP     AX      
         INT(21H)
-        SUB     AH,AH   ; AL is return code.Clear m.s byte
-        JMP     APUSH
+        PUSH     AX      
+        PUSH     BX      
+        PUSH     CX      
+        PUSH     DX      
+        PUSHF      ; Status usually returned into flags!
+        JMP     NEXT 
 
              ; SVGA-modus 43*132 char's
 HEADER({SMALL},{SMALL},{DOCOL})
@@ -2266,8 +2272,54 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;------------------------------------
 ;       SYSTEM DEPENDANT CHAR I/O
 ;------------------------------------
-;____1_____ _USEDOS_1_({
+;____1_____ _MODERN_1_({
+; All I/O goes through the modern (unix-borrowed)
+; file I/O.    
+HEADER({TYPE1},{TYPES1},{DOCOL})
+        DW      TOR, TOR
+        DW      LIT,04000H ; Write file or device 
+	DW      ONE     ; Handle
+        DW      FROMR, FROMR, SWAP
+        DW      BDOS, DROP ; ignore error 
+        DW      DROP, DROP, DROP, DROP
+        DW      SEMIS
+;
+HEADER({EMIT1},{EMIT1},{DOCOL})      
+	DW	SPFET, ONE, TYPES
+        DW      DROP
+	DW	SEMIS
+;
+ HEADER({EXPECT1},{EXPEC1},{DOCOL})
+        DW      OVER 
+        DW      TOR, TOR
+        DW      LIT,03F00H ; Write file or device 
+	DW      ZERO     ; Handle
+        DW      FROMR, FROMR
+        DW      BDOS, DROP ; ignore error 
+        DW      DROP, DROP, DROP ; Leave count
+        DW      TWO, LSUB ; Rid of 0D0A
+        DW      PLUS, ZERO, SWAP, CSTOR
+        DW      SEMIS
+;
+HEADER({KEY1},{KEY1},{$+2})
+        DW      LIT,0800H 
+        DW      ZERO,ZERO,ZERO
+        DW      BDOS, DROP ; ignore error 
+        DW      DROP, DROP, DROP
+        DW      LIT, 0FFH, LAND
+        DW      SEMIS
+;
+HEADER({?TERMINAL1},{QTERM1},{DOCOL})
+        DW      LIT,0B00H 
+        DW      ZERO,ZERO,ZERO
+        DW      BDOS, DROP ; ignore error 
+        DW      DROP, DROP, DROP
+        DW      LIT, 01H, LAND
+        DW      SEMIS
+;
 
+});_END___1__({_MODERN_1_})
+;____1_____ _USEDOS_1_({
 ; All I/O goes through the 3 assembler functions
 ; CI CHO CSTAT. They could be collapsed into the 
 ; code definitions, but this way they are available
@@ -2493,6 +2545,7 @@ HEADER({POUT},{POUT},{DOCOL})
 ;------------------------------------
 ;       SYSTEM DEPENDANT DISK I/O
 ;------------------------------------
+
 ;____1_____ _USEDOS_1_({
 HEADER({DR0},{DRZER},{DOCOL})
         DW      ZERO
