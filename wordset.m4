@@ -20,6 +20,5 @@ divert(1)
 divert(0)
 undivert
 {divert(0)}
-include(gloss2.mi)
 
 

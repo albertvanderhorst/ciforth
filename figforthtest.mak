@@ -181,13 +181,9 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 menu.texinfo : menu.m4 wordset.mig ; m4 menu.m4 >$@
 
-wordset.mi : wordset.m4 wordset.mig gloss2.mi
-	(echo 'changequote({,})' ; m4 wordset.m4)|m4 >$@
-
 # For tex we do not need to use the safe macro's
-%.tex :  prelude.m4 postlude.m4 manual.m4 gloss.m4 figforth.mi intro.mi manual.mi menu.texinfo %.mi;
-	cp $(@:%.tex=%.mi) gloss2.mi
-	make wordset.mi
+%.tex :  prelude.m4 postlude.m4 manual.m4 gloss.m4 figforth.mi intro.mi manual.mi menu.texinfo %.mi wordset.m4 wordset.mig 
+	(echo 'changequote({,})' ; m4 wordset.m4 $(@:%.tex=%.mi) )|m4 >wordset.mi
 	m4 $(@:fig86.%.tex=%.cfg) figforth.mi >$@
 #       rm gloss.mi wordset.mi
 
