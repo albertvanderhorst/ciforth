@@ -1,6 +1,5 @@
 dnl  $Id$  M4 file to handle the develish FIG headers.
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-traceon
 dnl Once and for all. 
 changequote({,})dnl
 dnl
@@ -46,25 +45,21 @@ dnl
 dnl Similar to HEADER but uses single quotes. instead of doubles. 
 dnl Useful if a name has double quotes like PDOT. (Cannot handle a combination of the two)
 define(HEADER_SGQ,{
-
+define({_x},len({$1}))dnl
+define({_y}, {substr({$1},eval(_x-1),1)})dnl
+define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  ********_star(len({$1})) 
 ;  *   $1   *
 ;  ********_star(len({$1})) 
 ;  
-        EVEN 
-	_LINK	= $                             ;;link points to a name string
-        DB   80H+len({$1})ifelse(1,$4,+40H,)
-        define({_x},len({$1}))dnl
-        define({_y}, {substr({$1},eval(_x-1),1)})dnl
-        define({_z}, {substr({$1},0,eval(_x-1))})dnl
+_$2:    DB   80H+len({$1})ifelse(1,$4,+40H,)
         DB       ifelse(1,_x, , _squote{_z}_squote{,})_squote{}_y{}_squote+80H
-        EVEN 
         DW    _LINKOLD
-        _LINKOLD=_LINK
 $2:     DW     $3
         undefine({_x})dnl
         undefine({_y})dnl
         undefine({_z})dnl
+define({_LINKOLD},{_$2})dnl
 })
 dnl
 dnl Similar to HEADER but can handle a name that ends in tick.
