@@ -1,5 +1,5 @@
 # $Id$
-# Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+# Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 
 Welcome and congratulations! (Already)
 
@@ -160,6 +160,9 @@ an older system you must experiment by using the BIOS word. (You need not
 resort to assembler for experimenting.) Then you can adapt your assembler 
 listing.
 
+Level 4 customization.
+Contact me if you want to contribute to the wider usability of this package.
+
 Programs
 In the file BLOCKS.BLK is available a screen editor, assembler, decompiler
 and tools like DUMP. Beware! Some of the tools handle hards disks. There are
@@ -173,7 +176,7 @@ The program `wc' is an example of how to use lina as a scripting language.
 Deviations
 
 Some non-substantial deviation of the original FIG source have been made
-for good reasons. 
+for good reasons. They are described in figdocadd.txt.
 
 The assumption in using OFFSET was that you have two identical floppy drives
 and no hard disk. That is nowadays extremely unlikely. Instead I put OFFSET
