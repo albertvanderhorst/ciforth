@@ -414,6 +414,54 @@ DEFER *<-->
 \ After the call we have that :
 \ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
 : QSORT   IS *<-->   IS *<   (QSORT) ;
+\ (MERGE)       \ AvdH A3dec02
+
+\ For EL1 and EL2, return EL1 and EL2 plus "el1 IS lower".
+VARIABLE *<M   : LL< *<M @ EXECUTE ;
+VARIABLE *->M   \ Contains XT
+\ For EL return next EL of list.
+: >N   *->M @ EXECUTE @ ;
+\ For LIST and EL , hang the list off the element.
+: LINK! *->M @ EXECUTE ! ;
+\ For LIST1 ( > ) LIST2 return LIST1 (>) LIST2' advanced
+: FIND-END   BEGIN DUP >R >N   DUP IF LL< 0= ELSE 0 THEN
+    WHILE RDROP REPEAT DROP R> ;
+\ Merge LIST1 ( > ) LIST2.
+: (MERGE)   BEGIN FIND-END   DUP >R  DUP >N >R LINK!
+    R> R>   OVER 0= UNTIL 2DROP ;
+
+( MERGE-SORT )  REQUIRE (MERGE)  \ AvdH A3dec02
+\ Merge SLIST1 and SLIST2, leave merged SLIST.
+: MERGE   LL< IF SWAP THEN   DUP >R (MERGE) R> ;
+\ Cut ULIST in two. Return SLIST and remaining ULIST.
+: SNIP DUP   BEGIN DUP >N   DUP IF LL< ELSE 0 THEN
+    WHILE SWAP DROP REPEAT   >R 0 SWAP LINK! R> ;
+\ Keep on merging as long as two slistp 's have the same level.
+: TRY-MERGES   BEGIN >R  OVER R@ =
+    WHILE SWAP DROP MERGE R> 1+ REPEAT R> ;
+\ Keep on merging until end-sentinel.
+: SHRINK DROP BEGIN OVER WHILE SWAP DROP MERGE REPEAT ;
+\ Expand zero, ulist into zero slistp .... slistp
+: EXPAND BEGIN SNIP >R 1 TRY-MERGES R> DUP WHILE REPEAT DROP ;
+\ For compare XT, next XT, linked LIST , leave a sorted LIST1.
+: MERGE-SORT   *->M !  *<M !   0 SWAP EXPAND SHRINK SWAP DROP ;
+
+( SORT-WID SORT-VOC )           \ AvdH A3dec02
+REQUIRE COMPARE         REQUIRE MERGE-SORT
+\ Note that xt's form a linked list
+\ For XT1 and XT2 return XT1 and XT2 plus "xt IS lower".
+    : GET-NAME >NFA @ $@   ;  \ Aux. For EL, return NAME.
+: NAMES< DUP >R OVER GET-NAME    R> GET-NAME    COMPARE 0 < ;
+
+\ Sort the WORDLIST alphabetically on names.
+\ This head of the list doesn't take part in the
+\ sorting (expect for the link field) , so it may be a dummy.
+: SORT-WID >LFA DUP >R   @ 'NAMES< '>LFA MERGE-SORT   R> ! ;
+
+\ Sort the vocabulary given its vocabulary XT.
+\ Don't use it on FORTH : it links through DENOTATIONS .
+: SORT-VOC >WID SORT-WID ;
+
 ( CRC-MORE CRC ) ?32 \ AvdH
 REQUIRE BOUNDS   REQUIRE NEW-IF    HEX
 \ Well the polynomial

@@ -170,6 +170,10 @@ dnl Include all loadable extensions, that are present in the source.
 dnl Alternatively, see this as a marking for words to be moved out.
 define( {_LOAD_}, _yes)dnl
 dnl
+dnl Include facilities for threads.
+dnl This makes sense on a Unix system only for the moment.
+define( {_THREADS_}, _no)dnl
+dnl
 dnl Include all file iot words. This is most of the ISO FILES wordset.
 dnl Note that this may not make sense, in particular for a booting system.
 define( {_FILES_}, _no)dnl

@@ -8,6 +8,8 @@
 #.SUFFIXES:
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
+FLOPPY=fd0h1440
+
 # Applicable suffixes : * are generated files
 # + are generated files if they are mentionned on the next line
 #
@@ -225,7 +227,7 @@ install: ; @echo 'There is no "make install" ; use "lina -i <binpath> <libpath>"
 # then copying the forth system to exact the first available cluster.
 # The option BOOTFD must be installed into alone.m4.
 boot: ci86.alone.bin
-	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
+	cp $+ /dev/$(FLOPPY) || fdformat /dev/$(FLOPPY) ; cp $+ /dev/$(FLOPPY)
 	mformat -k a:
 	mcopy $+ a:forth.com
 
@@ -239,7 +241,7 @@ trboot: ci86.alonetr.bin lina forth.lab.wina
 	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
 	     \"fdimage\" PUT-FILE BYE | lina
 	cat forth.lab.wina >>fdimage
-	cp fdimage /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp fdimage /dev/fd0H1440
+	cp fdimage /dev/$(FLOPPY) || fdformat /dev/$(FLOPPY) ; cp fdimage /dev/$(FLOPPY)
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 
@@ -272,7 +274,7 @@ forth.lab.wina : toblock options.frt errors.dos.txt blocks.frt
 # the hard disk succeed.
 # The option BOOTHD must be installed into alone.m4.
 hdboot: ci86.alonehd.bin
-	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
+	cp $+ /dev/$(FLOPPY) || fdformat /dev/$(FLOPPY) ; cp $+ /dev/$(FLOPPY)
 
 figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+

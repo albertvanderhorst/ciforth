@@ -1329,7 +1329,7 @@ forthdefi({denotation}) form _VERBOSE_({{without the space.
 Note that if you separate by a space, the ISO-conforming version of
  forthcode({'}) is found}}).
 },
-{{SEARCH-ORDER}, {[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
+{{CONTEXT}, {[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
 dnl Make sure to use the DENOTATION ' not the FORTH '
 {{ : X EXECUTE ; : [[ ALSO POSTPONE DENOTATION ; : ]] PREVIOUS ;},{},
 { [[ : QPE 1 2 ; ' QPE X  ' QPE ID. . . 'QPE ID. ]]},{QPE 2 1 QPE},
@@ -1460,7 +1460,7 @@ define({_STARTOFDENOTATION_},_LINKOLD)dnl
 worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
 {The name of the primary vocabulary. Execution pushes the
 forthcode({FORTH}) forthdefi({WID})
-to the top of the forthcode({SEARCH-ORDER}) .
+to the top of the forthcode({CONTEXT}) .
 (For ISO-compliance it
 would replace the top.)
 Until additional user forthdefi({word list}) 's are created, new user definitions
@@ -1468,8 +1468,8 @@ become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this forthdefi({word list}) at compile time.},
 {{VOCABULARY}},
-{ { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH-ORDER @ = .},{0},
-  { FORTH ' FORTH >WID SEARCH-ORDER @ = .},{_T_} },
+{ { VOCABULARY JOHN JOHN ' FORTH >WID CONTEXT @ = .},{0},
+  { FORTH ' FORTH >WID CONTEXT @ = .},{_T_} },
 enddoc)
 dnl Force a pointer to the denotations in FORTH 's link field.
 define({_LINKOLD}, DENOTBODY )dnl
@@ -1570,7 +1570,7 @@ are still available after forthcode({ONLY})}).
 If found the parse pointer is moved back to immediately after
 the prefix, and the corresponding denotation definition
 executed. This word list must be used with care as a
-forthcode({SEARCH-ORDER}) word list; and only as a
+forthcode({CONTEXT}) word list; and only as a
 forthcode({CURRENT}) word list whenever you want to add a denotation.
 _VERBOSE_({{The word forthcode({FORTH}) is hidden by the word
 forthcode({F}). Use forthsamp({{ONLY FORTH}}) to regain
@@ -1593,7 +1593,7 @@ associated forthdefi({word list}) contains environment queries.
 The names of words present in forthcode({ENVIRONMENT}) are
 recognized by
 forthcode({ENVIRONMENT?}). This word list is not intended to
-be used as a forthcode({SEARCH-ORDER}) word list; and only as a
+be used as a forthcode({CONTEXT}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add an environment
 query.},
 {{VOCABULARY}},
@@ -3331,7 +3331,7 @@ _VERBOSE_({{The WID has the structure of a forthdefi({dictionary entry}).
 This allows to link in a new word between the
 link field of the WID and the next definition.}})
 },
-{{VOCABULARY},{SEARCH-ORDER}},
+{{VOCABULARY},{CONTEXT}},
 {{CURRENT @ ' FORTH >WID = .},{_T_}},
 enddoc)
 _HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(34))
@@ -3348,7 +3348,7 @@ _HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
 ;      IMPORTANT
 ; REQUIRES ONE MORE CELL!
 ;
-worddoc( {WORDLISTS},{SEARCH-ORDER},{context},{--- addr},{FIG,U,L0},
+worddoc( {WORDLISTS},{CONTEXT},{context},{--- addr},{ISO,FIG,U,L0},
 { The context is the address where the WID is found of the wordlist
 that is searched first. In ciforth forthvar({addr}) actually points
 to a row of WID 's allocated in the user space,
@@ -3359,9 +3359,9 @@ It may contain up to M4_MAXWORDLIST WID 's in
 this ciforth, while the ISO Search-Order wordset requires a capacity of at
 least 8. },
 {{PRESENT},{VOCABULARY},{CURRENT}},
-{{SEARCH-ORDER @ ' FORTH >WID = .},{_T_}},
+{{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-_HEADER({SEARCH-ORDER},{SEARCH},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
+_HEADER({CONTEXT},{SEARCH},{DOUSE}, _CELLS(37)) ;{ Up to } 37+M4_MAXWORDLIST
 ;      IMPORTANT
 ;     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE
 ;     IN ADDITION TO THE ONE FOR SEARCH
@@ -4029,7 +4029,7 @@ worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{B,ISO,FIG,I,C,L0},
 Stop compilation and terminate a new defining word
 forthsamp({cccc}) by compiling forthcode({(;CODE)}). Set
 forthcode({ASSEMBLER}) to the top of the
-forthcode({SEARCH-ORDER}) order. Start assembling to machine
+forthcode({CONTEXT}) order. Start assembling to machine
 code the following mnemonics.
 
 When forthsamp({cccc}) later executes in the form:
@@ -4640,7 +4640,7 @@ leave a forthdefin({nil pointer}). If the first part of the string
 matches a forthdefi({denotation}) word, that word is found, whether
 the denotation is correct or not.
 },
-{{PRESENT}, {SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
+{{PRESENT}, {CONTEXT}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is found as a misspelled number!
 { 243 "1ONNOBO" FOUND 0= . .},{0 243},
@@ -4668,7 +4668,7 @@ worddoc( {DICTIONARY},{PRESENT},{present},{sc --- dea},{},
 current search order, return its forthvar({dea}), else leave a
 forthdefi({nil pointer}). For a a forthdefi({denotation}) word, the
 name must match forthvar({sc}) exactly.},
-{{FOUND}, {SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
+{{FOUND}, {CONTEXT}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" PRESENT ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is not present though it is a misspelled number
 { 243 "1ONNOBO" PRESENT 0= . .},{-1 243},
@@ -4697,7 +4697,7 @@ Return its
 execution token forthsamp({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
-{{SEARCH-ORDER},{PRESENT},{(FIND)}},
+{{CONTEXT},{PRESENT},{(FIND)}},
 {
 { : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
@@ -4729,7 +4729,7 @@ _VERBOSE_({{A forthdefi({WID}) is
 mostly a dummy forthdefi({DEA}) found in the
 data field of a
 vocabulary, fetched from forthcode({CURRENT}) or
-forthcode({SEARCH-ORDER}) }}). Leave the dictionary entry address
+forthcode({CONTEXT}) }}). Leave the dictionary entry address
 forthvar({dea}) of the first entry found, else leave a zero.
 Do not consume the string forthvar({sc})_VERBOSE_({{,
 as this is a repetitive action}}). },
@@ -5130,7 +5130,7 @@ worddoc( {PARSING},{INTERPRET},{interpret},{?? --- ??},{},
 forthsamp({current input source}) and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
-up in the vocabularies of forthcode({SEARCH-ORDER}), failing that in the
+up in the vocabularies of forthcode({CONTEXT}), failing that in the
  forthcode({DENOTATION}) wordlist.
 Note that the denotations are also present
 at the end of the forthcode({FORTH}) wordlist. If it is not found at all, it
@@ -5205,7 +5205,7 @@ vocabulary definition forthsamp({cccc}) . It will create a
 forthdefi({word list})in the ISO sense. Subsequent use of
 forthsamp({cccc}) will push this word list (the
 forthdefi({word list associated with}) forthsamp({cccc})) to the top of
-the search order in forthcode({SEARCH-ORDER}). So it will
+the search order in forthcode({CONTEXT}). So it will
 searched first by forthcode({INTERPRET}) .
 
 A vocabulary 's data content field contains at first the dovoc
@@ -5220,7 +5220,7 @@ empty fields, except for the link field.
 The forthdefi({link field address}) contains the DEA of the latest word of
 the vocabulary or a forthdefin({nil pointer}) if empty. Executing the
 vocabulary means pushing its WID on top of the
-forthcode({SEARCH-ORDER}) order. In ciforth when there can be
+forthcode({CONTEXT}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
 oldest one gets lost. The vocabularies generated are
 forthcode({IMMEDIATE}) words.},
@@ -5257,7 +5257,7 @@ DOVOC:
 worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{B,NISO,FIG,I,L1},
 {The name of the vocabulary to make machine code definitions.
 In ciforth execution it pushes the associated word list to the
-top of the forthcode({SEARCH-ORDER}) stack. (For ISO-compliance it
+top of the forthcode({CONTEXT}) stack. (For ISO-compliance it
 would replace the top.) forthcode({ASSEMBLER}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this vocabulary at compile time.
@@ -5273,11 +5273,11 @@ worddoc( {WORDLISTS},{DEFINITIONS},{definitions},{},{ISO},
            forthsamp({cccc DEFINITIONS})
 Make
 the top most
-forthcode({SEARCH-ORDER}) word list, the compilation, i.e.
+forthcode({CONTEXT}) word list, the compilation, i.e.
 forthcode({CURRENT}) word list.
 In the example, executing
 vocabulary name forthsamp({cccc}) add it to the top of the
-forthcode({SEARCH-ORDER}) order and executing
+forthcode({CONTEXT}) order and executing
 forthcode({DEFINITIONS}) will result in new definitions added to
 forthsamp({cccc}) .},
 {{VOCABULARY}},
@@ -5301,9 +5301,9 @@ If there were already M4_MAXWORDLIST WID 's,
 ciforth looses the last one.
 This is not counting
 the forthcode({ONLY}) search order.},
-{{SEARCH-ORDER},{VOCABULARY}},
+{{CONTEXT},{VOCABULARY}},
 {
-  { VOCABULARY JOHN ALSO ' JOHN >WID SEARCH-ORDER ! DEFINITIONS dnl
+  { VOCABULARY JOHN ALSO ' JOHN >WID CONTEXT ! DEFINITIONS dnl
   : ORAN ; ' FORTH >WID >LFA @ ' ORAN = .},{0},
   {' JOHN >WID >LFA @ ' ORAN = .},{_T_},
   {FORTH DEFINITIONS},{}
@@ -5321,10 +5321,10 @@ _HEADER({ALSO},{ALSO},{DOCOL})
 worddoc( {WORDLISTS},{PREVIOUS},{PREVIOUS},{},{ISO},
 {Pop the topmost forthdefi({WID}) from the search order stack.
 If empty still the forthcode({ONLY}) search order is left.},
-{{SEARCH-ORDER},{VOCABULARY}},
+{{CONTEXT},{VOCABULARY}},
 {
-  { SEARCH-ORDER @ VOCABULARY JOHN JOHN DUP SEARCH-ORDER @ = .},{0},
-  { PREVIOUS SEARCH-ORDER @ = .},{_T_}
+  { CONTEXT @ VOCABULARY JOHN JOHN DUP CONTEXT @ = .},{0},
+  { PREVIOUS CONTEXT @ = .},{_T_}
 },
 enddoc)
 _HEADER({PREVIOUS},{PREVI},{DOCOL})
@@ -5334,7 +5334,7 @@ _HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
-{Make forthcode({SEARCH-ORDER}), the search order stack empty, leaving the minimum search order ,
+{Make forthcode({CONTEXT}), the search order stack empty, leaving the minimum search order ,
 which is approximately the forthcode({DENOTATION}) word list plus the word forthcode({FORTH}).
 By using forthcode({FORTH}) one can regain control.
 },
@@ -9468,7 +9468,7 @@ worddoc( {DICTIONARY},{WORDS},{words},{},{ISO},
 search order.
 dnl A break as per forthcode({KEY?}) will terminate the listing.
 },
-{{SEARCH-ORDER}},
+{{CONTEXT}},
 {
 {VOCABULARY JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q 'GO >LFA ;},{},
