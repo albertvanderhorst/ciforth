@@ -127,6 +127,10 @@ define( {_HOSTED_LINUX_}, _no)dnl
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl
+dnl Include all loadable extensions, that are present in the source.
+dnl Alternatively, see this as a marking for words to be moved out.
+define( {_LOAD_}, _yes)dnl
+dnl
 dnl Multi tasking, i.e. PAUSE etc.
 define( {_TASK_}, _no)dnl
 dnl
