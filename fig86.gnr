@@ -1123,22 +1123,23 @@ HEADER({RESULT},{RESULT},{DOVAR})
 worddocsafe({DICTIONARY},{MATCHING-WORDS},{matching_words},{addr1 addr2 --- addr1 )}, {},
 {Intended to cooperate with forthcode({FOR-WORDS}) .
 Compares the string variable forthsamp({addr1}) with the dea forthvar({addr2}).
-If it is a a match, it 
+If it is a match, it 
 returns into forthcode({RESULT}) this forthdefi({dea}) and it exits prematurely 
 from forthcode({FOR-WORDS}).},
 {{FIND}})
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
-        DC      OVER, CFET
-        DC      OVER, TNFA, FETCH, CFET
-        DC      EQUAL
+        DC      TOR
+        DC      LDUP
+        DC      RR, TNFA, FETCH, CFET
+        DC      EQUAL   ;{ Compare counts.}
         _0BRANCH(MATS2)
-        DC      OVER, ONEP
-        DC      OVER, TNFA, FETCH, COUNT
-        DC      CORA, ZEQU
+        DC      OVER
+        DC      RR, TNFA, FETCH, COUNT
+        DC      CORA, ZEQU  ;{ Compare equals.}
         _0BRANCH(MATS2)
-        DC      FROMR, FROMR, DROP, ZERO, TOR, TOR ;{FORCE END}
-        DC      LDUP, RESULT, STORE 
-MATS2:  DC      DROP
+        DC      FROMR, FROMR, FROMR, DROP, ZERO, TOR, TOR, TOR ;{FORCE END}
+        DC      RR, RESULT, STORE 
+MATS2:  DC      FROMR, DROP
         DC      SEMIS
 ;
 worddoc({PARSING},{?BLANK)},{query_blank},{ch --- f },{},
@@ -2841,31 +2842,28 @@ HEADER({--FIND},{DDFIND},{DOCOL})
         DC      LBL, LWORD, DFIND
         DC SEMIS
 ;
-worddoc({DICTIONARY},{-FIND},{minus_find},{addr --- dea tf (found) --- ff (not found)},{},
-{For the counted string at forthsamp({addr}) 
+worddoc({DICTIONARY},{-FIND},{minus_find},{sc --- dea tf (found) --- ff (not found)},{},
+{For the string constant forthsamp({sc}) 
 search the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
-for a matching entry. If found, the dictionary entry address and a boolean true is left.
+for a matching entry. If found, the dictionary entry address 
+and a dirty true flag is left.
 Otherwise, only a boolean false is left.},{})
 HEADER({-FIND},{DFIND},{DOCOL})
         DC      ZERO, RESULT, STORE
+        DC      COUNT
         DC      CONT
         DC      FETCH
         DC      TLFA
         DC      FETCH
-        DC      LIT, MATCHING, SWAP, FORW, DROP
+        DC      LIT, MATCHING, SWAP, FORW
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
-        DC      HERE
         DC      LATES
-        DC      LIT, MATCHING, SWAP, FORW, DROP
-        DC      RESULT, FETCH, ZEQU
-        _0BRANCH(DFIN1)
-DFIN2:  DC      ZERO ; { Not found.}
-        _BRANCH(DFIN3)
-DFIN1:                          ; { Found.}
+        DC      LIT, MATCHING, SWAP, FORW
+DFIN1:                          
+        DC      DROP, DROP
         DC      RESULT,FETCH
-        DC      ONE
-DFIN3:                          
+        DC      DDUP
         DC      SEMIS
 ;
 worddocsafe({INIT},{(ABORT)},{paren_abort},{},{},
