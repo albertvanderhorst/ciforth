@@ -422,7 +422,7 @@ match by forthcode({(FIND)}).
 It is part of the flag field.
 forthitem
 The IMMEDIATE bit = 1 for IMMEDIATE definitions; it is called the
- forthdefi({precedence bit}). 
+ forthdefi({immediate bit}). 
 It is part of the flag field.
 forthitem
 The DUMMY bit =1 for a dictionary header contained in the 

@@ -1030,6 +1030,20 @@ CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
 ;
+_LOAD_({
+worddoc( {CONTROL},{RECURSE},,{---},{ISO},
+{Do a recursive call of the definition being compiled.},
+{{:}},
+{
+{: GI6 DUP IF DUP >R 1 - RECURSE R> . THEN ;},{}, 
+{3 GI6 .}, {1 2 3 0},
+},
+enddoc)
+HEADER({RECURSE}, {RECURSE}, {DOCOL}, ,{B_IMMED})
+        DC      LATEST, COMMA
+        DC      SEMIS
+;
+});_END_({_LOAD_})
 worddoc( {CONTROL},{SKIP},{skip},{},{C2,L0},
 {Skip over an area in memory, where the length is given in the next cell.
 _VERBOSE_({Internal, used for nested compilation})},
@@ -1098,10 +1112,9 @@ CODE_HEADER({(+LOOP)},{XPLOO})
         JMP SHORT     XLOO1
 ;
 worddocsafe( {CONTROL},{(DO)},{paren_do},{},{C},
-{The run-time proceedure compiled by forthcode({DO}) which moves the loop control
-
-parameters to the return stack.},{{DO}},
-{{." See DO"},{See DO}},
+{The run-time proceedure compiled by forthcode({DO}) which
+moves the loop control parameters to the return stack.},{{DO}}, 
+{{( See DO)},{}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
         POP     DX      ;{ INITIAL INDEX VALUE}
@@ -1136,7 +1149,7 @@ dnl [ FORWARD) ] UNLOOP ; 10 0 GS2},
 dnl {0 1 2 3},
 },
 enddoc)
-HEADER({UNLOOP},{UNLOOP}, {DOCOL}, , {B_IMMED})
+HEADER({UNLOOP},{UNLOOP}, {DOCOL}, ,{B_IMMED})
         DC      LIT, RDROP, COMMA
         DC      LIT, RDROP, COMMA
         DC      SEMIS
@@ -1450,13 +1463,15 @@ HEADER({CR},{CR},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {MEMORY},{CMOVE},{cmove},{from to count --},{},
-{Move the specified quantity of bytes beginning at address from forthvar({to})
-address forthvar({to}) . The contents of address from is moved first proceeding
-toward high memory. As the Pentintel 86-family is byte-addressing there are
-no restrictions. },
+{Move the specified quantity of characters beginning at address
+from forthvar({to}) address forthvar({to}) . The contents of
+address from is moved first proceeding toward high memory, such
+that memory propagation occurrs. As the Pentintel 86-family is
+byte-addressing there are no restrictions. }, 
 {},
 { {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 CMOVE dnl
-PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC} },
+PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
+{PAD DUP 1+ 2 CMOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAA} },
 enddoc)
 CODE_HEADER({CMOVE},{LCMOVE})
         CLD             ;{INC DIRECTION}
@@ -1464,9 +1479,39 @@ CODE_HEADER({CMOVE},{LCMOVE})
         POP     CX      ;{COUNT}
         POP     DI      ;{DEST}
         POP     SI      ;{SOURCE}
-;{       MOV    AX,DS}
-;{       MOV    ES,AX   ;ES <- DS}
         REP     MOVSB   ;{THAT'S THE MOVE}
+        MOV     SI,BX   ;{GET BACK IP}
+        _NEXT
+;
+worddoc( {MEMORY},{MOVE},{move},{from to count --},{},
+{Move the forthsamp({count}) 
+bytes beginning at address from forthvar({to})
+address forthvar({to}), such that the destination area contains 
+what the source area contained, regardless of overlaps.
+As the Pentintel 86-family is byte-addressing there are
+no restrictions. },
+{},               
+{ {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 MOVE dnl
+PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
+{PAD DUP 1+ 2 MOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAB} },
+enddoc)
+CODE_HEADER({MOVE},{LMOVE})
+        MOV     BX,SI   ;{SAVE IF}
+        POP     CX      ;{COUNT}
+        POP     DI      ;{DEST}
+        POP     SI      ;{SOURCE}
+        CMP     SI,DI
+        JC    MOVE1
+        CLD             ;{INC DIRECTION}
+        JMP SHORT MOVE2
+MOVE1:  STD
+        ADD     DI,CX
+        DEC     DI
+        ADD     SI,CX
+        DEC     SI
+MOVE2:
+        REP     MOVSB   ;{THAT'S THE MOVE}
+        CLD             ;{INC DIRECTION}
         MOV     SI,BX   ;{GET BACK IP}
         _NEXT
 ;
@@ -1597,13 +1642,13 @@ CODE_HEADER({RP!},{RPSTO})
         _NEXT
 ;
 worddoc( {CONTROL},{EXIT},{semicolon_s},{},{ISO},
-{ Stop interpretation of the current definition.
-The return stack must not be engaged, such as
-between forthcode({>R}) forthcode({R>}) or forthcode({DO}) forthcode({LOOP}) .
-In ciforth it can also be used to stop interpretation from a
-string, block or file.
-forthcode({EXIT}) is also the run-time word compiled at the end of a
-colon-definition which returns execution to the calling proceedure.},
+{ Stop interpretation of the current definition. The return
+stack must not be engaged, such as between forthcode({>R})
+forthcode({R>}) or forthcode({DO}) forthcode({LOOP}) . In
+ciforth it can also be used to stop interpretation from a
+string, block or file. forthcode({EXIT}) is also the run-time
+word compiled at the end of a colon-definition which returns
+execution to the calling proceedure.}, 
 {},
 { {: GS1 1 EXIT 2 ; GS1 .},{1} },
 enddoc)
@@ -2031,32 +2076,28 @@ enddoc)
         _NEXT
 });_END_({ _BITS16_})
 ;
-worddoc( {DEFINING},{:},{colon},{},{P,E,L0},
+worddoc( {DEFINING},{:},{colon},{},{I,E,L0},
 {Used in the form called a colon-definition:
 forthexample({: cccc     ...     ;})
 Creates a dictionary entry defining forthvar({cccc}) as equivalent to the
 following sequence of Forth word definitions '...' until the next
-forthcode({';'}) or forthcode({';CODE'}) .
+forthcode({';'}) or forthcode({';CODE'}). The word is added as the latest
+into the forthcode({CURRENT}) vocabulary.
 The compiling process is done by the text interpreter as long as
-forthcode({STATE}) is non-zero. Other details are that the forthcode({CONTEXT}) vocabulary is
-set to the forthcode({CURRENT}) vocabulary and that words with the precedence bit
+forthcode({STATE}) is non-zero. 
+Words with the immediate bit
 set (P) are executed rather than being compiled.},{},
 {{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
 enddoc)
 HEADER({:},{COLON},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QEXEC})
         DC      SCSP
-        DC      CURR
-        DC      FETCH
-        DC      CONT
-        DC      STORE
         DC      PWORD
         DC      PCREAT
         DC      RBRAC
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-;        LEA     SI,[BX+CELLS(1)]  ;{(IP) <- (PFA)}
          MOV     SI,[BX+CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
@@ -2066,7 +2107,7 @@ _SWITCH_({
 });_END_({ _SWITCH_})
         _NEXT
 ;
-worddoc( {DEFINING},{;},{semicolon},{},{P,C,L0},
+worddoc( {DEFINING},{;},{semicolon},{},{I,C,L0},
 {Terminate a colon-definition and stop further compilation. Compiles
 the run-time forthcode({EXIT}) .},{},
 {{." Via ;"},{Via ;}},
@@ -2091,7 +2132,7 @@ HEADER({CONSTANT},{CONST},{DOCOL})
         DC      PWORD
         DC      PCREAT
         DC      SMUDG
-        DC      LATES, TPFA, STORE
+        DC      LATEST, TPFA, STORE
         DC      PSCOD
 DOCON:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
@@ -2552,7 +2593,7 @@ worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
 forthvar({n2}). In ciforth this means one byte. Bytes are the
 address units ISO is talking about. _VERBOSE_({Unfortunately
 the ISO standard confounds characters and bytes.}) 
-},{(CELL+}},
+},{{CELL+}},
 {{123 CHAR+ .},{124}},}},
 enddoc)
 HEADER({CHAR+}, {CHARP}, {_VAR_FIELD(ONEP)})
@@ -2562,7 +2603,7 @@ worddoc( {MEMORY},{CHARS},{chars},{n1 --- n2},{ISO},
 forthvar({n2}). In ciforth this is a noop.
 _VERBOSE_({Unfortunately
 the ISO standard confounds characters and bytes.}) 
-},{(CELL+}},
+},{{CELLS}},
 {{123 CHARS .},{123}},}},
 enddoc)
 HEADER({CHARS}, {CHARS}, {DOCOL}, , {B_IMMED})
@@ -2572,7 +2613,7 @@ worddoc( {MEMORY},{ALIGN},{align},{ --- },{ISO},
 {Make sure that forthcode({HERE}) is forthdefi({aligned}) by advancing
 it if necessary.
 In ciforth this is a noop.
-},{(ALIGNED},
+},{{ALIGNED}},
 {{( See ALIGNED)},{}},
 enddoc)
 HEADER({ALIGN}, {LALIGN}, {DOCOL}, , {B_IMMED})
@@ -2582,7 +2623,7 @@ worddoc( {MEMORY},{ALIGNED},{aligned},{ad1 --- ad2},{ISO},
 {Make sure that forthsamp({ad1}) is forthdefi({aligned}) by advancing
 it if necessary to forthsamp({ad2}).
 In ciforth this is a noop.
-},{(ALIGNED},
+},{{ALIGN}},
 {{HERE 1 ALLOT ALIGN 123 , 1+ ALIGNED @ .},{123}},
 enddoc)
 HEADER({ALIGNED}, {ALIGNED}, {DOCOL}, , {B_IMMED})
@@ -2746,7 +2787,7 @@ of the topmost word in the forthcode({CURRENT})
 vocabulary.},{{VOCABULARY}},
 {{: APE ;  LATEST ID.},{APE}},
 enddoc)
-HEADER({LATEST},{LATES},{DOCOL})
+HEADER({LATEST},{LATEST},{DOCOL})
         DC      CURR
         DC      FETCH
         DC      TLFA
@@ -2963,7 +3004,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
 ;
 });_END_({_SECURITY_})
 ;
-worddoc( {PARSING},{[},{left_bracket},{},{ISO,P,L1},
+worddoc( {PARSING},{[},{left_bracket},{},{ISO,I,L1},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
@@ -2998,7 +3039,7 @@ dnl NOTE: a word starting with e.g. C would be a denotation.
 {{"ZXJEP" 2DUP (CREATE) 2DUP (FIND) . SMUDGE 2DUP (FIND) 0= .},{0 0} },
 enddoc)
 HEADER({SMUDGE},{SMUDG},{DOCOL})
-        DC      LATES
+        DC      LATEST
         DC      TFFA
         DC      LIT,B_INVIS
         DC      TOGGL
@@ -3034,12 +3075,12 @@ machine code sequence.},{{;CODE}},
 enddoc)
 HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      FROMR
-        DC      LATES
+        DC      LATEST
         DC      TCFA
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {DEFINING},{;CODE},{semicolon_code},{},{P,C,L0},
+worddoc( {DEFINING},{;CODE},{semicolon_code},{},{I,C,L0},
 {Used in the form:
   forthsamp({: cccc .... ;CODE})
 assembly mnemonics Stop compilation and terminate a new defining
@@ -3101,7 +3142,7 @@ compiler generation.},
 enddoc)
 HEADER({DOES>},{DOES},{DOCOL})
         DC      FROMR
-        DC      LATES
+        DC      LATEST
         DC      TPFA
         DC      FETCH
         DC      STORE
@@ -3148,7 +3189,7 @@ DTRA2:  DC      ONE
 DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
         DC      SEMIS
 ;
-worddocsafe( {OUTPUT},{."},{dot_quote},{},{P,L0},
+worddocsafe( {OUTPUT},{."},{dot_quote},{},{I,L0},
 {Used in the form:
   forthsamp({." cccc"})
 Compiles an in-line string forthsamp({cccc}) (delimited by the trailing ") with
@@ -3176,7 +3217,7 @@ DOTQ1:
 DOTQ2:                 
         DC      SEMIS   ;{ THEN}
 ;
-worddocsafe( {OUTPUT},{.(},{dot_paren},{},{P,L0},
+worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
 {Used in the form:
   forthsamp({.( cccc)})
 Display the string forthsamp({cccc}) (delimited by the trailing forthkey({}).
@@ -3191,7 +3232,7 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LTYPE
         DC      SEMIS
 ;
-worddoc( {PARSING},{(EVAL)},{paren_eval},{sc -- },{P},
+worddoc( {PARSING},{(EVAL)},{paren_eval},{sc -- },{I},
 {Make the string constant forthsamp({sc}) the current input
 stream. This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
@@ -3212,6 +3253,25 @@ _ISO_IN_({       DC     SOURC, FETCH, NEGATE, LDUP
 ;       DC      DOTS
         DC      SEMIS
 ;
+worddoc( {PARSING}, {EVALUATE}, , {sc --- ??}, {ISO},
+{Interpret the content of forthsamp({sc}). Afterwards return the current
+input stream.},
+{{LOAD},{INCLUDE},{(EVAL)}},
+{
+{"865" EVALUATE .},{865},
+{"8655 1+" EVALUATE .},{8656},
+{": GS1 856 ;" EVALUATE GS1 .},{856} 
+},
+enddoc)
+HEADER({EVALUATE}, {EVALUATE},{DOCOL})
+        DC      BLK, FETCH, TOR
+        DC      SAVE
+        DC      ZERO, BLK, STORE
+        DC      PEVAL, INTER
+        DC      RESTO
+        DC      FROMR, BLK, STORE
+        DC      SEMIS
+
 worddoc( {PARSING},{QUERY},,{},{ISO},
 {Input _BITS16_({50H})_BITS32_({8000H}) characters of text (or
 until a "return") from the operators terminal. Text is
@@ -3691,7 +3751,7 @@ POSTP1:
 POSTP2:
         DC      SEMIS
 ;
-worddoc( {COMPILING},{LITERAL},{literal},{n --- (compiling)},{ISO,P,C2,L0},
+worddoc( {COMPILING},{LITERAL},{literal},{n --- (compiling)},{ISO,I,C2,L0},
 {If compiling, then compile the stack value forthvar({n}) as a
 16 bit literal. This definition is immediate so that it will
 execute during a colon definition. The intended use is:
@@ -3710,7 +3770,7 @@ HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
         DC      COMMA   ;{THEN}
 LITE1:  DC      SEMIS
 ;
-worddoc( {COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{P},
+worddoc( {COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{I},
 {If compiling, compile a stack double number into a literal.
 Later execution of the definition containing the literal will
 push it to the stack. If executing, the number will remain on
@@ -3727,7 +3787,7 @@ HEADER({DLITERAL},{DLITE},{DOCOL}, , B_IMMED)
 DLIT1:  DC      SEMIS
 ;
 ;
-worddoc( {COMPILING},{SDLITERAL},{sdliteral},{d --- s/d (executing) d --- (compiling)},{P},
+worddoc( {COMPILING},{SDLITERAL},{sdliteral},{d --- s/d (executing) d --- (compiling)},{I},
 {If compiling, compile a stack double number into a literal or
 double literal, depending on whether forthcode({DPL}) contains a
 nil pointer or points into the input. Later execution of the
@@ -3837,7 +3897,7 @@ INTE8:  DC      DROP, DROP
 worddoc( {DICTIONARY},{IMMEDIATE},{immediate},{},{},
 {Mark the most recently made definition so that when encountered at
 compile time, it will be executed rather than being compiled, i.e.
-the precedence bit in its header is set.
+the immediate bit in its header is set.
 This method allows definitions to handle unusual compiling
 situations, rather than build them into the fundamental compiler.
 The user may force compilation of an immediate definition by
@@ -3845,7 +3905,7 @@ preceeding it with forthcode({[COMPILE]}) .},{},
 { { : GS1 &Z EMIT ; IMMEDIATE : GS2 GS1 ;},{Z}},
 enddoc)
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
-        DC      LATES
+        DC      LATEST
         DC      TFFA
         DC      LIT, B_IMMED
         DC      TOGGL
@@ -3909,7 +3969,7 @@ DOVOC:
 ;{   It is updated each time a definition is}
 ;{   appended to the 'FORTH' vocabulary.}
 ;
-worddoc( {VOCABULARIES},{FORTH},{forth},{},{P,L1},
+worddoc( {VOCABULARIES},{FORTH},{forth},{},{I,L1},
 {The name of the primary vocabulary. Execution makes
 forthcode({FORTH}) the forthcode({CONTEXT}) vocabulary. Until
 additional user vocabularies are defined, new user definitions
@@ -3925,7 +3985,7 @@ HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      0       ;{ END OF VOCABULARY LIST}
 HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 ;
-worddoc( {VOCABULARIES},{ASSEMBLER},{assembler},{},{P,L1},
+worddoc( {VOCABULARIES},{ASSEMBLER},{assembler},{},{I,L1},
 {The name of the vocabulary to make machine code definitions.
 Execution makes forthcode({ASSEMBLER}) the forthcode({CONTEXT})
 vocabulary. forthcode({ASSEMBLER}) is immediate, so it will
@@ -3958,7 +4018,7 @@ HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddocsafe( {PARSING},{(},{paren},{},{ISO,P,L0},
+worddocsafe( {PARSING},{(},{paren},{},{ISO,I,L0},
 {Used in the form:
 forthsamp({( cccc)})
 Ignore a comment that will be delimited by a right
@@ -3974,7 +4034,7 @@ HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 ;
-worddocsafe( {PARSING},{\},{backslash},{},{ISO,P,L0},
+worddocsafe( {PARSING},{\},{backslash},{},{ISO,I,L0},
 {Used in the form:
 forthsamp({\ cccc})
 Ignore a comment that will be delimited by the end of the current line.
@@ -4326,7 +4386,7 @@ HEADER({*},{STAR},{DOCOL})
 worddoc( {OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{ISO,FIG,L0},
 {Leave the remainder and signed quotient of forthvar({n1/n2}) .
 The remainder has the sign of the dividend
-(forthdefi({symmetric division}). },
+(forthdefi({symmetric division})). },
 {{*/MOD},{*/},{SM/REM}},
 {
 {  7  3 /MOD . . },{2   1},
@@ -4344,7 +4404,7 @@ HEADER({/MOD},{SLMOD},{DOCOL})
 ;
 worddoc( {OPERATOR},{/},{slash},{n1 n2 --- quot},{ISO,FIG,L0},
 {Leave the signed quotient of forthvar({n1/n2})
-(forthdefi({symmetric division}). },
+(forthdefi({symmetric division})). },
 {{+},{-},{*},{MOD},{*/MOD}},
 {
 {  7  3 / . },{2  },
@@ -4361,7 +4421,7 @@ HEADER({/},{SLASH},{DOCOL})
 ;
 worddoc( {OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG,L0},
 {Leave the remainder of forthvar({n1/n2}) , with the same sign
-as forthvar({n1}) (forthdefi({symmetric division}).},
+as forthvar({n1}) (forthdefi({symmetric division})).},
 {{+},{-},{*},{/},MOD,{*/MOD}},
 {
 {  7  3 MOD . },{1},
@@ -4378,8 +4438,8 @@ HEADER({MOD},{LMOD},{DOCOL})
 worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG,L0},
 {Leave the quotient forthvar({n5}) and remainder forthvar({n4})
 of the operation forthvar({n1*n2/n3}) A double precision
-intermediate product is used as for forthcode({*/}) (forthdefi({symmetric division}).},
-{{*/},{/MOD}},
+intermediate product is used as for forthcode({*/})
+(forthdefi({symmetric division})).}, {{*/},{/MOD}}, 
 {
 { 7 2 3   */MOD . . },{4  2 },
 { 7 2 -3  */MOD . . },{-4 2 },
@@ -4396,7 +4456,7 @@ HEADER({*/MOD},{SSMOD},{DOCOL})
 ;
 worddoc( {MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{ISO,FIG,L0},
 {Leave the ratio forthvar({n4 = n1*n2/n3}) where all are signed
-numbers(forthdefi({symmetric division}). Retention of a double
+numbers(forthdefi({symmetric division})). Retention of a double
 precision intermediate product permits greater accuracy than
 would be available with the sequence:
       forthsamp({n1 n2 * n3 /})
@@ -4858,7 +4918,7 @@ THRU1:
         DC      FROMR, BLK, STORE
         DC      SEMIS
 ;
-worddocsafe( {SCREEN},{-->},{next_screen},{},{P,L0},
+worddocsafe( {SCREEN},{-->},{next_screen},{},{I,L0},
 {Continue interpretation with the next disc screen. It the
 current input stream is not from a block, a crash will ensue. },
 {{LOAD}},
@@ -6201,7 +6261,7 @@ RSLW4:
 ;
 });_END_({ _RWHD_})
 ;
-worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{P,L0},
+worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{I,L0},
 {Used in the form: .
 forthcode({'}) forthcode({nnnn})
 Leaves the dictionary entry address of dictionary word forthvar({nnnn}).
@@ -6300,7 +6360,7 @@ HEADER({FORGET},{FORG},{DOCOL})
         DC      TNFA, FETCH, LDP, STORE
         DC      SEMIS
 ;
-worddoc( {CONTROL},{(BACK},{paren_back},{ -- addr},{},
+worddocsafe( {CONTROL},{(BACK},{paren_back},{ -- addr},{},
 {Start a backward branch by leaving the target address
 forthcode({HERE}) into forthsamp({addr}). _VERBOSE_({Usage is
 forthsamp({ (BACK .. POSTPONE BRANCH BACK) }) })},
@@ -6315,7 +6375,7 @@ HEADER({(BACK},{PBACK},{DOCOL})
         DC      HERE
         DC      SEMIS
 ;
-worddoc( {CONTROL},{BACKP)},{back_paren},{addr --},{},
+worddocsafe( {CONTROL},{BACKP)},{back_paren},{addr --},{},
 {Complete a backward branch by compiling an offset from
 forthcode({HERE}) to forthsamp({addr}), left there by
 forthcode({(BACK)}) . _VERBOSE_({Usage is forthsamp({ (BACK ..
@@ -6329,7 +6389,7 @@ HEADER({BACK)},{BACKP},{DOCOL})
         DC      COMMA
         DC      SEMIS
 ;
-worddoc( {CONTROL},{(FORWARD},{paren_forward},{ -- addr},{},
+worddocsafe( {CONTROL},{(FORWARD},{paren_forward},{ -- addr},{},
 {Start a forward branch by leaving the address that must be
 backpatched with an offset into forthsamp({addr}).
 _VERBOSE_({Usage is forthsamp({ POSTPONE BRANCH (FORWARD ..
@@ -6346,7 +6406,7 @@ HEADER({(FORWARD},{PFORWARD},{DOCOL})
         DC      COMMA
         DC      SEMIS
 ;
-worddoc( {CONTROL},{FORWARD)},{forward_paren},{addr --},{},
+worddocsafe( {CONTROL},{FORWARD)},{forward_paren},{addr --},{},
 {Complete a forward branch by backpatching an offset from
 forthcode({HERE}) into forthsamp({addr}), left there by
 forthcode({(FORWARD)}) . _VERBOSE_({Usage is forthsamp({
@@ -6362,7 +6422,7 @@ HEADER({FORWARD)},{FORWARDP},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{P,L0},
+worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{I,L0},
 {Occurs in a colon-definition in form:
   forthexample({BEGIN ... UNTIL})
   forthexample({BEGIN ... AGAIN})
@@ -6383,7 +6443,7 @@ HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, ONE})
         DC      SEMIS
 ;
-worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{ISO,FIG,P,CO,L0},
+worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{ISO,FIG,I,CO,L0},
 {Occurs in a colon-definition in form:
  forthsamp({IF ... THEN})                                                                                                                   x
  forthsamp({IF ... ELSE ... THEN})
@@ -6402,7 +6462,7 @@ HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{DO},{do},{n1 n2 --- (execute)
-addr n --- (compile)},{P,C2,L0},
+addr n --- (compile)},{I,C2,L0},
 {Occurs in a colon-definition in form:
     forthsamp({DO ... LOOP})
 
@@ -6431,7 +6491,7 @@ HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      LIT,3    ;{ Magic number}})
         DC      SEMIS
 ;
-worddoc( {CONTROL},{LOOP},{loop},{addr n --- (compiling)},{P,C2,L0},
+worddoc( {CONTROL},{LOOP},{loop},{addr n --- (compiling)},{I,C2,L0},
 {Occurs in a colon-definition in form:
                forthsamp({DO ... LOOP})
 At run-time, forthcode({LOOP}) selectively controls branching
@@ -6454,7 +6514,7 @@ HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      LIT, XLOOP, COMMA, BACKP
         DC      SEMIS
 ;
-worddoc( {CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{P,C2,L0},
+worddoc( {CONTROL},{+LOOP},{plus_loop},{n1 --- (run)  addr n2 --- (compile)},{I,C2,L0},
 {Used in a colon-definition in the form:
     forthsamp({DO ... n1 +LOOP})
 At run-time, forthcode({+LOOP}) selectively controls branching
@@ -6481,7 +6541,7 @@ HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{UNTIL},{until},{f --- (run-time)
- addr n --- (compile)},{P,C2,L0},
+ addr n --- (compile)},{I,C2,L0},
 {Occurs within a colon-definition in the form:
               forthsamp({BEGIN ... UNTIL})
 At run-time, forthcode({UNTIL}) controls the conditional branch
@@ -6503,7 +6563,7 @@ HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 ;
-worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{P,C2,L0},
+worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{I,C2,L0},
 {Used in a colon-definition in the form:
                 forthexample({BEGIN ... AGAIN})
 At run-time, forthcode({AGAIN}) forces execution to return to corresponding
@@ -6524,7 +6584,7 @@ HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 ;
-worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{ISO,FIG,P,C2},
+worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{ISO,FIG,I,C2},
 {Used within a colon-definition in the form:
     forthsamp({BEGIN ... WHILE ... REPEAT})
 At run-time, forthcode({REPEAT}) forces an unconditional branch
@@ -6549,7 +6609,7 @@ HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
 ;
 worddoc( {CONTROL},{IF},{if},
 {f --- (run-time) / --- addr n (compile)},
-{ISO,FIG,P,C2,L0},
+{ISO,FIG,I,C2,L0},
 {Occurs is a colon-definition in form:
       forthsamp({IF (tp) ...  THEN}) or
       forthsamp({IF (tp) ... ELSE (fp) ... THEN})
@@ -6578,7 +6638,7 @@ HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},
-{ISO,FIG,P,C2,L0},
+{ISO,FIG,I,C2,L0},
 {Occurs within a colon-definition in the form:
                forthexample({IF ... ELSE ... THEN})
 At run-time, forthcode({ELSE}) executes after the true part
@@ -6607,7 +6667,7 @@ HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{WHILE},{while},
-{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{ISO,FIG,P,C2},
+{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{ISO,FIG,I,C2},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
 At run-time, forthcode({WHILE}) selects conditional execution
