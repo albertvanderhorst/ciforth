@@ -48,9 +48,9 @@ License along with this program; if not, write to the
 
 ( -c PROGRAM_:_compile_PROGRAM_to_binary ) \ AvdH A1oct02
 1 LOAD   REQUIRE Z$@   REQUIRE TURNKEY   REQUIRE SWAP-DP
-ARGV CELL+ CELL+ @ Z$@ $, CONSTANT FILE-NAME
-: EXEC-NAME   FILE-NAME $@ + 4 - ".frt" CORA
-    IF "a.out" ELSE FILE-NAME $@ 4 - THEN ;
+REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
+
+2 ARG[] $, CONSTANT FILE-NAME
 \ Be economic with disk space
 : INCD'   SWAP-DP GET-FILE SWAP-DP EVALUATE ;
 : INC' (WORD) INCD' ;
@@ -61,7 +61,7 @@ ARGV CELL+ CELL+ @ Z$@ $, CONSTANT FILE-NAME
 FILE-NAME $@ INCLUDED
 LATEST CONSTANT XXX
 : DOIT [ XXX , ] BYE ;
-LATEST EXEC-NAME   TURNKEY
+LATEST   FILE-NAME $@ SRC>EXEC   TURNKEY
 ( -d This_option_is_available )
 
 
@@ -862,7 +862,7 @@ CREATE BASE' 0 ,
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
 
 
-(  ALIAS HIDE INCLUDE ^ IVAR ) REQUIRE CONFIG \ AvdH A1oct05
+(  ALIAS HIDE INCLUDE IVAR ) REQUIRE CONFIG \ AvdH A1oct05
 
 : ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
 
@@ -871,7 +871,7 @@ CREATE BASE' 0 ,
 \ : FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
 : IVAR CREATE , ;
 
-: ^ .S ;
+
 
 "INCLUDED" PRESENT? 0= ?LEAVE-BLOCK
 
@@ -1006,7 +1006,24 @@ REQUIRE T[
 \ The name must be a string constant on the stack
 \ Use only while compiling, or you crash the system
 : POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
-( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE CONFIG  ?LI \ A1sep25
+( Z$@ CTYPE ) \ A1sep25
+
+
+
+
+
+
+
+
+\ For a CSTRING (pointer to zero ended chars) return a STRING.
+: Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
+
+\ Print a CSTRING.
+: CTYPE Z$@ TYPE ;
+
+
+( ARGC ARGV ENV C$.S ) REQUIRE CONFIG  ?LI \ A1sep25
+REQUIRE Z$@
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
 
@@ -1015,30 +1032,77 @@ REQUIRE T[
 \ Return the environment POINTER passed by Linux
 : ENV   ARGS @   $@ 1+ CELLS + ;
 
-\ For a CSTRING (pointer to zero ended chars) return a STRING.
-: Z$@ DUP BEGIN COUNT 0= UNTIL 1- OVER - ;
 
-\ Print a CSTRING.
-: CTYPE Z$@ TYPE ;
+
 \ Print a zero-pointer ended ARRAY of ``CSTRINGS'' . Abuse $@.
 : C$.S BEGIN $@ DUP WHILE CTYPE CR REPEAT 2DROP ;
-( SHIFT-ARGS GET-ENV ) REQUIRE CONFIG  ?LI \ AvdH A1oct05
+
+
+( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) \ AvdH A1nov25
+REQUIRE CONFIG   REQUIRE +THRU
+
+1 2 +THRU
+
+
+
+
+
+
+
+
+
+
+
+
+( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?LI \ AvdH A1nov24
 REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
+: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+\ Find argument INDEX, counting from one. Return as a STRING.
+: ARG[] CELLS ARGV + @ Z$@ ;
 \ Return POINTER behind the end-0 of the environment.
 : ENV0 ENV BEGIN $@ WHILE REPEAT ;
-
 \ Shift the arguments, so as to remove argument 1.
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
-
 \ For SC and ENVSTRING leave SC / CONTENT and GOON flag.
 : (MENV)   DUP 0= IF   DROP 2DROP 0. 0   ELSE
     Z$@ &= $S 2SWAP >R >R 2OVER COMPARE
     IF   RDROP RDROP 1   ELSE   2DROP R> R> 0   THEN THEN ;
 ( Find a STRING in the environment, -its VALUE or NULL string)
 : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
+( SRC>EXEC ARG[] SHIFT-ARGS GET-ENV ) ?PC \ AvdH A1nov24
+REQUIRE -LEADING \   REQUIRE ENV   REQUIRE COMPARE
+HEX
+\ Find argument INDEX, counting from one. Return as a STRING.
+: ARG[]   81 COUNT >R >R
+   BEGIN R> R> -LEADING BL $S 2SWAP >R >R   ROT 1- DUP WHILE
+      ROT DROP ROT DROP   REPEAT RDROP RDROP ;
+\ Shift the arguments, so as to remove argument 1.
+: SHIFT-ARGS  81 COUNT   -LEADING BL $S 2DROP   81 $!-BD ;
+\ Linux versions kept for reference
+( Find a STRING in the environment, -its VALUE or NULL string)
+\ : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
+: GET-ENV TRUE ABORT" GET-ENV not implemented for MSDOS, yet" ;
+\ : SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+: SRC>EXEC TRUE ABORT" GET-ENV not implemented for MS, yet" ;
+DECIMAL
+( SAVE-SYSTEM TURNKEY ) \ AvdH
+REQUIRE CONFIG   REQUIRE +THRU
+1 3 +THRU
 
-( SAVE-SYSTEM TURNKEY ) REQUIRE CONFIG 1 2 +THRU ?LI HEX \ AvdH
+
+
+
+
+
+
+
+
+
+
+
+
+( SAVE-SYSTEM TURNKEY ) ?LI HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -1052,7 +1116,7 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
-\ Save a system to do SOMETHING in a file with NAME .
+\ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
 ( --save_system_ turnkey ) ?PC HEX \ AvdH
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
@@ -1134,7 +1198,7 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 
-( DO-DEBUG NO-DEBUG ) \ AvdH A1oct15
+( DO-DEBUG NO-DEBUG ^ ) \ AvdH A1nov24
 REQUIRE OLD:
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
@@ -1148,7 +1212,7 @@ REQUIRE OLD:
    'NEW-THRU >DFA @   'THRU >DFA ! ;
 : NO-DEBUG   'OK RESTORED   'THRU RESTORED ;
 
-
+: ^ .S ;
 
 ( DUMP ) REQUIRE B.  <HEX \ AvdH A1oct02
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
