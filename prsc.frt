@@ -20,6 +20,10 @@ REQUIRE ^
 \ Number of screens to put in a column
 5 CONSTANT #Screens
 
+\ Number of lines to put in a column (assembler file.)
+117 CONSTANT #Lines
+
+
 \ upper left coordinates of top screen of left column
 2500 76961 COORDINATE LeftColumn
 
@@ -32,7 +36,9 @@ REQUIRE ^
 \ Position of screen number w.r.t. screen
 \ Position of first line w.r.t. screen
 \ Stride between lines, vertical
--902 CONSTANT NextLine
+CREATE LineStride -902 ,
+\ Leave relative vector to next line position
+: NextLine LineStride @ ;
 
 \ Relative position of screen's lower right corner
 28000 11640 COORDINATE ScreenSize
@@ -40,8 +46,11 @@ REQUIRE ^
 \ Line width
 \ Font size of screens content characters
 \ Font size of screen number and header
-\ File name
-: FileName   ARGV 3 CELLS + @ Z$@ ;
+
+\ File name for the screens file.
+: ScreensName   ARGV 3 CELLS + @ Z$@ ;
+\ File name of the assembler source.
+: AssemblerName   ARGV 4 CELLS + @ Z$@ ;
 
 : PrintWithEscapes  OVER + SWAP ?DO
     I C@
@@ -57,7 +66,7 @@ CREATE FileContent 2 CELLS ALLOT
 
 \ Output the next line from the screens to position, first place to next line.
 : PrintLine
-    &( EMIT   Line PrintWithEscapes   &) EMIT
+    ." ("   Line PrintWithEscapes   ." )"
     0 NextLine .COORDINATE ." rmoveto gsave show grestore" CR ;
 
 \ Add the next line to the output at POSITION .
@@ -78,19 +87,21 @@ CREATE FileContent 2 CELLS ALLOT
     ." moveto " C/L 3 / . ." M (SCR #"
     DUP . ." ) TitleF show BodyF" CR #Screens + ;
 
-\ Output a screen at POSITION unless empty. Return it was EMPTY.
-: OneScreen
+\ Output at POSITION a NUMBER lines. Return it was EMPTY.
+: MultLine >R
       2DUP .COORDINATE ." moveto 1 M " CR
-      16 0 DO PrintLine LOOP
-      DrawBorder
+      R> 0 DO PrintLine LOOP
 ;
+
+\ Output a screen at POSITION unless empty. Return it was EMPTY.
+: OneScreen    16 MultLine DrawBorder ;
 
 \ Print the PAGE number and the file name on top.
 
 \ Output a SCREEN and following at PAGE in two columns of screens.
 \ Leave incremented SCREEN and PAGE and indication we MUST stop.
 : NextPage
-      DUP &( EMIT 4 .R ." ) (Appendix A. forth.lab) exch StartPage " CR 1+ >R
+      DUP ." (" 4 .R ." ) (Appendix A. forth.lab) exch StartPage " CR 1+ >R
       LeftColumn 2@ ScreenNumber
       LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
       RightColumn 2@ ScreenNumber
@@ -191,12 +202,52 @@ CREATE FileContent 2 CELLS ALLOT
 %%Pages:"  TYPE . CR ;
 
 
-\ Output it all.
+\ Output the screens.
 : OutputScreens
-    FileName GET-FILE FileContent 2!
+    ScreensName GET-FILE FileContent 2!
     PreLude
     0 1  BEGIN NextPage UNTIL
     1- PostLude DROP
 ;
 
+: Interlude
+." %%Appendix B
+ /BodyF { 550 /Courier /Courier-Latin1 ChgFnt } def
+%%Endinterlude
+"
+-625 LineStride ! ;
+
+
+
+\ Output a column at POSITION unless empty.
+: OneColumn   #Lines MultLine ;
+
+: DrawBar RightColumn 2@
+        NextLine 3 * - .COORDINATE ." CW sub moveto " CR
+        0 NextLine #Lines 6 + * .COORDINATE
+        ." CW sub rlineto CW 10 div setlinewidth .5 setgray stroke 0 setgray" CR
+;
+
+\ Output a PAGE in two columns.
+\ Leave incremented SCREEN and PAGE and indication we MUST stop.
+: NextPageSrc
+      DUP ." (" 4 .R ." ) (Appendix B. assembler) exch StartPage " CR 1+ >R
+      LeftColumn 2@ OneColumn
+      DrawBar
+      RightColumn 2@ OneColumn
+      ." EndPage " CR
+      R>
+      FileContent @ 0=
+;
+
+\ Output the file.
+: OutputFile
+    AssemblerName GET-FILE FileContent 2!
+    Interlude
+    1 NextPageSrc DROP
+    1- PostLude DROP
+;
+
+
 OutputScreens
+OutputFile
