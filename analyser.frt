@@ -15,17 +15,18 @@
 \
 \ Convention: ?xxx? works only have effect if needed.
 
+\ Caveat : adapt the CODE-TYPES bag, if you use threading, as indicated.
+
 \ ---------------- TO DO ---------------------------
 \ The analyser must be in two parts, one that needs the assembler, one that doesn't.
 
-\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
-\ INCLUDE asgen.frt
-\ INCLUDE asi586.frt
+CREATE task
+INCLUDE asgen.frt
+INCLUDE asi586.frt
 
-REQUIRE BOUNDS
-REQUIRE BAG
-REQUIRE IN-BAG?
-REQUIRE ?CD
+\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
+
+                                HEX
 
 \ ------------------------------------------------
 \ Set BITS of mask in ADDRESS.
@@ -34,40 +35,13 @@ REQUIRE ?CD
 \ Reset BITS of mask in ADDRESS.
 : AND!U >R INVERT R@ @ AND R> ! ;
 \ ------------------------------------------------
-
-
-\ Maybe this part belogns in the .lab file.
-
-'TASK >CFA @ CONSTANT DOCOL
-'FORTH >CFA @ CONSTANT DODOES
-'BASE  >CFA @ CONSTANT DOUSER
-VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
-'BL >CFA @ CONSTANT DOCON
-
-\ ---------------------------------------------------------------------------
-HEX
-\ ------------------------ DATA DESIGN ----------------------------------
-\ >FFA leaves the flag field that is considered an area of 4 bytes.
-\ >FFA 0 + gives the dummy, invisible, immediate and denotation bits.
-\ bits 4..7 are available and used here.
-\ >FFA 1 + : any bits set open up an optimisation opportunity.
-\ >FFA 2 + reserved for the return stack effect nibbles.
-\ >FFA 3 + gives the data stack effect nibbles:
-\ high nibble : input:  1-- 0E depth popped +1
-\ low nibble : output: 0 = unknown , 1-- 0E depth pushed +1
-\ 0 = unknown , 0FH = variable.
-\ A ``STACK EFFECT'' is a pair (input nibble, output nibble) with the above encoding.
-\ A ``pure stack effect'' is a pair (depth popped, depth pushed).
-
-
-0FF00 CONSTANT FMASK
-
-\ ----------------------    ( From analyser.frt)
 10 CONSTANT FMASK-IL    \ Data is following in line.
 20 CONSTANT FMASK-HO    \ This definition has been high level optimised.
 40 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
 80 CONSTANT FMASK-DUP   \ This is a duplicator, i.e. stack items consumed
                         \ are put back unchanged.
+
+0FF00 CONSTANT FMASK
 
 \ If 0 the side effects are absent.
 100 CONSTANT FMASK-N@    \ No input side effects. "No fetches."
@@ -79,51 +53,29 @@ HEX
 FMASK-N@ FMASK-N! OR FMASK-FDI OR CONSTANT FMASK-ES \ No side effects except stack.
 FMASK-ES FMASK-ST OR CONSTANT FMASK-NS \ No side effects at all.
 
-\ For DEA : it IS a real (non-dummy) header.
-: REAL? >FFA @ 1 AND 0= ;
+\ ------------------------------------------------
 
-\ Fill optimisations BITS in into DEA.
-: !OB   >FFA >R    R@ @ FMASK INVERT AND   OR  R> ! ;
+\ From FLAGS POPS PUSHES compose a flag field content and return IT.
+: COMPOSE-FLAGS 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR ;
 
-\ Fill in the stack effect BYTE into the flag field of DEA.
-: !SE >FFA 3 + C! ;
+\ Fill FLAGS POPS PUSHES in into DEA's flag field.
+\ Leave hidden, immediate etc. alone.
+: !FLAGS >R COMPOSE-FLAGS R> >FFA OR!U ;
 
-\ For DEA return its stack effect BYTE.
-: SE@ >FFA 3 + C@ ;
+\ ------------------------------------------------
 
-\ Type the interpretation of a stack effect NIBBLE.
-: .SE/2 DUP 0 = IF "unknown" TYPE ELSE DUP 0F = IF "variable" TYPE
-ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
+DECIMAL
 
-\ Split a BYTE into a STACK EFFECT .
-: SE:1>2 DUP 4 RSHIFT SWAP 0F AND ;
+REQUIRE BOUNDS
+REQUIRE BAG
+REQUIRE IN-BAG?
+REQUIRE ?CD
 
-\ Combine the STACK EFFECT into one BYTE.
-: SE:2>1 0F AND SWAP 4 LSHIFT OR ;
+\ ------------------ assembler stuff here -----------------------------------
 
-\ Type the stack effect BYTE.
-: .SE   SE:1>2 "( " TYPE SWAP .SE/2 "-- " TYPE .SE/2 &) EMIT ;
+\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
 
-\ For DEA type its optimisation and other properties.
-: OPT? >FFA @
-    CR "Optim. bits etc.: " TYPE
-    DUP FMASK     AND 0= IF "No optimisations " TYPE THEN
-    DUP FMASK-N@  AND IF "No fetches " TYPE THEN
-    DUP FMASK-N!  AND IF "No stores " TYPE THEN
-    DUP FMASK-ST  AND IF "No depth " TYPE THEN
-    DUP FMASK-IL  AND IF "In line data " TYPE THEN
-    DUP FMASK-HO  AND IF "Been optimised " TYPE THEN
-    DUP FMASK-HOB AND IF "Cannot be optimised " TYPE THEN
-    DUP FMASK-FDI AND IF "Loop index is available " TYPE THEN
-    DUP FMASK-DUP AND IF "A duplicator" TYPE THEN
-    DROP
-;
-
-\ For DEA type its stack effect.
-: SE?   SE@ .SE ;
-
-\ For DEA type everything.
-: .DE DUP SE? DUP CRACKED OPT? ;
+                                HEX
 
 \ Set of duplicators.
 CREATE DUPS  HERE 0 ,
@@ -196,6 +148,10 @@ VARIABLE PROTO-FMASK
 \ Initialise to "no side effects". Innocent until proven guilty.
 : !FMASK FMASK-NS PROTO-FMASK ! ;
 
+\ A forth flag has all bit set. Hence the idiom ``FLAG MASK AND''
+\ instead of FLAG IF MASK ELSE 0 THEN''. Also note that in Stallman
+\ convention a capitalised verb means a (forth) flag.
+
 \ Add to FLAGS if instruction IS storing, the no output side effects flag.
 \ Return the new FLAGS. (So those are the flags to become invalid.)
 : IS-STORING       FMASK-N! AND    OR ;
@@ -210,8 +166,6 @@ VARIABLE PROTO-FMASK
 
 \ Look whether we have the current disassembled instruction forces us to
 \ revise the flag mask.
-\ A forth flag has all bit set. Hence the idiom ``FLAG MASK AND''
-\ instead of FLAG IF MASK ELSE 0 THEN''.
 : REVISE-FMASK
     0
     OPCODE STORES IN-BAG? IS-STORING
@@ -241,11 +195,12 @@ VARIABLE PROTO-FMASK
     2DROP
 ;
 
-PREVIOUS
 
 \ Define a ``NEXT'' sequence. It must have the exact code that is in
 \ the kernel.
-: NEXT  ASSEMBLER  LODS, X'|   JMPO, D0| [AX] ; PREVIOUS
+: NEXT  LODS, X'|   JMPO, D0| [AX] ;
+
+PREVIOUS
 
 \ The sequence of bytes that forms next, as a string.
 \ (This means you can $@ it.)
@@ -263,17 +218,58 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ Get also its side effect mask.
 : ANALYSE-CODE >CFA @ DUP >NA ACCUMULATE-AS-INFO ;
 
-\ --------------- DIRTY FIXME ------------------------------
 \ For DEA fill in the stack effect byte and the side effect mask.
 \ It must be a code definition.
-: FILL-FLAG-CODE   >R   R@ ANALYSE-CODE   PROTO-FMASK @   R@ >FFA   OR!U
-  #POPS @ 1+   #PUSHES @ 1+   SE:2>1   R> !SE ;
+: FILL-FLAG-CODE   >R   R@ ANALYSE-CODE
+    PROTO-FMASK @ #POPS @ #PUSHES @ R> !FLAGS ;
 
-\ From FLAGS POPS PUSHES compose a flag field content and return IT.
-: COMPOSE-FLAGS 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR ;
+DECIMAL
 
-\ Fill FLAGS POPS PUSHES in into DEA's flag field.
-: !FLAGS >R COMPOSE-FLAGS R> >FFA ! ;
+\ ------------------------------------------------
+
+'TASK >CFA @ CONSTANT DOCOL
+'FORTH >CFA @ CONSTANT DODOES
+'BASE  >CFA @ CONSTANT DOUSER
+VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
+'BL >CFA @ CONSTANT DOCON
+
+\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
+
+                                HEX
+
+\ ------------------------ DATA DESIGN ----------------------------------
+\ >FFA leaves the flag field that is considered an area of 4 bytes.
+\ >FFA 0 + gives the dummy, invisible, immediate and denotation bits.
+\ bits 4..7 are available and used here.
+\ >FFA 1 + : any bits set open up an optimisation opportunity.
+\ >FFA 2 + reserved for the return stack effect nibbles.
+\ >FFA 3 + gives the data stack effect nibbles:
+\ high nibble : input:  1-- 0E depth popped +1
+\ low nibble : output: 0 = unknown , 1-- 0E depth pushed +1
+\ 0 = unknown , 0FH = variable.
+\ A ``STACK EFFECT'' is a pair (input nibble, output nibble) with the above encoding.
+\ A ``pure stack effect'' is a pair (depth popped, depth pushed).
+
+
+
+\ ----------------------
+\ For DEA : it IS a real (non-dummy) header.
+: REAL? >FFA @ 1 AND 0= ;
+
+\ Fill optimisations BITS in into DEA.
+: !OB   >FFA >R    R@ @ FMASK INVERT AND   OR  R> ! ;
+
+\ Fill in the stack effect BYTE into the flag field of DEA.
+: !SE >FFA 3 + C! ;
+
+\ For DEA return its stack effect BYTE.
+: SE@ >FFA 3 + C@ ;
+
+\ Split a BYTE into a STACK EFFECT .
+: SE:1>2 DUP 4 RSHIFT SWAP 0F AND ;
+
+\ Combine the STACK EFFECT into one BYTE.
+: SE:2>1 0F AND SWAP 4 LSHIFT OR ;
 
 \ Irritating exceptions filled in by hand. Filling in the stack effect
 \ (although it could be found automatically), prevents changes.
@@ -356,13 +352,19 @@ HERE SWAP !
 : FILL-SE-DODOES   >R   12   R@ >DFA @ @   ANALYSE-CHAIN   R> !SE ;
 
 \ A code definition ( not ``:'' and not ``DOES>'') may be a type if the
-\ code pointer is not pointing past the header. Reanalysing is then a waste
-\ of time, so that dea's can be looked up here.
-\ Moreover the analyser now works independantly of the dissassembler, if the
-\ user fills in the stack effect of his code words if any.
+\ code pointer is not pointing past the header.
+\ There are several motivations for this lookup table:
+\  1. CONSTANT's and VARIABLE's have the FMASK-NS optimisation which
+\      doesn't follow from an automatic analysis.
+\  2. Reanalysing for each same code field is a waste of time.
+\  3. The analyser works (partly) independantly of the dissassembler.
+\  4. If multi-threading is used the automatic analysis is right for
+\      USER's, however normally they can have the FMASK-NS optimisation.
+\ The user only needs to fill in the stack effect of his code words, to forego
+\ the need of loading the assembler.
 CREATE CODE-TYPES  HERE 0 ,
     FMASK-NS 0 1 COMPOSE-FLAGS   \ Content of flag field for all those types.
-    DOCON , DUP ,   DOVAR , DUP ,   DOUSER , DUP ,
+    DOCON , DUP ,   DOVAR , DUP ,  DOUSER , DUP ,
 DROP    HERE SWAP !
 
 \ For DEA fill in the stack effect byte and the side effect bits.
@@ -458,5 +460,42 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE-ANY _   THEN   DROP ;
 
 \ Fill in everything.
 : FILL-ALL MARK-DUP (FILL-ALL) ;
+
+DECIMAL
+
+\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
+
+                                HEX
+\ Debugging aids for analyser.frt. Print the information added to flag fields.
+
+REQUIRE CRACK
+
+\ Type the interpretation of a stack effect NIBBLE.
+: .SE/2 DUP 0 = IF "unknown" TYPE ELSE DUP 0F = IF "variable" TYPE
+ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
+
+\ Type the stack effect BYTE.
+: .SE   SE:1>2 "( " TYPE SWAP .SE/2 "-- " TYPE .SE/2 &) EMIT ;
+
+\ For DEA type its optimisation and other properties.
+: OPT? >FFA @
+    CR "Optim. bits etc.: " TYPE
+    DUP FMASK     AND 0= IF "No optimisations " TYPE THEN
+    DUP FMASK-N@  AND IF "No fetches " TYPE THEN
+    DUP FMASK-N!  AND IF "No stores " TYPE THEN
+    DUP FMASK-ST  AND IF "No depth " TYPE THEN
+    DUP FMASK-IL  AND IF "In line data " TYPE THEN
+    DUP FMASK-HO  AND IF "Been optimised " TYPE THEN
+    DUP FMASK-HOB AND IF "Cannot be optimised " TYPE THEN
+    DUP FMASK-FDI AND IF "Loop index is available " TYPE THEN
+    DUP FMASK-DUP AND IF "A duplicator" TYPE THEN
+    DROP
+;
+
+\ For DEA type its stack effect.
+: SE?   SE@ .SE ;
+
+\ For DEA type everything.
+: .DE DUP SE? DUP CRACKED OPT? ;
 
 DECIMAL

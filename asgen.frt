@@ -91,7 +91,7 @@
 
 ( ############### PART I ASSEMBLER #################################### )
 ( MAYBE NOT PRESENT UTILITIES                                           )
-: @+ >R R@ CELL+ R> @ ; ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
+REQUIRE @+ ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
 : !+ >R R@ ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
 : @- 0 CELL+ - >R R@ @ R>  ;

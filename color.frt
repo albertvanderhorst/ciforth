@@ -1,3 +1,6 @@
+( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+( $Id$)
+
 \ Fix up the analyser with information about what are duplicators.
 
 HEX  1B CONSTANT ESC DECIMAL
@@ -91,6 +94,8 @@ CREATE RENDER-TABLE    \ Colors in relation to stack effect.
 
 \ ******************* PATCH UP THE DECOMPILER WITH COLORS ***************
 \                      DOESN'T BELONG HERE
+
+REQUIRE RESTORED
 
 \ Install the behaviour of DEA into the behaviour of DEA.
 : REVECTOR 3 CELLS MOVE ;

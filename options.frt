@@ -29,7 +29,7 @@ DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 : PRESENT? PRESENT 0= 0= ;
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
-: REQUIRE (WORD) REQUIRED ;    : CF "CONFIG" REQUIRED ;
+: REQUIRE (WORD) REQUIRED ;    : CF: "CONFIG" REQUIRED ;
 ( -b :_This_option_is_available )
 
 
@@ -149,7 +149,7 @@ REQUIRE SAVE-SYSTEM   REQUIRE ARG[]
 BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
 3 ARG[] BLOCK-FILE $!
 \ Trim back to before ``task''. Save system at binary path.
-: DOIT   'task    DUP 'FORTH FORGET-VOC   >NFA @ DP !
+: DOIT   'task    'FORTH FORGET-VOC   >NFA @ DP !
     2 ARG[] SAVE-SYSTEM   BYE ;
 
 \ Must all be done in one go!
