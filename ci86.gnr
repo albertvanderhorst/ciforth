@@ -3581,18 +3581,18 @@ HEADER({-->},{ARROW},{DOCOL},1)
         DC      SEMIS
         PAGE
 ;
-;{ Generic call on BIOS. A boon for experimenters.}
-;{ Because there is no such thing as a variable interrupt:}
-;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
-;{ BEWARE OF THE SOFTWARE POLICE!}
 worddoc({SYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},{
 Do a call of ``BIOS'' interrupt forthvar({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contains
 forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
 register.
 },{{BDOS}})
+;{ Generic call on BIOS. A boon for experimenters.}
+;{ Because there is no such thing as a variable interrupt:}
+;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
+;{ BEWARE OF THE SOFTWARE POLICE!}
 CODE_HEADER({BIOS},{BIOS})
-})        POP     AX      ;{ Function code}
+        POP     AX      ;{ Function code}
         ;{ Once we are more acknowledgable, put segment overwrite here.}
         MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
         POP     DX
@@ -3682,9 +3682,11 @@ HEADER({SMALL},{SMALL},{DOCOL})
 ;{       SYSTEM DEPENDANT CHAR I/O}
 ;{------------------------------------}
 _MODERN_({
-worddoc({OUTPUT},{TYPE},{type},{addr count ---},{L0},{
+worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},{
 Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through forthcode({TYPE}).
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthref({revectoring}) it. 
+In this ciforth the string must not contain embedded LF's.
 forthcode({OUT}) is incremented for each character output.},{{EMIT},{OUT}})
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTOR
@@ -3702,9 +3704,11 @@ _BITS32_({        DC      LIT, TYPEBUF })
         DC      SEMIS
 _BITS32_({TYPEBUF:  _RESB    0100H })
 ;
-worddoc({OUTPUT},{EMIT},{emit},{c ---},{L0},{
+worddoc({OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},{
 Transmit ascii character forthvar({c}) to the output device. 
-forthcode({OUT}) is incremented for each character output.},{{OUT}})
+forthcode({OUT}) is incremented for each character output
+and reset by a LF. 
+.},{{OUT}})
 HEADER({EMIT},{EMIT},{DOCOL})
         DC      LDUP,LIT,LF,EQUAL
         _0BRANCH(EMIT1)
@@ -3715,12 +3719,12 @@ EMIT1:
         DC      DROP
         DC      SEMIS
 ;
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{L0},{
-Transfer characters from the terminal to address, until a "return"
-or the count of characters have been received. 
+worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},{
+Transfer characters from the terminal to address forthvar({addr}) , until a "return"
+or a number of forthvar({count}) characters have been received. 
 Rely on the operating system for input editing.
 One or more nulls are
-added at the end of the text.},{})
+added at the end of the text.}, {{KEY},{?TERMINAL}})
  HEADER({EXPECT},{EXPEC},{DOCOL})
 _BITS32_({; MSDOS cannot handle a 32 bits address: use the buffer.})
 _BITS32_({        DC      LIT, EXPECTBUF})
@@ -3739,8 +3743,8 @@ _BITS32_({        DC      TOR, LDUP, LIT, EXPECTBUF, SWAP, RR, LCMOVE, FROMR })
         DC      SEMIS
 _BITS32_({EXPECTBUF:  _RESB    0100H })
 ;
-worddoc({INPUT},{KEY},{key},{--- c},{L0},{
-Leave the ascii value of the next terminal key struck.},{})
+worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},{
+Leave the ascii value of the next terminal key struck.},{EXPECT},{?TERMINAL})
 HEADER({KEY},{KEY},{DOCOL})
         DC         LIT, 1000H, ZERO, ZERO, ZERO
         DC         LIT, 0016H, BIOS
@@ -3750,7 +3754,7 @@ HEADER({KEY},{KEY},{DOCOL})
 worddoc({INPUT},{?TERMINAL},{question_terminal},{--- f},{},{
 Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
-A true flag indicates actuation. },{})
+A true flag indicates actuation. },{{KEY},{EXPECT}})
 HEADER({?TERMINAL},{QTERM},DOCOL)
         DC      LIT,0B00H
         DC      ZERO,ZERO,ZERO
@@ -3759,40 +3763,34 @@ HEADER({?TERMINAL},{QTERM},DOCOL)
         DC      LIT, 01H, LAND
         DC      SEMIS
 ;
-
 });_END_({_MODERN_})
 _LINUX_C_({
 ;{ Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
-worddoc({OUTPUT},{TYPE},{type},{addr count ---},{L0},{
+worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},{
 Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through forthcode({TYPE}).
-forthcode({OUT}) is incremented for each character output.},{{EMIT},{OUT}})
-CODE_HEADER({TYPE},{LTYPE})
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthref({revectoring}) it. 
+forthcode({OUT}) is not observed.},{{EMIT},{OUT}})
+HEADER({TYPE},{LTYPE})
+        DC      $+CELLS(1) ; { Turns this code word into high level.}
         CALL    c_type
         LEA     ESP,[ESP+CELLS(2)]    ; remove input
         _NEXT
 ;
-worddoc({OUTPUT},{EMIT},{emit},{c ---},{L0},{
-Transmit ascii character forthvar({c}) to the output device. 
-forthcode({OUT}) is (is that true?) incremented for each character output.},{{OUT}})
-HEADER({EMIT},{EMIT},{DOCOL})
-        DC      SPFET, ONE, LTYPE
-        DC      DROP
-        DC      SEMIS
+worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},{
+Transfer characters from the terminal to address forthvar({addr}) ,
+until a "return" or a number of forthvar({count}) characters have been
+received. Rely on the operating system for input editing. One or more
+nulls are added at the end of the text. 
+},{{KEY},{?TERMINAL}})
 ;
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{L0},{
-Transfer characters from the terminal to address, until a "return"
-or the count of characters have been received. 
-Rely on the operating system for input editing.
-One or more nulls are added at the end of the text.
-},{})
 CODE_HEADER({EXPECT},{EXPEC})
         CALL    c_expec
         LEA     ESP,[ESP+CELLS(2)]    ; remove input
         _NEXT
 ;
-worddoc({INPUT},{KEY},{key},{--- c},{L0},{
+worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},{
 Leave the ascii value of the next terminal key struck.},{})
 CODE_HEADER({KEY},{KEY})
         CALL    c_key
@@ -3813,13 +3811,17 @@ _LINUX_N_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
+worddoc({SYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},{
+Handle the error forthvar({errno}) by interpreting it as returned from a 
+Linux system call. If it is negative error forthvar({-n}) is displayed and the word
+is aborted.
+},{{?ERROR}})
 HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
         DC      LDUP, ZERO, MIN, SWAP ; ( errno -- error flag, errno)
         DC      LIT, 64, PLUS   ; Project onto SCREEN 4..7.
         DC      QERR  ; Make errno's count from the top.
         DC      SEMIS
 ;
-
 worddoc({INPUT},{TERMIO},{termio},{--- addr},{},{
 Leave the address of the terminal description.
 },{{SET-TERM}})
@@ -3847,10 +3849,12 @@ STTERM_A:
 STTERM_B:
 
 ;
-worddoc({OUTPUT},{TYPE},{type},{addr count ---},{L0},{
+worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},{
 Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through forthcode({TYPE}).
-forthcode({OUT}) is incremented (true?)for each character output.},{{EMIT},{OUT}})
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthref({revectoring}) it 
+_VERBOSE_(and the usual redirection or forthvar({tee})-ing by Linux).
+forthcode({OUT}) is not observed.},{{EMIT},{OUT}})
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
         DC      LIT, write
@@ -3858,19 +3862,12 @@ HEADER({TYPE},{LTYPE},{DOCOL})
         DC      DROP
         DC      SEMIS
 ;
-worddoc({OUTPUT},{EMIT},{emit},{c ---},{L0},{
-Transmit ascii character forthvar({c}) to the output device. 
-forthcode({OUT}) is (is that true?) incremented for each character output.},{{OUT}})
-HEADER({EMIT},{EMIT},{DOCOL})
-        DC      SPFET, ONE, LTYPE
-        DC      DROP
-        DC      SEMIS
-;
-worddoc({INPUT},{EXPECT},{expect},{addr count ---},{L0},{
+worddoc({INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},{
 Transfer characters from the terminal to address, until a "return"
 or the count of characters have been received. 
 Rely on the operating system for input editing.
-One or more nulls are added at the end of the text.},{})
+One or more nulls are added at the end of the text.},
+{{KEY},{?TERMINAL}})
 HEADER({EXPECT},{EXPEC},{DOCOL})
         DC      ZERO    ; filedescriptor 0 for standard input.
         DC      ROT
@@ -3899,8 +3896,9 @@ EXPEC3: _LOOP(EXPEC1)
         DC      SEMIS
 EXPEC_B:
 ;
-worddoc({INPUT},{KEY},{key},{--- c},{L0},{
-Leave the ascii value of the next terminal key struck.},{})
+worddoc({INPUT},{KEY},{key},{--- c},{ISO FIG L0},{
+Leave the ascii value of the next terminal key struck.},
+{{EXPECT},{?TERMINAL}})
 HEADER({KEY},{KEY},{DOCOL})
         DC      ONE, LIT, RAWIO, STTERM ; Do not wait for CR
         DC      ZERO, SPFET     ; Expect single key on stack
@@ -3913,7 +3911,8 @@ HEADER({KEY},{KEY},{DOCOL})
 worddoc({INPUT},{?TERMINAL},{question_terminal},{--- f},{},{
 Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is consumed.
-A true flag indicates actuation. },{})
+A true flag indicates actuation. },
+{{KEY},{EXPECT}})
 HEADER({?TERMINAL},{QTERM},{DOCOL})
         ; Return immediately even for zero characters available
         DC      ZERO, LIT, RAWIO, STTERM
@@ -3926,6 +3925,18 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
         DC      SEMIS
 ;
 });_END_({_LINUX_N_})
+_HOSTED_LINUX_({
+worddoc({OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},{
+Transmit ascii character forthvar({c}) to the output device. 
+All terminal I/O goes through forthcode({TYPE}).
+forthcode({OUT}) is not observed.},{{TYPE},{OUT}})
+HEADER({EMIT},{EMIT},{DOCOL})
+        DC      SPFET, ONE, LTYPE
+        DC      DROP
+        DC      SEMIS
+;
+});_END_({_HOSTED_LINUX_})
+;
 _CLASSIC_({
 ;{ All I/O goes through the 3 assembler functions}
 ;{ CI CHO CSTAT. They could be collapsed into the }
