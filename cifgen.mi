@@ -110,27 +110,97 @@ has more information to work with and can ultimately outperform any
 other system in speed.
 
 @section History
-@subsection Deviations
+From the introduction to the figforth installation manual:
+forthquotation
+The figforth implementation project occurred because a key group of Forth
+fanciers wished to make this valuable tool available on a personal computing
+level. In June of 1978, we gathered a team of nine systems level
+programmers, each with a particular target computer. The charter of the
+group was to translate a common model of Forth into assembly language
+listings for each computer. It was agreed that the group's work would be
+distributed in the public domain by FIG. 
 
-Some non-substantial deviation of the original FIG source have been made
-for good reasons. 
+We intend that our primary recipients of the Implementation Project be
+computer users groups, libraries, and commercial vendors. 
+We expect that each will further customize for particular computers and
+redistribute. No restrictions are placed on cost, but we expect faithfulness
+to the model. FIG does not intend to distribute machine readable versions,
+as that entails customization, revision, and customer support better
+reserved for commercial vendors. 
 
+Of course, another broad group of recipients of the work is the community of
+personal computer users. We hope that our publications will aid in the use
+of Forth and increase the user expectation of the performance of high level
+computer languages. 
+forthendquotation
+
+@subsection                 Deviations of the FIG model
+
+The first version of ciforth complies still faithfully to the fig model, 
+at least as faithfully as is customary. 
+
+The rigid subdivision in 7 area's was never adhered to. 
+In particular the bootup parameters
+are not up front as CP/M and MSDOS require a 100H byte reserved
+area there. 
+There is mention of forthvar({(KEY)}) being ``implementation dependant code''
+but these were not often present in 
+fig implementations. 
+This was based on the idea that there was some EPROM with console commands.
+This has been replaces by calls to an operating system, that do not
+comply with a simple function that could be called.
+Here 
+the code definitions for forthcode({KEY}) itself
+become implementation dependant code, but often it can written in  
+high level.
+
+All documentation is now accurate but only claims to describe
+ciforth. 
+The forthcode({RUBOUT}) key is a bonafide forthcode({USER}) variable
+and now has a name.
+
+DR0 and DR1 are removed. There is only one consecutive mass storage area, be
+it a disk or a file. 
 The assumption in using forthcodeni({OFFSET}) was that you have two identical floppy drives
 and no hard disk. That is nowadays extremely unlikely. Instead I put forthcodeni({OFFSET}) 
 to good use to screen off a part of the floppy that must not be used (such
 as an MSDOS directory or the hard disk part that contains the forth system.)
+
+forthvar({MOVE MON BLOCK-READ BLOCK-WRITE DLIST}) are not present.
+Altering OUT to influence formatting doesn't work here, nor on 
+any figforth I know off.
+
+Some non-substantial deviation of the original FIG source have been made
+for good reasons. 
 
 The FIG filosofy is that sectors, blocks and screens must be compatible, but
 may be all different. The original 8086 FIG had one sector for a block. I
 changed that in having one block for a screen. This is a boon for those
 wanting to ISO-fy the sources.
 
-The way I coded the character I/O points ahead to vectoring forthcodeni({TYPE}) and forthcodeni({EXPECT}) 
-rather than forthcodeni({EMIT}) and forthcodeni({KEY}) . This way I can have the host system handle the rub
-out key. 
+The way I coded the character I/O points ahead to vectoring
+forthcodeni({TYPE}) and forthcodeni({EXPECT}) rather than
+forthcodeni({EMIT}) and forthcodeni({KEY}) . This way I can have the
+host system handle the rub out key. 
 
-I added generic words forthcodeni({BIOS}) , forthcodeni({BDOS}) and forthcodeni({LINOS}) . 
-(See subsection The joy of genericity.)
+I added generic words for accessing system resources
+forthcodeni({BIOS}) , forthcodeni({BDOS}) and forthcodeni({LINOS}) .
+(See subsection The joy of genericity.) 
+
+Some real errors were fixed:
+forthenumerate
+forthitem
+The redefine forthsample({NULL}) bug is fixed.
+It is no longer possible to redefine this word, 
+that handles the refill of the forthcode({TIB}), 
+by typing a <ret> immediately after a defining word.
+forthitem
+Forgetting part of a vocabulary, other than the forthcode({FORTH}) vocabulary
+no longer crashes.
+forthitem
+Loading a screen with characters having an 8th bit set, 
+no longer crashes.
+forthendenumerate
 
 @section Evolution of ciforth
 The first version of 
@@ -279,7 +349,7 @@ A macro is like a function. In the macro call the text is replaced by
 the text present in the function. 
 Within the text the placeholders for the parameters are replaced
 by the actual parameters.
-In forthprog({m4}) the placeholders are forthsamp({${}1}) ... forthsamp({${}9}).
+In forthprog({m4}) the placeholders are forthsamp({$}{1}) ... forthsamp({$}{9}).
 Parameters can be passed, and any (even multiline)
 text can be given as a parameter, provided it is quoted.
 We will use forthsamp({_lbracket_}) and forthsamp({_rbracket_}) (braces) througout.
@@ -304,7 +374,7 @@ which gives, of course, the size of a double number.
 
 This is accomplished by 
 
-forthsamp({{define(_lbracket__BITSxx_  _rbracket_,_lbracket_$1  _rbracket_)}})
+forthsamp({define(_lbracket__BITSxx_  _rbracket_,_lbracket_$1  _rbracket_)})
 
 for the actual bitsize and
 
@@ -317,9 +387,10 @@ As in
 forthexample(
 {{_VERBOSE_}_lbracket_({_BITS64_}(_lbracket_The possibility to cycle through all (64-bit) 
 numbers by {forthsamp}(_lbracket_0 0 DO ... LOOP_rbracket_) is very useful indeed._rbracket_)_rbracket_)})
-Here you see at work, apart from forthmacro({{_BITS64_}}) , the macro forthmacro({{_VERBOSE_}}) that allows (if turned on)
+Here you see at work, apart from forthmacro({_BITS64_}) , the macro forthmacro({_VERBOSE_}) 
+that allows (if turned on)
 verbosity that can help understanding but is not always appreciated.
-You alse see forthmacro({{forthsamp}}) that is in fact
+You alse see forthmacro({forthsamp}) that is in fact
 a markup to indicate we have a piece of Forth code there.
 
 Selections can be used to throw out a block of 
@@ -333,11 +404,11 @@ results in forthprog({m4}) interpreting the remainder as a second parameter,
 which it wil ignore.
    
 @subsection A postponed markup language.
-Just say forthsamp({{forthcode(_lbracket_+LOOP _rbracket_)}}) to indicate that you want 
+Just say forthsamp({forthcode(_lbracket_+LOOP _rbracket_)}) to indicate that you want 
 formatting as for ``code'' words. 
 Later you can decide to use 
 forthbreak
- forthsamp({{define}(_lbracket_forthcode _rbracket_,_lbracket__comat_code_lbracket_${}1_rbracket__rbracket_)}) 
+ forthsamp({{define}(_lbracket_forthcode _rbracket_,_lbracket__comat_code_lbracket_$}{1_rbracket__rbracket_)}) 
 forthbreak
 for forthsamp({texinfo}) or  
 forthbreak
@@ -360,16 +431,16 @@ parents({Aayilah},{Sjantil},{Bodaji})
 ...
 
 With 
- forthsamp({define({parents},}) {$2}) we get a list of (you guessed) the mothers.
+ forthsamp({{define}({parents},{$}{2})}) we get a list of (you guessed) the mothers.
 
-The usage of forthmacro({{divert()}}) can best be explained with an example in this context.
+The usage of forthmacro({divert()}) can best be explained with an example in this context.
 
 forthexample(
 {{define}(_lbracket_parents_rbracket_,
 _lbracket_{divert(3)dnl}
-${}2
+$}{2
 {divert(6)dnl}
-${}3
+$}{3
 _rbracket_)})
 
 will give out the mothers on channel 3 and fathers on channel 6.
@@ -616,6 +687,11 @@ You are on your own here.
 
 @subsection Level 3 customization.
 
+So you have this assembler file, 
+and it looks like what you want to have, but not quite.
+And of course it doesn't work.
+
+@subsubsection My rants
 The usual customisation in assembler files is possible. 
 If you use other than 3" floppy disks you have to specify the disk
 parameters. Parameters for a 5" HD floppy are present and can be commented
@@ -634,19 +710,151 @@ blocks (and yes a 16 bit system would be inconvenient). If you want to use
 an older system you must experiment by using the forthcodeni({BIOS}) word. 
 (You need not resort to assembler for experimenting.) 
 Then you can adapt your assembler listing.
-There is a description in the history section about bringing up an assembler
-system.
+@subsubsection FIG's rants
+
+You may want to use the assembly code of this ciforth to 
+base a new Forth on. If this adversely affects the documentation
+I urge you not to do that but to use the generic system.
+
+The  following words 
+are traditionally 
+the only portion that need change between different
+installations of the same computer cpu. 
+They cannot come close to the capabilities
+of the generic system, 
+and should be used for minor modifications only.
+
+There are five words that need adaptation:
+
+@table @code
+forthitem KEY 
+Push the next ascii value (7 bits) from the terminal keystroke to the
+computation stack and execute NEXT. High 9 bits are zero. Do not echo
+this character, especially a control character. 
+forthitem EMIT 
+Pop the computation stack (16 bit value). Display the low 7 bits on the
+terminal device, then execute NEXT. Control characters have their
+natural functions. 
+forthitem ?TERMINAL 
+For terminals with a break key, wait till released and push to the
+computation stack 1 if it was found depressed; otherwise 0.
+Execute NEXT. If no break key is available, sense any key depression as
+a break (sense but don't wait for a key). If both the above are
+unavailable, simply push 0 and execute NEXT. 
+forthitem CR 
+Execute a terminal carriage return and line feed. Execute NEXT. 
+forthitem R/W 
+This colon-definition is the standard linkage to your disc. It requests
+the read or write of a disc block, be it raw disk or allocated in a file.
+@end table 
+
+On primitive systems these may be jumps to ROM-code. But generally on i86
+facilities like this are available using forthdefi({INT})'s a kind of traps.
+These observe operating system protocols and are available as high level forth
+code.
+@subsubsection FIG's rants : Ram disc simulation
+
+If disc is not available, a simulation of forthcode({BLOCK}) and 
+forthcode({BUFFER}) may be made in RAM. 
+The following definitions setup high memory as mass storage. 
+Referenced ``screens'' are then brought to the ``disc buffer'' area. 
+This is a good method
+to test the start-up program even if disc may be available. 
+
+forthexample(
+{HEX  
+4000 CONSTANT LO ( START OF BUFFER AREA ) 
+6800 CONSTANT HI ( 10 SCREEN EQUIVALENT ) 
+: R/W >R ( save boolean ) 
+    B/BUF * LO + DUP 
+    HI > 6 ?ERROR ( range check ) 
+    R> IF ( read ) SWAP ENDIF 
+    B/BUF CMOVE ; })   
+
+Insert the code field address of forthcode({R/W}) into forthcode({BLOCK}) and forthcode({BUFFER}) 
+and proceed as if testing disc. 
+This forthcode({R/W}) simulates screens 0 thru 9, in the
+memory area 04000H thru 067FFH. 
+@subsubsection FIG's rants : Debugging an assembled system.
+
+Let us assume we have an system based on an assembler listing 
+and we want to debug it. 
+
+Here are the sequential steps: 
+forthenumerate
+forthitem
+Familiarize yourself with the model written in Forth, the glossary, and
+specific assembly listings. 
+forthitem
+Edit the assembly listings into your system. Set the fifth
+boot-up parameters (WARNING) to 0 
+(warning messages are shown as simple numbers).
+forthitem
+Alter the terminal support code ( forthcode({KEY}) , forthcode({EMIT}) , etc,) to match your system. 
+Observe register protocol specific to your  implementation!
+forthitem
+Place a break in your debugger at the end of NEXT, 
+just before indirectly jumping via register W to execution. 
+forthsamp({W}) is the Forth name for the register
+holding a code field address. 
+In ciforth this is the Intel 86 register BX.
+If your NEXT is inline code, 
+for the moment replace it by a jump.
+Mostly this can be done by inactivating the macro forthmacro({_NEXT32_}) 
+through removing the line 
+forthsamp({_BITS32_(_lbracket_{define}(_lbracket__NEXT_rbracket_,_lbracket__NEXT32_rbracket_)_rbracket_)})
+from forthfile({postlude.m4}).
+forthitem
+Enter the cold start at the origin. 
+Upon the break, check that the interpretive pointer IP points within forthcodeni({ABORT}) 
+and W points to forthcodeni({SP!}) . 
+In ciforth IP is held in the Intel 86 register DI.
+forthcodeni({COLD}) being a colon-definition, 
+the IP has been initialized on the way to NEXT and your testing will
+begin in forthcodeni({COLD}) . 
+The purpose of forthcodeni({COLD}) is to initialize IP, SP, RP, VP,
+and some user variables from the start-up 
+parameters at the origin. 
+forthitem
+Continue execution one word at a time. 
+Clever individuals could write a simple trace routine to print IP, W, SP, RP
+and the top of the stacks. 
+Run in this single step mode until the greeting message is printed. 
+Note that the interpretation is several hundred cycles to this stage! 
+forthitem
+Execution errors may be localized by observing the above pointers when a
+crash occurs. 
+forthitem
+After the word forthcodeni({QUIT}) is executed (incrementally), 
+and you can input a "return" key and get ``OK'' printed, remove the break. 
+You may have some remaining errors, but a reset and examination of the
+above registers will again localize problems. 
+forthitem
+When the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BUFFERS}) 
+to clear the disc buffer area. 
+forthitem
+If your disc driver differs from the assembly version, you must create
+your own forthcodeni({R/W}) .
+You may test the disc access by typing: 
+forthsamp({0 BLOCK 64 TYPE})
+This should bring block zero from the disc to a buffer and
+type the first 64 characters. 
+If forthcodeni({BLOCK}) (and forthcodeni({R/W}) ) doesn't function--happy hunting! 
+forthendenumerate
 
 @subsection Level 4 customization.
 Contact me if you want to contribute to the wider usability of this package.
 
 @subsection Programs
 In the file forthfile({BLOCKS.BLK}) is available a screen editor, assembler, decompiler
-and tools like DUMP. Beware! Some of the tools handle hards disks. There are
-example programs and benchmarks. Everything under screen 100 you will find
+and tools like forthcodeni({DUMP}). 
+Beware! Some of the tools handle hards disks. 
+There are example programs and benchmarks. 
+Everything under screen 100 you will find
 more or less working, but maybe not on your system.
 Everything loaded from 8 is used by me on a regular basis and is 16/32 bits
-clean. Beware! The full screen editor doesnot work under Linux (protection).
+clean. 
+Beware! The full screen editor doesnot work under Linux (protection).
 The system doesn't load it under Linux with forthsamp({8 LOAD}) .
 The program forthprog({wc}) is an example of how to use forthprog({lina}) as a scripting language.
 
@@ -745,6 +953,47 @@ forthitem
 forthitem
 Since I installed a new Red Hat (6.2) figforth crashes. 
 forthendenumerate
+
+@chapter MULTI-USER
+
+The name forthcodeni({USER}) reflects that more than one user could use the dictionary
+and users could share the background storage, 
+provided certain precautions are taken. 
+These precautions are
+forthenumerate
+forthitem 
+Variables that can be different for different users, 
+must be defined as an offset to an area, 
+that is different for each user: the forthdefi({user area}) .
+forthitem
+Provisions that maintains the integrity of the dictionary.
+Different scratchpads for each user.
+forthitem
+Different stacks, user area's and terminal input buffer's for each user.
+forthitem
+A means to switch applications.
+forthendenumerate
+
+Almost nothing from this is realised in the figforth model.
+In fact only 1, but there is the pointer to that area is 
+in the bootup parameters, a design error.
+
+Still forthcode({USER}) variables seem to serve a useful purpose. 
+They are initialised during start up, 
+by changing it one could modify the system.
+This however is only seemingly.
+Because the initialised memory is saved anyway,
+the initial values would be stored even if they
+were ordinary variables.
+So we are left with the disadvantage that we have to store them
+back before saving the system.
+Remains the advantage that they can be restored by typing forthcode({COLD}) .
+This too is hardly an advantage because with the fast mass storage you would 
+rather type forthcode({BYE}) and forthsamp({forth}) as a much safer way 
+to restart your Forth. 
+Furthermore forthcode({COLD}) performs a buggy forthcode({FORGET}) , 
+it cannot reinitalise the dictionary for a system that has active
+glossaries, that remain after a boot.
 
 dnl@node Glossary Index,,,Top
 @unnumbered Program Index
