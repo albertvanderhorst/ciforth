@@ -2,15 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/times.h>
-/* tty.c */
-
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
-/* tty.h */
- 
 #include <termios.h> 
  
+/* The maximum size of a Forth command passed to the OS */
+#define MAX_COMMAND 2000
+
 /* public declarations */ 
 struct ttystate { struct termios tio; }; 
 struct tty      { int fd; struct ttystate org; struct ttystate now; };  
@@ -166,95 +165,6 @@ char reservespace[1000000];
 
 struct tms tm;
 struct tty std_in;
-char str[256];
-
-/* Assume the terminal understands TERM=Linux or TERM=X console codes */
-
-enum
-  {
-    cursor_home,
-    cursor_left,
-    cursor_right,
-    cursor_up,
-    cursor_down,
-    clear_screen,
-    clr_eos,
-    clr_eol,
-    bell,
-    delete_character,
-    delete_line,
-    scroll_forward,
-    scroll_reverse,
-    enter_standout_mode,
-    exit_standout_mode,
-    enter_underline_mode,
-    exit_underline_mode,
-    enter_bold_mode,
-    enter_reverse_mode,
-    enter_blink_mode,
-    exit_attribute_mode
-  };
-
-static char *control_string[] =	/* Some hardcoded console cmds (Linux/XTerm) */
-{"\033[H",			/* ho - home position */
- "\b",				/* le - cursor left */
- "\033[C",			/* nd - right one column */
- "\033[A",			/* up - up one column */
- "\n",				/* do - down one column */
-
- "\033[H\033[J",		/* cl - clear screen and home */
- "\033[J",			/* cd - clear down */
- "\033[K",			/* ce - clear to end of line */
- "\a",				/* bl - bell */
-
- "\033[P",			/* dc - delete character in line */
- "\033[M",			/* dl - delete line from screen */
-
- "\033D",			/* sf - scroll screen up (XTerm ??) */
- "\033M",			/* sr - scroll screen down */
-
- "\033[7m",			/* so - enter standout mode */
- "\033[27m",			/* se - leave standout mode */
- "\033[4m",			/* us - turn on underline mode */
- "\033[m",			/* ue - turn off underline mode */
-
- "\033[1m",			/* md - enter double bright mode */
- "\033[7m",			/* mr - enter reverse video mode */
- "\033[5m",			/* mb - enter blinking mode (XTerm??) */
- "\033[m"			/* me - turn off all appearance modes */
-};
-
-
-
-char *xterm_rawkey_string[] =	/* Strings sent by function keys */
-{
-  "\033[11~",			/* k1 - function keys 1 - 4 */
-  "\033[12~",			/* k2 */
-  "\033[13~",			/* k3 */
-  "\033[14~",			/* k4 */
-  "\033[15~",			/* k5 */
-  "\033[17~",			/* k6 */
-  "\033[18~",			/* k7 */
-  "\033[19~",			/* k8 */
-  "\033[20~",			/* k9 */
-  "\033[21~",			/* k0 */
-
-  "\033OD",			/* kl - arrow left */
-  "\033OC",			/* kr - arrow right */
-  "\033OA",			/* ku - arrow up */
-  "\033OB",			/* kd - arrow down */
-
-  "\033[1~",			/* kh - home key ?? */
-  "\033[4~",			/* kH - end key ?? */
-  "\033[6~",			/* kN - next page */
-  "\033[5~",			/* kP - previous page */
-
-  "\b",				/* kb - backspace key */
-  "\033[3~",			/* kD - delete character key ?? */
-  "\033[2~"			/* kI - insert character key */
-};				/* 21 strings */
-
-char buf[257];
 
 int 
 qkey (void)
@@ -271,8 +181,7 @@ qkey (void)
     return buf;			/* only one */
 }
 
-void 
-emit (int ch)
+void EMIT (int ch)
 {
   fputc (ch, stdout);
   fflush (stdout);
@@ -285,28 +194,32 @@ type (int count, char *addr)
   fflush (stdout);
 }
 
-int 
-shell (int count, char addr[])
+/* Perform ANSI Forth 'SYSTEM' */
+/* Interpret the Forth string (`command',`count') as linux                   */
+/* command and execute it.                                                   */
+int SYSTEM(int count, char command[])
 {
   int i;
-  str[0] = '\0';
-  count &= 0xFF;
-  if (count)
-    for (i = 0; i < count; i++)
-      str[i] = addr[i];
-  str[i] = '\0';
-  return system (str);
+  char buffer[MAX_COMMAND];
+
+  if( MAX_COMMAND-1 > count )
+      return -1;
+
+  strncpy( buffer, command, count);
+  buffer[count]=0;
+  return system (buffer);
 }
 
 typedef int FUNC ();		/* array with I/O functions */
+
 FUNC *call[256] =
 {
   0,                      /* eForth itself */
   qkey,				/*  1   */
-  emit,				/*  2   */
+  EMIT,				/*  2   */
   0,                            /*  3   */
   type,				/*  4   */
-  shell,			/*  5   */
+  SYSTEM,                       /*  5   */
 /* REMAINDER NOT USED IN EFORTH */
 };
 
