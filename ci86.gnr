@@ -2216,6 +2216,7 @@ HEADER({:},{COLON},{DOCOL})
         _SECURITY_({DC      SCSP})
         DC      PWORD
         DC      PCREAT
+        _SECURITY_({DC      LATEST, HIDDEN})
         DC      RBRAC
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-_CELLS(1)]
@@ -2237,7 +2238,7 @@ enddoc)
 HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCSP})
         DC      LIT, SEMIS, COMMA
-        DC      SMUDG
+        _SECURITY_({DC      LATEST, HIDDEN})
         DC      LBRAC
         DC      SEMIS
 ;
@@ -2253,7 +2254,6 @@ enddoc)
 HEADER({CONSTANT},{CONST},{DOCOL})
         DC      PWORD
         DC      PCREAT
-        DC      SMUDG
         DC      LATEST, TPFA, STORE
         DC      PSCOD
 DOCON:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
@@ -2272,7 +2272,6 @@ enddoc)
 HEADER({VARIABLE},{VAR},{DOCOL})
         DC      PWORD
         DC      PCREAT
-        DC      SMUDG
         DC      ZERO, COMMA
         DC      PSCOD
 DOVAR:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
@@ -3033,7 +3032,7 @@ worddoc( {DICTIONARY~},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return the
 flag field.},
 {{'},{>CFA},{>PFA},{>LFA},{>NFA}},
-{{"FRED" (CREATE) SMUDGE ' FRED >FFA DUP @ . SMUDGE @ .},{0 2}},
+{{"FRED" (CREATE) ' FRED >FFA DUP @ . IMMEDIATE @ .},{0 4}},
 enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
         DC      LIT, _CELLS(F_HOFFSET)
@@ -3071,7 +3070,7 @@ to the high level code for a colon-definition, and to the
  forthcode({DOES>}) pointer for a word build using forthcode({CREATE}) .
 In all these cases it directly follows the header.},
 {{'},{>CFA},{>FFA},{>LFA},{>NFA}},
-{{ "APE" (CREATE) SMUDGE HERE ' APE >PFA @ = .},{_T_}},
+{{ "APE" (CREATE) HERE ' APE >PFA @ = .},{_T_}},
 enddoc)
 HEADER({>PFA},{TPFA},{DOCOL})
         DC      LIT, _CELLS(D_HOFFSET)
@@ -3224,17 +3223,23 @@ HEADER({]},{RBRAC},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{SMUDGE},{smudge},{},{FIG},
-{Used during word definition to toggle the "smudge bit" in a
-definitions' name field. This prevents an uncompleted definition
-from being found during dictionary searches, until compiling is
-completed without error.},
-{{IMMEDIATE}},
+worddoc( {DICTIONARY~},{HIDDEN},{hidden},{dea -- },{},
+{Make the word with dictionary entry address forthvar({dea})
+unfindable, by toggling the "smudge bit" in a definitions' flag
+field. If however it was the forthvar({dea}) of an unfindable
+word, it is made findable again.
+_SECURITY_({{Used
+during the definition of a colon word to prevents an
+uncompleted definition from being found during dictionary
+searches, until compiling is completed without error. It also
+prevents that a word can be used recursively.}})
+},
+{{IMMEDIATE},{RECURSE}},
 dnl NOTE: a word starting with e.g. C would be a denotation.
-{{"ZXJEP" 2DUP (CREATE) 2DUP (FIND) . SMUDGE 2DUP (FIND) 0= .},{0 0} },
+{{"ZXJEP" 2DUP (CREATE) 2DUP (FIND) 0= .},{0},
+{LATEST HIDDEN (FIND) .},{0} },
 enddoc)
-HEADER({SMUDGE},{SMUDG},{DOCOL})
-        DC      LATEST
+HEADER({HIDDEN},{HIDDEN},{DOCOL})
         DC      TFFA
         DC      LIT,B_INVIS
         DC      TOGGL
@@ -3324,7 +3329,6 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      PWORD
         DC      PCREAT
         DC      LIT, HLNOOP, COMMA
-        DC      SMUDG
         DC      PSCOD
 DODOE:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
@@ -3975,6 +3979,7 @@ ERRO2:
 });_END_({_LOAD_})
         DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
+        DC      SEMIS
 ;
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
 {Execute forthsamp({xt}). If it executes successfully, i.e. no
@@ -4109,10 +4114,10 @@ creates a dictionary entries with that string
 as the namefield. It is linked into the forthcode({CURRENT}) vocabulary.
 The code field and data field both
 point to the area owned by this header, i.e. immediately following the
-completed header. It leaves the header momentarily unfindable,
-until forthcode({SMUDGE}) is executed.},
+completed header.
+},
 {{CREATE}},
-{{"FRED" (CREATE) SMUDGE ' FRED LATEST = .},{_T_}},
+{{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
 enddoc)
 HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LDUP
@@ -4141,7 +4146,7 @@ CREA1:  DC      DROP
         DC      RR, LIT, _CELLS(DC_HOFFSET), PLUS
         DC      COMMA         ; {Parameter field.}
 
-        DC      LIT, B_INVIS, COMMA ; {Flag field.}
+        DC      ZERO, COMMA ; {Flag field.}
 
         DC      CURR, FETCH, TLFA
         DC      LDUP, FETCH, COMMA   ; {Link field.}
@@ -4555,6 +4560,7 @@ NOOPS:  DC      STATE  ;{ This code may be patched.}
         DC      LTYPE
         DC      CR
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
 worddoc( {INIT},{ABORT},{abort},{},{ISO,FIG,L0},
 {Restart the system. In addition and before the actions of
@@ -7768,6 +7774,7 @@ enddoc)
 HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
         DC      ZERO, ZERO, ZERO, ONE, LINOS
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 });_END_({ _HOSTED_LINUX_})
 ;
 worddoc( {SCREEN},{LIST},{list},{n ---},{ISO,FIG,L0},
