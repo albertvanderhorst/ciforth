@@ -2771,7 +2771,7 @@ worddoc({ERRORS},{?ERROR},{question_error},{f n --},{},
 {  Issue an error message number forthcode({n}) , if the boolean flag is true.},
 {ERROR}, 
 {{0 12 ?ERROR},{}, 
- {0 WARNING !   1 12 ?ERROR},{? MSG # 12},
+ {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? MSG # 12 },
  {CR},{} }, 
 enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
@@ -2785,7 +2785,7 @@ QERR2:  DC      SEMIS
 _SECURITY_({
 worddoc({SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}}, 
-{{0 WARNING !   ?COMP},{? MSG # 11},
+{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? MSG # 11 }, 
  {CR},{} }, 
 enddoc)
 HEADER({?COMP},{QCOMP},{DOCOL})
@@ -2812,7 +2812,7 @@ worddoc({SECURITY},{?PAIRS},{question_pairs},{n1 n2 --},{},
 {Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
 indicates that compiled conditionals do not match.},{{?ERROR}}, 
 {{ 1 1 ?PAIRS},{}, 
-{0 WARNING !  1 2 ?PAIRS},{? MSG # 13},
+{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? MSG # 13 },
  {CR},{} }, 
 {}, 
 enddoc)
@@ -2826,7 +2826,7 @@ worddoc({SECURITY},{?CSP},{question_c_s_p},{},{},
 {Issue error message if stack position differs from value saved in
 forthvar({CSP}) .},{}, 
 {{!CSP ?CSP},{}, 
-{0 WARNING !   !CSP 1 ?CSP},{? MSG # 14},
+{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? MSG # 14 }, 
  {CR},{} }, 
 enddoc)
 HEADER({?CSP},{QCSP},{DOCOL})
@@ -2840,7 +2840,7 @@ HEADER({?CSP},{QCSP},{DOCOL})
 ;
 worddoc({SECURITY},{?LOADING},{question_loading},{},{},
 {Issue an error message if not loading},{{?ERROR}}, 
-{{0 WARNING ! ?LOADING },{? MSG # 16},
+{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? MSG # 16 }, 
  {CR},{} }, 
 enddoc)
 HEADER({?LOADING},{QLOAD},{DOCOL})
@@ -3018,13 +3018,15 @@ HEADER({DOES>},{DOES},{DOCOL})
         DC      STORE
         DC      SEMIS
 ;
-worddoc({STRING},{COUNT},{count},{addr1 --- addr2 n},{L0},
+worddoc({STRING},{COUNT},{count},{addr1 --- addr2 n},{ISO,L0},
 {Leave the byte address forthvar({addr2}) and byte count forthvar({n}) of a message text
 beginning at address forthvar({addr1}) . It is presumed that the first byte at
 forthvar({addr1}) contains the text byte count and the actual text starts with
 the second byte. Alternatively stated, fetch a string constant forthsamp({addr n})
 from the brain damaged string variable at forthsamp({addr1}) .
-},{{TYPE}}, {}, enddoc)
+},{{TYPE}}, 
+{{HERE 3 C, 45 C, 45 C, 45 C, COUNT . HERE - .},{3 -3}},
+enddoc)
 HEADER({COUNT},{COUNT},{DOCOL})
         DC      LDUP
         DC      ONEP
@@ -3034,7 +3036,9 @@ HEADER({COUNT},{COUNT},{DOCOL})
 ;
 worddoc({STRING},{-TRAILING},{dash_trailing},{addr n1 --- addr n2},{},
 {Adjusts the character count forthvar({n1}) of a text string beginning at
-address forthvar({addr}) so as not to contain trailing blanks. },{}, {}, enddoc)
+address forthvar({addr}) so as not to contain trailing blanks. },{}, 
+{{ "    NUKES   " -TRAILING 41 EMIT TYPE 41 EMIT},{A   NUKESA}}, 
+enddoc)
 HEADER({-TRAILING},{DTRAI},{DOCOL})
         DC      LDUP
         DC      ZERO
@@ -3058,12 +3062,18 @@ DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
 worddocsafe({OUTPUT},{."},{dot_quote},{},{P,L0},
 {Used in the form:
   forthsamp({." cccc"})
-Compiles an in-line string forthsamp({cccc}) (delimited by the trailing %) with
+Compiles an in-line string forthsamp({cccc}) (delimited by the trailing ") with
 an execution proceedure to transmit the text to the selected output
 device.
 If executed outside a definition, forthcode({."}) will immediately print the text
-until the final ". In ciforth the number of characters has no limit.},
-{{OUT},{(.")}}, {}, enddoc)
+until the final ". 
+In ciforth the number of characters has no limit and has always an effect
+on forthcode({HERE}) during interpretation.
+In ISO programs you may only use this word during compilation.
+_VERBOSE_({We want forthsamp({." cccc"}) replace by forthsamp({"cccc" $.}).})},
+{{OUT}}}, 
+{{: GS1 ." the end" ; GS1 },{the end}}, 
+enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         DC      LIT, -1, LIN, PSTOR
         DC      DENQ
@@ -3072,6 +3082,21 @@ HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
         _0BRANCH(DOTQ1) ;{ IF}
         DC      COMP
 DOTQ1:                  ;{ ENDIF}
+        DC      LTYPE   
+        DC      SEMIS
+;
+worddocsafe({OUTPUT},{.(},{dot_paren},{},{P,L0},
+{Used in the form:
+  forthsamp({.( cccc)})
+Display the string forthsamp({cccc}) (delimited by the trailing forthkey({}).
+In ciforth the number of characters has no limit.
+_VERBOSE_({We want forthsamp({.( cccc)}) replace by forthsamp({"cccc" $.}).})},
+{{OUT},{."}}, 
+{{.( the end)},{the end}}, 
+enddoc)
+HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
+        DC      LIT, ')'
+        DC      PPARS
         DC      LTYPE   
         DC      SEMIS
 ;
@@ -3381,6 +3406,10 @@ just screen 4. If forthcode({WARNING}) is zero, forthvar({n}) is just printed as
 executed, normally a warm start via forthcode({QUIT}) .},{QERROR}, {}, enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
         DC      WARN
+;{ If you leave the following line out, the test for POSTPONE fails!!}
+;{ AND YES! THIS IS TOTALLY UNCOMPREHENSIBLE. }
+
+        DC      HERE, COUNT, LTYPE 
         DC      FETCH
         DC      ZLESS
         _0BRANCH(ERRO1) ;{IF}
@@ -4373,7 +4402,9 @@ worddoc({SCREEN},{LOAD},,{n ---},{L0},
 interpret screen forthvar({n}) .
 At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input stream.},
-{{-->},{QUIT},{EXIT}}, {}, enddoc)
+{{-->},{QUIT},{EXIT}}, 
+{{." interactive"},{interactive}},
+enddoc)
 HEADER({LOAD},{LOAD},{DOCOL})
         DC      LDUP, THRU
         DC      SEMIS
@@ -4384,7 +4415,9 @@ interpret screen forthvar({n1}) through forthvar({n2})
 (inclusive).
 At the end of the screens, barring errors or forced changes,
 it continues with the interrupted input stream.},
-{{-->},{QUIT},{EXIT}}, {}, enddoc)
+{{-->},{QUIT},{EXIT}}, 
+{{." interactive"},{interactive}},
+enddoc)
 HEADER({THRU},{THRU},{DOCOL})
         DC      BLK, FETCH, TOR
         DC      SAVE
@@ -4409,7 +4442,9 @@ _ISO_IN_({       DC     SOURC, FETCH, NEGATE, LDUP
         DC      SEMIS
 ;
 worddocsafe({SCREEN},{-->},{next_screen},{},{P,L0},
-{Continue interpretation with the next disc screen.},{{LOAD}}, {}, enddoc)
+{Continue interpretation with the next disc screen.},{{LOAD}}, 
+{{." interactive"},{interactive}},
+enddoc)
 HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
         DC      QLOAD
         DC      ONE
