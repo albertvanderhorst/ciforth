@@ -1758,7 +1758,7 @@ DECIMAL
 
 
 
-( OS-IMPORT cd ) REQUIRE CONFIG ?LI \ AvdH A1sep25
+( OS-IMPORT cd ) REQUIRE CONFIG \ AvdH A1sep25
 "SYSTEM" PRESENT? 0= ?LEAVE-BLOCK
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
@@ -1767,14 +1767,14 @@ CREATE cmdbuf 1000 ALLOT
      2@ cmdbuf $! BL cmdbuf $C+ \ Command
      ^J (PARSE) cmdbuf $+!      \ Append
      cmdbuf $@ SYSTEM          \  Execute
-;
-
+;   1 3 +THRU
+?LI
 \ Change directory to SC .
 : cdED PAD $! 0 PAD $C+
 PAD CELL+ HERE HERE 12 LINOS ?ERRUR ;
 \ Idem but string from input.
 : cd (WORD) cdED ;
-( cat echo diff grep list ls make man rm cp ee l ) \ AvdH 
+( cat echo diff grep list ls make man rm cp ee l ) ?LI
 REQUIRE OS-IMPORT       ?LI
 "cat    "   OS-IMPORT cat
 "echo   "   OS-IMPORT echo
@@ -1790,6 +1790,38 @@ REQUIRE OS-IMPORT       ?LI
 "ee     "   OS-IMPORT ee
 "l      "   OS-IMPORT l
 ""          OS-IMPORT !!
+( cat echo list ls cp cd rm edit ) ?PC
+"I-LIKE-DOS" PRESENT? ?LEAVE-BLOCK
+REQUIRE OS-IMPORT
+"TYPE   "   OS-IMPORT cat
+"ECHO   "   OS-IMPORT echo
+"MORE<  "   OS-IMPORT list
+\ "LIST  "   OS-IMPORT list
+"DIR    "   OS-IMPORT ls
+"COPY   "   OS-IMPORT cp
+"DEL    "   OS-IMPORT rm
+"CD     "   OS-IMPORT cd
+"EDIT   "   OS-IMPORT edit
+\ "ee     "   OS-IMPORT ee
+
+
+
+( TYPE ECHO MORE LIST DIR COPY DEL CD EDIT ) ?PC
+"I-LIKE-DOS" PRESENT? 0= ?LEAVE-BLOCK
+REQUIRE OS-IMPORT
+"TYPE   "   OS-IMPORT TYPE
+"ECHO   "   OS-IMPORT ECHO
+"MORE<  "   OS-IMPORT MORE
+\ "LIST   "   OS-IMPORT LIST
+"DIR    "   OS-IMPORT DIR
+"COPY   "   OS-IMPORT COPY
+"DEL    "   OS-IMPORT DEL
+"CD     "   OS-IMPORT CD
+"EDIT   "   OS-IMPORT edit  \ Not to conflict with: BL EDIT
+
+
+
+
 ( EDITOR ) REQUIRE CONFIG   ?PC    \ AvdH A1oct05
 REQUIRE IVAR   REQUIRE +THRU
 REQUIRE VIDEO-MODE   REQUIRE $
