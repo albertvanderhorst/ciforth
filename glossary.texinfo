@@ -60,7 +60,7 @@ worddoc({# },{},{             d1  ---  d2           },{            L0},{
 
 
 worddoc({#>  },{ },{          d  ---  addr  count},{              L0},{
-        Terminates numeric output conversion by dropping @var{d,} leaving the text
+        Terminates numeric output conversion by dropping @var{d}, leaving the text
         address and character count suitable for @code{TYPE}.},{})
 
 
@@ -76,7 +76,7 @@ worddoc({' },{tick},{            ---  addr     },{                  P,L0   },{
         Leaves the parameter field address of dictionary word @var{nnnn}.
         As a compiler directive, executes in a colon-definition to compile
         the address as a literal. If the word is not found after a search of
-        @code{CONTEXT} and @code{CURRENT,} an appropriate error message is given.},{})
+        @code{CONTEXT} and @code{CURRENT} , an appropriate error message is given.},{})
 
 
 worddoc({(},{},{ },{                                              P,L0},{
@@ -115,7 +115,7 @@ worddoc({(DO)  },{},{},{                                           C},{
 
 
 worddoc({(FIND)  },{},{addr1 addr2 --- pfa b tf (ok)
-        addr1 addr2 .--- ff (bad)                   },{
+        addr1 addr2 .--- ff (bad)                   },{},{
         Searches the dictionary starting at the name field address @var{addr2},
         matching to the text at @var{addr1}. Returns parameter field address,
         length byte of name field and boolean true for a good match. If no
@@ -127,7 +127,7 @@ worddoc({(LINE) },{},{n1 n2 --- addr count},{ },{
         text length.                             },{})
 
 
-worddoc({(LOOP)  },{},{},{                                       },{ C2},{
+worddoc({(LOOP)  },{},{                                       },{ C2},{
         The run-time proceedure compiled by LOOP which increments the loop
         index and tests for loop completion.
         },{{LOOP}})
@@ -535,7 +535,7 @@ worddoc({BUFFER},{},{ n --- addr},{},{
         storage.},{})
 
 
-worddoc({C!},{},{},{            b  addr  ---},{},{
+worddoc({C!},{},{            b  addr  ---},{},{
         Store 8 bits at @var{addr} . On word addressing computers, further
         specification is necessary regarding byte addressing.},{})
 
@@ -626,11 +626,11 @@ worddoc({D+-},{},{           d1  n  ---  d2},{},{
         Apply the sign of @var{n} to the double number @var{d1} , leaving it as @var{d2} .},{})
 
 
-worddoc({D.},{},{            d  ---                            },{L1},{
+worddoc({D.},{D-dot},{            d  ---                            },{L1},{
         Print a signed double number from a 32 bit two's complement value.
         The high-order l6 bits are most accessable on the stack. Conversion
         is performed according to the current @code{BASE} . A blank follows.
-        Pronounced D-dot.},{})
+        },{})
 
 
 worddoc({D.R},{},{           d  n  ---},{},{
@@ -750,7 +750,7 @@ worddoc({ELSE},{},{ addr1 n1 --- addr2 n2 (compiling) },{P,C2,L0},{
         resolves the pending forward branch from @code{IF} by calculating the
         offset from @var{addr1} to @code{HERE} and storing at @var{addr1} .},{})
 
-worddoc({EMIT},{          c  ---                            },{L0},{
+worddoc({EMIT},{},{       c  ---                            },{L0},{
         Transmit ascii character @var{c} to the selected output device. @code{OUT} is
         incremented for each character output.},{})
 
@@ -860,7 +860,7 @@ worddoc({HEX},{},{},{                                             L0},{
         Set the numeric conversion base to sixteen (hexadecimal).      },{})
 
 
-worddoc({HLD},{},{},{           ---  addr                        },{L0},{
+worddoc({HLD},{},{           ---  addr                        },{L0},{
         A user variable that holds the address of the latest character of
         text during numeric output conversion.},{})
 
@@ -1011,7 +1011,7 @@ worddoc({M/},{},{              d  n1  ---  n2  n3},{},{
         The  remainder takes its sign from the dividend.},{})
 
 
-worddoc({M/MOD},{ ud1 u2 --- u3 ud4},{},{
+worddoc({M/MOD},{},{ ud1 u2 --- u3 ud4},{},{
         An unsigned mixed magnitude math operation which leaves a double
         quotient @var{ud4} and remainder @var{u3} , from a double dividend ud1 and single
         divisor @var{u2} .},{})
@@ -1048,7 +1048,7 @@ worddoc({MON},{},{},{},{
 
 worddoc({MOVE},{},{ addr1 addr2 n --},{},{
         Move the contents of @var{n} memory cells (l6 bit contents) beginning at
-        @var{addr1} into n cells beginning at @var{addr2} .
+        @var{addr1} into @var{n} cells beginning at @var{addr2} .
         The contents of @var{addr1} is moved first.
         This definition is appropriate on on word addressing computers.},{})
 
@@ -1104,14 +1104,14 @@ worddoc({PAD},{},{            ---   addr                           },{L0},{
         above @code{HERE} .},{})
 
 
-worddoc({PFA},{ nfa --- pfa},{},{
+worddoc({PFA},{},{ nfa --- pfa},{},{
         Convert the name field address of a compiled definition to its
         parameter field address. },{})
 
 
 worddoc({POP},{},{},{},{
         The code sequence to remove a stack value and return to @code{NEXT} . @code{POP} is
-        not directly executable, but is s Forth re-entry point after machine
+        not directly executable, but is a Forth re-entry point after machine
         code.},{})
 
 
@@ -1225,7 +1225,7 @@ worddoc({SP!},{},{},{},{
 
 worddoc({SP@},{},{ --- addr},{},{
         A computer dependent proceedure to return the address of the stack
-        position to the top of the stack, as it was before SP@ was executed.
+        position to the top of the stack, as it was before @code{SP@} was executed.
             (e.g.  @samp{1  2  SP@  @  ...}     would
             type @samp{2  2   1} )},{})
 
@@ -1255,7 +1255,7 @@ worddoc({TASK},{},{},{},{
         in its entirety. },{})
 
 
-worddoc({THEN},{},{},{},{                                        P,CO,L O},{
+worddoc({THEN},{},{},{                                        P,CO,L O},{
         An alias for @code{ENDIF} .},{})
 
 
