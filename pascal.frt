@@ -9,6 +9,8 @@ FORWARD compound-statement
 FORWARD conditional-statement
 FORWARD constant-definition
 FORWARD constant-definition-part
+FORWARD constituent 
+FORWARD dyadic
 FORWARD expression
 FORWARD expression-list
 FORWARD file-type 
@@ -22,8 +24,8 @@ FORWARD function-heading
 FORWARD label-declaration-part
 FORWARD list
 FORWARD main-program-declaration
+FORWARD monadic
 FORWARD number
-FORWARD operator
 FORWARD operator-adding   
 FORWARD operator-exponentiating   
 FORWARD operator-multiplying   
@@ -50,7 +52,8 @@ FORWARD variable-declaration
 FORWARD variable-declaration-part  
 FORWARD while-statement 
 
-
+\ In this bnf the order where in alternatives are states is crucial for the
+\ automatic translation. 
 
 \ An atom is a constant, a variable (accessed) or a function (called)
 \ The identifier determines which of the three. list only with function.
@@ -70,10 +73,12 @@ BNF: compound-statement   `begin' statement-sequence `end' ;BNF
 BNF: conditional-statement   if-statement | case-statement ;BNF
 BNF: constant-definition   identifier `=' expression ;BNF
 BNF: constant-definition-part   `const' constant-definition `;' { constant-definition `;' } ;BNF
-BNF: expression   `(' expression   `)' | ( atom | number ) { operator ( atom | number ) } ;BNF
+BNF: dyadic operator-adding | operator-exponentiating | operator-multiplying | operator-relational ;BNF
+BNF: constituent character-string | `(' expression `)' | atom | number ;BNF
+BNF: expression   [ monadic ] constituent { dyadic expression } ;BNF
 BNF: expression-list   expression { `,' expression } ;BNF
 BNF: file-type     0 SUCCESS ! ;BNF    \ CAN'T DEAL BEHIND THAT
-BNF: for-statement   `for' identifier ( `:=' expression `downto' | `:=' expression `to' | `in' ) expression ;BNF
+BNF: for-statement   `for' identifier ( `:=' expression `downto' | `:=' expression `to' | `in' ) expression `do' statement ;BNF
 BNF: formal-parameter-list [ `var' | `function' | `procedure' | ] identifier-list [ `:' identifier ] ;BNF  
 BNF: formal-parameters `(' formal-parameter-list { `;' formal-parameter-list } `)' ;BNF
 BNF: function-declaration-part   function-heading block `;' ;BNF
@@ -82,24 +87,25 @@ BNF: identifier-list   identifier { `,' identifier } ;BNF
 BNF: if-statement   `if' expression `then' statement [ `else' statement ] ;BNF
 BNF: label-declaration-part   `label' digit-sequence { `,' digit-sequence } `;' ;BNF
 BNF: list   expression { `,' expression } ;BNF
+BNF: monadic operator-adding | `not' ;BNF
 BNF: number [ `+' | `-' ] digit-sequence [ `.' digit-sequence ] [ `e' digit-sequence ] ;BNF
-BNF: operator operator-adding | operator-exponentiating | operator-multiplying | operator-relational ;BNF
-BNF: operator-adding   `+' | `-' ;BNF
+BNF: operator-adding   `+' | `-' | `or' ;BNF
 BNF: operator-exponentiating   `**' | `pow' ;BNF
 BNF: operator-multiplying   `*' | `/' | `div' | `mod' | `and' ;BNF
-BNF: operator-relational   `=' | `<>' | `<' | `<=' | `>=' | `>' | `in' ;BNF
+BNF: operator-relational   `<>' | `<=' | `>=' | `<' | `>' | `=' | `in' ;BNF
 BNF: ordinal-type identifier | `(' identifier-list `)' | expression `..' expression ;BNF
 BNF: program-heading `program' identifier [ `(' identifier-list `)' ] ;BNF
-BNF: program program-heading `;' block ;BNF
+BNF: program program-heading `;' block `.' ;BNF
 \ Here an atom must be a function call. For an assigment types must be compatible.
 BNF: repeat-statement   `repeat' statement-sequence `until' expression ;BNF
 BNF: repetitive-statement   repeat-statement | while-statement | for-statement ;BNF
 BNF: while-statement   `while' expression `do' statement ;BNF
 BNF: simple-statement    atom [ `:=' expression ] | `goto' digit-sequence ;BNF
-\ This one is to try to match a keyword and than fail
+\  "no-keyword" matches everything except keywords that can start a statement, 
+\ but doesn't advance the parse pointer. 
 \ This is the only way to convince "atom" that "else" is not a call to the procedure "else" 
-BNF: skip-keyword ( `begin' | `end' | `if' | `then' | `else' | `while' | `repeat' | `do' | `until' | `to' | `downto' ) SUCCESS @ 0= SUCCESS ! ;BNF
-BNF: statement   [ digit-sequence `:' ] ( structured-statement | skip-keyword simple-statement | ) ;BNF
+BNF: no-keyword ( `begin' | `end' | `if' | `then' | `else' | `while' | `repeat' | `do' | `until' | `to' | `downto' ) SUCCESS @ 0= SUCCESS ! ;BNF
+BNF: statement   [ digit-sequence `:' ] ( structured-statement | no-keyword simple-statement | ) ;BNF
 BNF: statement-sequence   statement { `;' statement } ;BNF
 BNF: structured-statement compound-statement | conditional-statement | repetitive-statement ;BNF    
 BNF: type-definition   identifier `=' type-denoter ;BNF
