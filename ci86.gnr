@@ -2791,7 +2791,7 @@ HEADER({BM},{LBM},{DOCON}, ORG0)
 worddoc( {STORAGE},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
 count read from disc by forthcode({BLOCK}) .
-The ISO standard fixes this to 1024.},{{B/SCR}},
+The ISO standard fixes this to 1024.},{{BUFFER}},
 {{B/BUF .},{400}},
 enddoc)
 HEADER({B/BUF},{BBUF},{DOCON}, KBBUF)
@@ -5156,6 +5156,7 @@ _BLOCKSINFILE_({Opens the file that contains the blocks.})
 {{( No test)},{}},
 enddoc)
 HEADER({COLD},{COLD},{DOCOL})
+        DC      ZERO, HANDLER, STORE
         DC      MTBUF
         DC      FIRST
         DC      STALEST,STORE
@@ -5174,21 +5175,16 @@ _BLOCKSINFILE_({
         DC      FORTH
         DC      DEFIN
 _LINUX_N_({
+        DC      ONE            ; {Sign on wanted.}
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
         ;{ Not a terminal. Cannot set the terminal, get rid of "OK".}
-;        DC      LIT, TDROP    ;{ STTERM becomes 2DROP.}
-;        DC      LIT, STTERM
-;        DC      LIT, _CELLS(3), LCMOVE ; {Patch.}
+        DC      DROP, ZERO      ;{ Sign on suppressed.}
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
-        _BRANCH(COLD2)
-});_END_({_LINUX_N_})
 COLD1:
-        DC      SIGNON    ; {Suppressed for scripting!}
-COLD2:
 ;       Execute option.
         DC      ARGS, FETCH, CELLP, CELLP, FETCH
         DC      LDUP
@@ -5197,16 +5193,21 @@ COLD2:
         DC      LDUP, LIT, 0FFH, LAND
         DC      LIT, '-', UNEQ
         _0BRANCH(COLD3)
-         _STRINGINLINE({Invalid option})
-        DC      LTYPE, CR
-        DC      ONE, ZERO, ZERO, ONE, LINOS
+        DC      LIT, 3, LDUP, MESS, CR ; {Fatal, but can't use ERROR.}
+; { I can't help it. May god have mercy with me. }
+; { I use 'ONE' instead of 'LIT, exit,' to save one cell.}
+        DC      ZERO, ZERO, ONE, LINOS ; {Exit with error 3.}
 COLD3:
         DC      LIT, 8, RSHIFT
         DC      LIT, 1FH, LAND
         DC      LOAD
-        DC      ZERO    ; {Dummy to drop.}
+        DC      ZERO, SWAP ;{ Sign on suppressed.}
 COLD4:
         DC      DROP
+        _0BRANCH(COLD5)
+});_END_({_LINUX_N_})
+        DC      SIGNON    ; {Suppressed for scripting! Or any options.}
+COLD5:
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
@@ -5618,7 +5619,7 @@ incidental text such as report headers.
 If forthcode({WARNING}) is zero, the message will simply be
 printed as a number (disc unavailable).
 If forthcode({WARNING}) is not 1 and there are disk problems:
-Because forthcode({ERROR}) uses forthcode({MESSAGE}) , nothing
+because forthcode({ERROR}) uses forthcode({MESSAGE}) , nothing
 will be printed in case of disk errors, not even that there is
 a disk error. },
 {{ERROR}},
@@ -5630,16 +5631,14 @@ HEADER({MESSAGE},{MESS},{DOCOL})
         DC      LWARN
         DC      FETCH
         _0BRANCH(MESS1) ;{IF}
-        DC      QDUP
-        _0BRANCH(MESS2) ;{IF}
         DC      LIT,4
         DC      DLINE
         DC      SPACE   ;{THEN}
-MESS2:  _BRANCH(MESS3)  ;{ELSE}
+        _BRANCH(MESS2)  ;{ELSE}
 MESS1:  _STRINGINLINE({MSG # })
         DC      LTYPE
         DC      DOT     ;{THEN}
-MESS3:  DC      SEMIS
+MESS2:  DC      SEMIS
 ;
 _PC_({
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
@@ -5819,6 +5818,7 @@ _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0FFH.})},
 {{BUFFER},{R/W},{OFFSET},{UPDATE},{FLUSH}},
 {{!CSP 1 BLOCK FIRST LIMIT WITHIN . ?CSP},{_T_} },
+{{BUFFER},{B/BUF}},
 enddoc)
 HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
@@ -7601,7 +7601,7 @@ worddoc( {STORAGE},{SEC/BLK},{sectors_per_block},{--- c},{},
 {This constant leaves the number of sectors per block. _VERBOSE_(
 The original idea was that a sector forthemph({is}) a block. In
 fact SEC/BLK is set such that B/SRC is one, as is required for ISO.)
-},{{BLOCK},{B/SCR}}, {}, enddoc)
+},{{BLOCK},{B/BUF}}, {}, enddoc)
 HEADER({SEC/BLK},{SPBLK},{DOCON}, SPB)
 ;
 });_END_({_USEBIOS_})
