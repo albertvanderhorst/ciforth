@@ -10,7 +10,7 @@ dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in HEADER, because index must look in the real string,
 dnl not on some variable that contains the string.
 dnl The digression using _squote is needed because the single quote is used in m4.
-define(_squote,'})
+define(_squote,')
 define({_dbquoted},"{$1}")dnl
 define({_sgquoted},'{$1}')dnl
 define({_quoted},{ifelse( -1, index({$1},"),{_dbquoted},{_sgquoted})}({{$1}}))
