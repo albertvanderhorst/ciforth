@@ -233,18 +233,16 @@ GDTLEN EQU GDTSIZE-1      ; {Intel peculiarity.}
 BOOTOFFSET EQU 0
 });_END_({ _SWITCH_})
 
-_LINUX_N_({
+_HOSTED_LINUX_({
 include(constant.m4)
 SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
 RAWIO           EQU     (ECHO _OR_ ICANON)
-        global  _start        ; Entry point
-});_END_({_LINUX_N_})
-
-_LINUX_C_({
+        global  _start        ; Entry point. dnl
+_LINUX_C_({Called from c. Remainder c-routines to be called from here.})
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init, c_debug
-        global  ciforth,_start        ; Called from c. Remainder c-routines to be called from here.
-});_END_({_LINUX_C_})
+        global  ciforth
+});_END_({ _HOSTED_LINUX_})
 
 _HOSTED_LINUX_({
         section forth progbits write exec alloc
@@ -954,6 +952,7 @@ TNEXT3: LODSW           ;{ AX <- (IP)}
         JMP     SHORT   NEXT1
 });_END_({_OLDDEBUG_ })
         PAGE
+_PC_({
 _NEWDEBUG_({
 DISPLAYSI:
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -978,6 +977,7 @@ DISPLAYSI:
         RET
 ;
 });_END_({_NEWDEBUG_ })
+});_END_({_PC_ })
 ;
 _OLDDEBUG_({ _COMMENT
     Patch the code from NEXT:  ( using a debugger ) with a
@@ -997,7 +997,7 @@ _NEWDEBUG_({
 });_END_({_LINUX_C_})
         LODSW           ;{AX <- (IP)}
 NEXT1:  MOV     WR,AX   ;{ (WR) <- (IP)}
-_NEWDEBUG_({ CALL    DISPLAYSI})
+_PC_({_NEWDEBUG_({ CALL    DISPLAYSI})})
         JMP     _CELL_PTR[WR]    ;{ TO `CFA'}
 ;
 ;{       Dictionary starts here.}
@@ -6051,8 +6051,40 @@ CODE_HEADER({LINOS5},{LINOS5})
         MOV     SI,[BP]    ;{ Restore}
         LEA     BP,[BP+_CELLS(1)]
         _PUSH     ; Positive means okay. Negative means -errno.
+;
+worddoc( {OPERATINGSYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
+{Handle the error forthsamp({errno}) by interpreting it as returned from a
+Linux system call. If it is negative, error forthvar({errno}) is displayed and the word
+is aborted.
+},{{?ERROR}},
+{
+{0 ?LINUX-ERROR 1 ?LINUX-ERROR},{},
+{0 WARNING ! -20 ?LINUX-ERROR },
+{ ! -20 ?LINUX-ERROR ? MSG # -20},
+{CR},{},
+},
+enddoc)
+HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
+        DC      ZERO, MIN, THROW
+        DC      SEMIS
+;
+worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
+{ Wait for forthvar({n1}) miliseconds. },
+{{KEY?}},
+{{ 123 10 MS . },{123}},
+enddoc)
+HEADER({MS},{MS},{DOCOL})
+        DC      LIT, 1000, SLMOD
+        DC      LIT, TV, TSTOR
+        DC      ZERO, ZERO
+        DC      ZERO, ZERO
+        DC      LIT, TV
+        DC      LIT, _newselect, LINOS5
+        DC      QLERR
+        DC      SEMIS
+TV:     _RESB   8
+;
 });_END_({ _HOSTED_LINUX_})
-
 _PC_({
              ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{LSMALL},{DOCOL})
@@ -6066,6 +6098,42 @@ HEADER({SMALL},{LSMALL},{DOCOL})
 ;{       SYSTEM DEPENDANT CHAR I/O}
 ;{------------------------------------}
 _MODERN_({
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+{Transmit ascii character forthvar({c}) to the output device.
+forthcode({OUT}) is incremented for each character output
+and reset by a LF.
+.},{{OUT}}, {}, enddoc)
+HEADER({EMIT},{EMIT},{DOCOL})
+        DC      LDUP,LIT,LF,EQUAL
+        _0BRANCH(EMIT1)
+        DC      LIT,ACR,EMIT
+        DC      ZERO,LOUT,STORE
+EMIT1:
+        DC      SPFET, ONE, LTYPE
+        DC      DROP
+        DC      SEMIS
+;
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+{Leave the ascii value of the next terminal key struck.},
+{ACCEPT},{KEY?}, {}, enddoc)
+HEADER({KEY},{KEY},{DOCOL})
+        DC         LIT, 1000H, ZERO, ZERO, ZERO
+        DC         LIT, 0016H, BIOS
+        DC         DROP,DROP,DROP,DROP
+        DC         LIT, 00FFH, LAND, SEMIS
+;
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
+{Perform a test of the terminal keyboard for a break request.
+Any key pressed is interpreted as such and the key is not consumed.
+A true flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
+HEADER({KEY?},{KEYQ},DOCOL)
+        DC      LIT,0B00H
+        DC      ZERO,ZERO,ZERO
+        DC      BDOS, DROP ;{ ignore error }
+        DC      DROP, DROP, DROP
+        DC      LIT, 01H, LAND
+        DC      SEMIS
+;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit count characters from forthvar({addr}) to the output device.
 All terminal I/O goes through this word. It's first word is a forthcode({NOOP}) so terminal
@@ -6089,22 +6157,7 @@ _BITS32_({        DC      LIT, TYPEBUF })
         DC      SEMIS
 _BITS32_({TYPEBUF:  _RESB    0400H })
 ;
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
-{Transmit ascii character forthvar({c}) to the output device.
-forthcode({OUT}) is incremented for each character output
-and reset by a LF.
-.},{{OUT}}, {}, enddoc)
-HEADER({EMIT},{EMIT},{DOCOL})
-        DC      LDUP,LIT,LF,EQUAL
-        _0BRANCH(EMIT1)
-        DC      LIT,ACR,EMIT
-        DC      ZERO,LOUT,STORE
-EMIT1:
-        DC      SPFET, ONE, LTYPE
-        DC      DROP
-        DC      SEMIS
-;
-worddoc( {INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
+worddoc( {INPUT~},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) , until a "return"
 or a number of forthsamp({count}) characters have been received.
 Rely on the operating system for input editing.
@@ -6129,40 +6182,10 @@ _BITS32_({        DC      TOR, LDUP, LIT, EXPECTBUF, SWAP, RR, LCMOVE, FROMR })
         DC      SEMIS
 _BITS32_({EXPECTBUF:  _RESB    0100H })
 ;
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
-{Leave the ascii value of the next terminal key struck.},
-{ACCEPT},{KEY?}, {}, enddoc)
-HEADER({KEY},{KEY},{DOCOL})
-        DC         LIT, 1000H, ZERO, ZERO, ZERO
-        DC         LIT, 0016H, BIOS
-        DC         DROP,DROP,DROP,DROP
-        DC         LIT, 00FFH, LAND, SEMIS
-;
-worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
-{Perform a test of the terminal keyboard for a break request.
-Any key pressed is interpreted as such and the key is not consumed.
-A true flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
-HEADER({KEY?},{KEYQ},DOCOL)
-        DC      LIT,0B00H
-        DC      ZERO,ZERO,ZERO
-        DC      BDOS, DROP ;{ ignore error }
-        DC      DROP, DROP, DROP
-        DC      LIT, 01H, LAND
-        DC      SEMIS
-;
 });_END_({_MODERN_})
 _LINUX_C_({
 ;{ Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
-{Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through this word.
-forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
-CODE_HEADER({TYPE},{LTYPE},DOCOL)
-        CALL    c_type
-        LEA     ESP,[ESP+_CELLS(2)]    ; remove input
-        _NEXT
-;
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) ,
 until a "RET" is received.
@@ -6192,75 +6215,20 @@ CODE_HEADER({KEY?},{KEYQ})
         PUSH    EAX
         _NEXT
 ;
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+{Transmit count characters from forthvar({addr}) to the output device.
+All terminal I/O goes through this word.
+forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
+CODE_HEADER({TYPE},{LTYPE},DOCOL)
+        CALL    c_type
+        LEA     ESP,[ESP+_CELLS(2)]    ; remove input
+        _NEXT
+;
 });_END_({_LINUX_C_})
 _LINUX_N_({
 ;{ All I/O goes through the modern device (unix-standard)}
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
-worddoc( {OPERATINGSYSTEM},{?LINUX-ERROR},{query_linux_error},{errno ---},{},
-{Handle the error forthsamp({errno}) by interpreting it as returned from a
-Linux system call. If it is negative, error forthvar({errno}) is displayed and the word
-is aborted.
-},{{?ERROR}},
-{
-{0 ?LINUX-ERROR 1 ?LINUX-ERROR},{},
-{0 WARNING ! -20 ?LINUX-ERROR },
-{ ! -20 ?LINUX-ERROR ? MSG # -20},
-{CR},{},
-},
-enddoc)
-HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
-        DC      ZERO, MIN, THROW
-        DC      SEMIS
-;
-worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
-{Leave the address of the terminal description, this has the layout of
-a c-structure forthsamp({termio}) .
-},{{SET-TERM}},
-{{." interactive"},{interactive}},
-enddoc)
-HEADER({TERMIO},{TERMIO},{DOVAR}, )
-        _RESB    SIZE_TERMIO     ; Filled induring cold boot.
-;
-worddoc( {INPUT~},{SET-TERM},{set_term},{len b --- },{},
-{Set the terminal length to forthsamp({len}) and toggle the c_lflag field
-with forthvar({b}) in the termio structure forthcode({TERMIO}) .
-In particular toggling with 0AH makes that
-the terminal doesn't wait for a forthkey({RET}).
-This word is invalid for pipes, and is replaced by
-a forthcode({2DROP}) in that case.
-},{{SET-TERM}},
-{{." interactive"},{interactive}},
-enddoc)
-HEADER({SET-TERM},{STTERM},{DOCOL})
-        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(3)
-        DC      SWAP, TOGGL
-        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(4)+7
-        DC      CSTOR
-        DC      ZERO, LIT, TCSETS, TERMIO
-        DC      LIT, ioctl, LINOS, QLERR
-        DC      SEMIS
-;
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
-{Transmit forthvar({count}) characters from forthvar({addr}) to
-the output device. All terminal I/O goes through this word. It
-is high level so terminal I/O can be redirected, by
-forthdefi({revectoring}) it _VERBOSE_({{and the usual
-redirection or forthsamp({tee})-ing by Linux}}). In this
-ciforth strings may contain embedded forthkey({LF}) 's with the
-effect of a new line at that point in the output, however in
-that case forthcode({OUT}) is not observed. },
-{{EMIT},{OUT}},
-{{HERE 41 C, 42 C, 2 TYPE},{AB}},
-enddoc)
-HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      LDUP, LOUT, PSTORE
-        DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
-        DC      LIT, write
-        DC      LINOS
-        DC      DROP
-        DC      SEMIS
-;
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthsamp({count}) characters from the
 terminal to address, until a forthkey({RET}) is received. The
@@ -6386,7 +6354,7 @@ HEADER({KEY?},{KEYQ},{DOCOL})
         DC      ONE, OVER, STORE ;{ Waiting for standard in.}
         DC      ZERO, ZERO  ;{ Not output, not events.}
         DC      ZERO, ZERO
-        DC      LIT, TV, TSTOR ;{ Time out of zero.}
+        DC      LIT, TV, TSTOR ;{ Time out of zero. See MS.}
         DC      LIT, TV
         DC      LIT, _newselect, LINOS5
         DC      LDUP,  QLERR
@@ -6395,21 +6363,53 @@ HEADER({KEY?},{KEYQ},{DOCOL})
         DC      SEMIS
         _ALIGN  4
 RFDS:   _RESB   128     ;{32 channels maximum.}
-TV:     _RESB   8
 ;
-worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n1 ---},{ISO},
-{ Wait for forthvar({n1}) miliseconds. },
-{{KEY?}},
-{{ 123 10 MS . },{123}},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+{Transmit forthvar({count}) characters from forthvar({addr}) to
+the output device. All terminal I/O goes through this word. It
+is high level so terminal I/O can be redirected, by
+forthdefi({revectoring}) it _VERBOSE_({{and the usual
+redirection or forthsamp({tee})-ing by Linux}}). In this
+ciforth strings may contain embedded forthkey({LF}) 's with the
+effect of a new line at that point in the output, however in
+that case forthcode({OUT}) is not observed. },
+{{EMIT},{OUT}},
+{{HERE 41 C, 42 C, 2 TYPE},{AB}},
 enddoc)
-HEADER({MS},{MS},{DOCOL})
-        DC      LIT, 1000, SLMOD
-        DC      LIT, TV, TSTOR
-        DC      ZERO, ZERO
-        DC      ZERO, ZERO
-        DC      LIT, TV
-        DC      LIT, _newselect, LINOS5
-        DC      QLERR
+HEADER({TYPE},{LTYPE},{DOCOL})
+        DC      LDUP, LOUT, PSTORE
+        DC      ONE, ROT, ROT   ; filedescriptor 1 for standard output.
+        DC      LIT, write
+        DC      LINOS
+        DC      DROP
+        DC      SEMIS
+;
+worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
+{Leave the address of the terminal description, this has the layout of
+a c-structure forthsamp({termio}) .
+},{{SET-TERM}},
+{{." interactive"},{interactive}},
+enddoc)
+HEADER({TERMIO},{TERMIO},{DOVAR}, )
+        _RESB    SIZE_TERMIO     ; Filled induring cold boot.
+;
+worddoc( {INPUT~},{SET-TERM},{set_term},{len b --- },{},
+{Set the terminal length to forthsamp({len}) and toggle the c_lflag field
+with forthvar({b}) in the termio structure forthcode({TERMIO}) .
+In particular toggling with 0AH makes that
+the terminal doesn't wait for a forthkey({RET}).
+This word is invalid for pipes, and is replaced by
+a forthcode({2DROP}) in that case.
+},{{SET-TERM}},
+{{." interactive"},{interactive}},
+enddoc)
+HEADER({SET-TERM},{STTERM},{DOCOL})
+        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(3)
+        DC      SWAP, TOGGL
+        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(4)+7
+        DC      CSTOR
+        DC      ZERO, LIT, TCSETS, TERMIO
+        DC      LIT, ioctl, LINOS, QLERR
         DC      SEMIS
 ;
 });_END_({_LINUX_N_})
@@ -6466,6 +6466,41 @@ _CLASSIC_({
 ;{ CI CHO CSTAT. They could be collapsed into the }
 ;{ code definitions, but this way they are available}
 ;{ to be called from code. And the high level words can be revectored }
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+{Transmit ascii character forthvar({c}) to the terminal.
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthdefi({revectoring}) it.
+forthcode({OUT}) is incremented for each character output and reset for
+a carriage return.
+Note that in this ciforth (``classical FIG'') terminal I/O mainly
+uses BDOS, where disk I/O uses the BIOS.
+},{{TYPE},{OUT}}, {}, enddoc)
+HEADER({EMIT},{EMIT},{DOCOL})
+        DC      PEMIT
+        DC      ONE,LOUT
+        DC      PSTORE,SEMIS
+PEMIT   DC      $+_CELLS(1)
+        POP     AX      ;{GET CHAR}
+        CMP     AL,LF   ;{ Precede ^J with ^M}
+        JNE     PEMIT1
+        MOV     _CELL_PTR[_VAR_FIELD(LOUT)],0H
+        MOV     AL,ACR
+        CALL    CHO
+        MOV     AL,LF
+        ;{ Bizar, without the colon MASM reports error.}
+PEMIT1: CALL    CHO    ;{CHAR OUTPUT}
+        _NEXT
+CHO     PROC    NEAR
+        PUSH    DX
+        PUSH    AX      ;{SAVE CHAR}
+        MOV     DL,AL   ;{CHAR TO WRITE}
+        MOV     AH,2    ;{CHAR OUT FUNCTION}
+        INT     21H     ;{DOS}
+        POP     AX
+        POP     DX
+        RET
+_ENDP CHO     ENDP
+;
 worddoc( {INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) ,
 until a "return" or a number of forthsamp({count}) characters have been
@@ -6536,62 +6571,6 @@ CI      PROC    NEAR
         RET
 _ENDP CI      ENDP
 ;
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
-{Transmit forthsamp({count}) characters from forthvar({addr}) to the
-terminal.
-In this ciforth all terminal I/O goes through forthcode({EMIT}), so
-forthcode({OUT}) is observed.},{{EMIT},{OUT}}, {}, enddoc)
-HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      QDUP
-        _0BRANCH(TYPE1) ;{ IF}
-        DC      OVER
-        DC      PLUS
-        DC      SWAP
-        _DO(TYPE4)
-TYPE2:  DC      IDO
-        DC      CFET
-        DC      EMIT
-        _LOOP(TYPE2)    ;{ LOOP}
-TYPE4:
-        _BRANCH(TYPE3)  ;{ ELSE}
-TYPE1:  DC      DROP    ;{ THEN}
-TYPE3:  DC      SEMIS
-;
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
-{Transmit ascii character forthvar({c}) to the terminal.
-All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthdefi({revectoring}) it.
-forthcode({OUT}) is incremented for each character output and reset for
-a carriage return.
-Note that in this ciforth (``classical FIG'') terminal I/O mainly
-uses BDOS, where disk I/O uses the BIOS.
-},{{TYPE},{OUT}}, {}, enddoc)
-HEADER({EMIT},{EMIT},{DOCOL})
-        DC      PEMIT
-        DC      ONE,LOUT
-        DC      PSTORE,SEMIS
-PEMIT   DC      $+_CELLS(1)
-        POP     AX      ;{GET CHAR}
-        CMP     AL,LF   ;{ Precede ^J with ^M}
-        JNE     PEMIT1
-        MOV     _CELL_PTR[_VAR_FIELD(LOUT)],0H
-        MOV     AL,ACR
-        CALL    CHO
-        MOV     AL,LF
-        ;{ Bizar, without the colon MASM reports error.}
-PEMIT1: CALL    CHO    ;{CHAR OUTPUT}
-        _NEXT
-CHO     PROC    NEAR
-        PUSH    DX
-        PUSH    AX      ;{SAVE CHAR}
-        MOV     DL,AL   ;{CHAR TO WRITE}
-        MOV     AH,2    ;{CHAR OUT FUNCTION}
-        INT     21H     ;{DOS}
-        POP     AX
-        POP     DX
-        RET
-_ENDP CHO     ENDP
-;
 worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 {Perform a test of the terminal keyboard for a break request.
 Any key pressed is interpreted as such and the key is not consumed.
@@ -6614,8 +6593,39 @@ CSTAT   PROC    NEAR
         POP     DX
 STATRT: RET
 _ENDP CSTAT   ENDP
+;
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+{Transmit forthsamp({count}) characters from forthvar({addr}) to the
+terminal.
+In this ciforth all terminal I/O goes through forthcode({EMIT}), so
+forthcode({OUT}) is observed.},{{EMIT},{OUT}}, {}, enddoc)
+HEADER({TYPE},{LTYPE},{DOCOL})
+        DC      QDUP
+        _0BRANCH(TYPE1) ;{ IF}
+        DC      OVER
+        DC      PLUS
+        DC      SWAP
+        _DO(TYPE4)
+TYPE2:  DC      IDO
+        DC      CFET
+        DC      EMIT
+        _LOOP(TYPE2)    ;{ LOOP}
+TYPE4:
+        _BRANCH(TYPE3)  ;{ ELSE}
+TYPE1:  DC      DROP    ;{ THEN}
+TYPE3:  DC      SEMIS
+;
 });_END_({_CLASSIC_})
 _USEBIOS_({
+worddocsafe( {OUTPUT},{(EMIT)},{paren_emit},{c ---},{},
+{Just transmit ascii character forthvar({c}) to the terminal
+by a BIOS call.
+},{{EMIT}}, {}, enddoc)
+HEADER({(EMIT)},{PEMIT},{DOCOL})
+             DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
+             DC      LIT, 0010H, BIOS
+             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+;
 worddoc( {INPUT},{EXPECT},{expect},{addr count ---},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) ,
 until a "return" or a number of forthsamp({count}) characters have been
@@ -6674,6 +6684,23 @@ EXPE8:
         DC      DROP
         DC      SEMIS
 ;
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+{Transmit ascii character forthvar({c}) to the terminal.
+All terminal I/O goes through this word. It is high level so terminal
+I/O can be redirected, by forthdefi({revectoring}) it.
+forthcode({OUT}) is incremented for each character output and reset for
+a carriage return.
+},{{TYPE},{OUT}}, {}, enddoc)
+HEADER({EMIT},{EMIT},{DOCOL})
+             DC      ONE,LOUT,PSTORE
+             DC      LIT, 07FH, LAND
+             DC      LDUP,LIT,LF,EQUAL
+             _0BRANCH(EMIT1)
+             DC      LIT,ACR,PEMIT
+             DC      ZERO,LOUT,STORE
+EMIT1:       DC      PEMIT
+             DC      SEMIS
+;
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ascii value of the next terminal key struck.},{}, {}, enddoc)
 HEADER({KEY},{KEY},{DOCOL})
@@ -6681,6 +6708,27 @@ HEADER({KEY},{KEY},{DOCOL})
              DC         LIT, 0016H, BIOS
              DC         DROP,DROP,DROP,DROP
              DC         LIT, 00FFH, LAND, SEMIS
+;
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
+{Perform a test of the terminal keyboard for a break request.
+Any key pressed is interpreted as such and the key is not consumed.
+A true flag indicates actuation. },
+{{KEY},{ACCEPT}}, {}, enddoc)
+HEADER({KEY?},{KEYQ},{DOCOL})
+             DC      LIT, 01100H, ZERO, ZERO, ZERO
+             DC      LIT, 016H, BIOS
+             DC      LIT, 040H, LAND, ZEQU, TOR
+             DC      DROP, DROP, DROP, DROP
+             DC      FROMR, SEMIS
+;
+worddoc( {OUTPUT},{POUT)},{p_out},{c ---},{},
+{Just transmit ascii character forthvar({c}) to the printer
+by a BIOS call. forthcode({OUT}) is not observed.
+},{{EMIT}}, {}, enddoc)
+HEADER({POUT},{POUT},{DOCOL})
+             DC      ZERO, ZERO, ZERO
+             DC      LIT, 0017H, BIOS
+             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit count characters from forthvar({addr}) to the output device.
@@ -6700,55 +6748,6 @@ TYPE2:       DC      IDO,    CFET,    EMIT
 TYPE4:
 TYPE1:       DC      DROP
 TYPE3:       DC      SEMIS
-;{            }
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
-{Transmit ascii character forthvar({c}) to the terminal.
-All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthdefi({revectoring}) it.
-forthcode({OUT}) is incremented for each character output and reset for
-a carriage return.
-},{{TYPE},{OUT}}, {}, enddoc)
-HEADER({EMIT},{EMIT},{DOCOL})
-             DC      ONE,LOUT,PSTORE
-             DC      LIT, 07FH, LAND
-             DC      LDUP,LIT,LF,EQUAL
-             _0BRANCH(EMIT1)
-             DC      LIT,ACR,PEMIT
-             DC      ZERO,LOUT,STORE
-EMIT1:       DC      PEMIT
-             DC      SEMIS
-;{            }
-worddocsafe( {OUTPUT},{(EMIT)},{paren_emit},{c ---},{},
-{Just transmit ascii character forthvar({c}) to the terminal
-by a BIOS call.
-},{{EMIT}}, {}, enddoc)
-HEADER({(EMIT)},{PEMIT},{DOCOL})
-             DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
-             DC      LIT, 0010H, BIOS
-             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
-
-;
-worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
-{Perform a test of the terminal keyboard for a break request.
-Any key pressed is interpreted as such and the key is not consumed.
-A true flag indicates actuation. },
-{{KEY},{ACCEPT}}, {}, enddoc)
-HEADER({KEY?},{KEYQ},{DOCOL})
-             DC      LIT, 01100H, ZERO, ZERO, ZERO
-             DC      LIT, 016H, BIOS
-             DC      LIT, 040H, LAND, ZEQU, TOR
-             DC      DROP, DROP, DROP, DROP
-             DC      FROMR, SEMIS
-
-             ;{ Output to PRN }
-worddoc( {OUTPUT},{POUT)},{p_out},{c ---},{},
-{Just transmit ascii character forthvar({c}) to the printer
-by a BIOS call. forthcode({OUT}) is not observed.
-},{{EMIT}}, {}, enddoc)
-HEADER({POUT},{POUT},{DOCOL})
-             DC      ZERO, ZERO, ZERO
-             DC      LIT, 0017H, BIOS
-             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
 ;
 });_END_({_USEBIOS_})
         PAGE
