@@ -244,10 +244,9 @@ MAXCHUNK        EQU    1024 *100000H /CHUNKSIZE
 
 _HOSTED_DPMI_({
 ;{DPMI segment defines.}
-;{ The Big and Granularity bits are complemented}
-;{ on switching to 32 bits mode in 6th byte.}
-;{For the moment, if we only can switch to 16 bit code...}
-IDENTIFY_TOGGLE EQU 040H
+;{We can't aim for better than level privilege level 3.}
+IDENTIFY_TOGGLE EQU 040H   ;{ The Big and Granularity bits are complemented}
+                            ;{ on switching to 32 bits mode in 6th byte.}
 });_END_({_HOSTED_DPMI_})
 _SWITCH_({
 ;{ Segments   @ Valid in real mode % Valid in protected mode }
@@ -301,9 +300,11 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.})
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init, c_debug
         global  ciforth
+});_END_({ _HOSTED_LINUX_})
 
+_HOSTED_LINUX_({
         section forth progbits write exec alloc
-
+        PAGE
 });_END_({ _HOSTED_LINUX_})
 
 ; ########################################################################################
@@ -780,12 +781,11 @@ ORIG:                         ; Accommodate also .exe files
 ;
 ; Check to see if DPMI is available, and make the switch if it is
 ; If one is, the stat info is stored.
-
+            MOV     BL,1
             MOV     AX,1687h            ;Get DPMI host address
             INT     2Fh                 ;Multiplex interrupt
 
             CMP     AX,0                ;Was it there?
-            MOV     AL,1
             JNE     ERRMSG              ;Nope, so exit
 
             AND     BL,1                ;Test bit 1 (32-bit OK?)
@@ -802,19 +802,16 @@ ORIG:                         ; Accommodate also .exe files
             JE      Plunge              ;No, so continue
             MOV     AH,48h              ;Allocate memory
             INT     21h
-
-            MOV     AL,2
+            MOV     BL,2
             JC      ERRMSG              ;Could not allocate
 
 Plunge:     MOV     ES,AX
             MOV     AX,0        ;{Always 16 bit mode, to start.}
             _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
-
-            MOV     AL,3
+            MOV     BL,3
             JC      ERRMSG      ;still in real mode
 
             JMP     DPMISUCCESS
-
 ; Data used by check DPMI.
 
 Flag32      DB      00
@@ -825,10 +822,14 @@ DPMIentry   DW      0000,0000
 Scratch     _RESB(8)
 
 ;Error-- called from diverse places.
-; This code works in 32 bits (!)
+           MOV     AL, BL ; {Use the infamous errorlevel.}
 ERRMSG:
            MOV     AH,4CH
            INT     21H
+; The error number is patched!
+EMsg       DB      'ciforth DPMI : ERROR #',ACR,ALF
+EMsgS      EQU     $-EMsg
+
 
 ; If we reach this point, we are operating in protected mode
 DPMISUCCESS:
@@ -836,17 +837,15 @@ DPMISUCCESS:
             MOV     AX,000AH            ;{Alias for LDT descriptor.}
             MOV     BX,CS
             INT     31H
+            MOV     BL,4
             MOV     CX,AX
-
-            MOV     AL,4
             JC      ERRMSG             ;{Could not allocate.}
 
             MOV     AX,000AH            ;{Alias for LDT descriptor.}
             MOV     BX,CS
             INT     31H
+            MOV     BL,5
             MOV     DX,AX
-
-            MOV     AL,5
 ERRMSG2:    JC      ERRMSG             ;{Could not allocate.}
 
 ; -------------- Adapt the segments to 32 bits --------
@@ -854,46 +853,40 @@ ERRMSG2:    JC      ERRMSG             ;{Could not allocate.}
 
             LEA     DI,[Scratch]
             MOV     AX,000BH            ;{Get Description.}
-            MOV     BX,CS
+            MOV     BX,CX
             INT     31H
-
-            MOV     AL,6
+            MOV     BL,6
             JC      ERRMSG2
-
             MOV     AL,[DI+6]
-            XOR     AL, IDENTIFY_TOGGLE
+_BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
+            MOV     AL,0FAH
+            MOV     [DI+5],AL
             MOV     [DI+6],AL
             MOV     AX,000CH            ;{Set Description.}
             MOV     BX,CX
             INT     31H
-
-            MOV     AL,7
+            MOV     BL,7
             JC      ERRMSG2
 
             MOV     AX,000BH            ;{Get Description.}
             MOV     BX,DX
             INT     31H
-            MOV     AL,8
+            MOV     BL,8
             JC      ERRMSG2
             MOV     AL,[DI+6]
-            XOR     AL, IDENTIFY_TOGGLE
+_BITS32_({  XOR     AL, IDENTIFY_TOGGLE },{dnl})
             MOV     [DI+6],AL
             MOV     AX,000CH            ;{Set Description.}
             MOV     BX,DX
             INT     31H
-            MOV     AL,9
+            MOV     BL,9
             JC      ERRMSG2
 
 ; -------------- Use the alias descriptors for CS and DS --------
-           LEA     AX, [SWITCHTO32]
-           MOV     [DPMIentry+0],AX
-           MOV     [DPMIentry+2],CX
-            _CALL_FAR_INDIRECT(DPMIentry) ;Switch to protected mode
-SWITCHTO32:             ;{32 bit code, 16 bit data.}
-;{The following shows that the switch was succesful, more there is not.}
-            DB  66H     ;{Use a 16 bit instruction in 32 bit mode.}
-            MOV AX,4C0AH
-            INT 21H
+            MOV     ES,CX       ;{CX -> ES -> CS}.
+            ES
+            JMP     SWITCHSEG
+SWITCHSEG:
             MOV     DS,DX
             MOV     ES,DX
             MOV     SS,DX
@@ -955,10 +948,6 @@ ciforth:
 _start:
 });_END_({_LINUX_N_})
 
-_HOSTED_DPMI_({
-            MOV     AL,10
-            JMP      ERRMSG2
-});_END_({_HOSTED_DPMI_})
         CLD                     ;{ DIR = INC}
         _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
         MOV     SPO,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
