@@ -170,6 +170,24 @@ forthvar({MOVE MON BLOCK-READ BLOCK-WRITE DLIST}) are not present.
 Altering OUT to influence formatting doesn't work here, nor on 
 any figforth I know off.
 
+forthcode({+ORIGIN}) now points to the first user
+variable instead to some not well defined start of the boot image.
+The layout has not changed, so the negative offsets can be used for
+the other data traditionally there.
+ Their indices have not changed, but there is now a bootup
+parameter for each and every user variable. A system with other boot
+parameters can now be generated in an even more portable fashion by using
+phrase like forthsamp({7 CELLS +ORIGIN}).
+
+Where possible installation dependant code is using a generic call to the
+operating system in particular MSDOS BIOS or LINOS. This mostly results in
+the installation dependant code to be high level. 
+
+The false urban legend that one could forthcodeni({FORGET}) forthcodeni({TASK}) 
+has been replaced by an accurate description of forthcodeni({TASK}).
+The following words have been documented for the first time:
+forthcodeni({FLUSH}) forthcodeni({CURRENT}) forthcodeni({2DUP}) forthcodeni({RP_comat_}) forthcodeni({U.}). 
+
 Some non-substantial deviation of the original FIG source have been made
 for good reasons. 
 
