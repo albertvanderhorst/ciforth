@@ -22,6 +22,7 @@
 REQUIRE Z$@
 REQUIRE -LEADING
 REQUIRE COMPARE
+REQUIRE POSTFIX
 
 \ This is used as an invalid index into an array to indicate that
 \ there was no array item at all.
@@ -105,26 +106,44 @@ CREATE #DIAGNOSES @ 0 DO ^J $S #QUESTIONS @ GET-NUMBERS SPARE CELLS ALLOT LOOP
        STRIDE @ SPARE * ALLOT
 DOES> ROT STRIDE @ * + SWAP CELLS + ;
 
+"DIAGNOSES" (CREATE)
+"QUESTIONS" (CREATE)
+"YESSES"    (CREATE)
+"NOES"      (CREATE)
+"?ES"       (CREATE)
 
-"database" GET-FILE
+\ Read the database from file with NAME .
+: READ-DATABASE
+    GET-FILE
 
-    ^J $S atoi    DUP #DIAGNOSES !  $ARRAY DIAGNOSES
-    ^J $S atoi    DUP #QUESTIONS !  $ARRAY QUESTIONS
+    ^J $S atoi    DUP #DIAGNOSES !
+    "DIAGNOSES*" POSTFIX $ARRAY
+    LATEST 'DIAGNOSES ^ 3 CELLS MOVE
+    ^J $S atoi    DUP #QUESTIONS !
+    "QUESTIONS*" POSTFIX $ARRAY
+    LATEST 'QUESTIONS ^ 3 CELLS MOVE
+
     #QUESTIONS @ SPARE + CELLS STRIDE !
 
     ^J $S CR TYPE   \ Show potential problems.
 
-    ANSWER-ARRAY YESSES
+    "YESSES*" POSTFIX ANSWER-ARRAY
+    LATEST 'YESSES ^ 3 CELLS MOVE
 
     ^J $S CR TYPE   \ Show potential problems.
 
-    ANSWER-ARRAY NOES
+    "NOES*" POSTFIX ANSWER-ARRAY
+    LATEST 'NOES ^ 3 CELLS MOVE
 
     ^J $S CR TYPE   \ Show potential problems.
 
-    ANSWER-ARRAY ?ES
+    "?ES*" POSTFIX ANSWER-ARRAY
+    LATEST '?ES ^ 3 CELLS MOVE
 
-2DROP
+    2DROP
+;
+
+\D "database" READ-DATABASE
 \D CR ." Expect 0 : " DEPTH . CR
 \D 0 0 YESSES ." YESSES Expect 0 0 : " ? DEPTH .  CR
 \D 0 0 NOES   ." NOES   Expect 2 0 : " ? DEPTH .  CR
@@ -707,7 +726,7 @@ RDROP ;
 \D ." ADD-A Expect 2 2 0 : " 0 1 YESSES ? 0 1 NOES ? DEPTH . CR
 \D ." ADD-A Expect 7 2 0 : " 1 1 YESSES ? 1 1 NOES ? DEPTH . CR
 
-: INIT ( Nothing, the database have been read in) ;
+: INIT "database" READ-DATABASE ;
 
 
 \ Ask as many question as makes sense to zoom in onto the diagnosis.
