@@ -8,7 +8,7 @@ While sitting in your interactive Forth doing a ``hello world'' is easy:
 forthexample({"Hello world!" TYPE
 Hello world! OK })
 forthbreak
-Making it into an interactively useable program is also easy:
+Making it into an interactively usable program is also easy:
 forthexample({
 : HELLO "Hello world!" TYPE CR ;
 OK
@@ -59,20 +59,22 @@ type forthcode({1 LOAD}) .
 _VERBOSE_({ The extension of forthsamp({.lab}) in
 forthfile({forth.lab}) means Library Addressable by Block.})
 
-Now type
-forthexample({"DO-DEBUG" REQUIRED
+Now we will add forthcode({DO-DEBUG}) using this library mechanism.
+It is used immediately.
+It is handy during development, after every line it
+shows you what numbers Forth remembers for you.
+Also from now on
+the header of each
+block that is forthcode({LOAD})-ed is shown.
+Type
+forthexample({
+"DO-DEBUG" REQUIRED
 OK
 DO-DEBUG
 
 S[ ] OK 1
 
 S[ 1 ] OK})
-You see that DO-DEBUG can be used immediately.
-It is handy during development, after every line it
-shows you what numbers Forth remembers for you.
-Also from now on
-the header of each
-block that is forthcode({LOAD})-ed is shown.
 You can turn forthcode({DO-DEBUG})
 off with forthcode({NO-DEBUG}) .
 
@@ -87,7 +89,7 @@ The convention about the way the library file must be
 organized for forthcode({REQUIRED}) to find something is
 simple. It is divided into blocks of 16 lines.
 The first line is the header of the block. If the word
-we are looking for is mentionned in the header, that
+we are looking for is mentioned in the header, that
 block is compiled.
 
 The library file contains examples for you
@@ -142,7 +144,7 @@ To be able to type shell-commands from within Forth as if you
 were in a terminal window.
  })_END_({_HOSTED_LINUX_}).
  _PC_({
-To be able to type dos-commands from within Forth as if you
+To be able to type DOS-commands from within Forth as if you
 were in a terminal window.
  })_END_({_PC_}).
  })_END_({_HOSTED_}).
@@ -163,15 +165,28 @@ You are not obliged to work with separate windows.
 Suppose your favorite editor
 is called _PC_({forthfile({edlin})})_HOSTED_LINUX_({forthfile({vi})}). After
 
-_PC_({forthsamp({"EDLIN" OS-IMPORT EDLIN})})
-_HOSTED_LINUX_({forthsamp({"vi" OS-IMPORT vi})}).
+_PC_({forthsamp({ "EDLIN" OS-IMPORT EDLIN })})
+_HOSTED_LINUX_({forthsamp({ "vi" OS-IMPORT vi })}).
 
 you can start editing a file in the same way as from
-_PC_({a DOS window or plain DOS})_HOSTED_LINUX_({the shell}).
+_PC_({a DOS window or plain DOS}) _HOSTED_LINUX_({the shell}).
 Of course you now have to switch between editing a file
 and thisforth. But at least you need not set up your Forth again,
 until your testing causes your Forth to crash.
  })_END_({_HOSTED_}).
+
+@section Configuring
+For configuring your thisforth, without traces, you may use the following sequence
+forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
+1 LOAD
+REQUIRE SAVE-SYSTEM
+: DOIT 'CONTAINS 'FORTH FORGET-VOC "newforth" SAVE-SYSTEM BYE ;
+DOIT })
+Here forthvar({DOIT}) trims the dictionary just before the saving your system into a new
+file.
+You can use a similar sequence for expanding the system without
+building in the forthcode({SAVE-SYSTEM}) command as well.
+A similar sequence canbe used
 
 @section Concepts
 
@@ -265,7 +280,7 @@ a bitmap or advance a pointer a couple of bytes.
 In accordance with this there are no errors such as overflow given.
 
 Sometimes we use data of two cells, a forthdefi({double}) .
-The high-order cell are most accessable on the stack and if stored in
+The high-order cell are most accessible on the stack and if stored in
 memory, it is highest.
 
 The code for a high level word can be typed in from the
@@ -284,7 +299,7 @@ screen has the same effect as typing its content from the
 terminal.
 The extension lab stands for forthcode({Library Addressable by Block}),
 
-Traditionnally Forthers have things called
+Traditionally Forthers have things called
 forthdefi({number})'s, words that are present in the source be
 it interpreted or compiled, and are thought of not as being
 executed but rather being a description of something to be put
@@ -332,7 +347,7 @@ forthitem
 The error system uses forthcode({CATCH}) and forthcode({THROW}) in a conforming way.
 However the codes are not assigned according to the table
 in the standard. Instead positive numbers are ciforth errors
-and documentated in this manual.
+and documented in this manual.
 ciforth's errors identify a problem more precisely than the
 standard allows. An error condition that is not detected
 has no number assigned to it.
@@ -360,14 +375,14 @@ The forthcode({>IN}) that is there is a fake, that can only be
 read, not changed.
 }) dnl
 forthitem
-This is not strictly non-conforming, but worth mentionning here.
+This is not strictly non-conforming, but worth mentioning here.
 Despite the fact that thisforth contains only one state-smart word besides
  forthcode({SLITERAL})  (that is forthcode({."}) )
 which is about politically correct,
 as a consequence all denotations and some other words like
  forthcode({CHAR}) turn out to be state smart as a design consequence.
 This is used freely in the libraries of ciforth; it is
-the right of a system developper to do so. The library is not
+the right of a system developer to do so. The library is not
 a supposedly ISO-conforming program, so don't
 complain about non-portability. The libraries tend to rely on
 ciforth-specific and thisforth-specific -- but hopefully documented -- behaviour anyway.
@@ -395,7 +410,7 @@ Often this is called an ``implementation defined'' behaviour in the standard.
 Indeed we are obliged to specify this behaviour in our glossary,
 or we don't comply to the standard.
 The behaviour of the other system may very well be a crash.
-In that case the standard probably defines this an ``ambigous condition''.
+In that case the standard probably defines this an ``ambiguous condition''.
 
 For example:
 forthbreak
@@ -480,7 +495,7 @@ input buffer.
 forthenditemize
 
 _LOW_BUF_({The disk block buffers are allocated in the dictionary,
-because otherwise they would not be accessable to the BIOS})
+because otherwise they would not be accessible to the BIOS})
 
 The program as residing on disk may contain startup code, but that is
 of no concern for the usage.
@@ -689,7 +704,7 @@ A forthdefi({dictionary entry}) is a part of the dictionary that
 belongs to a specific word.
 A forthdefi({dictionary entry address}), abbreviated
 forthdefi({DEA}) is a pointer to a dictionary entry. In
-thisforth it is the lowest addres of the entry, where the code
+thisforth it is the lowest address of the entry, where the code
 field is.
 
 
@@ -778,7 +793,7 @@ The IMMEDIATE bit = 1 for IMMEDIATE definitions; it is called the
  forthdefi({immediate bit}).
 forthitem
 The DUMMY bit =1 for a dictionary header contained in the
-data of a vocabulary. This indicates that it shoudl not be executed.
+data of a vocabulary. This indicates that it should not be executed.
 forthitem
 The DENOTATION bit =1 for a word from the DENOTATION word list.
 This means that it is a short word used as a prefix
@@ -787,7 +802,7 @@ all forthdefi({denotation})'s (numbers) that start with that prefix, e.g. 7 or &
 Usually it is a one letter word, but not necessarily.
 _ALIGNED_(
 {forthitem
-After the last letter follow zero bytes uptill the next cell boundary.})
+After the last letter follow zero bytes up till the next cell boundary.})
 forthenditemize
 forthcode({(CREATE)}) takes care to generate this data structure;
 it is called by all defining words.
@@ -824,7 +839,7 @@ forthenditemize
 A forthdefi({dictionary entry address}) can be turned into any
 of these fields by words that are in the vocabulary
 forthsamp({DICTIONARY}) . forthxref({DICTIONARY}). They
-customaryly start with > .
+customarily start with > .
 
 A dictionary falls apart into the
 forthenumerate
@@ -878,13 +893,13 @@ The terminal input buffer  and the return stack share an area of
 M4_RTS bytes.
 The lower half is intended for the terminal input buffer, and the higher part
 is used for the return stack, growing down from the end.
-The initial stackpointer is in variable forthcode({R0}).
+The initial stack pointer is in variable forthcode({R0}).
 The return stack grows downward from the user area toward the terminal
 buffer.
 
 The computation stack grows downward from the terminal buffer toward the
 dictionary which grows upward.
-The initial stackpointer is in variable forthcode({S0}).
+The initial stack pointer is in variable forthcode({S0}).
 
 During a cold start, the user variables are initialised from the bootup parameters
 to contain the addresses of the above memory assignments.
@@ -899,7 +914,7 @@ separate user area for each task, as well as a separate return
 stack area and a separate data stack area. A task that asks for
 input, also needs an extra terminal input buffer.})
 @subsection  Terminal I/O and vectoring.
-It is usefull to be able to change the behaviour of I/O words such
+It is useful to be able to change the behaviour of I/O words such
 that they put their output to a different channel.
 For instance they must output to the
 printer instead of to the console.
@@ -942,13 +957,13 @@ Consequently forthcode({RUBOUT}) is not used.
 }).
 
 
-@section Libraries
+@section Libraries and options
 
 In ciforth there is no notion of object (i.e. compiled) libraries,
 only of source libraries.
 A Forth library is a block file adorned with one convention.
 This is that the words defined in a screen are
-mentionned on the first line of that screen,
+mentioned on the first line of that screen,
 the forthdefi({index line}).
 This is of course quite established as a habit.
 The word forthcode({REQUIRED}) takes a string and loads the
@@ -965,7 +980,7 @@ a first parameter that is a one-letter option, the corresponding
 screen is to be executed. _VERBOSE_({So forthsamp({-a}) or forthsamp({-A}) is
 equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
  forthsamp({-Z}) is equivalent to forthsamp({26 LOAD}).})
-@subsection options
+@subsection Options
 ciforth is a primitive system, and can interpret just one option on the
 command line. If the first argument is not starting with forthkey({-})
 ciforth returns with error code 3.
@@ -990,7 +1005,7 @@ forthsamp({-c name})
 
 Compile the file forthfile({name}) to an executable binary. The name of the binary
 is forthfile({name}) without the trailing forthsamp({.frt}) or else forthfile({a.out}) .
-Upon invokation of the binary the word defined latest is executed , then Forth goes
+Upon invocation of the binary the word defined latest is executed , then Forth goes
  forthcode({BYE}) .
 _VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
 Also forthcode({REQUIRED}) is made available.
@@ -1015,7 +1030,7 @@ Options such as in this list are available on the remainder of the line, but the
 must be invoked with two slashes instead of one, and having more letters is allowed
 but ignored.
 _VERBOSE_({{So }forthsamp({--compile}){ instead of }forthsamp({-c})}).
-forthsamp({--library}) behaves slighly different than
+forthsamp({--library}) behaves slightly different than
 forthsamp({-l}). The library is switched, taking effect for the
 remainder of forthsamp({forthcode}), but no shifting is done of
 the arguments.

@@ -3362,9 +3362,9 @@ HEADER({CHARS}, {CHARS}, {DOCOL}, , {B_IMMED})
 ;
 worddoc( {MEMORY},{ALIGN},{align},{ --- },{ISO},
 {Make sure that forthcode({HERE}) is forthdefi({aligned}) by advancing
-it if necessary. This means that data of any size can be fetched
-from that address.
-In this ciforth this is a NOOP.
+it if necessary.
+This means that data of any size can be fetched from that address efficiently.
+_ALIGNED_(,{ In this ciforth this is a NOOP.})
 },{{ALIGNED}},
 _ALIGNED_({
 {{ 1 ALLOT ALIGN HERE 0 CELL+ MOD . },{0}}
@@ -3381,7 +3381,7 @@ _ALIGNED_({
 worddoc( {MEMORY},{ALIGNED},{aligned},{ad1 --- ad2},{ISO},
 {Make sure that forthsamp({ad1}) is forthdefi({aligned}) by advancing
 it if necessary to forthsamp({ad2}).
-In this ciforth this is a NOOP.
+_ALIGNED_(,{ In this ciforth this is a NOOP.})
 },{{ALIGN}},
 _ALIGNED_({
 {{ 4 ALIGNED .},{4},
@@ -5880,8 +5880,8 @@ MESS1:                  ;{THEN}
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
 forthsamp({port}). A port address is always 16 bits.
-_VERBOSE({In practice on a IBM PC architecture a port address is
-10 bits.}) _LINUX_({You can use ports only after asking permission
+_VERBOSE_({In practice on a IBM PC architecture a port address is
+10 bits.}) _HOSTED_LINUX_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PC!},{P@},{P!},{@}},
@@ -5898,8 +5898,8 @@ worddoc( {MEMORY},{PC!},{port_char_store},{b port --- },{},
 {Store a byte forthvar({b}) to the port address
 forthsamp({port}).
 A port address is always 16 bits.
-_VERBOSE({In practice on a IBM PC architecture a port address is
-10 bits.}) _LINUX_({You can use ports only after asking permission
+_VERBOSE_({In practice on a IBM PC architecture a port address is
+10 bits.}) _HOSTED_LINUX_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PC@},{P!},{P@},{!}},
@@ -5914,8 +5914,8 @@ CODE_HEADER({PC!},{PCSTO})
 worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
 forthsamp({port}). A port address is always 16 bits.
-_VERBOSE({In practice on a IBM PC architecture a port address is
-10 bits.}) _LINUX_({You can use ports only after asking permission
+_VERBOSE_({In practice on a IBM PC architecture a port address is
+10 bits.}) _HOSTED_LINUX_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{P!},{PC@},{PC!},{@}},
@@ -5929,8 +5929,8 @@ CODE_HEADER({P@},{PFET})
 worddoc( {MEMORY},{P!},{port_store},{n port --- },{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
 forthsamp({port}).
-_VERBOSE({In practice on a IBM PC architecture a port address is
-10 bits.}) _LINUX_({You can use ports only after asking permission
+_VERBOSE_({In practice on a IBM PC architecture a port address is
+10 bits.}) _HOSTED_LINUX_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{P@},{PC!},{PC@},{!}},
@@ -8511,10 +8511,10 @@ dnl An alias header. CFA DFA are the same.
 HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 ;
 });_END_({_LOAD_})
-worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{deaw deav --
-deaw },{}, {Forget the words forthvar({deaw}) and all later
-words from the forthcode({VOCABULARY}) whose DEA is given by
-forthvar({deav}) . Leave forthvar({deaw}) (as
+worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{addr wid --
+addr },{}, {Forget all words whose DEA is greater (later defined) than
+forthvar({addr}) from a wordlist given by
+forthvar({wid}) . Leave forthvar({addr}) (as
 forthcode({FORGET-VOC}) is intended to be used with
 forthcode({FOR-VOCS})) . If any whole vocabulary is forgotten,
 the search order is reset to forthsamp({ONLY FORTH}). },

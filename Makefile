@@ -196,10 +196,11 @@ $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ 
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
     $(LINUXFORTHS) $(OTHERTARGETS)
 
-clean : ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) $(OTHERTARGETS)
+clean: ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS)
+cleanother:  rm -f $(OTHERTARGETS)
 
-#msdos32.zip soesn't work yet.
-release : strip figdoc.zip zip mina.zip lina.zip # as.zip
+#msdos32.zip doesn't work yet.
+release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
 
 # You may need to run the following run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
@@ -257,7 +258,7 @@ zip : $(RELEASECONTENT) ; echo ci86g$(VERSION) $+ | xargs zip
 
 # For msdos truncate all file stems to 8 char's and loose prefix `ci86.'
 # Compiling a simple c-program may be too much, so supply forth.lab
-mina.zip : $(RELEASECONTENT) mslinks ;\
+msdos.zip : $(RELEASECONTENT) mslinks ;\
     echo fg$(VERSION) $(RELEASECONTENT) |\
     sed -e's/ ci86\./ /g' |\
     sed -e's/ gnr / ci86.gnr /g' |\

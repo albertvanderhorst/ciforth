@@ -222,36 +222,62 @@ include(assembler.mi)
 
 @node Errors, Documentation, Assembler, top
 @chapter  Errors
-Errors are identified by a number and by the reporting program.
-This information ``ciforth ERROR '' and the number is always printed
+
+Errors are uniquely identified by a number.
+The error code is the same as the forthcode({THROW}) code. In other words
+the Forth exception system is used for errors.
+A ciforth always displays
+the text ``ciforth ERROR #'' plus the error number, 
 immediately and directly.
-_VERBOSE_({Of course the error numbers are given in decimal, always.})
+_VERBOSE_({Of course the error numbers are given in decimal. irrespective of forthcode({BASE}).})
+This allows you to look the error up in the section ``Error explanations''.
+More specific problems are addressed in the section ``Common Problems''.
+@section Error philosophy
+If you know the error number issued by ciforth, the situation
+you are in is identified, and you can read an explanation in the next section.
 Preferably in
-addition to the number a mnemonic messages is displayed.
+addition to the number a forthdefi({mnemonic message}) is displayed.
+ It is fetched from the
+forthdefi({library file}).
 But this is not always possible, such is the nature of error
 situations.
-If in the following an explanation is missing, this means that the
+A mnemonic message has a size limited to 63 characters and is therefore seldomly
+a sufficient explanation.
+
+A good error system gives additional specific information about the error.
+In a plain ciforth this is limited to the input line that generated the error.
+Via the library file you may install
+a more sophisticated error reporting, if available.
+
+Within ciforth itself all error situation have their unique identification.
+You may issue errors yourself at your discretion using
+forthcode({THROW}) or, preferably, forthcode({?ERROR}) and use
+an error number with an applicable message.
+However, unless yours is a quick and dirty program, you are encouraged to
+use some other unique error number.
+@section Error explanations
+This section shows the explanation of the errors in ascending order.
+In actual situations sometimes you may not see the part after the semi colon.
+If in this section an explanation is missing, this means that the
 error is given for reference only; the error cannot be generated
 by your thisforth, but maybe by
 other version of ciforth or even a differently configured thisforth.
 For example for a version without
 security you will never see error 1. If it says ``not used'', this
 means it is not used by any ciforth.
-You may issue errors yourself at your discretion using
-forthcode({THROW}) or, preferably, forthcode({?ERROR}) and use
-an error number with an applicable message.
 
 The errors whose message starts with forthsamp({AS:}) are used by the PostIt FixUp assembler
-in the file forthfile({asgen.frt}) . forthxpref({Assembler Errors})
+in the file forthfile({asgen.frt}) . forthpxref({Assembler})
 
 _HOSTED_({Negative error numbers are those reported by
-_PC_({MSDOS})_HOSTED_LINUX_({Linux}). If possible, error
-messages are shown. But no explanation of the error is
+_PC_({MSDOS}) _HOSTED_LINUX_({Linux}). If possible, mnemonic
+error messages are shown. But no explanation of the error is
 available.
-_PC_({MSDOS error numbers are given here in decimal, while in some documentation
+_PC_({MSDOS error numbers are displayed in decimal, while in some documentation
 they are given as hex numbers.})
 }).
 
+Here are the error explanations.
 forthitemize
 forthitem
 forthsamp({ciforth ERROR # 1 : EMPTY STACK})
@@ -279,7 +305,7 @@ forthitem
  forthsamp({ciforth ERROR # 4 : ISN'T UNIQUE})
 
 Not being unique is not so much an error as a warning. The word
-printed is the latest defined. It was already in the current
+printed is the latest defined. A word with the same name exists already in the current
 search order.
 
 forthitem
@@ -452,6 +478,47 @@ getting the wrong screen.
 
 forthenditemize
 
+@section Common problems
+_HOSTED_({
+_PC_({
+@subsection "DIR" SYSTEM doesn't work
+It is problematic for ciforth to find the command interpreter on a DOS or
+Windows system.
+Instead of inspecting environment variables that may or may not be set correctly,
+ciforth contains a string forthcode({SHELL}) , that contains the name of the
+command interpreter, with as a default forthfile({/COMMAND.COM}).
+If this is not correct you may change it as appropriate by e.g.
+forthsamp({S" C:/WINDOWS/SYSTEM/COMMAND.COM" SHELL $! })
+})
+@subsection Error 8 at startup
+If you get an error 8 at startup, as soon as you try to forthcode({LOAD}) or forthcode({LIST}) a screen
+or use an option,
+this is because you cannot access the
+library file. It may not be there, or it may not be at the expected place.
+ciforth contains a string forthcode({BLOCK-FILE}) , that contains the name of the
+library file interpreter, with as a default forthfile({forth.lab}).
+If this is not correct you may change it as appropriate by e.g.
+_PC_({ forthsamp({S" C:/FORTH/forth.lab" BLOCK-FILE $! })})
+_HOSTED_LINUX_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
+
+If you have run ciforth without this message
+before, the problem is most probably caused by
+a crash of ciforth that has left the file open.
+You are the victim of file sharing under DOS/Windows.
+The remedy is to restart Windows.
+@subsection Error 8 while editing a screen
+If after editing a screen, you get error 8, the screen has not been written
+to disk, because you have no write
+access for the library file.
+You must issue forthcode({DEVELOP}) which reopens the library file in READ_WRITE
+mode. Normally this should be part of loading the forthcode({EDITOR}) .
+_HOSTED_LINUX_({ It may be of course that you don't have privilege to write
+to the file. As non-privileged user you cannot edit the the system-wide library file.
+})
+You may always edit and use a private copy of the library file, by the forthsamp({-l}) option.
+forthxref({Manual}) _VERBOSE_({The forthsamp({-l}) option itself works only if at least the
+official library file has been correctly installed.})
+})
 @node Documentation,Glossary,Errors,top
 @chapter  Documentation summary
 

@@ -18,6 +18,7 @@ has been renamed to BACKUP-BLOCKS (was SAVE-BLOCKS)
 How to do the Johns Hopkins univerity test
 lina <tsuite.frt
 Is now incorporated into test.mak
+make testlina
 
 How to find the search ORDER
 REQUIRE ORDER
@@ -34,5 +35,4 @@ RESTORE-BLOCKS    \ If you want these blocks on hd too
 INSTALL-KERNEL    \ Insert floppy with kernel
 
 How to load a VOCABULARY high:
-
 2001 oct 9
