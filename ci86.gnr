@@ -1954,7 +1954,6 @@ quotient forthsamp({u3}) from the unsigned double dividend
 forthvar({ud}) and unsigned divisor forthvar({u1}) .},
 {{UM*},{SM/REM},{/}},
 {
-{-1. -1 UM/MOD . .},{-1 -1},
 {DECIMAL 12.34 100 UM/MOD . .},{12 34}
 },
 enddoc)
@@ -1962,14 +1961,7 @@ CODE_HEADER({UM/MOD},{USLAS})
         POP     BX      ;{DIVISOR}
         POP     DX      ;{MSW OF DIVIDEND}
         POP     AX      ;{LSW OF DIVIDEND}
-        CMP     DX,BX   ;{DICIDE BY 0?}
-        JNB     DZERO   ;{ ERROR - ZERO DIVIDE}
         DIV     BX      ;{16 BIT DIVIDE}
-        _2PUSH          ;{STORE QUOT/REM}
-;
-;{      DIVIDE BY ZERO ERROR - SHOW MAX NUMBERS}
-DZERO:  MOV     AX,-1
-        MOV     DX,AX
         _2PUSH          ;{STORE QUOT/REM}
 ;
 worddoc( {LOGIC},{AND},{and},{n1 n2 --- n2},{ISO,FIG,L0},
