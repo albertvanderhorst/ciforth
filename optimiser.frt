@@ -22,6 +22,9 @@ REQUIRE $
 : SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
 : SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
 : .SET   @+ SWAP DO I ? 0 CELL+ +LOOP ;   ( Print non-empty SET )
+\ For VALUE and SET : value IS present in set.
+: IN-SET? $@ SWAP
+ DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
@@ -118,6 +121,13 @@ VARIABLE MIN-DEPTH
 
 \ ---------------------------------------------------------------------
 
+CREATE DROPS  HERE 0 ,
+' DROP       ,          ' 2DROP      ,
+HERE SWAP !
+
+\ For DEA : it IS a trivial annihilator.
+: IS-A-DROP DROPS IN-SET? ;
+
 ASSEMBLER
 50 SET ANNIHILATORS
 PREVIOUS
@@ -169,8 +179,10 @@ PREVIOUS
 \ (no jumps) post the start, the end and the equivalent number of drops
 \ Always leave the new SEQUENCE be it just
 \ after the annihilitee or bumped by one.
-: ANNIHILATE-ONE DUP ANNIHILATE-SEQ? IF DUP >R SAVE-ANNIL R> ELSE
-    DROP NEXT-ITEM THEN ;
+: ANNIHILATE-ONE
+    DUP @ IS-A-DROP IF NEXT-ITEM ELSE
+    DUP ANNIHILATE-SEQ? IF DUP >R SAVE-ANNIL R> ELSE
+    DROP NEXT-ITEM THEN THEN ;
 
 \ Annihilate as much as possible from SEQUENCE.
 \ NOT YET :
