@@ -1,4 +1,4 @@
-( $Id: )
+( $Id$ )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 VOCABULARY ASSEMBLER IMMEDIATE
 ( This file `asgen.frt' contains generic tools and is usable at least   )
@@ -61,10 +61,15 @@ VOCABULARY ASSEMBLER IMMEDIATE
 : @+ >R R CELL+ R> @ ;
 : !TALLY -1 TALLY ! -1 TALLY CELL+ ! ;
 HEX
+( The `INCONSISTENCY-PAIRS' only serve to detect mutually exclusive     )
+( instrcution pairs. All of other bits of the `TALLY' are to be filled  )
+( up before an instruction is considered completed. It is a             )
+( configuration item because 4 pairs may sometimes not be enough.       )
+FF VARIABLE INCONSISTENCY-PAIRS
 ( Return: instruction IS complete, or not started)
-( All of the `TALLY' except the first 8 bits must have been filled up.  )
-: AT-REST? TALLY @ FF OR -1 = TALLY CELL+ @ -1 = AND ;
-: BADPAIRS? INVERT DUP 2 * AND AA AND ; ( For N: it CONTAINS badpairs)
+: AT-REST? TALLY @ INCONSISTENCY-PAIRS @ OR -1 = TALLY CELL+ @ -1 = AND ;
+( For N: it CONTAINS badpairs)
+: BADPAIRS? INVERT DUP 2 * AND AAAAAAAA AND INCONSISTENCY-PAIRS @ AND ; 
 ( Return : there IS an inconsistency, i.e. even and subsequent ) 
 ( odd bit in the inverted `TALLY' byte are both up. ) 
 : INCONSISTENT? TALLY @ BADPAIRS? ; 
@@ -114,9 +119,9 @@ DECIMAL
 : CHECK28 2DUP AND 28 ?ERROR ;
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @  CHECK28 OR R> ! ;
-( And DATA into ADDRESS. If bits - not from ls byte - were              )
+( And DATA into ADDRESS. If bits - apart from inconsistency - were      )
 ( already down its wrong.                                               )
-: CHECK29 2DUP OR 255 OR INVERT 29 ?ERROR   ;
+: CHECK29 2DUP OR INCONSISTENCY-PAIRS @ OR INVERT 29 ?ERROR   ;
 : AND! >R R @ CHECK29 AND R> ! ;
 (   Based on PFA of a fixup fix into tally)
 : TALLY:| CELL+ @+ TALLY CELL+ OR! @ TALLY AND! ;
