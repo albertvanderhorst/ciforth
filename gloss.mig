@@ -30,3 +30,31 @@ terminate interpretation of a line of text from the terminal or
 within a disc buffer, as both buffers always have a null at the
 nd.},{})
 
+worddoc({'},{tick},{---  addr},{P,L0},{
+        Used in the form: .
+        forthsamp({' nnnn})  
+        Leaves the parameter field address of dictionary word forthvar({nnnn}).
+        As a compiler directive, executes in a colon-definition to compile
+        the address as a literal. If the word is not found after a search of
+        forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is given.},{})
+
+worddocsafe({(},{paren},{},{P,L0},{
+        Used in the form:
+        forthsamp({( cccc)})
+        Ignore a comment that will be delimited by a right
+        parenthesis on the same line. May occur during execution or in a
+        colon-definition. A blank after the leading parenthesis is required.},{})
+
+worddocsafe({(LINE)},{paren_line},{n1 n2 --- addr count},{},{
+        Convert the line number forthcode({n1}) and the screen forthvar({n2}) to the disc buffer
+        address containing the data. A count of 64 indicates the full line
+        text length.},{})
+
+worddocsafe({@ },{fetch},{addr  ---  n},{L0},{
+        Leave the 16 bit contents of forthvar({addr}) .},{})
+
+worddocsafe({C,},{comma},{n  ---},{L0},{        
+Store forthvar({n}) into the next available dictionary memory cell, advancing        
+the dictionary pointer.},{})
+
+
