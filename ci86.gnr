@@ -962,10 +962,13 @@ RETDOS:
         MOV     AX, [Save_DS_PR] ;{Aliased.}
         MOV     DS,AX
         MOV     ES,AX
-        MOV     [STACK_SPEC+2],AX
-        LSS     SP,[STACK_SPEC]    ;{We must help the OS to keep a valid stack at all times!}
+;{The following looks like very clean code, but it crashes dpmi versions.}
+;;;;;;;;MOV     [STACK_SPEC+2],AX
+;;;;;;;;LSS     SP,[STACK_SPEC]
 
 ; FIXME   the real cleanup code comes here
+; It turns out that no cleanup code is required to prevent
+; memory leaks.
 
         MOV     AL,BL
         MOV     AH,4CH
@@ -1031,12 +1034,28 @@ _start:
 COLD_ENTRY:
         CLD                     ;{ DIR = INC}
         _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
-        MOV     SPO,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
+_PROTECTED_({
+        MOV     AX,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
+        MOV     [STACK_LOAD],AX ;{PARAM. STACK}
+        MOV     [STACK_LOAD+CW],DS ;{Stack segment}
+        LSS     SPO,[STACK_LOAD]    ;{PARAM. STACK}
+});_END_({ _PROTECTED_})
+_REAL_({
+        CLI
+        MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    ;{PARAM. STACK}
+        MOV     AX,DS
+        MOV     SS,AX
+        STI
+});_END_({ _REAL_})
         MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    ;{RETURN STACK}
         MOV     HIP,_OFFSET CLD1  ;{ (IP) <-}
         _NEXT
 ;
 CLD1:   DC      COLD    ; { This is a piece of headerless high level code.}
+_PROTECTED_({
+STACK_LOAD:     DC      0       ;{Stack pointer.}
+                DW      0       ;{Stack segment.}
+});_END_({ _PROTECTED_})
 ;
 ; ########################################################################################
 ;                       FORTH ITSELF (entry point : BOOTUP)
@@ -6886,7 +6905,7 @@ _HOSTED_LINUX_({
 HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, FROMR, X
         DC      LIT, open, LINOS
-        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      LDUP, ZERO, MIN
         DC      SEMIS
 });_END_({_HOSTED_LINUX_})
 _MODERN_({
@@ -7883,7 +7902,6 @@ worddoc( {STORAGE},{?DISK-ERROR},{disk_error_},{u---},{},
 Report an error if it contains an error condition.
 },{{BLOCK-FILE},{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
 HEADER({?DISK-ERROR},{QDSKER},{DOCOL})
-        DC      ONE, LAND
         DC      LIT, 8, QERR
         DC      SEMIS
 ;
@@ -7930,7 +7948,7 @@ HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      ZERO, LWARN, FETCH, MIN
         DC      LWARN, STORE            ;{ Affect WARNING only if it was 1.}
         DC      LIT, -1, BHAN, STORE    ;{Regardless of close errors.}
-        DC      ZEQU, ZEQU, QDSKER
+        DC      QDSKER
         DC      SEMIS
 ;
 worddoc( {STORAGE~},{SEEK},{seek},{n---},{},
@@ -7943,7 +7961,7 @@ HEADER({SEEK},{SEEK},{DOCOL})
         DC      USTAR
         DC      BHAN, FETCH
         DC      PFILE           ;{ Disk position.}
-        DC      ZEQU, ZEQU, QDSKER
+        DC      QDSKER
         DC      SEMIS
 ;
 worddoc( {STORAGE},{R\W},{read_slash_write},{addr blk f --},{},
@@ -7973,7 +7991,7 @@ HEADER({R\W},{RSLW},{DOCOL})
         _BRANCH(RSLW2)
 RSLW1:  DC      WFILE           ;{ Disk write}
 RSLW2:
-        DC      ZEQU, ZEQU, QDSKER
+        DC      QDSKER
         DC      SEMIS
 ;
 });_END_({_BLOCKSINFILE_})
