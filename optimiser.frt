@@ -577,34 +577,36 @@ STRIDE SET PEES
 
 \ Match any entry of the table to SEQUENCE.
 \ Return the STRING to be copied into the gap, else two zeros.
-: (?MM)   MATCH-TABLE
+: ?MM   MATCH-TABLE
     BEGIN    2DUP ?MATCH DUP IF 2SWAP 2DROP EXIT THEN 2DROP
         STRIDE 2 * CELLS + DUP ?NOT-EXIT WHILE REPEAT
     2DROP 0 0 ;
 
-
-: ?MM DUP (?MM) ROT + SWAP ;
-
 \ If ADDRESS contains a place holder, replace it by the next placeholder data.
 : ?PEE? DUP @ 'P = IF PEES SET+@ SWAP ! _ THEN DROP ;
 
-\ Copy MATCH to THERE filling in the place holders.
+\ Copy SEQUENCE STRING to HERE filling in the place holders.
+\ Leave LIMIT
 : COPY-MATCH   !PEES
-    >R R@ STRIDE CELLS MOVE
+    >R
+    SWAP R@ + SWAP
     R>
-    BEGIN DUP ?TILL-NOOP WHILE DUP ?PEE? CELL+ REPEAT
-    DROP
+    HERE DUP >R
+    SWAP  DUP ALLOT
+    MOVE
+    R> BEGIN DUP ?TILL-NOOP WHILE DUP ?PEE? CELL+ REPEAT DROP
 ;
 
 \ For SEQUENCE : copy its first item to ``HERE'' possibly
 \ replacing it by a match optimisation.
 \ Leave sequence BEGIN' of what is still to be handled.
 :  MATCH-ONE
-        DUP ?MM DUP 0= IF
-            2DROP DUP NEXT-ITEM >HERE
+        DUP DUP ?MM DUP 0= IF
+            2DROP DROP
+            DUP NEXT-ITEM >HERE
         ELSE
-            HERE STRIDE CELLS ALLOT
-            COPY-MATCH SWAP DROP    -1 PROGRESS !
+            COPY-MATCH -1 PROGRESS !
+            SWAP DROP
         THEN
 ;
 
