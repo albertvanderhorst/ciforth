@@ -81,19 +81,19 @@ LATEST EXEC-NAME   TURNKEY
 ( -e system_electives ) \ AvdH A1oct19
 .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
 REQ CONFIG
-REQ L-S ( MAINTENANCE )
+( MAINTENANCE ) REQ L-S  REQ DO-DEBUG
 REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ DUMP2
 REQ $.   REQ ^
-REQ EDITOR REQ OOPS
 \ REQ REFRESH ( temporaryly)
 REQ CRACK    REQ LOCATE
+REQ EDITOR REQ OOPS
  ( BACKUP        250 LOAD   77 81 THRU )
 ( REQ ASSEMBLERi86 )
 ( REQ DEADBEEF )
 
 
 : TASK ;   ( 'REQ HIDDEN)
-OK
+
 ( -f forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD  REQUIRE CONFIG   ?LI
 REQUIRE ARGV   REQUIRE CTYPE
@@ -974,22 +974,22 @@ REQUIRE T[
 
 
 
-( POSTFIX OLD: ) \ AvdH A1sep26
-
-\ Restore the normal behaviour of ``(WORD)''
-: (WORD)-NEW '(WORD) DUP >PHA SWAP >DFA ! ;
-
-\ Make the following defining word postfix for one definition
-\ The name must be a string constant on the stack
-\ Use only while compiling, or you crash the system
-: POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
+( OLD: RESTORED POSTFIX ) \ AvdH A1sep26
+\ WARNING: use these facilities only with high level words.
 
 \ Compile the current execution behaviour of "name".
 \ This behaviour remains the same if "name" is revectored.
 : OLD:   (WORD) FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R ;
     IMMEDIATE
 
-
+\ Have the original behaviour of DEA restored.
+: RESTORED   DUP >PHA SWAP >DFA ! ;
+\ Do nothing for one call of ``(WORD)''
+: (WORD)-NEW   '(WORD) RESTORE ;
+\ Make the following defining word postfix for one execution.
+\ The name must be a string constant on the stack
+\ Use only while compiling, or you crash the system
+: POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
 ( ARGC ARGV Z$@ CTYPE ENV C$.S ) REQUIRE CONFIG  ?LI \ A1sep25
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
@@ -1055,18 +1055,18 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
 
 
 ( DO-DEBUG NO-DEBUG ) \ AvdH A1oct15
+REQUIRE OLD:
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 
+\ An alternative ``THRU'' that display's the first index line.
+: NEW-THRU  0 OVER .LINE CR OLD: THRU ;
+
 \ Install and de-install the alternative ``OK''
-: DO-DEBUG   'NEW-OK >DFA @   'OK >DFA ! ;
-: NO-DEBUG   'OK >PHA    'OK >DFA ! ;
-
-
-
-
-
-
+: DO-DEBUG
+   'NEW-OK >DFA @   'OK >DFA !
+   'NEW-THRU >DFA @   'THRU >DFA ! ;
+: NO-DEBUG   'OK RESTORED   'THRU RESTORED ;
 
 
 
@@ -1667,7 +1667,7 @@ DECIMAL
 \ Interpret a SOURCEFIELD heuristically.
 : .SOURCEFIELD
     DUP 0 = IF "Belongs to the kernel" TYPE CR ELSE
-    DUP 1000 < IF LIST ELSE
+    DUP 1000 U< IF LIST ELSE
     DUP TIB @ 40000 WITHIN IF "Typed in" TYPE CR ELSE
     50 - 200 TYPE THEN THEN THEN ;
 \ Show the screen or text how SC is defined
@@ -2478,7 +2478,7 @@ This contains examples and benchmarks.
         THEN
      LOOP ;
 
-( ERATOSTHENES SIEVE by_multiple_batches ) \ AvdH A1oct04
+( ERATOSTHENES by_multiple_batches ) \ AvdH A1oct04
 ( Adaptations from CP/M : VARIABLE )
 REQUIRE +THRU
 1 5 +THRU
@@ -3102,21 +3102,21 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 : .SYSS   .ES .DS .FS .GS CR   .IP .CS .SP .SS .PSW CR   ;
 : .ALL .REGS .SYSS ;
 
-( Experiment PD PE PC Get selectors for code segment etc.) ?WI
+( PD PE PC PS get_selectors) \ AvdH A1nov 01
 REQUIRE ASSEMBLERi86 HEX
+CODE PC PUSHS, CS| NEXT C;
 CODE PD PUSHS, DS| NEXT C;
 CODE PE PUSHS, ES| NEXT C;
-CODE PC PUSHS, CS| NEXT C;
-CODE BIOS31A
-POP|X, DI|   POP|X, DX|   POP|X, CX|   POP|X, BX|   POP|X, AX|
-INT, 31 C,
-PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX|  PUSH|X, DX|  PUSHF,
-NEXT C;
+CODE PS PUSHS, SS| NEXT C;
 
-\ Get the content of the DESCRIPTOR into the BUFFER
-: GET-DES >R >R 0B R> 0 0 R> BIOS31A
-    1 AND 0D ?ERROR  2DROP 2DROP ;
 DECIMAL
+
+
+
+
+
+
+
 
 ( .CODE .DATE auxiliary_for_DUMP-SEL )
 HEX
@@ -3124,11 +3124,11 @@ HEX
 : NOT 0= IF ." NOT " THEN ;
 : .CODE
 DUP 1 AND NOT ." ACCESSED, "     DUP 2 AND NOT ." READABLE, "
-DUP 4 AND NOT ." CONFORMING, "   DUP 8 AND NOT ." PPPPPPPP "
+DUP 4 AND NOT ." CONFORMING, "   DUP 8 AND NOT ." PRESENT "
 DROP ;
 : .DATA
 DUP 1 AND NOT ." ACCESSED, "     DUP 2 AND NOT ." WRITABLE, "
-DUP 4 AND NOT ." EXPAND DOWN, "  DUP 8 AND NOT ." PPPPPPPP "
+DUP 4 AND NOT ." EXPAND DOWN, "  DUP 8 AND NOT ." PRESENT "
 DROP ;
 DECIMAL
 
@@ -3150,22 +3150,22 @@ R@ 6 + @ 0FF00 AND OR   RDROP
  CR ;
 : SEL-DUMP DUP .PRIV   DUP .ST   DUP .CD   DUP .BASE   .LIMIT ;
 DECIMAL
-( GET-SEL PUT-SEL NEW-SEL read_and_write_DPMI_selectors) ?WI
-HEX
-: 4DROP   2DROP 2DROP ;
+( GET-SEL PUT-SEL NEW-SEL handle_DPMI_selectors) ?WI HEX
+: 4DROP   2DROP 2DROP ;    : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
+\ Get the content of the DESCRIPTOR into the BUFFER
+: GET-DES >R >R 0B R> 0 0 R> BIOS31+ 4DROP ;
 \ Make the selector DESCRIPTION 32 bits from 16 bits or vv.
 : TOGGLE-32   6 + 40 TOGGLE ;
 \ Make the selector DESCRIPTION code from data or vv.
 : TOGGLE-CODE   5 + 8 TOGGLE ;
 \ For an existing SELECTOR, return an ALIAS
-: GET-ALIAS  0A SWAP 0 0 0 BIOS31 1 AND 0D ?ERROR 2DROP DROP ;
+: GET-ALIAS  0A SWAP 0 0 0 BIOS31+ 2DROP DROP ;
 \ Get a SELECTOR to BUFFER
-: GET-SEL   >R 0B SWAP 0 0 R> BIOS31 1 AND 0D ?ERROR 4DROP ;
+: GET-SEL   >R 0B SWAP 0 0 R> BIOS31+ 4DROP ;
 \ Install a SELECTOR from BUFFER
-: PUT-SEL   >R 0C SWAP 0 0 R> BIOS31 1 AND 0D ?ERROR 4DROP ;
+: PUT-SEL   >R 0C SWAP 0 0 R> BIOS31+ 4DROP ;
 \ Return a freshly allocated SELECTOR
-: NEW-SEL   0 0 1 0 0 BIOS31 1 AND 0D ?ERROR 2DROP DROP ;
-DECIMAL
+: NEW-SEL   0 0 1 0 0 BIOS31+ 2DROP DROP ; DECIMAL
 ( Experiment with DPMI testing jumps to 32 bit code. ) ?WI
 REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE PC
 PC GET-ALIAS CONSTANT NEW       \ Create a new segment that
