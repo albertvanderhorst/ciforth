@@ -33,7 +33,7 @@ wordsetnode_$1()
 dnl Leave the first half of the first definition (unused) 
 {divert(1)dnl}
     {{
-define({{__dummy__}},dnl}}
+define({{_dummy_}},dnl}}
 dnl Initialise menu channel 
 dnl Normal description comes after the definitions but before the menu's 
 dnl and contents.

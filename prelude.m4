@@ -19,7 +19,7 @@ dnl Note that there is no attempt to quote the paremeters.
 dnl If you try to make Forth words with { } your coat is sold.
 changequote({,})dnl
 dnl Indicate that a large part of conditional assembly ends here
-define({_END___1__}, )dnl obsolete version
+define({_END_}, )dnl obsolete version
 define({_END_}, )dnl preferred version
 dnl _yes and  _no are expanded during definition time and generate
 dnl define({aap},$1) or define({aap},)
@@ -28,26 +28,26 @@ define({_no},)dnl
 dnl
 dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
 dnl     Memory layout is defined using equ's
-define( {_EQULAYOUT_1_}, _yes )dnl
+define( {_EQULAYOUT_}, _yes )dnl
 dnl    Block buffer are allocated somewhere high
-define( {_HIGH_BUF_1_}, _yes )dnl
+define( {_HIGH_BUF_}, _yes )dnl
 dnl    Block buffer are allocated in the dictionary
-define( {_LOW_BUF_1_}, _no)dnl
+define( {_LOW_BUF_}, _no)dnl
 dnl    Booting directly into forth, from floppy or hard disk.
-define({_BOOTED_1_},_no)dnl
+define({_BOOTED_},_no)dnl
 dnl    The 32 bit mode uses no paging for access to memory.
-define({_DIRECTMAPPED_1_},_no)dnl
+define({_DIRECTMAPPED_},_no)dnl
 dnl    The code must be load at an absolute address.
-define({_ABSOLUTELOAD_1_},_no)dnl
+define({_ABSOLUTELOAD_},_no)dnl
 dnl Work around a deficiency in nasm : an ORG requires a numeric argument
 define({M4_BIOSBOOT},{07C00H})
 dnl Have code to switch ourselves to protected mode, e.g. after booting.
 dnl Move forth up such thar ORG agrees with LOADADDRESS.
-define( {_SWITCH_1_}, _no)dnl
+define( {_SWITCH_}, _no)dnl
 dnl Have a normal return to MSDOS (without jumping to a CS-corrector)
-define({_NORMAL_BYE_1_}, _no)
+define({_NORMAL_BYE_}, _no)
 dnl Work on a PC, as a PC. Not Linux.
-define({_PC_1_}, _no)
+define({_PC_}, _no)
 dnl Normally no code needed switch between modes.
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPHERE_FROM_PROT},{})dnl
@@ -57,74 +57,74 @@ dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl Run the forth in real mode.
-define( {_REAL_1_}, _no)dnl
+define( {_REAL_}, _no)dnl
 dnl
 dnl Run the forth in protected mode, in fact mucho invisible.
-define( {_PROTECTED_1_}, _no)dnl
+define( {_PROTECTED_}, _no)dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
 dnl Run the forth in 16 bits mode
-define( {_BITS16_1_}, _no)dnl
+define( {_BITS16_}, _no)dnl
 dnl
 dnl Run the forth in 32bits (so protected) mode
 dnl (must be in accordance with above).
-define( {_BITS32_1_}, _no)dnl
+define( {_BITS32_}, _no)dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl    Combine those marked A only with A's from the next group,
 dnl    same for B's
 dnl
 dnl A Use BIOS for I/O. No redirection but possible stand alone.
-define( {_USEBIOS_1_}, _no)dnl
+define( {_USEBIOS_}, _no)dnl
 dnl A1 In addition choose either
 dnl A1 Hard disk I/O
-define({_RWHD_1_},_no)
+define({_RWHD_},_no)
 dnl A1 Floppy disk I/O
-define({_RWFD_1_},_no)
+define({_RWFD_},_no)
 dnl A1 Blocks in files
-define({_RWFILE_1_},_no)
+define({_RWFILE_},_no)
 dnl
 dnl A Use DOS for I/O. Possibility of redirection.
 dnl Rely partly on DOS for I/O. The original mishmesh, using
 dnl the physical floppy lay out and some functions now declared obsolete.
-define( {_CLASSIC_1_}, _no)dnl
+define( {_CLASSIC_}, _no)dnl
 dnl
 dnl A File based, no obsolete MSDOS features.
-define( {_MODERN_1_}, _no)dnl
+define( {_MODERN_}, _no)dnl
 dnl
 dnl B Use LINUX for I/O. Possibility of redirection.
 dnl File based.
-define( {_LINUX_C_1_}, _no)dnl
+define( {_LINUX_C_}, _no)dnl
 dnl
 dnl B Use LINUX for I/O. Possibility of redirection.
 dnl File based.  No c involved.
-define( {_LINUX_N_1_}, _no)dnl
+define( {_LINUX_N_}, _no)dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl     See remarks of previous group.
 dnl
 dnl A Boot sector present for use on PC. _USEBIOS_ & RWFD required.
 dnl May run under MSDOS as well. Boot from floppy.
-define( {_BOOTFD__1_}, _no)dnl
+define( {_BOOTFD_}, _no)dnl
 dnl
 dnl A Boot sector present for use on PC. _USEBIOS_ & RWHD required.
 dnl May run under MSDOS as well. Boot from hard disk.
-define( {_BOOTHD__1_}, _no)dnl
+define( {_BOOTHD_}, _no)dnl
 dnl
 dnl A Rely on MSDOS to start the program.
-define( {_HOSTED_MSDOS_1_}, _no)dnl
+define( {_HOSTED_MSDOS_}, _no)dnl
 dnl
 dnl B Rely on LINUX to start the program.
-define( {_HOSTED_LINUX_1_}, _no)dnl
+define( {_HOSTED_LINUX_}, _no)dnl
 dnl
 dnl    FEATURES THAT STAND ON THEIR OWN, MOSTLY INDEPENDANT
 dnl
 dnl Keep the old debugging facility with place for breakpoints
-define( {_OLDDEBUG_1_}, _no)dnl
+define( {_OLDDEBUG_}, _no)dnl
 dnl
 dnl Keep the new debugging facility that allow to print IP (register SI)
-define( {_NEWDEBUG_1_}, _no)dnl
+define( {_NEWDEBUG_}, _no)dnl
 dnl
 dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
 define({M4_EM},10000H)
@@ -159,26 +159,26 @@ dnl ############## USER CHOICES END #########################################
 dnl ############## STILL ON WISH LIST ################## IGNORE ##############
 dnl Keep old FIG features like WIDTH ENCLOSE
 dnl STILL ON WISH LIST
-define( {_OLDFIG__1_}, _no)dnl
+define( {_OLDFIG_}, _no)dnl
 dnl
 dnl Put all ANSI CORE definitions in, even if they could be loaded
 dnl STILL ON WISH LIST
-define( {_CORE____1_}, _no)dnl
+define( {_CORE_}, _no)dnl
 dnl
 dnl If undefined, a really minimalistic system results.
 dnl STILL ON WISH LIST
-define( {_MAXIM___1_}, _no)dnl
+define( {_MAXIM_}, _no)dnl
 dnl
 dnl To strip even further use NODOUBLE instead of DOUBLE (Not ANSI!)
 dnl STILL ON WISH LIST
-define( {_DOUBLE__1_}, _no)dnl
-define( {_NODOUBLE_1_}, _no)dnl
+define( {_DOUBLE_}, _no)dnl
+define( {_NODOUBLE_}, _no)dnl
 dnl
 dnl Put interrupts on overflows in. (Not ANSI!)
 dnl In practice you limit your memory to under $7f00.0000.0000.0000
 dnl (even less for <64 bit systems)
 dnl STILL ON WISH LIST
-define( {_SAFECALC_1_}, _no)dnl
+define( {_SAFECALC_}, _no)dnl
 dnl OTHER MISCELLANEOUS
 
 dnl ############## GENERATION OF DOCUMENTATION ##############################

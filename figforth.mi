@@ -14,7 +14,7 @@ modern file i/o.
 
 @titlepage
 @title fig-Forth Manual
-A _BITS16_1_({16})_BITS32_1_({32})-bits _BOOTED_1_({standalone}) Forth _HOSTED_LINUX_1_({running under Linux})_HOSTED_MSDOS_1_({running under MSDOS})
+A _BITS16_({16})_BITS32_({32})-bits _BOOTED_({standalone}) Forth _HOSTED_LINUX_({running under Linux})_HOSTED_MSDOS_({running under MSDOS})
 @author Albert van der Horst 
 Dutch Forth Workshop
 @end titlepage
@@ -38,14 +38,14 @@ This file documents what a user needs to know for using ciforth.
 ciforth consists of three files:
 forthitemize
 forthitem
-_BOOTED_1_({A booting floppy or hard disk})dnl
-_HOSTED_MSDOS_1_({forth.com})_HOSTED_LINUX_1_({lina}) : the program
+_BOOTED_({A booting floppy or hard disk})dnl
+_HOSTED_MSDOS_({forth.com})_HOSTED_LINUX_({lina}) : the program
 forthitem
 ciforth.ps ciforth.html : the documentation
 forthitem
 ciforth.blk : source for auxiliary programs
 forthenditemize
-_BOOTED_1_({If you inspect a booting floppy from MSDOS you discover that you can 
+_BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can 
 see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})dnl
 These files are generated together by the generic system fig86.gnr.
 The documentation only applies to the ciforth with which it goes.
@@ -59,34 +59,34 @@ particular version of ciforth once it
 is installed on your system. 
 It features the following :
 
-_PROTECTED_1_({It is running in protected mode.
+_PROTECTED_({It is running in protected mode.
 })
-_REAL_1_({It is running in real mode.
+_REAL_({It is running in real mode.
 })
-_BOOTED_1_({It is a standalone Forth,
+_BOOTED_({It is a standalone Forth,
 })dnl
-_BOOTHD__1_({booting directly from a hard disk
+_BOOTHD_({booting directly from a hard disk
 })dnl
-_BOOTFD__1_({booting from a floppy disk
+_BOOTFD_({booting from a floppy disk
 })dnl
-_HOSTED_LINUX_1_({running under Linux
+_HOSTED_LINUX_({running under Linux
 })dnl
-_HOSTED_MSDOS_1_({running under MSDOS
+_HOSTED_MSDOS_({running under MSDOS
 })dnl
-define( {_USEBIOS_1_}, { Use BIOS for I/O. No redirection but possible stand alone.
+define( {_USEBIOS_}, { Use BIOS for I/O. No redirection but possible stand alone.
 })dnl
-_RWHD_1_({Blocks are on a raw hard disk})dnl
-_RWFD_1_({Blocks are on a raw floppy disk})dnl
-_RWFILE_1_({Blocks are allocated in files in files})dnl
-_CLASSIC_1_({ Rely partly on DOS for I/O, partly on the BIOS.})dnl
-_MODERN_1_({ Use DOS for I/O, and uses no obsolete MSDOS features. })dnl
-_BITS16_1_({A number has a precision of 16 bits
+_RWHD_({Blocks are on a raw hard disk})dnl
+_RWFD_({Blocks are on a raw floppy disk})dnl
+_RWFILE_({Blocks are allocated in files in files})dnl
+_CLASSIC_({ Rely partly on DOS for I/O, partly on the BIOS.})dnl
+_MODERN_({ Use DOS for I/O, and uses no obsolete MSDOS features. })dnl
+_BITS16_({A number has a precision of 16 bits
 })dnl
-_BITS32_1_({A number has a precision of 32 bits
+_BITS32_({A number has a precision of 32 bits
 })dnl
-_LINUX_C_1_({C-routines for I/O
+_LINUX_C_({C-routines for I/O
 })dnl
-_LINUX_N_1_({Calls linux system from assembler
+_LINUX_N_({Calls linux system from assembler
 })dnl
 
 @menu 

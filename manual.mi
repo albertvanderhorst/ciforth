@@ -32,12 +32,12 @@ forthitem
 Memory, available for dictionary and stacks.
 Its lowest part is used as a scratch area
 forthitem
-Stacks{}_HIGH_BUF_1_({, disk block buffers}) and terminal
+Stacks{}_HIGH_BUF_({, disk block buffers}) and terminal
 input buffer. 
 forthitem
 forthenditemize
 
-_LOW_BUF_1_({The disk block buffers are allocated in the dictionary,
+_LOW_BUF_({The disk block buffers are allocated in the dictionary,
 because otherwise they would not be accessable to the BIOS})
 
 The program as residing on disk may contain startup code , but that is
