@@ -9,6 +9,7 @@ define({SAVE_SP},{
         MOV     _CELL_PTR[SPSAVE],STACKPOINTER
         AND     AX,AX
         MOV     STACKPOINTER,AX})dnl
+dnl Switch from protected mode stay at the same place.
 define({JMPHERE_FROM_PROT},{
         JMP     GDT_SWITCH: $+3+CW+M4_SWITCHOFFSET
         MOV EAX,CR0
@@ -18,15 +19,16 @@ dnl The curly brackets prevent AX to be expanded to EAX
         SET_16_BIT_MODE
         MOV     {AX},SWITCHSEGMENT
         MOV     DS,{AX}
-        MOV     ES,{AX}
+        MOV     ES,{AX}})dnl
+dnl Do everything to restore coming from Forth.
+define({JMPHERE_FROM_FORTH},{
+        SAVE_SP
+        JMPHERE_FROM_PROT
         MOV     {AX},DS_SANDBOX ; {Make stack valid}
         MOV     SS,{AX}
         STI})dnl
-define({JMPHERE_FROM_FORTH},{
-        SAVE_SP
-        JMPHERE_FROM_PROT})dnl
+dnl Switch from real mode stay at the same place.
 define({JMPHERE_FROM_REAL},{
-        CLI
         MOV EAX,CR0
         INC AL
         MOV CR0,EAX            ;set protected mode
@@ -39,6 +41,8 @@ define({JMPHERE_FROM_REAL},{
         MOV     SS,AX})dnl
 define({RESTORE_SP},{
         MOV     STACKPOINTER,_CELL_PTR[SPSAVE]})dnl
+dnl Do everything to setup going to Forth.
 define({JMPHERE_FROM_OS},{
-    JMPHERE_FROM_REAL
-    RESTORE_SP})dnl
+        CLI
+        JMPHERE_FROM_REAL
+        RESTORE_SP})dnl
