@@ -88,7 +88,6 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 0 CELL+  4   ' ,  CFA   COMMAER X,  ( immediate data : address)
 1        8   ' C, CFA   COMMAER P,  ( port number ; byte     )
 
-00 FF 00 1PI NOP       00 FF C9 1PI RET       00 FF 76 1PI HLT
 00 FF T! 08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
 00 FF T! 08 E3 4 1FAMILY, XTHL XCHG DI EI
 00 FF T! 08 E9 2 1FAMILY, PCHL SPHL
@@ -101,7 +100,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 00 CF T! 01 02 2 1FAMILY, STAX INX               ( BC|)
 00 CF T! 01 09 3 1FAMILY, DAD LDAX DCX           ( BC|)
 02 CF 01 1PI LXI ( BC| IX,)
-00 3F 28 xFI PSW|
+00 30 30 xFI PSW|
 00 CF T! 04 C1 2 1FAMILY, POP PUSH               ( BC|)
 CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( With immediate data )
@@ -120,6 +119,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 00 08 T! 08 00 2 xFAMILY| N| Y|
 00 C7 C0 1PI RC, ( ZR| Y| )
 04 C7 T! 02 C2 2 1FAMILY, JC, CC, ( ZR| Y| T, )
+00 FF 00 1PI NOP       00 FF C9 1PI RET       00 FF 76 1PI HLT
 ' ;S 0B + @ CONSTANT (NEXT)
 : NEXT JMP (NEXT) X, ;
 : PSH1 JMP (NEXT) 1 - X, ;
@@ -246,11 +246,11 @@ DISS .SET
 
     % ONLY-DO-INST FOR-ALL-AS
 
-( These dissassemblers are quite similar:
-  if the DEA on the stack is of the right type and
-  if the precondition is fullfilled it does the reassuring
-  actions toward the tally as with assembling and add the 
-  fixup/posti/commaer to the disassembly struct. Leave the DEA)
+( These dissassemblers are quite similar:                               )
+( if the DEA on the stack is of the right type and if the precondition  )
+( is fullfilled it does the reassuring actions toward the tally as with )
+( assembling and add the fixup/posti/commaer to the disassembly struct. )
+( Leave the DEA.                                                        )
 : DIS-1PI
     DUP IS-1PI IF 
     AT-REST? IF
