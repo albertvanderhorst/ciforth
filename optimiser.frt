@@ -78,6 +78,9 @@ REQUIRE $
 \ For NUMBER1 and NUMBER2 : "``NUMBER!'' IS smaller or equal."
 : <= > 0= ;
 
+\ For NUMBER1 and NUMBER2 : "``NUMBER!'' IS greater or equal."
+: >= < 0= ;
+
 \ ----------------------    ----------------------     ----------------------
 
 
@@ -221,7 +224,7 @@ THEN RDROP ;
 
 \ For GAP and POSITION of a branch offset, adjust if it jumps from right
 \ over the gap. ``ANNIL-OFFSET'' must have been filled in.
-: ADJUST-BRANCH-FROM-RIGHT    >R   R@ <   SWAP R@ >TARGET >   AND IF
+: ADJUST-BRANCH-FROM-RIGHT    >R   R@ <  SWAP R@ >TARGET >=   AND IF
     ANNIL-OFFSET @ NEGATE R@ +!
 THEN RDROP ;
 
@@ -244,7 +247,7 @@ THEN RDROP ;
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
 : ADJUST-BRANCHES BRANCHES @+ SWAP DO
     2DUP I @ ADJUST-BRANCH-FROM-LEFT
-\   2DUP I @ ADJUST-BRANCH-FROM-RIGHT   has not been tested because ANNIHILATE crashes for back jumps.
+    2DUP I @ ADJUST-BRANCH-FROM-RIGHT
     2DUP I ELIMINATE-BRANCH-IN-GAP
 0 CELL+ +LOOP 2DROP ;
 
