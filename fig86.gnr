@@ -2157,8 +2157,11 @@ HEADER({LATEST},{LATES},{DOCOL})
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{CFA},{cfa},{pfa --- cfa},{},
-{Convert the parameter field address of a definition to its code
-field address.},{{'},{PFA}})
+{Given a dictionary entry addres return the code field address
+field address.
+_VERBOSE_({In fact we want to get rid of the CFA altogether,
+so there is no point in changing CFA to >CFA }) },
+{{'},{PFA}})
 HEADER({CFA},{CFA},{DOCOL})
         DC      LCELL
         DC      LSUB
@@ -2199,9 +2202,10 @@ worddoc({DICTIONARY},{>CFA},{cfa},{dea --- cfa},{},
 {Given a dictionary entry addres return the
 code field address.},{{'},{CFA}})
 HEADER({>CFA},{TCFA},{DOCOL})
-        DC      PFA
-        DC      LCELL
-        DC      LSUB
+        DC      ONE
+        DC      TRAV
+        DC      LIT,1+CELLS(1)
+        DC      PLUS
         DC      SEMIS
 ;
 worddoc({DICTIONARY},{>NFA},{to_name_field_address},{dea --- nfa},{},
@@ -2363,8 +2367,7 @@ machine code sequence.},{{;CODE}})
 HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      FROMR
         DC      LATES
-        DC      PFA
-        DC      CFA
+        DC      TCFA
         DC      STORE
         DC      SEMIS
 ;
@@ -2724,11 +2727,10 @@ NUMB2:  DC      DROP
         DC      DMINU   ;{ ENDIF}
 NUMB3:  DC      SEMIS
 ;
-worddoc({DICTIONARY},{-FIND},{minus_find},{--- pfa b tf (found) --- ff (not found)},{},
+worddoc({DICTIONARY},{-FIND},{minus_find},{--- dea b tf (found) --- ff (not found)},{},
 {Accepts the next text word (delimited by blanks) in the input stream
 to forthcode({HERE}) , and searches the forthcode({CONTEXT}) and then forthcode({CURRENT}) vocabularies
-for a matching entry. If found, the dictionary entry's parameter
-field address, its length byte, and a boolean true is left.
+for a matching entry. If found, the dictionary entry address, its length byte, and a boolean true is left.
 Otherwise, only a boolean false is left.},{{(FIND)}})
 HEADER({-FIND},{DFIND},{DOCOL})
         DC      BLS
@@ -2750,8 +2752,8 @@ HEADER({-FIND},{DFIND},{DOCOL})
 DFIN2:  DC      ZERO ; { Not found.}
         _BRANCH(DFIN3)
 DFIN1:                          ; { Found.}
-        DC      RESULT,FETCH, PFA
-        DC      RESULT, FETCH, CFET
+        DC      RESULT,FETCH
+        DC      LDUP, CFET
         DC      ONE
 DFIN3:                          
         DC      SEMIS
@@ -2760,7 +2762,7 @@ worddocsafe({INIT},{(ABORT)},{paren_abort},{},{},
 {Executes after an error when forthcode({WARNING}) is -1. This word normally
 executes forthcode({ABORT}), but may be altered (with care) to a user's
 alternative proceedure forthvar({AP}) as follows:
-forthsamp({ ' AP CFA   ' (ABORT) !}).
+forthsamp({ ' AP ' (ABORT) >PFA !}).
 },{})
 HEADER({(ABORT)},{PABOR},{DOCOL})
         DC      ABORT
@@ -2833,7 +2835,7 @@ HEADER({CREATE},{CREAT},{DOCOL})
         DC      QERR
         _0BRANCH(CREA1) ;{IF}
         DC      DROP
-        DC      NFA
+;        DC      >NFA  fixme
         DC      IDDOT
         DC      LIT,4
         DC      MESS
@@ -2878,7 +2880,7 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
         DC      ZERO
         DC      QERR
         DC      DROP
-        DC      CFA
+        DC      TCFA
         DC      COMMA
         DC      SEMIS
 ;
@@ -2956,10 +2958,10 @@ INTE1:  DC      DFIND   ;{BEGIN}
         DC      FETCH
         DC      LESS
         _0BRANCH(INTE3) ;{IF}
-        DC      CFA
+        DC      TCFA
         DC      COMMA
         _BRANCH(INTE4)  ;{ELSE}
-INTE3:  DC      CFA
+INTE3:  DC      TCFA
         DC      EXEC    ;{ENDIF}
 INTE4:  DC      QSTAC
         _BRANCH(INTE5)  ;{ELSE}
@@ -4835,6 +4837,7 @@ HEADER({'},{TICK},{DOCOL},1)
         DC      ZERO
         DC      QERR
         DC      DROP
+        DC      TPFA
         DC      LITER
         DC      SEMIS
 ;
