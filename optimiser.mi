@@ -1,4 +1,4 @@
-forthsection({Introduction})
+@section Introduction
 You may wonder why an optimizer for a computer language would be considered an
 AI application.
 This optimizer is not so much for a particular language as well
@@ -8,14 +8,14 @@ Different types of optimisations interfere and finding ones way through this
 certainly requires some heuristics. The bottom line is that an optimiser
 qualifies as an AI application.
 
-forthsubsection({Properties})
+@subsection Properties
 
 A Forth system is a database of small programs. It is worthwhile to
 investigate what properties these small programs (words) might have.
 The flag field of a word allow to add this information to the header.
 A certain combination of flags allow a particular optimisation.
 
-forthsubsection({Definitions})
+@subsection Definitions
 An annihilator is a word that only deletes an item from the stack.
 Examples are DROP 2DROP NIP RDROP.
 
@@ -25,13 +25,14 @@ Examples are SWAP 2SWAP ROT.
 A duplicator copies an item from the stack.
 Examples are DUP OVER 2DUP.
 
-forthsubsection({Optimisations}
+@subsection Optimisations
 Optimisations are manipulations on a program source or intermediate code
 to improve the speed of the resulting program.
 In other respect the result is inferior. Symbolic debugging --
 one of Forth's strong points -- goes through the drain.
 (The name "optimisation" is a misnomer.)
 
+forthitemize
 forthitem({folding})
 Constant folding is a well known technique in optimisation.
 It means that if an operator works on constants the result may be replaced
@@ -58,6 +59,7 @@ This technique is extremely important in Forth, more so than
 in other languages, due to the small size of Forth words.
 Inlining is always a winner in speed, and mostly even also a
 winner with regard to space.
+forthenditemize
 
 Even more important is the fact that inlining allows folding to be applied
 across constituent words. This applies to high level and low level code
@@ -67,7 +69,7 @@ Inlining high level code is trivial.
 A further inlining stage replaces a high level definition that only calls code
 words, by a code definition which concatenates the code words.
 
-forthsubsection({Data collecting})
+@subsection Data collecting
 While disassembling a code word, the registers used can be marked.
 This allows to add register usage information to the header.
 
@@ -86,7 +88,7 @@ The stack effect of a high level words is the concatenation of the stack effect
 of its constituents. The register usage of a high level word is the logical or
 of the register usage of the constituents.
 
-forthsubsection({Purpose})
+@subsection Purpose
 A \ci in general will use optimisation to generate a temporary definition
 that is much faster, and retain all the valuable partial information about
 words.
@@ -96,6 +98,119 @@ and those eventually by code definitions. Meanwhile words that are no longer dir
 used in the final application are eliminated.
 For space conservation headers may be removed as well provided in the application
 no dictionary lookup is needed.
+
+@section Implementation
+The information about a word, optimisation opportunities and stack effect,
+sits in the flag field.
+Whenever nothing is filled in in the flag field, it means unknown.
+This applies equally to the stack effect as to the optimisation flags.
+
+@subsection Stack effects
+The information about
+the stack effects sits in the 3th byte of the flag field.
+The highest nibble of this third byte applies to input.
+It is the number of stack items popped plus one.
+The lowest nibble thusly indicates the number of pushed items.
+0 means an unknown (not yet analysed) stack effect.
+0FH indicates a variable number of items.
+
+The stack effect is added in three steps.
+For all low level words the stack effect is found by counting
+pops and pushes.
+Irregular stack effects are corrected as well as filled in for high level words.
+All high level stack effects are derived from the stack effect of their
+constituents.
+
+Code words are analysed by disassembling the code that is pointed to by the
+code field to the first next code encountered. For each instruction
+the opcode, which is the first part of its disassembly, is looked up in
+a set of possible pop and push instructions.
+
+Irregularities are just tabulated in the source code of the analyser.
+
+High level words are recognized by their code field.
+This takes care of any CREATE .. (;CODE) words.
+For a linear chain of calls the stack effect is calculated as follows:
+
+*Start with a zero -- zero stack effect.
+*For each constituent
+    subtract the pops from the left (output) nibble.
+    if the output nibble is negative, subtract it from the inputs, and make it zero
+    add the pushes to the left (output) nibble
+(Correction by 11H is not yet done).
+
+The following exceptions to a linear chain have special treatment:
+* LIT BRANCH'es and SKIP are followed by inline data that must be taken care off
+* a BRANCH or 0BRANCH forward is always taken, analysing just one path through a definition
+* If the stack effect of a constituent is unknown, an unknown result overrules
+  any other outcome
+* For a CREATE .. DOES> word the linear chain pointed to by the DOES> pointer is
+analysed. However the stack effect is initialised to ( 0 -- 1) to reflect the
+passing of the data pointer to the  DOES> part.
+* '<SOME-WORD> EXECUTE has the stack effect of <SOME-WORD> .
+Other occurrences of EXECUTE lead to a variable stack effect.
+* '<SOME-WORD> CATCH has the stack effect of <SOME-WORD> plus an extra output.
+Other occurrences of CATCH lead to a variable stack effect.
+
+A high level word is recognised by its code field address containing DOCOL , i.e. the
+nesting routine for the interpreter. A CREATE .. DOES> word is detected by
+is code field address containing DODOES , i.e. the common code that starts up words defined
+by compiler extension.
+All other words are treated as code.
+
+The whole of Forth is treated as follows:
+* Fill in the exception
+* Sweep repeatedly through the dictionary, from early to latest:
+    For each unknown stack effect, try to find it by discriminating between
+    DODOES DOCOL and other words,
+* Stop if no progress is made any more.
+
+Hopefully everything is known now, but maybe we must add to the exceptions.
+
+The notion of a simple sequence is one that doesn't reach to the stack outside
+what is defined within the sequence.
+
+@subsection Optimisation class
+As has been pointed out, the optimisation class of a word is indicated by a bit
+set
+in the flags field. Each bit set opens up a particular opportunity for optimisation.
+In general a sequence has a certain class if each constituent has that class.
+For example, if one of the words called does a store, the sequence is found to
+do a store and the optimisations that would be allowed by no stores are blocked.
+forthsub subsection({The no store bit.})
+The "no store" bit would better be named "no output side effect" bit.
+It indicates that the outside world doesn't change by executing this word.
+Again not that the stacks and internal registers are inside.
+
+
+The following optimisation are opened up:
+* In combination with an anihilator. If the output of a "no store" sequence is annihilated,
+the whole sequence and the annihilator may be left out.
+Example: BASE CELL+ @ XX @ NIP becomes XX @
+* In combination with a juggler. If the outputs of "no store" sequence are juggled,
+the sequences itself may be juggled, eliminating the juggler.
+Example: XX CELL+ @ BASE @ SWAP becomes BASE @ XX CELL+ @
+* In combinaton with a duplicator. Again a sequence may be duplicated and the duplicator
+eliminated. This probably never makes sense as an optimisation.
+
+Note that fetching from a port has an output side effect, (as well as an input side effect.)
+forthsub subsection({The no fetch bit.})
+The "no fetch" bit would better be named "no input side effect" bit.
+It indicates that the outside world affects the outcome of this word.
+Input side effects are weaker that output side effects and on their own
+allow little optimisation.
+
+In combiation with the "no store bit" a word is called "no side effect".
+It is amenable to folding:
+* If a NS-sequence has only constant inputs, it may be run at compile time
+and the inputs and sequence by the resulting constant outputs.
+Example: After "12 4 3    * +" is replaced by 24.
+In fact this is equivalent to
+* If a NS-sequence has no inputs, it may be run at compile time
+and replaced by the resulting constant outputs.
+The difference with the preceeding example is that the sequence starts
+with 12 instead of *. Any literals are of course NS.
+
 
 -------------------------------------------------------------
 : A0 ;
