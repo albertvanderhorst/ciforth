@@ -585,28 +585,21 @@ STRIDE SET PEES
 \ If ADDRESS contains a place holder, replace it by the next placeholder data.
 : ?PEE? DUP @ 'P = IF PEES SET+@ SWAP ! _ THEN DROP ;
 
-\ Copy SEQUENCE STRING to HERE filling in the place holders.
-\ Leave LIMIT
-: COPY-MATCH   !PEES
-    >R
-    SWAP R@ + SWAP
-    R>
-    HERE DUP >R
-    SWAP  DUP ALLOT
-    MOVE
-    R> BEGIN DUP ?TILL-NOOP WHILE DUP ?PEE? CELL+ REPEAT DROP
+\ Replace code at SEQUENCE with STRING , filling in the place holders.
+\ Leave the END of the replaced string (where matching must continue.)
+: COPY-MATCH   >R   OVER R@ MOVE
+    !PEES DUP R@ BOUNDS DO I ?PEE? 0 CELL+ +LOOP
+    R> +
 ;
 
 \ For SEQUENCE : copy its first item to ``HERE'' possibly
 \ replacing it by a match optimisation.
 \ Leave sequence BEGIN' of what is still to be handled.
 :  MATCH-ONE
-        DUP DUP ?MM DUP 0= IF
-            2DROP DROP
-            DUP NEXT-ITEM >HERE
+        DUP ?MM DUP 0= IF
+            2DROP NEXT-ITEM
         ELSE
             COPY-MATCH -1 PROGRESS !
-            SWAP DROP
         THEN
 ;
 
@@ -616,7 +609,7 @@ STRIDE SET PEES
 : (MATCH) BEGIN DUP ?NOT-EXIT WHILE MATCH-ONE REPEAT DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
-: OPTIMISE   HERE SWAP    (MATCH)   POSTPONE (;)  ;
+: OPTIMISE   DUP (MATCH)   ;
 
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
