@@ -692,3 +692,85 @@ OB : Obligatory byte
 forthbreak
 OW : Obligatory word (=16bits)
 forthbreak
+
+@section  Assembler Errors
+
+Errors are identified by a number. They are globally unique, so
+assembler error numbers do not overlap with other ciforth error numbers,
+or errors returned from operating system calls.
+_VERBOSE_({Of course the error numbers are given in decimal, always.})
+
+The errors whose message starts with forthsamp({AS:}) are used by the PostIt FixUp assembler
+in the file forthfile({asgen.frt}). For other error forthxpref(({Errors})
+
+forthitemize
+forthitem
+forthsamp({ERR # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE})
+
+You left holes in the instruction before the current one, i.e.
+one or more fixups like forthcode({X|}) are missing. Or you forget
+to supply data required by the opcode like forthcode({OW,}) .
+_VERBOSE_({With forthcode({SHOW:}) you can see what completions of your opcode
+are legal.})
+
+forthitem
+forthsamp({ERR # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY})
+
+The instruction you try to assemble would have been legal, if Intel
+had not made an exception just for this combination. This situation
+is handled by special code, to issue just this error.
+
+forthitem
+forthsamp({ERR # 28 : AS: UNEXPECTED FIXUP/COMMAER})
+
+You try to complete an opcode by fixup's (like forthcode({X|}))
+or commaers (like forthcode({OW,}) ) in a way that conflicts
+with what you specified earlier. So the fixup/commaer word at
+which this error is detected conflicts with either the opcode,
+or one of the other fixup/commaer's.
+dnl FIXME This explanation is the same as the following.
+_VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode
+or with a DI| operand.})
+
+forthitem
+ forthsamp({ERR # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER})
+
+You try to complete an opcode by fixup's (like forthcode({X|})
+) or commaers (like forthcode({OW,}) ) in a way that conflicts
+with what you specified earlier. So the fixup/commaer word at
+which this error is detected conflicts with either the opcode,
+or one of other fixup/commaer's.
+dnl FIXME This explanation is the same as the previous.
+_VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode
+or with a DI| operand.})
+
+forthitem
+forthsamp({ERR # 30 : AS: COMMAERS IN WRONG ORDER})
+
+The opcode requires more than one data item to be commaed in, such as
+immediate data and an address. However you put them in the wrong order.
+Use forthcode({SHOW:}) .
+
+forthitem
+ forthsamp({ERR # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK})
+
+This signals an internal inconsistency in the assembler itself.
+If you are using an assembler supplied with ciforth, you can report
+this as a defect (``bug'').
+The remainder of this explanation is intended for the writers
+of assemblers.
+The bits that are filled in by an assembler word are outside
+of the area were it is supposed to fill bits in. The latter
+are specified separately by a mask.
+
+forthitem
+ forthsamp({ERR # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT})
+
+The total instruction with opcode, fixups and data is ``bad''.
+Somewhere there are parts that are conflicting. This may be another
+one of the irregularities of the Intel instruction set. Or the
+forthcode({BAD}) data was preset with bits to indicate that you
+want to prohibit this instruction on this processor, because it
+is not implemented. Investigate forthcode({BAD}) for two consecutive bits
+that are up, and inspect the meaning of each of the two bits.
+forthenditemize

@@ -88,7 +88,7 @@ The information below allows an expert to reconstruct how to
 generate a corresponding version. _VERBOSE_({Not all of it may make
 sense to you. Tell him whether you want to
 fit the Forth to the description or vice versa.}).
-forthxref({Rationale & legalese})
+forthpxref({Rationale & legalese})
 
 These are the features:
 
@@ -124,7 +124,7 @@ It is indirect threaded.
 
 @iftex
 If you are new to Forth you may want to read the Gentle Introduction,
-otherwise you better skip this. The second chapter most users will not
+otherwise you better skip this. The third chapter most users will not
 be interested in.
 @end iftex
 
@@ -228,92 +228,106 @@ Preferably in
 addition to the number a mnemonic messages is displayed.
 But this is not always possible, such is the nature of error
 situations.
+If in the following an explanation is missing, this means that the
+error is given for reference only; the error cannot be generated
+by your ciforth. For example for a version without
+security you will never see error 1. If it says ``not used'', this
+means it is not used by any ciforth.
+You may issue errors yourself at your discretion using
+forthcode({THROW}) or, preferably, forthcode({?ERROR}) and use
+an error number with an applicable message.
 
-The error messages starting by AS: are used by the PostIt FixUp assembler
-in the file forthfile({asgen.frt}) .
+The errors whose message starts with forthsamp({AS:}) are used by the PostIt FixUp assembler
+in the file forthfile({asgen.frt}) . forthxpref({Assembler Errors})
 
 _HOSTED_({Negative error numbers are those reported by
 _PC_({MSDOS})_HOSTED_LINUX_({Linux}). If possible, error
 messages are shown. But no explanation of the error is
 available.
 _PC_({MSDOS error numbers are given here in decimal, while in some documentation
-they ar given as hex numbers.})
+they are given as hex numbers.})
 }).
 
-
-forthenumerate
+forthitemize
 forthitem
-ERR # 1 : EMPTY STACK
+forthsamp({ERR # 1 : EMPTY STACK})
 
-           The stack has underflowed. This is detected at several
-           places, in particular in forthcode({INTERPRET}) after
-           each word interpreted
- or compiled. There is ample slack, but malicious intent can
- crash the system before this is detected.
-
-forthitem
- aRR # 2 : DICTIONARY FULL
-
-Reserved. Not used.
+_SECURITY_({ The stack has underflowed. This is detected by
+forthcode({?STACK}) at several places, in particular in
+forthcode({INTERPRET}) after each word interpreted or compiled.
+There is ample slack, but malicious intent can crash the system
+before this is detected. },{dnl})_END_({_SECURITY_})
 
 forthitem
- ERR # 3 : FIRST ARGUMENT MUST BE OPTION
+ forthsamp({ERR # 2 : DICTIONARY FULL})
 
+Not used.
+
+forthitem
+forthsamp({ERR # 3 : FIRST ARGUMENT MUST BE OPTION})
+
+_HOSTED_({
 If you pass arguments to ciforth, your first argument must be
 an option (such as -a), otherwise it doesn't know what to
-do with it.
+do with it.})
 
 forthitem
- ERR # 4 : ISN'T UNIQUE
+ forthsamp({ERR # 4 : ISN'T UNIQUE})
 
 Not being unique is not so much an error as a warning. The word
-printed is the latest defined and it was already in the current
+printed is the latest defined. It was already in the current
 search order.
 
 forthitem
- ERR # 5 : EMPTY NAME FOR NEW DEFINITION
+ forthsamp({ERR # 5 : EMPTY NAME FOR NEW DEFINITION})
+
 An attempt is made to define a new word with an empty string
 for a name. This is detected by forthcode({(CREATE)}) .
 All forthdefi({defining}) word can return this message. It is
 typically caused by using such a word at the end of a line.
 
 forthitem
- ERR # 6 : DISK RANGE ?
+forthsamp({ERR # 6 : DISK RANGE ?})
+
 Reading to the terminal input buffer failed. The message is
 probably inappropiate.
 
 forthitem
- ERR # 7 : FULL STACK
+forthsamp({ERR # 7 : FULL STACK})
 
-The stack has run into the dictionary. This can be caused
-by pushing too many items, but usually it must be interpreted
-as dictionary full. If you have enough room, you have passed
-a wrong value to forthcode({ALLOT}) .
-This is detected at several places,
- in particular in forthcode({INTERPRET}) after each word
- interpreted.
+_SECURITY_({ The stack has run into the dictionary. This can be
+caused by pushing too many items, but usually it must be
+interpreted as dictionary full. If you have enough room, you
+have passed a wrong value to forthcode({ALLOT}) . This is
+detected at several places, in particular in
+forthcode({INTERPRET}) after each word interpreted.
+},{dnl})_END_({_SECURITY_})
 
 forthitem
- ERR # 8 : DISC ERROR !
+ forthsamp({ERR # 8 : DISC ERROR !})
+
 An access to the Library Accessible by Block (screen aka block
-file) has failed. This is detected by forthcode({?DISK-ERROR}) called from
-places where a disk access has occurred. It may be that the
-library file has not been properly installed. Check the content
-of forthcode({BLOCK-FILE}) . You may not have the right to
-access it. Try to view the file.
-Normally the library file is opened read-only. If you want to edit it
-make sure to do forthcode({DEVELOP}) in order to reopen
-it in read/write mode. If you forget, you get this message too.
+file) has failed. This is detected by
+forthcode({?DISK-ERROR}) called from places where
+a disk access has occurred. It may be that the library file has
+not been properly installed. Check the content of
+forthcode({BLOCK-FILE}) . You may not have the right to access
+it. Try to view the file. Normally the library file is opened
+read-only. If you want to edit it make sure to do
+forthcode({DEVELOP}) in order to reopen it in read/write mode.
+If you forget, you get this message too.
 
 forthitem
- ERR # 9 : UNRESOLVED FORWARD REFERENCE
-Reserved. Not used.
+ forthsamp({ERR # 9 : UNRESOLVED FORWARD REFERENCE})
+
+Not used.
 
 forthitem
- ERR # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION
+ forthsamp({ERR # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION})
+
 The string printed was not found in the dictionary as such,
 but its first part matches a forthdefi({denotation}) .
-The denotation however rejected it as not properly formed.
+The denotation word however rejected it as not properly formed.
 An example of this is a number containing some non-digit
 character, or the character denotation forthcode({&}) followed by more
 than one character. It may also be a miss-spelled word that
@@ -323,47 +337,114 @@ If the forthcode({DENOTATION}) vocabulary is on top of the search order,
 you get this message if you type forthcode({2SWAP}) .
 
 forthitem
- ERR # 11 : WORD IS NOT FOUND
+ forthsamp({ERR # 11 : WORD IS NOT FOUND})
 
 The string printed was not found in the dictionary.
-This error is detected by forthcode({'}) .
+This error is detected by forthcode({'}) (tick).
 
- ERR # 12 : NOT RECOGNIZED
+forthitem
+ forthsamp({ERR # 12 : NOT RECOGNIZED})
+
 The string printed was not found in the dictionary, nor
 does it match a number, or some other denotation.
 
- ERR # 13 : ERROR, NO FURTHER INFORMATION
-This error is used temporily,
- ERR # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY
-This message is only applicable to a stand alone Forth
-system booting from a hard disk accessed by Logical
-Block Addressing. If the library is saved to or restored from
-floppy this must be done in a Forth that boots from floppy.
+forthitem
+ forthsamp({ERR # 13 : ERROR, NO FURTHER INFORMATION})
 
- ERR # 15 : CANNOT FIND WORD TO BE POSTPONED
-Reserved. Not used.
+This error is used temporily, whenever there is need for
+an error message but there is not yet one assigned.
 
- ERR # 16 : (this error messages is not in use)
- ERR # 17 : COMPILATION ONLY, USE IN DEFINITION
- ERR # 18 : EXECUTION ONLY
- ERR # 19 : CONDITIONALS NOT PAIRED
- ERR # 20 : DEFINITION NOT FINISHED
- ERR # 21 : IN PROTECTED DICTIONARY
- ERR # 22 : USE ONLY WHEN LOADING
- ERR # 23 : OFF CURRENT EDITING SCREEN
- ERR # 24 : DECLARE VOCABULARY
- ERR # 25 : LIST EXPECTS DECIMAL
-You can use this message in a redefined forthcode({LIST}) , to prevent
+forthitem
+ forthsamp({ERR # 14 : SAVE/RESTORE MUST RUN FROM FLOPPY})
+
+_BOOTLBA_({
+If the library is saved to or restored from
+floppy this must be done in a Forth that boots from floppy.})
+
+forthitem
+ forthsamp({ERR # 15 : CANNOT FIND WORD TO BE POSTPONED})
+
+Not used.
+
+forthitem
+forthsamp({ERR # 16 : (this error messages is not in use)})
+
+forthitem
+forthsamp({ERR # 17 : COMPILATION ONLY, USE IN DEFINITION})
+
+_SECURITY_({
+This error is reported by forthcode({?COMP}). You try to use a
+word that doesn't work properly in interpret mode. This mostly
+refers to control words like forthcode({IF}) and forthcode({DO}) .
+_VERBOSE_({If you want control words to work in interpret mode,
+require forthcode({NEW-IF}) .})
+})
+
+forthitem
+forthsamp({ERR # 18 : EXECUTION ONLY})
+_SECURITY_({
+This error is reported by forthcode({?EXEC.}). You try to use a
+word that doesn't work properly in compile mode. You will not
+see this error, because all words in ciforth do.
+})
+
+forthitem
+ forthsamp({ERR # 19 : CONDITIONALS NOT PAIRED})
+
+_SECURITY_({
+This error is reported by forthcode({?PAIRS}). You try to
+improperly use control words that pair up (like forthcode({IF}) and
+forthcode({THEN}) , or forthcode({DO}) and forthcode({LOOP}) )
+})
+
+forthitem
+forthsamp({ERR # 20 : DEFINITION NOT FINISHED})
+
+_SECURITY_({
+This error is reported by forthcode({?CSP}). It detects
+stack unbalance between forthcode({:}) and forthcode({;}) .
+This means there is an error in the compiled code.
+It happens also if you try to use data that is put on the stack before
+ forthcode({:}) during compilation.
+Instead of
+
+forthsamp({<generatedata> : name LITERAL .... ;})
+
+use
+
+forthsamp({<generatedata> : name [ _ SWAP ] LITERAL .... ; DROP})
+
+to keep the stack at the same depth.
+})
+
+forthitem
+forthsamp({ERR # 21 : IN PROTECTED DICTIONARY})
+
+The word you are trying to forthcode({FORGET}) is below the forthcode({FENCE}) ,
+such that forgetting is not allowed.
+
+forthitem
+forthsamp({ERR # 22 : USE ONLY WHEN LOADING})
+
+_SECURITY_({
+This error is reported by forthcode({?LOAD}). You try to use a
+word that only works while loading from the forthcode({BLOCK-FILE}) ,
+in casu forthcode({-->}) .
+})
+
+forthitem
+forthsamp({ERR # 23 : OFF CURRENT EDITING SCREEN})
+
+forthitem
+ forthsamp({ERR # 24 : DECLARE VOCABULARY})
+
+forthitem
+ forthsamp({ERR # 25 : LIST EXPECTS DECIMAL})
+
+This message is used by a redefined forthcode({LIST}) , to prevent
 getting the wrong screen.
 
- ERR # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE
- ERR # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY
- ERR # 28 : AS: UNEXPECTED FIXUP/COMMAER
- ERR # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER
- ERR # 30 : AS: COMMAERS IN WRONG ORDER
- ERR # 31 : AS: DESIGN ERROR, INCOMPATIBLE MASK
- ERR # 32 : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT
-forthendenumerate
+forthenditemize
 
 @node Documentation,Glossary,Errors,top
 @chapter  Documentation summary
