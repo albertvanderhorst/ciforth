@@ -12,6 +12,7 @@ define({DX},{EDX})dnl
 define({DI},{EDI})dnl
 define({SI},{ESI})dnl
 define({BP},{EBP})dnl
+define({SP},{ESP})dnl
 define({STACKPOINTER},{ESP})dnl
 define({LODSW},{LODSD})dnl
 define({WR},{EAX})dnl
