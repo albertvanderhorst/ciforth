@@ -107,9 +107,14 @@ AGAIN ;
 'testJ SHOW-IT
 
 \ Expansion with LEAVEs present.
-: (TESTK) DO ROT LEAVE SWAP LOOP 2DUP ;
+: (TESTK) DO ROT IF LEAVE THEN SWAP LOOP 2DUP ;
 : testK    (TESTK) ;
 'testK SHOW-IT
+
+\ Expansion with LEAVEs present.
+: (TESTK2) DO ROT IF LEAVE THEN SWAP DO LOOP LOOP 2DUP ;
+: testK2    (TESTK2) ;
+'testK2 SHOW-IT
 
 \ Interfering LEAVEs and EXITs.
 : (TESTL) DO
@@ -151,6 +156,8 @@ HIDE A8 HIDE A9
 'testO3 SHOW-IT
 : testO4 -1 IF ROT THEN ;
 'testO4 SHOW-IT
+: testO5 1 IF ROT THEN ;
+'testO5 SHOW-IT
 
 \ ---------------------------------------------------------------------------
 
@@ -243,10 +250,15 @@ THEN SWAP
 'testJ SHOW-IT
 
 : testK
-DO ROT RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] SWAP LOOP [ R> FORWARD) ] 2DUP
+DO ROT IF RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] THEN SWAP LOOP [ R> FORWARD) ] 2DUP
 ;
 
 'testK SHOW-IT
+
+: testK2
+DO ROT IF RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] THEN SWAP DO LOOP LOOP [ R> FORWARD) ] 2DUP
+;
+'testK2 SHOW-IT
 
 : testL DO
 DUP IF RDROP  RDROP  RDROP  BRANCH [ (FORWARD >R ] ELSE BRANCH [ (FORWARD >R ] THEN SWAP
@@ -275,4 +287,6 @@ ROT
 'testO3 SHOW-IT
 : testO4 ROT ;
 'testO4 SHOW-IT
+: testO5 ROT ;
+'testO5 SHOW-IT
 CR

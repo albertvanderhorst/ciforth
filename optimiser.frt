@@ -160,6 +160,10 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ The following control words interfere with the optimiser FIXME!
 'EXIT FMASK-ST!
 'LEAVE FMASK-ST!
+'(LOOP)  FMASK-ST!
+'(+LOOP) FMASK-ST!
+'(DO)    FMASK-ST!
+'(?DO)   FMASK-ST!
 
 \ The minimum step depth we have encountered.
 VARIABLE MIN-DEPTH
@@ -348,9 +352,13 @@ CONSTANT LEAVE-LENGTH
 \ Return the incremented SEQUENCE.
 : LEAVE-GAP SET-LEAVE-OFFSET ENLARGE-LEAVE-GAP >R FILL-LEAVE-GAP R> ;
 
-\ Increment ADDRESS (part of a sequence) until pointing after a loop
-\ instruction. Return IT.
-: FIND-LOOP BEGIN NEXT-PARSE 0= 13 ?ERROR IS-A-LOOP UNTIL ;
+\ Increment ADDRESS (of a ``LEAVE'') until pointing after the corresponding
+\ loop end. Return IT.
+: FIND-LOOP ( Go on until past one loop ) 1 >R
+    BEGIN NEXT-PARSE 0= 13 ?ERROR
+        DUP IS-A-LOOP IF R> 1- >R THEN
+        IS-A-DO IF R> 1+ >R THEN
+    R@ 0= UNTIL RDROP ;
 
 \ Fill in the offset of a leave-replacing branch that ends at SEQUENCE.
 \ (The offset is one cell before this end.)
