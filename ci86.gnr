@@ -97,7 +97,7 @@ P_HOFFSET EQU     4       ;{ Same for parameter field}
 ;
 ;{      MEMORY + I/O CONSTANTS}
 ;
-NBUF    EQU     8       ;{ NO. OF BUFFERS AKA SCREENS }
+NBUF    EQU     8      ;{ NO. OF BUFFERS AKA SCREENS }
 KBBUF   EQU     1024    ;{DATA BYTES PER DISK BUFFER}
 US      EQU     100H     ;{ USER VARIABLE SPACE}
 _BITS16_({ RTS     EQU     0A0H    ;{ RETURN STACK & TERM BUFFER} })
@@ -3068,6 +3068,7 @@ INTE1:
         DC      PFIND   ;{BEGIN}
         DC      DDUP
         _0BRANCH(INTE2) ;{IF}
+;        DC      LDUP, IDDOT
         DC      LDUP, TFFA, CFET
         DC      STATE
         DC      FETCH
@@ -3678,6 +3679,8 @@ HEADER({BUFFER},{BUFFE},{DOCOL})
         DC      LDUP, TOR
 BUFF1:  DC      PBUF            ;{ Skip PREV buffer.}
         _0BRANCH(BUFF1)
+        DC      LDUP, CELLP, FETCH, ZEQU ;{ Skip locked buffers.}
+        _0BRANCH(BUFF1)
         DC      STALEST,STORE
         DC      RR,STORE
         DC      RR,PREV, STORE,
@@ -3787,6 +3790,18 @@ HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC      SOURC, TSTOR
         DC SEMIS
 ;
+HEADER({LOCK},{LLOCK},{DOCOL})
+        DC      ONE
+        DC      SOURC, FETCH, LIT, CW, LSUB
+        DC      STORE
+        DC      SEMIS
+;
+HEADER({UNLOCK},{LUNLOCK},{DOCOL})
+        DC      ZERO
+        DC      SOURC, FETCH, LIT, CW, LSUB
+        DC      STORE
+        DC      SEMIS
+;
 worddoc({SCREEN},{LOAD},{load},{n ---},{L0},
 {Interrupt the current input stream in order to
 interpret screen forthvar({n}) .
@@ -3801,7 +3816,9 @@ HEADER({LOAD},{LOAD},{DOCOL})
         DC      LDUP, SOURC, STORE
         DC      LDUP, LIN, STORE
         DC      LIT, KBBUF, PLUS, SOURC, CELLP, STORE
+        DC      LLOCK
         DC      INTER   ;{INTERPRET FROM OTHER}
+        DC      LUNLOCK
 SCREEN: DC      RESTO
         DC      FROMR, BLK, STORE
         DC      SEMIS
@@ -3810,12 +3827,15 @@ worddocsafe({SCREEN},{-->},{next_screen},{},{P,L0},
 {Continue interpretation with the next disc screen.},{{LOAD}})
 HEADER({-->},{ARROW},{DOCOL},1)
         DC      QLOAD
-        DC      ZERO
-        DC      LIN
-        DC      STORE
         DC      ONE
         DC      BLK
         DC      PSTOR
+        DC      LUNLOCK
+        DC      BLK, FETCH, BLOCK
+        DC      LDUP, SOURC, STORE
+        DC      LDUP, LIN, STORE
+        DC      LIT, KBBUF, PLUS, SOURC, CELLP, STORE
+        DC      LLOCK
         DC      SEMIS
         PAGE
 ;

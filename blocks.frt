@@ -1,4 +1,4 @@
-         9 1 DO I J ! 5 SPACES ( eerst wat spaties)
+s         9 1 DO I J ! 5 SPACES ( eerst wat spaties)
                 9 1 DO 9 J @1 - I BORD @ EMIT SPACE LOOP CR
 
 
@@ -136,7 +136,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
  ( KRAKER )        10 LOAD
  ( CRC             71 LOAD   )
  ( ASSEMBLER 8080  74 LOAD   )
- ( ASSEMBLER 80x86 SAVE-BLOCKS)  ;S 120 LOAD   97 98 THRU
+ ( ASSEMBLER 80x86 SAVE-BLOCKS) ;S   120 LOAD   97 98 THRU
  : \ 0 WORD DROP ;  IMMEDIATE
  2 LIST    : TASK ;
  ( OLD:  NEW SYSTEM      23 LOAD   )
@@ -627,7 +627,7 @@ THEN ;
     OVER + SWAP FFF0 AND
     DO
         CR DUP H. I H. ." : "
-        I
+        I  
         10 0 DO
             2DUP I + L@ B.
             I 2 MOD IF SPACE THEN
@@ -782,21 +782,21 @@ KRAAKER
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( testing of the block mechanism )
+: FOR-BLOCKS >R PREV @ 
+    BEGIN DUP R EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
+: SHOW-BLOCK 
+    DUP STALEST @ = IF CR ." STALEST:" THEN 
+    DUP CR H. 
+    DUP @ IF 
+        ." #" DUP ? 
+        CELL+ DUP @ IF ." LOCKED" ELSE ." NOT LOCKED" THEN
+        CELL+ &: | EMIT 50 TYPE &: | EMIT
+    ELSE 
+        ." FREE" DROP 
+    THEN ;
+: .B ' SHOW-BLOCK >CFA FOR-BLOCKS ;
+    .B
 
 ( A0dec21 www STRING AND PARSING words )
 FORGET TASK      : TASK ;  CHAR " CONSTANT DLM   36 38 THRU
@@ -2066,12 +2066,12 @@ CODE TEST-NEXT NEXT  C;
 ?32  ( Test applicable to 32 bit mode)
 FORTH DEFINITIONS DECIMAL
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT C;
-CODE TEST-MORE TO-REAL,   TO-PROT, NEXT C;
-CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
-  GDT_DS COPY-SEG   NEXT C;
 
-
-
+( CODE TEST-MORE TO-REAL,   TO-PROT, NEXT C;               )
+( CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,)
+( GDT_DS COPY-SEG   NEXT C;                                  )
+RP@ 100 DUMP SP@ 100 DUMP 
+.B
 
 
 
