@@ -19,7 +19,7 @@ How to create a floppy booting into ciforth
 make allboot
 
 How to create a hard disk booting into ciforth:
-2001 aug 29
+REQUIRE INSTALL-KERNEL    REQUIRE RESTORE-BLOCKS
 
 How to create an official decompilation :
 2001 aug 30
