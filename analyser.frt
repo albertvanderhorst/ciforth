@@ -37,6 +37,8 @@ HEX
 20 CONSTANT FMASK-N!    \ No output side effects. "No stores."
 80 CONSTANT FMASK-IL    \ Data is following in line.
 
+FMASK-N@ FMASK-N! OR CONSTANT FMASK-NS \ No side effects.
+
 \ A set : #how far filled, data. See asgen.frt
 
 \ Fill in the STACK effect into the flag field of DEA.
@@ -117,7 +119,7 @@ VARIABLE #POPS          VARIABLE #PUSHES
 VARIABLE PROTO-FMASK
 
 \ Initialise to "no side effects". Innocent until proven guilty.
-: !FMASK FMASK-N@ FMASK-N! OR PROTO-FMASK ! ;
+: !FMASK FMASK-NS PROTO-FMASK ! ;
 
 \ Add to FLAGS if instruction IS storing, the no output side effects flag.
 \ Return the new FLAGS. (So those are the flags to become invalid.)
@@ -233,7 +235,8 @@ FMASK-IL    ' (?DO) >FFA  OR!U      FMASK-IL    ' LIT >FFA    OR!U
 \ ---------------------------------------------------------------------------
 
 \ Inspect POINTER and XT. If the xt is of a type followed by inline
-\ code advance pointer appropriately. Inspect new POINTER and XT.
+\ code advance pointer as far as possible, remaining in the same chain.
+\ Leave new POINTER and XT.
 : ?INLINE? >R
     R@ >FFA @ FMASK-IL AND IF
         R@ 'LIT = OVER @ 0< OR IF   \ In line literal or back jump.
@@ -307,8 +310,77 @@ DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
 \ Count the ``#UNKNOWNS''.
 : FILL-ALL   !UNKNOWNS   'TASK FILL-SE-WID   'ENVIRONMENT >WID FILL-SE-WID ;
 
-\ Go on
+\ Go on until the number of unknown stack effects no longer changes.
 : FILL-ALL-SE 0 BEGIN FILL-ALL #UNKNOWNS @ SWAP OVER = UNTIL DROP ;
+\ Inspect POINTER and XT. If the xt is of a type followed by inline
+\ code advance pointer to next high level code.
+\ Leave new POINTER and XT.
+: ?INLINE2? >R
+    R@ >FFA @ FMASK-IL AND IF
+        R@ 'SKIP = IF   \ In line string.
+            $@ + ALIGNED
+        ELSE
+            CELL+
+        THEN
+    THEN R> ;
 
-13 '(NUMBER) !SE
+
+\ Add to a BYTE the fetch-store optimisation bits of DEA. Result a new BYTE.
+: ADD-!@    >FFA @ AND ;
+
+\ To a stack effect BYTE apply a CHAIN of high level code.
+\ Return the resulting stack effect BYTE.
+: ANALYSE-CHAIN2
+        BEGIN @+ ( DUP ID.) DUP CHAIN? WHILE ?INLINE2? SWAP >R ADD-!@ R> REPEAT 2DROP ;
+
+\ For DEA return the optimisation BITS.
+\ It must be a high level definition
+: FIND-OB-DOCOL   FMASK-NS SWAP >DFA @ ANALYSE-CHAIN2 ;
+
+\ For DEA return the optimisation BITS.
+\ It must be a ``CREATE .. DOES>'' definition
+: FIND-OB-DODOES FMASK-NS SWAP >DFA @ @ ANALYSE-CHAIN2 ;
+
+\ For DEA return the optimisation BITS.
+\ It can be any definition, because non high level are ignored, they
+\ have already been filled in.
+: FIND-OB-ANY
+    DUP >CFA @ DOCOL = IF FIND-OB-DOCOL ELSE
+    DUP >CFA @ DODOES = IF FIND-OB-DODOES ELSE
+       >FFA @
+    THEN THEN ;
+
+\ Fill optimisations BITS in into DEA.
+: !OB   >FFA >R    R@ @ FMASK-NS INVERT AND   OR  R> ! ;
+
+\ For DEA find the optimisation bits and fill it in.
+\ It can be any definition.
+\ Dummy headers are ignored.
+: FILL-OB
+    DUP >FFA @ 1 AND 0= IF \ Ignore dummy headers
+        DUP FIND-OB-ANY SWAP !OB _
+    THEN DROP ;
+
+\ The number of entries with unknown stack effect.
+VARIABLE #UNKNOWNS
+
+: !UNKNOWNS 0 #UNKNOWNS ! ;
+
+\ For DEA fill in the opt bits and remember if there was a change.
+: ?FILL-OB?   ( DUP ID. CR)
+    DUP >FFA @ >R   DUP FILL-OB    >FFA @ R> <> NEGATE #UNKNOWNS +! ;
+
+\ For a WID fill in all optimisation bits.
+: FILL-OB-WID '?FILL-OB? SWAP FOR-WORDS ;
+
+\ Sweep once through the base dictionary filling in optimisation bits.
+\ There are three vocabularies. ``Forth'' is done partly, from ``TASK''.
+\ ``ENVIRNONMENT'' is done in full. ``DENOTATION'' hangs off ``FORTH''.
+\ Count the ``#UNKNOWNS''.
+: (FILL-ALL-OB)   !UNKNOWNS   'TASK FILL-OB-WID   'ENVIRONMENT >WID FILL-OB-WID ;
+
+\ Go on until the number of unknown stack effects no longer changes.
+: FILL-ALL-OB 0 BEGIN (FILL-ALL-OB) #UNKNOWNS @ SWAP OVER = UNTIL DROP ;
+
+
 DECIMAL
