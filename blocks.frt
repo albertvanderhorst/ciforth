@@ -242,17 +242,17 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
                       CFOF SKIP BY -sk
-  : -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT
-      TYPE [CHAR] " EMIT BL EMIT  $@ + ;
-                             CFOF ($) BY -sq
+: -sq CELL+ DUP $@ CR [CHAR] " EMIT BL EMIT TYPE [CHAR] " EMIT
+  BL EMIT $@ + ;                     CFOF ($) BY -sq
   : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
+  : -qdo CR ." ?DO " CELL+ CELL+ ;   CFOF (?DO) BY -qdo
   : -lo CR ." LOOP " CELL+ CELL+ ;   CFOF (LOOP) BY -lo
   : -pl CR ." +LOOP " CELL+ CELL+ ;  CFOF (+LOOP) BY -pl
   ( : -cm ." COMPILE " -lit ;  CFOF COMPILE BY -cm    )
-    : -cm ID.+ ID.+ ;            CFOF COMPILE BY -cm
+    : -cm ID.+ ID.+ ;                CFOF COMPILE BY -cm
   : -pc CR ." ;CODE plus code (suppressed)"
   ( DIRTY TRICK FOLLOWING : Destroy decompile pointer !)
-    DROP ' TASK >PFA ;          CFOF (;CODE) BY -pc
+    DROP ' TASK >PFA ;               CFOF (;CODE) BY -pc
       -->
  CR ." KRAAKER"
  : -dd C>D ." CREATE DOES> word " ID.. CR ;
@@ -4078,19 +4078,19 @@ DECIMAL  getit
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+( <ud><a><u> --- <ud2><a2><u> )
+: >NUMBER     
+    2DUP + >R                              
+    0 ?DO
+        DUP .S
+        C@ BASE @ DIGIT        ( a2 is address first          )
+          0= IF LEAVE   ( if unconvertible digit.          )
+          THEN
+        SWAP >R
+        SWAP BASE @ UM* DROP    ( hi*base::new_digit          )
+        ROT  BASE @ UM* D+      ( lo*base_high::lo*base::lo   )
+        R> 1+                ( increment pointer           )
+    LOOP
+    R> OVER -
+;
 ( Last line, preserve !! Must be line 4096)

@@ -3660,7 +3660,60 @@ HEADER({NUMBER},{NUMB},{DOCOL})
 LNUMB:  DC      PNUMB, SDLITE
         DC      SEMIS
 ;
+_LOAD_({
+worddoc( {FORMATTING},{>NUMBER},{to_number},
+{ud1 addr1 u1 --- ud2 addr2 u2},
+{ISO},
+{
+forthsamp({ud2}) is the result of converting the characters
+within the character string specified by forthsamp({addr1 u1})
+into digits, using the number in forthcode({BASE}) , and adding
+each into ud1 after multiplying forthsamp({ud1}) by the number
+in forthcode({BASE}) . Conversion continues until a character
+that is not convertible is encountered or the string is
+entirely converted. forthsamp({addr2}) is the location of the
+first unconverted character or the first character past the end
+of the string if the string was entirely converted.
+forthsamp({u2}) is the number of unconverted characters in the
+string. If forthsamp({ud2}) overflows, ciforth only
+forthsamp({ud2}) will be incorrect. _VERBOSE({Both
+forthkey({-}) and forthkey({+}) are considered unconvertible
+character's by forthvar({>NUMBER}) .}) 
+},
+{{NUMBER},{DIGIT}},
+{
+{ 0. "1324" >NUMBER . 4 - 4 TYPE D.},{0 13241324},
+{ 0. "1324.KL" >NUMBER DUP . TYPE D.},{3 .KL1324},
+}, enddoc)
+HEADER({>NUMBER},{TONUMB},{DOCOL})
+        DC      TDUP, PLUS, TOR     ;{ End available on return stack.}
+        DC      ZERO
+        _QDO(TONUM9)
+TONUM1:  
+        DC      LDUP, CFET, BASE, FETCH, DIGIT
+        DC      ZEQU
+        _0BRANCH(TONUM4) ;{ IF}
+        DC      LLEAV
+TONUM4:
+        DC      SWAP, TOR ; {Address out of the way.}
+        DC      SWAP
+        DC      BASE
+        DC      FETCH
+        DC      USTAR
+        DC      DROP
+        DC      ROT
+        DC      BASE
+        DC      FETCH
+        DC      USTAR
+        DC      DPLUS
+        DC      FROMR, ONEP     ; {Address back.}
+        _LOOP(TONUM1)
+TONUM9:                 
+        DC      FROMR
+        DC      OVER, LSUB
+        DC      SEMIS
 ;
+});_END_({_LOAD_})
 worddocsafe( {DICTIONARY},{FIND%},{find_following},{"name" --- dea},{},
 {Parse a blank-delimited string from the current input stream
 and look the string up according to forthcode({(FIND)}) . If
