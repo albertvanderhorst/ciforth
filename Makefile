@@ -127,9 +127,9 @@ $(EXAMPLES)     \
 wc            \
 # That's all folks!
 
-# 3v1 ### Version : an official release 3.1
-# 3d154  Release of a revision, so beta, the revision number is 3.154
-VERSION=test  # Because normally VERSION is passed via the command line.
+# 4v0 ### Version : an official release 4.0
+# Left out : beta, revision number is taken from rcs e.g. 3.154
+VERSION=  # Because normally VERSION is passed via the command line.
 DATE=2030     # To get the newest version
 
 RELEASELINA = \
@@ -159,25 +159,27 @@ ci86.gnr:RCS/ci86.gnr,v ; co -d$(DATE) $<
 # allow to generate ci86.mina.bin etc.
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
-ci86.%.asm : %.cfg nasm.m4 ci86.gnr
+VERSION : ; echo 'define(M4_VERSION,$(VERSION))' >VERSION
+
+ci86.%.asm : VERSION %.cfg nasm.m4 ci86.gnr
 	make constant.m4
-	m4 $+ >$(TEMPFILE)
+	cat $+ | m4 >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.asm=%.rawdoc)
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
-ci86.%.msm : %.cfg masm.m4 ci86.gnr ; \
-	m4 $+ >$(TEMPFILE)
+ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr ; \
+	cat $+ | m4 >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.msm=%.rawdoc)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$(@:%.msm=%.rawtest)
 	rm $(TEMPFILE)
 
-ci86.%pres  : %.cfg gas.m4  ci86.gnr ; m4 $+ >$@
-ci86.%     : %.cfg       ci86.gnr ; m4 $+ >$@
+ci86.%pres  : %.cfg gas.m4  ci86.gnr ; cat $+ | m4 >$@
+ci86.%     : %.cfg       ci86.gnr ; cat $+ | m4 >$@
 
 # gas needs extra transformations that m4 cannot handle.
 # In particular the order of operands.
@@ -203,6 +205,9 @@ cleanother:  rm -f $(OTHERTARGETS)
 #msdos32.zip doesn't work yet.
 release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
 
+#Install it. To be run as root
+install: ; @echo 'There is no "make install" ; use "lina -i <binpath> <libpath>"'
+
 # You may need to run the following run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
 # then creating a dos file system in accordance with the boot sector,
@@ -227,7 +232,7 @@ trboot: ci86.alonetr.bin lina forth.lab
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 
-# Figforth calculates whether the screen boundaries are off by a sector.
+# ciforth calculates whether the screen boundaries are off by a sector.
 # You can copy the filler by hand if this calculation fails, e.g. 5" floppies.
 # The symptom is 8 LIST show the electives screen half and half of some other screen.
 filler: ci86.alone.bin lina filler.frt
