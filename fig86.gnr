@@ -593,6 +593,7 @@ _BITS32_1_({include(width32.m4) })
 BMASK   EQU     BLOCKS_IN_USE_MASK
        
 ;____1_____ _SWITCH_1_({
+        CLI     ;{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
 REP1:
 ;____1_____ _BITS32_1_({
@@ -1400,6 +1401,7 @@ DOCOL:  LEA     BP,[BP-CELLS(1)]
 ;        CALL    DISPLAYSI
 ;____1_____ _SWITCH_1_({
         _SWITCH_1_({JMPHERE_FROM_FORTH})
+        ;{ Allow interrupts to happen.}
         _SWITCH_1_({JMPHERE_FROM_OS})
 });_END___1__({ _SWITCH_1_})
         _NEXT
@@ -3847,7 +3849,7 @@ HEADER({BYE},{BYE},{DOCOL})
 ;____1_____ _ABSOLUTELOAD_1_({
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
-        _SWITCH_1_({JMPHERE_FROM_PROT})
+        _SWITCH_1_({JMPHERE_FROM_FORTH})
 RETDOSV: JMP 0:0        ; {Filled in during boot}
         _BITS32_1_({SET_32_BIT_MODE})
 
