@@ -31,6 +31,11 @@ ASSEMBLER DEFINITIONS  HEX
 \     0010,0000 AMASK 2 is clear           0020,0000 Instruction requires AMASK 2
 \     0040,0000 AMASK 8 is clear           0080,0000 Instruction requires AMASK 8
 
+\    1,000,0000 Disallow /U/SU IEEE        2,0000,0000 /S or /SU trap.
+\    4,000,0000 Disallow /U/SU/SUI         8,0000,0000 /U /SU /SUI trap.
+\   10,000,0000 Disallow /SUI             20,0000,0000  /SUI trap.
+
+
 
 \ For DEA set and individual MASK to bad (or back).
 : !BAD    SWAP >BA SWAP TOGGLE ;
@@ -51,17 +56,17 @@ ASSEMBLER DEFINITIONS  HEX
 ( ***************************** 4.7 FP Modifiers ********************** )
 
 (                                   TRP bits                            )
-4000 0 E000 0000 xFI /I
-4080 0 E000 2000 xFI /U
-4040 0 E000 2000 xFI /V
-4080 0 E000 4000 xFI --
-4080 0 E000 6000 xFI --
-4020 0 E000 8000 xFI /S
-4080 0 E000 A000 xFI /SU
-4040 0 E000 A000 xFI /SV
-4090 0 E000 C000 xFI --
-4090 0 E000 E000 xFI /SUI
-4050 0 E000 E000 xFI /SVI
+00,0000,4000 0 E000 0000 xFI /I
+2A,0000,4080 0 E000 2000 xFI /U
+2A,0000,4040 0 E000 2000 xFI /V
+(                 4000                                                  )
+(                 6000                                                  )
+00,0000,4020 0 E000 8000 xFI /S        ( Only VAX )
+2A,0000,4080 0 E000 A000 xFI /SU
+0A,0000,4040 0 E000 A000 xFI /SV
+(                 C000                                                  )
+28,0000,4090 0 E000 E000 xFI /SUI      ( Only IEEE )
+28,0000,4050 0 E000 E000 xFI /SVI
 
 (                                   RND bits                            )
 4000 0 1800 0000 xFI /C
@@ -86,6 +91,13 @@ ASSEMBLER DEFINITIONS  HEX
 0020,0000 0   20 xFAMILY|
   a0| a1| a2| a3| a4| a5| a6| a7| a8| a9| a10| a11| a12| a13| a14| a15| a16|
   a17| a18| a19| a20| a21| a22| a23| a24| a25| a26| a27| a28| a29| a30| az|
+
+(   Toggle the a-register field in the MASK. Leave IT.                  )
+(   This can be use to clear the register field in a BI-mask as well    )
+(   as set it them in an instruction , i.e. the all zero register.      )
+: NO-a  03E0,0000 XOR  ;
+(   Toggle the a-register field in the MASK. Leave IT.                  )
+: NO-b  001F,0000 XOR  ;
 
 ( Toggle some register fixup's back to interesting, i.e. make it show   )
 ( up in disassembly.                                                    )
@@ -116,8 +128,8 @@ ASSEMBLER DEFINITIONS  HEX
     BI: 0.10 BI: 10.1D 6 4FAMILY, CMPULT, CMPEQ, CMPULE, CMPLT, -- CMPLE,
 
 ( Have ``bz|'' and ``R|'' fixed in the instruction. )
-20,0000 0 F3I-MASK  'bz| >BI @ XOR   'R| >BI @ XOR  T!
-    BI: 0.01 BI: 1C.30 'bz| >DATA @ OR   'R| >DATA @ OR  4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
+20,0000 0 F3I-MASK  NO-b 'R| >BI @ XOR  T!
+    BI: 0.01 BI: 1C.30 NO-b 'R| >DATA @ OR  4 4FAMILY, CTPOP, --    CTLZ, CTTZ,
 ( Resolve conflict with ``FTOIT,'' by disallowing ``az|'' )
 ' CTPOP, 0400 !BAD
 
@@ -173,46 +185,55 @@ ASSEMBLER DEFINITIONS  HEX
 
 ( ***************************** 4.10 FP Operate *********************** )
 
-(     At Dec the /N bit is set in the 3 operand instruction, i.e.       )
-(     normal rounding is built in in the assembler instruction for      )
-(     normal calculations. This are the first two groups.               )
+(  The instructions as shown in Table C-8 are always /N /I .            )
+(  If alternatives for /N are allowed, the /N bit is stripped in the    )
+(  base instruction, i.e. subtract 80 from yyy in BI: xx.yyy            )
+
+\ SPLIT LATER IN TRAPPING AND NON TRAPPING. NORMAL ROUNDING OBLIGATORY.
 4094 0 F3F-MASK T!
     BI: 0.001 BI: 16.000 4 4FAMILY, ADDS, SUBS, MULS, DIVS,
     BI: 0.001 BI: 16.020 4 4FAMILY, ADDT, SUBT, MULT, DIVT,
-    BI: 0.001 BI: 16.024 4 4FAMILY, CMPTUN, CMPTEQ, CMPTLT, CMPTLE,
-8,4094 0 F3F-MASK 'az| >BI @ XOR   T!
-    BI: 0.020 BI: 14.00B 'az| >DATA @ OR  2 4FAMILY, SQRTS, SQRTT,
+4094 0 03FF,001F  T!
+    BI: 0.001 BI: 16.0A4 4 4FAMILY, CMPTUN, CMPTEQ, CMPTLT, CMPTLE,
+8,4094 0 F3F-MASK NO-a T!
+    BI: 0.020 BI: 14.00B NO-a 2 4FAMILY, SQRTS, SQRTT,
 
 40A4 0 F3F-MASK T!
     BI: 0.001 BI: 15.000 4 4FAMILY, ADDF, SUBF, MULF, DIVF,
     BI: 0.001 BI: 15.00A 4 4FAMILY, ADDG, SUBG, MULG, DIVG,
-    BI: 0.001 BI: 15.025 3 4FAMILY, CMPGEQ, CMPGLT, CMPGLE,
-8,40A4 0 F3F-MASK 'az| >BI @ XOR   T!
-    BI: 0.020   BI: 14.00A  'az| >DATA @ OR  2 4FAMILY, SQRTF, SQRTG,
+4,0000,40A4 0 03FF,E01F  T!
+    BI: 0.001 BI: 15.0A5 3 4FAMILY, CMPGEQ, CMPGLT, CMPGLE,
+8,40A4 0 F3F-MASK NO-a T!
+    BI: 0.020   BI: 14.00A  NO-a 2 4FAMILY, SQRTF, SQRTG,
 
+40A4 0 F3F-MASK          BI: 15.01E 4PI CVTDG,
 
-4004 0 F3F-MASK T!
-40A4 0 F3F-MASK BI: 15.01E 4PI CVTDG,
-40A4 0 F3F-MASK BI: 15.02C 4PI CVTGF,
-40A4 0 F3F-MASK BI: 15.02D 4PI CVTGD,
-4064 0 F3F-MASK BI: 15.02F 4PI CVTGQ,
-40A4 0 F3F-MASK BI: 15.03E 4PI CVTQG,
-40A4 0 F3F-MASK BI: 15.03C 4PI CVTQF,
+40A4 0 F3F-MASK          BI: 15.02C 4PI CVTGF,
+40A4 0 F3F-MASK          BI: 15.02D 4PI CVTGD,
+4064 0 F3F-MASK          BI: 15.02F 4PI CVTGQ,
 
-4094 0 F3F-MASK BI: 16.02C 4PI CVTTS,
-4054 0 F3F-MASK BI: 16.02F 4PI CVTTQ,
-4094 0 F3F-MASK BI: 16.03C 4PI CVTQS,
-4094 0 F3F-MASK BI: 16.03E 4PI CVTQT,
-4094 0 F3F-MASK BI: 16.00C 4PI CVTST,
+40A4 0 03FF,181F         BI: 15.03E 4PI CVTQG,
+40A4 0 03FF,181F         BI: 15.03C 4PI CVTQF,
 
-( Instructions without the /N bit built in.                             )
-4084 0 F3F-MASK T!
+4094 0 F3F-MASK          BI: 16.02C 4PI CVTTS,
+4054 0 F3F-MASK          BI: 16.02F 4PI CVTTQ,
+
+1,0000,4094 0 F3F-MASK          BI: 16.03C 4PI CVTQS,
+1,0000,4094 0 F3F-MASK          BI: 16.03E 4PI CVTQT,
+
+( These instructions are irregular!                                     )
+4,0000,4094 0 03FF,001F          BI: 16.2AC 4PI CVTST,
+4,0000,4094 0 03FF,001F          BI: 16.6AC 4PI CVTST/S,
+
+4084 0 03FF,001F T!
     BI: 0.001 BI: 17.020 3 4FAMILY, CPYS, CPYSE, CPYSN,
 
-4044 0 F3F-MASK T!
-    BI: 0.020 BI: 17.010 2 4FAMILY, CVTLQ, CVTQL,
+        4044 0 03FF,001F BI: 17.010 4PI CVTLQ,
+( Mark this instruction as VAX floating for trap modifiers.             )
+4064 0 03FF,E01F BI: 17.030 4PI CVTQL,
+\ 10,0000,4044 0 03FF,E01F BI: 17.030 4PI CVTQL,
 
-4084 0 F3F-MASK T!
+4084 0 03FF,001F T!
     BI: 0.001 BI: 17.02A 6 4FAMILY, FCMOVEQ, FCMOVNE, FCMOVLT, FCMOVGE,
         FCMOVLE, FCMOVGT,
     BI: 0.001 BI: 17.024 2 4FAMILY, MT_FPCR, MF_FPCR,
@@ -220,9 +241,9 @@ ASSEMBLER DEFINITIONS  HEX
 8,4054 0 F3F-MASK T!
     BI: 0.010 BI: 14.004 3 4FAMILY, ITOFS, ITOFF, ITOFT,
 
-( Fix ``az|'' in the instruction, disallow ``bz|''. See ``CTPOP''       )
-8,5054 0 F3F-MASK 'az| >BI @ XOR   T!
-    BI: 0.008 BI: 1C.030  'az| >DATA @ OR   2 4FAMILY, FTOIT, FTOIS,
+( Fixed ``az|'' in the instruction, disallow ``bz|''. See ``CTPOP''     )
+8,5054 0 F3F-MASK NO-a T!
+    BI: 0.008 BI: 1C.030  NO-a 2 4FAMILY, FTOIT, FTOIS,
 
 ( **************************** Misc Opr ******************************  )
 
@@ -279,7 +300,7 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 0 0   0000,0000  6000,0400 4PI EXCB
 0 0 001F,0000 T!
       0000,2000  6000,8000 2 4FAMILY, FETCH, FETCH_M,
-0 0   0000,001F BI: 11.6C 4PI IMPLVER,
+0 0   0000,001F BI: 11.6C NO-a NO-b 4PI IMPLVER,
 0 0   0000,0000  6000,4000 4PI MB,
 0 0   03E0,0000  6000,E000 4PI RC,
 0 0   03E0,0000  6000,C000 4PI RPCC,
