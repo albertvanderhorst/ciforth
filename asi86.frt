@@ -1,3 +1,4 @@
+
 ( Returns the DEA from the inline word. Like an xt in ans. )
 ( A subsequent `ID.' must print the name of that word      )
 : % [COMPILE] ' NFA ;
@@ -22,18 +23,18 @@
 : AT-REST? TALLY @ 256 <  TALLY CELL+ @ -1 = AND ;
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
 ( Based on DATAFIELD of a postit, tally it)
-: TALLY:, CELL+ @+ TALLY CELL+ ! @ TALLY ! ;
+: TALLY:, CELL+ @+ TALLY CELL+ ! @+ TALLY ! @ ISL ! ;
 ( Correct dictionary to have an instruction of N bytes, after           )
 ( `,' allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
-: DO-POST CHECK26 !POST DUP TALLY:, DUP @ , 3 CELLS + @ DUP ISL ! CORRECT ;
+: DO-POST CHECK26 !POST DUP TALLY:, DUP @ , ISL @ CORRECT ;
 : INVERT -1 XOR ;
 0 VARIABLE TEMP ( Should be passed via the stack )
 ( Build a word that tests whether it of same type as stored )
 ( in `TEMP'. Execution: Leave for DEA : it IS of same type )
 : IS-A <BUILDS TEMP @ , DOES> @ SWAP PFA CFA CELL+ @ = ;
 ( Generate error if data for postit defining word was inconsistent)
-: CHECK31 & HERE 4 CELLS - DUP @ SWAP CELL+ @ INVERT  ^ AND 
+: CHECK31 & HERE 4 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 
     31 ?ERROR ;                                                         
 HEX
 
@@ -65,7 +66,7 @@ DECIMAL
 : OR! >R R @  CHECK28 OR R> ! ;
 ( And DATA into ADDRESS. If bits were already down its wrong.)
 : CHECK29 2DUP OR -1 - 29 ?ERROR   ;
-: AND! >R R @ CHECK29 AND R> ! ;
+: AND! >R R @ ( CHECK29) AND R> ! ;
 (   Based on PFA of a fixup fix into tally)
 : TALLY:| CELL+ @+ TALLY CELL+ OR! @ TALLY AND! ;
 
@@ -80,7 +81,7 @@ DECIMAL
 DOES> [ HERE TEMP ! ] DUP TALLY:| @ ISS @ OR! ;
 IS-A IS-xFI
 
-: CORRECT-I ISL @ ROTRIGHT ;
+: CORRECT-I 0 CELL+ ISL @ - ROTRIGHT ;
 (   Based on PFA of a fixup fix into tally )
 : TALLY:|R CELL+ @+ CORRECT-I TALLY CELL+ OR! @ TALLY AND! ;
 ( Note: the mask is inverted compared to postit, such that a            )
@@ -156,9 +157,9 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE
 1 .
 00 C000 0s 0000 0s xFIR      D0|
 11 .
-01 C000 0s 4000 0s xFIR      DB|
-04 C000 0s 8000 0s xFIR      DW|
-00 C000 0s C000 0s xFIR      R|
+204 C000 0s 4000 0s xFIR      DB|
+208 C000 0s 8000 0s xFIR      DW|
+00  C000 0s C000 0s xFIR      R|
 00 0700 0s T!
  100 0s 0 8 xFAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] [BP] [BX]
  100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
@@ -306,8 +307,8 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE
    THEN
 ;
 : DIS-xFIR
-   DUP IS-xFIR IF
-   DUP >MASK ISL @ ROTRIGHT TALLY CELL+ @ INVERT CONTAINED-IN IF
+   DUP IS-xFIR IF     
+   DUP >MASK CORRECT-I TALLY CELL+ @ INVERT CONTAINED-IN IF
        DUP >BODY TALLY:|R
        DUP +DISS
    THEN
@@ -355,15 +356,16 @@ HEX VOCABULARY ASSEMBLER IMMEDIATE
         REBUILD
     THEN
 ;
-
+    % RESULT +DISS                                                      
 : DOIT
     !DISS
     !TALLY
     STARTVOC BEGIN
+(       DUP ID.                                                         )
         DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
+(       ." We are at " .DISS CR CR                                      )
         RESULT
         >NEXT%
-(       DUP ID.                                                         )
         BEGIN DUP VOCEND? DISS? AND WHILE BACKTRACK REPEAT
     DUP VOCEND? UNTIL DROP
 ;
