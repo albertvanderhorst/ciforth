@@ -1,7 +1,5 @@
 dnl  $Id$  M4 file to handle the develish FIG headers.
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl Once and for all. 
-changecom(_M4_COMMENT,_M4_ENDCOMMENT)dnl
 dnl
 dnl _STRING : Lay down a string in memory.
 dnl Take care of embedded double quotes by using single quotes.
@@ -11,7 +9,7 @@ dnl The digression using _squote is needed because the single quote is used in m
 define(_squote,')
 define({_dbquoted},"{{$1}}")dnl
 define({_sgquoted},'{{$1}}')dnl
-define({_quoted},{ifelse( -1, index({$1},"),{_dbquoted},{_sgquoted})}({{$1}}))
+define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
 define({_STRING},{
         DB      len({$1})
         DSS      _quoted}({{$1}}))dnl
@@ -25,54 +23,30 @@ dnl Lay down a header with forth name $1, assembler name $2 and code field $3
 dnl If $4 is defined, make the word immediate.
 define(HEADER, {dnl
 define({_x},len({$1}))dnl
-define({_y}, {substr({$1},eval(_x-1),1)})dnl
-define({_z}, {substr({$1},0,eval(_x-1))})dnl
 ;  ********_star(len({$1})) 
 ;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
 N_$2:     DB   80H+len({$1})ifelse(1,$4,+40H,)
 ifelse(1,_x, , 
-{         DSS      }"{_z}"
+{         DSS      }_quoted({substr({$1},0,eval(_x-1))})
+)dnl    
+dnl Rather mysterious: without the dummy ifelse it just doesn;t work
+ifelse(1,2, , 
+{         DB       }_quoted({substr({$1},eval(_x-1),1)})+80H
 )dnl
-         DB     "_y"+80H
          DC    _LINKOLD
 $2:      DC     $3
          undefine({_x})dnl
-         undefine({_y})dnl
-         undefine({_z})dnl
 define({_LINKOLD},{N_$2})dnl
 })dnl
-dnl
-dnl Similar to HEADER but uses single quotes. instead of doubles. 
-dnl Useful if a name has double quotes like PDOT. (Cannot handle a combination of the two)
-define(HEADER_SGQ,{
-define({_x},len({$1}))dnl
-define({_y}, {substr({$1},eval(_x-1),1)})dnl
-define({_z}, {substr({$1},0,eval(_x-1))})dnl
-;  ********_star(len({$1})) 
-;  *   $1   *
-;  ********_star(len({$1})) 
-;  
-_$2:    DB   80H+len({$1})ifelse(1,$4,+40H,)
-ifelse(1,_x, , 
-{         DSS      }_squote{_z}_squote
-)dnl
-         DB     _squote{}_y{}_squote+80H
-        DC    _LINKOLD
-$2:     DC     $3
-        undefine({_x})dnl
-        undefine({_y})dnl
-        undefine({_z})dnl
-define({_LINKOLD},{_$2})dnl
-})
-dnl
 define({HEADER_NULL},{
-_$2:            DB      0C1H,80H
+N_$2:            DB      0C1H,80H
                 DC      _LINKOLD
 $2:             DC      $3
-define({_LINKOLD},{_$2})dnl
+define({_LINKOLD},{N_$2})dnl
 })
+dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl The link etc. field of the word with assembler name $1

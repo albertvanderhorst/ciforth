@@ -2432,7 +2432,7 @@ DTRA3:  _LOOP(DTRA1)    ;{ LOOP}
 worddocsafe({PARSING},{(.")},{paren_dot_quote},{},{C+},
 {The run-time proceedure, compiled by forthcode({."}) which transmits the
 following in-line text to the selected output device.},{{."}})
-HEADER_SGQ({(.")},{PDOTQ},{DOCOL})
+HEADER({(.")},{PDOTQ},{DOCOL})
         DC      RR
         DC      COUNT
         DC      LDUP
@@ -2452,7 +2452,7 @@ device.
 If executed outside a definition, forthcode({."}) will immediately print the text
 until the final ". The maximum number of characters may be an
 installation dependent value.},{{OUT},{(.")}})
-HEADER_SGQ({."},{DOTQ},{DOCOL},1)
+HEADER({."},{DOTQ},{DOCOL},1)
         DC      LIT,22H
         DC      STATE
         DC      FETCH
@@ -2494,7 +2494,7 @@ actually executed.
 It terminates interpretation of a line of text from the terminal or
 of a disc buffer,
 },{})
-HEADER_NULL({(NULL)},{NULL},{DOCOL})
+HEADER_NULL({NULL},{NULL},{DOCOL},1)
 ;{       Special header putting an ASCII NULL in the dictionary.}
         DC      BLK
         DC      FETCH
