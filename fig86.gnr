@@ -879,17 +879,18 @@ Within a colon-definition, forthcode({LIT}) is compiled followed by a
 _BITS_ bit literal number given during compilation. Later execution of
 forthcode({LIT}) causes the contents of this next dictionary address to be pushed
 to the stack.},{{}},
-{{: TL LIT [ 123 , ] ; TL .},{123},
-{: TL LIT [ 246 , ] ; TL .},{246}
-})
+{{: TL LIT [ 123 , ] ; TL .},{123}})
 DP0:
 CODE_HEADER({LIT},{LIT})
         LODSW           ;{ AX <- LITERAL}
         _PUSH          ;{ TO TOP OF STACK}
 ;
 worddoc({MISC},{EXECUTE},{execute},{addr -},{},{
-Execute the definition whose code field address is given by forthvar({addr}) .
-},{{'},{CFA}})
+Execute the definition whose forthdefi({dictionary entry address})
+is given by forthvar({addr}) .
+_VERBOSE_({The DEA serves as an execution token.})
+},{{'},{CFA}},
+{{ ' BL EXECUTE .},{32}})
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
@@ -3070,6 +3071,7 @@ _ENDCOMMENT
         DC      FORTH
         DC      DEFIN
         DC      QUIT
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
         PAGE
 ;{      WARM START VECTOR COMES HERE}
 ;
@@ -3086,6 +3088,7 @@ the operators terminal, printing a startup message with the version number.
 HEADER({WARM},{WARM},{DOCOL})
         DC      MTBUF
         DC      ABORT
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
 ;{      COLD START VECTOR COMES HERE}
 ;
@@ -3152,6 +3155,7 @@ _BLOCKSINFILE_({
         DC      BLINI
 });_END_({_BLOCKSINFILE_})
         DC      ABORT
+        DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
         PAGE
 worddoc({DOUBLE},{S->D},{s_to_d},{n --- d},{},{
