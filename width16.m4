@@ -6,5 +6,4 @@ define({CELLWIDTH},2)dnl
 define({LCELL},TWO)dnl
 define({DC},DW)dnl
 define({STACKPOINTER},{SP})dnl
-define({W},{AX})dnl
-
+define({W},{BX})dnl

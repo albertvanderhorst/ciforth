@@ -326,7 +326,7 @@ BEGIN1: CALL    READSECTOR
         CMP     BX,RELATIVE_WRT_ORIG(TEXTEND)
         JB      BEGIN1
 
-        MOV     AL,'W'
+        MOV     AL,'{W}'
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
@@ -1731,9 +1731,9 @@ before forthcode({n1}) was pushed.},
 {{  1 2 3 DEPTH .},{3} },
 enddoc)
 CODE_HEADER({DEPTH},{DEPTH})
-        MOV     AX,_CELL_PTR[USINI]
-        MOV     AX,_CELL_PTR[AX] ;{User pointer for current task.}
-        MOV     AX,[AX+_CELLS(3)]
+        MOV     BX,_CELL_PTR[USINI]
+        MOV     BX,_CELL_PTR[BX] ;{User pointer for current task.}
+        MOV     AX,[BX+_CELLS(3)]
         MOV     DX,STACKPOINTER   ;{ (S1) <- (SP)}
         SUB     AX,DX
         SAR     AX,2
@@ -2758,7 +2758,7 @@ enddoc)
 ; ))))
 CODE_HEADER({CELLS},{LCELLS})
         POP     AX
-        LEA     AX,[AX*4]
+        SHL     AX,2
         _PUSH
 ;
 worddoc( {MEMORY},{CHAR+},{char_plus},{n1 --- n2},{ISO},
@@ -6860,7 +6860,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      SWAP, LIT, 0100H, STAR, PLUS, ONEP
         DC      FROMR, LIT, 0100H, STAR  ;{ .. to arrive at CX, DX}
         DC      LIT, 13H, BIOS
-        DC      ONE, LAND, DSKERR, PSTORE
+        DC      ONE, LAND, DERR, PSTORE
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
@@ -6877,7 +6877,7 @@ forthcode({DISK-ERROR}) contains an error count for the latest operation.
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
          _SWITCH_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
-        DC      ZERO, DSKERR, STORE
+        DC      ZERO, DERR, STORE
         _0BRANCH(RSLW1)
         DC      LIT, 0201H      ;{ Read (AH) one (AL) sector }
         _BRANCH(RSLW2)
@@ -6895,7 +6895,7 @@ RSLW0:
         _LOOP(RSLW0)
 RSLW9:
         DC      DROP, DROP
-        DC      DSKERR, FETCH,     QDUP
+        DC      DERR, FETCH,     QDUP
         _0BRANCH(RSLW5)              ;{OK}
         DC      ZLESS
         _0BRANCH(RSLW3)
@@ -6999,7 +6999,7 @@ HEADER({R/W},{RSLW},{DOCOL})
         DC      RBLK
         _BRANCH(RSLW2)
 RSLW1:  DC      WBLK
-RSLW2:  DC      LDUP, DSKERR, STORE
+RSLW2:  DC      LDUP, DERR, STORE
 
         DC      ONE, LAND, LDUP
         _0BRANCH(RSLW4)
