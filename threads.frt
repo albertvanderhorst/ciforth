@@ -39,13 +39,33 @@ HEX
     4 -1 DO   RTS NEGATE U0 I CELLS +   +!   LOOP
 ;
 
+\ Clone the current process, share memory and interrupts.
+\ Leave PID (or zero for the clone)
+: CLONE _ DSP@ 400 - 1FF 78 LINOS DUP ?ERRUR ;
 
 \ Keep item ONE and TWO on the data stack while
 \ switching the stack frame to new return stack POINTER.
 \ This also switches the user variables.
+\ This code must be inlined, you could'nt switch the return stack like
+\ that while it is engaged.
 : SWITCH-VARIABLE-AREA RSP! >R S0 @ DSP! R> ;
 
-: FORK _ _ _ 2 LINOS ;
+\ Create: allocate a new stack frame and size dictionary SPACE
+\ Does: use that space to run XT in a thread.
+\ Note: if applicable allocate sufficient dictionary space to use
+\ the area to format numbers (below ``PAD'') and / or ``PAD'' itself.
+: THREAD CREATE RSP@ ,  CVA ALLOT
+\ Split the interpreter pointer (program counter) over two execution paths
+\ with separate data stacks, one original, one temporary.
+\ Transport the 2 items on the stack via the return stack.
+DOES> >R >R CLONE IF R> R> 2DROP ELSE R> R>
+\ Install return stack
+@ RSP!
+\ Install data stack trasnporting one item via return stack.
+>R S0 @ DSP! R>
+\ Run and stop
+EXECUTE 0 _ _ 1 LINOS THEN ;
+
 
 : hoezee
     8 0 DO  I . 400 MS  CR LOOP
@@ -53,57 +73,15 @@ HEX
     8 0 DO  I . 400 MS  CR LOOP
 ;
 
-: SWAP-RETURN-STACK
-\   DSP@ 1000 - DSP!
-;
 
-: doit
-    RSP@ RTS + RSP!
-    S0 @ DSP!
-    DUMP-IT
-    hoezee
-    _ _ _ 1 LINOS DROP
-;
+10000 CONSTANT RTS    40 CELLS CONSTANT US
 
+: CVA   DSP@   DUP RTS -   U0 @ DSP@ - US +   MOVE
+        DSP@ RTS - DSP!    RSP@ RTS - RSP!
+        4 -1 DO   RTS NEGATE U0 I CELLS +   +!   LOOP ;
 
-\ Clone the current process, share memory and interrupts.
-\ Leave PID (or zero for the clone)
 : CLONE _ DSP@ 400 - 1FF 78 LINOS DUP ?ERRUR ;
 
-: (clone)
-\     >DFA @ >R
-    ( DSP@ 400 - DSP!)
-    _
-    DSP@ 1000 -
-    1FF
-    78 LINOS
-    DUP
-    IF
-    400 MS
-\    _ _ _ 1 LINOS
-\     RDROP
-    DUMP-IT
-    "RESULT:" TYPE . CR
-    ELSE
-    DUMP-IT
-    "RESULT:" TYPE . CR
-    doit
-    THEN
-\   1 CLOSE-FILE ABORT" ERROR CLSOING STDIN"
-\   0 CLOSE-FILE ABORT" ERROR CLSOING STDOUT"
-\   7000,0000 MS
-;
-
-\ The 1D (pause) waits for a signal.
-: clone   'doit (clone) ;
-
-: SVA   SWITCH-VARIABLE-AREA ;
-
-: THREAD CREATE RSP@ ,  CVA
-         DOES> ^ >R >R
-CLONE IF R> R> 2DROP ELSE ^ R> ^ R> ^ @ ^
-RSP! >R S0 @ DSP! R> ^
-\ SVA
-^ DUMP-IT ^
-. ^ CR ^ 1000 MS ^
-_ _ _ 1 LINOS THEN ;
+: THREAD   CREATE   RSP@ ,   CVA   ALLOT
+   DOES> >R >R CLONE IF R> R> 2DROP ELSE R> R>
+   @ RSP!   >R S0 @ DSP! R>   EXECUTE   0 _ _ 1 LINOS   THEN ;
