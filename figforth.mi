@@ -215,6 +215,9 @@ forthitem L0
 Level Zero definition of FORTH-78
 forthitem L1     
 Level One definition of FORTH-78
+forthitem NISO      
+Word belongs to ISO standard, but the implementation is not 
+quite conforming.
 forthitem U      
 A user variable.
 @end table 
