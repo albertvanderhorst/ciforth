@@ -127,8 +127,8 @@ _ENDCOMMENT
 ; Bios specific equates.
 BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
 SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
-        ; Skip boot sector,fats and root dir.
-SECSTRT EQU     1+NFAT*SECFAT + SECROOT            
+        ; Skip boot sector,fats and root dir and first sector of file.
+SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
 _COMMENT
 ; Alternative if the disk need not be recognized by MSDOS
 ; Usable for generating a bootable floppy simple.
