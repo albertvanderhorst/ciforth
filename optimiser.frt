@@ -131,20 +131,19 @@ VARIABLE CODE-MARKER
 \ 0 length : no good.
 : (FIND-SWAPPABLE) FIND-LIT !OPT-START DUP CODE-MARKER ! COUNT-LIT COLLECT-SWAPPER ;
 
-\ For SEQUENCE , return the STRING that is swappable.
-\ FIXME : ?NOT-EXIT can be dropped here.
-\ 0 length : there is none.
-: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?NOT-EXIT OVER 0= AND WHILE DROP REPEAT ;
+\ For SEQUENCE , return the ADDRESS where a possible swappable part ends.
+\ Note that backtracking occurs to the end of the litterals that failed to optimise.
+: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?NOT-EXIT OVER 0= AND WHILE DROP REPEAT + ;
 
 \ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
 \ The order to be compiled is A-B C-D B-C .
-: GET-PIECES   DUP  FIND-SWAPPABLE   ( D) + >R
+: GET-PIECES   DUP  FIND-SWAPPABLE   ( D) >R
     CODE-MARKER @ ( H.) DUP CSC @ 2 * CELLS + R> ;
 
 \ Inspect A B C and report into ``PROGRESS'' whether there is any
 \ optimisation by swapping. For that A-B and C-D must be both non-empty.
 \ Leave A B C.
-: ?PROGRESS   >R 2DUP <> R> SWAP  >R 2DUP <> R>   AND   PROGRESS OR! ;
+: ?PROGRESS?  >R 2DUP <> R> SWAP  >R 2DUP <> R>   AND   PROGRESS OR! ;
 
 \ For addresses A B C D compile A-B ordinary sequence, C-D no stack side
 \ effect sequence, B-C postponable constants sequence
@@ -154,7 +153,7 @@ VARIABLE CODE-MARKER
 \ Reorder a SEQUENCE to delay constants as much as possible.
 \ Return rearragned SEQUENCE.
 : REORDER HERE SWAP
-    BEGIN GET-PIECES ?PROGRESS DUP >R COMPILE-PIECES R> DUP ?NOT-EXIT 0= UNTIL DROP
+    BEGIN GET-PIECES ?PROGRESS? DUP >R COMPILE-PIECES R> DUP ?NOT-EXIT 0= UNTIL DROP
 POSTPONE (;)  ;
 
 \ ---------------------------------------------------------------------
