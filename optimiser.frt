@@ -319,7 +319,7 @@ THEN RDROP ;
 \ At this point ``VD'' contains the remaining stack depth, i.e. the
 \ number of constants not touched by the swappable code. Those can be
 \ placed after the swappable code.
-: STILL-SWAPPING? DUP NSST? SWAP SE@ ENOUGH-POPS AND ;
+: STILL-REORDERING? DUP NSST? SWAP SE@ ENOUGH-POPS AND ;
 
 \ We are at an stable point. i.e. we consumed all the constants,
 \ we may have replaced ourselves. Or we can't swap anyway.
@@ -328,46 +328,45 @@ THEN RDROP ;
 \ For DEA : adding it would result in a not yet stable sequence.
 \ Otherwise the optimisation is known to end here or there is no optimisation.
 : NOT-YET-STABLE?
-DUP STILL-SWAPPING? IF SE@ COMBINE-VD STABLE? 0= ELSE -1 MIN-DEPTH !
+DUP STILL-REORDERING? IF SE@ COMBINE-VD STABLE? 0= ELSE -1 MIN-DEPTH !
 DROP 0 THEN ;
 
 \ From ADDRESS collect all code to be executed before (some of the) constants
 \ collected. Leave ADDRESS LENGTH (in address units.)
-: COLLECT-SWAPPER !MIN-DEPTH
-    DUP ?NOT-EXIT 0= IF 0 EXIT THEN
+: FIND-REORDER !MIN-DEPTH
     DUP BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
-     OVER -   STABLE? AND
+     SWAP OVER <>   STABLE? AND   VD @ 0<> AND
 ;
 
 \ Assuming there has been folding, increment SEQUENCE to point past all
 \ constants at its start. Return incrementer SEQUENCE.
-: COUNT-LIT BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 VD +! REPEAT ;
+: COUNT-LIT !OPT-START BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 VD +! REPEAT ;
 
-\ For ADDRESS where constants start, leave the STRING thereafter that may be swappable.
-: FIND-SWAPPABLE !OPT-START COUNT-LIT COLLECT-SWAPPER ;
+\ For a reorderable GAP return the first part as string.
+: FIRST-PART   DROP VD @ CELLS ;
 
-\ From ADDRESS where constants start, and a swappable STRING
-\ calculate three boundaries, delineating 2 areas. Return B C D.
-\ The order to be compiled is C-D B-C .
-: GET-PIECES  + ( B D) >R DUP VD @ 2 * CELLS + R> ;
-
-\ Inspect B C D and report into ``PROGRESS'' whether there is any
-\ optimisation by swapping. For that B-C and C-D must be both non-empty.
-\ Leave B C D.
-: ?PROGRESS?  >R 2DUP <> R> SWAP  >R 2DUP <> R>   AND   PROGRESS OR! ;
-
-\ For addresses B C D compile A-B ordinary sequence, C-D no stack side
-\ effect sequence, B-C postponable constants sequence
-: COMPILE-PIECES ( C) OVER >R
+\ Reorder a reorderable GAP .
+: REORDER-PIECES
+( B D) >R DUP VD @ 2 * CELLS + R>
+( C) OVER >R
     OVER - PAD $!
     DUP R>   OVER -   PAD $+!
     PAD $@ >R SWAP R> MOVE ;
 
+: FORBIDDEN-REORDER?
+    2DUP FORBIDDEN-GAP? >R
+    FIRST-PART OVER + FORBIDDEN-GAP? R> OR
+;
+
+\ Try to reorder one gap at the start of a SEQUENCE, leave the incremented
+\ SEQUENCE.
 : REORDER-ONE
-    DUP @ 'LIT <> IF NEXT-ITEM  ELSE
-    DUP FIND-SWAPPABLE DUP 0= IF 2DROP NEXT-ITEM ELSE
-    GET-PIECES ?PROGRESS? DUP >R COMPILE-PIECES R>
-    THEN THEN
+    DUP @ 'LIT <> IF NEXT-ITEM ELSE
+    DUP COUNT-LIT DUP ?NOT-EXIT 0= IF DROP NEXT-ITEM ELSE
+    FIND-REORDER 0= IF DROP NEXT-ITEM ELSE
+    2DUP FORBIDDEN-REORDER? IF DROP NEXT-ITEM ELSE
+    DUP >R REORDER-PIECES R>  -1 PROGRESS +!
+    THEN THEN THEN THEN
 ;
 \ Reorder a SEQUENCE to delay constants as much as possible.
 \ Return rearranged SEQUENCE (which is in fact the same address.)
@@ -423,7 +422,7 @@ DROP 0 THEN ;
         SE@ COMBINE-VD               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
     ELSE
-        DROP ( DUP COLLECT-SWAPPER) CASH  ( DEA -- )
+        DROP ( DUP FIND-REORDER) CASH  ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
         !OPT-START
     THEN ;
