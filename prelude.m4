@@ -222,7 +222,7 @@ define({worddoc},
 {_GENERATE_DOC{}dnl}
 {{worddoc({$1},{$2},{$3},{$4},{$5},{$6},{$7})}}
 {_GENERATE_TEST{}dnl}
-{{wordtest({$8})}}
+{{wordtest({$2},{$8})}}
 {_GENERATE_CODE{}dnl}
 )dnl
 
@@ -230,7 +230,7 @@ define({worddocsafe},
 {_GENERATE_DOC{}dnl}
 {{worddocsafe({$1},{$2},{$3},{$4},{$5},{$6},{$7})}}
 {_GENERATE_TEST{}dnl}
-{{wordtest({$8})}}
+{{wordtest({$3},{$8})}}
 {_GENERATE_CODE{}dnl}
 )dnl
 

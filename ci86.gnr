@@ -889,14 +889,14 @@ _NEWDEBUG_({ CALL    DISPLAYSI})
 ;{       Dictionary starts here.}
 
 DP0:
-worddoc({DENOTATIONS},{&},{char_follows}, {--- c},{CI},
+worddoc({DENOTATIONS},{DEN&},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
 Skip remaining non-blank characters.},
 {},
-{{& HELL HEX .},{48 },
-{& X  HEX .},{58 },
-{: GS1 & HELLO ; GS1 HEX .] },{48 },
-{: GS1 & X ; GS1 HEX .},{58 }}, enddoc)
+{{&H .},{48 },
+{&X  .},{58 },
+{: GS1 &H ; GS1 .},{48 },
+{: GS2 &X ; GS2 .},{58 }}, enddoc)
 HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      INBRS, DROP, DROP
         DC      INBRS
@@ -945,7 +945,7 @@ HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
         DC      NUMB, SEMIS
 ;
-worddoc({DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
+worddocsafe({DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {Leave a forthkey({"}) delimited string.},
 {},
 {{"AAP" TYPE},{AAP},
@@ -1014,7 +1014,7 @@ worddoc({MISC},{EXECUTE},{execute},{addr -},{},
 is given by forthvar({addr}) .
 _VERBOSE_({The DEA serves as an execution token.})
 },{{'},{>CFA}},
-{{ ' BL >CFA EXECUTE .},{32}}, enddoc)
+{{ ' BL >CFA EXECUTE .},{20}}, enddoc)
 CODE_HEADER({EXECUTE},{EXEC})
         POP     BX      ;{ GET CFA}
         JMP     _CELL_PTR[BX]
@@ -1313,8 +1313,8 @@ Leave the word found as a string constant.
 _VERBOSE_({As it goes with string constants, you may not
 alter its content, nor assume anything is appended.})},
 {{BLK},{WORD},{IN}},
-{{: GS2 MWORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
-{HEX : GS1 MWORD COUNT . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
+{{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
+{HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 HEADER({(WORD)},{PWORD},{DOCOL})
 PWORD1: DC INBRS
         DC OVER, SOURC, CELLP, FETCH, LSUB
@@ -1334,15 +1334,14 @@ PWORD2A:
         DC OVER, LSUB
         DC      SEMIS
 ;
-worddocsafe({PARSING},{(PARSE)},{paren_word},{ch addr1 addr2 --- addr3 },{},
-{Scan the area between forthsamp({addr1}) and
-forthsamp({addr2}) (non-inclusive) for the character forthsamp({ch}) .
+worddocsafe({PARSING},{(PARSE)},{paren_word},{ --- addr3 },{},
+{Scan the current input stream for the character forthsamp({ch}) .
 Return forthsamp({addr3}): the address of the first such character
-at or after forthsamp({addr2}), but not past forthvar({addr2}) .
-_VERBOSE_({So if forthsamp({addr2}) equals forthvar({addr3})
-the characer is not present.})},
+or an address just past the end of the current input stream if its
+is not there. 
+_VERBOSE_({So no leading delimiters are skipped.})},
 {{WORD}},
-{{ HEX 20 C, 41 C, 20 C, 41 HERE 3 - HERE (PARSE) HERE - . },{-2 }}, enddoc)
+{{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 HEADER({(PARSE)},{PPARS},{DOCOL})
         DC      SOURC, CELLP, TFET
         DC TOR
@@ -1361,7 +1360,7 @@ PPARS2: DC SWAP, DROP
         DC      OVER, LSUB
         DC SEMIS
 ;
-worddocsafe({PARSING},{SOURCE},{source},{addr --- },{},
+worddoc({PARSING},{SOURCE},{source},{addr --- },{},
 {Return the address forthsamp({addr})
 of the current scan specification, allocated in the user area.
 It consists of three cells:
@@ -1375,7 +1374,7 @@ _VERBOSE_({Words like forthsamp({BLK}) and
 forthsamp({SOURCE-ID}) are secondary,
 and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
 {{BLK},{SOURCE-ID}},
-{{ 9 2 SOURCE +! 8 9 . .},{9 9 }}, enddoc)
+{{SOURCE @ TIB @ = .},{1}}, enddoc)
 HEADER({SOURCE},{SOURC},{DOUSE}, CELLS(27))      ;{ And 28 and 29.}
 ;
 worddoc({OUTPUT},{CR},{cr},{},{L0},
@@ -1945,7 +1944,7 @@ worddoc({STRING},{$+!},{string_append},{sc addr --- },{},
 {Append a string constant forthsamp({sc})
 to the string variable at address forthsamp({addr}).},
 {{$@},{$!},{$C+}},
-{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - dnl
 $@ 2DUP PAD $! PAD $+! PAD $@ TYPE},{A9A9}}, enddoc)
 HEADER({$+!},{SPTOR},{DOCOL})
         DC   LDUP, FETCH, TOR ;{ Remember old count.}
@@ -1957,7 +1956,7 @@ worddoc({STRING},{$C+},{char_append},{ch addr --- },{},
 {Append a char forthsamp({ch})
 to the string variable at address forthsamp({addr}).},
 {{$@},{$!},{$+!}},
-{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -  dnl
 $@ PAD $! HERE 1 - C@ PAD $C+ PAD $@ TYPE},{A99}}, enddoc)
 HEADER({$C+},{SCPLUS},{DOCOL})
         DC   LDUP, TOR
@@ -2722,7 +2721,7 @@ but that is taken by ISO.})
 },
 {},
 {{ HEX 41 C, 42 C, 43 C, HERE 3 - DUP 3 CORA .},{0 },
-{HERE 2 - HERE 3 - 2 CORRA . },{1 },
+{HERE 2 - HERE 3 - 2 CORA . },{1 },
 {HERE 3 - HERE 2 - 2 CORA .},{-1 }},
 enddoc)
 CODE_HEADER({CORA},{CORA})
@@ -2780,7 +2779,7 @@ HEADER({PAD},{PAD},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc({PARSING},{AWORD},{newword},{c ---addr},{ISO L0},
+worddoc({PARSING},{WORD},{newword},{c ---addr},{ISO L0},
 {Parse the forthsamp({current input stream}) using forthsamp({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input stream.
@@ -2794,8 +2793,9 @@ ends with two or more blanks.
 If forthcode({BLK}) is zero text is taken from the terminal input buffer,
 otherwise from the disc block stored in forthcode({BLK}) .},
 {{BLK} ,{IN}},
-{{: GS2 BL WORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
-{HEX : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ},{2 Q}}, enddoc)
+{{: GS2 BL WORD COUNT . C@ EMIT ; GS2 CELLO},{5 C},
+{( : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ)},{}}, enddoc)
+{ : GS1 5A WORD COUNT . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 HEADER({WORD},{AWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(AWORD1)
@@ -2819,10 +2819,10 @@ worddoc({PARSING},{&%},{char_follows}, {--- c},{CI},
 {Leave forthvar({c}) the non blank char that follows.
 Skip remaining non-blank characters.},
 {},
-{{&: HELL HEX .},{48 },
-{&: X  HEX .},{58 },
-{: GS1 &: HELLO ; GS1 HEX .] },{48 },
-{: GS1 &: X ; GS1 HEX .},{58 }}, enddoc)
+{{&: HELL .},{48 },
+{&: X  .},{58 },
+{: GS1 &: HELLO ; GS1 . },{48 },
+{: GS2 &: X ; GS2 .},{58 }}, enddoc)
 HEADER({&:},{CHF},{DOCOL}, , B_IMMED)
         DC      PWORD, DROP, CFET, LITER
         DC      SEMIS
@@ -2831,10 +2831,10 @@ worddoc({PARSING},{^%},{control_follows}, {--- c},{CI},
 {Leave forthvar({c}) the control version of the non blank char that follows.
 Skip remaining non-blank characters.},
 {},
-{{^: HELL HEX .},{8 },
-{^: X  HEX .},{18 },
-{: GS1 ^: HELLO ; GS1 HEX .] },{8 },
-{: GS1 ^: X ; GS1 HEX .},{18 }}, enddoc)
+{{^: HELL .},{8 },
+{^: X  .},{18 },
+{: GS1 ^: HELLO ; GS1 . },{8 },
+{: GS2 ^: X ; GS2 .},{18 }}, enddoc)
 HEADER({^:},{CTF},{DOCOL}, , B_IMMED)
         DC       PWORD, DROP, CFET, LIT, 40H, LSUB, LITER
         DC      SEMIS
@@ -2855,8 +2855,8 @@ worddocsafe({PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
 leave forthvar({c}), the first non blank char of that word in the
 input stream.},
 {},
-{{: GS1 [CHAR] HELLO ; GS1 HEX .] },{48 },
-{: GS1 [CHAR] X ; GS1 HEX .},{58 }}, enddoc)
+{{: GS1 [CHAR] HELLO ; GS1 HEX . },{48 },
+{: GS2 [CHAR] X ; GS2 HEX .},{58 }}, enddoc)
 HEADER({[CHAR]},{BCHAR},{DOCOL}, , B_IMMED)
         DC      CHF
         DC      SEMIS
@@ -3315,7 +3315,6 @@ HEADER({QUIT},{QUIT},{DOCOL})
         DC      STORE
         DC      LBRAC
 QUIT1:  DC      RPSTO   ;{BEGIN}
-        DC      CR
         DC      QUERY
         DC      INTER
         DC      STATE
@@ -3324,6 +3323,7 @@ QUIT1:  DC      RPSTO   ;{BEGIN}
         _0BRANCH(QUIT2) ;{IF}
         _STRINGINLINE({OK})   ;{ENDIF}
         DC      LTYPE
+        DC      CR
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
 ;
 worddoc({INIT},{ABORT},{abort},{},{FIG NISO L0},
@@ -4246,9 +4246,9 @@ or the count of characters have been received.
 Rely on the operating system for input editing.
 One or more nulls are added at the end of the text.},
 {{KEY},{?TERMINAL}},
-{{( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)},{( 1 A)},
-{( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )},{( 6)},
-{( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)},{( 1 Z)}}, enddoc)
+{{( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)},{dnl{}( 1 A)},
+{( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )},{dnl{}( 6)},
+{( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)},{dnl{}( 1 Z)}}, enddoc)
 HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      ZERO    ; filedescriptor 0 for standard input.
         DC      ROT
