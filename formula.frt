@@ -1,20 +1,20 @@
+8 LOAD
 \               Formula music translation program.
 \ $Id$}
 \ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 
-: \ 0 WORD ;
 : ?TEST DROP ;
 
 \ worddoc( {ISO},{CHAR},{--- c},{ISO},
 \ {Leave forthvar({c}) the first non blank char in the 
 \ input stream.},
 \ {{}})
-: CHAR 
-TIB @ IN @ +   
-BEGIN DUP C@ BL = WHILE 1+ REPEAT 
-DUP C@ SWAP
-1+ TIB @ - IN ! 
-;
+: CHAR BL WORD HERE 1+ C@ ;
+\ TIB @ IN @ +   
+\ BEGIN DUP C@ BL = WHILE 1+ REPEAT 
+\ DUP C@ SWAP
+\ 1+ TIB @ - IN ! 
+\ ;
 
 : CHARS ;
 
@@ -110,4 +110,58 @@ CR ." EXPECT 0 : " S" AAPAA" CHAR C $I .
 VECTOR Q    : JAN 1 2 3 ;   ' JAN CFA    ' Q   ! 
 CR ." EXPECT 3 2 1 :"  Q . . . 
 FORGET Q 
+
+\ worddoc( {STRING},{COMPARE-AREA},{compare_area},{addr1 addr2 n--- f},{},{
+\ Compare two memory area's with length forthvar({n}) and starting
+\ at forthvar({addr1}) and forthvar({addr2}) .
+\ Return forthvar({f}) the difference between
+\ the first two nonequal char's or 0 for all equal.
+\ },{{}})
+VARIABLE EQUALITY
+: COMPARE-AREA  
+    0 DO   
+        OVER I + C@   OVER I + C@  - 
+            DUP EQUALITY ! 
+        IF LEAVE THEN 
+    LOOP 2DROP EQUALITY @ ;
+
+6 ?TEST
+S" AAP" S" AAP" ROT DROP COMPARE-AREA 
+CR ." EXPECT 0 :"  .
+S" CAP" S" AAP" ROT DROP COMPARE-AREA 
+CR ." EXPECT 2 :"  .
+S" AAP" S" ACP" ROT DROP COMPARE-AREA 
+CR ." EXPECT -2 :" .
+
+
+\ worddoc( {STRING},{$=},{string_equal},{sc1 sc2 --- f},{},{
+\ Return forthvar({f}) indicating that the forthdfn({string constant})s
+\ forthvar({sc1}) and forthvar({sc2}) are equal. },
+\ {{}})
+: $= ROT OVER = 0= IF
+        DROP DROP DROP 0  
+    ELSE 
+        COMPARE-AREA 0= 
+    THEN ;
+
+3 ?TEST
+S" AAP" S" AAP" $=     CR ." EXPECT 0:" .
+S" CAP" S" AAP" $=     CR ." EXPECT 0:" .
+S" AAP" S" AAPA" $=    CR ." EXPECT 0 :" .
+
+\ worddoc({TIME},{TICKS},{ticks},{--- d},{},
+\ {Return the number of clock cycles since the 
+\ computer was started up. This works only on 
+\ Pentium machines.},
+\ {{}})
+HEX
+CODE TICKS 0F C, 31 C, ( 90 C, 90 C, 90 C, 90 C, )
+    50 C, 52 C,  ( push AX & DX )
+    AD C, 89 C, C3 C, FF C, 23 C,  ( next)
+C;
+
+1 ?TEST
+." EXPECT 0 1 :" TICKS DMINUS TICKS D+ . 0FFFF U< . 
+
+DECIMAL 
 
