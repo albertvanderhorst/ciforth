@@ -8,12 +8,12 @@
 #.SUFFIXES:
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
-# Applicable suffixes : * are generated files 
+# Applicable suffixes : * are generated files
 # + are generated files if they are mentionned on the next line
 #
 #* .dvi .tex .ps : as usual (See TeX)
 #+ .texinfo : texinfo
-#   menu.texinfo gloss.texinfo 
+#   menu.texinfo gloss.texinfo
 #* .asm : input file for `nasm' assembler
 #* .BLK : contains blocks usable by Forth
 # .frt : text file : contains blocks in an \n separated stream
@@ -24,14 +24,14 @@
 #* .gas : input file for `gas' assembler
 #* .rawdoc : unsorted glossary items from the generic source.
 #+ .m4 : m4 macro's possibly including other macro's
-#   except constant.m4 
+#   except constant.m4
 # .cfg : m4 macro's generating files ( fig86.%.x + %.cfg -> fig86.%.y)
 # .mi : files that after processed by m4 give a .texinfo file
 # .mig : Currently in use for the wordset, which is a .mi file (WRONG!)
 # It could be, but it has been stolen.
 
 # ALL FILES STARTING IN ``fig86'' BUT BUT ``fig86.gnr'' ARE GENERATED
-                                       
+
 INGREDIENTS = \
 gas.m4          \
 header.m4        \
@@ -52,7 +52,7 @@ BINTARGETS= msdos alone
 # subsequently run
 LINUXFORTHS= figforth lina
 # Auxiliary targets. Because of GNU make bug, keep constant.m4.
-OTHERTARGETS= BLOCKS.BLK toblock fromblock # constant.m4 
+OTHERTARGETS= BLOCKS.BLK toblock fromblock # constant.m4
 # C-sources with various aims.
 CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= figforth stealconstant
@@ -118,10 +118,10 @@ TEMPFILE=/tmp/figforthscratch
 
 # msdos.cfg and alone.cfg are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
-fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr 
+fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
-	(sed $(TEMPFILE) -e '1,/Split here for doc/d' ; cat wordset.mig )>$(@:%.asm=%.rawdoc)
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
 	rm $(TEMPFILE)
 
 fig86.%.msm fig86.%.rawdoc : %.cfg masm.m4 fig86.gnr ; \
@@ -228,9 +228,9 @@ figforth : figforth.c fig86.linux.o link.script
 # Linux native forth
 lina : fig86.lina.o ; ld $+ -o $@
 
-# Error in GNU make. This dependancy is not seen. 
+# Error in GNU make. This dependancy is not seen.
 # Do `make constant.m4' explicitly beforehand.
-fig86.alone.asm : constant.m4 
+fig86.alone.asm : constant.m4
 
 # Convenience under linux. Steal the definitions of constants from c include's.
 constant.m4 : stealconstant.c ; cc -E -I/usr/include/asm $+ | m4 prelude.m4 - >$@

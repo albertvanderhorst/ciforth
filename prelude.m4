@@ -223,7 +223,12 @@ define({worddocsafe},
 {_GENERATE_CODE{}dnl}
 )dnl
 
-define({worddocchapterend},{dnl})dnl ignore those
-define({worddocchapter},,{dnl})dnl ignore those
+dnl Same for ``worddocchapter'' 
+define({worddocchapter},
+{_GENERATE_DOC{}dnl}
+{{worddocchapter({$1},{ },{$3},{$4},{$5},{$6},{$7})}}
+{{worddocchapterend({$1},{~},{CONTENT},{},{},{},{})}}
+{_GENERATE_CODE}
+)dnl
 
 divert(-1){}dnl
