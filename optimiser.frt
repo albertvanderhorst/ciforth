@@ -27,6 +27,10 @@ REQUIRE $
 
 \ Like +! but ors.
 : OR!  DUP @ ROT OR SWAP ! ;
+
+\ For a soft FLAG, returns a FORTH flag (-1/0)
+: 0<>   0= 0= ;
+
 \ ----------------------    ----------------------     ----------------------
 
 
@@ -150,9 +154,12 @@ HEX
 800 CONSTANT FMASK-SP    \ Special optimisation possible. Pattern.
 DECIMAL
 \ ----------------------------------------------------------------
-\ Add as many noops to the dictionary to have it aligned at an 8-cell
+
+10 CONSTANT STRIDE       \ # of cells between entries in MATCH-TABLE
+
+\ Add as many noops to the dictionary to have it aligned at an stride*cell
 \ boundary.
-: ALIGN-NOOPS   ALIGN  BEGIN HERE 8 CELLS MOD WHILE POSTPONE NOOP REPEAT ;
+: ALIGN-NOOPS   ALIGN  BEGIN HERE STRIDE CELLS MOD WHILE POSTPONE NOOP REPEAT ;
 IMMEDIATE
 
 \ Place holder
@@ -162,8 +169,9 @@ CREATE P
 \ : 'P       ['] LIT COMPILE, ['] P COMPILE, ; IMMEDIATE
 \ This looks more portable, but is it?
 
+
 \ Create a table of optimisations :
-\    ``8 CELLS'' code pattern    | ``8 CELLS'' optimised replacement |
+\  ``STRIDE CELLS'' code pattern  | ``STRIDE CELLS'' optimised replacement |
 \ The first pattern to start with NOOP is the end.
 \ Not intended to be executed, but patterns are to be matched
 \ from this definitions, and pieces to be copied out.
@@ -209,7 +217,8 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 '| HIDDEN       ']L HIDDEN
 
 \ Here is your table
-' (MATCH-TABLE) >DFA @ 1- 8 CELLS 1- OR 1+ CONSTANT MATCH-TABLE
+' (MATCH-TABLE) >DFA @ STRIDE CELLS /MOD SWAP 0<> - STRIDE CELLS *
+CONSTANT MATCH-TABLE
 
 \ \ Portability note.
 \ \ You could have the table like this :
@@ -228,7 +237,7 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 : .SET   @+ SWAP DO I . 0 CELL+ +LOOP ;   ( Print non-empty SET )
 : SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
 
-8 SET PEES
+STRIDE SET PEES
 : !PEES PEES !SET ;
 \ ----------------------------------------------------------------
 
@@ -243,7 +252,7 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 \ Return the LIMIT to where matched and the MATCH itself, or two zeros.
 \ As a side effect, remember the place holders.
 : ?MATCH    !PEES
-    8 0 DO
+    STRIDE 0 DO
         DUP [I] 'NOOP = IF SWAP I CELLS + SWAP LEAVE THEN       \ Success
         DUP [I] 'P = IF
             OVER [I] PEES SET+!
@@ -260,21 +269,21 @@ FMASK-HOB '(MATCH-TABLE) >FFA OR!
 
 \ This was a typical example of premature optimisation.
 \ \ Seen the code SEQUENCE (its begin), return there MAY be a match in the table.
-\ : OPT-SPECIAL?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0= 0= ELSE
+\ : OPT-SPECIAL?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0<> ELSE
 \     DROP 0 THEN ;
 
 \ Match any entry of the table to SEQUENCE.
 \ Return the LIMIT to where matched and the MATCH itself, else two zeros.
 : ?MM   MATCH-TABLE
     BEGIN    2DUP ?MATCH DUP IF 2SWAP 2DROP EXIT THEN 2DROP
-        16 CELLS + DUP ?TILL-EXIT WHILE REPEAT
+        STRIDE 2 * CELLS + DUP ?TILL-EXIT WHILE REPEAT
     2DROP 0 0 ;
 
 \ If ITEM is a place holder, replace it by the next placeholder DATA.
 : ?PEE? DUP 'P = IF DROP PEES SET+@ THEN ;
 
 \ Copy MATCH to ``HERE'' filling in the place holders.
-: COPY-MATCH   !PEES   8 CELLS +
+: COPY-MATCH   !PEES   STRIDE CELLS +
     BEGIN DUP ?TILL-NOOP WHILE DUP @ ?PEE? , CELL+ REPEAT
     DROP
 ;
