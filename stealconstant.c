@@ -45,6 +45,8 @@ steal({O}{_RDONLY},O_RDONLY)
 
 ; Numbers of system calls. See "Linux kernel Internals" Appendix A.
 ; By M.Beck, H. Boehme e.a. Addison Wesley.
+; The system calls themselves are extensively documented in chapter
+; 2 of the man pages, e.g. "man 2 exit"
 steal({e}{xit},__NR_exit)
 steal({o}{pen},__NR_open)
 steal({c}{lose},__NR_close)
