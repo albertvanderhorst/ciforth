@@ -2,7 +2,162 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/times.h>
-#include "tty.c"
+/* tty.c */
+
+#include <unistd.h>
+#include <string.h>
+#include <sys/time.h>
+/* tty.h */
+ 
+#include <termios.h> 
+ 
+/* public declarations */ 
+struct ttystate { struct termios tio; }; 
+struct tty      { int fd; struct ttystate org; struct ttystate now; };  
+ 
+extern int errno;
+int nodevice;
+
+/* ****************************************************************************
+ * tty_error(),tty_warning():
+ *     error handling and cleanup
+ * ***************************************************************************/
+void 
+tty_error (char *s)
+{
+  fprintf (stderr, "\n\nerror: %s, (%s)\n", s, sys_errlist[errno]);
+  fflush (stderr);
+}
+
+void 
+tty_warning (char *s)
+{
+  fprintf (stderr, "\n\nwarning: %s, (%s)\n", s, sys_errlist[errno]);
+  fflush (stderr);
+}
+
+/* ****************************************************************************
+ * tty_init(), tty_set(), tty_restore()  : 
+ *     primitive functions to encapsulate terminal state changes. Any
+ *     terminal state modification is done through this two functions.
+ * ***************************************************************************/
+void 
+tty_set (struct tty *ptty)
+{
+  if (nodevice)
+    return;
+  if (tcsetattr (ptty->fd, TCSADRAIN, &ptty->now.tio) < 0)
+    tty_error ("unable to set tty state");
+}
+
+void 
+tty_restore (struct tty *ptty)
+{				/* write termio struct */
+  if (nodevice)
+    return;
+  if (tcsetattr (ptty->fd, TCSADRAIN, &ptty->org.tio) < 0)
+    tty_error ("unable to restore tty state");
+}
+
+void 
+tty_init (int fd, struct tty *ptty)
+{				/* fill-in tty struct */
+  ptty->fd = fd;
+  nodevice = 0;
+  /* save original tty_state */
+  if (tcgetattr (ptty->fd, &ptty->org.tio) < 0)
+    nodevice = 1;
+  if (nodevice)
+    return;
+  /* template for new tty_state */
+  if (tcgetattr (ptty->fd, &ptty->now.tio) < 0)
+    nodevice = 1;
+  if (nodevice)
+    return;
+  /* disable some special characters */
+  ptty->now.tio.c_cc[VINTR] = _POSIX_VDISABLE;
+  ptty->now.tio.c_cc[VQUIT] = _POSIX_VDISABLE;
+  ptty->now.tio.c_cc[VSUSP] = _POSIX_VDISABLE;
+  tty_set (ptty);
+}
+
+/* ****************************************************************************
+ * tty_echo(), tty_noecho() :
+ *     change tty attributes
+ * ***************************************************************************/
+void 
+tty_echo (struct tty *ptty)
+{
+  if (nodevice)
+    return;
+  ptty->now.tio.c_lflag |= ECHO;
+  tty_set (ptty);
+}
+
+void 
+tty_noecho (struct tty *ptty)
+{
+  if (nodevice)
+    return;
+  ptty->now.tio.c_lflag &= ~ECHO;
+  tty_set (ptty);
+}
+
+/* ****************************************************************************
+ * tty_keymode(), tty_linemode() :
+ *    change main tty operating mode
+ * ***************************************************************************/
+void 
+tty_keymode (struct tty *ptty)
+{
+  if (nodevice)
+    return;
+  ptty->now.tio.c_lflag &= ~ICANON;
+  ptty->now.tio.c_cc[VMIN] = 1;
+  ptty->now.tio.c_cc[VTIME] = 0;
+  tty_set (ptty);
+}
+
+void 
+tty_linemode (struct tty *ptty)
+{
+  if (nodevice)
+    return;
+  ptty->now.tio.c_lflag |= ICANON;
+/* VMIN, VTIME are overloaded and should really be restored ... */
+  ptty->now.tio.c_cc[VMIN] = ptty->org.tio.c_cc[VMIN];
+  ptty->now.tio.c_cc[VTIME] = ptty->org.tio.c_cc[VTIME];
+  tty_set (ptty);
+}
+
+/* ************************************************************************** */
+
+int 
+keyq (int fd)
+{
+  fd_set rfds;
+  fd_set afds;
+  struct timeval tv;
+  int nfds = 1;
+  if (nodevice)
+    return 1;
+  tv.tv_sec = 0;
+  tv.tv_usec = 0;
+  FD_ZERO (&afds);
+  FD_SET (fd, &afds);
+  memmove (&rfds, &afds, sizeof (rfds));
+  if (select (nfds, &rfds, NULL, NULL, &tv) < 0)	/* any input around? */
+    tty_warning ("select failed");
+  if (FD_ISSET (fd, &rfds))	/* input from fd? */
+    return 1;
+  return 0;
+}				/* no input */
+
+int 
+tty_keyq (struct tty *ptty)
+{
+  return (keyq (ptty->fd));
+}
 
 void (*figforth)() = 0x8050000;
 
@@ -69,34 +224,7 @@ static char *control_string[] =	/* Some hardcoded console cmds (Linux/XTerm) */
  "\033[m"			/* me - turn off all appearance modes */
 };
 
-char **inkeys;
 
-char *linux_rawkey_string[] =	/* Strings sent by function keys */
-{"\033[[A",			/* k1 - function keys 1 - 4 */
- "\033[[B",			/* k2 */
- "\033[[C",			/* k3 */
- "\033[[D",			/* k4 */
- "\033[[E",			/* k5 */
- "\033[17~",			/* k6 */
- "\033[18~",			/* k7 */
- "\033[19~",			/* k8 */
- "\033[20~",			/* k9 */
- "\033[21~",			/* k0 */
-
- "\033[D",			/* kl - arrow left */
- "\033[C",			/* kr - arrow right */
- "\033[A",			/* ku - arrow up */
- "\033[B",			/* kd - arrow down */
-
- "\033[1~",			/* kh - home key */
- "\033[4~",			/* kH - home down key (end key) */
- "\033[6~",			/* kN - next page */
- "\033[5~",			/* kP - previous page */
-
- "\b",				/* kb - backspace key */
- "\033[3~",			/* kD - delete character key */
- "\033[2~"			/* kI - insert character key */
-};				/* 21 strings */
 
 char *xterm_rawkey_string[] =	/* Strings sent by function keys */
 {
@@ -129,28 +257,6 @@ char *xterm_rawkey_string[] =	/* Strings sent by function keys */
 char buf[257];
 
 int 
-identify (void)
-{
-  int i, index;			/* only called when nodevice=0 */
-  buf[0] = 0x1B;
-  i = 1;
-  do
-    {
-      read (0, &buf[i], 1);
-      buf[i + 1] = '\0';
-      i++;
-      for (index = 0; index < 21; index++)
-	if (strcmp (inkeys[index], buf) == 0)
-	  break;		/* recognized string */
-    }
-  while (keyq (0) && (i < 256));
-  if (i == 256)
-    return 0x1B;
-  else
-    return index;
-}
-
-int 
 qkey (void)
 {
   char buf;
@@ -162,14 +268,8 @@ qkey (void)
   if (!keyq (0))
     return EOF;
   read (0, &buf, 1);
-  if (buf == 8)
-    return 127;			/* ^H -> delete */
-  if (buf != 0x1B)
     return buf;			/* only one */
-  return (0x100 | identify ());	/* ESC followed by something else */
 }
-
-static int row, col;		/* track cursor position */
 
 void 
 emit (int ch)
@@ -182,7 +282,6 @@ void
 type (int count, char *addr)
 {
   fwrite (addr, 1, count, stdout);
-  col = col + count;
   fflush (stdout);
 }
 
@@ -222,19 +321,9 @@ main (int argc, char *argv[])
     }
   fread ((char *) figforth, 1, 1000000, in);
   fclose (in);
-/*printf ("[0x%x] ", figforth);                                              */
   tty_init (0, &std_in);
   tty_keymode (&std_in);
   tty_noecho (&std_in);
-  if (!nodevice)
-    if (strcmp (getenv ("TERM"), "linux"))
-      {
-	inkeys = xterm_rawkey_string;
-      }
-    else
-      {
-	inkeys = linux_rawkey_string;
-      }
   figforth (argc, argv, &call);
   tty_restore (&std_in);
 }
