@@ -51,8 +51,8 @@ BINTARGETS= msdos alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
 LINUXFORTHS= figforth lina
-# Auxiliary targets
-OTHERTARGETS= BLOCKS.BLK toblock fromblock
+# Auxiliary targets. Because of GNU make bug, keep constant.m4.
+OTHERTARGETS= BLOCKS.BLK toblock fromblock # constant.m4 
 # C-sources with various aims.
 CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= figforth stealconstant
@@ -115,9 +115,10 @@ TEMPFILE=/tmp/figforthscratch
 %.bin:%.asm
 	nasm -fbin $< -o $@ -l $*.lst
 
+
 # msdos.cfg and alone.cfg are present (at least via RCS)
 # allow to generate fig86.msdos.bin etc.
-fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr
+fig86.%.asm fig86.%.rawdoc : %.cfg nasm.m4 fig86.gnr 
 	m4 $+ >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' >$(@:%.asm=%.rawdoc)
@@ -226,10 +227,13 @@ figforth : figforth.c fig86.linux.o link.script
 
 # Linux native forth
 lina : fig86.lina.o ; ld $+ -o $@
-lina.asm : fig86.alone.asm ; cp $+ $@
+
+# Error in GNU make. This dependancy is not seen. 
+# Do `make constant.m4' explicitly beforehand.
+fig86.alone.asm : constant.m4 
 
 # Convenience under linux. Steal the definitions of constants from c include's.
-constant.m4 : stealconstant.c ; cc -E $+ | m4 prelude.m4 - >$@
+constant.m4 : stealconstant.c ; cc -E -I/usr/include/asm $+ | m4 prelude.m4 - >$@
 
 # Add termporary stuff for testing, if needed.
 include test.mak
