@@ -783,17 +783,17 @@ REQUIRE COMPARE
 
 
 ( RAND ) HEX \ EDN 1991JAN21, pg 151
-
+REQUIRE TICKS
 VARIABLE SEED
 ( . -- . ) ( Use the nanosecond counter to start)
-: RANDOMIZE TIME DROP SEED ! ;
+: RANDOMIZE TICKS DROP SEED ! ;
 
 ( -- N  Leave a random number )
 : RAND SEED @ 107465 * 234567 + DUP SEED ! ;
 
 ( N -- R Leave a random number < N)
 : CHOOSE RAND UM* SWAP DROP ;
-( Swap the number at R with a number 1..N cells away)
+( Swap the number at ADDRESS1 with one at ADDRESS2 )
 : @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
 ( RANDOM-SWAP ( R N -- )
 ( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
@@ -894,37 +894,85 @@ CREATE BASE' 0 ,
 : STRING CREATE &" (PARSE) $, DROP DOES> $@ ;
 
 
-( TIME ELAPSED ) REQUIRE CONFIG ?32 \ AvdH A1oct05
+( TICKS TICKS-PER-SECOND ) \ AvdH A1nov25
+REQUIRE CONFIG   REQUIRE +THRU
+1 2 +THRU
+
+
+
+
+
+
+
+
+
+
+
+
+
+( TICKS TICKS-PER-SECOND ) ?LI \ AvdH A1nov25
+\ Assuming we run on an 486 or better, and a 32 bits Forth
 REQUIRE ASSEMBLERi86 HEX
-\  CODE TIME 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
-CODE TIME 0F C, 31 C, 50 C, 52 C, NEXT C;
+\  CODE TICKS 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
+CODE TICKS 0F C, 31 C, 50 C, 52 C, NEXT C;
 
- DECIMAL
- ." What is the speed of your Pentium (in Mhz)?"
- PAD DUP 80 ACCEPT EVALUATE CONSTANT SPEED
- : MARK-TIME TIME ;
- : .mS SPACE 0 <# # # # [CHAR] . HOLD #S #> TYPE ." mS "  ;
- : .uS SPACE . ." uS "  ;
- : ELAPSED DNEGATE TIME D+ SPEED SM/REM SWAP DROP ;  DECIMAL
+DECIMAL
+." What is the speed of your Pentium (in Mhz)?"
+PAD DUP 80 ACCEPT EVALUATE CONSTANT TICKS-PER-SECOND
 
 
+\ For a TIME in ticks: it IS in the past.
+: PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 
 
-( MEASURE test_for_TIME ) REQUIRE CONFIG ?32 \ AvdH A1oct05
+
+( TICKS TICKS-PER-SECOND ) ?PC ?32 \ AvdH nyi
+\ The idea is to use the timer ticks on the pc.
+\ Until then the following works for 486 and better.
+REQUIRE ASSEMBLERi86 HEX
+\  CODE TICKS 0F C, 31 C, PUSH, AX| PUSH, DX| NEXT C;
+CODE TICKS 0F C, 31 C, 50 C, 52 C, NEXT C;
+
+DECIMAL
+." What is the speed of your Pentium (in Mhz)?"
+PAD DUP 80 ACCEPT EVALUATE CONSTANT TICKS-PER-SECOND
+
+
+\ For a TIME in ticks: it IS in the past.
+: PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
+
+
+( MARK-TIME .mS .uS ELAPSED ) \ AvdH A1nov25
+REQUIRE TICKS
+DECIMAL
+\ Mark a point in time by leaving its tick COUNT.
+: MARK-TIME TICKS ;
+\ Print a TIME interval, given in uS as ms.
+: .mS SPACE 0 <# # # # [CHAR] . HOLD #S #> TYPE ." mS "  ;
+\ Print a TIME interval, given in uS, as us.
+: .uS SPACE . ." uS "  ;
+\ For the TIME (in ticks) on the stack return ELAPSED time
+\ since then, in uS.
+: ELAPSED   DNEGATE TICKS D+   TICKS-PER-SECOND SM/REM
+    SWAP DROP ;
+DECIMAL
+
+
+( MEASURE-PRIME test_for_TIME ) \ AvdH A1oct05
  : TASK ;
-REQUIRE DO-PRIME-ISO    REQUIRE TIME    REQUIRE  NEW-IF
+REQUIRE ASSEMBLERi86 \ Otherwise nesting gets too deep
+REQUIRE DO-PRIME-ISO   REQUIRE MARK-TIME   REQUIRE  NEW-IF
 REQUIRE POSTFIX
 
-: MEASURE
-  TIME DO-PRIME-ISO DROP ELAPSED
+: MEASURE-PRIME
+  TICKS DO-PRIME-ISO DROP ELAPSED
   CR  ." THE ISO BYTE BENCHMARK LASTED " .mS  ;
 
-  MEASURE
+  MEASURE-PRIME
 
-CR ." FORGET MEASURE Y/N" KEY &Y =  IF
+CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY &Y =  IF
   "TASK" POSTFIX FORGET
 THEN
-
 
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct04
 VARIABLE FAR-DP         \ Alternative DP
@@ -1262,7 +1310,7 @@ VARIABLE L
  : SUPER-QUAD CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
  : SQ SUPER-QUAD ;
 
-( FOR-BLOCKS SHOW-BLOCK .B Testing_of_block ) \ AvdH A1oct09
+( FOR-BLOCKS SHOW-BLOCK .BL Testing_of_block ) \ AvdH A1oct09
 REQUIRE H.
 : FOR-BLOCKS >R PREV @
     BEGIN DUP R@ EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
@@ -1276,7 +1324,7 @@ REQUIRE H.
     ELSE
         ." FREE " DROP
     THEN ;
-: .B 'SHOW-BLOCK >CFA FOR-BLOCKS ;
+: .BL 'SHOW-BLOCK >CFA FOR-BLOCKS ;
 
 ( DB-INSTALL DB-UNINSTALL Show_block_properties) \ AvdH A1oc08
 REQUIRE ALIAS
