@@ -2707,56 +2707,6 @@ EMIT1:
 	DC      DROP
 	DC	SEMIS
 ;
-_COMMENT
-HEADER({EXPECT},{EXPEC},{DOCOL})        
-	DC	OVER                            
-	DC	PLUS                            
-	DC	OVER                            
-	DC	XDO	;{ DO                    }
-EXPE1	DC	KEY                             
-	DC	DUPE                            
-	DC	RUBOUT 
-	DC      FETCH
-	DC	EQUAL                           
-	_0BRANCH(EXPE2) ;{ IF                    }
-	DC	DROP                            
-	DC	DUPE                            
-	DC	IDO                             
-	DC	EQUAL                           
-	DC	DUPE                            
-	DC	FROMR                           
-	DC	TWO     ;{ Remove last 2 chars }
-	DC	LSUB                            
-	DC	PLUS                            
-	DC	TOR                             
-	_0BRANCH(EXPE6) ;{ IF                    }
-	DC	LIT                             
-	DC	BELL                            
-	_BRANCH(EXPE7)  ;{ ELSE                  }
-EXPE6	DC	LIT                             
-	DC	BSOUT	;{ ENDIF                 }
-EXPE7	_BRANCH(EXPE3)  ;{ ELSE                  }
-EXPE2	DC	DUPE                            
-	DC	LIT,0DH
-	DC	EQUAL
-	_0BRANCH(EXPE4) ;{ IF}
-	DC	LLEAV
-	DC	DROP
-	DC	BLS
-	DC	ZERO
-	_BRANCH(EXPE5)  ;{ ELSE}
-EXPE4	DC	DUPE	;{ ENDIF}
-EXPE5	DC	IDO
-	DC	CSTOR
-	DC	ZERO
-	DC	IDO
-	DC	ONEP
-	DC	STORE	;{ ENDIF}
-EXPE3	DC	EMIT
-	_LOOP(EXPE1) 	;{ LOOP}
-	DC	DROP
-	DC	SEMIS
-_ENDCOMMENT
 CODE_HEADER({EXPECT},{EXPEC})
 	CALL	c_expec               
 	LEA     ESP,[ESP+CELLS(2)]    ; remove input
@@ -2767,7 +2717,7 @@ CODE_HEADER({KEY},{KEY})
 	PUSH	EAX
 	_NEXT
 ;
-HEADER({?TERMINAL},{QTERM},{DOCOL})
+CODE_HEADER({?TERMINAL},{QTERM})
 	CALL	c_qterm
 	PUSH	EAX
 	_NEXT
