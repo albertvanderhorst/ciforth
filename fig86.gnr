@@ -938,7 +938,7 @@ worddoc({DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {: GS1 -58 ; GS1 .},{-58 }}, enddoc)
 HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
         DC      ONE, LIN, PSTOR
-        DC      PNUMB, DMINU, SDLITE
+        DC      PNUMB, DNEGA, SDLITE
         DC      SEMIS
 ;
 worddoc({DENOTATIONS},{DEN+},{den_plus}, {--- s/d},{CI},
@@ -1661,7 +1661,11 @@ CODE_HEADER({+},{PLUS})
         _PUSH
 ;
 worddoc({DOUBLE},{D+},{d_plus},{d1 d2 --- dsum},{},
-{Leave the double number sum of two double numbers.},{{DMINUS},{+}}, {}, enddoc)
+{Leave the double number sum of two double numbers.},
+{{DNEGATE},{+}}, 
+{ { DECIMAL  240. 204. D+ D.},{444},
+  { DECIMAL  -240. -204. D+ D.},{-444} },
+enddoc)
 CODE_HEADER({D+},{DPLUS})
         POP     AX      ;{ YHW}
         POP     DX      ;{ YLW}
@@ -1671,19 +1675,27 @@ CODE_HEADER({D+},{DPLUS})
         ADC     AX,BX   ;{ SHW}
         _2PUSH
 ;
-worddoc({OPERATOR},{MINUS},{minus},{n1 --- n2},{L0},
+worddoc({OPERATOR},{NEGATE},{negate},{n1 --- n2},{L0},
 {Leave the two's complement of a number, i.e.
- forthvar({n2}) is forthvar({-n1})
-},{{-}}, {}, enddoc)
-CODE_HEADER({MINUS},{MINUS})
+ forthvar({n2}) is forthvar({-n1})},
+{{-}}, 
+{ {0 NEGATE .}, {0},
+  {  1 NEGATE .}, {-1},
+  {  -1 NEGATE .}, {1} },
+enddoc)
+CODE_HEADER({NEGATE},{NEGATE})
         POP     AX
         NEG     AX
         _PUSH
 ;
-worddoc({DOUBLE},{DMINUS},{d_minus},{d1 --- d2},{},
+worddoc({DOUBLE},{DNEGATE},{d_negate},{d1 --- d2},{},
 {Leave the double number two's complement of a double number, i.e.
- forthvar({d2}) is forthvar({-d1}) },{{D+}}, {}, enddoc)
-CODE_HEADER({DMINUS},{DMINU})
+ forthvar({d2}) is forthvar({-d1}) },{{D+}}, 
+{ {0. DNEGATE D.}, {0},
+  {  1. DNEGATE D.}, {-1},
+  {  -1. DNEGATE D.}, {1} },
+enddoc)
+CODE_HEADER({DNEGATE},{DNEGA})
         POP     BX
         POP     CX
         SUB     AX,AX
@@ -1694,7 +1706,11 @@ CODE_HEADER({DMINUS},{DMINU})
         PAGE
 ;
 worddoc({JUGGLING},{OVER},{over},{nl n2 --- nl n2 n1},{L0},
-{Copy the second stack value, placing it as the new top.},{{DUP}}, {}, enddoc)
+{Copy the second stack value, placing it as the new top.},
+{{DUP}}, 
+{{SP! 1 2 3 4 OVER .S},{
+S: 1 2 3 4 3} },
+enddoc)
 CODE_HEADER({OVER},{OVER})
         POP     DX
         POP     AX
@@ -1702,27 +1718,54 @@ CODE_HEADER({OVER},{OVER})
         _2PUSH
 ;
 worddoc({JUGGLING},{DROP},{drop},{n ---},{L0},
-{Drop the number from the stack.},{{DUP}}, {}, enddoc)
+{Drop the number from the stack.},
+{{DUP}}, 
+{{SP! 1 2 3 4 DROP .S},{
+S: 1 2 3} },
+enddoc)
 CODE_HEADER({DROP},{DROP})
         POP     AX
         _NEXT
 ;
+;
+worddoc({JUGGLING},{2DROP},{two_drop},{n1 n2 ---},{L0},
+{Drop the topmost two 
+numbers (or double number)
+ from the stack.},
+{{DROP},{2DUP}}, 
+{{SP! 1 2 3 4 2DROP .S},{
+S: 1 2} },
+enddoc)
+CODE_HEADER({2DROP},{TDROP})
+        POP     AX
+        POP     AX
+        _NEXT
+;
 worddoc({JUGGLING},{SWAP},{swap},{nl n2 --- n2 n1},{L0},
-{Exchange the top two values on the stack.},{{ROT}}, {}, enddoc)
+{Exchange the top two values on the stack.},{{ROT}}, 
+{{SP! 1 2 3 4 SWAP .S },{
+S: 1 2 4 3} },
+enddoc)
 CODE_HEADER({SWAP},{SWAP})
         POP     DX
         POP     AX
         _2PUSH
 ;
 worddoc({JUGGLING},{DUP},{dup},{n --- n n},{L0},
-{Duplicate the value on the stack.},{{OVER}}, {}, enddoc)
+{Duplicate the value on the stack.},{{OVER}}, 
+{{SP! 1 2 3 4 DUP .S},{
+S: 1 2 3 4 4} },
+enddoc)
 CODE_HEADER({DUP},{LDUP})
         POP     AX
         PUSH    AX
         _PUSH
 ;
 worddoc({JUGGLING},{2DUP},{two_dup},{d --- d d},{L0},
-{Duplicate the double number on the stack.},{{OVER}}, {}, enddoc)
+{Duplicate the double number on the stack.},{{OVER}}, 
+{{SP! 1 2 3 4 2DUP .S},{
+S: 1 2 3 4 3 4} },
+enddoc)
 CODE_HEADER({2DUP},{TDUP})
         POP     AX
         POP     DX
@@ -2366,7 +2409,7 @@ HEADER({C,},{CCOMM},{DOCOL})
         DC      SEMIS
 ;
 worddoc({OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{L0},
-{Leave the difference of forthvar({n1-n2}) .},{{MINUS},{+},{*},{/},{MOD}}, 
+{Leave the difference of forthvar({n1-n2}) .},{{NEGATE},{+},{*},{/},{MOD}}, 
 { { 0A BASE !  240 204 - .},{36} },
 {}, enddoc)
 CODE_HEADER({-},{LSUB})
@@ -3585,7 +3628,7 @@ worddoc({FORMATTING},{+-},{plus_minus},{n1 n2 --- n3},{},
 HEADER({+-},{PM},{DOCOL})
         DC      ZLESS
         _0BRANCH(PM1)   ;{IF}
-        DC      MINUS   ;{ENDIF}
+        DC      NEGATE   ;{ENDIF}
 PM1:    DC      SEMIS
 ;
 worddoc({FORMATTING},{D+-},{d_plus_minus},{d1 n --- d2},{},
@@ -3594,7 +3637,7 @@ worddoc({FORMATTING},{D+-},{d_plus_minus},{d1 n --- d2},{},
 HEADER({D+-},{DPM},{DOCOL})
         DC      ZLESS
         _0BRANCH(DPM1)  ;{IF}
-        DC      DMINU   ;{ENDIF}
+        DC      DNEGA   ;{ENDIF}
 DPM1:   DC      SEMIS
 ;
 worddoc({OPERATOR},{ABS},{abs},{n --- u},{L0},
@@ -3605,7 +3648,7 @@ HEADER({ABS},{LABS},{DOCOL})
         DC      SEMIS
 ;
 worddoc({DOUBLE},{DABS},{d_abs},{d --- ud},{},
-{Leave the absolute value forthvar({ud}) of a double number.},{{DMINUS}}, {}, enddoc)
+{Leave the absolute value forthvar({ud}) of a double number.},{{DNEGATE}}, {}, enddoc)
 HEADER({DABS},{DABS},{DOCOL})
         DC      LDUP
         DC      DPM
@@ -5926,7 +5969,7 @@ INDE1:  DC      CR,IDO
 INDE2:  _LOOP(INDE1)
         DC      SEMIS
 ;
-HEADER({^},{DOTS},{DOCOL})
+HEADER({.S},{DOTS},{DOCOL})
         DC      CR
         _STRINGINLINE({S: })
         DC      LTYPE

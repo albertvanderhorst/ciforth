@@ -30,7 +30,7 @@ CR ." EXPECT 1 2 : " 1 2 3 4 2DROP . .
 1 ?TEST
 CR ." EXPECT 1 2 3 4  : |" 2 1 4 3 2SWAP . . . . 
 
-: D= DMINUS D+ OR 0= ;
+: D= DNEGATE D+ OR 0= ;
 1 ?TEST
 CR ." EXPECT 1 1 0 123 |"  123 -1. -1. D= . 0. 0. D= . 2. 4. D= . .
 
@@ -173,7 +173,7 @@ CODE TICKS 0F C, 31 C, ( 90 C, 90 C, 90 C, 90 C, )
 C;
 
 1 ?TEST
-." EXPECT 0 1 :" TICKS DMINUS TICKS D+ . 0FFFF U< . 
+." EXPECT 0 1 :" TICKS DNEGATE TICKS D+ . 0FFFF U< . 
 
 DECIMAL 
 
@@ -189,14 +189,14 @@ DECIMAL
 \ {The time forthvar({d}) indicating a tick count, is in the past.
 \ },
 \ {{TICKS}})
-: PASSED DMINUS TICKS D+ SWAP DROP 0< 0= ;
+: PASSED DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 
 \ worddoc(  {EVENT},{EARLIER},{earlier},{d1 d2 --- f},{},
 \ {The time forthvar({d1}) indicating a tick count, is earlier
 \  or at the same time than the time forthvar({d2}) .
 \ },
 \ {{TICKS},{PASSED}})
-: EARLIER  DMINUS D+ -1. D+ SWAP DROP ;
+: EARLIER  DNEGATE D+ -1. D+ SWAP DROP ;
 
 2 ?TEST
 ." EXPECT -1 :" TICKS TICKS EARLIER . 
@@ -382,7 +382,7 @@ FORGET T
 ." EXPECT 3 3 -1 :" 40. SET-EVENT . GET-EVENT . GET-EVENT .
 ." EXPECT 20 123 :" 1 EVENT[] 2@ D. .
 
-^
+.S
 \ worddoc({TIME},{NS},{@},{n ---},{},
 \ {Wait forthvar({n}) nanoseconds.
 \ This is a busy wait

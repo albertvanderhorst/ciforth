@@ -97,7 +97,7 @@
 1 VARIABLE TABLE 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in )
 ( memory! Not as printed on a big endian machine! )
-: ROTLEFT TABLE + @ U* OR ;   ( aqa " 8 * LSHIFT" on bigendian. )
+: ROTLEFT TABLE + @ UM* OR ;   ( aqa " 8 * LSHIFT" on bigendian. )
 
 ( ------------- UTILITIES, SYSTEM DEPENDANT ----------------------------) 
 VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
@@ -283,7 +283,7 @@ IS-A  IS-COMMA   : COMMAER <BUILDS  , 0 , , , , , DOES> REMEMBER COMMA ;
  ' .DISS-AUX CFA   VARIABLE 'DISS  ( Can be redefined to generate testsets)
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
-: DISS- 0 CELL+ MINUS DISS +! ; ( Discard last item of `DISS' )
+: DISS- 0 CELL+ NEGATE DISS +! ; ( Discard last item of `DISS' )
 
 ( ------------- TRYERS --------------------------------------------------) 
  
