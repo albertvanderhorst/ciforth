@@ -271,11 +271,10 @@ THEN RDROP ;
 : ANNIHILATE-GAP
     2DUP CALCULATE-ANNIL-OFFSET
     2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES
-    DUP >R
-    2DUP " Between " TYPE SWAP H. " and " TYPE H.
-    " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
-    SHIFT-GAP-SHUT   DUP MOVE-BRANCHES   FILL-WITH-DROPS
-    R>
+\     2DUP " Between " TYPE SWAP H. " and " TYPE H.
+\     " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
+    SHIFT-GAP-SHUT   DUP MOVE-BRANCHES   DUP FILL-WITH-DROPS
+    VD @ NEGATE CELLS +
 ;
 
 \ Investigate the start of SEQUENCE. If it can be anihilated do it.
