@@ -12,11 +12,13 @@ define({OFFSET})dnl Ignore this design error altogether.
 define({PAGE},;)dnl Turn PAGE into comment.
 define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
-define({_WRD_PTR},)dnl Ignore 'WRD PTR' altogether. 
+define({_WORD_PTR},)dnl Ignore 'WORD PTR' altogether. 
 dnl
 dnl Specification of the length of an operand,
 dnl needed to get exactly the same code as MASM.
 define({_BYTE},BYTE)dnl Operand has length BYTE.
+dnl Fill in where MASM introduces a superfluous NOP
+define({_EXTRANOP},NOP)dnl Superfluous nops introduced by MASM
 dnl
 dnl More complicated tricks to get rid of MASM.
 define({_ENDP},;)dnl Each ENDP is started with _ENDP in generic listing.

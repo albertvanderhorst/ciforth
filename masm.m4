@@ -5,7 +5,8 @@ dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl 
 dnl
 define({_ENDP},)dnl Each ENDP is started with _ENDP in generic listing.
-define({_WRD_PTR},WRD PTR)dnl Sometimes really needed even after introducing [].
+define({_WORD_PTR},WORD PTR)dnl Sometimes really needed even after introducing [].
+define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
 dnl
 dnl Handling large blocks of comment
 define({_COMMENT},COMMENT ~
