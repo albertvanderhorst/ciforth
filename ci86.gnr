@@ -662,23 +662,23 @@ _BITS32_({
 _LINUX_C_({
 SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
 RETURN_LINUX:
-        MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
-        MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
-        MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
-        MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
-        MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
+        MOV     ESP,_CELL_PTR[SAVE_LINUX+_CELLS(0)]
+        MOV     EBP,_CELL_PTR[SAVE_LINUX+_CELLS(1)]
+        MOV     ESI,_CELL_PTR[SAVE_LINUX+_CELLS(2)]
+        MOV     EDI,_CELL_PTR[SAVE_LINUX+_CELLS(3)]
+        MOV     EBX,_CELL_PTR[SAVE_LINUX+_CELLS(4)]
         RET     ; Assuming the old stack has not been disturbed.It shouldn't.
 figforth:
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
-        MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
-        LEA     ECX,[ESP+CELLS(1)]
+        MOV     _CELL_PTR[SAVE_LINUX+_CELLS(0)],ESP
+        MOV     _CELL_PTR[SAVE_LINUX+_CELLS(1)],EBP
+        MOV     _CELL_PTR[SAVE_LINUX+_CELLS(2)],ESI
+        MOV     _CELL_PTR[SAVE_LINUX+_CELLS(3)],EDI
+        MOV     _CELL_PTR[SAVE_LINUX+_CELLS(4)],EBX
+        LEA     ECX,[ESP+_CELLS(1)]
         XOR     EAX,EAX
         CMP     EAX,_CELL_PTR[ECX]
         JZ     ENDIF1
-        JMP     BOOTUP+CELLS(2)         ; Warm start
+        JMP     BOOTUP+_CELLS(2)         ; Warm start
 ENDIF1:
 
 });_END_({_LINUX_C_})
@@ -999,11 +999,11 @@ CODE_HEADER({NOOP},{NOOP})
        _NEXT
 ;
 _OLDDEBUG_({ ;{ Rather unclear what this is supposed to.}
-NOP0:   DC      $+CELLS(1)
+NOP0:   DC      $+_CELLS(1)
         JMP SHORT NEXT
-NOP1:   DC      $+CELLS(1)
+NOP1:   DC      $+_CELLS(1)
         JMP SHORT NEXT
-NOP2:   DC      $+CELLS(1)
+NOP2:   DC      $+_CELLS(1)
         JMP SHORT NEXT
 });_END_({_OLDDEBUG_ })
 ;
@@ -1053,7 +1053,7 @@ _VERBOSE_({Internal, used for nested compilation})},
 enddoc)
 CODE_HEADER({SKIP},{SKIP})
         ADD     SI,[SI]
-        LEA     SI,[SI+CELLS(1)]
+        LEA     SI,[SI+_CELLS(1)]
         _NEXT    ;{ JUMP TO OFFSET}
 ;
 worddoc( {CONTROL},{BRANCH},{branch},{},{C2,L0},
@@ -1080,7 +1080,7 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         POP     AX      ;{ GET STACK VALUE}
         OR      AX,AX   ;{ ZERO?}
         JZ      BRAN1   ;{ YES, BRANCH}
-        LEA     SI,[SI+CELLS(1)]
+        LEA     SI,[SI+_CELLS(1)]
         _NEXT
 ;
 worddocsafe( {CONTROL},{(LOOP)},{paren_loop},{},{C2},
@@ -1093,13 +1093,13 @@ CODE_HEADER({(LOOP)},{XLOOP})
         MOV     BX,1    ;{ INCREMENT}
 XLOO1:  ADD     [BP],BX ;{ INDEX = INDEX + INCR}
         MOV     AX,[BP] ;{ GET NEW INDEX}
-        SUB     AX,[BP+CELLS(1)]        ;{ COMPARE WITH LIMIT}
+        SUB     AX,[BP+_CELLS(1)]        ;{ COMPARE WITH LIMIT}
         XOR     AX,BX   ;{ TEST SIGN}
         JS      BRAN1   ;{ KEEP LOOPING}
 ;
 ;{  END OF `DO' LOOP}
-        ADD     BP,_BYTE CELLS(2)  ;{ ADJ RETURN STACK}
-        LEA     SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
+        ADD     BP,_BYTE _CELLS(2)  ;{ ADJ RETURN STACK}
+        LEA     SI,[SI+_CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
         _NEXT
 ;
 worddocsafe( {CONTROL},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
@@ -1445,7 +1445,7 @@ and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
 {{BLK},{SOURCE-ID}},
 {{SOURCE @ TIB @ = .},{_T_}},
 enddoc)
-HEADER({SOURCE},{SOURC},{DOUSE}, CELLS(27))      ;{ And 28 and 29.}
+HEADER({SOURCE},{SOURC},{DOUSE}, _CELLS(27))      ;{ And 28 and 29.}
 ;
 worddoc( {OUTPUT},{CR},{cr},{},{L0},
 {Transmit character(s)
@@ -1616,8 +1616,8 @@ worddoc( {STACKS},{SP!},{s_p_store},{},{},
 {{  1 2 3 SP! SP@ S0 @ = .},{_T_} },
 enddoc)
 CODE_HEADER({SP!},{SPSTO})
-        MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR BASE ADDR}
-        MOV     STACKPOINTER,[BX+CELLS(3)]        ;{RESET PARAM STACK POINTER}
+        MOV     BX,_CELL_PTR[USINI+_CELLS(1)]   ;{USER VAR BASE ADDR}
+        MOV     STACKPOINTER,[BX+_CELLS(3)]        ;{RESET PARAM STACK POINTER}
         _NEXT
 ;
 worddocsafe( {STACKS},{RP@},{r_p_fetch},{--- addr},{},
@@ -1637,8 +1637,8 @@ pointer from user variable forthcode({R0}) .},
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({RP!},{RPSTO})
-        MOV     BX,_CELL_PTR[USINI+CELLS(1)]   ;{(AX) <- USR VAR BASE}
-        MOV     BP,[BX+CELLS(4)]        ;{RESET RETURN STACK PTR}
+        MOV     BX,_CELL_PTR[USINI+_CELLS(1)]   ;{(AX) <- USR VAR BASE}
+        MOV     BP,[BX+_CELLS(4)]        ;{RESET RETURN STACK PTR}
         _NEXT
 ;
 worddoc( {CONTROL},{EXIT},{semicolon_s},{},{ISO},
@@ -1654,7 +1654,7 @@ execution to the calling proceedure.},
 enddoc)
 CODE_HEADER({EXIT},{SEMIS})
         MOV     SI,[BP] ;{(IP) <- (R1)}
-        LEA     BP,[BP+CELLS(1)]
+        LEA     BP,[BP+_CELLS(1)]
         _NEXT
 ;
 worddoc( {CONTROL},{LEAVE},{leave},{},{C,L0},
@@ -1667,7 +1667,7 @@ encountered.},{},
 enddoc)
 CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
         MOV     AX,[BP] ;{GET INDEX}
-        MOV     [BP+CELLS(1)],AX        ;{STORE IT AT LIMIT}
+        MOV     [BP+_CELLS(1)],AX        ;{STORE IT AT LIMIT}
         _NEXT
 ;
 worddoc( {STACKS},{>R},{to_r},{n ---},{C,L0},
@@ -1678,7 +1678,7 @@ the same definition.},{{R}},
 enddoc)
 CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
         POP     BX      ;{GET STACK PARAMETER}
-        LEA     BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
+        LEA     BP,[BP-_CELLS(1)]    ;{MOVE RETURN STACK DOWN}
         MOV     [BP],BX ;{ADD TO RETURN STACK}
         _NEXT
 ;
@@ -1689,7 +1689,7 @@ computation stack. },{{>R},{R}},
 enddoc)
 CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
         MOV     AX,[BP] ;{ GET RETURN STACK VALUE}
-        LEA     BP,[BP+CELLS(1)]
+        LEA     BP,[BP+_CELLS(1)]
         _PUSH
 ;
 worddoc( {STACKS},{RDROP},{r_drop},{---} ,{CIG},
@@ -1697,7 +1697,7 @@ worddoc( {STACKS},{RDROP},{r_drop},{---} ,{CIG},
 {{." Via >R"},{Via >R}},
 enddoc)
 CODE_HEADER({RDROP},{RDROP})      ;{(S1) <- (R1)}
-        LEA     BP,[BP+CELLS(1)]
+        LEA     BP,[BP+_CELLS(1)]
         _NEXT
 ;
 worddoc( {STACKS},{R},{r},{--- n},{},
@@ -1945,7 +1945,7 @@ enddoc)
 CODE_HEADER({2@},{TFET})
         POP     BX      ;{ADDR}
         MOV     AX,[BX] ;{MSW}
-        MOV     DX,[BX+CELLS(1)]        ;{LSW}
+        MOV     DX,[BX+_CELLS(1)]        ;{LSW}
         _2PUSH
 ;
 worddoc( {MEMORY},{!},{store},{n addr ---},{ISO L0},
@@ -1980,7 +1980,7 @@ CODE_HEADER({2!},{TSTOR})
         POP     AX      ;{MSW}
         MOV     [BX],AX
         POP     AX      ;{LSW}
-        MOV     [BX+CELLS(1)],AX
+        MOV     [BX+_CELLS(1)],AX
         _NEXT
 ;
 worddoc( {MEMORY},{WITHIN},{within},{n1 n2 n3 --- f},{ISO},
@@ -2096,9 +2096,9 @@ HEADER({:},{COLON},{DOCOL}, , B_IMMED)
         DC      PCREAT
         DC      RBRAC
         DC      PSCOD
-DOCOL:  LEA     BP,[BP-CELLS(1)]
+DOCOL:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-         MOV     SI,[BX+CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
+         MOV     SI,[BX+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -2134,7 +2134,7 @@ HEADER({CONSTANT},{CONST},{DOCOL})
         DC      SMUDG
         DC      LATEST, TPFA, STORE
         DC      PSCOD
-DOCON:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
+DOCON:  MOV     AX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
 ;
 worddoc( {DEFINING},{VARIABLE},{variable},{},{NISO,E,LU},
@@ -2153,7 +2153,7 @@ HEADER({VARIABLE},{VAR},{DOCOL})
         DC      SMUDG
         DC      ZERO, COMMA
         DC      PSCOD
-DOVAR:  MOV     AX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
+DOVAR:  MOV     AX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
 worddoc( {DEFINING},{USER},{user},{n ---},{L0},
@@ -2171,8 +2171,8 @@ enddoc)
 HEADER({USER},{USER},{DOCOL})
         DC      CONST
         DC      PSCOD
-DOUSE:  MOV     BX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
-        MOV     DI,_CELL_PTR[USINI+CELLS(1)]   ;{USER VAR ADDRESS}
+DOUSE:  MOV     BX,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
+        MOV     DI,_CELL_PTR[USINI+_CELLS(1)]   ;{USER VAR ADDRESS}
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
 ;
@@ -2346,7 +2346,7 @@ This is dependant on which task is running.},
 {{USER},{+ORIGIN}},
 {{U0 @ 0 +ORIGIN @ = .},{_T_}},
 enddoc)
-HEADER({U0},{UZERO},{DOUSE}, CELLS(1))
+HEADER({U0},{UZERO},{DOUSE}, _CELLS(1))
 ;
 worddoc( {INPUT},{RUBOUT},{rub_out},{--- c},{},
 {A user variable, leaving the key code that must delete the
@@ -2356,27 +2356,27 @@ editing is left to the host operating system.)
 },{{USER}},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({RUBOUT},{RUBOUT},{DOUSE}, CELLS(2))
+HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(2))
 ;
 worddoc( {STACKS},{S0},{s_zero},{--- addr},{U},
 {A user variable that contains the initial value for the data stack
 pointer.},{{SP!}},
 {{." See SP@"},{See SP@}},
 enddoc)
-HEADER({S0},{SZERO},{DOUSE}, CELLS(3))
+HEADER({S0},{SZERO},{DOUSE}, _CELLS(3))
 ;
 worddoc( {STACKS},{R0},{r_zero},{--- addr},{U},
 {A user variable containing the initial location of the return stack. },
 {{RP!}},
 {{." See RP@"},{See RP@}},
 enddoc)
-HEADER({R0},{RZERO},{DOUSE}, CELLS(4))
+HEADER({R0},{RZERO},{DOUSE}, _CELLS(4))
 ;
 worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{U},
 {A user variable containing the address of the terminal input buffer.},{},
 {{." See SOURCE"},{See SOURCE}},
 enddoc)
-HEADER({TIB},{TIB},{DOUSE}, CELLS(5))
+HEADER({TIB},{TIB},{DOUSE}, _CELLS(5))
 ;
 worddoc( {ERRORS},{WARNING},{warning},{--- addr},{U},
 {A user variable containing a value controlling messages. If = 1 disc
@@ -2386,7 +2386,7 @@ by number. If = -1, execute forthcode({(ABORT)}) for a user specified proceedure
 },{{MESSAGE},{ERROR}},
 {{." See MESSAGE"},{See MESSAGE}},
 enddoc)
-HEADER({WARNING},{WARN},{DOUSE}, CELLS(7))
+HEADER({WARNING},{WARN},{DOUSE}, _CELLS(7))
 ;
 worddoc( {DICTIONARY},{FENCE},{fence},{---  addr},{U},
 {A user variable containing an address below which forthcode({FORGET}) ting is
@@ -2394,7 +2394,7 @@ trapped. To forget below this point the user must alter the contents
 of forthcode({FENCE}) .},{},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({FENCE},{FENCE},{DOUSE}, CELLS(8))
+HEADER({FENCE},{FENCE},{DOUSE}, _CELLS(8))
 ;
 worddoc( {DICTIONARY},{DP},{d_P},{---- addr},{U,L},
 {A user variable, the dictionary pointer, which contains the address
@@ -2402,7 +2402,7 @@ of the next free memory above the dictionary. The value may be read
 by forthcode({HERE}) and altered by forthcode({ALLOT}) .},{},
 {{HERE DP @ = .},{_T_}},
 enddoc)
-HEADER({DP},{LDP},{DOUSE}, CELLS(9))
+HEADER({DP},{LDP},{DOUSE}, _CELLS(9))
 ;
 worddoc( {VOCABULARIES},{VOC-LINK},{voc_link},{--- addr},{U},
 {A user variable containing the forthdefi({dictionary entry
@@ -2413,7 +2413,7 @@ ting thru multiple vocabularies.})},
 {{VOCABULARY}},
 {{VOC-LINK @ ' FORTH = .},{_T_}},
 enddoc)
-HEADER({VOC-LINK},{VOCL},{DOUSE}, CELLS(10))
+HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 ;
 worddoc( {STORAGE},{OFFSET},{offset},{--- addr},{U},
 {A user variable which may contain a block offset to disc drives,
@@ -2427,7 +2427,7 @@ Messages by forthcode({MESSAGE}) are independent of forthcode({OFFSET}) .},
 {{BLOCK},{MESSAGE} },
 {{OFFSET @ 1000000 U< .},{_T_}},
 enddoc)
-HEADER({OFFSET},{OFSET},{DOUSE}, CELLS(11))
+HEADER({OFFSET},{OFSET},{DOUSE}, _CELLS(11))
 ;
 ;{ End of user variables with fixed place.}
 ;
@@ -2436,7 +2436,7 @@ worddoc( {SCREEN},{SCR},{s_c_r},{--- addr},{U},
 by forthcode({LIST}) .},{{BLOCK}},
 {{." interactive"},{interactive}},
 enddoc)
-HEADER({SCR},{SCR},{DOUSE}, CELLS(14))
+HEADER({SCR},{SCR},{DOUSE}, _CELLS(14))
 ;
 worddoc( {VOCABULARIES},{CONTEXT},{context},{--- addr},{ISO,U,L0},
 {A user variable containing a pointer into the data of
@@ -2444,7 +2444,7 @@ a vocabulary that contains a dummy dea with which the
 dictionary searches will first begin.},{{VOCABULARY},{CURRENT}},
 {{CONTEXT @ ' FORTH >DDEA = .},{_T_}},
 enddoc)
-HEADER({CONTEXT},{CONT},{DOUSE}, CELLS(16))
+HEADER({CONTEXT},{CONT},{DOUSE}, _CELLS(16))
 ;
 worddoc( {VOCABULARIES},{CURRENT},{current},{--- addr},{ISO,U,L0},
 {A user variable containing a pointer to data field of
@@ -2455,7 +2455,7 @@ dummy dea and the next definition.},
 {{VOCABULARY},{CONTEXT}},
 {{CURRENT @ ' FORTH >DDEA = .},{_T_}},
 enddoc)
-HEADER({CURRENT},{CURR},{DOUSE}, CELLS(17))
+HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(17))
 ;
 worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
 {A user variable containing the compilation state. A non-zero value
@@ -2463,7 +2463,7 @@ indicates compilation.},{},
 {{STATE @ .},{0},
 { : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
 enddoc)
-HEADER({STATE},{STATE},{DOUSE}, CELLS(18))
+HEADER({STATE},{STATE},{DOUSE}, _CELLS(18))
 ;
 worddoc( {FORMATTING},{BASE},{base},{--- addr},{ISO,U,L0},
 {A user variable containing the current number base used for input
@@ -2471,7 +2471,7 @@ and output conversion.},
 {{DECIMAL},{HEX},{<#}},
 {{DECIMAL BASE @ 16 BASE ! .},{A}},
 enddoc)
-HEADER({BASE},{BASE},{DOUSE}, CELLS(19))
+HEADER({BASE},{BASE},{DOUSE}, _CELLS(19))
 ;
 worddoc( {FORMATTING},{DPL},{d_p_l},{---- addr},{ISO,U,L0},
 {A user variable containing the address of the decimal point on
@@ -2481,7 +2481,7 @@ generated formating. },
 {{<#},{FLD},{HLD}},
 {{1234.56 DPL @ 0= .},{0}},
 enddoc)
-HEADER({DPL},{DPL},{DOUSE}, CELLS(20))
+HEADER({DPL},{DPL},{DOUSE}, _CELLS(20))
 ;
 worddoc( {FORMATTING},{FLD},{f_l_d},{--- addr},{U},
 {A user variable for control of number output field width.
@@ -2489,14 +2489,14 @@ Unused in the kernel of ciforth.},
 {},
 {{." No test"},{No test} },
 enddoc)
-HEADER({FLD},{LFLD},{DOUSE}, CELLS(21))
+HEADER({FLD},{LFLD},{DOUSE}, _CELLS(21))
 ;
 worddoc( {SECURITY},{CSP},{c_s_p},{---- addr},{U},
 {A user variable temporarily storing the stack pointer position, for
 compilation error checking.},{},
 {{1256 CSP ! CSP @ .},{1256}},
 enddoc)
-HEADER({CSP},{LCSP},{DOUSE}, CELLS(22))
+HEADER({CSP},{LCSP},{DOUSE}, _CELLS(22))
 ;
 worddoc( {SCREEN},{R#},{r_hash},{--- addr},{U},
 {A user variable which may contain the location of an editing cursor,
@@ -2505,7 +2505,7 @@ Unused in the kernel of ciforth.},
 {},
 {{." No test"},{No test} },
 enddoc)
-HEADER({R#},{RNUM},{DOUSE}, CELLS(23))
+HEADER({R#},{RNUM},{DOUSE}, _CELLS(23))
 ;
 worddoc( {FORMATTING},{HLD},{hld},{--- addr},{L0},
 {A user variable that holds the address of the latest character of
@@ -2513,7 +2513,7 @@ text during numeric output conversion.},
 {{<#},{DPL},{FLD}},
 {{." No test"},{No test} },
 enddoc)
-HEADER({HLD},{HLD},{DOUSE}, CELLS(24))
+HEADER({HLD},{HLD},{DOUSE}, _CELLS(24))
 ;
 worddoc( {OUTPUT},{OUT},{OUT},{--- addr},{U},
 {A user variable that reflects the position at the current line
@@ -2524,7 +2524,7 @@ forthkey(LF) embedded in a string that is forthcode({TYPE})d.},
 {{EMIT},{TYPE},{CR}},
 {{CR 41 EMIT 42 EMIT OUT @ .},{AB2}},
 enddoc)
-HEADER({OUT},{LOUT},{DOUSE}, CELLS(25))
+HEADER({OUT},{LOUT},{DOUSE}, _CELLS(25))
 ;
 worddoc( {STORAGE},{BLK},{blk},{--- addr},{NISO,U,L0},
 {A user variable that reflects the state of the current input source.
@@ -2536,7 +2536,7 @@ the forthdefi({current input source}) has changed.},
 {{BLOCK},{TIB}},
 {{BLK @ .},{0}},
 enddoc)
-HEADER({BLK},{BLK},{DOUSE}, CELLS(26))
+HEADER({BLK},{BLK},{DOUSE}, _CELLS(26))
 ;
 worddoc( {INPUT},{IN},{in},{--- addr},{L0},
 {A user variable containing the byte offset within the current input
@@ -2545,7 +2545,7 @@ accepted. All parsing words use and move the value of forthcode({IN}) .},
 {{WORD},{(WORD)},{NUMBER},{(PARSE)},{IN[]}},
 {{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
 enddoc)
-HEADER({IN},{LIN},{DOUSE}, CELLS(29))
+HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -2579,11 +2579,11 @@ forthvar({n2}). _VERBOSE_({This is invaluable for writing portable
 code. Many of the screens of ciforth run on both 16 and 32 bits
 systems, thanks to this.})
 },{{CELL+}},
-_BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
+_BITS32_({{{2 _CELLS .},{8}},})dnl expanded before worddoc is!
 _BITS16_({{{2 CELL+ .},{4}},})dnl expanded before worddoc is!
 enddoc)
 ; ))))
-CODE_HEADER({CELLS},{LCELLS})
+CODE_HEADER({CELLS},{L_CELLS})
         POP     AX
         LEA     AX,[AX*4]
         _PUSH
@@ -2802,7 +2802,7 @@ construct, return its  data field forthsamp({addr}).},
 {{ CREATE Q 12346 ,  ' Q >BODY @ .},{12346}},
 enddoc)
 HEADER({>BODY},{TOBODY},{DOCOL})
-        DC      LIT,CELLS(B_HOFFSET)
+        DC      LIT,_CELLS(B_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2814,7 +2814,7 @@ construct to its forthsamp({dea}) .},
 {{ CREATE QAQ HERE BODY> ID.},{QAQ}},
 enddoc)
 HEADER({BODY>},{BODYF},{DOCOL})
-        DC      LIT,CELLS(B_HOFFSET)
+        DC      LIT,_CELLS(B_HOFFSET)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2824,7 +2824,7 @@ dea address.},{{'},{>CFA},{>LFA},{>NFA}},
 {{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
 enddoc)
 HEADER({C>D},{CTOD},{DOCOL})
-        DC      LIT,CELLS(C_HOFFSET)
+        DC      LIT,_CELLS(C_HOFFSET)
         DC      LSUB
         DC      SEMIS
 ;
@@ -2834,7 +2834,7 @@ name field.},{{'},{>CFA}},
 {{ ' WORDS >NFA @ $@ TYPE},{WORDS}},
 enddoc)
 HEADER({>NFA},{TNFA},{DOCOL})
-        DC      LIT,CELLS(N_HOFFSET)
+        DC      LIT,_CELLS(N_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2844,7 +2844,7 @@ flag field.},{{'},{>NFA}},
 {{"FRED" (CREATE) SMUDGE ' FRED >FFA DUP @ . SMUDGE @ .},{0 2}},
 enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
-        DC      LIT, CELLS(F_HOFFSET)
+        DC      LIT, _CELLS(F_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2854,7 +2854,7 @@ link field address.},{{'},{>LFA}},
 {{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}},
 enddoc)
 HEADER({>LFA},{TLFA},{DOCOL})
-        DC      LIT, CELLS(L_HOFFSET)
+        DC      LIT, _CELLS(L_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2867,7 +2867,7 @@ In ciforth this is actually the same as the dea.},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
-        DC      LIT, CELLS(C_HOFFSET)
+        DC      LIT, _CELLS(C_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -2881,7 +2881,7 @@ In all these cases it directly follows the header.},
 {{ "APE" (CREATE) SMUDGE HERE ' APE >PFA @ = .},{_T_}},
 enddoc)
 HEADER({>PFA},{TPFA},{DOCOL})
-        DC      LIT, CELLS(D_HOFFSET)
+        DC      LIT, _CELLS(D_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
@@ -3117,10 +3117,10 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      LIT, HLNOOP, COMMA
         DC      SMUDG
         DC      PSCOD
-DODOE:  LEA     BP,[BP-CELLS(1)]
+DODOE:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-        MOV     SI,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
-        LEA     AX,[SI+CELLS(1)]
+        MOV     SI,[BX+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        LEA     AX,[SI+_CELLS(1)]
         MOV     SI,[SI]
         _PUSH
 HLNOOP: DC      SEMIS
@@ -3201,7 +3201,7 @@ In ciforth the number of characters has no limit and has always an effect
 on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
 _VERBOSE_({We want forthsamp({." cccc"}) replace by forthsamp({"cccc" $.}).})},
-{{OUT}}},
+{{OUT}},
 {{: GS1 ." the end" ; GS1 },{the end}},
 enddoc)
 HEADER({."},{DOTQ},{DOCOL}, , B_IMMED)
@@ -3232,7 +3232,7 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LTYPE
         DC      SEMIS
 ;
-worddoc( {PARSING},{(EVAL)},{paren_eval},{sc -- },{I},
+worddocsafe( {PARSING},{(EVAL)},{paren_eval},{sc -- },{I},
 {Make the string constant forthsamp({sc}) the current input
 stream. This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
@@ -3566,7 +3566,7 @@ HEADER({(FIND)},{PFIND},{DOCOL})
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
         DC      DROP, ONE
-        DC      LIT, _DEA(DENOT) + CELLS(B_HOFFSET  + 1)
+        DC      LIT, _DEA(DENOT) + _CELLS(B_HOFFSET  + 1)
         DC      LIT, MATCHING, SWAP, FORW
 DFIN1:
         DC      DROP, DROP
@@ -3679,10 +3679,10 @@ CREA1:  DC      DROP
         DC      SCOMMA
         DC      HERE,TOR
 
-        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
+        DC      RR, LIT, _CELLS(DC_HOFFSET), PLUS
         DC      COMMA   ; {Code field.}
 
-        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
+        DC      RR, LIT, _CELLS(DC_HOFFSET), PLUS
         DC      COMMA         ; {Parameter field.}
 
         DC      LIT, B_INVIS, COMMA ; {Flag field.}
@@ -4143,8 +4143,8 @@ _HOSTED_MSDOS_({
 });_END_({ _HOSTED_MSDOS_})
 _ENDCOMMENT
         CLD                     ;{ DIR = INC}
-        MOV     STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
-        MOV     BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
+        MOV     STACKPOINTER,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
+        MOV     BP,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
         _NEXT
 ;
 CLD1:   DC      COLD
@@ -4170,7 +4170,7 @@ HEADER({COLD},{COLD},{DOCOL})
         DC      PREV,STORE
 ;{ Fill user area for single task.}
         DC      LIT, USINI
-        DC      LIT, USINI+CELLS(1), FETCH
+        DC      LIT, USINI+_CELLS(1), FETCH
         DC      LIT, US
         DC      LCMOVE
 _LINUX_N_({
@@ -5137,7 +5137,7 @@ All terminal I/O goes through this word.
 forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
 CODE_HEADER({TYPE},{LTYPE},DOCOL)
         CALL    c_type
-        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        LEA     ESP,[ESP+_CELLS(2)]    ; remove input
         _NEXT
 ;
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
@@ -5149,7 +5149,7 @@ nulls are added at the end of the text.
 },{{KEY},{?TERMINAL}}, {}, enddoc)
 CODE_HEADER({ACCEPT},{ACCEP})
         CALL    c_expec
-        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        LEA     ESP,[ESP+_CELLS(2)]    ; remove input
         PUSH    EAX
         _NEXT
 ;
@@ -5210,9 +5210,9 @@ the terminal doesn't wait for a <return>.
 {{( Interactive)},{}},
 enddoc)
 HEADER({SET-TERM},{STTERM},{DOCOL})
-        DC      LIT, _VAR_FIELD(TERMIO)+CELLS(3)
+        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(3)
         DC      SWAP, TOGGL
-        DC      LIT, _VAR_FIELD(TERMIO)+CELLS(4)+7
+        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(4)+7
         DC      CSTOR
         DC      ZERO, LIT, TCSETS, TERMIO
         DC      LIT, ioctl, LINOS, QLERR
@@ -5525,7 +5525,7 @@ HEADER({EMIT},{EMIT},{DOCOL})
         DC      PEMIT
         DC      ONE,LOUT
         DC      PSTOR,SEMIS
-PEMIT   DC      $+CELLS(1)
+PEMIT   DC      $+_CELLS(1)
         POP     AX      ;{GET CHAR}
         CMP     AL,LF   ;{ Precede ^J with ^M}
         JNE     PEMIT1
@@ -5959,7 +5959,7 @@ CODE_HEADER({BLOCK-INIT},{BLINI})
         PUSH    AX
         CALL    c_block_init
         MOV     [_VAR_FIELD(DERR)],AX
-        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        LEA     ESP,[ESP+_CELLS(2)]    ; remove input
         _NEXT
 ;
 worddoc( {STORAGE},{BLOCK-EXIT},{block_exit},{---},{},
@@ -5985,7 +5985,7 @@ performs the read-write and shows errors via forthcode({DISK-ERROR}).},
 CODE_HEADER({R/W},{RSLW})
         CALL c_rslw
         MOV     [_VAR_FIELD(DERR)],AX
-        LEA     ESP,[ESP+CELLS(3)]    ; remove input
+        LEA     ESP,[ESP+_CELLS(3)]    ; remove input
         _NEXT
 
 
@@ -7118,7 +7118,7 @@ HEADER({.CPU},{DOTCPU},{DOCOL})
         DC      BASE,FETCH
         DC      LIT,36
         DC      BASE,STORE
-        DC      LIT,CELLS(12),PORIG ;
+        DC      LIT,_CELLS(12),PORIG ;
         DC      TFET
 _BITS32_({
         DC      LIT, 10000H, STAR, PLUS, ZERO
@@ -7135,14 +7135,14 @@ worddoc( {MEMORY},{LOW-DP},{low_dictionary_pointer},{---- addr},{},
 1 Mbyte of physical memory. This variable can be swapped with DP to
 compile into this area.
 },{{LOW-EM}}, {}, enddoc)
-HEADER({LOW-DP},{LOWDP},{DOUSE}, CELLS(14))
+HEADER({LOW-DP},{LOWDP},{DOUSE}, _CELLS(14))
 ;
 worddoc( {MEMORY},{LOW-EM},{low_end_memory},{---- addr},{},
 {A user variable leaving the address just above the highest memory
 usable in the lowest 1 Mbyte of physical memory. This area can be used
 to compile buffers into that must be accessed from real mode.
 },{{DP},{EM}}, {}, enddoc)
-HEADER({LOW-EM},{LOWEM},{DOUSE}, CELLS(15))
+HEADER({LOW-EM},{LOWEM},{DOUSE}, _CELLS(15))
 ;
 });_END_({ _DIRECTMAPPED_})
 ;
