@@ -60,7 +60,7 @@
 0200 10700 0s T!'
  0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP -- [SI [DI
 000280 10700 0s 0500 0s xFIR' [BP   ( Fits in the hole, safe inconsistency check)
-000240 10700 0s 0500 0s xFIR' [..   ( Fits in the hole, safe inconsistency check)
+020240 10700 0s 0500 0s xFIR' [..   ( Fits in the hole, safe inconsistency check)
 
 0120 0700 0s T!'
 ( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
@@ -198,6 +198,26 @@
 01040001 00   C8 1PI' ENTER, ( 3)
       00 00   C9 1PI' LEAVE, ( 3)
       00 00 060F 2PI' CLTS,  ( 3)
+
+( ############## HANDLING THE SIB BYTE ################################ )
+
+( Handle a `sib' bytes as an instruction-within-an-instruction )
+( This is really straightforward, we say the sib commaer is a sib )
+( as per -- error checking omitted -- " 10000 ' SIB, CFA COMMAER SIB,," )
+( All the rest is to nest the state in this recursive situation )
+( Leaving this bit on would flag [.X+ +.* .X] as errors )
+( Leaving BY would flag commaers to be done after the sib byte as errors)
+: (SIB),,   
+    TALLY-BA @   TALLY-BY @   !TALLY      ( . -- state1 state2 )
+    SIB,   
+    TALLY-BY ! 100 INVERT AND TALLY-BA @ OR TALLY-BA ! ;
+
+' (SIB),, CFA   % SIB,, >DATA !   ( Not available during  generation)
+
+( Disassemble the sib byte from ADDRESS. Leave INCREMENTED address.     )
+: DIS-SIB POINTER ! [ % SIB, ] LITERAL F-D POINTER @ ;
+( Disassembler was not available while creating the commaer. )
+' DIS-SIB CFA   % SIB,, >DIS !    0   % SIB,, >CNT !   
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may always want to use these instead of (RB,)
