@@ -235,6 +235,9 @@ BOOT:
         JZ  ELSE3
         JMP ENDBOOT     ; {Skip booting if started from MSDOS}
 ELSE3:
+        ; {WE WANT TO GET RID OF THIS HERE. WHY NOT LOAD DIRECTLY TO}
+        ; {BOOTADDRESS+BPS?) BUT THEN READING FAILS. It says}
+        ; {DF04000020 0005 ad infinitum}.
         ;{ Adjust code segment address without leaving the ball}
         ;{ Generating machine code is actually simpler than}
         ;{ beating the assembler. After 10 attempts I gave up}
@@ -265,14 +268,13 @@ ELSE1:
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
         JB      RETRY
-        CMP     BX,[ENDLD]
-        JL      BEGIN1
+        CMP     BX,INITDP-$$
+        JB      BEGIN1
 
         MOV     AL,'W'
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
-ENDLD:  DW      INITDP
 ;{       Read the sector with number in CX (Counting from 0)}
 ;{       Leave into CX the incremented sec# }
 READSECTOR:
@@ -360,6 +362,7 @@ BOOT:
         JZ  ELSE3
         JMP ENDBOOT     ; {Skip booting if started from MSDOS}
 ELSE3:
+        ; {See also the comment at BOOTFD}
         ;{ Adjust code segment address without leaving the ball}
         ;{ Generating machine code is actually simpler than}
         ;{ beating the assembler. After 10 attempts I gave up}
@@ -424,7 +427,7 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         INT(10H)
         RET
 
-ENDBOOT:                        
+ENDBOOT:
 });_END___1__({ _BOOTED_1_})
 
 ; ########################################################################################
@@ -432,11 +435,9 @@ ENDBOOT:
 ; ########################################################################################
 ;____1_____ _HOSTED_MSDOS_1_({
         ORG     100H    ;{ Required start of .COM program.}
-        JMP     BOOTUP
 });_END___1__({ _HOSTED_MSDOS_1_})
 
 ;____1_____ _BOOTED_1_({
-_REAL_1_({        JMP     BOOTUP})
 _SWITCH_1_({        JMP     PROTECT})
         _NEW_ORG(01FEH)
         ;{ Signature. Last piece of boot sector. }
@@ -445,10 +446,12 @@ _SWITCH_1_({        JMP     PROTECT})
 });_END___1__({ _BOOTED_1_})
 
 ; ########################################################################################
-;                       SWITCH TO PROTECTED MODE/32 BITS (optional) 
+;                       SWITCH TO PROTECTED MODE/32 BITS (optional)
 ; ########################################################################################
-PROTECT:
 ;____1_____ _SWITCH_1_({
+GDTLOAD DW     GDTLEN
+        DD     GDT
+PROTECT:
 ;{CODE-SEGMENT  10 * CONSTANT CODE-START                          }
         MOV     AX,GDT_SEGMENT ;{ GDT segment}
         MOV     ES,AX
@@ -505,13 +508,10 @@ BMASK   EQU     BLOCKS_IN_USE_MASK
 ;{************************}
 ;____1_____ _SWITCH_1_({
         JMPHERE_FROM_REAL
-         JMP     BOOTUP
-GDTLOAD DW     GDTLEN
-        DD     GDT
 });_END___1__({ _SWITCH_1_})
 
 ; ########################################################################################
-;                       FORTH GLUE CODE (optional)
+;                       FORTH GLUE CODE (optional, except for the jump)
 ; ########################################################################################
 
 ;____1_____ _HOSTED_LINUX_1_({
@@ -519,6 +519,14 @@ GDTLOAD DW     GDTLEN
 });_END___1__({ _HOSTED_LINUX_1_})
 
 ;____1_____ _LINUX_C_1_({
+SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
+RETURN_LINUX:
+        MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
+        MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
+        MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
+        MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
+        MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
+        RET     ; Assuming the old stack has not been disturbed.It shouldn't.
 figforth:
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
         MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
@@ -528,27 +536,18 @@ figforth:
         LEA     ECX,[ESP+CELLS(1)]
         XOR     EAX,EAX
         CMP     EAX,_CELL_PTR[ECX]
-        JNZ     ENDIF1
-        JMP     BOOTUP                  ; Cold start
-ENDIF1:
+        JZ     ENDIF1
         JMP     BOOTUP+CELLS(2)         ; Warm start
+ENDIF1:
 
-RETURN_LINUX:
-        MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
-        MOV     EBP,_CELL_PTR[SAVE_LINUX+CELLS(1)]
-        MOV     ESI,_CELL_PTR[SAVE_LINUX+CELLS(2)]
-        MOV     EDI,_CELL_PTR[SAVE_LINUX+CELLS(3)]
-        MOV     EBX,_CELL_PTR[SAVE_LINUX+CELLS(4)]
-        RET     ; Assuming the old stack has not been disturbed.It shouldn't.
-SAVE_LINUX:     DD      0,0,0,0,0 ; SP, BP, SI, DI, BX
 });_END___1__({_LINUX_C_1_})
 
 ;____1_____ _LINUX_N_1_({
 figforth:
 _start:
-        JMP     BOOTUP                  ; Cold start
 });_END___1__({_LINUX_N_1_})
 
+        JMP     BOOTUP                  ; Cold start
 
 ; ########################################################################################
 ;                       FORTH ITSELF (entry point : BOOTUP)
