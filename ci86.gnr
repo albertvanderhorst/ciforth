@@ -1205,7 +1205,11 @@ worddocsafe( {DENOTATIONS},{0},{den_zero}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({0}) .},
 {},
 {{048 .},{48 },
-{: GS1 058 ; GS1 .},{58 }}, enddoc)
+{: GS1 058 ; GS1 .},{58 }},
+{{0000,0048 .},{48 },
+{: GS1 0000,058 ; GS1 .},{58 }},
+{{10048. D.},{10048 }},
+enddoc)
 HEADER({0},{DEN0},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({1},{DEN1},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({2},{DEN2},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
@@ -3604,7 +3608,10 @@ HEADER({DECIMAL},{DECA},{DOCOL})
 worddocsafe( {DEFINING~},{(;CODE)},{paren_semicolon_code},{},{C},
 {The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
 field of the most recently defined word to point to the following
-machine code sequence.},{{;CODE}},
+machine code sequence. _VERBOSE_({{This is not needed for words made by
+forthcode({(CREATE)}) as it defaults to creating assembler words.}})
+},
+{{ (CREATE)}, {;CODE}},
 {{." No test"},{No test} },
 enddoc)
 HEADER({(;CODE)},{PSCOD},{DOCOL})
@@ -3632,7 +3639,7 @@ jumping to the code after forthsamp({nnnn}) .
 Because of intimate relation to the
 assembler, it is present in loadable form in the screens file
 forthfile({BLOCKS.BLK}) .},
-{{(;CODE)},{LOAD}},
+{{(;CODE)},{LOAD},{:}},
 {{." Not present"},{Not present} },
 enddoc)
 ;
@@ -4089,12 +4096,15 @@ input source. In ciforth this word works also in interpret mode.},
 HEADER({[CHAR]},{BCHAR},{DOCOL}, _VAR_FIELD({LCHAR}), B_IMMED)
 ;
 worddocsafe( {FORMATTING~},{(NUMBER)},{paren_number},{ --- d1},{},
-{Convert the ascii text at the forthdefi({current input source}) with regard
-to forthcode({BASE}) . The new value is accumulated into double
-number forthvar({d1}) , being left. The only non-digit
-acceptable is a decimal point, that signifies that the input is
-to be considered as a double. If the first unconvertable digit
-is not a blank, this is an error. },
+{Convert the ascii text at the forthdefi({current input
+source}) with regard to forthcode({BASE}) . The new value is
+accumulated into double number forthvar({d1}) , being left. A
+decimal point, anywhere, signifies that the input is to be
+considered as a double. ISO requires it to be at the end of the
+number. ciforth allows any number of decimal points with the
+same meaning. ciforth also allows any number of comma's that
+are just ignored, to improve readibility. If the first
+unconvertable digit is not a blank, this is an error. },
 {{NUMBER},{?BLANK}},
 {{ (NUMBER) 1324 D.},{1324} },
 }, enddoc)
@@ -4103,8 +4113,13 @@ HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, DPL, STORE
 NPNUM1:  DC      INBRS   ;{ BEGIN}
         DC      LDUP, LIT, ADOT, EQUAL
-        _0BRANCH(NPNUM2) ;{ IF}
+        _0BRANCH(NPNUM2A) ;{ IF}
         DC      DROP, DPL, STORE, ZERO
+        _BRANCH(NPNUM3) ;{ ELSE}
+NPNUM2A:
+        DC      LDUP, LIT, ',', EQUAL
+        _0BRANCH(NPNUM2) ;{ IF}
+        DC      TDROP, ZERO
         _BRANCH(NPNUM3) ;{ ELSE}
 NPNUM2:
         DC      LDUP, QBL
@@ -4453,14 +4468,15 @@ IDDOT1:
         DC      SEMIS
 ;
 worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc --},{},
-{This is the basis for all defining words.
-It lays down the string forthvar({sc}) in the dictionary, then
-creates a dictionary entries with that string
-as the namefield. It is linked into the forthcode({CURRENT}) word list.
-The code field and data field both
-point to the area owned by this header, i.e. immediately following the
-completed header.
-},
+{This is the basis for all defining words. It lays down the
+string forthvar({sc}) in the dictionary, then creates a
+dictionary entries with that string as the namefield. It is
+linked into the forthcode({CURRENT}) word list. The code field
+and data field both point to the area owned by this header,
+i.e. immediately following the completed header{}_VERBOSE_({{as
+appriopriate for a low level (assembler) definition}}). The
+flag field is empty{}_VERBOSE_({{, so not forthcode({SMUDGE})
+d}}). },
 {{CREATE}},
 {{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
 enddoc)

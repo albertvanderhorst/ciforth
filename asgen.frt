@@ -90,32 +90,33 @@
 : @+ >R R@ CELL+ R> @ ; ( Fetch from ADDRES. Leave incremented ADDRESS and DATA )
 : !+ >R R@ ! R> CELL+ ; ( Store DATA to ADDRES. Leave incremented ADDRESS)
 ( Fetch from decremented ADDRES. Leave DATA and ADDRESS)
-: @- 0 CELL+ - >R R@ @ R>  ; 
+: @- 0 CELL+ - >R R@ @ R>  ;
 ( CHAR - CONSTANT &-     CHAR ~ CONSTANT &~                             )
 CREATE TABLE 1 , 1 , ( x TABLE + @ yields $100^[-x mod 4] )
 ( Rotate X by I bytes left leaving X' Left i.e. such as it appears in )
 ( memory! Not as printed on a big endian machine! )
 : ROTLEFT TABLE + @ UM* OR ;   ( aqa " 8 * LSHIFT" on bigendian. )
 
-( ------------- UTILITIES, SYSTEM DEPENDANT ----------------------------) 
+( ------------- UTILITIES, SYSTEM DEPENDANT ----------------------------)
 VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( We use the abstraction of a dea "dictionary entry address". aqa "xt" )
-: % [COMPILE] ' ;   ( Return the DEA from "word". )
+( Return the DEA from "word". )
+ALSO DENOTATION : % POSTPONE ' ; PREVIOUS
 : %ID. ID. ;   ( Print a definitions name from its DEA.)
-: %>BODY >BODY ; ( From DEA to the DATA field of a created word )
-: %BODY> BODY> ; ( Reverse of above)
-: %>CODE >PFA ; ( From DEA to the DOES> pointer )
+: %>BODY >CFA >BODY ; ( From DEA to the DATA field of a created word )
+: %BODY> BODY> CFA> ; ( Reverse of above)
+: %>CODE >PHA ; ( From DEA to the DOES> pointer for a ``DOES>'' word )
 ( Leave for DEA : it IS to be ignored. This is used for supressing the  )
 ( bare bones of the sib mechanism in i586.                              )
 : IGNORE? >NFA @ CELL+ C@ &~ = ;
 
 : (>NEXT%) >LFA @ ; ( Given a DEA, return the next DEA. )
 ( For a DEA as returned from (>NEXT%} : it IS the end, not a real dea.  )
-: VOCEND? >NFA @ 0= ;
+: VOCEND? >LFA @ 0= ;
 ( As (>NEXT%} but skip holes, i.e. words with names starting in ``-''   )
 : >NEXT% BEGIN  (>NEXT%) DUP >NFA @ CELL+ C@ &- - UNTIL ;
 ( Leave the first DEA of the assembler vocabulary.                      )
-: STARTVOC ' ASSEMBLER >DDEA >LFA @ ;
+: STARTVOC ' ASSEMBLER >WID >LFA @ ;
 
 ( Build: for "word" remember type -- creation class -- exemplified by   )
 ( DOES> address of the code to be executed.                             )
@@ -128,25 +129,25 @@ VOCABULARY ASSEMBLER IMMEDIATE DEFINITIONS HEX
 ( Also needed : ?ERROR                                                  )
 (   `` : ?ERROR DROP DROP ; '' defeats all checks.                      )
 
-( ------------- UTILITIES, SYSTEM INDEPENDANT ----------------------------) 
+( ------------- UTILITIES, SYSTEM INDEPENDANT ----------------------------)
 (   The FIRST bitset is contained in the SECOND one, leaving it IS      )
 : CONTAINED-IN OVER AND = ;
-CREATE TABLE 0 , FF , FFFF , FFFFFF , FFFFFFFF ,  
-( From a MASK leave only SOME first bytes up, return IT ) 
-( First means lower in memory, this looks different if printed on b.e.) 
+CREATE TABLE 0 , FF , FFFF , FFFFFF , FFFFFFFF ,
+( From a MASK leave only SOME first bytes up, return IT )
+( First means lower in memory, this looks different if printed on b.e.)
 : FIRSTBYTES CELLS TABLE + @ AND ;
 
-( ------------- ASSEMBLER, BOOKKEEPING ----------------------------) 
+( ------------- ASSEMBLER, BOOKKEEPING ----------------------------)
 ( The bookkeeping is needed for error detection and disassembly.        )
 VARIABLE TALLY-BI  ( Bits that needs fixed up)
 VARIABLE TALLY-BY  ( Bits represent a commaer that is to be supplied)
 VARIABLE TALLY-BA  ( State bits, bad if two consequitive bits are up)
-VARIABLE PREVIOUS ( Previous comma, or zero)
+VARIABLE OLDCOMMA ( Previous comma, or zero)
 VARIABLE ISS  ( Start of current instruction)
 VARIABLE ISL  ( Lenghth of current instruction)
 
 ( Initialise ``TALLY''                                                  )
-: !TALLY   0 TALLY-BI !   0 TALLY-BY !   0 TALLY-BA !  0 PREVIOUS ! ;
+: !TALLY   0 TALLY-BI !   0 TALLY-BY !   0 TALLY-BA !  0 OLDCOMMA ! ;
 ( Return: instruction IS complete, or not started)
 : AT-REST? TALLY-BI @ 0=   TALLY-BY @ 0=  AND ;
 : BADPAIRS? DUP 2 * AND AAAAAAAA AND ; ( For N : it CONTAINS bad pairs)
@@ -156,23 +157,23 @@ VARIABLE ISL  ( Lenghth of current instruction)
 DECIMAL
 ( Generate errors. None have net stack effects, such that they may be   )
 ( replaced by NULL definitions.                                         )
-: CHECK26 AT-REST? 0= 26 ?ERROR ;  ( Error at postit time )             
-: CHECK32 BAD? 32 ?ERROR ; ( Always an error )                 
+: CHECK26 AT-REST? 0= 26 ?ERROR ;  ( Error at postit time )
+: CHECK32 BAD? 32 ?ERROR ; ( Always an error )
 ( Generate error for fixup, if for the BI, some of the the     )
 ( BITS would stick out it. Leave MASK and BITS . Programming error!     )
-: CHECK31 2DUP SWAP CONTAINED-IN 0= 31 ?ERROR ;                            
+: CHECK31 2DUP SWAP CONTAINED-IN 0= 31 ?ERROR ;
 ( Generate error for postit, if for the inverted BI , some of the the   )
 ( BITS would stick out it. Leave MASK and BITS . Programming error!     )
-: CHECK33 2DUP SWAP INVERT CONTAINED-IN 0= 31 ?ERROR ;                            
+: CHECK33 2DUP SWAP INVERT CONTAINED-IN 0= 31 ?ERROR ;
 ( BITS would stick out it. Leave MASK and BITS . Programming error!     )
 ( Generate error on data for postit/fixup, if some BITS to fill in      )
 ( are already in the MASK. Leave BITS and MASK.                         )
-: CHECK28 2DUP AND 28 ?ERROR ;                                          
+: CHECK28 2DUP AND 28 ?ERROR ;
 ( Generate error on data for commaer, if the BITS to reset are not      )
 ( present in the MASK. Leave BITS and MASK.                             )
 : CHECK29 2DUP OR -1 - 29 ?ERROR   ;
 ( Generate error if COMMAMASK is not in ascending order. Leave IT.      )
-: CHECK30 DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
+: CHECK30 DUP OLDCOMMA @ < 30 ?ERROR DUP OLDCOMMA ! ;
 HEX
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R@ @  CHECK28 OR R> ! ;
@@ -180,7 +181,7 @@ HEX
 ( Reset bits of DATA into ADDRESS. If bits were already down it's wrong )
 : AND! >R INVERT R@ @ CHECK29 AND R> ! ;
 
-( ------------- ASSEMBLER, DEFINING WORDS    ----------------------------) 
+( ------------- ASSEMBLER, DEFINING WORDS    ----------------------------)
 
 ( Common fields in the defining words for posits fixups and commaers.   )
 ( All leave a single ADDRESS.                                           )
@@ -196,9 +197,9 @@ HEX
 : >CNT %>BODY 4 CELLS + ;   ( `HERE' advances with count )
 : >DIS %>BODY 5 CELLS + ;   ( disassembler only for COMMA)
 
-( Adjust `HERE' for actual instruction length after `DO-POST' did `,' ) 
-: CORRECT,- ISL @   1 CELLS -  ALLOT ; 
-: !POSTIT  HERE ISS !  0 PREVIOUS ! ;  ( Initialise in behalf of postit )
+( Adjust `HERE' for actual instruction length after `DO-POST' did `,' )
+: CORRECT,- ISL @   1 CELLS -  ALLOT ;
+: !POSTIT  HERE ISS !  0 OLDCOMMA ! ;  ( Initialise in behalf of postit )
 ( Bookkeeping for a postit using a pointer to the BIBYBA )
 ( information, can fake a postit in disassembling too                   )
 : TALLY:,   @+ TALLY-BI !    @+ TALLY-BY !    @+ TALLY-BA ! @ ISL ! ;
@@ -207,26 +208,26 @@ HEX
     @+ ,   TALLY:,   CORRECT,- ;
 ( Define an instruction by BA BY BI and the OPCODE                      )
 ( The `BI' information is what is left to be filled in cf. fixups       )
-IS-A IS-1PI : 1PI  CHECK33 CREATE , , , , 1 , DOES> REMEMBER POSTIT ; 
+IS-A IS-1PI : 1PI  CHECK33 CREATE , , , , 1 , DOES> REMEMBER POSTIT ;
 IS-A IS-2PI : 2PI  CHECK33 CREATE , , , , 2 , DOES> REMEMBER POSTIT ;
 IS-A IS-3PI : 3PI  CHECK33 CREATE , , , , 3 , DOES> REMEMBER POSTIT ;
 : IS-PI  >R R@ IS-1PI R@ IS-2PI R@ IS-3PI OR OR R> DROP ;
 
 ( Bookkeeping for a fixup using a pointer to the BIBYBA information,    )
 ( can fake a fixup in disassembling too.                                )
-: TALLY:|   @+ TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;  
+: TALLY:|   @+ TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;
 ( Fix up the instruction using a pointer to DATA. )
 : FIXUP>   @+ ISS @ OR!   TALLY:|   CHECK32 ;
 ( Define an fixup by BA BY BI and the FIXUP bits )
 ( One size fits all, because of the or character of the operations. )
 IS-A IS-xFI   : xFI   CHECK31 CREATE , , , , DOES> REMEMBER FIXUP> ;
 
-( Rotate the MASK etc from a fixup-from-reverse into a NEW mask fit ) 
+( Rotate the MASK etc from a fixup-from-reverse into a NEW mask fit )
 ( for using from the start of the instruction. We know the length!  )
 : CORRECT-R 0 CELL+ ISL @ - ROTLEFT ;
 ( Bookkeeping for a fixup-from-reverse using a pointer to the BIBYBA    )
 ( information, can fake a fixup in disassembling too.                   )
-: TALLY:|R  @+ CORRECT-R TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ; 
+: TALLY:|R  @+ CORRECT-R TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;
 ( Fix up the instruction from reverse using a pointer to DATA. )
 : FIXUP<   @+ CORRECT-R ISS @ OR!   TALLY:|R  CHECK32 ;
 ( Define a fixup-from-reverse by BA BY BI and the FIXUP bits )
@@ -235,16 +236,16 @@ IS-A IS-xFIR   : xFIR   CHECK31 CREATE , , , , DOES> REMEMBER FIXUP< ;
 
 ( Bookkeeping for a commaer using a pointer to the BIBYBA information.  )
 ( Not used by the disassembler.                                         )
-: TALLY:,, CELL+   @+ CHECK30 TALLY-BY AND!   @ TALLY-BA OR!U ;  
+: TALLY:,, CELL+   @+ CHECK30 TALLY-BY AND!   @ TALLY-BA OR!U ;
 : COMMA @+ >R  TALLY:,,  CHECK32   R> EXECUTE ;
 ( Build with an disassembly ROUTINE, with the LENGTH to comma, the BA   )
 ( BY information and the ADDRESS that is executing the commaer          )
 IS-A  IS-COMMA   : COMMAER CREATE  , 0 , , , , , DOES> REMEMBER COMMA ;
 
-( ------------- ASSEMBLER, SUPER DEFINING WORDS ----------------------) 
+( ------------- ASSEMBLER, SUPER DEFINING WORDS ----------------------)
 
 CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
-( Fill in the tally prototype with BA BY BI information )           
+( Fill in the tally prototype with BA BY BI information )
 : T! PRO-TALLY !+ !+ !+ DROP ;
 ( Get the data from the tally prototype back BA BY BI )
 : T@ PRO-TALLY 3 CELLS +  @- @- @- DROP ;
@@ -254,7 +255,7 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 : 2FAMILY,    0 DO   DUP >R T@ R> 2PI   OVER + LOOP DROP DROP ;
 : 3FAMILY,    0 DO   DUP >R T@ R> 3PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
-: xFAMILY|R 0 DO DUP >R T@ R> xFIR OVER + LOOP DROP DROP ; 
+: xFAMILY|R 0 DO DUP >R T@ R> xFIR OVER + LOOP DROP DROP ;
 
 ( ############### PART II DISASSEMBLER #################################### )
 
@@ -264,7 +265,7 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 ( bookkeeping. They are similar but disassemblers take one more aspect  )
 ( into account, a piece of actual code. They do not backtrack but fail. )
 
-( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------) 
+( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
 ( Build a set "x" with X items. )
 : SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
@@ -272,21 +273,21 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 : SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
 : .SET   @+ SWAP DO I . 0 CELL+ +LOOP ;   ( Print non-empty SET )
 
-( ------------- DATA STRUCTURES -----------------------------------------) 
+( ------------- DATA STRUCTURES -----------------------------------------)
 12 SET DISS          ( A row of dea's representing a disassembly. )
 : !DISS DISS !SET ;
 : .DISS-AUX DISS @+ SWAP DO
     I @ DUP IS-COMMA IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
 ( ' DISS can be redefined to generate testsets)
-VARIABLE 'DISS    ' .DISS-AUX 'DISS ! 
+VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
 : DISS- 0 CELL+ NEGATE DISS +! ; ( Discard last item of `DISS' )
 
-( ------------- TRYERS --------------------------------------------------) 
- 
-( These tryers are quite similar:                               
+( ------------- TRYERS --------------------------------------------------)
+
+( These tryers are quite similar:
 ( if the DEA on the stack is of the right type and if the precondition  )
 ( is fullfilled it does the reassuring actions toward the tally as with )
 ( assembling and add the fixup/posti/commaer to the disassembly struct. )
@@ -310,7 +311,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
    THEN
 ;
 : TRY-xFIR
-   DUP IS-xFIR IF     
+   DUP IS-xFIR IF
    DUP >BI @ CORRECT-R TALLY-BI @ CONTAINED-IN IF
        DUP >BI TALLY:|R
        DUP +DISS
@@ -320,14 +321,14 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 : TRY-COMMA
    DUP IS-COMMA IF
    DUP >BY @ TALLY-BY @ CONTAINED-IN IF
-       DUP >BI TALLY:,, 
+       DUP >BI TALLY:,,
        DUP +DISS
    THEN
    THEN
 ;
 
 ( Generate bookkeeping such as to correspond with `DISS'.               )
-: REBUILD              
+: REBUILD
     !TALLY
     DISS? IF
         DISS @+ SWAP !DISS DO  ( Get bounds before clearing)
@@ -340,7 +341,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 ( incorrect --. Replace DEA with the proper DEA to inspect from here.   )
 : BACKTRACK
 (   ." BACKTRACKING"                                                    )
-    DROP DISS @ @- DISS ! 
+    DROP DISS @ @- DISS !
 (   DROP DISS @ 0 CELL+ - @                                             )
     >NEXT%
 (   DISS-                                                               )
@@ -361,10 +362,10 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
     THEN
 ;
 
-     % RESULT +DISS                                                      
+     % RESULT +DISS
 ( Try to expand the current instruction in `DISS' by looking whether    )
 ( DEA fits. Leave the NEXT dea.                                         )
-: SHOW-STEP    
+: SHOW-STEP
         TRY-PI TRY-xFI TRY-xFIR TRY-COMMA
         RESULT
         >NEXT%
@@ -377,7 +378,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 : SHOW-ALL
     !DISS   !TALLY
     STARTVOC BEGIN
-       SHOW-STEP       
+       SHOW-STEP
     DUP VOCEND? UNTIL DROP
 ;
 
@@ -385,7 +386,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 : SHOW-OPCODES
     !DISS   !TALLY
     STARTVOC BEGIN
-       DUP IS-PI IF DUP %ID. THEN >NEXT% 
+       DUP IS-PI IF DUP %ID. THEN >NEXT%
     DUP VOCEND? UNTIL DROP
 ;
 
@@ -397,7 +398,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
      OVER DISS CELL+ @ - OVER VOCEND? OR UNTIL DROP DROP
 ;
 
-( ------------- DISASSEMBLERS ------------------------------------------------) 
+( ------------- DISASSEMBLERS ------------------------------------------------)
 VARIABLE POINTER
 HERE POINTER !
 
@@ -418,7 +419,7 @@ HERE POINTER !
         DUP >BI TALLY:,
         DUP +DISS
         POINTER @ ISS !
-        DUP >CNT @ POINTER +!   
+        DUP >CNT @ POINTER +!
     THEN
     THEN
     THEN
@@ -436,7 +437,7 @@ HERE POINTER !
    THEN
 ;
 : DIS-xFIR
-   DUP IS-xFIR IF     
+   DUP IS-xFIR IF
    DUP >BI @ CORRECT-R   TALLY-BI @ CONTAINED-IN IF
    DUP >BI @ CORRECT-R   INSTRUCTION AND   OVER >DATA @ CORRECT-R = IF
    DUP >BA @  COMPATIBLE? IF
@@ -452,7 +453,7 @@ HERE POINTER !
    DUP IS-COMMA IF
    DUP >BY @ TALLY-BY @ CONTAINED-IN IF
    DUP >BA @  COMPATIBLE? IF
-       DUP >BI TALLY:,,     
+       DUP >BI TALLY:,,
        DUP +DISS
    THEN
    THEN
@@ -476,13 +477,13 @@ HERE POINTER !
 ( Print the disassembly `DISS'                                          )
 : .DISS   DISS @+ SWAP DO
     I @ DUP IS-COMMA 0= IF   %~ID.   ELSE   .COMMA   THEN
- 0 CELL+ +LOOP 
+ 0 CELL+ +LOOP
 ;
 
 ( Dissassemble one instruction from `POINTER' starting at DEA. )
 ( Based on what is currently left in `TALLY!' )
 ( Leave `POINTER' pointing after that instruction. )
-: ((DISASSEMBLE)) 
+: ((DISASSEMBLE))
     POINTER @ >R
     ( startdea -- ) BEGIN
         DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
@@ -493,7 +494,7 @@ HERE POINTER !
       R> DROP
       .DISS
     ELSE
-      R> COUNT . POINTER ! ."  C, " 
+      R> COUNT . POINTER ! ."  C, "
     THEN
 ;
 
@@ -521,13 +522,17 @@ HERE POINTER !
 : REJECT> DUP >BI ISS @ @ AND SWAP >DATA @ = 27 ?ERROR ;
 
 ( ************************* )
-: ;CODE
-?CSP   POSTPONE (;CODE)   POSTPONE [   POSTPONE ASSEMBLER
+( Define "word" using assembly instructions up till ``C;'' )
+( One could put a ``SMUDGE'' in both. )
+: CODE
+    ?EXEC (WORD) (CREATE) POSTPONE ASSEMBLER !TALLY !CSP
 ; IMMEDIATE
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !TALLY !CSP ; IMMEDIATE
-: C; CURRENT @ CONTEXT ! ?EXEC CHECK26 CHECK32 SMUDGE ; IMMEDIATE
+( Close an assembly definition: restore and check.)
+: C;
+    ?CSP ?EXEC CHECK26 CHECK32 POSTPONE PREVIOUS
+; IMMEDIATE
+( Like ``DOES>'' but assembly code follows, closed by ``C;'' )
+: ;CODE
+    ?CSP   POSTPONE (;CODE)   POSTPONE [   POSTPONE ASSEMBLER
+; IMMEDIATE
 ASSEMBLER DEFINITIONS
-
-
-
-

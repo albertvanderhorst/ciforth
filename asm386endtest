@@ -12,9 +12,11 @@
 # assembly2           The output after assembly + disassmbly of assembly1
 # temp2               Raw output of test2
 # hex2                The raw data whose disassembly would be assembly2
-# assdiff             The difference between assembly1 and assembly2 
-# hexdiff             The difference between hex1 and hex2 
-
+# assdiff             The difference between assembly1 and assembly2
+#                       should be empty
+# hexdiff             The difference between hex1 and hex2
+# hex2.cmp            An independant disassembly of hex2 (nasm) to be compared
+#                       with assembly1 . (Has been done once by hand.
 
 cat >/tmp/prelude1<<\%%
 ( ( )
@@ -30,19 +32,19 @@ cat >/tmp/prelude1<<\%%
 cat >/tmp/postlude1<<\%%
 ( Install a disassembly shower that insert random data for the commaers. )
 ( and preceede each line with a random number )
-: .DISS-RAND 
+: .DISS-RAND
 RAND 0 8 D.R SPACE
 DISS @+ SWAP DO
     I @ DUP IS-COMMA IF RAND U. THEN ID.
  0 CELL+ +LOOP CR ;
 ' .DISS-RAND CFA 'DISS !
 
-." TEST STARTS HERE" CR SHOW-ALL  CR ." TEST STOPS HERE" CR 
+." TEST STARTS HERE" CR SHOW-ALL  CR ." TEST STOPS HERE" CR
 ( Now get Linux to snip and sort this and feed it to the next part)
-BYE 
+BYE
 %%
 cat >/tmp/test1<<\%%
-!TALLY 
+!TALLY
 HEX
 10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
 HERE
@@ -60,7 +62,7 @@ grep -v 'D0. .*[5D] SIB,,' |
 cat >>/tmp/test1
 
 cat >>/tmp/test1<<\%%
-." TEST STARTS HERE" HERE 2DUP OVER - DUMP 
+HERE ." TEST STARTS HERE" 2DUP OVER - DUMP
 ." TEST MIDDLE HERE" CR DIS-RANGE CR ." TEST STOPS HERE"
 BYE
 %%
@@ -72,15 +74,15 @@ sed '1,/TEST STARTS HERE/d' |
 sed '/TEST STOPS HERE/,$d' |
 tee /tmp/temp1 |
 sed '1,/TEST MIDDLE HERE/d' |
-cat > /tmp/assembly1  
+cat > /tmp/assembly1
 
 # Do not need these anymore, or so we hope
 echo this is wrong
-grep  '^\['      /tmp/assembly1     
-grep  '\[MEM'    /tmp/assembly1  
+grep  '^\['      /tmp/assembly1
+grep  '\[MEM'    /tmp/assembly1
 echo this was wrong
 
-cat /tmp/temp1 | 
+cat /tmp/temp1 |
  sed '/TEST MIDDLE HERE/,$d' |
  sed 's/^[0-9A-F \.]*: /DB /' |
  sed 's/ |.*$//'             |
@@ -90,7 +92,7 @@ cat /tmp/temp1 |
 
 
 cat >/tmp/test2<<\%%
-!TALLY 
+!TALLY
 HEX
 10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
 HERE
@@ -99,7 +101,7 @@ HERE
 cat /tmp/assembly1 >> /tmp/test2
 
 cat >>/tmp/test2<<\%%
-." TEST STARTS HERE" HERE 2DUP OVER - DUMP 
+HERE ." TEST STARTS HERE" 2DUP OVER - DUMP
 ." TEST MIDDLE HERE" CR DIS-RANGE CR ." TEST STOPS HERE"
 BYE
 %%
@@ -110,9 +112,9 @@ lina |
 sed '1,/TEST STARTS HERE/d' |
 sed '/TEST STOPS HERE/,$d' |
 tee /tmp/temp2 |
-sed '1,/TEST MIDDLE HERE/d' > /tmp/assembly2 
+sed '1,/TEST MIDDLE HERE/d' > /tmp/assembly2
 
-cat /tmp/temp2 | 
+cat /tmp/temp2 |
  sed '/TEST MIDDLE HERE/,$d' |
  sed 's/^[0-9A-F \.]*: /DB /' |
  sed 's/ |.*$//'             |

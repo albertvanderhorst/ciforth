@@ -115,7 +115,7 @@ testas86: asgen.frt asi86.frt testset8086 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.]*://' >$@       ;\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
     diff -w $@ testset8086 >$@.diff ;\
     diff $@.diff testresults
 
@@ -123,7 +123,7 @@ testas386: asgen.frt asi586.frt testset386 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.]*://' >$@       ;\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
     diff -w $@ testset386 >$@.diff ;\
     diff $@.diff testresults
 
@@ -133,7 +133,7 @@ testas386a: asgen.frt asi586.frt testset386a ; \
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
     sed '/^OK$$/d' |\
-    sed 's/^[0-9A-F \.]*://' >$@       ;\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
     diff -w $@ testset386a >$@.diff ;\
     diff $@.diff testresults
 
@@ -141,7 +141,7 @@ testas80: asgen.frt as80.frt testset8080 ; \
     (echo 8 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.]*://' >$@       ;\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
     diff -w $@ testset8080 >$@.diff ;\
     diff $@.diff testresults
 
@@ -198,9 +198,9 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	ssort $(@:%.html=%.mig) -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s |\
 	m4 indexhtml.m4 - > $@
 	cat $(@:%.html=%.mig)|\
-	sed -e 's/@@/@/g'                |\
+	sed -e 's/@@/@/g'               |\
 	sed -e s'/worddocsafe/worddoc/g'  |\
-	sed -e 's/</\&lt\;/g'        > temp.html
+	sed -e 's/</\&lt\;/g'   > temp.html
 	( \
 	    cat namescooked.m4 indexhtml.m4 ; \
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
@@ -225,9 +225,9 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 names
 
 cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
 	m4 lina.cfg manual.m4 namescooked.m4 cifgen.mi |\
-	sed -e 's/_lbracket_/@{/g'                   |\
-	sed -e 's/_rbracket_/@}/g'                   |\
-	sed -e 's/_comat_/@@/g'                 > $@
+	sed -e 's/_lbracket_/@{/g'                 |\
+	sed -e 's/_rbracket_/@}/g'                 |\
+	sed -e 's/_comat_/@@/g'          > $@
 
 TESTLINA= \
 test.m4 \

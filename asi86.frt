@@ -3,7 +3,7 @@
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
 ( The patch ofr the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
-: lsbyte, 0 100 U/ SWAP C, ;
+: lsbyte, 0 100 UM/MOD SWAP C, ;
 : W, lsbyte, lsbyte, DROP ;
 : L, lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
 : IS, C, ;
@@ -11,21 +11,21 @@
 ( bytes this trick allows to debug -- but not run -- 8086 assembler     )
 ( of 32 bits system. The pattern 00 01 {$100} to fixup the last bit     )
 ( becomes 00 00 00 01 {$1000000} on a 16 bit system                     )
-: 0s 2 ROTLEFT ;  ." WARNING : testing version on 8086"                 
+: 0s 2 ROTLEFT ;  ." WARNING : testing version on a 32 bit machine"
 ( By defining 0s as a NOP you get a normal 8086 version                 )
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
 ( right order                                                           )
-0 0 CELL+  0 8000 'O ,  CFAO  COMMAER (RX,) ( cell relative to IP )
-0 1        0 4000 'O C, CFAO  COMMAER (RB,) ( byte relative to IP )
-0 2        0 2000 'O W, CFAO  COMMAER SG,   (  Segment: WORD      )
-0 1        0 1000 'O C, CFAO  COMMAER P,    ( port number ; byte     )
-0 1        0  800 'O C, CFAO  COMMAER IS,   ( immediate byte data, obligatory size)
-0 0 CELL+  2  400 'O ,  CFAO  COMMAER IX,   ( immediate data : cell)
-0 1        1  400 'O C, CFAO  COMMAER IB,   ( immediate byte data)
-0 0 CELL+  8  200 'O ,  CFAO  COMMAER X,    ( immediate data : address/offset )
-0 1        4  200 'O C, CFAO  COMMAER B,    ( immediate byte : address/offset )
-0 2        0  100 'O W, CFAO  COMMAER W,    ( obligatory word     )
+0 0 CELL+  0 8000 ' ,  >CFA  COMMAER (RX,) ( cell relative to IP )
+0 1        0 4000 ' C, >CFA  COMMAER (RB,) ( byte relative to IP )
+0 2        0 2000 ' W, >CFA  COMMAER SG,   (  Segment: WORD      )
+0 1        0 1000 ' C, >CFA  COMMAER P,    ( port number ; byte     )
+0 1        0  800 ' C, >CFA  COMMAER IS,   ( immediate byte data, obligatory size)
+0 0 CELL+  2  400 ' ,  >CFA  COMMAER IX,   ( immediate data : cell)
+0 1        1  400 ' C, >CFA  COMMAER IB,   ( immediate byte data)
+0 0 CELL+  8  200 ' ,  >CFA  COMMAER X,    ( immediate data : address/offset )
+0 1        4  200 ' C, >CFA  COMMAER B,    ( immediate byte : address/offset )
+0 2        0  100 ' W, >CFA  COMMAER W,    ( obligatory word     )
 ( Bits in TALLY  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
 (                4 OFFSET   DB|        8 ADDRESS      DW|               )
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
@@ -105,7 +105,7 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 00 00 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
 02 00 DF02 08C 2PI MOV|SG,
 
-00 00 10002 0s 00 0s xFIR 1|   
+00 00 10002 0s 00 0s xFIR 1|
 00 800 10002 0s 02 0s xFIR V|
 00 0 1C703 T!
 (    0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,         )
@@ -132,11 +132,11 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may always want to use these instead of (RB,)
-    : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;                    
+    : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;
 (   : RW, ISS @ - (RW,} ;      : RL, ISS @ - (RL,} ;                    )
-(   : D0|  'O [BP] REJECT D0|  ;                                         )
-(   : [BP] 'O D0|  REJECT [BP] ;                                         )
-(   : R| 'O LES, REJECT 'O LDS REJECT R| ;                                )
+(   : D0|  ' [BP] REJECT D0|  ;                                         )
+(   : [BP] ' D0|  REJECT [BP] ;                                         )
+(   : R| ' LES, REJECT 'O LDS REJECT R| ;                               )
  ASSEMBLER DEFINITIONS
 (   : NEXT                                                              )
 (        LODS, W1|                                                      )
@@ -144,4 +144,4 @@ A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
 (        JMPO, D0| [BX]                                                 )
 (    ;                                                                  )
 ( ############## 8086 ASSEMBLER POST ################################## )
-CODE JAN MOV|SG, T| ES| R| AX| C;
+( CODE JAN MOV|SG, T| ES| R| AX| C;                                     )
