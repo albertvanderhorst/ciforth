@@ -112,7 +112,6 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 
 \ Irritating exceptions
 0FF '?DUP !SE
-0FF 'DIGIT !SE
 
 \ FILL IN EVERYTHING
 \ Add to an existing pure STACK EFFECT the pure STACK EFFECT. Return the combined
@@ -161,14 +160,25 @@ IMASK    ' (?DO) >FFA  OR!      IMASK    ' LIT >FFA    OR!
 \ Inspect POINTER and XT. If the xt is of a type followed by inline
 \ code advance pointer appropriately. Inspect new POINTER and XT.
 : ?INLINE? >R
-   R@ >FFA @ IMASK AND IF
-    R@ 'LIT = IF CELL+ ELSE $@ + ALIGNED THEN
-   THEN R> ;
+    R@ >FFA @ IMASK AND IF
+        R@ 'LIT = OVER @ 0< OR IF   \ In line literal or back jump.
+            CELL+
+        ELSE
+            $@ + ALIGNED
+        THEN
+    THEN R> ;
+
+CREATE STOPPERS HERE 0 ,
+' (;)        ,          ' (;CODE)    ,          ' DOES>      ,
+HERE OVER - 0 CELL+ / 1- SWAP !
+
+\ The DEA means : we ARE still in a chain.
+: CHAIN? STOPPERS IN-SET? 0= ;
 
 \ To a stack effect BYTE apply a CHAIN of high level code.
 \ Return the resulting stack effect BYTE.
 : ANALYSE-CHAIN
-        BEGIN @+ DUP '(;) <> WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
+        BEGIN @+ DUP ID. DUP CHAIN? WHILE ?INLINE? SWAP >R ADD-SE R> REPEAT 2DROP ;
 
 \ For DEA return the stack effect BYTE.
 \ It must be a high level definition
@@ -180,14 +190,28 @@ IMASK    ' (?DO) >FFA  OR!      IMASK    ' LIT >FFA    OR!
 
 \ For DEA return the stack effect BYTE.
 \ It can be any definition.
-: FIND-SE-ANY DUP >CFA @ DOCOL = IF FIND-SE-DOCOL ELSE
-              DUP >CFA @ DODOES = IF FIND-SE-DODOES ELSE
-              FIND-SE-CODE THEN THEN ;
-
+: FIND-SE-ANY
+    DUP >FFA @ 1 AND IF DROP 0 ELSE     \ Ignore dummy headers
+    DUP >CFA @ DOCOL = IF FIND-SE-DOCOL ELSE
+    DUP >CFA @ DODOES = IF FIND-SE-DODOES ELSE
+    FIND-SE-CODE THEN THEN THEN ;
 
 \ For DEA find the stack effect and fill it in.
 \ It can be any definition.
 : FILL-SE DUP FIND-SE-ANY SWAP !SE ;
+
+\ The number of entries with unknown stack effect.
+VARIABLE #UNKNOWNS
+
+: !UNKNOWNS 0 #UNKNOWNS ! ;
+
+\ For DEA fill in the stack effect if it is not yet known.
+: ?FILL-SE?   DUP ID. CR
+DUP SE@ 0=   IF   1 #UNKNOWNS +!   FILL-SE _   THEN   DROP ;
+
+\ Sweep through the dictionary from WID filling in stack effects.
+\ Fill in ``#UNKNOWNS''.
+: FILL-ALL !UNKNOWNS '?FILL-SE? 'TASK FOR-WORDS ;
 
 13 '(NUMBER) !SE
 DECIMAL
