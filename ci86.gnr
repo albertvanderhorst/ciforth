@@ -4601,7 +4601,11 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 
         DC      COMMA   ; {Name field.}
 
-_SOURCEFIELD_({ DC      BLK, FETCH, COMMA  ; {Source field.}
+_SOURCEFIELD_({
+        DC      BLK, FETCH, LDUP, ZEQU
+        _0BRANCH(CREA2)
+        DC      DROP, LIN, FETCH
+CREA2:  DC      COMMA  ; {Source field.}
 },{dnl})
         DC      RDROP
         DC      SEMIS
@@ -6735,12 +6739,14 @@ worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 fill up forthcode({TIB}) . Normally this means until a
 forthkey({RET}). If the input is redirected (such that reading
 after forthkey({RET}) cannot be prevented)
-forthsamp({REMAINDER 2@}) contains the first part of
-forthcode({TIB}) that has a left over from the previous read.
-After forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
+forthsamp({REMAINDER 2@}) contains the part of
+forthcode({TIB}) that is outside the reach of forthcode({SRC}) ,
+is not consumed nor consumable directly by Forth parsing words,
+such as forthcode({ACCEPT}) or forthcode({WORD}).
+Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
 the characters ready in the input buffer. All characters are
 retained including the forthkey({RET}). The editing functions
-are the same as with forthcode({ACCEPT}).
+are those described by forthcode({ACCEPT}).
 },
 {{ACCEPT},{(ACCEPT)}},
 {
