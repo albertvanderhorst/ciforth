@@ -270,8 +270,8 @@ exchanges all the time, and might as well recode QSORT all the time.
 (The current practice.)
 
 \ Exchange the content at ADDRESS1 and ADDRESS2 over a fixed LENGTH.
-: EXCHANGE 0 ?DO OVER I + C@ >R  OVER I + C@   OVER I + C!
-     OVER I + R> SWAP C! LOOP ;
+: EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
+                   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
 
 This type of code shows the ugly side of Forth. Anyway, let us
 assume that it is a word considered standard, used extensively and
@@ -291,7 +291,8 @@ To my surprise and relief the regression test succeeds.
 
 You might get bored with infinitesimal changes at this point.
 Make no mistake. At the end of the day the code will be seemingly
-unrelated with what we started with.
+unrelated with what we started with in a non-trivial maintenance
+project.
 
 OUR THIRD CHANGE : SIMPLICATION
 
@@ -334,8 +335,6 @@ put back in equivalent code.
 But this is the kind of thing you should do at this point.)
 
 To my surprise and relief the regression test succeeds.
-
-OUR FOURTH CHANGE : vectorisation for <-->
 
 OUR FIRST NO-CHANGE : INDICES
 
@@ -477,7 +476,7 @@ We get then a partitioning like [1,4] [5,10] with the pivot in the first
 paritioning. We ma just leave it at that. Or we may consider the optimisation
 to exchange the pivot with item 4 and have the partitioning [1,3] 4 [5,10].
 
-OUR FIFTH CHANGE: FIXING PRECEEDES
+OUR SECOND NOCHANGE:  FIXING PRECEEDES
 
 Fixing PRECEEDES in the above sense, is not an infinitesimal change to the
 algorithm. It is not a change in the algorithm at all.
@@ -492,50 +491,6 @@ And it dumps core. It crashes.
 
 (No examples, because I didn't actually try this out. Maybe it doesn't
 even crash nicely.)
-
-OUR SIXTH CHANGE: SIMPLIFYING AGAIN  PART I
-
-It looks like it makes no sense to test two times whether the pointer going up
-and the pointer going down has crossed their paths. So we exchange a BEGIN UNTIL
-plus an IF THEN for a BEGIN WHILE REPEAT.
-Somehow the algorithm makes more sense now.
-
-: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  ALIGN-DOWN @ >R ( R: median)
-    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
-    2DUP < WHILE
-         2DUP EXCHANGE  >R CELL+ R> CELL-
-    REPEAT ( lo_1 hi_2 lo_2 hi_1)
-    R> DROP                            ( R: )
-    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
-    ;
-
-To my surprise and relief the regression test succeeds.
-
-OUR SEVENTH CHANGE: SIMPLIFYING AGAIN  PART II
-
-In view of the daring steps we are going to take
-we need not adjust the pointers after an EXCHANGE. That will be
-done in the loop anyway. We can put in that optimisation lateron,
-if it is worthwhile. (It probably is, because it saves two superfluous
-PRECEDES calls.) But we won't just have them around for the moment.
-
-
-: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  ALLIGN-DOWN @ >R  ( R: median)
-    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
-    2DUP < WHILE
-         2DUP EXCHANGE
-    REPEAT ( lo_1 hi_2 lo_2 hi_1)
-    R> DROP                            ( R: )
-    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
-    ;
-
-To my surprise and relief the regression test succeeds.
 
 OUR EIGHT CHANGE: PARTITIONING IN TWO
 
