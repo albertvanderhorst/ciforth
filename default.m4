@@ -27,6 +27,9 @@ dnl If you try to make Forth words with { } your coat is sold.
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
+dnl Run the forth in real mode.
+define( {_REAL_1_}, _no({$0}) )dnl       
+dnl
 dnl Run the forth in protected mode.
 define( {_PROTECTED_1_}, _no({$0}) )dnl       
 dnl

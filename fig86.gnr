@@ -1,6 +1,6 @@
-;               HCC FIG generic 8086 FORTH
-; $Id$
-; Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+;{               HCC FIG generic 8086 FORTH}
+;{ $Id$}
+;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
 ;
 	PAGE  66,106
  TITLE   GENERIC FORTH FOR 8086 $Revision$
@@ -63,98 +63,101 @@ credit notice:
 	       San Carlos, Ca.  94070
 _ENDCOMMENT
 	PAGE
-FIGREL	EQU	2	; FIG RELEASE #
-FIGREV	EQU	0	; FIG REVISION #
-USRVER  EQU     34      ; USER VERSION NUMBER, a digit now
+FIGREL	EQU	2	;{ FIG RELEASE #}
+FIGREV	EQU	0	;{ FIG REVISION #}
+USRVER  EQU     34      ;{ USER VERSION NUMBER, a digit now}
 ;
-;       PROTECTION
-PMASK   EQU     0FFH    ; Allow to access only 256 blocks from OFFSET
+;{       PROTECTION}
+PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFFSET}
 ;
-;	ASCII CHARACTER EQUIVALENTS
+;{	ASCII CHARACTER EQUIVALENTS}
 ;
-ABL	EQU	20H	; SPACE
-ACR	EQU    	0DH	; CR
-ADOT	EQU	2EH	; PERIOD
-BELL	EQU	07H	; ^G
-BSIN	EQU	08H	; INPUT DELETE CHARACTER
-BSOUT	EQU	08H	; OUTPUT BACKSPACE ( ^H )
-LF	EQU 	0AH	; LINE FEED, USED INTERNALLY AS
-			; LINE ENDER
-FF	EQU	0CH	; FORM FEED
+ABL	EQU	20H	;{ SPACE}
+ACR	EQU    	0DH	;{ CR}
+ADOT	EQU	2EH	;{ PERIOD}
+BELL	EQU	07H	;{ ^G}
+BSIN	EQU	08H	;{ INPUT DELETE CHARACTER}
+BSOUT	EQU	08H	;{ OUTPUT BACKSPACE ( ^H )}
+LF	EQU 	0AH	;{ LINE FEED, USED INTERNALLY AS}
+			;{ LINE ENDER}
+FF	EQU	0CH	;{ FORM FEED}
 ;
-;	MEMORY + I/O CONSTANTS
+;{	MEMORY + I/O CONSTANTS}
 ;
-EM	EQU	10000H  ; END OF MEMORY + 1
-NBUF	EQU	2	; NO. OF BUFFERS AKA SCREENS 
-KBBUF	EQU	1024    ;DATA BYTES PER DISK BUFFER
-US	EQU	100H     ; USER VARIABLE SPACE
-RTS	EQU	0A0H	; RETURN STACK & TERM BUFFER
+EM	EQU	10000H  ;{ END OF MEMORY + 1}
+NBUF	EQU	2	;{ NO. OF BUFFERS AKA SCREENS }
+KBBUF	EQU	1024    ;{DATA BYTES PER DISK BUFFER}
+US	EQU	100H     ;{ USER VARIABLE SPACE}
+RTS	EQU	0A0H	;{ RETURN STACK & TERM BUFFER}
 ;
-CO	EQU	KBBUF+8         ; DISK BUFFER + 2 NUMBERS (AT MOST 32 BIT)
-BUF1	EQU	EM-CO*NBUF	; FIRST DISK BUFFER
-STRUSA  EQU     BUF1-US         ; User area
-STRTIB  EQU     STRUSA-RTS      ; Start return stack area
-				; Under this : data stack
-INITR0  EQU     STRUSA         ; Grows down
-INITS0  EQU     STRTIB          ; Growns down
+;____1_____ _REAL_1_({
+BUF1	EQU	EM-(KBBUF+2*2)*NBUF      ;{ FIRST DISK BUFFER}
+STRUSA  EQU     BUF1-US         ;{ User area}
+});_END___1__({ _REAL_1_})
+;____1_____ _PROTECTED_1_({
+STRUSA  EQU     EM-US         ;{ User area at end }
+});_END___1__({ _PROTECTED_1_})
+STRTIB  EQU     STRUSA-RTS      ;{ Start return stack area}
+				;{ Under this : data stack}
+INITR0  EQU     STRUSA         ;{ Grows down}
+INITS0  EQU     STRTIB          ;{ Growns down}
 
 ;____1_____ _USEDOS_1_({
-DRIVE   EQU     0       ; Use floppy A for blocks.
+DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 });_END___1__({_USEDOS_1_})
 
-BPS     EQU     512             ;Bytes/sector, common to all of MSDOS
+BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
 ;
-; PHYSICAL DISK PARAMETERS
-; (not needed for MODERN)
-; (not needed for BOOTHD)
+;{ PHYSICAL DISK PARAMETERS}
+;{ (not needed for MODERN)}
+;{ (not needed for BOOTHD)}
 ;
-; Disk parameters: 
-; HD drive 3" 
-TRKS    EQU     80    ;Number of tracks
-SPT     EQU     18    ;Sectors/track
-HEADS   EQU     2     ;Number of heads 
-NFAT    EQU     2     ; Number of FATS
-SECROOT EQU     0EH   ; Sectors for root directory entry.
-SECFAT  EQU     9     ; Sectors per FAT
-MEDIA   EQU    0F0H   ; Descriptor byte. Anachronism.
+;{ Disk parameters: }
+;{ HD drive 3" }
+TRKS    EQU     80    ;{Number of tracks}
+SPT     EQU     18    ;{Sectors/track}
+HEADS   EQU     2     ;{Number of heads }
+NFAT    EQU     2     ;{ Number of FATS}
+SECROOT EQU     0EH   ;{ Sectors for root directory entry.}
+SECFAT  EQU     9     ;{ Sectors per FAT}
+MEDIA   EQU    0F0H   ;{ Descriptor byte. Anachronism.}
 
 _COMMENT
-; HD drive 5" 
-TRKS    EQU     80      ;Number of tracks
-SPT     EQU     15      ;Sectors/track
-HEADS   EQU     2       ;Number of heads 
-NFAT    EQU     2       ; Number of FATS
-SECROOT EQU     ?       ; Sectors for root directory entry.
-SECFAT  EQU     ?       ; Sectors per FAT
-MEDIA   EQU    F0H      ; Descriptor byte. Anachronism.
+;{ HD drive 5" }
+TRKS    EQU     80      ;{Number of tracks}
+SPT     EQU     15      ;{Sectors/track}
+HEADS   EQU     2       ;{Number of heads }
+NFAT    EQU     2       ;{ Number of FATS}
+SECROOT EQU     ?       ;{ Sectors for root directory entry.}
+SECFAT  EQU     ?       ;{ Sectors per FAT}
+MEDIA   EQU    F0H      ;{ Descriptor byte. Anachronism.}
 _ENDCOMMENT
 
-; Bios specific equates.
-BOOTADDRESS     EQU     07C00H          ; PC jumps to 0:7C00 to boot
-SPDRV   EQU     HEADS*TRKS*SPT    ; sectors/drive
-	; Skip boot sector,fats and root dir and first sector of file.
+;{ Bios specific equates.}
+BOOTADDRESS     EQU     07C00H          ;{ PC jumps to 0:7C00 to boot}
+SPDRV   EQU     HEADS*TRKS*SPT    ;{ sectors/drive}
+	;{ Skip boot sector,fats and root dir and first sector of file.}
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
 _COMMENT
-; Alternative if the disk need not be recognized by MSDOS
-; Usable for generating a bootable floppy simple.
+;{ Alternative if the disk need not be recognized by MSDOS}
+;{ Usable for generating a bootable floppy simple.}
 SECSTRT EQU     1       
 _ENDCOMMENT
-; END  OF PHYSICAL DISK PARAMETERS
+;{ END  OF PHYSICAL DISK PARAMETERS}
 
-; Segments
-CODESEGMENT     EQU     BOOTADDRESS/10H ; PC jumps to 0:7C00 to boot
+;{ Segments}
+REALSEGMENT     EQU     BOOTADDRESS/10H ;{ All real code executes here}
 ;____1_____ _PROTECTED_1_({
-REALSEGMENT     EQU     BOOTADDRESS/10H ; All real code executes here
-CS_COMMON       EQU     REALSEGMENT     ; Protected overlapping segment with same
-DS_16           EQU     1800H           ; Real mode may dabble here
-DS_32           EQU     1800H           ; Real mode may dabble here
-CODE_SEGMENT EQU 07C0H ; The same for real and prot)         
-CS_16 EQU 10H  ; 16 BITS CODE SEGMENT DID                 
-CS_32 EQU 10H  ; 32 BITS CODE SEGMENT DID                 
+CS_COMMON       EQU     REALSEGMENT     ;{ Protected overlapping segment with same}
+DS_16           EQU     1800H           ;{ Real mode may dabble here}
+DS_32           EQU     1800H           ;{ Real mode may dabble here}
+CODE_SEGMENT EQU 07C0H ;{ The same for real and prot)         }
+CS_16 EQU 10H  ;{ 16 BITS CODE SEGMENT DID                 }
+CS_32 EQU 10H  ;{ 32 BITS CODE SEGMENT DID                 }
 
-IDENTIFY_16 EQU 008FH   ; Identification of 16 bit data segment
-IDENTIFY_32 EQU 00CFH   ; Identification of 32 bit data segment
+IDENTIFY_16 EQU 008FH   ;{ Identification of 16 bit data segment}
+IDENTIFY_32 EQU 00CFH   ;{ Identification of 32 bit data segment}
 
 GDTLEN EQU 7FFFH 
 GDT EQU 28000H 
@@ -168,7 +171,7 @@ GDT_SEGMENT EQU GDT/10H
 	  ORG     0H
 ORG0:   JMP     SHORT BOOT
 	NOP
-	; MSDOS programmers reference (thru 6, 3.9)
+	;{ MSDOS programmers reference (thru 6, 3.9)}
 	DB    "DFW--EXP"
 LBPS    DW         BPS
 	DB         1
@@ -182,8 +185,8 @@ LSPT    DW         SPT
 LHEADS  DW       HEADS
 HIDDENSECS    DD        0H
 HUGESECS      DD         000H
-      ; BIOS parameter block ends here
-	DB 000H, 000H, 029H                  ; Required magic.
+      ;{ BIOS parameter block ends here}
+	DB 000H, 000H, 029H                  ;{ Required magic.}
 	DB         004H, 01CH, 040H,  00BH
 	DB    "           "
 	DB    "FAT12   "
@@ -191,9 +194,9 @@ HUGESECS      DD         000H
 RETRY:
 	CALL    DISPLAYW
 	MOV     AL,' '
-	MOV     AH,00   ; Reset
-	MOV     DL,00            ;Drive 0 (floppy 1)
-	INT(13H)                 ;BIOS disk read function
+	MOV     AH,00   ;{ Reset}
+	MOV     DL,00            ;{Drive 0 (floppy 1)}
+	INT(13H)                 ;{BIOS disk read function}
 	CALL    DISPLAYW
 	MOV     AL,' '
 	CALL DISPLAY
@@ -205,34 +208,34 @@ BOOT:
 	MOV     AL,'D'
 	CALL    DISPLAY
 	MOV AX,CS
-	AND AX,AX       ; Z = BOOTING ?
+	AND AX,AX       ;{ Z = BOOTING ?}
 	JNZ  ELSE1
-	; Adjust code segment address without leaving the ball
-	; Generating machine code is actually simpler than
-	; beating the assembler. After 10 attempts I gave up
-	; This is a simple straightforward intersegment jump
-;       JMP FAR BOOTADDRESS+ELSE1
+	;{ Adjust code segment address without leaving the ball}
+	;{ Generating machine code is actually simpler than}
+	;{ beating the assembler. After 10 attempts I gave up}
+	;{ This is a simple straightforward intersegment jump}
+;{       JMP FAR BOOTADDRESS+ELSE1}
 	 DB      0EAH
 	 DW      ELSE1
 	 DW     REALSEGMENT
 ELSE1:  
-;MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE
+;{MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE}
 	MOV     AL,'F'
 	CALL    DISPLAY
-	CLI                     ; Disallow interrups until stack ready
-	MOV     AX,CS           ; Will do for now (real mode)
+	CLI                     ;{ Disallow interrups until stack ready}
+	MOV     AX,CS           ;{ Will do for now (real mode)}
 	MOV     DS,AX
 	MOV     SS,AX
 	MOV     ES,AX
 	MOV     STACKPOINTER,0H
-	STI                     ; Allow interrupts
-	MOV     AH,00   ; Reset
-	MOV     DL,00            ;Drive 0 (floppy 1)
-	INT(13H)                 ;BIOS disk read function
+	STI                     ;{ Allow interrupts}
+	MOV     AH,00   ;{ Reset}
+	MOV     DL,00            ;{Drive 0 (floppy 1)}
+	INT(13H)                 ;{BIOS disk read function}
 	JB      RETRY
 
-	; The first file copied to a freshly formatted floppy will
-	; be at SECSTRT (See also genboot.bat)
+	;{ The first file copied to a freshly formatted floppy will}
+	;{ be at SECSTRT (See also genboot.bat)}
 	MOV     CX,SECSTRT                                                     
 	MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
@@ -245,8 +248,8 @@ BEGIN1: CALL    READSECTOR
 	CALL    DISPLAYCR
 	JMP     ORIG
 ENDLD:  DW      INITDP
-;       Read the sector with number in CX (Counting from 0)
-;       Leave into CX the incremented sec# 
+;{       Read the sector with number in CX (Counting from 0)}
+;{       Leave into CX the incremented sec# }
 READSECTOR:
 	PUSH    CX
 	PUSH    BX
@@ -254,14 +257,14 @@ READSECTOR:
 	XOR     DX,DX
 	DIV     _CELL_PTR[LSPT]
 	MOV     CL,DL
-	INC     CL      ; Sectors counting from 1!
+	INC     CL      ;{ Sectors counting from 1!}
 	XOR     DX,DX
 	DIV     _CELL_PTR[LHEADS]
-	MOV     DH,DL   ; Head number
-	MOV     CH,AL   ; Only small disks <256 cylinders
-	MOV     DL,00            ;Drive 0 (floppy 1)
-	MOV     AX,0201H   ; Read absolute one sector
-	INT(13H)                 ;BIOS disk read function
+	MOV     DH,DL   ;{ Head number}
+	MOV     CH,AL   ;{ Only small disks <256 cylinders}
+	MOV     DL,00            ;{Drive 0 (floppy 1)}
+	MOV     AX,0201H   ;{ Read absolute one sector}
+	INT(13H)                 ;{BIOS disk read function}
 	POP     BX
 	PUSHF
 	ADD     BX,BPS
@@ -278,31 +281,31 @@ DISPLAYCR:
 	
 DISPLAYPC:      POP     AX
 	PUSH    AX
-DISPLAYW:       PUSH    AX              ; Display AX in hex 
+DISPLAYW:       PUSH    AX              ;{ Display AX in hex }
 	MOV     AL,AH
 	CALL    DISPLAYHEX
 	POP     AX
-	; CALL DISPLAYHEX ; RET
-DISPLAYHEX:     PUSH    AX              ; Display AL in hex 
+	;{ CALL DISPLAYHEX ; RET}
+DISPLAYHEX:     PUSH    AX              ;{ Display AL in hex }
 	MOV     CL,4
 	SAR     AL,CL
 	CALL    DISPLAYHD
 	POP     AX
-	; CALL DISPLAYHD ; RET
-DISPLAYHD:      AND     AL,0FH          ; Display AL as one hex digit
+	;{ CALL DISPLAYHD ; RET}
+DISPLAYHD:      AND     AL,0FH          ;{ Display AL as one hex digit}
 	DAA
 	MOV     AH,AL
 	MOV     CL,5
 	SHR     AH,CL
 	ADC     AL,30H
-	; CALL DISPLAY ; RET
-DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
+	;{ CALL DISPLAY ; RET}
+DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 	MOV     AH,0EH
 	INT(10H)
 	RET
 	
 	_NEW_ORG(01FEH)
-	; Signature. 
+	;{ Signature. }
 	DB         055H, 0AAH
 		 
 });_END___1__({ _BOOTFD__1_})
@@ -311,7 +314,7 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
 	  ORG     0H
 ORG0:   JMP     SHORT BOOT
 	NOP
-	; MSDOS programmers reference (thru 6, 3.9)
+	;{ MSDOS programmers reference (thru 6, 3.9)}
 	DB    "DFW---HD"
 LBPS    DW         BPS
 	DB         1
@@ -325,23 +328,23 @@ LSPT    DW         SPT
 LHEADS  DW       HEADS
 HIDDENSECS    DD        0H
 HUGESECS      DD         000H
-      ; BIOS parameter block ends here
-	DB 000H, 000H, 029H                  ; Required magic.
+      ;{ BIOS parameter block ends here}
+	DB 000H, 000H, 029H                  ;{ Required magic.}
 	DB         004H, 01CH, 040H,  00BH
 	DB    "           "
 	DB    "FAT12   "
 
 BOOTLBA:  DB      10H, 0
-	DW      (INITDP-$$)/BPS      ; ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.
-	DW      BPS             ; OFFSET AND SEGMENT
+	DW      (INITDP-$$)/BPS      ;{ ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.}
+	DW      BPS             ;{ OFFSET AND SEGMENT}
 	DW      REALSEGMENT
-	; At a hard disk we just read sector from sector 1        
-	DD      1       ; Start
-	DD      0       ; M.S. 32 BITS
+	;{ At a hard disk we just read sector from sector 1        }
+	DD      1       ;{ Start}
+	DD      0       ;{ M.S. 32 BITS}
 
 HDREAD:
-	MOV     AX,4200H  ;   Read extended                                
-	MOV     DX,0080H  ;   Disk C                                 
+	MOV     AX,4200H  ;{   Read extended                                }
+	MOV     DX,0080H  ;{   Disk C                                 }
 	MOV     SI,BOOTLBA
 	INT     13H
 
@@ -349,9 +352,9 @@ HDREAD:
 RETRY:
 	CALL    DISPLAYW
 	MOV     AL,' '
-	MOV     AH,00   ; Reset
-	MOV     DL,80            ;Drive 80 (hd C:)
-	INT(13H)                 ;BIOS disk read function
+	MOV     AH,00   ;{ Reset}
+	MOV     DL,80            ;{Drive 80 (hd C:)}
+	INT(13H)                 ;{BIOS disk read function}
 	CALL    DISPLAYW
 	MOV     AL,' '
 	CALL DISPLAY
@@ -363,30 +366,30 @@ BOOT:
 	MOV     AL,'D'
 	CALL    DISPLAY
 	MOV AX,CS
-	AND AX,AX       ; Z = BOOTING ?
+	AND AX,AX       ;{ Z = BOOTING ?}
 	JNZ  ELSE1
-	; Adjust code segment address without leaving the ball
-	; Generating machine code is actually simpler than
-	; beating the assembler. After 10 attempts I gave up
-	; This is a simple straightforward intersegment jump
-;       JMP FAR BOOTADDRESS+ELSE1
+	;{ Adjust code segment address without leaving the ball}
+	;{ Generating machine code is actually simpler than}
+	;{ beating the assembler. After 10 attempts I gave up}
+	;{ This is a simple straightforward intersegment jump}
+;{       JMP FAR BOOTADDRESS+ELSE1}
 	 JMPFAR 
 	 DW      ELSE1
 	 DW     REALSEGMENT
 ELSE1:  
-;MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE
+;{MYSELF: JMP MYSELF    ; STOP IT RIGHT HERE}
 	MOV     AL,'F'
 	CALL    DISPLAY
-	CLI                     ; Disallow interrups until stack ready
-	MOV     AX,CS           ; Will do for now (real mode)
+	CLI                     ;{ Disallow interrups until stack ready}
+	MOV     AX,CS           ;{ Will do for now (real mode)}
 	MOV     DS,AX
 	MOV     SS,AX
 	MOV     ES,AX
 	MOV     STACKPOINTER,0H
-	STI                     ; Allow interrupts
-	MOV     AH,00   ; Reset
-	MOV     DL,80            ;Drive 80 (hd C:)
-	INT(13H)                 ;BIOS disk read function
+	STI                     ;{ Allow interrupts}
+	MOV     AH,00   ;{ Reset}
+	MOV     DL,80            ;{Drive 80 (hd C:)}
+	INT(13H)                 ;{BIOS disk read function}
 	JB      RETRY
 	CALL    HDREAD
 	JB      RETRY
@@ -402,49 +405,49 @@ DISPLAYCR:
 	
 DISPLAYPC:      POP     AX
 	PUSH    AX
-DISPLAYW:       PUSH    AX              ; Display AX in hex 
+DISPLAYW:       PUSH    AX              ;{ Display AX in hex }
 	MOV     AL,AH
 	CALL    DISPLAYHEX
 	POP     AX
-	; CALL DISPLAYHEX ; RET
-DISPLAYHEX:     PUSH    AX              ; Display AL in hex 
+	;{ CALL DISPLAYHEX ; RET}
+DISPLAYHEX:     PUSH    AX              ;{ Display AL in hex }
 	MOV     CL,4
 	SAR     AL,CL
 	CALL    DISPLAYHD
 	POP     AX
-	; CALL DISPLAYHD ; RET
-DISPLAYHD:      AND     AL,0FH          ; Display AL as one hex digit
+	;{ CALL DISPLAYHD ; RET}
+DISPLAYHD:      AND     AL,0FH          ;{ Display AL as one hex digit}
 	DAA
 	MOV     AH,AL
 	MOV     CL,5
 	SHR     AH,CL
 	ADC     AL,30H
-	; CALL DISPLAY ; RET
-DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
+	;{ CALL DISPLAY ; RET}
+DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
 	MOV     AH,0EH
 	INT(10H)
 	RET
 	
 	_NEW_ORG(01FEH)
-	; Signature. 
+	;{ Signature. }
 	DB         055H, 0AAH
 		 
 });_END___1__({ _BOOTHD__1_})
 
 ;____1_____ _HOSTED__1_({
-	ORG	100H	; Required start of .COM program.
+	ORG	100H	;{ Required start of .COM program.}
 });_END___1__({ _HOSTED__1_})
 
 ORIG:
 ;____1_____ _PROTECTED_1_({
-;CODE-SEGMENT  10 * CONSTANT CODE-START                          
-	MOV     AX,GDT_SEGMENT ; GDT segment
+;{CODE-SEGMENT  10 * CONSTANT CODE-START                          }
+	MOV     AX,GDT_SEGMENT ;{ GDT segment}
 	MOV     ES,AX
 	MOV     DI,0 
 	MOV     AX,GDTLEN
 	STOSW
-; PREPARE-CS : THIS MUST LOOK THE SAME IN REAL AND 16 BITS                                                    
-;               PROTECTED MODE
+;{ PREPARE-CS : THIS MUST LOOK THE SAME IN REAL AND 16 BITS                                                    }
+;{               PROTECTED MODE}
 	MOV     DI,CS_COMMON 
 	MOV     AX,0FFFFH
 	STOSW
@@ -454,9 +457,9 @@ ORIG:
 	STOSW
 	MOV     AX,IDENTIFY_16 
 	STOSW
-; PREPARE DS/SS/ES ; only SS used in real mode.                                                    
-;  BECAUSE IT IS USED IN REAL MODE DS_16
-;  MUST BE EMPTY.            
+;{ PREPARE DS/SS/ES ; only SS used in real mode.                                                    }
+;{  BECAUSE IT IS USED IN REAL MODE DS_16}
+;{  MUST BE EMPTY.            }
 	MOV     DI,DS_PROT
 	MOV     AX,0FFFFH
 	STOSW
@@ -466,7 +469,7 @@ ORIG:
 	STOSW
 	MOV     AX,IDENTIFY_PROT 
 	STOSW
-; PREPARE-CS 16/32 BITS                                                   
+;{ PREPARE-CS 16/32 BITS                                                   }
 	MOV     DI,CS_PROT
 	MOV     AX,0FFFFH
 	STOSW
@@ -480,13 +483,11 @@ ORIG:
 	MOV     AX,REALSEGMENT 
 	MOV     ES,AX
 	LGDT    [GDTLOAD]
-;************************
+;{************************}
 ;____1_____ _BITS32_1_({
 include(width32.m4)       
 });_END___1__({ _BITS32_1_})
-;************************
-CW      EQU     CELLWIDTH       ; I.e. for the mode used in Forth, not in the bootcode.
-BMASK   EQU     BLOCKS_IN_USE_MASK
+;{************************}
 
 	JMPHERE_FROM_REAL
 	 JMP     SAME3
@@ -495,10 +496,15 @@ GDTLOAD DW     GDTLEN
 
 SAME3:
 });_END___1__({ _PROTECTED_1_})
+
+;{ The following is not known until the final width m4 final has been included.}
+CW      EQU     CELLWIDTH       ;{ I.e. for the mode used in Forth, not in the bootcode.}
+BMASK   EQU     BLOCKS_IN_USE_MASK
+
 	NOP
-	JMP	LCLD     ;VECTOR TO COLD START
+	JMP	LCLD     ;{VECTOR TO COLD START}
 	NOP
-	JMP	WRM	; VECTOR TO WARM START
+	JMP	WRM	;{ VECTOR TO WARM START}
 ;
 _COMMENT
    FORTH REGISTERS
@@ -609,40 +615,40 @@ NOTE:	THE ABOVE ADDRESSES CAN'T POINT TO A
 ----------------------------------------------------- 
 _ENDCOMMENT
 
-BIP	DC	0	; BREAKPOINT START ADDRESS
-BIPE	DC	0	; BREAKPOINT END ADDR
+BIP	DC	0	;{ BREAKPOINT START ADDRESS}
+BIPE	DC	0	;{ BREAKPOINT END ADDR}
 	PAGE
-;	THIS IS THE `NEXT' WITH DEBUG SUPPORT
+;{	THIS IS THE `NEXT' WITH DEBUG SUPPORT}
 
-TNEXT:  PUSHF		;SAVE REGISTER
+TNEXT:  PUSHF		;{SAVE REGISTER}
 	PUSH	AX
-	MOV	AX,[BIP]  ; BREAKPOINT START ADDR
-	OR	AX,AX	; ZERO?
-	JZ	TNEXT2	; NO BREAKPOINT
+	MOV	AX,[BIP]  ;{ BREAKPOINT START ADDR}
+	OR	AX,AX	;{ ZERO?}
+	JZ	TNEXT2	;{ NO BREAKPOINT}
 	CMP	AX,-1
-	JZ	TNEXT1	; STEP ALL POINTS
-	CMP	AX,SI	; IN BREAKPOINT RANGE?
-	JZ	TNEXT1	; STEP THIS LOCATION
-	JA	TNEXT2	; NO
-	MOV	AX,[BIPE] ; BREAKPOINT END ADDR
-	OR	AX,AX	; ZERO?
-	JZ	TNEXT2	; ONLY 1 LOCATION
-	CMP	AX,SI	; IN RANGE STILL?
-	JB	TNEXT2	; NO
+	JZ	TNEXT1	;{ STEP ALL POINTS}
+	CMP	AX,SI	;{ IN BREAKPOINT RANGE?}
+	JZ	TNEXT1	;{ STEP THIS LOCATION}
+	JA	TNEXT2	;{ NO}
+	MOV	AX,[BIPE] ;{ BREAKPOINT END ADDR}
+	OR	AX,AX	;{ ZERO?}
+	JZ	TNEXT2	;{ ONLY 1 LOCATION}
+	CMP	AX,SI	;{ IN RANGE STILL?}
+	JB	TNEXT2	;{ NO}
 
-;	PAUSE ON ADDRESS
+;{	PAUSE ON ADDRESS}
 ;
 TNEXT1: POPF
 ;
-;********  ADD YOUR BREAKPOINT HERE  **********
+;{********  ADD YOUR BREAKPOINT HERE  **********}
 ;
-BREAK:  JMP	SHORT	TNEXT3	;CONT WITH PROGRAM
+BREAK:  JMP	SHORT	TNEXT3	;{CONT WITH PROGRAM}
 ;
-;	NO BREAKPOINT PAUSE - RESTORE REGISTERS
+;{	NO BREAKPOINT PAUSE - RESTORE REGISTERS}
 ;
 TNEXT2:	POP	AX
 	POPF
-TNEXT3:	LODSW           ; AX <- (IP)
+TNEXT3:	LODSW           ;{ AX <- (IP)}
 	MOV	BX,AX
 	JMP	SHORT	NEXT1
 	PAGE
@@ -669,36 +675,36 @@ _COMMENT
     `JMP TNEXT' for tracing through high level FORTH words. 
 
 _ENDCOMMENT
-NEXT:	LODSW		;AX <- (IP)
+NEXT:	LODSW		;{AX <- (IP)}
 ;
-NEXT1:	MOV	DI,AX   ; (W) <- (IP)
-;       CALL    DISPLAYSI
-	JMP     _CELL_PTR[DI]    ; TO `CFA'
+NEXT1:	MOV	DI,AX   ;{ (W) <- (IP)}
+;{       CALL    DISPLAYSI}
+	JMP     _CELL_PTR[DI]    ;{ TO `CFA'}
 	PAGE
 ;
-;       Dictionary starts here.
+;{       Dictionary starts here.}
 DP0:
 CODE_HEADER({LIT},{LIT})
-	LODSW		; AX <- LITERAL
-	JMP SHORT     APUSH   ; TO TOP OF STACK
+	LODSW		;{ AX <- LITERAL}
+	JMP SHORT     APUSH   ;{ TO TOP OF STACK}
 ;
 CODE_HEADER({EXECUTE},{EXEC})
-	POP     DI      ; GET CFA
+	POP     DI      ;{ GET CFA}
 	JMP     _CELL_PTR[DI]    
-;                                 
+;{                                 }
 CODE_HEADER({BRANCH},{BRAN})      
 BRAN1:	ADD     SI,[SI]           
-	JMP SHORT     NEXT    ; JUMP TO OFFSET
+	JMP SHORT     NEXT    ;{ JUMP TO OFFSET}
 ;
 CODE_HEADER({0BRANCH},{ZBRAN})
-	POP	AX	; GET STACK VALUE
-	OR	AX,AX	; ZERO?
-	JZ	BRAN1	; YES, BRANCH
+	POP	AX	;{ GET STACK VALUE}
+	OR	AX,AX	;{ ZERO?}
+	JZ	BRAN1	;{ YES, BRANCH}
 	LEA	SI,[SI+CELLS(1)]
 	JMP SHORT     NEXT
 	PAGE
 HEADER({NOOP},{NOOP},{$+4})
-;	DEBUG STUFF
+;{	DEBUG STUFF}
 NOP0	DC	$+CELLS(1)
 	JMP SHORT     NEXT
 NOP1	DC 	$+CELLS(1)
@@ -709,34 +715,34 @@ NOP2	DC	$+CELLS(1)
 
 ;
 CODE_HEADER({(LOOP)},{XLOOP})
-	MOV	BX,1	; INCREMENT
-XLOO1:	ADD	[BP],BX	; INDEX = INDEX + INCR
-	MOV	AX,[BP]	; GET NEW INDEX
-	SUB	AX,[CELLS(1)+BP]        ; COMPARE WITH LIMIT
-	XOR	AX,BX	; TEST SIGN
-	JS	BRAN1	; KEEP LOOPING
+	MOV	BX,1	;{ INCREMENT}
+XLOO1:	ADD	[BP],BX	;{ INDEX = INDEX + INCR}
+	MOV	AX,[BP]	;{ GET NEW INDEX}
+	SUB	AX,[CELLS(1)+BP]        ;{ COMPARE WITH LIMIT}
+	XOR	AX,BX	;{ TEST SIGN}
+	JS	BRAN1	;{ KEEP LOOPING}
 ;
-;  END OF `DO' LOOP
-	ADD	BP,_BYTE CELLS(2)  ; ADJ RETURN STACK
-	LEA	SI,[SI+CELLS(1)]       ; BYPASS BRANCH OFFSET
+;{  END OF `DO' LOOP}
+	ADD	BP,_BYTE CELLS(2)  ;{ ADJ RETURN STACK}
+	LEA	SI,[SI+CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
 	JMP     NEXT
 ;
 CODE_HEADER({(+LOOP)},{XPLOO})
-	POP	BX	; GET LOOP VALUE
+	POP	BX	;{ GET LOOP VALUE}
 	JMP SHORT     XLOO1
 ;
 CODE_HEADER({(DO)},{XDO})
-	POP	DX	; INITIAL INDEX VALUE
-	POP	AX	; LIMIT VALUE
-	XCHG	BP,STACKPOINTER   ; GET RETURN STACK
+	POP	DX	;{ INITIAL INDEX VALUE}
+	POP	AX	;{ LIMIT VALUE}
+	XCHG	BP,STACKPOINTER   ;{ GET RETURN STACK}
 	PUSH	AX
 	PUSH	DX
-	XCHG	BP,STACKPOINTER   ; GET PARAMETER STACK
+	XCHG	BP,STACKPOINTER   ;{ GET PARAMETER STACK}
 	JMP	NEXT
 	PAGE
 CODE_HEADER({I},{IDO})
-	MOV	AX,[BP]	; GET INDEX VALUE
-	JMP	APUSH	; TO PARAMETER STACK
+	MOV	AX,[BP]	;{ GET INDEX VALUE}
+	JMP	APUSH	;{ TO PARAMETER STACK}
 ;
 HEADER({+ORIGIN},{PORIG},{DOCOL})
 	DC	LIT
@@ -745,207 +751,207 @@ HEADER({+ORIGIN},{PORIG},{DOCOL})
 	DC	SEMIS
 ;
 ;
-;	Initialisation block for user variables through VOC-LINK
-;       <<<<< must be in same order as user variables >>>>>
+;{	Initialisation block for user variables through VOC-LINK}
+;{       <<<<< must be in same order as user variables >>>>>}
 ;
 USINI:
 ;____1_____ _MODERN_1_({
-	DC      0       ; INIT (OFFSET) 
+	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_MODERN_1_})
 ;____1_____ _USEDOS_1_({
 _COMMENT
-; This will steer clear of a forth executable, provided it is
-; the first file on the floppy. 
-; The 2 is rounding plus the extra sector in .EXE files.
-; However it deviates much from the classic model and requires
-; that the disk parameters are available (not only for USEBIOS)
+;{ This will steer clear of a forth executable, provided it is}
+;{ the first file on the floppy. }
+;{ The 2 is rounding plus the extra sector in .EXE files.}
+;{ However it deviates much from the classic model and requires}
+;{ that the disk parameters are available (not only for USEBIOS)}
 	DC      (INITDP-$$-1)/KBBUF+1 
 _ENDCOMMENT
-; So for now just the classic, swap disk after booting.
-	DC      0       ; INIT (OFFSET) 
+;{ So for now just the classic, swap disk after booting.}
+	DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_USEDOS_1_})
 ;____1_____ _BOOTFD__1_({
-; This will reserve place for dos information, such that the floppy
-; can be accessed from DOS and makes sure blocks are not allocated
-; within the forth system itself. 
-; (X-1)/S+1 rounds up to whole `S', and yes both parts separately.
+;{ This will reserve place for dos information, such that the floppy}
+;{ can be accessed from DOS and makes sure blocks are not allocated}
+;{ within the forth system itself. }
+;{ (X-1)/S+1 rounds up to whole `S', and yes both parts separately.}
 	DC      (SECSTRT-1)/SPB+1 + (INITDP-$$-1)/KBBUF+1 
-			; INIT (OFFSET) 
+			;{ INIT (OFFSET) }
 });_END___1__({_BOOTFD__1_})
 ;____1_____ _BOOTHD__1_({
-; This will reserve place for the system itself, on the first part of a 
-; hard disk. No problem to just reserve whole memory.
-	DC      64      ; Kbyte.
+;{ This will reserve place for the system itself, on the first part of a }
+;{ hard disk. No problem to just reserve whole memory.}
+	DC      64      ;{ Kbyte.}
 });_END___1__({_BOOTHD__1_})
-UP	DC	STRUSA	; USER AREA POINTER 1
-	DC      0       ; (Unused)          2
-	DC 	INITS0	; INIT (S0)         3
-        DC 	INITR0	; INIT (R0)         4
-	DC 	STRTIB  ; INIT (TIB)        5
-	DC	32	; INIT (WIDTH)      6
-	DC	0	; INIT (WARNING)      7
-	DC	INITDP	;	INIT (FENCE)  8
-	DC	INITDP  ;	INIT (DP)     9
-	DC	_VOC_LATEST(FORTH) ;       INIT (VOC-LINK) 10
+UP	DC	STRUSA	;{ USER AREA POINTER 1}
+	DC      0       ;{ (Unused)          2}
+	DC 	INITS0	;{ INIT (S0)         3}
+        DC 	INITR0	;{ INIT (R0)         4}
+	DC 	STRTIB  ;{ INIT (TIB)        5}
+	DC	32	;{ INIT (WIDTH)      6}
+	DC	0	;{ INIT (WARNING)      7}
+	DC	INITDP	;{	INIT (FENCE)  8}
+	DC	INITDP  ;{	INIT (DP)     9}
+	DC	_VOC_LATEST(FORTH) ;{       INIT (VOC-LINK) 10}
 	;
-	_RESB(CELLS(14))        ; User variables up to 24 in use
-;	<<<<< end of data used by cold start >>>>>
+	_RESB(CELLS(14))        ;{ User variables up to 24 in use}
+;{	<<<<< end of data used by cold start >>>>>}
 ;
-;	The following is the CPU's name, printed
-;       during cold start.
-;       The name is 32 bits in base 36.
+;{	The following is the CPU's name, printed}
+;{       during cold start.}
+;{       The name is 32 bits in base 36.}
 ;
-CPUNM   DC      5H,0B328H       ; '8088'     25 26 
-	DC      FIGREL + FIGREV *100H  ; FIG RELEASE + REVISION 27
-       DC      USRVER  + 0EH*100H      ; USER REVISION + VERSION ATTRIBUTES 28
-LAINI:  DC	_LINK_FIELD(TASK) ; LAST CELL 29 
-	DC	BSIN	; RUBOUT: get rid of latest char 30
+CPUNM   DC      5H,0B328H       ;{ '8088'     25 26 }
+	DC      FIGREL + FIGREV *100H  ;{ FIG RELEASE + REVISION 27}
+       DC      USRVER  + 0EH*100H      ;{ USER REVISION + VERSION ATTRIBUTES 28}
+LAINI:  DC	_LINK_FIELD(TASK) ;{ LAST CELL 29 }
+	DC	BSIN	;{ RUBOUT: get rid of latest char 30}
 ;
 CODE_HEADER({DIGIT},{DIGIT})
-	POP	DX	;NUMBER BASE
-	POP	AX	;ASCII DIGIT
+	POP	DX	;{NUMBER BASE}
+	POP	AX	;{ASCII DIGIT}
 	SUB	AL,'0'
-	JB	DIGI2	;NUMBER ERROR
+	JB	DIGI2	;{NUMBER ERROR}
 	CMP	AL,9
-	JBE	DIGI1	;NUMBER = 0 THRU 9
+	JBE	DIGI1	;{NUMBER = 0 THRU 9}
 	SUB	AL,7
-	CMP	AL,10	;NUMBER 'A' THRU 'Z'?
-	JB	DIGI2	;NO
-DIGI1:	CMP	AL,DL	; COMPARE NUMBER TO BASE
-	JAE	DIGI2	;NUMBER ERROR
-	SUB	DX,DX	;ZERO
-	MOV	DL,AL	;NEW BINARY NUMBER
-	MOV	AL,1	;TRUE FLAG
-	JMP	DPUSH	;ADD TO STACK
-;   NUMBER ERROR
-DIGI2:	SUB	AX,AX	;FALSE FLAG
+	CMP	AL,10	;{NUMBER 'A' THRU 'Z'?}
+	JB	DIGI2	;{NO}
+DIGI1:	CMP	AL,DL	;{ COMPARE NUMBER TO BASE}
+	JAE	DIGI2	;{NUMBER ERROR}
+	SUB	DX,DX	;{ZERO}
+	MOV	DL,AL	;{NEW BINARY NUMBER}
+	MOV	AL,1	;{TRUE FLAG}
+	JMP	DPUSH	;{ADD TO STACK}
+;{   NUMBER ERROR}
+DIGI2:	SUB	AX,AX	;{FALSE FLAG}
 	JMP	APUSH
 	PAGE
 CODE_HEADER({(FIND)},{PFIND})
-;       MOV     AX,DS
-;       MOV	ES,AX	;ES = DS
-	POP	BX	;NFA
-	POP	CX	;STRING ADDR
+;{       MOV     AX,DS}
+;{       MOV	ES,AX	;ES = DS}
+	POP	BX	;{NFA}
+	POP	CX	;{STRING ADDR}
 ;
-;  SEARCH LOOP
-PFIN1:  MOV	DI,CX	;GET ADDR
-	MOV	AL,[BX]	;GET WORD LENGTH
-	MOV	DL,AL	;SAVE WORD LENGTH
+;{  SEARCH LOOP}
+PFIN1:  MOV	DI,CX	;{GET ADDR}
+	MOV	AL,[BX]	;{GET WORD LENGTH}
+	MOV	DL,AL	;{SAVE WORD LENGTH}
 	XOR	AL,[DI]
-	AND	AL,3FH	;CHECK LENGTHS
-	JNZ	PFIN5	;LENGTHS DIFFER
+	AND	AL,3FH	;{CHECK LENGTHS}
+	JNZ	PFIN5	;{LENGTHS DIFFER}
 
 ;
-;   LENGTHS MATCH - CHECK EACH CHARACTER IN NAME
+;{   LENGTHS MATCH - CHECK EACH CHARACTER IN NAME}
 PFIN2:	INC	BX
-	INC	DI	; NEXT CHAR OF NAME
+	INC	DI	;{ NEXT CHAR OF NAME}
 	MOV	AL,[BX]
-	XOR	AL,[DI]	;COMPARE NAMES
-	ADD	AL,AL	;THIS WILL BE TEST BIT 8
-	JNZ	PFIN5	;NO MATCH
-	JNB	PFIN2	;MATCH SO FAR - LOOP
+	XOR	AL,[DI]	;{COMPARE NAMES}
+	ADD	AL,AL	;{THIS WILL BE TEST BIT 8}
+	JNZ	PFIN5	;{NO MATCH}
+	JNB	PFIN2	;{MATCH SO FAR - LOOP}
 ;
-;   FOUND END OF NAME (BIT 8 SET) - A MATCH
-	ADD	BX,_BYTE 1+CELLS(2); BX = PFA
-	PUSH	BX	; (S3) <- PFA
-	MOV	AX,1	;TRUE VALUE
+;{   FOUND END OF NAME (BIT 8 SET) - A MATCH}
+	ADD	BX,_BYTE 1+CELLS(2);{ BX = PFA}
+	PUSH	BX	;{ (S3) <- PFA}
+	MOV	AX,1	;{TRUE VALUE}
 	SUB	DH,DH
 	JMP	DPUSH
 ;
-;   NO NAME MATCH - TRY ANOTHER
+;{   NO NAME MATCH - TRY ANOTHER}
 ;
-; GET NEXT LINK FIELD ADDR (LFA)
-; ( ZERO = FIRST WORD OF DICTIONARY )
+;{ GET NEXT LINK FIELD ADDR (LFA)}
+;{ ( ZERO = FIRST WORD OF DICTIONARY )}
 ;
-PFIN5:	INC	BX	;NEXT ADDR
-	JB	PFIN6	;END OF NAME
-	MOV	AL,[BX]	;GET NEXT CHAR
-	ADD	AL,AL	;SET/RESET CARRY
-	JMP SHORT     PFIN5   ;LOOP UNTIL FOUND
+PFIN5:	INC	BX	;{NEXT ADDR}
+	JB	PFIN6	;{END OF NAME}
+	MOV	AL,[BX]	;{GET NEXT CHAR}
+	ADD	AL,AL	;{SET/RESET CARRY}
+	JMP SHORT     PFIN5   ;{LOOP UNTIL FOUND}
 ;
-PFIN6:	MOV	BX,[BX]	; GET LINK FIELD ADDR
-	OR	BX,BX	; START OF DICT ( 0 )
-	JNZ	PFIN1	; NO , LOOK MORE
-	MOV	AX,0	; FALSE FLAG
-	JMP	APUSH	; DONE ( NO MATCH FOUND )
+PFIN6:	MOV	BX,[BX]	;{ GET LINK FIELD ADDR}
+	OR	BX,BX	;{ START OF DICT ( 0 )}
+	JNZ	PFIN1	;{ NO , LOOK MORE}
+	MOV	AX,0	;{ FALSE FLAG}
+	JMP	APUSH	;{ DONE ( NO MATCH FOUND )}
 	PAGE
 CODE_HEADER({ENCLOSE},{ENCL})
-	POP	AX	;S1 - TERMINATOR CHAR
-	POP	BX	;S2 - TEXT ADDR
-	PUSH	BX	;ADDR - BACK TO STACK ( IT RHYMES )
-	MOV	AH,0	;ZERO
-	MOV	DX,-1	;CHAR OFFSET COUNTER
-	DEC	BX	;ADDR -1
+	POP	AX	;{S1 - TERMINATOR CHAR}
+	POP	BX	;{S2 - TEXT ADDR}
+	PUSH	BX	;{ADDR - BACK TO STACK ( IT RHYMES )}
+	MOV	AH,0	;{ZERO}
+	MOV	DX,-1	;{CHAR OFFSET COUNTER}
+	DEC	BX	;{ADDR -1}
 ;
-;   SCAN TO FIRST NON-TERMINATOR CHARACTER
-ENCL1:	INC	BX	;ADDR+1
-	INC	DX	;COUNT+1
+;{   SCAN TO FIRST NON-TERMINATOR CHARACTER}
+ENCL1:	INC	BX	;{ADDR+1}
+	INC	DX	;{COUNT+1}
 	CMP	AL,[BX]
-	JZ	ENCL1	;WAIT FOR NON-TERMINATOR
-	PUSH	DX	;OFFSET TO 1ST TEXT CHAR
-	CMP	AH,[BX]	;NULL CHAR?
-	JNZ	ENCL2	;NO
+	JZ	ENCL1	;{WAIT FOR NON-TERMINATOR}
+	PUSH	DX	;{OFFSET TO 1ST TEXT CHAR}
+	CMP	AH,[BX]	;{NULL CHAR?}
+	JNZ	ENCL2	;{NO}
 ;
-;  FOUND NULL BEFORE 1ST NON-TERM CHAR
-	MOV	AX,DX	;COPY COUNTER
-	INC	DX	; +1
+;{  FOUND NULL BEFORE 1ST NON-TERM CHAR}
+	MOV	AX,DX	;{COPY COUNTER}
+	INC	DX	;{ +1}
 	JMP	DPUSH
 ;
-;   FOUND FIRST TEXT CHAR - COUNT THE CHARS
-ENCL2:	INC	BX	; ADDR+1
-	INC	DX	;COUNT+1
-	CMP	AL,[BX]	;TERMINATOR CHAR?
-	JZ	ENCL4	;YES
-	CMP	AH,[BX]	;NULL CHAR?
-	JNZ	ENCL2	;NO, LOOP AGAIN
+;{   FOUND FIRST TEXT CHAR - COUNT THE CHARS}
+ENCL2:	INC	BX	;{ ADDR+1}
+	INC	DX	;{COUNT+1}
+	CMP	AL,[BX]	;{TERMINATOR CHAR?}
+	JZ	ENCL4	;{YES}
+	CMP	AH,[BX]	;{NULL CHAR?}
+	JNZ	ENCL2	;{NO, LOOP AGAIN}
 ;
-;   FOUND NULL AT END OF TEXT
-ENCL3:	MOV	AX,DX	;COUNTERS ARE EQUAL
+;{   FOUND NULL AT END OF TEXT}
+ENCL3:	MOV	AX,DX	;{COUNTERS ARE EQUAL}
 	JMP	DPUSH
 ;
-;   FOUND TERMINATOR CHARACTER
+;{   FOUND TERMINATOR CHARACTER}
 ENCL4:	MOV	AX,DX
-	INC	AX	;COUNT+1
+	INC	AX	;{COUNT+1}
 	JMP	DPUSH
 	PAGE
-	; At line     LINE ~500
+	;{ At line     LINE ~500}
 HEADER({CR},{CR},{DOCOL})
 	DC      LIT,LF
 	DC      EMIT
 	DC      SEMIS
 	PAGE       
 CODE_HEADER({CMOVE},{LCMOVE})
-	CLD             ;INC DIRECTION
-	MOV	BX,SI	;SAVE IF
-	POP	CX	;COUNT
-	POP	DI	;DEST
-	POP	SI	;SOURCE
-;       MOV	AX,DS
-;       MOV	ES,AX	;ES <- DS
-	REP	MOVSB	;THAT'S THE MOVE
-	MOV	SI,BX	;GET BACK IP
+	CLD             ;{INC DIRECTION}
+	MOV	BX,SI	;{SAVE IF}
+	POP	CX	;{COUNT}
+	POP	DI	;{DEST}
+	POP	SI	;{SOURCE}
+;{       MOV	AX,DS}
+;{       MOV	ES,AX	;ES <- DS}
+	REP	MOVSB	;{THAT'S THE MOVE}
+	MOV	SI,BX	;{GET BACK IP}
 	JMP	NEXT
 ;
 CODE_HEADER({U*},{USTAR})
 	POP	AX
 	POP	BX
-	MUL	BX	;UNSIGNED
-	XCHG	AX,DX	;AX NOW = MSW
-	JMP	DPUSH	;STORE DOUBLE CELL
+	MUL	BX	;{UNSIGNED}
+	XCHG	AX,DX	;{AX NOW = MSW}
+	JMP	DPUSH	;{STORE DOUBLE CELL}
 ;
 CODE_HEADER({U/},{USLAS})
-	POP	BX	;DIVISOR
-	POP	DX	;MSW OF DIVIDEND
-	POP	AX	;LSW OF DIVIDEND
-	CMP	DX,BX	;DICIDE BY 0?
-	JNB	DZERO	; ERROR - ZERO DIVIDE
-	DIV	BX	;16 BIT DIVIDE
-	JMP	DPUSH	;STORE QUOT/REM
+	POP	BX	;{DIVISOR}
+	POP	DX	;{MSW OF DIVIDEND}
+	POP	AX	;{LSW OF DIVIDEND}
+	CMP	DX,BX	;{DICIDE BY 0?}
+	JNB	DZERO	;{ ERROR - ZERO DIVIDE}
+	DIV	BX	;{16 BIT DIVIDE}
+	JMP	DPUSH	;{STORE QUOT/REM}
 ;
-;	DIVIDE BY ZERO ERROR - SHOW MAX NUMBERS
+;{	DIVIDE BY ZERO ERROR - SHOW MAX NUMBERS}
 DZERO:	MOV	AX,-1
 	MOV	DX,AX
-	JMP	DPUSH	;STORE QUOT/REM
+	JMP	DPUSH	;{STORE QUOT/REM}
 	PAGE
 CODE_HEADER({AND},{LAND})
 	POP	AX
@@ -954,54 +960,54 @@ CODE_HEADER({AND},{LAND})
 	JMP	APUSH
 ;
 CODE_HEADER({OR},{LOR})
-	POP	AX      ; (S1) <- (S1) OR (S2)
+	POP	AX      ;{ (S1) <- (S1) OR (S2)}
 	POP	BX
 	OR	AX,BX
 	JMP	APUSH
 ;
 CODE_HEADER({XOR},{LXOR})
-	POP	AX      ; (S1) <- (S1) XOR (S2)
+	POP	AX      ;{ (S1) <- (S1) XOR (S2)}
 	POP	BX
 	XOR	AX,BX
 	JMP	APUSH
 	PAGE
 CODE_HEADER({SP@},{SPFET})
-	MOV	AX,STACKPOINTER   ; (S1) <- (SP)
+	MOV	AX,STACKPOINTER   ;{ (S1) <- (SP)}
 	JMP	APUSH
 ;
 CODE_HEADER({SP!},{SPSTO})
-	MOV	BX,[UP]   ;USER VAR BASE ADDR
-	MOV	STACKPOINTER,[CELLS(3)+BX]        ;RESET PARAM STACK POINTER
+	MOV	BX,[UP]   ;{USER VAR BASE ADDR}
+	MOV	STACKPOINTER,[CELLS(3)+BX]        ;{RESET PARAM STACK POINTER}
 	JMP	NEXT
 ;
-CODE_HEADER({RP@},{RPFET})      ;(S1) <- (RP)
-	MOV	AX,BP	;RETURN STACK ADDR
+CODE_HEADER({RP@},{RPFET})      ;{(S1) <- (RP)}
+	MOV	AX,BP	;{RETURN STACK ADDR}
 	JMP	APUSH
 ;
 CODE_HEADER({RP!},{RPSTO})
-	MOV	BX,[UP]   ;(AX) <- USR VAR BASE
-	MOV	BP,[CELLS(4)+BX]        ;RESET RETURN STACK PTR
+	MOV	BX,[UP]   ;{(AX) <- USR VAR BASE}
+	MOV	BP,[CELLS(4)+BX]        ;{RESET RETURN STACK PTR}
 	JMP	NEXT
 	PAGE
 CODE_HEADER({;S},{SEMIS})
-	MOV	SI,[BP]	;(IP) <- (R1)
+	MOV	SI,[BP]	;{(IP) <- (R1)}
 	LEA	BP,[BP+CELLS(1)]
 	JMP	NEXT
 ;
-CODE_HEADER({LEAVE},{LLEAV})  ;LIMIT <- INDEX
-	MOV	AX,[BP]	;GET INDEX
-	MOV	[CELLS(1)+BP],AX        ;STORE IT AT LIMIT
+CODE_HEADER({LEAVE},{LLEAV})  ;{LIMIT <- INDEX}
+	MOV	AX,[BP]	;{GET INDEX}
+	MOV	[CELLS(1)+BP],AX        ;{STORE IT AT LIMIT}
 	JMP	NEXT
 	PAGE
 ;
-CODE_HEADER({>R},{TOR})        ; (R1) <- (S1)
-	POP	BX	;GET STACK PARAMETER
-	LEA	BP,[BP-CELLS(1)]    ;MOVE RETURN STACK DOWN
-	MOV	[BP],BX	;ADD TO RETURN STACK
+CODE_HEADER({>R},{TOR})        ;{ (R1) <- (S1)}
+	POP	BX	;{GET STACK PARAMETER}
+	LEA	BP,[BP-CELLS(1)]    ;{MOVE RETURN STACK DOWN}
+	MOV	[BP],BX	;{ADD TO RETURN STACK}
 	JMP	NEXT
 ;
-CODE_HEADER({R>},{FROMR})      ;(S1) <- (R1)
-	MOV	AX,[BP]	; GET RETURN STACK VALUE
+CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
+	MOV	AX,[BP]	;{ GET RETURN STACK VALUE}
 	LEA	BP,[BP+CELLS(1)]
 	JMP	APUSH
 ;
@@ -1009,33 +1015,33 @@ HEADER({R},{RR},{IDO+CELLS(1)})
 	PAGE
 CODE_HEADER({0=},{ZEQU})
 	POP	AX
-	OR	AX,AX	;DO TEST
-	MOV	AX,1	;TRUE
-	JZ	ZEQU1	;IT'S 0
-	DEC	AX	;FALSE
+	OR	AX,AX	;{DO TEST}
+	MOV	AX,1	;{TRUE}
+	JZ	ZEQU1	;{IT'S 0}
+	DEC	AX	;{FALSE}
 ZEQU1:	JMP	APUSH
 ;
 CODE_HEADER({0<},{ZLESS})
 	POP	AX
-	OR	AX,AX	;SET FLAGS
-	MOV	AX,1	;TRUE
+	OR	AX,AX	;{SET FLAGS}
+	MOV	AX,1	;{TRUE}
 	JS	ZLESS1
-	DEC	AX	;FALSE
+	DEC	AX	;{FALSE}
 ZLESS1:	JMP	APUSH
 ;
 CODE_HEADER({+},{PLUS})
-	POP	AX      ;(S1) <- (S1) + (S2)
+	POP	AX      ;{(S1) <- (S1) + (S2)}
 	POP	BX
 	ADD	AX,BX
 	JMP	APUSH
 	PAGE
 CODE_HEADER({D+},{DPLUS})
-	POP	AX	; YHW
-	POP	DX	; YLW
-	POP	BX	; XHW
-	POP	CX	; XLW
-	ADD	DX,CX	; SLW
-	ADC	AX,BX	; SHW
+	POP	AX	;{ YHW}
+	POP	DX	;{ YLW}
+	POP	BX	;{ XHW}
+	POP	CX	;{ XLW}
+	ADD	DX,CX	;{ SLW}
+	ADC	AX,BX	;{ SHW}
 	JMP	DPUSH
 ;
 CODE_HEADER({MINUS},{MINUS})
@@ -1048,8 +1054,8 @@ CODE_HEADER({DMINUS},{DMINU})
 	POP	CX
 	SUB	AX,AX
 	MOV	DX,AX
-	SUB	DX,CX	; MAKE 2'S COMPLEMENT
-	SBB	AX,BX	; HIGH CELL
+	SUB	DX,CX	;{ MAKE 2'S COMPLEMENT}
+	SBB	AX,BX	;{ HIGH CELL}
 	JMP	DPUSH
 	PAGE
 ;
@@ -1081,14 +1087,14 @@ CODE_HEADER({2DUP},{TDUP})
 	JMP	DPUSH
 ;
 CODE_HEADER({+!},{PSTOR})
-	POP	BX	;ADDRESS
-	POP	AX	;INCREMENT
+	POP	BX	;{ADDRESS}
+	POP	AX	;{INCREMENT}
 	ADD	[BX],AX
 	JMP	NEXT
 ;
 CODE_HEADER({TOGGLE},{TOGGL})
-	POP	AX	;BIT PATTERN
-	POP	BX	;ADDR
+	POP	AX	;{BIT PATTERN}
+	POP	BX	;{ADDR}
 	XOR	[BX],AL	;
 	JMP	NEXT
 ;
@@ -1104,36 +1110,36 @@ CODE_HEADER({C@},{CFET})
 	JMP	APUSH
 ;
 CODE_HEADER({2@},{TFET})
-	POP	BX	;ADDR
-	MOV	AX,[BX]	;MSW
-	MOV	DX,[CELLS(1)+BX]        ;LSW
+	POP	BX	;{ADDR}
+	MOV	AX,[BX]	;{MSW}
+	MOV	DX,[CELLS(1)+BX]        ;{LSW}
 	JMP	DPUSH
 ;
 CODE_HEADER({!},{STORE})
-	POP	BX	;ADDR
-	POP	AX	;DATA
+	POP	BX	;{ADDR}
+	POP	AX	;{DATA}
 	MOV	[BX],AX
 	JMP	NEXT
 ;
 CODE_HEADER({C!},{CSTOR})
-	POP	BX	;ADDR
-	POP	AX	;DATA
+	POP	BX	;{ADDR}
+	POP	AX	;{DATA}
 	MOV	[BX],AL
 	JMP	NEXT
 ;
 CODE_HEADER({2!},{TSTOR})
-	POP	BX	;ADDR
-	POP	AX	;MSW
+	POP	BX	;{ADDR}
+	POP	AX	;{MSW}
 	MOV	[BX],AX
-	POP	AX	;LSW
+	POP	AX	;{LSW}
 	MOV	[CELLS(1)+BX],AX
 	JMP	NEXT
 ;
-; Do it the old way, via real mode (!)
-; Because L@ and L! are to be removed anyway.
+;{ Do it the old way, via real mode (!)}
+;{ Because L@ and L! are to be removed anyway.}
 CODE_HEADER({L@},{LFET})
-	POP	BX	;MEM LOC
-	POP	CX	;SEG REG VAL
+	POP	BX	;{MEM LOC}
+	POP	CX	;{SEG REG VAL}
         JMPHERE_FROM_PROT
 	MOV	DX,DS
 	MOV	DS,CX
@@ -1144,12 +1150,12 @@ CODE_HEADER({L@},{LFET})
 	JMP	NEXT
 ;
 ;
-;        POP     BX      ;MEM LOC
-;        POP     ES      ;SEG REG VAL
-;        MOV     AX,[ES:BX]
-;        MOV     DX,DS
-;        MOV     ES,DX
-;        JMP     APUSH
+;{        POP     BX      ;MEM LOC}
+;{        POP     ES      ;SEG REG VAL}
+;{        MOV     AX,[ES:BX]}
+;{        MOV     DX,DS}
+;{        MOV     ES,DX}
+;{        JMP     APUSH}
 ;
 CODE_HEADER({L!},{LSTORE})
 	POP	BX
@@ -1163,7 +1169,7 @@ CODE_HEADER({L!},{LSTORE})
         JMPHERE_FROM_REAL
 	JMP	NEXT
 	PAGE
-	; At line     LINE ~1000
+	;{ At line     LINE ~1000}
 ;
 HEADER({:},{COLON},{DOCOL},1)
 	DC	QEXEC
@@ -1176,8 +1182,8 @@ HEADER({:},{COLON},{DOCOL},1)
 	DC	RBRAC
 	DC	PSCOD
 DOCOL:	LEA     BP,[BP-CELLS(1)]
-	MOV	[BP],SI	;R1 <- (IP)
-	LEA     SI,[DI+CELLS(1)]  ;(IP) <- (PFA)
+	MOV	[BP],SI	;{R1 <- (IP)}
+	LEA     SI,[DI+CELLS(1)]  ;{(IP) <- (PFA)}
 ;____1_____ _PROTECTED_1_({
         JMPHERE_FROM_PROT
         JMPHERE_FROM_REAL
@@ -1197,22 +1203,22 @@ HEADER({CONSTANT},{CON},{DOCOL})
 	DC	SMUDG
 	DC	COMMA
 	DC	PSCOD
-DOCON:  MOV     AX,[DI+CELLS(1)] ;GET DATA FROM PFA
+DOCON:  MOV     AX,[DI+CELLS(1)] ;{GET DATA FROM PFA}
 	JMP	APUSH
-;               
+;{               }
 HEADER({VARIABLE},{VAR},{DOCOL})
 	DC      CON
 	DC      PSCOD
-DOVAR:	LEA     AX,[DI+CELLS(1)] ;(AX) <- PFA
+DOVAR:	LEA     AX,[DI+CELLS(1)] ;{(AX) <- PFA}
 	JMP	APUSH
 ;
 HEADER({USER},{USER},{DOCOL})
 	DC	CON
 	DC	PSCOD
 DOUSE:  XOR     BX,BX
-	MOV     BL,[DI+CELLS(1)] ;PFA  
-	MOV	DI,[UP]   ;USER VAR ADDRESS
-	LEA	AX,[BX+DI]	;ADDR OF VARIABLE
+	MOV     BL,[DI+CELLS(1)] ;{PFA  }
+	MOV	DI,[UP]   ;{USER VAR ADDRESS}
+	LEA	AX,[BX+DI]	;{ADDR OF VARIABLE}
 	JMP	APUSH
 	PAGE
 CODE_HEADER({0},{ZERO})
@@ -1223,7 +1229,7 @@ CODE_HEADER({1},{ONE})
 	MOV	AX,1
 	JMP	APUSH
 ;
-CODE_HEADER({2},{TWO})   ; Needed also CELLS
+CODE_HEADER({2},{TWO})   ;{ Needed also CELLS}
 	MOV	AX,2
 	JMP	APUSH
 ;
@@ -1232,19 +1238,26 @@ CODE_HEADER({3},{THREE})
 	JMP	APUSH
 ;
 HEADER({BL},{BLS},{DOCON})
-;	THIS IS ONLY A SPAC
+;{	THIS IS ONLY A SPAC}
 	DC	20H
 ;
 HEADER({C/L},{CSLL},{DOCON})
 	DC	64
 ;
+;____1_____ _REAL_1_({
 HEADER({FIRST},{FIRST},{DOCON})
 	DC	BUF1
+});_END___1__({ _REAL_1_})
+;____1_____ _PROTECTED_1_({
+HEADER({FIRST},{FIRST},{DOVAR})
+BUF1    EQU     FIRST+CW
+        RESB    (KBBUF+2*CW)*NBUF       
+});_END___1__({ _PROTECTED_1_})
 ;
-; THE END  OF THE MEMORY 
+;{ THE END OF THE BUFFERS}
 HEADER({LIMIT},{LIMIT},{DOCON})
-	DC	EM
-; THE END  OF THE MEMORY 
+	DC	BUF1+(KBBUF+2*CW)*NBUF        
+;{ THE END  OF THE MEMORY }
 HEADER({EM},{LEM},{DOCON})
 	DC	EM
 ;
@@ -1256,10 +1269,10 @@ HEADER({B/SCR},{BSCR},{DOCON})
 ;
 	PAGE
 ;
-; All user variables are initialised 
-; with the values from USINI.
-; The implementation relies on the initialisation of 
-; those with numbers (6..16H), so change in concord with USINI.
+;{ All user variables are initialised }
+;{ with the values from USINI.}
+;{ The implementation relies on the initialisation of }
+;{ those with numbers (6..16H), so change in concord with USINI.}
 HEADER({S0},{SZERO},{DOUSE})
 	DC	CELLS(3) 
 ;
@@ -1284,7 +1297,7 @@ HEADER({DP},{LDP},{DOUSE})
 
 HEADER({VOC-LINK},{VOCL},{DOUSE})
 	DC	CELLS(10)
-; End of user variables with fixed place.
+;{ End of user variables with fixed place.}
 HEADER({BLK},{BLK},{DOUSE})
 	DC	CELLS(11)
 ;
@@ -1331,14 +1344,14 @@ HEADER({HLD},{HLD},{DOUSE})
 HEADER({RUBOUT},{RUBOUT},{DOUSE})
 	DC	CELLS(30)
 ;
-;========== END USER VARIABLES =============;
+;{========== END USER VARIABLES =============;}
 	PAGE
 CODE_HEADER({1+},{ONEP})
 	POP	AX
 	INC	AX
 	JMP	APUSH
 ;
-CODE_HEADER({2+},{TWOP})   ; Needed also CELLP
+CODE_HEADER({2+},{TWOP})   ;{ Needed also CELLP}
 	POP	AX
 	ADD	AX,2
 	JMP	APUSH
@@ -1368,10 +1381,10 @@ HEADER({C,},{CCOMM},{DOCOL})
 	DC	SEMIS
 ;
 CODE_HEADER({-},{LSUB})
-	POP	DX	;S1
+	POP	DX	;{S1}
 	POP	AX
 	SUB	AX,DX
-	JMP	APUSH	;S1 = S2 - S1
+	JMP	APUSH	;{S1 = S2 - S1}
 ;
 HEADER({=},{EQUAL},{DOCOL})
 	DC	LSUB
@@ -1379,27 +1392,27 @@ HEADER({=},{EQUAL},{DOCOL})
 	DC	SEMIS
 ;
 CODE_HEADER({<},{LESS})
-	POP	DX	;S1
-	POP	AX	;S2
+	POP	DX	;{S1}
+	POP	AX	;{S2}
 	MOV	BX,DX
-	XOR	BX,AX	;TEST FOR EQUAL SIGNS
-	JS	LES1	;SIGNS ARE NOT THE SAME
+	XOR	BX,AX	;{TEST FOR EQUAL SIGNS}
+	JS	LES1	;{SIGNS ARE NOT THE SAME}
 	SUB	AX,DX
-LES1:	OR	AX,AX	;TEST SIGN BIT
-	MOV	AX,0	;ASSUME FALSE
-	JNS	LES2	;NOT LESS THAN
-	INC	AX	;TRUE (1)
+LES1:	OR	AX,AX	;{TEST SIGN BIT}
+	MOV	AX,0	;{ASSUME FALSE}
+	JNS	LES2	;{NOT LESS THAN}
+	INC	AX	;{TRUE (1)}
 LES2:	JMP	APUSH
 ;
 HEADER({U<},{ULESS},{DOCOL})
 	DC      TDUP
 	DC	LXOR,ZLESS
-	_0BRANCH(ULES1) ;IF
+	_0BRANCH(ULES1) ;{IF}
 	DC	DROP,ZLESS
 	DC	ZEQU
 	_BRANCH(ULES2) 
-ULES1	DC	LSUB,ZLESS      ;ELSE
-ULES2	DC	SEMIS		;ENDIF
+ULES1	DC	LSUB,ZLESS      ;{ELSE}
+ULES2	DC	SEMIS		;{ENDIF}
 ;
 HEADER({>},{GREAT},{DOCOL})
 	DC	SWAP
@@ -1407,9 +1420,9 @@ HEADER({>},{GREAT},{DOCOL})
 	DC	SEMIS
 ;
 CODE_HEADER({ROT},{ROT})
-	POP	DX	;S1
-	POP	BX	;S2
-	POP	AX	;S3
+	POP	DX	;{S1}
+	POP	BX	;{S2}
+	POP	AX	;{S3}
 	PUSH	BX
 	JMP	DPUSH
 ;
@@ -1420,19 +1433,19 @@ HEADER({SPACE},{SPACE},{DOCOL})
 ;
 HEADER({-DUP},{DDUP},{DOCOL})
 	DC	DUPE
-	_0BRANCH(DDUP1) ; IF
-	DC	DUPE	;ENDIF
+	_0BRANCH(DDUP1) ;{ IF}
+	DC	DUPE	;{ENDIF}
 DDUP1	DC	SEMIS
 ;
 HEADER({TRAVERSE},{TRAV},{DOCOL})
 	DC	SWAP
-TRAV1	DC	OVER	;BEGIN
+TRAV1	DC	OVER	;{BEGIN}
 	DC	PLUS
 	DC	LIT,7FH
 	DC	OVER
 	DC	CFET
 	DC	LESS
-	_0BRANCH(TRAV1) ;UNTIL
+	_0BRANCH(TRAV1) ;{UNTIL}
 	DC	SWAP
 	DC	DROP
 	DC	SEMIS
@@ -1467,7 +1480,7 @@ HEADER({PFA},{PFA},{DOCOL})
 	DC	PLUS
 	DC	SEMIS
 	PAGE
-	; At line     LINE ~1500
+	;{ At line     LINE ~1500}
 HEADER({!CSP},{SCSP},{DOCOL})
 	DC	SPFET
 	DC	LCSP
@@ -1476,10 +1489,10 @@ HEADER({!CSP},{SCSP},{DOCOL})
 ;
 HEADER({?ERROR},{QERR},{DOCOL})
 	DC	SWAP
-	_0BRANCH(QERR1) ;IF
+	_0BRANCH(QERR1) ;{IF}
 	DC	ERROR
-	_BRANCH(QERR2)  ;ELSE
-QERR1	DC	DROP	;ENDIF
+	_BRANCH(QERR2)  ;{ELSE}
+QERR1	DC	DROP	;{ENDIF}
 QERR2	DC	SEMIS
 ;
 HEADER({?COMP},{QCOMP},{DOCOL})
@@ -1573,7 +1586,7 @@ HEADER({;CODE},{SEMIC},{DOCOL},1)
 	DC	COMP
 	DC	PSCOD
 	DC	LBRAC
-SEMI1	DC	NOOP	; ( ASSEMBLER )
+SEMI1	DC	NOOP	;{ ( ASSEMBLER )}
 	DC	SEMIS
 ;
 HEADER({<BUILDS},{BUILD},{DOCOL})
@@ -1588,8 +1601,8 @@ HEADER({DOES>},{DOES},{DOCOL})
 	DC	STORE
 	DC	PSCOD
 DODOE:	LEA     BP,[BP-CELLS(1)]
-	MOV	[BP],SI	;R1 <- (IP)
-	MOV	SI,[DI+CELLS(1)] ;NEW IP 
+	MOV	[BP],SI	;{R1 <- (IP)}
+	MOV	SI,[DI+CELLS(1)] ;{NEW IP }
 	LEA     AX,[DI+2*CELLS(1)]
 	JMP	APUSH 
 ;
@@ -1603,7 +1616,7 @@ HEADER({COUNT},{COUNT},{DOCOL})
 HEADER({-TRAILING},{DTRAI},{DOCOL})
 	DC	DUPE
 	DC	ZERO
-	DC	XDO	;DO
+	DC	XDO	;{DO}
 DTRA1	DC	OVER
 	DC	OVER
 	DC	PLUS
@@ -1612,15 +1625,15 @@ DTRA1	DC	OVER
 	DC	CFET
 	DC	BLS
 	DC	LSUB
-	_0BRANCH(DTRA2) ;IF
+	_0BRANCH(DTRA2) ;{IF}
 	DC	LLEAV
-	_BRANCH(DTRA3)  ; ELSE
+	_BRANCH(DTRA3)  ;{ ELSE}
 DTRA2	DC	ONE
-	DC	LSUB    ; ENDIF
-DTRA3	_LOOP(DTRA1)    ; LOOP
+	DC	LSUB    ;{ ENDIF}
+DTRA3	_LOOP(DTRA1)    ;{ LOOP}
 	DC	SEMIS
 	PAGE
-	; At line     LINE ~2000
+	;{ At line     LINE ~2000}
 HEADER_SGQ({(.")},{PDOTQ},{DOCOL})
 	DC	RR
 	DC	COUNT
@@ -1636,7 +1649,7 @@ HEADER_SGQ({."},{DOTQ},{DOCOL},1)
 	DC	LIT,22H
 	DC	STATE
 	DC	FETCH
-	_0BRANCH(DOTQ1) ; IF
+	_0BRANCH(DOTQ1) ;{ IF}
 	DC	COMP
 	DC	PDOTQ
 	DC	WORDS
@@ -1644,11 +1657,11 @@ HEADER_SGQ({."},{DOTQ},{DOCOL},1)
 	DC	CFET
 	DC	ONEP
 	DC	ALLOT
-	_BRANCH(DOTQ2)  ; ELSE
+	_BRANCH(DOTQ2)  ;{ ELSE}
 DOTQ1	DC	WORDS
 	DC	HERE
 	DC	COUNT
-	DC	TYPES	; ENDIF
+	DC	TYPES	;{ ENDIF}
 DOTQ2	DC	SEMIS
 	PAGE
 HEADER({QUERY},{QUERY},{DOCOL})
@@ -1662,10 +1675,10 @@ HEADER({QUERY},{QUERY},{DOCOL})
 	DC	SEMIS
 	PAGE
 HEADER_NULL({(NULL)},{NULL},{DOCOL})
-;       Special header putting an ASCII NULL in the dictionary.
+;{       Special header putting an ASCII NULL in the dictionary.}
 	DC	BLK
 	DC	FETCH
-	_0BRANCH(NULL1) ; IF
+	_0BRANCH(NULL1) ;{ IF}
 	DC	ONE
 	DC	BLK
 	DC	PSTOR
@@ -1679,23 +1692,23 @@ HEADER_NULL({(NULL)},{NULL},{DOCOL})
 	DC	LSUB
 	DC	LAND
 	DC	ZEQU
-	_0BRANCH(NULL2) ; IF
+	_0BRANCH(NULL2) ;{ IF}
 	DC	QEXEC
 	DC	FROMR
-	DC	DROP	; ENDIF
-NULL2	_BRANCH(NULL3)  ; ELSE
+	DC	DROP	;{ ENDIF}
+NULL2	_BRANCH(NULL3)  ;{ ELSE}
 NULL1	DC	FROMR
-	DC	DROP	; ENDIF
+	DC	DROP	;{ ENDIF}
 NULL3	DC	SEMIS
 ;
 CODE_HEADER({FILL},{FILL})
-	POP	AX	; FILL CHAR
-	POP	CX	; FILL COUNT
-	POP	DI	; BEGIN ADDR
-;       MOV	BX,DS
-;       MOV	ES,BX	; ES <- DS
-	CLD		; INC DIRECTION
-	REP	STOSB	;STORE BYTE
+	POP	AX	;{ FILL CHAR}
+	POP	CX	;{ FILL COUNT}
+	POP	DI	;{ BEGIN ADDR}
+;{       MOV	BX,DS}
+;{       MOV	ES,BX	; ES <- DS}
+	CLD		;{ INC DIRECTION}
+	REP	STOSB	;{STORE BYTE}
 	JMP	NEXT
 ;
 HEADER({ERASE},{ERASEE},{DOCOL})
@@ -1726,13 +1739,13 @@ HEADER({PAD},{PAD},{DOCOL})
 HEADER({WORD},{WORDS},{DOCOL})
 	DC	BLK
 	DC	FETCH
-	_0BRANCH(WORD1) ; IF
+	_0BRANCH(WORD1) ;{ IF}
 	DC	BLK
 	DC	FETCH
 	DC	BLOCK
-	_BRANCH(WORD2)  ; ELSE
+	_BRANCH(WORD2)  ;{ ELSE}
 WORD1	DC	TIB
-	DC	FETCH      ; ENDIF
+	DC	FETCH      ;{ ENDIF}
 WORD2	DC	LIN
 	DC	FETCH
 	DC	PLUS
@@ -1757,14 +1770,14 @@ WORD2	DC	LIN
 	DC	SEMIS
 	PAGE
 HEADER({(NUMBER)},{PNUMB},{DOCOL})
-PNUM1	DC	ONEP	; BEGIN
+PNUM1	DC	ONEP	;{ BEGIN}
 	DC	DUPE
 	DC	TOR
 	DC	CFET
 	DC	BASE
 	DC	FETCH
 	DC	DIGIT
-	_0BRANCH(PNUM2) ; WHILE
+	_0BRANCH(PNUM2) ;{ WHILE}
 	DC	SWAP
 	DC	BASE
 	DC	FETCH
@@ -1778,12 +1791,12 @@ PNUM1	DC	ONEP	; BEGIN
 	DC	DPL
 	DC	FETCH
 	DC	ONEP
-	_0BRANCH(PNUM3) ; IF
+	_0BRANCH(PNUM3) ;{ IF}
 	DC	ONE
 	DC	DPL
-	DC	PSTOR	; ENDIF
+	DC	PSTOR	;{ ENDIF}
 PNUM3	DC	FROMR
-	_BRANCH(PNUM1)  ; REPEAT
+	_BRANCH(PNUM1)  ;{ REPEAT}
 PNUM2	DC	FROMR
 	DC	SEMIS
 	PAGE
@@ -1800,14 +1813,14 @@ HEADER({NUMBER},{NUMB},{DOCOL})
 	DC	TOR
 	DC	PLUS
 	DC	LIT,-1
-NUMB1	DC	DPL	; BEGIN
+NUMB1	DC	DPL	;{ BEGIN}
 	DC	STORE
 	DC	PNUMB
 	DC	DUPE
 	DC	CFET
 	DC	BLS
 	DC	LSUB
-	_0BRANCH(NUMB2) ; WHILE
+	_0BRANCH(NUMB2) ;{ WHILE}
 	DC	DUPE
 	DC	CFET
 	DC	LIT,2EH
@@ -1815,11 +1828,11 @@ NUMB1	DC	DPL	; BEGIN
 	DC	ZERO
 	DC	QERR
 	DC	ZERO
-	_BRANCH(NUMB1)  ; REPEAT
+	_BRANCH(NUMB1)  ;{ REPEAT}
 NUMB2	DC	DROP
 	DC	FROMR
-	_0BRANCH(NUMB3) ; IF
-	DC	DMINU	; ENDIF
+	_0BRANCH(NUMB3) ;{ IF}
+	DC	DMINU	;{ ENDIF}
 NUMB3	DC	SEMIS
 	PAGE
 HEADER({-FIND},{DFIND},{DOCOL})
@@ -1832,11 +1845,11 @@ HEADER({-FIND},{DFIND},{DOCOL})
 	DC	PFIND
 	DC	DUPE
 	DC	ZEQU
-	_0BRANCH(DFIN1) ;IF
+	_0BRANCH(DFIN1) ;{IF}
 	DC	DROP
 	DC	HERE
 	DC	LATES
-	DC	PFIND	;ENDIF
+	DC	PFIND	;{ENDIF}
 DFIN1	DC	SEMIS
 ;
 HEADER({(ABORT)},{PABOR},{DOCOL})
@@ -1847,8 +1860,8 @@ HEADER({ERROR},{ERROR},{DOCOL})
 	DC	WARN
 	DC	FETCH
 	DC	ZLESS
-	_0BRANCH(ERRO1) ;IF
-	DC	PABOR	;ENDIF
+	_0BRANCH(ERRO1) ;{IF}
+	DC	PABOR	;{ENDIF}
 ERRO1	DC	HERE
 	DC	COUNT
 	DC	TYPES
@@ -1857,14 +1870,14 @@ ERRO1	DC	HERE
 	DC	MESS
 	DC	SPSTO
 ;
-;	CHANGE FROM FIG MODEL
-;	DC LIN,FETCH,BLK,FETCH
+;{	CHANGE FROM FIG MODEL}
+;{	DC LIN,FETCH,BLK,FETCH}
 ;
 	DC	BLK,FETCH
 	DC	DDUP
-	_0BRANCH(ERRO2) ; IF
+	_0BRANCH(ERRO2) ;{ IF}
 	DC	LIN,FETCH
-	DC	SWAP	;ENDIF
+	DC	SWAP	;{ENDIF}
 ERRO2	DC	QUIT
 ;
 HEADER({ID.},{IDDOT},{DOCOL})
@@ -1898,13 +1911,13 @@ HEADER({ID.},{IDDOT},{DOCOL})
 	PAGE
 HEADER({CREATE},{CREAT},{DOCOL})
 	DC	DFIND
-	_0BRANCH(CREA1) ;IF
+	_0BRANCH(CREA1) ;{IF}
 	DC	DROP
 	DC	NFA
 	DC	IDDOT
 	DC	LIT,4
 	DC	MESS
-	DC	SPACE	;ENDIF
+	DC	SPACE	;{ENDIF}
 CREA1	DC	HERE
 	DC	DUPE
 	DC	CFET
@@ -1944,20 +1957,20 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL},1)
 HEADER({LITERAL},{LITER},{DOCOL},1)
 	DC	STATE
 	DC	FETCH
-	_0BRANCH(LITE1) ;IF
+	_0BRANCH(LITE1) ;{IF}
 	DC	COMP
 	DC	LIT
-	DC	COMMA	;ENDIF
+	DC	COMMA	;{ENDIF}
 LITE1	DC	SEMIS
 	PAGE
 ;
 HEADER({DLITERAL},{DLITE},{DOCOL},1)
 	DC	STATE
 	DC	FETCH
-	_0BRANCH(DLIT1) ; IF
+	_0BRANCH(DLIT1) ;{ IF}
 	DC	SWAP
 	DC	LITER
-	DC	LITER	; ENDIF
+	DC	LITER	;{ ENDIF}
 DLIT1	DC	SEMIS
 ;
 HEADER({?STACK},{QSTAC},{DOCOL})
@@ -1977,33 +1990,33 @@ HEADER({?STACK},{QSTAC},{DOCOL})
 	DC	QERR
 	DC	SEMIS
 	PAGE
-	; At line     LINE ~2500
+	;{ At line     LINE ~2500}
 HEADER({INTERPRET},{INTER},{DOCOL})
-INTE1	DC	DFIND	;BEGIN
-	_0BRANCH(INTE2) ;IF
+INTE1	DC	DFIND	;{BEGIN}
+	_0BRANCH(INTE2) ;{IF}
 	DC	STATE
 	DC	FETCH
 	DC	LESS
-	_0BRANCH(INTE3) ;IF
+	_0BRANCH(INTE3) ;{IF}
 	DC	CFA
 	DC	COMMA
-	_BRANCH(INTE4)  ;ELSE
+	_BRANCH(INTE4)  ;{ELSE}
 INTE3	DC	CFA
-	DC	EXEC	;ENDIF
+	DC	EXEC	;{ENDIF}
 INTE4	DC	QSTAC
-	_BRANCH(INTE5)  ;ELSE
+	_BRANCH(INTE5)  ;{ELSE}
 INTE2	DC	HERE
 	DC	NUMB
 	DC	DPL
 	DC	FETCH
 	DC	ONEP
-	_0BRANCH(INTE6) ;IF
+	_0BRANCH(INTE6) ;{IF}
 	DC	DLITE
-	_BRANCH(INTE7)  ;ELSE
+	_BRANCH(INTE7)  ;{ELSE}
 INTE6	DC	DROP
-	DC	LITER	;ENDIF
-INTE7	DC	QSTAC	;ENDIF
-INTE5	_BRANCH(INTE1)  ;AGAIN
+	DC	LITER	;{ENDIF}
+INTE7	DC	QSTAC	;{ENDIF}
+INTE5	_BRANCH(INTE1)  ;{AGAIN}
 	PAGE
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
 	DC	LATES
@@ -2033,15 +2046,15 @@ DOVOC	DC	CELLP
 	DC	SEMIS
 	PAGE
 ;
-;   THE LINKFIELD OF TASK IS A COLD START VALUE ONLY.
-;   IT IS CHANGED EACH TIME A DEFINITION IS
-;   APPENDED TO THE 'FORTH' VOCABULARY.
+;{   THE LINKFIELD OF TASK IS A COLD START VALUE ONLY.}
+;{   IT IS CHANGED EACH TIME A DEFINITION IS}
+;{   APPENDED TO THE 'FORTH' VOCABULARY.}
 ;
 HEADER({FORTH},{FORTH},{DODOE},1)
 	DC	DOVOC
 	DC	0A081H
 	DC	_LINK_FIELD(TASK)
-	DC	0	; END OF VOCABULARY LIST
+	DC	0	;{ END OF VOCABULARY LIST}
 ;
 HEADER({DEFINITIONS},{DEFIN},{DOCOL})
 	DC	CONT
@@ -2060,39 +2073,39 @@ HEADER({QUIT},{QUIT},{DOCOL})
 	DC	BLK
 	DC	STORE
 	DC	LBRAC
-QUIT1	DC	RPSTO	;BEGIN
+QUIT1	DC	RPSTO	;{BEGIN}
 	DC	CR
 	DC	QUERY
 	DC	INTER
 	DC	STATE
 	DC	FETCH
 	DC	ZEQU
-	_0BRANCH(QUIT2) ;IF
+	_0BRANCH(QUIT2) ;{IF}
 	DC	PDOTQ
-	_STRING({OK})   ;ENDIF
-QUIT2	_BRANCH(QUIT1)  ;AGAIN
+	_STRING({OK})   ;{ENDIF}
+QUIT2	_BRANCH(QUIT1)  ;{AGAIN}
 ;
 HEADER({ABORT},{ABORT},{DOCOL})
 	DC	SPSTO
 	DC	DECA
-	DC	QSTAC	; IT DID TO & INCL THIS
+	DC	QSTAC	;{ IT DID TO & INCL THIS}
 	DC	CR
 	DC	DOTCPU
 	DC	PDOTQ
 
 _COMMENT
-;       If this is there it is an official release
+;{       If this is there it is an official release}
 	DB	22
 	DB	'IBM-PC Fig-Forth '
 	DB	FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
 _ENDCOMMENT
-;       If this is there it is a beta release
+;{       If this is there it is a beta release}
 	_STRING({IBM-PC $RCSfile$ $Revision$ })
 	DC	FORTH
 	DC	DEFIN
 	DC	QUIT
 	PAGE
-;	WARM START VECTOR COMES HERE
+;{	WARM START VECTOR COMES HERE}
 ;
 WRM:	MOV	SI,_OFFSET WRM1
 	JMP	NEXT
@@ -2103,24 +2116,24 @@ HEADER({WARM},{WARM},{DOCOL})
 	DC	MTBUF
 	DC	ABORT
 ;
-;	COLD START VECTOR COMES HERE
+;{	COLD START VECTOR COMES HERE}
 ;
-LCLD:    MOV     SI,_OFFSET CLD1  ; (IP) <-
+LCLD:    MOV     SI,_OFFSET CLD1  ;{ (IP) <-}
 ;____1_____ _HOSTED__1_({
 	PUSH    DS
 	MOV	AX,0
-	MOV	DS,AX		;TO VECTOR AREA
+	MOV	DS,AX		;{TO VECTOR AREA}
 	MOV	BX,08CH
 	LEA	AX,[WRM]
-	MOV	[BX],AX		;JUMP TO WRM ON <CTRL-BREAK>
+	MOV	[BX],AX		;{JUMP TO WRM ON <CTRL-BREAK>}
 	INC	BX
 	INC	BX
 	MOV	[BX],CS
 	POP     DS
 });_END___1__({ _HOSTED__1_})
-	CLD			; DIR = INC
-	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;PARAM. STACK
-	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;RETURN STACK
+	CLD			;{ DIR = INC}
+	MOV	STACKPOINTER,_CELL_PTR[USINI+CELLS(3)]    ;{PARAM. STACK}
+	MOV	BP,_CELL_PTR[USINI+CELLS(4)]    ;{RETURN STACK}
 	JMP	NEXT
 ;
 CLD1	DC	COLD
@@ -2141,28 +2154,28 @@ HEADER({COLD},{COLD},{DOCOL})
 	DC	LIT,_VOC_LATEST(FORTH)
 	DC	STORE
 ;____1_____ _MODERN_1_({
-	DC      BLINI           ; Can abort!
+	DC      BLINI           ;{ Can abort!}
 });_END___1__({_MODERN_1_})
 	DC	ABORT
 	PAGE
 CODE_HEADER({S->D},{STOD})
-	POP	DX	;S1
+	POP	DX	;{S1}
 	SUB	AX,AX
 	OR	DX,DX
-	JNS	STOD1	;POS
-	DEC	AX	;NEG
+	JNS	STOD1	;{POS}
+	DEC	AX	;{NEG}
 STOD1:	JMP	DPUSH
 ;
 HEADER({+-},{PM},{DOCOL})
 	DC	ZLESS
-	_0BRANCH(PM1)   ;IF
-	DC	MINUS	;ENDIF
+	_0BRANCH(PM1)   ;{IF}
+	DC	MINUS	;{ENDIF}
 PM1	DC	SEMIS
 ;
 HEADER({D+-},{DPM},{DOCOL})
 	DC	ZLESS
-	_0BRANCH(DPM1)  ;IF
-	DC	DMINU	;ENDIF
+	_0BRANCH(DPM1)  ;{IF}
+	DC	DMINU	;{ENDIF}
 DPM1	DC	SEMIS
 ;
 HEADER({ABS},{LABS},{DOCOL})
@@ -2178,16 +2191,16 @@ HEADER({DABS},{DABS},{DOCOL})
 HEADER({MIN},{MIN},{DOCOL})
 	DC      TDUP
 	DC	GREAT
-	_0BRANCH(MIN1)  ;IF
-	DC	SWAP	;ENDIF
+	_0BRANCH(MIN1)  ;{IF}
+	DC	SWAP	;{ENDIF}
 MIN1	DC	DROP
 	DC	SEMIS
 ;
 HEADER({MAX},{MAX},{DOCOL})
 	DC      TDUP
 	DC	LESS
-	_0BRANCH(MAX1)  ;IF
-	DC	SWAP	;ENDIF
+	_0BRANCH(MAX1)  ;{IF}
+	DC	SWAP	;{ENDIF}
 MAX1	DC	DROP
 	DC	SEMIS
 	PAGE
@@ -2292,66 +2305,66 @@ HEADER({.LINE},{DLINE},{DOCOL})
 HEADER({MESSAGE},{MESS},{DOCOL})
 	DC	WARN
 	DC	FETCH
-	_0BRANCH(MESS1) ;IF
+	_0BRANCH(MESS1) ;{IF}
 	DC	DDUP
-	_0BRANCH(MESS2) ;IF
+	_0BRANCH(MESS2) ;{IF}
 	DC	LIT,4
 	DC	DLINE
-	DC	SPACE	;ENDIF
-MESS2	_BRANCH(MESS3)  ;ELSE
+	DC	SPACE	;{ENDIF}
+MESS2	_BRANCH(MESS3)  ;{ELSE}
 MESS1	DC	PDOTQ
 	_STRING({MSG # })
-	DC	DOT	;ENDIF
+	DC	DOT	;{ENDIF}
 MESS3	DC	SEMIS
 	PAGE
-	; At line     LINE ~3000
-;--------------------------------------------
+	;{ At line     LINE ~3000}
+;{--------------------------------------------}
 ;
-;	8086/88 PORT FETCH AND STORE
+;{	8086/88 PORT FETCH AND STORE}
 ;
-;--------------------------------------------
+;{--------------------------------------------}
 ;
 CODE_HEADER({PC@},{PCFET})
-; FETCH CHARACTER (BYTE) FROM PORT
-	POP	DX	; PORT ADDR
-	IN	AL,{DX}   ; BYTE INPUT
+;{ FETCH CHARACTER (BYTE) FROM PORT}
+	POP	DX	;{ PORT ADDR}
+	IN	AL,{DX}   ;{ BYTE INPUT}
 	SUB	AH,AH
 	JMP	APUSH
 ;
 CODE_HEADER({PC!},{PCSTO})
-; STORE CHARACTER (BYTE) AT PORT
-	POP	DX	;PORT ADDR
-	POP	AX	;DATA
-	OUT	{DX},AL   ; BYTE OUTPUT
+;{ STORE CHARACTER (BYTE) AT PORT}
+	POP	DX	;{PORT ADDR}
+	POP	AX	;{DATA}
+	OUT	{DX},AL   ;{ BYTE OUTPUT}
 	JMP	NEXT
 ;
 CODE_HEADER({P@},{PFET})
-; FETCH WORD FROM PORT
-	POP	DX	;PORT ADDR
-	IN	AX,{DX}   ;WORD INPUT
+;{ FETCH WORD FROM PORT}
+	POP	DX	;{PORT ADDR}
+	IN	AX,{DX}   ;{WORD INPUT}
 	JMP	APUSH
 ;
 CODE_HEADER({P!},{PSTO})
-; STORE WORD AT PORT
-	POP	DX	;PORT ADDR
-	POP	AX	;DATA
-	OUT	{DX},AX   ;WORD OUTPUT
+;{ STORE WORD AT PORT}
+	POP	DX	;{PORT ADDR}
+	POP	AX	;{DATA}
+	OUT	{DX},AX   ;{WORD OUTPUT}
 	JMP	NEXT
 ;
 HEADER({USE},{USE},{DOVAR})
-	;ADDR OF NEXT BUFR TO USE
+	;{ADDR OF NEXT BUFR TO USE}
 	DC BUF1
 ;
 HEADER({PREV},{PREV},{DOVAR})
-;       ;ADDR OF PREV USED BUFR
+;{       ;ADDR OF PREV USED BUFR}
 	DC	BUF1
 	PAGE
 HEADER({#BUFF},{NOBUF},{DOCON})
-	;NO. OF BUFFERS
+	;{NO. OF BUFFERS}
 	DC      NBUF
 ;
 HEADER({+BUF},{PBUF},{DOCOL})
-	DC	LIT,CO
+	DC	LIT,(KBBUF+2*CW)
 	DC	PLUS,DUPE
 	DC	LIMIT,EQUAL
 	_0BRANCH(PBUF1) 
@@ -2376,7 +2389,7 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
 	PAGE
 ;
 HEADER({BUFFER},{BUFFE},{DOCOL})
-; NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER
+;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
 	DC      USE
 	DC	FETCH,DUPE
 	DC	TOR
@@ -2438,8 +2451,8 @@ HEADER({LOAD},{LOAD},{DOCOL})
 	DC	TOR,ZERO
 	DC	LIN,STORE
 	DC	BSCR,STAR
-	DC	BLK,STORE	;BLK <- SCR * B/SCR
-	DC	INTER	;INTERPRET FROM OTHER
+	DC	BLK,STORE	;{BLK <- SCR * B/SCR}
+	DC	INTER	;{INTERPRET FROM OTHER}
 SCREEN	DC	FROMR,LIN
 	DC	STORE
 	DC	FROMR,BLK
@@ -2462,86 +2475,86 @@ HEADER({-->},{ARROW},{DOCOL},1)
 	DC	SEMIS
 	PAGE
 ;
-; Generic call on BIOS. A boon for experimenters.
-; Because there is no such thing as a variable interrupt:
-; THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!
-; BEWARE OF THE SOFTWARE POLICE!
+;{ Generic call on BIOS. A boon for experimenters.}
+;{ Because there is no such thing as a variable interrupt:}
+;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
+;{ BEWARE OF THE SOFTWARE POLICE!}
 CODE_HEADER({BIOS},{BIOS})
-	POP     AX      ; Function code
-	; Once we are more acknowledgable, put segment overwrite here.
-	MOV     _BYTE_PTR([RQBIOS+1]),AL ; Patch the code.
+	POP     AX      ;{ Function code}
+	;{ Once we are more acknowledgable, put segment overwrite here.}
+	MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
 	POP     DX        
 	POP     CX      
 	POP     BX      
 	POP     AX      
-	PUSH     SI      ; Save Forth registers. NEEDED? 
+	PUSH     SI      ;{ Save Forth registers. NEEDED? }
 	PUSH     BP      
-	XCHG    SI,AX   ; Save AX in (already free) SI
+	XCHG    SI,AX   ;{ Save AX in (already free) SI}
         JMPHERE_FROM_PROT
 	XCHG    SI,AX   
-RQBIOS: INT(0)          ; Request number to be overwritten.
-	PUSHF      ; Save status into DI 
+RQBIOS: INT(0)          ;{ Request number to be overwritten.}
+	PUSHF      ;{ Save status into DI }
 	POP     DI      
-	XCHG    SI,AX   ; Save AX in (still free) SI     
+	XCHG    SI,AX   ;{ Save AX in (still free) SI     }
         JMPHERE_FROM_REAL
 	XCHG    SI,AX   
-	POP	BP	; Restore Forth registers. NEEDED? 
-	POP	SI	;INTERPRETER PNTR
+	POP	BP	;{ Restore Forth registers. NEEDED? }
+	POP	SI	;{INTERPRETER PNTR}
 	PUSH     AX      
 	PUSH     BX      
 	PUSH     CX      
 	PUSH     DX      
-	PUSH     DI     ; i.e. flags 
+	PUSH     DI     ;{ i.e. flags }
 	JMP     NEXT    ;
-; SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!
+;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
-; Generic call on MSDOS/MS WIndows2000
-; This works in a standalone Forth (if started from MSDOS).
+;{ Generic call on MSDOS/MS WIndows2000}
+;{ This works in a standalone Forth (if started from MSDOS).}
 CODE_HEADER({BDOS},{BDOS})
 	POP     DX        
 	POP     CX      
 	POP     BX      
 	POP     AX      
-	PUSH     SI      ; Save Forth registers. NEEDED? 
+	PUSH     SI      ;{ Save Forth registers. NEEDED? }
 	PUSH     BP      
-	XCHG    SI,AX   ; Save AX in (already free) SI
+	XCHG    SI,AX   ;{ Save AX in (already free) SI}
         JMPHERE_FROM_PROT
 	XCHG    SI,AX   
         INT     21H          
-	PUSHF      ; Save status into DI 
+	PUSHF      ;{ Save status into DI }
 	POP     DI      
-	XCHG    SI,AX   ; Save AX in (still free) SI     
+	XCHG    SI,AX   ;{ Save AX in (still free) SI     }
         JMPHERE_FROM_REAL
 	XCHG    SI,AX   
-	POP	BP	; Restore Forth registers. NEEDED? 
-	POP	SI	;INTERPRETER PNTR
+	POP	BP	;{ Restore Forth registers. NEEDED? }
+	POP	SI	;{INTERPRETER PNTR}
 	PUSH     AX      
 	PUSH     BX      
 	PUSH     CX      
 	PUSH     DX      
-	PUSH     DI     ; i.e. flags 
+	PUSH     DI     ;{ i.e. flags }
 	JMP     NEXT    
 
-	     ; SVGA-modus 43*132 char's
+	     ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{SMALL},{DOCOL})
 	     DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
 	     DC      LIT, 0010H, BIOS
 	     DC      DROP, DROP, DROP, DROP, DROP, SEMIS
-	     ;                          ^ MUST BE 4FH
+	     ;{                          ^ MUST BE 4FH}
 	PAGE    
-;------------------------------------
-;       SYSTEM DEPENDANT CHAR I/O
-;------------------------------------
+;{------------------------------------}
+;{       SYSTEM DEPENDANT CHAR I/O}
+;{------------------------------------}
 ;____1_____ _MODERN_1_({
-; All I/O goes through the modern (unix-borrowed)
-; file I/O.    
+;{ All I/O goes through the modern (unix-borrowed)}
+;{ file I/O.    }
 HEADER({TYPE},{TYPES},{DOCOL})
 	DC      DUPE, LOUT, PSTOR
 	DC      TOR, TOR
-	DC      LIT,04000H ; Write file or device 
-	DC      ONE     ; Handle
+	DC      LIT,04000H ;{ Write file or device }
+	DC      ONE     ;{ Handle}
 	DC      FROMR, FROMR, SWAP
-	DC      BDOS, DROP ; ignore error 
+	DC      BDOS, DROP ;{ ignore error }
 	DC      DROP, DROP, DROP, DROP
 	DC      SEMIS
 ;
@@ -2558,12 +2571,12 @@ EMIT1:
  HEADER({EXPECT},{EXPEC},{DOCOL})
 	DC      OVER 
 	DC      TOR, TOR
-	DC      LIT,03F00H ; Write file or device 
-	DC      ZERO     ; Handle
+	DC      LIT,03F00H ;{ Write file or device }
+	DC      ZERO     ;{ Handle}
 	DC      FROMR, FROMR
-	DC      BDOS, DROP ; ignore error 
-	DC      DROP, DROP, DROP ; Leave count
-	DC      TWO, LSUB ; Rid of 0D0A
+	DC      BDOS, DROP ;{ ignore error }
+	DC      DROP, DROP, DROP ;{ Leave count}
+	DC      TWO, LSUB ;{ Rid of 0D0A}
 	DC      PLUS, ZERO, SWAP, CSTOR
 	DC      SEMIS
 ;
@@ -2576,7 +2589,7 @@ CODE_HEADER({KEY},{KEY})
 HEADER({?TERMINAL},{QTERM},{DOCOL})
 	DC      LIT,0B00H 
 	DC      ZERO,ZERO,ZERO
-	DC      BDOS, DROP ; ignore error 
+	DC      BDOS, DROP ;{ ignore error }
 	DC      DROP, DROP, DROP
 	DC      LIT, 01H, LAND
 	DC      SEMIS
@@ -2584,84 +2597,84 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
 
 });_END___1__({_MODERN_1_})
 ;____1_____ _USEDOS_1_({
-; All I/O goes through the 3 assembler functions
-; CI CHO CSTAT. They could be collapsed into the 
-; code definitions, but this way they are available
-; to be called from code.
+;{ All I/O goes through the 3 assembler functions}
+;{ CI CHO CSTAT. They could be collapsed into the }
+;{ code definitions, but this way they are available}
+;{ to be called from code.}
 HEADER({EXPECT},{EXPEC},{DOCOL})        
 	DC	OVER                            
 	DC	PLUS                            
 	DC	OVER                            
-	DC	XDO	; DO                    
+	DC	XDO	;{ DO                    }
 EXPE1	DC	KEY                             
 	DC	DUPE                            
 	DC	RUBOUT 
 	DC      FETCH
 	DC	EQUAL                           
-	_0BRANCH(EXPE2) ; IF                    
+	_0BRANCH(EXPE2) ;{ IF                    }
 	DC	DROP                            
 	DC	DUPE                            
 	DC	IDO                             
 	DC	EQUAL                           
 	DC	DUPE                            
 	DC	FROMR                           
-	DC	TWO     ; Remove last 2 chars 
+	DC	TWO     ;{ Remove last 2 chars }
 	DC	LSUB                            
 	DC	PLUS                            
 	DC	TOR                             
-	_0BRANCH(EXPE6) ; IF                    
+	_0BRANCH(EXPE6) ;{ IF                    }
 	DC	LIT                             
 	DC	BELL                            
-	_BRANCH(EXPE7)  ; ELSE                  
+	_BRANCH(EXPE7)  ;{ ELSE                  }
 EXPE6	DC	LIT                             
-	DC	BSOUT	; ENDIF                 
-EXPE7	_BRANCH(EXPE3)  ; ELSE                  
+	DC	BSOUT	;{ ENDIF                 }
+EXPE7	_BRANCH(EXPE3)  ;{ ELSE                  }
 EXPE2	DC	DUPE                            
 	DC	LIT,0DH
 	DC	EQUAL
-	_0BRANCH(EXPE4) ; IF
+	_0BRANCH(EXPE4) ;{ IF}
 	DC	LLEAV
 	DC	DROP
 	DC	BLS
 	DC	ZERO
-	_BRANCH(EXPE5)  ; ELSE
-EXPE4	DC	DUPE	; ENDIF
+	_BRANCH(EXPE5)  ;{ ELSE}
+EXPE4	DC	DUPE	;{ ENDIF}
 EXPE5	DC	IDO
 	DC	CSTOR
 	DC	ZERO
 	DC	IDO
 	DC	ONEP
-	DC	STORE	; ENDIF
+	DC	STORE	;{ ENDIF}
 EXPE3	DC	EMIT
-	_LOOP(EXPE1) 	; LOOP
+	_LOOP(EXPE1) 	;{ LOOP}
 	DC	DROP
 	DC	SEMIS
 ;
 CODE_HEADER({KEY},{KEY})
-	CALL	CI	;CONSOLE INPUT
-	MOV     AH,0    ;MAKE 16 BITS
-	JMP	APUSH	;SAVE KEY VALUE
+	CALL	CI	;{CONSOLE INPUT}
+	MOV     AH,0    ;{MAKE 16 BITS}
+	JMP	APUSH	;{SAVE KEY VALUE}
 CI	PROC	NEAR
-	MOV	AH,0	; READ CHAR FUNCTION
+	MOV	AH,0	;{ READ CHAR FUNCTION}
 	INT	16H
 	RET
 _ENDP CI      ENDP
 ;
 HEADER({TYPE},{TYPES},{DOCOL})
 	DC	DDUP
-	_0BRANCH(TYPE1) ; IF
+	_0BRANCH(TYPE1) ;{ IF}
 	DC	OVER
 	DC	PLUS
 	DC	SWAP
-	DC	XDO	; DO
+	DC	XDO	;{ DO}
 TYPE2	DC	IDO
 	DC	CFET
 	DC	LIT,7FH
-	DC	LAND    ;STRIP 80H FROM LAST CHAR
+	DC	LAND    ;{STRIP 80H FROM LAST CHAR}
 	DC	EMIT
-	_LOOP(TYPE2)    ; LOOP
-	_BRANCH(TYPE3)  ; ELSE
-TYPE1	DC	DROP	; ENDIF
+	_LOOP(TYPE2)    ;{ LOOP}
+	_BRANCH(TYPE3)  ;{ ELSE}
+TYPE1	DC	DROP	;{ ENDIF}
 TYPE3	DC	SEMIS
 ;
 HEADER({EMIT},{EMIT},{DOCOL})
@@ -2669,21 +2682,21 @@ HEADER({EMIT},{EMIT},{DOCOL})
 	DC	ONE,LOUT
 	DC	PSTOR,SEMIS
 PEMIT	DC	$+CELLS(1)
-	POP	AX	;GET CHAR
-	CMP     AL,LF   ; Precede ^J with ^M
+	POP	AX	;{GET CHAR}
+	CMP     AL,LF   ;{ Precede ^J with ^M}
 	JNE     PEMIT1
 	MOV	AL,ACR
 	CALL	CHO    
 	MOV	AL,LF  
-	; Bizar, without the colon MASM reports error.
-PEMIT1: CALL	CHO    ;CHAR OUTPUT
+	;{ Bizar, without the colon MASM reports error.}
+PEMIT1: CALL	CHO    ;{CHAR OUTPUT}
 	JMP	NEXT
 CHO	PROC	NEAR
 	PUSH	DX
-	PUSH	AX	;SAVE CHAR
-	MOV	DL,AL	;CHAR TO WRITE
-	MOV	AH,2	;CHAR OUT FUNCTION
-	INT	21H	;DOS
+	PUSH	AX	;{SAVE CHAR}
+	MOV	DL,AL	;{CHAR TO WRITE}
+	MOV	AH,2	;{CHAR OUT FUNCTION}
+	INT	21H	;{DOS}
 	POP	AX
 	POP	DX
 	RET
@@ -2691,12 +2704,12 @@ _ENDP CHO     ENDP
 ;
 CODE_HEADER({?TERMINAL},{QTERM})
 	JMP	PQTER
-PQTER:	CALL	CSTAT	;TEST FOR KEY
-	OR	AL,AL	;ANY KEY?
-	JZ	PQTER1	;NO
-	MOV	AL,1	;TRUE = CHAR FOUND
-PQTER1:	MOV	AH,0	;MAKE 16 BITS
-	JMP	APUSH	;SAVE STATUS
+PQTER:	CALL	CSTAT	;{TEST FOR KEY}
+	OR	AL,AL	;{ANY KEY?}
+	JZ	PQTER1	;{NO}
+	MOV	AL,1	;{TRUE = CHAR FOUND}
+PQTER1:	MOV	AH,0	;{MAKE 16 BITS}
+	JMP	APUSH	;{SAVE STATUS}
 ;
 CSTAT	PROC	NEAR
 	PUSH	DX
@@ -2712,48 +2725,48 @@ HEADER({EXPECT},{EXPEC},{DOCOL})
 	DC	OVER                            
 	DC	PLUS                            
 	DC	OVER                            
-	DC	XDO	; DO                    
+	DC	XDO	;{ DO                    }
 EXPE1	DC	KEY                             
 	DC	DUPE                            
 	DC	RUBOUT 
 	DC      FETCH
 	DC	EQUAL                           
-	_0BRANCH(EXPE2) ; IF                    
+	_0BRANCH(EXPE2) ;{ IF                    }
 	DC	DROP                            
 	DC	DUPE                            
 	DC	IDO                             
 	DC	EQUAL                           
 	DC	DUPE                            
 	DC	FROMR                           
-	DC	TWO     ; Remove last 2 chars 
+	DC	TWO     ;{ Remove last 2 chars }
 	DC	LSUB                            
 	DC	PLUS                            
 	DC	TOR                             
-	_0BRANCH(EXPE6) ; IF                    
+	_0BRANCH(EXPE6) ;{ IF                    }
 	DC	LIT                             
 	DC	BELL                            
-	_BRANCH(EXPE7)  ; ELSE                  
+	_BRANCH(EXPE7)  ;{ ELSE                  }
 EXPE6	DC	LIT                             
-	DC	BSOUT	; ENDIF                 
-EXPE7	_BRANCH(EXPE3)  ; ELSE                  
+	DC	BSOUT	;{ ENDIF                 }
+EXPE7	_BRANCH(EXPE3)  ;{ ELSE                  }
 EXPE2	DC	DUPE                            
 	DC	LIT,0DH
 	DC	EQUAL
-	_0BRANCH(EXPE4) ; IF
+	_0BRANCH(EXPE4) ;{ IF}
 	DC	LLEAV
 	DC	DROP
 	DC	BLS
 	DC	ZERO
-	_BRANCH(EXPE5)  ; ELSE
-EXPE4	DC	DUPE	; ENDIF
+	_BRANCH(EXPE5)  ;{ ELSE}
+EXPE4	DC	DUPE	;{ ENDIF}
 EXPE5	DC	IDO
 	DC	CSTOR
 	DC	ZERO
 	DC	IDO
 	DC	ONEP
-	DC	STORE	; ENDIF
+	DC	STORE	;{ ENDIF}
 EXPE3	DC	EMIT
-	_LOOP(EXPE1) 	; LOOP
+	_LOOP(EXPE1) 	;{ LOOP}
 	DC	DROP
 	DC	SEMIS
 ;
@@ -2773,7 +2786,7 @@ TYPE2:       DC      IDO,    CFET,    EMIT
 	     _BRANCH(TYPE3)
 TYPE1:       DC      DROP
 TYPE3:       DC      SEMIS
-;            
+;{            }
 HEADER({EMIT},{EMIT},{DOCOL})
 	     DC      ONE,LOUT,PSTOR
 	     DC      LIT, 07FH, LAND
@@ -2783,7 +2796,7 @@ HEADER({EMIT},{EMIT},{DOCOL})
 	     DC      ZERO,LOUT,STORE
 EMIT1:       DC      PEMIT
 	     DC      SEMIS
-;            
+;{            }
 HEADER({(EMIT)},{PEMIT},{DOCOL})
 	     DC      LIT, 0E00H, PLUS, ZERO, ZERO, ZERO
 	     DC      LIT, 0010H, BIOS
@@ -2797,7 +2810,7 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
 	     DC      DROP, DROP, DROP, DROP
 	     DC      FROMR, SEMIS
 
-	     ; Output to PRN 
+	     ;{ Output to PRN }
 HEADER({POUT},{POUT},{DOCOL})
 	     DC      ZERO, ZERO, ZERO
 	     DC      LIT, 0017H, BIOS
@@ -2805,14 +2818,14 @@ HEADER({POUT},{POUT},{DOCOL})
 ;
 });_END___1__({_USEBIOS_1_})
 	PAGE
-;------------------------------------
-;       SYSTEM DEPENDANT DISK I/O
-;------------------------------------
+;{------------------------------------}
+;{       SYSTEM DEPENDANT DISK I/O}
+;{------------------------------------}
 
 ;____1_____ _MODERN_1_({
 HEADER({BLOCK-FILE},{BLFL},{DOVAR})
 	_STRING({BLOCKS.FRT})
-	_RESB(20)               ; Allow for some path
+	_RESB(20)               ;{ Allow for some path}
 ;
 HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
 	DC      0
@@ -2823,47 +2836,47 @@ HEADER({DISK-ERR},{DERR},{DOCOL})
 	DC	SEMIS
 ;
 HEADER({BLOCK-INIT},{BLINI},{DOCOL})
-	DC      LIT, 03D02H    ; Open file for read/write
+	DC      LIT, 03D02H    ;{ Open file for read/write}
 	DC      ZERO,ZERO
 	DC      BLFL
 	DC      COUNT, OVER, PLUS
-	DC      ZERO, SWAP, CSTOR  ; Zero ended as required
+	DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
 	DC	BDOS, DERR
 	DC      DROP, DROP, DROP
 	DC      BHAN, STORE
 	DC	SEMIS
 ;
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
-	DC      LIT, 03E00H    ; Open file for read/write
+	DC      LIT, 03E00H    ;{ Open file for read/write}
 	DC      BHAN, FETCH
 	DC      ZERO, ZERO
 	DC	BDOS, DERR
 	DC      DROP, DROP, DROP, DROP
 	DC	SEMIS
 ;
-;       Block #, Handle
+;{       Block #, Handle}
 HEADER({SEEK},{SEEK},{DOCOL})
 	DC      SWAP, TOR, TOR
-	DC      LIT, 04200H     ; Seek from start
-	DC      FROMR           ; Handle
+	DC      LIT, 04200H     ;{ Seek from start}
+	DC      FROMR           ;{ Handle}
 	DC      FROMR, BBUF, USTAR
-	DC      SWAP    ; L.S. ON TOP
+	DC      SWAP    ;{ L.S. ON TOP}
 	DC	BDOS, DERR
 	DC      DROP, DROP, DROP, DROP
 	DC      SEMIS
 ;
-;	( ADDR  BLK#  FLAG (0=W, 1=R) --- )
+;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
 	_0BRANCH(RSLW1) 
-	DC	LIT, 03F00H     ; Disk read 
+	DC	LIT, 03F00H     ;{ Disk read }
 	_BRANCH(RSLW2) 
-RSLW1	DC      LIT, 04000H     ; Disk write
+RSLW1	DC      LIT, 04000H     ;{ Disk write}
 RSLW2:  DC      TOR 
-	DC      BHAN, FETCH, SEEK ; That's done
+	DC      BHAN, FETCH, SEEK ;{ That's done}
 	DC      FROMR, SWAP, TOR
 	DC      BHAN, FETCH
 	DC      BBUF
-	DC      FROMR           ; ADDR
+	DC      FROMR           ;{ ADDR}
 	DC	BDOS, DERR
 	DC      DROP, DROP, DROP
 	DC      BBUF, LSUB, DERR
@@ -2876,26 +2889,26 @@ WERR	DB  	'DISK WRITE ERROR  $'
 RERR	DB  	'DISK READ ERROR   $'
 ;
 SBLK    PROC    NEAR
-;	( ADDR  BLK# -- )
-;	THIS ROUTINE WILL PREPARE PARAMETERS FOR DISK I/O
-;       DRIVE, ADDRESS, LENGTH, SEC#
-	POP	DI	;SAVE RETURN
-	POP	AX      ;BLK #
+;{	( ADDR  BLK# -- )}
+;{	THIS ROUTINE WILL PREPARE PARAMETERS FOR DISK I/O}
+;{       DRIVE, ADDRESS, LENGTH, SEC#}
+	POP	DI	;{SAVE RETURN}
+	POP	AX      ;{BLK #}
 	MOV	CX,SPB 
-	MUL     CX   ;SEC #
+	MUL     CX   ;{SEC #}
 	MOV     DX,AX
-	MOV	AL,DRIVE    ;SELECT DR A
-	POP     BX      ;TRANSFER ADDR
-	PUSH	DI	;GET THAT RETURN BACK
+	MOV	AL,DRIVE    ;{SELECT DR A}
+	POP     BX      ;{TRANSFER ADDR}
+	PUSH	DI	;{GET THAT RETURN BACK}
 	RET
 _ENDP SBLK    ENDP
 ;
 CODE_HEADER({RBLK},{RBLK})
 	CALL	SBLK
-	PUSH	SI	;PRESERVE INTERPRETER POINTER
-	PUSH	BP	;RETURN POINTER
+	PUSH	SI	;{PRESERVE INTERPRETER POINTER}
+	PUSH	BP	;{RETURN POINTER}
 	INT	25H
-	JNC	DOK	;NO ERRORS
+	JNC	DOK	;{NO ERRORS}
 	LEA	DX,[RERR]
 	JMP	DERR
 ;
@@ -2907,18 +2920,18 @@ CODE_HEADER({WBLK},{WBLK})
 	JNC	DOK
 	LEA	DX,[WERR]
 DERR:	PUSH	AX
-	MOV	AH,9	;STRING WRITE FNCN
+	MOV	AH,9	;{STRING WRITE FNCN}
 	INT	21H
-	POP	AX	;ERROR CODE IN AX
-;  WRITE ERROR MESSAGE HERE
+	POP	AX	;{ERROR CODE IN AX}
+;{  WRITE ERROR MESSAGE HERE}
 ;
-DOK:	POPF		;POP FLAGS
-	POP	BP	;RETURN STACK
-	POP	SI	;INTERPRETER PNTR
+DOK:	POPF		;{POP FLAGS}
+	POP	BP	;{RETURN STACK}
+	POP	SI	;{INTERPRETER PNTR}
 	JMP	NEXT
 ;
 ;
-;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
+;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
 	_0BRANCH(RSLW1) 
 	DC	RBLK
@@ -2934,7 +2947,7 @@ HEADER({DRIVE},{DRIVE},{DOVAR})
 HEADER({RECORD},{REC},{DOVAR})
       DC  0
 ;
-HEADER({SEC/BLK},{SPBLK},{DOCON}) ;# SECTORS/BLOCK
+HEADER({SEC/BLK},{SPBLK},{DOCON}) ;{# SECTORS/BLOCK}
 	DC	SPB
 ;
 HEADER({DISK-ERROR},{DSKERR},{DOVAR})
@@ -2942,24 +2955,24 @@ HEADER({DISK-ERROR},{DSKERR},{DOVAR})
 });_END___1__({_USEBIOS_1_})
 ;
 ;____1_____ _BOOTFD__1_({
-;  (Command, address, sec# -- )
+;{  (Command, address, sec# -- )}
 HEADER({SEC-RW},{SECRW},{DOCOL})
-	DC      LIT, SPT*HEADS, SLMOD   ; Juggle #sec, #head, #track
+	DC      LIT, SPT*HEADS, SLMOD   ;{ Juggle #sec, #head, #track}
 	DC      SWAP, LIT, SPT, SLMOD, TOR
 	DC      SWAP, LIT, 0100H, STAR, PLUS, ONEP
-	DC      FROMR, LIT, 0100H, STAR  ; .. to arrive at CX, DX
+	DC      FROMR, LIT, 0100H, STAR  ;{ .. to arrive at CX, DX}
 	DC      LIT, 13H, BIOS
 	DC      ONE, LAND, DSKERR, STORE
 	DC      DROP, DROP, DROP, DROP
 	DC      SEMIS
 ;
-;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
+;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
 	DC      ZERO, DSKERR, STORE
 	_0BRANCH(RSLW1)
-	DC      LIT, 0201H      ; Read (AH) one (AL) sector 
+	DC      LIT, 0201H      ;{ Read (AH) one (AL) sector }
 	_BRANCH(RSLW2)
-RSLW1:  DC      LIT, 0301H      ; Write (AH) one (AL) sector 
+RSLW1:  DC      LIT, 0301H      ;{ Write (AH) one (AL) sector }
 RSLW2:  DC      SWAP
 	DC      SPBLK,  STAR
 	DC      SPBLK,  OVER, PLUS
@@ -2972,71 +2985,71 @@ RSLW0:
 	_LOOP(RSLW0)
 	DC      DROP, DROP
 	DC      DSKERR, FETCH,     DDUP
-	_0BRANCH(RSLW5)              ;OK
+	_0BRANCH(RSLW5)              ;{OK}
 	DC      ZLESS
 	_0BRANCH(RSLW3)
-	DC      LIT,    9   ;Write error
+	DC      LIT,    9   ;{Write error}
 	_BRANCH(RSLW4)
-RSLW3:  DC      LIT,    8   ;Read error
-RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
-						   ; is no good!
+RSLW3:  DC      LIT,    8   ;{Read error}
+RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;{This  buffer}
+						   ;{ is no good!}
 	DC      QERR
 RSLW5:  DC      SEMIS
 ;
 });_END___1__({ _BOOTFD__1_})
 ;____1_____ _BOOTHD__1_({
-; Warning : if this LBA is used apart from by R/W
-; the fields marked default must be restored.
+;{ Warning : if this LBA is used apart from by R/W}
+;{ the fields marked default must be restored.}
 HEADER({LBAPAR},{LBA},{DOVAR})
-	DB      10H, 0      ; default    
-	DC      SPB         ; default    
-	DC      0           ; to be filled with offset
-	DC      REALSEGMENT ; default segment
-	; At a hard disk we just read sector from sector 1        
-	DD      0       ; sector number
-	DD      0       ; M.S. 32 BITS default
+	DB      10H, 0      ;{ default    }
+	DC      SPB         ;{ default    }
+	DC      0           ;{ to be filled with offset}
+	DC      REALSEGMENT ;{ default segment}
+	;{ At a hard disk we just read sector from sector 1        }
+	DD      0       ;{ sector number}
+	DD      0       ;{ M.S. 32 BITS default}
 
-; Reads/ writes the block such as in LBA
+;{ Reads/ writes the block such as in LBA}
 CODE_HEADER({RBLK},{RBLK})
 	POP     AX     
-	PUSH	SI	;PRESERVE INTERPRETER POINTER
+	PUSH	SI	;{PRESERVE INTERPRETER POINTER}
 	MOV     SI,AX  
-	PUSH	BP	;RETURN POINTER
+	PUSH	BP	;{RETURN POINTER}
 	MOV     BX,4200H       
-	MOV     DX,0080H  ;   Disk C                                 
+	MOV     DX,0080H  ;{   Disk C                                 }
         JMPHERE_FROM_PROT
 	XCHG    BX,AX
 	INT     13H
-	PUSHF           ; REMEMBER STATUS
+	PUSHF           ;{ REMEMBER STATUS}
 	POP     BX
         JMPHERE_FROM_REAL
-	POP	BP	;RETURN STACK
-	POP	SI	;INTERPRETER PNTR
-	PUSH    BX      ; REMEMBER STATUS
+	POP	BP	;{RETURN STACK}
+	POP	SI	;{INTERPRETER PNTR}
+	PUSH    BX      ;{ REMEMBER STATUS}
 	JMP	NEXT
 ;
 CODE_HEADER({WBLK},{WBLK})
 	POP     AX     
-	PUSH	SI	;PRESERVE INTERPRETER POINTER
+	PUSH	SI	;{PRESERVE INTERPRETER POINTER}
 	MOV     SI,AX  
-	PUSH	BP	;RETURN POINTER
+	PUSH	BP	;{RETURN POINTER}
 	MOV     BX,4300H       
-	MOV     DX,0080H  ;   Disk C                                 
+	MOV     DX,0080H  ;{   Disk C                                 }
         JMPHERE_FROM_PROT
 	XCHG    BX,AX
 	INT     13H
-	PUSHF           ; REMEMBER STATUS
+	PUSHF           ;{ REMEMBER STATUS}
 	POP     BX
         JMPHERE_FROM_REAL
-	POP	BP	;RETURN STACK
-	POP	SI	;INTERPRETER PNTR
+	POP	BP	;{RETURN STACK}
+	POP	SI	;{INTERPRETER PNTR}
 	PUSH    BX
 	JMP	NEXT
 
-;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
+;{	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
 	DC      TOR
-	DC      LIT, SPB, STAR  ; Sector number
+	DC      LIT, SPB, STAR  ;{ Sector number}
 	DC      LBA, LIT, 8, PLUS, STORE  
 	DC      LBA, LIT, 4, PLUS, STORE  
 	DC      LBA
@@ -3049,18 +3062,18 @@ RSLW2:  DC      DUPE, DSKERR, STORE
 
 	DC      ONE, LAND, DUPE
 	_0BRANCH(RSLW4)
-;        DC      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
-						   ; is no good!
+;{        DC      ZERO,   PREV,   FETCH,     STORE   ;This  buffer}
+						   ;{ is no good!}
 RSLW4:  
-	; Handle error
-	DC      LIT,    9   ;Write error
-	DC      FROMR, LSUB ; 1 less: read error
+	;{ Handle error}
+	DC      LIT,    9   ;{Write error}
+	DC      FROMR, LSUB ;{ 1 less: read error}
 	DC      QERR
 	DC      SEMIS
 ;
 });_END___1__({ _BOOTHD__1_})
 	PAGE
-	; At line     LINE ~3500
+	;{ At line     LINE ~3500}
 HEADER({'},{TICK},{DOCOL},1)
 	DC	DFIND
 	DC	ZEQU
@@ -3110,7 +3123,7 @@ HEADER({BEGIN},{BEGIN},{DOCOL},1)
 ;
 HEADER({ENDIF},{ENDIFF},{DOCOL},1)
 	DC	QCOMP
-	DC	TWO     ; Magic number
+	DC	TWO     ;{ Magic number}
 	DC	QPAIR
 	DC	HERE
 	DC	OVER
@@ -3127,11 +3140,11 @@ HEADER({DO},{DO},{DOCOL},1)
 	DC	COMP
 	DC	XDO
 	DC	HERE
-	DC	THREE   ; Magic number
+	DC	THREE   ;{ Magic number}
 	DC	SEMIS
 ;
 HEADER({LOOP},{LOOPC},{DOCOL},1)
-	DC	THREE   ; Magic number
+	DC	THREE   ;{ Magic number}
 	DC	QPAIR
 	DC	COMP
 	DC	XLOOP
@@ -3139,7 +3152,7 @@ HEADER({LOOP},{LOOPC},{DOCOL},1)
 	DC	SEMIS
 	PAGE
 HEADER({+LOOP},{PLOOP},{DOCOL},1)
-	DC	THREE   ; Magic number
+	DC	THREE   ;{ Magic number}
 	DC	QPAIR
 	DC	COMP
 	DC	XPLOO
@@ -3172,7 +3185,7 @@ HEADER({REPEAT},{REPEA},{DOCOL},1)
 	DC	AGAIN
 	DC	FROMR
 	DC	FROMR
-	DC	TWO     ; Magic number
+	DC	TWO     ;{ Magic number}
 	DC	LSUB
 	DC	ENDIFF
 	DC	SEMIS
@@ -3183,11 +3196,11 @@ HEADER({IF},{IFF},{DOCOL},1)
 	DC      HERE
 	DC	ZERO
 	DC	COMMA
-	DC	TWO     ; Magic number           
+	DC	TWO     ;{ Magic number           }
 	DC	SEMIS
 	PAGE
 HEADER({ELSE},{ELSEE},{DOCOL},1)
-	DC	TWO     ; Magic number 
+	DC	TWO     ;{ Magic number }
 	DC	QPAIR
 	DC	COMP
 	DC	BRAN
@@ -3195,14 +3208,14 @@ HEADER({ELSE},{ELSEE},{DOCOL},1)
 	DC	ZERO
 	DC	COMMA
 	DC	SWAP
-	DC	TWO     ; Magic number           
+	DC	TWO     ;{ Magic number           }
 	DC	ENDIFF
-	DC	TWO     ; Magic number           
+	DC	TWO     ;{ Magic number           }
 	DC	SEMIS
 ;
 HEADER({WHILE},{WHILE},{DOCOL},1)
 	DC	IFF
-	DC	TWOP        ; Magic number           
+	DC	TWOP        ;{ Magic number           }
 	DC	SEMIS
 	PAGE
 HEADER({SPACES},{SPACS},{DOCOL})
@@ -3211,9 +3224,9 @@ HEADER({SPACES},{SPACS},{DOCOL})
 	DC	DDUP
 	_0BRANCH(SPAX1) 
 	DC	ZERO
-	DC	XDO	;DO
+	DC	XDO	;{DO}
 SPAX2	DC	SPACE
-	_LOOP(SPAX2) 	;LOOP
+	_LOOP(SPAX2) 	;{LOOP}
 SPAX1	DC	SEMIS
 ;
 HEADER({<#},{BDIGS},{DOCOL})
@@ -3235,9 +3248,9 @@ HEADER({#>},{EDIGS},{DOCOL})
 HEADER({SIGN},{SIGN},{DOCOL})
 	DC	ROT
 	DC	ZLESS
-	_0BRANCH(SIGN1) ;IF
+	_0BRANCH(SIGN1) ;{IF}
 	DC	LIT,2DH
-	DC	HOLD	;ENDIF
+	DC	HOLD	;{ENDIF}
 SIGN1	DC	SEMIS
 ;
 HEADER({#},{DIG},{DOCOL})
@@ -3248,21 +3261,21 @@ HEADER({#},{DIG},{DOCOL})
 	DC	LIT,9
 	DC	OVER
 	DC	LESS
-	_0BRANCH(DIG1)  ;IF
+	_0BRANCH(DIG1)  ;{IF}
 	DC	LIT,7
-	DC	PLUS	;ENDIF
+	DC	PLUS	;{ENDIF}
 DIG1	DC	LIT,30H
 	DC	PLUS
 	DC	HOLD
 	DC	SEMIS
 ;
 HEADER({#S},{DIGS},{DOCOL})
-DIGS1	DC	DIG	;BEGIN
+DIGS1	DC	DIG	;{BEGIN}
 	DC	OVER
 	DC	OVER
 	DC	LOR
 	DC	ZEQU
-	_0BRANCH(DIGS1) ;UNTIL
+	_0BRANCH(DIGS1) ;{UNTIL}
 	DC	SEMIS
 ;
 HEADER({D.R},{DDOTR},{DOCOL})
@@ -3309,7 +3322,7 @@ HEADER({U.},{UDOT},{DOCOL})
 	DC	DDOT
 	DC	SEMIS
 	PAGE
-	; At line     LINE ~4000
+	;{ At line     LINE ~4000}
 HEADER({VLIST},{VLIST},{DOCOL})
 	DC	LIT,80H
 	DC	LOUT
@@ -3317,15 +3330,15 @@ HEADER({VLIST},{VLIST},{DOCOL})
 	DC	CONT
 	DC	FETCH
 	DC	FETCH
-VLIS1	DC	LOUT    ;BEGIN
+VLIS1	DC	LOUT    ;{BEGIN}
 	DC	FETCH
 	DC	CSLL
 	DC	GREAT
-	_0BRANCH(VLIS2) ;IF
+	_0BRANCH(VLIS2) ;{IF}
 	DC	CR
 	DC	ZERO
 	DC	LOUT
-	DC	STORE	;ENDIF
+	DC	STORE	;{ENDIF}
 VLIS2	DC	DUPE
 	DC	IDDOT
 	DC	SPACE
@@ -3337,16 +3350,16 @@ VLIS2	DC	DUPE
 	DC	ZEQU
 	DC	QTERM
 	DC	LOR
-	_0BRANCH(VLIS1) ;UNTIL
+	_0BRANCH(VLIS1) ;{UNTIL}
 	DC	DROP
 	DC	SEMIS
 ;
 CODE_HEADER({BYE},{BYE})
 ;____1_____ _HOSTED__1_({
-; EXIT TO PC-DOS
-	INT	27H	;I'M HISTORY
+;{ EXIT TO PC-DOS}
+	INT	27H	;{I'M HISTORY}
 });_END___1__({ _HOSTED__1_})
-CYCLE:  _0BRANCH(CYCLE) ;PREVENT DISASTERS
+CYCLE:  _0BRANCH(CYCLE) ;{PREVENT DISASTERS}
  
 	PAGE
 HEADER({LIST},{LISTC},{DOCOL})
@@ -3363,7 +3376,7 @@ LIST1	DC	CR,IDO
 	DC	DOTR,SPACE
 	DC	IDO,SCR
 	DC	FETCH,DLINE
-	DC	QTERM	; ?TERMINAL
+	DC	QTERM	;{ ?TERMINAL}
 	_0BRANCH(LIST2) 
 	DC	LLEAV
 LIST2	_LOOP(LIST1) 
@@ -3396,15 +3409,15 @@ HEADER({TRIAD},{TRIAD},{DOCOL})
 	DC	SWAP,XDO
 TRIA1	DC	CR,IDO
 	DC	LISTC
-	DC	QTERM	; ?TERMINAL
+	DC	QTERM	;{ ?TERMINAL}
 	_0BRANCH(TRIA2) 
-	DC	LLEAV   ;LEAVE
-TRIA2	_LOOP(TRIA1) 	;ENDIF
+	DC	LLEAV   ;{LEAVE}
+TRIA2	_LOOP(TRIA1) 	;{ENDIF}
 	DC	CR
 	DC	SEMIS
 ;
 HEADER({.CPU},{DOTCPU},{DOCOL})
-; PRINT CPU TYPE (8088)
+;{ PRINT CPU TYPE (8088)}
 	DC	BASE,FETCH
 	DC	LIT,36
 	DC	BASE,STORE
@@ -3428,54 +3441,54 @@ _COMMENT
 
 _ENDCOMMENT
 CODE_HEADER({MATCH},{MATCH})
-	MOV	DI,SI	; SAVE IP
-	POP	CX	; STRING COUNT
-	POP	BX	;STRING ADDR
-	POP	DX	;BYTES LEFT TO SEARCH
-	POP	SI	;CURSOR ADDR
-	PUSH	SI	;SAVE COPY
-MAT1:	LODSB		;GET FIRST BYTE
-	CMP	AL,[BX]	;MATCH?
-	JNZ	MAT3	;NO
-	PUSH	BX	;SAVE STRING ADDR
-	PUSH	CX	; &   STRING COUNT
-	PUSH	SI	; &   CURSOR ADDR
-; TRY TO MATCH REMAINING CHARS IN STRING
+	MOV	DI,SI	;{ SAVE IP}
+	POP	CX	;{ STRING COUNT}
+	POP	BX	;{STRING ADDR}
+	POP	DX	;{BYTES LEFT TO SEARCH}
+	POP	SI	;{CURSOR ADDR}
+	PUSH	SI	;{SAVE COPY}
+MAT1:	LODSB		;{GET FIRST BYTE}
+	CMP	AL,[BX]	;{MATCH?}
+	JNZ	MAT3	;{NO}
+	PUSH	BX	;{SAVE STRING ADDR}
+	PUSH	CX	;{ &   STRING COUNT}
+	PUSH	SI	;{ &   CURSOR ADDR}
+;{ TRY TO MATCH REMAINING CHARS IN STRING}
 ;
-MAT2:	DEC	CX	;STR. COUNT -1
-	JZ	MATCHOK	;EXIT - MATCH FOUND
-	DEC	DX	;BYTES LEFT -1
-	JZ	NOMATCH	;EXIT - NO MATCH
-	INC	BX	;NEXT STR CHAR ADDR
-	LODSB		;GET FIRST BYTE
-	CMP	AL,[BX]	;MATCH?
-	JZ	MAT2	;YES, GET MORE
-; NO MATCH YET
+MAT2:	DEC	CX	;{STR. COUNT -1}
+	JZ	MATCHOK	;{EXIT - MATCH FOUND}
+	DEC	DX	;{BYTES LEFT -1}
+	JZ	NOMATCH	;{EXIT - NO MATCH}
+	INC	BX	;{NEXT STR CHAR ADDR}
+	LODSB		;{GET FIRST BYTE}
+	CMP	AL,[BX]	;{MATCH?}
+	JZ	MAT2	;{YES, GET MORE}
+;{ NO MATCH YET}
 	POP	SI
 	POP	CX
-	POP	BX	;RESTORE POINTERS
-MAT3:	DEC	DX	;BYTE LEFT COUNT -1
-	JNZ	MAT1	;START OVER
-	JMP	MAT4	;EXIT...NO MATCH
+	POP	BX	;{RESTORE POINTERS}
+MAT3:	DEC	DX	;{BYTE LEFT COUNT -1}
+	JNZ	MAT1	;{START OVER}
+	JMP	MAT4	;{EXIT...NO MATCH}
 MATCHOK:
 NOMATCH:
-	POP	CX	;ADJUST STACK
-	POP	CX	;FOR EXIT
+	POP	CX	;{ADJUST STACK}
+	POP	CX	;{FOR EXIT}
 	POP	CX
-; EXIT HERE: DX = TRUE/FALSE FLAG ( 0=NO MATCH)
+;{ EXIT HERE: DX = TRUE/FALSE FLAG ( 0=NO MATCH)}
 ;
-MAT4:	MOV	AX,SI	;NEW CURSOR ADDR
-	POP	SI	;GET STARTING ADDR
-	SUB	AX,SI	;COMPUTE CURSOR OFFSET
-	MOV	SI,DI	;GET BACK UP
-	JMP	DPUSH	; BYE..BYE
+MAT4:	MOV	AX,SI	;{NEW CURSOR ADDR}
+	POP	SI	;{GET STARTING ADDR}
+	SUB	AX,SI	;{COMPUTE CURSOR OFFSET}
+	MOV	SI,DI	;{GET BACK UP}
+	JMP	DPUSH	;{ BYE..BYE}
 	PAGE
 ;
-;**** LAST DICTIONARY WORD ****
+;{**** LAST DICTIONARY WORD ****}
 HEADER({TASK},{TASK},{DOCOL})
 	DC	SEMIS
 ;
-INITDP	EQU	$	;SHOW END OF DICTIONARY
+INITDP	EQU	$	;{SHOW END OF DICTIONARY}
 ;
 _COMMENT 
 
@@ -3539,5 +3552,5 @@ _COMMENT
 
 _ENDCOMMENT
 
-; Define the entry point, not valid for auto booting.
+;{ Define the entry point, not valid for auto booting.}
 	END	ORIG
