@@ -136,50 +136,16 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( The DEA is in fact not a dea, leave: it IS the endmarker             )
 : DICTEND? @ $FFFF AND $A081 = ;
 : %EXECUTE PFA CFA EXECUTE ;
-( Execute the DEA with as data the                                        )
-( NAMEFIELD that is given plus for all other words in                     )
-(   the same vocabulary.,                                               )
-: FOR-REMAINING-AS
-BEGIN
-2DUP SWAP %EXECUTE
- >NEXT%
-DUP DICTEND? UNTIL
-DROP DROP
-;
 ( Leave the first DEA of the assembler vocabulary.                    )
 : START ' ASSEMBLER 2 +  CELL+ @ ;
-( Execute the DEA with as data each time                              )
-( the namefield of the assembler vocabulary.                          )
-( a dea can be found using % )
-: FOR-ALL-AS START FOR-REMAINING-AS ;
-% ID. FOR-ALL-AS
-
-% LXI IS-1PI ." LXI: " . CR
-% B| IS-1PI ." B|: " . CR
-% LXI IS-xFI ." LXI: " . CR
-% B| IS-xFI ." B|: " . CR
-( print name if tos is a postit )
-: PIFPOST DUP IS-1PI IF ID. CR ELSE DROP THEN ;
-( print name if tos is a fixup )
-: PIFFIX DUP IS-xFI IF ID. CR ELSE DROP THEN ;
 
 
-( %MYSELF %EXECUTE in a definition is the same as recurse)
-: %MYSELF LATEST [COMPILE] LITERAL ; IMMEDIATE
-
-." There comes the posts"
- % PIFPOST FOR-ALL-AS
-." There comes the fixs"
-%  PIFFIX FOR-ALL-AS
 : >BODY PFA CELL+ ;
 : >INST >BODY @ ;
 : >MASK >BODY CELL+ @ ;
 : >COMMA >BODY CELL+ CELL+ @ ;
 (   The FIRST set is contained in the SECOND set, leaving IT            )
 : CONTAINED-IN OVER AND = ;
-% MOV >INST  H.
-% MOV >MASK  H.
-% MOV >COMMA H.
 
 : SET <BUILDS HERE CELL+ , CELLS ALLOT DOES> ;
 ( Add ITEM to the SET )
@@ -191,10 +157,6 @@ DROP DROP
 ( For the SET : it IS non-empty )
 : SET? DUP @ SWAP CELL+ = 0= ;
 12 SET DISS
-DISS 10 DUMP
-123456 DISS SET+!
-DISS 10 DUMP
-DISS .SET
 
 : -DISS DISS -SET ;
 : .DISS DISS DUP @ SWAP CELL+ DO
@@ -202,49 +164,6 @@ DISS .SET
  0 CELL+ +LOOP CR ;
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
-87654 +DISS
-DISS .SET
--DISS
-
-." TO HIER?"
-^
-: DO-FIX
-    DUP IS-xFI IF
-        DUP >MASK ( DUP H.) TALLY CELL+ @ INVERT  ( DUP H.)
-        CONTAINED-IN IF
-            DUP >BODY FIX| DROP
-            +DISS
-        ELSE DROP THEN
-    ELSE DUP IS-COMMA IF
-        DROP
-    ELSE
-        DROP
-    THEN THEN ;
-% MOV >MASK TALLY !
-% MOV >COMMA TALLY CELL+ !
-% DO-FIX % MOV FOR-REMAINING-AS
-% LXI >MASK TALLY !
-% LXI >COMMA TALLY CELL+ !
-(   % DO-FIX % LXI FOR-REMAINING-AS                                     )
-
-( Reconstruct from DEA an instruction with fixups. )
-: DO-INST
-    !TALLY
-    DUP >BODY POST, DROP
-    DUP +DISS
-    [ % DO-FIX ] LITERAL SWAP FOR-REMAINING-AS
-    .DISS
-    -DISS
-;
-: ONLY-DO-INST
-   DUP IS-1PI IF DO-INST ELSE DROP THEN
-;
-    % MOV DO-INST
-    % LXI DO-INST
-
-
-
-    % ONLY-DO-INST FOR-ALL-AS
 
 ( These dissassemblers are quite similar:                               )
 ( if the DEA on the stack is of the right type and if the precondition  )
@@ -289,7 +208,7 @@ DISS .SET
     THEN
 ;
 
-( Replace DEA with the next DEA )                                       )
+( Replace DEA with the next DEA                                         )
 ( Discard the last item of the disassembly that is either               )
 ( used up or incorrect                                                  )
 : BACKTRACK
