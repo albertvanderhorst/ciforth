@@ -1554,10 +1554,10 @@ CR  ." THE ISO BYTE BENCHMARK LASTED " .mS
 ?16 ?PC HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
 CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
-RW-BUFFER , 0 , HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
+RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
  : R/W-BLOCK  ASSEMBLER
-  POPX, AX|            ADD, W| R| AX'| AX|
-  MOVFA, W1| BL# W,    PUSHX, SI|
+  OS:, POPX, AX|   OS:, ADD, W| R| AX'| AX|
+  OS:, MOVFA, W1| BL# W,   PUSHX, SI|
   MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
   MOVXI, SI| PARAM-BLOCK SWITCH_DS 10 * -  W,
   TO-REAL, SWITCH_DS COPY-SEG
@@ -1566,22 +1566,22 @@ RW-BUFFER , 0 , HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
   POPX, SI|   PUSHX, BX|  NEXT ; PREVIOUS
 CODE READ-BLOCK 4200 R/W-BLOCK  C;
 CODE WRITE-BLOCK 4300 R/W-BLOCK  C;     DECIMAL
-?PC HEX ( copy a hd system, was written to a floppy to the
+?16 ?PC HEX ( copy a hd system, present on a floppy to the
 hard disk. Done by a Forth booted from another floppy.)
-?16 ?PC    40 CONSTANT HD-OFFSET
-: SAFE HD-OFFSET OFFSET @ = 17 ?ERROR ;
-: COPY-FLOPPY SAFE EMPTY-BUFFERS  ." Put hd floppy and key"
- KEY DROP 0 0 0 0 13 BIOS  80 0 0 0 13 BIOS
-  HD-OFFSET 0 DO
-    RW-BUFFER I 1 R/W   I WRITE-BLOCK 1 AND .
-  LOOP ; : COPY-FLOPPY-V 4 * BL# 2 + ! COPY-FLOPPY ;
-: RESTORE-BLOCKS SAFE 100 0 DO
-   RW-BUFFER I OFFSET @ + 1 R/W
-   I HD-OFFSET + WRITE-BLOCK 1 AND .
-LOOP ;
-: SAVE-BLOCKS SAFE 100 0 DO
-   I HD-OFFSET + READ-BLOCK 1 AND .
-   RW-BUFFER I OFFSET @ + 0 R/W LOOP ;  DECIMAL
+( Prompt for floppy change, plus whatever needed.)
+: SWAP-FLOPPY   0 WARNING !
+  "Swap floppy and press a key" TYPE   KEY &Q = IF ABORT THEN
+  EMPTY-BUFFERS   0 0 0 0 13 BIOSI     80 0 0 0 13 BIOSI ;
+( Write the default buffer to hard disk at 32-bit POSITION)
+: (HWD) SWAP WRITE-BLOCK 1 AND . ;
+( Read the default buffer from hard disk at 32-bit POSITION)
+: (HRD) SWAP READ-BLOCK 1 AND . ;
+
+
+
+
+
+
 ( Experimenting with drive parameters ) HEX
 B/BUF SEC/BLK / CONSTANT SEC-LEN
 CREATE RW-BUFFER B/BUF ALLOT
@@ -3309,45 +3309,45 @@ LOOP DROP   DROP   DISK-ERROR   @   ?DUP
 0BRANCH [ 38 , ] 0< 0BRANCH [ 10 , ] 9
 BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
 ;  : R-floppy 1 R/W-floppy ;  : W-floppy 0 R/W-floppy ;
-DECIMAL
-?PC HEX ( copy a hd system, was written to a floppy to the
+
+?PC ?16 ( copy a hd system, was written to a floppy to the
 hard disk. Done by a Forth booted from another floppy.)
-?16 ?PC    40 CONSTANT HD-OFFSET
-: SAFE HD-OFFSET OFFSET @ = 17 ?ERROR ;
-: SAVE-BLOCKS   ( First Last -- )
-EMPTY-BUFFERS  ." Put hd floppy and key"
-KEY DROP
-OVER - DO
-   DUP + READ-BLOCK 1 AND .
-   RW-BUFFER I 0 R/W LOOP 2DROP ;  DECIMAL
+DECIMAL
+( As R/W but absolute, counting from zero. )
+: ABSR/W EMPTY-BUFFERS OFFSET @ >R 0 OFFSET ! R/W R> OFFSET ! ;
+( Read absolute BLOCK from floppy into default buffer.)
+: (FRD) RW-BUFFER SWAP 1 ABSR/W ;
+( Write absolute BLOCK to floppy from default buffer.)
+: (FWD) RW-BUFFER SWAP 0 ABSR/W ;
+\ DBS : default boot system, first 1400 K of hd.
+\ Prompt for empty floppy. Save from hard disk BLOCK
+\ (a 32-bit number) and 1400K following to the floppy.
+: BACKUP>FLOPPY  SWAP-FLOPPY
+1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
+\ Prompt for floppy created with ``BACKUP>FLOPPY''
+\ Restore to hard disk ``DBS'' 1400 K from floppy.
+: RESTORE<FLOPPY  SWAP-FLOPPY
+1400 0 DO I (FRD) 2DUP I S>D D+ (HWD) LOOP 2DROP ;
+\ Copy the kernel (first 64K of ``DBS'' to raw floppy.
+: BACKUP-KERNEL   64 0 DO I S>D (HRD) I (FWD) LOOP ;
+\ Copy the BLOCKS (256K at 64K of ``DBS'') to BLOCKS.BLK.
+: BACKUP-BLOCKS   SWAP-FLOPPY
+64 256 OVER + SWAP DO I S>D (HRD) RW-BUFFER I 1 R/W LOOP ;
+\ Copy the kernel (first 64K of ``DBS'') from raw floppy.
+: RESTORE-KERNEL 64 0 DO I (FRD) I S>D (HWD) LOOP ;
+\ Copy the BLOCKS (256K at 64K of ``DBS'') from BLOCKS.BLK.
+: RESTORE-BLOCKS
+64 256 OVER + SWAP DO RW-BUFFER I 0 R/W I S>D (HWD) LOOP ;
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+?32 ?PC
+\ Copy the currently booted chunk to free space on the hd,
+\ flanked by comment blocks (block 200, fill beforehand).
+: backup ;
+\ From START restore LEN blocks to ``DBS''.
+: restore ;
 
 
 
