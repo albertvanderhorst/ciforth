@@ -203,16 +203,24 @@ VARIABLE CURRENT-DEA
     !OPTIMISED ;
 
 \D : test 1 SWAP 3 2 SWAP ;
-\D 'test OPT-FOLD
+\D 'test OPTIMISE-O
 \D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
 \D : test1 1 2 + 3 4 * OR ;
-\D 'test1 OPT-FOLD
+\D 'test1 OPTIMISE-O
 \D "EXPECT `` F '' :" CR TYPE CRACK test1
 \D : test2 1 2 SWAP ;
-\D 'test2 OPT-FOLD
+\D 'test2 OPTIMISE-O
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test2
 \D : test3 1 2 'SWAP EXECUTE ;
-\D 'test3 OPT-FOLD
+\D 'test3 OPTIMISE-O
 \D "EXPECT `` 1 2 SWAP '' :" CR TYPE CRACK test3
-\D 'test3 OPT-FOLD
+\D 'test3 OPTIMISE-O
 \D "EXPECT `` 2 1 '' :" CR TYPE CRACK test3
+\D : A0 1 ;
+\D : A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
+\D : A4 A3 A3 + ;   : A5 A4 A4 + ;    : A6 A5 A5 + ;
+\D : A7 A6 A6 + ;   : A8 A7 A7 + ;    : A9 A8 A8 + ;
+\D
+\D : B0 A9 A9 + ;
+\D 'B0 OPTIMISE-O
+\D "EXPECT `` 400 '' :" CR TYPE CRACK B0

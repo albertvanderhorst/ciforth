@@ -1,6 +1,8 @@
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( $Id$)
 
+
+\ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
 \ INCLUDE asgen.frt
 \ INCLUDE asi586.frt
 
@@ -26,21 +28,34 @@ REQUIRE BOUNDS
 \ ---------------------------------------------------------------------------
 HEX
 \ Data design : >FFA leavers the flag field that is considered
-\ an area of 4 bytes. >FFA 3 + gives the stack effect nibbles:
+\ an area of 4 bytes.
+\ >FFA 0 + gives the dummy, invisible, immediate and denotation bits.
+\ bits 4..7 available for just anything.
+\ >FFA 1 + : any bits set open up an optimisation opportunity.
+\ >FFA 2 + reserved for the return stack effect nibbles.
+\ >FFA 3 + gives the data stack effect nibbles:
 \ high nibble : input:  1-- 0E depth popped +1
 \ low nibble : output: 0 = unknown , 1-- 0E depth pushed +1
 \ 0 = unknown , 0FH = variable.
 \ A ``STACK EFFECT'' is a pair (input nibble, output nibble) with the above encoding.
 \ A ``pure stack effect'' is a pair (depth popped, depth pushed).
 
-10 CONSTANT FMASK-N@    \ No input side effects. "No fetches."
-20 CONSTANT FMASK-N!    \ No output side effects. "No stores."
-80 CONSTANT FMASK-IL    \ Data is following in line.
+
+0FF00 CONSTANT FMASK
+
+\ ----------------------    ( From analyser.frt)
+10 CONSTANT FMASK-IL    \ Data is following in line.
+20 CONSTANT FMASK-HO    \ This definition has been high level optimised.
+40 CONSTANT FMASK-HOB   \ This definition cannot be high level optimised.
+
+100 CONSTANT FMASK-N@    \ No input side effects. "No fetches."
+200 CONSTANT FMASK-N!    \ No output side effects. "No stores."
+400 CONSTANT FMASK-ST    \ No stack side effects. "No absolute stack reference."
 
 FMASK-N@ FMASK-N! OR CONSTANT FMASK-NS \ No side effects.
 
 \ Fill optimisations BITS in into DEA.
-: !OB   >FFA >R    R@ @ FMASK-NS INVERT AND   OR  R> ! ;
+: !OB   >FFA >R    R@ @ FMASK INVERT AND   OR  R> ! ;
 
 \ A set : #how far filled, data. See asgen.frt
 
@@ -63,8 +78,23 @@ ELSE BASE @ >R DECIMAL 1 - . R> BASE ! _ THEN THEN DROP ;
 \ Type the stack effect BYTE.
 : .SE   SE:1>2 "( " TYPE SWAP .SE/2 "-- " TYPE .SE/2 &) EMIT ;
 
+\ For DEA type its optimisation and other properties.
+: OPT? >FFA @
+    CR "Optim. bits etc.: " TYPE
+    DUP FMASK AND 0= IF "No optimisations " TYPE THEN
+    DUP FMASK-N@ AND IF "No fetches " TYPE THEN
+    DUP FMASK-N! AND IF "No stores " TYPE THEN
+    DUP FMASK-IL AND IF "In line data " TYPE THEN
+    DUP FMASK-HO AND IF "Been optimised " TYPE THEN
+    DUP FMASK-HOB AND IF "Cannot be optimised " TYPE THEN
+    DROP
+;
+
 \ For DEA type its stack effect.
 : SE?   SE@ .SE ;
+
+\ For DEA type everything.
+: .DE DUP SE? DUP (KRAAK) OPT? ;
 
 \ For VALUE and SET : value IS present in set.
 : IN-SET? $@ SWAP
@@ -201,18 +231,22 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 : FIND-SE-CODE DUP ANALYSE-CODE   PROTO-FMASK @ SWAP >FFA OR!U
   #POPS @ 1+   #PUSHES @ 1+   SE:2>1 ;
 
+\ Fill FLAGS POPS PUSHES in into DEA's flag field.
+: !FLAGS >FFA >R 1+ SWAP 1+ 4 LSHIFT OR 18 LSHIFT OR R> ! ;
+
 \ Irritating exceptions
 0FF '?DUP !SE
 0FF 'EXECUTE !SE
-021 'FOR-VOCS !SE     \ Despite an execute this is known
-031 'FOR-WORDS !SE
-012 'LIT !SE          FMASK-NS 'LIT !OB
-01100,0000 FMASK-NS OR FMASK-IL OR 'BRANCH >FFA !
-02100,0000 FMASK-NS OR FMASK-IL OR '0BRANCH >FFA !
-01100,0000 FMASK-NS OR FMASK-IL OR '(LOOP) >FFA !
-02100,0000 FMASK-NS OR FMASK-IL OR '(+LOOP) >FFA !
-03100,0000 FMASK-NS OR FMASK-IL OR '(DO) >FFA !
-03100,0000 FMASK-NS OR FMASK-IL OR '(?DO) >FFA !
+0                    1 0 'FOR-VOCS  !FLAGS  \ Despite an execute this is known
+0                    2 0 'FOR-WORDS !FLAGS
+FMASK-NS FMASK-IL OR 0 1 'LIT       !FLAGS
+FMASK-NS FMASK-IL OR 0 2 'SKIP      !FLAGS
+FMASK-NS FMASK-IL OR 0 0 'BRANCH    !FLAGS
+FMASK-NS FMASK-IL OR 1 0 '0BRANCH   !FLAGS
+FMASK-NS FMASK-IL OR 0 0 '(LOOP)    !FLAGS
+FMASK-NS FMASK-IL OR 1 0 '(+LOOP)   !FLAGS
+FMASK-NS FMASK-IL OR 2 0 '(DO)      !FLAGS
+FMASK-NS FMASK-IL OR 2 0 '(?DO)     !FLAGS
 
 \ FILL IN EVERYTHING
 \ Add to an existing pure STACK EFFECT the pure STACK EFFECT. Return the combined
@@ -237,13 +271,6 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 
 \ ---------------------------------------------------------------------------
 
-\ MAYBE THIS PART BELONGS IN optimiser.frt
-FMASK-IL    ' SKIP >FFA OR!U
-FMASK-IL    ' LIT >FFA    OR!U
-
-
-\ ---------------------------------------------------------------------------
-
 \ Inspect POINTER and XT. If the xt is of a type followed by inline
 \ code advance pointer as far as possible, remaining in the same chain.
 \ Leave new POINTER and XT.
@@ -257,7 +284,7 @@ FMASK-IL    ' LIT >FFA    OR!U
     THEN R> ;
 
 CREATE STOPPERS HERE 0 ,
-' (;)        ,          ' (;CODE)    ,          ' DOES>      ,
+' (;)        ,          ' (;CODE)    ,          ' DOES>      ,  ' EXIT    ,
 HERE SWAP !
 
 \ The DEA means : we ARE still in a chain.

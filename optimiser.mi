@@ -48,18 +48,20 @@ they fall prey to folding.
 Reordering might also eliminate a juggler.
 
 forthitem({Annihilation})
+Annihilation is the elimination of e a whole sequence of operations.
 In Forth sometimes the result of a calculation is dropped.
 Depending on the properties of the calculation,
-this calculation can sometimes be removed.
-Annihilation is always related to an annihilator.
+the calculation itself can be removed.
+This type of annihilation is related to an annihilator.
+Another type is related to conditional branching where the condition is
+known at compile time. Code known to be skipped is removed.
 
 forthitem({Inlining})
 Inlining means replacing a Forth word with its constituents.
-This technique is extremely important in Forth, more so than
+This technique is very important in Forth, more so than
 in other languages, due to the small size of Forth words.
 Inlining is always a winner in speed, and mostly even also a
 winner with regard to space.
-forthenditemize
 
 Even more important is the fact that inlining allows folding to be applied
 across constituent words. This applies to high level and low level code
@@ -68,26 +70,50 @@ alike.
 Inlining high level code is trivial.
 A further inlining stage replaces a high level definition that only calls code
 words, by a code definition which concatenates the code words.
+forthenditemize
 
 @subsection Data collecting
-While disassembling a code word, the registers used can be marked.
-This allows to add register usage information to the header.
+In order to add introspective information to a Forth, in the first
+place the machine code words must be analysed, because ultimately everything is
+defined in terms of code words.
+For this purpose the code words are disassembled using a disassembler that
+allows to readily inspect the parts of a disassembled instruction.
+A Postit-Fixup assembler and disassembler is well suited.
+forthitemize
+forthitem(register usage)
+By inspecting register words in the disassembly,
+registers usage can be accumulated.
+This information is then added to the header.
 
-Also information about whether memory or I/O ports are
-accessed for read or write
-can be collected.
+forthitem(side effects)
+At the same time information about whether memory or I/O ports
+are accessed for read or write can be collected.
+It turns out to be useful make a difference between input and output
+side effects.
+Here the words to look out for are the MOVE and IN/OUT instructions,
+operations that access memory (in fact all operations that not target
+registers) and special instructions like the string operations on
+Pentia.
 
+forthitem(stack effects)
 Finally the stack effect can be deduced from the number of POP's and
-PUSH'es. And the use of the return stack can be marked, which means that
-the code word has to be treated by hand.
+PUSH'es.
+And the use of the return stack can be marked, which mostly
+warrants a special treatment.
+forthenditemize
 
-After all code words have been analysed, and
-the information has been completed manually where needed,
+After all code words have been analysed,
 the stack effects and register usage can be concluded for all high level words.
 The stack effect of a high level words is the concatenation of the stack effect
-of its constituents. The register usage of a high level word is the logical or
-of the register usage of the constituents.
+of its constituents.
+The register usage of a high level word is the logical or of the
+register usage of the constituents, as are its side effects.
 
+There will no doubt be exceptions.
+It is wrong to cater for too many exceptional situation in such a heuristic tool.
+Instead, the exception are filled in by hand before the automated collection is started,
+it fills in only as yet unknown items.
+Of course it helps to have a simple and straightforward Forth to begin with.
 @subsection Purpose
 A \ci in general will use optimisation to generate a temporary definition
 that is much faster, and retain all the valuable partial information about
@@ -96,10 +122,13 @@ words.
 In normal non-AI applications, words are recursively replaced by faster words,
 and those eventually by code definitions. Meanwhile words that are no longer directly
 used in the final application are eliminated.
-For space conservation headers may be removed as well provided in the application
+For space conservation headers may be removed as well, provided in the application
 no dictionary lookup is needed.
 
 @section Implementation
+The following implementation notes apply to a 32 bits Pentium Forth
+where a full cell (4 bytes, 0..3) is reserved for the flags.
+They must be considered as an example.
 The information about a word, optimisation opportunities and stack effect,
 sits in the flag field.
 Whenever nothing is filled in in the flag field, it means unknown.
@@ -107,7 +136,7 @@ This applies equally to the stack effect as to the optimisation flags.
 
 @subsection Stack effects
 The information about
-the stack effects sits in the 3th byte of the flag field.
+the stack effects sits in the byte 3 of the flag field.
 The highest nibble of this third byte applies to input.
 It is the number of stack items popped plus one.
 The lowest nibble thusly indicates the number of pushed items.
@@ -122,160 +151,222 @@ All high level stack effects are derived from the stack effect of their
 constituents.
 
 Code words are analysed by disassembling the code that is pointed to by the
-code field to the first next code encountered. For each instruction
+code field to the first ``next'' code encountered. For each
+instruction
 the opcode, which is the first part of its disassembly, is looked up in
 a set of possible pop and push instructions.
 
 Irregularities are just tabulated in the source code of the analyser.
 
-High level words are recognized by their code field.
-This takes care of any CREATE .. (;CODE) words.
+Words are recognized by their code field.
+High level words are either created by ``:'' or by
+a ``CREATE .. DOES>'' construction .
+They are recognised by the code field containing DOCOL or DODOES respectively.
+For both the data field points to a chain of high level calls, i.e. a number of such calls
+possibly with inlined data and ending in a ``(;)'', the word compiled by ``;''.
+(The result of this ``high level next'' is to return
+control is returned to the word that called this one.)
 For a linear chain of calls the stack effect is calculated as follows:
 
-*Start with a zero -- zero stack effect.
-*For each constituent
-    subtract the pops from the left (output) nibble.
-    if the output nibble is negative, subtract it from the inputs, and make it zero
-    add the pushes to the left (output) nibble
+forthitemize
+forthitem
+Start with a effect of ( 0 -- 0 ).
+forthitem
+For each constituent
+forthbreak
+    Subtract the pops from the left (output) nibble.
+    If the output nibble is negative, add its (absolute) value to inputs, and make it zero.
+    Add the pushes to the left (output) nibble.
 (Correction by 11H is not yet done).
 
+forthbreak
 The following exceptions to a linear chain have special treatment:
-* LIT BRANCH'es and SKIP are followed by inline data that must be taken care off
-* a BRANCH or 0BRANCH forward is always taken, analysing just one path through a definition
-* If the stack effect of a constituent is unknown, an unknown result overrules
-  any other outcome
-* For a CREATE .. DOES> word the linear chain pointed to by the DOES> pointer is
+forthitem
+LIT BRANCH'es and SKIP are followed by inline data that must be taken care off
+forthitem
+A BRANCH or 0BRANCH forward is always taken, analysing just one path through a
+definition: the shortest one. A more sophisticated way is to analyse
+all paths and conclude a variable outcome if it is not consistent or
+any of the paths contains a variable constituent.
+forthitem
+If the stack effect of a constituent is variable, the result is
+variable, overruling any other outcome
+forthitem
+If the stack effect of a constituent is unknown, the result is
+unknown, overruling any other outcome except variable.
+forthitem
+ For a CREATE .. DOES> word the linear chain pointed to by the DOES> pointer is
 analysed. However the stack effect is initialised to ( 0 -- 1) to reflect the
 passing of the data pointer to the  DOES> part.
-* '<SOME-WORD> EXECUTE has the stack effect of <SOME-WORD> .
+forthitem
+'<SOME-WORD> EXECUTE has the stack effect of <SOME-WORD> .
 Other occurrences of EXECUTE lead to a variable stack effect.
-* '<SOME-WORD> CATCH has the stack effect of <SOME-WORD> plus an extra output.
+Lateron we will leave this to the optimiser, but at the stage of
+analysing the kernel this is useful, especially because all usage of
+EXECUTE in the kernel is of this type.
+forthitem
+'<SOME-WORD> CATCH has the stack effect of <SOME-WORD> plus an extra output.
 Other occurrences of CATCH lead to a variable stack effect.
+So a word is treated as if exceptions do not occur.
+This is okay because the stack effect is not relevant in case of
+exceptions.
+forthenditemize
 
 A high level word is recognised by its code field address containing DOCOL , i.e. the
-nesting routine for the interpreter. A CREATE .. DOES> word is detected by
+nesting routine for the interpreter.
+A CREATE .. DOES> word is detected by
 is code field address containing DODOES , i.e. the common code that starts up words defined
 by compiler extension.
 All other words are treated as code.
 
 The whole of Forth is treated as follows:
-* Fill in the exception
-* Sweep repeatedly through the dictionary, from early to latest:
+forthitemize
+forthitem
+Fill in the exception
+forthitem
+Fill in the code words
+forthitem
+Sweep repeatedly through the dictionary, from early to latest:
     For each unknown stack effect, try to find it by discriminating between
     DODOES DOCOL and other words,
-* Stop if no progress is made any more.
+  Stop if no progress is made any more.
+forthenditemize
 
 Hopefully everything is known now, but maybe we must add to the exceptions.
+And repeat the above process.
 
 The notion of a simple sequence is one that doesn't reach to the stack outside
 what is defined within the sequence.
 
-@subsection Optimisation class
+@subsection Optimisation classes
 As has been pointed out, the optimisation class of a word is indicated by a bit
 set
-in the flags field. Each bit set opens up a particular opportunity for optimisation.
-In general a sequence has a certain class if each constituent has that class.
+in the flags field. Each bit set to true opens up a particular opportunity for optimisation.
+Further
+a sequence has a certain class if each constituent has that class.
 For example, if one of the words called does a store, the sequence is found to
-do a store and the optimisations that would be allowed by no stores are blocked.
-forthsub subsection({The no store bit.})
+do a store and the optimisations that would be allowed by ``no
+stores''
+are blocked.
+So the optimisation class of a sequence is the logical or of the oc's of the constituents.
+This can be done efficiently by bit-wise or operations.
+@subsubsection {The no store bit.}
 The "no store" bit would better be named "no output side effect" bit.
 It indicates that the outside world doesn't change by executing this word.
 Again not that the stacks and internal registers are inside.
-
+Note that fetching from an input port has an output side effect, (as
+well as an input side effect.)
 
 The following optimisation are opened up:
-* In combination with an anihilator. If the output of a "no store" sequence is annihilated,
+forthitemize
+forthitem
+In combination with an annihilator. If the output of a "no store" sequence is annihilated,
 the whole sequence and the annihilator may be left out.
 Example: BASE CELL+ @ XX @ NIP becomes XX @
-* In combination with a juggler. If the outputs of "no store" sequence are juggled,
+forthitem
+In combination with a juggler. If the outputs of "no store" sequence are juggled,
 the sequences itself may be juggled, eliminating the juggler.
 Example: XX CELL+ @ BASE @ SWAP becomes BASE @ XX CELL+ @
-* In combinaton with a duplicator. Again a sequence may be duplicated and the duplicator
-eliminated. This probably never makes sense as an optimisation.
+forthitem
+In combination with a duplicator. Again a sequence may be duplicated and the duplicator
+eliminated. This is not an optimisation, except for the duplication of constants.
+Going the other direction can be an optimisation.
+Two identical sequences with no output side effect can be replaced by one and a duplicator.
+Example: (for a recursive definition with stack effect ( 1 -- 1 ) and no side effects)
+12 RECURSE OVER RECURSE becomes 12 RECURSE 12 RECURSE  (elimination duplicator)
+forthbreak
+12 RECURSE 12 RECURSE becomes 12 RECURSE DUP. (introducing duplicator)
+forthenditemize
 
-Note that fetching from a port has an output side effect, (as well as an input side effect.)
-forthsub subsection({The no fetch bit.})
+@subsubsection {The no fetch property.}
 The "no fetch" bit would better be named "no input side effect" bit.
 It indicates that the outside world affects the outcome of this word.
-Input side effects are weaker that output side effects and on their own
-allow little optimisation.
+Input side effects are weaker than output side effects and the
+knowledge that they are absent allows less optimisation.
 
-In combiation with the "no store bit" a word is called "no side effect".
-It is amenable to folding:
-* If a NS-sequence has only constant inputs, it may be run at compile time
+@subsubsection {The no stack effect property.}
+The "no stack effect fetch" bit refers to absolute accesses of the stacks,
+i.e. where the data or return stack are not used as stacks.
+Typical examples are DEPTH and RSP@.
+These words are rare but prevent considerable optimisation.
+
+@subsubsection {The no side effect property.}
+The combination of the ``no store '', ``no fetch '' and ``no stack effect ''
+properties is quite common. Such a word is said to have the ``no side
+effect'' property.
+The combination allows substantially more optimisation than
+each alone. We will use the abbreviation NS for this important concept.
+Examples are CONSTANT's, VARIABLE's, operators like + or NEGATE, and all stack
+manipulations: jugglers, annihilator, duplicators.
+
+NS-words are amenable to folding:
+forthitemize
+forthitem
+If a NS-sequence has only constant inputs, it may be run at compile time
 and the inputs and sequence by the resulting constant outputs.
-Example: After "12 4 3    * +" is replaced by 24.
+Example: After "12 4 3 SWAP * +" is replaced by 24.
 In fact this is equivalent to
-* If a NS-sequence has no inputs, it may be run at compile time
+forthitem
+If a NS-sequence has no inputs, it may be run at compile time
 and replaced by the resulting constant outputs.
 The difference with the preceeding example is that the sequence starts
 with 12 instead of *. Any literals are of course NS.
+forthenditemize
 
+@subsubsection {Associativity.}
+An NS-operator with two inputs and one output can have, in addition,
+the property of associativity. This refers to a situation where three
+operands are involved. Examples are OR and + . However forthemphasized(*not* F+) .
+This allows to replace the sequence ``x % y %'' with ``x y % %'' where
+it may be that ``x y %'' can be folded into a constant.
+Example: ``CELL+ CELL+'' is first inlined to ``8 + 8 +'' then to ``8 8 + +''
+then to ``16 +''.
 
--------------------------------------------------------------
-: A0 ;
-: A1 A0 A0 ;
-: A2 A1 A1 ;
-: A3 A2 A1 :
-By now you should understand that A2 does nothing and therefore we need another constant buffer.
-: test UF 1m . THEN 12 ;
-Right by remembering where it cane from , must return to.
-How does it keep track e.g.can I execute the second A1 of A3 or of A2 the return stack.
-Even here we can use the [ [ to interrupt the compulation and doe some calculation. The great advantage of a lifo buffer.
+@subsection Optimisation by recursive inlining
+A word is optimized by first optimizing its constituents, then
+inlining the constituents and apply any optimisation
 
-( In the first case A1 must return to point Q, and then A2 that is ..
-this must return to R.
-In the second case we must remember point P.
-There is no problem that A1 in its turn executes A0 because that is the advatage of  las in first out buffer.
-
-If you have interrupted a compilation or test in the module you can
-investigate what FOrth is doing to compiler TEST. You can inspect the
-memory where "TEXT" is stored and you will discover that IF has
-remembered some dat that wll be used by THEN.
-
-Keeping track of what you have,
-As soon as you return from this subroutine you forgot where you were
-(no problem) but you also forget what you have.
-Or you must alwas "pass" data to subroutines beacse the data is not
-remembered.
-Total control
-At each point, agter each word, you know in what overall state Forth
-is in, and ytou can manipulate it.
-For example. Instead of being carefull not to dusturb Forth by leaving
-a number on betweeen [ and ] you can take cibtrik abd do everything
-the compler would do, by hand. Note that you are supposed to undestand
-, but the following is a means to compile tes by hand after IF
-[ 'LIT >CFA , 1 , 'DOT >CFA , BACK ' S; >CFA , HIDDEN
-
--------------------------------------------------------------
-FOR i FROM 0 TO 1 BY -1 DO ... WHILE ... OD
-init : initialise start to 1,increment to 1, end to infirinity
-cond to TRUE .
-remember last index name and discard it.
-FOR init
-   make init the new index name
-
-FROM
-   if FOR-ed init set start to stack ahead
-TO if FROM init
-   set end to infinity
-
-BY if started init
-   set increment to ahead
-      if end and increment differ in sign, end*=-1
-
-while  compile noheader stuff
-
+opportunities like folding that open up.
+forthbreak
+In more detail we have the following steps:
+forthitemize
+forthitem Check
+First of all check whether the item has been optimised already.
+We do in fact a ``depth first'' optimisation, so the words
+lowest in the call hierarchy are optimised first. It is important
+to only attempt optimisation once. This cuts the recursion short.
+forthitem   Recurse
+For all constituent words of this definition, do an optimisation, such
+as defined in these steps.
+forthitem Inline
+Build up an executable sequence in the dictionary.
+Inline a constituents word, keeping track of all opportunities to
+optimise. Try to build up a sequence  of NS-words
+that starts with constants
+and where each word following doesn't consume more inputs than
+are available. Consequently the outputs are available as constants.
+forthitem Breakdown
+When a sequence of NS-words breaks down, we have identified a sequence
+that can be run at compile time. This sequence is run, and removed from
+the output sequence. Then the output of the run is compiled, as a
+sequence of constants.
+forthitem Special opportunities.
+After each inlining the constituent is checked whether it allows
+special optimisations. Here the likes of the associativity optimisation
+is done, by looking for a ``operand % operand %'' pattern.
+In a fashion similar to the breakdown of a NS-sequence the tail of the sequence
+that is being built up is, is replaced.
+forthitem Replace
+After inlining is finished, the sequence is now attached to the word
+we are optimizing to replace the original sequence. Maybe the original code is
+kept if no folding took place and the sequence is longer that a certain limit.
+forthitem Mark properties
+The current word is marked as optimised. Its stack effect and its optimization
+classes are derived from its constituents and added to the flags header.
+forthenditemize
 -------------------------------------------------------------
 NSR
-NSS
-NSI
-NSO
-replicators
-jugglers
-anihilators
 commutative
-associative
 
 A Folding
 B Reordering
@@ -288,7 +379,7 @@ A
     0BRANCH EXECUTE i.c.w. constant input.
     NSO ic.w. NIP DROP
     Duplicators (e.g. DUP >R ) i.c.w. constant input
-    Asociative operation ( + ) i.c.w. constant input and same
+    Associative operation ( + ) i.c.w. constant input and same
     operation
 
 B SWAP/ROT sequences instead of results for NS .
@@ -297,15 +388,15 @@ B SWAP/ROT sequences instead of results for NS .
 C for NSR in line the code to a maximum of 1 K
 
 D Loop optimizing
- 1 A DO LOOP innermost is entitled to a reigster for I
- 2. An intermost loop is entitled to 1K : .5 foldable,
- 3. An intermost loop is entitled to 1K : .5 not foldable
+ 1 A DO LOOP innermost is entitled to a register for I
+ 2. An innermost loop is entitled to 1K : .5 foldable,
+ 3. An innermost loop is entitled to 1K : .5 not foldable
  4 A recursion is entitled to registers for its inputs
  5. A recursion is entitled to 1K
  6 A loop is entitled to registers for the stack items accessed from
  the loop.
 
-Optmise
+Optimise
     optimise constituents
     Fold reorder fold inline fold
     expand loop
