@@ -91,7 +91,7 @@ colon-definition. A blank after the leading parenthesis is required.},{})
 
 worddocsafe({},{(.")},{paren_dot_quote},{},{C+},{
 The run-time proceedure, compiled by forthcode({."}) which transmits the
-following in-line text to the selected output device.},{{."}}) .
+following in-line text to the selected output device.},{{."}}) 
 
 
 worddocsafe({},{(;CODE)},{paren_semicolon_code},{},{C},{
