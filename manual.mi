@@ -553,8 +553,10 @@ The DUMMY bit =1 for a dictionary header contained in the
 data of a vocabulary. This indicates that it shoudl not be executed.
 forthitem
 The DENOTATION bit =1 for a word from the DENOTATION word list.
-This means that it is a one letter word, that can parse
-all forthdefi({denotation})'s (numbers) that start with that letter, e.g. 0 .
+This means that it is a short word used as a prefix
+that can parse
+all forthdefi({denotation})'s (numbers) that start with that prefix, e.g. 7 or & .
+Usually it is a one letter word, but not necessarily.
 _ALIGNED_(
 {forthitem
 After the last letter follow zero bytes uptill the next cell boundary.})
