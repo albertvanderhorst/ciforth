@@ -5,50 +5,9 @@ Dated: 1979-MAY.
 Copyright: See DISTRIBUTION in figdoc.txt 
 OCER-ed by Albert van der Horst DFW The Netherlands 2000-MAR
 
-The first line of each entry shows a symbolic description of the action of
-the proceedure on the parameter stack. The symbols indicate the order in
-which input parameters have been placed on the stack. Three dashes "---"
-indicate the execution point; any parameters left on the stack are listed.
-In this notation, the top of the stack is to the right.
-
-
-The symbols include:
-
-addr   memory address
-b      8 bit byte (i.e. hi 8 bits zero)
-c      7 bit ascii character (hi 9 bits zero)
-d      32 bit signed double integer: most significant portion with sign
-on top of stack.
-f      boolean flag. 0=false, non-zero=true
-ff     boolean false flag=0
-n      16 bit signed integer number
-u      16 bit unsigned integer
-tf     boolean true flag=non-zero
-
-The capital letters on the right show definition characteristics:
-
-B      The word is available only after loading from background storage
-C      May only be used within a colon definition. A digit indicates number
-  of memory addresses used, if other than one.
-E      Intended for execution only.
-L0     Level Zero definition of FORTH-78
-L1     Level One definition of FORTH-78
-P      Has precedence bit set. Will execute even when compiling.
-U      A user variable.
-
-
-Unless otherwise noted, all references to numbers are for 16 bit signed
-integers. On 8 bit data bus computers, the high byte of a number is on top
-of the stack, with the sign in the leftmost bit. For 32 bit signed double
-numbers, the most significant part (with the sign) is on top.
-
-All arithmetic is implicitly 16 bit signed integer math, with error and
-under-flow indication unspecified.
-
-
-
--- present but not documented
-FLUSH CURRENT 2DUP RP@ U.
+At 2000:nov:11 this documentation was burned down in favour
+of the generated user information for ciforth.
+It is still obtainable as the latest branch of gloss.mig 1.12
 
 -- documented but not present 
 worddoc({},{MOVE},{move},{addr1 addr2 n --},{},{
@@ -72,13 +31,6 @@ write one block to the disc.},{{BLOCK}})
 worddoc({},{DLIST},{d_list},{},{},{
 List the names of the dictionary entries in the forthcode({CONTEXT}) vocabulary.},{})
 
-                   -- removed by myself --
-worddoc({},{DR0 DR1},{d_r_zero},{},{},{
-Installation dependent commands to select disc drives, by presetting
-forthcode({OFFSET}) . The contents of forthcode({OFFSET}) is added to the block number in forthcode({BLOCK})
-to allow for this selection. Offset is suppressed for error text so
-that is may always originate from drive 0.
-No longer true. Is dismissed.},{})
 
 -- documented but present only in background store
 worddoc({MEMORY},{DUMP},{dump},{addr n ---},{B,L0},{
@@ -106,28 +58,4 @@ to execute compiled Forth definitions. It is not directly executed
 but is the return point for all code proceedures. 
 },{})
 
----- DOesn/t belong in dictionary
-The high-order l6 bits are most accessable on the stack. 
-The new word is created in the forthcode({CURRENT}) vocabulary.
-
-
-It acts by
-fetching the address pointed by forthvar({IP}) , storing this value in register
-forthvar({W}) . It then jumps to the address pointed to by the address pointed to
-by forthvar({W}) . forthvar({W}) points to the code field of a definition which contains
-the address of the code which executes for that definition.
-This usage of indirect threaded code is a major contributor to the
-power, portability, and extensibility of Forth. Locations of forthvar({IP}) and
-forthvar({W}) are computer specific.
-
-code field address is also called the compilation address.
------ not true
-Altering OUT to influence formatting
-
-fig-FORTH saves the contents of forthcode({IN}) and forthcode({BLK}) to assist in determining
-the location of the error. 
-
----- mooie zin
-In combination with the change of the boot-up parameters at
- forthcode({+ORIGIN}) this allows to make a turnkey system.
 
