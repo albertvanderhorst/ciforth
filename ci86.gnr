@@ -1131,13 +1131,14 @@ _PC_({_NEWDEBUG_({ CALL    DISPLAYSI})})
 ;{       Dictionary starts here.}
 
 DP0:
-; Vocabularies all end in a link to the word FORTH,
+; Vocabularies all end in a link to 0.
+; Only the word FORTH links to the DENOTATION wordlist,
 ; that in turn links to 0.
 
 worddoc( {WORDLISTS},{FORTH},{forth},{},{ISO,FIG,I,L1},
-{The name of the primary vocabulary. Execution makes
-forthcode({FORTH}) the forthcode({SEARCH}) forthsamp({word}) list  . Until
-additional user word list 's are created, new user definitions
+{The name of the primary vocabulary. Execution adds
+forthcode({FORTH}) to the forthcode({SEARCH}) forthsamp({word}) list.
+Until additional user word list 's are created, new user definitions
 become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this forthdefi({word list}) at compile time.},
@@ -1145,13 +1146,14 @@ colon-definition, to select this forthdefi({word list}) at compile time.},
 { { VOCABULARY JOHN JOHN ' FORTH >WID SEARCH @ = .},{0},
   { FORTH ' FORTH >WID SEARCH @ = .},{_T_} },
 enddoc)
-dnl Force a nil pointer in FORTH 's link field.
-define({_LINKOLD},0)dnl
+dnl Force a pointer to the denotations in FORTH 's link field.
+define({_LINKOLD}, DENOTBODY )dnl
 HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
 HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 ;
+define({_LINKOLD},0)dnl
 worddocsafe( {DICTIONARY},{'},{tick},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: .
 forthsamp({' nnnn})
@@ -1274,9 +1276,9 @@ HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      SEMIS
 ;
 dnl Remember the top of the denotation chain.
-define({_ENDOFDENOTATIONS_},_LINKOLD)dnl
+define({_STARTOFDENOTATIONS_},_LINKOLD)dnl
 dnl Reset the link chain at this to start the ENVIRONMENT wordlist.
-define({_LINKOLD},FORTH)dnl
+define({_LINKOLD},0)dnl
 ;
 worddoc({ENVIRONMENTS},{CORE},{core}, {--- f},{ISO},
 {An environment query whether the CORE wordset is present.},
@@ -1288,22 +1290,26 @@ HEADER({CORE},{CORE},{DOCOL})
         DC      SEMIS
 ;
 dnl Remember the top of the environment chain.
-define({_ENDOFENVIRONMENTS_},_LINKOLD)dnl
+define({_STARTOFENVIRONMENTS_},_LINKOLD)dnl
 dnl Reset the link chain at this to start the FORTH wordlist.
 dnl out of the normal search.
 define({_LINKOLD},FORTH)dnl
 ;
 worddoc( {WORDLISTS},{DENOTATION},{denotation},{},{CI},
-{The name of the forthcode({DENOTATION}) vocabulary. The associated forthdefi({word list})
-contains one-letter words, called
+{The name of the forthcode({DENOTATION}) vocabulary. The
+associated forthdefi({word list}) contains prefix words, called
 forthdefi({denotation}) definitions. If a word is not found in
-the current search order, a string consisting only of its first
-letter is looked up in this word list. If found the parse
-pointer is moved back to after this first letter of the word,
-and the corresponding denotation definition executed. This
-word list must be used with care as a
+the current search order, FORTH will lookup its prefix in this
+word list _VERBOSE_({{, such as to find numbers and strings}}).
+If found the parse pointer is moved back to immediately after
+the prefix, and the corresponding denotation definition
+executed. This word list must be used with care as a
 forthcode({SEARCH}) word list; and only as a
-forthcode({CURRENT}) whenever you want to add a denotation.},
+forthcode({CURRENT}) whenever you want to add a denotation.
+_VERBOSE_({{The word forthcode({FORTH}) is hidden by the word
+forthcode({F}). Use forthsample({{ONLY FORTH}}) to regain
+control.}})
+},
 {{VOCABULARY}},
 {{: AUX1 [COMPILE] DENOTATION DEFINITIONS ;},{},
 {: AUX2 [COMPILE] FORTH DEFINITIONS ;},{},
@@ -1311,8 +1317,9 @@ forthcode({CURRENT}) whenever you want to add a denotation.},
 enddoc)
 HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      _DEA(FORTH)     ;{ END OF VOCABULARY LIST}
-HEADER( , , ,0, B_DUMMY, _ENDOFDENOTATIONS_)
+        DC      _DEA(FORTH)     ;{ NEXT VOCABULARY }
+DENOTBODY:
+HEADER( , , ,0, B_DUMMY, _STARTOFDENOTATIONS_)
 ;
 worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
 {The name of the forthcode({ENVIRONMENT}) vocabulary. The associated forthdefi({word list})
@@ -1328,8 +1335,8 @@ FORTH DEFINITIONS ; GS1},{CORE}},
 enddoc)
 HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      _DEA(DENOT)       ;{ END OF VOCABULARY LIST}
-HEADER( , , ,0, B_DUMMY, _ENDOFENVIRONMENTS_)
+        DC      _DEA(DENOT)       ;{ NEXT VOCABULARY }
+HEADER( , , ,0, B_DUMMY, _STARTOFENVIRONMENTS_)
 ;
 worddoc( {MISC},{NOOP},{no_operation},{},{},
 {Do nothing. Primarily useful as a placeholder.
@@ -1705,9 +1712,8 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      ZEQU
         _0BRANCH(MATS2)
 ;       DC      RR, IDDOT
-        DC      LDUP
         DC      RR, TNFA, FETCH, FETCH
-        DC      LSUB
+        DC      OVER, LSUB
         DC      RR, TFFA, FETCH, LIT, B_DENOT, LAND ;{Get flag.}
         DC      OVER, ZLESS, LAND  ;{Ignorable length difference.}
         DC      ZEQU, LAND
@@ -3331,7 +3337,7 @@ HEADER({>CFA},{TCFA},{DOCOL})
 ;
 worddoc( {DICTIONARY~},{>DFA},{to_data_field_address},{dea --- dfa},{},
 {Given a dictionary entry addres return its forthdefi({data
-field address}) forthvar({pfa}) . This points to the code for a
+field address}) forthvar({dfa}) . This points to the code for a
 code word, to the high level code for a colon-definition, and
 to the forthcode({DOES>}) pointer for a word build using
 forthcode({CREATE}) . Normally this is the area behind the
@@ -4260,7 +4266,8 @@ entry address forthvar({dea}) of the first entry found, else
 leave a nil pointer.},
 {{SEARCH}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
-{ 243 "BONNOBO" FOUND . .},{0 243},
+dnl BONNOBO is found as a wrong hex number!
+{ 243 "BONNOBO" FOUND 0= . .},{0 243},
 { 541 "MYBONOBO" FOUND . .},{0 541}
 },
 enddoc)
@@ -4293,7 +4300,7 @@ the original forthvar({addr}) and a zero. },
 { : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
 { IMMEDIATE 142 FIND: BONOBO . ' BONOBO = . .},{1 _T_ 142},
-{ 153 FIND: BONNOBO . HERE - ABS 30 U< . .},{0 _T_ 153},
+{ 153 FIND: GONNOBO . HERE - ABS 30 U< . .},{0 _T_ 153},
 },
 enddoc)
 HEADER({FIND},{FIND},{DOCOL})
@@ -4800,15 +4807,13 @@ of the next vocabulary or 0 for the end.
 Then follows a dummy dea that serves as forthdefi({word list
 identifier}) or WID in the sense of the ISO standard. with
 empty fields, except for the link field (forthdefi({DLFA}))
-that points to the dea of the first word of the vocabulary.
+that points to the dea of the first word of the vocabulary
+or a zero pointer if empty.
 Executing the vocabulary means pushing its WID on top of the
 forthcode({SEARCH}) order. In ciforth when there can be at most
 M4_MAXWORDLIST word list 's in the search order, the oldest one
 gets lost.
-
-In ciforth forthvar({cccc}) will be so chained as to have FORTH
-as its last word, such that one always can regain control. By
-convention, vocabulary names are to be declared
+By convention, vocabulary names are to be declared
 forthcode({IMMEDIATE}) .},
 {{VOC-LINK},{DEFINITIONS}},
 {{123 VOCABULARY JOHN .},{123},
@@ -4825,7 +4830,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      ZERO, COMMA   ;{ Dummy code field}
         DC      ZERO, COMMA   ;{ Dummy data field}
         DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
-        DC      LIT, FORTH, COMMA ;{Links to the word FORTH}
+        DC      ZERO, COMMA ;{Links to the word FORTH}
 
         DC      DOES
 DOVOC:
@@ -4926,7 +4931,8 @@ such that one can regain control.
 },
 {{VOCABULARY}},
 {
-  {: test ONLY WORDS POSTPONE FORTH ; test},{FORTH}
+  {: test ONLY WORDS POSTPONE FORTH ; test},
+{FORTH "   +   -   F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0   ^   &   '}
 },
 enddoc)
 HEADER({ONLY},{ONLY},{DOCOL})
