@@ -23,7 +23,9 @@ HEX : XX ; CR
 divert(4)dnl
 testing $1
 forall2({onetest},$2)
+S[ ] 
 divert(2)dnl
+.S CR
 FORGET XX  })
 divert(1)dnl
 CR
