@@ -12,21 +12,21 @@ dnl Define a words test test on channel 2
 dnl   the corresponding outcome on channel 4
 define({onetest},
 {divert(2)dnl
-$1 CR QUIT 
+$1 CR
 divert(4)dnl
 $2
 })dnl
 define({wordtest},
 {divert(2)dnl
-." testing $1" QUIT
-HEX : X ; CR QUIT
+." testing $1"
+HEX : X ; CR
 divert(4)dnl
 testing $1
 forall2({onetest},$2)
 divert(2)dnl
-FORGET X  QUIT})
+FORGET X  })
 divert(1)dnl
-CR QUIT                                                                
+CR
 divert(3)dnl
 BYE
 Split here for test
