@@ -11,7 +11,7 @@ dnl A(define(B),y) followed by C(define(B),n) means
 dnl normally A requiries with an exception for C.
 
 dnl Combinations
-_BOOTFD_({define({_BOOTED_}, _yes)})
+_BOOTSECTRK_({define({_BOOTED_}, _yes)})
 _BOOTLBA_({define({_BOOTED_}, _yes)})
 _LINUX_N_({ define( {_HOSTED_LINUX_}, _yes)})
 _LINUX_C_({ define( {_HOSTED_LINUX_}, _yes)})
@@ -21,7 +21,6 @@ _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 
 dnl Hard consequences
-_BOOTFD_({define({_BOOTSECTRK_}, _yes)})
 _REAL_({define({_BITS16_}, _yes)})
 _BOOTSECTRK_({define({_RWSECTRK_}, _yes)})
 _BOOTLBA_({define({_RWLBA_}, _yes)})

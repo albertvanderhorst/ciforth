@@ -132,8 +132,6 @@ dnl A Boot sector present for use on PC. _USEBIOS_ & RWSECTRK required.
 dnl May run under MSDOS as well. Boot from floppy.
 dnl Or in the floppy fashion from old hard disks.
 define( {_BOOTSECTRK_}, _no)dnl
-dnl alias for the time being. DO NOT USE AN ALIAS IN THE CONFIGURATION.
-define({_BOOTFD_},{_BOOTSECTRK_({$1},{$2})})
 dnl
 dnl A Boot sector present for use on PC. _USEBIOS_ & RWLBA required.
 dnl May run under MSDOS as well. Boot from hard disk.
@@ -180,7 +178,7 @@ dnl
 dnl ############## SIZES #############################################
 dnl
 dnl The offset of the errors in the Library Addressable by Block file.
-define( {M4_ERRORSCREEN}, 32)dnl
+define( {M4_ERRORSCREEN}, 48)dnl
 dnl
 dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
 define({M4_EM},10000H)
