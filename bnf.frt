@@ -7,8 +7,11 @@
 ( plus LINOS (par1, par2, par3, function# -- result/error               )
 ( plus everything in the book available in the screens of a fully       )
 ( loaded lina system. Plus the BNF system.                              )
-(   \ is not known by figforth, it used with impunity outside of        )
-(   definitions because it only results in \ MSG #0                     )
+
+(   \ is not known by figforth, it can be used with impunity outside    )
+(   of  definitions because it only results in "\ MSG #0", but          )
+(   anyway:                                                             )
+: \ 0 WORD ;
 
 ( Run as follows:                                                       )
 \   #! /bin/sh
@@ -61,14 +64,14 @@ TEST ." EXPECT 1:" &A IS-LETTER . ^
 TEST ." EXPECT 1:" &1 IS-DIGIT . ^
 
 (  For the CHARACTER supplied, return it IS a valid in an identifier.   )
-: IS-FOLLOW
+: IS-IDENT
     DUP IS-DIGIT >R
     DUP IS-LETTER >R
     DUP &_ = >R
     DROP
     R> R> R> OR OR ;
 
-TEST ." EXPECT 1:" &_ IS-FOLLOW . ^
+TEST ." EXPECT 1:" &_ IS-IDENT . ^
 
 (    For the CHARACTER supplied, return it IS valid in comment.         )
 : IS-COMMENT
@@ -79,11 +82,20 @@ TEST ." EXPECT 1:" &_ IS-FOLLOW . ^
 
 TEST ." EXPECT 1:" &{ IS-COMMENT . ^
 
+(    For the CHARACTER supplied, return it IS valid in a string.        )
+: IS-STRING
+    DUP &} = 0= >R
+    DUP 0= >R
+    DROP
+    R> R> OR ;
+
+TEST ." EXPECT 1:" &{ IS-STRING . ^
+
 (  For the above categories scan a single character.                    )
 BNF: blank-symbol    @TOKEN IS-BLANK DUP SUCCESS ! +TOKEN ;BNF
 BNF: letter-symbol   @TOKEN IS-LETTER DUP SUCCESS ! +TOKEN ;BNF
 BNF: digit-symbol    @TOKEN IS-DIGIT DUP SUCCESS ! +TOKEN ;BNF
-BNF: follow-symbol   @TOKEN IS-FOLLOW DUP SUCCESS ! +TOKEN ;BNF
+BNF: ident-symbol    @TOKEN IS-IDENT DUP SUCCESS ! +TOKEN ;BNF
 BNF: comment-symbol   @TOKEN IS-COMMENT DUP SUCCESS ! +TOKEN ;BNF
 TEST ." EXPECT 1:" 1 SUCCESS ! comment-symbol @ SUCCESS ? ^
 
@@ -98,7 +110,7 @@ TEST ." EXPECT 1:" 1 SUCCESS ! comment {fred} SUCCESS ? ^
 (  KEYWORD .                                                            )
 BNF: skip   { blank | comment } ;BNF
 TEST ." EXPECT 1:" 1 SUCCESS ! skip  { somecomment} {more{_1} SUCCESS ? ^
-BNF: identifier   skip letter-symbol { follow-symbol } ;BNF
+BNF: identifier   skip letter-symbol { ident-symbol } ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 identifier  Sp_2 SUCCESS ? . ^
 BNF: digit-sequence   skip digit-symbol { digit-symbol } ;BNF
 TEST ." EXPECT 1 1:" 1 SUCCESS ! 1 digit-sequence 0234 SUCCESS ? . ^
@@ -132,7 +144,6 @@ TEST ." EXPECT 1 2:" 1 SUCCESS ! `=>' =>2 SUCCESS ? . ^
 (   special                                                             )
 BNF:  `='    '='                ;BNF 
 BNF:  `!'    '!'                ;BNF 
-BNF:  `?'    '?'                ;BNF 
 BNF:  `!?'   '!' '?'            ;BNF 
 BNF:  `!='   '!' '='            ;BNF 
 BNF:  `?='   '?' '='            ;BNF 
@@ -144,7 +155,6 @@ BNF:  `#'    '#'                ;BNF
 BNF:  `*'    '*'                ;BNF 
 BNF:  `/'    '/'                ;BNF 
 BNF:  `e'    [ 'e' | 'E' ]      ;BNF 
-BNF:  `><'   '>' '<'            ;BNF 
 
 
 ( ---------- The keywords -------------------------------------------- )
@@ -207,8 +217,13 @@ TEST ." EXPECT 1:" 1 SUCCESS ! `with'    {follows with} with SUCCESS @ 0= 0= . ^
 BNF: `or_else'   `or' `else'  ;BNF
 BNF: `and_then'  `and' `then' ;BNF
 
+BNF: character-string ''' { ident-symbol | ''' ''' } ''' ;BNF
+
+( Simple renames )
 : (   [COMPILE] (( ;  IMMEDIATE 
 : )   [COMPILE] )) ;  IMMEDIATE 
 : digit COMPILE digit-symbol ; IMMEDIATE
 : letter COMPILE letter-symbol ; IMMEDIATE
+
+
 
