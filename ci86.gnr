@@ -4971,9 +4971,10 @@ _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
-        DC      LIT, STTERM_A
-        DC      LIT, _VAR_FIELD(STTERM)
-        DC      LIT, STTERM_B-STTERM_A
+        ;{ Not a terminal.}
+        DC      LIT, TDROP    ;{ STTERM becomes 2DROP.}
+        DC      LIT, STTERM
+        DC      LIT, _CELLS(3)
         DC      LCMOVE
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,NOOPS, STORE
@@ -6226,6 +6227,8 @@ worddoc( {INPUT~},{SET-TERM},{set_term},{len b --- },{},
 with forthvar({b}) in the termio structure forthcode({TERMIO}) .
 In particular toggling with 0AH makes that
 the terminal doesn't wait for a forthkey({RET}).
+This word is invalid for pipes, and is replaced by
+a forthcode({2DROP}) in that case.
 },{{SET-TERM}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -6237,12 +6240,6 @@ HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      ZERO, LIT, TCSETS, TERMIO
         DC      LIT, ioctl, LINOS, QLERR
         DC      SEMIS
-; Alternative: if no terminal, this is copied over above code during boot
-STTERM_A:
-        DC      DROP, DROP
-        DC      SEMIS
-STTERM_B:
-
 ;
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
@@ -6309,44 +6306,43 @@ dnl {." Type an 'ABCDEF'" DUP . },{6},
 enddoc)
 HEADER({(ACCEPT)},{PACCEP},{DOCOL})
 PACCEP2:
-        DC      NOLF
-        _0BRANCH(PACCEP1)
-        DC      RETOBO, REFTIB
-        _BRANCH(PACCEP2)
-PACCEP1:
-        DC      SPLOFF
-        DC      SEMIS
-
-REMAIND:        DC      0,0
-HEADER({NO-LF},{NOLF},{DOCOL})
+;        DC      NOLF
+;        DC       LIT, 'a', EMIT
         DC      LIT, REMAIND
         DC      TFET
         DC      LIT, LF, SINDEX
         DC      ZEQU
-        DC      SEMIS
-HEADER({REM-TO-BOTTOM},{RETOBO},{DOCOL})
+        _0BRANCH(PACCEP1)
+;        DC      RETOBO
         DC      LIT, REMAIND, TFET
         DC      TIB, FETCH
         DC      SWAP, LMOVE
         DC      TIB, FETCH
         DC      LIT, REMAIND, CELLP, STORE
-        DC      SEMIS
-HEADER({REFILL-TIB},{REFTIB},{DOCOL})
+;        DC      REFTIB
         DC      LIT, REMAIND, FETCH, TOR
         DC      ZERO
         DC      TIB, FETCH, RR, PLUS
         DC      LIT, RTS/2, RR, LSUB
         DC      LIT, read
         DC      LINOS, LDUP, QLERR
+        DC      LDUP, ZEQU, LIT, -EPIPE, LAND, QLERR ; {Presumably end of pipe.}
         DC      TIB, FETCH, SWAP, FROMR, PLUS
         DC      LIT, REMAIND, TSTOR
-        DC      SEMIS
-HEADER({SPLIT-OFF},{SPLOFF},{DOCOL})
-        DC      NOLF, LIT, 13, QERR
+        _BRANCH(PACCEP2)
+PACCEP1:
+;        DC      SPLOFF
+        DC      LIT, REMAIND             ; go
+        DC      TFET                     ; go
+        DC      LIT, LF, SINDEX          ; go
+        DC      ZEQU                     ; go
+        DC      LIT, 13, QERR            ; go
         DC      LIT, REMAIND, TFET
         DC      LIT, LF, SSPLIT
         DC      TSWAP, LIT, REMAIND, TSTOR
-        DC SEMIS
+        DC      SEMIS
+
+REMAIND:        DC      0,0
 
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO FIG L0},
 {Leave the ascii value of the next terminal key struck.},
