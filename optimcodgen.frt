@@ -1,9 +1,16 @@
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 ( $Id$)
-: \D POSTPONE \ ; IMMEDIATE
+
+\ The model is that a hl definition is a sequence of execution
+\ tokens. You can get the dea from an execution token.
+\ Also ' is assumed to give an execution token.
+
+\ : \D POSTPONE \ ; IMMEDIATE
+: \D ;            IMMEDIATE
 \D REQUIRE DUMP
 REQUIRE ASSEMBLERi86
-
+\ Like +! but ors.
+: OR!  DUP @ ROT OR SWAP ! ;
 
 \ Define a ``NEXT'' sequence. It must have the exact code that is in
 \ the kernel.
@@ -11,7 +18,7 @@ REQUIRE ASSEMBLERi86
 
 \ The common content of all high level definitions.
 \ Catch before ``NEXT'' is optimised!
-'NEXT >CFA @ CONSTANT DOCOL
+'NEXT @ CONSTANT DOCOL
 
 \ For DEA : it IS high-level.
 : HIGH-LEVEL? >CFA @ DOCOL = ;
@@ -30,8 +37,12 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 
 \D ." Expect 1 :" 'DROP >CFA @ DUP >NA SWAP - . CR
 
-\ Fetch the code from DEA , return it as a Forth STRING.
-: CODE@  >CFA @ DUP >NA OVER - ;
+\ Fetch the code from XT , return it as a Forth STRING.
+: CODE@  @ DUP >NA OVER - ;
+
+\ Store a STRING with code in the dictionary.
+: CODE, HERE OVER ALLOT SWAP CMOVE ;
+
 \D ." Expect POP AX instruction :" CR
 \D 'DROP CODE@ DUMP-STRING
 \ The most important flag of them all, not used here.
@@ -46,18 +57,22 @@ HEX 80 CONSTANT IMASK   \ Data is following in line.
 RMASK WMASK IMASK OR OR CONSTANT AO-MASK \
 DECIMAL
 
+\ Leave an incremented ADDRESS and the CONTENT.
+: @+ $@ ;
+
 \ For DEA: it IS A-optimisable.
 : A-OPTIMISABLE?   >FFA @   AO-MASK AND   0=   ;
 
-\ Forward definition.
+\ Try and optimise the DEA with respect to method `A' (inlining.)
+\ Reach trough to underlying levels.
 : OPTIMISE-A ;
 
 \ For a parse ADDRESS return an incremented parse ADDRESS, its
 \ CONTENT and a go on FLAG.
 : NEXT-PARSE
-   $@ >R   R@ >FFA @ IMASK AND IF CELL+ THEN
+   @+ >R   R@ CFA> >FFA @ IMASK AND IF CELL+ THEN
    R@
-   R@ ID.
+\D   R@ CFA> ID.
    R> '(;) <> ;
 
 \ For all elements of DEA attempt a a ``OPTIMISE-A'' .
@@ -65,24 +80,22 @@ DECIMAL
 : OPTIMISE-A1 DUP HIGH-LEVEL? IF
     -1 >R
     >DFA @ BEGIN NEXT-PARSE WHILE
-    DUP OPTIMISE-A
+    CFA> DUP OPTIMISE-A
     A-OPTIMISABLE? R> AND >R REPEAT
-    2DROP R>
+    2DROP R>  \D .S
     ELSE
-       DROP 0
+       DROP 0  \D .S
     THEN
 ;
 
 \ Concatenate the code of all elements of DEA , turning it into
 \ a code definition. This must be allowed or we crash.
-: OPTIMISE-A2 DUP >R HERE >R
+: OPTIMISE-A2  HERE OVER >CFA !
     >DFA @
-    BEGIN $@ DUP '(;) <> WHILE CODE@ HERE OVER ALLOT SWAP CMOVE REPEAT
-    2DROP NEXT
-    R> R> >CFA ! ;
+    BEGIN NEXT-PARSE WHILE CODE@ CODE, REPEAT
+    2DROP NEXT ;
 
-\ Try and optimise the DEA with respect to method `A' (inlining.)
-\ Reach trhough to underlying levels.
+\ Resolve OPTIMISE-A
 : (OPTIMISE-A)
     DUP OPTIMISE-A1 IF OPTIMISE-A2 _ THEN DROP ;
 '(OPTIMISE-A) >DFA @   'OPTIMISE-A >DFA !
@@ -109,13 +122,17 @@ DECIMAL
 \D : TEST 0 DO BA LOOP ;
 \D : Q 0 DO 10000 TEST I . LOOP ;
 \D \ -------------- end of sample code --------------------------
-\D ' (LOOP) >FFA IMASK  TOGGLE
-\D ' (DO) >FFA IMASK  TOGGLE
-\D ' LIT >FFA IMASK  TOGGLE
+\D IMASK    ' BRANCH >FFA OR!
+\D IMASK    ' 0BRANCH >FFA OR!
+\D IMASK    ' (LOOP) >FFA OR!
+\D IMASK    ' (+LOOP) >FFA OR!
+\D IMASK    ' (DO) >FFA   OR!
+\D IMASK    ' (?DO) >FFA   OR!
+\D IMASK    ' LIT >FFA    OR!
 \D \ Just block optimisation here, because we are not ready for
 \D \ all out optimisation :
-\D ' I >FFA AO-MASK  TOGGLE
-\D ' . >FFA AO-MASK  TOGGLE
+\D AO-MASK  ' I >FFA      OR!
+\D AO-MASK  ' . >FFA      OR!
 EXIT
 \D 'Q OPTIMISE-A
 \D ." Expect  1 2 3 4 5 :" 5 Q CR
