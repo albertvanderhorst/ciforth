@@ -1040,7 +1040,7 @@ USINI:
         DC      0       ;{ INIT (WARNING)      7}
         DC      INITDP  ;{      INIT (FENCE)  8}
         DC      INITDP  ;{      INIT (DP)     9}
-        DC      _DEA(FORTH) ;{       INIT (VOC-LINK) 10}
+        DC      _DEA(ASSEM) ;{       INIT (VOC-LINK) 10}
 _LINUX_C_({
         DC      0       ;{ INIT (OFFSET) }
 });_END_({_LINUX_C_})
@@ -1913,7 +1913,7 @@ HEADER({SCR},{SCR},{DOUSE})
 ;
 worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{U,L0},
 {A user variable containing a pointer to data field of 
-a vocabulary within that contains a dummy dea with which the
+a vocabulary that contains a dummy dea with which the
 dictionary searches will first begin.},{{VOCABULARY},{CURRENT}})
 HEADER({CONTEXT},{CONT},{DOUSE})
         DC      CELLS(16)
@@ -2369,6 +2369,7 @@ from being found during dictionary searches, until compiling is
 completed without error.},{{IMMEDIATE}})
 HEADER({SMUDGE},{SMUDG},{DOCOL})
         DC      LATES
+        DC      FETCH
         DC      LIT,20H
         DC      TOGGL
         DC      SEMIS
@@ -2420,7 +2421,7 @@ HEADER({;CODE},{SEMIC},{DOCOL},1)
         DC      COMP
         DC      PSCOD
         DC      LBRAC
-SEMI1:  DC      NOOP    ;{ The code field of ASSEMBLER must be patched here. }
+SEMI1:  DC      ASSEM   ; { Always ASSEMBLER used as CONTEXT.}
         DC      SEMIS
 ;
 worddoc({DEFINING},{<BUILDS},{builds},{},{C,L0},
@@ -2783,7 +2784,7 @@ DFIN2:  DC      ZERO ; { Not found.}
         _BRANCH(DFIN3)
 DFIN1:                          ; { Found.}
         DC      RESULT,FETCH
-        DC      LDUP, CFET
+        DC      LDUP, FETCH, CFET
         DC      ONE
 DFIN3:                          
         DC      SEMIS
@@ -2891,7 +2892,7 @@ CREA1:  DC      HERE
         DC      COMMA   ; {Name field.}
         DC      LATES
         DC      COMMA   ; {Link field.}
-        DC      HERE,FROMR
+        DC      FROMR
         DC      CURR
         DC      FETCH
         DC      TLFA
@@ -3022,6 +3023,7 @@ The user may force compilation of an immediate definition by
 preceeding it with forthcode({[COMPILE]}) .},{})
 HEADER({IMMEDIATE},{IMMED},{DOCOL})
         DC      LATES
+        DC      FETCH
         DC      LIT,40H
         DC      TOGGL
         DC      SEMIS
@@ -3055,8 +3057,10 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      HERE
         DC      LCELL,LSUB ;{ Skip over dovoc.}
         DC      PTON       ;{ Future VOC-LINK.}
-        DC      ZERO, COMMA   ; Dummy name field
+        DC      LIT, DUMMY, COMMA   ; Dummy name field
         DC      CURR
+        DC      FETCH
+        DC      TLFA
         DC      FETCH
         DC      COMMA    ; { Points to DLFA of current vocabulary.}
         DC      VOCL
@@ -3065,10 +3069,12 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      VOCL
         DC      STORE
         DC      DOES
-DOVOC:  DC      CONT
+DOVOC:  
+        DC      CONT
         DC      STORE
         DC      SEMIS
         PAGE
+DUMMY:  DB      81H,0A0H ;{ Skippable dummy name field.}
 ;
 ;{   The link to task is a cold start value only.}
 ;{   It is updated each time a definition is}
@@ -3082,9 +3088,22 @@ forthcode({FORTH}) . forthcode({FORTH}) is immediate, so it will execute during 
 a colon-definition, to select this vocabulary at compile time.},{{VOCABULARY}})
 HEADER({FORTH},{FORTH},{DODOE},1)
         DC      DOVOC
-        DC      0 ; Dummy name field
+        DC      DUMMY; Dummy name field
         DC      _DEA(TASK)
         DC      0       ;{ END OF VOCABULARY LIST}
+;
+worddoc({VOCABULARIES},{ASSEMBLER},{forth},{},{P,L1},
+{The name of the primary vocabulary.
+Execution makes forthcode({ASSEMBLER}) the forthcode({CONTEXT}) vocabulary. 
+ forthcode({ASSEMBLER}) is immediate, so it will execute during the creation of
+a colon-definition, to select this vocabulary at compile time.
+_VERBOSE_({It is defined in the kernel because the forthcode({;CODE}) word needs it.})},
+{{VOCABULARY}})
+HEADER({ASSEMBLER},{ASSEM},{DODOE},1)
+        DC      DOVOC
+        DC      DUMMY; Dummy name field
+        DC      _DEA(FORTH)+CELLS(4); {Dummy dea of FORTH. } 
+        DC      _DEA(FORTH)       
 ;
 worddoc({VOCABULARIES},{DEFINITIONS},{definitions},{},{L1},
 {Used in the form:
