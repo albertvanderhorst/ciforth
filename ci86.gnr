@@ -1284,7 +1284,7 @@ parsing and searching instead.}})},
 {{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1},
 { : AAPE 1 2 ; 'AAPE EXECUTE  'AAPE ID. . .},{AAPE 2 1},
-{'APEEE },{'APEEE ?  MSG # 11 : WORD IS NOT FOUND},
+{'APEEE },{'APEEE ?  ERR # 11 : WORD IS NOT FOUND},
 {CR},{}
 },
 enddoc)
@@ -3761,7 +3761,7 @@ errors signalled using forthcode({?ERRUR}) do.
 },
 {ERROR},
 {{0 12 ?ERROR},{},
- {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? MSG # 18 },
+ {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? ERR # 18 },
  {CR},{} },
 enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
@@ -3785,7 +3785,7 @@ is aborted.
 {
 {0 ?ERRUR 1 ?ERRUR},{},
 {0 WARNING ! -20 ?ERRUR },
-{ARNING ! -20 ?ERRUR ? MSG # -32 },
+{ARNING ! -20 ?ERRUR ? ERR # -32 },
 {CR},{},
 },
 enddoc)
@@ -3799,7 +3799,7 @@ worddoc( {SECURITY},{?DELIM},{question_delimiter},{},{},
 delimiter.},{},
 {
 {DECIMAL 0 WARNING !   ?DELIM   },{},
-{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1? MSG # 10 },
+{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1? ERR # 10 },
  {CR},{} },
 enddoc)
 HEADER({?DELIM},{QDELIM},{DOCOL})
@@ -3814,7 +3814,7 @@ worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
 {Issue error message if stack position differs from value saved in
 forthsamp({CSP}) .},{},
 {{!CSP ?CSP},{},
-{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? MSG # 20 },
+{0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? ERR # 20 },
  {CR},{} },
 enddoc)
 HEADER({?CSP},{QCSP},{DOCOL})
@@ -3827,7 +3827,7 @@ HEADER({?CSP},{QCSP},{DOCOL})
 ;
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}},
-{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? MSG # 17 },
+{{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? ERR # 17 },
  {CR},{} },
 enddoc)
 HEADER({?COMP},{QCOMP},{DOCOL})
@@ -3852,7 +3852,7 @@ worddoc( {SECURITY},{?PAIRS},{question_pairs},{n1 n2 --},{},
 {Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
 indicates that compiled conditionals do not match.},{{?ERROR}},
 {{ 1 1 ?PAIRS},{},
-{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? MSG # 19 },
+{0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? ERR # 19 },
  {CR},{} },
 {},
 enddoc)
@@ -3864,7 +3864,7 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
 _LOAD_({
 worddoc( {SECURITY},{?LOADING},{question_loading},{},{},
 {Issue an error message if not loading},{{?ERROR}},
-{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? MSG # 22 },
+{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? ERR # 22 },
  {CR},{} },
 enddoc)
 HEADER({?LOADING},{QLOAD},{DOCOL})
@@ -4644,7 +4644,7 @@ Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a descript
 This word is executed by forthcode({CATCH}) before restarting the interpreter
 and can be revectored to give more elaborate diagnostics. },
 {{?ERROR},{WARNING}},
-{ {SCR @ DUP WHERE 2! 12 ERROR},{? MSG # 18},
+{ {0. WHERE 2! 12 ERROR},{? ERR # 18},
  {CR},{} },
 enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
@@ -4652,11 +4652,16 @@ HEADER({ERROR},{ERROR},{DOCOL})
         DC      OVER, LIT, 20, LSUB
         DC      MAX
         DC      SWAP,OVER, LSUB
-        DC      LTYPE
-        DC      LIT, '?', EMIT
-        DC      SPACE
+        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        _STRINGINLINE({? ERR # })
+        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      BASE, FETCH
+        DC      DECA
+        DC      OVER
+        DC      STOD, ZERO, PDDOTR      ;{This is about (.) }
+        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      BASE, STORE
         DC      MESS
-        DC      CR
         DC      SEMIS
 ;
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
@@ -4693,7 +4698,7 @@ forthcode({CATCH}), a non-zero forthsamp({tc}) aborts.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR}},
 {{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
-{ 2 3 12 THROW ; GS1 ? MSG # 18},
+{ 2 3 12 THROW ; GS1 ? ERR # 18},
  {CR},{} },
 enddoc)
 HEADER({THROW},{THROW},{DOCOL})
@@ -4806,7 +4811,6 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      IDDOT
         DC      LIT,4
         DC      MESS
-        DC      CR
         DC      SPACE   ;{THEN}
         DC      ZERO
 CREA1:  DC      DROP
@@ -4957,7 +4961,7 @@ worddoc( {SECURITY},{?STACK},{question_stack},{},{},
 {{ S0 @ DSP! ?STACK},{},
 {0 WARNING ! : GS1 DROP ?STACK ;},{},
 dnl Do not use the part of TIB that is corrupted!
- {                               GS1},{      GS1 ? MSG # 1 },
+ {                               GS1},{      GS1 ? ERR # 1 },
  {CR},{} },
 enddoc)
 HEADER({?STACK},{QSTAC},{DOCOL})
@@ -5384,7 +5388,7 @@ OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
         DC      LIT, _PC_({0FDH}) _LINUX_N_({0FFH}), LAND
         DC      LIT, '-', UNEQ
         _0BRANCH(OPT3)
-        DC      LIT, 3, LDUP, MESS, CR ; {Fatal, but can't use ERROR.}
+        DC      LIT, 3, LDUP, ERROR
         DC      XCODE, STORE, BYE
 OPT3:
         DC      LIT, 8, RSHIFT
@@ -5830,25 +5834,8 @@ HEADER({(LINE)},{PLINE},{DOCOL})
         DC      PLUS
         DC      BLOCK
         DC      PLUS
-        DC      LIT,63  ;{ Leave off the '\n'.}
+        DC      LIT,63
         DC      SEMIS
-;
-worddoc( {SCREEN},{.LINE},{dot_line},{line scr --},{},
-{Print on the terminal device, a line of text from the disc by its
-line and screen number. _VERBOSE_(
-{{Trailing blanks are suppressed,
-which leads to a tremendous speed advantage on modern glass tty's.}})},
-{{C/L}},
-{
-{1 0 .LINE}, { LICENSE }
-},
-enddoc)
-HEADER({.LINE},{DLINE},{DOCOL})
-        DC      PLINE
-        DC      DTRAI
-        DC      LTYPE
-        DC      SEMIS
-;
 ;
 worddoc( {ERRORS},{ERRSCR},{error_screen},{--- addr},{},
 {A variable containing the address of the number of the screen
@@ -5859,48 +5846,41 @@ forthsamp({0 MESSAGE}) prints the first line of this screen.
 _VERBOSE_({Traditionally this was screen 4, but the negative
 Unix error numbers makes this unattractive.})
 },{{C/L},{MESSAGE}},
-{{HEX ERRSCR ?},{20}},
+{{HEX ERRSCR ?},{30}},
 enddoc)
 HEADER({ERRSCR},{ERRSCR},{DOVAR}, )
         DC ERRORSCREEN
 ;
 worddoc( {ERRORS},{MESSAGE},{message},{n --},{},
-{Print on the selected output device the text of line
+{ forthcode({MESSAGE}) is generally used to print error and
+warning messages.
+Print on the _HOSTED_LINUX_({standard error channel})_PC_({output device})
+the text of line
 forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
 positive or negative and beyond just screen forthcode({ERRSCR}).
-forthcode({MESSAGE}) is generally used to print error and
-warning messages.
-_PC_({This ciforth contains only messages with positive offset.})
-_HOSTED_LINUX_({The messages with only with negative offset contain
-the strings belonging to the return values for Linux system calls.})
+The messages with negative offset contain
+the strings belonging to the return values for _HOSTED_LINUX_({Linux system calls})_PC_({BDOS calls}).
 forthsamp({0 MESSAGE}) will print version information about the library file,
 the messages sit in.
-If forthcode({WARNING}) is zero, the message will simply be
-printed as a number (disc unavailable) in decimal, ignoring the
-current forthcode({BASE}).
+If forthcode({WARNING}) is zero (disc unavailable), the message will simply be ignored.
 },
 {{ERROR}},
 {
-{1 WARNING ! -190 MESSAGE}, {( -g This_option_is_available )},
-{0 WARNING ! HEX 12 MESSAGE},{MSG # 18 }},
+{1 WARNING ! -190 MESSAGE}, {( -w This_option_is_available )},
+{1 WARNING ! HEX 12 MESSAGE},{ : EXECUTION ONLY }},
+{0 WARNING ! HEX 12 MESSAGE},{}},
 enddoc)
-; FIXME the message number should be printed regardless.
-; FIXME always print a cr after the message.
 HEADER({MESSAGE},{MESS},{DOCOL})
         DC      LWARN
         DC      FETCH
         _0BRANCH(MESS1) ;{IF}
         DC      ERRSCR, FETCH
-        DC      DLINE
-        DC      SPACE   ;{THEN}
-        _BRANCH(MESS2)  ;{ELSE}
-MESS1:  _STRINGINLINE({MSG # })
-        DC      LTYPE
-        DC      BASE, FETCH
-        DC      DECA
-        DC      SWAP, DOT
-        DC      BASE, STORE
-MESS2:                      ;{THEN}
+        DC      PLINE, ONEP     ;{ Also print the '\n' !}
+        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      X
+MESS1:                  ;{THEN}
+        DC      DROP
+        DC      CR
         DC      SEMIS
 ;
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
@@ -7572,12 +7552,31 @@ redirection or forthsamp({tee})-ing by Linux}}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output, however in
 that case forthcode({OUT}) is not observed. },
-{{EMIT},{OUT}},
+{{EMIT},{OUT},{ETYPE}},
 {{HERE 41 C, 42 C, 2 TYPE},{AB}},
 enddoc)
 HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTORE
         DC      ONE, WFILE, DROP
+        DC      SEMIS
+;
+worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
+{Transmit forthvar({count}) characters from forthvar({addr}) to
+the standard error device.
+It
+is high level so error output can be redirected, by
+forthdefi({revectoring}) it _VERBOSE_({{and the usual
+redirection or forthsamp({tee})-ing by Linux}}). In this
+ciforth strings may contain embedded forthkey({LF}) 's with the
+effect of a new line at that point in the output, however in
+that case forthcode({OUT}) is not observed. },
+{{EMIT},{OUT},{ETYPE}},
+dnl This test assumes a redirection of error out to standard out.
+{{HERE 41 C, 42 C, 2 ETYPE},{AB}},
+enddoc)
+HEADER({ETYPE},{ETYPE},{DOCOL})
+        DC      LDUP, LOUT, PSTORE
+        DC      TWO, WFILE, DROP
         DC      SEMIS
 ;
 worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
@@ -7991,9 +7990,9 @@ no longer are.},
 {
 {EMPTY-BUFFERS BLOCK-EXIT},{},
 {0 WARNING ! EMPTY-BUFFERS 1 BLOCK},
- {PTY-BUFFERS 1 BLOCK ? MSG # 8},
+ {PTY-BUFFERS 1 BLOCK ? ERR # 8},
 { CR DISK-ERROR @ 0 < . 2 BLOCK-INIT},{_T_},
-{1 0 .LINE}, { LICENSE }
+{1 0 (LINE) TYPE}, { LICENSE }
 },
 enddoc)
 HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
@@ -9077,16 +9076,16 @@ DIGS1:  DC      DIG     ;{BEGIN}
         _0BRANCH(DIGS1) ;{UNTIL}
         DC      SEMIS
 ;
-worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{ISO,FIG},
-{Print a signed double number forthvar({d}) right aligned in a
-field forthvar({n}) characters wide. Enlarge the field, if
+worddoc( {OUTPUT},{(D.R)},{paren_d_dot_r},{d n ---sc},{ISO,FIG},
+{Format a signed double number forthvar({d}) right aligned in a
+field forthvar({n}) characters wide to the string forthvar({sc}).
+Enlarge the field, if
 needed. _VERBOSE_({{By giving a field length of 0, it is ignored.}}).
-
 },
 {{OUT},{D.}},
-{{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}},
+{{-12. 41 EMIT 5 (D.R) 41 EMIT TYPE},{A  A-12}},
 enddoc)
-HEADER({D.R},{DDOTR},{DOCOL})
+HEADER({(D.R)},{PDDOTR},{DOCOL})
         DC      TOR
         DC      SWAP
         DC      OVER
@@ -9100,12 +9099,26 @@ HEADER({D.R},{DDOTR},{DOCOL})
         DC      OVER
         DC      LSUB
         DC      SPACES
+        DC      SEMIS
+;
+worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{ISO,FIG},
+{Print a signed double number forthvar({d}) right aligned in a
+field forthvar({n}) characters wide. Enlarge the field, if
+needed. _VERBOSE_({{By giving a field length of 0, it is ignored.}}).
+
+},
+{{OUT},{D.},{(D.R)}},
+{{-12. 41 EMIT 5 D.R 41 EMIT},{A  -12A}},
+enddoc)
+HEADER({D.R},{DDOTR},{DOCOL})
+        DC      PDDOTR
         DC      LTYPE
         DC      SEMIS
 ;
 worddocsafe( {OUTPUT},{.R},{dot_r},{n1 n2 ---},{},
 {Print the number n1 right aligned in a field whose width is forthvar({n2}) . No
-following blank is printed.},{{OUT},{.}},
+following blank is printed.},
+{{OUT},{.},{(D.R)}},
 {{-12 41 EMIT 5 .R 41 EMIT},{A  -12A}},
 enddoc)
 HEADER({.R},{DOTR},{DOCOL})
@@ -9118,7 +9131,7 @@ HEADER({.R},{DOTR},{DOCOL})
 worddoc( {OUTPUT},{D.},{d_dot},{d ---},{ISO,FIG,L1},
 {Print a signed double number forthvar({d}),
 according to the current forthcode({BASE}) . A blank follows.
-},{{OUT},{.},{D.R}},
+},{{OUT},{.},{D.R},{(D.R)}},
 {{-12. D. 41 EMIT},{-12 A}},
 enddoc)
 HEADER({D.},{DDOT},{DOCOL})
@@ -9131,7 +9144,7 @@ worddocsafe( {OUTPUT},{.},{dot},{n ---},{ISO,FIG,L0},
 {Print a number from a signed _BITS_ bit two's complement value,
 converted according to the numeric forthcode({BASE}) .
 A blanks follows.},
-{{OUT},{U.},{.R},{D.R},{D.}},
+{{OUT},{U.},{.R},{D.R},{D.},{(D.R)}},
 {{-12 41 EMIT . 41 EMIT},{A-12 A}},
 enddoc)
 HEADER({.},{DOT},{DOCOL})
@@ -9155,7 +9168,7 @@ worddocsafe( {OUTPUT},{U.},{u_dot},{u ---},{ISO},
 converted according to the numeric forthcode({BASE}) .
 A trailing blanks
 follows.},
-{{OUT},{.},{.R},{D.R},{D.}},
+{{OUT},{.},{.R},{D.R},{D.},{(D.R)}},
 _BITS32_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
 {-1 41 EMIT U. 41 EMIT},{AFFFFFFFF A}},})
 _BITS16_({ {{12 41 EMIT U. 41 EMIT},{A12 A},
@@ -9344,7 +9357,7 @@ INDE1:  DC      CR,IDO
         DC      LIT,3
         DC      DOTR,SPACE
         DC      ZERO,IDO
-        DC      DLINE,KEYQ
+        DC      PLINE, LTYPE, KEYQ
         _0BRANCH(INDE2)
         DC      LLEAV
 INDE2:  _LOOP(INDE1)
