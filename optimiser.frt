@@ -9,9 +9,12 @@
 
 REQUIRE $
 REQUIRE SWAP-DP
+( ------------ COMFIGURATION --------------------------------- )
+
+500 CONSTANT MAX-SET       \ Default set size.
 
 ( ------------ DEBUGGING ------------------------------------- )
-      : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
+: \D POSTPONE \ ; IMMEDIATE    : ^^ ;
 \ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
 
 \ REQUIRE SET (not yet)
@@ -98,6 +101,9 @@ R> R> REPEAT 2DROP ;
 \ Like +! but ors.
 : OR!  DUP @ ROT OR SWAP ! ;
 
+\ Like +! but ands.
+: AND!  DUP @ ROT AND SWAP ! ;
+
 \ For a soft FLAG, returns a FORTH flag (-1/0)
 : 0<>   0= 0= ;
 
@@ -147,8 +153,18 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 : NS?   FMASK-NS ALLOWED? ;
 
 \ Move to analyser.frt    FIXME!
-FMASK-ST '.S >FFA OR!
-FMASK-ST 'DEPTH >FFA OR!
+: FMASK-ST! FMASK-NS INVERT SWAP >FFA AND! ;
+'.S FMASK-ST!
+'DEPTH FMASK-ST!
+
+\ The return stack is not handled in any way.   FIXME!
+'>R FMASK-ST!
+'R> FMASK-ST!
+'R@ FMASK-ST!
+'RDROP FMASK-ST!
+\ The following control words interfere with the optimiser FIXME!
+'EXIT FMASK-ST!
+'LEAVE FMASK-ST!
 
 \ The minimum step depth we have encountered.
 VARIABLE MIN-DEPTH
@@ -178,7 +194,7 @@ HERE SWAP !
 : IS-A-DROP DROPS IN-SET? ;
 
 \ The set of addresses where a branch offset is stored.
-50 SET BRANCHES
+MAX-SET SET BRANCHES
 : !BRANCHES   BRANCHES !SET ;
 
 \ For a POSITION of a branch offset, find the target.
@@ -232,7 +248,7 @@ THEN RDROP ;
 THEN RDROP ;
 
 \ The set of branches that is marked for elimination from the set ``BRANCHES''.
-50 SET MARKED-BRANCHES
+MAX-SET SET MARKED-BRANCHES
 : !MARKED-BRANCHES  MARKED-BRANCHES !SET ;
 
 \ For GAP and ADDRESS of entry in branches, if the branch is taken from inside
@@ -284,18 +300,42 @@ THEN RDROP ;
 \ The set of shifts ; Each pairs is and ADDRESS SHIFT.
 \ All branches-parts (start or targets) higher than address are to be
 \ offset by the corresponding shift. These offsets are cumulative.
-50 SET SHIFTS     : !SHIFTS   SHIFTS !SET ;
+MAX-SET SET SHIFTS     : !SHIFTS   SHIFTS !SET ;
 
-\ A GAP to be copied contains some branching.
-: REMEMBER-BRANCH   HERE SHIFTS SET+!   SWAP - SHIFTS SET+! ;
+\ The set of exits : places where a branch has to be filled in
+\ that replace an exit from a word that is expanded in line.
+MAX-SET SET EXITS     : !EXITS   EXITS !SET ;
 
-: COPY-ONE IS-A-BRANCH IF HERE CELL+ BRANCHES SET+!  THEN >HERE ;
+\ If DEA is a BRANCH remember it in ``BRANCHES''
+: REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES SET+!  THEN ;
+
+\ Copy an ``EXIT'' statement to the output sequence, replacing it by a branch.
+: COPY-EXIT
+HERE CELL+ BRANCHES SET+!   HERE EXITS SET+!
+POSTPONE BRANCH 0 ,   ;
+
+\ For all the ``EXITS'' remembered, fill in the ``SHIFTS'' caused by expansion
+\ of the ``EXIT''. To be called when ``HERE'' is where the ``EXIT'' must
+\ branch to.
+: HANDLE-EXITS
+EXITS @+ SWAP ?DO
+    I @ CELL+    HERE OVER CELL+ -   SWAP !
+    I @ SHIFTS SET+!    0 CELL+ SHIFTS SET+!
+0 CELL+ +LOOP ;
+
+\ Copy a GAP containing a single statement (xt plus possible inline stuff)
+\ to ``HERE'' take into account specialties associated with its DEA.
+\ Leave the END of the gap.
+: COPY-ONE   DUP REMEMBER-BRANCH
+'EXIT = IF SWAP DROP COPY-EXIT ELSE
+>HERE THEN ;
 
 \ For a forward branch at ADDRESS do all the corrections found in ``SHIFTS''.
 \ Note that this accumulates changes, and the decision to apply a correction
 \ depends on order and previous corrections applied.
 : CORRECT-ONE-BRANCH-FORWARD
-SHIFTS @+ SWAP ?DO
+SHIFTS
+@+ SWAP ?DO
     I @    OVER    DUP >TARGET    WITHIN IF I CELL+ @ OVER +! THEN
 2 CELLS +LOOP DROP ;
 
@@ -318,20 +358,24 @@ BRANCHES @+ SWAP ?DO
     I @ DUP @ 0< IF CORRECT-ONE-BRANCH-BACKWARD ELSE CORRECT-ONE-BRANCH-FORWARD THEN
 0 CELL+ +LOOP ;
 
+\ Copy the SEQUENCE of high level code to ``HERE'' , expanding the high level words.
+: COPY-CONTENT   BEGIN DUP NEXT-PARSE WHILE  COPY-ONE REPEAT 2DROP DROP ;
+
 \ Copy the SEQUENCE of high level code to ``HERE'' .
 \ Do not initialise, or terminate.
-: (EXPAND-ONE) DUP >R HERE >R
-    BEGIN DUP NEXT-PARSE WHILE  COPY-ONE REPEAT
-    R> SHIFTS SET+!
-    2DROP
-    R> CELL+ -   SHIFTS SET+!
+: (EXPAND-ONE)
+!EXITS
+     HERE SWAP COPY-CONTENT
+    DUP SHIFTS SET+!
+    HERE SWAP CELL+ -   SHIFTS SET+!
+    HANDLE-EXITS
 ;
 
 \ For GAP and DEA : expand GAP to ``HERE'' filling in ``SHIFTS''.
 \ Leave the END of the gap.
 : EXPAND-ONE
     DUP HIGH-LEVEL? IF >DFA @ (EXPAND-ONE) SWAP DROP
-    ELSE COPY-ONE THEN ;
+    ELSE REMEMBER-BRANCH >HERE THEN ;
 
 \ Expand the SEQUENCE of high level code to ``HERE'' ,  possibly optimizing it.
 \ Do not initialise, or terminate.
