@@ -21,9 +21,17 @@
 ( Assemble an 1..3 byte instruction and post what is missing.)
 : CHECK1 HERE 3 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
 HEX
-: 1PI <BUILDS  , FFFFFF00 OR , INVERT , CHECK1 DOES> <POST POST, 1 CORRECT ;
-: 2PI <BUILDS  , FFFF0000 OR , INVERT , CHECK1 DOES> <POST POST, 2 CORRECT ;
-: 3PI <BUILDS  , FF000000 OR , INVERT , CHECK1 DOES> <POST POST, 3 CORRECT ;
+0 VARIABLE TEMP
+: 1PI <BUILDS  , FFFFFF00 OR , INVERT , CHECK1
+DOES> [ HERE TEMP ! ] <POST POST, 1 CORRECT ;
+(   Return for DEA : it IS of type 1PI                                  )
+: IS-1PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
+: 2PI <BUILDS  , FFFF0000 OR , INVERT , CHECK1 DOES>
+DOES> [ HERE TEMP ! ] <POST POST, 2 CORRECT ;
+: IS-2PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
+: 3PI <BUILDS  , FF000000 OR , INVERT , CHECK1 DOES>
+DOES> [ HERE TEMP ! ] <POST POST, 3 CORRECT ;
+: IS-3PI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
 DECIMAL
 ( Or DATA into ADDRESS. If bits were already up its wrong.)
 : OR! >R R @    2DUP AND 28 ?ERROR   OR R> ! ;
@@ -33,7 +41,8 @@ DECIMAL
 : FIX| @+ ISS @ OR! @+ TALLY CELL+ OR! @ TALLY AND! ;
 
 ( One size fits all. )
-: xFI <BUILDS , , INVERT , CHECK1 DOES> FIX| ;
+: xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ;
+: IS-xFI PFA CFA CELL+ @ [ TEMP @ ] LITERAL = ;
 
 : CHECK DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK TALLY OR! ;
@@ -119,8 +128,11 @@ A 2 + CELL+ @ CONSTANT B
 ( B @ PFA LFA DUP H. 10 DUMP )
 : QQ PFA LFA @ ;
 : RR QQ DUP 10 DUMP ;
+(   Given a DEA, return the next DEA)
 : >NEXT% PFA LFA @ ;
 : % [COMPILE] ' NFA ;
+( The DEA is in fact not a dea, leave it IS the endmarker             )
+: DICTEND? @ $FFFF AND $A081 = ;
 : %EXECUTE PFA CFA EXECUTE ;
 B H.
 ( Execute the DEA with as data the                                        )
@@ -130,34 +142,27 @@ the same vocabulary., leaving that CFA
 BEGIN
 2DUP SWAP %EXECUTE
  >NEXT%
-DUP @ $FFFF AND $A081 = UNTIL
+DUP DICTEND? UNTIL
 DROP
 ;
 (   Execute the DEA with as data each time                              )
 (   the namefield of the assembler vocabulary.                          )
 ( a dea can be found using % )
-: FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS DROP 
+: FOR-ALL-AS ' ASSEMBLER 2 +  CELL+ @ FOR-REMAINING-AS DROP
 ;
 % ID. FOR-ALL-AS
-0 0 0 1PI SAMPLE
 
-( For the PFA , return it IS a posit.)
-: POSTIT? @  ' SAMPLE @ = ;
-' SAMPLE POSTIT? ." SAMPLE: " . CR
-' LXI POSTIT? ." LXI: " . CR
-' B| POSTIT? ." B|: " . CR
-0 0 0 xFI SAMPLE
-: FIXUP? @  ' SAMPLE @ = ;
-' SAMPLE FIXUP? ." SAMPLE: " . CR
-' LXI FIXUP? ." LXI: " . CR
-' B| FIXUP? ." B|: " . CR
+% LXI IS-1PI ." LXI: " . CR
+% B| IS-1PI ." B|: " . CR
+% LXI IS-xFI ." LXI: " . CR
+% B| IS-xFI ." B|: " . CR
 ( print name if tos is a postit )
-: PIFPOST DUP PFA POSTIT? IF ID. CR ELSE DROP THEN ;
+: PIFPOST DUP IS-1PI IF ID. CR ELSE DROP THEN ;
 ( print name if tos is a fixup )
-: PIFFIX DUP PFA FIXUP? IF ID. CR ELSE DROP THEN ;
+: PIFFIX DUP IS-xFI IF ID. CR ELSE DROP THEN ;
 
 ." There comes the posts"
- ' PIFPOST CFA FOR-ALL-AS 
-." There comes the posts"
- ' PIFFIX CFA FOR-ALL-AS 
+ % PIFPOST FOR-ALL-AS
+." There comes the fixs"
+%  PIFFIX FOR-ALL-AS
 
