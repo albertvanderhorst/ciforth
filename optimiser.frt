@@ -26,6 +26,9 @@ REQUIRE $
 : IN-SET? $@ SWAP
  DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 
+\ Fill from ADDRESS to END a number of cells with CONTENT.
+: WFILL   ROT ROT SWAP ?DO DUP I !   0 CELL+ +LOOP DROP ;
+
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
@@ -121,19 +124,11 @@ VARIABLE MIN-DEPTH
 
 \ ---------------------------------------------------------------------
 
+\ In the following a GAP is a pair START END with START inclusive and END
+\ exclusive.
+
 \ For DEA : it IS a branch, i.e. it is followed by a relative control target.
 : IS-A-BRANCH   DUP 'LIT <>   SWAP >FFA @ FMASK-IL AND 0= 0= AND ;
-
-\ The set of absolute branch targets.
-50 SET BRANCH-TARGETS
-: !TARGETS   BRANCH-TARGETS !SET ;
-
-\ If there is some branch at ADDRESS fill its target in into ``BRANCH-TARGETS''
-: FILL-ONE-TARGET DUP @ IS-A-BRANCH IF CELL+ $@ + BRANCH-TARGETS SET+! _ THEN DROP ;
-
-\ For a SEQUENCE fill the ``BRANCH-TARGET'' set.
-: FILL-TARGETS !TARGETS BEGIN DUP FILL-ONE-TARGET NEXT-PARSE WHILE DROP REPEAT 2DROP ;
-
 
 CREATE DROPS  HERE 0 ,
 ' DROP       ,          ' 2DROP      ,
@@ -142,9 +137,26 @@ HERE SWAP !
 \ For DEA : it IS a trivial annihilator.
 : IS-A-DROP DROPS IN-SET? ;
 
-\ ASSEMBLER
-50 SET ANNIHILATORS
-\ PREVIOUS
+\ The set of addresses where a branch offset is stored.
+50 SET BRANCHES
+: !BRANCHES   BRANCHES !SET ;
+
+\ For a POSITION where a branch offset is stored, find the target.
+: >TARGET   $@ + ;
+
+\ For START if there is some branch at ADDRESS add it to ``BRANCHES''
+: FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
+    CELL+   BRANCHES SET+!
+    _ THEN DROP ;
+
+\ For a SEQUENCE fill the ``BRANCHES'' set.
+: FILL-BRANCHES !BRANCHES BEGIN DUP FILL-ONE-BRANCH NEXT-PARSE WHILE DROP REPEAT 2DROP ;
+
+\ For a GAP : it IS forbidden, i.e. there is some branch from outside to inside
+\ the gap.
+: FORBIDDEN-GAP? BRANCHES @+ SWAP DO
+    2DUP I @ ROT ROT WITHIN 0= IF 2DUP I @ >TARGET ROT ROT WITHIN IF 2DROP 0. LEAVE THEN THEN
+0 CELL+ +LOOP OR 0= ;
 
 \ For DEA return "it CAN be part of annihilatable code",
 \ as far as its stack & side effects are concerned.
@@ -186,25 +198,25 @@ HERE SWAP !
 : ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
     DUP 0<> ANNIL-STABLE? AND ;
 
-\ Save START END and number of equivalent drops to the set ``ANIHILATORS''.
-: SAVE-ANNIL ANNIHILATORS >R SWAP R@ SET+!   R@ SET+!  VD @ NEGATE R> SET+! ;
+\ Do something with START END and number of equivalent drops.
+\ Return the new position of END (where we have to go on optimising.).
+: ANNIHILATE-GAP DUP >R " Between " SWAP TYPE H. " and " TYPE H.
+" we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR R> ;
 
-\ Investigate the start of SEQUENCE. If it can be anihilated
-\ (no jumps) post the start, the end and the equivalent number of drops
+\ Investigate the start of SEQUENCE. If it can be anihilated do it.
 \ Always leave the new SEQUENCE be it just
-\ after the annihilitee or bumped by one.
+\ after the annihilitee or bumped by one item.
 : ANNIHILATE-ONE
     DUP @ IS-A-DROP IF NEXT-ITEM ELSE
-    DUP ANNIHILATE-SEQ? IF DUP >R SAVE-ANNIL R> ELSE
-    DROP NEXT-ITEM THEN THEN ;
+    DUP ANNIHILATE-SEQ? 0= IF DROP NEXT-ITEM ELSE
+    2DUP FORBIDDEN-GAP? IF DROP NEXT-ITEM ELSE
+    ANNIHILATE-GAP THEN THEN THEN ;
 
 \ Annihilate as much as possible from SEQUENCE.
-\ NOT YET :
-    \ Return recompiled SEQUENCE.
-    \ : ANNIHILATE HERE SWAP   ANNIHILATORS !SET
-: ANNIHILATE DUP   ANNIHILATORS !SET
+\ Return recompiled SEQUENCE.
+: ANNIHILATE HERE SWAP   DUP FILL-BRANCHES
     BEGIN ANNIHILATE-ONE DUP ?NOT-EXIT 0= UNTIL DROP
-POSTPONE (;)  ;
+;
 
 \ ---------------------------------------------------------------------
 
