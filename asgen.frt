@@ -9,14 +9,18 @@
 ( distinct parts:                                                       )
 (   1. the opcode that identifies the operation                         )
 (   2. modifiers such as the register working on                        )
-(   3. data, including addresses or offsets.                            )
+(   3. data, as a bit field in the instruction.                         )
+(   4. data, including addresses or offsets.                            )
 ( This assembler goes through three stages for each instruction:        )
 (   1. postit: assemblers the opcode with holes for the modifiers.      )
 (      This has a fixed length. Also posts requirements for commaers.   )
 (   2. fixup: fill up the holes, either from the beginning or the       )
 (     end of the post. These can also post required commaers            )
-(   3. The commaers. Any user supplied data in addition to opcode.      )
-(      Each has a separate command, where checks are built in.          )
+(   3. fixup's with data. It has user supplied data in addition to      )
+(      opcode bits. Both together fill up bits left by a postit.        )
+(   4. The commaers. Any user supplied data in addition to              )
+(      opcode, that can be added as separate bytes. Each has a          )
+(      separate command, where checks are built in.                     )
 ( Keeping track of this is done by bit arrays, similar to the a.i.      )
 ( blackboard concept. This is ONLY to notify the user of mistakes,      )
 ( they are NOT needed for the assembler proper.                         )
@@ -231,7 +235,7 @@ R> DROP ;
 IS-A IS-xFI   : xFI   CHECK31 CREATE , , , , DOES> REMEMBER FIXUP> ;
 
 ( Fix up the instruction using DATA and a pointer to the bit POSITION. )
-: FIXUP-DATA >R @+ R> SWAP LSHIFT ISS @ OR! TALLY:| CHECK32 ;
+: FIXUP-DATA @+ ROT SWAP LSHIFT ISS @ OR! TALLY:| CHECK32 ;
 ( Define a data fixup by BA BY BI, and LEN the bit position.            )
 ( At assembly time: expect DATA that is shifted before use              )
 ( One size fits all, because of the or character of the operations.     )
@@ -328,6 +332,14 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
    THEN
    THEN
 ;
+: TRY-DFI
+   DUP IS-DFI IF
+   DUP >BI @ TALLY-BI @ CONTAINED-IN IF
+       DUP >BI TALLY:|
+       DUP +DISS
+   THEN
+   THEN
+;
 : TRY-xFIR
    DUP IS-xFIR IF
    DUP >BI @ CORRECT-R TALLY-BI @ CONTAINED-IN IF
@@ -350,7 +362,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
     !TALLY
     DISS? IF
         DISS @+ SWAP !DISS DO  ( Get bounds before clearing)
-            I @ TRY-PI TRY-xFI TRY-xFIR TRY-COMMA DROP
+            I @ TRY-PI TRY-xFI TRY-DFI TRY-xFIR TRY-COMMA DROP
         0 CELL+ +LOOP
     THEN
 ;
@@ -384,7 +396,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 ( Try to expand the current instruction in `DISS' by looking whether    )
 ( DEA fits. Leave the NEXT dea.                                         )
 : SHOW-STEP
-        TRY-PI TRY-xFI TRY-xFIR TRY-COMMA
+        TRY-PI TRY-DFI TRY-xFI TRY-xFIR TRY-COMMA
         RESULT
         >NEXT%
 (       DUP ID.                                                         )
@@ -454,6 +466,16 @@ HERE POINTER !
    THEN
    THEN
 ;
+: DIS-DFI
+   DUP IS-DFI IF
+   DUP >BI @ TALLY-BI @ CONTAINED-IN IF
+   DUP >BA @  COMPATIBLE? IF
+       DUP >BI TALLY:|
+       DUP +DISS
+   THEN
+   THEN
+   THEN
+;
 : DIS-xFIR
    DUP IS-xFIR IF
    DUP >BI @ CORRECT-R   TALLY-BI @ CONTAINED-IN IF
@@ -504,7 +526,7 @@ HERE POINTER !
 : ((DISASSEMBLE))
     POINTER @ >R
     ( startdea -- ) BEGIN
-        DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
+        DIS-PI DIS-xFI DIS-DFI DIS-xFIR DIS-COMMA
         >NEXT%
 (       DUP ID. ." : "  'DISS @ EXECUTE                                 )
     DUP VOCEND? RESULT? OR UNTIL DROP
