@@ -41,7 +41,11 @@ HEX
 
 \ Clone the current process, share memory and interrupts.
 \ Leave PID (or zero for the clone)
-: CLONE _ DSP@ 400 - 1FF 78 LINOS DUP ?ERRUR ;
+\ It has been experimentally verified that :
+\  - the first parameter matters
+\  - the second parameter is indeed the stack of the child
+\  - the third parameter matters not
+: CLONE _ ( 100 OR) DSP@ 400 - _ 78 LINOS DUP ?ERRUR ;
 
 \ Keep item ONE and TWO on the data stack while
 \ switching the stack frame to new return stack POINTER.
@@ -65,23 +69,3 @@ DOES> >R >R CLONE IF R> R> 2DROP ELSE R> R>
 >R S0 @ DSP! R>
 \ Run and stop
 EXECUTE 0 _ _ 1 LINOS THEN ;
-
-
-: hoezee
-    8 0 DO  I . 400 MS  CR LOOP
-    "hello" TYPE CR
-    8 0 DO  I . 400 MS  CR LOOP
-;
-
-
-10000 CONSTANT RTS    40 CELLS CONSTANT US
-
-: CVA   DSP@   DUP RTS -   U0 @ DSP@ - US +   MOVE
-        DSP@ RTS - DSP!    RSP@ RTS - RSP!
-        4 -1 DO   RTS NEGATE U0 I CELLS +   +!   LOOP ;
-
-: CLONE _ DSP@ 400 - 1FF 78 LINOS DUP ?ERRUR ;
-
-: THREAD   CREATE   RSP@ ,   CVA   ALLOT
-   DOES> >R >R CLONE IF R> R> 2DROP ELSE R> R>
-   @ RSP!   >R S0 @ DSP! R>   EXECUTE   0 _ _ 1 LINOS   THEN ;
