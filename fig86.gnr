@@ -2730,7 +2730,9 @@ HEADER({>PFA},{TPFA},{DOCOL})
 worddoc({DICTIONARY},{>DFA},{to_dummy_dea},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the dummy dea.
-},{{VOCABULARY},{>CFA}}, {}, enddoc)
+},{{VOCABULARY},{>CFA}}, 
+{{: APE ; ' FORTH >DFA >LFA @ ID.},{APE}},
+enddoc)
 HEADER({>DFA},{TDFA},{DOCOL})
         DC      TOBODY
         DC      CELLP ; {Skip vfa link.}
@@ -2740,24 +2742,32 @@ worddoc({DICTIONARY},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the link to the next vocabulary.
 },{{VOCABULARY},{>CFA}}, 
-{{." Via VOC-LINK"},{Via VOC-LINK}},
+{{VOCABULARY APE ' APE >VFA @  ' FORTH = .},{_T_}},
 enddoc)
 HEADER({>VFA},{TVFA},{DOCOL})
         DC      TOBODY
         DC      SEMIS
 ;
+_SECURITY_({
 worddoc({SECURITY},{!CSP},{store_c_s_p},{},{},
 {Save the stack position in forthcode({CSP}). Used as part of the compiler
-security.},{}, {}, enddoc)
+security.},{}, 
+{{." Via ?CSP"},{Via ?CSP}},
+enddoc)
 HEADER({!CSP},{SCSP},{DOCOL})
         DC      SPFET
         DC      LCSP
         DC      STORE
         DC      SEMIS
+});_END_({_SECURITY_})
 ;
 worddoc({ERRORS},{?ERROR},{question_error},{f n --},{},
 {  Issue an error message number forthcode({n}) , if the boolean flag is true.},
-{ERROR}, {}, enddoc)
+{ERROR}, 
+{{0 12 ?ERROR},{}, 
+ {0 WARNING !   1 12 ?ERROR},{? MSG # 12},
+ {CR},{} }, 
+enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
         DC      SWAP
         _0BRANCH(QERR1) ;{IF}
@@ -2768,7 +2778,10 @@ QERR2:  DC      SEMIS
 ;
 _SECURITY_({
 worddoc({SECURITY},{?COMP},{question_compile},{},{},
-{Issue error message if not compiling.},{{?ERROR}}, {}, enddoc)
+{Issue error message if not compiling.},{{?ERROR}}, 
+{{0 WARNING !   ?COMP},{? MSG # 11},
+ {CR},{} }, 
+enddoc)
 HEADER({?COMP},{QCOMP},{DOCOL})
         DC      STATE
         DC      FETCH
@@ -2778,7 +2791,10 @@ HEADER({?COMP},{QCOMP},{DOCOL})
         DC      SEMIS
 ;
 worddoc({SECURITY},{?EXEC},{question_exec},{},{},
-{Issue an error message if not executing.},{{?ERROR}}, {}, enddoc)
+{Issue an error message if not executing.},{{?ERROR}}, 
+{{!CSP ?CSP},{}, 
+{0 WARNING ! ?EXEC},{} }, 
+enddoc)
 HEADER({?EXEC},{QEXEC},{DOCOL})
         DC      STATE
         DC      FETCH
@@ -2788,7 +2804,12 @@ HEADER({?EXEC},{QEXEC},{DOCOL})
 ;
 worddoc({SECURITY},{?PAIRS},{question_pairs},{n1 n2 --},{},
 {Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
-indicates that compiled conditionals do not match.},{{?ERROR}}, {}, enddoc)
+indicates that compiled conditionals do not match.},{{?ERROR}}, 
+{{ 1 1 ?PAIRS},{}, 
+{0 WARNING !  1 2 ?PAIRS},{? MSG # 13},
+ {CR},{} }, 
+{}, 
+enddoc)
 HEADER({?PAIRS},{QPAIR},{DOCOL})
         DC      LSUB
         DC      LIT,13H
@@ -2797,7 +2818,11 @@ HEADER({?PAIRS},{QPAIR},{DOCOL})
 ;
 worddoc({SECURITY},{?CSP},{question_c_s_p},{},{},
 {Issue error message if stack position differs from value saved in
-forthvar({CSP}) .},{}, {}, enddoc)
+forthvar({CSP}) .},{}, 
+{{!CSP ?CSP},{}, 
+{0 WARNING !   !CSP 1 ?CSP},{? MSG # 14},
+ {CR},{} }, 
+enddoc)
 HEADER({?CSP},{QCSP},{DOCOL})
         DC      SPFET
         DC      LCSP
@@ -2808,7 +2833,10 @@ HEADER({?CSP},{QCSP},{DOCOL})
         DC      SEMIS
 ;
 worddoc({SECURITY},{?LOADING},{question_loading},{},{},
-{Issue an error message if not loading},{{?ERROR}}, {}, enddoc)
+{Issue an error message if not loading},{{?ERROR}}, 
+{{0 WARNING ! ?LOADING },{? MSG # 16},
+ {CR},{} }, 
+enddoc)
 HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      BLK
         DC      FETCH
@@ -2823,7 +2851,9 @@ worddoc({COMPILING},{COMPILE},{compile},{},{C2},
 the word following forthcode({COMPILE}) is copied (compiled) into the dictionary.
 This allows specific compilation situations to be handled in
 addition to simply compiling an execution address (which the
-interpreter already does).},{[COMPILE]}, {}, enddoc)
+interpreter already does).},{[COMPILE]}, 
+{}, 
+enddoc)
 HEADER({COMPILE},{COMP},{DOCOL})
         DC      QCOMP
         DC      FROMR
