@@ -56,9 +56,7 @@ IS-A IS-xFI
 : >INST >BODY @ ;  ( Get you at fixup too)
 : >MASK >BODY CELL+ @ ;
 : >COMMA >BODY CELL+ CELL+ @ ;
-HEX
-0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,
-DECIMAL
+HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
 : >CNT >BODY CELL+ CELL+ CELL+ @ ;
 : >IMASK >CNT CELLS TABLE + @ ;
 
@@ -66,7 +64,7 @@ DECIMAL
 : BOOKKEEPING CHECK TALLY OR! ;
 ( Build with the LENGTH to comma the ADDRESS that is executint the comm )
 ( and a MASK with the bit for this commaer.                             )
-: COMMAER <BUILDS  SWAP , , DUP , ,
+: COMMAER <BUILDS  , , DUP , ,
 DOES> [ HERE TEMP ! ] @+ BOOKKEEPING   @ EXECUTE ;
 IS-A IS-COMMA
 
@@ -94,10 +92,10 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >1<"
 
 ( The increasing order means that a decompiler hits them in the         )
 ( right order                                                           )
-1        1   ' C, CFA   COMMAER IB, ( immediate byte data)
-0 CELL+  2   ' ,  CFA   COMMAER IX, ( immediate data : cell)
-0 CELL+  4   ' ,  CFA   COMMAER X,  ( immediate data : address)
-1        8   ' C, CFA   COMMAER P,  ( port number ; byte     )
+1        ' C, CFA   1   COMMAER IB, ( immediate byte data)
+0 CELL+  ' ,  CFA   2   COMMAER IX, ( immediate data : cell)
+0 CELL+  ' ,  CFA   4   COMMAER X,  ( immediate data : address)
+1        ' C, CFA   8   COMMAER P,  ( port number ; byte     )
 
 00 00 T! 08 07 8 1FAMILY, RLC RRC RAL RAR DAA CMA STC CMC
 00 00 T! 08 E3 4 1FAMILY, XTHL XCHG DI EI
@@ -249,14 +247,6 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 0 VARIABLE POINTER
 0 VARIABLE NEW-POINTER
 HERE POINTER !
-( Disassemble the instruction at `POINTER' and accumulated into         )
-( `DISS'. `POINTER' has advanced to the commadata                       )
-: .DISS2 DISS DUP @ SWAP CELL+ DO
-    I @ DUP IS-COMMA IF
-       POINTER @ .
-       DUP >BODY CELL+ POINTER +!
-    THEN ID.
- 0 CELL+ +LOOP CR ;
 
 ( These dissassemblers are quite similar:                               )
 ( if the DEA on the stack is of the right type and if the               )
@@ -303,7 +293,6 @@ HERE POINTER !
    THEN
 ;
 
-: VL. CELLS TABLE + @ AND U. ;
 ( Print the DEA in an appropriate way, it must be a comma-er   )
 : .COMMA 
     DUP >IMASK NEW-POINTER @ @ AND U.
