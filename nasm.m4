@@ -9,7 +9,7 @@ dnl Directives ignored by NASM.
 define({ASSUME},;)dnl Turn ASSUME into comment.
 define({CSEG},;)dnl Turn CSEG into comment.
 define({END},;)dnl Turn END into comment.
-define({OFFSET})dnl Ignore this design error altogether. 
+define({_OFFSET})dnl Ignore this design error altogether. 
 define({PAGE},;)dnl Turn PAGE into comment.
 define({PROC},;)dnl Turn PROC into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
@@ -34,4 +34,7 @@ DW      ZBRAN
         DW      $1-$)dnl
 define({_BRANCH},dnl
 DW      BRAN
+        DW      $1-$)dnl
+define({_LOOP},dnl
+DW      XLOOP
         DW      $1-$)dnl
