@@ -351,10 +351,10 @@ VARIABLE RE-FILLED
 
 \ Build up a set to be matched.
 CREATE SET-MATCHED ALLOT-CHAR-SET DROP
-: !SET-MATCHED   SET-MATCHED MAX-SET ERASE   1 SET-MATCHED C! ;
+: !SET-MATCHED   SET-MATCHED MAX-SET ERASE ;
 
 
-\ Add the command to match the string in ``NORMAL-CHARS'' to the compiled
+\ Add the command to match the set in ``SET-MATCHED'' to the compiled
 \ expression.
 : HARVEST-SET-MATCHED 'ADVANCE-CHAR RE,   SET-MATCHED RE-SET,  !SET-MATCHED  ;
 
@@ -412,13 +412,12 @@ ELSE NORMAL-CHARS $C+ THEN ;
 \ A coy of the regular expression string, zero ended.
 CREATE (RE-EXPR) MAX-RE ALLOT
 
-\ Transform the EXPRESSION string. Copy it to the ``(RE-EXPR)'' buffer,
-\ and make it zero ended.
-\ Leave a pointer to the zero ended EXPRESSION to parse.
-: FIRST-PASS >R (RE-EXPR) R@ MOVE   0 (RE-EXPR) R> + C!   (RE-EXPR) ;
+\ Remember the start if the EXPRESSION string. Leave IT.
+: REMEMBER-START-RE OVER (RE-EXPR) ! ;
 
-\ Everything to be initialised for a build.
-: INIT-BUILD   FIRST-PASS !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   'FORTRACK RE, ;
+\ Everything to be initialised for a build. Take EXPRESSION string, leave zero-ended
+\ EXPRESSION.
+: INIT-BUILD   REMEMBER-START-RE !NORMAL-CHARS   !SET-MATCHED   !RE-FILLED   'FORTRACK RE, ;
 
 \ Everything to be harvested after a build.
 : EXIT-BUILD   HARVEST-NORMAL-CHARS 0 RE, ;
@@ -428,7 +427,7 @@ CREATE (RE-EXPR) MAX-RE ALLOT
 \ For EP and CHAR : EP plus "it IS one of ^ $ without its special meaning".
 \ ``EP'' points after ``CHAR'' in the re, and is of course needed to
 \ determine this.
-: ^$? DUP &^ = IF DROP (RE-EXPR) 1+ OVER <> ELSE
+: ^$? DUP &^ = IF DROP (RE-EXPR) @ 1+ OVER <> ELSE
     &$ = IF DUP C@ 0= 0= ELSE FALSE THEN THEN ;
 
 \ If the character at EP is to be treated normally, return incremented EP plus IT,
@@ -472,13 +471,19 @@ CREATE (RE-EXPR) MAX-RE ALLOT
              DUP 0= ABORT" Illegal escaped char for command, system error"
              HARVEST-NORMAL-CHARS CELL+ @ EXECUTE ;
 
-\ Parse one element of regular EXPRESSION .
-\ Leave EXPRESSION incremented past parsed part.
-: RE-BUILD-ONE    NORMAL-CHAR? DUP IF ADD-TO-NORMAL ELSE DROP C@+ DO-ABNORMAL THEN ;
+\ Parse one element of re POINTER . Leave incremented POINTER.
+: (RE-BUILD-ONE)
+    NORMAL-CHAR? DUP IF ADD-TO-NORMAL ELSE DROP C@+ DO-ABNORMAL THEN ;
+
+\ Parse one element of regular EXPRESSION ending at END.
+\ Leave EXPRESSION incremented past parsed part and END as is.
+\ Leave flag "The expression IS fully parsed".
+: RE-BUILD-ONE    2DUP > ABORT" Premature end of regular expression"
+        2DUP = IF TRUE ELSE >R (RE-BUILD-ONE) R> FALSE THEN ;
 
 \ Parse the EXPRESSION string, put the result in the buffer
-\ ``RE-PATTERN''.
-: RE-BUILD INIT-BUILD BEGIN RE-BUILD-ONE DUP C@ 0= UNTIL DROP EXIT-BUILD ;
+\ ``RE-COMPILED''
+: RE-BUILD INIT-BUILD OVER + BEGIN RE-BUILD-ONE UNTIL 2DROP EXIT-BUILD ;
 
 \ Null-ended copy fo the string in which we try to match.
 CREATE STRING-COPY MAX-RE ALLOT
