@@ -13,6 +13,9 @@ define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
 define({_STRING},
 {DB      len({$1})
         DSS      _quoted}({{$1}}))dnl
+define({_STRINGNEW},
+{DC      len({$1})
+        DSS      _quoted}({{$1}}))dnl
 dnl             
 dnl _LINKOLD is a m4 variable that generates numbers in sequence.
 dnl We lay down a nice square around the definition as a tribute to Thomas Newman
@@ -27,7 +30,7 @@ define({_x},len({$1}))dnl
 ;  *   {$1}   *
 ;  ********_star(len({$1})) 
 ;  
-N_$2:   _STRING({$1})
+N_$2:   _STRINGNEW({$1})
         DC    N_$2
         DC    ifelse(1,$4,+40H,0H)
         DC    _LINKOLD

@@ -1147,11 +1147,11 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      LAND, ZEQU
         _0BRANCH(MATS2)
         DC      LDUP
-        DC      RR, TNFA, FETCH, CFET
+        DC      RR, TNFA, FETCH, FETCH
         DC      EQUAL   ;{ Compare counts.}
         _0BRANCH(MATS2)
         DC      OVER
-        DC      RR, TNFA, FETCH, COUNT
+        DC      RR, TNFA, FETCH, SFET
         DC      CORA, ZEQU  ;{ Compare equals.}
         _0BRANCH(MATS2)
         DC      FROMR, FROMR, FROMR, DROP, ZERO, TOR, TOR, TOR ;{FORCE END}
@@ -2991,18 +2991,8 @@ HEADER({ID.},{IDDOT},{DOCOL})
         DC      FETCH
         DC      DDUP
         _0BRANCH(IDDOT1)
-        DC      COUNT
-        DC      LIT,1FH
-        DC      LAND
-        DC      ONE
-        DC      LSUB
-        DC      TDUP
+        DC      SFET
         DC      LTYPE
-        DC      PLUS
-        DC      CFET
-        DC      LIT,07FH
-        DC      LAND
-        DC      EMIT
         DC      SPACE
         DC      SPACE
         DC      SPACE
@@ -3016,25 +3006,20 @@ by such words as forthcode({CODE}) and forthcode({CONSTANT}) to create a diction
 a Forth definition. The code field contains the address of the words
 parameter field. },{})
 HEADER({CREATE},{CREAT},{DOCOL})
-        DC      LBL, AWORD, COUNT
-        DC      PFIND
-        DC      HERE
-        DC      ONEP
-        DC      CFET
+        DC      MWORDN
+        DC      LDUP
         DC      ZEQU
         DC      LIT,5
         DC      QERR
+        DC      TDUP
+        DC      PFIND
         DC      DDUP
         _0BRANCH(CREA1) ;{IF}
         DC      IDDOT
         DC      LIT,4
         DC      MESS
         DC      SPACE   ;{ENDIF}
-CREA1:  DC      HERE
-        DC      LDUP
-        DC      CFET
-        DC      ONEP
-        DC      ALLOT
+CREA1:  DC      SCOMMA
         DC      HERE,TOR
         DC      COMMA   ; {Name field.}
         DC      ZERO,COMMA ; {Flag field.}
