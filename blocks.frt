@@ -1038,6 +1038,38 @@ REQUIRE Z$@   REQUIRE ENV   REQUIRE COMPARE
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  ' ABORT >DFA !  SAVE-SYSTEM BYE ;
+( PD PE PC PS get_selectors/descriptors ) \ AvdH A1nov02
+REQUIRE ASSEMBLERi86 HEX
+CODE PC PUSHS, CS| NEXT C;
+CODE PD PUSHS, DS| NEXT C;
+CODE PE PUSHS, ES| NEXT C;
+CODE PS PUSHS, SS| NEXT C;
+
+DECIMAL
+
+
+
+
+
+
+
+
+( GET-SEL PUT-SEL NEW-SEL handle_DPMI_selectors) ?WI \ A1nov02
+HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
+\ Get the content of the DESCRIPTOR into the BUFFER
+: GET-DES >R >R 0B R> 0 0 R> BIOS31+ 4DROP ;
+\ Make the selector DESCRIPTION 32 bits from 16 bits or vv.
+: TOGGLE-32   6 + 40 TOGGLE ;
+\ Make the selector DESCRIPTION code from data or vv.
+: TOGGLE-CODE   5 + 8 TOGGLE ;  : TOGGLE-PRES   5 + 80 TOGGLE ;
+\ For an existing SELECTOR, return an ALIAS
+: GET-ALIAS  0A SWAP 0 0 0 BIOS31+ 2DROP DROP ;
+\ Get a SELECTOR to BUFFER
+: GET-SEL   >R 0B SWAP 0 0 R> BIOS31+ 4DROP ;
+\ Install a SELECTOR from BUFFER
+: PUT-SEL   >R 0C SWAP 0 0 R> BIOS31+ 4DROP ;
+\ Return a freshly allocated SELECTOR
+: NEW-SEL   0 0 1 0 0 BIOS31+ 2DROP DROP ; DECIMAL
 ( **************ciforth tools*********************************)
 
 
@@ -1615,18 +1647,18 @@ DECIMAL
 100 0 2 1FAMILY| Y'| N'|
 200 0 8 1FAMILY| O'| C'| Z'| CZ'| S'| P'| L'| LE'|
 ( 80386_instructions_PUSH..LMSW )
-1 0FA0 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
-800 FA300 4 3FAMILY, BT, BTS, BTR, BTC,
-800 FA400 2 3FAMILY, SHLDI, SHRDI,
-800 FA500 2 3FAMILY, SHLD|C, SHRD|C,
-1 0FB200 4 3FAMILY, LSS, HOLE LFS, LGS,
-800 0FB600 2 3FAMILY, MOVZX|B, MOVSX|B,
-800 0FB700 2 3FAMILY, MOVZX|W, MOVSX|W,
+1 A00F 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
+800 A30F 4 3FAMILY, BT, BTS, BTR, BTC,
+800 A40F 2 3FAMILY, SHLDI, SHRDI,
+800 A50F 2 3FAMILY, SHLD|C, SHRD|C,
+1   B20F 4 3FAMILY, LSS, HOLE LFS, LGS,
+800 B60F 2 3FAMILY, MOVZX|B, MOVSX|B,
+800 B70F 2 3FAMILY, MOVZX|W, MOVSX|W,
 
-1 0FA8 2 2FAMILY, PUSH|GS, POP|GS,
-800 0F0000 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,
-800 0FBA20 4 3FAMILY, BTI, BTSI, BTRI, BTCI,
-800 0F0F00 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, HOLE LMSW,
+1 A80F 2 2FAMILY, PUSH|GS, POP|GS,
+800 00000F 6 3FAMILY, SLDT, STR, LLDT, LTR, VERR, VERW,
+800 20BA0F 4 3FAMILY, BTI, BTSI, BTRI, BTCI,
+800 000F0F 7 3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, HOLE LMSW,
 
 
 
@@ -2014,6 +2046,38 @@ LOOP ;
    LOOP ;
 : MEM-SIZE SET-MEMORY TEST-MEMORY (MEM-SIZE) @ ;
 DECIMAL
+( SEL-DUMP dump_a_selector ) \ AvdH A1nov02
+HEX 1 1 +THRU
+: .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
+." CODE SEGMENT: " R@ .CODE ELSE
+." DATA SEGMENT: " R@ .DATA THEN  R@ 1+ .PRES
+   ELSE ." SOME SORT OF GATE" THEN CR RDROP ;
+: .LIMIT DUP @ 0FFFF AND  OVER 6 + C@ 0F AND  DH.
+   ."  PARAGRAPHS OF " 6 + C@
+80 AND IF ." A 4K PAGE"  ELSE ." ONE BYTE" THEN  CR  ;
+: .BASE >R   R@ 2 + @ 0FFFF AND  R@ 4 + @ 0FF AND
+R@ 6 + @ 0FF00 AND OR   RDROP
+ ." LINEAR BASE ADDRESS : " DH. CR ;
+: .ST 6 + C@ 40 AND IF ." 32-BITS " ELSE ." 16-BITS" THEN
+ CR ;
+: SEL-DUMP DUP .PRIV   DUP .ST   DUP .CD   DUP .BASE   .LIMIT ;
+DECIMAL
+( dump_a_selector ) \ AvdH A1nov02
+
+: .PRIV 5 + C@ 5 RSHIFT 3 AND ." PRIVILEGE LEVEL: " . CR ;
+: NOT 0= IF ." NOT " THEN ;
+: .CODE
+  DUP 1 AND NOT ." ACCESSED, "     DUP 2 AND NOT ." READABLE, "
+  DUP 4 AND NOT ." CONFORMING, "   DUP 8 AND NOT ." Ppppppp, "
+  DROP ;
+: .DATA
+  DUP 1 AND NOT ." ACCESSED, "     DUP 2 AND NOT ." WRITABLE, "
+  DUP 4 AND NOT ." EXPAND DOWN, "  DUP 8 AND NOT ." Ppppppp, "
+  DROP ;
+: .PRES
+  DUP 80 AND NOT ." PRESENT. "
+  DROP ;
+
 ( **************communication with stand alone hd ************)
 
 
@@ -3102,70 +3166,6 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 : .SYSS   .ES .DS .FS .GS CR   .IP .CS .SP .SS .PSW CR   ;
 : .ALL .REGS .SYSS ;
 
-( PD PE PC PS get_selectors) \ AvdH A1nov 01
-REQUIRE ASSEMBLERi86 HEX
-CODE PC PUSHS, CS| NEXT C;
-CODE PD PUSHS, DS| NEXT C;
-CODE PE PUSHS, ES| NEXT C;
-CODE PS PUSHS, SS| NEXT C;
-
-DECIMAL
-
-
-
-
-
-
-
-
-( .CODE .DATE auxiliary_for_DUMP-SEL )
-HEX
-: .PRIV 5 + C@ 5 RSHIFT 3 AND ." PRIVILEGE LEVEL: " . CR ;
-: NOT 0= IF ." NOT " THEN ;
-: .CODE
-DUP 1 AND NOT ." ACCESSED, "     DUP 2 AND NOT ." READABLE, "
-DUP 4 AND NOT ." CONFORMING, "   DUP 8 AND NOT ." PRESENT "
-DROP ;
-: .DATA
-DUP 1 AND NOT ." ACCESSED, "     DUP 2 AND NOT ." WRITABLE, "
-DUP 4 AND NOT ." EXPAND DOWN, "  DUP 8 AND NOT ." PRESENT "
-DROP ;
-DECIMAL
-
-
-
-( SEL-DUMP dump_a_selector )
-REQUIRE .CODE HEX
-: .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
-." CODE SEGMENT: " R@ .CODE ELSE
-." DATA SEGMENT: " R@ .DATA THEN
-   ELSE ." SOME SORT OF GATE" THEN CR RDROP ;
-: .LIMIT DUP @ 0FFFF AND  OVER 6 + C@ 0F AND  DH.
-   ."  PARAGRAPHS OF " 6 + C@
-80 AND IF ." A 4K PAGE"  ELSE ." ONE BYTE" THEN  CR  ;
-: .BASE >R   R@ 2 + @ 0FFFF AND  R@ 4 + @ 0FF AND
-R@ 6 + @ 0FF00 AND OR   RDROP
- ." LINEAR BASE ADDRESS : " DH. CR ;
-: .ST 6 + C@ 40 AND IF ." 32-BITS " ELSE ." 16-BITS" THEN
- CR ;
-: SEL-DUMP DUP .PRIV   DUP .ST   DUP .CD   DUP .BASE   .LIMIT ;
-DECIMAL
-( GET-SEL PUT-SEL NEW-SEL handle_DPMI_selectors) ?WI HEX
-: 4DROP   2DROP 2DROP ;    : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
-\ Get the content of the DESCRIPTOR into the BUFFER
-: GET-DES >R >R 0B R> 0 0 R> BIOS31+ 4DROP ;
-\ Make the selector DESCRIPTION 32 bits from 16 bits or vv.
-: TOGGLE-32   6 + 40 TOGGLE ;
-\ Make the selector DESCRIPTION code from data or vv.
-: TOGGLE-CODE   5 + 8 TOGGLE ;
-\ For an existing SELECTOR, return an ALIAS
-: GET-ALIAS  0A SWAP 0 0 0 BIOS31+ 2DROP DROP ;
-\ Get a SELECTOR to BUFFER
-: GET-SEL   >R 0B SWAP 0 0 R> BIOS31+ 4DROP ;
-\ Install a SELECTOR from BUFFER
-: PUT-SEL   >R 0C SWAP 0 0 R> BIOS31+ 4DROP ;
-\ Return a freshly allocated SELECTOR
-: NEW-SEL   0 0 1 0 0 BIOS31+ 2DROP DROP ; DECIMAL
 ( Experiment with DPMI testing jumps to 32 bit code. ) ?WI
 REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE PC
 PC GET-ALIAS CONSTANT NEW       \ Create a new segment that
@@ -3358,6 +3358,70 @@ HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
   INT, 13 B, PUSHF, POP|X, BX| TO-PROT,
   POP|X, SI|   PUSH|X, BX|  NEXT ;
 DECIMAL
+( Experimenting ALLOC-MEM Get_sludges_of_memory) ?WI
+REQUIRE ASSEMBLERi86 HEX
+CODE BIOS31SI
+  LEA, BP'| DB| [BP] -2 B,     MOV, W| F| SI'| DB| [BP] 0 B,
+  POP|X, DI|   POP|X, SI|   POP|X, DX|
+  POP|X, CX|   POP|X, BX|   POP|X, AX|
+  INT, 31 C,
+  PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX|  PUSH|X, DX|
+  PUSH|X, SI|  PUSH|X, DI|  PUSHF,
+  MOV, W| T| SI'| DB| [BP] 0 B,   LEA, BP'| DB| [BP] 2 B,
+NEXT C;
+: BIOS31SI+ BIOS31SI 1 AND 0D ?ERROR ;
+\ Get an amount DOUBLE of memory, return linear ADDRESS and HDL
+: ALLOC-MEM   0501 SWAP ROT 0 0 0   BIOS31SI+
+  >R >R DROP >R >R DROP R> R> R> R> ;
+DECIMAL
+( Experiment with DPMI testing jumps to 32 bit code. ) ?WI
+REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE ALLOC-MEM
+REQUIRE PC   REQUIRE SEL-DUMP HEX
+10.0000 ALLOC-MEM CREATE HANDLE , ,
+NEW-SEL CONSTANT NEW32          \ Create a new segment that
+NEW32 PAD GET-SEL                 \ differs from current code
+PAD TOGGLE-32     \ segment in being 32 bit.
+10.0000 -1. D+ PAD 6 + C@ 0F INVERT AND OR PAD 6 + C!   PAD !
+PAD 2 + !   DUP PAD 4 + C!   8 RSHIFT PAD 7 + C!
+PAD SEL-DUMP NEW32 PAD PUT-SEL
+\ To prove that we can actually use the 32 bits code segment.
+CODE CRASH    \ It doesn't crash. But pushes a 32 bit EAX !
+JMPFAR, HERE 4 + , NEW32 ,
+PUSH|X, AX|
+JMPFAR, HERE 6 + , 0 , PC ,
+NEXT C;                                DECIMAL
+( Experimenting Get_a_32_bit_code_segment) ?WI HEX
+: MOVEIT   NEW32 LES   0 0 FFF0 MOVE   LES DROP ;
+: GETIT   NEW32 PAD GET-SEL    PAD TOGGLE-CODE
+   NEW32 PAD PUT-SEL ;
+NEW32 GET-ALIAS CONSTANT NEW32D
+CODE CRASH
+  POP|X, DI|   POP|X, DX|  POP|X, CX|  POP|X, BX|   POP|X, AX|
+  JMPFAR, HERE 4 + , NEW32 ,
+  INT, 31 C,
+  JMPFAR, HERE 6 + , 0 , PC ,
+  PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX| PUSH|X, DX| PUSH|X, DI|
+  PUSHF,
+NEXT C;
+DECIMAL
+
+
+( Experimenting Use_a_32_bit_code_segment) ?WI HEX
+CODE CRASH2  POPS, ES|
+  POP|X, DI|   POP|X, DX|  POP|X, CX|  POP|X, BX|   POP|X, AX|
+  JMPFAR, HERE 4 + , NEW32 ,
+  INT, 31 C,
+  JMPFAR, HERE 6 + , 0 , PC ,
+  PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX| PUSH|X, DX| PUSH|X, DI|
+  PUSHF, PUSHS, DS| POPS, ES|
+NEXT C;
+: IDLE-OKAY   1680 REG-SET 1C + !   0 REG-SET 1E + !
+0300 002F 0 0 REG-SET CRASH ;
+: OKAY 200 REG-SET 1C + ! 0 REG-SET 1E + !   &x REG-SET 14 + !
+  0 REG-SET 16 + ! 0300 0021 0 0 REG-SET CRASH ; \ Works!
+: CRSH2 200 REG-SET 1C + ! 0 REG-SET 1E + !   &x REG-SET 14 + !
+  0 REG-SET 16 + ! 0300 0021 0 0 REG-SET NEW32D CRASH2 ;
+DECIMAL \ The last one crashes under windows 3.11: 32 bit ES
 ( **************ciforth FIG model examples **************)
         EXIT
 
