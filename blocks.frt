@@ -133,7 +133,7 @@ DROP   CURRENT !
 \ In general use
 : BOUNDS   OVER + SWAP ;
 
-
+REQUIRE CONFIG
 "ALIGNED" PRESENT? ?LEAVE-BLOCK
 \ ISO
 : ALIGNED    1-   0 CELL+ 1- OR   1+ ;
@@ -158,6 +158,22 @@ DROP   CURRENT !
 
 
 \
+( DEFER IS ) \ AvdH A2apr22
+
+\ Default action for not filled in deferred word.
+: DEFER-ERROR    -1 13 ?ERROR ;
+
+\ Define a word, with a changable behaviour. "deferred" word".
+: DEFER CREATE 'DEFER-ERROR , DOES> @ EXECUTE ;
+
+\ Fill XT in as the behaviour of the named deferred word.
+\ This ugly word is state-smart!
+: IS   (WORD) FOUND >BODY   STATE @ IF
+    POSTPONE LITERAL POSTPONE ! ELSE ! THEN ; IMMEDIATE
+
+
+
+\
 ( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
 \ Print all vocabularies names in existence.
 : .VOCS 'ID. FOR-VOCS ;
@@ -166,8 +182,8 @@ DROP   CURRENT !
 \ Print the current search order by vocabulary names
 : ORDER SEARCH-ORDER BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT
 2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
+\ This is a BUFFER compatible with FIG-Forth.
 : BUFFER   (BUFFER) CELL+ CELL+ ;
-
 
 
 
@@ -238,6 +254,70 @@ CREATE XXX 123 , 64 , 32 , 12
 
 
 
+( EXCHANGE PAIR[] --qsort-auxiliary ) \ AvdH A2apr22
+
+\ Exchange the content at ADDR1 and ADDR2 over a fixed LENGTH.
+: EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
+                   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
+
+\ For INDEX1 and INDEX2 and TABLE, return corresponding
+\ ADDRESS1 and ADDRESS2 .
+: PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
+
+
+
+
+
+
+\
+( QSORT ) \ AvdH A2apr22
+REQUIRE DEFER   REQUIRE +THRU
+\ Compare item N1 and N2. Return ``N1'' IS lower and not equal.
+DEFER *<
+\ Exchange item N1 and N2.
+DEFER *<-->
+
+1 2 +THRU
+
+
+
+
+
+
+
+
+( QSORT_part2 ) \ AvdH A2apr22
+\ Partition inclusive range LO HI leaving LO_1 HI_1 LO_2 HI_2.
+: PARTITION   2DUP + 2/   >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > 0= IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    RDROP                            ( R: )
+    SWAP ROT ;      ( lo_1 hi_1 lo_2 hi_2)
+( QSORT_part3 ) \ AvdH A2apr22
+\ Sort the range LOW to HIGH inclusive observing
+\ ``LOW'' and ``HIGH'' must be indices compatible with the
+\   current values of *< and *<-->
+: (QSORT)             ( lo hi -- )
+    PARTITION                ( lo_1 hi_1 lo_2 hi_2)
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
+\ Sort the range FIRST to LAST (inclusive) of item compared
+\ by the xt COMPARING and exchanged by the xt EXHANGING.
+\ All indices in this range must be proper to pass to the xt's.
+\ The xt's are filled in into *< and *<--> and must observe the
+\ interface.
+\ After the call we have that :
+\ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
+: QSORT   IS *<-->   IS *<   (QSORT) ;
 ( CRC-MORE CRC ) ?32 \ AvdH
 REQUIRE BOUNDS   REQUIRE NEW-IF    HEX
 \ Well the polynomial
@@ -270,7 +350,7 @@ DECIMAL
 
 
 
-( -LEADING $@=                ) \ AvdH A1sep30
+( -LEADING                    ) \ AvdH A2jun18
 REQUIRE COMPARE
  : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
     BEGIN                        ( heading blanks )
@@ -278,8 +358,8 @@ REQUIRE COMPARE
     WHILE
       1 - SWAP 1 + SWAP
     REPEAT  ;
- : $@=  ( S1 S2 --F string at address S1 equal to other one)
-   >R $@ R> $@ COMPARE ;
+
+
 
 
 
@@ -465,8 +545,8 @@ DECIMAL
 ( MEASURE-PRIME test_for_TIME ) \ AvdH A1oct05
  : TASK ;
 REQUIRE ASSEMBLERi86 \ Otherwise nesting gets too deep
-REQUIRE DO-PRIME-ISO   REQUIRE MARK-TIME   REQUIRE  NEW-IF
-REQUIRE POSTFIX
+REQUIRE DO-PRIME-ISO   REQUIRE MARK-TIME
+
 
 : MEASURE-PRIME
   TICKS DO-PRIME-ISO DROP ELAPSED
@@ -474,9 +554,9 @@ REQUIRE POSTFIX
 
   MEASURE-PRIME
 
-CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY &Y =  IF
-  "TASK" POSTFIX FORGET
-THEN
+CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY DUP EMIT
+&Y <>  ?LEAVE-BLOCK
+  FORGET TASK
 
 ( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct21
 VARIABLE FAR-DP         \ Alternative DP
