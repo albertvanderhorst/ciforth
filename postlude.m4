@@ -78,6 +78,7 @@ _USEBIOS_({ _MODERN_( {errprint({BIOS and Modern I/O model are in conflict. Choo
 _HOSTED_DPMI_({ _HOSTED_MSDOS_({errprint({You must choose either hosting by dos or by windows, not both.
 })m4exit(1008)})})
 dnl immediate consequences
+_SOURCEFIELD_({define({M4_HS},{6})})
 _BITS32_({define({M4_CELLWIDTH}, 4)})
 _BITS16_({define({M4_CELLWIDTH}, 2)})
 _BITS16_({define({M4_INITDP}, {TEXTEND})})

@@ -17,9 +17,14 @@ The forthdefi({dictionary}) is the part of the memory where the forthcode({words
 It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 This structure is called a forthdefi({dictionary entry}).
+Its address is called a forthdefi({dictionary entry address})
+or forthdefi({dea}). In ciforth this address is used for external
+reference in a consistent way. For example it is used as the
+forthdefi({execution token}) of a word in the ISO sense.
 A word can be executed by typing its name.
 Each word in the dictionary belongs to precisely one forthdefi({word list}),
-or as we will say here vocabulary.
+or as we will say here vocabulary, with the exception of the word
+forthword({FORTH}) that is the common end point of all word lists.
 Apart from the name a word contains data and executable code,
 (interpreted or not) and linking information
 forthpxref({VOCABULARY}).
@@ -30,8 +35,15 @@ convenient, being a word list with a name, created by
 forthcode({VOCABULARY}) . ISO merely knows
 forthdefi({word list identification}) 's, a kind of handle,
 abbreviated as forthdefi({WID}) . A new word list is
-initiated by the use of forthcode({VOCABULARY}), and if
-you know the name you know the forthdefi({WID}) .
+created by the use of forthcode({VOCABULARY}), and
+by executing the vocabulary word the associated
+word list is pushed
+to the front of the search order.
+In fact in ciforth every dea can serve as a WID. It defines a
+wordlist consisting of itself and all earlier words in the same
+vocabulary.
+If needed you can
+always derive the forthdefi({WID}) from the dea of a vocabulary.
 
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}). Its code is called
@@ -500,6 +512,11 @@ name was lowest in memory. That they happen to be the same is
 no reason to confuse two completely different concepts. In this
 Forth the code field address and the dictionary address are the
 same, but not accidentally so. })
+_SOURCEFIELD_({forthitem
+The source field. This is one cell.
+This can be used to hold a reference to the source,
+a block number or a pointer to a string.
+It has not been filled in, in the kernel system.},{dnl})
 forthitem
 Past the header . This is actually not a field, but the
 free roaming dictionary. However, most of the time the part of
@@ -513,14 +530,15 @@ forthendenumerate
 Note that the entries are not only in alphabetic order, they
 are in order of essentiality. They are accessed by
 forthcode({>CFA}) forthcode({>DFA}) forthcode({>FFA})
-forthcode({>LFA}) forthcode({>NFA}) forthcode({>PHA}) .
+forthcode({>LFA}) forthcode({>NFA}) forthcode({>SHA}) .
 
 Note forthdefi({data field}) has a specific meaning in the ISO
 standard. It is accessed through forthcode({>BODY}) from the
 forthdefi({execution token}) while a data field address is
 accessed through forthcode({>DFA}) from the
 forthdefi({dictionary entry address}). It is in fact one cell
-behind the forthdefi({past header address}).
+behind where the forthdefi({data field address}) pointer points
+to.
 
 The most important flag bits currently defined are:
 forthitemize

@@ -46,6 +46,8 @@ dnl    The code must be load at an absolute address.
 define({_ABSOLUTELOAD_},_no)dnl
 dnl Work around a deficiency in nasm : an ORG requires a numeric argument
 define({M4_BIOSBOOT},{07C00H})
+dnl Default size of a header. Changes if there are text addresses.
+define({M4_HS},{5})
 dnl Have code to switch ourselves to protected mode, e.g. after booting.
 dnl Move forth up such thar ORG agrees with LOADADDRESS.
 define( {_SWITCH_}, _no)dnl
@@ -148,6 +150,10 @@ define( {_ISO_IN_}, _no)dnl
 dnl
 dnl Security means the protection against wrong control structures.
 define( {_SECURITY_}, _yes)dnl
+dnl
+dnl Source fields mean that there is a field in the header for a pointer
+dnl to the source. It is not (yet) used in the kernel in any way.
+define( {_SOURCEFIELD_}, _no)dnl
 dnl
 dnl Keep the old debugging facility with place for breakpoints
 define( {_OLDDEBUG_}, _no)dnl

@@ -53,6 +53,7 @@ ifelse(0,len($2),,$2:)dnl
 {_LINKOLD{}define({_LINKOLD},{$2-_CELLS(C_HOFFSET)})},dnl
 $6)
         DC    ifelse(0,len({$1}),0,N_$2)
+_SOURCEFIELD_({    DC    0},{dnl})
 })dnl
 dnl
 dnl
