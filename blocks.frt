@@ -1,4 +1,4 @@
-COPYRIGHT (c) 2000-2002 STICHTING DFW , THE NETHERLANDS
+COPYRIGHT (c) 2000-2002 Albert van der Horst, THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -766,7 +766,7 @@ BYE
  : No such process
  : No such file or directory
  : Operation not permitted
- : ( ciforth lab  $Revision$ (c) AvdH DFW HOLLAND)
+ : ( ciforth lab  $Revision$ (c) Albert van der Horst)
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION

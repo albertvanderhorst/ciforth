@@ -1,7 +1,7 @@
 ;{              ciforth : a generic I86 ISO FORTH by HCC FIG}
 
 ;{ $Id$}
-;{ Copyright (2000): Albert van der Horst, HCC FIG Holland by GNU Public License}
+;{ Copyright (2000):} M4_SUPPLIER {by GNU Public License}
 ;
 ;{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
@@ -40,8 +40,10 @@ _FEWBLOCKS_({{; number of blocks limited to 256
 ;
  _HEADER_ASM
 _COMMENT
-        A generic version of ISO FORTH for IBM type standard PC's
-                Albert van der Horst
+        A generic version of ISO FORTH for IBM type standard PC's by
+                M4_SUPPLIER
+
+                in cooperation with
                 HCC Forth user group
                 The Netherlands
                 www.forth.hccnet.nl
@@ -1506,10 +1508,11 @@ worddoc({ENVIRONMENTS},{SUPPLIER},{supplier}, {--- sc},{CI},
 {An environment query giving the SUPPLIER of this Forth as a forthdefin({string constant}).
 },
 {{ENVIRONMENT?}},
+dnl Cannot test against the actual M4_SUPPLIER here, it is not expanded.
 {{"SUPPLIER" ENVIRONMENT? . TYPE },{_T_ Albert van der Horst}},
 enddoc)
 HEADER({SUPPLIER},{SUPPLIER},{DOCOL})
-        _STRINGINLINE({Albert van der Horst})
+        _STRINGINLINE(M4_SUPPLIER)
         DC      SEMIS
 ;
 dnl Remember the top of the environment chain.
