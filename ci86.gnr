@@ -3524,7 +3524,10 @@ HEADER({!CSP},{SCSP},{DOCOL})
 ;
 });_END_({_SECURITY_})
 worddoc( {ERRORS},{?ERROR},{question_error},{f n --},{},
-{  Issue an error message number forthsamp({n}) , if the boolean flag is true.},
+{  Throw exception with number forthsamp({n}) , if the boolean flag is true.
+All kernel error handling goes through this words, allowing to
+catch e.g. disk errors.
+},
 {ERROR},
 {{0 12 ?ERROR},{},
  {0 WARNING !   1 12 ?ERROR},{ING !   1 12 ?ERROR ? MSG # 12 },
@@ -3533,7 +3536,7 @@ enddoc)
 HEADER({?ERROR},{QERR},{DOCOL})
         DC      SWAP
         _0BRANCH(QERR1) ;{IF}
-        DC      ERROR
+        DC      THROW
         _BRANCH(QERR2)  ;{ELSE}
 QERR1:  DC      DROP    ;{THEN}
 QERR2:  DC      SEMIS
@@ -4402,7 +4405,8 @@ HEADER({(ABORT)},{PABOR},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {ERRORS},{ERROR},{error},{n --- in blk},{},
-{Execute a notification that error forthvar({n}) has occurred,
+{Execute a notification that an uncaught exception or
+error with number forthvar({n}) has occurred,
 then restart the interpreter by executing forthcode({QUIT}) .
 forthcode({WARNING}) is first examined. If 1, the text of line
 forthvar({n}) , relative to screen 4 is printed. This
@@ -4411,7 +4415,7 @@ line number may be positive or negative, and beyond just screen
 printed as a message number (non disc installation). If
 forthcode({WARNING}) is -1, the user modifiable
 definition forthcode({(ABORT)}) is executed.},
-{QERROR},
+{?ERROR},
 { {12 ERROR},{12 ERROR ? MSG # 12},
  {CR},{} },
 enddoc)
@@ -7408,7 +7412,7 @@ specifies the source or destination block buffer, forthsamp({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
 read. forthcode({R/W}) determines the location on mass storage,
-performs the read-write and records errors.},
+performs the read-write and records errors, but doesn't abort on them.},
 {{BLOCK}},
 dnl we can use block 0 for scratch
 {
@@ -7440,7 +7444,7 @@ RSLW1:
 RSLW3:
         DC      LIT, write
 RSLW4:  DC      LINOS
-        DC      ZERO, MIN      ; 0/-errno
+        DC      BBUF, UNEQ     ; { Catches errors (negative) too.}
         DC      DERR, STORE
 RSLW2:  DC      DERR, FETCH
         DC      LIT, 8, QERR
