@@ -15,6 +15,11 @@ REQUIRE $
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
 
+\ For POINTER : it POINTS not yet to an ``EXIT''.
+: ?TILL-EXIT   @ '(;) = 0= ;
+\ For POINTER : it POINTS not yet to a ``NOOP''.
+: ?TILL-NOOP   @ 'NOOP = 0= ;
+
 \ For a parse ADDRESS return an INCREMENTED parse address, the
 \ DEA (content of ``ADDRESS'') and a  FLAG : this IS_NOT the
 \ end of definition.
@@ -107,6 +112,7 @@ VARIABLE MIN-DEPTH
 : UNSTABLE? CSPP @ MIN-DEPTH @ <> MIN-DEPTH 0 > AND ;
 
 \ For DEA : executing it would result in a not yet stable sequence.
+\ If it is stable that may mean that there is surely no optimisation.
 : NOT-YET-STABLE?
 DUP STILL-SWAPPING? IF SE@ COMBINE-CSPP UNSTABLE? ELSE -1 MIN-DEPTH !
 DROP 0 THEN ;
@@ -115,10 +121,27 @@ DROP 0 THEN ;
 \ collected. Leave ADDRESS LENGTH (in address units.)
 : COLLECT-SWAPPER !SWAPPER-START DUP
      BEGIN NEXT-PARSE SWAP NOT-YET-STABLE? AND WHILE REPEAT
+\           BEGIN DUP @ NOT-YET-STABLE? OVER ?TILL-NOOP AND WHILE NEXT-ITEM REPEAT
      OVER -
      UNSTABLE? IF DROP 0 THEN \ Alles umsonst.
 ;
 
+\ Assuming there has been folding, increment SEQUENCE to point past all
+\ constants at its start. Return incrementer SEQUENCE.
+: COUNT-LIT BEGIN DUP @ 'LIT = WHILE 2 CELLS + 1 CSC +! REPEAT ;
+\ For SEQUENCE , return the POINTER to first constant (``LIT'')
+: FIND-LIT BEGIN DUP @ 'LIT <> OVER ?TILL-EXIT AND WHILE NEXT-ITEM  REPEAT ;
+
+
+\ For SEQUENCE , return the STRING that is swappable.
+\ 0 length : no good.
+: (FIND-SWAPPABLE) !OPT-START FIND-LIT COUNT-LIT COLLECT-SWAPPER ;
+
+\ For SEQUENCE , return the STRING that is swappable.
+\ 0 length : there is none.
+: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?TILL-EXIT OVER 0<> OR UNTIL ;
+
+: REORDER ;
 \ ---------------------------------------------------------------------
 \ Combine a STACKEFFECTBYTE into ``CSC''.
 \ ``-'' works here because both nibbles have offset 1!
@@ -331,11 +354,6 @@ STRIDE SET PEES
     LOOP
 ;
 
-\ For POINTER : it POINTS not yet to an ``EXIT''.
-: ?TILL-EXIT   @ '(;) = 0= ;
-\ For POINTER : it POINTS not yet to a ``NOOP''.
-: ?TILL-NOOP   @ 'NOOP = 0= ;
-
 \ This was a typical example of premature optimisation.
 \ \ Seen the code SEQUENCE (its begin), return there MAY be a match in the table.
 \ : OPT-SPECIAL?   DUP @ 'LIT = IF CELL+ CELL+ @ >FFA @ FMASK-SP AND 0<> ELSE
@@ -371,6 +389,7 @@ STRIDE SET PEES
 \ Find optimisation patterns in the SEQUENCE of high level code
 \ and perform optimisation while copying to ``HERE'' ,
 \ Do not initialise, or terminate.
+
 : (MATCH) BEGIN DUP ?TILL-EXIT WHILE ?MATCH-EXEC? REPEAT DROP ;
 
 \ Optimise a SEQUENCE using pattern matching.
@@ -379,7 +398,7 @@ STRIDE SET PEES
 \ ----------------------------------------------------------------
 \ Optimise DEA by expansion plus applying optimations to the expanded code.
 : OPT-EXPAND   >DFA DUP @  ^^
-    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ PROGRESS @ WHILE REPEAT
+    BEGIN !PROGRESS EXPAND ^^ OPTIMISE ^^ REORDER PROGRESS @ WHILE REPEAT
 SWAP ! ;
 
 \ For DEA remember that it has been optimised
