@@ -103,7 +103,7 @@ VARIABLE lastep
      0 lastep !
 \
 \    \ The '^' at the beginning has a special meaning (see manual)
-     OVER C@ &^ = IF CSYNC !++ THEN
+     OVER C@ &^ <> IF CSYNC !++ THEN
 
      BEGIN OVER C@ DUP WHILE
 
