@@ -970,7 +970,6 @@ HERE6:
         JMP  ENDDPMI
 
 ; ######################### DPMI CLEAN UP CODE #####################################################
-STACK_SPEC:     DW      0,0
 
 RETDOS:
 ;       JMP     SHORT $
@@ -979,9 +978,6 @@ RETDOS:
         MOV     AX, [Save_DS_PR] ;{Aliased.}
         MOV     DS,AX
         MOV     ES,AX
-;{The following looks like very clean code, but it crashes dpmi versions.}
-;;;;;;;;MOV     [STACK_SPEC+2],AX
-;;;;;;;;LSS     SP,[STACK_SPEC]
 
 ; FIXME   the real cleanup code comes here
 ; It turns out that no cleanup code is required to prevent
@@ -5355,11 +5351,13 @@ HEADER({WARM},{WARM},{DOCOL})
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
 ;
-_LINUX_N_({
+_HOSTED_({
 worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
-{Handle command line options. This is primarily a vector point
-to suppress the handling of options during cold boot, in behalf
-of turnkey applications. Accept and return a flag
+{Handle command line options, i.e. execute the screen corresponding
+to the option letter.
+By redefining this as a forthcode({NOOP}) ,
+the handling of options during cold boot is suppressed, useful
+for turnkey applications. Accept and return a flag
 forthvar({f}) whether the signon message must be
 displayed._VERBOSE_({Simply replace by a forthcode({NOOP}) if
 options must be suppressed.})
@@ -5368,26 +5366,34 @@ options must be suppressed.})
 enddoc)
 HEADER({OPTIONS},{OPTIONS},{DOCOL})
 ;       Execute option.
-        DC      ARGS, FETCH, CELLP, CELLP, FETCH
-        DC      LDUP
-        _0BRANCH(COLD4) ; {No options}
+_LINUX_N_(
+{        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
+        _0BRANCH(OPT4) ; {No options}  })
+_PC_(
+{        DC      LIT, 80H, COUNT
+        _0BRANCH(OPT4) ; {No options}
+OPT1:
+        DC      LDUP, CFET, LBL, EQUAL
+        _0BRANCH(OPT2)
+        DC      ONEP
+        _BRANCH(OPT1)
+OPT2:                           })
         DC      FETCH
-        DC      LDUP, LIT, 0FFH, LAND
+        DC      LDUP
+        DC      LIT, _PC_({0FDH}) _LINUX_N_({0FFH}), LAND
         DC      LIT, '-', UNEQ
-        _0BRANCH(COLD3)
+        _0BRANCH(OPT3)
         DC      LIT, 3, LDUP, MESS, CR ; {Fatal, but can't use ERROR.}
-; { I can't help it. May god have mercy with me. }
-; { I use 'ONE' instead of 'LIT, exit,' to save one cell.}
-        DC      ZERO, ZERO, ONE, LINOS ; {Exit with error 3.}
-COLD3:
+        DC      XCODE, STORE, BYE
+OPT3:
         DC      LIT, 8, RSHIFT
         DC      LIT, 1FH, LAND
         DC      LOAD
         DC      ZERO, SWAP ;{ Sign on suppressed.}
-COLD4:
+OPT4:
         DC      DROP
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
-});_END_({_LINUX_N_})
+});_END_({_HOSTED_})
 
 worddoc( {INIT},{COLD},{cold},{},{FIG},
 {Reinitialise the system. Clear all block buffers.
@@ -5431,9 +5437,11 @@ _LINUX_N_({
         DC      LIT,NOOP  ; {Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
-COLD1:  DC      OPTIONS
-        _0BRANCH(COLD5)
+COLD1:
 });_END_({_LINUX_N_})
+_HOSTED_(
+{        DC      OPTIONS})
+        _0BRANCH(COLD5)
         DC      SIGNON    ; {Suppressed for scripting! Or any options.}
 COLD5:
         DC      ABORT
