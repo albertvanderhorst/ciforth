@@ -234,10 +234,32 @@ TESTLINA= \
 test.m4 \
 ci86.lina.rawtest
 
+TESTLINUX= \
+test.m4 \
+ci86.linux.rawtest
+
+TESTMSDOS= \
+test.m4 \
+ci86.msdos.rawtest
+
 testlina : $(TESTLINA) ci86.lina.rawtest lina BLOCKS.BLK ;
 	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	lina <$@.1 | grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
+#       rm $(TEMPFILE)
+
+testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc BLOCKS.BLK ;
+	m4 $(TESTLINUX)  >$(TEMPFILE)
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	ciforthc <$@.1 | grep -v RCSfile >$@.3
+	diff -b -B $@.2 $@.3 || true
+#       rm $(TEMPFILE)
+
+testmsdos : $(TESTMSDOS) ci86.msdos.rawtest ;
+	m4 $(TESTMSDOS)  >$(TEMPFILE)
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 #       rm $(TEMPFILE)
