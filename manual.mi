@@ -31,7 +31,7 @@ forthbreak
 The result is a file forthfile({hello}) forthfile({HELLO.EXE}).
 For the compiler to run you must have the library correctly
 installed. If that failed, or anything else fails, you will
-get a message with at least forthsamp({ ERR ###})
+get a message with at least forthsamp({ ciforth ERROR ###})
 and hopefully some more or less helpful text as well.
 The forthsamp({###}) is an error number forthxref({Errors}).
 
@@ -77,7 +77,7 @@ You can turn forthcode({DO-DEBUG})
 off with forthcode({NO-DEBUG}) .
 
 If you try to forthcode({INCLUDE}) a program, you may
-get errors like ``xxx? ERR # 12 : NOT RECOGNIZED'' .
+get errors like ``xxx? ciforth ERROR # 12 : NOT RECOGNIZED'' .
 forthxref({Errors}).
 Apparently, thisforth doesn't know about forthcode({xxx}),
 but after forthsamp({"xxx" REQUIRED}) maybe
@@ -958,12 +958,13 @@ in the input stream.
 These words are not in the kernel but are in screen 17, that
 corresponds to the forthsamp({-r}) option.
 
-Screen 0 and screen 1 to 26 are reserved. When a Forth is started up with
+Screen 0 and screen 1 to 26 are reserved.
+_HOSTED_({
+When a Forth is started up with
 a first parameter that is a one-letter option, the corresponding
 screen is to be executed. _VERBOSE_({So forthsamp({-a}) or forthsamp({-A}) is
 equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
  forthsamp({-Z}) is equivalent to forthsamp({26 LOAD}).})
-_HOSTED_LINUX_({
 @subsection options
 ciforth is a primitive system, and can interpret just one option on the
 command line. If the first argument is not starting with forthkey({-})
@@ -999,7 +1000,7 @@ forthsamp({-e})
 
 Load the elective screen, screen 5.
 But system wide default preferences
-can be installed there. _VERBOSE_({{In a preference screen you just put
+can be installed there. _VERBOSE_({{In a elective screen you just put
 commands you want to be executed after Forth starts up, such as }})
 _VERBOSE_({forthsamp({"fortune -f /usr/lib/forthcookies" SYSTEM})})
 _VERBOSE_({{ or }})
@@ -1009,11 +1010,11 @@ forthitem
 forthsamp({-f forthcode})
 
 Execute the forthsamp({forthcode}) in the order present.
+_UNIMPLEMENTED(
 Options such as in this list are available on the remainder of the line, but they
 must be invoked with two slashes instead of one, and having more letters is allowed
 but ignored.
 _VERBOSE_({{So }forthsamp({--compile}){ instead of }forthsamp({-c})}).
-_UNIMPLEMENTED(
 forthsamp({--library}) behaves slighly different than
 forthsamp({-l}). The library is switched, taking effect for the
 remainder of forthsamp({forthcode}), but no shifting is done of
@@ -1068,28 +1069,42 @@ forthenditemize
 
 The remaining screens are available for options to be added at a later time,
 or for user defined options in a private library.
-
+})_END_({_HOSTED_}).
 @subsection Private libraries
 
 Working with source in files is quite comfortable using the default block library, especially
 if sufficient tools have been added to it. In principle all ISO words should be
 made available via forthcode({REQUIRED}) .
 
-In order to customize the forth library, you have to copy the default
-forthfile({/usr/lib/ciforth/forth.lab}) to your home directory, preferably to a lib
-subdirectory. Most shells allow you to redefine commands, such as e.g. in bash:
+In order to customize the forth library, you have to make a
+copy _HOSTED_LINUX_({of the default
+forthfile({/usr/lib/ciforth/forth.lab}) to your home directory}), preferably to a lib
+subdirectory.
+
+_HOSTED_LINUX_({
+Most shells allow you to redefine commands, such as e.g. in bash:
 
 forthsamp({alias lina='lina -l $HOME/lib/forth.lab'}).
+})
+_HOSTED_DPMI_({You can make a pif file that start forthsamp({wina}) with
+a library:
+
+wina -l c:/projects/database/forth.lab.})
+_HOSTED_MSDOS_({You can make a forthvar({.BAT}) file that start forthsamp({mina}) with
+a library :
+
+mina -l c:/projects/database/forth.lab.})
 
 Note that the forthsamp({-l}) option hides itself, such that
 such an alias can be used completely identical to the original
 with respect to all options, including forthsamp({-l}).
 Analysing arguments passed to thisforth in your programs remains
 completely the same.
+An additional feature is that the default file is opened for reading only.
+A file specified via forthsamp({-l}) is opened for reading and
+writing.
 
 @subsection Turnkey applications.
 A turnkey application should always attempt to close the library file that is default
 opened in forthcode({COLD}) , by executing forthcode({BLOCK-EXIT}).
 Errors never lead to throws and can be safely ignored.
-
-})
