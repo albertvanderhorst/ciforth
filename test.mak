@@ -225,8 +225,12 @@ cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
 	sed -e 's/_rbracket_/@}/g'                     |\
 	sed -e 's/_comat_/@@/g'                        > $@
 
-testlina : test.m4 fig86.lina.rawtest ;
-	m4 $+ >$(TEMPFILE)
+TESTLINA= \
+test.m4 \
+fig86.lina.rawtest
+
+testlina : $(TESTLINA) fig86.lina.rawtest lina BLOCKS.BLK ;
+	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	lina <$@.1 | grep -v RCSfile >$@.3
