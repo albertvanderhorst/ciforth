@@ -115,11 +115,11 @@ _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFF
 ;
 ;{      ASCII CHARACTER EQUIVALENTS}
 ;
-ABL     EQU     20H     ;{ SPACE}
+ABL     EQU     ' '     ;{ SPACE}
 ACR     EQU     0DH     ;{ CR}
-ACO     EQU     7BH     ;{ CURLY BRACKET OPEN }
-ACC     EQU     7DH     ;{ CURLY BRACKET CLOSE }
-ADOT    EQU     2EH     ;{ PERIOD}
+ASO     EQU     '['     ;{ SQUARE BRACKET OPEN }
+ASC     EQU     ']'     ;{ SQUARE BRACKET CLOSE }
+ADOT    EQU     '.'     ;{ PERIOD}
 ALF      EQU     0AH     ;{ LINE FEED, USED INTERNALLY AS}
                         ;{ LINE ENDER}
 AFF      EQU     0CH     ;{ FORM FEED}
@@ -1811,16 +1811,14 @@ LINE LINEFEED WORD ;}). })},
 {{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 HEADER({(WORD)},{LPWORD},{DOCOL})
-PWORD1: DC INBRS
+PWORD1: DC INBRS, QBL
         DC OVER, SRC, CELLP, FETCH, LSUB
-        _0BRANCH(PWORD1B)
-        DC QBL
+        DC LAND
         _0BRANCH(PWORD1A)
         DC DROP
         _BRANCH(PWORD1)
-PWORD1B:
-        DC DROP
 PWORD1A:
+
 PWORD2: DC INBRS, QBL, ZEQU
         _0BRANCH(PWORD2A)
         DC DROP
@@ -2269,7 +2267,7 @@ worddoc( {JUGGLING},{OVER},{over},{nl n2 --- nl n2 n1},{ISO,FIG,L0},
 {Copy the second stack value, placing it as the new top.},
 {{DUP}},
 {{S0 @ DSP! 1 2 3 4 OVER .S},{
-S: 1 2 3 4 3} },
+S[  1 2 3 4 3 ]} },
 enddoc)
 CODE_HEADER({OVER},{OVER})
         POP     DX
@@ -2281,7 +2279,7 @@ worddoc( {JUGGLING},{DROP},{drop},{n ---},{ISO,FIG,L0},
 {Drop the number from the stack.},
 {{DUP}},
 {{S0 @ DSP! 1 2 3 4 DROP .S},{
-S: 1 2 3} },
+S[  1 2 3 ]} },
 enddoc)
 CODE_HEADER({DROP},{DROP})
         POP     AX
@@ -2293,7 +2291,7 @@ numbers (or one double number)
  from the stack.},
 {{DROP},{2DUP}},
 {{S0 @ DSP! 1 2 3 4 2DROP .S},{
-S: 1 2} },
+S[  1 2 ]} },
 enddoc)
 CODE_HEADER({2DROP},{TDROP})
         POP     AX
@@ -2303,7 +2301,7 @@ CODE_HEADER({2DROP},{TDROP})
 worddoc( {JUGGLING},{SWAP},{swap},{n1 n2 --- n2 n1},{ISO,FIG,L0},
 {Exchange the top two values on the stack.},{{ROT}},
 {{S0 @ DSP! 1 2 3 4 SWAP .S },{
-S: 1 2 4 3} },
+S[  1 2 4 3 ]} },
 enddoc)
 CODE_HEADER({SWAP},{SWAP})
         POP     DX
@@ -2313,7 +2311,7 @@ CODE_HEADER({SWAP},{SWAP})
 worddoc( {JUGGLING},{DUP},{dup},{n --- n n},{ISO,FIG,L0},
 {Duplicate the value on the stack.},{{OVER}},
 {{S0 @ DSP! 1 2 3 4 DUP .S},{
-S: 1 2 3 4 4} },
+S[  1 2 3 4 4 ]} },
 enddoc)
 CODE_HEADER({DUP},{LDUP})
         POP     AX
@@ -2323,7 +2321,7 @@ CODE_HEADER({DUP},{LDUP})
 worddoc( {JUGGLING},{2DUP},{two_dup},{d --- d d},{ISO},
 {Duplicate the double number on the stack.},{{OVER}},
 {{S0 @ DSP! 1 2 3 4 2DUP .S},{
-S: 1 2 3 4 3 4} },
+S[  1 2 3 4 3 4 ]} },
 enddoc)
 CODE_HEADER({2DUP},{TDUP})
         POP     AX
@@ -2335,7 +2333,7 @@ CODE_HEADER({2DUP},{TDUP})
 worddoc( {JUGGLING},{2SWAP},{two_swap},{d1 d2 --- d2 d1},{ISO},
 {Exchange the top doubles on the stack.},{{ROT}},
 {{S0 @ DSP! 1 2 3 4 2SWAP .S },{
-S: 3 4 1 2} },
+S[  3 4 1 2 ]} },
 enddoc)
 CODE_HEADER({2SWAP},{TSWAP})
         POP     BX
@@ -2350,7 +2348,7 @@ worddoc( {JUGGLING},{2OVER},{two_over},{d1 d2 --- d1 d2 d1},{ISO},
 {Copy the second stack double, placing it as the new top.},
 {{2DUP}},
 {{S0 @ DSP! 1 2 3 4 2OVER .S},{
-S: 1 2 3 4 1 2 } },
+S[  1 2 3 4 1 2 ]} },
 enddoc)
 CODE_HEADER({2OVER},{TOVER})
         POP     BX
@@ -3299,7 +3297,7 @@ worddoc( {JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{ISO,FIG,L0},
 {Rotate the top three values on the stack, bringing the third to the
 top.},{{SWAP}},
 {{S0 @ DSP! 1 2 3 4 ROT .S},{
-S: 1 3 4 2} },
+S[  1 3 4 2 ]} },
 enddoc)
 CODE_HEADER({ROT},{ROT})
         POP     DX      ;{S1}
@@ -3324,9 +3322,9 @@ usually used to copy a value just before forthcode({IF}) , to
 eliminate the need for an forthcode({ELSE}) part to drop
 it.},{{DUP}},
 {{S0 @ DSP!  1 2 3 4 ?DUP .S},{
-S: 1 2 3 4 4},
+S[  1 2 3 4 4 ]},
 {S0 @ DSP! 1 2 3 0 ?DUP .S},{
-S: 1 2 3 0} },
+S[  1 2 3 0 ]} },
 enddoc)
 HEADER({?DUP},{QDUP},{DOCOL})
         DC      LDUP
@@ -6080,7 +6078,7 @@ CODE_HEADER({BIOS},{BIOS})
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
         _SWITCH_({JMPHERE_FROM_FORTH})
         XCHG    {SI},{AX}
-RQBIOS: INT(0)          ;{ Request number to be overwritten.}
+RQBIOS:  INT(0)          ;{ Request number to be overwritten.}
         PUSHF      ;{ Save status into DI }
         POP     {DI}
         XCHG    {SI},{AX} ;{ Save AX in (still free) SI     }
@@ -8587,12 +8585,12 @@ INDE9:
 worddocsafe( {STACKS},{.S},{dot_s},{from to --},{},
 {Print the stack, in the current base.},
 {{LIST}},
-{{S0 @ DSP! 1 2 3 .S},{S: 1 2 3}},
+{{S0 @ DSP! 1 2 3 .S},{S[ 1 2 3 ]}},
 enddoc)
 HEADER({.S},{DOTS},{DOCOL})
         DC      CR
         DC      LIT, 'S', EMIT
-        DC      LIT, ACO, EMIT
+        DC      LIT, ASO, EMIT
         DC      SPACE
         DC      SPFET, SZERO, FETCH
 DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
@@ -8600,7 +8598,7 @@ DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
         DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
         _BRANCH(DOC2)
 DOC1:    DC DROP, DROP
-        DC      LIT, ACC, EMIT
+        DC      LIT, ASC, EMIT
         DC SEMIS
 ;
 worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},( addr n -- i*x t/f ),{ISO},
