@@ -1108,7 +1108,50 @@ forthitem
 Since I installed a new Red Hat (6.2) figforth crashes. 
 forthendenumerate
 
-@chapter MULTI-USER
+@chapter Loose ends
+@section list of safe customisation in the assember.
+RTS TIB / Return stack area
+
+The mass storage is easily the most crappy part of the fig model. What
+little advantage it had, is no longer applicable. Interestingly this block
+system is copied verbatim into ANS. 
+32 bits systems can enlarge the dictionary by redefining the stacks and the
+terminal input buffer positions. The block buffers are in the way. So I put
+them in the dictionary space. In fact the block buffers have become the 
+data field of FIRST.
+
+This method allows reentrant use of the Forth vocabulary. 
+
+The backspace character is also in the boot-up origin parameters. It is
+universally expected that "rubout" is the backspace. 
+
+Despite all the talk about user variables, I am not aware that a multi-user
+fig forth existed, ever. The above block policy is not compatible with 
+multi-user (but the actual code is not worse than it ever was, and you can
+rebuilt it with 1000 block buffers if you like.)
+
+CUSTOMISING
+
+The name USER reflects that more than one user could use the dictionary
+and users could share the background storage, provided certain precautions
+are taken. About this you can forget.
+What you can do is, store back you user variables in the boot-up 
+parameters as follows
+forthsamp({USVA @   ' USVA @   +ORIGIN !})
+where forthvar({USVA}) is the user variable which value you want to keep.
+
+Underneath the I/O model has improved. TYPE and EXPECT are drawn into
+the I/O model dependant part. If at all possible CR and EMIT used TYPE
+such that TYPE becomes a natural vectoring point. 
+
+Rubout is best left to the EXPECT code. Remember, a Linux itself knows the
+rubout key for any of its 500+ known terminal types and isn't it nice in
+MSDOS that F3 gets the previous command back for you? 
+If EXPECT builds up a line from separate key strokes, and if you ever want
+to change the rubout key, just change the RUBOUT user variable. 
+
+
+@section MULTI-USER
 
 The name forthcodeni({USER}) reflects that more than one user could use the dictionary
 and users could share the background storage, 
