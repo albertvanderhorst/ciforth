@@ -14,12 +14,13 @@ forth.lab        \
 
 RELEASETXT="      \
 COPYING           \
-README.$m         \
+READwina.txt     \
 $m.asm            \
 $m.texinfo        \
 $m.html           \
 $m.ps             \
-toblock.frt      \
+toblk.frt         \ 
+fromblk.frt     \
 " # That's all folks!
 
 version=`echo $1 | sed -e 's/d/./g'`

@@ -15,6 +15,10 @@ It looks as if sometimes K' fails. But not for a freshly booted system.
 If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
+Stable version 4.0.3  Suse and XP
+The XP version failed the MEASURE-PRIME because it was a Celearon
+system without the clock count instruction 0F 31 .
+
 Stable version 4.0.1  Suse
 
 Environment  4.0 S.u.S.e.
@@ -134,7 +138,8 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   4.0.1 lina.cfg        lina          BCDEFHKMOPR
+hosted_linux linux_native   4.0.3 lina.cfg        lina          BCDEFHKMOPR
+                            4.0.1 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0  lina.cfg         lina          BCDEFHKMOPR
                             275  lina.cfg         lina          BCDEFHKMOPR
                             223  lina.cfg         lina          BCDEFHKMOPR

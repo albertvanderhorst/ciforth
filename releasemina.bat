@@ -1,6 +1,4 @@
 #!/bin/sh --debug
-# Not tried out after moving the zip building to the end
-# To be added TOBLOCK.FRT TOBLOCK.EXE
 m=mina
 mm=mna
 s=ci86.$m
@@ -14,12 +12,13 @@ forth.lab        \
 
 RELEASETXT="      \
 COPYING           \
-README.$m         \
+READmina.txt      \
 $m.asm            \
 $m.texinfo        \
 $m.html           \
 $m.ps             \
-toblock.frt      \
+toblk.frt      \
+fromblk.frt      \
 " # That's all folks!
 
 version=`echo $1 | sed -e 's/d/./g'`

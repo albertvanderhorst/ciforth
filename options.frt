@@ -78,22 +78,22 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 
 \
-( -e :_Load_system_electives ) \ AvdH A1oct19
+( -e :_Load_system_electives ) \ AvdH A3sep01
 .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
 
-REQ CONFIG
-( MAINTENANCE ) REQ L-S  REQ DO-DEBUG
-REQ H.   REQ DUMP   REQ SUPER-QUAD   REQ FARDUMP
-REQ $.   REQ ^      REQ INCLUDE
-\ REQ REFRESH ( temporaryly)  \ CREATE I-LIKE-DOS
-REQ CRACK    REQ LOCATE   REQ OS-IMPORT
-REQ EDITOR   REQ OOPS                         OK  EXIT
+REQ CONFIG      REQ HELP
+REQ L-S         REQ DO-DEBUG    REQ H.          REQ DUMP
+REQ SUPER-QUAD  REQ FARDUMP     REQ $.          REQ ^
+REQ INCLUDE     REQ CRACK       REQ LOCATE      REQ OS-IMPORT
+REQ CASE-INSENSITIVE          ( CASE-INSENSITIVE )
+\ REQ EDITOR      REQ OOPS
+\ REQ ASSEMBLERi86 REQ DEADBEEF
+
+( REQ DIR )     REQ ls    \ Select os-interface DOS/Unix
+
+: TASK ;
  ( BACKUP        250 LOAD   77 81 THRU )
-( REQ ASSEMBLERi86 )
-( REQ DEADBEEF )
-
-
-: TASK ;   ( 'REQ HIDDEN)     OK
+OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD  REQUIRE CONFIG   ?LI
 REQUIRE ARGV   REQUIRE Z$@
@@ -127,11 +127,11 @@ DOIT    COMMAND-BUFFER $@
 
 \
 ( -h :_help,_show_options ) \ AvdH A1oct04
-.SIGNON   1 31 INDEX   OK BYE
+.SIGNON   1 20 INDEX CR
+.( See also the pdf documentation ) CR
+.( or print the PostScript documentation ) CR
 
-
-
-
+OK BYE
 
 
 

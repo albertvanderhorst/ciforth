@@ -4767,14 +4767,14 @@ _HEADER({ERROR},{ERROR},{DOCOL})
         DC      OVER, LIT, 20, LSUB
         DC      MAX
         DC      SWAP,OVER, LSUB
-        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      ETYPE
         _STRINGINLINE({? ciforth ERROR # })
-        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      ETYPE
         DC      BASE, FETCH
         DC      DECA
         DC      OVER
         DC      STOD, ZERO, PDDOTR      ;{This is about (.) }
-        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      ETYPE
         DC      BASE, STORE
         DC      MESS
         DC      SEMIS
@@ -4846,7 +4846,7 @@ enddoc)
 _HEADER({(ABORT")},{PABORTQ},{DOCOL})
         DC      ROT
         _0BRANCH(PABQ1) ;{IF}
-        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      ETYPE
         DC      SIGNON, ABORT
         _BRANCH(PABQ2) ;{ELSE}
 PABQ1:  DC       TDROP
@@ -4920,7 +4920,7 @@ _HEADER({HEADER},{LHEAD},{DOCOL})
         DC      LDUP
         _0BRANCH(CREA1) ;{IF}
         DC      TNFA, FETCH, SFET
-        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      ETYPE
         DC      LIT,4
         DC      MESS
         DC      X       ;{THEN}
@@ -6034,7 +6034,7 @@ _HEADER({MESSAGE},{MESS},{DOCOL})
         _0BRANCH(MESS1) ;{IF}
         DC      ERRSCR, FETCH
         DC      PLINE, ONEP     ;{ Also print the '\n' !}
-        DC      _HOSTED_LINUX_({ETYPE},{LTYPE})
+        DC      ETYPE
         DC      X
 MESS1:                  ;{THEN}
         DC      DROP
@@ -6700,7 +6700,9 @@ registers this agrees with the forthsamp({PUSH_ALL}) instruction.})
 },
 {{BIOSO}},
 dnl Expect a reasonable value for the data segment.
-{{REG-SET 24 + @ 0FFFF AND 1000 3000 WITHIN .},{_T_} },
+dnl Commented out, for XP it is 0x0DXX . So?
+dnl {{REG-SET 24 + @ 0FFFF AND 1000 3000 WITHIN .},{_T_} },
+,
 enddoc)
 _HEADER({REG-SET},{REGSET},{DOVAR},)
 SaveDI:     DD      00000000
@@ -7320,10 +7322,10 @@ WFIL1:                          ;BEGIN
         DC      MIN, RR, WRITE
         DC      LDUP             ;   DUP
         _0BRANCH({WFIL2})        ; IF RDROP >R 2DROP R> EXIT
-        DC      RDROP, TOR, TDROP, TOR, EXIT
+        DC      RDROP, TOR, TDROP, FROMR, EXIT
 WFIL2:                           ; THEN DROP
         DC      DROP, LIT, 8000H, LSUB      ; 8000 -
-        DC      LDUP, ZERO, GREAT      ; 8000 - DUP 0 >
+        DC      LDUP, ZERO, GREAT      ; DUP 0 >
         _0BRANCH({WFIL3})        ; WHILE
         DC      SWAP, LIT, 8000H ; SWAP 8000
         DC      PLUS, SWAP       ; + SWAP
@@ -7588,7 +7590,7 @@ CODE_HEADER({TYPE},{LTYPE},DOCOL)
         _NEXT
 ;
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
-{This is an alias for forthcode({TYPE}) .
+{This behaves identical to forthcode({TYPE}) .
 However it is used for all error message, so via this word
 error output can be redirected, by
 forthdefi({revectoring}) it.
@@ -7809,6 +7811,20 @@ _HEADER({EMIT},{EMIT},{DOCOL})
 });_END_({_HOSTED_LINUX_})
 ;
 _PC_({
+worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
+{This behaves identical to forthcode({TYPE}) .
+However it is used for all error message, so via this word
+error output can be redirected, by
+forthdefi({revectoring}) it.
+},
+,
+dnl This test assumes a redirection of error out to standard out.
+{{HERE 41 C, 42 C, 2 ETYPE},{AB}},
+enddoc)
+HEADER({ETYPE},{ETYPE},{DOCOL})
+        DC      LTYPE
+        DC      SEMIS
+;
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthsamp({count}) characters from the
 terminal to address, until a forthkey({RET}) is received.
@@ -8316,6 +8332,10 @@ _HOSTED_DPMI_(
 {       DC      ZERO, LIT, COMBUF + CW
         DC      LIT, Save_DS_PR, FETCH, OVER
         DC      LIT, 256
+        DC      FMOVE
+        DC      ZERO, LIT, SHELL + CW
+        DC      LIT, Save_DS_PR, FETCH, OVER
+        DC      LIT, _FILENAMELENGHT_M4_
         DC      FMOVE                         }) _END_({_HOSTED_DPMI_})
         DC      SHELL, CELLP, X, LIT, LOADEXEC
         DC      LIT, 4B00H, BDOSN
@@ -9320,7 +9340,7 @@ Enlarge the field, if
 needed. _VERBOSE_({{So a field length of 0 results effectively in free format.}})
 },
 {{OUT},{D.},{D.R}},
-{{-12. 41 EMIT 5 (D.R) 41 EMIT TYPE},{A  A-12}},
+{{-12. 41 EMIT 5 (D.R) 41 EMIT TYPE 41 EMIT},{AA  -12A}},
 enddoc)
 _HEADER({(D.R)},{PDDOTR},{DOCOL})
         DC      TOR
@@ -9334,8 +9354,13 @@ _HEADER({(D.R)},{PDDOTR},{DOCOL})
         DC      EDIGS
         DC      FROMR
         DC      OVER
-        DC      LSUB
-        DC      SPACES
+        DC      LSUB, ZERO, MAX
+        DC      ZERO
+        _QDO(PDDOT1)
+PDDOT2:  DC      LBL, HOLD  ;{WARNING: HOLD outside of #>.}
+        _LOOP(PDDOT2)
+PDDOT1:
+        DC      EDIGS  ;{Drop string instead of number.}
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{D.R},{d_dot_r},{d n ---},{ISO,FIG},
@@ -9902,7 +9927,7 @@ To make a distinction with the same words in other wordlists,
 the names of denotations are prepended with ``Prefix_'' in the
 documentation. Actual names in the dictionary do not contain
 the prefix. Apart from forthcode({Prefix_0}) , the vocabulary
-contains entries for all hex digits forthsamp({{{{1-9,A-F}}}}).
+contains entries for all hex digits 1...9 and A...F.
 Like forthcode({NUMBER}) always did, all denotations behave
 identical in interpret and compile mode and they cannot be
 postponed. },

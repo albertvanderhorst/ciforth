@@ -196,7 +196,10 @@ No function key works, only control keys.
 ^G ^T ^Y : Delete char, word, line.
 
 
-^Z ^U ^P : Undelete word, line. Undelete line and pop.
+^Z ^U : Undelete word, line.
+
+
+^W ^P : Undelete word and pop. Undelete line and pop.
 
 
 ^J ^O : Join lines, Open (split) line.
@@ -205,11 +208,12 @@ No function key works, only control keys.
 ESC Q / ESC q : quit (abondon edit and do not update.)
 
 
-ESC x (or whatever) : exit editing, save and update.
+ESC x (or whatever, not q): exit editing, save and update.
 
-Word and line deletes stack at the bottom of the screen.
-^P is the only one that pops this stack.
-
+Word and line deletes stack up at the bottom of the screen.
+^P and ^W pop this stack.
+In all other case the
+last deleted item remains available for multiple undeletes.
 
 Editing outside of the blue cadre allows useful tricks.
 Small sequences perform useful actions:

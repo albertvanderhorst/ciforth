@@ -1,5 +1,5 @@
 .\" $Id$
-.TH LINA "1" "Jan 2002" "ciforth 4.0.0" DFW
+.TH LINA "1" "aug 2003" "ciforth 4.0.3" DFW
 .SH "NAME"
 lina ciforth \- ISO Forth Language And Environment
 .SH "SYNOPSIS"
@@ -9,7 +9,7 @@ lina ciforth \- ISO Forth Language And Environment
 .br
 \fBlina\fR      \ \fB\-F\fR\ [ forth code ]
 .br
-\fBlina\fR      \ \fB\-I\fR\ <binary-path> <library-path>
+\fBlina\fR      \ \fB\-I\fR\ <binary-path> <library-path> [<shell-path>]
 .br
 \fBlina\fR      \ \fB\-L\fR\ <library> [ params ]
 .br
@@ -67,11 +67,12 @@ Then start the interpreter.
 \fB\-H\fR
 Print help, i.e. the option summary.
 .TP
-\fB\-I\fR \fIbinary-path\fR \fIlibrary-path\fR
+\fB\-I\fR \fIbinary-path\fR \fIlibrary-path\fR [\fIshell-path\fR]
 Install the current compiler into \fIbinary-path\fR and the current library into
 \fIlibrary-path\fR.
+Optionally specify the path of the command interpreter to be used.
 This must be fully qualified names, not directories.
-Configure appropriately.
+The system is configured accordingly.
 .TP
 \fB\-L\fR \fIlibrary-path\fR [\fIarguments\fR]
 Close the default library, and open the library at

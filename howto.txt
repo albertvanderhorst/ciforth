@@ -86,3 +86,11 @@ apparently you wil get 4.0.2 plus maybe some patches
 already made.
 Before release, call this version 4.0.3.
 From then on 4.0.2 can no longer be patched.
+
+2003 sep 04
+How to move a sticky tag to a new branch:
+In this example from 4.15.2.5 to 4.15.3.1
+
+cvs tag -d rel-4-0-patches ci86.gnr
+cvs update -r4.15.3 ci86.gnr
+cvs tag rel-4-0-patches ci86.gnr

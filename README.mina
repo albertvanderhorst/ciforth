@@ -36,7 +36,7 @@ a program.
 
 RELEASE CONTENT
 COPYING         Copyright notice
-README.min      This file
+READMINA.TXT    This file
 MINA.ASM        Source
 MINA.COM        Forth interpreter compiler
 MINA.TEX        Doc source
@@ -44,7 +44,8 @@ MINA.HTM        Usable reference documentation
 MINA.PDF        Full documentation
 MINA.PS         Full documentation
 FORTH.LAB       Source library
-TOBLOCK.FRT     Example.
+TOBLK.FRT       Example : transform text into Forth blocks.
+FROMBLK.FRT     Example : transform Forth blocks into text.
 
 The latest version can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
@@ -112,7 +113,3 @@ A simple manual installation is superior to an automatic installation
 that would never work acrross all the targeted platforms.
 I am aware that even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)
-
-CAVEAT
-The file toblock.frt is an example of how to write a filter in Linux.
-It doesn't work (properly) in MS-DOS because of defects in the redirection.

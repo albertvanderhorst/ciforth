@@ -9,6 +9,7 @@
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
 FLOPPY=fd0h1440
+THISDIR=ci41
 
 # Applicable suffixes : * are generated files
 # + are generated files if they are mentionned on the next line
@@ -310,8 +311,8 @@ lina.zip : $(RELEASELINA) ;\
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	(cd ..; ln -s ciforth lina-$(VERSION))
-	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
+	(cd ..; ln -s $(THISDIR) lina-$(VERSION))
+	(cd ..; tar -czvf $(THISDIR)/lina-$(VERSION).tar.gz `cat $(THISDIR)/MANIFEST`)
 	(cd ..; rm lina-$(VERSION))
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
