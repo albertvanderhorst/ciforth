@@ -101,7 +101,8 @@ DRIVE   EQU     0       ; Use floppy A for blocks.
 
 BPS     EQU     512             ;Bytes/sector, common to all of MSDOS
 ;
-;____1_____ _USEBIOS_1_({
+; PHYSICAL DISK PARAMETERS
+; (not needed for MODERN)
 ;
 ; Disk parameters:
 ; HD drive 3" 
@@ -134,7 +135,7 @@ _COMMENT
 ; Usable for generating a bootable floppy simple.
 SECSTRT EQU     1       
 _ENDCOMMENT
-});_END___1__({_USEBIOS_1_})
+; END  OF PHYSICAL DISK PARAMETERS
 
         PAGE
         CSEG    SEGMENT PARA PUBLIC 'CODE'
@@ -1889,7 +1890,28 @@ HEADER({COLD},{COLD},{DOCOL})
 	DW	USE,STORE
 	DW	FIRST
 	DW	PREV,STORE
+;____1_____ _MODERN_1_({
+        DW      BLINI
         DW      ZERO, OFSET,STORE
+});_END___1__({_MODERN_1_})
+;____1_____ _USEDOS_1_({
+_COMMENT
+; This will steer clear of a forth executable, provided it is
+; the first file on the floppy. The 1 is the extra sector in .EXE files.
+; However it deviates much from the classic model and requires
+; that the disk parameters are available (no only for USEBIOS)
+        DW      LIT, 1+(SECSTRT + EM/BPS)/(KBBUF/BPS)  ; Overestimation.
+        DW      OFSET,STORE
+_ENDCOMMENT
+        DW      ZERO, OFSET,STORE
+});_END___1__({_USEDOS_1_})
+;____1_____ _USEBIOS_1_({
+; This will reserve place for dos information, such that the floppy
+; can be accessed from DOS and makes sure blocks are not allocated
+; within the forth system itself.
+        DW      LIT, (SECSTRT + EM/BPS)/(KBBUF/BPS)  ; Overestimation.
+        DW      OFSET,STORE
+});_END___1__({_USEBIOS_1_})
 	DW	LIT, USINI   
 	DW	LIT,UP
 	DW	FETCH
@@ -2625,9 +2647,10 @@ SBLK    PROC    NEAR
 ;	THIS ROUTINE WILL PREPARE PARAMETERS FOR DISK I/O
 ;       DRIVE, ADDRESS, LENGTH, SEC#
 	POP	DI	;SAVE RETURN
+	POP	AX      ;BLK #
 	MOV	CX,KBBUF/BPS 
-	POP	DX	;BLK #
-        MUL     DX,CX   ;SEC #
+        MUL     CX   ;SEC #
+        MOV     DX,AX
 	MOV	AL,DRIVE    ;SELECT DR A
         POP     BX      ;TRANSFER ADDR
 	PUSH	DI	;GET THAT RETURN BACK
