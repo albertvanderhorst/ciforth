@@ -5893,10 +5893,13 @@ MESS1:  _STRINGINLINE({MSG # })
 MESS2:                      ;{THEN}
         DC      SEMIS
 ;
-_PC_({
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
-forthsamp({port}). A port address is always 16 bits .},
+forthsamp({port}). A port address is always 16 bits.
+_VERBOSE({In practice on a IBM PC architecture a port address is
+10 bits.}) _LINUX_({You can use ports only after asking permission
+(using e.g. forthvar({ioperm}) ) and being super user.})
+},
 {{PC!},{P@},{P!},{@}},
 {{( No test)},{}},
 enddoc)
@@ -5910,7 +5913,11 @@ CODE_HEADER({PC@},{PCFET})
 worddoc( {MEMORY},{PC!},{port_char_store},{b port --- },{},
 {Store a byte forthvar({b}) to the port address
 forthsamp({port}).
-A port address is always 16 bits .},
+A port address is always 16 bits.
+_VERBOSE({In practice on a IBM PC architecture a port address is
+10 bits.}) _LINUX_({You can use ports only after asking permission
+(using e.g. forthvar({ioperm}) ) and being super user.})
+},
 {{PC@},{P!},{P@},{!}},
 {{( No test)},{}},
 enddoc)
@@ -5922,7 +5929,11 @@ CODE_HEADER({PC!},{PCSTO})
 ;
 worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
-forthsamp({port}). A port address is always 16 bits .},
+forthsamp({port}). A port address is always 16 bits.
+_VERBOSE({In practice on a IBM PC architecture a port address is
+10 bits.}) _LINUX_({You can use ports only after asking permission
+(using e.g. forthvar({ioperm}) ) and being super user.})
+},
 {{P!},{PC@},{PC!},{@}},
 {{( No test)},{}},
 enddoc)
@@ -5933,7 +5944,11 @@ CODE_HEADER({P@},{PFET})
 ;
 worddoc( {MEMORY},{P!},{port_store},{n port --- },{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
-forthsamp({port}) .},
+forthsamp({port}).
+_VERBOSE({In practice on a IBM PC architecture a port address is
+10 bits.}) _LINUX_({You can use ports only after asking permission
+(using e.g. forthvar({ioperm}) ) and being super user.})
+},
 {{P@},{PC!},{PC@},{!}},
 {{( No test)},{}},
 enddoc)
@@ -5943,7 +5958,6 @@ CODE_HEADER({P!},{PSTO})
         OUT     {DX},AX   ;{WORD OUTPUT}
         _NEXT
 ;
-});_END_({_PC_})
 worddoc( {STORAGE~},{STALEST},{stalest},{--- addr},{},
 {A variable containing the address of the oldest
 block buffer, the first candidate to be claimed if a new
