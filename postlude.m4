@@ -41,7 +41,7 @@ _MODERN_({define({_FILES_}, _yes)})
 _LINUX_N_({define({_FILES_}, _yes)})
 
 dnl Other consequences
-_BITS32_({define({M4_RTS}, 10000H)})
+_BITS32_({define({M4_RTS}, 0x10000)})
 dnl _BITS32_({define({M4_NBUF}, 16 )}) NOT YET!
 dnl _BITS32_({define({M4_MAXWORDLIST}, 16 )}) NOT YET!
 
@@ -61,7 +61,7 @@ _SWITCH_({define({_LOW_BUF_}, _yes)})
 _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 dnl after the real memorya plus the high memory.
-_SWITCH_({_BITS32_({define({M4_INITDP},{110000H})})})
+_SWITCH_({_BITS32_({define({M4_INITDP},{0x110000})})})
 _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
@@ -107,7 +107,8 @@ _SOURCEFIELD_({ _LOAD_(, {errprint({You must have BLK to use source fields, henc
 _HOSTED_({_RESPECTDOS_( {errprint({Respecting dos makes no sense for a hosted system.
 })m4exit(1010)})})
 dnl immediate consequences
-_SOURCEFIELD_({define({M4_HS},{6})})
+_SOURCEFIELD_({define({M4_HS},M4_HS+1)})dnl
+_EXTRAFIELD_({define({M4_HS},M4_HS+1)})dnl
 _BITS32_({define({M4_CELLWIDTH}, 4)})
 _BITS16_({define({M4_CELLWIDTH}, 2)})
 _BITS16_({define({M4_INITDP}, {TEXTEND})})

@@ -2,14 +2,6 @@ dnl  $Id$  M4 file to handle the develish FIG headers.
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl
 dnl _STRING : Lay down a string in memory.
-dnl Take care of embedded double quotes by using single quotes.
-dnl Note: this cannot be used in _HEADER, because index must look in the real string,
-dnl not on some variable that contains the string.
-dnl The digression using _squote is needed because the single quote is used in m4.
-define(_squote,')
-define({_dbquoted},"{{$1}}")dnl
-define({_sgquoted},'{{$1}}')dnl
-define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
 define({_STRING},
 {DC      len({$1})
         DSS      _quoted}({{$1}}))dnl
@@ -37,33 +29,37 @@ dnl Lay down a header with forth name $1, assembler name $2 and code field $3
 dnl and data field $4, flag field $5, link field $6.
 dnl All except the assembler name are optional.
 define(_HEADER, {dnl
+define({_L},ifelse(0,len({$6}),dnl Only link in if there is no explicit link.
+{_LINKOLD{}define({_LINKOLD},{$2})},dnl
+$6))dnl
 ifelse(0,len({$1}),,
-;  ********_star(len({$1}))
-;  *   {{$1}}   *
-;  ********_star(len({$1}))
-;
-_ALIGNED_({    _ALIGN(4)},{dnl})
-N_$2:   {_STRING}({{$1}}))
-_ALIGNED_({    _ALIGN(4)},{dnl})
-ifelse(0,len($2),,$2:)dnl
-        DC    ifelse(0,len($3),0H,$3)
-        DC    ifelse(0,len($4),_AP_ + _CELLS(PH_OFFSET-D_HOFFSET),$4)
-        DC    ifelse(0,len($5),0H,$5)
-        DC    ifelse(0,len({$6}),dnl Only link in if there is no explicit link.
-{_LINKOLD{}define({_LINKOLD},{$2-_CELLS(C_HOFFSET)})},dnl
-$6)
-        DC    ifelse(0,len({$1}),0,N_$2)
-_SOURCEFIELD_({    DC    0},{dnl})
+_C  ********_star(len({$1}))
+_C  *   {{$1}}   *
+_C  ********_star(len({$1}))
+_C
+_ALIGNED_({        _ALIGN(4)},{dnl})
+N_$2:
+        {_STRING}({{$1}}))
+_ALIGNED_({        _ALIGN(4)},{dnl})
+ifelse(0,len($2),,$2:)
+        DC    ifelse(0,len($3),0x0,$3)
+        DC    ifelse(0,len($4),$2+HEADSIZE,$4)
+        DC    ifelse(0,len($5),0x0,$5)
+        DC    _L
+        DC    ifelse(0,len({$1}),_DATA_FIELD(ZERO),N_$2)
+_SOURCEFIELD_({        DC    0},{dnl})
+_EXTRAFIELD_({        DC    0},{dnl})
 })dnl
 dnl
 dnl
 dnl ------------------ to get dictionaries better under control -------------------------------------
 dnl Remember! The assembler names denote the code field.
 dnl The link etc. field of the word with assembler name $1
-define({_DEA},{$1-_CELLS(C_HOFFSET)})dnl
-define({_LINK_FIELD},{($1+_CELLS(L_HOFFSET-C_HOFFSET))})dnl
+define({_DEA},{$1})dnl
 define({_CODE_FIELD},$1)dnl
-define({_VAR_FIELD},{($1+_CELLS(PH_OFFSET-C_HOFFSET))})dnl
+define({_DATA_FIELD},{($1+_CELLS(D_HOFFSET))})dnl
+define({_LINK_FIELD},{($1+_CELLS(L_HOFFSET))})dnl
+define({_VAR_FIELD},{($1+HEADSIZE)})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
@@ -84,12 +80,12 @@ dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
 {_HEADER({$1},
 {$2},
-{_AP_+_CELLS(PH_OFFSET-C_HOFFSET)},
-{_AP_+_CELLS(PH_OFFSET-D_HOFFSET)},
+{$2+HEADSIZE},
+{$2+HEADSIZE},
 $5)})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
-define({JMPFAR},{DB    0EAH})dnl
+define({JMPFAR},{DB    0x0EA})dnl
 define({_CELLS},(CW*($1)))dnl
 #
 # Start of Intel dependant code part
@@ -99,7 +95,7 @@ define({_CELLS},(CW*($1)))dnl
 # See definition of NEXT in glossary.
 define({_NEXT},{JMP     NEXT})
 define({_NEXT32},
-        {LODSW                 ; NEXT
+        {LODSW                 _C NEXT
         JMP     _CELL_PTR[WOR]  } )
 # See definition of PUSH in glossary.
 define({_PUSH},{JMP     APUSH})

@@ -1,6 +1,16 @@
 dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
+dnl Take care of embedded double quotes by using single quotes.
+dnl Note: this cannot be defined in _HEADER, because quoting is
+dnl assembler- dependant.
+define({_dbquoted},"{{$1}}")dnl
+define({_sgquoted},'{{$1}}')dnl
+define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
+dnl comment
+define({_C},{{;}})
+dnl octal
+define({_O},{{$1Q}})
 dnl
 define({_HEADER_ASM},{;
 ; This is a NASM version of ciforth created by ``m4'' from the generic listing.
@@ -76,4 +86,5 @@ define({DSS},{DB})dnl
 dnl A nobits section takes no place in the object file.
 define({_SECTION_},{section $1 progbits write exec alloc})
 define({_SECTION_NOBITS_},{section $1 nobits write exec alloc})
+define({_DX16},{{DX}})
 divert{}dnl

@@ -2,84 +2,97 @@ dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 dnl
-define({_HEADER_ASM},{;
-; ``GNU assembler'' (gas) version of ciforth created by M4 from generic listing.
-; The next line may not be true as we are still in a constuction phase:
-; This version can be assembled on a Linux system by
-;   as forth.asm -o forth.o
-;   ld forth.o -o forth
-; We could use ".Intel_syntax noprefix" , but in fact there is so
-; much crap that we need ``sed'' anyway. The % prefixes, and the
-; the destination-source are in fact no big deal.
-;})dnl
+dnl Take care of embedded double quotes by using single quotes.
+dnl Note: this cannot be used in _HEADER, because index must look in the real string,
+dnl not on some variable that contains the string.
+define({_quoted},{"patsubst({{$1}},{\([\"]\)},{\\\1})"})
+define({_HEADER_ASM},{#
+# Gnu as version of ciforth created by ``m4'' from generic listing.
+# This source can be assembled using versions better than 2.13.
+# This file must be assembled and linked in the following (unexpected) way:
+#       as lina.s
+#       strip a.out --strip-unneeded -R .bss -R .data -R .text
+#       ld a.out -o lina
+# The stripping is required, because otherwise two program sections
+# are created. It is tricky, because the least deviation of the above
+# command may result in loss of the entry point, and an unusable binary.
+# Optionally follow by
+#       strip $@ -s -R .bss
+# to strip more irrelevant crap.
+
+.Intel_syntax prefix
+})dnl
+define({_C},{{#}})
+define({_O},{{0$1}})
+define({ASSUME},#)dnl Turn ASSUME into comment.
+define({CSEG},#)dnl Turn CSEG into comment.
+define({END},#)dnl Turn END into comment.
+define({TITLE},#)dnl Turn TITLE into comment.
+define({PAGE},#)dnl Turn PAGE into comment.
+define({GLOBAL},.global)dnl
+dnl Get rid of unknown MASM specifier.
+define({_BYTE},)dnl
 dnl
-dnl Directives ignored by gas.
-define({ASSUME},;)dnl Turn ASSUME into comment.
-define({CSEG},;)dnl Turn CSEG into comment.
-define({END},;)dnl Turn END into comment.
-define({_OFFSET},{{$}})dnl Immediate data.
-define({PAGE},;)dnl Turn PAGE into comment.
-define({PROC},;)dnl Turn PROC into comment.
-define({TITLE},;)dnl Turn TITLE into comment.
-define({_CELL_PTR},{ CELL_M4})dnl Make it specify SIZE only.
+define({_ENDP},)dnl Each ENDP is started with _ENDP in generic listing.
+define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
+define({RELATIVE_WRT_ORIG}, {$1 - ORIG})
 dnl
-dnl gas doesnot allow to shift the program counter with ORG
-define({_NEW_ORG},{RESB    $1-(_AP_-$$)})dnl
+define({_RESB},       {.SPACE   $1})dnl
 dnl
 dnl Assembly Pointer
 define({_AP_}, {.})dnl
 dnl
-dnl gas uses c-operators such as | and &
+dnl Second and later uses of ORG shift the program counter
+define({_NEW_ORG},
+        ORG    $1)dnl
+dnl
+dnl MASM uses operators as keywords. We want bitwise or here!
 define({_OR_},{|})
 dnl
-define({_RESB},       {.SPACE   $1})dnl
-dnl
-dnl Specification of the length of an operand,
-dnl needed to get exactly the same code as MASM.
-define({_BYTE},BYTE)dnl Operand has length BYTE.
-dnl Fill in where MASM introduces a superfluous NOP
-define({_EXTRANOP},NOP)dnl Superfluous nops introduced by MASM
-dnl
-dnl More complicated tricks to get rid of MASM.
-define({_ENDP},;)dnl Each ENDP is started with _ENDP in generic listing.
+dnl Pointer handling
+define({_BYTE_PTR},{BYTE PTR $1})dnl
+define({_CALL_FAR_INDIRECT},{CALL DWORD PTR [$1]})dnl Perfectly unreasonable!
+define({_CELL_PTR},{DWORD PTR})dnl Sometimes really needed even after introducing [].
+define({SET_32_BIT_MODE},)dnl
+define({_OFFSET},OFFSET)dnl
 dnl
 dnl Handling large blocks of comment
 define({_COMMENT}, { /* })dnl
 define({_ENDCOMMENT}, { */ })dnl
-define({_BYTE_PTR},{$1})dnl
-define({_CELL_PTR},{$1})dnl
-define({SET_32_BIT_MODE},)dnl
-dnl The padding value is specified to get the same code as in nasm.
+dnl
+dnl A nobits section takes no place in the object file.
+define({_SECTION_},{.section $1,"awx"})
+define({_SECTION_NOBITS_},{.section $1,"awx",@nobits})
+dnl leave this to sed for the moment.
 define({_ALIGN},{{.balign    4,0x90}})dnl
 define({DSS},{.ASCII})dnl
-dnl
-define({LODSD},{{LODSL}})dnl
-define({extern},{{.extern}})dnl
-define({global},{{.global}})dnl
-dnl Index registers
 define({EDI},{{%EDI}})dnl
 define({ESI},{{%ESI}})dnl
 dnl Stacks and base registers
 define({EBP},{{%EBP}})dnl
+define({ESP},{{%ESP}})dnl
 dnl Normal registers
 define({EAX},{{%EAX}})dnl
 define({EBX},{{%EBX}})dnl
 define({ECX},{{%ECX}})dnl
 define({EDX},{{%EDX}})dnl
+define({_DX16},{{%DX}})dnl  Used for in and outports
 dnl Segment registers
 define({CS},{{%CS}})dnl
 define({DS},{{%DS}})dnl
 define({ES},{{%ES}})dnl
 define({SS},{{%SS}})dnl
-dnl Don't define the half registers, require context often!
-dnl
-define({SHORT},{})dnl
-define({INT},{{INT} $1})dnl
-dnl A nobits section takes no place in the object file.
-define({_SECTION_},{.section $1,"awx"})
-define({_SECTION_NOBITS_},{.section $1,"awx",@nobits})
-dnl leave this to sed for the moment.
-dnl define({DD},{.long})
-dnl define({DW},{.word})
-dnl define({DB},{.byte})
+dnl Half registers
+define({AL},{{%AL}})dnl
+define({AH},{{%AH}})dnl
+define({BL},{{%BL}})dnl
+define({BH},{{%BH}})dnl
+define({CL},{{%CL}})dnl
+define({CH},{{%CH}})dnl
+define({DL},{{%DL}})dnl
+define({DH},{{%DH}})dnl
+define({DD},{.long})
+define({DW},{.word})
+define({DB},{.byte})
+define({EQU},{=})
 divert{}dnl

@@ -57,7 +57,7 @@ define({_DIRECTMAPPED_},_no)dnl
 dnl    The code must be load at an absolute address.
 define({_ABSOLUTELOAD_},_no)dnl
 dnl Work around a deficiency in nasm : an ORG requires a numeric argument
-define({M4_BIOSBOOT},{07C00H})
+define({M4_BIOSBOOT},{0x07C00})
 dnl Default size of a header. Changes if there are text addresses.
 dnl You can introduce extra fields in the headers.
 define({M4_HS},{5})
@@ -188,6 +188,9 @@ dnl Source fields mean that there is a field in the header for a pointer
 dnl to the source. It is not (yet) used in the kernel in any way.
 define( {_SOURCEFIELD_}, _yes)dnl
 dnl
+dnl Extra field mean that there is a field in the header for a whatever.
+define( {_EXTRAFIELD_}, _no)dnl
+dnl
 dnl Keep the old debugging facility with place for breakpoints
 define( {_OLDDEBUG_}, _no)dnl
 dnl
@@ -200,16 +203,16 @@ dnl The offset of the errors in the Library Addressable by Block file.
 define( {M4_ERRORSCREEN}, 48)dnl
 dnl
 dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
-define({M4_EM},10000H)
+define({M4_EM},0x10000)
 dnl
 dnl The maximum number of wordsets that can be in the search order.
 define({M4_MAXWORDLIST},8)
 dnl
 dnl The size of the return stack plus tib.
-define({M4_RTS}, 0100H)
+define({M4_RTS}, 0x0100)
 dnl
 dnl The size of the user area in cells.
-define({M4_US}, 40H)
+define({M4_US}, 0x40)
 dnl
 dnl The number of blocks cached in memory.
 define({M4_NBUF}, 8 )

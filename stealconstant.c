@@ -24,7 +24,7 @@
 /*****************************************************************************/
 
 /* Steal the information what value B has, leave it in A */
-#define STEAL(A,B)   printf("%s   EQU   0x%x\n", A, B );
+#define STEAL(A,B)   printf("%s\tEQU\t0x%x\n", A, B );
 
 /* Have a A that has the same value than in C. */
 #define STEALNAME(A)   STEAL( #A, A)
@@ -34,6 +34,10 @@
 
 int main()
 {
+printf("_C{ ------------------------------------------------------------      }\n");
+printf("_C{   Start of constants stolen from C.                                 }\n");
+printf("_C{ ------------------------------------------------------------      }\n");
+printf("\n");
         STEALNAME(SEEK_SET)
         STEALNAME(TCGETS)
         STEALNAME(TCSETS)
@@ -52,10 +56,11 @@ int main()
 
         STEAL("SIZE_TERMIO",sizeof(struct termios))
 
-printf(";{ Numbers of system calls. See \"Linux kernel Internals\" Appendix A. }\n");
-printf(";{ By M.Beck, H. Boehme e.a. Addison Wesley.                         }\n");
-printf(";{ The system calls themselves are extensively documented in chapter }\n");
-printf(";{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
+printf("\n");
+printf("_C{ Numbers of system calls. See \"Linux kernel Internals\" Appendix A. }\n");
+printf("_C{ By M.Beck, H. Boehme e.a. Addison Wesley.                         }\n");
+printf("_C{ The system calls themselves are extensively documented in chapter }\n");
+printf("_C{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEALSYS(exit)
         STEALSYS(open)
         STEALSYS(close)
@@ -73,8 +78,8 @@ printf(";{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEALSYS(execve)
         STEALSYS(fork)
         STEALSYS(waitpid)
-printf(";{ ------------------------------------------------------------      }\n");
-printf(";{   End of constants stolen from C.                                 }\n");
-printf(";{ ------------------------------------------------------------      }\n");
+printf("_C{ ------------------------------------------------------------      }\n");
+printf("_C{   End of constants stolen from C.                                 }\n");
+printf("_C{ ------------------------------------------------------------      }\n");
         exit(0);
 }

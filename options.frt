@@ -112,7 +112,7 @@ DOIT    COMMAND-BUFFER $@
 \
 ( -g :_This_option_is_available )
 
-
+  .S
 
 
 
