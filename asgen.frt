@@ -165,7 +165,7 @@ DECIMAL
 : CHECK31 2DUP SWAP CONTAINED-IN 0= 31 ?ERROR ;
 ( Generate error for ``FIXUP-DATA'' , if the BI and the LEN             )
 ( are not compatible. Leave BI and LEN . Programming error!             )
-: CHECK31A 2DUP OVER >R RSHIFT OVER LSHIFT 1 OR R> <> 31 ?ERROR ;
+: CHECK31A 2DUP OVER >R RSHIFT 1 OR OVER LSHIFT R> <> 31 ?ERROR ;
 ( Generate error for postit, if for the inverted BI , some of the the   )
 ( BITS would stick out it. Leave MASK and BITS . Programming error!     )
 : CHECK33 2DUP SWAP INVERT CONTAINED-IN 0= 31 ?ERROR ;
@@ -273,6 +273,7 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 : 4FAMILY,    0 DO   DUP >R T@ R> 4PI   OVER + LOOP DROP DROP ;
 : xFAMILY|    0 DO   DUP >R T@ R> xFI   OVER + LOOP DROP DROP ;
 : xFAMILY|R   0 DO   DUP >R T@ R> xFIR  OVER + LOOP DROP DROP ;
+: xFAMILY|F   0 DO   DUP >R T@ R> DFI   OVER + LOOP DROP DROP ;
 
 ( ############### PART II DISASSEMBLER #################################### )
 
