@@ -44,5 +44,6 @@ include(intro.mi)
 
 @node Glossary, top ,Manual,top
 @chapter Glossary
-include(gloss.mi)
+include(menu.mi)
+include(wordset.mi)
 @bye

@@ -7,14 +7,19 @@ divert(1)
 {define({next}{}previous,$1})
 {define({previous},$1})
 divert(2)
-{define({wordsetnode_$1},{{
+{define({wordsetnode_$1},{
 @node $1, next$1(),prev$1(), Glossary
-@subsection $1}})}
+@section $1})}
 })
-divert(-1)
+divert(1)
+{divert(-1)}
+{define({previous},)}
 include(wordset.mig)
+divert(1)
+{define({next}{}previous,)}
 divert(0)
 undivert
+{divert(0)}
 include(gloss.mi)
 
 

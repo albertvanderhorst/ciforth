@@ -6,7 +6,7 @@ dnl   and the content including a definition for the second pass on channel 1
 define({worddoccommon},{
 divert(9)dnl
 @node $8, next$3(), prev(), MyTop()
-@subsubsection $8
+@subsection $8
 
 NAME: $2 
 
