@@ -82,11 +82,26 @@ REQUIRE COMPARE
 
 
 \ For NAME DEA, return NAME DEA2. skipping the part before dea's far link.
-: ?SKIP?   DUP >R >XFA @ DUP IF MATCH2 THEN
-     0< IF DUP .S ID. "REJECTED " TYPE DROP R> ELSE DUP .S ID. "OKAY " TYPE RDROP THEN ;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
-: FIND2-a BEGIN ?SKIP?   MATCH2 0 > WHILE >LFA @ DUP DUP WHILE DROP REPEAT THEN ;
+: FIND2-a
+    BEGIN
+        DUP >R >XFA @ DUP IF MATCH2 THEN
+        0< IF
+                DUP .S ID. "REJECTED " TYPE DROP R>
+        ELSE
+        DUP .S ID. "OKAY " TYPE RDROP
+        THEN
+    MATCH2 0 > WHILE
+        >LFA @ DUP
+    DUP WHILE DROP
+    REPEAT
+THEN
+;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
 : FIND2-b MATCH2 IF DROP 0 THEN >R 2DROP R> ;
 \ Find NAME in WID, return DEA or zero. Assume it is sorted.
 : FIND2   FIND2-a FIND2-b ;
+
+'FORTH FILL-XFA
+"DROP" 'FORTH >WID >LFA @ FIND2
+"POPE" 'FORTH >WID >LFA @ FIND2
