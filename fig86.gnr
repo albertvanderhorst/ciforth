@@ -1693,7 +1693,8 @@ CODE_HEADER({3},{THREE})
 ;
 worddoc({STRING},{BL},{BL},{--- c},{},
 { A constant that leaves the
-   ascii value for "blank".},{}) HEADER({BL},{BLS},{DOCON})
+   ascii value for "blank".},{}) 
+HEADER({BL},{LBL},{DOCON})
 ;{ THIS IS ONLY A SPAC}
     DC 20H
 ;
@@ -2063,7 +2064,7 @@ CODE_HEADER({ROT},{ROT})
 worddoc({OUTPUT},{SPACE},{space},{},{L0},
 {Transmit an ascii blank to the output device.},{{EMIT},{OUT}})
 HEADER({SPACE},{SPACE},{DOCOL})
-        DC      BLS
+        DC      LBL
         DC      EMIT
         DC      SEMIS
 ;
@@ -2397,7 +2398,7 @@ DTRA1:  DC      OVER
         DC      ONE
         DC      LSUB
         DC      CFET
-        DC      BLS
+        DC      LBL
         DC      LSUB
         _0BRANCH(DTRA2) ;{IF}
         DC      LLEAV
@@ -2439,13 +2440,11 @@ HEADER({."},{DOTQ},{DOCOL},1)
         DC      COMP
         DC      PDOTQ
         DC      LWORD
-        DC      HERE
         DC      CFET
         DC      ONEP
         DC      ALLOT
         _BRANCH(DOTQ2)  ;{ ELSE}
 DOTQ1:  DC      LWORD
-        DC      HERE
         DC      COUNT
         DC      LTYPE   ;{ ENDIF}
 DOTQ2:  DC      SEMIS
@@ -2555,7 +2554,7 @@ HEADER({ERASE},{LERASE},{DOCOL})
 worddoc({MEMORY},{BLANKS},{blanks},{addr count --},{},
 {Shorthand for ``forthcode({BL}) forthcode({FILL})''.},{})
 HEADER({BLANKS},{BLANK},{DOCOL})
-        DC      BLS
+        DC      LBL
         DC      FILL
         DC      SEMIS
 ;
@@ -2582,15 +2581,22 @@ HEADER({PAD},{PAD},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc({PARSING},{WORD},{word},{c ---},{L0},
-{Read the next text characters from the input stream being
-interpreted, until a delimiter forthvar({c}) is found, storing the packed
-character string beginning at the dictionary buffer forthcode({HERE}) . forthcode({WORD})
+worddoc({PARSING},{WORD},{word},{c ---addr},{ISO L0},
+{Parse the input stream using forthsamp({c}) for a delimiter.
+Skip leading delimiters then advance the input pointer to past
+the next delimiter or past the end of the input stream.
+Leave at forthsamp({addr}) as a counted string a copy of the string,
+that was surrounded by forthsamp({c}) in the input stream. 
+In ciforth the character string is positioned 
+at the dictionary buffer forthcode({HERE}) . 
+forthcode({WORD})
 leaves the character count in the first byte, the characters, and
-ends with two or more blanks. Leading occurrences of forthvar({c}) are ignored.
+ends with two or more blanks. 
 If forthcode({BLK}) is zero text is taken from the terminal input buffer,
 otherwise from the disc block stored in forthcode({BLK}) .},
-{{BLK} ,{IN}})
+{{BLK} ,{IN}},
+{{: GS2 BL WORD COUNT . C@ EMIT ; GS3 CELLO . .},{5 C},
+{HEX : GS1 5A WORD COUNT . C@ EMIT ; GS1 ZZZQQZ},{2 Q}})
 HEADER({WORD},{LWORD},{DOCOL})
         DC      BLK
         DC      FETCH
@@ -2622,6 +2628,29 @@ WORD2:  DC      LIN
         DC      ONEP
         DC      FROMR
         DC      LCMOVE
+        DC      HERE
+        DC      SEMIS
+;
+worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
+{Parse a word and 
+leave forthvar({c}) the first non blank char of that word 
+input stream.},
+{{}},
+{{CHAR HELLO HEX .},{48 },
+{CHAR X  HEX .},{58 }})
+HEADER({CHAR},{LCHAR},{DOCOL})
+        DC       LBL, LWORD, ONEP, CFET
+        DC      SEMIS
+;
+worddocsafe({PARSING},{[CHAR]},{ bracket_char_bracket}, {--- c},{ISO I},
+{A compiling word. Parse a word.  Add the run time behaviour:
+leave forthvar({c}), the first non blank char of that word in the
+input stream.},
+{{}},
+{{: GS1 [CHAR] HELLO ; GS1 HEX .] },{48 },
+{: GS1 [CHAR] X ; GS1 HEX .},{58 }})
+HEADER({[CHAR]},{BCHAR},{DOCOL},1)
+        DC      LCHAR, LITER
         DC      SEMIS
 ;
 worddocsafe({FORMATTING},{(NUMBER)},{paren_number},{d1 addr1 --- d2 addr2},{},
@@ -2684,7 +2713,7 @@ NUMB1:  DC      DPL     ;{ BEGIN}
         DC      PNUMB
         DC      LDUP
         DC      CFET
-        DC      BLS
+        DC      LBL
         DC      LSUB
         _0BRANCH(NUMB2) ;{ WHILE}
         DC      LDUP
@@ -2707,10 +2736,9 @@ to forthcode({HERE}) , and searches the forthcode({CONTEXT}) and then forthcode(
 for a matching entry. If found, the dictionary entry address and a boolean true is left.
 Otherwise, only a boolean false is left.},{})
 HEADER({--FIND},{DFIND},{DOCOL})
-        DC      BLS
+        DC      LBL
         DC      LWORD
         DC      ZERO, RESULT, STORE
-        DC      HERE
         DC      CONT
         DC      FETCH
         DC      TLFA
@@ -3057,6 +3085,7 @@ colon-definition. A blank after the leading parenthesis is required.},{})
 HEADER({(},{PAREN},{DOCOL},1)
         DC      LIT,')'
         DC      LWORD
+        DC      DROP
         DC      SEMIS
 ;
 worddoc({INIT},{QUIT},{quit},{},{},
@@ -4032,7 +4061,7 @@ EXPE2:  DC      LDUP
         _0BRANCH(EXPE4) ;{ IF}
         DC      LLEAV
         DC      DROP
-        DC      BLS
+        DC      LBL
         DC      ZERO
         _BRANCH(EXPE5)  ;{ ELSE}
 EXPE4:  DC      LDUP    ;{ ENDIF}
@@ -4179,7 +4208,7 @@ EXPE2:  DC      LDUP
         _0BRANCH(EXPE4) ;{ IF}
         DC      LLEAV
         DC      DROP
-        DC      BLS
+        DC      LBL
         DC      ZERO
         _BRANCH(EXPE5)  ;{ ELSE}
 EXPE4:  DC      LDUP    ;{ ENDIF}
