@@ -55,60 +55,12 @@ WHILE COUNT-BUFFER REPEAT DROP ;
 
 : DO-FILE BEGIN OPEN-FILE STILL-FILES WHILE TREAT-FILE CLOSE-FILE REPEAT BYE ;
 DO-FILE $*
-BYE
+%
 
-The remainder is interpreted by the shell as a here document,
-but forth has long gone bye.
+# The remainder is interpreted by the shell as a here document,
+# but forth has long gone bye.
+# 
+# Note that we need to go BYE in DO-FILE otherwhise we get a spurious new
+# line. Furthermore we need ``|tail -n<number of file>'' otherwise there will
+# be a lot of OK's.
 
-If you are not familiar with wc, study the specification by typing
-man wc an a Unix system.
-
-1. What can be done to improve the program with regard to style?
-Hints :
- A. Brodie has said: "If you see dashes, there is something wrong"
- B. Moore has said: "Do not comment, rewrite!"
-Warning: if your proposal detoriates the program, it will cost you points.
-2. Why would the author use the word TREAT-FILE while HANDLE-FILE would
-be more straightforward?
-3. There are lots of global variables. Still the author claims this program
-is object oriented. How could such a stand be defended? Do you agree with
-such a stand? If this is a class how many objects are there?
-4. Make a Magic-7 map of the program. Start with a list of Forth words used.
-Mention any improvements you see based on this analysis.
-5. What do you think about all those words that do not pass parameters?
-Is this good style?
-6 What would you expect to loose in speed compared to a c-implementation?
-First guess. Then measure on your system. Use:
-time wc <somefile>
-Play around a bit and make a list of all other inconveniences.
-7. Discuss how you would add the handling of the -c -w -l options in this
-program. Now do it! Discuss where your expectations went afoul.
-8. What words need to be changed if you would port this to ANSI?
-How would you go about, if both fig and ANSI version need to be kept?
-
-9 (Bonus).
-En een speciale vraag voor Marcel Hendrix. Stel ik heb de zaak zover
-ontworpen dat ik de namen van alle forth woorden weet. Hoe lang mag een
-beetje Forth programmeur er dan over doen om het te implementeren en
-debuggen?
-
-A Magic-7 map of a source is a subdivision of the source in parts
-(7-space's) where each part has at most seven names that are global (i.e.
-used by some other part), at most seven more (local) names and each part
-uses names from at most seven other parts. 7-space's with names of the
-language used need not be checked for usage of other parts (you cannot look
-into the implementation of the language.) 
-
-Operators of the language used, keywords, macro names,
-names of include files (or name spaces) all count as names.
-Of course a part must be connected, (i.e. consist of consecutive lines,
-you cannot put all ROT operators on a separate line and make it a magic-7
-part.) 
-
-In general :
-A magic-7 part may be totally embedded in some other magic-7 part,
-without making the later part invalid.
-Language elements that do not count as magic-7 names are brackets,
-trait d'unions, quotes and comment.
-In forth we effectively only have the comment and any text printed as
-not counting.
