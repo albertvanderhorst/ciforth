@@ -21,7 +21,7 @@ lina <<% | tail -n$#
 0 VARIABLE L
 0 VARIABLE W
 0 VARIABLE C
-: ZERO-COUNT 0 L !   0 W !   0 C ! 0 LAST-WAS-BLANK ! ;
+: ZERO-COUNT 0 L !   0 W !   0 C ! 1 LAST-WAS-BLANK ! ;
 : SHOW-COUNT SPACE L @ . W @ . C @ . CR ;
 
 1000000 CONSTANT SIZE
