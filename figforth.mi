@@ -3,7 +3,7 @@
 fig-Forth
 @end macro
 @setfilename figforthversion
-@settitle fig-FORTH 3.0 manual
+@settitle ciforth manual
 @setchapternewpage odd
 @ifinfo 
 This file documents generic fig-forth
@@ -27,37 +27,39 @@ Copyright @copyright{{}} 2000 Dutch Forth Workshop
 Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
 
-@node Top, Introduction, Glossary, 
 
 @ifinfo 
 example of stuff that only appears in info
 @end ifinfo
 @page
+@node Top, General Introduction, Glossary, 
 @chapter Overview
-This file documents what a user needs to know for using ciforth. 
+Forth is an interactive programming system. 
+ciforth is a Forth that can be generated in many different version
+for many different operation systems.
+This file documents what you as a user needs to know for using this
+particular version of ciforth once it is installed on your system. 
+
 ciforth consists of three files:
 forthitemize
 forthitem
 _BOOTED_({A booting floppy or hard disk})dnl
 _HOSTED_MSDOS_({forth.com})_HOSTED_LINUX_({lina}) : the program
+_BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can 
+see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})
 forthitem
 ciforth.ps ciforth.html : the documentation
 forthitem
 ciforth.blk : source for auxiliary programs
 forthenditemize
-_BOOTED_({If you inspect a booting floppy from MSDOS you discover that you can 
-see the  files forth.com and ciforth.blk. You can even start the program from MSDOS})dnl
+
 These files are generated together by the generic system fig86.gnr.
 The documentation only applies to the ciforth with which it goes.
 
-These are the features, if they do not fit your Forth
-get a new version. forthxref({Rationale & legalese}).
+If your Forth doesn\'t fit description below get a new version.
+forthxref({Rationale & legalese}). 
 
-Forth is an interactive programming system. 
-This is the reference documentation for using the
-particular version of ciforth once it 
-is installed on your system. 
-It features the following :
+These are the features:, 
 
 _PROTECTED_({It is running in protected mode.
 })
@@ -88,33 +90,99 @@ _LINUX_C_({C-routines for I/O
 })dnl
 _LINUX_N_({Calls linux system from assembler
 })dnl
+It is indirect threaded.
 
 @menu 
-* General introduction:: Introduction to Forth and this Forth
+* General Introduction:: Introduction to Forth and this Forth
 * Rationale & legalese:: For experts. You don't want to read this.
 * Manual::	   User manual 
 * Glossary::  	   Description of Forth words
 @end menu
 
-@node Introduction, Rationale & legalese, top, top
-@chapter Introduction
+@node General Introduction, Rationale & legalese, top, top
+@chapter General introduction
 include(intro.mi)
 
-@node Rationale & legalese, Manual, Introduction, top
+@node Rationale & legalese, Manual, General Introduction, top
 @chapter  Rationale & legalese
 include(rational.mi)
 
-@node Manual, Rationale & legalese, Glossary, top
+@node Manual, Glossary, Rationale & legalese, top
 @chapter Manual
 include(manual.mi)
 
-@node Glossary, top Manual ,Manual,top
+@node Glossary,top,Manual,top
 @chapter Glossary
 Wherever it says 16 bits read single precision number or "cell".
 Wherever it says 32 bits read double precision number.
 
 forthcode({X}) must be understood that there is no actual definition with name forthvar({X}). 
 In the assembler listing it has label NULL.
+
+The first line of each entry shows a symbolic description of the action of
+the proceedure on the parameter stack. The symbols indicate the order in
+which input parameters have been placed on the stack. Three dashes "---"
+indicate the execution point; any parameters left on the stack are listed.
+In this notation, the top of the stack is to the right.
+
+
+The symbols include:
+
+@table @var
+forthitem addr   
+memory address
+forthitem b      
+8 bit byte (i.e. hi 8 bits zero)
+forthitem c      
+7 bit ascii character (hi 9 bits zero)
+forthitem d      
+32 bit signed double integer: most significant portion with sign
+on top of stack.
+forthitem f      
+boolean flag. 0=false, non-zero=true
+forthitem ff     
+boolean false flag=0
+forthitem n      
+16 bit signed integer number
+forthitem u      
+16 bit unsigned integer
+forthitem tf     
+boolean true flag=non-zero
+@end table 
+
+The capital letters on the right show definition characteristics:
+
+@table @var
+forthitem B      
+The word is available only after loading from background storage
+forthitem C      
+May only be used within a colon definition. A digit indicates number
+of memory addresses used, if other than one. 
+forthitem E      
+Intended for execution only.
+forthitem L0     
+Level Zero definition of FORTH-78
+forthitem L1     
+Level One definition of FORTH-78
+forthitem P      
+Has precedence bit set. Will execute even when compiling.
+forthitem U      
+A user variable.
+@end table 
+
+
+Unless otherwise noted, all references to numbers are for 16 bit signed
+integers. On 8 bit data bus computers, the high byte of a number is on top
+of the stack, with the sign in the leftmost bit. For 32 bit signed double
+numbers, the most significant part (with the sign) is on top.
+
+All arithmetic is implicitly 16 bit signed integer math, with error and
+under-flow indication unspecified.
+
+
+
+-- present but not documented
+FLUSH CURRENT 2DUP RP@ U.
 
 include(menu.texinfo)
 include(wordset.mi)
