@@ -4,6 +4,11 @@ changequote({,})
 dnl Define a word definition on channel 9 
 dnl   the corresponding menu item on channel 6 
 dnl   and the content including a definition for the second pass on channel 1
+define({quote},{{{$1}}})
+define({seealso}, {ifelse(len({$1}),0,,
+forthcode({$1}) {seealso({$2},{$3},{$4})}
+)})
+dnl {@code{}quote($1) seealso({$2},{$3},{$4})}
 define({worddoccommon},{
 divert(9)dnl
 @node $8, next$3(), prev(), MyTop()
@@ -20,6 +25,7 @@ Attributes: $5
 
 Description: $6
 
+ifelse(len({$7}),0,, {See also: seealso({$7})})dnl
     {define({prev},{$8})dnl}
     divert(1)dnl
 {{{$8}})dnl
