@@ -64,9 +64,10 @@ This publication has been made available by the Forth Interest Group,
 
 albert@@spenarnc.xs4all.nl     http://home.hccnet.nl/a.w.m.van.der.horst
 
-@section                         Two stage system
+@section Generic Configuration Manual
 
-This information will in due time be removed to the installation manual.
+This information will in due time be removed to a separate 
+manual.
 A ciforth user will not normally be interested in this.
 The source and executable of this ciforth was generated, out of at
 least dozen's of possibilities, by a generic system. An important goal
@@ -75,9 +76,8 @@ relevant information.
 The original system can be obtained via
 http://home.hccnet.nl/a.w.m.van.der.horst/figforth.html
 
-@subsection Generic Configuration Manual
 
-@subsubsection Introduction
+@subsection Introduction
 
 What you find here is a Forth for the Intel 86. It is a FIG Forth as of old.
 Complying in detail with the Fig glossary, which is available in electronic
@@ -97,14 +97,14 @@ The original is public domain. My extensions are GPL-ed or libary GPL-ed.
 I transferred the copyright to the Dutch Forth Workshop, a foundation that
 supports Forth and defends the GPL.
 
-@subsubsection 32 bits
+@subsection 32 bits
 It is unusual for a figforth to be 32 bit.
 It turned out that the addition of CELL+ goes a long way toward allowing
 utilities like a decompiler to be 16/32 bit clean. In the FIG documentation
 about the user variables and +ORIGIN you may read cells where appropriate
 and the documentation applies. 
 
-@subsubsection System requirements
+@subsection System requirements
 
 This generic version -if suitably built- runs on industry standard hardware
 ("PC's") : standalone, under Linux and under MSDOS/MSWINDOWS. 
@@ -119,7 +119,7 @@ with all of its tools. I use GNU-Linux (RedHat) and do the makes and version
 control on that. If you want your bootable floppies made from linux to be
 MSDOS-compatible you need mtools. 
 
-@subsubsection Assembler sources
+@subsection Assembler sources
 
 The following two assembly sources generated are supplied as a service.
 These are in fact just examples. You can generate different ones (see next
@@ -141,7 +141,7 @@ The file msdos.msm can be assembled using TASM and MASM. The resulting Forth
 executable can be run off hard disk and respects the file system on it.
 It uses the file BLOCKS.BLK.
 
-@subsubsection A generic Forth
+@subsection A generic Forth
 This version has one single source file: the generic I86 figForth.
 All advantages of assembler source would be gone, if an engineer were
 confronted with conditional compilation and lots of code for other systems
@@ -172,7 +172,7 @@ You can adapt the generic source. This is difficult, but gratifying.
 If you manage to ANSI-fy it, the result is multiplied.
 forthendenumerate
 
-@subsubsection Level 1 customization.
+@subsection Level 1 customization.
 
 This is assuming you run on Unix.
 
@@ -232,10 +232,10 @@ disk or you specified it yourself in the first place. Etc.
 as once you decide for a {_REAL_} mode Forth, it must be {_BITS16_} and you need
 not specify that. In particular {_LINUX_N_} or {_LINUX_C_} says it all.    
 
-@subsubsection Level 2 customization.
+@subsection Level 2 customization.
 You are on your own here.
 
-@subsubsection Level 3 customization.
+@subsection Level 3 customization.
 
 The usual customisation in assembler files is possible. 
 If you use other than 3" floppy disks you have to specify the disk
@@ -258,10 +258,10 @@ listing.
 There is a description in the history section about bringing up an assembler
 system.
 
-@subsubsection Level 4 customization.
+@subsection Level 4 customization.
 Contact me if you want to contribute to the wider usability of this package.
 
-@subsubsection Programs
+@subsection Programs
 In the file BLOCKS.BLK is available a screen editor, assembler, decompiler
 and tools like DUMP. Beware! Some of the tools handle hards disks. There are
 example programs and benchmarks. Everything under screen 100 you will find
@@ -270,7 +270,7 @@ Everything loaded from 8 is used by me on a regular basis and is 16/32 bits
 clean. Beware! The full screen editor doesnot work under Linux (protection).
 The program `wc' is an example of how to use lina as a scripting language.
 
-@subsubsection Deviations
+@subsection Deviations
 
 Some non-substantial deviation of the original FIG source have been made
 for good reasons. They are described in figdocadd.txt.
@@ -293,7 +293,7 @@ I added generic words forthcode({BIOS}) , forthcode({BDOS}) and forthcode({LINOS
 words to handle about all forthcode({BIOS}) and interrupt 21 calls. Linux is better.
  forthcode({LINOS}) handles all Linux system calls. 
 
-@subsubsection The joy of genericity
+@subsection The joy of genericity
 
 Genericity is acomplished by the Unix tools m4. I use GNU m4. This is a weird
 tool but powerful. Forthers probably like it.
@@ -304,7 +304,7 @@ peculiarities}) and you may want to have the headers alligned at word bounds.
 This is easily done by changes to forthfile({header.m4}) .
 This kind of possibilities were in fact the motivation for this undertaking. 
 
-@subsubsection Web sites.
+@subsection Web sites.
 A newer or improved version may be gotten from
 http://home.hccnet.nl/a.w.m.van.der.horst
 Nasm is found at 
@@ -317,7 +317,7 @@ The original fig documentation is at
 http://home.hccnet.nl/a.w.m.van.der.horst/figforth.html
 This include the pictures.
 
-@subsubsection Linux application notes figforth version
+@subsection Linux application notes figforth version
 The linux forth called figforth has its i/o based on c. This may seem more
 portable but it isn't. Where c is very portable on Linux, the way assembler
 is linked with forth is not documented (as far as I can tell, in my version.
@@ -336,7 +336,7 @@ A segmentation fault also results in a warm start. ^C immediately leaves.
 ^S/^Q can be used to hold up output and are not interpreted as a break
 in e.g. VLIST.
 
-@subsubsection Linux application notes lina version
+@subsection Linux application notes lina version
 The lina version is based on a single assembler source, built without
 trickery and binary-portable accross Linux Intel (all systems were it has
 been tried work : 1.2.13 .. 2.0.13). No run time c-libraries, no compile time
@@ -349,7 +349,18 @@ forthexample({
 })
 It is less than 12 K and the dictionary space is set at 64 Mbyte. 
 
-@subsubsection Bugs
+Blocks are allocated in a file called forthfile({BLOCKS.BLK}) This name can be changed in
+listing and also during run time. 
+ forthfile({BLOCKS.BLK}) can be changed into an editable file and back by
+forthsamp({cat BLOCKS.BLK | fromblocks > blocks.frt
+cat blocks.frt | toblocks > BLOCKS.BLK})
+
+The user variable forthvar({EM}) still is the end of the memory. 
+The forthvar({M4_EM}) in the configuration files is such that it designates the relative
+size, from the relocatable start. 
+Consequently it is not the same as the user variable. 
+(The relocatable start is some 128 Mbyte into the memory space.).
+@subsection Bugs
 See the separate test report for an indication of which and how far 
 versions have been tested.
 forthenumerate
@@ -359,6 +370,9 @@ Once you have used a SIGQUIT to interrupt a loop, forthcode({BYE}) no longer wor
 You can exit the program by "0 0 0 1 LINOS", which is exit(0) in
 c-parlance or by pressing ^C, or by killing it from some other terminal,
 or by just closing the window. 
+You will not encounter this bug in version 2.148,
+because that version crashes immediately, 
+due to build problems.
 forthitem
 forthcode({OUT}) may not be observed in all I/O models. Needs examination.
 forthitem
