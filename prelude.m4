@@ -2,8 +2,10 @@ dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 dnl
-dnl This file contains the default version and mechanism for configuration.
-dnl YOU SHOULD NEVER NEED TO CHANGE THIS FILE. 
+dnl This file contains the default version and mechanism for configuration
+dnl for the generic figforth system.
+dnl TO CHANGE THIS FILE FOR THE PURPOSE OF GENERATION
+dnl A DIFFERENT VERSION OF FIGFORTH RESTRICT YOURSELF TO THE USE CHOICE'S PART
 dnl The choices are put in a configuration file, such as alone.m4
 dnl What is put here sets defaults.
 dnl Make sure the choices are compatible, in particular :
@@ -29,19 +31,20 @@ dnl ; _END__________________________________________________________________
 dnl for define({_USEDOS______________} _yes)
 dnl This file should be included and later some definitions redefined.
 dnl _1_ is later to be replace by 40 _.
-define({_no}, 
-{;CODE SUPPRESSED:})dnl
 define({_END___1__},  
 _______1__ {$1})dnl
+dnl _yes and  _no are expanded during definition time and generate 
+dnl define({aap},$1) or define({aap},)
 define({_yes},{${}1})
+define({_no}, {_SUPPRESSED})dnl
 dnl
 dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
 dnl     Memory layout is defined using equ's
 define( {_EQULAYOUT_1_}, _yes )dnl       
 dnl    Block buffer are allocated somewhere high
-define( {_HIGH_BUF_1_}, _yes({$0}) )dnl       
+define( {_HIGH_BUF_1_}, _yes )dnl       
 dnl    Block buffer are allocated in the dictionary
-define( {_LOW_BUF_1_}, _no({$0}) )dnl       
+define( {_LOW_BUF_1_}, _no )dnl       
 dnl    Booting directly into forth, from floppy or hard disk.
 define({_BOOTED_1_},_no)dnl
 dnl    The 32 bit mode uses no paging for access to memory.     
@@ -52,7 +55,7 @@ dnl Work around a deficiency in nasm : an ORG requires a numeric argument
 define({M4_BIOSBOOT},{07C00H})
 dnl Have code to switch ourselves to protected mode, e.g. after booting.
 dnl Move forth up such thar ORG agrees with LOADADDRESS.
-define( {_SWITCH_1_}, _no({$0}) )dnl       
+define( {_SWITCH_1_}, _no )dnl       
 dnl Have a normal return to MSDOS (without jumping to a CS-corrector)
 define({_NORMAL_BYE_1_}, _no )
 dnl Work on a PC, as a PC. Not Linux.
@@ -60,6 +63,8 @@ define({_PC_1_}, _no )
 dnl Normally no code needed switch between modes.
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPHERE_FROM_PROT},{})dnl
+dnl
+dnl ############## USER CHOICES #############################################
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl
@@ -158,8 +163,10 @@ dnl
 dnl    FEATURES THAT NEED SELDOM CHANGES
 dnl
 dnl Where the dictionary starts for 32 bit systems.
-dnl (Is automatically overwritten for 16 bits systems.0
+dnl (Is automatically overwritten for 16 bits systems.
 define({M4_INITDP},{110000H})
+
+dnl ############## USER CHOICES END #########################################
 
 dnl ############## STILL ON WISH LIST ################## IGNORE ##############
 dnl Keep old FIG features like WIDTH ENCLOSE
@@ -185,4 +192,38 @@ dnl (even less for <64 bit systems)
 dnl STILL ON WISH LIST
 define( {_SAFECALC_1_}, _no({$0}) )dnl
 dnl OTHER MISCELLANEOUS 
+
+dnl ############## GENERATION OF DOCUMENTATION ##############################
+dnl The m4 system separates the doc and code onto different channels
+dnl such that the output is code, separation message, documentation.
+
+dnl Switch the system to generate assembler source
+define( {_GENERATE_CODE}, {
+define( {_SUPPRESSED}, {;CODE SUPPRESSED:})dnl
+divert(1)dnl
+})
+
+dnl Switch the system to generate documentation 
+define( {_GENERATE_DOC}, {
+define( {_SUPPRESSED}, {;DOC SUPPRESSED:})dnl
+divert(3)dnl
+})
+
+dnl Redefine ``worddoc'' to make sure it lands in the documentation part 
+define({worddoc}, 
+{_GENERATE_DOC dnl}                                                     
+{{worddoc({$1},{$2},{$3},{$4},{$5},{$6},{$7})}} 
+{_GENERATE_CODE dnl}                                                     
+)dnl
+
+define({worddocsafe}, 
+{_GENERATE_DOC dnl}                                                     
+{{worddocsafe({$1},{$2},{$3},{$4},{$5},{$6},{$7})}} 
+{_GENERATE_CODE dnl}                                                     
+)dnl
+
+divert(2)dnl
+; Split here for documentation
+_GENERATE_CODE dnl                                                     
+divert(-1) 
 
