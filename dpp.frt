@@ -114,11 +114,40 @@ DOES> ROT STRIDE * + SWAP CELLS + ;
 #DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
 #QUESTIONS @ SPARE + CONSTANT MAX-QUESTIONS
 
+38 LOAD \ For -LEADING and COMPARE
+
+\ For a STRING return a STRING without leading spaces.
+\D "   X ? " -LEADING ." Expect |X ? |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
+
+\ For a STRING return a clean STRING, without spaces or the question mark.
+: CLEAN-STRING -LEADING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN -TRAILING ;
+
+\D " How ? " CLEAN-STRING
+\D ." Expect |How |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
+
+\ Convert a STRING VARIABLE to lower case.
+: $TO-LOWER $@ OVER + SWAP DO I C@ &A &Z 1+ WITHIN IF 32 I +! THEN LOOP ;
+\D "AAP" $, DUP $TO-LOWER ." Expect aap : " $@ TYPE   CR
+
 \ Add STRING as a diagnosis.
-: ADD-DIAGNOSIS $, $@ #DIAGNOSES @ DIAGNOSES 2! 1 #DIAGNOSES +! ;
+: ADD-DIAGNOSIS CLEAN-STRING $, DUP $TO-LOWER $@
+    #DIAGNOSES @ DIAGNOSES 2! 1 #DIAGNOSES +! ;
+\ \D " Ape" ADD-DIAGNOSIS
+\ \D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|0 " &| EMIT TYPE &| EMIT DEPTH . CR
+\ \D -1 #DIAGNOSES +!
 
 \ Add STRING as a QUESTION.
-: ADD-QUESTION $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
+: ADD-QUESTION CLEAN-STRING $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
+
+\ Find a diagnosis STRING and return its INDEX.
+: FIND-DIAGNOSIS CLEAN-STRING PAD $! PAD $TO-LOWER
+    -1 PAD $@
+    #DIAGNOSES @ 0 DO 2DUP I DIAGNOSES 2@ COMPARE 0= IF
+        2DROP DROP I UNLOOP EXIT
+    THEN LOOP
+    2DROP ;
+\D "RENDIER " FIND-DIAGNOSIS ." FIND-D Expect 0 0 : " . DEPTH . CR
+\D "PENDIER " FIND-DIAGNOSIS ." FIND-D Expect -1 0 : " . DEPTH . CR
 
 : (U.) 0 <# #S #> ;
 
@@ -207,13 +236,6 @@ INTERACTION DEFINITIONS
     BEGIN 2DUP (GET-ANSWER) DUP 3 = WHILE DISAPPROVE REPEAT >R 2DROP R>
 ;
 
-\ For a STRING return a clean STRING, without a possible question mark.
-: CLEAN-STRING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN ;
-
-\D "How ? " CLEAN-STRING
-\D ." Expect |How |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
-
-
 PREVIOUS DEFINITIONS
 
 VOCABULARY D-MAIN
@@ -227,8 +249,35 @@ D-MAIN DEFINITIONS   DATABASE INTERACTION
      QuerySave$ GET-ANSWER A_NO = IF EXIT THEN
      Save$ TYPE CR 'WRITE-DATABASE CATCH ERROR-BYE
 ;
-ONLY FORTH DEFINITIONS
+ONLY FORTH
 
+INTERACTION DEFINITIONS
+DATABASE
+
+\ Create a simple array of N integers.
+\ The created word turns an INDEX into the ADDRESS of the integer.
+: ARRAY    CREATE CELLS ALLOT    DOES> SWAP CELLS + ;
+
+\ The following two arrays define the current focus.
+\ For DIAGNOSIS return the address of a flag whether is has been excluded.
+MAX-DIAGNOSES ARRAY EXCLUSIONS
+\ Initialise ``EXCLUSIONS''
+: !EXCLUSIONS  0 EXCLUSIONS MAX-DIAGNOSES CELLS ERASE ;
+\ For DIAGNOSIS return: it has BEEN excluded.
+: ?EXCLUDED EXCLUSIONS @ ;
+\D ." !EXCLUSIONS Expect 0 0 : " !EXCLUSIONS 0 ?EXCLUDED . DEPTH . CR
+
+\ For QUESTION return the address of the user answer or A_NONE if it is has
+\ not been posed.
+MAX-QUESTIONS ARRAY ANSWER-VECTOR
+\ Initialise ``ANSWER-VECTOR''
+: !ANSWER-VECTOR MAX-QUESTIONS 0 DO A_NONE I ANSWER-VECTOR ! LOOP ;
+
+\ For QUESTION return: it is has BEEN posed.
+: ?POSED ANSWER-VECTOR @ A_NONE <> ;
+\D ." !ANSWER-VECTOR Expect 0 0 : " !ANSWER-VECTOR 0 ?POSED . DEPTH . CR
+\D ." After PREVIOUS Expect DATABASE STRATEGY FORTH : " ORDER CR
+PREVIOUS
 
 VOCABULARY STRATEGY
 STRATEGY DEFINITIONS
@@ -286,30 +335,7 @@ VARIABLE C_AMB      \ The number of questions that is considered ambiguous
 \D ." Expect 0  : "  0 1  APPARENT? . CR
 \D ." Expect -1 0 : "  1 0  APPARENT? . DEPTH . CR
 
-\ Create a simple array of N integers.
-\ The created word turns an INDEX into the ADDRESS of the integer.
-: ARRAY    CREATE CELLS ALLOT    DOES> SWAP CELLS + ;
-
-\ The following two arrays define the current focus.
-
 DATABASE
-\ For DIAGNOSIS return the address of a flag whether is has been excluded.
-MAX-DIAGNOSES ARRAY EXCLUSIONS
-\ Initialise ``EXCLUSIONS''
-: !EXCLUSIONS  0 EXCLUSIONS MAX-DIAGNOSES CELLS ERASE ;
-\ For DIAGNOSIS return: it has BEEN excluded.
-: ?EXCLUDED EXCLUSIONS @ ;
-\D ." !EXCLUSIONS Expect 0 0 : " !EXCLUSIONS 0 ?EXCLUDED . DEPTH . CR
-
-\ For QUESTION return the address of a flag whether is has been posed.
-MAX-QUESTIONS ARRAY BEEN-POSED
-\ Initialise ``BEEN-POSED''
-: !BEEN-POSED  0 BEEN-POSED MAX-QUESTIONS CELLS ERASE ;
-\ For QUESTION return: it is has BEEN posed.
-: ?POSED BEEN-POSED @ ;
-\D ." !BEEN-POSED Expect 0 0 : " !BEEN-POSED 0 ?POSED . DEPTH . CR
-\D ." After PREVIOUS Expect DATABASE STRATEGY FORTH : " ORDER CR
-
 \ Accumulate the answer of QUESTION for DIAGNOSIS into the variables above.
 : ACCUMULATE
        DUP ?EXCLUDED IF 2DROP EXIT THEN
@@ -364,10 +390,10 @@ VARIABLE POSSIBILITIES  \ Number of diagnoses left
        2DUP APPARENT?   IF 2DROP A_YES EXIT THEN
        SWAP APPARENT?   IF A_NO EXIT THEN
        A_NONE ;
-\D 0 0 ANSWER-FOR ." ANSWER-FOR Expect 0 0 : " . DEPTH . CR
-\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 1 0 : " . DEPTH . CR
-\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 1 0 : " . DEPTH . CR
-\D 1 1 ANSWER-FOR ." ANSWER-FOR Expect 1 0 : " . DEPTH . CR
+\D 0 0 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO  . DEPTH . CR
+\D 0 1 ANSWER-FOR ." ANSWER-FOR Expect 0 0 0 : " . A_YES . DEPTH . CR
+\D 1 0 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
+\D 1 1 ANSWER-FOR ." ANSWER-FOR Expect 1 1 0 : " . A_NO . DEPTH . CR
 
 \ Eliminate, if uncompatible with ANSWER to QUESTION, a DIAGNOSIS.
 \ The diagnosis was not yet excluded and the answer is unambiguous.
@@ -413,6 +439,13 @@ DATABASE CONSULTING STRATEGY
     1 = IF IThinkIKnow$ ELSE ThereAreSeveral$ THEN TYPE
     -1 #DIAGNOSES @ 0 DO I CONFIRM DUP -1 <> IF SWAP DROP LEAVE THEN DROP LOOP
 ;
+
+\ The current answer vector and the vector for the outcome DIAGNOSES
+\ confirmed by the user are in conflict, because this outcome was apparently
+\ excluded along the way.
+\ Give the user an opportunity to change the answer vector before it is added
+\ to the database.
+\ This helps keeping the database clean from typo's and lousy answering.
 
 EXIT
 ONLY FORTH DEFINITIONS
