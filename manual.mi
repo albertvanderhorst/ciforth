@@ -1,4 +1,3 @@
-
 @section Concepts
 
 A forth user is well aware of how the memory of his 
@@ -7,18 +6,54 @@ and frees it again at will.
 
 The forthdefi({dictionary}) 
 is the part of the memory where the forthcode({words}) are
-(forthxrefp({DICTIONARY})
+(forthpxref({DICTIONARY}).
 It owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 A word can be executed by typing its name. 
+Each word in the dictionary belongs to precisely one forthdefi({vocabulary}) .
 Apart from the name a word contains data and executable code,
 (interpreted or not) and linking information 
-(forthxrefp({VOCABULARY}).
+(forthpxref({VOCABULARY}).
 
 A word that generates a new entry in the dictionary is called a 
-forthdefi({defining word}). forthxref({DEFININING}).
+forthdefi({defining word}) forthxref({DEFINING}).
+The new word is created in the forthcode({CURRENT}) vocabulary.
 
+Each processor has a natural size for the information. (This is
+sometimes called a machine word). For an Pentium processor this is 
+32 bit, for the older Intel 8086 it is 16 bit.
+The pendant in Forth is called a forthdefi({cell}) and its size
+may deviate from the processor you are running on.
+For this ciforth it is _BITS16_({16})_BITS32_({32}).
+It applies to the data remembered in the data stack, and the 
+return addresses on the return stack.
+memory accesses forthcode({@@}) and forthcode({!}) , the size of forthcode({VARIABLE})s
+and forthcode({CONSTANT})s.
+In Forth a cell has no hair. It is interpreted by you as a
+signed integer, a bit-map, a memory address or an unsigned number.
+The operator forthcode({+}) can be used to add numbers, to set a bit in 
+a bitmap or advance a pointer a couple of bytes.
+In accordance with this there are no errors such as overflow given.   
 
+Sometimes we use data of two cells.
+The high-order cell are most accessable on the stack and if stored in 
+memory, it is highest.
+
+A so called high level word, one defined by forthcode({:}) , is just a 
+sequence of addresses of other words. The forthdefi({inner interpreter})
+takes care to execute these words in sequence.
+It acts by fetching the address pointed by forthvar({IP}) , storing
+this value in register forthvar({W}) . It then jumps to the address
+pointed to by the address pointed to by forthvar({W}) . forthvar({W})
+points to the code field of a definition which contains the address of
+the code which executes for that definition. This usage of indirect
+threaded code is a major contributor to the power, portability, and
+extensibility of Forth. 
+
+@section Saving a new system
+
+In combination with the change of the boot-up parameters at
+forthcode({+ORIGIN}) this allows to make a turnkey system.
 
 @section Memory organization
 
@@ -40,7 +75,7 @@ forthenditemize
 _LOW_BUF_({The disk block buffers are allocated in the dictionary,
 because otherwise they would not be accessable to the BIOS})
 
-The program as residing on disk may contain startup code , but that is
+The program as residing on disk may contain startup code, but that is
 of no concern for the usage. 
 
 The dictionary area is the only part that is initialised,
@@ -325,6 +360,6 @@ and users could share the background storage, provided certain precautions
 are taken. About this you can forget.
 What you can do is, store back you user variables in the boot-up 
 parameters as follows
- forthsamp({USVA @   ' USVA @   +ORIGIN !})
+forthsamp({USVA @   ' USVA @   +ORIGIN !})
 where forthvar({USVA}) is the user variable which value you want to keep.
 
