@@ -2,6 +2,8 @@ In this lecture we will try to show some of the
 benefits of generic programming.
 
 At the same time a technique of program transformation is shown.
+Keep in mind that the example is too simple to show off the
+full prowess of the program transformation technique.
 
 QSORT
 
@@ -10,7 +12,8 @@ published in 1983.
 We will see that in 1983 Forth was almost ahead of the C++ of 1998,
 and at least could have been using techniques known at the time.
 (On the premise that we take the lack of static and dynamic type
-checking for granted.)
+checking for granted, as an essential feature of Forth and not
+something that will change as the language ``evolves''.)
 
 At first let us have a look at Wil's code, such as he has published on his
 web site.
@@ -84,12 +87,12 @@ CREATE INT-TABLE
 
 (And will come into its own only for tables a great deal larger.)
 
-It may also be use to sort a table of floats provided all floats
+It may also be used to sort a table of floats provided all floats
 are one cell wide like the integers.
 
 CREATE FLOAT-TABLE
-9.0E0 , 4.0E0 , 3.0E0 , 7.0E0 , 0.0E0 ,
-8.0E0 , 2.0E0 , 6.0E0 , 1.0E0 , 5.0E0 ,
+9.0E0 F, 4.0E0 F, 3.0E0 F, 7.0E0 F, 0.0E0 F,
+8.0E0 F, 2.0E0 F, 6.0E0 F, 1.0E0 F, 5.0E0 F,
 
 AND indeed we say
 ' F< IS PRECEDES
@@ -97,7 +100,7 @@ AND indeed we say
 It cannot be used however to sort the following table of doubles
 
 CREATE DOUBLE-TABLE
-9.0 , 4.0 , 3.0 , 7.0 , 0.0 , 8.0 , 2.0 , 6.0 , 1.0 , 5.0 ,
+9.0 , ,  4.0 , ,  3.0 , ,  7.0 , ,  0.0 , ,  8.0 , ,  2.0 , ,  6.0 , ,  1.0 , ,  5.0 , ,
 
 On the other hand
 With
@@ -359,7 +362,7 @@ get a stack phrase like.
 \ Sort the range FIRST to LAST (inclusive) of item compared by the xt
 \ COMPARING and exchanged by the xt EXHANGING.
 \ ``For FIRST<=I<J<=LAST      I J COMPARING EXECUTE leaves TRUE.''
-So forget about QSORT for the moment.
+For the moment we will concentrate on QSORT.
 
 ------------- what we have ----------------------
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
@@ -491,8 +494,12 @@ And it dumps core. It crashes.
 (No examples, because I didn't actually try this out. Maybe it doesn't
 even crash nicely.)
 
+Lesson. You may change the rules of the game. But then you really must be
+Master of the Situation. More often than not that is not the case.
+
 OUR FOURTH CHANGE: ADDRESS ON RETURN STACK
 
+We may have failed in the previous step, but we did gain. We gained insight.
 The more precise analysis above shows that there is no choice but
 keeping track where our pivot remains.
 
@@ -512,8 +519,8 @@ That is the price we have to pay.
          SWAP BEGIN  R@ @ OVER @  PRECEDES WHILE  CELL-  REPEAT
          2DUP > NOT IF
             \ Do we have a new position for our pivot?
-            OVER R@ = IF RDROP DUP >R ELSE
-            DUP  R@ = IF RDROP OVER >R THEN THEN
+            OVER R@ = IF R> DROP DUP >R ELSE
+            DUP  R@ = IF R> DROP OVER >R THEN THEN
             2DUP (<-->)
             >R CELL+ R> CELL-
         THEN
@@ -532,13 +539,11 @@ OUR FIFTH CHANGE: PRECEDES USES ADDRESSES
 We are now in a position to make the next move towards using
 indices, instead of addresses. That is by passing the addresses
 to PRECEDES instead of the content.
-Although indices are our ultimate goal, we have attained sufficient
-generality at this point that we can sort all the other tables
-described in the introduction. We have attained genericity.
 (Like in STL the standard library for C++.)
-This is a small change, it amounts to eliminating four fetches from
+This is not only infinitesimal, it is also in absolute sense
+a small change, it amounts to eliminating four fetches from
 PARTITION.
-It looks much better, because there same ``things'' are passed to
+It looks much better, because the same ``things'' are passed to
 PRECEDES and to <--> . This is important, because it makes you forget
 about what type of data is there, the only important thing is the
 manipulation.
@@ -550,8 +555,8 @@ manipulation.
          SWAP BEGIN  R@ OVER PRECEDES WHILE  CELL-  REPEAT
          2DUP > NOT IF
             \ Do we have a new position for our pivot?
-            OVER R@ = IF RDROP DUP >R ELSE
-            DUP  R@ = IF RDROP OVER >R THEN THEN
+            OVER R@ = IF R> DROP DUP >R ELSE
+            DUP  R@ = IF R> DROP OVER >R THEN THEN
             2DUP (<-->)
             >R CELL+ R> CELL-
         THEN
@@ -560,10 +565,68 @@ manipulation.
     SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
     ;
 
+Note that two of the four fetches where added just in the previous
+step.
+
+To my surprise and relief the regression test succeeds.
+
+OUR SIXTH CHANGE: CLEANUP
+
+I somehow don't like the names PRECEDES and (<-->)
+It is time to come up with a naming convention.
+I think we should have just < and <--> in the SORT module.
+However Forth has no modules and wordlists are too slimy, sticky
+and slippery (if it is possible to be all that at the same time!)
+So vectors have to stand off by a naming convention to reduce the
+risk of name clashes. The solution is to prepend the name with
+a ``*'' to be associated with the c- reference operator.
+(``&'' would be better but that one is taken.).
+When we are at it, we introduce RDROP that is pretty ubiquitous and
+can be defined easily anyway.
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R CELL+ R> CELL-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    RDROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+Furthermore the whole deferring stuff must be hidden in the SORT
+module, meaning that there are no assignement to deferred vectors
+outside of SORT. If you want to sort you have to pass the
+low and high addresses and two execution tokens.
+As follows :
+
+( lo hi xt-c xt-e -- )
+: SORT   '*<--> >BODY !   '*< >BODY !   QSORT ;
+
+Note that there is no use for IS . Anyway I hate that word
+because it looks ahead in the input stream, and that is exactly
+the reason the word is no use.
+
+Note that I do this cleanup as soon as it comes up, even now
+we are just one step short of our goal. This is the
+right way, lest we use much time in the frenzy that results
+when all those opportunities open up.
+
 To my surprise and relief the regression test succeeds.
 
 OUR SIXTH CHANGE: PRECEDES USES INDICES
-At last we now can use indicies instead of addresses:
+
+At last we now can use indices instead of addresses:
+Indices were our ultimate goal, we have attained sufficient
+generality at this point that we can sort all the other tables
+described in the introduction. We have attained genericity.
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
     2DUP OVER - 2/  >R  ( R: median)

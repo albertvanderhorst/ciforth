@@ -13,6 +13,7 @@ REQUIRE COMPARE
 
 : DEFER CREATE ' DEFER-ERROR , DOES> @ EXECUTE ;
 
+\ Do not use this.
 : IS   (WORD) FOUND >BODY ! ;
 
 \ Exchange the content at ADDRESS1 and ADDRESS2 over a fixed LENGTH.
@@ -21,18 +22,15 @@ REQUIRE COMPARE
 
 \D "Expect aap : " TYPE : aap "aap" TYPE ; DEFER iets 'aap IS iets iets
 
-DEFER PRECEDES
+DEFER *<
 
 \  For sorting character strings in increasing order:
 : SPRECEDES         ( addr addr -- flag )
     >R COUNT R> COUNT COMPARE 0< ;
-\   ' SPRECEDES IS PRECEDES
+\   ' SPRECEDES IS *<
 
 
-\ Swap the contenst of cells at ADDRESS1 and ADDRESS2.
-: <-->    0 CELL+ EXCHANGE ;
-
-DEFER (<-->)    ' <--> IS (<-->)
+DEFER *<-->    
 
 \ For ADDRESS return a next lower ADDRESS that is aligned.
 \ This may work only on two complement machines.
@@ -43,13 +41,13 @@ DEFER (<-->)    ' <--> IS (<-->)
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
     2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP R@ PRECEDES WHILE  CELL+  REPEAT
-         SWAP BEGIN  R@ OVER PRECEDES WHILE  CELL-  REPEAT
+         SWAP BEGIN  DUP R@ *< WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  CELL-  REPEAT
          2DUP > NOT IF
             \ Do we have a new position for our pivot?
             OVER R@ = IF RDROP DUP >R ELSE
             DUP  R@ = IF RDROP OVER >R THEN THEN
-            2DUP (<-->)
+            2DUP *<-->
             >R CELL+ R> CELL-
         THEN
     2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
@@ -62,8 +60,7 @@ DEFER (<-->)    ' <--> IS (<-->)
     2DUP < IF  RECURSE  ELSE  2DROP  THEN
     2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
 
-: SORT              ( addr n -- )
-    DUP 2 < IF  2DROP  EXIT THEN
-    1- CELLS OVER + ( addr addr+{n-1}cells) QSORT ( ) ;
+\ lo hi xt-c xt-e
+: SORT   '*<--> >BODY !   '*< >BODY !   QSORT ;
 
 \ AUXILIARY

@@ -11,11 +11,13 @@ CREATE INT-TABLE
 \ Expect nice order.
 
 W
+\ How to compare two things by the ADDRESSES
 : MY-<   >R @ R> @ < ;
-' MY-< IS PRECEDES
 
+\ Swap the contents of cells at ADDRESS1 and ADDRESS2.
+: <-->    0 CELL+ EXCHANGE ;
 
-INT-TABLE 10 SORT
+INT-TABLE   DUP 10 1- CELLS +   'MY-<   '<-->   SORT
 
 W
 
@@ -43,7 +45,6 @@ W2
 
 
 
-' $< IS PRECEDES
+STRING-TABLE   DUP 10 1- CELLS +   '$<   '<-->   SORT
 
-STRING-TABLE 10 SORT
 W2
