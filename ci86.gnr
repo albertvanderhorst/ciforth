@@ -751,6 +751,8 @@ Done:       RET
 
 ; If we reach this point, we are operating in protected mode
 DPMISUCCESS:
+        PUSH    DS
+        POP     ES
 
 ; ######################### DPMI END ###############################################################
 
@@ -2713,7 +2715,7 @@ The
 contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before calling
 forthsamp({R/W}). },
 {{BLOCK},{MESSAGE} },
-{{OFFSET @ 1000000 U< .},{_T_}},
+{{OFFSET @ 1000 U< .},{_T_}},
 enddoc)
 HEADER({OFFSET},{OFSET},{DOUSE}, _CELLS(11))
 ;
@@ -2793,7 +2795,7 @@ appear. The first position is zero. Only an explicit
 forthcode({CR}) will reset forthcode({OUT}) , not an
 forthkey(LF) embedded in a string that is forthcode({TYPE})d.},
 {{EMIT},{TYPE},{CR}},
-{{CR 41 EMIT 42 EMIT OUT @ .},{AB2}},
+{{41 EMIT 42 EMIT OUT @ .},{AB2}},
 enddoc)
 HEADER({OUT},{LOUT},{DOUSE}, _CELLS(25))
 ;
@@ -3397,7 +3399,7 @@ forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
 This allows calculation or compilation exceptions before resuming
 compilation with forthcode({]})},{{LITERAL} ,{]}},
-{{!CSP : GS1 LIT [ 12398 , ] ; ?CSP GS1 .},{12398}},
+{{!CSP : GS1 LIT [ 2398 , ] ; ?CSP GS1 .},{2398}},
 enddoc)
 HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      ZERO
@@ -3692,7 +3694,7 @@ the forthdefi({current input source}) .},
 {{LOAD},{INCLUDE},{SET-SRC}},
 {
 {"865" EVALUATE .},{865},
-{"8655 1+" EVALUATE .},{8656},
+{"8655 1+" EVALUATE U.},{8656},
 {": GS1 856 ;" EVALUATE GS1 .},{856}
 },
 enddoc)
@@ -4746,7 +4748,7 @@ is an immediate word{{}}_VERBOSE_({{, so colon definitions can
 be commented too}}).
 A blank after the word forthcode({{(}}) is required.}}}},
 {{\}},
-{{( Nothing to be seen) 8374 .},{8374} },
+{{( Nothing to be seen) 8374 U.},{8374} },
 enddoc)
 HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      LIT,')'
@@ -4786,7 +4788,8 @@ message is given.},
 enddoc)
 HEADER({QUIT},{QUIT},{DOCOL})
         DC      LBRAC
-QUIT1:  DC      RZERO   ;{BEGIN}
+QUIT1:                  ;{BEGIN}
+        DC      RZERO
         DC      FETCH
         DC      RPSTO
         _LINUX_N_({DC      LIT})
@@ -5269,11 +5272,19 @@ double quotient forthsamp({ud4}) and remainder forthsamp({u3}) ,
 from a double dividend forthvar({ud1}) and single divisor
 forthvar({u2}) .},
 {{UM/MOD},{SM/REM},{M*}},
+_BITS16_({
+{
+{-1. -1 M/MOD D. .},{10001 0},
+{ 88812.34 100 M/MOD D. .},{88812 34},
+{DECIMAL 12.34 100 M/MOD D. .},{12 34},
+} })
+_BITS32_({
 {
 {-1. -1 M/MOD D. .},{100000001 0},
 { 8888812.34 100 M/MOD D. .},{8888812 34},
 {DECIMAL 12.34 100 M/MOD D. .},{12 34},
-},
+} })
+,
 enddoc)
 HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      TOR
@@ -6119,7 +6130,7 @@ forthcode({TIB @}), but not necessarily at the beginning.}})
 {
 {(ACCEPT)},{},
  {GIBBON
-  _PC_(1-) DUP . TYPE},{6 GIBBON},
+  DUP . TYPE},{6 GIBBON},
 dnl { ." Type an 'A'" (ACCEPT) DUP . TYPE},{1 A)},
 dnl {." Type an 'ABCDEF'" DUP . },{6},
 },
@@ -6151,11 +6162,12 @@ PACCEP1:
         DC      LIT, REMAIND, TFET
         DC      LIT, ALF, SSPLIT
         DC      TSWAP, LIT, REMAIND, TSTOR
+        _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 
 REMAIND:        DC      0, STRTIB
 ;
-worddocsafe( {INPUT~},{(REFILL-TIB)},{refill-tib},{ --- } ,{},
+worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the current input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
 forthkey({RET}). If the input is redirected (such that reading
@@ -6194,7 +6206,11 @@ _BITS32_(
         DC      TIB, FETCH, RR, PLUS
         DC      SWAP, LCMOVE},
 {dnl})
-        DC      LDUP, ZEQU, LIT, -32, LAND, THROW ; {Presumably end of pipe.}
+        DC      LDUP, ZEQU,
+        _0BRANCH(PACCEP3)
+        DC      ZERO, LIT, REMAIND, STORE
+        DC      LIT, -32, LAND, THROW ; {Presumably end of pipe.}
+PACCEP3:
         DC      TIB, FETCH, SWAP, FROMR, PLUS
         DC      LIT, REMAIND, TSTOR
         DC      SEMIS
@@ -6341,6 +6357,7 @@ PACCEP1:
         DC      LIT, REMAIND, TFET
         DC      LIT, ALF, SSPLIT
         DC      TSWAP, LIT, REMAIND, TSTOR
+        _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 
 REMAIND:        DC      0, STRTIB
@@ -6426,7 +6443,7 @@ enddoc)
 HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
-worddocsafe( {INPUT~},{(REFILL-TIB)},{refill-tib},{ --- } ,{},
+worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
 {Accept characters from the current input stream such as to
 fill up forthcode({TIB}) . Normally this means until a
 forthkey({RET}). If the input is redirected (such that reading
@@ -6710,7 +6727,7 @@ HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      FETCH
         DC      LIT,RTS/2
         DC      TDUP
-;        DC      EXPEC
+; { Old fig code of EXPECT :}
              DC      OVER
              DC      PLUS
              DC      OVER
@@ -8387,6 +8404,7 @@ HEADER({TASK},{TASK},{DOCOL})
 _EQULAYOUT_({
 TEXTEND  EQU     $       ; {Show end of dictionary.}
 INITDP   EQU     M4_INITDP ;{Where we want new words.}
+ACTUAL_EM EQU    EM  ;{ Different for relocatable code only.}
 });_END_({ _EQULAYOUT_})
 
 _COMMENT
@@ -8423,7 +8441,7 @@ STRTIB: _RESB     RTS            ;{ Start return stack area}
 INITR0:                         ;{ Grows down}
 STRUSA: _RESB    US              ;{ User area}
 BUF1:   _RESB    BUFFERSIZE      ;{ FIRST DISK BUFFER}
-ACTUAL_EM:  ;{ Differs from EM if ocde is relocated.}
+ACTUAL_EM:  ;{ Differs from EM if code is relocated.}
 });_END_({ _HOSTED_LINUX_})
 ;
 
