@@ -30,7 +30,8 @@
 
 VARIABLE #DIAGNOSES \ Number of diagnoses
 VARIABLE #QUESTIONS \ Number of questions
-
+\ SPARE diagnoses and SPARE questions can be added in one session.
+50 CONSTANT SPARE
 
 \ Converts the STRING to a NUMBER. If there is more, throw.
 : atoi -TRAILING 0. 2SWAP >NUMBER 1001 ?ERROR DROP DROP ;
@@ -38,7 +39,8 @@ VARIABLE #QUESTIONS \ Number of questions
 \ From STRING split off N lines and put them in an array.
 \ Leave REMAINDER.
 \ The created word turns an INDEX into the ADDRESS of a string pointer.
-: $ARRAY CREATE 0 DO ^J $S , , LOOP 100 ALLOT DOES> SWAP 2* CELLS + ;
+: $ARRAY    CREATE 0 DO ^J $S , , LOOP SPARE 2* CELLS ALLOT
+            DOES> SWAP 2* CELLS + ;
 
 \ STRING contains N numbers, else throw. Put the numbers in the dictionary.
 : GET-NUMBERS 0 DO BL $S DUP 0= 1002 ?ERROR atoi , LOOP 2DROP ;
@@ -48,7 +50,8 @@ VARIABLE #QUESTIONS \ Number of questions
 \ Leave REMAINDER.
 \ The created word turns an INDEX into an ADDRESS.
 : ANSWER-ARRAY
-CREATE #DIAGNOSES @ 0 DO ^J $S #QUESTIONS @ GET-NUMBERS LOOP
+CREATE #DIAGNOSES @ 0 DO ^J $S #QUESTIONS @ GET-NUMBERS SPARE CELLS ALLOT LOOP
+       #QUESTIONS @ SPARE + SPARE * CELLS ALLOT
 DOES> SWAP CELLS + ;
 
 
@@ -71,6 +74,10 @@ DOES> SWAP CELLS + ;
 
 2DROP
 
+\ Upper limits for arrays
+#DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
+#QUESTIONS @ SPARE + CONSTANT MAX-QUESTIONS
+
 \ Add STRING as a diagnosis.
 : ADD-DIAGNOSIS $, $@ #DIAGNOSES @ DIAGNOSES 2! 1 #DIAGNOSES +! ;
 
@@ -91,9 +98,9 @@ VARIABLE OUTPUT$
 \ Add a NUMBER to the output.
 : u. (U.) OUTPUT$ @ $+!    ;
 
-\ Add the string of an ARRAY of N pointers to strings to the output.
+\ Add the strings of an ARRAY of N pointers to strings to the output.
 \ The array is passed as an xt.
-: .dot.   0 DO I OVER EXECUTE 2@ OUTPUT$ @ $+!  cr LOOP DROP ;
+: .$ARRAY   0 DO I OVER EXECUTE 2@ OUTPUT$ @ $+!  cr LOOP DROP ;
 
 \ Add from an ARRAY of N numbers to a line in the output.
 : PUT-NUMBERS 0 DO I CELLS OVER + @ u. bl LOOP cr DROP ;
@@ -104,15 +111,15 @@ VARIABLE OUTPUT$
 : PUT-ANSWERS
     uk
     #DIAGNOSES @ 0 DO
-        DUP #QUESTIONS @ PUT-NUMBERS #QUESTIONS @ CELLS +
+        DUP #QUESTIONS @ PUT-NUMBERS MAX-QUESTIONS CELLS +
     LOOP DROP ;
 
 \ Write the database to the file "database2"
 : WRITE-DATABASE
     HERE OUTPUT$ ! 0 , 10,000,000 ALLOT
 
-    #DIAGNOSES @ DUP u. cr   'DIAGNOSES SWAP .dot.
-    #QUESTIONS @ DUP u. cr   'QUESTIONS SWAP .dot.
+    #DIAGNOSES @ DUP u. cr   'DIAGNOSES SWAP .$ARRAY
+    #QUESTIONS @ DUP u. cr   'QUESTIONS SWAP .$ARRAY
 
     0 YESSES  PUT-ANSWERS
     0 NOES    PUT-ANSWERS
