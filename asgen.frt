@@ -5,11 +5,16 @@ VOCABULARY ASSEMBLER IMMEDIATE
 : % [COMPILE] ' NFA ;
 : >BODY PFA CELL+ ; ( From DEA to the DATA field of `X' *FOR A <BUILDS WORD!!*)
 
+1 VARIABLE TABLE 1 , ( I TABLE + @ yields $100^x )
+( Rotate X by I bytes right  leaving X')
+: ROTRIGHT TABLE + @ U* OR ;
+: & CURRENT @ @ ID. ; ." TESTING STUFF: &"
 ( First cell : contains bits down for each COMMAER still needed)
 ( Second cell contains bits up to be filled by TALLY:| )
  0 VARIABLE TALLY 0 CELL+ ALLOT  ( 4 BYTES FOR COMMAER 4 FOR INSTRUCTION)
  0 VARIABLE PRO-TALLY 0 CELL+ ALLOT  ( Prototype for TALLY)
  0 VARIABLE ISS  ( Start of current instruction)
+ 0 VARIABLE ISL  ( Start of current instruction)
  0 VARIABLE PREVIOUS ( Previous comma, or zero)
 : !POST HERE ISS !  0 PREVIOUS ! ;
 : @+ >R R CELL+ R> @ ;
@@ -21,11 +26,11 @@ HEX
 DECIMAL
 : CHECK26 AT-REST? 0= 26 ?ERROR ;
 ( Based on DATAFIELD of a postit, tally it)
-: TALLY:, CELL+ @+ TALLY CELL+ ! @ TALLY ! ;
+: TALLY:, CELL+ @+ TALLY CELL+ ! @+ TALLY ! @ ISL ! ;
 ( Correct dictionary to have an instruction of N bytes, after           )
 ( `,' allocated a whole cell)
 : CORRECT 0 CELL+ MINUS + ALLOT ;
-: DO-POST CHECK26 !POST DUP TALLY:, DUP @ , 3 CELLS + @ CORRECT ;
+: DO-POST CHECK26 !POST DUP TALLY:, @ , ISL @ CORRECT ;
 : INVERT -1 XOR ;
 HEX
 0 VARIABLE TEMP ( Should be passed via the stack )
@@ -64,17 +69,34 @@ DECIMAL
 ( And DATA into ADDRESS. If bits were already down its wrong.)
 : CHECK29 2DUP OR -1 - 29 ?ERROR   ;
 : AND! >R R @ CHECK29 AND R> ! ;
-(   Based on PFA of a fixup fix into tally and leave the FIXUi  )
+(   Based on PFA of a fixup fix into tally)
 : TALLY:| CELL+ @+ TALLY CELL+ OR! @ TALLY AND! ;
 
-( Note: the maks is inverted compared to postit, such that a            )
+( Note: the mask is inverted compared to postit, such that a            )
 ( postit and a fixup that go tohether have the same mask                )
-( Accept a MASK with a bit up for each commaer, a MASK indicating
+( Accept a MASK with a bit up for each commaer, a MASK indicating       )
 ( which bits are fixupped, and the FIXUP )
-( One size fits all. )
-: xFI <BUILDS , , INVERT , 1 , CHECK31
+( The fixup is a string of 0 CELL+ byte that is masked in this order    )
+( from the beginning of the instruction.                                )
+( One size fits all. Due to the mask )
+: xFI <BUILDS , , INVERT , 0 , CHECK31
 DOES> [ HERE TEMP ! ] DUP TALLY:| @ ISS @ OR! ;
 IS-A IS-xFI
+
+: CORRECT-I 0 CELL+ ISL @ - ROTRIGHT ;
+(   Based on PFA of a fixup fix into tally )
+: TALLY:|R CELL+ @+ CORRECT-I TALLY CELL+ OR! @ TALLY AND! ;
+( Note: the mask is inverted compared to postit, such that a            )
+( postit and a fixup that go together have a masks differing in a shift )
+( over whole byte.                                                      )
+( Accept a MASK with a bit up for each commaer, a MASK indicating
+( which bits are fixupped, and the FIXUP )
+( The fixup is a string of `0 CELL+ bytes' that is masked in from )
+( behind from the end of the instruction.                               )
+( One size fits all. Due to the mask )
+: xFIR <BUILDS , , INVERT , 0 , CHECK31
+DOES> [ HERE TEMP ! ] DUP TALLY:|R @ ISS @ ISL @ + 0 CELL+ - OR! ;
+IS-A IS-xFIR
 
 HEX  0 VARIABLE TABLE FF , FFFF , FFFFFF , FFFFFFFF ,  DECIMAL
 : >IMASK >CNT CELLS TABLE + @ ;
@@ -99,6 +121,7 @@ IS-A IS-COMMA
 : 3FAMILY, 0 DO DUP PREPARE 3PI OVER + LOOP DROP DROP ;
 
 : xFAMILY| 0 DO DUP PREPARE xFI OVER + LOOP DROP DROP ;
+: xFAMILY|R 0 DO DUP PREPARE xFIR OVER + LOOP DROP DROP ;
 
 HEX 
 (   Given a DEA, return the next DEA)
@@ -153,6 +176,14 @@ HEX
    THEN
    THEN
 ;
+: DIS-xFIR
+   DUP IS-xFIR IF     
+   DUP >MASK CORRECT-I TALLY CELL+ @ INVERT CONTAINED-IN IF
+       DUP >BODY TALLY:|R
+       DUP +DISS
+   THEN
+   THEN
+;
 : DIS-COMMA
    DUP IS-COMMA IF
    DUP >BODY @ TALLY @ INVERT FF OR CONTAINED-IN IF
@@ -169,7 +200,7 @@ HEX
     DISS? IF
         DISS @+ SWAP !DISS
         DO
-            I @ DIS-PI DIS-xFI DIS-COMMA DROP
+            I @ DIS-PI DIS-xFI DIS-xFIR DIS-COMMA DROP
         0 CELL+ +LOOP
     THEN
 ;
@@ -196,11 +227,12 @@ HEX
     THEN
 ;
 
+     % RESULT +DISS                                                      
 : DOIT
     !DISS
     !TALLY
     STARTVOC BEGIN
-        DIS-PI DIS-xFI DIS-COMMA
+        DIS-PI DIS-xFI DIS-xFIR DIS-COMMA
         RESULT
         >NEXT%
 (       DUP ID.                                                         )
