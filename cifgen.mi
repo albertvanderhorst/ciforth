@@ -1,3 +1,5 @@
+dnl $ Id: $
+dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public License
 undefine({worddoc})
 \input texinfo
 @setfilename thisfilename
@@ -256,17 +258,19 @@ are in the 2-branch and the latest version is available still.
 This version has however an manual not split between a generic and
 a user part. But the user part of the manual forthemph({is})
 generated from the generic source.
+This version 2 can be seen as a 32-bit figForth.
 
-The second and third
+The third and fourth
 versions of ciforth (RCS branch 3 and 4)
 are generated  according to this manual.
 As you see there is little pertinent information about these Forth's
 in this manual.
 All the information you need to use it is in the user manual,
 generated with that version.
-The second version is a ISO compatible system.
-The third version is how I think a Forth should be,
-based on technical criteria and putting all compatibility issues aside.
+Branch 3 evolvestowards an ISO compatible system.
+Version 4 is  a stable maintained ISO compatible system,
+a balance between
+technical criteria and compatibility issues.
 
 @section                         Source
 In practice the GPL
@@ -375,14 +379,19 @@ This doesn't mean it is cumbersome or difficult.
 Under Linux we need
 forthexample(
 {HEX
-S" newforth" BLOCK-FILE $!  BLOCK-INIT   ( Abuse block file)
-HERE FENCE !   LATEST 0 +ORIGIN !  ( Extend the system )
-8049000 CONSTANT SM     ( This is in depth knowledge)
-U0 @   0 +ORIGIN   100    CMOVE  ( Save user variables)
-HERE SM - CONSTANT FSIZE   ( Length of file, incl.header)
-HERE BM - SM 44 + !    FSIZE SM 20 + ! ( Patch header)
-BLOCK-HANDLE @ 8049000   FSIZE  5 LINOS ?LINUX-ERROR ( Write)
-BLOCK-EXIT
+\ The magic number marking the start of an ELF header
+ CREATE MAGIC 7F C, &E C, &L C, &F C,
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
+\ Return the VALUE of ``HERE'' when this forth started.
+ : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
+\ Save the system in a file with NAME .
+ : SAVE-SYSTEM
+\ Increment the file and dictionary sizes
+  HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+\ Now write it. Consume NAME here.
+   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 })
 
 @section How m4 is used.
@@ -483,12 +492,12 @@ With
 The usage of forthmacro({divert()}) can best be explained with an example in this context.
 
 forthexample(
-{define(_lbracket_parents_rbracket_,
+{{define(_lbracket_parents_rbracket_,
 _lbracket_{divert(3)dnl}
 $}{2
 {divert(6)dnl}
 $}{3
-_rbracket_)})
+_rbracket_)}})
 
 will give out the mothers on channel 3 and fathers on channel 6.
 The output will be concatenated,
@@ -837,9 +846,10 @@ file. Then you specify your configuration and include
 forthfile({postlude.m4}). forthfile({postlude.m4}) will correct
 the options to the most, or the only, sensible ones for that configuration.
 It will reject some of the configurations that will not
-compile, or lead to programs that do not work. Then you can
+assemble, or lead to programs that do not work. Then you can
 after including forthfile({postlude.m4}) overwrite some of the
-sensible defaults.
+sensible defaults. So you can force the generation of source
+that is rejected by the assembler anyway.
 An example is the default stack size of 64K
 for 32 bit programs. Sensible as it is, you may want to have a
 32 bit Forth that runs in 64K. You will overwrite that stack
@@ -851,8 +861,10 @@ The forthvar({.msm}) are acceptable by
 TASM.EXE too. You can generate an equivalent forthfile({.s}) file, but this is
 experimental and doesn't lead to a working forth.
 
-With respect to the I/O (words like forthcodeni({EXPECT}) forthcodeni({R/W}) ) you can choose between
-three on MSDOS.
+With respect to the I/O (words like forthcodeni({EXPECT})
+forthcodeni({R\W}) ) you can choose between three on MSDOS. (
+forthcode({R\W}) is what was named forthcode({R/W}) in
+figForth, but that name is reserved by ISO now.)
 You can use dos forthmacro({_CLASSIC_}) in the classic way as with the original. This
 means that the floppy is used directly without regard for directory
 structures. This uses calls that are declared obsolete.
@@ -966,7 +978,7 @@ a break (sense but don't wait for a key). If both the above are
 unavailable, simply push 0 and execute NEXT.
 forthitem CR
 Execute a terminal carriage return and line feed. Execute NEXT.
-forthitem R/W
+forthitem R\W
 This colon-definition is the standard linkage to your disc. It requests
 the read or write of a disc block, be it raw disk or allocated in a file.
 @end table
@@ -988,15 +1000,15 @@ forthexample(
 {HEX
 4000 CONSTANT LO ( START OF BUFFER AREA )
 6800 CONSTANT HI ( 10 SCREEN EQUIVALENT )
-: R/W >R ( save boolean )
+: R\W >R ( save boolean )
     B/BUF * LO + DUP
     HI > 6 ?ERROR ( range check )
     R> IF ( read ) SWAP ENDIF
     B/BUF CMOVE ; })
 
-Insert the code field address of forthcode({R/W}) into forthcode({BLOCK}) and forthcode({BUFFER})
+Insert the code field address of forthcode({R\W}) into forthcode({BLOCK}) and forthcode({BUFFER})
 and proceed as if testing disc.
-This forthcode({R/W}) simulates screens 0 thru 9, in the
+This forthcode({R\W}) simulates screens 0 thru 9, in the
 memory area 04000H thru 067FFH.
 @subsubsection FIG's rants : Debugging an assembled system.
 
@@ -1057,12 +1069,12 @@ When the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BU
 to clear the disc buffer area.
 forthitem
 If your disc driver differs from the assembly version, you must create
-your own forthcodeni({R/W}) .
+your own forthcodeni({R\W}) .
 You may test the disc access by typing:
 forthsamp({0 BLOCK 64 TYPE})
 This should bring block zero from the disc to a buffer and
 type the first 64 characters.
-If forthcodeni({BLOCK}) (and forthcodeni({R/W}) ) doesn't function--happy hunting!
+If forthcodeni({BLOCK}) (and forthcodeni({R\W}) ) doesn't function--happy hunting!
 forthendenumerate
 
 @subsection Level 4 customization.
