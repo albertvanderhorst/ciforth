@@ -11,9 +11,11 @@ define({forthsamp},{@samp{{$1}}})
 define({forthmacro},{@samp{{$1}}})
 define({forthprog},{@code{{$1}}})
 define({forthcodeni},{@code{{$1}}})
-dnl A line break? Apparently texinfo can't do it.
 define({forthbreak},{@*})
 define({forthemph},{@b{{$1}}})
+dnl There is a problem. Using this and the following
+dnl macro at the end of line, leads to a break.
+dnl Using ` dnl' after the macro call solves this.
 define({forthcode},{@code{{$1}}
 @findex $1
 })
@@ -23,7 +25,7 @@ define({forthdefi},{@dfn{{$1}}
 define({forthunderline},{$1})
 define({forthxref},{@xref{{$1}}})
 define({forthpxref},{@pxref{{$1}}})
-define({forthitemize},{{@itemize}})
+define({forthitemize},{{@itemize @bullet}})
 define({forthenditemize},{{@end itemize}})
 define({forthenumerate},{{@enumerate}})
 define({forthendenumerate},{{@end enumerate}})
