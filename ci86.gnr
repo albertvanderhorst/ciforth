@@ -1179,9 +1179,11 @@ enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LPWORD, LDUP, TOR
         DC      FOUND
-        DC      LDUP, ZEQU, LIT, 11, QERR
+        DC      LDUP, ZEQU
+        DC      LIT, 11, QERR
         DC      LDUP, TNFA, FETCH, FETCH ; { Get precise length.}
-        DC      FROMR, EQUAL, ZEQU, LIT, 11, QERR ; { to prevent match for denotation.}
+        DC      FROMR, EQUAL, ZEQU
+        DC      LIT, 11, QERR ; { to prevent match for denotation.}
         DC      LITER
         DC      SEMIS
 ;
@@ -3550,8 +3552,7 @@ HEADER({?DELIM},{QDELIM},{DOCOL})
         DC      INBRS
         DC      QBL
         DC      ZEQU
-        DC      LIT, 10
-        DC      QERR
+        DC      LIT, 10, QERR
         DC      DROP
         DC      SEMIS
 ;
@@ -3567,8 +3568,7 @@ HEADER({?CSP},{QCSP},{DOCOL})
         DC      LCSP
         DC      FETCH
         DC      LSUB
-        DC      LIT,14H
-        DC      QERR
+        DC      LIT, 20, QERR
         DC      SEMIS
 ;
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
@@ -3580,8 +3580,7 @@ HEADER({?COMP},{QCOMP},{DOCOL})
         DC      STATE
         DC      FETCH
         DC      ZEQU
-        DC      LIT,11H
-        DC      QERR
+        DC      LIT, 17, QERR
         DC      SEMIS
 ;
 worddoc( {SECURITY},{?EXEC},{question_exec},{},{},
@@ -3592,8 +3591,7 @@ enddoc)
 HEADER({?EXEC},{QEXEC},{DOCOL})
         DC      STATE
         DC      FETCH
-        DC      LIT,12H
-        DC      QERR
+        DC      LIT, 18, QERR
         DC      SEMIS
 ;
 worddoc( {SECURITY},{?PAIRS},{question_pairs},{n1 n2 --},{},
@@ -3606,8 +3604,7 @@ indicates that compiled conditionals do not match.},{{?ERROR}},
 enddoc)
 HEADER({?PAIRS},{QPAIR},{DOCOL})
         DC      LSUB
-        DC      LIT,13H
-        DC      QERR
+        DC      LIT, 19, QERR
         DC      SEMIS
 ;
 _LOAD_({
@@ -3620,8 +3617,7 @@ HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      BLK
         DC      FETCH
         DC      ZEQU
-        DC      LIT,16H
-        DC      QERR
+        DC      LIT, 22, QERR
         DC      SEMIS
 ;
 });_END_({_LOAD_})
@@ -4220,7 +4216,8 @@ NPNUM2:
 NPNUM4:
         DC      SWAP, DROP
         DC      BASE, FETCH, DIGIT
-        DC      ZEQU, LIT, 10, QERR
+        DC      ZEQU
+        DC      LIT, 10, QERR
 
         DC      SWAP
         DC      BASE
@@ -4579,8 +4576,7 @@ enddoc)
 HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      LDUP
         DC      ZEQU
-        DC      LIT,5
-        DC      QERR
+        DC      LIT, 5, QERR
         DC      TDUP
         DC      FOUND
         DC      LDUP
@@ -4635,8 +4631,7 @@ HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
         DC      FOUND
         DC      LDUP
         DC      ZEQU
-        DC      ZERO
-        DC      QERR
+        DC      ZERO, QERR
         DC      TCFA
         DC      COMMA
         DC      SEMIS
@@ -4660,8 +4655,7 @@ HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         DC      FOUND
         DC      LDUP
         DC      ZEQU
-        DC      ZERO
-        DC      QERR
+        DC      ZERO, QERR
         DC      LDUP, TFFA, FETCH
         DC      LIT, B_IMMED, LAND, ZEQU
         _0BRANCH(POSTP1)
@@ -4752,15 +4746,13 @@ HEADER({?STACK},{QSTAC},{DOCOL})
         DC      FETCH
         DC      SWAP
         DC      ULESS
-        DC      ONE
-        DC      QERR
+        DC      ONE, QERR
         DC      SPFET
         DC      HERE
         DC      LIT,80H
         DC      PLUS
         DC      ULESS
-        DC      LIT,7
-        DC      QERR
+        DC      LIT, 7, QERR
         DC      SEMIS
         PAGE
 });_END_({_SECURITY_})
@@ -4797,7 +4789,8 @@ INTE1:
 ;       DC      TDUP, LTYPE
         DC      OVER, TOR       ; {Save old parse pointer.}
         DC      FOUND
-        DC      LDUP, ZEQU, LIT, 12, QERR
+        DC      LDUP, ZEQU
+        DC      LIT, 12, QERR
         DC      LDUP, TFFA, FETCH
         DC      LDUP, LIT, B_DENOT, LAND ;{Retain copy of flags.}
         _0BRANCH(INTE3B) ;{IF}
@@ -6522,7 +6515,8 @@ _BITS32_(
         DC       LIT, EXPECTBUF },
 {dnl})
 _SWITCH_({        DC   LIT, M4_SWITCHOFFSET, PLUS, },{dnl})
-        DC      BDOS, ONE, LAND, LIT, 6, QERR
+        DC      BDOS, ONE, LAND
+        DC      LIT, 6, QERR
         DC      DROP, DROP, DROP ;{ Leave count}
 _BITS32_(
 {;{ Copy the buffer.}
@@ -7162,7 +7156,7 @@ Report an error if it contains an error condition.
 },{{BLOCK-FILE},{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
 HEADER({?DISK-ERROR},{QDSKER},{DOCOL})
         DC      ONE, LAND
-        DC      LIT, 08H, QERR
+        DC      LIT, 8, QERR
         DC      SEMIS
 ;
 worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
@@ -7449,7 +7443,7 @@ RSLW4:  DC      LINOS
         DC      ZERO, MIN      ; 0/-errno
         DC      DERR, STORE
 RSLW2:  DC      DERR, FETCH
-        DC      LIT, 08H, QERR
+        DC      LIT, 8, QERR
         DC      SEMIS
 
 });_END_({_LINUX_N_})
@@ -7672,7 +7666,7 @@ RSLW9:
 RSLW3:  DC      LIT,    8   ;{Read error}
 RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;{This  buffer}
                                                    ;{ is no good!}
-        DC      QERR
+        DC      QERR    ; { 8 or 9. }
 RSLW5:  DC      SEMIS
 ;
 });_END_({ _RWFD_})
@@ -7781,7 +7775,7 @@ RSLW4:
         ;{ Handle error}
         DC      LIT,    9   ;{Write error}
         DC      FROMR, LSUB ;{ 1 less: read error}
-        DC      QERR
+        DC      QERR    ;{8 or 9 }
         DC      SEMIS
 ;
 });_END_({ _RWHD_})
@@ -7873,8 +7867,7 @@ HEADER({FORGET},{FORG},{DOCOL})
         DC      FENCE
         DC      FETCH
         DC      LESS
-        DC      LIT,15H
-        DC      QERR
+        DC      LIT, 21, QERR
         DC      LIT,FORGV
         DC      FORV
         DC      TNFA, FETCH, LDP, STORE
