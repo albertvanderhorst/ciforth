@@ -125,24 +125,24 @@ DROP 0 THEN ;
 \ For SEQUENCE , return the POINTER to first constant (``LIT'')
 : FIND-LIT BEGIN DUP @ 'LIT <> OVER ?NOT-EXIT AND WHILE NEXT-ITEM  REPEAT ;
 
-VARIABLE CODE-MARKER
+\ For SEQUENCE , return the ADDRESS where the next constants start and
+\ the STRING thereafter that may be swappable.
+: (FIND-SWAPPABLE) FIND-LIT !OPT-START DUP COUNT-LIT COLLECT-SWAPPER ;
 
-\ For SEQUENCE , return the STRING that is swappable.
-\ 0 length : no good.
-: (FIND-SWAPPABLE) FIND-LIT !OPT-START DUP CODE-MARKER ! COUNT-LIT COLLECT-SWAPPER ;
-
-\ For SEQUENCE , return the ADDRESS where a possible swappable part ends.
+\ For SEQUENCE , return ADDRESS ADDRESS1 that comprise two possible swappable part ends.
 \ Note that backtracking occurs to the end of the litterals that failed to optimise.
-: FIND-SWAPPABLE BEGIN (FIND-SWAPPABLE) OVER ?NOT-EXIT OVER 0= AND WHILE DROP REPEAT + ;
+: FIND-SWAPPABLE
+    BEGIN (FIND-SWAPPABLE) OVER ?NOT-EXIT OVER 0= AND WHILE
+    DROP SWAP DROP
+    REPEAT + ;
 
 \ Get from SEQUENCE four boundaries, delineating 3 areas. Return A B C D.
 \ The order to be compiled is A-B C-D B-C .
-: GET-PIECES   DUP  FIND-SWAPPABLE   ( D) >R
-    CODE-MARKER @ ( H.) DUP CSC @ 2 * CELLS + R> ;
+: GET-PIECES   DUP  FIND-SWAPPABLE ( B D) >R DUP CSC @ 2 * CELLS + R> ;
 
-\ Inspect A B C and report into ``PROGRESS'' whether there is any
-\ optimisation by swapping. For that A-B and C-D must be both non-empty.
-\ Leave A B C.
+\ Inspect B C D and report into ``PROGRESS'' whether there is any
+\ optimisation by swapping. For that B-C and C-D must be both non-empty.
+\ Leave B C D.
 : ?PROGRESS?  >R 2DUP <> R> SWAP  >R 2DUP <> R>   AND   PROGRESS OR! ;
 
 \ For addresses A B C D compile A-B ordinary sequence, C-D no stack side
