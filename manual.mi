@@ -100,16 +100,28 @@ where you want your code to run on.
 By using forthcode({CELL+}) it is easy to keep your code 16/32 bit clean.
 This means that it runs on 16 and 32 bits systems.
 @section Saving a new system
-
-In combination with the change of the boot-up parameters at
-forthcode({+ORIGIN}) this allows to make a turnkey system.
-The procedure for saving the system.
+We have said it before: ``Programming Forth is extending the Forth language.''.
+A facility to save your system after it has been extended is of the essential.
+It can be argued that if you don't have that, you ain't have no Forth.
+It is used for two purposes, that are in fact the same.
+Make a customised Forth, like forthemph({you}) want to have it.
+Make a customised environment, like a customer wants to have it.
+Such a ``customised environment'', for example a game, is also
+called a forthdefi({turnkey system}) . 
+It often hides the normal working of the underlying Forth.
+Of course, whether you have a 
+hosted system _HOSTED_LINUX_(like this one) _HOSTED_MSDOS_(like this one) or
+a booted system _BOOTED_(like this one), it is clear that some 
+system-dependant information goes into accomplishing this.
 
 In the following we use the naming convention of ISO about cells.
 A cell is the fundamental unit of storage for the Forth engine.
 Here it is _BITS_ bits (_BITS16_(2)_BITS32_(4) bytes).
 
-Saving the system proceeds as follows:
+The change of the boot-up parameters at
+forthcode({+ORIGIN}), in combination with storing an image on disk 
+goes a long way to extending the system.
+This proceeds as follows:
 forthenumerate
 forthitem
 All user variables are saved by copying them from forthsamp({U0 @@})
@@ -140,8 +152,8 @@ forthendenumerate
 _LINUX_N_({In this ciforth you can do this by the forthcode({SAVE-SYSTEM}) of block 146. 
 It changes the current block file to the program file (using forthcode({BLOCK-EXIT}) and 
  forthcode({BLOCK-INIT}) )
-and performing raw writes (using forthcode({R/W}) ), then switching back to your 
-original block file. })
+and performing raw writes (using forthcode({LINOS}) ),
+then switching back to your original block file. })
 
 @section Memory organization
 
@@ -157,7 +169,6 @@ Its lowest part is used as a scratch area
 forthitem
 Stacks{}_HIGH_BUF_({, disk block buffers}) and terminal
 input buffer. 
-forthitem
 forthenditemize
 
 _LOW_BUF_({The disk block buffers are allocated in the dictionary,
@@ -169,7 +180,7 @@ of no concern for the usage.
 The dictionary area is the only part that is initialised,
 the other parts are just allocated.
 Logically the Forth system consists of these 7 parts.
-forthitemize forthbullet
+forthitemize 
 forthitem
 Boot-up parameters 
 forthitem
@@ -342,18 +353,11 @@ _VERBOSE_(
 it is where forthcode({DP}) points.
 The other areas are not clearly separated at all.
 But even this boundary constantly changes as you add and forget definitions.})
-@subsection                    crap
-Underneath the I/O model has improved. TYPE and EXPECT are drawn into
-the I/O model dependant part. If at all possible CR and EMIT used TYPE
-such that TYPE becomes a natural vectoring point. Similarly KEY 
-tries to use EXPECT, but mostly this is not possible because EXPECT doesnot
-return before the user hits the Enter key.
-
 @section Specific layouts
 @subsection The layout of a dictionary entry
 
 We will divide the dictionary in entries. 
-An forthdefi({dictionary entry}) is a part of the dictionary that
+A forthdefi({dictionary entry}) is a part of the dictionary that
 belongs to a specific word.
 A forthdefi({dictionary entry address}) is a pointer to a dictionary entry.
 In this ciforth it is the lowest addres of the entry, where the name is.
@@ -434,11 +438,11 @@ forthcode({VARIABLE}), forthcode({USER}), or forthcode({CONSTANT}) dnl
 it has a width of one cell, and contains data.
 forthitem
 For a forthdefi({colon definition}) the code field contains
-a pointer to the forthdefi({inner interpreter}) code.
+a pointer to the same code, the forthdefi({inner interpreter}), called forthsamp({DOCOL}).
 The parameter field has a variable length and contains the
 compiled high level code, a sequence of forthdefi({code field address})es.
 forthitem
-For all word defined via forthdefi({<BUILDS ... DOES>}) the code field 
+For all word defined via forthsamp({<BUILDS ... DOES>}) the code field 
 contains the same code, forthsamp({DODOES}).
 The first cell contains a pointer to the forthdefi({high level}) code 
 defined by forthcode({DOES>}) and the remainder is data. 
@@ -446,74 +450,100 @@ A pointer to the data is passed to the forthcode({DOES>}) code.
 forthenditemize
 @subsection Details of memory layout
 
-The disc buffer area is at the upper bound of RAM memory. It is comprised of
-an integral number of buffers, each B/BUF+4 bytes. 
-B/BUF is the number of bytes read from the disc, usually one sector. B/BUF
-must be a power of two (64, 128, 256, 512 or 1024). 
-The constant FIRST has the value of the address of the start of the first
+The disc buffers are mainly needed for source code that is fetched
+from disk were it resides in a file.
+_HIGH_BUF_({
+The disc buffer area is at the upper bound of RAM memory, So it ends at forthcode({EM}) . })
+_LOW_BUF_({
+The disc buffer area is in fact the parameter field of forthcode({FIRST}). })
+It is comprised of
+an integral number of buffers, each forthcode({B/BUF}) bytes plus two cells. 
+forthcode({B/BUF}) is the number of bytes read from the disc in one go{}_VERBOSE_({, 
+originally thought of as one sector}).
+In ciforth forthcode({B/BUF}) is always the size of one screen according to ISO :
+1024 bytes.
+The constant forthcode({FIRST}) has the value of the address of the start of the first
 buffer. 
-LIMIT has the value of the first address beyond the top buffer. The distance
-between FIRST and LIMIT must be N*(B/BUF+4) bytes. 
-This N must be two or more. 
+ forthcode({LIMIT}) has the value of the first address beyond the top buffer. 
+The distance between forthcode({FIRST}) and forthcode({LIMIT}) is a multiple of 
+forthcode({B/BUF CELL+ CELL+}) bytes. 
 
-I set the number of disk buffers at 2, the minimum possible. Even a floppy
-is fast enough that working with blocks from memory has no merits. It is
-dangerous because during testing you never know what was saved and what not.
-The mass storage is easily the most crappy part of the fig model. What
-little advantage it had, is no longer applicable. Interestingly this block
-system is copied verbatim into ANS. 
-32 bits systems can enlarge the dictionary by redefining the stacks and the
-terminal input buffer positions. The block buffers are in the way. So I put
-them in the dictionary space. In fact the block buffers have become the 
-data field of FIRST.
+I set the number of disk buffers at 2, the minimum possible. 
+_VERBOSE_(
+{Even a floppy
+is fast enough that working with blocks from memory has no merits. 
+It is
+dangerous because during testing you never know what was saved and what not.})
 
-Constant B/SCR has the value of the number of buffers per screen; 
-i.e. 1024 / B/BUF. 
+The user area is 100H bytes, most of it unused. 
+There is no word to add user variables. 
+_VERBOSE_(
+{If you need multi-tasking you have to allocate a separate user area for each task.})
+_HIGH_BUF_({
+The user area is just under the disc buffers. So it ends at forthcode({FIRST}) . })
+_LOW_BUF_({
+The user area is at the upper bound of RAM memory. So it ends at forthcode({EM}) . })
 
-The user area must be at least 34 bytes; 48 is more appropriate. In a 
-multi-user system, each user has his own user area, for his copy of system 
-variables. This method allows reentrant use of the Forth vocabulary. 
-
-The terminal input buffer is decimal 80 bytes (the hex 50 in QUERY) plus 2
-at the end. If a different value is desired, change the limit in QUERY. A
-parameter in the boot-up literals locates the address of this area for TIB.
-The backspace character is also in the boot-up origin parameters. It is
-universally expected that "rubout" is the backspace. 
-
+The terminal input buffer  and the return stack share an area of
+_BITS16_(0A0H)_BITS32_(010000H) bytes.
+The lower half is intended for the terminal input buffer, and the higher part
+is used for the return stack, growing down from the end.
+The initial stackpointer is in variable forthcode({R0}). 
 The return stack grows downward from the user area toward the terminal
-buffer. Forty-eight bytes are sufficient. The origin is in R0 (R-zero) and
-is loaded from a boot-up literal. 
+buffer. 
+_VERBOSE_(
+{If you need multi-tasking you have to allocate a separate return stack
+area for each task. 
+If the task also asks for input, you need also an extra terminal input buffer.})
 
 The computation stack grows downward from the terminal buffer toward the
-dictionary which grows upward. The origin of the stack is is in variable S0
-(S-zero) and is loaded from a boot-up literal. 
-
-After a cold start, the user variables contain the addresses of the above
-memory assignments. 
-An advanced user may relocate while the system is running. A newcomer should
-alter the startup literals and execute COLD. The word +ORIGIN is provided
-for this purpose. +ORIGIN gives the address byte or word relative to the
-origin depending on the computer addressing method. 
-
-Despite all the talk about user variables, I am not aware that a multi-user
-fig forth existed, ever. The above block policy is not compatible with 
-multi-user (but the actual code is not worse than it ever was, and you can
-rebuilt it with 1000 block buffers if you like.)
-
-Rubout is best left to the EXPECT code. Remember, a Linux itself knows the
-rubout key for any of its 500+ known terminal types and isn't it nice in
-MSDOS that F3 gets the previous command back for you? 
-If EXPECT builds up a line from separate key strokes, and if you ever want
-to change the rubout key, just change the RUBOUT user variable. 
+dictionary which grows upward. 
+The initial stackpointer is in variable forthcode({S0}). 
 
 
-CUSTOMISING
+During a cold start, the user variables are initialised from the bootup parameters
+to contain the addresses of the above memory assignments. 
+They can be changed. 
+The safest way is to change the bootup parameters and
+perform forthcode({COLD}). forthxref({+ORIGIN}).
+But if you are careful you can change the system on the fly.
 
-The name USER reflects that more than one user could use the dictionary
-and users could share the background storage, provided certain precautions
-are taken. About this you can forget.
-What you can do is, store back you user variables in the boot-up 
-parameters as follows
-forthsamp({USVA @   ' USVA @   +ORIGIN !})
-where forthvar({USVA}) is the user variable which value you want to keep.
+
+@subsection  Terminal I/O and vectoring.
+It is usefull to be able to change the behaviour of I/O words that 
+they put their output to a different channel, such as output to the 
+printer instead of to the console.
+In general this is called forthdefi({vectoring}).
+Remember that in normal Forth system, 
+all printing of numbers is to the terminal, 
+not to a file or even a buffer.
+
+_HOSTED_LINUX_({On a linux system the need for this is low, 
+because of the redirection facilities available.})
+_HOSTED_MSDOS_({On a MSDOS system the need for this should be low, 
+because of the redirection facilities available. 
+However they are buggy.})
+_BOOTED_({On a standalone system the need for this is high, 
+because there is no redirection.})
+For this reason character output forthcode({CR}), forthcode({EMIT}) and 
+forthcode({TYPE}) all go through a common word that can be changed.
+_LINUX_N_({For this ciforth it is forthcode({TYPE}) }).
+There still are no provisions to revector forthcode({TYPE}) by high level code.
+If you have a forthdefi({code word}) that outputs like forthcode({TYPE}),
+you can copy the content of its 
+forthdefi({code field address}) to the code field addres of forthcode({TYPE}).
+
+A similar technique cannot be used on the input side, 
+because keys entered during EXPECT are subject to correction
+until <RET> has been pressed.
+_HOSTED_LINUX_({On this linux ciforth forthcode({EXPECT}) is left to the
+operating system, such that inputting to ciforth has the same 
+look and feel as other input.
+Text can be pasted in with the mouse, etc. 
+Consequently forthcode({RUBOUT}) is not used.
+}).
+
+
+
+
 
