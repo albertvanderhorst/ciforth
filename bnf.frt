@@ -280,6 +280,28 @@ BNF: `and_then'  `and' `then' ;BNF
 ( Get the file to the buffer )
 : GET-FILE OPEN-LINUX READ-FILE CLOSE-FILE ;
 
+( Prints the status of the parsing and the name of the executing        )
+( word from its PARAMETER field. Intended to run at the end of a bnf.   )
+: END-REPORT   CR ID. &: EMIT SUCCESS @ IF
+     ."  MATCHED with ..." IN @ 20 - 0 MAX TIB @ + 20 TYPE &| EMIT 
+   ELSE DROP ." FAILED" THEN ;
+
+( Adorn the ;BNF word with a debug report. )
+: ;BNF 
+    LATEST [COMPILE] LITERAL COMPILE END-REPORT [COMPILE] ;BNF
+; IMMEDIATE
+
+( Prints what we are going to parse and the name of the executing       )
+( word from its PARAMETER field. Intended to run at the start of a bnf. )
+: START-REPORT CR ID. &: EMIT 
+    ."  trying to match |" TIB @ IN @ + 20 TYPE ." ...  at "  IN ? ; 
+
+( Adorn the BNF: word with a debug report. )
+: BNF: 
+    [COMPILE] BNF:
+    LATEST [COMPILE] LITERAL COMPILE START-REPORT 
+; IMMEDIATE
+
 ( ################# Simple renames ####################################### )
 ( This must be done at the last minute, because it hides the Forth      )
 ( comment sign.                                                         )
@@ -289,16 +311,4 @@ BNF: `and_then'  `and' `then' ;BNF
 : digit COMPILE digit-symbol ; IMMEDIATE
 : letter COMPILE letter-symbol ; IMMEDIATE
 
-: ;BNF 
-    COMPILE CR COMPILE SUCCESS COMPILE ? 
-    LATEST [COMPILE] LITERAL COMPILE ID. [COMPILE] ;BNF
-; IMMEDIATE
-
-
-: BNF: 
-    [COMPILE] BNF:
-    COMPILE CR &? [COMPILE] LITERAL COMPILE EMIT 
-    COMPILE IN COMPILE ?
-    LATEST [COMPILE] LITERAL COMPILE ID. 
-; IMMEDIATE
 
