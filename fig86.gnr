@@ -2663,6 +2663,9 @@ CODE_HEADER({BIOS},{BIOS})
         PUSH     SI      ;{ Save Forth registers. NEEDED? }
         PUSH     BP
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
+        MOV     _CELL_PTR[SPSAVE],STACKPOINTER
+        AND     AX,AX
+        MOV     STACKPOINTER,AX
         JMPHERE_FROM_PROT
         XCHG    {SI},{AX}
 RQBIOS: INT(0)          ;{ Request number to be overwritten.}
@@ -2671,6 +2674,7 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         XCHG    {SI},{AX}  ;{ Save AX in (still free) SI     }
         JMPHERE_FROM_REAL
         XCHG    SI,AX
+        MOV     STACKPOINTER,_CELL_PTR[SPSAVE]
         POP     BP      ;{ Restore Forth registers. NEEDED? }
         POP     SI      ;{INTERPRETER PNTR}
         PUSH     AX
@@ -2679,6 +2683,7 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         PUSH     DX
         PUSH     DI     ;{ i.e. flags }
         _NEXT
+SPSAVE: DC       0H
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
 ;{ Generic call on MSDOS/MS WIndows2000}
