@@ -163,14 +163,14 @@ DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 _USEBIOS_({
 DRIVE   EQU     0       ;{ Use floppy A for blocks.}
 _COMMENT
-DRIVE   EQU     80      ;{ Use drive C for blocks.}
+DRIVE   EQU     80H     ;{ Use drive C for blocks.}
 _ENDCOMMENT
 });_END_({_USEBIOS_})
 
 BPS     EQU     512             ;{Bytes/sector, common to all of MSDOS}
 SPB     EQU     KBBUF/BPS
 ;
-_RWHD_({
+_RWLBA_({
 ;{ PHYSICAL DISK PARAMETERS}
 ;{Most of this makes no sense but it is required in a bootsector,}
 NFAT    EQU     0     ;{ Number of FATS}
@@ -181,9 +181,9 @@ SPT     EQU     0     ;{Sectors/track}
 HEADS   EQU     0     ;{Number of heads }
 TRKS    EQU     0    ;{Number of tracks}
 SPDRV   EQU     HEADS*TRKS*SPT    ;{ sectors/drive}
-});_END_({_RWHD_})
+});_END_({_RWLBA_})
 
-_RWFD_({
+_RWSECTRK_({
 ;{ PHYSICAL DISK PARAMETERS}
 ;
 ;{ Disk parameters: }
@@ -204,41 +204,42 @@ HEADS   EQU     2       ;{Number of heads }
 NFAT    EQU     2       ;{ Number of FATS}
 SECROOT EQU     ?       ;{ Sectors for root directory entry.}
 SECFAT  EQU     ?       ;{ Sectors per FAT}
-MEDIA   EQU    F0H      ;{ Descriptor byte. Anachronism.}
+MEDIA   EQU    0F0H      ;{ Descriptor byte. Anachronism.}
 _ENDCOMMENT
 
 _COMMENT
 ;{ Hard drive }
-;{This works supposedly with all reasonably modern drives, }
-;{ but has the 1Gbyte limit.}
-TRKS    EQU     1024      ;{Number of tracks}
+;{This works supposedly with all reasonably modern drives. }
+TRKS    EQU     1       ;{Number of tracks, dummy}
 SPT     EQU     63      ;{Sectors/track}
-HEADS   EQU     16      ;{Number of heads }
+HEADS   EQU     255     ;{Number of heads }
 NFAT    EQU     2       ;{ Number of FATS}
-SECROOT EQU     ?       ;{ Sectors for root directory entry.}
-SECFAT  EQU     ?       ;{ Sectors per FAT}
-MEDIA   EQU    F9H      ;{ Descriptor byte. Anachronism.}
+SECROOT EQU     0       ;{ Sectors for root directory entry, dummy.}
+SECFAT  EQU     0       ;{ Sectors per FAT, dummy}
+MEDIA   EQU    0F9H      ;{ Descriptor byte. Anachronism.}
 _ENDCOMMENT
 
 ;{ Bios specific equates.}
 BOOTADDRESS     EQU     M4_BIOSBOOT ;{ PC jumps to 0:7C00 to boot}
-SPDRV   EQU     HEADS*TRKS*SPT    ;{ sectors/drive}
         ;{ Skip boot sector,fats and root dir and first sector of file.}
+_RESPECTDOS_({
 SECSTRT EQU     1+NFAT*SECFAT + SECROOT + 1
-_COMMENT
-;{ Alternative if the disk need not be recognized by MSDOS}
+});_END_({_RESPECTDOS_})
+_NO_RESPECTDOS_({
+;{ The disk need not be recognized by MSDOS}
 ;{ Usable for generating a bootable floppy simple.}
+;{ Always used for hard disk.}
 SECSTRT EQU     1
-_ENDCOMMENT
+});_END_({_NO_RESPECTDOS_})
 ;{ END  OF PHYSICAL DISK PARAMETERS}
-});_END_({_RWFD_})
-_BOOTHD_({
+});_END_({_RWSECTRK_})
+_BOOTLBA_({
 ;{ The first gigabyte of the disk is divided chunks, }
 ;{ the size of the core memory to alternately boot from, as a backup.}
 CHUNKSIZE       EQU     80H * 100000H ;{ 128 Mb. }
 ;{Size in sectors. }
 MAXCHUNK        EQU    1024 *100000H /CHUNKSIZE
-});_END_({_BOOTHD_})
+});_END_({_BOOTLBA_})
 
 _HOSTED_DPMI_({
 ;{DPMI segment defines.}
@@ -316,7 +317,7 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.})
     _ABSOLUTELOAD_({ ORG     M4_ORG})
 ORG0:
 
-_BOOTFD_({
+_BOOTSECTRK_({
         JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -326,7 +327,7 @@ LBPS    DW         BPS
 RESSECTORS  DW     01H
         DB         NFAT
         DW BPS*SECROOT/32
-        DW         SPDRV
+        DW         HEADS*TRKS*SPT    ;{ sectors/drive}
         DB         MEDIA
         DB         SECFAT, 0H
 LSPT    DW         SPT
@@ -354,7 +355,7 @@ READSECTOR:
         DIV     CH
         MOV     DH,AH   ;{ Head number}
         MOV     CH,AL   ;{ Only small disks <256 cylinders}
-        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        MOV     DL,DRIVE
         MOV     AX,0201H   ;{ Read absolute one sector}
         INT(13H)                 ;{BIOS disk read function}
         POP     BX
@@ -365,7 +366,7 @@ RETRY:
         CALL    DISPLAYW
         XOR     AX,AX   ;{ Reset}
         MOV     AL,' '
-        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        MOV     DL,DRIVE
         INT(13H)                 ;{BIOS disk read function}
         CALL    DISPLAYW
         MOV     AL,' '
@@ -384,7 +385,7 @@ BOOT:
         MOV     AL,'F'
         CALL    DISPLAY
         MOV     AH,00   ;{ Reset}
-        MOV     DL,00            ;{Drive 0 (floppy 1)}
+        MOV     DL,DRIVE
         INT(13H)                 ;{BIOS disk read function}
         JB      RETRY
 
@@ -405,9 +406,9 @@ BEGIN1: CALL    READSECTOR
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
-});_END_({ _BOOTFD_})
+});_END_({ _BOOTSECTRK_})
 
-_BOOTHD_({
+_BOOTLBA_({
         JMP     SHORT BOOT
         NOP
         ;{ MSDOS programmers reference (thru 6, 3.9)}
@@ -494,7 +495,7 @@ ENDIF:  CALL    HDREAD
         CALL    DISPLAYCR
         JMP     ENDBOOT
 
-});_END_({ _BOOTHD_})
+});_END_({ _BOOTLBA_})
 _BOOTED_({
 ; Debug code, could be dispensed with in an ideal world.
 DISPLAYCR:
@@ -1693,7 +1694,7 @@ _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
 });_END_({_CLASSIC_})
-_RWFD_({
+_RWSECTRK_({
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
 ;{ within the forth system itself. }
@@ -1702,12 +1703,12 @@ _RWFD_({
 ;       You need a filler file of one sector,
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
         DC      (SECSTRT+((RELATIVE_WRT_ORIG(TEXTEND)-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
-});_END_({_RWFD_})
-_RWHD_({
+});_END_({_RWSECTRK_})
+_RWLBA_({
 ;{ This will reserve place for the system itself, on the first part of a }
 ;{ hard disk. No problem to just reserve whole memory.}
         DC      64      ;{ Kbyte.}
-});_END_({_RWHD_})
+});_END_({_RWLBA_})
 ;
         DC      0, 0            ;{ WHERE             12 13 }
         DC      0, STRTIB       ;{REMAINDER   14 15 }
@@ -5633,7 +5634,7 @@ HEADER({.LINE},{DLINE},{DOCOL})
         DC      SEMIS
 ;
 ;
-worddoc( {},{ERRSCR},{error-screen},{--- addr},{},
+worddoc( {ERRORS},{ERRSCR},{error_screen},{--- addr},{},
 {A variable containing the address of the number of the screen
 from which messages are offset. Messages
 correspond with lines and the offset
@@ -6285,7 +6286,7 @@ worddoc( {OPERATINGSYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},
 registers forthsamp({AX BX CX DX}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
 of the processors flag register. This draws upon all facilities made
-available by MSDOS. _BOOTFD_({This works in this standalone Forth, but
+available by MSDOS. _BOOTSECTRK_({This works in this standalone Forth, but
 only if it is started from MSDOS.})
 },{{BIOS}}, {}, enddoc)
 _NORMAL_BIOS_({
@@ -7647,7 +7648,7 @@ HEADER({SEC/BLK},{SPBLK},{DOCON}, SPB)
 ;
 });_END_({_USEBIOS_})
 ;
-_RWFD_({
+_RWSECTRK_({
 worddoc( {STORAGE},{SEC-RW},{sector_read_write},{com addr blk --},{},
 {Performs the forthcode({BIOS}) function forthsamp({com}) , for
 a single sector
@@ -7710,8 +7711,8 @@ RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   ;{This  buffer}
         DC      QERR    ; { 8 or 9. }
 RSLW5:  DC      SEMIS
 ;
-});_END_({ _RWFD_})
-_RWHD_({
+});_END_({ _RWSECTRK_})
+_RWLBA_({
 
 ;{ Warning : if this LBA is used apart from by R/W}
 ;{ the fields marked default must be restored.}
@@ -7819,7 +7820,7 @@ RSLW4:
         DC      QERR    ;{8 or 9 }
         DC      SEMIS
 ;
-});_END_({ _RWHD_})
+});_END_({ _RWLBA_})
 ;
 _LOAD_({
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
@@ -9077,8 +9078,8 @@ forthdefi({stack pointer})'s can be altered.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({STORAGE},{ },
 {The wordset forthsamp({STORAGE}) contains words to input and output
-to the mass storage, in this ciforth _BOOTFD_({ to the hard disk})
-_BOOTHD_({to the hard disk}) _HOSTED_({to the file
+to the mass storage, in this ciforth _BOOTSECTRK_({ to the disk, by sector and track, })
+_BOOTLBA_({to the hard disk}) _HOSTED_({to the file
 forthfile({BLOCKS.BLK}) , and to other files}).
 They are underlying the forthsamp({SCREEN}) facilities.},
 {},{},{},{}, {}, enddoc)
