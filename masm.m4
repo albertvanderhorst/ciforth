@@ -37,4 +37,3 @@ define({_ENDCOMMENT},~
 )dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
-define({M4_EM},0FFFEH)
