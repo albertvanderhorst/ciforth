@@ -84,5 +84,7 @@ alone.asm : fig86.alone.asm ; cp $+ $@
 
 zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
 
+releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
+
 # Add termporary stuff for testing, if needed.
 include test.mak
