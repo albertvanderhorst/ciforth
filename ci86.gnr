@@ -117,6 +117,8 @@ _FEWBLOCKS_({PMASK   EQU     0FFH    ;{ Allow to access only 256 blocks from OFF
 ;
 ABL     EQU     20H     ;{ SPACE}
 ACR     EQU     0DH     ;{ CR}
+ACO     EQU     7BH     ;{ CURLY BRACKET OPEN }
+ACC     EQU     7DH     ;{ CURLY BRACKET CLOSE }
 ADOT    EQU     2EH     ;{ PERIOD}
 ALF      EQU     0AH     ;{ LINE FEED, USED INTERNALLY AS}
                         ;{ LINE ENDER}
@@ -3366,7 +3368,7 @@ code word, to the high level code for a colon-definition, and
 to the forthcode({DOES>}) pointer for a word build using
 forthcode({CREATE}) . Normally this is the area behind the
 header, found via forthcode({>PHA}) . },
-{{'},{>CFA},{>FFA},{>LFA},{>NFA},,{>SFA},{>PHA}},
+{{'},{>CFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
 {{ "APE" (CREATE) HERE ' APE >DFA @ = .},{_T_}},
 enddoc)
 HEADER({>DFA},{TDFA},{DOCOL})
@@ -4602,7 +4604,7 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 
         DC      COMMA   ; {Name field.}
 
-_SOURCEFIELD_({ DC      ZERO, COMMA  ; {Source field.}
+_SOURCEFIELD_({ DC      BLK, FETCH, COMMA  ; {Source field.}
 },{dnl})
         DC      RDROP
         DC      SEMIS
@@ -6028,10 +6030,10 @@ BLK2:
 worddocsafe( {SCREEN},{-->},{next_screen},{},{I,L0},
 {Continue interpretation with the next disc screen. If the
 current input source is not from a block, a crash will ensue.
-If there is an exception in this new screen, that screen may
-remain locked until a forthcode({QUIT}) .
-},
-{{LOAD}},
+If this new screen is left by throw of an exception, the
+screen may remain locked until a forthcode({QUIT}), or any
+uncaught exception. },
+{{LOCK},{CATCH},{LOAD}},
 {{." interactive"},{interactive}},
 enddoc)
 HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
@@ -8589,14 +8591,16 @@ worddocsafe( {STACKS},{.S},{dot_s},{from to --},{},
 enddoc)
 HEADER({.S},{DOTS},{DOCOL})
         DC      CR
-        _STRINGINLINE({S: })
-        DC      LTYPE
+        DC      LIT, 'S', EMIT
+        DC      LIT, ACO, EMIT
+        DC      SPACE
         DC      SPFET, SZERO, FETCH
 DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
         _0BRANCH(DOC1)
         DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
         _BRANCH(DOC2)
 DOC1:    DC DROP, DROP
+        DC      LIT, ACC, EMIT
         DC SEMIS
 ;
 worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},( addr n -- i*x t/f ),{ISO},
