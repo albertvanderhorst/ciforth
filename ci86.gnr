@@ -1805,23 +1805,14 @@ _VERBOSE_({So no leading delimiters are skipped.})},
 {{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 HEADER({(PARSE)},{PPARS},{DOCOL})
         DC      SRC, CELLP, TFET
-        DC TOR
-PPARS1: DC LDUP, RR, LSUB
-        _0BRANCH(PPARS2)
-        DC OVER, OVER
-        _ISO_IN_({DC      SRC, FETCH, PLUS})
-        DC CFET, LSUB
-        _0BRANCH(PPARS2)
-        DC ONEP
-        _BRANCH(PPARS1)
-PPARS2: DC SWAP, DROP
-        DC      RDROP
-        DC      LIN, FETCH
-        DC      SWAP
-        DC      LDUP, LIN, STORE
-        DC      INBRS, DROP, DROP
         DC      OVER, LSUB
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
+        DC      ROT, SSPLIT, TSWAP
+        DC      ZEQU
+        _0BRANCH(PPARS8)
+        DC      DROP, SRC, CELLP, FETCH
+PPARS8: _ISO_IN_({DC      SRC, FETCH, LSUB })
+        DC      SRC, CELLP, CELLP, STORE
         DC SEMIS
 ;
 worddoc( {PARSING},{SRC},{s_r_c},{addr --- },{},
