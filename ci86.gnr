@@ -872,9 +872,12 @@ _SWITCH_({
 REP1:
 _BITS32_({
         INC AX                  ;{ Wait until a20 works(!)}
-        MOV [M4_LOADADDRESS],AX
-        CMP AX,[100000H + M4_LOADADDRESS] ; { 2^20 beyond}
+        MOV [TESTVALUE],AX
+        CMP AX,[100000H + TESTVALUE] ; { 2^20 beyond}
         JE REP1
+        JMP PASTTEST
+TESTVALUE: DD   0
+PASTTEST:
 });_END_({ _BITS32_})
 });_END_({ _SWITCH_})
 
@@ -2405,9 +2408,10 @@ CODE_HEADER({C!},{CSTOR})
         _NEXT
 ;
 worddoc( {MEMORY},{2!},{two_store},{addr--- x1 x2},{ISO},
-{Store a pair of _BITS_ bits values forthsamp({x1}) forthsamp({x2}) to
-consecutive cells at forthvar({addr}) . forthsamp({x2}) is stored at
-the lowest address. },{{2@},{!},{C!}},
+{Store a pair of _BITS_ bits values forthsamp({x1})
+forthsamp({x2}) to consecutive cells at forthvar({addr}) .
+forthsamp({x2}) is stored at the lowest address.
+},{{2@},{!},{C!}},
 {{." Via 2@"},{Via 2@}},
 enddoc)
 CODE_HEADER({2!},{TSTOR})
@@ -2423,7 +2427,7 @@ worddoc( {MEMORY},{WITHIN},{within},{n1 n2 n3 --- f},{ISO},
 the range forthvar({n2}) (inclusive)
 to forthsamp({n3}) (non-inclusive).
 This works for signed as well as unsigned numbers.
-Shorthand for: forthsamp({OVER - >R - RU<}) },
+Shorthand for: forthsamp({OVER - >R - R U<}) },
 {{<},{U<}},
 {{ 1 1 3 WITHIN .},{_T_},
 { 2 1 3 WITHIN .},{_T_},
@@ -8145,9 +8149,10 @@ DC      SEMIS
 ;
 worddoc( {FORMATTING},{<#},{less_number_sign},{},{ISO,FIG,L0},
 {Setup for pictured numeric output formatting using the words:
-   forthcode({<#}) forthcode({#}) forthcode({#S}) forthcode({SIGN}) forthcode({#>})
-The conversion is done on a double number producing text
-growing down from forthcode({PAD}) .},
+forthcode({<#}) forthcode({#}) forthcode({#S})
+forthcode({SIGN}) forthcode({#>}) The conversion is done on a
+double number producing text growing down from forthcode({PAD})
+.},
 {{DPL},{HLD},{HOLD},{FLD}},
 {
  {!CSP 123.456 <# #> TYPE ?CSP}, {},
@@ -8871,7 +8876,7 @@ worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
 i.e. it gets a word from the forthdefi({current input source})
 and interprets or compiles it, advancing the
-_CIF_IN_({forthcode({IN})}) _ISO_IN_({forthcode({>IN})}) dnl
+_CIF_IN_({forthcode({IN})}) _ISO_IN_({forthcode({>IN})})
 pointer. The wordset forthsamp({PARSING}) contains the words
 used by this interpreter and other words that consume
 characters from the input source. In this way the outer
