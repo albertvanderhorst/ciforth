@@ -1,5 +1,4 @@
 \ Copyright 2001: Albert van der Horst, HCC FIG Holland by GNU Public License
-\ $Id$
 
 
 \ Diagnostic program.
@@ -18,6 +17,7 @@
 
 : Notice1$      "This program is Copyright 2001 by the foundation Dutch Forth Workshop" ;
 : Notice2$      "dpp.frt (c) 2001 It may be freely copied under the GNU Public License" ;
+: Notice3$      " $Id$ " ;
 
 
 REQUIRE Z$@
@@ -59,7 +59,7 @@ LANGUAGE-FILE INCLUDED
 
 
 : WELCOME
-    Notice1$ TYPE CR Notice2$ TYPE CR CR CR
+    Notice1$ TYPE CR Notice2$ TYPE CR Notice3$ TYPE CR CR CR
     Welcome$  TYPE CR CR
 ;
 
@@ -606,10 +606,9 @@ DATABASE CONSULTING STRATEGY
 
 \ For the GUESSED diagnosis and QUESTION : it MAKES sense to ask
 \ it to distinguish between diagnosis and the current outcome.
-: ?SELECTABLE DUP ?POSED IF 2DROP 0 ELSE
-     DUP >R ANSWER-FOR   R> ANSWER-VECTOR @ ^
+: ?SELECTABLE
+    DUP >R ANSWER-FOR   R> ANSWER-VECTOR @ ^
     MAX-ANSWER * + CELLS MAY-BE-DISTINGUISHING + @
-    THEN
 ;
 \D ." ?SELECTABLE Expect 0 0 : " 1 0 ?SELECTABLE . DEPTH . CR
 
@@ -636,13 +635,13 @@ DATABASE CONSULTING STRATEGY
 : #SELECTABLE 0 #QUESTIONS @ 0 DO OVER I ?SELECTABLE IF 1+ THEN LOOP SWAP DROP ;
 
 \ For GUESSED diagnosis return an existing QUESTION that
-\ will make a distinction between the it and the answer vector.
-\ Or NONE.
+\ will make a distinction between it and the answer vector.
+\ Or ``NONE''.
 : SELECT-EXISTING ^
      DUP #SELECTABLE 0 > IF
     CR PossibleExisting$ TYPE CR CR
     #QUESTIONS @ 0 DO DUP I ?SELECTABLE IF I PRINT-FOR-SELECT THEN LOOP
-    CR CR AnyGoodQuestion$ GET-ANSWER A_YES = IF GET-EXISTING ELSE NONE THEN
+    CR CR AnyGoodQuestion$ GET-ANSWER A_YES = IF GET-EXISTING ELSE DROP NONE THEN
     ELSE DROP NONE THEN ^
 ;
 
@@ -673,7 +672,7 @@ DATABASE CONSULTING STRATEGY
 : FILL-IN-DB >R
     R@ A_YES = IF NOES 2 SWAP +! ELSE
     R@ A_NO = IF YESSES 2 SWAP +! ELSE
-    2DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
+    2DROP NoGoodEeh1$ TYPE CR  NoGoodEeh2$ TYPE CR
     THEN THEN
 RDROP ;
 
