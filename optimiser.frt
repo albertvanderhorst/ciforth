@@ -288,7 +288,8 @@ THEN RDROP ;
 
 \ Annihilate as much as possible from SEQUENCE.
 \ Return recompiled SEQUENCE.
-: ANNIHILATE HERE SWAP   DUP FILL-BRANCHES
+\ Return recompiled SEQUENCE (which is in fact the same address.)
+: ANNIHILATE DUP   DUP FILL-BRANCHES
     BEGIN ANNIHILATE-ONE DUP ?NOT-EXIT 0= UNTIL DROP
 ;
 
