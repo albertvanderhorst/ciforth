@@ -2081,8 +2081,10 @@ worddoc( {CONTROL},{EXIT},{semicolon_s},{},{ISO},
 { Stop interpretation of the current definition. The return
 stack must not be engaged, such as between forthcode({>R}) and
 forthcode({R>}) , or forthcode({DO}) and forthcode({LOOP}) . In
-ciforth it can also be used to stop interpretation from a
-string, block or file. forthcode({EXIT}) is also the run-time
+ciforth it can also be used to terminate
+interpretation from a
+string, block or file, or a line from the current input stream.
+forthcode({EXIT}) is also the run-time
 word compiled at the end of a colon-definition which returns
 execution to the calling proceedure.},
 {},
@@ -3946,7 +3948,7 @@ worddoc( {STRING},{$S},{string_split},{sc ch -- sc1 sc2},{},
 forthvar({sc}) and split it at that address. Return the strings
 after and before forthvar({ch}) into forthvar({sc1}) and
 forthvar({sc2}) respectively. If the character is not present
-forthvar({sc1}) is a null string _VERBOSE({{(its address is
+forthvar({sc1}) is a null string _VERBOSE_({{(its address is
 zero)}}) and forthvar({sc2}) is the original string.
 _VERBOSE_({{Both forthvar({sc1}) and forthvar({sc2}) may be
 empty strings (i.e. their count is zero), if forthvar({ch}) is
@@ -5993,7 +5995,7 @@ Under DPMI we have to do this via a special call to the
 unadorned , which is in this case protected mode, interrupt 31H function 0300H.
 In behalf of this registers are saved and restored in forthcode({REG-SET}) .
 Unadorned calls to interrupt 31H (DPMI) are available as forthcode({BIOSP}) .})
-_VERBOSE({ forthsamp({1 AND}) leaves a zero if the call was successful.})
+_VERBOSE_({ forthsamp({1 AND}) leaves a zero if the call was successful.})
 },{{BDOS}}, {}, enddoc)
 _NORMAL_BIOS_({
 ;{ Because there is no such thing as a variable interrupt:}
@@ -6111,7 +6113,7 @@ worddoc( {OPERATINGSYSTEM},{BIOSP},{biosp},{a b c d di i---ar br cr dr fl},{},
 forthsamp({i}) with forthsamp({a b c d di}) in registers
 forthsamp({AX BX CX DX DI}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
-content of the processors flag register. _VERBOSE({
+content of the processors flag register. _VERBOSE_({
 forthsamp({1 AND}) leaves a zero if the call was successful.})
 },{{BIOS},{BDOS}}, {}, enddoc)
 ; Wanted here is a generic call on BIOS. A boon for experimenters.
@@ -6345,10 +6347,10 @@ It doesn't contain a trailing forthkey({LF}).
 But possibly a trailing forthkey({RET}) (0DH).
 The
 editing functions are the same as with forthcode({ACCEPT}) .
-_VERBOSE({{This is lighter on the system and sometimes easier
+_VERBOSE_({{This is lighter on the system and sometimes easier
 to use than forthcode({ACCEPT}).
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning.}})
+forthcode({TIB @}), but not necessarily at the beginning. }})
 },
 {{KEY},{KEY?},{ACCEPT}},
 {
@@ -6445,9 +6447,14 @@ _LINUX_C_({
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Input a line
 until a "return") from the operators terminal, and leave it as
-a string constant. It doesn't contain a trailing forthey({LF}).
+a string constant.
+It doesn't contain the forthkey({LF}),
+but the buffer still does and after forthcode({1+}) the string
+contains forthkey({LF}).
+_VERBOSE({{This is lighter on the system and sometimes easier
+to use than forthcode({ACCEPT})
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning.
+forthcode({TIB @}), but not necessarily at the beginning. }})
 },
 {{ACCEPT},{EVALUATE}},
 {{." interactive"},{interactive}},
@@ -6533,11 +6540,15 @@ HEADER({ACCEPT},{ACCEP},{DOCOL})
         DC      SEMIS
 ;
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
-{Accept characters from the terminal, until a forthkey({RET})
+{Accept characters from the terminal, until a forthkey({LF})
 is received and return the result as a constant string
-forthvar({sc}). It doesn't contain the forthkey({RET}). The
+forthvar({sc}).
+It doesn't contain the forthkey({LF}),
+but the buffer still does and after forthcode({1+}) the string
+contains forthkey({RET}).
+The
 editing functions are the same as with forthcode({ACCEPT}) .
-_VERBOSE({{This is lighter on the system and sometimes easier
+_VERBOSE_({{This is lighter on the system and sometimes easier
 to use than forthcode({ACCEPT}) }})
 },
 {{KEY},{KEY?},{ACCEPT}},
@@ -6927,8 +6938,10 @@ worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 until a forthkey({RET)}) from the input terminal, and leave it as
 a string constant. It doesn't contain a trailing forthkey({LF}).
 But possibly a trailing forthkey({RET}) (0DH).
+_VERBOSE({{This is lighter on the system and sometimes easier
+to use than forthcode({ACCEPT})
 Text is probably present in the buffer address contained in
-forthcode({TIB @}), but not necessarily at the beginning.
+forthcode({TIB @}), but not necessarily at the beginning. }})
 Editing is done locally observing forthcode({RUBOUT}) .
 },
 {{ACCEPT},{EVALUATE}},
@@ -7558,10 +7571,11 @@ worddoc( {STORAGE},{LBAPAR},{l_b_a_params},{--},{},
 { A data structure used by R/W , that also must be filled in for disk
 operations forthcode({RBLK}) and forthcode({WBLK}) . Do not touch the
 first 16-bits word. The second word is the number of sectors to be
-transferred. The third and fourth word contain a long real pointer
-where the data comes from or goes to. The fourth word and fifth word
-is as 32 bit counter for the sector on the disc. If a 2 Terabyte disk
-is not enough this can be extended into the sixth and seventh word.
+transferred. The third and fourth word contain a long real mode
+pointer where the data comes from or goes to. The fourth word
+and fifth word is as 32 bit counter for the sector on the disc.
+If a 2 Terabyte disk is not enough this can be extended into
+the sixth and seventh word.
 Word 1,2,4 6 and 7 must be restored to their previous value after
 calling forthcode({RBLK}) and forthcode({WLBK}) so as not to interfere
 with forthcode({R/W}). },
@@ -7626,14 +7640,15 @@ bit 1 (carry flag) indicates an error.
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
         DC      TOR
-        DC      LIT, SPB, STAR  ;{ Sector number}
         DC      SWAP
 ;       On a big endian machine the following code is 16/32 bit clean.
 ;       The 2 m.s. bytes are overwritten by the next store.
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS })
+         _SWITCH_({DC   LIT, A_FORTH0, PLUS })
+        DC      LDUP, LIT, 0FH, LAND
         DC      LBA, LIT, 4, PLUS, STORE   ; { Address }
-        DC      LIT, _SWITCH_({SWITCHSEGMENT})
+        DC      LIT, 4, RSHIFT
         DC      LBA, LIT, 6, PLUS, STORE
+        DC      LIT, SPB, STAR  ;{ Sector number}
         DC      LBA, LIT, 8, PLUS, STORE ; { Sector number. }
         DC      LBA
         DC      RR
