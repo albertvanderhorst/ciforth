@@ -2198,13 +2198,6 @@ _COMMENT
 _ENDCOMMENT
 ;{       If this is there it is a beta release}
 	_STRING({IBM-PC $RCSfile$ $Revision$ })
-        DC      LIT,'Q'    ; To be removed 
-        DC      EMIT       ; To be removed 
-        DC      KEY        ; To be removed 
-        DC      EMIT       ; To be removed 
-        DC      QTERM
-        DC      DOT
-        DC      DOT
 	DC	FORTH
 	DC	DEFIN
 	DC	QUIT
@@ -2727,6 +2720,7 @@ EMIT1:
 	DC      DROP
 	DC	SEMIS
 ;
+_COMMENT
 HEADER({EXPECT},{EXPEC},{DOCOL})        
 	DC	OVER                            
 	DC	PLUS                            
@@ -2775,11 +2769,30 @@ EXPE3	DC	EMIT
 	_LOOP(EXPE1) 	;{ LOOP}
 	DC	DROP
 	DC	SEMIS
+_ENDCOMMENT
+CODE_HEADER({EXPECT},{EXPEC})
+        POP     EAX
+        POP     EBX
+	PUSH	EBP			; save Forth machine
+	PUSH	ESI
+        PUSH    EBX
+        PUSH    EAX
+	MOV	EAX, _CELL_PTR[JMPTABLE]
+	CALL	[EAX+CELLS(5)]                
+        LEA     ESP,[ESP+CELLS(2)]    ; remove input
+	POP	ESI			; restore Forth
+	POP	EBP
+        _NEXT
 ;
-HEADER({KEY},{KEY},{DOCOL})
-KEY1:		DC	QRX 
-		_0BRANCH(KEY1)
-                DC      SEMIS
+CODE_HEADER({KEY},{KEY})
+	PUSH	EBP			; save Forth machine
+	PUSH	ESI
+	MOV	EAX, _CELL_PTR[JMPTABLE]
+	CALL	[EAX+CELLS(3)]                   
+	POP	ESI			; restore Forth
+	POP	EBP
+	PUSH	EAX
+        _NEXT
 
 CODE_HEADER({?RX},{QRX})
 	PUSH	EBP			; save Forth machine
