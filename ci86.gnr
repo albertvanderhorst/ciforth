@@ -6219,13 +6219,15 @@ to forthcode({BEGIN}) will occur if the top of the stack is false;
 for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) always occurs.
 
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
-error checking.},{}, {}, enddoc)
+error checking.},{},
+{{( See AGAIN WHILE)},{}}, 
+enddoc)
 HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         DC      PBACK
         _SECURITY_({DC      QCOMP, ONE})
         DC      SEMIS
 ;
-worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{P,CO,L0},
+worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{ISO,FIG,P,CO,L0},
 {Occurs in a colon-definition in form:
  forthsamp({IF ... THEN})                                                                                                                   x
  forthsamp({IF ... ELSE ... THEN})
@@ -6236,7 +6238,7 @@ compile-time, forthcode({THEN}) computes the forward branch
 offset from forthvar({addr}) to forthcode({HERE}) and stores it
 at forthvar({addr}) . forthvar({n}) is used for error tests.},
 {{IF},{ELSE}}, 
-{}, 
+{{( See IF ELSE)},{}}, 
 enddoc)
 HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, TWO, QPAIR})
@@ -6333,8 +6335,13 @@ execution continues ahead.
 
 At compile-time, forthcode({UNTIL}) compiles
 forthcode({0BRANCH}) and an offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for error tests.},{}, 
-{}, enddoc)
+addr. forthvar({n}) is used for error tests.},
+{{BEGIN}}, 
+{
+{: GI4 BEGIN DUP . 1+ DUP 5 > UNTIL ; 3 GI4 .},{3 4 5 6},
+{8 GI4 .},{8 9} 
+}, 
+enddoc)
 HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      ONE, QPAIR})
         DC      LIT, ZBRAN, COMMA, BACKP
@@ -6349,13 +6356,19 @@ There is no effect on the stack. Execution cannot leave this loop
 (unless forthcode({R>}) forthcode({DROP}) is executed one level below).
 
 At compile time, forthcode({AGAIN}) compiles forthcode({BRANCH}) with an offset from forthcode({HERE}) to
-addr. forthvar({n}) is used for compile-time error checking.},{}, {}, enddoc)
+addr. forthvar({n}) is used for compile-time error checking.},
+{{BEGIN}}, 
+{
+{ : GCE2 BEGIN DUP . 1 - DUP 0= IF EXIT THEN AGAIN ; 3 GCE2},
+{3 2 1}
+}, 
+enddoc)
 HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      ONE, QPAIR})
         DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 ;
-worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{P,C2},
+worddoc( {CONTROL},{REPEAT},{repeat},{addr n --- (compiling)},{ISO,FIG,P,C2},
 {Used within a colon-definition in the form:
     forthsamp({BEGIN ... WHILE ... REPEAT})
 At run-time, forthcode({REPEAT}) forces an unconditional branch
@@ -6364,7 +6377,10 @@ back to just after the corresponding forthcode({BEGIN}) .
 At compile-time, forthcode({REPEAT}) compiles
 forthcode({BRANCH}) and the offset from forthcode({HERE}) to
 addr. forthvar({n}) is used for error testing.},{{WHILE}}, 
-{},
+{
+{ : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
+{0 1 2 3 4}
+},
 enddoc) 
 HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, LIT, 4, QPAIR ; {Matches WHILE ?}})
@@ -6376,7 +6392,8 @@ HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{IF},{if},
-{f --- (run-time) / --- addr n (compile)},{P,C2,L0},
+{f --- (run-time) / --- addr n (compile)},
+{ISO,FIG,P,C2,L0},
 {Occurs is a colon-definition in form:
       forthsamp({IF (tp) ...  THEN}) or
       forthsamp({IF (tp) ... ELSE (fp) ... THEN})
@@ -6393,14 +6410,19 @@ At compile-time forthcode({IF}) compiles forthcode({0BRANCH})
 and reserves space for an offset at forthvar({addr}) .
 forthvar({addr}) and forthvar({n}) are used later for
 resolution of the offset and error testing.},{}, 
-{}, 
+{
+{ : GI1 IF 123 THEN ; 234 1 GI1 . .},{123 234},
+{  234 -1 GI1 . .},{123 234},
+{  234 0 GI1 .},{234},
+}, 
 enddoc) 
 HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
         _SECURITY_({DC      TWO     ;{ Magic number}})
         DC      SEMIS
 ;
-worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},{P,C2,L0},
+worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},
+{ISO,FIG,P,C2,L0},
 {Occurs within a colon-definition in the form:
                forthexample({IF ... ELSE ... THEN})
 At run-time, forthcode({ELSE}) executes after the true part
@@ -6415,7 +6437,10 @@ resolves the pending forward branch from forthcode({IF}) by
 calculating the offset from forthvar({addr1}) to
 forthcode({HERE}) and storing at forthvar({addr1}) .}, 
 {}, 
-{}, 
+{
+{: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234}, 
+{1 GI2 .},{123}
+}, 
 enddoc)
 HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, TWO, QPAIR})
@@ -6426,7 +6451,7 @@ HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {CONTROL},{WHILE},{while},
-{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{p,C2},
+{f --- (run-time) / ad1 nl --- ad1 n1 ad2 n2},{ISO,FIG,P,C2},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
 At run-time, forthcode({WHILE}) selects conditional execution
@@ -6440,9 +6465,13 @@ structure.
 At compile time, forthcode({WHILE}) emplaces
 forthcode({0BRANCH}) and leaves forthvar({ad2}) of the reserved
 offset. The stack values will be resolved by
-forthcode({REPEAT}) .}, 
-{}, 
-{}, 
+Forthcode({REPEAT}) .}, 
+{{BEGIN}}, 
+{
+{ : GI3 BEGIN DUP 4 < WHILE DUP . DUP 1+ REPEAT ; 0 GI3 .},
+{0 1 2 3 4},
+{6 GI3 .},{6}
+}, 
 enddoc)
 HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
@@ -6450,7 +6479,9 @@ HEADER({WHILE},{WHILE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{L0},
-{Transmit forthvar({n}) ascii blanks to the output device.},{{SPACE},{OUT}}, {}, enddoc)
+{Transmit forthvar({n}) ascii blanks to the output device.},{{SPACE},{OUT}}, 
+{}, 
+enddoc)
 HEADER({SPACES},{SPACES},{DOCOL})
         DC      ZERO
         DC      MAX
