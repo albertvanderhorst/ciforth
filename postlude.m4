@@ -16,6 +16,8 @@ _HOSTED_LINUX_1_({define( {_BITS32_1_}, _yes )})
 dnl immediate consequences
 _BITS32_1_({define({M4_CELLWIDTH},4)})
 _BITS16_1_({define({M4_CELLWIDTH},2)})
+_BITS32_1_({define({M4_INITDP},{TEXTEND})})
+_BITS16_1_({define({M4_INITDP},{TEXTEND})})
 _BITS32_1_({define({_NEXT},{_NEXT32})})
 _BITS32_1_({define({_PUSH},{_PUSH32})})
 _BITS32_1_({define({_2PUSH},{_2PUSH32})})
