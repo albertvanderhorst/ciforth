@@ -14,6 +14,17 @@
 \ 101. Internet interface.
 \ 102. Logging of answer vectors for disapproval.
 
+\ #################### CONFIGURATION ##################################
+
+\ Leave a FRACTION (numerator/denominator) that decides whether
+\ the difference between occurences of answers is significant.
+: CRITERION 5 1 ;
+\ This means yes-answers must outnumber the no-answers 5 to 1, or vv.
+
+\ On a scale from 0 to 1000, the tendency to ask questions that
+\ learn at the expense of faster retrieval.
+: CURIOSITY 720 ;
+
 \ #################### DATABASE #######################################
 
 : \D ; \ Debug
@@ -37,6 +48,7 @@
 \    ND answers for question NQ      ^
 \ ... all answers
 
+
 "dstring.frt" INCLUDED
 
 VOCABULARY DATABASE
@@ -59,14 +71,16 @@ VARIABLE #QUESTIONS \ Number of questions
 \ STRING contains N numbers, else throw. Put the numbers in the dictionary.
 : GET-NUMBERS 0 DO BL $S DUP 0= 1002 ?ERROR atoi , LOOP 2DROP ;
 
-\ Create from a STRING an array of answers ``#ANSWERS'' by ``#QUESTIONS''
+\ The DISTANCE in address units between question for different diagnosis
+: STRIDE #QUESTIONS @ SPARE + CELLS ;
+\ Create from a STRING an array of answers ``MAX-DIAGNOSIS'' by ``MAX-QUESTIONS''
 \ The answers for the same question are together on one line.
 \ Leave REMAINDER.
-\ The created word turns an INDEX into an ADDRESS.
+\ The created word turns an DIAGNOSIS and QUESTION into an ADDRESS.
 : ANSWER-ARRAY
 CREATE #DIAGNOSES @ 0 DO ^J $S #QUESTIONS @ GET-NUMBERS SPARE CELLS ALLOT LOOP
-       #QUESTIONS @ SPARE + SPARE * CELLS ALLOT
-DOES> SWAP CELLS + ;
+       STRIDE SPARE * ALLOT
+DOES> ROT STRIDE * + SWAP CELLS + ;
 
 
 "database" GET-FILE
@@ -87,6 +101,11 @@ DOES> SWAP CELLS + ;
     ANSWER-ARRAY ?ES
 
 2DROP
+\D CR ." Expect 0 : " DEPTH . CR
+\D 0 0 YESSES ." YESSES Expect 0 0 :" ? DEPTH .  CR
+\D 0 0 NOES   ." NOES   Expect 1 0 :" ? DEPTH .  CR
+\D 1 0 NOES   ." NOES   Expect 1 0 :" ? DEPTH .  CR
+\D 1 1 NOES   ." NOES   Expect 1 0 :" ? DEPTH .  CR
 
 \ Upper limits for arrays
 #DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
@@ -187,7 +206,10 @@ INTERACTION DEFINITIONS
 
 \ For a STRING return a clean STRING, without a possible question mark.
 : CLEAN-STRING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN ;
-\D "How ? " CLEAN-STRING ." EXPECT |How | :" &| EMIT TYPE &| EMIT
+
+\D "How ? " CLEAN-STRING
+\D ." Expect |How |0 :" &| EMIT TYPE &| EMIT DEPTH . CR
+
 
 PREVIOUS DEFINITIONS
 
@@ -203,3 +225,109 @@ D-MAIN DEFINITIONS   DATABASE INTERACTION
      Save$ TYPE CR 'WRITE-DATABASE CATCH ERROR-BYE
 ;
 ONLY FORTH DEFINITIONS
+
+
+VOCABULARY STRATEGY
+STRATEGY DEFINITIONS
+
+\ Divide a DOUBLE by a SINGLE, leaving a SINGLE quotient.
+: M/ SM/REM SWAP DROP ;
+
+\D ." Expect 12 0 : " 1234. 100 M/ . DEPTH . CR
+
+\ Subtract from DOUBLE another DOUBLE.
+: D- DNEGATE D+ ;
+\D ." Expect 1200 : " 1234. 34. D- D. CR
+
+: DOUBLE CREATE 2 CELLS ALLOT DOES> ;
+\D ." Expect 1234 : " DOUBLE MONKEY 1234. MONKEY 2! MONKEY 2@ D. CR
+\ D FORGET MONKEY
+
+VARIABLE C_UNKNOWN  \ The number of questions that never got a definite answer
+VARIABLE C_YES      \ The number of questions that got a yes answer
+VARIABLE C_NO      \ The number of questions that got a no answer
+VARIABLE C_AMB      \ The number of questions that is considered ambiguous
+VARIABLE C_TOTAL   \ Auxiliary: total number of questions
+VARIABLE C_UNAMB   \ Auxiliary: total number of unambiguous questions
+VARIABLE C_UN_CUR  \ Auxiliary: number unambiguous questions corrected for curiosity
+
+VARIABLE Q_YES  \ Number of yes answers for current question and diagnosis
+VARIABLE Q_NO   \ Number of no answers for current question and diagnosis
+VARIABLE UNAMB  \ Indicate unambiguousness : 0. is bad , 1000. is perfect
+VARIABLE BAL    \ Indicate balance         : 0. is bad , 1000. is perfect
+
+\ Reinitalise the answer ballots.
+: !ANSWERS 0 C_UNKNOWN !   0 C_YES !   0 C_NO !   0 C_AMB ! ;
+
+\ The first NUMBER is compared to the SECOND. It IS apparently so
+\ much greater that the first number represents the true answer.
+: APPARENT? CRITERION */ > ;
+\D ." Expect -1 : "  100 19 APPARENT? . CR
+\D ." Expect 0  : "  0 1  APPARENT? . CR
+\D ." Expect -1 0 : "  1 0  APPARENT? . DEPTH . CR
+
+\ Create a simple array of N integers.
+\ The created word turns an INDEX into the ADDRESS of the integer.
+: ARRAY    CREATE CELLS ALLOT    DOES> SWAP CELLS + ;
+
+\ The following two arrays define the current focus.
+
+DATABASE
+\ For DIAGNOSIS return the address of a flag whether is has been excluded.
+MAX-DIAGNOSES ARRAY EXCLUSIONS
+\ Initialise ``EXCLUSIONS''
+: !EXCLUSIONS  0 EXCLUSIONS MAX-DIAGNOSES CELLS ERASE ;
+\ For DIAGNOSIS return: it has BEEN excluded.
+: ?EXCLUDED EXCLUSIONS @ ;
+\D ." !EXCLUSIONS Expect 0 0 : " !EXCLUSIONS 0 ?EXCLUDED . DEPTH . CR
+
+\ For QUESTION return the address of a flag whether is has been posed.
+MAX-QUESTIONS ARRAY BEEN-POSED
+\ Initialise ``BEEN-POSED''
+: !BEEN-POSED  0 BEEN-POSED MAX-QUESTIONS CELLS ERASE ;
+\ For QUESTION return: it is has BEEN posed.
+: ?POSED BEEN-POSED @ ;
+\D ." !BEEN-POSED Expect 0 0 : " !BEEN-POSED 0 ?POSED . DEPTH . CR
+PREVIOUS
+\D ." After PREVIOUS Expect STATEGY FORTH : " ORDER CR
+
+\ Accumulate the answer of QUESTION for DIAGNOSIS into the variables above.
+DATABASE
+: ACCUMULATE
+       DUP ?EXCLUDED IF 2DROP EXIT THEN
+       2DUP NOES @ >R YESSES @ R>
+       2DUP + 0=        IF 2DROP 1 C_UNKNOWN +! EXIT THEN
+       2DUP APPARENT?   IF 2DROP 1 C_YES +! EXIT THEN
+       SWAP APPARENT?   IF 1 C_NO +! EXIT THEN
+       1 C_AMB +!
+;
+\D !ANSWERS ." !ANSWERS Expect 0 0 0 :" C_YES ? C_NO ? DEPTH . CR
+\D 0 0 ACCUMULATE ." ACCUMULATE Expect 0 1 0 :" C_YES ? C_NO ? DEPTH . CR
+\D 0 1 ACCUMULATE ." ACCUMULATE Expect 1 1 0 :" C_YES ? C_NO ? DEPTH . CR
+\D 1 0 ACCUMULATE ." ACCUMULATE Expect 1 2 0 :" C_YES ? C_NO ? DEPTH . CR
+\D 1 1 ACCUMULATE ." ACCUMULATE Expect 1 3 0 :" C_YES ? C_NO ? DEPTH . CR
+
+\ Evaluates and returns the quality for question number INDEX
+\ for the current focus. It is a number between 0 and 1000. and
+\ it is proportional to the number of diagnoses that can be eliminated
+\ provided the user can answer the question.
+: QUESTION-QUALITY
+   !ANSWERS
+   #DIAGNOSES @ 0 DO DUP I ACCUMULATE LOOP DROP
+   C_YES @ C_NO @ + C_UNAMB !
+   C_AMB @ C_UNAMB @ C_UNKNOWN @   + + C_TOTAL !
+
+   C_UNAMB @ 0= IF 0 EXIT THEN  \ No quality at all.
+
+   1000 C_YES @ C_NO @ - ABS 1000 M* C_UNAMB @ C_UN_CUR @ + M/ -
+   DUP BAL !
+
+   C_UNAMB @ 1000 M*    C_UNKNOWN @ CURIOSITY M*  D+ C_TOTAL @ M/
+   DUP UNAMB !
+
+   1000 */
+;
+\D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 :" . DEPTH . CR
+\D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 :" . DEPTH . CR
+
+PREVIOUS
