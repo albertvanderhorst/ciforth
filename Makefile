@@ -41,6 +41,7 @@ VERSION=0A
 # The kinds of Forth's that can be made.
 # Different assemblers should generate equivalent Forth's.
 TARGETS= msdos alone linux
+CSRCS= figforth tty
 
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm
@@ -60,7 +61,7 @@ alone.m4 msdos.m4 : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ;
 
 all: $(TARGETS:%=fig86.%.bin) $(TARGETS:%=fig86.%.msm) $(TARGETS:%=fig86.%.asm)
 
-clean : ; rm $(TARGETS:%=fig86.%.*)  
+clean : ; rm $(TARGETS:%=fig86.%.*)  rm $(CSRCS:%=%.o) figforth
 
 # The following must be run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
