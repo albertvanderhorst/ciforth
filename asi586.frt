@@ -9,7 +9,7 @@
 
 ( Al fixups-from-reverse are at most 2 bytes, so they all end in        )
 ( 0000 To improve readability we replace `xxxx0000' by `xxxx 0s'       )
-: 0s 2 ROTLEFT ;  
+: 0s 2 ROTLEFT ;
 
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
@@ -23,6 +23,7 @@
 1        ' C, CFA   40001 COMMAER IB,   ( immediate byte data)
 0 CELL+  ' ,  CFA   20008 COMMAER X,    ( immediate data : address/offset )
 1        ' C, CFA   20004 COMMAER B,    ( immediate byte : address/offset )
+1        ' C, CFA   10000 COMMAER Q,    ( Most bizarre     )
 
 FFFF INCONSISTENCY-PAIRS !
 ( Inconsistent:  1 OPERAND IS BYTE     2 OPERAND IS CELL                )
@@ -30,56 +31,61 @@ FFFF INCONSISTENCY-PAIRS !
 ( By setting 20 an opcode can force a memory reference, e.g. CALLFARO  )
 (               10 Register op        20 Memory op                    )
 (               40 D0                 80 [BP]' {16} [BP] {32}         )
+(  sib:        100 normal             200 [AX +8*| DI]               )
 
 ( Only valid for 16 bits real mode, in combination with an address
   overwite. Use W, L, and end the line in TALLY! to defeat checks.
-20 0700 0s T!
- 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
-A0 0700 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check) 
- 0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX] 
-010020 0700 0s 0400 0s xFIR [SIB]   ( Fits in the hole, requires also SIB, ) 
-0000A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check) 
+0120 0700 0s T!
+( 0100 0s 0 8 xFAMILY|R [BX+SI]' [BX+DI]' [BP+SI]' [BP+DI]' [SI]' [DI]' -- [BX]'
+( A0 0700 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check)
+ 0100 0s 0000 0s 4 xFAMILY|R [AX] [CX] [DX] [BX]
+010120 0700 0s 0400 0s xFIR [SIB]   ( Fits in the hole, requires also SIB, )
+0001A0 0700 0s 0500 0s xFIR [BP]   ( Fits in the hole, safe inconsistency check)
  0100 0s 0600 0s 2 xFAMILY|R [SI] [DI]
 
-12 0700 0s T!
- 0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
-11 0700 0s T!
+0111 0700 0s T!
  0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
-
-000060 C000 0s 0000 0s xFIR      D0|
-020024 C000 0s 4000 0s xFIR      DB|
-020028 C000 0s 8000 0s xFIR      DW|
-000010 C000 0s C000 0s xFIR      R|
-020008 C700 0s 0600 0s xFIR      MEM|' ( Overrules D0| [BP]')
-020008 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )
-
-02 3800 0s T!
- 0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
-01 3800 0s T!
+0112 0700 0s T!
+ 0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
+000160 C000 0s 0000 0s xFIR      D0|
+020124 C000 0s 4000 0s xFIR      DB|
+020128 C000 0s 8000 0s xFIR      DW|
+000110 C000 0s C000 0s xFIR      R|
+( 020008 C700 0s 0600 0s xFIR      MEM|' ( Overrules D0| [BP]')
+020108 C700 0s 0500 0s xFIR      MEM| ( Overrules D0| [BP] )
+0101 3800 0s T!
  0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
+0102 3800 0s T!
+ 0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
 
-00 FF 00 1PI ((SIB)),
-: (SIB), TALLY @ !TALLY ((SIB)), 
-  30 XOR ( Toggle from using memory to registers)
-  TALLY ! ;
-1        ' (SIB), CFA   10000 COMMAER SIB, ( Most bizarre     )
+0200 3800 0s T!
+ 0800 0s 0 8 xFAMILY|R AX] CX] DX] BX] SP] BP] SI] DI]
+0200 C000 0s T!
+ 4000 0s 0 4 xFAMILY|R  +1* +2* +4* +8*
+0200 10700 0s T!
+ 0100 0s 0 8 xFAMILY|R [AX [CX [DX [BX [SP [BP [SI [DI
 
-00 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
-01 0001 0s 0 0s xFIR B|
-02 0001 0s 1 0s xFIR W|
+0200 1FF 00 1PI SIB,
+(   : (SIB), TALLY @ !TALLY ((SIB)),                                    )
+(     30 XOR ( Toggle from using memory to registers)                   )
+(     TALLY ! ;                                                         )
+
+0000 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
+0001 0001 0s 0 0s xFIR B|
+0002 0001 0s 1 0s xFIR W|
 
 ( --------- two fixup operands ----------)
-00 FF03 T!
+0000 FF03 T!
  0008 0000 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
-00 FF01 T!
+0000 FF01 T!
  0002 0084 2 2FAMILY, TEST, XCHG,
 00 FF03 0088 2PI MOV,
 22 FF00 008D 2PI LEA,
-22 FF00 T!   0001 00C4 2 2FAMILY, LES, LDS,
+0022 FF00 T!   0001 00C4 2 2FAMILY, LES, LDS,
 00 FF01 00C6 2PI MOVI,
 
 ( --------- one fixup operands ----------)
-12 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
+0012 07 T!   08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
 12 07 90 1PI XCHG|AX,
 040011 07 B0 1PI MOVI|BR,
 040012 07 B8 1PI MOVI|XR,
@@ -109,8 +115,8 @@ A0 0700 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check)
 
 ( --------- special fixups ----------)
 
-00 10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
-00 00E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
+00     10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
+00     00E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
 400000 10F 70 1PI J,
 
 00 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
@@ -143,8 +149,8 @@ A0 0700 0s 0600 0s xFIR [BP]'  ( Fits in the hole, safe inconsistency check)
 
 ( ############## 8086 ASSEMBLER PROPER END ############################ )
 ( You may always want to use these instead of (RB,)
-    : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;                    
-    : RW, ISS @ - (RW,) ;      : RL, ISS @ - (RL,) ;                    
+    : RB, ISS @ - (RB,) ;      : RX, ISS @ - (RX,) ;
+    : RW, ISS @ - (RW,) ;      : RL, ISS @ - (RL,) ;
 (   : D0|  ' [BP] REJECT D0|  ;                                         )
 (   : [BP] ' D0|  REJECT [BP] ;                                         )
 (   : R| ' LES, REJECT ' LDS REJECT R| ;                                )
