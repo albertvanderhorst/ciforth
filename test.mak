@@ -246,6 +246,8 @@ testlina : $(TESTLINA) ci86.lina.rawtest lina BLOCKS.BLK ;
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	lina <$@.1 | grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
+	lina -r <tsuite.frt >tsuite.out
+	diff tsuite.out testresults
 #       rm $(TEMPFILE)
 
 testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc BLOCKS.BLK ;
