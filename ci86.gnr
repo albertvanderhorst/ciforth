@@ -91,11 +91,11 @@ B_DUMMY   EQU     01H     ;{ dea is dummy, from vocabulary link}
 B_INVIS   EQU     02H     ;{ dea is invisible, "smudged".}
 B_IMMED   EQU     04H     ;{ dea is a immediate.}
 B_DENOT   EQU     08H     ;{ dea is a denotation.}
-C_HOFFSET EQU     3       ;{ Offsets of code field in cells, w.r.t. dea}
-D_HOFFSET EQU     4       ;{ Same for data field}
-F_HOFFSET EQU     1       ;{ Same for flag field}
-L_HOFFSET EQU     2       ;{ Same for link field}
-N_HOFFSET EQU     0       ;{ Same for name field}
+C_HOFFSET EQU     0       ;{ Offsets of code field in cells, w.r.t. dea}
+D_HOFFSET EQU     1       ;{ Same for data field}
+F_HOFFSET EQU     2       ;{ Same for flag field}
+L_HOFFSET EQU     3       ;{ Same for link field}
+N_HOFFSET EQU     4       ;{ Same for name field}
 DC_HOFFSET EQU     5       ;{ Start of data area (content).}
 B_HOFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
 ;
@@ -1012,9 +1012,7 @@ to add a denotation.},
 HEADER({DENOTATION},{DENOT},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
-        DC      0       ;{ Dummy name field}
-        DC      B_DUMMY ;{ Dummy flag field}
-        DC      _ENDOFDENOTATIONS_
+HEADER( , , ,0, B_DUMMY, _ENDOFDENOTATIONS_)
 ;
 worddoc({MISC},{NOOP},{no_operation},{},{},
 {Do nothing. Primarily useful as a placeholder.
@@ -1563,7 +1561,7 @@ CODE_HEADER({R>},{FROMR})      ;{(S1) <- (R1)}
 ;
 worddoc({STACKS},{R},{r},{--- n},{},
 {Copy the top of the return stack to the computation stack.},{{>R}}, {}, enddoc)
-HEADER({R},{RR},{IDO+CELLS(2)})
+HEADER({R},{RR},{_VAR_FIELD(IDO)})
 ;
 worddoc({LOGIC},{0=},{zero_equals},{n --- f},{L0},
 {Leave a true flag forthvar({f}) is the number forthvar({n}) is equal to zero, otherwise leave a
@@ -3072,7 +3070,11 @@ CREA1:  DC      DROP
         DC      SCOMMA
         DC      HERE,TOR
 
-        DC      COMMA   ; {Name field.}
+        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
+        DC      COMMA   ; {Code field.}
+
+        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
+        DC      COMMA         ; {Parameter field.}
 
         DC      LIT, B_INVIS, COMMA ; {Flag field.}
 
@@ -3080,11 +3082,7 @@ CREA1:  DC      DROP
         DC      LDUP, FETCH, COMMA   ; {Link field.}
         DC      RR, SWAP, STORE
 
-        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
-        DC      COMMA   ; {Code field.}
-
-        DC      RR, LIT, CELLS(DC_HOFFSET), PLUS
-        DC      COMMA         ; {Parameter field.}
+        DC      COMMA   ; {Name field.}
 
         DC      FROMR, DROP
         DC      SEMIS
@@ -3198,12 +3196,12 @@ INTE1:
         DC      PWORD
         DC      LDUP      ;{ Zero length.}
         _0BRANCH(INTE8) ;{WHILE}
-;        DC      DOTS
+;       DC      DOTS
         DC      OVER, TOR
         DC      PFIND   ;{BEGIN}
         DC      LDUP
         DC      ZEQU, ZERO, QERR
-;        DC      LDUP, IDDOT
+;       DC      LDUP, IDDOT
         DC      LDUP, TFFA, FETCH, LIT, B_DENOT, LAND
         _0BRANCH(INTE3A) ;{IF}
         DC      FROMR, LIN, STORE
@@ -3303,9 +3301,7 @@ a colon-definition, to select this vocabulary at compile time.},
 HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       ;{ END OF VOCABULARY LIST}
-        DC      0       ;{ Dummy name field}
-        DC      B_DUMMY ;{ Dummy flag field}
-        DC      _DEA(TASK)
+HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 ;
 worddoc({VOCABULARIES},{ASSEMBLER},{assembler},{},{P,L1},
 {The name of the primary vocabulary.

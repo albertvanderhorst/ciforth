@@ -292,15 +292,15 @@ int c_system(int count, char command[])
   return system(buffer);
 }
 
-void c_debug(void ***pcfa)
+void c_debug(void ***pdea)
 {
-    void **dea = *pcfa;
-    long *nfa = *(int **)(dea-3);                                     
+    void **dea = *pdea;
+    long *nfa = *(int **)(dea+4);                                     
     char *pc;
     int len;
     int i;                                                             
 
-    printf("%p ",pcfa);
+    printf("%p ",pdea);
     printf("%p ",dea);
     printf("%p ",nfa);
     if ( 0x08100000 < (int)nfa && (int)nfa <0x08200000 )

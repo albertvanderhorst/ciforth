@@ -28,22 +28,23 @@ dnl _star(x) generates x stars
 define({_star},{ifelse}(0,$1,,{*{_star}({decr}($1))}))
 define({_LINKOLD},0)dnl
 dnl Lay down a header with forth name $1, assembler name $2 and code field $3
-dnl and parameter field $4
-dnl If $5 is defined, use that as a flag field.
+dnl and data field $4, flag field $5, link field $6.
+dnl All except the assembler name are optional.
 define(HEADER, {dnl
+ifelse(0,len({$1}),,
 ;  ********_star(len({$1})) 
-;  *   {$1}   *
-;  ********_star(len({$1})) 
+;  *   {{$1}}   *
+;  ********_star(len({$1}))
 ;  
-N_$2:   _STRING({$1})
-        DC    N_$2
+N_$2:   {_STRING}({{$1}}))
+ifelse(0,len($2),,$2:)dnl
+        DC    ifelse(0,len($3),0H,$3)
+        DC    ifelse(0,len($4),$ + CELLS(DC_HOFFSET-D_HOFFSET),$4) 
         DC    ifelse(0,len($5),0H,$5) 
-        DC    _LINKOLD
-$2:     DC     $3
-        DC    ifelse(0,len($4),$ + CELLS(1),$4) 
-dnl ifelse(0,len($4),, {
-dnl    DC    $4}) 
-define({_LINKOLD},{$2-CELLS(C_HOFFSET)})dnl
+        DC    ifelse(0,len({$6}),dnl Only link in if there is no explicit link.
+{_LINKOLD{}define({_LINKOLD},{$2-CELLS(C_HOFFSET)})},dnl
+$6)
+        DC    ifelse(0,len({$1}),0,N_$2)
 })dnl
 dnl
 dnl

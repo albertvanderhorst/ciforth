@@ -197,7 +197,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
     DUP @ SEL@ IF ( Is content of CFA known?)
        EXECUTE ( Assuming CFA also on stack)
     ELSE
-       CR DROP DUP DUP @ 0 CELL+ CELL+ - = IF
+       CR DROP DUP DUP @ SWAP 5 CELLS + = IF
            ." Code definition : " ELSE ." Can't handle : "
        ENDIF ID.. CR
     ENDIF ;  : B.. H.. ;
