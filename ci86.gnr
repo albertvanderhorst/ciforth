@@ -2066,32 +2066,42 @@ DOUSE:  MOV     BX,[BX+CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
         _PUSH
 ;
 worddoc({SUPERFLUOUS},{0},{zero},{--- 0},{},
-{Leave the number 0. },{{CONSTANT}}, {}, enddoc)
+{Leave the number 0. },{{CONSTANT}}, 
+{{0 .},{0}},
+enddoc)
 CODE_HEADER({0},{ZERO})
         XOR     AX,AX
         _PUSH
 ;
 worddoc({SUPERFLUOUS},{1},{one},{--- 1},{},
-{Leave the number 1. },{{CONSTANT}}, {}, enddoc)
+{Leave the number 1. },{{CONSTANT}}, 
+{{1 .},{1}},
+enddoc)
 CODE_HEADER({1},{ONE})
         MOV     AX,1
         _PUSH
 ;
 worddoc({SUPERFLUOUS},{2},{two},{--- 2},{},
-{Leave the number 2. },{{CONSTANT}}, {}, enddoc)
+{Leave the number 2. },{{CONSTANT}}, 
+{{2 .},{2}},
+enddoc)
 CODE_HEADER({2},{TWO})
         MOV     AX,2
         _PUSH
 ;
 worddoc({SUPERFLUOUS},{3},{three},{--- 3},{},
-{Leave the number 3. },{{CONSTANT}}, {}, enddoc)
+{Leave the number 3. },{{CONSTANT}}, 
+{{3 .},{3}},
+enddoc)
 CODE_HEADER({3},{THREE})
         MOV     AX,3
         _PUSH
 ;
 worddoc({STRING},{BL},{BL},{--- c},{},
 { A constant that leaves the
-   ascii value for "blank".},{}, {}, enddoc)        
+   ascii value for "blank".},{}, 
+{{BL .},{20}},
+enddoc)        
 HEADER({BL},{LBL},{DOCON}, ABL)
 ;
 worddocsafe({STRING},{$@},{string_fetch},{addr --- sc},{},
@@ -2169,7 +2179,7 @@ worddoc({STORAGE},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.},
 {{BLOCK},{LIMIT}}, 
-{}, 
+{{LIMIT FIRST - B/BUF /MOD #BUFF = .},{_T_}}, 
 enddoc)
 HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 });_END_({ _HIGH_BUF_})
@@ -2183,7 +2193,7 @@ buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
 },{{BLOCK},{LIMIT}}, 
-{{LIMIT @ FIRST @ B/BUF @ /MOD DROP #BUF = .},{_T_}}, 
+{{LIMIT FIRST - B/BUF @ /MOD DROP #BUF = .},{_T_}}, 
 enddoc)
 HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB    (KBBUF+2*CW)*NBUF
@@ -2290,10 +2300,14 @@ enddoc)
 HEADER({DP},{LDP},{DOUSE}, CELLS(9))
 ;
 worddoc({VOCABULARIES},{VOC-LINK},{voc_link},{--- addr},{U},
-{A user variable containing the address of the VLFA in the word
-most recently created by forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
-linked by these fields to allow control for forthcode({FORGET}) ting thru multiple
-vocabularies.})},{{VOCABULARY}}, {}, enddoc)
+{A user variable containing the forthdefi({dictionary entry
+address}) of the word most recently created by
+forthcode({VOCABULARY}) . _VERBOSE_({All vocabulary names are
+linked by these fields to allow control for forthcode({FORGET})
+ting thru multiple vocabularies.})}, 
+{{VOCABULARY}}, 
+{{VOC-LINK @ ' FORTH = .},{_T_}},
+enddoc) 
 HEADER({VOC-LINK},{VOCL},{DOUSE}, CELLS(10))
 ;
 worddoc({STORAGE},{OFFSET},{offset},{--- addr},{U},
@@ -2622,7 +2636,9 @@ HEADER({>DFA},{TDFA},{DOCOL})
 worddoc({DICTIONARY},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
 {Given the dictionary entry addres of a vocabulary
 return the address of the link to the next vocabulary.
-},{{VOCABULARY},{>CFA}}, {}, enddoc)
+},{{VOCABULARY},{>CFA}}, 
+{{." Via VOC-LINK"},{Via VOC-LINK}},
+enddoc)
 HEADER({>VFA},{TVFA},{DOCOL})
         DC      TOBODY
         DC      SEMIS
