@@ -3778,7 +3778,7 @@ NPNUM2:
 NPNUM4:
         DC      SWAP, DROP
         DC      BASE, FETCH, DIGIT
-        DC      ZEQU, ZERO, QERR
+        DC      ZEQU, LIT, 5, QERR
 
         DC      SWAP
         DC      BASE
@@ -3930,20 +3930,33 @@ pointer.},
 { { : BONOBO ; "BONOBO" (FIND) ' BONOBO = .},{_T_} },
 enddoc)
 HEADER({(FIND)},{PFIND},{DOCOL})
-        DC      ZERO, RESULT, STORE
         DC      CONT, FETCH
-        DC      LIT, MATCHING, SWAP, FORW
-        DC      RESULT, FETCH, ZEQU
+        DC      PPFIND
+        DC      TOR
+        DC      RR, ZEQU
         _0BRANCH(DFIN1)
+        DC      RDROP
         DC      CURR, FETCH
-        DC      LIT, MATCHING, SWAP, FORW
-        DC      RESULT, FETCH, ZEQU
-        _0BRANCH(DFIN1)
-        DC      DROP, ONE
-        DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
-        DC      LIT, MATCHING, SWAP, FORW
+        DC      PPFIND
+        DC      TOR
 DFIN1:
-        DC      DROP, DROP
+        DC      TDROP, FROMR
+        DC      SEMIS
+;
+worddocsafe( {DICTIONARY~},{((FIND))},{paren_paren_find},{sc dea1 --- sc dea2},{},
+{Search down from the DEA forthvar({dea}) for a word with name
+forthvar({sc}) found and leave its DEA as dea2 or a nil pointer
+if not found. _VERBOSE_({The forthvar({dea1}) is mostly the
+forthdefi({DDEA}) of a vocabulary, or the content of
+forthcode({CURRENT}) or forthcode({CONTEXT}) }). Leave the
+dictionary entry address forthvar({dea2}) of the first entry
+found, else leave a nil pointer.},
+{{FIND},{(FIND)}},
+{ { : BONOBO ; CURRENT @ "BONOBO" (FIND) ' BONOBO = .},{_T_} },
+enddoc)
+HEADER({((FIND))},{PPFIND},{DOCOL})
+        DC      ZERO, RESULT, STORE
+        DC      LIT, MATCHING, SWAP, FORW
         DC      RESULT,FETCH
         DC      SEMIS
 ;
@@ -3987,8 +4000,8 @@ ERRO1:  DC      LIN, FETCH, LDUP
         DC      SRC, FETCH, MAX
         DC      SWAP,OVER, LSUB
         DC      LTYPE
-        _STRINGINLINE({? })
-        DC      LTYPE
+        DC      LIT, '?', EMIT
+        DC      SPACE
         DC      MESS
         DC      SZERO, FETCH, SPSTO
 _LOAD_({
@@ -4358,19 +4371,18 @@ INTE1:
         _0BRANCH(INTE8) ;{WHILE}
 ;       DC      DOTS
 ;       DC      TDUP, LTYPE
-        DC      OVER, TOR
-        DC      PFIND   ;{BEGIN}
-        DC      LDUP
-        DC      ZEQU, ZERO, QERR
-;       DC      LDUP, IDDOT
-        DC      LDUP, TFFA, FETCH, LIT, B_DENOT, LAND
-        _0BRANCH(INTE3A) ;{IF}
-        DC      FROMR, ONEP, LIN, STORE
-        _BRANCH(INTE4A)  ;{ELSE}
-INTE3A:
-        DC      RDROP
-                        ;{THEN}
-INTE4A:
+        DC      OVER, TOR       ; {Save old parse pointer.}
+        DC      PFIND, LDUP, ZEQU
+        _0BRANCH(INTE3B) ;{IF}
+        DC      DROP
+        DC      RR, ONE
+        DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
+        DC      PPFIND, SWAP, DROP, SWAP, DROP, LDUP
+        _0BRANCH(INTE3B) ;{IF}
+        DC      RR, ONEP, LIN, STORE
+INTE3B:                  ;{THEN THEN THEN}
+        DC      RDROP           ; {Drop old parse pointer.}
+        DC      LDUP, ZEQU, LIT, 12, QERR
         DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) ;{IF}
@@ -7006,11 +7018,10 @@ It is recommended this word is not postponed.},
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED)
         DC      PWORD
-        DC      PFIND
+        DC      FOUND
         DC      LDUP
         DC      ZEQU
-        DC      ZERO
-        DC      QERR
+        DC      LIT, 11, QERR
         DC      LITER
         DC      SEMIS
 ;
