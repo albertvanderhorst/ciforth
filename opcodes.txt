@@ -1,6 +1,9 @@
 # $Id$
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 This is a quick reference card for Intel 386 in its 16 bit mode.
+It applies to the code in ass.frt, that is no longer updated.
+This assembler is in figforth codem and has some errors probably.
+See asi86.frt for a maintained assembler.
 
      0       1      2      3      4      5     6      7
      8       9      a      b      c      d     e      f
