@@ -67,6 +67,9 @@ FIGREL	EQU	2	; FIG RELEASE #
 FIGREV	EQU	0	; FIG REVISION #
 USRVER  EQU     'A'-'0' ; USER VERSION NUMBER, a digit now
 ;
+;       PROTECTION
+PMASK   EQU     0FFH    ; Allow to access only 256 blocks from OFFSET
+
 ;	ASCII CHARACTER EQUIVALENTS
 ;
 ABL	EQU	20H	; SPACE
@@ -315,30 +318,49 @@ DISPLAY:XOR     BH,BH           ; Display AL as an ASCII char
 ORG0:   JMP     SHORT BOOT
 	NOP
 	; MSDOS programmers reference (thru 6, 3.9)
-	DB    "DFW--EXP"
-LBPS    DW         BPS
-	DB         1
-RESSECTORS  DW     01H
-	DB         NFAT 
-	DW BPS*SECROOT/32
-	DW         SPDRV
-	DB         MEDIA
-	DB         SECFAT, 0H
-LSPT    DW         SPT
-LHEADS  DW       HEADS
+  	DB    "DFW---HD"
+
+_COMMENT
+         ; Can we do something reasonable here?
+        ; Instead of this :
+LBPS    DW         0   
+	DB         0 
+RESSECTORS  DW     00H
+	DB         0    
+	DW         0         
+	DW         0       
+	DB         0         
+	DB         0,      0H
+LSPT    DW         0  
+LHEADS  DW       0     
 HIDDENSECS    DD        0H
 HUGESECS      DD         000H
       ; BIOS parameter block ends here
 	DB 000H, 000H, 029H                  ; Required magic.
 	DB         004H, 01CH, 040H,  00BH
 	DB    "           "
-	DB    "FAT12   "
+	DB    "FORTH   "
+_ENDCOMMENT
+
+BOOTLBA: DB      10H, 0
+        DW      (INITDP-$$)/BPS      ; ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.
+        DW      BPS             ; OFFSET AND SEGMENT
+	DW      BOOTADDRESS/10H
+	; At a hard disk we just read sector from sector 1        
+        DD      1       ; Start
+        DD      0       ; M.S. 32 BITS
+
+HDREAD:
+	MOV     AX,4200H  ;   Read extended                                
+	MOV     DX,0080H  ;   Disk C                                 
+	MOV     SI,BOOTLBA
+        INT     13H
+        RET
 
 RETRY:
 	CALL    DISPLAYW
-	MOV     AL,' '
 	MOV     AH,00   ; Reset
-	MOV     DL,00            ;Drive 0 (floppy 1)
+  	MOV     DL,80            ;Drive 80 (hd C:)
 	INT(13H)                 ;BIOS disk read function
 	CALL    DISPLAYW
 	MOV     AL,' '
@@ -374,27 +396,15 @@ ELSE1:
 	MOV     SP,0H
 	STI                     ; Allow interrupts
 	MOV     AH,00   ; Reset
-	MOV     DL,80            ;Drive 0 (floppy 1)
+  	MOV     DL,80            ;Drive 80 (hd C:)
 	INT(13H)                 ;BIOS disk read function
 	JB      RETRY
-
-	; At a hard disk we just read sector from sector 1        
-	; be at SECSTRT (See also genboot.bat)
-	MOV     AX,4200H  ;   Read extended                                
-	MOV     DX,0080H  ;   Disk C                                 
-	MOV     SI,PARBL
-        INT     13H
+        CALL    HDREAD
 	JB      RETRY
 	MOV     AL,'W'
 	CALL    DISPLAY
 	CALL    DISPLAYCR
 	JMP     ORIG
-PARBL:  DB      10H, 0
-        DW      (INITDP-$$)/BPS      ; ROUNDS DOWN, BUT WE ALREADY HAVE 1 SEC.
-        DW      BPS             ; OFFSET AND SEGMENT
-	DW      BOOTADDRESS/10H
-        DD      1
-        DD      0       ; M.S. 32 BITS
 
 DISPLAYCR:
 	MOV     AL,ACR
@@ -2843,7 +2853,9 @@ HEADER({SEC/BLK},{SPBLK},{DOCON}) ;# SECTORS/BLOCK
 ;
 HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DW  0
+});_END___1__({_USEBIOS_1_})
 ;
+;____1_____ _BOOTFD__1_({
 ;  (Command, address, sec# -- )
 HEADER({SEC-RW},{SECRW},{DOCOL})
 	DW      LIT, SPT*HEADS, SLMOD   ; Juggle #sec, #head, #track
@@ -2885,7 +2897,70 @@ RSLW4:  DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
 	DW      QERR
 RSLW5:  DW      SEMIS
 ;
-});_END___1__({_USEBIOS_1_})
+});_END___1__({ _BOOTFD__1_})
+
+;____1_____ _BOOTHD__1_({
+; Warning : if this LBA is used apart from by R/W
+; the fields marked default must be restored.
+HEADER({LBAPAR},{LBA},{DOVAR})
+        DB      10H, 0            ; default    
+        DW      KBBUF/SPB         ; default    
+        DW      0               ; to be filled with offset
+	DW      BOOTADDRESS/10H ; default
+	; At a hard disk we just read sector from sector 1        
+        DD      0       ; sector number
+        DD      0       ; M.S. 32 BITS default
+
+; Reads/ writes the block such as in LBA
+HEADER({RBLK},{RBLK},{$+2})
+	PUSH	SI	;PRESERVE INTERPRETER POINTER
+	PUSH	BP	;RETURN POINTER
+	MOV     AX,4300       
+	MOV     DX,0080H  ;   Disk C                                 
+	MOV     SI,LBA  
+        INT     13H
+	POP	BP	;RETURN STACK
+	POP	SI	;INTERPRETER PNTR
+	PUSHF           ; REMEMBER STATUS
+	JMP	NEXT
+;
+HEADER({WBLK},{WBLK},{$+2})
+	PUSH	SI	;PRESERVE INTERPRETER POINTER
+	PUSH	BP	;RETURN POINTER
+	MOV     AX,4300       
+	MOV     DX,0080H  ;   Disk C                                 
+	MOV     SI,LBA  
+        INT     13H
+	POP	BP	;RETURN STACK
+	POP	SI	;INTERPRETER PNTR
+	PUSHF           ; REMEMBER STATUS
+	JMP	NEXT
+
+;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
+HEADER({R/W},{RSLW},{DOCOL})
+        DW      TOR
+	DW      LIT, KBBUF/SPB, STAR  ; Sector number
+        DW      LBA, LIT, 4, PLUS, STORE  
+        DW      LBA, LIT, 8, PLUS, STORE  
+        DW      RR
+	_0BRANCH(RSLW1)
+	DW      RBLK
+	_BRANCH(RSLW2)
+RSLW1:  DW      WBLK
+RSLW2:  DW      DUPE, DSKERR, STORE
+
+        DW      ONE, LAND, DUPE
+	_0BRANCH(RSLW4)
+        DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
+						   ; is no good!
+RSLW4:  
+        ; Handle error
+	DW      LIT,    9   ;Write error
+        DW      FROMR, LSUB ; 1 less: read error
+	DW      QERR
+        DW      SEMIS
+;
+});_END___1__({ _BOOTFD__1_})
 	PAGE
 	; At line     LINE ~3500
 HEADER({'},{TICK},{DOCOL},1)
