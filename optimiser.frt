@@ -177,7 +177,7 @@ DROP 0 THEN ;
         SE@ COMBINE-CSC               ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
     ELSE
-        DROP DUP COLLECT-SWAPPER CASH  ( DEA -- )
+        DROP ( DUP COLLECT-SWAPPER) CASH  ( DEA -- )
         >HERE                        ( BEGIN END -- BEGIN' )
         !OPT-START
     THEN ;
