@@ -22,5 +22,13 @@ Is now incorporated into test.mak
 How to find the search ORDER
 REQUIRE ORDER
 
-How to save a ssystem
+How to save a system
 REQUIRE SAVE-SYSTEM
+"aap" SAVE-SYSTEM
+
+How to install a kernel on hard disk
+Boot from version created by alone.cfg
+18 LOAD
+REQUIRE INSTALL-KERNEL
+RESTORE-BLOCKS    \ If you want these blocks on hd too
+INSTALL-KERNEL    \ Insert floppy with kernel
