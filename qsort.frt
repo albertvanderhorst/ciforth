@@ -26,12 +26,14 @@ DEFER PRECEDES  ' < IS PRECEDES
 : EXCHANGE          ( addr_1 addr_2 -- )
     DUP @ >R  OVER @ SWAP !  R> SWAP ! ;
 
-: -CELL ( -- n )  -1 CELLS ;
+\ For ADDRESS return a next lower ADDRESS that is aligned.
+\ This may work only on two complement machines.
+: ALIGN-DOWN   -1 CELLS AND ;
 
 : CELL-  ( addr -- addr' )  1 CELLS - ;
 
 : PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
-    2DUP OVER - 2/  -CELL AND +  @ >R  ( R: median)
+    2DUP OVER - 2/  ALIGN-DOWN +  @ >R  ( R: median) 
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
          SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
          SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
