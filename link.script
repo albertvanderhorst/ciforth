@@ -1,7 +1,22 @@
 SECTIONS {
-/*  .init : { *(.init) }                                                     */
-/*  .text : { *(.text)  }                                                    */
-    forth      0x8100000 :  {  fig86.linux.o(forth) }
-    dictionary :  {  fig86.linux.o(dictionary)  }
+    .init 0x08048080 : { *(.init) }                                                       
+    .text           : { *(.text           )  }                                                      
+    .fini           : { *(.fini       )  }     
+    .rodata         : { *(.rodata     )  }     
+    __libc_atexit   : { *(__libc_atexit )  }   
+    .data           : { *(.data       )  }     
+    .ctors          : { *(.ctors      )  }     
+    .dtors          : { *(.dtors      )  }     
+    .got            : { *(.got        )  }     
+    .bss            : { *(.bss        )  }     
+    forth      0x8100000      : { *(forth       )  }     
+    dictionary      : { *(dictionary  )  }     
+
 }
+
+
+
+
+
+
 
