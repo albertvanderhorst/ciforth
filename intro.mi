@@ -17,36 +17,31 @@ The latest result is used up first, hence the name lifo buffer.
 
 For example:
 
-forthsamp({1 2 + 7 * 
-
+forthexample({1 2 + 7 * 
 OK
-
 .
-
 21 OK
 })
 
 
 1 2 and 7 are numbers and are just remembered as they are typed in. 
-'10 OK' is the answer of the computer.
+'21 OK' is the answer of the computer.
 forthcode(+) is a small program with an appropriate name.
 It adds the two numbers that were entered the latest, in this
 case 1 and 2. The result 3 remains, but 1 and 2 are consumed.
-The program forthcode(*) adds the 2 and the 7 and the result is 10.
+The program forthcode(*) multiplies the 3 and the 7 and the result is 21.
 The program forthcode(.) prints this results. It could have
-been put on the same line equallt easily.
+been put on the same line equally easily.
 
 Programs can be added to the database by special programs: the so
 called defining words. A defining word generally gets the name of the
-new word from the input stream. 
+new word from the input line.
 
 For example: a constant is just a program that leaves always 
-the same value.
-
+the same value. 
 A constant is created in this way, by the defining word forthcode({CONSTANT}) :
 
-forthsamp({127 CONSTANT MONKEY   12 .
-
+forthexample({127 CONSTANT MONKEY   12 .
 12 OK})
 
 This must not be read like:
@@ -56,7 +51,6 @@ This must not be read like:
 but as:
 
 a number, a program and a name that is consumed, and after that
-
 life goes on. The forthsamp({12 .}) we put there for demonstration purposes,
 to show that forthcode({CONSTANT}) reads ahead only one word.
 We see that forthcode({CONSTANT}) like any other program consumes some 
@@ -66,8 +60,7 @@ the constant called  forthvar({MONKEY}) .
 A very important defining word is forthcode({:}), with its closure 
 forthcode({;}).
 
-forthsamp({: TEST 1 2 + 7 * ;     12 . 
-
+forthexample({: TEST 1 2 + 7 * ;     12 . 
 12 OK })
 
 
@@ -76,8 +69,7 @@ numbers and programs are executed.
 Instead they form a specification of what forthvar({TEST}) must do.
 After the semicolon life continues as usual.
 
-forthsamp({TEST TEST + .
-
+forthexample({TEST TEST + .
 42 OK})
 
 We see that forthvar({TEST}) behaves as a shorthand for the line up till
