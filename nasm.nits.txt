@@ -1,0 +1,76 @@
+Nits
+I think 1+2 is a glaring ommission, it can be fixed by adding one line.
+The other remarks are just comments.
+
+1.
+The symbol ; is not present in the index, maybe even missing from the
+documentation. It is of course crucially important.
+2.
+The keyword `comment' lacks from the index.
+(Actually I was looking for multiple line comments, there aren't any. apparently).
+3.
+Add the following line to the paragraph defining sections (introduction 5.2):
+"
+    A `section' of an assembler program is normally understood as 
+    a part of the program that can be mapped independantly from the
+    other parts in memory. The keyword SECTION defines such as section.
+    Intel uses the word segment which is large and by the same.
+    Sections are handled by linkers and their names often define the 
+    way it is handled by a linker. This, of course, depends on the
+    target a linker is used for.
+"
+This is to stress that nasm behaves as one would expect from 
+a mainstream assembler.
+
+4. I would like to see a comprehensive overview of all assembler 
+directives. E.g. I find it difficult to find out whether there is
+some where a way to communicate what the entry point is towards the linker.
+[I am not arguing that such thing should be present in an assembler.
+In your filosofy probably it should not be present in nasm.
+This is purely a remark about organisation of documentation.]
+
+5.
+I have this book "the 8086 primer" of Stephen Morse.ISBN 0-8104-5165-4
+According to the cover "Written by the man responsible for the architectural
+definition of the 8086"
+
+You may to want to cite from the book (pg. 122)
+"The ASSUME statement on line 2 is a bit harder to explain. I wish 
+I could give you a good reason for having it. I can't.
+"
+There is no doubt, he is really meaning the ASSUME statement 
+as such, in general. He then goes on explaining what those people
+that made the assembler require you to put in this statement.
+
+6.
+The following is apparently acceptable (critical expression)
+      X EQU $-$$ 
+The following is not
+      %assign X $-$$
+I think this is a bug because $-$$ is a critical expression all right.
+This is very strange in view of the fact that the sequence
+      X EQU $-$$
+      %assign XX X
+is accepted allright!
+
+Apparently this is done using a different mechanism.
+Normally assemblers have SET that behave like X, except that 
+a redefinition is not an error.
+I like this a lot better. The syntax is more symmetric. It is more of 
+an assembly variable than something to do with preprocessing.
+Probably it is easier to implement.
+This really bites me!
+
+I think NASM is an 
+excellent piece of work, the dream assembler for i86,
+an assembler like I would have written one.
+Because I could have written it, I appreciate the enormous amount of
+work that has gone into it.
+
+Please do not drop the comprehensive list of assembler instructions.
+It is indispensible in an assembler, and it is an invaluable piece
+of information in its own right.
+
+Albert.
+
+
