@@ -1,0 +1,224 @@
+forthsection({Introduction})
+You may wonder why an optimizer for a computer language would be considered an
+AI application.
+This optimizer is not so much for a particular language as well
+related to a Computer Intelligence that has insight in her own code.
+
+Different types of optimisations interfere and finding ones way through this
+certainly requires some heuristics. The bottom line is that an optimiser
+qualifies as an AI application.
+
+forthsubsection({Properties})
+
+A Forth system is a database of small programs. It is worthwhile to
+investigate what properties these small programs (words) might have.
+The flag field of a word allow to add this information to the header.
+A certain combination of flags allow a particular optimisation.
+
+forthsubsection({Definitions})
+An annihilator is a word that only deletes an item from the stack.
+Examples are DROP 2DROP NIP RDROP.
+
+A juggler reorders the stack without adding or removing items.
+Examples are SWAP 2SWAP ROT.
+
+A duplicator copies an item from the stack.
+Examples are DUP OVER 2DUP.
+
+forthsubsection({Optimisations}
+Optimisations are manipulations on a program source or intermediate code
+to improve the speed of the resulting program.
+In other respect the result is inferior. Symbolic debugging --
+one of Forth's strong points -- goes through the drain.
+(The name "optimisation" is a misnomer.)
+
+forthitem({folding})
+Constant folding is a well known technique in optimisation.
+It means that if an operator works on constants the result may be replaced
+by a constant that is calculated at compile time.
+In Forth we generalise this to folding.
+Folding refers to all words that can be replaced by simpler words in case
+they receive constant data on the stack.
+
+forthitem({reordering})
+Reordering is not so much an optimisation per se, but it allows other optimisations
+to kick in. As a rule of thumb constants are moved to the top of the stack, where
+they fall prey to folding.
+Reordering might also eliminate a juggler.
+
+forthitem({Annihilation})
+In Forth sometimes the result of a calculation is dropped.
+Depending on the properties of the calculation,
+this calculation can sometimes be removed.
+Annihilation is always related to an annihilator.
+
+forthitem({Inlining})
+Inlining means replacing a Forth word with its constituents.
+This technique is extremely important in Forth, more so than
+in other languages, due to the small size of Forth words.
+Inlining is always a winner in speed, and mostly even also a
+winner with regard to space.
+
+Even more important is the fact that inlining allows folding to be applied
+across constituent words. This applies to high level and low level code
+alike.
+
+Inlining high level code is trivial.
+A further inlining stage replaces a high level definition that only calls code
+words, by a code definition which concatenates the code words.
+
+forthsubsection({Data collecting})
+While disassembling a code word, the registers used can be marked.
+This allows to add register usage information to the header.
+
+Also information about whether memory or I/O ports are
+accessed for read or write
+can be collected.
+
+Finally the stack effect can be deduced from the number of POP's and
+PUSH'es. And the use of the return stack can be marked, which means that
+the code word has to be treated by hand.
+
+After all code words have been analysed, and
+the information has been completed manually where needed,
+the stack effects and register usage can be concluded for all high level words.
+The stack effect of a high level words is the concatenation of the stack effect
+of its constituents. The register usage of a high level word is the logical or
+of the register usage of the constituents.
+
+forthsubsection({Purpose})
+A \ci in general will use optimisation to generate a temporary definition
+that is much faster, and retain all the valuable partial information about
+words.
+
+In normal non-AI applications, words are recursively replaced by faster words,
+and those eventually by code definitions. Meanwhile words that are no longer directly
+used in the final application are eliminated.
+For space conservation headers may be removed as well provided in the application
+no dictionary lookup is needed.
+
+-------------------------------------------------------------
+: A0 ;
+: A1 A0 A0 ;
+: A2 A1 A1 ;
+: A3 A2 A1 :
+By now you should understand that A2 does nothing and therefore we need another constant buffer.
+: test UF 1m . THEN 12 ;
+Right by remembering where it cane from , must return to.
+How does it keep track e.g.can I execute the second A1 of A3 or of A2 the return stack.
+Even here we can use the [ [ to interrupt the compulation and doe some calculation. The great advantage of a lifo buffer.
+
+( In the first case A1 must return to point Q, and then A2 that is ..
+this must return to R.
+In the second case we must remember point P.
+There is no problem that A1 in its turn executes A0 because that is the advatage of  las in first out buffer.
+
+If you have interrupted a compilation or test in the module you can
+investigate what FOrth is doing to compiler TEST. You can inspect the
+memory where "TEXT" is stored and you will discover that IF has
+remembered some dat that wll be used by THEN.
+
+Keeping track of what you have,
+As soon as you return from this subroutine you forgot where you were
+(no problem) but you also forget what you have.
+Or you must alwas "pass" data to subroutines beacse the data is not
+remembered.
+Total control
+At each point, agter each word, you know in what overall state Forth
+is in, and ytou can manipulate it.
+For example. Instead of being carefull not to dusturb Forth by leaving
+a number on betweeen [ and ] you can take cibtrik abd do everything
+the compler would do, by hand. Note that you are supposed to undestand
+, but the following is a means to compile tes by hand after IF
+[ 'LIT >CFA , 1 , 'DOT >CFA , BACK ' S; >CFA , HIDDEN
+
+-------------------------------------------------------------
+FOR i FROM 0 TO 1 BY -1 DO ... WHILE ... OD
+init : initialise start to 1,increment to 1, end to infirinity
+cond to TRUE .
+remember last index name and discard it.
+FOR init
+   make init the new index name
+
+FROM
+   if FOR-ed init set start to stack ahead
+TO if FROM init
+   set end to infinity
+
+BY if started init
+   set increment to ahead
+      if end and increment differ in sign, end*=-1
+
+while  compile noheader stuff
+
+-------------------------------------------------------------
+NSR
+NSS
+NSI
+NSO
+replicators
+jugglers
+anihilators
+commutative
+associative
+
+A Folding
+B Reordering
+c Inlining
+D Loop/Recursion optimisation
+
+A
+ NSR+NSS+NSI+NSO inc combination with constant input.
+ Specials:
+    0BRANCH EXECUTE i.c.w. constant input.
+    NSO ic.w. NIP DROP
+    Duplicators (e.g. DUP >R ) i.c.w. constant input
+    Asociative operation ( + ) i.c.w. constant input and same
+    operation
+
+B SWAP/ROT sequences instead of results for NS .
+   Commutative op's SWAP constants to top
+
+C for NSR in line the code to a maximum of 1 K
+
+D Loop optimizing
+ 1 A DO LOOP innermost is entitled to a reigster for I
+ 2. An intermost loop is entitled to 1K : .5 foldable,
+ 3. An intermost loop is entitled to 1K : .5 not foldable
+ 4 A recursion is entitled to registers for its inputs
+ 5. A recursion is entitled to 1K
+ 6 A loop is entitled to registers for the stack items accessed from
+ the loop.
+
+Optmise
+    optimise constituents
+    Fold reorder fold inline fold
+    expand loop
+    fold
+    - - - - - -
+    generate code for non-primary constituents
+    generate code.
+
+
+Note ad RECURSION
+   Try to reorder to get like recursion together. That is really
+   a bug win.
+        DUP RECURSE >R RECURSE
+    becomes
+        DUP RECURSE DUP >R
+-------------------------------------------------------------
+Steps :
+*1. Decompile code definitions by instruction
+*2. For each pop add 1 to POPS
+*3. For each push add 1 to PUSHES
+4. Replace each by 0E if  variable stack effect
+*4. Combine into one byte
+*5. Add $11
+* 6. Fill in
+
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
+-------------------------------------------------------------
