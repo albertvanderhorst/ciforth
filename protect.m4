@@ -17,6 +17,7 @@ dnl The curly brackets prevent AX to be expanded to EAX
         MOV     {AX},REALSEGMENT
         MOV     DS,{AX}
         MOV     ES,{AX}
+        MOV     {AX},DS_SANDBOX ; {Make stack valid}
         MOV     SS,{AX}
         STI
         _BITS32_1_({BITS 32})

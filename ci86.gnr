@@ -157,6 +157,7 @@ _ENDCOMMENT
 SEGSIZE         EQU     1000H   ;{Segment size in segment units.}
 REALSEGMENT     EQU     BOOTADDRESS/10H ;{ @ All real code executes here}
 ;____1_____ _SWITCH_1_({
+M4_SWITCHOFFSET EQU  (M4_SWITCHORG-M4_ORG)
 DS_SANDBOX      EQU     REALSEGMENT + SEGSIZE ;{ @ Real mode may dabble here}
 GDT_SEGMENT     EQU     DS_SANDBOX + SEGSIZE       ;{ @ General descriptor table.}
 ;{ The GDT_.. are offsets in the GDT table. They can be arbitrarily choosen and }
@@ -520,13 +521,6 @@ HERE3:  POP   BX         ;{ Reality.}
         PUSH BX     ; {Corrected program counter}
         RETF        ; {Returning to HERE4 now}
 HERE4:
-        CLI                     ;{ Disallow interrups until stack ready}
-        MOV     AX,CS           ;{ Will do for now (real mode)}
-        MOV     DS,AX
-        MOV     SS,AX
-        MOV     ES,AX
-        MOV     STACKPOINTER,0H
-        STI                     ;{ Allow interrupts}
 });_END___1__({ _PROTECTED_1_})
 
 
@@ -3178,6 +3172,7 @@ HEADER({SEEK},{SEEK},{DOCOL})
 ;
 ;{      ( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
+         _SWITCH_1_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         _0BRANCH(RSLW1)
         DC      LIT, 03F00H     ;{ Disk read }
         _BRANCH(RSLW2)
@@ -3335,6 +3330,7 @@ DOK:    POPF            ;{POP FLAGS}
 ;
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
+         _SWITCH_1_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         _0BRANCH(RSLW1)
         DC      RBLK
         _BRANCH(RSLW2)
@@ -3370,6 +3366,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
 ;
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
+         _SWITCH_1_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         DC      ZERO, DSKERR, STORE
         _0BRANCH(RSLW1)
         DC      LIT, 0201H      ;{ Read (AH) one (AL) sector }
@@ -3450,6 +3447,7 @@ CODE_HEADER({WBLK},{WBLK})
 
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
+         _SWITCH_1_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
         DC      TOR
         DC      LIT, SPB, STAR  ;{ Sector number}
         DC      SWAP
