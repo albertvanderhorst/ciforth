@@ -8,9 +8,20 @@
 \ have been filled in in the flag fields.
 
 REQUIRE $
+
+( ------------ DEBUGGING ------------------------------------- )
       : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
-\ : \D ; IMMEDIATE
-: ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
+\ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
+
+\ REQUIRE SET (not yet)
+( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
+( Build a set "x" with X items. )
+: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
+: !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
+: SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
+: SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
+: SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
+: .SET   @+ SWAP DO I ? 0 CELL+ +LOOP ;   ( Print non-empty SET )
 
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
@@ -106,6 +117,11 @@ VARIABLE MIN-DEPTH
 : COMBINE-VD    SE:1>2 SWAP 1- NEGATE VD +! REMEMBER-DEPTH 1- VD +! ;
 
 \ ---------------------------------------------------------------------
+
+ASSEMBLER
+50 SET ANNIHILATORS
+PREVIOUS
+
 \ For DEA return "it CAN be part of annihilatable code",
 \ as far as its stack & side effects are concerned.
 : ANNILABLE? DUP NS!?   SWAP SE@ NO-GOOD 0= AND ;
@@ -122,14 +138,14 @@ VARIABLE MIN-DEPTH
 \ Investigate the start of SEQUENCE. Return the ADDRESS
 \ to which it can be annihilated, else 0.
 : (ANNIHILATE-SEQ)
-    BEGIN ^ &S EMIT
+    BEGIN
         NEXT-PARSE OVER ANNILABLE? AND 0= IF 2DROP 0 EXIT THEN
         DUP 'BRANCH = IF SWAP 1 CELLS - @+ + SWAP THEN
         DUP '0BRANCH = IF
             SE@ COMBINE-VD
-            ^ &1 EMIT DUP VD @ >R RECURSE VD @ R> VD ! >R
-            SWAP 1 CELLS - @+ + ^ &2 EMIT RECURSE
-            OVER ^ &C EMIT <>
+            DUP VD @ >R RECURSE VD @ R> VD ! >R
+            SWAP 1 CELLS - @+ + RECURSE
+            OVER <>
             R> VD @ <> OR IF DROP 0 THEN
         EXIT THEN
     ANNILLING?  WHILE REPEAT ;
@@ -140,21 +156,30 @@ VARIABLE MIN-DEPTH
     VD @ NEGATE 0 ?DO POSTPONE DROP LOOP
 ;
 
-\ Try to annihilate the start of SEQUENCE. If it works compile
-\ equivalent code and return the remaining SEQUENCE, else 0.
-: ANNIHILATE-SEQ !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
-    ANNIL-STABLE? IF COMPILE-DROPS ELSE DROP 0 THEN ;
+\ Investigate the start of SEQUENCE. Leave END of that
+\ sequence plus a FLAG whether it can be annihilated
+\ without considering jumps into the middle of this code.
+: ANNIHILATE-SEQ? !OPT-START !MIN-DEPTH (ANNIHILATE-SEQ)
+    DUP 0<> ANNIL-STABLE? AND ;
 
-\ Recompile the start of SEQUENCE . Leave remaining SEQUENCE.
-\ It may be an annihilatable part  or just an item.
-: ANNIHILATE-ONE DUP ANNIHILATE-SEQ DUP IF SWAP DROP ELSE
-      DROP DUP NEXT-ITEM >HERE THEN ;
+\ Save START END and number of equivalent drops to the set ``ANIHILATORS''.
+: SAVE-ANNIL ANNIHILATORS >R SWAP R@ SET+!   R@ SET+!  VD @ NEGATE R> SET+! ;
+
+\ Investigate the start of SEQUENCE. If it can be anihilated
+\ (no jumps) post the start, the end and the equivalent number of drops
+\ Always leave the new SEQUENCE be it just
+\ after the annihilitee or bumped by one.
+: ANNIHILATE-ONE DUP ANNIHILATE-SEQ? IF DUP >R SAVE-ANNIL R> ELSE
+    DROP NEXT-ITEM THEN ;
 
 \ Annihilate as much as possible from SEQUENCE.
-\ Return recompiled SEQUENCE.
-: ANNIHILATE HERE SWAP
+\ NOT YET :
+    \ Return recompiled SEQUENCE.
+    \ : ANNIHILATE HERE SWAP   ANNIHILATORS !SET
+: ANNIHILATE DUP   ANNIHILATORS !SET
     BEGIN ANNIHILATE-ONE DUP ?NOT-EXIT 0= UNTIL DROP
 POSTPONE (;)  ;
+
 \ ---------------------------------------------------------------------
 
 \ For DEA we are still in the swappable code, i.e. we don't dig below
@@ -388,15 +413,6 @@ CONSTANT MATCH-TABLE
 
 
 \ ----------------------------------------------------------------
-( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
-( Build a set "x" with X items. )
-: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
-: !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
-: SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
-: SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
-: .SET   @+ SWAP DO I . 0 CELL+ +LOOP ;   ( Print non-empty SET )
-: SET+@   DUP >R @ @ 0 CELL+ R> +! ;   ( retract from SET. Leave ITEM )
-
 STRIDE SET PEES
 : !PEES PEES !SET ;
 \ ----------------------------------------------------------------
