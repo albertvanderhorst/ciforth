@@ -300,10 +300,10 @@ CREATE PRO-TALLY 3 CELLS ALLOT  ( Prototype for TALLY-BI BY BA )
 12 SET DISS          ( A row of dea's representing a disassembly. )
 : !DISS DISS !SET ;
 : .DISS-AUX DISS @+ SWAP DO
-    I @ DUP IS-COMMA IF I DISS - . THEN ID.
+    I @ DUP IS-COMMA OVER IS-DFI OR IF I DISS - . THEN ID.
  0 CELL+ +LOOP CR ;
-( ' DISS can be redefined to generate testsets)
-VARIABLE 'DISS    ' .DISS-AUX 'DISS !
+( DISS-VECTOR can be redefined to generate testsets)
+VARIABLE DISS-VECTOR    ' .DISS-AUX DISS-VECTOR !
 : +DISS DISS SET+! ;
 : DISS? DISS SET? ;
 : DISS- 0 CELL+ NEGATE DISS +! ; ( Discard last item of `DISS' )
@@ -387,7 +387,7 @@ VARIABLE 'DISS    ' .DISS-AUX 'DISS !
 ( If present, print a result and continue searching for a new last item )
 : RESULT
     RESULT? IF
-        'DISS @ EXECUTE
+        DISS-VECTOR @ EXECUTE
         DISS-
         REBUILD
     THEN
@@ -543,7 +543,7 @@ VARIABLE POINTER       HERE POINTER !
     ( startdea -- ) BEGIN
         DIS-PI DIS-xFI DIS-DFI DIS-xFIR DIS-COMMA
         >NEXT%
-(       DUP ID. ." : "  'DISS @ EXECUTE                                 )
+(       DUP ID. ." : "  DISS-VECTOR @ EXECUTE                                 )
     DUP VOCEND? RESULT? OR UNTIL DROP
     RESULT? IF
       R> DROP
