@@ -17,7 +17,7 @@ REQUIRE ^
 \ Print a coordinate pair
 : .COORDINATE  SPACE SWAP . . ;
 
-\ ################# PostScript EQU's ##############################
+\ ################# PostScript MANIFEST CONSTANTS #################
 
 \ Number of screens to put in a column
 5 CONSTANT #Screens
@@ -35,107 +35,17 @@ REQUIRE ^
 15229 CONSTANT NextScreen
 
 \ Stride between lines, vertical
-CREATE LineStride -902 ,
+VARIABLE LineStride
 \ Leave relative vector to next line position
 : NextLine LineStride @ ;
+: BlockLineStride  -902  LineStride ! ;
+: FileLineStride   -625 LineStride ! ;
 
 \ Relative position of screen's lower right corner
 28000 11640 COORDINATE ScreenSize
 
-\ ################# TOOLS #########################################
-\ The kind of things that culd be useful for other programs.
-
-\ For argument NUMBER (counting from one) : return as a string.
-: ARG$  2 + CELLS   ARGV +   @ Z$@ ;
-
-: PrintWithEscapes  OVER + SWAP ?DO
-    I C@
-    DUP &\ = IF &\ EMIT THEN
-    DUP &( = IF &\ EMIT THEN
-    DUP &) = IF &\ EMIT THEN
-    EMIT
-LOOP ;
-
-\ ################# DATA ##########################################
-
-\ Appendix letter, A..Z.
-VARIABLE CurrentAppendix    &@ CurrentAppendix !  \ Increment before use
-: .Appendix    CurrentAppendix @ EMIT ;
-
-\ Page number, through going, may be starting at the end of the file
-\ to which we are going to append.
-VARIABLE CurrentPage
-
-\ Print the PAGE number in behalf of viewers as PostScript comment.
-: PSPagePragma
-    1 CurrentPage +!
-    ." %%Page: "   .Appendix &- EMIT .   CurrentPage  @ . CR
-;
-
-\ The NAME of the current file.
-CREATE FileName 2 CELLS ALLOT
-
-\ Get the next LINE from the screens .
-CREATE FileContent 2 CELLS ALLOT
-
-\ Get a file with NAME.
-: GetNextFile
-    2DUP FileName 2!   GET-FILE FileContent 2!   1 CurrentAppendix +! ;
-
-: Line   FileContent 2@  OVER IF ^J $S   2SWAP FileContent 2! THEN ;
-
-\ Output the next line from the screens to position, first place to next line.
-: PrintLine
-    ." ("   Line PrintWithEscapes   ." )"
-    0 NextLine .COORDINATE ." rmoveto gsave show grestore" CR ;
-
-\ Add the next line to the output at POSITION .
-
-\ Add a screens content of the output at POSITION .
-\ Return the screen WAS empty.
-
-\ Draw a border around the screen at POSITION .
-: DrawBorder ." .5 setgray" CR
-    .COORDINATE ."  moveto "
-    C/L 1 +          . ." CW mul 0 rlineto "
-    NextLine         . ." 16.5 mul 0 exch rlineto "
-    C/L 1 + NEGATE   . ." CW mul 0 rlineto " CR
-                       ." closepath CW setlinewidth .5 setgray stroke 0 setgray" CR
-;
-\ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
-\ As a side effect set the proper font for printing screens.
-: ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
-    ." moveto " C/L 3 / . ." MM (SCR #"
-    DUP . ." ) TitleF show BodyFl" CR #Screens + ;
-
-\ Output at POSITION a NUMBER lines. Return it was EMPTY.
-: MultLine >R
-      2DUP .COORDINATE ." moveto 1 MM " CR
-      R> 0 DO PrintLine LOOP
-;
-
-\ Output a screen at POSITION unless empty. Return it was EMPTY.
-: OneScreen    16 MultLine DrawBorder ;
-
-\ Print the header of page NUMBER .
-: PageHeader
-    DUP PSPagePragma
-    ." (" 4 .R ." ) (Appendix " .Appendix &. EMIT SPACE
-    FileName 2@ TYPE ." ) exch StartPage " CR
-;
-
-\ Output a SCREEN and following at PAGE in two columns of screens.
-\ Leave incremented SCREEN and PAGE and indication we MUST stop.
-: NextPage
-    DUP PageHeader 1+ >R
-    LeftColumn 2@ ScreenNumber
-    LeftColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
-    RightColumn 2@ ScreenNumber
-    RightColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
-    ." EndPage " CR
-    R>
-    FileContent @ 0=
-;
+\ ################# PostScript PLUG INS ###########################
+\ Warning: contains multi-line strings, perfectly allowed in scripts.
 
 \ Output some PostScript code to fixup the use of dictionary by ``DVIps''
 \ By this proper usage ``gv'' can now view each page independantly,
@@ -162,7 +72,7 @@ end
 %%EndComments
 " TYPE ;
 
-\ Output the Prolog : PostScript code.
+\ Output the Prolog : PostScript code with the definitions to print our pages.
 : PreLude
 "/ForthDict 30 dict def
 ForthDict begin
@@ -189,7 +99,6 @@ ForthDict begin
 ] def
 
 /reencdict 12 dict def
-
 
 
     % change fonts using ISO Latin1 characters
@@ -252,20 +161,103 @@ end  % ForthDict
 " TYPE ;
 
 
-\ Output file given by NAME , in the next appendix, printed as screens.
-: OutputScreens
-    GetNextFile
-    0 1  BEGIN NextPage UNTIL
-    1- PostLude DROP
+\ ################# TOOLS #########################################
+\ The kind of things that culd be useful for other programs.
+
+\ For argument NUMBER (counting from one) : return as a string.
+: ARG$  2 + CELLS   ARGV +   @ Z$@ ;
+
+: PrintWithEscapes  OVER + SWAP ?DO
+    I C@
+    DUP &\ = IF &\ EMIT THEN
+    DUP &( = IF &\ EMIT THEN
+    DUP &) = IF &\ EMIT THEN
+    EMIT
+LOOP ;
+
+\ ################# DATA ##########################################
+
+\ Appendix letter, A..Z.
+VARIABLE CurrentAppendix    &@ CurrentAppendix !  \ Increment before use
+: .Appendix    CurrentAppendix @ EMIT ;
+
+\ Page number, through going, may be starting at the end of the file
+\ to which we are going to append.
+VARIABLE CurrentPage
+
+\ Print the PAGE number in behalf of viewers as PostScript comment.
+: PSPagePragma
+    1 CurrentPage +!
+    ." %%Page: "   .Appendix &- EMIT .   CurrentPage  @ . CR
 ;
 
-: Interlude
-." %%Appendix B
-%%Endinterlude
-"
--625 LineStride ! ;
+\ The NAME of the current file.
+CREATE FileName 2 CELLS ALLOT
 
+\ The remaining CONTENT of the current file as a string.
+CREATE FileContent 2 CELLS ALLOT
 
+\ Get a file with NAME.
+: GetNextFile
+    2DUP FileName 2!   GET-FILE FileContent 2!   1 CurrentAppendix +! ;
+
+\ Get the next LINE .
+: Line   FileContent 2@  OVER IF ^J $S   2SWAP FileContent 2! THEN ;
+
+\ Output the next line from the screens to position, first place to next line.
+: PrintLine
+    ." ("   Line PrintWithEscapes   ." )"
+    0 NextLine .COORDINATE ." rmoveto gsave show grestore" CR ;
+
+\ Draw a border around the screen at POSITION .
+: DrawBorder ." .5 setgray" CR
+    .COORDINATE ."  moveto "
+    C/L 1 +          . ." CW mul 0 rlineto "
+    NextLine         . ." 16.5 mul 0 exch rlineto "
+    C/L 1 + NEGATE   . ." CW mul 0 rlineto " CR
+                       ." closepath CW setlinewidth .5 setgray stroke 0 setgray" CR
+;
+\ Print the SCREEN number of the screen at POSITION . Leave incremented SCREEN.
+\ As a side effect set the proper font for printing screens.
+: ScreenNumber   0 NextLine 2 /  NEGATE D+ .COORDINATE
+    ." moveto " C/L 3 / . ." MM (SCR #"
+    DUP . ." ) TitleF show BodyFl" CR #Screens + ;
+
+\ Output at POSITION a NUMBER lines. Return it was EMPTY.
+: MultLine >R
+      2DUP .COORDINATE ." moveto 1 MM " CR
+      R> 0 DO PrintLine LOOP
+;
+
+\ Output a screen at POSITION unless empty. Return it was EMPTY.
+: OneScreen    16 MultLine DrawBorder ;
+
+\ Print the header of page NUMBER .
+: PageHeader
+    DUP PSPagePragma
+    ." (" 4 .R ." ) (Appendix " .Appendix &. EMIT SPACE
+    FileName 2@ TYPE ." ) exch StartPage " CR
+;
+
+\ Output a SCREEN and following at PAGE in two columns of screens.
+\ Leave incremented SCREEN and PAGE.
+: NextPage
+    DUP PageHeader 1+ >R
+    LeftColumn  2@ ScreenNumber
+    LeftColumn  2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
+    RightColumn 2@ ScreenNumber
+    RightColumn 2@ #Screens 0 DO 2DUP OneScreen NextScreen - LOOP 2DROP
+    ." EndPage " CR
+    R>
+;
+
+\ Output file given by NAME , in the next appendix, printed as screens.
+: OutputScreens
+    BlockLineStride
+    GetNextFile
+    0 1  BEGIN NextPage FileContent @ 0= UNTIL
+    DROP
+;
 
 \ Output a column at POSITION unless empty.
 : OneColumn   #Lines MultLine ;
@@ -276,25 +268,21 @@ end  % ForthDict
     ." CW sub rlineto CW 10 div setlinewidth .5 setgray stroke 0 setgray" CR
 ;
 
-\ Output a PAGE in two columns.
-\ Leave incremented PAGE and indication we MUST stop.
+\ Output a PAGE in two columns. Leave incremented PAGE.
 : NextPageSrc
-    DUP PageHeader 1+ >R
+    DUP PageHeader 1+
     LeftColumn 2@ OneColumn
     DrawBar
     RightColumn 2@ OneColumn
     ." EndPage " CR
-    R>
-    FileContent @ 0=
 ;
 
-\ Output the .
 \ Output the file given by NAME in the next appendix in two columns.
 : OutputFile
+    FileLineStride
     GetNextFile
-    Interlude
-    1 BEGIN NextPageSrc UNTIL
-    1- PostLude DROP
+    1 BEGIN NextPageSrc   FileContent @ 0= UNTIL
+    DROP
 ;
 
     0 CurrentPage !
@@ -303,3 +291,4 @@ end  % ForthDict
     PreLude
     1 ARG$ OutputScreens
     2 ARG$ OutputFile
+    PostLude
