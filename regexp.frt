@@ -33,6 +33,14 @@ REQUIRE TRUE
 \                      Bit sets
 \ -----------------------------------------------------------------------
 REQUIRE NEW-DO
+\ REQUIRE 2SET+!
+: 2SET+! >R SWAP R@ SET+! R> SET+! ;
+\ REQUIRE WHERE-IN-SET
+
+( For VALUE and SET return the POSITION of value in set, or a null. )
+: WHERE-IN-SET $@ SWAP ?DO
+   DUP I @ = IF DROP I UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
+
 
 CREATE BIT-MASK-TABLE 1   8 0 DO DUP C, 1 LSHIFT LOOP DROP
 : BIT-MASK   CHARS BIT-MASK-TABLE + C@ ;
@@ -81,7 +89,7 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 &n ^J |   &r ^M |   &b ^H |   &t ^I |   &e ^Z 1+ |
 
 \ For CHARACTER return the ``ASCII'' VALUE it represents, when escaped.
-: GET-ESCAPE ESCAPE-TABLE IN-SET? DUP IF CELL+ @ _ THEN DROP ;
+: GET-ESCAPE ESCAPE-TABLE WHERE-IN-SET DUP IF CELL+ @ _ THEN DROP ;
 '| HIDDEN
 
 \ -----------------------------------------------------------------------
@@ -99,11 +107,10 @@ REQUIRE ?BLANK      \ Indicating whether a CHAR is considered blank in this Fort
 \ atom = 'ADVANCE( <term>+ <endsentinel>
 
 CREATE RE-PATTERN MAX-RE CELLS ALLOT
-
-\ I AM FAR FROM SURE ABOUT THIS ONE
+: CELL- 0 CELL+ - ;
 \ For CHARPOINTER and EXPRESSIONPOINTER :
-\ return "there IS a match"
-: MATCH @+ EXECUTE >R 2DROP R> ;
+\ bla bla + return "there IS a match"
+: MATCH BEGIN @+ DUP WHILE EXECUTE 0= IF CELL- 0 EXIT THEN REPEAT CELL- 1 ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
 \ if the character matches the charset at the expression,
@@ -112,38 +119,47 @@ CREATE RE-PATTERN MAX-RE CELLS ALLOT
 : ADVANCE-CHAR  OVER C@ OVER IN-SET? DUP >R IF SWAP CHAR+ SWAP MAX-SET CHARS + THEN R> ;
 
 \ For CHARPOINTER and EXPRESSIONPOINTER :
-\ if the char sequence at charpointer matches the string variable at the
-\ expressionpointer, advance both past the match, else leave them as is.
-\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
-: ADVANCE-EXACT  2DUP $@ CORA 0= DUP >R IF $@ >R SWAP R@ + SWAP R> + ALIGNED THEN R> ;
-
-\ For CHARPOINTER and EXPRESSIONPOINTER :
-\ if the following match xt (at ``EXPRESSIONPOINTER'' ) works out,
-\ with the modifier ( * + ? ) ,
-\ advance both past the match, else leave them as is.
-\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
-: ADVANCE?
-    OVER >R @+ EXECUTE >R 2DUP MATCH IF
-        RDROP RDROP 2DROP TRUE
-    ELSE R> IF
-            DROP R> SWAP MATCH
-        ELSE
-            2DROP RDROP  FALSE
-        THEN
-    THEN ;
-: ADVANCE*
-    OVER >R
+\ as long as the character agrees with the matcher at the expression,
+\ advance it.
+\ Return CHARPOINTER advanced and EXPRESSIONPOINTER advanced past the matcher.
+: (ADVANCE*)
     @+ >R
     BEGIN
         2DUP R@ EXECUTE
     WHILE
         DROP >R >R DROP R> R> SWAP
     REPEAT
-    >R DROP DROP R> RDROP
+    >R DROP DROP R> RDROP ;
+\ This would benefit from locals :
+\ : (ADVANCE*) @+ LOCAL MATCHER   LOCAL EP   LOCAL CP
+\         BEGIN CP EP MATCHER EXECUTE WHILE DROP TO CP REPEAT
+\         TO EP DROP     CP EP ;
 
-MATCH
+\ For CHARPOINTER and EXPRESSIONPOINTER :
+\ if the char sequence at charpointer matches the string variable at the
+\ expressionpointer, advance both past the match, else leave them as is.
+\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
+: ADVANCE-EXACT  2DUP $@ CORA 0= DUP >R IF $@ >R SWAP R@ + SWAP R> + ALIGNED THEN R> ;
 
-;
+\
 
+\ For CHARPOINTER and EXPRESSIONPOINTER and BACKTRACKPOINTER :
+\ if there is match between btp and cp with the ep,
+\ return CHARPOINTER ann EXPRESSIONPOINTER incremented past the match,
+\ else return BTP and EP. Plus "there IS a match".
+: BACKTRACK
+    >R BEGIN MATCH 0= WHILE
+        OVER R@ = IF RDROP 0 EXIT THEN
+        SWAP 1 - SWAP
+    REPEAT
+    RDROP 1 ;
 
-: ADVANCE+ 2DUP @+ EXECUTE >R 2DROP R@ IF ADVANCE* DROP THEN R> ;
+\ if the following match xt (at ``EXPRESSIONPOINTER'' ) works out,
+\ with the modifier ( * + ? ) ,
+\ advance both past the match, else leave them as is.
+\ Return CHARPOINTER and EXPRESSIONPOINTER and "there IS a match".
+: ADVANCE? OVER >R   \ Remember backtrack point
+    @+ EXECUTE DROP
+    R> BACKTRACK ;
+: ADVANCE* OVER >R   (ADVANCE*) R> BRACKTRACK ;
+: ADVANCE+ @+ EXECUTE >R R@ IF ADVANCE* DROP THEN R> ;
