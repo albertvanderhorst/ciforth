@@ -23,6 +23,10 @@ REQUIRE Z$@
 REQUIRE -LEADING
 REQUIRE COMPARE
 
+\ This is used as an invalid index into an array to indicate that
+\ there was no array item at all.
+-1 CONSTANT NONE
+
 \ #################### CONFIGURATION ##################################
 
 \ Leave a FRACTION (numerator/denominator) that decides whether
@@ -161,15 +165,15 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 \ Add STRING as a QUESTION.
 : ADD-QUESTION CLEAN-STRING $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
 
-\ Find a diagnosis STRING and return its INDEX.
+\ Find a diagnosis STRING and return its INDEX (or ``NONE'').
 : FIND-DIAGNOSIS CLEAN-STRING PAD $! PAD $TO-LOWER
-    -1 PAD $@
+    NONE PAD $@
     #DIAGNOSES @ 0 DO 2DUP I DIAGNOSES 2@ COMPARE 0= IF
         2DROP DROP I UNLOOP EXIT
     THEN LOOP
     2DROP ;
 \D "RENDIER " FIND-DIAGNOSIS ." FIND-D Expect 0 0 : " . DEPTH . CR
-\D "PENDIER " FIND-DIAGNOSIS ." FIND-D Expect -1 0 : " . DEPTH . CR
+\D "PANDIER " FIND-DIAGNOSIS ." FIND-D Expect -1 0 : " . DEPTH . CR
 
 : (U.) 0 <# #S #> ;
 
@@ -249,6 +253,7 @@ INTERACTION DEFINITIONS
    Yes$ DROP C@ OVER = IF DROP A_YES EXIT THEN
    No$  DROP C@ OVER = IF DROP A_NO  EXIT THEN
    Amb$ DROP C@ OVER = IF DROP A_AMB EXIT THEN
+   &?           OVER = IF DROP A_AMB EXIT THEN
    DROP A_NONE
 ;
 
@@ -402,12 +407,16 @@ DATABASE
 \D 1 1 ACCUMULATE ." ACCUMULATE Expect 1 3 0 : " C_YES ? C_NO ? DEPTH . CR
 
 \ Evaluates and returns the quality for question number INDEX
-\ for the current focus. It is a number between 0 and 1000.
+\ for the current focus. It is a number between -1 and 1000.
 \ It is proportional to the number of diagnoses that can be eliminated
 \ provided the user can answer the question. (More or less. )
+\ -1 is reserved for the situation that none of the questions can
+\ lead to any exclusions, where 0 means that with luck there may be
+\ conclusions.
+-1 CONSTANT REAL-BAD
 : QUESTION-QUALITY
    !ANSWERS   #DIAGNOSES @ 0 DO DUP I ACCUMULATE LOOP DROP
-   C_UNAMB 0= IF 0 ELSE BAL UNAMB 1000 */ THEN
+   C_UNAMB 0= IF REAL-BAD ELSE BAL UNAMB 1000 */ THEN
 ;
 \D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 : " . DEPTH . CR
 \D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 : " . DEPTH . CR
@@ -418,10 +427,11 @@ DATABASE
 \D 3 200 0 100 BEST-PAIR ." BP Expect 3 300 :" SWAP . . CR
 
 \ Select the best question still available. Return its INDEX.
-: SELECT-QUESTION -1 0  \ Initial INDEX and QUALITY.
+: SELECT-QUESTION NONE 0  \ Initial INDEX and QUALITY.
     #QUESTIONS @ 0 DO I ?POSED 0= IF
        I  I QUESTION-QUALITY BEST-PAIR
-    THEN LOOP DROP
+    THEN LOOP
+    REAL-BAD = IF DROP NONE THEN   \ The best question is worthless.
 ;
 \D SELECT-QUESTION ." SELECT-QUESTION Expect 0 0 : " . DEPTH . CR
 
@@ -480,20 +490,20 @@ ONLY FORTH DEFINITIONS
 
 INTERACTION DEFINITIONS
 DATABASE CONSULTING STRATEGY
-\ Ask confirmation of the DIAGNOSIS. Return IT if confirmed else -1.
-: CONFIRM
-    DUP ?EXCLUDED IF DROP -1 EXIT THEN
+\ For DIAGNOSIS: return IT if it is the outcome else ``NONE''.
+: CONFIRM-DIAGNOSIS
+    DUP ?EXCLUDED IF DROP NONE EXIT THEN
     IsIt$ PAD $! DUP DIAGNOSES 2@ PAD $+!
-    PAD $@ GET-ANSWER A_YES = IF SmartEeh$ TYPE ELSE DROP -1 THEN
+    PAD $@ GET-ANSWER A_YES = IF SmartEeh$ TYPE ELSE DROP NONE THEN
 ;
 
 \ Return the DIAGNOSIS that comes out. Always ask the
 \ user for confirmation, especially if there are more
-\ possibilities. Return -1 for no confirmed diagnosis.
+\ possibilities. Return ``NONE'' for no confirmed diagnosis.
 : POSE-DIAGNOSIS
-    POSSIBILITIES @ DUP 0= IF DROP -1 EXIT THEN
+    POSSIBILITIES @ DUP 0= IF DROP NONE EXIT THEN
     1 = IF IThinkIKnow$ ELSE ThereAreSeveral$ THEN TYPE
-    -1 #DIAGNOSES @ 0 DO I CONFIRM DUP -1 <> IF SWAP DROP LEAVE THEN DROP LOOP
+    NONE #DIAGNOSES @ 0 DO I CONFIRM-DIAGNOSIS DUP NONE <> IF SWAP DROP LEAVE THEN DROP LOOP
 ;
 
 \ The answer for QUESTION is turned into a corrected ANSWER.
@@ -518,7 +528,23 @@ DATABASE CONSULTING STRATEGY
     OVER ?AMBIGUOUS IF 2DROP 0 EXIT THEN
     <> ;
 
-\ The current answer vector and the vector for the outcome DIAGNOSES
+\ Have the user confirm for this OUTCOME that the answer for the
+\ QUESTION that the he gave was intended. If it isn't, correct the
+\ ``ANSWER-VECTOR'' for that question to ``A_NONE''.
+\ (Do not ask to correct the answer, this would be unlawful influencing.)
+: CONFIRM-ONE-ANSWER
+    AreYouSure1$ TYPE CR
+    8 SPACES DUP QUESTIONS 2@ TYPE CR
+    AreYouSure2$ TYPE
+    OVER DIAGNOSES 2@ TYPE
+    AreYouSure2a$ TYPE CR
+    8 SPACES
+    DUP ANSWER-VECTOR @ A_YES = IF Yes$ ELSE No$ THEN TYPE CR CR
+    AreYouSure3$  TYPE CR CR
+    DUP QUESTIONS 2@ GET-ANSWER   OVER  ANSWER-VECTOR !
+    2DROP ;
+
+\ The current answer vector and the vector for the outcome DIAGNOSIS
 \ confirmed by the user are in conflict, because this outcome was apparently
 \ excluded along the way.
 \ Give the user an opportunity to change the answer vector before it is added
@@ -526,16 +552,10 @@ DATABASE CONSULTING STRATEGY
 \ This helps keeping the database clean from typo's and lousy answering.
 : CONFIRM-ANSWERS
     #QUESTIONS @ 0 DO
-        I ANSWER-VECTOR @   DUP I ANSWER-FOR CONFLICTING? IF
-            AreYouSure1$  TYPE CR
-            AreYouSure2$ TYPE CR
-            I ANSWER-VECTOR @ A_YES = IF Yes$ ELSE No$ THEN TYPE CR
-            AreYouSure3$  POSE-QUESTION A_YES <> IF
-                I POSE-QUESTION DUP I ANSWER-VECTOR !
-                ( DUP ?AMBIGUOUS 0= IF I OVER EXCLUDE-MORE THEN ) DROP
-            THEN
+        I ANSWER-VECTOR @   OVER I ANSWER-FOR CONFLICTING? IF
+            DUP I CONFIRM-ONE-ANSWER
         THEN
-    LOOP
+    LOOP DROP
 ;
 
 \ Ask the user to introduce a new diagnosis, because no diagnosis
@@ -545,10 +565,10 @@ DATABASE CONSULTING STRATEGY
 : NEW-DIAGNOSIS
     DumbEeh$ TYPE CR
     PleaseLearn$ POSE-QUESTION (ACCEPT)
-    2DUP FIND-DIAGNOSIS DUP -1 = IF
+    2DUP FIND-DIAGNOSIS DUP NONE = IF
         DROP ADD-DIAGNOSIS
     ELSE  \ Should be an exceptional case
-        GotItWrong$ TYPE
+        GotItWrong$ TYPE CR CR CR
         >R 2DROP  R@ CONFIRM-ANSWERS R>
     THEN
 ;
@@ -570,7 +590,7 @@ DATABASE CONSULTING STRATEGY
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 select an existing QUESTION that
 \ will make a distinction between the two.
-: SELECT-EXISTING 2DROP -1 ;
+: SELECT-EXISTING 2DROP NONE ;
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new question that will
 \ make a distinction between the two. Return IT.
@@ -580,13 +600,13 @@ DATABASE CONSULTING STRATEGY
     QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION
     #QUESTIONS @ 1- ;
 
-\ For DIAGNOSIS1 and DIAGNOSIS2 return a QUESTION that will make a
-\ make a distinction between the two.
+\ For DIAGNOSIS1 and DIAGNOSIS2 return a QUESTION that will
+\ make a distinction between the two. Or ``NONE''.
 : GENERATE-QUESTION
      NeedQuestion1$ TYPE CR      NeedQuestion2$ TYPE CR
      OVER DIAGNOSES 2@ TYPE CR   DUP DIAGNOSES 2@ TYPE CR
      2DUP  SELECT-EXISTING
-     DUP -1 = IF DROP 2DUP NEW-QUESTION THEN
+     DUP NONE = IF DROP 2DUP NEW-QUESTION THEN
      >R 2DROP R>
 ;
 
@@ -665,7 +685,7 @@ RDROP ;
 
 \ Ask as many question as makes sense to zoom in onto the diagnosis.
 : INTERROGATION
-    BEGIN SELECT-QUESTION DUP -1 <> POSSIBILITIES @ 1 > AND WHILE
+    BEGIN SELECT-QUESTION DUP REAL-BAD <> POSSIBILITIES @ 1 > AND WHILE
         GotLeft1$ TYPE POSSIBILITIES @ . GotLeft2$ TYPE CR
         DUP QUESTIONS 2@ GET-ANSWER   SWAP
         2DUP ANSWER-VECTOR !    ELIMINATE
@@ -676,7 +696,7 @@ RDROP ;
 : ONE-DIAGNOSIS
     !EXCLUSIONS !ANSWER-VECTOR  #DIAGNOSES @ POSSIBILITIES !
     INTERROGATION
-    POSE-DIAGNOSIS DUP -1 = IF DROP NEW-DIAGNOSIS THEN
+    POSE-DIAGNOSIS DUP NONE = IF DROP NEW-DIAGNOSIS THEN
     DUP ELIMINATE-AMBIGUITY ADD-ANSWERS
     !ANSWER-VECTOR
 ;
