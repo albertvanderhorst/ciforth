@@ -1470,7 +1470,7 @@ worddoc({MULTIPLYING},{UM/MOD},{u_slash},{ud u1 --- u2 u3},{ISO},
 {Leave the unsigned remainder forthvar({u2}) and unsigned
 quotient forthvar({u3}) from the unsigned double dividend
 forthvar({ud}) and unsigned divisor forthvar({u1}) .},
-{{UM*},{M/},{/}},
+{{UM*},{SM/REM},{/}},
 {
 {-1. -1 UM/MOD . .},{-1 -1},
 {DECIMAL 12.34 100 UM/MOD . .},{12 34}
@@ -4053,7 +4053,14 @@ CODE_HEADER({S>D},{STOD})
 STOD1:  _2PUSH
 ;
 worddoc({OPERATOR},{ABS},{abs},{n --- u},{L0},
-{Leave the absolute value of forthvar({n}) as forthvar({u}) .},{}, {}, enddoc)
+{Leave the absolute value of forthvar({n}) as forthvar({u}) .},
+{{DABS}}, 
+{
+{ 0  ABS .},{0 },                      
+{ 1  ABS .},{1 },                      
+{ -1 ABS .},{1}                      
+},
+enddoc)
 HEADER({ABS},{LABS},{DOCOL})
         DC      LDUP
         DC      ZLESS
@@ -4063,7 +4070,13 @@ PM1:
         DC      SEMIS
 ;
 worddoc({DOUBLE},{DABS},{d_abs},{d --- ud},{},
-{Leave the absolute value forthvar({ud}) of a double number.},{{DNEGATE}}, {}, enddoc)
+{Leave the absolute value forthvar({ud}) of a double number.},{{DNEGATE},{ABS}}, 
+{
+{ 0.  DABS D.},{0},                      
+{ 1.  DABS D.},{1},                      
+{ -1. DABS D.},{1}                      
+},
+enddoc)
 HEADER({DABS},{DABS},{DOCOL})
         DC      LDUP
         DC      ZLESS
@@ -4073,7 +4086,10 @@ DPM1:
         DC      SEMIS
 ;
 worddoc({OPERATOR},{MIN},{min},{n1 n2 --- min},{L0},
-{Leave the smaller of two numbers.},{{MAX}}, {}, enddoc)
+{Leave the smaller of two numbers.},{{MAX}}, 
+{{ 204 420 MIN .},{204},
+ { -204 -420 MIN .},{-420} },
+enddoc)
 HEADER({MIN},{MIN},{DOCOL})
         DC      TDUP
         DC      GREAT
@@ -4083,7 +4099,10 @@ MIN1:   DC      DROP
         DC      SEMIS
 ;
 worddoc({OPERATOR},{MAX},{max},{n1 n2 --- max},{L0},
-{Leave the greater of two numbers.},{{MIN}}, {}, enddoc)
+{Leave the greater of two numbers.},{{MIN}}, 
+{{ 204 420 MAX .},{420},
+ { -204 -420 MAX .},{-204} },
+enddoc)
 HEADER({MAX},{MAX},{DOCOL})
         DC      TDUP
         DC      LESS
@@ -4093,9 +4112,13 @@ MAX1:   DC      DROP
         DC      SEMIS
 ;
 worddoc({MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{},
-{A mixed magnitude math operation which leaves the double number
- forthvar({d}) : the signed product of two signed number forthvar({n1}) and forthvar({n2}) .},
-{{M/MOD},{M/},{*}}, {}, enddoc)
+{A mixed magnitude math operation which leaves the double
+number forthvar({d}) : the signed product of two signed number
+forthvar({n1}) and forthvar({n2}) .}, 
+{{M/MOD},{SM/REM},{*}}, 
+{ { -1 -1 M* D. },{1},
+  {DECIMAL 240 204 M* D.},{48960} },
+enddoc)
 HEADER({M*},{MSTAR},{DOCOL})
         DC      TDUP
         DC      LXOR
@@ -4111,12 +4134,22 @@ HEADER({M*},{MSTAR},{DOCOL})
 DPM2:   
         DC      SEMIS
 ;
-worddoc({MULTIPLYING},{M/},{m_slash},{d n1 --- n2 n3},{},
-{A mixed magnitude math operator which leaves the signed remainder forthvar({n2})
-and signed quotient forthvar({n3}) from a double number dividend forthvar({d}) and divisor forthvar({n1}) .
-The remainder takes its sign from the dividend.},
-{{M/MOD},{/},{M*}}, {}, enddoc)
-HEADER({M/},{MSLAS},{DOCOL})
+worddoc({MULTIPLYING},{SM/REM},{m_slash},{d n1 --- n2 n3},{},
+{A mixed magnitude math operator which leaves the signed
+remainder forthvar({n2}) and signed quotient forthvar({n3})
+from a double number dividend forthvar({d}) and divisor
+forthvar({n1}). This is a symmetic division{}_VERBOSE_({, i.e.
+the remainder takes its sign from the
+dividend.})}, 
+{{M/MOD},{/},{M*}}, 
+{
+{  7 S>D  3 SM/REM . . },{2   1},        
+{  7 S>D -3 SM/REM . . },{-2   1},       
+{ -7 S>D  3 SM/REM . . },{-2  -1},      
+{ -7 S>D -3 SM/REM . . },{2  -1}       
+}, 
+enddoc)
+HEADER({SM/REM},{MSLAS},{DOCOL})
         DC      OVER
         DC      TOR
         DC      TOR
@@ -4203,7 +4236,7 @@ HEADER({*/},{SSLA},{DOCOL})
 worddoc({MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{},
 {An unsigned mixed magnitude math operation which leaves a double
 quotient forthvar({ud4}) and remainder forthvar({u3}) , from a double dividend forthvar({ud1}) and single
-divisor forthvar({u2}) .},{{/MOD},{M/},{M*}}, {}, enddoc)
+divisor forthvar({u2}) .},{{/MOD},{SM/REM},{M*}}, {}, enddoc)
 HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      TOR
         DC      ZERO
@@ -4275,7 +4308,7 @@ CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
         POP     DX      ;{ PORT ADDR}
         XOR     AX,AX
-        IN      AL,{DX}   ;{ BYTE INPUT}
+        IN      AL,{DX}  ;{ BYTE INPUT}
         _PUSH
 ;
 worddoc({MEMORY},{PC!},{port_char_store},{b port --- },{},
@@ -4295,7 +4328,7 @@ forthvar({port}). A port address is always 16 bits .},
 {{P!},{PC@},{PC!},{@}}, {}, enddoc)
 CODE_HEADER({P@},{PFET})
         POP     DX      ;{PORT ADDR}
-        IN      AX,{DX}   ;{WORD INPUT}
+        IN      AX,{DX}  ;{WORD INPUT}
         _PUSH
 ;
 worddoc({MEMORY},{P!},{port_store},{n port --- },{},
@@ -4608,7 +4641,7 @@ CODE_HEADER({BIOS},{BIOS})
 RQBIOS: INT(0)          ;{ Request number to be overwritten.}
         PUSHF      ;{ Save status into DI }
         POP     {DI}
-        XCHG    {SI},{AX}  ;{ Save AX in (still free) SI     }
+        XCHG    {SI},{AX} ;{ Save AX in (still free) SI     }
         _SWITCH_({JMPHERE_FROM_OS})
         XCHG    SI,AX
         POP     BP      ;{ Restore Forth registers. NEEDED? }
@@ -4642,8 +4675,8 @@ CODE_HEADER({BDOS},{BDOS})
         XCHG    {SI},{AX}
         INT     21H
         PUSHF      ;{ Save status into DI }
-        POP     {DI} ;{ Not EDI! }
-        XCHG    {SI},{AX}   ;{ Save AX in (still free) SI     }
+        POP     {DI};{ Not EDI! }
+        XCHG    {SI},{AX}  ;{ Save AX in (still free) SI     }
         _SWITCH_({JMPHERE_FROM_OS})
 ;        XCHG    {SI},{AX}   ; This is more correct actually.
         XCHG    SI,AX
