@@ -303,6 +303,15 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.})
         extern  c_rslw, c_block_exit, c_block_init, c_debug
         global  ciforth
 });_END_({ _HOSTED_LINUX_})
+_HOSTED_MSDOS_({
+create  EQU     3C00H
+open    EQU     3D00H
+close   EQU     3E00H
+read    EQU     3F00H
+write   EQU     4000H
+delete  EQU     4100H
+lseek   EQU     4200H
+});_END_({ _HOSTED_MSDOS_})
 
 _HOSTED_LINUX_({
         section forth progbits write exec alloc
@@ -1896,14 +1905,14 @@ LINE LINEFEED WORD ;}). })},
 {{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 HEADER({(WORD)},{LPWORD},{DOCOL})
-        DC      ZERO ; { Dummy to drop }
+        DC      X
 PWORD0: DC      DROP
         DC      INBRS, QBL
         DC      OVER, SRC, CELLP, FETCH, LSUB ;{ At end?}
         DC      LAND, ZEQU
         _0BRANCH(PWORD0)
 
-        DC      ZERO ; { Dummy to drop }
+        DC      X
 PWORD1: DC      DROP
         DC      INBRS, QBL
         _0BRANCH(PWORD1)
@@ -2748,6 +2757,16 @@ DOUSE:  MOV     BX,[WOR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI]
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
+;
+;
+worddoc( {MISC},{X},{do_not_care},{--- x},{},
+{Leave an undefined value forthvar({x}).
+_VERBOSE_({{Presumably it is to be dropped at some time, or it is a place holder.}})
+},{},
+{{DEPTH X DEPTH SWAP DROP - .},{-2}},
+enddoc)
+CODE_HEADER({X},{X})
+        _PUSH ;{Whatever happens to be in }AX{, i.e. the dea of ``X''.}
 ;
 worddoc( {SUPERFLUOUS},{0},{zero},{--- 0},{},
 {Leave the number 0. },{{CONSTANT}},
@@ -5241,7 +5260,7 @@ worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
 to suppress the handling of options during cold boot, in behalf
 of turnkey applications. Accept and return a flag
 forthvar({f}) whether the signon message must be
-displayed._VERBOSE({Simply replace by a forthcode({NOOP}) if
+displayed._VERBOSE_({Simply replace by a forthcode({NOOP}) if
 options must be suppressed.})
 },{{COLD}},
 {{( No test)},{}},
@@ -6221,7 +6240,7 @@ HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
 });_END_({_LOAD_})
 _PC_({
 ;{ Generic call on BIOS. A boon for experimenters.}
-worddoc( {OPERATINGSYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},
+worddoc( {OPERATINGSYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{}
 {Do a call of ``BIOS'' interrupt forthsamp({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contain
 forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
@@ -6312,11 +6331,104 @@ CODE_HEADER({BIOS},{BIOS})
        PUSH    AX
        JMP     NEXT
 ;
+});_END_({_SIMULATE_BIOS_})
+;{ Generic call on BIOS. A boon for experimenters.}
+worddoc( {OPERATINGSYSTEM},{BIOSN},{biosn},{d c b a i---ar fl},{},
+{Do a call of ``BIOS'' interrupt forthsamp({i}) with
+forthsamp({a b c d}) in registers forthsamp({AX BX CX DX}).
+Return as a result the content of register forthsamp({ar}).
+forthsamp({fl}) is the carry flag, that is one for a failed
+operation. In general forthvar({ar}) then contains some error
+code. _DPMI_({ If you want selectors forthvar({DS}) or
+forthvar({ES}) different from the Forth segment, or any
+register different from the default, you must fill that in in
+the forthcode({REG-SET}) structure. If your BIOS call destroys
+registers, in particular forthvar({DS}) or forthvar({ES}) you
+must take care to restore them. This word performs calls only
+as related to a real mode interface. Under DPMI we have to do
+this via a special call to the unadorned interrupt, which is in
+this case protected mode, interrupt 31H function 0300H. In
+behalf of this registers are saved and restored in
+forthcode({REG-SET}) . Unadorned calls to real interrupts are
+only available as forthcode({BIOS31}) .})
+},{{BDOSN}},
+{{23 X X X X 28 BDOSN . DROP .},{0 23}},
+enddoc)
+
+_NORMAL_BIOS_({
+;{ Because there is no such thing as a variable interrupt:}
+;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
+;{ BEWARE OF THE SOFTWARE POLICE!}
+CODE_HEADER({BIOSN},{BIOSN})
+        POP     AX      ;{ Function code}
+        ;{ Once we are more acknowledgable, put segment overwrite here.}
+        MOV     _BYTE_PTR([RQBIOSN+1]),AL ;{ Patch the code.}
+        POP     AX
+        POP     BX
+        POP     CX
+        POP     DX
+        PUSH     HIP      ;{ Save Forth registers. NEEDED? }
+        PUSH     RPO
+        XCHG    SI,AX   ;{ Save AX in (already free) SI}
+        _SWITCH_({JMPHERE_FROM_FORTH})
+        XCHG    {SI},{AX}
+RQBIOSN:  INT(0)          ;{ Request number to be overwritten.}
+        PUSHF      ;{ Save status into DI }
+        POP     {DI}
+        XCHG    {SI},{AX} ;{ Save AX in (still free) SI     }
+        _SWITCH_({JMPHERE_FROM_OS})
+        XCHG    SI,AX
+        POP     RPO      ;{ Restore Forth registers. NEEDED? }
+        POP     HIP
+        PUSH     AX
+        AND     DI, 1
+        PUSH     DI     ;{ i.e. flags }
+        _NEXT
+;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
+});_END_({_NORMAL_BIOS_})
+_SIMULATE_BIOS_({
+CODE_HEADER({BIOSN},{BIOSN})
+; Adapted from Allen Wyatt, Advanced Assembly language, QUE
+; from pmtest.asm.
+
+        POP     BX      ; {Put function code on return stack.}
+        LEA     RPO,[RPO - _CELLS(1)]
+        MOV     [RPO],BX
+
+        POP     AX
+        POP     BX
+        POP     CX
+        POP     DX
+        PUSHAD            ;{Save also Forth registers.}
+
+        MOV     CX, 8
+        MOV     SI, SP
+        LEA     DI, [REGSET+(CW*(PH_OFFSET-C_HOFFSET))]
+        REP     MOVSD
+
+        MOV     AX,0300h            ;{Simulate real-mode interrupt.}
+        MOV     BX,[RPO] ;{ Get function code from return stack.}
+        MOV     CX,0                ;Copy nothing from stack
+        LEA     DI, [REGSET+(CW*(PH_OFFSET-C_HOFFSET))]
+        INT     31h
+
+        POPAD   ;{Get it all back.}
+        LEA     RPO,[RPO + _CELLS(1)] ;{Bump return stack. After the pop!}.
+        MOV     AX,_CELL_PTR[SaveAX]
+        PUSH     AX
+        MOV     AX,_CELL_PTR[SaveFlags]
+        PUSH    AX
+        _NEXT
+;
+_SWITCH_({SPSAVE: DC       0H})
+;
 worddoc( {STORAGE},{REG-SET},{register_set},{--- addr},{},
-{Leaves the forthvar({addr})
-the register storage areas for cross-mode interrupt handling.
-This structure is defined by the DPMI specifications for
-use with interrupt 31H function 0300H.
+{Leaves the forthvar({addr}) the register storage areas for
+cross-mode interrupt handling. _VERBOSE_({ This structure is
+defined by the DPMI specifications for use with interrupt 31H
+function 0300H.}) The layout is as forthvar({DI SI BP BX DX CX
+AX Flags ES DS FS GS IP CS SP SS}) _VERBOSE_( {For the general
+registers this agrees with the forthsamp({PUSH_ALL}) instruction.})
 },
 {{BIOS}},
 dnl Expect a reasonable value for the data segment.
@@ -6641,6 +6753,7 @@ PACCEP1:
         DC      SEMIS
 ;
 _PC_({
+_HOSTED_DPMI_({
 worddoc( {STORAGE~},{RW-BUFFER},{read_write_buffer},{--- addr},{},
 {A constant that leaves the address of a disk buffer used by
 file i/o words.
@@ -6650,12 +6763,12 @@ file i/o words.
 enddoc)
 HEADER({RWBUF},{RWBUF},{DOCON}, 8000H)
 ;
-worddoc( {~INPUT},{READ-FILE}, {addr n1 fd --- n2 u1 }, {ISO}
+worddoc( {~INPUT},{READ-FILE}, {read_file}, {addr n1 fd --- n2 u1 }, {ISO}
 {Read forthvar({n}) characters to forthvar({addr}) from current
 position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters succesfully read,
 this may be zero. forthvar({u1}) is 0 for success, or otherwise
-the MSDOS error code negated. },
+the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
 {{R/W}},
 {{( No test yet)}},
 enddoc)
@@ -6674,12 +6787,12 @@ RFILE1:
 RFILE2:
         DC      SEMIS
 ;
-worddoc( {~INPUT},{WRITE-FILE}, {addr n fd --- u1 }, {ISO}
+worddoc( {~INPUT},{WRITE-FILE}, {write_file}, {addr n fd --- u1 }, {ISO}
 {Write forthvar({n}) characters from addr to the file that is
 open at forthvar({fd}) , starting at its current position.
 forthvar({u1}) is 0 for success, positive for a short read of
 forthvar({u1}) characters, or otherwise the MSDOS error code
-negated.
+negated, to be inspected using forthcode({MESSAGE}).
 },
 {{R/W}},
 {{( No test yet)}},
@@ -6698,6 +6811,159 @@ WFILE1:
         DC      TDROP, TDROP, ZERO             ;  2DROP DROP 0 THEN ;
 WFILE2:
         DC      SEMIS
+;
+});_END_({ _HOSTED_DPMI_})
+_HOSTED_MSDOS_({
+HEADER({BDOSN},{BDOSN},{DOCOL})
+        DC      LIT, 21H, BIOSN
+        DC      SEMIS
+;
+worddoc( {~INPUT},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO}
+{Open the file with name forthvar({sc}) and file access method
+forthvar({fam}). Return a file handle into forthvar({fileid})
+and a result code into forthvar({ior}). The latter is the MSDOS
+error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{( No test yet)}},
+enddoc)
+HEADER({OPEN-FILE},{OPEN},{DOCOL})
+        DC      TOR
+        DC      PAD, SSTOR
+        DC      PAD, SFET
+        DC      OVER, PLUS, ZERO, SWAP, CSTOR ; Zero ended
+        DC      X, X
+        DC      LIT, open, FROMR, PLUS, BDOSN
+        _0BRANCH({OFILE1})
+        DC      NEGATE, LDUP
+        _BRANCH({OFILE2})
+OFILE1:
+        DC      ZERO
+OFILE2:
+        DC      SEMIS
+;
+;
+worddoc( {~INPUT},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO}
+{Delete the file with name forthvar({sc}). Return
+a result code into forthvar({ior}). The latter is the MSDOS
+error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{( No test yet)}},
+enddoc)
+HEADER({DELETE-FILE},{DELETE},{DOCOL})
+        DC      X, X
+        DC      ROT
+        DC      LIT, delete, BDOSN
+        _0BRANCH({DFILE1})
+        DC      NEGATE
+        _BRANCH({DFILE2})
+DFILE1:
+        DC      DROP, ZERO
+DFILE2:
+        DC      SEMIS
+;
+worddoc( {~INPUT},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO}
+{Create a file with name forthvar({sc}) and file access method
+forthvar({fam}). If it already exists, it is truncated to zero length.
+Return a file handle into forthvar({fileid})
+and a result code into forthvar({ior}). The latter is the MSDOS
+error code negated, to be inspected using forthcode({MESSAGE}). },
+{{R/W}},
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{( No test yet)}},
+enddoc)
+HEADER({CREATE-FILE},{CREATEF},{DOCOL})
+        DC      TOR
+        DC      PAD, SSTOR
+        DC      PAD, SFET
+        DC      OVER, PLUS, ZERO, SWAP, CSTOR ; Zero ended
+        DC      X, X
+        DC      LIT, create, FROMR, PLUS, BDOSN
+        _0BRANCH({CRFILE1})
+        DC      NEGATE, LDUP
+        _BRANCH({CRFILE2})
+CRFILE1:
+        DC      ZERO
+CRFILE2:
+        DC      SEMIS
+;
+worddoc( {~INPUT},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO}
+{Read forthvar({n}) characters to forthvar({addr}) from current
+position of the file that is open at forthvar({fd}) .
+forthvar({n2}) is the number of characters succesfully read,
+this may be zero. forthvar({ior}) is 0 for success, or otherwise
+the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R/W}},
+{{( No test yet)}},
+enddoc)
+HEADER({READ-FILE},{RFILE},{DOCOL})
+        DC      LIT, read, BDOSN
+        _0BRANCH({RFILE1})
+        DC      NEGATE, ZERO, SWAP
+        _BRANCH({RFILE2})
+RFILE1:
+        DC      ZERO
+RFILE2:
+        DC      SEMIS
+;
+worddoc( {~INPUT},{REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO}
+{Position the file that is open at forthvar({fd}) at position
+forthvar({ud}).
+forthvar({ior}) is 0 for success, or otherwise
+the MSDOS error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
+{{( No test yet)}},
+enddoc)
+HEADER({POSITION-FILE},{PFILE},{DOCOL})
+        DC      LIT, lseek, BDOSN
+        _0BRANCH({PFILE1})
+        DC      NEGATE
+        _BRANCH({PFILE2})
+PFILE1:
+        DC      DROP, ZERO
+PFILE2:
+        DC      SEMIS
+;
+worddoc( {~INPUT},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO}
+{Write forthvar({n}) characters from addr to the file that is
+open at forthvar({fd}) , starting at its current position.
+forthvar({u1}) is 0 for success, positive for a short read of
+forthvar({u1}) characters, or otherwise the MSDOS error code
+negated, to be inspected using forthcode({MESSAGE}).
+},
+{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{R/W}},
+{{( No test yet)}},
+enddoc)
+HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      LIT, write, BDOSN
+        _0BRANCH({WFILE1})
+        DC      NEGATE
+        _BRANCH({WFILE2})
+WFILE1:
+        DC      DROP, ZERO
+WFILE2:
+        DC      SEMIS
+;
+worddoc( {~INPUT},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO}
+{Close the file with file handle in forthvar({fileid}). Return
+a result code into forthvar({ior}). The latter is the MSDOS
+error code negated, to be inspected using forthcode({MESSAGE}). },
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{( No test yet)}},
+enddoc)
+HEADER({CLOSE-FILE},{CLOSE},{DOCOL})
+        DC      TOR
+        DC      X, X
+        DC      FROMR
+        DC      LIT, close, BDOSN
+        _0BRANCH({CFILE1})
+        DC      NEGATE
+        _BRANCH({CFILE2})
+CFILE1:
+        DC      DROP, ZERO
+CFILE2:
+        DC      SEMIS
+});_END_({ _HOSTED_MSDOS_})
+
 });_END_({ _PC_})
 
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ --- } ,{},
