@@ -1006,12 +1006,12 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
 
 
 
-
-
-
-
-
-
+ 10 CONSTANT LF
+: EXPECT2
+    OVER OVER 1+ ERASE
+    OVER + SWAP DO
+       KEY DUP LF = IF LEAVE ELSE I C! THEN
+    LOOP ;
 
 
 
@@ -4093,4 +4093,4 @@ DECIMAL  getit
 
 
 
-( Last line, preserve !! )
+( Last line, preserve !! Must be line 4096)
