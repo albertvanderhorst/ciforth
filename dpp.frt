@@ -505,14 +505,13 @@ DATABASE CONSULTING STRATEGY
 : (EL-AM)
     2DUP GENERATE-QUESTION
     AnswerQuestion$ TYPE CR    OVER DIAGNOSES 2@ TYPE CR
-^    QUESTIONS 2@ GET-ANSWER >R  ( new_question -- )
-^    DUP R@ SWAP ANSWER-VECTOR !
-^    R@ A_YES = IF SWAP NOES 2 SWAP +! ELSE
-^    R@ A_NO = IF SWAP YESSES 2 SWAP +! ELSE
-^    DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
-^    THEN THEN RDROP
+    QUESTIONS 2@ GET-ANSWER >R  ( new_question -- )
+    DUP R@ SWAP ANSWER-VECTOR !
+    R@ A_YES = IF SWAP NOES 2 SWAP +! ELSE
+    R@ A_NO = IF SWAP YESSES 2 SWAP +! ELSE
+    DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
+    THEN THEN RDROP
 ;
-EXIT
 
 \ The outcome was the diagnosis INDEX. (Maybe just added.)
 \ Ask the operator for help to make sure this diagnosis can be
@@ -525,8 +524,25 @@ EXIT
        IF I OVER (EL-AM) THEN
     LOOP DROP ;
 
-: NEW-QUESTION ;
-: PRINTTABLE ;
+\ Auxiliary type vertical lines connecting questions with answers.
+: .BLOCKS 0 ?DO "|     " TYPE LOOP ;
+\ Print all information that can still influence the outcome.
+: PRINTTABLE
+  "______________________________________________" TYPE CR
+
+  0 #QUESTIONS @ 0 DO I ?POSED 0= IF
+    21 SPACES DUP .BLOCKS I QUESTIONS 2@ TYPE 1+ CR
+  THEN LOOP DROP
+  #DIAGNOSES @ 0 DO I ?EXCLUDED 0= IF
+      I 3 .R SPACE I DIAGNOSES 2@ DUP >R TYPE 15 R> - SPACES
+      #QUESTIONS @ 0 DO I ?POSED 0= IF
+          I J YESSES @ 3 .R I J NOES @ 3 .R
+      THEN LOOP CR
+  THEN LOOP
+  "______________________________________________" TYPE CR
+;
+!EXCLUSIONS
+EXIT
 : ADD-ANSWERS ;
 : CONFIRM_ASNWERS :
 : exclude-more ;
