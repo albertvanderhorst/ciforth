@@ -54,6 +54,7 @@ fig86.%.msm : %.m4 masm.m4 fig86.gnr ; m4 $+ >$@
 fig86.%     : %.m4         fig86.gnr ; m4 $+ >$@
 
 # Default target for convenience
+default : figforth
 fig86.$(s).bin :
 
 # Put include type of dependancies here
@@ -87,7 +88,7 @@ zip : $(RELEASECONTENT) ; zip fig86g$(VERSION) $+
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff $$i ; done
 
-fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@
+fig86.linux.o : fig86.linux.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
 figforth : figforth.c fig86.linux.o ; $(CC) $(CFLAGS) $+ -o $@
 

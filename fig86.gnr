@@ -506,7 +506,9 @@ GDTLOAD DW     GDTLEN
 ;____1_____ _LINUXHOSTED_1_({
 include(width32.m4)       
 	global  figforth        ; Called from c. Remainder c-routines to be called from here.
-        extern  c_type,c_expec,c_key,c_qterm,c_qterm 
+        extern  c_type,c_expec,c_key,c_qterm
+        extern  c_rslw, c_block_exit, c_block_init
+
 	section forth progbits write exec alloc
 figforth:
 ;       ORG     M4_ORIG 
@@ -515,7 +517,6 @@ figforth:
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
-	MOV     EBP,ESP
 	JMP     BOOTUP
 
 RETURN_LINUX:
@@ -2692,16 +2693,8 @@ HEADER({?TERMINAL},{QTERM},{DOCOL})
 ;{ device I/O. Code fields are filled in during bootup. }
 ;{ Lower case labels starting with "c_.." are c-supplied facilities.}
 CODE_HEADER({TYPE},{LTYPE})
-	POP     EAX
-	POP     EBX
-	PUSH	EBP			; save Forth machine
-	PUSH	ESI
-	PUSH    EBX
-	PUSH    EAX
 	CALL	c_type                  
 	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	POP	ESI			; restore Forth
-	POP	EBP
 	_NEXT
 ;
 HEADER({EMIT},{EMIT},{DOCOL})      
@@ -2765,35 +2758,19 @@ EXPE3	DC	EMIT
 	DC	SEMIS
 _ENDCOMMENT
 CODE_HEADER({EXPECT},{EXPEC})
-	POP     EAX
-	POP     EBX
-	PUSH	EBP			; save Forth machine
-	PUSH	ESI
-	PUSH    EBX
-	PUSH    EAX
 	CALL	c_expec               
 	LEA     ESP,[ESP+CELLS(2)]    ; remove input
-	POP	ESI			; restore Forth
-	POP	EBP
 	_NEXT
 ;
 CODE_HEADER({KEY},{KEY})
-	PUSH	EBP			; save Forth machine
-	PUSH	ESI
 	CALL	c_key
-	POP	ESI			; restore Forth
-	POP	EBP
 	PUSH	EAX
 	_NEXT
 ;
 HEADER({?TERMINAL},{QTERM},{DOCOL})
-	PUSH	EBP			; save Forth machine
-	PUSH	ESI
 	CALL	c_qterm
-	POP	ESI			; restore Forth
-	POP	EBP
 	PUSH	EAX
-	DC      SEMIS
+	_NEXT
 ;
 });_END___1__({_LINUXIO_1_})
 ;____1_____ _USEDOS_1_({
@@ -3088,60 +3065,30 @@ HEADER({BLOCK-FILE},{BLFL},{DOVAR})
 	_STRING({BLOCKS.FRT})
 	_RESB(20)               ;{ Allow for some path}
 ;
-HEADER({BLOCK-HANDLE},{BHAN},{DOVAR})
+HEADER({DISK-ERROR},{DERR},{DOVAR})
 	DC      0
 ;
-HEADER({DISK-ERR},{DERR},{DOCOL})
-	DC      ONE, LAND
-	DC      LIT, 08H, QERR
-	DC	SEMIS
+CODE_HEADER({BLOCK-INIT},{BLINI})
+        XOR     AX,AX
+        MOV     AL,[_PARAMETER_FIELD(BLFL)]
+        MOV     BX,_PARAMETER_FIELD(BLFL)
+        PUSH    BX
+        PUSH    AX
+        CALL    c_block_init
+        MOV     [_PARAMETER_FIELD(DERR)],AX
+	LEA     ESP,[ESP+CELLS(2)]    ; remove input
+        _NEXT
 ;
-HEADER({BLOCK-INIT},{BLINI},{DOCOL})
-	DC      LIT, 03D02H    ;{ Open file for read/write}
-	DC      ZERO,ZERO
-	DC      BLFL
-	DC      COUNT, OVER, PLUS
-	DC      ZERO, SWAP, CSTOR  ;{ Zero ended as required}
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP
-	DC      BHAN, STORE
-	DC	SEMIS
-;
-HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
-	DC      LIT, 03E00H    ;{ Open file for read/write}
-	DC      BHAN, FETCH
-	DC      ZERO, ZERO
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP, DROP
-	DC	SEMIS
-;
-;{       Block #, Handle}
-HEADER({SEEK},{SEEK},{DOCOL})
-	DC      SWAP, TOR, TOR
-	DC      LIT, 04200H     ;{ Seek from start}
-	DC      FROMR           ;{ Handle}
-	DC      FROMR, BBUF, USTAR
-	DC      SWAP    ;{ L.S. ON TOP}
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP, DROP
-	DC      SEMIS
+CODE_HEADER({BLOCK-EXIT},{BLEXI})
+        CALL    c_block_exit
+        _NEXT
 ;
 ;{	( ADDR  BLK#  FLAG (0=W, 1=R) --- )}
-HEADER({R/W},{RSLW},{DOCOL})
-	_0BRANCH(RSLW1) 
-	DC	LIT, 03F00H     ;{ Disk read }
-	_BRANCH(RSLW2) 
-RSLW1	DC      LIT, 04000H     ;{ Disk write}
-RSLW2:  DC      TOR 
-	DC      BHAN, FETCH, SEEK ;{ That's done}
-	DC      FROMR, SWAP, TOR
-	DC      BHAN, FETCH
-	DC      BBUF
-	DC      FROMR           ;{ ADDR}
-	DC	BDOS, DERR
-	DC      DROP, DROP, DROP
-	DC      BBUF, LSUB, DERR
-	DC      SEMIS
+CODE_HEADER({R/W},{RSLW})
+        CALL c_rslw
+        MOV     [_PARAMETER_FIELD(DERR)],AX
+	LEA     ESP,[ESP+CELLS(3)]    ; remove input
+        _NEXT
 
 });_END___1__({_LINUXIO_1_})
 ;____1_____ _USEDOS_1_({
