@@ -206,6 +206,9 @@ dnl
 dnl Retain information in the documentation that is redundant but illustrative.
 define({_VERBOSE_},_yes)
 dnl
+dnl The fields in the dictionary headers are aligned to a cell boundary.
+define( {_ALIGNED_}, _no)dnl
+dnl
 dnl    FEATURES THAT NEED SELDOM CHANGES
 dnl
 dnl Where the dictionary starts for 32 bit systems.
@@ -215,18 +218,6 @@ define({M4_INITDP},{110000H})
 dnl ############## USER CHOICES END #########################################
 
 dnl ############## STILL ON WISH LIST ################## IGNORE ##############
-dnl
-dnl The fields in the dictionary headers are aligned to a cell boundary.
-dnl STILL ON WISH LIST
-define( {_ALIGNED_}, _no)dnl
-dnl
-dnl Keep old FIG features like WIDTH ENCLOSE
-dnl STILL ON WISH LIST
-define( {_OLDFIG_}, _no)dnl
-dnl
-dnl Put all ANSI CORE definitions in, even if they could be loaded
-dnl STILL ON WISH LIST
-define( {_CORE_}, _no)dnl
 dnl
 dnl If undefined, a really minimalistic system results.
 dnl STILL ON WISH LIST
