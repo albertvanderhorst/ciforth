@@ -12,6 +12,9 @@ ASSEMBLER DEFINITIONS  HEX
 ( Meaning of the bits in TALLY-BA :                                     )
 \     0000,0001 Interesting required       0000,0002 Instruction part isn't
 \     0000,0004 b reg operand              0000,0008 8 bit data field
+\     0000,0010 F-P IEEE                   0000,0020 F-P VAX
+\     0000,0040 F-P Integer out            0000,0080 F-P Floating point out
+\     0000,0100 F-P Opcode 14              0000,0200 F-P Opcode 16 / 15
 \
 \     0001,0000 AMASK 0 is clear           0002,0000 Instruction requires AMASK 0
 \     0004,0000 AMASK 1 is clear           0008,0000 Instruction requires AMASK 1
@@ -106,6 +109,37 @@ ASSEMBLER DEFINITIONS  HEX
 
 0 0 F3-MASK BI: 1C.00 4PI SEXTB,
 0 0 F3-MASK BI: 1C.01 4PI SEXTW,
+
+( ***************************** 4.7 FP Modifiers ********************** )
+
+(                                   TRP bits                            )
+0000 0 E000 0000 xFI /I
+0080 0 E000 2000 xFI /U
+0040 0 E000 2000 xFI /V
+0080 0 E000 4000 xFI --
+0080 0 E000 6000 xFI --
+0020 0 E000 8000 xFI /S
+0080 0 E000 A000 xFI /SU
+0040 0 E000 A000 xFI /SV
+0090 0 E000 C000 xFI --
+0090 0 E000 E000 xFI /SUI
+0050 0 E000 E000 xFI /SVI
+
+(                                   RND bits                            )
+0000 0 1800 0000 xFI /C
+0010 0 1800 0800 xFI /M
+0000 0 1800 1000 xFI /N
+0010 0 1800 1800 xFI /D
+
+(                                   SRC bits                            )
+0010 0 0600 0000 xFI S|       ( IEEE)
+0010 0 0600 0400 xFI T|
+0210 0 0600 0600 xFI Q|
+
+0020 0 0600 0000 xFI F|       ( VAX)
+0220 0 0600 0200 xFI D|
+0020 0 0600 0400 xFI G|
+0220 0 0600 0600 xFI Q|
 
 ( ***************************** Misc Opr ****************************** )
 
