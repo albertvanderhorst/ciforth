@@ -502,6 +502,8 @@ HERE6:  POP     AX                 ; { Calculate address of the first byte to mo
 HERE5:
         MOV     AX,CS
         MOV     DS,AX
+        MOV     ES,AX
+        MOV     SS,AX
         CLD     ; {Reset direction to going up.}
 });_END___1__({_ABSOLUTELOAD_1_})
 
@@ -957,7 +959,7 @@ _ENDCOMMENT
 ;{ So for now just the classic, swap disk after booting.}
         DC      0       ;{ INIT (OFFSET) }
 });_END___1__({_CLASSIC_1_})
-;____1_____ _BOOTFD__1_({
+;____1_____ _USEBIOS_1_({
 ;{ This will reserve place for dos information, such that the floppy}
 ;{ can be accessed from DOS and makes sure blocks are not allocated}
 ;{ within the forth system itself. }
@@ -966,7 +968,7 @@ _ENDCOMMENT
 ;       You need a filler file of one sector,
 ;       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
         DC      (SECSTRT+((TEXTEND-$$-1-BPS)/BPS+1)-1)/SPB+1     ;{ INIT (OFFSET) }
-});_END___1__({_BOOTFD__1_})
+});_END___1__({_USEBIOS_1_})
 ;____1_____ _BOOTHD__1_({
 ;{ This will reserve place for the system itself, on the first part of a }
 ;{ hard disk. No problem to just reserve whole memory.}
@@ -2315,11 +2317,11 @@ HEADER({ABORT},{ABORT},{DOCOL})
 _COMMENT
 ;{       If this is there it is an official release}
         DB      22
-        DB      'IBM-PC Fig-Forth '
+        DB      'IBM-PC Fig-Forth'
         DB      FIGREL+30H,ADOT,FIGREV+30H,ADOT,USRVER+30H
 _ENDCOMMENT
 ;{       If this is there it is a beta release}
-        _STRING({IBM-PC $RCSfile$ $Revision$ })
+        _STRING({IBM-PC $RCSfile$ $Revision: 2.102+ })
         DC      FORTH
         DC      DEFIN
         DC      QUIT
@@ -3427,7 +3429,7 @@ HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      SWAP, LIT, 0100H, STAR, PLUS, ONEP
         DC      FROMR, LIT, 0100H, STAR  ;{ .. to arrive at CX, DX}
         DC      LIT, 13H, BIOS
-        DC      ONE, LAND, DSKERR, STORE
+        DC      ONE, LAND, DSKERR, PSTOR
         DC      DROP, DROP, DROP, DROP
         DC      SEMIS
 ;
