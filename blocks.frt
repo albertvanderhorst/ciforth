@@ -14,8 +14,8 @@
 
 
 
-HEX
-  : ^ .S ;     : IVAR CREATE , ;
+( ?16 ?32 ?LI ?PC Commands applicable to 16-bit A1sep24 )
+  : ^ .S ;     : IVAR CREATE , ; CREATE 16-bit
 : LC@ L@ FF AND ;
 : LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
  : VV B800 0 ;   VARIABLE BLUE 17 BLUE !
@@ -29,7 +29,7 @@ HEX
 : ?PC "BIOS" FOUND 'B = ?LEAVE-BLOCK ;
 : ?LI "LINOS" FOUND 0= ?LEAVE-BLOCK ;
 "INCLUDED" FOUND 0= ?LEAVE-BLOCK
-: INCLUDE &" (PARSE) INCLUDED ;
+: INCLUDE (WORD) INCLUDED ;
 COPYRIGHT (c) 2000 STICHTING DFW , THE NETHERLANDS
            I have a beautiful disclaimer,
      but this screen is too small to contain it.
@@ -46,8 +46,8 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 
            THIS IS A WARNING ONLY.
  THE CONTENT OF THE FILE COPYING IS LEGALLY BINDING.
-( Commands aplicable to 32 bit mode A0jun29 )
-  : ^ .S ;     : IVAR CREATE , ;
+( ?16 ?32 ?LI ?PC Commands applicable to 32-bit A1sep24 )
+  : ^ .S ;     : IVAR CREATE , ;   CREATE 32-bit
   HEX 0 CONSTANT CS_START
  : LC@ SWAP 10 * + CS_START - C@ ;
  : LC! SWAP 10 * + CS_START - C! ;
@@ -61,7 +61,7 @@ RIGHTS TO RESTRICT THE RIGHTS OF OTHERS) ARE RESTRICTED.
 : ?PC "BIOS" FOUND 'B = ?LEAVE-BLOCK ;
 : ?LI "LINOS" FOUND 0= ?LEAVE-BLOCK ;
 "INCLUDED" FOUND 0= ?LEAVE-BLOCK
-: INCLUDE &" (PARSE) INCLUDED ;
+: INCLUDE (WORD) INCLUDED ;
  ( ERROR MESSAGES   )
  MSG # 1 : EMPTY STACK
  MSG # 2 : DICTIONARY FULL
@@ -128,7 +128,7 @@ CREATE BASE' 0 ,
 ;    HEX>
 ." SYSTEM ELECTIVE $RCSfile$ $Revision$"
 CR 2 LIST
-  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES)
+  -1 CELL+ LOAD  ( 16/32 BIT DEPENDANCIES) 9 LOAD
  ( MAINTENANCE )  100 LOAD   34 LOAD
 ( HEX CHAR DUMP)  6 LOAD 32 LOAD 7 LOAD 39 LOAD ( i.a. editor)
 ( STRINGS      )  35 LOAD 36 LOAD
@@ -142,22 +142,22 @@ CR 2 LIST
  ( FIG:  SAVE-SYSTEM      23 LOAD   )
 : TASK ;
 ( STAR PRINTER 31 LOAD ) ( CP/M CONVERT 80 LOAD )
- ." QUADRUPLE ARITHMETIC 08-02-84 "
- : ADC ( n1,n2-n,c  add, leave sum and carry)
-    0 SWAP 0 D+ ;
- : 2M+ ( d1,d2-d,c  add double )
-   >R SWAP >R    ADC R> ADC   R> SWAP >R
-   ADC R> + ;
- : 3M+ ROT >R 2M+ R> ADC ;
- : 4M+ ROT >R 3M+ R> ADC ;
- : 2U*  ( d1,d2-q unsigned product)
- ROT ( l1,l2,h2,h1)    OVER OVER UM* >R >R .S
- ROT ( l1,h2,h1,l2)    OVER OVER UM* >R >R .S
- SWAP DROP ROT ROT ( l2,l1,h2) OVER OVER UM* >R >R .S
- DROP ( l1,l2)    UM* .S R> ADC .S R> ADC .S
-  IF ( carry) R> R> 2M+ 1+ ." C" ELSE
-              R> R> 2M+    ." NC" THEN  .S
-  R> R> 2M+ DROP .S ;
+( COMPARE PRESENT? REQUIRE REQUIRED ) \ AvdH A1sep24
+
+ : COMPARE ( ISO) ROT 2DUP SWAP - >R
+     MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
+\ For LINE and WORD sc's : line CONTAINS word.
+: CONTAINS   PAD $! BEGIN BL $S PAD $@ COMPARE 0= DUP >R 0=
+OVER AND WHILE RDROP REPEAT 2DROP R> ;
+\ Find WORD in the block library and load it.
+: FIND&LOAD
+ 256 0 DO I BLOCK 63 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
+ 2DROP ;
+\ For WORD sc: leave WORD, + it IS found not as a denotation.
+: PRESENT? 2DUP FOUND DUP IF >NFA @ $@ 2OVER COMPARE 0= THEN ;
+\ Make sure WORD is present in the ``FORTH'' vocabulary.
+: REQUIRED PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
+: REQUIRE (WORD) REQUIRED ;
  CR ." A1MAY17  FORTH KRAKER >1<  ALBERT VAN DER HORST "
  CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
  : T,  ( N--. Put N in select table)
@@ -477,6 +477,7 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
            C-MASK + C@         ( Get mask)
            OVER C@ AND SWAP C! ( Clear the bit)  ;
 
+
  ." ERATOSTHENES >4< Bit manipulation - A. van der Horst " CR
  : SET-B ( BIT# --  sets the specified bit)
            8/MOD FLAGS + SWAP  ( Address in flags table)
@@ -509,7 +510,6 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
      INIT-T INIT-P 2 .P BATCH1
      THOUSANDS @ 1
      ?DO I MILS !  1 MANTISSA !  NEWLINE I 500 * BATCH LOOP ;
-
  ." DEFINE $ FOR HEX NUMBERS A1APR15 ALBERT VAN DER HORST"
  'DENOTATION >BODY CELL+ CURRENT ! ( DEFINITIONS won't work!)
  : $ BASE @ >R HEX (NUMBER) R> BASE ! POSTPONE SDLITERAL ;
@@ -554,8 +554,8 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
     DUP HEADER CR
     16 0 DO  I L ! DUP 1LINE
     LOOP  ;
- : SQ CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
-
+ : SUPER-QUAD CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
+ : SQ SUPER-QUAD ;
 
 
 ( Elementary string: $. remains      A1mar15-AH)
@@ -2334,7 +2334,7 @@ DECIMAL
  : NEXTC ( CFA--CFA Like previous definition, giving CFA)
    NEXTD >CFA ;
 
-?LI ( SAVE-SYSTEM TURNKEY )  HEX
+( SAVE-SYSTEM TURNKEY )  REQUIRE 32-bit ?LI HEX \ AvdH A1sep24
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -3166,22 +3166,22 @@ AAP
 FORTH
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ ." QUADRUPLE ARITHMETIC 08-02-84 "
+ : ADC ( n1,n2-n,c  add, leave sum and carry)
+    0 SWAP 0 D+ ;
+ : 2M+ ( d1,d2-d,c  add double )
+   >R SWAP >R    ADC R> ADC   R> SWAP >R
+   ADC R> + ;
+ : 3M+ ROT >R 2M+ R> ADC ;
+ : 4M+ ROT >R 3M+ R> ADC ;
+ : 2U*  ( d1,d2-q unsigned product)
+ ROT ( l1,l2,h2,h1)    OVER OVER UM* >R >R .S
+ ROT ( l1,h2,h1,l2)    OVER OVER UM* >R >R .S
+ SWAP DROP ROT ROT ( l2,l1,h2) OVER OVER UM* >R >R .S
+ DROP ( l1,l2)    UM* .S R> ADC .S R> ADC .S
+  IF ( carry) R> R> 2M+ 1+ ." C" ELSE
+              R> R> 2M+    ." NC" THEN  .S
+  R> R> 2M+ DROP .S ;
 ( Show block properties )
 : .CON &| EMIT   28 TYPE   &| EMIT ;
 
