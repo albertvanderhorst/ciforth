@@ -94,6 +94,7 @@ F_HOFFSET EQU     1       ;{ Same for flag field}
 L_HOFFSET EQU     2       ;{ Same for link field}
 N_HOFFSET EQU     0       ;{ Same for name field}
 P_HOFFSET EQU     4       ;{ Same for parameter field}
+D_HOFFSET EQU     5       ;{ Start of data area for DOES> word.}
 ;
 ;{      MEMORY + I/O CONSTANTS}
 ;
@@ -881,7 +882,51 @@ _NEWDEBUG_({ CALL    DISPLAYSI})
         JMP     _CELL_PTR[BX]    ;{ TO `CFA'}
 ;
 ;{       Dictionary starts here.}
+
 DP0:
+worddoc({DENOTATIONS},{&},{char_follows}, {--- c},{CI},
+{Leave forthvar({c}) the non blank char that follows.
+Skip remaining non-blank characters.},
+{{}},
+{{& HELL HEX .},{48 },
+{& X  HEX .},{58 }},
+{{: GS1 & HELLO ; GS1 HEX .] },{48 },
+{: GS1 & X ; GS1 HEX .},{58 }})
+HEADER({&},{DCHAR},{DOCOL}, 1)
+        DC      INBRS, DROP, DROP
+        DC      INBRS
+        DC      LDUP, QBL, ZEQU
+        DC      LIT, 10, QERR
+        DC      LITER, DROP
+        DC      INBRS 
+        DC      QBL, LIT, 10, QERR
+        DC      DROP
+        DC      SEMIS
+;
+dnl Reset the link chain at this point to keep denotations
+dnl out of the normal search.
+define({_LINKOLD},0)dnl
+worddoc({VOCABULARIES},{DENOTATIONS},{DENOTATIONS},{},{CI},
+{The name of the DENOTATIONS vocabulary.
+This vocabulary contains one-letter words, called
+ forthdefi({denotation}) definitions.
+If a word is not found in the current search order,
+the word containing its first letter is looked up in this 
+vocabulary. 
+If found the parse pointer is moved back to the start
+of the word, and the corresponding denotation definition
+executed.
+This vocabulary is not intended to be used as a forthcode({CONTEXT}) 
+vocabulary; and only as a forthcode({CURRENT}) whenever you want
+to add a denotation.},
+{{VOCABULARY}})
+HEADER({DENOTATIONS},{DENOT},{DODOE},1)
+        DC      DOVOC
+        DC      0       ;{ END OF VOCABULARY LIST}
+        DC      0       ;{ Dummy name field}
+        DC      B_DUMMY ;{ Dummy flag field}
+        DC      _DEA(DCHAR)
+;
 worddoc({MISC},{NOOP},{no_operation},{},{},
 {Do nothing. Primarily useful as a placeholder.
 },{})
@@ -2035,7 +2080,7 @@ HEADER({SCR},{SCR},{DOUSE})
         DC      CELLS(14)
 ;
 worddoc({VOCABULARIES},{CONTEXT},{context},{--- addr},{U,L0},
-{A user variable containing a pointer to data field of 
+{A user variable containing a pointer into the data of 
 a vocabulary that contains a dummy dea with which the
 dictionary searches will first begin.},{{VOCABULARY},{CURRENT}})
 HEADER({CONTEXT},{CONT},{DOUSE})
@@ -2908,6 +2953,11 @@ HEADER({(FIND)},{PFIND},{DOCOL})
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
         DC      CURR, FETCH
+        DC      LIT, MATCHING, SWAP, FORW
+        DC      RESULT, FETCH, ZEQU
+        _0BRANCH(DFIN1)
+        DC      DROP, ONE
+        DC      LIT, _DEA(DENOT) + CELLS(D_HOFFSET  + 1)
         DC      LIT, MATCHING, SWAP, FORW
 DFIN1:                          
         DC      DROP, DROP
