@@ -1644,6 +1644,23 @@ CODE_HEADER({2!},{TSTOR})
         MOV     [BX+CELLS(1)],AX
         _NEXT
 ;
+worddoc({MEMORY},{WITHIN},{within},{n1 n2 n3 --- f},{ISO},
+{Return a flag indicating that forthsamp({n1}) is in 
+the range forthsamp({n2}) (inclusive)
+to forthsamp({n3}) (non-inclusive). 
+This works for signed as well as unsigned numbers.
+Shorthand for: forthsamp({OVER - >R - R> U<}) },
+{{<},{U<}},
+{{ 1 1 3 WITHIN .},{1}},
+{ 2 1 3 WITHIN .},{1}, 
+{ 3 1 3 WITHIN .},{0}, 
+{ 4 1 3 WITHIN .},{0})
+HEADER({WITHIN},{WITHIN}, {DOCOL})
+        DC      OVER, LSUB, TOR
+        DC      LSUB, FROMR
+        DC      ULESS
+        DC      SEMIS
+;
 CODE_HEADER({L@},{LFET})
 _BITS32_({
 worddocsafe({MEMORY},{L@},{long_fetch},{rseg addr --- n},{},
@@ -1877,6 +1894,17 @@ HEADER({$C+},{SCPLUS},{DOCOL})
         DC   LDUP, TOR 
         DC   LDUP, FETCH, PLUS, CELLP, CSTOR
         DC   ONE, FROMR, PSTOR
+        DC SEMIS
+;
+worddoc({STRING},{$,},{string_comma},{sc --- addr},{},
+{Allocate and store a string constant forthsamp({sc}) 
+in the vocabulary and leave its address forthsamp({addr}).},
+{{$@},{$!},{}},
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ $, $@ TYPE},{A9}})
+HEADER({$,},{SCOMMA},{DOCOL})
+        DC HERE, TOR
+        DC LDUP, CELLP, ALLOT
+        DC RR, SSTOR, FROMR
         DC SEMIS
 ;
 worddoc({SCREEN},{C/L},{char_per_line},{--- c},{},
@@ -2894,7 +2922,7 @@ NUMB2:  DC      DROP
         DC      DMINU   ;{ ENDIF}
 NUMB3:  DC      SEMIS
 ;
-HEADER({--FIND},{DDFIND},{DOCOL})
+HEADER({FIND:},{DDFIND},{DOCOL})
         DC      MWORDN, PFIND
         DC SEMIS
 ;
