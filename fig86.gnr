@@ -1482,7 +1482,8 @@ CODE_HEADER({TOGGLE},{TOGGL})
         _NEXT
 ;
 worddocsafe({MEMORY},{@},{fetch},{addr --- n},{ISO L0},{
-Leave the _BITS_ bit contents of forthvar({addr}) .},{{!},{C@},{2@}})
+Leave the _BITS_ bit contents forthvar({n}) 
+of forthvar({addr}) .},{{!},{C@},{2@},{P@},{PC@},{L@}})
 CODE_HEADER({@},{FETCH})
         POP     BX
         MOV     AX,[BX]
@@ -1509,7 +1510,7 @@ CODE_HEADER({2@},{TFET})
         _2PUSH
 ;
 worddoc({MEMORY},{!},{store},{n addr ---},{ISO L0},{
-Store 16 bits of n at address.},{{@},{C!},{2!}})
+Store 16 bits of n at address.},{{@},{C!},{2!},{L!},{P!},{PC!}})
 CODE_HEADER({!},{STORE})
         POP     BX      ;{ADDR}
         POP     AX      ;{DATA}
@@ -2036,7 +2037,7 @@ HEADER({=},{EQUAL},{DOCOL})
         DC      SEMIS
 ;
 worddoc({LOGIC},{<},{less_than},{n1 n2 --- f},{L0},{
-Leave a true flag if n1 is less than n2; otherwise leave a false
+Leave a true flag if forthvar({n1}) is less than forthvar({n2}) ;otherwise leave a false
 flag.},{{=},{>},{0<}})                     
 CODE_HEADER({<},{LESS})
         POP     DX      ;{S1}
@@ -2051,6 +2052,9 @@ LES1:   OR      AX,AX   ;{TEST SIGN BIT}
         INC     AX      ;{TRUE (1)}
 LES2:   _PUSH
 ;
+worddoc({LOGIC},{U<},{u_less_than},{u1 u2 --- f},{L0},{
+Leave a true flag if forthvar({u1}) is less than forthvar({u2}) ; otherwise leave a false
+flag.(Interpreted as unsigned numbers).},{{<}})                     
 HEADER({U<},{ULESS},{DOCOL})
         DC      TDUP
         DC      LXOR,ZLESS
@@ -2529,6 +2533,11 @@ HEADER({BLANKS},{BLANK},{DOCOL})
         DC      FILL
         DC      SEMIS
 ;
+worddoc({FORMATTING},{HOLD},{hold},{c ---},{ISO FIG},{
+Add the character forthvar({c}) to the beginning of the output string.
+It must be executed for numeric formatting inside a forthcode({<#})
+and forthcode({#>}) construct . 
+},{{#},{DIGIT}})
 HEADER({HOLD},{HOLD},{DOCOL})
         DC      LIT,-1
         DC      HLD
@@ -3009,7 +3018,7 @@ HEADER({QUIT},{QUIT},{DOCOL})
         DC      BLK
         DC      STORE
         DC      LBRAC
-QUIT1:  DC      RPSTO   ;{BEGIN}
+QUIT1:  DC      SPSTO   ;{BEGIN}
         DC      CR
         DC      QUERY
         DC      INTER
@@ -3021,10 +3030,12 @@ QUIT1:  DC      RPSTO   ;{BEGIN}
         _STRING({OK})   ;{ENDIF}
 QUIT2:  _BRANCH(QUIT1)  ;{AGAIN}
 ;
-worddoc({ERRORS},{ABORT},{abort},{},{L0},{
-Clear the stacks and enter the execution state. Return control to
-the operators terminal, printing a message appropriate to the
-installation.},{})
+worddoc({INIT},{ABORT},{abort},{},{FIG NISO L0},{
+Clear the stacks and enter the execution state. Set BASE to
+decimal._VERBOSE_({Note how this is different from COLD , where the
+bootup value is reinstalled(!)}) Return control to the operators
+terminal, printing a startup message with the version number. 
+},{{WARM}})
 HEADER({ABORT},{ABORT},{DOCOL})
         DC      SPSTO
         DC      DECA
@@ -3052,6 +3063,11 @@ WRM:    MOV     SI,_OFFSET WRM1
 ;
 WRM1:   DC      WARM
 ;
+worddoc({INIT},{WARM},{warm},{},{FIG L0},{
+Discard blocks that may be not be written back to mass storage.
+Clear the stacks and enter the execution state. Return control to
+the operators terminal, printing a startup message with the version number.
+},{{ABORT}})
 HEADER({WARM},{WARM},{DOCOL})
         DC      MTBUF
         DC      ABORT
@@ -3080,12 +3096,14 @@ _ENDCOMMENT
 ;
 CLD1:   DC      COLD
 ;
-worddoc({INIT},{COLD},{cold},{},{},{
-The cold start proceedure to adjust all user variables to their intial values, i.a.
-the stacks and the dictionary pointers.
-Restart via forthcode({ABORT}) .
-May be called from the terminal to remove application programs and
-restart.},{})
+worddoc({INIT},{COLD},{cold},{},{FIG},{
+The cold start proceedure to adjust all user variables to their intial
+values, i.a. the stacks and the dictionary pointers. Restart via
+forthcode({ABORT}) . May be called from the terminal to remove
+application programs and restart.
+_RWFILE_({Opens the file that contains the blocks.})
+_LINUX_HOSTED_({Opens the file that contains the blocks.})
+},{{WARM},{BLOCK},{LIST}}) 
 HEADER({COLD},{COLD},{DOCOL})
         DC      MTBUF
         DC      FIRST
@@ -3346,14 +3364,11 @@ MESS1:  DC      PDOTQ
         _STRING({MSG # })
         DC      DOT     ;{ENDIF}
 MESS3:  DC      SEMIS
-        PAGE
-        ;{ At line     LINE ~3000}
-;{--------------------------------------------}
 ;
-;{      8086/88 PORT FETCH AND STORE}
-;
-;{--------------------------------------------}
-;
+worddocsafe({MEMORY},{PC@},{port_char_fetch},{port --- b},{},{
+Fetch a byte forthvar({b}) from the port address
+forthvar({port}). A port address is always 16 bits .}, 
+{{PC!},{P@},{P!},{@}})
 CODE_HEADER({PC@},{PCFET})
 ;{ FETCH CHARACTER (BYTE) FROM PORT}
         POP     DX      ;{ PORT ADDR}
@@ -3361,21 +3376,31 @@ CODE_HEADER({PC@},{PCFET})
         IN      AL,{DX}   ;{ BYTE INPUT}
         _PUSH
 ;
+worddoc({MEMORY},{PC!},{port_char_store},{b port --- },{},{
+Store a byte forthvar({b}) to the port address 
+forthvar({port}).
+A port address is always 16 bits .}, 
+{{PC@},{P!},{P@},{!}})
 CODE_HEADER({PC!},{PCSTO})
-;{ STORE CHARACTER (BYTE) AT PORT}
         POP     DX      ;{PORT ADDR}
         POP     AX      ;{DATA}
         OUT     {DX},AL   ;{ BYTE OUTPUT}
         _NEXT
 ;
+worddocsafe({MEMORY},{P@},{port_fetch},{port --- n},{},{
+Fetch the _BITS_ bit contents forthvar({n}) from the port address
+forthvar({port}). A port address is always 16 bits .}, 
+{{P!},{PC@},{PC!},{@}})
 CODE_HEADER({P@},{PFET})
-;{ FETCH WORD FROM PORT}
         POP     DX      ;{PORT ADDR}
         IN      AX,{DX}   ;{WORD INPUT}
         _PUSH
 ;
+worddoc({MEMORY},{P!},{port_store},{n port --- },{},{
+Store the _BITS_ bit data forthvar({n}) to the port address
+forthvar({port}) .},
+{{P@},{PC!},{PC@},{!}})
 CODE_HEADER({P!},{PSTO})
-;{ STORE WORD AT PORT}
         POP     DX      ;{PORT ADDR}
         POP     AX      ;{DATA}
         OUT     {DX},AX   ;{WORD OUTPUT}
@@ -3389,19 +3414,24 @@ HEADER({USE},{USE},{DOVAR})
 ;
 worddoc({STORAGE},{PREV},{prev},{---- addr},{},{
 A variable containing the address of the disc buffer most recently
-referenced. The forthcode({UPDATE}) command marks this buffer to be later written
-to disc.},{{BLOCK}})
+referenced. The forthcode({UPDATE}) command marks this buffer to be
+later written to disc.},{{BLOCK}}) 
 HEADER({PREV},{PREV},{DOVAR})
         DC      BUF1
 ;
+worddoc({STORAGE},{#BUFF},{hash_buf},{--- c},{},
+{A constant that leaves the number of block buffers.
+}, 
+{{BLOCK}}) 
 HEADER({#BUFF},{NOBUF},{DOCON})
         ;{NO. OF BUFFERS}
         DC      NBUF
 ;
-worddoc({STORAGE},{+BUF},{plus_buf},{add1 --- addr2 f},{},{
-Advance the disc buffer address forthvar({addr1}) to the address of the next
-buffer forthvar({addr2}) . Boolean forthvar({f}) is false when forthvar({addr2}) is the buffer presently
-pointed to by variable forthcode({PREV})},{{BLOCK}})
+worddoc({STORAGE},{+BUF},{plus_buf},{add1 --- addr2 f},{FIG},{
+Advance the disc buffer address forthvar({addr1}) to the address of
+the next buffer forthvar({addr2}) . Boolean forthvar({f}) is false
+when forthvar({addr2}) is the buffer presently pointed to by variable
+forthcode({PREV})},{{BLOCK}}) 
 HEADER({+BUF},{PBUF},{DOCOL})
         DC      LIT,(KBBUF+2*CW)
         DC      PLUS,LDUP
@@ -3413,9 +3443,10 @@ PBUF1:  DC      LDUP,PREV
         DC      SEMIS
 ;
 worddoc({STORAGE},{UPDATE},{update},{},{L0},{
-Marks the most recently referenced block (pointed to by forthcode({PREV}) ) as
-altered. The block will subsequently be transferred automatically to
-disc should its buffer be required for storage of a different block.},{{BLOCK},{SCREEN}})
+Marks the most recently referenced block (pointed to by
+forthcode({PREV}) ) as altered. The block will subsequently be
+transferred automatically to disc should its buffer be required for
+storage of a different block.},{{BLOCK},{SCREEN}}) 
 HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV
         DC      FETCH,FETCH
@@ -3424,11 +3455,11 @@ HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV,FETCH
         DC      STORE,SEMIS
 ;
-worddoc({STORAGE},{EMPTY-BUFFERS},{empty_buffers},{},{L0},{
+worddoc({STORAGE},{EMPTY-BUFFERS},{empty_buffers},{},{ISO FIG L0},{
 Mark all block-buffers as empty, not necessarily affecting the
-contents.
-Updated blocks are not written to the disc. This is also an
-initialization proceedure before first use of the disc.},{{BLOCK},{SCREEN}})
+contents. Updated blocks are not written to the disc. This is also an
+initialization proceedure before first use of the
+disc.},{{FLUSH},{BLOCK},{SCREEN}}) 
 HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
@@ -3436,12 +3467,11 @@ HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      SEMIS
         PAGE
 ;
-worddoc({STORAGE},{BUFFER},{buffer},{n --- addr},{},{
-Obtain the next memory buffer, assigning it to block forthvar({n}) . If the
-contents of the buffer is marked as updated, it is written to the
-disc. The block is not read from the disc.
-The address left is the first cell within the buffer for data
-storage.},{{BLOCK}})
+worddoc({STORAGE},{BUFFER},{buffer},{n --- addr},{ISO FIG},{
+Obtain the next memory buffer, assigning it to block forthvar({n}) .
+If the contents of the buffer is marked as updated, it is written to
+the disc. The block is not read from the disc. The address left is the
+first cell within the buffer for data storage.},{{BLOCK},{USE},{PREV}}) 
 HEADER({BUFFER},{BUFFE},{DOCOL})
 ;{ NOTE: THIS WORD WON'T WORK IF ONLY USING SINGLE BUFFER}
         DC      USE
@@ -3463,7 +3493,7 @@ BUFF2:  DC      RR,STORE
         DC      STORE,FROMR
         DC      CELLP,SEMIS
 ;
-worddoc({STORAGE},{BLOCK},{block},{n --- addr},{L0},{
+worddoc({STORAGE},{BLOCK},{block},{n --- addr},{ISO FIG L0},{
 Leave the memory address of the block buffer containing block forthvar({n}),
 which is the physical disk block forthsamp({OFFSET+n}).
 If the block is not already in memory, it is transferred from disc to
@@ -3498,7 +3528,12 @@ BLOC3:  DC      LDUP,FETCH
         DC      STORE
 BLOC1:  DC      FROMR,DROP
         DC      CELLP,SEMIS
-        PAGE
+;
+worddoc({STORAGE},{FLUSH},{flush},{},{ISO FIG L0},{
+Transfer the content of each UPDATE d block buffer to disk.
+They are no longer associated with a block and their content is  
+no longer available.
+},{{EMPTY-BUFFERS},{BLOCK},{SCREEN}}) 
 HEADER({FLUSH},{FLUSH},{DOCOL})
         DC      NOBUF,ONEP
         DC      ZERO,XDO
@@ -3550,8 +3585,14 @@ HEADER({-->},{ARROW},{DOCOL},1)
 ;{ Because there is no such thing as a variable interrupt:}
 ;{ THIS IS SELF MODIFYING CODE! NOT REENTRANT! DO NOT PUT IN ROM!}
 ;{ BEWARE OF THE SOFTWARE POLICE!}
+worddoc({SYSTEM},{BIOS},{bios},{a b c d i---ar br cr dr fl},{},{
+Do a call of ``BIOS'' interrupt forthvar({i}) with forthsamp({a b c d})
+in registers forthsamp({AX BX CX DX}). Upon return those registers contains
+forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
+register.
+},{{BDOS}})
 CODE_HEADER({BIOS},{BIOS})
-        POP     AX      ;{ Function code}
+})        POP     AX      ;{ Function code}
         ;{ Once we are more acknowledgable, put segment overwrite here.}
         MOV     _BYTE_PTR([RQBIOS+1]),AL ;{ Patch the code.}
         POP     DX
@@ -3580,8 +3621,14 @@ RQBIOS: INT(0)          ;{ Request number to be overwritten.}
 _SWITCH_({SPSAVE: DC       0H})
 ;{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 
-;{ Generic call on MSDOS/MS WIndows2000}
-;{ This works in a standalone Forth (if started from MSDOS).}
+worddoc({SYSTEM},{BDOS},{bdos},{a b c d i---ar br cr dr fl},{},{
+Do a call of ``BDOS'' interrupt (21H) with forthsamp({a b c d}) in
+registers forthsamp({AX BX CX DX}). Upon return those registers
+contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
+of the processors flag register. This draws upon all facilities made
+available by MSDOS. _BOOTFD_({This works in this standalone Forth, but
+only if it is started from MSDOS.}) 
+},{{BIOS}})
 CODE_HEADER({BDOS},{BDOS})
         POP     DX
         POP     CX
@@ -3609,13 +3656,18 @@ CODE_HEADER({BDOS},{BDOS})
         _NEXT
 
 _HOSTED_LINUX_({
-;{ Generic call on LINUX }
+worddoc({SYSTEM},{LINOS},{bios},{p1 p2 p3 n---ret},{},{ Do a Linux
+system call (man 2) with parameters forthsamp({p1 p2 p3}).
+forthvar({ret}) is the return value of the call. If it is negative, it
+is mostly an error, such as known by forthvar({errno}) . This makes
+available forthemph({all}) facilities present in Linux. 
+},{{?LINUX-ERROR}})
 CODE_HEADER({LINOS},{LINOS})
         POP     AX        ; Function number
         POP     DX        ; Third parameter, if any
         POP     CX        ; Second parameter, if any
         POP     BX        ; First parameter.
-        INT     80H
+        INT     80H        ;{ Generic call on LINUX }
         _PUSH     ; Positive means okay. Negative means -errno.
 });_END_({ _HOSTED_LINUX_})
 
@@ -3767,11 +3819,19 @@ HEADER({?LINUX-ERROR},{QLERR},{DOCOL})
         DC      QERR  ; Make errno's count from the top.
         DC      SEMIS
 ;
+
+worddoc({INPUT},{TERMIO},{termio},{--- addr},{},{
+Leave the address of the terminal description.
+},{{SET-TERM}})
 HEADER({TERMIO},{TERMIO},{DOVAR})
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
 ;
-;          ( len b -- )
-;  Set the terminal length to len and toggle the c_lflag field with b
+worddoc({INPUT},{SET-TERM},{set_term},{len b --- },{},{
+Set the terminal length to forthvar({len}) and toggle the c_lflag field 
+with forthvar({b}) in the termio structure forthcode({TERMIO}) .
+In particular toggling with 0AH makes that
+the terminal doesn't wait for a <return>.
+},{{SET-TERM}})
 HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      LIT, _PARAMETER_FIELD(TERMIO)+CELLS(3)
         DC      SWAP, TOGGL

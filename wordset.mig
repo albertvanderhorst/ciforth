@@ -37,6 +37,18 @@ for the NUMBER formatting wordset that uses them exclusively.})},
 worddocchapter({ERRORS},{ },
 {The wordset forthvar({ERRORS}) contains words to handle errors.},
 {},{},{},{})
+worddocchapter({FORMATTING},{ },
+{The wordset forthvar({FORMATTING}) generates formatted output for 
+numbers, i.e. printing the digits in a field with a certain width,
+possibly with sign etc.
+This is possible in any forthdefi({number base}). (Normally base 10 is used,
+which means that digits are found as a remainder by dividing by 10).
+Formatting in Forth is always based on forthdefi({double}) numbers.
+Single numbers are handled by converting them to forthdefi({double}) first.
+This requires some double precision operators to be present in the Forth core. 
+forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
+},
+{},{},{},{})
 worddocchapter({INIT},{ },
 {The wordset forthvar({INIT}) contains words to initialise or reinitialise Forth.},
 {},{},{},{})
@@ -86,18 +98,6 @@ you will have less need, but scaling remain tricky.}).
 Formatting is done with forthdefi({double})'s exclusively, and relies 
 on this wordset. Operators with mixed precision and unsigned operators
 allow to build arbitray precision from them in forthdefi({high level}) code.},
-{},{},{},{})
-worddocchapter({FORMATTING},{ },
-{The wordset forthvar({FORMATTING}) generates formatted output for 
-numbers, i.e. printing the digits in a field with a certain width,
-possibly with sign etc.
-This is possible in any forthdefi({number base}). (Normally base 10 is used,
-which means that digits are found as a remainder by dividing by 10).
-Formatting in Forth is always based on forthdefi({double}) numbers.
-Single numbers are handled by converting them to forthdefi({double}) first.
-This requires some double precision operators to be present in the Forth core. 
-forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
-},
 {},{},{},{})
 worddocchapter({OPERATOR},{ },
 {The wordset forthvar({OPERATOR}) contains the familiar operators for addition, multiplication etc. 
@@ -175,6 +175,10 @@ because they are equivalent to small sequences of code.
 _VERBOSE_({Traditionally one hoped to speed Forth up by coding these words
 directly})},
 {},{},{},{})
+worddocchapter({SYSTEM},{ },
+{The wordset forthvar({SYSTEM}) contains words that call the underlying operating
+system or functions available in the BIOS-rom.},
+{},{},{},{})
 worddocchapter({VOCABULARIES},{ },
 {The dictionary is subdivided in non-overlapping subsets:
 the forthdefi({vocabulary})'s. forthxref({DICTIONARY}). 
@@ -208,4 +212,5 @@ worddocchapterend({STACKS},{~},{CONTENT},{},{},{},{})
 worddocchapterend({STORAGE},{~},{CONTENT},{},{},{},{})
 worddocchapterend({STRING},{~},{CONTENT},{},{},{},{})
 worddocchapterend({SUPERFLUOUS},{~},{CONTENT},{},{},{},{})
+worddocchapterend({SYSTEM},{~},{CONTENT},{},{},{},{})
 worddocchapterend({VOCABULARIES},{~},{CONTENT},{},{},{},{})
