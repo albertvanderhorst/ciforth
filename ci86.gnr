@@ -600,9 +600,15 @@ ENDBOOT:
 ;                       ADJUST CODE SEGMENT REGISTER (still real mode)
 ; ########################################################################################
 ;{ Required start of .COM program.}
-    _HOSTED_MSDOS_(_REAL_({ORG     100H
-ORIG:                         ; {Accommodate also .exe files} }))
-
+_HOSTED_MSDOS_({
+_REAL_(
+{           ORG     100H
+ORIG:                         ; {Accommodate also .exe files} })
+_MODERN_(
+{       MOV     BX, (EM-1)/10H+1
+        MOV     AH,4Ah              ;Modify memory allocation
+        INT     21h})
+})
 ; ########################################################################################
 ;                       MOVE CODE TO ITS PLACE (still real mode)
 ; ########################################################################################
@@ -981,6 +987,14 @@ RETDOS:
 ENDDPMI:
 ; ######################### DPMI END ###############################################################
 });_END_({_HOSTED_DPMI_})
+
+_MODERN_({
+        MOV     [LOADEXEC], DS
+        MOV     [LOADEXEC+4], DS
+        MOV     [LOADEXEC+8], DS
+        MOV     [LOADEXEC+12], DS
+});_END_({_MODERN_})
+
 _BITS32_({
 ;{************************}
 include(width32.m4)
@@ -1388,13 +1402,13 @@ DENQ1:
         DC      INBRS, LDUP, LIT, '"', EQUAL ;           IN[] DUP &" =
         _0BRANCH(DENQ2)                 ;           WHILE
         DC      TDROP, ONEP             ;           2DROP 1+ R@ $+!
-        DC      LDUP, ALLOT, RR, SPTOR
+        DC      LDUP, ALLOT, RR, SADD
         _BRANCH(DENQ1)                  ;           REPEAT
 DENQ2:
         DC      QBL, ZEQU
         DC      LIT, 10, QERR           ;           ?BLANK 0= 5 ?ERROR
         DC      DROP                    ;                DROP R@ $+!
-        DC      LDUP, ALLOT, RR, SPTOR
+        DC      LDUP, ALLOT, RR, SADD
 _ALIGNED_({ DC LALIGN}, {dnl})
         DC      FROMR, SFET, DLITE      ;           R> $@ POSTPONE DLITERAL ;
         DC      SEMIS
@@ -2890,7 +2904,7 @@ to the string variable at address forthvar({addr}).},
 {{$@},{$!},{$C+}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - dnl
 $@ 2DUP PAD $! PAD $+! PAD $@ TYPE},{A9A9}}, enddoc)
-HEADER({$+!},{SPTOR},{DOCOL})
+HEADER({$+!},{SADD},{DOCOL})
         DC   LDUP, FETCH, TOR ;{ Remember old count.}
         DC   TDUP, PSTORE
         DC   CELLP, FROMR, PLUS, SWAP, LCMOVE
@@ -3218,19 +3232,19 @@ HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
 worddoc( {OPERATINGSYSTEM},{ARGS},{arguments},{--- addr},{},
 { Return the addr of forthcode({ARGS}) a user variable that
 contains a system dependant pointer to any arguments that are
-passed from the operating system to ciforth during startup.}
+passed from the operating system to ciforth during startup.
 _LINUX_N_({{
 In this ciforth it points to an area with the argument count,
 followed by a a null ended array of arguments strings,
 then by a null ended array of environment strings.
-}});_END_({_LINUX_N_})
-_PC_({
+}})
+_PC_({{
 In this ciforth it contains the real segment of the ``environment-block''
 _HOSTED_DPMI_({,which is real hard to come by in protected mode}).
 _VERBOSE_({The arguments passed to the program, ``command tail''
 is available as a forthdefi({brain damaged string}) at address 80H.})
-});_END_({_PC_})
-,
+}})
+},
 {{SYSTEM}},
 {{." Interactive"},{Interactive}},
 enddoc)
@@ -6331,7 +6345,7 @@ worddoc( {OPERATINGSYSTEM},{BIOSO},{bios},{a b c d i---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt forthsamp({i}) with forthsamp({a b c d})
 in registers forthsamp({AX BX CX DX}). Upon return those registers contain
 forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
-register._DPMI_({This word performs calls only as related to a real mode interface.
+register._HOSTED_DPMI_({This word performs calls only as related to a real mode interface.
 Under DPMI we have to do this via a special call to the
 unadorned interrupt, which is in this case protected mode,
 interrupt 31H function 0300H. In behalf of this registers are
@@ -6426,7 +6440,7 @@ forthsamp({a b c d}) in registers forthsamp({AX BX CX DX}).
 Return as a result the content of register forthsamp({ar}).
 forthsamp({fl}) is the carry flag, that is one for a failed
 operation. In general forthvar({ar}) then contains some error
-code. _DPMI_({ If you want selectors forthvar({DS}) or
+code. _HOSTED_DPMI_({ If you want selectors forthvar({DS}) or
 forthvar({ES}) different from the Forth segment, or any
 register different from the default, you must fill that in in
 the forthcode({REG-SET}) structure. If your BIOS call destroys
@@ -6551,7 +6565,7 @@ Save_ES_PR: DW    0000
 ;
 worddoc( {OPERATINGSYSTEM},{BIOS31},{bios31},{a b c d di---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt 31H, directly from
-protected mode. _VERBOSE_({The word forthcode({BIOSN}) simulates
+protected mode. _VERBOSE_({The word forthcode({BIOS}) simulates
 a real mode interrupt; that is what you usually want.})
 dnl forthsamp({i})
 with forthsamp({a b c d di}) in registers
@@ -6559,7 +6573,7 @@ forthsamp({AX BX CX DX DI}). Upon return those registers
 contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
 content of the processors flag register. _VERBOSE_({
 forthsamp({1 AND}) leaves a zero if the call was successful.})
-},{{BIOSN},{BDOSN}}, {}, enddoc)
+},{{BIOS},{BDOS}}, {}, enddoc)
 ; Wanted here is a generic call on BIOS. A boon for experimenters.
 ;{ Because there is no such thing as a variable interrupt:}
 ; I tried to use self modifying code , filling in the interrupt
@@ -6870,7 +6884,7 @@ HEADER({ZEN},{ZEN}, {DOCOL})
 worddoc( {FILES},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
-and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
+and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({ forthvar({errno}) })
 error code negated, to be inspected using forthcode({MESSAGE}).
  forthvar({fam}) is one of 0=READ_ONLY, 1=WRITE_ONLY, 2=READ_WRITE.
 },
@@ -6936,7 +6950,7 @@ _LINUX_N_({ Create a file with name forthvar({sc}) and file
 access privileges forthvar({u}) }) If the file already exists,
 it is truncated to zero length. Return a file handle into
 forthvar({fileid}) and a result code into forthvar({ior}). The
-latter is the _PC_({ MSDOS})_HOSTED_LINUX_({ forthvar({errno})
+latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({ forthvar({errno})
 }) negated, to be inspected using forthcode({MESSAGE}). The
 handle is open for READ_WRITE. },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
@@ -6997,7 +7011,7 @@ worddoc( {FILES},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO},
 position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters succesfully read,
 this may be zero. forthvar({ior}) is 0 for success, or
-otherwise _PC_({the MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
+otherwise _PC_({the MSDOS}) _HOSTED_LINUX_({ forthvar({errno}) })
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R\W}},
 {
@@ -7052,7 +7066,7 @@ worddoc( {FILES}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
 {Position the file that is open at forthvar({fd}) at position
 forthvar({ud}).
 forthvar({ior}) is 0 for success, or otherwise
-_PC_({the MSDOS error code negated })_HOSTED_LINUX_({ -1 with
+_PC_({the MSDOS error code negated }){}_HOSTED_LINUX_({ -1 with
 more information in forthvar({errno}) }). Information about error codes
 can be found by forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
@@ -7089,7 +7103,7 @@ worddoc( {FILES},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
 {Write forthvar({n}) characters from forthvar({addr}) to the file that is
 open at forthvar({fd}) , starting at its current position.
 forthvar({u1}) is 0 for success,
-or otherwise _PC_({the MSDOS})_HOSTED_LINUX_({ forthvar({errno}) })
+or otherwise _PC_({the MSDOS}) _HOSTED_LINUX_({ forthvar({errno}) })
 error code
 negated, to be inspected using forthcode({MESSAGE}).
 dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
@@ -8010,13 +8024,14 @@ RSLW2:
         DC      SEMIS
 ;
 });_END_({_BLOCKSINFILE_})
-_LINUX_N_({
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc1 --- },{ISO},
 {Have the operating system execute the command contained
 in the string forthsamp({sc1}).
 },{{BLOCK},{?ERRUR}},
-{{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}},
+_LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}}, })
+_MODERN_({ {{"TYPE hello.frt" SYSTEM },{." Hello world!"}}, })
 enddoc)
+_LINUX_N_({
 HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
         DC      ZERO, ZERO, ZERO, LIT, fork, LINOS
@@ -8049,7 +8064,32 @@ COMBUF:  _RESB(256)
 SYSARGS: DC   SYSARG1, SYSARG2, COMBUF + _CELLS(1), 0
 ;
 });_END_({_LINUX_N_})
-
+_MODERN_({
+HEADER({SYSTEM},{SYSTEM},{DOCOL})
+        DC      LIT, COMBUF, TOR
+        _STRINGINLINE({X /c })
+        DC      RR, SSTOR
+        DC      RR, SADD, LIT, ACR, RR, CHAPP
+        DC      FROMR, SFET, ONEM, SWAP, CSTOR ;{Fill in (BD) count at X.}
+_HOSTED_DPMI_(
+{       DC      0, LIT, COMBUF
+        DC      LIT, Save_DS_PR, FETCH, OVER
+        DC      FMOVE                         }) _END_({_HOSTED_DPMI_})
+        DC      ARGS, FETCH, LIT, LOADEXEC, STORE
+        DC      LIT, SHELL, X, LIT, LOADEXEC
+        DC      LIT, 4B00H, BDOSN
+        DC      SWAP, QERR
+        DC      SEMIS
+LOADEXEC:   DW  0       ; {The 0 are filled in at boot with DS.}
+        DW      COMBUF + CW  ;{Allow it to be a counted string.}
+        DW      0
+        DW      6CH
+        DW      0
+        DW      7CH
+        DW      0
+COMBUF:  _RESB(256)
+SHELL:   DB      "\COMMAND.COM",0
+});_END_({_MODERN_})
 _LINUX_C_({
 worddoc( {STORAGE},{BLOCK-INIT},{block_init},{---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
