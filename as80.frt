@@ -24,18 +24,19 @@ HEX
 ( in `TEMP'. Execution: Leave for DEA : it IS of same type )
 : IS-A <BUILDS TEMP @ , DOES> @ SWAP PFA CFA CELL+ @ = ;
 ( Generate error if data for postit defining word was inconsistent)
-: CHECK1 HERE 3 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
+: CHECK1 HERE 4 CELLS - DUP @ SWAP CELL+ @ INVERT  AND 31 ?ERROR ;
 ( Accept a MASK with a bit up for each commaer, a MASK indicating
-( which bits are postitted, and the INSTRUCTION )
+( which bits are missing from postitted, and the INSTRUCTION )
 ( Assemble an 1..3 byte instruction and post what is missing.)
-: 1PI <BUILDS  , INVERT , INVERT , CHECK1
+( The last masks are for convenience in disassembly                     )
+: 1PI <BUILDS  , INVERT , INVERT , FF , CHECK1
 DOES> [ HERE TEMP ! ] <POST POST, , 1 CORRECT ;
 ( Return for DEA : it IS of type 1PI                                  )
 IS-A IS-1PI
-: 2PI <BUILDS  , FFFF0000 OR , INVERT , CHECK1 DOES>
+: 2PI <BUILDS  , INVERT , INVERT , FFFF , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 2 CORRECT ;
 IS-A IS-2PI
-: 3PI <BUILDS  , FF000000 OR , INVERT , CHECK1 DOES>
+: 3PI <BUILDS  , INVERT , INVERT , FFFFFF , CHECK1 DOES>
 DOES> [ HERE TEMP ! ] <POST POST, , 3 CORRECT ;
 IS-A IS-3PI
 DECIMAL
@@ -50,6 +51,12 @@ DECIMAL
 ( One size fits all. )
 : xFI <BUILDS , , INVERT , CHECK1 DOES> [ HERE TEMP ! ] FIX| ISS @ OR! ;
 IS-A IS-xFI
+
+: >BODY PFA CELL+ ;
+: >INST >BODY @ ;  ( Get you at fixup too)
+: >MASK >BODY CELL+ @ ;
+: >COMMA >BODY CELL+ CELL+ @ ;
+: >IMASK >BODY CELL+ CELL+ CELL+ @ ;
 
 : CHECK DUP PREVIOUS @ < 30 ?ERROR DUP PREVIOUS ! ;
 : BOOKKEEPING CHECK TALLY OR! ;
@@ -140,10 +147,6 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 : START ' ASSEMBLER 2 +  CELL+ @ ;
 
 
-: >BODY PFA CELL+ ;
-: >INST >BODY @ ;  ( Get you at fixup too)
-: >MASK >BODY CELL+ @ ;
-: >COMMA >BODY CELL+ CELL+ @ ;
 (   The FIRST set is contained in the SECOND set, leaving IT            )
 : CONTAINED-IN OVER AND = ;
 
@@ -170,8 +173,8 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 ( is fullfilled it does the reassuring actions toward the tally as with )
 ( assembling and add the fixup/posti/commaer to the disassembly struct. )
 ( Leave the DEA.                                                        )
-: DIS-1PI
-    DUP IS-1PI IF
+: DIS-PI
+    0   OVER IS-1PI OR   OVER IS-2PI OR   OVER IS-3PI OR   IF
     AT-REST? IF
         DUP >BODY POST, DROP
         DUP +DISS
@@ -203,7 +206,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
     DISS? IF
         DISS @+ SWAP -DISS
         DO
-            I @ DIS-1PI DIS-xFI DIS-COMMA DROP
+            I @ DIS-PI DIS-xFI DIS-COMMA DROP
         0 CELL+ +LOOP
     THEN
 ;
@@ -230,7 +233,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
     !TALLY
     START
     BEGIN
-        DIS-1PI DIS-xFI DIS-COMMA
+        DIS-PI DIS-xFI DIS-COMMA
         RESULT
         >NEXT%
 (       DUP ID.                                                         )
@@ -259,9 +262,9 @@ HERE POINTER !
 ( disassembly struct.
 ( Leave the DEA.                                                        )
 : dis-1PI
-    DUP IS-1PI IF
+    0   OVER IS-1PI OR   OVER IS-2PI OR   OVER IS-3PI OR   IF
     AT-REST? IF
-    DUP >MASK POINTER @ @ AND FF AND OVER >INST = IF
+    DUP >MASK OVER >IMASK AND POINTER @ @ AND OVER >INST = IF
         DUP >BODY POST, DROP
         DUP +DISS
         POINTER @ 1+ NEW-POINTER !
@@ -272,20 +275,6 @@ HERE POINTER !
     THEN
 ;
 
-( Ugly! )
-: dis-2PI
-    DUP IS-2PI IF
-    AT-REST? IF
-    DUP >MASK POINTER @ @ AND FFFF AND OVER >INST = IF
-        DUP >BODY POST, DROP
-        DUP +DISS
-( distrubr dis-dix        2 POINTER +!)
-(       DUP ID.                                                         )
-(       ." BINGA"                                                       )
-    THEN
-    THEN
-    THEN
-;
 : dis-xFI
    DUP IS-xFI IF
    DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
