@@ -24,6 +24,12 @@ REQUIRE -LEADING
 REQUIRE COMPARE
 REQUIRE POSTFIX
 
+\ ################ FIXME ######################################################
+\ Upper limits for arrays
+1000 CONSTANT MAX-DIAGNOSES
+200 CONSTANT MAX-QUESTIONS
+
+
 \ This is used as an invalid index into an array to indicate that
 \ there was no array item at all.
 -1 CONSTANT NONE
@@ -75,6 +81,7 @@ REQUIRE POSTFIX
 : VOCABULARY CREATE DOES> DROP ;
 : PREVIOUS ;
 
+\ ############################################################################
 VOCABULARY DATABASE
 DATABASE DEFINITIONS
 
@@ -153,46 +160,10 @@ DOES> ROT STRIDE @ * + SWAP CELLS + ;
 \D ." Expect a question : " 0 QUESTIONS 2@ TYPE CR
 \D ." Expect 0 : " DEPTH .  CR
 
-\ Upper limits for arrays
-#DIAGNOSES @ SPARE + CONSTANT MAX-DIAGNOSES
-#QUESTIONS @ SPARE + CONSTANT MAX-QUESTIONS
 \D : .QUESTION CR DUP . DUP 0 #QUESTIONS @ WITHIN 0= ABORT" QUESTION OUT  OF BOUNDS"
 \D   DUP QUESTIONS 2@ TYPE CR ;
 \D : .DIAGNOSIS CR DUP . DUP 0 #DIAGNOSES @ WITHIN 0= ABORT" DIAGNOSIS OUT  OF BOUNDS"
 \D   DUP DIAGNOSES 2@ TYPE CR ;
-
-\ For a STRING return a STRING without leading spaces.
-\D "   X ? " -LEADING ." Expect |X ? |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
-
-\ For a STRING return a clean STRING, without spaces or the question mark.
-: CLEAN-STRING -LEADING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN -TRAILING ;
-
-\D " How ? " CLEAN-STRING
-\D ." Expect |How|0 : " &| EMIT TYPE &| EMIT DEPTH . CR
-
-\ Convert a STRING VARIABLE to lower case.
-: $TO-LOWER $@ OVER + SWAP DO I C@ &A &Z 1+ WITHIN IF 32 I +! THEN LOOP ;
-\D "AAP" $, DUP $TO-LOWER ." Expect aap : " $@ TYPE   CR
-
-\ Add STRING as a diagnosis.
-: ADD-DIAGNOSIS CLEAN-STRING $, DUP $TO-LOWER $@
-    #DIAGNOSES @ DIAGNOSES 2! #DIAGNOSES @ 1 #DIAGNOSES +! ;
-\D " Ape" ADD-DIAGNOSIS
-\D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|2 0 :" &| EMIT TYPE &| EMIT . DEPTH . CR
-\D -1 #DIAGNOSES +!
-
-\ Add STRING as a QUESTION.
-: ADD-QUESTION CLEAN-STRING $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
-
-\ Find a diagnosis STRING and return its INDEX (or ``NONE'').
-: FIND-DIAGNOSIS CLEAN-STRING PAD $! PAD $TO-LOWER
-    NONE PAD $@
-    #DIAGNOSES @ 0 DO 2DUP I DIAGNOSES 2@ COMPARE 0= IF
-        2DROP DROP I UNLOOP EXIT
-    THEN LOOP
-    2DROP ;
-\D "RENDIER " FIND-DIAGNOSIS ." FIND-D Expect 0 0 : " . DEPTH . CR
-\D "PANDIER " FIND-DIAGNOSIS ." FIND-D Expect -1 0 : " . DEPTH . CR
 
 : (U.) 0 <# #S #> ;
 
@@ -229,7 +200,7 @@ VARIABLE OUTPUT$
 : PUT-ANSWERS
     uk
     #DIAGNOSES @ 0 DO
-        DUP #QUESTIONS @ PUT-NUMBERS MAX-QUESTIONS CELLS +
+        DUP #QUESTIONS @ PUT-NUMBERS STRIDE @ +
     LOOP DROP ;
 
 ONLY FORTH DEFINITIONS
@@ -247,6 +218,41 @@ DATABASE
     0 0 ?ES     PUT-ANSWERS
     OUTPUT$ @ $@ "database2" PUT-FILE
 ;
+
+\ ############################################################################
+\ For a STRING return a STRING without leading spaces.
+\D "   X ? " -LEADING ." Expect |X ? |0 : " &| EMIT TYPE &| EMIT DEPTH . CR
+
+\ For a STRING return a clean STRING, without spaces or the question mark.
+: CLEAN-STRING -LEADING -TRAILING 2DUP + 1- C@ &? = IF 1- THEN -TRAILING ;
+
+\D " How ? " CLEAN-STRING
+\D ." Expect |How|0 : " &| EMIT TYPE &| EMIT DEPTH . CR
+
+\ Convert a STRING VARIABLE to lower case.
+: $TO-LOWER $@ OVER + SWAP DO I C@ &A &Z 1+ WITHIN IF 32 I +! THEN LOOP ;
+\D "AAP" $, DUP $TO-LOWER ." Expect aap : " $@ TYPE   CR
+
+\ Add STRING as a diagnosis.
+: ADD-DIAGNOSIS CLEAN-STRING $, DUP $TO-LOWER $@
+    #DIAGNOSES @ DIAGNOSES 2! #DIAGNOSES @ 1 #DIAGNOSES +! ;
+\D " Ape" ADD-DIAGNOSIS
+\D 2 DIAGNOSES 2@ ." ADD-D Expect |ape|2 0 :" &| EMIT TYPE &| EMIT . DEPTH . CR
+\D -1 #DIAGNOSES +!
+
+\ Add STRING as a QUESTION.
+: ADD-QUESTION CLEAN-STRING $, $@ #QUESTIONS @ QUESTIONS 2! 1 #QUESTIONS +! ;
+
+\ Find a diagnosis STRING and return its INDEX (or ``NONE'').
+: FIND-DIAGNOSIS CLEAN-STRING PAD $! PAD $TO-LOWER
+    NONE PAD $@
+    #DIAGNOSES @ 0 DO 2DUP I DIAGNOSES 2@ COMPARE 0= IF
+        2DROP DROP I UNLOOP EXIT
+    THEN LOOP
+    2DROP ;
+\D "RENDIER " FIND-DIAGNOSIS ." FIND-D Expect 0 0 : " . DEPTH . CR
+\D "PANDIER " FIND-DIAGNOSIS ." FIND-D Expect -1 0 : " . DEPTH . CR
+
 
 \ For INDEX get the diagnostic STRING.
 : DIAG DIAGNOSES 2@ ;
@@ -316,7 +322,7 @@ DATABASE
 \ For DIAGNOSIS return the address of a flag whether is has been excluded.
 MAX-DIAGNOSES ARRAY EXCLUSIONS
 \ Initialise ``EXCLUSIONS''
-: !EXCLUSIONS  0 EXCLUSIONS MAX-DIAGNOSES CELLS ERASE ;
+: !EXCLUSIONS  0 EXCLUSIONS #DIAGNOSES @ CELLS ERASE ;
 \ For DIAGNOSIS return: it has BEEN excluded.
 : ?EXCLUDED EXCLUSIONS @ ;
 \D ." !EXCLUSIONS Expect 0 0 : " !EXCLUSIONS 0 ?EXCLUDED . DEPTH . CR
@@ -325,7 +331,7 @@ MAX-DIAGNOSES ARRAY EXCLUSIONS
 \ not been posed.
 MAX-QUESTIONS ARRAY ANSWER-VECTOR
 \ Initialise ``ANSWER-VECTOR''
-: !ANSWER-VECTOR MAX-QUESTIONS 0 DO A_NONE I ANSWER-VECTOR ! LOOP ;
+: !ANSWER-VECTOR #QUESTIONS @ 0 DO A_NONE I ANSWER-VECTOR ! LOOP ;
 
 \ For QUESTION return: it is has BEEN posed.
 : ?POSED ANSWER-VECTOR @ A_NONE <> ;
