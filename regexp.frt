@@ -541,9 +541,23 @@ VARIABLE RE-EXPR-END
 \ Return a POINTER to the start of the string.
 : STRING-BUILD OVER +   OVER STRING-TABLE 2! ;
 
+\ For STRING and POINTER to compiled expression:
+\ "there IS a match". \0 ..\9 are filled in.
+: (RE-MATCH) >R STRING-BUILD R> (MATCH) >R 2DROP R> ;
+
 \ For STRING and regular expression STRING:
-\ "there IS a match". \0 ..\9 have been filled in.
-: RE-MATCH RE-BUILD >R STRING-BUILD R> (MATCH) >R 2DROP R> ;
+\ "there IS a match". \0 ..\9 are been filled in.
+: RE-MATCH RE-BUILD (RE-MATCH) ;
+
+\ Compile "inline regular expression ending in '"' ":
+\ compile code that leave a pointer to that expression compiled.
+: RE-BUILD"    &" (PARSE) RE-BUILD RE-FILLED @ OVER -
+        POSTPONE SKIP   $,   CELL+   POSTPONE LITERAL ;
+
+\ Only to be used while compiling.
+\ For STRING and "inline regular expression":
+\ "there IS a match". \0 ..\9 are been filled in.
+: RE-MATCH" RE-BUILD" POSTPONE (RE-MATCH) ; IMMEDIATE
 
 \ Return remaining STRING of ``STRING-COPY'' after substring INDEX.
 : REMAINING STRING[] CELL+ @   1 STRING[] CELL+ @ OVER - ;

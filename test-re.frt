@@ -320,4 +320,14 @@ CR \1 TYPE \2 TYPE \3 TYPE \4 TYPE \5 TYPE \6 TYPE \7 TYPE \8 TYPE \9 TYPE
 \  "IHGFEDCBA"
 "ABCDEFGHI" "(A)(B)(C)(D)(E)(F)(G)(H)(I)" RE-MATCH match
 "\9\8\7\6\5\4\3\2\1" RE-REPLACE CR TYPE
+
+\ Precompiled expressions --------------------------------------
+\ "A" "B" "C"
+: test1 RE-MATCH" (A).*(B).*(C)" ;
+"A B C" test1 match CR \1 TYPE \2 TYPE \3 TYPE ;
+
+\  "QIHGFEDCBAQ"
+: test2 RE-MATCH" (A)(B)(C)(D)(E)(F)(G)(H)(I)" ;
+"QABCDEFGHIQ" test2 match
+"\9\8\7\6\5\4\3\2\1" RE-REPLACE CR TYPE
 CR
