@@ -54,8 +54,8 @@ FORWARD while-statement
 
 \ An atom is a constant, a variable (accessed) or a function (called)
 \ The identifier determines which of the three. list only with function.
-BNF: atom    
-    identifier [ '(' list ')' ]    
+BNF: atom  
+    identifier [ `(' list `)' ]    
     { `[' expression { `,' expression } `]' 
        | `.' identifier 
        | `[' expression `..' expression `]' 
@@ -65,12 +65,13 @@ BNF: array-type `array' `[' ordinal-type { `;' ordinal-type } `]' `of' type-deno
 
 BNF: block { label-declaration-part | constant-definition-part | type-definition-part | variable-declaration-part | function-declaration-part } compound-statement ;BNF
 BNF: case-statement   `case' expression `of' case-list-element { `;' case-list-element } `end' ;BNF
-BNF: case-list-element   expression-list `:' statement ;BNF
+BNF: case-list-element   expression-list `:' statement | ;BNF
 BNF: compound-statement   `begin' statement-sequence `end' ;BNF      
 BNF: conditional-statement   if-statement | case-statement ;BNF
 BNF: constant-definition   identifier `=' expression ;BNF
 BNF: constant-definition-part   `const' constant-definition `;' { constant-definition `;' } ;BNF
-BNF: expression   `(' expression   `)' | atom { operator atom } | number ;BNF
+BNF: expression   `(' expression   `)' | ( atom | number ) { operator ( atom | number ) } ;BNF
+BNF: expression-list   expression { `,' expression } ;BNF
 BNF: file-type     0 SUCCESS ! ;BNF    \ CAN'T DEAL BEHIND THAT
 BNF: for-statement   `for' identifier ( `:=' expression `downto' | `:=' expression `to' | `in' ) expression ;BNF
 BNF: formal-parameter-list [ `var' | `function' | `procedure' | ] identifier-list [ `:' identifier ] ;BNF  
