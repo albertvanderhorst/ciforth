@@ -578,7 +578,7 @@ FIND: BIOS CONSTANT MSMS    FIND: LINOS CONSTANT LILI   SP!
 ( HANDY & Preparation for ANSI-fication)
 : PARSE WORD COUNT ;     : ($) R@ $@ DUP CELL+ R> + >R ;
 
-: S" POSTPONE " ; IMMEDIATE
+
 
 : C"  HERE POSTPONE " 
     DUP @ SWAP CELL+ 1 - C! ( Make it brain damaged)
