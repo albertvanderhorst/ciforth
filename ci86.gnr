@@ -2077,23 +2077,31 @@ CODE_HEADER({RSP!},{RPSTO})
         POP     RPO
         _NEXT
 ;
-worddoc( {CONTROL},{EXIT},{semicolon_s},{},{ISO},
+worddoc( {CONTROL},{EXIT},{exit},{},{ISO},
 { Stop interpretation of the current definition. The return
 stack must not be engaged, such as between forthcode({>R}) and
 forthcode({R>}) , or forthcode({DO}) and forthcode({LOOP}) . In
 ciforth it can also be used to terminate
 interpretation from a
 string, block or file, or a line from the current input stream.
-forthcode({EXIT}) is also the run-time
-word compiled at the end of a colon-definition which returns
-execution to the calling proceedure.},
-{},
+},
+{{(;)}},
 { {: GS1 1 EXIT 2 ; GS1 .},{1} },
 enddoc)
-CODE_HEADER({EXIT},{SEMIS})
+CODE_HEADER({EXIT},{EXIT})
         MOV     LIP,[RPO] ;{(IP) <- (R1)}
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
+;
+worddocsafe( {CONTROL},{{;}},{semicolon_s},{},{},
+{ This is a synonym for forthcode({EXIT}). It is the run-time
+word compiled at the end of a colon-definition which returns
+execution to the calling proceedure. Stop interpretation of the
+current definition. The return stack must not be engaged. },
+{EXIT},
+{ {: GS1 1 (;) 2 ; GS1 .},{1} },
+enddoc)
+HEADER({(;)},{SEMIS},{_VAR_FIELD(EXIT)})
 ;
 worddoc( {CONTROL},{LEAVE},{leave},{},{ISO},
 {Termination a do-loop by branching to directly behind the
@@ -5757,7 +5765,8 @@ BLOC3:  DC      LDUP,FETCH
         DC      LDUP,PREV
         DC      STORE
 BLOC1:  DC      RDROP
-        DC      CELLP,CELLP,SEMIS
+        DC      CELLP,CELLP
+        DC      SEMIS
 ;
 worddoc( {STORAGE~},{FLUSH},{flush},{},{ISO FIG L0},
 {Transfer the content of each forthcode({UPDATE}) d block buffer to disk.
@@ -6270,9 +6279,10 @@ TV:     _RESB( 8 )
 _PC_({
              ;{ SVGA-modus 43*132 char's}
 HEADER({SMALL},{LSMALL},{DOCOL})
-             DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
-             DC      LIT, 0010H, BIOS
-             DC      DROP, DROP, DROP, DROP, DROP, SEMIS
+        DC      LIT, 4F02H, LIT, 010AH, ZERO, ZERO
+        DC      LIT, 0010H, BIOS
+        DC      DROP, DROP, DROP, DROP, DROP
+        DC      SEMIS
              ;{                          ^ MUST BE 4FH}
 });_END_({_PC_})
         PAGE
@@ -8149,7 +8159,7 @@ HEADER({SPACES},{SPACES},{DOCOL})
 SPAX2:  DC      SPACE
         _LOOP(SPAX2)    ;{LOOP}
 SPAX1:
-DC      SEMIS
+        DC      SEMIS
 ;
 worddoc( {FORMATTING},{<#},{less_number_sign},{},{ISO,FIG,L0},
 {Setup for pictured numeric output formatting using the words:

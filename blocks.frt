@@ -226,7 +226,7 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
  CFOF TASK @ CONSTANT DOCOL ( Get the  DOCOLON address )
  ( Decompilation of special high level words)
   : -hi CR ." : " DUP DUP ID.. CELL+ @ CR
-   BEGIN ?Q DUP @  LIT EXIT <> ( >R DUP LIM @ < R> AND ) WHILE
+   BEGIN ?Q DUP @  LIT (;) <> ( >R DUP LIM @ < R> AND ) WHILE
         ITEM REPEAT   CR DROP ." ;"  DUP
 ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  ( DENOTATION)" THEN
 CR ;         CFOF TASK @  BY -hi
@@ -2899,7 +2899,7 @@ FORWARD FAC
 : POP POSTPONE R> ;    : PUSH POSTPONE >R ;
 : SUC@ POSTPONE  SUCCESS POSTPONE @ ;
 : SUC! POSTPONE 1 POSTPONE SUCCESS POSTPONE ! ;
-: EXIT R> DROP ;     : % DSP@ H. TIB @ IN @ TYPE
+: % DSP@ H. TIB @ IN @ TYPE
 SPACE SUCCESS ? CR ; : % POSTPONE  % ;
  CODE  POPSP MOV, W| T| SP'| DB| [BP] 0 B,
  LEA, BP'| DB| [BP] 0 CELL+ B, NEXT C;
