@@ -819,9 +819,9 @@ _HOSTED_DPMI_({
             JNE     ERRMSG              ;Nope, so exit
 
             AND     BL,1                ;Test bit 1 (32-bit OK?)
-            MOV     [Flag32],BL
-            MOV     [ProcType],CL
-            MOV     [VerNum],DX
+;            MOV     [Flag32],BL
+;            MOV     [ProcType],CL
+;            MOV     [VerNum],DX
             MOV     [DPMIentry+0],DI
             MOV     [DPMIentry+2],ES
             PUSH    SI                  ;{Allocation.}
@@ -847,9 +847,9 @@ Plunge:     MOV     ES,AX
             JMP     SHORT DPMISUCCESS
 ; Data used by check DPMI.
 
-Flag32      DB      00
-ProcType    DB      00
-VerNum      DW      0000
+;Flag32      DB      00
+;ProcType    DB      00
+;VerNum      DW      0000
 DPMIentry   DW      0000,0000
 MEM_HANDLESI: DW     0000
 MEM_HANDLEDI: DW     0000
@@ -860,8 +860,8 @@ ERRMSG:
            MOV     AH,4CH
            INT     21H
 ; The error number is patched!
-EMsg       DB      'ciforth DPMI : ERROR #',ACR,ALF
-EMsgS      EQU     $-EMsg
+;EMsg       DB      'ciforth DPMI : ERROR #',ACR,ALF
+;EMsgS      EQU     $-EMsg
 
 
 ; If we reach this point, we are operating in protected mode
@@ -922,11 +922,34 @@ ERRMSG2:    JC      ERRMSG
         MOV     AX,CS
         MOV     [BX],AX
 
-; -------------- Copy Forth to the new segment ES --------
-            MOV     CX, TEXTEND
-            XOR     DI, DI      ;{dest}
-            XOR     SI, SI      ;{dest}
-            REP     MOVSB
+; -------------- Get an 32-bit alias for the data segment into DX  --------
+            MOV     AX,000AH            ;Alias for LDT descriptor.
+            MOV     BX,DS
+            INT     31H
+            MOV     DX,AX
+            MOV     BL,7
+            JC      ERRMSG2             ;Could not allocate.
+
+            MOV     AX,0009H            ;Set access rights.
+            MOV     BX,DX
+            ; %1000 0000 1111 1010  %1100 0000 1111 1010
+            MOV     CX, 80F2H  | 4000H
+            INT     31H
+            MOV     BL,7
+            JC      ERRMSG2             ;Could not allocate.
+
+; --------------  Now copy -------------------------------------------
+            PUSH    DS
+            MOV     DS, DX
+            MOV     ECX, [DPA]
+            XOR     EDI, EDI      ;SRC
+            XOR     ESI, ESI      ;dest
+            A32  REP     MOVSB
+            POP     DS
+
+
+; -------------- Release the 32-bit alias -------------------------------
+;           ????
 
 ;{We are now in a position to release the original memory.}
 ;           MOV     BX, 1000H          ;BX=paragraphs needed (64K)
@@ -941,7 +964,7 @@ ERRMSG2:    JC      ERRMSG
             INT     31H
             MOV     BL,5
             MOV     DX,AX
-            JC      ERRMSG2             ;{Could not allocate.}
+ERRMSG3:    JC      ERRMSG2             ;{Could not allocate.}
 
 ; -------------- Fill in the alias descriptors, possibly 32 bits --------
 
@@ -959,7 +982,7 @@ ERRMSG2:    JC      ERRMSG
             MOV     CX, 80F2H _BITS32_({ | 4000H })
             INT     31H
             MOV     BL,7
-            JC      ERRMSG2
+            JC      ERRMSG3
 
 ; -------------- Use the alias descriptors for CS and DS --------
             PUSH    ES    ; Corrected code segment
@@ -1800,7 +1823,7 @@ USINI:  DC      STRUSA  ;{ User area currently in use, cold value same as next.}
         DC      0       ;{ AVAILABLE         6}
         DC      1       ;{ INIT (WARNING)     7}
         DC      INITDP  ;{      INIT (FENCE)  8}
-        DC      INITDP  ;{      INIT (DP)     9}
+DPA:    DC      INITDP  ;{      INIT (DP)     9}
         DC      _DEA(ENV) ;{       INIT (VOC-LINK) 10}
 _HOSTED_LINUX_({
         DC      0       ;{ INIT (OFFSET) }
