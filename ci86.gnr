@@ -1206,13 +1206,13 @@ PPARS2: DC SWAP, DROP
 worddocsafe({PARSING},{SOURCE},{source},{addr --- },{},
 {Return the address forthsamp({addr}) 
 of the current scan specification, allocated in the user area.
-It consists of three cells: a pointer to the next character 
-to be parsed, and the lowest and non-inclusive highest value
-this pointer may have.
+It consists of three cells: 
+the lowest and non-inclusive highest address of the parse area
+and a pointer to the next character to be parsed.
 Changing forthsamp({SOURCE}) takes immediate effect, 
 and must be atomic, by using forthsamp({RESTORE-INPUT}),
-or changing only the first cell. 
-The first cell has the alias forthsamp({IN}) .
+or changing only the third cell. 
+The third cell has the alias forthsamp({IN}) .
 _VERBOSE_({Words like forthsamp({BLK}) and 
 forthsamp({SOURCE-ID}) are secondary, 
 and return their output by ``second-guessing'' forthsamp({SOURCE}) .})},
@@ -1778,6 +1778,48 @@ HEADER({BL},{LBL},{DOCON})
 ;{ THIS IS ONLY A SPAC}
     DC 20H
 ;
+worddoc({STRING},{$@},{string_fetch},{addr --- sc},{},
+{ From address forthsamp({addr}) fetch a string constant forthsamp({sc}) .},
+{{$@},{$!},{$+!},{$C+}},
+{{ HEX 4 , 41 C, 39 C, 45 C, 30 C, HERE 4 CELL+ - $@ TYPE},{A9E0}})
+HEADER({$@},{SFET},{DOCOL})
+        DC LDUP, CELLP, SWAP, FETCH
+        DC SEMIS
+;
+worddoc({STRING},{$!},{string_store},{sc addr --- },{},
+{Store a string constant forthsamp({sc})
+in the string variable at address forthsamp({addr}).},
+{{$@},{$+!},{$C+}},
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $! PAD $@ TYPE},{A9}})
+HEADER({$!},{SSTOR},{DOCOL})
+;        DC TDUP, STORE, CELLP, SWAP, LCMOVE
+        DC TDUP, CSTOR, ONEP, SWAP, LCMOVE
+        DC SEMIS
+;
+worddoc({STRING},{$+!},{string_append},{sc addr --- },{},
+{Append a string constant forthsamp({sc})
+to the string variable at address forthsamp({addr}).},
+{{$@},{$!},{$C+}},
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - 
+$@ 2DUP PAD $! PAD $+! PAD $@ TYPE},{A9A9}})
+HEADER({$+!},{SPTOR},{DOCOL})
+        DC   LDUP, FETCH, TOR ;{ Remember old count.}
+        DC   TDUP, PSTOR
+        DC   CELLP, FROMR, PLUS, SWAP, LCMOVE
+        DC SEMIS
+;
+worddoc({STRING},{$C+},{char_append},{ch addr --- },{},
+{Append a char forthsamp({ch})
+to the string variable at address forthsamp({addr}).},
+{{$@},{$!},{$+!}},
+{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - 
+$@ PAD $! HERE 1 - C@ PAD $C+ PAD $@ TYPE},{A99}})
+HEADER({$C+},{SCPLUS},{DOCOL})
+        DC   LDUP, TOR 
+        DC   LDUP, FETCH, PLUS, CELLP, CSTOR
+        DC   ONE, FROMR, PSTOR
+        DC SEMIS
+;
 worddoc({SCREEN},{C/L},{char_per_line},{--- c},{},
 {A constant that leaves the number of characters on a line of a
 standard screen. },
@@ -2015,7 +2057,7 @@ worddoc({INPUT},{IN},{in},{--- addr},{L0},
 text buffer (terminal or disc) from which the next text will be
 accepted. forthcode({WORD}) uses and moves the value of forthcode({IN}) .},{})
 HEADER({IN},{LIN},{DOUSE})
-        DC      CELLS(30)
+        DC      CELLS(29)
 ;
 ;{========== END USER VARIABLES =============;}
 ;
@@ -2548,8 +2590,9 @@ HEADER({QUERY},{QUERY},{DOCOL})
         DC      ZERO, LIN, STORE
         DC      TIB, FETCH
         DC      LDUP, SOURC, STORE
-        DC      LDUP, SOURC, CELLP, STORE
-        DC      PLUS, SOURC, CELLP, CELLP, STORE
+        DC      LDUP, SOURC, CELLP, CELLP, STORE ; { IN}
+        DC      PLUS, SOURC, CELLP, STORE
+;        DC      DOTS
         DC      SEMIS
 ;
 worddoc({MEMORY},{FILL},{fill},{addr quan b --},{},
@@ -2657,10 +2700,7 @@ HEADER({WORD},{LWORD},{DOCOL})
         DC      BLK
         DC      FETCH
         DC      BLOCK
-        _BRANCH(WORD2)  ;{ ELSE}
-WORD1:  DC      TIB
-        DC      FETCH      ;{ ENDIF}
-WORD2:  DC      LIN
+        DC      LIN
         DC      FETCH
         DC      PLUS
         DC      SWAP
@@ -2682,6 +2722,20 @@ WORD2:  DC      LIN
         DC      FROMR
         DC      LCMOVE
         DC      HERE
+        _BRANCH(WORD2)  ;{ ELSE}
+WORD1:  DC      DROP    ; { BL who wants that blank? }
+        DC      SOURC, CELLP
+        DC      TFET,PWORD
+        DC      LDUP, LIN, STORE
+        DC      OVER, LSUB
+        DC      HERE
+        DC      LIT,22H
+        DC      BLANK
+        DC      HERE
+        DC      SSTOR 
+        DC      HERE
+;        DC      DOTS
+WORD2:  
         DC      SEMIS
 ;
 worddoc({PARSING},{CHAR},{char}, {--- c},{ISO},
@@ -3005,7 +3059,9 @@ HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:  
         DC      LBL
         DC      LWORD
-        DC      HERE, ONEP, CFET
+        DC      LDUP, CFET      ;{ Zero length, regular.}
+        _0BRANCH(INTE8) ;{WHILE}
+        DC      LDUP, ONEP, CFET ;{ Zero first byte, bd (tm).} 
         _0BRANCH(INTE8) ;{WHILE}
         DC      DFIND   ;{BEGIN}
         _0BRANCH(INTE2) ;{IF}
