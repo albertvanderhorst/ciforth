@@ -9,7 +9,8 @@
 
 REQUIRE $
       : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
-\ : \D ; IMMEDIATE   : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
+\ : \D ; IMMEDIATE
+: ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
 
 \ ----------------------    ( From optimiser.frt)
 \ Store a STRING with hl-code in the dictionary.
@@ -123,11 +124,13 @@ VARIABLE MIN-DEPTH
 : (ANNIHILATE-SEQ)
     BEGIN ^ &S EMIT
         NEXT-PARSE OVER ANNILABLE? AND 0= IF 2DROP 0 EXIT THEN
-\         DUP 'BRANCH = IF DROP @+ + RECURSE EXIT THEN  problems if jump to (;)
+        DUP 'BRANCH = IF SWAP 1 CELLS - @+ + SWAP THEN
         DUP '0BRANCH = IF
             SE@ COMBINE-VD
-            ^ &1 EMIT DUP VD @ >R RECURSE R> VD !
-            SWAP 1 CELLS - @+ + ^ &2 EMIT RECURSE OVER ^ &C EMIT <> IF DROP 0 THEN
+            ^ &1 EMIT DUP VD @ >R RECURSE VD @ R> VD ! >R
+            SWAP 1 CELLS - @+ + ^ &2 EMIT RECURSE
+            OVER ^ &C EMIT <>
+            R> VD @ <> OR IF DROP 0 THEN
         EXIT THEN
     ANNILLING?  WHILE REPEAT ;
 
@@ -221,7 +224,7 @@ POSTPONE (;)  ;
 \ Execute at compile time the optimisable code we have collected from
 \ ``OPT-START''
 \ The result is supposedly ``VD'' stack items.
-: EXECUTE-DURING-COMPILE   POSTPONE (;)    OPT-START @ >R ;
+: EXECUTE-DURING-COMPILE   POSTPONE (;)    OPT-START @ ^^ >R ;
 
 \ Throw away the executable code that is to be replaced with optimised code.
 : THROW-AWAY   OPT-START @ DP ! ;
