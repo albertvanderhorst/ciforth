@@ -966,7 +966,7 @@ _HOSTED_DPMI_({
         _LINUX_N_({MOV     _CELL_PTR[USINI+_CELLS(31)],SPO}) ;{Remember ARGS.}
         MOV     SPO,_CELL_PTR[USINI+_CELLS(3)]    ;{PARAM. STACK}
         MOV     RPO,_CELL_PTR[USINI+_CELLS(4)]    ;{RETURN STACK}
-        MOV     LIP,_OFFSET CLD1  ;{ (IP) <-}
+        MOV     HIP,_OFFSET CLD1  ;{ (IP) <-}
         _NEXT
 ;
 CLD1:   DC      COLD    ; { This is a piece of headerless high level code.}
@@ -982,7 +982,7 @@ _COMMENT
    FORTH   8088     FORTH PRESERVATION RULES
    -----   ----     ----- ------------ -----
 dnl Note how the following is to pass through m4
-   {LIP}   LIP      High level Interpreter pointer.  Must be preserved
+   {HIP}   HIP      High level Interpreter Pointer.  Must be preserved
                     across FORTH words.
 
    {WOR}   WOR      Working register.  When entering a word
@@ -1100,13 +1100,13 @@ TNEXT:  PUSHF           ;{SAVE REGISTER}
         JZ      TNEXT2  ;{ NO BREAKPOINT}
         CMP     AX,-1
         JZ      TNEXT1  ;{ STEP ALL POINTS}
-        CMP     AX,LIP   ;{ IN BREAKPOINT RANGE?}
+        CMP     AX,HIP   ;{ IN BREAKPOINT RANGE?}
         JZ      TNEXT1  ;{ STEP THIS LOCATION}
         JA      TNEXT2  ;{ NO}
         MOV     AX,[BIPE] ;{ BREAKPOINT END ADDR}
         OR      AX,AX   ;{ ZERO?}
         JZ      TNEXT2  ;{ ONLY 1 LOCATION}
-        CMP     AX,LIP   ;{ IN RANGE STILL?}
+        CMP     AX,HIP   ;{ IN RANGE STILL?}
         JB      TNEXT2  ;{ NO}
 
 ;{      PAUSE ON ADDRESS}
@@ -1130,21 +1130,21 @@ _PC_({
 _NEWDEBUG_({
 DISPLAYSI:
         _SWITCH_({JMPHERE_FROM_FORTH})
-        PUSH    LIP
+        PUSH    HIP
         PUSH    RPO
         PUSH    WOR
         MOV     AX,WOR
         CALL    DISPLAYW
         MOV     AX,' '
         CALL    DISPLAY
-        MOV     AX,LIP
+        MOV     AX,HIP
         CALL    DISPLAYW
         CALL    DISPLAYCR
 ;        MOV     AH,10H
 ;        INT     16H
         POP    WOR
         POP    RPO
-        POP    LIP
+        POP    HIP
         _SWITCH_({JMPHERE_FROM_OS})
         RET
 ;
@@ -1162,9 +1162,9 @@ APUSH:  PUSH    AX
 NEXT:
 _LINUX_C_({
 _NEWDEBUG_({
-         PUSH    LIP
+         PUSH    HIP
          CALL    c_debug
-         POP     LIP
+         POP     HIP
 });_END_({_NEWDEBUG_ })
 });_END_({_LINUX_C_})
         LODSW           ;{AX <- (IP)}
@@ -1266,12 +1266,6 @@ HEADER({6},{DEN6},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({7},{DEN7},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({8},{DEN8},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 HEADER({9},{DEN9},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-HEADER({A},{DENA},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-HEADER({B},{DENB},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-HEADER({C},{DENC},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-HEADER({D},{DEND},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-HEADER({E},{DENE},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-HEADER({F},{DENF},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 ;
 worddoc( {DENOTATIONS},{DEN-},{den_minus}, {--- s/d},{CI},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
@@ -1298,7 +1292,7 @@ worddocsafe( {DENOTATIONS},{DEN"},{den_quote}, {--- sc},{CI},
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}}, enddoc)
 HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LIT,'"'
-        DC      PARSE
+        DC      PPARS
         DC      LIT, SKIP, COMMA
         DC      SCOMMA, SFET
         DC      DLITE
@@ -1526,7 +1520,7 @@ _ALIGNED_({
         OR      AL, M4_CELLWIDTH - 1
         INC     AX
 },{dnl});_END_({_ALIGNED_})
-        ADD     LIP,AX
+        ADD     HIP,AX
         _NEXT
 ;
 worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C2},
@@ -1541,7 +1535,7 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         POP     AX      ;{ GET STACK VALUE}
         OR      AX,AX   ;{ ZERO?}
         JZ      BRAN1   ;{ YES, BRANCH}
-        LEA     LIP,[LIP+_CELLS(1)]
+        LEA     HIP,[HIP+_CELLS(1)]
         _NEXT
 ;
 worddocsafe( {CONTROL~},{(LOOP)},{paren_loop},{},{C2},
@@ -1560,7 +1554,7 @@ XLOO1:  ADD     [RPO],BX ;{ INDEX = INDEX + INCR}
 ;
 ;{  END OF `DO' LOOP}
         LEA     RPO,[RPO+_CELLS(3)]  ;{ ADJ RETURN STACK}
-        LEA     LIP,[LIP+_CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
+        LEA     HIP,[HIP+_CELLS(1)]       ;{ BYPASS BRANCH OFFSET}
         _NEXT
 ;
 worddocsafe( {CONTROL~},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
@@ -1579,7 +1573,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
         LODSW
-        ADD     AX,LIP  ;{Make absolute}
+        ADD     AX,HIP  ;{Make absolute}
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     BX      ;{ LIMIT VALUE}
         XCHG    RPO,SPO   ;{ GET RETURN STACK}
@@ -1596,7 +1590,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
         LODSW
-        ADD     AX,LIP  ;{Make absolute}
+        ADD     AX,HIP  ;{Make absolute}
         POP     DX      ;{ INITIAL INDEX VALUE}
         POP     BX      ;{ LIMIT VALUE}
         CMP     DX,BX
@@ -1607,7 +1601,7 @@ CODE_HEADER({(?DO)},{XQDO})
         PUSH    DX
         XCHG    RPO,SPO   ;{ GET PARAMETER STACK}
         _NEXT
-QXDO1:  MOV     LIP,AX
+QXDO1:  MOV     HIP,AX
         _NEXT
 ;
 worddoc( {CONTROL},{I},{i},{--- n},{ISO,FIG,C,L0},
@@ -1874,7 +1868,7 @@ PWORD1: DC      DROP
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 ;
-worddoc( {PARSING~},{PARSE},{parse},{ ch --- sc },{ISO},
+worddocsafe( {PARSING~},{(PARSE)},{paren_parse},{ ch --- sc },{},
 {Scan the forthdefi({current input source}) for the character forthvar({ch}) .
 Return forthvar({sc}): a string from the current position in the
 input stream, ending before the first such character,
@@ -1882,18 +1876,20 @@ or at the end of the current input source if it isn't
 there. The character is consumed.
 _VERBOSE_({{As it goes with string constants, you may not alter
 its content, nor assume anything is appended.}})
-_VERBOSE_({So no leading delimiters are skipped.})},
-{{WORD}},
-{{ : GS1 5A PARSE . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
-HEADER({PARSE},{PARSE},{DOCOL})
+_VERBOSE_({So no leading delimiters are skipped.})}
+_VERBOSE_({The difference with an ISO forthsamp({PARSE}) is that
+ISO considers control characters a match for a blank.})},
+{{WORD},{WORD}},
+{{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
+HEADER({(PARSE)},{PPARS},{DOCOL})
         DC      SRC, CELLP, TFET
         DC      OVER, LSUB
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      ROT, SSPLIT, TSWAP
         DC      ZEQU
-        _0BRANCH(PARSE8)
+        _0BRANCH(PPARS8)
         DC      DROP, SRC, CELLP, FETCH
-PARSE8: _ISO_IN_({DC      SRC, FETCH, LSUB })
+PPARS8: _ISO_IN_({DC      SRC, FETCH, LSUB })
         DC      LIN, STORE
         DC SEMIS
 ;
@@ -1978,12 +1974,12 @@ PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
 enddoc)
 CODE_HEADER({CMOVE},{LCMOVE})
         CLD             ;{direction}
-        MOV     BX,LIP   ;{save }
+        MOV     BX,HIP   ;{save }
         POP     CX      ;{count}
         POP     DI      ;{dest}
         POP     SI      ;{source}
         REP     MOVSB
-        MOV     LIP,BX   ;{get back }
+        MOV     HIP,BX   ;{get back }
         _NEXT
 ;
 worddoc( {MEMORY},{MOVE},{move},{from to count --},{},
@@ -1999,7 +1995,7 @@ PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
 {PAD DUP 1+ 2 MOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAB} },
 enddoc)
 CODE_HEADER({MOVE},{LMOVE})
-        MOV     BX,LIP   ;{SAVE }
+        MOV     BX,HIP   ;{SAVE }
         POP     CX      ;{count}
         POP     DI      ;{dest}
         POP     SI      ;{source}
@@ -2015,7 +2011,7 @@ MOVE1:  STD
 MOVE2:
         REP     MOVSB   ;{THAT'S THE MOVE}
         CLD             ;{INC DIRECTION}
-        MOV     LIP,BX   ;{GET BACK }
+        MOV     HIP,BX   ;{GET BACK }
         _NEXT
 ;
 worddoc( {MULTIPLYING},{UM*},{u_start},{u1 u2 --- ud},{ISO},
@@ -2164,7 +2160,7 @@ string, block or file, or a line from the current input stream.
 { {: GS1 1 EXIT 2 ; GS1 .},{1} },
 enddoc)
 CODE_HEADER({EXIT},{EXIT})
-        MOV     LIP,[RPO] ;{(IP) <- (R1)}
+        MOV     HIP,[RPO] ;{(IP) <- (R1)}
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
 ;
@@ -2586,12 +2582,12 @@ HEADER({:},{COLON},{DOCOL})
         _SECURITY_({DC      SCSP})
         DC      LPWORD
         DC      PCREAT
-        _SECURITY_({DC      LATEST, HIDDEN})
+        DC      LATEST, HIDDEN
         DC      RBRAC
         DC      PSCOD
 DOCOL:  LEA     RPO,[RPO - _CELLS(1)]
-        MOV     [RPO],LIP ;{R1 <- (IP)}
-         MOV     LIP,[WOR+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
+        MOV     [RPO],HIP ;{R1 <- (IP)}
+         MOV     HIP,[WOR+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -2608,7 +2604,7 @@ enddoc)
 HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCSP})
         DC      LIT, SEMIS, COMMA
-        _SECURITY_({DC      LATEST, HIDDEN})
+        DC      LATEST, HIDDEN
         DC      LBRAC
         DC      SEMIS
 ;
@@ -3041,7 +3037,7 @@ worddoc( {INPUT},{IN},{in},{--- addr},{},
 {A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted. All parsing words use and move the value of forthcode({IN}) .},
-{{>IN},{WORD},{(WORD)},{NUMBER},{PARSE},{IN[]}},
+{{>IN},{WORD},{(WORD)},{NUMBER},{(PARSE)},{IN[]}},
 {{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
 enddoc)
 HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
@@ -3818,11 +3814,11 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      PCREAT
         DC      LIT, HLNOOP, COMMA
         DC      PSCOD
-DODOE:  LEA     RPO,[RPO - _CELLS(1)] ;{Pop LIP.}
-        MOV     [RPO],LIP
-        MOV     LIP,[WOR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
-        LEA     AX,[LIP+_CELLS(1)]
-        MOV     LIP,[LIP]
+DODOE:  LEA     RPO,[RPO - _CELLS(1)] ;{Pop HIP.}
+        MOV     [RPO],HIP
+        MOV     HIP,[WOR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        LEA     AX,[HIP+_CELLS(1)]
+        MOV     HIP,[HIP]
         _PUSH
 HLNOOP: DC      SEMIS
 ;
@@ -3954,7 +3950,7 @@ _VERBOSE_({We want forthsamp({.( cccc)}) replaced by the equivalent forthsamp({"
 enddoc)
 HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LIT, ')'
-        DC      PARSE
+        DC      PPARS
         DC      LTYPE
         DC      SEMIS
 ;
@@ -4036,7 +4032,7 @@ enddoc)
 CODE_HEADER({CORA},{CORA})
 ;{       MOV    ES,BX   ; ES <- DS}
 ;{       MOV    BX,DS}
-        MOV     DX,LIP   ;{SAVE}
+        MOV     DX,HIP   ;{SAVE}
         XOR     AX,AX   ;{ Result}
         POP     CX      ;{ count}
         POP     DI      ;{ addr2}
@@ -4048,7 +4044,7 @@ CODE_HEADER({CORA},{CORA})
         JNC     CORA3
         NEG     AX
 CORA3:
-        MOV     LIP,DX  ;{Restore}
+        MOV     HIP,DX  ;{Restore}
         _PUSH
 ;
 worddoc( {STRING},{$I},{string_index},{sc ch -- addr},{},
@@ -4204,7 +4200,7 @@ IWORD3:  DC      INBRS, RR, EQUAL
 IWORD4:
         DC      DROP
         DC      LIT, -1, LIN, PSTORE ;{ Backtrace to first non-delimiter.}
-        DC      FROMR, PARSE
+        DC      FROMR, PPARS
 ;        DC      DOTS
 IWORD2:
         DC      HERE
@@ -4372,8 +4368,8 @@ entry address forthvar({dea}) of the first entry found, else
 leave a nil pointer.},
 {{SEARCH-ORDER}, {FIND}, {(FIND)},{VOCABULARY}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
-dnl BONNOBO is found as a wrong hex number!
-{ 243 "BONNOBO" FOUND 0= . .},{0 243},
+dnl 1ONNOBO is found as a misspelled number!
+{ 243 "1ONNOBO" FOUND 0= . .},{0 243},
 { 541 "MYBONOBO" FOUND . .},{0 541}
 },
 enddoc)
@@ -5002,7 +4998,7 @@ such that one can regain control.
 {{VOCABULARY}},
 {
   {: test ONLY WORDS POSTPONE FORTH ; test},
-{FORTH "   +   -   F   E   D   C   B   A   9   8   7   6   5   4   3   2   1   0   ^   &   '}
+{FORTH "   +   -   9   8   7   6   5   4   3   2   1   0   ^   &   '}
 },
 enddoc)
 HEADER({ONLY},{ONLY},{DOCOL})
@@ -5022,7 +5018,7 @@ A blank after the word forthcode({{(}}) is required.}}}},
 enddoc)
 HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      LIT,')'
-        DC      PARSE
+        DC      PPARS
         DC      TDROP
         DC      SEMIS
 ;
@@ -5040,7 +5036,7 @@ A blank after the word forthcode({\}) is required.},
 enddoc)
 HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
         DC      LIT,ALF
-        DC      PARSE
+        DC      PPARS
         DC      TDROP
         DC      SEMIS
 ;
@@ -5137,7 +5133,7 @@ SET_16_BIT_MODE         ;{Pops back at next _SWITCH_}
 ;        MOV     [496H],{AX} ;{This should improve things, but doesn't.}
 });_END_({ _BOOTED_})
         _SWITCH_({JMPHERE_FROM_OS})
-        MOV     LIP,_OFFSET WRM1
+        MOV     HIP,_OFFSET WRM1
         _NEXT                   ;{Hope stacks are still okay.}
 ;
 WRM1:   DC      WARM
@@ -6144,7 +6140,7 @@ CODE_HEADER({BIOS},{BIOS})
         POP     CX
         POP     BX
         POP     AX
-        PUSH     LIP      ;{ Save Forth registers. NEEDED? }
+        PUSH     HIP      ;{ Save Forth registers. NEEDED? }
         PUSH     RPO
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -6156,7 +6152,7 @@ RQBIOS:  INT(0)          ;{ Request number to be overwritten.}
         _SWITCH_({JMPHERE_FROM_OS})
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
-        POP     LIP
+        POP     HIP
         PUSH     AX
         PUSH     BX
         PUSH     CX
@@ -6263,7 +6259,7 @@ CODE_HEADER({BIOSP},{BIOSP})
         POP     CX
         POP     BX
         POP     AX
-        PUSH     LIP      ;{ Save Forth registers. NEEDED? }
+        PUSH     HIP      ;{ Save Forth registers. NEEDED? }
         PUSH     RPO
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -6275,7 +6271,7 @@ RQBIOS: INT(31H)          ;{ Request number to be overwritten.}
         _SWITCH_({JMPHERE_FROM_OS})
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
-        POP     LIP
+        POP     HIP
         PUSH     AX
         PUSH     BX
         PUSH     CX
@@ -6299,7 +6295,7 @@ CODE_HEADER({BDOS},{BDOS})
         POP     CX
         POP     BX
         POP     AX
-        PUSH     LIP      ;{ Save Forth registers. NEEDED? }
+        PUSH     HIP      ;{ Save Forth registers. NEEDED? }
         PUSH     RPO
         XCHG    SI,AX   ;{ Save AX in (already free) SI}
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -6312,7 +6308,7 @@ CODE_HEADER({BDOS},{BDOS})
 ;        XCHG    {SI},{AX}   ; This is more correct actually.
         XCHG    SI,AX
         POP     RPO      ;{ Restore Forth registers. NEEDED? }
-        POP     LIP
+        POP     HIP
         PUSH     AX
         PUSH     BX
         PUSH     CX
@@ -6356,8 +6352,8 @@ available forthemph({all}) facilities present in Linux.
 {{1 "CHIMP" 0 0 4 LINOS5 .},{CHIMP5}},
 enddoc)
 CODE_HEADER({LINOS5},{LINOS5})
-        LEA     RPO,[RPO - _CELLS(1)] ;{Save LIP on return stack.}
-        MOV     [RPO],LIP
+        LEA     RPO,[RPO - _CELLS(1)] ;{Save HIP on return stack.}
+        MOV     [RPO],HIP
         POP     AX        ; Function number
         POP     DI        ; 5th parameter, if any
         POP     SI        ; 4th parameter, if any
@@ -6365,7 +6361,7 @@ CODE_HEADER({LINOS5},{LINOS5})
         POP     CX        ; Second parameter, if any
         POP     BX        ; First parameter.
         INT     80H        ;{ Generic call on LINUX }
-        MOV     LIP,[RPO]    ;{ Restore}
+        MOV     HIP,[RPO]    ;{ Restore}
         LEA     RPO,[RPO+_CELLS(1)]
         _PUSH     ; Positive means okay. Negative means -errno.
 ;
@@ -7612,7 +7608,7 @@ worddoc( {STORAGE},{RBLK},{read_block},{addr blk --},{},
 },{{R/W}}, {}, enddoc)
 CODE_HEADER({RBLK},{RBLK})
         CALL    SBLK
-        PUSH    LIP      ;{PRESERVE INTERPRETER POINTER}
+        PUSH    HIP      ;{PRESERVE INTERPRETER POINTER}
         PUSH    RPO      ;{RETURN POINTER}
         INT     25H
         JNC     DOK     ;{NO ERRORS}
@@ -7624,7 +7620,7 @@ worddoc( {STORAGE},{WBLK},{write_block},{addr blk --},{},
 },{{R/W}}, {}, enddoc)
 CODE_HEADER({WBLK},{WBLK})
         CALL    SBLK
-        PUSH    LIP
+        PUSH    HIP
         PUSH    RPO
         INT     26H
         JNC     DOK
@@ -7639,7 +7635,7 @@ RWERR:   PUSH    AX      ; DX contains message.
 ;{ Okay exit for both RBLK and WBLK }
 DOK:    POPF            ;{POP FLAGS}
         POP     RPO      ;{RETURN STACK}
-        POP     LIP      ;{INTERPRETER PNTR}
+        POP     HIP      ;{INTERPRETER PNTR}
         _NEXT
 ;
 worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
@@ -7788,7 +7784,7 @@ CODE_HEADER({WBLK},{WBLK})
         MOV     BX,4300H
 RWBLK:
         POP     AX
-        PUSH    LIP      ;{PRESERVE INTERPRETER POINTER}
+        PUSH    HIP      ;{PRESERVE INTERPRETER POINTER}
         _SWITCH_({ADD     AX, M4_SWITCHOFFSET })
         MOV     SI,AX
         PUSH    RPO      ;{RETURN POINTER}
@@ -7800,7 +7796,7 @@ RWBLK:
         POP     BX
         _SWITCH_({JMPHERE_FROM_OS})
         POP     RPO      ;{RETURN STACK}
-        POP     LIP      ;{INTERPRETER PNTR}
+        POP     HIP      ;{INTERPRETER PNTR}
         PUSH    BX
         _NEXT
 
