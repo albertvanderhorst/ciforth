@@ -508,16 +508,25 @@ include(width32.m4)
 	global  figforth        ; Called from c. Remainder c-routines to be called from here.
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init
+        extern  print_cold , print_hot
 
 	section forth progbits write exec alloc
 figforth:
 ;       ORG     M4_ORIG 
+        LEA     ECX,[ESP+CELLS(1)]
+        XOR     EAX,EAX
+        CMP     EAX,_CELL_PTR[ECX]
+        JNZ     ENDIF1          ; Warm
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(0)],ESP
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(1)],EBP
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(2)],ESI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(3)],EDI
 	MOV     _CELL_PTR[SAVE_LINUX+CELLS(4)],EBX
-	JMP     BOOTUP
+        call    print_cold
+	JMP     BOOTUP                  ; Cold start
+ENDIF1: 
+        call    print_hot
+        JMP     BOOTUP+CELLS(2)         ; Warm start
 
 RETURN_LINUX:
 	MOV     ESP,_CELL_PTR[SAVE_LINUX+CELLS(0)]
@@ -2206,6 +2215,8 @@ WRM1	DC	WARM
 ;
 HEADER({WARM},{WARM},{DOCOL})
 	DC	MTBUF
+        DC      LIT, 'Q', EMIT
+        DC      LIT, 'R', EMIT
 	DC	ABORT
 ;
 ;{	COLD START VECTOR COMES HERE}
@@ -3021,7 +3032,7 @@ HEADER({DISK-ERROR},{DERR},{DOVAR})
 CODE_HEADER({BLOCK-INIT},{BLINI})
         XOR     AX,AX
         MOV     AL,[_PARAMETER_FIELD(BLFL)]
-        MOV     BX,_PARAMETER_FIELD(BLFL)
+        MOV     BX,_PARAMETER_FIELD(BLFL)+1
         PUSH    BX
         PUSH    AX
         CALL    c_block_init
@@ -3659,7 +3670,6 @@ HEADER({TASK},{TASK},{DOCOL})
 ;____1_____ _EQULAYOUT_1_({
 INITDP	EQU	$	;{SHOW END OF DICTIONARY}
 });_END___1__({ _EQULAYOUT_1_})
-FORTHSIZE       EQU     $-figforth
 
 ;____1_____ _LINUXHOSTED_1_({
 ;       This is the proper way to do it.
@@ -3667,6 +3677,8 @@ FORTHSIZE       EQU     $-figforth
 ;       However there is no way to teach the linker to keep the
 ;       two sections together. So we are going to write all those
 ;       zero bits in the output file.
+
+FORTHSIZE       EQU     $-figforth
          section dictionary nobits write exec alloc             
 
 INITDP:                 ;  It may be that it is not consecutive with TASK
