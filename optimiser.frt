@@ -160,6 +160,7 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 '>R FMASK-ST!
 'R> FMASK-ST!
 'R@ FMASK-ST!
+'I  FMASK-ST!
 'RDROP FMASK-ST!
 \ The following control words interfere with the optimiser FIXME!
 'EXIT FMASK-ST!
@@ -329,7 +330,8 @@ THEN RDROP ;
 
 \ ----------------------    Special expansions ---------------
 
-\ Code to replace a ``LEAVE'' exection token. Branch is still to be filled in.
+\ Sample code to replace a ``LEAVE'' exection token.
+\ Not to be executed directly. Branch is still to be filled in.
 : LEAVE-CODE UNLOOP BRANCH [ _ , ] ;
 
 \ For DEA: it IS a ``LEAVE''.
@@ -775,6 +777,8 @@ CREATE P
 'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT         |
 [ 0 ]L 0BRANCH [ 'P , ] | NOP1 NOP1 BRANCH [ 'P , ] | \ Branch optimisation
 'P 0BRANCH [ 'P , ]     | NOOP                     | \ Non-zero, zero is matched by previous
+< 0=                    | >                        |
+> 0=                    | <                        |
 ;
 
 \ Optimalisation of this table is thoroughly forbidden!

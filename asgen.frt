@@ -384,6 +384,7 @@ VARIABLE DISS-VECTOR    ['] .DISS-AUX DISS-VECTOR !
 (   ." BACKTRACKING"                                                    )
     DROP DISS @ @- DISS !
 (   DROP DISS @ 0 CELL+ - @                                             )
+    "Failed at :" TYPE DUP ID. CR
     >NEXT%
 (   DISS-                                                               )
     REBUILD
@@ -592,24 +593,24 @@ VARIABLE I-ALIGNMENT    1 I-ALIGNMENT !   ( Instruction alignment )
 
 ( ********************* DEFINING WORDS FRAMEWORK ********************** )
 ( Close an assembly definition: restore and check.)
-: ENDCODE
+: END-CODE
     ?CSP ?EXEC CHECK26 CHECK32 PREVIOUS
 ; IMMEDIATE
 
 ( FIXME : we must get rid of this one )
-: ;C POSTPONE ENDCODE "WARNING: get rid of C;" ETYPE CR ; IMMEDIATE
+: ;C POSTPONE END-CODE "WARNING: get rid of C;" TYPE CR ; IMMEDIATE
 
 \ The following two definitions must *NOT* be in the assembler wordlist.
 PREVIOUS DEFINITIONS DECIMAL
 
 ASSEMBLER
-( Define "word" using assembly instructions up till ``C;'' )
+( Define "word" using assembly instructions up till END-CODE )
 ( One could put a ``SMUDGE'' in both. )
 : CODE
     ?EXEC (WORD) (CREATE) POSTPONE ASSEMBLER !TALLY DSP@
 ; IMMEDIATE
 
-( Like ``DOES>'' but assembly code follows, closed by ``C;'' )
+( Like ``DOES>'' but assembly code follows, closed by END-CODE )
 : ;CODE
     ?CSP   POSTPONE (;CODE)   POSTPONE [   POSTPONE ASSEMBLER
 ; IMMEDIATE

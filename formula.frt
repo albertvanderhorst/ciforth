@@ -43,7 +43,7 @@ REQUIRE $.
 \ Pentium machines.},
 \ {{}})
 HEX
-CODE TICKS  0F C, 31 C, 50 C, 52 C, NEXT C;
+CODE TICKS  0F C, 31 C, 50 C, 52 C, NEXT END-CODE
 
 \D CR ." TICKS EXPECT 0 1 :" TICKS DNEGATE TICKS D+ . -1 U< .
 

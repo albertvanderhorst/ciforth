@@ -1076,6 +1076,7 @@ COLD_ENTRY:
 _THREADS_({
         MOV     EAX, _CELL_PTR[USINI+_CELLS(1)]
         MOV     EDI, EAX
+        DEC     EDI
         OR      EDI, STACKSIZE-1    ;Requires it is power of 2.
         INC     EDI
         SUB     EDI,EAX
@@ -1095,8 +1096,6 @@ _HOSTED_LINUX_(
         MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    ;{RETURN STACK}
         MOV     HIP,_OFFSET CLD1  ;{ (IP) <-}
         _NEXT
-;
-CLD1:   DC      COLD    ; { This is a piece of headerless high level code.}
 ;
 ; ########################################################################################
 ;                       FORTH ITSELF (entry point : BOOTUP)
@@ -5487,8 +5486,6 @@ SET_16_BIT_MODE         ;{Pops back at next _SWITCH_}
         MOV     HIP,_OFFSET WRM1
         _NEXT                   ;{Hope stacks are still okay.}
 ;
-WRM1:   DC      WARM
-;
 worddoc( {INIT},{WARM},{warm},{},{FIG L0},
 {Perform a so called "warm" start. In addition and before the
 actions of forthcode({ABORT}), discard blocks; they may not be
@@ -5497,7 +5494,7 @@ written back to mass storage. Display the sign on message.
 {{( No test)},{}},
 enddoc)
 _HEADER({WARM},{WARM},{DOCOL})
-        DC      MTBUF
+WRM1:   DC      MTBUF
         DC      SIGNON
         DC      ABORT
         DC      SEMIS   ;{Unnecessary, but helpful for decompilation.}
@@ -5559,6 +5556,7 @@ _BOOTED_({But it is better to reboot.})
 {{( No test)},{}},
 enddoc)
 _HEADER({COLD},{COLD},{DOCOL})
+CLD1:                           ;{Used by cold start for HIP.}
         DC      ZERO, HANDLER, STORE
         DC      MTBUF
         DC      FIRST

@@ -8,6 +8,7 @@
 
 REQUIRE BOUNDS
 REQUIRE SET
+REQUIRE CRACKED
 
 \ ------------------------------------------------
 \ Set BITS of mask in ADDRESS.
@@ -23,7 +24,7 @@ REQUIRE SET
 'TASK >CFA @ CONSTANT DOCOL
 'FORTH >CFA @ CONSTANT DODOES
 'BASE  >CFA @ CONSTANT DOUSER
-'RESULT >CFA @ CONSTANT DOVAR
+VARIABLE DUMMY 'DUMMY >CFA @ CONSTANT DOVAR
 'BL >CFA @ CONSTANT DOCON
 
 \ ---------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 ( $Id: )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
-
+( Note that this is FIG-Forth, hence i.a. <BUILDS C; )
 ( POSTIT/FIXUP 8086 ASSEMBLER LOAD SCREEN AvdH HCC HOLLAND)         
   92 LOAD                                                      
 		
