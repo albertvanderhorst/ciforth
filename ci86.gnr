@@ -2987,7 +2987,7 @@ worddoc( {DICTIONARY},{>BODY},{to_body},{dea --- addr},{ISO},
 definition created with a forthcode({CREATE}) /
 forthcode({DOES>}) construct, return its data field
 forthvar({addr}).},
-{{'},{>CFA},{>PFA},{>FFA},{>LFA},{>NFA}},
+{{'},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA}},
 {{ CREATE Q 12346 ,  ' Q >BODY @ .},{12346}},
 enddoc)
 HEADER({>BODY},{TOBODY},{DOCOL})
@@ -3007,7 +3007,7 @@ HEADER({BODY>},{BODYF},{DOCOL})
         DC      LSUB
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{C>D},{parameter_field_address},{cfa --- dea},{},
+worddoc( {DICTIONARY~},{C>D},{code_to_dea},{cfa --- dea},{},
 {Convert the code field address of a definition to its
 dea address.},{{'},{>CFA}},
 {{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
@@ -3020,7 +3020,7 @@ HEADER({C>D},{CTOD},{DOCOL})
 worddoc( {DICTIONARY~},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
 name field.},
-{{'},{>CFA},{>PFA},{>FFA},{>LFA}},
+{{'},{>CFA},{>DFA},{>FFA},{>LFA}},
 {{ ' WORDS >NFA @ $@ TYPE},{WORDS}},
 enddoc)
 HEADER({>NFA},{TNFA},{DOCOL})
@@ -3031,7 +3031,7 @@ HEADER({>NFA},{TNFA},{DOCOL})
 worddoc( {DICTIONARY~},{>FFA},{to_flag_field_address},{dea --- ffa},{},
 {Given a dictionary entry addres return the
 flag field.},
-{{'},{>CFA},{>PFA},{>LFA},{>NFA}},
+{{'},{>CFA},{>DFA},{>LFA},{>NFA}},
 {{"FRED" (CREATE) ' FRED >FFA DUP @ . IMMEDIATE @ .},{0 4}},
 enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
@@ -3042,7 +3042,7 @@ HEADER({>FFA},{TFFA},{DOCOL})
 worddoc( {DICTIONARY~},{>LFA},{to_link_field_address},{dea --- lfa},{},
 {Given a dictionary entry addres return the
 link field address.},
-{{'},{>CFA},{>PFA},{>FFA},{>NFA}},
+{{'},{>CFA},{>DFA},{>FFA},{>NFA}},
 {{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}},
 enddoc)
 HEADER({>LFA},{TLFA},{DOCOL})
@@ -3055,7 +3055,7 @@ worddoc( {DICTIONARY~},{>CFA},{to_code_field_address},{dea --- cfa},{},
 code field address : the address that is compiled within high level
 definitions. It serves as an execution token as well.
 In ciforth this is actually the same as the dea.},
-{{'},{>PFA},{>FFA},{>LFA},{>NFA}},
+{{'},{>DFA},{>FFA},{>LFA},{>NFA}},
 {{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
 HEADER({>CFA},{TCFA},{DOCOL})
@@ -3063,16 +3063,16 @@ HEADER({>CFA},{TCFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>PFA},{to_parameter_field_address},{dea --- pfa},{},
+worddoc( {DICTIONARY~},{>DFA},{to_data_field_address},{dea --- pfa},{},
 {Given a dictionary entry addres return the
 data field address. This points to the code for a code word,
 to the high level code for a colon-definition, and to the
  forthcode({DOES>}) pointer for a word build using forthcode({CREATE}) .
 In all these cases it directly follows the header.},
 {{'},{>CFA},{>FFA},{>LFA},{>NFA}},
-{{ "APE" (CREATE) HERE ' APE >PFA @ = .},{_T_}},
+{{ "APE" (CREATE) HERE ' APE >DFA @ = .},{_T_}},
 enddoc)
-HEADER({>PFA},{TPFA},{DOCOL})
+HEADER({>DFA},{TPFA},{DOCOL})
         DC      LIT, _CELLS(D_HOFFSET)
         DC      PLUS
         DC      SEMIS
@@ -3928,9 +3928,9 @@ worddocsafe( {INIT},{(ABORT)},{paren_abort},{},{},
 {Executes after an error when forthcode({WARNING}) is -1. This word normally
 executes forthcode({ABORT}), but may be altered to a customized
 alternative proceedure forthsamp({AP}) as follows:
-forthsamp({ ' AP >PFA @ ' (ABORT) >PFA !}).
+forthsamp({ ' AP >DFA @ ' (ABORT) >DFA !}).
 },{},
-{{ : AP 7831 QUIT ; ' AP >PFA @ ' (ABORT) >PFA ! dnl
+{{ : AP 7831 QUIT ; ' AP >DFA @ ' (ABORT) >DFA ! dnl
 -1 WARNING ! 1 ERROR
 0 WARNING ! .},{7831} },
 enddoc)
@@ -4091,7 +4091,7 @@ ABQ4:
 });_END_({_LOAD_})
 worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea ---},{},
 {Print a definition's name from its dictionary entry address.},
-{{'},{>PFA},{>NFA}},
+{{'},{>DFA},{>NFA}},
 { { : GORILLA ; ' GORILLA ID.},{GORILLA} },
 enddoc)
 HEADER({ID.},{IDDOT},{DOCOL})
@@ -4399,8 +4399,9 @@ forthdefi({VLFA}) ) The VLFA points to the VLFA of the next
 vocabulary or 0 for the end.
 
 Then follows
-a dummy dea (forthdefi({DDEA})) with empty names and parameter
-fields and a link field  (forthdefi({DLFA}))
+a dummy dea (forthdefi({DDEA})) with empty
+fields, except for the
+link field  (forthdefi({DLFA}))
 that points to the dea of
 the first word of the vocabulary. Actually executing the
 vocabulary means storing its DDEA into forthcode({CONTEXT}) .
@@ -4423,7 +4424,7 @@ HEADER({VOCABULARY},{VOCAB},{DOCOL})
         DC      VOCL
         DC      STORE
         DC      ZERO, COMMA   ;{ Dummy code field}
-        DC      ZERO, COMMA   ;{ Dummy parameter field}
+        DC      ZERO, COMMA   ;{ Dummy data field}
         DC      LIT, B_DUMMY, COMMA ;{ Dummy flag field}
         DC      CURR
         DC      FETCH
@@ -6977,7 +6978,7 @@ forthcode({CONTEXT}) and forthcode({CURRENT}) , an appropriate error message is 
 This word is intended for interpret mode,  but in ciforth it works as
 well in compilation mode.
 It is recommended this word is not postponed.},
-{{FOUND},{>CFA},{>FFA},{>LFA},{>NFA},{>PFA},{EXECUTE}} ,
+{{FOUND},{>CFA},{>FFA},{>LFA},{>NFA},{>DFA},{EXECUTE}} ,
 {{ : APE 1 2 ; ' APE EXECUTE  ' APE ID. . .},{APE 2 1}},
 enddoc)
 HEADER({'},{TICK},{DOCOL}, , B_IMMED)
@@ -7010,11 +7011,13 @@ dnl An alias header. CFA FFA PFA are the same.
 HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 ;
 });_END_({_LOAD_})
-worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{deaw deav -- deaw },{},
-{Forget the words forthvar({deaw}) and all later words from the
-vocabulary whose dea is given by forthvar({deav}) . Leave
-forthvar({deaw}) (as this word is intended to be used with
-forthcode({FOR-VOCS})) .},
+worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{deaw deav --
+deaw },{}, {Forget the words forthvar({deaw}) and all later
+words from the vocabulary whose dea is given by
+forthvar({deav}) . Leave forthvar({deaw}) (as
+forthcode({FORGET-VOC}) is intended to be used with
+forthcode({FOR-VOCS})) . If any whole vocabulary is forgotten,
+the search order is reset. },
 {{FORGET}},
 {
 {!CSP VOCABULARY APE dnl
@@ -7049,11 +7052,11 @@ FORGV3:
 FORGV1:
 ;       { Vocabulary itself is also forgotten.}
         DC      TVFA
-        DC      FORTH
-        DC      DEFIN
         DC      FETCH     ;{ Unlink by linking next vocabulary.}
         DC      VOCL
         DC      STORE
+        DC      FORTH
+        DC      DEFIN
 FORGV2: DC      SEMIS
 ;
 worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
