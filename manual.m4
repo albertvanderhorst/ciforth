@@ -28,7 +28,7 @@ define({forthdefi},{@dfn{{$1}}
 @cindex $1
 })
 define({forthunderline},{$1})
-define({forthxref},{@xref{{$1}}})
+define({forthxref},{@xref{{$1}},})
 define({forthpxref},{@pxref{{$1}}})
 define({forthitemize},{{@itemize @bullet}})
 define({forthenditemize},{{@end itemize}})
@@ -43,13 +43,12 @@ dnl define({a},{{@a}}) define({enda},{{@end a}})
 dnl be careful, an example always occupies whole lines.
 define({forthexample},
 {@example
-@iftex 
+@iftex
 @cartouche $1
 @end cartouche
 @end iftex
-@ifinfo 
+@ifinfo
 $1
 @end ifinfo
 @end example})dnl
 divert(0)dnl
-
