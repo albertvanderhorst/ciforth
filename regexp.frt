@@ -16,7 +16,6 @@ REQUIRE BOUNDS
 INCLUDE set.frt
 INCLUDE bits.frt
 INCLUDE defer.frt
-INCLUDE stringloops.frt
 
 \ Regular expressions in Forth.
 \ This package handles only simple regular expressions and replacements.
@@ -139,7 +138,9 @@ DROP
 \ 3. Offset 4 and 5 : the parts that match subexpression 1, between first pair of ( and )
 \ 2n. 2n+1 : subexpression n-1.
 
-CREATE STRING-TABLE 20 CELLS ALLOT
+22 CONSTANT MAX-RANGES
+
+CREATE STRING-TABLE MAX-RANGES CELLS ALLOT
 \ To where has the table been used (during expression parsing).
 
 \ For string INDEX, return WHERE its start address is stored. (end is one cell beyond)
@@ -160,7 +161,7 @@ VARIABLE ALLOCATOR
 
 \ Return a new ALLOCATOR index, and increment it.
 : ALLOCATOR++
-    ALLOCATOR @ DUP 11 = ABORT" Too many substrings with ( ), max 9, user error"
+    ALLOCATOR @ DUP MAX-RANGES > ABORT" Too many substrings with ( ), max 9, user error"
     1 ALLOCATOR +! ;
 
 \ Return a new INDEX for a '('.
@@ -172,7 +173,7 @@ DUP 1 AND 0= ABORT" ) where ( expected, inproper nesting, user error" ;
 
 \ Remember CHARPOINTER as the substring with INDEX.
 : REMEMBER()
-\D DUP 0 10 WITHIN 0= ABORT" substring index out of range, system error"
+\D DUP 0 MAX-RANGES WITHIN 0= ABORT" substring index out of range, system error"
 CELLS STRING-TABLE + ! ;
 
 \ For ADDRESS containing a start end pair, return the STRING represented.
