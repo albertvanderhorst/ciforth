@@ -1,5 +1,5 @@
 SECTIONS {
-    .init 0x08048080 : { *(.init) }                                                       
+    .init 0x080480b4 : { *(.init) }                                                       
     .text           : { *(.text           )  }                                                      
     .fini           : { *(.fini       )  }     
     .rodata         : { *(.rodata     )  }     
@@ -9,9 +9,12 @@ SECTIONS {
     .dtors          : { *(.dtors      )  }     
     .got            : { *(.got        )  }     
     .bss            : { *(.bss        )  }     
-    forth      0x8100000      : { *(forth       )  }     
-    dictionary      : { *(dictionary  )  }     
-
+    .note           : { *(.note       )  }     
+    .comment        : { *(.comment    )  }     
+    .stab           : { *(.stab       )  }     
+    .stabstr        : { *(.stabstr    )  }     
+    forth      0x8100000      : { *(forth       )  
+                                  *(dictionary  )  }     
 }
 
 
