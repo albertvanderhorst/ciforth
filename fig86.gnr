@@ -1367,12 +1367,12 @@ CODE_HEADER({L!},{LSTORE})
 ;____1_____ _BITS16_1_({
         POP     BX
         POP     CX
+        POP     DX
         _SWITCH_1_({JMPHERE_FROM_PROT})
-        MOV     DX,DS   ;{ Leave this for real mode code.}
+        MOV     AX,DS
         MOV     DS,CX
-        POP     AX
-        MOV     [BX],AX
-        MOV     DS,DX
+        MOV     [BX],DX
+        MOV     DS,AX
         _SWITCH_1_({JMPHERE_FROM_REAL})
         _NEXT
 });_END___1__({ _BITS16_1_})
