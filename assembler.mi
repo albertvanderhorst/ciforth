@@ -153,7 +153,7 @@ forthfile({as80.frt}) sources. You better get your feet wet with forthfile({as80
 before you attack the Pentium. The way forthsamp({SIB}) is handled is so
 clever, that sometimes I don't understand it myself.
 
-Another invention in this assembler is the forthdefi({family}) of instructions.
+Another invention in this assembler is the forthdefi({family of instructions}).
 Assembler instructions are grouped into families with identical fixups, and
 a increment for the opcodes. These are defined as a group by a single execution of a defining
 word. For each group there is one opportunity to get the opcode wrong; formerly that
@@ -386,15 +386,15 @@ prefer your fixups in alphabetic order. (A nice rule for those
 Code Standard Police out there?).
 
 And yes forthsamp({ES: OS:
-MOV, X| T| DI'| sib|, DX| [BP +8* AX] FFFFF800 X,}) though
+MOV, X| T| DI'| SIB|, DX| [BP +8* AX] FFFFF800 X,}) though
 being correct, and in a logical order, looks still bad, because
 it forthemph({is}) bad in the sense that the Pentium design got
 overboard in complication. (This example is from the built-in assembler,
-the one in forthfile({asi586.frt}) redefines forthcode({[BP}) c.s. to get rid of the forthcode({sib|,}) instruction.)
+the one in forthfile({asi586.frt}) redefines forthcode({[BP}) c.s. to get rid of the forthcode({SIB|,}) instruction.)
 forthbreak
 First remark: lets assume this is
 32 bit code,(because otherwise there
-would not be a forthcode({sib,}) sure?)
+would not be a forthcode({SIB,}) sure?)
 forthbreak
 There are 3 sizes involved :
 forthitemize
@@ -594,8 +594,8 @@ forthitem OI      : Operand indirect
 @section The dreaded SIB byte
 
 If you ask for the operands of a memory instruction (one of the
-simple one is LGDT, ) instead of all the sib possibilities you
-see.
+simple one is LGDT, ) instead of all the sib (forthdefi({scaled index byte}))
+possibilities you see.
 forthsamp({LGDT, DB| ~SIB| 14 SIB,, 18, B,})
 This loads the general description table from an address
 described by a sib-byte of 14.

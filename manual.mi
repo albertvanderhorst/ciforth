@@ -222,19 +222,22 @@ Every stack is in fact a buffer and needs also a forthdefi({stack pointer})dnl
 to keep track of how far it has been filled.
 It is just the address where the last data item has been stored in the buffer.
 
-The forthdefi({dictionary}) is the part of the memory where the forthcode({words}) are
+The forthdefi({dictionary}) is the part of the memory where the forthdefin({word})'s are
 (forthpxref({DICTIONARY})).
-It owns a part of the dictionary, starting with its name and
+Each word owns a part of the dictionary, starting with its name and
 ending where the name of the next word starts.
 This structure is called a forthdefi({dictionary entry}).
 Its address is called a forthdefi({dictionary entry address})dnl
-or forthdefi({dea}). In ciforth's this address is used for external
+or forthdefi({DEA}). In ciforth's this address is used for external
 reference in a consistent way. For example it is used as the
 forthdefi({execution token}) of a word in the ISO sense.
+In building a word the boundary between the dictionary and the free space shifts up.
+This process is called forthdefi({allocating}), and the boundary is marked by
+a forthdefi({dictionary pointer}) called forthcode({DP}) .
 A word can be executed by typing its name.
 Each word in the dictionary belongs to precisely one forthdefi({word list}),
-or as we will say here vocabulary, with the exception of the word
-forthword({FORTH}) that is the common end point of all word lists.
+or as we will say here vocabulary, with the exception of some fine points
+regarding forthdefin({denotation})'s.
 Apart from the name a word contains data and executable code,
 (interpreted or not) and linking information
 (forthpxref({VOCABULARY})).
@@ -243,17 +246,17 @@ The concept word list is part of the ISO standard, but we will
 use forthdefi({vocabulary}). A vocabulary is much more
 convenient, being a word list with a name, created by
 forthcode({VOCABULARY}) . ISO merely knows
-forthdefi({word list identification}) 's, a kind of handle,
+forthdefi({word list identifier}) 's, a kind of handle,
 abbreviated as forthdefi({WID}). A new word list is
 created by the use of forthcode({VOCABULARY}), and
 by executing the vocabulary word the associated
 word list is pushed
 to the front of the search order.
-In fact in ciforth's every dea can serve as a WID. It defines a
+In fact in ciforth's every DEA can serve as a WID. It defines a
 wordlist consisting of itself and all earlier words in the same
 vocabulary.
 If needed you can
-always derive the WID from the dea of a vocabulary.
+always derive the WID from the DEA of a vocabulary.
 
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}). Its code is called
@@ -317,7 +320,7 @@ character is forthkey(^J) such that they may be edited in a
 normal way with some editors. To forthdefi({load}) such a
 screen has the same effect as typing its content from the
 terminal.
-The extension lab stands for forthcode({Library Addressable by Block}),
+The extension lab stands for forthdefi({Library Addressable by Block}),
 
 Traditionally Forthers have things called
 forthdefi({number})'s, words that are present in the source be
@@ -732,10 +735,14 @@ We will divide the dictionary in entries.
 A forthdefi({dictionary entry}) is a part of the dictionary that
 belongs to a specific word.
 A forthdefi({dictionary entry address}), abbreviated
-forthdefi({DEA}) is a pointer to a dictionary entry. In
-thisforth it is the lowest address of the entry, where the code
-field is.
-
+forthdefi({DEA}) is a pointer to the header of
+a dictionary entry.
+In
+ciforth a header extends from the lowest address of the entry, where the code
+field is to the forthdefi({past header address}), just after the last field address.
+A forthdefin({dictionary entry}) apart from the header owns a part of the dictionary space
+that can extend before the header (mostly the name of the entry) or after it (mostly data
+and code).
 
 A dictionary entry has fields, and the addresses of fields directly
 offset from the dictionary entry address, are called
@@ -794,7 +801,7 @@ forthitem
 Past the header . This is actually not a field, but the
 free roaming dictionary. However, most of the time the part of
 the dictionary space owned by a dictionary entry starts here. A
-pointer to such a field is called a forthdefi({post header
+pointer to such a field is called a forthdefi({past header
 address}).
 Mostly a forthdefi({data field address}) contains a
 pointer to just this address.
@@ -836,7 +843,7 @@ forthenditemize
 forthcode({(CREATE)}) takes care to generate this data structure;
 it is called by all defining words.
 
-For all forthdefi({colon definition}) the code field contains
+For all forthdefi({colon definition})'s the code field contains
 a pointer to the same code, the forthdefi({inner interpreter}), called
 forthsamp({DOCOL}).
 For all words defined via forthsamp({CREATE ... DOES>}) the code field
@@ -853,14 +860,14 @@ For a word defined by
 forthcode({VARIABLE}), forthcode({USER}), or forthcode({CONSTANT}) dnl
 it has a width of one cell, and contains data.
 forthitem
-For all forthdefi({colon definition}) the data field address
-contains a pointer to an area variable length and contains the
+For all forthdefi({colon definition})'s the data field address
+contains a pointer to an area with a variable length. It contains the
 compiled high level code, a sequence of forthdefi({code field
 address})es.
 forthitem
 For a word defined via forthsamp({CREATE ... DOES>}) the first
-cell of this area contains a pointer to the forthdefi({high
-level}) code defined by forthcode({DOES>}) and the remainder is
+cell of this area contains a pointer to the
+forthdefi({high level}) code defined by forthcode({DOES>}) and the remainder is
 data. A pointer to the data is passed to this
 forthcode({DOES>}) code.
 forthenditemize
@@ -949,19 +956,21 @@ In general this is called forthdefi({vectoring}).
 Remember that in normal Forth system,
 all printing of numbers is to the terminal,
 not to a file or even a buffer.
-
-_HOSTED_LINUX_({On a linux system this can be accomplished
-by the redirection facilities available.})
-_HOSTED_MSDOS_({On a MSDOS system the need for this should be low,
+ _HOSTED_LINUX_({(On a linux system something like it
+can be accomplished
+by the redirection facilities available.)})
+_HOSTED_MSDOS_({(On a MSDOS system the need for this should be low,
 because of the redirection facilities available.
-However they are buggy.})
-_BOOTED_({On a standalone system the need for this is high,
-because there is no redirection.})
+However they are buggy.)})
+_BOOTED_({(On a standalone system the need for this is high,
+because there is no redirection.)})
 For this reason character output forthcode({CR}), forthcode({EMIT}) and
 forthcode({TYPE}) all go through a common word that can be changed.
 _LINUX_N_({For thisforth it is forthcode({TYPE}) }).
 Because this is defined in high level code it can temporarily be replaced
-by other code.
+by other code. This forthdefi({revectoring}) is possible for all high level
+words in ciforth,
+such that we need no special measures to make forthdefi({vectoring}) possible.
 As an example we replace forthcode({TYPE}) by forthcode({MYTYPE}) .
 forthbreak forthsamp({' MYTYPE >DFA @ ' TYPE >DFA !}) forthbreak
 And back to default:
