@@ -554,10 +554,29 @@ PROTECT:
         CALL  HERE3
 HERE3:  POP   BX         ;{ Reality.}
         SUB BX,AX    ;
-        ADD BX,HERE4-HERE3
+        ADD BX,THERE4-HERE3
         PUSH BX     ; {Corrected program counter}
-        RETF        ; {Returning to HERE4 now}
-HERE4:
+        RETF        ; {Returning to THERE4 now}
+
+_BITS16_1_({THERE4:})
+
+;____1_____ _BITS32_1_({
+;{ 32 bit protected mode is no good unless the A20 address line works.}
+;{ The following tedious code is copied from the nuni startup code}
+;{ for linux. }
+KB_WAIT:
+        IN AL,64H
+        AND AL,2
+        JNZ KB_WAIT
+        RET     
+THERE4:
+        CALL KB_WAIT           
+        MOV AL,0D1H
+        OUT 064H,AL            ;{ Enable a20}
+        CALL KB_WAIT
+        MOV AL,0DFH
+        OUT 060H,AL
+});_END___1__({ _BITS32_1_})
 });_END___1__({ _SWITCH_1_})
 
 
@@ -566,9 +585,18 @@ _BITS32_1_({include(width32.m4) })
 ;{************************}
 ;{ The following had to wait until width32.m4 had been included.}
 BMASK   EQU     BLOCKS_IN_USE_MASK
-
-        _SWITCH_1_({JMPHERE_FROM_REAL})
-
+       
+;____1_____ _SWITCH_1_({
+        JMPHERE_FROM_REAL
+REP1:
+;____1_____ _BITS32_1_({
+        INC AX                  ;{ Wait until a20 works(!)}
+        MOV [LOADADDRESS],AX
+        CMP AX,[100000H + LOADADDRESS] ; { 2^20 beyond}
+        JE REP1  
+});_END___1__({ _BITS32_1_})
+});_END___1__({ _SWITCH_1_})
+       
 ; ########################################################################################
 ;                       FORTH GLUE CODE (optional, except for the jump)
 ; ########################################################################################
