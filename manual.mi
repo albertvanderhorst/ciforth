@@ -449,10 +449,11 @@ it makes a distinction between those addresses and other addresses.
 For example, this allows to make the distinction between a
 forthdefi({data field address}), that is always present, and a
 forthdefi({data field}) in the ISO sense that has only a
-(differing) meaning for forthcode({CREATE}) forthcode({DOES> })
-definitions.
-Typically, a field address contains a pointer. A forthdefi({data field address})
-contains a pointer to near the forthdefi({data field}), whenever the latter exists.
+(differing) meaning for
+forthcode({CREATE}) forthcode({DOES> }) definitions.
+Typically, a field address contains a pointer. A
+forthdefi({data field address}) contains a pointer to
+near the forthdefi({data field}), whenever the latter exists.
 
 They go from lowest in memory to highest:
 forthenumerate
@@ -480,7 +481,7 @@ The name field. This is one cell.
 This contains a pointer to a string.
 A pointer to such a field is called a forthdefi({name field address}).
 The name itself is stored at outside of the dictionary header
-in are gular string, i.e. a one cell count followed by as many characters.
+in a regular string, i.e. a one cell count followed by as many characters.
 _VERBOSE_({Unfortunately, forthdefi({name field address}) is
 often used, where a forthdefi({dictionary entry address}) would
 be more correct, especially in older documentation, and this
@@ -504,10 +505,12 @@ are in order of essentiality. They are accessed by
 forthcode({>CFA}) forthcode({>DFA}) forthcode({>FFA})
 forthcode({>LFA}) forthcode({>NFA}) forthcode({>PHA}) .
 
-Note forthdefi({data field}) has a different meaning in the ISO standard.
-It is accessed through forthcode({>BODY}) from the forthdefi({execution token})
-instead of through forthcode({>DFA}) from the forthdefi({dictionary entry address}).
-It is in fact one cell behind the forthdefi({post header address}).
+Note forthdefi({data field}) has a specific meaning in the ISO
+standard. It is accessed through forthcode({>BODY}) from the
+forthdefi({execution token}) while a data field address is
+accessed through forthcode({>DFA}) from the
+forthdefi({dictionary entry address}). It is in fact one cell
+behind the forthdefi({past header address}).
 
 The most important flag bits currently defined are:
 forthitemize
@@ -528,7 +531,8 @@ _ALIGNED_(
 {forthitem
 After the last letter follow zero bytes uptill the next cell boundary.})
 forthenditemize
-forthcode({CREATE}) takes care to generate this data structure.
+forthcode({(CREATE)}) takes care to generate this data structure;
+it is called by all defining words.
 
 For all forthdefi({colon definition}) the code field contains
 a pointer to the same code, the forthdefi({inner interpreter}), called
@@ -544,8 +548,8 @@ For a code word, it contains machine code.
 The code field of this word points to it too.
 forthitem
 For a word defined by
-forthcode({VARIABLE}), forthcode({USER}), or forthcode({CONSTANT}) dnl
-it has a width of one cell, and contains .
+forthcode({VARIABLE}), forthcode({USER}), or forthcode({CONSTANT}) dq
+it has a width of one cell, and contains data.
 forthitem
 For all forthdefi({colon definition}) the data field address
 contains a pointer to an area variable length and contains the
@@ -664,7 +668,7 @@ forthsamp({' MYTYPE >DFA @ ' TYPE >DFA !})
 forthbreak
 And back to default:
 forthbreak
-forthsamp({' TYPE >BODY 1 CELLS - ' TYPE >DFA !})
+forthsamp({' TYPE >PHA ' TYPE >DFA !})
 Be careful not to define forthcode({MYTYPE}) in terms of forthcode({TYPE}) , as a
 recursive tangle will result.
 This method works in all versions of ciforth an is called forthdefi({revectoring}) .

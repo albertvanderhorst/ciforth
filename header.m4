@@ -18,13 +18,13 @@ define({_STRINGINLINE},
 {DC      SKIP
          DC      len({$1})
 SB{}_sc: DSS      _quoted}({{$1}})
-{       DC      LIT, SB{}_sc 
+{       DC      LIT, SB{}_sc
         DC      LIT, len({$1})
 define({_sc},{incr}(_sc))dnl })dnl
-dnl             
+dnl
 dnl _VOCLINKOLD is a m4 variable that generates a chain of vocabularies.
 define({_VOCLINKOLD},0)dnl
-define(_VOCLINK, 
+define(_VOCLINK,
         {DC      DOVOC
         DC      _VOCLINKOLD{}define({_VOCLINKOLD},_LINKOLD)dnl
 })dnl
@@ -38,15 +38,15 @@ dnl and data field $4, flag field $5, link field $6.
 dnl All except the assembler name are optional.
 define(HEADER, {dnl
 ifelse(0,len({$1}),,
-;  ********_star(len({$1})) 
+;  ********_star(len({$1}))
 ;  *   {{$1}}   *
 ;  ********_star(len({$1}))
-;  
+;
 N_$2:   {_STRING}({{$1}}))
 ifelse(0,len($2),,$2:)dnl
         DC    ifelse(0,len($3),0H,$3)
-        DC    ifelse(0,len($4),$ + _CELLS(DC_HOFFSET-D_HOFFSET),$4) 
-        DC    ifelse(0,len($5),0H,$5) 
+        DC    ifelse(0,len($4),$ + _CELLS(PH_OFFSET-D_HOFFSET),$4)
+        DC    ifelse(0,len($5),0H,$5)
         DC    ifelse(0,len({$6}),dnl Only link in if there is no explicit link.
 {_LINKOLD{}define({_LINKOLD},{$2-_CELLS(C_HOFFSET)})},dnl
 $6)
@@ -60,7 +60,7 @@ dnl The link etc. field of the word with assembler name $1
 define({_DEA},{$1-_CELLS(C_HOFFSET)})dnl
 define({_LINK_FIELD},{($1+_CELLS(L_HOFFSET-C_HOFFSET))})dnl
 define({_CODE_FIELD},$1)dnl
-define({_VAR_FIELD},{($1+_CELLS(DC_HOFFSET-C_HOFFSET))})dnl
+define({_VAR_FIELD},{($1+_CELLS(PH_OFFSET-C_HOFFSET))})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
@@ -81,8 +81,8 @@ dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
 {HEADER({$1},
 {$2},
-{$+_CELLS(DC_HOFFSET-C_HOFFSET)},
-{$+_CELLS(DC_HOFFSET-D_HOFFSET)},
+{$+_CELLS(PH_OFFSET-C_HOFFSET)},
+{$+_CELLS(PH_OFFSET-D_HOFFSET)},
 $5)})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
@@ -94,18 +94,17 @@ define({_CELLS},(CW*($1)))dnl
 # _NEXT etc. to generate faster code.
 #
 # See definition of NEXT in glossary.
-define({_NEXT},{JMP     NEXT})   
+define({_NEXT},{JMP     NEXT})
 define({_NEXT32},
         {LODSW                 ; NEXT
         JMP     _CELL_PTR[W]  } )
 # See definition of PUSH in glossary.
-define({_PUSH},{JMP     APUSH})   
+define({_PUSH},{JMP     APUSH})
 define({_PUSH32},
         {PUSH    AX
         _NEXT32})
-# Like PUSH but for two numbers.      
-define({_2PUSH},{JMP     DPUSH})   
+# Like PUSH but for two numbers.
+define({_2PUSH},{JMP     DPUSH})
 define({_2PUSH32},
         {PUSH    DX
         _PUSH32})
-

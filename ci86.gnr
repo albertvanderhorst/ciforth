@@ -96,8 +96,8 @@ D_HOFFSET EQU     1       ;{ Same for data field}
 F_HOFFSET EQU     2       ;{ Same for flag field}
 L_HOFFSET EQU     3       ;{ Same for link field}
 N_HOFFSET EQU     4       ;{ Same for name field}
-DC_HOFFSET EQU     5       ;{ Start of data area (content).}
-B_HOFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
+PH_OFFSET EQU     5       ;{ Past header field: Start of data area. }
+BD_OFFSET EQU     6       ;{ Start of BODY for CREATEd word.}
 ;
 ;{      MEMORY + I/O CONSTANTS}
 ;
@@ -1372,7 +1372,7 @@ worddoc( {DICTIONARY~},{MATCHING-WORDS},{matching_words},{sc addr2 --- addr1}, {
 {Intended to cooperate with forthcode({FOR-WORDS}) . Compares
 the string constant forthvar({sc}) with the dea
 forthvar({addr2}). If it is a match, it returns into
-forthcode({RESULT}) this forthdefi({dea}) and it exits
+forthcode({RESULT}) this forthdefi({DEA}) and it exits
 prematurely from forthcode({FOR-WORDS}).},
 {{FIND}},
 {{ : GS1 DUP >R DUP FOR-WORDS RESULT @ R> = ; dnl
@@ -1393,9 +1393,11 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      RR, TNFA, FETCH, SFET
         DC      CORA, ZEQU  ;{ Compare equals.}
         _0BRANCH(MATS2)
-        DC      FROMR, FROMR, FROMR, DROP, ZERO, TOR, TOR, TOR ;{FORCE END}
+        DC      FROMR, FROMR,
+        DC      RDROP, ZERO, TOR, ;{FORCE END}
+        DC      TOR, TOR
         DC      RR, RESULT, STORE
-MATS2:  DC      FROMR, DROP
+MATS2:  DC      RDROP
         DC      SEMIS
 ;
 worddoc( {PARSING},{?BLANK},{query_blank},{ch --- f },{},
@@ -1486,7 +1488,7 @@ PPARS1: DC LDUP, RR, LSUB
         DC ONEP
         _BRANCH(PPARS1)
 PPARS2: DC SWAP, DROP
-        DC FROMR, DROP
+        DC      RDROP
         DC      LIN, FETCH
         DC      SWAP
         DC      LDUP, LIN, STORE
@@ -2254,7 +2256,7 @@ enddoc)
 HEADER({CONSTANT},{CONST},{DOCOL})
         DC      PWORD
         DC      PCREAT
-        DC      LATEST, TPFA, STORE
+        DC      LATEST, TDFA, STORE
         DC      PSCOD
 DOCON:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
@@ -2982,56 +2984,39 @@ HEADER({LATEST},{LATEST},{DOCOL})
         DC      FETCH
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{>BODY},{to_body},{dea --- addr},{ISO},
-{Given the dictionary entry addres forthvar({dea}) of a
-definition created with a forthcode({CREATE}) /
-forthcode({DOES>}) construct, return its data field
-forthvar({addr}).},
-{{'},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA}},
-{{ CREATE Q 12346 ,  ' Q >BODY @ .},{12346}},
+worddoc( {DICTIONARY~},{>CFA},{to_code_field_address},{dea --- cfa},{},
+{Given a dictionary entry addres forthvar({dea}) return its
+forthdefi({code field address}) forthvar({cfa}) : the address
+that is compiled within high level definitions. It serves as an
+execution token as well. In ciforth this is actually the same
+as the forthdefi({DEA}) .},
+{{'},{>DFA},{>FFA},{>LFA},{>NFA},{>PHA}},
+{{' WORD  DUP >CFA = .},{_T_}},
 enddoc)
-HEADER({>BODY},{TOBODY},{DOCOL})
-        DC      LIT,_CELLS(B_HOFFSET)
+HEADER({>CFA},{TCFA},{DOCOL})
+        DC      LIT, _CELLS(C_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
-{Convert the data field forthvar({addr})
-of a definition created with a forthcode({CREATE}) /
-forthcode({DOES>}) construct to its forthvar({dea}) .},
-{{'},{>BODY}},
-{{ CREATE QAQ HERE BODY> ID.},{QAQ}},
+worddoc( {DICTIONARY~},{>DFA},{to_data_field_address},{dea --- dfa},{},
+{Given a dictionary entry addres return its forthdefi({data
+field address}) forthvar({pfa}) . This points to the code for a
+code word, to the high level code for a colon-definition, and
+to the forthcode({DOES>}) pointer for a word build using
+forthcode({CREATE}) . Normally this is the area behind the
+header, found via forthcode({>PHA}) . },
+{{'},{>CFA},{>FFA},{>LFA},{>NFA},{>PHA}},
+{{ "APE" (CREATE) HERE ' APE >DFA @ = .},{_T_}},
 enddoc)
-HEADER({BODY>},{BODYF},{DOCOL})
-        DC      LIT,_CELLS(B_HOFFSET)
-        DC      LSUB
-        DC      SEMIS
-;
-worddoc( {DICTIONARY~},{C>D},{code_to_dea},{cfa --- dea},{},
-{Convert the code field address of a definition to its
-dea address.},{{'},{>CFA}},
-{{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
-enddoc)
-HEADER({C>D},{CTOD},{DOCOL})
-        DC      LIT,_CELLS(C_HOFFSET)
-        DC      LSUB
-        DC      SEMIS
-;
-worddoc( {DICTIONARY~},{>NFA},{to_name_field_address},{dea --- nfa},{},
-{Given a dictionary entry addres return the
-name field.},
-{{'},{>CFA},{>DFA},{>FFA},{>LFA}},
-{{ ' WORDS >NFA @ $@ TYPE},{WORDS}},
-enddoc)
-HEADER({>NFA},{TNFA},{DOCOL})
-        DC      LIT,_CELLS(N_HOFFSET)
+HEADER({>DFA},{TDFA},{DOCOL})
+        DC      LIT, _CELLS(D_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
 worddoc( {DICTIONARY~},{>FFA},{to_flag_field_address},{dea --- ffa},{},
-{Given a dictionary entry addres return the
-flag field.},
-{{'},{>CFA},{>DFA},{>LFA},{>NFA}},
+{Given a dictionary entry addres return its
+forthdefi({flag field address}) forthvar({ffa}) .},
+{{'},{>CFA},{>DFA},{>LFA},{>NFA},{>PHA}},
 {{"FRED" (CREATE) ' FRED >FFA DUP @ . IMMEDIATE @ .},{0 4}},
 enddoc)
 HEADER({>FFA},{TFFA},{DOCOL})
@@ -3040,9 +3025,10 @@ HEADER({>FFA},{TFFA},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {DICTIONARY~},{>LFA},{to_link_field_address},{dea --- lfa},{},
-{Given a dictionary entry addres return the
-link field address.},
-{{'},{>CFA},{>DFA},{>FFA},{>NFA}},
+{Given a dictionary entry addres return its
+forthdefi({link field address}) forthvar({lfa}). It contains
+the DEA of the previous word. },
+{{'},{>CFA},{>DFA},{>FFA},{>NFA},{>PHA}},
 {{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}},
 enddoc)
 HEADER({>LFA},{TLFA},{DOCOL})
@@ -3050,37 +3036,75 @@ HEADER({>LFA},{TLFA},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>CFA},{to_code_field_address},{dea --- cfa},{},
+worddoc( {DICTIONARY~},{>NFA},{to_name_field_address},{dea --- nfa},{},
 {Given a dictionary entry addres return the
-code field address : the address that is compiled within high level
-definitions. It serves as an execution token as well.
-In ciforth this is actually the same as the dea.},
-{{'},{>DFA},{>FFA},{>LFA},{>NFA}},
-{{' WORD  DUP >CFA = .},{_T_}},
+ forthdefi({name field address}).},
+{{'},{>CFA},{>DFA},{>FFA},{>LFA}},
+{{ ' WORDS >NFA @ $@ TYPE},{WORDS}},
 enddoc)
-HEADER({>CFA},{TCFA},{DOCOL})
-        DC      LIT, _CELLS(C_HOFFSET)
+HEADER({>NFA},{TNFA},{DOCOL})
+        DC      LIT,_CELLS(N_HOFFSET)
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>DFA},{to_data_field_address},{dea --- pfa},{},
+worddoc( {DICTIONARY~},{>PHA},{past_header_address},{dea --- addr},{},
 {Given a dictionary entry addres return the
-data field address. This points to the code for a code word,
-to the high level code for a colon-definition, and to the
- forthcode({DOES>}) pointer for a word build using forthcode({CREATE}) .
-In all these cases it directly follows the header.},
-{{'},{>CFA},{>FFA},{>LFA},{>NFA}},
-{{ "APE" (CREATE) HERE ' APE >DFA @ = .},{_T_}},
+forthdefi({past header address}). Here starts the area that no
+longer belongs to the header of a dictionary entry, but most
+often it is owned by it. },
+{{'},{>CFA},{>BODY}},
+{{ "Q" (CREATE) ' Q >PHA HERE = .},{_T_} },
 enddoc)
-HEADER({>DFA},{TPFA},{DOCOL})
-        DC      LIT, _CELLS(D_HOFFSET)
+HEADER({>PHA},{TPHA},{DOCOL})
+        DC      LIT,_CELLS(PH_OFFSET)
         DC      PLUS
         DC      SEMIS
 ;
-worddoc( {DICTIONARY~},{>DDEA},{to_dummy_dea},{dea --- cfa},{},
+worddoc( {DICTIONARY},{>BODY},{to_body},{dea --- addr},{ISO},
+{Given the dictionary entry addres forthvar({dea}) of a
+definition created with a forthcode({CREATE}) /
+forthcode({DOES>}) construct, return its data field
+forthvar({addr}).},
+{{'},{>CFA},{>DFA},{>PHA},{BODY>}},
+{{ CREATE Q  ' Q >BODY HERE = .},{_T_} },
+enddoc)
+HEADER({>BODY},{TOBODY},{DOCOL})
+        DC      CTOD
+        DC      TDFA, FETCH
+        DC      CELLP           ;{ Skip DOES> pointer.}
+        DC      SEMIS
+;
+worddoc( {DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
+{Convert the data field forthvar({addr}) of a definition
+created with a forthcode({CREATE}) / forthcode({DOES>})
+construct to its forthvar({dea}). Where forthcode({>BODY})
+keeps working after revectoring, forthcode({BODY>}) does not.
+_VERBOSE_({{ There is some logic to this, because the DEA to
+which the body belongs is no longer unique.}})
+},
+{{'},{>BODY}},
+{{ CREATE QAQ HERE BODY> ID.},{QAQ}},
+enddoc)
+HEADER({BODY>},{BODYF},{DOCOL})
+        DC      LIT,_CELLS(BD_OFFSET)
+        DC      LSUB
+        DC      SEMIS
+;
+worddoc( {DICTIONARY~},{C>D},{code_to_dea},{cfa --- dea},{},
+{Convert the code field address of a definition to its
+forthdefi({dictionary entry address}) forthvar({dea}) .},{{'},{>CFA}},
+{{ : GS1 LIT WORDS ; GS1 C>D ID.},{WORDS}},
+enddoc)
+HEADER({C>D},{CTOD},{DOCOL})
+        DC      LIT,_CELLS(C_HOFFSET)
+        DC      LSUB
+        DC      SEMIS
+;
+worddoc( {DICTIONARY~},{>DDEA},{to_dummy_dea},{dea --- dea},{},
 {Given the dictionary entry addres of a vocabulary
-return the address of the dummy dea.
-},{{VOCABULARY},{>CFA}},
+return the address of the forthdefi({DDEA}), a dummy DEA that
+serves as the start of a dictionary search. },
+{{VOCABULARY},{>CFA}},
 {{: APE ; ' FORTH >DDEA >LFA @ ID.},{APE}},
 enddoc)
 HEADER({>DDEA},{TDDEA},{DOCOL})
@@ -3339,18 +3363,16 @@ DODOE:  LEA     BP,[BP-_CELLS(1)]
 HLNOOP: DC      SEMIS
 ;
 worddoc( {DEFINING},{DOES>},{does},{},{ISO,FIG,L0},
-{A word which is normally use to specify
-the run-time action within a high-level
-defining word. forthcode({DOES>}) alters the dictionary header
-of the latest word word to execute the sequence of
+{A word which is normally use to specify the run-time action
+within a high-level defining word. forthcode({DOES>}) modifies
+the behaviour of the latest word as to execute the sequence of
 compiled word addresses following forthcode({DOES>}) . Used in
 combination with forthcode({CREATE}) . When the
 forthcode({DOES>}) part executes it begins with the address of
 the data field of the word on the stack. This allows
-interpretation using this area or its contents.
-_VERBOSE_({ Typical uses
-include the Forth assembler, multidimensional arrays, and
-compiler generation.})
+interpretation using this area or its contents. _VERBOSE_({
+Typical uses include the Forth assembler, multidimensional
+arrays, and compiler generation.})
 },
 {},
 {{ !CSP : GS1 DOES> @ 1 + ;  : GS2 DOES> @ 2 + ; dnl
@@ -3359,7 +3381,7 @@ enddoc)
 HEADER({DOES>},{DOES},{DOCOL})
         DC      FROMR
         DC      LATEST
-        DC      TPFA
+        DC      TDFA
         DC      FETCH
         DC      STORE
         DC      SEMIS
@@ -3473,11 +3495,12 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{SET-SRC},{set_source},{sc -- },{},
-{Make the string constant forthvar({sc}) the forthdefi({current
-input source}). This input is chained, i.e. exhausting it has
-the same effect as exhausting the input that called
-forthcode({SET-SRC}). _VERBOSE_({ In practice this word is
-almost always followed by a call to forthcode({INTERPRET}).})},
+{Make the string constant forthvar({sc}) the
+forthdefi({current input source}). This input is chained, i.e.
+exhausting it has the same effect as exhausting the input that
+called forthcode({SET-SRC}). _VERBOSE_({ In practice this word
+is almost always followed by a call to
+forthcode({INTERPRET}).})},
 {{EVALUATE},{INTERPRET}},
 {{ "1 2 3 . CR" SET-SRC . . .},{3}},
 enddoc)
@@ -3917,7 +3940,7 @@ HEADER({(FIND)},{PFIND},{DOCOL})
         DC      RESULT, FETCH, ZEQU
         _0BRANCH(DFIN1)
         DC      DROP, ONE
-        DC      LIT, _DEA(DENOT) + _CELLS(B_HOFFSET  + 1)
+        DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
         DC      LIT, MATCHING, SWAP, FORW
 DFIN1:
         DC      DROP, DROP
@@ -4140,10 +4163,10 @@ CREA1:  DC      DROP
         DC      SCOMMA
         DC      HERE,TOR
 
-        DC      RR, LIT, _CELLS(DC_HOFFSET), PLUS
+        DC      RR, LIT, _CELLS(PH_OFFSET), PLUS
         DC      COMMA   ; {Code field.}
 
-        DC      RR, LIT, _CELLS(DC_HOFFSET), PLUS
+        DC      RR, LIT, _CELLS(PH_OFFSET), PLUS
         DC      COMMA         ; {Parameter field.}
 
         DC      ZERO, COMMA ; {Flag field.}
@@ -4154,7 +4177,7 @@ CREA1:  DC      DROP
 
         DC      COMMA   ; {Name field.}
 
-        DC      FROMR, DROP
+        DC      RDROP
         DC      SEMIS
 ;
 worddoc( {COMPILING},{[COMPILE]},{bracket_compile},{},{I,C},
@@ -4345,7 +4368,7 @@ INTE1:
         DC      FROMR, ONEP, LIN, STORE
         _BRANCH(INTE4A)  ;{ELSE}
 INTE3A:
-        DC      FROMR, DROP
+        DC      RDROP
                         ;{THEN}
 INTE4A:
         DC      LDUP, TFFA, FETCH, LIT, B_IMMED, LAND
@@ -4910,7 +4933,7 @@ HEADER({FM/MOD},{FMSLAS},{DOCOL})
         DC      SWAP, FROMR, PLUS, SWAP
         _BRANCH(FMMOD2)
 FMMOD1:
-        DC      FROMR, DROP
+        DC      RDROP
 FMMOD2:
         DC      SEMIS
 ;
@@ -5307,7 +5330,7 @@ BLOC3:  DC      LDUP,FETCH
         _0BRANCH(BLOC2)
         DC      LDUP,PREV
         DC      STORE
-BLOC1:  DC      FROMR,DROP
+BLOC1:  DC      RDROP
         DC      CELLP,CELLP,SEMIS
 ;
 worddoc( {STORAGE~},{FLUSH},{flush},{},{ISO FIG L0},
@@ -6625,7 +6648,7 @@ HEADER({R/W},{RSLW},{DOCOL})
         DC      ZERO, MIN      ; 0/-errno
         DC      LDUP, DERR, STORE
         _0BRANCH( RSLW1 )
-        DC      FROMR, DROP
+        DC      RDROP
         _BRANCH( RSLW2 )
 RSLW1:
         DC      BHAN, FETCH, SWAP
@@ -7664,7 +7687,7 @@ worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt dea --x1...xn},{},
 and all that are linked from that word
 execute forthsamp({xt})
  with as data forthsamp({x1..xn}) plus
-the forthdefi({dea}) of those words.         forthsamp({xt})
+the forthdefi({DEA}) of those words.         forthsamp({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
 {{FOR-VOCS},{EXECUTE}},
@@ -7684,15 +7707,13 @@ FORW1:  DC      FROMR
         DC      RR
         DC      ZEQU
         _0BRANCH(FORW1)
-        DC      FROMR
-        DC      DROP
-        DC      FROMR
-        DC      DROP
+        DC      RDROP
+        DC      RDROP
         DC      SEMIS
 ;
 worddoc( {DICTIONARY~},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
 {For all vocabularies execute forthsamp({xt})
- with as data the forthdefi({dea}) of those words. forthsamp({xt})
+ with as data the forthdefi({DEA}) of those words. forthsamp({xt})
 must have the stack diagram forthsamp({x1..xn dea --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}},
@@ -7717,10 +7738,8 @@ FORV1:  DC      FROMR
         DC      RR
         DC      ZEQU
         _0BRANCH(FORV1)
-        DC      FROMR
-        DC      DROP
-        DC      FROMR
-        DC      DROP
+        DC      RDROP
+        DC      RDROP
         DC      SEMIS
 ;
 worddoc( {DICTIONARY},{WORDS},{words},{},{ISO},
@@ -8070,7 +8089,7 @@ the wordset forthsamp({DEFINING}) concern the memory area that
 is allocated to the dictionary. They may add data to the dictionary at the expense
 of the free space, one cell or one byte at a time, or allocate a buffer at once.
 The dictionary space may also be shrunk, and the words that were there are lost.
-The forthdefi({dictionary entry address}) or forthdefi({dea})
+The forthdefi({dictionary entry address}) or forthdefi({DEA})
 represents a word. It is the lowest address of a record with
 fields. Words to access those fields also belong to this
 wordset.},

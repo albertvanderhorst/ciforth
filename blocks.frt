@@ -3107,7 +3107,7 @@ R> DROP R> DROP ;
 : FORGET-VOC
   2DUP SWAP U< IF ( contains something)
       SWAP >R
-      >DFA CELL+  ( start with dictionary entry)
+      >DDEA  ( start with dictionary entry)
       DUP
  BEGIN CR DUP ID. >LFA  @  DUP  DUP H. R@  DUP H. U<  UNTIL
         CR DUP H. DUP ID.
