@@ -3,7 +3,7 @@
 
  ASSEMBLER DEFINITIONS HEX
 
-( ############## 8086 ASSEMBLER ADDITIONS ############################# )
+( ############## 80386 ASSEMBLER ADDITIONS ############################ )
 ( The patch for the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
 : lsbyte, DUP C, 0008 RSHIFT ;
@@ -13,7 +13,7 @@
 ( Al fixups-from-reverse are at most 0002 bytes, so they all end in     )
 ( 0000 To improve readability we use the ignore ``,'' from ciforth.     )
 
-( ############## 8086 ASSEMBLER PROPER ################################ )
+( ############## 80386 ASSEMBLER PROPER ############################### )
 ( The decreasing order means that a decompiler hits them in the         )
 ( right order                                                           )
 ( Fields: a disassembly XT,      LENGTH to comma, the BA BY information )
@@ -37,21 +37,21 @@ _ 1 0000 0001 _    COMMAER SIB,, ( An instruction with in an instruction )
 ( Meaning of the bits in TALLY-BA :                                     )
 ( Inconsistent:  0001 OPERAND IS BYTE     0002 OPERAND IS CELL          )
 (                0004 OFFSET   DB|        0008 ADDRESS      DW          )
-( By setting 0020 an opcode can force a memory reference, e.g. CALLFARO  )
+( By setting 0020 an opcode can force a memory reference, e.g. CALLFARO )
 (               0010 Register op         0020 Memory op                 )
-(               0040 D0|                 0080 [BP]' {16} [BP]      {32}     )
-(  sib:       0100 no ..             0200 [AX +8*| DI]               )
-(  logical    0400 no ..             0800 Y| Y'| Z| Z'|              )
+(               0040 D0|                 0080 [BP]' {16} [BP]      {32} )
+(  sib:       0100 no ..             0200 [AX +8*| DI]                  )
+(  logical    0400 no ..             0800 Y| Y'| Z| Z'|                 )
 (  segment    1000 no ..             2000 ES| ..                        )
-( test/debug 4,0000 no ..            8,0000 CR0 ..DB0
+( test/debug 4,0000 no ..            8,0000 CR0 ..DB0                   )
 
 ( Names *ending* in primes BP|' -- not BP'| the prime registers -- are  )
-( only valid for 0016 bits real mode, in combination with an address      )
+( only valid for 0016 bits real mode, in combination with an address    )
 ( overwite. Use W, L, and end the line in TALLY! to defeat checks.      )
 
 ( Like xFIR but without any checks and unfindable for the disassembler  )
 ( Use for 0016 bit mode instructions.                                     )
-: xFIR16   CHECK31 CREATE , , , , DOES> FIXUP< ;
+: xFIR16   CHECK31 CREATE-- , , , , DOES> FIXUP< ;
 : xFAMILY|R16   0000 DO   DUP >R T@ R> xFIR16  OVER + LOOP DROP DROP ;
 
 0200 0 3800,0000 T!
@@ -219,13 +219,14 @@ _ 1 0000 0001 _    COMMAER SIB,, ( An instruction with in an instruction )
     ~SIB,
     TALLY-BY ! 0900 INVERT AND TALLY-BA @ OR TALLY-BA ! ;
 
- ' (SIB),, >CFA   % SIB,, >DATA !   ( Not available during  generation)
+ ' (SIB),,   % SIB,, >DATA !   ( Fill in deferred data creation action  )
 
 ( Disassemble the sib byte where the disassembler sits now.             )
-( [ `F-D' takes care itself of incrementing the disassembly pointer. ]  )
-: DIS-SIB [ % ~SIB, ] LITERAL F-D ;
-( Disassembler was not available while creating the commaer. )
- ' DIS-SIB >CFA   % SIB,, >DIS !    0000   % SIB,, >CNT !
+( [ `FORCED-DISASSEMBLY' takes care itself of incrementing the          )
+(   disassembly pointer. ]                                              )
+: DIS-SIB [ % ~SIB, ] LITERAL FORCED-DISASSEMBLY ;
+( Fill in deferred disassembler action.                                 )
+ ' DIS-SIB    % SIB,, >DIS !    0000   % SIB,, >CNT !
 
 ( Redefine some fixups, such that the user may say                      )
 ( "[AX" instead of " ~SIB| SIB,, [AX"                                   )
