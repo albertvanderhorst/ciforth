@@ -230,14 +230,14 @@ BOOTOFFSET EQU 0
 _LINUX_N_({
 include(constant.m4)
 SIZE_TERMIO     EQU     60      ; sizeof(termio) also captured from c.
-RAWIO           EQU     (ECHO | ICANON)
+RAWIO           EQU     (ECHO _OR_ ICANON)
         global  _start        ; Entry point
 });_END_({_LINUX_N_})
 
 _LINUX_C_({
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init, c_debug
-        global  figforth,_start        ; Called from c. Remainder c-routines to be called from here.
+        global  ciforth,_start        ; Called from c. Remainder c-routines to be called from here.
 });_END_({_LINUX_C_})
 
 _HOSTED_LINUX_({
@@ -320,7 +320,7 @@ BOOT:
         CALL    DISPLAY
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
-        JNZ  ELSE3
+        JNZ  NOBOOT
 
         MOV     AL,'F'
         CALL    DISPLAY
@@ -405,7 +405,7 @@ BOOT:
         CALL    DISPLAY
         MOV AX,CS
         AND AX,AX       ;{ Z = BOOTING ?}
-        JNZ  ELSE3
+        JNZ  NOBOOT
         MOV     AL,'F'
         CALL    DISPLAY
         MOV     AH,00   ;{ Reset}
@@ -414,29 +414,12 @@ BOOT:
         JB      RETRY
         CALL    HDREAD
         JB      RETRY
-        MOV     AL,'W'
+        MOV     AL,'{W}'
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ENDBOOT
 });_END_({ _BOOTHD_})
 
-ELSE3:
-_ABSOLUTELOAD_({
-;{ Apparently we may have to move the code, e.g. if started from MSDOS.}
-;{ Prepare return to MSDOS using the original code segment.}
-        MOV     AX,CS
-        MOV     DS,AX
-        CALL    HERE1
-HERE1:  POP     BX
-        MOV     CX,BX
-        ADD     BX,RETDOSV-HERE1+1        ;{ Independant of load address.}
-        ADD     CX,RETDOS-HERE1
-        MOV     [BX],CX
-        INC     BX
-        INC     BX
-        MOV     [BX],AX
-        JMP ENDBOOT     ; {Skip booting }
-});_END_({ _ABSOLUTELOAD_})
 
 _BOOTED_({
 ; Debug code, could be dispensed with in an ideal world.
@@ -472,7 +455,24 @@ DISPLAY:XOR     BH,BH           ;{ Display AL as an ASCII char}
         RET
 });_END_({ _BOOTED_})
 
+NOBOOT:         ; {Skip till here if not booting.}
+
 _ABSOLUTELOAD_({
+;{ Apparently we may have to move the code, e.g. if started from MSDOS.}
+;{ Prepare return to MSDOS using the original code segment.}
+        MOV     AX,CS
+        MOV     DS,AX
+        CALL    HERE1
+HERE1:  POP     BX
+        MOV     CX,BX
+        ADD     BX,RETDOSV-HERE1+1        ;{ Independant of load address.}
+        ADD     CX,RETDOS-HERE1
+        MOV     [BX],CX
+        INC     BX
+        INC     BX
+        MOV     [BX],AX
+        JMP ENDBOOT     ;
+
 ;{ Returns to DOS, provided we started from dos as a .COM.}
 ;{ Use far jump restoring CS to .COM value. }
 RETDOS:
@@ -684,7 +684,7 @@ RETURN_LINUX:
         MOV     EDI,_CELL_PTR[SAVE_LINUX+_CELLS(3)]
         MOV     EBX,_CELL_PTR[SAVE_LINUX+_CELLS(4)]
         RET     ; Assuming the old stack has not been disturbed.It shouldn't.
-figforth:
+ciforth:
         MOV     _CELL_PTR[SAVE_LINUX+_CELLS(0)],ESP
         MOV     _CELL_PTR[SAVE_LINUX+_CELLS(1)],EBP
         MOV     _CELL_PTR[SAVE_LINUX+_CELLS(2)],ESI
@@ -700,7 +700,7 @@ ENDIF1:
 });_END_({_LINUX_C_})
 
 _LINUX_N_({
-figforth:
+ciforth:
 _start:
 });_END_({_LINUX_N_})
 
@@ -718,8 +718,8 @@ _COMMENT
     IP      SI      Interpreter pointer.  Must be preserved
                     across FORTH words.
 
-     {W}      AX      Working register.  When entering a word
-                    via its code field the DEA is passed in W.
+    {WR}      AX      Working register.  When entering a word
+                    via its code field the DEA is passed in WR.
 
     {SP}      SP      Parameter stack pointer.  Must be preserved
                     across FORTH words.
@@ -855,7 +855,7 @@ BREAK:  JMP     SHORT   TNEXT3  ;{CONT WITH PROGRAM}
 TNEXT2: POP     AX
         POPF
 TNEXT3: LODSW           ;{ AX <- (IP)}
-        MOV     W,AX
+        MOV     WR,AX
         JMP     SHORT   NEXT1
 });_END_({_OLDDEBUG_ })
         PAGE
@@ -865,8 +865,8 @@ DISPLAYSI:
         SET_16_BIT_MODE
         PUSH    SI
         PUSH    BP
-        PUSH    W
-        MOV     AX,W
+        PUSH    WR
+        MOV     AX,WR
         CALL    DISPLAYW
         MOV     AX,' '
         CALL    DISPLAY
@@ -877,7 +877,7 @@ DISPLAYSI:
         MOV     AH,10H
         INT     16H
         _SWITCH_({JMPHERE_FROM_OS})
-        POP    W
+        POP    WR
         POP    BP
         POP    SI
         RET
@@ -901,9 +901,9 @@ _NEWDEBUG_({
 });_END_({_NEWDEBUG_ })
 });_END_({_LINUX_C_})
         LODSW           ;{AX <- (IP)}
-NEXT1:  MOV     W,AX   ;{ (W) <- (IP)}
+NEXT1:  MOV     WR,AX   ;{ (WR) <- (IP)}
 _NEWDEBUG_({ CALL    DISPLAYSI})
-        JMP     _CELL_PTR[W]    ;{ TO `CFA'}
+        JMP     _CELL_PTR[WR]    ;{ TO `CFA'}
 ;
 ;{       Dictionary starts here.}
 
@@ -1137,8 +1137,8 @@ forthdefi({DEA}) is an execution token in portable code.)}})},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
 CODE_HEADER({EXECUTE},{EXEC})
-        POP     W      ;{ GET CFA}
-        JMP     _CELL_PTR[W]
+        POP     WR      ;{ GET CFA}
+        JMP     _CELL_PTR[WR]
 ;
 _LOAD_({
 worddoc( {CONTROL},{RECURSE},,{(varies)},{ISO},
@@ -1463,7 +1463,7 @@ enddoc)
 HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      TOR
         DC      RR, TFFA, FETCH
-        DC      LIT, B_INVIS | B_DUMMY
+        DC      LIT, B_INVIS _OR_ B_DUMMY
         DC      LAND, ZEQU
         _0BRANCH(MATS2)
 ;       DC      RR, IDDOT
@@ -1475,8 +1475,8 @@ HEADER({MATCHING-WORDS},{MATCHING},{DOCOL})
         DC      RR, TNFA, FETCH, SFET
         DC      CORA, ZEQU  ;{ Compare equals.}
         _0BRANCH(MATS2)
-        DC      FROMR, FROMR,
-        DC      RDROP, ZERO, TOR, ;{FORCE END}
+        DC      FROMR, FROMR
+        DC      RDROP, ZERO, TOR ;{FORCE END}
         DC      TOR, TOR
         DC      RR, RESULT, STORE
 MATS2:  DC      RDROP
@@ -1818,7 +1818,7 @@ CODE_HEADER({DEPTH},{DEPTH})
         MOV     AX,[BX+_CELLS(3)]
         MOV     DX,STACKPOINTER   ;{ (S1) <- (SP)}
         SUB     AX,DX
-        SAR     AX,2
+        SAR     AX, _BITS32_(2) _BITS16_(1)
         _PUSH
 ;
 });_END_({_LOAD_})
@@ -2305,7 +2305,7 @@ HEADER({:},{COLON},{DOCOL})
         DC      PSCOD
 DOCOL:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-         MOV     SI,[W+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
+         MOV     SI,[WR+_CELLS(D_HOFFSET - C_HOFFSET)]  ;{(IP) <- (PFA)}
 ;        CALL    DISPLAYSI
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
@@ -2340,7 +2340,7 @@ HEADER({CONSTANT},{CONST},{DOCOL})
         DC      PCREAT
         DC      LATEST, TDFA, STORE
         DC      PSCOD
-DOCON:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
+DOCON:  MOV     AX,[WR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{GET DATA FROM PFA}
         _PUSH
 ;
 worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,E,LU},
@@ -2358,7 +2358,7 @@ HEADER({VARIABLE},{VAR},{DOCOL})
         DC      PCREAT
         DC      ZERO, COMMA
         DC      PSCOD
-DOVAR:  MOV     AX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
+DOVAR:  MOV     AX,[WR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{(AX) <- PFA}
         _PUSH
 ;
 worddoc( {DEFINING},{USER},{user},{n ---},{ISO,L0},
@@ -2378,7 +2378,7 @@ enddoc)
 HEADER({USER},{USER},{DOCOL})
         DC      CONST
         DC      PSCOD
-DOUSE:  MOV     BX,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
+DOUSE:  MOV     BX,[WR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{PFA  }
         MOV     DI,_CELL_PTR[USINI]
         LEA     AX,[BX+DI]      ;{ADDR OF VARIABLE}
         _PUSH
@@ -2499,6 +2499,7 @@ HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 _LOW_BUF_({
         _ALIGN  2       ; Otherwise INT 13 hangs when filling
         ; in into the lba block as a buffer address.
+        DB      0       ;{Padding the odd # of bytes in the name FIRST.}
 worddoc( {STORAGE~},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.
@@ -3450,7 +3451,7 @@ HEADER({CREATE},{CREATE},{DOCOL})
         DC      PSCOD
 DODOE:  LEA     BP,[BP-_CELLS(1)]
         MOV     [BP],SI ;{R1 <- (IP)}
-        MOV     SI,[W+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
+        MOV     SI,[WR+_CELLS((D_HOFFSET-C_HOFFSET))] ;{NEW IP }
         LEA     AX,[SI+_CELLS(1)]
         MOV     SI,[SI]
         _PUSH
@@ -3996,7 +3997,7 @@ HEADER({FIND},{FIND},{DOCOL})
         DC      SWAP, DROP ; {The address.}
         ; {Fine point, get xt by TCFA. Even if a nop.}
         DC      LDUP, TCFA, SWAP
-        DC      TFFA, FETCH,
+        DC      TFFA, FETCH
         DC      LIT, B_IMMED, LAND
         DC      LIT, -1, SWAP
         _0BRANCH(FIND1) ;{IF}
@@ -4216,7 +4217,7 @@ HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      FOUND
         DC      LDUP
         _0BRANCH(CREA1) ;{IF}
-        DC      LDUP, TFFA, FETCH,
+        DC      LDUP, TFFA, FETCH
         DC      LIT, B_DENOT, LAND, ZEQU
         _0BRANCH(CREA1) ;{IF}
         DC      IDDOT
@@ -4426,7 +4427,7 @@ INTE1:
         DC      DROP
         DC      RR, ONE
         DC      LIT, _DEA(DENOT) + _CELLS(BD_OFFSET  + 1)
-        DC      PFIND, SWAP, DROP, SWAP, DROP,
+        DC      PFIND, SWAP, DROP, SWAP, DROP
 INTE3A:                  ;{THEN THEN }
         DC      LDUP, ZEQU, LIT, 12, QERR
         DC      LDUP, TFFA, FETCH
@@ -6476,7 +6477,7 @@ _PC_({ One means an error and and zero means okay.}) },
 _HOSTED_LINUX_({ {{BLOCK},{?LINUX-ERROR}}, })
 _USEBIOS_({ {{BLOCK},{R/W}}, })
 _HOSTED_LINUX_({ {{ CR DISK-ERROR @ 0 < . BLOCK-INIT},{0},}, })
-_PC({ {{ CR DISK-ERROR @ 0=},{0},}, })
+_PC_({ {{ CR DISK-ERROR @ 0=},{0},}, }),
 enddoc)
 HEADER({DISK-ERROR},{DERR},{DOVAR}, )
         DC      -1
@@ -6629,7 +6630,7 @@ HEADER({GET-FILE},{GFILE},DOCOL)
         DC      FROMR, SFET, OVER, PLUS, TOR
         DC      LIT, O_RDONLY, ZERO, LIT, open, LINOS
         DC      LDUP, QLERR
-        DC      LDUP, RR, LIT,  9999000,
+        DC      LDUP, RR, LIT,  9999000
         DC      LIT ,read, LINOS
         DC      LDUP, QLERR, TOR
         DC      ZERO,ZERO, LIT, close, LINOS, QLERR
@@ -6647,7 +6648,7 @@ HEADER({PUT-FILE},{PFILE},DOCOL)
         DC      PAD, SSTOR, ZERO, PAD, CHAPP ; {Unix requires a c-string.}
         DC      TOR, TOR
         DC      PAD, CELLP
-        DC      LIT, O_RDWR | O_CREAT, LIT, 777Q
+        DC      LIT, O_RDWR _OR_ O_CREAT, LIT, 777Q
         DC      LIT, open, LINOS, LDUP, QLERR
         DC      LDUP, FROMR, FROMR
         DC      LIT, write, LINOS, QLERR
@@ -6812,9 +6813,8 @@ because forthcode({WARNING}) no longer is maintained properly.
 We could import it to C , but there is no end to that.}})
 },{{BLOCK},{LIST},{LOAD},{BLOCK-EXIT},{DISK-ERROR}}, {}, enddoc)
 CODE_HEADER({BLOCK-INIT},{BLINI})
-        XOR     AX,AX
-        MOV     AL,[_VAR_FIELD(BLFL)]
-        MOV     BX,_VAR_FIELD(BLFL)+1
+        MOV     AX,[_VAR_FIELD(BLFL)]
+        MOV     BX,_VAR_FIELD(BLFL)+CW
         PUSH    BX
         PUSH    AX
         CALL    c_block_init
@@ -6924,19 +6924,18 @@ DOK:    POPF            ;{POP FLAGS}
         _NEXT
 ;
 worddoc( {STORAGE},{R/W},{read_slash_write},{addr blk f --},{},
-{The figforth standard disc read-write linkage. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
-the sequential number of the referenced physical block; and
-forthvar({f}) is a flag for forthvar({f})=0 write and forthvar({f})=l
-read. forthcode({R/W}) determines the location on mass storage,
+{The basic mass storage read-write linkage. (Already present in
+figforth.) forthvar({addr}) specifies the source or destination
+block buffer, forthsamp({blk}) is the sequential number of the
+referenced physical block; and forthvar({f}) is a flag for
+forthvar({f})=0 write and forthvar({f})=l read.
+forthcode({R/W}) determines the location on mass storage,
 performs the read-write. This version of ciforth features the
-most classic
-mass storage. Blocks are counted sequentially from 0
-on the drive with MSDOS code in forthcode({DRIVE}),
-so forthcode({R/W}) can be used to write boot code.
-Errors are handled by writing directly to the console
-after they are detected.
-},
+most classic mass storage. Blocks are counted sequentially from
+0 on the drive with MSDOS code in forthcode({DRIVE}), so
+forthcode({R/W}) can be used to write boot code. Errors are
+handled by writing directly to the console after they are
+detected. },
 {{BLOCK},{DRIVE}}, {}, enddoc)
 ;{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 HEADER({R/W},{RSLW},{DOCOL})
@@ -7962,7 +7961,7 @@ HEADER({.S},{DOTS},{DOCOL})
         DC      CR
         _STRINGINLINE({S: })
         DC      LTYPE
-        DC      SPFET, SZERO, FETCH,
+        DC      SPFET, SZERO, FETCH
 DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
         _0BRANCH(DOC1)
         DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
