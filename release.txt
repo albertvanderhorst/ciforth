@@ -5,10 +5,10 @@ GENERAL.
 Date: See RCS-ID
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl
 Copyright: GPL, inasfar not public domain by FIG
-Archive: ci86g3d154.zip
+Archive: ci86g3d179.zip
 
 All generic CI86 forths have version number 3.
-Preliminary releases derive their version id, in this case as 3.154, from
+Preliminary releases derive their version id, in this case as 3.179, from
 the RCS version of the generic source file `ci86.gnr'
 Stable versions will use a regular numbering, that starts with old FIG :
     1.x (FIG)
@@ -16,7 +16,10 @@ Stable versions will use a regular numbering, that starts with old FIG :
     3.x CI86
 
 Release :
-RCS version 3.154 is archived into fig86g3d154.zip and consists of
+The previous release was 3.154. There has been no change in the number
+of files, and there purpose.
+
+RCS version 3.179 is archived into fig86g3d179.zip and consists of
 (this version is named after RCS so it is a beta release)
 
 The source.
