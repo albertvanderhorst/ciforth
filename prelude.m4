@@ -5,10 +5,23 @@ dnl
 dnl DO NOT CHANGE THIS FILE FOR CONFIGURATION!
 dnl OVERWRITE CONFIGURATION ITEMS IN A .cfg FILE.
 dnl
+dnl Change the quotes once and for all.
+dnl This means a separate pass (we do not want this!)
+dnl Note that there is no attempt to quote the paremeters.
+dnl If you try to make Forth words with { } your coat is sold.
+changequote({,})dnl
+changecom{}dnl no braindamaged comment with #
+dnl
 dnl No version means the rcs version id counts.
 dnl This may be redefined by a ``VERSION=xx'' parameter passed to ``make''.
 define( {M4_VERSION}, )dnl
-
+dnl
+dnl The default supplier, such as they will appear in a generated system.
+dnl It is intended that it contains the name of the copyright holder of
+dnl the configered source.
+define( {M4_SUPPLIER}, {Albert van der Horst})
+dnl define( {M4_SUPPLIER}, {DFW})
+dnl
 dnl This file contains the default version and mechanism for configuration
 dnl for the generic figforth system.
 dnl The choices are put in a configuration file, such as alone.cfg
@@ -18,12 +31,6 @@ dnl a bootable system must rely on BIOS not MSDOS
 dnl a 32 bit system cannot be real mode
 dnl (And of course activating 16 and 32 bit at the same time is really out.)
 dnl
-dnl Change the quotes once and for all.
-dnl This means a separate pass (we do not want this!)
-dnl Note that there is no attempt to quote the paremeters.
-dnl If you try to make Forth words with { } your coat is sold.
-changequote({,})dnl
-changecom{}dnl no braindamaged comment with #
 dnl Indicate that a large part of conditional assembly ends here
 define({_END_},{$1})dnl
 dnl _yes and  _no are expanded during definition time and generate

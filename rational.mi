@@ -1,6 +1,9 @@
+dnl $ Id: $
+dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public License
 @section                        Legalese
-This Forth is called ciforth and is made available through the
-DFW
+This application currently is copyright by M4_SUPPLIER.
+This Forth is called ciforth and is made available by the
+DFW.
 All publications of the DFW are available under GPL, the GNU public license.
 The file forthfile({COPYING}) containing the legal expression of these
 lines must accompagny it.
@@ -11,7 +14,8 @@ always are legally obliged to make the source available.
 But we consider this ``fair use in the Forth sense'' as
 expressed by the following statement.
 
-In addition to the GPL the DFW states the following:
+In addition to the GPL M4_SUPPLIER grants the following rights
+in writing:
 
 The GPL is interpreted in the sense that a system based on ciforth
 and intended to serve a particular purpose, that purpose not being a
