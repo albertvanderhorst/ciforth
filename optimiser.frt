@@ -29,6 +29,12 @@ REQUIRE $
 : IN-SET? $@ SWAP
  ?DO DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 
+\ For a SET print it backwards. Primarily intended as how to loop backwards example.
+: SET-PRINT-BACKWARDS
+@+ SWAP BEGIN 2DUP > WHILE   >R 1 CELLS - >R
+    R@ ?
+R> R> REPEAT 2DROP ;
+
 \ Fill from ADDRESS to END a number of cells with CONTENT.
 : WFILL   ROT ROT SWAP ?DO DUP I !   0 CELL+ +LOOP DROP ;
 
@@ -204,17 +210,31 @@ BRANCHES @+ SWAP ?DO
 
 : COPY-ONE IS-A-BRANCH IF HERE CELL+ BRANCHES SET+!  THEN >HERE ;
 
-\ For a branch at ADDRESS do all the corrections found in ``SHIFTS''.
-: CORRECT-ONE-BRANCH
+\ For a forward branch at ADDRESS do all the corrections found in ``SHIFTS''.
+\ Note that this accumulates changes, and the decision to apply a correction
+\ depends on order and previous corrections applied.
+: CORRECT-ONE-BRANCH-FORWARD
 SHIFTS @+ SWAP ?DO
-    I @ OVER   DUP DUP @ + SWAP CELL+ WITHIN IF I CELL+ @ OVER +! THEN
-    I @ OVER   DUP DUP @ + WITHIN IF I CELL+ @ NEGATE OVER +! THEN
+    I @    OVER    DUP >TARGET    WITHIN IF I CELL+ @ OVER +! THEN
 2 CELLS +LOOP DROP ;
+
+\ For an ENTRY in ``SHIFTS'' return the highest ADDRESS in the expanded area.
+: >END-SHIFT DUP @   SWAP CELL+ @  + ;
+
+\ For a backward branch at ADDRESS do all the corrections found in ``SHIFTS''.
+\ Note that this accumulates changes, and the decision to apply a correction
+\ depends on order and previous corrections applied.
+\ For a backward branch, ``SHIFTS'' must be inspected nackwards.
+: CORRECT-ONE-BRANCH-BACKWARD
+SHIFTS
+@+ SWAP BEGIN 2DUP > WHILE   >R 2 CELLS - >R
+    R@ >END-SHIFT   OVER DUP >TARGET SWAP   WITHIN IF R@ CELL+ @ NEGATE OVER +! THEN
+R> R> REPEAT 2DROP DROP ;
 
 \ Correct all branches.
 : CORRECT-BRANCHES
 BRANCHES @+ SWAP ?DO
-    I @ CORRECT-ONE-BRANCH
+    I @ DUP @ 0< IF CORRECT-ONE-BRANCH-BACKWARD ELSE CORRECT-ONE-BRANCH-FORWARD THEN
 0 CELL+ +LOOP ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' .

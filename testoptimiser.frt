@@ -57,6 +57,21 @@ CRACK DOIT
 'test8 SHOW-IT
 
 : (test1) + AND OR LSHIFT ;
-: test9 BEGIN (test1) AGAIN ;
+: test9 IF (test1) THEN ;
 \ This is all we can do for the moment:
 'test9 >DFA @ EXPAND-NEW CRACK-CHAIN
+
+: (test1) + AND OR LSHIFT ;
+: testA IF (test1) (test1) THEN ;
+\ This is all we can do for the moment:
+'testA >DFA @ EXPAND-NEW CRACK-CHAIN
+
+: (test1) + AND OR LSHIFT ;
+: testB BEGIN (test1) AGAIN ;
+\ This is all we can do for the moment:
+'testB >DFA @ EXPAND-NEW CRACK-CHAIN
+
+: (test1) + AND OR LSHIFT ;
+: testC BEGIN (test1) (test1) AGAIN ;
+\ This is all we can do for the moment:
+'testC >DFA @ EXPAND-NEW CRACK-CHAIN CR
