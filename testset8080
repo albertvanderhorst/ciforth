@@ -1,0 +1,245 @@
+!TALLY
+HLT
+RET
+NOP
+CC, Y| LS| 10 X,
+CC, Y| PE| 10 X,
+CC, Y| CY| 10 X,
+CC, Y| ZR| 10 X,
+CC, N| LS| 10 X,
+CC, N| PE| 10 X,
+CC, N| CY| 10 X,
+CC, N| ZR| 10 X,
+JC, Y| LS| 10 X,
+JC, Y| PE| 10 X,
+JC, Y| CY| 10 X,
+JC, Y| ZR| 10 X,
+JC, N| LS| 10 X,
+JC, N| PE| 10 X,
+JC, N| CY| 10 X,
+JC, N| ZR| 10 X,
+RC, Y| LS|
+RC, Y| PE|
+RC, Y| CY|
+RC, Y| ZR|
+RC, N| LS|
+RC, N| PE|
+RC, N| CY|
+RC, N| ZR|
+MVI A'| C IB,
+MVI M'| C IB,
+MVI L'| C IB,
+MVI H'| C IB,
+MVI E'| C IB,
+MVI D'| C IB,
+MVI C'| C IB,
+MVI B'| C IB,
+MOV A'| A|
+MOV A'| M|
+MOV A'| L|
+MOV A'| H|
+MOV A'| E|
+MOV A'| D|
+MOV A'| C|
+MOV A'| B|
+MOV M'| A|
+MOV M'| L|
+MOV M'| H|
+MOV M'| E|
+MOV M'| D|
+MOV M'| C|
+MOV M'| B|
+MOV L'| A|
+MOV L'| M|
+MOV L'| L|
+MOV L'| H|
+MOV L'| E|
+MOV L'| D|
+MOV L'| C|
+MOV L'| B|
+MOV H'| A|
+MOV H'| M|
+MOV H'| L|
+MOV H'| H|
+MOV H'| E|
+MOV H'| D|
+MOV H'| C|
+MOV H'| B|
+MOV E'| A|
+MOV E'| M|
+MOV E'| L|
+MOV E'| H|
+MOV E'| E|
+MOV E'| D|
+MOV E'| C|
+MOV E'| B|
+MOV D'| A|
+MOV D'| M|
+MOV D'| L|
+MOV D'| H|
+MOV D'| E|
+MOV D'| D|
+MOV D'| C|
+MOV D'| B|
+MOV C'| A|
+MOV C'| M|
+MOV C'| L|
+MOV C'| H|
+MOV C'| E|
+MOV C'| D|
+MOV C'| C|
+MOV C'| B|
+MOV B'| A|
+MOV B'| M|
+MOV B'| L|
+MOV B'| H|
+MOV B'| E|
+MOV B'| D|
+MOV B'| C|
+MOV B'| B|
+DCR A'|
+DCR M'|
+DCR L'|
+DCR H'|
+DCR E'|
+DCR D'|
+DCR C'|
+DCR B'|
+INR A'|
+INR M'|
+INR L'|
+INR H'|
+INR E'|
+INR D'|
+INR C'|
+INR B'|
+CALL 8 X,
+JMP 8 X,
+LDA 8 X,
+STA 8 X,
+LHLD 8 X,
+SHLD 8 X,
+CPI 8 IB,
+ORI 8 IB,
+XRI 8 IB,
+ANI 8 IB,
+SBI 8 IB,
+SUI 8 IB,
+ACI 8 IB,
+ADI 8 IB,
+IN 8 P,
+OUT 8 P,
+PUSH PSW|
+PUSH HL|
+PUSH DE|
+PUSH BC|
+POP PSW|
+POP HL|
+POP DE|
+POP BC|
+LXI SP| C IX,
+LXI HL| C IX,
+LXI DE| C IX,
+LXI BC| C IX,
+DCX SP|
+DCX HL|
+DCX DE|
+DCX BC|
+LDAX DE|
+LDAX BC|
+DAD SP|
+DAD HL|
+DAD DE|
+DAD BC|
+INX SP|
+INX HL|
+INX DE|
+INX BC|
+STAX DE|
+STAX BC|
+CMP A|
+CMP M|
+CMP L|
+CMP H|
+CMP E|
+CMP D|
+CMP C|
+CMP B|
+ORA A|
+ORA M|
+ORA L|
+ORA H|
+ORA E|
+ORA D|
+ORA C|
+ORA B|
+XRA A|
+XRA M|
+XRA L|
+XRA H|
+XRA E|
+XRA D|
+XRA C|
+XRA B|
+ANA A|
+ANA M|
+ANA L|
+ANA H|
+ANA E|
+ANA D|
+ANA C|
+ANA B|
+SBB A|
+SBB M|
+SBB L|
+SBB H|
+SBB E|
+SBB D|
+SBB C|
+SBB B|
+SUB A|
+SUB M|
+SUB L|
+SUB H|
+SUB E|
+SUB D|
+SUB C|
+SUB B|
+ADC A|
+ADC M|
+ADC L|
+ADC H|
+ADC E|
+ADC D|
+ADC C|
+ADC B|
+ADD A|
+ADD M|
+ADD L|
+ADD H|
+ADD E|
+ADD D|
+ADD C|
+ADD B|
+RST7
+RST6
+RST5
+RST4
+RST3
+RST2
+RST1
+RST0
+SPHL
+PCHL
+EI
+DI
+XCHG
+XTHL
+CMC
+STC
+CMA
+DAA
+RAR
+RAL
+RRC
+RLC
