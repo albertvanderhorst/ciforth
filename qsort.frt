@@ -52,8 +52,6 @@ DEFER (<-->)    ' <--> IS (<-->)
 
 : QSORT             ( lo hi -- )
     PARTITION                ( lo_1 hi_1 lo_2 hi_2)
-    2OVER 2OVER  - +         ( . . . . lo_1 hi_1+lo_2-hi_2)
-        < IF  2SWAP  THEN    ( lo_1 hi_1 lo_2 hi_2)
     2DUP < IF  RECURSE  ELSE  2DROP  THEN
     2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
 
