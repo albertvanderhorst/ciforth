@@ -7,6 +7,9 @@
 MASK=FF
 PREFIX=0
 TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
+TESTTARGETS=*.ps testas* testlina.[0-9] testmsdos.[0-9] testlinux.[0-9]
+
+testclean: ; rm $(TESTTARGETS)
 
 %.ps:%.dvi  ;
 	 texindex  $(@:%.ps=%.??)
@@ -207,17 +210,13 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	)| m4 > $@
 	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html >> $@
 
-ci86.%.info : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 namescooked.m4
-	m4 menu.m4 $(@:%.info=%.mig) > menu.texinfo
-	m4 wordset.m4 $(@:%.info=%.mim)  $(@:%.info=%.mig) |m4 >wordset.mi
-	(cat $(@:ci86.%.info=%.cfg) manual.m4 namescooked.m4 ciforth.mi)|\
-	  m4 | tee spy | makeinfo
-	rm wordset.mi menu.texinfo
+%.info : %.texinfo  ; makeinfo --no-split $< -o $@
 
 # For tex we do not need to use the safe macro's
 ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 namescooked.m4
 	m4 menu.m4 $(@:%.texinfo=%.mig) > menu.texinfo
 	m4 wordset.m4 $(@:%.texinfo=%.mim)  $(@:%.texinfo=%.mig) |m4 >wordset.mi
+	echo 'define({thisfilename},{$@})' >>namescooked.m4
 	( \
 	    cat $(@:ci86.%.texinfo=%.cfg) manual.m4 namescooked.m4 ciforth.mi \
 	)| tee spy | m4 > $@
