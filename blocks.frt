@@ -2886,7 +2886,7 @@ MEISJES JOPIE     NO-SEX .rel
    R> 1 CELLS - DUP >R  ! ;
 ( : DOIT HERE IN @ COMPILE ' ! IN ! COMPILE : ;   )
 : :R  IN @ >R [COMPILE] : R> IN !
-HERE CFA -FIND 0= 0 ?ERROR DROP CELL+ ! ; IMMEDIATE
+HERE CFA -FIND SWAP DROP IF CELL+ ! THEN ; IMMEDIATE
 FORWARD FAC
 :R FAC   DUP 0= IF DROP 1 ELSE DUP 1 - FAC * THEN ;
 ^ 4 FAC ^ ." 4! IS " .
@@ -2944,15 +2944,15 @@ ELSE       DROP THEN ;
 
 ( bnf PARSER TOKENS                                     )
 ( Skip blanks and handle comment )
-FORWARD COMMENT
 : SKIP-BLANKS TIB @ IN @ + BEGIN DUP C@ BL = WHILE
   1+ 1 IN +! REPEAT DROP ;
+FORWARD skip  ( SKIP-BLANKS is possible)
 : +KEYWORD ( VS f -) IF C@ IN +! ELSE DROP THEN ;
 : =KEYWORD  ( VS -) SUCCESS @ IF DUP
-IN @ TIB @ + SWAP 255 SWAP $@ ^ MATCH ^ DROP DUP SUCCESS !
+IN @ TIB @ + SWAP 255 SWAP $@ MATCH DROP DUP SUCCESS !
 +KEYWORD ELSE DROP THEN ;
 : KEYWORD <BUILDS BL WORD HERE C@ 1+ ALLOT
-DOES> COMMENT =KEYWORD ;
+DOES> skip =KEYWORD ;
 
 
 
@@ -2976,7 +2976,7 @@ by BNF: xxx ... ;BNF )
 
 ( THE { } round_bracket_pair and [ ] definitions )
 ( Start a BNF definition, must have been declared by FORWARD )
-: BNF:   [COMPILE] :R   COMPILE COMMENT   <BNF   SUC!   ;
+: BNF:   [COMPILE] :R   <BNF   SUC!   ;
 : ;BNF   BNF>   [COMPILE] ;   ; IMMEDIATE
 
 : | SUC@ `IF PTS> `EXIT `ELSE BT> <PTS SUC! `THEN ;
@@ -2991,7 +2991,7 @@ IMMEDIATE
 
 
 ( Examples and tests )
- :R COMMENT  SKIP-BLANKS  ;
+ : COMMENT  SKIP-BLANKS  ;
 FORWARD AUX1 BNF: AUX1 'A' [ 'B' | 'C' ] ;BNF
 : RUN[ 1 SUCCESS ! AUX1 SUCCESS ? ;
 : RUN{ 1 SUCCESS ! 'A' { 'B' 'C' } SUCCESS ? ;
