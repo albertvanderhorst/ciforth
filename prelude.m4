@@ -210,16 +210,26 @@ define( {_GENERATE_DOC},
 {divert(3)dnl}
 )
 
+dnl Switch the system to split off testinfo
+dnl the real tests are further down the pipeline
+define( {_GENERATE_TEST}, 
+{divert(5)dnl}
+)
+
 dnl Redefine ``worddoc'' to make sure it lands in the documentation part
 define({worddoc},
 {_GENERATE_DOC{}dnl}
 {{worddoc({$1},{$2},{$3},{$4},{$5},{$6},{$7})}}
+{_GENERATE_TEST{}dnl}
+{{wordtest({$8})}}
 {_GENERATE_CODE{}dnl}
 )dnl
 
 define({worddocsafe},
 {_GENERATE_DOC{}dnl}
 {{worddocsafe({$1},{$2},{$3},{$4},{$5},{$6},{$7})}}
+{_GENERATE_TEST{}dnl}
+{{wordtest({$8})}}
 {_GENERATE_CODE{}dnl}
 )dnl
 
@@ -231,4 +241,12 @@ define({worddocchapter},
 {_GENERATE_CODE{}dnl}
 )dnl
 
+dnl m4 generates code on channel 1
+divert(2)dnl
+; Split here for documentation
+dnl m4 generates documentation on 3
+divert(4)dnl 
+; Split here for test
+dnl m4 generates tests on 5
 divert(-1){}dnl
+
