@@ -309,8 +309,8 @@ NEXT1:	MOV	DX,BX	; (W) <- (IP)
 	INC	DX	; (W) <- (W) + 1
 	JMP     _WORD_PTR[BX]    ; TO `CFA'
 	PAGE
-_START_DICTIONARY
 ;
+;       Dictionary starts here.
 DP0:    HEADER({LIT},{LIT},{$ + 2})
 	LODSW		; AX <- LITERAL
 	JMP SHORT     APUSH   ; TO TOP OF STACK
@@ -482,6 +482,7 @@ ENCL4:	MOV	AX,DX
 	; At line     LINE ~500
  	HEADER({CR},{CR},{DOCOL})
         DW      LIT,LF
+        DW      EMIT
         DW      SEMIS
 	PAGE
  	HEADER({CMOVE},{LCMOVE},{$+2})
@@ -2018,7 +2019,7 @@ SCREEN	DW	FROMR,INN
         HEADER({BIOS},{BIOS},{$ + 2})
         POP     AX      ; Function code
         ; Once we are more acknowledgable, put segment overwrite here.
-        MOV     _BYTE [RQBIOS+1],AL ; Patch the code.
+        MOV     _BYTE_PTR([RQBIOS+1]),AL ; Patch the code.
         POP     DX        
         POP     CX      
         POP     BX      
@@ -2140,12 +2141,13 @@ TYPE3	DW	SEMIS
 	DW	PSTOR,SEMIS
 PEMIT	DW	$+2
 	POP	AX	;GET CHAR
-        CMP     AX,LF   ; Precede ^J with ^M
+        CMP     AL,LF   ; Precede ^J with ^M
         JNE     PEMIT1
     	MOV	AL,ACR
 	CALL	CHO    
-	MOV	AL,LF
-PEMIT1  CALL	CHO    ;CHAR OUTPUT
+	MOV	AL,LF  
+        ; Bizar, without the colon MASM reports error.
+PEMIT1: CALL	CHO    ;CHAR OUTPUT
 	JMP	NEXT
 CHO	PROC	NEAR
 	PUSH	DX

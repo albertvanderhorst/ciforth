@@ -38,3 +38,5 @@ DW      BRAN
 define({_LOOP},dnl
 DW      XLOOP
         DW      $1-$)dnl
+define({_BYTE_PTR},BYTE $1)dnl
+
