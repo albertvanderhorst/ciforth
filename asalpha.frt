@@ -243,7 +243,7 @@ ASSEMBLER DEFINITIONS  HEX
 
 ( ***************************** 16 bits displacement ****************** )
 
-0 0 0000,FFFF 0 DFI D16|
+0 0 0000,FFFF 0 DFI w#|
 
 ( ***************************** 4.2 LOAD/STORE ************************ )
 
@@ -267,7 +267,7 @@ BI: 01.0 BI: 20.0 8 4FAMILY, LDF, LDG, LDS, LDT, STF, STG, STS, STT,
 0 0 3FF,3FFF T!
 BI: 00.200 BI: 1A.000 4 4FAMILY, JMP, JSR, RET, JSR_COROUTINE,
 
-20,0000 0 001F,FFFF 0 DFI D21| \ 21 bits displacement
+20,0000 0 001F,FFFF 0 DFI c#| \ 21 bits displacement
 
 ( DEC calls this a branch instruction format.                           )
 8 0 NORMAL-MASK  T!
@@ -288,7 +288,7 @@ BI: 01.0 BI: 30.0 8 4FAMILY, -- FBEQ, FBLT, FBLE, -- FBNE, FBGE, FBGT,
 ( Dirty trick out board hanging bit, to prevent matches with other      )
 ( assembler parts. Doing this via the ``BAD'' mechanism is just too     )
 ( expensive.                                                            )
-0 0 1,03FF,FFFF 0 DFI N25|    ( 26 bits number built in)
+0 0 1,03FF,FFFF 0 DFI n#|    ( 26 bits number built in)
 0 0 1,03FF,FFFF BI: 0.0     4PI CALL_PAL
 0 0   001F,0000  6000,E800 4PI ECB
 0 0   0000,0000  6000,0400 4PI EXCB
