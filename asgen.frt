@@ -262,13 +262,19 @@ IS-A IS-DFI  : DFI   CHECK31A CREATE-- , , , , DOES> REMEMBER FIXUP-DATA ;
 ( Bookkeeping for a fixup-from-reverse using a pointer to the BIBYBA    )
 ( information, can fake a fixup in disassembling too.                   )
 : TALLY:|R  @+ CORRECT-R TALLY-BI AND!   @+ TALLY-BY OR!   @ TALLY-BA OR!U ;
-( Fix up the instruction from reverse using a pointer to DATA. )
-: FIXUP<   @+ CORRECT-R ISS @ OR!   TALLY:|R  CHECK32 ;
+( Fix up the instruction from reverse with DATA. )
+: FIXUP<   CORRECT-R ISS @ OR!   ;
 ( Define a fixup-from-reverse by BA BY BI and the FIXUP bits )
 ( One size fits all, because of the character of the or-operations. )
 ( bi and fixup are specified that last byte is lsb, such as you read it )
 IS-A IS-FIR   : FIR   CHECK31 CREATE-- REVERSE-BYTES , REVERSE-BYTES , , ,
-    DOES> REMEMBER FIXUP< ;
+    DOES> REMEMBER @+ FIXUP< TALLY:|R  CHECK32 ;
+
+( Define a fixup-from-reverse by BA BY BI and LEN to shift )
+( One size fits all, because of the character of the or-operations. )
+( bi and fixup are specified that last byte is lsb, such as you read it )
+IS-A IS-DFIR   : DFIR   CHECK31 CREATE-- , REVERSE-BYTES , , ,
+    DOES> REMEMBER @+ SWAP >R LSHIFT REVERSE-BYTES FIXUP< R> TALLY:|R  CHECK32 ;
 
 ( *************** PREFERRED NOT YET USED ************************       )
 ( If bits were already down it is wrong. For next two words.)
@@ -516,6 +522,16 @@ VARIABLE POINTER       HERE POINTER !
    THEN
    THEN
 ;
+: DIS-DFIR
+   DUP IS-DFIR IF
+   DUP >BI @ CORRECT-R   TALLY-BI @ CONTAINED-IN IF
+   DUP >BA @  COMPATIBLE? IF
+       DUP >BI TALLY:|R
+       DUP +DISS
+   THEN
+   THEN
+   THEN
+;
 : DIS-FIR
    DUP IS-FIR IF
    DUP >BI @ CORRECT-R   TALLY-BI @ CONTAINED-IN IF
@@ -546,6 +562,13 @@ VARIABLE POINTER       HERE POINTER !
     %ID.                         ( DEA -- )
 ;
 
+( Print a disassembly for the data-fixup from reverse DEA.              )
+: .DFIR
+    INSTRUCTION   OVER >BI @ CORRECT-R AND   OVER >DATA @ RSHIFT
+    REVERSE-BYTES CORRECT-R U.
+    %ID.                         ( DEA -- )
+;
+
 ( Print a standard disassembly for the commaer DEA.                     )
 : .COMMA-STANDARD
     POINTER @ @ OVER >CNT @ FIRSTBYTES U.
@@ -567,9 +590,11 @@ VARIABLE POINTER       HERE POINTER !
         .COMMA
     ELSE DUP IS-DFI IF
         .DFI
+    ELSE DUP IS-DFIR IF
+        .DFIR
     ELSE
         %~ID.
-    THEN THEN
+    THEN THEN THEN
  0 CELL+ +LOOP
 ;
 
@@ -586,7 +611,7 @@ VARIABLE I-ALIGNMENT    1 I-ALIGNMENT !   ( Instruction alignment )
     SWAP
     >R R@ POINTER !
     ( startdea -- ) BEGIN
-        DIS-PI DIS-xFI DIS-DFI DIS-FIR DIS-COMMA
+        DIS-PI DIS-xFI DIS-DFI DIS-DFIR DIS-FIR DIS-COMMA
         >NEXT%
 (       DUP ID. ." : "  DISS-VECTOR @ EXECUTE                                 )
     DUP VOCEND? RESULT? OR UNTIL DROP

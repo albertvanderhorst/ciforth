@@ -8,10 +8,10 @@ PULU,   (& DPR& B& )S,
 PSHU,   (& DPR& B& )S,
 PULS,   (& DPR& B& )S,
 PSHS,   (& DPR& B& )S,
-LEAU,   X ,C
-LEAS,   X ,C
-LEAY,   X ,C
-LEAX,   X ,C
+LEAU,   X C (|#,)
+LEAS,   X C (|#,)
+LEAY,   X C (|#,)
+LEAX,   X C (|#,)
 CWAI,   8 #,
 ANDCC,   8 #,
 ORCC,   8 #,
@@ -46,157 +46,157 @@ BSR,   8 #,
 LBRS,   8 ##,
 LBRA,   8 ##,
 JSR,   E|   C E,
-JSR,   []   X ,C
+JSR,   []   X C (|#,)
 JSR,   DP|   C DO,
 JMP,   E|   C E,
-JMP,   []   X ,C
+JMP,   []   X C (|#,)
 STS,   E|   C E,
-STS,   []   X ,C
+STS,   []   X C (|#,)
 STS,   DP|   C DO,
 STY,   E|   C E,
-STY,   []   X ,C
+STY,   []   X C (|#,)
 STY,   DP|   C DO,
 LDS,   E|   C E,
-LDS,   []   X ,C
+LDS,   []   X C (|#,)
 LDS,   DP|   C DO,
 LDS,   #|   C ##,
 LDY,   E|   C E,
-LDY,   []   X ,C
+LDY,   []   X C (|#,)
 LDY,   DP|   C DO,
 LDY,   #|   C ##,
 CMPS,   E|   C E,
-CMPS,   []   X ,C
+CMPS,   []   X C (|#,)
 CMPS,   DP|   C DO,
 CMPS,   #|   C ##,
 CMPY,   E|   C E,
-CMPY,   []   X ,C
+CMPY,   []   X C (|#,)
 CMPY,   DP|   C DO,
 CMPY,   #|   C ##,
 CMPU,   E|   C E,
-CMPU,   []   X ,C
+CMPU,   []   X C (|#,)
 CMPU,   DP|   C DO,
 CMPU,   #|   C ##,
 CMPD,   E|   C E,
-CMPD,   []   X ,C
+CMPD,   []   X C (|#,)
 CMPD,   DP|   C DO,
 CMPD,   #|   C ##,
 STD,   E|   C E,
-STD,   []   X ,C
+STD,   []   X C (|#,)
 STD,   DP|   C DO,
 LDU,   E|   C E,
-LDU,   []   X ,C
+LDU,   []   X C (|#,)
 LDU,   DP|   C DO,
 LDU,   #|   C ##,
 LDX,   E|   C E,
-LDX,   []   X ,C
+LDX,   []   X C (|#,)
 LDX,   DP|   C DO,
 LDX,   #|   C ##,
 LDD,   E|   C E,
-LDD,   []   X ,C
+LDD,   []   X C (|#,)
 LDD,   DP|   C DO,
 LDD,   #|   C ##,
 CMPX,   E|   C E,
-CMPX,   []   X ,C
+CMPX,   []   X C (|#,)
 CMPX,   DP|   C DO,
 CMPX,   #|   C ##,
 ADDD,   E|   C E,
-ADDD,   []   X ,C
+ADDD,   []   X C (|#,)
 ADDD,   DP|   C DO,
 ADDD,   #|   C ##,
 SUBD,   E|   C E,
-SUBD,   []   X ,C
+SUBD,   []   X C (|#,)
 SUBD,   DP|   C DO,
 SUBD,   #|   C ##,
 STU,   E|   C E,
-STU,   []   X ,C
+STU,   []   X C (|#,)
 STU,   DP|   C DO,
 STX,   E|   C E,
-STX,   []   X ,C
+STX,   []   X C (|#,)
 STX,   DP|   C DO,
 STB,   E|   C E,
-STB,   []   X ,C
+STB,   []   X C (|#,)
 STB,   DP|   C DO,
 STA,   E|   C E,
-STA,   []   X ,C
+STA,   []   X C (|#,)
 STA,   DP|   C DO,
 ADDB,   E|   C E,
-ADDB,   []   X ,C
+ADDB,   []   X C (|#,)
 ADDB,   DP|   C DO,
 ADDB,   #|   C #,
 ORB,   E|   C E,
-ORB,   []   X ,C
+ORB,   []   X C (|#,)
 ORB,   DP|   C DO,
 ORB,   #|   C #,
 ADCB,   E|   C E,
-ADCB,   []   X ,C
+ADCB,   []   X C (|#,)
 ADCB,   DP|   C DO,
 ADCB,   #|   C #,
 EORB,   E|   C E,
-EORB,   []   X ,C
+EORB,   []   X C (|#,)
 EORB,   DP|   C DO,
 EORB,   #|   C #,
 LDB,   E|   C E,
-LDB,   []   X ,C
+LDB,   []   X C (|#,)
 LDB,   DP|   C DO,
 LDB,   #|   C #,
 BITB,   E|   C E,
-BITB,   []   X ,C
+BITB,   []   X C (|#,)
 BITB,   DP|   C DO,
 BITB,   #|   C #,
 ANDB,   E|   C E,
-ANDB,   []   X ,C
+ANDB,   []   X C (|#,)
 ANDB,   DP|   C DO,
 ANDB,   #|   C #,
 SBCB,   E|   C E,
-SBCB,   []   X ,C
+SBCB,   []   X C (|#,)
 SBCB,   DP|   C DO,
 SBCB,   #|   C #,
 CMPB,   E|   C E,
-CMPB,   []   X ,C
+CMPB,   []   X C (|#,)
 CMPB,   DP|   C DO,
 CMPB,   #|   C #,
 SUBB,   E|   C E,
-SUBB,   []   X ,C
+SUBB,   []   X C (|#,)
 SUBB,   DP|   C DO,
 SUBB,   #|   C #,
 ADDA,   E|   C E,
-ADDA,   []   X ,C
+ADDA,   []   X C (|#,)
 ADDA,   DP|   C DO,
 ADDA,   #|   C #,
 ORA,   E|   C E,
-ORA,   []   X ,C
+ORA,   []   X C (|#,)
 ORA,   DP|   C DO,
 ORA,   #|   C #,
 ADCA,   E|   C E,
-ADCA,   []   X ,C
+ADCA,   []   X C (|#,)
 ADCA,   DP|   C DO,
 ADCA,   #|   C #,
 EORA,   E|   C E,
-EORA,   []   X ,C
+EORA,   []   X C (|#,)
 EORA,   DP|   C DO,
 EORA,   #|   C #,
 LDA,   E|   C E,
-LDA,   []   X ,C
+LDA,   []   X C (|#,)
 LDA,   DP|   C DO,
 LDA,   #|   C #,
 BITA,   E|   C E,
-BITA,   []   X ,C
+BITA,   []   X C (|#,)
 BITA,   DP|   C DO,
 BITA,   #|   C #,
 ANDA,   E|   C E,
-ANDA,   []   X ,C
+ANDA,   []   X C (|#,)
 ANDA,   DP|   C DO,
 ANDA,   #|   C #,
 SBCA,   E|   C E,
-SBCA,   []   X ,C
+SBCA,   []   X C (|#,)
 SBCA,   DP|   C DO,
 SBCA,   #|   C #,
 CMPA,   E|   C E,
-CMPA,   []   X ,C
+CMPA,   []   X C (|#,)
 CMPA,   DP|   C DO,
 CMPA,   #|   C #,
 SUBA,   E|   C E,
-SUBA,   []   X ,C
+SUBA,   []   X C (|#,)
 SUBA,   DP|   C DO,
 SUBA,   #|   C #,
 CLR|D,   8 DO,
@@ -212,47 +212,47 @@ LSR|D,   8 DO,
 COM|D,   8 DO,
 NEG|D,   8 DO,
 CLR,   E|   C E,
-CLR,   []   X ,C
+CLR,   []   X C (|#,)
 CLR,   B|
 CLR,   A|
 TST,   E|   C E,
-TST,   []   X ,C
+TST,   []   X C (|#,)
 TST,   B|
 TST,   A|
 INC,   E|   C E,
-INC,   []   X ,C
+INC,   []   X C (|#,)
 INC,   B|
 INC,   A|
 DEC,   E|   C E,
-DEC,   []   X ,C
+DEC,   []   X C (|#,)
 DEC,   B|
 DEC,   A|
 ROL,   E|   C E,
-ROL,   []   X ,C
+ROL,   []   X C (|#,)
 ROL,   B|
 ROL,   A|
 ASL,   E|   C E,
-ASL,   []   X ,C
+ASL,   []   X C (|#,)
 ASL,   B|
 ASL,   A|
 ASR,   E|   C E,
-ASR,   []   X ,C
+ASR,   []   X C (|#,)
 ASR,   B|
 ASR,   A|
 ROR,   E|   C E,
-ROR,   []   X ,C
+ROR,   []   X C (|#,)
 ROR,   B|
 ROR,   A|
 LSR,   E|   C E,
-LSR,   []   X ,C
+LSR,   []   X C (|#,)
 LSR,   B|
 LSR,   A|
 COM,   E|   C E,
-COM,   []   X ,C
+COM,   []   X C (|#,)
 COM,   B|
 COM,   A|
 NEG,   E|   C E,
-NEG,   []   X ,C
+NEG,   []   X C (|#,)
 NEG,   B|
 NEG,   A|
 TFR,   PC<=   =>PC
@@ -450,134 +450,134 @@ LDA, []   ,R+   U
 LDA, []   ,R+   Y
 LDA, []   ,R+   X
 LDA, []   [##]  0FDEA WO,
-LDA, []   S   ,F
-LDA, []   S   ,E
-LDA, []   S   ,D
-LDA, []   S   ,C
-LDA, []   S   ,B
-LDA, []   S   ,A
-LDA, []   S   ,9
-LDA, []   S   ,8
-LDA, []   S   ,7
-LDA, []   S   ,6
-LDA, []   S   ,5
-LDA, []   S   ,4
-LDA, []   S   ,3
-LDA, []   S   ,2
-LDA, []   S   ,1
-LDA, []   S   ,0
-LDA, []   S   ,-1
-LDA, []   S   ,-2
-LDA, []   S   ,-3
-LDA, []   S   ,-4
-LDA, []   S   ,-5
-LDA, []   S   ,-6
-LDA, []   S   ,-7
-LDA, []   S   ,-8
-LDA, []   S   ,-9
-LDA, []   S   ,-A
-LDA, []   S   ,-B
-LDA, []   S   ,-C
-LDA, []   S   ,-D
-LDA, []   S   ,-E
-LDA, []   S   ,-F
-LDA, []   S   ,-10
-LDA, []   U   ,F
-LDA, []   U   ,E
-LDA, []   U   ,D
-LDA, []   U   ,C
-LDA, []   U   ,B
-LDA, []   U   ,A
-LDA, []   U   ,9
-LDA, []   U   ,8
-LDA, []   U   ,7
-LDA, []   U   ,6
-LDA, []   U   ,5
-LDA, []   U   ,4
-LDA, []   U   ,3
-LDA, []   U   ,2
-LDA, []   U   ,1
-LDA, []   U   ,0
-LDA, []   U   ,-1
-LDA, []   U   ,-2
-LDA, []   U   ,-3
-LDA, []   U   ,-4
-LDA, []   U   ,-5
-LDA, []   U   ,-6
-LDA, []   U   ,-7
-LDA, []   U   ,-8
-LDA, []   U   ,-9
-LDA, []   U   ,-A
-LDA, []   U   ,-B
-LDA, []   U   ,-C
-LDA, []   U   ,-D
-LDA, []   U   ,-E
-LDA, []   U   ,-F
-LDA, []   U   ,-10
-LDA, []   Y   ,F
-LDA, []   Y   ,E
-LDA, []   Y   ,D
-LDA, []   Y   ,C
-LDA, []   Y   ,B
-LDA, []   Y   ,A
-LDA, []   Y   ,9
-LDA, []   Y   ,8
-LDA, []   Y   ,7
-LDA, []   Y   ,6
-LDA, []   Y   ,5
-LDA, []   Y   ,4
-LDA, []   Y   ,3
-LDA, []   Y   ,2
-LDA, []   Y   ,1
-LDA, []   Y   ,0
-LDA, []   Y   ,-1
-LDA, []   Y   ,-2
-LDA, []   Y   ,-3
-LDA, []   Y   ,-4
-LDA, []   Y   ,-5
-LDA, []   Y   ,-6
-LDA, []   Y   ,-7
-LDA, []   Y   ,-8
-LDA, []   Y   ,-9
-LDA, []   Y   ,-A
-LDA, []   Y   ,-B
-LDA, []   Y   ,-C
-LDA, []   Y   ,-D
-LDA, []   Y   ,-E
-LDA, []   Y   ,-F
-LDA, []   Y   ,-10
-LDA, []   X   ,F
-LDA, []   X   ,E
-LDA, []   X   ,D
-LDA, []   X   ,C
-LDA, []   X   ,B
-LDA, []   X   ,A
-LDA, []   X   ,9
-LDA, []   X   ,8
-LDA, []   X   ,7
-LDA, []   X   ,6
-LDA, []   X   ,5
-LDA, []   X   ,4
-LDA, []   X   ,3
-LDA, []   X   ,2
-LDA, []   X   ,1
-LDA, []   X   ,0
-LDA, []   X   ,-1
-LDA, []   X   ,-2
-LDA, []   X   ,-3
-LDA, []   X   ,-4
-LDA, []   X   ,-5
-LDA, []   X   ,-6
-LDA, []   X   ,-7
-LDA, []   X   ,-8
-LDA, []   X   ,-9
-LDA, []   X   ,-A
-LDA, []   X   ,-B
-LDA, []   X   ,-C
-LDA, []   X   ,-D
-LDA, []   X   ,-E
-LDA, []   X   ,-F
-LDA, []   X   ,-10
+LDA, []   S   F   (|#,)
+LDA, []   S   E   (|#,)
+LDA, []   S   D   (|#,)
+LDA, []   S   C   (|#,)
+LDA, []   S   B   (|#,)
+LDA, []   S   A   (|#,)
+LDA, []   S   9   (|#,)
+LDA, []   S   8   (|#,)
+LDA, []   S   7   (|#,)
+LDA, []   S   6   (|#,)
+LDA, []   S   5   (|#,)
+LDA, []   S   4   (|#,)
+LDA, []   S   3   (|#,)
+LDA, []   S   2   (|#,)
+LDA, []   S   1   (|#,)
+LDA, []   S   0   (|#,)
+LDA, []   S   1F  (|#,)
+LDA, []   S   1E  (|#,)
+LDA, []   S   1D  (|#,)
+LDA, []   S   1C  (|#,)
+LDA, []   S   1B  (|#,)
+LDA, []   S   1A  (|#,)
+LDA, []   S   19  (|#,)
+LDA, []   S   18  (|#,)
+LDA, []   S   17  (|#,)
+LDA, []   S   16  (|#,)
+LDA, []   S   15  (|#,)
+LDA, []   S   14  (|#,)
+LDA, []   S   13  (|#,)
+LDA, []   S   12  (|#,)
+LDA, []   S   11  (|#,)
+LDA, []   S   10  (|#,)
+LDA, []   U   F   (|#,)
+LDA, []   U   E   (|#,)
+LDA, []   U   D   (|#,)
+LDA, []   U   C   (|#,)
+LDA, []   U   B   (|#,)
+LDA, []   U   A   (|#,)
+LDA, []   U   9   (|#,)
+LDA, []   U   8   (|#,)
+LDA, []   U   7   (|#,)
+LDA, []   U   6   (|#,)
+LDA, []   U   5   (|#,)
+LDA, []   U   4   (|#,)
+LDA, []   U   3   (|#,)
+LDA, []   U   2   (|#,)
+LDA, []   U   1   (|#,)
+LDA, []   U   0   (|#,)
+LDA, []   U   1F  (|#,)
+LDA, []   U   1E  (|#,)
+LDA, []   U   1D  (|#,)
+LDA, []   U   1C  (|#,)
+LDA, []   U   1B  (|#,)
+LDA, []   U   1A  (|#,)
+LDA, []   U   19  (|#,)
+LDA, []   U   18  (|#,)
+LDA, []   U   17  (|#,)
+LDA, []   U   16  (|#,)
+LDA, []   U   15  (|#,)
+LDA, []   U   14  (|#,)
+LDA, []   U   13  (|#,)
+LDA, []   U   12  (|#,)
+LDA, []   U   11  (|#,)
+LDA, []   U   10  (|#,)
+LDA, []   Y   F   (|#,)
+LDA, []   Y   E   (|#,)
+LDA, []   Y   D   (|#,)
+LDA, []   Y   C   (|#,)
+LDA, []   Y   B   (|#,)
+LDA, []   Y   A   (|#,)
+LDA, []   Y   9   (|#,)
+LDA, []   Y   8   (|#,)
+LDA, []   Y   7   (|#,)
+LDA, []   Y   6   (|#,)
+LDA, []   Y   5   (|#,)
+LDA, []   Y   4   (|#,)
+LDA, []   Y   3   (|#,)
+LDA, []   Y   2   (|#,)
+LDA, []   Y   1   (|#,)
+LDA, []   Y   0   (|#,)
+LDA, []   Y   1F  (|#,)
+LDA, []   Y   1E  (|#,)
+LDA, []   Y   1D  (|#,)
+LDA, []   Y   1C  (|#,)
+LDA, []   Y   1B  (|#,)
+LDA, []   Y   1A  (|#,)
+LDA, []   Y   19  (|#,)
+LDA, []   Y   18  (|#,)
+LDA, []   Y   17  (|#,)
+LDA, []   Y   16  (|#,)
+LDA, []   Y   15  (|#,)
+LDA, []   Y   14  (|#,)
+LDA, []   Y   13  (|#,)
+LDA, []   Y   12  (|#,)
+LDA, []   Y   11  (|#,)
+LDA, []   Y   10  (|#,)
+LDA, []   X   F   (|#,)
+LDA, []   X   E   (|#,)
+LDA, []   X   D   (|#,)
+LDA, []   X   C   (|#,)
+LDA, []   X   B   (|#,)
+LDA, []   X   A   (|#,)
+LDA, []   X   9   (|#,)
+LDA, []   X   8   (|#,)
+LDA, []   X   7   (|#,)
+LDA, []   X   6   (|#,)
+LDA, []   X   5   (|#,)
+LDA, []   X   4   (|#,)
+LDA, []   X   3   (|#,)
+LDA, []   X   2   (|#,)
+LDA, []   X   1   (|#,)
+LDA, []   X   0   (|#,)
+LDA, []   X   1F  (|#,)
+LDA, []   X   1E  (|#,)
+LDA, []   X   1D  (|#,)
+LDA, []   X   1C  (|#,)
+LDA, []   X   1B  (|#,)
+LDA, []   X   1A  (|#,)
+LDA, []   X   19  (|#,)
+LDA, []   X   18  (|#,)
+LDA, []   X   17  (|#,)
+LDA, []   X   16  (|#,)
+LDA, []   X   15  (|#,)
+LDA, []   X   14  (|#,)
+LDA, []   X   13  (|#,)
+LDA, []   X   12  (|#,)
+LDA, []   X   11  (|#,)
+LDA, []   X   10  (|#,)
 
 HERE
 0 , 0 , 0 , 0 ,

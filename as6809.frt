@@ -38,9 +38,9 @@ ASSEMBLER DEFINITIONS  HEX
 
 
 ( --------------- Handling of the index byte. ------------------------- )
-    80 00 9F T!R
-01 10 10 FAMILY|R ,-10 ,-F ,-E ,-D ,-C ,-B ,-A ,-9 ,-8 ,-7 ,-6 ,-5 ,-4 ,-3 ,-2 ,-1
-01 00 10 FAMILY|R ,0 ,1 ,2 ,3 ,4 ,5 ,6 ,7 ,8 ,9 ,A ,B ,C ,D ,E ,F
+    80 00 9F 0 DFIR (|#,)    \ Incorporate 5 bit unsigned DATA.
+\ Incorporate signed DATA. Cut off negative values at 5 bits.
+: |#, DUP -10 +10 WITHIN 0= 31 ?ERROR  1F AND   (|#,) ;
 80 0 60 T!R       20 0 4 FAMILY|R X Y U S
 280 02 FF 9F FIR [##]
     80 00 9F T!R

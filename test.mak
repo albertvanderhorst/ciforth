@@ -124,6 +124,14 @@ lina2 : ci86.lina.s ; gcc $+ -l 2>aap
 
 ci86.lina.s :
 
+testasalpha: asgen.frt asalpha.frt testsetalpha ; \
+    echo CR REQUIRE INCLUDE REQUIRE DUMP REQUIRE ALIAS \'\$$\@ ALIAS @+ INCLUDE asgen.frt INCLUDE asalpha.frt INCLUDE testrunalpha|\
+    lina -a    |\
+    sed '1,/TEST STARTS HERE/d' |\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
+    diff -w $@ testsetalpha >$@.diff ;\
+    diff $@.diff testresults
+
 testas80: asgen.frt as80.frt testset8080 ; \
     (echo 5 LOAD; cat $+)|\
     lina |\

@@ -415,7 +415,7 @@ DEFER *<-->
 \ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
 : QSORT   IS *<-->   IS *<   (QSORT) ;
 \ (MERGE)       \ AvdH A3dec02
-
+\ list : sorted   ulist : unsorted   listp : list level
 \ For EL1 and EL2, return EL1 and EL2 plus "el1 IS lower".
 VARIABLE *<M   : LL< *<M @ EXECUTE ;
 VARIABLE *->M   \ Contains XT
@@ -431,21 +431,21 @@ VARIABLE *->M   \ Contains XT
     R> R>   OVER 0= UNTIL 2DROP ;
 
 ( MERGE-SORT )  REQUIRE (MERGE)  \ AvdH A3dec02
-\ Merge SLIST1 and SLIST2, leave merged SLIST.
+
+\ Merge LIST1 and LIST2, leave merged LIST.
 : MERGE   LL< IF SWAP THEN   DUP >R (MERGE) R> ;
-\ Cut ULIST in two. Return SLIST and remaining ULIST.
+\ Cut ULIST in two. Return LIST and remaining ULIST.
 : SNIP DUP   BEGIN DUP >N   DUP IF LL< ELSE 0 THEN
     WHILE SWAP DROP REPEAT   >R 0 SWAP LINK! R> ;
-\ Keep on merging as long as two slistp 's have the same level.
+\ Keep on merging as long as two listp 's have the same level.
 : TRY-MERGES   BEGIN >R  OVER R@ =
     WHILE SWAP DROP MERGE R> 1+ REPEAT R> ;
-\ Keep on merging until end-sentinel.
-: SHRINK DROP BEGIN OVER WHILE SWAP DROP MERGE REPEAT ;
-\ Expand zero, ulist into zero slistp .... slistp
+\ Expand zero, ulist into zero list, level .... list, level
 : EXPAND BEGIN SNIP >R 1 TRY-MERGES R> DUP WHILE REPEAT DROP ;
+\ Keep on merging list-level pairs until end-sentinel.
+: SHRINK DROP BEGIN OVER WHILE SWAP DROP MERGE REPEAT ;
 \ For compare XT, next XT, linked LIST , leave a sorted LIST1.
 : MERGE-SORT   *->M !  *<M !   0 SWAP EXPAND SHRINK SWAP DROP ;
-
 ( SORT-WID SORT-VOC )           \ AvdH A3dec02
 REQUIRE COMPARE         REQUIRE MERGE-SORT
 \ Note that xt's form a linked list
@@ -453,8 +453,8 @@ REQUIRE COMPARE         REQUIRE MERGE-SORT
     : GET-NAME >NFA @ $@   ;  \ Aux. For EL, return NAME.
 : NAMES< DUP >R OVER GET-NAME    R> GET-NAME    COMPARE 0 < ;
 
-\ Sort the WORDLIST alphabetically on names.
-\ This head of the list doesn't take part in the
+\ Sort the WID alphabetically on names.
+\ A wid is a head of a list and doesn't take part in the
 \ sorting (expect for the link field) , so it may be a dummy.
 : SORT-WID >LFA DUP >R   @ 'NAMES< '>LFA MERGE-SORT   R> ! ;
 
