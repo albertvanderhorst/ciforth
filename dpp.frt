@@ -1,4 +1,4 @@
-\ Copyright (2001): Albert van der Horst, HCC FIG Holland by GNU Public License
+\ Copyrillght (2001): Albert van der Horst, HCC FIG Holland by GNU Public License
 \ $Id$
 
 \ Diagnostic program.
@@ -612,8 +612,10 @@ DATABASE CONSULTING STRATEGY
 \D ." ?DIST Expect 1 0 : " 0 1 ?DISTINGHUISABLE . DEPTH . CR
 \D ." ?DIST Expect 1 0 : " 1 0 ?DISTINGHUISABLE . DEPTH . CR
 
-\ For the QUESTION : it MAKES sense to ask it for the current outcome.
-: ?SELECTABLE DUP ?POSED 0=   SWAP   QUESTION-QUALITY REAL-BAD <> AND ;
+\   For the GUESSED diagnosis and QUESTION : it MAKES sense to
+\   ask it for the current outcome.
+: ?SELECTABLE SWAP ." Guessed " . &| EMIT
+DUP ?POSED 0=   SWAP   QUESTION-QUALITY REAL-BAD <> AND ;
 \D ." ?SELECTABLE Expect 0 0 : " 0 ?SELECTABLE . DEPTH .
 
 \ Print a QUESTION with an identification for selection.
@@ -623,25 +625,30 @@ DATABASE CONSULTING STRATEGY
 \ If not a valid number return NONE.
 : GET-NUMBER 0. (ACCEPT) >NUMBER  IF 2DROP DROP NONE ELSE 2DROP THEN ;
 
-\ For the QUESTION : it IS validated as a selectable question.
-: VALID? DUP 0 #QUESTIONS @ WITHIN  SWAP ?SELECTABLE AND ;
+\ For the GUESSED diagnosis and QUESTION : it IS validated as a selectable question.
+: VALID? DUP 0 #QUESTIONS @ WITHIN >R ?SELECTABLE R> AND ;
 
-\ Return the question the user selects.
-: GET-EXISTING
-    BEGIN CR CR GiveIdentification$ TYPE CR GET-NUMBER VALID? 0= DUP WHILE
+\ For GUESSED diagnosis return return the QUESTION the user selects.
+: GET-EXISTING ^
+    BEGIN CR CR GiveIdentification$ TYPE CR GET-NUMBER 2DUP VALID? 0= WHILE
        DROP ThatIsNoGood$ TYPE CR
     REPEAT
+    SWAP DROP  ^
 ;
 
 
-: #SELECTABLE 0 #QUESTIONS @ 0 DO I ?SELECTABLE IF 1+ THEN LOOP ;
+\ For GUESSED diagnosis return return the number of possible questions.
+: #SELECTABLE 0 #QUESTIONS @ 0 DO OVER I ?SELECTABLE IF 1+ THEN LOOP SWAP DROP ;
 
-\ For DIAGNOSIS1 and DIAGNOSIS2 return an existing QUESTION that
-\ will make a distinction between the two. Or NONE.
-: SELECT-EXISTING 2DROP
+\ For GUESSED diagnosis return an existing QUESTION that
+\ will make a distinction between the it and the answer vector.
+\ Or NONE.
+: SELECT-EXISTING ^
+     DUP #SELECTABLE 0 > IF
     CR PossibleExisting$ TYPE CR CR
-    #QUESTIONS @ 0 DO I ?SELECTABLE IF I PRINT-FOR-SELECT THEN LOOP
+    #QUESTIONS @ 0 DO DUP I ?SELECTABLE IF I PRINT-FOR-SELECT THEN LOOP
     CR CR AnyGoodQuestion$ GET-ANSWER A_YES = IF GET-EXISTING ELSE NONE THEN
+    ELSE DROP NONE THEN ^
 ;
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new question that will
@@ -652,12 +659,12 @@ DATABASE CONSULTING STRATEGY
     QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION
     #QUESTIONS @ 1- ;
 
-\ For DIAGNOSIS1 and DIAGNOSIS2 return a QUESTION that will
-\ make a distinction between the two. Or ``NONE''.
+\ For GUESSED diagnosis and CORRECT diagnosis return a QUESTION
+\ that will make a distinction between the two. Or ``NONE''.
 : GENERATE-QUESTION
      NeedQuestion1$ TYPE CR      NeedQuestion2$ TYPE CR
      OVER DIAGNOSES 2@ TYPE CR   DUP DIAGNOSES 2@ TYPE CR
-     #SELECTABLE 0 > IF 2DUP SELECT-EXISTING ELSE NONE THEN
+     OVER SELECT-EXISTING
      DUP NONE = IF DROP 2DUP NEW-QUESTION THEN
      >R 2DROP R>
 ;
@@ -674,7 +681,7 @@ DATABASE CONSULTING STRATEGY
     THEN THEN
 RDROP ;
 
-\ Eliminate the ambiguity for DIAGNOSIS and OUTCOME diagnosis by
+\ Eliminate the ambiguity for GUESSED diagnosis and CORRECT diagnosis by
 \ having a question answered by the user.
 : (EL-AM)
     2DUP GENERATE-QUESTION ( d o -- d o q )
