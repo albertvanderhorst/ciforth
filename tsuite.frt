@@ -1,9 +1,12 @@
 \ AH This is based on something from MHX.
 \ Modifications have to do with where Hayce moves the interpret
 \ pointer to the iend of the input buffer
-\ The jump out of a BEGIN loop, is refused whit _SECURITY op yes.
-24 LOAD
+\ The jump out of a BEGIN loop, is refused with _SECURITY_( _yes )
 
+\ Start with:  lina -r <thisfile
+\ Add things not belonging in the kernel.
+REQUIRE TRUE
+REQUIRE DEADBEEF
 
 \ (C) 1993 JOHNS HOPKINS UNIVERSITY / APPLIED PHYSICS LABORATORY
 \ MAY BE DISTRIBUTED FREELY AS LONG AS THIS COPYRIGHT NOTICE REMAINS.
