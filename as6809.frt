@@ -66,12 +66,14 @@ ASSEMBLER DEFINITIONS  HEX
 ( The ~IB, are print-suppressed.                                       )
 : []   [] IB,, ;
 
-( ---- Exchanges, has a slot to prevent too many matches.-------------- )
-50 0 F000 T!    1000 8000 4 xFAMILY| =>A =>B =>CCR =>DPR
-60 0 F000 T!    1000 0000 6 xFAMILY| =>D =>X =>Y =>US =>SP =>PC
-50 0 10F00 T!   0100 0800 4 xFAMILY| A<= B<= CCR<= DPR<=
-60 0 10F00 T!   0100 0000 6 xFAMILY| D<= X<= Y<= US<= SP<= PC<=
-00 0 1FF00 T!   01 1E 2 2FAMILY, EXG, TFR,
+( ---- Exchanges, transfer -------------------------------------------- )
+( A small trick: one bit of the opcode that is zero anyway is used      )
+( as a slot to prevent too many matches.                                )
+50 0 0F80 T!   0100 0800 4 xFAMILY| =>A =>B =>CCR =>DPR
+60 0 0F80 T!   0100 0000 6 xFAMILY| =>D =>X =>Y =>US =>SP =>PC
+50 0 F000 T!   1000 8000 4 xFAMILY| A== B== CCR== DPR==
+60 0 F000 T!   1000 0000 6 xFAMILY| D== X== Y== US== SP== PC==
+00 0 FF80 T!   01 1E 2 2FAMILY, EXG, TFR,
 
 \ One operand instruction
     01 00 30 T!
