@@ -46,6 +46,15 @@ fig86gnr.txt       \
 cfg.zip         \
 # That's all folks!
 
+# These files can easily be generated, if you have linux.
+EXAMPLES = \
+fig86.alone.asm  \
+fig86.msdos.msm  \
+fig86.linux.asm  \
+fig86.lina.asm  \
+fig86.alonehd.asm  \
+# That's all folks!
+
 RELEASECONTENT = \
 fig86.gnr        \
 $(DOC)           \
@@ -55,12 +64,9 @@ $(TARGETS:%=%.cfg) \
 $(CSRC:%=%.c)    \
 Makefile         \
 blocks.frt       \
-fig86.alone.asm  \
-fig86.msdos.msm  \
-fig86.linux.asm  \
-fig86.lina.asm  \
 genboot.bat      \
 link.script    \
+$(EXAMPLES)     \
 # That's all folks!
 
 # r## revision 2.## a beta release
