@@ -7256,7 +7256,7 @@ the name forthsamp({sc1}) ) . Any errors are thrown. },
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
 HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      _PC_({{ZERO}})_LINUX_N_({{LIT, 644Q}})
+        DC      _PC_({{ZERO}})_LINUX_N_({{LIT, 755Q}})
         DC      CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
