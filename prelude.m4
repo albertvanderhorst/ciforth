@@ -150,7 +150,7 @@ dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
 define({M4_EM},10000H)
 dnl
 dnl The maximum number of wordsets that can be in the search order.
-define({M4_MAXWORDSET},2)
+define({M4_MAXWORDLIST},8)
 dnl
 dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.
 dnl
