@@ -1962,14 +1962,14 @@ HEADER({BLK},{BLK},{DOUSE})
 ;{========== END USER VARIABLES =============;}
 ;
 worddoc({SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},{
-Shorthand for forthvar({1}) forthcode({+}).},{})
+Shorthand for ``forthvar({1}) forthcode({+})''.},{})
 CODE_HEADER({1+},{ONEP})
         POP     AX
         INC     AX
         _PUSH
 ;
 worddoc({SUPERFLUOUS},{2+},{two_plus},{n1 --- n2},{},{
-Shorthand for forthvar({2}) forthcode({+}).},{})
+Shorthand for ``forthvar({2}) forthcode({+})''.},{})
 CODE_HEADER({2+},{TWOP})
         POP     AX
         ADD     AX,2
@@ -2107,7 +2107,7 @@ forthvar({addr1}) is the address of either the length byte or the last letter.
 If forthvar({n})=1, the motion is toward hi memory; if forthvar({n})=-l, the motion is
 toward low memory. The forthvar({addr2}) resulting is address of the other end
 of the name.
-_ALIGNED({
+_ALIGNED_({
 "The last letter" must be understood as
 the last byte of the cell containing the actual last letter, the byte
 with the 8th bit up.  forthsamp({-1 TRAVERSE})
@@ -2521,14 +2521,14 @@ CODE_HEADER({FILL},{FILL})
         _NEXT
 ;
 worddoc({MEMORY},{ERASE},{erase},{addr n --},{},{
-Shorthand for ``{forthvar({0}) forthcode({FILL}})''.},{})
+Shorthand for ``forthvar({0}) forthcode({FILL})''.},{})
 HEADER({ERASE},{LERASE},{DOCOL})
         DC      ZERO
         DC      FILL
         DC      SEMIS
 ;
 worddoc({MEMORY},{BLANKS},{blanks},{addr count --},{},{
-Shorthand for ``{forthcode({BL}) forthcode({FILL}})''.},{})
+Shorthand for ``forthcode({BL}) forthcode({FILL})''.},{})
 HEADER({BLANKS},{BLANK},{DOCOL})
         DC      BLS
         DC      FILL
@@ -3688,8 +3688,8 @@ HEADER({SMALL},{SMALL},{DOCOL})
 _MODERN_({
 worddoc({OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},{
 Transmit count characters from forthvar({addr}) to the output device.
-All terminal I/O goes through this word. It is high level so terminal
-I/O can be redirected, by forthref({revectoring}) it.
+All terminal I/O goes through this word. It's first word is a forthcode({NOOP}) so terminal
+I/O can be redirected, by forthdefi({revectoring}) it.
 In this ciforth the string must not contain embedded LF's.
 forthcode({OUT}) is incremented for each character output.},{{EMIT},{OUT}})
 HEADER({TYPE},{LTYPE},{DOCOL})
@@ -5238,7 +5238,7 @@ For all words in the current context execute forthvar({xt})
 the forthcode({NFA}) of those words.         forthvar({xt})
 must have the stack diagram forthsamp({x1..xn nfa --- x1..xn})
 },
-{{FOR-VOCS}})
+{{FOR-VOCS},{EXECUTE}})
 HEADER({FOR-WORDS},{FORW},{DOCOL})
         DC      TOR
         DC      CONT
@@ -5267,7 +5267,7 @@ For all vocabularies execute forthvar({xt})
  with as data the forthdefi({VLFA}) of those words. forthvar({xt})
 must have the stack diagram forthsamp({x1..xn vlfa --- x1..xn})
 },
-{{FOR-VOCS}})
+{{FOR-WORDS},{EXECUTE}})
 HEADER({FOR-VOCS},{FORV},{DOCOL})
         DC      TOR
         DC      VOCL
