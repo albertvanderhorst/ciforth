@@ -288,6 +288,25 @@ MAX-QUESTIONS ARRAY ANSWER-VECTOR
 : ?POSED ANSWER-VECTOR @ A_NONE <> ;
 \D ." !ANSWER-VECTOR Expect 0 0 : " !ANSWER-VECTOR 0 ?POSED . DEPTH . CR
 \ \D ." After PREVIOUS Expect DATABASE STRATEGY FORTH : " ORDER CR
+
+\ Auxiliary type vertical lines connecting questions with answers.
+: .BLOCKS 0 ?DO "|     " TYPE LOOP ;
+\ Print all information that can still influence the outcome.
+: PRINTTABLE
+  "______________________________________________" TYPE CR
+
+  0 #QUESTIONS @ 0 DO I ?POSED 0= IF
+    21 SPACES DUP .BLOCKS I QUESTIONS 2@ TYPE 1+ CR
+  THEN LOOP DROP
+  #DIAGNOSES @ 0 DO I ?EXCLUDED 0= IF
+      I 3 .R SPACE I DIAGNOSES 2@ DUP >R TYPE 15 R> - SPACES
+      #QUESTIONS @ 0 DO I ?POSED 0= IF
+          J I YESSES @ 3 .R J I NOES @ 3 .R
+      THEN LOOP CR
+  THEN LOOP
+  "______________________________________________" TYPE CR
+;
+
 PREVIOUS
 
 VOCABULARY STRATEGY
@@ -374,10 +393,15 @@ DATABASE
 \D 0 QUESTION-QUALITY ." QUESTION-QUALITY Expect 1000 0 : " . DEPTH . CR
 \D 1 QUESTION-QUALITY ." QUESTION-QUALITY Expect 0 0 : " . DEPTH . CR
 
+\ From I1 Q1 I2 Q2 leave the pair with highest Q.
+: BEST-PAIR DUP >R 2SWAP DUP R> > IF 2SWAP THEN 2DROP ;
+\D 0 100 3 200 BEST-PAIR ." BP Expect 3 300 :" SWAP . . CR
+\D 3 200 0 100 BEST-PAIR ." BP Expect 3 300 :" SWAP . . CR
+
 \ Select the best question still available. Return its INDEX.
 : SELECT-QUESTION -1 0  \ Initial INDEX and QUALITY.
     #QUESTIONS @ 0 DO ^ I ?POSED 0= IF
-       DUP I  QUESTION-QUALITY 2DUP < IF >R >R 2DROP R> R> ELSE 2DROP THEN
+       I  I QUESTION-QUALITY BEST-PAIR
     THEN LOOP DROP
 ;
 \D SELECT-QUESTION ." SELECT-QUESTION Expect 0 0 : " . DEPTH . CR
@@ -528,12 +552,13 @@ DATABASE CONSULTING STRATEGY
 \ will make a distinction between the two.
 : SELECT-EXISTING 2DROP -1 ;
 
-\ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new QUESTION that will
-\ make a distinction between the two.
+\ For DIAGNOSIS1 and DIAGNOSIS2 ask for a new question that will
+\ make a distinction between the two. Return IT.
 : NEW-QUESTION
     QuerySepar1$ TYPE CR      QuerySepar2$ TYPE CR
-     SWAP DIAGNOSES 2@ TYPE CR   DIAGNOSES 2@ TYPE CR
-    QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION #QUESTIONS @ 1- ;
+     SWAP DIAGNOSES 2@ TYPE CR   DIAGNOSES 2@ TYPE CR ( d1 d2 --)
+    QuerySepar3$ TYPE CR (ACCEPT) ADD-QUESTION
+    #QUESTIONS @ 1- ;
 
 \ For DIAGNOSIS1 and DIAGNOSIS2 return a QUESTION that will make a
 \ make a distinction between the two.
@@ -545,17 +570,26 @@ DATABASE CONSULTING STRATEGY
      >R 2DROP R>
 ;
 
+\ For QUESTION and ANSWER store in the database for the outcome diagnosis.
+\ (The answer vector is later added to the database.)
+: FILL-IN-NEW SWAP ANSWER-VECTOR ! ;
+
+\ For DIAGNOSIS QUESTION and ANSWER store in the database.
+: FILL-IN-DB >R
+    R@ A_YES = IF NOES 2 SWAP +! ELSE
+    R@ A_NO = IF YESSES 2 SWAP +! ELSE
+    2DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
+    THEN THEN
+RDROP ;
+
 \ Eliminate the ambiguity for DIAGNOSIS and OUTCOME diagnosis by
 \ having a question answered by the user.
 : (EL-AM)
-    2DUP GENERATE-QUESTION
-    AnswerQuestion$ TYPE CR    OVER DIAGNOSES 2@ TYPE CR
-    QUESTIONS 2@ GET-ANSWER >R  ( new_question -- )
-    DUP R@ SWAP ANSWER-VECTOR !
-    R@ A_YES = IF SWAP NOES 2 SWAP +! ELSE
-    R@ A_NO = IF SWAP YESSES 2 SWAP +! ELSE
-    2DROP NoGoodEeh1$ TYPE CR  NoGoodEeh1$ TYPE CR
-    THEN THEN RDROP
+    2DUP GENERATE-QUESTION ( d o -- d o q )
+    AnswerQuestion$ TYPE CR    SWAP DIAGNOSES 2@ TYPE CR ( o q -- q)
+    DUP QUESTIONS 2@ GET-ANSWER ( d q -- d q a)
+    2DUP FILL-IN-NEW
+    FILL-IN-DB                  ( d q a -- )
 ;
 
 \ The outcome was the diagnosis INDEX. (Maybe just added.)
@@ -569,24 +603,6 @@ DATABASE CONSULTING STRATEGY
        DUP I <>   I ?EXCLUDED 0= AND   OVER I ?DISTINGHUISABLE 0= AND
        IF I OVER (EL-AM) THEN
     LOOP DROP ;
-
-\ Auxiliary type vertical lines connecting questions with answers.
-: .BLOCKS 0 ?DO "|     " TYPE LOOP ;
-\ Print all information that can still influence the outcome.
-: PRINTTABLE
-  "______________________________________________" TYPE CR
-
-  0 #QUESTIONS @ 0 DO I ?POSED 0= IF
-    21 SPACES DUP .BLOCKS I QUESTIONS 2@ TYPE 1+ CR
-  THEN LOOP DROP
-  #DIAGNOSES @ 0 DO I ?EXCLUDED 0= IF
-      I 3 .R SPACE I DIAGNOSES 2@ DUP >R TYPE 15 R> - SPACES
-      #QUESTIONS @ 0 DO I ?POSED 0= IF
-          J I YESSES @ 3 .R J I NOES @ 3 .R
-      THEN LOOP CR
-  THEN LOOP
-  "______________________________________________" TYPE CR
-;
 
 \ Convert an ANSWER to an PAIR of integers to be added to the
 \ ``YES'' and ``NOES' arrays.
