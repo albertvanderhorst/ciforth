@@ -62,9 +62,14 @@ REQUIRE $
 \  R@ CFA> ID.          \ For desperado debugging.
    R> '(;) <> ;
 
+\ ----------------------    MISCELLANEOUS
+
 \ For an ITEM in a high level word, return the next ITEM.
 \ So it skips also ``ITEM'' 's inline data.
 : NEXT-ITEM NEXT-PARSE 2DROP ;
+
+\ For a SEQUENCE return its end, i.e. just after where `` (;) '' sits.
+: END-OF-SEQUENCE BEGIN NEXT-PARSE WHILE DROP REPEAT DROP ;
 
 \ Like +! but ors.
 : OR!  DUP @ ROT OR SWAP ! ;
@@ -193,12 +198,6 @@ BRANCHES @+ SWAP DO
         EXIT THEN
     ANNILLING?  WHILE REPEAT ;
 
-\ Compile ``DROP'' equivalent to the annihilated code.
-: COMPILE-DROPS
-\     -1 PROGRESS OR!
-    VD @ NEGATE 0 ?DO POSTPONE DROP LOOP
-;
-
 \ Investigate the start of SEQUENCE. Leave END of that
 \ sequence plus a FLAG whether it can be annihilated
 \ without considering jumps into the middle of this code.
@@ -248,13 +247,24 @@ THEN RDROP ;
     2DUP I ELIMINATE-BRANCH-IN-GAP
 0 CELL+ +LOOP 2DROP ;
 
+\ For END of gap, shift the remainder to close the gap.
+: SHIFT-GAP-SHUT
+    DUP END-OF-SEQUENCE OVER - >R   DUP ANNIL-OFFSET @ +  R>   MOVE ;
+
+\ For START of gap, fill with ``DROP''.
+: FILL-WITH-DROPS   DUP VD @ NEGATE CELLS +   'DROP   WFILL ;
+
 \ Do something with START END and number of equivalent drops.
 \ Return the new position of END (where we have to go on optimising.).
 : ANNIHILATE-GAP
     2DUP CALCULATE-ANNIL-OFFSET
     2DUP ADJUST-BRANCHES   DELETE-MARKED-BRANCHES
-DUP >R " Between " TYPE SWAP H. " and " TYPE H.
-" we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR R> ;
+    DUP >R
+\ " Between " TYPE SWAP H. " and " TYPE H.
+\ " we can replace with " TYPE SPACE VD @ NEGATE   . " DROPS. " TYPE CR
+    SHIFT-GAP-SHUT  FILL-WITH-DROPS
+    R>
+;
 
 \ Investigate the start of SEQUENCE. If it can be anihilated do it.
 \ Always leave the new SEQUENCE be it just
