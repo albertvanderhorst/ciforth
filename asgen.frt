@@ -273,6 +273,16 @@ HERE POINTER !
    THEN
    THEN
 ;
+: dis-xFIR
+   DUP IS-xFIR IF     
+   DUP >MASK CORRECT-I TALLY CELL+ @ INVERT CONTAINED-IN IF
+   DUP >MASK  POINTER @ 0 CELL+ - @ AND OVER >INST = IF
+       DUP >BODY TALLY:|R
+       DUP +DISS
+   THEN
+   THEN
+   THEN
+;
 
 : dis-COMMA
    DUP IS-COMMA IF
@@ -303,7 +313,7 @@ HERE POINTER !
     !DISS   !TALLY
     POINTER @ >R
     STARTVOC BEGIN
-        dis-PI dis-xFI  dis-COMMA
+        dis-PI dis-xFI dis-xFIR dis-COMMA
         >NEXT%
 (       DUP ID.                                                         )
     DUP VOCEND? RESULT? OR UNTIL DROP
@@ -311,7 +321,7 @@ HERE POINTER !
       R> DROP
       .DISS'
     ELSE
-      R> COUNT . 1 POINTER ! ."  C," CR
+      R> COUNT . POINTER ! ."  C," CR
     THEN
 ;
 
