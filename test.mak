@@ -124,6 +124,14 @@ lina2 : ci86.lina.s ; gcc $+ -l 2>aap
 
 ci86.lina.s :
 
+testas80: asgen.frt as80.frt testset8080 ; \
+    (echo 5 LOAD; cat $+)|\
+    lina |\
+    sed '1,/TEST STARTS HERE/d' |\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
+    diff -w $@ testset8080 >$@.diff ;\
+    diff $@.diff testresults
+
 testas86: asgen.frt asi86.frt testset8086 ; \
     (echo 5 LOAD; cat $+)|\
     lina |\
@@ -150,12 +158,22 @@ testas386a: asgen.frt asi586.frt testset386a ; \
     diff -w $@ testset386a >$@.diff ;\
     diff $@.diff testresults
 
-testas80: asgen.frt as80.frt testset8080 ; \
+testas6809: asgen.frt as6809.frt testset6809 ; \
     (echo 5 LOAD; cat $+)|\
     lina |\
     sed '1,/TEST STARTS HERE/d' |\
     sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset8080 >$@.diff ;\
+    diff -w $@ testset6809 >$@.diff ;\
+    diff $@.diff testresults
+
+# Special test to exercise otherwise hidden instructions.
+testas6809a: asgen.frt as6809.frt testset6809a ; \
+    (echo 5 LOAD; cat $+)|\
+    lina |\
+    sed '1,/TEST STARTS HERE/d' |\
+    sed '/^OK$$/d' |\
+    sed 's/^[0-9A-F \.,]*://' >$@       ;\
+    diff -w $@ testset6809a >$@.diff ;\
     diff $@.diff testresults
 
 RELEASEASSEMBLER=      \

@@ -384,7 +384,7 @@ VARIABLE DISS-VECTOR    ['] .DISS-AUX DISS-VECTOR !
 (   ." BACKTRACKING"                                                    )
     DROP DISS @ @- DISS !
 (   DROP DISS @ 0 CELL+ - @                                             )
-    "Failed at :" TYPE DUP ID. CR
+(   "Failed at :" TYPE DUP ID. CR                                       )
     >NEXT%
 (   DISS-                                                               )
     REBUILD

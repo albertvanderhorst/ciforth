@@ -13754,6 +13754,8 @@ ADD, B| F| AL'| D0| [BP+SI]
 ADD, B| F| AL'| D0| [BX+DI]
 ADD, B| F| AL'| D0| [BX+SI]
 HERE
+0 , 0 , 0 , 0 ,
+." Padding"
 ." TEST STARTS HERE"
 2DUP OVER - DUMP
 DISASSEMBLE-RANGE

@@ -1,0 +1,589 @@
+\ Testing the 6809 assembler/disassembler
+ASSEMBLER
+!TALLY
+HEX
+10 HERE 10 MOD - ALLOT ( To get a nice DUMP)
+HERE
+PULU,   (& DPR& B& )S,
+PSHU,   (& DPR& B& )S,
+PULS,   (& DPR& B& )S,
+PSHS,   (& DPR& B& )S,
+LEAU,   X ,C
+LEAS,   X ,C
+LEAY,   X ,C
+LEAX,   X ,C
+CWAI,   8 #,
+ANDCC,   8 #,
+ORCC,   8 #,
+SWI3,
+SWI2,
+SWI,
+MUL,
+RTI,
+ABX,
+RTS,
+SEX,
+DAA,
+SYNC,
+NOP,
+BR,   <=|   C #,
+BR,   >|   C #,
+BR,   <|   C #,
+BR,   >=|   C #,
+BR,   0<|   C #,
+BR,   0>=|   C #,
+BR,   VS|   C #,
+BR,   VC|   C #,
+BR,   <>|   C #,
+BR,   =|   C #,
+BR,   U<|   C #,
+BR,   U>=|   C #,
+BR,   U<=|   C #,
+BR,   U>|   C #,
+BR,   N|   C #,
+BR,   Y|   C #,
+BSR,   8 #,
+LBRS,   8 ##,
+LBRA,   8 ##,
+JSR,   E|   C E,
+JSR,   []   X ,C
+JSR,   DP|   C DO,
+JMP,   E|   C E,
+JMP,   []   X ,C
+STS,   E|   C E,
+STS,   []   X ,C
+STS,   DP|   C DO,
+STY,   E|   C E,
+STY,   []   X ,C
+STY,   DP|   C DO,
+LDS,   E|   C E,
+LDS,   []   X ,C
+LDS,   DP|   C DO,
+LDS,   #|   C ##,
+LDY,   E|   C E,
+LDY,   []   X ,C
+LDY,   DP|   C DO,
+LDY,   #|   C ##,
+CMPS,   E|   C E,
+CMPS,   []   X ,C
+CMPS,   DP|   C DO,
+CMPS,   #|   C ##,
+CMPY,   E|   C E,
+CMPY,   []   X ,C
+CMPY,   DP|   C DO,
+CMPY,   #|   C ##,
+CMPU,   E|   C E,
+CMPU,   []   X ,C
+CMPU,   DP|   C DO,
+CMPU,   #|   C ##,
+CMPD,   E|   C E,
+CMPD,   []   X ,C
+CMPD,   DP|   C DO,
+CMPD,   #|   C ##,
+STD,   E|   C E,
+STD,   []   X ,C
+STD,   DP|   C DO,
+LDU,   E|   C E,
+LDU,   []   X ,C
+LDU,   DP|   C DO,
+LDU,   #|   C ##,
+LDX,   E|   C E,
+LDX,   []   X ,C
+LDX,   DP|   C DO,
+LDX,   #|   C ##,
+LDD,   E|   C E,
+LDD,   []   X ,C
+LDD,   DP|   C DO,
+LDD,   #|   C ##,
+CMPX,   E|   C E,
+CMPX,   []   X ,C
+CMPX,   DP|   C DO,
+CMPX,   #|   C ##,
+ADDD,   E|   C E,
+ADDD,   []   X ,C
+ADDD,   DP|   C DO,
+ADDD,   #|   C ##,
+SUBD,   E|   C E,
+SUBD,   []   X ,C
+SUBD,   DP|   C DO,
+SUBD,   #|   C ##,
+STU,   E|   C E,
+STU,   []   X ,C
+STU,   DP|   C DO,
+STX,   E|   C E,
+STX,   []   X ,C
+STX,   DP|   C DO,
+STB,   E|   C E,
+STB,   []   X ,C
+STB,   DP|   C DO,
+STA,   E|   C E,
+STA,   []   X ,C
+STA,   DP|   C DO,
+ADDB,   E|   C E,
+ADDB,   []   X ,C
+ADDB,   DP|   C DO,
+ADDB,   #|   C #,
+ORB,   E|   C E,
+ORB,   []   X ,C
+ORB,   DP|   C DO,
+ORB,   #|   C #,
+ADCB,   E|   C E,
+ADCB,   []   X ,C
+ADCB,   DP|   C DO,
+ADCB,   #|   C #,
+EORB,   E|   C E,
+EORB,   []   X ,C
+EORB,   DP|   C DO,
+EORB,   #|   C #,
+LDB,   E|   C E,
+LDB,   []   X ,C
+LDB,   DP|   C DO,
+LDB,   #|   C #,
+BITB,   E|   C E,
+BITB,   []   X ,C
+BITB,   DP|   C DO,
+BITB,   #|   C #,
+ANDB,   E|   C E,
+ANDB,   []   X ,C
+ANDB,   DP|   C DO,
+ANDB,   #|   C #,
+SBCB,   E|   C E,
+SBCB,   []   X ,C
+SBCB,   DP|   C DO,
+SBCB,   #|   C #,
+CMPB,   E|   C E,
+CMPB,   []   X ,C
+CMPB,   DP|   C DO,
+CMPB,   #|   C #,
+SUBB,   E|   C E,
+SUBB,   []   X ,C
+SUBB,   DP|   C DO,
+SUBB,   #|   C #,
+ADDA,   E|   C E,
+ADDA,   []   X ,C
+ADDA,   DP|   C DO,
+ADDA,   #|   C #,
+ORA,   E|   C E,
+ORA,   []   X ,C
+ORA,   DP|   C DO,
+ORA,   #|   C #,
+ADCA,   E|   C E,
+ADCA,   []   X ,C
+ADCA,   DP|   C DO,
+ADCA,   #|   C #,
+EORA,   E|   C E,
+EORA,   []   X ,C
+EORA,   DP|   C DO,
+EORA,   #|   C #,
+LDA,   E|   C E,
+LDA,   []   X ,C
+LDA,   DP|   C DO,
+LDA,   #|   C #,
+BITA,   E|   C E,
+BITA,   []   X ,C
+BITA,   DP|   C DO,
+BITA,   #|   C #,
+ANDA,   E|   C E,
+ANDA,   []   X ,C
+ANDA,   DP|   C DO,
+ANDA,   #|   C #,
+SBCA,   E|   C E,
+SBCA,   []   X ,C
+SBCA,   DP|   C DO,
+SBCA,   #|   C #,
+CMPA,   E|   C E,
+CMPA,   []   X ,C
+CMPA,   DP|   C DO,
+CMPA,   #|   C #,
+SUBA,   E|   C E,
+SUBA,   []   X ,C
+SUBA,   DP|   C DO,
+SUBA,   #|   C #,
+CLR|D,   8 DO,
+JMP|D,   8 DO,
+TST|D,   8 DO,
+INC|D,   8 DO,
+DEC|D,   8 DO,
+ROL|D,   8 DO,
+ASL|D,   8 DO,
+ASR|D,   8 DO,
+ROR|D,   8 DO,
+LSR|D,   8 DO,
+COM|D,   8 DO,
+NEG|D,   8 DO,
+CLR,   E|   C E,
+CLR,   []   X ,C
+CLR,   B|
+CLR,   A|
+TST,   E|   C E,
+TST,   []   X ,C
+TST,   B|
+TST,   A|
+INC,   E|   C E,
+INC,   []   X ,C
+INC,   B|
+INC,   A|
+DEC,   E|   C E,
+DEC,   []   X ,C
+DEC,   B|
+DEC,   A|
+ROL,   E|   C E,
+ROL,   []   X ,C
+ROL,   B|
+ROL,   A|
+ASL,   E|   C E,
+ASL,   []   X ,C
+ASL,   B|
+ASL,   A|
+ASR,   E|   C E,
+ASR,   []   X ,C
+ASR,   B|
+ASR,   A|
+ROR,   E|   C E,
+ROR,   []   X ,C
+ROR,   B|
+ROR,   A|
+LSR,   E|   C E,
+LSR,   []   X ,C
+LSR,   B|
+LSR,   A|
+COM,   E|   C E,
+COM,   []   X ,C
+COM,   B|
+COM,   A|
+NEG,   E|   C E,
+NEG,   []   X ,C
+NEG,   B|
+NEG,   A|
+TFR,   PC<=   =>PC
+TFR,   PC<=   =>SP
+TFR,   PC<=   =>US
+TFR,   PC<=   =>Y
+TFR,   PC<=   =>X
+TFR,   PC<=   =>D
+TFR,   SP<=   =>PC
+TFR,   SP<=   =>SP
+TFR,   SP<=   =>US
+TFR,   SP<=   =>Y
+TFR,   SP<=   =>X
+TFR,   SP<=   =>D
+TFR,   US<=   =>PC
+TFR,   US<=   =>SP
+TFR,   US<=   =>US
+TFR,   US<=   =>Y
+TFR,   US<=   =>X
+TFR,   US<=   =>D
+TFR,   Y<=   =>PC
+TFR,   Y<=   =>SP
+TFR,   Y<=   =>US
+TFR,   Y<=   =>Y
+TFR,   Y<=   =>X
+TFR,   Y<=   =>D
+TFR,   X<=   =>PC
+TFR,   X<=   =>SP
+TFR,   X<=   =>US
+TFR,   X<=   =>Y
+TFR,   X<=   =>X
+TFR,   X<=   =>D
+TFR,   D<=   =>PC
+TFR,   D<=   =>SP
+TFR,   D<=   =>US
+TFR,   D<=   =>Y
+TFR,   D<=   =>X
+TFR,   D<=   =>D
+TFR,   DPR<=   =>DPR
+TFR,   DPR<=   =>CCR
+TFR,   DPR<=   =>B
+TFR,   DPR<=   =>A
+TFR,   CCR<=   =>DPR
+TFR,   CCR<=   =>CCR
+TFR,   CCR<=   =>B
+TFR,   CCR<=   =>A
+TFR,   B<=   =>DPR
+TFR,   B<=   =>CCR
+TFR,   B<=   =>B
+TFR,   B<=   =>A
+TFR,   A<=   =>DPR
+TFR,   A<=   =>CCR
+TFR,   A<=   =>B
+TFR,   A<=   =>A
+EXG,   PC<=   =>PC
+EXG,   PC<=   =>SP
+EXG,   PC<=   =>US
+EXG,   PC<=   =>Y
+EXG,   PC<=   =>X
+EXG,   PC<=   =>D
+EXG,   SP<=   =>PC
+EXG,   SP<=   =>SP
+EXG,   SP<=   =>US
+EXG,   SP<=   =>Y
+EXG,   SP<=   =>X
+EXG,   SP<=   =>D
+EXG,   US<=   =>PC
+EXG,   US<=   =>SP
+EXG,   US<=   =>US
+EXG,   US<=   =>Y
+EXG,   US<=   =>X
+EXG,   US<=   =>D
+EXG,   Y<=   =>PC
+EXG,   Y<=   =>SP
+EXG,   Y<=   =>US
+EXG,   Y<=   =>Y
+EXG,   Y<=   =>X
+EXG,   Y<=   =>D
+EXG,   X<=   =>PC
+EXG,   X<=   =>SP
+EXG,   X<=   =>US
+EXG,   X<=   =>Y
+EXG,   X<=   =>X
+EXG,   X<=   =>D
+EXG,   D<=   =>PC
+EXG,   D<=   =>SP
+EXG,   D<=   =>US
+EXG,   D<=   =>Y
+EXG,   D<=   =>X
+EXG,   D<=   =>D
+EXG,   DPR<=   =>DPR
+EXG,   DPR<=   =>CCR
+EXG,   DPR<=   =>B
+EXG,   DPR<=   =>A
+EXG,   CCR<=   =>DPR
+EXG,   CCR<=   =>CCR
+EXG,   CCR<=   =>B
+EXG,   CCR<=   =>A
+EXG,   B<=   =>DPR
+EXG,   B<=   =>CCR
+EXG,   B<=   =>B
+EXG,   B<=   =>A
+EXG,   A<=   =>DPR
+EXG,   A<=   =>CCR
+EXG,   A<=   =>B
+EXG,   A<=   =>A
+
+
+LDA, []   [##,PCR]___   C WO,
+LDA, []   [##,PCR]__   C WO,
+LDA, []   [##,PCR]_   C WO,
+LDA, []   [##,PCR]   C WO,
+LDA, []   ##,PCR___   C WO,
+LDA, []   ##,PCR__   C WO,
+LDA, []   ##,PCR_   C WO,
+LDA, []   ##,PCR   C WO,
+LDA, []   [#,PCR]___   C CO,
+LDA, []   [#,PCR]__   C CO,
+LDA, []   [#,PCR]_   C CO,
+LDA, []   [#,PCR]   C CO,
+LDA, []   #,PCR___   C CO,
+LDA, []   #,PCR__   C CO,
+LDA, []   #,PCR_   C CO,
+LDA, []   #,PCR   C CO,
+LDA, []   [##,R]   S   10 WO,
+LDA, []   [##,R]   U   10 WO,
+LDA, []   [##,R]   Y   10 WO,
+LDA, []   [##,R]   X   10 WO,
+LDA, []   ##,R   S   10 WO,
+LDA, []   ##,R   U   10 WO,
+LDA, []   ##,R   Y   10 WO,
+LDA, []   ##,R   X   10 WO,
+LDA, []   [#,R]   S   10 CO,
+LDA, []   [#,R]   U   10 CO,
+LDA, []   [#,R]   Y   10 CO,
+LDA, []   [#,R]   X   10 CO,
+LDA, []   #,R   S   10 CO,
+LDA, []   #,R   U   10 CO,
+LDA, []   #,R   Y   10 CO,
+LDA, []   #,R   X   10 CO,
+LDA, []   [D,R]   S
+LDA, []   [D,R]   U
+LDA, []   [D,R]   Y
+LDA, []   [D,R]   X
+LDA, []   D,R   S
+LDA, []   D,R   U
+LDA, []   D,R   Y
+LDA, []   D,R   X
+LDA, []   [A,R]   S
+LDA, []   [A,R]   U
+LDA, []   [A,R]   Y
+LDA, []   [A,R]   X
+LDA, []   [B,R]   S
+LDA, []   [B,R]   U
+LDA, []   [B,R]   Y
+LDA, []   [B,R]   X
+LDA, []   [,R]   S
+LDA, []   [,R]   U
+LDA, []   [,R]   Y
+LDA, []   [,R]   X
+LDA, []   [,--R]   S
+LDA, []   [,--R]   U
+LDA, []   [,--R]   Y
+LDA, []   [,--R]   X
+LDA, []   [,R++]   S
+LDA, []   [,R++]   U
+LDA, []   [,R++]   Y
+LDA, []   [,R++]   X
+LDA, []   A,R   S
+LDA, []   A,R   U
+LDA, []   A,R   Y
+LDA, []   A,R   X
+LDA, []   B,R   S
+LDA, []   B,R   U
+LDA, []   B,R   Y
+LDA, []   B,R   X
+LDA, []   ,R   S
+LDA, []   ,R   U
+LDA, []   ,R   Y
+LDA, []   ,R   X
+LDA, []   ,--R   S
+LDA, []   ,--R   U
+LDA, []   ,--R   Y
+LDA, []   ,--R   X
+LDA, []   ,-R   S
+LDA, []   ,-R   U
+LDA, []   ,-R   Y
+LDA, []   ,-R   X
+LDA, []   ,R++   S
+LDA, []   ,R++   U
+LDA, []   ,R++   Y
+LDA, []   ,R++   X
+LDA, []   ,R+   S
+LDA, []   ,R+   U
+LDA, []   ,R+   Y
+LDA, []   ,R+   X
+LDA, []   [##]  0FDEA WO,
+LDA, []   S   ,F
+LDA, []   S   ,E
+LDA, []   S   ,D
+LDA, []   S   ,C
+LDA, []   S   ,B
+LDA, []   S   ,A
+LDA, []   S   ,9
+LDA, []   S   ,8
+LDA, []   S   ,7
+LDA, []   S   ,6
+LDA, []   S   ,5
+LDA, []   S   ,4
+LDA, []   S   ,3
+LDA, []   S   ,2
+LDA, []   S   ,1
+LDA, []   S   ,0
+LDA, []   S   ,-1
+LDA, []   S   ,-2
+LDA, []   S   ,-3
+LDA, []   S   ,-4
+LDA, []   S   ,-5
+LDA, []   S   ,-6
+LDA, []   S   ,-7
+LDA, []   S   ,-8
+LDA, []   S   ,-9
+LDA, []   S   ,-A
+LDA, []   S   ,-B
+LDA, []   S   ,-C
+LDA, []   S   ,-D
+LDA, []   S   ,-E
+LDA, []   S   ,-F
+LDA, []   S   ,-10
+LDA, []   U   ,F
+LDA, []   U   ,E
+LDA, []   U   ,D
+LDA, []   U   ,C
+LDA, []   U   ,B
+LDA, []   U   ,A
+LDA, []   U   ,9
+LDA, []   U   ,8
+LDA, []   U   ,7
+LDA, []   U   ,6
+LDA, []   U   ,5
+LDA, []   U   ,4
+LDA, []   U   ,3
+LDA, []   U   ,2
+LDA, []   U   ,1
+LDA, []   U   ,0
+LDA, []   U   ,-1
+LDA, []   U   ,-2
+LDA, []   U   ,-3
+LDA, []   U   ,-4
+LDA, []   U   ,-5
+LDA, []   U   ,-6
+LDA, []   U   ,-7
+LDA, []   U   ,-8
+LDA, []   U   ,-9
+LDA, []   U   ,-A
+LDA, []   U   ,-B
+LDA, []   U   ,-C
+LDA, []   U   ,-D
+LDA, []   U   ,-E
+LDA, []   U   ,-F
+LDA, []   U   ,-10
+LDA, []   Y   ,F
+LDA, []   Y   ,E
+LDA, []   Y   ,D
+LDA, []   Y   ,C
+LDA, []   Y   ,B
+LDA, []   Y   ,A
+LDA, []   Y   ,9
+LDA, []   Y   ,8
+LDA, []   Y   ,7
+LDA, []   Y   ,6
+LDA, []   Y   ,5
+LDA, []   Y   ,4
+LDA, []   Y   ,3
+LDA, []   Y   ,2
+LDA, []   Y   ,1
+LDA, []   Y   ,0
+LDA, []   Y   ,-1
+LDA, []   Y   ,-2
+LDA, []   Y   ,-3
+LDA, []   Y   ,-4
+LDA, []   Y   ,-5
+LDA, []   Y   ,-6
+LDA, []   Y   ,-7
+LDA, []   Y   ,-8
+LDA, []   Y   ,-9
+LDA, []   Y   ,-A
+LDA, []   Y   ,-B
+LDA, []   Y   ,-C
+LDA, []   Y   ,-D
+LDA, []   Y   ,-E
+LDA, []   Y   ,-F
+LDA, []   Y   ,-10
+LDA, []   X   ,F
+LDA, []   X   ,E
+LDA, []   X   ,D
+LDA, []   X   ,C
+LDA, []   X   ,B
+LDA, []   X   ,A
+LDA, []   X   ,9
+LDA, []   X   ,8
+LDA, []   X   ,7
+LDA, []   X   ,6
+LDA, []   X   ,5
+LDA, []   X   ,4
+LDA, []   X   ,3
+LDA, []   X   ,2
+LDA, []   X   ,1
+LDA, []   X   ,0
+LDA, []   X   ,-1
+LDA, []   X   ,-2
+LDA, []   X   ,-3
+LDA, []   X   ,-4
+LDA, []   X   ,-5
+LDA, []   X   ,-6
+LDA, []   X   ,-7
+LDA, []   X   ,-8
+LDA, []   X   ,-9
+LDA, []   X   ,-A
+LDA, []   X   ,-B
+LDA, []   X   ,-C
+LDA, []   X   ,-D
+LDA, []   X   ,-E
+LDA, []   X   ,-F
+LDA, []   X   ,-10
+
+HERE
+0 , 0 , 0 , 0 ,
+." Padding"
+." TEST STARTS HERE"
+2DUP OVER - DUMP
+2DUP OVER - "testset6809.bin" PUT-FILE
+DISASSEMBLE-RANGE
+BYE
