@@ -1051,8 +1051,8 @@ worddoc( {MISC},{EXECUTE},{execute},{addr -},{ISO,FIG,L0},
 {Execute the definition whose forthdefi({dictionary entry address})
 is given by forthvar({addr}) .
 _VERBOSE_({{The forthdefi({dictionary entry address})
-serves as an execution token. forthdefi({>CFA}) is gives the code field,
-but this has offset 0.}})
+serves as an execution token. Applying forthcode({>CFA}) to a dea
+gives the code field, but this has offset 0.}})
 },{{'},{>CFA}},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
@@ -1410,9 +1410,9 @@ HEADER({?BLANK},{QBL},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {PARSING},{IN[]},{in_next},{ ---addr chr},{CI L0},
-{Parse the forthdefi({current input stream}) for a character
+{Parse the forthdefi({current input source}) for a character
 and leave its address and the character. If at of the end of
-the input stream, leave the a pointer past the end and a zero.
+the input source, leave the a pointer past the end and a zero.
 Advance the input pointer to the next character. _VERBOSE_({{As
 it goes with string constants, you may not alter its content,
 nor assume anything is appended.}})}, 
@@ -1434,10 +1434,10 @@ INBRS2:
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{(WORD)},{m_parse},{--- sc},{CI L0},
-{Parse the forthdefi({current input stream}) for a word, i.e.
+{Parse the forthdefi({current input source}) for a word, i.e.
 observing forthcode({?BLANK}) . Skip leading delimiters then
 advance the input pointer to past the next delimiter or past
-the end of the input stream. Leave the word found as a string
+the end of the input source. Leave the word found as a string
 constant forthvar({sc}) . _VERBOSE_({As it goes with string
 constants, you may not alter its content, nor assume anything
 is appended. Note that this is more deserving of the name
@@ -1467,9 +1467,9 @@ PWORD2A:
         DC      SEMIS
 ;
 worddocsafe( {PARSING~},{(PARSE)},{paren_word},{ ch --- addr },{},
-{Scan the current input stream for the character forthvar({ch}) .
+{Scan the forthdefi({current input source}) for the character forthvar({ch}) .
 Return forthvar({addr}): the address of the first such character
-or an address just past the end of the current input stream if its
+or an address just past the end of the current input source if its
 is not there.
 _VERBOSE_({So no leading delimiters are skipped.})},
 {{WORD}},
@@ -1497,12 +1497,13 @@ PPARS2: DC SWAP, DROP
 ;
 worddoc( {PARSING},{SRC},{s_r_c},{addr --- },{},
 {Return the address forthvar({addr})
-of the current scan specification, allocated in the user area.
-It consists of three cells:
-the lowest and non-inclusive highest address of the parse area
-_CIF_IN_({the non-inclusive highest address of the parse area and a pointer to the next character to be parsed.})
-_ISO_IN_({the number of characters and the current index in the parse area.})
-Changing forthsamp({SRC}) takes immediate effect,
+of the forthdefi({current input source}) specification,
+allocated in the user area. It consists of three cells: the
+lowest and non-inclusive highest address of the parse area 
+_CIF_IN_({the non-inclusive highest address of the parse area
+and a pointer to the next character to be parsed.})
+_ISO_IN_({the number of characters and the current index in the
+parse area.}) Changing forthsamp({SRC}) takes immediate effect, 
 and must be atomic, by using forthsamp({RESTORE-INPUT}),
 or changing only the third cell.
 The third cell has the alias
@@ -1517,7 +1518,7 @@ HEADER({SRC},{SRC},{DOUSE}, _CELLS(27))      ;{ And 28 and 29.}
 ;
 _LOAD_({
 worddoc( {PARSING},{SOURCE},{source},{ --- addr n1},{ISO},
-{Return the address and length of the current input source.
+{Return the address and length of the forthdefi({current input source}) .
 },
 {{SRC},{SOURCE-ID}},
 {{SOURCE DROP TIB @ = .},{_T_}},
@@ -2467,7 +2468,7 @@ HEADER({B/BUF},{BBUF},{DOCON}, KBBUF)
 worddoc( {MISC},{U0},{u_zero},{--- addr},{},
 {A user variable, leaving the start address of the user area. This is
 for reference only. What is taken into account by user variables is
-the initialisation variable at forthdefi({+ORIGIN}) with offset zero.
+the initialisation variable at forthsamp({0 +ORIGIN}) .
 This is dependant on which task is running.},
 {{USER},{+ORIGIN}},
 {{U0 @ 0 +ORIGIN @ = .},{_T_}},
@@ -2658,7 +2659,7 @@ HEADER({OUT},{LOUT},{DOUSE}, _CELLS(25))
 ;
 worddocsafe( {STORAGE~},{(BLK)},{paren_blk},{--- addr},{U},
 {When the standard word forthcode({BLK}) is used, this user variable
-reflects the state of the current input source.
+reflects the state of the forthsamp({current input source}).
 It indicates the block number being interpreted, or
 zero, if input is being taken from the terminal input buffer.
 Changing forthcode({BLK}) has no effect, and its content must be fetched before
@@ -2782,7 +2783,8 @@ HEADER({CHARS}, {CHARS}, {DOCOL}, , {B_IMMED})
 ;
 worddoc( {MEMORY},{ALIGN},{align},{ --- },{ISO},
 {Make sure that forthcode({HERE}) is forthdefi({aligned}) by advancing
-it if necessary.
+it if necessary. This means that data of any size can be fetched 
+from that address.
 In this ciforth this is a noop.
 },{{ALIGNED}},
 {{( See ALIGNED)},{}},
@@ -3467,11 +3469,11 @@ HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 ;
 worddocsafe( {PARSING},{SET-SRC},{set_source},{sc -- },{},
-{Make the string constant forthvar({sc}) the current input
-stream. This input is chained, i.e.
-exhausting it has the same effect as exhausting the input that
-called forthcode({SET-SRC}). _VERBOSE_({ In practice this word
-is almost always followed by a call to forthcode({INTERPRET}).})},
+{Make the string constant forthvar({sc}) the forthdefi({current
+input source}). This input is chained, i.e. exhausting it has
+the same effect as exhausting the input that called
+forthcode({SET-SRC}). _VERBOSE_({ In practice this word is
+almost always followed by a call to forthcode({INTERPRET}).})}, 
 {{EVALUATE},{INTERPRET}},
 {{ "1 2 3 . CR" SET-SRC . . .},{3}},
 enddoc)
@@ -3489,7 +3491,7 @@ _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
 ;
 worddoc( {PARSING}, {EVALUATE}, , {sc --- ??}, {ISO},
 {Interpret the content of forthvar({sc}). Afterwards return to
-the current input stream.},
+the forthdefi({current input source}) .},
 {{LOAD},{INCLUDE},{SET-SRC}},
 {
 {"865" EVALUATE .},{865},
@@ -3510,8 +3512,8 @@ worddoc( {PARSING},{QUERY},,{},{ISO},
 until a "return") from the operators terminal. Text is
 input to the address contained in forthcode({TIB}) with
 forthcode({IN}) set to _ISO_IN_({zero})_CIF_IN_({the start of
-the buffer}). The current input stream is set to this buffer,
-abandoning whatever was the current input stream. This means
+the buffer}). The forthdefi({current input source}) is set to this buffer,
+abandoning whatever was the current input source. This means
 it leaves included files open, and block locked, and remainder of
 input lines ignored. Therefore it is declared obsolete by ISO.
 You should instead use  forthsamp({... ACCEPT ... EVALUATE}).
@@ -3552,12 +3554,14 @@ CODE_HEADER({FILL},{FILL})
 worddoc( {MEMORY},{CORA},{CORA},{addr1 addr2 len  -- n},{CIF},
 {Compare the memory areas at forthvar({addr1}) and forthvar({addr2})
 over a length forthsamp({len}) .
-For the first bytes that differ, return the difference between the byte
-from forthvar({addr1}) and the one from forthvar({addr2}),
-or zero if all forthsamp({len}) bytes are equal.
-_VERBOSE_({This is an abbreviation of forthcode({COMPARE-AREA}).
+For the first bytes that differ, return -1 if the byte
+from forthvar({addr1}) is less (unsigned) than the one from forthvar({addr2}),
+and 1 if it is greater. 
+If all forthsamp({len}) bytes are equal, return 
+zero.
+_VERBOSE_({{This is an abbreviation of forthcode({COMPARE-AREA}).
 It should have been named forthsamp({COMPARE}) ,
-but that is taken by ISO.})
+but that is taken by ISO.}})
 },
 {},
 {{ HEX 41 C, 42 C, 43 C, HERE 3 - DUP 3 CORA .},{0 },
@@ -3635,12 +3639,13 @@ HEADER({PAD},{PAD},{DOCOL})
         DC      PLUS
         DC      SEMIS
 ;
+_LOAD_({
 worddoc( {PARSING},{WORD},{newword},{c ---addr},{ISO,FIG,L0},
-{Parse the forthsamp({current input stream}) using forthvar({c}) for a delimiter.
+{Parse the forthsamp({current input source}) using forthvar({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
-the next delimiter or past the end of the input stream.
+the next delimiter or past the end of the input source.
 Leave at forthvar({addr}) a copy of the string,
-that was surrounded by forthvar({c}) in the input stream.
+that was surrounded by forthvar({c}) in the input source.
 This is an oldfashioned string to be fetched by forthcode({COUNT}) , not forthcode({$@}) .
 In ciforth the character string is positioned
 at the dictionary buffer forthcode({HERE}) .
@@ -3680,6 +3685,7 @@ IWORD2:
 ;        DC      DOTS
         DC      SEMIS
 ;
+});_END_({_LOAD_})
 worddoc( {PARSING},{^%},{control_follows}, {--- c},{CI},
 {
 Leave forthvar({c}) the control version of the 
@@ -3698,7 +3704,7 @@ HEADER({^:},{CTF},{DOCOL}, , B_IMMED)
 worddoc( {PARSING},{CHAR},{char}, {--- c},{ISO,I},
 {Parse a word and
 leave forthvar({c}) the first non blank char of that word in the 
-input stream. In ciforth this word works also in compiled mode.},
+input source. In ciforth this word works also in compiled mode.},
 {{DEN&},{CHAR}},
 {{CHAR HELL .},{48 },
 {CHAR X  .},{58 },
@@ -3712,7 +3718,7 @@ HEADER({CHAR},{LCHAR},{DOCOL}, , B_IMMED)
 worddocsafe( {PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
 {A compiling word. Parse a word.  Add the run time behaviour:
 leave forthvar({c}), the first non blank char of that word in the
-input stream. In ciforth this word works also in interpret mode.},
+input source. In ciforth this word works also in interpret mode.},
 {{DEN&},{CHAR}},
 {},
 {{: GS1 [CHAR] HELLO ; GS1 HEX . },{48 },
@@ -3720,7 +3726,7 @@ input stream. In ciforth this word works also in interpret mode.},
 HEADER({[CHAR]},{BCHAR},{DOCOL}, _VAR_FIELD({LCHAR}), B_IMMED)
 ;
 worddocsafe( {FORMATTING~},{(NUMBER)},{paren_number},{ --- d1},{},
-{Convert the ascii text at the current input stream with regard
+{Convert the ascii text at the forthdefi({current input source}) with regard
 to forthcode({BASE}) . The new value is accumulated into double
 number forthvar({d1}) , being left. The only non-digit
 acceptable is a decimal point, that signifies that the input is
@@ -3763,7 +3769,7 @@ NPNUM3:                 ; {THEN THEN}
         DC      SEMIS
 ;
 worddoc( {FORMATTING~},{NUMBER},{number},{ ---  s/d},{},
-{Convert characters from the current input stream into a number,
+{Convert characters from the forthdefi({current input source}) into a number,
 and compile or execute this number. If the string contains a
 decimal point it is a double else a single integer number. If
 numeric conversion is not possible, an error message will be
@@ -3958,13 +3964,16 @@ ERRO1:  DC      LIN, FETCH, LDUP
         DC      LTYPE
         DC      MESS
         DC      SZERO, FETCH, SPSTO
+_LOAD_({
         DC      BLK,FETCH
         DC      QDUP
         _0BRANCH(ERRO2) ;{ IF}
         DC      DOT
         DC      LIN,FETCH, SRC, FETCH, LSUB
         DC      DOT    ;{THEN}
-ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
+ERRO2:  
+});_END_({_LOAD_})
+        DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
 ;
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
@@ -4288,7 +4297,7 @@ HEADER({?STACK},{QSTAC},{DOCOL})
 });_END_({_SECURITY_})
 ;
 worddoc( {PARSING},{INTERPRET},{interpret},{},{},
-{Repeatedly fetch the next text word in the input stream and
+{Repeatedly fetch the next text word in the input source and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in forthcode({CONTEXT}) and forthcode({CURRENT}) respectively.
@@ -4560,7 +4569,9 @@ HEADER({ABORT},{ABORT},{DOCOL})
         DC      DECA
         _SECURITY_({DC      QSTAC})
         DC      CR
+_LOAD_({
         DC      DOTCPU
+});_END_({_LOAD_})
 
 _COMMENT
 ;{       If this is there it is an official release}
@@ -5370,7 +5381,7 @@ SAVE-INPUT . ciforth is always able to restore the input across
 different input sources, as long as the input to be restored is
 not exhausted. This has the effect of chaining, and doesn't
 effect the return from nested calls be it interpreting, loading
-or evaluating. _VERBOSE_({{The input stream abandoned will
+or evaluating. _VERBOSE_({{The input source abandoned will
 never be closed properly, so don't use it.}}) }, 
 {{RESTORE},{SAVE-INPUT}},
 {{( Via SAVE-INPUT)},{}},
@@ -5385,7 +5396,7 @@ HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
 worddoc( {STORAGE},{LOCK},{lock},{ n --- },{CI},
 {Lock the block forthvar({n}).
 _VERBOSE_({{Probably, because it
-is to become the current input stream.}})
+is to become the forthdefi({current input source}).}})
 The result is that its buffer will not be reclaimed
 until a forthcode({UNLOCK}) occurs.},
 {{BLOCK},{UNLOCK},{#BUFF}},
@@ -5401,7 +5412,7 @@ HEADER({LOCK},{LLOCK},{DOCOL})
 worddoc( {STORAGE},{UNLOCK},{unlock},{ n --- },{CI},
 {Unlock the block forthvar({n})
 _VERBOSE_({{Probably, because it
-is no longer the current input stream.}})
+is no longer the forthdefi({current input source.})}})
 The result is that its buffer can again be reclaimed.},
 {{LOCK},{#BUFF}},
 {
@@ -5416,11 +5427,11 @@ HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG,L0},
-{Interrupt the current input stream in order to
+{Interrupt the forthdefi({current input source}) in order to
 interpret screen forthvar({n}) . 
 _VERBOSE_({{The stack changes in according with the words executed.}})
 At the end of the screen, barring errors or forced changes,
-it continues with the interrupted input stream.},
+it continues with the interrupted input source.},
 {{#BUFF},{THRU},{QUIT},{EXIT},{-->}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -5429,12 +5440,12 @@ HEADER({LOAD},{LOAD},{DOCOL})
         DC      SEMIS
 ;
 worddoc( {SCREEN},{THRU},,{n1 n2 --- ??},{ISO,FIG,L0},
-{Interrupt the current input stream in order to
+{Interrupt the forthdefi({current input source}) in order to
 interpret screen forthvar({n1}) through forthvar({n2})
 (inclusive).
 _VERBOSE_({{The stack changes in according with the words executed.}})
 At the end of the screens, barring errors or forced changes,
-it continues with the interrupted input stream.},
+it continues with the interrupted input source.},
 {{#BUFF},{LOAD},{QUIT},{EXIT},{-->}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -5493,7 +5504,7 @@ BLK2:
 ;
 worddocsafe( {SCREEN},{-->},{next_screen},{},{I,L0},
 {Continue interpretation with the next disc screen. If the
-current input stream is not from a block, a crash will ensue.
+current input source is not from a block, a crash will ensue.
 If there is an exception in this new screen, that screen may
 remain locked until a forthcode({QUIT}) .
 },
@@ -8029,9 +8040,10 @@ the wordset forthsamp({DEFINING}) concern the memory area that
 is allocated to the dictionary. They may add data to the dictionary at the expense
 of the free space, one cell or one byte at a time, or allocate a buffer at once.
 The dictionary space may also be shrunk, and the words that were there are lost.
-The forthdefi({dictionary entry}) of a word is represented by its lowest address. Based on that
-an entry may considered a record with fields. Words to access those fields also belong
-to this wordset.},
+The forthdefi({dictionary entry address}) or forthdefi({dea})
+represents a word. It is the lowest address of a record with
+fields. Words to access those fields also belong to this
+wordset.}, 
 {},{},{},{}, {}, enddoc)
 worddocchapter({DOUBLE},{ },
 {The wordset forthsamp({DOUBLE}) contains words that manipulate forthdefi({double})'s.
@@ -8154,13 +8166,13 @@ worddocchapter({OUTPUT},{ },
 to the terminal and such. For disk I/O: forthxref({STORAGE}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({PARSING},{ },
-{The forthdefi({outer interpreter}) is responsible for parsing, i.e.
-it gets a word from the input stream and interprets or compiles
-it, advancing 
-the _CIF_IN_({forthcode({IN})}) _ISO_IN_({forthcode({>IN})}) dnl
+{The forthdefi({outer interpreter}) is responsible for parsing,
+i.e. it gets a word from the forthdefi({current input source})
+and interprets or compiles it, advancing the
+_CIF_IN_({forthcode({IN})}) _ISO_IN_({forthcode({>IN})}) dnl 
 pointer. The wordset forthsamp({PARSING}) contains the words
 used by this interpreter and other words that consume
-characters from the input stream. In this way the outer
+characters from the input source. In this way the outer
 interpreter need not be very smart, because its capabilities
 can be extended by new words based on those building blocks.}, 
 {},{},{},{})

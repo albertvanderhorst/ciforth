@@ -78,6 +78,43 @@ This file is divided into forthdefi({screen})'s , consisting of
 16 lines of 64 characters.
 To forthdefi({load}) such a screen has the same effect as
 typing its content from the terminal.
+
+Traditionnally Forthers have things called
+forthdefi({number})'s, words that are present in the source be
+it interpreted or compiled, and are thought of not as being
+executed but rather being a description of something to be put
+on the stack directly. In early implementations the word forthsamp({NUMBER})
+was a catch-all for anything not found in the dictionary, and
+could be adapted to the application.
+For such an extensible language as
+Forth, and in particular where strings and floating point
+numbers play an increasing role, numbers must be generalised to
+the concept of forthdefi({denotation})'s and the need of a way
+that catch those is as present as it was in those early days.
+Denotations put a
+constant object on the stack without the need to define it
+first. Naturally they look, and in fact are, the same in both
+modes. Here we adopt a practice of selecting a type of the denotations
+based on the first letter. This is quite practical and familiar.
+Examples of this are (some from C, some from assemblers, some
+from this Forth) : 
+forthexample({10 
+'a' 
+^A 
+0DEAD 
+$8000403A 
+#3487 
+0177 
+"Arpeggio" 
+"JAMES BROWN IS DEAD" 
+" JK " 
+' DROP}) 
+These examples demonstrate 
+that a denotation may contain spaces, and still are easy to scan.
+And yes, I insist that forthsamp({' DROP}) is a denotation.
+Of course a sensible programmer will not define a word that looks like
+a denotation :
+forthexample({ : 7 CR "This must be my lucky day" TYPE ; ( DON'T DO THIS) })
 @section Portability
 If you build your words from the words defined in the ISO standard,
 and are otherwise careful, your programs may run on other systems that
@@ -371,7 +408,7 @@ Later you can rewrite them as code words.})
 Again words belonging to tools are perfectly normal dictionary entries. 
 @subsection                    RAM Workspace
 The RAM workspace contains the compilation space for the dictionary,
-_HIGH_BUF_(disc buffers,}) the computation and return stacks, the user area,
+_HIGH_BUF_({disc buffers,}) the computation and return stacks, the user area,
 and the terminal input buffer, 
 _VERBOSE_({From the figforthuser manual
 forthquotation
@@ -402,7 +439,7 @@ belongs to a specific word.
 A forthdefi({dictionary entry address}) is a pointer to a dictionary entry.
 In this ciforth it is the lowest addres of the entry, where the name is.
 
-A dictionary entry has the following fields:
+A dictionary entry has the following fields, from lowest in memory to highest:
 forthenumerate
 forthitem
 The code field. This is one cell. 
@@ -428,11 +465,14 @@ This contains a pointer to a string.
 A pointer to such a field is called a forthdefi({name field address}).
 The name itself is stored at outside of the dictionary header
 in are gular string, i.e. a one cell count followed by as many characters.
-_VERBOSE_({Unfortunately, forthdefi({name field address}) is often used, 
-where a forthdefi({dictionary entry address}) would be more correct,
-especially in older documentation, and this usage may leak into this
-document.
-That they happen to be the same is no reason to confuse two completely different concepts.})
+_VERBOSE_({Unfortunately, forthdefi({name field address}) is
+often used, where a forthdefi({dictionary entry address}) would
+be more correct, especially in older documentation, and this
+usage may leak into this document. This came about because the
+name was lowest in memory. That they happen to be the same is
+no reason to confuse two completely different concepts. In this
+Forth the code field address and the dictionary address are the
+same, but not accidentally so. }) 
 forthitem
 forthendenumerate
 If the parameter field were called data field, they would be in alphabetic order.
@@ -452,7 +492,7 @@ data of a vocabulary. This indicates that it shoudl not be executed.
 forthitem
 The DENOTATION bit =1 for a word from the DENOTATION vocabulary.
 This means that it is a one letter word, that can parse 
-all forthdefi({denotations}) (numbers) that start with that letter, e.g. 0 .
+all forthdefi({denotation})'s (numbers) that start with that letter, e.g. 0 .
 _ALIGNED_(
 {forthitem
 After the last letter follow zero bytes uptill the next cell boundary.})
