@@ -141,7 +141,7 @@ CR ." CASSADY'S 8080 ASSEMBLER 81AUG17  >2<"
 
 
 : >BODY PFA CELL+ ;
-: >INST >BODY @ ;
+: >INST >BODY @ ;  ( Get you at fixup too)
 : >MASK >BODY CELL+ @ ;
 : >COMMA >BODY CELL+ CELL+ @ ;
 (   The FIRST set is contained in the SECOND set, leaving IT            )
@@ -263,6 +263,7 @@ HERE POINTER !
     DUP >MASK POINTER @ @ ^ AND FF AND OVER >INST ^ = IF
         DUP >BODY POST, DROP
         DUP +DISS
+( distrubr dis-dix        1 POINTER +!)
         DUP ID.
         ." BINGA"
     THEN
@@ -270,6 +271,36 @@ HERE POINTER !
     THEN
 ;
 
+( Ugly! )
+: dis-2PI
+    DUP IS-2PI IF
+    AT-REST? IF
+    DUP >MASK POINTER @ @ ^ AND FFFF AND OVER >INST ^ = IF
+        DUP >BODY POST, DROP
+        DUP +DISS
+( distrubr dis-dix        2 POINTER +!)
+        DUP ID.
+        ." BINGA"
+    THEN
+    THEN
+    THEN
+;
+: dis-xFI
+   DUP IS-xFI IF
+   DUP >MASK TALLY CELL+ @ INVERT CONTAINED-IN IF
+   DUP >INST  POINTER @ @ ^ TALLY CELL+ @ INVERT ^ AND ^ = IF
+       DUP >BODY FIX| DROP
+       DUP +DISS
+        DUP ID.
+        ." BINGU"
+   THEN
+   THEN
+   THEN
+;
+
+( If the disassembly contains something: `AT-REST?' means
+( we have gone full cycle rest->postits->fixups->commaers               )
+( so the disassembly contains a result.                                 )
 : RESULT? AT-REST? DISS? AND  ;
 ( Dissassemble one instruction from ADDRESS. )
 ( Leave `POINTER' pointing after that instruction. )
@@ -279,7 +310,7 @@ HERE POINTER !
     !TALLY
     START
     BEGIN
-        dis-1PI ( DIS-xFI DIS-COMMA )
+        dis-1PI dis-xFI ( DIS-COMMA )
         >NEXT%
 (       DUP ID.                                                         )
     DUP DICTEND? RESULT? OR UNTIL
