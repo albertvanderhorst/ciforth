@@ -606,8 +606,8 @@ string else 0. It is assumed del cannot be a valid addr )
 \      SWAP OVER - 1 - ( Length after delimiter)
 \      R> 1+ SWAP
 \   ELSE ( DROP 0) 0 THEN  2SWAP ;
-(  -HEADING                   89jul16-AH )
- : -HEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
+(  -LEADING                   89jul16-AH )
+ : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
     BEGIN                        ( heading blanks )
       OVER C@ BL = OVER 0= 0=  AND
     WHILE
@@ -616,12 +616,12 @@ string else 0. It is assumed del cannot be a valid addr )
  : COMPARE ( ISO) ROT 2DUP SWAP - >R
      MIN CORA DUP IF RDROP ELSE DROP R> THEN ;
  : $@=  ( S1 S2 --F string at address S1 equal to other one)
-   >R $@ R> $@ COMPARE
-;
-
-
-
-
+   >R $@ R> $@ COMPARE ;
+\ For VAR and ENVZSTRING leeave STRING or CONTENT and GOON.
+: (MENV) DUP 0= IF DROP 2DROP 0. 0 ELSE Z$@ &= $S 2SWAP >R >R
+2OVER COMPARE IF RDROP RDROP 1 ELSE 2DROP R> R> 0 THEN THEN ;
+( Find a STRING in the environment, -its VALUE or NULL string)
+: GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
 ?PC  <HEX ( DEBUG SCR#7 )
 :  DUMP2   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
@@ -3140,14 +3140,14 @@ PS ABA + BABAA
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
 \ Print the current search order by vocabulary names
-: ORDER SEARCH BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT DROP ;
+: ORDER SEARCH BEGIN $@ DUP 'FORTH <> WHILE .WID REPEAT 2DROP ;
 
-'EXECUTE ALIAS NEW-EXEC  CREATE X
-: EXEC'  DUP ID. R> PUSH NEW-EXEC POP >R ;
-: DEBUG 'EXEC' 'EXECUTE 2 CELLS MOVE ;
-: NODEBUG 'EXECUTE DUP >R >PHA DUP   R@ >CFA !   R> >DFA !  ;
-: IP-DEBUG BEGIN POP $@ SWAP PUSH DUP ID. EXECUTE AGAIN ;
-: DEBUG: (WORD) FOUND >DFA @ PUSH IP-DEBUG POP DROP ;
+
+
+
+
+
+
 
 
 ( Test screens                                      )
