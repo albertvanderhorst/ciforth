@@ -1,0 +1,158 @@
+# $Id$
+# Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+
+Welcome and congratulations! (Already)
+
+Introduction
+
+What you find here is a Forth for the Intel 86. It is a FIG Forth as of old.
+Complying in detail with the Fig glossary, which is available in electronic
+from for the first time in history.
+The motivation for having this type of Forth available follows from its
+characteristics. It is available as an assembler source, and it is an
+indirect threaded Forth. 
+An assembler source is a distinct advantage for getting started from
+nothing. An engineer might balk at the description of how to use a meta
+compiler, but feels at ease with a (much larger) assembler manual.
+Although speed is currently in fashion, using subroutine threaded Forth's
+with optimisers, indirect threading is the preferred choice for some
+applications. I did this work, because I needed it. 
+It is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
+that is available via taygeta. And of course kudo's to FIG.
+
+System requirements
+
+You need a version of nasm , TASM or MASM on your system. I recomment nasm,
+it is an open source assembler and available on different platforms, at
+least MSDOS and Unix. It solves a lot of the design errors I find in the
+Intel ways of MASM.EXE. It generates a binary without a linker.
+On the opposite side, e.g. Borland's TASM you can buy nowaday's only as part
+of a giant C++ package. 
+If you want to use the generic possibilities you will need a Unix system
+with all of its tools. I use GNU-Linux (RedHat) and do the makes and version
+control on that. For making bootable floppies you need mtools. 
+
+Assembler sources
+
+The following two assembly sources generated are supplied as a service.
+These are in fact just
+examples. You can generate different ones (see next section.) 
+The file alone.asm can be assembled using NASM. It includes a boot sector
+such that it can boot from a standard floppy on a industry standard Intel
+PC. If you have the mtools set (most Linux'es have it) the Makefile shows
+you how to make the floppy. 
+If you run on Linux with
+mtools, "make boot" will do it. 
+The resulting floppy will even be recognized by
+MSDOS, such that you can copy block sources to it. 
+Make "moreboot" will do this from Linux, then you will have BLOCKS.BLK
+available.
+Otherwise on MSDOS (I recommended version
+3.2, the most stable MSDOS ever) adapt the example genboot.asm.
+The file msdos.msm can be assembled using TASM and MASM. The resulting Forth
+executable can be run off hard disk and respects the file system on it.
+It uses the file BLOCKS.FRT.
+
+A generic Forth
+
+This is assuming you run on Unix.
+By specifying what you want in a configuration file you can generate a host
+of assembler listings. This is as simple as replacing "yes" with "no" in
+configuration files, see the examples msdos.m4 and alone.m4 and the
+Makefile.
+
+With respect to the assembler you can choose between NASM and MASM, with
+file extension .asm and .msm respectively. The .msm are acceptable by
+TASM.EXE too.
+
+With respect to the I/O (words like EXPECT R/W) you can choose between
+three.
+You can use dos (_USE_DOS_) in the classic way as with the original. This
+means that the floppy is used directly without regard for directory
+structures.
+You can use dos in a modern way. (_MODERN_). This allocates block in the
+file with name BLOCKS.FRT. This name is available in the string BLOCK-FILE
+for you to change, also at run time. No (as of 2000) obsolete MSDOS calls
+are used. 
+You can use the BIOS (_USE_BIOS_) No MSDOS interrupts are required. 
+
+With respect to the hosting you can choose between _HOSTED_ and _BOOTED_.
+A hosted version relies on MSDOS to get the program started. (It may or may
+not use MSDOS for I/O, once started.).
+A _BOOTED_ version contains a boot sector, such that you you can make a
+standalone version that boots from floppy. 
+
+Of course a _BOOTED_ version that tries to use MSDOS I/O crashes
+immediately, so not all versions are useful. 
+
+Customisation
+
+The usual customisation in assembler files is possible. 
+If you use other that 3" floppy disks you have to specify the disk
+parameters. Parameters for a 5" HD floppy are present and can be commented
+in. 
+If you do not need a DOS-compatible floppy, you can start the image
+immediately after the boot sector, like I do for the hard disk version. 
+You can change the default name of the BLOCK-FILE. 
+If you want to change the header layout, you will find that the way headers
+are done via MACRO's make it more pleasant to use the generic listing. 
+If you may want you can use this as a starting point for generating a whole
+other Forth (like me).   
+If you want to boot into your 20 Gbyte disk (like me), you probably have a
+version 3.0 super modern LBA BIOS. If you want to use an older system you
+must experiment by using the BIOS word. (You need not resort to assembler
+for experimenting.) 
+
+Programs
+In the file BLOCKS.BLK is available a screen editor, assembler, decompiler
+and tools like DUMP. Beware! Some of the tools handle hards disks. There are
+example programs and benchmarks. Everything under screen 100 you will find
+more or less working. Everything loaded from 8 is used by me on a regular
+basis and is 16/32 bits clean. 
+Beware! The full screen editor doesnot work under Linux (protection).
+The assembler may work in 32 bit mode, but it generates 16 bit code!
+
+Deviations
+
+Some non-substantial deviation of the original FIG source have been made
+for good reasons. 
+
+The assumption in using OFFSET was that you have two identical floppy drives
+and no hard disk. That is nowadays extremely unlikely. Instead I put OFFSET
+to good use to screen off a part of the floppy that must not be used (such
+as an MSDOS directory or the hard disk part that contains the forth system.)
+
+The FIG filosofy is that sectors, blocks and screens must be compatible, but
+may be all different. The original 8086 FIG had one sector for a block. I
+changed that in having one block for a screen. This is a boon for those
+wanting to ANSI-fy the sources.
+
+The way I coded the character I/O points ahead to vectoring TYPE and EXPECT
+rather than EMIT and KEY. This way I can have the host system handle the rub
+out key. 
+
+I added generic words BIOS, BDOS and LINOS. These allow to have high level
+words to handle about all BIOS and interrupt 21 calls. Linux is better.
+LINOS handles all Linux system calls. 
+
+The joy of genericity
+
+Genericity is acomplished by the Unix tools m4. I use GNU m4. This is a weird
+tool but powerful. Forthers probably like it.
+Some implementation details are hidden in the file header.m4. In particular
+the way headers are built. I want to get rid of the WIDTH and TRAVERSE
+abominations and you may want to have the headers alligned at word bounds.
+This is easily done by changes to header.m4.
+This kind of possibilities were in fact the motivation for this undertaking. 
+
+Web sites.
+A newer or improved version may be gotten from
+http://home.hccnet.nl/a.w.m.van.der.horst
+Nasm is found at 
+
+The FIG source this is based on is at 
+
+MASM.EXE is available 
+
+The original fig documentation is at 
+This include the pictures.
