@@ -7,6 +7,7 @@
  			;    dd < a.out > whatever bs=512 skip=62
   
 A_GDT             EQU     27C00H
+A_IDT             EQU     01000H
  BITS 16
 _start:
   
@@ -55,14 +56,14 @@ cs32:
  mov esp,              09000h  ; first 64k of second meg is our stack
   
  ;
- ;# BUILD Interrupt Descriptor Table at 01000h physical
+ ;# BUILD Interrupt Descriptor Table at A_IDT physical
  ;      256 interrupt gate descriptors that call sequential IIT
  ;      calls, which all call INTCALLER.
   
  mov ax,07003h 
- mov edi,01000h 
+ mov edi,A_IDT 
 per_IDT_descriptor:                     ; Our first (example) entry is...
- 	mov [edi],ax               ; 03 70       starting at 01000h 
+ 	mov [edi],ax               ; 03 70       starting at A_IDT 
  	inc edi                        ; offset
  	inc edi
  	mov WORD [edi],008h 
@@ -254,7 +255,7 @@ gdt_entries:
   
 initial_idtr:
  	DW  0800h            ; 2k, 256 * 8
- 	DD 01000h           ; gdt physical address
+ 	DD A_IDT           ; gdt physical address
   
 initial_gdtr:
  	DW  0400h            ; gdt limit
