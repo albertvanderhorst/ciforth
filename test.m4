@@ -19,16 +19,18 @@ $2
 define({wordtest},
 {divert(2)dnl
 ." testing $1"
-HEX : X ; CR
+HEX : XX ; CR
 divert(4)dnl
 testing $1
 forall2({onetest},$2)
 divert(2)dnl
-FORGET X  })
+FORGET XX  })
 divert(1)dnl
 CR
 divert(3)dnl
 BYE
 Split here for test
+divert(2)dnl
+'NOOP 'OK 3 CELLS MOVE
 divert(5)dnl
 divert{}dnl
