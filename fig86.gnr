@@ -149,7 +149,7 @@ ORG0:   JMP     SHORT BOOT
         ; MSDOS programmers reference (thru 6, 3.9)
         DB    "DFW--EXP"
 LBPS    DW         BPS
-        DB         001H
+        DB         1
 RESSECTORS  DW     01H
         DB         NFAT 
         DW BPS*SECROOT/32
@@ -216,14 +216,14 @@ ELSE1:
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
         JB      RETRY
-        CMP     CX,SECSTRT + EM/BPS      ; Grossly overestimated.
-        JNE     BEGIN1
+        CMP     BX,[ENDLD]            
+        JL      BEGIN1
         
         MOV     AL,'W'
         CALL    DISPLAY
         CALL    DISPLAYCR
         JMP     ORIG
-        
+ENDLD:  DW      INITDP
 ;       Read the sector with number in CX (Counting from 0)
 ;       Leave into CX the incremented sec# 
 READSECTOR:
@@ -691,7 +691,7 @@ HEADER({CR},{CR},{DOCOL})
         DW      LIT,LF
         DW      EMIT
         DW      SEMIS
-	PAGE
+	PAGE       
 HEADER({CMOVE},{LCMOVE},{$+2})
 	CLD             ;INC DIRECTION
 	MOV	BX,SI	;SAVE IF
@@ -1010,7 +1010,11 @@ HEADER({C/L},{CSLL},{DOCON})
 HEADER({FIRST},{FIRST},{DOCON})
 	DW	BUF1
 ;
+; THE END  OF THE MEMORY 
 HEADER({LIMIT},{LIMIT},{DOCON})
+	DW	EM
+; THE END  OF THE MEMORY 
+HEADER({EM},{LEM},{DOCON})
 	DW	EM
 ;
 HEADER({B/BUF},{BBUF},{DOCON})
@@ -1897,10 +1901,11 @@ HEADER({COLD},{COLD},{DOCOL})
 ;____1_____ _USEDOS_1_({
 _COMMENT
 ; This will steer clear of a forth executable, provided it is
-; the first file on the floppy. The 1 is the extra sector in .EXE files.
+; the first file on the floppy. 
+; The 2 is rounding plus the extra sector in .EXE files.
 ; However it deviates much from the classic model and requires
-; that the disk parameters are available (no only for USEBIOS)
-        DW      LIT, 1+(SECSTRT + EM/BPS)/(KBBUF/BPS)  ; Overestimation.
+; that the disk parameters are available (not only for USEBIOS)
+        DW      LEM, BBUF, SLASH,TWOP
         DW      OFSET,STORE
 _ENDCOMMENT
         DW      ZERO, OFSET,STORE
@@ -1909,7 +1914,7 @@ _ENDCOMMENT
 ; This will reserve place for dos information, such that the floppy
 ; can be accessed from DOS and makes sure blocks are not allocated
 ; within the forth system itself.
-        DW      LIT, (SECSTRT + EM/BPS)/(KBBUF/BPS)  ; Overestimation.
+        DW      LEM, BBUF, SLASH,ONEP 
         DW      OFSET,STORE
 });_END___1__({_USEBIOS_1_})
 	DW	LIT, USINI   
@@ -2613,7 +2618,7 @@ HEADER({SEEK},{SEEK},{DOCOL})
         DW      SWAP, TOR, TOR
         DW      LIT, 04200H     ; Seek from start
         DW      FROMR           ; Handle
-        DW      FROMR, LIT, KBBUF, USTAR
+        DW      FROMR, BBUF, USTAR
         DW      SWAP    ; L.S. ON TOP
 	DW	BDOS, DERR
         DW      DROP, DROP, DROP, DROP
@@ -2629,11 +2634,11 @@ RSLW2:  DW      TOR
         DW      BHAN, FETCH, SEEK ; That's done
         DW      FROMR, SWAP, TOR
         DW      BHAN, FETCH
-        DW      LIT, KBBUF
+        DW      BBUF
         DW      FROMR           ; ADDR
 	DW	BDOS, DERR
         DW      DROP, DROP, DROP
-        DW      LIT, KBBUF, LSUB, DERR
+        DW      BBUF, LSUB, DERR
         DW      SEMIS
 
 });_END___1__({_MODERN_1_})
@@ -2685,8 +2690,8 @@ DOK:	POPF		;POP FLAGS
 	JMP	NEXT
 ;
 ;
+;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
 HEADER({R/W},{RSLW},{DOCOL})
-;	( ADDR  BLK#  FLAG (0=W, 1=R) --- )
 	_0BRANCH(RSLW1) 
 	DW	RBLK
 	_BRANCH(RSLW2) 
@@ -2706,58 +2711,58 @@ HEADER({SEC/BLK},{SPBLK},{DOCON}) ;# SECTORS/BLOCK
 ;
 HEADER({DISK-ERROR},{DSKERR},{DOVAR})
       DW  0
-
-HEADER({T&SCALC},{TSCALC},{DOCOL})
-                DW      LIT,    SPDRV, SLMOD
-                DW      DRIVE,  STORE
-                DW      REC,    STORE,  SEMIS
 ;
 HEADER({BLOCK-READ},{BLKRD},{DOCOL})
-                DW      LIT, 0201H, USE, FETCH                ;AL = drive no.
-                DW      REC, FETCH, LIT, SPT*HEADS, SLMOD
-                DW      SWAP, LIT, SPT, SLMOD, TOR
-                DW      SWAP, LIT, 0100H, STAR, PLUS, ONEP
-                DW      FROMR, LIT, 0100H, STAR, DRIVE, FETCH, PLUS
-                DW      LIT, 13H, BIOS
-                DW      DROP, DROP, DROP, DROP
-                DW      ONE, LAND, DSKERR, STORE
-                DW      SEMIS
+        DW      LIT, 0201H, SWAP                      ;AL = drive no.
+        DW      REC, FETCH, LIT, SPT*HEADS, SLMOD
+        DW      SWAP, LIT, SPT, SLMOD, TOR
+        DW      SWAP, LIT, 0100H, STAR, PLUS, ONEP
+        DW      FROMR, LIT, 0100H, STAR
+        DW      LIT, 13H, BIOS
+        DW      ONE, LAND, DSKERR, STORE
+        DW      DROP, DROP, DROP, DROP
+        DW      SEMIS
 
 HEADER({BLOCK-WRITE},{BLKWRT},{DOCOL})
-                DW      LIT, 0301H, USE, FETCH                ;AL = drive no.
-                DW      REC, FETCH, LIT, SPT*HEADS, SLMOD
-                DW      SWAP, LIT, SPT, SLMOD, TOR
-                DW      SWAP, LIT, 0100H, STAR, PLUS, ONEP
-                DW      FROMR, LIT, 0100H, STAR, DRIVE, FETCH, PLUS
-                DW      LIT, 13H, BIOS
-                DW      DROP, DROP, DROP, DROP
-                DW      ONE, LAND, DSKERR, STORE
-                DW      SEMIS
+        DW      LIT, 0301H, SWAP                      ;AL = drive no.
+        DW      REC, FETCH, LIT, SPT*HEADS, SLMOD
+        DW      SWAP, LIT, SPT, SLMOD, TOR
+        DW      SWAP, LIT, 0100H, STAR, PLUS, ONEP
+        DW      FROMR, LIT, 0100H, STAR
+        DW      LIT, 13H, BIOS
+        DW      ONE, LAND, DSKERR, STORE
+        DW      DROP, DROP, DROP, DROP
+        DW      SEMIS
 ;
-;
+; 
+;	( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )
 HEADER({R/W},{RSLW},{DOCOL})
-                DW      USE,    FETCH,     TOR
-                DW      TOR
-                DW      SWAP,   USE, STORE
-                DW      SPBLK,  STAR
-                DW      TSCALC
-                DW      FROMR
-                _0BRANCH(RSLW1)
-                DW      BLKRD
-                _BRANCH(RSLW2)
-RSLW1:          DW      BLKWRT
-RSLW2:          DW      FROMR,  USE,    STORE
-                DW      DSKERR, FETCH,     DDUP
-                _0BRANCH(RSLW5)              ;OK
-                DW      ZLESS
-                _0BRANCH(RSLW3)
-                DW      LIT,    9                       ;Write error
-                _BRANCH(RSLW4)
-RSLW3:          DW      LIT,    8                       ;Read error
-RSLW4:          DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
-                                                        ; is no good!
-                DW      QERR
-RSLW5:          DW      SEMIS
+        DW      TOR
+        DW      SPBLK,  STAR
+        DW      SPBLK,  OVER, PLUS
+        DW      SWAP,   XDO
+RSLW0:  DW      DUPE
+        DW      IDO,    REC, STORE
+        DW      RR
+        _0BRANCH(RSLW1)
+        DW      BLKRD
+        _BRANCH(RSLW2)
+RSLW1:  DW      BLKWRT
+RSLW2:  
+        DW      LIT, BPS, PLUS
+        _LOOP(RSLW0)
+        DW      DROP, FROMR, DROP
+        DW      DSKERR, FETCH,     DDUP
+        _0BRANCH(RSLW5)              ;OK
+        DW      ZLESS
+        _0BRANCH(RSLW3)
+        DW      LIT,    9                       ;Write error
+        _BRANCH(RSLW4)
+RSLW3:  DW      LIT,    8                       ;Read error
+RSLW4:  DW      ZERO,   PREV,   FETCH,     STORE   ;This  buffer
+                                                   ; is no good!
+        DW      QERR
+RSLW5:  DW      SEMIS
 ;
 });_END___1__({_USEBIOS_1_})
 	PAGE
