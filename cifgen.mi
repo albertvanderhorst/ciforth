@@ -25,6 +25,7 @@ Program is protected by the GNU Public License.
 @chapter Overview
 forthvar({fig86.gnr}) is a system to generate ciforth in all its
 configuration's.
+This is a configurators manual.
 For each ciforth there is a corresponding documentation;
 there is however just this one documentation for the generic 
 system.
@@ -47,13 +48,66 @@ contains in itself some provision such that it can be loaded on
 any of the ciforth systems, independantly of whether they are 16 or 32
 bits or whether they can or cannot handle direct access of the video memory. 
 
-@chapter How tools are used.
-If you are a Unix guru, you can skip this chapter.
+@chapter Non-technical background.
+@section Legal matters
+My extensions are GPL-ed or libary GPL-ed.
+I transferred the copyright to the Dutch Forth Workshop, a foundation that
+supports Forth and defends the GPL.
+The original figforth is public domain and is still available.
+@section History
+@subsection Deviations
+
+Some non-substantial deviation of the original FIG source have been made
+for good reasons. 
+
+The assumption in using forthcodeni({OFFSET}) was that you have two identical floppy drives
+and no hard disk. That is nowadays extremely unlikely. Instead I put forthcodeni({OFFSET}) 
+to good use to screen off a part of the floppy that must not be used (such
+as an MSDOS directory or the hard disk part that contains the forth system.)
+
+The FIG filosofy is that sectors, blocks and screens must be compatible, but
+may be all different. The original 8086 FIG had one sector for a block. I
+changed that in having one block for a screen. This is a boon for those
+wanting to ISO-fy the sources.
+
+The way I coded the character I/O points ahead to vectoring forthcodeni({TYPE}) and forthcodeni({EXPECT}) 
+rather than forthcodeni({EMIT}) and forthcodeni({KEY}) . This way I can have the host system handle the rub
+out key. 
+
+I added generic words forthcodeni({BIOS}) , forthcodeni({BDOS}) and forthcodeni({LINOS}) . 
+(See subsection The joy of genericity.)
+
+@section Acknowledgment
+ciforth is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
+that is available via taygeta. And of course kudo's to FIG.
+This work and all of figforth is public domain. 
+@chapter Background.
+If you are a Unix and a Forth guru, you can skip this chapter.
 _VERBOSE_({ If you think you 
 are, you can read this chapter and discover you are not.})
-This chapter is about how tools are used, conceptually.
+This chapter is about pervading concepts and 
+how tools are used, conceptually.
 
-@section m4
+@section Orthogonality
+The concept of orthogonality is central to this effort.
+Orthogonality means that different aspects of configuration 
+(int this case)
+are made independant of each other. 
+For example, ciforth can be bootable or started by MSDOS,
+it can be assembled by forthprog({nasm}) or by forthprog({MASM.EXE}) .
+These two choices can be made indepedantly from each other,
+and every combination ought to work. 
+Each choice is associated with file with macros for forthprog({m4}) , 
+so ideally if you need to modify how forthprog({nasm})  
+assembly source is generated to you only need to change the file 
+forthfile({nasm.m4}).
+
+This is, of course, as far as it goes. 
+Try as you may to separate all information about header layout
+in the forthfile({header.m4}) configuration file, 
+a change to the order of the fields in a header will certainly have
+it impact at certain places in the source.
+@section How m4 is used.
 The unix macroprocessor forthprog({m4}) is very powerful indeed. 
 Testimony is that the description of its usage in here
 is longer that its man-pages.
@@ -71,37 +125,39 @@ This is convenient, because they are
 not used in a Basic Forth system
 and  they are 
 special anyway (e.g. for TeX).
+The use of quotation is very critical at times, 
+and the find points are not covered in the following.
 @subsection Customisation
 Simple customisation can be done by forthprog({m4}) as follows:
 
- forthsamp({define(version,2.149)})
+ forthsamp({define(_lbracket_version_rbracket_,2.149)})
 
 Within the text treated the version number is substituted.
 @subsection Selection
 Selection, often one of alternatives, is in general done as follows
 
- forthsamp({_BITS16_(32)_BITS32_(64)_BITS64_(128)})
+forthsamp({_BITS16_(32)_BITS32_(64)_BITS64_(128)}) ,
 
-, which gives, of course, the size of a double number.
+which gives, of course, the size of a double number.
 
 This is accomplished by 
 
-    forthsamp({{define(_lbracket__BITSxx_  _rbracket_,_lbracket_$1  _rbracket_)}})
+forthsamp({{define(_lbracket__BITSxx_  _rbracket_,_lbracket_$1  _rbracket_)}})
 
 for the actual bitsize and
 
-    forthsamp({define(_lbracket__BITSxx_  _rbracket_,)}) 
+forthsamp({define(_lbracket__BITSxx_  _rbracket_,)}) 
 
 for others.
 
-Selections can be nested, with any other forthprog({m4}) construct. 
+Selections can be nested within other forthprog({m4}) macro construct. 
 As in 
 forthexample(
 {{_VERBOSE_}_lbracket_({_BITS64_}(_lbracket_The possibility to cycle through all (64-bit) 
 numbers by {forthsamp}(_lbracket_0 0 DO ... LOOP_rbracket_) is very useful indeed._rbracket_)_rbracket_)})
-Here you see at work, apart from {_BITS64_} , the macro {_VERBOSE_} that allows (if turned on)
+Here you see at work, apart from forthmacro({{_BITS64_}}) , the macro forthmacro({{_VERBOSE_}}) that allows (if turned on)
 verbosity that can help understanding but is not always appreciated.
-You alse see {forthsamp} that is in fact
+You alse see forthmacro({{forthsamp}}) that is in fact
 a markup to indicate we have a piece of Forth code there.
 
 Selections can be used to throw out a block of 
@@ -110,11 +166,11 @@ For example words accessing I/O ports are not available in a Linux Forth,
 as they would only lead to privilege violations.
 
 The braces are essential here. 
-Without it the introduction of a comma somewhere in the text,
-result in will forthprog({m4}) interpreting the remainder as a second parameter,
+Without it the introduction of a comma somewhere in the text
+results in forthprog({m4}) interpreting the remainder as a second parameter,
 which it wil ignore.
    
-forthprog({m4}) is used as a postponed markup language.
+@subsection forthprog({m4}) is used as a postponed markup language.
 Just say forthsamp({{forthcode(_lbracket_+LOOP _rbracket_)}}) to indicate that you want 
 formatting as for ``code'' words. 
 Later you can decide to use
@@ -130,15 +186,19 @@ Suppose we have a list of structures, meaning that the first person is
 a child of the second and third person:
 
 parents({Alice},{Mary},{John})
+
 parents({Fred},{Mary},{John})
+
 parents({Aayilah},{Sjantil},{Bodaji})
+
 ...
+
 With 
 define({parents}, {$2}) we get a list of (you guessed) the mothers.
 
-The usage of {divert()} can best be explained with an example in this context.
+The usage of forthmacro({{divert()}}) can best be explained with an example in this context.
 
-forthsamp({
+forthexample({
 {define}(_lbracket_parents_rbracket_,
 _lbracket_{divert}(3)dnl
 ${}2
@@ -148,12 +208,12 @@ _rbracket_)
 })
 
 will give out the mothers on channel 3 and fathers on channel 6.
-This will be concatenated on the output, 
+The output will be concatenated, 
 but all mothers and all fathers stay together.
 
 @subsection Lists
 By using an extra pair of braces you can have a list in forthprog({m4}) .
-So forthsamp(_lbracket__lbracket__lbracket_A_rbracket_,_lbracket_B_rbracket_,_lbracket_C_rbracket_,_lbracket_D_rbracket__rbracket__rbracket_) is 
+So forthsamp({_lbracket__lbracket_A_rbracket_,_lbracket_B_rbracket_,_lbracket_C_rbracket_,_lbracket_D_rbracket__rbracket_}) is 
 a single parameter to a macro and can 
 be passed to other macro's as a whole. 
 The outer braces are removed and 
@@ -174,7 +234,6 @@ of the everyday person.
 The very inconvenient way nodes must be linked in texinfo even forced 
 me to define part of the macro in one macro and the remainder in
 another. 
-
 
 @section ssort
 The sorting tool ssort can order multiple field records, with 
@@ -240,42 +299,23 @@ Furthermore the current trend of subroutine threaded Forth's may very
 well be unsuitable for 64-bits processors like the Alpha.
 I did this work, because I needed it for my thesis on computer intelligence.
 
-@subsection Orthogonality
-The concept of orthogonality is central to this effort.
-Orthogonality means that different aspects of configuration are 
-made independant of each other. 
-For example, ciforth can be bootable or started by MSDOS,
-it can be assembled by MASM or by NASM.
-These two choices can be made indepedantly from each other,
-and every combination ought to work.
-This is, of course, as far as it goes. 
-Try as you may to separate all information about header layout
-in the forthfile({header.m4}) configuration file, 
-a change to the order of the fields in a header will certainly have
-it impact at certain places in the source.
-@section Acknowledgment
-ciforth is based on the work of Charlie Krajewski and Thomas Newman, Hayward, Ca.
-that is available via taygeta. And of course kudo's to FIG.
-The original is public domain. My extensions are GPL-ed or libary GPL-ed.
-I transferred the copyright to the Dutch Forth Workshop, a foundation that
-supports Forth and defends the GPL.
-
 @subsection 32 bits
 It is unusual for a figforth to be 32 bit.
-It turned out that the addition of CELL+ goes a long way toward allowing
+It turned out that the addition of forthcode({CELL+}) goes a long way toward allowing
 utilities like a decompiler to be 16/32 bit clean. In the FIG documentation
-about the user variables and +ORIGIN you may read cells where appropriate
-and the documentation applies. 
+about the user variables and forthcode({+ORIGIN}) you may read cells where appropriate
+and the documentation applies, as well as it ever did. 
+But I hope this documentation is better.
 
 @subsection System requirements
 
 This generic version -if suitably built- runs on industry standard hardware
 ("PC's") : standalone, under Linux and under MSDOS/MSWINDOWS. 
-To build, you need a version of nasm, TASM or MASM on your system. I
-recomment nasm, it is an open source assembler and available on different
+To build, you need a version of forthprog({nasm}) , forthprog({TASM.EXE}) or forthprog({MASM.EXE}) on your system. I
+recomment forthprog({nasm}) , it is an open source assembler and available on different
 platforms, at least MSDOS and Unix. It solves a lot of the design errors I
-find in the Intel ways of MASM.EXE. It generates a binary without a linker. 
-On the opposite side, e.g. Borland's TASM you can buy nowaday's only as part
+find in the Intel ways of forthprog({MASM.EXE}) . It generates a binary without a linker. 
+On the opposite side, e.g. Borland's forthprog({TASM.EXE}) you can buy nowaday's only as part
 of a giant C++ package. 
 If you want to use the generic possibilities you will need a Unix system
 with all of its tools. I use GNU-Linux (RedHat) and do the makes and version
@@ -287,22 +327,27 @@ MSDOS-compatible you need mtools.
 The following two assembly sources generated are supplied as a service.
 These are in fact just examples. You can generate different ones (see next
 section.) 
-The file alone.asm can be assembled using NASM. It includes a boot
+The file forthfile({alone.asm}) can be assembled using forthprog({nasm}) . It includes a boot
 sector such that it can boot from a standard floppy on a industry standard
 Intel PC. If you have the mtools set (most Linux'es have it) the Makefile
-shows you how to make the floppy. On MSDOS you can use DEBUG. 
+shows you how to make the floppy. On MSDOS you can use forthprog({DEBUG.EXE}) . 
 If you run on Linux with
-mtools, "make boot" will do it. 
+ forthsamp({mtools}) , forthsamp({make boot}) will do it. 
 The resulting floppy will even be recognized by
 MSDOS, such that you can copy block sources to it. 
-Make "moreboot" will do this from Linux, then you will have BLOCKS.BLK
-available. Make "allboot" will do it all, but it needs a working forth
+ forthsamp({make moreboot})
+will do this from Linux, then you will have forthfile({BLOCKS.BLK})
+available.
+forthsamp({make allboot})
+will do it all, but it needs a working forth
 on Linux for doing some calculations.
 Otherwise on MSDOS (I recommended version 3.3, the most stable MSDOS ever)
-adapt the example genboot.asm. 
-The file msdos.msm can be assembled using TASM and MASM. The resulting Forth
+adapt the example forthfile({genboot.asm}) . 
+The file forthfile({msdos.msm}) can be assembled 
+using forthprog({TASM.EXE}) and forthprog({MASM.EXE}). 
+The resulting Forth
 executable can be run off hard disk and respects the file system on it.
-It uses the file BLOCKS.BLK.
+It uses the file forthfile({BLOCKS.BLK}) .
 
 @subsection A generic Forth
 As was mentionned before, ciforth has one single source file: the generic I86 figForth.
@@ -317,7 +362,7 @@ engineers.
 You can customize at a number of levels.
 forthenumerate
 forthitem
-Configuration files have extension .cfg , these are files with forthprog({m4})
+Configuration files have extension forthsamp({.cfg}) , these are files with forthprog({m4})
 commands. They are intended to use at the highest and easiest level of
 configuration and contain their own simple usage instructions. 
 forthitem
@@ -332,7 +377,7 @@ of your assembler, and will not see any code applicable to other operating
 systems or I/O systems. (It is not commented out, it is just not there.) 
 forthitem
 You can adapt the generic source. This is difficult, but gratifying.
-If you manage to ANSI-fy it, the result is multiplied.
+If you manage to ISO-fy it, the result is a lot of ISO systems, not just one.
 forthendenumerate
 
 @subsection Level 1 customization.
@@ -340,27 +385,28 @@ forthendenumerate
 This is assuming you run on Unix.
 
 By specifying what you want in a configuration file you can generate a host
-of assembler listings. This is as simple as replacing "yes" with "no" in
+of assembler listings. This is as simple as replacing ``_yes'' with ``_no'' in
 configuration files.
 See the examples forthfile({msdos.cfg}) and forthfile({alone.cfg}) and the Makefile. 
 You can find out what the options are by inspecting forthfile({prelude.m4}) . 
 
-With respect to the assembler you can choose between NASM and MASM, with
-file extension forthfile({.asm}) and forthfile({.msm}) respectively. The forthvar({.msm}) are acceptable by
+With respect to the assembler you can choose between forthprog({nasm}) and forthprog({MASM.EXE}) , with
+file extension forthfile({.asm}) and forthfile({.msm}) respectively. 
+The forthvar({.msm}) are acceptable by
 TASM.EXE too. You can generate an equivalent forthfile({.s}) file, but this is 
 experimental and doesn't lead to a working forth.
 
 With respect to the I/O (words like forthcodeni({EXPECT}) forthcodeni({R/W}) ) you can choose between
 three on MSDOS.
-You can use dos ({_CLASSIC_}) in the classic way as with the original. This
+You can use dos forthmacro({_CLASSIC_}) in the classic way as with the original. This
 means that the floppy is used directly without regard for directory
 structures. This uses calls that are declared obsolete.
-You can use dos in a modern way. ({_MODERN_}). This allocates block in the
+You can use dos in a modern way. forthmacro({_MODERN_}). This allocates block in the
 file with name forthfile({BLOCKS.BLK}) . This name is available in the string forthcodeni({BLOCK-FILE}) 
 for you to change, also at run time. No (as of 2000 ) obsolete MSDOS calls
 are used (Checked against MS-DOS programmers reference "covers through
 version 6" ISBN 1-55615-546-8) 
-You can use the BIOS ({_USEBIOS_}) No MSDOS interrupts are required. 
+You can use the BIOS forthmacro({_USEBIOS_}) No MSDOS interrupts are required. 
 
 With repect to I/O on linux you can choose between c-based and native.
 The c-based version may be portable to other I86 unices. The native version
@@ -368,15 +414,16 @@ of course not. All linux versions have their blocks in a file. (Accessing
 a floppy in the classic way is perfectly possible -- and implementing it would
 be a perfectly pointless exercise.)
 
-With respect to the hosting you can choose between {_HOSTED_} ({_HOSTED_LINUX_} or
-{_HOSTED_MSDOS_}) and {_BOOTED_}. ({_BOOTDF_} or {_BOOTHD_}). A hosted version relies on
-MSDOS or Linux to get the program started. (It may or may not use MSDOS for
-I/O, once started.). A {_BOOTED_} version contains a boot sector, such that
+With respect to the hosting you can choose between forthmacro({{_HOSTED_}}) ( forthmacro({{_HOSTED_LINUX_}}) or
+ forthmacro({{_HOSTED_MSDOS_})}) and forthmacro({{_BOOTED_}}) . ( forthmacro({{_BOOTDF_}}) or forthmacro({{_BOOTHD_}}) ). 
+A hosted version relies on MSDOS or Linux to get the program started. 
+(It may or may not use MSDOS for I/O, once started.). 
+A forthmacro({{_BOOTED_}}) version contains a boot sector, such that
 you you can make a standalone version that boots from floppy or hard disk. 
-A {_BOOTED_} version may very well be startable from plain DOS and its files 
+A forthmacro({{_BOOTED_}}) version may very well be startable from plain DOS and its files 
 visible from DOS.
 
-Of course a {BOOTED_} version that tries to use MSDOS I/O (or Linux) crashes
+Of course a forthmacro({{BOOTED_}}) version that tries to use MSDOS I/O (or Linux) crashes
 immediately, so not all versions are useful. 
 
 You have a choice between 16 or 32 protected mode and real mode.
@@ -387,13 +434,16 @@ virtual real mode, e.g. they will not run in a "DOS box" in Windows.
 If you manage to specify conflicting options the preprocessor (forthprog({m4})) breaks
 off and you can find the exit code in forthfile({postlude.m4}) . Than you can reason back
 why this is a conflict. For example error 1000 indicates floppy and hard
-disk i/o at the same time. From forthfile({postlude.m4}) you see that {_RWFD_} and {_RWHD_} are
-on at the same time. {_RWHD_} is turned on because you wanted to boot from hard
+disk i/o at the same time. 
+From forthfile({postlude.m4}) you see that forthmacro({{_RWFD_}}) and forthmacro({{_RWHD_}}) are
+on at the same time. forthmacro({{_RWHD_}}) is turned on because you wanted to boot from hard
 disk or you specified it yourself in the first place. Etc. 
 
- forthfile({postlude.m4}) does you another favor. It derives logical consequences, such
-as once you decide for a {_REAL_} mode Forth, it must be {_BITS16_} and you need
-not specify that. In particular {_LINUX_N_} or {_LINUX_C_} says it all.    
+forthfile({postlude.m4}) does you another favor. It derives logical consequences, such
+as once you decide for a forthmacro({{_REAL_}}) mode Forth, it must be forthmacro({{_BITS16_}}) 
+and you need not specify 
+that_VERBOSE_({ (And yes, we could add a real mode 32 bits Forth, any volunteers?)}).
+In particular forthmacro({{_LINUX_N_}}) or forthmacro({{_LINUX_C_}}) define a whole configuration.
 
 @subsection Level 2 customization.
 You are on your own here.
@@ -407,7 +457,7 @@ in.
 If you do not need a DOS-compatible floppy, you can put the image
 immediately after the boot sector. A bootable hard disk version always works
 like that. 
-You can change the default name of the BLOCK-FILE at run time.
+You can change the default name of the forthcodeni({BLOCK-FILE}) at run time.
 If you want to change the header layout, you will find that the way headers
 are done via MACRO's make it more pleasant to use the generic listing. 
 If you may want you can use this as a starting point for generating a whole
@@ -415,9 +465,9 @@ other Forth (like me).
 If you want to boot into your 20 Gbyte disk (like me), you probably have a
 version 3.0 super modern LBA BIOS. There is no file system, just 20,000,000
 blocks (and yes a 16 bit system would be inconvenient). If you want to use
-an older system you must experiment by using the BIOS word. (You need not
-resort to assembler for experimenting.) Then you can adapt your assembler 
-listing.
+an older system you must experiment by using the forthcodeni({BIOS}) word. 
+(You need not resort to assembler for experimenting.) 
+Then you can adapt your assembler listing.
 There is a description in the history section about bringing up an assembler
 system.
 
@@ -425,39 +475,22 @@ system.
 Contact me if you want to contribute to the wider usability of this package.
 
 @subsection Programs
-In the file BLOCKS.BLK is available a screen editor, assembler, decompiler
+In the file forthfile({BLOCKS.BLK}) is available a screen editor, assembler, decompiler
 and tools like DUMP. Beware! Some of the tools handle hards disks. There are
 example programs and benchmarks. Everything under screen 100 you will find
 more or less working, but maybe not on your system.
 Everything loaded from 8 is used by me on a regular basis and is 16/32 bits
 clean. Beware! The full screen editor doesnot work under Linux (protection).
 The system doesn't load it under Linux with forthsamp({8 LOAD}) .
-The program `wc' is an example of how to use lina as a scripting language.
-
-@subsection Deviations
-
-Some non-substantial deviation of the original FIG source have been made
-for good reasons. 
-
-The assumption in using OFFSET was that you have two identical floppy drives
-and no hard disk. That is nowadays extremely unlikely. Instead I put OFFSET
-to good use to screen off a part of the floppy that must not be used (such
-as an MSDOS directory or the hard disk part that contains the forth system.)
-
-The FIG filosofy is that sectors, blocks and screens must be compatible, but
-may be all different. The original 8086 FIG had one sector for a block. I
-changed that in having one block for a screen. This is a boon for those
-wanting to ANSI-fy the sources.
-
-The way I coded the character I/O points ahead to vectoring forthcodeni({TYPE}) and forthcodeni({EXPECT}) 
-rather than forthcodeni({EMIT}) and forthcodeni({KEY}) . This way I can have the host system handle the rub
-out key. 
-
-I added generic words forthcodeni({BIOS}) , forthcodeni({BDOS}) and forthcodeni({LINOS}) . These allow to have high level
-words to handle about all forthcodeni({BIOS}) and interrupt 21 calls. Linux is better.
- forthcodeni({LINOS}) handles all Linux system calls. 
+The program forthprog({wc}) is an example of how to use forthprog({lina}) as a scripting language.
 
 @subsection The joy of genericity
+
+I added generic words forthcodeni({BIOS}) , forthcodeni({BDOS}) and forthcodeni({LINOS}) . 
+These allow to have high level
+words to handle about all ``BIOS'' and interrupt 21 calls. 
+Linux is better.
+forthcodeni({LINOS}) handles all Linux system calls. 
 
 Genericity is acomplished by the Unix tools forthprog({m4}) . I use GNU forthprog({m4}). This is a weird
 tool but powerful. Forthers probably like it.
