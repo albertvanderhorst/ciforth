@@ -3790,11 +3790,6 @@ is executed, normally a warm start via forthcode({QUIT}) .},
 enddoc)
 HEADER({ERROR},{ERROR},{DOCOL})
         DC      WARN
-;{ If you leave the following line out, the test for POSTPONE fails!!}
-;{ AND YES! THIS IS TOTALLY UNCOMPREHENSIBLE. }
-;       DC      HERE, COUNT, LTYPE
-;{ AND NO! IF YOU DON'T IT ALSO FAILS.}
-
         DC      FETCH
         DC      ZLESS
         _0BRANCH(ERRO1) ;{IF}
@@ -3818,6 +3813,51 @@ ERRO1:  DC      LIN, FETCH, LDUP
 ERRO2:  DC      MTBUF  ;{ A (too) crude way to remove locks}
         DC      QUIT
 ;
+_LOAD_({
+worddocsafe( {ERRORS},{(ABORT")},{paren_abort_quote},{line --- in blk},{},
+{The run time action of forthcode({ABORT"}) .},
+{},
+{{( See abort_quote)},{}}, 
+enddoc)
+HEADER({(ABORT")},{PABORTQ},{DOCOL})
+        DC      ROT
+        _0BRANCH(PABQ1) ;{IF}
+        DC      LTYPE, ABORT
+        _BRANCH(PABQ2) ;{ELSE}
+PABQ1:  DC       TDROP
+PABQ2:   DC      SEMIS
+;
+worddocsafe( {ERRORS},{ABORT"},{abort_quote},{line --- in blk},{},
+{Usage is forthsamp({: <SOME> ... ABORT" <message>" ... ;}). If
+ABORT" finds a non-zero on the stack, the
+forthsamp({<message>}) is displayed and an forthcode({ABORT})
+is executed. 
+Otherwise proceed with the words
+after forthsamp({<message>}). In ciforth it is also allowed to 
+use forthcode({ABORT"}) in interpret mode.  
+},
+{{?ERROR}},
+{{ 0  ABORT" APE" 123 .},{123},
+{: GS1 0 ABORT" APE" 123 ; GS1 .},{123},
+dnl The warm start message is filtered away!
+{ 1  ABORT" APE" },{APE},
+{: GS2 1 ABORT" APE" 123 ; GS2 .},{APE}
+},
+enddoc)
+HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
+        DC      LIT, -1, LIN, PSTORE
+        DC      DENQ
+        DC      STATE
+        DC      FETCH
+        _0BRANCH(ABQ3) ;{ IF}
+        DC      LIT, PABORTQ, COMMA
+        _BRANCH(ABQ4) 
+ABQ3:                 
+        DC      PABORTQ
+ABQ4:                 
+        DC      SEMIS
+;
+});_END_({_LOAD_})
 worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea --},{},
 {Print a definition's name from its dictionary entry address.},
 {{'},{>PFA},{>NFA}},
@@ -5456,7 +5496,7 @@ worddoc( {INPUT},{TERMIO},{termio},{--- addr},{},
 {Leave the address of the terminal description, this has the layout of
 a the c-structure forthsamp({termio}) .
 },{{SET-TERM}},
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB    SIZE_TERMIO     ; Filled induring cold boot.
@@ -5467,7 +5507,7 @@ with forthvar({b}) in the termio structure forthcode({TERMIO}) .
 In particular toggling with 0AH makes that
 the terminal doesn't wait for a <return>.
 },{{SET-TERM}},
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({SET-TERM},{STTERM},{DOCOL})
         DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(3)
@@ -5622,7 +5662,7 @@ worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 The next execution of forthcode({KEY}) will return the character immediately.
 },
 {{KEY},{ACCEPT},{KEY?}},
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({KEY?},{KEYQ},{DOCOL})
         DC      ZERO, LIT, RAWIO, STTERM
@@ -5642,7 +5682,7 @@ HEADER({KEY?},{KEYQ},{DOCOL})
 RFDS:   _RESB   128     ;{32 channels maximum.}
 TV:     _RESB   8
 ;
-worddoc( {SYSTEM},{MS},{millisecond},{n1 ---},{ISO}
+worddoc( {SYSTEM},{MS},{millisecond},{n1 ---},{ISO},
 { Wait for forthsamp({n1}) miliseconds. },
 {{KEY?}},
 {{ 123 10 MS . },{123}},
@@ -7309,7 +7349,7 @@ _NORMAL_BYE_({
 worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment MSDOS.
 },{{COLD}}, 
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({BYE},{BYE},{DOCOL})
         DC      LIT, 4CH, ZERO, ZERO, ZERO, LIT, 21H, BIOS
@@ -7320,7 +7360,7 @@ worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {_PROTECTED_({Switch back to real mode.})
 Return to the host environment MSDOS.
 },{{COLD}}, 
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 CODE_HEADER({BYE},{BYE})
 ;{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
@@ -7333,7 +7373,7 @@ _HOSTED_LINUX_({
 worddoc( {SYSTEM},{BYE},{bye},{---},{ISO FIG},
 {Return to the host environment Linux.
 },{{COLD}}, 
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({BYE},{BYE},{DOCOL})
 ;{ Exit to linux, with okay status. }
@@ -7344,7 +7384,7 @@ worddoc( {SCREEN},{LIST},{list},{n ---},{L0},
 {Display the ascii text of screen forthvar({n}) on the selected output device.
 forthcode({SCR}) contains the screen number during and after this process.},
 {}, 
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({LIST},{LLIST},{DOCOL})
         DC      DECA
@@ -7373,7 +7413,7 @@ worddoc( {SCREEN},{INDEX},{index},{from to --},{},
 forthvar({from}) , forthvar({to}) . This is used to view the
 comment lines of an area of text on disc screens.}, 
 {{LIST}}, 
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({INDEX},{INDEX},{DOCOL})
         DC      LIT,FF
@@ -7415,7 +7455,7 @@ include that numbered forthvar({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
 reference line at the bottom taken from line 15 of screen 4.},
 {{MESSAGE}}, 
-{{( Interactive)},{}},
+{{." interactive"},{interactive}},
 enddoc)
 HEADER({TRIAD},{TRIAD},{DOCOL})
         DC      LIT,FF
