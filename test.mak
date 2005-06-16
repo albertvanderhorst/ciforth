@@ -125,66 +125,9 @@ lina2 : ci86.lina.s ; gcc $+ -l 2>aap
 
 ci86.lina.s :
 
-testasalpha: asgen.frt asalpha.frt testsetalpha ; \
-    echo CR REQUIRE INCLUDE REQUIRE DUMP REQUIRE ALIAS \'\$$\@ ALIAS @+ INCLUDE asgen.frt INCLUDE asalpha.frt INCLUDE testrunalpha|\
-    lina -a    |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testsetalpha >$@.diff ;\
-    diff $@.diff testresults
-
-testas80: asgen.frt as80.frt testset8080 ; \
-    (echo 5 LOAD; cat $+)|\
-    lina |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset8080 >$@.diff ;\
-    diff $@.diff testresults
-
-testas86: asgen.frt asi86.frt testset8086 ; \
-    (echo 5 LOAD; cat $+)|\
-    lina |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset8086 >$@.diff ;\
-    diff $@.diff testresults
-
-testas386: asgen.frt asi586.frt testset386 ; \
-    (echo 5 LOAD; cat $+)|\
-    lina |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset386 >$@.diff ;\
-    diff $@.diff testresults
-
-# Special test to exercise otherwise hidden instructions.
-testas386a: asgen.frt asi586.frt testset386a ; \
-    (echo 5 LOAD; cat $+)|\
-    lina |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed '/^OK$$/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset386a >$@.diff ;\
-    diff $@.diff testresults
-
-testas6809: asgen.frt as6809.frt testset6809 ; \
-    (echo 5 LOAD; cat $+)|\
-    lina |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset6809 >$@.diff ;\
-    diff $@.diff testresults
-
-# Special test to exercise otherwise hidden instructions.
-testas6809a: asgen.frt as6809.frt testset6809a ; \
-    (echo 5 LOAD; cat $+)|\
-    lina |\
-    sed '1,/TEST STARTS HERE/d' |\
-    sed '/^OK$$/d' |\
-    sed 's/^[0-9A-F \.,]*://' >$@       ;\
-    diff -w $@ testset6809a >$@.diff ;\
-    diff $@.diff testresults
-
+# Done by the separate project now.
+# Kept here until releasing the assemblers works out.
+# It is unclear where I want the assembler doc's in the end.
 RELEASEASSEMBLER=      \
 as80.frt        \
 assembler.txt   \
@@ -204,8 +147,6 @@ testset8086     \
 test.mak        \
 # That's all folks!
 # testset386a    (fails)
-
-as.zip : $(RELEASEASSEMBLER) ; echo as$(VERSION) $+ | xargs zip
 
 msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     make mslinks ; \
@@ -229,7 +170,8 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
 	echo "define({ci86gnrversion}, ifelse(M4_VERSION,,\
-{snapshot `rlog -r -h -N ci86.gnr|grep head|sed -e s/head://`},\
+{snapshot `grep TITLE ci86.gnr|sed -e 's/.*Revision: //'|\
+   sed -e 's/ .*//' `},\
 {M4_VERSION}\
 ))dnl" >>$@
 

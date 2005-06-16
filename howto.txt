@@ -6,7 +6,7 @@ Do a regression test on lina :
 and
     lina -e | tee aap
 Within Forth :
-    CRACK-FROM DENOTATION BYE
+    CRACK-FROM ONLY BYE
 
 Then
    sed -f blabla <aap >qqq
@@ -99,7 +99,7 @@ In this example from 4.15.2.5 to 4.15.3.1
 
 Just use rcs to do this:
 ln -s $CVSROOT/ciforth RCS
-NEWBRANCH=4.15.3.1.
+NEWBRANCH=4.15.0.3
 co -l -rrel-4-0-patches $f
 cvs diff $f     # check : no diffs
 ci -f -r$NEWBRANCH $f

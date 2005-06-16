@@ -245,9 +245,8 @@ This process is called forthdefi({allocating}), and the boundary is marked by
 a forthdefi({dictionary pointer}) called forthcode({DP}) .
 A word can be executed by typing its name.
 Each word in the dictionary belongs to precisely one forthdefi({word list}),
-or as we will say here vocabulary, with the exception of some fine points
-regarding forthdefin({denotation})'s.
-Apart from the name a word contains data and executable code,
+or as we will say here vocabulary.
+Apart from the name, a word contains data and executable code,
 (interpreted or not) and linking information
 (forthpxref({VOCABULARY})).
 
@@ -361,10 +360,14 @@ $8000403A
 "Arpeggio"
 "JAMES BROWN IS DEAD"
 " JK "
+'DROP
 ' DROP})
 These examples demonstrate
 that a denotation may contain spaces, and still are easy to scan.
 And yes, I insist that forthsamp({' DROP}) is a denotation.
+But forthsamp({'DROP}) is clearer,
+because it can only be interpreted as such;
+it is not a valid word.
 
 Of course a sensible programmer will not define a word that looks like
 a denotation :
@@ -411,21 +414,20 @@ read, not changed.
 forthitem
 Vocabularies are wordlists with a name. However they push the wordlist
 to the search order, instead of replacing the topmost one.
-In this sense forthcode({FORTH}) and forthcode({ASSEMBLER}) words are not strictly conforming.
+In this sense forthcode({FORTH}) and forthcode({ASSEMBLER}) words are not
+strictly conforming.
 forthitem
 This is not strictly non-conforming, but worth mentioning here.
-Despite the fact that thisforth contains only one state-smart word besides
- forthcode({SLITERAL})  (that word is forthcode({."}) )
-which is about politically correct,
-as a consequence all denotations and some other words like
- forthcode({[CHAR]}) and forthcode({[']})
-(but not forthcode({CHAR}) and forthcode({'}))
-turn out to be state smart as a design consequence.
-This is used freely in the libraries of ciforth; it is
-the right of a system developer to do so. The library is not
-a supposedly ISO-conforming program, so don't
-complain about non-portability. The libraries tend to rely on
-ciforth-specific and thisforth-specific -- but hopefully documented -- behaviour anyway.
+In fact thisforth contains only one state-smart word
+besides forthcode({SLITERAL}) (that word is forthcode({."}) ).
+All denotations are state-smart,
+but the result is correct ISO behaviour for numbers.
+Knowledge of this is used freely in the libraries of ciforth;
+it is the right of a system developer to do so.
+The library is not a supposedly ISO-conforming program.
+It tends to rely on
+ciforth-specific and thisforth-specific -- but hopefully documented -- behaviour.
+Understanding it requires some study of non-portable facilities.
 forthendenumerate
 
 Here we will explain how you must read the glossary of thisforth,
@@ -488,7 +490,13 @@ hosted system _HOSTED_LINUX_(like this one) _HOSTED_MSDOS_(like this one) or
 a booted system _BOOTED_(like this one), it is clear that some
 system-dependant information goes into accomplishing this.
 
-In the following we use the naming convention of ISO about cells.
+This has all been sorted out for you. Just use
+forthcode({SAVE-SYSTEM}) .
+This accepts a string, the name you want the
+program-file to have.
+
+In the following it is explained.
+We use the naming convention of ISO about cells.
 A cell is the fundamental unit of storage for the Forth engine.
 Here it is _BITS_ bits (_BITS16_(2)_BITS32_(4) bytes).
 
@@ -516,12 +524,12 @@ Adjust
 version information (if needed)
 forthitem
 Copy your thisforth to a new file using forthcode({PUT-FILE}) .
-The difficult part is to get the system specific header right.
-Add to the header the area from forthcode({BM}) to forthcode({HERE}).
+The difficult part is to add to the system specific header information
+about the new size of the system, which is
+the area from forthcode({BM}) to forthcode({HERE}).
+The command forthsamp({REQUIRE SAVE-SYSTEM}) loads
+a version that does that correctly for your hosted system.
 forthendenumerate
-
-This has all been sorted out for you. Just use
-forthcode({SAVE-SYSTEM}) .
 
 @section Memory organization
 
@@ -756,9 +764,9 @@ a dictionary entry.
 In
 ciforth a header extends from the lowest address of the entry, where the code
 field is to the forthdefi({past header address}), just after the last field address.
-A forthdefin({dictionary entry}) apart from the header owns a part of the dictionary space
-that can extend before the header (mostly the name of the entry) or after it (mostly data
-and code).
+A forthdefin({dictionary entry}) apart from the header owns a part of
+the dictionary space that can extend before the header (mostly the
+name of the entry) or after it (mostly data and code).
 
 A dictionary entry has fields, and the addresses of fields directly
 offset from the dictionary entry address, are called
@@ -847,11 +855,12 @@ forthitem
 The DUMMY bit =1 for a dictionary header contained in the
 data of a vocabulary. This indicates that it should not be executed.
 forthitem
-The DENOTATION bit =1 for a word from the DENOTATION word list.
+The DENOTATION bit =1 for a prefix word.
 This means that it is a short word used as a prefix
 that can parse
 all forthdefi({denotation})'s (numbers) that start with that prefix, e.g. 7 or & .
 Usually it is a one letter word, but not necessarily.
+All built-in prefix words are part of the minimum search order.
 _ALIGNED_(
 {forthitem
 After the last letter follow zero bytes up till the next cell boundary.})
@@ -1079,40 +1088,43 @@ Execute the forthsamp({forthcode}) in the order present.
 _VERBOSE_({{Beware of the special characters in the shell. Also
 the shell will collapse multiple spaces into one.}})
 
-_SUPPRESSED({
 forthitem
-forthsamp({-i forthcode})
-It is not clear whether we really want this.
-Options such as in this list are available on the remainder of the line, but they
-must be invoked with two slashes instead of one, and having more letters is allowed
-but ignored.
-_VERBOSE_({{So }forthsamp({--compile}){ instead of }forthsamp({-c})}).
-forthsamp({--library}) behaves slightly different than
-forthsamp({-l}). The library is switched, taking effect for the
-remainder of forthsamp({forthcode}), but no shifting is done of
-the arguments.
-})
+forthsamp({-g number name})
+
+Expand the system by forthsamp({number}) Megabytes, then save it
+under the name forthsamp({name}).
+forthsamp({number}) may be negative, and in that case the system
+is made smaller.
 
 forthitem
 forthsamp({-h})
 
 Print overview of options.
 
-_HOSTED_LINUX_({
 forthitem
-forthsamp({-i binpath libpath})
+forthsamp({-i binpath libpath [shellpath]})
 
 Install the forth in forthsamp({binpath}) and the library in forthsamp({libpath}) .
-Both must be full path names, not just directories.
+If the forthsamp({shellpath}) parameter is specified,
+it will be installed as the command interpreter used for forthcode({SYSTEM}).
+All of them must be full path names, not just directories.
 The ciforth that is running is copied to forthfile({binpath}), and the block file
 is copied to forthfile({libpath}).
 
-For system wide installation the following is recommended:
+_HOSTED_LINUX_({
+For system wide installation on a modern large system the following
+is recommended:
 forthexample({
     su
-    ./lina -i /usr/bin/lina /usr/lib/forth.lab
+    ./lina -g 60 lina+
+    ./lina+ -i /usr/bin/lina /usr/lib/forth.lab
     chmod 755 /usr/bin/lina
     chmod 644 /usr/lib/forth.lab})
+
+For a smallish system you may expand by 0 Mbyte forthsamp({-g 0}).
+If the system has no swap space, and less than 8 Mbyte of memory,
+use forthsamp({-g -3}), diminish from 4 to 1 Mbyte.
+
 })
 _HOSTED_LINUX_({
 forthitem
@@ -1128,7 +1140,7 @@ version information is printed.
 _VERBOSE_({This conforms to the FSF-conventions.})
 })
 forthitem
-forthsamp({-l name})
+forthsamp({-l name [more]})
 
 Use a library forthsamp({name}).
 Restart Forth with as a block file forthfile({name}) and as options the remainder

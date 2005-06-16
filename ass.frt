@@ -1,86 +1,90 @@
 ( $Id: )
-( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
-( Note that this is FIG-Forth, hence i.a. <BUILDS C; )
-( POSTIT/FIXUP 8086 ASSEMBLER LOAD SCREEN AvdH HCC HOLLAND)         
-  92 LOAD                                                      
-		
-( POSTIT/FIXUP 8086 ASSEMBLER SYSDEPENDANT AvdH HCC HOLLAND)   
-									       
-( AUXILIARY DEFINITIONS ) DECIMAL                               
-0 VARIABLE IDP   : <FIX HERE IDP ! ; : IHERE IDP @ ;            
-: C| -1 IDP +! ^ IHERE ^ C@ ^ OR ^ IHERE ^ ! ;  ( c.f. C, )     
-: C@+ COUNT ;  : C@- 1 - DUP C@ ; ( : C!+ >R R ! R> 1+ ;)       
-: MEM, , ; : R, HERE - 2 + , ; : S, C, ;  : W, , ; : SEG, , ;   
-: POST, C@+ C, ;       : FIX| C@- C| ;                          
-: 1PI <BUILDS C, DOES> POST, DROP ;                             
-: 2PI <BUILDS C, C, DOES> POST, POST, DROP ;                    
-: 1FI <BUILDS C, DOES> <FIX 1+ FIX| DROP ;                      
-: 2FI <BUILDS C, C, DOES> <FIX 2+ FIX| FIX| DROP ;              
-: 1FAMILY,  ( INCREMENT, OPCODE , COUNT -- )                    
-   0 DO DUP 1PI OVER + LOOP DROP DROP ;                         
-: 1FAMILY| 0 DO DUP 1FI OVER + LOOP DROP DROP ;                 
-: SPLIT 256 /MOD SWAP ; ( To handle two bytes at once )         
-: 2FAMILY, 0 DO DUP SPLIT 2PI OVER + LOOP DROP DROP ;           
-: 2FAMILY| 0 DO DUP SPLIT 2FI OVER + LOOP DROP DROP ;           
+( Copyright{2005}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+( Minimal POSTIT/FIXUP 8086 ASSEMBLER AvdH HCC HOLLAND)
+( This replace the FIG-Forth version. )
+( 5 screens follow here, this is an excerpt of the Pentium              )
+( assembler in the blocks of ciforth after 4.0.6 and                    )
+( compatible with the great assembler                                   )
 
-( POST-IT/FIX-UP 8086 ASSEMBLER , OPCODES AvdH HCCFIG HOLLAND)  
- 8 0 4 1FAMILY| ES| CS| SS| DS|    1 4 2 1FAMILY, PUSHS, POPS,  
- HEX 8 26 4 1FAMILY, ES:, CS:, SS:, DS:,                        
- 8 27 4 1FAMILY, DAA, DAS, AAA, AAS,                            
- 1 0 2 1FAMILY| B1| W1|   08 04 8 1FAMILY, ADDAI, ORAI, ADCAI,  
-SBBAI, ANDAI, SUBAI, XORAI, CMPAI, 2 A0 2 1FAMILY, MOVTA, MOVFA,
- 1 0 2 1FAMILY| Y| N|   2 0 8 1FAMILY| O| C| Z| CZ| S| P| L| LE|
- 70 1PI J,  ( As in J, L| Y| <CALC> S, )                        
- 1 0 8 1FAMILY| AX| CX| DX| BX| SP| BP| SI| DI|                 
- 08 40 4 1FAMILY, INCX, DECX, PUSHX, POPX,    90 1PI XCHGX,     
- ( C7) 6 1FI MEM|   ( C0) 40 00 4 1FAMILY| D0| DB| DDW| R|      
- ( 38) 08 C0 8 1FAMILY| AX1| CX1| DX1| BX1| SP1| BP1| SI1| DI1| 
- ( 07) 1 0 8 1FAMILY| [BX+SI] [BX+DI] [BP+SI] [BP+DI]           
-[SI] [DI] [BP] [BX]                                             
- 1 0 8 1FAMILY| AL| CL| DL| BL| AH| CH| DH| BH|                 
-								
-( POST-IT/FIX-UP 8086 ASSEMBLER , OPCODES AvdH HCCFIG HOLLAND)  
-1 0 2 2FAMILY| B| W|   2 0 2 2FAMILY| F| T|                     
-8 0 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,           
-2 84 2 2FAMILY, TEST, XCHG,   0 88 2PI MOV,                     
-( 00FD) 0 8C 2PI MOVSW,   ( 00FE) 0 8D 2PI LEA,                 
-( IRR,egular)  ( FF) 9A 1PI CALLFAR,  ( FE) A8 1PI TESTAI, ( FF)
-1 98 8 1FAMILY, CBW, CWD, IR2, WAIT, PUSHF, POPF, SAHF, LAHF,   
-( FE) 2 A4 6 1FAMILY, MOVS, COMPS, IR3, STOS, LODS, SCAS,       
-08 B0 2 1FAMILY, MOVRI, MOVXI,                                  
-8 C2 2 1FAMILY, RET+, RETFAR+,  8 C3 2 1FAMILY, RET,  RETFAR,   
-1 C4 2 1FAMILY, LES, LDS,  0 C6 2PI MOVI,  0 CD 2PI INTI,       
-1 CA 4 1FAMILY, INT3, IRR, INTO, IRET,                          
-1 D4 4 1FAMILY, AAM, AAD, IL3, XLAT,                            
-1 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,                      
-2 E4 2 1FAMILY, INAI, OUTAI,  2 EC 2 1FAMILY, INAD, OUTADI,     
-1 E8 2 1FAMILY, CALL, JMP,  E9 1PI JMPFAR,  EA 1PI JMPS,        
+                        HEX
 
-( POST-IT/FIX-UP 8086 ASSEMBLER , OPCODES AvdH HCCFIG HOLLAND)  
-1 F0 6 2FAMILY, LOCK, ILL, REP, REPZ, HLT, CMC,                 
-1 F8 6 2FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)           
-800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI,                  
-SUBI, XORI, CMPI,                                               
-800 83 8 2FAMILY, ADDSI, IL4, ADCSI, SBBSI, IL5,                
-SUBSI, IL6, CMPSI,                                              
-800 D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, IL6, RAR,       
-800 10F6 6 2FAMILY, NOT, NEG, MUL, IMUL, DIV, IDIV,             
-00 F6 2PI TESTI, 800 FE 2 2FAMILY, INC, DEC,                    
-( 38FF) 00 8F 2PI POP,  30 FE 2PI PUSH,                         
-800 10FF 4 2FAMILY, CALLO, CALLFARO, JMPO, JMPFARO,             
-								
-( POST-IT/FIX-UP 8086 ASSEMBLER , POSTLUDE AvdH HCCFIG HOLLAND) 
-HEX VOCABULARY ASSEMBLER IMMEDIATE                              
- 'O ASSEMBLER CFAO 'O ;CODE 8 + !        ( PATCH ;CODE IN NUCLEUS ) 
-: CODE ?EXEC CREATE [COMPILE] ASSEMBLER !CSP ; IMMEDIATE        
-: C; CURRENT @ CONTEXT ! ?EXEC ?CSP SMUDGE ; IMMEDIATE          
-: NEXT                                                          
-     LODS, W1|                                                  
-     MOV, W| F| R| BX| AX1|                                     
-     MOV, W| F| BX1| DX|                                        
-     INCX, DX|                                                  
-     JMPO, D0| [BX]                                             
- ;                                                              
- CODE TEST NEXT  C;                                             
-                                                                
+( --assembler_generic SPLIT 1PI FIR 1FAMILY, )  \ A4sep27 AvdH
+: SPLIT 0 100 UM/MOD SWAP   ; \ Split X : ls BYTE and REMAINDER
+\ Post INSTRUCTION of LENGTH.  Big endian specific!
+: POST  SWAP , 1 CELLS - ALLOT ;
+\ Fixup with ms byte of FIX below ADDR, leave next FIX ADDR
+: FIX| 1- >R   SPLIT R@ SWAP TOGGLE   R> ;
+: 1PI CREATE , DOES>  @ 1 POST  ;   \ 1 byte post-it opcode
+: 2PI CREATE , DOES>  @ 2 POST  ;   \ 2 byte post-it opcode
+: 3PI CREATE , DOES>  @ 3 POST  ;   \ 3 byte post-it opcode
+\ Fixup from behind starting with ls byte.
+: FIR CREATE , DOES> @ HERE BEGIN FIX| OVER 0= UNTIL 2DROP ;
+\ Create a family adding INC to OPCODE with COUNT members
+: 1FAMILY, 0 DO DUP 1PI OVER + LOOP DROP DROP ;
+: 2FAMILY, 0 DO DUP 2PI OVER + LOOP DROP DROP ;
+: 3FAMILY, 0 DO DUP 3PI OVER + LOOP DROP DROP ;
+: FAMILY|R 0 DO DUP FIR OVER + LOOP DROP DROP ;
+( --assembler_commaers ) \ A4sep27 AvdH
+: lsbyte, SPLIT C, ;
+: (W,) lsbyte, lsbyte, DROP ;
+: (L,) lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
 
+( O=obligatory R=Relative I=Immediate )
+' (W,) ALIAS OW,        ' (L,) ALIAS IL,
+' (L,) ALIAS (RL,)      ' (W,) ALIAS IW,
+' (W,) ALIAS (RW,)      ' C,   ALIAS IB,
+' C,   ALIAS (RB,)      ' (L,) ALIAS L,
+' (W,) ALIAS SG,        ' (W,) ALIAS W,
+' C,   ALIAS P,         ' C,   ALIAS B,
+' C,   ALIAS IS,
+
+
+
+( --assembler_i86_opcodes_1 )                  \ A4sep27 AvdH
+08 06 4 1FAMILY, PUSH|ES, PUSH|CS, PUSH|SS, PUSH|DS,
+08 07 4 1FAMILY, POP|ES, -- POP|SS, POP|DS,
+08 26 4 1FAMILY, ES:, CS:, SS:, DS:,
+08 27 4 1FAMILY, DAA, DAS, AAA, AAS,
+01 00 2 FAMILY|R B'| X'|
+08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A,
+                 XORI|A, CMPI|A,
+02 A0 2 1FAMILY, MOV|TA, MOV|FA,
+
+70 1PI J,  ( As in J, L| Y| <CALC> S, )
+    01 00 2 FAMILY|R Y| N|
+    02 00 8 FAMILY|R O| C| Z| CZ| S| P| L| LE|
+
+08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
+90 1PI XCHG|AX,
+( --assembler_i86_opcodes_2 )                  \ A4sep27 AvdH
+08 00 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
+02 84 2 2FAMILY, TEST, XCHG,
+01 98 8 1FAMILY, CBW, CWD, IR2, WAIT, PUSHF, POPF, SAHF, LAHF,
+02 A4 6 1FAMILY, MOVS, CMPS, -- STOS, LODS, SCAS,
+08 B0 2 1FAMILY, MOVI|BR, MOVI|XR,
+08 C3 2 1FAMILY, RET,  RETFAR,  08 C2 2 1FAMILY, RET+, RETFAR+,
+01 C4 2 2FAMILY, LES, LDS,  00C6 2PI MOVI,   0CD 1PI INT,
+01 CC 4 1FAMILY, INT3, -- INTO, IRET,
+01 D4 4 1FAMILY, AAM, AAD, -- XLAT,
+01 E0 4 1FAMILY, LOOPNZ, LOOPZ, LOOP, JCXZ,
+02 E4 2 1FAMILY, IN|P, OUT|P,  2 EC 2 1FAMILY, IN|D, OUT|D,
+01 E8 2 1FAMILY, CALL, JMP,
+
+0088 2PI MOV,           008C 2PI MOV|SG,        008D 2PI LEA,
+EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
+( --assembler_i86_opcodes_3 ) \ A2oct21 AvdH
+01 F0 6 1FAMILY, LOCK, -- REPNZ, REPZ, HLT, CMC,
+01 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)
+800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI,
+    CMPI,
+0800 83 8 2FAMILY, ADDSI, -- ADCSI, SBBSI, -- SUBSI, -- CMPSI,
+800 10F6 6 2FAMILY, NOT, NEG, MUL|AD, IMUL|AD, DIV|AD, IDIV|AD,
+0800 00FE 2 2FAMILY, INC, DEC,
+0800 10FF 4 2FAMILY, CALLO, CALLFARO, JMPO, JMPFARO,
+
+0200 0000 2 FAMILY|R 1| V|
+0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,
+0800 C0 8 2FAMILY, ROLI, RORI, RCLI, RCRI, SHLI, SHRI, -- SARI,
+
+00F6 2PI TESTI,         008F 2PI POP,           30FF 2PI PUSH,
+00,AF0F 3PI IMUL,

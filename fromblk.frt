@@ -12,15 +12,6 @@ REQUIRE ARG[]
 : ECR CR$ $@ ETYPE ;
 : E. S>D 0 (D.R) ETYPE ;
 
-\ The information that there are some non-index lines has not been printed.
-VARIABLE INFO-LINE   1 INFO-LINE !
-
-\ Print the message about non-index lines, if this is the first.
-: INFO-MESSAGE
-    INFO-LINE @ IF
-        "Possible non-index line in block file" ETYPE ECR   0 INFO-LINE !
-    THEN ;
-
 \ Current input line.
 VARIABLE LINE   0 LINE !
 

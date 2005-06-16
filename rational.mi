@@ -6,7 +6,7 @@ This Forth is called ciforth and is made available by the
 DFW.
 All publications of the DFW are available under GPL, the GNU public license.
 The file forthfile({COPYING}) containing the legal expression of these
-lines must accompagny it.
+lines must accompany it.
 
 Because Forth is ``programming by extending the language'' the GPL
 could be construed to mean that systems based on ciforth
@@ -59,7 +59,7 @@ organisation that generated it for you.
 
 This Forth builds on figforth. It is based on the work of
 Charlie Krajewski and Thomas Newman, Hayward, Ca. still
-available via taygeta. The acknowledgements for systems that
+available via taygeta. The acknowledgments for systems that
 serves as a base, in particular the original figforth, are
 found in the generic documentation, including detailed
 information how these systems can be obtained.
@@ -78,7 +78,7 @@ manual for the generic Forth.
 @section The Generic System this Forth is based on.
 
 The source and executable of this ciforth was generated, out of at
-least dozen's of possibilities, by a generic system.
+least dozens of possibilities, by a generic system.
 You can configure
 the operating system, memory sizes, file names and minor issues like
 security policy. You can select between a 16 and 32 bit word size.

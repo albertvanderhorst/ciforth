@@ -1,5 +1,5 @@
 .\" $Id$
-.TH LINA "1" "aug 2003" "ciforth 4.0.3" DFW
+.TH LINA "1" "nov 2004" "ciforth 4.0.6" DFW
 .SH "NAME"
 lina ciforth \- ISO Forth Language And Environment
 .SH "SYNOPSIS"
@@ -8,6 +8,8 @@ lina ciforth \- ISO Forth Language And Environment
 \fBlina\fR      \ \fB\-C\fR\ <source>
 .br
 \fBlina\fR      \ \fB\-F\fR\ [ forth code ]
+.br
+\fBlina\fR      \ \fB\-G\fR\ <N> <binary-path>
 .br
 \fBlina\fR      \ \fB\-I\fR\ <binary-path> <library-path> [<shell-path>]
 .br
@@ -63,6 +65,12 @@ Then start the interpreter.
 \fB\-F\fR \fIwords\fR
 Execute the forthcode \fIwords\fR .
 Then start the interpreter.
+.TP
+\fB\-G N \fIbinary-path\fR
+Expand the system by \fIN\fR Megabytes,
+then save it under the name \fIbinary-path\fR.
+\fIN\fR may be negative,
+and in that case the system is made smaller.
 .TP
 \fB\-H\fR
 Print help, i.e. the option summary.
@@ -152,7 +160,7 @@ The library should contain a full complement of the ISO Forth
 language.
 
 .SH "AUTHOR"
-Copyright \(co 2000-2002
+Copyright \(co 2000-2004
 Albert van der Horst \fI albert@spenarnc.xs4all.nl\fR.
 \fBciforth\fR is made available under the GNU Public License:
 quality, but NO warranty.

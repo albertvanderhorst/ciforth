@@ -15,7 +15,6 @@ _BOOTSECTRK_({define({_BOOTED_}, _yes)})
 _BOOTLBA_({define({_BOOTED_}, _yes)})
 _LINUX_N_({ define( {_HOSTED_LINUX_}, _yes)})
 _LINUX_C_({ define( {_HOSTED_LINUX_}, _yes)})
-_WIN32_({define({_HOSTED_}, _yes)})
 _HOSTED_DPMI_({define({_HOSTED_}, _yes)})
 _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
@@ -31,14 +30,14 @@ _HOSTED_LINUX_({ define( {_BITS32_}, _yes)})
 _HOSTED_LINUX_({ define({_BLOCKSINFILE_}, _yes)})
 _HOSTED_DPMI_({define({_PROTECTED_}, _yes)})
 _BOOTED_({define({_USEBIOS_}, _yes)})
-_WIN32_({ define( {_BITS32_}, _yes)})
 _USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
 _CLASSIC_({define({_KEY_BY_KEY_}, _yes )})
 _BITS32_({define({_PROTECTED_}, _yes)})
 ;{The following consequences are hard because otherwise you wouldn't have blocks.}
-define({_FILES_}, _no)})
+define({_FILES_}, _no)
 _MODERN_({define({_FILES_}, _yes)})
 _LINUX_N_({define({_FILES_}, _yes)})
+_LINUX_N_({define({M4_EM},M4_EM-0x74)})dnl
 
 dnl Other consequences
 _BITS32_({define({M4_RTS}, 0x10000)})
@@ -61,7 +60,7 @@ _SWITCH_({define({_LOW_BUF_}, _yes)})
 _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 dnl after the real memorya plus the high memory.
-_SWITCH_({_BITS32_({define({M4_INITDP},{0x110000})})})
+_SWITCH_({_BITS32_({define({M4_INITDP},{0x100000})})})
 _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
@@ -76,12 +75,12 @@ _HOSTED_DPMI_({define({_CLEANUP_BYE_}, _yes)})
 _CLEANUP_BYE_({define({_MSDOS_BYE_}, _no)})
 
 dnl Defines that directly regulate source inclusions, without depending defines.
-define({_NO_RESPECTDOS_}, _yes)}) dnl default
-_RESPECTDOS_({define({_NO_RESPECTDOS_}, _no)})}) dnl exception
-define({_NO_SECURITY_}, _yes)}) dnl default
-_SECURITY_({define({_NO_SECURITY_}, _no)})}) dnl exception
-define({_CIF_IN_}, _yes)})
-_ISO_IN_({define({_CIF_IN_}, _no)})})
+define({_NO_RESPECTDOS_}, _yes) dnl default
+_RESPECTDOS_({define({_NO_RESPECTDOS_}, _no)}) dnl exception
+define({_NO_SECURITY_}, _yes) dnl default
+_SECURITY_({define({_NO_SECURITY_}, _no)}) dnl exception
+define({_CIF_IN_}, _yes)
+_ISO_IN_({define({_CIF_IN_}, _no)})
 
 dnl Detectable error situations. Terminate.
 _RWSECTRK_({ _RWLBA_({errprint({LBA disk access conflicts with access by sectors and tracks.
@@ -115,6 +114,11 @@ _BITS16_({define({M4_INITDP}, {TEXTEND})})
 _BITS32_({define({_NEXT}, {_NEXT32})})
 _BITS32_({define({_PUSH}, {_PUSH32})})
 _BITS32_({define({_2PUSH}, {_2PUSH32})})
+dnl must be overruled after inclusion of postlude.4m
+_HOSTED({_BITS32_({define({M4_NBUF}, 16)})})
+_HOSTED({_SWITCH_({_BITS32_({define({M4_INITDP},{0x110000})})})})
+_BITS32_({define({M4_MAXWORDLIST}, 16)})
+
 dnl LEAVE THIS! THE BOOT CODE IS ALWAYS 16 BITS.
 include(width16.m4)
 include(namescooked.m4)

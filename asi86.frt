@@ -1,20 +1,18 @@
-( $Id$ )
+ ( $Id$ )
 ( Copyright{2000}: Albert van der Horst, HCC FIG Holland by GNU Public License)
-
-                          HEX
- ASSEMBLER DEFINITIONS
-
 ( ############## 8086 ASSEMBLER ADDITIONS ############################# )
-( The patch for the assembler doesn't belong in the generic part        )
+( The patch ofr the assembler doesn't belong in the generic part        )
 ( To be used when overruling, e.g. prefix)
 : lsbyte, 0 100 UM/MOD SWAP C, ;
 : W, lsbyte, lsbyte, DROP ;
 : L, lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
 : IS, C, ;
-( There are some fixups-from-reverse that are larger than 2 l bytes.    )
-( Using the out of mask bit trick, that has to be eliminated.           )
-." This 8086 assembler runs only on 32 bits systems!" CR
-
+( Because there are no fixups-from-reverse that are larger than 2       )
+( bytes this trick allows to debug -- but not run -- 8086 assembler     )
+( of 32 bits system. The pattern 00 01 {$100} to fixup the last bit     )
+( becomes 00 00 00 01 {$1000000} on a 16 bit system                     )
+: 0s 2 ROTLEFT ;  ." WARNING : testing version on a 32 bit machine"
+( By defining 0s as a NOP you get a normal 8086 version                 )
 ( ############## 8086 ASSEMBLER PROPER ################################ )
 ( The decreasing order means that a decompiler hits them in the         )
 ( right order                                                           )
@@ -34,29 +32,29 @@
 (               10 Register op        20 Memory op                    )
 (               40 D0                 80 [BP]                         )
 ( Only valid for 16 bits real mode  A0JUL04 AvdH )
-20 0 07 T!R
- 01 0 8 FAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] -- [BX]
-A0 0 07 06 FIR [BP]  ( Fits in the hole, safe incompatibility)
-12 0 07 T!R
- 01 0 8 FAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
-11 0 07 T!R
- 01 0 8 FAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
+20 0 700 0s T!
+ 0100 0s 0 8 xFAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI] [SI] [DI] -- [BX]
+A0 0 0700 0s 0600 0s xFIR [BP]  ( Fits in the hole, safe incompatibility)
+12 0 0700 0s T!
+ 0100 0s 0 8 xFAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
+11 0 0700 0s T!
+ 0100 0s 0 8 xFAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
 
-60 000  C0 00 FIR      D0|
-24 200  C0 40 FIR      DB|
-28 200  C0 80 FIR      DW|
-10 000  C0 C0 FIR      R|
-08 200  C7 06 FIR      MEM|
+60 000  C000 0s 0000 0s xFIR      D0|
+24 200  C000 0s 4000 0s xFIR      DB|
+28 200  C000 0s 8000 0s xFIR      DW|
+10 000  C000 0s C000 0s xFIR      R|
+08 200  C700 0s 0600 0s xFIR      MEM|
  ( Overrules D0| [BP] )
 
-02 00 38 T!R
- 08 0 8 FAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
-01 00 38 T!R
- 08 0 8 FAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
+02 00 3800 0s T!
+ 0800 0s 0 8 xFAMILY|R AX'| CX'| DX'| BX'| SP'| BP'| SI'| DI'|
+01 00 3800 0s T!
+ 0800 0s 0 8 xFAMILY|R AL'| CL'| DL'| BL'| AH'| CH'| DH'| BH'|
 
-00 00 0200 T!R   0200 0 2 FAMILY|R F| T|
-01 00 0100 0000 FIR B|
-02 00 0100 0100 FIR W|
+00 00 0002 0s T!   0002 0s 0 0s 2 xFAMILY|R F| T|
+01 00 0001 0s 0 0s xFIR B|
+02 00 0001 0s 1 0s xFIR W|
 
 ( --------- two fixup operands ----------)
 00 00 FF03 T!
@@ -87,8 +85,8 @@ A0 0 07 06 FIR [BP]  ( Fits in the hole, safe incompatibility)
 22 00 C700 T!  1000 18FF 2 2FAMILY, CALLFARO, JMPFARO,
 
 ( --------- no fixup operands ----------)
-01 00 02000001 00 FIR B'|
-02 00 02000001 01 FIR W'|
+01 00 20100 0s 0000 0s xFIR B'|
+02 00 20100 0s 0100 0s xFIR W'|
 8 0200 201 T!    02 A0 2 1FAMILY, MOVTA, MOVFA,
 0 0400 201 T!
  08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A, XORI|A, CMPI|A,
@@ -99,18 +97,17 @@ A0 0 07 06 FIR [BP]  ( Fits in the hole, safe incompatibility)
 
 ( --------- special fixups ----------)
 
-00 00 0100,0001 T!R   01 0 2 FAMILY|R Y| N|
-00 00 0E T!R   02 0 8 FAMILY|R O| C| Z| CZ| S| P| L| LE|
+00 00 10100 0s T!   0100 0s 0 0s 2 xFAMILY|R Y| N|
+00 00 00E00 0s T!   0200 0s 0 0s 8 xFAMILY|R O| C| Z| CZ| S| P| L| LE|
 00 4000 10F 70 1PI J,
 
-00 00 18 T!R   08 0 4 FAMILY|R ES| CS| SS| DS|
+00 00 1800 0s T!   0800 0s 0 0s 4 xFAMILY|R ES| CS| SS| DS|
 00 00 18 T!   01 06 2 1FAMILY, PUSH|SG, POP|SG,
 02 00 DF02 08C 2PI MOV|SG,
 
-00 00  0100,0200 0000 FIR 1|
-00 800 0100,0200 0200 FIR V|
-
-00 0 01,C703 T!
+00 00 10002 0s 00 0s xFIR 1|
+00 800 10002 0s 02 0s xFIR V|
+00 0 1C703 T!
 (    0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,         )
  0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, SAL, SAR,
 
@@ -140,13 +137,11 @@ A0 0 07 06 FIR [BP]  ( Fits in the hole, safe incompatibility)
 (   : D0|  ' [BP] REJECT D0|  ;                                         )
 (   : [BP] ' D0|  REJECT [BP] ;                                         )
 (   : R| ' LES, REJECT 'O LDS REJECT R| ;                               )
+ ASSEMBLER DEFINITIONS
 (   : NEXT                                                              )
-(        LODS, W'|                                                      )
+(        LODS, W1|                                                      )
 (        MOV, W| F| AX'| R| BX|                                         )
 (        JMPO, D0| [BX]                                                 )
 (    ;                                                                  )
 ( ############## 8086 ASSEMBLER POST ################################## )
-( CODE JAN MOV|SG, T| ES| R| AX| ENDCODE                                )
-
-                        DECIMAL
-PREVIOUS DEFINITIONS
+( CODE JAN MOV|SG, T| ES| R| AX| C;                                     )

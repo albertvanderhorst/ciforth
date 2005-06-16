@@ -434,12 +434,14 @@ character, or the character denotation forthcode({&}) followed by more
 than one character. It may also be a miss-spelled word that
 looks like a number, e.g. forthsamp({25WAP}) .
 Be aware that denotations may mask regular words.
-If the forthcode({DENOTATION}) vocabulary is on top of the search order,
-you get this message if you type forthcode({2SWAP}) .
-Note that hex digits must be typed in uppercase, even if
-forthcode({"CASE-SENSITIVE"}) is in effect.
-This error may be caused by using lower case where upper case is
-required for ISO standard words.
+This will only happen with user-defined denotations.
+Built-in denotations are in the
+forthcode({ONLY}) vocabulary, that can only be accessed last,
+because it ends the search order.
+Note that hex digits must be typed in uppercase, 
+even if forthcode({"CASE-SENSITIVE"}) is in effect.
+Error 10 may be caused by using lower case where upper case is 
+expected, suach as for ISO standard words.  
 See the section "Common problems" in this chapter if you want
 to make ciforth case insensitive.
 
@@ -556,10 +558,20 @@ forthitem
 forthsamp({ciforth ERROR # 23 : OFF CURRENT EDITING SCREEN})
 
 forthitem
- forthsamp({ciforth ERROR # 24 : DECLARE VOCABULARY})
+forthsamp({ciforth ERROR # 24 : (WARNING) NOT PRESENT, THOUGH REQUIRED})
+This error is reported by forthcode({REQUIRED}).
+The word you required, has been looked up in the index lines.
+It was not found in the index lines, 
+or it was a dummy item, 
+that only marks the screen to be loaded, 
+e.g. forthsamp({ASSEMBLER-GENERIC}).
+In the latter case it can be safely ignored.
+dnl Maybe it is better to replace by: required but not found.
+_VERBOSE_({ This forthemph({must}) be a warning only,
+because compilation can still succeed if the word is supplied by
+other means, in particular conditional compilation.})
 
-forthitem
- forthsamp({ciforth ERROR # 25 : LIST EXPECTS DECIMAL})
+forthsamp({ciforth ERROR # 25 : LIST EXPECTS DECIMAL})
 
 This message is used by a redefined forthcode({LIST}) , to prevent
 getting the wrong screen.
@@ -669,6 +681,9 @@ forthitem L0
 Level Zero definition of FORTH-78
 forthitem L1
 Level One definition of FORTH-78
+forthitem NFIG
+Word belongs to FIG standard, 
+but the implementation is not quite conforming.
 forthitem NISO
 Word belongs to ISO standard, but the implementation is not
 quite conforming.
@@ -702,7 +717,7 @@ forthitem
 A defining word --- one that adds to the dictionary --- is
 present in the wordset forthsamp({DEFINING}).
 forthitem
-A denotation word -- one that has the denotation bit set -- is
+A denotation word -- one that has the prefix bit set -- is 
 present in the wordset forthsamp({DENOTATIONS}).
 forthitem
 An environmental query word --- one that is understood by

@@ -1,15 +1,7 @@
 dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl Take care of embedded double quotes by using single quotes.
-dnl Note: this cannot be defined in _HEADER, because quoting is
-dnl assembler- dependant.
-define({_dbquoted},"{{$1}}")dnl
-define({_sgquoted},'{{$1}}')dnl
-define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
-dnl comment
-define({_C},{{;}})
-dnl octal
 dnl
+define({_C},{{;}})
 define({_HEADER_ASM},{;
 ; MASM/TASM version of ciforth created by ``m4'' from generic listing.
 ; This source can be assembled using the ubiquitous microsoft MASM assembler.

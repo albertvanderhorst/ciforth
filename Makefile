@@ -8,9 +8,6 @@
 #.SUFFIXES:
 #.SUFFIXES:.bin.asm.m4.v.o.c
 
-FLOPPY=fd0h1440
-THISDIR=ci41
-
 # Applicable suffixes : * are generated files
 # + are generated files if they are mentionned on the next line
 #
@@ -237,7 +234,7 @@ install: ; @echo 'There is no "make install" ; use "lina -i <binpath> <libpath>"
 # then copying the forth system to exact the first available cluster.
 # The option BOOTFD must be installed into alone.m4.
 boot: ci86.alone.bin
-	cp $+ /dev/$(FLOPPY) || fdformat /dev/$(FLOPPY) ; cp $+ /dev/$(FLOPPY)
+	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 	mformat -k a:
 	mcopy $+ a:forth.com
 
@@ -251,7 +248,7 @@ trboot: ci86.alonetr.bin lina forth.lab.wina
 	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
 	     \"fdimage\" PUT-FILE BYE | lina
 	cat forth.lab.wina >>fdimage
-	cp fdimage /dev/$(FLOPPY) || fdformat /dev/$(FLOPPY) ; cp fdimage /dev/$(FLOPPY)
+	cp fdimage /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp fdimage /dev/fd0H1440
 
 filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 
@@ -261,9 +258,8 @@ filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 filler: ci86.alone.bin lina filler.frt
 	rm -f wc # Use the official `wc' command
 	# Have forth calculate whether we need the filler sector
-	# Use the exit command to return 1 or 0
 	(filesize=`cat ci86.alone.bin |wc -c`; \
-	x=`echo $$filesize 1 - 512 / 1 + 2 MOD . | lina`; \
+	x=`echo $$filesize 1 - 512 / 1 + 2 MOD . BYE | lina`; \
 	if [ 0 = $$x ] ; then mcopy filler.frt a:filler.frt ;fi)
 
 moreboot: forth.lab.wina ci86.alone.bin  ci86.mina.bin
@@ -284,7 +280,7 @@ forth.lab.wina : toblock options.frt errors.dos.txt blocks.frt
 # the hard disk succeed.
 # The option BOOTHD must be installed into alone.m4.
 hdboot: ci86.alonehd.bin
-	cp $+ /dev/$(FLOPPY) || fdformat /dev/$(FLOPPY) ; cp $+ /dev/$(FLOPPY)
+	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 
 figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
 figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
@@ -319,8 +315,8 @@ lina.zip : $(RELEASELINA) ;\
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	(cd ..; ln -s $(THISDIR) lina-$(VERSION))
-	(cd ..; tar -czvf $(THISDIR)/lina-$(VERSION).tar.gz `cat $(THISDIR)/MANIFEST`)
+	(cd ..; ln -s ciforth lina-$(VERSION))
+	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
 	(cd ..; rm lina-$(VERSION))
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done

@@ -44,11 +44,20 @@ For customized installation see the -i option.
 
 For system wide installation the following is recommended:
     su
-    ./lina -i /usr/bin/lina /usr/lib/forth.lab
+    ./lina -g 60 lina+
+    ./lina+ -i /usr/bin/lina /usr/lib/forth.lab
     chmod 755 /usr/bin/lina
     chmod 644 /usr/lib/forth.lab
 
     cp ci86.lina.* /usr/share/doc/lina
     cp lina.1      /usr/share/man/man1
+
+On info :
+The info system for program documentation actively discourages
+adding documentation to a system, by hiding how a .info file
+can be installed. The nice folks of Debian have added a separate
+program install-info , but without that you are out of luck.
+Your only option is to do
+   info -f <absolute-path>
 
 $Id$

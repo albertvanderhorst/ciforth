@@ -101,10 +101,6 @@ dnl Run the forth in 32bits (so protected) mode
 dnl (must be in accordance with above).
 define( {_BITS32_}, _no)dnl
 dnl
-dnl This forth is 64 bits (compatibility with Alpha).
-dnl (must be in accordance with above).
-define( {_BITS64_}, _no)dnl
-dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl    Combine those marked A only with A's from the next group,
 dnl    same for B's
@@ -170,10 +166,6 @@ dnl Include all loadable extensions, that are present in the source.
 dnl Alternatively, see this as a marking for words to be moved out.
 define( {_LOAD_}, _yes)dnl
 dnl
-dnl Include facilities for threads.
-dnl This makes sense on a Unix system only for the moment.
-define( {_THREADS_}, _no)dnl
-dnl
 dnl Include all file iot words. This is most of the ISO FILES wordset.
 dnl Note that this may not make sense, in particular for a booting system.
 define( {_FILES_}, _no)dnl
@@ -184,8 +176,8 @@ dnl
 dnl Security means the protection against wrong control structures.
 define( {_SECURITY_}, _yes)dnl
 dnl
-dnl Source fields mean that there is a field in the header for a pointer
-dnl to the source. It is not (yet) used in the kernel in any way.
+dnl Source field mean that there is a field in the header for a pointer
+dnl to the source.
 define( {_SOURCEFIELD_}, _yes)dnl
 dnl
 dnl Extra field mean that there is a field in the header for a whatever.
@@ -224,8 +216,10 @@ define({M4_INITDP},{_AP_})
 dnl
 dnl ##################################################################
 dnl
-dnl Applicable if 'BOOTSECTRK = _yes'
-dnl Make a boot floppy that is DOS compatible.
+dnl Applicable if this is a booted version.
+dnl Make a boot floppy that is DOS compatible and make it possible
+dnl to run the executable under plain DOS.
+dnl
 define({_RESPECTDOS_}, _no )
 dnl
 dnl If M4_LOADADDRESS and M4_ORG are the same, FORTH address 0 is physical address 0.

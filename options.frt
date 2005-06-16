@@ -1,4 +1,4 @@
-COPYRIGHT (c) 2000-2002 Albert van der Horst, THE NETHERLANDS
+COPYRIGHT (c) 2000-2004 Albert van der Horst, THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -25,13 +25,14 @@ pad $+!   BL pad $C+   pad @ - OVER + SWAP
 : FIND&LOAD     256 ERRSCR @ 4 +
 DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 2DROP ;
-\ For WORD sc: it IS found unabbreviated.
-: PRESENT? PRESENT 0= 0= ;
+: PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
-: REQUIRED 2DUP PRESENT? IF 2DROP ELSE FIND&LOAD THEN ;
+: REQUIRED 2DUP PRESENT 0= IF 2DUP FIND&LOAD THEN
+    2DUP PRESENT 0= IF ETYPE 24 MESSAGE _ _ THEN 2DROP ;
 : REQUIRE (WORD) REQUIRED ;    : CF: "CONFIG" REQUIRED ;
 ( -b :_This_option_is_available )
 
+  .S
 
 
 
@@ -44,8 +45,7 @@ DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
 
 
 
-
-
+\
 ( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH A1oct02
 1 LOAD   REQUIRE OLD:   REQUIRE TURNKEY   REQUIRE SWAP-DP
 REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
@@ -79,9 +79,9 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 \
 ( -e :_Load_system_electives ) \ AvdH A3sep01
-.SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
+DROP .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
 
-REQ CONFIG      REQ HELP
+REQ CONFIG      REQ HELP        REQ ORDER
 REQ L-S         REQ DO-DEBUG    REQ H.          REQ DUMP
 REQ SUPER-QUAD  REQ FARDUMP     REQ $.          REQ ^
 REQ INCLUDE     REQ CRACK       REQ LOCATE      REQ OS-IMPORT
@@ -93,41 +93,41 @@ REQ CASE-INSENSITIVE          ( CASE-INSENSITIVE )
 
 : TASK ;
  ( BACKUP        250 LOAD   77 81 THRU )
-OK
+0 ( No signon) OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
-1 LOAD  CF:   ?LI
-REQUIRE ARGV   REQUIRE Z$@
+DROP 1 LOAD
+REQUIRE ARG[]   REQUIRE Z$@
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
-: DOIT   ARGV CELL+ CELL+
-    BEGIN $@   DUP WHILE
-    Z$@ COMMAND-BUFFER $+!   BL COMMAND-BUFFER $C+
-    REPEAT 2DROP ;
+: DOIT
+    BEGIN SHIFT-ARGS ARGC 1 > WHILE
+    1 ARG[] COMMAND-BUFFER $+!   BL COMMAND-BUFFER $C+
+    REPEAT ;
 DOIT    COMMAND-BUFFER $@
 \ 'DOIT HIDDEN   COMMAND-BUFFER HIDDEN
-2DUP TYPE EVALUATE
+2DUP TYPE EVALUATE    0 ( No signon)
 
 
 
 
 \
-( -g :_This_option_is_available )
-
-  .S
-
-
-
-
-
-
-
-
-
-
-
-
-\
+( -g GROW :_grow_by_megabytes ) \ AvdH A4oct26
+'FORTH >WID >LFA @    HERE CONSTANT HERE-NOW
+1 LOAD      REQUIRE ARG[]  CF: ?LI
+ARGC 4 <> 13 ?ERROR    REQUIRE SAVE-SYSTEM
+SM HERE-NOW OVER - $, CONSTANT thisforth$
+ 2 ARG[] EVALUATE 20 LSHIFT CONSTANT INCREASE
+ thisforth$ CELL+ SM - CONSTANT >TARGET
+: PATCH   >TARGET + INCREASE SWAP +! ;
+: PATCH-CONSTANT   >DFA PATCH ;
+: PATCH-ALL   5 0 DO I CELLS +ORIGIN PATCH LOOP
+  STALEST PATCH   PREV PATCH   SIZE^ PATCH
+  'EM PATCH-CONSTANT   'FIRST PATCH-CONSTANT
+  'LIMIT PATCH-CONSTANT  ;
+: GROW   'FORTH >WID >LFA >TARGET + ! PATCH-ALL
+thisforth$ $@ 3 ARG[]   PUT-FILE ;
+GROW BYE
 ( -h :_help,_show_options ) \ AvdH A1oct04
-.SIGNON   1 20 INDEX CR
+DROP .SIGNON   1 20 INDEX CR
 .( See also the pdf documentation ) CR
 .( or print the PostScript documentation ) CR
 
@@ -142,21 +142,21 @@ OK BYE
 
 
 \
-( -i BIN_INSTALL_PATH LIB_INSTALL_PATH :_Install) \ A1jan20
-CREATE task
-1 LOAD
-REQUIRE SAVE-SYSTEM   REQUIRE ARG[]
-BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
-3 ARG[] BLOCK-FILE $!
+( -i BINARY_PATH LIBRARY_PATH SHELL_PATH )\ A3aug30
+CREATE task     1 LOAD
+   REQUIRE ARG[]   REQUIRE SAVE-SYSTEM
+: INSTALL-LIB BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
+    3 ARG[] BLOCK-FILE $! ;
 \ Trim back to before ``task''. Save system at binary path.
-: DOIT   'task    'FORTH FORGET-VOC   >NFA @ DP !
-    2 ARG[] SAVE-SYSTEM   BYE ;
-
-\ Must all be done in one go!
+\ Must be done all at once, because of forgetting.
+: INSTALL-BIN 'task    DUP 'FORTH FORGET-VOC   >NFA @ DP !
+    2 ARG[] SAVE-SYSTEM  BYE ;
+\ Specify shell name.
+: INSTALL-SHELL 4 ARG[] SHELL $! ;
+: DOIT   ARGC 4 6 WITHIN 0=
+    IF ." -i requires 2 or 3 arguments" CR BYE THEN
+    ARGC 5 = IF INSTALL-SHELL THEN   INSTALL-LIB INSTALL-BIN ;
 DOIT
-
-
-
 \
 ( -j :_This_option_is_available )
 
@@ -303,13 +303,14 @@ SWITCH-LIBS
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-DROP  1 LOAD   REQUIRE ?LI   REQUIRE OLD:   REQUIRE ARGV
+DROP  1 LOAD   REQUIRE OLD:   REQUIRE ARG[]
 REQUIRE CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
-0 ARG[] $, CONSTANT INTERPRETER
+: BY-WHO   "LINOS" PRESENT? IF " run by " TYPE
+0 ARG[] TYPE THEN ;
 \ This error handler may be overwritten by the script.
 : MY-ERROR    DECIMAL
-    "In file " TYPE SCRIPT-NAME $@ TYPE " run by "
-    TYPE INTERPRETER $@ TYPE CR  IN @ 20 - 40 TYPE CR
+    "In file " TYPE SCRIPT-NAME $@ TYPE BY-WHO CR
+    IN @ 20 - 40 TYPE CR
     "Fatal error at : " TYPE   OLD: ERROR CR CR    ;
 -1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 SHIFT-ARGS  SHIFT-ARGS
@@ -317,22 +318,21 @@ SCRIPT-NAME $@ GET-FILE
 ^J $S 2DROP     \ Line with #!lina
 EVALUATE
 BYE
-
 ( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
 .SIGNON 1 LOAD
 \ Reload REQUIRE with new ``CORA'' but hide it direct after.
 REQUIRE CORA-IGNORE
 : CORA CORA-IGNORE ;   1 LOAD   'CORA HIDDEN
 
-REQUIRE [IF]   REQUIRE ARG[]   REQUIRE ARGC   REQUIRE $
+REQUIRE [IF]   REQUIRE ARG[]   REQUIRE PREFIX
 
 REQUIRE CASE-INSENSITIVE    CASE-INSENSITIVE
 REQUIRE AUTOLOAD            AUTOLOAD
 
-ARGC 3 < ?LEAVE-BLOCK
 2 ARG[] INCLUDED
 SECOND-PASS @ 0= ?LEAVE-BLOCK
 2 ARG[] INCLUDED
+
 \
 ( -u :_This_option_is_available )
 
