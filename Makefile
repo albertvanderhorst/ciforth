@@ -239,7 +239,7 @@ cleanall: clean  testclean RCSCLEAN ; \
     rm -f *.aux *.log *.ps *.toc *.pdf
 
 RCSCLEAN: ;\
-	ln -s $CVSROOT/ciforth RCS
+	ln -s $(CVSROOT)/ciforth RCS
 	ln -f Makefile makefile
 	rcsclean
 	rm RCS
