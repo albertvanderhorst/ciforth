@@ -191,6 +191,7 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
 	)| m4 > $@
 	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 temp.html >> $@
+	rm temp.html
 
 %.info : %.texinfo  ; makeinfo --no-split $< -o $@
 

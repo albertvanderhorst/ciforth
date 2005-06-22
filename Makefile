@@ -70,7 +70,25 @@ BINTARGETS= mina alone
 # subsequently run
 LINUXFORTHS= ciforthc lina
 # Auxiliary targets. Because of GNU make bug, keep constant.m4.
-OTHERTARGETS= forth.lab forth.lab.lina forth.lab.wina toblock fromblock constant.m4 namescooked.m4
+OTHERTARGETS=   \
+forth.lab       \
+forth.lab.lina  \
+forth.lab.wina  \
+toblock         \
+fromblock       \
+constant.m4     \
+namescooked.m4  \
+stealconstant   \
+MANIFEST        \
+# That's all folks!
+
+# Intermediate targets.
+INTERTARGETS=   \
+menu.texinfo    \
+temp.html       \
+wordset.mi      \
+# That's all folks!
+
 # C-sources with various aims. FIXME: start with .c names.
 CSRCAUX= toblock fromblock stealconstant
 CSRCFORTH= ciforth stealconstant
@@ -200,7 +218,7 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 
 .PRECIOUS: ci86.%.rawdoc
 
-.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release
+.PHONY: default all clean RCSCLEAN boot filler moreboot allboot hdboot releaseproof zip mslinks release
 # Default target for convenience
 default : lina
 ci86.$(s).bin :
@@ -216,11 +234,15 @@ clean: \
 ; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy\
 ; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
 
-cleanall: clean  testclean ; \
-    rcsclean ; \
-    rm -f $(OTHERTARGETS) ; \
+cleanall: clean  testclean RCSCLEAN ; \
+    rm -f $(OTHERTARGETS) $(INTERTARGETS) ; \
     rm -f *.aux *.log *.ps *.toc *.pdf
 
+RCSCLEAN: ;\
+	ln -s $CVSROOT/ciforth RCS
+	ln -f Makefile makefile
+	rcsclean
+	rm RCS
 
 #msdos32.zip doesn't work yet.
 release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
