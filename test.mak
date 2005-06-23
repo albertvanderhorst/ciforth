@@ -4,10 +4,7 @@
 # Just to jot down small tests not wanted in the makefile
 # and any other commands.
 
-MASK=FF
-PREFIX=0
-TITLE=QUICK REFERENCE PAGE FOR 80386 ASSEMBLER
-TESTTARGETS=*.ps testas* testlina.[0-9] testmina.[0-9] testlinux.[0-9]
+TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9]
 
 testclean: ; rm -f $(TESTTARGETS)
 
@@ -26,25 +23,6 @@ testclean: ; rm -f $(TESTTARGETS)
 	pdftex $<
 	# Don't leave invalid indices for postscript!
 	for i in $(INDICES) ; do rm $(@:%.pdf=%.$$i) ; done
-
-%.ps : asgen.frt %.frt ps.frt ; \
-    ( \
-	echo 5 LOAD; \
-	cat $+ ;\
-	echo 'PRELUDE' ;\
-	echo 'HEX $(MASK) MASK ! $(PREFIX) PREFIX ! DECIMAL ' ;\
-	echo ' "$(TITLE)"   TITLE $$!' ;\
-	echo ' QUICK-REFERENCE BYE' \
-    )|\
-    lina |\
-    sed '1,/SNIP TILL HERE/d' |\
-    sed '/SI[MB]/d' |\
-    sed '/OK/d' >p$(PREFIX).$@
-
-qr8080.ps  : lina forth.lab ; make as80.ps ; mv p0.as80.ps $@
-qr8086.ps  : lina forth.lab ; make asi86.ps ; mv p0.asi86.ps $@
-p0.asi586.ps  : lina forth.lab  ; make asi586.ps PREFIX=0 MASK=FF
-p0F.asi586.ps : lina forth.lab  ; make asi586.ps PREFIX=0F MASK=FFFF
 
 do : ci86.mina.msm
 		diff -w ci86.mina.msm orig/FORTH > masm.dif ||true
@@ -118,9 +96,6 @@ ci86.lina.lis : ci86.lina.mac ;
 		as ci86.lina.mac -a=ci86.lina.lis  ;\
 		objcopy a.out -O binary
 
-ci86.lina.mac : ci86.lina.asm transforms ; \
-		sed -f transforms < ci86.lina.asm > $@
-
 lina2 : ci86.lina.s ; gcc $+ -l 2>aap
 
 ci86.lina.s :
@@ -128,25 +103,7 @@ ci86.lina.s :
 # Done by the separate project now.
 # Kept here until releasing the assemblers works out.
 # It is unclear where I want the assembler doc's in the end.
-RELEASEASSEMBLER=      \
-as80.frt        \
-assembler.txt   \
-asgen.frt       \
-asi586.frt      \
-asi86.frt       \
-asm386endtest   \
-ass.frt  \
-p0.asi586.ps    \
-p0F.asi586.ps   \
-ps.frt    \
-qr8086.ps       \
-qr8080.ps       \
-testset386      \
-testset8080     \
-testset8086     \
-test.mak        \
-# That's all folks!
-# testset386a    (fails)
+RELEASEASSEMBLER=      assembler.txt    ps.frt
 
 msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
     make mslinks ; \

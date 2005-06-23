@@ -1,2 +1,0 @@
-# Transforms as needed to make generic assembler into gas
-# This file is no longer needed, as per .Intel_syntax option.

@@ -148,7 +148,7 @@ blocks.frt      \
 options.frt     \
 genboot.bat     \
 $(EXAMPLES)     \
-wc              \
+mywc            \
 errors.linux.txt \
 errors.dos.txt \
 # That's all folks!
@@ -172,7 +172,7 @@ lina      \
 lina.1    \
 forth.lab     \
 $(CSRCAUX:%=%.c)    \
-wc            \
+mywc          \
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
