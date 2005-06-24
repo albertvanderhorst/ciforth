@@ -4,7 +4,7 @@
 # Just to jot down small tests not wanted in the makefile
 # and any other commands.
 
-TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9]
+TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9] orang hello.frt tsuite.out
 
 testclean: ; rm -f $(TESTTARGETS)
 

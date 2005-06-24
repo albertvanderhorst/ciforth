@@ -63,18 +63,20 @@ INDICES= cp fn ky pg tp vr
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= lina wina mina alone linux alonehd msdos32 alonetr
+TARGETS= lina wina mina alone linux alonehd forth32 msdos32 alonetr
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
-LINUXFORTHS= ciforthc lina
-# Auxiliary targets. Because of GNU make bug, keep constant.m4.
+LINUXFORTHS= ciforthc lina glina
+# Auxiliary targets.
 OTHERTARGETS=   \
+filler.frt      \
 forth.lab       \
 forth.lab.lina  \
 forth.lab.wina  \
 toblock         \
+toblk           \
 fromblock       \
 constant.m4     \
 namescooked.m4  \
@@ -231,12 +233,14 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
     $(LINUXFORTHS) $(OTHERTARGETS)
 
 clean: \
-; rm -f $(TARGETS:%=ci86.%.*)  $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy\
+; rm -f $(TARGETS:%=%.asm)  $(TARGETS:%=%.msm)  $(TARGETS:%=ci86.%.*)  \
+; rm -f $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy a.out\
 ; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
 
 cleanall: clean  testclean RCSCLEAN ; \
     rm -f $(OTHERTARGETS) $(INTERTARGETS) ; \
-    rm -f *.aux *.log *.ps *.toc *.pdf
+    rm -f *.aux *.log *.ps *.toc *.pdf    ; \
+    rm *.zip *gz
 
 RCSCLEAN: ;\
 	ln -s $(CVSROOT)/ciforth RCS
@@ -244,11 +248,10 @@ RCSCLEAN: ;\
 	rcsclean
 	rm RCS
 
-#msdos32.zip doesn't work yet.
-release : strip figdoc.zip zip msdos.zip lina.zip # as.zip
+release : strip figdoc.zip zip msdos32.zip msdos.zip lina.zip
 
 #Install it. To be run as root
-install: ; @echo 'There is no "make install" ; use "lina -i <binpath> <libpath>"'
+install: ; @echo 'There is no "make install" ; use "lina -i <binpath> <libpath> <shellpath>"'
 
 # You may need to run the following run as root.
 # Make a boot floppy by filling the bootsector by a raw copy,
