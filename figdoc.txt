@@ -1,7 +1,0 @@
-  This documentation is dated 1979:may. 
-  Chapter 6.0 was considered out of date 1980:NOV. 
-  OCR-ed by A.van der Horst, DFW, The Netherlands (2000:MAR)
-  Correction of typo's (some original) and slight changes to the layout are
-  the only changes. 
-
-Burned down in behalf of the generic manuals dd 2000:NOV:11.

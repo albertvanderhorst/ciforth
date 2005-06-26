@@ -1,7 +1,0 @@
-This glossary contains all of the word definitions in Release 1 of
-fig-FORTH. The definitions are presented in the order of their ascii sort.
-Dated: 1979-MAY.
-Copyright: See DISTRIBUTION in figdoc.txt 
-OCER-ed by Albert van der Horst DFW The Netherlands 2000-MAR
-
-Burned down in behalf of the generic manuals dd 2000:DEC:3

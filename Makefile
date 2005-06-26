@@ -114,13 +114,6 @@ testreport.txt     \
 $(SRCMI) \
 # That's all folks!
 
-# The following must be updated on the website, whenever
-# any typo's are fixed. Unfortunately, it has become a separate
-# maintenance chore, and is in effect a separate project.
-DOCOLD = \
-figdoc.zip    \
-# That's all folks!
-
 # These files can easily be generated, if you have linux.
 EXAMPLES = \
 ci86.alone.asm  \
@@ -248,7 +241,7 @@ RCSCLEAN: ;\
 	rcsclean
 	rm RCS
 
-release : strip figdoc.zip zip msdos32.zip msdos.zip lina.zip
+release : strip zip msdos32.zip msdos.zip lina.zip
 
 #Install it. To be run as root
 install: ; @echo 'There is no "make install" ; use "lina -i <binpath> <libpath> <shellpath>"'
@@ -307,8 +300,7 @@ forth.lab.wina : toblock options.frt errors.dos.txt blocks.frt
 hdboot: ci86.alonehd.bin
 	cp $+ /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp $+ /dev/fd0H1440
 
-figdoc.txt glossary.txt frontpage.tif memmap.tif : ; co -r1 $@
-figdoc.zip : figdoc.txt glossary.txt frontpage.tif memmap.tif ; zip figdoc $+
+figdoc.zip : ; echo "checkout an old version for figdoc.zip, use rcs!"
 
 zip : $(RELEASECONTENT) ; echo ciforth-$(VERSION).tar.gz $+ | xargs tar -cvzf
 

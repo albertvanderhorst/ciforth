@@ -1,5 +1,0 @@
-# $Id$
-# Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
-GENERAL.
-
-Burned down in favor of README.ciforth.

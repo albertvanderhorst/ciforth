@@ -1,6 +1,0 @@
-# $Id$
-# Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
-
-At 2000:dec:3 this documentation was burned down in favour
-of the generated user information for ciforth.
-It is still obtainable as the latest branch of figdoc.txt 1.3.
