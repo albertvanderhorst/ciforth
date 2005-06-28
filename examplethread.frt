@@ -23,6 +23,9 @@ DECIMAL
 \ A channel. It is inactive (contains no character) if it is zero.
 : CHANNEL CREATE 0 C, ;
 
+\ Initialise channel to free.
+: !CHANNEL   0 SWAP C! ;
+
 \ Store a CHARACTER to a CHANNEL.
 : CHANNEL-C! BEGIN PAUSE DUP C@ 0= UNTIL C! ;
 
@@ -36,7 +39,7 @@ CHANNEL S>M  \ Communication channel from slave to master.
 BEGIN
     KEY DUP M>S CHANNEL-C! ^D <> WHILE
     S>M CHANNEL-C@ EMIT
-REPEAT ;
+REPEAT PAUSE ;
 
 : do-slave
 BEGIN
@@ -49,6 +52,6 @@ REPEAT DROP ;
 
 \ Send hither and thither characters until an ``ASCII''
 \ End Of Text (ETX or ^D) is pressed.
-: do-it   'do-slave SLAVE   do-master ;
+: do-it   M>S !CHANNEL   S>M !CHANNEL   'do-slave SLAVE   do-master ;
 
 \ -----------------------------

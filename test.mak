@@ -96,10 +96,6 @@ ci86.lina.lis : ci86.lina.mac ;
 		as ci86.lina.mac -a=ci86.lina.lis  ;\
 		objcopy a.out -O binary
 
-lina2 : ci86.lina.s ; gcc $+ -l 2>aap
-
-ci86.lina.s :
-
 # Done by the separate project now.
 # Kept here until releasing the assemblers works out.
 # It is unclear where I want the assembler doc's in the end.

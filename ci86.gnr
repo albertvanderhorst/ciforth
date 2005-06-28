@@ -64,7 +64,7 @@ _COMMENT
          John_Cassidy
          Kim_Harris
          George_Flammer
-         Robert_D._Villwock _C
+         Robert_D._Villwock ;
 
  : for tools
          Richard M. Stallman
@@ -116,9 +116,12 @@ KBBUF   EQU     1024      _C {Data bytes per disk buffer}
 US      EQU     M4_US*CW  _C {User variable space}
 EM      EQU     M4_EM     _C {Where the memory ends w.r.t. ORIG. 1) }
 EMP     EQU     (EM-1)/0x1000+1 _C {Number of pages.}
-RTS     EQU     M4_RTS    _C {Return stack & terminal input buffer}
+TAS     EQU     M4_RTS    _C{Size of unitialised area per task.}
+RTS     EQU     TAS       _C {Return stack & terminal input buffer}
+STACKSIZE   EQU TAS/4  _C{For both stacks. } but for now
+TIBSIZE     EQU TAS/2  _C{TIB size. }
 _C
-_C NOTE 1:
+_C{ NOTE 1:}
 _C{This trick to not have a round memory allocated convinces loaders}
 _C{ on Linux 1.24 and following to load the elf header in memory}
 _C{ in front of the executable, and not in some other place.}
@@ -133,10 +136,10 @@ _C{      ASCII CHARACTER EQUIVALENTS}
 _C
 ABL     EQU     ' '     _C{ SPACE}
 ACR     EQU     {0x0D}     _C{ CR}
-AMS     EQU     '-'
-ASO     EQU     '['
-ASC     EQU     ']'
-ADOT    EQU     '.'
+AMS     EQU     '-'          _C{ MINUS SIGN }
+ASO     EQU     '['          _C{ SQUARE BRACKET OPEN }
+ASC     EQU     ']'          _C{ SQUARE BRACKET CLOSE }
+ADOT    EQU     '.'          _C{ PERIOD}
 ALF      EQU     {0x0A}     _C{ LINE FEED, USED INTERNALLY AS}
                         _C{ LINE ENDER}
 AFF      EQU     {0x0C}     _C{ FORM FEED}
@@ -163,17 +166,18 @@ _C
 _EQULAYOUT_({
 _HIGH_BUF_({
 BUF1    EQU     EM-(KBBUF+2*M4_CELLWIDTH)*NBUF      _C{ FIRST DISK BUFFER}
-STRUSA  EQU     BUF1-US         _C{ User area}
+TASKEND  EQU     BUF1         _C{ User area}
 })_C{}_END_({ _HIGH_BUF_})
 _LOW_BUF_({
-STRUSA  EQU     EM-US         _C{ User area at end }
+TASKEND  EQU     EM         _C{ User area at end }
 _C
 })_C{}_END_({ _LOW_BUF_})
 
-STRTIB  EQU     STRUSA-RTS      _C{ Start return stack area}
-                                _C{ Under this : data stack}
-INITR0  EQU     STRUSA         _C{ Grows down}
-INITS0  EQU     STRTIB          _C{ Grows down}
+STRUSA  EQU     TASKEND - US    _C{ User area}
+INITR0  EQU     TASKEND - US    _C{ Return stack, grows down}
+TASKSTART EQU   TASKEND - TAS
+STRTIB  EQU     TASKSTART+STACKSIZE     _C{ Start terminal input buffer}
+INITS0  EQU     TASKSTART+STACKSIZE     _C{ Grows down,possibly out of task area}
 _C
 })_C{}_END_({ _EQULAYOUT_})
 _CLASSIC_({
@@ -1071,6 +1075,20 @@ _start:
 })_C{}_END_({_LINUX_N_})
 COLD_ENTRY:
         CLD                     _C{ DIR = INC}
+_THREADS_({
+        MOV     EAX, _CELL_PTR[USINI+_CELLS(1)]
+        MOV     EBX, EAX
+        DEC     EBX
+        OR      EBX, STACKSIZE-1    _C{Requires it is power of 2.}
+        INC     EBX
+        SUB     EBX,EAX
+        ADD     LONG[USINI+(CW*(0))], EBX
+        ADD     LONG[USINI+(CW*(1))], EBX
+        ADD     LONG[USINI+(CW*(2))], EBX
+        ADD     LONG[USINI+(CW*(3))], EBX
+        ADD     LONG[USINI+(CW*(4))], EBX
+
+})_C{}_END_({_THREADS_})
 _HOSTED_LINUX_(
 {       MOV     _CELL_PTR[USINI+_CELLS(31)],SPO _C{Remember ARGS.}
 })
@@ -1849,7 +1867,8 @@ _C        DC      COLD_ENTRY
 USINI:  DC      STRUSA  _C{ User area currently in use, cold value same as next.}
         DC      STRUSA  _C{ INIT (U0) user area of the main task 1}
         DC      INITS0  _C{ INIT (S0)         2}
-        DC      INITR0  _C{ INIT (R0)         3}
+        DC      INITR0  - _CELLS(1)
+                        _C{ INIT (R0)         3}
         DC      STRTIB  _C{ INIT (TIB)        4}
         DC      BSIN    _C{ RUBOUT: get rid of latest char 5}
         DC      0       _C{ AVAILABLE         6}
@@ -2878,8 +2897,14 @@ _HEADER({USER},{USER},{DOCOL})
         DC      LCONST
         DC      PSCOD
 DOUSE:  MOV     BX,[WOR+_CELLS((D_HOFFSET))] _C{PFA  }
-        MOV     DI,_CELL_PTR[USINI]
-        LEA     AX,[BX+DI]      _C{ADDR OF VARIABLE}
+_THREADS_(
+{       MOV     AX, BP
+        OR      AX, STACKSIZE-1  _C{Requires it is power of 2.}
+        INC     AX
+},
+{        MOV     AX,_CELL_PTR[USINI]
+})dnl _END_({_THREADS_})
+        ADD     AX,BX      _C{ADDR OF VARIABLE}
         _PUSH
 _C
 _C
@@ -3045,6 +3070,18 @@ in use by Forth.
 enddoc)
 _HEADER({BM},{LBM},{DOCON}, ORIG)
 _C
+_THREADS_({
+worddoc( {MEMORY},{TASK-SIZE},{task_size},{---- n},{},
+{A constant leaving the size of the per task areas:
+data stack size, return stack size, terminal input buffer plus
+user area.
+The data stack of the main task runs down to forthword({HERE}) .
+},{{DSP@},{RSP@},{TIB}},
+{{TASK-SIZE . ." one bit up"},{10000 one bit up} },
+enddoc)
+_HEADER({TASK-SIZE},{LTAS},{DOCON}, TAS)
+_C
+})_C{}_END_({_THREADS_})
 worddoc( {BLOCKS},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
 count read from disc by forthcode({BLOCK}) .
@@ -7470,7 +7507,7 @@ _HEADER({WRITE},{WRITE},{DOCOL})
         DC      RWBUF, FROMR, FROMR     _C{ RW-BUFFER R> R>}
         DC      LIT, write, BDOSN       _C{  4000 BDOSN}
         DC      ZEQU
-        _0BRANCH({WRITE1})              _C{ IF NEGATE ELSE DROP 0 THEN _C}
+        _0BRANCH({WRITE1})              _C{ IF NEGATE ELSE DROP 0 THEN ;}
         DC      DROP
         DC      ZERO
 WRITE1:
@@ -7560,7 +7597,7 @@ enddoc)
 _HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      REMAIND, FETCH, TOR
         DC      TIB, FETCH, RR, PLUS
-        DC      LIT, RTS/2, RR, LSUB
+        DC      LIT, TIBSIZE, RR, LSUB
         DC      ZERO, RFILE
         DC      QERRUR
         DC      LDUP, ZEQU, LIT, -EPIPE, LAND _C {Presumably end of pipe.}
@@ -7595,7 +7632,7 @@ _BITS16_({      DC      TIB, FETCH, REMAIND, FETCH, PLUS},{dnl})
 _BITS32_( {_C{ MSDOS cannot handle a 32 bits address: use the buffer.}})
 _BITS32_( {     DC   LIT, EXPECTBUF },{dnl})
 _SWITCH_({        DC   LIT, M4_SWITCHOFFSET, PLUS, },{dnl})
-_BITS16_({        DC      LIT, RTS/2, REMAIND, FETCH, LSUB},{dnl})
+_BITS16_({        DC      LIT, TIBSIZE, REMAIND, FETCH, LSUB},{dnl})
 _BITS32_( {     DC   LIT, 0x0200},{dnl})
         DC      ZERO     _C{ Handle}
         DC      RFILE, LIT, 6, QERR
@@ -7640,7 +7677,7 @@ _HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      TIB
         DC      FETCH
         DC      LDUP
-        DC      LIT,RTS/2
+        DC      LIT,TIBSIZE
         DC      ACCEP
 _C Keep the next line in for debugging ACCEPT for MSDOS.
 _C        DC      LIT, 0x41, EMIT, TDUP, LTYPE, LIT, 0x41, EMIT
@@ -8139,7 +8176,7 @@ enddoc)
 _HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      TIB
         DC      FETCH
-        DC      LIT,RTS/2
+        DC      LIT,TIBSIZE
         DC      TDUP
 _C { Old fig code of EXPECT :}
              DC      OVER
@@ -9899,17 +9936,28 @@ INITDP:                 _C  It may be that it is not consecutive with TASK.
                         _C  Because of bad linking, resulting in a unusable Forth.
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
-       _RESB( EM - FORTHSIZE - RTS - US - BUFFERSIZE )
-INITS0:                         _C{ Grows down}
-STRTIB: _RESB( RTS )            _C{ Start return stack area}
+
+        _RESB( EM - FORTHSIZE - TAS - US - STACKSIZE - BUFFERSIZE )
+_C{ The following framework may be repeated for more tasks.}
+_C{ It is floating, i.e. it may be shifted up and down, in order}
+_C{ to have INITR0 at a STACKSIZE boundary. }
+INITR1:                         _C{ Return stack for next task}
+        _RESB( US )             _C{  For next task, if present. }
+        _RESB( STACKSIZE - US )   _C{ Data stack, only limited if more tasks present.}
+INITS0:                         _C{ Grows down.}
+STRTIB: _RESB( TIBSIZE )    _C{ Terminal input buffer.}
+        _RESB( STACKSIZE )      _C{ Return stack, grows down.}
 INITR0:                         _C{ Grows down}
 STRUSA: _RESB( US )             _C{ User area}
+_THREADS_(
+{        _RESB( STACKSIZE )            _C{ Possibly the framework is shifted up by this.}
+})dnl _END_({_THREADS_})
 BUF1:   _RESB( BUFFERSIZE )     _C{ FIRST DISK BUFFER}
 ACTUAL_EM:  _C{ Differs from EM if code is relocated.}
 })_C{}_END_({ _HOSTED_LINUX_})
 _C
 
- CSEG    ENDS
+        CSEG    ENDS
         PAGE
 _COMMENT
 
@@ -10118,7 +10166,7 @@ negative numbers. (forthdefi({floored division})). _BITS16_(
 {Having a mere 30000 for the number range can easily
 lead to overflow in intermediate results during
 forthdefi({scaling}): a multiplication followed by a division.
-_VERBOSE_({{For example }forthsamp({: ADD10% 110 * 100 / _C}){}}).
+_VERBOSE_({{For example }forthsamp({: ADD10% 110 * 100 / ;}){}}).
 There are special operators to get around that.
 forthxref({MULTIPLYING}).})},
  {},{},{},{}, {}, enddoc)

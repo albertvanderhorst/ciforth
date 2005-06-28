@@ -287,7 +287,7 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 
 \
 ( @+ SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
-'$@ ALIAS @+    ( Obsoleted by bags)
+( Obsoleted by bags) REQUIRE ALIAS   '$@ ALIAS @+
 ( Build a set "x" with X items. )
 : SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
@@ -638,6 +638,54 @@ RANDOMIZE
 
 
 
+( TIME&DATE ) CF: \ AH A30610
+REQUIRE +THRU
+1 2 +THRU
+
+
+
+
+
+
+
+
+
+
+
+
+
+( TIME&DATE ) CF: ?LI \ AH A30610
+: SSE   0 0 0 13 LINOS ; ( Seconds since epoch: 1970/1/1)
+: |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
+CREATE TABLE ( start of month within leap period) 0
+    31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
+    31 | 28 | 5m 5m   DROP    : T[] CELLS TABLE + @ ;
+\ For DAYS within leap return MONTHS
+: MONTHS   >R 0 BEGIN R@ OVER T[] > WHILE 1+ REPEAT 1- RDROP ;
+\ For DAYS within leap period return DAY MONTH YEARS
+: SPLIT-LEAP  DUP MONTHS DUP >R T[] - 1+  R> 12 /MOD >R 1+ R> ;
+\ For TIME return SEC MIN HOUR DAYS
+: SPLIT-OFF-TIME   0 60 UM/MOD   60 /MOD   24 /MOD ;
+\ For DAYS return DAY MONTH YEAR
+: SPLIT-OFF-DATE  1461 /MOD >R SPLIT-LEAP   R> 4 * + 1970 + ;
+\ Return current  SEC MIN HOUR DAY MONTH YEAR
+: TIME&DATE   SSE   SPLIT-OFF-TIME   SPLIT-OFF-DATE ;
+( TIME&DATE ) CF: ?PC \ AH A30612
+
+HEX
+
+\ Return current  DAY MONTH YEAR
+: DATE    2A00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
+    R> 100 /MOD   R> ;
+
+\ Return current  SEC MIN HOUR
+: TIME    2C00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
+    R> 100 /   R> 100 /MOD ;
+
+\ Return current  SEC MIN HOUR DAY MONTH YEAR
+: TIME&DATE TIME DATE ;
+
+DECIMAL
 ( $-PREFIX #-PREFIX  ESC ) \ AvdH A1apr15
 
 
@@ -1086,6 +1134,70 @@ VARIABLE HEAD-DP  \ Fill in pointer
 \ Actually this is the same than in Linux.
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+( CVA  aux_for_threads ) \ AvdH A2jul5
+REQUIRE TASK-SIZE   \ Fails unless kernel prepared for threads
+
+HEX   40 CELLS CONSTANT US
+
+\ Clone the stack frame to ``TASK-SIZE'' lower in memory.
+\ This area extends up to ``R0 @ US + '' .
+\ The Forth is left running in the new area.
+: CVA  DSP@   DUP TASK-SIZE -   U0 @ DSP@ - US +   MOVE
+       DSP@ TASK-SIZE - DSP!    RSP@ TASK-SIZE - RSP!
+       4 -1 DO   TASK-SIZE NEGATE U0 I CELLS +   +!   LOOP ;
+
+
+
+
+\
+( THREAD-PET KILL-PET PAUSE-PET ) CF: ?LI \ A2nov16
+REQUIRE CVA   HEX
+\ Exit a thread. Indeed this is exit().
+: EXIT-PET 0 _ _ 1 LINOS ;
+\ Do a preemptive pause. ( more or less 1 MS )
+: PAUSE-PET 0 0 1000 0 DSP@ 8E LINOS5 DROP ;
+
+\ Create a thread with dictionary SPACE. Execute XT in thread.
+: THREAD-PET CREATE S0 @ 2 CELLS - , R0 @ , 0 , CVA ALLOT
+    DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
+    112 R@ @ _ 78 LINOS DUP 0< IF THROW THEN
+    DUP IF ( Mother) R> 2 CELLS + !
+    ELSE ( Child) DROP RSP! EXECUTE EXIT-PET THEN ;
+\ Kill a THREAD-PET , preemptively. Throw errors.
+: KILL-PET >BODY 2 CELLS + @ 9 _ 25 LINOS ?ERRUR ;
+DECIMAL
+( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH A2jul5
+REQUIRE SET
+100 SET TASK-TABLE   VARIABLE TASK-POINTER
+: THIS TASK-POINTER @ ;
+\ Make first task current.
+: SET-FIRST-TASK TASK-TABLE CELL+ TASK-POINTER ! ;
+
+\ Add running task and make it current.
+TASK-TABLE !SET   _ TASK-TABLE SET+!   SET-FIRST-TASK
+
+\ Switch to next task, only administration.
+: NEXT-TASK   THIS CELL+ TASK-POINTER !
+    THIS TASK-TABLE @ = IF SET-FIRST-TASK THEN ;
+\ Switch from current task to next one.
+: PAUSE-COT
+    DSP@ >R RSP@ THIS !   NEXT-TASK   THIS @ RSP! R> DSP! ;
+( EXIT-COT THREAD-COT ) HEX \ AvdH A2jul5
+REQUIRE TASK-TABLE   REQUIRE CVA
+
+\ Exit: remove current task, then chain to first one.
+: EXIT-COT  THIS TASK-TABLE SET-REMOVE
+    SET-FIRST-TASK   THIS @ RSP! R> DSP! ;
+
+\ Create a thread with dictionary SPACE. Execute XT in thread.
+: THREAD-COT   CREATE R0 @ 3 CELLS - , S0 @ , CVA ALLOT
+    DOES> $@ >R  \ R@ is rsp of new task
+    @                   R@ !
+    >DFA @              R@ CELL+ !
+    'EXIT-COT >DFA @    R@ CELL+ CELL+ !
+    R> TASK-TABLE SET+! ;
+
+\
 ( NESTED-COMPILE ) \ AvdH A2oct28
 
 \ Isolate the latest word from the dictionary. Leave its DEA.
