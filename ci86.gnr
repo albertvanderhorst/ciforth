@@ -7,18 +7,18 @@ _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
  TITLE   ciforth $Revision$
 _C
-_C For the generic system (to generate ciforth in an other configuration than this one):
-_C     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html
+_C{ For the generic system (to generate ciforth in an other configuration than this one):}
+_C{     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html}
 _C
-_C If this is a configured assembly file, it should be accompanied with configured
-_C documentation (texinfo, ps, html.)
-_C WITHOUT THE DOCUMENTATION: GIVE UP! GET THE REAL THING!
-_C You have a configured system, if there are NO curly brackets on the next line.
-_C {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
+_C{ If this is a configured assembly file, it should be accompanied with configured}
+_C{ documentation (texinfo, ps, html.)}
+_C{ WITHOUT THE DOCUMENTATION: GIVE UP! GET THE REAL THING!}
+_C{ You have a configured system, if there are NO curly brackets on the next line.}
+_C{ } {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
 _C
-_C Configuration of this particular version:
-_C _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })
-_C _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl
+_C{ Configuration of this particular version:}
+_C{ _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })}
+_C{ _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl}
 _HOSTED_DPMI_({running under DPMI (OS/2 or MS-Windows)
 _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })dnl
@@ -26,18 +26,18 @@ _HOSTED_MSDOS_({running under MSDOS
 _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 }) _LINUX_C_({_C  with c-routines for I/O})_LINUX_N_({_C  with native forth I/O})
 _C Normally ciforth doesn't observe ISO >IN{}_ISO_IN_({{, but this one does}}).
-_C Contains :
-_C (there may be no items here.)
-_SECURITY_({_C        Security words
+_C{ Contains :}
+_C{ (there may be no items here.)}
+_SECURITY_({_C{        Security words}
 })dnl
-_LOAD_({_C         Loadable words, i.e. all of ISO CORE, more than is needed
-_C           for a self contained kernel.
+_LOAD_({_C{         Loadable words, i.e. all of ISO CORE, more than is needed}
+_C{           for a self contained kernel.}
 })dnl
-_SOURCEFIELD_({_C A field in the header to point to source
+_SOURCEFIELD_({_C{ A field in the header to point to source}
 })dnl
-_EXTRAFIELD_({_C An extra field in the header for double links or free use.
+_EXTRAFIELD_({_C{ An extra field in the header for double links or free use.}
 })dnl
-_FEWBLOCKS_({_C number of blocks limited to 256
+_FEWBLOCKS_({_C{ number of blocks limited to 256}
 })dnl
 _C
 _HEADER_ASM
@@ -97,9 +97,9 @@ credit notice:
 based on fig-Forth no stone is left unturned.]
 _ENDCOMMENT
         PAGE
-_C ########################################################################################
-_C                       PREPARATION (no code)
-_C ########################################################################################
+_C{ ########################################################################################}
+_C{                       PREPARATION (no code)}
+_C{ ########################################################################################}
 FIGREL  EQU     4       _C{ FIG RELEASE #}
 FIGREV  EQU     0       _C{ FIG REVISION #}
 USRVER  EQU     0      _C{ USER VERSION NUMBER, a digit now}
@@ -111,13 +111,13 @@ _C
 _C{      MEMORY LAYOUT.}
 _C{ Normally this is specified at the m4 configuration level.}
 _C{ For a configured system these values can be changed at this single place. }
-NBUF    EQU     M4_NBUF   _C {No. of buffers, or screens }
-KBBUF   EQU     1024      _C {Data bytes per disk buffer}
-US      EQU     M4_US*CW  _C {User variable space}
-EM      EQU     M4_EM     _C {Where the memory ends w.r.t. ORIG. 1) }
-EMP     EQU     (EM-1)/0x1000+1 _C {Number of pages.}
+NBUF    EQU     M4_NBUF   _C{ No. of buffers, or screens }
+KBBUF   EQU     1024      _C{ Data bytes per disk buffer}
+US      EQU     M4_US*CW  _C{ User variable space, eats into next data stack, if any.}
+EM      EQU     M4_EM     _C{ Where the memory ends w.r.t. ORIG. 1) }
+EMP     EQU     (EM-1)/0x1000+1 _C{ Number of pages.}
 TAS     EQU     M4_RTS    _C{Size of unitialised area per task.}
-RTS     EQU     TAS       _C {Return stack & terminal input buffer}
+RTS     EQU     TAS       _C{ Return stack & terminal input buffer}
 STACKSIZE   EQU TAS/4  _C{For both stacks. } but for now
 TIBSIZE     EQU TAS/2  _C{TIB size. }
 _C
@@ -278,20 +278,20 @@ _C{ Names starting in A_ are linear, physical (32 bit), absolute addresses }
 RSTSIZE     EQU     0x10000  _C{ For real mode stack. }
 GDTSIZE         EQU     0x8000   _C{ For GDT-table.}
 IDTSIZE         EQU     0x0800   _C{ For IDT-table. Not yet used. }
-A_FORTH0     EQU     M4_LOADADDRESS - M4_ORG _C { Physical address of Forth's CS:0 = SS:0 = ES:0 . }
+A_FORTH0     EQU     M4_LOADADDRESS - M4_ORG _C{  Physical address of Forth's CS:0 = SS:0 = ES:0 . }
 
 A_SWITCH        EQU     M4_SWITCHORG
 A_RST       EQU     A_SWITCH + 0x10000
 A_GDT             EQU     A_RST + RSTSIZE
-A_IDT             EQU     A_GDT + GDTSIZE  _C { reserved but not yet used. }
-A_LOWDP         EQU     A_IDT + IDTSIZE _C { Must become this. }
+A_IDT             EQU     A_GDT + GDTSIZE  _C{  reserved but not yet used. }
+A_LOWDP         EQU     A_IDT + IDTSIZE _C{  Must become this. }
 
 _C{ @ Real mode place for the stack.}
 _C{ This is such that after switching to real mode an isolated }
 _C{ Stack is available }
 SS_RST      EQU     A_RST/0x10 _C
 SWITCHSEGMENT     EQU     A_SWITCH/0x10 _C{ @ DS and CS for real code }
-_C {Add this to go from GDT_CS addresses to GDT_SWITCH addresses.}
+_C{ Add this to go from GDT_CS addresses to GDT_SWITCH addresses.}
 M4_SWITCHOFFSET EQU  ( A_FORTH0 - M4_SWITCHORG)
 
 _C{ The GDT_.. are offsets in the GDT table. They can be arbitrarily chosen }
@@ -309,7 +309,7 @@ IDENTIFY_INT EQU 0x8E00  _C{ Identification of an interrupt descriptor, byte 5}
 IDENTIFY_XR  EQU 0x9A00  _C{ Identification of a code segment, execute read, byte 5}
 IDENTIFY_RW  EQU 0x9200  _C{ Identification of a data segment, read write, byte 5}
 
-GDTLEN EQU GDTSIZE-1      _C {Intel peculiarity.}
+GDTLEN EQU GDTSIZE-1      _C{ Intel peculiarity.}
 BOOTOFFSET EQU 0
 })_C{}_END_({ _SWITCH_})
 
@@ -341,18 +341,18 @@ ORIG:
 dnl
 _BOOTED_(
 {_C ########################################################################################
-_C                      BOOTCODE    (optional, always real mode)
-_C ########################################################################################
+_C{                      BOOTCODE    (optional, always real mode)}
+_C{ ########################################################################################}
 
-_C {All bootcode must be relocatable and its memory references absolute.}
-_C {Not for the sake of booting, but to allow MSDOS to start the program too. }
+_C{ All bootcode must be relocatable and its memory references absolute.}
+_C{ Not for the sake of booting, but to allow MSDOS to start the program too. }
         CSEG    SEGMENT PARA PUBLIC 'CODE'
         ASSUME CS:CSEG,DS:CSEG,SS:CSEG,ES:CSEG
 })_C{}_END_({ _BOOTED_})
 dnl
     _ABSOLUTELOAD_({ ORG     M4_ORG})
     _BOOTED_(_REAL_({ORG     0x100
-ORIG:                         _C {Accommodate also .exe files} }))
+ORIG:                         _C{ Accommodate also .exe files} }))
 
 _BOOTSECTRK_({
 ORIG:
@@ -393,6 +393,7 @@ READSECTOR:
         DIV     CH
         MOV     DH,AH   _C{ Head number}
         MOV     CH,AL   _C{ Only small disks <256 cylinders}
+        MOV     DL,DRIVE
         MOV     AX,0x0201   _C{ Read absolute one sector}
         INT(0x13)                 _C{BIOS disk access.}
         POP     BX
@@ -402,7 +403,7 @@ READSECTOR:
 RETRY:
         CALL    DISPLAYW
         XOR     AX,AX   _C{ Reset}
-_C       MOV     DL,DRIVE
+_C{       MOV     DL,DRIVE}
         INT(0x13)                 _C{BIOS disk access.}
         CALL    DISPLAYW
         MOV     AL,' '
@@ -412,11 +413,11 @@ _C       MOV     DL,DRIVE
         MOV     AL,' '
         CALL DISPLAY
 BOOT:
-        MOV     DL, 0x80          _C {Hard disk, default.}
+        MOV     DL, 0x80          _C{ Hard disk, default.}
         MOV     AL, [LMEDIA]
-        CMP     AL, 0x0F8        _C {Fixed disk.}
+        CMP     AL, 0x0F8        _C{ Fixed disk.}
         JZ     ENDIF1A
-        MOV     DL, 0x0          _C {Floppy.}
+        MOV     DL, 0x0          _C{ Floppy.}
 ENDIF1A:
 
         MOV     AL,'D'
@@ -429,14 +430,14 @@ ENDIF1B:
         MOV     AL,'F'
         CALL    DISPLAY
         MOV     AH,00   _C{ Reset}
-_C       MOV     DL,DRIVE
+_C{       MOV     DL,DRIVE}
         INT(0x13)                 _C{BIOS disk access.}
         JB      RETRY
 
         _C{ The first file copied to a freshly formatted floppy will}
         _C{ be at SECSTRT (See also genboot.bat)}
-        MOV     CX,SECSTRT      _C {Counting from zero}
-        MOV     AX,BOOTADDRESS/0x10 _C {Bootsegment}
+        MOV     CX,SECSTRT      _C{ Counting from zero}
+        MOV     AX,BOOTADDRESS/0x10 _C{ Bootsegment}
         MOV     ES,AX
         MOV     BX,BPS
 BEGIN1: CALL    READSECTOR
@@ -497,7 +498,7 @@ STARTSECTOR: _C{ HD Start sector, do be chosen by key press.}
 HDREAD:
         MOV     AX,SWITCHSEGMENT
         MOV     DS,AX
-        MOV     SI,RELATIVE_WRT_ORIG(BOOTLBA) _C {DS:SI absolute address of lba.}
+        MOV     SI,RELATIVE_WRT_ORIG(BOOTLBA) _C{ DS:SI absolute address of lba.}
         MOV     AX,0x4200  _C{   Read extended                                }
         MOV     DX,0x0080  _C{   Disk C                                 }
         INT     0x13
@@ -550,7 +551,7 @@ ENDIF:  CALL    HDREAD
 
 })_C{}_END_({ _BOOTLBA_})
 _BOOTED_({
-_C Debug code, could be dispensed with in an ideal world.
+_C{ Debug code, could be dispensed with in an ideal world.}
 DISPLAYCR:
         MOV     AL,ACR
         CALL    DISPLAY
@@ -563,20 +564,20 @@ DISPLAYW:       PUSH    AX              _C{ Display AX in hex }
         MOV     AL,AH
         CALL    DISPLAYHEX
         POP     AX
-        _C{ CALL DISPLAYHEX _C RET}
+        _C{ CALL DISPLAYHEX _C{ RET}}
 DISPLAYHEX:     PUSH    AX              _C{ Display AL in hex }
         MOV     CL,4
         SAR     AL,CL
         CALL    DISPLAYHD
         POP     AX
-        _C{ CALL DISPLAYHD _C RET}
+        _C{ CALL DISPLAYHD _C{ RET}}
 DISPLAYHD:      AND     AL,0x0F          _C{ Display AL as one hex digit}
         DAA
         MOV     AH,AL
         MOV     CL,5
         SHR     AH,CL
         ADC     AL,0x30
-        _C{ CALL DISPLAY _C RET}
+        _C{ CALL DISPLAY _C{ RET}}
 DISPLAY:XOR     BH,BH           _C{ Display AL as an ASCII char}
         MOV     AH,0x0E
         INT(0x10)
@@ -588,7 +589,7 @@ GETKEY: MOV     AH, 0x01       _C{ If CARRY, a key sits in AL. }
         INT(0x16)
 ENDIF1:  RET
 })_C{}_END_({ _BOOTED_})
-NOBOOT:         _C {Skip till here if not booting.}
+NOBOOT:         _C{ Skip till here if not booting.}
 
 _ABSOLUTELOAD_({
 _C{ Apparently we may have to move the code, e.g. if started from MSDOS.}
@@ -620,55 +621,55 @@ RETDOS:
 ENDBOOT:
 
 _HOSTED_MSDOS_({
-_C ########################################################################################
-_C                       ADJUST CODE SEGMENT REGISTER (still real mode)
-_C ########################################################################################
+_C{ ########################################################################################}
+_C{                       ADJUST CODE SEGMENT REGISTER (still real mode)}
+_C{ ########################################################################################}
 _C{ Required start of .COM program.}
 _REAL_(
 {           ORG     0x100
-ORIG:                         _C {Accommodate also .exe files} })
+ORIG:                         _C{ Accommodate also .exe files} })
 _MODERN_(
 {       MOV     BX, (EM-1)/0x10+1
         MOV     AH,0x4A              _C{Modify memory allocation}
-        INT     21h})
+        INT     0x21})
 })
 _ABSOLUTELOAD_({
-_C ########################################################################################
-_C                       MOVE CODE TO ITS PLACE (still real mode)
-_C ########################################################################################
-_C {  Take care of the situation where booting code is actually started up by  }
-_C {  MSDOS. This is no problem as long as the code is moved to where it would }
-_C {  be if booted. If the code is at its place, nothing really happens here.  }
-_C {  Furthermore all protected code started by MSDOS must be at an absolute address.}
-        STD     _C Start at the end going back.
-        MOV     CX,TEXTEND-HERE5 _C Amount to move
+_C{ ########################################################################################}
+_C{                       MOVE CODE TO ITS PLACE (still real mode)}
+_C{ ########################################################################################}
+_C{   Take care of the situation where booting code is actually started up by  }
+_C{   MSDOS. This is no problem as long as the code is moved to where it would }
+_C{   be if booted. If the code is at its place, nothing really happens here.  }
+_C{   Furthermore all protected code started by MSDOS must be at an absolute address.}
+        STD     _C{ Start at the end going back.}
+        MOV     CX,TEXTEND-HERE5 _C{ Amount to move}
         CALL  HERE6
-HERE6:  POP     AX                 _C { Calculate address of the first byte to move}
+HERE6:  POP     AX                 _C{  Calculate address of the first byte to move}
         ADD     AX,TEXTEND-HERE6-1
-        MOV     SI,AX           _C {Relocatable address, w.r.t code segment.}
+        MOV     SI,AX           _C{ Relocatable address, w.r.t code segment.}
         MOV     AX,CS
         MOV     DS,AX
-        MOV     AX, A_FORTH0/0x10 _C Destination segment
+        MOV     AX, A_FORTH0/0x10 _C{ Destination segment}
         MOV     ES, AX
         MOV     DI, TEXTEND-1
         REPNZ
         MOVSB
-        PUSH    ES    _C {Corrected code segment}
+        PUSH    ES    _C{ Corrected code segment}
         MOV BX, HERE5
-        PUSH BX     _C {Correct program counter}
-        RETF        _C {Returning to here5 now}
+        PUSH BX     _C{ Correct program counter}
+        RETF        _C{ Returning to here5 now}
 HERE5:
         MOV     AX,CS
         MOV     DS,AX
         MOV     ES,AX
         MOV     SS,AX
-        CLD     _C {Reset direction to going up.}
+        CLD     _C{ Reset direction to going up.}
 
 })_C{}_END_({_ABSOLUTELOAD_})
 _SWITCH_({
-_C ########################################################################################
-_C                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)
-_C ########################################################################################
+_C{ ########################################################################################}
+_C{                       FILL GDT AND SWITCH TO PROTECTED MODE/32 BITS (optional)}
+_C{ ########################################################################################}
         JMP    PROTECT
 GDTLOAD DW     GDTLEN
         DD     A_GDT
@@ -691,7 +692,7 @@ _C{ when you are currently executing in the range GDT_SWITCH:[0:FFFFH] }
         MOV     DI,BX
         MOV     AX,0x0FFFF
         STOSW
-        SHL     BX,4     _C { Turn segment register into IP}
+        SHL     BX,4     _C{  Turn segment register into IP}
         MOV     AX,BX
         STOSW
         MOV     AX,IDENTIFY_XR
@@ -707,7 +708,7 @@ _C{ Accommodate a 24 bit start address, a maximal limit, large pages. }
         MOV     AX,0x0FFFF
         STOSW
         MOV     EAX,A_FORTH0
-        STOSW           _C {Only 16 bits}
+        STOSW           _C{ Only 16 bits}
         SHR     EAX,8
         ADD     AX,IDENTIFY_RW
         STOSW
@@ -718,7 +719,7 @@ _C{ PREPARE-CS 16/32 BITS                                                   }
         MOV     AX,0x0FFFF
         STOSW
         MOV     EAX,A_FORTH0
-        STOSW           _C {Only 16 bits}
+        STOSW           _C{ Only 16 bits}
         SHR     EAX,8
         ADD     AX,IDENTIFY_XR
         STOSW
@@ -755,7 +756,7 @@ _C{ Remember: we are now in the real mode for a protected model.}
 _C{ Make sure we are in the switch segment, such that we can switch.}
         MOV   BX,CS      _C{ Reality.}
         MOV AX, GDT_SWITCH _C{ Dream.}
-        PUSH AX     _C {Correct code segment}
+        PUSH AX     _C{ Correct code segment}
         SUB AX,BX      _C{ Discrepancy between dream and reality}
         MOV CX,0x10     _C{ How much units would that be for the IP?}
         CWD
@@ -764,8 +765,8 @@ _C{ Make sure we are in the switch segment, such that we can switch.}
 HERE3:  POP   BX         _C{ Reality.}
         SUB BX,AX    _C
         ADD BX,THERE4-HERE3
-        PUSH BX     _C {Corrected program counter}
-        RETF        _C {Returning to THERE4 now}
+        PUSH BX     _C{ Corrected program counter}
+        RETF        _C{ Returning to THERE4 now}
 
 _BITS16_({THERE4:})
 
@@ -789,17 +790,17 @@ THERE4:
 })_C{}_END_({ _SWITCH_})
 dnl
 _HOSTED_DPMI_({
-_C ########################################################################################
-_C                       PREPARE FOR USING DPMI (OPTIONAL)
-_C ########################################################################################
+_C{ ########################################################################################}
+_C{                       PREPARE FOR USING DPMI (OPTIONAL)}
+_C{ ########################################################################################}
 
-_C Required start of .COM program.
-        ORG     0x100          _C Accommodate also .exe files
+_C{ Required start of .COM program.}
+        ORG     0x100          _C{ Accommodate also .exe files}
 ORIG:
-_C These are real mode descriptors !
-        MOV     _CELL_PTR[SaveCS],CS           _C Once and for all
+_C{ These are real mode descriptors !}
+        MOV     _CELL_PTR[SaveCS],CS           _C{ Once and for all}
         MOV     _CELL_PTR[SaveDS],DS
-        MOV     _CELL_PTR[SaveES],ES           _C Still pointing to PSP (!?)
+        MOV     _CELL_PTR[SaveES],ES           _C{ Still pointing to PSP (!?)}
 })_C{}_END_({_HOSTED_DPMI_})
 _MODERN_({
         MOV     [LOADEXEC+4], DS
@@ -813,7 +814,7 @@ _C{Must be done before switching to protected mode.}
 })_C{}_END_({_MODERN_})
 
 _HOSTED_DPMI_({
-_C {Do a double precision shift to find number of paragraphs. }
+_C{ Do a double precision shift to find number of paragraphs. }
     MOV     BX, [DPA]
     MOV     CL,4
     SHR     BX,CL
@@ -824,13 +825,13 @@ _C {Do a double precision shift to find number of paragraphs. }
     OR      BX, 0x0FFF   _C{Minimum is 64 K for RW-BUFFER .}.
     INC     BX
     MOV     AH,0x4A  _C{Modify memory allocation to what is needed.}
-    INT     21h
+    INT     0x21
 _C
-_C Check to see if DPMI is available, and make the switch if it is
-_C If one is, the stat info is stored.
+_C{ Check to see if DPMI is available, and make the switch if it is}
+_C{ If one is, the stat info is stored.}
             MOV     BL,1
             MOV     AX,0x1687            _C{Get DPMI host address}
-            INT     2Fh                 _C{Multiplex interrupt}
+            INT     0x2F                 _C{Multiplex interrupt}
 
             CMP     AX,0                _C{Was it there?}
             JNE     ERRMSG              _C{Nope, so exit}
@@ -853,29 +854,29 @@ Plunge:     MOV     ES,AX
 _C{Setting this bit, doesn't mean you arrive in a 32 bit segment!}
             MOV     AX, _BITS16_(0) _BITS32_(1)
             _CALL_FAR_INDIRECT(DPMIentry) _C{Switch to protected mode}
-_C {From here to where the assembler switches to protected mode,}
-_C {code must be 16/32 bit independant.}
+_C{ From here to where the assembler switches to protected mode,}
+_C{ code must be 16/32 bit independant.}
             MOV     BL,3
             JC      ERRMSG      _C{still in real mode}
 
             JMP     SHORT DPMISUCCESS
 
-_C Data used by DPMI.
+_C{ Data used by DPMI.}
 DPMIentry   DW      0000,0000
 
 _C{Error-- called from diverse places.}
 ERRMSG:
-           MOV     AL, BL _C {Use the infamous errorlevel.}
+           MOV     AL, BL _C{ Use the infamous errorlevel.}
            MOV     AH,0x4C
            INT     0x21
 
-_C If we reach this point, we are operating in protected mode
+_C{ If we reach this point, we are operating in protected mode}
 DPMISUCCESS:
-_C -------------- First and for all: save --------
+_C{ -------------- First and for all: save --------}
             MOV     _CELL_PTR[Save_CS_PR],CS
             MOV     _CELL_PTR[Save_DS_PR],DS
             MOV     _CELL_PTR[Save_ES_PR],ES
-_C -------------- Get a new segment for our Forth to ES --------
+_C{ -------------- Get a new segment for our Forth to ES --------}
             MOV     AX,0x0000            _C{A new selector.}
             MOV     CX,1
             INT     0x31
@@ -913,12 +914,12 @@ ERRMSG2:    JC      ERRMSG
 
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,ES
-            MOV     CX, 0x80F2 _C %1000 0000 1111 0010 Wyatt pg.618
+            MOV     CX, 0x80F2 _C{ %1000 0000 1111 0010 Wyatt pg.618}
             INT     0x31
             MOV     BL,7
             JC      ERRMSG2
 
-_C -------------- Fill in the vector at BYE ----------------------
+_C{ -------------- Fill in the vector at BYE ----------------------}
 _C{This must be done before copying!}
         LEA     ECX,[RETDOS]
         LEA     BX,[RETDOSV+1]
@@ -927,7 +928,7 @@ _C{This must be done before copying!}
         MOV     AX,CS
         MOV     [BX],AX
 
-_C -------------- Get an 32-bit alias for the data segment into DX  --------
+_C{ -------------- Get an 32-bit alias for the data segment into DX  --------}
             MOV     AX,0x000A            _C{Alias for LDT descriptor.}
             MOV     BX,DS
             INT     0x31
@@ -937,13 +938,13 @@ _C -------------- Get an 32-bit alias for the data segment into DX  --------
 
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,DX
-            _C %1000 0000 1111 1010  %1100 0000 1111 1010
+            _C{ %1000 0000 1111 1010  %1100 0000 1111 1010}
             MOV     CX, 0x80F2  | 0x4000
             INT     0x31
             MOV     BL,7
             JC      ERRMSG2             _C{Could not allocate.}
 
-_C --------------  Now copy -------------------------------------------
+_C{ --------------  Now copy -------------------------------------------}
             PUSH    DS
             MOV     DS, DX
             MOV     ECX, [DPA]
@@ -953,16 +954,16 @@ _C --------------  Now copy -------------------------------------------
             POP     DS
 
 
-_C -------------- Release the 32-bit alias -------------------------------
-_C           ????
+_C{ -------------- Release the 32-bit alias -------------------------------}
+_C{           ????}
 
 _C{We are now in a position to release the original memory.}
-_C           MOV     BX, 0x1000          _C{BX=paragraphs needed (64K)}
-_C           MOV     AH,4Ah              _C{Modify memory allocation}
-_C           INT     21h
+_C{           MOV     BX, 0x1000          _C{BX=paragraphs needed (64K)}}
+_C{           MOV     AH,0x4A             _C{Modify memory allocation}}
+_C{           INT     0x21}
 
-_C -------------- Alias descriptors for ES --------
-_C After this section : ES is an alias for CS , DX for DS.
+_C{ -------------- Alias descriptors for ES --------}
+_C{ After this section : ES is an alias for CS , DX for DS.}
 
             MOV     AX,0x000A            _C{Alias for LDT descriptor.}
             MOV     BX,ES
@@ -971,11 +972,11 @@ _C After this section : ES is an alias for CS , DX for DS.
             MOV     DX,AX
 ERRMSG3:    JC      ERRMSG2             _C{Could not allocate.}
 
-_C -------------- Fill in the alias descriptors, possibly 32 bits --------
+_C{ -------------- Fill in the alias descriptors, possibly 32 bits --------}
 
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,ES
-            _C %1000 0000 1111 1010  %1100 0000 1111 1010
+            _C{ %1000 0000 1111 1010  %1100 0000 1111 1010}
             MOV     CX, 0x80FA _BITS32_({ | 0x4000 })
             INT     0x31
             MOV     BL,7
@@ -983,40 +984,40 @@ _C -------------- Fill in the alias descriptors, possibly 32 bits --------
 
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,DX
-            _C %1000 0000 1111 1010  %1100 0000 1111 1010
+            _C{ %1000 0000 1111 1010  %1100 0000 1111 1010}
             MOV     CX, 0x80F2 _BITS32_({ | 0x4000 })
             INT     0x31
             MOV     BL,7
             JC      ERRMSG3
 
-_C -------------- Use the alias descriptors for CS and DS --------
-            PUSH    ES    _C Corrected code segment
-            MOV     BX, ENDDPMI _C Correct program counter
+_C{ -------------- Use the alias descriptors for CS and DS --------}
+            PUSH    ES    _C{ Corrected code segment}
+            MOV     BX, ENDDPMI _C{ Correct program counter}
             PUSH    BX
             MOV     DS,DX
             MOV     ES,DX
-            RETF        _C Returning to ENDDPMI
+            RETF        _C{ Returning to ENDDPMI}
 
-_C ######################### DPMI CLEAN UP CODE #####################################################
+_C{ ######################### DPMI CLEAN UP CODE #####################################################}
 
 RETDOS:
-_C       JMP     SHORT $
+_C{       JMP     SHORT $}
 _C{ BY jumping back here from BYE CS is restored.}
 _C{ Restore also the DS ES and SS.}
         MOV     AX, [Save_DS_PR] _C{Aliased.}
         MOV     DS,AX
         MOV     ES,AX
 
-_C FIXME   the real cleanup code comes here
-_C It turns out that no cleanup code is required to prevent
-_C memory leaks.
+_C{ FIXME   the real cleanup code comes here}
+_C{ It turns out that no cleanup code is required to prevent}
+_C{ memory leaks.}
 
         MOV     AL,BL
         MOV     AH,0x4C
         INT     0x21    _C{ Only works if cs is the same as while starting.}
 
 ENDDPMI:
-_C ######################### DPMI END ###############################################################
+_C{ ######################### DPMI END ###############################################################}
 })_C{}_END_({_HOSTED_DPMI_})
 
 _BITS32_({
@@ -1033,7 +1034,7 @@ REP1:
 _BITS32_({
         INC AX                  _C{ Wait until a20 works(!)}
         MOV [TESTVALUE],AX
-        CMP AX,[0x100000 + TESTVALUE] _C { 2^20 beyond}
+        CMP AX,[0x100000 + TESTVALUE] _C{  2^20 beyond}
         JE REP1
         JMP PASTTEST
 TESTVALUE: DD   0
@@ -1042,17 +1043,17 @@ PASTTEST:
 })_C{}_END_({ _SWITCH_})
 dnl
 _LINUX_C_({
-_C ########################################################################################
-_C                       FORTH GLUE CODE (optional, except for the jump)
-_C ########################################################################################
-SAVE_LINUX:     DD      0,0,0,0,0 _C SP, BP, SI, DI, BX
+_C{ ########################################################################################}
+_C{                       FORTH GLUE CODE (optional, except for the jump)}
+_C{ ########################################################################################}
+SAVE_LINUX:     DD      0,0,0,0,0 _C{ SP, BP, SI, DI, BX}
 RETURN_LINUX:
         MOV     ESP,_CELL_PTR[SAVE_LINUX+_CELLS(0)]
         MOV     EBP,_CELL_PTR[SAVE_LINUX+_CELLS(1)]
         MOV     ESI,_CELL_PTR[SAVE_LINUX+_CELLS(2)]
         MOV     EDI,_CELL_PTR[SAVE_LINUX+_CELLS(3)]
         MOV     EBX,_CELL_PTR[SAVE_LINUX+_CELLS(4)]
-        RET     _C Assuming the old stack has not been disturbed.It shouldn't.
+        RET     _C{ Assuming the old stack has not been disturbed.It shouldn't.}
 ciforth:
         MOV     _CELL_PTR[SAVE_LINUX+_CELLS(0)],ESP
         MOV     _CELL_PTR[SAVE_LINUX+_CELLS(1)],EBP
@@ -1063,13 +1064,13 @@ ciforth:
         XOR     EAX,EAX
         CMP     EAX,_CELL_PTR[ECX]
         JZ     ENDIF1
-        JMP     WARM_ENTRY         _C Warm start
+        JMP     WARM_ENTRY         _C{ Warm start}
 ENDIF1:
 
 })_C{}_END_({_LINUX_C_})
 
 _LINUX_N_({
-_C 4.15.3.2
+_C{ 4.15.3.2}
 ciforth:
 _start:
 })_C{}_END_({_LINUX_N_})
@@ -1091,19 +1092,18 @@ _THREADS_({
 })_C{}_END_({_THREADS_})
 _HOSTED_LINUX_(
 {       MOV     _CELL_PTR[USINI+_CELLS(31)],SPO _C{Remember ARGS.}
-})
-        MOV     AX,DS
-        MOV     SS,AX           _C{Atomic with next instruction.}
+})dnl
+        MOV     {AX},DS
+        MOV     SS,{AX}           _C{Atomic with next instruction.}
         MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    _C{PARAM. STACK}
         MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    _C{RETURN STACK}
         MOV     HIP,_OFFSET CLD1  _C{ (IP) <-}
         _NEXT
 _C
-CLD1:   DC      COLD    _C { This is a piece of headerless high level code.}
 _C
-_C ########################################################################################
-_C                       FORTH ITSELF
-_C ########################################################################################
+_C{ ########################################################################################}
+_C{                       FORTH ITSELF}
+_C{ ########################################################################################}
 _C
 _COMMENT
    FORTH REGISTERS
@@ -1145,6 +1145,18 @@ dnl Note how the following is to pass through m4
                     a few words. However it MUST remain equal to
                     DS, such that string primitives can be used
                     with impunity.
+            The remaining registers are free to use.
+            Within assembler words WOR can be used too,
+            as it has served its purpose.
+
+            Here are some  useful code sequences.
+            For next:
+                    _NEXT
+            For push single and next:
+                    _PUSH
+            For push double and next:
+                    _2PUSH
+
 
 ----------------------------------------------------------
 _ENDCOMMENT
@@ -1160,14 +1172,16 @@ _COMMENT
 
   NAME        =  Address of name
   (NAME)      =  Contents of name
-
+  DEA         =  DICTIONARY ENTRY ADDRESS
+                 fields have fixed offsets from DEA
   CFA         =  CODE FIELD ADDRESS : a pointer to executable code
   DFA         =  DATA FIELD ADDRESS : a pointer to
                         data/high level code/ DOES> pointer
   FFA         =  FLAG FIELD ADDRESS: contains flags
-  LFA         =  LINK FIELD ADDRESS: a pointer
-  NFA         =  NAME FIELD ADDRESS: a pointer to a variable number of chars
-  PHA         =  POST {HEADER} ADDRESS
+  LFA         =  LINK FIELD ADDRESS: a pointer to the next DEA
+  NFA         =  NAME FIELD ADDRESS: a pointer to a name buffer
+  _SOURCEFIELD_({SFA         =  SOURCE FIELD ADDRESS: a pointer into source code})
+  PHA         =  POST HEADER ADDRESS: Afterall fields
 
   S1          =  Parameter stack - 1st cell
   S2          =  Parameter stack - 2nd cell
@@ -1178,7 +1192,8 @@ _COMMENT
   MSB         =  Most  significant bit
   LB          =  Low byte
   HB          =  High byte
-  LW          =  Low  cell
+  LC          =  Low  cell
+  HC          =  High cell
 
 ------------------------------------------------------------
 _ENDCOMMENT
@@ -1271,8 +1286,8 @@ DISPLAYSI:
         MOV     AX,HIP
         CALL    DISPLAYW
         CALL    DISPLAYCR
-_C        MOV     AH,0x10
-_C        INT     0x16
+_C{        MOV     AH,0x10}
+_C{        INT     0x16}
         POP    WOR
         POP    RPO
         POP    HIP
@@ -1306,7 +1321,7 @@ _C
 _C{       Dictionary starts here.}
 
 DP0:
-_C Vocabularies all end in a link to 0.
+_C{ Vocabularies all end in a link to 0.}
 define({_LINKOLD},0)dnl
 worddocsafe( {DENOTATIONS},{Prefix__TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,L0},
 {Used in the form: forthexample({'nnnn})
@@ -1466,22 +1481,22 @@ _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.}
 {: GS1 "NOOT" ; GS1 TYPE},{NOOT}},
 enddoc)
 _HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      LIT, SKIP, COMMA        _C  'SKIP , HERE >R 0 ,
+        DC      LIT, SKIP, COMMA        _C{  'SKIP , HERE >R 0 ,}
         DC      HERE, TOR, ZERO, COMMA
 DENQ1:
-        DC      LIT, '"', PPARS         _C           BEGIN &" (PARSE)
-        DC      INBRS, LDUP, LIT, '"', EQUAL _C           IN[] DUP &" =
-        _0BRANCH(DENQ2)                 _C           WHILE
-        DC      TDROP, ONEP             _C           2DROP 1+ R@ $+!
+        DC      LIT, '"', PPARS         _C{           BEGIN &" (PARSE)}
+        DC      INBRS, LDUP, LIT, '"', EQUAL _C{           IN[] DUP &" =}
+        _0BRANCH(DENQ2)                 _C{           WHILE}
+        DC      TDROP, ONEP             _C{           2DROP 1+ R@ $+!}
         DC      LDUP, ALLOT, RR, SADD
-        _BRANCH(DENQ1)                  _C           REPEAT
+        _BRANCH(DENQ1)                  _C{           REPEAT}
 DENQ2:
         DC      QBL, ZEQU
-        DC      LIT, 10, QERR           _C           ?BLANK 0= 5 ?ERROR
-        DC      DROP                    _C                DROP R@ $+!
+        DC      LIT, 10, QERR           _C{           ?BLANK 0= 5 ?ERROR}
+        DC      DROP                    _C{                DROP R@ $+!}
         DC      LDUP, ALLOT, RR, SADD
 _ALIGNED_({ DC LALIGN}, {dnl})
-        DC      FROMR, SFET, DLITE      _C           R> $@ POSTPONE DLITERAL _C
+        DC      FROMR, SFET, DLITE      _C{           R> $@ POSTPONE DLITERAL ;}
         DC      SEMIS
 _C
 worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
@@ -1498,12 +1513,13 @@ colon-definition, to select this forthdefi({word list}) at compile time.},
 { { VOCABULARY JOHN JOHN ' FORTH >WID CONTEXT @ = .},{0},
   { FORTH ' FORTH >WID CONTEXT @ = .},{_T_} },
 enddoc)
-_C The FORTH word is the only non-denotation in the ONLY vocabulary.
+_C{ The FORTH word is the only non-denotation in the ONLY vocabulary.}
 _HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
         DC      0       _C{ END OF VOCABULARY LIST}
 _HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 _C
+dnl Remember the top of the ONLY vocabulary.
 define({_STARTOFONLY_},_LINKOLD)dnl
 _C
 dnl Reset the link chain at this to start the ENVIRONMENT wordlist.
@@ -1582,8 +1598,8 @@ _HEADER({SUPPLIER},{SUPPLIER},{DOCOL})
 _C
 dnl Remember the top of the environment chain.
 define({_STARTOFENVIRONMENT_},_LINKOLD)dnl
-dnl Reset the link chain at this to start the FORTH wordlist.
-dnl out of the normal search.
+dnl The following words belong to the FORTH wordlist.
+dnl Reset the link chain.
 define({_LINKOLD},0)dnl
 _C
 worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
@@ -1862,8 +1878,8 @@ _C
 _C{      Initialisation block for user variables through DOC-LINK}
 _C{       <<<<< must be in same order as user variables >>>>>}
 _C
-_C        DC      WARM_ENTRY FIXME
-_C        DC      COLD_ENTRY
+_C{        DC      WARM_ENTRY FIXME}
+_C{        DC      COLD_ENTRY}
 USINI:  DC      STRUSA  _C{ User area currently in use, cold value same as next.}
         DC      STRUSA  _C{ INIT (U0) user area of the main task 1}
         DC      INITS0  _C{ INIT (S0)         2}
@@ -1890,7 +1906,7 @@ _C{ (X-1)/S+1 rounds up to whole `S', this is used several times. }
 _C{ The 2 is rounding plus the extra sector in .EXE files.}
 _C{ However it deviates much from the classic model and requires}
 _C{ that the disk parameters are available (not only for USEBIOS)}
-        DC      (RELATIVE_WRT_ORIG(TEXTEND)-1)/KBBUF+1 ; +1 for EXE
+        DC      (RELATIVE_WRT_ORIG(TEXTEND)-1)/KBBUF+1 _C{ +1 for EXE}
 _ENDCOMMENT
 _C{ So for now just the classic, swap disk after booting.}
         DC      0       _C{ INIT (OFFSET) }
@@ -1905,8 +1921,8 @@ _C{ can be accessed from DOS and makes sure blocks are not allocated}
 _C{ within the forth system itself. }
 _C{ BPS subtracted because SECSTRT corresponds with one sector into source. }
 _C{ Round up both parts separately.}
-_C       You need a filler file of one sector,
-_C       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).
+_C{       You need a filler file of one sector,}
+_C{       if this  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv even (for a 3" drive).}
         DC      (SECSTRT+((RELATIVE_WRT_ORIG(TEXTEND)-1-BPS)/BPS+1)-1)/SPB+1     _C{ INIT (OFFSET) }
 })_C{}_END_({_RESPECTDOS_})
 
@@ -1920,10 +1936,10 @@ _C
         DC      0, 0            _C{ WHERE             12 13 }
         DC      0, 0            _C{REMAINDER   14 15 }
 _SWITCH_({
-_C {Swap the following with DP to allocate in conventional memory.}
-         DC     TEXTEND         _C {LOW-DP        16}
-_C {Leave space to start conventional programs}
-         DC     0x80000          _C {LOW-EM        17}
+_C{ Swap the following with DP to allocate in conventional memory.}
+         DC     TEXTEND         _C{ LOW-DP        16}
+_C{ Leave space to start conventional programs}
+         DC     0x80000          _C{ LOW-EM        17}
 })_C{}_END_({ _SWITCH_})
         _RESB(US-(_AP_ - USINI))        _C{ All user can be initialised.}
 _C
@@ -1972,12 +1988,12 @@ It is required that the dea has a non-zero name field.
 enddoc)
 _HEADER({~MATCH},{NMATCH},{DOCOL})
 _C
-        DC      TOR                           _C {Remember dea}
+        DC      TOR                           _C{ Remember dea}
         DC      TDUP
         DC      RR, TNFA, FETCH, SFET
         DC      ROT, MIN
         DC      CORA
-        DC      FROMR, SWAP                   _C {Leave flag on top of dea.}
+        DC      FROMR, SWAP                   _C{ Leave flag on top of dea.}
         DC      SEMIS                            _C
 _C
 worddoc( {PARSING},{?BLANK},{query_blank},{c --- ff },{},
@@ -2221,18 +2237,19 @@ FARMV1:
         POP     SI      _C{source}
         POP     DX
         PUSH    DS
-        PUSH    BX      _C{ES in fact.}
         AND     DX,DX
         JZ      FARMV2
         MOV     DS,DX
 FARMV2:
         REP     MOVSB
         MOV     HIP,AX   _C{restore }
+        PUSH    BX
+        PUSH    BX
         POP     ES
         POP     DS
         _NEXT
 _C
-worddoc( {MULTIPLYING},{UM*},{u_star},{u1 u2 --- ud},{ISO},
+worddoc( {MULTIPLYING},{UM*},{u_start},{u1 u2 --- ud},{ISO},
 {A mixed magnitude math operation which leaves the double number
 forthvar({ud}) : the unsigned product of two unsigned numbers
 forthvar({u1}) and forthvar({u2}) .},
@@ -2253,6 +2270,7 @@ quotient forthvar({u3}) from the unsigned double dividend
 forthvar({ud}) and unsigned divisor forthvar({u1}) .},
 {{UM*},{SM/REM},{/}},
 {
+{1 -2 -1 UM/MOD . .},{-1 0},
 {DECIMAL 12.34 100 UM/MOD . .},{12 34}
 },
 enddoc)
@@ -2500,12 +2518,12 @@ double numbers forthvar({d1}) and forthvar({d2}) .},
   { DECIMAL  -240. -204. D+ D.},{-444} },
 enddoc)
 CODE_HEADER({D+},{DPLUS})
-        POP     AX      _C{ YHW}
-        POP     DX      _C{ YLW}
-        POP     BX      _C{ XHW}
-        POP     CX      _C{ XLW}
-        ADD     DX,CX   _C{ SLW}
-        ADC     AX,BX   _C{ SHW}
+        POP     AX      _C{ YHC}
+        POP     DX      _C{ YLC}
+        POP     BX      _C{ XHC}
+        POP     CX      _C{ XLC}
+        ADD     DX,CX   _C{ SLC}
+        ADC     AX,BX   _C{ SHC}
         _2PUSH
 _C
 worddoc( {OPERATOR},{NEGATE},{negate},{n1 --- n2},{ISO,FIG,L0},
@@ -2644,7 +2662,7 @@ CODE_HEADER({2OVER},{TOVER})
         _2PUSH
 _C
 worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{ISO,FIG,L0},
-{ Add forthvar({n}) to the value forthvar({addr}).},
+{ Add forthvar({n}) to the value at forthvar({addr}).},
 {{TOGGLE},{!}},
 {{0 PAD ! 1 PAD +! PAD @ .},{1},
  {1 PAD ! -1 PAD +! PAD @ .},{0} },
@@ -2729,7 +2747,7 @@ CODE_HEADER({C!},{CSTOR})
         MOV     [BX],AL
         _NEXT
 _C
-worddoc( {MEMORY},{2!},{two_store},{addr--- x1 x2},{ISO},
+worddoc( {MEMORY},{2!},{two_store},{x1 x2 addr --- },{ISO},
 {Store a pair of _BITS_ bits values forthsamp({x1})
 forthsamp({x2}) to consecutive cells at forthvar({addr}) .
 forthsamp({x2}) is stored at the lowest address.
@@ -2761,7 +2779,6 @@ _HEADER({WITHIN},{WITHIN}, {DOCOL})
         DC      ULESS
         DC      SEMIS
 _C
-_LOAD_({
 worddocsafe( {MEMORY},{L@},{long_fetch},{faraddr --- n},{},
 {Leave the _BITS_ bit contents of
 segment address pair forthsamp({faraddr}).
@@ -2770,6 +2787,7 @@ segment address pair forthsamp({faraddr}).
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({L@},{LFET})
+_BITS16_({
         POP     BX      _C{Offset}
         POP     CX      _C{Segment}
 _BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
@@ -2779,6 +2797,16 @@ _BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
         MOV     DS,DX
 _BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
         PUSH    BX
+})_C{}_END_({_BITS16_})
+_BITS32_({
+        POP     BX      _C{MEM LOC}
+        MOV     AX,FS
+        POP     FS      _C{SEG REG VAL}
+        MOV     BX,[FS:BX]
+        MOV     FS,AX
+        PUSH    BX
+        _NEXT
+})_C{}_END_({_BITS32_})
         _NEXT
 _C
 worddoc( {MEMORY},{L!},{long_store},{n faraddr ---},{},
@@ -2789,6 +2817,7 @@ forthvar({faraddr}).
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({L!},{LSTORE})
+_BITS16_({
         POP     BX
         POP     CX
         POP     DX
@@ -2799,7 +2828,16 @@ _BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
         MOV     DS,AX
 _BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
         _NEXT
-})_C{}_END_({_LOAD_})
+})_C{}_END_({_BITS16_})
+_BITS32_({
+        POP     BX
+        MOV     AX,FS
+        POP     FS      _C{SEG REG VAL}
+        POP     DX
+        MOV     [FS:BX],DX
+        MOV     FS,AX
+        _NEXT
+})_C{}_END_({_BITS32_})
 _C
 worddoc( {DEFINING},{:},{colon},{},{ISO,FIG,E,L0},
 {Used in the form called a colon-definition:
@@ -2824,7 +2862,7 @@ _HEADER({:},{COLON},{DOCOL})
 DOCOL:  LEA     RPO,[RPO - _CELLS(1)]  _C{Push HIP}
         MOV     [RPO],HIP _C{R1 <- (IP)}
          MOV     HIP,[WOR+_CELLS(D_HOFFSET - C_HOFFSET)]  _C{(IP) <- (PFA)}
-_C        CALL    DISPLAYSI
+_C{        CALL    DISPLAYSI}
 _SWITCH_({
         _SWITCH_({JMPHERE_FROM_FORTH})
         _C{ Allow interrupts to happen.}
@@ -2922,7 +2960,7 @@ worddoc( {SUPERFLUOUS},{0},{zero},{--- 0},{},
 {{0 .},{0}},
 enddoc)
 _HEADER({0},{ZERO},{DOCON},0)
-_C {The data field of 0 is used for an empty string.}
+_C{ The data field of 0 is used for an empty string.}
 _C
 worddoc( {SUPERFLUOUS},{Number_1},{one},{--- 1},{},
 {Leave the number 1. },{{CONSTANT}},
@@ -3030,8 +3068,8 @@ _HEADER({FIRST},{FIRST},{DOCON}, BUF1)
 })_C{}_END_({ _HIGH_BUF_})
 _C
 _LOW_BUF_({
-        _ALIGN(2)       _C Otherwise INT 13 hangs when filling
-        _C in into the lba block as a buffer address.
+        _ALIGN(2)       _C{ Otherwise INT 13 hangs when filling}
+        _C{ in into the lba block as a buffer address.}
         DB      0       _C{Padding the odd # of bytes in the name FIRST.}
 worddoc( {BLOCKS~},{FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
@@ -3203,7 +3241,7 @@ caught. },
 {{THROW},{CATCH} },
 {{"1 12 ?ERROR" 2DUP 'EVALUATE CATCH DROP 2DROP + WHERE 2@ DROP = .},{_T_}},
 enddoc)
-_HEADER({WHERE},{LWHERE},{DOUSE}, _CELLS(12))    _C { Occupies two CELLS! }
+_HEADER({WHERE},{LWHERE},{DOUSE}, _CELLS(12))    _C{  Occupies two CELLS! }
 _C
 worddoc( {SCREEN},{SCR},{s_c_r},{--- addr},{U},
 {A user variable containing the screen number most recently reference
@@ -3376,8 +3414,8 @@ Used as in forthsamp({REMAINDER 2@}) .
 {{REMAINDER 2@ DROP TIB @ R0 @ WITHIN .},{_T_}},
 enddoc)
 _HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
-_C      IMPORTANT
-_C REQUIRES ONE MORE CELL!
+_C{      IMPORTANT}
+_C{ REQUIRES ONE MORE CELL!}
 _C
 worddoc( {WORDLISTS},{CONTEXT},{context},{--- addr},{FIG,U,L0},
 { The context is the address where the WID is found of the wordlist
@@ -3400,9 +3438,9 @@ such that new user variables may be allocated using offsets of
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
 _HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(37)) _C{ Up to } 37+M4_MAXWORDLIST
-_C      IMPORTANT
-_C     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE
-_C     IN ADDITION TO THE ONE FOR CONTEXT
+_C{      IMPORTANT}
+_C{     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE}
+_C{     IN ADDITION TO THE ONE FOR CONTEXT}
 _C
 _C{========== END USER VARIABLES =============}
 _C
@@ -3441,7 +3479,7 @@ _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
 _C
 _HEADER({CELLS},{LCELLS},{DOCOL})
-        DC      _BITS16_({ONE}) _BITS32_({TWO})
+        DC      _BITS16_({ONE}) _BITS32_({TWO}) _BITS64_({{LIT, 4}})
         DC      LSHIFT
         DC      SEMIS
 _C
@@ -3490,15 +3528,16 @@ it if necessary to forthsamp({addr2}).
 _ALIGNED_(,{ In this ciforth this is a NOOP.})
 },{{ALIGN}},
 _ALIGNED_({
-{{ 4 ALIGNED .},{4},
-{5 ALIGNED . },{8}}
+_BITS16_({{{ 4 ALIGNED .},{4}, {5 ALIGNED . },{6}},}) dnl Expanded before worddoc.
+_BITS32_({{{ 4 ALIGNED .},{4}, {5 ALIGNED . },{8}},}) dnl Expanded before worddoc.
+_BITS64_({{{ 8 ALIGNED .},{8}, {0A ALIGNED . },{10}},}) dnl Expanded before worddoc.
 }),
 enddoc)
 CODE_HEADER({ALIGNED}, {ALIGNED} )
 _ALIGNED_({
         POP     AX
         DEC     AX
-        OR      AL, _OFFSET 3
+        OR      AX, _OFFSET _CELLS(1)-1
         INC     AX
         PUSH    AX
 },{dnl })_C{}_END_({_ALIGNED_})
@@ -3846,7 +3885,7 @@ dictionary search. },
 enddoc)
 _HEADER({>WID},{TWID},{DOCOL})
         DC      TOBODY
-        DC      CELLP _C {Skip vfa link.}
+        DC      CELLP _C{ Skip vfa link.}
         DC      SEMIS
 _C
 worddoc( {DICTIONARY~},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
@@ -4111,7 +4150,7 @@ forthfile({forth.lab}) .},
 {{." Not present"},{Not present} },
 enddoc)
 _C
-worddoc( {DEFINING},{CREATE},{create},{},{},
+worddoc( {DEFINING},{CREATE},{create},{},{ISO},
 {A defining word used in the form:
      forthsamp({CREATE cccc})
 Later execution of forthsamp({cccc}) returns its data field, i.e.
@@ -4123,14 +4162,14 @@ It can be the base of a new defining word if used in the form:
 CREATOR cccc
 })
 The second line has the effect of creating a word forthsamp({cccc}) .
-Its datastructure is build
-by the code forthsamp({aaaa}) and when executing forthsamp({cccc}) , its data field is pushed
-on the stack, then the code forthsamp({bbbb}) is executed.
+Its datastructure is build by the code forthsamp({aaaa}) and when
+executing forthsamp({cccc}) , its data field is pushed on the stack,
+then the code forthsamp({bbbb}) is executed.
 
 _VERBOSE_({{Space in this data field has yet to
 be allocated and the execution action can be changed.}})
 ciforth is byte aligned, so no extra measures are needed.},
-{{DOES>},{;CODE},{ALLOT},{,},{C,}},
+{{>BODY},{DOES>},{;CODE},{ALLOT},{,},{C,}},
 {{ CREATE ZWY LATEST ID.},{ZWY},
 {HERE ZWY = .},{_T_}},
 enddoc)
@@ -4296,12 +4335,12 @@ _HEADER({SET-SRC},{SETSRC},{DOCOL})
         DC      OVER, PLUS
         DC      SWAP, SRC, TSTOR
         DC      SRC, FETCH
-        DC      LIN, STORE _C { IN}
+        DC      LIN, STORE _C{  IN}
 _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
         DC     SRC, CELLP, PSTORE
         DC     LIN, PSTORE
 })
-_C       DC      DOTS
+_C{       DC      DOTS}
         DC      SEMIS
 _C
 worddoc( {PARSING}, {EVALUATE}, {evaluate}, {sc --- ??}, {ISO},
@@ -4427,7 +4466,7 @@ _C{       Assume the extra segment points to the data segment }
         CLD             _C{ INC DIRECTION}
         REPNZ     SCASB   _C{ Compare BYTE}
         JZ      SSPLIT1
-_C {Not present.}
+_C{ Not present.}
         PUSH    CX   _C{ Nil pointer.}
         JMP SHORT SSPLIT2
 SSPLIT1:
@@ -4527,15 +4566,15 @@ IWORD4:
         DC      DROP
         DC      LIT, -1, LIN, PSTORE _C{ Backtrace to first non-delimiter.}
         DC      FROMR, PPARS
-_C        DC      DOTS
+_C{        DC      DOTS}
 IWORD2:
         DC      HERE
         DC      LIT,0x22
         DC      BLANK
         DC      HERE
-        DC      SSTORBD     _C {FIXME}
+        DC      SSTORBD     _C{ FIXME}
         DC      HERE
-_C        DC      DOTS
+_C{        DC      DOTS}
         DC      SEMIS
 _C
 })_C{}_END_({_LOAD_})
@@ -4620,7 +4659,7 @@ NPNUM4:
         DC      USTAR
         DC      DPLUS
         DC      ZERO
-NPNUM3:                 _C {THEN THEN}
+NPNUM3:                 _C{ THEN THEN}
         _0BRANCH(NPNUM1)
         DC      SEMIS
 _C
@@ -4681,7 +4720,7 @@ TONUM1:
         DC      DROP
         DC      LLEAV
 TONUM4:
-        DC      SWAP, TOR _C {Address out of the way.}
+        DC      SWAP, TOR _C{ Address out of the way.}
         DC      SWAP
         DC      BASE
         DC      FETCH
@@ -4692,7 +4731,7 @@ TONUM4:
         DC      FETCH
         DC      USTAR
         DC      DPLUS
-        DC      FROMR, ONEP     _C {Address back.}
+        DC      FROMR, ONEP     _C{ Address back.}
         _LOOP(TONUM1)
 TONUM9:
         DC      FROMR
@@ -4718,7 +4757,7 @@ enddoc)
 _HEADER({FOUND},{FOUND},{DOCOL})
         DC      CONTEXT, TOR
 FOUND1: DC      RR, FETCH
-_C        DC      DOTS
+_C{        DC      DOTS}
         DC      PFIND, LDUP, ZEQU
         _0BRANCH(FOUND3)
         DC      DROP
@@ -4749,7 +4788,7 @@ _HEADER({PRESENT},{PRESENT},{DOCOL})
         DC      LDUP
         _0BRANCH(PRES1)
         DC      LDUP
-        DC      TNFA, FETCH, FETCH _C { Get precise length.}
+        DC      TNFA, FETCH, FETCH _C{  Get precise length.}
         DC      RR, EQUAL
         DC      LAND
 PRES1:
@@ -4778,8 +4817,8 @@ _HEADER({FIND},{FIND},{DOCOL})
         DC      LDUP, COUNT, PRESENT
         DC      LDUP
         _0BRANCH(FIND1) _C{IF}
-        DC      SWAP, DROP _C {The address.}
-        _C {Fine point, get xt by TCFA. Even if a NOOP.}
+        DC      SWAP, DROP _C{ The address.}
+        _C{ Fine point, get xt by TCFA. Even if a NOOP.}
         DC      LDUP, TCFA, SWAP
         DC      TFFA, FETCH
         DC      LIT, B_IMMED, LAND
@@ -4826,17 +4865,17 @@ as this is a repetitive action}}). },
  {TYPE},{BONOBO} },
 enddoc)
 _HEADER({(FIND)},{PFIND},{DOCOL})
-_C {The idea is to have a fast slim loop.}
-_C {The optimisation tries to skip, using the extra links.}
-_C At all labels the stack is (sc, dea).
-_C PFIND0 : nothing known yet about dea
-_C PFINDM1 : dea has no optimisation possibilities any more
-_C PFINDM2 : dea has a possible match: ~MATCH returns 0(=equal)
-_C PFIND1 : dea is a match, inasfar name and prefix
-_C PFIND2 : dea is the match, or null.
+_C{ The idea is to have a fast slim loop.}
+_C{ The optimisation tries to skip, using the extra links.}
+_C{ At all labels the stack is (sc, dea).}
+_C{ PFIND0 : nothing known yet about dea}
+_C{ PFINDM1 : dea has no optimisation possibilities any more}
+_C{ PFINDM2 : dea has a possible match: ~MATCH returns 0(=equal)}
+_C{ PFIND1 : dea is a match, inasfar name and prefix}
+_C{ PFIND2 : dea is the match, or null.}
 
 PFIND0:                       _C{Start of fast loop}.
-        _EXTRAFIELD_({DC      OPT                   _C (Speed optimisation).
+        _EXTRAFIELD_({DC      OPT                   _C{ (Speed optimisation).}
         DC      LDUP
         _0BRANCH(PFIND2)
 })        DC      NMATCH
@@ -4846,29 +4885,29 @@ PFINDM1:
         DC      LDUP, ZEQU
         _0BRANCH(PFIND0)      _C{End of fast loop}.
 
-_C Exit for end of chain (fall through)
+_C{ Exit for end of chain (fall through)}
         _BRANCH(PFIND2)
-_C Exit for possible match
-_C ~MATCH is sure in determining a no-match,
-_C a possible match must be investigated closely.
+_C{ Exit for possible match}
+_C{ ~MATCH is sure in determining a no-match,}
+_C{ a possible match must be investigated closely.}
 PFINDM2:
 _C
-_C Discard, because name too short to match dea, can't be a denotation.
+_C{ Discard, because name too short to match dea, can't be a denotation.}
         DC      TDUP, TNFA, FETCH, FETCH
         DC      LESS, ZEQU
         _0BRANCH(PFINDM1)
 _C
-_C Equal: found, barring invisibility and dummy entries.
+_C{ Equal: found, barring invisibility and dummy entries.}
         DC      TDUP, TNFA, FETCH, FETCH
         DC      LSUB
         _0BRANCH(PFIND1)
 _C
-_C Discard, unless dea is a denotation ("prefix")
+_C{ Discard, unless dea is a denotation ("prefix")}
         DC      LDUP, TFFA, FETCH
         DC      LIT, B_DENOT, LAND
         _0BRANCH(PFINDM1)
 
-_C Discard still, if invisible ("smudged") or dummy.
+_C{ Discard still, if invisible ("smudged") or dummy.}
 PFIND1:
         DC      LDUP, TFFA, FETCH
         DC      LIT, B_INVIS _OR_ B_DUMMY, LAND
@@ -5056,24 +5095,24 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 _ALIGNED_({ DC      LALIGN},{dnl})
         DC      HERE,TOR
 
-        DC      RR, TPHA, COMMA         _C {Code field.}
+        DC      RR, TPHA, COMMA         _C{ Code field.}
 
-        DC      RR, TPHA, COMMA         _C {Data field.}
+        DC      RR, TPHA, COMMA         _C{ Data field.}
 
-        DC      ZERO, COMMA _C {Flag field.}
+        DC      ZERO, COMMA _C{ Flag field.}
 
         DC      CURR, FETCH, TLFA
         DC      LDUP, FETCH
-        DC      COMMA   _C {Link field.}
+        DC      COMMA   _C{ Link field.}
         DC      RR, SWAP, STORE
 
-        DC      COMMA   _C {Name field.}
+        DC      COMMA   _C{ Name field.}
 
 _SOURCEFIELD_({
         DC      BLK, FETCH, LDUP, ZEQU
         _0BRANCH(CREA2)
         DC      DROP, LIN, FETCH
-CREA2:  DC      COMMA  _C {Source field.}
+CREA2:  DC      COMMA  _C{ Source field.}
 },{dnl})
         _EXTRAFIELD_({DC      ZERO, COMMA
 })        DC      RDROP
@@ -5232,8 +5271,11 @@ forthsamp({current input source}) and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in the vocabularies of forthdefi({search-order}).
-Note that the denotations
-in the forthcode({ONLY}) wordlist match numbers.
+It can be either matched exactly, or it can match a prefix.
+A word that matches a prefix is called a forthdefi({denotation});
+mostly this is a number.
+Prefixes are present in forthcode({ONLY}) which is the last wordlist
+in the search order, and the minimum search order.
 If it is not found at all, it
 is an forthcode({ERROR}).
 A forthdefi({denotation}) is a number, a double number, a
@@ -5258,9 +5300,9 @@ INTE1:
         DC      LPWORD
         DC      LDUP      _C{ Zero length.}
         _0BRANCH(INTE8) _C{WHILE}
-_C       DC      DOTS
-_C       DC      TDUP, LTYPE
-        DC      OVER, TOR       _C {Save old parse pointer.}
+_C{       DC      DOTS}
+_C{       DC      TDUP, LTYPE}
+        DC      OVER, TOR       _C{ Save old parse pointer.}
         DC      FOUND
         DC      LDUP, ZEQU
         DC      LIT, 12, QERR
@@ -5270,7 +5312,7 @@ _C       DC      TDUP, LTYPE
         DC      OVER, TNFA, FETCH, FETCH
         DC      RR, PLUS, LIN, STORE  _C{Skip over prefix.}
 INTE3B:                  _C{THEN }
-        DC      RDROP           _C {Drop old parse pointer.}
+        DC      RDROP           _C{ Drop old parse pointer.}
         DC      LIT, B_IMMED, LAND
         DC      STATE, FETCH, ZEQU, LOR
         _0BRANCH(INTE3) _C{IF}
@@ -5353,7 +5395,7 @@ forthcode({CONTEXT}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
 oldest one gets lost. The vocabularies generated are
 forthcode({IMMEDIATE}) words.},
-{{VOC-LINK},{DEFINITIONS}},
+{{VOC-LINK},{DEFINITIONS},{FOR-VOCS}},
 {{123 VOCABULARY JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
@@ -5402,11 +5444,8 @@ _C
 worddoc( {WORDLISTS},{DEFINITIONS},{definitions},{},{ISO},
 {Used in the form:
            forthsamp({cccc DEFINITIONS})
-Make
-the top most
-forthdefi({search order}) word list, (context),
-the compilation
-word list (current).
+Make the top most forthdefi({search order}) word list, (context),
+the compilation word list (current).
 In the example, executing
 vocabulary name forthsamp({cccc}) add it to the top of the
 forthdefi({search order}) and executing
@@ -5496,14 +5535,14 @@ Blank space after the word forthcode({\}) is required.},
 },{} },
 enddoc)
 _HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
-_C {Backup one character, just in case we are at the end of a line.}
+_C{ Backup one character, just in case we are at the end of a line.}
         DC      LIT, -1, LIN, PSTORE
         DC      LIT,ALF
         DC      PPARS
         DC      TDROP
         DC      SEMIS
 _C
-worddoc( {INIT},{QUIT},{quit},{},{ISO,FIG},
+worddoc( {{INITIALISATIONS}},{QUIT},{quit},{},{ISO,FIG},
 {Restart the interpreter. Clear the return stack, stop
 compilation, and return control to the operators terminal,
 or to the redirected input stream.
@@ -5535,7 +5574,7 @@ ENDIF7:
         _BRANCH(QUIT1)  _C{AGAIN}
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
-worddoc( {INIT},{OK},{ok},{},{ISO,FIG},
+worddoc( {{INITIALISATIONS}},{OK},{ok},{},{ISO,FIG},
 {Takes care of printing the okay-message, after interpreting
 a line. Default it prints ``OK'' only for an interactive session
 in interpret forthcode({STATE}). },
@@ -5554,7 +5593,7 @@ _HEADER({OK},{OK},{DOCOL})
 OK2:
         DC      SEMIS
 _C
-worddoc( {INIT},{ABORT},{abort},{},{ISO,FIG,L0},
+worddoc( {{INITIALISATIONS}},{ABORT},{abort},{},{ISO,FIG,L0},
 {Restart the system. In addition and before the actions of
 forthcode({QUIT}), clear also the data stack and reset the
 search order, reset the exception mechanism and set
@@ -5595,23 +5634,22 @@ _C{the next call of KEY (INT 0x10 function 0x0E)}
         XOR     {AX},{AX}
         MOV     DS,{AX}
         MOV     [0x417],{AX}
-;        MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
+_       MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
 })_C{}_END_({ _BOOTED_})
         _SWITCH_({JMPHERE_FROM_OS})
         MOV     HIP,_OFFSET WRM1
         _NEXT                   _C{Hope stacks are still okay.}
 _C
-WRM1:   DC      WARM
-_C
-worddoc( {INIT},{WARM},{warm},{},{FIG L0},
-{Perform a so called "warm" start. In addition and before the
-actions of forthcode({ABORT}), discard blocks; they may not be
-written back to mass storage. Display the sign on message.
+worddoc( {{INITIALISATIONS}},{WARM},{warm},{},{FIG L0},
+{Perform a so called "warm" start.
+Perform a so called "warm" start.
+Reinitialise the system as per forthcode({INIT}).
+Show the signon message and restart via forthcode({ABORT}) .
 },{{ABORT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({WARM},{WARM},{DOCOL})
-        DC      MTBUF
+WRM1:   DC      MTBUF
         DC      SIGNON
         DC      ABORT
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
@@ -5629,19 +5667,19 @@ suppressed, useful for turnkey applications. By redefining as
 {{( No test)},{}},
 enddoc)
 _HEADER({OPTIONS},{OPTIONS},{DOCOL})
-_C       Execute option.
+_C{       Execute option.}
 _HOSTED_LINUX_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
-        _0BRANCH(OPT4) _C {No options}  })
+        _0BRANCH(OPT4) _C{ No options}  })
 _PC_(
 {        DC      LIT, 0x81
 OPT1:
         DC      LDUP, CFET, LBL, EQUAL
-        _0BRANCH(OPT2)            _C {Skip blanks.}
+        _0BRANCH(OPT2)            _C{ Skip blanks.}
         DC      ONEP
         _BRANCH(OPT1)
 OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
-        _0BRANCH(OPT4) _C {No options}  })
+        _0BRANCH(OPT4) _C{ No options}  })
         DC      FETCH
         DC      LDUP
         DC      LIT, _PC_({0x0FD}) _HOSTED_LINUX_({0x0FF}) , LAND
@@ -5662,43 +5700,45 @@ OPT4:
 worddoc( {INIT},{COLD},{cold},{},{FIG},
 {Reinitialise the system. Clear all block buffers. Reinitialise
 all user variables to their boot up values values, i.a. the
-stacks and the forthdefin({dictionary pointer}) . _BLOCKSINFILE_({Opens the
-file that contains the blocks.}) Restart via forthcode({ABORT}) .
+stacks and the forthdefin({dictionary pointer}) .
+_BLOCKSINFILE_({Opens the file that contains the blocks.})
+Handle command line options, if any.
+Show signon message and restart via forthcode({ABORT}) .
 May be called from the terminal to remove application
 programs and restart, as long as there are no
 new vocabularies with definitions.
 _HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
 _BOOTED_({But it is better to reboot.})
-},{{WARM},{BLOCK},{LIST}},
+},{{WARM},{INIT},OPTIONS},
 {{( No test)},{}},
 enddoc)
 _HEADER({COLD},{COLD},{DOCOL})
-        DC      ZERO, HANDLER, STORE
+CLD1:   DC      ZERO, HANDLER, STORE
         DC      MTBUF
         DC      FIRST
         DC      STALEST,STORE
         DC      FIRST
         DC      PREV,STORE
 _C{ Fill user area for single task.}
-        DC      LIT, USINI
+        DC      LIT, USINI      _C{ Fails if SP/RP are not usable!}
         DC      LIT, USINI+_CELLS(1), FETCH
         DC      LIT, US
         DC      LCMOVE
 _BLOCKSINFILE_({
         DC      LIT, 0, BLINI  _C{Default, don't write in the library file!}
 })_C{}_END_({_BLOCKSINFILE_})
-        DC      DECA    _C {FIXME has to go done by ABORT anyway.}
-        DC      ONLY    _C {FIXME has to go done by ABORT anyway.}
-        DC      FORTH   _C {FIXME has to go done by ABORT anyway.}
-        DC      DEFIN   _C {FIXME has to go done by ABORT anyway.}
-        DC      ONE            _C {Sign on wanted.}
+        DC      DECA    _C{ FIXME has to go done by ABORT anyway.}
+        DC      ONLY    _C{ FIXME has to go done by ABORT anyway.}
+        DC      FORTH   _C{ FIXME has to go done by ABORT anyway.}
+        DC      DEFIN   _C{ FIXME has to go done by ABORT anyway.}
+        DC      ONE            _C{ Sign on wanted.}
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, LINOS, ZLESS
         _0BRANCH(COLD1)
         _C{ Not a terminal. Cannot set the terminal, get rid of "OK".}
         DC      DROP, ZERO      _C{ Sign on suppressed.}
-        DC      LIT,NOOP  _C {Suppress OK for pipes.}
+        DC      LIT,NOOP  _C{ Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
 COLD1:
@@ -5706,11 +5746,11 @@ COLD1:
 _HOSTED_(
 {        DC      OPTIONS})
         _0BRANCH(COLD5)
-        DC      SIGNON    _C {Suppressed for scripting! Or any options.}
+        DC      SIGNON    _C{ Suppressed for scripting! Or any options.}
 COLD5:
         DC      ABORT
-        DC      BYE     _C {In case of turnkey programs.}
-        DC      SEMIS   _C {Unnecessary, but helpful for decompilation.}
+        DC      BYE     _C{ In case of turnkey programs.}
+        DC      SEMIS   _C{ Unnecessary, but helpful for decompilation.}
 _C
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
 {Sign extend a single number to form a double number.},{},
@@ -6380,7 +6420,7 @@ no longer available.
 enddoc)
 _HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
 
-_C Unlock all buffers
+_C{ Unlock all buffers}
         DC      LIMIT
         DC      FIRST, CELLP
         _DO(FLUS2)
@@ -6649,10 +6689,10 @@ _C{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 })_C{}_END_({_NORMAL_BIOS_})
 _SIMULATE_BIOS_({
 CODE_HEADER({BIOSO},{BIOSO})
-_C Adapted from Allen Wyatt, Advanced Assembly language, QUE
-_C from pmtest.asm.
+_C{ Adapted from Allen Wyatt, Advanced Assembly language, QUE}
+_C{ from pmtest.asm.}
 
-        POP     BX      _C Function code
+        POP     BX      _C{ Function code}
         POP     AX
         MOV     _CELL_PTR[SaveDX],AX _C{Parameters specified from stack.}
         POP     AX
@@ -6671,7 +6711,7 @@ _C from pmtest.asm.
        MOV     _CELL_PTR[SaveBP],BP
 
        MOV     AX,0x0300            _C{Simulate real-mode interrupt}
-       _C  Function number was popped into BX register.
+       _C{  Function number was popped into BX register.}
        MOV     CX,0                _C{Copy nothing from stack}
        LEA     DI, [REGSET+HEADSIZE]
        INT     31h
@@ -6753,10 +6793,10 @@ _C{ SELF MODIFYING CODE ENDS HERE! YOU HAVE BEEN WARNED!}
 })_C{}_END_({_NORMAL_BIOS_})
 _SIMULATE_BIOS_({
 CODE_HEADER({BIOSN},{BIOSN})
-_C Adapted from Allen Wyatt, Advanced Assembly language, QUE
-_C from pmtest.asm.
+_C{ Adapted from Allen Wyatt, Advanced Assembly language, QUE}
+_C{ from pmtest.asm.}
 
-        POP     BX      _C {Put function code on return stack.}
+        POP     BX      _C{ Put function code on return stack.}
         LEA     RPO,[RPO - _CELLS(1)]
         MOV     [RPO],BX
 
@@ -6839,13 +6879,13 @@ content of the processors flag register. _VERBOSE_({{
  _VERBOSE_({{The word }forthcode({BIOS}){ simulates
 a real mode interrupt_C that is what you usually want.}})
 },{{BIOS},{BDOS}}, {}, enddoc)
-_C Wanted here is a generic call on BIOS. A boon for experimenters.
+_C{ Wanted here is a generic call on BIOS. A boon for experimenters.}
 _C{ Because there is no such thing as a variable interrupt:}
-_C I tried to use self modifying code , filling in the interrupt
-_C number. Like in the BIOS for the real case.
-_C In protected mode with different selectors for code
-_C and data this is dubious. If it turns out to work, this could
-_C be made in a general trap generator.
+_C{ I tried to use self modifying code , filling in the interrupt}
+_C{ number. Like in the BIOS for the real case.}
+_C{ In protected mode with different selectors for code}
+_C{ and data this is dubious. If it turns out to work, this could}
+_C{ be made in a general trap generator.}
 CODE_HEADER({BIOS31},{BIOS31})
         POP     DI
         POP     DX
@@ -6914,12 +6954,12 @@ that are handled by forthcode({LINOS5}) .
 {{1 "CHIMP" 4 LINOS .},{CHIMP5}},
 enddoc)
 CODE_HEADER({LINOS},{LINOS})
-        POP     AX        _C Function number
-        POP     DX        _C Third parameter, if any
-        POP     CX        _C Second parameter, if any
-        POP     BX        _C First parameter.
+        POP     AX        _C{ Function number}
+        POP     DX        _C{ Third parameter, if any}
+        POP     CX        _C{ Second parameter, if any}
+        POP     BX        _C{ First parameter.}
         INT     0x80        _C{ Generic call on LINUX }
-        _PUSH     _C Positive means okay. Negative means -errno.
+        _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 worddoc( {OPERATINGSYSTEM},{LINOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
 { Do a Linux system call forthvar({n}) (man 2) with parameters
@@ -6933,16 +6973,16 @@ enddoc)
 CODE_HEADER({LINOS5},{LINOS5})
         LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
         MOV     [RPO],HIP
-        POP     AX        _C Function number
-        POP     DI        _C 5th parameter, if any
-        POP     SI        _C 4th parameter, if any
-        POP     DX        _C Third parameter, if any
-        POP     CX        _C Second parameter, if any
-        POP     BX        _C First parameter.
+        POP     AX        _C{ Function number}
+        POP     DI        _C{ 5th parameter, if any}
+        POP     SI        _C{ 4th parameter, if any}
+        POP     DX        _C{ Third parameter, if any}
+        POP     CX        _C{ Second parameter, if any}
+        POP     BX        _C{ First parameter.}
         INT     0x80        _C{ Generic call on LINUX }
         MOV     HIP,[RPO]    _C{ Restore}
         LEA     RPO,[RPO+_CELLS(1)]
-        _PUSH     _C Positive means okay. Negative means -errno.
+        _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 { Wait for forthvar({n}) milliseconds. },
@@ -7183,10 +7223,10 @@ _HEADER({ZEN},{ZEN}, {DOCOL})
 _HOSTED_DPMI_({
 _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      TOR, ZERO, SWAP
-        DC      LIT, Save_DS_PR, FETCH, RWBUF _C <FAR> RW-BUFFER
-        DC      RR, FMOVE        _C  R@ FARMOVE
+        DC      LIT, Save_DS_PR, FETCH, RWBUF _C{ <FAR> RW-BUFFER}
+        DC      RR, FMOVE        _C{  R@ FARMOVE}
         DC      ZERO
-        DC      LIT, Save_DS_PR, FETCH, RWBUF _C <FAR> RW-BUFFER
+        DC      LIT, Save_DS_PR, FETCH, RWBUF _C{ <FAR> RW-BUFFER}
         DC      FROMR, PLUS, LSTORE
         DC      RWBUF
         DC      SEMIS
@@ -7600,7 +7640,7 @@ _HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      LIT, TIBSIZE, RR, LSUB
         DC      ZERO, RFILE
         DC      QERRUR
-        DC      LDUP, ZEQU, LIT, -EPIPE, LAND _C {Presumably end of pipe.}
+        DC      LDUP, ZEQU, LIT, -EPIPE, LAND _C{ Presumably end of pipe.}
         DC      QERRUR
         DC      TIB, FETCH, SWAP, FROMR, PLUS
         DC      REMAIND, TSTOR
@@ -7645,7 +7685,7 @@ _BITS32_(
         DC      LDUP, ZEQU
         _0BRANCH(PACCEP3)
         DC      ZERO, REMAIND, STORE
-        DC      LIT, -32, LAND, THROW _C {Presumably end of pipe.}
+        DC      LIT, -32, LAND, THROW _C{ Presumably end of pipe.}
 PACCEP3:
         DC      TIB, FETCH, SWAP, REMAIND, FETCH, PLUS
         DC      REMAIND, TSTOR
@@ -7679,9 +7719,9 @@ _HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      LDUP
         DC      LIT,TIBSIZE
         DC      ACCEP
-_C Keep the next line in for debugging ACCEPT for MSDOS.
-_C        DC      LIT, 0x41, EMIT, TDUP, LTYPE, LIT, 0x41, EMIT
-_C        DC      DOTS
+_C{ Keep the next line in for debugging ACCEPT for MSDOS.}
+_C{        DC      LIT, 0x41, EMIT, TDUP, LTYPE, LIT, 0x41, EMIT}
+_C{        DC      DOTS}
         DC      SEMIS
 _C
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
@@ -7693,7 +7733,7 @@ nulls are added at the end of the text.
 },{{KEY},{KEY?}}, {}, enddoc)
 CODE_HEADER({ACCEPT},{ACCEP})
         CALL    c_expec
-        LEA     ESP,[ESP+_CELLS(2)]    _C remove input
+        LEA     ESP,[ESP+_CELLS(2)]    _C{ remove input}
         PUSH    EAX
         _NEXT
 _C
@@ -7719,7 +7759,7 @@ All terminal I/O goes through this word.
 forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
 CODE_HEADER({TYPE},{LTYPE},DOCOL)
         CALL    c_type
-        LEA     ESP,[ESP+_CELLS(2)]    _C remove input
+        LEA     ESP,[ESP+_CELLS(2)]    _C{ remove input}
         _NEXT
 _C
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -7788,14 +7828,14 @@ dnl {." Type an 'ABCDEF'" DUP . },{6},
 enddoc)
 _HEADER({(ACCEPT)},{PACCEP},{DOCOL})
 PACCEP2:
-_C        DC      NOLF
-_C        DC       LIT, 'a', EMIT
+_C{        DC      NOLF}
+_C{        DC       LIT, 'a', EMIT}
         DC      REMAIND
         DC      TFET
         DC      LIT, ALF, SINDEX
         DC      ZEQU
         _0BRANCH(PACCEP1)
-_C        DC      RETOBO
+_C{        DC      RETOBO}
         DC      REMAIND, TFET
         DC      TIB, FETCH
         DC      SWAP, LMOVE
@@ -7804,7 +7844,7 @@ _C        DC      RETOBO
         DC      REFTIB
         _BRANCH(PACCEP2)
 PACCEP1:
-_C        DC      SPLOFF
+_C{        DC      SPLOFF}
         DC      REMAIND, TFET
         DC      LIT, ALF, SSPLIT
         DC      TSWAP, REMAIND, TSTOR
@@ -7835,7 +7875,7 @@ _HEADER({KEY},{KEY},{DOCOL})
         DC      SWAP, ONE       _C{ Buffer and length}
         DC      LIT, read, LINOS
         DC      LDUP, QERRUR
-        DC      ZEQU, LIT, -EPIPE, LAND, QERRUR _C {Presumably end of pipe.}
+        DC      ZEQU, LIT, -EPIPE, LAND, QERRUR _C{ Presumably end of pipe.}
         DC      ONE, LIT, RAWIO, STTERM       _C{ Toggle back}
         DC      SEMIS
 _C
@@ -7857,7 +7897,7 @@ _HEADER({KEY?},{KEYQ},{DOCOL})
         DC      LIT, TV
         DC      LIT, _newselect, LINOS5
         DC      LDUP,  QERRUR
-        DC      NEGATE        _C {1 -> flag.}
+        DC      NEGATE        _C{ 1 -> flag.}
         DC      ZERO, LIT, RAWIO, STTERM
         DC      SEMIS
         _ALIGN(4)
@@ -7903,7 +7943,7 @@ a c-structure forthsamp({termio}) .
 {{." interactive"},{interactive}},
 enddoc)
 _HEADER({TERMIO},{TERMIO},{DOVAR}, )
-        _RESB(SIZE_TERMIO)     _C Filled in during cold boot.
+        _RESB(SIZE_TERMIO)     _C{ Filled in during cold boot.}
 _C
 worddoc( {INPUT~},{SET-TERM},{set_term},{len b ---},{},
 {Set the terminal length to forthsamp({len}) and toggle the c_lflag field
@@ -8178,7 +8218,7 @@ _HEADER({(ACCEPT)},{PACCEP},{DOCOL})
         DC      FETCH
         DC      LIT,TIBSIZE
         DC      TDUP
-_C { Old fig code of EXPECT :}
+_C{  Old fig code of EXPECT :}
              DC      OVER
              DC      PLUS
              DC      OVER
@@ -8210,7 +8250,7 @@ EXPE2:       DC      LDUP
              DC      LIT,0x0D
              DC      EQUAL
              _0BRANCH(EXPE4) _C{ IF}
-             _C {Emulate old fashioned LEAVE.}
+             _C{ Emulate old fashioned LEAVE.}
              DC      FROMR, RDROP, LDUP, TOR, TOR
              DC      DROP
              DC      LBL
@@ -8227,7 +8267,7 @@ EXPE3:       DC      EMIT
              _LOOP(EXPE1)    _C{ LOOP}
 EXPE8:
              DC      DROP
-_C        END      EXPEC
+_C{        END      EXPEC}
         DC      ZERO, SINDEX
         DC      TIB, FETCH, SWAP, OVER, LSUB
         DC      SEMIS
@@ -8409,7 +8449,7 @@ _HEADER({SHELL},{SHELL},{DOVAR}, )
         _PC_(
 {        _STRING({C:\COMMAND.COM})})
         _RESB(_FILENAMELENGTH_M4_-9)               _C{ Allow for some path}
-_PC_({  _RESB(0x100)     _C Double serve as stack at start up. })
+_PC_({  _RESB(0x100)     _C{ Double serve as stack at start up. }})
 _C
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc ---},{ISO},
 {Have the operating system execute the command contained
@@ -8430,7 +8470,7 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LDUP, ZEQU
         _0BRANCH(SYSTEM1)
         DC      SHELL, CELLP, LIT, SYSARGS
-_C  Get environment vector
+_C{  Get environment vector}
         DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
         DC      LIT, execve, LINOS
         DC      LIT, -127, QERRUR, BYE
@@ -8476,7 +8516,7 @@ _HOSTED_DPMI_(
         DC      LIT, 0x4B00, BDOSN
         DC      SWAP, QERR
         DC      SEMIS
-LOADEXEC:   DW  0       _C {The 0 are filled in at boot with DS.}
+LOADEXEC:   DW  0       _C{ The 0 are filled in at boot with DS.}
         DW      COMBUF + CW  _C{Allow it to be a counted string.}
         DW      0
         DW      0x6C
@@ -8508,7 +8548,7 @@ CODE_HEADER({BLOCK-INIT},{BLINI})
         PUSH    CX
         CALL    c_block_init
         MOV     [_VAR_FIELD(DERR)],AX
-        LEA     ESP,[ESP+_CELLS(3)]    _C remove input
+        LEA     ESP,[ESP+_CELLS(3)]    _C{ remove input}
         _NEXT
 _C
 worddoc( {BLOCKS},{BLOCK-EXIT},{block_exit},{---},{},
@@ -8538,7 +8578,7 @@ _C{      ( ADDR  BLK#  FLAG (0=W, 1=R)}
 CODE_HEADER({R\W},{RSLW})
         CALL c_rslw
         MOV     [_VAR_FIELD(DERR)],AX
-        LEA     ESP,[ESP+_CELLS(3)]    _C remove input
+        LEA     ESP,[ESP+_CELLS(3)]    _C{ remove input}
         _NEXT
 
 
@@ -8561,15 +8601,15 @@ other disk is to be accessed, such as installing a bootable
 system on hard disk from floppy.}})},
 {{BLOCK},{FLUSH}}, {}, enddoc)
 _HEADER({DRIVE},{LDRIVE},{DOVAR}, )
-LFDRIVE DB      DRIVE                   _C {To be used by Forth.}
+LFDRIVE DB      DRIVE                   _C{ To be used by Forth.}
 LFSPT   DB      SPT
 LFHEADS DB      HEADS
         _ALIGNED_({_ALIGN(4)})
 _C
 })_C{}_END_({ _RWSECTRK_})
 _CLASSIC_({
-_C This the mass storage I/O that looks most like FIG.
-_C It may not be pretty but it surely is the smallest.
+_C{ This the mass storage I/O that looks most like FIG.}
+_C{ It may not be pretty but it surely is the smallest.}
 _C
 _C
 worddoc( {BLOCKS},{DRIVE},{drive},{--- addr},{},
@@ -8625,7 +8665,7 @@ CODE_HEADER({WBLK},{WBLK})
         LEA     DX,[WERR]
 _C
 _C{ Error exit for both RBLK and WBLK }
-RWERR:   PUSH    AX      _C DX contains message.
+RWERR:   PUSH    AX      _C{ DX contains message.}
         MOV     AH,9    _C{String write function, obsolete for ages}
         INT     0x21
         POP     AX      _C{ERROR CODE IN AX}
@@ -8683,8 +8723,8 @@ _HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, LFSPT, CFET, SLMOD
         DC      LIT, LFHEADS, CFET, SLMOD   _C{ Now #sec, #head, #cyl}
         DC      TOR
-        DC      RR, LIT, 8, RSHIFT, LIT, 6, LSHIFT _C {Bit 8, 9 of cyl}
-        DC      ROT, ONEP, LOR         _C {Compose and in place.}
+        DC      RR, LIT, 8, RSHIFT, LIT, 6, LSHIFT _C{ Bit 8, 9 of cyl}
+        DC      ROT, ONEP, LOR         _C{ Compose and in place.}
         DC      FROMR, LIT, 8, LSHIFT     _C{Bits 0..7 of #cyl.}
         DC      LOR   _C{ High, low -- reg CX. }
         DC      SWAP
@@ -8736,7 +8776,7 @@ RSLW9:
 RSLW3:  DC      LIT,    8   _C{Read error}
 RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   _C{This  buffer}
                                                    _C{ is no good!}
-        DC      QERR    _C { 8 or 9. }
+        DC      QERR    _C{  8 or 9. }
 RSLW5:  DC      SEMIS
 _C
 })_C{}_END_({ _RWSECTRK_})
@@ -8820,15 +8860,15 @@ _C{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 _HEADER({R\W},{RSLW},{DOCOL})
         DC      TOR
         DC      SWAP
-_C       On a big endian machine the following code is 16/32 bit clean.
-_C       The 2 m.s. bytes are overwritten by the next store.
+_C{       On a big endian machine the following code is 16/32 bit clean.}
+_C{       The 2 m.s. bytes are overwritten by the next store.}
          _SWITCH_({DC   LIT, A_FORTH0, PLUS })
         DC      LDUP, LIT, 0x0F, LAND
-        DC      LBA, LIT, 4, PLUS, STORE   _C { Address }
+        DC      LBA, LIT, 4, PLUS, STORE   _C{  Address }
         DC      LIT, 4, RSHIFT
         DC      LBA, LIT, 6, PLUS, STORE
         DC      LIT, SPB, STAR  _C{ Sector number}
-        DC      LBA, LIT, 8, PLUS, STORE _C { Sector number. }
+        DC      LBA, LIT, 8, PLUS, STORE _C{  Sector number. }
         DC      LBA
         DC      RR
         _0BRANCH(RSLW1)
@@ -8936,7 +8976,7 @@ _HEADER({FORGET-VOC},{FORGV},{DOCOL})
         DC      SWAP
         DC      ULESS
         _0BRANCH(FORGV1)
-_C { Forget part of contents.}
+_C{  Forget part of contents.}
         DC      SWAP
         DC      TOR
         DC      TWID
@@ -8949,18 +8989,18 @@ FORGV3:
         DC      RR
         DC      ULESS
         _0BRANCH(FORGV3)
-        DC      SWAP            _C { Not to be forgotten entry found.}
+        DC      SWAP            _C{  Not to be forgotten entry found.}
         DC      TLFA
-        DC      STORE           _C { Short other entries out.}
+        DC      STORE           _C{  Short other entries out.}
         DC      TLFA,FETCH
         DC      LDUP
         DC      ZEQU
-        _0BRANCH(FORGV0)        _C { Repeat until end of wordlist.}
+        _0BRANCH(FORGV0)        _C{  Repeat until end of wordlist.}
         DC      DROP
         DC      FROMR
         _BRANCH(FORGV2)
 FORGV1:
-_C       { Vocabulary itself is also forgotten.}
+_C{       { Vocabulary itself is also forgotten.}}
         DC      TVFA
         DC      FETCH     _C{ Unlink by linking next vocabulary.}
         DC      VOCL
@@ -9261,9 +9301,9 @@ forthsamp({n1 n2}) is used for error testing.},
 },
 enddoc)
 _HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      ONE, QPAIR   _C {Matches BEGIN ?}})
+        _SECURITY_({DC      ONE, QPAIR   _C{ Matches BEGIN ?}})
         DC      LIT, BRAN, COMMA, BACKP
-        _SECURITY_({DC      QCOMP, LIT, 4, QPAIR _C {Matches WHILE ?}})
+        _SECURITY_({DC      QCOMP, LIT, 4, QPAIR _C{ Matches WHILE ?}})
         DC      FORWARDP _C{ WHILE target. }
         DC      SEMIS
 _C
@@ -9357,7 +9397,7 @@ provide checks for compiler security.},
 },
 enddoc)
 _HEADER({WHILE},{LWHILE},{DOCOL}, , B_IMMED)
-        DC      TOR    _C { Save backward target. }
+        DC      TOR    _C{  Save backward target. }
         _SECURITY_({DC      TOR})
         DC      LIT, ZBRAN, COMMA, PFORWARD
         _SECURITY_({DC      LIT, 4 _C{ Magic number}})
@@ -9699,7 +9739,7 @@ CODE_HEADER({BYE},{BYE})
 _C{ EXIT TO PC-DOS, if run from PC-DOS, otherwise hang or whatever.}
         MOV     BX,[_VAR_FIELD(XCODE)]
         _SWITCH_({JMPHERE_FROM_FORTH})
-RETDOSV: JMP 0:0        _C {Filled in during boot}
+RETDOSV: JMP 0:0        _C{ Filled in during boot}
         _BITS32_({SET_32_BIT_MODE})
 
 })_C{}_END_({ _CLEANUP_BYE_})
@@ -9851,7 +9891,7 @@ TRIA9:
         DC      SEMIS
 })_C{}_END_({_LOAD_})
 _C
-_C This word is not even fig!
+_C{ This word is not even fig!}
 worddocsafe( {MISC},{.SIGNON},{dot_cpu},{---},{},
 {Print a message identifying the version of this Forth.
 _VERBOSE_({{ The name of the processor known from the environment
@@ -9903,7 +9943,7 @@ _HEADER({TASK},{TASK},{DOCOL})
         DC      SEMIS
 _C
 _EQULAYOUT_({
-TEXTEND  EQU     _AP_       _C {Show end of dictionary.}
+TEXTEND  EQU     _AP_       _C{ Show end of dictionary.}
 INITDP   EQU     M4_INITDP _C{Where we want new words.}
 ACTUAL_EM EQU    EM  _C{ Different for relocatable code only.}
 })_C{}_END_({ _EQULAYOUT_})
@@ -9924,16 +9964,16 @@ used for:
 _ENDCOMMENT
 
 _HOSTED_LINUX_({
-_C       This is the proper way to do it.
-_C       No memory addresses should be arrived at through equates.
-_C       However now we must teach the linker to keep the
-_C       two sections together.
+_C{       This is the proper way to do it.}
+_C{       No memory addresses should be arrived at through equates.}
+_C{       However now we must teach the linker to keep the}
+_C{       two sections together.}
 
 FORTHSIZE       EQU     _AP_ - _start
         _SECTION_NOBITS_({dictionary})
 
-INITDP:                 _C  It may be that it is not consecutive with TASK.
-                        _C  Because of bad linking, resulting in a unusable Forth.
+INITDP:                 _C{  It may be that it is not consecutive with TASK.}
+                        _C{  Because of bad linking, resulting in a unusable Forth.}
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
 
@@ -10055,8 +10095,8 @@ This requires some double precision operators to be present in the Forth core.
 forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
 },
 {},{},{},{}, {}, enddoc)
-worddocchapter({INIT},{ },
-{The wordset forthsamp({INIT}) contains words to initialise,
+worddocchapter({{INITIALISATIONS}},{ },
+{The wordset forthsamp({{INITIALISATIONS}}) contains words to initialise,
 reinitialise or configure Forth.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DENOTATIONS},{ },

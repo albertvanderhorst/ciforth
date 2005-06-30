@@ -126,13 +126,29 @@ for ISO, that in my opinion should never be loaded.
 
 
 \
-( DEADBEEF leading_hex_digit) REQUIRE CONFIG \ AvdH A1oct13
+( DEADBEEF leading_hex_digit) CF: \ AvdH A5jun28
+\ Are denotations starting with "Z" already known?
+"A" 'ONLY >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
+\ Apparently not, so:
+REQUIRE ALIAS
+CURRENT @   'ONLY >WID CURRENT !  '3
+\ Make sure Forth understands DEADBEEF as a number
+    DUP ALIAS A   DUP ALIAS B   DUP ALIAS C   DUP ALIAS D
+    DUP ALIAS E   DUP ALIAS F
+DROP   CURRENT !
+
+
+
+
+\
+\ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
+( DEADHORSE leading_hex_digit) CF: \ AvdH A5jun28
 \ Are denotations starting with "Z" already known?
 "Z" 'ONLY >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
 \ Apparently not, so:
 REQUIRE ALIAS
 CURRENT @   'ONLY >WID CURRENT !  '3
-\ Make sure Forth understands DEADBEEF as a hex number
+\ Make sure Forth understands DEADHORSE as a number
 (   DUP ALIAS A   DUP ALIAS B   DUP ALIAS C   DUP ALIAS D    )
 (   DUP ALIAS E   DUP ALIAS F ) DUP ALIAS G   DUP ALIAS H
     DUP ALIAS I   DUP ALIAS J   DUP ALIAS K   DUP ALIAS L
@@ -173,7 +189,39 @@ DROP   CURRENT !
 
 
 
+\
+( READ-LINE GETCHAR ) CF: ?LI                 \ AvdH A5jun28
+\ From HANDLE get : a CHAR. Errors are thrown , 6=eof.
+: GETCHAR >R 0 DSP@ 1 R@ READ-FILE THROW 0=  6 AND THROW
+    DUP ^M = IF DROP R@ RECURSE THEN RDROP ;
 
+: eol? ^J = ; \ For CHAR : "it IS a line end".
+
+\ To BUFFER read COUNT chars from HANDLE. Leave free ADDRESS.
+: (READ-LINE) SWAP BEGIN >R >R   R@ GETCHAR   2DUP SWAP C!
+    eol? IF R> R> DROP 0 ELSE 1+ R> R> 1- THEN
+    DUP  WHILE REPEAT  2DROP ;
+\ To BUFFER read a line of at most COUNT char's from HANDLE.
+\ Leave actual COUNT, "chars REMAIN", ERROR.
+: READ-LINE   ROT DUP >R ROT ROT   '(READ-LINE) CATCH
+   DUP 6 = IF 2DROP 2DROP 0 0 0 ELSE   DUP IF 0 0 ROT ELSE
+   DROP   R@ - -1 0 THEN THEN   RDROP ;
+( WRITE-LINE PUTCHAR ) CF: ?LI                \ AvdH A5jun28
+
+\ Linux file ending.
+CREATE CR$ 1 , ^J C,
+
+\ Output CHAR to HANDLE. Errors are thrown.
+: PUTCHAR >R  DSP@ 1 R> WRITE-FILE THROW DROP ;
+
+\ Write a line from BUFFER COUNT characters to HANDLE.
+\ Errors are thrown.
+: (WRITE-LINE)   DUP >R   WRITE-FILE THROW
+    CR$ $@ R> WRITE-FILE THROW ;
+
+\ Write a line from BUFFER COUNT characters to HANDLE.
+\ Leave actual ERROR.
+: WRITE-LINE '(WRITE-LINE) CATCH DUP IF >R 2DROP DROP R> THEN ;
 ( COMPARE $= BOUNDS ALIGN UNUSED ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
