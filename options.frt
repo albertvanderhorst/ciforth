@@ -79,7 +79,7 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 \
 ( -e :_Load_system_electives ) \ AvdH A3sep01
-DROP .SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
+.SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
 
 REQ CONFIG      REQ HELP        REQ ORDER
 REQ L-S         REQ DO-DEBUG    REQ H.          REQ DUMP
@@ -93,9 +93,9 @@ REQ CASE-INSENSITIVE          ( CASE-INSENSITIVE )
 
 : TASK ;
  ( BACKUP        250 LOAD   77 81 THRU )
-0 ( No signon) OK
+OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
-DROP 1 LOAD
+1 LOAD
 REQUIRE ARG[]   REQUIRE Z$@
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
 : DOIT
@@ -104,7 +104,7 @@ CREATE COMMAND-BUFFER 0 , 1000 ALLOT
     REPEAT ;
 DOIT    COMMAND-BUFFER $@
 \ 'DOIT HIDDEN   COMMAND-BUFFER HIDDEN
-2DUP TYPE EVALUATE    0 ( No signon)
+2DUP TYPE EVALUATE
 
 
 
@@ -127,7 +127,7 @@ SM HERE-NOW OVER - $, CONSTANT thisforth$
 thisforth$ $@ 3 ARG[]   PUT-FILE ;
 GROW BYE
 ( -h :_help,_show_options ) \ AvdH A1oct04
-DROP .SIGNON   1 20 INDEX CR
+.SIGNON   1 20 INDEX CR
 .( See also the pdf documentation ) CR
 .( or print the PostScript documentation ) CR
 
@@ -303,7 +303,7 @@ SWITCH-LIBS
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-DROP  1 LOAD   REQUIRE OLD:   REQUIRE ARG[]
+1 LOAD   REQUIRE OLD:   REQUIRE ARG[]
 REQUIRE CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
 : BY-WHO   "LINOS" PRESENT? IF " run by " TYPE
 0 ARG[] TYPE THEN ;

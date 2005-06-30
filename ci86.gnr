@@ -1856,7 +1856,7 @@ _HEADER({UNLOOP},{UNLOOP}, {DOCOL}, ,{B_IMMED})
         DC      LIT, RDROP, COMMA
         DC      SEMIS
 _C
-worddoc( {INIT},{+ORIGIN},{plus_origin},{n --- addr},{},
+worddoc( {INITIALISATIONS},{+ORIGIN},{plus_origin},{n --- addr},{},
 {Leave the memory address relative by forthvar({n}) bytes to
 the area from which the user variables are initialised, so one
 can access or modify the boot-up parameters. During run time
@@ -5542,7 +5542,7 @@ _C{ Backup one character, just in case we are at the end of a line.}
         DC      TDROP
         DC      SEMIS
 _C
-worddoc( {{INITIALISATIONS}},{QUIT},{quit},{},{ISO,FIG},
+worddoc( {INITIALISATIONS},{QUIT},{quit},{},{ISO,FIG},
 {Restart the interpreter. Clear the return stack, stop
 compilation, and return control to the operators terminal,
 or to the redirected input stream.
@@ -5574,7 +5574,7 @@ ENDIF7:
         _BRANCH(QUIT1)  _C{AGAIN}
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
-worddoc( {{INITIALISATIONS}},{OK},{ok},{},{ISO,FIG},
+worddoc( {INITIALISATIONS},{OK},{ok},{},{ISO,FIG},
 {Takes care of printing the okay-message, after interpreting
 a line. Default it prints ``OK'' only for an interactive session
 in interpret forthcode({STATE}). },
@@ -5593,7 +5593,7 @@ _HEADER({OK},{OK},{DOCOL})
 OK2:
         DC      SEMIS
 _C
-worddoc( {{INITIALISATIONS}},{ABORT},{abort},{},{ISO,FIG,L0},
+worddoc( {INITIALISATIONS},{ABORT},{abort},{},{ISO,FIG,L0},
 {Restart the system. In addition and before the actions of
 forthcode({QUIT}), clear also the data stack and reset the
 search order, reset the exception mechanism and set
@@ -5640,7 +5640,7 @@ _       MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
         MOV     HIP,_OFFSET WRM1
         _NEXT                   _C{Hope stacks are still okay.}
 _C
-worddoc( {{INITIALISATIONS}},{WARM},{warm},{},{FIG L0},
+worddoc( {INITIALISATIONS},{WARM},{warm},{},{FIG L0},
 {Perform a so called "warm" start.
 Perform a so called "warm" start.
 Reinitialise the system as per forthcode({INIT}).
@@ -5655,7 +5655,7 @@ WRM1:   DC      MTBUF
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
 _HOSTED_({
-worddoc( {INIT},{OPTIONS},{options},{f1 -- f2},{FIG L0},
+worddoc( {INITIALISATIONS},{OPTIONS},{options},{f1 -- f2},{FIG L0},
 {Handle command line options, i.e. execute the screen
 corresponding to the option letter. Accept and return a flag
 forthvar({f}) whether the signon message must be
@@ -5697,7 +5697,7 @@ OPT4:
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({_HOSTED_})
 
-worddoc( {INIT},{COLD},{cold},{},{FIG},
+worddoc( {INITIALISATIONS},{COLD},{cold},{},{FIG},
 {Reinitialise the system. Clear all block buffers. Reinitialise
 all user variables to their boot up values values, i.a. the
 stacks and the forthdefin({dictionary pointer}) .
@@ -10095,8 +10095,8 @@ This requires some double precision operators to be present in the Forth core.
 forthxref({DOUBLE}) wordset. forthxref({MULTIPLYING}) wordset.
 },
 {},{},{},{}, {}, enddoc)
-worddocchapter({{INITIALISATIONS}},{ },
-{The wordset forthsamp({{INITIALISATIONS}}) contains words to initialise,
+worddocchapter({INITIALISATIONS},{ },
+{The wordset forthsamp({INITIALISATIONS}) contains words to initialise,
 reinitialise or configure Forth.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({DENOTATIONS},{ },
