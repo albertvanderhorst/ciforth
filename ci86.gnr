@@ -4629,20 +4629,17 @@ _HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, DPL, STORE
 NPNUM1:  DC      INBRS   _C{ BEGIN}
         DC      LDUP, LIT, ADOT, EQUAL
-        _0BRANCH(NPNUM2A) _C{ IF}
-        DC      DROP, DPL, STORE, ZERO
-        _BRANCH(NPNUM3) _C{ ELSE}
-NPNUM2A:
-        DC      LDUP, LIT, ',', EQUAL
-        _0BRANCH(NPNUM2) _C{ IF}
-        DC      TDROP, ZERO
-        _BRANCH(NPNUM3) _C{ ELSE}
+        _0BRANCH(NPNUM2) _C{ case 1 }
+        DC      DROP, DPL, STORE
+        _BRANCH(NPNUM1) _C{ continue }
 NPNUM2:
-        DC      LDUP, QBL
-        _0BRANCH(NPNUM4) _C{ IF}
-        DC      DROP, DROP, ONE
-        _BRANCH(NPNUM3) _C{ ELSE}
-NPNUM4:
+        DC      LDUP, LIT, ',', EQUAL
+        _0BRANCH(NPNUM3) _C{ case 2 }
+        DC      TDROP
+        _BRANCH(NPNUM1) _C{ continue }
+NPNUM3:
+        DC      LDUP, QBL, ZEQU
+        _0BRANCH(NPNUM5)  _C{ while }
         DC      SWAP, DROP
         DC      BASE, FETCH, DIGIT
         DC      ZEQU
@@ -4658,9 +4655,9 @@ NPNUM4:
         DC      FETCH
         DC      USTAR
         DC      DPLUS
-        DC      ZERO
-NPNUM3:                 _C{ THEN THEN}
-        _0BRANCH(NPNUM1)
+        _BRANCH(NPNUM1) _C{ repeat }
+NPNUM5:
+        DC      TDROP
         DC      SEMIS
 _C
 worddoc( {FORMATTING~},{NUMBER},{number},{ ---  s/d},{},
@@ -5064,19 +5061,23 @@ IDDOT1:
 IDDOT2:
         DC      SEMIS
 _C
-worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc ---},{},
-{This is the basis for all defining words. It lays down the
-string forthvar({sc}) in the dictionary, then creates a
-dictionary entries with that string as the namefield. It is
-linked into the forthcode({CURRENT}) word list. The code field
-and data field both point to the area owned by this header,
-i.e. immediately following the completed header _VERBOSE_({{as
-appropriate for a low level (assembler) definition}}). The
-flag field is empty _VERBOSE_({{, so not }forthcode({HIDDEN}){}}). },
-{{CREATE}},
-{{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
+_C
+worddoc( {DEFINING~},{HEADER},{header},{sc -- dea},{},
+{Create a dictionary entry structure for the word forthvar({sc}) and
+returns its address into forthvar({dea}).
+The code field and data field both point to the area owned by this
+header, i.e. immediately following the completed header _VERBOSE_({{as
+appropriate for a low level (assembler) definition}}).
+The flag and link fields are intialised to
+zero _VERBOSE_({{, so not }forthcode({HIDDEN}){}}).
+The name forthvar({sc}) is layed down in the dictionary and filled in
+into the name field.
+_SOURCEFIELD_({{The source field is filled in to best possibility.}})
+},
+{{(CREATE)}},
+{{"FRED" HEADER >NFA @ $@ TYPE},{FRED}},
 enddoc)
-_HEADER({(CREATE)},{PCREAT},{DOCOL})
+_HEADER({HEADER},{LHEAD},{DOCOL})
         DC      LDUP
         DC      ZEQU
         DC      LIT, 5, QERR
@@ -5095,27 +5096,54 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 _ALIGNED_({ DC      LALIGN},{dnl})
         DC      HERE,TOR
 
-        DC      RR, TPHA, COMMA         _C{ Code field.}
-
-        DC      RR, TPHA, COMMA         _C{ Data field.}
-
-        DC      ZERO, COMMA _C{ Flag field.}
-
-        DC      CURR, FETCH, TLFA
-        DC      LDUP, FETCH
-        DC      COMMA   _C{ Link field.}
-        DC      RR, SWAP, STORE
-
-        DC      COMMA   _C{ Name field.}
+        DC      RR, TPHA, COMMA         _C{Code field.}
+        DC      RR, TPHA, COMMA         _C{Data field.}
+        DC      ZERO, COMMA _C{Flag field.}
+        DC      ZERO, COMMA _C{Link field.}
+        DC      COMMA   _C{Name field.}
 
 _SOURCEFIELD_({
         DC      BLK, FETCH, LDUP, ZEQU
         _0BRANCH(CREA2)
         DC      DROP, LIN, FETCH
-CREA2:  DC      COMMA  _C{ Source field.}
+CREA2:  DC      COMMA  _C{Source field.}
 },{dnl})
         _EXTRAFIELD_({DC      ZERO, COMMA
-})        DC      RDROP
+})        DC      FROMR
+        DC      SEMIS
+_C
+worddoc( {DEFINING~},{LINK},{link},{dea wid ---},{},
+{Links the forth word represented by forthvar({dea}) into the wordlist
+represented by forthvar({wid}) as the latest entry.
+_VERBOSE_({{Alternatively, consider forthvar({wid}) as an other
+forthvar({dea2}). Link forthvar({dea}) between the forthvar({dea2})
+and its successor in the linked list.}})
+},
+{{HEADER},{(CREATE)}},
+{{"FRED" HEADER CURRENT @ LINK ' FRED LATEST = .},{_T_}},
+enddoc)
+_HEADER({LINK},{LLINK},{DOCOL})
+        DC      TLFA
+        DC      TDUP
+        DC      FETCH
+        DC      SWAP, TLFA, STORE
+        DC      STORE
+        DC      SEMIS
+_C
+worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc ---},{},
+{This is the basis for all defining words, including
+_VERBOSE_({those which lack a data field in the ISO sense: })dnl
+forthcode({:}) and forthcode({CONSTANT}).
+It creates a header with name forthvar({sc}) in the dictionary and
+links it into the forthcode({CURRENT}) word list.
+},
+{{HEADER},{CREATE}},
+{{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
+enddoc)
+_HEADER({(CREATE)},{PCREAT},{DOCOL})
+        DC      LHEAD
+        DC      CURR, FETCH
+        DC      LLINK
         DC      SEMIS
 _C
 worddocsafe( {COMPILING},{[COMPILE]},{bracket_compile},{},{ISO,I,C},
