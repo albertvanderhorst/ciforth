@@ -17,8 +17,8 @@ _C{ You have a configured system, if there are NO curly brackets on the next lin
 _C{ } {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
 _C
 _C{ Configuration of this particular version:}
-_C{ _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })}
-_C{ _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl}
+_C _BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })
+_C _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl
 _HOSTED_DPMI_({running under DPMI (OS/2 or MS-Windows)
 _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })dnl
@@ -6905,7 +6905,7 @@ contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
 content of the processors flag register. _VERBOSE_({{
 }forthsamp({1 AND}){ leaves a zero if the call was successful.}})
  _VERBOSE_({{The word }forthcode({BIOS}){ simulates
-a real mode interrupt_C that is what you usually want.}})
+a real mode interrupt; that is what you usually want.}})
 },{{BIOS},{BDOS}}, {}, enddoc)
 _C{ Wanted here is a generic call on BIOS. A boon for experimenters.}
 _C{ Because there is no such thing as a variable interrupt:}
@@ -7908,7 +7908,7 @@ _HEADER({KEY},{KEY},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {INPUT},{KEY?},{key_question},{--- ff},{ISO},
-{Return into forthvar({ff}) return whether a character is available.
+{Return into forthvar({ff}) whether a character is available.
 The next execution of forthcode({KEY}) will return the character immediately.
 },
 {{KEY},{ACCEPT},{KEY?}},
@@ -8597,8 +8597,9 @@ _C
 worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk n ---},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
-the sequential number of the referenced physical block_C and
-forthvar({n}) is a flag for forthvar({n})=0 write and forthvar({n})=l
+the sequential number of the referenced physical block; and
+forthvar({n}) is a control variable
+for forthvar({n})=0 write and forthvar({n})=l
 read. forthcode({R\W}) determines the location on mass storage,
 performs the read or write and shows errors via forthcode({DISK-ERROR}).},
 {{BLOCK}}, {}, enddoc)
@@ -8708,7 +8709,8 @@ worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk n ---},{},
 {The basic mass storage read-write linkage. (Already present in
 figforth.) forthvar({addr}) specifies the source or destination
 block buffer, forthsamp({blk}) is the sequential number of the
-referenced physical block_C and forthvar({n}) is a flag for
+referenced physical block; and forthvar({n}) is a control variable
+for
 forthvar({n})=0 write and forthvar({n})=l read.
 forthcode({R\W}) determines the location on mass storage,
 performs the read-write. This version of ciforth features the
@@ -8767,8 +8769,9 @@ _C
 worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk n ---},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, forthsamp({blk}) is
-the sequential number of the referenced physical block_C and
-forthvar({n}) is a flag for forthvar({n})=0 write and forthvar({n})=l
+the sequential number of the referenced physical block; and
+forthvar({n}) is a control variable
+for forthvar({n})=0 write and forthvar({n})=l
 read. forthcode({R\W}) determines the location on mass storage,
 performs the read-write and aborts with an error message for failures.
 forthcode({DISK-ERROR}) contains an error count for the latest operation.
@@ -8871,8 +8874,9 @@ worddoc( {BLOCKS},{R\W},{read_slash_write},{addr blk n ---},{},
 specifies the source or destination block buffer, It must reside
 in the lowest 1 Mbyte of physical memory.
 forthsamp({blk}) is
-the sequential number of the referenced physical block_C and
-forthvar({n}) is a flag for forthvar({n})=0 write and forthvar({n})=l
+the sequential number of the referenced physical block; and
+forthvar({n}) is a control variable
+for forthvar({n})=0 write and forthvar({n})=l
 read. forthcode({R\W}) determines the location on mass storage,
 performs the read-write and aborts with an error message for failures.
 This function uses ``LBA'' : Logical Block Addressing and may
@@ -8907,7 +8911,7 @@ RSLW2:  DC      LDUP, DERR, STORE
 
         DC      ONE, LAND, LDUP
         _0BRANCH(RSLW4)
-_C{        DC      ZERO,   PREV,   FETCH,     STORE   _CThis  buffer}
+_C{        DC      ZERO,   PREV,   FETCH,     STORE   }_C{This  buffer}
                                                    _C{ is no good!}
 RSLW4:
         _C{ Handle error}
@@ -8940,9 +8944,7 @@ for non-portable code forthcode({'}) is used in its
 forthdefi({denotation}) form without the space}).
 },
 {{[']},{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},
-{>SFA},
-{>XFA},
-{EXECUTE}},
+{>SFA},{>XFA},{EXECUTE}},
 {
 { : QPE 1 2 ; ' QPE EXECUTE ' QPE ID. . . },{QPE 2 1 },
 { : QQ  ' EXECUTE ' ID. . . ; QQ  QPE QPE },{QPE 2 1},

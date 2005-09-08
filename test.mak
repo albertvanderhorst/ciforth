@@ -186,7 +186,7 @@ testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab.lina tsuite.frt ;
 	lina <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
 	lina -a <tsuite.frt 2>&1 |cat >tsuite.out
-	diff -b -B tsuite.out testresults || true
+	cvs diff -bBw tsuite.out || true
 	ln -sf forth.lab.lina  forth.lab
 	rm $(TEMPFILE)
 
