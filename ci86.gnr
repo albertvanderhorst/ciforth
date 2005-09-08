@@ -5622,23 +5622,18 @@ OK2:
         DC      SEMIS
 _C
 worddoc( {INITIALISATIONS},{ABORT},{abort},{},{ISO,FIG,L0},
-{Restart the system. In addition and before the actions of
-forthcode({QUIT}), clear also the data stack and reset the
-search order, reset the exception mechanism and set
-the numeric base to default.
-_VERBOSE_({{As required by ISO it is silent. This may be confusing
+{Restart the interpreter. In addition and before the actions of
+forthcode({QUIT}), clear also the data stack and
+reset the exception mechanism.
+_VERBOSE_({{This word is silent. This may be confusing
 at times, because you can't tell the difference between a word
 that is still busy or that has aborted.}})
-},{{WARM}},
+},{{WARM},{INIT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({ABORT},{ABORT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
         DC      ZERO, HANDLER, STORE
-        DC      DECA
-        DC      ONLY
-        DC      FORTH
-        DC      DEFIN
         DC      QUIT
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
@@ -5670,27 +5665,28 @@ _       MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
 _C
 worddoc( {INITIALISATIONS},{WARM},{warm},{},{FIG L0},
 {Perform a so called "warm" start.
-Perform a so called "warm" start.
 Reinitialise the system as per forthcode({INIT}).
 Show the signon message and restart via forthcode({ABORT}) .
 },{{ABORT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({WARM},{WARM},{DOCOL})
-WRM1:   DC      MTBUF
+WRM1:   DC      INIT
         DC      SIGNON
         DC      ABORT
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
 _HOSTED_({
-worddoc( {INITIALISATIONS},{OPTIONS},{options},{f1 -- f2},{FIG L0},
-{Handle command line options, i.e. execute the screen
-corresponding to the option letter. Accept and return a flag
-forthvar({f}) whether the signon message must be
-displayed._VERBOSE_({{ By redefining this as a
-}forthsamp({NOOP}){, the handling of options during cold boot is
-suppressed, useful for turnkey applications. By redefining as
-}forthsamp({DROP 0}){, execution and signon are suppressed.}}) },
+worddoc( {INITIALISATIONS},{OPTIONS},{options},{ft -- f2},{FIG
+L0},
+{Handle command line option.
+If an option is passed during startup execute the screen corresponding
+to the option letter and return a false flag into forthvar({f2}),
+otherwise leave a true flag. If this flag is set, the signon message
+is displayed. ._VERBOSE_({{ An option can always decide to execute
+forthword({.SIGNON}). By redefining forthword({OPTIONS}) as
+}forthsamp({DROP 0}){, the handling of options during cold boot is
+suppressed, useful for turnkey applications. }}) },
 {{COLD}},
 {{( No test)},{}},
 enddoc)
@@ -5718,7 +5714,7 @@ OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
 OPT3:
         DC      LIT, 8, RSHIFT
         DC      LIT, 0x1F, LAND
-        DC      LOAD
+        DC      LOAD       _C{Supposedly stack-neutral.}
         DC      ZERO, SWAP _C{ Sign on suppressed.}
 OPT4:
         DC      DROP
@@ -5726,10 +5722,9 @@ OPT4:
 })_C{}_END_({_HOSTED_})
 
 worddoc( {INITIALISATIONS},{COLD},{cold},{},{FIG},
-{Reinitialise the system. Clear all block buffers. Reinitialise
-all user variables to their boot up values values, i.a. the
-stacks and the forthdefin({dictionary pointer}) .
-_BLOCKSINFILE_({Opens the file that contains the blocks.})
+{Initialise all user variables to their boot up values values,
+i.a. the stacks and the forthdefin({dictionary pointer}) .
+Initialise the system as per forthcode({INIT}).
 Handle command line options, if any.
 Show signon message and restart via forthcode({ABORT}) .
 May be called from the terminal to remove application
@@ -5741,24 +5736,13 @@ _BOOTED_({But it is better to reboot.})
 {{( No test)},{}},
 enddoc)
 _HEADER({COLD},{COLD},{DOCOL})
-CLD1:   DC      ZERO, HANDLER, STORE
-        DC      MTBUF
-        DC      FIRST
-        DC      STALEST,STORE
-        DC      FIRST
-        DC      PREV,STORE
+CLD1:                           _C{Used by cold start for HIP.}
 _C{ Fill user area for single task.}
         DC      LIT, USINI      _C{ Fails if SP/RP are not usable!}
         DC      LIT, USINI+_CELLS(1), FETCH
         DC      LIT, US
         DC      LCMOVE
-_BLOCKSINFILE_({
-        DC      LIT, 0, BLINI  _C{Default, don't write in the library file!}
-})_C{}_END_({_BLOCKSINFILE_})
-        DC      DECA    _C{ FIXME has to go done by ABORT anyway.}
-        DC      ONLY    _C{ FIXME has to go done by ABORT anyway.}
-        DC      FORTH   _C{ FIXME has to go done by ABORT anyway.}
-        DC      DEFIN   _C{ FIXME has to go done by ABORT anyway.}
+        DC      INIT
         DC      ONE            _C{ Sign on wanted.}
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
@@ -5780,6 +5764,33 @@ COLD5:
         DC      BYE     _C{ In case of turnkey programs.}
         DC      SEMIS   _C{ Unnecessary, but helpful for decompilation.}
 _C
+worddoc( {INITIALISATIONS},{INIT},{init},{},{FIG},
+{Initialise or reinitialise the system.
+Reset the data stack, the wordlists, the number base and the
+exception mechanism.
+Initialise the block mechanism.
+Any blocks that have not yet been
+written back to mass storage are discarded.
+_BLOCKSINFILE_({I.e. open the file that contains the blocks, in read-only mode.})
+_VERBOSE_({{After forthcode({INIT}) we have the following situation.
+The search order contains the forthcode({FORTH}) words,
+plus forthcode({ONLY}) with i.a. number handling.
+Definitions are added to the forthcode({FORTH}) forthdefi({vocabulary}).
+The number base is decimal.   }}).
+},{{WARM},{COLD},{FORTH},{BLOCK-INIT},{BASE},{S0}},
+{{( No test)},{}},
+enddoc)
+_HEADER({INIT},{INIT},{DOCOL})
+        DC      SZERO, FETCH, SPSTO
+        DC      ZERO, HANDLER, STORE
+        DC      DECA
+        DC      ONLY, FORTH, DEFIN
+_BLOCKSINFILE_({
+        DC      LIT, 0, BLINI  _C{Default, open library file read-only!}
+})_C{}_END_({_BLOCKSINFILE_})
+        DC      MTBUF
+        DC      SEMIS
+_C{}
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
 {Sign extend a single number to form a double number.},{},
 {{ 0 S>D D.},{0},
