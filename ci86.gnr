@@ -5750,7 +5750,7 @@ _LINUX_N_({
         _0BRANCH(COLD1)
         _C{ Not a terminal. Cannot set the terminal, get rid of "OK".}
         DC      DROP, ZERO      _C{ Sign on suppressed.}
-        DC      LIT,NOOP  _C{ Suppress OK for pipes.}
+        DC      LIT,TASK  _C{ Suppress OK for pipes.}
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
 COLD1:

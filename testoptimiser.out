@@ -1,0 +1,858 @@
+
+80386 ciforth beta $RCSfile$ $Revision$ 
+####################
+BEFORE
+
+: test   
+1   SWAP   3 2   SWAP   
+;
+AFTER
+
+: test   
+1 SWAP   2 3 
+;
+####################
+BEFORE
+
+: test1   
+1   2   +   3 4 *   OR   
+;
+AFTER
+
+: test1   
+F 
+;
+####################
+BEFORE
+
+: test2   
+2   1   
+;
+AFTER
+
+: test2   
+2 1 
+;
+####################
+BEFORE
+
+: test3   
+1   2   'SWAP   EXECUTE   
+;
+AFTER
+
+: test3   
+2 1 
+;
+####################
+BEFORE
+
+: B0   
+A9   A9   +   
+;
+AFTER
+
+: B0   
+400 
+;
+####################
+BEFORE
+
+: DOIT   
+1   2   WRONG   RIGHT   EXECUTE   EXECUTE   
+;
+AFTER
+
+: DOIT   
+2 1 
+;
+####################
+BEFORE
+
+: test4   
+1   2   3 4 BASE   !   
+;
+AFTER
+
+: test4   
+4 C042F0C !   1 2 3 
+;
+####################
+BEFORE
+
+: test5   
+SWAP   1   2   3 5 BASE   !   SWAP   
+;
+AFTER
+
+: test5   
+SWAP   5 C042F0C !   1 3 2 
+;
+####################
+BEFORE
+
+: test6   
+BASE   @   
+0BRANCH [ 4 , ] ( between SWAP   2DROP   ) SWAP   2DROP   
+;
+AFTER
+
+: test6   
+DROP   DROP   
+;
+####################
+BEFORE
+
+: test7   
+
+0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3 +   
+;
+AFTER
+
+: test7   
+
+0BRANCH [ C , ] ( between +   LIT   ) 2 +   3 +   
+;
+####################
+BEFORE
+
+: test8   
+SWAP   
+0BRANCH [ 8 , ] ( between ? LIT   ) 3 5 7 9 BASE   !   SWAP   
+;
+AFTER
+
+: test8   
+SWAP   
+0BRANCH [ 8 , ] ( between ? LIT   ) 3 9 C042F0C !   7 5 
+;
+####################
+BEFORE
+
+: test9   
+
+0BRANCH [ 4 , ] ( between (test1)   (;)   ) (test1)   
+;
+AFTER
+
+: test9   
+
+0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
+;
+####################
+BEFORE
+
+: testA   
+
+0BRANCH [ 8 , ] ( between (test1)   (;)   ) (test1)   (test1)   
+;
+AFTER
+
+: testA   
+
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+;
+####################
+BEFORE
+
+: testB   
+(test1)   
+BRANCH  [ -C , ] ( between ? (test1)   ) 
+;
+AFTER
+
+: testB   
++   AND   OR   LSHIFT   
+BRANCH  [ -18 , ] ( between (;)   +   ) 
+;
+####################
+BEFORE
+
+: testC   
+(test1)   (test1)   
+BRANCH  [ -10 , ] ( between ? (test1)   ) 
+;
+AFTER
+
+: testC   
++   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+BRANCH  [ -28 , ] ( between (;)   +   ) 
+;
+####################
+BEFORE
+
+: testD   
+
+0BRANCH [ C , ] ( between ? DROP   ) SWAP   
+BRANCH  [ C , ] ( between @   2DROP   ) DROP   BASE   @   2DROP   
+;
+AFTER
+
+: testD   
+DROP   DROP   DROP   
+;
+####################
+BEFORE
+
+: testE   
++   DROP   
+;
+AFTER
+
+: testE   
+DROP   DROP   
+;
+####################
+BEFORE
+
+: testF   
+
+0BRANCH [ C , ] ( between ? 2   ) 1   
+BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
+;
+AFTER
+
+: testF   
+DROP   
+;
+####################
+BEFORE
+
+: testG   
+
+0BRANCH [ C , ] ( between ? 2   ) 1   
+BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
+BRANCH  [ -24 , ] ( between ? 0BRANCH   ) 
+;
+AFTER
+
+: testG   
+DROP   
+BRANCH  [ -C , ] ( between (;)   DROP   ) 
+;
+####################
+BEFORE
+
+: testH   
+
+0BRANCH [ C , ] ( between ? 2   ) 1   
+BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
+0BRANCH [ 10 , ] ( between ? LIT   ) 5 
+BRANCH  [ 8 , ] ( between ? DROP   ) 6 DROP   
+BRANCH  [ -48 , ] ( between ? 0BRANCH   ) 
+;
+AFTER
+
+: testH   
+DROP   DROP   
+BRANCH  [ -10 , ] ( between (;)   DROP   ) 
+;
+####################
+BEFORE
+
+: testI   
+(TESTI)   (TESTI)   
+;
+AFTER
+
+: testI   
+
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+####################
+BEFORE
+
+: testJ   
+(TESTJ)   
+;
+AFTER
+
+: testJ   
+
+0BRANCH [ 14 , ] ( between ? OR   ) AND   
+BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
+BRANCH  [ C , ] ( between ? SWAP   ) OR   
+BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
+;
+####################
+BEFORE
+
+: testK   
+(TESTK)   
+;
+AFTER
+
+: testK   
+
+DO ROT   
+0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
+LOOP 2DUP   
+;
+####################
+BEFORE
+
+: testK2   
+(TESTK2)   
+;
+AFTER
+
+: testK2   
+
+DO ROT   
+0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
+DO 
+LOOP 
+LOOP 2DUP   
+;
+####################
+BEFORE
+
+: testL   
+(TESTL)   2OVER   
+;
+AFTER
+
+: testL   
+
+DO DUP   
+0BRANCH [ 68 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
+BRANCH  [ 50 , ] ( between ? ROT   ) 
+BRANCH  [ 8 , ] ( between ? SWAP   ) 
+BRANCH  [ 44 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 34 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
+BRANCH  [ 1C , ] ( between ? ROT   ) 
+BRANCH  [ 8 , ] ( between ? 2SWAP   ) 
+BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
+LOOP ROT   2OVER   
+;
+####################
+BEFORE
+
+: testM   
+C0   
+;
+AFTER
+
+: testM   
+120000 +   
+;
+####################
+BEFORE
+
+: testN   
+ROT   
+0BRANCH [ 14 , ] ( between ? 2OVER   ) 
+0BRANCH [ 4 , ] ( between DROP   BRANCH   ) DROP   
+BRANCH  [ -20 , ] ( between ? ROT   ) 2OVER   
+;
+AFTER
+
+: testN   
+ROT   
+0BRANCH [ 14 , ] ( between ? 2OVER   ) 
+0BRANCH [ -14 , ] ( between (;)   ROT   ) DROP   
+BRANCH  [ -20 , ] ( between (;)   ROT   ) 2OVER   
+;
+####################
+BEFORE
+
+: testO1   
+
+0BRANCH [ 0 , ] ( between ? (;)   ) 
+;
+AFTER
+
+: testO1   
+DROP   
+;
+####################
+BEFORE
+
+: testO2   
+
+0BRANCH [ C , ] ( between ? (;)   ) ROT   
+BRANCH  [ 0 , ] ( between ? (;)   ) 
+;
+AFTER
+
+: testO2   
+
+0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+####################
+BEFORE
+
+: testO3   
+0   
+0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+AFTER
+
+: testO3   
+
+;
+####################
+BEFORE
+
+: testO4   
+-1 
+0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+AFTER
+
+: testO4   
+ROT   
+;
+####################
+BEFORE
+
+: testO5   
+1   
+0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+AFTER
+
+: testO5   
+ROT   
+;
+
+SPLIT HERE
+####################
+BEFORE
+
+: test   
+1   SWAP   2   3 
+;
+AFTER
+
+: test   
+1 SWAP   2 3 
+;
+####################
+BEFORE
+
+: test1   
+F 
+;
+AFTER
+
+: test1   
+F 
+;
+####################
+BEFORE
+
+: test2   
+2   1   
+;
+AFTER
+
+: test2   
+2 1 
+;
+####################
+BEFORE
+
+: test3   
+2   1   
+;
+AFTER
+
+: test3   
+2 1 
+;
+####################
+BEFORE
+
+: B0   
+400 
+;
+AFTER
+
+: B0   
+400 
+;
+####################
+BEFORE
+
+: DOIT   
+2   1   
+;
+AFTER
+
+: DOIT   
+2 1 
+;
+####################
+BEFORE
+
+: test4   
+4 BASE   !   1   2   3 
+;
+AFTER
+
+: test4   
+4 C042F0C !   1 2 3 
+;
+####################
+BEFORE
+
+: test5   
+SWAP   5 BASE   !   1   3 2   
+;
+AFTER
+
+: test5   
+SWAP   5 C042F0C !   1 3 2 
+;
+####################
+BEFORE
+
+: test6   
+BASE   @   
+0BRANCH [ 4 , ] ( between SWAP   2DROP   ) SWAP   2DROP   
+;
+AFTER
+
+: test6   
+DROP   DROP   
+;
+####################
+BEFORE
+
+: test7   
+
+0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3 +   
+;
+AFTER
+
+: test7   
+
+0BRANCH [ C , ] ( between +   LIT   ) 2 +   3 +   
+;
+####################
+BEFORE
+
+: test8   
+SWAP   
+0BRANCH [ 8 , ] ( between ? LIT   ) 3 9 BASE   !   7 5 
+;
+AFTER
+
+: test8   
+SWAP   
+0BRANCH [ 8 , ] ( between ? LIT   ) 3 9 C042F0C !   7 5 
+;
+####################
+BEFORE
+
+: test9   
+
+0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
+;
+AFTER
+
+: test9   
+
+0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
+;
+####################
+BEFORE
+
+: testA   
+
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+;
+AFTER
+
+: testA   
+
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+;
+####################
+BEFORE
+
+: testB   
++   AND   OR   LSHIFT   
+BRANCH  [ -18 , ] ( between ? +   ) 
+;
+AFTER
+
+: testB   
++   AND   OR   LSHIFT   
+BRANCH  [ -18 , ] ( between (;)   +   ) 
+;
+####################
+BEFORE
+
+: testC   
++   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+BRANCH  [ -28 , ] ( between ? +   ) 
+;
+AFTER
+
+: testC   
++   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+BRANCH  [ -28 , ] ( between (;)   +   ) 
+;
+####################
+BEFORE
+
+: testD   
+DROP   DROP   DROP   
+;
+AFTER
+
+: testD   
+DROP   DROP   DROP   
+;
+####################
+BEFORE
+
+: testE   
+DROP   DROP   
+;
+AFTER
+
+: testE   
+DROP   DROP   
+;
+####################
+BEFORE
+
+: testF   
+DROP   
+;
+AFTER
+
+: testF   
+DROP   
+;
+####################
+BEFORE
+
+: testG   
+DROP   
+BRANCH  [ -C , ] ( between ? DROP   ) 
+;
+AFTER
+
+: testG   
+DROP   
+BRANCH  [ -C , ] ( between (;)   DROP   ) 
+;
+####################
+BEFORE
+
+: testH   
+DROP   DROP   
+BRANCH  [ -10 , ] ( between ? DROP   ) 
+;
+AFTER
+
+: testH   
+DROP   DROP   
+BRANCH  [ -10 , ] ( between (;)   DROP   ) 
+;
+####################
+BEFORE
+
+: testI   
+
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+AFTER
+
+: testI   
+
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+####################
+BEFORE
+
+: testJ   
+
+0BRANCH [ 14 , ] ( between ? OR   ) AND   
+BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
+BRANCH  [ C , ] ( between ? SWAP   ) OR   
+BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
+;
+AFTER
+
+: testJ   
+
+0BRANCH [ 14 , ] ( between ? OR   ) AND   
+BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
+BRANCH  [ C , ] ( between ? SWAP   ) OR   
+BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
+;
+####################
+BEFORE
+
+: testK   
+
+DO ROT   
+0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
+LOOP 2DUP   
+;
+AFTER
+
+: testK   
+
+DO ROT   
+0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
+LOOP 2DUP   
+;
+####################
+BEFORE
+
+: testK2   
+
+DO ROT   
+0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
+DO 
+LOOP 
+LOOP 2DUP   
+;
+AFTER
+
+: testK2   
+
+DO ROT   
+0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
+DO 
+LOOP 
+LOOP 2DUP   
+;
+####################
+BEFORE
+
+: testL   
+
+DO DUP   
+0BRANCH [ 1C , ] ( between ? BRANCH   ) RDROP   RDROP   RDROP   
+BRANCH  [ 50 , ] ( between ? ROT   ) 
+BRANCH  [ 8 , ] ( between ? SWAP   ) 
+BRANCH  [ 44 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 1C , ] ( between ? BRANCH   ) RDROP   RDROP   RDROP   
+BRANCH  [ 1C , ] ( between ? ROT   ) 
+BRANCH  [ 8 , ] ( between ? 2SWAP   ) 
+BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
+LOOP ROT   2OVER   
+;
+AFTER
+
+: testL   
+
+DO DUP   
+0BRANCH [ 68 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
+BRANCH  [ 50 , ] ( between ? ROT   ) 
+BRANCH  [ 8 , ] ( between ? SWAP   ) 
+BRANCH  [ 44 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 34 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
+BRANCH  [ 1C , ] ( between ? ROT   ) 
+BRANCH  [ 8 , ] ( between ? 2SWAP   ) 
+BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
+LOOP ROT   2OVER   
+;
+####################
+BEFORE
+
+: testM   
+120000 +   
+;
+AFTER
+
+: testM   
+120000 +   
+;
+####################
+BEFORE
+
+: testN   
+ROT   
+0BRANCH [ 14 , ] ( between ? 2OVER   ) 
+0BRANCH [ -14 , ] ( between ? ROT   ) DROP   
+BRANCH  [ -20 , ] ( between ? ROT   ) 2OVER   
+;
+AFTER
+
+: testN   
+ROT   
+0BRANCH [ 14 , ] ( between ? 2OVER   ) 
+0BRANCH [ -14 , ] ( between (;)   ROT   ) DROP   
+BRANCH  [ -20 , ] ( between (;)   ROT   ) 2OVER   
+;
+####################
+BEFORE
+
+: testO1   
+DROP   
+;
+AFTER
+
+: testO1   
+DROP   
+;
+####################
+BEFORE
+
+: testO2   
+
+0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+AFTER
+
+: testO2   
+
+0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+;
+####################
+BEFORE
+
+: testO3   
+
+;
+AFTER
+
+: testO3   
+
+;
+####################
+BEFORE
+
+: testO4   
+ROT   
+;
+AFTER
+
+: testO4   
+ROT   
+;
+####################
+BEFORE
+
+: testO5   
+ROT   
+;
+AFTER
+
+: testO5   
+ROT   
+;
+

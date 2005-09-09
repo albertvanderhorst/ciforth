@@ -7,13 +7,19 @@
 \ It assumes the stack effect bytes and the optimisation properties
 \ have been filled in in the flag fields.
 
-REQUIRE $
+REQUIRE $-PREFIX
 REQUIRE SWAP-DP
 REQUIRE SET
+REQUIRE BOUNDS
+
+( Retract from BAG in same order. Leave ITEM. Use after !BAG )
+\ This is tricky, it uses the filled pointer so while retracting
+\ No other bag word can be used. Afterwards do !BAG.
+: BAG+@   DUP >R @ @ 0 CELL+ R> +! ;
 
 ( ------------ PORTABILITY --------------------------------- )
 
-\ It is assumed that all addresses are postive, so < etc. is used for
+\ It is assumed that all addresses are positive, so < etc. is used for
 \ comparison of addresses with impunity. For 16 bit Forths unsigned
 \ comparison may have to be carefully introduced.
 
@@ -27,7 +33,11 @@ REQUIRE SET
 
 ( ------------ DEBUGGING ------------------------------------- )
 : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
-\ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT ^ DUP CRACK-CHAIN &> EMIT &; EMIT ;
+\ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT .S DUP CRACK-CHAIN &> EMIT &; EMIT ;
+
+VARIABLE CHECK-SP
+: !CHECK-SP DSP@ CHECK-SP ! ;
+: ?CHECK-SP DSP@ CHECK-SP @ - 13 ?ERROR ;
 
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
 \ For a SET print it backwards. Primarily intended as how to loop backwards example.
@@ -88,6 +98,9 @@ R> R> REPEAT 2DROP ;
 
 \ ----------------------    MISCELLANEOUS
 
+\ For DEA : it IS high-level.
+: HIGH-LEVEL? >CFA @ DOCOL = ;
+
 \ For an ITEM in a high level word, return the next ITEM.
 \ So it skips also ``ITEM'' 's inline data.
 : NEXT-ITEM NEXT-PARSE 2DROP ;
@@ -147,23 +160,7 @@ VARIABLE PROGRESS            : !PROGRESS 0 PROGRESS ! ;
 \ For DEA : it HAS no side effects, input or output (or stack).
 : NS?   FMASK-NS ALLOWED? ;
 
-\ Move to analyser.frt    FIXME!
-: FMASK-ST! FMASK-NS INVERT SWAP >FFA AND! ;
-\ '.S FMASK-ST!
-\ 'DEPTH FMASK-ST!
-
 \ The return stack is not handled in any way.   FIXME!
-'>R FMASK-ST!
-'R> FMASK-ST!
-'R@ FMASK-ST!
-'RDROP FMASK-ST!
-\ The following control words interfere with the optimiser FIXME!
-'EXIT FMASK-ST!
-'LEAVE FMASK-ST!
-'(LOOP)  FMASK-ST!
-'(+LOOP) FMASK-ST!
-'(DO)    FMASK-ST!
-'(?DO)   FMASK-ST!
 
 \ The minimum step depth we have encountered.
 VARIABLE MIN-DEPTH
@@ -325,7 +322,8 @@ THEN RDROP ;
 
 \ ----------------------    Special expansions ---------------
 
-\ Code to replace a ``LEAVE'' exection token. Branch is still to be filled in.
+\ Sample code to replace a ``LEAVE'' exection token.
+\ Not to be executed directly. Branch is still to be filled in.
 : LEAVE-CODE UNLOOP BRANCH [ _ , ] ;
 
 \ For DEA: it IS a ``LEAVE''.
@@ -679,10 +677,10 @@ SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
 \ The return stack is used because downward loops don't handle the zero case
 \ gracefully.
 : FILL-WITH-CONSTANTS
-    DSSWAP   SWAP >R >R   !CSP EXECUTE-GAP
+    DSSWAP   SWAP >R >R   !CHECK-SP EXECUTE-GAP
     BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
         'LIT R@ !  R@ CELL+ ! REPEAT
-    DROP ?CSP DROP
+    DROP ?CHECK-SP DROP
 ;
 
 \ For a foldable GAP, replace it with constants. Leave the new END of
@@ -771,6 +769,8 @@ CREATE P
 'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT         |
 [ 0 ]L 0BRANCH [ 'P , ] | NOP1 NOP1 BRANCH [ 'P , ] | \ Branch optimisation
 'P 0BRANCH [ 'P , ]     | NOOP                     | \ Non-zero, zero is matched by previous
+< 0=                    | >                        |
+> 0=                    | <                        |
 ;
 
 \ Optimalisation of this table is thoroughly forbidden!
@@ -825,7 +825,7 @@ STRIDE SET PEES
     2DROP 0 0 ;
 
 \ If ADDRESS contains a place holder, replace it by the next placeholder data.
-: ?PEE? DUP @ 'P = IF PEES SET+@ SWAP ! _ THEN DROP ;
+: ?PEE? DUP @ 'P = IF PEES BAG+@ SWAP ! _ THEN DROP ;
 
 \ Replace code at SEQUENCE with STRING , filling in the place holders.
 \ Leave the END of the replaced string (where matching must continue.)

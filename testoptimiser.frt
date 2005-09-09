@@ -1,6 +1,12 @@
 
-ONLY FORTH
-: SHOW-IT DUP OPTIMISE   DUP CRACKED HIDDEN ;
+ONLY FORTH DEFINITIONS
+
+: SHOW-IT
+"####################" TYPE CR
+"BEFORE" TYPE CR
+DUP CRACKED
+"AFTER" TYPE CR
+DUP OPTIMISE   DUP CRACKED HIDDEN ;
 : A-MARKER ;
 
 : test 1 SWAP 3 2 SWAP ;
@@ -147,7 +153,6 @@ HIDE A8 HIDE A9
 : testN BEGIN ROT WHILE IF DROP THEN REPEAT 2OVER ;
 'testN SHOW-IT
 
-\ These empty branches are taking care off by the annihilator.
 : testO1 IF THEN ;
 'testO1 SHOW-IT
 : testO2 IF ROT ELSE THEN ;
@@ -278,8 +283,10 @@ ROT
 : testN [ (BACK >R ] BEGIN ROT WHILE 0BRANCH [ R> BACK) ] DROP REPEAT 2OVER ;
 'testN SHOW-IT
 
+\ These empty branches are taking care off by the annihilator.
 \ testO1 fails: showing a defect in the annihilator.
 : testO1 DROP ;
+\ : testO1 IF THEN ;
 'testO1 SHOW-IT
 : testO2 IF ROT THEN ;
 'testO2 SHOW-IT

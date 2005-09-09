@@ -12,8 +12,8 @@
 \ List here: FMASK-IL
 
 REQUIRE ALIAS
-  : \D POSTPONE \ ; IMMEDIATE
-\ : \D ;            IMMEDIATE
+\ : \D POSTPONE \ ; IMMEDIATE
+  : \D ;            IMMEDIATE
 \D REQUIRE DUMP
 \D : DUMP-STRING
 \D     OVER H. SPACE DUP H. DUMP ;
@@ -153,6 +153,7 @@ DECIMAL
 \D : A1 A0 A0 ;   : A2 A1 A1 ;    : A3 A2 A2 ;
 \D : A4 A3 A3 ;   : A5 A4 A4 ;    : A6 A5 A5 ;
 \D : A7 A6 A6 ;   : A8 A7 A7 ;    : A9 A8 A8 ;
+\D : BA A9 A9 ;
 \D
 \D : TEST 0 DO BA LOOP ;
 \D : Q 0 DO 10000 TEST I . LOOP ;
@@ -160,7 +161,7 @@ DECIMAL
 \D ( 'BA OPTIMISE-B)
 \D  'Q OPTIMISE-B
 \D ." Expect  0 1 2 3 4 :" 5 Q CR
-EXIT
+
 
 \D \ -------------- sample code --------------------------
 \D \ This is the code we seek to optimise. ( Nesting_benchmark )
@@ -172,6 +173,8 @@ EXIT
 \D
 \D : B0 A9 A9 ;   ( 3072 + )
 \D
-\D : TEST 1000 0 DO ' B0 I DROP EXECUTE LOOP ; ( 3,072,000 + )
+\D : TEST 1000 0 DO ['] B0 I DROP EXECUTE LOOP ; ( 3,072,000 + )
+'TEST OPTIMISE-B    CRACK TEST
 \D : Q 4 >R BEGIN TEST R> 1- DUP WHILE >R REPEAT RDROP ; ( 12,216,000 + )
+'Q OPTIMISE-B    CRACK Q
 \D \ -------------- end of sample code --------------------------

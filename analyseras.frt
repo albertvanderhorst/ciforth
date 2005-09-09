@@ -5,6 +5,8 @@
 
 \ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
 
+REQUIRE IN-BAG?
+
                                 HEX
 
 ASSEMBLER
@@ -119,7 +121,7 @@ VARIABLE PROTO-FMASK
 
 \ Define a ``NEXT'' sequence. It must have the exact code that is in
 \ the kernel.
-: NEXT  LODS, X'|   JMPO, D0| [AX] ;
+: NEXT  LODS, X'|   JMPO, ZO| [AX] ;
 
 PREVIOUS
 
@@ -147,4 +149,3 @@ HERE NEXT-IDENTIFICATION CELL+ -   NEXT-IDENTIFICATION !
 \ ------------------------------------------------
 
 DECIMAL
-

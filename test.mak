@@ -203,3 +203,31 @@ test% : ci86.%.rawtest test.m4 ;
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
+
+# #################################################################
+#       Test optimiser section
+# Assumes there is a symbolic link from the official ciasdis archive
+# to RCS-as
+
+ANASRC=                 \
+analyserconfig.frt      \
+analyseras.frt          \
+analysermain.frt        \
+analyserdebug.frt       \
+# That's all folks!
+
+asgen.frt : RCS-as/asgen.frt,v ; co $<
+asi386.frt : RCS-as/asi386.frt,v ; co $<
+
+# A Forth with the analyser built-in.
+lina-ana : lina asgen.frt asi386.frt #(ANASRC)
+	echo '"analyser.frt" INCLUDED   REQUIRE SAVE-SYSTEM  "$@" SAVE-SYSTEM' |lina
+
+# Test the optimiser. FIXME! Gives ERROR 22 ( --> not called from block).
+#testoptimiser.out : testoptimiser.frt optimiser.frt lina-ana
+#        echo 'INCLUDE optimiser.frt INCLUDE $<' |lina-ana > $@
+#        cvs diff -bBw $@ || true
+
+lina-opt : optimiser.frt lina-ana
+	echo 'INCLUDE optimiser.frt "$@" SAVE-SYSTEM' |lina-ana
+	echo include optimiser.frt from lina-opt manually!
