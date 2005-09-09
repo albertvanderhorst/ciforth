@@ -78,6 +78,7 @@ printf("_C{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEALSYS(execve)
         STEALSYS(fork)
         STEALSYS(waitpid)
+        STEALSYS(pipe)
 printf("_C{ ------------------------------------------------------------      }\n");
 printf("_C{   End of constants stolen from C.                                 }\n");
 printf("_C{ ------------------------------------------------------------      }\n");

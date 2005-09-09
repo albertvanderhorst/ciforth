@@ -3113,7 +3113,7 @@ worddoc( {MEMORY},{TASK-SIZE},{task_size},{---- n},{},
 {A constant leaving the size of the per task areas:
 data stack size, return stack size, terminal input buffer plus
 user area.
-The data stack of the main task runs down to forthword({HERE}) .
+The data stack of the main task runs down to forthcode({HERE}) .
 },{{DSP@},{RSP@},{TIB}},
 {{TASK-SIZE . ." one bit up"},{10000 one bit up} },
 enddoc)
@@ -5683,10 +5683,10 @@ L0},
 If an option is passed during startup execute the screen corresponding
 to the option letter and return a false flag into forthvar({f2}),
 otherwise leave a true flag. If this flag is set, the signon message
-is displayed. ._VERBOSE_({{ An option can always decide to execute
-forthword({.SIGNON}). By redefining forthword({OPTIONS}) as
-}forthsamp({DROP 0}){, the handling of options during cold boot is
-suppressed, useful for turnkey applications. }}) },
+is displayed. ._VERBOSE_({ An option can always decide to execute
+forthcode({.SIGNON}). By redefining forthcode({OPTIONS}) as
+forthsamp({DROP 0}), the handling of options during cold boot is
+suppressed, useful for turnkey applications. }) },
 {{COLD}},
 {{( No test)},{}},
 enddoc)
