@@ -35,10 +35,6 @@ REQUIRE BOUNDS
 : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
 \ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT .S DUP CRACK-CHAIN &> EMIT &; EMIT ;
 
-VARIABLE CHECK-SP
-: !CHECK-SP DSP@ CHECK-SP ! ;
-: ?CHECK-SP DSP@ CHECK-SP @ - 13 ?ERROR ;
-
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
 \ For a SET print it backwards. Primarily intended as how to loop backwards example.
 : SET-PRINT-BACKWARDS
@@ -677,10 +673,10 @@ SE@ COMBINE-VD  SWAP DROP REPEAT 2DROP ;
 \ The return stack is used because downward loops don't handle the zero case
 \ gracefully.
 : FILL-WITH-CONSTANTS
-    DSSWAP   SWAP >R >R   !CHECK-SP EXECUTE-GAP
+    DSSWAP   SWAP >R >R   !CSP EXECUTE-GAP
     BEGIN R> R> 2DUP <> WHILE >R 2 CELLS - >R
         'LIT R@ !  R@ CELL+ ! REPEAT
-    DROP ?CHECK-SP DROP
+    DROP ?CSP DROP
 ;
 
 \ For a foldable GAP, replace it with constants. Leave the new END of
@@ -897,24 +893,3 @@ SWAP ! ;
         DUP OPT-EXPAND
     THEN
     DUP ?FILL-SE?   DUP FILL-OB   !OPTIMISED ;
-
-\D : test 1 SWAP 3 2 SWAP ;
-\D 'test OPTIMISE
-\D "EXPECT `` 1 SWAP 2 3 '' :" CR TYPE CRACK test
-\D : test1 1 2 + 3 4 * OR ;
-\D 'test1 OPTIMISE
-\D "EXPECT `` F '' :" CR TYPE CRACK test1
-\D : test2 1 2 SWAP ;
-\D 'test2 OPTIMISE
-\D "EXPECT `` 2 1 '' :" CR TYPE CRACK test2
-\D : test3 1 2 'SWAP EXECUTE ;
-\D 'test3 OPTIMISE
-\D "EXPECT `` 2 1 '' :" CR TYPE CRACK test3
-\D : A0 1 ;
-\D : A1 A0 A0 + ;   : A2 A1 A1 + ;    : A3 A2 A2 + ;
-\D : A4 A3 A3 + ;   : A5 A4 A4 + ;    : A6 A5 A5 + ;
-\D : A7 A6 A6 + ;   : A8 A7 A7 + ;    : A9 A8 A8 + ;
-\D
-\D : B0 A9 A9 + ;
-\D 'B0 OPTIMISE
-\D "EXPECT `` 400 '' :" CR TYPE CRACK B0
