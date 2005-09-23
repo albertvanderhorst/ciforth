@@ -1703,13 +1703,13 @@ REQUIRE +THRU           REQUIRE ALIAS
  08 00 4 FAMILY|R ES| CS| SS| DS|
 0100 0000 2 FAMILY|R B| X|   0200 0000 2 FAMILY|R F| T|
 
-\ No need to prime any thingies where there are no unprimed.
+\ No strict need to prime thingies when there are no unprimed.
 06 FIR MEM| ( OVERRULES ZO| [BP] )
-
+06 FIR MEM|% ( OVERRULES ZO| [BP] )
 ( 07) 1 0 8 FAMILY|R [BX+SI] [BX+DI] [BP+SI] [BP+DI]
     [SI] [DI] [BP] [BX]
-
-
+( 07) 1 0 8 FAMILY|R% [BX+SI]% [BX+DI]% [BP+SI]% [BP+DI]%
+    [SI]% [DI]% [BP]% [BX]%
 ( --assembler_i86_fixups_1 [AX] AX| AX|) CF: ?32 \ A4sep27 AvdH
 
  40 00 4 FAMILY|R ZO| BO| XO| R|
@@ -1950,12 +1950,12 @@ REQUIRE +THRU
   " next Tested " TYPE
 
 \
-( --assembler_macros_1 NOP, CP, COPY-SEG )
+( --asm_macros_1 NOP, CP, COPY-SEG )
 \ Using plain comma's here to work for 16/32 bits.
-
 
 \ Copy data from ADDRESS1 to ADDRESS2
 : CP, MOV|TA, B| SWAP DUP , 1 + MOV|FA, B| SWAP DUP , 1 + ;
+\                      L, / W,                  L, / W,
 
 \ Do nothing.
 : NOP, XCHG|AX, AX| ;
@@ -1966,10 +1966,10 @@ REQUIRE +THRU
     MOV|SG, T| ES| R| AX|
     MOV|SG, T| SS| R| AX|  ;
 
-( --assembler_macros_2 TO-PROT, TO-REAL, ) CF: ?32
+( --asm_macros_2 TO-PROT, TO-REAL, ) CF: ?32
 
-: GET-CR0   MOV|CD, F| CR0| R| AX| ;
-: PUT-CR0   MOV|CD, T| CR0| R| AX| ;
+: GET-CR0   MOV|CD, F| CR0| AX| ;
+: PUT-CR0   MOV|CD, T| CR0| AX| ;
 : TO-PROT,  GET-CR0  INC|X, AX|  PUT-CR0 ;
 : TO-REAL,  GET-CR0  DEC|X, AX|  PUT-CR0 ;
 
@@ -1982,38 +1982,38 @@ REQUIRE +THRU
 
 
 \
-( --assembler_macros_3 REAL, PROT, )       CF: ?32
+( --asm_macros_3 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32
 HEX
+REQUIRE TO-PROT, TO-REAL,
 \ These macro's are useful for protected mode under MSDOS
 \ or for stand alone booting systems.
  7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
  10 CONSTANT GDT_CS
-: JMP-PROT, JMPFAR, HERE 4 +  L, GDT_CS (W,) ;
+: JMP-PROT, JMPFAR, HERE 4 +  L, GDT_CS SG, ;
 : JMP-REAL,
-    JMPFAR, HERE 4 + SWITCH_DS 10 * -  L, SWITCH_DS (W,) ;
+    JMPFAR, HERE 4 + SWITCH_DS 10 * -  L, SWITCH_DS SG, ;
 : REAL, JMP-REAL,  TO-REAL, ;
 : PROT,  TO-PROT, JMP-PROT, ;
 
 
 
-
 DECIMAL
-( --assembler_test TEST-JUMP ) CF: ?32  \ AvdH A3dec18
+( --asm_macros_4 TEST-JUMP ) CF: ?32  \ AvdH A5sep13
+\ These must always assemble, but run only on booted systems.
 ( Test applicable to 32 bit mode and special versions.)
+REQUIRE TO-PROT,     REQUIRE JMP-PROT,
 
 CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT, END-CODE
+CODE TEST-MORE TO-REAL,   TO-PROT, NEXT, END-CODE
+CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
+    GDT_DS COPY-SEG   NEXT, END-CODE
 
-( CODE TEST-MORE TO-REAL,   TO-PROT, NEXT, END-CODE          )
-( CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,)
-( GDT_DS COPY-SEG   NEXT, END-CODE                           )
+
+
+
+
+
 DECIMAL
-
-
-
-
-
-
-
 ( LOCATED LOCATE .SOURCEFIELD ) CF: \ AvdH A4nov26
 ">SFA" PRESENT? 0= ?LEAVE-BLOCK
 \ Interpret a SOURCEFIELD heuristically.
@@ -2415,7 +2415,7 @@ LOOP ;
 : MEM-SIZE   PROBE @   MAGIC PROBE !   SET-MEMORY TEST-MEMORY
    PROBE !   (MEM-SIZE) @ ;   DECIMAL
 ( SEL-DUMP dump_a_selector ) \ AvdH A1nov02
-HEX 1 1 +THRU
+REQUIRE DH. HEX 1 1 +THRU
 : .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
 ." CODE SEGMENT: " R@ .CODE ELSE
 ." DATA SEGMENT: " R@ .DATA THEN  R@ 1+ .PRES
@@ -2478,18 +2478,18 @@ REQUIRE ASSEMBLERi86   REQUIRE DISK-INIT   REQUIRE +THRU
 
 
 
-( --hd_LBA READ-BLOCK WRITE-BLOCK RW-BUFFER ) CF: ?16 ?PC HEX
+( --hd_LBA R\W-BLOCK READ-BLOCK RW-BUFFER ) CF: ?16 ?PC HEX
 HERE DUP 3 + 3 INVERT AND SWAP - ALLOT HERE B/BUF ALLOT
-CONSTANT RW-BUFFER      retest after assembler change
+CONSTANT RW-BUFFER
 CREATE PARAM-BLOCK 10 C, 0 C, 2 , ( 2 sectors/block)
 RW-BUFFER , 0 , HERE 2 CELLS ALLOT 0 , 0 , CONSTANT BL#
- : R\W-BLOCK  ASSEMBLER
-  OS:, POP|X, AX|   OS:, ADD, W| R| AX'| AX|
-  OS:, MOVFA, W1| BL# W,   PUSH|X, SI|
-  MOVXI, BX| ( FUNCTION CODE ) W,   MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK SWITCH_DS 10 * -  W,
+ASSEMBLER
+ : R\W-BLOCK   POP|X, AX|   ADD, X| T| AX'| R| AX|
+  MOV|FA, X'| BL# W,   PUSH|X, SI|
+  MOVI|X, BX| ( FUNCTION CODE ) IW,   MOVI|X, DX| 0080 IW,
+  MOVI|X, SI| PARAM-BLOCK SWITCH_DS 10 * -  IW,
   TO-REAL, SWITCH_DS COPY-SEG
- XCHG|AX, BX| INT, 13 B, PUSHF, POP|X, BX|
+ XCHG|AX, BX| INT, 13 IB, PUSHF, POP|X, BX|
  TO-PROT, GDT_DS COPY-SEG
   POP|X, SI|   PUSH|X, BX|  NEXT, ; PREVIOUS
 CODE READ-BLOCK 4200 R\W-BLOCK  C;
@@ -3630,23 +3630,23 @@ SOURCE-ID ? "SOURCE-ID ?" EVALUATE
 : .SYSS   .ES .DS .FS .GS CR   .IP .CS .SP .SS .PSW CR   ;
 : .ALL .REGS .SYSS ;
 
-( Experiment with DPMI testing jumps to 32 bit code. ) CF: ?WI
+( Test in DPMI for jumps to 32 bit code. ) CF ?WI ?16
 REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE PC
 PC GET-ALIAS CONSTANT NEW       \ Create a new segment that
 NEW PAD GET-SEL                 \ differs from current code
 PAD TOGGLE-32                   \ segment in being 32 bit.
 PAD TOGGLE-CODE  ( Alias always return data segments )
 NEW PAD PUT-SEL
-           retest after assembler change
+
 \ To prove that we can actually use the 32 bits code segment.
 CODE CRASH    \ It doesn't crash. But pushes a 32 bit EAX !
-JMPFAR, HERE 4 + , NEW ,
+JMPFAR, HERE 4 + W, NEW SG,
 PUSH|X, AX|
-JMPFAR, HERE 6 + , 0 , PC ,
+JMPFAR, HERE 6 + 0 L, PC SG,
 NEXT, C;
 \ This pushes return information correct for a 16 bit segment
-CODE CRASH2   AS:, CALLFAR, HERE 4 + , 0 , PC ,   NEXT, C;
-( Experiment with GDT etc.) HEX
+CODE CRASH2   AS:, CALLFAR, HERE 4 + L, PC SG,   NEXT, C;
+( LOAD-GDT ) HEX   CF: ?16
 ( 32 K GDT AT 0001.8000 ) 2800 CONSTANT GDT-SEGMENT
 7FFF IVAR GDT 2.8000 SWAP , ,
 7C0 CONSTANT CODE-SEGMENT ( The same for real and prot)
@@ -3659,10 +3659,10 @@ CODE-SEGMENT  10 * CONSTANT CODE-START
 : PREPARE-DS
   FFFF 0 DATA! CODE-START 2 DATA!
   9200 4 DATA! 008F 6 DATA! ;
- CODE LOAD-GDT CLI, 0F C, 01 C, 10 C, MEM| GDT MEM,
-NEXT, C; DECIMAL
+ CODE LOAD-GDT   CLI,   LGDT, MEM|% GDT W,   NEXT, C; DECIMAL
 
-( Experiment with GDT etc.) HEX
+
+( Experiment with GDT etc.) HEX   CF: ?16
 7C8 CONSTANT CS-32 ( 32 BITS CODE SEGMENT)
 10  CONSTANT DS-32 ( 32 BITS DATA SEGMENT)
 : CS32! CS-32 + GDT! ;   : DS32! DS-32 + GDT! ;
@@ -3678,7 +3678,7 @@ DECIMAL
 
 
 
-( Experimenting with drive parameters ) HEX
+( WRITE-SYSTEM experiment_drive_parameters ) HEX CF: ?16
 B/BUF SEC/BLK / CONSTANT SEC-LEN
 0 IVAR RW-BUFFER B/BUF ALLOT
 0 IVAR PARAM-BLOCK -2 ALLOT 10 C, 0 C,
@@ -3686,37 +3686,38 @@ HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
 ( We use the two l.s. bytes of 64 bit number)
               1 , 0 , 0 , 0 ,
  CODE WRITE-SYSTEM
-  PUSH|X, SI|   retest after assembler change
-  MOVXI, AX| 4300 W,
-  MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,
-  INT, 13  B,
+  PUSH|X, SI|
+  MOVI|X, AX| 4300 IW,
+  MOVI|X, DX| 0080 IW,
+  MOVI|X, SI| PARAM-BLOCK IW,
+  INT, 13  IB,
   POP|X, SI|
   PUSHF,
   NEXT, C;            DECIMAL
-( Experiment: switch to protected mode and back )
-  90 LOAD 41 42 THRU HEX     LOAD-GDT
-CODE TO-PROT1
-  CLI, PUSH|DS,  TO-PROT,
-    JMPFAR, HERE 4 + MEM, CS-32 SEG,
-    MOVI, W| R| AX| DS-32 , 0 ,
-    MOVSW, T| DS| R| AX|
-    MOVI, W| R| AX| 61 , 0 ,
-    XCHG|AX, AX| XCHG|AX, AX| XCHG|AX, AX| XCHG|AX, AX|
-    MOVFA, B| B.0400 SWAP , ,
-    JMPFAR, HERE 6 + MEM, 0 , CODE-SEGMENT SEG,
- TO-REAL, STI, POP|DS,  OS, PUSH|X, AX|
+( Experiment: switch to protected mode and back ) CF: ?16
+REQUIRE TO-PROT,   REQUIRE TO-REAL,     REQUIRE LOAD-GDT
+LOAD-GDT
+CODE TO-PROT1    \ Experiment ,  put an 'a' on the screen
+   CLI,   PUSH|DS,   TO-PROT,
+   JMPFAR, HERE 4 + L, CS-32 SG,
+   MOVI, X| R| AX| DS-32 IL,
+   MOV|SG, T| DS| R| AX|
+   MOVI, X| R| AX|  &a IL,
+   XCHG|AX, AX| XCHG|AX, AX| XCHG|AX, AX| XCHG|AX, AX|
+   MOV|FA, B'| ( B.0400 ) B04000 SWAP , , ( L, )
+   JMPFAR, HERE 6 + L, CODE-SEGMENT SG,
+   TO-REAL, BITS-16
+   STI,   POP|DS,   PUSH|X, AX|
  NEXT, C; DECIMAL
 
-
-
-( Switch to protected mode and back timing test )
-CODE TO-PROT2   retest after assembler change
-  CLI, TO-PROT,
-    JMPFAR, HERE 4 + MEM, CS-32 SEG,
-    JMPFAR, HERE 6 + MEM, 0 , CODE-SEGMENT SEG,
- TO-REAL, STI,
- NEXT, C; DECIMAL
+( Switch to protected mode and back timing test ) CF: ?16
+REQUIRE TO-PROT,   REQUIRE TO-REAL,
+CODE TO-PROT2
+   CLI,   TO-PROT,
+   JMPFAR,   HERE 4 + W,   CS-32 SG,
+   JMPFAR,   HERE 6 + L,   CODE-SEGMENT SG,
+   TO-REAL,     STI,
+   NEXT,   C; DECIMAL
 CODE TO-PROT3
   CLI, TO-PROT,   TO-REAL, STI,
  NEXT, C; DECIMAL
@@ -3725,29 +3726,28 @@ CODE TO-PROT3
 : TEST3 0 DO TO-PROT3 LOOP ;
 : Q2 0 DO 10000 TEST2 LOOP ;
 : Q3 0 DO 10000 TEST3 LOOP ;
-
-( Switch to protected mode and back replacement for DOCOL )
-  90 LOAD 41 42 THRU HEX     LOAD-GDT
-CODE NEW-DOCOL  retest after assembler change
- (  JMPFAR, HERE 6 + MEM, 0 , CODE-SEGMENT SEG, )
- (  TO-REAL,) STI,   CLI,   ( TO-PROT,)
-(  JMPFAR, HERE 4 + MEM, CS-32 SEG, )
-  LEA, BP'| DB| [BP] -2 B,
-  MOV, W| F| SI'| DB| [BP] 0 B,
-  LEA, SI'| DB| [DI] 2 B,
- NEXT, C; DECIMAL
+( Protected mode and back, replacement for DOCOL) CF: ?16
+REQUIRE TO-PROT,   REQUIRE TO-REAL,   REQUIRE LOAD-GDT
+LOAD-GDT  CODE NEW-DOCOL
+  (  JMPFAR, HERE 6 + L, CODE-SEGMENT SG, )
+  (  TO-REAL,) STI,   CLI,   ( TO-PROT,)
+  (  JMPFAR, HERE 4 + L, CS-32 SG, )
+   LEA, BP'| BO| [BP]% -1 CELLS B,
+   MOV, X| F| SI'| BO| [BP]% 0 B,
+   LEA, SI'| BO| [DI]% 1 CELLS B,
+    NEXT, C; DECIMAL
  : A0 ; ' A0 >CFA @ CONSTANT 'DOCOL
-CODE X JMP,  ' NEW-DOCOL >DFA 'DOCOL 3 + - , C;
+CODE X JMP,  ' NEW-DOCOL >DFA 'DOCOL 3 + - (RW,) C;
  CODE SWITCH  ' X >DFA 'DOCOL  CP, CP, CP, DROP DROP
-CLI,  ( TO-PROT, MOVXI, AX| DATA-SEGMENT MEM,
- MOVSW, T| DS| R| AX|  MOVSW, T| ES| R| AX|  MOVSW, T|
+CLI,  ( TO-PROT, MOVI|X, AX| DATA-SEGMENT L,
+  MOV|SG, T| DS| R| AX|  MOV|SG, T| ES| R| AX|  MOV|SG, T|
 SS| R| AX| ) NEXT, C;  DECIMAL
-( Switch to protected mode and back replacement for DOCOL )
-CODE NEW-BIOS   retest after assembler change
-  POP|X, AX|   MOVFA, B| HERE 0 ,    ( PATCH THE INTERRUPT #)
-  POP|X, DX|  POP|X, CX|  POP|X, BX|  POP|X, DI|
+( Protected mode and back, replacement for DOCOL) CF: ?32
+CODE NEW-BIOS
+   POP|X, AX|   MOV|FA, B'| HERE 0 L, \ PATCH THE INTERRUPT #
+   POP|X, DX|  POP|X, CX|  POP|X, BX|  POP|X, DI|
 PUSH|X, SI|   PUSH|X, BP| ( TO-REAL,) STI, XCHG|AX, DI|
-  INT, HERE SWAP ! 0 C, ( PATCH THE ADDRESS WHERE TO PATCH )
+  INT, HERE SWAP ! 0 IB, ( PATCH THE ADDRESS WHERE TO PATCH )
   PUSHF, POP|X, DI|   ( SAVE FLAGS BEFORE THEY ARE DESTROYED)
   XCHG|AX, SI| ( FREE AX)  CLI,  ( TO-PROT,)
   ( NOW ALL REGISTERS ARE TIED UP EXCEPT ax| [!])
@@ -3774,25 +3774,10 @@ CODE HLT HLT, C;
  : ONTDOOI DIEP-VRIES @ TAARTEN +! 0 DIEP-VRIES ! ;
  : STATUS CR ." AANTAL AANWEZIGE TAARTEN: " TAARTEN ?
    CR ." EN NOG " DIEP-VRIES ? ." IN DE DIEP VRIES " ;
-( Experimenting with drive parameters ) HEX
-B/BUF SEC/BLK / CONSTANT SEC-LEN
-CREATE RW-BUFFER B/BUF ALLOT
-CREATE PARAM-BLOCK -2 ALLOT 10 C, 0 C,
-HERE 1 - SEC-LEN / , SEC-LEN , 7C0 ,
-( We use the two l.s. bytes of 64 bit number)
-              1 , 0 , 0 , 0 ,
- CODE WRITE-SYSTEM
-  PUSH|X, SI|  retest after assembler change
-  MOVXI, AX| 4300 W,
-  MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,
-  INT, 13  B,
-  POP|X, SI|
-  PUSHF,
-  NEXT, C;            DECIMAL
 ( TEST OF HARD DISK ) CF: ?16 HEX
+REQUIRE R\W-BLOCK
 CODE READ-BLOCK2 4200 R\W-BLOCK  C;  ( D - . )
- CODE WRITE-BLOCK2 4300 R\W-BLOCK  C; ( D - . )
+CODE WRITE-BLOCK2 4300 R\W-BLOCK  C; ( D - . )
 DECIMAL : TEST  0.
   BEGIN  CR 2DUP D.
          2000. D+ ( SKIP 1 MEG)
@@ -3805,40 +3790,39 @@ HEX : SAVE 140 * SYSTEM-OFFSET !
   LOOP ;
 : .ELECTIVE 140 UM* 48. D+ READ-BLOCK2 . RW-BUFFER C/L TYPE ;
 DECIMAL
-
-( 16 BITS: Experimenting with drive parameters ) HEX
+( Experimenting with drive parameters ) HEX CF: ?16
 ALIGN 0 IVAR RW-BUFFER B/BUF ALLOT
-0 IVAR PARAM-BLOCK -2 ALLOT 10 C, 0 C,
+CREATE PARAM-BLOCK 10 C, 0 C,
 2 , ( 2 sectors/block) RW-BUFFER , 7C0 ,
 HERE 2 ALLOT  0 , 0 , 0 , CONSTANT BL#
  : R\W-BLOCK  ASSEMBLER  ( MACRO: OPCODE -- . )
   POP|X, BX|    POP|X, AX|
-  ADD, W| AX'| R| AX|  MOVFA, W1| BL# W, XCHG|AX, BX|
-  ADC, W| AX'| R| AX|  MOVFA, W1| BL# 2 + W,
-  PUSH|X, SI|  MOVXI, BX| W,  MOVXI, DX| 0080 W,
-  MOVXI, SI| PARAM-BLOCK W,  TO-REAL,
-  MOVI, W| AX| 7C0 MEM,  MOVSW, T| DS| AX|
+  ADD, X| AX'| R| AX|  MOV|FA, X'| BL# W, XCHG|AX, BX|
+  ADC, X| AX'| R| AX|  MOV|FA, X'| BL# 2 + W,
+  PUSH|X, SI|  MOVI|X, BX| IW,  MOVI|X, DX| 0080 IW,
+  MOVI|X, SI| PARAM-BLOCK IW,  TO-REAL,
+  MOVI, X| AX| 7C0 W,  MOV|SG, T| DS| AX|
   XCHG|AX, BX|
-  INT, 13 B, PUSHF, POP|X, BX| TO-PROT,
+  INT, 13 IB, PUSHF, POP|X, BX| TO-PROT,
   POP|X, SI|   PUSH|X, BX|  NEXT, ;
 DECIMAL
-( Experimenting ALLOC-MEM Get_sludges_of_memory) CF: ?WI
+( Experimenting ALLOC-MEM Get_truckloads_of_memory) CF: ?WI
 REQUIRE ASSEMBLERi86 HEX
-CODE BIOS31SI retest after assembler change
-  LEA, BP'| DB| [BP] -2 B,     MOV, W| F| SI'| DB| [BP] 0 B,
+CODE BIOS31SI
+  LEA, BP'| BO| [BP] -2 B,     MOV, X| F| SI'| BO| [BP] 0 B,
   POP|X, DI|   POP|X, SI|   POP|X, DX|
   POP|X, CX|   POP|X, BX|   POP|X, AX|
-  INT, 31 C,
+  INT, 31 IB,
   PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX|  PUSH|X, DX|
   PUSH|X, SI|  PUSH|X, DI|  PUSHF,
-  MOV, W| T| SI'| DB| [BP] 0 B,   LEA, BP'| DB| [BP] 2 B,
+  MOV, X| T| SI'| BO| [BP] 0 B,   LEA, BP'| BO| [BP] 2 B,
 NEXT, C;
 : BIOS31SI+ BIOS31SI 1 AND 0D ?ERROR ;
 \ Get an amount DOUBLE of memory, return linear ADDRESS and HDL
 : ALLOC-MEM   0501 SWAP ROT 0 0 0   BIOS31SI+
   >R >R DROP >R >R DROP R> R> R> R> ;
 DECIMAL
-( Experiment with DPMI testing jumps to 32 bit code. ) CF: ?WI
+( DPMI_testing_jumps_to_32_bit_code. ) CF: ?WI ?16
 REQUIRE ASSEMBLERi86 REQUIRE GET-SEL REQUIRE ALLOC-MEM
 REQUIRE PC   REQUIRE SEL-DUMP HEX
 10.0000 ALLOC-MEM CREATE HANDLE , ,
@@ -3850,41 +3834,41 @@ PAD 2 + !   DUP PAD 4 + C!   8 RSHIFT PAD 7 + C!
 PAD SEL-DUMP NEW32 PAD PUT-SEL
 \ To prove that we can actually use the 32 bits code segment.
 CODE CRASH    \ It doesn't crash. But pushes a 32 bit EAX !
-JMPFAR, HERE 4 + , NEW32 ,  retest after assembler change
-PUSH|X, AX|
-JMPFAR, HERE 6 + , 0 , PC ,
+   JMPFAR, HERE 4 + W, NEW32 SG,
+   PUSH|X, AX|
+   JMPFAR, HERE 6 + L, PC SG,
 NEXT, C;                                DECIMAL
-( Experimenting Get_a_32_bit_code_segment) CF: ?WI HEX
+( Get_a_32_bit_code_segment CRASH ) CF: ?WI ?16 HEX
 : MOVEIT   NEW32 LES   0 0 FFF0 MOVE   LES DROP ;
 : GETIT   NEW32 PAD GET-SEL    PAD TOGGLE-CODE
    NEW32 PAD PUT-SEL ;
 NEW32 GET-ALIAS CONSTANT NEW32D
-CODE CRASH  retest after assembler change
+: CRASH
   POP|X, DI|   POP|X, DX|  POP|X, CX|  POP|X, BX|   POP|X, AX|
-  JMPFAR, HERE 4 + , NEW32 ,
-  INT, 31 C,
-  JMPFAR, HERE 6 + , 0 , PC ,
+  JMPFAR, HERE 4 + W, NEW32 SG,
+  INT, 31 IB,
+  JMPFAR, HERE 6 + L, PC SG,
   PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX| PUSH|X, DX| PUSH|X, DI|
-  PUSHF,
-NEXT, C;
+  PUSHF, ;
+CODE CRASH,   CRASH   NEXT, C;
 DECIMAL
 
 
 ( Experimenting Use_a_32_bit_code_segment) CF: ?WI HEX
-CODE CRASH2  POP|ES, retest after assembler change
-  POP|X, DI|   POP|X, DX|  POP|X, CX|  POP|X, BX|   POP|X, AX|
-  JMPFAR, HERE 4 + , NEW32 ,
-  INT, 31 C,
-  JMPFAR, HERE 6 + , 0 , PC ,
-  PUSH|X, AX|  PUSH|X, BX|  PUSH|X, CX| PUSH|X, DX| PUSH|X, DI|
-  PUSHF, PUSH|DS, POP|ES,
-NEXT, C;
+REQUIRE CRASH
+CODE CRASH2   POP|ES,   CRASH   PUSH|DS, POP|ES,   NEXT, C;
+
 : IDLE-OKAY   1680 REG-SET 1C + !   0 REG-SET 1E + !
 0300 002F 0 0 REG-SET CRASH ;
+
 : OKAY 200 REG-SET 1C + ! 0 REG-SET 1E + !   &x REG-SET 14 + !
   0 REG-SET 16 + ! 0300 0021 0 0 REG-SET CRASH ; \ Works!
+
 : CRSH2 200 REG-SET 1C + ! 0 REG-SET 1E + !   &x REG-SET 14 + !
   0 REG-SET 16 + ! 0300 0021 0 0 REG-SET NEW32D CRASH2 ;
+
+
+
 DECIMAL \ The last one crashes under windows 3.11: 32 bit ES
 ( **************ciforth FIG model examples **************)
         EXIT
@@ -3957,8 +3941,8 @@ FORWARD FAC
 : SUC! POSTPONE 1 POSTPONE SUCCESS POSTPONE ! ;
 : % DSP@ H. TIB @ IN @ TYPE
 SPACE SUCCESS ? CR ; : % POSTPONE  % ;
- CODE  POPSP MOV, W| T| SP'| DB| [BP] 0 B,
- LEA, BP'| DB| [BP] 0 CELL+ B, NEXT, C;
+   CODE  POPSP MOV, X| T| SP'| BO| [BP] 0 B,
+   LEA, BP'| BO| [BP] 0 CELL+ B, NEXT, C;
 : <PTS POSTPONE DSP@ PUSH
        POSTPONE DP POSTPONE @ PUSH
        POSTPONE IN POSTPONE @ PUSH ;
