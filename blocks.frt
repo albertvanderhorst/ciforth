@@ -286,7 +286,7 @@ REQUIRE CONFIG
 
 
 \
-( [IF] ] [ELSE] [THEN] [DEFINED] [UNDEFINED] ) \ AvdH A2oct22
+( [IF] ] [ELSE] [THEN] [DEFINED] [UNDEFINED] ) \ AvdH A5sep24
 REQUIRE COMPARE
 \ From ANSI manual.
 : SKIPPING
@@ -300,15 +300,15 @@ REPEAT 2DROP DROP ;
 : [ELSE] SKIPPING ; IMMEDIATE
 : [THEN] ; IMMEDIATE
 
-: [DEFINED] (WORD) 2DUP REQUIRED PRESENT? ;
-: [UNDEFINED] [DEFINED] 0= ;
+: [DEFINED] (WORD) 2DUP REQUIRED PRESENT? ; IMMEDIATE
+: [UNDEFINED] POSTPONE [DEFINED] 0= ; IMMEDIATE
 ( VALUE TO FROM ) \ AvdH A1oct22
 
 
 VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 : FROM 0 TO-MESSAGE ! ;
 \ ISO
-: TO 1 TO-MESSAGE ! ;
+: TO  1 TO-MESSAGE ! ;
 \ ISO
 : VALUE CREATE , DOES> TO-MESSAGE @ IF ! ELSE @ THEN
     0 TO-MESSAGE ! ;
@@ -1358,14 +1358,14 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 
-( DO-DEBUG NO-DEBUG ^ ) \ AvdH A1nov24
+( DO-DEBUG NO-DEBUG ^ ) \ AvdH A5sep24
 REQUIRE OLD:
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 \ Print index line of SCREEN .
-: .INDEX-LINE  0 SWAP (LINE) -TRAILING TYPE ;
+: .INDEX-LINE  CR DUP 4 .R 0 SWAP (LINE) -TRAILING TYPE ;
 \ An alternative ``THRU'' that displays first and last index.
-: NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
+: NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE
   OLD: THRU ;
 
 \ Install and de-install the alternative ``OK''
@@ -2401,19 +2401,19 @@ DECIMAL
 ( SET-MEMORY TEST-MEMORY MEM-SIZE ) CF: ?PC ?32 \ AvdH A1oct17
 STALEST CONSTANT PROBE  \ Use this as a probe.
 DECIMAL  123456789 CONSTANT MAGIC  HEX
-HERE 10,0000 PROBE + > 0D ?ERROR \ Probe forbidden in 2th Mb?
+HERE 10,0000 PROBE + > 0D ?ERROR \ Probe must be in first Mb!
 VARIABLE (MEM-SIZE)   1000 (MEM-SIZE) ! \ Megabytes
 : FAIL?   DUP >R   @ MAGIC =   MAGIC R@ ! R> @ MAGIC <>  OR ;
 : SET-MEMORY   (MEM-SIZE) @ 2 DO
    \ ^M EMIT ." probing " I . 4 SPACES
    I 14 LSHIFT  PROBE +
-   DUP FAIL? IF I (MEM-SIZE) ! LEAVE THEN   I SWAP !
+   DUP FAIL? IF DROP I (MEM-SIZE) ! LEAVE THEN   I SWAP !
 LOOP ;
 : TEST-MEMORY   (MEM-SIZE) @ 2 DO
    I 14 LSHIFT  PROBE +  @ I <>  IF I (MEM-SIZE) ! LEAVE THEN
    LOOP ;
-: MEM-SIZE   PROBE @   MAGIC PROBE !   SET-MEMORY TEST-MEMORY
-   PROBE !   (MEM-SIZE) @ ;   DECIMAL
+PROBE @   MAGIC PROBE !   SET-MEMORY TEST-MEMORY PROBE !
+(MEM-SIZE) @ CONSTANT MEM-SIZE DECIMAL
 ( SEL-DUMP dump_a_selector ) \ AvdH A1nov02
 REQUIRE DH. HEX 1 1 +THRU
 : .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
@@ -2590,7 +2590,7 @@ DECIMAL
 
 
 
-( SECTORS/TRACK #HEADS ) CF: ?32 ?PC \ AvdH A1oct10
+( SECTORS/TRACK #HEADS #BLOCKS MEDIA-HD ) CF: ?32 ?PC
 HEX
 \ See Ralph Brown's table 03196
 \ Address of interrupt 41
@@ -2601,19 +2601,20 @@ HEX
 (hd1) 2 + C@ CONSTANT #HEADS
 \ Sectors per track for hard disk one.
 (hd1) 0E + C@ CONSTANT SECTORS/TRACK
+F8 CONSTANT MEDIA-HD \ For hard disk.
 DECIMAL
-
-
+CREATE #BLOCKS 256 ,
 
 
 ( INSTALL-FORTH-ON-HD ) CF: ?32 \ AvdH A1oct11
 REQUIRE +THRU
 \ Elective and configuration screen
-\ Define and overrule this for manual installation
-CREATE #BLOCKS 256 ,
-HEX F8 CONSTANT MEDIA-ID \ For hard disk.
-\ ?? CONSTANT #HEADS   ?? CONSTANT SECTORS/TRACK
+\ You can overrule here for manual installation
+\ ?? CONSTANT #BLOCKS   ?? CONSTANT MEDIA-HD
+REQUIRE #BLOCKS         REQUIRE MEDIA-HD
+\ ?? CONSTANT #HEADS    ?? CONSTANT SECTORS/TRACK
 \ ?? CONSTANT MEM-SIZE
+REQUIRE #HEADS  REQUIRE SECTORS/TRACK   REQUIRE MEM-SIZE
 1 6 +THRU
 CR ." If you really want to install on hard disk"
 CR ." issue the command: INSTALL-FORTH-ON-HD"
@@ -2621,7 +2622,6 @@ CR ." issue the command: INSTALL-FORTH-ON-HD"
 \ floppy). This is a user utility, so it can be run for other
 \ type ciforth's. But then it only explains to the user what is
 \ going wrong.
-
 ( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?HD \ AvdH A1oct11
 
 \ This utility is intended for sectors & track installations
@@ -2638,136 +2638,24 @@ QUIT
 
 
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
+( flush-key fatal-questiON last-chance show ready ) CF: ?32
 \ Throw away any keys that are typed ahead
 : flush-key   BEGIN KEY? WHILE KEY DROP REPEAT ;
 \ Stop, unless the user types Y.
 : stop?   KEY &Y <>  IF ." ABONDANNED! " CR QUIT THEN ;
 \ Ask QUESTION and require ``Y''
-: fatal-question   TYPE  flush-key   "??  Y/N" TYPE CR stop? ;
-CR
-." You are about to install Forth on your hard disk" CR
-." making it unusable for any other purpose." CR
-." No dual boot system, no partition or even a master" CR
-." boot record will remain, and on some computers e.g. " CR
-." Compaq some data will be permanently lost." CR
-." Go on at your own risk. No guarantees." CR CR
-" GO ON " fatal-question
-
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
-CR ." Analysing..." CR
-REQUIRE #HEADS    REQUIRE B. DECIMAL
-CR ." The number of heads on your hard disk is reported: "
-#HEADS DUP . B. &H EMIT
-CR ." The number of sectors/track is reported: "
-SECTORS/TRACK DUP . B. &H EMIT
-CR ." (If this is incorrect, you have to configure manually)"
-CR CR " Do you believe this" fatal-question
-
-: LAST-CHANCE
+: fatal-question   flush-key   "??  Y/N" TYPE CR stop? ;
+: last-chance
    ." Last chance to quit!" CR
    ." If you type Y your hard disk will be overwritten." CR
    ." Are you sure you want to install?" fatal-question ;
 
+: show ^M EMIT ." BLOCK" 4 .R 5 SPACES KEY DROP ;
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD ?32 \ AvdH A1oct17
-CR ." Analysing..." CR
-REQUIRE MEM-SIZE   REQUIRE B.   REQUIRE NEW-IF
-DECIMAL
-CR ." The amount of Megabytes on your system is probed as: "
-MEM-SIZE DUP . HEX 0 .R &H EMIT DECIMAL
-CR ." (If this is incorrect, you have to configure manually)"
-CR CR " Do you believe this?" fatal-question
-
-HEX
-\ Now patch the systems memory size.
-\ This takes effect after booting only.
-
-: PATCH-MEM BM -  \ Addres to which start of buffer corresponds
- 5 0 DO MEM-SIZE 14 LSHIFT EM - OVER I CELLS + +ORIGIN +!
-
-( INSTALL-FORTH-ON-HD ) CF: ?32 \ AvdH A1oct11
-REQUIRE +THRU
-\ Elective and configuration screen
-\ Define and overrule this for manual installation
-CREATE #BLOCKS 256 ,
-HEX F8 CONSTANT MEDIA-ID \ For hard disk.
-\ ?? CONSTANT #HEADS   ?? CONSTANT SECTORS/TRACK
-\ ?? CONSTANT MEM-SIZE
-1 6 +THRU
-CR ." If you really want to install on hard disk"
-CR ." issue the command: INSTALL-FORTH-ON-HD"
-\ Re-installs a sector-and-track ciforth to a hard disk (or
-\ floppy). This is a user utility, so it can be run for other
-\ type ciforth's. But then it only explains to the user what is
-\ going wrong.
-
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?HD \ AvdH A1oct11
-
-\ This utility is intended for sectors & track installations
-\ so for floppy compatible hard disks.
-
-." This is the wrong utility for your Forth ." CR
-." Try INSTALL-KERNEL and RESTORE-BLOCKS instead." CR
-
-QUIT
-
-
-
-
-
-
-
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
-\ Throw away any keys that are typed ahead
-: flush-key   BEGIN KEY? WHILE KEY DROP REPEAT ;
-\ Stop, unless the user types Y.
-: stop?   KEY &Y <>  IF ." ABONDANNED! " CR QUIT THEN ;
-\ Ask QUESTION and require ``Y''
-: fatal-question   TYPE  flush-key   "??  Y/N" TYPE CR stop? ;
-CR
-." You are about to install Forth on your hard disk" CR
-." making it unusable for any other purpose." CR
-." No dual boot system, no partition or even a master" CR
-." boot record will remain, and on some computers e.g. " CR
-." Compaq some data will be permanently lost." CR
-." Go on at your own risk. No guarantees." CR CR
-" GO ON " fatal-question
-
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
-CR ." Analysing..." CR
-REQUIRE #HEADS    REQUIRE B. DECIMAL
-CR ." The number of heads on your hard disk is reported: "
-#HEADS DUP . B. &H EMIT
-CR ." The number of sectors/track is reported: "
-SECTORS/TRACK DUP . B. &H EMIT
-CR ." (If this is incorrect, you have to configure manually)"
-CR CR " Do you believe this" fatal-question
-
-: LAST-CHANCE
-   ." Last chance to quit!" CR
-   ." If you type Y your hard disk will be overwritten." CR
-   ." Are you sure you want to install?" fatal-question ;
-
-
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD ?32 \ AvdH A1oct17
-CR ." Analysing..." CR
-REQUIRE MEM-SIZE   REQUIRE B.   REQUIRE NEW-IF
-DECIMAL
-CR ." The amount of Megabytes on your system is probed as: "
-MEM-SIZE DUP . HEX 0 .R &H EMIT DECIMAL
-CR ." (If this is incorrect, you have to configure manually)"
-CR CR " Do you believe this?" fatal-question
-HEX
-\ Now patch the systems memory size.
-\ This takes effect after booting only.
-
-: PATCH-MEM BM -  \ Addres to which start of buffer corresponds
- 5 0 DO MEM-SIZE 14 LSHIFT EM - OVER I CELLS + +ORIGIN +!
-LOOP  MEM-SIZE 14 LSHIFT SWAP 'EM >DFA + ! ;
-LOOP  MEM-SIZE 14 LSHIFT SWAP 'EM >DFA + ! ;
+: ready ." Press the reset button, to boot your new FORTH"
+    CR ;
 ( PATCH-NEW-FORTH PATCH-THIS-FORTH ) CF: ?FD ?32 \ AvdH A1oct12
-REQUIRE #HEADS HEX
+REQUIRE #HEADS  REQUIRE MEDIA-HD          HEX
 \ The SIZE of Forth (kernel +blocks) in blocks.
 : SIZE-FORTH   OFFSET @   #BLOCKS @  + ;
 \ What we need then
@@ -2775,15 +2663,46 @@ CREATE buffer SIZE-FORTH B/BUF * ALLOT
 \ Now patch into the boot record the hard disk dimensions
 \ And into the access definition of this Forth
 : PATCH-NEW-FORTH   \ Overlapping 32 bits stores, big endian!
-   MEDIA-ID          buffer 15 + C!
+   MEDIA-HD          buffer 15 + C!
    SECTORS/TRACK     buffer 18 + !     \ Actually 16 bit
    #HEADS            buffer 1A + ! ;   \ Actually 16 bit
 : PATCH-THIS-FORTH   \ This Forth now accesses hard disk
    80                DRIVE C!
    SECTORS/TRACK     DRIVE 1+ C!
    #HEADS            DRIVE 2 + C! ;
-( INSTALL-FORTH-ON-HD ) CF: ?FD \ AvdH A1oct11
-: show ^M EMIT ." BLOCK" 4 .R 5 SPACES ;
+( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
+
+CR ." You are about to install Forth on your hard disk"
+CR ." making it unusable for any other purpose."
+CR ." No dual boot system, no partition or even a master"
+CR ." boot record will remain, and on some computers e.g. "
+CR ." Compaq some data will be permanently lost."
+CR ." Go on at your own risk. No guarantees."
+CR CR " GO ON " fatal-question
+
+CR ." Analysing..." CR
+CR ." The number of heads on your hard disk is reported: "
+REQUIRE #HEADS    REQUIRE B.    DECIMAL
+#HEADS DUP . B. &H EMIT
+
+
+( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD ?32 \ AvdH A1oct17
+CR ." The number of sectors/track is reported: "
+SECTORS/TRACK DUP . B. &H EMIT
+CR ." (If this is incorrect, you have to configure manually)"
+CR CR " Do you believe this" fatal-question
+CR ." Analysing..." CR
+
+DECIMAL
+CR ." The amount of Megabytes on your system is probed as: "
+REQUIRE MEM-SIZE   DECIMAL
+MEM-SIZE DUP . HEX 0 .R &H EMIT
+CR ." (If this is incorrect, you have to configure manually)"
+CR CR " Do you believe this?" fatal-question
+
+
+
+( INSTALL-FORTH-ON-HD PATCH-MEM ) CF: ?FD \ AvdH A5sep26
 \ Read into BUFFER absolute block NUMBER , leave NEXT buffer.
 : read+ OFFSET @ -   BLOCK     OVER B/BUF MOVE   B/BUF + ;
 \ Cannot read directly into the buffer because it is above 1 Mb
@@ -2791,10 +2710,11 @@ CREATE buffer SIZE-FORTH B/BUF * ALLOT
 \ Cannot write directly into the buffer because it is above 1 M
 : write+   OFFSET @ - (BUFFER) CELL+ CELL+   OVER SWAP   B/BUF
    MOVE     UPDATE B/BUF + ;
-: WRITE-FORTH  LAST-CHANCE
+: WRITE-FORTH  last-chance
    buffer SIZE-FORTH 0 DO I show I write+ LOOP DROP ;
-: ready ." Press the reset button, to boot your new FORTH"
-    CR ;
+: PATCH-MEM BM -  \ Patch the memory size of a BUFFER.
+ 5 0 DO MEM-SIZE 14 LSHIFT EM - OVER I CELLS + +ORIGIN +!
+LOOP  MEM-SIZE 14 LSHIFT SWAP 'EM >DFA + ! ;
 : INSTALL-FORTH-ON-HD  DRIVE @ 0 WARNING ! READ-FORTH
 buffer PATCH-MEM PATCH-NEW-FORTH PATCH-THIS-FORTH WRITE-FORTH
 EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
@@ -4509,4 +4429,4 @@ RDROP 2DROP RC @ 0 ;   'RC HIDDEN
 
 
 
-( 4096 last line)
+( 4432 last line)

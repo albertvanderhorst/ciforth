@@ -466,7 +466,7 @@ ORIG:
         JMP     SHORT BOOT
         NOP
         _C{ MSDOS programmers reference (thru 6, 3.9)}
-        DB    "DFW---HD"
+        DB    "{DFW}---HD"
 LBPS    DW         BPS
         DB         1
 RESSECTORS  DW     0x01
@@ -6363,6 +6363,8 @@ _HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
         DC      LSUB,LERASE
+        DC      FIRST, STALEST, STORE
+        DC      FIRST, PREV, STORE
         DC      SEMIS
         PAGE
 _C

@@ -41,8 +41,6 @@ _LINUX_N_({define({M4_EM},M4_EM-0x74)})dnl
 
 dnl Other consequences
 _BITS32_({define({M4_RTS}, 0x10000)})
-dnl _BITS32_({define({M4_NBUF}, 16 )}) NOT YET!
-dnl _BITS32_({define({M4_MAXWORDLIST}, 16 )}) NOT YET!
 
 dnl Consequences with exceptions
 dnl switch back and forth between protected and real mode.
