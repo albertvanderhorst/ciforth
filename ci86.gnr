@@ -360,16 +360,17 @@ ORIG:
         NOP
         _C{ MSDOS programmers reference (thru 6, 3.9)}
         DB    "{DFW}--EXP"
-LBPS    DW         BPS
+BBPS    DW         BPS
         DB         1
 RESSECTORS  DW     0x01
         DB         NFAT
         DW BPS*SECROOT/32
         DW         HEADS*TRKS*SPT    _C{ sectors/drive}
-LMEDIA  DB         MEDIA
+BDRIVE                               _C{ True meaning. BIOS drive id.}
+BMEDIA  DB         MEDIA             _C{ Temporary meaning, nS after booting.}
         DB         SECFAT, 0x0
-LSPT    DW         SPT
-LHEADS  DW       HEADS
+BSPT    DW         SPT
+BHEADS  DW       HEADS
 HIDDENSECS    DD        0x0
 HUGESECS      DD         0x000
       _C{ BIOS parameter block ends here}
@@ -384,16 +385,16 @@ READSECTOR:
         PUSH    CX
         PUSH    BX
         MOV     AX,CX
-        MOV     CL,[LSPT]
+        MOV     CL,[BSPT]
         DIV     CL
         MOV     CL,AH
         INC     CL      _C{ Sectors counting from 1!}
         XOR     AH,AH   _C{ Get rid of remainder}
-        MOV     CH,[LHEADS]
+        MOV     CH,[BHEADS]
         DIV     CH
         MOV     DH,AH   _C{ Head number}
         MOV     CH,AL   _C{ Only small disks <256 cylinders}
-        MOV     DL,DRIVE
+        MOV     DL,[BDRIVE]
         MOV     AX,0x0201   _C{ Read absolute one sector}
         INT(0x13)                 _C{BIOS disk access.}
         POP     BX
@@ -403,7 +404,7 @@ READSECTOR:
 RETRY:
         CALL    DISPLAYW
         XOR     AX,AX   _C{ Reset}
-_C{       MOV     DL,DRIVE}
+        MOV     DL,[BDRIVE]
         INT(0x13)                 _C{BIOS disk access.}
         CALL    DISPLAYW
         MOV     AL,' '
@@ -413,13 +414,14 @@ _C{       MOV     DL,DRIVE}
         MOV     AL,' '
         CALL DISPLAY
 BOOT:
+_C{ Start with replacing braindamaged media byte drive id.}
         MOV     DL, 0x80          _C{ Hard disk, default.}
-        MOV     AL, [LMEDIA]
+        MOV     AL, [BMEDIA]
         CMP     AL, 0x0F8        _C{ Fixed disk.}
         JZ     ENDIF1A
         MOV     DL, 0x0          _C{ Floppy.}
 ENDIF1A:
-
+        MOV     [BDRIVE],DL
         MOV     AL,'D'
         CALL    DISPLAY
         MOV AX,CS
@@ -430,7 +432,7 @@ ENDIF1B:
         MOV     AL,'F'
         CALL    DISPLAY
         MOV     AH,00   _C{ Reset}
-_C{       MOV     DL,DRIVE}
+        MOV     DL,[BDRIVE]
         INT(0x13)                 _C{BIOS disk access.}
         JB      RETRY
 
@@ -451,11 +453,11 @@ BEGIN1: CALL    READSECTOR
         CALL    DISPLAY
         CALL    DISPLAYCR
 
-        MOV     AL, [LHEADS]     _C{Copy from boot sector to Forth.}
+        MOV     AL, [BHEADS]     _C{Copy from boot sector to Forth.}
         MOV     [LFHEADS],AL
-        MOV     AL, [LSPT]
+        MOV     AL, [BSPT]
         MOV     [LFSPT],AL
-        MOV     AL, 0
+        MOV     AL, [BDRIVE]
         MOV     [LFDRIVE], DL
 
         JMP     ENDBOOT
@@ -467,7 +469,7 @@ ORIG:
         NOP
         _C{ MSDOS programmers reference (thru 6, 3.9)}
         DB    "{DFW}---HD"
-LBPS    DW         BPS
+BBPS    DW         BPS
         DB         1
 RESSECTORS  DW     0x01
         DB         NFAT
@@ -8643,6 +8645,7 @@ other disk is to be accessed, such as installing a bootable
 system on hard disk from floppy.}})},
 {{BLOCK},{FLUSH}}, {}, enddoc)
 _HEADER({DRIVE},{LDRIVE},{DOVAR}, )
+_BOOTSECTRK_({_C{During booting replaced by copy from boot sector.}})
 LFDRIVE DB      DRIVE                   _C{ To be used by Forth.}
 LFSPT   DB      SPT
 LFHEADS DB      HEADS

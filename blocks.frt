@@ -2590,7 +2590,7 @@ DECIMAL
 
 
 
-( SECTORS/TRACK #HEADS #BLOCKS MEDIA-HD ) CF: ?32 ?PC
+( SECTORS/TRACK #HEADS FORTH-SIZE MEDIA-HD ) CF: ?32 ?PC
 HEX
 \ See Ralph Brown's table 03196
 \ Address of interrupt 41
@@ -2603,15 +2603,15 @@ HEX
 (hd1) 0E + C@ CONSTANT SECTORS/TRACK
 F8 CONSTANT MEDIA-HD \ For hard disk.
 DECIMAL
-CREATE #BLOCKS 256 ,
-
+\ The SIZE of Forth (kernel +blocks) in blocks.
+#BLOCKS OFFSET @ + CONSTANT FORTH-SIZE
 
 ( INSTALL-FORTH-ON-HD ) CF: ?32 \ AvdH A1oct11
 REQUIRE +THRU
 \ Elective and configuration screen
 \ You can overrule here for manual installation
-\ ?? CONSTANT #BLOCKS   ?? CONSTANT MEDIA-HD
-REQUIRE #BLOCKS         REQUIRE MEDIA-HD
+\ ?? CONSTANT FORTH-SIZE   ?? CONSTANT MEDIA-HD
+REQUIRE FORTH-SIZE         REQUIRE MEDIA-HD
 \ ?? CONSTANT #HEADS    ?? CONSTANT SECTORS/TRACK
 \ ?? CONSTANT MEM-SIZE
 REQUIRE #HEADS  REQUIRE SECTORS/TRACK   REQUIRE MEM-SIZE
@@ -2650,16 +2650,16 @@ QUIT
    ." If you type Y your hard disk will be overwritten." CR
    ." Are you sure you want to install?" fatal-question ;
 
-: show ^M EMIT ." BLOCK" 4 .R 5 SPACES KEY DROP ;
+: show ^M EMIT ." BLOCK" 4 .R 5 SPACES ;
 
 : ready ." Press the reset button, to boot your new FORTH"
     CR ;
 ( PATCH-NEW-FORTH PATCH-THIS-FORTH ) CF: ?FD ?32 \ AvdH A1oct12
 REQUIRE #HEADS  REQUIRE MEDIA-HD          HEX
-\ The SIZE of Forth (kernel +blocks) in blocks.
-: SIZE-FORTH   OFFSET @   #BLOCKS @  + ;
+REQUIRE FORTH-SIZE
+
 \ What we need then
-CREATE buffer SIZE-FORTH B/BUF * ALLOT
+CREATE buffer FORTH-SIZE B/BUF * ALLOT
 \ Now patch into the boot record the hard disk dimensions
 \ And into the access definition of this Forth
 : PATCH-NEW-FORTH   \ Overlapping 32 bits stores, big endian!
@@ -2706,12 +2706,12 @@ CR CR " Do you believe this?" fatal-question
 \ Read into BUFFER absolute block NUMBER , leave NEXT buffer.
 : read+ OFFSET @ -   BLOCK     OVER B/BUF MOVE   B/BUF + ;
 \ Cannot read directly into the buffer because it is above 1 Mb
-: READ-FORTH  buffer SIZE-FORTH 0 DO I show I read+ LOOP DROP ;
+: READ-FORTH  buffer FORTH-SIZE 0 DO I show I read+ LOOP DROP ;
 \ Cannot write directly into the buffer because it is above 1 M
 : write+   OFFSET @ - (BUFFER) CELL+ CELL+   OVER SWAP   B/BUF
    MOVE     UPDATE B/BUF + ;
 : WRITE-FORTH  last-chance
-   buffer SIZE-FORTH 0 DO I show I write+ LOOP DROP ;
+   buffer FORTH-SIZE 0 DO I show I write+ LOOP DROP ;
 : PATCH-MEM BM -  \ Patch the memory size of a BUFFER.
  5 0 DO MEM-SIZE 14 LSHIFT EM - OVER I CELLS + +ORIGIN +!
 LOOP  MEM-SIZE 14 LSHIFT SWAP 'EM >DFA + ! ;
@@ -3262,8 +3262,8 @@ VARIABLE IMAX \ Als IX 'COMP EXECUTE waar is,
         THEN
     REPEAT
 IMIN @ ;
- ( *************stand alone unshaven***************  )
-( tools for stand alone system, to be reimplemented )
+( *************stand alone unshaven***************      )
+( tools for stand alone system, to be reimplemented     )
 
 
 
@@ -3434,6 +3434,22 @@ ONLY POSTPONE FORTH DEFINITIONS QUIT ;
 
 'ABORT-NEW 'ABORT  3 CELLS MOVE
 DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
+
+
+
+
+
+( ************** end of lab ****************************)
+( This is the block number to be filled in into         )
+( option block 0, after combination with options.frt    )
+
+
+
+
+
+
+
+
 
 
 
@@ -3998,7 +4014,7 @@ PS ABA + BABAA
 
 
 
-( **************Non working FIG model examples  **************)
+( **************Non working examples {FIG model} *********)
         EXIT
 
 These are examples from old FIG screens.

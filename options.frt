@@ -1,5 +1,5 @@
 COPYRIGHT (c) 2000-2004 Albert van der Horst, THE NETHERLANDS
-                   LICENSE
+		   LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
 Public License as published by the Free Software Foundation.
@@ -11,7 +11,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public
 License along with this program; if not, write to the
-            Free Software Foundation, Inc.,
+	    Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
 ( -a :_Make_require_available_silently ) \ AvdH A2jan20
@@ -21,14 +21,14 @@ License along with this program; if not, write to the
 CREATE pad 80 ALLOT    : CONTAINS   0 pad !   BL pad $C+
 pad $+!   BL pad $C+   pad @ - OVER + SWAP
     DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
+263 CONSTANT #BLOCKS \ Where it says ``end of lab''.
 \ Find WORD in the block library and load it.
-: FIND&LOAD     256 ERRSCR @ 4 +
-DO 0 I (LINE) 2OVER CONTAINS IF I LOAD LEAVE THEN LOOP
-2DROP ;
+: FIND&LOAD   #BLOCKS ERRSCR @ 4 + DO    0 I (LINE)
+    2OVER CONTAINS IF I LOAD LEAVE THEN LOOP 2DROP ;
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
 : REQUIRED 2DUP PRESENT 0= IF 2DUP FIND&LOAD THEN
-    2DUP PRESENT 0= IF ETYPE 24 MESSAGE _ _ THEN 2DROP ;
+    2DUP PRESENT 0= IF ETYPE 24 MESSAGE ELSE 2DROP THEN ;
 : REQUIRE (WORD) REQUIRED ;    : CF: "CONFIG" REQUIRED ;
 ( -b :_This_option_is_available )
 
