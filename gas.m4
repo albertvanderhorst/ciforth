@@ -81,6 +81,8 @@ dnl Segment registers
 define({CS},{{%CS}})dnl
 define({DS},{{%DS}})dnl
 define({ES},{{%ES}})dnl
+define({FS},{{%FS}})dnl
+define({GS},{{%GS}})dnl
 define({SS},{{%SS}})dnl
 dnl Half registers
 define({AL},{{%AL}})dnl

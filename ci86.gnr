@@ -1095,8 +1095,8 @@ _THREADS_({
 _HOSTED_LINUX_(
 {       MOV     _CELL_PTR[USINI+_CELLS(31)],SPO _C{Remember ARGS.}
 })dnl
-        MOV     {AX},DS
-        MOV     SS,{AX}           _C{Atomic with next instruction.}
+        MOV     AX,DS
+        MOV     SS,AX           _C{Atomic with next instruction.}
         MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    _C{PARAM. STACK}
         MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    _C{RETURN STACK}
         MOV     HIP,_OFFSET CLD1  _C{ (IP) <-}

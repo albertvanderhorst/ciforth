@@ -705,13 +705,13 @@ REQUIRE +THRU
 ( TIME&DATE ) CF: ?LI \ AH A30610
 : SSE   0 0 0 13 LINOS ; ( Seconds since epoch: 1970/1/1)
 : |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
-CREATE TABLE ( start of month within leap period) 0
+CREATE TABLE ( start of month within leap period) -1
     31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
-    31 | 28 | 5m 5m   DROP    : T[] CELLS TABLE + @ ;
+    31 | 28 | 5m 5m   ,   : T[] CELLS TABLE + @ ;
 \ For DAYS within leap return MONTHS
 : MONTHS   >R 0 BEGIN R@ OVER T[] > WHILE 1+ REPEAT 1- RDROP ;
 \ For DAYS within leap period return DAY MONTH YEARS
-: SPLIT-LEAP  DUP MONTHS DUP >R T[] - 1+  R> 12 /MOD >R 1+ R> ;
+: SPLIT-LEAP  DUP MONTHS DUP >R T[] - R> 12 /MOD >R 1+ R> ;
 \ For TIME return SEC MIN HOUR DAYS
 : SPLIT-OFF-TIME   0 60 UM/MOD   60 /MOD   24 /MOD ;
 \ For DAYS return DAY MONTH YEAR
@@ -719,20 +719,20 @@ CREATE TABLE ( start of month within leap period) 0
 \ Return current  SEC MIN HOUR DAY MONTH YEAR
 : TIME&DATE   SSE   SPLIT-OFF-TIME   SPLIT-OFF-DATE ;
 ( TIME&DATE ) CF: ?PC \ AH A30612
-
 HEX
-
 \ Return current  DAY MONTH YEAR
 : DATE    2A00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
     R> 100 /MOD   R> ;
 
 \ Return current  SEC MIN HOUR
-: TIME    2C00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
+: TIME    2C00 _ _ _ BDOSO 2DROP SWAP >R >R DROP
     R> 100 /   R> 100 /MOD ;
 
 \ Return current  SEC MIN HOUR DAY MONTH YEAR
 : TIME&DATE TIME DATE ;
-
+\ In fact a check is in order whether the day has changed
+: TIME&DATE DATE >R >R >R   TIME DATE 2DROP DUP R> = IF
+    R> R> ELSE RDROP RDROP 2DROP 2DROP RECURSE THEN ;
 DECIMAL
 ( $-PREFIX #-PREFIX  ESC ) \ AvdH A1apr15
 
