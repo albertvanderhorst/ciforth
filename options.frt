@@ -1,5 +1,5 @@
 COPYRIGHT (c) 2000-2004 Albert van der Horst, THE NETHERLANDS
-		   LICENSE
+                   LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
 Public License as published by the Free Software Foundation.
@@ -11,7 +11,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public
 License along with this program; if not, write to the
-	    Free Software Foundation, Inc.,
+            Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
 ( -a :_Make_require_available_silently ) \ AvdH A2jan20
@@ -53,11 +53,11 @@ REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
 \ Be economic with disk space
 : INCD'   SWAP-DP GET-FILE SWAP-DP EVALUATE ;
 
-: MY-OPTIONS DROP 0 ;  \ No options, no sign on.
+
 'MY-ERROR DUP 'ERROR 3 CELLS CMOVE  HIDDEN
 'INCD' DUP 'INCLUDED 3 CELLS MOVE   HIDDEN
+'TASK 'OPTIONS 3 CELLS MOVE \ No options, no sign on.
 
-'MY-OPTIONS DUP 'OPTIONS 3 CELLS MOVE  HIDDEN
 ARGC 3 < 13 ?ERROR  0 HANDLER ! ( We are being caught!)
 2 ARG[] INCLUDED
 LATEST   2 ARG[] SRC>EXEC   TURNKEY

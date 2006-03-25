@@ -892,18 +892,19 @@ COUNT-BITS 2* CONSTANT #BITS-UD         \ NUMBER OF BITS IN UD
 { GP6 -> <TRUE> }
 
 : GP7
-   BASE @ >R  MAX-BASE BASE !
+   BASE @ >R    MAX-BASE BASE !
    <TRUE>
    A 0 DO
       I 0 <# #S #>
-      >R C@ 30 I + = AND R> 1 = AND
+      1 = SWAP C@ I 30 + = AND AND
    LOOP
-   MAX-BASE 1+ A DO
+   MAX-BASE A DO
       I 0 <# #S #>
-      >R C@ 41 I A - + = AND R> 1 = AND
+      1 = SWAP C@ 41 I A - + = AND AND
    LOOP
    R> BASE ! ;
-\ { GP7 -> <TRUE> }     \ BUG: FAILS ON JHFORTH: LOWERCASE A
+
+{ GP7 -> <TRUE> }
 
 \ >NUMBER TESTS
 CREATE GN-BUF 0 C,

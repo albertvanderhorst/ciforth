@@ -1838,7 +1838,7 @@ CODE_HEADER({J},{JDO})
         MOV     AX,[RPO+_CELLS(3)] _C{ GET INDEX VALUE}
         _PUSH          _C{ TO PARAMETER STACK}
 _C
-worddoc( {CONTROL},{UNLOOP},{unloop},{--- n},{ISO,I,C,L0},
+worddoc( {CONTROL},{UNLOOP},{unloop},{},{ISO,I,C,L0},
 {Discard the loop parameters. Must be used when the regular end
 of the loop is by-passed. That means it is not ended via
 forthcode({LOOP}) forthcode({+LOOP}) or forthcode({LEAVE}). },
@@ -2427,7 +2427,7 @@ enddoc)
 _HEADER({(;)},{SEMIS},{_VAR_FIELD(EXIT)})
 _C
 worddoc( {CONTROL},{LEAVE},{leave},{},{ISO},
-{Termination a do-loop by branching to directly behind the
+{Terminate a do-loop by branching to directly behind the
 end of a loop started by forthsamp({DO}) or forthsamp({?DO}) ,
 so after the corresponding
 forthcode({LOOP}) or forthcode({+LOOP}) .},{},
@@ -2439,7 +2439,8 @@ _HEADER({LEAVE},{LLEAV},{DOCOL})  _C{LIMIT <- INDEX}
 _C
 worddoc( {STACKS},{>R},{to_r},{n ---},{ISO,FIG,C,L0},
 {Remove a number from the forthdefi({data stack}) and place as the most
-accessable on the forthdefi({return stack}). Use should be balanced with forthcode({R>}) in
+accessable on the forthdefi({return stack}). Use
+should be balanced with forthcode({R>}) in
 the same definition.},{{R@}},
 { {: GS1 1 2 3 >R . R@ . R> . . ; GS1},{2 3 3 1} },
 enddoc)
@@ -2887,10 +2888,11 @@ _C
 worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{ISO,FIG,L0},
 {A defining word used in the form:
     forthvar({n}) forthcode({CONSTANT}) forthsamp({cccc})
-to create word forthsamp({cccc}) , with its data field containing
-forthsamp({n}) . When forthsamp({cccc}) is later executed, it
+to create word forthsamp({cccc}) ,
+where the content of its forthdefi({data field address}) is forthsamp({n}) .
+When forthsamp({cccc}) is later executed, it
 will push the value of forthsamp({n}) to the stack.},
-{{VARIABLE}},
+{{VARIABLE},{>DFA}},
 {{12A CONSTANT FRED FRED .},{12A} },
 enddoc)
 _HEADER({CONSTANT},{LCONST},{DOCOL})
@@ -2901,14 +2903,17 @@ _HEADER({CONSTANT},{LCONST},{DOCOL})
 DOCON:  MOV     AX,[WOR+_CELLS((D_HOFFSET))] _C{GET DATA FROM PFA}
         _PUSH
 _C
-worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,E,LU},
+worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,FIG,L0},
 {A defining word used in the form:
                  forthsamp({VARIABLE cccc})
-When forthcode({VARIABLE}) is executed, it creates the definition forthsamp({cccc}) with its
-data field pointing to a data location.
-When forthsamp({cccc}) is later executed, the
-content of its data field (containing forthvar({n}) ) is left on the stack,
-so that a fetch or store may access this location.},{{USER},{CONSTANT}},
+When forthcode({VARIABLE}) is executed,
+it creates the definition forthsamp({cccc})
+whose forthdefi({data field address}) contains a
+pointer forthsamp({n}) to a data location.
+When forthsamp({cccc}) is later executed,
+this pointer forthsamp({n}) is left on the stack,
+so that a fetch or store may access this location.},
+{{USER},{CONSTANT},{>DFA}},
 {{ VARIABLE APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 _HEADER({VARIABLE},{VAR},{DOCOL})
@@ -3060,7 +3065,7 @@ enddoc)
 _HEADER({C/L},{CSLL},{DOCON}, 64)
 _C
 _HIGH_BUF_({
-worddoc( {BLOCKS~},{FIRST},{first},{--- n},{},
+worddoc( {BLOCKS~},{FIRST},{first},{--- addr1},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.},
 {{BLOCK},{LIMIT}},
@@ -3085,7 +3090,7 @@ _HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB( (KBBUF+2*CW)*NBUF )
 })_C{}_END_({ _LOW_BUF_})
 _C
-worddoc( {BLOCKS~},{LIMIT},{limit},{---- n},{},
+worddoc( {BLOCKS~},{LIMIT},{limit},{---- addr1},{},
 {A constant leaving the address just above the highest memory
 available for a disc buffer.
 _HIGH_BUF_({Actually this is the highest system memory.})
@@ -3747,7 +3752,8 @@ _HEADER({>CFA},{TCFA},{DOCOL})
 _C
 worddoc( {DICTIONARY~},{>DFA},{to_data_field_address},{dea --- addr},{},
 {Given a dictionary entry addres return
-its forthdefi({data field address}) forthvar({addr}) . This points to the code for a
+its forthdefi({data field address}) forthvar({addr}) .
+This points to the code for a
 code word, to the high level code for a colon-definition, and
 to the forthcode({DOES>}) pointer for a word build using
 forthcode({CREATE}). Normally this is the area behind the
@@ -3850,10 +3856,10 @@ _HEADER({>BODY},{TOBODY},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
-{Convert the data field forthvar({addr}) of a definition
-created
-with a forthcode({CREATE}) / forthcode({DOES>}) construct to
-its forthvar({dea}). Where forthcode({>BODY}) keeps working
+{Convert the data field forthvar({addr}) of a definition created
+with a forthcode({CREATE}) / forthcode({DOES>}) construct
+_VERBOSE_({(this is not a header forthdefi({data field address}))})
+to its forthvar({dea}). Where forthcode({>BODY}) keeps working
 after forthdefi({revectoring}) , forthcode({BODY>}) does not.
 _VERBOSE_({{ There is some logic to this, because the
 }forthdefi({DEA}){ to which the body belongs is no longer
@@ -4155,7 +4161,7 @@ _C
 worddoc( {DEFINING},{CREATE},{create},{},{ISO},
 {A defining word used in the form:
      forthsamp({CREATE cccc})
-Later execution of forthsamp({cccc}) returns its data field, i.e.
+Later execution of forthsamp({cccc}) returns its forthdefi({data}) field, i.e.
 the value of forthcode({HERE}) immediately
 after executing forthcode({CREATE}) .
 
@@ -4189,7 +4195,7 @@ DODOE:  LEA     RPO,[RPO - _CELLS(1)] _C{Push HIP.}
 HLNOOP: DC      SEMIS
 _C
 worddoc( {DEFINING},{DOES>},{does},{},{ISO,FIG,L0},
-{A word which is normally use to specify the run-time action
+{A word which is normally used to specify the run-time action
 within a high-level defining word. forthcode({DOES>}) modifies
 the behaviour of the latest word as to execute the sequence of
 compiled word addresses following forthcode({DOES>}) . Used in
@@ -5067,16 +5073,22 @@ _C
 worddoc( {DEFINING~},{HEADER},{header},{sc -- dea},{},
 {Create a dictionary entry structure for the word forthvar({sc}) and
 returns its address into forthvar({dea}).
-The code field and data field both point to the area owned by this
-header, i.e. immediately following the completed header _VERBOSE_({{as
+_VERBOSE_({A pointer to each of its fields is called a "field address".
+In particular note dat a data field address is not a forthdefi({data field'})
+in the ISO sense.})
+The forthdefi({code field addres}) and forthdefi({data field address}) addres
+contain a same pointer,
+to the area owned by this header,
+i.e. immediately following the completed header _VERBOSE_({{as
 appropriate for a low level (assembler) definition}}).
 The flag and link fields are intialised to
 zero _VERBOSE_({{, so not }forthcode({HIDDEN}){}}).
-The name forthvar({sc}) is layed down in the dictionary and filled in
-into the name field.
-_SOURCEFIELD_({{The source field is filled in to best possibility.}})
+The name forthvar({sc}) is layed down in the dictionary before
+the header and filled in into the name field.
+_SOURCEFIELD_({{The source field is filled in to best knowledge.}})
 },
-{{(CREATE)}},
+{{(CREATE)},{LINK},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},
+{>SFA},{>XFA}},
 {{"FRED" HEADER >NFA @ $@ TYPE},{FRED}},
 enddoc)
 _HEADER({HEADER},{LHEAD},{DOCOL})
@@ -5139,7 +5151,7 @@ forthcode({:}) and forthcode({CONSTANT}).
 It creates a header with name forthvar({sc}) in the dictionary and
 links it into the forthcode({CURRENT}) word list.
 },
-{{HEADER},{CREATE}},
+{{HEADER},{LINK},{CREATE}},
 {{"FRED" (CREATE) ' FRED LATEST = .},{_T_}},
 enddoc)
 _HEADER({(CREATE)},{PCREAT},{DOCOL})
@@ -5149,12 +5161,14 @@ _HEADER({(CREATE)},{PCREAT},{DOCOL})
         DC      SEMIS
 _C
 worddocsafe( {COMPILING},{[COMPILE]},{bracket_compile},{},{ISO,I,C},
-{Used in a colon-definition in form:
-forthexample({:  xxx    [COMPILE]   FORTH   ;})
-forthcode({[COMPILE]}) will force the compilation of an immediate definitions,
-that would otherwise execute during compilation. The above example
-will select the forthcode({FORTH}) vocabulary when forthsamp({xxx}) executes, rather than at
-compile time.},{{POSTPONE}},
+{Used in a colon-definition in the form:
+forthexample({:  xxx ... [COMPILE] IF ...  ;})
+forthcode({[COMPILE]}) will force the compilation of an immediate definition,
+that would otherwise execute during compilation.
+The above example will perform forthcode({IF}) when forthsamp({xxx})
+executes, rather than introducing conditional code in forthsamp({xxx})
+itself.
+},{{POSTPONE}},
 { {: MY-IF [COMPILE] IF ; IMMEDIATE dnl
  : JAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 JAN 1 JAN},{2 1},
 { [COMPILE] NON-EXISTING },
@@ -5406,7 +5420,7 @@ vocabulary definition forthsamp({cccc}) . It will create a
 forthdefi({word list})in the ISO sense. Subsequent use of
 forthsamp({cccc}) will push this word list (the
 forthdefi({word list associated with}) forthsamp({cccc})) to the top of
-the search order in forthcode({CONTEXT}). So it will
+the search order in forthcode({CONTEXT}). So it will be
 searched first by forthcode({INTERPRET}) .
 
 A vocabulary 's data content field contains at first the dovoc
@@ -8324,15 +8338,15 @@ _C{------------------------------------}
 define({_FILENAMELENGTH_M4_},_BITS16_(30)_BITS32_(252))
 worddoc( {BLOCKS},{DISK-ERROR},{disk_error},{--- addr},{},
 {_PC_({
-Leave the address forthvar({addr}) of a variable containing
+{Leave the address} forthvar({addr}) {of a variable containing
 information about the latest disk error in opening, using or
 closing the block file.
 One means an
-error and and zero means okay.
+error and and zero means okay.}
 _VERBOSE_({{Beware that if error messages are loaded from disk,
 this may clear }forthcode({DISK-ERROR}){ }})})
 dnl _HOSTED_LINUX_({ This is just a flag, indicating there was an error. }).
-_HOSTED_LINUX_({ This flag is not used, errors are thrown. }).
+_HOSTED_LINUX_({{This flag is not used, errors are thrown.}}).
 },
 {{BLOCK}},
 {{." See BLOCK-EXIT"},{See BLOCK-EXIT}},
