@@ -686,6 +686,22 @@ RANDOMIZE
 
 
 
+( OBSOLETE L! L@ )       \ AvdH A6may13
+\ Use of these words in modern programs, i.e. released
+\ after 2006 may, may be risky.
+: L! FAR! ;
+: L@ FAR@ ;
+
+
+
+
+
+
+
+
+
+
+\
 ( TIME&DATE ) CF: \ AH A30610
 REQUIRE +THRU
 1 2 +THRU
@@ -2133,8 +2149,8 @@ VID PAD GET-SEL
 00 PAD     C!   20 PAD 1 + C!   00 PAD 2 + C!   80 PAD 3 + C!
 0B PAD 4 + C!
 VID PAD PUT-SEL
-: LC@ L@ 0FF AND ;
-: LC! OVER OVER L@ 0FF INVERT AND >R ROT R> OR ROT ROT L! ;
+: LC@ FAR@ 0FF AND ;
+: LC! OVER OVER FAR@ 0FF INVERT AND >R ROT R> OR ROT ROT FAR! ;
 
 DECIMAL
 
@@ -2146,8 +2162,8 @@ DECIMAL
 "VID" PRESENT? ?LEAVE-BLOCK  \ Already protected mode
 HEX
 B800 CONSTANT VID
-: LC@ L@ FF AND ;
-: LC! OVER OVER L@ FF00 AND >R ROT R> OR ROT ROT L! ;
+: LC@ FAR@ FF AND ;
+: LC! OVER OVER FAR@ FF00 AND >R ROT R> OR ROT ROT FAR! ;
 
 
 
@@ -2374,10 +2390,10 @@ DECIMAL
         CR DUP H. I H. ." : "
         I
         10 0 DO
-            2DUP I + L@ B.
+            2DUP I + FAR@ B.
             I 2 MOD IF SPACE THEN
         LOOP  [CHAR] | EMIT
-        10 0 DO 2DUP I + L@ FF AND TO-PRINT EMIT LOOP
+        10 0 DO 2DUP I + FAR@ FF AND TO-PRINT EMIT LOOP
         [CHAR] | EMIT DROP
     10 +LOOP CR DROP
 ;    HEX>
@@ -2580,11 +2596,11 @@ HEX
 \ Far address of interrupt 41
 : (int41) 0 041 4 * ;
 \ Far address of HD 1 table.
-: (hd1) (int41) CELL+ L@ (int41) L@ ;
+: (hd1) (int41) CELL+ FAR@ (int41) FAR@ ;
 \ Number of heads on hard disk one.
-(hd1) 2 + L@ 0FF AND CONSTANT #HEADS
+(hd1) 2 + FAR@ 0FF AND CONSTANT #HEADS
 \ Sectors per track for hard disk one.
-(hd1) 0E + L@ 0FF AND CONSTANT SECTORS/TRACK
+(hd1) 0E + FAR@ 0FF AND CONSTANT SECTORS/TRACK
 DECIMAL
 
 
@@ -3587,7 +3603,7 @@ CODE CRASH2   AS:, CALLFAR, HERE 4 + L, PC SG,   NEXT, C;
 7FFF IVAR GDT 2.8000 SWAP , ,
 7C0 CONSTANT CODE-SEGMENT ( The same for real and prot)
 CODE-SEGMENT  10 * CONSTANT CODE-START
-: GDT! GDT-SEGMENT SWAP L! ;   1800 CONSTANT DATA-SEGMENT
+: GDT! GDT-SEGMENT SWAP FAR! ;   1800 CONSTANT DATA-SEGMENT
 : CODE! CODE-SEGMENT + GDT! ;   : DATA! DATA-SEGMENT + GDT! ;
 : PREPARE-CS
   FFFF 0 CODE!   CODE-START 2 CODE!
