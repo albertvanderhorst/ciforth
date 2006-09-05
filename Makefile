@@ -338,7 +338,7 @@ lina.zip : $(RELEASELINA) ;\
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
-ci86.lina.o : ci86.lina.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
+ci86.lina.o : ci86.lina.asm ; nasm $+ -felf -g -o $@ -l $(@:.o=.lst)
 
 ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
