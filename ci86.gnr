@@ -1097,9 +1097,9 @@ _HOSTED_LINUX_(
 })dnl
         MOV     AX,DS
         MOV     SS,AX           _C{Atomic with next instruction.}
-        MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    _C{PARAM. STACK}
-        MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    _C{RETURN STACK}
-        MOV     HIP,_OFFSET CLD1  _C{ (IP) <-}
+        MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    _C{Parameter stack}
+        MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    _C{Return stack}
+        MOV     HIP,_OFFSET COLD+_CELLS(PH_OFFSET) _C{Interpreter pointer}
         _NEXT
 _C
 _C
@@ -1879,9 +1879,16 @@ _HEADER({+ORIGIN},{PORIG},{DOCOL})
 _C
 _C{      Initialisation block for user variables through DOC-LINK}
 _C{       <<<<< must be in same order as user variables >>>>>}
+_C{ Still fig-compatible! Both entries take two cells.}
 _C
-_C{        DC      WARM_ENTRY FIXME}
-_C{        DC      COLD_ENTRY}
+        MOV     WOR,_OFFSET COLD
+        JMP     [WOR]                   _C{Hope stacks are still okay.}
+        _ALIGN(_CELLS(1))
+dnl This is for indirect threaded code, loading HIP with PHA would be portable.
+_C{ Make it possible to revector WARM. You can even make it low level. }
+        MOV     WOR,_OFFSET WARM
+        JMP     [WOR]                   _C{Hope stacks are still okay.}
+        _ALIGN(_CELLS(1))
 USINI:  DC      STRUSA  _C{ User area currently in use, cold value same as next.}
         DC      STRUSA  _C{ INIT (U0) user area of the main task 1}
         DC      INITS0  _C{ INIT (S0)         2}
@@ -5675,9 +5682,9 @@ _C{the next call of KEY (INT 0x10 function 0x0E)}
         MOV     [0x417],{AX}
 _       MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
 })_C{}_END_({ _BOOTED_})
+
         _SWITCH_({JMPHERE_FROM_OS})
-        MOV     HIP,_OFFSET WRM1
-        _NEXT                   _C{Hope stacks are still okay.}
+        JMP USINI+_CELLS(-2)
 _C
 worddoc( {INITIALISATIONS},{WARM},{warm},{},{FIG L0},
 {Perform a so called "warm" start.
@@ -5687,7 +5694,7 @@ Show the signon message and restart via forthcode({ABORT}) .
 {{( No test)},{}},
 enddoc)
 _HEADER({WARM},{WARM},{DOCOL})
-WRM1:   DC      INIT
+        DC      INIT
         DC      SIGNON
         DC      ABORT
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
@@ -5752,7 +5759,6 @@ _BOOTED_({But it is better to reboot.})
 {{( No test)},{}},
 enddoc)
 _HEADER({COLD},{COLD},{DOCOL})
-CLD1:                           _C{Used by cold start for HIP.}
 _C{ Fill user area for single task.}
         DC      LIT, USINI      _C{ Fails if SP/RP are not usable!}
         DC      LIT, USINI+_CELLS(1), FETCH

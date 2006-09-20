@@ -1374,22 +1374,38 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 
-( DO-DEBUG NO-DEBUG ^ ) \ AvdH A5sep24
-REQUIRE OLD:
+( SET-TRAPS ) CF: \ AvdH A3jun12
+
+\ Default (MSDOS) no worky-worky
+: SET-TRAPS  DROP ;
+
+?LI
+'SET-TRAPS HIDDEN
+\ Make sure any traps restart Forth at ADDRESS .
+: SET-TRAPS  32 0 DO I OVER _ 48 LINOS DROP LOOP DROP ;
+\ Still fig tradition: warm and cold starts below origin
+: SET-TRAPS-WARM   -2 CELLS +ORIGIN   SET-TRAPS ;
+: SET-NO-TRAPS   0 SET-TRAPS ;
+: NEW-WARM    SET-TRAPS-WARM   OLD: WARM ;
+
+
+
+( DO-DEBUG NO-DEBUG ) \ AvdH A6sep19
+REQUIRE OLD:    REQUIRE SET-TRAPS
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 \ Print index line of SCREEN .
 : .INDEX-LINE  CR DUP 4 .R 0 SWAP (LINE) -TRAILING TYPE ;
 \ An alternative ``THRU'' that displays first and last index.
-: NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE
+: NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
   OLD: THRU ;
-
-\ Install and de-install the alternative ``OK''
-: DO-DEBUG
+\ Install and de-install the alternative ``OK'' and traps
+: DO-DEBUG   SET-TRAPS-WARM
+   'NEW-WARM >DFA @   'WARM >DFA !
    'NEW-OK >DFA @   'OK >DFA !
    'NEW-THRU >DFA @   'THRU >DFA ! ;
-: NO-DEBUG   'OK RESTORED   'THRU RESTORED ;
-: ^ .S ;
+: NO-DEBUG   SET-NO-TRAPS  'OK RESTORED
+ 'WARM RESTORED 'THRU RESTORED ;
 ( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A2oct24
 REQUIRE RESTORED HEX
 \ Characters ONE and TWO are equal, ignoring case.
