@@ -15,21 +15,21 @@ License along with this program; if not, write to the
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
 ( -a :_Make_require_available_silently ) \ AvdH A2jan20
-( PRESENT? REQUIRE REQUIRED ) \ AvdH A1oct04
-\ This screen must be at a fixed location. To find REQUIRED.
+( PRESENT? WANT WANTED ) \ AvdH A1oct04
+\ This screen must be at a fixed location. To find WANTED.
 \ For LINE and WORD sc's : line CONTAINS word.
 CREATE pad 80 ALLOT    : CONTAINS   0 pad !   BL pad $C+
 pad $+!   BL pad $C+   pad @ - OVER + SWAP
     DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
-263 CONSTANT #BLOCKS \ Where it says ``end of lab''.
+264 CONSTANT #BLOCKS \ Where it says ``end of lab''.
 \ Find WORD in the block library and load it.
 : FIND&LOAD   #BLOCKS ERRSCR @ 4 + DO    0 I (LINE)
     2OVER CONTAINS IF I LOAD LEAVE THEN LOOP 2DROP ;
-: PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
+
 \ Make sure WORD is present in the ``FORTH'' vocabulary.
-: REQUIRED 2DUP PRESENT 0= IF 2DUP FIND&LOAD THEN
+: WANTED 2DUP PRESENT 0= IF 2DUP FIND&LOAD THEN
     2DUP PRESENT 0= IF ETYPE 24 MESSAGE ELSE 2DROP THEN ;
-: REQUIRE (WORD) REQUIRED ;    : CF: "CONFIG" REQUIRED ;
+: WANT (WORD) WANTED ;    : CF: "CONFIG" WANTED ;
 ( -b :_This_option_is_available )
 
   .S
@@ -47,8 +47,8 @@ pad $+!   BL pad $C+   pad @ - OVER + SWAP
 
 \
 ( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH A1oct02
-1 LOAD   REQUIRE OLD:   REQUIRE TURNKEY   REQUIRE SWAP-DP
-REQUIRE ARG[]   REQUIRE INCLUDE   REQUIRE SRC>EXEC
+1 LOAD   WANT OLD:   WANT TURNKEY   WANT SWAP-DP
+WANT ARG[]   WANT INCLUDE   WANT SRC>EXEC
 : MY-ERROR  DUP EXIT-CODE ! OLD: ERROR BYE ;
 \ Be economic with disk space
 : INCD'   SWAP-DP GET-FILE SWAP-DP EVALUATE ;
@@ -79,15 +79,15 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 \
 ( -e :_Load_system_electives ) \ AvdH A3sep01
-.SIGNON CR 0 LIST  1 LOAD    : REQ REQUIRE ;
+.SIGNON CR 0 LIST  1 LOAD    
 
-REQ CONFIG      REQ HELP        REQ ORDER
-REQ L-S         REQ DO-DEBUG    REQ H.          REQ DUMP
-REQ SUPER-QUAD  REQ FARDUMP     REQ $.          REQ ^
-REQ INCLUDE     REQ CRACK       REQ LOCATE      REQ OS-IMPORT
-REQ CASE-INSENSITIVE          ( CASE-INSENSITIVE )
-\ REQ EDITOR      REQ OOPS
-\ REQ ASSEMBLERi86 REQ DEADBEEF
+WANT CONFIG      WANT HELP       WANT ORDER      
+WANT L-S         WANT DO-DEBUG   WANT H.         WANT DUMP
+WANT SUPER-QUAD  WANT FARDUMP    WANT $.         WANT ^
+WANT INCLUDE     WANT CRACK      WANT LOCATE     WANT OS-IMPORT
+WANT CASE-INSENSITIVE          ( CASE-INSENSITIVE )
+\ WANT EDITOR      WANT OOPS
+\ WANT ASSEMBLERi86 WANT DEADBEEF
 
 ( REQ DIR )     REQ ls    \ Select os-interface DOS/Unix
 
@@ -96,7 +96,7 @@ REQ CASE-INSENSITIVE          ( CASE-INSENSITIVE )
 OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD
-REQUIRE ARG[]   REQUIRE Z$@
+WANT ARG[]   WANT Z$@
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
 : DOIT
     BEGIN SHIFT-ARGS ARGC 1 > WHILE
@@ -112,8 +112,8 @@ DOIT    COMMAND-BUFFER $@
 \
 ( -g GROW :_grow_by_megabytes ) \ AvdH A4oct26
 'FORTH >WID >LFA @    HERE CONSTANT HERE-NOW
-1 LOAD      REQUIRE ARG[]  CF: ?LI
-ARGC 4 <> 13 ?ERROR    REQUIRE SAVE-SYSTEM
+1 LOAD      WANT ARG[]  CF: ?LI
+ARGC 4 <> 13 ?ERROR    WANT SAVE-SYSTEM
 SM HERE-NOW OVER - $, CONSTANT thisforth$
  2 ARG[] EVALUATE 20 LSHIFT CONSTANT INCREASE
  thisforth$ CELL+ SM - CONSTANT >TARGET
@@ -144,7 +144,7 @@ OK BYE
 \
 ( -i BINARY_PATH LIBRARY_PATH SHELL_PATH )\ A3aug30
 CREATE task     1 LOAD
-   REQUIRE ARG[]   REQUIRE SAVE-SYSTEM
+   WANT ARG[]   WANT SAVE-SYSTEM
 : INSTALL-LIB BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
     3 ARG[] BLOCK-FILE $! ;
 \ Trim back to before ``task''. Save system at binary path.
@@ -192,7 +192,7 @@ DOIT
 \
 ( -l LIBRARY :_LIBRARY_to_be_used_for_blocks ) \ AvdH A1oct05
 CREATE task
-1 LOAD   REQUIRE SHIFT-ARGS   REQUIRE ARG[]
+1 LOAD   WANT SHIFT-ARGS   WANT ARG[]
 \ Install other library
 : SWITCH-LIBS   BLOCK-EXIT
     2 ARG[] BLOCK-FILE $!
@@ -303,8 +303,8 @@ SWITCH-LIBS
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-1 LOAD   REQUIRE OLD:   REQUIRE ARG[]
-REQUIRE CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
+1 LOAD   WANT OLD:   WANT ARG[]
+WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
 : BY-WHO   "LINOS" PRESENT? IF " run by " TYPE
 0 ARG[] TYPE THEN ;
 \ This error handler may be overwritten by the script.
@@ -320,14 +320,14 @@ EVALUATE
 BYE
 ( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
 .SIGNON 1 LOAD
-\ Reload REQUIRE with new ``CORA'' but hide it direct after.
-REQUIRE CORA-IGNORE
+\ Reload WANT with new ``CORA'' but hide it direct after.
+WANT CORA-IGNORE
 : CORA CORA-IGNORE ;   1 LOAD   'CORA HIDDEN
 
-REQUIRE [IF]   REQUIRE ARG[]   REQUIRE PREFIX
+WANT [IF]   WANT ARG[]   WANT PREFIX
 
-REQUIRE CASE-INSENSITIVE    CASE-INSENSITIVE
-REQUIRE AUTOLOAD            AUTOLOAD
+WANT CASE-INSENSITIVE    CASE-INSENSITIVE
+WANT AUTOLOAD            AUTOLOAD
 
 2 ARG[] INCLUDED
 SECOND-PASS @ 0= ?LEAVE-BLOCK
