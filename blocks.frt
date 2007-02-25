@@ -22,7 +22,7 @@
  : IN PROTECTED DICTIONARY
  : USE ONLY WHEN LOADING
  : OFF CURRENT EDITING SCREEN
- : (WARNING) NOT PRESENT, THOUGH WANTED
+ : (WARNING) NOT PRESENT, THOUGH WANTED 
  : LIST EXPECTS DECIMAL
  : AS: PREVIOUS INSTRUCTION INCOMPLETE
  : AS: INSTRUCTION PROHIBITED IRREGULARLY
@@ -3488,8 +3488,8 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
 
 
 ( ************** end of lab ****************************)
-( This is the block number to be filled in into         )
-( option block 0, after combination with options.frt    )
+( This block has an empty index line to serve as an     )
+(  end sentinel                                         )
 
 
 

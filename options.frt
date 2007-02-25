@@ -15,20 +15,20 @@ License along with this program; if not, write to the
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
 ( -a :_Make_require_available_silently ) \ AvdH A2jan20
-( PRESENT? WANT WANTED ) \ AvdH A1oct04
-\ This screen must be at a fixed location. To find WANTED.
-\ For LINE and WORD sc's : line CONTAINS word.
-CREATE pad 80 ALLOT    : CONTAINS   0 pad !   BL pad $C+
-pad $+!   BL pad $C+   pad @ - OVER + SWAP
-    DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
-264 CONSTANT #BLOCKS \ Where it says ``end of lab''.
-\ Find WORD in the block library and load it.
-: FIND&LOAD   #BLOCKS ERRSCR @ 4 + DO    0 I (LINE)
-    2OVER CONTAINS IF I LOAD LEAVE THEN LOOP 2DROP ;
-
-\ Make sure WORD is present in the ``FORTH'' vocabulary.
-: WANTED 2DUP PRESENT 0= IF 2DUP FIND&LOAD THEN
-    2DUP PRESENT 0= IF ETYPE 24 MESSAGE ELSE 2DROP THEN ;
+( WANT WANTED CF: ) \ AvdH A7feb24
+CREATE pad 80 ALLOT \ Word surrounded by spaces
+: FILL-pad   ( sc --) " " pad $!   pad $+!   " " pad $+! ;
+\ For LINE : it CONTAINS the word at pad.
+: CONTAINS   pad @ - OVER + SWAP
+  DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
+\ If word is in index line of BLOCK load it. Leave NEXT block.
+: ?LOAD?   >R   0 R@ (LINE) -TRAILING   DUP 0= 24 AND THROW
+   CONTAINS IF R@ LOAD THEN   R> 1+ ;
+: (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R
+  BEGIN R> ?LOAD? >R 2DUP PRESENT UNTIL   RDROP ;
+\ Make sure WORD is present in the ``FORTH'' vocabulary
+: WANTED   2DUP FILL-pad '(WANTED) CATCH
+  DUP 24 = IF >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
 : WANT (WORD) WANTED ;    : CF: "CONFIG" WANTED ;
 ( -b :_This_option_is_available )
 
@@ -79,9 +79,9 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 \
 ( -e :_Load_system_electives ) \ AvdH A3sep01
-.SIGNON CR 0 LIST  1 LOAD    
+.SIGNON CR 0 LIST  1 LOAD
 
-WANT CONFIG      WANT HELP       WANT ORDER      
+WANT CONFIG      WANT HELP       WANT ORDER
 WANT L-S         WANT DO-DEBUG   WANT H.         WANT DUMP
 WANT SUPER-QUAD  WANT FARDUMP    WANT $.         WANT ^
 WANT INCLUDE     WANT CRACK      WANT LOCATE     WANT OS-IMPORT
@@ -89,7 +89,7 @@ WANT CASE-INSENSITIVE          ( CASE-INSENSITIVE )
 \ WANT EDITOR      WANT OOPS
 \ WANT ASSEMBLERi86 WANT DEADBEEF
 
-( REQ DIR )     REQ ls    \ Select os-interface DOS/Unix
+( WANT DIR )     WANT ls    \ Select os-interface DOS/Unix
 
 : TASK ;
  ( BACKUP        250 LOAD   77 81 THRU )
