@@ -495,7 +495,7 @@ that is 16 bits in an otherwise 32 bits environment.
 @section The built in assembler
 
 From within ciforth one can load an assembler from the installed LAB
-library by the command forthcode({REQUIRE ASSEMBLERi86 }).
+library by the command forthcode({WANT ASSEMBLERi86 }).
 Automatically a 32 bit assembler is loaded
 if the Forth itself is 32 bits and a 16 bit assembler for the
 16 bit forths.

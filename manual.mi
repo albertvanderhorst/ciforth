@@ -57,7 +57,7 @@ Forth as such doesn't have a library mechanism,
 but thisforth does.
 
 thisforth uses the forthdefi({blocks}) as a library
-by addition of the word forthcode({REQUIRED}) and a convention.
+by addition of the word forthcode({WANTED}) and a convention.
 Starting with forthsamp({thisforth -r}) or most any option you have this
 facility available. If you are already in thisforth, you can
 type forthsamp({1 LOAD}).
@@ -73,7 +73,7 @@ the header of each
 block that is forthcode({LOAD})-ed is shown. forthbreak
 Type (forthsamp({1 LOAD}) may not be necessary):
 forthexample({1 LOAD
-"DO-DEBUG" REQUIRED
+"DO-DEBUG" WANTED
 OK
 DO-DEBUG
 
@@ -86,21 +86,24 @@ If you try to forthcode({INCLUDE}) a program, you may
 get errors like forthsamp({TUCK? ciforth ERROR # 12 : NOT RECOGNIZED}).
 forthxref({Errors}) Section Explanations.
 Apparently, thisforth doesn't know about a forth word named
-forthcode({TUCK}), but after forthsamp({"TUCK" REQUIRED}) maybe
+forthcode({TUCK}), but after forthsamp({"TUCK" WANTED}) maybe
 it does. You may try again.
 
 The convention about the way the library file must be
-organized for forthcode({REQUIRED}) to find something is
+organized for forthcode({WANTED}) to find something is
 simple. It is divided into blocks of 16 lines.
-The first line is the header of the block. If the word
-we are looking for is mentioned in the header, that
-block is compiled.
+The first line is the header of the block.
+If the word we are looking for is mentioned in the header,
+that block is compiled.
+This continues until the word has been defined,
+or the end of the search area is reached.
+This is marked by a screen with an empty index line.
 
 The library file contains examples for you
-to load using forthcode({REQUIRE}) .
+to load using forthcode({WANT}) .
 Try
 forthexample(
-{REQUIRE SIEVE
+{WANT SIEVE
 LIM # 4 ISN'T UNIQUE
 OK
 10 SIEVE
@@ -123,9 +126,9 @@ forthbreak
 You will have available:
 forthenumerate
 forthitem
-forthcode({REQUIRED}) and forthcode({REQUIRE}) .
-forthsamp({REQUIRE xxx}) is equivalent to
-forthsamp({"xxx" REQUIRED}) , but it is more convenient.
+forthcode({WANTED}) and forthcode({WANT}) .
+forthsamp({WANT xxx}) is equivalent to
+forthsamp({"xxx" WANTED}) , but it is more convenient.
 forthitem
  forthcode({DH.}) forthcode({H.}) forthcode({B.}) forthcode({DUMP}) forthcode({FARDUMP})
 For showing numbers in hex and parts of memory.
@@ -187,11 +190,11 @@ you must
 start up thisforth again by forthsamp({thisforth -e}).
 The sequence
 forthexample(
-{REQUIRE TUCK
+{WANT TUCK
 LOCATE TUCK})
 shows you the source for TUCK if it is in the library somewhere.
 forthexample(
-{REQUIRE TUCK
+{WANT TUCK
 CRACK TUCK})
 show you the source for TUCK if it is in the library or in the kernel,
 but without comment or usage information.
@@ -201,7 +204,7 @@ For configuring your thisforth, without enlarging the dictionary,
 you may use the following sequence
 forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
 1 LOAD
-REQUIRE SAVE-SYSTEM
+WANT SAVE-SYSTEM
 : DOIT
     'CONTAINS 'FORTH FORGET-VOC
     'CONTAINS >NFA @ DP !
@@ -470,6 +473,27 @@ where you want your code to run on.
 
 By using forthcode({CELL+}) it is easy to keep your code 16/32 bit clean.
 This means that it runs on 16 and 32 bits systems.
+@section Compatibility with thisforth 4.0.x
+Since version 4.2 changes have been made to increase compatibility
+with existing practice.
+By invoking forthcode({WANT _legacy_}) you load a screen that
+forces compatibility with 4.0 and 4.1 versions.
+You will notice that existing programs either invoke this, or have
+been reworked to not need legacy items.
+In either case, those programs have been tested with version 4.2.
+
+What the legacy items are can be seen from the screen that has
+forthcode({_legacy_}) in its index line.
+In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY})
+are to be found in that screen.
+
+The names forthcode({VOCABULARY REQUIRE}) are proposed for standardisation.
+The ciforth definitions are not compatible with this proposal.
+So the forthcode({REQUIRE}) of older versions is now called forthcode({WANT}).
+Likewise forthcode({REQUIRED}) is renamed to forthcode({WANTED}).
+forthcode({VOCABULARY}) is renamed to forthcode({NAMESPACE}).
+This allows to include the new standardised definitions
+in a loadable screen.
 @section Saving a new system
 We have said it before: ``Programming Forth is extending the Forth language.''.
 A facility to save your system after it has been extended is of the essential.
@@ -527,7 +551,7 @@ Copy your thisforth to a new file using forthcode({PUT-FILE}) .
 The difficult part is to add to the system specific header information
 about the new size of the system, which is
 the area from forthcode({BM}) to forthcode({HERE}).
-The command forthsamp({REQUIRE SAVE-SYSTEM}) loads
+The command forthsamp({WANT SAVE-SYSTEM}) loads
 a version that does that correctly for your hosted system.
 forthendenumerate
 
@@ -685,7 +709,7 @@ A text editor and machine code assembler are the first tools
 normally available.
 An assembler is
 not part of ciforth as delivered, but it
-is available after forthsamp({REQUIRE ASSEMBLERi86}).
+is available after forthsamp({WANT ASSEMBLERi86}).
 It automatically loads the proper _BITS_-bits version.
 You can load a more elaborate assembler. forthxref(Assembler) Section Overview.
 They are among the first candidates to be integrated into
@@ -715,6 +739,7 @@ forthbreak
 386 and a 8086
 Forth assemblers are available in forthfile({forth.lab}).
 They are loaded in accordance with the system that is run.
+The register used by thisforth are HIP, SPO, RPO and WOR.
 
 It is essential that you regard thisforth as just a way to get started
 with Forth.
@@ -1023,9 +1048,9 @@ This is that the words defined in a screen are
 mentioned on the first line of that screen,
 the forthdefi({index line}).
 This is of course quite established as a habit.
-The word forthcode({REQUIRED}) takes a string and loads the
+The word forthcode({WANTED}) takes a string and loads the
 first screen where that name occurs in the index line. For
-convenience also forthcode({REQUIRE}) is there that looks ahead
+convenience also forthcode({WANT}) is there that looks ahead
 in the input stream.
 These words are not in the kernel but are in screen 17, that
 corresponds to the forthsamp({-r}) option.
@@ -1052,7 +1077,7 @@ forthitemize
 forthitem
 forthsamp({-a})
 
-Make sure forthcode({REQUIRED}) is available.
+Make sure forthcode({WANTED}) is available.
 This is a copy of the forthsamp({-r}) command
 because it is easier to remember forthsamp({1 LOAD}) if the screen
 must be loaded manually.
@@ -1066,7 +1091,7 @@ is forthfile({name}) without the trailing forthsamp({.frt}) or else forthfile({a
 Upon invocation of the binary the word defined latest is executed, then Forth goes
  forthcode({BYE}) .
 _VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
-Also forthcode({REQUIRED}) is made available.
+Also forthcode({WANTED}) is made available.
 
 forthitem
 forthsamp({-e})
@@ -1079,7 +1104,7 @@ _VERBOSE_({{In a elective screen you just put
 commands you want to be executed after Forth starts up, such as }})
 _VERBOSE_({forthsamp({ "fortune -f /usr/lib/forthcookies" SYSTEM })})
 _VERBOSE_({{ or }})
-_VERBOSE_({forthsamp({ REQUIRE EDIT })})
+_VERBOSE_({forthsamp({ WANT EDIT })})
 
 forthitem
 forthsamp({-f forthcode})
@@ -1166,7 +1191,7 @@ forthcode({OS-IMPORT}) is made available to add to this list.
 forthitem
 forthsamp({-r})
 
-Make sure forthcode({REQUIRED}) is available.
+Make sure forthcode({WANTED}) is available.
 
 _HOSTED_LINUX_({
 forthitem
@@ -1178,7 +1203,7 @@ interpreted rather than compiled.
 _VERBOSE_({{The first line is probably}
 forthsamp({#!lina -s}){ or some such as }
 forthsamp({#!lina -l /usr/lib/forth/cgi/forth.lab -s}).})
-In a script forthcode({REQUIRED}) is available and
+In a script forthcode({WANTED}) is available and
 you can use standard in and standard out.
 })
 forthitem
@@ -1204,7 +1229,7 @@ or for user defined options in a private library.
 
 Working with source in files is quite comfortable using the default block library, especially
 if sufficient tools have been added to it. In principle all ISO words should be
-made available via forthcode({REQUIRED}) .
+made available via forthcode({WANTED}) .
 
 In order to customize the forth library, you have to make a
 copy _HOSTED_LINUX_({of the default

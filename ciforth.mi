@@ -176,7 +176,7 @@ The editor for editing screens is a very simple screen editor.
 For editing files from within thisforth you just use Your Favorite
 Editor (forthpxref({Manual})).
 
-The editor becomes available after forthsamp({REQUIRE EDITOR})
+The editor becomes available after forthsamp({WANT EDITOR})
 and is invoked by  forthsamp({<number> EDIT}) or forthcode({E-S}) for
 the current screen at forthcode({SCR}).
 
@@ -286,8 +286,8 @@ _VERBOSE_({ and only words that match in this respect too
 are found in the dictionary}).
 
 After forthsamp({1 LOAD}) or if started up using forthsamp({lina -r})
-you have forthcode({REQUIRED}) available.
-You may now issue forthsamp({  "CASE-INSENSITIVE" REQUIRED }) and switch the system
+you have forthcode({WANTED}) available.
+You may now issue forthsamp({  "CASE-INSENSITIVE" WANTED }) and switch the system
 into case-insensitivity and back by issuing the words forthcode({CASE-INSENSITIVE}) and
 forthcode({CASE-SENSITIVE}).
 
@@ -558,8 +558,8 @@ forthitem
 forthsamp({ciforth ERROR # 23 : OFF CURRENT EDITING SCREEN})
 
 forthitem
-forthsamp({ciforth ERROR # 24 : (WARNING) NOT PRESENT, THOUGH REQUIRED})
-This error is reported by forthcode({REQUIRED}).
+forthsamp({ciforth ERROR # 24 : (WARNING) NOT PRESENT, THOUGH WANTED})
+This error is reported by forthcode({WANTED}).
 The word you required, has been looked up in the index lines.
 It was not found in the index lines,
 or it was a dummy item,
