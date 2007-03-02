@@ -82,7 +82,7 @@ CREATE x-TABLE , ,
 : x<  x-ADDRESSES   8 CORA 0< ;
 
 \ Swap the contents of two things of ``x-TABLE'' by the 2 INDICES
-: x<-->    ADDRESSES 8 EXCHANGE ;
+: x<-->  x-ADDRESSES 8 EXCHANGE ;
 
 WT
 0 9 'x< 'x<--> QSORT
