@@ -22,7 +22,7 @@
  : IN PROTECTED DICTIONARY
  : USE ONLY WHEN LOADING
  : OFF CURRENT EDITING SCREEN
- : (WARNING) NOT PRESENT, THOUGH WANTED 
+ : (WARNING) NOT PRESENT, THOUGH WANTED
  : LIST EXPECTS DECIMAL
  : AS: PREVIOUS INSTRUCTION INCOMPLETE
  : AS: INSTRUCTION PROHIBITED IRREGULARLY
@@ -526,14 +526,13 @@ See also  binary_search_test in the examples section.
 
 
 \
-( QSORT ) \ AvdH A2apr22
-WANT DEFER   WANT +THRU
+( QSORT 1 ) \ AvdH A7feb28
+WANT DEFER
 \ Compare item N1 and N2. Return ``N1'' IS lower and not equal.
 DEFER *<
 \ Exchange item N1 and N2.
 DEFER *<-->
 
-1 2 +THRU
 
 
 
@@ -542,7 +541,8 @@ DEFER *<-->
 
 
 
-( QSORT_part2 ) \ AvdH A2apr22
+
+( QSORT 2 ) \ AvdH A7feb28
 \ Partition inclusive range LO HI leaving LO_1 HI_1 LO_2 HI_2.
 : PARTITION   2DUP + 2/   >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
@@ -558,7 +558,7 @@ DEFER *<-->
     2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
     RDROP                            ( R: )
     SWAP ROT ;      ( lo_1 hi_1 lo_2 hi_2)
-( QSORT_part3 ) \ AvdH A2apr22
+( QSORT ) \ AvdH A7feb28
 \ Sort the range LOW to HIGH inclusive observing
 \ ``LOW'' and ``HIGH'' must be indices compatible with the
 \   current values of *< and *<-->
@@ -718,22 +718,6 @@ RANDOMIZE
 
 
 \
-( TIME&DATE ) CF: \ AH A30610
-WANT +THRU
-1 2 +THRU
-
-
-
-
-
-
-
-
-
-
-
-
-
 ( TIME&DATE ) CF: ?LI \ AH A30610
 : SSE   0 0 0 13 LINOS ; ( Seconds since epoch: 1970/1/1)
 : |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
@@ -862,23 +846,7 @@ CODE TICKS RDTSC, PUSH|X, AX| PUSH|X, DX| NEXT, C;
 \ For a TIME in ticks: it IS in the past.
 : PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 DECIMAL
-( TICKS-PER-SECOND ) \ AvdH A2oct21
-
-WANT +THRU
-1 1 +THRU   "TICKS-PER-SECOND" PRESENT ?LEAVE-BLOCK
-
-
-." What is the speed of your Pentium (in Mhz)?"
-PAD DUP 80 ACCEPT EVALUATE 1000000 *
-  CONSTANT TICKS-PER-SECOND
-
-
-
-
-
-
-
-( TICKS-PER-SECOND ) \ AvdH A3nov07
+( TICKS-PER-SECOND ) CF: \ AvdH A7feb28
 
 "MS" PRESENT 0= ?LEAVE-BLOCK
 
@@ -887,6 +855,22 @@ DECIMAL TICKS DNEGATE 1000 MS TICKS D+ DROP
 
 
 
+
+
+
+
+
+
+
+( TICKS-PER-SECOND ) \ AvdH A2oct21
+
+
+
+
+
+." What is the speed of your Pentium (in Mhz)?"
+PAD DUP 80 ACCEPT EVALUATE 1000000 *
+  CONSTANT TICKS-PER-SECOND
 
 
 
@@ -1054,23 +1038,7 @@ WANT T[
 
 
 
-( ARGC ARG[] SHIFT-ARGS SRC>EXEC ) \ AvdH A3mar20
-
-
-WANT +THRU
-
-1 4 +THRU
-
-
-
-
-
-
-
-
-
-
-( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV ) CF: ?LI \ AvdH A3mar20
+( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV 1) CF: ?LI \ AvdH A3mar20
 WANT Z$@   WANT COMPARE
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
@@ -1086,23 +1054,7 @@ WANT Z$@   WANT COMPARE
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
 
-( SRC>EXEC   ) CF: ?LI \ AvdH A3mar20
-
-\ Given a source file NAME, return the binary file NAME.
-: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
-
-
-
-
-
-
-
-
-
-
-
-
-( ARG$ ARGC ARG[] SHIFT-ARGS ) CF: ?PC \ AvdH A3mar25
+( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?PC \ AvdH A3mar25
 HEX    WANT DROP-WORD
 \ Return argument STRING for (prot) DOS.
 : ARG$   80 COUNT -LEADING -TRAILING ;
@@ -1118,7 +1070,23 @@ HEX    WANT DROP-WORD
 : SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
 DECIMAL
 
-( SRC>EXEC ) CF: ?PC                \ AvdH A3mar20
+( SRC>EXEC 1  ) CF: ?LI \ AvdH A3mar20
+
+\ Given a source file NAME, return the binary file NAME.
+: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+
+
+
+
+
+
+
+
+
+
+
+
+( SRC>EXEC 2 ) CF: ?PC                \ AvdH A3mar20
 HEX
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   PAD $!   PAD $@ + 4 - >R
@@ -1150,23 +1118,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
 
 
 
-( SAVE-SYSTEM TURNKEY ) \ AvdH
-WANT +THRU
-1 3 +THRU
-
-
-
-
-
-
-
-
-
-
-
-
-
-( SAVE-SYSTEM TURNKEY ) CF: ?LI HEX \ AvdH
+( SAVE-SYSTEM TURNKEY 1 ) CF: ?LI HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -1182,7 +1134,7 @@ WANT +THRU
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
-( --save_system_turnkey ) CF: ?PC HEX \ AvdH
+( SAVE-SYSTEM TURNKEY 1 ) CF: ?PC HEX \ AvdH A7feb28
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer
 : W,   HEAD-DP @ >R   \ Add a 16 bit WORD to the header.
@@ -1198,7 +1150,7 @@ VARIABLE HEAD-DP  \ Fill in pointer
   HEAD-DP @  0 W,   100 W,   -10 W,   SIZE W,   0 W, ;
  STALEST CONSTANT SIZE^  \ Give -g a harmless address.
  BM CONSTANT SM          \ Start for -g.
-( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH
+( SAVE-SYSTEM TURNKEY 2 ) CF: ?PC HEX \ AvdH A7feb28
 \ Fill in checksum at the required POSITION in the header.
 : CHECKSUM   HEAD-DP !
     0   SIZE 0 DO I @ + 2 +LOOP  NEGATE   W, ;
@@ -1518,11 +1470,8 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
-( SEE KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
-WANT +THRU
-1 7 +THRU
-: SEE   CRACK ;
-: KRAAK CRACK ;
+( KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
+WANT SEE
 
 
 
@@ -1534,7 +1483,10 @@ WANT +THRU
 
 
 
-( cracker1 ) \ AvdH A1MAY17
+
+
+
+( SEE   1 ) \ AvdH A1MAY17
  CREATE SELTAB 60 CELLS ALLOT   CREATE SELTOP SELTAB ,
  : T,  ( N--. Put N in select table)
      SELTOP @ !  0 CELL+ SELTOP +!  ;
@@ -1550,7 +1502,7 @@ WANT +THRU
            DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
 
-( cracker2 ) \ AvdH A0MAR30
+( SEE   2 ) \ AvdH A0MAR30
  : CRACKED ( DEA--. Decompile a word from its DEA)
   (  DUP NEXTD >NFA @ LIM ! Get an absolute limit)
     DUP @ SEL@ IF ( Is content of CFA known?)
@@ -1566,7 +1518,7 @@ WANT +THRU
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
-( cracker3 ) \ AvdH A1MAY17
+( SEE   3 ) \ AvdH A1MAY17
 ( DEA--DEA Get the DEA of the word defined after the CFA one)
 : NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
 WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
@@ -1582,7 +1534,7 @@ BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP CRACKED REPEAT DROP ;
 DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
 
 
-( cracker4 ) \ AvdH A0apr11
+( SEE   4 ) \ AvdH A0apr11
  : BY ( DEA --. the CFA word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
  ( Example of a defining word decompilation)
@@ -1598,7 +1550,7 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
      IF EXECUTE ( The special) ALIGNED ELSE
         DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
-( cracker5 ) \ AvdH A20MAR21
+( SEE   5 ) \ AvdH A20MAR21
 : CRACK-CHAIN CR BEGIN ?Q DUP @ LIT (;) <>
 ( >R DUP LIM @ < R> AND )  WHILE ITEM REPEAT DROP ;
  ( Decompilation of special high level words)
@@ -1614,7 +1566,7 @@ CFOF LIT BY -lit
 
 
 
-( cracker6 ) \ AvdH A0APR11
+( SEE   6 ) \ AvdH A0APR11
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
                       CFOF SKIP BY -sk
@@ -1630,7 +1582,7 @@ CFOF LIT BY -lit
   ( DIRTY TRICK FOLLOWING :
 make decompile pointer point to exit!)
     DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
-( cracker7 ) \ AvdH A1MAY17
+( SEE   7 ) \ AvdH A1MAY17
  : -dd CFA> ." CREATE DOES> word " ID.. CR ;
         CFOF FORTH @ BY -dd
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
@@ -1642,9 +1594,9 @@ CFOF 0BRANCH BY -0br
 : -br  CR ." BRANCH  [ " -con ." , ] " -target ;
 CFOF BRANCH BY -br
 
+: KRAAK CRACK ;
 
-
-
+: SEE   CRACK ;
 
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
 VOCABULARY ASSEMBLER IMMEDIATE
@@ -2079,7 +2031,7 @@ DECIMAL
 
 
 ( OS-IMPORT cdED ) CF: \ AvdH A2feb05
-"SYSTEM" PRESENT 0= ?LEAVE-BLOCK   WANT +THRU
+"SYSTEM" PRESENT 0= ?LEAVE-BLOCK
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
      CREATE , ,
@@ -2091,22 +2043,6 @@ CREATE cmdbuf 1000 ALLOT
 ?LI
 \ Change directory to SC .
 : cdED   ZEN HERE HERE 12 LINOS ?ERRUR ;
-
-
-
-( cat echo diff grep list ls make man rm cd cp ee l ) CF:
-\ Unix like commands
-WANT +THRU
-1 2 +THRU
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2124,7 +2060,7 @@ WANT OS-IMPORT ( and cdED )          \ AvdH A30325
 "man    "   OS-IMPORT man
 "rm  -i "   OS-IMPORT rm
 \ "ee     "   OS-IMPORT ee  \ My favorite editor
-"vi           OS-IMPORT ed  \ Less favorite editor
+"vi     "     OS-IMPORT ed  \ Less favorite editor
 ""          OS-IMPORT !!
 ( cat cd cp echo ed more ls rm   ee l unix) CF: ?WIMS \ AvdH
 WANT OS-IMPORT       HEX
@@ -2958,23 +2894,7 @@ This contains examples and benchmarks.
         THEN
      LOOP ;
 
-( ERATOSTHENES SIEVE by_multiple_batches ) \ AvdH A1oct04
-( Adaptations from CP/M : VARIABLE )
-WANT +THRU
-1 5 +THRU
-
-
-
-
-
-
-
-
-
-
-
-
-(       ERATOSTHENES >1< Variables - A. van der Horst         )
+( ERATOSTHENES SIEVE 1 Variables - A. van der Horst         )
  ( User specified variables:)
 VARIABLE CH/L  80 CH/L  !  ( Characters per line)
 VARIABLE LN/P  24 LN/P  ! ( Lines per page)
@@ -2990,7 +2910,7 @@ VARIABLE PAUSE  1 PAUSE ! ( Boolean: pause between pages)
  VARIABLE MILS      ( Contains current thousand)
  VARIABLE MANTISSA  ( The current thousands is to be printed)
 
-(       ERATOSTHENES >2< Pretty printing - A. van der Horst   )
+( ERATOSTHENES SIEVE 2 Pretty printing - A. van der Horst   )
  : FFEED  PAUSE @ IF CR ." KEY FOR NEXT SCREEN" KEY DROP THEN
      12 EMIT CR ." ERATOSTHENES SIEVE -- PRIMES LESS THAN"
      THOUSANDS @ 5 .R ."  000" CR 2 L# ! 1 MANTISSA ! ;
@@ -3006,7 +2926,7 @@ VARIABLE PAUSE  1 PAUSE ! ( Boolean: pause between pages)
  : .P   4 ?L SPACE 0 <# # # # #> TYPE ;
  : INIT-P  FFEED NEWLINE  ;
 
-(       ERATOSTHENES >3< Bit manipulation - A. van der Horst  )
+( ERATOSTHENES SIEVE 3 Bit manipulation - A. van der Horst  )
    HEX
  : NOT   0FF XOR ( N -- N  FLIP ALL BITS OF N) ;
 CREATE S-MASK
@@ -3022,7 +2942,7 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
            OVER C@ AND SWAP C! ( Clear the bit)  ;
 
 
-(       ERATOSTHENES >4< Bit manipulation - A. van der Horst  )
+( ERATOSTHENES SIEVE 4 Bit manipulation - A. van der Horst  )
  : SET-B ( BIT# --  sets the specified bit)
            8/MOD FLAGS + SWAP  ( Address in flags table)
            S-MASK + C@         ( Get mask)
@@ -3038,7 +2958,7 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
  : CHECK SIZE 16 UM* 1000 UM/MOD  THOUSANDS @ U< IF
        ." INCREASE SIZE " ABORT ELSE DROP DROP THEN ;
 
-(       ERATOSTHENES >5< Main program - A. van der Horst     )
+( ERATOSTHENES SIEVE 5 Main program - A. van der Horst     )
  : BATCH1 ( First batch of 500 numbers)
       500 1 ( Only odd numbers)
      DO I TEST-B
