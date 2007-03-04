@@ -117,7 +117,7 @@ _HOSTED({_BITS32_({define({M4_NBUF}, 16)})})
 _HOSTED({_SWITCH_({_BITS32_({define({M4_INITDP},{0x110000})})})})
 _BITS32_({define({M4_MAXWORDLIST}, 16)})
 
-dnl LEAVE THIS! THE BOOT CODE IS ALWAYS 16 BITS.
-include(width16.m4)
+_BITS16_({include(width16.m4)})
+_BITS32_({include(width32.m4)})
 include(namescooked.m4)
 divert{}dnl

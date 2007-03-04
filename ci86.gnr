@@ -800,9 +800,9 @@ _C{ Required start of .COM program.}
         ORG     0x100          _C{ Accommodate also .exe files}
 ORIG:
 _C{ These are real mode descriptors !}
-        MOV     _CELL_PTR[SaveCS],CS           _C{ Once and for all}
-        MOV     _CELL_PTR[SaveDS],DS
-        MOV     _CELL_PTR[SaveES],ES           _C{ Still pointing to PSP (!?)}
+        MOV     WORD[SaveCS],CS           _C{ Once and for all}
+        MOV     WORD[SaveDS],DS
+        MOV     WORD[SaveES],ES           _C{ Still pointing to PSP (!?)}
 })_C{}_END_({_HOSTED_DPMI_})
 _MODERN_({
         MOV     [LOADEXEC+4], DS
@@ -875,9 +875,9 @@ ERRMSG:
 _C{ If we reach this point, we are operating in protected mode}
 DPMISUCCESS:
 _C{ -------------- First and for all: save --------}
-            MOV     _CELL_PTR[Save_CS_PR],CS
-            MOV     _CELL_PTR[Save_DS_PR],DS
-            MOV     _CELL_PTR[Save_ES_PR],ES
+            MOV     WORD[Save_CS_PR],CS
+            MOV     WORD[Save_DS_PR],DS
+            MOV     WORD[Save_ES_PR],ES
 _C{ -------------- Get a new segment for our Forth to ES --------}
             MOV     AX,0x0000            _C{A new selector.}
             MOV     CX,1
@@ -887,8 +887,8 @@ _C{ -------------- Get a new segment for our Forth to ES --------}
             JC      ERRMSG
 
             MOV     AX,0x0501            _C{Allocate memory}
-            MOV     BX, _CELL_PTR[LEM+_CELLS(D_HOFFSET)+2] _C{Split into two words}
-            MOV     CX, _CELL_PTR[LEM+_CELLS(D_HOFFSET)]
+            MOV     BX, WORD[LEM+_CELLS(D_HOFFSET)+2] _C{Split into two words}
+            MOV     CX, WORD[LEM+_CELLS(D_HOFFSET)]
             INT     0x31
             PUSH    CX
             PUSH    BX
@@ -906,8 +906,8 @@ ERRMSG2:    JC      ERRMSG
 
             MOV     AX,0x0008            _C{Set segment limit.}
             MOV     BX,ES
-            MOV     CX, _CELL_PTR[LEM+_CELLS(D_HOFFSET)+2] _C{Split into two words}
-            MOV     DX, _CELL_PTR[LEM+_CELLS(D_HOFFSET)]
+            MOV     CX, WORD[LEM+_CELLS(D_HOFFSET)+2] _C{Split into two words}
+            MOV     DX, WORD[LEM+_CELLS(D_HOFFSET)]
             SUB     DX,1
             SBB     CX,0
             INT     0x31
@@ -1024,7 +1024,20 @@ _C{ ######################### DPMI END #########################################
 
 _BITS32_({
 _C{************************}
-include(width32.m4)
+dnl It doesn't make sense to have duplicate code for 16/32 bits
+dnl where m4 can handle it this easily.
+SET_32_BIT_MODE         _C Assembler directive
+define({DC},{DD})dnl
+define({AX},{EAX})dnl
+define({BX},{EBX})dnl
+define({CX},{ECX})dnl
+define({DX},{EDX})dnl
+define({DI},{EDI})dnl
+define({SI},{ESI})dnl
+define({BP},{EBP})dnl
+define({SP},{ESP})dnl
+define({LODSW},{LODSD})dnl Only instruction to be changed.
+define({WORD},{LONG})dnl
 _C{************************}}
 ,{dnl})
 _SWITCH_({
@@ -3587,7 +3600,8 @@ enddoc)
 _HEADER({,},{COMMA},{DOCOL})
         DC      HERE
         DC      STORE
-        DC      LCELL
+        DC      LIT
+        DC      CW
         DC      ALLOT
         DC      SEMIS
 _C
