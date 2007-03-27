@@ -142,6 +142,22 @@ for ISO, that in my opinion should never be loaded.
 
 
 \
+( DEPTH )                               \ AvdH A7mar27
+: DEPTH   S0 @ DSP@ -   [ 0 CELL+ ] LITERAL /   1- ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ( DEADBEEF leading_hex_digit) CF: \ AvdH A5jun28
 \ Are denotations starting with "Z" already known?
 "A" 'ONLY >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK

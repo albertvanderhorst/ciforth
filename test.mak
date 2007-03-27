@@ -169,7 +169,8 @@ cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
 
 TESTLINA= \
 test.m4 \
-ci86.lina.rawtest
+ci86.lina.rawtest \
+ci86.lina.labtest
 
 TESTLINUX= \
 test.m4 \

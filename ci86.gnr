@@ -2090,9 +2090,7 @@ or at the end of the current input source if it isn't
 there. The character is consumed.
 _VERBOSE_({{As it goes with }forthdefin({string constant}){s, you may not alter
 its content, nor assume anything is appended.}})
-_VERBOSE_({{So no leading delimiters are skipped.}})
-_VERBOSE_({{The difference with an ISO }forthsamp({PARSE}){ is that
-ISO considers control characters a match for a blank.}})},
+_VERBOSE_({{So no leading delimiters are skipped.}})},
 {{WORD},{NAME}},
 {{ : GS1 5A PARSE . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
 _HEADER({PARSE},{PARSE},{DOCOL})
@@ -2371,19 +2369,12 @@ CODE_HEADER({DSP!},{SPSTO})
         _NEXT
 _C
 _LOAD_({
-worddoc( {STACKS},{DEPTH},,{--- n1},{ISO},
+worddoc( {STACKS},{DEPTH},,{--- n1},{ISO,WANT},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthvar({n1}) was pushed.},
 {{DSP@}},
-{{  1 2 3 DEPTH . DROP DROP DROP},{3} },
+{},
 enddoc)
-_HEADER({DEPTH},{DEPTH},{DOCOL})
-        DC      SZERO, FETCH
-        DC      SPFET
-        DC      LSUB
-        DC      LIT, CW, SLASH
-        DC      ONEM
-        DC      SEMIS
 _C
 })_C{}_END_({_LOAD_})
 worddocsafe( {STACKS},{RSP@},{r_s_p_fetch},{--- addr},{},
@@ -2977,7 +2968,7 @@ worddoc( {MISC},{_},{do_not_care},{--- x},{},
 {Leave an undefined value forthvar({x}).
 _VERBOSE_({{Presumably it is to be dropped at some time, or it is a place holder.}})
 },{},
-{{DEPTH _ DEPTH SWAP DROP - .},{-2}},
+{{123475 _ DROP . },{123475}},
 enddoc)
 CODE_HEADER({_},{X})
         _PUSH _C{Whatever happens to be in }AX{, i.e. the dea of ``_''.}
