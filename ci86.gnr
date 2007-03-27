@@ -1084,11 +1084,11 @@ ENDIF1:
 
 })_C{}_END_({_LINUX_C_})
 
-_LINUX_N_({
+_HOSTED_LINUX_({
 _C{ 4.15.3.2}
-ciforth:
+dnl ciforth:
 _start:
-})_C{}_END_({_LINUX_N_})
+})_C{}_END_({_HOSTED_LINUX_})
 COLD_ENTRY:
         CLD                     _C{ DIR = INC}
 _THREADS_({
