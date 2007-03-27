@@ -1,0 +1,6 @@
+1 LOAD
+divert(4)dnl
+-legacy-
+wordtest( {DEPTH},
+{ {WANT DEPTH},{},
+{  1 2 3 DEPTH . DROP DROP DROP},{3} })
