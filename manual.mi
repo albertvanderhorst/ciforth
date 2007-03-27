@@ -248,26 +248,26 @@ This process is called forthdefi({allocating}), and the boundary is marked by
 a forthdefi({dictionary pointer}) called forthcode({DP}) .
 A word can be executed by typing its name.
 Each word in the dictionary belongs to precisely one forthdefi({word list}),
-or as we will say here vocabulary.
+or as we will say here namespace.
 Apart from the name, a word contains data and executable code,
 (interpreted or not) and linking information
-(forthpxref({VOCABULARY})).
+(forthpxref({NAMESPACE})).
 
 The concept word list is part of the ISO standard, but we will
-use forthdefi({vocabulary}). A vocabulary is much more
+use forthdefi({namespace}). A namespace is much more
 convenient, being a word list with a name, created by
-forthcode({VOCABULARY}) . ISO merely knows
+forthcode({NAMESPACE}) . ISO merely knows
 forthdefi({word list identifier}) 's, a kind of handle,
 abbreviated as forthdefi({WID}). A new word list is
-created by the use of forthcode({VOCABULARY}), and
-by executing the vocabulary word the associated
+created by the use of forthcode({NAMESPACE}), and
+by executing the namespace word the associated
 word list is pushed
 to the front of the search order.
 In fact in ciforth's every DEA can serve as a WID. It defines a
 wordlist consisting of itself and all earlier words in the same
-vocabulary.
+namespace.
 If needed you can
-always derive the WID from the DEA of a vocabulary.
+always derive the WID from the DEA of a namespace.
 
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}). Its code is called
@@ -487,11 +487,11 @@ forthcode({_legacy_}) in its index line.
 In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY})
 are to be found in that screen.
 
-The names forthcode({VOCABULARY REQUIRE}) are proposed for standardisation.
+The names forthcode({NAMESPACE WANT}) are proposed for standardisation.
 The ciforth definitions are not compatible with this proposal.
 So the forthcode({REQUIRE}) of older versions is now called forthcode({WANT}).
 Likewise forthcode({REQUIRED}) is renamed to forthcode({WANTED}).
-forthcode({VOCABULARY}) is renamed to forthcode({NAMESPACE}).
+forthcode({NAMESPACE}) is renamed to forthcode({NAMESPACE}).
 This allows to include the new standardised definitions
 in a loadable screen.
 @section Saving a new system
@@ -878,7 +878,7 @@ The IMMEDIATE bit = 1 for IMMEDIATE definitions; it is called the
  forthdefi({immediate bit}).
 forthitem
 The DUMMY bit =1 for a dictionary header contained in the
-data of a vocabulary. This indicates that it should not be executed.
+data of a namespace. This indicates that it should not be executed.
 forthitem
 The DENOTATION bit =1 for a prefix word.
 This means that it is a short word used as a prefix
@@ -923,7 +923,7 @@ forthcode({DOES>}) code.
 forthenditemize
 
 A forthdefi({dictionary entry address}) can be turned into any
-of these fields by words that are in the vocabulary
+of these fields by words that are in the namespace
 forthsamp({DICTIONARY}). forthxref({DICTIONARY}), for those field words. They
 customarily start with forthkey({>}).
 

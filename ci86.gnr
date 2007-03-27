@@ -148,7 +148,7 @@ BSIN    EQU     0x08     _C{ INPUT DELETE CHARACTER}
 BSOUT   EQU     0x08     _C{ OUTPUT BACKSPACE ( ^H )}
 _C
 _C{      HEADER RELATED EQUATES}
-B_DUMMY   EQU     0x01     _C{ dea is dummy, from vocabulary link}
+B_DUMMY   EQU     0x01     _C{ dea is dummy, from namespace link}
 B_INVIS   EQU     0x02     _C{ dea is invisible, "smudged".}
 B_IMMED   EQU     0x04     _C{ dea is a immediate.}
 B_DENOT   EQU     0x08     _C{ dea is a denotation.}
@@ -1499,7 +1499,7 @@ _HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LIT, SKIP, COMMA        _C{  'SKIP , HERE >R 0 ,}
         DC      HERE, TOR, ZERO, COMMA
 DENQ1:
-        DC      LIT, '"', PPARS         _C{           BEGIN &" (PARSE)}
+        DC      LIT, '"', PARSE         _C{           BEGIN &" PARSE}
         DC      INBRS, LDUP, LIT, '"', EQUAL _C{           IN[] DUP &" =}
         _0BRANCH(DENQ2)                 _C{           WHILE}
         DC      TDROP, ONEP             _C{           2DROP 1+ R@ $+!}
@@ -1515,7 +1515,7 @@ _ALIGNED_({ DC LALIGN}, {dnl})
         DC      SEMIS
 _C
 worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
-{The name of the primary vocabulary. Execution pushes the
+{The name of the primary namespace. Execution pushes the
 forthcode({FORTH}) forthdefi({WID})
 to the top of the forthdefi({search order}) .
 (For ISO-compliance it
@@ -1524,17 +1524,17 @@ Until additional user forthdefi({word list}) 's are created, new user definition
 become a part of forthcode({FORTH}) . forthcode({FORTH}) is
 immediate, so it will execute during the creation of a
 colon-definition, to select this forthdefi({word list}) at compile time.},
-{{CONTEXT},{VOCABULARY}},
-{ { VOCABULARY JOHN JOHN ' FORTH >WID CONTEXT @ = .},{0},
+{{CONTEXT},{NAMESPACE}},
+{ { NAMESPACE JOHN JOHN ' FORTH >WID CONTEXT @ = .},{0},
   { FORTH ' FORTH >WID CONTEXT @ = .},{_T_} },
 enddoc)
-_C{ The FORTH word is the only non-denotation in the ONLY vocabulary.}
+_C{ The FORTH word is the only non-denotation in the ONLY namespace.}
 _HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      0       _C{ END OF VOCABULARY LIST}
+        DC      0       _C{ END OF NAMESPACE LIST}
 _HEADER( , , ,0, B_DUMMY,_DEA(TASK))
 _C
-dnl Remember the top of the ONLY vocabulary.
+dnl Remember the top of the ONLY namespace.
 define({_STARTOFONLY_},_LINKOLD)dnl
 _C
 dnl Reset the link chain at this to start the ENVIRONMENT wordlist.
@@ -1596,7 +1596,7 @@ worddoc({ENVIRONMENTS},{NAME},{name}, {--- sc},{CI},
 {{ENVIRONMENT?}},
 {{"NAME" ENVIRONMENT? . TYPE },{_T_ ciforth}},
 enddoc)
-_HEADER({NAME},{LNAME},{DOCOL})
+_HEADER({NAME},{LENAME},{DOCOL})
         _STRINGINLINE({ciforth})
         DC      SEMIS
 _C
@@ -1623,7 +1623,7 @@ forthdefi({denotation})'s (numbers etc.) can be found
 plus the word forthcode({FORTH}).
 By using forthcode({FORTH}) one can regain control towards a startup search order.
 
-forthcode({ONLY}) is actually a regular forthcode({VOCABULARY}).
+forthcode({ONLY}) is actually a regular forthcode({NAMESPACE}).
 The
 associated forthdefi({word list}) contains mainly prefix words,
 that scan denotations and are described in the chapter
@@ -1641,12 +1641,12 @@ This prevents masking regular words with the same prefix.})
 enddoc)
 _HEADER({ONLY},{ONLY},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      _DEA(FORTH)     _C{ NEXT VOCABULARY }
+        DC      _DEA(FORTH)     _C{ NEXT NAMESPACE }
 ONLYBODY:
 _HEADER( , , ,0, B_DUMMY, _STARTOFONLY_)
 _C
 worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
-{The name of the forthcode({ENVIRONMENT}) vocabulary. The
+{The name of the forthcode({ENVIRONMENT}) namespace. The
 associated forthdefi({word list}) contains environment queries.
 The names of words present in forthcode({ENVIRONMENT}) are
 recognized by
@@ -1654,13 +1654,13 @@ forthcode({ENVIRONMENT?}). This word list is not intended to
 be used as a forthcode({CONTEXT}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add an environment
 query.},
-{{VOCABULARY}},
+{{NAMESPACE}},
 {{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
 FORTH DEFINITIONS ; GS1},{SUPPLIER}},
 enddoc)
 _HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
         DC      DOVOC
-        DC      _DEA({ONLY})       _C{ NEXT VOCABULARY }
+        DC      _DEA({ONLY})       _C{ NEXT NAMESPACE }
 _HEADER( , , ,0, B_DUMMY, _STARTOFENVIRONMENT_)
 _C
 worddoc( {MISC},{NOOP},{no_operation},{},{},
@@ -2052,7 +2052,7 @@ INBRS1:
 INBRS2:
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{(WORD)},{paren_word},{--- sc},{CI L0},
+worddocsafe( {PARSING},{NAME},{name},{--- sc},{CI L0},
 {Parse the forthdefi({current input source}) for a word, i.e.
 blank-delimited as per forthcode({?BLANK}) . Skip leading delimiters then
 advance the input pointer to past the next delimiter or past
@@ -2063,9 +2063,9 @@ is appended. Note that this is more deserving of the name
 ``WORD'' than what is in the ISO standard, that can be used to parse lines.
 }})},
 {{BLK},{WORD},{IN}},
-{{: GS2 (WORD) . C@ EMIT ; GS2 CELLO},{5 C},
-{HEX : GS1 (WORD) . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
-_HEADER({(WORD)},{LPWORD},{DOCOL})
+{{: GS2 NAME . C@ EMIT ; GS2 CELLO},{5 C},
+{HEX : GS1 NAME . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
+_HEADER({NAME},{LNAME},{DOCOL})
         DC      X
 PWORD0: DC      DROP
         DC      INBRS, QBL
@@ -2082,7 +2082,7 @@ PWORD1: DC      DROP
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{(PARSE)},{paren_parse},{ c --- sc },{},
+worddocsafe( {PARSING},{PARSE},{parse},{ c --- sc },{},
 {Scan the forthdefi({current input source}) for the character forthvar({c}) .
 Return forthvar({sc}): a string from the current position in the
 input stream, ending before the first such character,
@@ -2093,17 +2093,17 @@ its content, nor assume anything is appended.}})
 _VERBOSE_({{So no leading delimiters are skipped.}})
 _VERBOSE_({{The difference with an ISO }forthsamp({PARSE}){ is that
 ISO considers control characters a match for a blank.}})},
-{{WORD},{(WORD)}},
-{{ : GS1 5A (PARSE) . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
-_HEADER({(PARSE)},{PPARS},{DOCOL})
+{{WORD},{NAME}},
+{{ : GS1 5A PARSE . C@ EMIT ; GS1 QQZ},{2 Q}}, enddoc)
+_HEADER({PARSE},{PARSE},{DOCOL})
         DC      SRC, CELLP, TFET
         DC      OVER, LSUB
         _ISO_IN_({DC      SWAP, SRC, FETCH, PLUS, SWAP})
-        DC      ROT, SSPLIT, TSWAP
+        DC      ROT, SSLAS, TSWAP
         DC      ZEQU
-        _0BRANCH(PPARS8)
+        _0BRANCH(PARSE8)
         DC      DROP, SRC, CELLP, FETCH
-PPARS8: _ISO_IN_({DC      SRC, FETCH, LSUB })
+PARSE8: _ISO_IN_({DC      SRC, FETCH, LSUB })
         DC      LIN, STORE
         DC SEMIS
 _C
@@ -2877,7 +2877,7 @@ set (I) are executed rather than being compiled.},{},
 enddoc)
 _HEADER({:},{COLON},{DOCOL})
         _SECURITY_({DC      SCSP})
-        DC      LPWORD
+        DC      LNAME
         DC      PCREAT
         DC      LATEST, HIDDEN
         DC      RBRAC
@@ -2916,7 +2916,7 @@ will push the value of forthsamp({n}) to the stack.},
 {{12A CONSTANT FRED FRED .},{12A} },
 enddoc)
 _HEADER({CONSTANT},{LCONST},{DOCOL})
-        DC      LPWORD
+        DC      LNAME
         DC      PCREAT
         DC      LATEST, TDFA, STORE
         DC      PSCOD
@@ -2937,7 +2937,7 @@ so that a fetch or store may access this location.},
 {{ VARIABLE APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 _HEADER({VARIABLE},{VAR},{DOCOL})
-        DC      LPWORD
+        DC      LNAME
         DC      PCREAT
         DC      ZERO, COMMA
         DC      PSCOD
@@ -3234,10 +3234,10 @@ _C
 worddoc( {WORDLISTS~},{VOC-LINK},{voc_link},{--- addr},{U},
 {A user variable containing the forthdefi({dictionary entry
 address}) of the word most recently created by
-forthcode({VOCABULARY}) . _VERBOSE_({{All vocabulary names are
+forthcode({NAMESPACE}) . _VERBOSE_({{All namespace names are
 linked by these fields to allow }forthcode({FORGET}){ to find all
 vocabularies.}})},
-{{VOCABULARY}},
+{{NAMESPACE}},
 {{VOC-LINK @ ' ENVIRONMENT = .},{_T_}},
 enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
@@ -3364,7 +3364,7 @@ worddoc( {INPUT},{IN},{in},{--- addr},{},
 {A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted. All parsing words use and move the value of forthcode({IN}) .},
-{{>IN},{WORD},{(WORD)},{NUMBER},{(PARSE)},{IN[]}},
+{{>IN},{WORD},{NAME},{NUMBER},{PARSE},{IN[]}},
 {{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
 enddoc)
 _HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
@@ -3418,7 +3418,7 @@ enddoc)
 _HEADER({HANDLER},{HANDLER},{DOUSE}, _CELLS(32))
 _C
 worddoc( {WORDLISTS},{CURRENT},{current},{--- addr},{FIG,U,L0},
-{A user variable containing the WID of a vocabulary to which
+{A user variable containing the WID of a namespace to which
 new words will be added.
 It is
 the forthdefi({compilation word list}) in the sense of the ISO
@@ -3427,7 +3427,7 @@ _VERBOSE_({{The WID has the structure of a }forthdefi({dictionary entry}){.
 This allows to link in a new word between the
 link field of the WID and the next definition.}})
 },
-{{VOCABULARY},{CONTEXT}},
+{{NAMESPACE},{CONTEXT}},
 {{CURRENT @ ' FORTH >WID = .},{_T_}},
 enddoc)
 _HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(34))
@@ -3461,7 +3461,7 @@ forthcode({CONTEXT}) is the last user variable at offset 37 ,
 such that new user variables may be allocated using offsets of
 37+M4_MAXWORDLIST and up.
 },
-{{PRESENT},{VOCABULARY},{CURRENT},{USER}},
+{{PRESENT},{NAMESPACE},{CURRENT},{USER}},
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
 _HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(37)) _C{ Up to } 37+M4_MAXWORDLIST
@@ -3745,7 +3745,7 @@ _C
 worddoc( {WORDLISTS},{LATEST},{latest},{--- addr},{FIG},
 {Leave the dictionary entry address forthvar({addr}) of the
 topmost word in the forthcode({CURRENT}) word list.},
-{{VOCABULARY}},
+{{NAMESPACE}},
 {{: APE ;  LATEST ID.},{APE}},
 enddoc)
 _HEADER({LATEST},{LATEST},{DOCOL})
@@ -3906,10 +3906,10 @@ _HEADER({CFA>},{CTOD},{DOCOL})
 _C
 worddoc( {DICTIONARY~},{>WID},{to_w_i_d},{dea --- wid},{},
 {Given the dictionary entry addres forthvar({dea}) of a
-vocabulary return its
+namespace return its
 forthdefi({WID}) forthvar({wid}), a dummy DEA that serves as the start of a
 dictionary search. },
-{{VOCABULARY},{>CFA},{(FIND)}},
+{{NAMESPACE},{>CFA},{(FIND)}},
 {{: APE ; ' FORTH >WID >LFA @ ID.},{APE}},
 enddoc)
 _HEADER({>WID},{TWID},{DOCOL})
@@ -3917,11 +3917,12 @@ _HEADER({>WID},{TWID},{DOCOL})
         DC      CELLP _C{ Skip vfa link.}
         DC      SEMIS
 _C
-worddoc( {DICTIONARY~},{>VFA},{to_vocabulary_field_address},{dea --- cfa},{},
-{Given the dictionary entry addres of a vocabulary
-return the address of the link to the next vocabulary.
-},{{VOCABULARY},{>CFA},{>WID}},
-{{VOCABULARY APE VOCABULARY MONKEY dnl
+worddoc( {DICTIONARY~},{>VFA},{to_namespace_field_address},{dea --- cfa},{},
+{Given the dictionary entry addres of a namespace
+return the address of the link to the next namespace.
+_VERBOSE_({{Traditionally this was called vocabulary, hence the} forthkey({V}).})
+},{{NAMESPACE},{>CFA},{>WID}},
+{{NAMESPACE APE NAMESPACE MONKEY dnl
 'MONKEY >VFA @  ' APE = .},{_T_}},
 enddoc)
 _HEADER({>VFA},{TVFA},{DOCOL})
@@ -4203,7 +4204,7 @@ ciforth is byte aligned, so no extra measures are needed.},
 {HERE ZWY = .},{_T_}},
 enddoc)
 _HEADER({CREATE},{CREATE},{DOCOL})
-        DC      LPWORD
+        DC      LNAME
         DC      PCREAT
         DC      LIT, HLNOOP, COMMA
         DC      PSCOD
@@ -4345,7 +4346,7 @@ _VERBOSE_({{We recommend that }forthsamp({.( cccc)}){ is replaced by }forthsamp(
 enddoc)
 _HEADER({.(},{DOTP},{DOCOL}, , B_IMMED)
         DC      LIT, ')'
-        DC      PPARS
+        DC      PARSE
         DC      LTYPE
         DC      SEMIS
 _C
@@ -4441,18 +4442,18 @@ CORA3:
         MOV     HIP,DX  _C{Restore}
         _PUSH
 _C
-worddoc( {STRING},{$I},{string_index},{sc c -- addr},{},
+worddoc( {STRING},{$^},{string_index},{sc c -- addr},{},
 {Find the first forthvar({c}) in the forthdefin({string constant}) forthvar({sc}) and
 return its forthvar({addr}) if present.
 Otherwise return a forthdefin({nil pointer}).
 A null string (0 0) or an empty string are allowed, and result in not found. },
-{{$S},{CORA}},
-{{ 132 "ORANG" OVER >R &N $I R> - . .},{3 132},
-{ 132 "" &N $I . .},{0 132},
-{ 132 0 0 &N $I . .},{0 132},
-{ 132 "ORANG" &Z $I 0= . .},{_T_ 132}},
+{{$/},{CORA}},
+{{ 132 "ORANG" OVER >R &N $^ R> - . .},{3 132},
+{ 132 "" &N $^ . .},{0 132},
+{ 132 0 0 &N $^ . .},{0 132},
+{ 132 "ORANG" &Z $^ 0= . .},{_T_ 132}},
 enddoc)
-CODE_HEADER({$I},{SINDEX})
+CODE_HEADER({$^},{SINDEX})
 _C{       Assume the extra segment points to the data segment }
         POP     AX      _C{ char}
         POP     CX      _C{ count}
@@ -4468,7 +4469,7 @@ SINDEX1:
         PUSH    DI
         _NEXT
 _C
-worddoc( {STRING},{$S},{string_split},{sc c -- sc1 sc2},{},
+worddoc( {STRING},{$/},{string_slash},{sc c -- sc1 sc2},{},
 {Find the first forthvar({c}) in the forthdefin({string constant})
 forthvar({sc}) and split it at that address. Return the strings
 after and before forthvar({c}) into forthvar({sc1}) and
@@ -4478,13 +4479,13 @@ zero)}}) and forthvar({sc2}) is the original string.
 _VERBOSE_({{Both }forthvar({sc1}){ and }forthvar({sc2}){ may be
 empty strings (i.e. their count is zero), if }forthvar({c}){ is
 the last or first character in }forthvar({sc}){ .}}) },
-{{$I},{CORA}},
-{{ 132 "ORANG" &O $S . DROP TYPE . },{0 RANG132},
-{ "ORANG OETAN" BL $S TYPE TYPE },{ORANGOETAN},
-{ "ORANG" &G $S TYPE 0 . TYPE },{ORAN0 },
-{ 132 "ORANG" &Z $S TYPE . . .},{ORANG0 0 132 }},
+{{$^},{CORA}},
+{{ 132 "ORANG" &O $/ . DROP TYPE . },{0 RANG132},
+{ "ORANG OETAN" BL $/ TYPE TYPE },{ORANGOETAN},
+{ "ORANG" &G $/ TYPE 0 . TYPE },{ORAN0 },
+{ 132 "ORANG" &Z $/ TYPE . . .},{ORANG0 0 132 }},
 enddoc)
-CODE_HEADER({$S},{SSPLIT})
+CODE_HEADER({$/},{SSLAS})
 _C{       Assume the extra segment points to the data segment }
         POP     AX      _C{ char}
         POP     CX      _C{ count}
@@ -4494,15 +4495,15 @@ _C{       Assume the extra segment points to the data segment }
         MOV     DX,DI   _C{ Copy}
         CLD             _C{ INC DIRECTION}
         REPNZ     SCASB   _C{ Compare BYTE}
-        JZ      SSPLIT1
+        JZ      SSLAS1
 _C{ Not present.}
         PUSH    CX   _C{ Nil pointer.}
-        JMP SHORT SSPLIT2
-SSPLIT1:
+        JMP SHORT SSLAS2
+SSLAS1:
         PUSH    DI
         SUB     BX,CX
         DEC     BX      _C{Delimiter is not part of first string.}
-SSPLIT2:
+SSLAS2:
         PUSH    CX   _C{Remaining length}
         PUSH    DX   _C{Start of first string.}
         PUSH    BX   _C{Skipped length.}
@@ -4574,7 +4575,7 @@ at the dictionary buffer forthcode({HERE}) .
 forthcode({WORD}) leaves the character count in the first byte, the characters, and
 ends with two or more blanks.
 },
-{{(WORD)},{(PARSE)},{BLK} ,{IN}},
+{{NAME},{PARSE},{BLK} ,{IN}},
 {{: GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
 { : GS3 5A WORD COUNT DUP . TYPE ; GS3 ZZZQQZ},{2 QQ}
@@ -4584,7 +4585,7 @@ _HEADER({WORD},{IWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(IWORD1)
          DC      DROP
-         DC      LPWORD
+         DC      LNAME
         _BRANCH(IWORD2)
 IWORD1: DC      TOR
 IWORD3:  DC      INBRS, RR, EQUAL
@@ -4594,7 +4595,7 @@ IWORD3:  DC      INBRS, RR, EQUAL
 IWORD4:
         DC      DROP
         DC      LIT, -1, LIN, PSTORE _C{ Backtrace to first non-delimiter.}
-        DC      FROMR, PPARS
+        DC      FROMR, PARSE
 _C{        DC      DOTS}
 IWORD2:
         DC      HERE
@@ -4624,7 +4625,7 @@ one never compiles or postpones forthcode({CHAR}).
 {: GS2 CHAR ; GS2 X .},{58 }},
 enddoc)
 _HEADER({CHAR},{LCHAR},{DOCOL})
-        DC      LPWORD, DROP, CFET
+        DC      LNAME, DROP, CFET
         DC      SEMIS
 _C
 worddocsafe( {PARSING},{[CHAR]},{bracket_char_bracket}, {--- c},{ISO I},
@@ -4773,7 +4774,7 @@ leave a forthdefin({nil pointer}). If the first part of the string
 matches a forthdefi({denotation}) word, that word is found, whether
 the denotation is correct or not.
 },
-{{PRESENT}, {CONTEXT}, {FIND}, {(FIND)},{VOCABULARY}},
+{{PRESENT}, {CONTEXT}, {FIND}, {(FIND)},{NAMESPACE}},
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is found as a misspelled number!
 { 243 "1ONNOBO" FOUND 0= . .},{0 243},
@@ -4801,7 +4802,7 @@ worddoc( {DICTIONARY},{PRESENT},{present},{sc --- dea},{},
 current search order, return its forthvar({dea}), else leave a
 forthdefi({nil pointer}). For a a forthdefi({denotation}) word, the
 name must match forthvar({sc}) exactly.},
-{{FOUND}, {CONTEXT}, {FIND}, {(FIND)},{VOCABULARY}},
+{{FOUND}, {CONTEXT}, {FIND}, {(FIND)},{NAMESPACE}},
 { { 123 : BONOBO ; "BONOBO" PRESENT ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is not present though it is a misspelled number
 { 243 "1ONNOBO" PRESENT 0= . .},{-1 243},
@@ -4881,7 +4882,7 @@ word with name forthvar({sc}).
 _VERBOSE_({{A }forthdefi({WID}){ is
 mostly a dummy }forthdefi({DEA}){ found in the
 data field of a
-vocabulary, fetched from }forthcode({CURRENT}){ or an other wid in the
+namespace, fetched from }forthcode({CURRENT}){ or an other wid in the
 }forthdefi({search order}){ }}). Leave the dictionary entry address
 forthvar({dea}) of the first entry found, else leave a zero.
 Do not consume the string forthvar({sc})_VERBOSE_({{,
@@ -5197,7 +5198,7 @@ itself.
 },
 enddoc)
 _HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
-        DC      LPWORD
+        DC      LNAME
         DC      PRESENT
         DC      LDUP
         DC      ZEQU
@@ -5224,7 +5225,7 @@ dnl This must not find 7 in the ONLY wordlist
 },
 enddoc)
 _HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
-        DC      LPWORD
+        DC      LNAME
         DC      PRESENT
         DC      LDUP
         DC      ZEQU
@@ -5362,7 +5363,7 @@ number. Comma's are ignored in ciforth.}})
 enddoc)
 _HEADER({INTERPRET},{INTER},{DOCOL})
 INTE1:
-        DC      LPWORD
+        DC      LNAME
         DC      LDUP      _C{ Zero length.}
         _0BRANCH(INTE8) _C{WHILE}
 _C{       DC      DOTS}
@@ -5425,7 +5426,7 @@ The result is that the compiled code looks the same and behaves the
 same than the interpreted code.
  _VERBOSE_({It is recommended that the only smart words present are
  prefix words.}) },{{IMMEDIATE}},
-{ { : Q &Z EMIT (WORD) TYPE ; PREFIX QPO},{ZPO}},
+{ { : Q &Z EMIT NAME TYPE ; PREFIX QPO},{ZPO}},
 enddoc)
 _HEADER({PREFIX},{PREFX},{DOCOL})
         DC      LATEST
@@ -5434,37 +5435,37 @@ _HEADER({PREFIX},{PREFX},{DOCOL})
         DC      TOGGL
         DC      SEMIS
 _C
-worddoc( {DEFINING},{VOCABULARY},{vocabulary},{},{FIG,E,L},
+worddoc( {DEFINING},{NAMESPACE},{namespace},{},{FIG,E,L},
 {A defining word used in the form:
-forthcode({VOCABULARY}) forthsamp({cccc}) to create a
-vocabulary definition forthsamp({cccc}) . It will create a
+forthcode({NAMESPACE}) forthsamp({cccc}) to create a
+namespace definition forthsamp({cccc}) . It will create a
 forthdefi({word list})in the ISO sense. Subsequent use of
 forthsamp({cccc}) will push this word list (the
 forthdefi({word list associated with}) forthsamp({cccc})) to the top of
 the search order in forthcode({CONTEXT}). So it will be
 searched first by forthcode({INTERPRET}) .
 
-A vocabulary 's data content field contains at first the dovoc
+A namespace 's data content field contains at first the dovoc
 pointer (like for any forthcode({DOES>}) word) , then follows
-its body. The body contains the vocabulary link
+its body. The body contains the namespace ("vocabulary") link
 field address ( forthdefi({VLFA}) ). The VLFA points to the VLFA
-of the next vocabulary or  a forthdefi({nil pointer}) for the end.
+of the next namespace  or  a forthdefi({nil pointer}) for the end.
 Then follows a dummy dea that serves
 as forthdefi({word list identifier}) or forthdefi({WID}) in the sense of the ISO standard.
 It has
 empty fields, except for the link field.
 The forthdefi({link field address}) contains the DEA of the latest word of
-the vocabulary or a forthdefin({nil pointer}) if empty. Executing the
-vocabulary means pushing its WID on top of the
+the namespace or a forthdefin({nil pointer}) if empty. Executing the
+namespace means pushing its WID on top of the
 forthcode({CONTEXT}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
 oldest one gets lost. The vocabularies generated are
 forthcode({IMMEDIATE}) words.},
 {{VOC-LINK},{DEFINITIONS},{FOR-VOCS}},
-{{123 VOCABULARY JOHN .},{123},
+{{123 NAMESPACE JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
-_HEADER({VOCABULARY},{VOCAB},{DOCOL})
+_HEADER({NAMESPACE},{VOCAB},{DOCOL})
         DC      CREATE
         DC      LATEST   _C{ Link this DEA into VOC-LINK chain.}
         DC      VOCL
@@ -5490,19 +5491,19 @@ DOVOC:
 _C
 _C{   The link to task is a cold start value only.}
 _C{   It is updated each time a definition is}
-_C{   appended to the 'FORTH' vocabulary.}
+_C{   appended to the 'FORTH' namespace.}
 _C
 worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{B,NISO,FIG,I,L1},
-{The name of the vocabulary to make machine code definitions.
+{The name of the namespace that contains machine code definitions.
 In ciforth execution it pushes the associated word list to the
 top of the forthcode({CONTEXT}) stack. (For ISO-compliance it
 would replace the top.) forthcode({ASSEMBLER}) is
 immediate, so it will execute during the creation of a
-colon-definition, to select this vocabulary at compile time.
+colon-definition, to select this namespace at compile time.
 This word makes only sense in combination with the words that
 belong to it. So it is present in loadable form in the screens
 file forthfile({forth.lab}) .},
-{{VOCABULARY},{LOAD}},
+{{NAMESPACE},{LOAD}},
 {{( No test) },{}},
 enddoc)
 _C
@@ -5512,13 +5513,13 @@ worddoc( {WORDLISTS},{DEFINITIONS},{definitions},{},{ISO},
 Make the top most forthdefi({search order}) word list, (context),
 the compilation word list (current).
 In the example, executing
-vocabulary name forthsamp({cccc}) add it to the top of the
+namespace name forthsamp({cccc}) add it to the top of the
 forthdefi({search order}) and executing
 forthcode({DEFINITIONS}) will result in new definitions added to
 forthsamp({cccc}) .},
-{{CONTEXT},{VOCABULARY}},
+{{CONTEXT},{NAMESPACE}},
 {
-  { VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; dnl
+  { NAMESPACE JOHN JOHN DEFINITIONS : ORAN ; dnl
   ' FORTH >WID >LFA @ ' ORAN = .},{0},
   {' JOHN >WID >LFA @ ' ORAN = .},{_T_},
   {FORTH DEFINITIONS},{}
@@ -5538,10 +5539,10 @@ ciforth looses the last one.
 This is not counting
 the forthcode({ONLY}) search order.
 _VERBOSE_({{You seldomly want to use this word, because in ciforth
-by naming a vocabulary you add it to the order.}})},
-{{CONTEXT},{VOCABULARY}},
+by naming a namespace you add it to the order.}})},
+{{CONTEXT},{NAMESPACE}},
 {
-  { VOCABULARY JOHN ALSO ' JOHN >WID CONTEXT ! DEFINITIONS dnl
+  { NAMESPACE JOHN ALSO ' JOHN >WID CONTEXT ! DEFINITIONS dnl
   : ORAN ; ' FORTH >WID >LFA @ ' ORAN = .},{0},
   {' JOHN >WID >LFA @ ' ORAN = .},{_T_},
   {FORTH DEFINITIONS},{}
@@ -5559,9 +5560,9 @@ _C
 worddoc( {WORDLISTS},{PREVIOUS},{PREVIOUS},{},{ISO},
 {Pop the topmost forthdefi({WID}) from the search order stack.
 If empty still the forthcode({ONLY}) search order is left.},
-{{CONTEXT},{VOCABULARY}},
+{{CONTEXT},{NAMESPACE}},
 {
-  { CONTEXT @ VOCABULARY JOHN JOHN DUP CONTEXT @ = .},{0},
+  { CONTEXT @ NAMESPACE JOHN JOHN DUP CONTEXT @ = .},{0},
   { PREVIOUS CONTEXT @ = .},{_T_}
 },
 enddoc)
@@ -5584,7 +5585,7 @@ A blank after the word forthcode({{(}}) is required.}}}},
 enddoc)
 _HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      LIT,')'
-        DC      PPARS
+        DC      PARSE
         DC      TDROP
         DC      SEMIS
 _C
@@ -5603,7 +5604,7 @@ _HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
 _C{ Backup one character, just in case we are at the end of a line.}
         DC      LIT, -1, LIN, PSTORE
         DC      LIT,ALF
-        DC      PPARS
+        DC      PARSE
         DC      TDROP
         DC      SEMIS
 _C
@@ -5811,7 +5812,7 @@ _BLOCKSINFILE_({I.e. open the file that contains the blocks, in read-only mode.}
 _VERBOSE_({{After forthcode({INIT}) we have the following situation.
 The search order contains the forthcode({FORTH}) words,
 plus forthcode({ONLY}) with i.a. number handling.
-Definitions are added to the forthcode({FORTH}) forthdefi({vocabulary}).
+Definitions are added to the forthcode({FORTH}) forthdefi({namespace}).
 The number base is decimal.   }}).
 },{{WARM},{COLD},{FORTH},{BLOCK-INIT},{BASE},{S0}},
 {{( No test)},{}},
@@ -7199,7 +7200,7 @@ PACCEP2:
         _BRANCH(PACCEP2)
 PACCEP1:
         DC      REMAIND, TFET
-        DC      LIT, ALF, SSPLIT
+        DC      LIT, ALF, SSLAS
         DC      TSWAP, REMAIND, TSTOR
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
@@ -7923,7 +7924,7 @@ _C{        DC      RETOBO}
 PACCEP1:
 _C{        DC      SPLOFF}
         DC      REMAIND, TFET
-        DC      LIT, ALF, SSPLIT
+        DC      LIT, ALF, SSLAS
         DC      TSWAP, REMAIND, TSTOR
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
@@ -9002,7 +9003,7 @@ forthdefi({denotation}) form without the space}).
 },
 enddoc)
 _HEADER({'},{ITICK},{DOCOL} )
-        DC      LPWORD, PRESENT
+        DC      LNAME, PRESENT
         DC      LDUP, ZEQU
         DC      LIT, 11, QERR
         DC      SEMIS
@@ -9038,12 +9039,12 @@ This works too if links have been redirected, such that some earlier
 words point back to later defined words.
 Leave forthvar({addr}) (as
 forthcode({FORGET-VOC}) is intended to be used with
-forthcode({FOR-VOCS})) . If any whole vocabulary is removed,
+forthcode({FOR-VOCS})) . If any whole namespace is removed,
 the search order is reset to forthsamp({ONLY FORTH}). The space
 freed is not recovered.},
 {{FORGET}},
 {
-{!CSP VOCABULARY APE dnl
+{!CSP NAMESPACE APE dnl
 APE DEFINITIONS : GO ; : CH ; : GI ; dnl
 FORTH DEFINITIONS : NEW ; ?CSP},{},
 {APE ' CH ' APE FORGET-VOC ID.},{CH},
@@ -9082,7 +9083,7 @@ FORGV3:
 FORGV1:
 _C{       { Vocabulary itself is also forgotten.}}
         DC      TVFA
-        DC      FETCH     _C{ Unlink by linking next vocabulary.}
+        DC      FETCH     _C{ Unlink by linking next namespace.}
         DC      VOCL
         DC      STORE
         DC      ONLY, FORTH
@@ -9749,7 +9750,7 @@ must have the stack diagram forthsamp({x1..xn dea --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}},
 {
-{ VOCABULARY JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
+{ NAMESPACE JOHN JOHN DEFINITIONS : ORAN ; ' ID. FOR-VOCS},
 {JOHN ENVIRONMENT ONLY FORTH},
 {FORTH DEFINITIONS},{}
 },
@@ -9780,7 +9781,7 @@ dnl A break as per forthcode({KEY?}) will terminate the listing.
 },
 {{CONTEXT}},
 {
-{VOCABULARY JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
+{NAMESPACE JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q 'GO >LFA ;},{},
 {: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
 {FORTH DEFINITIONS},{}
@@ -9841,7 +9842,8 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment Linux.
 },{{COLD},{EXIT-CODE}},
 {{"lina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
-{23 EXIT-CODE ! BYE 23}},
+{-legacy- : (WARNING) NOT PRESENT, THOUGH WANTED
+23 EXIT-CODE ! BYE 23}},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to linux, with okay status. }
@@ -9866,7 +9868,7 @@ _HEADER({LIST},{LLIST},{DOCOL})
         DC      BASE, STORE
         DC      SCR, FETCH, BLOCK
         DC      LIT,1024
-LLIST1: DC      LIT, ALF, SSPLIT
+LLIST1: DC      LIT, ALF, SSLAS
         DC      CR, LTYPE
         DC      OVER,ZEQU _C{DUP would not show a last empty line!}
         _0BRANCH(LLIST1)
@@ -9922,10 +9924,10 @@ worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},{sc --- i*x true/fals
 attribute, leave into forthsamp({i*x}) the information about
 that attribute and a true flag, else leave a false flag. In
 fact the flag indicates whether the words is present in the
-forthcode({ENVIRONMENT}) vocabulary and forthsamp({i*x}) is
+forthcode({ENVIRONMENT}) namespace and forthsamp({i*x}) is
 what is left by the word if executed.
 },
-{{VOCABULARY}},
+{{NAMESPACE}},
 {{"CORE" ENVIRONMENT? . .},{_T_ 0}},
 {{"APE" ENVIRONMENT? .},{0}},
 enddoc)
@@ -9989,7 +9991,7 @@ _C{ PRINT CPU TYPE (8088)}
         DC      LCPU, DDOT
         DC      BASE,STORE
 _C
-        DC      LNAME, LTYPE, SPACE
+        DC      LENAME, LTYPE, SPACE
         DC      LVERSION, LTYPE, SPACE
         DC      CR
         DC      SEMIS
@@ -10193,7 +10195,7 @@ order wordset, called forthcode({ONLY}).
 To make a distinction with the same words in other wordlists,
 the names of denotations are prepended with ``Prefix_'' in the
 documentation. Actual names in the dictionary do not contain
-the prefix. Apart from forthcode({Prefix_0}) , the vocabulary
+the prefix. Apart from forthcode({Prefix_0}) , the namespace
 contains entries for all hex digits 1...9 and A...F.
 Like forthcode({NUMBER}) always did, all denotations behave
 identical in interpret and compile mode and they are not supposed to be
@@ -10201,7 +10203,7 @@ postponed. },
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
 {The wordset forthsamp({ENVIRONMENTS}) contains all words of
-the forthcode({ENVIRONMENT}) vocabulary and those words needed
+the forthcode({ENVIRONMENT}) namespace and those words needed
 to recognize them as Forth environment queries.
 _VERBOSE_({{Note that these are not environment variables in
 the sense that are passed from an operating system to a
@@ -10384,16 +10386,16 @@ worddocchapter({WORDLISTS},{ },
 {The dictionary is subdivided in non-overlapping subsets: the
 forthdefi({word list})'s (forthpxref({DICTIONARY})).
  They are created by the defining word
-forthcode({VOCABULARY}) and filled by defining words while that
-vocabulary is forthcode({CURRENT}) . They regulate how words
+forthcode({NAMESPACE}) and filled by defining words while that
+namespace is forthcode({CURRENT}) . They regulate how words
 are found; different vocabularies can have words with the same
 names.
 
 A word list in the ISO sense has no name, but a
  forthdefi({word list identifier}) or forthdefi({WID}),
 which is
-inconvenient. We use vocabulary words created by the defining
-word forthcode({VOCABULARY}) . They are used to manipulate the
+inconvenient. We use namespace words created by the defining
+word forthcode({NAMESPACE}) . They are used to manipulate the
 word list's that are associated with them. _VERBOSE_({{So
 vocabularies are nearly the wordlist 's of the ISO standard,
 the primary difference is that they have a name.}}) },

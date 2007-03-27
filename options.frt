@@ -26,10 +26,10 @@ CREATE pad 80 ALLOT \ Word surrounded by spaces
    CONTAINS IF R@ LOAD THEN   R> 1+ ;
 : (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R
   BEGIN 2DUP FILL-pad R> ?LOAD? >R 2DUP PRESENT UNTIL   RDROP ;
-\ Make sure WORD is present in the ``FORTH'' vocabulary
+\ Make sure WORD is present in the ``FORTH'' namespace
 : WANTED   '(WANTED) CATCH
   DUP 24 = IF >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
-: WANT (WORD) WANTED ;    : CF: "CONFIG" WANTED ;
+: WANT NAME WANTED ; : CF: "CONFIG" WANTED ; WANT -legacy-
 ( -b :_This_option_is_available )
 
   .S
@@ -315,7 +315,7 @@ WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
 -1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 SHIFT-ARGS  SHIFT-ARGS
 SCRIPT-NAME $@ GET-FILE
-^J $S 2DROP     \ Line with #!lina
+^J $/ 2DROP     \ Line with #!lina
 EVALUATE
 BYE
 ( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26

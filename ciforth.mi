@@ -436,7 +436,7 @@ looks like a number, e.g. forthsamp({25WAP}) .
 Be aware that denotations may mask regular words.
 This will only happen with user-defined denotations.
 Built-in denotations are in the
-forthcode({ONLY}) vocabulary, that can only be accessed last,
+forthcode({ONLY}) namespace, that can only be accessed last,
 because it ends the search order.
 Note that hex digits must be typed in uppercase,
 even if forthcode({"CASE-SENSITIVE"}) is in effect.

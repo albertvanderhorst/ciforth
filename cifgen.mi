@@ -236,7 +236,7 @@ It is no longer possible to redefine this word,
 that handles the refill of the forthcode({TIB}),
 by typing a <ret> immediately after a defining word.
 forthitem
-Forgetting part of a vocabulary, other than the forthcode({FORTH}) vocabulary
+Forgetting part of a namespace, other than the forthcode({FORTH}) namespace
 no longer crashes.
 forthitem
 Loading a screen with characters having an 8th bit set,

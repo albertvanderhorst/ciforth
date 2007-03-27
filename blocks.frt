@@ -110,10 +110,11 @@ WANT PRESENT?
    ELSE   "BDOSN"  PRESENT? IF
       "wina.pdf" SYSTEM THEN THEN ;
 
-( PRESENT? REQUIRE REQUIRED ) \ AvdH A7feb20
-: REQUIRE WANT ;
-: REQUIRED WANTED ;
-
+( -legacy- PRESENT? REQUIRE REQUIRED ) \ AvdH A7feb20
+: REQUIRE WANT ;   : REQUIRED WANTED ;
+: $S $/ ;   : $I $^ ;
+: (WORD) NAME ;   : (PARSE) PARSE ;
+: VOCABULARY NAMESPACE ;
 
 
 
@@ -122,7 +123,6 @@ WANT PRESENT?
 
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
-
 
 
 
@@ -296,7 +296,7 @@ CF:
 
 \ Fill XT in as the behaviour of the named deferred word.
 \ This ugly word is state-smart!
-: IS   (WORD) FOUND >BODY   STATE @ IF
+: IS   NAME FOUND >BODY   STATE @ IF
     POSTPONE LITERAL POSTPONE ! ELSE ! THEN ; IMMEDIATE
 
 
@@ -306,7 +306,7 @@ CF:
 WANT COMPARE
 \ From ANSI manual.
 : SKIPPING
-1 BEGIN (WORD) DUP WHILE
+1 BEGIN NAME DUP WHILE
    2DUP "[IF]" COMPARE 0= IF 2DROP 1+ ELSE
    2DUP "[ELSE]" COMPARE 0= IF 2DROP 1- DUP IF 1+ THEN ELSE
         "[THEN]" COMPARE 0= IF 1- THEN THEN THEN
@@ -316,7 +316,7 @@ REPEAT 2DROP DROP ;
 : [ELSE] SKIPPING ; IMMEDIATE
 : [THEN] ; IMMEDIATE
 
-: [UNDEFINED] (WORD) 2DUP WANTED PRESENT 0= ; IMMEDIATE
+: [UNDEFINED] NAME 2DUP WANTED PRESENT 0= ; IMMEDIATE
 : [DEFINED] POSTPONE [UNDEFINED] 0= ; IMMEDIATE
 ( VALUE TO FROM ) \ AvdH A1oct22
 
@@ -335,11 +335,11 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 
 
 ( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
-\ Print all vocabularies names in existence.
+\ Print all namespace (voc) names in existence.
 : .VOCS 'ID. FOR-VOCS ;
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
-\ Print the current search order by vocabulary names
+\ Print the current search order by namespace names
 : ORDER  CONTEXT BEGIN $@ DUP 'ONLY >WID <> WHILE .WID REPEAT
     2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 \ This is a BUFFER compatible with FIG-Forth.
@@ -410,7 +410,7 @@ VARIABLE LAST-IN         VARIABLE start
 : GLI >R LAST-IN @ IN @  R> - OVER - ; \ Input since RLI trim.
 : itoa 0 <# #S BL HOLD #> ; \ Transform an INT to a STRING.
 \ Add the first part of a definition of a field to DOES>$.
-: F:   " : " DOES>$ $+! (WORD) DOES>$ $+!   RLI
+: F:   " : " DOES>$ $+! NAME DOES>$ $+!   RLI
   HERE start @ - itoa DOES>$ $+!   " ^" DOES>$ $+!
   NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
 
@@ -420,7 +420,7 @@ WANT F:
 : FDOES>  7 ( length of " FDOES>") GLI CRS$ $+!
     &; (PARSE) 1+ DOES>$ $+! ;
 \ Defining word for the struct. Defer actual creation.
-: struct   (WORD) NAME$ $!   !CRS$   "VARIABLE ^" +NAME$
+: struct   NAME NAME$ $!   !CRS$   "VARIABLE ^" +NAME$
   CRS$ $@ EVALUATE   HERE start !   !CRS$  ": CREATE-" +NAME$
   " HERE >R " CRS$ $+!   "" DOES>$ $! ;
 \ Create fields and a defining words for the struct.
@@ -452,7 +452,7 @@ WANT M:
 : +NAME+$   +NAME   CRS$ $+! ;  \ Add the name and a STRING.
 
 \ Define class "name". Compile this-pointer, start build-word.
-: class   (WORD) NAME$ $!   "VARIABLE ^" CRS$ $!
+: class   NAME NAME$ $!   "VARIABLE ^" CRS$ $!
    +NAME   CRS$ $@ EVALUATE   ": BUILD-" CRS$ $!
    " HERE >R " +NAME+$   SWAP-DP   HERE DP-MARKER !   !IN ;
 
@@ -618,7 +618,7 @@ WANT COMPARE         WANT MERGE-SORT
 \ sorting (expect for the link field) , so it may be a dummy.
 : SORT-WID >LFA DUP >R   @ 'NAMES< '>LFA MERGE-SORT   R> ! ;
 
-\ Sort the vocabulary given its vocabulary XT.
+\ Sort the namespace given its namespace XT.
 
 : SORT-VOC >WID SORT-WID ;
 
@@ -665,7 +665,7 @@ WANT COMPARE
 
 
 \ From a STRING remove the first word. Leave the rest STRING.
-: DROP-WORD   -LEADING BL $S 2DROP ;
+: DROP-WORD   -LEADING BL $/ 2DROP ;
 
 
 
@@ -800,18 +800,18 @@ CREATE BASE' 0 ,
 
 (  ALIAS HIDE INCLUDE IVAR ) CF: \ AvdH A1oct05
 
-: ALIAS  (WORD) (CREATE) LATEST 3 CELLS MOVE ;
+: ALIAS  NAME (CREATE) LATEST 3 CELLS MOVE ;
 
-: HIDE (WORD) FOUND DUP 0= 11 ?ERROR HIDDEN ;
+: HIDE NAME FOUND DUP 0= 11 ?ERROR HIDDEN ;
 
-\ : FORGET (WORD) FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
+\ : FORGET NAME FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
 : IVAR CREATE , ;
 
 
 
 "INCLUDED" PRESENT 0= ?LEAVE-BLOCK
 
-: INCLUDE (WORD) INCLUDED ;
+: INCLUDE NAME INCLUDED ;
 
 
 ( SLITERAL PARSE SCAN-WORD DOC $. $? ."$" ) \ AvdH
@@ -821,15 +821,15 @@ WANT 2>R
 IMMEDIATE
 \ ISO
 : PARSE (PARSE) ;
-: ((WORD)) (WORD) DUP 0= 13 ?ERROR ;
+: (NAME) NAME DUP 0= 13 ?ERROR ;
 \ Skip words until and including STRING.
-: SCAN-WORD 2>R BEGIN BEGIN ((WORD)) R@ <> WHILE DROP REPEAT
+: SCAN-WORD 2>R BEGIN BEGIN (NAME) R@ <> WHILE DROP REPEAT
    2R@ CORA WHILE REPEAT RDROP RDROP ;
 : DOC "ENDDOC" SCAN-WORD ;  \ Skip till "ENDDOC".
  : $. TYPE ;  \ Print a STRING constant.
  : $? $@ $. ;  \ Print a string at ADDRESS.
 \ Print STRING, as a quoted string, reconsumable.
-: ."$" BEGIN &" $S &" EMIT TYPE &" EMIT OVER 0= UNTIL 2DROP ;
+: ."$" BEGIN &" $/ &" EMIT TYPE &" EMIT OVER 0= UNTIL 2DROP ;
 ( TICKS PAST? ) CF: ?32 \ AvdH A2oct21
 \ Assuming we run on an 486 or better, and a 32 bits Forth
 WANT ASSEMBLERi86 HEX
@@ -1011,16 +1011,16 @@ WANT T[
 
 \ Compile the current execution behaviour of "name".
 \ This behaviour remains the same if "name" is revectored.
-: OLD:   (WORD) FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R
+: OLD:   NAME FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R
     POSTPONE CO ; IMMEDIATE
 \ Have the original behaviour of DEA restored.
 : RESTORED   DUP >PHA SWAP >DFA ! ;
-\ Do nothing for one call of ``(WORD)''
-: (WORD)-NEW   '(WORD) RESTORED ;
+\ Do nothing for one call of ``NAME''
+: NAME-NEW   'NAME RESTORED ;
 \ Make the following defining word postfix for one execution.
 \ The name must be a string constant on the stack
 \ Use only while compiling, or you crash the system
-: POSTFIX ( ?COMP ) '(WORD)-NEW >DFA @ '(WORD) >DFA ! ;
+: POSTFIX ( ?COMP ) 'NAME-NEW >DFA @ 'NAME >DFA ! ;
 \ Example: : :P POSTFIX : !CSP ;
 ( Z$@ CTYPE C$.S ) \ AvdH A3mar20
 
@@ -1064,7 +1064,7 @@ HEX    WANT DROP-WORD
    >R 2DROP R> ;
 \ Find argument INDEX, counting from one. Return as a STRING.
 : ARG[]   >R ARG$   R@ 1 < 0D ?ERROR
-    R> 1 ?DO DROP-WORD LOOP   -LEADING BL $S 2SWAP 2DROP ;
+    R> 1 ?DO DROP-WORD LOOP   -LEADING BL $/ 2SWAP 2DROP ;
 
 \ Shift the arguments, so as to remove argument 1. Keep cr!
 : SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
@@ -1109,7 +1109,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
 
 \ For SC and ENVSTRING leave SC / CONTENT and GOON flag.
 : (MENV)   DUP 0= IF   DROP 2DROP 0. 0   ELSE
-    Z$@ &= $S 2SWAP >R >R 2OVER COMPARE
+    Z$@ &= $/ 2SWAP >R >R 2OVER COMPARE
     IF   RDROP RDROP 1   ELSE   2DROP R> R> 0   THEN THEN ;
 ( Find a STRING in the environment, -its VALUE or NULL string)
 : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
@@ -1253,7 +1253,7 @@ WANT TASK-TABLE   WANT CVA
 : (WORD-BACK) BEGIN 1- DUP C@ ?BLANK 0= UNTIL 1+
     BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ;
 \ Return SC the latest word in the input.
-: LATEST-WORD IN @ (WORD-BACK) SRC @ MAX IN ! (WORD) ( TRIM') ;
+: LATEST-WORD IN @ (WORD-BACK) SRC @ MAX IN ! NAME ( TRIM') ;
 \ The compiled program can't run.
 VARIABLE FAILED    0 FAILED !
 \ The compiled program can run, after reload.
@@ -1412,7 +1412,7 @@ WANT RESTORED HEX
 ">SFA" PRESENT 0= ?LEAVE-BLOCK
 
 \ edit the following word
-: EDIT: (WORD) FOUND >SFA @  1 MAX 255 MIN EDIT ;
+: EDIT: NAME FOUND >SFA @  1 MAX 255 MIN EDIT ;
 
 
 \ edit the latest word, the one with the bug
@@ -1491,7 +1491,7 @@ WANT SEE
  : T,  ( N--. Put N in select table)
      SELTOP @ !  0 CELL+ SELTOP +!  ;
  : CFOF ( --N Get dea of word following )
-    (WORD) FOUND ;
+    NAME FOUND ;
 
  : ID.. CFA> ID. ; ( cfa--. Print a words name )
  : ID.+ $@ ID.. ; ( dip -- dip' Print a words name )
@@ -1514,7 +1514,7 @@ WANT SEE
        THEN ID.. CR
     THEN ;
 : CRACK  ( Use CRACK "ITEM" to decompile the word ITEM)
-    (WORD) FOUND DUP 0= 11 ?ERROR CRACKED ;
+    NAME FOUND DUP 0= 11 ?ERROR CRACKED ;
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
  : ?Q KEY? IF QUIT THEN ; ( NOODREM)
@@ -1599,9 +1599,9 @@ CFOF BRANCH BY -br
 : SEE   CRACK ;
 
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
-VOCABULARY ASSEMBLER IMMEDIATE
+NAMESPACE ASSEMBLER IMMEDIATE
 \ ISO standard words.
-: CODE ?EXEC (WORD) (CREATE) [COMPILE] ASSEMBLER !CSP  ;
+: CODE ?EXEC NAME (CREATE) [COMPILE] ASSEMBLER !CSP  ;
 : ;CODE
 ?CSP   POSTPONE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
 ; IMMEDIATE
@@ -2025,7 +2025,7 @@ DECIMAL
 \ Show the screen or text how SC is defined
 : LOCATED FOUND DUP 0= 11 ?ERROR >SFA @ .SOURCEFIELD ;
 \ Idem but string from input.
-: LOCATE (WORD) LOCATED ;
+: LOCATE NAME LOCATED ;
 
 
 
@@ -2037,7 +2037,7 @@ CREATE cmdbuf 1000 ALLOT
      CREATE , ,
      DOES>
      2@ cmdbuf $! BL cmdbuf $C+ \ Command
-     ^J (PARSE) cmdbuf $+!      \ Append
+     ^J PARSE cmdbuf $+!        \ Append
      cmdbuf $@ SYSTEM          \  Execute
 ;
 ?LI
@@ -2049,7 +2049,7 @@ CREATE cmdbuf 1000 ALLOT
 ( cat cp echo diff grep list ls make man rm ee l unix) CF: ?LI
 WANT OS-IMPORT ( and cdED )          \ AvdH A30325
 "cat    "   OS-IMPORT cat
-: cd (WORD) cdED ;      \ Change directory to "SC"
+: cd NAME cdED ;      \ Change directory to "SC"
 "cp     "   OS-IMPORT cp
 "echo   "   OS-IMPORT echo
 "diff   "   OS-IMPORT diff
@@ -2071,7 +2071,7 @@ WANT OS-IMPORT       HEX
 "DIR    "   OS-IMPORT ls
 "COPY   "   OS-IMPORT cp
 "DEL    "   OS-IMPORT rm
-: cd   (WORD) ZEN _ _ 3B00 BDOSN 1 AND SWAP ?ERROR ;
+: cd   NAME ZEN _ _ 3B00 BDOSN 1 AND SWAP ?ERROR ;
 "EDIT   "   OS-IMPORT ed
 "ee     "   OS-IMPORT ee  \ My favorite editor
 
@@ -2087,7 +2087,7 @@ WANT OS-IMPORT       HEX
 "DIR    "   OS-IMPORT DIR
 "COPY   "   OS-IMPORT COPY
 "DEL    "   OS-IMPORT DEL
-: CD   (WORD) ZEN _ _ 3B00 BDOSN 1 AND SWAP ?ERROR ;
+: CD   NAME ZEN _ _ 3B00 BDOSN 1 AND SWAP ?ERROR ;
 "EDIT   "   OS-IMPORT ed  \ Not to conflict with: #BL EDIT
 "RENAME "   OS-IMPORT RENAME
 "A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
@@ -2719,7 +2719,7 @@ EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
 
 
 ( 250 Redefine R\W to accomodate larger addresses. A1may05AH)
-VOCABULARY SYS ONLY FORTH
+NAMESPACE SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
 ( 247 248 ) THRU HEX
 : NEW-COLD
@@ -3312,7 +3312,7 @@ BRANCH  [ 8 , ] 8 0   PREV   @   !   ?ERROR
 
 ( PROBABLY OBSOLETE Alternative for COLD A1may04 AH)  HEX
 DP @ LOW-DP @  DP ! LOW-DP ! \ Compile to low memory.
-VOCABULARY SYS    SYS DEFINITIONS
+NAMESPACE SYS    SYS DEFINITIONS
 : NEW-COLD
 EMPTY-BUFFERS   FIRST STALEST !   FIRST PREV !
 'SYS 'FORTH >WID >LFA !
@@ -3375,7 +3375,7 @@ R@   NOOP RBLK' DUP  @   R@   -   0=
 ' UPDATE' 'UPDATE 3 CELLS MOVE
 ' BLOCK' 'BLOCK 3 CELLS MOVE
 ( Redefine R\W to accomodate larger addresses. A1may05AH)
-VOCABULARY SYS ONLY FORTH
+NAMESPACE SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
 247 248 THRU HEX
 : NEW-COLD
@@ -3454,18 +3454,18 @@ BLK ?
 
 
 
-( $I $S Reference_implementation ) \ AvdH A0APR04
+( $^ $/ Reference_implementation ) \ AvdH A0APR04
 ( cs, del - Index Index is the first place del is found in the
 string else 0. It is assumed del cannot be a valid addr )
-: $I   OVER 0= IF DROP DROP DROP 0 ELSE  DUP >R
+: $^   OVER 0= IF DROP DROP DROP 0 ELSE  DUP >R
      ROT ROT OVER + SWAP DO
      DUP I C@ = IF DROP I LEAVE THEN
    LOOP R> OVER = IF DROP 0 THEN
 THEN ;
 ( cs, del -- cs2 , cs1 )  ( Splits the text at the del )
    ( in two, if not present, cs2 is a null string )
-: $S
-  >R OVER OVER R> $I  DUP IF
+: $/
+  >R OVER OVER R> $^  DUP IF
     >R OVER R@ SWAP - ( Length before delimiter )
     SWAP OVER - 1 - ( Length after delimiter)
     R> 1+ SWAP
@@ -3831,7 +3831,7 @@ WANT +THRU
 ( : DOIT HERE IN @ POSTPONE ' POSTPONE >DFA ! IN !
 POSTPONE : ; )
 : :R  IN @ >R [COMPILE] : R> IN !
-HERE >CFA (WORD) FOUND IF CELL+ ! THEN ; IMMEDIATE
+HERE >CFA NAME FOUND IF CELL+ ! THEN ; IMMEDIATE
 FORWARD FAC
 :R FAC   DUP 0= IF DROP 1 ELSE DUP 1 - FAC * THEN ;
 .S 4 FAC .S ." 4! IS " .
