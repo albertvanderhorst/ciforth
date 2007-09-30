@@ -1820,7 +1820,7 @@ CODE_HEADER({(?DO)},{XQDO})
         POP     DX      _C{ INITIAL INDEX VALUE}
         POP     BX      _C{ LIMIT VALUE}
         CMP     DX,BX
-        JZ      QXDO1
+        JGE     QXDO1
         XCHG    RPO,SPO   _C{ GET RETURN STACK}
         PUSH    AX      _C{ Target location.}
         PUSH    BX
@@ -5066,9 +5066,12 @@ For dummy entries print nothing. },
 { { : GORILLA ; ' GORILLA ID.},{GORILLA} },
 enddoc)
 _HEADER({ID.},{IDDOT},{DOCOL})
-        DC      LDUP, TFFA
-        DC      FETCH, LIT, B_DUMMY, LXOR
+        DC      LDUP, TFFA, FETCH
+        DC      LIT, B_DUMMY, LAND
         _0BRANCH(IDDOT1)
+        DC      DROP
+        _BRANCH(IDDOT2)
+IDDOT1:
         DC      TNFA
         DC      FETCH
         DC      SFET
@@ -5076,9 +5079,6 @@ _HEADER({ID.},{IDDOT},{DOCOL})
         DC      SPACE
         DC      SPACE
         DC      SPACE
-        _BRANCH(IDDOT2)
-IDDOT1:
-        DC      DROP
 IDDOT2:
         DC      SEMIS
 _C
@@ -9240,14 +9240,22 @@ _HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{?DO},{question_do},{n1 n2 --- (execute)
-addr n --- (compile)},{ISO,I,C2,L0},
+addr n --- (compile)},{NISO,I,C2,L0},
 {Occurs in a colon-definition in form:
     forthexample({?DO ... LOOP})
-It behaves like DO , with the exception that if n1 and n2 are equal
-the loop body is not executed.},
+It behaves like forthcode({DO}),
+with the exception that if n1 is less or equal to n2
+the loop body is not executed.
+This is intended to supress the unwanted behaviour of looping
+through the whole number range.
+ciforth deviates from ISO in that it also supresses the unwanted
+behaviour of looping through almost the whole number range for
+an input of e.g. forthexample({1 2}).
+},
 {{DO},{I},{LOOP},{+LOOP},{LEAVE}},
 { { : GS1 ?DO 41 EMIT LOOP 0 . ; 3 0 GS1},{AAA0 },
   {: GS3 0 1 1 ?DO I . LOOP . ; GS3 },{0} },
+  {: GS4 0 -1 1 ?DO I . LOOP . ; GS4 },{0} },
 enddoc)
 _HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
          DC      LIT, XQDO, COMMA, PFORWARD, PBACK
