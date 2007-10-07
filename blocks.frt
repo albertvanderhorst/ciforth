@@ -383,13 +383,13 @@ VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
 : IN-SET? $@ SWAP ?DO
    DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 ( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE BAG-HOLE BAG-INSERT )
-WANT @+
+\ Warning uses $@ as as @+
 ( Build a bag with X items. )
 : BUILD-BAG   HERE CELL+ , CELLS ALLOT ;
 ( Create a bag "x" with X items. )
 : BAG   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !BAG   DUP CELL+ SWAP ! ;   ( Make the BAG empty )
-: BAG?   @+ = 0= ;   ( For the BAG : it IS non-empty )
+: BAG?   $@ = 0= ;   ( For the BAG : it IS non-empty )
 : BAG+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Push ITEM to the BAG )
 : BAG@- 0 CELL+ NEGATE OVER +! @ @ ;   ( From BAG: pop ITEM )
 : BAG-REMOVE    ( Remove entry at ADDRESS from BAG. )
@@ -399,9 +399,9 @@ WANT @+
 ( Insert VALUE at ADDRESS in BAG. )
 : BAG-INSERT   OVER SWAP BAG-HOLE   ! ;
 ( |BAG| DO-BAG .BAG BAG-WHERE IN-BAG? BAG- SET+ SET- ) \ AvdH
-: |BAG|   @+ SWAP - 0 CELL+ / ; ( For BAG : NUMBER of items )
+: |BAG|   $@ SWAP - 0 CELL+ / ; ( For BAG : NUMBER of items )
 \ Loop over a bag, see ``.BAG'' for an example.
-: DO-BAG  POSTPONE @+ POSTPONE SWAP POSTPONE ?DO ; IMMEDIATE
+: DO-BAG  POSTPONE $@ POSTPONE SWAP POSTPONE ?DO ; IMMEDIATE
 : LOOP-BAG 0 CELL+ POSTPONE LITERAL POSTPONE +LOOP ; IMMEDIATE
 : .BAG   DO-BAG I ? LOOP-BAG ; ( Print BAG )
 ( For VALUE and BAG : ADDRESS of value in bag/nill.)
@@ -1548,8 +1548,8 @@ BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP CRACKED REPEAT DROP ;
 ( The <BM is not only optimisation, else `LIT 0' goes wrong.)
 : DEA? DUP BM < IF DROP 0 ELSE
 DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
-
-
+\ For DEA: it IS a header (heuristically).
+ : HEAD? DUP >DFA @ SWAP  >PHA = ;
 ( SEE   4 ) \ AvdH A0apr11
  : BY ( DEA --. the CFA word is decompiled using : )
    T, CFOF T, ; ( a word from the input stream )
@@ -1599,7 +1599,11 @@ CFOF LIT BY -lit
 make decompile pointer point to exit!)
     DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
 ( SEE   7 ) \ AvdH A1MAY17
- : -dd CFA> ." CREATE DOES> word " ID.. CR ;
+\ For ADDRESS: find DEA to which this address belongs.
+ : FIND-HEAD ALIGNED ( Important for CREATE )
+     BEGIN DUP HEAD? 0= WHILE 0 CELL+ - REPEAT ;
+: TO-DOES   >DFA @ @ ; \ For DEA: hl POINTER in ``DOES>'' code.
+ : -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID.. ID.. CR ;
         CFOF FORTH @ BY -dd
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 : .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
@@ -1609,11 +1613,7 @@ make decompile pointer point to exit!)
 CFOF 0BRANCH BY -0br
 : -br  CR ." BRANCH  [ " -con ." , ] " -target ;
 CFOF BRANCH BY -br
-
-: KRAAK CRACK ;
-
-: SEE   CRACK ;
-
+: KRAAK CRACK ;          : SEE   CRACK ;
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
 NAMESPACE ASSEMBLER IMMEDIATE
 \ ISO standard words.
