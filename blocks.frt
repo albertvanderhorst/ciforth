@@ -79,20 +79,20 @@
 
 \
 ( CONFIG ?LEAVE-BLOCK ?16 ?32 ?LI ?PC ?MS ?FD ?HD ) \ A4dec8
-WANT PRESENT?
+
 : ?LEAVE-BLOCK IF SRC CELL+ @ IN ! THEN ;
-: CONFIG CREATE , DOES> @ ?LEAVE-BLOCK ;
-0 CELL+ 2 <> CONFIG ?16
-0 CELL+ 4 <> CONFIG ?32
-0 CELL+ 8 <> CONFIG ?64
- "BIOS31" PRESENT 0=   DUP CONFIG ?WI   \ DPMI ("windows")
- "BDOSN"  PRESENT 0=   DUP CONFIG ?MS   \ MS-DOS
-               AND DUP CONFIG ?WIMS \ One of 2 above
- "LINOS"  PRESENT 0= DUP   CONFIG ?LI   \ Linux
-                 AND  CONFIG ?HS   \ Any host
- "BIOSN"  PRESENT 0=   CONFIG ?PC   \ Possibly stand alone
- "LBAPAR" PRESENT 0=   CONFIG ?HD   \ Hard disk, modern
- "SEC-RW" PRESENT 0=   CONFIG ?FD   \ Floppy or hard disk old
+: CONFIG CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
+0 CELL+ 2 = CONFIG ?16
+0 CELL+ 4 = CONFIG ?32
+0 CELL+ 8 = CONFIG ?64
+ "BIOS31" PRESENT DUP CONFIG ?WI   \ DPMI ("windows")
+ "BDOSN"  PRESENT DUP CONFIG ?MS   \ MS-DOS
+               OR DUP CONFIG ?WIMS \ One of 2 above
+ "LINOS"  PRESENT DUP   CONFIG ?LI   \ Linux
+                 OR CONFIG ?HS   \ Any host
+ "BIOSN"  PRESENT CONFIG ?PC   \ Possibly stand alone
+ "LBAPAR" PRESENT CONFIG ?HD   \ Hard disk, modern
+ "SEC-RW" PRESENT CONFIG ?FD   \ Floppy or hard disk old
 
 ( HELP ) CF: ?HS \ A5dec07
 : HELP-WANTED? ." Press space to skip " TYPE
@@ -1570,7 +1570,7 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
 : CRACK-CHAIN CR BEGIN ?Q DUP @ LIT (;) <>
 ( >R DUP LIM @ < R> AND )  WHILE ITEM REPEAT DROP ;
  ( Decompilation of special high level words)
- : -hi CR ." : " DUP DUP ID.. CELL+ @ CRACK-CHAIN
+ : -hi CR ." : " DUP DUP ID.. >DFA @ CRACK-CHAIN
 CR ." ;"  DUP
 ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  PREFIX" THEN
 CR ;         CFOF TASK @  BY -hi

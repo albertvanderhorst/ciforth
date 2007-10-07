@@ -21,11 +21,11 @@ CREATE pad 80 ALLOT \ Word surrounded by spaces
 \ For LINE : it CONTAINS the word at pad.
 : CONTAINS   pad @ - OVER + SWAP
   DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
-\ If word is in index line of BLOCK load it. Leave NEXT block.
-: ?LOAD?   >R   0 R@ (LINE) -TRAILING   DUP 0= 24 AND THROW
-   CONTAINS IF R@ LOAD THEN   R> 1+ ;
-: (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R
-  BEGIN 2DUP FILL-pad R> ?LOAD? >R 2DUP PRESENT UNTIL   RDROP ;
+\ Find word in blocks N and up. Load and leave the block AFTER.
+: ?LOAD?   BEGIN 0 OVER (LINE) -TRAILING   DUP 0= 24 AND THROW
+   CONTAINS 0= WHILE 1+ REPEAT   DUP LOAD 1+ ;
+: (WANTED)   ( sc -- sc) 2DUP FILL-pad   ERRSCR @ 4 + >R
+  BEGIN 2DUP PRESENT 0= WHILE R> ?LOAD? >R REPEAT RDROP ;
 \ Make sure WORD is present in the ``FORTH'' namespace
 : WANTED   '(WANTED) CATCH
   DUP 24 = IF >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
