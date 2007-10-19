@@ -848,7 +848,7 @@ IMMEDIATE
 : ."$" BEGIN &" $/ &" EMIT TYPE &" EMIT OVER 0= UNTIL 2DROP ;
 ( TICKS PAST? ) CF: ?32 \ AvdH A2oct21
 \ Assuming we run on an 486 or better, and a 32 bits Forth
-WANT ASSEMBLERi86 HEX
+WANT ASSEMBLERi86-HIGH HEX
 CODE  TEST-EF POPF, PUSHF, NEXT, C;
 DECIMAL
 1 21 LSHIFT CONSTANT ID-FLAG
@@ -858,7 +858,7 @@ HEX CODE CPUID POP|X, AX| CPUID, PUSH|X, DX| NEXT, C;
 1 CPUID 10 AND 0= DECIMAL ?LEAVE-BLOCK HEX
 CODE TICKS RDTSC, PUSH|X, AX| PUSH|X, DX| NEXT, C;
 
-
+TRIM \ The assembler
 \ For a TIME in ticks: it IS in the past.
 : PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
 DECIMAL
@@ -944,7 +944,7 @@ DECIMAL
 
 ( MEASURE-PRIME test_for_TIME ) \ AvdH A1oct05
  : TASK ;
-WANT ASSEMBLERi86 \ Otherwise nesting gets too deep
+
 WANT DO-PRIME-ISO   WANT MARK-TIME
 
 
@@ -1390,14 +1390,14 @@ WANT OLD:    WANT SET-TRAPS
    'NEW-THRU >DFA @   'THRU >DFA ! ;
 : NO-DEBUG   SET-NO-TRAPS  'OK RESTORED
  'WARM RESTORED 'THRU RESTORED ;
-( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A2oct24
+( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11
 WANT RESTORED HEX
 \ Characters ONE and TWO are equal, ignoring case.
 : C=-IGNORE DUP >R   XOR DUP 0= IF 0= ELSE
      20 <> IF 0 ELSE
      R@ 20 OR &a &z 1+ WITHIN THEN THEN  RDROP ;
 \ ( sc1 sc2 -- f) f means equal (0) or not. No lexicography.
-: CORA-IGNORE 0 DO   OVER I + C@   OVER I + C@   C=-IGNORE 0=
+: CORA-IGNORE 0 ?DO   OVER I + C@   OVER I + C@   C=-IGNORE 0=
     IF   2DROP -1 UNLOOP EXIT   THEN LOOP   2DROP 0 ;
 \ Caseinsensitive version of ~MATCH
 : ~MATCH-IGNORE   >R   2DUP   R@ >NFA @ $@   ROT MIN
@@ -1615,11 +1615,11 @@ CFOF 0BRANCH BY -0br
 CFOF BRANCH BY -br
 : KRAAK CRACK ;          : SEE   CRACK ;
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
-NAMESPACE ASSEMBLER IMMEDIATE
+NAMESPACE ASSEMBLER
 \ ISO standard words.
 : CODE ?EXEC NAME (CREATE) [COMPILE] ASSEMBLER !CSP  ;
 : ;CODE
-?CSP   POSTPONE   (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
+?CSP   POSTPONE (;CODE)   [COMPILE] [   [COMPILE] ASSEMBLER
 ; IMMEDIATE
 : END-CODE ?EXEC ?CSP PREVIOUS ;
 \ Non standard. A traditional alias for END-CODE .
@@ -1629,56 +1629,40 @@ NAMESPACE ASSEMBLER IMMEDIATE
 
 
 
-
-( ASSEMBLERi86-HIGH )  CF: ?32 \ AvdH A0oct17
-
-WANT ASSEMBLER  WANT IVAR   WANT +THRU
-WANT SWAP-DP
-
+\
+( ASSEMBLERi86-HIGH )  CF:          \ A7oct19 AvdH
+WANT ASSEMBLER   WANT SWAP-DP   WANT ALIAS
 "ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
-: ASSEMBLERi86 ;
-
-ASSEMBLER DEFINITIONS
 SWAP-DP
-2 DUP +THRU
-SWAP-DP
-PREVIOUS DEFINITIONS
-
-
-
-( ASSEMBLERi86 )  CF:                      \ AvdH A4sep27
-WANT ASSEMBLER  WANT +THRU
-
-"ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
 : ASSEMBLERi86 ;
-
 ASSEMBLER DEFINITIONS
-
+ HEX
  WANT  ASSEMBLER-GENERIC
- WANT   ASSEMBLER-CODES-i86
- WANT   ASSEMBLER-CODES-PENTIUM
- WANT   ASSEMBLER-MACROS-i86
- WANT TEST-NEXT
-\  WANT TEST-JUMP
+ WANT  ASSEMBLER-CODES-i86
+ WANT  ASSEMBLER-CODES-PENTIUM
+ WANT  ASSEMBLER-MACROS-i86
+ DECIMAL
+SWAP-DP
+
 
 PREVIOUS DEFINITIONS
-( ASSEMBLER-GENERIC )                          \ AvdH A3dec18
+( ASSEMBLERi86 )  CF:               \ A7oct19 AvdH
+WANT ASSEMBLER   WANT ALIAS
 
-WANT +THRU
+"ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
 
- 1 1 HEX +THRU  DECIMAL ( Common code , prelude)
-
-
-
-
-
-
-
-
-
+: ASSEMBLERi86 ;
+ASSEMBLER DEFINITIONS
+ HEX
+ WANT  ASSEMBLER-GENERIC
+ WANT  ASSEMBLER-CODES-i86
+ WANT  ASSEMBLER-CODES-PENTIUM
+ WANT  ASSEMBLER-MACROS-i86
+ DECIMAL
 
 
-( --assembler_generic SPLIT 1PI FIR 1FAMILY, )  \ A4sep27 AvdH
+PREVIOUS DEFINITIONS
+( ASSEMBLER-GENERIC SPLIT 1PI FIR 1FAMILY, )  \ A7oct19 AvdH
 : SPLIT 0 100 UM/MOD SWAP   ; \ Split X : ls BYTE and REMAINDER
 \ Post INSTRUCTION of LENGTH.  Big endian specific!
 : POST  SWAP , 1 CELLS - ALLOT ;
@@ -1694,23 +1678,7 @@ WANT +THRU
 : 2FAMILY, 0 DO DUP 2PI OVER + LOOP DROP DROP ;
 : 3FAMILY, 0 DO DUP 3PI OVER + LOOP DROP DROP ;
 : FAMILY|R 0 DO DUP FIR OVER + LOOP DROP DROP ;
-( ASSEMBLER-CODES-i86 )                         \ A3dec18 AvdH
-
-WANT +THRU           WANT ALIAS
-
-1 9 HEX +THRU DECIMAL
-
-( 1 3 Load either 16 or 32 bit fix up's)
-( 4   commaers )
-( 5 7 8086 level instructions )
-( 8 9 80386 level instructions )
-
-
-
-
-
-
-( --assembler_i86_fixups_1 ) CF: ?16 \ A2oct21 AvdH
+( ASSEMBLER-CODES-i86 AX| ) CF: ?16 \ A2oct21 AvdH
  40 00 4 FAMILY|R ZO| BO| XO| R|
  01 00 8 FAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
  01 00 8 FAMILY|R AX| CX| DX| BX| SP| BP| SI| DI|
@@ -1726,7 +1694,7 @@ WANT +THRU           WANT ALIAS
     [SI] [DI] [BP] [BX]
 ( 07) 1 0 8 FAMILY|R% [BX+SI]% [BX+DI]% [BP+SI]% [BP+DI]%
     [SI]% [DI]% [BP]% [BX]%
-( --assembler_i86_fixups_1 [AX] AX| AX|) CF: ?32 \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 [AX] AX| ) CF: ?32 \ A4sep27 AvdH
 
  40 00 4 FAMILY|R ZO| BO| XO| R|
  05 FIR MEM| ( instead of ZO| BP| )
@@ -1742,7 +1710,7 @@ WANT +THRU           WANT ALIAS
 ( C7) 6 FIR MEM|%
 ( 07) 1 0 8 FAMILY|R [BX+SI]% [BX+DI]% [BP+SI]% [BP+DI]%
 [SI]% [DI]% [BP]% [BX]%
-( --assembler_i86_fixups_2 SIB,, [AX )   CF: ?32 \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86  SIB,, [AX )   CF: ?32 \ A4sep27 AvdH
 \ Fixups from this pages must come after all others
 \ and start with a [xx .
 0 1PI SIB,,      \ Required after SIB|
@@ -1758,7 +1726,7 @@ WANT +THRU           WANT ALIAS
 
 
 
-( --assembler_commaers ) \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 IL, IW, ) \ A4sep27 AvdH
 : lsbyte, SPLIT C, ;
 : (W,) lsbyte, lsbyte, DROP ;
 : (L,) lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
@@ -1774,7 +1742,7 @@ WANT +THRU           WANT ALIAS
 
 
 
-( --assembler_i86_opcodes_1 )                  \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 --opcodes1 ) \ A4sep27 AvdH
 08 06 4 1FAMILY, PUSH|ES, PUSH|CS, PUSH|SS, PUSH|DS,
 08 07 4 1FAMILY, POP|ES, -- POP|SS, POP|DS,
 08 26 4 1FAMILY, ES:, CS:, SS:, DS:,
@@ -1790,7 +1758,7 @@ WANT +THRU           WANT ALIAS
 
 08 40 4 1FAMILY, INC|X, DEC|X, PUSH|X, POP|X,
 90 1PI XCHG|AX,
-( --assembler_i86_opcodes_2 )                  \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 --opcodes2 ) \ A4sep27 AvdH
 08 00 8 2FAMILY, ADD, OR, ADC, SBB, AND, SUB, XOR, CMP,
 02 84 2 2FAMILY, TEST, XCHG,
 01 98 8 1FAMILY, CBW, CWD, IR2, WAIT, PUSHF, POPF, SAHF, LAHF,
@@ -1806,7 +1774,7 @@ WANT +THRU           WANT ALIAS
 
 0088 2PI MOV,           008C 2PI MOV|SG,        008D 2PI LEA,
 EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
-( --assembler_i86_opcodes_3 ) \ A2oct21 AvdH
+( ASSEMBLER-CODES-i86 --opcodes3 ) \ A2oct21 AvdH
 01 F0 6 1FAMILY, LOCK, -- REPNZ, REPZ, HLT, CMC,
 01 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)
 800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI,
@@ -1822,7 +1790,7 @@ EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
 
 00F6 2PI TESTI,         008F 2PI POP,           30FF 2PI PUSH,
 00,AF0F 3PI IMUL,
-( --assembler_i386_opcodes_1 )        CF: ?32    \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 --opcodes4 )  CF: ?32    \ A4sep27 AvdH
 01 60 2 1FAMILY, PUSH|ALL, POP|ALL,
 01 62 2 2FAMILY, BOUND, ARPL,
 01 64 4 1FAMILY, FS:, GS:, OS:, AS:,
@@ -1838,7 +1806,7 @@ EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
 
 C8 1PI ENTER,           C9 1PI LEAVE,           060F 2PI CLTS,
 C0200F 3PI MOV|CD,      800F 2PI J|X,
-( --assembler_i386_opcodes_2 )        CF: ?32    \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 --opcodes4 )  CF: ?32    \ A4sep27 AvdH
 00,0100 00,020F 2 3FAMILY, LAR, LSL, ( 3)
 0100 A00F 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
 00,0800 00,A30F 4 3FAMILY, BT, BTS, BTR, BTC,
@@ -1854,23 +1822,7 @@ C0200F 3PI MOV|CD,      800F 2PI J|X,
 08,0000 00,010F 7
     3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,
 
-( ASSEMBLER-CODES-PENTIUM )                      \ A3dec18 AvdH
-
-WANT +THRU
-
-1 4 HEX +THRU DECIMAL
-
-( 1   non fp Pentium instructions )
-( 2   fp fixups )
-( 3 4 fp instruction )
-
-
-
-
-
-
-
-( --assembler_pentium_opcodes_1 ) CF: ?32       \ A4sep27 AvdH
+( ASSEMBLER-CODES-PENTIUM --opcodes ) CF: ?32  \ A7oct19 AvdH
 
 
 \ 0F prefix
@@ -1886,7 +1838,7 @@ C80F 2PI BSWAP,
 08C70F 3PI CMPXCHG8B,
 
 
-( --assembler_pentium_fixups_fp_1 ) CF: ?32     \ A4sep27 AvdH
+( ASSEMBLER-CODES-PENTIUM --fixups_fp ) CF: ?32 \ A7oct19 AvdH
    01 00 8 FAMILY|R ST0| ST1| ST2| ST3| ST4| ST5| ST6| ST7|
 0400 00 2 FAMILY|R s| d|     \ Single/Double 16/32
 0400 00 2 FAMILY|R |32 |16   \ memory int
@@ -1902,7 +1854,7 @@ C80F 2PI BSWAP,
 
 
 
-( --assembler_pentium_opcodes_fp_1 ) CF: ?32    \ A4sep27 AvdH
+( ASSEMBLER-CODES-PENTIUM --fp_1 ) CF: ?32    \ A7oct19 AvdH
 0800 00D8 7 2FAMILY, FADD, FMUL, FCOM, FCOMP, FSUB, -- FDIV,
 
 0800 10D9 6 2FAMILY, FST, FSTP, FLDENV, FLDCW, FSTENV, FSTCW,
@@ -1918,7 +1870,7 @@ C80F 2PI BSWAP,
 0800 00DA 4 2FAMILY, FIADD, FIMUL, FICOM, FICOMP,
 1000 20DA 2 2FAMILY, FISUB, FIDIV,
 E9DA 2PI FUCOMPP,
-( --assembler_pentium_opcodes_fp_2 ) CF: ?32    \ A4sep27 AvdH
+( ASSEMBLER-CODES-PENTIUM --fp_2) CF: ?32 \ A7oc17 AvdH
 0800 00DB 4 2FAMILY, FILD, -- FIST, FISTP,
 1000 28DB 2 2FAMILY, FLD|e, FSTP|e,
 E2DB 2PI FCLEX,         E3DB 2PI FINIT,
@@ -1934,23 +1886,7 @@ D9DE 2PI FCOMPP,
 E0DF 2PI FSTSW|AX,
 
 
-( ASSEMBLER-MACROS-i86 )
-
-WANT +THRU
-
- 1 3 HEX +THRU  DECIMAL ( Common code , prelude)
-
-
-
-
-
-
-
-
-
-
-
-( --assembler_next NEXT, TEST-NEXT ) \ A4oct19 AvdH
+( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) \ A7oct19 AvdH
 : NEXT,
      LODS, X'|
      MOV, X| F| AX'| R| BX|
@@ -1966,7 +1902,7 @@ WANT +THRU
   " next Tested " TYPE
 
 \
-( --asm_macros_1 NOP, CP, COPY-SEG )
+( ASSEMBLER-MACROS-i86 NOP, CP, COPY-SEG ) \ A7oct19 AvdH
 \ Using plain comma's here to work for 16/32 bits.
 
 \ Copy data from ADDRESS1 to ADDRESS2
@@ -1982,7 +1918,7 @@ WANT +THRU
     MOV|SG, T| ES| R| AX|
     MOV|SG, T| SS| R| AX|  ;
 
-( --asm_macros_2 TO-PROT, TO-REAL, ) CF: ?32
+( ASSEMBLER-MACROS-i86 TO-PROT, TO-REAL, ) CF: ?32 \ A7oct19
 
 : GET-CR0   MOV|CD, F| CR0| AX| ;
 : PUT-CR0   MOV|CD, T| CR0| AX| ;
@@ -1998,8 +1934,8 @@ WANT +THRU
 
 
 \
-( --asm_macros_3 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32
-HEX
+( --special_macros_1 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32
+HEX   \ Not part of assembler!
 WANT TO-PROT, TO-REAL,
 \ These macro's are useful for protected mode under MSDOS
 \ or for stand alone booting systems.
@@ -2014,7 +1950,8 @@ WANT TO-PROT, TO-REAL,
 
 
 DECIMAL
-( --asm_macros_4 TEST-JUMP ) CF: ?32  \ AvdH A5sep13
+( --special_macros_2 TEST-JUMP ) CF: ?32  \ AvdH A5sep13
+\ Not part of assembler!
 \ These must always assemble, but run only on booted systems.
 ( Test applicable to 32 bit mode and special versions.)
 WANT TO-PROT,     WANT JMP-PROT,
@@ -2023,7 +1960,6 @@ CODE TEST-JUMP JMP-REAL, JMP-PROT, NEXT, END-CODE
 CODE TEST-MORE TO-REAL,   TO-PROT, NEXT, END-CODE
 CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
     GDT_DS COPY-SEG   NEXT, END-CODE
-
 
 
 
@@ -4429,4 +4365,4 @@ RDROP 2DROP RC @ 0 ;   'RC HIDDEN
 
 
 
-( 4432 last line)
+( 4368 last line)

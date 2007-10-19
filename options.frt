@@ -24,8 +24,8 @@ CREATE pad 80 ALLOT \ Word surrounded by spaces
 \ Find word in blocks N and up. Load and leave the block AFTER.
 : ?LOAD?   BEGIN 0 OVER (LINE) -TRAILING   DUP 0= 24 AND THROW
    CONTAINS 0= WHILE 1+ REPEAT   DUP LOAD 1+ ;
-: (WANTED)   ( sc -- sc) 2DUP FILL-pad   ERRSCR @ 4 + >R
-  BEGIN 2DUP PRESENT 0= WHILE R> ?LOAD? >R REPEAT RDROP ;
+: (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R   BEGIN 2DUP FILL-pad
+  2DUP PRESENT 0= WHILE R> ?LOAD? >R REPEAT RDROP ;
 \ Make sure WORD is present in the ``FORTH'' namespace
 : WANTED   '(WANTED) CATCH
   DUP 24 = IF >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
