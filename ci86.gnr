@@ -3251,7 +3251,7 @@ _C
 _C
 worddoc( {ERRORS},{WHERE},{where},{--- addr},{U},
 {A user variable pair which contains the start of the source and the
-character position of the last error that was thrown by
+position after the last character parsed when an error thrown by
 forthcode({?ERROR}) _VERBOSE_({{,so not of exceptions thrown}}).
 The contents of forthcode({WHERE}) is interpreted by
 forthcode({ERROR}) if the corresponding exception was never
@@ -4940,14 +4940,15 @@ worddoc( {ERRORS},{ERROR},{error},{n ---},{},
 error with number forthvar({n}) has occurred.
 The word that caused it is found using forthcode({WHERE}) and displayed .
 Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a description
- of the error.
+ of the error, clamped to the range [M4_ERRORMIN, M4_ERRORMAX].
 This word is executed by forthcode({THROW}) before restarting the interpreter
 and can be revectored to give more elaborate diagnostics. },
-{{?ERROR},{WARNING}},
+{{MESSAGE},{?ERROR},{WARNING}},
 { {0. WHERE 2! 12 ERROR},{? ciforth ERROR # 18},
  {CR},{} },
 enddoc)
 _HEADER({ERROR},{ERROR},{DOCOL})
+_C{ Make sure the whole word is shown in case of denotations. }
         DC      LWHERE, TFET
         DC      OVER, LIT, 20, LSUB
         DC      MAX
@@ -4961,6 +4962,8 @@ _HEADER({ERROR},{ERROR},{DOCOL})
         DC      STOD, ZERO, PDDOTR      _C{This is about (.) }
         DC      ETYPE
         DC      BASE, STORE
+        DC      LIT, M4_ERRORMIN, MAX
+        DC      LIT, M4_ERRORMAX, MIN
         DC      MESS
         DC      SEMIS
 _C
@@ -5008,7 +5011,6 @@ _HEADER({THROW},{THROW},{DOCOL})
         DC      HANDLER, FETCH, ZEQU
         _0BRANCH(THROW2)
         DC      ERROR
-        DC      MTBUF  _C{ A (too) crude way to remove locks}
         DC      SZERO, FETCH, SPSTO
         DC      QUIT
 THROW2:
@@ -6223,11 +6225,17 @@ Print on the _HOSTED_LINUX_({standard error channel}) _PC_({output device})
 the text of line
 forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
 positive or negative and beyond just screen forthcode({ERRSCR}).
-The messages with negative offset contain
+A certain range around 0 is reserved.
+The messages with smalll positive offset contain ciforth error messages.
+The messages with small negative offset contain
 the strings belonging to the return values for _HOSTED_LINUX_({Linux system calls}) _PC_({BDOS calls}).
+_VERBOSE_({{
+forthcode({ERROR}) makes some assumption about what is present for
+small forthvar({n}), if you want to use this word for other purposes
+you have to redefine }forthcode({ERROR}).})
 forthsamp({0 MESSAGE}) will print version information about the library file,
 the messages sit in.
-If forthcode({WARNING}) is zero (disc unavailable), the message will simply be ignored.
+If forthcode({WARNING}) is zero (disc unavailable), this is a noop.
 },
 {{ERROR}},
 {
@@ -6636,15 +6644,22 @@ _HEADER({THRU},{THRU},{DOCOL})
         DC      ONEP, SWAP
         _DO(THRU2)
 THRU1:
-        DC      IDO, LLOCK
-        DC      IDO, BLOCK
-        DC      LIT, KBBUF
+        DC      IDO
+        DC      LIT, LLOCK, CATCH  _C{ Be careful about always unlocking.}
+        DC      QDUP
+        _0BRANCH(THRU4)
+        DC      DROP
+        _BRANCH(THRU5)
+THRU4:
+        DC      IDO, BLOCK     _C{ Can't fail anymore. }
+        DC      BBUF
         DC      SETSRC
         DC      LIT, INTER, CATCH
         DC      IDO, LUNLOCK
         DC      QDUP
         _0BRANCH(THRU3)
-        DC      RDROP, RDROP, RDROP _C{UNLOOP}.
+THRU5:
+        DC      RDROP, RDROP, RDROP _C{UNLOOP.}
         DC      RESTO
         DC      THROW
 THRU3:

@@ -26,7 +26,7 @@ CREATE pad 80 ALLOT \ Word surrounded by spaces
    CONTAINS 0= WHILE 1+ REPEAT   DUP LOAD 1+ ;
 : (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R   BEGIN 2DUP FILL-pad
   2DUP PRESENT 0= WHILE R> ?LOAD? >R REPEAT RDROP ;
-\ Make sure WORD is present in the ``FORTH'' namespace
+\ Make sure WORD is present in the current namespace
 : WANTED   '(WANTED) CATCH
   DUP 24 = IF >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
 : WANT NAME WANTED ; : CF: "CONFIG" WANTED ; WANT -legacy-

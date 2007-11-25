@@ -199,8 +199,10 @@ define( {_NEWDEBUG_}, _no)dnl
 dnl
 dnl ############## SIZES #############################################
 dnl
-dnl The offset of the errors in the Library Addressable by Block file.
+dnl The offset etc. of the errors in the Library Addressable by Block file.
 define( {M4_ERRORSCREEN}, 48)dnl
+define( {M4_ERRORMIN}, -256)dnl
+define( {M4_ERRORMAX}, 63)dnl
 dnl
 dnl The end of memory, typically good for 16 bit. Redefine for 32 bit.
 define({M4_EM},0x10000)
