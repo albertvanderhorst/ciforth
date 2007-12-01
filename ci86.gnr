@@ -6321,21 +6321,12 @@ CODE_HEADER({P!},{PSTO})
         OUT     _DX16,AX   _C{WORD OUTPUT}
         _NEXT
 _C
-worddoc( {BLOCKS~},{STALEST},{stalest},{--- addr},{},
-{A variable containing the address of the oldest
-block buffer, the first candidate to be claimed if a new
-one is needed.},{{BLOCK}},
-{ { STALEST @ FIRST LIMIT WITHIN .},{_T_} },
-enddoc)
-_HEADER({STALEST},{STALEST},{DOVAR}, )
-        DC BUF1
-_C
 worddoc( {BLOCKS~},{PREV},{prev},{---- addr},{},
 {A variable containing the address of the disc buffer (not its
 content field!) most recently referenced. The
 forthcode({UPDATE}) command marks this buffer to be
 written to disc.},{{(BUFFER)}},
-{ { STALEST @ FIRST LIMIT WITHIN .},{_T_} },
+{ { PREV @ FIRST LIMIT WITHIN .},{_T_} },
 enddoc)
 _HEADER({PREV},{PREV},{DOVAR}, )
         DC      BUF1
@@ -6399,7 +6390,6 @@ _HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
         DC      LSUB,LERASE
-        DC      FIRST, STALEST, STORE
         DC      FIRST, PREV, STORE
         DC      SEMIS
         PAGE
@@ -6413,17 +6403,17 @@ content. The status is negative for locked, zero for free and
 one for present and unlocked.
 The block is not read from the disc. The buffer
 is either one that was already assigned, or else a free buffer.
-If there is none free, the stalest buffer is freed. The
+If there is none free, some non-locked buffer is freed. The
 contents of that buffer is written to the disc, if it was
 marked as updated. In ciforth this is never needed, because
 updated blocks are written immediately. In ciforth blocks can
 be locked, and locked buffers are never freed by
 forthcode({(BUFFER)}) .
 _VERBOSE_({{An update flag would somehow be multiplexed with
-the lock count, but it is not needed in ciforth.}}) If all
-buffers were locked, forthcode({(BUFFER)}) freezes the system.
+the lock count, but it is not needed in this ciforth.}}) If all
+buffers were locked, forthcode({(BUFFER)}) throws exception 8.
 },
-{{BLOCK},{STALEST},{PREV},{#BUFF},{LOCK},{UNLOCK}},
+{{BLOCK},{PREV},{#BUFF},{LOCK},{UNLOCK}},
 {{!CSP 1 (BUFFER) FIRST LIMIT WITHIN . ?CSP},{_T_}},
 enddoc)
 _HEADER({(BUFFER)},{BUFFER},{DOCOL})
@@ -6437,19 +6427,16 @@ BUFFER3:
     DC          FROMR
     DC      PBUF, ZEQU
     _0BRANCH(BUFFER1)
-    DC       DROP
-_C{ Just allocate the stalest buffer.}
-    DC       STALEST,   FETCH, TOR
-_C{ Remember the next stalest buffer. }
-    DC       RR
+_C{ We are left with the previous buffer.}
 BUFFER2:
     DC       PBUF, OVER, CELLP, FETCH
-    DC       LIT, -1, GREAT, LAND
+    DC       LIT, -1, GREAT, LAND     _C{ unlocked buffer?}
     _0BRANCH(BUFFER2)
-    DC       STALEST, STORE
+    DC       TOR
 _C{ Fill in the house keeping.}
     DC       RR, STORE
     DC       ZERO, RR, CELLP, STORE
+
     DC       RR, PREV, STORE
     DC       FROMR
     DC  SEMIS
@@ -9856,8 +9843,7 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment Linux.
 },{{COLD},{EXIT-CODE}},
 {{"lina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
-{-legacy- : (WARNING) NOT PRESENT, THOUGH WANTED
-23 EXIT-CODE ! BYE 23}},
+{23 EXIT-CODE ! BYE 23}},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to linux, with okay status. }

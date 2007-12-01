@@ -110,21 +110,21 @@
    ELSE   "BDOSN"  PRESENT? IF
       "wina.pdf" SYSTEM THEN THEN ;
 
-( -legacy- PRESENT? REQUIRE REQUIRED ) \ AvdH A7feb20
+( -legacy- PRESENT? REQUIRE REQUIRED ) \ AvdH A7dec1
+\ This will make most old programs run.
 : REQUIRE WANT ;   : REQUIRED WANTED ;
+
 : $S $/ ;   : $I $^ ;
+
 : (WORD) NAME ;   : (PARSE) PARSE ;
+
 : VOCABULARY NAMESPACE ;
-
-
-
-
 
 
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
-
+CREATE -legacy-
 
 ( **************ISO language extension ***********************)
                     EXIT
