@@ -9248,13 +9248,14 @@ addr n --- (compile)},{NISO,I,C2,L0},
 {Occurs in a colon-definition in form:
     forthexample({?DO ... LOOP})
 It behaves like forthcode({DO}),
-with the exception that if n1 is less or equal to n2
+with the exception that if forthvar({n1}) is less or equal to forthvar({n2})
 the loop body is not executed.
 This is intended to supress the unwanted behaviour of looping
 through the whole number range.
 ciforth deviates from ISO in that it also supresses the unwanted
 behaviour of looping through almost the whole number range for
-an input of e.g. forthexample({1 2}).
+an input of e.g. forthexample({1 2})
+.
 },
 {{DO},{I},{LOOP},{+LOOP},{LEAVE}},
 { { : GS1 ?DO 41 EMIT LOOP 0 . ; 3 0 GS1},{AAA0 },
