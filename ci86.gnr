@@ -4964,7 +4964,7 @@ _C{ Make sure the whole word is shown in case of denotations. }
         DC      BASE, STORE
         DC      LIT, M4_ERRORMIN, MAX
         DC      LIT, M4_ERRORMAX, MIN
-        DC      MESS
+        DD      LIT, MESS, CATCH, DROP  _C{Prevent error loops }
         DC      SEMIS
 _C
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
@@ -6411,7 +6411,7 @@ be locked, and locked buffers are never freed by
 forthcode({(BUFFER)}) .
 _VERBOSE_({{An update flag would somehow be multiplexed with
 the lock count, but it is not needed in this ciforth.}}) If all
-buffers were locked, forthcode({(BUFFER)}) throws exception 8.
+buffers were locked, forthcode({(BUFFER)}) throws exception 48.
 },
 {{BLOCK},{PREV},{#BUFF},{LOCK},{UNLOCK}},
 {{!CSP 1 (BUFFER) FIRST LIMIT WITHIN . ?CSP},{_T_}},
@@ -6429,8 +6429,9 @@ BUFFER3:
     _0BRANCH(BUFFER1)
 _C{ We are left with the previous buffer.}
 BUFFER2:
-    DC       PBUF, OVER, CELLP, FETCH
-    DC       LIT, -1, GREAT, LAND     _C{ unlocked buffer?}
+    DD       PBUF, ZEQU, LIT, 48, QERR  _C{ No free buffers available.}
+    DD       LDUP, CELLP, FETCH
+    DD       LIT, -1, GREAT        _C{ Unlocked buffer?}
     _0BRANCH(BUFFER2)
     DC       TOR
 _C{ Fill in the house keeping.}
@@ -6577,7 +6578,11 @@ The result is that its buffer will not be reclaimed
 until an forthcode({UNLOCK}) occurs.},
 {{BLOCK},{UNLOCK},{#BUFF}},
 { {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
-    PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{-1 _T_} },
+    PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{-1 _T_},
+{ : test #BUFF 1+ 0 DO I LOCK LOOP ; test },
+{ I LOCK LOOP ; test ? ciforth ERROR # 48 },
+{ EMPTY-BUFFERS}, {},
+},
 enddoc)
 _HEADER({LOCK},{LLOCK},{DOCOL})
         DC      BLOCK
@@ -6633,11 +6638,8 @@ _HEADER({THRU},{THRU},{DOCOL})
 THRU1:
         DC      IDO
         DC      LIT, LLOCK, CATCH  _C{ Be careful about always unlocking.}
-        DC      QDUP
-        _0BRANCH(THRU4)
-        DC      DROP
-        _BRANCH(THRU5)
-THRU4:
+        DC      QDUP, ZEQU
+        _0BRANCH(THRU5)
         DC      IDO, BLOCK     _C{ Can't fail anymore. }
         DC      BBUF
         DC      SETSRC
