@@ -6353,7 +6353,7 @@ forthcode({PREV}).
 { +BUF 0= . FIRST LIMIT WITHIN .},{0 _T_},
 }, enddoc)
 _HEADER({+BUF},{PBUF},{DOCOL})
-        DC      LIT,(KBBUF+2*CW)
+        DC      BBUF, CELLP, CELLP
         DC      PLUS,LDUP
         DC      LIMIT,EQUAL
         _0BRANCH(PBUF1)
@@ -6706,7 +6706,7 @@ _HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
         DC      LDUP, LLOCK
         DC      LDUP, BLK, STORE
         DC      BLOCK
-        DC      LIT, KBBUF
+        DC      BBUF
         DC      SETSRC
         DC      SEMIS
         PAGE
@@ -9862,20 +9862,24 @@ forthcode({SCR}) contains the screen number during and after this process.},
 {{." interactive"},{interactive}},
 enddoc)
 _HEADER({LIST},{LLIST},{DOCOL})
+        DC      BASE, FETCH, TOR
+        DC      DECA
         DC      SCR,STORE
+
         _STRINGINLINE({SCR # })
         DC      LTYPE
-        DC      BASE, FETCH
-        DC      DECA
         DC      SCR, FETCH, DOT
-        DC      BASE, STORE
-        DC      SCR, FETCH, BLOCK
-        DC      LIT,1024
+        DC      SCR, FETCH, BLOCK, BBUF
+
+        DC      LIT, 16, ZERO
+        _DO(LLIST9)
 LLIST1: DC      LIT, ALF, SSLAS
-        DC      CR, LTYPE
-        DC      OVER,ZEQU _C{DUP would not show a last empty line!}
-        _0BRANCH(LLIST1)
+        DC      CR, IDO, LIT, 2, DOTR
+        DC      SPACE, LTYPE
+        _LOOP(LLIST1)
+LLIST9:
         DC      TDROP
+        DC      FROMR, BASE, STORE
         DC      SEMIS
 _C
 worddoc( {SCREEN},{INDEX},{index},{from to ---},{},
