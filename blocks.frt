@@ -1137,8 +1137,8 @@ WANT Z$@   WANT COMPARE   WANT ENV
 ( SAVE-SYSTEM TURNKEY 1 ) CF: ?LI HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
-\ Return the START of the ``ELF'' header.
- : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
+: SM  \ Return the START of the ``ELF'' header. Not Cells!
+ BM BEGIN DUP @ MAGIC @ XOR 0FFFF,FFFF AND WHILE 4 - REPEAT ;
  SM 48 + CONSTANT SIZE^  \ Where to patch total size.
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
@@ -2299,8 +2299,8 @@ BASE !
 : L-S SCR @ LIST ;
 : LO-S SCR @ LOAD ;
 : C-S SWAP BLOCK SWAP BLOCK B/BUF CMOVE UPDATE FLUSH ;
-: LIST' BASE @ 10 - 25 ?ERROR LIST ;
-: LIST LIST' ;
+: LISTP BASE @ 10 - 25 ?ERROR LIST ;
+
 
 ( BIOSI VIDEO-MODE DISK-INIT ) CF: ?PC \ AvdH A1oct05
 HEX
