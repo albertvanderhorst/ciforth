@@ -20,19 +20,20 @@ _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 
 dnl Hard consequences
+_BITS32_({define({_LARGE_}, _yes)})
+_BITS64_({define({_LARGE_}, _yes)})
 _REAL_({define({_BITS16_}, _yes)})
 _BOOTSECTRK_({define({_RWSECTRK_}, _yes)})
 _BOOTLBA_({define({_RWLBA_}, _yes)})
 _BOOTED_({define({_PC_}, _yes)})
 _HOSTED_DPMI_({define({_PC_}, _yes)})
 _HOSTED_MSDOS_({define({_PC_}, _yes)})
-_HOSTED_LINUX_({ define( {_BITS32_}, _yes)})
 _HOSTED_LINUX_({ define({_BLOCKSINFILE_}, _yes)})
 _HOSTED_DPMI_({define({_PROTECTED_}, _yes)})
 _BOOTED_({define({_USEBIOS_}, _yes)})
 _USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
 _CLASSIC_({define({_KEY_BY_KEY_}, _yes )})
-_BITS32_({define({_PROTECTED_}, _yes)})
+_LARGE_({define({_PROTECTED_}, _yes)})
 ;{The following consequences are hard because otherwise you wouldn't have blocks.}
 define({_FILES_}, _no)
 _MODERN_({define({_FILES_}, _yes)})
@@ -40,7 +41,7 @@ _LINUX_N_({define({_FILES_}, _yes)})
 _LINUX_N_({define({M4_EM},M4_EM-0x74)})dnl
 
 dnl Other consequences
-_BITS32_({define({M4_RTS}, 0x10000)})
+_LARGE_({define({M4_RTS}, 0x10000)})
 
 dnl Consequences with exceptions
 dnl switch back and forth between protected and real mode.
@@ -58,7 +59,7 @@ _SWITCH_({define({_LOW_BUF_}, _yes)})
 _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 dnl after the real memorya plus the high memory.
-_SWITCH_({_BITS32_({define({M4_INITDP},{0x100000})})})
+_SWITCH_({_LARGE_({define({M4_INITDP},{0x100000})})})
 _HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
@@ -89,6 +90,10 @@ _BOOTED_({ _HOSTED_MSDOS_({errprint({Cannot boot into a MSDOS hosted Forth.
 })m4exit(1002)})})
 _BITS16_({ _BITS32_({errprint({32 and 16 bits at the same time? Choose one option!
 })m4exit(1003)})})
+_BITS16_({ _BITS64_({errprint({64 and 16 bits at the same time? Choose one option!
+})m4exit(1003)})})
+_BITS64_({ _BITS32_({errprint({32 and 64 bits at the same time? Choose one option!
+})m4exit(1003)})})
 _LINUX_C_({ _LINUX_N_( {errprint({C library and native calls at the same time? Choose one option!
 })m4exit(1004)})})
 _CLASSIC_({ _USEBIOS_( {errprint({Classic and BIOS I/O model are in conflict. Choose one option!
@@ -106,18 +111,15 @@ _HOSTED_({_RESPECTDOS_( {errprint({Respecting dos makes no sense for a hosted sy
 dnl immediate consequences
 _SOURCEFIELD_({define({M4_HS},M4_HS+1)})dnl
 _EXTRAFIELD_({define({M4_HS},M4_HS+1)})dnl
-_BITS32_({define({M4_CELLWIDTH}, 4)})
 _BITS16_({define({M4_CELLWIDTH}, 2)})
 _BITS16_({define({M4_INITDP}, {TEXTEND})})
-_BITS32_({define({_NEXT}, {_NEXT32})})
-_BITS32_({define({_PUSH}, {_PUSH32})})
-_BITS32_({define({_2PUSH}, {_2PUSH32})})
 dnl must be overruled after inclusion of postlude.4m
-_HOSTED({_BITS32_({define({M4_NBUF}, 16)})})
-_HOSTED({_SWITCH_({_BITS32_({define({M4_INITDP},{0x110000})})})})
-_BITS32_({define({M4_MAXWORDLIST}, 16)})
+_HOSTED({_LARGE_({define({M4_NBUF}, 16)})})
+_HOSTED({_SWITCH_({_LARGE_({define({M4_INITDP},{0x110000})})})})
+_LARGE_({define({M4_MAXWORDLIST}, 16)})
 
 _BITS16_({include(width16.m4)})
 _BITS32_({include(width32.m4)})
+_BITS64_({include(width64.m4)})
 include(namescooked.m4)
 divert{}dnl

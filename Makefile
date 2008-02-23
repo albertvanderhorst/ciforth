@@ -68,7 +68,7 @@ TARGETS= lina wina mina alone linux alonehd forth32 msdos32 alonetr
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
-LINUXFORTHS= ciforthc lina glina
+LINUXFORTHS= ciforthc lina glina glina64
 # Auxiliary targets.
 OTHERTARGETS=   \
 filler.frt      \
@@ -354,6 +354,11 @@ lina : ci86.lina.o ; ld $+ -o $@
 
 # Linux native forth by gnu tools
 glina : ci86.lina.s ; as $+; \
+    strip a.out --strip-unneeded -R .bss -R .data -R .text ; \
+    ld a.out -o $@  ; strip $@ -s -R .bss
+
+# Linux native forth by gnu tools
+glina64 : ci86.lina64.s ; as $+; \
     strip a.out --strip-unneeded -R .bss -R .data -R .text ; \
     ld a.out -o $@  ; strip $@ -s -R .bss
 

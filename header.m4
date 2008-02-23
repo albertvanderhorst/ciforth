@@ -89,21 +89,21 @@ define({JMPFAR},{DB    0x0EA})dnl
 define({_CELLS},(CW*($1)))dnl
 #
 # Start of Intel dependant code part
-# The 32 bit version may be used in the postlude to redefine
+# The _MACRO bit version may be used to redefine   
 # _NEXT etc. to generate faster code.
 #
 # See definition of NEXT in glossary.
 define({_NEXT},{JMP     NEXT})
-define({_NEXT32},
+define({_NEXT_MACRO},
         {LODSW                 _C NEXT
         JMP     _CELL_PTR[WOR]  } )
 # See definition of PUSH in glossary.
 define({_PUSH},{JMP     APUSH})
-define({_PUSH32},
+define({_PUSH_MACRO},
         {PUSH    AX
-        _NEXT32})
+        _NEXT_MACRO})
 # Like PUSH but for two numbers.
 define({_2PUSH},{JMP     DPUSH})
-define({_2PUSH32},
+define({_2PUSH_MACRO},
         {PUSH    DX
-        _PUSH32})
+        _PUSH_MACRO})

@@ -51,9 +51,10 @@ define({_OR_},{|})
 dnl
 dnl Pointer handling
 define({_BYTE_PTR},{BYTE PTR $1})dnl
-define({_CALL_FAR_INDIRECT},{CALL DWORD PTR [$1]})dnl Perfectly unreasonable!
-define({_CELL_PTR},{DWORD PTR})dnl Sometimes really needed even after introducing [].
+define({_CALL_FAR_INDIRECT},{CALL CWORD PTR [$1]})dnl Perfectly unreasonable!
+define({_CELL_PTR},{CWORD PTR})dnl Sometimes really needed even after introducing [].
 define({SET_32_BIT_MODE},)dnl
+define({SET_64_BIT_MODE},)dnl
 define({_OFFSET},OFFSET)dnl
 dnl
 dnl Handling large blocks of comment
@@ -64,18 +65,27 @@ dnl A nobits section takes no place in the object file.
 define({_SECTION_},{.section $1,"awx"})
 define({_SECTION_NOBITS_},{.section $1,"awx",@nobits})
 dnl leave this to sed for the moment.
-define({_ALIGN},{{.balign    4,0x90}})dnl
+define({_ALIGN},{.balign    M4_CELLWIDTH{,}0x00})dnl
 define({DSS},{.ASCII})dnl
+dnl string register
 define({EDI},{{%EDI}})dnl
 define({ESI},{{%ESI}})dnl
+define({RDI},{{%RDI}})dnl
+define({RSI},{{%RSI}})dnl
 dnl Stacks and base registers
 define({EBP},{{%EBP}})dnl
 define({ESP},{{%ESP}})dnl
+define({RBP},{{%RBP}})dnl
+define({RSP},{{%RSP}})dnl
 dnl Normal registers
 define({EAX},{{%EAX}})dnl
 define({EBX},{{%EBX}})dnl
 define({ECX},{{%ECX}})dnl
 define({EDX},{{%EDX}})dnl
+define({RAX},{{%RAX}})dnl
+define({RBX},{{%RBX}})dnl
+define({RCX},{{%RCX}})dnl
+define({RDX},{{%RDX}})dnl
 define({_DX16},{{%DX}})dnl  Used for in and outports
 dnl Segment registers
 define({CS},{{%CS}})dnl
@@ -93,6 +103,7 @@ define({CL},{{%CL}})dnl
 define({CH},{{%CH}})dnl
 define({DL},{{%DL}})dnl
 define({DH},{{%DH}})dnl
+define({DQ},{.quad})
 define({DD},{.long})
 define({DW},{.word})
 define({DB},{.byte})

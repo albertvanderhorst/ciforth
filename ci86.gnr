@@ -1040,6 +1040,24 @@ define({LODSW},{LODSD})dnl Only instruction to be changed.
 define({WORD},{LONG})dnl
 _C{************************}}
 ,{dnl})
+_BITS64_({
+_C{************************}
+dnl It doesn't make sense to have duplicate code for 16/32 bits
+dnl where m4 can handle it this easily.
+SET_32_BIT_MODE         _C Assembler directive
+define({DC},{DQ})dnl
+define({AX},{RAX})dnl
+define({BX},{RBX})dnl
+define({CX},{RCX})dnl
+define({DX},{RDX})dnl
+define({DI},{RDI})dnl
+define({SI},{RSI})dnl
+define({BP},{RBP})dnl
+define({SP},{RSP})dnl
+define({LODSW},{LODSQ})dnl Only instruction to be changed.
+define({WORD},{QUAD})dnl
+_C{************************}}
+,{dnl})
 _SWITCH_({
         CLI     _C{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
@@ -4965,7 +4983,7 @@ _C{ Make sure the whole word is shown in case of denotations. }
         DC      BASE, STORE
         DC      LIT, M4_ERRORMIN, MAX
         DC      LIT, M4_ERRORMAX, MIN
-        DD      LIT, MESS, CATCH, DROP  _C{Prevent error loops }
+        DC      LIT, MESS, CATCH, DROP  _C{Prevent error loops }
         DC      SEMIS
 _C
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
@@ -6430,9 +6448,9 @@ BUFFER3:
     _0BRANCH(BUFFER1)
 _C{ We are left with the previous buffer.}
 BUFFER2:
-    DD       PBUF, ZEQU, LIT, 48, QERR  _C{ No free buffers available.}
-    DD       LDUP, CELLP, FETCH
-    DD       LIT, -1, GREAT        _C{ Unlocked buffer?}
+    DC       PBUF, ZEQU, LIT, 48, QERR  _C{ No free buffers available.}
+    DC       LDUP, CELLP, FETCH
+    DC       LIT, -1, GREAT        _C{ Unlocked buffer?}
     _0BRANCH(BUFFER2)
     DC       TOR
 _C{ Fill in the house keeping.}
