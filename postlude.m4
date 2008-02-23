@@ -38,7 +38,8 @@ _LARGE_({define({_PROTECTED_}, _yes)})
 define({_FILES_}, _no)
 _MODERN_({define({_FILES_}, _yes)})
 _LINUX_N_({define({_FILES_}, _yes)})
-_LINUX_N_({define({M4_EM},M4_EM-0x74)})dnl
+dnl This dirty trick is commented in the main source.
+dnl _BITS32_(_LINUX_N_({define({M4_EM},M4_EM-0x74)}))dnl
 
 dnl Other consequences
 _LARGE_({define({M4_RTS}, 0x10000)})
