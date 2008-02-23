@@ -1134,23 +1134,39 @@ WANT Z$@   WANT COMPARE   WANT ENV
 
 
 
-( SAVE-SYSTEM TURNKEY 1 ) CF: ?LI HEX \ AvdH
+( SAVE-SYSTEM TURNKEY ) CF: ?LI ?32 HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
-: SM  \ Return the START of the ``ELF'' header. Not Cells!
- BM BEGIN DUP @ MAGIC @ XOR 0FFFF,FFFF AND WHILE 4 - REPEAT ;
- SM 48 + CONSTANT SIZE^  \ Where to patch total size.
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
+ SM 1C + @ SM + 10 + CONSTANT SIZE^  \ Where to patch size.
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM \ Save the system in a file with NAME .
-  0 SM 20 + !   0 SM 30 + ! \ Kill sections
-  HERE SM - SM 44 + !  \ Fill in file size = memory size
+  0 SM 20 + !  0 SM 30 + !  \ Kill sections
+  HERE SM -  SIZE^ !  \ Fill in file size = memory size
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
-( SAVE-SYSTEM TURNKEY 1 ) CF: ?PC HEX \ AvdH A7feb28
+( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH
+\ The magic number marking the start of an ELF header
+ CREATE MAGIC 7F C, &E C, &L C, &F C,
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
+ SM 20 + @ SM + 20 + CONSTANT SIZE^  \ Where to patch size.
+\ Return the VALUE of ``HERE'' when this forth started.
+ : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
+ : SAVE-SYSTEM \ Save the system in a file with NAME .
+  0 SM 28 + !  0 SM 3C + C!  0 CM 3D + C! \ Kill sections
+  HERE SM -  SIZE^ !  \ Fill in file size = memory size
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+\ Now write it. Consume NAME here.
+   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
+\ Save a system to do ACTION in a file with NAME .
+: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH A7feb28
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer
 : W,   HEAD-DP @ >R   \ Add a 16 bit WORD to the header.
@@ -1166,7 +1182,7 @@ VARIABLE HEAD-DP  \ Fill in pointer
   HEAD-DP @  0 W,   100 W,   -10 W,   SIZE W,   0 W, ;
  PREV CONSTANT SIZE^  \ Give -g a harmless address.
  BM CONSTANT SM          \ Start for -g.
-( SAVE-SYSTEM TURNKEY 2 ) CF: ?PC HEX \ AvdH A7feb28
+( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH A7feb28
 \ Fill in checksum at the required POSITION in the header.
 : CHECKSUM   HEAD-DP !
     0   SIZE 0 DO I @ + 2 +LOOP  NEGATE   W, ;
