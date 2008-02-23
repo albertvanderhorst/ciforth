@@ -1159,7 +1159,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM \ Save the system in a file with NAME .
-  0 SM 28 + !  0 SM 3C + C!  0 CM 3D + C! \ Kill sections
+  0 SM 28 + !  0 SM 3C + C!  0 SM 3D + C! \ Kill sections
   HERE SM -  SIZE^ !  \ Fill in file size = memory size
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
