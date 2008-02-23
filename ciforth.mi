@@ -405,7 +405,7 @@ forthitem
 forthsamp({ciforth ERROR # 6 : DISK RANGE ?})
 
 Reading to the terminal input buffer failed. The message is
-probably inappropiate.
+probably inappropriate.
 
 forthitem
 forthsamp({ciforth ERROR # 7 : FULL STACK})
@@ -487,7 +487,7 @@ to make ciforth case insensitive.
 forthitem
  forthsamp({ciforth ERROR # 13 : ERROR, NO FURTHER INFORMATION})
 
-This error is used temporily, whenever there is need for
+This error is used temporarily, whenever there is need for
 an error message but there is not yet one assigned.
 
 forthitem
@@ -716,6 +716,12 @@ but the implementation is not quite conforming.
 forthitem NISO
 Word belongs to ISO standard, but the implementation is not
 quite conforming.
+forthitem WANT
+Word is not in the kernel, use the forthcode({WANT}) to load
+it from the library.
+These words are maintained and tested,
+will only be changed with notice and an upgrade pad will be supplied.
+
 forthitem U
 A user variable.
 @end table

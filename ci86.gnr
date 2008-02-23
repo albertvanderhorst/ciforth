@@ -2368,7 +2368,8 @@ CODE_HEADER({DSP!},{SPSTO})
         MOV     SPO,AX        _C{RESET PARAM STACK POINTER}
         _NEXT
 _C
-_LOAD_({
+dnl Note that this is now in the .lab .
+dnl If there are more, this documentation should be in the a lab.mi file.
 worddoc( {STACKS},{DEPTH},,{--- n1},{ISO,WANT},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthvar({n1}) was pushed.},
@@ -2376,7 +2377,7 @@ before forthvar({n1}) was pushed.},
 {},
 enddoc)
 _C
-})_C{}_END_({_LOAD_})
+dnl was the end of a LOADable option.
 worddocsafe( {STACKS},{RSP@},{r_s_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the current return
 stack position, i.e. pointing the current topmost value.},
