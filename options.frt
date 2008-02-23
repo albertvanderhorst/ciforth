@@ -50,13 +50,13 @@ CREATE pad 80 ALLOT \ Word surrounded by spaces
 1 LOAD   WANT OLD:   WANT TURNKEY   WANT SWAP-DP
 WANT ARG[]   WANT INCLUDE   WANT SRC>EXEC
 : MY-ERROR  DUP EXIT-CODE ! OLD: ERROR BYE ;
-\ Be economic with disk space
+'MY-ERROR DUP 'ERROR 3 CELLS MOVE  HIDDEN
+\ Don't include source in executable.
 : INCD'   SWAP-DP GET-FILE SWAP-DP EVALUATE ;
-
-
-'MY-ERROR DUP 'ERROR 3 CELLS CMOVE  HIDDEN
 'INCD' DUP 'INCLUDED 3 CELLS MOVE   HIDDEN
-'TASK 'OPTIONS 3 CELLS MOVE \ No options, no sign on.
+
+'TASK 'OPTIONS 3 CELLS MOVE \ No options.
+'TASK '.SIGNON 3 CELLS MOVE \ No sign on.
 
 ARGC 3 < 13 ?ERROR  0 HANDLER ! ( We are being caught!)
 2 ARG[] INCLUDED
