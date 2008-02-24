@@ -1033,9 +1033,9 @@ forthitem
 Familiarize yourself with the model written in Forth, the glossary, and
 specific assembly listings.
 forthitem
-Edit the assembly listings into your system. Set the fifth
-boot-up parameters (WARNING) to 0
-(warning messages are shown as simple numbers).
+Edit the assembly listings into your system. Set the 
+boot-up parameter that initialises the forthcode({WARNING}) user variable to 0;
+so warning messages are shown as simple numbers.
 forthitem
 Alter the terminal support code ( forthcode({KEY}) , forthcode({EMIT}) , etc,) to match your system.
 Observe register protocol specific to your  implementation!
@@ -1047,14 +1047,13 @@ holding a code field address.
 In ciforth this is the Intel 86 register AX.
 If your NEXT is inline code,
 for the moment replace it by a jump.
-Mostly this can be done by inactivating the macro forthmacro({_NEXT32_})
-through removing the line
-forthsamp({_BITS32_(_lbracket_define(_lbracket__NEXT_rbracket_,_lbracket__NEXT32_rbracket_)_rbracket_)})
-from forthfile({postlude.m4}).
+Mostly this can be done by inactivating the macro forthmacro({_NEXT_})
+through removing the line containing it from 
+from forthfile( _BITS16_({width16.m4}) _BITS32_({width32.m4}) _BITS64_({width64.m4}) ).
 forthitem
 Enter the cold start at the origin.
 Upon the break, check that the interpretive pointer HIP points within forthcodeni({ABORT})
-and W points to forthcodeni({SP!}) .
+and WOR points to forthcodeni({SP!}) .
 But in the source the symbolic names is used.
 forthcodeni({COLD}) being a colon-definition,
 the HIP has been initialized on the way to NEXT and your testing will
@@ -1077,11 +1076,14 @@ and you can input a "return" key and get ``OK'' printed, remove the break.
 You may have some remaining errors, but a reset and examination of the
 above registers will again localize problems.
 forthitem
-When the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BUFFERS})
-to clear the disc buffer area.
+Get forthcodeni({H.}) running.
+You may replace temporarily forthcodeni({.}) by forthcodeni({H.}) in forthcode({.S}).
+Hunt down code words that don't work by using forthcode({.S}).   
+The forthfile({tsuite.frt}) may come in handy for this.
 forthitem
-If your disc driver differs from the assembly version, you must create
-your own forthcodeni({R\W}) .
+Once the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BUFFERS}) 
+to clear the disc buffer area.
+You must create now your disc driver, the word forthcodeni({R\W}) .  
 You may test the disc access by typing:
 forthsamp({0 BLOCK 64 TYPE})
 This should bring block zero from the disc to a buffer and
@@ -1097,12 +1099,12 @@ In the file forthfile({forth.lab}) is available a screen editor, assembler, deco
 and tools like forthcodeni({DUMP}).
 Beware! Some of the tools handle hards disks.
 There are example programs and benchmarks.
-Everything under screen 100 you will find
-more or less working, but maybe not on your system.
-Everything loaded from 8 is used by me on a regular basis and is 16/32 bits
-clean.
+Everything up till the screen marked forthsamp({end of lab})
+you will find more or less working, but maybe not all of it on all systems. 
+Everything loaded from the electives screen (traditionally 8, now 5)
+is used by me on a regular basis and is 16/32/64 bits clean.
 Beware! The full screen editor does not work under Linux (protection).
-The system doesn't load it under Linux with forthsamp({8 LOAD}) .
+The system doesn't load it under Linux with forthsamp({5 LOAD}) .
 The program forthprog({wc}) is an example of how to use forthprog({lina}) as a scripting language.
 
 @subsection The joy of genericity
