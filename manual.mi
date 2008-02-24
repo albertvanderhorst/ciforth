@@ -522,7 +522,7 @@ program-file to have.
 In the following it is explained.
 We use the naming convention of ISO about cells.
 A cell is the fundamental unit of storage for the Forth engine.
-Here it is _BITS_ bits (_BITS16_(2)_BITS32_(4) bytes).
+Here it is _BITS_ bits (_BITS16_(2)_BITS32_(4)_BITS64_(8) bytes).
 
 The change of the boot-up parameters at
 forthcode({+ORIGIN}), in combination with storing an image on disk
@@ -767,7 +767,7 @@ like factoring numbers of a few hundred digits, in a workspace of 2k bytes.
 More typical a workspace is several megabytes to over hundred megabytes.
 
 _BITS16_({There is no longer a reason to put up with a 16-bit system less than 64K.})
-_BITS32_({32 bits system are set at 64Mbyte but this is arbitrary and could be set much
+_LARGE_({32 and 64 bits system are set at 64Mbyte but this is arbitrary and could be set much
 higher or lower without consequences for system load or whatever.
 Before long we will put the dictionary space on I86-Linux to 4G minus
 something and forget about this issue forver. })

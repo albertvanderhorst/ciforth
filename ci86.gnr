@@ -17,7 +17,7 @@ _C{ You have a configured system, if there are NO curly brackets on the next lin
 _C{ } {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
 _C
 _C{ Configuration of this particular version:}
-_C _BITS64_(64)_BITS32_(32)_BITS16_(16){}-bits _REAL_({real mode })_PROTECTED_({protected mode })
+_C _BITS_{}-bits _REAL_({real mode })_PROTECTED_({protected mode })
 _C _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl
 _HOSTED_DPMI_({running under DPMI (OS/2 or MS-Windows)
 _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
@@ -3222,13 +3222,12 @@ enddoc)
 _HEADER({RUBOUT},{RUBOUT},{DOUSE}, _CELLS(5))
 _C
 worddoc( {ERRORS},{WARNING},{warning},{--- addr},{FIG,U},
-{A user variable containing a value controlling messages. If it
-is 1, a library file is open, and messages are fetched from it.
+{A user variable containing a value controlling messages.
+If it is 1,
+a library file is assumed to be open,
+and messages are fetched from it.
 If it is 0,
-messages will be presented by number only.
-Don't set forthcode({WARNING}) to 1 if there is no block system available,
-because the error system will call itself recursively.
-This may lead to a crash.
+error messages will be presented by number only.
 },
 {{MESSAGE},{ERROR},{ERRSCR}},
 {{." See MESSAGE"},{See MESSAGE}},

@@ -49,8 +49,10 @@ Then with code that at least contains valid instruction enter
 the debugging phase with the assembler from the library.
 
 forthbreak
-forth.lab : equivalent to _BITS16_({asgen.frt plus asi86.frt})
-_BITS32_({asgen.frt plus asi86.frt plus asipentium.frt}) but without error detection.
+_BITS64_({There is no assembler yet for 64 bit lina}, 
+{forth.lab : equivalent to _BITS16_({asgen.frt plus asi86.frt})
+_BITS32_({asgen.frt plus asi86.frt plus asipentium.frt}) 
+but without error detection.})
 forthbreak
 forthfile({ass.frt})  : the 80-line 8086 assembler (no error detection), a prototype.
 forthbreak

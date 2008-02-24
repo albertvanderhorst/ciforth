@@ -115,6 +115,7 @@ _CLASSIC_({It relies partly on DOS for I/O, partly on the BIOS.}) dnl
 _MODERN_({It uses DOS for I/O, and uses no obsolete MSDOS features.}) dnl
 _BITS16_({A number has a precision of 16 bits.}) dnl
 _BITS32_({A number has a precision of 32 bits.}) dnl
+_BITS64_({A number has a precision of 64 bits.}) dnl
 _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
 _SECURITY_({It has compiler security, sacrificing some bizarre ISO
@@ -638,7 +639,8 @@ Wherever it says
 single precision number or forthdefi({cell}) _BITS_ bits is meant.
 Wherever it says
  forthdefi({double}) or ``double precision number'' a
-_BITS16_({32})_BITS32_({64}) bits number is meant.
+_BITS16_({32})_BITS32_({64})_BITS64_({128}) 
+bits number is meant.
 
 dnl symbols is a reserved name in `m4'.
 The first line of each entry shows a symbolic description of the action of
@@ -659,7 +661,7 @@ forthitem b
 forthitem c
 7 bit ascii character (the remaining bits are zero)
 forthitem d
-_BITS16_({32})_BITS32_({64}) bit signed double integer: most significant portion with sign
+_BITS16_({32})_BITS32_({64})_BITS64_({128}) bit signed double integer: most significant portion with sign
 on top of stack
 forthitem dea
 An forthdefi({dictionary entry address}) , the basic address of a Forth word from which
@@ -685,7 +687,7 @@ a true forthdefi({Forth flag}): -1.
 forthitem u
 _BITS_-bit unsigned integer
 forthitem ud
-_BITS16_({32})_BITS32_({64})-bit unsigned double integer: most significant portion
+_BITS16_({32})_BITS32_({64})_BITS64_({128})-bit unsigned double integer: most significant portion
 on top of stack
 @end table
 
@@ -733,7 +735,7 @@ _VERBOSE_({Words marked with forthsamp({ISO,FIG,L0}) will behave identically
 over all but the whole spectra of Forth's.})
 
 Unless otherwise noted, all references to numbers are for _BITS_-bit
-signed integers. For _BITS16_({32})_BITS32_({64})-bit signed numbers, the
+signed integers. For _BITS16_({32})_BITS32_({64})_BITS64_({128})-bit signed numbers, the
 most significant part (with the sign) is on top.
 
 All arithmetic is implicitly _BITS_-bit signed integer math, with error and

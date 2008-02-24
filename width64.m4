@@ -4,7 +4,6 @@ SET_64_BIT_MODE         _C Assembler directive
 define({CELL_M4},{QUAD})dnl
 define({CWORD},{QWORD})dnl
 define({M4_CELLWIDTH},8)dnl
-define({LCELL},{{LIT, CW}})dnl
 define({SPO},{RSP})dnl
 define({RPO},{RBP})dnl
 define({HIP},{RSI})dnl
