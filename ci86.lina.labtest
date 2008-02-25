@@ -2,4 +2,4 @@
 divert(4)dnl
 wordtest( {DEPTH},
 { {WANT DEPTH},{},
-{  1 2 3 DEPTH . DROP DROP DROP},{3} })
+{  1 2 3 DEPTH . DROP DROP DROP DEPTH .},{3 0} })

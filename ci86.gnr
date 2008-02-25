@@ -8226,7 +8226,7 @@ TYPE2:  DC      IDO
         _LOOP(TYPE2)    _C{ LOOP}
 TYPE4:
         _BRANCH(TYPE3)  _C{ ELSE}
-TYPE1:  DC      DROP    _C{ THEN}
+TYPE1:  DC      THROW   _C{ THEN}
 TYPE3:  DC      SEMIS
 _C
 })_C{}_END_({_CLASSIC_})
@@ -8584,7 +8584,7 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
 _C{  Get environment vector}
         DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
         DC      LIT, execve, LINOS
-        DC      LIT, -127, QERRUR, BYE
+        DC      LIT, 49, ERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:
         DC      LDUP
         DC      LIT, STATUS, ZERO, LIT, waitpid, LINOS

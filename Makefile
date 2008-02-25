@@ -170,6 +170,21 @@ $(CSRCAUX:%=%.c)    \
 mywc          \
 # That's all folks!
 
+RELEASELINA64 = \
+COPYING   \
+README.lina \
+ci86.lina64.info \
+ci86.lina64.html \
+ci86.lina64.pdf \
+ci86.lina64.ps \
+ci86.lina64.texinfo \
+ci86.lina64.s      \
+lina.1    \
+forth.lab     \
+$(CSRCAUX:%=%.c)    \
+mywc          \
+# That's all folks!
+
 TEMPFILE=/tmp/ciforthscratch
 
 # Define NASM as *the* assembler generating bin files.
@@ -335,6 +350,14 @@ lina.zip : $(RELEASELINA) ;\
 	(cd ..; ln -s ciforth lina-$(VERSION))
 	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
 	(cd ..; rm lina-$(VERSION))
+
+lina64.zip : $(RELEASELINA64) ;\
+	make forth.lab.lina
+	ln -f forth.lab.lina forth.lab
+	ls $+ | sed s:^:lina64-$(VERSION)/: >MANIFEST
+	(cd ..; ln -s ciforth lina64-$(VERSION))
+	(cd ..; tar -czvf ciforth/lina64-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
+	(cd ..; rm lina64-$(VERSION))
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
