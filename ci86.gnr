@@ -8028,7 +8028,7 @@ that case forthcode({OUT}) is not observed. },
 enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTORE
-        DC      ONE, WFILE, DROP
+        DC      ONE, WFILE, THROW
         DC      SEMIS
 _C
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -8044,7 +8044,7 @@ dnl This test assumes a redirection of error out to standard out.
 {{HERE 41 C, 42 C, 2 ETYPE},{AB}},
 enddoc)
 _HEADER({ETYPE},{ETYPE},{DOCOL})
-        DC      TWO, WFILE, DROP
+        DC      TWO, WFILE, THROW
         DC      SEMIS
 _C
 worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
@@ -8226,7 +8226,7 @@ TYPE2:  DC      IDO
         _LOOP(TYPE2)    _C{ LOOP}
 TYPE4:
         _BRANCH(TYPE3)  _C{ ELSE}
-TYPE1:  DC      THROW   _C{ THEN}
+TYPE1:  DC      DROP _C{ THEN}
 TYPE3:  DC      SEMIS
 _C
 })_C{}_END_({_CLASSIC_})
@@ -8582,7 +8582,8 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         _0BRANCH(SYSTEM1)
         DC      SHELL, CELLP, LIT, SYSARGS
 _C{  Get environment vector}
-        DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
+_BITS32_({      DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS},{dnl})
+_BITS64_({       DC      ZERO},{dnl})
         DC      LIT, execve, LINOS
         DC      LIT, 49, ERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:
@@ -8598,11 +8599,15 @@ SYSTEM2:
         DC      TDROP
         DC      SEMIS
 _C
+        _ALIGN(_CELLS(1))
 STATUS:  DC     0
 SYSARG2: DSS     "-c"
          DB      0
+        _ALIGN(_CELLS(1))
 COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
-SYSARGS: DC   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
+        _ALIGN(_CELLS(1))
+        _C{ These are longs, not cells! }
+SYSARGS: DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 _C
 })_C{}_END_({_LINUX_N_})
 _MODERN_({
