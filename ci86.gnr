@@ -1576,8 +1576,9 @@ worddoc({ENVIRONMENTS},{CPU},{cpu}, {--- d},{CI},
 {An environment query returning the cpu-type to be printed as a
 base-36 number. },
 {{ENVIRONMENT?}},
-_PROTECTED_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 80386}},})
-_REAL_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 8088}},})
+_BITS64_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ AMD-X86}},})
+_BITS32_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 80386}},})
+_BITS16_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 8088}},})
 enddoc)
 _HEADER({CPU},{LCPU},{DOCOL})
 _PROTECTED_({
@@ -2730,7 +2731,7 @@ _C
 worddocsafe( {MEMORY},{@},{fetch},{addr --- n},{ISO,FIG,L0},
 {Leave the _BITS_ bit contents forthvar({n})
 of forthvar({addr}) .},
-{{!},{C@},{2@},{P@},{PC@},{L@}},
+{{!},{C@},{2@},{P@},{PC@},{FAR@}},
 { {-23 PAD ! PAD @ .},{-23} },
 enddoc)
 CODE_HEADER({@},{FETCH})
@@ -2738,6 +2739,20 @@ CODE_HEADER({@},{FETCH})
         MOV     AX,[BX]
         _PUSH
 _C
+_BITS64_({
+worddocsafe( {MEMORY},{L@},{long_fetch},{addr --- n},{ISO,FIG,L0},
+{Leave the 32 bit contents forthvar({n})
+of forthvar({addr}) .},
+{{!},{C@},{2@},{P@},{PC@},{FAR@}},
+{ {-23 PAD L! PAD L@ .},{FFFFFF23} },
+enddoc)
+CODE_HEADER({L@},{LFETCH})
+        POP     BX
+        XOR     AX,AX
+        MOV     {EAX},[BX]
+        _PUSH
+_C
+})_C{}_END_({_BITS64_})
 worddocsafe( {MEMORY},{C@},{c_fetch},{addr --- b},{ISO},
 {Leave the 8 bit contents of memory address.
 In ciforth , running on the Intel architectures
@@ -2765,7 +2780,7 @@ CODE_HEADER({2@},{TFET})
         _2PUSH
 _C
 worddoc( {MEMORY},{!},{store},{n addr ---},{ISO,FIG,L0},
-{Store all _BITS_ bits of n at forthvar({addr}) .},{{@},{C!},{2!},{L!},{P!},{PC!}},
+{Store all _BITS_ bits of n at forthvar({addr}) .},{{@},{C!},{2!},{FAR!},{P!},{PC!}},
 {{." Via @"},{Via @}},
 enddoc)
 CODE_HEADER({!},{STORE})
@@ -2774,6 +2789,19 @@ CODE_HEADER({!},{STORE})
         MOV     [BX],AX
         _NEXT
 _C
+_BITS64_({
+worddocsafe( {MEMORY},{L!},{long-store},{n addr --- },{},
+{Store the 32-bit contents of forthvar({n}) at forthvar({addr}) .},
+{{L@},{!},{C!},{2!},{P!},{PC!},{FAR!}},
+{ {-23 PAD L! PAD L@ .},{FFFFFF23} },
+enddoc)
+CODE_HEADER({L!},{LSTORE})
+        POP     BX      _C{ADDR}
+        POP     AX      _C{DATA}
+        MOV     [BX],{EAX}
+        _NEXT
+_C
+})_C{}_END_({_BITS64_})
 worddoc( {MEMORY},{C!},{c_store},{b addr ---},{ISO},
 {Store 8 bits of forthsamp({b}) at forthvar({addr}) .
 In ciforth , running on the Intel architectures
@@ -2821,14 +2849,14 @@ _HEADER({WITHIN},{WITHIN}, {DOCOL})
         DC      SEMIS
 _C
 _BITS64_(,{
-worddocsafe( {MEMORY},{L@},{long_fetch},{faraddr --- n},{},
+worddocsafe( {MEMORY},{FAR@},{far_fetch},{faraddr --- n},{},
 {Leave the _BITS_ bit contents of
 segment address pair forthsamp({faraddr}).
 },
-{{L!},{@},{C@},{2@}},
+{{FAR!},{@},{C@},{2@}},
 {{." No test"},{No test} },
 enddoc)
-CODE_HEADER({L@},{LFET})
+CODE_HEADER({FAR@},{LFET})
 _BITS16_({
         POP     BX      _C{Offset}
         POP     CX      _C{Segment}
@@ -2851,14 +2879,14 @@ _BITS32_({
 })_C{}_END_({_BITS32_})
         _NEXT
 _C
-worddoc( {MEMORY},{L!},{long_store},{n faraddr ---},{},
+worddoc( {MEMORY},{FAR!},{far_store},{n faraddr ---},{},
 {Store _BITS_ bits of forthvar({n}) at segment address pair
 forthvar({faraddr}).
 },
-{{L@},{!},{C!},{2!}},
+{{FAR@},{!},{C!},{2!}},
 {{." No test"},{No test} },
 enddoc)
-CODE_HEADER({L!},{LSTORE})
+CODE_HEADER({FAR!},{LSTORE})
 _BITS16_({
         POP     BX
         POP     CX
@@ -7100,7 +7128,8 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
         DC      LIT, 1000, LIT, 1000000, SSMOD _C{ (ms -- us s) }
-        DC      LIT, TV, TSTOR
+        _BITS64_({DC    LIT, TV, LSTORE, LIT, TV+4, LSTORE}
+        ,{ DC      LIT, TV, TSTOR})
         DC      ZERO, ZERO
         DC      ZERO, ZERO
         DC      LIT, TV
@@ -7308,7 +7337,7 @@ _HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_DPMI_({
-{{: G3 "AAP" ZEN REG-SET 34 + @ SWAP 2 + L@ FF AND ;},{},
+{{: G3 "AAP" ZEN REG-SET 34 + @ SWAP 2 + FAR@ FF AND ;},{},
 {G3 EMIT },{P}}
 })
 ,
@@ -7999,12 +8028,14 @@ The next execution of forthcode({KEY}) will return the character immediately.
 enddoc)
 _HEADER({KEY?},{KEYQ},{DOCOL})
         DC      ZERO, LIT, RAWIO, STTERM
+        DC      ZERO, ZERO     _C{ Time out of zero. See MS.}
+        _BITS64_({DC    LIT, TV, LSTORE, LIT, TV+4, LSTORE}
+        ,{ DC      LIT, TV, TSTOR})
+        DC      ONE _C{ Waiting for standard in.}
+        DC      LIT, RFDS, _BITS64_({LSTORE},{STORE})
         DC      ONE     _C{ # of highest channel to watch.}
-        DC      LIT, RFDS   _C{ Waiting for input }
-        DC      ONE, OVER, STORE _C{ Waiting for standard in.}
+        DC      LIT, RFDS
         DC      ZERO, ZERO  _C{ Not output, not events.}
-        DC      ZERO, ZERO
-        DC      LIT, TV, TSTOR _C{ Time out of zero. See MS.}
         DC      LIT, TV
         DC      LIT, _newselect, LINOS5
         DC      LDUP,  QERRUR
@@ -8067,9 +8098,10 @@ a forthcode({2DROP}) in that case.
 {{." interactive"},{interactive}},
 enddoc)
 _HEADER({SET-TERM},{STTERM},{DOCOL})
-        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(3)
+SIZEL   EQU 4     _C{ Also for 64 bits. }
+        DC      LIT, _VAR_FIELD(TERMIO)+SIZEL*3
         DC      SWAP, TOGGL
-        DC      LIT, _VAR_FIELD(TERMIO)+_CELLS(4)+7
+        DC      LIT, _VAR_FIELD(TERMIO)+SIZEL*4+7
         DC      CSTOR
         DC      ZERO, LIT, TCSETS, TERMIO
         DC      LIT, ioctl, LINOS, QERRUR

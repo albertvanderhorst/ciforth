@@ -47,7 +47,7 @@
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : NO BUFFER COULD BE FREED, ALL LOCKED
- : EXECUTION OF EXTERNAL PROGRAM FAILED 
+ : EXECUTION OF EXTERNAL PROGRAM FAILED
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -721,9 +721,9 @@ RANDOMIZE
 ( OBSOLETE L! L@ )       \ AvdH A6may13
 \ Use of these words in modern programs, i.e. released
 \ after 2006 may, may be risky.
-: L! FAR! ;
-: L@ FAR@ ;
-
+\ ``want L!'' may not work, because L! is defined as 32 bit
+\ : L! FAR! ;
+\ : L@ FAR@ ;
 
 
 
