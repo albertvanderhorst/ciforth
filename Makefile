@@ -179,6 +179,7 @@ ci86.lina64.pdf \
 ci86.lina64.ps \
 ci86.lina64.texinfo \
 ci86.lina64.s      \
+lina64          \
 lina.1    \
 forth.lab     \
 $(CSRCAUX:%=%.c)    \

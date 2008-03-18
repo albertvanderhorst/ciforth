@@ -2790,7 +2790,7 @@ CODE_HEADER({!},{STORE})
         _NEXT
 _C
 _BITS64_({
-worddocsafe( {MEMORY},{L!},{long-store},{n addr --- },{},
+worddocsafe( {MEMORY},{L!},{long_store},{n addr --- },{},
 {Store the 32-bit contents of forthvar({n}) at forthvar({addr}) .},
 {{L@},{!},{C!},{2!},{P!},{PC!},{FAR!}},
 { {-23 PAD L! PAD L@ .},{FFFFFF23} },
