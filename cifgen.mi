@@ -874,8 +874,8 @@ at the time, at least from kernels 2.4.x on, GNU tools should be
 able to generate a Forth.}})
 
 With respect to the I/O (words like forthcodeni({EXPECT})
-forthcodeni({R\W}) ) you can choose between three on MSDOS. (
-forthcode({R\W}) is what was named forthcode({R/W}) in
+forthcodeni({R|W}) ) you can choose between three on MSDOS. (
+forthcode({R|W}) is what was named forthcode({R/W}) in
 figForth, but that name is reserved by ISO now.)
 You can use dos forthmacro({_CLASSIC_}) in the classic way as with the original. This
 means that the floppy is used directly without regard for directory
@@ -990,7 +990,7 @@ a break (sense but don't wait for a key). If both the above are
 unavailable, simply push 0 and execute NEXT.
 forthitem CR
 Execute a terminal carriage return and line feed. Execute NEXT.
-forthitem R\W
+forthitem R|W
 This colon-definition is the standard linkage to your disc. It requests
 the read or write of a disc block, be it raw disk or allocated in a file.
 @end table
@@ -1012,15 +1012,15 @@ forthexample(
 {HEX
 4000 CONSTANT LO ( START OF BUFFER AREA )
 6800 CONSTANT HI ( 10 SCREEN EQUIVALENT )
-: R\W >R ( save boolean )
+: R|W >R ( save boolean )
     B/BUF * LO + DUP
     HI > 6 ?ERROR ( range check )
     R> IF ( read ) SWAP ENDIF
     B/BUF CMOVE ; })
 
-Insert the code field address of forthcode({R\W}) into forthcode({BLOCK}) and forthcode({BUFFER})
+Insert the code field address of forthcode({R|W}) into forthcode({BLOCK}) and forthcode({BUFFER})
 and proceed as if testing disc.
-This forthcode({R\W}) simulates screens 0 thru 9, in the
+This forthcode({R|W}) simulates screens 0 thru 9, in the
 memory area 04000H thru 067FFH.
 @subsubsection FIG's rants : Debugging an assembled system.
 
@@ -1083,12 +1083,12 @@ The forthfile({tsuite.frt}) may come in handy for this.
 forthitem
 Once the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BUFFERS}) 
 to clear the disc buffer area.
-You must create now your disc driver, the word forthcodeni({R\W}) .  
+You must create now your disc driver, the word forthcodeni({R|W}) .  
 You may test the disc access by typing:
 forthsamp({0 BLOCK 64 TYPE})
 This should bring block zero from the disc to a buffer and
 type the first 64 characters.
-If forthcodeni({BLOCK}) (and forthcodeni({R\W}) ) doesn't function--happy hunting!
+If forthcodeni({BLOCK}) (and forthcodeni({R|W}) ) doesn't function--happy hunting!
 forthendenumerate
 
 @subsection Level 4 customization.

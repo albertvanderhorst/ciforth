@@ -200,20 +200,25 @@ show you the source for TUCK if it is in the library or in the kernel,
 but without comment or usage information.
 
 @section Configuring
+For configuring your thisforth,
+you may use forthcode({"newforth" SAVE-SYSTEM}) .
+This will do most of the time,
+but then you build in the forthcode({SAVE-SYSTEM}) command as well.
 For configuring your thisforth, without enlarging the dictionary,
 you may use the following sequence
 forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
 1 LOAD
 WANT SAVE-SYSTEM
 : DOIT
-    'CONTAINS 'FORTH FORGET-VOC
-    'CONTAINS >NFA @ DP !
+    'pad 'FORTH FORGET-VOC
+    'pad >NFA @ DP !
     "newforth" SAVE-SYSTEM BYE ;
 DOIT })
-Here forthvar({DOIT}) trims the dictionary just before the saving your system into a new
-file.
-You can use a similar sequence for expanding the system without
-building in the forthcode({SAVE-SYSTEM}) command as well.
+Here forthvar({DOIT}) trims the dictionary just before
+saving your system into a file.
+forthcode({pad}) is the first word of
+the facilities in screen 1 that was loaded.
+This was different in previous version of ciforth.
 
 forthcode({FAR-DP}) allows have a disposable part of the
 dictionary. This may be occasionally useful, but make sure to
@@ -631,7 +636,7 @@ _SUPPRESSED({but after the jump vectors and the release numbers.})
 @subsection                     Installation Dependent Code
 
 forthcode({KEY}) forthcode({EMIT}) forthcode({KEY?}) forthcode({CR}) and
-forthcode({R/W}) are indeed different for different I/O models.
+forthcode({R|W}) are indeed different for different I/O models.
 This is of little concern to you as a user,
 because these are perfectly normal dictionary entries and the different
 implementations serves to make them behave similarly.
