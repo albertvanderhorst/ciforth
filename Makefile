@@ -68,7 +68,7 @@ TARGETS= lina wina mina alone linux alonehd forth32 msdos32 alonetr
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
-LINUXFORTHS= ciforthc lina glina glina64
+LINUXFORTHS= ciforthc lina glina lina64
 # Auxiliary targets.
 OTHERTARGETS=   \
 filler.frt      \
@@ -150,7 +150,8 @@ errors.dos.txt \
 
 # 4.0 ### Version : an official release 4.0
 # Left out : beta, revision number is taken from rcs e.g. 3.154
-VERSION=  # Because normally VERSION is passed via the command line.
+# Normally VERSION is passed via the command line.
+VERSION=test
 DATE=2030     # To get the newest version
 
 RELEASELINA = \
@@ -381,8 +382,8 @@ glina : ci86.lina.s ; as $+; \
     strip a.out --strip-unneeded -R .bss -R .data -R .text ; \
     ld a.out -o $@  ; strip $@ -s -R .bss
 
-# Linux native forth by gnu tools
-glina64 : ci86.lina64.s ; as $+; \
+# Linux 64 bit native forth, can only by gnu tools.
+lina64 : ci86.lina64.s ; as --64 $+; \
     strip a.out --strip-unneeded -R .bss -R .data -R .text ; \
     ld a.out -o $@  ; strip $@ -s -R .bss
 
