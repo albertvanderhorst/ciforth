@@ -20,6 +20,7 @@ _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 
 dnl Hard consequences
+_BITS16_({define({_LARGE_}, _no)})
 _BITS32_({define({_LARGE_}, _yes)})
 _BITS64_({define({_LARGE_}, _yes)})
 _REAL_({define({_BITS16_}, _yes)})
