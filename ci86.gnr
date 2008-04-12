@@ -18,7 +18,7 @@ _C{ } {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
 _C
 _C{ Configuration of this particular version:}
 _C _BITS_{}-bits _REAL_({real mode })_PROTECTED_({protected mode })
-_C _BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })dnl
+_C _BOOTED_({standalone })_HOSTED_({running under _OS_ })dnl
 _HOSTED_DPMI_({running under DPMI (OS/2 or MS-Windows)
 _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })dnl
@@ -5834,7 +5834,7 @@ _C{ Fill user area for single task.}
         DC      ONE            _C{ Sign on wanted.}
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
-        DC      LIT, ioctl, LINOS, ZLESS
+        DC      LIT, ioctl, XOS, ZLESS
         _0BRANCH(COLD1)
         _C{ Not a terminal. Cannot set the terminal, get rid of "OK".}
         DC      DROP, ZERO      _C{ Sign on suppressed.}
@@ -6292,7 +6292,7 @@ positive or negative and beyond just screen forthcode({ERRSCR}).
 A certain range around 0 is reserved.
 The messages with smalll positive offset contain ciforth error messages.
 The messages with small negative offset contain
-the strings belonging to the return values for _HOSTED_LINUX_({Linux system calls}) _PC_({BDOS calls}).
+the strings belonging to the return values for _HOSTED_LINUX_({_OS_ system calls}) _PC_({BDOS calls}).
 _VERBOSE_({{
 forthcode({ERROR}) makes some assumption about what is present for
 small forthvar({n}), if you want to use this word for other purposes
@@ -7079,18 +7079,18 @@ _HEADER({BDOSO},{BDOSO},{DOCOL})
 })_C{}_END_({_SIMULATE_BIOS_})
 })_C{}_END_({ _PC_})
 _HOSTED_LINUX_({
-worddoc( {OPERATINGSYSTEM},{LINOS},{linos},{n1 n2 n3 n---ret},{},
-{ Do a Linux
+worddoc( {OPERATINGSYSTEM},{XOS},{xos},{n1 n2 n3 n---ret},{},
+{ Do a traditional Unix type
 system call forthvar({n})
 (man 2) with parameters forthsamp({n1 n2 n3}).
 forthsamp({ret}) is the return value of the call. If it is negative, it
 is mostly an error, such as known by forthsamp({errno}) . This makes
-available all facilities present in Linux, except those with 4 or 5 parameters
-that are handled by forthcode({LINOS5}) .
+available all facilities present in _OS_, except those with 4 or 5 parameters
+that are handled by forthcode({XOS5}) .
 },{{?ERRUR}},
-{{1 "CHIMP" 4 LINOS .},{CHIMP5}},
+{{1 "CHIMP" 4 XOS .},{CHIMP5}},
 enddoc)
-CODE_HEADER({LINOS},{LINOS})
+CODE_HEADER({XOS},{XOS})
         POP     AX        _C{ Function number}
         POP     DX        _C{ Third parameter, if any}
         POP     CX        _C{ Second parameter, if any}
@@ -7098,16 +7098,16 @@ CODE_HEADER({LINOS},{LINOS})
         INT     0x80        _C{ Generic call on LINUX }
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
-worddoc( {OPERATINGSYSTEM},{LINOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
-{ Do a Linux system call forthvar({n}) (man 2) with parameters
+worddoc( {OPERATINGSYSTEM},{XOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
+{ Do a traditional Unix type system call forthvar({n}) (man 2) with parameters
 forthsamp({n1 n2 n3 n4 n5}). forthsamp({ret}) is the return
 value of the call. If it is negative, it is mostly an error,
 such as known by forthsamp({errno}) . This makes available
-forthemph({all}) facilities present in Linux.
+forthemph({all}) facilities present in _OS_.
 },{{?ERRUR}},
-{{1 "CHIMP" 0 0 4 LINOS5 .},{CHIMP5}},
+{{1 "CHIMP" 0 0 4 XOS5 .},{CHIMP5}},
 enddoc)
-CODE_HEADER({LINOS5},{LINOS5})
+CODE_HEADER({XOS5},{XOS5})
         LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
         MOV     [RPO],HIP
         POP     AX        _C{ Function number}
@@ -7133,7 +7133,7 @@ _HEADER({MS},{MS},{DOCOL})
         DC      ZERO, ZERO
         DC      ZERO, ZERO
         DC      LIT, TV
-        DC      LIT, _newselect, LINOS5
+        DC      LIT, _newselect, XOS5
         DC      QERRUR
         DC      SEMIS
 TV:     _RESB( 8 )
@@ -7331,7 +7331,7 @@ to the operating system. In fact this is }forthcode({RW-BUFFER}){ . }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
-_HOSTED_LINUX_({ {{OPEN-FILE},{LINOS},{LINOS5}}, })
+_HOSTED_LINUX_({ {{OPEN-FILE},{XOS},{XOS5}}, })
 _HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
@@ -7387,7 +7387,7 @@ enddoc)
 _HOSTED_LINUX_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, FROMR, X
-        DC      LIT, open, LINOS
+        DC      LIT, open, XOS
         DC      LDUP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_LINUX_})
@@ -7406,7 +7406,7 @@ OFILE2:
 _C
 worddoc( {FILES},{CLOSE-FILE}, {close_file},{fileid --- ior }, {ISO},
 {Close the file with file handle in forthvar({fileid}). Return
-a result code into forthvar({ior}). The latter is the _PC_({MSDOS}) _HOSTED_LINUX_({Linux})
+a result code into forthvar({ior}). The latter is the _HOSTED_({_OS_})
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{." See OPEN-FILE"},{See OPEN-FILE}},
@@ -7414,7 +7414,7 @@ enddoc)
 _HOSTED_LINUX_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      X, X
-        DC      LIT, close, LINOS
+        DC      LIT, close, XOS
         DC      SEMIS
 })_C{}_END_({_HOSTED_LINUX_})
 _MODERN_({
@@ -7450,7 +7450,7 @@ _HOSTED_LINUX_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, TDUP, DFILE, DROP
         DC      ZEN, FROMR, X
-        DC      LIT, creat, LINOS
+        DC      LIT, creat, XOS
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_LINUX_})
@@ -7482,7 +7482,7 @@ enddoc)
 _HOSTED_LINUX_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN, X, X
-        DC      LIT, unlink, LINOS
+        DC      LIT, unlink, XOS
         DC      SEMIS
 })_C{}_END_({_HOSTED_LINUX_})
 _MODERN_({
@@ -7513,7 +7513,7 @@ enddoc)
 _LINUX_N_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      ROT, ROT
-        DC      LIT, read, LINOS
+        DC      LIT, read, XOS
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _LINUX_N_})
@@ -7571,7 +7571,7 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      TOR, DROP, FROMR   _C{Convert to single precision.}
         DC      SWAP
         DC      LIT, SEEK_SET
-        DC      LIT, lseek, LINOS
+        DC      LIT, lseek, XOS
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_LINUX_N_})
@@ -7611,7 +7611,7 @@ enddoc)
 _LINUX_N_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      ROT, ROT
-        DC      LIT, write, LINOS
+        DC      LIT, write, XOS
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _LINUX_N_})
@@ -7924,7 +7924,7 @@ _C{ Lower case labels starting with "c_.." are c-supplied facilities.}
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthsamp({count}) characters from the
 terminal to address, until a forthkey({RET}) is received. The
-simple tty editing functions of Linux are observed, i.e. the
+simple tty editing functions of _OS_ are observed, i.e. the
 ``erase'' (delete a character) and ``kill'' (delete a line)
 characters. Typically these are the backspace key and ^U. Note
 that excess characters after forthsamp({count}) are ignored.
@@ -8013,7 +8013,7 @@ _HEADER({KEY},{KEY},{DOCOL})
         DC      ZERO, SPFET     _C{ Expect single key on stack}
         DC      ZERO            _C{ Standard input}
         DC      SWAP, ONE       _C{ Buffer and length}
-        DC      LIT, read, LINOS
+        DC      LIT, read, XOS
         DC      LDUP, QERRUR
         DC      ZEQU, LIT, -EPIPE, LAND, QERRUR _C{ Presumably end of pipe.}
         DC      ONE, LIT, RAWIO, STTERM       _C{ Toggle back}
@@ -8037,7 +8037,7 @@ _HEADER({KEY?},{KEYQ},{DOCOL})
         DC      LIT, RFDS
         DC      ZERO, ZERO  _C{ Not output, not events.}
         DC      LIT, TV
-        DC      LIT, _newselect, LINOS5
+        DC      LIT, _newselect, XOS5
         DC      LDUP,  QERRUR
         DC      NEGATE        _C{ 1 -> flag.}
         DC      ZERO, LIT, RAWIO, STTERM
@@ -8050,7 +8050,7 @@ worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
 forthdefi({revectoring}) it _VERBOSE_({{and the usual
-redirection or }forthsamp({tee}){-ing by Linux}}). In this
+redirection or }forthsamp({tee}){-ing by _OS_}}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output, however in
 that case forthcode({OUT}) is not observed. },
@@ -8067,7 +8067,7 @@ worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
 the standard error device.
 It is high level so error output can be redirected, by
 forthdefi({revectoring}) it. _VERBOSE_({{Or you may use
-redirection by Linux}}). In this
+redirection by _OS_}}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output. },
 {{EMIT},{TYPE}},
@@ -8104,7 +8104,7 @@ SIZEL   EQU 4     _C{ Also for 64 bits. }
         DC      LIT, _VAR_FIELD(TERMIO)+SIZEL*4+7
         DC      CSTOR
         DC      ZERO, LIT, TCSETS, TERMIO
-        DC      LIT, ioctl, LINOS, QERRUR
+        DC      LIT, ioctl, XOS, QERRUR
         DC      SEMIS
 _C
 })_C{}_END_({_LINUX_N_})
@@ -8608,7 +8608,7 @@ _LINUX_N_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
         DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
-        DC      X, X, X, LIT, fork, LINOS
+        DC      X, X, X, LIT, fork, XOS
         DC      LDUP, QERRUR
         DC      LDUP, ZEQU
         _0BRANCH(SYSTEM1)
@@ -8616,11 +8616,11 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
 _C{  Get environment vector}
 _BITS32_({      DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS},{dnl})
 _BITS64_({       DC      ZERO},{dnl})
-        DC      LIT, execve, LINOS
+        DC      LIT, execve, XOS
         DC      LIT, 49, ERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:
         DC      LDUP
-        DC      LIT, STATUS, ZERO, LIT, waitpid, LINOS
+        DC      LIT, STATUS, ZERO, LIT, waitpid, XOS
         DC      LDUP
         DC      LIT, EINTR, EQUAL
         _BRANCH(SYSTEM2)
@@ -9911,7 +9911,7 @@ worddoc( {OPERATINGSYSTEM},{EXIT-CODE},{exit_code},{addr ---},{},
 exit code. Its content is passed to the host environment while
 going forthcode({BYE}) . It is custom to return zero if there
 are no errors. _PC_({MSDOS allows only single byte return
-codes.}) _HOSTED_LINUX_({Linux allows only single byte return
+codes.}) _HOSTED_LINUX_({_OS_ allows only single byte return
 codes.})
 },{{BYE}},
 {{." See BYE"},{See BYE}},
@@ -9921,14 +9921,14 @@ _HEADER({EXIT-CODE},{XCODE},{DOVAR}, )
 _C
 _HOSTED_LINUX_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
-{Return to the host environment Linux.
+{Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
 {{"lina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
 {23 EXIT-CODE ! BYE 23}},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to linux, with okay status. }
-        DC      XCODE, FETCH, X, X, ONE, LINOS
+        DC      XCODE, FETCH, X, X, ONE, XOS
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _HOSTED_LINUX_})
 _C

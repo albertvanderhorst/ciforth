@@ -19,6 +19,10 @@ _HOSTED_DPMI_({define({_HOSTED_}, _yes)})
 _HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 
+_HOSTED_DPMI_( {define({_OS_}, MS-Windows)})
+_HOSTED_LINUX_({define({_OS_}, Linux)})
+_HOSTED_MSDOS_({define({_OS_}, MSDOS)})
+
 dnl Hard consequences
 _BITS16_({define({_LARGE_}, _no)})
 _BITS32_({define({_LARGE_}, _yes)})
@@ -86,10 +90,8 @@ _ISO_IN_({define({_CIF_IN_}, _no)})
 dnl Detectable error situations. Terminate.
 _RWSECTRK_({ _RWLBA_({errprint({LBA disk access conflicts with access by sectors and tracks.
 })m4exit(1000)})})
-_BOOTED_({_HOSTED_LINUX_({errprint({Cannot boot into a Linux hosted Forth.
+_BOOTED_({_HOSTED_({errprint({Cannot boot into a _OS_ hosted Forth.
 })m4exit(1001)})})
-_BOOTED_({ _HOSTED_MSDOS_({errprint({Cannot boot into a MSDOS hosted Forth.
-})m4exit(1002)})})
 _BITS16_({ _BITS32_({errprint({32 and 16 bits at the same time? Choose one option!
 })m4exit(1003)})})
 _BITS16_({ _BITS64_({errprint({64 and 16 bits at the same time? Choose one option!

@@ -88,7 +88,7 @@
  "BIOS31" PRESENT DUP CONFIG ?WI   \ DPMI ("windows")
  "BDOSN"  PRESENT DUP CONFIG ?MS   \ MS-DOS
                OR DUP CONFIG ?WIMS \ One of 2 above
- "LINOS"  PRESENT DUP   CONFIG ?LI   \ Linux
+ "XOS"    PRESENT DUP   CONFIG ?LI   \ Linux, BSD, OSX.
                  OR CONFIG ?HS   \ Any host
  "BIOSN"  PRESENT CONFIG ?PC   \ Possibly stand alone
  "LBAPAR" PRESENT CONFIG ?HD   \ Hard disk, modern
@@ -100,7 +100,7 @@
 :  HELP    1 20 INDEX   CR
   "I will try to start a help window" TYPE CR
   "Press a key" TYPE CR KEY DROP
-  "LINOS"  PRESENT? IF
+  "XOS"  PRESENT? IF
   "PDF" HELP-WANTED? IF
       "acroread ci86.lina.pdf&" SYSTEM EXIT THEN
   "PostScript" HELP-WANTED? IF
@@ -120,7 +120,7 @@
 
 : VOCABULARY NAMESPACE ;
 
-
+: LINOS XOS ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
@@ -735,7 +735,7 @@ RANDOMIZE
 
 \
 ( TIME&DATE ) CF: ?LI \ AH A30610
-: SSE   0 0 0 13 LINOS ; ( Seconds since epoch: 1970/1/1)
+: SSE   0 0 0 13 XOS ; ( Seconds since epoch: 1970/1/1)
 : |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
 CREATE TABLE ( start of month within leap period) -1
     31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
@@ -900,7 +900,7 @@ PAD DUP 80 ACCEPT EVALUATE 1000000 *
 
 DECIMAL
 
-: MS@ 0 0 0 43 LINOS 10 * ;
+: MS@ 0 0 0 43 XOS 10 * ;
 
 
 
@@ -1217,18 +1217,18 @@ HEX   40 CELLS CONSTANT US
 ( THREAD-PET KILL-PET PAUSE-PET ) CF: ?LI \ A2nov16
 WANT CVA   HEX
 \ Exit a thread. Indeed this is exit().
-: EXIT-PET 0 _ _ 1 LINOS ;
+: EXIT-PET 0 _ _ 1 XOS ;
 \ Do a preemptive pause. ( more or less 1 MS )
-: PAUSE-PET 0 0 1000 0 DSP@ 8E LINOS5 DROP ;
+: PAUSE-PET 0 0 1000 0 DSP@ 8E XOS5 DROP ;
 
 \ Create a thread with dictionary SPACE. Execute XT in thread.
 : THREAD-PET CREATE S0 @ 2 CELLS - , R0 @ , 0 , CVA ALLOT
     DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
-    112 R@ @ _ 78 LINOS DUP 0< IF THROW THEN
+    112 R@ @ _ 78 XOS DUP 0< IF THROW THEN
     DUP IF ( Mother) R> 2 CELLS + !
     ELSE ( Child) DROP RSP! EXECUTE EXIT-PET THEN ;
 \ Kill a THREAD-PET , preemptively. Throw errors.
-: KILL-PET >BODY 2 CELLS + @ 9 _ 25 LINOS ?ERRUR ;
+: KILL-PET >BODY 2 CELLS + @ 9 _ 25 XOS ?ERRUR ;
 DECIMAL
 ( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH A2jul5
 WANT SET
@@ -1382,7 +1382,7 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 ?LI
 'SET-TRAPS HIDDEN
 \ Make sure any traps restart Forth at ADDRESS .
-: SET-TRAPS  32 0 DO I OVER _ 48 LINOS DROP LOOP DROP ;
+: SET-TRAPS  32 0 DO I OVER _ 48 XOS DROP LOOP DROP ;
 \ Still fig tradition: warm and cold starts below origin
 : SET-TRAPS-WARM   -2 CELLS +ORIGIN   SET-TRAPS ;
 : SET-NO-TRAPS   0 SET-TRAPS ;
@@ -2010,7 +2010,7 @@ CREATE cmdbuf 1000 ALLOT
 ;
 ?LI
 \ Change directory to SC .
-: cdED   ZEN HERE HERE 12 LINOS ?ERRUR ;
+: cdED   ZEN HERE HERE 12 XOS ?ERRUR ;
 
 
 
@@ -3457,7 +3457,7 @@ THEN ;
 ( This has the effect as ?ERROR ) CF: ?LI
 ( But counting back from 100 )
 : LINUX-ERROR 100 OVER - ?ERROR ;
-: IOCTL 54 LINOS LINUX-ERROR ;
+: IOCTL 54 XOS LINUX-ERROR ;
 0 IVAR TERMIO 60 ALLOT
 HEX 5401 CONSTANT TCGETS
 HEX 5402 CONSTANT TCSETS
@@ -3476,14 +3476,14 @@ DECIMAL  getit
 ( expect one key and retain it.)
 : KEY2 1 RAWIO tc
      0 DSP@
-    0 SWAP 1 read LINOS DROP
+    0 SWAP 1 read XOS DROP
      1 RAWIO tc
 ;
 ( expect zero keys and retain the count.)
 : KEY?2
     0 RAWIO tc
     0 DSP@
-    0 SWAP 1 read LINOS SWAP DROP
+    0 SWAP 1 read XOS SWAP DROP
     1 RAWIO tc
 ;
 ( A reverse engineering BLK and SOURCE-ID )

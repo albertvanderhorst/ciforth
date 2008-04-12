@@ -774,8 +774,8 @@ More typical a workspace is several megabytes to over hundred megabytes.
 _BITS16_({There is no longer a reason to put up with a 16-bit system less than 64K.})
 _LARGE_({32 and 64 bits system are set at 64Mbyte but this is arbitrary and could be set much
 higher or lower without consequences for system load or whatever.
-Before long we will put the dictionary space on I86-Linux to 4G minus
-something and forget about this issue forver. })
+Before long we will put the dictionary space on 32-bits Linux to 4G minus
+something and forget about this issue forever. })
 
 _VERBOSE_(
 {The boundary between this area and the previous one is pretty sharp,

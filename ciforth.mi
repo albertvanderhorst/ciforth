@@ -19,7 +19,7 @@ version ci86gnrversion
 forthitem
 _BITS_-bits _REAL_({real mode })_PROTECTED_({protected mode })
 forthitem
-_BOOTED_({standalone })_HOSTED_LINUX_({running under Linux })_HOSTED_MSDOS_({running under MSDOS
+_BOOTED_({standalone })_HOSTED_LINUX_({running under _OS_ })_HOSTED_MSDOS_({running under _OS_
 forthitem
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })_HOSTED_DPMI_({running under DPMI (``Windows'')})dnl
@@ -104,9 +104,8 @@ _BOOTHD_({It is booting directly from a hard disk.}) dnl
 _BOOTSECTRK_({Booting from harddisk or floppy uses classical disk
 access by sector and track.}) dnl
 _BOOTLBA_({Booting from harddisk uses LBA disk access.})
-_HOSTED_LINUX_({It is running under Linux.}) dnl
-_HOSTED_MSDOS_({It is running under MSDOS.}) dnl
-_HOSTED_DPMI_({It is running under DPMI (OS/2 or MS-Windows).}) dnl
+_HOSTED_({It is running under
+_HOSTED_DPMI_({DPMI (OS/2 or_OS_, or the DOS-emulator of Linux).},{_OS_})}) dnl
 _USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.}) dnl
 _RWHD_({Blocks are on a raw hard disk.}) dnl
 _RWFD_({Blocks are on a raw floppy disk.}) dnl
@@ -639,7 +638,7 @@ Wherever it says
 single precision number or forthdefi({cell}) _BITS_ bits is meant.
 Wherever it says
  forthdefi({double}) or ``double precision number'' a
-_BITS16_({32})_BITS32_({64})_BITS64_({128}) 
+_BITS16_({32})_BITS32_({64})_BITS64_({128})
 bits number is meant.
 
 dnl symbols is a reserved name in `m4'.
