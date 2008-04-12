@@ -143,8 +143,8 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	    cat indexhtml.m4 ; \
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
 	)| m4 > $@
-	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 temp.html >> $@
-	rm temp.html
+	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html >> $@
+	#rm temp.html
 
 %.info : %.texinfo  ; makeinfo --no-split $< -o $@
 
@@ -212,7 +212,7 @@ testlina64 : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.s forth.lab.lina tsui
 	echo "diff tsuite.tmp tsuite64.out || true            ">>$@
 	echo "cp forth.lab.lina  forth.lab            ">>$@
 	rm $(TEMPFILE)
-	tar cf $@.tar glina64 forth.lab.lina tsuite.frt tsuite64.out $@ $@.1 $@.2 ci86.lina64.s
+	tar cf $@.tar lina64 forth.lab.lina tsuite.frt tsuite64.out $@ $@.1 $@.2 ci86.lina64.s
 
 testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;
 	m4 $(TESTLINUX)  >$(TEMPFILE)
