@@ -375,7 +375,7 @@ ciforthc : ciforth.o ci86.linux.o
 	 ld -static /usr/lib/gcrt1.o $+ -lc  -o ciforthc
 
 # Linux native forth
-lina : ci86.lina.o ; ld $+ -o $@
+lina : ci86.lina.o ; ld $+ -o $@ ; strip $@ -s -R .bss -R .comment
 
 # Linux native forth by gnu tools
 glina : ci86.lina.s ; as $+; \
