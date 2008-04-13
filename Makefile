@@ -375,12 +375,10 @@ ciforthc : ciforth.o ci86.linux.o
 	 ld -static /usr/lib/gcrt1.o $+ -lc  -o ciforthc
 
 # Linux native forth
-lina : ci86.lina.o ; ld $+ -o $@ ; strip $@ -s -R .bss -R .comment
+lina : ci86.lina.o ; ld $+ -N -o $@
 
 # Linux native forth by gnu tools
-glina : ci86.lina.s ; as $+; \
-    strip a.out --strip-unneeded -R .bss -R .data -R .text ; \
-    ld a.out -o $@  ; strip $@ -s -R .bss
+glina : ci86.lina.s ; as $+; ld -N a.out -o $@
 
 # Linux 64 bit native forth, can only by gnu tools.
 lina64 : ci86.lina64.s ; as --64 $+; \

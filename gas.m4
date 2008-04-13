@@ -62,8 +62,8 @@ define({_COMMENT}, { /* })dnl
 define({_ENDCOMMENT}, { */ })dnl
 dnl
 dnl A nobits section takes no place in the object file.
-define({_SECTION_},{.section $1,"awx"})
-define({_SECTION_NOBITS_},{.section $1,"awx",@nobits})
+define({_SECTION_},{.text})
+define({_SECTION_NOBITS_},{.bss})
 dnl leave this to sed for the moment.
 define({_ALIGN},{.balign    M4_CELLWIDTH{,}0x00})dnl
 define({DSS},{.ASCII})dnl

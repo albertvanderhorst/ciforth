@@ -83,8 +83,8 @@ define({SET_32_BIT_MODE},{BITS   32})dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
 dnl A nobits section takes no place in the object file.
-define({_SECTION_},{section $1 progbits write exec alloc})
-define({_SECTION_NOBITS_},{section $1 nobits write exec alloc})
+define({_SECTION_},{section .text})
+define({_SECTION_NOBITS_},{section .bss})
 dnl A quirk, make sure in port instruction, DX is not turned into EDX
 define({_DX16},{{DX}})
 divert{}dnl
