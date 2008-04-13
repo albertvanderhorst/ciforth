@@ -9,15 +9,11 @@ define({_quoted},{"patsubst({{$1}},{\([\"]\)},{\\\1})"})
 define({_HEADER_ASM},{#
 # Gnu as version of ciforth created by ``m4'' from generic listing.
 # This source can be assembled using versions better than 2.13.
-# This file must be assembled and linked in the following (unexpected) way:
+# This file can be assembled and linked in the following way:
 #       as lina.s
-#       strip a.out --strip-unneeded -R .bss -R .data -R .text
-#       ld a.out -o lina
-# The stripping is required, because otherwise two program sections
-# are created. It is tricky, because the least deviation of the above
-# command may result in loss of the entry point, and an unusable binary.
+#       ld -N a.out -o lina
 # Optionally follow by
-#       strip $@ -s -R .bss
+#       strip $@ -s -R .data
 # to strip more irrelevant crap.
 
 .Intel_syntax prefix

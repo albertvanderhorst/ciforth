@@ -381,9 +381,7 @@ lina : ci86.lina.o ; ld $+ -N -o $@
 glina : ci86.lina.s ; as $+; ld -N a.out -o $@
 
 # Linux 64 bit native forth, can only by gnu tools.
-lina64 : ci86.lina64.s ; as --64 $+; \
-    strip a.out --strip-unneeded -R .bss -R .data -R .text ; \
-    ld a.out -o $@  ; strip $@ -s -R .bss
+lina64 : ci86.lina64.s ; as --64 $+; ld a.out -o $@
 
 # This dependancy is problematic.
 # Do `make constant.m4' explicitly beforehand.

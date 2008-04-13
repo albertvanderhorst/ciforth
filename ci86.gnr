@@ -319,7 +319,6 @@ BOOTOFFSET EQU 0
 _HOSTED_LINUX_({
 include(constant.m4)
 RAWIO           EQU     (ECHO _OR_ ICANON)
-        GLOBAL  _start        _C Entry point. dnl
 _LINUX_C_({Called from c. Remainder c-routines to be called from here.
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init, c_debug
@@ -339,6 +338,7 @@ EPIPE   EQU     38
 _HOSTED_LINUX_({
         _SECTION_({forth})
         PAGE
+        GLOBAL  _start        _C Entry point.
 ORIG:
 })_C{}_END_({ _HOSTED_LINUX_})
 dnl

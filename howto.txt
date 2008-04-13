@@ -68,6 +68,7 @@ How to create a distribution :
    Release generic version, beta
    make zip VERSION=3d286
    Result in ciforth-3d286.tar.gz (not yet)
+   Or use $V.
 
    Release Linux version, official
    make lina.zip VERSION=4.0
@@ -76,6 +77,7 @@ How to create a distribution :
    Release Linux version, beta
    make lina.zip VERSION=3d286
    Result in lina-3d286.tar.gz
+   Or use $V.
 
    Release mina / wina
    Use

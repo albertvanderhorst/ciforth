@@ -19,9 +19,9 @@ define({_HEADER_ASM},{;
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
 ;   nasm forth.asm -felf -o forth.o
-;   ld forth.o -o forth
+;   ld -N forth.o -o forth
 ;And to get the smallest possible executable(optional):
-;   strip forth -s -R .bss -R .comment
+;   strip forth -s -R .data
 })dnl
 _LINUX_C_({
 ; This source is to be linked with c-code. You are referred to the
