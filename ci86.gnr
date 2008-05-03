@@ -1,7 +1,7 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
 
 _C{ $Id$}
-_C{ Copyright (2000):} M4_SUPPLIER {by GNU Public License}
+_C{ Copyright (2008):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
@@ -49,6 +49,9 @@ _COMMENT
                 HCC Forth user group
                 The Netherlands
                 www.forth.hccnet.nl
+
+                with
+        direct contributions for OSX from Robert Spykerman.
 
               based on
               FIG-FORTH
@@ -324,6 +327,9 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.
         extern  c_rslw, c_block_exit, c_block_init, c_debug
         GLOBAL  ciforth})
 })_C{}_END_({ _HOSTED_LINUX_})
+_HOSTED_OSX_({
+include(constant_osx.m4)
+})_C{}_END_({ _HOSTED_OSX_})
 _PC_({
 create  EQU     0x3C00
 open    EQU     0x3D00
@@ -335,12 +341,13 @@ lseek   EQU     0x4200
 EPIPE   EQU     38
 })_C{}_END_({ _PC_})
 
-_HOSTED_LINUX_({
+_HOSTED_X_({
         _SECTION_({forth})
         PAGE
-        GLOBAL  _start        _C Entry point.
+        GLOBAL  _start       _C Entry point.
+        GLOBAL  start        _C Entry point.
 ORIG:
-})_C{}_END_({ _HOSTED_LINUX_})
+})_C{}_END_({ _HOSTED_X_})
 dnl
 _BOOTED_(
 {_C ########################################################################################
@@ -1105,11 +1112,12 @@ ENDIF1:
 
 })_C{}_END_({_LINUX_C_})
 
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _C{ 4.15.3.2}
 dnl ciforth:
 _start:
-})_C{}_END_({_HOSTED_LINUX_})
+start:
+})_C{}_END_({_HOSTED_X_})
 COLD_ENTRY:
         CLD                     _C{ DIR = INC}
 _THREADS_({
@@ -1126,7 +1134,7 @@ _THREADS_({
         ADD     LONG[USINI+(CW*(4))], EBX
 
 })_C{}_END_({_THREADS_})
-_HOSTED_LINUX_(
+_HOSTED_X_(
 {       MOV     _CELL_PTR[USINI+_CELLS(31)],SPO _C{Remember ARGS.}
 })dnl
 _BITS64_(,
@@ -1939,9 +1947,9 @@ USINI:  DC      STRUSA  _C{ User area currently in use, cold value same as next.
         DC      INITDP  _C{      INIT (FENCE)  8}
 DPA:    DC      INITDP  _C{      INIT (DP)     9}
         DC      _DEA(ENV) _C{       INIT (VOC-LINK) 10}
-_HOSTED_LINUX_({
+_HOSTED_X_({
         DC      0       _C{ INIT (OFFSET) }
-})_C{}_END_({_HOSTED_LINUX_})
+})_C{}_END_({_HOSTED_X_})
 _RWFILE_({
         DC      0       _C{ INIT (OFFSET) }
 })_C{}_END_({_RWFILE_})
@@ -3293,7 +3301,7 @@ worddoc( {BLOCKS~},{OFFSET},{offset},{--- addr},{U},
 {A user variable which contains a block offset to disc drives;
 in this way a part of it is available for boot-code.
 _HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system it is 0.})
-_HOSTED_LINUX_({As blocks are allocated in a file on the host operating system it is 0.})
+_HOSTED_X_({As blocks are allocated in a file on the host operating system it is 0.})
 The
 contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before calling
 forthsamp({R|W}). },
@@ -3433,7 +3441,7 @@ worddoc( {OPERATINGSYSTEM},{ARGS},{arguments},{--- addr},{},
 { Return the addr of forthcode({ARGS}) a user variable that
 contains a system dependant pointer to any arguments that are
 passed from the operating system to ciforth during startup.
-_HOSTED_LINUX_({{
+_HOSTED_X_({{
 In this ciforth it points to an area with the argument count,
 followed by a a null ended array of arguments strings,
 then by a null ended array of environment strings.
@@ -5781,7 +5789,10 @@ suppressed, useful for turnkey applications. }) },
 enddoc)
 _HEADER({OPTIONS},{OPTIONS},{DOCOL})
 _C{       Execute option.}
-_HOSTED_LINUX_(
+_HOSTED_X_(
+{        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
+        _0BRANCH(OPT4) _C{ No options}  })
+_HOSTED_OSX_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) _C{ No options}  })
 _PC_(
@@ -5795,7 +5806,7 @@ OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
         _0BRANCH(OPT4) _C{ No options}  })
         DC      FETCH
         DC      LDUP
-        DC      LIT, _PC_({0x0FD}) _HOSTED_LINUX_({0x0FF}) , LAND
+        DC      LIT, _PC_({0x0FD}, {0x0FF}), LAND
         DC      LIT, '-', UNEQ
         _0BRANCH(OPT3)
         DC      LIT, 3, LDUP, ERROR
@@ -6285,14 +6296,14 @@ _C
 worddoc( {ERRORS},{MESSAGE},{message},{n ---},{},
 { forthcode({MESSAGE}) is generally used to print error and
 warning messages.
-Print on the _HOSTED_LINUX_({standard error channel}) _PC_({output device})
+Print on the _HOSTED_X_({standard error channel}) _PC_({output device})
 the text of line
 forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
 positive or negative and beyond just screen forthcode({ERRSCR}).
 A certain range around 0 is reserved.
 The messages with smalll positive offset contain ciforth error messages.
 The messages with small negative offset contain
-the strings belonging to the return values for _HOSTED_LINUX_({_OS_ system calls}) _PC_({BDOS calls}).
+the strings belonging to the return values for _HOSTED_X_({_OS_ system calls}) _PC_({BDOS calls}).
 _VERBOSE_({{
 forthcode({ERROR}) makes some assumption about what is present for
 small forthvar({n}), if you want to use this word for other purposes
@@ -6324,7 +6335,7 @@ worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
 forthsamp({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_LINUX_({You can use ports only after asking permission
+10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PC!},{P@},{P!},{@}},
@@ -6342,7 +6353,7 @@ worddoc( {MEMORY},{PC!},{port_char_store},{b port ---},{},
 forthsamp({port}).
 A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_LINUX_({You can use ports only after asking permission
+10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PC@},{P!},{P@},{!}},
@@ -6358,7 +6369,7 @@ worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
 forthsamp({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_LINUX_({You can use ports only after asking permission
+10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{P!},{PC@},{PC!},{@}},
@@ -6373,7 +6384,7 @@ worddoc( {MEMORY},{P!},{port_store},{n port ---},{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
 forthsamp({port}).
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_LINUX_({You can use ports only after asking permission
+10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{P@},{PC!},{PC@},{!}},
@@ -7078,7 +7089,7 @@ _HEADER({BDOSO},{BDOSO},{DOCOL})
         DC      SEMIS
 })_C{}_END_({_SIMULATE_BIOS_})
 })_C{}_END_({ _PC_})
-_HOSTED_LINUX_({
+_HOSTED_X_({
 worddoc( {OPERATINGSYSTEM},{XOS},{xos},{n1 n2 n3 n---ret},{},
 { Do a traditional Unix type
 system call forthvar({n})
@@ -7090,6 +7101,7 @@ that are handled by forthcode({XOS5}) .
 },{{?ERRUR}},
 {{1 "CHIMP" 4 XOS .},{CHIMP5}},
 enddoc)
+_LINUX_N_({
 CODE_HEADER({XOS},{XOS})
         POP     AX        _C{ Function number}
         POP     DX        _C{ Third parameter, if any}
@@ -7098,6 +7110,23 @@ CODE_HEADER({XOS},{XOS})
         INT     0x80        _C{ Generic call on LINUX }
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
+})_C{}_END_({_LINUX_N_})
+_HOSTED_OSX_({
+CODE_HEADER({XOS},{XOS})
+; OS X expects parameters on the stack, parm 1 in the most accessible place,
+; so swap first and third parameter
+        MOV     BX, [SP+_CELLS(1)]
+        MOV     CX, [SP+_CELLS(3)]
+        MOV     [SP+_CELLS(1)], CX
+        MOV     [SP+_CELLS(3)], BX
+
+        MOV     [SP], AX   _C{ Get call number, leave dummy.}
+        INT     0x80        _C{ Generic call on OSX }
+        LEA     SP, [SP+_CELLS(4)] _C{ 3 parameters plus call number.}
+
+        _PUSH     _C{ Positive means okay. Negative means -errno.}
+_C
+})_C{}_END_({_HOSTED_OSX_})
 worddoc( {OPERATINGSYSTEM},{XOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
 { Do a traditional Unix type system call forthvar({n}) (man 2) with parameters
 forthsamp({n1 n2 n3 n4 n5}). forthsamp({ret}) is the return
@@ -7107,6 +7136,7 @@ forthemph({all}) facilities present in _OS_.
 },{{?ERRUR}},
 {{1 "CHIMP" 0 0 4 XOS5 .},{CHIMP5}},
 enddoc)
+_LINUX_N_({
 CODE_HEADER({XOS5},{XOS5})
         LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
         MOV     [RPO],HIP
@@ -7121,6 +7151,27 @@ CODE_HEADER({XOS5},{XOS5})
         LEA     RPO,[RPO+_CELLS(1)]
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
+})_C{}_END_({_LINUX_N_})
+_HOSTED_OSX_({
+CODE_HEADER({XOS5},{XOS5})
+; OS X expects parameters on the stack, parm 1 in the most accessible place,
+; so swap first and fifth parameter, second and fourth too.
+        MOV     BX, [SP+_CELLS(1)]
+        MOV     CX, [SP+_CELLS(5)]
+        MOV     [SP+_CELLS(1)], CX
+        MOV     [SP+_CELLS(5)], BX
+        MOV     BX, [SP+_CELLS(2)]
+        MOV     CX, [SP+_CELLS(4)]
+        MOV     [SP+_CELLS(2)], CX
+        MOV     [SP+_CELLS(4)], BX
+
+        MOV     [SP], AX   _C{ Get call number, leave dummy.}
+        INT     0x80        _C{ Generic call on OSX }
+        LEA     SP, [SP+_CELLS(6)] _C{ 5 parameters plus call number.}
+
+        _PUSH     _C{ Positive means okay. Negative means -errno.}
+_C
+})_C{}_END_({_HOSTED_OSX_})
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 { Wait for forthvar({n}) milliseconds. },
 {{KEY?}},
@@ -7138,7 +7189,7 @@ _HEADER({MS},{MS},{DOCOL})
         DC      SEMIS
 TV:     _RESB( 8 )
 _C
-})_C{}_END_({ _HOSTED_LINUX_})
+})_C{}_END_({ _HOSTED_X_})
 _PC_({
 worddoc( {OPERATINGSYSTEM},{m_s_fetch},{millisecond_fetch},{ --- n},{},
 { Return a counter that is increase by 1 for each millisecond.
@@ -7317,11 +7368,11 @@ define({SIZE_RWBUF}, {0x200})
 _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
 })_C{}_END_({ _HOSTED_MSDOS_})
-_HOSTED_LINUX_({
+_HOSTED_X_({
 define({SIZE_RWBUF}, {0x200})
 _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
-})_C{}_END_({ _HOSTED_LINUX_})
+})_C{}_END_({ _HOSTED_X_})
 _C
 worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
 {Leaves an address that contains a zero-ended (c-type) equivalent of forthvar({sc}).
@@ -7331,10 +7382,10 @@ to the operating system. In fact this is }forthcode({RW-BUFFER}){ . }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
-_HOSTED_LINUX_({ {{OPEN-FILE},{XOS},{XOS5}}, })
+_HOSTED_X_({ {{OPEN-FILE},{XOS},{XOS5}}, })
 _HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
-_HOSTED_LINUX_({ {{"AAP" ZEN 3 + C@ .},{0}} })
+_HOSTED_X_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_DPMI_({
 {{: G3 "AAP" ZEN REG-SET 34 + @ SWAP 2 + FAR@ FF AND ;},{},
@@ -7342,14 +7393,14 @@ _HOSTED_DPMI_({
 })
 ,
 enddoc)
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RWBUF, SSTOR
         DC      ZERO, RWBUF, CHAPP
         DC      RWBUF, CELLP
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      SEMIS
-})_C{}_END_({ _HOSTED_LINUX_})
+})_C{}_END_({ _HOSTED_X_})
 _HOSTED_MSDOS_({
 _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RWBUF, SSTOR
@@ -7373,7 +7424,7 @@ _C
 worddoc( {FILES},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
-and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({ forthvar({errno}) })
+and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS}) _HOSTED_X_({ forthvar({errno}) })
 error code negated, to be inspected using forthcode({MESSAGE}).
  forthvar({fam}) is one of 0=READ_ONLY, 1=WRITE_ONLY, 2=READ_WRITE.
 },
@@ -7384,13 +7435,13 @@ error code negated, to be inspected using forthcode({MESSAGE}).
 {CLOSE-FILE .},{0}
 },
 enddoc)
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, FROMR, X
         DC      LIT, open, XOS
         DC      LDUP, ZERO, MIN
         DC      SEMIS
-})_C{}_END_({_HOSTED_LINUX_})
+})_C{}_END_({_HOSTED_X_})
 _MODERN_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, X, X
@@ -7411,12 +7462,12 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {{." See OPEN-FILE"},{See OPEN-FILE}},
 enddoc)
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      X, X
         DC      LIT, close, XOS
         DC      SEMIS
-})_C{}_END_({_HOSTED_LINUX_})
+})_C{}_END_({_HOSTED_X_})
 _MODERN_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      TOR, X, X, FROMR
@@ -7434,11 +7485,11 @@ worddoc( {FILES},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
 properties forthvar({u}), for normal files this is just 0.
 _PC_({The meaning is to be found in the MSDOS programmers
 manual at INT 21h function 3Ch "Create file with handle"}).})
-_HOSTED_LINUX_({ Create a file with name forthvar({sc}) and file
+_HOSTED_X_({ Create a file with name forthvar({sc}) and file
 access privileges forthvar({u}) }) If the file already exists,
 it is truncated to zero length. Return a file handle into
 forthvar({fileid}) and a result code into forthvar({ior}).
-The latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({
+The latter is the _PC_({ MSDOS}) _HOSTED_X_({
 forthvar({errno}) }) negated, to be inspected using
 forthcode({MESSAGE}) .
 The handle is open for READ_WRITE. },
@@ -7446,14 +7497,14 @@ The handle is open for READ_WRITE. },
 {{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}},
 enddoc)
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, TDUP, DFILE, DROP
         DC      ZEN, FROMR, X
         DC      LIT, creat, XOS
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
-})_C{}_END_({_HOSTED_LINUX_})
+})_C{}_END_({_HOSTED_X_})
 _MODERN_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, ZEN, FROMR, X
@@ -7470,7 +7521,7 @@ _C
 worddoc( {FILES},{DELETE-FILE}, {delete_file},{sc --- ior }, {ISO},
 {Delete the file with name forthvar({sc}). Return
 a result code into forthvar({ior}).
-The latter is the _PC_({ MSDOS}) _HOSTED_LINUX_({
+The latter is the _PC_({ MSDOS}) _HOSTED_X_({
 forthvar({errno}) }) negated, to be inspected using
 forthcode({MESSAGE}) .
 },
@@ -7479,12 +7530,12 @@ forthcode({MESSAGE}) .
 {"AAP" DELETE-FILE . },{0 },
 {345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345}},
 enddoc)
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN, X, X
         DC      LIT, unlink, XOS
         DC      SEMIS
-})_C{}_END_({_HOSTED_LINUX_})
+})_C{}_END_({_HOSTED_X_})
 _MODERN_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN, X, X
@@ -7501,7 +7552,7 @@ worddoc( {FILES},{READ-FILE}, {read_file}, {addr n1 fd --- n2 ior }, {ISO},
 position of the file that is open at forthvar({fd}) .
 forthvar({n2}) is the number of characters successfully read,
 this may be zero. forthvar({ior}) is 0 for success, or
-otherwise _PC_({the MSDOS}) _HOSTED_LINUX_({ forthvar({errno}) })
+otherwise _PC_({the MSDOS}) _HOSTED_X_({ forthvar({errno}) })
 error code negated, to be inspected using forthcode({MESSAGE}). },
 {{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{R|W}},
 {
@@ -7510,13 +7561,13 @@ error code negated, to be inspected using forthcode({MESSAGE}). },
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
-_LINUX_N_({
+_HOSTED_X_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      ROT, ROT
         DC      LIT, read, XOS
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
-})_C{}_END_({ _LINUX_N_})
+})_C{}_END_({ _HOSTED_X_})
 _HOSTED_MSDOS_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      LIT, read, BDOSN
@@ -7555,7 +7606,7 @@ _C
 worddoc( {FILES}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
 {Position the file that is open at forthvar({fd}) at position
 forthvar({ud}). forthvar({ior}) is 0 for success, or otherwise
-_PC_({the MSDOS error code}) _HOSTED_LINUX_({forthvar({errno})})
+_PC_({the MSDOS error code}) _HOSTED_X_({forthvar({errno})})
 negated . Information about
 error codes can be found by forthcode({MESSAGE}). },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE}},
@@ -7575,6 +7626,14 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_LINUX_N_})
+_HOSTED_OSX_({
+_HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
+        DC      ROT, ROT
+        DC      LIT, SEEK_SET, X
+        DC      LIT, _osx_lseek, XOS5
+        DC      ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({_HOSTED_OSX_})
 _MODERN_({
 _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         _BITS32_({DC     TOR, DROP, LIT, 0x10000, SLMOD, FROMR})
@@ -7591,7 +7650,7 @@ worddoc( {FILES},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
 {Write forthvar({n}) characters from forthvar({addr}) to the file that is
 open at forthvar({fd}) , starting at its current position.
 forthvar({u1}) is 0 for success,
-or otherwise _PC_({the MSDOS}) _HOSTED_LINUX_({ forthvar({errno}) })
+or otherwise _PC_({the MSDOS}) _HOSTED_X_({ forthvar({errno}) })
 error code
 negated, to be inspected using forthcode({MESSAGE}).
 dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
@@ -7602,19 +7661,19 @@ _PC_({
 {"."" Hello world!""" FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
 })
-_LINUX_N_({
+_HOSTED_X_({
 { { "hello.frt" 8 BASE ! 644 CREATE-FILE . CONSTANT FD },{0 },
 {"."" Hello world!""" FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
 })
 enddoc)
-_LINUX_N_({
+_HOSTED_X_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      ROT, ROT
         DC      LIT, write, XOS
         DC      ZERO, MIN
         DC      SEMIS
-})_C{}_END_({ _LINUX_N_})
+})_C{}_END_({ _HOSTED_X_})
 _HOSTED_MSDOS_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      LIT, write, BDOSN
@@ -7718,7 +7777,7 @@ the name forthsamp({sc1}). Any errors are thrown. },
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
 _HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      _PC_({{ZERO}})_LINUX_N_({LIT, _O(755)})
+        DC      _PC_({{ZERO}})_HOSTED_X_({LIT, _O(755)})
         DC      CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
@@ -7917,7 +7976,7 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
         DC      SEMIS
 _C
 })_C{}_END_({_LINUX_C_})
-_LINUX_N_({
+_HOSTED_X_({
 _C{ All I/O goes through the modern device (Unix-standard)}
 _C{ device I/O. Code fields are filled in during bootup. }
 _C{ Lower case labels starting with "c_.." are c-supplied facilities.}
@@ -8107,8 +8166,8 @@ SIZEL   EQU 4     _C{ Also for 64 bits. }
         DC      LIT, ioctl, XOS, QERRUR
         DC      SEMIS
 _C
-})_C{}_END_({_LINUX_N_})
-_HOSTED_LINUX_({
+})_C{}_END_({ _HOSTED_X_})
+_HOSTED_X_({
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ASCII character forthvar({c}) to the output device.
 For this ciforth all terminal I/O goes through forthcode({TYPE}).
@@ -8121,7 +8180,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
-})_C{}_END_({_HOSTED_LINUX_})
+})_C{}_END_({_HOSTED_X_})
 _C
 _PC_({
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -8431,8 +8490,8 @@ One means an
 error and and zero means okay.}
 _VERBOSE_({{Beware that if error messages are loaded from disk,
 this may clear }forthcode({DISK-ERROR}){ }})})
-dnl _HOSTED_LINUX_({ This is just a flag, indicating there was an error. }).
-_HOSTED_LINUX_({{This flag is not used, errors are thrown.}}).
+dnl _HOSTED_X_({ This is just a flag, indicating there was an error. }).
+_HOSTED_X_({{This flag is not used, errors are thrown.}}).
 },
 {{BLOCK}},
 {{." See BLOCK-EXIT"},{See BLOCK-EXIT}},
@@ -9911,7 +9970,7 @@ worddoc( {OPERATINGSYSTEM},{EXIT-CODE},{exit_code},{addr ---},{},
 exit code. Its content is passed to the host environment while
 going forthcode({BYE}) . It is custom to return zero if there
 are no errors. _PC_({MSDOS allows only single byte return
-codes.}) _HOSTED_LINUX_({_OS_ allows only single byte return
+codes.}) _HOSTED_X_({_OS_ allows only single byte return
 codes.})
 },{{BYE}},
 {{." See BYE"},{See BYE}},
@@ -9919,7 +9978,7 @@ enddoc)
 _HEADER({EXIT-CODE},{XCODE},{DOVAR}, )
         DC      0
 _C
-_HOSTED_LINUX_({
+_HOSTED_X_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
@@ -9930,7 +9989,7 @@ _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to linux, with okay status. }
         DC      XCODE, FETCH, X, X, ONE, XOS
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
-})_C{}_END_({ _HOSTED_LINUX_})
+})_C{}_END_({ _HOSTED_X_})
 _C
 worddoc( {SCREEN},{LIST},{list},{n ---},{ISO,FIG,L0},
 {Display the ASCII text of forthdefi({screen}) forthvar({n}).
@@ -10130,7 +10189,7 @@ used for:
 
 _ENDCOMMENT
 
-_HOSTED_LINUX_({
+_HOSTED_X_({
 _C{       This is the proper way to do it.}
 _C{       No memory addresses should be arrived at through equates.}
 _C{       However now we must teach the linker to keep the}
@@ -10161,7 +10220,7 @@ _THREADS_(
 })dnl _END_({_THREADS_})
 BUF1:   _RESB( BUFFERSIZE )     _C{ FIRST DISK BUFFER}
 ACTUAL_EM:  _C{ Differs from EM if code is relocated.}
-})_C{}_END_({ _HOSTED_LINUX_})
+})_C{}_END_({ _HOSTED_X_})
 _C
 
         CSEG    ENDS

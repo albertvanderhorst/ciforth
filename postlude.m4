@@ -15,13 +15,19 @@ _BOOTSECTRK_({define({_BOOTED_}, _yes)})
 _BOOTLBA_({define({_BOOTED_}, _yes)})
 _LINUX_N_({ define( {_HOSTED_LINUX_}, _yes)})
 _LINUX_C_({ define( {_HOSTED_LINUX_}, _yes)})
+_HOSTED_LINUX_({define({_HOSTED_X_}, _yes)})
+_HOSTED_OSX_({define({_HOSTED_X_}, _yes)})
+_HOSTED_BSD_({define({_HOSTED_X_}, _yes)})
+
+_HOSTED_X_({define({_HOSTED_}, _yes)})
 _HOSTED_DPMI_({define({_HOSTED_}, _yes)})
-_HOSTED_LINUX_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
 
 _HOSTED_DPMI_( {define({_OS_}, MS-Windows)})
 _HOSTED_LINUX_({define({_OS_}, Linux)})
 _HOSTED_MSDOS_({define({_OS_}, MSDOS)})
+_HOSTED_OSX_( {define({_OS_}, Apple OSX)})
+_HOSTED_BSD_( {define({_OS_}, BSD Unix)})
 
 dnl Hard consequences
 _BITS16_({define({_LARGE_}, _no)})
@@ -33,7 +39,7 @@ _BOOTLBA_({define({_RWLBA_}, _yes)})
 _BOOTED_({define({_PC_}, _yes)})
 _HOSTED_DPMI_({define({_PC_}, _yes)})
 _HOSTED_MSDOS_({define({_PC_}, _yes)})
-_HOSTED_LINUX_({ define({_BLOCKSINFILE_}, _yes)})
+_HOSTED_X_({ define({_BLOCKSINFILE_}, _yes)})
 _HOSTED_DPMI_({define({_PROTECTED_}, _yes)})
 _BOOTED_({define({_USEBIOS_}, _yes)})
 _USEBIOS_({define({_KEY_BY_KEY_}, _yes )})
@@ -43,6 +49,8 @@ _LARGE_({define({_PROTECTED_}, _yes)})
 define({_FILES_}, _no)
 _MODERN_({define({_FILES_}, _yes)})
 _LINUX_N_({define({_FILES_}, _yes)})
+_HOSTED_OSX_({define({_FILES_}, _yes)})
+_HOSTED_BSD_({define({_FILES_}, _yes)})
 dnl This dirty trick is commented in the main source.
 _BITS32_({_LINUX_N_({define({M4_EM},M4_EM-0x74)})})dnl
 
@@ -66,7 +74,7 @@ _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 dnl after the real memorya plus the high memory.
 _SWITCH_({_LARGE_({define({M4_INITDP},{0x100000})})})
-_HOSTED_LINUX_({define( {_EQULAYOUT_},  _no )})
+_HOSTED_X_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
 

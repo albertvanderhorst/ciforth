@@ -16,6 +16,13 @@ define({_HEADER_ASM},{;
 ; It can be assembled using ``nasm'' obtainable via :
 ; Source: ftp://ftp.us.kernel.org/pub/software/devel/nasm/source/
 ; URL: http://www.cryogen.com/Nasm/
+_HOSTED_OSX_({
+; This version can be assembled on an OS X system (Apple):    
+;   nasm -f macho xina.asm forth.o
+;   ld forth.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o forth
+;And to get the smallest possible executable(optional):
+;   strip forth 
+})dnl
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
 ;   nasm forth.asm -felf -o forth.o

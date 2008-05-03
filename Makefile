@@ -39,6 +39,7 @@ prelude.m4       \
 protect.m4       \
 width16.m4       \
 width32.m4       \
+width64.m4       \
 # That's all folks!
 
 DOCTRANSFORMS = \
