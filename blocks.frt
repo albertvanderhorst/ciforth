@@ -1139,7 +1139,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
  : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
- SM 1C + @ SM + 10 + CONSTANT SIZE^  \ Where to patch size.
+ SM 48 + CONSTANT SIZE^  \ Where to patch size.
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM \ Save the system in a file with NAME .
