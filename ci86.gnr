@@ -7120,7 +7120,7 @@ CODE_HEADER({XOS},{XOS})
         MOV     [SP+_CELLS(1)], CX
         MOV     [SP+_CELLS(3)], BX
 
-        MOV     [SP], AX   _C{ Get call number, leave dummy.}
+        MOV     AX, [SP]    _C{ Get call number, leave dummy.}
         INT     0x80        _C{ Generic call on OSX }
         LEA     SP, [SP+_CELLS(4)] _C{ 3 parameters plus call number.}
 
@@ -7165,7 +7165,7 @@ CODE_HEADER({XOS5},{XOS5})
         MOV     [SP+_CELLS(2)], CX
         MOV     [SP+_CELLS(4)], BX
 
-        MOV     [SP], AX   _C{ Get call number, leave dummy.}
+        MOV     AX, [SP]    _C{ Get call number, leave dummy.}
         INT     0x80        _C{ Generic call on OSX }
         LEA     SP, [SP+_CELLS(6)] _C{ 5 parameters plus call number.}
 
@@ -7186,7 +7186,7 @@ CODE_HEADER({XOSV},{XOSV})
         POP     AX      _C{ system call no. }
         INT     0x80    _C{ Generic call on OSX }
         POP     BX      _C{ Number of parameters }
-        LEA     SP, [SP + 4*BP]
+        LEA     SP, [SP + 4*BX]
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 })_C{}_END_({_HOSTED_OSX_})
@@ -8664,7 +8664,7 @@ a start up stack.})
 ,
 enddoc)
 _HEADER({SHELL},{SHELL},{DOVAR}, )
-         _HOSTED_LINUX_(
+         _HOSTED_X_(
 {        _STRING({/bin/sh})})
         _PC_(
 {        _STRING({C:\COMMAND.COM})})
