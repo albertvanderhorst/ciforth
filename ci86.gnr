@@ -7171,6 +7171,24 @@ CODE_HEADER({XOS5},{XOS5})
 
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
+worddoc( {OPERATINGSYSTEM},{XOSV},{xos variable},{ nx ...n3 n2 n1 n nc ---ret},{},
+{ Do a traditional Unix type system call forthvar({nc}) (man 2) with
+forthvar({n}) parameters forthsamp({n1 n2 n3 n4 n5}). forthsamp({ret}) is the return
+value of the call. If it is negative, it is mostly an error,
+such as known by forthsamp({errno}) . This makes available
+forthemph({all}) facilities present in _OS_.
+_VERBOSE_({Please note that the parameters appear in reverse order compared to
+normal documentation.})
+},{{?ERRUR}},
+{{1 "CHIMP" 0 0 5 4 XOSV .},{CHIMP5}},
+enddoc)
+CODE_HEADER({XOSV},{XOSV})
+        POP     AX      _C{ system call no. }
+        INT     0x80    _C{ Generic call on OSX }
+        POP     BX      _C{ Number of parameters }
+        LEA     SP, [SP + 4*BP]
+        _PUSH     _C{ Positive means okay. Negative means -errno.}
+_C
 })_C{}_END_({_HOSTED_OSX_})
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 { Wait for forthvar({n}) milliseconds. },
@@ -8698,9 +8716,73 @@ SYSARG2: DSS     "-c"
 COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
         _ALIGN(_CELLS(1))
         _C{ These are longs, not cells! }
-SYSARGS: DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
+SYSARGS:DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 _C
 })_C{}_END_({_LINUX_N_})
+_HOSTED_OSX_({
+_HEADER({SYSTEM},{SYSTEM},{DOCOL})
+        DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
+        DD      XOSFORK
+        DC      LDUP, QERRUR
+        DC      LDUP, ZEQU
+        _0BRANCH(SYSTEM1)
+_C{  Get environment vector}
+        DD      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS
+                DD      LIT, SYSARGS
+                DD      SHELL, CELLP
+                DD      LIT, 3
+        DD      LIT, _osx_execve, XOSV
+        DC      LIT, 49, ERROR, BYE   _C{ Returned, this is always wrong.}
+SYSTEM1:
+        DC      LDUP
+
+        DD      ZERO ; struct rusage *rusage
+        DD      ZERO, ; options
+        DD      ROT
+        DD      LIT, STATUS ; status
+        DD      SWAP  ; pid on top
+        DD      LIT, 4
+        DD      LIT, waitpid  ; wait4 (OSX)
+        DD      XOSV
+
+        DC      LDUP
+        DC      LIT, EINTR, EQUAL
+        _BRANCH(SYSTEM2)
+        DC      DROP
+        _0BRANCH(SYSTEM1)
+SYSTEM2:
+        DC      QERRUR
+        DC      TDROP
+        DC      SEMIS
+_C
+        _ALIGN(_CELLS(1))
+STATUS:  DC     0
+SYSARG2: DSS     "-c"
+         DB      0
+        _ALIGN(_CELLS(1))
+COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
+        _ALIGN(_CELLS(1))
+        _C{ These are longs, not cells! }
+SYSARGS: DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
+_C
+worddoc( {OPERATINGSYSTEM},{XOSFORK},{system},{ -- flag},{},
+{Fork the process. If it is negative, it is an error.
+Otherwise, if forthvar({flag}) is clear, we are the child else the
+mother.}, {{SYSTEM}}, {}, enddoc )
+CODE_HEADER({XOSFORK},{XOSFORK})
+_C{ This is working code! }
+        MOV     EAX, fork  _C{ Syscall coded in assembler for no good reason}
+        PUSH EAX
+        INT     0x80
+        ADD     ESP, 4
+
+        NEG EDX         _C{ Mysterious manipulation }
+        NOT     EDX
+        AND EAX, EDX
+
+        _PUSH
+})_C{}_END_({_HOSTED_OSX_})
 _MODERN_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, TOR
