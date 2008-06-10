@@ -10013,10 +10013,18 @@ _HEADER({WORDS},{WORDS},{DOCOL})
         DC      CSLL
         DC      LOUT
         DC      STORE
-        DC      LIT, IDDOT
+        DC      ZERO
+        DC      LIT, NOOP
         DC      CONTEXT
         DC      FETCH
         DC      FORW
+WORDS1:
+        DC      LDUP
+        _0BRANCH(WORDS2)
+        DC      IDDOT
+        _BRANCH(WORDS1)
+WORDS2:
+        DC DROP
         DC      SEMIS
 _C
 _MSDOS_BYE_({
