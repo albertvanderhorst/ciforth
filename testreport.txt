@@ -15,6 +15,8 @@ It looks as if sometimes K' fails. But not for a freshly booted system.
 If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
+Stable version 5.0.0  Suse ( and XP)
+
 Stable version 4.0.6  Suse and XP
 
 The redirection on XP doesn't work for the command interpreter:
@@ -76,7 +78,7 @@ before 2.223 : REQUIRE ERATOSTHENES 0 PAUSE ! 100 SIEVE
 E (requires A) KRAAK QUIT
 F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
 G (r. A) Editing a screen
-H wc *.asm
+H ``wc *.asm''  . later ``mywc *.asm''.
 J Binary equivalent than compiled on linux
 K BYE
 L Dos Directory correct
@@ -156,6 +158,7 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
+hosted_linux linux_native   5.0.0 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.6 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.5 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.3 lina.cfg        lina          BCDEFHKMOPR

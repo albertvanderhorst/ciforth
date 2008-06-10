@@ -496,7 +496,8 @@ The names forthcode({NAMESPACE WANT}) are proposed for standardisation.
 The ciforth definitions are not compatible with this proposal.
 So the forthcode({REQUIRE}) of older versions is now called forthcode({WANT}).
 Likewise forthcode({REQUIRED}) is renamed to forthcode({WANTED}).
-forthcode({NAMESPACE}) is renamed to forthcode({NAMESPACE}).
+forthcode({VOCABULARY}) is renamed to forthcode({NAMESPACE}),
+with the difference that forthcode({NAMESPACE}) is not immediate.
 This allows to include the new standardised definitions
 in a loadable screen.
 @section Saving a new system

@@ -6,7 +6,7 @@
 
 \ Facility for filling in double link fields in Forth
 
-VOCABULARY THINGY THINGY DEFINITIONS
+NAMESPACE THINGY THINGY DEFINITIONS
 REQUIRE SORT-VOC
 'FORTH SORT-VOC
 REQUIRE ALIAS
@@ -35,7 +35,7 @@ REQUIRE H.
 : !LINK!   2SWAP >R >R   OVER R@ >XFA !   R> >LFA @   R> 1-
     DUP 0= IF 2DROP THEN ;
 
-\ fill all xfa's of VOCABULARY
+\ fill all xfa's of NAMESPACE
 : FILL-XFA   0 SWAP   >WID >LFA @   DUP dictionary-length
     BEGIN DUP WHILE DUP 1 = IF links-same ELSE VOC/2 !LINK! THEN REPEAT DROP ;
 

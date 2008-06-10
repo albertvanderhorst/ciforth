@@ -53,7 +53,8 @@ REQUIRE INSTALL-KERNEL
 RESTORE-BLOCKS    \ If you want these blocks on hd too
 INSTALL-KERNEL    \ Insert floppy with kernel
 
-How to load a VOCABULARY high:
+How to load a VOCABULARY / NAMESPACE high:
+???
 2001 oct 9
 
 How to create a distribution :

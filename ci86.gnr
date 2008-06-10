@@ -1545,7 +1545,7 @@ _ALIGNED_({ DC LALIGN}, {dnl})
         DC      FROMR, SFET, DLITE      _C{           R> $@ POSTPONE DLITERAL ;}
         DC      SEMIS
 _C
-worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,I,L1},
+worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,L1},
 {The name of the primary namespace. Execution pushes the
 forthcode({FORTH}) forthdefi({WID})
 to the top of the forthdefi({search order}) .
@@ -1560,7 +1560,7 @@ colon-definition, to select this forthdefi({word list}) at compile time.},
   { FORTH ' FORTH >WID CONTEXT @ = .},{_T_} },
 enddoc)
 _C{ The FORTH word is the only non-denotation in the ONLY namespace.}
-_HEADER({FORTH},{FORTH},{DODOE}, , B_IMMED)
+_HEADER({FORTH},{FORTH},{DODOE}, , )
         DC      DOVOC
         DC      0       _C{ END OF NAMESPACE LIST}
 _HEADER( , , ,0, B_DUMMY,_DEA(TASK))
@@ -1672,13 +1672,13 @@ This prevents masking regular words with the same prefix.})
 {
 },
 enddoc)
-_HEADER({ONLY},{ONLY},{DODOE}, , B_IMMED)
+_HEADER({ONLY},{ONLY},{DODOE}, , )
         DC      DOVOC
         DC      _DEA(FORTH)     _C{ NEXT NAMESPACE }
 ONLYBODY:
 _HEADER( , , ,0, B_DUMMY, _STARTOFONLY_)
 _C
-worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{CI},
+worddoc( {WORDLISTS},{ENVIRONMENT},{environment},{},{},
 {The name of the forthcode({ENVIRONMENT}) namespace. The
 associated forthdefi({word list}) contains environment queries.
 The names of words present in forthcode({ENVIRONMENT}) are
@@ -1691,7 +1691,7 @@ query.},
 {{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
 FORTH DEFINITIONS ; GS1},{SUPPLIER}},
 enddoc)
-_HEADER({ENVIRONMENT},{ENV},{DODOE}, , B_IMMED)
+_HEADER({ENVIRONMENT},{ENV},{DODOE}, , )
         DC      DOVOC
         DC      _DEA({ONLY})       _C{ NEXT NAMESPACE }
 _HEADER( , , ,0, B_DUMMY, _STARTOFENVIRONMENT_)
@@ -5494,7 +5494,7 @@ _HEADER({PREFIX},{PREFX},{DOCOL})
         DC      TOGGL
         DC      SEMIS
 _C
-worddoc( {DEFINING},{NAMESPACE},{namespace},{},{FIG,E,L},
+worddoc( {DEFINING},{NAMESPACE},{namespace},{},{},
 {A defining word used in the form:
 forthcode({NAMESPACE}) forthsamp({cccc}) to create a
 namespace definition forthsamp({cccc}) . It will create a
