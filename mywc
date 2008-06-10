@@ -2,7 +2,7 @@
 lina <<%
 \ ( Environmental dependancies : )
 \ ( This is a ISO Forth Program using only standard ISO Words)
-\ ( plus LINOS (par1, par2, par3, function# -- result/error )
+\ ( plus XOS (par1, par2, par3, function# -- result/error )
 \ ( The following words are not ANSI : none (any more))
 \ ( An environmental dependancy ?BLANK is used. )
 
@@ -37,7 +37,7 @@ CREATE Buffer SIZE ALLOT
 VARIABLE HANDLE
 : COUNT-FILE
     BEGIN
-        HANDLE @ Buffer SIZE READ LINOS DUP ?ERRUR
+        HANDLE @ Buffer SIZE READ XOS DUP ?ERRUR
     DUP 0 > WHILE
         COUNT-BUFFER
     REPEAT DROP ;
@@ -45,10 +45,10 @@ VARIABLE HANDLE
 : ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
 : STILL-FILES C@  ; ( string variable -- flag )( Length <>0 means more files)
 ( c-name -- ) ( Open file with the specified name, c-name must be modifiable)
-: MY-OPEN-FILE ZERO-ENDED O_RDONLY 0 OPEN LINOS DUP ?ERRUR HANDLE ! ;
+: MY-OPEN-FILE ZERO-ENDED O_RDONLY 0 OPEN XOS DUP ?ERRUR HANDLE ! ;
 ( [filename-at-here] -- handle/-1 )
 : TREAT-FILE ZERO-COUNT COUNT-FILE COUNT TYPE SHOW-COUNT ;
-: MY-CLOSE-FILE HANDLE @ 0 0 CLOSE LINOS ?ERRUR ;
+: MY-CLOSE-FILE HANDLE @ 0 0 CLOSE XOS ?ERRUR ;
 
 : DO-FILE
     BEGIN
