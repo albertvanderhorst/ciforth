@@ -78,22 +78,22 @@
 
 
 \
-( CONFIG ?LEAVE-BLOCK ?16 ?32 ?LI ?PC ?MS ?FD ?HD ) \ A4dec8
+( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ A7jun10
+: ?LEAVE-BLOCK   IF SRC CELL+ @ IN ! THEN ;
+: CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
+0 CELL+
+  DUP 2 = CONFIG ?16   DUP 4 = CONFIG ?32   8 = CONFIG ?64
 
-: ?LEAVE-BLOCK IF SRC CELL+ @ IN ! THEN ;
-: CONFIG CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
-0 CELL+ 2 = CONFIG ?16
-0 CELL+ 4 = CONFIG ?32
-0 CELL+ 8 = CONFIG ?64
- "BIOS31" PRESENT DUP CONFIG ?WI   \ DPMI ("windows")
- "BDOSN"  PRESENT DUP CONFIG ?MS   \ MS-DOS
-               OR DUP CONFIG ?WIMS \ One of 2 above
- "XOS"    PRESENT DUP   CONFIG ?LI   \ Linux, BSD, OSX.
-                 OR CONFIG ?HS   \ Any host
+ "BIOS31" PRESENT DUP   CONFIG ?WI   \ DPMI ("windows")
+ "BDOSN"  PRESENT DUP   CONFIG ?MS   \ MS-DOS
+               OR DUP   CONFIG ?WIMS \ One of 2 above
+ "XOSV"   PRESENT DUP   CONFIG ?OSX  \ OSX.
+ DUP 0= "XOS" PRESENT OR DUP     CONFIG ?LI   \ Linux, BSD.,
+    OR           OR     CONFIG ?HS \ Any host
+
  "BIOSN"  PRESENT CONFIG ?PC   \ Possibly stand alone
  "LBAPAR" PRESENT CONFIG ?HD   \ Hard disk, modern
  "SEC-RW" PRESENT CONFIG ?FD   \ Floppy or hard disk old
-
 ( HELP ) CF: ?HS \ A5dec07
 : HELP-WANTED? ." Press space to skip " TYPE
  ." , other key to confirm" CR KEY BL <> ;
@@ -1139,12 +1139,12 @@ WANT Z$@   WANT COMPARE   WANT ENV
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
  : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
- SM 48 + CONSTANT SIZE^  \ Where to patch size.
+ SM 48 + CONSTANT SIZE^  \ Where to patch for GROW.
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM \ Save the system in a file with NAME .
-  0 SM 20 + !  0 SM 30 + !  \ Kill sections
-  HERE SM -  SIZE^ !  \ Fill in file size = memory size
+  0 SM 20 + !   0 SM 30 + ! \ Kill sections
+  HERE SM - SM 44 + !  \ Fill in file size = memory size
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL

@@ -10005,7 +10005,7 @@ dnl A break as per forthcode({KEY?}) will terminate the listing.
 {
 {NAMESPACE JOHN JOHN DEFINITIONS : GO ; : CH ; : GI ; },{},
 {: Q 'GO >LFA ;},{},
-{: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GS1 Q GI CH GO},
+{: GS1 Q @ 0 Q ! WORDS Q ! ; GS1},{GO CH GI Q GS1 },
 {FORTH DEFINITIONS},{}
 },
 enddoc)
@@ -10013,7 +10013,7 @@ _HEADER({WORDS},{WORDS},{DOCOL})
         DC      CSLL
         DC      LOUT
         DC      STORE
-        DC      ZERO
+        DC      ZERO            _C{ End sentinel. }
         DC      LIT, NOOP
         DC      CONTEXT
         DC      FETCH
