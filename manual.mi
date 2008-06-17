@@ -716,6 +716,8 @@ normally available.
 An assembler is
 not part of ciforth as delivered, but it
 is available after forthsamp({WANT ASSEMBLERi86}).
+Beware! The assembler can only be loaded on top of a
+forthcode({CASE-SENSITIVE}) system.
 It automatically loads the proper _BITS_-bits version.
 You can load a more elaborate assembler. forthxref(Assembler) Section Overview.
 They are among the first candidates to be integrated into

@@ -163,11 +163,14 @@ dnl
 dnl C Rely on WINDOWS / OS/2 to start the program.
 define( {_HOSTED_DPMI_}, _no)dnl
 dnl
-dnl D Rely on OSX (Apple) to start the program.    
+dnl D Rely on OSX (Apple) to start the program.
 define( {_HOSTED_OSX_}, _no)dnl
 dnl
-dnl D Rely on BSD Unix to start the program.      
+dnl E Rely on BSD Unix to start the program.
 define( {_HOSTED_BSD_}, _no)dnl
+dnl
+dnl F Rely on some Unix look alike to start the program.
+define({_HOSTED_X_}, _no)dnl
 dnl
 dnl ############## FEATURES ##########################################
 dnl    Features that stand on their own, mostly independant

@@ -491,8 +491,8 @@ WANT POSTFIX
   DROP ; IMMEDIATE
 
 \ ISO
-: MARKER  CREATE   DOES>   BODY>   'FORGET-VOC FOR-VOCS
-  >NFA @ DP ! ;
+: MARKER HERE CREATE , DOES> @ 'FORGET-VOC FOR-VOCS DP ! ;
+
 
 ( BIN-SEARCH binary_search_by stack ) \ AvdH
 ( nmin nmax xt -- nres )
