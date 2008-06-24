@@ -85,10 +85,10 @@
   DUP 2 = CONFIG ?16   DUP 4 = CONFIG ?32   8 = CONFIG ?64
 
  "BIOS31" PRESENT DUP   CONFIG ?WI   \ DPMI ("windows")
- "BDOSN"  PRESENT DUP   CONFIG ?MS   \ MS-DOS
+ DUP 0= "BIOSN" PRESENT AND DUP   CONFIG ?MS   \ MS-DOS
                OR DUP   CONFIG ?WIMS \ One of 2 above
  "XOSV"   PRESENT DUP   CONFIG ?OSX  \ OSX.
- DUP 0= "XOS" PRESENT OR DUP     CONFIG ?LI   \ Linux, BSD.,
+ DUP 0= "XOS" PRESENT AND DUP     CONFIG ?LI   \ Linux, BSD.,
     OR           OR     CONFIG ?HS \ Any host
 
  "BIOSN"  PRESENT CONFIG ?PC   \ Possibly stand alone
@@ -110,7 +110,23 @@
    ELSE   "BDOSN"  PRESENT? IF
       "wina.pdf" SYSTEM THEN THEN ;
 
-( -legacy- PRESENT? REQUIRE REQUIRED ) \ AvdH A7dec1
+( -legacy- ) CF: ?LI \ AvdH A8jun24
+
+
+
+
+
+
+
+
+
+: LINOS XOS ;
+
+
+
+
+
+( -legacy- PRESENT? REQUIRE REQUIRED ) \ AvdH A8jun24
 \ This will make most old programs run.
 : REQUIRE WANT ;   : REQUIRED WANTED ;
 
@@ -120,7 +136,7 @@
 
 : VOCABULARY NAMESPACE IMMEDIATE ;
 
-: LINOS XOS ;
+
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
@@ -1374,24 +1390,40 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 
-( SET-TRAPS ) CF: \ AvdH A3jun12
+( INSTALL-TRAPS ) CF: ?WIMS \ AvdH A3jun12
+\ Nobody knows how to do this on Bill's systems.
+: INSTALL-TRAPS  DROP ;
+: INSTALL-NO-TRAPS  ;
 
-\ Default (MSDOS) no worky-worky
-: SET-TRAPS  DROP ;
 
-?LI
-'SET-TRAPS HIDDEN
+
+
+
+
+
+
+
+
+
+
+( SET-TRAPS  INSTALL-TRAPS ) CF: ?LI \ AvdH A3jun12
+
 \ Make sure any traps restart Forth at ADDRESS .
 : SET-TRAPS  32 0 DO I OVER _ 48 XOS DROP LOOP DROP ;
+
 \ Still fig tradition: warm and cold starts below origin
 : SET-TRAPS-WARM   -2 CELLS +ORIGIN   SET-TRAPS ;
 : SET-NO-TRAPS   0 SET-TRAPS ;
+
 : NEW-WARM    SET-TRAPS-WARM   OLD: WARM ;
+
+: INSTALL-TRAPS SET-TRAPS-WARM
+   'NEW-WARM >DFA @   'WARM >DFA !
 
 
 
 ( DO-DEBUG NO-DEBUG ) \ AvdH A6sep19
-WANT OLD:    WANT SET-TRAPS
+WANT OLD:    WANT INSTALL-TRAPS
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 \ Print index line of SCREEN .
@@ -1400,12 +1432,12 @@ WANT OLD:    WANT SET-TRAPS
 : NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
   OLD: THRU ;
 \ Install and de-install the alternative ``OK'' and traps
-: DO-DEBUG   SET-TRAPS-WARM
-   'NEW-WARM >DFA @   'WARM >DFA !
+: DO-DEBUG   INSTALL-TRAPS
    'NEW-OK >DFA @   'OK >DFA !
    'NEW-THRU >DFA @   'THRU >DFA ! ;
-: NO-DEBUG   SET-NO-TRAPS  'OK RESTORED
+: NO-DEBUG   INSTALL-NO-TRAPS  'OK RESTORED
  'WARM RESTORED 'THRU RESTORED ;
+
 ( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11
 WANT RESTORED HEX
 \ Characters ONE and TWO are equal, ignoring case.

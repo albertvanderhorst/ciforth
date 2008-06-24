@@ -120,7 +120,6 @@ US      EQU     M4_US*CW  _C{ User variable space, eats into next data stack, if
 EM      EQU     M4_EM     _C{ Where the memory ends w.r.t. ORIG. 1) }
 EMP     EQU     (EM-1)/0x1000+1 _C{ Number of pages.}
 TAS     EQU     M4_RTS    _C{Size of unitialised area per task.}
-RTS     EQU     TAS       _C{ Return stack & terminal input buffer}
 STACKSIZE   EQU TAS/4  _C{For both stacks. } but for now
 TIBSIZE     EQU TAS/2  _C{TIB size. }
 _C
@@ -2290,7 +2289,6 @@ CODE_HEADER({FARMOVE},{FMOVE})
 FARMV1:
         POP     SI      _C{source}
         POP     DX
-        PUSH    DS
         AND     DX,DX
         JZ      FARMV2
         MOV     DS,DX
@@ -2409,8 +2407,15 @@ worddoc( {STACKS},{DEPTH},,{--- n1},{ISO,WANT},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthvar({n1}) was pushed.},
 {{DSP@}},
-{},
+{{  1 2 3 DEPTH . DROP DROP DROP},{3} },
 enddoc)
+_HEADER({DEPTH},{DEPTH},{DOCOL})
+        DC      SZERO, FETCH
+        DC      SPFET
+        DC      LSUB
+        DC      LIT, CW, SLASH
+        DC      ONEM
+        DC      SEMIS
 _C
 dnl was the end of a LOADable option.
 worddocsafe( {STACKS},{RSP@},{r_s_p_fetch},{--- addr},{},
@@ -3521,7 +3526,7 @@ such that new user variables may be allocated using offsets of
 enddoc)
 _HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(37)) _C{ Up to } 37+M4_MAXWORDLIST
 _C{      IMPORTANT}
-_C{     M4_MAXWORDLIST USER SPACE CELLS MUST BE KEPT FREE}
+_C{     }M4_MAXWORDLIST{ USER SPACE CELLS MUST BE KEPT FREE}
 _C{     IN ADDITION TO THE ONE FOR CONTEXT}
 _C
 _C{========== END USER VARIABLES =============}
