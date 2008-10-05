@@ -1413,13 +1413,13 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 \ Still fig tradition: warm and cold starts below origin
 : SET-TRAPS-WARM   -2 CELLS +ORIGIN   SET-TRAPS ;
-: SET-NO-TRAPS   0 SET-TRAPS ;
+: INSTALL-NO-TRAPS   0 SET-TRAPS ;
 
 : NEW-WARM    SET-TRAPS-WARM   OLD: WARM ;
 
+\ Install traps such that they are reinstated if invoked.
 : INSTALL-TRAPS SET-TRAPS-WARM
-   'NEW-WARM >DFA @   'WARM >DFA !
-
+   'NEW-WARM >DFA @   'WARM >DFA ! ;
 
 
 ( DO-DEBUG NO-DEBUG ) \ AvdH A6sep19
