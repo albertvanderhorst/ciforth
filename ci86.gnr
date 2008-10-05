@@ -6319,7 +6319,7 @@ If forthcode({WARNING}) is zero (disc unavailable), this is a noop.
 },
 {{ERROR}},
 {
-{1 WARNING ! -190 MESSAGE}, {( -w :_This_option_is_available )},
+{1 WARNING ! -180 MESSAGE}, {( -x :_This_option_is_available )},
 {1 WARNING ! HEX 12 MESSAGE},{ : EXECUTION ONLY },
 {0 WARNING ! HEX 12 MESSAGE},{}
 },
