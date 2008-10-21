@@ -64,7 +64,7 @@ cmp: ci86.mina.bin ci86.alone.bin ciforth lina
 
 # Not all of these segments are present always.
 strip : lina
-	strip lina -s -R .bss -R .comment -R .data -R .text
+	strip lina -s -R .comment -R .data
 
 copy1: $(TARGETS:%=ci86.%.bin)
 		mount /mnt/dosa
