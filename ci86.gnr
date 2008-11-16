@@ -6030,7 +6030,7 @@ CODE_HEADER({SM/REM},{MSLAS})
         POP     BX      _C{DIVISOR}
         POP     DX      _C{MSW OF DIVIDEND}
         POP     AX      _C{LSW OF DIVIDEND}
-        IDIV     BX      _C{16 BIT DIVIDE}
+        IDIV     BX      _C _BITS_ {BIT DIVIDE}
         _2PUSH          _C{STORE QUOT/REM}
 _C
 _LOAD_({
@@ -10081,7 +10081,7 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {23 EXIT-CODE ! BYE 23}},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
-_C{ Exit to linux, with okay status. }
+_C{ Exit to linux, with status as stored. }
         DC      XCODE, FETCH, X, X, ONE, XOS
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _HOSTED_X_})
