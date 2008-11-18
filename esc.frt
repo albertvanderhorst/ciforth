@@ -88,8 +88,15 @@ CREATE e-buf  size ALLOT
 SCR @ BLOCK 16 0 DO DUP e-buf  I VW * + C/L 1- MOVE C/L + LOOP DROP ;
 : e>blk SCR @ BLOCK 16 0 DO e-buf  I VW * + OVER C/L 1- MOVE C/L + LOOP DROP ;
 VARIABLE cursor-x    VARIABLE cursor-y
+\ Delete character at cursor position in the e-buffer.
 : del-c   e-buf cursor-y @ VW * + >R  R@ cursor-x @ + DUP 1+ SWAP
     R@ VW + OVER - MOVE    BL R> VW + 1- C! ;
+: cur-l@ e-buf cursor-y @ VW * + ;
+\ Insert KEY at cursor position in the e-buffer.
+: ins-c   cur-l@ >R  R@ cursor-x @ + DUP 1+
+    R@ VW + OVER - 1- MOVE    R> cursor-x @ + C! ;
+\ Store KEY at cursor position in the e-buffer.
+: sto-c   cur-l@ cursor-x @ + C! ;
 
 : CP cursor-x @ ;
 : SET-CURSOR   cursor-x @ cursor-y @  AT-XY ;
@@ -97,46 +104,53 @@ VARIABLE cursor-x    VARIABLE cursor-y
 : MOVE-X ( WORD STAR)
 DUP ^D = IF  1 ELSE       DUP ^S = IF -1 ELSE
 DUP ^I = IF  8 ELSE       DUP ^M = IF VW CP - ELSE
+\ DUP BL 127 WITHIN IF  1 ELSE
 0    THEN THEN THEN THEN
 cursor-x @ + clamp-x ! ;
 : clamp-y 0 MAX height 1- MIN ;
 : MOVE-Y ( WORD STAR)
-DUP ^X = IF 1 ELSE       DUP ^E = IF -1 ELSE
+DUP ^X = IF 1 ELSE
+DUP ^H = IF -1 ELSE
+DUP ^E = IF -1 ELSE
 DUP ^C = IF 8 ELSE   DUP ^R = IF -8 ELSE
 DUP ^M = IF 1 ELSE
-0    THEN THEN THEN THEN THEN
+0    THEN THEN THEN THEN THEN THEN
 cursor-y @ + clamp-y cursor-y ! ;
-: EM-C EMIT 1 CURSOR-X +! ;
+: set-c  DUP BL 127 WITHIN IF
+    I-MODE @ IF DUP ins-c ELSE DUP sto-c THEN THEN ;
+: EM-C EMIT set-c 1 CURSOR-X +! ;
 : PRINT ( C --C . Print it if printable)
-  DUP $1F $7F WITHIN IF   DUP EM-C   THEN ;
-: toggle_insert   I-MODE 1 TOGGLE I-MODE @ IF enter_insert_mode ELSE
-    exit_insert_mode THEN ;
+  DUP BL $7F WITHIN IF   DUP EM-C   THEN ;
+: update_insert I-MODE @ IF enter_insert_mode ELSE exit_insert_mode THEN ;
+: toggle_insert   I-MODE 1 TOGGLE update_insert ;
 : INSELETING
-      DUP ^H = IF ( RUB-C ) ELSE
+      DUP ^H = IF delete_character  del-c ELSE
       DUP ^G = IF delete_character  del-c ELSE
       DUP ^V = IF toggle_insert ELSE
       THEN THEN THEN ;
 : ROUTE BEGIN KEY
   PRINT
 \ DELSTORING
- INSELETING
 \ JOINITTING
 \ WORDING
 move-x
 move-y
 SET-CURSOR
+ INSELETING
 ( DEBUG)
 ESC = UNTIL ;
 : E-S  ( EDIT CURRENT SCREEN )
-    1 I-MODE !
+    1 I-MODE ! update_insert
 \    FRAME
     PAGE   BLK>V blk>e
     0 cursor-x !
     0 cursor-y !   SET-CURSOR
     ROUTE
 \    EXITING
+
    e>blk
 \    AT-END
 \    NO-FRAME
+   0 height AT-XY exit_insert_mode
 ;
 :  EDIT SCR ! E-S ;
