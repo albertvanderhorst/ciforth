@@ -79,39 +79,63 @@ CONSTANT escape-fore   CONSTANT escape-back
 
 VARIABLE I-MODE   0 I-MODE !
 DECIMAL
-: BLK>V  SCR @ BLOCK 1024 TYPE ;
-VARIABLE CURSOR    0 CURSOR !
 80 CONSTANT VW
-: CP CURSOR @ VW MOD  ;
-: SET-CURSOR   CURSOR @ VW /MOD AT-XY ;
-: MOVE-CURSOR   ( WORD STAR)
+24 CONSTANT height
+VW height * CONSTANT size
+CREATE e-buf  size ALLOT
+: BLK>V  SCR @ BLOCK 1024 TYPE ;
+: blk>e  e-buf size BLANK
+SCR @ BLOCK 16 0 DO DUP e-buf  I VW * + C/L 1- MOVE C/L + LOOP DROP ;
+: e>blk SCR @ BLOCK 16 0 DO e-buf  I VW * + OVER C/L 1- MOVE C/L + LOOP DROP ;
+VARIABLE cursor-x    VARIABLE cursor-y
+: del-c   e-buf cursor-y @ VW * + >R  R@ cursor-x @ + DUP 1+ SWAP
+    R@ VW + OVER - MOVE    BL R> VW + 1- C! ;
+
+: CP cursor-x @ ;
+: SET-CURSOR   cursor-x @ cursor-y @  AT-XY ;
+: clamp-x 0 MAX VW 1- MIN cursor-x ;
+: MOVE-X ( WORD STAR)
 DUP ^D = IF  1 ELSE       DUP ^S = IF -1 ELSE
-DUP ^X = IF VW ELSE       DUP ^E = IF 0 VW - ELSE
-DUP ^C = IF VW 8 * ELSE   DUP ^R = IF 0 VW 8 * - ELSE
 DUP ^I = IF  8 ELSE       DUP ^M = IF VW CP - ELSE
-0    THEN THEN THEN THEN THEN THEN THEN THEN CURSOR +! ;
-: EM-C EMIT 1 CURSOR +! ;
+0    THEN THEN THEN THEN
+cursor-x @ + clamp-x ! ;
+: clamp-y 0 MAX height 1- MIN ;
+: MOVE-Y ( WORD STAR)
+DUP ^X = IF 1 ELSE       DUP ^E = IF -1 ELSE
+DUP ^C = IF 8 ELSE   DUP ^R = IF -8 ELSE
+DUP ^M = IF 1 ELSE
+0    THEN THEN THEN THEN THEN
+cursor-y @ + clamp-y cursor-y ! ;
+: EM-C EMIT 1 CURSOR-X +! ;
 : PRINT ( C --C . Print it if printable)
-  DUP $1F $7F WITHIN IF
-  DUP EM-C
-  THEN ;
+  DUP $1F $7F WITHIN IF   DUP EM-C   THEN ;
+: toggle_insert   I-MODE 1 TOGGLE I-MODE @ IF enter_insert_mode ELSE
+    exit_insert_mode THEN ;
+: INSELETING
+      DUP ^H = IF ( RUB-C ) ELSE
+      DUP ^G = IF delete_character  del-c ELSE
+      DUP ^V = IF toggle_insert ELSE
+      THEN THEN THEN ;
 : ROUTE BEGIN KEY
   PRINT
 \ DELSTORING
-\ INSELETING
+ INSELETING
 \ JOINITTING
 \ WORDING
-MOVE-CURSOR
+move-x
+move-y
 SET-CURSOR
 ( DEBUG)
 ESC = UNTIL ;
 : E-S  ( EDIT CURRENT SCREEN )
     1 I-MODE !
 \    FRAME
-    0 CURSOR !   SET-CURSOR
-    PAGE   BLK>V
+    PAGE   BLK>V blk>e
+    0 cursor-x !
+    0 cursor-y !   SET-CURSOR
     ROUTE
 \    EXITING
+   e>blk
 \    AT-END
 \    NO-FRAME
 ;
