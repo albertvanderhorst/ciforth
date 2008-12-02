@@ -86,13 +86,21 @@ CONSTANT escape-fore   CONSTANT escape-back
 VARIABLE I-MODE   0 I-MODE !
 DECIMAL
 80 CONSTANT width
-24 CONSTANT height
+25 CONSTANT height
 width height * CONSTANT size
-CREATE e-buf  size ALLOT
-CREATE l-buf  width ALLOT
+CREATE e-buf  size ALLOT        \ Edit buffer
+CREATE l-buf  width ALLOT       \ line buffer
+\ For LINE return START in e-buf.
 : >l    width * e-buf + ;
+\ Save LINE to l-buf.
 : save  >l l-buf width MOVE ;
+\ Restore LINE from l-buf.
 : restore  >l l-buf SWAP width MOVE ;
+\ Rotate LINEH through LINEL up, within e-buf.
+: roll^ DUP save 2DUP - width * >R >l DUP width + SWAP R> MOVE restore ;
+\ Rotate LINEH through LINEL down, within e-buf.
+: rollv OVER save 2DUP - width * >R DUP >l DUP width + R> MOVE restore DROP ;
+\
 : showl    0 OVER AT-XY  exit_insert_mode   >l width TYPE ;
 \ : showl    0 OVER AT-XY  exit_insert_mode   . 20 SPACES &* EMIT ;
 : BLK>V  SCR @ BLOCK 1024 TYPE ;
@@ -136,7 +144,10 @@ cursor-y @ + clamp-y cursor-y ! ;
 : update_insert I-MODE @ IF enter_insert_mode ELSE exit_insert_mode THEN ;
 : toggle_insert   I-MODE 1 TOGGLE update_insert ;
 : DELSTORING
-    DUP ^Y = IF cursor-y @ save delete_line height 1- DUP restore showl update_insert ELSE
+    DUP ^Y = IF
+    height 1- cursor-y @ roll^   delete_line
+    0 height 1- AT-XY insert_line l-buf width 1- TYPE
+ELSE
     DUP ^P = IF height 1- save insert_line cursor-y @ DUP restore showl update_insert ELSE
     DUP ^U = IF insert_line ELSE
     THEN THEN THEN ;                                 DECIMAL
