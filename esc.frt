@@ -86,6 +86,7 @@ CONSTANT escape-fore   CONSTANT escape-back
 VARIABLE I-MODE   0 I-MODE !
 DECIMAL
 80 CONSTANT width
+20 CONSTANT mh    \ Mid height where lines are lost.
 25 CONSTANT height
 width height * CONSTANT size
 CREATE e-buf  size ALLOT        \ Edit buffer
@@ -148,8 +149,16 @@ cursor-y @ + clamp-y cursor-y ! ;
     height 1- cursor-y @ roll^   delete_line
     0 height 1- AT-XY insert_line l-buf width 1- TYPE
 ELSE
-    DUP ^P = IF height 1- save insert_line cursor-y @ DUP restore showl update_insert ELSE
-    DUP ^U = IF insert_line ELSE
+    DUP ^U = IF
+    mh 1- cursor-y @ rollv
+    0 cursor-y @ AT-XY insert_line height 1- >l width 1- TYPE
+    0 mh AT-XY delete_line
+ELSE
+    DUP ^P = IF
+    height 1- cursor-y @ rollv
+    0 cursor-y @ AT-XY insert_line l-buf width 1- TYPE
+    0 height AT-XY delete_line
+ELSE
     THEN THEN THEN ;                                 DECIMAL
 : INSELETING
       DUP ^H = IF delete_character  del-c ELSE
