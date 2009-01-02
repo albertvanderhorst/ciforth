@@ -686,6 +686,38 @@ DECIMAL
 
 
 
+( SQRT x^x                               ) \ AvdH A8nov09
+\ For N return FLOOR of the square root of n.
+: SQRT  DUP >R 10 RSHIFT 1024 MAX  \ Minimize iterations.
+   BEGIN R@ OVER / OVER + 1 RSHIFT  2DUP > WHILE
+    SWAP DROP REPEAT   DROP RDROP ;
+VARIABLE m ( Modulo number)
+\ Multiply A and B modulo ``m'' , return product of a and b.
+: *MOD   M* m @ SM/REM DROP ;
+\ A step of Russian peasant, for A B and C: return A B en C.
+: reduce_1-  1- >R >R    R@ *MOD   R> R> ;
+\ A step of Russian peasant, for A B and C: return A B en C.
+: reduce_2/   2/ SWAP   DUP *MOD   SWAP ;
+\ Calculate B^C mod MOD by Russian peasant method. Return IT.
+: x^x    m @ >R m !   1 ROT ROT
+   BEGIN   DUP 1 AND IF   reduce_1-   THEN reduce_2/
+      DUP 0= UNTIL   2DROP   R> m ! ;
+( PRIME?                                ) \ AvdH A8nov30
+\ For N return: "It IS prime" ( Cases 0 1 return FALSE)
+: PRIME?
+  DUP 4 < IF 1 > EXIT THEN     \ 0 1 2 3
+  DUP 1 AND 0= IF DROP 0 EXIT THEN  \ Even non-prime.
+  3 BEGIN
+    2DUP /MOD SWAP
+    0= IF DROP 2DROP 0 EXIT THEN
+    OVER < IF 2DROP -1 EXIT THEN
+    2 +
+    AGAIN
+;
+
+
+
+
 ( -LEADING DROP-WORD                   ) \ AvdH A3mar21
 WANT COMPARE
  : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
@@ -1018,7 +1050,7 @@ WANT T[
 : +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
 : REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
 : UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
-
+: AGAIN           POSTPONE AGAIN     POSTPONE T[ ; IMMEDIATE
 
 
 
@@ -1432,12 +1464,12 @@ WANT OLD:    WANT INSTALL-TRAPS
 : NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
   OLD: THRU ;
 \ Install and de-install the alternative ``OK'' and traps
-: DO-DEBUG   INSTALL-TRAPS
-   'NEW-OK >DFA @   'OK >DFA !
+: DO-DEBUG   INSTALL-TRAPS   'NEW-OK >DFA @   'OK >DFA !
    'NEW-THRU >DFA @   'THRU >DFA ! ;
 : NO-DEBUG   INSTALL-NO-TRAPS  'OK RESTORED
  'WARM RESTORED 'THRU RESTORED ;
-
+: break   SAVE  BEGIN '(ACCEPT) CATCH DUP -32 <> WHILE ?ERRUR
+    SET-SRC INTERPRET REPEAT   DROP RESTORE ; \ End by ^D
 ( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11
 WANT RESTORED HEX
 \ Characters ONE and TWO are equal, ignoring case.
@@ -2046,7 +2078,7 @@ CREATE cmdbuf 1000 ALLOT
 
 
 
-( cat cp echo diff grep list ls make man rm ee l unix) CF: ?LI
+( cat cp echo diff grep more ls make man rm ee l unix) CF: ?LI
 WANT OS-IMPORT ( and cdED )          \ AvdH A30325
 "cat    "   OS-IMPORT cat
 : cd NAME cdED ;      \ Change directory to "SC"
@@ -2054,7 +2086,7 @@ WANT OS-IMPORT ( and cdED )          \ AvdH A30325
 "echo   "   OS-IMPORT echo
 "diff   "   OS-IMPORT diff
 "grep   "   OS-IMPORT grep
-"list   "   OS-IMPORT list
+"more   "   OS-IMPORT more
 "ls     "   OS-IMPORT ls
 "make   "   OS-IMPORT make
 "man    "   OS-IMPORT man
@@ -2078,7 +2110,7 @@ WANT OS-IMPORT       HEX
 ""          OS-IMPORT !!
 "A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
 DECIMAL
-( cat ECHO MORE list DIR COPY DEL CD edit ) CF: ?WIMS  \ AvdH
+( cat ECHO MORE more DIR COPY DEL CD edit ) CF: ?WIMS  \ AvdH
 WANT OS-IMPORT       HEX
 "TYPE   "   OS-IMPORT cat   \ type is really embarassing.
 "ECHO   "   OS-IMPORT ECHO
@@ -2094,7 +2126,7 @@ WANT OS-IMPORT       HEX
 
 
 DECIMAL
-( DEVELOP EDITOR ME ) CF: ?HS    \ AvdH A1oct05
+( DEVELOP EDITOR ME ) CF: ?WIMS    \ AvdH A9oct05
 
 
 
