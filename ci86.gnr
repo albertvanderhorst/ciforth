@@ -3590,7 +3590,7 @@ the ISO standard has no way to address bytes.}})
 },{{CELLS}},
 {{123 CHARS .},{123}},
 enddoc)
-_HEADER({CHARS}, {CHARS}, {DOCOL}, , {B_IMMED})
+_HEADER({CHARS}, {CHARS}, {DOCOL} )
         DC      SEMIS
 _C
 worddoc( {MEMORY},{ALIGN},{align},{ ---},{ISO},
@@ -3603,7 +3603,7 @@ _ALIGNED_({
 {{ 1 ALLOT ALIGN HERE 0 CELL+ MOD . },{0}}
 }),
 enddoc)
-_HEADER({ALIGN}, {LALIGN}, {DOCOL}, , {B_IMMED})
+_HEADER({ALIGN}, {LALIGN}, {DOCOL} )
 _ALIGNED_({
         DC      LDP, FETCH
         DC      ALIGNED
