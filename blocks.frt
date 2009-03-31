@@ -702,21 +702,21 @@ VARIABLE m ( Modulo number)
 : x^x    m @ >R m !   1 ROT ROT
    BEGIN   DUP 1 AND IF   reduce_1-   THEN reduce_2/
       DUP 0= UNTIL   2DROP   R> m ! ;
-( PRIME?                                ) \ AvdH A8nov30
+( PRIME? FACTOR GCD                        ) \ AvdH A9feb06
+\ For N and HINT return FACTOR >= hint, maybe n.
+: FACTOR   BEGIN   2DUP /MOD SWAP
+    0= IF DROP SWAP DROP EXIT THEN
+    OVER < IF DROP EXIT THEN
+2 + AGAIN ;
+
 \ For N return: "It IS prime" ( Cases 0 1 return FALSE)
 : PRIME?
   DUP 4 < IF 1 > EXIT THEN     \ 0 1 2 3
   DUP 1 AND 0= IF DROP 0 EXIT THEN  \ Even non-prime.
-  3 BEGIN
-    2DUP /MOD SWAP
-    0= IF DROP 2DROP 0 EXIT THEN
-    OVER < IF 2DROP -1 EXIT THEN
-    2 +
-    AGAIN
-;
+  DUP 3 FACTOR = ;
 
-
-
+\ For M N , return their GCD.
+: GCD   BEGIN OVER MOD DUP WHILE SWAP REPEAT DROP ;
 
 ( -LEADING DROP-WORD                   ) \ AvdH A3mar21
 WANT COMPARE
@@ -1006,7 +1006,7 @@ CR ." FORGET ``MEASURE-PRIME'' Y/N" KEY DUP EMIT
 &Y <>  ?LEAVE-BLOCK
   FORGET TASK
 
-( FAR-DP SWAP-DP scratch_dictionary_area ) \ AvdH A1oct21
+( SWAP-DP T] T[ scratch_dictionary_area ) \ AvdH A9mar31
 VARIABLE FAR-DP         \ Alternative DP
 DSP@ 1 RSHIFT HERE 1 RSHIFT + ALIGNED FAR-DP !
 \ Use alternative dictionary area or back.
@@ -1014,33 +1014,17 @@ DSP@ 1 RSHIFT HERE 1 RSHIFT + ALIGNED FAR-DP !
 \ Remove all words from the scratch area.
 : TRIM   HERE 'FORGET-VOC FOR-VOCS DROP ;
 
-
-
-
-
-
-
-
-
-( T] T[ ) \ AvdH A1oct04
-WANT SWAP-DP
-
-\ Compile at temporary place : remember old HERE and STATE.
+\ While compiling, T[ just throws away the state pushed by T].
+\ Interpreting:
+\ Start compiling at temporary place : return START and STATE.
 : T] STATE @ 0= IF SWAP-DP HERE THEN STATE @ ] ;
-
-\ Execute code at old HERE , restore STATE and dictionary.
+\ Execute code at START dropping STATE, restore dictionary.
 : T[ 0= IF POSTPONE (;) SWAP-DP POSTPONE [ >R THEN ; IMMEDIATE
-
-
-
-
-
-
 
 
 ( NEW-IF interpreting__control_words ) \ AvdH A1oct04
 : NEW-IF ;
-WANT T[
+WANT T]
 : IF           T] POSTPONE IF                    ; IMMEDIATE
 : DO           T] POSTPONE DO                    ; IMMEDIATE
 : ?DO          T] POSTPONE ?DO                   ; IMMEDIATE
