@@ -2455,10 +2455,11 @@ CODE_HEADER({EXIT},{EXIT})
         _NEXT
 _C
 worddoc( {CONTROL},{CO},{coroutine},{},{},
-{ Return suspend interpretation of the current definition,
+{ Return to the caller,
+suspending interpretation of the current definition,
 such that when the caller exits, this definition is resumed.
-The return
-stack must not be engaged, such as between forthcode({>R}) and
+The return stack must not be engaged,
+such as between forthcode({>R}) and
 forthcode({R>}) , or forthcode({DO}) and forthcode({LOOP}) .
 },
 {{EXIT}},
