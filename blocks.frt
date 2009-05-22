@@ -654,11 +654,11 @@ WANT COMPARE         WANT MERGE-SORT
 
 : SORT-VOC >WID SORT-WID ;
 
-( CRC-MORE CRC ) CF: ?32 \ AvdH
+( CRC-MORE CRC ) CF:                    \ AvdH
+1 CELLS 4 < ?LEAVE-BLOCK
 WANT BOUNDS   WANT NEW-IF    HEX
 \ Well the polynomial
 EDB8,8320 CONSTANT CRC32_POLYNOMIAL
-
 \ Auxiliary table with values for single bytes.
 CREATE CRCTable
 100 0 DO   I 8 0 DO
@@ -974,7 +974,7 @@ WANT TICKS   WANT TICKS-PER-SECOND
 
 
 
-( MARK-TIME .mS .uS ELAPSED ) \ AvdH A2oct21
+( MARK-TIME .mS .uS ELAPSED ) ?32 \ AvdH A2oct21
 WANT TICKS   WANT TICKS-PER-SECOND
 DECIMAL
 \ Mark a point in time by leaving its tick COUNT.
@@ -1171,12 +1171,12 @@ WANT Z$@   WANT COMPARE   WANT ENV
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
  : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
- SM 48 + CONSTANT SIZE^  \ Where to patch for GROW.
+ SM 44 + CONSTANT D-SIZE  \ Where to patch for dictionary.
+ SM 48 + CONSTANT G-SIZE  \ Where to patch for GROW.
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM \ Save the system in a file with NAME .
-  0 SM 20 + !   0 SM 30 + ! \ Kill sections
-  HERE SM - SM 44 + !  \ Fill in file size = memory size
+  HERE BM - D-SIZE !  \ Fill in dict size (.text)
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
@@ -1187,12 +1187,12 @@ WANT Z$@   WANT COMPARE   WANT ENV
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
  : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
- SM 20 + @ SM + 20 + CONSTANT SIZE^  \ Where to patch size.
+ SM 20 + @ SM + 20 + CONSTANT D-SIZE \ Dictionary size.
+ D-SIZE 8 + CONSTANT G-SIZE
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM \ Save the system in a file with NAME .
-  0 SM 28 + !  0 SM 3C + C!  0 SM 3D + C! \ Kill sections
-  HERE SM -  SIZE^ !  \ Fill in file size = memory size
+( 0 SM 28 + ! ( Kill sections) HERE BM - D-SIZE ! ( dict size)
    U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
@@ -1212,7 +1212,7 @@ VARIABLE HEAD-DP  \ Fill in pointer
 : EXEHEADER    0  HEAD-DP !  5A4D W,   0 W,   SIZE  200 / W,
   0 W,   10 W,   10 W,   10 W,   0 W,   STACK-OFFSET 100 -  W,
   HEAD-DP @  0 W,   100 W,   -10 W,   SIZE W,   0 W, ;
- PREV CONSTANT SIZE^  \ Give -g a harmless address.
+ PREV CONSTANT G-SIZE  \ Give -g a harmless address.
  BM CONSTANT SM          \ Start for -g.
 ( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH A7feb28
 \ Fill in checksum at the required POSITION in the header.
