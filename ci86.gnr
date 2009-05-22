@@ -10298,13 +10298,13 @@ INITDP:                 _C{  It may be that it is not consecutive with TASK.}
                         _C{  Because of bad linking, resulting in a unusable Forth.}
         BUFFERSIZE      EQU  (KBBUF+2*CW)*NBUF
 
-
-        _RESB( EM - FORTHSIZE - TAS - US - STACKSIZE - BUFFERSIZE )
+_C{ For more task the TAS area is duplicated; the remainder is the same.}
+        _RESB( EM - FORTHSIZE - TAS - BUFFERSIZE )
+_C{ INITR1:                         Return stack for next task}
+_C          _RESB( US )             _C{  For next task, if present. }
 _C{ The following framework may be repeated for more tasks.}
 _C{ It is floating, i.e. it may be shifted up and down, in order}
 _C{ to have INITR0 at a STACKSIZE boundary. }
-INITR1:                         _C{ Return stack for next task}
-        _RESB( US )             _C{  For next task, if present. }
         _RESB( STACKSIZE - US )   _C{ Data stack, only limited if more tasks present.}
 INITS0:                         _C{ Grows down.}
 STRTIB: _RESB( TIBSIZE )    _C{ Terminal input buffer.}

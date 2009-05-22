@@ -11,10 +11,8 @@ define({_HEADER_ASM},{#
 # This source can be assembled using versions better than 2.13.
 # This file can be assembled and linked in the following way:
 #       as lina.s
-#       ld -N a.out -o lina
-# Optionally follow by
-#       strip $@ -s -R .data
-# to strip more irrelevant crap.
+#       ld -s -N a.out -o lina
+# The -s (strip) may not be necessary.
 
 .Intel_syntax prefix
 })dnl

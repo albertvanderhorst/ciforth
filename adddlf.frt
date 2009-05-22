@@ -2,7 +2,8 @@
 \ $Id$
 : \D ( POSTPONE \ ) ;  IMMEDIATE
 
-\D : ID.. DUP IF ID. ELSE DROP "(null)" TYPE THEN ;
+
+\D : ID... DUP IF ID. ELSE DROP "(null)" TYPE THEN ;
 
 \ Facility for filling in double link fields in Forth
 
@@ -11,7 +12,7 @@ REQUIRE SORT-VOC
 'FORTH SORT-VOC
 REQUIRE ALIAS
 REQUIRE H.
-'>SFA ALIAS >XFA
+\ '>SFA ALIAS >XFA
 
 \ For DEA, return the NUMBER of dea's, including itself,  after it
 \ in the same dictionary,
@@ -23,8 +24,8 @@ REQUIRE H.
 \ FIXME, not yet For DEA and N , put the end-sentinel in the last xfa (there is only one.)
 \ For DEA and N , copy lfa to xfa.
 : links-same   1 <> ABORT" only length 1 allowed."
-\      DUP >LFA @ SWAP >XFA ! ;
-   0 >XFA ! ;
+      DUP >LFA @ SWAP >XFA ! ;
+\   0 SWAP >XFA ! ;
 
 \ Split DEA COUNT into DEA1 COUNT1 DEA2 COUNT2 approximately half the vocs.
 : VOC/2 DUP 2/ DUP >R - 2DUP >LFAS R> ;
@@ -40,9 +41,10 @@ REQUIRE H.
     BEGIN DUP WHILE DUP 1 = IF links-same ELSE VOC/2 !LINK! THEN REPEAT DROP ;
 
 \ For DEA and N , copy the lfa to the xfa.
-: dump 1- 0 ?DO DUP >XFA @ ID..  >LFA @ LOOP >XFA @ ID.. CR CR ;
+: dump 1- 0 ?DO DUP >XFA @ ID...  >LFA @ LOOP >XFA @ ID... CR CR ;
 
-: dump1 .S 1- .S 0 .S ?DO .S DUP .S >LFA .S @ .S ID.. .S  .S >LFA .S @ .S LOOP .S >LFA .S @ .S ID.. .S CR .S CR .S ;
+: dump1 .S 1- .S 0 .S ?DO .S DUP .S >LFA .S @ .S ID... .S  .S >LFA .S @ .S LOOP .S >LFA .S @ .S
+ID... .S CR .S CR .S ;
 
 
 \D CREATE AAP CREATE NOOT CREATE MIES  CREATE HUIS
@@ -82,10 +84,10 @@ REQUIRE COMPARE
     MATCH3 0 > WHILE  \ While lexographically lower
         DUP >R >XFA @  \ Attempt far link, but keep backtrackpointer
         MATCH3 0< IF   \ Far link is lexicgraphically higher?
-\D              DUP .S ID.. "FAR LINK REJECTED: NAME TOO LOW " TYPE
+\D              DUP .S ID... "FAR LINK REJECTED: NAME TOO LOW " TYPE
                 DROP R> >LFA @    \ Backtrack
         ELSE
-\D              DUP .S DUP IF ID.. " FOLLOWING FAR LINK " TYPE
+\D              DUP .S DUP IF ID... " FOLLOWING FAR LINK " TYPE
 \D      ELSE
 \D              DROP " AT END OF LIST (null) " TYPE THEN
                 RDROP          \ Drop backtrack pointer
@@ -103,7 +105,7 @@ REQUIRE COMPARE
 
 \D REQUIRE DO-DEBUG DO-DEBUG
 \D 'FORTH FILL-XFA
-\D "DROP" 'FORTH >WID >LFA @ FIND2   ID.. CR
+\D "DROP" 'FORTH >WID >LFA @ FIND2   ID... CR
 \D "POPE" 'FORTH >WID >LFA @ FIND2   . CR
-\D "!" 'FORTH >WID >LFA @ FIND2      ID.. CR
+\D "!" 'FORTH >WID >LFA @ FIND2      ID... CR
 \D "~~~~" 'FORTH >WID >LFA @ FIND2   . CR
