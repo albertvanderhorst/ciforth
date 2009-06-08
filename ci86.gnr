@@ -103,7 +103,10 @@ _ENDCOMMENT
 _C{ ########################################################################################}
 _C{                       PREPARATION (no code)}
 _C{ ########################################################################################}
-FIGREL  EQU     4       _C{ FIG RELEASE #}
+dnl 16 bits is default for the boot code.
+_BITS16_({include(width16.m4)})
+
+FIGREL  EQU     5       _C{ FIG RELEASE #}
 FIGREV  EQU     0       _C{ FIG REVISION #}
 USRVER  EQU     0      _C{ USER VERSION NUMBER, a digit now}
 _C
@@ -1031,42 +1034,14 @@ ENDDPMI:
 _C{ ######################### DPMI END ###############################################################}
 })_C{}_END_({_HOSTED_DPMI_})
 
-_BITS32_({
-_C{************************}
-dnl It doesn't make sense to have duplicate code for 16/32 bits
+dnl It doesn't make sense to have duplicate code for 16/32/64 bits
 dnl where m4 can handle it this easily.
-SET_32_BIT_MODE         _C Assembler directive
-define({DC},{DD})dnl
-define({AX},{EAX})dnl
-define({BX},{EBX})dnl
-define({CX},{ECX})dnl
-define({DX},{EDX})dnl
-define({DI},{EDI})dnl
-define({SI},{ESI})dnl
-define({BP},{EBP})dnl
-define({SP},{ESP})dnl
-define({LODSW},{LODSD})dnl Only instruction to be changed.
-define({WORD},{LONG})dnl
-_C{************************}}
-,{dnl})
-_BITS64_({
-_C{************************}
-dnl It doesn't make sense to have duplicate code for 16/32 bits
-dnl where m4 can handle it this easily.
-SET_32_BIT_MODE         _C Assembler directive
-define({DC},{DQ})dnl
-define({AX},{RAX})dnl
-define({BX},{RBX})dnl
-define({CX},{RCX})dnl
-define({DX},{RDX})dnl
-define({DI},{RDI})dnl
-define({SI},{RSI})dnl
-define({BP},{RBP})dnl
-define({SP},{RSP})dnl
-define({LODSW},{LODSQ})dnl Only instruction to be changed.
-define({WORD},{QUAD})dnl
-_C{************************}}
-,{dnl})
+dnl 16 bits was default for the startup code, now overrule.
+_BITS32_({SET_32_BIT_MODE         _C Assembler directive},{dnl})
+_BITS32_({include(width32.m4)},{dnl})
+_BITS64_({SET_64_BIT_MODE         _C Assembler directive},{dnl})
+_BITS64_({include(width64.m4)},{dnl})
+
 _SWITCH_({
         CLI     _C{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
@@ -8504,7 +8479,6 @@ _C
 _C{------------------------------------}
 _C{       SYSTEM DEPENDANT DISK I/O}
 _C{------------------------------------}
-define({_FILENAMELENGTH_M4_},_BITS16_(30)_LARGE_(252))
 worddoc( {BLOCKS},{DISK-ERROR},{disk_error},{--- addr},{},
 {_PC_({
 {Leave the address} forthvar({addr}) {of a variable containing
@@ -8529,7 +8503,7 @@ worddoc( {BLOCKS},{BLOCK-FILE},{block_file},{---addr},{},
 the name of a forthdefi({library file})
 in which forthdefi({blocks}) are (to be) allocated.
 The name may contain a path and be at most}
-_FILENAMELENGTH_M4_ {characters long.
+M4_FILENAMELENGTH {characters long.
 The default name is forthsamp({forth.lab}) .
 This name may be changed and is used by the
  forthcode({BLOCK-INIT}) command.
@@ -8538,7 +8512,7 @@ This name may be changed and is used by the
 enddoc)
 _HEADER({BLOCK-FILE},{BLFL},{DOVAR}, )
         _STRING({forth.lab})
-        _RESB(_FILENAMELENGTH_M4_-9)               _C{ Allow for some path}
+        _RESB(M4_FILENAMELENGTH-9)               _C{ Allow for some path}
 worddoc( {BLOCKS},{BLOCK-HANDLE},{block_handle},{---n},{},
 {Leave a file handle in forthvar({n}) .
 If it is negative there is no block file open,
@@ -8661,7 +8635,7 @@ or shell.
 This name may be changed an is used by the
  forthcode({SYSTEM}) command.
 The name may contain a path and be at most}
-_FILENAMELENGTH_M4_ {characters long.
+M4_FILENAMELENGTH {characters long.
 _HOSTED_LINUX_({ The default name is forthsamp({/bin/sh}) .})
 _PC_({ The default name is forthsamp({C:\COMMAND.COM}) .
 256 bytes after forthcode({SHELL})) are reserved for
@@ -8674,7 +8648,7 @@ _HEADER({SHELL},{SHELL},{DOVAR}, )
 {        _STRING({/bin/sh})})
         _PC_(
 {        _STRING({C:\COMMAND.COM})})
-        _RESB(_FILENAMELENGTH_M4_-9)               _C{ Allow for some path}
+        _RESB(M4_FILENAMELENGTH-9)               _C{ Allow for some path}
 _PC_({  _RESB(0x100)     _C{ Double serve as stack at start up. }})
 _C
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc ---},{ISO},
@@ -8805,7 +8779,7 @@ _HOSTED_DPMI_(
         DC      FMOVE
         DC      ZERO, LIT, SHELL + CW
         DC      LIT, Save_DS_PR, FETCH, OVER
-        DC      LIT, _FILENAMELENGTH_M4_
+        DC      LIT, M4_FILENAMELENGTH
         DC      FMOVE                         }) _END_({_HOSTED_DPMI_})
         DC      SHELL, CELLP, X, LIT, LOADEXEC
         DC      LIT, 0x4B00, BDOSN

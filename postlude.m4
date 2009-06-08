@@ -123,15 +123,17 @@ _HOSTED_({_RESPECTDOS_( {errprint({Respecting dos makes no sense for a hosted sy
 dnl immediate consequences
 _SOURCEFIELD_({define({M4_HS},M4_HS+1)})dnl
 _EXTRAFIELD_({define({M4_HS},M4_HS+1)})dnl
-_BITS16_({define({M4_CELLWIDTH}, 2)})
 _BITS16_({define({M4_INITDP}, {TEXTEND})})
 dnl must be overruled after inclusion of postlude.4m
 _HOSTED({_LARGE_({define({M4_NBUF}, 16)})})
 _HOSTED({_SWITCH_({_LARGE_({define({M4_INITDP},{0x110000})})})})
 _LARGE_({define({M4_MAXWORDLIST}, 16)})
+_BITS16_({define({M4_FILENAMELENGTH},{30})})
+_LARGE_({define({M4_FILENAMELENGTH},{252})})
 
-_BITS16_({include(width16.m4)})
-_BITS32_({include(width32.m4)})
-_BITS64_({include(width64.m4)})
+_BITS16_({define({M4_CELLWIDTH}, 2)})
+_BITS32_({define({M4_CELLWIDTH}, 4)})
+_BITS64_({define({M4_CELLWIDTH}, 8)})
+
 include(namescooked.m4)
 divert{}dnl

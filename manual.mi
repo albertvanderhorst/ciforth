@@ -744,10 +744,12 @@ forthsamp({ "mysrc.frt" INCLUDED })
 forthbreak
 })forthxref(Manual) Section Getting Started.
 
-386 and a 8086
-Forth assemblers are available in forthfile({forth.lab}).
+A Pentium 32 and a 8086
+Forth assembler are available in forthfile({forth.lab}).
 They are loaded in accordance with the system that is run.
-The register used by thisforth are HIP, SPO, RPO and WOR.
+The registers used by thisforth are called HIP, SPO, RPO and WOR.
+The mapping on actual processor registers is documented in the
+source.
 
 It is essential that you regard thisforth as just a way to get started
 with Forth.
