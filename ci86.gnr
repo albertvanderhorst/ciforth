@@ -2758,7 +2758,7 @@ CODE_HEADER({C@},{CFET})
 _C
 worddocsafe( {MEMORY},{2@},{two_fetch},{addr--- x1 x2},{ISO},
 {Leave a pair of _BITS_ bits values forthsamp({x1}) forthsamp({x2}) from
-consequitive cells at forthvar({addr}) . forthsamp({x2}) is fetched from
+consecutive cells at forthvar({addr}) . forthsamp({x2}) is fetched from
 the lowest address. },{{2!},{@},{C@}},
 { {-23. PAD 2! PAD 2@ D.},{-23} },
 enddoc)
@@ -3989,7 +3989,7 @@ and it is remembered that this is the original place where the
 exception originated.
 If the exception is never caught, an error message is displayed
 using forthcode({ERROR}) .
-All errors signalled by the kernel go
+All errors signaled by the kernel go
 through this word, allowing to catch
 dnl The following may be a design error
 e.g. errors in accessing the block file.
@@ -4588,7 +4588,7 @@ _HEADER({HOLD},{HOLD},{DOCOL})
 _C
 worddoc( {DICTIONARY},{PAD},{pad},{--- addr},{ISO,FIG,L0},
 {Leave the address of the text output buffer, which is a fixed offset
-above forthcode({HERE}). The area growing downword from forthcode({PAD}) is used
+above forthcode({HERE}). The area growing downward from forthcode({PAD}) is used
 for numeric conversion.
 },{},
 {{4321 PAD ! PAD @ .},{4321 } },
@@ -5143,7 +5143,7 @@ contain a same pointer,
 to the area owned by this header,
 i.e. immediately following the completed header _VERBOSE_({{as
 appropriate for a low level (assembler) definition}}).
-The flag and link fields are intialised to
+The flag and link fields are initialised to
 zero _VERBOSE_({{, so not }forthcode({HIDDEN}){}}).
 The name forthvar({sc}) is layed down in the dictionary before
 the header and filled in into the name field.
@@ -6267,7 +6267,7 @@ correspond with lines and the offset
 may be positive or negative.
 forthsamp({0 MESSAGE}) prints the first line of this screen.
 _VERBOSE_({{Traditionally this was screen 4, but the negative
-Unix error numbers makes this unfeasible.}})
+Unix error numbers makes this infeasible.}})
 },{{C/L},{MESSAGE}},
 {{HEX ERRSCR ?},{30}},
 enddoc)
@@ -6282,7 +6282,7 @@ the text of line
 forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
 positive or negative and beyond just screen forthcode({ERRSCR}).
 A certain range around 0 is reserved.
-The messages with smalll positive offset contain ciforth error messages.
+The messages with small positive offset contain ciforth error messages.
 The messages with small negative offset contain
 the strings belonging to the return values for _HOSTED_X_({_OS_ system calls}) _PC_({BDOS calls}).
 _VERBOSE_({{
@@ -9446,9 +9446,9 @@ addr n --- (compile)},{NISO,I,C2,L0},
 It behaves like forthcode({DO}),
 with the exception that if forthvar({n1}) is less or equal to forthvar({n2})
 the loop body is not executed.
-This is intended to supress the unwanted behaviour of looping
+This is intended to suppress the unwanted behaviour of looping
 through the whole number range.
-ciforth deviates from ISO in that it also supresses the unwanted
+ciforth deviates from ISO in that it also suppresses the unwanted
 behaviour of looping through almost the whole number range for
 an input of e.g. forthexample({1 2})
 .
@@ -10435,7 +10435,7 @@ of data on the forthdefi({data stack}) .
 The necessity for this arise, because the data you want to feed to a Forth word
 is not directly accessible, i.e. on top of the stack.
 It is also possible that  you need the same data twice, because you have to feed
-it to two different words's.
+it to two different words.
 Design your word such that you need them as little as possible,
 because they are confusing.},
 {},{},{},{}, {}, enddoc)
@@ -10495,7 +10495,7 @@ On ciforth the forthcode({/}) is a forthdefi({symmetric division}), i.e.
 forthsamp({-n m /}) give the same result as forthsamp({n m /}), but negated.
 The foregoing rule now has the consequence that forthsamp({m MOD})
 has forthsamp({2|m|-1}) possible outcomes instead of forthsamp({|m|}) .
-This is very worrysome for mathematicians, who stick to the
+This is very worrisome for mathematicians, who stick to the
 rule that forthsamp({m MOD}) has forthsamp({|m|}) outcomes:
 forthsamp({0 ... |m|-1}), or forthsamp({-|m|+1 ... 0 }) for
 negative numbers. (forthdefi({floored division})). _BITS16_(
