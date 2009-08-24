@@ -479,20 +479,23 @@ where you want your code to run on.
 By using forthcode({CELL+}) it is easy to keep your code 16/32 bit clean.
 This means that it runs on 16 and 32 bits systems.
 @section Compatibility with thisforth 4.0.x
-Since version 4.2 changes have been made to increase compatibility
+Since version 5.x changes have been made to increase compatibility
 with existing practice.
 By invoking forthcode({WANT _legacy_}) you load a screen that
 forces compatibility with 4.0 and 4.1 versions.
 You will notice that existing programs either invoke this, or have
 been reworked to not need legacy items.
-In either case, those programs have been tested with version 4.2.
+In either case, those programs have been tested with version 5.x
 
 What the legacy items are can be seen from the screen that has
 forthcode({_legacy_}) in its index line.
-In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY})
-are to be found in that screen.
+In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY}) are
+to be found in that screen.
+Note that by using legacy items your code may be in conflict with
+upcoming standards.
 
-The names forthcode({NAMESPACE WANT}) are proposed for standardisation.
+The names forthcode({VOCABULARY}) and forthcode({REQUIRE}) are
+being proposed for standardisation.
 The ciforth definitions are not compatible with this proposal.
 So the forthcode({REQUIRE}) of older versions is now called forthcode({WANT}).
 Likewise forthcode({REQUIRED}) is renamed to forthcode({WANTED}).
