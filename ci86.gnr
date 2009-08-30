@@ -10115,10 +10115,8 @@ INDE1:  DC      CR,IDO
         DC      LIT,3
         DC      DOTR,SPACE
         DC      ZERO,IDO
-        DC      PLINE, LTYPE, KEYQ
-        _0BRANCH(INDE2)
-        DC      LLEAV
-INDE2:  _LOOP(INDE1)
+        DC      PLINE, LTYPE
+        _LOOP(INDE1)
 INDE9:
         DC      SEMIS
 _C
@@ -10477,11 +10475,11 @@ worddocchapter({MISC},{ },
 {The wordset forthsamp({MISC}) contains words that defy categorisation.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({MULTIPLYING},{ },
-{The _BITS32_(original) 16 bits Forth's have problems with overflow (forthpxref({OPERATOR})).
+{The _LARGE_(original) 16 bits Forth's have problems with overflow (forthpxref({OPERATOR})).
 Operators with intermediate results of double precision, mostly scaling operators,
 solve this and are
-present in the forthsamp({MULTIPLYING}) wordset. _BITS32_({In this 32-bit Forth
-you will have less need, but scaling remain tricky.}).
+present in the forthsamp({MULTIPLYING}) wordset. _LARGE_({{In this _BITS_ bit Forth
+you will have less need, but scaling remains tricky.}}).
 Formatting is done with forthdefi({double})'s exclusively, and relies
 on this wordset. Operators with mixed precision and unsigned operators
 allow to build arbitrary precision operators from them in forthdefi({high level}) code.},
