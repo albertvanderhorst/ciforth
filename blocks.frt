@@ -1548,7 +1548,7 @@ WANT H.
     ELSE
         ." FREE " DROP
     THEN ;
-: .BL 'SHOW-BLOCK >CFA FOR-BLOCKS ;
+: .BL 'SHOW-BLOCK FOR-BLOCKS ;
 
 ( DB-INSTALL DB-UNINSTALL Show_block_properties) \ AvdH A1oc08
 WANT ALIAS
@@ -1589,7 +1589,7 @@ WANT SEE
  : CFOF ( --N Get dea of word following )
     NAME FOUND ;
 
- : ID.. CFA> ID. ; ( cfa--. Print a words name )
+ : ID.. ID. ; ( dea --. Print a words name )
  : ID.+ $@ ID.. ; ( dip -- dip' Print a words name )
  : SEL@    ( N--M,F F="value N present in table" )
     ( if F then M is vector address else M=N)
@@ -1613,7 +1613,7 @@ WANT SEE
     NAME FOUND DUP 0= 11 ?ERROR CRACKED ;
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
- : ?Q KEY? IF QUIT THEN ; ( NOODREM)
+
 ( SEE   3 ) \ AvdH A1MAY17
 ( DEA--DEA Get the DEA of the word defined after the CFA one)
 : NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
@@ -1630,30 +1630,30 @@ BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP CRACKED REPEAT DROP ;
 DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
 \ For DEA: it IS a header (heuristically).
  : HEAD? DUP >DFA @ SWAP  >PHA = ;
-( SEE   4 ) \ AvdH A0apr11
- : BY ( DEA --. the CFA word is decompiled using : )
-   T, CFOF T, ; ( a word from the input stream )
- ( Example of a defining word decompilation)
- ( It is done by examples of the defined words )
- : -co DUP CFA> >DFA @ CR H.. ." CONSTANT " ID.. CR ;
-        CFOF BL @ BY -co
- : -va DUP CFA> >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
-    ID.. CR ;              CFOF PREV @ BY -va
- : -us DUP CFA> >DFA C@ CR B.. ."  USER " ID.. CR ;
-        CFOF FENCE @ BY -us
+( SEE   4 ) \ AvdH A9aug30
+\ all -words: ( p --p' ) decompile pointer
+\ Decompile when finding DEA by "name"
+ : BY   T, CFOF T, ;
+\ Decompile words with like cfa of DEA by "name"
+ : EX-FOR   >CFA @    T, CFOF T, ;
+ : -co DUP >DFA @ CR H.. ." CONSTANT " ID.. CR ;
+        CFOF BL EX-FOR -co
+ : -va DUP >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
+    ID.. CR ;              CFOF PREV EX-FOR -va
+ : -us DUP >DFA C@ CR B.. ."  USER " ID.. CR ;
+        CFOF FENCE EX-FOR -us
 ( Crack item at POINTER. Leave incremented POINTER , GOON flag)
- : ITEM DUP @ SEL@ ( Something special ?)
-     IF EXECUTE ( The special) ALIGNED ELSE
+ : ITEM DUP @ SEL@ IF EXECUTE ( The special) ALIGNED ELSE
         DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
-( SEE   5 ) \ AvdH A20MAR21
-: CRACK-CHAIN CR BEGIN ?Q DUP @ LIT (;) <>
+( SEE   5 ) \ AvdH A9aug30
+: CRACK-CHAIN CR BEGIN DUP @ LIT (;) <>
 ( >R DUP LIM @ < R> AND )  WHILE ITEM REPEAT DROP ;
  ( Decompilation of special high level words)
  : -hi CR ." : " DUP DUP ID.. >DFA @ CRACK-CHAIN
 CR ." ;"  DUP
 ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  PREFIX" THEN
-CR ;         CFOF TASK @  BY -hi
+CR ;         CFOF TASK EX-FOR -hi
  ( for all -words: 1/1 pointer before afd after execution)
  : -con CELL+ DUP @ H.. CELL+ ;
  : -dea CELL+ DUP @ &' EMIT ID.. CELL+ ;
@@ -1684,7 +1684,7 @@ make decompile pointer point to exit!)
      BEGIN DUP HEAD? 0= WHILE 0 CELL+ - REPEAT ;
 : TO-DOES   >DFA @ @ ; \ For DEA: hl POINTER in ``DOES>'' code.
  : -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID.. ID.. CR ;
-        CFOF FORTH @ BY -dd
+        CFOF FORTH EX-FOR -dd
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 : .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
 : -target DUP ( IP -- IP ,print comment about current jump)
