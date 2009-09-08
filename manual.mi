@@ -420,6 +420,11 @@ The forthcode({>IN}) that is there is a fake, that can only be
 read, not changed.
 }) dnl
 forthitem
+Counting in do loops do not wrap through the boundary between
+negative and positive numbers.
+This is not useful on Forths of 32 bits and higher;
+for compatibility among {ciforths} 16 bit {ciforths} don't wrap either.
+forthitem
 Vocabularies are wordlists with a name. However they push the wordlist
 to the search order, instead of replacing the topmost one.
 In this sense forthcode({FORTH}) and forthcode({ASSEMBLER}) words are not

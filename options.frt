@@ -1,4 +1,4 @@
-COPYRIGHT (c) 2000-2004 Albert van der Horst, THE NETHERLANDS
+COPYRIGHT (c) 2000-2009 Albert van der Horst, THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General

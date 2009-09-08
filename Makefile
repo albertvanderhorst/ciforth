@@ -355,6 +355,7 @@ lina.zip : $(RELEASELINA) ;\
 	(cd ..; rm lina-$(VERSION))
 
 lina64.zip : $(RELEASELINA64) ;\
+	chmod +x lina64 # Must be compiled on a 64 bit machine, assumed present.
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
 	ls $+ | sed s:^:lina64-$(VERSION)/: >MANIFEST

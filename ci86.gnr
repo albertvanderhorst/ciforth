@@ -7768,8 +7768,8 @@ _HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      SEMIS
 _C
 worddoc( {FILES},{PUT-FILE},{put_file},{sc1 sc2 ---},{},
-{Save the forthdefin({string constant}) forthsamp({sc2}) to a file with
-the name forthsamp({sc1}). Any errors are thrown. },
+{Save the forthdefin({string constant}) forthsamp({sc1}) to a file with
+the name forthsamp({sc2}). Any errors are thrown. },
 {{GET-FILE},{OPEN-FILE},{THROW}},
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
@@ -10184,10 +10184,7 @@ _HEADER({TRIAD},{TRIAD},{DOCOL})
         _DO(TRIA9)
 TRIA1:  DC      CR,IDO
         DC      LLIST
-        DC      KEYQ
-        _0BRANCH(TRIA2)
-        DC      LLEAV   _C{LEAVE}
-TRIA2:  _LOOP(TRIA1)    _C{THEN}
+        _LOOP(TRIA1)    _C{THEN}
 TRIA9:
         DC      CR
         DC      ZERO, MESS
@@ -10479,7 +10476,7 @@ worddocchapter({MULTIPLYING},{ },
 Operators with intermediate results of double precision, mostly scaling operators,
 solve this and are
 present in the forthsamp({MULTIPLYING}) wordset. _LARGE_({{In this _BITS_ bit Forth
-you will have less need, but scaling remains tricky.}}).
+you will have less need, but scaling remains tricky}}).
 Formatting is done with forthdefi({double})'s exclusively, and relies
 on this wordset. Operators with mixed precision and unsigned operators
 allow to build arbitrary precision operators from them in forthdefi({high level}) code.},

@@ -117,7 +117,7 @@ _BITS32_({A number has a precision of 32 bits.}) dnl
 _BITS64_({A number has a precision of 64 bits.}) dnl
 _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
-_SECURITY_({It has compiler security, sacrificing some bizarre ISO
+_SECURITY_({It has compiler security, sacrificing some ISO 
 compatibity.}) dnl
 _CIF_IN_({It doesn't use forthcode({>IN}) exactly in the way prescribed by ISO.}) dnl
 _ISO_IN_({It uses forthcode({>IN}) in the way prescribed by ISO.}) dnl
