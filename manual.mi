@@ -138,8 +138,9 @@ forthitem
 The editor for editing blocks of the library file.
 })_END_({_PC_})
 forthitem
- forthcode({CRACK})
+ forthcode({SEE})
 To analyse words, showing the source code of compiled words.
+(Also known as forthcode({CRACK}).)
  _SOURCEFIELD_({
 forthitem
  forthcode({LOCATE})
@@ -164,7 +165,7 @@ an operating system, you can develop in a convenient way.
 Start thisforth in a window, and use a separate window to start your
 editor. Try out things in thisforth. If they work, paste the code into
 your editor. If a word works, but its source has scrolled off the screen,
-you can recover the source using forthcode({CRACK}) .
+you can recover the source using forthcode({SEE}) .
 If you have constructed a part or all of your program,
 you can save it from your editor to a file. Then by the command
 forthsamp({INCLUDE <file-name> }) load the program in thisforth
@@ -195,7 +196,7 @@ LOCATE TUCK})
 shows you the source for TUCK if it is in the library somewhere.
 forthexample(
 {WANT TUCK
-CRACK TUCK})
+SEE TUCK})
 show you the source for TUCK if it is in the library or in the kernel,
 but without comment or usage information.
 

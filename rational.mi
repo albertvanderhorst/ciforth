@@ -11,18 +11,23 @@ lines must accompany it.
 Because Forth is ``programming by extending the language'' the GPL
 could be construed to mean that systems based on ciforth
 always are legally obliged to make the source available.
-But we consider this ``fair use in the Forth sense'' as
+But we consider this ``normal use in the Forth sense'' as
 expressed by the following statement.
 
 In addition to the GPL M4_SUPPLIER grants the following rights
 in writing:
 
-The GPL is interpreted in the sense that a system based on ciforth
-and intended to serve a particular purpose, that purpose not being a
-``general purpose Forth system'', is fair use of the system, even if it
-could accomplish everything ciforth could, under the condition that the
-ciforth it is based on is available in accordance to the GPL rules,
-and this is made known to the user of the derived system.
+The GPL is interpreted in the sense that a system based on ciforth and
+intended to serve a particular purpose, that purpose not being a
+``general purpose Forth system'', is considered normal use of the
+compilation system, even if it could accomplish everything ciforth
+could, under the condition that the ciforth it is based on is
+available in accordance to the GPL rules, and this is made known to
+the user of the derived system.
+
+So if you base an application program on ciforth, you need not make its
+source available, even if it would be a derived system in a strict
+interpretation of the GPL.
 
 @section                         Rationale
 

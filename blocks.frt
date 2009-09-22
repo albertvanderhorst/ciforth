@@ -206,14 +206,14 @@ CURRENT @   'ONLY >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
-( NIP PICK TUCK ) \ AvdH A1oct22
+( NIP TUCK -ROT PICK ROLL ) \ AvdH A9sep15
 \ Obscure stack manipulations.
 : NIP SWAP DROP ;
 : PICK 1+ CELLS DSP@ + @ ;
 : TUCK SWAP OVER ;
-
-
-
+: -ROT ROT ROT ;
+: ROLL   >R DSP@ DUP CELL+ R> 2 - CELLS
+    2DUP + @ >R CELL+ MOVE DROP R> ;
 
 
 
@@ -1422,9 +1422,9 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 
-( INSTALL-TRAPS ) CF: ?WIMS \ AvdH A3jun12
+( INSTALL-TRAPS ) CF: ?WIMS \ AvdH A9sep15
 \ Nobody knows how to do this on Bill's systems.
-: INSTALL-TRAPS  DROP ;
+: INSTALL-TRAPS  ;
 : INSTALL-NO-TRAPS  ;
 
 
@@ -1470,6 +1470,22 @@ WANT OLD:    WANT INSTALL-TRAPS
  'WARM RESTORED 'THRU RESTORED ;
 : break   SAVE  BEGIN '(ACCEPT) CATCH DUP -32 <> WHILE ?ERRUR
     SET-SRC INTERPRET REPEAT   DROP RESTORE ; \ End by ^D
+( DO-SECURITY NO-SECURITY ) \ AvdH A9sep22
+WANT RESTORED
+\
+\ Want a high level definition, to replace ?PAIRS
+: ?NO-PAIRS  2DROP ;
+
+
+
+
+
+\ Install and de-install the security
+: NO-SECURITY   '?NO-PAIRS >DFA @   '?PAIRS >DFA ! ;
+
+: DO-SECURITY   '?PAIRS RESTORED ;
+
+
 ( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11
 WANT RESTORED HEX
 \ Characters ONE and TWO are equal, ignoring case.
