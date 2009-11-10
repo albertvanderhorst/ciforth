@@ -364,7 +364,7 @@ _C{ Not for the sake of booting, but to allow MSDOS to start the program too. }
 dnl
     _ABSOLUTELOAD_({ ORG     M4_ORG})
     _BOOTED_(_REAL_({ORG     0x100
-ORIG:                         _C{ Accommodate also .exe files} }))
+                              _C{ Accommodate also .exe files} }))
 
 _BOOTSECTRK_({
 ORIG:
@@ -470,7 +470,7 @@ BEGIN1: CALL    READSECTOR
         MOV     AL, [BSPT]
         MOV     [LFSPT],AL
         MOV     AL, [BDRIVE]
-        MOV     [LFDRIVE], DL
+        MOV     [LFDRIVE], AL
 
         JMP     ENDBOOT
 })_C{}_END_({ _BOOTSECTRK_})
@@ -3637,10 +3637,10 @@ the forthdefi({dictionary pointer}).},{{DP},{C,}},
 enddoc)
 _HEADER({,},{COMMA},{DOCOL})
         DC      HERE
-        DC      STORE
         DC      LIT
         DC      CW
         DC      ALLOT
+        DC      STORE
         DC      SEMIS
 _C
 worddocsafe( {DICTIONARY},{C,},{c_comma},{b ---},{ISO,FIG},
@@ -3650,9 +3650,9 @@ the forthdefi({dictionary pointer}). },{{DP},{,}},
 enddoc)
 _HEADER({C,},{CCOMM},{DOCOL})
         DC      HERE
-        DC      CSTOR
         DC      ONE
         DC      ALLOT
+        DC      CSTOR
         DC      SEMIS
 _C
 worddoc( {OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{ISO,FIG,L0},
@@ -5081,7 +5081,7 @@ _HEADER({(ABORT")},{PABORTQ},{DOCOL})
         DC      ROT
         _0BRANCH(PABQ1) _C{IF}
         DC      ETYPE
-        DC      SIGNON, ABORT
+        DC      ABORT
         _BRANCH(PABQ2) _C{ELSE}
 PABQ1:  DC       TDROP
 PABQ2:   DC      SEMIS
@@ -8302,20 +8302,16 @@ terminal.
 In this ciforth all terminal I/O goes through forthcode({EMIT}), so
 forthcode({OUT}) is observed.},{{EMIT},{OUT}}, {}, enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      QDUP
-        _0BRANCH(TYPE1) _C{ IF}
         DC      OVER
         DC      PLUS
         DC      SWAP
-        _DO(TYPE4)
+        _QDO(TYPE4)
 TYPE2:  DC      IDO
         DC      CFET
         DC      EMIT
         _LOOP(TYPE2)    _C{ LOOP}
 TYPE4:
-        _BRANCH(TYPE3)  _C{ ELSE}
-TYPE1:  DC      DROP _C{ THEN}
-TYPE3:  DC      SEMIS
+        DC      SEMIS
 _C
 })_C{}_END_({_CLASSIC_})
 _USEBIOS_({
@@ -8384,17 +8380,16 @@ In this ciforth all terminal I/O goes through forthcode({EMIT}), so
 forthcode({OUT}) is observed.
 },{{EMIT},{OUT}}, {}, enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
-             DC      QDUP
-             _0BRANCH(TYPE1)
-             DC      OVER,   PLUS
-             DC      SWAP
-             _DO(TYPE4)
-TYPE2:       DC      IDO,    CFET,    EMIT
-             _LOOP(TYPE2)
-             _BRANCH(TYPE3)
+        DC      OVER
+        DC      PLUS
+        DC      SWAP
+        _QDO(TYPE4)
+TYPE2:  DC      IDO
+        DC      CFET
+        DC      EMIT
+        _LOOP(TYPE2)    _C{ LOOP}
 TYPE4:
-TYPE1:       DC      DROP
-TYPE3:       DC      SEMIS
+        DC      SEMIS
 _C
 })_C{}_END_({_USEBIOS_})
 _KEY_BY_KEY_({
@@ -8999,7 +8994,7 @@ forthsamp({sec}) either a read to forthvar({addr}) or write from
 forthvar({addr}) .
 Disk errors are stored in
 forthcode({DISK-ERROR}).},
-{{BLOCK},{R|W}}, {}, enddoc)
+{{BLOCK},{BLOCK-READ},{BLOCK-WRITE}}, {}, enddoc)
 _HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, LFSPT, CFET, SLMOD
         DC      LIT, LFHEADS, CFET, SLMOD   _C{ Now #sec, #head, #cyl}
@@ -9017,49 +9012,69 @@ _HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      TDROP, TDROP
         DC      SEMIS
 _C
-worddoc( {BLOCKS},{R|W},{read_slash_write},{addr blk n ---},{FIG},
-{The ciforth primitive for read-write of blocks. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
-the sequential number of the referenced physical block; and
-forthvar({n}) is a control variable
-for forthvar({n})=0 write and forthvar({n})=l
-read. forthcode({R|W}) determines the location on mass storage,
-performs the read-write and aborts with an error message for failures.
+worddoc( {BLOCKS},{BLOCK-READ},{block_read},{addr blk ---},{},
+{The ciforth primitive for reading of blocks. forthvar({addr})
+specifies the destination block buffer, forthsamp({blk}) is
+the sequential number of the referenced physical block
+forthcode({BLOCK-READ}) determines the location on mass storage,
+performs the read and throws an exception on errors.
 forthcode({DISK-ERROR}) contains an error count for the latest operation.
 },
-{{BLOCK},{DISK-ERROR},{SECRW}}, {}, enddoc)
+{{BLOCK},{DISK-ERROR},{SEC-RW}}, {}, enddoc)
 _C{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
-_HEADER({R|W},{RSLW},{DOCOL})
-         _SWITCH_({DC   ROT, LIT, M4_SWITCHOFFSET, PLUS, ROT, ROT})
+_HEADER({BLOCK-READ},{BLREAD},{DOCOL})
+         _SWITCH_({DC   SWAP, LIT, M4_SWITCHOFFSET, PLUS, SWAP})
         DC      ZERO, DERR, STORE
-        _0BRANCH(RSLW1)
         DC      LIT, 0x0201      _C{ Read (AH) one (AL) sector }
-        _BRANCH(RSLW2)
-RSLW1:  DC      LIT, 0x0301      _C{ Write (AH) one (AL) sector }
-RSLW2:  DC      SWAP
+        DC      SWAP
         DC      SPBLK,  STAR
         DC      SPBLK,  OVER, PLUS
-        DC      SWAP
-        _DO(RSLW9)
-RSLW0:
-        DC      SWAP, TDUP
+        _DO(BLREAD9)
+BLREAD0:
+        DC      TDUP
         DC      IDO
         DC      SECRW
-        DC      LIT, BPS, PLUS, SWAP
-        _LOOP(RSLW0)
-RSLW9:
-        DC      DROP, DROP
-        DC      DERR, FETCH,     QDUP
-        _0BRANCH(RSLW5)              _C{OK}
-        DC      ZLESS
-        _0BRANCH(RSLW3)
-        DC      LIT,    9   _C{Write error}
-        _BRANCH(RSLW4)
-RSLW3:  DC      LIT,    8   _C{Read error}
-RSLW4:  DC      ZERO,   PREV,   FETCH,     STORE   _C{This  buffer}
-                                                   _C{ is no good!}
-        DC      QERR    _C{  8 or 9. }
-RSLW5:  DC      SEMIS
+        DC      LIT, BPS, PLUS
+        _LOOP(BLREAD0)
+BLREAD9:
+        DC      TDROP
+        DC      DERR, FETCH
+        _0BRANCH(BLREAD5)              _C{OK}
+        DC      ZERO,   PREV,   FETCH,     STORE   _C{This buffer is no good!}
+        DC      LIT,    8, ERROR _C{Read error}
+BLREAD5:  DC      SEMIS
+_C
+worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{addr blk ---},{},
+{The ciforth primitive for writing of blocks. forthvar({addr})
+specifies the source or destination block buffer, forthsamp({blk}) is
+the sequential number of the referenced physical block.
+forthcode({BLOCK-WRITE}) determines the location on mass storage,
+performs the write and throws an exception on errors.
+forthcode({DISK-ERROR}) contains an error for the latest operation.
+},
+{{BLOCK},{DISK-ERROR},{SEC-RW}}, {}, enddoc)
+_C{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
+_HEADER({BLOCK-WRITE},{BLWRITE},{DOCOL})
+        DC      ZERO, DERR, STORE
+         _SWITCH_({DC   SWAP, LIT, M4_SWITCHOFFSET, PLUS, SWAP})
+        DC      LIT, 0x0301      _C{ Write (AH) one (AL) sector }
+        DC      SWAP
+        DC      SPBLK,  STAR
+        DC      SPBLK,  OVER, PLUS
+        _DO(BLWRIT9)
+BLWRIT0:
+        DC      TDUP
+        DC      IDO
+        DC      SECRW
+        DC      LIT, BPS, PLUS
+        _LOOP(BLWRIT0)
+BLWRIT9:
+        DC      TDROP
+        DC      DERR, FETCH
+        _0BRANCH(BLWRIT5)              _C{OK}
+        DC      ZERO,   PREV,   FETCH,     STORE   _C{This  buffer}
+        DC      LIT, 9, ERROR
+BLWRIT5:  DC      SEMIS
 _C
 })_C{}_END_({ _RWSECTRK_})
 _RWLBA_({
