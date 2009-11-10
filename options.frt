@@ -18,12 +18,12 @@ License along with this program; if not, write to the
 ( WANT WANTED CF: ) \ AvdH A7feb24
 CREATE pad 80 ALLOT \ Word surrounded by spaces
 : FILL-pad   ( sc --) " " pad $!   pad $+!   " " pad $+! ;
-\ For LINE : it CONTAINS the word at pad.
-: CONTAINS   pad @ - OVER + SWAP
-  DO   I pad $@ CORA   0= IF -1 UNLOOP EXIT THEN   LOOP   0 ;
+\  For LINE : return the POSITION of the word at ``pad''.
+: POSITION   pad @ - OVER + SWAP
+  DO   I pad $@ CORA   0= IF I UNLOOP EXIT THEN   LOOP   0 ;
 \ Find word in blocks N and up. Load and leave the block AFTER.
 : ?LOAD?   BEGIN 0 OVER (LINE) -TRAILING   DUP 0= 24 AND THROW
-   CONTAINS 0= WHILE 1+ REPEAT   DUP LOAD 1+ ;
+   POSITION 0= WHILE 1+ REPEAT   DUP LOAD 1+ ;
 : (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R   BEGIN 2DUP FILL-pad
   2DUP PRESENT 0= WHILE R> ?LOAD? >R REPEAT RDROP ;
 \ Make sure WORD is present in the current namespace
