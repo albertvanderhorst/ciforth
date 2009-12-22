@@ -8917,9 +8917,9 @@ _C{       DRIVE, ADDRESS, LENGTH, SEC#}
 _ENDP SBLK    ENDP
 _C
 worddoc( {BLOCKS},{BLOCK-READ},{block_read},{addr blk ---},{},
-{forthsamp({1 R|W}) is an abbreviation for forthsamp({BLREAD}).
+{forthsamp({1 R|W}) is an abbreviation for forthsamp({BLOCK-READ}).
 },{{R|W}}, {}, enddoc)
-CODE_HEADER({BLREAD},{BLREAD})
+CODE_HEADER({BLOCK-READ},{BLREAD})
         CALL    SBLK
         PUSH    HIP      _C{PRESERVE INTERPRETER POINTER}
         PUSH    RPO      _C{RETURN POINTER}
@@ -8928,10 +8928,10 @@ CODE_HEADER({BLREAD},{BLREAD})
         LEA     DX,[RERR]
         JMP     RWERR
 _C
-worddoc( {BLOCKS},{BLWRITE},{block_write},{addr blk ---},{},
-{forthsamp({0 R|W}) is an abbreviation for forthsamp({BLWRITE}).
+worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{addr blk ---},{},
+{forthsamp({0 R|W}) is an abbreviation for forthsamp({BLOCK-WRITE}).
 },{{R|W}}, {}, enddoc)
-CODE_HEADER({BLWRITE},{BLWRITE})
+CODE_HEADER({BLOCK-WRITE},{BLWRITE})
         CALL    SBLK
         PUSH    HIP
         PUSH    RPO
@@ -8939,13 +8939,13 @@ CODE_HEADER({BLWRITE},{BLWRITE})
         JNC     DOK
         LEA     DX,[WERR]
 _C
-_C{ Error exit for both BLREAD and BLWRITE }
+_C{ Error exit for both BLOCK-READ and BLOCK-WRITE }
 RWERR:   PUSH    AX      _C{ DX contains message.}
         MOV     AH,9    _C{String write function, obsolete for ages}
         INT     0x21
         POP     AX      _C{ERROR CODE IN AX}
 _C
-_C{ Okay exit for both BLREAD and BLWRITE }
+_C{ Okay exit for both BLOCK-READ and BLOCK-WRITE }
 DOK:    POPF            _C{POP FLAGS}
         POP     RPO      _C{RETURN STACK}
         POP     HIP      _C{INTERPRETER PNTR}
@@ -9083,7 +9083,7 @@ _C{ Warning : if this LBA is used apart from by R|W}
 _C{ the fields marked default must be restored.}
 worddoc( {BLOCKS},{LBAPAR},{l_b_a_params},{--},{},
 { A data structure used by R|W , that also must be filled in for disk
-operations forthcode({BLREAD}) and forthcode({BLWRITE}) . Do not touch the
+operations forthcode({BLOCK-READ}) and forthcode({BLOCK-WRITE}) . Do not touch the
 first 16-bits word. The second word is the number of sectors to be
 transferred. The third and fourth word contain a long real mode
 pointer where the data comes from or goes to. The fourth word
@@ -9091,7 +9091,7 @@ and fifth word is as 32 bit counter for the sector on the disc.
 If a 2 Terabyte disk is not enough this can be extended into
 the sixth and seventh word.
 Word 1,2,4 6 and 7 must be restored to their previous value after
-calling forthcode({BLREAD}) and forthcode({WLBK}) so as not to interfere
+calling forthcode({BLOCK-READ}) and forthcode({BLOCK-WRITE}) so as not to interfere
 with forthcode({R|W}). },
 {{R|W},{BLOCK},{OFFSET}}, {}, enddoc)
 _HEADER({LBAPAR},{LBA},{DOVAR}, )
@@ -9103,19 +9103,19 @@ _HEADER({LBAPAR},{LBA},{DOVAR}, )
         DD      0       _C{ sector number}
         DD      0       _C{ M.S. 32 BITS default}
 
-worddoc( {BLOCKS},{BLREAD},{block_read},{--},{},
+worddoc( {BLOCKS},{BLOCK-READ},{block_read},{--},{},
 {Perform a disk read operation using a properly filled in LBA structure
 in forthcode({LBAPAR}). },
-{{R|W},{BLWRITE}}, {}, enddoc)
-CODE_HEADER({BLREAD},{BLREAD})
+{{R|W},{BLOCK-WRITE}}, {}, enddoc)
+CODE_HEADER({BLOCK-READ},{BLREAD})
         MOV     BX,0x4200
         JMP    RWBLK
 _C
-worddoc( {BLOCKS},{BLWRITE},{block_write},{--},{},
+worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{--},{},
 {Perform a disk write operation using a properly filled in LBA
 structure in forthcode({LBAPAR}). },
-{{R|W},{BLREAD}}, {}, enddoc)
-CODE_HEADER({BLWRITE},{BLWRITE})
+{{R|W},{BLOCK-READ}}, {}, enddoc)
+CODE_HEADER({BLOCK-WRITE},{BLWRITE})
         MOV     BX,0x4300
 RWBLK:
         POP     AX
@@ -9149,11 +9149,11 @@ This function uses ``LBA'' : Logical Block Addressing and may
 not work on elderly hard disks.
 _BITS16_({{Where blk is at most 64K the largest addressable disk is
 64M , you can get around this by filling in }forthcode({LBAPAR}){ and then calling
- forthcode({BLREAD}) or }forthcode({WBLK}){ }})
+ forthcode({BLOCK-READ}) or }forthcode({BLOCK-WRITE}){ }})
 forthcode({DISK-ERROR}) contains the status of the latest operation,
 bit 1 (carry flag) indicates an error.
 },
-{{BLOCK},{DISK-ERROR},{LBAPAR},{BLREAD},{WBLK}}, {}, enddoc)
+{{BLOCK},{DISK-ERROR},{LBAPAR},{BLOCK-READ},{BLOCK-WRITE}}, {}, enddoc)
 _C{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 _HEADER({R|W},{RSLW},{DOCOL})
         DC      TOR
@@ -9172,7 +9172,7 @@ _C{       The 2 m.s. bytes are overwritten by the next store.}
         _0BRANCH(RSLW1)
         DC      BLREAD
         _BRANCH(RSLW2)
-RSLW1:  DC      WBLK
+RSLW1:  DC      BLWRITE
 RSLW2:  DC      LDUP, DERR, STORE
 
         DC      ONE, LAND, LDUP
