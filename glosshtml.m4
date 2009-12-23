@@ -8,13 +8,13 @@ define({forall}, {ifelse(len({$2}),0,,
 dnl Define a word definition on channel 9
 dnl        the corresponding menu item on channel 6
 dnl        and a definition for the second pass on channel 0
-define({forthvar}, <I>$1</I>)
-define({forthdefi}, <I>$1</I>)
-define({forthdefin}, <I>$1</I>)
-define({forthsamp}, <B>$1</B>)
-define({forthemph}, <B>$1</B>)
-define({forthkey}, <B>$1</B>)
-define({forthfile}, ``$1'')
+define({forthvar}, {<B>$1</B>})
+define({forthdefi}, {<I>$1</I>})
+define({forthdefin}, {<I>$1</I>})
+define({forthsamp}, {<B>$1</B>})
+define({forthemph}, {<B>$1</B>})
+define({forthkey}, {<B>$1</B>})
+define({forthfile}, {``$1''})
 define({forthexample},<P><B>$1</B><P>)
 define({forthcode}, <A HREF="#$1">$1</A>)
 define({forthxref}, <A HREF="#$1">See also $1</A>)

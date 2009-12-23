@@ -2026,7 +2026,7 @@ _C
         DC      SEMIS                            _C
 _C
 worddoc( {PARSING},{?BLANK},{query_blank},{c --- ff },{},
-{For the character forthsamp({c}) return whether this is
+{For the character forthvar({c}) return whether this is
 considered to be white space into the flag forthvar({ff}) .
 At least the space, ASCII null, the tab and the carriage return and line
 feed characters are white space.},
@@ -2121,7 +2121,7 @@ _CIF_IN_({the non-inclusive highest address of the parse area
 and a pointer to the next character to be parsed.})
 _ISO_IN_({the number of characters and the current index in the
 parse area.}) Changing forthsamp({SRC}) takes immediate effect,
-and must be atomic, by using forthsamp({RESTORE-INPUT}),
+and must be atomic, by using forthcode({RESTORE-INPUT}),
 or changing only the third cell.
 The third cell has the alias
 _CIF_IN_({forthsamp({IN}) .})
@@ -2181,8 +2181,8 @@ _HEADER({CR},{CR},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {MEMORY},{CMOVE},{cmove},{from to count ---},{},
-{Move the specified quantity of characters beginning at address
- forthsamp({from}) to address forthsamp({to}) . The contents of
+{Move the forthvar({count}) quantity of characters beginning at address
+ forthvar({from}) to address forthvar({to}) . The contents of
 address from is moved first proceeding toward high memory, such
 that memory propagation occurs. As the Intel 86-family is
 byte-addressing there are no restrictions in ciforth. },
@@ -2202,7 +2202,7 @@ CODE_HEADER({CMOVE},{LCMOVE})
         _NEXT
 _C
 worddoc( {MEMORY},{MOVE},{move},{from to count ---},{},
-{Move the forthvar({count})
+{Move forthvar({count})
 bytes beginning at address forthvar({from}) to
 address forthvar({to}), such that the destination area contains
 what the source area contained, regardless of overlaps.
@@ -2456,7 +2456,7 @@ _HEADER({(;)},{SEMIS},{_VAR_FIELD(EXIT)})
 _C
 worddoc( {CONTROL},{LEAVE},{leave},{},{ISO},
 {Terminate a do-loop by branching to directly behind the
-end of a loop started by forthsamp({DO}) or forthsamp({?DO}) ,
+end of a loop started by forthcode({DO}) or forthcode({?DO}) ,
 so after the corresponding
 forthcode({LOOP}) or forthcode({+LOOP}) .},{},
 { {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3} },
@@ -2559,7 +2559,7 @@ CODE_HEADER({D+},{DPLUS})
 _C
 worddoc( {OPERATOR},{NEGATE},{negate},{n1 --- n2},{ISO,FIG,L0},
 {Leave the two's complement of a number, i.e.
- forthvar({n2}) is forthsamp({-n1})},
+ forthvar({n2}) is forthvar({-n1})},
 {{-}},
 { {0 NEGATE .}, {0},
   {  1 NEGATE .}, {-1},
@@ -2757,8 +2757,8 @@ CODE_HEADER({C@},{CFET})
         _PUSH
 _C
 worddocsafe( {MEMORY},{2@},{two_fetch},{addr--- x1 x2},{ISO},
-{Leave a pair of _BITS_ bits values forthsamp({x1}) forthsamp({x2}) from
-consecutive cells at forthvar({addr}) . forthsamp({x2}) is fetched from
+{Leave a pair of _BITS_ bits values forthvar({x1}) forthvar({x2}) from
+consecutive cells at forthvar({addr}) . forthvar({x2}) is fetched from
 the lowest address. },{{2!},{@},{C@}},
 { {-23. PAD 2! PAD 2@ D.},{-23} },
 enddoc)
@@ -2792,7 +2792,7 @@ CODE_HEADER({L!},{LSTORE})
 _C
 })_C{}_END_({_BITS64_})
 worddoc( {MEMORY},{C!},{c_store},{b addr ---},{ISO},
-{Store 8 bits of forthsamp({b}) at forthvar({addr}) .
+{Store 8 bits of forthvar({b}) at forthvar({addr}) .
 In ciforth , running on the Intel architectures
 there are no restrictions regarding byte
 addressing.
@@ -2806,9 +2806,9 @@ CODE_HEADER({C!},{CSTOR})
         _NEXT
 _C
 worddoc( {MEMORY},{2!},{two_store},{x1 x2 addr --- },{ISO},
-{Store a pair of _BITS_ bits values forthsamp({x1})
-forthsamp({x2}) to consecutive cells at forthvar({addr}) .
-forthsamp({x2}) is stored at the lowest address.
+{Store a pair of _BITS_ bits values forthvar({x1})
+forthvar({x2}) to consecutive cells at forthvar({addr}) .
+forthvar({x2}) is stored at the lowest address.
 },{{2@},{!},{C!}},
 {{." Via 2@"},{Via 2@}},
 enddoc)
@@ -2823,7 +2823,7 @@ _C
 worddoc( {MEMORY},{WITHIN},{within},{n1 n2 n3 --- ff},{ISO},
 {Return a flag indicating that forthvar({n1}) is in
 the range forthvar({n2}) (inclusive)
-to forthsamp({n3}) (non-inclusive).
+to forthvar({n3}) (non-inclusive).
 This works for signed as well as unsigned numbers.
 This is shorthand for: forthsamp({OVER - >R - R U<}) },
 {{<},{U<}},
@@ -2839,8 +2839,8 @@ _HEADER({WITHIN},{WITHIN}, {DOCOL})
 _C
 _BITS64_(,{
 worddocsafe( {MEMORY},{FAR@},{far_fetch},{faraddr --- n},{},
-{Leave the _BITS_ bit contents of
-segment address pair forthsamp({faraddr}).
+{Leave the _BITS_ bit contents forthvar({n}) of
+segment address pair forthvar({faraddr}).
 },
 {{FAR!},{@},{C@},{2@}},
 {{." No test"},{No test} },
@@ -2946,9 +2946,9 @@ worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{ISO,FIG,L0},
 {A defining word used in the form:
     forthvar({n}) forthcode({CONSTANT}) forthsamp({cccc})
 to create word forthsamp({cccc}) ,
-where the content of its forthdefi({data field address}) is forthsamp({n}) .
+where the content of its forthdefi({data field address}) is forthvar({n}) .
 When forthsamp({cccc}) is later executed, it
-will push the value of forthsamp({n}) to the stack.},
+will push the value of forthvar({n}) to the stack.},
 {{VARIABLE},{>DFA}},
 {{12A CONSTANT FRED FRED .},{12A} },
 enddoc)
@@ -3090,7 +3090,7 @@ _HEADER({$+!},{SADD},{DOCOL})
         DC SEMIS
 _C
 worddoc( {STRING},{$C+},{char_append},{c addr ---},{},
-{Append a char forthsamp({c})
+{Append a char forthvar({c})
 to the string variable at address forthvar({addr}).},
 {{$@},{$!},{$+!}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -  dnl
@@ -3386,7 +3386,7 @@ _HEADER({OUT},{LOUT},{DOUSE}, _CELLS(25))
 _C
 worddocsafe( {SCREEN~},{(BLK)},{paren_blk},{--- addr},{U},
 {When the standard word forthcode({BLK}) is used, this user variable
-reflects the state of the forthsamp({current input source}).
+reflects the state of the forthdefi({current input source}).
 It indicates the block number being interpreted, or
 zero, if input is being taken from the terminal input buffer.
 Changing forthcode({BLK}) has no effect, and its content must be fetched before
@@ -3508,7 +3508,7 @@ _C
 _C{========== END USER VARIABLES =============}
 _C
 worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
-{This is shorthand for ``forthsamp({1}) forthcode({+})''.},
+{This is shorthand for ``forthsamp({1 +})''.},
 {{CELL+},{1-}},
 {{5 1+ .},{6}},
 enddoc)
@@ -3588,8 +3588,8 @@ _ALIGNED_({
         DC      SEMIS
 _C
 worddoc( {MEMORY},{ALIGNED},{aligned},{addr1 --- addr2},{ISO},
-{Make sure that forthsamp({addr1}) is forthdefi({aligned}) by advancing
-it if necessary to forthsamp({addr2}).
+{Make sure that forthvar({addr1}) is forthdefi({aligned}) by advancing
+it if necessary to forthvar({addr2}).
 _ALIGNED_(,{ In this ciforth this is a NOOP.})
 },{{ALIGN}},
 _ALIGNED_({
@@ -3983,7 +3983,7 @@ _C
 worddoc( {ERRORS},{?ERROR},{question_error},{f n ---},{},
 {
 If the boolean flag is true, forthdefi({signal an error}) with
-number forthsamp({n}).
+number forthvar({n}).
 This means that an exception is thrown,
 and it is remembered that this is the original place where the
 exception originated.
@@ -4011,7 +4011,7 @@ QERR1:  DC      DROP    _C{THEN}
 QERR2:  DC      SEMIS
 _C
 worddoc( {ERRORS},{?ERRUR},{query_error_Unix},{n ---},{},
-{Handle the possible error forthsamp({n}) in Unix fashion. If
+{Handle the possible error forthvar({n}) in Unix fashion. If
 it is zero or positive, this means okay. If it is negative, its
 value identifies an error condition. This error is handled in
 the same way as by forthcode({?ERROR}) . },
@@ -4283,7 +4283,7 @@ worddoc( {STRING},{COUNT},{count},{addr1 --- addr2 n},{ISO,FIG,L0},
 beginning at address forthvar({addr1}) . It is presumed that the first byte at
 forthvar({addr1}) contains the text byte count and the actual text starts with
 the second byte. Alternatively stated, fetch a
-forthdefin({string constant}) forthsamp({addr n}) from
+forthdefin({string constant}) forthvar({addr2 n}) from
 the brain damaged string variable at forthvar({addr1}) .
 },{{TYPE}},
 {{HERE 3 C, 45 C, 45 C, 45 C, COUNT . HERE - .},{3 -3}},
@@ -4326,7 +4326,7 @@ worddocsafe( {STRING},{S"},{s_quote},{ --- addr1 n},{ISO,L0},
 { Used in the form:
   forthsamp({S" cccc"})
 Leaves an in-line string forthsamp({cccc}) (delimited by the
-trailing forthkey({"})) as a constant string forthsamp({addr1
+trailing forthkey({"})) as a constant string forthvar({addr1
 n}) . In ciforth the number of characters has no limit and
 using forthsamp({S"}) has always an effect on
 forthcode({HERE}), even during interpretation.
@@ -4448,11 +4448,11 @@ _C{       Assume the extra segment points to the data segment }
 _C
 worddoc( {MEMORY},{CORA},{CORA},{addr1 addr2 len  -- n},{CIF},
 {Compare the memory areas at forthvar({addr1}) and forthvar({addr2})
-over a length forthsamp({len}) .
+over a length forthvar({len}) .
 For the first bytes that differ, return -1 if the byte
 from forthvar({addr1}) is less (unsigned) than the one from forthvar({addr2}),
 and 1 if it is greater.
-If all forthsamp({len}) bytes are equal, return
+If all forthvar({len}) bytes are equal, return
 zero.
 _VERBOSE_({{This is an abbreviation of }forthcode({COMPARE-AREA}){.
 It would have been named }forthsamp({COMPARE}){ ,
@@ -4730,14 +4730,15 @@ NPNUM5:
 _C
 worddoc( {FORMATTING~},{NUMBER},{number},{ ---  s/d},{},
 {
-This word is intended to be called from single character denotation
-words, hence the parse pointer is decremented, to include this first
+This word is intended to be called from (aliased as)
+single character denotation
+words, marked as forthcode({PREFIX}) forthcode({IMMEDIATE}).
+Therefore it decrements the parse pointer to include this first
 character.
-Convert characters from the current input source into a number,
-and compile or execute this number. If the string contains a
-decimal point it is a double else a single integer number. If
-numeric conversion is not possible, an error message will be
-given.
+Starting with this character, it converts characters from the current input source
+into a number, and compile or execute this number, depending on forthcode({state}).
+If the string contains a decimal point it is a double else a single integer number.
+If numeric conversion is not possible, an error message will be given.
 },
 {{BASE},{(NUMBER)}},
 {{ (NUMBER) 1324 D.},{1324} },
@@ -4754,7 +4755,7 @@ worddoc( {FORMATTING},{>NUMBER},{to_number},
 {ISO},
 {
 forthvar({ud2}) is the result of converting the characters
-within the character string specified by forthsamp({addr1 u1})
+within the character string specified by forthvar({addr1 u1})
 into digits, using the number in forthcode({BASE}) , and adding
 each into ud1 after multiplying forthvar({ud1}) by the number
 in forthcode({BASE}) . Conversion continues until a character
@@ -4866,7 +4867,7 @@ worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO},
 preceding character count)}}) at forthvar({addr}) find a Forth
 word in the current search order.
 Return its
-execution token forthsamp({xt}). If the word is immediate, also
+execution token forthvar({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
 {{CONTEXT},{PRESENT},{(FIND)}},
@@ -5017,8 +5018,8 @@ _C
 worddoc( {ERRORS},{CATCH},{catch},{... xt --- ... tc },{ISO},
 {Execute forthvar({xt}). If it executes successfully, i.e. no
 forthcode({THROW}) is executed by forthvar({xt}), leave a zero
-into forthsamp({tc}) in addition to any stack effect
-forthvar({xt}) itself might have. Otherwise in forthsamp({tc})
+into forthvar({tc}) in addition to any stack effect
+forthvar({xt}) itself might have. Otherwise in forthvar({tc})
 the non-zero throw code is left, and the stack depth is
 restored. The values of the parameters for
 forthvar({xt}) could have been modified. _VERBOSE_({{In
@@ -5040,11 +5041,11 @@ _HEADER({CATCH},{CATCH},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {ERRORS},{THROW},{throw},{... tc --- ... / ... tc},{ISO},
-{If forthsamp({tc}) is zero, it is merely discarded. If we are
+{If forthvar({tc}) is zero, it is merely discarded. If we are
 executing under control of a forthcode({CATCH}) , see
 forthcode({CATCH}) for the effect of a non-zero
-forthsamp({tc}). If we are executing not under control of a
-forthcode({CATCH}), a non-zero forthsamp({tc}) gives a message to the effect
+forthvar({tc}). If we are executing not under control of a
+forthcode({CATCH}), a non-zero forthvar({tc}) gives a message to the effect
 that this exception has occurred and starts Forth anew.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR},{ERROR}},
@@ -5373,7 +5374,7 @@ _HEADER({?STACK},{QSTAC},{DOCOL})
 _C
 worddoc( {PARSING},{INTERPRET},{interpret},{?? --- ??},{},
 {Repeatedly fetch the next text word from the
-forthsamp({current input source}) and
+forthdefi({current input source}) and
 execute it (forthcode({STATE}) is not 1) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in the vocabularies of forthdefi({search-order}).
@@ -5947,7 +5948,7 @@ MAX1:   DC      DROP
         DC      SEMIS
 _C
 worddoc( {OPERATOR},{LSHIFT},,{u1 n --- u2},{ISO},
-{Perform a forthsamp({{logical {{{shift}}} }}) of the bits of
+{Perform a forthemph({{logical {{{shift}}} }}) of the bits of
 forthvar({u1}) to the left by forthvar({n}) places.
 _VERBOSE_({{Put zero into the places uncovered by the {{{{shift}}}}.}}) },
 {{RSHIFT},{2*}},
@@ -5960,7 +5961,7 @@ CODE_HEADER({LSHIFT},{LSHIFT},{DOCOL})
         _PUSH
 _C
 worddoc( {OPERATOR},{RSHIFT},,{u1 n --- u2},{ISO},
-{Perform a forthsamp({{logical {{{shift}}} }}) of the bits of
+{Perform a forthemph({{logical {{{shift}}} }}) of the bits of
 forthvar({u1}) to the right by forthvar({n}) places.
 _VERBOSE_({{Put zero into the places uncovered by the {{{{shift}}}}.}}) },
 {{LSHIFT},{2/}},
@@ -5989,7 +5990,7 @@ CODE_HEADER({M*},{MSTAR})
 _C
 worddoc( {MULTIPLYING},{SM/REM},{m_slash},{d n1 --- n2 n3},{ISO},
 {A mixed magnitude math operator which leaves the signed
-remainder forthvar({n2}) and signed quotient forthsamp({n3})
+remainder forthvar({n2}) and signed quotient forthvar({n3})
 from a double number dividend forthvar({d}) and divisor
 forthvar({n1}). This is a symmetric division{{}}_VERBOSE_({{, i.e.
 the remainder takes its sign from the
@@ -6060,7 +6061,7 @@ _C
 })_C{}_END_({_LOAD_})
 worddoc( {MULTIPLYING},{FM/MOD},{floored_slash},{d n1 --- n2 n3},{ISO},
 {A mixed magnitude math operator which leaves the signed
-remainder forthvar({n2}) and signed quotient forthsamp({n3})
+remainder forthvar({n2}) and signed quotient forthvar({n3})
 from a double number dividend forthvar({d}) and divisor
 forthvar({n1}). This is floored division{{}}, i.e.
 the remainder takes its sign from the divisor.},
@@ -6140,7 +6141,7 @@ _HEADER({/},{SLASH},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG,L0},
-{Leave the remainder of forthsamp({n1}) divided by forthvar({n2}) , with the same sign
+{Leave the remainder of forthvar({n1}) divided by forthvar({n2}) , with the same sign
 as forthvar({n1}) (i.e. forthdefi({symmetric division})).},
 {{+},{-},{*},{/},MOD,{*/MOD}},
 {
@@ -6156,8 +6157,8 @@ _HEADER({MOD},{LMOD},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG,L0},
-{Leave the quotient forthsamp({n5}) and remainder
-forthsamp({n4}) of the operation forthsamp({n1*n2/n3}) (using forthdefi({symmetric division})).
+{Leave the quotient forthvar({n5}) and remainder
+forthvar({n4}) of the operation forthsamp({n1*n2/n3}) (using forthdefi({symmetric division})).
 A double precision
 intermediate product is used giving correct results, unless
 forthvar({n4}) or forthvar({n5}) overflows.
@@ -6201,7 +6202,7 @@ _HEADER({*/},{SSLA},{DOCOL})
 _C
 worddoc( {MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{CIF,FIG},
 {An unsigned mixed magnitude math operation which leaves a
-double quotient forthsamp({ud4}) and remainder forthsamp({u3}) ,
+double quotient forthvar({ud4}) and remainder forthvar({u3}) ,
 from a double dividend forthvar({ud1}) and single divisor
 forthvar({u2}).
 },
@@ -6239,7 +6240,7 @@ _HEADER({M/MOD},{MSMOD},{DOCOL})
         DC      SEMIS
 _C
 worddocsafe( {SCREEN},{(LINE)},{paren_line},{n1 n2 --- sc },{},
-{Convert the line number forthsamp({n1}) and the screen
+{Convert the line number forthvar({n1}) and the screen
 forthvar({n2}) to a string forthvar({sc}) the content of the
 line (without the trailing new line). },
 {{LINE}},
@@ -6314,7 +6315,7 @@ MESS1:                  _C{THEN}
 _C
 worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
-forthsamp({port}). A port address is always 16 bits.
+forthvar({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
@@ -6331,7 +6332,7 @@ _C{ FETCH CHARACTER (BYTE) FROM PORT}
 _C
 worddoc( {MEMORY},{PC!},{port_char_store},{b port ---},{},
 {Store a byte forthvar({b}) to the port address
-forthsamp({port}).
+forthvar({port}).
 A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
@@ -6348,7 +6349,7 @@ CODE_HEADER({PC!},{PCSTO})
 _C
 worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
-forthsamp({port}). A port address is always 16 bits.
+forthvar({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
@@ -6363,7 +6364,7 @@ CODE_HEADER({P@},{PFET})
 _C
 worddoc( {MEMORY},{P!},{port_store},{n port ---},{},
 {Store the _BITS_ bit data forthvar({n}) to the port address
-forthsamp({port}).
+forthvar({port}).
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
@@ -6714,7 +6715,7 @@ _C
 _LOAD_({
 _C
 worddoc( {SCREEN~},{BLK},{blk},{--- addr},{ISO},
-{When the standard word forthcode({BLK}) is used, the content
+{When the standard word forthsamp({BLK}) is used, the content
 of the user variable forthsamp({(BLK)}) is refreshed to reflect
 the state of the current input source and its address is returned
 in forthvar({addr}) .
@@ -6769,9 +6770,9 @@ _C
 _PC_({
 _C{ Generic call on BIOS. A boon for experimenters.}
 worddoc( {OPERATINGSYSTEM},{BIOSO},{bios},{a b c d i---ar br cr dr fl},{},
-{Do a call of ``BIOS'' interrupt forthsamp({i}) with forthsamp({a b c d})
-in registers forthsamp({AX BX CX DX}). Upon return those registers contain
-forthsamp({ar br cr dr}) and forthsamp({fl}) is the content of the processors flag
+{Do a call of ``BIOS'' interrupt forthvar({i}) with forthvar({a b c d})
+in registers forthemph({AX BX CX DX}). Upon return those registers contain
+forthvar({ar br cr dr}) and forthvar({fl}) is the content of the processors flag
 register._HOSTED_DPMI_({This word performs calls only as related to a real mode interface.
 Under DPMI we have to do this via a special call to the
 unadorned interrupt, which is in this case protected mode,
@@ -6863,8 +6864,8 @@ _C
 _C{ Generic call on BIOS. A boon for experimenters.}
 worddoc( {OPERATINGSYSTEM},{BIOSN},{biosn},{d c b a i---ar fl},{},
 {Do a call of ``BIOS'' interrupt forthvar({i}) with
-forthvar({a b c d}) in registers forthsamp({AX BX CX DX}).
-Return as a result the content of register forthsamp({AX}) into forthvar({ar}).
+forthvar({a b c d}) in registers forthemph({AX BX CX DX}).
+Return as a result the content of register forthemph({AX}) into forthvar({ar}).
 forthvar({fl}) contains the flag register.
 If the carry flag is set, it is presumably a
 failed operation. _VERBOSE_({{For other conventions you have to resort to }forthcode({BIOSO}){ .}})
@@ -6962,7 +6963,7 @@ function 0x0300.}}) The layout is as forthvar({DI SI BP BX DX CX
 AX Flags ES DS FS GS IP CS SP SS
 _HOSTED_DPMI_({and startup selectors : CS ES SS}).
 }) _VERBOSE_( {For the general
-registers this agrees with the forthsamp({PUSH_ALL}) instruction.})
+registers this agrees with the forthemph({PUSH_ALL}) instruction.})
 },
 {{BIOSO}},
 dnl Expect a reasonable value for the data segment.
@@ -6998,9 +6999,9 @@ _C
 worddoc( {OPERATINGSYSTEM},{BIOS31},{bios31},{a b c d di---ar br cr dr fl},{},
 {Do a call of ``BIOS'' interrupt 0x31, directly from
 protected mode
-with forthsamp({a b c d di}) in registers
-forthsamp({AX BX CX DX DI}). Upon return those registers
-contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the
+with forthvar({a b c d di}) in registers
+forthemph({AX BX CX DX DI}). Upon return those registers
+contains forthvar({ar br cr dr}) and forthvar({fl}) is the
 content of the processors flag register. _VERBOSE_({{
 }forthsamp({1 AND}){ leaves a zero if the call was successful.}})
  _VERBOSE_({{The word }forthcode({BIOS}){ simulates
@@ -7028,9 +7029,9 @@ RQBIOS: INT(0x31)          _C{ Request number to be overwritten.}
         _NEXT
 })_C{}_END_({_SIMULATE_BIOS_})
 worddoc( {OPERATINGSYSTEM},{BDOSO},{bdos},{a b c d---ar br cr dr fl},{},
-{Do a call of ``BDOS'' interrupt (0x21) with forthsamp({a b c d}) in
-registers forthsamp({AX BX CX DX}). Upon return those registers
-contains forthsamp({ar br cr dr}) and forthsamp({fl}) is the content
+{Do a call of ``BDOS'' interrupt (0x21) with forthvar({a b c d}) in
+registers forthemph({AX BX CX DX}). Upon return those registers
+contains forthvar({ar br cr dr}) and forthvar({fl}) is the content
 of the processors flag register. This draws upon all facilities made
 available by MSDOS. _BOOTSECTRK_({{This works in this standalone Forth, but
 only if it is started from MSDOS.}}) This is obsolescent, use forthcode({BDOSN}) .
@@ -7072,9 +7073,9 @@ _HOSTED_X_({
 worddoc( {OPERATINGSYSTEM},{XOS},{xos},{n1 n2 n3 n---ret},{},
 { Do a traditional Unix type
 system call forthvar({n})
-(man 2) with parameters forthsamp({n1 n2 n3}).
-forthsamp({ret}) is the return value of the call. If it is negative, it
-is mostly an error, such as known by forthsamp({errno}) . This makes
+(man 2) with parameters forthvar({n1 n2 n3}).
+forthvar({ret}) is the return value of the call. If it is negative, it
+is mostly an error, such as known by forthemph({errno}) . This makes
 available all facilities present in _OS_, except those with 4 or 5 parameters
 that are handled by forthcode({XOS5}) .
 },{{?ERRUR}},
@@ -7108,9 +7109,9 @@ _C
 })_C{}_END_({_HOSTED_OSX_})
 worddoc( {OPERATINGSYSTEM},{XOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
 { Do a traditional Unix type system call forthvar({n}) (man 2) with parameters
-forthsamp({n1 n2 n3 n4 n5}). forthsamp({ret}) is the return
+forthvar({n1 n2 n3 n4 n5}). forthvar({ret}) is the return
 value of the call. If it is negative, it is mostly an error,
-such as known by forthsamp({errno}) . This makes available
+such as known by forthemph({errno}) . This makes available
 forthemph({all}) facilities present in _OS_.
 },{{?ERRUR}},
 {{1 "CHIMP" 0 0 4 XOS5 .},{CHIMP5}},
@@ -7152,9 +7153,9 @@ CODE_HEADER({XOS5},{XOS5})
 _C
 worddoc( {OPERATINGSYSTEM},{XOSV},{xos variable},{ nx ...n3 n2 n1 n nc ---ret},{},
 { Do a traditional Unix type system call forthvar({nc}) (man 2) with
-forthvar({n}) parameters forthsamp({n1 n2 n3 n4 n5}). forthsamp({ret}) is the return
+forthvar({n}) parameters forthvar({n1 n2 n3 n4 n5}). forthvar({ret}) is the return
 value of the call. If it is negative, it is mostly an error,
-such as known by forthsamp({errno}) . This makes available
+such as known by forthemph({errno}) . This makes available
 forthemph({all}) facilities present in _OS_.
 _VERBOSE_({Please note that the parameters appear in reverse order compared to
 normal documentation.})
@@ -7316,7 +7317,7 @@ _C
 worddoc( {OPERATINGSYSTEM},{BDOSN},{bdosn},{d c b a ---ar fl},{},
 {Do a call of ``BDOS'' interrupt (0x21) with forthvar({d c b a }) in
 registers forthvar({ DX CX BX AX }).
-Return as a result the content of register forthsamp({AX}) into forthvar({ar}).
+Return as a result the content of register forthemph({AX}) into forthvar({ar}).
 forthvar({fl}) contains the flag register.
 If the carry flag is set, it is presumably a
 failed operation.
@@ -7750,8 +7751,8 @@ WRITE1:
 _C
 })_C{}_END_({ _HOSTED_DPMI_})
 worddoc( {FILES},{GET-FILE},{get_file},{sc1 --- sc2},{},
-{Get the content of the file with name forthsamp({sc1});
-leave it as a string forthsamp({sc2}). Any errors are thrown. },
+{Get the content of the file with name forthvar({sc1});
+leave it as a string forthvar({sc2}). Any errors are thrown. },
 {{PUT-FILE},{OPEN-FILE},{THROW}},
 {{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
 enddoc)
@@ -7768,8 +7769,8 @@ _HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      SEMIS
 _C
 worddoc( {FILES},{PUT-FILE},{put_file},{sc1 sc2 ---},{},
-{Save the forthdefin({string constant}) forthsamp({sc1}) to a file with
-the name forthsamp({sc2}). Any errors are thrown. },
+{Save the forthdefin({string constant}) forthvar({sc1}) to a file with
+the name forthvar({sc2}). Any errors are thrown. },
 {{GET-FILE},{OPEN-FILE},{THROW}},
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
@@ -7782,9 +7783,9 @@ _HEADER({PUT-FILE},{PUTFILE},DOCOL)
         DC      SEMIS
 _C
 worddoc( {FILES},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
-{Interpret the content of the file with name forthsamp({sc1})
+{Interpret the content of the file with name forthvar({sc1})
 as if it was typed from the console, leaving result
-forthsamp({i*x}). },
+forthvar({i*x}). },
 {{LOAD},{}},
 {{"hello.frt" INCLUDED},{Hello world!}},
 enddoc)
@@ -7923,7 +7924,7 @@ _C
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
 {Transfer characters from the terminal to address forthvar({addr}) ,
 until a "RET" is received.
-At most forthsamp({count}) characters will be transferred to forthvar({addr})
+At most forthvar({count}) characters will be transferred to forthvar({addr})
 Rely on the operating system for input editing. One or more
 nulls are added at the end of the text.
 },{{KEY},{KEY?}}, {}, enddoc)
@@ -7978,14 +7979,14 @@ _C{ All I/O goes through the modern device (Unix-standard)}
 _C{ device I/O. Code fields are filled in during bootup. }
 _C{ Lower case labels starting with "c_.." are c-supplied facilities.}
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
-{Transfer at most forthsamp({count}) characters from the
+{Transfer at most forthvar({count}) characters from the
 terminal to address, until a forthkey({RET}) is received. The
 simple tty editing functions of _OS_ are observed, i.e. the
 ``erase'' (delete a character) and ``kill'' (delete a line)
 characters. Typically these are the backspace key and ^U. Note
-that excess characters after forthsamp({count}) are ignored.
+that excess characters after forthvar({count}) are ignored.
 The number of characters not
-including the forthkey({RET}) is returned into forthsamp({n}).
+including the forthkey({RET}) is returned into forthvar({n}).
 },
 {{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
 {
@@ -8144,7 +8145,7 @@ _HEADER({TERMIO},{TERMIO},{DOVAR}, )
         _RESB(SIZE_TERMIO)     _C{ Filled in during cold boot.}
 _C
 worddoc( {INPUT~},{SET-TERM},{set_term},{len b ---},{},
-{Set the terminal length to forthsamp({len}) and toggle the c_lflag field
+{Set the terminal length to forthvar({len}) and toggle the c_lflag field
 with forthvar({b}) in the termio structure forthcode({TERMIO}) .
 In particular toggling with 0x0A makes that
 the terminal doesn't wait for a forthkey({RET}).
@@ -8195,15 +8196,15 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
-{Transfer at most forthsamp({count}) characters from the
+{Transfer at most forthvar({count}) characters from the
 terminal to address, until a forthkey({RET}) is received.
 The backspace key on the standard PC keyboard layout
 is used to delete characters, without involvement of Forth, so
 changing forthcode({RUBOUT}) has no effect. Other editing keys such as
 forthkey({F3}) and cursor keys probably work as usual with a console application.
-Note that excess characters after forthsamp({count}) are ignored. The number of
+Note that excess characters after forthvar({count}) are ignored. The number of
 characters not including the forthkey({RET}) is returned into
-forthsamp({n}). },
+forthvar({n}). },
 {{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
 {
 {PAD 10 ACCEPT},{},
@@ -8297,7 +8298,7 @@ STATRT: RET
 _ENDP CSTAT   ENDP
 _C
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
-{Transmit forthsamp({count}) characters from forthvar({addr}) to the
+{Transmit forthvar({count}) characters from forthvar({addr}) to the
 terminal.
 In this ciforth all terminal I/O goes through forthcode({EMIT}), so
 forthcode({OUT}) is observed.},{{EMIT},{OUT}}, {}, enddoc)
@@ -8497,7 +8498,7 @@ the name of a forthdefi({library file})
 in which forthdefi({blocks}) are (to be) allocated.
 The name may contain a path and be at most}
 M4_FILENAMELENGTH {characters long.
-The default name is forthsamp({forth.lab}) .
+The default name is forthemph({forth.lab}) .
 This name may be changed and is used by the
  forthcode({BLOCK-INIT}) command.
 },{{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}},
@@ -8591,7 +8592,7 @@ _HEADER({BLSEEK},{BLSEEK},{DOCOL})
 _C
 worddoc( {BLOCKS},{BLOCK-READ},{block_read},{addr blk ---},{},
 {The ciforth primitive for reading of blocks. forthvar({addr})
-specifies the destination block buffer, forthsamp({blk}) is
+specifies the destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block
 forthcode({BLOCK-READ}) determines the location on mass storage,
 performs the read and throws an exception on errors.},
@@ -8614,7 +8615,7 @@ _HEADER({BLOCK-READ},{BLREAD},{DOCOL})
 _C
 worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{addr blk ---},{},
 {The ciforth primitive for writing of blocks. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
+specifies the source or destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block.
 forthcode({BLOCK-WRITE}) determines the location on mass storage,
 performs the write and throws an exception on errors.},
@@ -8640,8 +8641,8 @@ This name may be changed an is used by the
  forthcode({SYSTEM}) command.
 The name may contain a path and be at most}
 M4_FILENAMELENGTH {characters long.
-_HOSTED_LINUX_({ The default name is forthsamp({/bin/sh}) .})
-_PC_({ The default name is forthsamp({C:\COMMAND.COM}) .
+_HOSTED_LINUX_({ The default name is forthemph({/bin/sh}) .})
+_PC_({ The default name is forthemph({C:\COMMAND.COM}) .
 256 bytes after forthcode({SHELL})) are reserved for
 a start up stack.})
 },{{SYSTEM}},
@@ -8657,7 +8658,7 @@ _PC_({  _RESB(0x100)     _C{ Double serve as stack at start up. }})
 _C
 worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc ---},{ISO},
 {Have the operating system execute the command contained
-in the string forthsamp({sc}).
+in the string forthvar({sc}).
 _MODERN_({{The environment is passed to the
 command, but not the changes made after ciforth started.}})
 },{{BLOCK},{?ERROR},{?ERRUR}},
@@ -8841,7 +8842,7 @@ CODE_HEADER({BLOCK-EXIT},{BLEXI})
 _C
 worddoc( {BLOCKS},{R|W},{read_slash_write},{addr blk n ---},{FIG},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
+specifies the source or destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({n}) is a control variable
 for forthvar({n})=0 write and forthvar({n})=l
@@ -8954,7 +8955,7 @@ _C
 worddoc( {BLOCKS},{R|W},{read_slash_write},{addr blk n ---},{},
 {The basic mass storage read-write linkage. (Already present in
 figforth.) forthvar({addr}) specifies the source or destination
-block buffer, forthsamp({blk}) is the sequential number of the
+block buffer, forthvar({blk}) is the sequential number of the
 referenced physical block; and forthvar({n}) is a control variable
 for
 forthvar({n})=0 write and forthvar({n})=l read.
@@ -8988,9 +8989,9 @@ _C
 _C
 _RWSECTRK_({
 worddoc( {BLOCKS},{SEC-RW},{sector_read_write},{com addr sec ---},{},
-{Performs the BIOS function forthsamp({com}) , for
+{Performs the BIOS function forthvar({com}) , for
 a single sector
-forthsamp({sec}) either a read to forthvar({addr}) or write from
+forthvar({sec}) either a read to forthvar({addr}) or write from
 forthvar({addr}) .
 Disk errors are stored in
 forthcode({DISK-ERROR}).},
@@ -9014,7 +9015,7 @@ _HEADER({SEC-RW},{SECRW},{DOCOL})
 _C
 worddoc( {BLOCKS},{BLOCK-READ},{block_read},{addr blk ---},{},
 {The ciforth primitive for reading of blocks. forthvar({addr})
-specifies the destination block buffer, forthsamp({blk}) is
+specifies the destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block
 forthcode({BLOCK-READ}) determines the location on mass storage,
 performs the read and throws an exception on errors.
@@ -9046,7 +9047,7 @@ BLREAD5:  DC      SEMIS
 _C
 worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{addr blk ---},{},
 {The ciforth primitive for writing of blocks. forthvar({addr})
-specifies the source or destination block buffer, forthsamp({blk}) is
+specifies the source or destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block.
 forthcode({BLOCK-WRITE}) determines the location on mass storage,
 performs the write and throws an exception on errors.
@@ -9139,7 +9140,7 @@ worddoc( {BLOCKS},{R|W},{read_slash_write},{addr blk n ---},{},
 {The ciforth primitive for read-write of blocks. forthvar({addr})
 specifies the source or destination block buffer, It must reside
 in the lowest 1 Mbyte of physical memory.
-forthsamp({blk}) is
+forthvar({blk}) is
 the sequential number of the referenced physical block; and
 forthvar({n}) is a control variable
 for forthvar({n})=0 write and forthvar({n})=l
@@ -9597,7 +9598,7 @@ At compile-time, forthcode({REPEAT}) compiles
 forthcode({BRANCH}) and the offset from forthcode({HERE}) to
 forthvar({addr2}) . Then it fills in another branch offset at
 forthvar({addr1}) left there by forthcode({WHILE}) .
-forthsamp({n1 n2}) is used for error testing.},
+forthvar({n1 n2}) is used for error testing.},
 {{WHILE}},
 {
 { : GI3 BEGIN DUP 4 < WHILE DUP . 1+ REPEAT ; 0 GI3 .},
@@ -9689,8 +9690,8 @@ structure.
 
 At compile time, forthcode({WHILE}) compiles
 forthcode({0BRANCH}) and tucks the
-target address forthsamp({addr2})
-under the forthsamp({addr1}) left there by
+target address forthvar({addr2})
+under the forthvar({addr1}) left there by
 forthcode({BEGIN}) . The stack values will be resolved by
 forthcode({REPEAT}) . forthvar({n1}) and forthvar({n2})
 provide checks for compiler security.},
@@ -9941,10 +9942,10 @@ _C
 worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt wid --x1...xn},{},
 {For all words from a word list identified by
 forthvar({wid})
-execute forthsamp({xt})
- with as data forthsamp({x1..xn}) plus
-the forthdefi({DEA}) of those words.         forthsamp({xt})
-must have the stack diagram forthsamp({x1..xn dea --- x1..xn}).
+execute forthvar({xt})
+ with as data forthvar({x1..xn}) plus
+the forthdefi({DEA}) of those words.         forthvar({xt})
+must have the stack diagram forthvar({x1..xn dea --- x1..xn}).
 _VERBOSE_({{Note that you can use the DEA of any word as a WID
 and the remainder of the word list will be searched.}})
 },
@@ -9970,9 +9971,9 @@ FORW1:  DC      FROMR
         DC      SEMIS
 _C
 worddoc( {DICTIONARY~},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
-{For all vocabularies execute forthsamp({xt})
- with as data the forthdefi({DEA}) of those words. forthsamp({xt})
-must have the stack diagram forthsamp({x1..xn dea --- x1..xn})
+{For all vocabularies execute forthvar({xt})
+ with as data the forthdefi({DEA}) of those words. forthvar({xt})
+must have the stack diagram forthvar({x1..xn dea --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}},
 {
@@ -10116,7 +10117,7 @@ _C
 worddoc( {SCREEN},{INDEX},{index},{from to ---},{},
 {Print the first line of each screen over the inclusive
 range
-forthsamp({from}) , forthsamp({to}) . This is used to view the
+forthvar({from}) , forthvar({to}) . This is used to view the
 comment lines of an area of text on disc screens.},
 {{LIST}},
 {{." interactive"},{interactive}},
@@ -10156,11 +10157,11 @@ DOC1:    DC DROP, DROP
         DC SEMIS
 _C
 worddoc( {ENVIRONMENTS},{ENVIRONMENT?},{environment_query},{sc --- i*x true/false},{ISO},
-{If the string forthsamp({sc}) is a known environment
-attribute, leave into forthsamp({i*x}) the information about
+{If the string forthvar({sc}) is a known environment
+attribute, leave into forthvar({i*x}) the information about
 that attribute and a true flag, else leave a false flag. In
 fact the flag indicates whether the words is present in the
-forthcode({ENVIRONMENT}) namespace and forthsamp({i*x}) is
+forthcode({ENVIRONMENT}) namespace and forthvar({i*x}) is
 what is left by the word if executed.
 },
 {{NAMESPACE}},
@@ -10180,7 +10181,7 @@ _C
 _LOAD_({
 worddoc( {SCREEN},{TRIAD},{triad},{scr ---},{},
 {Display on the selected output device the three screens which
-include that numbered forthsamp({scr}) , beginning with a screen evenly divisible
+include that numbered forthvar({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
 reference line at the bottom taken from line 0 of the first error screen.},
 {{MESSAGE},{ERRSCR} },
@@ -10417,18 +10418,20 @@ reinitialise or configure Forth.},
 worddocchapter({DENOTATIONS},{ },
 {The wordset forthsamp({DENOTATIONS}) contains prefixes (mostly one letter
 words) that introduce a forthdefi({denotation}), i.e. a generalisation of
-forthcode({NUMBER}) .
-Any word starting with the prefix is considered found in the
-dictionary and the prefix word executed.
-These words parse input and leave a constant
+forthcode({NUMBER}) . forthcode({PREFIX}) turns the latest definition into
+a prefix, similar to forthcode({IMMEDIATE}).
+If a word starting with the prefix is looked up in the dictionary,
+the prefix is found and executed.
+Prefix words parse input and leave a constant
 (number, char or string) on the stack, or compile such constant,
 depending on forthcode({STATE}).
 For a kernel system it is guaranteed that they reside in the minimum search
-order wordset, called forthcode({ONLY}).
+order wordlist, associated with the namespace forthcode({ONLY}).
 To make a distinction with the same words in other wordlists,
 the names of denotations are prepended with ``Prefix_'' in the
-documentation. Actual names in the dictionary do not contain
-the prefix. Apart from forthcode({Prefix_0}) , the namespace
+documentation. Actual names consists of the one character following
+``Prefix''.
+Apart from forthcode({Prefix_0}) , forthcode({ONLY})
 contains entries for all hex digits 1...9 and A...F.
 Like forthcode({NUMBER}) always did, all denotations behave
 identical in interpret and compile mode and they are not supposed to be

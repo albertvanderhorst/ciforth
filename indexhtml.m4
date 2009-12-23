@@ -6,12 +6,12 @@ changequote({,})dnl
 dnl Define a word index on channel 2
 dnl        the wordset index on channel 4
 dnl        and a definition for the second pass on channel 0
-define({forthvar}, <I>$1</I>)
-define({forthdefi}, <I>$1</I>)
-define({forthdefin}, <I>$1</I>)
-define({forthsamp}, <B>$1</B>)
-define({forthemph}, <B>$1</B>)
-define({forthkey}, <B>$1</B>)
+define({forthvar}, {<B>$1</B>})
+define({forthdefi}, {<I>$1</I>})
+define({forthdefin}, {<I>$1</I>})
+define({forthsamp}, {<B>$1</B>})
+define({forthemph}, {<B>$1</B>})
+define({forthkey}, {<B>$1</B>})
 define({forthexample},{<P><B>$1</B><P>})
 define({forthcode}, {<A HREF="#$1">$1</A>})
 define({forthxref}, {<A HREF="#$1">See also $1</A>})
