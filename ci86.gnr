@@ -8106,7 +8106,7 @@ worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
 forthdefi({revectoring}) it _VERBOSE_({{and the usual
-redirection or }forthsamp({tee}){-ing by _OS_}}). In this
+redirection or }forthsamp({tee})-ing by _OS_}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output, however in
 that case forthcode({OUT}) is not observed. },
@@ -8122,8 +8122,8 @@ worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the standard error device.
 It is high level so error output can be redirected, by
-forthdefi({revectoring}) it. _VERBOSE_({{Or you may use
-redirection by _OS_}}). In this
+forthdefi({revectoring}) it. _VERBOSE_({Or you may use
+redirection by _OS_}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output. },
 {{EMIT},{TYPE}},

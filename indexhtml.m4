@@ -29,13 +29,21 @@ define({worddocchapter},
 <A HREF="#$1INDEX">$1</A> &nbsp; &nbsp; }) dnl
 dnl ----------------------- worddocchapterend  -----------------------------
 define({worddocchapterend},{dnl})dnl
+include(namescooked.m4)
 divert(0)dnl
 <HTML>
 <HEAD>
-dnl<META HTTP-EQUIV="Content-Type" CONTENT="text/html"; charset="iso-8859-1">
+   <META http-equiv="content-type" content="text/html; charset=ISO-8859-1">
    <TITLE>thisforth ci86gnrversion Manual</TITLE>
 </HEAD>
 <BODY>
+
+{<style type="text/css">
+h1   { color: green; background: #CCFFCC; font-family: verdana; font: 24px; font-weight: bold; }
+h2   { color: red; background: #CCFFCC; font-family: verdana; font: 20px; }
+a    { color: blue; background: #CCFFCC; font-family: verdana; font: 18px; font-weight: bold; }
+body { background: #CCFFCC; }
+</style>}
 
 <H1>
    thisforth Version [ ci86gnrversion ] GLOSSARY </H1>

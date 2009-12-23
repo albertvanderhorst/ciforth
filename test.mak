@@ -122,7 +122,7 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
-	echo "define({ci86gnrversion}, ifelse(M4_VERSION,,\
+	echo "define({ci86gnrversion}, ifelse(M4_VERSION,test,\
 {snapshot `grep TITLE ci86.gnr|sed -e 's/.*Revision: //'|\
    sed -e 's/ .*//' `},\
 {M4_VERSION}\
@@ -139,11 +139,14 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	sed -e 's/@@/@/g'               |\
 	sed -e s'/worddocsafe/worddoc/g'  |\
 	sed -e 's/</\&lt\;/g'   > temp.html
+	echo 'define({thisfilename},{$@})' >>namescooked.m4
+	echo 'define({thisforth},{$(@:ci86.%.texinfo=%)})'>>namescooked.m4
 	( \
-	    cat indexhtml.m4 ; \
+	    cat indexhtml.m4 namescooked.m4 ; \
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
 	)| m4 > $@
-	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html >> $@
+	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html |\
+	sed -e 's/~"/"/' >> $@
 	#rm temp.html
 
 %.info : %.texinfo  ; makeinfo --no-split $< -o $@
