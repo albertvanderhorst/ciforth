@@ -1361,9 +1361,8 @@ instead.)
 Furthermore it is recommended
 that for non-portable code forthcode({'}) is used in its
 forthdefi({denotation}) form without the space.
-_VERBOSE_({{ Note that if you separate forthcode({'}) by a space,
-the ISO-conforming version of
- }forthcode({'}){ is found}}).
+_VERBOSE_({ Note that if you separate forthcode({'}) by a space{,}
+the ISO-conforming version of forthcode({'}) is found}).
 },
 {{CONTEXT}, {[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
 dnl Make sure to use the ONLY ' not the FORTH '
@@ -1638,7 +1637,7 @@ forthcode({DENOTATIONS}).
 If found the parse pointer is moved back to immediately after
 the prefix, and the corresponding denotation definition
 executed.
-_VERBOSE_({ If you want to add a denotation,
+_VERBOSE_({ If you want to add a denotation{,}
 add it to the forthcode({ONLY}) wordlist preferably.
 This prevents masking regular words with the same prefix.})
 },
@@ -2242,9 +2241,9 @@ defaults: data segment _SEGMENT_ for source, extra segment _SEGMENT_
 for destination.
 Copying is done from low to high
 offset, so there may be memory
-propagating. _VERBOSE_({{This is not easily seen
+propagating. _VERBOSE_({This is not easily seen
 from the _SEGMENT_'s{}_PROTECTED_({{, particularly not so in
-protected mode}}).}})
+protected mode}}).})
 As the Intel 86-family is byte-addressing there are
 no restrictions.
 },
@@ -3047,7 +3046,7 @@ _HEADER({BL},{LBL},{DOCON}, ABL)
 _C
 worddocsafe( {STRING},{$@},{string_fetch},{addr --- sc},{},
 { From address forthvar({addr}) fetch a forthdefin({string constant}) forthvar({sc}) .},
-{{$@},{$!},{$+!},{$C+}},
+{{$!},{$+!},{$C+}},
 {{ HEX 4 , 41 C, 39 C, 45 C, 30 C, HERE 4 CELL+ - $@ TYPE},{A9E0}}, enddoc)
 _C
 CODE_HEADER({$@},{SFET})
@@ -4485,7 +4484,7 @@ worddoc( {STRING},{$^},{string_index},{sc c -- addr},{},
 return its forthvar({addr}) if present.
 Otherwise return a forthdefin({nil pointer}).
 A null string (0 0) or an empty string are allowed, and result in not found. },
-{{$/},{CORA}},
+{{$/},{CORA},{$@}},
 {{ 132 "ORANG" OVER >R &N $^ R> - . .},{3 132},
 { 132 "" &N $^ . .},{0 132},
 { 132 0 0 &N $^ . .},{0 132},
@@ -4517,7 +4516,7 @@ zero)}}) and forthvar({sc2}) is the original string.
 _VERBOSE_({{Both }forthvar({sc1}){ and }forthvar({sc2}){ may be
 empty strings (i.e. their count is zero), if }forthvar({c}){ is
 the last or first character in }forthvar({sc}){ .}}) },
-{{$^},{CORA}},
+{{$^},{CORA},{$@}},
 {{ 132 "ORANG" &O $/ . DROP TYPE . },{0 RANG132},
 { "ORANG OETAN" BL $/ TYPE TYPE },{ORANGOETAN},
 { "ORANG" &G $/ TYPE 0 . TYPE },{ORAN0 },
@@ -4736,7 +4735,7 @@ words, marked as forthcode({PREFIX}) forthcode({IMMEDIATE}).
 Therefore it decrements the parse pointer to include this first
 character.
 Starting with this character, it converts characters from the current input source
-into a number, and compile or execute this number, depending on forthcode({state}).
+into a number, and compile or execute this number, depending on forthcode({STATE}).
 If the string contains a decimal point it is a double else a single integer number.
 If numeric conversion is not possible, an error message will be given.
 },
@@ -5192,9 +5191,9 @@ _C
 worddoc( {DEFINING~},{LINK},{link},{dea wid ---},{},
 {Links the forth word represented by forthvar({dea}) into the wordlist
 represented by forthvar({wid}) as the latest entry.
-_VERBOSE_({{Alternatively, consider forthvar({wid}) as an other
+_VERBOSE_({Alternatively{,} consider forthvar({wid}) as an other
 forthvar({dea2}). Link forthvar({dea}) between the forthvar({dea2})
-and its successor in the linked list.}})
+and its successor in the linked list.})
 },
 {{HEADER},{(CREATE)}},
 {{"FRED" HEADER CURRENT @ LINK ' FRED LATEST = .},{_T_}},
@@ -5493,8 +5492,7 @@ field address ( forthdefi({VLFA}) ). The VLFA points to the VLFA
 of the next namespace  or  a forthdefi({nil pointer}) for the end.
 Then follows a dummy dea that serves
 as forthdefi({word list identifier}) or forthdefi({WID}) in the sense of the ISO standard.
-It has
-empty fields, except for the link field.
+It has empty fields, except for the link field.
 The forthdefi({link field address}) contains the DEA of the latest word of
 the namespace or a forthdefin({nil pointer}) if empty. Executing the
 namespace means pushing its WID on top of the
@@ -5502,7 +5500,7 @@ forthcode({CONTEXT}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
 oldest one gets lost. The vocabularies generated are
 forthcode({IMMEDIATE}) words.},
-{{VOC-LINK},{DEFINITIONS},{FOR-VOCS}},
+{{VOC-LINK},{DEFINITIONS},{FOR-VOCS},{>WID}},
 {{123 NAMESPACE JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
@@ -5613,14 +5611,14 @@ _HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      LMOVE
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{(},{paren},{},{ISO,FIG,I,L0},
-{{{{Used in the form: forthsamp({{( cccc)}}). Ignore a comment that
+worddocsafe( {PARSING},{%},{paren},{},{ISO,FIG,I,L0},
+{Used in the form: forthsamp({{% cccc%}}). Ignore a comment that
 will be delimited by a right parenthesis that must be in the
 same input source, i.e. on the same line for terminal input, or
 in the same string, block or file, when that is the input. It
-is an immediate word{{}}_VERBOSE_({{, so colon definitions can
-be commented too}}).
-A blank after the word forthcode({{(}}) is required.}}}},
+is an immediate word. _VERBOSE_({So colon definitions can
+be commented too}).
+A blank after the word forthsamp({{%}}) is required},
 {{\}},
 {{( Nothing to be seen) 8374 U.},{8374} },
 enddoc)
@@ -5852,12 +5850,12 @@ exception mechanism.
 Initialise the block mechanism.
 Any blocks that have not yet been
 written back to mass storage are discarded.
-_BLOCKSINFILE_({I.e. open the file that contains the blocks, in read-only mode.})
-_VERBOSE_({{After forthcode({INIT}) we have the following situation.
-The search order contains the forthcode({FORTH}) words,
+_BLOCKSINFILE_({Now open the file that contains the blocks{,} in read-only mode.})
+_VERBOSE_({After forthcode({INIT}) we have the following situation.
+The search order contains the forthcode({FORTH}) words{,}
 plus forthcode({ONLY}) with i.a. number handling.
 Definitions are added to the forthcode({FORTH}) forthdefi({namespace}).
-The number base is decimal.   }}).
+The number base is decimal.   }).
 },{{WARM},{COLD},{FORTH},{BLOCK-INIT},{BASE},{S0}},
 {{( No test)},{}},
 enddoc)
@@ -6278,6 +6276,7 @@ _C
 worddoc( {ERRORS},{MESSAGE},{message},{n ---},{},
 { forthcode({MESSAGE}) is generally used to print error and
 warning messages.
+If forthcode({WARNING}) is zero (disc unavailable), this is a noop.
 Print on the _HOSTED_X_({standard error channel}) _PC_({output device})
 the text of line
 forthvar({n}) relative to screen forthcode({ERRSCR}) . forthvar({n}) may be
@@ -6286,15 +6285,10 @@ A certain range around 0 is reserved.
 The messages with small positive offset contain ciforth error messages.
 The messages with small negative offset contain
 the strings belonging to the return values for _HOSTED_X_({_OS_ system calls}) _PC_({BDOS calls}).
-_VERBOSE_({{
-forthcode({ERROR}) makes some assumption about what is present for
-small forthvar({n}), if you want to use this word for other purposes
-you have to redefine }forthcode({ERROR}).})
 forthsamp({0 MESSAGE}) will print version information about the library file,
 the messages sit in.
-If forthcode({WARNING}) is zero (disc unavailable), this is a noop.
 },
-{{ERROR}},
+{{ERROR},{BLOCK-FILE}},
 {
 {1 WARNING ! -180 MESSAGE}, {( -x :_This_option_is_available )},
 {1 WARNING ! HEX 12 MESSAGE},{ : EXECUTION ONLY },
@@ -8512,7 +8506,7 @@ worddoc( {BLOCKS},{BLOCK-HANDLE},{block_handle},{---n},{},
 If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
 _LINUX_C_({In this ciforth forthcode({BLOCK-HANDLE}) is not used.})
-},{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT}},
+},{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT},{$@}},
 {{BLOCK-HANDLE @ 10 U< .},{_T_}},
 enddoc)
 _HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, )
