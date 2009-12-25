@@ -1946,7 +1946,7 @@ _NO_RESPECTDOS_({
 _RESPECTDOS_({
 _C{ This will reserve place for dos information, such that the floppy}
 _C{ can be accessed from DOS and makes sure blocks are not allocated}
-_C{ within the forth system itself. }
+_C{ within the Forth system itself. }
 _C{ BPS subtracted because SECSTRT corresponds with one sector into source. }
 _C{ Round up both parts separately.}
 _C{       You need a filler file of one sector,}
@@ -5189,7 +5189,7 @@ CREA2:  DC      COMMA  _C{Source field.}
         DC      SEMIS
 _C
 worddoc( {DEFINING~},{LINK},{link},{dea wid ---},{},
-{Links the forth word represented by forthvar({dea}) into the wordlist
+{Links the Forth word represented by forthvar({dea}) into the wordlist
 represented by forthvar({wid}) as the latest entry.
 _VERBOSE_({Alternatively{,} consider forthvar({wid}) as an other
 forthvar({dea2}). Link forthvar({dea}) between the forthvar({dea2})
@@ -5611,14 +5611,15 @@ _HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      LMOVE
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{%},{paren},{},{ISO,FIG,I,L0},
-{Used in the form: forthsamp({{% cccc%}}). Ignore a comment that
+dnl _left_parenthesis_ is replaced by ')' in the makefiles.
+worddocsafe( {PARSING},{_left_parenthesis_},{paren},{},{ISO,FIG,I,L0},
+{Used in the form: forthsamp({{_left_parenthesis_ cccc)}}). Ignore a comment that
 will be delimited by a right parenthesis that must be in the
 same input source, i.e. on the same line for terminal input, or
 in the same string, block or file, when that is the input. It
 is an immediate word. _VERBOSE_({So colon definitions can
 be commented too}).
-A blank after the word forthsamp({{%}}) is required},
+A blank after the word forthsamp({{_left_parenthesis_}}) is required.},
 {{\}},
 {{( Nothing to be seen) 8374 U.},{8374} },
 enddoc)
@@ -10246,7 +10247,7 @@ _C
 _C{**** LAST DICTIONARY WORD ****}
 worddoc( {MISC},{TASK},{task},{},{},
 {A no-operation word which marks the boundary between
-the forth system and applications. },{{COLD}},
+the Forth system and applications. },{{COLD}},
 {{!CSP TASK ?CSP},{}},
 enddoc)
 _HEADER({TASK},{TASK},{DOCOL})
@@ -10487,8 +10488,8 @@ worddocchapter({MULTIPLYING},{ },
 {The _LARGE_(original) 16 bits Forth's have problems with overflow (forthpxref({OPERATOR})).
 Operators with intermediate results of double precision, mostly scaling operators,
 solve this and are
-present in the forthsamp({MULTIPLYING}) wordset. _LARGE_({{In this _BITS_ bit Forth
-you will have less need, but scaling remains tricky}}).
+present in the forthsamp({MULTIPLYING}) wordset. _LARGE_({In this _BITS_ bit Forth
+you will have less need, but scaling remains tricky}).
 Formatting is done with forthdefi({double})'s exclusively, and relies
 on this wordset. Operators with mixed precision and unsigned operators
 allow to build arbitrary precision operators from them in forthdefi({high level}) code.},

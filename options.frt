@@ -21,15 +21,15 @@ CREATE pad 80 ALLOT \ Word surrounded by spaces
 \  For LINE : return the POSITION of the word at ``pad''.
 : POSITION   pad @ - OVER + SWAP
   DO   I pad $@ CORA   0= IF I UNLOOP EXIT THEN   LOOP   0 ;
-\ Find word in blocks N and up. Load and leave the block AFTER.
-: ?LOAD?   BEGIN 0 OVER (LINE) -TRAILING   DUP 0= 24 AND THROW
-   POSITION 0= WHILE 1+ REPEAT   DUP LOAD 1+ ;
-: (WANTED)   ( sc -- sc) ERRSCR @ 4 + >R   BEGIN 2DUP FILL-pad
-  2DUP PRESENT 0= WHILE R> ?LOAD? >R REPEAT RDROP ;
+\ Find WORD in blocks N and up. Leave the BLOCK or throw.
+: #LOCATED  >R FILL-pad R> BEGIN 0 OVER (LINE) -TRAILING
+    DUP 0= 24 AND THROW POSITION 0= WHILE 1+ REPEAT   ;
+: (WANTED)   ( sc -- ) ERRSCR @ 4 + >R   BEGIN 2DUP PRESENT 0=
+  WHILE 2DUP R> #LOCATED DUP 1+ >R  LOAD REPEAT RDROP ;
 \ Make sure WORD is present in the current namespace
-: WANTED   '(WANTED) CATCH
-  DUP 24 = IF >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
-: WANT NAME WANTED ; : CF: "CONFIG" WANTED ; WANT -legacy-
+: WANTED   '(WANTED) CATCH DUP 24 = IF >R ETYPE R> MESSAGE
+    ELSE THROW 2DROP THEN ;   : WANT   ( "name" ) NAME WANTED ;
+: CF: "CONFIG" WANTED ;   WANT -legacy-
 ( -b :_This_option_is_available )
 
 

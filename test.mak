@@ -146,7 +146,7 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
 	)| m4 > $@
 	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html |\
-	sed -e 's/~"/"/' >> $@
+	sed -e 's/~"/"/' -e 's/_left_parenthesis_/\(/' >> $@
 	#rm temp.html
 
 %.info : %.texinfo  ; makeinfo --no-split $< -o $@
@@ -161,7 +161,7 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 menu.
 	    cat $(@:ci86.%.texinfo=%.cfg) manual.m4 namescooked.m4 ciforth.mi \
 	)| tee spy | m4 |\
 	sed -e '/Split here for documentation/,$$d' |\
-	sed -e 's/thisforth/$(@:ci86.%.texinfo=%)/g' > $@
+	sed -e 's/thisforth/$(@:ci86.%.texinfo=%)/g' -e 's/_left_parenthesis_/\(/' > $@
 #        rm wordset.mi menu.texinfo
 
 cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
