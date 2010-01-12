@@ -14,13 +14,13 @@ License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
-( -a :_Make_require_available_silently ) \ AvdH A2jan20
+( -a :_Make_require_available_silently ) \ AvdH B0jan12
 ( WANT WANTED CF: ) \ AvdH A7feb24
-CREATE pad 80 ALLOT \ Word surrounded by spaces
-: FILL-pad   ( sc --) " " pad $!   pad $+!   " " pad $+! ;
-\  For LINE : return the POSITION of the word at ``pad''.
-: POSITION   pad @ - OVER + SWAP
-  DO   I pad $@ CORA   0= IF I UNLOOP EXIT THEN   LOOP   0 ;
+CREATE _pad 80 ALLOT \ Word surrounded by spaces
+: FILL-pad   ( sc --) " " _pad $!   _pad $+!   " " _pad $+! ;
+\  For LINE : return the POSITION of the word at ``_pad''.
+: POSITION   _pad @ - OVER + SWAP
+  DO   I _pad $@ CORA   0= IF I UNLOOP EXIT THEN   LOOP   0 ;
 \ Find WORD in blocks N and up. Leave the BLOCK or throw.
 : #LOCATED  >R FILL-pad R> BEGIN 0 OVER (LINE) -TRAILING
     DUP 0= 24 AND THROW POSITION 0= WHILE 1+ REPEAT   ;

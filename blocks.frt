@@ -78,8 +78,8 @@
 
 
 \
-( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ A7jun10
-: ?LEAVE-BLOCK   IF SRC CELL+ @ IN ! THEN ;
+( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B0jan12
+: ?LEAVE-BLOCK   IF SRC CELL+ @ >IN ! THEN ;
 : CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
 0 CELL+
   DUP 2 = CONFIG ?16   DUP 4 = CONFIG ?32   8 = CONFIG ?64
@@ -136,7 +136,7 @@
 
 : VOCABULARY NAMESPACE IMMEDIATE ;
 
-
+: l_>IN >IN   @   SRC   @   -   (>IN)   !   (>IN) ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
@@ -438,8 +438,8 @@ CREATE DOES>$ LEN ALLOT   \ Generate fields/methods.
 \ Add STRING and the name of the current struct to CRS$.
 : +NAME$   CRS$ $+!    NAME$ $@ CRS$ $+!   BL CRS$ $C+ ;
 VARIABLE LAST-IN         VARIABLE start
-: RLI IN @ LAST-IN ! ; \ Remember last value of ``IN''.
-: GLI >R LAST-IN @ IN @  R> - OVER - ; \ Input since RLI trim.
+: RLI >IN @ LAST-IN ! ; \ Remember last value of ``>IN''.
+: GLI >R LAST-IN @ >IN @  R> - OVER - ; \ Input since RLI trim.
 : itoa 0 <# #S BL HOLD #> ; \ Transform an INT to a STRING.
 \ Add the first part of a definition of a field to DOES>$.
 : F:   " : " DOES>$ $+! NAME DOES>$ $+!   RLI
@@ -468,8 +468,8 @@ CREATE NAME$ 128  ALLOT         \ The name of the struct.
 CREATE CRS$ 4096 ALLOT          \ Evaluate buffer, general.
 VARIABLE LAST-IN                \ Start of interpreted code
 VARIABLE DP-MARKER              \ Start of alternative dict.
-: !IN   IN @ LAST-IN ! ;        \ Remember last value of ``IN''
-: IN$  LAST-IN @ IN @  OVER - ; \ Return input STRING since !IN
+: !IN   >IN @ LAST-IN ! ;       \ Remember last value of ``IN''
+: IN$  LAST-IN @ >IN @  OVER - ; \ Return input since >IN !
 : itoa   0 <# #S #> ;           \ Transform an INT to a STRING.
 \ Compile "method" working on addres with offset.
     CREATE M$ 256 ALLOT         \ Evaluate buffer, method.
@@ -1333,7 +1333,7 @@ WANT TASK-TABLE   WANT CVA
 : (WORD-BACK) BEGIN 1- DUP C@ ?BLANK 0= UNTIL 1+
     BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ;
 \ Return SC the latest word in the input.
-: LATEST-WORD IN @ (WORD-BACK) SRC @ MAX IN ! NAME ( TRIM') ;
+: LATEST-WORD >IN @ (WORD-BACK) SRC @ MAX >IN ! NAME ( TRIM') ;
 \ The compiled program can't run.
 VARIABLE FAILED    0 FAILED !
 \ The compiled program can run, after reload.
@@ -1351,7 +1351,7 @@ WANT SWAP-DP    WANT LATEST-WORD   WANT NESTED-COMPILE
 \ Make words that look like malformed numbers (like 2R> )
 \ compile without error, but with run time errors.
 \ Loading the same code another time will give correct code.
-: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 IN +!
+: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 >IN +!
 -1 SECOND-PASS !   -1 POSTPONE LITERAL   13 POSTPONE LITERAL
  POSTPONE ?ERROR   " Recompile!" TYPE CR ;
 \ Fix up errors caused by unknown words, if the library can
@@ -3568,7 +3568,7 @@ DECIMAL  getit
 ;
 ( A reverse engineering BLK and SOURCE-ID )
 : BLK'
-    IN @ FIRST LIMIT WITHIN
+    >IN @ FIRST LIMIT WITHIN
     SRC 2@ - 1024 = AND
     IF SRC @ 2 CELLS - @ ELSE 0 THEN
     BLK !
@@ -3892,9 +3892,9 @@ WANT +THRU
   with that definition. )
 : FORWARD CREATE 0 , DOES> @ DUP 0= 9 ?ERROR
    R> 1 CELLS - DUP >R  ! ;
-( : DOIT HERE IN @ POSTPONE ' POSTPONE >DFA ! IN !
+( : DOIT HERE >IN @ POSTPONE ' POSTPONE >DFA ! >IN !
 POSTPONE : ; )
-: :R  IN @ >R [COMPILE] : R> IN !
+: :R  >IN @ >R [COMPILE] : R> >IN !
 HERE >CFA NAME FOUND IF CELL+ ! THEN ; IMMEDIATE
 FORWARD FAC
 :R FAC   DUP 0= IF DROP 1 ELSE DUP 1 - FAC * THEN ;
