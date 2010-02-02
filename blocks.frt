@@ -151,6 +151,22 @@ the standard but that is implemented by using only standard
 words.
 Sometimes it is an ``in''tension, a loadable extension required
 for ISO, that in my opinion should never be loaded.
+Note that ISO words are only documented by the comment ISO.
+
+
+
+
+
+\
+( SAVE-INPUT RESTORE-INPUT --> )                \ B0jan12
+: SAVE-INPUT    SRC 2@ >IN @ 3 ;                \ ISO
+: RESTORE-INPUT   DROP >IN ! SRC 2! -1 ;        \ ISO
+: -->   BLK @ DUP UNLOCK   1+ DUP LOCK
+    BLOCK B/BUF SET-SRC ; IMMEDIATE             \ ISO
+
+
+
+
 
 
 
@@ -158,22 +174,38 @@ for ISO, that in my opinion should never be loaded.
 
 
 \
-( DEPTH )                               \ AvdH A7mar27
-: DEPTH   S0 @ DSP@ -   [ 0 CELL+ ] LITERAL /   1- ;
+( TIME&DATE ) CF: ?LI \ AH A30610
+: SSE   0 0 0 13 XOS ; ( Seconds since epoch: 1970/1/1)
+: |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
+CREATE TABLE ( start of month within leap period) -1
+    31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
+    31 | 28 | 5m 5m   ,   : T[] CELLS TABLE + @ ;
+\ For DAYS within leap return MONTHS
+: MONTHS   >R 0 BEGIN R@ OVER T[] > WHILE 1+ REPEAT 1- RDROP ;
+\ For DAYS within leap period return DAY MONTH YEARS
+: SPLIT-LEAP  DUP MONTHS DUP >R T[] - R> 12 /MOD >R 1+ R> ;
+\ For TIME return SEC MIN HOUR DAYS
+: SPLIT-OFF-TIME   0 60 UM/MOD   60 /MOD   24 /MOD ;
+\ For DAYS return DAY MONTH YEAR
+: SPLIT-OFF-DATE  1461 /MOD >R SPLIT-LEAP   R> 4 * + 1970 + ;
+\ Return current  SEC MIN HOUR DAY MONTH YEAR
+: TIME&DATE   SSE   SPLIT-OFF-TIME   SPLIT-OFF-DATE ;
+( TIME&DATE ) CF: ?PC \ AH A30612
+HEX
+\ Return current  DAY MONTH YEAR
+: DATE    2A00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
+    R> 100 /MOD   R> ;
 
+\ Return current  SEC MIN HOUR
+: TIME    2C00 _ _ _ BDOSO 2DROP SWAP >R >R DROP
+    R> 100 /   R> 100 /MOD ;
 
-
-
-
-
-
-
-
-
-
-
-
-
+\ Return current  SEC MIN HOUR DAY MONTH YEAR
+: TIME&DATE TIME DATE ;
+\ In fact a check is in order whether the day has changed
+: TIME&DATE DATE >R >R >R   TIME DATE 2DROP DUP R> = IF
+    R> R> ELSE RDROP RDROP 2DROP 2DROP RECURSE THEN ;
+DECIMAL
 ( DEADBEEF leading_hex_digit) CF: \ AvdH A5jun28
 \ Are denotations starting with "Z" already known?
 "A" 'ONLY >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
@@ -753,6 +785,22 @@ RANDOMIZE
 ( **************Non ISO language extension *******************)
 
 
+Contains language extensions that are not ISO in the sense
+that they are neither a standard word nor implemented using
+standard words.
+We put here also reference implementations.
+
+
+
+
+
+
+
+
+
+( DEPTH )                               \ AvdH A7mar27
+: DEPTH   S0 @ DSP@ -   [ 0 CELL+ ] LITERAL /   1- ;
+
 
 
 
@@ -782,38 +830,6 @@ RANDOMIZE
 
 
 \
-( TIME&DATE ) CF: ?LI \ AH A30610
-: SSE   0 0 0 13 XOS ; ( Seconds since epoch: 1970/1/1)
-: |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
-CREATE TABLE ( start of month within leap period) -1
-    31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
-    31 | 28 | 5m 5m   ,   : T[] CELLS TABLE + @ ;
-\ For DAYS within leap return MONTHS
-: MONTHS   >R 0 BEGIN R@ OVER T[] > WHILE 1+ REPEAT 1- RDROP ;
-\ For DAYS within leap period return DAY MONTH YEARS
-: SPLIT-LEAP  DUP MONTHS DUP >R T[] - R> 12 /MOD >R 1+ R> ;
-\ For TIME return SEC MIN HOUR DAYS
-: SPLIT-OFF-TIME   0 60 UM/MOD   60 /MOD   24 /MOD ;
-\ For DAYS return DAY MONTH YEAR
-: SPLIT-OFF-DATE  1461 /MOD >R SPLIT-LEAP   R> 4 * + 1970 + ;
-\ Return current  SEC MIN HOUR DAY MONTH YEAR
-: TIME&DATE   SSE   SPLIT-OFF-TIME   SPLIT-OFF-DATE ;
-( TIME&DATE ) CF: ?PC \ AH A30612
-HEX
-\ Return current  DAY MONTH YEAR
-: DATE    2A00 _ _ _ BDOSO DROP SWAP >R >R 2DROP
-    R> 100 /MOD   R> ;
-
-\ Return current  SEC MIN HOUR
-: TIME    2C00 _ _ _ BDOSO 2DROP SWAP >R >R DROP
-    R> 100 /   R> 100 /MOD ;
-
-\ Return current  SEC MIN HOUR DAY MONTH YEAR
-: TIME&DATE TIME DATE ;
-\ In fact a check is in order whether the day has changed
-: TIME&DATE DATE >R >R >R   TIME DATE 2DROP DUP R> = IF
-    R> R> ELSE RDROP RDROP 2DROP 2DROP RECURSE THEN ;
-DECIMAL
 ( $-PREFIX #-PREFIX  ESC ) \ AvdH A1apr15
 
 

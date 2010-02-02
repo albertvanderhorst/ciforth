@@ -2143,7 +2143,7 @@ _HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      OVER, LSUB
         DC      SEMIS
 _C
-worddoc( {LEGACY},{legacy_>IN},{legacy_in},{--- addr},{ISO},
+worddoc( {LEGACY},{l_>IN},{legacy_in},{--- addr},{ISO},
 {Hides and replaces the user variable forthcode({>IN}).
 All parsing words use and move the value of that user variable.
 Return a variable that contains the offset from the start
@@ -3392,7 +3392,7 @@ the forthdefi({current input source}) has changed.},
 enddoc)
 _HEADER({(BLK)},{PBLK},{DOUSE}, _CELLS(26))
 _C
-worddoc( {INPUT},{>IN},{to-in},{--- addr},{},
+worddoc( {INPUT},{>IN},{to_in},{--- addr},{},
 {A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted. All parsing words use and move the value of forthcode({>IN}) .
@@ -5867,9 +5867,9 @@ _HEADER({INIT},{INIT},{DOCOL})
         DC      DECA
         DC      ONLY, FORTH, DEFIN
 _BLOCKSINFILE_({
-        DC      LIT, 0, BLINI  _C{Default, open library file read-only!}
-})_C{}_END_({_BLOCKSINFILE_})
+        DC      LIT, 0, BLINI  _C{Default, open library file read-only!}},{
         DC      MTBUF
+})_C{}_END_({_BLOCKSINFILE_})
         DC      SEMIS
 _C{}
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
@@ -6580,7 +6580,7 @@ _HEADER({RESTORE},{RESTO},{DOCOL})
         DC SEMIS
 _C
 _LOAD_({
-worddoc( {BLOCKS~},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
+worddoc( {LIBRARY},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
 {Get a complete specification of the input source stream. For
 ciforth this is the content of forthcode({SRC}). ciforth needs
 3 cells, and is always able to forthcode({RESTORE}) an input
@@ -6589,16 +6589,11 @@ saved like this. _VERBOSE_({{In practice the use of
 of the same stream.
 }}) },
 {{RESTORE},{RESTORE-INPUT}},
-{{!CSP : GS1 SAVE-INPUT 0 >IN ! RESTORE-INPUT ; dnl
+{{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 >IN ! RESTORE-INPUT ; dnl
     34 GS1 . . ?CSP},{-1 34} },
 enddoc)
-_HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
-        DC      SRC, TFET
-        DC      LIN, FETCH
-        DC      LIT, 3
-        DC SEMIS
 _C
-worddoc( {BLOCKS~},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3---f},{ISO},
+worddoc( {LIBRARY},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3---f},{ISO},
 {Restore the input source stream from what was saved by
 SAVE-INPUT .
 ciforth is always able to restore the input across
@@ -6612,12 +6607,6 @@ input source. }}) },
 {{RESTORE},{SAVE-INPUT}},
 {{( Via SAVE-INPUT)},{}},
 enddoc)
-_HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
-        DC      DROP
-        DC      LIN, STORE
-        DC      SRC, TSTOR
-        DC      LIT, -1
-        DC SEMIS
 _C
 })_C{}_END_({_LOAD_})
 worddoc( {SCREEN},{LOCK},{lock},{ n ---},{CI},
@@ -6740,7 +6729,7 @@ BLK2:
         DC      PBLK
         DC      SEMIS
 _C
-worddocsafe( {SCREEN},{-->},{next_screen},{},{I,L0},
+worddocsafe( {LIBRARY},{-->},{next_screen},{},{I,L0},
 {Continue interpretation with the next disc screen. If the
 current input source is not from a block, a crash will ensue.
 If this new screen is left by throw of an exception, the
@@ -6749,18 +6738,6 @@ uncaught exception. },
 {{LOCK},{CATCH},{LOAD}},
 {{." interactive"},{interactive}},
 enddoc)
-_HEADER({-->},{ARROW},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      QLOAD})
-        DC      BLK, FETCH
-        DC      LDUP, LUNLOCK
-        DC      ONEP
-        DC      LDUP, LLOCK
-        DC      LDUP, BLK, STORE
-        DC      BLOCK
-        DC      BBUF
-        DC      SETSRC
-        DC      SEMIS
-        PAGE
 _C
 })_C{}_END_({_LOAD_})
 _PC_({
@@ -8546,6 +8523,7 @@ _HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      LWARN, FETCH, MIN _C{ AND but WARNING is 0/1.}
         DC      LWARN, STORE
         DC      BHAN, STORE
+        DC      MTBUF
         DC      SEMIS
 _C
 worddoc( {BLOCKS},{BLOCK-EXIT},{block_exit},{---},{},
@@ -10613,6 +10591,13 @@ directly.})},
 worddocchapter({OPERATINGSYSTEM},{ },
 {The wordset forthsamp({OPERATINGSYSTEM}) contains words that call the underlying operating
 system or functions available in the BIOS-rom.},
+{},{},{},{}, {}, enddoc)
+worddocchapter({LIBRARY},{ },
+{The words compiled into library are mainly legacy words that
+were traditionally in the kernel.
+All of them can be loaded from the library by forthsamp({WANT})
+forthvar({LEGACY_WORD}).
+},
 {},{},{},{}, {}, enddoc)
 worddocchapter({WORDLISTS},{ },
 {The dictionary is subdivided in non-overlapping subsets: the
