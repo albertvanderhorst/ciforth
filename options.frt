@@ -19,7 +19,7 @@ License along with this program; if not, write to the
 CREATE _pad 80 ALLOT \ Word surrounded by spaces
 : FILL-pad   ( sc --) " " _pad $!   _pad $+!   " " _pad $+! ;
 \  For LINE : return the POSITION of the word at ``_pad''.
-: POSITION   _pad @ - OVER + SWAP
+: POSITION   _pad @ - 0 MAX OVER + SWAP
   DO   I _pad $@ CORA   0= IF I UNLOOP EXIT THEN   LOOP   0 ;
 \ Find WORD in blocks N and up. Leave the BLOCK or throw.
 : #LOCATED  >R FILL-pad R> BEGIN 0 OVER (LINE) -TRAILING
