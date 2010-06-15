@@ -48,7 +48,7 @@
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : NO BUFFER COULD BE FREED, ALL LOCKED
  : EXECUTION OF EXTERNAL PROGRAM FAILED
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ : NOT ENOUGH MEMORY FOR ALLOCATE
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -157,6 +157,38 @@ Note that ISO words are only documented by the comment ISO.
 
 
 
+\
+( MEMORY _AH            )                      \ AvdH B0jun10
+WANT NIP   2 CELLS CONSTANT overhead
+CREATE _alloc-buf HERE _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
+    HERE OVER ! DUP , ,
+VARIABLE _ADP   _alloc-buf _ADP !    : _AH _ADP @ ;
+: _bump   _AH @ _ADP ! ;
+: _alloc_f   CELL+ DUP >R CELL+ + R> ! ;
+: _free   0 SWAP CELL+ ! ;
+: _split DUP $@ SWAP @ ALIGNED >R 0 R@ CELL+ ! R@ ! R>
+    SWAP ! ;
+: _merge DUP @ OVER < IF DROP ELSE DUP >R
+    BEGIN @ DUP CELL+ @ UNTIL R> !  THEN ;
+: _free? CELL+ @ 0= ;
+: _avail   DUP @ SWAP - overhead - ;
+: _remain DUP $@ SWAP @ DUP IF - NIP ELSE DROP SWAP - THEN
+    overhead - ;
+( MEMORY ALLOCATE FREE RESIZE  )                \ AvdH B0jun10
+WANT _AH
+: _search  _AH BEGIN DUP _merge 2DUP _remain > WHILE @
+  DUP _AH = 50 ?ERROR REPEAT _ADP ! DROP ;
+: _allocate  _AH _merge   DUP _AH _remain > IF
+   _bump DUP _search THEN   _AH _free? 0= IF
+   _AH _split _bump THEN   _AH _alloc_f _AH overhead + ;
+: _alloc&move DUP _allocate DUP >R SWAP CMOVE  R> ;
+: _resize   OVER overhead - >R R@ _merge  DUP R@ _avail > IF
+   _alloc&move R> _free ELSE R> _alloc_f THEN  ;
+: INTEGRITY?   DUP BEGIN DUP @ 2DUP < WHILE NIP REPEAT NIP = ;
+( ISO )
+: ALLOCATE   ['] _allocate CATCH ;
+: FREE   overhead - _free 0 ;
+: RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
 \
 ( SAVE-INPUT RESTORE-INPUT --> )                \ B0jan12
 : SAVE-INPUT    SRC 2@ >IN @ 3 ;                \ ISO
