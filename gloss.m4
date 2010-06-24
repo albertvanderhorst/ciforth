@@ -40,7 +40,7 @@ See also: forall({forthsamp},$7)})dnl
 {{{$8}})dnl
 define({_next$3},}dnl
     divert(6)dnl
-* $2  :ifelse($9,,:,$9)
+* $2  :ifelse($3,,:,$3)
 divert(9)dnl
 })dnl
 define({worddocchapter},

@@ -2143,7 +2143,8 @@ _HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      OVER, LSUB
         DC      SEMIS
 _C
-worddoc( {LEGACY},{l_>IN},{legacy_in},{--- addr},{ISO},
+dnl doc( {LIBRARY},{L_>IN},{legacy_in},{--- addr},{ISO},
+worddoc( {LIBRARY},{L_IN},{legacy_in},{--- addr},{ISO},
 {Hides and replaces the user variable forthcode({>IN}).
 All parsing words use and move the value of that user variable.
 Return a variable that contains the offset from the start
@@ -3407,12 +3408,12 @@ _C
 _LOAD_({
 worddocsafe( {INPUT~},{(>IN)},{paren_iso_in},{--- addr},{},
 {After forthsample({WANT -legacy-}) this is used by
-the redefined word forthcode({>IN}), to store
+the word forthcode({L_>IN}), to store
 the offset from the start within the current input
 text buffer (terminal or disc) from which the next text will be
 accepted, to get a behaviour more in accordance with the standard.
 All parsing words use and move the value of forthcode({>IN}) .},
-{{>IN},{>IN}},
+{{>IN}},
 {{." See >IN"},{See >IN}},
 enddoc)
 _HEADER({(>IN)},{PIIN},{DOUSE}, _CELLS(30))
@@ -10593,8 +10594,12 @@ worddocchapter({OPERATINGSYSTEM},{ },
 system or functions available in the BIOS-rom.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({LIBRARY},{ },
-{The words compiled into library are mainly legacy words that
-were traditionally in the kernel.
+{The words described into library have nothing particular in common,
+except that they are available in the forthdefi({LAB}) and not the
+ciforth kernel.
+They are either words from the library that are sufficiently useful
+to merit being described here, or legacy words that
+were in the kernel in earlier versions.
 All of them can be loaded from the library by forthsamp({WANT})
 forthvar({LEGACY_WORD}).
 },

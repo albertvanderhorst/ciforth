@@ -126,17 +126,17 @@
 
 
 
-( -legacy- PRESENT? REQUIRE REQUIRED ) \ AvdH A8jun24
+( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH A8jun24
 \ This will make most old programs run.
 : REQUIRE WANT ;   : REQUIRED WANTED ;
+WANT SAVE-INPUT
 
-: $S $/ ;   : $I $^ ;
-
-: (WORD) NAME ;   : (PARSE) PARSE ;
+WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
+'PARSE ALIAS (PARSE)
 
 : VOCABULARY NAMESPACE IMMEDIATE ;
 
-: l_>IN >IN   @   SRC   @   -   (>IN)   !   (>IN) ;
+: L_>IN >IN   @   SRC   @   -   (>IN)   !   (>IN) ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
