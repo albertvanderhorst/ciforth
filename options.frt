@@ -310,7 +310,7 @@ WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
 \ This error handler may be overwritten by the script.
 : MY-ERROR    DECIMAL
     "In file " TYPE SCRIPT-NAME $@ TYPE BY-WHO CR
-    IN @ 20 - 40 TYPE CR
+    >IN @ 20 - 40 TYPE CR
     "Fatal error at : " TYPE   OLD: ERROR CR CR    ;
 -1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 SHIFT-ARGS  SHIFT-ARGS
