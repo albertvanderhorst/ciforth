@@ -74,11 +74,14 @@ C List and load the elective screen (8 before 3.223, now 5)
 D
 after 2.223 : REQUIRE SIEVE 0 PAUSE ! 100 SIEVE
 before 2.223 : REQUIRE ERATOSTHENES 0 PAUSE ! 100 SIEVE
+after  5.62 :  WANT    ERATOSTHENES 0 PAUSE ! 100 SIEVE
   primes ending in 99971 99989 99991
 E (requires A) KRAAK QUIT
 F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
+After 5.62 : CASE-INSENSITIVE WANT MEASURE-PRIME
 G (r. A) Editing a screen
 H ``wc *.asm''  . later ``mywc *.asm''.
+After 5.62 : ``mywc *.asm''.
 J Binary equivalent than compiled on linux
 K BYE
 L Dos Directory correct
