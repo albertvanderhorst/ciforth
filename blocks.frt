@@ -902,7 +902,7 @@ CREATE BASE' 0 ,
 ( Add a . after 4 digits )
  : 4?  1+ 4 MOD 0= IF &, HOLD THEN ;
 ( Generate string with hex format of DOUBLE of LEN digits)
- : (DH.) <HEX <# 1- 0 DO # I 4? LOOP # #> HEX> ;
+ : (DH.) <HEX <# 1- 0 ?DO # I 4? LOOP # #> HEX> ;
  : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
  : H.  S>D 2 CELLS (DH.) TYPE ; ( print SINGLE in hex )
  : B.  S>D 2 (DH.) TYPE ; ( print BYTE in hex )
