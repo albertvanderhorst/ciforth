@@ -27,7 +27,7 @@ HEX
     DSP@
     DUP RTS -
     U0 @ DSP@ - US +
-    ^ MOVE
+    .S MOVE
     DSP@ RTS - DSP!
     DUMP-IT
     RSP@ RTS - RSP!
@@ -50,7 +50,7 @@ HEX
 \  - the first parameter matters
 \  - the second parameter is indeed the stack of the child
 \  - the third parameter matters not
-: CLONE SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone LINOS DUP 0< IF THROW THEN ;
+: CLONE SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone XOS DUP 0< IF THROW THEN ;
 
 \ Keep item ONE and TWO on the data stack while
 \ switching the stack frame to new return stack POINTER.
@@ -71,7 +71,7 @@ HEX
 \ with separate data stacks, one original, one temporary.
 \ Transport the 2 items on the stack via the return stack.
 DOES> 0 OVER ! >R >R
-SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone LINOS DUP 0< IF THROW THEN
+SIGCHLD CLONE_VM OR DSP@ 400 - _ sys_clone XOS DUP 0< IF THROW THEN
 \ Don't use the return stack until child has been set up.
 DUP IF RDROP R> BEGIN DUP @ UNTIL ! ELSE R> R>
 \ Install return stack
@@ -79,14 +79,14 @@ DUP [ 0 CELL+ ] LITERAL + @ RSP! \ CELL+ is high level!
 \ Install data stack transporting two items via return stack.
 >R >R S0 @ DSP! R> R> -1 SWAP !
 \ Run and stop
-EXECUTE 0 _ _ 1 LINOS THEN ;
+EXECUTE 0 _ _ 1 XOS THEN ;
 
 \ Kill the thread via its DEA. Throw errors.
-: KILL >BODY @ 9 _ 25 LINOS ?ERRUR ;
+: KILL >BODY @ 9 _ 25 XOS ?ERRUR ;
 
 \ Do a preemptive pause.
 \ In fact wait on nothing with a 10^6 nanoseconds timeout.
-: PAUSE 0 0 1000 0 DSP@ 8E LINOS5 DROP ;
+: PAUSE 0 0 1000 0 DSP@ 8E XOS5 DROP ;
 
 \ Example. From the transputer world.
 
@@ -114,6 +114,7 @@ REPEAT ;
 : do-slave
 BEGIN
     M>S CHANNEL-C@ DUP ^D <> WHILE
+    ." received" DUP EMIT
     >UPC S>M CHANNEL-C!
 REPEAT DROP ;
 
@@ -123,7 +124,7 @@ REPEAT DROP ;
 \ Send hither and thither characters until an ``ASCII''
 \ End Of Text (ETX or ^D) is pressed.
 : do-it   'do-slave SLAVE   do-master ;
-
+EXIT
 \ -----------------------------
 REQUIRE SET
 
