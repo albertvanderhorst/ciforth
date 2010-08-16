@@ -673,8 +673,23 @@ you will see that they are interspersed with the
 high level Forth definitions.
 In fact it is quite common to decide to rewrite a code definition in high level
 Forth, or the other way around.
+The forthdefi({Library Addressable by Block}) contains an assembler,
+to add code definitions that will blend in like they were written
+in the kernel.
+Such definitions are to be closely matched with your particular
+ciforth,
+and you must be aware which registers play which role in ciforth.
+This is documented in the assembler source of this ciforth that
+accompagnies this distribution.
+Of course it is also a rich source of examples how to
+make assembler definitions.
 
-Again code words are perfectly normal dictionary entries.
+It bears repeating: code words are perfectly normal dictionary entries.
+
+Note: there is a separate document for if you want to change
+this ciforth's assembler source to fit your needs,
+although I strove to make it self contained.
+It includes assembling and linking instructions.
 @subsection                      High-level Standard Definitions
 
 The high level standard definitions add all
