@@ -1095,17 +1095,17 @@ start:
 COLD_ENTRY:
         CLD                     _C{ DIR = INC}
 _THREADS_({
-        MOV     EAX, _CELL_PTR[USINI+_CELLS(1)]
-        MOV     EBX, EAX
-        DEC     EBX
-        OR      EBX, STACKSIZE-1    _C{Requires it is power of 2.}
-        INC     EBX
-        SUB     EBX,EAX
-        ADD     LONG[USINI+(CW*(0))], EBX
-        ADD     LONG[USINI+(CW*(1))], EBX
-        ADD     LONG[USINI+(CW*(2))], EBX
-        ADD     LONG[USINI+(CW*(3))], EBX
-        ADD     LONG[USINI+(CW*(4))], EBX
+        MOV     AX, _CELL_PTR[USINI+_CELLS(1)]
+        MOV     BX, AX
+        DEC     BX
+        OR      BX, STACKSIZE-1    _C{Requires it is power of 2.}
+        INC     BX
+        SUB     BX,AX
+        ADD     _CELL_PTR[USINI+(CW*(0))], BX
+        ADD     _CELL_PTR[USINI+(CW*(1))], BX
+        ADD     _CELL_PTR[USINI+(CW*(2))], BX
+        ADD     _CELL_PTR[USINI+(CW*(3))], BX
+        ADD     _CELL_PTR[USINI+(CW*(4))], BX
 
 })_C{}_END_({_THREADS_})
 _HOSTED_X_(
@@ -1908,7 +1908,11 @@ _C{ Make it possible to revector WARM. You can even make it low level. }
         MOV     WOR,_OFFSET WARM
         JMP     [WOR]                   _C{Hope stacks are still okay.}
         _ALIGN(_CELLS(1))
-USINI:  DC      STRUSA  _C{ User area currently in use, cold value same as next.}
+USINI:  DC      STRUSA   dnl
+_THREADS_(
+_C{ user area, unused in this threading Forth.},
+_C{ user area, cold value same as next.}
+)_C{}_END_({_THREADS_})
         DC      STRUSA  _C{ INIT (U0) user area of the main task 1}
         DC      INITS0  _C{ INIT (S0)         2}
         DC      INITR0  - _CELLS(1)
@@ -2982,12 +2986,22 @@ worddoc( {DEFINING},{USER},{user},{n ---},{ISO,L0},
 {A defining word used in the form:
                forthsamp({n USER cccc})
 which creates a user variable forthsamp({cccc}) . The data
-field of forthsamp({cccc}) contains forthvar({n}) as a fixed
-offset relative to the user pointer register forthsamp({UP})
+field of forthsamp({cccc}) contains forthvar({n}) as a
+cell offset relative to the user pointer register forthsamp({UP})
 for this user variable. When forthsamp({cccc}) is later
 executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
-particular variable. In ciforth the forthsamp({UP}) is fixed.
+particular variable.
+_THREADS_(
+{In this ciforth forthsamp({UP}) is coupled to the return stack.
+This means that with a switch of the return stack{,}
+forthsamp({UP}) is switched also automatically.},
+{In this ciforth the forthsamp({UP}) is to be found at
+forthsamp({0 +ORIGIN}).
+})_C{}_END_({_THREADS_})
+forthcode({CONTEXT}) is the last user variable at offset 37 ,
+such that new user variables may be allocated using offsets of
+37+M4_MAXWORDLIST and up.
 },
 {{VARIABLE},{+ORIGIN},{CONTEXT},{>DFA}},
 {{ 0 USER APE 1A34 APE ! APE @ .},{1A34} },
@@ -3180,7 +3194,7 @@ The data stack of the main task runs down to forthcode({HERE}) .
 enddoc)
 _HEADER({TASK-SIZE},{LTAS},{DOCON}, TAS)
 _C
-})_C{}_END_({_THREADS_})
+})dnl{}_END_({_THREADS_})
 worddoc( {BLOCKS},{B/BUF},{bytes_per_buf},{--- n},{},
 {This constant leaves the number of bytes per disc buffer, the byte
 count read from disc by forthcode({BLOCK}) .
@@ -3494,9 +3508,6 @@ compilation in threads}).
 It may contain up to M4_MAXWORDLIST WID 's in
 this ciforth, while the ISO Search-Order wordset requires a capacity of at
 least 8.
-forthcode({CONTEXT}) is the last user variable at offset 37 ,
-such that new user variables may be allocated using offsets of
-37+M4_MAXWORDLIST and up.
 },
 {{PRESENT},{NAMESPACE},{CURRENT},{USER}},
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
