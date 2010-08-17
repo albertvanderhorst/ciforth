@@ -1098,7 +1098,7 @@ _THREADS_({
         MOV     AX, _CELL_PTR[USINI+_CELLS(1)]
         MOV     BX, AX
         DEC     BX
-        OR      BX, STACKSIZE-1    _C{Requires it is power of 2.}
+        OR      BX, _OFFSET STACKSIZE-1    _C{Requires it is power of 2.}
         INC     BX
         SUB     BX,AX
         ADD     _CELL_PTR[USINI+(CW*(0))], BX
@@ -3012,7 +3012,7 @@ _HEADER({USER},{USER},{DOCOL})
 DOUSE:  MOV     BX,[WOR+_CELLS((D_HOFFSET))] _C{PFA  }
 _THREADS_(
 {       MOV     AX, BP
-        OR      AX, STACKSIZE-1  _C{Requires it is power of 2.}
+        OR      AX, _OFFSET STACKSIZE-1  _C{Requires it is power of 2.}
         INC     AX
 },
 {        MOV     AX,_CELL_PTR[USINI]

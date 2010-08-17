@@ -128,3 +128,13 @@ How to make an xp distro for Simtel
         make an executable with the correct default shell, by editing the asm file
         copy the distribution to wna4x0x#
         replace executable and README.wina in the a copy of the distro
+
+2010 aug 17
+How to make a 64 bit release.
+make lina64.zip VERSION=beta-5-63
+Now the executable has to be build on a 64 bit system, because the
+executable generated on Suse 32 bit, doesn't run.
+[This may be a red herring, as the gas source contained an error
+dd 2010 aug 17 ]
+as -64 lina64.s
+ld -s -N a.out -o lina64
