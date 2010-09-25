@@ -1157,7 +1157,7 @@ WANT Z$@   WANT COMPARE
 \ Return the argument VECTOR passed by Linux
 : ARGV   ARGS @   CELL+ ;
 \ Return the environment POINTER passed by Linux
-: ENV   ARGS @   $@ 1+ CELLS + ;
+ARGS @   $@ 1+ CELLS +  CONSTANT ENV
 \ Find argument INDEX, counting from one. Return as a STRING.
 : ARG[] CELLS ARGV + @ Z$@ ;
 \ Return POINTER behind the end-0 of the environment.
