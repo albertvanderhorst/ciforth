@@ -936,11 +936,11 @@ ERRMSG2:    JC      ERRMSG
 _C{ -------------- Fill in the vector at BYE ----------------------}
 _C{This must be done before copying!}
         LEA     ECX,[RETDOS]
-        LEA     BX,[RETDOSV+1]
-        MOV     [BX],ECX
-        LEA     BX, [BX+CW]
+        LEA     EBX,[RETDOSV+1]
+        MOV     [EBX],ECX               _C{For 16 bit, half is overwritten}
+        LEA     EBX, [EBX+CW]
         MOV     AX,CS
-        MOV     [BX],AX
+        MOV     [EBX],AX
 
 _C{ -------------- Get an 32-bit alias for the data segment into DX  --------}
             MOV     AX,0x000A            _C{Alias for LDT descriptor.}
@@ -953,7 +953,7 @@ _C{ -------------- Get an 32-bit alias for the data segment into DX  --------}
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,DX
             _C{ %1000 0000 1111 1010  %1100 0000 1111 1010}
-            MOV     CX, 0x80F2  | 0x4000
+            MOV     CX, 0x80F2  _OR_ 0x4000
             INT     0x31
             MOV     BL,7
             JC      ERRMSG2             _C{Could not allocate.}
@@ -991,7 +991,7 @@ _C{ -------------- Fill in the alias descriptors, possibly 32 bits --------}
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,ES
             _C{ %1000 0000 1111 1010  %1100 0000 1111 1010}
-            MOV     CX, 0x80FA _BITS32_({ | 0x4000 })
+            MOV     CX, 0x80FA _BITS32_({ _OR_ 0x4000 })
             INT     0x31
             MOV     BL,7
             JC      ERRMSG3
@@ -999,7 +999,7 @@ _C{ -------------- Fill in the alias descriptors, possibly 32 bits --------}
             MOV     AX,0x0009            _C{Set access rights.}
             MOV     BX,DX
             _C{ %1000 0000 1111 1010  %1100 0000 1111 1010}
-            MOV     CX, 0x80F2 _BITS32_({ | 0x4000 })
+            MOV     CX, 0x80F2 _BITS32_({ _OR_ 0x4000 })
             INT     0x31
             MOV     BL,7
             JC      ERRMSG3
@@ -4253,7 +4253,7 @@ ciforth is byte aligned, so no extra measures are needed.},
 {{ CREATE ZWY LATEST ID.},{ZWY},
 {HERE ZWY = .},{_T_}},
 enddoc)
-_HEADER({CREATE},{CREATE},{DOCOL})
+_HEADER({CREATE},{LCREATE},{DOCOL})
         DC      LNAME
         DC      PCREAT
         DC      LIT, HLNOOP, COMMA
@@ -5518,7 +5518,7 @@ forthcode({IMMEDIATE}) words.},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
 _HEADER({NAMESPACE},{VOCAB},{DOCOL})
-        DC      CREATE
+        DC      LCREATE
         DC      LATEST   _C{ Link this DEA into VOC-LINK chain.}
         DC      VOCL
         DC      FETCH
@@ -7229,7 +7229,7 @@ worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ASCII value of the next terminal key struck.},
 {{ACCEPT},{KEY?}}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
-        DC      LIT, 0x1000, X, X, X,
+        DC      LIT, 0x1000, X, X, X
         DC      LIT, 0x0016, BIOSO
         DC      TDROP, TDROP
         DC      LIT, 0x00FF, LAND, SEMIS
@@ -7567,7 +7567,7 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      ZERO, LIT, RC, STORE, TOR
 RFIL1:
         DC      TDUP, LIT, 0x8000, MIN
-        DC      RR, READ
+        DC      RR, LREAD
         DC      LDUP
         _0BRANCH({RFIL2})
         DC      RDROP, TOR, TDROP, FROMR, EXIT
@@ -7671,7 +7671,7 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      TOR             _C{>R}
 WFIL1:                          _C{BEGIN}
         DC      TDUP, LIT, 0x8000 _C{   2DUP 8000 MIN R@ ^ WRITE-FILE}
-        DC      MIN, RR, WRITE
+        DC      MIN, RR, LWRITE
         DC      LDUP             _C{   DUP}
         _0BRANCH({WFIL2})        _C{ IF RDROP >R 2DROP R> EXIT}
         DC      RDROP, TOR, TDROP, FROMR, EXIT
@@ -7698,7 +7698,7 @@ worddoc( {FILES},{READ}, {read}, {addr n1 fd --- n2 ior }, {ISO},
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
-_HEADER({READ},{READ},{DOCOL})
+_HEADER({READ},{LREAD},{DOCOL})
         DC      RWBUF, ROT, ROT         _C{ RW-BUFFER ROT ROT}
         DC      LIT, read, BDOSN        _C{ 3F00 BDOSN IF}
         _0BRANCH({READ1})
@@ -7721,7 +7721,7 @@ worddoc( {FILES},{WRITE}, {write},{addr n fd --- u1 }, {ISO},
 {"."" Hello world!""" FD WRITE .},{0},
 {FD CLOSE-FILE .},{0} },
 enddoc)
-_HEADER({WRITE},{WRITE},{DOCOL})
+_HEADER({WRITE},{LWRITE},{DOCOL})
         DC      TOR, TOR, ZERO, SWAP    _C{   >R >R  0 SWAP}
         DC      LIT, Save_DS_PR, FETCH, RWBUF  _C{ PD RW-BUFFER}
         DC      RR, FMOVE               _C{ R@ FARMOVE}
@@ -10299,7 +10299,9 @@ ACTUAL_EM:  _C{ Differs from EM if code is relocated.}
 })_C{}_END_({ _HOSTED_X_})
 _C
 
+_BOOTED_(
         CSEG    ENDS
+})_C{}_END_({ _BOOTED_})
         PAGE
 _COMMENT
 

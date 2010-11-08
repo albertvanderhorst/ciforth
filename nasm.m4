@@ -17,11 +17,11 @@ define({_HEADER_ASM},{;
 ; Source: ftp://ftp.us.kernel.org/pub/software/devel/nasm/source/
 ; URL: http://www.cryogen.com/Nasm/
 _HOSTED_OSX_({
-; This version can be assembled on an OS X system (Apple):    
+; This version can be assembled on an OS X system (Apple):
 ;   nasm -f macho xina.asm forth.o
 ;   ld forth.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o forth
 ;And to get the smallest possible executable(optional):
-;   strip forth 
+;   strip forth
 })dnl
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
@@ -94,4 +94,6 @@ define({_SECTION_},{section .text})
 define({_SECTION_NOBITS_},{section .bss})
 dnl A quirk, make sure in port instruction, DX is not turned into EDX
 define({_DX16},{{DX}})
+dnl Work around because of poor performance of .NET assembler.
+define({_OR_},{|})
 divert{}dnl

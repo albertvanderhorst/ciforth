@@ -1,5 +1,12 @@
 dnl $Id$
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+divert(-1)dnl
+dnl Take care of embedded double quotes by using single quotes.
+dnl Note: this cannot be used in _HEADER, because index must look in the real string,
+dnl not on some variable that contains the string.
+define({_dbquoted},"{{$1}}")dnl
+define({_sgquoted},'{{$1}}')dnl
+define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
 dnl
 define({_C},{{;}})
 define({_HEADER_ASM},{;
@@ -15,8 +22,7 @@ define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
 define({RELATIVE_WRT_ORIG}, {$1 - ORIG})
 dnl
 dnl MASM has an unreasonable quirk to reserve memory
-define({_RESB},
-        DB      $1 DUP (?))dnl
+define({_RESB}, {DB      $1 DUP (0)})dnl
 dnl
 dnl Assembly Pointer
 define({_AP_}, {$})dnl
@@ -41,3 +47,8 @@ define({_ENDCOMMENT},~
 )dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
+dnl Work around because of poor performance of .NET assembler.
+define({A32},{DB 0x67
+        })
+define({REP},{REPZ})
+divert{}dnl
