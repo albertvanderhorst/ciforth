@@ -2119,10 +2119,10 @@ worddoc( {PARSING},{SRC},{s_r_c},{addr ---},{},
 {Return the address forthvar({addr})
 of the forthdefi({current input source}) specification,
 allocated in the user area. It consists of three cells: the
-lowest and non-inclusive highest address of the parse area
-_CIF_IN_({the non-inclusive highest address of the parse area
+lowest address of the parse area,
+and _CIF_IN_({the non-inclusive highest address of the parse area
 and a pointer to the next character to be parsed.})
-_ISO_IN_({the number of characters and the current index in the
+_ISO_IN_({the number of characters and the current offset in the
 parse area.}) Changing forthsamp({SRC}) takes immediate effect,
 and must be atomic, by using forthcode({RESTORE-INPUT}),
 or changing only the third cell.
@@ -5473,7 +5473,7 @@ fashion.
 A prefix word finds the interpreter pointer pointing to
 the remainder of the name (or number) sought for, and must compile
 that remainder.
-Prefix words are most mostly both immediate and forthdefi({smart}),
+Prefix words are mostly both immediate and forthdefi({smart}),
 i.e. they behave differently when compiled, than interpreted.
 The result is that the compiled code looks the same and behaves the
 same than the interpreted code.
