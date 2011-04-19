@@ -14,7 +14,7 @@ License along with this program; if not, write to the
             Free Software Foundation, Inc.,
    59 Temple Place, Suite 330, Boston, MA 02111, USA.
 
-( -a :_Make_require_available_silently ) \ AvdH B0jan12
+( -a :_Make_want_available_silently )           \ AvdH B0nov25
 ( WANT WANTED CF: ) \ AvdH A7feb24
 CREATE _pad 80 ALLOT \ Word surrounded by spaces
 : FILL-pad   ( sc --) " " _pad $!   _pad $+!   " " _pad $+! ;
@@ -79,8 +79,8 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 \
 ( -e :_Load_system_electives ) \ AvdH A3sep01
-.SIGNON CR 0 BLOCK  B/BUF TYPE 1 LOAD
-
+.SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
+1 LOAD
 WANT CONFIG      WANT HELP       WANT ORDER
 WANT L-S         WANT DO-DEBUG   WANT H.         WANT DUMP
 WANT SUPER-QUAD  WANT FARDUMP    WANT $.         WANT ^
@@ -127,13 +127,13 @@ SM HERE-NOW OVER - $, CONSTANT thisforth$
 thisforth$ $@ 3 ARG[]   PUT-FILE ;
 GROW BYE
 ( -h :_help,_show_options ) \ AvdH A1oct04
-.SIGNON   1 20 INDEX CR
+.SIGNON CR   0 MESSAGE
+0 BLOCK  B/BUF TYPE
+1 20 INDEX CR
 .( See also the pdf documentation ) CR
 .( or print the PostScript documentation ) CR
 
 OK BYE
-
-
 
 
 
@@ -352,12 +352,12 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 \
 ( -v :_Version_and_copyright_information_)
 "CPU  NAME  VERSION" TYPE .SIGNON CR
+0 MESSAGE
 "LIBRARY FILE: " TYPE
 "$RCSfile$ $Revision$" TYPE CR
 CR
 0 BLOCK  B/BUF TYPE
 BYE
-
 
 
 
