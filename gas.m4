@@ -10,7 +10,7 @@ define({_HEADER_ASM},{#
 # Gnu as version of ciforth created by ``m4'' from generic listing.
 # This source can be assembled using versions better than 2.13.
 # This file can be assembled and linked in the following way:
-#       as lina.s
+#       as _BITS64_({-64}) lina.s
 #       ld -s -N a.out -o lina
 # The -s (strip) may not be necessary.
 

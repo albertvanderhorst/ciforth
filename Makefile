@@ -18,6 +18,7 @@
 #* .BLK : contains blocks usable by Forth
 # .frt : text file : contains blocks in an \n separated stream
 #* .msm : input file for `MASM' and `tasm' assembler
+#* .ml : input file for `ML' formerly 'MASM' assembler
 #* .s : input file for `gas' assembler  Experimental
 #* .bin : a binary image without header (useful i.a. for msdos .com)
 #* .gas : input file for `gas' assembler
@@ -210,15 +211,31 @@ ci86.%.asm : %.cfg VERSION nasm.m4 ci86.gnr
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.asm=%.rawtest)
 	rm $(TEMPFILE)
 
-# As of 2010, Windows has introduced a few nasty quirks, requiring sed.
+# This is for masm and tasm.
 ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr ; \
 	cat $+ | m4 >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' | \
+	sed -e 's/0x\([A-F0-9]*\)/0\1H/g'             | \
 	sed -e 's/^\([_A-Za-z0-9]*:\) *\(D[BWD]\)/\1\n\
 	\2/g' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.msm=%.rawdoc)
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.msm=%.rawtest)
+	rm $(TEMPFILE)
+
+# As of 2010, Windows has introduced a few nasty quirks, requiring sed.
+# And they can't handle 0x hex numbers.
+# And they can't handle an FS: segment override.
+ci86.%.ml : VERSION %.cfg ml.m4 ci86.gnr ; \
+	cat $+ | m4 >$(TEMPFILE)
+	sed $(TEMPFILE) -e '/Split here for doc/,$$d' | \
+	sed -e 's/0x\([A-F0-9]*\)/0\1H/g'             | \
+	sed -e 's/^\(.*\[\)FS:\(.*\)/    DB 64H\n   \1\2/g' | \
+	sed -e 's/^\([_A-Za-z0-9]*:\) *\(D[BWD]\)/\1\n    \2/g' \
+	>$@
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
+	sed -e '/Split here for test/,$$d' >$(@:%.ml=%.rawdoc)
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.ml=%.rawtest)
 	rm $(TEMPFILE)
 
 # Now that gas has the .Intel_syntax option, its source can be

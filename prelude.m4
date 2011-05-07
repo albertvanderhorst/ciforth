@@ -133,12 +133,18 @@ dnl A File based, no obsolete MSDOS features.
 define( {_MODERN_}, _no)dnl
 dnl
 dnl B Use LINUX for I/O. Possibility of redirection.
-dnl File based.
+dnl File based. C-file with glue functions.
 define( {_LINUX_C_}, _no)dnl
 dnl
 dnl B Use LINUX for I/O. Possibility of redirection.
-dnl File based.  No c involved.
+dnl File based.  System calls
 define( {_LINUX_N_}, _no)dnl
+dnl
+dnl B Use os via shared libraries, dll/so
+define( {_DLL_}, _no)dnl
+dnl
+dnl B Use os via shared libraries, dll/so
+define( {_SHARO_}, _no)dnl
 dnl
 dnl    CHOOSE ONE OF THE FOLLOWING
 dnl     See remarks of previous group.

@@ -25,6 +25,7 @@ _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USE
 _HOSTED_MSDOS_({running under MSDOS
 _C _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 }) _LINUX_C_({_C  with c-routines for I/O})_LINUX_N_({_C  with native forth I/O})
+_DLL_({_C  with calls to shared libraries in MS-Windows})
 _C Normally ciforth doesn't observe ISO >IN{}_ISO_IN_({{, but this one does}}).
 _C{ Contains :}
 _C{ (there may be no items here.)}
@@ -348,8 +349,18 @@ _HOSTED_X_({
         PAGE
         GLOBAL  _start       _C Entry point.
         GLOBAL  start        _C Entry point.
-ORIG:
+_ORIG:
 })_C{}_END_({ _HOSTED_X_})
+_DLL_({
+        .386P
+.model  FLAT
+INCLUDELIB LIBC
+        _SECTION_({_TEXT})
+PUBLIC  _main   _C Entry point.
+_main:
+_ORIG:
+})_C{}_END_({ _DLL_})
+
 dnl
 _BOOTED_(
 {_C ########################################################################################
@@ -367,7 +378,7 @@ dnl
                               _C{ Accommodate also .exe files} }))
 
 _BOOTSECTRK_({
-ORIG:
+_ORIG:
         JMP     SHORT BOOT
         NOP
         _C{ MSDOS programmers reference (thru 6, 3.9)}
@@ -476,7 +487,7 @@ BEGIN1: CALL    READSECTOR
 })_C{}_END_({ _BOOTSECTRK_})
 
 _BOOTLBA_({
-ORIG:
+_ORIG:
         JMP     SHORT BOOT
         NOP
         _C{ MSDOS programmers reference (thru 6, 3.9)}
@@ -641,7 +652,7 @@ _C{ ############################################################################
 _C{ Required start of .COM program.}
 _REAL_(
 {           ORG     0x100
-ORIG:                         _C{ Accommodate also .exe files} })
+_ORIG:                         _C{ Accommodate also .exe files} })
 _MODERN_(
 {       MOV     BX, (EM-1)/0x10+1
         MOV     AH,0x4A              _C{Modify memory allocation}
@@ -810,7 +821,7 @@ _C{ ############################################################################
 
 _C{ Required start of .COM program.}
         ORG     0x100          _C{ Accommodate also .exe files}
-ORIG:
+_ORIG:
 _C{ These are real mode descriptors !}
         MOV     WORD[SaveCS],CS           _C{ Once and for all}
         MOV     WORD[SaveDS],DS
@@ -1396,6 +1407,15 @@ _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LITER
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
+_DLL_({
+PACCEP:
+EPIPE   EQU 31
+BYE:
+BLWRITE:
+BLREAD:
+WFILE:
+})
+
 _C
 worddoc( {DENOTATIONS},{Prefix_^},{control_follows}, {--- b},{CI},
 {Leave forthvar({b}) the control character value of the char that follows
@@ -1901,12 +1921,12 @@ _C{       <<<<< must be in same order as user variables >>>>>}
 _C{ Still fig-compatible! Both entries take two cells.}
 _C
         MOV     WOR,_OFFSET COLD
-        JMP     [WOR]                   _C{Hope stacks are still okay.}
+        JMP     _CELL_PTR[WOR]          _C{Hope stacks are still okay.}
         _ALIGN(_CELLS(1))
 dnl This is for indirect threaded code, loading HIP with PHA would be portable.
 _C{ Make it possible to revector WARM. You can even make it low level. }
         MOV     WOR,_OFFSET WARM
-        JMP     [WOR]                   _C{Hope stacks are still okay.}
+        JMP     _CELL_PTR[WOR]          _C{Hope stacks are still okay.}
         _ALIGN(_CELLS(1))
 USINI:  DC      STRUSA   dnl
 _THREADS_(
@@ -3181,7 +3201,7 @@ in use by Forth.
 },{{DP},{EM}},
 {{." No test"},{No test} },
 enddoc)
-_HEADER({BM},{LBM},{DOCON}, ORIG)
+_HEADER({BM},{LBM},{DOCON}, _ORIG)
 _C
 _THREADS_({
 worddoc( {MEMORY},{TASK-SIZE},{task_size},{---- n},{},
@@ -3233,7 +3253,10 @@ enddoc)
 _HEADER({R0},{RZERO},{DOUSE}, _CELLS(3))
 _C
 worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{ISO,FIG,U},
-{A user variable containing the address of the terminal input buffer.},
+{A user variable containing the address of the terminal input buffer.
+_VERBOSE_({Traditionally, this was used for file i/o too, but not so in
+ciforth.})
+},
 {{QUIT}},
 {{." See SRC"},{See SRC}},
 enddoc)
@@ -4483,7 +4506,7 @@ _C{       Assume the extra segment points to the data segment }
         POP     DI      _C{ addr2}
         POP     SI      _C{ addr1}
         CLD             _C{ INC DIRECTION}
-        REP     CMPSB   _C{ Compare BYTE}
+        REPZ    CMPSB   _C{ Compare BYTE}
         JZ      CORA3
         MOV     AL,1    _C{Remainder is already 0}
         JNC     CORA3
@@ -7207,7 +7230,7 @@ LMS0:   DC      LDUP,  MSFET
 })_C{}_END_({ _PC_})
         PAGE
 _C{------------------------------------}
-_C{       SYSTEM DEPENDANT CHAR I/O}
+_C{       CONSOLE RELEATED I/O         }
 _C{------------------------------------}
 _MODERN_({
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
@@ -8120,6 +8143,18 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
         DC      TWO, WFILE, THROW
         DC      SEMIS
 _C
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+{Transmit ASCII character forthvar({c}) to the output device.
+For this ciforth all terminal I/O goes through forthcode({TYPE}).
+In this ciforth forthcode({EMIT}) maintains forthcode({OUT}).},
+{{TYPE},{OUT}},
+{ {&z EMIT},{z} },
+enddoc)
+_HEADER({EMIT},{EMIT},{DOCOL})
+        DC      SPFET, ONE, LTYPE
+        DC      DROP
+        DC      SEMIS
+_C
 worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
 {Leave the address of the terminal description, this has the layout of
 a c-structure forthsamp({termio}) .
@@ -8150,7 +8185,40 @@ SIZEL   EQU 4     _C{ Also for 64 bits. }
         DC      SEMIS
 _C
 })_C{}_END_({ _HOSTED_X_})
-_HOSTED_X_({
+_DLL_({
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+{Transmit forthvar({count}) characters from forthvar({addr}) to
+the output device. All terminal I/O goes through this word. It
+is high level so terminal I/O can be redirected, by
+forthdefi({revectoring}) it _VERBOSE_({{and the usual
+redirection or }forthsamp({tee})-ing by _OS_}). In this
+ciforth strings may contain embedded forthkey({LF}) 's with the
+effect of a new line at that point in the output, however in
+that case forthcode({OUT}) is not observed. },
+{{EMIT},{OUT},{ETYPE}},
+{{HERE 41 C, 42 C, 2 TYPE},{AB}},
+enddoc)
+_HEADER({TYPE},{LTYPE},{DOCOL})
+        DC      LDUP, LOUT, PSTORE
+        DC      ONE, WFILE, THROW
+        DC      SEMIS
+_C
+worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
+{Transmit forthvar({count}) characters from forthvar({addr}) to
+the standard error device.
+It is high level so error output can be redirected, by
+forthdefi({revectoring}) it. _VERBOSE_({Or you may use
+redirection by _OS_}). In this
+ciforth strings may contain embedded forthkey({LF}) 's with the
+effect of a new line at that point in the output. },
+{{EMIT},{TYPE}},
+dnl This test assumes a redirection of error out to standard out.
+{{HERE 41 C, 42 C, 2 ETYPE},{AB}},
+enddoc)
+_HEADER({ETYPE},{ETYPE},{DOCOL})
+        DC      TWO, WFILE, THROW
+        DC      SEMIS
+_C
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ASCII character forthvar({c}) to the output device.
 For this ciforth all terminal I/O goes through forthcode({TYPE}).
@@ -8163,7 +8231,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
-})_C{}_END_({_HOSTED_X_})
+})_C{}_END_({_DLL_})
 _C
 _PC_({
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -10247,6 +10315,10 @@ _C
 _EQULAYOUT_({
 TEXTEND  EQU     _AP_       _C{ Show end of dictionary.}
 INITDP   EQU     M4_INITDP _C{Where we want new words.}
+_DLL_({
+;COMM _buffer: BYTE: EM-TEXTEND
+COMM _buffer: BYTE: 100000
+})
 ACTUAL_EM EQU    EM  _C{ Different for relocatable code only.}
 })_C{}_END_({ _EQULAYOUT_})
 
@@ -10344,7 +10416,7 @@ _HOSTED_MSDOS_({
 _ENDCOMMENT
 
 _C{ Define the entry point, not valid for auto booting.}
-        END     ORIG
+        END     _ORIG
 worddocchapter({COMPILING},{ },
 {The wordset forthsamp({COMPILING}) contains words that compile
 forthxref({IMMEDIATE}) words and numbers.
