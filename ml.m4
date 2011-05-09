@@ -15,8 +15,10 @@ define({_HEADER_ASM},{;
 ; This source can be assembled using the microsoft assembler ML.EXE ,
 ;  nowadays deeply hidden in a Visual Studio bin directory.
 ;})dnl
-define({SET_32_BIT_MODE},{ .386p })dnl
+define({SET_32_BIT_MODE},{ .686p })dnl
 define({_SECTION_},{$1    SEGMENT})
+define({_SECTION_NOBITS_},{$1   SEGMENT READ WRITE EXECUTE STACK})
+define({_SECTION_END_},{$1   ENDS})    
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl
 dnl

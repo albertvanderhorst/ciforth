@@ -19,6 +19,11 @@ _HOSTED_LINUX_({define({_HOSTED_X_}, _yes)})
 _HOSTED_OSX_({define({_HOSTED_X_}, _yes)})
 _HOSTED_BSD_({define({_HOSTED_X_}, _yes)})
 
+_HOSTED_X_({define({_LAYOUTBYSECTION_}, _yes)})
+_HOSTED_X_({define( {_EQULAYOUT_},  _no )})
+_DLL_({define({_LAYOUTBYSECTION_}, _no)})
+_DLL_({define( {_EQULAYOUT_},  _yes )})
+
 _HOSTED_X_({define({_HOSTED_}, _yes)})
 _HOSTED_DPMI_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
@@ -51,6 +56,7 @@ _MODERN_({define({_FILES_}, _yes)})
 _LINUX_N_({define({_FILES_}, _yes)})
 _HOSTED_OSX_({define({_FILES_}, _yes)})
 _HOSTED_BSD_({define({_FILES_}, _yes)})
+_DLL_({define({_FILES_}, _yes)})
 dnl This dirty trick is commented in the main source.
 _BITS32_({_LINUX_N_({define({M4_EM},M4_EM-0x74)})})dnl
 
@@ -74,7 +80,6 @@ _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 dnl after the real memorya plus the high memory.
 _SWITCH_({_LARGE_({define({M4_INITDP},{0x100000})})})
-_HOSTED_X_({define( {_EQULAYOUT_},  _no )})
 _MODERN_({define({_RWFILE_}, _yes)})
 _RWFILE_({ define({_BLOCKSINFILE_}, _yes)})
 
@@ -123,7 +128,7 @@ _HOSTED_({_RESPECTDOS_( {errprint({Respecting dos makes no sense for a hosted sy
 dnl immediate consequences
 _SOURCEFIELD_({define({M4_HS},M4_HS+1)})dnl
 _EXTRAFIELD_({define({M4_HS},M4_HS+1)})dnl
-_BITS16_({define({M4_INITDP}, {TEXTEND})})
+_EQULAYOUT_({define({M4_INITDP}, {TEXTEND})})
 dnl must be overruled after inclusion of postlude.4m
 _HOSTED({_LARGE_({define({M4_NBUF}, 16)})})
 _HOSTED({_SWITCH_({_LARGE_({define({M4_INITDP},{0x110000})})})})

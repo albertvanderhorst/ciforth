@@ -92,6 +92,7 @@ define({DSS},{DB})dnl
 dnl A nobits section takes no place in the object file.
 define({_SECTION_},{section .text})
 define({_SECTION_NOBITS_},{section .bss})
+define({_SECTION_END_},{})
 dnl A quirk, make sure in port instruction, DX is not turned into EDX
 define({_DX16},{{DX}})
 dnl Work around because of poor performance of .NET assembler.

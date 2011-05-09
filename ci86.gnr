@@ -343,6 +343,21 @@ delete  EQU     0x4100
 lseek   EQU     0x4200
 EPIPE   EQU     38
 })_C{}_END_({ _PC_})
+_DLL_({
+PUBLIC   _ORIG
+EXTRN     __create    :NEAR
+EXTRN     __open    :NEAR
+EXTRN     __close   :NEAR
+EXTRN     __read    :NEAR
+EXTRN     __write   :NEAR
+EXTRN     __delete  :NEAR
+EXTRN     __lseek   :NEAR
+EXTRN     __exit   :NEAR
+EPIPE   EQU     38
+OFILE     EQU     0    ; to be fixed, now satisfy external.
+CREATEF   EQU     0
+CFILE     EQU     0
+})_C{}_END_({ _DLL_})
 
 _HOSTED_X_({
         _SECTION_({forth})
@@ -352,7 +367,7 @@ _HOSTED_X_({
 _ORIG:
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
-        .386P
+        .686P
 .model  FLAT
 INCLUDELIB LIBC
         _SECTION_({_TEXT})
@@ -1408,12 +1423,9 @@ _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
 _DLL_({
-PACCEP:
 EPIPE   EQU 31
-BYE:
 BLWRITE:
 BLREAD:
-WFILE:
 })
 
 _C
@@ -7574,6 +7586,13 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _HOSTED_X_})
+_DLL_({
+_HEADER({READ-FILE},{RFILE},{DOCOL})
+        DC      TOR, SWAP, FROMR
+        DC      LIT, __read, LCALL
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      LIT, read, BDOSN
@@ -7680,6 +7699,13 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _HOSTED_X_})
+_DLL_({
+_HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      TOR, SWAP, FROMR
+        DC      LIT, __write, LCALL
+        DC      ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      LIT, write, BDOSN
@@ -7783,7 +7809,7 @@ the name forthvar({sc2}). Any errors are thrown. },
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
 _HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      _PC_({{ZERO}})_HOSTED_X_({LIT, _O(755)})
+        DC      _PC_({{ZERO}})_HOSTED_X_({LIT, _O(755)})_DLL_({ZERO})
         DC      CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
@@ -8186,6 +8212,7 @@ SIZEL   EQU 4     _C{ Also for 64 bits. }
 _C
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
+dnl same as in HOSTED_X
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the output device. All terminal I/O goes through this word. It
@@ -8203,6 +8230,7 @@ _HEADER({TYPE},{LTYPE},{DOCOL})
         DC      ONE, WFILE, THROW
         DC      SEMIS
 _C
+dnl same as in HOSTED_X
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the standard error device.
@@ -8219,6 +8247,7 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
         DC      TWO, WFILE, THROW
         DC      SEMIS
 _C
+dnl same as in HOSTED_X
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
 {Transmit ASCII character forthvar({c}) to the output device.
 For this ciforth all terminal I/O goes through forthcode({TYPE}).
@@ -8231,7 +8260,86 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
+dnl same as in HOSTED_X
+worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
+{Accept characters from the terminal, until a forthkey({RET})
+is received and return the result as a constant string
+forthvar({sc}).
+It doesn't contain a trailing forthkey({LF}).
+But possibly a trailing forthkey({RET}) (0x0D).
+The
+editing functions are the same as with forthcode({ACCEPT}) .
+_VERBOSE_({{This is lighter on the system and sometimes easier
+to use than }forthcode({ACCEPT}){.
+Text is probably present in the buffer address contained in
+}forthcode({TIB @}){, but not necessarily at the beginning. }})
+},
+{{KEY},{KEY?},{ACCEPT}},
+{
+{(ACCEPT) DUP . PAD SWAP CMOVE },{6},
+ {GIBBON
+PAD 6 TYPE },{GIBBON},
+dnl { ." Type an 'A'" (ACCEPT) DUP . TYPE},{1 A)},
+dnl {." Type an 'ABCDEF'" DUP . },{6},
+},
+enddoc)
+_HEADER({(ACCEPT)},{PACCEP},{DOCOL})
+PACCEP2:
+        DC      REMAIND
+        DC      TFET
+        DC      LIT, ALF, SINDEX
+        DC      ZEQU
+        _0BRANCH(PACCEP1)
+        DC      REMAIND, TFET
+        DC      TIB, FETCH
+        DC      SWAP, LMOVE
+        DC      TIB, FETCH
+        DC      REMAIND, CELLP, STORE
+        DC      REFTIB
+        _BRANCH(PACCEP2)
+PACCEP1:
+        DC      REMAIND, TFET
+        DC      LIT, ALF, SSLAS
+        DC      TSWAP, REMAIND, TSTOR
+        _PC_({DC ONEM}, {dnl})
+        DC      SEMIS
+_C
 })_C{}_END_({_DLL_})
+_DLL_({
+worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
+{Return to the host environment _OS_.
+},{{COLD},{EXIT-CODE}},
+{{"lina -f 23 EXIT-CODE ! BYE " SYSTEM},
+{23 EXIT-CODE ! BYE 23}},
+enddoc)
+_HEADER({BYE},{BYE},{DOCOL})
+_C{ Exit to _OS_, with status as stored. }
+        DC      XCODE, FETCH, LIT, __exit, LCALL
+        DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
+})_C{}_END_({ _DLL_})
+_DLL_({
+dnl specific for DLL
+worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x adr --- n2*x ior }, {},
+{ Execute a call to forthvar({adr}).
+This is probably an external subroutine, supplied via a DLL.
+The stack must be filled with its parameters.
+It depends on this subroutine whether those remain or are popped.
+The forthvar({ior}) is a subroutine dependent indication whether
+the operation has succeeded.
+It is assumed that it was returned into AX.
+},
+{{OPEN-FILE}},
+{
+{ dnl all OS calls testin fact this interface
+}
+},
+enddoc)
+CODE_HEADER({CALL},{LCALL})
+        POP    AX
+        CALL   AX
+       _PUSH
+})_C{}_END_({_DLL_})
+
 _C
 _PC_({
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -10315,11 +10423,13 @@ _C
 _EQULAYOUT_({
 TEXTEND  EQU     _AP_       _C{ Show end of dictionary.}
 INITDP   EQU     M4_INITDP _C{Where we want new words.}
+dnl TBS : the following may not be needed.
 _DLL_({
-;COMM _buffer: BYTE: EM-TEXTEND
-COMM _buffer: BYTE: 100000
+        ORG     EM-4
+        DB 0,0,0,0
 })
 ACTUAL_EM EQU    EM  _C{ Different for relocatable code only.}
+_SECTION_END_({_TEXT})
 })_C{}_END_({ _EQULAYOUT_})
 
 _COMMENT
@@ -10337,7 +10447,7 @@ used for:
 
 _ENDCOMMENT
 
-_HOSTED_X_({
+_LAYOUTBYSECTION_({
 _C{       This is the proper way to do it.}
 _C{       No memory addresses should be arrived at through equates.}
 _C{       However now we must teach the linker to keep the}
@@ -10368,7 +10478,9 @@ _THREADS_(
 })dnl _END_({_THREADS_})
 BUF1:   _RESB( BUFFERSIZE )     _C{ FIRST DISK BUFFER}
 ACTUAL_EM:  _C{ Differs from EM if code is relocated.}
-})_C{}_END_({ _HOSTED_X_})
+
+        _SECTION_END_({dictionary})
+})_C{}_END_({ _LAYOUTBYSECTION_})
 _C
 
 _BOOTED_(

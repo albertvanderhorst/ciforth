@@ -42,8 +42,10 @@ define({_no},{${}2})
 define({_SUPPRESSED}, )dnl
 dnl
 dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
-dnl     Memory layout is defined using equ's
+dnl     Memory layout is defined using equ's, default, miscellaneous. 
 define( {_EQULAYOUT_}, _yes )dnl
+dnl     The layout is defined using sections.
+define({_LAYOUTBYSECTION_}, _no)
 dnl    Block buffer are allocated somewhere high
 define( {_HIGH_BUF_}, _yes )dnl
 dnl    Block buffer are allocated in the dictionary
