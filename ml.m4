@@ -18,7 +18,7 @@ define({_HEADER_ASM},{;
 define({SET_32_BIT_MODE},{ .686p })dnl
 define({_SECTION_},{$1    SEGMENT})
 define({_SECTION_NOBITS_},{$1   SEGMENT READ WRITE EXECUTE STACK})
-define({_SECTION_END_},{$1   ENDS})    
+define({_SECTION_END_},{$1   ENDS})
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl
 dnl
@@ -51,6 +51,11 @@ define({_COMMENT},COMMENT ~
 )dnl
 define({_ENDCOMMENT},~
 )dnl
+dnl cludge for ml version 7.00.
+dnl things go terrible and strangely wrong if the entrypoint is put here
+define({_ENDOFPROGRAM},{
+        END ;  $1 Don't! Don't put the entry point here.
+})dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
 define({_DX16},{{DX}})

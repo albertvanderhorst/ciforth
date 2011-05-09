@@ -10528,7 +10528,7 @@ _HOSTED_MSDOS_({
 _ENDCOMMENT
 
 _C{ Define the entry point, not valid for auto booting.}
-        END     _ORIG
+        _ENDOFPROGRAM(_ORIG)
 worddocchapter({COMPILING},{ },
 {The wordset forthsamp({COMPILING}) contains words that compile
 forthxref({IMMEDIATE}) words and numbers.

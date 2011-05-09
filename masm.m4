@@ -45,6 +45,9 @@ define({_COMMENT},COMMENT ~
 )dnl
 define({_ENDCOMMENT},~
 )dnl
+define({_ENDOFPROGRAM},{
+        END $1 
+})dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
 dnl Work around because of poor performance of .NET assembler.
