@@ -82,10 +82,8 @@ _SWITCH_({define({_HIGH_BUF_}, _no)})
 _SWITCH_({define({_ABSOLUTELOAD_}, _yes)})
 dnl after the real memorya plus the high memory.
 _SWITCH_({_LARGE_({define({M4_INITDP},{0x100000})})})
-_MODERN_({define({__DUMMYOFFSET__}, _yes)})
 
 dnl Exclude some c-handled words for blocks in file.
-_BLOCKSINFILE_({define({_DUMMYOFFSET_}, _yes)})
 _BLOCKSINFILE_({define({_BLOCKSBYFILEWS_}, _yes)})
 _LINUX_C_({ define({_BLOCKSBYFILEWS_}, _no)})
 

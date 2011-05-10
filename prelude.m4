@@ -123,8 +123,6 @@ dnl    Used for old hard disk too.
 define({_RWSECTRK_},_no)
 dnl alias for the time being. DO NOT USE AN ALIAS IN THE CONFIGURATION.
 define({_RWFD_},{_RWSECTRK_({$1},{$2})})
-dnl A1 Blocks in files, so a disk offset is dummy.
-define({__DUMMYOFFSET__},_no)
 dnl
 dnl A Use DOS for I/O. Possibility of redirection.
 dnl Rely partly on DOS for I/O. The original mishmesh, using
