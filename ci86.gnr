@@ -125,7 +125,10 @@ EM      EQU     M4_EM     _C{ Where the memory ends w.r.t. ORIG. 1) }
 EMP     EQU     (EM-1)/0x1000+1 _C{ Number of pages.}
 TAS     EQU     M4_RTS    _C{Size of unitialised area per task.}
 STACKSIZE   EQU TAS/4  _C{For both stacks. } but for now
-TIBSIZE     EQU TAS/2  _C{TIB size. }
+_DLL_(
+{TIBSIZE     EQU 4000H },
+{TIBSIZE     EQU TAS/2  _C{TIB size. }
+})dnl
 _C
 _C{ NOTE 1:}
 _BITS64_({_C{Nothing tricky on 64 bits systems}},
@@ -1949,12 +1952,7 @@ _C{ user area, cold value same as next.}
         DC      INITDP  _C{      INIT (FENCE)  8}
 DPA:    DC      INITDP  _C{      INIT (DP)     9}
         DC      _DEA(ENV) _C{       INIT (VOC-LINK) 10}
-_HOSTED_X_({
         DC      0       _C{ INIT (OFFSET) }
-})_C{}_END_({_HOSTED_X_})
-_DUMMYOFFSET_({
-        DC      0       _C{ INIT (OFFSET) }
-})_C{}_END_({_DUMMYOFFSET_})
 _CLASSIC_({
 _COMMENT
 _C{ This will steer clear of a forth executable, provided it is}
@@ -7469,7 +7467,7 @@ _HEADER({OPEN-FILE},{OFILE},{DOCOL})
 _DLL_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, FROMR, SWAP
-        DC      LIT, __open, LCALL
+        DC      LIT, 2, LIT, __open, LCALL
         DC      LDUP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -7501,7 +7499,7 @@ _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
-        DC      LIT, __close, LCALL
+        DC      LIT, 1, LIT, __close, LCALL
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7545,7 +7543,7 @@ _DLL_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, TDUP, DFILE, DROP
         DC      ZEN, FROMR
-        DC      LIT, __creat, LCALL
+        DC      LIT, 2, LIT, __creat, LCALL
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -7583,7 +7581,7 @@ _HEADER({DELETE-FILE},{DFILE},{DOCOL})
 _DLL_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN
-        DC      LIT, __unlink, LCALL
+        DC      ONE, LIT, __unlink, LCALL
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7621,7 +7619,7 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
 _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      TOR, SWAP, FROMR
-        DC      LIT, __read, LCALL
+        DC      LIT, 3, LIT, __read, LCALL
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _DLL_})
@@ -7695,7 +7693,7 @@ _DLL_({
 _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      TOR, DROP _C{Convert to single precision.}
         DC      TOR, LIT, SEEK_SET, FROMR, FROMR
-        DC      LIT, __lseek, LCALL
+        DC      LIT, 3, LIT, __lseek, LCALL
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -7742,7 +7740,7 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
 _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      TOR, SWAP, FROMR
-        DC      LIT, __write, LCALL
+        DC      LIT, 3, LIT, __write, LCALL
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _DLL_})
@@ -8354,16 +8352,16 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
-        DC      XCODE, FETCH, LIT, __exit, LCALL
+        DC      XCODE, FETCH, ONE, LIT, __exit, LCALL
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _DLL_})
 _DLL_({
 dnl specific for DLL
-worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x adr --- n2*x ior }, {},
+worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x n1 adr --- ior }, {},
 { Execute a call to forthvar({adr}).
 This is probably an external subroutine, supplied via a DLL.
-The stack must be filled with its parameters.
-It depends on this subroutine whether those remain or are popped.
+The stack must be filled with its parameters, then the count forthvar({n1})
+of the parameters, such that they can be popped.
 The forthvar({ior}) is a subroutine dependent indication whether
 the operation has succeeded.
 It is assumed that it was returned into AX.
@@ -8376,7 +8374,10 @@ It is assumed that it was returned into AX.
 enddoc)
 CODE_HEADER({CALL},{LCALL})
         POP    AX
+        POP    BX
         CALL   AX
+        SHL    BX,2
+        ADD    SP,BX
        _PUSH
 })_C{}_END_({_DLL_})
 
