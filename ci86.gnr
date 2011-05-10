@@ -345,18 +345,16 @@ EPIPE   EQU     38
 })_C{}_END_({ _PC_})
 _DLL_({
 PUBLIC   _ORIG
-EXTRN     __create    :NEAR
+EXTRN     __creat    :NEAR
 EXTRN     __open    :NEAR
 EXTRN     __close   :NEAR
 EXTRN     __read    :NEAR
 EXTRN     __write   :NEAR
-EXTRN     __delete  :NEAR
+EXTRN     __unlink  :NEAR
 EXTRN     __lseek   :NEAR
 EXTRN     __exit   :NEAR
+SEEK_SET   EQU 0
 EPIPE   EQU     38
-OFILE     EQU     0    ; to be fixed, now satisfy external.
-CREATEF   EQU     0
-CFILE     EQU     0
 })_C{}_END_({ _DLL_})
 
 _HOSTED_X_({
@@ -1422,11 +1420,6 @@ _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LITER
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
-_DLL_({
-EPIPE   EQU 31
-BLWRITE:
-BLREAD:
-})
 
 _C
 worddoc( {DENOTATIONS},{Prefix_^},{control_follows}, {--- b},{CI},
@@ -1959,9 +1952,9 @@ DPA:    DC      INITDP  _C{      INIT (DP)     9}
 _HOSTED_X_({
         DC      0       _C{ INIT (OFFSET) }
 })_C{}_END_({_HOSTED_X_})
-_RWFILE_({
+_DUMMYOFFSET_({
         DC      0       _C{ INIT (OFFSET) }
-})_C{}_END_({_RWFILE_})
+})_C{}_END_({_DUMMYOFFSET_})
 _CLASSIC_({
 _COMMENT
 _C{ This will steer clear of a forth executable, provided it is}
@@ -7391,6 +7384,11 @@ define({SIZE_RWBUF}, {0x200})
 _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
 })_C{}_END_({ _HOSTED_X_})
+_DLL_({
+define({SIZE_RWBUF}, {0x200})
+_HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
+        _RESB(SIZE_RWBUF)
+})_C{}_END_({ _DLL_})
 _C
 worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
 {Leaves an address that contains a zero-ended (c-type) equivalent of forthvar({sc}).
@@ -7419,6 +7417,14 @@ _HEADER({ZEN},{ZEN}, {DOCOL})
          _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      SEMIS
 })_C{}_END_({ _HOSTED_X_})
+_DLL_({
+_HEADER({ZEN},{ZEN}, {DOCOL})
+        DC      RWBUF, SSTOR
+        DC      ZERO, RWBUF, CHAPP
+        DC      RWBUF, CELLP
+         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
+        DC      SEMIS
+})_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
 _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RWBUF, SSTOR
@@ -7460,6 +7466,13 @@ _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      LDUP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_X_})
+_DLL_({
+_HEADER({OPEN-FILE},{OFILE},{DOCOL})
+        DC      TOR, ZEN, FROMR, SWAP
+        DC      LIT, __open, LCALL
+        DC      LDUP, ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({_DLL_})
 _MODERN_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, X, X
@@ -7486,6 +7499,11 @@ _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      LIT, close, XOS
         DC      SEMIS
 })_C{}_END_({_HOSTED_X_})
+_DLL_({
+_HEADER({CLOSE-FILE},{CFILE},{DOCOL})
+        DC      LIT, __close, LCALL
+        DC      SEMIS
+})_C{}_END_({_DLL_})
 _MODERN_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
         DC      TOR, X, X, FROMR
@@ -7523,6 +7541,14 @@ _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_X_})
+_DLL_({
+_HEADER({CREATE-FILE},{CREATEF},{DOCOL})
+        DC      TOR, TDUP, DFILE, DROP
+        DC      ZEN, FROMR
+        DC      LIT, __creat, LCALL
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({_DLL_})
 _MODERN_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, ZEN, FROMR, X
@@ -7554,6 +7580,12 @@ _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      LIT, unlink, XOS
         DC      SEMIS
 })_C{}_END_({_HOSTED_X_})
+_DLL_({
+_HEADER({DELETE-FILE},{DFILE},{DOCOL})
+        DC      ZEN
+        DC      LIT, __unlink, LCALL
+        DC      SEMIS
+})_C{}_END_({_DLL_})
 _MODERN_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN, X, X
@@ -7659,6 +7691,14 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_OSX_})
+_DLL_({
+_HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
+        DC      TOR, DROP _C{Convert to single precision.}
+        DC      TOR, LIT, SEEK_SET, FROMR, FROMR
+        DC      LIT, __lseek, LCALL
+        DC      ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({_DLL_})
 _MODERN_({
 _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         _BITS32_({DC     TOR, DROP, LIT, 0x10000, SLMOD, FROMR})
@@ -10299,9 +10339,13 @@ INDE9:
         DC      SEMIS
 _C
 worddocsafe( {STACKS},{.S},{dot_s},{from to ---},{},
-{Print the stack, in the current base.},
+{Print the stack, in the current base.
+For stack underflow print nothing.
+},
 {{LIST}},
 {{S0 @ DSP! 1 2 3 .S},{S[ 1 2 3 ]},
+{ : test S0 @ DSP! DROP .S ; test},
+{S[ ]DSP! DROP .S ; test ? ciforth ERROR # 1 : EMPTY STACK},
 {S0 @ DSP!},{} },
 enddoc)
 _HEADER({.S},{DOTS},{DOCOL})
@@ -10310,7 +10354,7 @@ _HEADER({.S},{DOTS},{DOCOL})
         DC      LIT, ASO, EMIT
         DC      SPACE
         DC      SPFET, SZERO, FETCH
-DOC2:   DC      OVER, OVER,  EQUAL, ZEQU
+DOC2:   DC      OVER, OVER,  LSUB, ZLESS
         _0BRANCH(DOC1)
         DC      ZERO, CELLP, LSUB, LDUP, FETCH, DOT
         _BRANCH(DOC2)

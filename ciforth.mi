@@ -109,7 +109,7 @@ _HOSTED_DPMI_({DPMI (OS/2 or_OS_, or the DOS-emulator of Linux).},{_OS_})}) dnl
 _USEBIOS_({It is using BIOS for I/O, so no redirection of I/O is possible.}) dnl
 _RWHD_({Blocks are on a raw hard disk.}) dnl
 _RWFD_({Blocks are on a raw floppy disk.}) dnl
-_RWFILE_({Blocks are allocated in files.}) dnl
+_BLOCKSINFILE_({Blocks are allocated in files.}) dnl
 _CLASSIC_({It relies partly on DOS for I/O, partly on the BIOS.}) dnl
 _MODERN_({It uses DOS for I/O, and uses no obsolete MSDOS features.}) dnl
 _BITS16_({A number has a precision of 16 bits.}) dnl
