@@ -346,19 +346,6 @@ delete  EQU     0x4100
 lseek   EQU     0x4200
 EPIPE   EQU     38
 })_C{}_END_({ _PC_})
-_DLL_({
-PUBLIC   _ORIG
-EXTRN     __creat    :NEAR
-EXTRN     __open    :NEAR
-EXTRN     __close   :NEAR
-EXTRN     __read    :NEAR
-EXTRN     __write   :NEAR
-EXTRN     __unlink  :NEAR
-EXTRN     __lseek   :NEAR
-EXTRN     __exit   :NEAR
-SEEK_SET   EQU 0
-EPIPE   EQU     38
-})_C{}_END_({ _DLL_})
 
 _HOSTED_X_({
         _SECTION_({forth})
@@ -368,9 +355,28 @@ _HOSTED_X_({
 _ORIG:
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
+PUBLIC   _ORIG
+dnl C
+EXTRN     __creat    :NEAR
+EXTRN     __open    :NEAR
+EXTRN     __close   :NEAR
+EXTRN     __read    :NEAR
+EXTRN     __write   :NEAR
+EXTRN     __unlink  :NEAR
+EXTRN     __lseek   :NEAR
+EXTRN     __exit   :NEAR
+SEEK_SET   EQU 0
+dnl what we want: kernel32
+EPIPE   EQU     38
+})_C{}_END_({ _DLL_})
+_DLL_({
         .686P
 .model  FLAT
-INCLUDELIB LIBC
+;INCLUDELIB LIBC
+EXTRN     _ExitProcess@4   :NEAR 
+EXTRN     _GetStdHandle@4: NEAR
+EXTRN     _ReadFile@20: NEAR
+EXTRN     _WriteFile@20: NEAR
         _SECTION_({_TEXT})
 PUBLIC  _main   _C Entry point.
 _main:
@@ -5908,8 +5914,35 @@ _BLOCKSINFILE_({
         DC      LIT, 0, BLINI  _C{Default, open library file read-only!}},{
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
+_DLL_({
+        DC      LIT, -10, ONE, LIT, _GetStdHandle@4, LCALL
+        DC      LIT, STDIN+_CELLS(D_HOFFSET), STORE
+        DC      LIT, -11, ONE, LIT, _GetStdHandle@4, LCALL
+        DC      LIT, STDOUT+_CELLS(D_HOFFSET), STORE
+        DC      LIT, -12, ONE, LIT, _GetStdHandle@4, LCALL
+        DC      LIT, STDERR+_CELLS(D_HOFFSET), STORE
+})_C{}_END_({_DLL_})
         DC      SEMIS
 _C{}
+_DLL_({
+worddoc( {STDIN},{STDIN},{standard_in},{ --- n},{},
+{The file descriptior for standard input at the console.},{},
+{{ STDIN},{6} },
+enddoc)
+_HEADER({STDIN},{STDIN},{DOCON}, 0)
+_C
+worddoc( {STDOUT},{STDOUT},{standard_out},{ --- n},{},
+{The file descriptior for standard output at the console.},{},
+{{ STDOUT},{7} },
+enddoc)
+_HEADER({STDOUT},{STDOUT},{DOCON}, 0)
+_C
+worddoc( {STDERR},{STDERR},{standard_err},{ --- n},{},
+{The file descriptior for standard error output at the console.},{},
+{{ STDERR},{7} },
+enddoc)
+_HEADER({STDERR},{STDERR},{DOCON}, 0)
+})_C{}_END_({_DLL_})
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
 {Sign extend a single number to form a double number.},{},
 {{ 0 S>D D.},{0},
@@ -7247,7 +7280,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      LIT,ACR,EMIT
         DC      ZERO,LOUT,STORE
 EMIT1:
-        DC      SPFET, ONE, LTYPE
+        DC      X, SPFET, ONE, LTYPE
         DC      DROP
         DC      SEMIS
 _C
@@ -7420,7 +7453,6 @@ _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RWBUF, SSTOR
         DC      ZERO, RWBUF, CHAPP
         DC      RWBUF, CELLP
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -7618,9 +7650,12 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      TOR, SWAP, FROMR
-        DC      LIT, 3, LIT, __read, LCALL
-        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      TOR 
+        DC      SWAP, TOR, TOR
+        DC      X, SPFET, ZERO, SWAP    
+        DC      FROMR, FROMR, FROMR
+        DC      LIT, 5, LIT, _ReadFile@20, LCALL
+        DC      ZEQU
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -7739,9 +7774,12 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR, SWAP, FROMR
-        DC      LIT, 3, LIT, __write, LCALL
-        DC      ZERO, MIN
+        DC      TOR 
+        DC      SWAP, TOR, TOR
+        DC      X, SPFET, ZERO, SWAP  
+        DC      FROMR, FROMR, FROMR
+        DC      LIT, 5, LIT, _WriteFile@20, LCALL
+        DC      ZEQU, SWAP, DROP
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -7906,7 +7944,8 @@ _HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      REMAIND, FETCH, TOR
         DC      TIB, FETCH, RR, PLUS
         DC      LIT, TIBSIZE, RR, LSUB
-        DC      ZERO, RFILE
+        DC      _DLL_({STDIN},{ZERO})
+        DC      RFILE
         DC      QERRUR
         DC      LDUP, ZEQU, LIT, -EPIPE, LAND _C{ Presumably end of pipe.}
         DC      QERRUR
@@ -8250,7 +8289,6 @@ SIZEL   EQU 4     _C{ Also for 64 bits. }
 _C
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
-dnl same as in HOSTED_X
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the output device. All terminal I/O goes through this word. It
@@ -8265,10 +8303,9 @@ that case forthcode({OUT}) is not observed. },
 enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTORE
-        DC      ONE, WFILE, THROW
+        DC      STDOUT, WFILE, THROW
         DC      SEMIS
 _C
-dnl same as in HOSTED_X
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the standard error device.
@@ -8282,7 +8319,7 @@ dnl This test assumes a redirection of error out to standard out.
 {{HERE 41 C, 42 C, 2 ETYPE},{AB}},
 enddoc)
 _HEADER({ETYPE},{ETYPE},{DOCOL})
-        DC      TWO, WFILE, THROW
+        DC      STDERR, WFILE, THROW
         DC      SEMIS
 _C
 dnl same as in HOSTED_X
@@ -8352,7 +8389,7 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
-        DC      XCODE, FETCH, ONE, LIT, __exit, LCALL
+        DC      XCODE, FETCH, ONE, LIT, _ExitProcess@4, LCALL
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _DLL_})
 _DLL_({
