@@ -115,10 +115,9 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 
 # Sort the raw information and add the wordset chapter ends
-# A .mig file has its @ duplicated!
+# In the input of the .mig file all @ are (should be) duplicated!
 %.mig : %.rawdoc ;
-	ssort $+ -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s |\
-	sed -e 's/@/@@/g' >$@
+	ssort $+ -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s >$@
 
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
@@ -167,8 +166,7 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 menu.
 cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
 	m4 lina.cfg manual.m4 namescooked.m4 cifgen.mi |\
 	sed -e 's/_lbracket_/@{/g'                 |\
-	sed -e 's/_rbracket_/@}/g'                 |\
-	sed -e 's/_comat_/@@/g'          > $@
+	sed -e 's/_rbracket_/@}/g'               > $@
 
 TESTLINA= \
 test.m4 \

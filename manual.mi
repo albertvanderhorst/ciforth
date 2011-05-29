@@ -212,7 +212,7 @@ forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
 WANT SAVE-SYSTEM
 : DOIT
     'pad 'FORTH FORGET-VOC
-    'pad >NFA @ DP !
+    'pad >NFA @@ DP !
     "newforth" SAVE-SYSTEM BYE ;
 DOIT })
 Here forthvar({DOIT}) trims the dictionary just before
@@ -1056,7 +1056,7 @@ by other code. This forthdefi({revectoring}) is possible for all high level
 words in ciforth,
 such that we need no special measures to make forthdefi({vectoring}) possible.
 As an example we replace forthcode({TYPE}) by forthcode({MYTYPE}) .
-forthbreak forthsamp({' MYTYPE >DFA @ ' TYPE >DFA !}) forthbreak
+forthbreak forthsamp({' MYTYPE >DFA @@ ' TYPE >DFA !}) forthbreak
 And back to default:
 forthbreak forthsamp({' TYPE >PHA ' TYPE >DFA !}) forthbreak
 Be careful not to define forthcode({MYTYPE}) in terms of forthcode({TYPE}) , as a

@@ -285,7 +285,7 @@ BITS32_TOGGLE EQU 0x040   _C{ The Big (and Granularity, not yet) bits are comple
 CODE_TOGGLE EQU 0x08   _C{ Toggle between code and data, in the 5th byte.}
 })_C{}_END_({_HOSTED_DPMI_})
 _SWITCH_({
-_C{ Segments   @ Valid in real mode % Valid in protected mode }
+_C{ Segments   * Valid in real mode % Valid in protected mode }
 _C{ Names starting in A_ are linear, physical (32 bit), absolute addresses }
 RSTSIZE     EQU     0x10000  _C{ For real mode stack. }
 GDTSIZE         EQU     0x8000   _C{ For GDT-table.}
@@ -298,11 +298,11 @@ A_GDT             EQU     A_RST + RSTSIZE
 A_IDT             EQU     A_GDT + GDTSIZE  _C{  reserved but not yet used. }
 A_LOWDP         EQU     A_IDT + IDTSIZE _C{  Must become this. }
 
-_C{ @ Real mode place for the stack.}
+_C{ * Real mode place for the stack.}
 _C{ This is such that after switching to real mode an isolated }
 _C{ Stack is available }
 SS_RST      EQU     A_RST/0x10 _C
-SWITCHSEGMENT     EQU     A_SWITCH/0x10 _C{ @ DS and CS for real code }
+SWITCHSEGMENT     EQU     A_SWITCH/0x10 _C{ * DS and CS for real code }
 _C{ Add this to go from GDT_CS addresses to GDT_SWITCH addresses.}
 M4_SWITCHOFFSET EQU  ( A_FORTH0 - M4_SWITCHORG)
 
@@ -313,7 +313,7 @@ GDT_SWITCH       EQU    SWITCHSEGMENT  _C{ % Switching segment, must be same for
 GDT_CS EQU 0x10  _C{ % The protected mode code segment }
 GDT_SS         EQU     SS_RST _C{ % The protected mode data segment}
 GDT_DS         EQU     SS_RST _C{ % The protected mode data segment}
-GDT_SEGMENT    EQU     A_GDT/0x10       _C{ @ General descriptor table.}
+GDT_SEGMENT    EQU     A_GDT/0x10       _C{ * General descriptor table.}
 
 IDENTIFY_16 EQU 0x008F   _C{ Identification of 16 bit data/code segment, byte 6}
 IDENTIFY_32 EQU 0x00CF   _C{ Identification of 32 bit data/code segment, byte 6}
@@ -373,7 +373,7 @@ _DLL_({
         .686P
 .model  FLAT
 ;INCLUDELIB LIBC
-EXTRN     _ExitProcess@4   :NEAR 
+EXTRN     _ExitProcess@4   :NEAR
 EXTRN     _GetStdHandle@4: NEAR
 EXTRN     _ReadFile@20: NEAR
 EXTRN     _WriteFile@20: NEAR
@@ -1770,7 +1770,7 @@ _C
 worddoc( {CONTROL},{SKIP},{skip},{},{C2,L0},
 {Skip over an area in memory, where the length is given in the next cell.
 This length doesn't include the length cell, so it is compatible with
-forthcode({$@}) .
+forthcode({$@@}) .
 _VERBOSE_({{Internal, used for nested compilation and compiling strings. }})},
 {{BRANCH}},
 {{ : GS1 1 SKIP [ 0 CELL+ , ] BL BL ; GS1 . .},
@@ -2385,9 +2385,9 @@ CODE_HEADER({INVERT},{INVERT})
         NOT     AX
         _PUSH
 _C
-worddocsafe( {STACKS},{DSP@},{d_s_p_fetch},{--- addr},{},
+worddocsafe( {STACKS},{DSP@@},{d_s_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the data stack position,
-as it was before forthcode({DSP@}) was executed.
+as it was before forthcode({DSP@@}) was executed.
 },
 {{S0},{DSP!}},
 { {1  2  DSP@  @  . . . },{2 2 1} },
@@ -2398,7 +2398,7 @@ CODE_HEADER({DSP@},{SPFET})
 _C
 worddoc( {STACKS},{DSP!},{d_s_p_store},{addr ---},{},
 {Initialize the data stack pointer with forthvar({addr}) .},
-{{DSP@}},
+{{DSP@@}},
 {{  1 2 3 S0 @ DSP! DSP@ S0 @ = .},{_T_} },
 enddoc)
 CODE_HEADER({DSP!},{SPSTO})
@@ -2411,7 +2411,7 @@ dnl If there are more, this documentation should be in the a lab.mi file.
 worddoc( {STACKS},{DEPTH},,{--- n1},{ISO,WANT},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthvar({n1}) was pushed.},
-{{DSP@}},
+{{DSP@@}},
 {{  1 2 3 DEPTH . DROP DROP DROP},{3} },
 enddoc)
 _HEADER({DEPTH},{DEPTH},{DOCOL})
@@ -2423,7 +2423,7 @@ _HEADER({DEPTH},{DEPTH},{DOCOL})
         DC      SEMIS
 _C
 dnl was the end of a LOADable option.
-worddocsafe( {STACKS},{RSP@},{r_s_p_fetch},{--- addr},{},
+worddocsafe( {STACKS},{RSP@@},{r_s_p_fetch},{--- addr},{},
 {Return the address forthvar({addr}) of the current return
 stack position, i.e. pointing the current topmost value.},
 {{R0},{RSP!}},
@@ -2436,7 +2436,7 @@ _C
 worddoc( {STACKS},{RSP!},{r_s_p_store},{addr ---},{},
 {Initialize the return stack
 pointer with forthvar({addr}).},
-{{RSP@}},
+{{RSP@@}},
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({RSP!},{RPSTO})
@@ -2499,7 +2499,7 @@ worddoc( {STACKS},{>R},{to_r},{n ---},{ISO,FIG,C,L0},
 {Remove a number from the forthdefi({data stack}) and place as the most
 accessable on the forthdefi({return stack}). Use
 should be balanced with forthcode({R>}) in
-the same definition.},{{R@}},
+the same definition.},{{R@@}},
 { {: GS1 1 2 3 >R . R@ . R> . . ; GS1},{2 3 3 1} },
 enddoc)
 CODE_HEADER({>R},{TOR})        _C{ (R1) <- (S1)}
@@ -2510,7 +2510,7 @@ CODE_HEADER({>R},{TOR})        _C{ (R1) <- (S1)}
 _C
 worddoc( {STACKS},{R>},{r_from},{--- n},{ISO,FIG,L0},
 {Remove the top value from the forthdefi({return stack}) and leave it on the
-forthdefi({data stack}) . },{{>R},{R@}},
+forthdefi({data stack}) . },{{>R},{R@@}},
 {{." Via >R"},{Via >R}},
 enddoc)
 CODE_HEADER({R>},{FROMR})      _C{(S1) <- (R1)}
@@ -2519,14 +2519,14 @@ CODE_HEADER({R>},{FROMR})      _C{(S1) <- (R1)}
         _PUSH
 _C
 worddoc( {STACKS},{RDROP},{r_drop},{---} ,{},
-{Remove the top value from the return stack.},{{>R},{R@},{R>}},
+{Remove the top value from the return stack.},{{>R},{R@@},{R>}},
 {{." Via >R"},{Via >R}},
 enddoc)
 CODE_HEADER({RDROP},{RDROP})      _C{(S1) <- (R1)}
         LEA     RPO,[RPO+_CELLS(1)]
         _NEXT
 _C
-worddocsafe( {STACKS},{R@},{r_fetch},{--- n},{ISO},
+worddocsafe( {STACKS},{R@@},{r_fetch},{--- n},{ISO},
 {Copy the top of the return stack to the data stack.},{{>R},{<R}},
 {{." Via >R"},{Via >R}},
 enddoc)
@@ -2747,10 +2747,10 @@ CODE_HEADER({TOGGLE},{TOGGL})
         XOR     [BX],AX _C
         _NEXT
 _C
-worddocsafe( {MEMORY},{@},{fetch},{addr --- n},{ISO,FIG,L0},
+worddocsafe( {MEMORY},{@@},{fetch},{addr --- n},{ISO,FIG,L0},
 {Leave the _BITS_ bit contents forthvar({n})
 of forthvar({addr}) .},
-{{!},{C@},{2@},{P@},{PC@},{FAR@}},
+{{!},{C@@},{2@@},{P@@},{PC@@},{FAR@@}},
 { {-23 PAD ! PAD @ .},{-23} },
 enddoc)
 CODE_HEADER({@},{FETCH})
@@ -2759,10 +2759,10 @@ CODE_HEADER({@},{FETCH})
         _PUSH
 _C
 _BITS64_({
-worddocsafe( {MEMORY},{L@},{long_fetch},{addr --- n},{ISO,FIG,L0},
+worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- n},{ISO,FIG,L0},
 {Leave the 32 bit contents forthvar({n})
 of forthvar({addr}) .},
-{{!},{C@},{2@},{P@},{PC@},{FAR@}},
+{{!},{C@@},{2@@},{P@@},{PC@@},{FAR@@}},
 { {-23 PAD L! PAD L@ .},{FFFFFF23} },
 enddoc)
 CODE_HEADER({L@},{LFETCH})
@@ -2772,12 +2772,12 @@ CODE_HEADER({L@},{LFETCH})
         _PUSH
 _C
 })_C{}_END_({_BITS64_})
-worddocsafe( {MEMORY},{C@},{c_fetch},{addr --- b},{ISO},
+worddocsafe( {MEMORY},{C@@},{c_fetch},{addr --- b},{ISO},
 {Leave the 8 bit contents of memory address.
 In ciforth , running on the Intel architectures
 there are no restrictions regarding byte
 addressing.
-},{{C!},{@},{2@}},
+},{{C!},{@@},{2@@}},
 { {-23 PAD C! PAD C@ .},{DD} },
 enddoc)
 CODE_HEADER({C@},{CFET})
@@ -2786,10 +2786,10 @@ CODE_HEADER({C@},{CFET})
         MOV     AL,[BX]
         _PUSH
 _C
-worddocsafe( {MEMORY},{2@},{two_fetch},{addr--- x1 x2},{ISO},
+worddocsafe( {MEMORY},{2@@},{two_fetch},{addr--- x1 x2},{ISO},
 {Leave a pair of _BITS_ bits values forthvar({x1}) forthvar({x2}) from
 consecutive cells at forthvar({addr}) . forthvar({x2}) is fetched from
-the lowest address. },{{2!},{@},{C@}},
+the lowest address. },{{2!},{@@},{C@@}},
 { {-23. PAD 2! PAD 2@ D.},{-23} },
 enddoc)
 CODE_HEADER({2@},{TFET})
@@ -2799,7 +2799,8 @@ CODE_HEADER({2@},{TFET})
         _2PUSH
 _C
 worddoc( {MEMORY},{!},{store},{n addr ---},{ISO,FIG,L0},
-{Store all _BITS_ bits of n at forthvar({addr}) .},{{@},{C!},{2!},{FAR!},{P!},{PC!}},
+{Store all _BITS_ bits of n at forthvar({addr}) .},
+{{@@},{C!},{2!},{FAR!},{P!},{PC!}},
 {{." Via @"},{Via @}},
 enddoc)
 CODE_HEADER({!},{STORE})
@@ -2811,7 +2812,7 @@ _C
 _BITS64_({
 worddocsafe( {MEMORY},{L!},{long_store},{n addr --- },{},
 {Store the 32-bit contents of forthvar({n}) at forthvar({addr}) .},
-{{L@},{!},{C!},{2!},{P!},{PC!},{FAR!}},
+{{L@@},{!},{C!},{2!},{P!},{PC!},{FAR!}},
 { {-23 PAD L! PAD L@ .},{FFFFFF23} },
 enddoc)
 CODE_HEADER({L!},{LSTORE})
@@ -2826,7 +2827,7 @@ worddoc( {MEMORY},{C!},{c_store},{b addr ---},{ISO},
 In ciforth , running on the Intel architectures
 there are no restrictions regarding byte
 addressing.
-},{{C@},{!}},
+},{{C@@},{!}},
 {{." Via C@"},{Via C@}},
 enddoc)
 CODE_HEADER({C!},{CSTOR})
@@ -2839,7 +2840,7 @@ worddoc( {MEMORY},{2!},{two_store},{x1 x2 addr --- },{ISO},
 {Store a pair of _BITS_ bits values forthvar({x1})
 forthvar({x2}) to consecutive cells at forthvar({addr}) .
 forthvar({x2}) is stored at the lowest address.
-},{{2@},{!},{C!}},
+},{{2@@},{!},{C!}},
 {{." Via 2@"},{Via 2@}},
 enddoc)
 CODE_HEADER({2!},{TSTOR})
@@ -2868,11 +2869,11 @@ _HEADER({WITHIN},{WITHIN}, {DOCOL})
         DC      SEMIS
 _C
 _BITS64_(,{
-worddocsafe( {MEMORY},{FAR@},{far_fetch},{faraddr --- n},{},
+worddocsafe( {MEMORY},{FAR@@},{far_fetch},{faraddr --- n},{},
 {Leave the _BITS_ bit contents forthvar({n}) of
 segment address pair forthvar({faraddr}).
 },
-{{FAR!},{@},{C@},{2@}},
+{{FAR!},{@@},{C@@},{2@@}},
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({FAR@},{LFET})
@@ -2902,7 +2903,7 @@ worddoc( {MEMORY},{FAR!},{far_store},{n faraddr ---},{},
 {Store _BITS_ bits of forthvar({n}) at segment address pair
 forthvar({faraddr}).
 },
-{{FAR@},{!},{C!},{2!}},
+{{FAR@@},{!},{C!},{2!}},
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({FAR!},{LSTORE})
@@ -3085,7 +3086,7 @@ worddoc( {STRING},{BL},{BL},{--- c},{ISO.FIG},
 enddoc)
 _HEADER({BL},{LBL},{DOCON}, ABL)
 _C
-worddocsafe( {STRING},{$@},{string_fetch},{addr --- sc},{},
+worddocsafe( {STRING},{$@@},{string_fetch},{addr --- sc},{},
 { From address forthvar({addr}) fetch a forthdefin({string constant}) forthvar({sc}) .},
 {{$!},{$+!},{$C+}},
 {{ HEX 4 , 41 C, 39 C, 45 C, 30 C, HERE 4 CELL+ - $@ TYPE},{A9E0}}, enddoc)
@@ -3099,7 +3100,7 @@ _C
 worddoc( {STRING},{$!},{string_store},{sc addr ---},{},
 {Store a forthdefin({string constant}) forthvar({sc})
 in the string variable at address forthvar({addr}).},
-{{$@},{$+!},{$C+}},
+{{$@@},{$+!},{$C+}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $! PAD $@ TYPE},{A9}}, enddoc)
 _HEADER({$!},{SSTOR},{DOCOL})
         DC TDUP, STORE, CELLP, SWAP, LCMOVE
@@ -3120,7 +3121,7 @@ _C
 worddoc( {STRING},{$+!},{string_append},{sc addr ---},{},
 {Append a forthdefin({string constant}) forthvar({sc})
 to the string variable at address forthvar({addr}).},
-{{$@},{$!},{$C+}},
+{{$@@},{$!},{$C+}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - dnl
 $@ 2DUP PAD $! PAD $+! PAD $@ TYPE},{A9A9}}, enddoc)
 _HEADER({$+!},{SADD},{DOCOL})
@@ -3132,7 +3133,7 @@ _C
 worddoc( {STRING},{$C+},{char_append},{c addr ---},{},
 {Append a char forthvar({c})
 to the string variable at address forthvar({addr}).},
-{{$@},{$!},{$+!}},
+{{$@@},{$!},{$+!}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -  dnl
 $@ PAD $! HERE 1 - C@ PAD $C+ PAD $@ TYPE},{A99}}, enddoc)
 _HEADER({$C+},{CHAPP},{DOCOL})
@@ -3144,7 +3145,7 @@ _C
 worddocsafe( {STRING},{$,},{string_comma},{sc --- addr},{},
 {Allocate and store a forthdefin({string constant}) forthvar({sc})
 in the dictionary and leave its address forthvar({addr}).},
-{{$@},{$!},{}},
+{{$@@},{$!},{}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ $, $@ TYPE},{A9}}, enddoc)
 _HEADER({$,},{SCOMMA},{DOCOL})
         DC HERE, TOR
@@ -3218,7 +3219,7 @@ worddoc( {MEMORY},{TASK-SIZE},{task_size},{---- n},{},
 data stack size, return stack size, terminal input buffer plus
 user area.
 The data stack of the main task runs down to forthcode({HERE}) .
-},{{DSP@},{RSP@},{TIB}},
+},{{DSP@@},{RSP@@},{TIB}},
 {{TASK-SIZE . ." one bit up"},{10000 one bit up} },
 enddoc)
 _HEADER({TASK-SIZE},{LTAS},{DOCON}, TAS)
@@ -3518,7 +3519,7 @@ _C
 worddoc( {INPUT~},{REMAINDER},{remainder},{--- addr},{},
 {A pointer to a constant string that contains the balance of
 characters fetched into the input buffer, but not yet consumed.
-Used as in forthsamp({REMAINDER 2@}) .
+Used as in forthsamp({REMAINDER 2@@}) .
 },
 {{REFILL-TIB}},
 {{REMAINDER 2@ DROP TIB @ R0 @ WITHIN .},{_T_}},
@@ -4529,7 +4530,7 @@ worddoc( {STRING},{$^},{string_index},{sc c -- addr},{},
 return its forthvar({addr}) if present.
 Otherwise return a forthdefin({nil pointer}).
 A null string (0 0) or an empty string are allowed, and result in not found. },
-{{$/},{CORA},{$@}},
+{{$/},{CORA},{$@@}},
 {{ 132 "ORANG" OVER >R &N $^ R> - . .},{3 132},
 { 132 "" &N $^ . .},{0 132},
 { 132 0 0 &N $^ . .},{0 132},
@@ -4561,7 +4562,7 @@ zero)}}) and forthvar({sc2}) is the original string.
 _VERBOSE_({{Both }forthvar({sc1}){ and }forthvar({sc2}){ may be
 empty strings (i.e. their count is zero), if }forthvar({c}){ is
 the last or first character in }forthvar({sc}){ .}}) },
-{{$^},{CORA},{$@}},
+{{$^},{CORA},{$@@}},
 {{ 132 "ORANG" &O $/ . DROP TYPE . },{0 RANG132},
 { "ORANG OETAN" BL $/ TYPE TYPE },{ORANGOETAN},
 { "ORANG" &G $/ TYPE 0 . TYPE },{ORAN0 },
@@ -4651,7 +4652,7 @@ Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input source.
 Leave at forthvar({addr}) a copy of the string,
 that was surrounded by forthvar({c}) in the input source.
-This is an oldfashioned string to be fetched by forthcode({COUNT}) , not forthcode({$@}) .
+This is an oldfashioned string to be fetched by forthcode({COUNT}) , not forthcode({$@@}) .
 In ciforth the character string is positioned
 at the dictionary buffer forthcode({HERE}) .
 forthcode({WORD}) leaves the character count in the first byte, the characters, and
@@ -6380,14 +6381,14 @@ MESS1:                  _C{THEN}
         DC      DROP
         DC      SEMIS
 _C
-worddocsafe( {MEMORY},{PC@},{port_char_fetch},{port --- b},{},
+worddocsafe( {MEMORY},{PC@@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
 forthvar({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{PC!},{P@},{P!},{@}},
+{{PC!},{P@@},{P!},{@@}},
 {{( No test)},{}},
 enddoc)
 CODE_HEADER({PC@},{PCFET})
@@ -6405,7 +6406,7 @@ _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{PC@},{P!},{P@},{!}},
+{{PC@@},{P!},{P@@},{!}},
 {{( No test)},{}},
 enddoc)
 CODE_HEADER({PC!},{PCSTO})
@@ -6414,14 +6415,14 @@ CODE_HEADER({PC!},{PCSTO})
         OUT     _DX16,AL   _C{ BYTE OUTPUT}
         _NEXT
 _C
-worddocsafe( {MEMORY},{P@},{port_fetch},{port --- n},{},
+worddocsafe( {MEMORY},{P@@},{port_fetch},{port --- n},{},
 {Fetch the _BITS_ bit contents forthvar({n}) from the port address
 forthvar({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{P!},{PC@},{PC!},{@}},
+{{P!},{PC@@},{PC!},{@@}},
 {{( No test)},{}},
 enddoc)
 CODE_HEADER({P@},{PFET})
@@ -6436,7 +6437,7 @@ _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{P@},{PC!},{PC@},{!}},
+{{P@@},{PC!},{PC@@},{!}},
 {{( No test)},{}},
 enddoc)
 CODE_HEADER({P!},{PSTO})
@@ -7326,7 +7327,7 @@ editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than }forthcode({ACCEPT}){.
 Text is probably present in the buffer address contained in
-}forthcode({TIB @}){, but not necessarily at the beginning. }})
+}forthcode({TIB @@}){, but not necessarily at the beginning. }})
 },
 {{KEY},{KEY?},{ACCEPT}},
 {
@@ -7650,9 +7651,9 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      TOR 
+        DC      TOR
         DC      SWAP, TOR, TOR
-        DC      X, SPFET, ZERO, SWAP    
+        DC      X, SPFET, ZERO, SWAP
         DC      FROMR, FROMR, FROMR
         DC      LIT, 5, LIT, _ReadFile@20, LCALL
         DC      ZEQU
@@ -7774,9 +7775,9 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR 
+        DC      TOR
         DC      SWAP, TOR, TOR
-        DC      X, SPFET, ZERO, SWAP  
+        DC      X, SPFET, ZERO, SWAP
         DC      FROMR, FROMR, FROMR
         DC      LIT, 5, LIT, _WriteFile@20, LCALL
         DC      ZEQU, SWAP, DROP
@@ -7922,13 +7923,13 @@ by forthcode({ACCEPT}) or after forthcode({SET-SRC})
 by Forth parsing words like forthcode({WORD}) .
 The editing functions
 are those described by forthcode({ACCEPT}).
-Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
+Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@@}) defines
 the characters ready in the input buffer. All characters are
 retained including the forthkey({RET}).
 
 If the input is redirected (such that reading
 after a forthkey({RET}) occurs)
-forthsamp({REMAINDER 2@}) contains the part of
+forthsamp({REMAINDER 2@@}) contains the part of
 forthcode({TIB}) that is not yet consumed by forthcode({(ACCEPT)}) ,
 and outside the reach of forthcode({SRC}) .
 
@@ -7961,9 +7962,9 @@ worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ ---} ,{},
 fill up forthcode({TIB}) . Normally this means until a
 forthkey({RET}). If the input is redirected (such that reading
 after forthkey({RET}) cannot be prevented)
-forthsamp({REMAINDER 2@}) contains the first part of
+forthsamp({REMAINDER 2@@}) contains the first part of
 forthcode({TIB}) that has a left over from the previous read.
-After forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@}) defines
+After forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@@}) defines
 the characters ready in the input buffer. All characters are
 retained including the forthkey({RET}). The editing functions
 are the same as with forthcode({ACCEPT}).
@@ -8016,7 +8017,7 @@ contains forthkey({LF}).
 _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than }forthcode({ACCEPT}){
 Text is probably present in the buffer address contained in
-}forthcode({TIB @}){, but not necessarily at the beginning. }})
+}forthcode({TIB @@}){, but not necessarily at the beginning. }})
 },
 {{ACCEPT},{EVALUATE}},
 {{." interactive"},{interactive}},
@@ -8641,7 +8642,7 @@ But possibly a trailing forthkey({RET}) (0x0D).
 _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than }forthcode({ACCEPT}){
 Text is probably present in the buffer address contained in
-}forthcode({TIB @}){, but not necessarily at the beginning. }})
+}forthcode({TIB @@}){, but not necessarily at the beginning. }})
 Editing is done locally observing forthcode({RUBOUT}) .
 },
 {{ACCEPT},{EVALUATE}},
@@ -8751,7 +8752,7 @@ worddoc( {BLOCKS},{BLOCK-HANDLE},{block_handle},{---n},{},
 If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
 _LINUX_C_({In this ciforth forthcode({BLOCK-HANDLE}) is not used.})
-},{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT},{$@}},
+},{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT},{$@@}},
 {{BLOCK-HANDLE @ 10 U< .},{_T_}},
 enddoc)
 _HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, )

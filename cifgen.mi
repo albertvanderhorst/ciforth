@@ -378,18 +378,19 @@ in depth knowledge of the operating system.
 This doesn't mean it is cumbersome or difficult.
 Under Linux we need
 forthexample(
+dnl NOTE! All @ must be doubled for tex.
 {HEX
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
- : SM BM BEGIN DUP @ MAGIC @ <> WHILE 1 CELLS - REPEAT ;
+ : SM BM BEGIN DUP @@ MAGIC @@ <> WHILE 1 CELLS - REPEAT ;
 \ Return the VALUE of ``HERE'' when this forth started.
- : HERE-AT-STARTUP  ' DP >DFA @ +ORIGIN @ ;
+ : HERE-AT-STARTUP  ' DP >DFA @@ +ORIGIN @@ ;
 \ Save the system in a file with NAME .
  : SAVE-SYSTEM
 \ Increment the file and dictionary sizes
   HERE HERE-AT-STARTUP - DUP SM 20 + +!      SM 44 + +!
-   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+   U0 @@   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 })
@@ -1033,7 +1034,7 @@ forthitem
 Familiarize yourself with the model written in Forth, the glossary, and
 specific assembly listings.
 forthitem
-Edit the assembly listings into your system. Set the 
+Edit the assembly listings into your system. Set the
 boot-up parameter that initialises the forthcode({WARNING}) user variable to 0;
 so warning messages are shown as simple numbers.
 forthitem
@@ -1048,7 +1049,7 @@ In ciforth this is the Intel 86 register AX.
 If your NEXT is inline code,
 for the moment replace it by a jump.
 Mostly this can be done by inactivating the macro forthmacro({_NEXT_})
-through removing the line containing it from 
+through removing the line containing it from
 from forthfile( _BITS16_({width16.m4}) _BITS32_({width32.m4}) _BITS64_({width64.m4}) ).
 forthitem
 Enter the cold start at the origin.
@@ -1078,12 +1079,12 @@ above registers will again localize problems.
 forthitem
 Get forthcodeni({H.}) running.
 You may replace temporarily forthcodeni({.}) by forthcodeni({H.}) in forthcode({.S}).
-Hunt down code words that don't work by using forthcode({.S}).   
+Hunt down code words that don't work by using forthcode({.S}).
 The forthfile({tsuite.frt}) may come in handy for this.
 forthitem
-Once the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BUFFERS}) 
+Once the system is interpreting from the keyboard, execute forthcodeni({EMPTY-BUFFERS})
 to clear the disc buffer area.
-You must create now your disc driver, the word forthcodeni({R|W}) .  
+You must create now your disc driver, the word forthcodeni({R|W}) .
 You may test the disc access by typing:
 forthsamp({0 BLOCK 64 TYPE})
 This should bring block zero from the disc to a buffer and
@@ -1100,7 +1101,7 @@ and tools like forthcodeni({DUMP}).
 Beware! Some of the tools handle hards disks.
 There are example programs and benchmarks.
 Everything up till the screen marked forthsamp({end of lab})
-you will find more or less working, but maybe not all of it on all systems. 
+you will find more or less working, but maybe not all of it on all systems.
 Everything loaded from the electives screen (traditionally 8, now 5)
 is used by me on a regular basis and is 16/32/64 bits clean.
 Beware! The full screen editor does not work under Linux (protection).
@@ -1270,7 +1271,7 @@ and users could share the background storage, provided certain precautions
 are taken. About this you can forget.
 What you can do is, store back you user variables in the boot-up
 parameters as follows
-forthsamp({USVA @   ' USVA @   +ORIGIN !})
+forthsamp({USVA @@  ' USVA @@  +ORIGIN !})
 where forthvar({USVA}) is the user variable which value you want to keep.
 
 Underneath the I/O model has improved. TYPE and EXPECT are drawn into
