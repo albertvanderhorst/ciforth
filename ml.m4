@@ -16,9 +16,9 @@ define({_HEADER_ASM},{;
 ;  nowadays deeply hidden in a Visual Studio bin directory.
 ;})dnl
 define({SET_32_BIT_MODE},{ .686p })dnl
-define({_SECTION_},{$1    SEGMENT})
-define({_SECTION_NOBITS_},{$1   SEGMENT READ WRITE EXECUTE STACK})
-define({_SECTION_END_},{$1   ENDS})
+define({_SECTION_},{$1 SEGMENT})
+define({_SECTION_NOBITS_},{})
+define({_SECTION_END_},{$1 ENDS})
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl
 dnl
@@ -26,8 +26,8 @@ define({_ENDP},)dnl Each ENDP is started with _ENDP in generic listing.
 define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
 define({RELATIVE_WRT_ORIG}, {$1 - ORIG})
 dnl
-dnl MASM has an unreasonable quirk to reserve memory
-define({_RESB}, {DB      $1 DUP (0)})dnl
+dnl ML reserves memory using ORG.
+define({_RESB}, {DB  ($1) DUP(?)})dnl
 dnl
 dnl Assembly Pointer
 define({_AP_}, {$})dnl

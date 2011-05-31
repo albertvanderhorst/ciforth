@@ -372,7 +372,7 @@ EPIPE   EQU     38
 _DLL_({
         .686P
 .model  FLAT
-;INCLUDELIB LIBC
+INCLUDELIB LIBC
 EXTRN     _ExitProcess@4   :NEAR
 EXTRN     _GetStdHandle@4: NEAR
 EXTRN     _ReadFile@20: NEAR
@@ -5915,14 +5915,14 @@ _BLOCKSINFILE_({
         DC      LIT, 0, BLINI  _C{Default, open library file read-only!}},{
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
-_DLL_({
+_SUPPRESSED({ dnl NOT YET
         DC      LIT, -10, ONE, LIT, _GetStdHandle@4, LCALL
         DC      LIT, STDIN+_CELLS(D_HOFFSET), STORE
         DC      LIT, -11, ONE, LIT, _GetStdHandle@4, LCALL
         DC      LIT, STDOUT+_CELLS(D_HOFFSET), STORE
         DC      LIT, -12, ONE, LIT, _GetStdHandle@4, LCALL
         DC      LIT, STDERR+_CELLS(D_HOFFSET), STORE
-})_C{}_END_({_DLL_})
+})_C{}_END_({_SUPPRESSED})
         DC      SEMIS
 _C{}
 _DLL_({
@@ -5936,13 +5936,13 @@ worddoc( {STDOUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
 {{ STDOUT},{7} },
 enddoc)
-_HEADER({STDOUT},{STDOUT},{DOCON}, 0)
+_HEADER({STDOUT},{STDOUT},{DOCON}, 1)
 _C
 worddoc( {STDERR},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
 {{ STDERR},{7} },
 enddoc)
-_HEADER({STDERR},{STDERR},{DOCON}, 0)
+_HEADER({STDERR},{STDERR},{DOCON}, 2)
 })_C{}_END_({_DLL_})
 worddoc( {DOUBLE},{S>D},{s_to_d},{n --- d},{ISO},
 {Sign extend a single number to form a double number.},{},
@@ -7281,7 +7281,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      LIT,ACR,EMIT
         DC      ZERO,LOUT,STORE
 EMIT1:
-        DC      X, SPFET, ONE, LTYPE
+        DC      SPFET, ONE, LTYPE
         DC      DROP
         DC      SEMIS
 _C
@@ -7651,12 +7651,9 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      TOR
-        DC      SWAP, TOR, TOR
-        DC      X, SPFET, ZERO, SWAP
-        DC      FROMR, FROMR, FROMR
-        DC      LIT, 5, LIT, _ReadFile@20, LCALL
-        DC      ZEQU
+        DC      TOR, SWAP, FROMR
+        DC      LIT, 3, LIT, __read, LCALL
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -7775,12 +7772,9 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR
-        DC      SWAP, TOR, TOR
-        DC      X, SPFET, ZERO, SWAP
-        DC      FROMR, FROMR, FROMR
-        DC      LIT, 5, LIT, _WriteFile@20, LCALL
-        DC      ZEQU, SWAP, DROP
+        DC      TOR, SWAP, FROMR
+        DC      LIT, 3, LIT, __write, LCALL
+        DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -8390,7 +8384,7 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
-        DC      XCODE, FETCH, ONE, LIT, _ExitProcess@4, LCALL
+        DC      XCODE, FETCH, ONE, LIT, __exit, LCALL
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _DLL_})
 _DLL_({
@@ -10506,12 +10500,9 @@ _C
 _EQULAYOUT_({
 TEXTEND  EQU     _AP_       _C{ Show end of dictionary.}
 INITDP   EQU     M4_INITDP _C{Where we want new words.}
-dnl TBS : the following may not be needed.
-_DLL_({
-        ORG     EM-4
-        DB 0,0,0,0
-})
 ACTUAL_EM EQU    EM  _C{ Different for relocatable code only.}
+         ORG     EM-4
+         DB 0,0,0,0
 _SECTION_END_({_TEXT})
 })_C{}_END_({ _EQULAYOUT_})
 
