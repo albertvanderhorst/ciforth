@@ -28,6 +28,8 @@ _DLL_({define( {_EQULAYOUT_},  _yes )})
 _HOSTED_X_({define({_HOSTED_}, _yes)})
 _HOSTED_DPMI_({define({_HOSTED_}, _yes)})
 _HOSTED_MSDOS_({define({_HOSTED_}, _yes)})
+_DLL_({define({_HOSTED_}, _yes)})
+
 
 _HOSTED_DPMI_( {define({_OS_}, MS-Windows)})
 _HOSTED_LINUX_({define({_OS_}, Linux)})

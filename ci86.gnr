@@ -357,6 +357,8 @@ _ORIG:
 _DLL_({
 PUBLIC   _ORIG
 dnl C
+INCLUDELIB LIBC
+_C{ Functions from c-library }
 EXTRN     __creat    :NEAR
 EXTRN     __open    :NEAR
 EXTRN     __close   :NEAR
@@ -372,11 +374,16 @@ EPIPE   EQU     38
 _DLL_({
         .686P
 .model  FLAT
-INCLUDELIB LIBC
-EXTRN     _ExitProcess@4   :NEAR
-EXTRN     _GetStdHandle@4: NEAR
-EXTRN     _ReadFile@20: NEAR
-EXTRN     _WriteFile@20: NEAR
+_C{ INCLUDELIB KERNEL32 }
+EXTRN     _ExitProcess@4        : NEAR
+EXTRN     _GetCommandLineA@0    : NEAR
+EXTRN     _GetModuleHandleA@4   : NEAR
+EXTRN     _GetProcAddress@8     : NEAR
+EXTRN     _GetStdHandle@4       : NEAR
+EXTRN     _LoadLibraryA@4       : NEAR
+EXTRN     _ReadFile@20          : NEAR
+EXTRN     _WriteFile@20         : NEAR
+
         _SECTION_({_TEXT})
 PUBLIC  _main   _C Entry point.
 _main:
@@ -3482,6 +3489,12 @@ by in protected mode}).
 _VERBOSE_({{The arguments passed to the program, ``command tail''
 is available as a }forthdefi({brain damaged string}){ at address 0x80.}})
 }})
+_DLL_({{
+In this ciforth it contains a pointer to a zero ended string
+with the command line.
+_VERBOSE_({{The operating system doesn't help to separate the arguments,
+so beware of blank space.}})
+}})
 },
 {{SYSTEM}},
 {{." Interactive"},{Interactive}},
@@ -5822,6 +5835,23 @@ _HOSTED_X_(
 _HOSTED_OSX_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) _C{ No options}  })
+_DLL_(
+{        DC      ARGS, FETCH
+dnl Later handle double quotes, maybe.
+dnl     DC       BL, SSLAS, TDROP, LDUP
+OPT5:
+        DC       LDUP, CFET, QBL, INVERT
+        _0BRANCH(OPT6)            _C{ Skip non-blanks.}
+        DC      ONEP
+        _BRANCH(OPT5)
+OPT6:
+        DC      LDUP, CFET, QBL
+        _0BRANCH(OPT7)            _C{ Skip blanks.}
+        DC      ONEP
+        _BRANCH(OPT6)
+OPT7:
+        DC      LDUP, CFET
+        _0BRANCH(OPT4) _C{ No options}  })
 _PC_(
 {        DC      LIT, 0x81
 OPT1:
@@ -5831,15 +5861,17 @@ OPT1:
         _BRANCH(OPT1)
 OPT2:   DC      LDUP, CFET, LIT, ACR, UNEQ
         _0BRANCH(OPT4) _C{ No options}  })
-        DC      FETCH
-        DC      LDUP
-        DC      LIT, _PC_({0x0FD}, {0x0FF}), LAND
+
+_C{Supposedly on the stack is now a pointer to the option.}
+        DC      COUNT
+_PC_(
+{       DC      LIT, 0x0FD, LAND    _C{Accept / as well as -.}})
         DC      LIT, '-', UNEQ
         _0BRANCH(OPT3)
         DC      LIT, 3, LDUP, ERROR
         DC      XCODE, STORE, BYE
 OPT3:
-        DC      LIT, 8, RSHIFT
+        DC      CFET
         DC      LIT, 0x1F, LAND
         DC      LOAD       _C{Supposedly stack-neutral.}
         DC      ZERO, SWAP _C{ Sign on suppressed.}
@@ -5870,6 +5902,10 @@ _C{ Fill user area for single task.}
         DC      LCMOVE
         DC      INIT
         DC      ONE            _C{ Sign on wanted.}
+_DLL_({
+        DC      ZERO, LIT, _GetCommandLineA@0, LCALL
+        DC      ARGS, STORE
+})_C{}_END_({_DLL_})
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, XOS, ZLESS
@@ -5926,6 +5962,25 @@ _SUPPRESSED({ dnl NOT YET
         DC      SEMIS
 _C{}
 _DLL_({
+
+worddoc( {GMH},{GMH},{_GetModuleHandleA@4},{ --- n},{},
+{The Proc address of _GetModuleHandleA@4 get the module handle of a library. },{},
+{{ GMH . },{7890A6} },
+enddoc)
+_HEADER({GMH},{GMH},{DOCON}, _GetModuleHandleA@4)
+_C
+worddoc( {LOLI},{LOLI},{_LoadLibraryA@4 standard_in},{ --- n},{},
+{The Proc address of __LoadLibraryA@4 load DLL library library. },{},
+{{ LOLI . },{7890A6} },
+enddoc)
+_HEADER({LOLI},{LOLI},{DOCON}, _LoadLibraryA@4 )
+_C
+worddoc( {GPA},{GPA},{_GetProcAddress@8 },{ --- n},{},
+{The Proc address of _GetProcAddress@8 load DLL library library. },{},
+{{ GPA .},{7890A6} },
+enddoc)
+_HEADER({GPA},{GPA},{DOCON}, _GetProcAddress@8)
+_C
 worddoc( {STDIN},{STDIN},{standard_in},{ --- n},{},
 {The file descriptior for standard input at the console.},{},
 {{ STDIN},{6} },
