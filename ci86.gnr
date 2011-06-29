@@ -377,6 +377,7 @@ _DLL_({
 _C{ INCLUDELIB KERNEL32 }
 EXTRN     _ExitProcess@4        : NEAR
 EXTRN     _GetCommandLineA@0    : NEAR
+EXTRN     _GetLastError@0       : NEAR
 EXTRN     _GetModuleHandleA@4   : NEAR
 EXTRN     _GetProcAddress@8     : NEAR
 EXTRN     _GetStdHandle@4       : NEAR
@@ -5836,22 +5837,20 @@ _HOSTED_OSX_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) _C{ No options}  })
 _DLL_(
-{        DC      ARGS, FETCH
-dnl Later handle double quotes, maybe.
-dnl     DC       BL, SSLAS, TDROP, LDUP
-OPT5:
-        DC       LDUP, CFET, QBL, INVERT
-        _0BRANCH(OPT6)            _C{ Skip non-blanks.}
-        DC      ONEP
-        _BRANCH(OPT5)
+{       DC      ARGS, FETCH
+        DC     ZERO, INVERT
+        DC     ZERO, SSLAS,  LBL, SSLAS
+        DC     TDROP, DROP
+        DC     TOR, TDROP, FROMR
+        DC      LDUP
+        _0BRANCH(OPT4) _C{ No options}
 OPT6:
         DC      LDUP, CFET, QBL
         _0BRANCH(OPT7)            _C{ Skip blanks.}
         DC      ONEP
         _BRANCH(OPT6)
 OPT7:
-        DC      LDUP, CFET
-        _0BRANCH(OPT4) _C{ No options}  })
+})
 _PC_(
 {        DC      LIT, 0x81
 OPT1:
@@ -5980,6 +5979,37 @@ worddoc( {GPA},{GPA},{_GetProcAddress@8 },{ --- n},{},
 {{ GPA .},{7890A6} },
 enddoc)
 _HEADER({GPA},{GPA},{DOCON}, _GetProcAddress@8)
+_C
+_C
+worddoc( {GLE},{GLE},{_GetLastError@0 },{ --- n},{},
+{The Proc address of _GetLastError@0 load DLL library library. },{},
+{{ GLE .},{7890A6} },
+enddoc)
+_HEADER({GLE},{GLE},{DOCOL})
+        DC      ZERO, LIT, _GetLastError@0, LCALL
+        DC      SEMIS
+_C
+worddoc( {ERRORS},{?ERRIR},{query_error_wIndows},{n --- n},{},
+{Handle the possible error forthvar({n}) in Windows fashion.
+If it is zero, this means okay.
+If it is minus one, it is an unknown error condition.
+This error is now fetched by getting the last error and negated.
+A mnemonic for it is typed using forthsamp({MESSAGE})
+},
+{{ERROR},{?ERROR}, {MESSAGE}},
+{
+{0 ?ERRIR},{},
+{0 WARNING ! -20 ?ERRIR },
+{ARNING ! -20 ?ERRIR ? ciforth ERROR # -32 },
+{CR},{},
+},
+enddoc)
+_HEADER({?ERRIR},{QERRIR},{DOCOL})
+        DC      LDUP
+        _0BRANCH(ERI1) _C{ No options}
+        DC      DROP, GLE, NEGATE
+ERI1:
+        DC      SEMIS
 _C
 worddoc( {STDIN},{STDIN},{standard_in},{ --- n},{},
 {The file descriptior for standard input at the console.},{},
@@ -7282,7 +7312,7 @@ _HEADER({MS},{MS},{DOCOL})
         DC      ZERO, ZERO
         DC      ZERO, ZERO
         DC      LIT, TV
-        DC      LIT, _newselect, XOS5
+       DC      LIT, _newselect, XOS5
         DC      QERRUR
         DC      SEMIS
 TV:     _RESB( 8 )
@@ -7307,7 +7337,7 @@ _HEADER({MS@},{MSFET},{DOCOL})
 _C
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 { Wait for forthvar({n}) milliseconds. },
-{{KEY?},{MS@}},
+{{KEY?},{MS@@}},
 {{ 123 10 MS . },{123}},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
