@@ -223,9 +223,16 @@ testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;
 	diff -b -B $@.2 $@.3 || true
 	rm $(TEMPFILE)
 
-test% : ci86.%.rawtest test.m4 ;
+testdpmi : ci86.dpmi.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	rm $(TEMPFILE)
+
+testwina : ci86.wina.rawtest test.m4 ;
+	m4 test.m4 $<  >$(TEMPFILE)
+	echo "'STDIN >DFA @ 'STDERR >DFA !" >$@.1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
 

@@ -378,7 +378,6 @@ _C{ INCLUDELIB KERNEL32 }
 EXTRN     _ExitProcess@4        : NEAR
 EXTRN     _GetCommandLineA@0    : NEAR
 EXTRN     _GetLastError@0       : NEAR
-EXTRN     _GetModuleHandleA@4   : NEAR
 EXTRN     _GetProcAddress@8     : NEAR
 EXTRN     _GetStdHandle@4       : NEAR
 EXTRN     _LoadLibraryA@4       : NEAR
@@ -4048,10 +4047,7 @@ and it is remembered that this is the original place where the
 exception originated.
 If the exception is never caught, an error message is displayed
 using forthcode({ERROR}) .
-All errors signaled by the kernel go
-through this word, allowing to catch
-dnl The following may be a design error
-e.g. errors in accessing the block file.
+All errors signaled by the kernel go through this word.
 },
 {{ERROR},{?ERRUR}},
 {{0 12 ?ERROR},{},
@@ -5961,13 +5957,6 @@ _SUPPRESSED({ dnl NOT YET
         DC      SEMIS
 _C{}
 _DLL_({
-
-worddoc( {GMH},{GMH},{_GetModuleHandleA@4},{ --- n},{},
-{The Proc address of _GetModuleHandleA@4 get the module handle of a library. },{},
-{{ GMH . },{7890A6} },
-enddoc)
-_HEADER({GMH},{GMH},{DOCON}, _GetModuleHandleA@4)
-_C
 worddoc( {LOLI},{LOLI},{_LoadLibraryA@4 standard_in},{ --- n},{},
 {The Proc address of __LoadLibraryA@4 load DLL library library. },{},
 {{ LOLI . },{7890A6} },
@@ -5981,32 +5970,41 @@ enddoc)
 _HEADER({GPA},{GPA},{DOCON}, _GetProcAddress@8)
 _C
 _C
-worddoc( {GLE},{GLE},{_GetLastError@0 },{ --- n},{},
-{The Proc address of _GetLastError@0 load DLL library library. },{},
-{{ GLE .},{7890A6} },
+worddoc( {LAST-ERROR},{LAST-ERROR},{_GetLastError@0 },{ --- n},{},
+{Get the last error from MS-windows, the value of a global variable.
+Windows functions can indicate this global variable is set,
+by returning a -1, a 0, or a NULL.
+It can indicate success, by returning a positive value,
+or a non-zero value, or by resetting this global variable to zero.
+},{},
+{{ LAST-ERROR .},{7890A6} },
 enddoc)
-_HEADER({GLE},{GLE},{DOCOL})
+_HEADER({LAST-ERROR},{GLE},{DOCOL})
         DC      ZERO, LIT, _GetLastError@0, LCALL
         DC      SEMIS
 _C
-worddoc( {ERRORS},{?ERRIR},{query_error_wIndows},{n --- n},{},
-{Handle the possible error forthvar({n}) in Windows fashion.
-If it is zero, this means okay.
-If it is minus one, it is an unknown error condition.
-This error is now fetched by getting the last error and negated.
-A mnemonic for it is typed using forthsamp({MESSAGE})
+worddoc( {ERRORS},{>ERROR},{query_error_wIndows},{n --- err},{},
+{Turn forthvar({n}) into a ciforth error code,
+assuming it was returned by a c-style function.
+If a library function looks like c-compatible it probably follows
+this convention, but you have to look this up for each call.
+If forthsamp({n}) is zero or positive, this means okay.
+If it is negative, it is indicates an error condition.
+This error is now fetched by forthsamp({LAST-ERROR}) and negated.
+dnl NOTYET!
+A mnemonic for it is typed using forthsamp({MESSAGE}).
 },
 {{ERROR},{?ERROR}, {MESSAGE}},
 {
-{0 ?ERRIR},{},
-{0 WARNING ! -20 ?ERRIR },
-{ARNING ! -20 ?ERRIR ? ciforth ERROR # -32 },
+{0 ?ERRUR},{},
+{0 WARNING ! -20 ?ERRUR },
+{ARNING ! -20 ?ERRUR ? ciforth ERROR # -32 },
 {CR},{},
 },
 enddoc)
-_HEADER({?ERRIR},{QERRIR},{DOCOL})
-        DC      LDUP
-        _0BRANCH(ERI1) _C{ No options}
+_HEADER({>ERROR},{TOERR},{DOCOL})
+        DC      ZERO, MIN, LDUP
+        _0BRANCH(ERI1)
         DC      DROP, GLE, NEGATE
 ERI1:
         DC      SEMIS
@@ -7586,7 +7584,7 @@ _DLL_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
         DC      TOR, ZEN, FROMR, SWAP
         DC      LIT, 2, LIT, __open, LCALL
-        DC      LDUP, ZERO, MIN
+        DC      LDUP, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
