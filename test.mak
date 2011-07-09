@@ -231,7 +231,7 @@ testdpmi : ci86.dpmi.rawtest test.m4 ;
 
 testwina : ci86.wina.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
-	echo "'STDIN >DFA @ 'STDERR >DFA !" >$@.1
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)

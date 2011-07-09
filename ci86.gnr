@@ -5835,17 +5835,10 @@ _HOSTED_OSX_(
 _DLL_(
 {       DC      ARGS, FETCH
         DC     ZERO, INVERT
-        DC     ZERO, SSLAS,  LBL, SSLAS
-        DC     TDROP, DROP
-        DC     TOR, TDROP, FROMR
-        DC      LDUP
+        DC     ZERO, SSLAS, SETSRC
+        DC     LNAME, TDROP
+        DC     LNAME
         _0BRANCH(OPT4) _C{ No options}
-OPT6:
-        DC      LDUP, CFET, QBL
-        _0BRANCH(OPT7)            _C{ Skip blanks.}
-        DC      ONEP
-        _BRANCH(OPT6)
-OPT7:
 })
 _PC_(
 {        DC      LIT, 0x81
@@ -5959,13 +5952,15 @@ _C{}
 _DLL_({
 worddoc( {LOLI},{LOLI},{_LoadLibraryA@4 standard_in},{ --- n},{},
 {The Proc address of __LoadLibraryA@4 load DLL library library. },{},
-{{ LOLI . },{7890A6} },
+{{ "kernel32.dll" ZEN 0 LOLI CALL DUP 0= . CONSTANT K32},{0},
+ { "GetLastError" ZEN K32 0 GPA CALL 0= . },{0} },
 enddoc)
 _HEADER({LOLI},{LOLI},{DOCON}, _LoadLibraryA@4 )
 _C
 worddoc( {GPA},{GPA},{_GetProcAddress@8 },{ --- n},{},
 {The Proc address of _GetProcAddress@8 load DLL library library. },{},
-{{ GPA .},{7890A6} },
+{{ GPA 0= .},{0},
+{." See LOLI"},{See LOLI} },
 enddoc)
 _HEADER({GPA},{GPA},{DOCON}, _GetProcAddress@8)
 _C
@@ -5984,22 +5979,21 @@ _HEADER({LAST-ERROR},{GLE},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {ERRORS},{>ERROR},{query_error_wIndows},{n --- err},{},
-{Turn forthvar({n}) into a ciforth error code,
-assuming it was returned by a c-style function.
-If a library function looks like c-compatible it probably follows
-this convention, but you have to look this up for each call.
+{
+Assuming forthvar({n}) was returned by a c-style function,
+turn it into a ciforth error code.
 If forthsamp({n}) is zero or positive, this means okay.
 If it is negative, it is indicates an error condition.
 This error is now fetched by forthsamp({LAST-ERROR}) and negated.
+If a library function looks like c-compatible it probably follows
+this convention, but you have to look this up for each call.
 dnl NOTYET!
 A mnemonic for it is typed using forthsamp({MESSAGE}).
 },
 {{ERROR},{?ERROR}, {MESSAGE}},
 {
-{0 ?ERRUR},{},
-{0 WARNING ! -20 ?ERRUR },
-{ARNING ! -20 ?ERRUR ? ciforth ERROR # -32 },
-{CR},{},
+{0 >ERROR .},{0},
+{0 WARNING ! -20 >ERROR . },{0},
 },
 enddoc)
 _HEADER({>ERROR},{TOERR},{DOCOL})
@@ -6011,19 +6005,19 @@ ERI1:
 _C
 worddoc( {STDIN},{STDIN},{standard_in},{ --- n},{},
 {The file descriptior for standard input at the console.},{},
-{{ STDIN},{6} },
+{{ STDIN .},{0} },
 enddoc)
 _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
 worddoc( {STDOUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT},{7} },
+{{ STDOUT .},{1} },
 enddoc)
 _HEADER({STDOUT},{STDOUT},{DOCON}, 1)
 _C
 worddoc( {STDERR},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
-{{ STDERR},{7} },
+{{ STDERR .},{2} },
 enddoc)
 _HEADER({STDERR},{STDERR},{DOCON}, 2)
 })_C{}_END_({_DLL_})
@@ -7514,9 +7508,11 @@ _HOSTED_DPMI_({{The result is present in the "real" segment, such that this addr
 only is useful to be passed to DPMI. }})
 },
 _HOSTED_X_({ {{OPEN-FILE},{XOS},{XOS5}}, })
+_DLL_({ {{OPEN-FILE},{LOLI},{GPA}}, })
 _HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
 _HOSTED_X_({ {{"AAP" ZEN 3 + C@ .},{0}} })
+_DLL_(     { {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_DPMI_({
 {{: G3 "AAP" ZEN REG-SET 34 + @ SWAP 2 + FAR@ FF AND ;},{},
@@ -7615,7 +7611,7 @@ _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
-        DC      LIT, 1, LIT, __close, LCALL
+        DC      LIT, 1, LIT, __close, LCALL, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7632,11 +7628,12 @@ CFILE2:
 _C
 worddoc( {FILES},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {NISO},
 {_MODERN_({ Create a file with name forthvar({sc}) and
-properties forthvar({u}), for normal files this is just 0.
+properties forthvar({u}), for normal files this is just 0.})
 _PC_({The meaning is to be found in the MSDOS programmers
-manual at INT 21h function 3Ch "Create file with handle"}).})
-_HOSTED_X_({ Create a file with name forthvar({sc}) and file
-access privileges forthvar({u}) }) If the file already exists,
+manual at INT 21h function 3Ch "Create file with handle"}).
+_HOSTED_({ Create a file with name forthvar({sc}) and file
+access privileges forthvar({u}) })
+If the file already exists,
 it is truncated to zero length. Return a file handle into
 forthvar({fileid}) and a result code into forthvar({ior}).
 The latter is the _PC_({ MSDOS}) _HOSTED_X_({
@@ -7660,7 +7657,7 @@ _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, TDUP, DFILE, DROP
         DC      ZEN, FROMR
         DC      LIT, 2, LIT, __creat, LCALL
-        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      LDUP, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7697,7 +7694,7 @@ _HEADER({DELETE-FILE},{DFILE},{DOCOL})
 _DLL_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN
-        DC      ONE, LIT, __unlink, LCALL
+        DC      ONE, LIT, __unlink, LCALL, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7736,7 +7733,7 @@ _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
         DC      TOR, SWAP, FROMR
         DC      LIT, 3, LIT, __read, LCALL
-        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      LDUP, TOERR
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -7810,7 +7807,7 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      TOR, DROP _C{Convert to single precision.}
         DC      TOR, LIT, SEEK_SET, FROMR, FROMR
         DC      LIT, 3, LIT, __lseek, LCALL
-        DC      ZERO, MIN
+        DC      TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7845,6 +7842,11 @@ _HOSTED_X_({
 {"."" Hello world!""" FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
 })
+_DLL_({
+{ { "hello.frt" 2 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE-FILE .},{0},
+{FD CLOSE-FILE .},{0} },
+})
 enddoc)
 _HOSTED_X_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
@@ -7857,7 +7859,7 @@ _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
         DC      TOR, SWAP, FROMR
         DC      LIT, 3, LIT, __write, LCALL
-        DC      ZERO, MIN
+        DC      TOERR
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
