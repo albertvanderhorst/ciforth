@@ -5972,7 +5972,7 @@ by returning a -1, a 0, or a NULL.
 It can indicate success, by returning a positive value,
 or a non-zero value, or by resetting this global variable to zero.
 },{},
-{{ LAST-ERROR .},{7890A6} },
+{{ LAST-ERROR .},{0} },
 enddoc)
 _HEADER({LAST-ERROR},{GLE},{DOCOL})
         DC      ZERO, LIT, _GetLastError@0, LCALL
@@ -5985,6 +5985,7 @@ turn it into a ciforth error code.
 If forthsamp({n}) is zero or positive, this means okay.
 If it is negative, it is indicates an error condition.
 This error is now fetched by forthsamp({LAST-ERROR}) and negated.
+If this indicates no error, the original error is returned.
 If a library function looks like c-compatible it probably follows
 this convention, but you have to look this up for each call.
 dnl NOTYET!
@@ -5993,13 +5994,13 @@ A mnemonic for it is typed using forthsamp({MESSAGE}).
 {{ERROR},{?ERROR}, {MESSAGE}},
 {
 {0 >ERROR .},{0},
-{0 WARNING ! -20 >ERROR . },{0},
+{0 WARNING ! -20 >ERROR . },{-20},
 },
 enddoc)
 _HEADER({>ERROR},{TOERR},{DOCOL})
         DC      ZERO, MIN, LDUP
         _0BRANCH(ERI1)
-        DC      DROP, GLE, NEGATE
+        DC      GLE, NEGATE, MIN
 ERI1:
         DC      SEMIS
 _C
@@ -6569,7 +6570,9 @@ forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
 storage of a different block. In fact the block is transferred
 to disk immediately.},{{BLOCK},{SCREEN}},
-{{BLOCK-EXIT 2 BLOCK-INIT 1 BLOCK DROP UPDATE},{} },
+{{BLOCK-EXIT 2 BLOCK-INIT 1 BLOCK DROP UPDATE},{},
+{ 1 BLOCK PAD B/BUF MOVE EMPTY-BUFFERS 1 BLOCK PAD B/BUF CORA .},{0}
+},
 enddoc)
 _HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      PREV, FETCH
@@ -8415,6 +8418,20 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+{Leave the ASCII value of the next terminal key struck.},
+{{ACCEPT},{KEY?}}, {}, enddoc)
+_HEADER({KEY},{KEY},{DOCOL})
+        DC      ONE
+        DC      SEMIS
+_C
+worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
+{Perform a test of the terminal keyboard for a break request.
+Any key pressed is interpreted as such and the key is not consumed.
+A non-zero flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
+_HEADER({KEY?},{KEYQ},DOCOL)
+        DC      LIT, -1
+        DC      SEMIS
 dnl same as in HOSTED_X
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({RET})
@@ -8929,8 +8946,8 @@ _HEADER({BLOCK-READ},{BLREAD},{DOCOL})
         DC      BBUF
         DC      BHAN, FETCH
         DC      RFILE           _C{ Disk read }
-        DC      SWAP, DROP
-        DC      QDSKER
+        DC      SWAP, BBUF, UNEQ
+        DC      LOR, QDSKER
         DC      SEMIS
 _C
 worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{addr blk ---},{},
@@ -9119,6 +9136,30 @@ LOADEXEC:   DW  0       _C{ The 0 are filled in at boot with DS.}
         DW      0
 COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
 })_C{}_END_({_MODERN_})
+_DLL_({
+_HEADER({SYSTEM},{SYSTEM},{DOCOL})
+        DC      TDROP
+        DC      SEMIS
+        DC      LIT, COMBUF, TOR
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
+        _STRINGINLINE({X /c })  _C{byte X contains string count.}
+        DC      RR, SSTOR
+        DC      RR, SADD, LIT, ACR, RR, CHAPP
+        DC      RR, FETCH, LIT, 2, LSUB _C{Count, minus X minus CR}
+        DC      FROMR, CELLP, CSTOR _C{Fill in (BD) count at X.}
+;       DC      SHELL, CELLP, X, LIT, LOADEXEC
+;       DC      LIT, 0x4B00, BDOSN
+        DC      SWAP, QERR
+        DC      SEMIS
+LOADEXEC:   DW  0       _C{ The 0 are filled in at boot with DS.}
+        DC      COMBUF + CW  _C{Allow it to be a counted string.}
+        DW      0
+        DW      0x6C
+        DW      0
+        DW      0x7C
+        DW      0
+COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
+})_C{}_END_({_DLL_})
 _LINUX_C_({
 worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{n ---},{},
 {Map the blocks on the block file forthcode({BLOCK-FILE}),
