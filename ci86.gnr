@@ -7654,9 +7654,9 @@ _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
-        DC      TOR, TDUP, DFILE, DROP
-        DC      ZEN, FROMR
-        DC      LIT, 2, LIT, __creat, LCALL
+        DC      DROP, TDUP, DFILE, DROP
+        DC      ZEN
+        DC      ONE, LIT, __creat, LCALL   ; Has no mode-parameter!
         DC      LDUP, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
