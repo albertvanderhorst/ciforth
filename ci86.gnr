@@ -7564,8 +7564,9 @@ forthvar({fam}). Return a file handle into forthvar({fileid})
 and a result code into forthvar({ior}). The latter is the _PC_({ MSDOS}) _HOSTED_X_({ forthvar({errno}) })
 error code negated, to be inspected using forthcode({MESSAGE}).
  forthvar({fam}) is one of 0=READ_ONLY, 1=WRITE_ONLY, 2=READ_WRITE.
+_DLL_({For your convenience, all files are opened in binary mode.})
 },
-{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
+{{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE}},
 {
 {345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345},
 {"hello.frt" 0 OPEN-FILE . DUP 0 > . },{0 _T_},
@@ -7581,6 +7582,7 @@ _HEADER({OPEN-FILE},{OFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
+        DC      LIT, 8000H, LOR
         DC      TOR, ZEN, FROMR, SWAP
         DC      LIT, 2, LIT, __open, LCALL
         DC      LDUP, TOERR
