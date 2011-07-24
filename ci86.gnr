@@ -386,6 +386,7 @@ EXTRN     _PeekConsoleInputA@16 : NEAR
 EXTRN     _ReadFile@20          : NEAR
 EXTRN     _ReadConsoleA@20      : NEAR
 EXTRN     _SetConsoleMode@8     : NEAR
+EXTRN     _Sleep@4              : NEAR
 EXTRN     _WriteFile@20         : NEAR
 
         _SECTION_({_TEXT})
@@ -8524,6 +8525,15 @@ PACCEP1:
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 _C
+worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
+{ Wait for forthvar({n}) milliseconds. },
+{{KEY?},{MS@@}},
+{{ 123 10 MS . },{123}},
+enddoc)
+_HEADER({MS},{MS},{DOCOL})
+        DC      ZERO, LIT, _Sleep@4, LCALL
+        DC      DROP
+        DC      SEMIS
 })_C{}_END_({_DLL_})
 _DLL_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
