@@ -377,11 +377,15 @@ _DLL_({
 _C{ INCLUDELIB KERNEL32 }
 EXTRN     _ExitProcess@4        : NEAR
 EXTRN     _GetCommandLineA@0    : NEAR
+EXTRN     _GetConsoleMode@8     : NEAR
 EXTRN     _GetLastError@0       : NEAR
 EXTRN     _GetProcAddress@8     : NEAR
 EXTRN     _GetStdHandle@4       : NEAR
 EXTRN     _LoadLibraryA@4       : NEAR
+EXTRN     _PeekConsoleInputA@16 : NEAR
 EXTRN     _ReadFile@20          : NEAR
+EXTRN     _ReadConsoleA@20      : NEAR
+EXTRN     _SetConsoleMode@8     : NEAR
 EXTRN     _WriteFile@20         : NEAR
 
         _SECTION_({_TEXT})
@@ -5939,9 +5943,9 @@ _BLOCKSINFILE_({
         DC      LIT, 0, BLINI  _C{Default, open library file read-only!}},{
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
-_SUPPRESSED({ dnl NOT YET
-        DC      LIT, -10, ONE, LIT, _GetStdHandle@4, LCALL
+        DC      LIT, -10, ZERO, LIT, _GetStdHandle@4, LCALL
         DC      LIT, STDIN+_CELLS(D_HOFFSET), STORE
+_SUPPRESSED({ dnl NOT YET
         DC      LIT, -11, ONE, LIT, _GetStdHandle@4, LCALL
         DC      LIT, STDOUT+_CELLS(D_HOFFSET), STORE
         DC      LIT, -12, ONE, LIT, _GetStdHandle@4, LCALL
@@ -6005,8 +6009,10 @@ ERI1:
         DC      SEMIS
 _C
 worddoc( {STDIN},{STDIN},{standard_in},{ --- n},{},
-{The file descriptior for standard input at the console.},{},
-{{ STDIN .},{0} },
+{The handle to the file input buffer for the console.
+Note, for actual console input 0 is used.
+},{},
+{{ STDIN .},{3} },
 enddoc)
 _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
@@ -8029,7 +8035,7 @@ _HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      REMAIND, FETCH, TOR
         DC      TIB, FETCH, RR, PLUS
         DC      LIT, TIBSIZE, RR, LSUB
-        DC      _DLL_({STDIN},{ZERO})
+        DC      ZERO            _C{ STDIN }
         DC      RFILE
         DC      QERRUR
         DC      LDUP, ZEQU, LIT, -EPIPE, LAND _C{ Presumably end of pipe.}
@@ -8420,11 +8426,46 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
+worddoc( {INPUT},{SET-MODE},{set_mode},{u -- },{},
+{Set the mode of standard input to forthvar({u}), as defined
+in MS-WINDOWS forthemph({GetConsoleMode}) function from
+forthemph({KERNEL32.DLL}).
+},
+{{GET-MODE},{KEY?}}, {}, enddoc)
+_HEADER({SET-MODE},{SETMODE},{DOCOL})
+        DC      STDIN
+        DC      ZERO, LIT, _SetConsoleMode@8, LCALL
+        DC      ZEQU, TOERR, THROW
+        DC      SEMIS
+_C
+worddoc( {INPUT},{GET-MODE},{get_mode},{ -- u },{},
+{Get the mode of standard input to forthvar({u}), as defined
+in MS-WINDOWS forthemph({GetConsoleMode}) function from
+forthemph({KERNEL32.DLL}).
+},
+{{SET-MODE},{KEY?}}, {}, enddoc)
+_C
+_HEADER({GET-MODE},{GETMODE},{DOCOL})
+        DC      X, SPFET,  STDIN
+        DC      ZERO, LIT, _GetConsoleMode@8, LCALL
+        DC      ZEQU, TOERR, THROW
+        DC      SEMIS
+; EXTRN     _GetConsoleMode@8    : NEAR
+; : GET-MODE _ DSP@ STD-IN 0 GCM CALL-C ;
+_C
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
 {Leave the ASCII value of the next terminal key struck.},
 {{ACCEPT},{KEY?}}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
-        DC      ONE
+        DC      GETMODE, TOR, ZERO, SETMODE  _C{ Raw mode.}
+
+        DC      ZERO, SPFET, TOR        _C{ Result buffer.}
+        DC      ZERO,  SPFET, LIT, 100, LSUB  _C{ parameters 5..4}
+        DC      ONE, FROMR, STDIN              _C{ parameters 3..1}
+        DC      ZERO, LIT, _ReadConsoleA@20, LCALL
+        DC      ZEQU, TOERR, THROW
+
+        DC      FROMR, SETMODE          _C{ Restore mode.}
         DC      SEMIS
 _C
 worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
@@ -8432,8 +8473,13 @@ worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 Any key pressed is interpreted as such and the key is not consumed.
 A non-zero flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
 _HEADER({KEY?},{KEYQ},DOCOL)
-        DC      LIT, -1
+        DC      X, SPFET             _C{ 4: Result buffer of length.}
+        DC      ONE, RWBUF, STDIN   _C{ 3..1 }
+        DC      ZERO, LIT, _PeekConsoleInputA@16, LCALL
+        DC      ZEQU, TOERR, THROW
+        DC      ZEQU, ZEQU      _C{ Well formed flag.}
         DC      SEMIS
+_C
 dnl same as in HOSTED_X
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({RET})
