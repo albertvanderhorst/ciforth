@@ -21,6 +21,7 @@
 #* .ml : input file for `ML' formerly 'MASM' assembler
 #* .s : input file for `gas' assembler  Experimental
 #* .bin : a binary image without header (useful i.a. for msdos .com)
+#* .fas : input file for `fasm' assembler
 #* .gas : input file for `gas' assembler
 #* .rawdoc : unsorted glossary items from the generic source.
 #* .rawtest : unsorted and unexpanded tests.
@@ -221,6 +222,21 @@ ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr ; \
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.msm=%.rawdoc)
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.msm=%.rawtest)
+	rm $(TEMPFILE)
+
+# As of 2010, Windows has introduced a few nasty quirks, requiring sed.
+# And they can't handle 0x hex numbers.
+# And they can't handle an FS: segment override.
+ci86.%.fas : VERSION %.cfg fasm.m4 ci86.gnr ; \
+	cat $+ | m4 >$(TEMPFILE)
+	sed $(TEMPFILE) -e '/Split here for doc/,$$d' | \
+	sed -e 's/0x\([A-F0-9]*\)/0\1H/g'             | \
+	sed -e 's/^\(.*\[\)FS:\(.*\)/    DB 64H\n   \1\2/g' | \
+	sed -e 's/^\([_A-Za-z0-9]*:\) *\(D[BWD]\)/\1\n    \2/g' \
+	>$@
+	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
+	sed -e '/Split here for test/,$$d' >$(@:%.fas=%.rawdoc)
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.fas=%.rawtest)
 	rm $(TEMPFILE)
 
 # As of 2010, Windows has introduced a few nasty quirks, requiring sed.

@@ -1053,8 +1053,8 @@ _C{ -------------- Use the alias descriptors for CS and DS --------}
             PUSH    ES    _C{ Corrected code segment}
             MOV     BX, ENDDPMI _C{ Correct program counter}
             PUSH    BX
-            MOV     DS,DX
-            MOV     ES,DX
+            MOV     DS,_DX16
+            MOV     ES,_DX16
             RETF        _C{ Returning to ENDDPMI}
 
 _C{ ######################### DPMI CLEAN UP CODE #####################################################}
@@ -2099,7 +2099,7 @@ INBRS1:
         DC      LDUP
         _ISO_IN_({ DC      SRC, FETCH, PLUS _C{ Make IN >IN.}})
         DC      CFET
-        DC      ONE, LIN, PSTORE
+        DC      ONE, LIN, PSTOR
 INBRS2:
         DC      SEMIS
 _C
@@ -2153,7 +2153,7 @@ _HEADER({PARSE},{PARSE},{DOCOL})
         _0BRANCH(PARSE8)
         DC      DROP, SRC, CELLP, FETCH
 PARSE8: _ISO_IN_({DC      SRC, FETCH, LSUB })
-        DC      LIN, STORE
+        DC      LIN, STOR
         DC SEMIS
 _C
 worddoc( {PARSING},{SRC},{s_r_c},{addr ---},{},
@@ -2219,7 +2219,7 @@ enddoc)
 _HEADER({CR},{CR},{DOCOL})
         DC      LIT,ALF
         DC      EMIT
-        DC      ZERO, LOUT, STORE
+        DC      ZERO, LOUT, STOR
         DC      SEMIS
 _C
 worddoc( {MEMORY},{CMOVE},{cmove},{from to count ---},{},
@@ -2300,15 +2300,15 @@ CODE_HEADER({FARMOVE},{FMOVE})
         POP     CX      _C{count}
         POP     DI      _C{dest}
         POP     DX
-        AND     DX,DX
+        AND     _DX16,_DX16
         JZ      FARMV1
-        MOV     ES,DX
+        MOV     ES,_DX16
 FARMV1:
         POP     SI      _C{source}
         POP     DX
-        AND     DX,DX
+        AND     _DX16,_DX16
         JZ      FARMV2
-        MOV     DS,DX
+        MOV     DS,_DX16
 FARMV2:
         REP     MOVSB
         MOV     HIP,AX   _C{restore }
@@ -2740,7 +2740,7 @@ worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{ISO,FIG,L0},
 {{0 PAD ! 1 PAD +! PAD @ .},{1},
  {1 PAD ! -1 PAD +! PAD @ .},{0} },
 enddoc)
-CODE_HEADER({+!},{PSTORE})
+CODE_HEADER({+!},{PSTOR})
         POP     BX      _C{ADDRESS}
         POP     AX      _C{INCREMENT}
         ADD     [BX],AX
@@ -2815,7 +2815,7 @@ worddoc( {MEMORY},{!},{store},{n addr ---},{ISO,FIG,L0},
 {{@@},{C!},{2!},{FAR!},{P!},{PC!}},
 {{." Via @"},{Via @}},
 enddoc)
-CODE_HEADER({!},{STORE})
+CODE_HEADER({!},{STOR})
         POP     BX      _C{ADDR}
         POP     AX      _C{DATA}
         MOV     [BX],AX
@@ -2827,7 +2827,7 @@ worddocsafe( {MEMORY},{L!},{long_store},{n addr --- },{},
 {{L@@},{!},{C!},{2!},{P!},{PC!},{FAR!}},
 { {-23 PAD L! PAD L@ .},{FFFFFF23} },
 enddoc)
-CODE_HEADER({L!},{LSTORE})
+CODE_HEADER({L!},{LSTOR})
         POP     BX      _C{ADDR}
         POP     AX      _C{DATA}
         MOV     [BX],{%EAX}
@@ -2893,19 +2893,19 @@ _BITS16_({
         POP     BX      _C{Offset}
         POP     CX      _C{Segment}
 _BITS16_({_SWITCH_({ JMPHERE_FROM_PROT},{dnl})},{dnl})
-        MOV     DX,DS
+        MOV     _DX16,DS
         MOV     DS,CX
         MOV     BX,[BX]
-        MOV     DS,DX
+        MOV     DS,_DX16
 _BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
         PUSH    BX
 })_C{}_END_({_BITS16_})
 _BITS32_({
         POP     BX      _C{MEM LOC}
-        MOV     AX,FS
+        MOV     _DX16,FS
         POP     FS      _C{SEG REG VAL}
         MOV     BX,[FS:BX]
-        MOV     FS,AX
+        MOV     FS,_DX16
         PUSH    BX
         _NEXT
 })_C{}_END_({_BITS32_})
@@ -2918,7 +2918,7 @@ forthvar({faraddr}).
 {{FAR@@},{!},{C!},{2!}},
 {{." No test"},{No test} },
 enddoc)
-CODE_HEADER({FAR!},{LSTORE})
+CODE_HEADER({FAR!},{LSTOR})
 _BITS16_({
         POP     BX
         POP     CX
@@ -2933,11 +2933,11 @@ _BITS16_({_SWITCH_({ JMPHERE_FROM_REAL},{dnl})},{dnl})
 })_C{}_END_({_BITS16_})
 _BITS32_({
         POP     BX
-        MOV     AX,FS
+        MOV     _DX16,FS
         POP     FS      _C{SEG REG VAL}
-        POP     DX
-        MOV     [FS:BX],DX
-        MOV     FS,AX
+        POP     AX
+        MOV     [FS:BX],AX
+        MOV     FS,_DX16
         _NEXT
 })_C{}_END_({_BITS32_})
 })_C{}_END_({_BITS64_})
@@ -2998,7 +2998,7 @@ enddoc)
 _HEADER({CONSTANT},{LCONST},{DOCOL})
         DC      LNAME
         DC      PCREAT
-        DC      LATEST, TDFA, STORE
+        DC      LATEST, TDFA, STOR
         DC      PSCOD
 DOCON:  MOV     AX,[WOR+_CELLS((D_HOFFSET))] _C{GET DATA FROM PFA}
         _PUSH
@@ -3115,7 +3115,7 @@ in the string variable at address forthvar({addr}).},
 {{$@@},{$+!},{$C+}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $! PAD $@ TYPE},{A9}}, enddoc)
 _HEADER({$!},{SSTOR},{DOCOL})
-        DC TDUP, STORE, CELLP, SWAP, LCMOVE
+        DC TDUP, STOR, CELLP, SWAP, LCMOVE
         DC SEMIS
 _C
 worddoc( {STRING},{$!-BD},{string_store_brain_damaged},{sc addr ---},{},
@@ -3138,7 +3138,7 @@ to the string variable at address forthvar({addr}).},
 $@ 2DUP PAD $! PAD $+! PAD $@ TYPE},{A9A9}}, enddoc)
 _HEADER({$+!},{SADD},{DOCOL})
         DC   LDUP, FETCH, TOR _C{ Remember old count.}
-        DC   TDUP, PSTORE
+        DC   TDUP, PSTOR
         DC   CELLP, FROMR, PLUS, SWAP, LCMOVE
         DC SEMIS
 _C
@@ -3151,7 +3151,7 @@ $@ PAD $! HERE 1 - C@ PAD $C+ PAD $@ TYPE},{A99}}, enddoc)
 _HEADER({$C+},{CHAPP},{DOCOL})
         DC   LDUP, TOR
         DC   LDUP, FETCH, PLUS, CELLP, CSTOR
-        DC   ONE, FROMR, PSTORE
+        DC   ONE, FROMR, PSTOR
         DC SEMIS
 _C
 worddocsafe( {STRING},{$,},{string_comma},{sc --- addr},{},
@@ -3646,7 +3646,7 @@ _HEADER({ALIGN}, {LALIGN}, {DOCOL} )
 _ALIGNED_({
         DC      LDP, FETCH
         DC      ALIGNED
-        DC      LDP, STORE
+        DC      LDP, STOR
 },{dnl })_C{}_END_({_ALIGNED_})
         DC      SEMIS
 _C
@@ -3690,7 +3690,7 @@ machine forthvar({n}) counts bytes. },{{CELL+}},
 enddoc)
 _HEADER({ALLOT},{ALLOT},{DOCOL})
         DC      LDP
-        DC      PSTORE
+        DC      PSTOR
         DC      SEMIS
 _C
 worddocsafe( {DICTIONARY},{,},{comma},{n ---},{ISO,FIG,L0},
@@ -3703,7 +3703,7 @@ _HEADER({,},{COMMA},{DOCOL})
         DC      LIT
         DC      CW
         DC      ALLOT
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddocsafe( {DICTIONARY},{C,},{c_comma},{b ---},{ISO,FIG},
@@ -4039,7 +4039,7 @@ enddoc)
 _HEADER({!CSP},{SCSP},{DOCOL})
         DC      SPFET
         DC      LCSP
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 })_C{}_END_({_SECURITY_})
@@ -4182,7 +4182,7 @@ enddoc)
 _HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      ZERO
         DC      STATE
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddocsafe( {PARSING},{]},{righ_bracket},{},{ISO,FIG,L1},
@@ -4193,7 +4193,7 @@ enddoc)
 _HEADER({]},{RBRAC},{DOCOL})
         DC      ONE
         DC      STATE
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {DICTIONARY~},{HIDDEN},{hidden},{dea ---},{},
@@ -4226,7 +4226,7 @@ enddoc)
 _HEADER({HEX},{HEX},{DOCOL})
         DC      LIT,16
         DC      BASE
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {FORMATTING},{DECIMAL},{decimal},{},{ISO,FIG,L0},
@@ -4237,7 +4237,7 @@ enddoc)
 _HEADER({DECIMAL},{DECA},{DOCOL})
         DC      LIT,10
         DC      BASE
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddocsafe( {DEFINING~},{(;CODE)},{paren_semicolon_code},{},{C},
@@ -4253,7 +4253,7 @@ _HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      FROMR
         DC      LATEST
         DC      TCFA
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{B,ISO,FIG,I,C,L0},
@@ -4335,7 +4335,7 @@ _HEADER({DOES>},{DOES},{DOCOL})
         DC      LATEST
         DC      TDFA
         DC      FETCH
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {STRING},{COUNT},{count},{addr1 --- addr2 n},{ISO,FIG,L0},
@@ -4463,10 +4463,10 @@ _HEADER({SET-SRC},{SETSRC},{DOCOL})
         DC      OVER, PLUS
         DC      SWAP, SRC, TSTOR
         DC      SRC, FETCH
-        DC      LIN, STORE _C{  IN}
+        DC      LIN, STOR _C{  IN}
 _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
-        DC     SRC, CELLP, PSTORE
-        DC     LIN, PSTORE
+        DC     SRC, CELLP, PSTOR
+        DC     LIN, PSTOR
 })
 _C{       DC      DOTS}
         DC      SEMIS
@@ -4640,7 +4640,7 @@ enddoc)
 _HEADER({HOLD},{HOLD},{DOCOL})
         DC      LIT,-1
         DC      HLD
-        DC      PSTORE
+        DC      PSTOR
         DC      HLD
         DC      FETCH
         DC      CSTOR
@@ -4692,7 +4692,7 @@ IWORD3:  DC      INBRS, RR, EQUAL
         _BRANCH(IWORD3)
 IWORD4:
         DC      DROP
-        DC      LIT, -1, LIN, PSTORE _C{ Backtrace to first non-delimiter.}
+        DC      LIT, -1, LIN, PSTOR _C{ Backtrace to first non-delimiter.}
         DC      FROMR, PARSE
 _C{        DC      DOTS}
 IWORD2:
@@ -4754,11 +4754,11 @@ unconvertible digit is not a blank, this is an error. },
 enddoc)
 _HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, ZERO
-        DC      ZERO, DPL, STORE
+        DC      ZERO, DPL, STOR
 NPNUM1:  DC      INBRS   _C{ BEGIN}
         DC      LDUP, LIT, ADOT, EQUAL
         _0BRANCH(NPNUM2) _C{ case 1 }
-        DC      DROP, DPL, STORE
+        DC      DROP, DPL, STOR
         _BRANCH(NPNUM1) _C{ continue }
 NPNUM2:
         DC      LDUP, LIT, ',', EQUAL
@@ -4805,7 +4805,7 @@ If numeric conversion is not possible, an error message will be given.
 enddoc)
 _HEADER({NUMBER},{NUMB},{DOCOL})
 LNUMB:
-        DC      LIT, -1, LIN, PSTORE
+        DC      LIT, -1, LIN, PSTOR
         DC      PNUMB, SDLITE
         DC      SEMIS
 _C
@@ -5069,7 +5069,7 @@ _C{ Make sure the whole word is shown in case of denotations. }
         DC      OVER
         DC      STOD, ZERO, PDDOTR      _C{This is about (.) }
         DC      ETYPE
-        DC      BASE, STORE
+        DC      BASE, STOR
         DC      LIT, M4_ERRORMIN, MAX
         DC      LIT, M4_ERRORMAX, MIN
         DC      LIT, MESS, CATCH, DROP  _C{Prevent error loops }
@@ -5094,9 +5094,9 @@ enddoc)
 _HEADER({CATCH},{CATCH},{DOCOL})
         DC      SPFET, CELLP, TOR
         DC      HANDLER, FETCH, TOR
-        DC      RPFET, HANDLER, STORE
+        DC      RPFET, HANDLER, STOR
         DC      EXEC
-        DC      FROMR, HANDLER, STORE
+        DC      FROMR, HANDLER, STOR
         DC      RDROP, ZERO
         DC      SEMIS
 _C
@@ -5123,7 +5123,7 @@ _HEADER({THROW},{THROW},{DOCOL})
         DC      QUIT
 THROW2:
         DC      HANDLER, FETCH, RPSTO
-        DC      FROMR, HANDLER, STORE
+        DC      FROMR, HANDLER, STOR
         DC      FROMR, SWAP, TOR
         DC      SPSTO
         DC      FROMR
@@ -5263,8 +5263,8 @@ _HEADER({LINK},{LLINK},{DOCOL})
         DC      TLFA
         DC      TDUP
         DC      FETCH
-        DC      SWAP, TLFA, STORE
-        DC      STORE
+        DC      SWAP, TLFA, STOR
+        DC      STOR
         DC      SEMIS
 _C
 worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc ---},{},
@@ -5477,7 +5477,7 @@ _C{       DC      TDUP, LTYPE}
         DC      LDUP, LIT, B_DENOT, LAND _C{Retain copy of flags.}
         _0BRANCH(INTE3B) _C{IF}
         DC      OVER, TNFA, FETCH, FETCH
-        DC      RR, PLUS, LIN, STORE  _C{Skip over prefix.}
+        DC      RR, PLUS, LIN, STOR  _C{Skip over prefix.}
 INTE3B:                  _C{THEN }
         DC      RDROP           _C{ Drop old parse pointer.}
         DC      LIT, B_IMMED, LAND
@@ -5572,7 +5572,7 @@ _HEADER({NAMESPACE},{VOCAB},{DOCOL})
         DC      FETCH
         DC      COMMA
         DC      VOCL
-        DC      STORE
+        DC      STOR
         DC      ZERO, COMMA   _C{ Dummy code field}
         DC      ZERO, COMMA   _C{ Dummy data field}
         DC      LIT, B_DUMMY, COMMA _C{ Dummy flag field}
@@ -5585,7 +5585,7 @@ DOVOC:
         DC      ALSO
         DC      CELLP   _C{ Make it a WID. }
         DC      CONTEXT
-        DC      STORE
+        DC      STOR
         DC      SEMIS
         PAGE
 _C
@@ -5629,7 +5629,7 @@ _HEADER({DEFINITIONS},{DEFIN},{DOCOL})
         DC      CONTEXT
         DC      FETCH
         DC      CURR
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {WORDLISTS},{ALSO},{also},{},{ISO},
@@ -5654,7 +5654,7 @@ _HEADER({ALSO},{ALSO},{DOCOL})
         DC      LMOVE
         DC      LIT, ONLYBODY  _C{End sentinel for array of word lists.}
         DC      CONTEXT, LIT, _CELLS(M4_MAXWORDLIST), PLUS
-        DC      STORE _C{Trim sets of wordset.}
+        DC      STOR _C{Trim sets of wordset.}
         DC      SEMIS
 _C
 worddoc( {WORDLISTS},{PREVIOUS},{PREVIOUS},{},{ISO},
@@ -5703,7 +5703,7 @@ Blank space after the word forthcode({\}) is required.},
 enddoc)
 _HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
 _C{ Backup one character, just in case we are at the end of a line.}
-        DC      LIT, -1, LIN, PSTORE
+        DC      LIT, -1, LIN, PSTOR
         DC      LIT,ALF
         DC      PARSE
         DC      TDROP
@@ -5772,7 +5772,7 @@ that is still busy or that has aborted.}})
 enddoc)
 _HEADER({ABORT},{ABORT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
-        DC      ZERO, HANDLER, STORE
+        DC      ZERO, HANDLER, STOR
         DC      QUIT
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
@@ -5862,11 +5862,11 @@ _PC_(
         DC      LIT, '-', UNEQ
         _0BRANCH(OPT3)
         DC      LIT, 3, LDUP, ERROR
-        DC      XCODE, STORE, BYE
+        DC      XCODE, STOR, BYE
 OPT3:
         DC      CFET
         DC      LIT, 0x1F, LAND
-        DC      LOAD       _C{Supposedly stack-neutral.}
+        DC      LLOAD       _C{Supposedly stack-neutral.}
         DC      ZERO, SWAP _C{ Sign on suppressed.}
 OPT4:
         DC      DROP
@@ -5897,7 +5897,7 @@ _C{ Fill user area for single task.}
         DC      ONE            _C{ Sign on wanted.}
 _DLL_({
         DC      ZERO, LIT, _GetCommandLineA@0, LCALL
-        DC      ARGS, STORE
+        DC      ARGS, STOR
 })_C{}_END_({_DLL_})
 _LINUX_N_({
         DC      ZERO, LIT, TCGETS, TERMIO
@@ -5937,20 +5937,20 @@ The number base is decimal.   }).
 enddoc)
 _HEADER({INIT},{INIT},{DOCOL})
         DC      SZERO, FETCH, SPSTO
-        DC      ZERO, HANDLER, STORE
+        DC      ZERO, HANDLER, STOR
         DC      DECA
         DC      ONLY, FORTH, DEFIN
 _BLOCKSINFILE_({
         DC      LIT, 0, BLINI  _C{Default, open library file read-only!}},{
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
+_SUPPRESSED({
         DC      LIT, -10, ZERO, LIT, _GetStdHandle@4, LCALL
-        DC      LIT, STDIN+_CELLS(D_HOFFSET), STORE
-_SUPPRESSED({ dnl NOT YET
+        DC      LIT, STDIN+_CELLS(D_HOFFSET), STOR
         DC      LIT, -11, ONE, LIT, _GetStdHandle@4, LCALL
-        DC      LIT, STDOUT+_CELLS(D_HOFFSET), STORE
+        DC      LIT, STDOUT+_CELLS(D_HOFFSET), STOR
         DC      LIT, -12, ONE, LIT, _GetStdHandle@4, LCALL
-        DC      LIT, STDERR+_CELLS(D_HOFFSET), STORE
+        DC      LIT, STDERR+_CELLS(D_HOFFSET), STOR
 })_C{}_END_({_SUPPRESSED})
         DC      SEMIS
 _C{}
@@ -6601,7 +6601,7 @@ _HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
         DC      FIRST
         DC      LIMIT,OVER
         DC      LSUB,LERASE
-        DC      FIRST, PREV, STORE
+        DC      FIRST, PREV, STOR
         DC      SEMIS
         PAGE
 _C
@@ -6646,10 +6646,10 @@ BUFFER2:
     _0BRANCH(BUFFER2)
     DC       TOR
 _C{ Fill in the house keeping.}
-    DC       RR, STORE
-    DC       ZERO, RR, CELLP, STORE
+    DC       RR, STOR
+    DC       ZERO, RR, CELLP, STOR
 
-    DC       RR, PREV, STORE
+    DC       RR, PREV, STOR
     DC       FROMR
     DC  SEMIS
 _C
@@ -6679,9 +6679,9 @@ _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
         DC      OVER, FETCH
         DC      LOFFSET,  FETCH, PLUS
         DC      BLREAD
-        DC      ONE, OVER, CELLP, STORE
+        DC      ONE, OVER, CELLP, STOR
 BLOCK1:
-        DC      LDUP, PREV, STORE
+        DC      LDUP, PREV, STOR
         DC      CELLP, CELLP
         DC      SEMIS
 _C
@@ -6699,7 +6699,7 @@ _C{ Unlock all buffers}
         DC      LIMIT
         DC      FIRST, CELLP
         _DO(FLUS2)
-FLUS1:  DC      ZERO, IDO, STORE
+FLUS1:  DC      ZERO, IDO, STOR
         DC      LIT,(KBBUF+2*CW)
         DC      PLOOP
         DC      (FLUS1-_AP_)
@@ -6733,7 +6733,7 @@ enddoc)
 _HEADER({RESTORE},{RESTO},{DOCOL})
         DC      FROMR
         DC      FROMR, FROMR, FROMR
-        DC      LIN, STORE
+        DC      LIN, STOR
         DC      SRC, TSTOR
         DC      TOR
         DC SEMIS
@@ -6786,7 +6786,7 @@ enddoc)
 _HEADER({LOCK},{LLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
-        DC      LIT, -2, SWAP, PSTORE
+        DC      LIT, -2, SWAP, PSTOR
         DC      SEMIS
 _C
 worddoc( {SCREEN},{UNLOCK},{unlock},{ n ---},{CI},
@@ -6804,7 +6804,7 @@ enddoc)
 _HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      BLOCK
         DC      LIT, CW, LSUB
-        DC      TWO, SWAP, PSTORE
+        DC      TWO, SWAP, PSTOR
         DC      SEMIS
 _C
 worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG,L0},
@@ -6816,7 +6816,7 @@ it continues with the interrupted input source.},
 {{BLOCK},{#BUFF},{THRU},{QUIT},{EXIT},{-->},{LIST}},
 {{." interactive"},{interactive}},
 enddoc)
-_HEADER({LOAD},{LOAD},{DOCOL})
+_HEADER({LOAD},{LLOAD},{DOCOL})
         DC      LDUP, THRU
         DC      SEMIS
 _C
@@ -6884,7 +6884,7 @@ _HEADER({BLK},{BLK},{DOCOL})
 BLK1:
         DC      ZERO
 BLK2:
-        DC      PBLK, STORE
+        DC      PBLK, STOR
         DC      PBLK
         DC      SEMIS
 _C
@@ -7309,7 +7309,7 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
         DC      LIT, 1000, LIT, 1000000, SSMOD _C{ (ms -- us s) }
-        _BITS64_({DC    LIT, TV, LSTORE, LIT, TV+4, LSTORE}
+        _BITS64_({DC    LIT, TV, LSTOR, LIT, TV+4, LSTOR}
         ,{ DC      LIT, TV, TSTOR})
         DC      ZERO, ZERO
         DC      ZERO, ZERO
@@ -7366,7 +7366,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      LDUP,LIT,ALF,EQUAL
         _0BRANCH(EMIT1)
         DC      LIT,ACR,EMIT
-        DC      ZERO,LOUT,STORE
+        DC      ZERO,LOUT,STOR
 EMIT1:
         DC      SPFET, ONE, LTYPE
         DC      DROP
@@ -7399,7 +7399,7 @@ In this ciforth the string must not contain embedded LF's.
 forthcode({OUT}) is incremented for each character output.},
 {{EMIT},{OUT}}, {}, enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      LDUP, LOUT, PSTORE
+        DC      LDUP, LOUT, PSTOR
         DC      ONE, WFILE, DROP
         DC      SEMIS
 _C
@@ -7436,7 +7436,7 @@ PACCEP2:
         DC      TIB, FETCH
         DC      SWAP, LMOVE
         DC      TIB, FETCH
-        DC      REMAIND, CELLP, STORE
+        DC      REMAIND, CELLP, STOR
         DC      REFTIB
         _BRANCH(PACCEP2)
 PACCEP1:
@@ -7560,7 +7560,7 @@ _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RR, FMOVE        _C{  R@ FARMOVE}
         DC      ZERO
         DC      LIT, Save_DS_PR, FETCH, RWBUF _C{ <FAR> RW-BUFFER}
-        DC      FROMR, PLUS, LSTORE
+        DC      FROMR, PLUS, LSTOR
         DC      RWBUF
         DC      SEMIS
 })_C{}_END_({ _HOSTED_DPMI_})
@@ -7761,7 +7761,7 @@ RFILE2:
 })_C{}_END_({ _HOSTED_MSDOS_})
 _HOSTED_DPMI_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      ZERO, LIT, RC, STORE, TOR
+        DC      ZERO, LIT, RC, STOR, TOR
 RFIL1:
         DC      TDUP, LIT, 0x8000, MIN
         DC      RR, LREAD
@@ -7770,7 +7770,7 @@ RFIL1:
         DC      RDROP, TOR, TDROP, FROMR, EXIT
 RFIL2:
         DC      DROP
-        DC      LIT, RC, PSTORE
+        DC      LIT, RC, PSTOR
         DC      LIT, 0x8000, LSUB, LDUP
         DC      ZERO, GREAT
         _0BRANCH({RFIL3})
@@ -7967,7 +7967,7 @@ _HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      LIT, 1000, LSUB
         DC      RR, RFILE, THROW
         DC      FROMR, CFILE, THROW
-        DC      TDUP, PLUS, LDP, STORE        _C{ No allocation if it fails.}
+        DC      TDUP, PLUS, LDP, STOR        _C{ No allocation if it fails.}
         DC      SEMIS
 _C
 worddoc( {FILES},{PUT-FILE},{put_file},{sc1 sc2 ---},{},
@@ -7996,7 +7996,7 @@ _HEADER({INCLUDED},{INCLUD},DOCOL)
         DC      LIT, GETFILE, CATCH
         DC      LDUP
         _0BRANCH(INCLUD1)
-        DC      FROMR, LDP, STORE
+        DC      FROMR, LDP, STOR
         DC      THROW
         _BRANCH(INCLUD2)
 INCLUD1:
@@ -8084,7 +8084,7 @@ _BITS32_(
 {dnl})
         DC      LDUP, ZEQU
         _0BRANCH(PACCEP3)
-        DC      ZERO, REMAIND, STORE
+        DC      ZERO, REMAIND, STOR
         DC      LIT, -32, LAND, THROW _C{ Presumably end of pipe.}
 PACCEP3:
         DC      TIB, FETCH, SWAP, REMAIND, FETCH, PLUS
@@ -8240,7 +8240,7 @@ _C{        DC      RETOBO}
         DC      TIB, FETCH
         DC      SWAP, LMOVE
         DC      TIB, FETCH
-        DC      REMAIND, CELLP, STORE
+        DC      REMAIND, CELLP, STOR
         DC      REFTIB
         _BRANCH(PACCEP2)
 PACCEP1:
@@ -8289,10 +8289,10 @@ enddoc)
 _HEADER({KEY?},{KEYQ},{DOCOL})
         DC      ZERO, LIT, RAWIO, STTERM
         DC      ZERO, ZERO     _C{ Time out of zero. See MS.}
-        _BITS64_({DC    LIT, TV, LSTORE, LIT, TV+4, LSTORE}
+        _BITS64_({DC    LIT, TV, LSTOR, LIT, TV+4, LSTOR}
         ,{ DC      LIT, TV, TSTOR})
         DC      ONE _C{ Waiting for standard in.}
-        DC      LIT, RFDS, _BITS64_({LSTORE},{STORE})
+        DC      LIT, RFDS, _BITS64_({LSTOR},{STOR})
         DC      ONE     _C{ # of highest channel to watch.}
         DC      LIT, RFDS
         DC      ZERO, ZERO  _C{ Not output, not events.}
@@ -8318,7 +8318,7 @@ that case forthcode({OUT}) is not observed. },
 {{HERE 41 C, 42 C, 2 TYPE},{AB}},
 enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      LDUP, LOUT, PSTORE
+        DC      LDUP, LOUT, PSTOR
         DC      ONE, WFILE, THROW
         DC      SEMIS
 _C
@@ -8394,7 +8394,7 @@ that case forthcode({OUT}) is not observed. },
 {{HERE 41 C, 42 C, 2 TYPE},{AB}},
 enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
-        DC      LDUP, LOUT, PSTORE
+        DC      LDUP, LOUT, PSTOR
         DC      STDOUT, WFILE, THROW
         DC      SEMIS
 _C
@@ -8515,7 +8515,7 @@ PACCEP2:
         DC      TIB, FETCH
         DC      SWAP, LMOVE
         DC      TIB, FETCH
-        DC      REMAIND, CELLP, STORE
+        DC      REMAIND, CELLP, STOR
         DC      REFTIB
         _BRANCH(PACCEP2)
 PACCEP1:
@@ -8633,7 +8633,7 @@ uses BDOS, where disk I/O uses the BIOS.
 _HEADER({EMIT},{EMIT},{DOCOL})
         DC      PEMIT
         DC      ONE,LOUT
-        DC      PSTORE,SEMIS
+        DC      PSTOR,SEMIS
 PEMIT   DC      _AP_ +_CELLS(1)
         POP     AX      _C{GET CHAR}
         CMP     AL,ALF   _C{ Precede ^J with ^M}
@@ -8728,12 +8728,12 @@ forthcode({OUT}) is incremented for each character output and reset for
 a carriage return.
 },{{TYPE},{OUT}}, {}, enddoc)
 _HEADER({EMIT},{EMIT},{DOCOL})
-             DC      ONE,LOUT,PSTORE
+             DC      ONE,LOUT,PSTOR
              DC      LIT, 0x07F, LAND
              DC      LDUP,LIT,ALF,EQUAL
              _0BRANCH(EMIT1)
              DC      LIT,ACR,PEMIT
-             DC      ZERO,LOUT,STORE
+             DC      ZERO,LOUT,STOR
 EMIT1:       DC      PEMIT
              DC      SEMIS
 _C
@@ -8851,7 +8851,7 @@ EXPE5:       DC      IDO
              DC      ZERO
              DC      IDO
              DC      ONEP
-             DC      STORE   _C{ THEN}
+             DC      STOR   _C{ THEN}
 EXPE3:       DC      EMIT
              _LOOP(EXPE1)    _C{ LOOP}
 EXPE8:
@@ -8942,8 +8942,8 @@ _HEADER({BLOCK-INIT},{BLINI},{DOCOL})
         DC      OFILE
         DC      ZEQU, NEGATE  _C{ 0 if disk problems, 1 if not.}
         DC      LWARN, FETCH, MIN _C{ AND but WARNING is 0/1.}
-        DC      LWARN, STORE
-        DC      BHAN, STORE
+        DC      LWARN, STOR
+        DC      BHAN, STOR
         DC      MTBUF
         DC      SEMIS
 _C
@@ -8967,8 +8967,8 @@ _HEADER({BLOCK-EXIT},{BLEXI},{DOCOL})
         DC      FLUSH
         DC      BHAN, FETCH
         DC      CFILE
-        DC      ZERO, LWARN, STORE
-        DC      LIT, -1, BHAN, STORE    _C{Regardless of close errors.}
+        DC      ZERO, LWARN, STOR
+        DC      LIT, -1, BHAN, STOR    _C{Regardless of close errors.}
         DC      QDSKER
         DC      SEMIS
 _C
@@ -9064,7 +9064,7 @@ dnl _MODERN_({ {{"TYPE hello.frt" SYSTEM },{." Hello world!"}} })
 _LINUX_N_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
-        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTOR
         DC      X, X, X, LIT, fork, XOS
         DC      LDUP, QERRUR
         DC      LDUP, ZEQU
@@ -9102,7 +9102,7 @@ _C
 _HOSTED_OSX_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, SSTOR, ZERO, LIT, COMBUF, CHAPP
-        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTOR
         DD      XOSFORK
         DC      LDUP, QERRUR
         DC      LDUP, ZEQU
@@ -9166,7 +9166,7 @@ _C{ This is working code! }
 _MODERN_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      LIT, COMBUF, TOR
-        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTOR
         _STRINGINLINE({X /c })  _C{byte X contains string count.}
         DC      RR, SSTOR
         DC      RR, SADD, LIT, ACR, RR, CHAPP
@@ -9199,7 +9199,7 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      TDROP
         DC      SEMIS
         DC      LIT, COMBUF, TOR
-        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTORE
+        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTOR
         _STRINGINLINE({X /c })  _C{byte X contains string count.}
         DC      RR, SSTOR
         DC      RR, SADD, LIT, ACR, RR, CHAPP
@@ -9428,7 +9428,7 @@ _HEADER({SEC-RW},{SECRW},{DOCOL})
         DC      LIT, LFDRIVE, CFET
         DC      LOR   _C{ High, low -- reg DX. }
         DC      LIT, 0x13, BIOSO
-        DC      ONE, LAND, DERR, PSTORE
+        DC      ONE, LAND, DERR, PSTOR
         DC      TDROP, TDROP
         DC      SEMIS
 _C
@@ -9444,7 +9444,7 @@ forthcode({DISK-ERROR}) contains an error count for the latest operation.
 _C{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 _HEADER({BLOCK-READ},{BLREAD},{DOCOL})
          _SWITCH_({DC   SWAP, LIT, M4_SWITCHOFFSET, PLUS, SWAP})
-        DC      ZERO, DERR, STORE
+        DC      ZERO, DERR, STOR
         DC      LIT, 0x0201      _C{ Read (AH) one (AL) sector }
         DC      SWAP
         DC      SPBLK,  STAR
@@ -9460,7 +9460,7 @@ BLREAD9:
         DC      TDROP
         DC      DERR, FETCH
         _0BRANCH(BLREAD5)              _C{OK}
-        DC      ZERO,   PREV,   FETCH,     STORE   _C{This buffer is no good!}
+        DC      ZERO,   PREV,   FETCH,     STOR   _C{This buffer is no good!}
         DC      LIT,    8, ERROR _C{Read error}
 BLREAD5:  DC      SEMIS
 _C
@@ -9475,7 +9475,7 @@ forthcode({DISK-ERROR}) contains an error for the latest operation.
 {{BLOCK},{DISK-ERROR},{SEC-RW}}, {}, enddoc)
 _C{      ( ADDR  OFFSET+BLK#  FLAG (0=W, 1=R) --- )}
 _HEADER({BLOCK-WRITE},{BLWRITE},{DOCOL})
-        DC      ZERO, DERR, STORE
+        DC      ZERO, DERR, STOR
          _SWITCH_({DC   SWAP, LIT, M4_SWITCHOFFSET, PLUS, SWAP})
         DC      LIT, 0x0301      _C{ Write (AH) one (AL) sector }
         DC      SWAP
@@ -9492,7 +9492,7 @@ BLWRIT9:
         DC      TDROP
         DC      DERR, FETCH
         _0BRANCH(BLWRIT5)              _C{OK}
-        DC      ZERO,   PREV,   FETCH,     STORE   _C{This  buffer}
+        DC      ZERO,   PREV,   FETCH,     STOR   _C{This  buffer}
         DC      LIT, 9, ERROR
 BLWRIT5:  DC      SEMIS
 _C
@@ -9582,22 +9582,22 @@ _C{       On a big endian machine the following code is 16/32 bit clean.}
 _C{       The 2 m.s. bytes are overwritten by the next store.}
          _SWITCH_({DC   LIT, A_FORTH0, PLUS })
         DC      LDUP, LIT, 0x0F, LAND
-        DC      LBA, LIT, 4, PLUS, STORE   _C{  Address }
+        DC      LBA, LIT, 4, PLUS, STOR   _C{  Address }
         DC      LIT, 4, RSHIFT
-        DC      LBA, LIT, 6, PLUS, STORE
+        DC      LBA, LIT, 6, PLUS, STOR
         DC      LIT, SPB, STAR  _C{ Sector number}
-        DC      LBA, LIT, 8, PLUS, STORE _C{  Sector number. }
+        DC      LBA, LIT, 8, PLUS, STOR _C{  Sector number. }
         DC      LBA
         DC      RR
         _0BRANCH(RSLW1)
         DC      BLREAD
         _BRANCH(RSLW2)
 RSLW1:  DC      BLWRITE
-RSLW2:  DC      LDUP, DERR, STORE
+RSLW2:  DC      LDUP, DERR, STOR
 
         DC      ONE, LAND, LDUP
         _0BRANCH(RSLW4)
-_C{        DC      ZERO,   PREV,   FETCH,     STORE   }_C{This  buffer}
+_C{        DC      ZERO,   PREV,   FETCH,     STOR   }_C{This  buffer}
                                                    _C{ is no good!}
 RSLW4:
         _C{ Handle error}
@@ -9707,7 +9707,7 @@ FORGV3:
         _0BRANCH(FORGV3)
         DC      SWAP            _C{  Not to be forgotten entry found.}
         DC      TLFA
-        DC      STORE           _C{  Short other entries out.}
+        DC      STOR           _C{  Short other entries out.}
         DC      TLFA,FETCH
         DC      LDUP
         DC      ZEQU
@@ -9720,7 +9720,7 @@ _C{       { Vocabulary itself is also forgotten.}}
         DC      TVFA
         DC      FETCH     _C{ Unlink by linking next namespace.}
         DC      VOCL
-        DC      STORE
+        DC      STOR
         DC      ONLY, FORTH
         DC      DEFIN
 FORGV2: DC      SEMIS
@@ -9746,7 +9746,7 @@ _HEADER({FORGET},{FORG},{DOCOL})
         DC      LIT, 21, QERR
         DC      LIT,FORGV
         DC      FORV
-        DC      TNFA, FETCH, LDP, STORE
+        DC      TNFA, FETCH, LDP, STOR
         DC      SEMIS
 _C
 worddocsafe( {CONTROL~},{(BACK},{paren_back},{--- addr},{},
@@ -9811,7 +9811,7 @@ _HEADER({FORWARD)},{FORWARDP},{DOCOL})
         DC      CELLP
         DC      LSUB
         DC      SWAP
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{ISO,FIG,I,L0},
@@ -10163,7 +10163,7 @@ enddoc)
 _HEADER({<#},{BDIGS},{DOCOL})
         DC      PAD
         DC      HLD
-        DC      STORE
+        DC      STOR
         DC      SEMIS
 _C
 worddoc( {FORMATTING},{#>},{number_sign_greater},{d --- sc },{ISO,FIG,L0},
@@ -10436,7 +10436,7 @@ enddoc)
 _HEADER({WORDS},{WORDS},{DOCOL})
         DC      CSLL
         DC      LOUT
-        DC      STORE
+        DC      STOR
         DC      ZERO            _C{ End sentinel. }
         DC      LIT, NOOP
         DC      CONTEXT
@@ -10515,7 +10515,7 @@ enddoc)
 _HEADER({LIST},{LLIST},{DOCOL})
         DC      BASE, FETCH, TOR
         DC      DECA
-        DC      SCR,STORE
+        DC      SCR,STOR
 
         _STRINGINLINE({SCR # })
         DC      LTYPE
@@ -10530,7 +10530,7 @@ LLIST1: DC      LIT, ALF, SSLAS
         _LOOP(LLIST1)
 LLIST9:
         DC      TDROP
-        DC      FROMR, BASE, STORE
+        DC      FROMR, BASE, STOR
         DC      SEMIS
 _C
 worddoc( {SCREEN},{INDEX},{index},{from to ---},{},
@@ -10644,9 +10644,9 @@ _HEADER({.SIGNON},{SIGNON},{DOCOL})
 _C{ PRINT CPU TYPE (8088)}
         DC      CR
         DC      BASE,FETCH
-        DC      LIT,36, BASE,STORE
+        DC      LIT,36, BASE,STOR
         DC      LCPU, DDOT
-        DC      BASE,STORE
+        DC      BASE,STOR
 _C
         DC      LENAME, LTYPE, SPACE
         DC      LVERSION, LTYPE, SPACE
