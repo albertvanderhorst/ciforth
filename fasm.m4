@@ -16,7 +16,9 @@ define({_HEADER_ASM},{;
 ; FASM version of ciforth created by ``m4'' from generic listing.
 ; This source can be assembled using the Flat Assembler,
 ;  available from the Net.
-        FORMAT  PE console      ; Jezus on a motor bike!
+        FORMAT  PE console  ; Instead of telling the linker.
+;
+        INCLUDE 'INCLUDE/WIN32A.INC'      ; ASCII windows definitions.
 ;})dnl
 define({SET_32_BIT_MODE},{ use32 })dnl
 define({_TEXT},{.text})
@@ -60,7 +62,6 @@ define({_COMMENT},{_SUPPRESSED(})
 define({_ENDCOMMENT},{)})
 define({_ENDOFPROGRAM},{
         ENTRY  $1
-        END
 })dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl

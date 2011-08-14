@@ -355,42 +355,91 @@ _HOSTED_X_({
 _ORIG:
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
-PUBLIC   _ORIG
-dnl C
-INCLUDELIB LIBC
-_C{ Functions from c-library }
-EXTRN     __creat    :NEAR
-EXTRN     __open    :NEAR
-EXTRN     __close   :NEAR
-EXTRN     __read    :NEAR
-EXTRN     __write   :NEAR
-EXTRN     __unlink  :NEAR
-EXTRN     __lseek   :NEAR
-EXTRN     __exit   :NEAR
-SEEK_SET   EQU 0
 dnl what we want: kernel32
 EPIPE   EQU     38
 })_C{}_END_({ _DLL_})
 _DLL_({
-        .686P
-.model  FLAT
-_C{ INCLUDELIB KERNEL32 }
-EXTRN     _ExitProcess@4        : NEAR
-EXTRN     _GetCommandLineA@0    : NEAR
-EXTRN     _GetConsoleMode@8     : NEAR
-EXTRN     _GetLastError@0       : NEAR
-EXTRN     _GetProcAddress@8     : NEAR
-EXTRN     _GetStdHandle@4       : NEAR
-EXTRN     _LoadLibraryA@4       : NEAR
-EXTRN     _PeekConsoleInputA@16 : NEAR
-EXTRN     _ReadFile@20          : NEAR
-EXTRN     _ReadConsoleA@20      : NEAR
-EXTRN     _SetConsoleMode@8     : NEAR
-EXTRN     _Sleep@4              : NEAR
-EXTRN     _WriteFile@20         : NEAR
+        section '.idata' import data readable writeable
+        dd 0,0,0,rva kernel_name,rva kernel_table
+        dd 0,0,0,0,0
 
-        _SECTION_({_TEXT})
-PUBLIC  _main   _C Entry point.
+kernel_table:
+ _ExitProcess@4     dd rva _ExitProcess
+ CreateFile     dd rva _CreateFileA
+ _ReadFile@20     dd rva _ReadFile
+ _WriteFile@20     dd rva _WriteFile
+ CloseHandle     dd rva _CloseHandle
+ SetFilePointer     dd rva _SetFilePointer
+ _GetCommandLineA@0     dd rva _GetCommandLineA
+ GetEnvironmentVariable     dd rva _GetEnvironmentVariable
+ _DeleteFileA@4     dd rva _DeleteFileA
+ _GetConsoleMode@8     dd rva _GetConsoleMode
+ _GetProcAddress@8     dd rva _GetProcAddress
+ _GetStdHandle@4         dd rva _GetStdHandle
+ _LoadLibraryA@4     dd rva _LoadLibraryA
+ _GetLastError@0     dd rva _GetLastError
+ _PeekConsoleInputA@16     dd rva _PeekConsoleInputA
+ _ReadConsoleA@20     dd rva _ReadConsoleA
+ VirtualAlloc     dd rva _VirtualAlloc
+ VirtualFree     dd rva _VirtualFree
+ GetTickCount     dd rva _GetTickCount
+ GetSystemTime     dd rva _GetSystemTime
+ GlobalMemoryStatus     dd rva _GlobalMemoryStatus
+ _SetConsoleMode@8     dd rva _SetConsoleMode
+ _Sleep@4     dd rva _Sleep
+            dd 0
+
+   kernel_name db 'KERNEL32.DLL',0
+
+ _ExitProcess dw 0
+          db 'ExitProcess',0
+ _CreateFileA dw 0
+          db 'CreateFileA',0
+ _ReadFile dw 0
+          db 'ReadFile',0
+ _WriteFile dw 0
+          db 'WriteFile',0
+ _CloseHandle dw 0
+          db 'CloseHandle',0
+ _SetFilePointer dw 0
+          db 'SetFilePointer',0
+ _GetCommandLineA dw 0
+          db 'GetCommandLineA',0
+ _GetEnvironmentVariable dw 0
+          db 'GetEnvironmentVariableA',0
+ _DeleteFileA dw 0
+          db 'DeleteFileA',0
+ _GetConsoleMode dw 0
+          db 'GetConsoleMode',0
+ _GetProcAddress dw 0
+          db 'GetProcAddress',0
+ _GetStdHandle dw 0
+          db 'GetStdHandle',0
+ _LoadLibraryA dw 0
+          db 'LoadLibraryA',0
+ _GetLastError dw 0
+          db 'GetLastError',0
+ _PeekConsoleInputA dw 0
+          db 'PeekConsoleInputA'
+ _ReadConsoleA dw 0
+          db 'ReadConsoleA'
+ _VirtualAlloc dw 0
+          db 'VirtualAlloc',0
+ _VirtualFree dw 0
+          db 'VirtualFree',0
+ _GetTickCount dw 0
+          db 'GetTickCount',0
+ _GetSystemTime dw 0
+          db 'GetSystemTime',0
+ _GlobalMemoryStatus dw 0
+          db 'GlobalMemoryStatus',0
+ _SetConsoleMode dw 0
+          db 'SetConsoleMode',0
+_Sleep dw 0
+       db 'Sleep', 0
+ section '.reloc' fixups data readable discardable
+                SECTION '.TEXT' code executable readable writable
+
 _main:
 _ORIG:
 })_C{}_END_({ _DLL_})
@@ -1157,8 +1206,8 @@ _HOSTED_X_(
 {       MOV     _CELL_PTR[USINI+_CELLS(31)],SPO _C{Remember ARGS.}
 })dnl
 _BITS64_(,
-{        MOV     AX,DS
-        MOV     SS,AX           _C{Atomic with next instruction.}
+{        MOV     _DX16,DS
+        MOV     SS,_DX16           _C{Atomic with next instruction.}
 })_C{}_END_({_BITS64_})
         MOV     SP,_CELL_PTR[USINI+_CELLS(2)]    _C{Parameter stack}
         MOV     RPO,_CELL_PTR[USINI+_CELLS(3)]    _C{Return stack}
@@ -2296,7 +2345,7 @@ enddoc)
 CODE_HEADER({FARMOVE},{FMOVE})
         CLD             _C{direction}
         MOV     AX,HIP   _C{save }
-        MOV     BX,DS    _C{save }
+        MOV     {BX},DS    _C{save }
         POP     CX      _C{count}
         POP     DI      _C{dest}
         POP     DX
@@ -5896,7 +5945,7 @@ _C{ Fill user area for single task.}
         DC      INIT
         DC      ONE            _C{ Sign on wanted.}
 _DLL_({
-        DC      ZERO, LIT, _GetCommandLineA@0, LCALL
+        DC      ZERO, LIT, _GetCommandLineA@0, ICALL
         DC      ARGS, STOR
 })_C{}_END_({_DLL_})
 _LINUX_N_({
@@ -5945,12 +5994,12 @@ _BLOCKSINFILE_({
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
 _SUPPRESSED({
-        DC      LIT, -10, ZERO, LIT, _GetStdHandle@4, LCALL
-        DC      LIT, STDIN+_CELLS(D_HOFFSET), STOR
-        DC      LIT, -11, ONE, LIT, _GetStdHandle@4, LCALL
-        DC      LIT, STDOUT+_CELLS(D_HOFFSET), STOR
-        DC      LIT, -12, ONE, LIT, _GetStdHandle@4, LCALL
-        DC      LIT, STDERR+_CELLS(D_HOFFSET), STOR
+        DC      LIT, STD_INPUT_HANDLE, LIT, _GetStdHandle@4, ICALL
+        DC      LIT, STDIN+(CW*(D_HOFFSET)), STOR
+        DC      LIT, STD_OUTPUT_HANDLE, LIT, _GetStdHandle@4, ICALL
+        DC      LIT, STDOUT+(CW*(D_HOFFSET)), STOR
+        DC      LIT, STD_ERROR_HANDLE, LIT, _GetStdHandle@4, ICALL
+        DC      LIT, STDERR+(CW*(D_HOFFSET)), STOR
 })_C{}_END_({_SUPPRESSED})
         DC      SEMIS
 _C{}
@@ -5980,7 +6029,7 @@ or a non-zero value, or by resetting this global variable to zero.
 {{ LAST-ERROR .},{0} },
 enddoc)
 _HEADER({LAST-ERROR},{GLE},{DOCOL})
-        DC      ZERO, LIT, _GetLastError@0, LCALL
+        DC      LIT, _GetLastError@0, ICALL
         DC      SEMIS
 _C
 worddoc( {ERRORS},{>ERROR},{query_error_wIndows},{n --- err},{},
@@ -6019,9 +6068,9 @@ _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
 worddoc( {STDOUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT .},{1} },
+{{ STDOUT .},{_DLL_({1},{3})} },
 enddoc)
-_HEADER({STDOUT},{STDOUT},{DOCON}, 1)
+_HEADER({STDOUT},{STDOUT},{DOCON}, 1 )
 _C
 worddoc( {STDERR},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
@@ -7400,7 +7449,7 @@ forthcode({OUT}) is incremented for each character output.},
 {{EMIT},{OUT}}, {}, enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTOR
-        DC      ONE, WFILE, DROP
+        DC      _DLL_({STDOUT},{ONE}), WFILE, DROP
         DC      SEMIS
 _C
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
@@ -7589,9 +7638,14 @@ _HEADER({OPEN-FILE},{OFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
-        DC      LIT, 8000H, LOR
         DC      TOR, ZEN, FROMR, SWAP
-        DC      LIT, 2, LIT, __open, LCALL
+        DC      TOR, TOR
+        DC      ZERO, ZERO, LIT, OPEN_EXISTING
+        DC      ZERO, LIT, FILE_SHARE_READ
+        DC      LIT, GENERIC_READ ; OR 8000H
+        DC      FROMR, LOR
+        DC      FROMR
+        DC      LIT, CreateFile, ICALL
         DC      LDUP, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -7623,7 +7677,7 @@ _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
-        DC      LIT, 1, LIT, __close, LCALL, TOERR
+        DC      LIT, CloseHandle, ICALL, ZEQU, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7666,9 +7720,15 @@ _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
-        DC      DROP, TDUP, DFILE, DROP
-        DC      ZEN
-        DC      ONE, LIT, __creat, LCALL   ; Has no mode-parameter!
+        DC      DROP, ZEN, TOR
+        DC    ZERO
+        DC    ZERO
+        DC    LIT, CREATE_ALWAYS
+        DC    ZERO
+        DC    LIT, FILE_SHARE_READ
+        DC    LIT, GENERIC_WRITE
+        DC      FROMR
+        DC      LIT, CreateFile, ICALL
         DC      LDUP, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -7706,7 +7766,8 @@ _HEADER({DELETE-FILE},{DFILE},{DOCOL})
 _DLL_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
         DC      ZEN
-        DC      ONE, LIT, __unlink, LCALL, TOERR
+        DC      LIT, _DeleteFileA@4, ICALL
+        DC      ZEQU, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
@@ -7743,9 +7804,13 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      TOR, SWAP, FROMR
-        DC      LIT, 3, LIT, __read, LCALL
-        DC      LDUP, TOERR
+        DC      TOR             ;fd
+        DC      SWAP, TOR       ;buf
+        DC      TOR     ; Count
+        DC      X, SPFET, ZERO,  SWAP
+        DC      FROMR, FROMR, FROMR
+        DC      LIT, _ReadFile@20, ICALL
+        DC      ZEQU, TOERR
         DC      SEMIS
 })_C{}_END_({ _DLL_})
 _HOSTED_MSDOS_({
@@ -7817,8 +7882,10 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
 _DLL_({
 _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      TOR, DROP _C{Convert to single precision.}
-        DC      TOR, LIT, SEEK_SET, FROMR, FROMR
-        DC      LIT, 3, LIT, __lseek, LCALL
+        DC      TOR       ; R handle, pos
+        DC      LIT, FILE_BEGIN, ZERO
+        DC      FROMR, FROMR
+        DC      LIT, SetFilePointer, ICALL
         DC      TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -7869,8 +7936,12 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR, SWAP, FROMR
-        DC      LIT, 3, LIT, __write, LCALL
+        DC      TOR             ;fd
+        DC      SWAP, TOR       ;buf
+        DC      TOR     ; Count
+        DC      ZERO, RPFET
+        DC      FROMR, FROMR, FROMR
+        DC      LIT, _WriteFile@20, ICALL
         DC      TOERR
         DC      SEMIS
 })_C{}_END_({ _DLL_})
@@ -8036,7 +8107,7 @@ _HEADER({REFILL-TIB},{REFTIB},{DOCOL})
         DC      REMAIND, FETCH, TOR
         DC      TIB, FETCH, RR, PLUS
         DC      LIT, TIBSIZE, RR, LSUB
-        DC      ZERO            _C{ STDIN }
+        DC      _DLL_({STDIN},{ZERO})
         DC      RFILE
         DC      QERRUR
         DC      LDUP, ZEQU, LIT, -EPIPE, LAND _C{ Presumably end of pipe.}
@@ -8319,7 +8390,7 @@ that case forthcode({OUT}) is not observed. },
 enddoc)
 _HEADER({TYPE},{LTYPE},{DOCOL})
         DC      LDUP, LOUT, PSTOR
-        DC      ONE, WFILE, THROW
+        DC      _DLL_({STDOUT},{ONE}), WFILE, THROW
         DC      SEMIS
 _C
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -8335,7 +8406,7 @@ dnl This test assumes a redirection of error out to standard out.
 {{HERE 41 C, 42 C, 2 ETYPE},{AB}},
 enddoc)
 _HEADER({ETYPE},{ETYPE},{DOCOL})
-        DC      TWO, WFILE, THROW
+        DC      _DLL_({STDERR},{TWO}), WFILE, THROW
         DC      SEMIS
 _C
 worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
@@ -8435,7 +8506,7 @@ forthemph({KERNEL32.DLL}).
 {{GET-MODE},{KEY?}}, {}, enddoc)
 _HEADER({SET-MODE},{SETMODE},{DOCOL})
         DC      STDIN
-        DC      ZERO, LIT, _SetConsoleMode@8, LCALL
+        DC      LIT, _SetConsoleMode@8, ICALL
         DC      ZEQU, TOERR, THROW
         DC      SEMIS
 _C
@@ -8448,7 +8519,7 @@ forthemph({KERNEL32.DLL}).
 _C
 _HEADER({GET-MODE},{GETMODE},{DOCOL})
         DC      X, SPFET,  STDIN
-        DC      ZERO, LIT, _GetConsoleMode@8, LCALL
+        DC      LIT, _GetConsoleMode@8, ICALL
         DC      ZEQU, TOERR, THROW
         DC      SEMIS
 ; EXTRN     _GetConsoleMode@8    : NEAR
@@ -8463,7 +8534,7 @@ _HEADER({KEY},{KEY},{DOCOL})
         DC      ZERO, SPFET, TOR        _C{ Result buffer.}
         DC      ZERO,  SPFET, LIT, 100, LSUB  _C{ parameters 5..4}
         DC      ONE, FROMR, STDIN              _C{ parameters 3..1}
-        DC      ZERO, LIT, _ReadConsoleA@20, LCALL
+        DC      LIT, _ReadConsoleA@20, ICALL
         DC      ZEQU, TOERR, THROW
 
         DC      FROMR, SETMODE          _C{ Restore mode.}
@@ -8476,7 +8547,7 @@ A non-zero flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
 _HEADER({KEY?},{KEYQ},DOCOL)
         DC      X, SPFET             _C{ 4: Result buffer of length.}
         DC      ONE, RWBUF, STDIN   _C{ 3..1 }
-        DC      ZERO, LIT, _PeekConsoleInputA@16, LCALL
+        DC      LIT, _PeekConsoleInputA@16, ICALL
         DC      ZEQU, TOERR, THROW
         DC      ZEQU, ZEQU      _C{ Well formed flag.}
         DC      SEMIS
@@ -8531,7 +8602,7 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 {{ 123 10 MS . },{123}},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
-        DC      ZERO, LIT, _Sleep@4, LCALL
+        DC      LIT, _Sleep@4, ICALL
         DC      DROP
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -8544,11 +8615,32 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
-        DC      XCODE, FETCH, ONE, LIT, __exit, LCALL
+        DC      XCODE, FETCH, LIT, _ExitProcess@4, ICALL
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _DLL_})
 _DLL_({
 dnl specific for DLL
+worddoc( {OPERATINGSYSTEM},{ICALL}, {indirect-call}, { n1*x adr --- ior }, {},
+{ Execute an indirect call to forthvar({adr}).
+This is probably an external subroutine, supplied via a DLL that is
+directly linked, not fetched via forthword({GPA}).
+The stack must be filled with its parameters,
+those are popped by the external subroutien.
+The forthvar({ior}) is a subroutine dependent indication whether
+the operation has succeeded.
+It is assumed that it was returned into AX.
+},
+{{OPEN-FILE},{GPA},{LOLI}},
+{
+{ dnl all OS calls testin fact this interface
+}
+},
+enddoc)
+CODE_HEADER({ICALL},{ICALL})
+        POP    AX
+        CALL   _CELL_PTR[AX]
+       _PUSH
+_C{}
 worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x n1 adr --- ior }, {},
 { Execute a call to forthvar({adr}).
 This is probably an external subroutine, supplied via a DLL.
@@ -8571,9 +8663,8 @@ CODE_HEADER({CALL},{LCALL})
         SHL    BX,2
         ADD    SP,BX
        _PUSH
-})_C{}_END_({_DLL_})
-
 _C
+})_C{}_END_({_DLL_})
 _PC_({
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
 {This behaves identical to forthcode({TYPE}) .
@@ -8634,7 +8725,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      PEMIT
         DC      ONE,LOUT
         DC      PSTOR,SEMIS
-PEMIT   DC      _AP_ +_CELLS(1)
+PEMIT   DC      _AP_ +_CELLS(1)     _C{ Mini header, pointer to code.}
         POP     AX      _C{GET CHAR}
         CMP     AL,ALF   _C{ Precede ^J with ^M}
         JNE     PEMIT1
