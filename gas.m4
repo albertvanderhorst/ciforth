@@ -58,6 +58,10 @@ dnl
 dnl A nobits section takes no place in the object file.
 define({_SECTION_},{.text})
 define({_SECTION_NOBITS_},{.bss})
+define({_SECTION_END_},{})
+define({_ENDOFPROGRAM},{
+        END $1
+})dnl
 dnl leave this to sed for the moment.
 define({_ALIGN},{.balign    M4_CELLWIDTH{,}0x00})dnl
 define({DSS},{.ASCII})dnl

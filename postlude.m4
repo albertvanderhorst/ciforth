@@ -21,9 +21,8 @@ _HOSTED_BSD_({define({_HOSTED_X_}, _yes)})
 
 _HOSTED_X_({define({_LAYOUTBYSECTION_}, _yes)})
 _HOSTED_X_({define( {_EQULAYOUT_},  _no )})
-dnl In the future this should be section based.
-_DLL_({define({_LAYOUTBYSECTION_}, _no )})
-_DLL_({define( {_EQULAYOUT_},  _yes )})
+_DLL_({define({_LAYOUTBYSECTION_}, _yes )})
+_DLL_({define( {_EQULAYOUT_},  _no )})
 
 _HOSTED_X_({define({_HOSTED_}, _yes)})
 _HOSTED_DPMI_({define({_HOSTED_}, _yes)})

@@ -2,8 +2,8 @@ dnl $Id$
 dnl Copyright(2011): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Macro's to adapt the source to Flat Assembler
 divert(-1)dnl
-define({_TITLE}, {dnl}) dnl rigorously get rid.
-define({_PAGE}, {dnl}) dnl rigorously get rid.
+define({TITLE},;)dnl Turn TITLE into comment.
+define({PAGE},;)dnl Turn PAGE into comment.
 dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in _HEADER, because index must look in the real string,
 dnl not on some variable that contains the string.

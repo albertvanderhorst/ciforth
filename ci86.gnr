@@ -5055,7 +5055,7 @@ and can be revectored to give more elaborate diagnostics. },
 { {0. WHERE 2! 12 ERROR},{? ciforth ERROR # 18},
  {CR},{} },
 enddoc)
-_HEADER({ERROR},{ERROR},{DOCOL})
+_HEADER({ERROR},{LERROR},{DOCOL})
 _C{ Make sure the whole word is shown in case of denotations. }
         DC      LWHERE, TFET
         DC      OVER, LIT, 20, LSUB
@@ -5118,7 +5118,7 @@ _HEADER({THROW},{THROW},{DOCOL})
         _0BRANCH(THROW1)
         DC      HANDLER, FETCH, ZEQU
         _0BRANCH(THROW2)
-        DC      ERROR
+        DC      LERROR
         DC      SZERO, FETCH, SPSTO
         DC      QUIT
 THROW2:
@@ -5861,7 +5861,7 @@ _PC_(
 {       DC      LIT, 0x0FD, LAND    _C{Accept / as well as -.}})
         DC      LIT, '-', UNEQ
         _0BRANCH(OPT3)
-        DC      LIT, 3, LDUP, ERROR
+        DC      LIT, 3, LDUP, LERROR
         DC      XCODE, STOR, BYE
 OPT3:
         DC      CFET
@@ -9074,7 +9074,7 @@ _C{  Get environment vector}
 _BITS32_({      DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS},{dnl})
 _BITS64_({       DC      ZERO},{dnl})
         DC      LIT, execve, XOS
-        DC      LIT, 49, ERROR, BYE   _C{ Returned, this is always wrong.}
+        DC      LIT, 49, LERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:
         DC      LDUP
         DC      LIT, STATUS, ZERO, LIT, waitpid, XOS
@@ -9113,7 +9113,7 @@ _C{  Get environment vector}
                 DD      SHELL, CELLP
                 DD      LIT, 3
         DD      LIT, _osx_execve, XOSV
-        DC      LIT, 49, ERROR, BYE   _C{ Returned, this is always wrong.}
+        DC      LIT, 49, LERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:
         DC      LDUP
 
