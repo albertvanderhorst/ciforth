@@ -1183,7 +1183,7 @@ ENDIF1:
 _HOSTED_X_({
 _C{ 4.15.3.2}
 dnl ciforth:
-_start:
+_main:
 start:
 })_C{}_END_({_HOSTED_X_})
 COLD_ENTRY:
@@ -2368,7 +2368,7 @@ FARMV2:
         _NEXT
 _C
 })_C{}_END_({_BITS64_})
-worddoc( {MULTIPLYING},{UM*},{u_start},{u1 u2 --- ud},{ISO},
+worddoc( {MULTIPLYING},{UM*},{u_star},{u1 u2 --- ud},{ISO},
 {A mixed magnitude math operation which leaves the double number
 forthvar({ud}) : the unsigned product of two unsigned numbers
 forthvar({u1}) and forthvar({u2}) .},
@@ -5993,14 +5993,14 @@ _BLOCKSINFILE_({
         DC      LIT, 0, BLINI  _C{Default, open library file read-only!}},{
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
-_SUPPRESSED({
+_DLL_({
         DC      LIT, STD_INPUT_HANDLE, LIT, _GetStdHandle@4, ICALL
         DC      LIT, STDIN+(CW*(D_HOFFSET)), STOR
         DC      LIT, STD_OUTPUT_HANDLE, LIT, _GetStdHandle@4, ICALL
         DC      LIT, STDOUT+(CW*(D_HOFFSET)), STOR
         DC      LIT, STD_ERROR_HANDLE, LIT, _GetStdHandle@4, ICALL
         DC      LIT, STDERR+(CW*(D_HOFFSET)), STOR
-})_C{}_END_({_SUPPRESSED})
+})_C{}_END_({_DLL_})
         DC      SEMIS
 _C{}
 _DLL_({
@@ -10802,7 +10802,7 @@ _C{       No memory addresses should be arrived at through equates.}
 _C{       However now we must teach the linker to keep the}
 _C{       two sections together.}
 
-FORTHSIZE       EQU     _AP_ - _start
+FORTHSIZE       EQU     _AP_ - _main
         _SECTION_NOBITS_({dictionary})
 
 INITDP:                 _C{  It may be that it is not consecutive with TASK.}
