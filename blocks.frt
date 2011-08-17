@@ -1192,7 +1192,7 @@ HEX    WANT DROP-WORD
    >R 2DROP R> ;
 \ Find argument INDEX, counting from one. Return as a STRING.
 : ARG[]   >R ARG$   R@ 1 < 0D ?ERROR
-    R> 1 ?DO DROP-WORD LOOP   -LEADING BL $/ 2SWAP 2DROP ;
+    R> 0 ?DO DROP-WORD LOOP   -LEADING BL $/ 2SWAP 2DROP ;
 
 \ Shift the arguments, so as to remove argument 1. Keep cr!
 : SHIFT-ARGS   ARG$ DROP-WORD   DROP ARGS ! ;
@@ -1214,7 +1214,7 @@ DECIMAL
 
 
 
-( SRC>EXEC 2 ) CF: ?PC                \ AvdH A3mar20
+( SRC>EXEC 2 ) CF:                    \ AvdH B1aug16
 HEX
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   PAD $!   PAD $@ + 4 - >R
@@ -1229,7 +1229,23 @@ DECIMAL
 
 
 
+\
+( GET-ENV K32 ) CF: ?WI            \ AvdH B1aug16
+HEX
+"kernel32.dll" LOAD-DLL CONSTANT K32
 
+"GetEnvironmentVariableA" K32 DLL-ADDRESS CONSTANT GCL
+
+\ Use RW-BUFFER for input and output. ( sc -- sc )
+: GET-ENV    ZEN 1000 OVER DUP GCL CALL ;
+DECIMAL
+
+
+
+
+
+
+\
 ( GET-ENV ) CF: ?LI \ AvdH A3mar20
 \ This must be defined on MS-DOS too
 
@@ -1246,20 +1262,20 @@ WANT Z$@   WANT COMPARE   WANT ENV
 
 
 
-( SAVE-SYSTEM TURNKEY ) CF: ?LI ?32 HEX \ AvdH
-\ The magic number marking the start of an ELF header
- CREATE MAGIC 7F C, &E C, &L C, &F C,
-\ Return the START of the ``ELF'' header.
- : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
- SM 44 + CONSTANT D-SIZE  \ Where to patch for dictionary.
- SM 48 + CONSTANT G-SIZE  \ Where to patch for GROW.
-\ Return the VALUE of ``HERE'' when this forth started.
- : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
- : SAVE-SYSTEM \ Save the system in a file with NAME .
-  HERE BM - D-SIZE !  \ Fill in dict size (.text)
-   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
-\ Now write it. Consume NAME here.
-   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
+( SAVE-SYSTEM TURNKEY ) CF: ?WI HEX \ AvdH
+: _BOOT-SECTION    BM 4000 -   BM 2400 - 200 MOVE ;
+: _KERNEL-SECTION  BM 3000 - BM 2200 - 200 MOVE ;
+: _FIXUP  SAVE >R  \ Fix up the kernel section at ADDRESS
+   R@ 0C + @ 1000 -   R@ +   DUP 200 +   1FF INVERT AND
+   OVER - SET-SRC    NAME 2DROP   R@ 10 + @  1000 -  R@ +
+   BEGIN NAME WHILE  2 - 1000 + R@ - OVER !
+    CELL+ REPEAT DROP RDROP RESTORE ;
+: SAVE-USER-VARS U0 @   0 +ORIGIN   40 CELLS  MOVE ;
+: INCREMENT    HERE   'DP >DFA @ +ORIGIN @ 'TASK DROP - ;
+: SAVE-SYSTEM  >R >R   \ Save the system in a file with NAME
+  _BOOT-SECTION INCREMENT BM 2400 - 1D8 + +!
+  _KERNEL-SECTION BM 2200 - _FIXUP  SAVE-USER-VARS
+   BM 2400 - HERE  OVER - 200 + R> R> PUT-FILE ;
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
 ( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH

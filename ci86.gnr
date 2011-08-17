@@ -6003,7 +6003,7 @@ _DLL_({
         DC      SEMIS
 _C{}
 _DLL_({
-worddoc( {LOAD-DLL},{LOLI},{load_dll},{ sc -- n},{},
+worddoc( {OPERATINGSYSTEM},{LOAD-DLL},{load_dll},{ sc -- n},{},
 {forthvar(n) is the handle of a DLL library with name forthvar(sc). },
 {DLL-ADDRESS},
 {{ "kernel32.dll" LOAD-DLL DUP 0= . CONSTANT K32},{0},
@@ -6015,7 +6015,7 @@ _HEADER({LOAD-DLL},{LOLI},{DOCOL} )
         DC      LDUP, TOERR, THROW
         DC      SEMIS
 _C
-worddoc( {COMMAND-LINE},{COMMAND-LINE},{command_line},{ -- sc },{},
+worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ -- sc },{},
 {forthvar(sc) is the command line with which this forth is invoked. },
 {},
 {{ COMMAND-LINE TYPE }, {wina},
@@ -6028,7 +6028,7 @@ _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
         DC      SSLAS, TSWAP, TDROP
         DC      SEMIS
 _C
-worddoc( {DLL-ADDRESS},{DLL-ADDRESS},{dll_address },{ sc u --- adr},{},
+worddoc( {OPERATINGSYSTEM},{DLL-ADDRESS},{dll_address },{ sc u --- adr},{},
 {Return the address forthvar({adr}) of the procedure with name forthvar({sc})
 from dll library with handle forthvar({u}). },{LOAD-DLL},
 {{ DLL-ADDRESS 0= .},{0},
@@ -7570,12 +7570,12 @@ _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
 })_C{}_END_({ _HOSTED_MSDOS_})
 _HOSTED_X_({
-define({SIZE_RWBUF}, {0x200})
+define({SIZE_RWBUF}, {0x1000})
 _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
-define({SIZE_RWBUF}, {0x200})
+define({SIZE_RWBUF}, {0x1000})
 _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
         _RESB(SIZE_RWBUF)
 })_C{}_END_({ _DLL_})
@@ -8663,27 +8663,23 @@ CODE_HEADER({ICALL},{ICALL})
         CALL   _CELL_PTR[AX]
        _PUSH
 _C{}
-worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x n1 adr --- ior }, {},
+worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x adr --- ior }, {},
 { Execute a call to forthvar({adr}).
-This is probably an external subroutine, supplied via a DLL.
-The stack must be filled with its parameters, then the count forthvar({n1})
-of the parameters, such that they can be popped.
-The forthvar({ior}) is a subroutine dependent indication whether
+This is probably an external subroutine, supplied via a DLL-library.
+The stack must be filled with its parameters,
+the forthvar({ior}) is a subroutine dependent indication whether
 the operation has succeeded.
 It is assumed that it was returned into AX.
-},
-{{OPEN-FILE}},
+_VERBOSE_({ If the c-convention is used, the caller must nip
+results that are under forthvar({ior}). })     },
+{{DLL-ADDRESS}},
 {
-{ dnl all OS calls testin fact this interface
-}
+{ ( all OS calls test in fact this interface) },{}
 },
 enddoc)
 CODE_HEADER({CALL},{LCALL})
         POP    AX
-        POP    BX
         CALL   AX
-        SHL    BX,2
-        ADD    SP,BX
        _PUSH
 _C
 })_C{}_END_({_DLL_})
@@ -9151,7 +9147,7 @@ The name may contain a path and be at most}
 M4_FILENAMELENGTH {characters long.
 _HOSTED_LINUX_({ The default name is forthemph({/bin/sh}) .})
 _PC_({ The default name is forthemph({C:\COMMAND.COM}) .
-256 bytes after forthcode({SHELL})) are reserved for
+256 bytes after forthcode({SHELL}) are reserved for
 a start up stack.})
 },{{SYSTEM}},
 ,
