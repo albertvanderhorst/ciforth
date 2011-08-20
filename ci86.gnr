@@ -1,5 +1,4 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
-
 _C{ $Id$}
 _C{ Copyright (2008):} M4_SUPPLIER {by GNU Public License}
 _C
@@ -356,10 +355,8 @@ _ORIG:
 _start:      _C Entry point.
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
-dnl what we want: kernel32
-EPIPE   EQU     38
-})_C{}_END_({ _DLL_})
-_DLL_({
+EPIPE   EQU     109     _C{ " broken pipe " }
+_C
         section '.idata' import data readable writeable
         dd 0,0,0,rva kernel_name,rva kernel_table
         dd 0,0,0,0,0
@@ -6083,19 +6080,19 @@ _C
 worddoc( {OUTPUT},{STDIN},{standard_in},{ --- n},{},
 {The handle to the file input buffer for the console.
 },{},
-{{ STDIN .},{3} },
+{{ STDIN DUP 40 > . 100 < . },{_T_ _T_} },
 enddoc)
 _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
 worddoc( {OUTPUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT .},{7} },
+{{ STDOUT DUP 40 > . 100 < . },{_T_ _T_} },
 enddoc)
 _HEADER({STDOUT},{STDOUT},{DOCON}, 1 )
 _C
 worddoc( {OUTPUT},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
-{{ STDERR .},{B} },
+{{ STDERR DUP 40 > . 100 < . },{_T_ _T_} },
 enddoc)
 _HEADER({STDERR},{STDERR},{DOCON}, 2)
 })_C{}_END_({_DLL_})
@@ -7587,19 +7584,17 @@ to the operating system. In fact this is }forthcode({RW-BUFFER}){ . }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
-_HOSTED_X_({ {{OPEN-FILE},{XOS},{XOS5}} })
-_DLL_({ {{OPEN-FILE},{LOAD-DLL},{DLL-ADDRESS}} })
-_HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}} })
-_HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}} })
-,
-_HOSTED_X_({ {{"AAP" ZEN 3 + C@ .},{0}} })
-_DLL_(     { {{"AAP" ZEN 3 + C@ .},{0}} })
-_HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
+_HOSTED_X_({ {{OPEN-FILE},{XOS},{XOS5}}, })
+_DLL_({ {{OPEN-FILE},{LOAD-DLL},{DLL-ADDRESS}}, })
+_HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}}, })
+_HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
+_HOSTED_X_({ {{"AAP" ZEN 3 + C@ .},{0}}, })
+_DLL_(     { {{"AAP" ZEN 3 + C@ .},{0}}, })
+_HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}}, })
 _HOSTED_DPMI_({
 {{: G3 "AAP" ZEN REG-SET 34 + @ SWAP 2 + FAR@ FF AND ;},{},
-{G3 EMIT },{P}}
+{G3 EMIT },{P}},
 })
-,
 enddoc)
 _HOSTED_X_({
 _HEADER({ZEN},{ZEN}, {DOCOL})
@@ -8574,19 +8569,42 @@ _HEADER({KEY?},{KEYQ},DOCOL)
         DC      ZEQU, ZEQU      _C{ Well formed flag.}
         DC      SEMIS
 _C
-dnl same as in HOSTED_X
+worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
+{Transfer at most forthvar({count}) characters from the
+terminal to address, until a forthkey({RET}) is received. The
+simple tty editing functions of _OS_ are observed, like the
+backspace key, and probably also the cursors keys, maybe more.
+Note that excess characters after forthvar({count}) are ignored.
+The number of characters not
+including the forthkey({RET}) is returned into forthvar({n}).
+},
+{{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
+{
+{PAD 10 ACCEPT},{},
+ {GIBBON
+  . PAD 5 TYPE},{6 GIBBO},
+ {( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)( 1 A)},{},
+ {( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )( 6)},{},
+ {( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)( 1 Z)},{}
+},
+enddoc)
+_HEADER({ACCEPT},{ACCEP},{DOCOL})
+        DC      PACCEP
+        DC      TSWAP, ROT, MIN
+        DC      LDUP, TOR, LMOVE, FROMR
+        DC      SEMIS
+_C
 worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
-{Accept characters from the terminal, until a forthkey({RET})
-is received and return the result as a constant string
+{Accept characters from the terminal, until a forthkey({ENTER})
+is pressed and return the result as a constant string
 forthvar({sc}).
-It doesn't contain a trailing forthkey({LF}).
-But possibly a trailing forthkey({RET}) (0x0D).
-The
-editing functions are the same as with forthcode({ACCEPT}) .
+The forthkey({ENTER}) is not part of forhtvar({sc}), nor will it
+contain other line endings such as a trailing (0x0D).
+The editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than }forthcode({ACCEPT}){.
 Text is probably present in the buffer address contained in
-}forthcode({TIB @}){, but not necessarily at the beginning. }})
+}forthcode({TIB @@}){, but not necessarily at the beginning. }})
 },
 {{KEY},{KEY?},{ACCEPT}},
 {
@@ -8616,6 +8634,7 @@ PACCEP1:
         DC      LIT, ALF, SSLAS
         DC      TSWAP, REMAIND, TSTOR
         _PC_({DC ONEM}, {dnl})
+        DC      ONE, LSUB    _C Rid of <CR>
         DC      SEMIS
 _C
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
@@ -9016,7 +9035,11 @@ If it is negative there is no block file open,
 otherwise the handle is used by the system to access blocks.
 _LINUX_C_({In this ciforth forthcode({BLOCK-HANDLE}) is not used.})
 },{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT},{$@@}},
+_DLL_({
+{{BLOCK-HANDLE @ DUP 100 > . 1000 < .},{_T_ _T_}},
+},{
 {{BLOCK-HANDLE @ 10 U< .},{_T_}},
+})
 enddoc)
 _HEADER({BLOCK-HANDLE},{BHAN},{DOVAR}, )
         DC      -1
