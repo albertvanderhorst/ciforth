@@ -353,6 +353,7 @@ _HOSTED_X_({
         GLOBAL  _start       _C Entry point.
         GLOBAL  start        _C Entry point.
 _ORIG:
+_start:      _C Entry point.
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 dnl what we want: kernel32
@@ -445,8 +446,8 @@ _ORIG:
 })_C{}_END_({ _DLL_})
 
 dnl
-_BOOTED_(
-{_C ########################################################################################
+_BOOTED_({ dnl
+_C{ ########################################################################################}
 _C{                      BOOTCODE    (optional, always real mode)}
 _C{ ########################################################################################}
 
@@ -6004,10 +6005,10 @@ _DLL_({
 _C{}
 _DLL_({
 worddoc( {OPERATINGSYSTEM},{LOAD-DLL},{load_dll},{ sc -- n},{},
-{forthvar(n) is the handle of a DLL library with name forthvar(sc). },
+{forthvar({n}) is the handle of a DLL library with name forthvar({sc}). },
 {DLL-ADDRESS},
 {{ "kernel32.dll" LOAD-DLL DUP 0= . CONSTANT K32},{0},
- { "GetLastError" ZEN K32 DLL-ADDRESS 0= . },{0} },
+ { "GetLastError" K32 DLL-ADDRESS 0= . },{0} },
 enddoc)
 _HEADER({LOAD-DLL},{LOLI},{DOCOL} )
         DC      ZEN
@@ -6016,10 +6017,10 @@ _HEADER({LOAD-DLL},{LOLI},{DOCOL} )
         DC      SEMIS
 _C
 worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ -- sc },{},
-{forthvar(sc) is the command line with which this forth is invoked. },
+{forthvar({sc}) is the command line with which this forth is invoked. },
 {},
 {{ COMMAND-LINE TYPE }, {wina},
- { GET-LAST-ERROR}, {0} },
+ { LAST-ERROR .}, {0} },
 enddoc)
 _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
         DC      LIT, _GetCommandLineA@0, ICALL
@@ -6031,8 +6032,7 @@ _C
 worddoc( {OPERATINGSYSTEM},{DLL-ADDRESS},{dll_address },{ sc u --- adr},{},
 {Return the address forthvar({adr}) of the procedure with name forthvar({sc})
 from dll library with handle forthvar({u}). },{LOAD-DLL},
-{{ DLL-ADDRESS 0= .},{0},
-{." See LOAD-DLL"},{See LOAD-DLL} },
+{ {." See LOAD-DLL"},{See LOAD-DLL} },
 enddoc)
 _HEADER({DLL-ADDRESS},{DLLADR},{DOCOL})
         DC      TOR, ZEN, FROMR
@@ -6041,7 +6041,7 @@ _HEADER({DLL-ADDRESS},{DLLADR},{DOCOL})
         DC      SEMIS
 _C
 _C
-worddoc( {LAST-ERROR},{LAST-ERROR},{_GetLastError@0 },{ --- n},{},
+worddoc( {OPERATINGSYSTEM},{LAST-ERROR},{_GetLastError@0 },{ --- n},{},
 {Get the last error from MS-windows, the value of a global variable.
 Windows functions can indicate this global variable is set,
 by returning a -1, a 0, or a NULL.
@@ -6080,23 +6080,22 @@ _HEADER({>ERROR},{TOERR},{DOCOL})
 ERI1:
         DC      SEMIS
 _C
-worddoc( {STDIN},{STDIN},{standard_in},{ --- n},{},
+worddoc( {OUTPUT},{STDIN},{standard_in},{ --- n},{},
 {The handle to the file input buffer for the console.
-Note, for actual console input 0 is used.
 },{},
 {{ STDIN .},{3} },
 enddoc)
 _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
-worddoc( {STDOUT},{STDOUT},{standard_out},{ --- n},{},
+worddoc( {OUTPUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT .},{_DLL_({1},{3})} },
+{{ STDOUT .},{7} },
 enddoc)
 _HEADER({STDOUT},{STDOUT},{DOCON}, 1 )
 _C
-worddoc( {STDERR},{STDERR},{standard_err},{ --- n},{},
+worddoc( {OUTPUT},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
-{{ STDERR .},{2} },
+{{ STDERR .},{B} },
 enddoc)
 _HEADER({STDERR},{STDERR},{DOCON}, 2)
 })_C{}_END_({_DLL_})
@@ -7588,10 +7587,11 @@ to the operating system. In fact this is }forthcode({RW-BUFFER}){ . }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
-_HOSTED_X_({ {{OPEN-FILE},{XOS},{XOS5}}, })
-_DLL_({ {{OPEN-FILE},{LOAD-DLL},{DLL-ADDRESS}}, })
-_HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}}, })
-_HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}}, })
+_HOSTED_X_({ {{OPEN-FILE},{XOS},{XOS5}} })
+_DLL_({ {{OPEN-FILE},{LOAD-DLL},{DLL-ADDRESS}} })
+_HOSTED_MSDOS_({ {{OPEN-FILE},{BIOSN},{BDOSN}} })
+_HOSTED_DPMI_({  {{OPEN-FILE},{BIOSN},{BDOSN}} })
+,
 _HOSTED_X_({ {{"AAP" ZEN 3 + C@ .},{0}} })
 _DLL_(     { {{"AAP" ZEN 3 + C@ .},{0}} })
 _HOSTED_MSDOS_({ {{"AAP" ZEN 3 + C@ .},{0}} })
@@ -8403,7 +8403,7 @@ worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
 forthdefi({revectoring}) it _VERBOSE_({{and the usual
-redirection or }forthsamp({tee})-ing by _OS_}). In this
+redirection or }forthsamp({tee}){-ing by _OS_}}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output, however in
 that case forthcode({OUT}) is not observed. },
@@ -8479,7 +8479,7 @@ worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
 forthdefi({revectoring}) it _VERBOSE_({{and the usual
-redirection or }forthsamp({tee})-ing by _OS_}). In this
+redirection or }forthsamp({tee}){-ing by _OS_}}). In this
 ciforth strings may contain embedded forthkey({LF}) 's with the
 effect of a new line at that point in the output, however in
 that case forthcode({OUT}) is not observed. },
@@ -10008,7 +10008,7 @@ an input of e.g. forthexample({1 2})
 },
 {{DO},{I},{LOOP},{+LOOP},{LEAVE}},
 { { : GS1 ?DO 41 EMIT LOOP 0 . ; 3 0 GS1},{AAA0 },
-  {: GS3 0 1 1 ?DO I . LOOP . ; GS3 },{0} },
+  {: GS3 0 1 1 ?DO I . LOOP . ; GS3 },{0} ,
   {: GS4 0 -1 1 ?DO I . LOOP . ; GS4 },{0} },
 enddoc)
 _HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
@@ -10850,7 +10850,7 @@ ACTUAL_EM:  _C{ Differs from EM if code is relocated.}
 })_C{}_END_({ _LAYOUTBYSECTION_})
 _C
 
-_BOOTED_(
+_BOOTED_({
         CSEG    ENDS
 })_C{}_END_({ _BOOTED_})
         PAGE
