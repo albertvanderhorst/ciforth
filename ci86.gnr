@@ -365,6 +365,7 @@ kernel_table:
  _ExitProcess@4     dd rva _ExitProcess
  CreateFile     dd rva _CreateFileA
  _ReadFile@20     dd rva _ReadFile
+ _CreateProcessA@40     dd rva _CreateProcess
  _WriteFile@20     dd rva _WriteFile
  CloseHandle     dd rva _CloseHandle
  SetFilePointer     dd rva _SetFilePointer
@@ -378,8 +379,6 @@ kernel_table:
  _GetLastError@0     dd rva _GetLastError
  _PeekConsoleInputA@16     dd rva _PeekConsoleInputA
  _ReadConsoleA@20     dd rva _ReadConsoleA
- VirtualAlloc     dd rva _VirtualAlloc
- VirtualFree     dd rva _VirtualFree
  GetTickCount     dd rva _GetTickCount
  GetSystemTime     dd rva _GetSystemTime
  GlobalMemoryStatus     dd rva _GlobalMemoryStatus
@@ -393,6 +392,8 @@ kernel_table:
           db 'ExitProcess',0
  _CreateFileA dw 0
           db 'CreateFileA',0
+ _CreateProcess dw 0
+          db 'CreateProcessA',0
  _ReadFile dw 0
           db 'ReadFile',0
  _WriteFile dw 0
@@ -421,10 +422,6 @@ kernel_table:
           db 'PeekConsoleInputA'
  _ReadConsoleA dw 0
           db 'ReadConsoleA'
- _VirtualAlloc dw 0
-          db 'VirtualAlloc',0
- _VirtualFree dw 0
-          db 'VirtualFree',0
  _GetTickCount dw 0
           db 'GetTickCount',0
  _GetSystemTime dw 0
@@ -8651,8 +8648,8 @@ _DLL_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
-{{"lina -f 23 EXIT-CODE ! BYE " SYSTEM},
-{23 EXIT-CODE ! BYE 23}},
+{{"wina -f 23 EXIT-CODE ! BYE " SYSTEM},
+{( No error!) }},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
@@ -9328,27 +9325,22 @@ COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
 })_C{}_END_({_MODERN_})
 _DLL_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
-        DC      TDROP
-        DC      SEMIS
         DC      LIT, COMBUF, TOR
-        DC      ZERO, SHELL, CHAPP, LIT, -1, SHELL, PSTOR
-        _STRINGINLINE({X /c })  _C{byte X contains string count.}
-        DC      RR, SSTOR
-        DC      RR, SADD, LIT, ACR, RR, CHAPP
-        DC      RR, FETCH, LIT, 2, LSUB _C{Count, minus X minus CR}
-        DC      FROMR, CELLP, CSTOR _C{Fill in (BD) count at X.}
-;       DC      SHELL, CELLP, X, LIT, LOADEXEC
-;       DC      LIT, 0x4B00, BDOSN
-        DC      SWAP, QERR
+        DC      SHELL, SFET, RR, SSTOR
+        _STRINGINLINE({ /c })  _C{byte X contains string count.}
+        DC      RR, SADD, RR, SADD
+        DC      ZERO, RR, CHAPP
+        DC      SPFET, LIT, 01000H, LSUB, LDUP, LIT, 0100H, LERASE  _C{ Limbo, 1}
+        DC      SPFET, LIT, 02000H, LSUB, LDUP, LIT, 0100H, LERASE  _C{ Limbo, 2}
+        DC      ZERO, ZERO, ZERO, ZERO
+_C{}    DC      INVERT         _C{ Inherit console. No effect? }
+        DC      ZERO, ZERO
+        DC      FROMR, CELLP    _C{ Zero ended command.}
+        DC      ZERO            _C{ Parameter 10 }
+        DC      LIT, _CreateProcessA@40, ICALL
+        DC      ZEQU, TOERR, THROW
         DC      SEMIS
-LOADEXEC:   DW  0       _C{ The 0 are filled in at boot with DS.}
-        DC      COMBUF + CW  _C{Allow it to be a counted string.}
-        DW      0
-        DW      0x6C
-        DW      0
-        DW      0x7C
-        DW      0
-COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
+COMBUF:  _RESB(CW+0x1000)  _C{One cell for high level string manipulation.}
 })_C{}_END_({_DLL_})
 _LINUX_C_({
 worddoc( {BLOCKS},{BLOCK-INIT},{block_init},{n ---},{},
