@@ -19,7 +19,7 @@ version ci86gnrversion
 forthitem
 _BITS_-bits _REAL_({real mode })_PROTECTED_({protected mode })
 forthitem
-_BOOTED_({standalone })_HOSTED_LINUX_({running under _OS_ })_HOSTED_MSDOS_({running under _OS_
+_BOOTED_({standalone })_HOSTED_X_({running under _OS_ })_HOSTED_MSDOS_({running under _OS_
 forthitem
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })_HOSTED_DPMI_({running under DPMI (``Windows'')})dnl
@@ -137,7 +137,8 @@ be interested in.
 * Gentle Introduction:: For newbies to Forth. You don't want to read this.
 * Rationale & legalese:: For experts. You don't want to read this.
 * Manual::         User manual
-_PC_({* Editor::         The full screen editor})dnl
+_PC_({{* Editor::         The full screen editor
+}})dnl
 * Assembler::      The assemblers
 * Errors::  What means forthsamp({ ciforth ERROR ###})?
 * Documentation::  Some references
@@ -156,7 +157,10 @@ include(intro.mi)
 @chapter  Rationale & legalese
 include(rational.mi)                                                              `
 
-_HOSTED_LINUX_({
+_HOSTED_X_({
+@node Manual, Assembler, Rationale & legalese, top
+})
+_DLL_({
 @node Manual, Assembler, Rationale & legalese, top
 })
 _PC_({
@@ -165,7 +169,10 @@ _PC_({
 
 @chapter Manual
 include(manual.mi)
-_HOSTED_LINUX_({
+_HOSTED_X_({
+@node Assembler, Errors, Manual, top
+})
+_DLL_({
 @node Assembler, Errors, Manual, top
 })
 _PC_({
@@ -303,7 +310,7 @@ ciforth contains a string forthcode({BLOCK-FILE}) , that contains the name of th
 library file interpreter, with as a default forthfile({forth.lab}).
 If this is not correct you may change it as appropriate by e.g.
 _PC_({ forthsamp({S" C:/FORTH/forth.lab" BLOCK-FILE $! })})
-_HOSTED_LINUX_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
+_HOSTED_X_({ forthsamp({S" /usrlib/ciforth/forth.lab" BLOCK-FILE $! })})
 The library is accessible for read and write access and mnemonic message
 will be fetched from it,
 after you install it with forthsamp({2 BLOCK-INIT    1 WARNING !}).
@@ -319,7 +326,7 @@ to disk, because you have no write
 access for the library file.
 You must issue forthcode({DEVELOP}) which reopens the library file in READ_WRITE
 mode. Normally this should be part of loading the forthcode({EDITOR}) .
-_HOSTED_LINUX_({ It may be of course that you don't have privilege to write
+_HOSTED_X_({ It may be of course that you don't have privilege to write
 to the file. As non-privileged user you cannot edit the system-wide library file.
 })
 You may always edit and use a private copy of the library file, by the forthsamp({-l}) option.
@@ -340,10 +347,9 @@ means it is not used by any ciforth.
 The errors whose message starts with forthsamp({AS:}) are used by the PostIt FixUp assembler
 in the file forthfile({asgen.frt}),(forthpxref({Assembler})).
 
-_HOSTED_({Negative error numbers are those reported by
-_PC_({MSDOS}) _HOSTED_LINUX_({Linux}). If possible, mnemonic
-error messages are shown. But no explanation of the error is
-available.
+_HOSTED_({Negative error numbers are those reported by _OS_.
+If possible, mnemonic error messages are shown.
+An explanation of the error is available in the manuals only.
 _PC_({MSDOS error numbers are displayed in decimal, while in some documentation
 they are given as hex numbers.})
 }).

@@ -3079,12 +3079,12 @@ executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
 particular variable.
 _THREADS_(
-{In this ciforth forthsamp({UP}) is coupled to the return stack.
+{{In this ciforth forthsamp({UP}) is coupled to the return stack.
 This means that with a switch of the return stack{,}
-forthsamp({UP}) is switched also automatically.},
-{In this ciforth the forthsamp({UP}) is to be found at
+forthsamp({UP}) is switched also automatically.}},
+{{In this ciforth the forthsamp({UP}) is to be found at
 forthsamp({0 +ORIGIN}).
-})_C{}_END_({_THREADS_})
+}})
 forthcode({CONTEXT}) is the last user variable at offset 37 ,
 such that new user variables may be allocated using offsets of
 37+M4_MAXWORDLIST and up.
@@ -4550,7 +4550,7 @@ _C{       Assume the extra segment points to the data segment }
         REP     STOSB   _C{STORE BYTE}
         _NEXT
 _C
-worddoc( {MEMORY},{CORA},{CORA},{addr1 addr2 len  -- n},{CIF},
+worddoc( {MEMORY},{CORA},{CORA},{addr1 addr2 len  --- n},{CIF},
 {Compare the memory areas at forthvar({addr1}) and forthvar({addr2})
 over a length forthvar({len}) .
 For the first bytes that differ, return -1 if the byte
@@ -4584,7 +4584,7 @@ CORA3:
         MOV     HIP,DX  _C{Restore}
         _PUSH
 _C
-worddoc( {STRING},{$^},{string_index},{sc c -- addr},{},
+worddoc( {STRING},{$^},{string_index},{sc c --- addr},{},
 {Find the first forthvar({c}) in the forthdefin({string constant}) forthvar({sc}) and
 return its forthvar({addr}) if present.
 Otherwise return a forthdefin({nil pointer}).
@@ -4611,7 +4611,7 @@ SINDEX1:
         PUSH    DI
         _NEXT
 _C
-worddoc( {STRING},{$/},{string_slash},{sc c -- sc1 sc2},{},
+worddoc( {STRING},{$/},{string_slash},{sc c --- sc1 sc2},{},
 {Find the first forthvar({c}) in the forthdefin({string constant})
 forthvar({sc}) and split it at that address. Return the strings
 after and before forthvar({c}) into forthvar({sc1}) and
@@ -5237,7 +5237,7 @@ IDDOT2:
         DC      SEMIS
 _C
 _C
-worddoc( {DEFINING~},{HEADER},{header},{sc -- dea},{},
+worddoc( {DEFINING~},{HEADER},{header},{sc --- dea},{},
 {Create a dictionary entry structure for the word forthvar({sc}) and
 returns its address into forthvar({dea}).
 _VERBOSE_({A pointer to each of its fields is called a "field address".
@@ -5860,7 +5860,7 @@ _HEADER({WARM},{WARM},{DOCOL})
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
 _HOSTED_({
-worddoc( {INITIALISATIONS},{OPTIONS},{options},{ft -- f2},{FIG
+worddoc( {INITIALISATIONS},{OPTIONS},{options},{ft --- f2},{FIG
 L0},
 {Handle command line option.
 If an option is passed during startup execute the screen corresponding
@@ -5998,7 +5998,7 @@ _DLL_({
         DC      SEMIS
 _C{}
 _DLL_({
-worddoc( {OPERATINGSYSTEM},{LOAD-DLL},{load_dll},{ sc -- n},{},
+worddoc( {OPERATINGSYSTEM},{LOAD-DLL},{load_dll},{ sc --- n},{},
 {forthvar({n}) is the handle of a DLL library with name forthvar({sc}). },
 {DLL-ADDRESS},
 {{ "kernel32.dll" LOAD-DLL DUP 0= . CONSTANT K32},{0},
@@ -6010,7 +6010,7 @@ _HEADER({LOAD-DLL},{LOLI},{DOCOL} )
         DC      LDUP, TOERR, THROW
         DC      SEMIS
 _C
-worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ -- sc },{},
+worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ --- sc },{},
 {forthvar({sc}) is the command line with which this forth is invoked. },
 {},
 {{ COMMAND-LINE TYPE }, {wina},
@@ -6023,8 +6023,8 @@ _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
         DC      SSLAS, TSWAP, TDROP
         DC      SEMIS
 _C
-worddoc( {OPERATINGSYSTEM},{DLL-ADDRESS},{dll_address },{ sc u --- adr},{},
-{Return the address forthvar({adr}) of the procedure with name forthvar({sc})
+worddoc( {OPERATINGSYSTEM},{DLL-ADDRESS},{dll_address},{ sc u --- addr},{},
+{Return the address forthvar({addr}) of the procedure with name forthvar({sc})
 from dll library with handle forthvar({u}). },{LOAD-DLL},
 { {." See LOAD-DLL"},{See LOAD-DLL} },
 enddoc)
@@ -6035,7 +6035,7 @@ _HEADER({DLL-ADDRESS},{DLLADR},{DOCOL})
         DC      SEMIS
 _C
 _C
-worddoc( {OPERATINGSYSTEM},{LAST-ERROR},{_GetLastError@0 },{ --- n},{},
+worddoc( {OPERATINGSYSTEM},{LAST-ERROR},{last_error},{ --- n},{},
 {Get the last error from MS-windows, the value of a global variable.
 Windows functions can indicate this global variable is set,
 by returning a -1, a 0, or a NULL.
@@ -6083,7 +6083,7 @@ _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
 worddoc( {OUTPUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT DUP 40 > . 100 < . },{_T_ _T_} },
+{{ STDOUT DUP 6 > . 100 < . },{_T_ _T_} },
 enddoc)
 _HEADER({STDOUT},{STDOUT},{DOCON}, 1 )
 _C
@@ -6595,7 +6595,7 @@ CODE_HEADER({P!},{PSTO})
         OUT     _DX16,AX   _C{WORD OUTPUT}
         _NEXT
 _C
-worddoc( {BLOCKS~},{PREV},{prev},{---- addr},{},
+worddoc( {BLOCKS~},{PREV},{prev},{--- addr},{},
 {A variable containing the address of the disc buffer (not its
 content field!) most recently referenced. The
 forthcode({UPDATE}) command marks this buffer to be
@@ -8512,7 +8512,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
-worddoc( {INPUT},{SET-MODE},{set_mode},{u -- },{},
+worddoc( {INPUT},{SET-MODE},{set_mode},{u --- },{},
 {Set the mode of standard input to forthvar({u}), as defined
 in MS-WINDOWS forthemph({GetConsoleMode}) function from
 forthemph({KERNEL32.DLL}).
@@ -8524,7 +8524,7 @@ _HEADER({SET-MODE},{SETMODE},{DOCOL})
         DC      ZEQU, TOERR, THROW
         DC      SEMIS
 _C
-worddoc( {INPUT},{GET-MODE},{get_mode},{ -- u },{},
+worddoc( {INPUT},{GET-MODE},{get_mode},{ --- u },{},
 {Get the mode of standard input to forthvar({u}), as defined
 in MS-WINDOWS forthemph({GetConsoleMode}) function from
 forthemph({KERNEL32.DLL}).
@@ -8658,8 +8658,8 @@ _C{ Exit to _OS_, with status as stored. }
 })_C{}_END_({ _DLL_})
 _DLL_({
 dnl specific for DLL
-worddoc( {OPERATINGSYSTEM},{ICALL}, {indirect-call}, { n1*x adr --- ior }, {},
-{ Execute an indirect call to forthvar({adr}).
+worddoc( {OPERATINGSYSTEM},{ICALL}, {indirect_call}, { n1*x addr --- ior }, {},
+{ Execute an indirect call to forthvar({addr}).
 This is probably an external subroutine, supplied via a DLL that is
 directly linked, not fetched via forthcode({DLL-ADDRESS}).
 The stack must be filled with its parameters,
@@ -8679,8 +8679,8 @@ CODE_HEADER({ICALL},{ICALL})
         CALL   _CELL_PTR[AX]
        _PUSH
 _C{}
-worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x adr --- ior }, {},
-{ Execute a call to forthvar({adr}).
+worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x addr --- ior }, {},
+{ Execute a call to forthvar({addr}).
 This is probably an external subroutine, supplied via a DLL-library.
 The stack must be filled with its parameters,
 the forthvar({ior}) is a subroutine dependent indication whether
@@ -9275,7 +9275,7 @@ COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
         _C{ These are longs, not cells! }
 SYSARGS: DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 _C
-worddoc( {OPERATINGSYSTEM},{XOSFORK},{system},{ -- flag},{},
+worddoc( {OPERATINGSYSTEM},{XOSFORK},{system},{ --- flag},{},
 {Fork the process. If it is negative, it is an error.
 Otherwise, if forthvar({flag}) is clear, we are the child else the
 mother.}, {{SYSTEM}}, {}, enddoc )
@@ -9625,10 +9625,11 @@ _RWLBA_({
 
 _C{ Warning : if this LBA is used apart from by R|W}
 _C{ the fields marked default must be restored.}
-worddoc( {BLOCKS},{LBAPAR},{l_b_a_params},{--},{},
+worddoc( {BLOCKS},{LBAPAR},{l_b_a_params},{ --- addr},{},
 { A data structure used by R|W , that also must be filled in for disk
-operations forthcode({BLOCK-READ}) and forthcode({BLOCK-WRITE}) . Do not touch the
-first 16-bits word. The second word is the number of sectors to be
+operations forthcode({BLOCK-READ}) and forthcode({BLOCK-WRITE}) .
+Do not touch the first 16-bits word.
+The second word is the number of sectors to be
 transferred. The third and fourth word contain a long real mode
 pointer where the data comes from or goes to. The fourth word
 and fifth word is as 32 bit counter for the sector on the disc.
@@ -9647,7 +9648,7 @@ _HEADER({LBAPAR},{LBA},{DOVAR}, )
         DD      0       _C{ sector number}
         DD      0       _C{ M.S. 32 BITS default}
 
-worddoc( {BLOCKS},{BLOCK-READ},{block_read},{--},{},
+worddoc( {BLOCKS},{BLOCK-READ},{block_read},{},{},
 {Perform a disk read operation using a properly filled in LBA structure
 in forthcode({LBAPAR}). },
 {{R|W},{BLOCK-WRITE}}, {}, enddoc)
@@ -9655,7 +9656,7 @@ CODE_HEADER({BLOCK-READ},{BLREAD})
         MOV     BX,0x4200
         JMP    RWBLK
 _C
-worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{--},{},
+worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{},{},
 {Perform a disk write operation using a properly filled in LBA
 structure in forthcode({LBAPAR}). },
 {{R|W},{BLOCK-READ}}, {}, enddoc)
@@ -9790,8 +9791,8 @@ dnl An alias header. CFA DFA are the same.
 _HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 _C
 })_C{}_END_({_LOAD_})
-worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{addr wid --
-addr },{}, {Remove all words whose DEA is greater (later defined) than
+worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{addr wid --- addr },{},
+{Remove all words whose DEA is greater (later defined) than
 forthvar({addr}) from a wordlist given by
 forthvar({wid}) .
 This works too if links have been redirected, such that some earlier
@@ -10482,7 +10483,7 @@ _HEADER({U.},{UDOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 _C
-worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt wid --x1...xn},{},
+worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt wid --- x1...xn},{},
 {For all words from a word list identified by
 forthvar({wid})
 execute forthvar({xt})
