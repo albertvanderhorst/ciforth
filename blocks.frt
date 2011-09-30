@@ -1262,9 +1262,9 @@ WANT Z$@   WANT COMPARE   WANT ENV
 
 
 
-( SAVE-SYSTEM TURNKEY ) CF: ?WI HEX \ AvdH
-: _BOOT-SECTION    BM 4000 -   BM 2400 - 200 MOVE ;
-: _KERNEL-SECTION  BM 3000 - BM 2200 - 200 MOVE ;
+( SAVE-SYSTEM TURNKEY ) CF: ?WI HEX \ AvdH   B1oct1
+: _BOOT-SECTION    BM 2000 -   BM  400 - 200 MOVE ;
+: _KERNEL-SECTION  BM 1000 - BM  200 - 200 MOVE ;
 : _FIXUP  SAVE >R  \ Fix up the kernel section at ADDRESS
    R@ 0C + @ 1000 -   R@ +   DUP 200 +   1FF INVERT AND
    OVER - SET-SRC    NAME 2DROP   R@ 10 + @  1000 -  R@ +
@@ -1272,12 +1272,12 @@ WANT Z$@   WANT COMPARE   WANT ENV
     CELL+ REPEAT DROP RDROP RESTORE ;
 : SAVE-USER-VARS U0 @   0 +ORIGIN   40 CELLS  MOVE ;
 : INCREMENT    HERE   'DP >DFA @ +ORIGIN @ 'TASK DROP - ;
-: SAVE-SYSTEM  >R >R   \ Save the system in a file with NAME
-  _BOOT-SECTION INCREMENT BM 2400 - 1D8 + +!
-  _KERNEL-SECTION BM 2200 - _FIXUP  SAVE-USER-VARS
-   BM 2400 - HERE  OVER - 200 + R> R> PUT-FILE ;
-\ Save a system to do ACTION in a file with NAME .
-: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+: SAVE-SYSTEM  ( Save the system in a file with NAME )
+   >R >R _BOOT-SECTION INCREMENT BM  400 - 1D8 + +!
+  _KERNEL-SECTION BM  200 - _FIXUP  SAVE-USER-VARS
+   BM  400 - HERE  OVER - 200 + R> R> PUT-FILE ;
+: TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
+  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
 ( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,

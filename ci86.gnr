@@ -364,8 +364,8 @@ _C
 kernel_table:
  _ExitProcess@4     dd rva _ExitProcess
  CreateFile     dd rva _CreateFileA
- _ReadFile@20     dd rva _ReadFile
  _CreateProcessA@40     dd rva _CreateProcess
+ _ReadFile@20     dd rva _ReadFile
  _WriteFile@20     dd rva _WriteFile
  CloseHandle     dd rva _CloseHandle
  SetFilePointer     dd rva _SetFilePointer
@@ -432,8 +432,7 @@ kernel_table:
           db 'SetConsoleMode',0
 _Sleep dw 0
        db 'Sleep', 0
- section '.reloc' fixups data readable discardable
-                SECTION '.TEXT' code executable readable writable
+                section '.text' code executable readable writable
 
 _main:
 _ORIG:

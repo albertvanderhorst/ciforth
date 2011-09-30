@@ -15,7 +15,7 @@ forth.lab        \
 RELEASETXT="      \
 COPYING           \
 READwina.txt     \
-$m.asm            \
+$m.fas            \
 $m.texinfo        \
 $m.html           \
 $m.ps             \
@@ -30,9 +30,9 @@ make VERSION=$version clean
 
 make forth.lab.wina
 ln -sf forth.lab.wina forth.lab
-make VERSION=$version $s.asm
+make VERSION=$version $s.fas
 make test$m
-mv $s.asm $m.asm
+mv $s.fas $m.fas
 make VERSION=$version $s.bin
 mv $s.bin $m.com
 # Before texinfo (not sure whether that is really required.)
