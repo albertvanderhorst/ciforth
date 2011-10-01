@@ -230,9 +230,7 @@ ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr ; \
 ci86.%.fas : VERSION %.cfg fasm.m4 ci86.gnr ; \
 	cat $+ | m4 >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' | \
-	sed -e 's/0x\([A-F0-9]*\)/0\1H/g'             | \
-	sed -e 's/^\(.*\[\)FS:\(.*\)/    DB 64H\n   \1\2/g' | \
-	sed -e 's/^\([_A-Za-z0-9]*:\) *\(D[BWD]\)/\1\n    \2/g' \
+	sed -e 's/^\(.*\[\)FS:\(.*\)/    DB 0x64\n   \1\2/g' \
 	>$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.fas=%.rawdoc)
