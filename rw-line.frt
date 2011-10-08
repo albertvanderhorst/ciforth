@@ -1,6 +1,6 @@
 
-REQUIRE READ-LINE
-REQUIRE WRITE-LINE
+WANT READ-LINE
+WANT WRITE-LINE
 
 
 \
@@ -37,16 +37,16 @@ EXIT
 
 : (READ-LINE) LOCAL HANDLE LOCAL COUNT
     BEGIN
-        HANDLE GETCHAR LOCAL THIS-CHAR
-        -1 +TO COUNT
+	HANDLE GETCHAR LOCAL THIS-CHAR
+	-1 +TO COUNT
     THIS-CHAR eol? 0=    COUNT 0>   AND WHILE
-        THIS-CHAR OVER C!   1+
+	THIS-CHAR OVER C!   1+
     REPEAT ;
 
 
 char *paren_read_line( char *buffer, int count, int handle)
 {
-    for ( i=count, pc=buffer; i-- && !eol( *pc = getchar(handle) ) ) pc++;
+   for ( i=count, pc=buffer; i-- && !eol( *pc = getchar(handle) ) ) pc++;
     return pc;
 }
 

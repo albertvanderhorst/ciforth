@@ -9,8 +9,9 @@ C/L 1- CONSTANT C/C     \ Content characters
 \ C/L CONSTANT C/C
 \ BL CONSTANT LINE-END   \ Not a separator, and may be overwritten.
 
-"rw-line.frt" INCLUDED
-REQUIRE ARG[]
+WANT WRITE-LINE
+WANT READ-LINE
+WANT ARG[]
 
 \ TYPE on the error channel
 : (etype) 2 WRITE-FILE DROP ;
@@ -28,7 +29,7 @@ VARIABLE INFO-LINE   1 INFO-LINE !
 \ Print the message about non-index lines, if this is the first.
 : INFO-MESSAGE
     INFO-LINE @ IF
-        "Possible non-index line in block file" ETYPE ECR   0 INFO-LINE !
+	"Possible non-index line in block file" ETYPE ECR   0 INFO-LINE !
     THEN ;
 
 \ Current input line.
@@ -43,7 +44,7 @@ VARIABLE LINE   0 LINE !
 \ Check STRING for being an index line, and give message if not.
 : CHECK-INDEX-LINE
     2DUP INDEX? IF
-        2DROP
+	2DROP
     ELSE
        INFO-MESSAGE
        " at block " ETYPE   LINE @ 16 / E. ":" ETYPE ETYPE ECR
@@ -98,9 +99,9 @@ CREATE OUTPUT-BUFFER C/L ALLOT
 \ for any inproper index lines.
 : MAIN    GET-HANDLES
     BEGIN PAD DUP 256 INPUT @ READ-LINE THROW WHILE
-        -TRAILING   1 LINE +!
-        LINE @ 16 MOD 1 = IF 2DUP CHECK-INDEX-LINE THEN
-        OUTPUT-LINE
+	-TRAILING   1 LINE +!
+	LINE @ 16 MOD 1 = IF 2DUP CHECK-INDEX-LINE THEN
+	OUTPUT-LINE
     REPEAT
     CLOSE-HANDLES
 ;
