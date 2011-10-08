@@ -6017,7 +6017,6 @@ worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ --- sc },{},
 enddoc)
 _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
         DC      LIT, _GetCommandLineA@0, ICALL
-        DC      LDUP, TOERR, THROW
         DC      ZERO, INVERT, ZERO
         DC      SSLAS, TSWAP, TDROP
         DC      SEMIS
