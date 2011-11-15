@@ -127,7 +127,7 @@
 
 
 ( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH A8jun24
-\ This will make most old programs run.
+\        This will make most old programs run.
 : REQUIRE WANT ;   : REQUIRED WANTED ;
 WANT SAVE-INPUT
 
@@ -136,7 +136,7 @@ WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
 
 : VOCABULARY NAMESPACE IMMEDIATE ;
 
-: L_>IN >IN   @   SRC   @   -   (>IN)   !   (>IN) ;
+
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
@@ -158,6 +158,22 @@ Note that ISO words are only documented by the comment ISO.
 
 
 \
+( D- D< D> DLSHIFT DRSHIFT DAND DOR DXOR )  \ AHCH B1nov15
+: D-   DNEGATE D+ ;
+: D< SWAP >R 2DUP <> IF < SWAP R> 2DROP ELSE 2DROP R> < THEN ;
+: D>   2SWAP D< ;
+: DAND   ROT AND SWAP    ROT AND SWAP ;
+: DXOR   ROT XOR SWAP    ROT XOR SWAP ;
+: DOR    ROT  OR SWAP    ROT  OR SWAP ;
+8 CELLS CONSTANT _b/c
+: (DRSHIFT)   2DUP RSHIFT >R  >R _b/c R@ - LSHIFT
+    SWAP R> RSHIFT OR R> ;
+: (DLSHIFT)   >R R@ LSHIFT OVER _b/c R@ - RSHIFT OR
+    SWAP R> LSHIFT SWAP ;
+: DRSHIFT  ?DUP IF DUP _b/c < IF (DRSHIFT) ELSE _b/c - >R SWAP
+    DROP 0 R> (DRSHIFT) THEN THEN ;
+: DLSHIFT  ?DUP IF DUP _b/c < IF (DLSHIFT) ELSE _b/c - >R DROP
+    0 SWAP R> (DLSHIFT) THEN THEN ;
 ( MEMORY _AH            )                      \ AvdH B0jun10
 WANT NIP   2 CELLS CONSTANT overhead
 CREATE _alloc-buf HERE _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
@@ -1050,8 +1066,8 @@ DECIMAL
 : .uS SPACE . ." uS "  ;
 \ For the TIME (in ticks) on the stack return ELAPSED time
 \ since then, in uS.
-: ELAPSED   DNEGATE TICKS D+ DROP
-    1,000,000 TICKS-PER-SECOND */ ;
+: ELAPSED   DNEGATE TICKS D+ DROP   1,000,000 TICKS-PER-SECOND
+    DUP 0< IF 1 RSHIFT SWAP 1 RSHIFT SWAP THEN */ ;
 DECIMAL
 
 ( MEASURE-PRIME test_for_TIME ) \ AvdH A1oct05
@@ -1150,7 +1166,7 @@ WANT T[
 
 
 
-( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV 1) CF: ?LI \ AvdH A3mar20
+( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV ) CF: ?LI \ AvdH A3mar20
 WANT Z$@   WANT COMPARE
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
@@ -1166,7 +1182,7 @@ ARGS @   $@ 1+ CELLS +  CONSTANT ENV
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
 
-( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?PC \ AvdH A3mar25
+( ARG$ ARGC ARG[] SHIFT-ARGS ) CF: ?PC \ AvdH A3mar25
 HEX    WANT DROP-WORD
 \ Return argument STRING for (prot) DOS.
 : ARG$   80 COUNT -LEADING -TRAILING ;
@@ -1182,7 +1198,7 @@ HEX    WANT DROP-WORD
 : SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
 DECIMAL
 
-( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?WI        \ AvdH B1jul10
+( ARG$ ARGC ARG[] SHIFT-ARGS ) CF: ?WI        \ AvdH B1jul10
 HEX    WANT DROP-WORD
 \ Return argument STRING for Windows.
 : ARG$   ARGS @ -1 0 $/ 2SWAP 2DROP ;
@@ -1234,10 +1250,10 @@ DECIMAL
 HEX
 "kernel32.dll" LOAD-DLL CONSTANT K32
 
-"GetEnvironmentVariableA" K32 DLL-ADDRESS CONSTANT GCL
+"GetEnvironmentVariableA" K32 DLL-ADDRESS CONSTANT _GEV
 
 \ Use RW-BUFFER for input and output. ( sc -- sc )
-: GET-ENV    ZEN 1000 OVER DUP GCL CALL ;
+: GET-ENV    ZEN 1000 OVER DUP _GEV CALL ;
 DECIMAL
 
 
@@ -1247,7 +1263,7 @@ DECIMAL
 
 \
 ( GET-ENV ) CF: ?LI \ AvdH A3mar20
-\ This must be defined on MS-DOS too
+\ TODO must be defined on MS-DOS too
 
 WANT Z$@   WANT COMPARE   WANT ENV
 
@@ -1806,8 +1822,10 @@ NAMESPACE ASSEMBLER
 
 
 \
-( ASSEMBLERi86-HIGH )  CF:          \ A7oct19 AvdH
+( ASSEMBLERi86-HIGH )  CF:          \ B1oct16 AvdH
 WANT ASSEMBLER   WANT SWAP-DP   WANT ALIAS
+\ Disallow case-insensitive assembler
+'~MATCH DUP >DFA @ SWAP >PHA <> 13 ?ERROR
 "ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
 SWAP-DP
 : ASSEMBLERi86 ;
@@ -1819,8 +1837,6 @@ ASSEMBLER DEFINITIONS
  WANT  ASSEMBLER-MACROS-i86
  DECIMAL
 SWAP-DP
-
-
 PREVIOUS DEFINITIONS
 ( ASSEMBLERi86 )  CF:               \ A7oct19 AvdH
 WANT ASSEMBLER   WANT ALIAS
