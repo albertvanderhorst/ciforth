@@ -64,7 +64,7 @@ How to create a distribution :
 
    Release generic version, official
    make zip VERSION=4.0
-   Result in ciforth-4.0.tar.gz (not yet)
+   Result in ciforth-4.0.tar.gz
 
    Release generic version, beta
    make zip VERSION=3d286
