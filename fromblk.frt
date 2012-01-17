@@ -2,8 +2,8 @@
 \ $Id$
 \ Convert a text file to a .lab file.
 
-"rw-line.frt" INCLUDED
-REQUIRE ARG[]
+WANT WRITE-LINE
+WANT ARG[]
 
 \ TYPE on the error channel
 : (etype) 2 WRITE-FILE DROP ;

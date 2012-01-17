@@ -1600,10 +1600,11 @@ DENQ1:
         _BRANCH(DENQ1)                  _C{           REPEAT}
 DENQ2:
         DC      QBL, ZEQU
-        DC      LIT, 10, QERR           _C{           ?BLANK 0= 5 ?ERROR}
-        DC      DROP                    _C{                DROP R@ $+!}
-        DC      LDUP, ALLOT, RR, SADD
-_ALIGNED_({ DC LALIGN}, {dnl})
+        DC      LIT, 10, QERR           _C{           ?BLANK 0= 10 ?ERROR}
+        DC      DROP                    _C{                DROP }
+        DC      LDUP, ALLOT, RR, SADD     _C{         DUP ALLOT R@ $+!}
+_DLL_({    DC      ZERO, HERE, STOR })    _C{          0 HERE ! }
+_ALIGNED_({    DC LALIGN}, {dnl})
         DC      FROMR, SFET, DLITE      _C{           R> $@ POSTPONE DLITERAL ;}
         DC      SEMIS
 _C
@@ -3908,7 +3909,7 @@ level definitions, so it serves as an execution token.
 _VERBOSE_({{In ciforth it has offset 0, so it is actually the
 same as the }forthdefi({DEA}){}}).},
 {{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
-{{' WORD  DUP >CFA = .},{_T_}},
+{{' TASK  DUP >CFA = .},{_T_}},
 enddoc)
 _HEADER({>CFA},{TCFA},{DOCOL})
         DC      LIT, _CELLS(C_HOFFSET)
@@ -4358,16 +4359,18 @@ DODOE:  LEA     RPO,[RPO - _CELLS(1)] _C{Push HIP.}
 HLNOOP: DC      SEMIS
 _C
 worddoc( {DEFINING},{DOES>},{does},{},{ISO,FIG,L0},
-{A word which is normally used to specify the run-time action
+{A word which is used
+in combination with forthcode({CREATE})
+to specify the run-time action
 within a high-level defining word. forthcode({DOES>}) modifies
-the behaviour of the latest word as to execute the sequence of
-compiled word addresses following forthcode({DOES>}) . Used in
-combination with forthcode({CREATE}) . When the
+the default behaviour of the created word so as to execute the sequence of
+compiled word addresses following forthcode({DOES>}) .
+When the
 forthcode({DOES>}) part executes it begins with the address of
 the data field of the word on the stack. This allows
 interpretation using this area or its contents. _VERBOSE_({{
-Typical uses include the Forth assembler, multidimensional
-arrays, and compiler generation.}})
+Typical uses include the Forth assembler,
+arrays and matrices, and compiler generation.}})
 },
 {},
 {{ !CSP : GS1 DOES> @ 1 + ;  : GS2 DOES> @ 2 + ; dnl
@@ -4704,7 +4707,7 @@ _C{ Allow for a one line name, a double binary number and some hold char's}
         DC      SEMIS
 _C
 _LOAD_({
-worddoc( {PARSING},{WORD},{word},{c ---addr},{ISO,FIG,L0},
+worddoc( {PARSING},{WORD},{word},{c ---addr},{ISO,FIG,L0,LOAD},
 {Parse the forthsamp({current input source}) using forthvar({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input source.
@@ -4717,11 +4720,12 @@ forthcode({WORD}) leaves the character count in the first byte, the characters, 
 ends with two or more blanks.
 },
 {{NAME},{PARSE},{BLK} ,{IN}},
-{{: GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
+{{1 LOAD : GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
 { : GS3 5A WORD COUNT DUP . TYPE ; GS3 ZZZQQZ},{2 QQ}
 },
 enddoc)
+_SUPPRESSED({{
 _HEADER({WORD},{IWORD},{DOCOL})
         DC      LDUP, LBL, EQUAL
         _0BRANCH(IWORD1)
@@ -4747,6 +4751,7 @@ IWORD2:
         DC      HERE
 _C{        DC      DOTS}
         DC      SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 _C
 })_C{}_END_({_LOAD_})
 worddoc( {PARSING},{CHAR},{char}, {--- c},{ISO,I},
@@ -4965,7 +4970,7 @@ PRES1:
         DC      SEMIS
 _C
 
-worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO},
+worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO LOAD},
 {For the forthdefi({old fashioned string}) _VERBOSE_({{(stored with a
 preceding character count)}}) at forthvar({addr}) find a Forth
 word in the current search order.
@@ -4975,13 +4980,14 @@ return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
 {{CONTEXT},{PRESENT},{(FIND)}},
 {
-{ : FIND: BL WORD FIND ; dnl
+{ 1 LOAD : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
 { IMMEDIATE 142 FIND: BONOBO . ' BONOBO = . .},{1 _T_ 142},
 dnl don't find the next, though it is a denotation
 { 153 FIND: BONNOBO . HERE - ABS 30 U< . .},{0 _T_ 153},
 },
 enddoc)
+_SUPPRESSED({{
 _HEADER({FIND},{FIND},{DOCOL})
         DC      LDUP, COUNT, PRESENT
         DC      LDUP
@@ -4996,6 +5002,7 @@ _HEADER({FIND},{FIND},{DOCOL})
         DC      NEGATE
 FIND1:               _C{THEN THEN}
         DC      SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 _C
 _EXTRAFIELD_({
 worddocsafe( {DICTIONARY~},{OPT},{optimiser},
@@ -5379,11 +5386,9 @@ _HEADER({POSTPONE},{POSTP},{DOCOL}, , B_IMMED)
         _0BRANCH(POSTP1)
          DC      LIT, LIT, COMMA
          DC      COMMA
-         DC      LIT, COMMA, COMMA
-        _BRANCH(POSTP2)
+         DC      LIT, COMMA
 POSTP1:
          DC      COMMA
-POSTP2:
         DC      SEMIS
 _C
 worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}, {ISO,I,C2,L0},
@@ -8176,7 +8181,7 @@ PACCEP3:
 _BITS32_({EXPECTBUF:  _RESB( 0x0200 ) },{dnl})
 _C
 })_C{}_END_({ _NO_DPMI_})
-}})_C{}_END_({ _SUPPRESSED_}) dnl with this this whole MODERN section has been burned down!
+}})_C{}_END_({ _SUPPRESSED}) dnl with this this whole MODERN section has been burned down!
 })_C{}_END_({_MODERN_})
 _LINUX_C_({
 _C{ Code fields are filled in during bootup. }

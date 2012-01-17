@@ -488,14 +488,15 @@ This means that it runs on 16 and 32 bits systems.
 Since version 5.x changes have been made to increase compatibility
 with existing practice.
 By invoking forthcode({WANT _legacy_}) you load a screen that
-forces compatibility with 4.0 and 4.1 versions.
+forces compatibility with 4.x.x versions.  
 You will notice that existing programs either invoke this, or have
 been reworked to not need legacy items.
 In either case, those programs have been tested with version 5.x
 
 What the legacy items are can be seen from the screen that has
 forthcode({_legacy_}) in its index line.
-In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY}) are
+In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY
+WORD FIND (WORD) (PARSE) SAVE-INPUT RESTORE-INPUT }) are
 to be found in that screen.
 Note that by using legacy items your code may be in conflict with
 upcoming standards.

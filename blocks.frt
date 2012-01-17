@@ -127,7 +127,7 @@
 
 
 ( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH A8jun24
-\        This will make most old programs run.
+\ This will make most old programs run.
 : REQUIRE WANT ;   : REQUIRED WANTED ;
 WANT SAVE-INPUT
 
@@ -135,13 +135,29 @@ WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
 'PARSE ALIAS (PARSE)
 
 : VOCABULARY NAMESPACE IMMEDIATE ;
-
-
+\ Use L_>IN instead of >IN , don't store into it!
+: L_>IN >IN   @   SRC   @   -   (>IN)   !   (>IN) ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
-CREATE -legacy-
 
+
+( -legacy- WORD FIND ) \ AvdH B2jan17
+: FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
+>FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
+: WORD   DUP BL = IF DROP NAME ELSE >R
+    BEGIN IN[] R@ = WHILE DROP REPEAT DROP -1 >IN +!
+    R> PARSE THEN   HERE 22 BLANK   HERE $!-BD HERE ;
+
+
+
+
+
+
+
+
+
+CREATE -legacy-
 ( **************ISO language extension ***********************)
                     EXIT
 
@@ -158,22 +174,6 @@ Note that ISO words are only documented by the comment ISO.
 
 
 \
-( D- D< D> DLSHIFT DRSHIFT DAND DOR DXOR )  \ AHCH B1nov15
-: D-   DNEGATE D+ ;
-: D< SWAP >R 2DUP <> IF < SWAP R> 2DROP ELSE 2DROP R> < THEN ;
-: D>   2SWAP D< ;
-: DAND   ROT AND SWAP    ROT AND SWAP ;
-: DXOR   ROT XOR SWAP    ROT XOR SWAP ;
-: DOR    ROT  OR SWAP    ROT  OR SWAP ;
-8 CELLS CONSTANT _b/c
-: (DRSHIFT)   2DUP RSHIFT >R  >R _b/c R@ - LSHIFT
-    SWAP R> RSHIFT OR R> ;
-: (DLSHIFT)   >R R@ LSHIFT OVER _b/c R@ - RSHIFT OR
-    SWAP R> LSHIFT SWAP ;
-: DRSHIFT  ?DUP IF DUP _b/c < IF (DRSHIFT) ELSE _b/c - >R SWAP
-    DROP 0 R> (DRSHIFT) THEN THEN ;
-: DLSHIFT  ?DUP IF DUP _b/c < IF (DLSHIFT) ELSE _b/c - >R DROP
-    0 SWAP R> (DLSHIFT) THEN THEN ;
 ( MEMORY _AH            )                      \ AvdH B0jun10
 WANT NIP   2 CELLS CONSTANT overhead
 CREATE _alloc-buf HERE _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
@@ -1166,7 +1166,7 @@ WANT T[
 
 
 
-( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV ) CF: ?LI \ AvdH A3mar20
+( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV 1) CF: ?LI \ AvdH A3mar20
 WANT Z$@   WANT COMPARE
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
@@ -1182,7 +1182,7 @@ ARGS @   $@ 1+ CELLS +  CONSTANT ENV
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
 
-( ARG$ ARGC ARG[] SHIFT-ARGS ) CF: ?PC \ AvdH A3mar25
+( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?PC \ AvdH A3mar25
 HEX    WANT DROP-WORD
 \ Return argument STRING for (prot) DOS.
 : ARG$   80 COUNT -LEADING -TRAILING ;
@@ -1198,7 +1198,7 @@ HEX    WANT DROP-WORD
 : SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
 DECIMAL
 
-( ARG$ ARGC ARG[] SHIFT-ARGS ) CF: ?WI        \ AvdH B1jul10
+( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?WI        \ AvdH B1jul10
 HEX    WANT DROP-WORD
 \ Return argument STRING for Windows.
 : ARG$   ARGS @ -1 0 $/ 2SWAP 2DROP ;
@@ -1263,7 +1263,7 @@ DECIMAL
 
 \
 ( GET-ENV ) CF: ?LI \ AvdH A3mar20
-\ TODO must be defined on MS-DOS too
+\ This must be defined on MS-DOS too
 
 WANT Z$@   WANT COMPARE   WANT ENV
 
@@ -1292,6 +1292,22 @@ WANT Z$@   WANT COMPARE   WANT ENV
    >R >R _BOOT-SECTION INCREMENT BM  400 - 1B0 + +!
   _KERNEL-SECTION BM  200 - _FIXUP  SAVE-USER-VARS
    BM  400 - HERE  OVER - 200 + R> R> PUT-FILE ;
+: TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
+  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
+( SAVE-SYSTEM TURNKEY ) CF: ?LI ?32 HEX \ AvdH
+\ The magic number marking the start of an ELF header
+ CREATE MAGIC 7F C, &E C, &L C, &F C,
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
+ SM 44 + CONSTANT D-SIZE  \ Where to patch for dictionary.
+ SM 48 + CONSTANT G-SIZE  \ Where to patch for GROW.
+\ Return the VALUE of ``HERE'' when this forth started.
+ : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
+ : SAVE-SYSTEM \ Save the system in a file with NAME .
+  HERE BM - D-SIZE !  \ Fill in dict size (.text)
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+\ Now write it. Consume NAME here.
+   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 : TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
   ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
 ( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH
