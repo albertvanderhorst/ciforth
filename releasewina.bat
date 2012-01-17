@@ -14,7 +14,7 @@ forth.lab        \
 
 RELEASETXT="      \
 COPYING           \
-READwina.txt     \
+READMEwina.txt     \
 $m.fas            \
 $m.texinfo        \
 $m.html           \

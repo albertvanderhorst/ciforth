@@ -66,7 +66,7 @@ INDICES= cp fn ky pg tp vr
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= masm nasm gas
 # The kinds of Forth assembler sources that can be made using any assembler
-TARGETS= lina wina mina alone linux alonehd forth32 msdos32 alonetr
+TARGETS= lina wina mina alone linux alonehd msdos32 alonetr
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
@@ -149,6 +149,7 @@ $(EXAMPLES)     \
 mywc            \
 errors.linux.txt \
 errors.dos.txt \
+ci86.lina.labtest \
 # That's all folks!
 
 # 4.0 ### Version : an official release 4.0
@@ -371,8 +372,6 @@ mslinks :
 	ln -sf ci86.linux.asm linux.asm
 	ln -sf ci86.mina.msm mina.msm
 	ln -sf ci86.wina.asm wina.asm
-	ln -sf ci86.mina.asm forth32.asm
-	ln -sf ci86.mina.bin forth32.com
 	ln -sf ci86.alone.asm alone.asm
 	ln -sf ci86.alonehd.asm alonehd.asm
 	ln -f forth.lab.wina forth.lab
