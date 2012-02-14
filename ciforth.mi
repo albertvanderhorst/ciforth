@@ -1,5 +1,5 @@
 dnl $ Id: $
-dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright{2000,2012}: Albert van der Horst, HCC FIG Holland by GNU Public License
 \input texinfo
 @setfilename thisfilename
 dnl @smallbook
@@ -29,7 +29,7 @@ number of blocks limited to 256})
 _SECURITY_({forthitem
 contains security words })
 _LOAD_({forthitem
-kernel contains the full ISO CORE set})
+the full ISO CORE set is present, possibly after loading})
 _SOURCEFIELD_({forthitem
 headers with source fields})
 
@@ -41,7 +41,7 @@ Dutch Forth Workshop
 
 @page
 @c @vskip Opt plus 1fill
-Copyright @copyright{{}} 2000 Dutch Forth Workshop
+Copyright @copyright{{}} 2000,2012 Dutch Forth Workshop
 
 Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
@@ -719,10 +719,6 @@ forthitem I
 Has immediate bit set. Will execute even when compiling.
 forthitem ISO
 Belongs to ISO standard
-forthitem L0
-Level Zero definition of FORTH-78
-forthitem L1
-Level One definition of FORTH-78
 forthitem NFIG
 Word belongs to FIG standard,
 but the implementation is not quite conforming.

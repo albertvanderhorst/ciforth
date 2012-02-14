@@ -1,6 +1,6 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
 _C{ $Id$}
-_C{ Copyright (2008):} M4_SUPPLIER {by GNU Public License}
+_C{ Copyright (2012):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
@@ -1431,7 +1431,7 @@ _C{       Dictionary starts here.}
 DP0:
 _C{ Vocabularies all end in a link to 0.}
 define({_LINKOLD},0)dnl
-worddocsafe( {DENOTATIONS},{Prefix__TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,L0},
+worddocsafe( {DENOTATIONS},{Prefix__TICK}, {tick_denotation},{--- addr},{ISO,FIG,I},
 {Used in the form: forthexample({'nnnn})
 In interpret mode it
 leaves the forthdefi({execution token}) (equivalent to the
@@ -1608,7 +1608,7 @@ _ALIGNED_({    DC LALIGN}, {dnl})
         DC      FROMR, SFET, DLITE      _C{           R> $@ POSTPONE DLITERAL ;}
         DC      SEMIS
 _C
-worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG,L1},
+worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG},
 {The name of the primary namespace. Execution pushes the
 forthcode({FORTH}) forthdefi({WID})
 to the top of the forthdefi({search order}) .
@@ -1775,7 +1775,7 @@ NOP2:   DC      $+_CELLS(1)
         JMP NEXT
 })_C{}_END_({_OLDDEBUG_ })
 _C
-worddoc( {COMPILING~},{LIT},{lit},{--- n},{FIG,C2,L0},
+worddoc( {COMPILING~},{LIT},{lit},{--- n},{FIG,C2},
 {Within a colon-definition, forthcode({LIT}) is compiled followed by a
 _BITS_ bit literal number given during compilation.
 Later execution of forthcode({LIT}) causes the contents of this
@@ -1785,7 +1785,7 @@ CODE_HEADER({LIT},{LIT})
         LODSW           _C{ AX <- LITERAL}
         _PUSH          _C{ TO TOP OF STACK}
 _C
-worddoc( {MISC},{EXECUTE},{execute},{xt ---},{ISO,FIG,L0},
+worddoc( {MISC},{EXECUTE},{execute},{xt ---},{ISO,FIG},
 {Execute the definition whose forthdefi({execution token}) is
 given by forthvar({xt}) . _VERBOSE_({{The
 }forthdefi({code field address}){ serves as an execution token.
@@ -1812,7 +1812,7 @@ _HEADER({RECURSE}, {RECURSE}, {DOCOL}, ,{B_IMMED})
         DC      SEMIS
 _C
 })_C{}_END_({_LOAD_})
-worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2,L0},
+worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2},
 {The run-time proceedure to unconditionally branch. An in-line
 offset is added to the interpretive pointer forthcode({IP}) to
 branch ahead or back. forthcode({BRANCH}) is compiled by
@@ -1823,7 +1823,7 @@ forthcode({ELSE}) forthcode({AGAIN}) forthcode({REPEAT}) .},
 enddoc)
 _HEADER({BRANCH},{BRAN}, {_VAR_FIELD(SKIP)})
 _C
-worddoc( {CONTROL},{SKIP},{skip},{},{C2,L0},
+worddoc( {CONTROL},{SKIP},{skip},{},{C2},
 {Skip over an area in memory, where the length is given in the next cell.
 This length doesn't include the length cell, so it is compatible with
 forthcode({$@@}) .
@@ -1926,7 +1926,7 @@ CODE_HEADER({(?DO)},{XQDO})
 QXDO1:  MOV     HIP,AX
         _NEXT
 _C
-worddoc( {CONTROL},{I},{i},{--- n},{ISO,FIG,C,L0},
+worddoc( {CONTROL},{I},{i},{--- n},{ISO,FIG,C},
 {Used within a do-loop to copy the loop index to the stack.},
 {{DO},{LOOP},{+LOOP}},
 { { : GS1 DO I . LOOP 0 . ; 2 -2 GS1},{-2 -1 0 1 0},
@@ -1936,7 +1936,7 @@ CODE_HEADER({I},{IDO})
         MOV     AX,[RPO] _C{ GET INDEX VALUE}
         _PUSH          _C{ TO PARAMETER STACK}
 _C
-worddoc( {CONTROL},{J}, ,{--- n},{ISO,FIG,C,L0},
+worddoc( {CONTROL},{J}, ,{--- n},{ISO,FIG,C},
 {Used within a nested do-loop to copy the loop index of the
 outer do-loop to the stack.},
 {{DO},{LOOP},{+LOOP}},
@@ -1947,7 +1947,7 @@ CODE_HEADER({J},{JDO})
         MOV     AX,[RPO+_CELLS(3)] _C{ GET INDEX VALUE}
         _PUSH          _C{ TO PARAMETER STACK}
 _C
-worddoc( {CONTROL},{UNLOOP},{unloop},{},{ISO,I,C,L0},
+worddoc( {CONTROL},{UNLOOP},{unloop},{},{ISO,I,C},
 {Discard the loop parameters. Must be used when the regular end
 of the loop is by-passed. That means it is not ended via
 forthcode({LOOP}) forthcode({+LOOP}) or forthcode({LEAVE}). },
@@ -2124,7 +2124,7 @@ _HEADER({?BLANK},{QBL},{DOCOL})
         DC      LBL, ONEP, LESS
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{IN[]},{in_next},{ ---addr c},{CI L0},
+worddocsafe( {PARSING},{IN[]},{in_next},{ ---addr c},{CI},
 {Parse the forthdefi({current input source}) leaving the next
 character forthvar({c}) and its address forthvar({addr}) . If
 at the end of the input source, leave a pointer past the end
@@ -2147,7 +2147,7 @@ INBRS1:
 INBRS2:
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{NAME},{name},{--- sc},{CI L0},
+worddocsafe( {PARSING},{NAME},{name},{--- sc},{CI},
 {Parse the forthdefi({current input source}) for a word, i.e.
 blank-delimited as per forthcode({?BLANK}) . Skip leading delimiters then
 advance the input pointer to past the next delimiter or past
@@ -2232,8 +2232,7 @@ _HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      OVER, LSUB
         DC      SEMIS
 _C
-dnl doc( {LIBRARY},{L_>IN},{legacy_in},{--- addr},{ISO},
-worddoc( {LIBRARY},{L_IN},{legacy_in},{--- addr},{ISO},
+worddoc( {LIBRARY},{L_>IN},{legacy_in},{--- addr},{ISO,WANT},
 {Hides and replaces the user variable forthcode({>IN}).
 All parsing words use and move the value of that user variable.
 Return a variable that contains the offset from the start
@@ -2251,7 +2250,7 @@ dnl GS1 .},{4}},
 enddoc)
 _C
 })_C{}_END_({_LOAD_})
-worddoc( {OUTPUT},{CR},{cr},{},{ISO,FIG,L0},
+worddoc( {OUTPUT},{CR},{cr},{},{ISO,FIG},
 {Transmit character(s)
 to the terminal, that result in
 a "carriage return" and a "line feed".
@@ -2395,7 +2394,7 @@ CODE_HEADER({UM/MOD},{USLAS})
         DIV     BX      _C{16 BIT DIVIDE}
         _2PUSH          _C{STORE QUOT/REM}
 _C
-worddoc( {LOGIC},{AND},{and},{n1 n2 --- n3},{ISO,FIG,L0},
+worddoc( {LOGIC},{AND},{and},{n1 n2 --- n3},{ISO,FIG},
 {Leave the bitwise logical and of forthvar({n1}) and
 forthvar({n2}) as forthvar({n3}) .},
 {{XOR},{OR}},
@@ -2407,7 +2406,7 @@ CODE_HEADER({AND},{LAND})
         AND     AX,BX
         _PUSH
 _C
-worddoc( {LOGIC},{OR},{or},{n1 n2 --- n3},{ISO,FIG,L0},
+worddoc( {LOGIC},{OR},{or},{n1 n2 --- n3},{ISO,FIG},
 {Leave the bit-wise logical or of two _BITS_-bit
 values.},{{AND},{XOR}},
 { { 2 BASE !  11110000 11001100 OR .},{11111100} },
@@ -2418,7 +2417,7 @@ CODE_HEADER({OR},{LOR})
         OR      AX,BX
         _PUSH
 _C
-worddoc( {LOGIC},{XOR},{xor},{nl n2 --- n3},{L1},
+worddoc( {LOGIC},{XOR},{xor},{nl n2 --- n3},{ISO,FIG},
 {Leave the bitwise logical exclusive or of two
  _BITS_-bit values.},{{AND},{OR}},
 { { 2 BASE !  11110000 11001100 XOR .},{111100} },
@@ -2429,7 +2428,7 @@ CODE_HEADER({XOR},{LXOR})
         XOR     AX,BX
         _PUSH
 _C
-worddoc( {LOGIC},{INVERT},{INVERT},{n1 --- n2},{ISO,L1},
+worddoc( {LOGIC},{INVERT},{INVERT},{n1 --- n2},{ISO},
 {Invert all bits of forthvar({n1}) leaving forthvar({n2}) .
 For pure flags (0 or -1) this is the forthdefi({logical not}) operator.
 },
@@ -2551,7 +2550,7 @@ _HEADER({LEAVE},{LLEAV},{DOCOL})  _C{LIMIT <- INDEX}
         DC      RDROP, RDROP, RDROP
         DC      SEMIS
 _C
-worddoc( {STACKS},{>R},{to_r},{n ---},{ISO,FIG,C,L0},
+worddoc( {STACKS},{>R},{to_r},{n ---},{ISO,FIG,C},
 {Remove a number from the forthdefi({data stack}) and place as the most
 accessable on the forthdefi({return stack}). Use
 should be balanced with forthcode({R>}) in
@@ -2564,7 +2563,7 @@ CODE_HEADER({>R},{TOR})        _C{ (R1) <- (S1)}
         MOV     [RPO],BX _C{ADD TO RETURN STACK}
         _NEXT
 _C
-worddoc( {STACKS},{R>},{r_from},{--- n},{ISO,FIG,L0},
+worddoc( {STACKS},{R>},{r_from},{--- n},{ISO,FIG},
 {Remove the top value from the forthdefi({return stack}) and leave it on the
 forthdefi({data stack}) . },{{>R},{R@@}},
 {{." Via >R"},{Via >R}},
@@ -2588,7 +2587,7 @@ worddocsafe( {STACKS},{R@@},{r_fetch},{--- n},{ISO},
 enddoc)
 _HEADER({R@},{RR},{_VAR_FIELD(IDO)})
 _C
-worddoc( {LOGIC},{0=},{zero_equals},{n --- ff},{ISO,FIG,L0},
+worddoc( {LOGIC},{0=},{zero_equals},{n --- ff},{ISO,FIG},
 {Leave a true flag forthvar({ff}) is the number forthvar({n})
 is equal to zero, otherwise leave a false flag.},{{=}},
 { {0 0= .},{_T_},
@@ -2602,7 +2601,7 @@ CODE_HEADER({0=},{ZEQU})
         SBB     AX,AX
         _PUSH
 _C
-worddoc( {LOGIC},{0<},{zero_less},{n --- ff},{ISO,FIG,L0},
+worddoc( {LOGIC},{0<},{zero_less},{n --- ff},{ISO,FIG},
 {Leave a true flag if the number is less than zero (negative),
 otherwise leave a false flag.},{{<}},
 { {0 0< .}, {0},
@@ -2617,7 +2616,7 @@ CODE_HEADER({0<},{ZLESS})
         DEC     AX      _C{TRUE}
 ZLESS1: _PUSH
 _C
-worddoc( {OPERATOR},{+},{plus},{n1 n2 --- sum},{ISO,FIG,L0},
+worddoc( {OPERATOR},{+},{plus},{n1 n2 --- sum},{ISO,FIG},
 {Leave the sum of forthvar({n1}) and forthvar({n2}) .},{{-},{*},{/},{MOD}},
 { { 0A BASE !  240 204 + .},{444} },
 {}, enddoc)
@@ -2643,7 +2642,7 @@ CODE_HEADER({D+},{DPLUS})
         ADC     AX,BX   _C{ SHC}
         _2PUSH
 _C
-worddoc( {OPERATOR},{NEGATE},{negate},{n1 --- n2},{ISO,FIG,L0},
+worddoc( {OPERATOR},{NEGATE},{negate},{n1 --- n2},{ISO,FIG},
 {Leave the two's complement of a number, i.e.
  forthvar({n2}) is forthvar({-n1})},
 {{-}},
@@ -2673,7 +2672,7 @@ CODE_HEADER({DNEGATE},{DNEGA})
         _2PUSH
         PAGE
 _C
-worddoc( {JUGGLING},{OVER},{over},{nl n2 --- nl n2 n1},{ISO,FIG,L0},
+worddoc( {JUGGLING},{OVER},{over},{nl n2 --- nl n2 n1},{ISO,FIG},
 {Copy the second stack value, placing it as the new top.},
 {{DUP}},
 {{S0 @ DSP! 1 2 3 4 OVER .S},{
@@ -2686,7 +2685,7 @@ CODE_HEADER({OVER},{OVER})
         PUSH    AX
         _2PUSH
 _C
-worddoc( {JUGGLING},{DROP},{drop},{n ---},{ISO,FIG,L0},
+worddoc( {JUGGLING},{DROP},{drop},{n ---},{ISO,FIG},
 {Drop the number from the stack.},
 {{DUP}},
 {{S0 @ DSP! 1 2 3 4 DROP .S},{S[  1 2 3 ]},
@@ -2710,7 +2709,7 @@ CODE_HEADER({2DROP},{TDROP})
         POP     AX
         _NEXT
 _C
-worddoc( {JUGGLING},{SWAP},{swap},{n1 n2 --- n2 n1},{ISO,FIG,L0},
+worddoc( {JUGGLING},{SWAP},{swap},{n1 n2 --- n2 n1},{ISO,FIG},
 {Exchange the top two values on the stack.},{{ROT}},
 {{S0 @ DSP! 1 2 3 4 SWAP .S },{
 S[  1 2 4 3 ]},
@@ -2721,7 +2720,7 @@ CODE_HEADER({SWAP},{SWAP})
         POP     AX
         _2PUSH
 _C
-worddoc( {JUGGLING},{DUP},{dup},{n --- n n},{ISO,FIG,L0},
+worddoc( {JUGGLING},{DUP},{dup},{n --- n n},{ISO,FIG},
 {Duplicate the value on the stack.},{{OVER}},
 {{S0 @ DSP! 1 2 3 4 DUP .S},{
 S[  1 2 3 4 4 ]},
@@ -2778,7 +2777,7 @@ CODE_HEADER({2OVER},{TOVER})
         PUSH     BX
         _2PUSH
 _C
-worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{ISO,FIG,L0},
+worddoc( {MEMORY},{+!},{plus_store},{n addr ---},{ISO,FIG},
 { Add forthvar({n}) to the value at forthvar({addr}).},
 {{TOGGLE},{!}},
 {{0 PAD ! 1 PAD +! PAD @ .},{1},
@@ -2803,7 +2802,7 @@ CODE_HEADER({TOGGLE},{TOGGL})
         XOR     [BX],AX _C
         _NEXT
 _C
-worddocsafe( {MEMORY},{@@},{fetch},{addr --- n},{ISO,FIG,L0},
+worddocsafe( {MEMORY},{@@},{fetch},{addr --- n},{ISO,FIG},
 {Leave the _BITS_ bit contents forthvar({n})
 of forthvar({addr}) .},
 {{!},{C@@},{2@@},{P@@},{PC@@},{FAR@@}},
@@ -2815,7 +2814,7 @@ CODE_HEADER({@},{FETCH})
         _PUSH
 _C
 _BITS64_({
-worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- n},{ISO,FIG,L0},
+worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- n},{ISO,FIG},
 {Leave the 32 bit contents forthvar({n})
 of forthvar({addr}) .},
 {{!},{C@@},{2@@},{P@@},{PC@@},{FAR@@}},
@@ -2854,7 +2853,7 @@ CODE_HEADER({2@},{TFET})
         MOV     DX,[BX+_CELLS(1)]        _C{LSW}
         _2PUSH
 _C
-worddoc( {MEMORY},{!},{store},{n addr ---},{ISO,FIG,L0},
+worddoc( {MEMORY},{!},{store},{n addr ---},{ISO,FIG},
 {Store all _BITS_ bits of n at forthvar({addr}) .},
 {{@@},{C!},{2!},{FAR!},{P!},{PC!}},
 {{." Via @"},{Via @}},
@@ -2986,7 +2985,7 @@ _BITS32_({
 })_C{}_END_({_BITS32_})
 })_C{}_END_({_BITS64_})
 _C
-worddoc( {DEFINING},{:},{colon},{},{ISO,FIG,E,L0},
+worddoc( {DEFINING},{:},{colon},{},{ISO,FIG,E},
 {Used in the form called a colon-definition:
 forthexample({: cccc     ...     ;})
 Creates a dictionary entry defining forthsamp({cccc}) as equivalent to the
@@ -3017,7 +3016,7 @@ _SWITCH_({
 })_C{}_END_({ _SWITCH_})
         _NEXT
 _C
-worddoc( {DEFINING},{;},{semicolon},{},{ISO,FIG,I,C,L0},
+worddoc( {DEFINING},{;},{semicolon},{},{ISO,FIG,I,C},
 {Terminate a colon-definition and stop further compilation. Compiles
 the run-time forthcode({EXIT}) .},{{:}},
 {{." Via :"},{Via :}},
@@ -3029,7 +3028,7 @@ _HEADER({;},{SEMI},{DOCOL}, , B_IMMED)
         DC      LBRAC
         DC      SEMIS
 _C
-worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{ISO,FIG,L0},
+worddoc( {DEFINING},{CONSTANT},{constant},{n ---},{ISO,FIG},
 {A defining word used in the form:
     forthvar({n}) forthcode({CONSTANT}) forthsamp({cccc})
 to create word forthsamp({cccc}) ,
@@ -3047,7 +3046,7 @@ _HEADER({CONSTANT},{LCONST},{DOCOL})
 DOCON:  MOV     AX,[WOR+_CELLS((D_HOFFSET))] _C{GET DATA FROM PFA}
         _PUSH
 _C
-worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,FIG,L0},
+worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,FIG},
 {A defining word used in the form:
                  forthsamp({VARIABLE cccc})
 When forthcode({VARIABLE}) is executed,
@@ -3068,7 +3067,7 @@ _HEADER({VARIABLE},{VAR},{DOCOL})
 DOVAR:  MOV     AX,[WOR+_CELLS((D_HOFFSET))] _C{(AX) <- PFA}
         _PUSH
 _C
-worddoc( {DEFINING},{USER},{user},{n ---},{ISO,L0},
+worddoc( {DEFINING},{USER},{user},{n ---},{ISO},
 {A defining word used in the form:
                forthsamp({n USER cccc})
 which creates a user variable forthsamp({cccc}) . The data
@@ -3413,7 +3412,7 @@ by forthcode({LIST}) .},{{BLOCK}},
 enddoc)
 _HEADER({SCR},{SCR},{DOUSE}, _CELLS(33))
 _C
-worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,L0,U},
+worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,U},
 {A user variable containing the compilation state. A non-zero value
 indicates compilation.},{},
 {{STATE @ .},{0},
@@ -3421,7 +3420,7 @@ indicates compilation.},{},
 enddoc)
 _HEADER({STATE},{STATE},{DOUSE}, _CELLS(18))
 _C
-worddoc( {FORMATTING},{BASE},{base},{--- addr},{ISO,FIG,U,L0},
+worddoc( {FORMATTING},{BASE},{base},{--- addr},{ISO,FIG,U},
 {A user variable containing the current number base used for input
 and output conversion.},
 {{DECIMAL},{HEX},{<#}},
@@ -3429,7 +3428,7 @@ and output conversion.},
 enddoc)
 _HEADER({BASE},{BASE},{DOUSE}, _CELLS(19))
 _C
-worddoc( {FORMATTING~},{DPL},{d_p_l},{---- addr},{FIG,U,L0},
+worddoc( {FORMATTING~},{DPL},{d_p_l},{---- addr},{FIG,U},
 {A user variable containing the address of the decimal point on
 double integer input, or a forthdefin({nil pointer}). It may also be used to
 hold the output column location of a decimal point, in user
@@ -3465,7 +3464,7 @@ Unused in the kernel of ciforth.},
 enddoc)
 _HEADER({R#},{RNUM},{DOUSE}, _CELLS(23))
 _C
-worddoc( {FORMATTING~},{HLD},{hld},{--- addr},{FIG,L0},
+worddoc( {FORMATTING~},{HLD},{hld},{--- addr},{FIG},
 {A user variable that holds the address of the latest character of
 text during numeric output conversion.},
 {{<#},{DPL},{FLD}},
@@ -3563,7 +3562,7 @@ position of the data stack top, and the previous value of forthcode({HANDLER}) .
 enddoc)
 _HEADER({HANDLER},{HANDLER},{DOUSE}, _CELLS(32))
 _C
-worddoc( {WORDLISTS},{CURRENT},{current},{--- addr},{FIG,U,L0},
+worddoc( {WORDLISTS},{CURRENT},{current},{--- addr},{FIG,U},
 {A user variable containing the WID of a namespace to which
 new words will be added.
 It is
@@ -3590,7 +3589,7 @@ _HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
 _C{      IMPORTANT}
 _C{ REQUIRES ONE MORE CELL!}
 _C
-worddoc( {WORDLISTS},{CONTEXT},{context},{--- addr},{FIG,U,L0},
+worddoc( {WORDLISTS},{CONTEXT},{context},{--- addr},{FIG,U},
 { The context is the address where the WID is found of the wordlist
 that is searched first. In ciforth forthvar({addr}) actually points
 to the forthdefi({search order}),
@@ -3614,7 +3613,7 @@ _C{     IN ADDITION TO THE ONE FOR CONTEXT}
 _C
 _C{========== END USER VARIABLES =============}
 _C
-worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{L1},
+worddoc( {SUPERFLUOUS},{1+},{one_plus},{n1 --- n2},{ISO,FIG},
 {This is shorthand for ``forthsamp({1 +})''.},
 {{CELL+},{1-}},
 {{5 1+ .},{6}},
@@ -3715,7 +3714,7 @@ _ALIGNED_({
 },{dnl })_C{}_END_({_ALIGNED_})
         _NEXT
 _C
-worddoc( {DICTIONARY},{HERE},{here},{--- addr},{ISO,FIG,L0},
+worddoc( {DICTIONARY},{HERE},{here},{--- addr},{ISO,FIG},
 {Leave the address forthvar({addr}) of the next available
 dictionary location.},
 {{DP}},
@@ -3726,7 +3725,7 @@ _HEADER({HERE},{HERE},{DOCOL})
         DC      FETCH
         DC      SEMIS
 _C
-worddoc( {DICTIONARY},{ALLOT},{allot},{n ---},{ISO,FIG,L0},
+worddoc( {DICTIONARY},{ALLOT},{allot},{n ---},{ISO,FIG},
 {Add the signed number to the forthdefi({dictionary pointer}) forthcode({DP}) . May be used to
 reserve dictionary space or re-origin memory. As the Pentium is a byte-addressable
 machine forthvar({n}) counts bytes. },{{CELL+}},
@@ -3737,7 +3736,7 @@ _HEADER({ALLOT},{ALLOT},{DOCOL})
         DC      PSTOR
         DC      SEMIS
 _C
-worddocsafe( {DICTIONARY},{,},{comma},{n ---},{ISO,FIG,L0},
+worddocsafe( {DICTIONARY},{,},{comma},{n ---},{ISO,FIG},
 {Store forthvar({n}) into the next available dictionary memory cell, advancing
 the forthdefi({dictionary pointer}).},{{DP},{C,}},
 {{HERE 625 , DUP @ . CELL+ HERE = .},{625 _T_}},
@@ -3762,7 +3761,7 @@ _HEADER({C,},{CCOMM},{DOCOL})
         DC      CSTOR
         DC      SEMIS
 _C
-worddoc( {OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{ISO,FIG,L0},
+worddoc( {OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{ISO,FIG},
 {Leave the difference of forthvar({n1}) and forthvar({n2}) .},
 {{NEGATE},{+},{*},{/},{MOD}},
 { { 0A BASE !  240 204 - .},{36} },
@@ -3773,7 +3772,7 @@ CODE_HEADER({-},{LSUB})
         SUB     AX,DX
         _PUSH   _C{S1 = S2 - S1}
 _C
-worddoc( {LOGIC},{=},{equals},{n1 n2 --- ff},{ISO,FIG,L0},
+worddoc( {LOGIC},{=},{equals},{n1 n2 --- ff},{ISO,FIG},
 {Leave a true flag if forthsamp({n1=n2}) ; otherwise leave a false flag.},
 {{<},{>},{0=},{-}},
 { { 0A BASE !  240 204 = .},{0},
@@ -3784,7 +3783,7 @@ _HEADER({=},{EQUAL},{DOCOL})
         DC      ZEQU
         DC      SEMIS
 _C
-worddoc( {LOGIC},{<},{less_than},{n1 n2 --- ff},{L0,ISO},
+worddoc( {LOGIC},{<},{less_than},{n1 n2 --- ff},{ISO},
 {Leave a true flag if forthvar({n1}) is less than forthvar({n2}) ;
 otherwise leave a false
 flag.},{{=},{>},{0<}},
@@ -3802,7 +3801,7 @@ CODE_HEADER({<},{LESS})
         DEC     AX
 LES1:   _PUSH
 _C
-worddoc( {LOGIC},{U<},{u_less_than},{u1 u2 --- ff},{ISO,L0},
+worddoc( {LOGIC},{U<},{u_less_than},{u1 u2 --- ff},{ISO},
 {Leave a true flag if forthvar({u1}) is less than forthvar({u2}) ; otherwise leave a false
 flag.(Interpreted as unsigned numbers).},{{<}},
 {{1 2 U< .},{_T_},
@@ -3817,7 +3816,7 @@ CODE_HEADER({U<},{ULESS})
         SBB     AX,AX
         _PUSH
 _C
-worddoc( {LOGIC},{>},{greater_than},{n1 n2 --- ff},{ISO,L0},
+worddoc( {LOGIC},{>},{greater_than},{n1 n2 --- ff},{ISO},
 {Leave a true flag if forthvar({n1}) is greater than
 forthvar({n2}) ; otherwise leave a false flag.},
 {{<},{=},{0<}},
@@ -3831,7 +3830,7 @@ _HEADER({>},{GREAT},{DOCOL})
         DC      LESS
         DC      SEMIS
 _C
-worddoc( {LOGIC},{<>},{unequal},{n1 n2 --- ff},{ISO,L0},
+worddoc( {LOGIC},{<>},{unequal},{n1 n2 --- ff},{ISO},
 {Leave a true flag if forthvar({n1}) is not equal than
 forthvar({n2}) ; otherwise leave a false flag.},
 {{>},{=},{0<}},
@@ -3846,7 +3845,7 @@ _HEADER({<>},{UNEQ},{DOCOL})
         DC      ZEQU
         DC      SEMIS
 _C
-worddoc( {JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{ISO,FIG,L0},
+worddoc( {JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{ISO,FIG},
 {Rotate the top three values on the stack, bringing the third to the
 top.},{{SWAP}},
 {{S0 @ DSP! 1 2 3 4 ROT .S},{
@@ -3860,7 +3859,7 @@ CODE_HEADER({ROT},{ROT})
         PUSH    BX
         _2PUSH
 _C
-worddoc( {OUTPUT},{SPACE},{space},{},{ISO,FIG,L0},
+worddoc( {OUTPUT},{SPACE},{space},{},{ISO,FIG},
 {Transmit an ASCII blank to the output device.},{{EMIT},{OUT}},
 {{41 EMIT SPACE 41 EMIT},{A A}},
 enddoc)
@@ -3870,7 +3869,7 @@ _HEADER({SPACE},{SPACE},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {JUGGLING},{?DUP},{question_dupe},
-{n1 --- n1 (if zero) / n1 --- n1 n1 (non-zero)},{ISO,FIG,L0},
+{n1 --- n1 (if zero) / n1 --- n1 n1 (non-zero)},{ISO,FIG},
 {Reproduce forthvar({n1}) only if it is non-zero. This is
 usually used to copy a value just before forthcode({IF}) , to
 eliminate the need for an forthcode({ELSE}) part to drop
@@ -4215,7 +4214,7 @@ _C
 })_C{}_END_({_LOAD_})
 })_C{}_END_({_SECURITY_})
 _C
-worddocsafe( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,L1},
+worddocsafe( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,},
 {Used in a colon-definition in form:
 forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
@@ -4229,7 +4228,7 @@ _HEADER({[},{LBRAC},{DOCOL}, , B_IMMED)
         DC      STOR
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{]},{righ_bracket},{},{ISO,FIG,L1},
+worddocsafe( {PARSING},{]},{righ_bracket},{},{ISO,FIG},
 {Resume compilation, to the completion of a colon-definition.},
 {{[}},
 {{." Via ["},{Via [}},
@@ -4262,7 +4261,7 @@ _HEADER({HIDDEN},{HIDDEN},{DOCOL})
         DC      TOGGL
         DC      SEMIS
 _C
-worddoc( {FORMATTING},{HEX},{hex},{},{ISO,FIG,L0},
+worddoc( {FORMATTING},{HEX},{hex},{},{ISO,FIG},
 {Set the numeric conversion forthcode({BASE}) for hexadecimal (base 16) input-output.},
 {{DECIMAL}},
 {{HEX BASE @ DECIMAL .},{16}},
@@ -4273,7 +4272,7 @@ _HEADER({HEX},{HEX},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddoc( {FORMATTING},{DECIMAL},{decimal},{},{ISO,FIG,L0},
+worddoc( {FORMATTING},{DECIMAL},{decimal},{},{ISO,FIG},
 {Set the numeric conversion forthcode({BASE}) for decimal input-output.},
 {{HEX}},
 {{." Via BASE"},{Via BASE}},
@@ -4300,7 +4299,7 @@ _HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{B,ISO,FIG,I,C,L0},
+worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{B,ISO,FIG,I,C},
 {Used in the form:
   forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
 Stop compilation and terminate a new defining word
@@ -4358,7 +4357,7 @@ DODOE:  LEA     RPO,[RPO - _CELLS(1)] _C{Push HIP.}
         _PUSH
 HLNOOP: DC      SEMIS
 _C
-worddoc( {DEFINING},{DOES>},{does},{},{ISO,FIG,L0},
+worddoc( {DEFINING},{DOES>},{does},{},{ISO,FIG},
 {A word which is used
 in combination with forthcode({CREATE})
 to specify the run-time action
@@ -4384,7 +4383,7 @@ _HEADER({DOES>},{DOES},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddoc( {STRING},{COUNT},{count},{addr1 --- addr2 n},{ISO,FIG,L0},
+worddoc( {STRING},{COUNT},{count},{addr1 --- addr2 n},{ISO,FIG},
 {Leave the byte address forthvar({addr2}) and byte count forthvar({n}) of a message text
 beginning at address forthvar({addr1}) . It is presumed that the first byte at
 forthvar({addr1}) contains the text byte count and the actual text starts with
@@ -4428,7 +4427,7 @@ DTRA4:
         DC      SEMIS
 _C
 _LOAD_({
-worddocsafe( {STRING},{S"},{s_quote},{ --- addr1 n},{ISO,L0},
+worddocsafe( {STRING},{S"},{s_quote},{ --- addr1 n},{ISO},
 { Used in the form:
   forthsamp({S" cccc"})
 Leaves an in-line string forthsamp({cccc}) (delimited by the
@@ -4448,7 +4447,7 @@ _HEADER({S"},{SQUOT},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 })_C{}_END_({_LOAD_})
-worddocsafe( {OUTPUT},{."},{dot_quote},{},{ISO,FIG,I,L0},
+worddocsafe( {OUTPUT},{."},{dot_quote},{},{ISO,FIG,I},
 {Used in the form:
   forthsamp({." cccc"})
 In a definition it compiles an in-line string forthsamp({cccc})
@@ -4479,7 +4478,7 @@ DOTQ1:
 DOTQ2:
         DC      SEMIS   _C{ THEN}
 _C
-worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I,L0},
+worddocsafe( {OUTPUT},{.(},{dot_paren},{},{I},
 { In ciforth this is an alias for ." , except that the string is closed with forthkey({{)}})
 _VERBOSE_({{instead of parsed as per }forthcode({"}){ }}).
 In ISO programs you may only use this word while interpreting.
@@ -4535,7 +4534,7 @@ _HEADER({EVALUATE}, {EVALUATE},{DOCOL})
         DC      THROW
         DC      SEMIS
 _C
-worddoc( {MEMORY},{FILL},{fill},{addr u b ---},{ISO,FIG,L0},
+worddoc( {MEMORY},{FILL},{fill},{addr u b ---},{ISO,FIG},
 { If forthvar({u}) is not zero, store forthvar({b})
 in each of forthvar({u}) consecutive bytes of memory beginning at
 forthvar({addr}) . },
@@ -4692,7 +4691,7 @@ _HEADER({HOLD},{HOLD},{DOCOL})
         DC      CSTOR
         DC      SEMIS
 _C
-worddoc( {DICTIONARY},{PAD},{pad},{--- addr},{ISO,FIG,L0},
+worddoc( {DICTIONARY},{PAD},{pad},{--- addr},{ISO,FIG},
 {Leave the address of the text output buffer, which is a fixed offset
 above forthcode({HERE}). The area growing downward from forthcode({PAD}) is used
 for numeric conversion.
@@ -4707,7 +4706,7 @@ _C{ Allow for a one line name, a double binary number and some hold char's}
         DC      SEMIS
 _C
 _LOAD_({
-worddoc( {PARSING},{WORD},{word},{c ---addr},{ISO,FIG,L0,LOAD},
+worddoc( {PARSING},{WORD},{word},{c ---addr},{ISO,FIG,WANT},
 {Parse the forthsamp({current input source}) using forthvar({c}) for a delimiter.
 Skip leading delimiters then advance the input pointer to past
 the next delimiter or past the end of the input source.
@@ -4970,7 +4969,7 @@ PRES1:
         DC      SEMIS
 _C
 
-worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO LOAD},
+worddoc( {DICTIONARY},{FIND},{find},{addr ---xt 1/xt -1/addr 0},{ISO,WANT},
 {For the forthdefi({old fashioned string}) _VERBOSE_({{(stored with a
 preceding character count)}}) at forthvar({addr}) find a Forth
 word in the current search order.
@@ -5391,7 +5390,7 @@ POSTP1:
          DC      COMMA
         DC      SEMIS
 _C
-worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}, {ISO,I,C2,L0},
+worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}, {ISO,I,C2},
 {If compiling, then compile the stack value forthvar({n}) as a
 _BITS_ bit literal.
 _VERBOSE_({{The intended use is:
@@ -5641,7 +5640,7 @@ _C{   The link to task is a cold start value only.}
 _C{   It is updated each time a definition is}
 _C{   appended to the 'FORTH' namespace.}
 _C
-worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{B,NISO,FIG,I,L1},
+worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{B,NISO,FIG,I},
 {The name of the namespace that contains machine code definitions.
 In ciforth execution it pushes the associated word list to the
 top of the forthcode({CONTEXT}) stack. (For ISO-compliance it
@@ -5721,7 +5720,7 @@ _HEADER({PREVIOUS},{PREVI},{DOCOL})
         DC      SEMIS
 _C
 dnl _left_parenthesis_ is replaced by ')' in the makefiles.
-worddocsafe( {PARSING},{_left_parenthesis_},{paren},{},{ISO,FIG,I,L0},
+worddocsafe( {PARSING},{_left_parenthesis_},{paren},{},{ISO,FIG,I},
 {Used in the form: forthsamp({{_left_parenthesis_ cccc)}}). Ignore a comment that
 will be delimited by a right parenthesis that must be in the
 same input source, i.e. on the same line for terminal input, or
@@ -5739,7 +5738,7 @@ _HEADER({(},{PAREN},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 _C
-worddocsafe( {PARSING},{\},{backslash},{},{ISO,I,L0},
+worddocsafe( {PARSING},{\},{backslash},{},{ISO,I},
 {Used in the form:
 forthsamp({\ cccc})
 Ignore a comment that will be delimited by the end of the current line.
@@ -5808,7 +5807,7 @@ _HEADER({OK},{OK},{DOCOL})
 OK2:
         DC      SEMIS
 _C
-worddoc( {INITIALISATIONS},{ABORT},{abort},{},{ISO,FIG,L0},
+worddoc( {INITIALISATIONS},{ABORT},{abort},{},{ISO,FIG},
 {Restart the interpreter. In addition and before the actions of
 forthcode({QUIT}), clear also the data stack and
 reset the exception mechanism.
@@ -5850,7 +5849,7 @@ _       MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
         _SWITCH_({JMPHERE_FROM_OS})
         JMP USINI+_CELLS(-2)
 _C
-worddoc( {INITIALISATIONS},{WARM},{warm},{},{FIG L0},
+worddoc( {INITIALISATIONS},{WARM},{warm},{},{FIG},
 {Perform a so called "warm" start.
 Reinitialise the system as per forthcode({INIT}).
 Show the signon message and restart via forthcode({ABORT}) .
@@ -5864,8 +5863,7 @@ _HEADER({WARM},{WARM},{DOCOL})
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 _C
 _HOSTED_({
-worddoc( {INITIALISATIONS},{OPTIONS},{options},{ft --- f2},{FIG
-L0},
+worddoc( {INITIALISATIONS},{OPTIONS},{options},{ft --- f2},{CI},
 {Handle command line option.
 If an option is passed during startup execute the screen corresponding
 to the option letter and return a false flag into forthvar({f2}),
@@ -6111,7 +6109,7 @@ CODE_HEADER({S>D},{STOD})
 STOD1:
         _2PUSH
 _C
-worddoc( {OPERATOR},{ABS},{abs},{n --- u},{ISO,FIG,L0},
+worddoc( {OPERATOR},{ABS},{abs},{n --- u},{ISO,FIG},
 {Leave the absolute value of forthvar({n}) as forthvar({u}) .},
 {{DABS}},
 {
@@ -6145,7 +6143,7 @@ _HEADER({DABS},{DABS},{DOCOL})
 DPM1:
         DC      SEMIS
 _C
-worddoc( {OPERATOR},{MIN},{min},{n1 n2 --- min},{ISO,FIG,L0},
+worddoc( {OPERATOR},{MIN},{min},{n1 n2 --- min},{ISO,FIG},
 {Leave the smaller of two numbers.},{{MAX}},
 {{ 204 240 MIN .},{204},
  { -204 -240 MIN .},{-240} },
@@ -6158,7 +6156,7 @@ _HEADER({MIN},{MIN},{DOCOL})
 MIN1:   DC      DROP
         DC      SEMIS
 _C
-worddoc( {OPERATOR},{MAX},{max},{n1 n2 --- max},{ISO,FIG,L0},
+worddoc( {OPERATOR},{MAX},{max},{n1 n2 --- max},{ISO,FIG},
 {Leave the greater of two numbers.},{{MIN}},
 {{ 204 240 MAX .},{240},
  { -204 -240 MAX .},{-204} },
@@ -6197,7 +6195,7 @@ CODE_HEADER({RSHIFT},{RSHIFT},{DOCOL})
         SHR     AX,CL
         _PUSH
 _C
-worddoc( {MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{ISO,FIG,L0},
+worddoc( {MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{ISO,FIG},
 {A mixed magnitude math operation which leaves the double
 number forthvar({d}) : the signed product of two signed number
 forthvar({n1}) and forthvar({n2}) .},
@@ -6314,7 +6312,7 @@ FMMOD1:
 FMMOD2:
         DC      SEMIS
 _C
-worddocsafe( {OPERATOR},{*},{star},{n1 n2 --- n3},{ISO,FIG,L0},
+worddocsafe( {OPERATOR},{*},{star},{n1 n2 --- n3},{ISO,FIG},
 {Leave the signed product forthvar({n3}) of two signed numbers
 forthvar({n1}) and forthvar({n2}) .},
 {{+},{-},{/},{MOD}},
@@ -6328,7 +6326,7 @@ _HEADER({*},{STAR},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
-worddoc( {OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{ISO,FIG,L0},
+worddoc( {OPERATOR},{/MOD},{slash_mod},{n1 n2 --- rem quot},{ISO,FIG},
 {Leave the remainder and signed quotient of forthvar({n1}) and forthvar({n2}) .
 The remainder has the sign of the dividend
 (i.e. forthdefi({symmetric division})). },
@@ -6347,7 +6345,7 @@ _HEADER({/MOD},{SLMOD},{DOCOL})
         DC      MSLAS
         DC      SEMIS
 _C
-worddoc( {OPERATOR},{/},{slash},{n1 n2 --- quot},{ISO,FIG,L0},
+worddoc( {OPERATOR},{/},{slash},{n1 n2 --- quot},{ISO,FIG},
 {Leave the signed quotient of forthvar({n1}) and forthvar({n2}) .
 (using forthdefi({symmetric division})). },
 {{+},{-},{*},{MOD},{*/MOD}},
@@ -6364,7 +6362,7 @@ _HEADER({/},{SLASH},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
-worddoc( {OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG,L0},
+worddoc( {OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG},
 {Leave the remainder of forthvar({n1}) divided by forthvar({n2}) , with the same sign
 as forthvar({n1}) (i.e. forthdefi({symmetric division})).},
 {{+},{-},{*},{/},MOD,{*/MOD}},
@@ -6380,7 +6378,7 @@ _HEADER({MOD},{LMOD},{DOCOL})
         DC      DROP
         DC      SEMIS
 _C
-worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG,L0},
+worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG},
 {Leave the quotient forthvar({n5}) and remainder
 forthvar({n4}) of the operation forthsamp({n1*n2/n3}) (using forthdefi({symmetric division})).
 A double precision
@@ -6404,7 +6402,7 @@ _HEADER({*/MOD},{SSMOD},{DOCOL})
         DC      MSLAS
         DC      SEMIS
 _C
-worddoc( {MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{ISO,FIG,L0},
+worddoc( {MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{ISO,FIG},
 {Leave the ratio forthsamp({n4 = n1*n2/n3}) where all are signed
 numbers(using forthdefi({symmetric division})).
 A double precision
@@ -6638,7 +6636,7 @@ _HEADER({+BUF},{PBUF},{DOCOL})
 PBUF1:  DC      LDUP, PREV, FETCH, LSUB
         DC      SEMIS
 _C
-worddoc( {BLOCKS},{UPDATE},{update},{},{ISO,FIG,L0},
+worddoc( {BLOCKS},{UPDATE},{update},{},{ISO,FIG},
 {Marks the most recently referenced block (pointed to by
 forthcode({PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
@@ -6656,7 +6654,7 @@ _HEADER({UPDATE},{UPDAT},{DOCOL})
         DC      BLWRITE
         DC      SEMIS
 _C
-worddoc( {BLOCKS},{EMPTY-BUFFERS},{empty_buffers},{},{ISO FIG L0},
+worddoc( {BLOCKS},{EMPTY-BUFFERS},{empty_buffers},{},{ISO,FIG},
 {Mark all block-buffers as empty. Updated blocks are not
 written to the disc. This is an initialization proceedure
 before first use of the disc. _VERBOSE_({{The usage as an
@@ -6721,7 +6719,7 @@ _C{ Fill in the house keeping.}
     DC  SEMIS
 _C
 
-worddoc( {BLOCKS},{BLOCK},{block},{n --- addr},{ISO FIG L0},
+worddoc( {BLOCKS},{BLOCK},{block},{n --- addr},{ISO,FIG},
 {Leave forthvar({addr}), the disc buffer containing block
 forthvar({n}), which is the physical disk block
 forthsamp({OFFSET+n}). The address left is the field within the
@@ -6752,7 +6750,7 @@ BLOCK1:
         DC      CELLP, CELLP
         DC      SEMIS
 _C
-worddoc( {BLOCKS~},{FLUSH},{flush},{},{ISO FIG L0},
+worddoc( {BLOCKS~},{FLUSH},{flush},{},{ISO,FIG},
 {Make sure that the content of all forthcode({UPDATE}) d block buffers
 has been transferred to disk.
 They are no longer associated with a block and their content is
@@ -6806,7 +6804,7 @@ _HEADER({RESTORE},{RESTO},{DOCOL})
         DC SEMIS
 _C
 _LOAD_({
-worddoc( {LIBRARY},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO},
+worddoc( {FILES},{SAVE-INPUT},{save_input},{ --- n1 n2 n3 3},{ISO,WANT},
 {Get a complete specification of the input source stream. For
 ciforth this is the content of forthcode({SRC}). ciforth needs
 3 cells, and is always able to forthcode({RESTORE}) an input
@@ -6814,12 +6812,19 @@ saved like this. _VERBOSE_({{In practice the use of
 }forthcode({SAVE-INPUT}){ should be restricted to restoring input
 of the same stream.
 }}) },
-{{RESTORE},{RESTORE-INPUT}},
+{{SAVE},{RESTORE-INPUT}},
 {{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 >IN ! RESTORE-INPUT ; dnl
     34 GS1 . . ?CSP},{-1 34} },
 enddoc)
+_SUPPRESSED({{
+_HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
+        DC      SRC, TFET
+        DC      LIN, FETCH
+        DC      LIT, 3
+        DC SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 _C
-worddoc( {LIBRARY},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3---f},{ISO},
+worddoc( {FILES},{RESTORE-INPUT},{restore_input},{ n1 n2 n3 3---f},{ISO,WANT},
 {Restore the input source stream from what was saved by
 SAVE-INPUT .
 ciforth is always able to restore the input across
@@ -6833,6 +6838,14 @@ input source. }}) },
 {{RESTORE},{SAVE-INPUT}},
 {{( Via SAVE-INPUT)},{}},
 enddoc)
+_SUPPRESSED({{
+_HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
+        DC      DROP
+        DC      LIN, STORE
+        DC      SRC, TSTOR
+        DC      LIT, -1
+        DC SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 _C
 })_C{}_END_({_LOAD_})
 worddoc( {SCREEN},{LOCK},{lock},{ n ---},{CI},
@@ -6874,7 +6887,7 @@ _HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      TWO, SWAP, PSTOR
         DC      SEMIS
 _C
-worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG,L0},
+worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG},
 {Interrupt the forthdefi({current input source}) in order to
 interpret screen forthvar({n}) .
 _VERBOSE_({{The stack changes in according with the words executed.}})
@@ -6887,7 +6900,7 @@ _HEADER({LOAD},{LLOAD},{DOCOL})
         DC      LDUP, THRU
         DC      SEMIS
 _C
-worddoc( {SCREEN},{THRU},,{n1 n2 --- ??},{ISO,FIG,L0},
+worddoc( {SCREEN},{THRU},,{n1 n2 --- ??},{ISO,FIG},
 {Interrupt the forthdefi({current input source}) in order to
 interpret screen forthvar({n1}) through forthvar({n2})
 (inclusive).
@@ -6955,7 +6968,7 @@ BLK2:
         DC      PBLK
         DC      SEMIS
 _C
-worddocsafe( {LIBRARY},{-->},{next_screen},{},{I,L0},
+worddocsafe( {BLOCKS},{-->},{next_screen},{},{I,WANT},
 {Continue interpretation with the next disc screen. If the
 current input source is not from a block, a crash will ensue.
 If this new screen is left by throw of an exception, the
@@ -7424,7 +7437,7 @@ _C{------------------------------------}
 _C{       CONSOLE RELEATED I/O         }
 _C{------------------------------------}
 _MODERN_({
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO,FIG},
 {Transmit ASCII character forthvar({c}) to the output device.
 forthcode({OUT}) is incremented for each character output
 and reset by a LF.
@@ -7439,7 +7452,7 @@ EMIT1:
         DC      DROP
         DC      SEMIS
 _C
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 {Leave the ASCII value of the next terminal key struck.},
 {{ACCEPT},{KEY?}}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
@@ -7458,7 +7471,7 @@ _HEADER({KEY?},{KEYQ},DOCOL)
         DC      LIT, 0x01, LAND  _C{Dubious!! FIXME!!}
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit count characters from forthvar({addr}) to the output device.
 All terminal I/O goes through this word, so terminal
 I/O can be redirected, by forthdefi({revectoring}) it.
@@ -8212,7 +8225,7 @@ _C{        DC      LIT, 0x41, EMIT, TDUP, LTYPE, LIT, 0x41, EMIT}
 _C{        DC      DOTS}
         DC      SEMIS
 _C
-worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO FIG L0},
+worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO,FIG},
 {Transfer characters from the terminal to address forthvar({addr}) ,
 until a "RET" is received.
 At most forthvar({count}) characters will be transferred to forthvar({addr})
@@ -8225,7 +8238,7 @@ CODE_HEADER({ACCEPT},{ACCEP})
         PUSH    EAX
         _NEXT
 _C
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 {Leave the ASCII value of the next terminal key struck.},{}, {}, enddoc)
 CODE_HEADER({KEY},{KEY})
         CALL    c_key
@@ -8241,7 +8254,7 @@ CODE_HEADER({KEY?},{KEYQ})
         PUSH    EAX
         _NEXT
 _C
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit count characters from forthvar({addr}) to the output device.
 All terminal I/O goes through this word.
 forthcode({OUT}) is not observed.},{{EMIT},{OUT}}, {}, enddoc)
@@ -8339,7 +8352,7 @@ _C{        DC      SPLOFF}
         _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO FIG L0},
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 {Leave the ASCII value of the next terminal key struck.},
 {{ACCEPT},{KEY?}},
 dnl THE TEST CODE HERE IS PARTLY INPUT FOR KEY
@@ -8393,7 +8406,7 @@ _HEADER({KEY?},{KEYQ},{DOCOL})
         _ALIGN(4)
 RFDS:   _RESB(128)     _C{32 channels maximum.}
 _C
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
@@ -8426,7 +8439,7 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
         DC      _DLL_({STDERR},{TWO}), WFILE, THROW
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO,FIG},
 {Transmit ASCII character forthvar({c}) to the output device.
 For this ciforth all terminal I/O goes through forthcode({TYPE}).
 In this ciforth forthcode({EMIT}) maintains forthcode({OUT}).},
@@ -8469,7 +8482,7 @@ SIZEL   EQU 4     _C{ Also for 64 bits. }
 _C
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
 the output device. All terminal I/O goes through this word. It
 is high level so terminal I/O can be redirected, by
@@ -8503,7 +8516,7 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
         DC      SEMIS
 _C
 dnl same as in HOSTED_X
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO,FIG},
 {Transmit ASCII character forthvar({c}) to the output device.
 For this ciforth all terminal I/O goes through forthcode({TYPE}).
 In this ciforth forthcode({EMIT}) maintains forthcode({OUT}).},
@@ -8542,7 +8555,7 @@ _HEADER({GET-MODE},{GETMODE},{DOCOL})
 ; EXTRN     _GetConsoleMode@8    : NEAR
 ; : GET-MODE _ DSP@ STD-IN 0 GCM CALL-C ;
 _C
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 {Leave the ASCII value of the next terminal key struck.},
 {{ACCEPT},{KEY?}}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
@@ -8749,7 +8762,7 @@ _C{ All I/O goes through the 3 assembler functions}
 _C{ CI CHO CSTAT. They could be collapsed into the }
 _C{ code definitions, but this way they are available}
 _C{ to be called from code. And the high level words can be revectored }
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO,FIG},
 {Transmit ASCII character forthvar({c}) to the terminal.
 All terminal I/O goes through this word. It is high level so terminal
 I/O can be redirected, by forthdefi({revectoring}) it.
@@ -8784,7 +8797,7 @@ CHO     PROC    NEAR
         RET
 _ENDP CHO     ENDP
 _C
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 {Leave the ASCII value of the next terminal key struck.},{}, {}, enddoc)
 CODE_HEADER({KEY},{KEY})
         CALL    CI      _C{CONSOLE INPUT}
@@ -8819,7 +8832,7 @@ CSTAT   PROC    NEAR
 STATRT: RET
 _ENDP CSTAT   ENDP
 _C
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit forthvar({count}) characters from forthvar({addr}) to the
 terminal.
 In this ciforth all terminal I/O goes through forthcode({EMIT}), so
@@ -8848,7 +8861,7 @@ _HEADER({(EMIT)},{PEMIT},{DOCOL})
         DC      TDROP, TDROP, DROP    _C{Ignore errors.}
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO FIG L0},
+worddoc( {OUTPUT},{EMIT},{emit},{c ---},{ISO,FIG},
 {Transmit ASCII character forthvar({c}) to the terminal.
 All terminal I/O goes through this word. It is high level so terminal
 I/O can be redirected, by forthdefi({revectoring}) it.
@@ -8865,7 +8878,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
 EMIT1:       DC      PEMIT
              DC      SEMIS
 _C
-worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG,L0},
+worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 {Leave the ASCII value of the next terminal key struck.},{}, {}, enddoc)
 _HEADER({KEY},{KEY},{DOCOL})
         DC      LIT, 0x1000, X, X, X
@@ -8896,7 +8909,7 @@ _HEADER({POUT},{POUT},{DOCOL})
         DC      DROP, TDROP, TDROP           _C{Ignore errors.}
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO FIG L0},
+worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit count characters from forthvar({addr}) to the output device.
 forthcode({OUT}) is incremented for each character output.
 In this ciforth all terminal I/O goes through forthcode({EMIT}), so
@@ -9737,7 +9750,7 @@ _C
 })_C{}_END_({ _RWLBA_})
 _C
 _LOAD_({
-worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG,I,L0},
+worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG,I},
 {Used in the form: forthexample({' nnnn })
 It leaves the forthdefi({execution token}) (equivalent to the
 dictionary entry address) of dictionary word forthsamp({nnnn}).
@@ -9853,7 +9866,7 @@ _C{       { Vocabulary itself is also forgotten.}}
         DC      DEFIN
 FORGV2: DC      SEMIS
 _C
-worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E,L0},
+worddoc( {DICTIONARY},{FORGET},{forget},{},{ISO,FIG,E},
 {Executed in the form:
                forthcode({FORGET}) forthvar({cccc})
 Deletes definition named forthvar({cccc}) from the dictionary
@@ -9942,7 +9955,7 @@ _HEADER({FORWARD)},{FORWARDP},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{ISO,FIG,I,L0},
+worddoc( {CONTROL},{BEGIN},{begin},{--- addr n  (compiling)},{ISO,FIG,I},
 {Occurs in a colon-definition in one of the forms:
   forthexample({BEGIN ... UNTIL})
   forthexample({BEGIN ... AGAIN})
@@ -9963,7 +9976,7 @@ _HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, ONE})
         DC      SEMIS
 _C
-worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{ISO,FIG,I,CO,L0},
+worddoc( {CONTROL},{THEN},{endif},{addr n --- (compile)},{ISO,FIG,I,CO},
 {Occurs in a colon-definition in form:
  forthexample({IF ... THEN})
  forthexample({IF ... ELSE ... THEN})
@@ -9982,7 +9995,7 @@ _HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{DO},{do},
-{n1 n2 --- (execute) addr n --- (compile)},{ISO,FIG,I,C2,L0},
+{n1 n2 --- (execute) addr n --- (compile)},{ISO,FIG,I,C2},
 {Occurs in a colon-definition in form: forthsamp({DO ... LOOP})
 At run time, forthcode({DO}) begins a sequence with repetitive
 execution controlled by a loop limit forthvar({n1}) and an
@@ -10012,7 +10025,7 @@ _HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{?DO},{question_do},{n1 n2 --- (execute)
-addr n --- (compile)},{NISO,I,C2,L0},
+addr n --- (compile)},{NISO,I,C2},
 {Occurs in a colon-definition in form:
     forthexample({?DO ... LOOP})
 It behaves like forthcode({DO}),
@@ -10036,7 +10049,7 @@ _HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{LOOP},{loop},
-{ --- (run) addr n --- (compiling)},{ISO,I,C2,L0},
+{ --- (run) addr n --- (compiling)},{ISO,I,C2},
 {Occurs in a colon-definition in form:
     forthexample({DO ... LOOP})
 At run-time, forthcode({LOOP}) selectively controls branching
@@ -10062,7 +10075,7 @@ _HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{+LOOP},{plus_loop},
-{n1 --- (run)  addr n2 --- (compile)},{ISO,I,C2,L0},
+{n1 --- (run)  addr n2 --- (compile)},{ISO,I,C2},
 {Used in a colon-definition in the form:
     forthexample({DO ... n1 +LOOP})
 At run-time, forthcode({+LOOP}) selectively controls branching
@@ -10092,7 +10105,7 @@ _HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{UNTIL},{until},
-{f --- (run-time) addr n --- (compile)},{ISO,FIG,I,C2,L0},
+{f --- (run-time) addr n --- (compile)},{ISO,FIG,I,C2},
 {Occurs within a colon-definition in the form:
               forthexample({BEGIN ... UNTIL})
 At run-time, forthcode({UNTIL}) controls the conditional branch
@@ -10114,7 +10127,7 @@ _HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 _C
-worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{ISO,FIG,I,C2,L0},
+worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{ISO,FIG,I,C2},
 {Used in a colon-definition in the form:
     forthexample({BEGIN ... AGAIN})
 At run-time,
@@ -10162,7 +10175,7 @@ _HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
 _C
 worddoc( {CONTROL},{IF},{if},
 {f --- (run-time) / --- addr n (compile)},
-{ISO,FIG,I,C2,L0},
+{ISO,FIG,I,C2},
 {Occurs in a colon-definition in form:
       forthexample({IF (tp) ...  THEN})
     or
@@ -10193,7 +10206,7 @@ _HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},
-{ISO,FIG,I,C2,L0},
+{ISO,FIG,I,C2},
 {Occurs within a colon-definition in the form:
                forthexample({IF ... ELSE ... THEN})
 At run-time, forthcode({ELSE}) executes after the true part
@@ -10258,7 +10271,7 @@ _HEADER({WHILE},{LWHILE},{DOCOL}, , B_IMMED)
         DC      FROMR
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{ISO,FIG,L0},
+worddoc( {OUTPUT},{SPACES},{spaces},{n ---},{ISO,FIG},
 {If forthvar({n}) is greater or equal to zero, display as much
 spaces. },{{SPACE},{OUT}},
 {
@@ -10276,7 +10289,7 @@ SPAX2:  DC      SPACE
 SPAX1:
         DC      SEMIS
 _C
-worddoc( {FORMATTING},{<#},{less_number_sign},{},{ISO,FIG,L0},
+worddoc( {FORMATTING},{<#},{less_number_sign},{},{ISO,FIG},
 {Setup for pictured numeric output formatting using the words:
 forthcode({<#}) forthcode({#}) forthcode({#S})
 forthcode({SIGN}) forthcode({#>}) The conversion is done on a
@@ -10294,7 +10307,7 @@ _HEADER({<#},{BDIGS},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddoc( {FORMATTING},{#>},{number_sign_greater},{d --- sc },{ISO,FIG,L0},
+worddoc( {FORMATTING},{#>},{number_sign_greater},{d --- sc },{ISO,FIG},
 {Terminates numeric output conversion by dropping forthvar({d}), leaving
 the formatted string forthvar({sc}) .},
 {{<#}},
@@ -10326,7 +10339,7 @@ _HEADER({SIGN},{SIGN},{DOCOL})
         DC      HOLD    _C{THEN}
 SIGN1:  DC      SEMIS
 _C
-worddoc( {FORMATTING},{#},{number_sign},{d1 --- d2},{ISO,FIG,L0},
+worddoc( {FORMATTING},{#},{number_sign},{d1 --- d2},{ISO,FIG},
 {Generate from a double number forthvar({d1}), the next ASCII
 character which is placed in an output string. Result
 forthvar({d2}) is the quotient after division by
@@ -10353,7 +10366,7 @@ DIG1:   DC      LIT,0x30
         DC      HOLD
         DC      SEMIS
 _C
-worddoc( {FORMATTING},{#S},{number_sign_s},{d1 --- d2},{ISO,FIG,L0},
+worddoc( {FORMATTING},{#S},{number_sign_s},{d1 --- d2},{ISO,FIG},
 {Generates ASCII text in the text output buffer, by the use of
 forthcode({{{{{#}}}}}), until a zero double number
 forthvar({d2}) results. Used between forthcode({<#}) and
@@ -10432,7 +10445,7 @@ _HEADER({.R},{DOTR},{DOCOL})
         DC      DDOTR
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{D.},{d_dot},{d ---},{ISO,FIG,L1},
+worddoc( {OUTPUT},{D.},{d_dot},{d ---},{ISO,FIG},
 {Print the signed double number forthvar({d}),
 observing the current forthcode({BASE}), followed by a blank.
 },
@@ -10445,7 +10458,7 @@ _HEADER({D.},{DDOT},{DOCOL})
         DC      SPACE
         DC      SEMIS
 _C
-worddocsafe( {OUTPUT},{.},{dot},{n ---},{ISO,FIG,L0},
+worddocsafe( {OUTPUT},{.},{dot},{n ---},{ISO,FIG},
 {Print the number forthvar({n1})
 observing the current forthcode({BASE}), followed by a blank.
 },
@@ -10457,7 +10470,7 @@ _HEADER({.},{DOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 _C
-worddoc( {OUTPUT},{?},{question},{addr ---},{ISO,FIG,L0},
+worddoc( {OUTPUT},{?},{question},{addr ---},{ISO,FIG},
 {Print the value contained at the address forthvar({addr})
 observing the current forthcode({BASE}), followed by a blank.
 },
@@ -10633,7 +10646,7 @@ _C{ Exit to linux, with status as stored. }
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _HOSTED_X_})
 _C
-worddoc( {SCREEN},{LIST},{list},{n ---},{ISO,FIG,L0},
+worddoc( {SCREEN},{LIST},{list},{n ---},{ISO,FIG},
 {Display the ASCII text of forthdefi({screen}) forthvar({n}).
 The number of the screen is always printed in decimal.
 forthcode({SCR}) contains the screen number during and after this process.},

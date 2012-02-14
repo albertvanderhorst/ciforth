@@ -144,7 +144,8 @@ To analyse words, showing the source code of compiled words.
  _SOURCEFIELD_({
 forthitem
  forthcode({LOCATE})
-To show the block of the library file where a word is located.
+To show the part of the source file where the word is defined,
+or, if loaded from the library file, the block where it is defined.
  })_END_({_SOURCEFIELD_})
  _HOSTED_({
 forthitem
@@ -211,17 +212,17 @@ forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any config
 1 LOAD
 WANT SAVE-SYSTEM
 : DOIT
-    'pad 'FORTH FORGET-VOC
-    'pad >NFA @@ DP !
+    '_pad 'FORTH FORGET-VOC
+    '_pad >NFA @@ DP !
     "newforth" SAVE-SYSTEM BYE ;
 DOIT })
 Here forthvar({DOIT}) trims the dictionary just before
 saving your system into a file.
-forthcode({pad}) is the first word of
+forthcode({_pad}) is the first word of
 the facilities in screen 1 that was loaded.
 This was different in previous version of ciforth.
 
-forthcode({FAR-DP}) allows have a disposable part of the
+forthcode({FAR-DP}) allows to have a disposable part of the
 dictionary. This may be occasionally useful, but make sure to
 forthcode({FORGET}) always the disposed off words.
 
@@ -272,8 +273,7 @@ to the front of the search order.
 In fact in ciforth's every DEA can serve as a WID. It defines a
 wordlist consisting of itself and all earlier words in the same
 namespace.
-If needed you can
-always derive the WID from the DEA of a namespace.
+You can derive the WID from the DEA of a namespace by forthcode({>WID}).
 
 A word that is defined using forthcode({:}) is often called a
 forthdefi({colon definition}). Its code is called
@@ -304,8 +304,8 @@ forthdefi({defining word}) (forthpxref({DEFINING})).
 The new word is created in the forthcode({CURRENT}) word list .
 
 Each processor has a natural size for the information. (This is
-sometimes called a machine word). For an Pentium processor this is
-32 bit, for the older Intel 8086 it is 16 bit.
+sometimes called a machine word). For a Pentium processor this is
+32 or 64 bit, for the older Intel 8086 it is 16 bit.
 The pendant in Forth is called a forthdefi({cell}) and its size
 may deviate from the processor you are running on.
 For this ciforth it is _BITS_,
@@ -321,7 +321,7 @@ In accordance with this there are no errors such as overflow given.
 
 Sometimes we use data of two cells, a forthdefi({double}).
 The high-order cell are most accessible on the stack and if stored in
-memory, it is highest.
+memory, it is lowest.
 
 The code for a high level word can be typed in from the
 terminal, but it can also fed into Forth by redirection from a
@@ -356,7 +356,8 @@ Denotations put a
 constant object on the stack without the need to define it
 first. Naturally they look, and in fact are, the same in both
 modes. Here we adopt a practice of selecting a type of the denotations
-based on the first letter. This is quite practical and familiar.
+based on the first letters, using forthword({PREFIX}).
+This is quite practical and familiar.
 Examples of this are (some from C, some from assemblers, some
 from this Forth) :
 forthexample({10
@@ -364,6 +365,7 @@ forthexample({10
 ^A
 0DEAD
 $8000403A
+0x8000403A
 #3487
 0177
 "Arpeggio"
@@ -488,7 +490,7 @@ This means that it runs on 16 and 32 bits systems.
 Since version 5.x changes have been made to increase compatibility
 with existing practice.
 By invoking forthcode({WANT _legacy_}) you load a screen that
-forces compatibility with 4.x.x versions.  
+forces compatibility with 4.x.x versions.
 You will notice that existing programs either invoke this, or have
 been reworked to not need legacy items.
 In either case, those programs have been tested with version 5.x
