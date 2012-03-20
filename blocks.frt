@@ -910,21 +910,21 @@ $1B CONSTANT ESC
 
 
 
-(  H. B. DH. BASE? <HEX ) \ AvdH A1oct04
-
-CREATE BASE' 0 ,
- : <HEX   BASE @ BASE' ! HEX ;       ( 0/1  SWITCH TO HEX)
- : HEX>   BASE' @ BASE !     ;       ( 1/0  AND BACK)
-( Add a . after 4 digits )
+(  H. B. DH. BASE? HEX: ) \ AvdH B2mar13
+\ Switch to hex for the duration of the definition.
+: HEX:    R> BASE @ >R  >R HEX CO R> BASE ! ;
+: DEC:    R> BASE @ >R  >R DECIMAL CO R> BASE ! ;
+( Add a , after 4 digits )
  : 4?  1+ 4 MOD 0= IF &, HOLD THEN ;
+ : 3?  1+ 3 MOD 0= IF &, HOLD THEN ;
 ( Generate string with hex format of DOUBLE of LEN digits)
- : (DH.) <HEX <# 1- 0 ?DO # I 4? LOOP # #> HEX> ;
- : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
- : H.  S>D 2 CELLS (DH.) TYPE ; ( print SINGLE in hex )
+ : (DH.) HEX: <# 1- 0 ?DO # I 4? LOOP # #> ;
  : B.  S>D 2 (DH.) TYPE ; ( print BYTE in hex )
-
+ : H.  S>D 2 CELLS (DH.) TYPE ; ( print SINGLE in hex )
+ : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
+(  print DOUBLE in decimal )
+ : DEC. 5 CELLS DEC: <# 1- 0 ?DO # I 3? LOOP # #> TYPE ;
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
-
 
 (  ALIAS HIDE INCLUDE IVAR ) CF: \ AvdH A1oct05
 
@@ -1614,7 +1614,7 @@ WANT RESTORED HEX
 \ Install matchers
 : CASE-INSENSITIVE   '~MATCH-IGNORE >DFA @ '~MATCH >DFA ! ;
 : CASE-SENSITIVE '~MATCH RESTORED ; DECIMAL
-( DUMP ) WANT B.  <HEX \ AvdH A1oct02
+( DUMP ) WANT B.  HEX: \ AvdH A1oct02
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
  : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
        [CHAR] | EMIT ;
@@ -1629,7 +1629,7 @@ WANT RESTORED HEX
         I 0F AND DUP 5 2 */ SPACES 10 SWAP -
         I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
-;    HEX>
+;
 ( OOPS EDIT: ) \ AvdH A1oct12
 
 "EDIT" PRESENT 0= ?LEAVE-BLOCK
@@ -2527,7 +2527,7 @@ HEX
 
 DECIMAL
 ( FARDUMP ) CF: ?PC \ AvdH A1oct
-<HEX
+HEX:
 :  FARDUMP   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
     DO
@@ -2540,7 +2540,7 @@ DECIMAL
         10 0 DO 2DUP I + FAR@ FF AND TO-PRINT EMIT LOOP
         [CHAR] | EMIT DROP
     10 +LOOP CR DROP
-;    HEX>
+;
 
 ( FREE-BLOCK ) CF:   ?LI   \ AvdH A3sep02
 \ Return the first BLOCK not written yet.
