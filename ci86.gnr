@@ -4719,7 +4719,7 @@ forthcode({WORD}) leaves the character count in the first byte, the characters, 
 ends with two or more blanks.
 },
 {{NAME},{PARSE},{BLK} ,{IN}},
-{{1 LOAD : GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
+{{1 LOAD WANT WORD : GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
 { : GS3 5A WORD COUNT DUP . TYPE ; GS3 ZZZQQZ},{2 QQ}
 },
@@ -4979,7 +4979,7 @@ return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero. },
 {{CONTEXT},{PRESENT},{(FIND)}},
 {
-{ 1 LOAD : FIND: BL WORD FIND ; dnl
+{ 1 LOAD WANT FIND : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
 { IMMEDIATE 142 FIND: BONOBO . ' BONOBO = . .},{1 _T_ 142},
 dnl don't find the next, though it is a denotation
@@ -8664,8 +8664,8 @@ _DLL_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
-{{"wina -f 23 EXIT-CODE ! BYE " SYSTEM},
-{( No error!) }},
+{{"wina -f 23 EXIT-CODE ! BYE " SYSTEM ( No error!)},
+{ }},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
