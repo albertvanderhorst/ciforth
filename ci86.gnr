@@ -2339,7 +2339,7 @@ enddoc)
 CODE_HEADER({FARMOVE},{FMOVE})
         CLD             _C{direction}
         MOV     AX,HIP   _C{save }
-        MOV     {BX},DS    _C{save }
+        MOV     BX,DS    _C{save }
         POP     CX      _C{count}
         POP     DI      _C{dest}
         POP     DX
@@ -2947,7 +2947,7 @@ _BITS32_({
         POP     BX      _C{MEM LOC}
         MOV     _DX16,FS
         POP     FS      _C{SEG REG VAL}
-        MOV     BX,[FS:BX]
+        MOV     BX,_FAR_ADDRESS(FS,BX)
         MOV     FS,_DX16
         PUSH    BX
         _NEXT
@@ -2979,7 +2979,7 @@ _BITS32_({
         MOV     _DX16,FS
         POP     FS      _C{SEG REG VAL}
         POP     AX
-        MOV     [FS:BX],AX
+        MOV     _FAR_ADDRESS(FS,BX),AX
         MOV     FS,_DX16
         _NEXT
 })_C{}_END_({_BITS32_})
@@ -10263,6 +10263,7 @@ provide checks for compiler security.},
 },
 enddoc)
 _HEADER({WHILE},{LWHILE},{DOCOL}, , B_IMMED)
+        _SECURITY_({DC      LDUP, ONE, QPAIR})
         DC      TOR    _C{  Save backward target. }
         _SECURITY_({DC      TOR})
         DC      LIT, ZBRAN, COMMA, PFORWARD

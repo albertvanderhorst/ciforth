@@ -46,6 +46,7 @@ dnl
 dnl Pointer handling
 define({_BYTE_PTR},{BYTE PTR $1})dnl
 define({_CALL_FAR_INDIRECT},{CALL CWORD PTR [$1]})dnl Perfectly unreasonable!
+define({_FAR_ADDRESS},{{$1:[$2]}})dnl
 define({_CELL_PTR},{CWORD PTR})dnl Sometimes really needed even after introducing [].
 define({SET_32_BIT_MODE},)dnl
 define({SET_64_BIT_MODE},)dnl

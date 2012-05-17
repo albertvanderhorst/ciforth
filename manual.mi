@@ -356,7 +356,7 @@ Denotations put a
 constant object on the stack without the need to define it
 first. Naturally they look, and in fact are, the same in both
 modes. Here we adopt a practice of selecting a type of the denotations
-based on the first letters, using forthword({PREFIX}).
+based on the first letters, using forthcode({PREFIX}).
 This is quite practical and familiar.
 Examples of this are (some from C, some from assemblers, some
 from this Forth) :
