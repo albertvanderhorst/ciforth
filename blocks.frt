@@ -543,12 +543,11 @@ WANT F:
    CRS$ $@ EVALUATE ; IMMEDIATE
 
 ( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH B2jun15
-WANT 2>R         CREATE CRS$ 4096 ALLOT
+WANT 2>R     WANT NO-SECURITY:     NO-SECURITY:
+CREATE CRS$ 4096 ALLOT
 NAMESPACE format-wid    format-wid DEFINITIONS
-\ Add INT as a string.
-: d 0 <# #S #> CRS$ $+! ;
-\ Add a STRING as such.
-: s CRS$ $+! ;
+\ Add INT resp. STRING as a string.
+: d 0 <# #S #> CRS$ $+! ;    : s CRS$ $+! ;
 PREVIOUS DEFINITIONS
 \ Format the first part of STRING, up till %, leave REST.
 : _plain    &% $/ CRS$ $+! ;
@@ -557,7 +556,8 @@ PREVIOUS DEFINITIONS
 \ Format X1 .. Xn using the format STRING. leave FORMATTED.
 : FORMAT 0 CRS$ ! BEGIN _plain OVER WHILE _format OVER WHILE
     REPEAT [ DROP 2 ] ( assume secure ) THEN 2DROP CRS$ $@ ;
-: FORMAT&EVAL   FORMAT EVALUATE ;   : FORMAT&TYPE FORMAT TYPE ;
+: FORMAT&EVAL   FORMAT EVALUATE ;
+: FORMAT&TYPE   FORMAT TYPE ;
 ( M: auxiliary_for_class ) \ AH A4nov26
 WANT SWAP-DP
 CREATE NAME$ 128  ALLOT         \ The name of the struct.
@@ -1598,20 +1598,20 @@ WANT OLD:    WANT INSTALL-TRAPS
  'WARM RESTORED 'THRU RESTORED ;
 : break   SAVE  BEGIN '(ACCEPT) CATCH DUP -32 <> WHILE ?ERRUR
     SET-SRC INTERPRET REPEAT   DROP RESTORE ; \ End by ^D
-( DO-SECURITY NO-SECURITY ) \ AvdH A9sep22
+( DO-SECURITY NO-SECURITY NO-SECURITY: ) \ AH B2jun15
 WANT RESTORED
 \
 \ Want a high level definition, to replace ?PAIRS
 : ?NO-PAIRS  2DROP ;
 
-
-
-
-
 \ Install and de-install the security
 : NO-SECURITY   '?NO-PAIRS >DFA @   '?PAIRS >DFA ! ;
 
 : DO-SECURITY   '?PAIRS RESTORED ;
+
+\ Install no-security with automatic recovery.
+: NO-SECURITY:    R> '?PAIRS >DFA @ >R  >R NO-SECURITY CO
+    R> '?PAIRS >DFA ! ;
 
 
 ( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11
