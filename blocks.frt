@@ -126,7 +126,7 @@
 
 
 
-( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH A8jun24
+( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH B2jun18
 \ This will make most old programs run.
 : REQUIRE WANT ;   : REQUIRED WANTED ;
 WANT SAVE-INPUT
@@ -142,7 +142,7 @@ WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
 
 
 
-( -legacy- WORD FIND ) \ AvdH B2feb14
+( -legacy- WORD FIND ?EXEC ?LOADING   ) \ AvdH B2feb14
 : FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
 >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
 : WORD   DUP BL = IF DROP NAME ELSE >R
@@ -150,8 +150,8 @@ WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
     R> PARSE THEN   HERE 34 BLANK   HERE $!-BD HERE ;
 
 
-
-
+: ?EXEC   STATE @   12 ?ERROR ;
+: ?LOADING   BLK   @   0=   16 ?ERROR ;
 
 
 

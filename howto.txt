@@ -28,7 +28,7 @@ How to create a hard disk booting into ciforth:
 REQUIRE INSTALL-KERNEL    REQUIRE RESTORE-BLOCKS
 
 How to create an official decompilation :
-2001 aug 30
+   see regressiontest
 
 How to save blocks from the first chunk to floppy:
 has been renamed to BACKUP-BLOCKS (was SAVE-BLOCKS)

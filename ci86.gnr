@@ -4123,7 +4123,7 @@ the same way as by forthcode({?ERROR}) . },
 {0 ?ERRUR 1 ?ERRUR},{},
 {0 WARNING ! -20 ?ERRUR },
 {ARNING ! -20 ?ERRUR ? ciforth ERROR # -32 },
-{CR},{},
+{CR 1 WARNING !},{},
 },
 enddoc)
 _HEADER({?ERRUR},{QERRUR},{DOCOL})
@@ -4136,8 +4136,8 @@ worddoc( {SECURITY},{?DELIM},{question_delimiter},{},{},
 delimiter.},{},
 {
 {DECIMAL 0 WARNING !   ?DELIM   },{},
-{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1? ciforth ERROR # 10 },
- {CR},{} },
+{0 WARNING !   ?DELIM 1}, {WARNING !   ?DELIM 1 ? ciforth ERROR # 10 },
+ {CR 1 WARNING !},{} },
 enddoc)
 _HEADER({?DELIM},{QDELIM},{DOCOL})
         DC      INBRS
@@ -4152,7 +4152,7 @@ worddoc( {SECURITY},{?CSP},{question_c_s_p},{},{},
 forthsamp({CSP}) .},{},
 {{!CSP ?CSP},{},
 {0 WARNING !   !CSP 1 ?CSP},{ING !   !CSP 1 ?CSP ? ciforth ERROR # 20 },
- {CR},{} },
+ {CR 1 WARNING !},{} },
 enddoc)
 _HEADER({?CSP},{QCSP},{DOCOL})
         DC      SPFET
@@ -4165,7 +4165,7 @@ _C
 worddoc( {SECURITY},{?COMP},{question_compile},{},{},
 {Issue error message if not compiling.},{{?ERROR}},
 {{0 WARNING !   ?COMP},{0 WARNING !   ?COMP ? ciforth ERROR # 17 },
- {CR},{} },
+ {CR 1 WARNING !},{} },
 enddoc)
 _HEADER({?COMP},{QCOMP},{DOCOL})
         DC      STATE
@@ -4174,23 +4174,26 @@ _HEADER({?COMP},{QCOMP},{DOCOL})
         DC      LIT, 17, QERR
         DC      SEMIS
 _C
-worddoc( {SECURITY},{?EXEC},{question_exec},{},{},
+worddoc( {SECURITY},{?EXEC},{question_exec},{},{FIG,WANT},
 {Issue an error message if not executing.},{{?ERROR}},
 {{!CSP ?CSP},{},
-{0 WARNING ! ?EXEC},{} },
+dnl {0 WARNING ! ?EXEC},{}
+},
 enddoc)
+_SUPPRESSED({{
 _HEADER({?EXEC},{QEXEC},{DOCOL})
         DC      STATE
         DC      FETCH
         DC      LIT, 18, QERR
         DC      SEMIS
 _C
+}})_C{}_END_({ _SUPPRESSED})
 worddoc( {SECURITY},{?PAIRS},{question_pairs},{n1 n2 ---},{},
 {Issue an error message if forthvar({n1}) does not equal forthvar({n2}) . The message
 indicates that compiled conditionals do not match.},{{?ERROR}},
 {{ 1 1 ?PAIRS},{},
 {0 WARNING !  1 2 ?PAIRS},{RNING !  1 2 ?PAIRS ? ciforth ERROR # 19 },
- {CR},{} },
+ {CR 1 WARNING !},{} },
 {},
 enddoc)
 _HEADER({?PAIRS},{QPAIR},{DOCOL})
@@ -4199,17 +4202,21 @@ _HEADER({?PAIRS},{QPAIR},{DOCOL})
         DC      SEMIS
 _C
 _LOAD_({
-worddoc( {SECURITY},{?LOADING},{question_loading},{},{},
+worddoc( {SECURITY},{?LOADING},{question_loading},{},{FIG,WANT},
 {Issue an error message if not loading},{{?ERROR}},
-{{0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? ciforth ERROR # 22 },
- {CR},{} },
+{
+dnl {0 WARNING ! ?LOADING },{ WARNING ! ?LOADING ? ciforth ERROR # 22 },
+dnl {CR 1 WARNING !},{}
+},
 enddoc)
+_SUPPRESSED({{
 _HEADER({?LOADING},{QLOAD},{DOCOL})
         DC      BLK
         DC      FETCH
         DC      ZEQU
         DC      LIT, 22, QERR
         DC      SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 _C
 })_C{}_END_({_LOAD_})
 })_C{}_END_({_SECURITY_})
@@ -4797,7 +4804,11 @@ same meaning. ciforth also allows any number of comma's that
 are just ignored, to improve readability. If the first
 unconvertible digit is not a blank, this is an error. },
 {{NUMBER},{?BLANK}},
-{{ (NUMBER) 1324 D.},{1324} },
+{
+{ (NUMBER) 1324 D.},{1324},
+{ (NUMBER) 1abcdefgh D.},
+{ (NUMBER) 1abcdefgh ? ciforth ERROR # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION}
+},
 enddoc)
 _HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, ZERO
@@ -4846,6 +4857,10 @@ Starting with this character, it converts characters from the current input sour
 into a number, and compile or execute this number, depending on forthcode({STATE}).
 If the string contains a decimal point it is a double else a single integer number.
 If numeric conversion is not possible, an error message will be given.
+Any comma's in the number are ignored, to help in structuring large numbers.
+_VERBOSE_({{Traditionally comma's also signified double precision numbers.}})
+_VERBOSE_({{Any number behaviour can be had by revectoring forthcode({NUMBER}),
+but defining prefixes is more convenient.}})
 },
 {{BASE},{(NUMBER)}},
 {{ (NUMBER) 1324 D.},{1324} },
@@ -5101,17 +5116,26 @@ Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a descript
 This word is executed by forthcode({THROW}) before restarting the interpreter
 and can be revectored to give more elaborate diagnostics. },
 {{MESSAGE},{?ERROR},{WARNING}},
-{ {0. WHERE 2! 12 ERROR},{? ciforth ERROR # 18},
+{ {0 WARNING ! 0. WHERE 2! 12 ERROR},{ ? ciforth ERROR # 18 },
  {CR},{} },
 enddoc)
 _HEADER({ERROR},{LERROR},{DOCOL})
 _C{ Make sure the whole word is shown in case of denotations. }
         DC      LWHERE, TFET
+        DC      OVER
+        _0BRANCH( ERR2)      _C{ Virgin: print empty string.}
         DC      OVER, LIT, 20, LSUB
         DC      MAX
-        DC      SWAP,OVER, LSUB
+        DC      SWAP
+        DC      ONEM         _C{Backup for if we are at next word.}
+ERR1:   DC      LDUP, CFET, QBL, ZEQU  _C{Show whole word!}
+        _0BRANCH( ERR2 )
+        DC      ONEP
+        _BRANCH( ERR1 )
+ERR2:
+        DC      OVER, LSUB
         DC      ETYPE
-        _STRINGINLINE({? ciforth ERROR # })
+        _STRINGINLINE({ ? ciforth ERROR # })
         DC      ETYPE
         DC      BASE, FETCH
         DC      DECA
@@ -5159,7 +5183,7 @@ that this exception has occurred and starts Forth anew.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR},{ERROR}},
 {{: GS1 >IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
-{ 2 3 12 THROW ; GS1 ? ciforth ERROR # 18},
+{ 2 3 12 THROW ; GS1 ? ciforth ERROR # 18 },
  {CR},{} },
 enddoc)
 _HEADER({THROW},{THROW},{DOCOL})
@@ -5345,6 +5369,8 @@ itself.
  : JAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 JAN 1 JAN},{2 1},
 { [COMPILE] NON-EXISTING },
 {MPILE] NON-EXISTING ?  ciforth ERROR # 16},
+{CR 0 WARNING !   IF},{CR 0 WARNING !   IF ? ciforth ERROR # 17 },
+ {CR 1 WARNING !},{}
 },
 enddoc)
 _HEADER({[COMPILE]},{BCOMP},{DOCOL}, , B_IMMED)
@@ -5369,7 +5395,7 @@ this is similar to forthsamp({[COMPILE] SOME-WORD}). },
 {!CSP : GS1 POSTPONE BL ; : GS2 [ GS1 ] ; GS2 .},{20},
 {: MY-IF POSTPONE IF ; IMMEDIATE dnl
 : IAN MY-IF 1 ELSE 2 THEN . ; ?CSP 0 IAN 1 IAN},{2 1},
-{ POSTPONE NON-EXISTING }, {STPONE NON-EXISTING ?  ciforth ERROR # 15},
+{ 0 WARNING ! POSTPONE NON-EXISTING }, {STPONE NON-EXISTING ?  ciforth ERROR # 15},
 dnl This must not find 7 in the ONLY wordlist
 {CR POSTPONE 7F89 .}, {CR POSTPONE 7F89 ? ciforth ERROR # 15}
 },
@@ -5782,6 +5808,7 @@ QUIT1:                  _C{BEGIN}
         DC      BYE     _C{End of input, no error!}
 ENDIF7:
         DC      QERRUR
+        DC      ONEP
         DC      SETSRC
         DC      INTER
         DC      OK
@@ -9969,7 +9996,10 @@ for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) al
 
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
 error checking.},{{(BACK}},
-{{( See AGAIN WHILE)},{}},
+{
+{0 WARNING !   BEGIN},{0 WARNING !   BEGIN ? ciforth ERROR # 17 },
+ {CR 1 WARNING !},{}
+},
 enddoc)
 _HEADER({BEGIN},{BEGIN},{DOCOL}, , B_IMMED)
         DC      PBACK
@@ -10015,13 +10045,16 @@ forthcode({(DO)}) and leaves the following address forthvar({addr}) and
 forthvar({n}) for later error checking.},
 {{I},{LOOP},{+LOOP},{LEAVE}},
 { { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA},
-  {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{1} },
-enddoc)
+  {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{1},
+ {0 WARNING !   DO},{0 WARNING !   DO ? ciforth ERROR # 17 },
+ {CR 1 WARNING !},{},
 dnl ISO VIOLATION :
 dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4},
+ },
+enddoc)
 _HEADER({DO},{DO},{DOCOL}, , B_IMMED)
          DC      LIT, XDO, COMMA, PFORWARD, PBACK
-        _SECURITY_({DC      LIT,3    _C{ Magic number}})
+        _SECURITY_({DC      QCOMP, LIT,3    _C{ Magic number}})
         DC      SEMIS
 _C
 worddoc( {CONTROL},{?DO},{question_do},{n1 n2 --- (execute)
@@ -10042,10 +10075,13 @@ an input of e.g. forthexample({1 2})
 { { : GS1 ?DO 41 EMIT LOOP 0 . ; 3 0 GS1},{AAA0 },
   {: GS3 0 1 1 ?DO I . LOOP . ; GS3 },{0} ,
   {: GS4 0 -1 1 ?DO I . LOOP . ; GS4 },{0} },
+{0 WARNING !   ?DO},{0 WARNING !   ?DO ? ciforth ERROR # 17 },
+ {CR 1 WARNING !},{}
+}
 enddoc)
 _HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
          DC      LIT, XQDO, COMMA, PFORWARD, PBACK
-        _SECURITY_({DC      LIT,3    _C{ Magic number}})
+        _SECURITY_({DC      QCOMP, LIT,3    _C{ Magic number}})
         DC      SEMIS
 _C
 worddoc( {CONTROL},{LOOP},{loop},
@@ -10069,7 +10105,7 @@ time error checking.},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
 _HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      LIT, 3, QPAIR})
+        _SECURITY_({DC      QCOMP, LIT, 3, QPAIR})
         DC      LIT, XLOOP, COMMA, BACKP
         DC      FORWARDP _C{ For DO to push the leave address.}
         DC      SEMIS
@@ -10099,7 +10135,7 @@ checking.},{},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
 enddoc)
 _HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      LIT, 3, QPAIR})
+        _SECURITY_({DC      QCOMP, LIT, 3, QPAIR})
         DC      LIT, XPLOO, COMMA, BACKP
         DC      FORWARDP _C{ For DO to push the leave address.}
         DC      SEMIS
@@ -10123,7 +10159,7 @@ addr. forthvar({n}) is used for error tests.},
 },
 enddoc)
 _HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      ONE, QPAIR})
+        _SECURITY_({DC      QCOMP, ONE, QPAIR})
         DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 _C
@@ -10144,7 +10180,7 @@ for compile-time error checking.},
 },
 enddoc)
 _HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      ONE, QPAIR})
+        _SECURITY_({DC      QCOMP, ONE, QPAIR})
         DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 _C
@@ -10167,9 +10203,9 @@ forthvar({n1 n2}) is used for error testing.},
 },
 enddoc)
 _HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      ONE, QPAIR   _C{ Matches BEGIN ?}})
+        _SECURITY_({DC      QCOMP, ONE, QPAIR   _C{ Matches BEGIN ?}})
         DC      LIT, BRAN, COMMA, BACKP
-        _SECURITY_({DC      QCOMP, LIT, 4, QPAIR _C{ Matches WHILE ?}})
+        _SECURITY_({DC      LIT, 4, QPAIR _C{ Matches WHILE ?}})
         DC      FORWARDP _C{ WHILE target. }
         DC      SEMIS
 _C
@@ -10202,7 +10238,7 @@ used later for resolution of the offset and error testing.},
 enddoc)
 _HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, PFORWARD
-        _SECURITY_({DC      TWO     _C{ Magic number}})
+        _SECURITY_({DC      QCOMP, TWO     _C{ Magic number}})
         DC      SEMIS
 _C
 worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},
@@ -10263,7 +10299,7 @@ provide checks for compiler security.},
 },
 enddoc)
 _HEADER({WHILE},{LWHILE},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      LDUP, ONE, QPAIR})
+        _SECURITY_({DC      QCOMP, LDUP, ONE, QPAIR})
         DC      TOR    _C{  Save backward target. }
         _SECURITY_({DC      TOR})
         DC      LIT, ZBRAN, COMMA, PFORWARD
