@@ -1,6 +1,7 @@
 \ AH This is based on something from MHX.
 \ Modifications have to do with where Hayce moves the interpret
-\ pointer to the iend of the input buffer
+\ pointer to the end or begin of the input buffer
+\ ciforth uses IN instead of >IN
 \ The jump out of a BEGIN loop, is refused with _SECURITY_( _yes )
 
 \ Start with:  lina -r <thisfile
@@ -822,7 +823,7 @@ TESTING SOURCE >IN WORD
 
 VARIABLE SCANS
 \     : RESCAN?  -1 SCANS +! SCANS @ IF 0 >IN ! THEN ;
-: RESCAN?  -1 SCANS +! SCANS @ IF SRC @ >IN ! THEN ;
+: RESCAN?  -1 SCANS +! SCANS @ IF SRC @ IN ! THEN ;
 
 { 2 SCANS !
 345 RESCAN?
@@ -835,7 +836,7 @@ VARIABLE SCANS
 { GS3 HELLO -> 5 CHAR H }
 
 \ : GS4 SOURCE >IN ! DROP ;
-: GS4 SRC CELL+ @ >IN ! ;
+: GS4 SRC CELL+ @ IN ! ;
 { GS4 123 456
 -> }
 

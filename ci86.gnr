@@ -2130,7 +2130,7 @@ character forthvar({c}) and its address forthvar({addr}) . If
 at the end of the input source, leave a pointer past the end
 and a zero. Advance the input pointer to the next character.
 },
-{{BLK},{WORD},{>IN}},
+{{BLK},{WORD},{IN}},
 {{IN[] A   EMIT TIB @ 8000 OVER + WITHIN .},{A{}_T_} },
 enddoc)
 _HEADER({IN[]},{INBRS},{DOCOL})
@@ -2157,7 +2157,7 @@ constants, you may not alter its content, nor assume anything
 is appended. Note that this is more deserving of the name
 ``WORD'' than what is in the ISO standard, that can be used to parse lines.
 }})},
-{{BLK},{WORD},{>IN}},
+{{BLK},{WORD},{IN}},
 {{: GS2 NAME . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 NAME . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 _HEADER({NAME},{LNAME},{DOCOL})
@@ -2211,7 +2211,7 @@ _ISO_IN_({the number of characters and the current offset in the
 parse area.}) Changing forthsamp({SRC}) takes immediate effect,
 and must be atomic, by using forthcode({RESTORE-INPUT}),
 or changing only the third cell.
-The third cell has the alias forthsamp({>IN}) .
+The third cell has the alias forthsamp({IN}) .
 _VERBOSE_({{Words like }forthsamp({>IN BLK SOURCE SOURCE-ID}){ are secondary,
 and return their output by ``second-guessing'' }forthsamp({SRC}){ .}})},
 {{BLK},{SOURCE-ID}},
@@ -2233,7 +2233,7 @@ _HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {LIBRARY},{L_>IN},{legacy_in},{--- addr},{ISO,WANT},
-{Hides and replaces the user variable forthcode({>IN}).
+{Hides and replaces the user variable forthcode({IN}).
 All parsing words use and move the value of that user variable.
 Return a variable that contains the offset from the start
 within the current input text buffer (terminal or disc) from
@@ -2242,7 +2242,7 @@ The legacy
 forthcode({>IN}) is not actually a variable:
 its content must be fetched immediately, and changing it has no effect.
 },
-{{(>IN)},{>IN}},
+{{(>IN)},{IN}},
 dnl this test to be moved to library test (after WANT legacy.)
 dnl {{: GS1 >IN @ ; QUIT
 dnl GS1 .},{4}},
@@ -3495,17 +3495,17 @@ the forthdefi({current input source}) has changed.},
 enddoc)
 _HEADER({(BLK)},{PBLK},{DOUSE}, _CELLS(26))
 _C
-worddoc( {INPUT},{>IN},{to_in},{--- addr},{},
+worddoc( {INPUT},{IN},{in},{--- addr},{},
 {A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
-accepted. All parsing words use and move the value of forthcode({>IN}) .
+accepted. All parsing words use and move the value of forthcode({IN}) .
 This is not conforming to ISO, in the sense that clearing it
 doesn't reset the parse pointer to the start of the current line.
 },
 {{>IN},{WORD},{NAME},{NUMBER},{PARSE},{IN[]}},
-{{: GS1 >IN @ IN[] 2DROP >IN @ - ; GS1 Q .},{-1}},
+{{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
 enddoc)
-_HEADER({>IN},{LIN},{DOUSE}, _CELLS(29))
+_HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
 _C
 _LOAD_({
 worddocsafe( {INPUT~},{(>IN)},{paren_iso_in},{--- addr},{},
@@ -5182,7 +5182,7 @@ forthcode({CATCH}), a non-zero forthvar({tc}) gives a message to the effect
 that this exception has occurred and starts Forth anew.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR},{ERROR}},
-{{: GS1 >IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
+{{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
 { 2 3 12 THROW ; GS1 ? ciforth ERROR # 18 },
  {CR},{} },
 enddoc)
@@ -6803,7 +6803,7 @@ worddoc( {BLOCKS~},{SAVE},{save},{ ---},{},
 prior to changing the forthdefi({current input source}).
 This must be balanced by a RESTORE in the same definition.},
 {{RESTORE},{SAVE-INPUT}},
-{{!CSP : GS1 SAVE 0 >IN ! RESTORE ; GS1 34 . ?CSP},{34} },
+{{!CSP : GS1 SAVE 0 IN ! RESTORE ; GS1 34 . ?CSP},{34} },
 enddoc)
 _HEADER({SAVE},{SAVE},{DOCOL})
         DC      FROMR
@@ -6840,7 +6840,7 @@ saved like this. _VERBOSE_({{In practice the use of
 of the same stream.
 }}) },
 {{SAVE},{RESTORE-INPUT}},
-{{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 >IN ! RESTORE-INPUT ; dnl
+{{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 IN ! RESTORE-INPUT ; dnl
     34 GS1 . . ?CSP},{-1 34} },
 enddoc)
 _SUPPRESSED({{

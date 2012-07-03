@@ -418,7 +418,7 @@ Files are not read line by line, but read in full and
 evaluated.
 _CIF_IN_({
 forthitem
-It doesn't use forthcode({>IN}) exactly in the way prescribed by ISO.
+It use forthcode({IN}) instead of the ISO forthcode({>IN})
 The forthcode({>IN}) that is there is a fake, that can only be
 read, not changed.
 }) dnl

@@ -119,7 +119,7 @@ _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
 _SECURITY_({It has compiler security, sacrificing some ISO
 compatibity.}) dnl
-_CIF_IN_({It doesn't use forthcode({>IN}) exactly in the way prescribed by ISO.}) dnl
+_CIF_IN_({It use forthcode({IN}) instead of the ISO forthcode({>IN})})dnl 
 _ISO_IN_({It uses forthcode({>IN}) in the way prescribed by ISO.}) dnl
 _FEWBLOCKS_({The number of blocks limited to 256.}) dnl
 _LOAD_({It contains the full ISO CORE in the kernel,

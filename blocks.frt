@@ -79,7 +79,7 @@
 
 \
 ( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B0jan12
-: ?LEAVE-BLOCK   IF SRC CELL+ @ >IN ! THEN ;
+: ?LEAVE-BLOCK   IF SRC CELL+ @ IN ! THEN ;
 : CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
 0 CELL+
   DUP 2 = CONFIG ?16   DUP 4 = CONFIG ?32   8 = CONFIG ?64
@@ -136,7 +136,7 @@ WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
 
 : VOCABULARY NAMESPACE IMMEDIATE ;
 \ Use L_>IN instead of >IN , don't store into it!
-: L_>IN >IN   @   SRC   @   -   (>IN)   !   (>IN) ;
+: L_>IN IN   @   SRC   @   -   (>IN)   !   (>IN) ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
@@ -146,7 +146,7 @@ WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
 : FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
 >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
 : WORD   DUP BL = IF DROP NAME ELSE >R
-    BEGIN IN[] R@ = WHILE DROP REPEAT DROP -1 >IN +!
+    BEGIN IN[] R@ = WHILE DROP REPEAT DROP -1 IN +!
     R> PARSE THEN   HERE 34 BLANK   HERE $!-BD HERE ;
 
 
@@ -207,8 +207,8 @@ WANT _AH
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
 \
 ( SAVE-INPUT RESTORE-INPUT --> )                \ B0jan12
-: SAVE-INPUT    SRC 2@ >IN @ 3 ;                \ ISO
-: RESTORE-INPUT   DROP >IN ! SRC 2! -1 ;        \ ISO
+: SAVE-INPUT    SRC 2@ IN @ 3 ;                \ ISO
+: RESTORE-INPUT   DROP IN ! SRC 2! -1 ;        \ ISO
 : -->   BLK @ DUP UNLOCK   1+ DUP LOCK
     BLOCK B/BUF SET-SRC ; IMMEDIATE             \ ISO
 
@@ -518,8 +518,8 @@ CREATE DOES>$ LEN ALLOT   \ Generate fields/methods.
 \ Add STRING and the name of the current struct to CRS$.
 : +NAME$   CRS$ $+!    NAME$ $@ CRS$ $+!   BL CRS$ $C+ ;
 VARIABLE LAST-IN         VARIABLE start
-: RLI >IN @ LAST-IN ! ; \ Remember last value of ``>IN''.
-: GLI >R LAST-IN @ >IN @  R> - OVER - ; \ Input since RLI trim.
+: RLI IN @ LAST-IN ! ; \ Remember last value of ``IN''.
+: GLI >R LAST-IN @ IN @  R> - OVER - ; \ Input since RLI trim.
 : itoa 0 <# #S BL HOLD #> ; \ Transform an INT to a STRING.
 \ Add the first part of a definition of a field to DOES>$.
 : F:   " : " DOES>$ $+! NAME DOES>$ $+!   RLI
@@ -543,7 +543,7 @@ WANT F:
    CRS$ $@ EVALUATE ; IMMEDIATE
 
 ( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH B2jun15
-WANT 2>R     WANT NO-SECURITY:     NO-SECURITY:
+WANT 2>R
 CREATE CRS$ 4096 ALLOT
 NAMESPACE format-wid    format-wid DEFINITIONS
 \ Add INT resp. STRING as a string.
@@ -555,7 +555,7 @@ PREVIOUS DEFINITIONS
 : _format   BL $/ 2SWAP 2>R format-wid EVALUATE PREVIOUS 2R> ;
 \ Format X1 .. Xn using the format STRING. leave FORMATTED.
 : FORMAT 0 CRS$ ! BEGIN _plain OVER WHILE _format OVER WHILE
-    REPEAT [ DROP 2 ] ( assume secure ) THEN 2DROP CRS$ $@ ;
+    REPEAT [ DROP 2 ( defeat security) ] THEN 2DROP CRS$ $@ ;
 : FORMAT&EVAL   FORMAT EVALUATE ;
 : FORMAT&TYPE   FORMAT TYPE ;
 ( M: auxiliary_for_class ) \ AH A4nov26
@@ -564,8 +564,8 @@ CREATE NAME$ 128  ALLOT         \ The name of the struct.
 CREATE CRS$ 4096 ALLOT          \ Evaluate buffer, general.
 VARIABLE LAST-IN                \ Start of interpreted code
 VARIABLE DP-MARKER              \ Start of alternative dict.
-: !IN   >IN @ LAST-IN ! ;       \ Remember last value of ``IN''
-: IN$  LAST-IN @ >IN @  OVER - ; \ Return input since >IN !
+: !IN   IN @ LAST-IN ! ;       \ Remember last value of ``IN''
+: IN$  LAST-IN @ IN @  OVER - ; \ Return input since IN !
 : itoa   0 <# #S #> ;           \ Transform an INT to a STRING.
 \ Compile "method" working on addres with offset.
     CREATE M$ 256 ALLOT         \ Evaluate buffer, method.
@@ -1461,7 +1461,7 @@ WANT TASK-TABLE   WANT CVA
 : (WORD-BACK) BEGIN 1- DUP C@ ?BLANK 0= UNTIL 1+
     BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ;
 \ Return SC the latest word in the input.
-: LATEST-WORD >IN @ (WORD-BACK) SRC @ MAX >IN ! NAME ( TRIM') ;
+: LATEST-WORD IN @ (WORD-BACK) SRC @ MAX IN ! NAME ( TRIM') ;
 \ The compiled program can't run.
 VARIABLE FAILED    0 FAILED !
 \ The compiled program can run, after reload.
@@ -1479,7 +1479,7 @@ WANT SWAP-DP    WANT LATEST-WORD   WANT NESTED-COMPILE
 \ Make words that look like malformed numbers (like 2R> )
 \ compile without error, but with run time errors.
 \ Loading the same code another time will give correct code.
-: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 >IN +!
+: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 IN +!
 -1 SECOND-PASS !   -1 POSTPONE LITERAL   13 POSTPONE LITERAL
  POSTPONE ?ERROR   " Recompile!" TYPE CR ;
 \ Fix up errors caused by unknown words, if the library can
