@@ -49,7 +49,7 @@
  : NO BUFFER COULD BE FREED, ALL LOCKED
  : EXECUTION OF EXTERNAL PROGRAM FAILED
  : NOT ENOUGH MEMORY FOR ALLOCATE
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ : UNKNOWN FORMAT IDENTIFIER
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -542,22 +542,22 @@ WANT F:
    " ^" +NAME$   " !  DOES> ^" +NAME$   " ! ; " CRS$ $+!
    CRS$ $@ EVALUATE ; IMMEDIATE
 
-( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH B2jun15
-WANT 2>R
-CREATE CRS$ 4096 ALLOT
-NAMESPACE format-wid    format-wid DEFINITIONS
-\ Add INT resp. STRING as a string.
-: d 0 <# #S #> CRS$ $+! ;    : s CRS$ $+! ;
-PREVIOUS DEFINITIONS
+( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH&CH B2jul11
+WANT 2>R   WANT NIP   CREATE CRS$ 4096 ALLOT
+NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
+\ Add INT as a string.
+: d 0 <# #S #> CRS$ $+! ;
+\ Add a STRING as such.
+: s CRS$ $+! ;                   PREVIOUS DEFINITIONS
 \ Format the first part of STRING, up till %, leave REST.
 : _plain    &% $/ CRS$ $+! ;
 \ Format X with first word of STRING, up till BL, leave REST.
-: _format   BL $/ 2SWAP 2>R format-wid EVALUATE PREVIOUS 2R> ;
-\ Format X1 .. Xn using the format STRING. leave FORMATTED.
+: _format   BL $/ 2SWAP 2>R 'FORMAT-WID >WID (FIND) NIP NIP
+    DUP 0= 51 ?ERROR EXECUTE 2R> ;
+\ Format X1 .. Xn using the format STRING.
 : FORMAT 0 CRS$ ! BEGIN _plain OVER WHILE _format OVER WHILE
-    REPEAT [ DROP 2 ( defeat security) ] THEN 2DROP CRS$ $@ ;
-: FORMAT&EVAL   FORMAT EVALUATE ;
-: FORMAT&TYPE   FORMAT TYPE ;
+    REPEAT [ DROP 2 ] ( assume secure ) THEN 2DROP CRS$ $@ ;
+: FORMAT&EVAL   FORMAT EVALUATE ;   : FORMAT&TYPE FORMAT TYPE ;
 ( M: auxiliary_for_class ) \ AH A4nov26
 WANT SWAP-DP
 CREATE NAME$ 128  ALLOT         \ The name of the struct.

@@ -119,7 +119,7 @@ _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
 _SECURITY_({It has compiler security, sacrificing some ISO
 compatibity.}) dnl
-_CIF_IN_({It use forthcode({IN}) instead of the ISO forthcode({>IN})})dnl 
+_CIF_IN_({It use forthcode({IN}) instead of the ISO forthcode({>IN})})dnl
 _ISO_IN_({It uses forthcode({>IN}) in the way prescribed by ISO.}) dnl
 _FEWBLOCKS_({The number of blocks limited to 256.}) dnl
 _LOAD_({It contains the full ISO CORE in the kernel,
@@ -616,6 +616,25 @@ which means that it must stay in memory.
 In addition blocks can be locked explicitly by forthcode({LOCK}).
 If a free block is needed, and there is no block that can be written
 back to the mass storage (disk or flash), you get this error.
+forthitem
+forthsamp({ciforth ERROR # 49 : EXECUTION OF EXTERNAL PROGRAM FAILED})
+The word forthcode({SYSTEM}) detected an error while trying to execute
+an external program.
+forthitem
+forthsamp({ciforth ERROR # 50 : NOT ENOUGH MEMORY FOR ALLOCATE})
+The dynamic memory allocation could not allocate a buffer of the
+size wanted, because there is not enough
+consecutive memory available.
+Fragmentation can cause this to happen while there is more than
+that size available in total.
+This is detected by forthcode({ALLOCATE}) or forthcode({RESIZE}) .
+
+forthitem
+forthsamp({ciforth ERROR # 51 : UNKNOWN FORMAT IDENTIFIER})
+This error is detected by the forthcode({FORMAT}) wordset.
+The word following forthkey(%) in a format string, is not known.
+This means that it is not present in the forthdefi({namespace})
+forthcode({FORMAT-WID}).
 
 forthenditemize
 
