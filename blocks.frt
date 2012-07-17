@@ -558,38 +558,22 @@ NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
 : FORMAT 0 CRS$ ! BEGIN _plain OVER WHILE _format OVER WHILE
     REPEAT [ DROP 2 ] ( assume secure ) THEN 2DROP CRS$ $@ ;
 : FORMAT&EVAL   FORMAT EVALUATE ;   : FORMAT&TYPE FORMAT TYPE ;
-( M: auxiliary_for_class ) \ AH A4nov26
-WANT SWAP-DP
-CREATE NAME$ 128  ALLOT         \ The name of the struct.
-CREATE CRS$ 4096 ALLOT          \ Evaluate buffer, general.
-VARIABLE LAST-IN                \ Start of interpreted code
-VARIABLE DP-MARKER              \ Start of alternative dict.
-: !IN   IN @ LAST-IN ! ;       \ Remember last value of ``IN''
-: IN$  LAST-IN @ IN @  OVER - ; \ Return input since IN !
-: itoa   0 <# #S #> ;           \ Transform an INT to a STRING.
-\ Compile "method" working on addres with offset.
-    CREATE M$ 256 ALLOT         \ Evaluate buffer, method.
-: M:   IN$ 3 - CRS$ $+!   "^" M$ $!   NAME$ $@ M$ $+!
-   " @ " M$ $+!   HERE DP-MARKER @ - itoa M$ $+!   " +" M$ $+!
-   SWAP-DP   :   M$ $@ EVALUATE ;
-\ End compiling a method.
-: M;   POSTPONE ;   SWAP-DP   !IN ; IMMEDIATE
-( class endclass ) \ AH A4jun16
-WANT M:
-: +NAME    NAME$ $@ CRS$ $+! ;  \ Add the name.
-: +NAME+$   +NAME   CRS$ $+! ;  \ Add the name and a STRING.
-
-\ Define class "name". Compile this-pointer, start build-word.
-: class   NAME NAME$ $!   "VARIABLE ^" CRS$ $!
-   +NAME   CRS$ $@ EVALUATE   ": BUILD-" CRS$ $!
-   " HERE >R " +NAME+$   SWAP-DP   HERE DP-MARKER !   !IN ;
-
-\ Recover memory, compile build-word and class-word.
-: endclass   ?EXEC   DP-MARKER @ HERE - ALLOT   SWAP-DP
-   IN$ 9 - CRS$ $+!   " R> ;" CRS$ $+!   CRS$ $@ EVALUATE
-   ": " CRS$ $!   " CREATE BUILD-" +NAME+$   " ^" +NAME+$
-   " ! DOES> ^" +NAME+$   " ! ;" +NAME+$   CRS$ $@ EVALUATE ;
-
+( class endclass M: M; ) \ AH B2jul17
+WANT SWAP-DP WANT FORMAT  VARIABLE LAST-IN   VARIABLE DP-MARKER
+CREATE NAME$ 128 ALLOT          CREATE BLD$ 4096 ALLOT
+: -WORD 1- BEGIN 1- DUP C@ ?BLANK UNTIL ;  ( in -- lastblank)
+: {BLD   IN @ LAST-IN ! ;
+\ Retain input since {BLD excluding word name.
+: BLD}   LAST-IN @   IN @ -WORD   OVER -   BLD$ $+! ;
+: class   NAME NAME$ $!   NAME$ $@ "VARIABLE ^%s" FORMAT&EVAL
+   "" BLD$ $! SWAP-DP   HERE DP-MARKER !   {BLD ;
+: M:   BLD}   HERE DP-MARKER @ - >R   SWAP-DP :
+    R> NAME$ $@ "^%s  @ %d  +" FORMAT&EVAL ;
+: M;   POSTPONE ;   SWAP-DP   {BLD ; IMMEDIATE
+: endclass   BLD}  DP-MARKER @ HERE - ALLOT   SWAP-DP
+  BLD$ $@ NAME$ $@ ": BUILD-%s  HERE >R %s  R> ;" FORMAT&EVAL
+  NAME$ $@ 2DUP 2DUP 2DUP
+  ": %s  CREATE BUILD-%s  ^%s  ! DOES> ^%s  ! ;" FORMAT&EVAL ;
 ( :NONAME CASE MARKER )
 WANT POSTFIX
 : :NONAME "NONAME" POSTFIX : LATEST DUP HIDDEN !CSP ; \ ISO

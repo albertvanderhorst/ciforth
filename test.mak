@@ -253,12 +253,12 @@ asi386.frt : RCS-as/asi386.frt,v ; co $<
 
 # A Forth with the analyser built-in.
 lina-ana : lina asgen.frt asi386.frt #(ANASRC)
-	echo '"analyser.frt" INCLUDED   REQUIRE SAVE-SYSTEM  "$@" SAVE-SYSTEM' |lina
+	echo '"analyser.frt" INCLUDED   WANT SAVE-SYSTEM  "$@" SAVE-SYSTEM' |lina
 
 # Test the optimiser. FIXME! Gives ERROR 22 ( --> not called from block).
-#testoptimiser.out : testoptimiser.frt optimiser.frt lina-ana
-#        echo 'INCLUDE optimiser.frt INCLUDE $<' |lina-ana > $@
-#        cvs diff -bBw $@ || true
+testoptimiser.out : testoptimiser.frt optimiser.frt lina-ana
+	echo 'INCLUDE optimiser.frt INCLUDE $<' |lina-ana > $@
+	cvs diff -bBw $@ || true
 
 lina-opt : optimiser.frt lina-ana
 	echo 'INCLUDE optimiser.frt "$@" SAVE-SYSTEM' |lina-ana
