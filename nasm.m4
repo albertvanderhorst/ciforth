@@ -77,10 +77,10 @@ dnl
 define({RELATIVE_WRT_ORIG}, {$1 - $$})
 dnl
 dnl Pointer handling
-define({_CELL_PTR},{ CELL_M4})dnl Make it specify SIZE only.
 define({_BYTE_PTR},{BYTE $1})dnl
 define({_CALL_FAR_INDIRECT},{CALL FAR [$1]})dnl
 define({_FAR_ADDRESS},{[$1:$2]})dnl
+define({_CELL_PTR},{ CELL_M4})dnl Make it specify SIZE only.
 define({_OFFSET})dnl Ignore this design error altogether.
 dnl
 dnl Handling large blocks of comment
