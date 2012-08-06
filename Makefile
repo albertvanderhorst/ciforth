@@ -272,7 +272,7 @@ default : lina
 ci86.$(s).bin :
 
 # Put include type of dependancies here
-$(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else co $@ ; fi
+$(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else cvs update $@ ; fi
 
 # Some of these targets make no sense and will fail
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
@@ -414,6 +414,9 @@ lina : ci86.lina.o ; ld $+ -N -o $@
 
 # Linux native forth by gnu tools
 glina : ci86.lina.s ; as $+; ld -N a.out -o $@
+
+# Linux native forth by fasm tools
+flina : ci86.lina.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
 # Linux 64 bit native forth, can only by gnu tools.
 lina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@

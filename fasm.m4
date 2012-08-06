@@ -4,6 +4,7 @@ dnl Macro's to adapt the source to Flat Assembler
 divert(-1)dnl
 define({TITLE},;)dnl Turn TITLE into comment.
 define({PAGE},;)dnl Turn PAGE into comment.
+define({GLOBAL},{;})dnl Start at first point in executable segment
 dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in _HEADER, because index must look in the real string,
 dnl not on some variable that contains the string.
@@ -12,18 +13,29 @@ define({_sgquoted},'{{$1}}')dnl
 define({_quoted},{ifelse( -1, index({$1},{"}),{_dbquoted},{_sgquoted})}({{$1}}))
 dnl
 define({_C},{{;}})
+dnl octal
+define({_O},{{$1O}})
 define({_HEADER_ASM},{;
 ; FASM version of ciforth created by ``m4'' from generic listing.
 ; This source can be assembled using the Flat Assembler,
 ;  available from the Net.
+_DLL_(
+{;      fasm forth.asm forth
         FORMAT  PE console  ; Instead of telling the linker.
 ;
         INCLUDE 'INCLUDE/WIN32A.INC'      ; ASCII windows definitions.
+})_C{}_END_({ _DLL_})
+_LINUX_N_(
+{;      fasm forth.asm forth
+
+        FORMAT  ELF EXECUTABLE ; Instead of telling the linker.
+;
+})_C{}_END_({ _LINUX_N_})
 ;})dnl
 define({SET_32_BIT_MODE},{ use32 })dnl
 define({_TEXT},{.text})
-define({_SECTION_},{       SECTION '$1'})
-define({_SECTION_NOBITS_},{})
+define({_SECTION_},       {       SEGMENT executable readable writable})
+define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})
 define({_SECTION_END_},)
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl
@@ -62,7 +74,9 @@ dnl Last possibility of block comment, suppress it in output.
 define({_COMMENT},{_SUPPRESSED(})
 define({_ENDCOMMENT},{)})
 define({_ENDOFPROGRAM},{
+_DLL_({
         ENTRY  $1
+})_C{}_END_({ _DLL_})
 })dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
