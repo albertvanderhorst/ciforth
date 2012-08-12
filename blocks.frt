@@ -430,20 +430,20 @@ REPEAT 2DROP DROP ;
 
 : [UNDEFINED] NAME 2DUP WANTED PRESENT 0= ; IMMEDIATE
 : [DEFINED] POSTPONE [UNDEFINED] 0= ; IMMEDIATE
-( VALUE TO FROM ) \ AvdH A1oct22
+( VALUE TO FROM ) \ AvdH B2aug07
 
 
 VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
+CREATE _value_jumps  '@ , '! , '+! ,
 : FROM 0 TO-MESSAGE ! ;
 \ ISO
 : TO  1 TO-MESSAGE ! ;
+\ Signal that we want to add to value
+: +TO 2 TO-MESSAGE ! ;
+
 \ ISO
-: VALUE CREATE , DOES> TO-MESSAGE @ IF ! ELSE @ THEN
-    0 TO-MESSAGE ! ;
-
-
-
-
+: VALUE CREATE , DOES> _value_jumps TO-MESSAGE @ CELLS +
+    @ EXECUTE   FROM ;
 
 
 ( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
@@ -1262,6 +1262,22 @@ DECIMAL
 
 
 \
+( LOAD-DLL: DLL-ADDRESS: K32 GET-ENV ) CF: ?WI \ AvdH B2aug9
+( sc -- adr) : Z 0 , DROP ;
+( n adr -- )
+: make-constant
+   BODY> >R    R@ >DFA  !   'BL >CFA @   R> >CFA ! ;
+( sc -- u )
+: LOAD-DLL: CREATE $, DROP DOES> DUP >R $@  LOAD-DLL
+    DUP R> make-constant ;
+( sc xt -- adr )
+: DLL-ADDRESS:   CREATE , $, DROP     DOES> DUP >R   CELL+ $@
+    R@ @ EXECUTE DLL-ADDRESS   DUP R> make-constant ;
+
+"kernel32.dll" LOAD-DLL: K32
+"GetEnvironmentVariableA" 'K32 DLL-ADDRESS: _gev
+( sc -- sc )
+: GET-ENV    _gev >R ZEN 1000 OVER DUP R> CALL ;
 ( GET-ENV ) CF: ?LI \ AvdH A3mar20
 \ This must be defined on MS-DOS too
 
