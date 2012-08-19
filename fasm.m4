@@ -23,19 +23,20 @@ _DLL_(
 {;      fasm forth.asm forth
         FORMAT  PE console  ; Instead of telling the linker.
 ;
-        INCLUDE 'INCLUDE/WIN32A.INC'      ; ASCII windows definitions.
+        INCLUDE 'include/win32a.inc'      ; ASCII windows definitions.
+define({_SECTION_NOBITS_},{})dnl
 })_C{}_END_({ _DLL_})
 _LINUX_N_(
 {;      fasm forth.asm forth
 
         FORMAT  ELF EXECUTABLE ; Instead of telling the linker.
+define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})dnl
 ;
 })_C{}_END_({ _LINUX_N_})
 ;})dnl
 define({SET_32_BIT_MODE},{ use32 })dnl
 define({_TEXT},{.text})
 define({_SECTION_},       {       SEGMENT executable readable writable})
-define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})
 define({_SECTION_END_},)
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)dnl
