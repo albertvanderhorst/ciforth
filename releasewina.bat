@@ -33,6 +33,7 @@ ln -sf forth.lab.wina forth.lab
 make VERSION=$version $s.fas
 make test$m
 mv $s.fas $m.fas
+fasm $m.fas -m300000
 # make VERSION=$version $s.bin   # Has to wait for fasm
 # mv $s.bin $m.exe
 # Before texinfo (not sure whether that is really required.)
