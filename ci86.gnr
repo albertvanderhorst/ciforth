@@ -6028,7 +6028,10 @@ _DLL_({
 _C{}
 _DLL_({
 worddoc( {OPERATINGSYSTEM},{LOAD-DLL},{load_dll},{ sc --- n},{},
-{forthvar({n}) is the handle of a DLL library with name forthvar({sc}). },
+{forthvar({n}) is the handle of a DLL library with name forthvar({sc}).
+Warning: for a compiled program you must postpone fetching this handle
+until the program is run, you can't do it at compile time.
+},
 {DLL-ADDRESS},
 {{ "kernel32.dll" LOAD-DLL DUP 0= . CONSTANT K32},{0},
  { "GetLastError" K32 DLL-ADDRESS 0= . },{0} },
@@ -6053,7 +6056,9 @@ _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
 _C
 worddoc( {OPERATINGSYSTEM},{DLL-ADDRESS},{dll_address},{ sc u --- addr},{},
 {Return the address forthvar({addr}) of the procedure with name forthvar({sc})
-from dll library with handle forthvar({u}). },{LOAD-DLL},
+from dll library with handle forthvar({u}).
+Provide it with correct parameters and you can use it with forthcode({CALL}).
+},{LOAD-DLL},
 { {." See LOAD-DLL"},{See LOAD-DLL} },
 enddoc)
 _HEADER({DLL-ADDRESS},{DLLADR},{DOCOL})
