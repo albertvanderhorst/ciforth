@@ -100,14 +100,14 @@
 :  HELP    1 20 INDEX   CR
   "I will try to start a help window" TYPE CR
   "Press a key" TYPE CR KEY DROP
-  "XOS"  PRESENT? IF
+  "XOS"  PRESENT IF
   "PDF" HELP-WANTED? IF
       "acroread ci86.lina.pdf&" SYSTEM EXIT THEN
   "PostScript" HELP-WANTED? IF
       "gv ci86.lina.ps&" SYSTEM THEN
   "info" HELP-WANTED? IF
       "info -f ci86.lina.info" SYSTEM THEN
-   ELSE   "BDOSN"  PRESENT? IF
+   ELSE   "BDOSN"  PRESENT IF
       "wina.pdf" SYSTEM THEN THEN ;
 
 ( -legacy- ) CF: ?LI \ AvdH A8jun24
@@ -128,35 +128,67 @@
 
 ( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH B2jun18
 \ This will make most old programs run.
-: REQUIRE WANT ;   : REQUIRED WANTED ;
-WANT SAVE-INPUT
-
-WANT ALIAS   '$/ ALIAS $S   '$^ ALIAS $I   'NAME ALIAS (WORD)
-'PARSE ALIAS (PARSE)
-
-: VOCABULARY NAMESPACE IMMEDIATE ;
-\ Use L_>IN instead of >IN , don't store into it!
-: L_>IN IN   @   SRC   @   -   (>IN)   !   (>IN) ;
+WANT ALIAS
+'$/ ALIAS $S   '$^ ALIAS $I
+'NAME ALIAS (WORD)     'PARSE ALIAS (PARSE)
+ : REQUIRE WANT ;   : REQUIRED WANTED ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
+
+WANT SAVE-INPUT
+
+
+
+
+
+
+( -legacy- >IN REFILL  )                      \ AvdH B2aug12
+WANT ALIAS
+\ Use L_>IN instead of >IN , don't store into it!
+: L_>IN IN   @   SRC   @   -   (>IN)   !   (>IN) ;
+'L_>IN ALIAS >IN
+: REFILL 0 ;
+
+
+
+
+
+
+
+
+
+
+( -legacy- VOCABULARY )                        \ AvdH B2aug12
+\ Use replacing vocabularies instead of pushing namespaces.
+
+: FORTH   CONTEXT @ 'ONLY >WID <> IF PREVIOUS THEN FORTH ;
+
+: VOCABULARY NAMESPACE  DOES> CELL+ CONTEXT ! ;
+
+
+
+
+
+
+
 
 
 
 ( -legacy- WORD FIND ?EXEC ?LOADING   ) \ AvdH B2feb14
+\ ISO
 : FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
 >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
 : WORD   DUP BL = IF DROP NAME ELSE >R
     BEGIN IN[] R@ = WHILE DROP REPEAT DROP -1 IN +!
     R> PARSE THEN   HERE 34 BLANK   HERE $!-BD HERE ;
 
-
+\ Exceptions on compilation modes.
 : ?EXEC   STATE @   12 ?ERROR ;
 : ?LOADING   BLK   @   0=   16 ?ERROR ;
 
 
 
-
-
+\ Last legacy block!
 CREATE -legacy-
 ( **************ISO language extension ***********************)
                     EXIT
@@ -206,6 +238,38 @@ CREATE _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 : ALLOCATE   ['] _allocate CATCH ;
 : FREE   overhead - _free 0 ;
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
+( SEARCH-WORDLIST GET-CURRENT SET-CURRENT )    \ AvdH B2aug12
+WANT NIP
+\ ISO
+: GET-CURRENT    CURRENT @ ;
+: SET-CURRENT    CURRENT ! ;
+: SEARCH-WORDLIST    (FIND) NIP NIP
+    DUP IF DUP >FFA @ 4 AND   IF 1 ELSE -1 THEN THEN ;
+
+
+
+
+
+
+
+
+
+( NOT >= <= UMIN U> D< D- D0= )                  \ AvdH B2aug12
+WANT NIP        WANT ALIAS
+'0= ALIAS NOT
+: >=   < NOT ;           : <=   > NOT ;
+: UMIN   2DUP U< IF SWAP THEN NIP ;
+: UMAX   2DUP U< IF SWAP THEN DROP ;
+: U>     SWAP U< ;
+
+: D0<>  OR 0= ;          : D0=  OR 0= ;
+: D0<   DROP 0< ;        : D-   DNEGATE D+ ;
+: D<    D- D0< ;         : D>=  D< NOT ;
+: D>    D- DNEGATE D0< ; : D<=  D> NOT ;
+
+
+
+
 ( SAVE-INPUT RESTORE-INPUT --> )                \ B0jan12
 : SAVE-INPUT    SRC 2@ IN @ 3 ;                \ ISO
 : RESTORE-INPUT   DROP IN ! SRC 2! -1 ;        \ ISO
@@ -382,11 +446,11 @@ CF:
 
 
 \
-( U> 0> U.R ) \ AvdH A2oct23
+( 0> U.R ) \ AvdH A2oct23
 
 
 
-: U> SWAP U< ;
+
 : 0> 0 > ;
 : U.R 0 SWAP D.R ;
 
@@ -798,23 +862,23 @@ VARIABLE m ( Modulo number)
 \ For M N , return their GCD.
 : GCD   BEGIN OVER MOD DUP WHILE SWAP REPEAT DROP ;
 
-( -LEADING DROP-WORD                   ) \ AvdH A3mar21
-WANT COMPARE
- : -LEADING ( $T,$C -$T,$C   Like -TRAILING, removes)
-    BEGIN                        ( heading blanks )
-      OVER C@ BL = OVER 0= 0=  AND
-    WHILE
-      1 - SWAP 1 + SWAP
-    REPEAT  ;
+( /STRING -LEADING DROP-WORD        )           \ AvdH B@aug12
 
+\ From SC trim N char's
+: /STRING >R  R@ - SWAP R> + SWAP ;
+
+\ Like -TRAILING sc-sc
+ : -LEADING BEGIN OVER C@ BL = OVER 0= 0=  AND
+    WHILE 1 - SWAP 1 + SWAP REPEAT  ;
 
 \ From a STRING remove the first word. Leave the rest STRING.
 : DROP-WORD   -LEADING BL $/ 2DROP ;
+\ : DROP-WORD   BEGIN BL $/ 0= WHILE DROP REPEAT DROP ;
 
 
 
 
-( RAND ) HEX \ EDN 1991JAN21, pg 151
+( RAND ) ?32 HEX        \ EDN 1991JAN21, pg 151 \ AvdH B2aug12
 WANT TICKS
 VARIABLE SEED
 ( . -- . ) ( Use the nanosecond counter to start)
@@ -846,6 +910,22 @@ We put here also reference implementations.
 
 
 
+( ?EXIT ?LEAVE )                        \ AvdH B2aug12
+\ Exit current definitions if FLAG.
+: ?EXIT   IF RDROP THEN ;
+\ Exit current loop if FLAG.
+: ?LEAVE  IF RDROP RDROP RDROP THEN ;
+
+
+
+
+
+
+
+
+
+
+\
 ( DEPTH )                               \ AvdH A7mar27
 : DEPTH   S0 @ DSP@ -   [ 0 CELL+ ] LITERAL /   1- ;
 
@@ -942,22 +1022,38 @@ $1B CONSTANT ESC
 : INCLUDE NAME INCLUDED ;
 
 
-( SLITERAL PARSE SCAN-WORD DOC $. $? ."$" ) \ AvdH
-WANT 2>R
+( SLITERAL $. $? ."$" )           \ AvdH B2aug12
+
 \ ISO
 : SLITERAL POSTPONE SKIP $, POSTPONE LITERAL POSTPONE $@ ;
 IMMEDIATE
 \ ISO
-: PARSE (PARSE) ;
-: (NAME) NAME DUP 0= 13 ?ERROR ;
-\ Skip words until and including STRING.
-: SCAN-WORD 2>R BEGIN BEGIN (NAME) R@ <> WHILE DROP REPEAT
-   2R@ CORA WHILE REPEAT RDROP RDROP ;
-: DOC "ENDDOC" SCAN-WORD ;  \ Skip till "ENDDOC".
+
+
+
+
+
  : $. TYPE ;  \ Print a STRING constant.
  : $? $@ $. ;  \ Print a string at ADDRESS.
 \ Print STRING, as a quoted string, reconsumable.
 : ."$" BEGIN &" $/ &" EMIT TYPE &" EMIT OVER 0= UNTIL 2DROP ;
+\
+( SCAN-WORD DOC ANEW )                          \ AvdH B2aug18
+WANT 2>R      WANT MARKER
+
+\ Like name but abort on eof.
+: _name NAME DUP 0= 13 ?ERROR ;
+\ Skip words until and including STRING.
+: SCAN-WORD 2>R BEGIN BEGIN _name R@ <> WHILE DROP REPEAT
+   2R@ CORA WHILE REPEAT RDROP RDROP ;
+: DOC "ENDDOC" SCAN-WORD ;  \ Skip till "ENDDOC".
+
+\ Destructive MARKER
+: ANEW IN @ >R NAME FOUND DUP IF EXECUTE _ THEN DROP
+  R> IN ! MARKER ;
+
+
+\
 ( TICKS PAST? ) CF: ?64 \ AvdH A2oct21
 \ We can't use the assembler in 64 bits.
 WANT ASSEMBLER HEX    \ Just for using CODE
@@ -1246,22 +1342,6 @@ DECIMAL
 
 
 \
-( GET-ENV K32 ) CF: ?WI            \ AvdH B1aug16
-HEX
-"kernel32.dll" LOAD-DLL CONSTANT K32
-
-"GetEnvironmentVariableA" K32 DLL-ADDRESS CONSTANT _GEV
-
-\ Use RW-BUFFER for input and output. ( sc -- sc )
-: GET-ENV    ZEN 1000 OVER DUP _GEV CALL ;
-DECIMAL
-
-
-
-
-
-
-\
 ( LOAD-DLL: DLL-ADDRESS: K32 GET-ENV ) CF: ?WI \ AvdH B2aug9
 ( sc -- adr) : Z 0 , DROP ;
 ( n adr -- )
@@ -1277,9 +1357,8 @@ DECIMAL
 "kernel32.dll" LOAD-DLL: K32
 "GetEnvironmentVariableA" 'K32 DLL-ADDRESS: _gev
 ( sc -- sc )
-: GET-ENV    _gev >R ZEN 1000 OVER DUP R> CALL ;
+: GET-ENV    _gev >R ZEN 4096 OVER DUP R> CALL ;
 ( GET-ENV ) CF: ?LI \ AvdH A3mar20
-\ This must be defined on MS-DOS too
 
 WANT Z$@   WANT COMPARE   WANT ENV
 
@@ -1289,6 +1368,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
     IF   RDROP RDROP 1   ELSE   2DROP R> R> 0   THEN THEN ;
 ( Find a STRING in the environment, -its VALUE or NULL string)
 : GET-ENV ENV BEGIN $@ SWAP >R (MENV) WHILE R> REPEAT RDROP ;
+
 
 
 
