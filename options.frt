@@ -29,7 +29,7 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
 \ Make sure WORD is present in the current namespace
 : WANTED   '(WANTED) CATCH DUP 24 = IF >R ETYPE R> MESSAGE
     ELSE THROW 2DROP THEN ;   : WANT   ( "name" ) NAME WANTED ;
-: CF: "CONFIG" WANTED ;   WANT -legacy-
+: CF: "CONFIG" WANTED ;
 ( -b :_This_option_is_available )
 
 
@@ -90,7 +90,7 @@ WANT CASE-INSENSITIVE            CASE-INSENSITIVE
 \ WANT ASSEMBLERi86 WANT DEADBEEF
 
 ( WANT DIR )     WANT ls    \ Select os-interface DOS/Unix
-
+WANT -legacy-
 : TASK ;
  ( BACKUP        250 LOAD   77 81 THRU )
 OK
@@ -326,13 +326,13 @@ WANT CORA-IGNORE
 
 WANT [IF]   WANT ARG[]   WANT PREFIX
 
-WANT CASE-INSENSITIVE    CASE-INSENSITIVE
-WANT AUTOLOAD            AUTOLOAD
+WANT CASE-INSENSITIVE   CASE-INSENSITIVE
+WANT NO-SECURITY        NO-SECURITY
+WANT AUTOLOAD           AUTOLOAD
 
 2 ARG[] INCLUDED
 SECOND-PASS @ 0= ?LEAVE-BLOCK
 2 ARG[] INCLUDED
-
 \
 ( -u :_This_option_is_available )
 
