@@ -98,7 +98,10 @@ define({_ENDOFPROGRAM},{
         END $1
 })dnl
 dnl A quirk, make sure in port instruction, DX is not turned into EDX
-define({_DX16},{{DX}})
+dnl in behalf of ports
+define({_DX16},{{DX}})dnl
+define({_AX16},{{AX}})dnl
+define({_AX32},{{EAX}})dnl
 dnl Work around because of poor performance of .NET assembler.
 define({_OR_},{|})
 divert{}dnl

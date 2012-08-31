@@ -2805,7 +2805,7 @@ _C
 worddocsafe( {MEMORY},{@@},{fetch},{addr --- n},{ISO,FIG},
 {Leave the _BITS_ bit contents forthvar({n})
 of forthvar({addr}) .},
-{{!},{C@@},{2@@},{P@@},{PC@@},{FAR@@}},
+{{!},{C@@},{2@@},{PW@@},{PC@@},{FAR@@}},
 { {-23 PAD ! PAD @ .},{-23} },
 enddoc)
 CODE_HEADER({@},{FETCH})
@@ -2817,7 +2817,7 @@ _BITS64_({
 worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- n},{ISO,FIG},
 {Leave the 32 bit contents forthvar({n})
 of forthvar({addr}) .},
-{{!},{C@@},{2@@},{P@@},{PC@@},{FAR@@}},
+{{!},{C@@},{2@@},{PW@@},{PC@@},{FAR@@}},
 { {-23 PAD L! PAD L@ .},{FFFFFF23} },
 enddoc)
 CODE_HEADER({L@},{LFETCH})
@@ -2855,7 +2855,7 @@ CODE_HEADER({2@},{TFET})
 _C
 worddoc( {MEMORY},{!},{store},{n addr ---},{ISO,FIG},
 {Store all _BITS_ bits of n at forthvar({addr}) .},
-{{@@},{C!},{2!},{FAR!},{P!},{PC!}},
+{{@@},{C!},{2!},{FAR!},{PW!},{PC!}},
 {{." Via @"},{Via @}},
 enddoc)
 CODE_HEADER({!},{STOR})
@@ -2867,7 +2867,7 @@ _C
 _BITS64_({
 worddocsafe( {MEMORY},{L!},{long_store},{n addr --- },{},
 {Store the 32-bit contents of forthvar({n}) at forthvar({addr}) .},
-{{L@@},{!},{C!},{2!},{P!},{PC!},{FAR!}},
+{{L@@},{!},{C!},{2!},{PW!},{PC!},{FAR!}},
 { {-23 PAD L! PAD L@ .},{FFFFFF23} },
 enddoc)
 CODE_HEADER({L!},{LSTOR})
@@ -6570,7 +6570,7 @@ _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{PC!},{P@@},{P!},{@@}},
+{{PC!},{PW@@},{PW!},{@@}},
 {{( No test)},{}},
 enddoc)
 CODE_HEADER({PC@},{PCFET})
@@ -6588,7 +6588,7 @@ _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{PC@@},{P!},{P@@},{!}},
+{{PC@@},{PW!},{P@@},{!}},
 {{( No test)},{}},
 enddoc)
 CODE_HEADER({PC!},{PCSTO})
@@ -6597,35 +6597,35 @@ CODE_HEADER({PC!},{PCSTO})
         OUT     _DX16,AL   _C{ BYTE OUTPUT}
         _NEXT
 _C
-worddocsafe( {MEMORY},{P@@},{port_fetch},{port --- n},{},
-{Fetch the _BITS_ bit contents forthvar({n}) from the port address
+worddocsafe( {MEMORY},{PW@@},{port_fetch},{port --- n},{},
+{Fetch the 16-bit contents forthvar({n}) from the port address
 forthvar({port}). A port address is always 16 bits.
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{P!},{PC@@},{PC!},{@@}},
+{{PW!},{PC@@},{PC!},{@@}},
 {{( No test)},{}},
 enddoc)
-CODE_HEADER({P@},{PFET})
+CODE_HEADER({PW@},{PFET})
         POP     DX      _C{PORT ADDR}
-        IN      AX,_DX16  _C{WORD INPUT}
+        IN      _AX16,_DX16  _C{WORD INPUT}
         _PUSH
 _C
-worddoc( {MEMORY},{P!},{port_store},{n port ---},{},
-{Store the _BITS_ bit data forthvar({n}) to the port address
+worddoc( {MEMORY},{PW!},{port_word_store},{n port ---},{},
+{Store the 16-bit data forthvar({n}) to the 16-bits port address
 forthvar({port}).
 _VERBOSE_({{In practice on a IBM PC architecture a port address is
 10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
-{{P@@},{PC!},{PC@@},{!}},
+{{PW@@},{PC!},{PC@@},{!}},
 {{( No test)},{}},
 enddoc)
-CODE_HEADER({P!},{PSTO})
+CODE_HEADER({PW!},{PSTO})
         POP     DX      _C{PORT ADDR}
         POP     AX      _C{DATA}
-        OUT     _DX16,AX   _C{WORD OUTPUT}
+        OUT     _DX16,_AX16   _C{WORD OUTPUT}
         _NEXT
 _C
 worddoc( {BLOCKS~},{PREV},{prev},{--- addr},{},
@@ -6873,7 +6873,7 @@ enddoc)
 _SUPPRESSED({{
 _HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC      DROP
-        DC      LIN, STORE
+        DC      LIN, STOR
         DC      SRC, TSTOR
         DC      LIT, -1
         DC SEMIS
