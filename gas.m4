@@ -85,7 +85,10 @@ define({RAX},{{%RAX}})dnl
 define({RBX},{{%RBX}})dnl
 define({RCX},{{%RCX}})dnl
 define({RDX},{{%RDX}})dnl
-define({_DX16},{{%DX}})dnl  Used for in and outports
+dnl in behalf of ports
+define({_DX16},{{%DX}})dnl
+define({_AX16},{{%AX}})dnl
+define({_AX32},{{%EAX}})dnl
 dnl Segment registers
 define({CS},{{%CS}})dnl
 define({DS},{{%DS}})dnl

@@ -2823,7 +2823,7 @@ enddoc)
 CODE_HEADER({L@},{LFETCH})
         POP     BX
         XOR     AX,AX
-        MOV     {%EAX},[BX]
+        MOV     _AX32,[BX]
         _PUSH
 _C
 })_C{}_END_({_BITS64_})
@@ -2873,7 +2873,7 @@ enddoc)
 CODE_HEADER({L!},{LSTOR})
         POP     BX      _C{ADDR}
         POP     AX      _C{DATA}
-        MOV     [BX],{%EAX}
+        MOV     [BX],_AX32
         _NEXT
 _C
 })_C{}_END_({_BITS64_})

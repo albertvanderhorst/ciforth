@@ -134,7 +134,15 @@ How to make a 64 bit release.
 make lina64.zip VERSION=beta-5-63
 Now the executable has to be build on a 64 bit system, because the
 executable generated on Suse 32 bit, doesn't run.
-[This may be a red herring, as the gas source contained an error
-dd 2010 aug 17 ]
 as -64 lina64.s
 ld -s -N a.out -o lina64
+
+2012 aug 31
+How to make a 64 bit wina.
+make ci86.wina64.fas
+fasm ci86.wina64.fas -M300000
+
+2012 sep 2
+A 64 bit release can be made on a 32 bit system if fasm is used.
+fasm ci86.lina64.fas
+mv ci86.lina64.fas ci86.lina64
