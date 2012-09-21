@@ -9,6 +9,8 @@ You will see a signon message.
 While sitting in your interactive Forth doing a ``hello world'' is easy:
 forthexample({"Hello world!" TYPE
 Hello world! OK })
+Note that the computer ends its output with forthsamp({OK})
+to indicate that it has completed the command.
 forthbreak
 Making it into an interactively usable program is also easy:
 forthexample(
@@ -18,20 +20,38 @@ HELLO
 Hello world!
 OK })
 This means you type the command forthsamp({HELLO}) while you
-are in thisforth. As soon as you leave thisforth, this command
-is gone.
+are in thisforth.
+As soon as you leave thisforth,
+the new command is gone.
 _HOSTED_({
 forthbreak
-In order to make a stand alone program to say hello you have to
-save the source to a file, such as forthfile({hello.frt}).
+If you want to use the program a second time,
+you can put it in a file forthfile({hello.frt}).
 It just contains the definition we typed earlier:
 forthexample({ : HELLO "Hello world!" TYPE CR ;})
+This file can be forthcode({INCLUDED}) inorder to add the command
+forthsamp({HELLO}) to your Forth environment, like so:
+forthexample(
+{"hello.frt" INCLUDED
+OK
+HELLO
+Hello world!
+OK })
+During development you probably have started with
+forthsamp({thisforth -e}), so you need just type
+forthexample({INCLUDE hello.frt})
+
+In order to make a stand alone program to say hello you can
+use that same source file, again forthfile({hello.frt}).
 Now build the program by
 forthbreak
 thisforth -c hello.frt
 forthbreak
 (That is forthkey({c}) for compile.)
 The result is a file _HOSTED_LINUX_({forthfile({hello})}) _PC_({forthfile({HELLO.EXE})}).
+This file can be run from your command interpreter, or shell.
+It is a single file that you can pass to some one else to run on their
+computer, without the need for them to install Forth.
 For the compiler to run you must have the library correctly
 installed.
 })
@@ -44,8 +64,8 @@ Note for the old hands. Indeed the quoted strings are not ISO.
 They surely are a Forth-like extension. Read up on denotations,
 and the definition of forthcode({"}) .
 
-In thisforth you never have to worry about those quoted strings,
-they are allocated in the dictionary and are permanent.
+In thisforth you never have to worry about the life time of those
+quoted strings, they are allocated in the dictionary and are permanent.
 
 @subsection The library.
 
@@ -68,8 +88,7 @@ Now we will add forthcode({DO-DEBUG}) using this library mechanism.
 It is used immediately.
 It is handy during development, after every line it
 shows you what numbers Forth remembers for you.
-Also from now on
-the header of each
+Also from now on the header of each
 block that is forthcode({LOAD})-ed is shown. forthbreak
 Type (forthsamp({1 LOAD}) may not be necessary):
 forthexample({1 LOAD
@@ -98,6 +117,8 @@ that block is compiled.
 This continues until the word has been defined,
 or the end of the search area is reached.
 This is marked by a screen with an empty index line.
+I tell you this not because you need to know,
+but to show that there is nothing to it.
 
 The library file contains examples for you
 to load using forthcode({WANT}) .
@@ -225,6 +246,8 @@ This was different in previous version of ciforth.
 forthcode({FAR-DP}) allows to have a disposable part of the
 dictionary. This may be occasionally useful, but make sure to
 forthcode({FORGET}) always the disposed off words.
+The forthsamp({-c}) option uses this to avoid having
+source files as part of an executable image.
 
 
 @section Concepts
@@ -368,7 +391,7 @@ $8000403A
 0x8000403A
 #3487
 0177
-"Arpeggio"
+S" Arpeggio"
 "JAMES BROWN IS DEAD"
 " JK "
 'DROP
