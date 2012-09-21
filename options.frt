@@ -303,21 +303,21 @@ SWITCH-LIBS
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-1 LOAD   WANT OLD:   WANT ARG[]
+1 LOAD   WANT OLD:   WANT ARG[] WANT -scripting-
 WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
-: BY-WHO   "LINOS" PRESENT? IF " run by " TYPE
+: BY-WHO   "XOS" PRESENT IF " run by " TYPE
 0 ARG[] TYPE THEN ;
 \ This error handler may be overwritten by the script.
-: MY-ERROR    DECIMAL
-    "In file " TYPE SCRIPT-NAME $@ TYPE BY-WHO CR
-    >IN @ 20 - 40 TYPE CR
-    "Fatal error at : " TYPE   OLD: ERROR CR CR    ;
+: MY-ERROR    OLD: ERROR
+      "Fatal error in file :" TYPE SCRIPT-NAME $@ TYPE CR
+    BY-WHO CR BYE ;
 -1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 SHIFT-ARGS  SHIFT-ARGS
 SCRIPT-NAME $@ GET-FILE
 ^J $/ 2DROP     \ Line with #!lina
 EVALUATE
 BYE
+
 ( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
 .SIGNON 1 LOAD
 \ Reload WANT with new ``CORA'' but hide it direct after.

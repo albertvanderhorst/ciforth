@@ -1198,35 +1198,35 @@ DSP@ 1 RSHIFT HERE 1 RSHIFT + ALIGNED FAR-DP !
 : T[ 0= IF POSTPONE (;) SWAP-DP POSTPONE [ >R THEN ; IMMEDIATE
 
 
-( NEW-IF interpreting__control_words ) \ AvdH A1oct04
-: NEW-IF ;
-WANT T]
-: IF           T] POSTPONE IF                    ; IMMEDIATE
-: DO           T] POSTPONE DO                    ; IMMEDIATE
-: ?DO          T] POSTPONE ?DO                   ; IMMEDIATE
-: BEGIN        T] POSTPONE BEGIN                 ; IMMEDIATE
-: THEN            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
-: LOOP            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
-: +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
-: REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
-: UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
-: AGAIN           POSTPONE AGAIN     POSTPONE T[ ; IMMEDIATE
+( NEW-IF -scripting-                           ) \ AvdH B2sep21
+: NEW-IF ;    \ Get rid!
+WANT T]      WANT :2
+:2 IF           T] POSTPONE IF                    ; IMMEDIATE
+:2 DO           T] POSTPONE DO                    ; IMMEDIATE
+:2 ?DO          T] POSTPONE ?DO                   ; IMMEDIATE
+:2 BEGIN        T] POSTPONE BEGIN                 ; IMMEDIATE
+:2 THEN            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
+:2 LOOP            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
+:2 +LOOP           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
+:2 REPEAT          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
+:2 UNTIL           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
+:2 AGAIN           POSTPONE AGAIN     POSTPONE T[ ; IMMEDIATE
+
+\ Last scripting block!
+CREATE -scripting-
+( :2 :F :R                                    )  \ AvdH B2sep21
+WANT ALIAS
+\ Alias of : , define a word for the second time.
+: :2   IN @ NAME FOUND >R R@ HIDDEN IN !   :   R> HIDDEN ;
+\ Use for dummy forward definitions.
+': ALIAS :F
+\ Resolve an earlier dummy definition for recursion.
+: :R   IN @ NAME FOUND >R R@ HIDDEN IN !   :   R@ HIDDEN
+  LATEST >DFA @ R> >DFA ! ;
 
 
 
-( if do ?do begin then loop +loop repeat until ) \ AvdH A1oct04
-\ The same but without the annoying message.
-WANT T[
-: if           T] POSTPONE IF                    ; IMMEDIATE
-: do           T] POSTPONE DO                    ; IMMEDIATE
-: ?do          T] POSTPONE ?DO                   ; IMMEDIATE
-: begin        T] POSTPONE BEGIN                 ; IMMEDIATE
-: then            POSTPONE THEN      POSTPONE T[ ; IMMEDIATE
-: loop            POSTPONE LOOP      POSTPONE T[ ; IMMEDIATE
-: +loop           POSTPONE +LOOP     POSTPONE T[ ; IMMEDIATE
-: repeat          POSTPONE REPEAT    POSTPONE T[ ; IMMEDIATE
-: until           POSTPONE UNTIL     POSTPONE T[ ; IMMEDIATE
-: else            POSTPONE ELSE                  ; IMMEDIATE
+
 
 
 
@@ -1262,8 +1262,8 @@ WANT T[
 
 
 
-( ARG ARGC ARGV ARG[] SHIFT-ARGS ENV 1) CF: ?LI \ AvdH A3mar20
-WANT Z$@   WANT COMPARE
+( ARGC ARGV ARG[] SHIFT-ARGS ENV       ) CF: ?LI \ AvdH B2sep21
+WANT Z$@
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
 \ Return the argument VECTOR passed by Linux
@@ -1278,7 +1278,7 @@ ARGS @   $@ 1+ CELLS +  CONSTANT ENV
 : SHIFT-ARGS   -1 ARGS @ +!
     ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
 
-( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?PC \ AvdH A3mar25
+( ARG$ ARGC ARG[] SHIFT-ARGS           ) CF: ?PC \ AvdH B2sep21
 HEX    WANT DROP-WORD
 \ Return argument STRING for (prot) DOS.
 : ARG$   80 COUNT -LEADING -TRAILING ;
