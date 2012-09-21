@@ -409,17 +409,20 @@ ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 ciforthc : ciforth.o ci86.linux.o
 	 ld -static /usr/lib/gcrt1.o $+ -lc  -o ciforthc
 
-# Linux native forth
+# Linux native forth by nasm.
 lina : ci86.lina.o ; ld $+ -N -o $@
 
 # Linux native forth by gnu tools
 glina : ci86.lina.s ; as $+; ld -N a.out -o $@
 
+# Linux native forth by gnu tools, only works on a 64 bit system
+glina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@
+
 # Linux native forth by fasm tools
 flina : ci86.lina.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
-# Linux 64 bit native forth, can only by gnu tools.
-lina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@
+# Linux 64 bit native forth.
+lina64: ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
 # This dependancy is problematic.
 # Do `make constant.m4' explicitly beforehand.

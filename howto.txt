@@ -144,5 +144,12 @@ fasm ci86.wina64.fas -M300000
 
 2012 sep 2
 A 64 bit release can be made on a 32 bit system if fasm is used.
+make ci86.lina64.fas
 fasm ci86.lina64.fas
-mv ci86.lina64.fas ci86.lina64
+mv ci86.lina64 ci86.lina64
+
+2012 sep 20
+The 64 version is now made using fasm, so
+make lina64
+uses fasm.
+`` make glina64 '' uses gas and works only on a 64 bit system.

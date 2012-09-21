@@ -1,6 +1,6 @@
 CIFORTH CUSTOMIZATION FOR LINUX
 
-COPYRIGHT (c) 2000-2002 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2012 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -8,8 +8,8 @@ Public License as published by the Free Software Foundation.
 
 
 Forth is a tool for evolutionary programming. This is the
-binary distribution of lina 4.0, a stable release. Without notice
-it applies to all updates 4.0.#.
+binary distribution of lina 5.#, still in beta. Without notice
+it applies to all updates 5.#.
 lina is
 the Linux native (= c-less) version of ciforth (common Intel
 Forth), an interpret environment and compiler for Forth. It is
@@ -23,8 +23,11 @@ understand a compiler in all details, this is your best, if not
 only, choice. ciforth sports the highest documentation to
 binary proportion in the EDP industry, barring m4 on Coherent.
 
+The following applies to the 64 bit version, replace lina
+by lina64 everywhere.
+
 Unpack in the directory where you want to use it by :
-    tar fxz lina-4.0.0.gz
+    tar fxz lina-5####.gz
 
 Now you can use lina by :
     lina
@@ -36,6 +39,7 @@ or view it:
 
 View the same information by :
     info -f ci86.lina.info
+or view ci86.lina.pdf with an appropriate tool.
 
 Viewing the file ``ci86.lina.html'' with a html viewer,
 gives a reference extract but with more cross links.
