@@ -1478,7 +1478,7 @@ _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.}
 {: GS2 &X ; GS2 .},{58 }}, enddoc)
 _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      INBRS
-        DC      SWAP, DROP
+        DC      NIP
         DC      LDUP, QBL
         DC      LIT, 10, QERR
         DC      LITER
@@ -1499,7 +1499,7 @@ _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.}
 {: GS2 ^I ; GS2 .},{9 }}, enddoc)
 _HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
         DC      INBRS
-        DC      SWAP, DROP
+        DC      NIP
         DC      LDUP, QBL
         DC      LIT, 10, QERR
         DC      LIT, '@', LSUB
@@ -2226,7 +2226,7 @@ worddoc( {PARSING},{SOURCE},{source},{ --- addr n1},{ISO},
 },
 {{SRC}},
 {{SOURCE DROP TIB @ 8000 OVER + WITHIN .},{_T_},
-{SOURCE SWAP DROP 0 8000 WITHIN .},{_T_} },
+{SOURCE NIP 0 8000 WITHIN .},{_T_} },
 enddoc)
 _HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      SRC, TFET
@@ -2694,6 +2694,18 @@ worddoc( {JUGGLING},{DROP},{drop},{n ---},{ISO,FIG},
 enddoc)
 CODE_HEADER({DROP},{DROP})
         POP     AX
+        _NEXT
+_C
+worddoc( {JUGGLING},{NIP},{nip},{n1 n2---n2},{ISO},
+{Drop the second number from the stack.},
+{{DUP},{DROP}},
+{{S0 @ DSP! 1 2 3 4 NIP .S},{S[  1 2 4 ]},
+{S0 @ DSP!},{} },
+enddoc)
+CODE_HEADER({NIP},{NIP})
+        POP     AX
+        POP     BX
+        PUSH    AX
         _NEXT
 _C
 worddoc( {JUGGLING},{2DROP},{two_drop},{n1 n2 ---},{ISO},
@@ -4828,7 +4840,7 @@ NPNUM2:
 NPNUM3:
         DC      LDUP, QBL, ZEQU
         _0BRANCH(NPNUM5)  _C{ while }
-        DC      SWAP, DROP
+        DC      NIP
         DC      BASE, FETCH, DIGIT
         DC      ZEQU
         DC      LIT, 10, QERR
@@ -4957,7 +4969,7 @@ _C{        DC      DOTS}
         _BRANCH(FOUND1)
 FOUND2: DC      ZERO
 FOUND3: DC      RDROP
-        DC      SWAP,DROP,SWAP,DROP
+        DC      NIP,NIP
         DC      SEMIS
 _C
 worddoc( {DICTIONARY},{PRESENT},{present},{sc --- dea},{},
@@ -5008,7 +5020,7 @@ _HEADER({FIND},{FIND},{DOCOL})
         DC      LDUP, COUNT, PRESENT
         DC      LDUP
         _0BRANCH(FIND1) _C{IF}
-        DC      SWAP, DROP _C{ The address.}
+        DC      NIP _C{ The address.}
         _C{ Fine point, get xt by TCFA. Even if a NOOP.}
         DC      LDUP, TCFA, SWAP
         DC      TFFA, FETCH
@@ -6271,8 +6283,8 @@ worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
 {Perform an arithmetical {{shift}} right.
 The bit pattern of forthvar({n1}) is shifted to the right, except that
 the left most bit (``sign bit'') remains the same.
-_VERBOSE_({{ This is the same as }forthsamp({S>D 2 FM/MOD SWAP
-DROP}){. It is not the same as }forthsamp({2 /}){ , nor is it the
+_VERBOSE_({{ This is the same as }forthsamp({S>D 2 FM/MOD NIP}){.
+It is not the same as }forthsamp({2 /}){ , nor is it the
 same as }forthsamp({1 RSHIFT}){. This confusing word should never
 be used.}})},
 {{2*} },
@@ -6284,7 +6296,7 @@ be used.}})},
 enddoc)
 _HEADER({2/},{TWOSL},{DOCOL})
         DC      STOD, TWO, FMSLAS
-        DC      SWAP, DROP
+        DC      NIP
         DC      SEMIS
 _C
 worddoc( {SUPERFLUOUS},{2*},{two_star},{n1 --- n2},{ISO},
@@ -6392,8 +6404,7 @@ worddoc( {OPERATOR},{/},{slash},{n1 n2 --- quot},{ISO,FIG},
 enddoc)
 _HEADER({/},{SLASH},{DOCOL})
         DC      SLMOD
-        DC      SWAP
-        DC      DROP
+        DC      NIP
         DC      SEMIS
 _C
 worddoc( {OPERATOR},{MOD},{mod},{n1 n2 --- mod},{ISO,FIG},
@@ -6452,8 +6463,7 @@ forthvar({n4}) overflows.
 }, enddoc)
 _HEADER({*/},{SSLA},{DOCOL})
         DC      SSMOD
-        DC      SWAP
-        DC      DROP
+        DC      NIP
         DC      SEMIS
 _C
 worddoc( {MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{CIF,FIG},

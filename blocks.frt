@@ -207,7 +207,7 @@ Note that ISO words are only documented by the comment ISO.
 
 \
 ( MEMORY _AH            )                      \ AvdH B0aug02
-WANT NIP   2 CELLS CONSTANT overhead
+2 CELLS CONSTANT overhead
 VARIABLE _ADP    : _AH ( -- adr ) _ADP @ ;
 : _bump ( -- ) _AH @ _ADP ! ;
 : _alloc_f   ( adr -- ) CELL+ DUP >R CELL+ + R> ! ;
@@ -239,7 +239,6 @@ CREATE _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 : FREE   overhead - _free 0 ;
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
 ( SEARCH-WORDLIST GET-CURRENT SET-CURRENT )    \ AvdH B2aug12
-WANT NIP
 \ ISO
 : GET-CURRENT    CURRENT @ ;
 : SET-CURRENT    CURRENT ! ;
@@ -254,8 +253,9 @@ WANT NIP
 
 
 
+
 ( NOT >= <= UMIN U> D< D- D0= )                  \ AvdH B2aug12
-WANT NIP        WANT ALIAS
+WANT ALIAS
 '0= ALIAS NOT
 : >=   < NOT ;           : <=   > NOT ;
 : UMIN   2DUP U< IF SWAP THEN NIP ;
@@ -350,14 +350,14 @@ CURRENT @   'ONLY >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
-( NIP TUCK -ROT PICK ROLL ) \ AvdH A9sep15
+( TUCK -ROT PICK ROLL )                          \ AvdH B2sep25
 \ Obscure stack manipulations.
-: NIP SWAP DROP ;
 : PICK 1+ CELLS DSP@ + @ ;
 : TUCK SWAP OVER ;
 : -ROT ROT ROT ;
 : ROLL   >R DSP@ DUP CELL+ R> 2 - CELLS
     2DUP + @ >R CELL+ MOVE DROP R> ;
+
 
 
 
@@ -607,7 +607,7 @@ WANT F:
    CRS$ $@ EVALUATE ; IMMEDIATE
 
 ( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH&CH B2jul11
-WANT 2>R   WANT NIP   CREATE CRS$ 4096 ALLOT
+WANT 2>R   CREATE CRS$ 4096 ALLOT
 NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
 \ Add INT as a string.
 : d 0 <# #S #> CRS$ $+! ;
