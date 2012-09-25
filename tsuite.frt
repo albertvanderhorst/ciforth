@@ -3,12 +3,17 @@
 \ pointer to the end or begin of the input buffer
 \ ciforth uses IN instead of >IN
 \ The jump out of a BEGIN loop, is refused with _SECURITY_( _yes )
+\ so NO-SECURITY is invoked.
 
-\ Start with:  lina -r <thisfile
-\ Add things not belonging in the kernel.
+\ Start with:  lina -a <thisfile
+\ Make sure facilities are present.
 WANT TRUE
 WANT DEADBEEF
 WANT DEPTH
+WANT WORD
+WANT NO-SECURITY
+
+                NO-SECURITY
 
 \ (C) 1993 JOHNS HOPKINS UNIVERSITY / APPLIED PHYSICS LABORATORY
 \ MAY BE DISTRIBUTED FREELY AS LONG AS THIS COPYRIGHT NOTICE REMAINS.

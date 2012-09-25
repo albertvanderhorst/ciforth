@@ -26,12 +26,6 @@ TESTING ' ['] FIND EXECUTE IMMEDIATE COUNT LITERAL POSTPONE STATE
 
 TESTING IF ELSE THEN BEGIN WHILE REPEAT UNTIL RECURSE
 
- 1+ REPEAT 123 ELSE ? ciforth ERROR # 19 : CONDITIONALS NOT PAIRED                                     
-{ 1 GI5 ? ciforth ERROR # 12 : NOT RECOGNIZED                                              
-{ 2 GI5 ? ciforth ERROR # 12 : NOT RECOGNIZED                                              
-{ 3 GI5 ? ciforth ERROR # 12 : NOT RECOGNIZED                                              
-{ 4 GI5 ? ciforth ERROR # 12 : NOT RECOGNIZED                                              
-{ 5 GI5 ? ciforth ERROR # 12 : NOT RECOGNIZED                                              
 TESTING DO LOOP +LOOP I J UNLOOP LEAVE EXIT
 
 TESTING DEFINING WORDS: : ; CONSTANT VARIABLE CREATE DOES> >BODY

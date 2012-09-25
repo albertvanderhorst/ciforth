@@ -192,9 +192,9 @@ testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab.lina tsuite.frt ;
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	lina <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
-	(echo WANT WORD; cat tsuite.frt)|lina -a 2>&1 |cat >tsuite.out
-	cvs diff -bBw tsuite.out || true
 	ln -sf forth.lab.lina  forth.lab
+	lina -a <tsuite.frt 2>&1 |cat >tsuite.out
+	cvs diff -bBw tsuite.out || true
 	rm $(TEMPFILE)
 
 # This just generates a test script and testfiles,
