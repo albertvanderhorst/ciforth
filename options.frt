@@ -81,6 +81,7 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 ( -e :_Load_system_electives ) \ AvdH A3sep01
 .SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
 1 LOAD
+WANT -legacy-     \ Must be first to WANT
 WANT CONFIG      WANT HELP       WANT ORDER
 WANT L-S         WANT DO-DEBUG   WANT H.         WANT DUMP
 WANT SUPER-QUAD  WANT FARDUMP    WANT $.         WANT ^
@@ -90,7 +91,6 @@ WANT CASE-INSENSITIVE            CASE-INSENSITIVE
 \ WANT ASSEMBLERi86 WANT DEADBEEF
 
 ( WANT DIR )     WANT ls    \ Select os-interface DOS/Unix
-WANT -legacy-
 : TASK ;
  ( BACKUP        250 LOAD   77 81 THRU )
 OK
@@ -286,8 +286,8 @@ SWITCH-LIBS
 
 
 \
-( -r :_Make_require_available ) \ AvdH A1oct04
-.SIGNON   1 LOAD   OK
+( -r :_This_option_is_available )
+
 
 
 
@@ -366,8 +366,8 @@ BYE
 
 
 \
-( -w :_This_option_is_available )
-
+( -w :_Make_want_available                     ) \ AvdH B2sep22
+.SIGNON   1 LOAD   OK
 
 
 

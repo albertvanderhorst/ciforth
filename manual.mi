@@ -78,7 +78,7 @@ but thisforth does.
 
 thisforth uses the forthdefi({blocks}) as a library
 by addition of the word forthcode({WANTED}) and a convention.
-Starting with forthsamp({thisforth -r}) or most any option you have this
+Starting with forthsamp({thisforth -w}) or most any option you have this
 facility available. If you are already in thisforth, you can
 type forthsamp({1 LOAD}).
 _VERBOSE_({ The extension of forthsamp({.lab}) in
@@ -1112,8 +1112,8 @@ The word forthcode({WANTED}) takes a string and loads the
 first screen where that name occurs in the index line. For
 convenience also forthcode({WANT}) is there that looks ahead
 in the input stream.
-These words are not in the kernel but are in screen 17, that
-corresponds to the forthsamp({-r}) option.
+These words are not in the kernel but are present in screen 1,
+that corresponds to the forthsamp({-a}) option.
 
 Screen 0 and screen 1 to 31 are reserved.
 _HOSTED_({
@@ -1138,7 +1138,7 @@ forthitem
 forthsamp({-a})
 
 Make sure forthcode({WANTED}) is available.
-This is a copy of the forthsamp({-r}) command
+This is a copy of the forthsamp({-w}) command
 because it is easier to remember forthsamp({1 LOAD}) if the screen
 must be loaded manually.
 In addition the signon message is suppressed.
@@ -1248,11 +1248,6 @@ forthsamp({ls more cat cd echo make }) can be typed to Forth as if it where a sh
 forthcode({OS-IMPORT}) is made available to add to this list.
 })
 
-forthitem
-forthsamp({-r})
-
-Make sure forthcode({WANTED}) is available.
-
 _HOSTED_LINUX_({
 forthitem
 forthsamp({-s script})
@@ -1279,6 +1274,11 @@ forthitem
 forthsamp({-v})
 
 Print version and copy right information.
+
+forthitem
+forthsamp({-w})
+
+Make sure forthcode({WANTED}) is available.
 
 forthenditemize
 
