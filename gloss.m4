@@ -3,6 +3,7 @@ dnl $Id$
 dnl NOTE IT DOESN'T WORK WITHOUT THE NEW LINE FOR THE RECURSIVE CALL
 dnl TO FORALL. THIS IS RATHER MYSTERIOUS.
 changequote({,})dnl
+undefine({shift})dnl
 define({forall}, {ifelse(len({$2}),0,,
 {$1}({{{{{{$2}}}}}})
  {forall({$1},{$3},{$4},{$5},{$6},{$7},{$8},{$9},{$10})}

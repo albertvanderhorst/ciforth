@@ -126,18 +126,18 @@
 
 
 
-( -legacy- PRESENT? REQUIRE VOCABULARY ) \ AvdH B2jun18
+( -legacy- $!-BD $/ $^ PRESENT? REQUIRE )       \ AvdH B2sep25
 \ This will make most old programs run.
 WANT ALIAS
+
 '$/ ALIAS $S   '$^ ALIAS $I
-'NAME ALIAS (WORD)     'PARSE ALIAS (PARSE)
- : REQUIRE WANT ;   : REQUIRED WANTED ;
+: $!-BD   2DUP C! 1+ SWAP CMOVE ;
+
+
+
+: REQUIRE WANT ;   : REQUIRED WANTED ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
-
-WANT SAVE-INPUT
-
-
 
 
 
@@ -174,22 +174,22 @@ WANT ALIAS
 
 
 
-( -legacy- WORD FIND ?EXEC ?LOADING   ) \ AvdH B2feb14
+\ -legacy- WORD FIND ?LOADING (WORD) (PARSE)    \ AvdH B2sep25
+WANT ALIAS      WANT $!-BD
 \ ISO
 : FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
->FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
+    >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
+\ ISO
 : WORD   DUP BL = IF DROP NAME ELSE >R
     BEGIN IN[] R@ = WHILE DROP REPEAT DROP -1 IN +!
     R> PARSE THEN   HERE 34 BLANK   HERE $!-BD HERE ;
 
+'NAME ALIAS (WORD)     'PARSE ALIAS (PARSE)
 \ Exceptions on compilation modes.
 : ?EXEC   STATE @   12 ?ERROR ;
 : ?LOADING   BLK   @   0=   16 ?ERROR ;
 
-
-
-\ Last legacy block!
-CREATE -legacy-
+CREATE -legacy-     \ Last legacy block!
 ( **************ISO language extension ***********************)
                     EXIT
 
@@ -270,7 +270,7 @@ WANT NIP        WANT ALIAS
 
 
 
-( SAVE-INPUT RESTORE-INPUT --> )                \ B0jan12
+( -legacy- SAVE-INPUT RESTORE-INPUT --> )             \ B2sep25
 : SAVE-INPUT    SRC 2@ IN @ 3 ;                \ ISO
 : RESTORE-INPUT   DROP IN ! SRC 2! -1 ;        \ ISO
 : -->   BLK @ DUP UNLOCK   1+ DUP LOCK

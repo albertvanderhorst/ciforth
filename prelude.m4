@@ -9,7 +9,9 @@ dnl Change the quotes once and for all.
 dnl This means a separate pass (we do not want this!)
 dnl Note that there is no attempt to quote the paremeters.
 dnl If you try to make Forth words with { } your coat is sold.
+dnl And the reserved word shift is a pain.
 changequote({,})dnl
+undefine({shift})dnl
 changecom{}dnl no braindamaged comment with #
 dnl
 dnl No version means the rcs version id counts.
@@ -42,7 +44,7 @@ define({_no},{${}2})
 define({_SUPPRESSED}, )dnl
 dnl
 dnl     DO NOT TOUCH THESE. INVISIBLE TO NORMAL CONFIGURATORS
-dnl     Memory layout is defined using equ's, default, miscellaneous. 
+dnl     Memory layout is defined using equ's, default, miscellaneous.
 define( {_EQULAYOUT_}, _yes )dnl
 dnl     The layout is defined using sections.
 define({_LAYOUTBYSECTION_}, _no)

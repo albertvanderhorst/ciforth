@@ -2209,12 +2209,13 @@ and _CIF_IN_({the non-inclusive highest address of the parse area
 and a pointer to the next character to be parsed.})
 _ISO_IN_({the number of characters and the current offset in the
 parse area.}) Changing forthsamp({SRC}) takes immediate effect,
-and must be atomic, by using forthcode({RESTORE-INPUT}),
-or changing only the third cell.
+and must be atomic,
+by changing only the third cell or
+by e.g. using forthcode({SET-SRC}).
 The third cell has the alias forthsamp({IN}) .
-_VERBOSE_({{Words like }forthsamp({>IN BLK SOURCE SOURCE-ID}){ are secondary,
+_VERBOSE_({{Words like }forthsamp({>IN BLK SOURCE}){ are secondary,
 and return their output by ``second-guessing'' }forthsamp({SRC}){ .}})},
-{{BLK},{SOURCE-ID}},
+{{SAVE},{RESTORE},{BLK}},
 {{SRC @ TIB @ 8000 OVER + WITHIN .},{_T_} },
 enddoc)
 _HEADER({SRC},{SRC},{DOUSE}, _CELLS(27))      _C{ And 28 and 29.}
@@ -2223,13 +2224,13 @@ _LOAD_({
 worddoc( {PARSING},{SOURCE},{source},{ --- addr n1},{ISO},
 {Return the address and length of the forthdefi({current input source}) .
 },
-{{SRC},{SOURCE-ID}},
-{{SOURCE DROP TIB @ 8000 OVER + WITHIN .},{_T_} },
+{{SRC}},
+{{SOURCE DROP TIB @ 8000 OVER + WITHIN .},{_T_},
+{SOURCE SWAP DROP 0 8000 WITHIN .},{_T_} },
 enddoc)
 _HEADER({SOURCE},{SOURCE},{DOCOL})
-        DC      SRC, FETCH
-        DC      SRC, CELLP, FETCH
-        DC      OVER, LSUB
+        DC      SRC, TFET
+        DC      SWAP, OVER, LSUB
         DC      SEMIS
 _C
 worddoc( {LIBRARY},{L_>IN},{legacy_in},{--- addr},{ISO,WANT},
@@ -3161,18 +3162,20 @@ _HEADER({$!},{SSTOR},{DOCOL})
         DC TDUP, STOR, CELLP, SWAP, LCMOVE
         DC SEMIS
 _C
-worddoc( {STRING},{$!-BD},{string_store_brain_damaged},{sc addr ---},{},
+worddoc( {STRING},{$!-BD},{string_store_brain_damaged},{sc addr ---},{WANT},
 {Store a forthdefin({string constant}) forthvar({sc}) in the
 forthdefi({old fashioned string}) variable at address
 forthvar({addr}), i.e. it can be fetched with
 forthcode({COUNT}). _VERBOSE_({{ (Where would that BD come
 from?)}})},
 {{COUNT},{$!}},
-{{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $!-BD PAD COUNT TYPE},{A9}}, enddoc)
+{{ 1 LOAD WANT $!-BD "A9" PAD $!-BD PAD COUNT TYPE},{A9}}, enddoc)
+_SUPPRESSED({{
 _HEADER({$!-BD},{SSTORBD},{DOCOL})
         DC TDUP, CSTOR, ONEP, SWAP, LCMOVE
         DC SEMIS
 _C
+}})_C{}_END_({ _SUPPRESSED})
 worddoc( {STRING},{$+!},{string_append},{sc addr ---},{},
 {Append a forthdefin({string constant}) forthvar({sc})
 to the string variable at address forthvar({addr}).},
@@ -3527,7 +3530,7 @@ contains a system dependant pointer to any arguments that are
 passed from the operating system to ciforth during startup.
 _HOSTED_X_({{
 In this ciforth it points to an area with the argument count,
-followed by a a null ended array of arguments strings,
+followed by a null ended array of arguments strings,
 then by a null ended array of environment strings.
 }})
 _PC_({{
@@ -4505,16 +4508,15 @@ worddocsafe( {PARSING},{SET-SRC},{set_source},{sc ---},{},
 forthdefi({current input source}). This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
 called forthcode({SET-SRC}). _VERBOSE_({{In practice this word
-is almost always followed by a call to
-}forthcode({INTERPRET}){.}})},
-{{EVALUATE},{INTERPRET}},
+is almost always preceeded by a call to forthcode({SAVE}) and
+followed by a call to }forthcode({INTERPRET}){.}})},
+{{SRC},{EVALUATE},{INTERPRET}},
 {{ "1 2 3 . CR" SET-SRC . . .},{3},
 { . . },{2 1} },
 enddoc)
 _HEADER({SET-SRC},{SETSRC},{DOCOL})
         DC      OVER, PLUS
-        DC      SWAP, SRC, TSTOR
-        DC      SRC, FETCH
+        DC      OVER, SRC, TSTOR
         DC      LIN, STOR _C{  IN}
 _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
         DC     SRC, CELLP, PSTOR
@@ -4935,7 +4937,7 @@ leave a forthdefin({nil pointer}). If the first part of the string
 matches a forthdefi({denotation}) word, that word is found, whether
 the denotation is correct or not.
 },
-{{PRESENT}, {CONTEXT}, {FIND}, {(FIND)},{NAMESPACE}},
+{{PRESENT}, {CONTEXT}, {(FIND)},{PREFIX}, {FIND} },
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is found as a misspelled number!
 { 243 "1ONNOBO" FOUND 0= . .},{0 243},
@@ -4961,9 +4963,9 @@ _C
 worddoc( {DICTIONARY},{PRESENT},{present},{sc --- dea},{},
 { If the string forthvar({sc}) is present as a word name in the
 current search order, return its forthvar({dea}), else leave a
-forthdefi({nil pointer}). For a a forthdefi({denotation}) word, the
+forthdefi({nil pointer}). For a forthdefi({denotation}) word, the
 name must match forthvar({sc}) exactly.},
-{{FOUND}, {CONTEXT}, {FIND}, {(FIND)},{NAMESPACE}},
+{{FOUND}, {CONTEXT}, {(FIND)},{NAMESPACE}, {FIND} },
 { { 123 : BONOBO ; "BONOBO" PRESENT ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is not present though it is a misspelled number
 { 243 "1ONNOBO" PRESENT 0= . .},{-1 243},
@@ -5599,7 +5601,7 @@ i.e. they behave differently when compiled, than interpreted.
 The result is that the compiled code looks the same and behaves the
 same than the interpreted code.
  _VERBOSE_({It is recommended that the only smart words present are
- prefix words.}) },{{IMMEDIATE}},
+ prefix words.}) },{{IN[]}, {IMMEDIATE}},
 { { : Q &Z EMIT NAME TYPE ; PREFIX QPO},{ZPO}},
 enddoc)
 _HEADER({PREFIX},{PREFX},{DOCOL})
@@ -6805,9 +6807,12 @@ FLUS2:
 _C
 worddoc( {BLOCKS~},{SAVE},{save},{ ---},{},
 {Save the content of forthcode({SRC}) on the return stack
-prior to changing the forthdefi({current input source}).
-This must be balanced by a RESTORE in the same definition.},
-{{RESTORE},{SAVE-INPUT}},
+to prepare for changing the forthdefi({current input source}).
+This must be balanced by a forthcode({RESTORE}) in the same
+definition.
+forthcode({CO}) can be used between the two.
+},
+{{SET-SRC},{SAVE-INPUT}},
 {{!CSP : GS1 SAVE 0 IN ! RESTORE ; GS1 34 . ?CSP},{34} },
 enddoc)
 _HEADER({SAVE},{SAVE},{DOCOL})
@@ -6824,7 +6829,7 @@ Restore the content of forthcode({SRC}) from the return stack
 thus restoring the forthdefi({current input source}) to what
 it was when the forthcode({SAVE}) was executed.
 },
-{{RESTORE-INPUT},{SAVE-INPUT}},
+{{SET-SRC},{RESTORE-INPUT}},
 {{( Via SAVE-INPUT)},{}},
 enddoc)
 _HEADER({RESTORE},{RESTO},{DOCOL})
