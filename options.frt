@@ -255,7 +255,8 @@ SWITCH-LIBS
 
 \
 ( -p :_Load_system_preferences ) \ AvdH A1oct02
-5 LOAD
+1 LOAD
+WANT -legacy-     \ Must be first to WANT
 
 
 
@@ -268,8 +269,7 @@ SWITCH-LIBS
 
 
 
-
-
+\
 ( -q :_This_option_is_available )
 
 

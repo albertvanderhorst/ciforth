@@ -1248,6 +1248,12 @@ forthsamp({ls more cat cd echo make }) can be typed to Forth as if it where a sh
 forthcode({OS-IMPORT}) is made available to add to this list.
 })
 
+forthitem
+forthsamp({-p})
+
+Be pedantic about ISO.
+Redefine some words to follow the standard as closely as possible.
+
 _HOSTED_LINUX_({
 forthitem
 forthsamp({-s script})

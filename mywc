@@ -1,11 +1,11 @@
 #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
-lina <<%
+lina -p <<%
 \ ( Environmental dependancies : )
 \ ( This is a ISO Forth Program using only standard ISO Words)
 \ ( plus XOS (par1, par2, par3, function# -- result/error )
 \ ( The following words are not ANSI : none (any more))
 \ ( An environmental dependancy ?BLANK is used. )
-
+WANT WORD
 9 CONSTANT TAB
 10 CONSTANT LF
  ( char -- flag)

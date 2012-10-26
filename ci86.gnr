@@ -6124,19 +6124,19 @@ _C
 worddoc( {OUTPUT},{STDIN},{standard_in},{ --- n},{},
 {The handle to the file input buffer for the console.
 },{},
-{{ STDIN DUP 40 > . 100 < . },{_T_ _T_} },
+{{ STDIN 100 < . },{_T_} },
 enddoc)
 _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
 worddoc( {OUTPUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT DUP 6 > . 100 < . },{_T_ _T_} },
+{{ STDOUT 100 < . },{_T_} },
 enddoc)
 _HEADER({STDOUT},{STDOUT},{DOCON}, 1 )
 _C
 worddoc( {OUTPUT},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
-{{ STDERR DUP 40 > . 100 < . },{_T_ _T_} },
+{{ STDERR 100 < . },{_T_} },
 enddoc)
 _HEADER({STDERR},{STDERR},{DOCON}, 2)
 })_C{}_END_({_DLL_})

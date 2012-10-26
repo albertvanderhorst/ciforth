@@ -174,7 +174,7 @@ WANT ALIAS
 
 
 
-\ -legacy- WORD FIND ?LOADING (WORD) (PARSE)    \ AvdH B2sep25
+\ -legacy- WORD FIND (WORD) (PARSE)             \ AvdH B2oct02
 WANT ALIAS      WANT $!-BD
 \ ISO
 : FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
@@ -185,6 +185,22 @@ WANT ALIAS      WANT $!-BD
     R> PARSE THEN   HERE 34 BLANK   HERE $!-BD HERE ;
 
 'NAME ALIAS (WORD)     'PARSE ALIAS (PARSE)
+
+
+
+
+CREATE -legacy-     \ Last legacy block!
+\ -legacy- ?LOADING ?EXEC                       \ AvdH B2oct02
+
+
+
+
+
+
+
+
+
+
 \ Exceptions on compilation modes.
 : ?EXEC   STATE @   12 ?ERROR ;
 : ?LOADING   BLK   @   0=   16 ?ERROR ;
@@ -591,7 +607,7 @@ VARIABLE LAST-IN         VARIABLE start
   NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
 
 ( struct endstruct ) \ AH A4jun16
-WANT F:
+WANT F:     WANT ?EXEC
 \ Add the create part and does part to respective strings.
 : FDOES>  7 ( length of " FDOES>") GLI CRS$ $+!
     &; (PARSE) 1+ DOES>$ $+! ;
@@ -625,7 +641,7 @@ NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
 ( class endclass M: M; ) \ AH B2jul17
 WANT SWAP-DP WANT FORMAT  VARIABLE LAST-IN   VARIABLE DP-MARKER
 CREATE NAME$ 128 ALLOT          CREATE BLD$ 4096 ALLOT
-: -WORD 1- BEGIN 1- DUP C@ ?BLANK UNTIL ;  ( in -- lastblank)
+: -WORD 1- BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ; ( in -- firstch)
 : {BLD   IN @ LAST-IN ! ;
 \ Retain input since {BLD excluding word name.
 : BLD}   LAST-IN @   IN @ -WORD   OVER -   BLD$ $+! ;
@@ -1902,13 +1918,13 @@ CFOF LIT BY -lit
   ( DIRTY TRICK FOLLOWING :
 make decompile pointer point to exit!)
     DROP 'TASK >DFA @ ;             CFOF (;CODE) BY -pc
-( SEE   7 ) \ AvdH A1MAY17
+( SEE   7 )                                     \ AvdH B2oct02
 \ For ADDRESS: find DEA to which this address belongs.
  : FIND-HEAD ALIGNED ( Important for CREATE )
      BEGIN DUP HEAD? 0= WHILE 0 CELL+ - REPEAT ;
 : TO-DOES   >DFA @ @ ; \ For DEA: hl POINTER in ``DOES>'' code.
  : -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID.. ID.. CR ;
-        CFOF FORTH EX-FOR -dd
+        CFOF ONLY  EX-FOR -dd  \ Use vocab as example.
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 : .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
 : -target DUP ( IP -- IP ,print comment about current jump)
@@ -1918,14 +1934,14 @@ CFOF 0BRANCH BY -0br
 : -br  CR ." BRANCH  [ " -con ." , ] " -target ;
 CFOF BRANCH BY -br
 : KRAAK CRACK ;          : SEE   CRACK ;
-( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct03
+( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct21
 NAMESPACE ASSEMBLER
 \ ISO standard words.
-: CODE ?EXEC NAME (CREATE) ASSEMBLER !CSP  ;
+: CODE NAME (CREATE) ASSEMBLER !CSP  ;
 : ;CODE
 ?CSP   POSTPONE (;CODE)   [COMPILE] [   ASSEMBLER
 ; IMMEDIATE
-: END-CODE ?EXEC ?CSP PREVIOUS ;
+: END-CODE ?CSP PREVIOUS ;
 \ Non standard. A traditional alias for END-CODE .
 : C; END-CODE ;
 

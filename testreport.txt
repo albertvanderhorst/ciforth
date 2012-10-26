@@ -67,7 +67,7 @@ MSDOS 3.3            (Pentium III "Coppermine")
 MASM 1.0 Copyright IBM 1981  (!)
 nasm 0.98
 
-The following tests are defined:
+The following tests are defined:  (USED for 4.0.# and 5.#.#
 A Booting/starting up
 B make it
 C List and load the elective screen (8 before 3.223, now 5)
@@ -80,9 +80,8 @@ E (requires A) KRAAK QUIT
 F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
 After 5.62 : CASE-INSENSITIVE WANT MEASURE-PRIME
 G (r. A) Editing a screen
-H ``wc *.asm''  . later ``mywc *.asm''.
-After 5.62 : ``mywc *.asm''.
-J Binary equivalent than compiled on linux
+H ``wc *.asm''  . After 5.62 : ``mywc *.asm''.
+J Binary equivalent than compiled on linux (for windows Forths and NASM)
 K BYE
 L Dos Directory correct
 M  Documentation complete
@@ -102,10 +101,10 @@ D (requires A) 25 LOAD 0 PAUSE ! 100 SIEVE
 E (requires A) KRAAK QUIT
 F ( <load assembler> 89 LOAD (does nothing for 16 bit, assembly code))
 G (r. A) Editing a screen
-H wc *.asm
+H wc *.asm  after 5.x named mywc
 J Binary equivalent than compiled on linux
 K BYE
-L Dos Directory correct
+L Dos Directory correct  / WANT ls ls
 M  Documentation complete
 N "ls -l" SYSTEM or "dir" SYSTEM
 O Built in regression test
@@ -161,7 +160,7 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_native   5.0.0 lina.cfg        lina          BCDEFHKMOPR
+hosted_linux linux_native   5.0.0 lina.cfg        lina          BCDEFHKLmNOPR
 hosted_linux linux_native   4.0.6 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.5 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.3 lina.cfg        lina          BCDEFHKMOPR
