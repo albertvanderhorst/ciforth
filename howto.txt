@@ -34,7 +34,7 @@ How to save blocks from the first chunk to floppy:
 has been renamed to BACKUP-BLOCKS (was SAVE-BLOCKS)
 2001 sep 1
 
-How to do the Johns Hopkins univerity test
+How to do the Johns Hopkins university test
 lina <tsuite.frt
 Is now incorporated into test.mak
 make testlina
@@ -91,7 +91,7 @@ How to patch, say release 4.0.2
 
 Make sure there is a branch rel-4-0-patches
 Get it. Because you want to make 4.0.2
-apparently you wil get 4.0.2 plus maybe some patches
+apparently you will get 4.0.2 plus maybe some patches
 already made.
 Before release, call this version 4.0.3.
 From then on 4.0.2 can no longer be patched.
@@ -151,5 +151,10 @@ mv ci86.lina64 ci86.lina64
 2012 sep 20
 The 64 version is now made using fasm, so
 make lina64
-uses fasm.
+uses fasm, but the resulting executable doesn't work.
 `` make glina64 '' uses gas and works only on a 64 bit system.
+
+2012 nov 6
+Make a dpmi version by
+releasedpmi.bat
+A windows dll version is henceforth made by the old releasewina.bat

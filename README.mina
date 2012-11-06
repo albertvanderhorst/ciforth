@@ -63,12 +63,6 @@ albert@spenarnc.xs4all.nl
 Include a valid e-mail address, and preferably a phone number.
 Shipping costs (especially oversee) may vary.
 
-ALL PRINTED MANUALS WILL BE DISTINGUISED WORKS OF ART. THEY ARE
-NUMBERED AND THEY HAVE ON THE BACK OF THE FRONT PAGE A HAND
-WRITTEN FORTUNE COOKIE FROM A LARGE COLLECTION, SOME ORIGINAL
-BY THE AUTHOR. EACH MANUAL IS ALSO DEDICATED TO YOU PERSONNALY
-AND SIGNED BY THE AUTHOR OF MINA/ciforth (*BEFORE* he got famous)
-
 If you have access to a Linux system you may
 print the manual (>150 pages) by :
     lpr ci86.mina.ps
@@ -110,6 +104,6 @@ Alternatively you can place mina.bat in your path with the content
 3 Place the executable some where in the path, or drag it to your desktop.
 
 A simple manual installation is superior to an automatic installation
-that would never work acrross all the targeted platforms.
+that would never work across all the targeted platforms.
 I am aware that even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)

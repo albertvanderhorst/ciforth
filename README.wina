@@ -34,7 +34,7 @@ The library contains facilities to access arguments passed to
 a program.
 
 RELEASE CONTENT
-Don't panick! ciforth is just two files.
+Don't panic! ciforth is just two files.
 The rest is documentation (examples and source).
 
 COPYING         Copyright notice
@@ -47,7 +47,7 @@ WINA.PDF        Documentation in Portable Data Format
 WINA.PS         Documentation in PostScript
 FORTH.LAB       Source library
 TOBLK.FRT       Example : transform text into Forth blocks.
-FROMBLK.FRT     Example : transform Forth blocks into text.         
+FROMBLK.FRT     Example : transform Forth blocks into text.
 
 The latest version can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
@@ -64,12 +64,6 @@ you can order a printed manual by sending a request to
 albert@spenarnc.xs4all.nl
 Include a valid e-mail address, and preferably a phone number.
 Shipping costs (especially oversee) may vary.
-
-ALL PRINTED MANUALS WILL BE DISTINGUISED WORKS OF ART. THEY ARE
-NUMBERED AND THEY HAVE ON THE BACK OF THE FRONT PAGE A HAND
-WRITTEN FORTUNE COOKIE FROM A LARGE COLLECTION, SOME ORIGINAL
-BY THE AUTHOR. EACH MANUAL IS ALSO DEDICATED TO YOU PERSONNALY
-AND SIGNED BY THE AUTHOR OF WINA/ciforth (*BEFORE* he got famous)
 
 If you have access to a Linux system you may
 print the manual (>150 pages) by :
@@ -112,7 +106,7 @@ It has to agree with the variable ComSpec that can be inspected
 with the SET command.
 
 A simple manual installation is superior to an automatic installation
-that would never work acrross all the targeted platforms.
+that would never work across all the targeted platforms.
 This Forth worked on windows version I never used or even heard of!
 And of course even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)

@@ -56,7 +56,7 @@ Documentation
 COPYING         : the conditions under which you are allowed to use all this
 README.ciforth  : this text
 testreport.txt  : findings of the final testing before this release
-assembler.mi    : About the internal assember and the separate assembler project.
+assembler.mi    : About the internal assembler and the separate assembler project.
 cifgen.mi       : generic documentation, how to configure.
 ciforth.mi      : Main documentation, and framework
 intro.mi        : Beginners introduction to Forth
@@ -65,7 +65,7 @@ rational.mi     : Installation and other expert level info
 
 (Removed :  editor.txt The built in editor is described in manual.mi .)
 
-Derived sources. For an msdos archive `ci86.' is ommitted.
+Derived sources. For an msdos archive `ci86.' is omitted.
 This is for your convenience, you could have generated them.
 ci86.alone.asm : nasm source for fd-bootable system using BIOS
                     i/o 16bit protected

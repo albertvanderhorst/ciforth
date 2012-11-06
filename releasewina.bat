@@ -2,7 +2,6 @@
 # Not tried out after moving the zip building to the end
 # To be added TOBLOCK.FRT TOBLOCK.EXE
 m=wina
-mm=wna
 s=ci86.$m
 r=release
 echo $m $s
@@ -44,6 +43,6 @@ mv $s.texinfo $m.texinfo
 make $m.ps
 make $m.pdf
 
-rm $mm$1.zip
-echo $mm$1 $RELEASETXT | xargs zip -k -l
-echo $mm$1 $RELEASEBIN | xargs zip -k
+rm $m$1.zip
+echo $m$1 $RELEASETXT | xargs zip -l
+echo $m$1 $RELEASEBIN | xargs zip 
