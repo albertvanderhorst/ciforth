@@ -158,3 +158,8 @@ uses fasm, but the resulting executable doesn't work.
 Make a dpmi version by
 releasedpmi.bat
 A windows dll version is henceforth made by the old releasewina.bat
+
+2013 mar 12
+Generate a regressiontest for xina:
+make testxina.
+

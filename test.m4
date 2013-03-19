@@ -7,7 +7,8 @@ changequote({,})dnl
 define({_T_},{-1})
 define({_TO_},{1})
 define({forall2}, {ifelse(len({$2}),0,{dnl},
-{$1}({{$2}},{{$3}}){forall2({$1},{$4},{$5},{$6},{$7},{$8},{$9},{$10})} )})dnl
+{$1}({{$2}},{{$3}}){forall2({$1},{$4},{$5},{$6},{$7},{$8},{$9},{$10}dnl
+,{$11},{$12},{$13},{$14},{$15},{$16},{$17},{$18},{$19},{$20} )} )})dnl
 dnl Define a words test test on channel 2
 dnl   the corresponding outcome on channel 4
 define({onetest},
@@ -23,7 +24,7 @@ HEX : XX ; CR
 divert(4)dnl
 testing $1
 forall2({onetest},$2)
-S[ ] 
+S[ ]
 divert(2)dnl
 .S CR
 FORGET XX  })
