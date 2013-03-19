@@ -264,7 +264,7 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.s=%.rawtest)
 	rm $(TEMPFILE)
 
-.PRECIOUS: ci86.lina.rawdoc ci86.lina.mig ci86.wina.rawdoc ci86.wina.mig
+.PRECIOUS: ci86.lina.rawdoc ci86.lina.mig ci86.wina.rawdoc ci86.wina.mig $(TEMPFILE)
 
 .PHONY: default all clean RCSCLEAN boot filler moreboot allboot hdboot releaseproof zip mslinks release
 # Default target for convenience

@@ -2468,7 +2468,7 @@ worddoc( {STACKS},{DEPTH},,{--- n1},{ISO,WANT},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthvar({n1}) was pushed.},
 {{DSP@@}},
-{{  1 2 3 DEPTH . DROP DROP DROP},{3} },
+{{  1 2 3 DEPTH . DROP DROP DROP DEPTH .},{3 0} },
 enddoc)
 _HEADER({DEPTH},{DEPTH},{DOCOL})
         DC      SZERO, FETCH

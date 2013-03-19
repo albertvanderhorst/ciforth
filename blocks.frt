@@ -270,18 +270,18 @@ CREATE _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 
 
 
-( NOT >= <= UMIN U> D< D- D0= )                  \ AvdH B2aug12
+( NOT 0<> >= <= UMIN U> D0= D0<> D0< D< D- )     \ AvdH B3mar12
 WANT ALIAS
-'0= ALIAS NOT
-: >=   < NOT ;           : <=   > NOT ;
+'0= ALIAS NOT           : 0<> 0= NOT ;
+: >=   < NOT ;          : <=   > NOT ;
 : UMIN   2DUP U< IF SWAP THEN NIP ;
 : UMAX   2DUP U< IF SWAP THEN DROP ;
 : U>     SWAP U< ;
 
-: D0<>  OR 0= ;          : D0=  OR 0= ;
-: D0<   DROP 0< ;        : D-   DNEGATE D+ ;
-: D<    D- D0< ;         : D>=  D< NOT ;
-: D>    D- DNEGATE D0< ; : D<=  D> NOT ;
+: D0=  OR 0= ;          : D0<>  OR 0<> ;
+: D-   DNEGATE D+ ;     : D0<   NIP 0< ;
+: D<   ROT 2DUP <> IF > NIP NIP ELSE 2DROP < THEN ;
+: D>   2SWAP D< ;       : D>=  D< NOT ;         : D<=  D> NOT ;
 
 
 
@@ -702,39 +702,39 @@ and `IMAX' (exclusive) for which `COMP' returns false.
 or else ``IMAX''.
 An empty range is possible, (`IMIN' and `IMAX' are equal.)
 See also  binary_search_test in the examples section.
-( EXCHANGE PAIR[] --qsort-auxiliary ) \ AvdH A2apr22
-
+( EXCHANGE PAIR[] SORT-B SORT-X ) \ AvdH B3dec22
+WANT QSORT
 \ Exchange the content at ADDR1 and ADDR2 over a fixed LENGTH.
 : EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
                    >R SWAP C!  R> SWAP C! LOOP 2DROP ;
-
-\ For INDEX1 and INDEX2 and TABLE, return corresponding
-\ ADDRESS1 and ADDRESS2 .
+\ For INDEX1 and INDEX2 and TABLE, return ADDR1 and ADDR2 .
 : PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
+\ For TABLE and LENGTH sort cells, must be aligned, len>1
+: SORT-X SWAP 1 CELLS / SWAP 1- OVER + '_x<_ '_x<--> QSORT ;
 
-
-
-
-
-
-\
-( QSORT 1 ) \ AvdH A7feb28
+VARIABLE _table_         VARIABLE _blen_
+: _l_  _blen_ @ * _table_ @ + ;
+: _b<_ _l_ SWAP _l_ _blen_ @ CORA 0 > ;
+: _b<-->  _l_ SWAP _l_ _blen_ @ EXCHANGE ;
+\ For TABLE and LENGTH BLEN sort bytes in collating order.
+: SORT-B _blen_ ! >R _table_ ! 0 R> 1- '_b<_ '_b<--> QSORT ;
+( QSORT 1 ) \ AvdH B3dec22
 WANT DEFER
 \ Compare item N1 and N2. Return ``N1'' IS lower and not equal.
 DEFER *<
 \ Exchange item N1 and N2.
 DEFER *<-->
 
+\ Comparison if addresses used as indices.
+: _x<_ CELLS @ SWAP CELLS @   > ;
+\ Exchanges if addresses used as indices.
+: _x<--> CELLS SWAP CELLS OVER @ OVER @ >R SWAP ! R> SWAP ! ;
 
 
 
 
 
-
-
-
-
-( QSORT 2 ) \ AvdH A7feb28
+( QSORT 2 ) \      AvdH A7feb28
 \ Partition inclusive range LO HI leaving LO_1 HI_1 LO_2 HI_2.
 : PARTITION   2DUP + 2/   >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
@@ -750,7 +750,7 @@ DEFER *<-->
     2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
     RDROP                            ( R: )
     SWAP ROT ;      ( lo_1 hi_1 lo_2 hi_2)
-( QSORT ) \ AvdH A7feb28
+( QSORT SORT ) \ AvdH A7feb28
 \ Sort the range LOW to HIGH inclusive observing
 \ ``LOW'' and ``HIGH'' must be indices compatible with the
 \   current values of *< and *<-->
@@ -760,12 +760,12 @@ DEFER *<-->
     2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
 \ Sort the range FIRST to LAST (inclusive) of item compared
 \ by the xt COMPARING and exchanged by the xt EXHANGING.
-\ All indices in this range must be proper to pass to the xt's.
 \ The xt's are filled in into *< and *<--> and must observe the
-\ interface.
+\ interface. All indices be compatible with these xt's.
 \ After the call we have that :
-\ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
+\ ``For FIRST<=I<J<=LAST      I J *< EXECUTE leaves TRUE.''
 : QSORT   IS *<-->   IS *<   (QSORT) ;
+: SORT    IS *<-->   IS *<   1- (QSORT) ; \ Exclusive
 \ (MERGE)       \ AvdH A3dec02
 \ list : sorted   ulist : unsorted   listp : list level
 \ For EL1 and EL2, return EL1 and EL2 plus "el1 IS lower".
@@ -867,7 +867,7 @@ VARIABLE m ( Modulo number)
 : FACTOR   BEGIN   2DUP /MOD SWAP
     0= IF DROP SWAP DROP EXIT THEN
     OVER < IF DROP EXIT THEN
-2 + AGAIN ;
+    1+ 1 OR AGAIN ;
 
 \ For N return: "It IS prime" ( Cases 0 1 return FALSE)
 : PRIME?
