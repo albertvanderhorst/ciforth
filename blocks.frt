@@ -862,7 +862,7 @@ VARIABLE m ( Modulo number)
 : x^x    m @ >R m !   1 ROT ROT
    BEGIN   DUP 1 AND IF   reduce_1-   THEN reduce_2/
       DUP 0= UNTIL   2DROP   R> m ! ;
-( PRIME? FACTOR GCD                        ) \ AvdH A9feb06
+( PRIME? FACTOR GCD                        ) \ AvdH B3apr03
 \ For N and HINT return FACTOR >= hint, maybe n.
 : FACTOR   BEGIN   2DUP /MOD SWAP
     0= IF DROP SWAP DROP EXIT THEN
@@ -870,13 +870,13 @@ VARIABLE m ( Modulo number)
     1+ 1 OR AGAIN ;
 
 \ For N return: "It IS prime" ( Cases 0 1 return FALSE)
-: PRIME?
-  DUP 4 < IF 1 > EXIT THEN     \ 0 1 2 3
-  DUP 1 AND 0= IF DROP 0 EXIT THEN  \ Even non-prime.
-  DUP 3 FACTOR = ;
+: PRIME?   DUP 4 < IF 1 > ELSE DUP 2 FACTOR = THEN ;
 
 \ For M N , return their GCD.
 : GCD   BEGIN OVER MOD DUP WHILE SWAP REPEAT DROP ;
+
+
+
 
 ( /STRING -LEADING DROP-WORD        )           \ AvdH B@aug12
 

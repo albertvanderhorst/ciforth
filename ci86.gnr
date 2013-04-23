@@ -325,16 +325,15 @@ BOOTOFFSET EQU 0
 })_C{}_END_({ _SWITCH_})
 
 _HOSTED_LINUX_({
-include(constant.m4)
+_BITS32_({include(constant.m4) })
+_BITS64_({include(constant_64.m4) })
 RAWIO           EQU     (ECHO _OR_ ICANON)
 _LINUX_C_({Called from c. Remainder c-routines to be called from here.
         extern  c_type,c_expec,c_key,c_qterm
         extern  c_rslw, c_block_exit, c_block_init, c_debug
         GLOBAL  ciforth})
 })_C{}_END_({ _HOSTED_LINUX_})
-_HOSTED_OSX_({
-include(constant_osx.m4)
-})_C{}_END_({ _HOSTED_OSX_})
+_HOSTED_OSX_({include(constant_osx.m4) })
 _PC_({
 create  EQU     0x3C00
 open    EQU     0x3D00
@@ -1990,12 +1989,12 @@ _C{      Initialisation block for user variables through DOC-LINK}
 _C{       <<<<< must be in same order as user variables >>>>>}
 _C{ Still fig-compatible! Both entries take two cells.}
 _C
-        MOV     WOR,_OFFSET COLD
+        LEA     WOR,[COLD]
         JMP     _CELL_PTR[WOR]          _C{Hope stacks are still okay.}
         _ALIGN(_CELLS(1))
 dnl This is for indirect threaded code, loading HIP with PHA would be portable.
 _C{ Make it possible to revector WARM. You can even make it low level. }
-        MOV     WOR,_OFFSET WARM
+        LEA     WOR,[WARM]
         JMP     _CELL_PTR[WOR]          _C{Hope stacks are still okay.}
         _ALIGN(_CELLS(1))
 USINI:  DC      STRUSA   dnl
@@ -7342,11 +7341,26 @@ that are handled by forthcode({XOS5}) .
 enddoc)
 _LINUX_N_({
 CODE_HEADER({XOS},{XOS})
+_BITS32_({
         POP     AX        _C{ Function number}
-        POP     DX        _C{ Third parameter, if any}
-        POP     CX        _C{ Second parameter, if any}
+        POP     DX        _C{ Third parameter, or dummy}
+        POP     CX        _C{ Second parameter, or dummy}
         POP     BX        _C{ First parameter.}
         INT     0x80        _C{ Generic call on LINUX }
+})_C{}_END_({_BITS32_})
+_BITS64_({
+        LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
+        MOV     [RPO],HIP
+_C({        XCHG    BX,HIP       #Save HIP in BX  why not })
+        POP     AX        # Function number
+        POP     DX        # Third parameter, or dummy
+        POP     SI        # Second parameter, or dummy
+        POP     DI        # First parameter.
+        SYSCALL             # Generic call on LINUX
+        MOV     HIP,[RPO]    _C{ Restore}
+        LEA     RPO,[RPO+_CELLS(1)]
+_C({        XCHG    BX,HIP   #Restore      why not })
+})_C{}_END_({_BITS64_})
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 })_C{}_END_({_LINUX_N_})
@@ -7379,13 +7393,26 @@ _LINUX_N_({
 CODE_HEADER({XOS5},{XOS5})
         LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
         MOV     [RPO],HIP
+
+_BITS32_({
         POP     AX        _C{ Function number}
-        POP     DI        _C{ 5th parameter, if any}
-        POP     SI        _C{ 4th parameter, if any}
-        POP     DX        _C{ Third parameter, if any}
-        POP     CX        _C{ Second parameter, if any}
+        POP     DI        _C{ 5th parameter, or dummy}
+        POP     SI        _C{ 4th parameter, or dummy}
+        POP     DX        _C{ Third parameter, or dummy}
+        POP     CX        _C{ Second parameter, or dummy}
         POP     BX        _C{ First parameter.}
         INT     0x80        _C{ Generic call on LINUX }
+})_C{}_END_({_BITS32_})
+_BITS64_({
+        POP     AX          # Function number
+        POP     %R8         # 5th parameter, or dummy
+        POP     %R10        # 4th parameter, or dummy
+        POP     DX          # Third parameter, or dummy
+        POP     SI          # Second parameter, or dummy
+        POP     DI          # First parameter.
+        SYSCALL             # Generic call on LINUX
+})_C{}_END_({_BITS64_})
+
         MOV     HIP,[RPO]    _C{ Restore}
         LEA     RPO,[RPO+_CELLS(1)]
         _PUSH     _C{ Positive means okay. Negative means -errno.}
@@ -7435,16 +7462,30 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 {{ 123 10 MS . },{123}},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
+_BITS32_({
+_C{ Use select because nanosleep has a 20 MS resolution. }
         DC      LIT, 1000, LIT, 1000000, SSMOD _C{ (ms -- us s) }
-        _BITS64_({DC    LIT, TV, LSTOR, LIT, TV+4, LSTOR}
-        ,{ DC      LIT, TV, TSTOR})
+        DC      LIT, TV, TSTOR
         DC      ZERO, ZERO
         DC      ZERO, ZERO
         DC      LIT, TV
        DC      LIT, _newselect, XOS5
+})_C{}_END_({ _BITS32_})
+_BITS64_({
+_C{ Use select because nanosleep has a 20 MS resolution. }
+_C{ Maybe change because 64 bits is better. }
+        DC      LIT, 1000, LIT, 1000000, SSMOD _C{ (ms -- us s) }
+        DC      LIT, TV, LSTOR, LIT, TV+4, LSTOR
+        DC      ZERO, ZERO
+        DC      ZERO, ZERO
+        DC      LIT, TV
+        DC      LIT, _newselect, XOS5
+})_C{}_END_({ _BITS64_})
+
         DC      QERRUR
         DC      SEMIS
-TV:     _RESB( 8 )
+TV:     _RESB( _CELLS(2) )   _C{ A time_t and a long, both cells.}
+
 _C
 })_C{}_END_({ _HOSTED_X_})
 _PC_({
@@ -8450,8 +8491,8 @@ _HEADER({KEY?},{KEYQ},{DOCOL})
         DC      NEGATE        _C{ 1 -> flag.}
         DC      ZERO, LIT, RAWIO, STTERM
         DC      SEMIS
-        _ALIGN(4)
-RFDS:   _RESB(128)     _C{32 channels maximum.}
+        _ALIGN(_CELLS(1))
+RFDS:   _RESB( _CELLS(32))     _C{32 channels maximum.}
 _C
 worddoc( {OUTPUT},{TYPE},{type},{addr count ---},{ISO,FIG},
 {Transmit forthvar({count}) characters from forthvar({addr}) to
@@ -10699,7 +10740,7 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to linux, with status as stored. }
-        DC      XCODE, FETCH, X, X, ONE, XOS
+        DC      XCODE, FETCH, X, X, LIT, exit, XOS
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
 })_C{}_END_({ _HOSTED_X_})
 _C
