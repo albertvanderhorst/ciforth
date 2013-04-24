@@ -41,7 +41,7 @@ _osx_execve  EQU     59
 fork    EQU 0x2
 waitpid EQU     0x7
 
-RAWIO           EQU     (ECHO | ICANON)
+RAWIO           EQU     (ECHO _OR_ ICANON)
 
 ; ------------------------------------------------------------
 ;   End of constants stolen from C in OSX environment.

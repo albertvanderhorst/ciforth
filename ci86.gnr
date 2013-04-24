@@ -7404,13 +7404,13 @@ _BITS32_({
         INT     0x80        _C{ Generic call on LINUX }
 })_C{}_END_({_BITS32_})
 _BITS64_({
-        POP     AX          # Function number
-        POP     %R8         # 5th parameter, or dummy
-        POP     %R10        # 4th parameter, or dummy
-        POP     DX          # Third parameter, or dummy
-        POP     SI          # Second parameter, or dummy
-        POP     DI          # First parameter.
-        SYSCALL             # Generic call on LINUX
+        POP     AX        _C{ Function number            }
+        POP     %R8       _C{ 5th parameter, or dummy    }
+        POP     %R10      _C{ 4th parameter, or dummy    }
+        POP     DX        _C{ Third parameter, or dummy  }
+        POP     SI        _C{ Second parameter, or dummy }
+        POP     DI        _C{ First parameter.           }
+        SYSCALL           _C{ Generic call on LINUX      }
 })_C{}_END_({_BITS64_})
 
         MOV     HIP,[RPO]    _C{ Restore}
