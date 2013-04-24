@@ -7462,7 +7462,7 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 {{ 123 10 MS . },{123}},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
-_BITS32_({
+dnl _BITS32_({  Maybe change because 64 bits has better nanosleep
 _C{ Use select because nanosleep has a 20 MS resolution. }
         DC      LIT, 1000, LIT, 1000000, SSMOD _C{ (ms -- us s) }
         DC      LIT, TV, TSTOR
@@ -7470,22 +7470,13 @@ _C{ Use select because nanosleep has a 20 MS resolution. }
         DC      ZERO, ZERO
         DC      LIT, TV
        DC      LIT, _newselect, XOS5
-})_C{}_END_({ _BITS32_})
-_BITS64_({
-_C{ Use select because nanosleep has a 20 MS resolution. }
-_C{ Maybe change because 64 bits is better. }
-        DC      LIT, 1000, LIT, 1000000, SSMOD _C{ (ms -- us s) }
-        DC      LIT, TV, LSTOR, LIT, TV+4, LSTOR
-        DC      ZERO, ZERO
-        DC      ZERO, ZERO
-        DC      LIT, TV
-        DC      LIT, _newselect, XOS5
-})_C{}_END_({ _BITS64_})
+dnl })_C{}_END_({ _BITS32_})
+dnl _BITS64_({
+dnl })_C{}_END_({ _BITS64_})
 
         DC      QERRUR
         DC      SEMIS
 TV:     _RESB( _CELLS(2) )   _C{ A time_t and a long, both cells.}
-
 _C
 })_C{}_END_({ _HOSTED_X_})
 _PC_({
@@ -9328,8 +9319,7 @@ SYSARG2: DSS     "-c"
         _ALIGN(_CELLS(1))
 COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
         _ALIGN(_CELLS(1))
-        _C{ These are longs, not cells! }
-SYSARGS:DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
+SYSARGS:DC   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 _C
 })_C{}_END_({_LINUX_N_})
 _HOSTED_OSX_({
