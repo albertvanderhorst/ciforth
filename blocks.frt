@@ -110,6 +110,38 @@
    ELSE   "BDOSN"  PRESENT IF
       "wina.pdf" SYSTEM THEN THEN ;
 
+( -syscalls- ) ?LI ?32                  \ AvdH B3apr23
+
+ 13 CONSTANT __NR_time
+ 43 CONSTANT __NR_times
+  1 CONSTANT __NR_exit
+
+120 CONSTANT __NR_clone
+ 37 CONSTANT __NR_kill
+ 48 CONSTANT __NR_signal
+ 12 CONSTANT __NR_chdir
+
+
+
+
+
+CREATE -syscalls-
+( -syscalls- ) ?LI ?64                  \ AvdH B3apr23
+
+201 CONSTANT __NR_time
+100 CONSTANT __NR_times
+ 60 CONSTANT __NR_exit
+
+ 56 CONSTANT __NR_clone
+ 62 CONSTANT __NR_kill
+ 48 CONSTANT __NR_signal
+ 80 CONSTANT __NR_chdir
+
+
+
+
+
+CREATE -syscalls-
 ( -legacy- ) CF: ?LI \ AvdH A8jun24
 
 
@@ -280,7 +312,7 @@ WANT ALIAS
 
 : D0=  OR 0= ;          : D0<>  OR 0<> ;
 : D-   DNEGATE D+ ;     : D0<   NIP 0< ;
-: D<   ROT 2DUP <> IF > NIP NIP ELSE 2DROP < THEN ;
+: D<   ROT 2DUP <> IF > NIP NIP ELSE 2DROP U< THEN ;
 : D>   2SWAP D< ;       : D>=  D< NOT ;         : D<=  D> NOT ;
 
 
@@ -302,8 +334,8 @@ WANT ALIAS
 
 
 \
-( TIME&DATE ) CF: ?LI \ AH A30610
-: SSE   0 0 0 13 XOS ; ( Seconds since epoch: 1970/1/1)
+( TIME&DATE ) CF: ?LI                   \ AH B30423
+WANT -syscalls-  : SSE   0 0 0 __NR_time XOS ; ( 1970/1/1)
 : |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
 CREATE TABLE ( start of month within leap period) -1
     31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
@@ -1134,14 +1166,14 @@ PAD DUP 80 ACCEPT EVALUATE 1000000 *
 
 
 
-( MS@ ) CF: ?LI \ AvdH A2oct21
-\ Assuming we run on an 486 or better, and a 32 bits Forth
+( MS@ ) CF: ?LI \ AvdH B3apr23
+WANT -syscalls-
+
 
 
 DECIMAL
 
-: MS@ 0 0 0 43 XOS 10 * ;
-
+: MS@ 0 0 0 __NR_times XOS 10 * ;
 
 
 
@@ -1431,9 +1463,9 @@ WANT Z$@   WANT COMPARE   WANT ENV
  D-SIZE 8 + CONSTANT G-SIZE
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
- : SAVE-SYSTEM \ Save the system in a file with NAME .
-( 0 SM 28 + ! ( Kill sections) HERE BM - D-SIZE ! ( dict size)
-   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+ : SAVE-SYSTEM ( ISO )   HERE BM - D-SIZE ! ( dict size) 
+   0 SM 28 + ! 1 SM 38 + ! ( Kill sections) 
+   U0 @   0 +ORIGIN   40 CELLS  MOVE ( Save user variables)
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
@@ -1487,20 +1519,20 @@ HEX   40 CELLS CONSTANT US
 
 \
 ( THREAD-PET KILL-PET PAUSE-PET ) CF: ?LI \ A2nov16
-WANT CVA   HEX
+WANT CVA   WANT -syscalls-      HEX
 \ Exit a thread. Indeed this is exit().
-: EXIT-PET 0 _ _ 1 XOS ;
-\ Do a preemptive pause. ( more or less 1 MS )
-: PAUSE-PET 0 0 1000 0 DSP@ 8E XOS5 DROP ;
+: EXIT-PET 0 _ _ __NR_exit XOS ;
+\ Do a preemptive pause. ( abuse MS )
+: PAUSE-PET 1 MS ;
 
 \ Create a thread with dictionary SPACE. Execute XT in thread.
 : THREAD-PET CREATE S0 @ 2 CELLS - , R0 @ , 0 , CVA ALLOT
     DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
-    112 R@ @ _ 78 XOS DUP 0< IF THROW THEN
+    112 R@ @ _ __NR_clone XOS DUP 0< IF THROW THEN
     DUP IF ( Mother) R> 2 CELLS + !
     ELSE ( Child) DROP RSP! EXECUTE EXIT-PET THEN ;
 \ Kill a THREAD-PET , preemptively. Throw errors.
-: KILL-PET >BODY 2 CELLS + @ 9 _ 25 XOS ?ERRUR ;
+: KILL-PET >BODY 2 CELLS + @ 9 _ __NR_kill XOS ?ERRUR ;
 DECIMAL
 ( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH A2jul5
 WANT SET
@@ -1663,9 +1695,9 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 
 
 ( SET-TRAPS  INSTALL-TRAPS ) CF: ?LI \ AvdH A3jun12
-
+WANT -syscalls-
 \ Make sure any traps restart Forth at ADDRESS .
-: SET-TRAPS  32 0 DO I OVER _ 48 XOS DROP LOOP DROP ;
+: SET-TRAPS  32 0 DO I OVER _ __NR_signal XOS DROP LOOP DROP ;
 
 \ Still fig tradition: warm and cold starts below origin
 : SET-TRAPS-WARM   -2 CELLS +ORIGIN   SET-TRAPS ;
@@ -2312,9 +2344,9 @@ CREATE cmdbuf 1000 ALLOT
      ^J PARSE cmdbuf $+!        \ Append
      cmdbuf $@ SYSTEM          \  Execute
 ;
-?LI
+?LI WANT -syscalls-
 \ Change directory to SC .
-: cdED   ZEN HERE HERE 12 XOS ?ERRUR ;
+: cdED   ZEN HERE HERE __NR_chdir XOS ?ERRUR ;
 
 
 
@@ -3309,4 +3341,4 @@ WANT BIN-SEARCH
 
 
 
-( 3216  last line.)
+( 3344  last line.)
