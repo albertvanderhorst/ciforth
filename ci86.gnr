@@ -7352,11 +7352,11 @@ _BITS64_({
         LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
         MOV     [RPO],HIP
 _C({        XCHG    BX,HIP       #Save HIP in BX  why not })
-        POP     AX        # Function number
-        POP     DX        # Third parameter, or dummy
-        POP     SI        # Second parameter, or dummy
-        POP     DI        # First parameter.
-        SYSCALL             # Generic call on LINUX
+        POP     AX       _C{ Function number              }
+        POP     DX       _C{ Third parameter, or dummy    }
+        POP     SI       _C{ Second parameter, or dummy   }
+        POP     DI       _C{ First parameter.             }
+        SYSCALL          _C{  Generic call on LINUX       }
         MOV     HIP,[RPO]    _C{ Restore}
         LEA     RPO,[RPO+_CELLS(1)]
 _C({        XCHG    BX,HIP   #Restore      why not })
@@ -7405,8 +7405,8 @@ _BITS32_({
 })_C{}_END_({_BITS32_})
 _BITS64_({
         POP     AX        _C{ Function number            }
-        POP     %R8       _C{ 5th parameter, or dummy    }
-        POP     %R10      _C{ 4th parameter, or dummy    }
+        POP     R8       _C{ 5th parameter, or dummy    }
+        POP     R10      _C{ 4th parameter, or dummy    }
         POP     DX        _C{ Third parameter, or dummy  }
         POP     SI        _C{ Second parameter, or dummy }
         POP     DI        _C{ First parameter.           }

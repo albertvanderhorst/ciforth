@@ -85,6 +85,15 @@ define({RAX},{{%RAX}})dnl
 define({RBX},{{%RBX}})dnl
 define({RCX},{{%RCX}})dnl
 define({RDX},{{%RDX}})dnl
+dnl 64 bit registers
+define({R8},{{%R8}})dnl
+define({R9},{{%R9}})dnl
+define({R10},{{%R10}})dnl
+define({R11},{{%R11}})dnl
+define({R12},{{%R12}})dnl
+define({R13},{{%R13}})dnl
+define({R14},{{%R14}})dnl
+define({R15},{{%R15}})dnl
 dnl in behalf of ports
 define({_DX16},{{%DX}})dnl
 define({_AX16},{{%AX}})dnl
