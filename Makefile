@@ -63,7 +63,7 @@ ssort   \
 INDICES= cp fn ky pg tp vr
 
 # Different assemblers should generate equivalent Forth's.
-ASSEMBLERS= masm nasm gas
+ASSEMBLERS= nasm  gas fasm masm
 # Forth assembler sources that can be made using any assembler
 # on any system, maybe needing a file constant.m4
 TARGETS= lina lina64 wina mina xina \
@@ -124,10 +124,12 @@ $(SRCMI) \
 EXAMPLES = \
 ci86.alone.asm  \
 ci86.mina.msm  \
-ci86.wina.asm  \
-ci86.linux.asm  \
+ci86.wina.fas  \
 ci86.lina.asm  \
+ci86.lina.fas \
+ci86.lina.s  \
 ci86.lina64.s  \
+ci86.lina64.fas \
 ci86.alonehd.asm  \
 forth.lab.wina \
 forth.lab.lina \

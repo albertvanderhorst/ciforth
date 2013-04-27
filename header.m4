@@ -10,7 +10,7 @@ define({_STRINGINLINE},
 {DC      SKIP
          DC      len({$1})
 SB{}_sc: DSS      _quoted}({{$1}})
-{       _ALIGNED_({_ALIGN(4)})
+{       _ALIGNED_({_ALIGN})
         DC      LIT, SB{}_sc
         DC      LIT, len({$1})
 define({_sc},{incr}(_sc))dnl })dnl
@@ -37,10 +37,10 @@ _C  ********_star(len({$1}))
 _C  *   {{$1}}   *
 _C  ********_star(len({$1}))
 _C
-_ALIGNED_({        _ALIGN(4)},{dnl})
+_ALIGNED_({        _ALIGN},{dnl})
 N_$2:
         {_STRING}({{$1}}))
-_ALIGNED_({        _ALIGN(4)},{dnl})
+_ALIGNED_({        _ALIGN},{dnl})
 ifelse(0,len($2),,$2:)
         DC    ifelse(0,len($3),0x0,$3)
         DC    ifelse(0,len($4),$2+HEADSIZE,$4)
@@ -89,7 +89,7 @@ define({JMPFAR},{DB    0x0EA})dnl
 define({_CELLS},(CW*($1)))dnl
 #
 # Start of Intel dependant code part
-# The _MACRO bit version may be used to redefine   
+# The _MACRO bit version may be used to redefine
 # _NEXT etc. to generate faster code.
 #
 # See definition of NEXT in glossary.
