@@ -238,11 +238,9 @@ ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr
 	rm $(TEMPFILE)
 
 # Using FASM, generating a windows executable on linux.
-# And they can't handle an FS: segment override. (Sure?).
 ci86.%.fas : VERSION %.cfg fasm.m4 ci86.gnr
 	cat $+ | m4 >$(TEMPFILE)
-	sed $(TEMPFILE) -e '/Split here for doc/,$$d' | \
-	sed -e 's/^\(.*\[\)FS:\(.*\)/    DB 0x64\n   \1\2/g' \
+	sed $(TEMPFILE) -e '/Split here for doc/,$$d' \
 	>$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.fas=%.rawdoc)
@@ -350,7 +348,8 @@ hdboot: ci86.alonehd.bin
 
 figdoc.zip : ; echo "checkout an old version for figdoc.zip, use rcs!"
 
-zip : $(RELEASECONTENT) ;\
+# Release a generic system.
+zip : $(RELEASECONTENT) cifgen.info ;\
 	mkdir ciforth-$(VERSION) ;\
 	cp $+ ciforth-$(VERSION) ;\
 	tar -cvzf ciforth-$(VERSION).tar.gz ciforth-$(VERSION) ;\
