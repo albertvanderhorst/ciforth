@@ -29,7 +29,7 @@ define({_BYTE},)
 
 define({_ENDP},)dnl Each ENDP is started with _ENDP in generic listing.
 define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
-define({RELATIVE_WRT_ORIG}, {$1 - ORIG})
+define({RELATIVE_WRT_ORIG}, {$1 - _ORIG})
 
 define({_RESB},       {.SPACE   $1})
 

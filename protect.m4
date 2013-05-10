@@ -35,10 +35,10 @@ define({JMPHERE_FROM_REAL},{
         SET_16_BIT_MODE
         JMP    GDT_CS: _AP_+5
         _BITS32_({SET_32_BIT_MODE})
-        MOV     AX,GDT_DS
-        MOV     DS,AX
-        MOV     ES,AX
-        MOV     SS,AX})dnl
+        MOV     {AX},GDT_DS
+        MOV     DS,{AX}
+        MOV     ES,{AX}
+        MOV     SS,{AX}})dnl
 define({RESTORE_SP},{
         MOV     SPO,_CELL_PTR[SPSAVE]})dnl
 dnl Do everything to setup going to Forth.

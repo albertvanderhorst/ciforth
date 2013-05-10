@@ -826,8 +826,8 @@ _C{ PREPARE-CS 16/32 BITS                                                   }
         STOSW
         MOV     AX,IDENTIFY_PROT
         STOSW
-
-        LGDT    [GDTLOAD]
+        LEA     BX,[GDTLOAD]
+        LGDT    [BX]
 })_C{}_END_({ _SWITCH_})
 
 _HOSTED_MSDOS_({
@@ -1133,7 +1133,7 @@ _SWITCH_({
         CLI     _C{ Wait for stacks to be setup.}
         JMPHERE_FROM_REAL
         MOV     AX,GDT_SS
-        MOV     SS,AX
+        MOV     SS,{AX}
 REP1:
 _BITS32_({
         INC AX                  _C{ Wait until a20 works(!)}
@@ -5883,7 +5883,7 @@ _C{the next call of KEY (INT 0x10 function 0x0E)}
         XOR     {AX},{AX}
         MOV     DS,{AX}
         MOV     [0x417],{AX}
-_       MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
+        MOV     [0x496],{AX} _C{This should improve things, but doesn't.}
 })_C{}_END_({ _BOOTED_})
 
         _SWITCH_({JMPHERE_FROM_OS})
@@ -10914,8 +10914,8 @@ _EQULAYOUT_({
 TEXTEND  EQU     _AP_       _C{ Show end of dictionary.}
 INITDP   EQU     M4_INITDP _C{Where we want new words.}
 ACTUAL_EM EQU    EM  _C{ Different for relocatable code only.}
-         ORG     EM-4
-         DB 0,0,0,0
+         ORG     M4_EM-8    _C{ Silly, NASM doesn't accept EM}
+         DB 0,0,0,0,0,0,0,0
 _SECTION_END_({_TEXT})
 })_C{}_END_({ _EQULAYOUT_})
 

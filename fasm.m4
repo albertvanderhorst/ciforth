@@ -2,9 +2,13 @@ dnl $Id$
 dnl Copyright(2011): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Macro's to adapt the source to Flat Assembler
 divert(-1)
+dnl Directives ignored by FASM.
+define({ASSUME},;)dnl Turn ASSUME into comment.
+define({CSEG},;)dnl Turn CSEG into comment.
 define({TITLE},;)dnl Turn TITLE into comment.
 define({PAGE},;)dnl Turn PAGE into comment.
 define({GLOBAL},{;})dnl Start at first point in executable segment
+
 dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in _HEADER, because index must look in the real string,
 dnl not on some variable that contains the string.
@@ -35,6 +39,7 @@ define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})
 ;
 })_C{}_END_({ _LINUX_N_})
 ;})
+define({SET_16_BIT_MODE},{ use16 })
 define({SET_32_BIT_MODE},{ use32 })
 define({SET_64_BIT_MODE},{ use64 })
 define({_TEXT},{.text})
@@ -45,7 +50,7 @@ define({_BYTE},)
 
 define({_ENDP},)dnl Each ENDP is started with _ENDP in generic listing.
 define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
-define({RELATIVE_WRT_ORIG}, {$1 - ORIG})
+define({RELATIVE_WRT_ORIG}, {$1 - _ORIG})
 
 dnl FASM reserves memory in a sensible way.
 define({_RESB}, {RB  ($1) })
@@ -60,7 +65,7 @@ dnl Introduced in behalf of MASM
 define({_OR_},{OR})
 
 dnl Pointer handling
-define({_BYTE_PTR},{BYTE PTR $1})
+define({_BYTE_PTR},{BYTE $1})
 define({_CALL_FAR_INDIRECT},{CALL DWORD PTR [$1]})dnl Perfectly unreasonable!
 define({_FAR_ADDRESS},{[$1:$2]})
 define({_CELL_PTR},{WORD})dnl Sometimes really needed even after introducing [].
@@ -94,4 +99,7 @@ dnl Work around for nasm. Here needed?
 define({A32},{DB 0x67
         })
 define({_FASM_}, _yes )
+dnl STRANGE ODDS AND ENDS
+dnl apparently display is a reserved word.
+define({DISPLAY},{MY_DISPLAY})
 divert{}

@@ -19,7 +19,7 @@ define({_BYTE},)dnl
 dnl
 define({_ENDP},)dnl Each ENDP is started with _ENDP in generic listing.
 define({_EXTRANOP},)dnl where MASM introduces a superfluous NOP
-define({RELATIVE_WRT_ORIG}, {$1 - ORIG})
+define({RELATIVE_WRT_ORIG}, {$1 - _ORIG})
 dnl
 dnl MASM has an unreasonable quirk to reserve memory
 define({_RESB}, {DB      $1 DUP (0)})dnl
