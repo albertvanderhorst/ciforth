@@ -81,6 +81,8 @@ dnl This is an experimental version, restricted to 255 blocks.
 define({_FEWBLOCKS_}, _no) dnl NO MORE!
 dnl Blocks are allocated in a file.
 define({_BLOCKSINFILE_}, _no)
+dnl Blocks are by file (WHAT?)
+define({_BLOCKSBYFILEWS_}, _no)})
 dnl Real BIOS is simulated from protected mode.
 define({_SIMULATE_BIOS_}, _no)
 dnl The keyboard input is accepted key by key, Forth supplies editing.
@@ -277,17 +279,9 @@ dnl ############## USER CHOICES END #########################################
 
 dnl ############## STILL ON WISH LIST ################## IGNORE ##############
 dnl
-dnl Multi tasking, i.e. PAUSE etc.
-define( {_TASK_}, _no)dnl
-dnl
 dnl If undefined, a really minimalistic system results.
 dnl STILL ON WISH LIST
 define( {_MAXIM_}, _no)dnl
-dnl
-dnl To strip even further use NODOUBLE instead of DOUBLE (Not ANSI!)
-dnl STILL ON WISH LIST
-define( {_DOUBLE_}, _no)dnl
-define( {_NODOUBLE_}, _no)dnl
 dnl
 dnl Put interrupts on overflows in. (Not ANSI!)
 dnl In practice you limit your memory to under $7f00.0000.0000.0000

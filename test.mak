@@ -243,6 +243,13 @@ testxina : ci86.xina.rawtest test.m4 ;
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
 
+testmina : ci86.mina.rawtest test.m4 ;
+	m4 test.m4 $<  >$(TEMPFILE)
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	rm $(TEMPFILE)
+
 # #################################################################
 #       Test optimiser section
 # Assumes there is a symbolic link from the official ciasdis archive

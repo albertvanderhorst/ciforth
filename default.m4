@@ -86,10 +86,6 @@ dnl
 dnl If undefined, a really minimalistic system results.
 define( {_MAXIM__}, _no)dnl
 dnl
-dnl To strip even further use NODOUBLE instead of DOUBLE (Not ANSI!)
-define( {_DOUBLE_}, _no)dnl
-define( {_NODOUBLE_}, _no)dnl
-dnl
 dnl Put interrupts on overflows in. (Not ANSI!)
 dnl In practice you limit your memory to under $7f00.0000.0000.0000
 dnl (even less for <64 bit systems) 

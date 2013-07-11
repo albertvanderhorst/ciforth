@@ -9679,7 +9679,7 @@ BLREAD9:
         DC      DERR, FETCH
         _0BRANCH(BLREAD5)              _C{OK}
         DC      ZERO,   PREV,   FETCH,     STOR   _C{This buffer is no good!}
-        DC      LIT,    8, ERROR _C{Read error}
+        DC      LIT,    8, LERROR _C{Read error}
 BLREAD5:  DC      SEMIS
 _C
 worddoc( {BLOCKS},{BLOCK-WRITE},{block_write},{addr blk ---},{},
@@ -9711,7 +9711,7 @@ BLWRIT9:
         DC      DERR, FETCH
         _0BRANCH(BLWRIT5)              _C{OK}
         DC      ZERO,   PREV,   FETCH,     STOR   _C{This  buffer}
-        DC      LIT, 9, ERROR
+        DC      LIT, 9, LERROR
 BLWRIT5:  DC      SEMIS
 _C
 })_C{}_END_({ _RWSECTRK_})
@@ -10914,8 +10914,10 @@ _EQULAYOUT_({
 TEXTEND  EQU     _AP_       _C{ Show end of dictionary.}
 INITDP   EQU     M4_INITDP _C{Where we want new words.}
 ACTUAL_EM EQU    EM  _C{ Different for relocatable code only.}
+_LARGE_({
          ORG     M4_EM-8    _C{ Silly, NASM doesn't accept EM}
          DB 0,0,0,0,0,0,0,0
+})_C{}_END_({ _LARGE_})
 _SECTION_END_({_TEXT})
 })_C{}_END_({ _EQULAYOUT_})
 

@@ -169,6 +169,7 @@ ci86.lina.labtest \
 # Normally VERSION is passed via the command line.
 VERSION=test
 DATE=2030     # To get the newest version
+# M4_DEBUG=--debug=V   # deperado debugging.
 
 RELEASELINA = \
 COPYING   \
@@ -217,7 +218,7 @@ ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 VERSION : ; echo 'define({M4_VERSION},$(VERSION))' >VERSION
 
 ci86.%.asm : %.cfg VERSION nasm.m4 ci86.gnr
-	cat $+ | m4 >$(TEMPFILE)
+	cat $+ | m4 $(M4_DEBUG) >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' >$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \
 	sed -e '/Split here for test/,$$d' >$(@:%.asm=%.rawdoc)
