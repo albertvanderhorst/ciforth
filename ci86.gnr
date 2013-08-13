@@ -3921,7 +3921,7 @@ executed. This is the address that is compiled within high
 level definitions, so it serves as an execution token.
 _VERBOSE_({{In ciforth it has offset 0, so it is actually the
 same as the }forthdefi({DEA}){}}).},
-{{'},{CFA>},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
+{{'},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>PHA}},
 {{' TASK  DUP >CFA = .},{_T_}},
 enddoc)
 _HEADER({>CFA},{TCFA},{DOCOL})
@@ -4029,7 +4029,6 @@ forthvar({addr}).},
 {{ CREATE Q  ' Q >BODY HERE = .},{_T_} },
 enddoc)
 _HEADER({>BODY},{TOBODY},{DOCOL})
-        DC      CTOD
         DC      TDFA, FETCH
         DC      CELLP           _C{ Skip DOES> pointer.}
         DC      SEMIS
@@ -4049,16 +4048,6 @@ unique.}})
 enddoc)
 _HEADER({BODY>},{BODYF},{DOCOL})
         DC      LIT,_CELLS(BD_OFFSET)
-        DC      LSUB
-        DC      SEMIS
-_C
-worddoc( {DICTIONARY~},{CFA>},{code_field_address_from},{cfa --- dea},{},
-{Convert the code field address of a definition to its
-forthdefi({dictionary entry address}) forthvar({dea}).},{{'},{>CFA}},
-{{ : GS1 LIT WORDS ; GS1 CFA> ID.},{WORDS}},
-enddoc)
-_HEADER({CFA>},{CTOD},{DOCOL})
-        DC      LIT,_CELLS(C_HOFFSET)
         DC      LSUB
         DC      SEMIS
 _C
