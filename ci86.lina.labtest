@@ -1,5 +1,6 @@
 1 LOAD
 dnl  $Id$
+dnl Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(4)dnl
 wordtest( {D0<},
 { {WANT D0<},{},
