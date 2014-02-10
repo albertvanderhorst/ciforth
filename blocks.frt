@@ -1317,15 +1317,15 @@ WANT Z$@
 \ Return the argument VECTOR passed by Linux
 : ARGV   ARGS @   CELL+ ;
 \ Return the environment POINTER passed by Linux
-ARGS @   $@ 1+ CELLS +  CONSTANT ENV
+: ENV ARGS @   $@ 1+ CELLS +  ;
 \ Find argument INDEX, counting from one. Return as a STRING.
 : ARG[] CELLS ARGV + @ Z$@ ;
 \ Return POINTER behind the end-0 of the environment.
 : ENV0 ENV BEGIN $@ WHILE REPEAT ;
 \ Shift the arguments, so as to remove argument 1.
-: SHIFT-ARGS   -1 ARGS @ +!
-    ARGV CELL+ >R   R@ CELL+   R@ ENV0 R> CELL+ - MOVE ;
-
+: SHIFT-ARGS  ARGV >R
+    R@ CELL+ CELL+   R@ CELL+  ENV0 R> -   MOVE
+    -1 ARGS @ +! ;
 ( ARG$ ARGC ARG[] SHIFT-ARGS           ) CF: ?PC \ AvdH B2sep21
 HEX    WANT DROP-WORD
 \ Return argument STRING for (prot) DOS.
@@ -1463,8 +1463,8 @@ WANT Z$@   WANT COMPARE   WANT ENV
  D-SIZE 8 + CONSTANT G-SIZE
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
- : SAVE-SYSTEM ( ISO )   HERE BM - D-SIZE ! ( dict size) 
-   0 SM 28 + ! 1 SM 38 + ! ( Kill sections) 
+ : SAVE-SYSTEM ( ISO )   HERE BM - D-SIZE ! ( dict size)
+   0 SM 28 + ! 1 SM 38 + ! ( Kill sections)
    U0 @   0 +ORIGIN   40 CELLS  MOVE ( Save user variables)
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
