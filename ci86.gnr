@@ -333,7 +333,10 @@ _LINUX_C_({Called from c. Remainder c-routines to be called from here.
         extern  c_rslw, c_block_exit, c_block_init, c_debug
         GLOBAL  ciforth})
 })_C{}_END_({ _HOSTED_LINUX_})
-_HOSTED_OSX_({include(constant_osx.m4) })
+_HOSTED_OSX_({
+include(constant_osx.m4)
+RAWIO           EQU     (ECHO _OR_ ICANON)
+})_C{}_END_({ _HOSTED_OSX_})
 _PC_({
 create  EQU     0x3C00
 open    EQU     0x3D00
@@ -2461,9 +2464,7 @@ CODE_HEADER({DSP!},{SPSTO})
         MOV     SPO,AX        _C{RESET PARAM STACK POINTER}
         _NEXT
 _C
-dnl Note that this is now in the .lab .
-dnl If there are more, this documentation should be in the a lab.mi file.
-worddoc( {STACKS},{DEPTH},,{--- n1},{ISO,WANT},
+worddoc( {STACKS},{DEPTH},{depth},{--- n1},{ISO},
 {Leave into forthvar({n1}) the number of items on the data stack,
 before forthvar({n1}) was pushed.},
 {{DSP@@}},
@@ -2475,6 +2476,16 @@ _HEADER({DEPTH},{DEPTH},{DOCOL})
         DC      LSUB
         DC      LIT, CW, SLASH
         DC      ONEM
+        DC      SEMIS
+_C
+worddoc( {STACKS},{CLS},{c_l_s},{ i*x -- },{},
+{Clear the data stack},
+{{DSP@@}},
+{{  1 2 3 CLS DEPTH .},{0} },
+enddoc)
+_HEADER({CLS},{CLS},{DOCOL})
+        DC      SZERO, FETCH
+        DC      SPSTO
         DC      SEMIS
 _C
 dnl was the end of a LOADable option.
@@ -7973,7 +7984,7 @@ _HOSTED_OSX_({
 _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
         DC      ROT, ROT
         DC      LIT, SEEK_SET, X
-        DC      LIT, _osx_lseek, XOS5
+        DC      LIT, lseek, XOS5
         DC      ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_OSX_})
@@ -9324,7 +9335,7 @@ _C{  Get environment vector}
                 DD      LIT, SYSARGS
                 DD      SHELL, CELLP
                 DD      LIT, 3
-        DD      LIT, _osx_execve, XOSV
+        DD      LIT, execve, XOSV
         DC      LIT, 49, LERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:
         DC      LDUP
