@@ -185,7 +185,7 @@ ci86.linux.rawtest
 # No output expected, except for an official version (VERSION=A.B.C)
 # The version number shows up in the diff.
 testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab.lina tsuite.frt ;
-	rm forth.lab
+	rm -f forth.lab
 	cp forth.lab.lina forth.lab
 	m4 $(TESTLINA)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
@@ -238,7 +238,7 @@ testwina : ci86.wina.rawtest test.m4 ;
 
 testxina : ci86.xina.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
-	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
+	echo "'TYPE >DFA @ 'ETYPE >DFA !" >$@.1
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)

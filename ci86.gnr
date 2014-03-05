@@ -1479,7 +1479,7 @@ _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.}
 {: GS1 &H ; GS1 .},{48 },
 {: GS2 &X ; GS2 .},{58 }}, enddoc)
 _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      INBRS
+        DC      PPFET
         DC      NIP
         DC      LDUP, QBL
         DC      LIT, 10, QERR
@@ -1500,7 +1500,7 @@ _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.}
 {: GS1 ^C ; GS1 .},{3 },
 {: GS2 ^I ; GS2 .},{9 }}, enddoc)
 _HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
-        DC      INBRS
+        DC      PPFET
         DC      NIP
         DC      LDUP, QBL
         DC      LIT, 10, QERR
@@ -1595,7 +1595,7 @@ _HEADER({"},{DENQ},{DOCOL}, , B_IMMED + B_DENOT)
         DC      HERE, TOR, ZERO, COMMA
 DENQ1:
         DC      LIT, '"', PARSE         _C{           BEGIN &" PARSE}
-        DC      INBRS, LDUP, LIT, '"', EQUAL _C{           IN[] DUP &" =}
+        DC      PPFET, LDUP, LIT, '"', EQUAL _C{           PP@@ DUP &" =}
         _0BRANCH(DENQ2)                 _C{           WHILE}
         DC      TDROP, ONEP             _C{           2DROP 1+ R@ $+!}
         DC      LDUP, ALLOT, RR, SADD
@@ -1777,7 +1777,7 @@ NOP2:   DC      $+_CELLS(1)
         JMP NEXT
 })_C{}_END_({_OLDDEBUG_ })
 _C
-worddoc( {COMPILING~},{LIT},{lit},{--- n},{FIG,C2},
+worddoc( {COMPILING~},{LIT},{lit},{--- n},{FIG,C},
 {Within a colon-definition, forthcode({LIT}) is compiled followed by a
 _BITS_ bit literal number given during compilation.
 Later execution of forthcode({LIT}) causes the contents of this
@@ -1814,7 +1814,7 @@ _HEADER({RECURSE}, {RECURSE}, {DOCOL}, ,{B_IMMED})
         DC      SEMIS
 _C
 })_C{}_END_({_LOAD_})
-worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C2},
+worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C},
 {The run-time proceedure to unconditionally branch. An in-line
 offset is added to the interpretive pointer forthcode({IP}) to
 branch ahead or back. forthcode({BRANCH}) is compiled by
@@ -1825,7 +1825,7 @@ forthcode({ELSE}) forthcode({AGAIN}) forthcode({REPEAT}) .},
 enddoc)
 _HEADER({BRANCH},{BRAN}, {_VAR_FIELD(SKIP)})
 _C
-worddoc( {CONTROL},{SKIP},{skip},{},{C2},
+worddoc( {CONTROL},{SKIP},{skip},{},{C},
 {Skip over an area in memory, where the length is given in the next cell.
 This length doesn't include the length cell, so it is compatible with
 forthcode({$@@}) .
@@ -1844,7 +1844,7 @@ _ALIGNED_({
         ADD     HIP,AX
         _NEXT
 _C
-worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C2},
+worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C},
 {The run-time proceedure to conditionally branch. If forthvar({f}) is false
 (zero), the following in-line parameter is added to the interpretive
 pointer to branch ahead or back.
@@ -1861,7 +1861,7 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         _NEXT
 _C
 _C
-worddocsafe( {CONTROL~},{(LOOP)},{paren_loop},{},{C2},
+worddocsafe( {CONTROL~},{(LOOP)},{paren_loop},{},{C},
 {The run-time proceedure compiled by LOOP which increments the loop
 index and tests for loop completion.
 },{{LOOP}},
@@ -1880,7 +1880,7 @@ _C{  END OF `DO' LOOP}
         LEA     HIP,[HIP+_CELLS(1)]       _C{ BYPASS BRANCH OFFSET}
         _NEXT
 _C
-worddocsafe( {CONTROL~},{(+LOOP)},{paren_plus_loop},{n ---},{C2},
+worddocsafe( {CONTROL~},{(+LOOP)},{paren_plus_loop},{n ---},{C},
 {The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
 index by n and tests for loop completion.},{{+LOOP}},
 {{." Via +LOOP"},{Via +LOOP}},
@@ -2126,27 +2126,27 @@ _HEADER({?BLANK},{QBL},{DOCOL})
         DC      LBL, ONEP, LESS
         DC      SEMIS
 _C
-worddocsafe( {PARSING},{IN[]},{in_next},{ ---addr c},{CI},
+worddocsafe( {PARSING},{PP@@@@},{parse_pointer_fetch_fetch},{ ---addr c},{CI},
 {Parse the forthdefi({current input source}) leaving the next
 character forthvar({c}) and its address forthvar({addr}) . If
 at the end of the input source, leave a pointer past the end
 and a zero. Advance the input pointer to the next character.
 },
-{{BLK},{WORD},{IN}},
-{{IN[] A   EMIT TIB @ 8000 OVER + WITHIN .},{A{}_T_} },
+{{BLK},{WORD},{PP}},
+{{PP@@ A   EMIT TIB @ 8000 OVER + WITHIN .},{A{}_T_} },
 enddoc)
-_HEADER({IN[]},{INBRS},{DOCOL})
+_HEADER({PP@@},{PPFET},{DOCOL})
         DC      SRC, CELLP, TFET
         DC      OVER, EQUAL
-        _0BRANCH(INBRS1)
+        _0BRANCH(PPFET1)
         DC      ZERO
-        _BRANCH(INBRS2)
-INBRS1:
+        _BRANCH(PPFET2)
+PPFET1:
         DC      LDUP
         _ISO_IN_({ DC      SRC, FETCH, PLUS _C{ Make IN >IN.}})
         DC      CFET
-        DC      ONE, LIN, PSTOR
-INBRS2:
+        DC      ONE, PP, PSTOR
+PPFET2:
         DC      SEMIS
 _C
 worddocsafe( {PARSING},{NAME},{name},{--- sc},{CI},
@@ -2165,14 +2165,14 @@ is appended. Note that this is more deserving of the name
 _HEADER({NAME},{LNAME},{DOCOL})
         DC      X
 PWORD0: DC      DROP
-        DC      INBRS, QBL
+        DC      PPFET, QBL
         DC      OVER, SRC, CELLP, FETCH, LSUB _C{ At end?}
         DC      LAND, ZEQU
         _0BRANCH(PWORD0)
 
         DC      X
 PWORD1: DC      DROP
-        DC      INBRS, QBL
+        DC      PPFET, QBL
         _0BRANCH(PWORD1)
 
         DC      OVER, LSUB
@@ -2199,7 +2199,7 @@ _HEADER({PARSE},{PARSE},{DOCOL})
         _0BRANCH(PARSE8)
         DC      DROP, SRC, CELLP, FETCH
 PARSE8: _ISO_IN_({DC      SRC, FETCH, LSUB })
-        DC      LIN, STOR
+        DC      PP, STOR
         DC SEMIS
 _C
 worddoc( {PARSING},{SRC},{s_r_c},{addr ---},{},
@@ -3243,45 +3243,45 @@ enddoc)
 _HEADER({C/L},{CSLL},{DOCON}, 64)
 _C
 _HIGH_BUF_({
-worddoc( {BLOCKS~},{FIRST},{first},{--- addr1},{},
+worddoc( {BLOCKS~},{_FIRST},{first},{--- addr1},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.},
-{{BLOCK},{LIMIT}},
-{{LIMIT FIRST - B/BUF 2 CELLS + /MOD #BUFF = . .},{_T_ 0}},
+{{BLOCK},{_LIMIT}},
+{{_LIMIT _FIRST - B/BUF 2 CELLS + /MOD #BUFF = . .},{_T_ 0}},
 enddoc)
-_HEADER({FIRST},{FIRST},{DOCON}, BUF1)
+_HEADER({_FIRST},{_FIRST},{DOCON}, BUF1)
 })_C{}_END_({ _HIGH_BUF_})
 _C
 _LOW_BUF_({
         _ALIGN(2)       _C{ Otherwise INT 13 hangs when filling}
         _C{ in into the lba block as a buffer address.}
         DB      0       _C{Padding the odd # of bytes in the name FIRST.}
-worddoc( {BLOCKS~},{FIRST},{first},{--- n},{},
+worddoc( {BLOCKS~},{_FIRST},{first},{--- n},{},
 {A constant that leaves the address of the first (lowest) block
 buffer.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
-},{{BLOCK},{LIMIT}},
-{{LIMIT FIRST - B/BUF 2 CELLS + /MOD DROP #BUFF = .},{_T_}},
+},{{BLOCK},{_LIMIT}},
+{{_LIMIT _FIRST - B/BUF 2 CELLS + /MOD DROP #BUFF = .},{_T_}},
 enddoc)
-_HEADER({FIRST},{FIRST},{DOVAR}, BUF1)
+_HEADER({_FIRST},{_FIRST},{DOVAR}, BUF1)
 BUF1:   _RESB( (KBBUF+2*CW)*NBUF )
 })_C{}_END_({ _LOW_BUF_})
 _C
-worddoc( {BLOCKS~},{LIMIT},{limit},{---- addr1},{},
+worddoc( {BLOCKS~},{_LIMIT},{limit},{---- addr1},{},
 {A constant leaving the address just above the highest memory
 available for a disc buffer.
 _HIGH_BUF_({Actually this is the highest system memory.})
-},{{BLOCK},{FIRST}},
-{{." See FIRST"},{See FIRST}},
+},{{BLOCK},{_FIRST}},
+{{." See _FIRST"},{See _FIRST}},
 enddoc)
-_HEADER({LIMIT},{LIMIT},{DOCON}, BUF1+(KBBUF+2*CW)*NBUF)
+_HEADER({_LIMIT},{_LIMIT},{DOCON}, BUF1+(KBBUF+2*CW)*NBUF)
 _C{ THE END  OF THE MEMORY }
 worddoc( {MEMORY},{EM},{end_memory},{---- addr},{},
 {A constant leaving the address just above the highest memory
 in use by Forth.
 },{{DP},{BM}},
-{{." See FIRST"},{See FIRST}},
+{{." See _FIRST"},{See _FIRST}},
 enddoc)
 _HEADER({EM},{LEM},{DOCON}, ACTUAL_EM)
 _C
@@ -3520,17 +3520,17 @@ the forthdefi({current input source}) has changed.},
 enddoc)
 _HEADER({(BLK)},{PBLK},{DOUSE}, _CELLS(26))
 _C
-worddoc( {INPUT},{IN},{in},{--- addr},{},
+worddoc( {INPUT},{PP},{parse_pointer},{--- addr},{},
 {A user variable containing a pointer within the current input
 text buffer (terminal or disc) from which the next text will be
-accepted. All parsing words use and move the value of forthcode({IN}) .
+accepted. All parsing words use and move the value of forthcode({PP}) .
 This is not conforming to ISO, in the sense that clearing it
 doesn't reset the parse pointer to the start of the current line.
 },
-{{>IN},{WORD},{NAME},{NUMBER},{PARSE},{IN[]}},
-{{: GS1 IN @ IN[] 2DROP IN @ - ; GS1 Q .},{-1}},
+{{>IN},{WORD},{NAME},{NUMBER},{PARSE},{PP@@@@}},
+{{: GS1 PP @ PP@@ 2DROP PP @ - ; GS1 Q .},{-1}},
 enddoc)
-_HEADER({IN},{LIN},{DOUSE}, _CELLS(29))
+_HEADER({PP},{PP},{DOUSE}, _CELLS(29))
 _C
 _LOAD_({
 worddocsafe( {INPUT~},{(>IN)},{paren_iso_in},{--- addr},{},
@@ -4119,7 +4119,7 @@ enddoc)
 _HEADER({?ERROR},{QERR},{DOCOL})
         DC      SWAP
         _0BRANCH(QERR1) _C{IF}
-        DC      LIN, FETCH
+        DC      PP, FETCH
         DC      SRC, FETCH
         DC      LWHERE, TSTOR
         DC      THROW
@@ -4154,7 +4154,7 @@ delimiter.},{},
  {CR 1 WARNING !},{} },
 enddoc)
 _HEADER({?DELIM},{QDELIM},{DOCOL})
-        DC      INBRS
+        DC      PPFET
         DC      QBL
         DC      ZEQU
         DC      LIT, 10, QERR
@@ -4304,7 +4304,7 @@ _HEADER({DECIMAL},{DECA},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddocsafe( {DEFINING~},{(;CODE)},{paren_semicolon_code},{},{C},
+worddocsafe( {DEFINING~},{(;CODE)},{paren_semicolon_code},{},{WANT,C},
 {The run-time proceedure, compiled by forthcode({;CODE}), that rewrites the code
 field of the most recently defined word to point to the following
 machine code sequence. It is used after forthcode({CREATE}) instead of forthcode({DOES>}) if the code following
@@ -4320,7 +4320,7 @@ _HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
-worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{B,ISO,FIG,I,C},
+worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{WANT,ISO,FIG,I,C},
 {Used in the form:
   forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
 Stop compilation and terminate a new defining word
@@ -4528,10 +4528,10 @@ enddoc)
 _HEADER({SET-SRC},{SETSRC},{DOCOL})
         DC      OVER, PLUS
         DC      OVER, SRC, TSTOR
-        DC      LIN, STOR _C{  IN}
+        DC      PP, STOR _C{  IN}
 _ISO_IN_({       DC     SRC, FETCH, NEGATE, LDUP
         DC     SRC, CELLP, PSTOR
-        DC     LIN, PSTOR
+        DC     PP, PSTOR
 })
 _C{       DC      DOTS}
         DC      SEMIS
@@ -4752,13 +4752,13 @@ _HEADER({WORD},{IWORD},{DOCOL})
          DC      LNAME
         _BRANCH(IWORD2)
 IWORD1: DC      TOR
-IWORD3:  DC      INBRS, RR, EQUAL
+IWORD3:  DC      PPFET, RR, EQUAL
         _0BRANCH(IWORD4)
         DC      DROP
         _BRANCH(IWORD3)
 IWORD4:
         DC      DROP
-        DC      LIT, -1, LIN, PSTOR _C{ Backtrace to first non-delimiter.}
+        DC      LIT, -1, PP, PSTOR _C{ Backtrace to first non-delimiter.}
         DC      FROMR, PARSE
 _C{        DC      DOTS}
 IWORD2:
@@ -4826,7 +4826,7 @@ enddoc)
 _HEADER({(NUMBER)},{PNUMB},{DOCOL})
         DC      ZERO, ZERO
         DC      ZERO, DPL, STOR
-NPNUM1:  DC      INBRS   _C{ BEGIN}
+NPNUM1:  DC      PPFET   _C{ BEGIN}
         DC      LDUP, LIT, ADOT, EQUAL
         _0BRANCH(NPNUM2) _C{ case 1 }
         DC      DROP, DPL, STOR
@@ -4880,7 +4880,7 @@ but defining prefixes is more convenient.}})
 enddoc)
 _HEADER({NUMBER},{NUMB},{DOCOL})
 LNUMB:
-        DC      LIT, -1, LIN, PSTOR
+        DC      LIT, -1, PP, PSTOR
         DC      PNUMB, SDLITE
         DC      SEMIS
 _C
@@ -5195,7 +5195,7 @@ forthcode({CATCH}), a non-zero forthvar({tc}) gives a message to the effect
 that this exception has occurred and starts Forth anew.
 },
 {{CATCH},{QUIT},{HANDLER},{?ERROR},{ERROR}},
-{{: GS1 IN @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
+{{: GS1 PP @ SRC @ WHERE 2! 1 2 3 12 THROW ; GS1 },
 { 2 3 12 THROW ; GS1 ? ciforth ERROR # 18 },
  {CR},{} },
 enddoc)
@@ -5328,7 +5328,7 @@ _ALIGNED_({ DC      LALIGN},{dnl})
 _SOURCEFIELD_({
         DC      BLK, FETCH, LDUP, ZEQU
         _0BRANCH(CREA2)
-        DC      DROP, LIN, FETCH
+        DC      DROP, PP, FETCH
 CREA2:  DC      COMMA  _C{Source field.}
 },{dnl})
         _EXTRAFIELD_({DC      ZERO, COMMA
@@ -5429,7 +5429,7 @@ POSTP1:
          DC      COMMA
         DC      SEMIS
 _C
-worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}, {ISO,I,C2},
+worddoc( {COMPILING},{LITERAL},{literal},{n --- n (executing) n --- (compiling)}, {ISO,I,C},
 {If compiling, then compile the stack value forthvar({n}) as a
 _BITS_ bit literal.
 _VERBOSE_({{The intended use is:
@@ -5563,7 +5563,7 @@ _C{       DC      TDUP, LTYPE}
         DC      LDUP, LIT, B_DENOT, LAND _C{Retain copy of flags.}
         _0BRANCH(INTE3B) _C{IF}
         DC      OVER, TNFA, FETCH, FETCH
-        DC      RR, PLUS, LIN, STOR  _C{Skip over prefix.}
+        DC      RR, PLUS, PP, STOR  _C{Skip over prefix.}
 INTE3B:                  _C{THEN }
         DC      RDROP           _C{ Drop old parse pointer.}
         DC      LIT, B_IMMED, LAND
@@ -5612,7 +5612,7 @@ i.e. they behave differently when compiled, than interpreted.
 The result is that the compiled code looks the same and behaves the
 same than the interpreted code.
  _VERBOSE_({It is recommended that the only smart words present are
- prefix words.}) },{{IN[]}, {IMMEDIATE}},
+ prefix words.}) },{{PP@@@@}, {IMMEDIATE}},
 { { : Q &Z EMIT NAME TYPE ; PREFIX QPO},{ZPO}},
 enddoc)
 _HEADER({PREFIX},{PREFX},{DOCOL})
@@ -5679,13 +5679,12 @@ _C{   The link to task is a cold start value only.}
 _C{   It is updated each time a definition is}
 _C{   appended to the 'FORTH' namespace.}
 _C
-worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{B,NISO,FIG,I},
+worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{WANT,NISO,FIG},
 {The name of the namespace that contains machine code definitions.
 In ciforth execution it pushes the associated word list to the
 top of the forthcode({CONTEXT}) stack. (For ISO-compliance it
-would replace the top.) forthcode({ASSEMBLER}) is
-immediate, so it will execute during the creation of a
-colon-definition, to select this namespace at compile time.
+would replace the top.) forthcode({ASSEMBLER}) is not
+immediate.
 This word makes only sense in combination with the words that
 belong to it. So it is present in loadable form in the screens
 file forthfile({forth.lab}) .},
@@ -5789,7 +5788,7 @@ Blank space after the word forthcode({\}) is required.},
 enddoc)
 _HEADER({\},{BACKS},{DOCOL}, , B_IMMED)
 _C{ Backup one character, just in case we are at the end of a line.}
-        DC      LIT, -1, LIN, PSTOR
+        DC      LIT, -1, PP, PSTOR
         DC      LIT,ALF
         DC      PARSE
         DC      TDROP
@@ -6639,14 +6638,14 @@ CODE_HEADER({PW!},{PSTO})
         OUT     _DX16,_AX16   _C{WORD OUTPUT}
         _NEXT
 _C
-worddoc( {BLOCKS~},{PREV},{prev},{--- addr},{},
+worddoc( {BLOCKS~},{_PREV},{prev},{--- addr},{},
 {A variable containing the address of the disc buffer (not its
 content field!) most recently referenced. The
 forthcode({UPDATE}) command marks this buffer to be
 written to disc.},{{(BUFFER)}},
-{ { PREV @ FIRST LIMIT WITHIN .},{_T_} },
+{ { _PREV @ _FIRST _LIMIT WITHIN .},{_T_} },
 enddoc)
-_HEADER({PREV},{PREV},{DOVAR}, )
+_HEADER({_PREV},{_PREV},{DOVAR}, )
         DC      BUF1
 _C
 worddoc( {BLOCKS},{#BUFF},{hash_buf},{--- n},{},
@@ -6663,25 +6662,25 @@ worddoc( {BLOCKS~},{+BUF},{plus_buf},{addr1 --- addr2 ff},{FIG},
 {Advance the disc buffer address forthvar({addr1}) to the address of
 the next buffer forthvar({addr2}) . Boolean forthvar({ff}) is false
 when forthvar({addr2}) is the buffer presently pointed to by variable
-forthcode({PREV}).
+forthcode({_PREV}).
 },{{BLOCK}},
 {
-{ PREV @ DUP +BUF DROP DUP PREV ! FIRST LIMIT WITHIN .},{_T_},
-{ +BUF . DUP FIRST LIMIT WITHIN .},{0 _T_},
-{ +BUF 0= . FIRST LIMIT WITHIN .},{0 _T_},
+{ _PREV @ DUP +BUF DROP DUP _PREV ! _FIRST _LIMIT WITHIN .},{_T_},
+{ +BUF . DUP _FIRST _LIMIT WITHIN .},{0 _T_},
+{ +BUF 0= . _FIRST _LIMIT WITHIN .},{0 _T_},
 }, enddoc)
 _HEADER({+BUF},{PBUF},{DOCOL})
         DC      BBUF, CELLP, CELLP
         DC      PLUS,LDUP
-        DC      LIMIT,EQUAL
+        DC      _LIMIT,EQUAL
         _0BRANCH(PBUF1)
-        DC      DROP,FIRST
-PBUF1:  DC      LDUP, PREV, FETCH, LSUB
+        DC      DROP,_FIRST
+PBUF1:  DC      LDUP, _PREV, FETCH, LSUB
         DC      SEMIS
 _C
 worddoc( {BLOCKS},{UPDATE},{update},{},{ISO,FIG},
 {Marks the most recently referenced block (pointed to by
-forthcode({PREV}) ) as altered. The block will subsequently be
+forthcode({_PREV}) ) as altered. The block will subsequently be
 transferred automatically to disc should its buffer be required for
 storage of a different block. In fact the block is transferred
 to disk immediately.},{{BLOCK},{SCREEN}},
@@ -6690,7 +6689,7 @@ to disk immediately.},{{BLOCK},{SCREEN}},
 },
 enddoc)
 _HEADER({UPDATE},{UPDAT},{DOCOL})
-        DC      PREV, FETCH
+        DC      _PREV, FETCH
         DC      LDUP, CELLP,CELLP
         DC      SWAP, FETCH
         DC      LOFFSET,  FETCH, PLUS
@@ -6706,10 +6705,10 @@ before first use of the disc. _VERBOSE_({{The usage as an
 {{!CSP EMPTY-BUFFERS ?CSP},{}},
 enddoc)
 _HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
-        DC      FIRST
-        DC      LIMIT,OVER
+        DC      _FIRST
+        DC      _LIMIT,OVER
         DC      LSUB,LERASE
-        DC      FIRST, PREV, STOR
+        DC      _FIRST, _PREV, STOR
         DC      SEMIS
         PAGE
 _C
@@ -6732,12 +6731,12 @@ _VERBOSE_({{An update flag would somehow be multiplexed with
 the lock count, but it is not needed in this ciforth.}}) If all
 buffers were locked, forthcode({(BUFFER)}) throws exception 48.
 },
-{{BLOCK},{PREV},{#BUFF},{LOCK},{UNLOCK}},
-{{!CSP 1 (BUFFER) FIRST LIMIT WITHIN . ?CSP},{_T_}},
+{{BLOCK},{_PREV},{#BUFF},{LOCK},{UNLOCK}},
+{{!CSP 1 (BUFFER) _FIRST _LIMIT WITHIN . ?CSP},{_T_}},
 enddoc)
 _HEADER({(BUFFER)},{BUFFER},{DOCOL})
 _C{ Find the buffer, if it is already here.}
-    DC      PREV, FETCH
+    DC      _PREV, FETCH
 BUFFER1:
     DC          TOR, RR, FETCH, OVER, EQUAL
     _0BRANCH(BUFFER3)
@@ -6757,7 +6756,7 @@ _C{ Fill in the house keeping.}
     DC       RR, STOR
     DC       ZERO, RR, CELLP, STOR
 
-    DC       RR, PREV, STOR
+    DC       RR, _PREV, STOR
     DC       FROMR
     DC  SEMIS
 _C
@@ -6776,7 +6775,7 @@ other data, e.g. for implementing a database. }})
 _FEWBLOCKS_({In this experimental version forthsamp({PMASK})
 restricts the number of blocks to 0x0FF.})},
 {{(BUFFER)},{BLOCK-READ},{BLOCK-WRITE},{OFFSET},{UPDATE},{FLUSH},{LOAD}},
-{{!CSP 1 BLOCK FIRST LIMIT WITHIN . ?CSP},{_T_} },
+{{!CSP 1 BLOCK _FIRST _LIMIT WITHIN . ?CSP},{_T_} },
 enddoc)
 _HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
@@ -6789,7 +6788,7 @@ _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
         DC      BLREAD
         DC      ONE, OVER, CELLP, STOR
 BLOCK1:
-        DC      LDUP, PREV, STOR
+        DC      LDUP, _PREV, STOR
         DC      CELLP, CELLP
         DC      SEMIS
 _C
@@ -6799,13 +6798,13 @@ has been transferred to disk.
 They are no longer associated with a block and their content is
 no longer available.
 },{{EMPTY-BUFFERS},{BLOCK},{SCREEN}},
-{{1 BLOCK DROP PREV @ @ 0= . FLUSH PREV @ @ 0= .},{0 _T_} },
+{{1 BLOCK DROP _PREV @ @ 0= . FLUSH _PREV @ @ 0= .},{0 _T_} },
 enddoc)
 _HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
 
 _C{ Unlock all buffers}
-        DC      LIMIT
-        DC      FIRST, CELLP
+        DC      _LIMIT
+        DC      _FIRST, CELLP
         _DO(FLUS2)
 FLUS1:  DC      ZERO, IDO, STOR
         DC      LIT,(KBBUF+2*CW)
@@ -6822,12 +6821,12 @@ definition.
 forthcode({CO}) can be used between the two.
 },
 {{SET-SRC},{SAVE-INPUT}},
-{{!CSP : GS1 SAVE 0 IN ! RESTORE ; GS1 34 . ?CSP},{34} },
+{{!CSP : GS1 SAVE 0 PP ! RESTORE ; GS1 34 . ?CSP},{34} },
 enddoc)
 _HEADER({SAVE},{SAVE},{DOCOL})
         DC      FROMR
         DC      SRC, TFET
-        DC      LIN, FETCH
+        DC      PP, FETCH
         DC      TOR, TOR, TOR
         DC      TOR
         DC SEMIS
@@ -6844,7 +6843,7 @@ enddoc)
 _HEADER({RESTORE},{RESTO},{DOCOL})
         DC      FROMR
         DC      FROMR, FROMR, FROMR
-        DC      LIN, STOR
+        DC      PP, STOR
         DC      SRC, TSTOR
         DC      TOR
         DC SEMIS
@@ -6859,13 +6858,13 @@ saved like this. _VERBOSE_({{In practice the use of
 of the same stream.
 }}) },
 {{SAVE},{RESTORE-INPUT}},
-{{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 IN ! RESTORE-INPUT ; dnl
+{{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 PP ! RESTORE-INPUT ; dnl
     34 GS1 . . ?CSP},{-1 34} },
 enddoc)
 _SUPPRESSED({{
 _HEADER({SAVE-INPUT},{SAVEI},{DOCOL})
         DC      SRC, TFET
-        DC      LIN, FETCH
+        DC      PP, FETCH
         DC      LIT, 3
         DC SEMIS
 }})_C{}_END_({ _SUPPRESSED})
@@ -6887,7 +6886,7 @@ enddoc)
 _SUPPRESSED({{
 _HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
         DC      DROP
-        DC      LIN, STOR
+        DC      PP, STOR
         DC      SRC, TSTOR
         DC      LIT, -1
         DC SEMIS
@@ -6903,7 +6902,7 @@ The result is that its buffer will not be reclaimed
 until an forthcode({UNLOCK}) occurs.},
 {{BLOCK},{UNLOCK},{#BUFF}},
 { {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
-    PREV @ CELL+ @ . FLUSH PREV @ CELL+ @ 0= .},{-1 _T_},
+    _PREV @ CELL+ @ . FLUSH _PREV @ CELL+ @ 0= .},{-1 _T_},
 { : test #BUFF 1+ 0 DO I LOCK LOOP ; test },
 { I LOCK LOOP ; test ? ciforth ERROR # 48 },
 { EMPTY-BUFFERS}, {},
@@ -6925,7 +6924,7 @@ Unlocking without a previous lock may lead to a crash.
 {{LOCK},{#BUFF}},
 {
 {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
- PREV @ CELL+ @ . 1 UNLOCK PREV @ CELL+ @ .},{-1 1} },
+ _PREV @ CELL+ @ . 1 UNLOCK _PREV @ CELL+ @ .},{-1 1} },
 enddoc)
 _HEADER({UNLOCK},{LUNLOCK},{DOCOL})
         DC      BLOCK
@@ -7000,8 +6999,8 @@ changed.},
 {{BLK @ .},{0}},
 enddoc)
 _HEADER({BLK},{BLK},{DOCOL})
-        DC      LIN, FETCH
-        DC      FIRST, LIMIT, WITHIN
+        DC      PP, FETCH
+        DC      _FIRST, _LIMIT, WITHIN
         DC      SRC, TFET, LSUB
         DC      LIT, 1024, EQUAL, LAND
         _0BRANCH(BLK1)
@@ -7437,16 +7436,16 @@ CODE_HEADER({XOS5},{XOS5})
 
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
-worddoc( {OPERATINGSYSTEM},{XOSV},{xos variable},{ nx ...n3 n2 n1 n nc ---ret},{},
+worddoc( {OPERATINGSYSTEM},{XOSV},{xos variable},{ ni ...n3 n2 n1 i nc ---ret},{},
 { Do a traditional Unix type system call forthvar({nc}) (man 2) with
-forthvar({n}) parameters forthvar({n1 n2 n3 n4 n5}). forthvar({ret}) is the return
+forthvar({i}) parameters forthvar({n1 n2 n3 .. ni}). forthvar({ret}) is the return
 value of the call. If it is negative, it is mostly an error,
 such as known by forthemph({errno}) . This makes available
 forthemph({all}) facilities present in _OS_.
 _VERBOSE_({Please note that the parameters appear in reverse order compared to
 normal documentation.})
 },{{?ERRUR}},
-{{1 "CHIMP" 0 0 5 4 XOSV .},{CHIMP5}},
+{{0 0 "CHIMP" SWAP 1 5 4 XOSV .},{CHIMP5}},
 enddoc)
 CODE_HEADER({XOSV},{XOSV})
         POP     AX      _C{ system call no. }
@@ -7819,14 +7818,22 @@ The handle is open for READ_WRITE. },
 {{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}},
 enddoc)
-_HOSTED_X_({
+_HOSTED_OSX_({
+_HEADER({CREATE-FILE},{CREATEF},{DOCOL})
+        DC      TOR, TDUP, DFILE, DROP
+        DD      ZEN, LIT, O_CREAT|O_WRONLY|O_TRUNC, FROMR
+        DD      LIT, open, XOS
+        DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({_HOSTED_OSX_})
+_HOSTED_LINUX_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, TDUP, DFILE, DROP
         DC      ZEN, FROMR, X
         DC      LIT, creat, XOS
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
-})_C{}_END_({_HOSTED_X_})
+})_C{}_END_({_HOSTED_LINUX_})
 _DLL_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      DROP, ZEN, TOR
@@ -9139,6 +9146,8 @@ _C
 worddoc( {BLOCKS},{?DISK-ERROR},{disk_error_},{n---},{},
 {Interpret forthvar({n}) as the status of a disk i/o call and
 forthdefi({signal an error}) if it contains an error condition.
+It is only used to signal errors related to accessing the
+forthcode({BLOCK-FILE}).
 },{{BLOCK-FILE},{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT}}, {}, enddoc)
 _HEADER({?DISK-ERROR},{QDSKER},{DOCOL})
         DC      LIT, 8, QERR
@@ -9374,16 +9383,17 @@ worddoc( {OPERATINGSYSTEM},{XOSFORK},{system},{ --- flag},{},
 Otherwise, if forthvar({flag}) is clear, we are the child else the
 mother.}, {{SYSTEM}}, {}, enddoc )
 CODE_HEADER({XOSFORK},{XOSFORK})
-_C{ This is working code! }
-        MOV     EAX, fork  _C{ Syscall coded in assembler for no good reason}
+_C{ This is coded in assembler because there is a return value in DX :}
+_C{ 0 = parent 1 = child }
+        MOV     EAX, fork  _C{ Syscall with no parameters}
         PUSH EAX
         INT     0x80
         ADD     ESP, 4
 
-        NEG EDX         _C{ Mysterious manipulation }
-        NOT     EDX
-        AND EAX, EDX
-
+        NEG EDX
+        NOT     EDX     _C{ TRUE: parent  FALSE: child }
+        AND EAX, EDX    _C{ parent: like classic fork }
+                        _C{ child: always zero }
         _PUSH
 })_C{}_END_({_HOSTED_OSX_})
 _MODERN_({
@@ -9678,7 +9688,7 @@ BLREAD9:
         DC      TDROP
         DC      DERR, FETCH
         _0BRANCH(BLREAD5)              _C{OK}
-        DC      ZERO,   PREV,   FETCH,     STOR   _C{This buffer is no good!}
+        DC      ZERO,   _PREV,   FETCH,     STOR   _C{This buffer is no good!}
         DC      LIT,    8, LERROR _C{Read error}
 BLREAD5:  DC      SEMIS
 _C
@@ -9710,7 +9720,7 @@ BLWRIT9:
         DC      TDROP
         DC      DERR, FETCH
         _0BRANCH(BLWRIT5)              _C{OK}
-        DC      ZERO,   PREV,   FETCH,     STOR   _C{This  buffer}
+        DC      ZERO,   _PREV,   FETCH,     STOR   _C{This  buffer}
         DC      LIT, 9, LERROR
 BLWRIT5:  DC      SEMIS
 _C
@@ -9816,7 +9826,7 @@ RSLW2:  DC      LDUP, DERR, STOR
 
         DC      ONE, LAND, LDUP
         _0BRANCH(RSLW4)
-_C{        DC      ZERO,   PREV,   FETCH,     STOR   }_C{This  buffer}
+_C{        DC      ZERO,   _PREV,   FETCH,     STOR   }_C{This  buffer}
                                                    _C{ is no good!}
 RSLW4:
         _C{ Handle error}
@@ -10076,7 +10086,7 @@ _HEADER({THEN},{THEN},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{DO},{do},
-{n1 n2 --- (execute) addr n --- (compile)},{ISO,FIG,I,C2},
+{n1 n2 --- (execute) addr n --- (compile)},{ISO,FIG,I,C},
 {Occurs in a colon-definition in form: forthsamp({DO ... LOOP})
 At run time, forthcode({DO}) begins a sequence with repetitive
 execution controlled by a loop limit forthvar({n1}) and an
@@ -10109,7 +10119,7 @@ _HEADER({DO},{DO},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{?DO},{question_do},{n1 n2 --- (execute)
-addr n --- (compile)},{NISO,I,C2},
+addr n --- (compile)},{NISO,I,C},
 {Occurs in a colon-definition in form:
     forthexample({?DO ... LOOP})
 It behaves like forthcode({DO}),
@@ -10136,7 +10146,7 @@ _HEADER({?DO},{QDO},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{LOOP},{loop},
-{ --- (run) addr n --- (compiling)},{ISO,I,C2},
+{ --- (run) addr n --- (compiling)},{ISO,I,C},
 {Occurs in a colon-definition in form:
     forthexample({DO ... LOOP})
 At run-time, forthcode({LOOP}) selectively controls branching
@@ -10162,7 +10172,7 @@ _HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{+LOOP},{plus_loop},
-{n1 --- (run)  addr n2 --- (compile)},{ISO,I,C2},
+{n1 --- (run)  addr n2 --- (compile)},{ISO,I,C},
 {Used in a colon-definition in the form:
     forthexample({DO ... n1 +LOOP})
 At run-time, forthcode({+LOOP}) selectively controls branching
@@ -10192,7 +10202,7 @@ _HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{UNTIL},{until},
-{f --- (run-time) addr n --- (compile)},{ISO,FIG,I,C2},
+{f --- (run-time) addr n --- (compile)},{ISO,FIG,I,C},
 {Occurs within a colon-definition in the form:
               forthexample({BEGIN ... UNTIL})
 At run-time, forthcode({UNTIL}) controls the conditional branch
@@ -10214,7 +10224,7 @@ _HEADER({UNTIL},{UNTIL},{DOCOL}, , B_IMMED)
         DC      LIT, ZBRAN, COMMA, BACKP
         DC      SEMIS
 _C
-worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{ISO,FIG,I,C2},
+worddoc( {CONTROL},{AGAIN},{again},{addr n --- (compiling)},{ISO,FIG,I,C},
 {Used in a colon-definition in the form:
     forthexample({BEGIN ... AGAIN})
 At run-time,
@@ -10235,7 +10245,7 @@ _HEADER({AGAIN},{AGAIN},{DOCOL}, , B_IMMED)
         DC      LIT, BRAN, COMMA, BACKP
         DC      SEMIS
 _C
-worddoc( {CONTROL},{REPEAT},{repeat},{addr1 n1 addr2 n2--- (compiling)},{ISO,FIG,I,C2},
+worddoc( {CONTROL},{REPEAT},{repeat},{addr1 n1 addr2 n2--- (compiling)},{ISO,FIG,I,C},
 {Used within a colon-definition in the form:
     forthexample({BEGIN ... WHILE ... REPEAT})
 At run-time, forthcode({REPEAT}) forces an unconditional branch
@@ -10262,7 +10272,7 @@ _HEADER({REPEAT},{REPEA},{DOCOL}, , B_IMMED)
 _C
 worddoc( {CONTROL},{IF},{if},
 {f --- (run-time) / --- addr n (compile)},
-{ISO,FIG,I,C2},
+{ISO,FIG,I,C},
 {Occurs in a colon-definition in form:
       forthexample({IF (tp) ...  THEN})
     or
@@ -10293,7 +10303,7 @@ _HEADER({IF},{LIF},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{ELSE},{else},{addr1 n1 --- addr2 n2 (compiling)},
-{ISO,FIG,I,C2},
+{ISO,FIG,I,C},
 {Occurs within a colon-definition in the form:
                forthexample({IF ... ELSE ... THEN})
 At run-time, forthcode({ELSE}) executes after the true part
@@ -10324,7 +10334,7 @@ _HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
 _C
 worddoc( {CONTROL},{WHILE},{while},
 {f --- (run-time) addr1 nl --- addr2 n1 addr1 n2(compile-time)},
-{ISO,FIG,I,C2},
+{ISO,FIG,I,C},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
 At run-time, forthcode({WHILE}) selects conditional execution

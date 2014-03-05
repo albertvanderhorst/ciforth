@@ -79,7 +79,7 @@
 
 \
 ( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B0jan12
-: ?LEAVE-BLOCK   IF SRC CELL+ @ IN ! THEN ;
+: ?LEAVE-BLOCK   IF SRC CELL+ @ PP ! THEN ;
 : CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
 0 CELL+
   DUP 2 = CONFIG ?16   DUP 4 = CONFIG ?32   8 = CONFIG ?64
@@ -110,7 +110,7 @@
    ELSE   "BDOSN"  PRESENT IF
       "wina.pdf" SYSTEM THEN THEN ;
 
-( -syscalls- ) ?LI ?32                  \ AvdH B3apr23
+( -syscalls- ) CF: ?LI ?32                      \ AvdH B4feb10
 
  13 CONSTANT __NR_time
  43 CONSTANT __NR_times
@@ -126,7 +126,7 @@
 
 
 CREATE -syscalls-
-( -syscalls- ) ?LI ?64                  \ AvdH B3apr23
+( -syscalls- ) CF: ?LI ?64                      \ AvdH B4feb10
 
 201 CONSTANT __NR_time
 100 CONSTANT __NR_times
@@ -136,6 +136,22 @@ CREATE -syscalls-
  62 CONSTANT __NR_kill
  48 CONSTANT __NR_signal
  80 CONSTANT __NR_chdir
+
+
+
+
+
+CREATE -syscalls-
+( -syscalls- ) CF: ?OSX                         \ AvdH B4feb10
+
+\ 13 CONSTANT __NR_time
+\ 43 CONSTANT __NR_times
+  1 CONSTANT __NR_exit
+
+\ 120 CONSTANT __NR_clone
+\  37 CONSTANT __NR_kill
+\ 48 CONSTANT __NR_signal
+\ 12 CONSTANT __NR_chdir
 
 
 
@@ -177,7 +193,7 @@ WANT ALIAS
 ( -legacy- >IN REFILL  )                      \ AvdH B2aug12
 WANT ALIAS
 \ Use L_>IN instead of >IN , don't store into it!
-: L_>IN IN   @   SRC   @   -   (>IN)   !   (>IN) ;
+: L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
 'L_>IN ALIAS >IN
 : REFILL 0 ;
 
@@ -213,7 +229,7 @@ WANT ALIAS      WANT $!-BD
     >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
 \ ISO
 : WORD   DUP BL = IF DROP NAME ELSE >R
-    BEGIN IN[] R@ = WHILE DROP REPEAT DROP -1 IN +!
+    BEGIN PP@@ R@ = WHILE DROP REPEAT DROP -1 PP +!
     R> PARSE THEN   HERE 34 BLANK   HERE $!-BD HERE ;
 
 'NAME ALIAS (WORD)     'PARSE ALIAS (PARSE)
@@ -319,8 +335,8 @@ WANT ALIAS
 
 
 ( -legacy- SAVE-INPUT RESTORE-INPUT --> )             \ B2sep25
-: SAVE-INPUT    SRC 2@ IN @ 3 ;                \ ISO
-: RESTORE-INPUT   DROP IN ! SRC 2! -1 ;        \ ISO
+: SAVE-INPUT    SRC 2@ PP @ 3 ;                \ ISO
+: RESTORE-INPUT   DROP PP ! SRC 2! -1 ;        \ ISO
 : -->   BLK @ DUP UNLOCK   1+ DUP LOCK
     BLOCK B/BUF SET-SRC ; IMMEDIATE             \ ISO
 
@@ -510,10 +526,10 @@ CF:
 
 
 
-( DEFER IS ) \ AvdH A2apr22
+( DEFER IS ) \ AvdH B4feb28
 
 \ Default action for not filled in deferred word.
-: DEFER-ERROR    -1 13 ?ERROR ;
+: DEFER-ERROR    -1 9 ?ERROR ;
 
 \ Define a word, with a changable behaviour. "deferred" word".
 : DEFER CREATE 'DEFER-ERROR , DOES> @ EXECUTE ;
@@ -630,8 +646,8 @@ CREATE DOES>$ LEN ALLOT   \ Generate fields/methods.
 \ Add STRING and the name of the current struct to CRS$.
 : +NAME$   CRS$ $+!    NAME$ $@ CRS$ $+!   BL CRS$ $C+ ;
 VARIABLE LAST-IN         VARIABLE start
-: RLI IN @ LAST-IN ! ; \ Remember last value of ``IN''.
-: GLI >R LAST-IN @ IN @  R> - OVER - ; \ Input since RLI trim.
+: RLI PP @ LAST-IN ! ; \ Remember last value of ``PP''.
+: GLI >R LAST-IN @ PP @  R> - OVER - ; \ Input since RLI trim.
 : itoa 0 <# #S BL HOLD #> ; \ Transform an INT to a STRING.
 \ Add the first part of a definition of a field to DOES>$.
 : F:   " : " DOES>$ $+! NAME DOES>$ $+!   RLI
@@ -674,9 +690,9 @@ NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
 WANT SWAP-DP WANT FORMAT  VARIABLE LAST-IN   VARIABLE DP-MARKER
 CREATE NAME$ 128 ALLOT          CREATE BLD$ 4096 ALLOT
 : -WORD 1- BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ; ( in -- firstch)
-: {BLD   IN @ LAST-IN ! ;
+: {BLD   PP @ LAST-IN ! ;
 \ Retain input since {BLD excluding word name.
-: BLD}   LAST-IN @   IN @ -WORD   OVER -   BLD$ $+! ;
+: BLD}   LAST-IN @   PP @ -WORD   OVER -   BLD$ $+! ;
 : class   NAME NAME$ $!   NAME$ $@ "VARIABLE ^%s" FORMAT&EVAL
    "" BLD$ $! SWAP-DP   HERE DP-MARKER !   {BLD ;
 : M:   BLD}   HERE DP-MARKER @ - >R   SWAP-DP :
@@ -1097,8 +1113,8 @@ WANT 2>R      WANT MARKER
 : DOC "ENDDOC" SCAN-WORD ;  \ Skip till "ENDDOC".
 
 \ Destructive MARKER
-: ANEW IN @ >R NAME FOUND DUP IF EXECUTE _ THEN DROP
-  R> IN ! MARKER ;
+: ANEW PP @ >R NAME FOUND DUP IF EXECUTE _ THEN DROP
+  R> PP ! MARKER ;
 
 
 \
@@ -1265,11 +1281,11 @@ CREATE -scripting-
 ( :2 :F :R                                    )  \ AvdH B2sep21
 WANT ALIAS
 \ Alias of : , define a word for the second time.
-: :2   IN @ NAME FOUND >R R@ HIDDEN IN !   :   R> HIDDEN ;
+: :2   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R> HIDDEN ;
 \ Use for dummy forward definitions.
 ': ALIAS :F
 \ Resolve an earlier dummy definition for recursion.
-: :R   IN @ NAME FOUND >R R@ HIDDEN IN !   :   R@ HIDDEN
+: :R   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R@ HIDDEN
   LATEST >DFA @ R> >DFA ! ;
 
 
@@ -1470,6 +1486,22 @@ WANT Z$@   WANT COMPARE   WANT ENV
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+( SAVE-SYSTEM TURNKEY ) CF: ?OSX ?32 HEX        \ RS A8
+CREATE MAGIC FEEDFACE , CREATE __DATA &_ C, &_ C, &D C, &A
+C, &T C, &A C, CREATE __LINKEDIT &_ C, &_ C, &L C, &I C, &N
+C, &K C, &E C, &D C, &I C, &T C, : HERE-AT-STARTUP'DP >DFA @
++ORIGIN @ ; : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
+: FIND__DATA SM BEGIN DUP __DATA 6 CORA WHILE 1+ REPEAT ;
+: FIND__LINKEDIT SM BEGIN DUP __LINKEDIT A CORA
+WHILE 1+ REPEAT ; : KILL__LINKEDIT 20 10 DO 0 FIND__LINKEDIT
+I + ! 4 +LOOP 48 38 DO 0 FIND__LINKEDIT I + ! 4 +LOOP ;
+FIND__DATA 1C + CONSTANT __DATASIZE FIND__DATA 18 +
+CONSTANT __FILEOFFSET
+: SAVE-SYSTEM \ Save the system in a file
+KILL__LINKEDIT HERE SM - __FILEOFFSET @  -  __DATASIZE !
+U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
+SM HERE OVER - 2SWAP PUT-FILE ; DECIMAL
+: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
 ( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH A7feb28
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer
@@ -1589,7 +1621,7 @@ WANT TASK-TABLE   WANT CVA
 : (WORD-BACK) BEGIN 1- DUP C@ ?BLANK 0= UNTIL 1+
     BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ;
 \ Return SC the latest word in the input.
-: LATEST-WORD IN @ (WORD-BACK) SRC @ MAX IN ! NAME ( TRIM') ;
+: LATEST-WORD PP @ (WORD-BACK) SRC @ MAX PP ! NAME ( TRIM') ;
 \ The compiled program can't run.
 VARIABLE FAILED    0 FAILED !
 \ The compiled program can run, after reload.
@@ -1607,7 +1639,7 @@ WANT SWAP-DP    WANT LATEST-WORD   WANT NESTED-COMPILE
 \ Make words that look like malformed numbers (like 2R> )
 \ compile without error, but with run time errors.
 \ Loading the same code another time will give correct code.
-: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 IN +!
+: FIX-NMB REMEDY 0 DSP@ 3 CELLS + ! DROP -1 PP +!
 -1 SECOND-PASS !   -1 POSTPONE LITERAL   13 POSTPONE LITERAL
  POSTPONE ?ERROR   " Recompile!" TYPE CR ;
 \ Fix up errors caused by unknown words, if the library can
@@ -1998,10 +2030,10 @@ ASSEMBLER DEFINITIONS
  DECIMAL
 SWAP-DP
 PREVIOUS DEFINITIONS
-( ASSEMBLERi86 )  CF:               \ A7oct19 AvdH
+( ASSEMBLERi86 )  CF:               \ B4feb28 AvdH
 WANT ASSEMBLER   WANT ALIAS
-\ Disallow case-insensitive assembler
-'~MATCH DUP >DFA @ SWAP >PHA <> 13 ?ERROR
+
+
 "ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
 
 : ASSEMBLERi86 ;
@@ -2190,11 +2222,11 @@ C80F 2PI BSWAP,
 08C70F 3PI CMPXCHG8B,
 
 
-( ASSEMBLER-CODES-PENTIUM --fixups_fp ) CF: ?32 \ A7oct19 AvdH
+( ASSEMBLER-CODES-PENTIUM --fixups_fp ) CF: ?32 \ B4feb28 AvdH
    01 00 8 FAMILY|R ST0| ST1| ST2| ST3| ST4| ST5| ST6| ST7|
 0400 00 2 FAMILY|R s| d|     \ Single/Double 16/32
 0400 00 2 FAMILY|R |32 |16   \ memory int
-0008 00 2 FAMILY|R n| r|     \ Normal reverse
+0008 00 2 FAMILY|R n| a|     \ Normal reverse
 0400 00C0 2 FAMILY|R u| m|
 
 

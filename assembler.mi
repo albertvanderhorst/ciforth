@@ -140,7 +140,7 @@ forthendenumerate
 This leaves room for a defect of the following type:
 A valid instruction is rejected or has been totally overlooked.
 
-But opcode maps reveal their Terra incognita relentlessly. So I
+But opcode maps reveal their Terra Incognita relentlessly. So I
 am quite confident to promise a bottle of good Irish whiskey to
 the first one to come up with a defect in this assembler.
 
@@ -184,7 +184,7 @@ size (some do, like forthcode({LEA,}) ),
 then a size fixup is needed ( forthsamp({X|}) or forthsamp({B|}) ).
 forthbreak
 In this assembler this looks like
-forthexample({        INC, B| D0 [BX] })
+forthexample({        INC, B| ZO| [BX] })
 This is completely unambiguous.
 
 These are the phases in which this assembler handles an instruction:
@@ -205,7 +205,7 @@ using e.g. forthcode({IL,}) or forthcode({L,})
 forthitem
 Check whether all commaers, requested either by postit's or fixup's
 are present.
-This check is actually executed by a postit like forthcode({MOV,})
+This check is actually executed by the next postit
 prior to assembling, or by forthcode({END-CODE}).
 forthenditemize
 
@@ -254,7 +254,7 @@ forthexample({ 38 C1 02 4 1FAMILY, POP -- PUSH RST      ( B'|) })
 But of course forthcode({RST}) (the restart instruction) has nothing
 to
 do
-with registers, so it gets a separated out. Then the exception, represented
+with registers, so it gets separated out. Then the exception, represented
 by the hole forthsamp({--}) disappears.
 The bottom line is : the assembler proper now takes 22 lines of code.
 Furthermore the ``call conditional'' and ``return conditional''
@@ -288,7 +288,8 @@ opcodes you are almost there. For if you want to know what the
 precise instruction format of e.g. forthcode({IMUL|AD,}) just
 type forthsamp({SHOW: IMUL|AD,}) You can also type
 forthcode({SHOW-ALL,}) but that takes a lot of time and is more
-intended for test purposes.
+intended for test purposes. The most useful of them all is forthcode({??})
+that for a partially completed instruction shows all possible completions.
 
 @node A7, A8, A6, Assembler
 _VERBOSE_({
@@ -347,7 +348,7 @@ Offset fixups determine the offset or address width : forthcode({XO|})
 forthitem
 Instruction ending in forthkey({I}) have an immediate data field after all
 fixups. This can be either
-forthcode({IB,}) forthcode({IW,}) forthcode({IL,}) ( 8 16 32 bit).
+forthcode({IB,}) forthcode({IW,}) forthcode({IL,}) forthcode({IQ,}) ( 8 16 32 64 bit).
 If there are width fixups they should correspond with the data.
 forthitem
 Instructions ending in forthsamp({|SG}) builtin fixup
@@ -361,18 +362,19 @@ have offsets (for forthcode({BO|}) and forthcode({XO|}) ) that
 must be assembled using forthcode({B,}) or forthcode({L,}) but
 mind the previous point.
 forthitem
-Instruction with r/m can have a register instead of memory indicated
-by the normal fixups forthcode({AX|}) etc.
+If an instructions with r/m has one register, it is always the target,
+i.e. it is modified.
 forthitem
-If instructions with r/m have another register, that one is indicated
-by a prime such as forthcode({AX'|}). Or if an instruction can handle two general
+If instructions with r/m have two registers, the second one is indicated
+by a prime such as forthcode({AX'|}).
+Or if an instruction can handle two general
 registers, the one that cannot be replaced by a memory reference gets a prime.
 forthitem
-Unless forthcode({T|}) forthcode({F|}) (to/from) are present,
-a primed register is the modifiable one,
-else forthcode({T|}) forthcode({F|}) refer to the primed register.
-The primed register is the one
-that cannot be replaced by a memory reference.
+Unless overruled by forthcode({T|}) and forthcode({F|}), a primed register is the modifiable one, e.g.
+in forthcode({LEA,})
+forthitem
+Instruction with r/m can have a register instead of memory indicated
+by the normal fixups forthcode({AX|}) etc.
 forthitem
 At the start of an instruction the mask of the previous instruction
 plus fixup should add up non-overlappingly to a full field.
@@ -464,15 +466,17 @@ that all end in a forthkey({%})-sign.
 In fixup X is used to mean Xell, or the natural word length.
 This is 16 bits for 16 bits segments and 32 bits for 32 bits segments.
 Likewise in PostIt-FixUp AX means Intel's forthcode({AX}) for 16 bits
-segments and forthcode({EAX}) for 32 bits segments.
+segments, forthcode({EAX}) for 32 bits segments and forthcode({RAX})
+for 64 bits segments.
 
 In comma-ing, you must always select the proper one, xell-wide commaers
-always contain either forthkey({W}) or forthkey({L}) .
+always contain either forthkey({W}) or forthkey({L}) or forthkey({Q}).
 
 After the directive forthcode({BITS-16}) code is generated for and checked
 against 16 bit code and data segments.
 After the directive forthcode({BITS-32}) code is generated for and checked
 against 32 bit code and data segments.
+At this moment there is no 64 bit code generated.
 
 In a 16 bits segments the following commaers must be used:
  forthcode({W,}) forthcode({IW,}) forthcode({(RW,)}) and forthcode({RW,}) .
@@ -492,9 +496,10 @@ put forthcode({!TALLY}) before the word that gives the error
 messages.
 This will forthdefi({override the error detection}).
 Proper use of the BITS-xx directives makes this largely unnecessary,
-but it can be needed if you use e.g. an extra segment forthcode({ES|})
+but it can be needed if you use e.g. an extra segment forthcode({ES|})dnl
 that is 16 bits in an otherwise 32 bits environment.
 
+A 64-bit assembler is not yet accomodated.
 @node A9, AA, A8, Assembler
 @section The built in assembler
 
@@ -553,7 +558,7 @@ prefer your fixups in alphabetic order. (A nice rule for those
 Code Standard Police out there?).
 
 And yes forthsamp({ES: OS:
-MOV, X| T| DI'| SIB|, XO| [BP +8* AX] FFFFF800 X,}) though
+MOV, X| T| DI'| XO| [BP +8* AX] FFFFF800 L,}) though
 being correct, and in a logical order, looks still bad, because
 it forthemph({is}) bad in the sense that the Pentium design got
 overboard in complication. (This example is from the built-in assembler,
@@ -642,7 +647,7 @@ forthitem AAM,
 forthitem AAS,
 forthitem ADC, ADCI, ADCI|A, ADCSI,
 forthitem ADD, ADDI, ADDI|A, ADDSI,
-forthitem AND, ANDI, ANDI|A,
+forthitem AND, ANDI, ANDI|A, ANDSI,
 forthitem ARPL,
 forthitem AS:,
 forthitem BOUND,
@@ -710,7 +715,7 @@ forthitem MOVZX|B, MOVZX|W,
 forthitem MUL|AD,
 forthitem NEG,
 forthitem NOT,
-forthitem OR, ORI, ORI|A,
+forthitem OR, ORI, ORI|A, ORSI,
 forthitem OS:,
 forthitem OUTS,
 forthitem OUT|D, OUT|P,
@@ -719,22 +724,22 @@ forthitem POPF,
 forthitem PUSH, PUSH|ALL, PUSH|CS, PUSH|DS, PUSH|ES, PUSH|FS, PUSH|GS, PUSH|SS, PUSH|X,
 forthitem PUSHF,
 forthitem PUSHI|B, PUSHI|X,
-forthitem RCL,
-forthitem RCR,
+forthitem RCL, RCLI,
+forthitem RCR, RCRI,
 forthitem REPNZ,
 forthitem REPZ,
 forthitem RET+, RET, RETFAR+, RETFAR,
-forthitem ROL,
-forthitem ROR,
+forthitem ROL, ROLI,
+forthitem ROR, RORI,
 forthitem SAHF,
-forthitem SAR,
+forthitem SAR, SARI,
 forthitem SBB, SBBI, SBBI|A, SBBSI,
 forthitem SCAS,
 forthitem SET,   (Intel SETcc)
 forthitem SGDT,
-forthitem SHL,
+forthitem SHL, SHLI,
 forthitem SHLD|C, SHLDI,
-forthitem SHR,
+forthitem SHR, SHRI,
 forthitem SHRD|C, SHRDI,
 forthitem SIDT,
 forthitem SLDT,
@@ -753,7 +758,7 @@ forthitem WAIT,
 forthitem XCHG,
 forthitem XCHG|AX,
 forthitem XLAT,
-forthitem XOR, XORI, XORI|A,
+forthitem XOR, XORI, XORI|A, XORSI,
 forthitem ~SIB,
 @end table
 
@@ -845,6 +850,7 @@ forthitem FLDL2E,
 forthitem FLDL2T,
 forthitem FLDLG2,
 forthitem FLDLN2,
+forthitem FLDPI,
 forthitem FLDZ,
 forthitem FMUL,
 forthitem FMULP,
@@ -904,7 +910,7 @@ forthitem d|      : Double (32 bit)
 forthitem m|      : Register is modifiable
 forthitem u|      : Register is unmodifiable
 forthitem n|      : ST0 is first operand (normal)
-forthitem r|      : ST0 is second operand (reverse)
+forthitem a|      : ST0 is second operand (abnormal)
 forthitem |16     : Int width in memory.
 forthitem |32     : Int width in memory.
 @end table
