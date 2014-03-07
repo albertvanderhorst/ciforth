@@ -1516,7 +1516,7 @@ VARIABLE HEAD-DP  \ Fill in pointer
 : EXEHEADER    0  HEAD-DP !  5A4D W,   0 W,   SIZE  200 / W,
   0 W,   10 W,   10 W,   10 W,   0 W,   STACK-OFFSET 100 -  W,
   HEAD-DP @  0 W,   100 W,   -10 W,   SIZE W,   0 W, ;
- PREV CONSTANT G-SIZE  \ Give -g a harmless address.
+ _PREV CONSTANT G-SIZE  \ Give -g a harmless address.
  BM CONSTANT SM          \ Start for -g.
 ( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH A7feb28
 \ Fill in checksum at the required POSITION in the header.
@@ -1840,7 +1840,7 @@ VARIABLE L
 
 ( FOR-BLOCKS SHOW-BLOCK .BL Testing_of_block ) \ AvdH A1oct09
 WANT H.
-: FOR-BLOCKS >R PREV @
+: FOR-BLOCKS >R _PREV @
     BEGIN DUP R@ EXECUTE +BUF WHILE REPEAT R> DROP DROP ;
 : SHOW-BLOCK
 
@@ -1860,10 +1860,10 @@ WANT ALIAS
 : .HEAD $@ " BLOCK NR IS " TYPE   .   $@
 "LOCK IS " TYPE   . ;
 : .SPECIAL
-DUP PREV @ = IF &> ELSE
+DUP _PREV @ = IF &> ELSE
 
 BL THEN EMIT ;
-: DB 0 LIMIT FIRST DO CR DUP . 1+
+: DB 0 _LIMIT FIRST DO CR DUP . 1+
 I .SPECIAL .HEAD .CON B/BUF CELL+ CELL+ +LOOP
 DROP KEY DROP .S ;
 'BLOCK ALIAS BLOCK2
@@ -1943,7 +1943,7 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
  : -co DUP >DFA @ CR H.. ." CONSTANT " ID.. CR ;
         CFOF BL EX-FOR -co
  : -va DUP >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
-    ID.. CR ;              CFOF PREV EX-FOR -va
+    ID.. CR ;              CFOF _PREV EX-FOR -va
  : -us DUP >DFA C@ CR B.. ."  USER " ID.. CR ;
         CFOF FENCE EX-FOR -us
 ( Crack item at POINTER. Leave incremented POINTER , GOON flag)
@@ -2735,7 +2735,7 @@ HEX:
 
 
 ( SET-MEMORY TEST-MEMORY MEM-SIZE ) CF: ?PC ?32 \ AvdH A1oct17
-PREV CONSTANT PROBE  \ Use this as a probe.
+_PREV CONSTANT PROBE  \ Use this as a probe.
 DECIMAL  123456789 CONSTANT MAGIC  HEX
 HERE 10,0000 PROBE + > 0D ?ERROR \ Probe must be in first Mb!
 VARIABLE (MEM-SIZE)   1000 (MEM-SIZE) ! \ Megabytes
@@ -3075,7 +3075,7 @@ NAMESPACE SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
 ( 247 248 ) THRU HEX
 : NEW-COLD
-EMPTY-BUFFERS   FIRST PREV !
+EMPTY-BUFFERS   FIRST _PREV !
 0 CELLS +ORIGIN DUP CELL+ @  40 CELLS CMOVE
 1<>64 LOAD-ALL (ABORT) ;
 'NEW-COLD 'COLD 3 CELLS MOVE
