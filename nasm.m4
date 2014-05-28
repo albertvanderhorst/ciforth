@@ -18,10 +18,10 @@ define({_HEADER_ASM},{;
 ; URL: http://www.cryogen.com/Nasm/
 _HOSTED_OSX_({
 ; This version can be assembled on an OS X system (Apple):
-;   nasm -f macho xina.asm forth.o
-;   ld forth.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o forth
+;   nasm -f macho xina.asm -o xina.o
+;   ld xina.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o xina
 ;And to get the smallest possible executable(optional):
-;   strip forth
+;   strip xina
 })
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
