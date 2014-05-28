@@ -81,8 +81,8 @@
 ( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B0jan12
 : ?LEAVE-BLOCK   IF SRC CELL+ @ PP ! THEN ;
 : CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
-0 CELL+
-  DUP 2 = CONFIG ?16   DUP 4 = CONFIG ?32   8 = CONFIG ?64
+  0 CELL+   DUP 2 = CONFIG ?16   DUP 2 > CONFIG ?32+
+    DUP 4 = CONFIG ?32   DUP 8 = CONFIG ?64 DROP
  "CALL" PRESENT DUP   CONFIG ?WI   \ (MS-windows)
  "BIOS31" PRESENT DUP   CONFIG ?DP   \ DPMI (legacy windows)
  DUP 0= "BIOSN" PRESENT AND DUP   CONFIG ?MS   \ MS-DOS
@@ -121,11 +121,11 @@
  48 CONSTANT __NR_signal
  12 CONSTANT __NR_chdir
 
+HEX
+ 36 CONSTANT __NR_ioctl
+ 8E CONSTANT __NR_select
 
-
-
-
-CREATE -syscalls-
+CREATE -syscalls- DECIMAL
 ( -syscalls- ) CF: ?LI ?64                      \ AvdH B4feb10
 
 201 CONSTANT __NR_time
@@ -137,11 +137,11 @@ CREATE -syscalls-
  48 CONSTANT __NR_signal
  80 CONSTANT __NR_chdir
 
+HEX
+ 10 CONSTANT __NR_ioctl
+ 17 CONSTANT __NR_select
 
-
-
-
-CREATE -syscalls-
+CREATE -syscalls- DECIMAL
 ( -syscalls- ) CF: ?OSX                         \ AvdH B4feb10
 
 \ 13 CONSTANT __NR_time
@@ -157,7 +157,7 @@ CREATE -syscalls-
 
 
 
-CREATE -syscalls-
+CREATE -syscalls- DECIMAL
 ( -legacy- ) CF: ?LI \ AvdH A8jun24
 
 
@@ -174,7 +174,7 @@ CREATE -syscalls-
 
 
 
-( -legacy- $!-BD $/ $^ PRESENT? REQUIRE )       \ AvdH B2sep25
+( -legacy- $!-BD $S $I PRESENT? REQUIRE )       \ AvdH B4may28
 \ This will make most old programs run.
 WANT ALIAS
 
@@ -237,7 +237,7 @@ WANT ALIAS      WANT $!-BD
 
 
 
-CREATE -legacy-     \ Last legacy block!
+
 \ -legacy- ?LOADING ?EXEC                       \ AvdH B2oct02
 
 
@@ -334,13 +334,13 @@ WANT ALIAS
 
 
 
-( -legacy- SAVE-INPUT RESTORE-INPUT --> )             \ B2sep25
+( PARSE-NAME SAVE-INPUT RESTORE-INPUT --> )   \ B4may27
+WANT ALIAS
 : SAVE-INPUT    SRC 2@ PP @ 3 ;                \ ISO
 : RESTORE-INPUT   DROP PP ! SRC 2! -1 ;        \ ISO
 : -->   BLK @ DUP UNLOCK   1+ DUP LOCK
     BLOCK B/BUF SET-SRC ; IMMEDIATE             \ ISO
-
-
+'NAME ALIAS PARSE-NAME                          \ ISO
 
 
 
@@ -590,22 +590,6 @@ CREATE _value_jumps  '@ , '! , '+! ,
 
 
 \
-( @+ SET !SET SET? SET+! .SET set_utility) \ AvdH 2K2may15
-( Obsoleted by bags) WANT ALIAS   '$@ ALIAS @+
-( Build a set "x" with X items. )
-: SET   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
-: !SET   DUP CELL+ SWAP ! ;   ( Make the SET empty )
-: SET?   @+ = 0= ;   ( For the SET : it IS non-empty )
-: SET+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Add ITEM to the SET )
-: .SET   @+ SWAP ?DO I ? 0 CELL+ +LOOP ;   ( Print SET )
-( Retract from SET in same order. Leave ITEM. Use after !SET )
-: SET+@   DUP >R @ @ 0 CELL+ R> +! ;
-( Remove entry at ADDRESS from SET. )
-: SET-REMOVE   >R   DUP CELL+ SWAP  R@ @ OVER -   MOVE
-    -1 CELLS R> +! ;
-( For VALUE and SET : value IS present in set.)
-: IN-SET? $@ SWAP ?DO
-   DUP I @ = IF DROP -1 UNLOOP EXIT THEN 0 CELL+ +LOOP DROP 0 ;
 ( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE BAG-HOLE BAG-INSERT )
 \ Warning uses $@ as as @+
 ( Build a bag with X items. )
@@ -653,22 +637,6 @@ VARIABLE LAST-IN         VARIABLE start
 : F:   " : " DOES>$ $+! NAME DOES>$ $+!   RLI
   HERE start @ - itoa DOES>$ $+!   " ^" DOES>$ $+!
   NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
-
-( struct endstruct ) \ AH A4jun16
-WANT F:     WANT ?EXEC
-\ Add the create part and does part to respective strings.
-: FDOES>  7 ( length of " FDOES>") GLI CRS$ $+!
-    &; (PARSE) 1+ DOES>$ $+! ;
-\ Defining word for the struct. Defer actual creation.
-: struct   NAME NAME$ $!   !CRS$   "VARIABLE ^" +NAME$
-  CRS$ $@ EVALUATE   HERE start !   !CRS$  ": CREATE-" +NAME$
-  " HERE >R " CRS$ $+!   "" DOES>$ $! ;
-\ Create fields and a defining words for the struct.
-: endstruct ?EXEC   start @ HERE - ALLOT   " R> ;" CRS$ $+!
-  CRS$ $@ EVALUATE   DOES>$ $@ EVALUATE
-   !CRS$ ": " +NAME$   " CREATE CREATE-" +NAME$
-   " ^" +NAME$   " !  DOES> ^" +NAME$   " ! ; " CRS$ $+!
-   CRS$ $@ EVALUATE ; IMMEDIATE
 
 ( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH&CH B2jul11
 WANT 2>R   CREATE CRS$ 4096 ALLOT
@@ -942,7 +910,7 @@ VARIABLE m ( Modulo number)
 
 
 
-( RAND ) ?32 HEX        \ EDN 1991JAN21, pg 151 \ AvdH B2aug12
+( RAND ) CF: ?32 HEX     \ EDN 1991JAN21, pg 151 \ AvdH B2aug12
 WANT TICKS
 VARIABLE SEED
 ( . -- . ) ( Use the nanosecond counter to start)
@@ -1327,6 +1295,22 @@ WANT ALIAS
 
 
 ( ARGC ARGV ARG[] SHIFT-ARGS ENV       ) CF: ?LI \ AvdH B2sep21
+WANT Z$@
+\ Return the NUMBER of arguments passed by Linux
+: ARGC   ARGS @   @ ;
+\ Return the argument VECTOR passed by Linux
+: ARGV   ARGS @   CELL+ ;
+\ Return the environment POINTER passed by Linux
+: ENV ARGS @   $@ 1+ CELLS +  ;
+\ Find argument INDEX, counting from one. Return as a STRING.
+: ARG[] CELLS ARGV + @ Z$@ ;
+\ Return POINTER behind the end-0 of the environment.
+: ENV0 ENV BEGIN $@ WHILE REPEAT ;
+\ Shift the arguments, so as to remove argument 1.
+: SHIFT-ARGS  ARGV >R
+    R@ CELL+ CELL+   R@ CELL+  ENV0 R> -   MOVE
+    -1 ARGS @ +! ;
+( ARGC ARGV ARG[] SHIFT-ARGS ENV      ) CF: ?OSX \ AvdH B4apr19
 WANT Z$@
 \ Return the NUMBER of arguments passed by Linux
 : ARGC   ARGS @   @ ;
@@ -1780,7 +1764,7 @@ WANT RESTORED HEX
 : C=-IGNORE DUP >R   XOR DUP 0= IF 0= ELSE
      20 <> IF 0 ELSE
      R@ 20 OR &a &z 1+ WITHIN THEN THEN  RDROP ;
-\ ( sc1 sc2 -- f) f means equal (0) or not. No lexicography.
+\ ( ad1 ad2 cnt -- f) f means equal (0) or not. No lexicography
 : CORA-IGNORE 0 ?DO   OVER I + C@   OVER I + C@   C=-IGNORE 0=
     IF   2DROP -1 UNLOOP EXIT   THEN LOOP   2DROP 0 ;
 \ Caseinsensitive version of ~MATCH
@@ -2078,7 +2062,7 @@ PREVIOUS DEFINITIONS
     [SI] [DI] [BP] [BX]
 ( 07) 1 0 8 FAMILY|R% [BX+SI]% [BX+DI]% [BP+SI]% [BP+DI]%
     [SI]% [DI]% [BP]% [BX]%
-( ASSEMBLER-CODES-i86 [AX] AX| ) CF: ?32 \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 [AX] AX| ) CF: ?32+ \ A4sep27 AvdH
 
  40 00 4 FAMILY|R ZO| BO| XO| R|
  05 FIR MEM| ( instead of ZO| BP| )
@@ -2094,7 +2078,7 @@ PREVIOUS DEFINITIONS
 ( C7) 6 FIR MEM|%
 ( 07) 1 0 8 FAMILY|R [BX+SI]% [BX+DI]% [BP+SI]% [BP+DI]%
 [SI]% [DI]% [BP]% [BX]%
-( ASSEMBLER-CODES-i86  SIB,, [AX )   CF: ?32 \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86  SIB,, [AX )   CF: ?32+ \ A4sep27 AvdH
 \ Fixups from this pages must come after all others
 \ and start with a [xx .
 0 1PI SIB,,      \ Required after SIB|
@@ -2174,7 +2158,7 @@ EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
 
 00F6 2PI TESTI,         008F 2PI POP,           30FF 2PI PUSH,
 00,AF0F 3PI IMUL,
-( ASSEMBLER-CODES-i86 --opcodes4 )  CF: ?32    \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 --opcodes4 )  CF: ?32+    \ A4sep27 AvdH
 01 60 2 1FAMILY, PUSH|ALL, POP|ALL,
 01 62 2 2FAMILY, BOUND, ARPL,
 01 64 4 1FAMILY, FS:, GS:, OS:, AS:,
@@ -2190,7 +2174,7 @@ EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
 
 C8 1PI ENTER,           C9 1PI LEAVE,           060F 2PI CLTS,
 C0200F 3PI MOV|CD,      800F 2PI J|X,
-( ASSEMBLER-CODES-i86 --opcodes4 )  CF: ?32    \ A4sep27 AvdH
+( ASSEMBLER-CODES-i86 --opcodes4 )  CF: ?32+   \ A4sep27 AvdH
 00,0100 00,020F 2 3FAMILY, LAR, LSL, ( 3)
 0100 A00F 3 2FAMILY, PUSH|FS, POP|FS, CPUID,
 00,0800 00,A30F 4 3FAMILY, BT, BTS, BTR, BTC,
@@ -2206,7 +2190,7 @@ C0200F 3PI MOV|CD,      800F 2PI J|X,
 08,0000 00,010F 7
     3FAMILY, SGDT, SIDT, LGDT, LIDT, SMSW, -- LMSW,
 
-( ASSEMBLER-CODES-PENTIUM --opcodes ) CF: ?32  \ A7oct19 AvdH
+( ASSEMBLER-CODES-PENTIUM --opcodes ) CF: ?32+ \ A7oct19 AvdH
 
 
 \ 0F prefix
@@ -2222,7 +2206,7 @@ C80F 2PI BSWAP,
 08C70F 3PI CMPXCHG8B,
 
 
-( ASSEMBLER-CODES-PENTIUM --fixups_fp ) CF: ?32 \ B4feb28 AvdH
+( ASSEMBLER-CODES-PENTIUM --fixups_fp ) CF: ?32+ \ B4feb28 AvdH
    01 00 8 FAMILY|R ST0| ST1| ST2| ST3| ST4| ST5| ST6| ST7|
 0400 00 2 FAMILY|R s| d|     \ Single/Double 16/32
 0400 00 2 FAMILY|R |32 |16   \ memory int
@@ -2238,7 +2222,7 @@ C80F 2PI BSWAP,
 
 
 
-( ASSEMBLER-CODES-PENTIUM --fp_1 ) CF: ?32    \ A7oct19 AvdH
+( ASSEMBLER-CODES-PENTIUM --fp_1 ) CF: ?32+   \ A7oct19 AvdH
 0800 00D8 7 2FAMILY, FADD, FMUL, FCOM, FCOMP, FSUB, -- FDIV,
 
 0800 10D9 6 2FAMILY, FST, FSTP, FLDENV, FLDCW, FSTENV, FSTCW,
@@ -2254,7 +2238,7 @@ C80F 2PI BSWAP,
 0800 00DA 4 2FAMILY, FIADD, FIMUL, FICOM, FICOMP,
 1000 20DA 2 2FAMILY, FISUB, FIDIV,
 E9DA 2PI FUCOMPP,
-( ASSEMBLER-CODES-PENTIUM --fp_2) CF: ?32 \ A7oc17 AvdH
+( ASSEMBLER-CODES-PENTIUM --fp_2) CF: ?32+ \ A7oc17 AvdH
 0800 00DB 4 2FAMILY, FILD, -- FIST, FISTP,
 1000 28DB 2 2FAMILY, FLD|e, FSTP|e,
 E2DB 2PI FCLEX,         E3DB 2PI FINIT,
@@ -2271,7 +2255,7 @@ E0DF 2PI FSTSW|AX,
 
 
 ( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) \ A7oct19 AvdH
-: NEXT,
+: NEXT,     \ Works even in 16 bits.
      LODS, X'|
      MOV, X| F| AX'| R| BX|
      JMPO, ZO| [BX]    \ JMPO, [AX] not available in 16 bits.
@@ -2302,12 +2286,12 @@ E0DF 2PI FSTSW|AX,
     MOV|SG, T| ES| R| AX|
     MOV|SG, T| SS| R| AX|  ;
 
-( ASSEMBLER-MACROS-i86 TO-PROT, TO-REAL, ) CF: ?32 \ A7oct19
+( ASSEMBLER-MACROS-i86 TO-PROT, TO-REAL, ) CF: ?32+ B4may28
 
 : GET-CR0   MOV|CD, F| CR0| AX| ;
 : PUT-CR0   MOV|CD, T| CR0| AX| ;
-: TO-PROT,  GET-CR0  INC|X, AX|  PUT-CR0 ;
-: TO-REAL,  GET-CR0  DEC|X, AX|  PUT-CR0 ;
+: TO-PROT,  GET-CR0  INC, X|  R| AX| PUT-CR0 ;
+: TO-REAL,  GET-CR0  DEC, X|  R| AX| PUT-CR0 ;
 
 
 
@@ -2318,16 +2302,16 @@ E0DF 2PI FSTSW|AX,
 
 
 \
-( --special_macros_1 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32
+( --special_macros_1 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32+
 HEX   \ Not part of assembler!
 WANT TO-PROT, TO-REAL,
 \ These macro's are useful for protected mode under MSDOS
 \ or for stand alone booting systems.
  7C0 CONSTANT SWITCH_DS 17C0 CONSTANT GDT_DS
  10 CONSTANT GDT_CS
-: JMP-PROT, JMPFAR, HERE 4 +  L, GDT_CS SG, ;
+: JMP-PROT, JMPFAR, HERE CELL+  , GDT_CS SG, ;
 : JMP-REAL,
-    JMPFAR, HERE 4 + SWITCH_DS 10 * -  L, SWITCH_DS SG, ;
+    JMPFAR, HERE CELL+ SWITCH_DS 10 * -  , SWITCH_DS SG, ;
 : REAL, JMP-REAL,  TO-REAL, ;
 : PROT,  TO-PROT, JMP-PROT, ;
 
