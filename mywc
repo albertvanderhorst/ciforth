@@ -1,5 +1,5 @@
 #  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
-lina -p <<%
+lina -a <<%
 \ ( Environmental dependancies : )
 \ ( This is a ISO Forth Program using only standard ISO Words)
 \ ( plus XOS (par1, par2, par3, function# -- result/error )
