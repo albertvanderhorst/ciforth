@@ -81,19 +81,19 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 ( -e :_Load_system_electives ) \ AvdH A3sep01
 .SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
 1 LOAD
-WANT -legacy-     \ Must be first to WANT
+\ WANT -legacy-    \ If you want this, it must be up front
 WANT CONFIG      WANT HELP       WANT ORDER
 WANT L-S         WANT DO-DEBUG   WANT H.         WANT DUMP
-WANT SUPER-QUAD  WANT FARDUMP    WANT $.         WANT ^
-WANT INCLUDE     WANT CRACK      WANT LOCATE     WANT OS-IMPORT
+WANT $.         WANT ^
+WANT INCLUDE     WANT CRACK      WANT LOCATE
 WANT CASE-INSENSITIVE            CASE-INSENSITIVE
-\ WANT EDITOR      WANT OOPS
-\ WANT ASSEMBLERi86 WANT DEADBEEF
+\ WANT EDITOR      \ WANT OOPS     \ WANT FARDUMP
+\ WANT ASSEMBLERi86 \ WANT DEADBEEF
+\ Select os-interface DOS/Unix
+WANT OS-IMPORT  ( WANT DIR )     WANT ls
+WANT -scripting-
 
-( WANT DIR )     WANT ls    \ Select os-interface DOS/Unix
-: TASK ;
- ( BACKUP        250 LOAD   77 81 THRU )
-OK
+: TASK ; OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD
 WANT ARG[]   WANT Z$@
