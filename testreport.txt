@@ -84,7 +84,7 @@ E (requires A) KRAAK QUIT (5.x.x SEE QUIT)
 F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
 After 5.62 : CASE-INSENSITIVE WANT MEASURE-PRIME
 G (r. A) Editing a screen
-H ``wc *.asm''  . After 5.62 : ``mywc *.asm''.
+ 0 PAUSE ! 100 SIEVEter 5.62 : ``mywc *.asm''.
 J Binary equivalent than compiled on linux (for windows Forths and NASM)
 K BYE
 L Dos Directory correct
@@ -164,8 +164,8 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
+hosted_linux linux_64        5.1.0 lina64.cfg     lina          ABCDEFHKLmNOP-R
 hosted_linux linux_32        5.1.0 lina32.cfg     lina32        ABCDEFHKLmNOPR
-hosted_linux linux_64        5.1.0 lina64.cfg     lina          |ABCDEFHKLmNOPR
 hosted_linux linux_native   5.0.0 lina.cfg        lina          BCDEFHKLmNOPR
 hosted_linux linux_native   4.0.6 lina.cfg        lina          BCDEFHKMOPR
 hosted_linux linux_native   4.0.5 lina.cfg        lina          BCDEFHKMOPR

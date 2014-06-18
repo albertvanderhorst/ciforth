@@ -200,7 +200,7 @@ testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab.lina tsuite.frt ;
 # This just generates a test script and testfiles,
 # but expects the test to run on a different system.
 # The version number shows up in the diff.
-testlina64 : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.s forth.lab.lina tsuite.frt ;
+testlina64 : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.fas forth.lab.lina tsuite.frt ;
 	echo "#!/bin/sh ">$@
 	echo "rm -f forth.lab                                 ">>$@
 	echo "cp forth.lab.lina forth.lab                  ">>$@
@@ -210,10 +210,10 @@ testlina64 : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.s forth.lab.lina tsui
 	echo "lina64 <$@.1 2>&1| grep -v RCSfile >$@.3      ">>$@
 	echo "diff -b -B $@.2 $@.3 || true                ">>$@
 	echo "lina64 -a <tsuite.frt 2>&1 |cat >tsuite.tmp   ">>$@
-	echo "diff tsuite.tmp tsuite64.out || true            ">>$@
+	echo "diff -bBw tsuite.tmp tsuite64.out || true            ">>$@
 	echo "cp forth.lab.lina  forth.lab            ">>$@
 	rm $(TEMPFILE)
-	tar cf $@.tar lina64 forth.lab.lina tsuite.frt tsuite64.out $@ $@.1 $@.2 ci86.lina64.s
+	tar cf $@.tar lina64 forth.lab.lina tsuite.frt tsuite64.out mywc64 $@ $@.1 $@.2 ci86.lina64.fas
 
 testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;
 	m4 $(TESTLINUX)  >$(TEMPFILE)

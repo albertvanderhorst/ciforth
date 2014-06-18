@@ -1650,13 +1650,13 @@ worddoc({ENVIRONMENTS},{CPU},{cpu}, {--- d},{CI},
 {An environment query returning the cpu-type to be printed as a
 base-36 number. },
 {{ENVIRONMENT?}},
-_BITS64_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ AMD-X86}},})
+_BITS64_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ AMDX86}},})
 _BITS32_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 80386}},})
 _BITS16_({{{"CPU" ENVIRONMENT? . 24 BASE ! D. },{_T_ 8088}},})
 enddoc)
 _HEADER({CPU},{LCPU},{DOCOL})
 _PROTECTED_({
-       _BITS64_({DC      LIT, 0x26482776, ZERO})     _C{ 'AMD-X86'}
+       _BITS64_({DC      LIT, 0x26482776, ZERO})     _C{ 'AMDX86'}
        _BITS32_({DC      LIT, 0x0CD1856, ZERO})      _C{ '80386'}
        _BITS16_({DC      LIT, 0x1856, LIT, 0x0CD})    _C{ '80386'}
 })_C{}_END_({ _PROTECTED_})
@@ -2852,7 +2852,7 @@ worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- n},{ISO,FIG},
 {Leave the 32 bit contents forthvar({n})
 of forthvar({addr}) .},
 {{!},{C@@},{2@@},{PW@@},{PC@@},{FAR@@}},
-{ {-23 PAD L! PAD L@ .},{FFFFFF23} },
+{ {-23 PAD L! PAD L@ .},{FFFFFFDD} },
 enddoc)
 CODE_HEADER({L@},{LFETCH})
         POP     BX
@@ -2902,7 +2902,7 @@ _BITS64_({
 worddocsafe( {MEMORY},{L!},{long_store},{n addr --- },{},
 {Store the 32-bit contents of forthvar({n}) at forthvar({addr}) .},
 {{L@@},{!},{C!},{2!},{PW!},{PC!},{FAR!}},
-{ {-23 PAD L! PAD L@ .},{FFFFFF23} },
+{ {-23 PAD L! PAD L@ .},{FFFFFFDD} },
 enddoc)
 CODE_HEADER({L!},{LSTOR})
         POP     BX      _C{ADDR}
@@ -3682,7 +3682,7 @@ forthvar({n2}). _VERBOSE_({{This is invaluable for writing portable
 code. Much of the library code of ciforth runs on both 16 and 32 bits
 systems, thanks to this.}})
 },{{CELL+}},
-_BITS64_({{{2 CELLS .},{16}},})dnl expanded before worddoc is!
+_BITS64_({{{2 CELLS .},{10}},})dnl expanded before worddoc is!
 _BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
 _BITS16_({{{2 CELLS .},{4}},})dnl expanded before worddoc is!
 enddoc)
@@ -7362,7 +7362,8 @@ is mostly an error, such as known by forthemph({errno}) . This makes
 available all facilities present in _OS_, except those with 4 or 5 parameters
 that are handled by forthcode({XOS5}) .
 },{{?ERRUR}},
-{{1 "CHIMP" 4 XOS .},{CHIMP5}},
+_BITS32_({ {{1 "CHIMP" 4 XOS .},{CHIMP5}}, })
+_BITS64_({ {{1 "CHIMP" 1 XOS .},{CHIMP5}}, })
 enddoc)
 _LINUX_N_({
 CODE_HEADER({XOS},{XOS})
@@ -7412,7 +7413,9 @@ value of the call. If it is negative, it is mostly an error,
 such as known by forthemph({errno}) . This makes available
 forthemph({all}) facilities present in _OS_.
 },{{?ERRUR}},
-{{1 "CHIMP" 0 0 4 XOS5 .},{CHIMP5}},
+dnl the syscall number for write has changed since 64 bits.
+_BITS32_({ {{1 "CHIMP" 0 0 4 XOS5 .},{CHIMP5}}, })
+_BITS64_({ {{1 "CHIMP" 0 0 1 XOS5 .},{CHIMP5}}, })
 enddoc)
 _LINUX_N_({
 CODE_HEADER({XOS5},{XOS5})
@@ -9341,7 +9344,7 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      SHELL, CELLP, LIT, SYSARGS
 _C{  Get environment vector}
 _BITS32_({      DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS},{dnl})
-_BITS64_({       DC      ZERO},{dnl})
+_BITS64_({      DC      ARGS, FETCH, SFET, ONEP, LCELLS, PLUS},{dnl})
         DC      LIT, execve, XOS
         DC      LIT, 49, LERROR, BYE   _C{ Returned, this is always wrong.}
 SYSTEM1:

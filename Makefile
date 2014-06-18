@@ -163,8 +163,9 @@ $(TOOLS)        \
 blocks.frt      \
 options.frt     \
 genboot.bat     \
-$(EXAMPLES)     \
 mywc            \
+mywc64          \
+$(EXAMPLES)     \
 errors.linux.txt \
 errors.dos.txt \
 ci86.lina.labtest \
@@ -202,12 +203,13 @@ ci86.lina64.html \
 ci86.lina64.pdf \
 ci86.lina64.ps \
 ci86.lina64.texinfo \
-ci86.lina64.s      \
+ci86.lina64.fas \
+ci86.lina64.s  \
 lina64          \
 lina.1    \
 forth.lab     \
 $(CSRCAUX:%=%.c)    \
-mywc          \
+mywc64        \
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
@@ -384,7 +386,7 @@ mslinks :
 
 forth.lab : forth.lab.lina forth.lab.wina
 
-lina.zip : $(RELEASELINA) ;\
+lina32.zip : $(RELEASELINA) ;\
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST

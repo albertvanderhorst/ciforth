@@ -131,6 +131,7 @@ How to make an xp distro for Simtel
 
 2010 aug 17
 How to make a 64 bit release.
+rm VERSION
 make lina64.zip VERSION=beta-5-63
 Now the executable has to be build on a 64 bit system, because the
 executable generated on Suse 32 bit, doesn't run.
@@ -151,7 +152,7 @@ mv ci86.lina64 ci86.lina64
 2012 sep 20
 The 64 version is now made using fasm, so
 make lina64
-uses fasm, but the resulting executable doesn't work.
+uses fasm
 `` make glina64 '' uses gas and works only on a 64 bit system.
 
 2012 nov 6
@@ -163,3 +164,7 @@ A windows dll version is henceforth made by the old releasewina.bat
 Generate a regressiontest for xina:
 make testxina.
 
+2014 jun 12
+From now on use
+make lina32.zip
+(not make lina64.zip)
