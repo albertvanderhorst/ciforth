@@ -1,5 +1,20 @@
 CIFORTH CUSTOMIZATION FOR OSX version 5.x.x.
 
+************************************************************************
+*  This is not a release, but an experimental version                  *
+*  for the early adapters.                                             *
+*                                                                      *
+*                                                                      *
+*  1. You have to build the executable yourself, using the             *
+*     prescript contained in the nasm source.                          *
+*     You'll have to install nasm first.                               *
+*                                                                      *
+*  2. Now you can test with the batch file testxina                    *
+*                                                                      *
+*     This should not give output. You or I may be at fault.           *
+*                                                                      *
+************************************************************************
+
 COPYRIGHT (c) 2000-2011 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or

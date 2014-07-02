@@ -8415,7 +8415,7 @@ including the forthkey({RET}) is returned into forthvar({n}).
 {
 {PAD 10 ACCEPT},{},
  {GIBBON
-  . PAD 5 TYPE},{6 GIBBO},
+  . PAD 6 TYPE},{6 GIBBON},
  {( ." Type an 'A'" PAD 2 ACCEPT . PAD C@ EMIT)( 1 A)},{},
  {( ." Type an 'ABCDEF'" PAD 80 ACCEPT . )( 6)},{},
  {( ." Type an 'ZX'" PAD 1 ACCEPT . PAD C@ EMIT)( 1 Z)},{}
