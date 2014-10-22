@@ -36,6 +36,8 @@ M4=m4 -G ciforth.m4
 # Only needed for gas where we need the patsubst macro.
 M4_GNU=m4 ciforth.m4
 
+FORTH=lina      # Our utility Forth.
+
 # ALL FILES STARTING IN ``ci86'' (OUTHER ``ci86.gnr'') ARE GENERATED
 
 INGREDIENTS = \
@@ -72,14 +74,14 @@ INDICES= cp fn ky pg tp vr
 ASSEMBLERS= nasm  gas fasm masm
 # Forth assembler sources that can be made using any assembler
 # on any system, maybe needing a file constant.m4
-TARGETS= lina lina64 wina mina xina \
+TARGETS= lina32 lina64 wina mina xina \
 alone linux alonehd msdos32 alonetr dpmi
 
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
-LINUXFORTHS= ciforthc lina glina lina64
+LINUXFORTHS= ciforthc lina32 glina32 lina64
 # Auxiliary targets.
 OTHERTARGETS=   \
 filler.frt      \
@@ -178,17 +180,17 @@ VERSION=test
 DATE=2030     # To get the newest version
 # M4_DEBUG=--debug=V   # deperado debugging.
 
-RELEASELINA = \
+RELEASELINA32 = \
 COPYING   \
 README.lina \
-ci86.lina.info \
-ci86.lina.html \
-ci86.lina.pdf \
-ci86.lina.ps \
-ci86.lina.texinfo \
-ci86.lina.asm      \
-ci86.lina.s      \
-lina      \
+ci86.lina32.info \
+ci86.lina32.html \
+ci86.lina32.pdf \
+ci86.lina32.ps \
+ci86.lina32.texinfo \
+ci86.lina32.asm      \
+ci86.lina32.s      \
+lina32      \
 lina.1    \
 forth.lab     \
 $(CSRCAUX:%=%.c)    \
@@ -213,6 +215,10 @@ mywc64        \
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
+
+FORTH=./lina64
+# How to generate a Forth executable.
+%: %.frt ; $(FORTH) -c $^
 
 # Define NASM as *the* assembler generating bin files.
 %.bin:%.asm
@@ -266,11 +272,11 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.s=%.rawtest)
 	rm $(TEMPFILE)
 
-.PRECIOUS: ci86.lina.rawdoc ci86.lina.mig ci86.wina.rawdoc ci86.wina.mig $(TEMPFILE)
+.PRECIOUS: ci86.lina32.rawdoc ci86.lina32.mig ci86.wina.rawdoc ci86.wina.mig $(TEMPFILE)
 
 .PHONY: default all clean RCSCLEAN boot filler moreboot allboot hdboot releaseproof zip mslinks release
 # Default target for convenience
-default : lina
+default : lina64
 ci86.$(s).bin :
 
 # Put include type of dependancies here
@@ -316,10 +322,10 @@ boot: ci86.alone.bin
 # The Forth gets its information from the boot sector,
 # that is filled in with care.
 # The option BOOTSECTRK must be installed into alonetr.m4.
-trboot: ci86.alonetr.bin lina forth.lab.wina
+trboot: ci86.alonetr.bin forth.lab.wina
 	rm fdimage || true
 	echo \"ci86.alonetr.bin\" GET-FILE DROP HEX 10000 \
-	     \"fdimage\" PUT-FILE BYE | lina
+	     \"fdimage\" PUT-FILE BYE | $(FORTH)
 	cat forth.lab.wina >>fdimage
 	cp fdimage /dev/fd0H1440 || fdformat /dev/fd0H1440 ; cp fdimage /dev/fd0H1440
 
@@ -328,11 +334,11 @@ filler.frt: ; echo This file occupies one disk sector on IBM-PCs >$@
 # ciforth calculates whether the screen boundaries are off by a sector.
 # You can copy the filler by hand if this calculation fails, e.g. 5" floppies.
 # The symptom is 8 LIST show the electives screen half and half of some other screen.
-filler: ci86.alone.bin lina filler.frt
+filler: ci86.alone.bin filler.frt
 	rm -f wc # Use the official `wc' command
 	# Have forth calculate whether we need the filler sector
 	(filesize=`cat ci86.alone.bin |wc -c`; \
-	x=`echo $$filesize 1 - 512 / 1 + 2 MOD . BYE | lina`; \
+	x=`echo $$filesize 1 - 512 / 1 + 2 MOD . BYE | $(FORTH)`; \
 	if [ 0 = $$x ] ; then mcopy filler.frt a:filler.frt ;fi)
 
 moreboot: forth.lab.wina ci86.alone.bin  ci86.mina.bin
@@ -375,7 +381,7 @@ msdos.zip : $(RELEASECONTENT) mslinks ;\
 
 # More messy things in behalf of msdos
 mslinks :
-	ln -sf ci86.lina.asm lina.asm
+	ln -sf ci86.lina32.asm lina32.asm
 	ln -sf ci86.linux.asm linux.asm
 	ln -sf ci86.mina.msm mina.msm
 	ln -sf ci86.wina.asm wina.asm
@@ -390,9 +396,9 @@ lina32.zip : $(RELEASELINA) ;\
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	(cd ..; ln -s ciforth lina-$(VERSION))
-	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
-	(cd ..; rm lina-$(VERSION))
+	(cd ..; ln -s ciforth lina32-$(VERSION))
+	(cd ..; tar -czvf ciforth/lina32-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
+	(cd ..; rm lina32-$(VERSION))
 
 lina64.zip : $(RELEASELINA64) ;\
 	chmod +x lina64 # Must be compiled on a 64 bit machine, assumed present.
@@ -405,7 +411,7 @@ lina64.zip : $(RELEASELINA64) ;\
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
-ci86.lina.o : ci86.lina.asm ; nasm $+ -felf -g -o $@ -l $(@:.o=.lst)
+ci86.lina32.o : ci86.lina32.asm ; nasm $+ -felf -g -o $@ -l $(@:.o=.lst)
 
 ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 
@@ -416,17 +422,17 @@ ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
 ciforthc : ciforth.o ci86.linux.o
 	 ld -static /usr/lib/gcrt1.o $+ -lc  -o ciforthc
 
-# Linux native forth by nasm.
-lina : ci86.lina.o ; ld $+ -N -o $@
+# Linux native forth by nasm. FIXME the linking doesn't work.
+lina32 : ci86.lina32.o ; ld $+ -melf_i386 -N -o $@
 
 # Linux native forth by gnu tools
-glina : ci86.lina.s ; as $+; ld -N a.out -o $@
+glina32 : ci86.lina32.s ; as --32 $+; ld -N a.out -o $@
 
 # Linux native forth by gnu tools, only works on a 64 bit system
 glina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@
 
 # Linux native forth by fasm tools
-flina : ci86.lina.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
 # Linux 64 bit native forth.
 lina64: ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@

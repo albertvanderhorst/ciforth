@@ -1240,7 +1240,7 @@ The redirection problem in lina must be solved as follows:
 1. If getterm reports failure the system must be patched.
 2. STTERM must be patched with DROP DROP SEMIS
 3. EXPECT must be patched with OVER OVER 1+ ERASE 0 DO KEY
-	   DUP LF = IF LEAVE ELSE I C! THEN  LOOP ;
+           DUP LF = IF LEAVE ELSE I C! THEN  LOOP ;
 But for now I must set up my side using the Fig script and just
 figforth.
 I finally have replaced all labels with stupid conventions like
@@ -1444,15 +1444,15 @@ I must introduce the following trick:
 make a piece of code that ensures the cs:ip is what is in the l
 Along the following lines
 here:   mov ax, here-$$
-	LEA bx,here
-	sub bx,ax      ; discrepancy between dream and reality
-	mov cx,cs
-	div bx,10h
-	add cx,bx
-	push cx         (new code segment)
-	add  ax, here2-here
-	push ax         (new program counter)
-	ret far         (returning to here2 now)
+        LEA bx,here
+        sub bx,ax      ; discrepancy between dream and reality
+        mov cx,cs
+        div bx,10h
+        add cx,bx
+        push cx         (new code segment)
+        add  ax, here2-here
+        push ax         (new program counter)
+        ret far         (returning to here2 now)
 here2
 Listing must look like
 preparation (equ etc.)
@@ -1845,15 +1845,15 @@ Notes about ommitted data:
 - the MASM versions all are MSDOS-hosted and real mode
 
 Description                 Configuration   Executable   Tests
-				file         name
+                                file         name
 hosted_linux linux_native   lina.cfg         (lina)      BCDEFH
 hosted_linux linux_c native linux.cfg        (figforth)  BCDEFH
 bootfd real                 alone1.cfg      forth.com    B I  A
-							   II
+                                                           II
 bootfd prot16               alone2.cfg      forth.com    B I  A
-							   II
+                                                           II
 bootfd prot32               alone3.cfg      forth.com    B I  A
-							   II
+                                                           II
 boothd prot32               alone4.cfg      forth.com    B I  A
 hostedmsdos MASM bios       msdos1.cfg      msdos.com    B II
 hostedmsdos MASM modern     msdos2.cfg      msdos.com    B II
@@ -2236,7 +2236,7 @@ For this a ((DISASSEMBLE)) introduced.
 
    Remember: If you to your Mam doesn't understand, your code w
    read it to hear through the telephone
-	     IT AIN'T FORTH
+             IT AIN'T FORTH
 
    Now where does this get to?
    To the concept of CONTEXT.
@@ -2385,7 +2385,7 @@ Optimising amounts to just copying the thing you need:
 Add X to the table
    Now pass through the table from X
       For all parts Y make sure Y is in the table.
-	 [Start from X  again, to make sure you catch recursive
+         [Start from X  again, to make sure you catch recursive
 Now we are sure that we have all the things we need in the tabl
 Now pass through the table repeatedly until X is a code definit
    If a COLON definition calls only code definitions replace it
@@ -2560,7 +2560,7 @@ M4_LOAD_ADDRESS : The physical address from where the Forth is
 M4_ORG : The logical address in CS/.. whithin Forth that corres
 M4_SWITCH : The physical address where the switch segment start
 Switching is possible if SWITCH < IP < SWITCH + 64K and
-		      LOAD - ORG < IP < LOAD - ORG + 64K.
+                      LOAD - ORG < IP < LOAD - ORG + 64K.
 For the situation that LOAD=ORG (i.e. addresses in Forth corres
 addresses) it follows that SWITCH < 64K . It follows also that
 preferably much smaller that that for the switchable area to be
@@ -3953,7 +3953,7 @@ BEGIN IN[] ?BLANK 0= WHILE DROP UNTIL
 
 : (PARSE)
 IN @ >R
-	      DUP  -1             <>
+              DUP  -1             <>
 >R BEGIN IN[] OVER SOURCE CELL+ @ <> SWAP R <> AND WHILE DROP U
 ( SOURCE ) R ( +) SWAP R> - ;
 ;
@@ -4155,7 +4155,7 @@ Researched the execve system call.
 The results are in
 main(int argc,char **argv, char **env)
     char *X[] ={ "/uin/sh", "-c","cat hello.c aap e.d>apekop",
-	execve("/bin/sh", X, env);
+        execve("/bin/sh", X, env);
 Added the ARGS command that allows access to the commmands pass
 the program. Surprisingly, the program is started with argc arg
 as local variables rather that arguments. So there is no return
@@ -4908,10 +4908,10 @@ Each part of Artemis can be rebuilt individually by GOD. As GOD
 I can say `` EDIT" DROP" '' and the code of `` DROP '' will
 appear:
 ``
-	CODE DROP
-	    pop, AX|
-	NEXT,
-	C;
+        CODE DROP
+            pop, AX|
+        NEXT,
+        C;
 ''
 After deleting the line with pop, the module DROP is rebuilt
 using the built in machine code assembler. And from now on
@@ -5718,7 +5718,7 @@ In order to get Artemis up again I need:
 - COLD restores the above 1 Mbyte area
 - a system dictionary
 - add the system library to the loaded sys:
-	1<>64 LOAD-ALL
+        1<>64 LOAD-ALL
 - testing the saving and restoring of such chunks
 - due care for LOW-DP etc
 
@@ -5946,8 +5946,8 @@ Yet another small improvement to (WORD)
 I had this idea about using BP as a pointer to the user area
 at the same time as a stack.
 LEA AX, [BP - R0 + (R0 +FFFF)&& (-FFFF) ]
-	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	    This is a run time constant.
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            This is a run time constant.
 What we sacrifice is duplicate the size needed for the return stack.
 
 d++ works now inclusive saving.
@@ -6006,7 +6006,7 @@ To my never ending surprise 0 MESSAGE is suppressed
 if coming from disk, but not if WARNING is 0.
 
 The error message have been made all in the same format
-	DC      LIT, ##, QERR
+        DC      LIT, ##, QERR
 where ## is a decimal number.
 The executable remained the same and this version is
 saved.
@@ -8592,20 +8592,20 @@ A logical way is (original lines with %)
     SI:=BX BX:80x BX:=[BX +SI]
     SI:=BX BX:80x TEST [BX +SI]
 ( after analysing the back branch)
-	   BX:80x TEST [BX +SI]
-	   TEST flags[SI]
+           BX:80x TEST [BX +SI]
+           TEST flags[SI]
 %     0BRANCH [ (FORWARD ]   I   DUP +   3 +   DUP   I +
     JZ                    BX:=SI CX:=BX  BX+:=CX CX:=3 (Clumsy)X+:=DX CX:=S BX+:=DX
     JZ                    BX:=SI BX+:=BX BX+:=3 CX:=BX CX+:=SI
     JZ                    BX:=ea[3+2*SI] CX:=ea[BX+SI]
 %         [ (BACK ]   DUP   1FFE <
-	CMP CX, 1FFE
+        CMP CX, 1FFE
 %         0BRANCH [ (FORWARD ]   0   OVER   807B350 +   C!   OVER +
-	JL                     flags[CX]:=0                CX+:=BX
+        JL                     flags[CX]:=0                CX+:=BX
 %        BRANCH  [ SWAP BACK) FORWARD) ]
-	JA
+        JA
 %        DROP   DROP   1 +
-	AX+:=1
+        AX+:=1
 %     [ FORWARD) ]
 %    R>   1 +   R@   OVER   SWAP < 0=
     BX:=SI BX+:=1     CMP BX,DI
@@ -9098,7 +9098,7 @@ This must be subtracted from 3C and 40 (physical and load address) and
 added to 44 (the length to be loaded.) This is all to no avail.
 
 Solution: it is sufficient to put
-	DD _start
+        DD _start
 in the line before _start .
 
 2003 oct 13 mon
@@ -9626,7 +9626,7 @@ in a reconsumable form.
 2004 june 16 wed
 Promoted in colorforth mail.
 2004 june 17 thu
-	2004 june 18 fri
+        2004 june 18 fri
 Plan to add before new version :
 /Not-yet /Done #  MARKER CASE PARSE-WORD ."$" $= :NONAME
 
@@ -9737,7 +9737,7 @@ This looks like a proper design.
     - if it overlaps with the previous one and has the same type and
       alignment, and the second one is named, trim the first section.
     - if it overlaps with the previous and has different type,
-	issue warning
+        issue warning
     - if it has a gap, introduce a character section
   This may lead to an extra section, one less section, or no change
   in the number of sections, but only at or after the current section.
@@ -10146,13 +10146,13 @@ README.ciforth must be added to the archive.
 
 It turns out that the simple trick
 NAME SET $
-	...
-	DL NAME
-	...
+        ...
+        DL NAME
+        ...
 NAME SET $
-	...
-	DL NAME
-	...
+        ...
+        DL NAME
+        ...
 just isn't available under NASM. (There is a godforlorn amount
 of trickery with macros.)
 This makes it unsuitable for
@@ -12471,8 +12471,8 @@ I want a few changes into ciasdis
      and mask with >BI.
      This means that directly after filling the >BI and >DATA
      field we fix them as follows:
-	fetch them and clear the field
-	fixup the field from behind, byte by byte.
+        fetch them and clear the field
+        fixup the field from behind, byte by byte.
    - This result in that T!R can go
    - in fact by doing similarly for normal postit and >BI fields
      the assembler becomes a lot more portable.
@@ -13572,13 +13572,43 @@ The version 5.1 for 64 bits has been released.
 2014 jun 24
 The version 5.1 for windows wina has been released.
 
-2014 jul 9 
+2014 jul 9
 Trouble with the apple system, extremely slow (ls last 17 sec for 0.01
-system time). It turns out that with not longer including sda in fstab 
+system time). It turns out that with not longer including sda in fstab
 and eliminating also pear from nfs, this improves. Other cleanups made,
 now . is at the end of the search order. This unveils a defect in test.mak
-The lina must be taken from the current directory ./lina. 
+The lina must be taken from the current directory ./lina.
 (Detected with PP in tsuite.out).
+
+2014 oct 18
+Welcome! The ciforth project is now hosted on sparc, and hopefully
+it will be complemented by a ciarm project on the same server.
+This log file is no longer called logboek.txt but logforth.txt
+and this is the only file in MIGRATED that was changed compared to the apple.
+This means that contributions are again accepted.
+Building a lina32 using masm now fails. This was the default version.
+fasm works like a charm but the -c option / SAVE-SYSTEM is not
+yet adapted to FASM.
+The only version that builds easily and works is glina64.
+That must become the base version now.
+
+To create a 32 bit version on a 64 bit system
+you must use the -m version of the linker,
+called emulation, in particular -melf_i386
+
+In the Makefile all version are now with a suffix, or gonna be.
+
+2014 oct 21
+Building a 32 bits version on a 64 bit system of lina succeeds
+including the test. There was a problem with using the locks
+in cvs but no more. The trick was allowing world write access on
+$(CVSROOT)/ciforth/cvsroot. The cvs commands within the Makefile
+must be adorned with a cvsroot.
+The tag MIGRATED is added to the cvs archive, marking the files
+that belong to the version that was migrated.
+
+2014 oct 23
+make testlina64 works.
 
 --------------------
 TODO

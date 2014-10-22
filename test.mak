@@ -4,6 +4,9 @@
 # Just to jot down small tests not wanted in the makefile
 # and any other commands.
 
+FORTH=lina      # Our utility Forth.
+CVS=cvs -d$(CVSROOT)
+
 TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9] orang hello.frt tsuite.out
 
 testclean: ; rm -f $(TESTTARGETS)
@@ -54,17 +57,17 @@ copy:
 		cp forth.lab       $(cd)/../test/forth.lab
 		cp genboot.bat      $(cd)/../test/genboot.bat
 
-cmp: ci86.mina.bin ci86.alone.bin ciforth lina
-		strip lina
+cmp: ci86.mina.bin ci86.alone.bin ciforth lina32
+		strip lina32
 		strip ciforth
 		cmp ci86.mina.bin  cmp/ci86.mina.bin
 		cmp ci86.alone.bin  cmp/ci86.alone.bin
-		cmp lina cmp/lina
+		cmp lina32 cmp/lina32
 		cmp ciforth cmp/ciforth
 
 # Not all of these segments are present always.
-strip : lina
-	strip lina -s -R .comment -R .data
+strip : lina32
+	strip lina32 -s -R .comment -R .data
 
 copy1: $(TARGETS:%=ci86.%.bin)
 		mount /mnt/dosa
@@ -90,8 +93,10 @@ sed -e's/\<ci86\.//g' |\
 sed -e's/\<gnr\>/ci86.gnr/' |\
 sed -e's/ \([^ .]\{1,8\}\)[^ .]*\./ \1./g'
 
+# FIXME maybe remove
 fina : fina.c ci86.lina.o ; $(CC) $(CFLAGS) $+ -static -Wl,-Tlink.script -o $@
 
+# FIXME maybe remove
 ci86.lina.lis : ci86.lina.mac ;
 		as ci86.lina.mac -a=ci86.lina.lis  ;\
 		objcopy a.out -O binary
@@ -163,14 +168,14 @@ ci86.%.texinfo : %.cfg $(SRCMI) ci86.%.mim ci86.%.mig manual.m4 wordset.m4 menu.
 	sed -e 's/thisforth/$(@:ci86.%.texinfo=%)/g' -e 's/_left_parenthesis_/\(/' > $@
 #        rm wordset.mi menu.texinfo
 
-cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina.cfg
-	m4 lina.cfg manual.m4 namescooked.m4 cifgen.mi |\
+cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina32.cfg
+	m4 lina32.cfg manual.m4 namescooked.m4 cifgen.mi |\
 	sed -e 's/_lbracket_/@{/g'                 |\
 	sed -e 's/_rbracket_/@}/g'               > $@
 
-TESTLINA= \
+TESTLINA32= \
 test.m4 \
-ci86.lina.rawtest \
+ci86.lina32.rawtest \
 ci86.lina.labtest
 
 TESTLINA64= \
@@ -184,36 +189,55 @@ ci86.linux.rawtest
 
 # No output expected, except for an official version (VERSION=A.B.C)
 # The version number shows up in the diff.
-testlina : $(TESTLINA) ci86.lina.rawtest lina forth.lab.lina tsuite.frt ;
+testlina32 : $(TESTLINA32) ci86.lina32.rawtest lina32 forth.lab.lina tsuite.frt ;
 	rm -f forth.lab
 	cp forth.lab.lina forth.lab
-	m4 $(TESTLINA)  >$(TEMPFILE)
+	m4 $(TESTLINA32) >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
-	lina <$@.1 2>&1| grep -v RCSfile >$@.3
+	./lina32 <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
 	ln -sf forth.lab.lina  forth.lab
-	lina -a <tsuite.frt 2>&1 |cat >tsuite.out
-	cvs diff -bBw tsuite.out || true
+	#./lina32 -a <tsuite.frt 2>&1 |cat >tsuite32.out
+	#$(CVS) diff -bBw tsuite32.out || true
+	./lina32 -a <tsuite.frt 2>&1 |cat >tsuite.out
+	$(CVS) diff -bBw tsuite.out || true
+	rm $(TEMPFILE)
+
+# No output expected, except for an official version (VERSION=A.B.C)
+# The version number shows up in the diff.
+testlina64 : $(TESTLINA64) ci86.lina64.rawtest lina64 forth.lab.lina tsuite.frt ;
+	rm -f forth.lab
+	cp forth.lab.lina forth.lab
+	m4 $(TESTLINA64) >$(TEMPFILE)
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	./lina64 <$@.1 2>&1| grep -v RCSfile >$@.3
+	diff -b -B $@.2 $@.3 || true
+	ln -sf forth.lab.lina  forth.lab
+	#./lina64 -a <tsuite.frt 2>&1 |cat >tsuite64.out
+	#$(CVS) diff -bBw tsuite64.out || true
+	./lina64 -a <tsuite.frt 2>&1 |cat >tsuite64.out
+	$(CVS) diff -bBw tsuite64.out || true
 	rm $(TEMPFILE)
 
 # This just generates a test script and testfiles,
 # but expects the test to run on a different system.
 # The version number shows up in the diff.
-testlina64 : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.fas forth.lab.lina tsuite.frt ;
-	echo "#!/bin/sh ">$@
-	echo "rm -f forth.lab                                 ">>$@
-	echo "cp forth.lab.lina forth.lab                  ">>$@
+testlina64.tar : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.fas forth.lab.lina tsuite.frt ;
+	echo "#!/bin/sh ">testlina64
+	echo "rm -f forth.lab                                 ">>testlina64
+	echo "cp forth.lab.lina forth.lab                  ">>testlina64
 	m4 $(TESTLINA64)  >$(TEMPFILE)
-	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
-	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
-	echo "lina64 <$@.1 2>&1| grep -v RCSfile >$@.3      ">>$@
-	echo "diff -b -B $@.2 $@.3 || true                ">>$@
-	echo "lina64 -a <tsuite.frt 2>&1 |cat >tsuite.tmp   ">>$@
-	echo "diff -bBw tsuite.tmp tsuite64.out || true            ">>$@
-	echo "cp forth.lab.lina  forth.lab            ">>$@
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >testlina64.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >testlina64.2
+	echo "lina64 <testlina64.1 2>&1| grep -v RCSfile >testlina64.3      ">>testlina64
+	echo "diff -b -B testlina64.2 testlina64.3 || true                ">>testlina64
+	echo "lina64 -a <tsuite.frt 2>&1 |cat >tsuite.tmp   ">>testlina64
+	echo "diff -bBw tsuite.tmp tsuite64.out || true            ">>testlina64
+	echo "cp forth.lab.lina  forth.lab            ">>testlina64
 	rm $(TEMPFILE)
-	tar cf $@.tar lina64 forth.lab.lina tsuite.frt tsuite64.out mywc64 $@ $@.1 $@.2 ci86.lina64.fas
+	tar cf $@ lina64 forth.lab.lina tsuite.frt tsuite64.out mywc64 testlina64 testlina64.1 testlina64.2 ci86.lina64.fas
 
 testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;
 	m4 $(TESTLINUX)  >$(TEMPFILE)
@@ -266,13 +290,13 @@ asgen.frt : RCS-as/asgen.frt,v ; co $<
 asi386.frt : RCS-as/asi386.frt,v ; co $<
 
 # A Forth with the analyser built-in.
-lina-ana : lina asgen.frt asi386.frt #(ANASRC)
-	echo '"analyser.frt" INCLUDED   WANT SAVE-SYSTEM  "$@" SAVE-SYSTEM' |lina
+lina-ana : lina32 asgen.frt asi386.frt #(ANASRC)
+	echo '"analyser.frt" INCLUDED   WANT SAVE-SYSTEM  "$@" SAVE-SYSTEM' |./lina32
 
 # Test the optimiser. FIXME! Gives ERROR 22 ( --> not called from block).
 testoptimiser.out : testoptimiser.frt optimiser.frt lina-ana
 	echo 'INCLUDE optimiser.frt INCLUDE $<' |lina-ana > $@
-	cvs diff -bBw $@ || true
+	$(CVS) diff -bBw $@ || true
 
 lina-opt : optimiser.frt lina-ana
 	echo 'INCLUDE optimiser.frt "$@" SAVE-SYSTEM' |lina-ana
