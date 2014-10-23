@@ -30,7 +30,8 @@ FD=/mnt/dosc/project/fig86/
 O=/mnt/dosc/dfw/tforth/test/system/okay
 DATE='"2010/04/05 15:00:00"'
 export b c d x C f p l a A s t R O FD I M DATE pat
-export CVSROOT=:pserver:frans@sparc:/usr/local/cvsroot
+export CVSROOT=:pserver:albert@sparc:/usr/local/cvsroot
+unalias cvs
 alias cvs='cvs -d$CVSROOT'
-V=`cvs log -r $f | grep -w revision| sed -e 's/revision /beta-/'`
 cvs login
+V=`cvs log -r $f | grep -w revision| sed -e 's/revision /beta-/'`
