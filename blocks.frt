@@ -190,13 +190,13 @@ WANT ALIAS
 
 
 
-( -legacy- >IN REFILL  )                      \ AvdH B2aug12
+( -legacy- IN >IN REFILL  )                   \ AvdH B4Oct25
 WANT ALIAS
 \ Use L_>IN instead of >IN , don't store into it!
 : L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
 'L_>IN ALIAS >IN
 : REFILL 0 ;
-
+: IN PP ;
 
 
 
@@ -334,14 +334,14 @@ WANT ALIAS
 
 
 
-( PARSE-NAME SAVE-INPUT RESTORE-INPUT --> )   \ B4may27
+( PARSE-NAME SAVE-INPUT EXECUTE-PARSING --> )   \ B4oct16
 WANT ALIAS
 : SAVE-INPUT    SRC 2@ PP @ 3 ;                \ ISO
 : RESTORE-INPUT   DROP PP ! SRC 2! -1 ;        \ ISO
 : -->   BLK @ DUP UNLOCK   1+ DUP LOCK
     BLOCK B/BUF SET-SRC ; IMMEDIATE             \ ISO
 'NAME ALIAS PARSE-NAME                          \ ISO
-
+: EXECUTE-PARSING SAVE SET-SRC CATCH RESTORE THROW ; \ ISO
 
 
 
@@ -638,22 +638,22 @@ VARIABLE LAST-IN         VARIABLE start
   HERE start @ - itoa DOES>$ $+!   " ^" DOES>$ $+!
   NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
 
-( FORMAT FORMAT&EVAL FORMAT&TYPE ) \ AH&CH B2jul11
+( FORMAT FORMAT&EVAL .FORMAT )          \ AH&CH B4Oct16
 WANT 2>R   CREATE CRS$ 4096 ALLOT
 NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
-\ Add INT as a string.
-: d 0 <# #S #> CRS$ $+! ;
-\ Add a STRING as such.
-: s CRS$ $+! ;                   PREVIOUS DEFINITIONS
+: n ^J CRS$ $C+ ;          \ Add a cr to as string.
+: d 0 <# BL HOLD #S #> CRS$ $+! ;  \ Add INT as a string.
+: s CRS$ $+! ;             \ Add a STRING as such.
+PREVIOUS DEFINITIONS
 \ Format the first part of STRING, up till %, leave REST.
 : _plain    &% $/ CRS$ $+! ;
 \ Format X with first word of STRING, up till BL, leave REST.
 : _format   BL $/ 2SWAP 2>R 'FORMAT-WID >WID (FIND) NIP NIP
     DUP 0= 51 ?ERROR EXECUTE 2R> ;
 \ Format X1 .. Xn using the format STRING.
-: FORMAT 0 CRS$ ! BEGIN _plain OVER WHILE _format OVER WHILE
-    REPEAT [ DROP 2 ] ( assume secure ) THEN 2DROP CRS$ $@ ;
-: FORMAT&EVAL   FORMAT EVALUATE ;   : FORMAT&TYPE FORMAT TYPE ;
+: FORMAT 0 CRS$ ! BEGIN DUP WHILE _plain DUP IF _format THEN
+    REPEAT 2DROP CRS$ $@ ;
+: FORMAT&EVAL   FORMAT EVALUATE ;   : .FORMAT FORMAT TYPE ;
 ( class endclass M: M; ) \ AH B2jul17
 WANT SWAP-DP WANT FORMAT  VARIABLE LAST-IN   VARIABLE DP-MARKER
 CREATE NAME$ 128 ALLOT          CREATE BLD$ 4096 ALLOT
@@ -1246,7 +1246,7 @@ WANT T]      WANT :2
 
 \ Last scripting block!
 CREATE -scripting-
-( :2 :F :R                                    )  \ AvdH B2sep21
+( :2 :F :R :I                                 )  \ AvdH B4oct14
 WANT ALIAS
 \ Alias of : , define a word for the second time.
 : :2   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R> HIDDEN ;
@@ -1255,9 +1255,9 @@ WANT ALIAS
 \ Resolve an earlier dummy definition for recursion.
 : :R   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R@ HIDDEN
   LATEST >DFA @ R> >DFA ! ;
-
-
-
+\ Alias of :, define a word that inlines it code.
+: :I   CREATE IMMEDIATE ]    LATEST HIDDEN !CSP
+   DOES> BEGIN $@ DUP '(;) <> WHILE , REPEAT 2DROP ;
 
 
 
