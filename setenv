@@ -33,5 +33,5 @@ export b c d x C f p l a A s t R O FD I M DATE pat
 export CVSROOT=:pserver:albert@sparc:/usr/local/cvsroot
 unalias cvs
 alias cvs='cvs -d$CVSROOT'
-cvs login
+cvs -d$CVSROOT login
 V=`cvs log -r $f | grep -w revision| sed -e 's/revision /beta-/'`
