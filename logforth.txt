@@ -13610,6 +13610,10 @@ that belong to the version that was migrated.
 2014 oct 23
 make testlina64 works.
 
+2014 oct 31
+After having made ssort up to date (64 bits), I now can generate
+a release again from cherry.
+
 --------------------
 TODO
 The help screen should contain a mention of what the system is,
