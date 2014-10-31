@@ -6,22 +6,20 @@ This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
 Public License as published by the Free Software Foundation.
 
+Forth is a tool for evolutionary programming. This is the binary
+distribution of lina 5.# . The following applies to all versions 5.#
+of lina  in 32 or 64 bits.
 
-Forth is a tool for evolutionary programming. This is the
-binary distribution of lina 5.#, still in beta. Without notice
-it applies to all updates 5.#.
-lina is
-the Linux native (= c-less) version of ciforth (common Intel
-Forth), an interpret environment and compiler for Forth. It is
-(large and by) compliant with the ISO Forth standard; the CORE
-wordset is fully implemented. The small, classic, indirect
-threaded kernel contains the essential, i.a. file access and
-exceptions. Its power is multiplied by an extensive source
-library, that add i.a. a decompiler and integrated 386
-assembler. It is fully self contained; if you want to
-understand a compiler in all details, this is your best, if not
-only, choice. ciforth sports the highest documentation to
-binary proportion in the EDP industry, barring m4 on Coherent.
+lina is the Linux native (= c-less) version of ciforth (common Intel
+Forth), an interpret environment and compiler for Forth. It is (large
+and by) compliant with the ISO Forth standard; the CORE wordset is
+fully implemented. The small, classic, indirect threaded kernel
+contains the essential, i.a. file access and exceptions. Its power is
+multiplied by an extensive source library, that add i.a. a decompiler
+and integrated 386 assembler. It is fully self contained; if you want
+to understand a compiler in all details, this is your best, if not
+only, choice. ciforth sports the highest documentation to binary
+proportion in the EDP industry, barring m4 on Coherent.
 
 The following applies to the 64 bit version, replace lina
 by lina64 everywhere.
@@ -31,20 +29,22 @@ Unpack in the directory where you want to use it by :
 
 Now you can use lina by :
     lina
+or
+    lina -e
 
 Print the manual (150 pages) by :
     lpr ci86.lina.ps
 or view it:
     gv ci86.lina.ps
 
-View the same information by :
+View the same information in ci86.lina.pdf with an appropriate tool
+or view by :
     info -f ci86.lina.info
-or view ci86.lina.pdf with an appropriate tool.
 
 Viewing the file ``ci86.lina.html'' with a html viewer,
-gives a reference extract but with more cross links.
+gives a reference that is concise but has more cross links.
 
-For customized installation see the -i option.
+For customized installation see the -i option in the manual.
 
 For system wide installation the following is recommended:
     su

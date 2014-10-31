@@ -78,7 +78,7 @@ _LINUX_N_({ thisforth })_LINUX_C_({ forthfile({ciforthc}) })  : the program
 _BOOTED_({_RESPECTDOS_({If you inspect a booting floppy from MSDOS you discover that you can
 see the  files forthfile({ciforth.com}) and forthfile({forth.lab}) . You can even start the program from MSDOS})})
 forthitem
-forthfile({ciforth.ps}) forthfile({ciforth.html}) : the documentation
+One of forthfile({ciforth.ps}) forthfile({ciforth.pdf}) forthfile({ciforth.html}) : the documentation
 forthitem
 forthfile({forth.lab}) : source library for auxiliary programs
 forthenditemize
@@ -130,12 +130,12 @@ It is indirect threaded.
 
 @iftex
 If you are new to Forth you may want to read the Gentle Introduction,
-otherwise you better skip it. The third chapter most users will not
+otherwise you better skip it. The second chapter most users will not
 be interested in.
 @end iftex
 
 @menu
-* Gentle Introduction:: For newbies to Forth. You don't want to read this.
+* Gentle Introduction:: For newbies to Forth. You don't need to read this.
 * Rationale & legalese:: For experts. You don't want to read this.
 * Manual::         User manual
 _PC_({{* Editor::         The full screen editor
