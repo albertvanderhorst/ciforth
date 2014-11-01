@@ -6080,7 +6080,7 @@ _C
 worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ --- sc },{},
 {forthvar({sc}) is the command line with which this forth is invoked. },
 {},
-{{ COMMAND-LINE TYPE }, {wina},
+{{ COMMAND-LINE TYPE }, {wina.exe},
  { LAST-ERROR .}, {0} },
 enddoc)
 _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
@@ -7630,7 +7630,6 @@ PACCEP1:
         DC      REMAIND, TFET
         DC      LIT, ALF, SSLAS
         DC      TSWAP, REMAIND, TSTOR
-        _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 _C
 worddoc( {OPERATINGSYSTEM},{BDOSN},{bdosn},{d c b a ---ar fl},{},
@@ -7761,7 +7760,8 @@ _DLL_({For your convenience, all files are opened in binary mode.})
 },
 {{READ-FILE},{WRITE-FILE},{CREATE-FILE},{DELETE-FILE},{CLOSE-FILE}},
 {
-{345 "AAP" 0 OPEN-FILE 0 < . DROP . },{_T_ 345},
+{345 "money" 0 OPEN-FILE 0 < . DROP . },{_T_ 345},
+dnl This may fail the first time the test runs
 {"hello.frt" 0 OPEN-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}
 },
@@ -8470,7 +8470,6 @@ _C{        DC      SPLOFF}
         DC      REMAIND, TFET
         DC      LIT, ALF, SSLAS
         DC      TSWAP, REMAIND, TSTOR
-        _PC_({DC ONEM}, {dnl})
         DC      SEMIS
 
 worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
@@ -8734,8 +8733,9 @@ worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({ENTER})
 is pressed and return the result as a constant string
 forthvar({sc}).
-The forthkey({ENTER}) is not part of forhtvar({sc}), nor will it
-contain other line endings such as a trailing (0x0D).
+The forthkey({ENTER}) is not part of forhtvar({sc}).
+It is possible that it contains other line endings such as a trailing (0x0D),
+which can be disposed off by forthcode({-TRAILING}).
 The editing functions are the same as with forthcode({ACCEPT}) .
 _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than }forthcode({ACCEPT}){.
@@ -8769,8 +8769,6 @@ PACCEP1:
         DC      REMAIND, TFET
         DC      LIT, ALF, SSLAS
         DC      TSWAP, REMAIND, TSTOR
-        _PC_({DC ONEM}, {dnl})
-        DC      ONE, LSUB    _C Rid of <CR>
         DC      SEMIS
 _C
 worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
@@ -8787,8 +8785,11 @@ _DLL_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
-{{"wina -f 23 EXIT-CODE ! BYE " SYSTEM ( No error!)},
-{ }},
+{
+{ 1 LOAD WANT GET-ENV },{},
+{ "COMSPEC" GET-ENV SHELL $!},{},
+{"wina.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
+},
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
@@ -9172,7 +9173,7 @@ otherwise the handle is used by the system to access blocks.
 _LINUX_C_({In this ciforth forthcode({BLOCK-HANDLE}) is not used.})
 },{{BLOCK-FILE},{BLOCK-INIT},{BLOCK-EXIT}},
 _DLL_({
-{{BLOCK-HANDLE @ DUP 100 > . 1000 < .},{_T_ _T_}},
+{{BLOCK-HANDLE @ DUP 0 > . 1000 < .},{_T_ _T_}},
 },{
 {{BLOCK-HANDLE @ 10 U< .},{_T_}},
 })
@@ -9332,6 +9333,7 @@ command, but not the changes made after ciforth started.}})
 _LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}} })
 dnl Redirection can not be reliably tested on Windows XP
 dnl _MODERN_({ {{"TYPE hello.frt" SYSTEM },{." Hello world!"}} })
+_DLL_({ {{." SEE BYE" },{SEE BYE}} })
 ,enddoc)
 _LINUX_N_({
 _HEADER({SYSTEM},{SYSTEM},{DOCOL})
