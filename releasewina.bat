@@ -1,4 +1,4 @@
-#!/bin/sh --debug
+#!/bin/bash --debug
 # Not tried out after moving the zip building to the end
 # To be added TOBLOCK.FRT TOBLOCK.EXE
 m=wina
@@ -33,6 +33,7 @@ make VERSION=$version $s.fas
 make test$m
 mv $s.fas $m.fas
 fasm $m.fas -m300000
+mv $m $m.exe
 # make VERSION=$version $s.bin   # Has to wait for fasm
 # mv $s.bin $m.exe
 # Before texinfo (not sure whether that is really required.)
@@ -44,5 +45,5 @@ make $m.ps
 make $m.pdf
 
 rm $m$1.zip
-echo $m$1 $RELEASETXT | xargs zip -l
-echo $m$1 $RELEASEBIN | xargs zip 
+echo $m$1.zip $RELEASETXT | xargs zip -l
+echo $m$1.zip $RELEASEBIN | xargs zip

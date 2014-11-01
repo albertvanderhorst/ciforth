@@ -13614,6 +13614,13 @@ make testlina64 works.
 After having made ssort up to date (64 bits), I now can generate
 a release again from cherry.
 
+2014 nov 1
+Tested wina with wine on the 64 bit system.
+Some minor problems: Attempt to remove a 0x0D.
+It is not documented whether it is there or not.
+Left to the user to remove with -TRAILING.
+The make targets testwina and testlina64 succeed.
+
 --------------------
 TODO
 The help screen should contain a mention of what the system is,

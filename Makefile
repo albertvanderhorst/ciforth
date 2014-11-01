@@ -36,7 +36,7 @@ M4=m4 -G ciforth.m4
 # Only needed for gas where we need the patsubst macro.
 M4_GNU=m4 ciforth.m4
 
-FORTH=lina      # Our utility Forth.
+FORTH=./lina64      # Our utility Forth.
 
 # ALL FILES STARTING IN ``ci86'' (OUTHER ``ci86.gnr'') ARE GENERATED
 
@@ -216,7 +216,6 @@ mywc64        \
 
 TEMPFILE=/tmp/ciforthscratch
 
-FORTH=./lina64
 # How to generate a Forth executable.
 %: %.frt ; $(FORTH) -c $^
 
@@ -278,6 +277,12 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 # Default target for convenience
 default : lina64
 ci86.$(s).bin :
+
+# Canonical targets
+lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+lina64: ci86.lina64.fas ;  fasm $+ -m256000; mv ${<:.fas=} $@
+lina: lina64 ; cp $< $@
+wina.exe: ci86.wina.fas ; fasm $+ -m256000
 
 # Put include type of dependancies here
 $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else cvs update $@ ; fi
@@ -423,7 +428,7 @@ ciforthc : ciforth.o ci86.linux.o
 	 ld -static /usr/lib/gcrt1.o $+ -lc  -o ciforthc
 
 # Linux native forth by nasm. FIXME the linking doesn't work.
-lina32 : ci86.lina32.o ; ld $+ -melf_i386 -N -o $@
+nlina32 : ci86.lina32.o ; ld $+ -melf_i386 -N -o $@
 
 # Linux native forth by gnu tools
 glina32 : ci86.lina32.s ; as --32 $+; ld -N a.out -o $@
@@ -433,9 +438,6 @@ glina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@
 
 # Linux native forth by fasm tools
 flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
-
-# Linux 64 bit native forth.
-lina64: ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
 # This dependancy is problematic.
 # Do `make constant.m4' explicitly beforehand.
