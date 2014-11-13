@@ -73,7 +73,7 @@ forthitemize
 forthitem
 _BOOTED_({A booting floppy or hard disk}) dnl
 dnl look into this whether thisforth can be used all the time.
-_HOSTED_DPMI_({forthfile{(wina.com})})_HOSTED_MSDOS_({ forthfile({mina.com}) }) dnl
+_HOSTED_DPMI_({forthfile{(wina.com})})_DLL_({forthfile({wina.exe})})_HOSTED_MSDOS_({ forthfile({mina.com}) }) dnl
 _LINUX_N_({ thisforth })_LINUX_C_({ forthfile({ciforthc}) })  : the program
 _BOOTED_({_RESPECTDOS_({If you inspect a booting floppy from MSDOS you discover that you can
 see the  files forthfile({ciforth.com}) and forthfile({forth.lab}) . You can even start the program from MSDOS})})

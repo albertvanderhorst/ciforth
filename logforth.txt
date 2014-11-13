@@ -13621,6 +13621,11 @@ It is not documented whether it is there or not.
 Left to the user to remove with -TRAILING.
 The make targets testwina and testlina64 succeed.
 
+2014 nov 3
+Oops. The versions made by fasm lina32 and lina64 cannot
+compile. SAVESYSTEM just doesn't work.
+Also glina32 doesn't even compile.
+
 --------------------
 TODO
 The help screen should contain a mention of what the system is,
