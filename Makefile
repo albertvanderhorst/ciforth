@@ -431,7 +431,7 @@ ciforthc : ciforth.o ci86.linux.o
 nlina32 : ci86.lina32.o ; ld $+ -melf_i386 -N -o $@
 
 # Linux native forth by gnu tools
-glina32 : ci86.lina32.s ; as --32 $+; ld -N a.out -o $@
+glina32 : ci86.lina32.s ; as --32 $+; ld a.out -melf_i386 -N -o $@
 
 # Linux native forth by gnu tools, only works on a 64 bit system
 glina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@
