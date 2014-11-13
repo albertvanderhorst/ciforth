@@ -86,7 +86,7 @@
  "CALL" PRESENT DUP   CONFIG ?WI   \ (MS-windows)
  "BIOS31" PRESENT DUP   CONFIG ?DP   \ DPMI (legacy windows)
  DUP 0= "BIOSN" PRESENT AND DUP   CONFIG ?MS   \ MS-DOS
-            OR OR DUP   CONFIG ?WIMS \ One of 3 above
+	    OR OR DUP   CONFIG ?WIMS \ One of 3 above
  "XOSV"   PRESENT DUP   CONFIG ?OSX  \ OSX.
  DUP 0= "XOS" PRESENT AND DUP     CONFIG ?LI   \ Linux, BSD.,
     OR           OR     CONFIG ?HS \ Any host
@@ -255,7 +255,7 @@ WANT ALIAS      WANT $!-BD
 
 CREATE -legacy-     \ Last legacy block!
 ( **************ISO language extension ***********************)
-                    EXIT
+		    EXIT
 
 An ISO language extension is either an ISO word, implemented in
 a possibly non-portable way, or a word that is not defined in
@@ -549,7 +549,7 @@ WANT COMPARE
 1 BEGIN NAME DUP WHILE
    2DUP "[IF]" COMPARE 0= IF 2DROP 1+ ELSE
    2DUP "[ELSE]" COMPARE 0= IF 2DROP 1- DUP IF 1+ THEN ELSE
-        "[THEN]" COMPARE 0= IF 1- THEN THEN THEN
+	"[THEN]" COMPARE 0= IF 1- THEN THEN THEN
    ?DUP 0= IF EXIT THEN
 REPEAT 2DROP DROP ;
 : [IF] 0= IF SKIPPING THEN ; IMMEDIATE
@@ -693,13 +693,13 @@ WANT POSTFIX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    >R
     BEGIN       \ Loop variant IMAX - IMIN
-        2DUP  <> WHILE
-        2DUP + 2/  ( -- ihalf )
-        DUP R@ EXECUTE IF
-           1+  SWAP ROT DROP \ Replace IMIN
-        ELSE
-           SWAP DROP \ Replace IMAX
-        THEN
+	2DUP  <> WHILE
+	2DUP + 2/  ( -- ihalf )
+	DUP R@ EXECUTE IF
+	   1+  SWAP ROT DROP \ Replace IMIN
+	ELSE
+	   SWAP DROP \ Replace IMAX
+	THEN
     REPEAT
 DROP RDROP ;
 ( binary_search_description )
@@ -722,7 +722,7 @@ See also  binary_search_test in the examples section.
 WANT QSORT
 \ Exchange the content at ADDR1 and ADDR2 over a fixed LENGTH.
 : EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
-                   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
+		   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
 \ For INDEX1 and INDEX2 and TABLE, return ADDR1 and ADDR2 .
 : PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
 \ For TABLE and LENGTH sort cells, must be aligned, len>1
@@ -754,15 +754,15 @@ DEFER *<-->
 \ Partition inclusive range LO HI leaving LO_1 HI_1 LO_2 HI_2.
 : PARTITION   2DUP + 2/   >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
-         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
-         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
-         2DUP > 0= IF
-            \ Do we have a new position for our pivot?
-            OVER R@ = IF RDROP DUP >R ELSE
-            DUP  R@ = IF RDROP OVER >R THEN THEN
-            2DUP *<-->
-            >R 1+ R> 1-
-        THEN
+	 SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+	 SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+	 2DUP > 0= IF
+	    \ Do we have a new position for our pivot?
+	    OVER R@ = IF RDROP DUP >R ELSE
+	    DUP  R@ = IF RDROP OVER >R THEN THEN
+	    2DUP *<-->
+	    >R 1+ R> 1-
+	THEN
     2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
     RDROP                            ( R: )
     SWAP ROT ;      ( lo_1 hi_1 lo_2 hi_2)
@@ -862,23 +862,39 @@ DECIMAL
 
 
 
-( SQRT x^x                               ) \ AvdH A8nov09
+( SQRT SQ SQ? )                                 \ AvdH A8nov09
 \ For N return FLOOR of the square root of n.
 : SQRT  DUP >R 10 RSHIFT 1024 MAX  \ Minimize iterations.
    BEGIN R@ OVER / OVER + 1 RSHIFT  2DUP > WHILE
     SWAP DROP REPEAT   DROP RDROP ;
-VARIABLE m ( Modulo number)
-\ Multiply A and B modulo ``m'' , return product of a and b.
-: *MOD   M* m @ SM/REM DROP ;
-\ A step of Russian peasant, for A B and C: return A B en C.
-: reduce_1-  1- >R >R    R@ *MOD   R> R> ;
-\ A step of Russian peasant, for A B and C: return A B en C.
-: reduce_2/   2/ SWAP   DUP *MOD   SWAP ;
-\ Calculate B^C mod MOD by Russian peasant method. Return IT.
-: x^x    m @ >R m !   1 ROT ROT
-   BEGIN   DUP 1 AND IF   reduce_1-   THEN reduce_2/
-      DUP 0= UNTIL   2DROP   R> m ! ;
-( PRIME? FACTOR GCD                        ) \ AvdH B3apr03
+
+: SQ DUP * ;
+
+\ FOR N:"it IS a square."
+: SQ?   DUP SQRT SQ = ;
+
+
+
+
+
+
+( +m -m *m /m **m x^x )              \ AvdH B4nov2
+WANT :I WANT XGCD      VARIABLE m ( Modulo number)
+\ suffix n : normalized number.
+:I _norm_-m  DUP 0< m @ AND + ; ( x -- xn ) \ -m<xn<+m
+:I +m   + m @ - _norm_-m  ;   ( an bn -- sumn )
+:I -m   - _norm_-m  ;         ( an bn -- diffn)
+:I *m   M* m @ SM/REM DROP ;  ( a b -- prodn) \ a>=0 b>=0
+:I /m    m @ XGCD DROP _norm_-m  *m ; ( a b -- quotn)
+
+\ Both steps: For A B and C: return A B en C.  Invariant A*B^C.
+:I reduce_1-  1- >R >R    R@ *m   R> R> ;
+:I reduce_2/   2/ SWAP   DUP *m   SWAP ;
+:I **m    1 ROT ROT BEGIN   DUP 1 AND IF   reduce_1-   THEN
+    reduce_2/ DUP 0= UNTIL   2DROP   ;  ( a b -- apowbn )
+
+:I x^x    m @ >R m !   **m   R> m ! ;   ( a b m -- a^b mod m )
+( PRIME? FACTOR GCD XGCD                       ) \ AvdH B4Nov03
 \ For N and HINT return FACTOR >= hint, maybe n.
 : FACTOR   BEGIN   2DUP /MOD SWAP
     0= IF DROP SWAP DROP EXIT THEN
@@ -891,9 +907,9 @@ VARIABLE m ( Modulo number)
 \ For M N , return their GCD.
 : GCD   BEGIN OVER MOD DUP WHILE SWAP REPEAT DROP ;
 
-
-
-
+\ For A B return C GCD where C*A+B*x=GCD
+: XGCD 1 0 2SWAP   BEGIN OVER /MOD OVER WHILE >R SWAP
+   2SWAP OVER R> * - SWAP 2SWAP REPEAT 2DROP NIP ;
 ( /STRING -LEADING DROP-WORD        )           \ AvdH B@aug12
 
 \ From SC trim N char's
@@ -921,11 +937,27 @@ VARIABLE SEED
 
 ( N -- R Leave a random number < N)
 : CHOOSE RAND UM* SWAP DROP ;
-( Swap the number at ADDRESS1 with one at ADDRESS2 )
-: @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
+
+
 ( RANDOM-SWAP ( R N -- )
 ( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
 RANDOMIZE
+( @SWAP @+ )                                    \ AvdH B4nov06
+WANT ALIAS
+
+'$@ ALIAS @+
+
+( Swap the number at ADDRESS1 with one at ADDRESS2 )
+: @SWAP  OVER @   OVER @   SWAP   ROT !   SWAP ! ;
+
+\ maybe !+
+
+
+
+
+
+
+
 ( **************Non ISO language extension *******************)
 
 
@@ -1779,15 +1811,15 @@ WANT RESTORED HEX
  : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP
        [CHAR] | EMIT ;
  : BYTES 0 DO
-            DUP I + C@ B.
-            I 2 MOD IF SPACE THEN
-        LOOP ;
+	    DUP I + C@ B.
+	    I 2 MOD IF SPACE THEN
+	LOOP ;
 :  DUMP   ( 2/0  DUMPS FROM ADDRESS-2 AMOUNT-1 BYTES)
     OVER + SWAP
     DO
-        CR I H. ." : "
-        I 0F AND DUP 5 2 */ SPACES 10 SWAP -
-        I   OVER BYTES   OVER .CHARS   DROP DROP
+	CR I H. ." : "
+	I 0F AND DUP 5 2 */ SPACES 10 SWAP -
+	I   OVER BYTES   OVER .CHARS   DROP DROP
     10 I 0F AND - +LOOP         CR
 ;
 ( OOPS EDIT: ) \ AvdH A1oct12
@@ -1806,7 +1838,7 @@ WANT RESTORED HEX
 
 
 
-( SUPER-QUAD SQ CONDENSED ) CF: ?PC
+( SUPER-QUAD CONDENSED ) CF: ?PC
 WANT VIDEO-MODE
 VARIABLE L
  : CONDENSED 34 VIDEO-MODE ;
@@ -1820,7 +1852,7 @@ VARIABLE L
     16 0 DO  I L ! DUP 1LINE
     LOOP  ;
  : SUPER-QUAD CONDENSED SUPER-DUPE 2 + SUPER-DUPE DROP ;
- : SQ SUPER-QUAD ;
+
 
 ( FOR-BLOCKS SHOW-BLOCK .BL Testing_of_block ) \ AvdH A1oct09
 WANT H.
@@ -1830,11 +1862,11 @@ WANT H.
 
     DUP CR H.
     DUP @ IF
-        ." #"  DUP ?
-        CELL+ DUP @ IF ."     LOCKED" ELSE ." NOT LOCKED" THEN
-        CELL+ &| EMIT 50 TYPE &| EMIT
+	." #"  DUP ?
+	CELL+ DUP @ IF ."     LOCKED" ELSE ." NOT LOCKED" THEN
+	CELL+ &| EMIT 50 TYPE &| EMIT
     ELSE
-        ." FREE " DROP
+	." FREE " DROP
     THEN ;
 : .BL 'SHOW-BLOCK FOR-BLOCKS ;
 
@@ -1883,7 +1915,7 @@ WANT SEE
     ( if F then M is vector address else M=N)
        0 SWAP ( initialise flag)
        SELTOP @ SELTAB DO
-           DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
+	   DUP I @ = IF ( FOUND!) DROP DROP 1 I CELL+ @ THEN
        0 CELL+ CELL+  +LOOP        SWAP   ( get flag up)  ;
 
 ( SEE   2 ) \ AvdH A0MAR30
@@ -1892,9 +1924,9 @@ WANT SEE
     DUP @ SEL@ IF ( Is content of CFA known?)
       EXECUTE ( Assuming CFA also on stack)
     ELSE
-        DROP CR
-        DUP >CFA @ OVER >PHA = IF
-           ." Code definition : " ELSE ." Can't handle : "
+	DROP CR
+	DUP >CFA @ OVER >PHA = IF
+	   ." Code definition : " ELSE ." Can't handle : "
        THEN ID.. CR
     THEN ;
 : CRACK  ( Use CRACK "ITEM" to decompile the word ITEM)
@@ -1925,14 +1957,14 @@ DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
 \ Decompile words with like cfa of DEA by "name"
  : EX-FOR   >CFA @    T, CFOF T, ;
  : -co DUP >DFA @ CR H.. ." CONSTANT " ID.. CR ;
-        CFOF BL EX-FOR -co
+	CFOF BL EX-FOR -co
  : -va DUP >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
     ID.. CR ;              CFOF _PREV EX-FOR -va
  : -us DUP >DFA C@ CR B.. ."  USER " ID.. CR ;
-        CFOF FENCE EX-FOR -us
+	CFOF FENCE EX-FOR -us
 ( Crack item at POINTER. Leave incremented POINTER , GOON flag)
  : ITEM DUP @ SEL@ IF EXECUTE ( The special) ALIGNED ELSE
-        DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
+	DUP ?IM IF ." POSTPONE " THEN ID.. CELL+
      THEN ;
 ( SEE   5 ) \ AvdH A9aug30
 : CRACK-CHAIN CR BEGIN DUP @ LIT (;) <>
@@ -1952,8 +1984,8 @@ CFOF LIT BY -lit
 
 ( SEE   6 ) \ AvdH A0APR11
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
-         ."  ] DLITERAL " $@ + 4 CELLS + ;
-                      CFOF SKIP BY -sk
+	 ."  ] DLITERAL " $@ + 4 CELLS + ;
+		      CFOF SKIP BY -sk
 
 
   : -do CR ." DO " CELL+ CELL+ ;     CFOF (DO) BY -do
@@ -1972,7 +2004,7 @@ make decompile pointer point to exit!)
      BEGIN DUP HEAD? 0= WHILE 0 CELL+ - REPEAT ;
 : TO-DOES   >DFA @ @ ; \ For DEA: hl POINTER in ``DOES>'' code.
  : -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID.. ID.. CR ;
-        CFOF ONLY  EX-FOR -dd  \ Use vocab as example.
+	CFOF ONLY  EX-FOR -dd  \ Use vocab as example.
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 : .DEA? DUP DEA? IF ID.. ELSE DROP ." ? " THEN ; ( DEA --. )
 : -target DUP ( IP -- IP ,print comment about current jump)
@@ -2117,7 +2149,7 @@ PREVIOUS DEFINITIONS
 08 27 4 1FAMILY, DAA, DAS, AAA, AAS,
 01 00 2 FAMILY|R B'| X'|
 08 04 8 1FAMILY, ADDI|A, ORI|A, ADCI|A, SBBI|A, ANDI|A, SUBI|A,
-                 XORI|A, CMPI|A,
+		 XORI|A, CMPI|A,
 02 A0 2 1FAMILY, MOV|TA, MOV|FA,
 
 70 1PI J,  ( As in J, L| Y| <CALC> S, )
@@ -2533,11 +2565,11 @@ VH VW * CONSTANT VL
 \ For INDEX leave the far ADDRES of that char on the screen
 : VA DUP + VID SWAP ;
 : >V SWAP 0 DO  ( sc offset - )
-        OVER I + C@ 700 OR   OVER I + VA LC!
+	OVER I + C@ 700 OR   OVER I + VA LC!
      LOOP DROP DROP ;
 : V> ( buf len offset - )
     SWAP 0 DO
-        OVER I +   OVER I + VA    LC@ SWAP C!
+	OVER I +   OVER I + VA    LC@ SWAP C!
     LOOP 2DROP   ;
 : PAGE PAD VL 2DUP BLANK 0 >V ;
 : PG PAD 10 VW * 2DUP BLANK 0 >V ;
@@ -2691,14 +2723,14 @@ HEX:
 :  FARDUMP   ( SEG ADDRESS AMOUNT - ..)
     OVER + SWAP FFF0 AND
     DO
-        CR DUP H. I H. ." : "
-        I
-        10 0 DO
-            2DUP I + FAR@ B.
-            I 2 MOD IF SPACE THEN
-        LOOP  [CHAR] | EMIT
-        10 0 DO 2DUP I + FAR@ FF AND TO-PRINT EMIT LOOP
-        [CHAR] | EMIT DROP
+	CR DUP H. I H. ." : "
+	I
+	10 0 DO
+	    2DUP I + FAR@ B.
+	    I 2 MOD IF SPACE THEN
+	LOOP  [CHAR] | EMIT
+	10 0 DO 2DUP I + FAR@ FF AND TO-PRINT EMIT LOOP
+	[CHAR] | EMIT DROP
     10 +LOOP CR DROP
 ;
 
@@ -3131,7 +3163,7 @@ CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
 : doit  CHUNK-SIZE 589 64 + CR WIPE-RANGE ;
 : WIPE-HD WIPE-BUFFER FIRST-BLOCK
      BEGIN RW-BUFFER OVER 0 R|W DISK-ERROR 1 AND 0= WHILE
-        DUP SHOW 1+ REPEAT DROP ;
+	DUP SHOW 1+ REPEAT DROP ;
 
 
 ( hd_driver3 FIRST-FREE ) CF: ?PC ?32 \ AH A1may3
@@ -3157,9 +3189,9 @@ HEX
   DUP SHOW KEY? IF UNLOOP EXIT THEN  LOOP . . ;
 : BLMOVE-FAST  ( as MOVE for blocks, ONLY MULTIPLES OF 64K.)
  1<>64 0 DO
-         SWAP RW-BUFFER OVER 1 R|W 40 +
-         SWAP RW-BUFFER OVER 0 R|W 40 +
-         DUP SHOW KEY? IF UNLOOP EXIT THEN
+	 SWAP RW-BUFFER OVER 1 R|W 40 +
+	 SWAP RW-BUFFER OVER 0 R|W 40 +
+	 DUP SHOW KEY? IF UNLOOP EXIT THEN
 40 +LOOP . . 1<>64 ;
 : BACKUP ( BACKUP THE CURRENT CHUNK TO PRISTINE DISK )
    CHUNK-START FNTB OVER - FIRST-FREE SWAP BLMOVE-FAST ;
@@ -3183,7 +3215,7 @@ DECIMAL  PREVIOUS
 
 
 ( **************Working ciforth examples *********************)
-        EXIT
+	EXIT
 
 This contains examples and benchmarks.
 
@@ -3222,12 +3254,12 @@ This contains examples and benchmarks.
      FLAGS SIZE 1 FILL
      0 ( 0 COUNT ) SIZE 0
      DO FLAGS I + C@
-        IF I DUP + 3 +  ( DUP . )
-           DUP I +
-           BEGIN DUP SIZE <
-           WHILE 0 OVER FLAGS +  C!  OVER + REPEAT
-           DROP DROP 1+
-        THEN
+	IF I DUP + 3 +  ( DUP . )
+	   DUP I +
+	   BEGIN DUP SIZE <
+	   WHILE 0 OVER FLAGS +  C!  OVER + REPEAT
+	   DROP DROP 1+
+	THEN
      LOOP ;
 
 ( ERATOSTHENES SIEVE 1 Variables - A. van der Horst         )
@@ -3268,29 +3300,29 @@ VARIABLE PAUSE  1 PAUSE ! ( Boolean: pause between pages)
 CREATE S-MASK
     01 C, 02 C, 04 C, 08 C, 10 C, 20 C, 40 C, 80 C,
 CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
-             10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
+	     10 NOT C, 20 NOT C, 40 NOT C, 80 NOT C,
  : INIT-T   FLAGS SIZE 0FF FILL ; ( Preset to 'prime')
  DECIMAL
  : 8/MOD   0 8 UM/MOD ; ( May be redefined in assembler )
  : CLEAR-B ( BIT# --  clears the specified bit)
-           8/MOD FLAGS + SWAP  ( Address in flags table)
-           C-MASK + C@         ( Get mask)
-           OVER C@ AND SWAP C! ( Clear the bit)  ;
+	   8/MOD FLAGS + SWAP  ( Address in flags table)
+	   C-MASK + C@         ( Get mask)
+	   OVER C@ AND SWAP C! ( Clear the bit)  ;
 
 
 ( ERATOSTHENES SIEVE 4 Bit manipulation - A. van der Horst  )
  : SET-B ( BIT# --  sets the specified bit)
-           8/MOD FLAGS + SWAP  ( Address in flags table)
-           S-MASK + C@         ( Get mask)
-           OVER C@ OR SWAP C!  ( Store with bit set)  ;
+	   8/MOD FLAGS + SWAP  ( Address in flags table)
+	   S-MASK + C@         ( Get mask)
+	   OVER C@ OR SWAP C!  ( Store with bit set)  ;
  : TEST-B ( BIT# -- FLAG  Gets a FLAG testable by IF)
-           8/MOD FLAGS + C@ SWAP  ( Get flag)
-           S-MASK + C@ AND        ( Result: =0 or #0)     ;
+	   8/MOD FLAGS + C@ SWAP  ( Get flag)
+	   S-MASK + C@ AND        ( Result: =0 or #0)     ;
  : FLIP ( PRIME,START -- .  , marks multiples of PRIME as
-        (  non prime starting with START)
-           BEGIN  DUP LIM @ U<  WHILE
-                  DUP CLEAR-B  OVER +
-           REPEAT   DROP DROP ;
+	(  non prime starting with START)
+	   BEGIN  DUP LIM @ U<  WHILE
+		  DUP CLEAR-B  OVER +
+	   REPEAT   DROP DROP ;
  : CHECK SIZE 16 UM* 1000 UM/MOD  THOUSANDS @ U< IF
        ." INCREASE SIZE " ABORT ELSE DROP DROP THEN ;
 
@@ -3298,8 +3330,8 @@ CREATE C-MASK 01 NOT C, 02 NOT C, 04 NOT C, 08 NOT C,
  : BATCH1 ( First batch of 500 numbers)
       500 1 ( Only odd numbers)
      DO I TEST-B
-        IF I DUP + 1 + DUP .P ( get prime number)
-           I FLIP THEN ( Mark multiple as non-prime)
+	IF I DUP + 1 + DUP .P ( get prime number)
+	   I FLIP THEN ( Mark multiple as non-prime)
      LOOP ;
  : BATCH ( OFFSET --  every  following batch )
       500 0
@@ -3316,13 +3348,13 @@ VARIABLE IMAX  \ IX 'COMP EXECUTE is always FALSE for IX>IMAX
 VARIABLE COMP \ Execution token of comparison word.
 : BIN-SEARCH    COMP !  IMAX ! IMIN !
     BEGIN       \ Loop variant IMAX - IMIN
-        IMIN @ IMAX @ ( .S) <> WHILE
-        IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
-        DUP COMP @ EXECUTE IF
-           ( ihalf) IMIN !
-        ELSE
-           ( ihalf) 1- IMAX !
-        THEN
+	IMIN @ IMAX @ ( .S) <> WHILE
+	IMAX @ IMIN @ + 1+ 2 /   ( -- ihalf )
+	DUP COMP @ EXECUTE IF
+	   ( ihalf) IMIN !
+	ELSE
+	   ( ihalf) 1- IMAX !
+	THEN
     REPEAT
 IMIN @ 1+ ; ( This example with variables works the same as )
 ( the stack version in utilities.)
