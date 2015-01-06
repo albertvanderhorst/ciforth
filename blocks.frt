@@ -296,12 +296,28 @@ WANT _AH
     _avail > IF _alloc&move R> _free ELSE R> _alloc_f THEN  ;
 : INTEGRITY? ( -- f ) DUP BEGIN DUP @ 2DUP < WHILE NIP
     REPEAT NIP = ;
-CREATE _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
+DATA _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
     _alloc-buf HERE OVER ! DUP , DUP ,  _ADP !
 ( ISO )
 : ALLOCATE   ['] _allocate CATCH ;
 : FREE   overhead - _free 0 ;
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
+( REALLOC AT-HERE )                                 AvdHB4Dec03
+
+\ For DEA of data fill the data pointer with here.
+: AT-HERE   HERE SWAP >DFA ! ;
+
+\ For DEA of data reserve LENGTH bytes at here.
+: REALLOC   SWAP AT-HERE   ALLOT ;
+
+
+
+
+
+
+
+
+
 ( SEARCH-WORDLIST GET-CURRENT SET-CURRENT )    \ AvdH B2aug12
 \ ISO
 : GET-CURRENT    CURRENT @ ;
@@ -353,7 +369,7 @@ WANT ALIAS
 ( TIME&DATE ) CF: ?LI                   \ AH B30423
 WANT -syscalls-  : SSE   0 0 0 __NR_time XOS ; ( 1970/1/1)
 : |   OVER , + ;   : 5m   31 | 30 | 31 | 30 | 31 | ;
-CREATE TABLE ( start of month within leap period) -1
+DATA TABLE ( start of month within leap period) -1
     31 | 28 | 5m 5m   31 | 28 | 5m 5m   31 | 29 | 5m 5m
     31 | 28 | 5m 5m   ,   : T[] CELLS TABLE + @ ;
 \ For DAYS within leap return MONTHS
@@ -430,7 +446,7 @@ DROP   CURRENT !
 
 
 
-( 2>R 2R> 2R@ ) \ AvdH A1oct22
+( 2>R 2R> 2R@ 2VARIABLE 2, )       \ AvdH B4Dec16
 
 
 
@@ -441,8 +457,8 @@ DROP   CURRENT !
 : 2R> POSTPONE R>  POSTPONE R> POSTPONE SWAP  ;  IMMEDIATE
 : 2R@ POSTPONE 2R> POSTPONE 2DUP POSTPONE 2>R ; IMMEDIATE
 
-
-
+: 2,   , , ;
+: 2VARIABLE   DATA 0. 2, ;
 
 
 \
@@ -465,7 +481,7 @@ DROP   CURRENT !
 ( WRITE-LINE PUTCHAR ) CF: ?LI                \ AvdH A5jun28
 
 \ Linux file ending.
-CREATE CR$ 1 , ^J C,
+DATA CR$ 1 , ^J C,
 
 \ Output CHAR to HANDLE. Errors are thrown.
 : PUTCHAR >R  DSP@ 1 R> WRITE-FILE THROW DROP ;
@@ -562,7 +578,7 @@ REPEAT 2DROP DROP ;
 
 
 VARIABLE TO-MESSAGE   \ 0 : FROM ,  1 : TO .
-CREATE _value_jumps  '@ , '! , '+! ,
+DATA _value_jumps  '@ , '! , '+! ,
 : FROM 0 TO-MESSAGE ! ;
 \ ISO
 : TO  1 TO-MESSAGE ! ;
@@ -595,7 +611,7 @@ CREATE _value_jumps  '@ , '! , '+! ,
 ( Build a bag with X items. )
 : BUILD-BAG   HERE CELL+ , CELLS ALLOT ;
 ( Create a bag "x" with X items. )
-: BAG   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
+: BAG   DATA HERE CELL+ , CELLS ALLOT DOES> ;
 : !BAG   DUP CELL+ SWAP ! ;   ( Make the BAG empty )
 : BAG?   $@ = 0= ;   ( For the BAG : it IS non-empty )
 : BAG+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Push ITEM to the BAG )
@@ -624,9 +640,9 @@ CREATE _value_jumps  '@ , '! , '+! ,
 : SET-   2DUP IN-BAG? IF BAG- ELSE 2DROP THEN ;
 ( F: auxiliary_for_struct ) \ AH A4jun16
 4096 CONSTANT LEN
-CREATE NAME$ 128  ALLOT         \ The name of the struct.
-CREATE CRS$ LEN ALLOT  : !CRS$ 0 CRS$ ! ; \ Generate struct
-CREATE DOES>$ LEN ALLOT   \ Generate fields/methods.
+DATA NAME$ 128  ALLOT         \ The name of the struct.
+DATA CRS$ LEN ALLOT  : !CRS$ 0 CRS$ ! ; \ Generate struct
+DATA DOES>$ LEN ALLOT   \ Generate fields/methods.
 \ Add STRING and the name of the current struct to CRS$.
 : +NAME$   CRS$ $+!    NAME$ $@ CRS$ $+!   BL CRS$ $C+ ;
 VARIABLE LAST-IN         VARIABLE start
@@ -639,9 +655,9 @@ VARIABLE LAST-IN         VARIABLE start
   NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
 
 ( FORMAT FORMAT&EVAL .FORMAT )          \ AH&CH B4Oct16
-WANT 2>R   CREATE CRS$ 4096 ALLOT
+WANT 2>R   DATA CRS$ 4096 ALLOT \  WANT :2
 NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
-: n ^J CRS$ $C+ ;          \ Add a cr to as string.
+: c CRS$ $C+ ;  : n ^J c ;   : r ^M c ;  \ Add single char's
 : d 0 <# BL HOLD #S #> CRS$ $+! ;  \ Add INT as a string.
 : s CRS$ $+! ;             \ Add a STRING as such.
 PREVIOUS DEFINITIONS
@@ -656,7 +672,7 @@ PREVIOUS DEFINITIONS
 : FORMAT&EVAL   FORMAT EVALUATE ;   : .FORMAT FORMAT TYPE ;
 ( class endclass M: M; ) \ AH B2jul17
 WANT SWAP-DP WANT FORMAT  VARIABLE LAST-IN   VARIABLE DP-MARKER
-CREATE NAME$ 128 ALLOT          CREATE BLD$ 4096 ALLOT
+DATA NAME$ 128 ALLOT          DATA BLD$ 4096 ALLOT
 : -WORD 1- BEGIN 1- DUP C@ ?BLANK UNTIL 1+ ; ( in -- firstch)
 : {BLD   PP @ LAST-IN ! ;
 \ Retain input since {BLD excluding word name.
@@ -708,7 +724,7 @@ EXIT
 Uses a comparison routine with execution token `COMP'
 `COMP' must have the stack diagram ( IT -- flag) , where flag
 typically means that IT compares lower or equal to some fixed
-value. It may be  TRUE , FALSE or undefined for `IMIN' , but
+value. It may be  TRUE , FALSE or undefined for `IMAX' , but
 it must be monotonic down in the range [IMIN,IMAX), i.e.
 if IMIN<=IX<=IY<IMAX then if IX COMP gives false, IY COMP
 cannot give true.
@@ -718,6 +734,22 @@ and `IMAX' (exclusive) for which `COMP' returns false.
 or else ``IMAX''.
 An empty range is possible, (`IMIN' and `IMAX' are equal.)
 See also  binary_search_test in the examples section.
+( MEMOIZE                                       ) \ AvdHB4dec02
+WANT BAG                WANT |BAG|              WANT BIN-SEARCH
+1000 CONSTANT CSIZE
+CSIZE BAG keys          CSIZE BAG values
+\ Reset and reallocate to N items, for zero, just reset.
+: INIT-MEMOIZE   DROP keys !BAG  values !BAG ;
+: key[]   1+ CELLS keys + ;    \ For INDEX return ADDRESS
+VARIABLE _compand
+: _compson key[] @ _compand @ < ;
+\ For COMPARAND find: POSITION where it is to be placed.
+: find-index   _compand !   0 keys |BAG| '_compson BIN-SEARCH ;
+\ The memoizer works on a one input one output function.
+: MEMOIZE DUP find-index key[] 2DUP @ = IF keys - values + @
+  NIP RDROP ELSE   DROP DUP  CO SWAP DUP find-index key[] >R
+  R@ keys BAG-INSERT   DUP R@ keys - values + values BAG-INSERT
+  RDROP THEN ;
 ( EXCHANGE PAIR[] SORT-B SORT-X ) \ AvdH B3dec22
 WANT QSORT
 \ Exchange the content at ADDR1 and ADDR2 over a fixed LENGTH.
@@ -942,9 +974,9 @@ WANT :I WANT XGCD      VARIABLE m ( Modulo number)
 
 
 
-( RAND ) CF: ?32 HEX     \ EDN 1991JAN21, pg 151 \ AvdH B2aug12
+( RAND ) CF: ?32         \ EDN 1991JAN21, pg 151 \ AvdH B2aug12
 WANT TICKS
-VARIABLE SEED
+VARIABLE SEED       HEX
 ( . -- . ) ( Use the nanosecond counter to start)
 : RANDOMIZE TICKS DROP SEED ! ;
 
@@ -953,6 +985,22 @@ VARIABLE SEED
 
 ( N -- R Leave a random number < N)
 : CHOOSE RAND UM* SWAP DROP ;
+
+
+( RANDOM-SWAP ( R N -- )
+( 1 - CHOOSE 1+ CELLS OVER + @SWAP ;)  DECIMAL
+RANDOMIZE
+( RAND ) CF: ?64         \ EDN 1991JAN21, pg 151 \ AvdH B2aug12
+WANT TICKS        HEX
+VARIABLE SEED
+( . -- . ) ( Use the nanosecond counter to start)
+: RANDOMIZE TICKS DROP SEED ! ;
+
+( -- N  Leave a random number 32 bits )
+: RAND SEED @ 107,465 * 23,4567 + 0FFFF,FFFF AND DUP SEED ! ;
+
+( N -- R Leave a random number < N)
+: CHOOSE RAND * 20 RSHIFT ;
 
 
 ( RANDOM-SWAP ( R N -- )
@@ -1086,20 +1134,36 @@ $1B CONSTANT ESC
  : DEC. 5 CELLS DEC: <# 1- 0 ?DO # I 3? LOOP # #> TYPE ;
  : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
 
-(  ALIAS HIDE INCLUDE IVAR ) CF: \ AvdH A1oct05
+( HIDE INCLUDE IVAR )            \ AvdH B4Dec03
 
-: ALIAS  NAME (CREATE) LATEST 3 CELLS MOVE ;
+
 
 : HIDE NAME FOUND DUP 0= 11 ?ERROR HIDDEN ;
 
-\ : FORGET NAME FOUND DUP 0= 11 ?ERROR FORGOTTEN ;
-: IVAR CREATE , ;
+
+: IVAR DATA , ;
 
 
 
-"INCLUDED" PRESENT 0= ?LEAVE-BLOCK
+
 
 : INCLUDE NAME INCLUDED ;
+
+
+(  ALIAS )                       \ AvdH B4Dec03
+
+: ALIAS  NAME (CREATE) LATEST 3 CELLS MOVE ;
+
+
+
+
+
+
+
+
+
+
+
 
 
 ( SLITERAL $. $? ."$" )           \ AvdH B2aug12
@@ -1296,7 +1360,7 @@ WANT T]      WANT :2
 CREATE -scripting-
 ( :2 :F :R :I                                 )  \ AvdH B4oct14
 WANT ALIAS
-\ Alias of : , define a word for the second time.
+\ Alias of : , redefine an existing(!) word. Or crash.
 : :2   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R> HIDDEN ;
 \ Use for dummy forward definitions.
 ': ALIAS :F

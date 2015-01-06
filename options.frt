@@ -305,6 +305,7 @@ WANT -legacy-     \ Must be first to WANT
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
 1 LOAD   WANT OLD:   WANT ARG[] WANT -scripting-
 WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
+HERE FAR-DP ! 2 ARG[] NIP 2 * ALLOT
 : BY-WHO   "XOS" PRESENT IF " run by " TYPE
 0 ARG[] TYPE THEN ;
 \ This error handler may be overwritten by the script.
@@ -317,7 +318,6 @@ SCRIPT-NAME $@ GET-FILE
 ^J $/ 2DROP     \ Line with #!lina
 EVALUATE
 BYE
-
 ( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
 .SIGNON 1 LOAD
 \ Reload WANT with new ``CORA'' but hide it direct after.
@@ -352,8 +352,8 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 \
 ( -v :_Version_and_copyright_information_)
 "CPU  NAME  VERSION" TYPE .SIGNON CR
-0 MESSAGE
 "LIBRARY FILE: " TYPE
+0 MESSAGE
 "$RCSfile$ $Revision$" TYPE CR
 CR
 0 BLOCK  B/BUF TYPE

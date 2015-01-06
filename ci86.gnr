@@ -2129,8 +2129,8 @@ _HEADER({?BLANK},{QBL},{DOCOL})
         DC      SEMIS
 _C
 worddocsafe( {PARSING},{PP@@@@},{parse_pointer_fetch_fetch},{ ---addr c},{CI},
-{Parse the forthdefi({current input source}) leaving the next
-character forthvar({c}) and its address forthvar({addr}) . If
+{Parse the forthdefi({current input source}) leaving the address forthvar({addr})
+of the next character forthvar({c}) . If
 at the end of the input source, leave a pointer past the end
 and a zero. Advance the input pointer to the next character.
 },
@@ -3086,7 +3086,8 @@ worddoc( {DEFINING},{VARIABLE},{variable},{},{ISO,FIG},
 When forthcode({VARIABLE}) is executed,
 it creates the definition forthsamp({cccc})
 whose forthdefi({data field address}) contains a
-pointer forthsamp({n}) to a data location.
+pointer forthsamp({n}) to a data location,
+that can contain one cell.
 When forthsamp({cccc}) is later executed,
 this pointer forthsamp({n}) is left on the stack,
 so that a fetch or store may access this location.},
@@ -3094,9 +3095,28 @@ so that a fetch or store may access this location.},
 {{ VARIABLE APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 _HEADER({VARIABLE},{VAR},{DOCOL})
+        DC      LDATA
+        DC      ZERO, COMMA
+        DC      SEMIS
+_C
+worddoc( {DEFINING},{DATA},{data},{},{},
+{A defining word used in the form:
+                 forthsamp({DATA cccc})
+When forthcode({DATA}) is executed,
+it creates the definition forthsamp({cccc})
+whose forthdefi({data field address}) contains a
+pointer forthsamp({n}) to forthcode({HERE}).
+_VERBOSE_({{This code is typically followed by some data
+allocation word like forthcode({ALLOT}) or forthcode({{{{,}}}}) .}})
+When forthsamp({cccc}) is later executed,
+this pointer forthsamp({n}) is left on the stack,
+so that data can be accessed.},
+{{VARIABLE},{(CREATE)},{>DFA}},
+{{ DATA APE 1A34 , APE @ .},{1A34} },
+enddoc)
+_HEADER({DATA},{LDATA},{DOCOL})
         DC      LNAME
         DC      PCREAT
-        DC      ZERO, COMMA
         DC      PSCOD
 DOVAR:  MOV     AX,[WOR+_CELLS((D_HOFFSET))] _C{(AX) <- PFA}
         _PUSH
@@ -8181,7 +8201,8 @@ _HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      LIT, 'F'+(0x100*('i'+0x100*('L'+0x100*'e'))), COMMA _C{Magic number.}
         DC      ZERO, OFILE, THROW, TOR
         DC      HERE, LDUP
-        DC      LEM, LIT, 6, SLASH, LDUP, ALLOT
+        DC      SPFET, HERE, LSUB
+        DC      LIT, 6, SLASH, LDUP, ALLOT
         DC      LIT, 1000, LSUB
         DC      RR, RFILE, THROW
         DC      FROMR, CFILE, THROW

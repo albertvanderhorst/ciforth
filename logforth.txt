@@ -13626,6 +13626,37 @@ Oops. The versions made by fasm lina32 and lina64 cannot
 compile. SAVESYSTEM just doesn't work.
 Also glina32 doesn't even compile.
 
+2014 dec 2
+DATA introduced and used in the block file.
+memoize added to the block file.
+D gives a duplicate when loading .FORMAT. (with D prefix)
+Defect: adding :2 to the D thingy in FORMAT gives problems.
+
+2014 dec 3
+Fib now works with memoizer in the blocks file.
+If WANT :2 is added, it crashes badly, even if it is
+not used in format.
+ALIAS deserves it own screen.
+2VARIABLE added in the 2R@ screen.
+emoize is in full testing.
+
+2014 dec 4
+:2 crashes because it doesn't find the previous word, and
+tries to HIDE null. That is a crash. So we have to live with
+the situation that this message comes as soon as we are
+case-sensitive.
+
+2015 dec 8
+The random generator is 43 bits only. Adapted a version for
+64 bits that at least generates a 32 bit random number.
+
+2015 dec 16
+Inspired by Williams I've implemented a dynamicstring library. This
+leads to the discovery that GET-FILE should use a 6-th of the
+remaining memory. The dynamicstring facility almost works, but
+if we load the facility a second time, it prints the buffer a second
+time and even tries to evaluate.
+
 --------------------
 TODO
 The help screen should contain a mention of what the system is,
