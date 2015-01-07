@@ -5962,9 +5962,6 @@ _C{       Execute option.}
 _HOSTED_X_(
 {        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
         _0BRANCH(OPT4) _C{ No options}  })
-_HOSTED_OSX_(
-{        DC      ARGS, FETCH, CELLP, CELLP, FETCH, LDUP
-        _0BRANCH(OPT4) _C{ No options}  })
 _DLL_(
 {       DC      ARGS, FETCH
         DC     ZERO, INVERT
@@ -7426,7 +7423,7 @@ CODE_HEADER({XOS},{XOS})
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 })_C{}_END_({_HOSTED_OSX_})
-worddoc( {OPERATINGSYSTEM},{XOS5},{linos5},{n1 n2 n3 n4 n5 n---ret},{},
+worddoc( {OPERATINGSYSTEM},{XOS5},{xos5},{n1 n2 n3 n4 n5 n---ret},{},
 { Do a traditional Unix type system call forthvar({n}) (man 2) with parameters
 forthvar({n1 n2 n3 n4 n5}). forthvar({ret}) is the return
 value of the call. If it is negative, it is mostly an error,
@@ -7485,7 +7482,7 @@ CODE_HEADER({XOS5},{XOS5})
 
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
-worddoc( {OPERATINGSYSTEM},{XOSV},{xos variable},{ ni ...n3 n2 n1 i nc ---ret},{},
+worddoc( {OPERATINGSYSTEM},{XOSV},{xos_variable},{ ni ...n3 n2 n1 i nc ---ret},{},
 { Do a traditional Unix type system call forthvar({nc}) (man 2) with
 forthvar({i}) parameters forthvar({n1 n2 n3 .. ni}). forthvar({ret}) is the return
 value of the call. If it is negative, it is mostly an error,
@@ -7740,7 +7737,6 @@ _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      RWBUF, SSTOR
         DC      ZERO, RWBUF, CHAPP
         DC      RWBUF, CELLP
-         _SWITCH_({DC   LIT, M4_SWITCHOFFSET, PLUS, })
         DC      SEMIS
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
@@ -9440,7 +9436,7 @@ COMBUF:  _RESB(CW+256)  _C{One cell for high level string manipulation.}
         _C{ These are longs, not cells! }
 SYSARGS: DD   _VAR_FIELD(SHELL)+CW, SYSARG2, COMBUF + CW, 0
 _C
-worddoc( {OPERATINGSYSTEM},{XOSFORK},{system},{ --- flag},{},
+worddoc( {OPERATINGSYSTEM},{XOSFORK},{xosfork},{ --- flag},{},
 {Fork the process. If it is negative, it is an error.
 Otherwise, if forthvar({flag}) is clear, we are the child else the
 mother.}, {{SYSTEM}}, {}, enddoc )
