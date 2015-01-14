@@ -47,7 +47,7 @@ Install nasm, the well known net wide assembler.
 
 Assemble and link using the instructions in the source.
 
-You can not yet compile a program `monkey.frt' to an executable
+You now can compile a program `monkey.frt' to an executable
 `monkey.exe':
     xina -c monkey.frt
 
@@ -58,10 +58,17 @@ The rest is documentation (examples and source).
 COPYING         Copyright notice
 READMExina.txt    This file
 xina.asm        Source, for the ``nasm'' assembler.
-NOT YET:        Forth interpreter compiler
+NOT YET: xina       Forth interpreter compiler
 xina.html       Usable reference documentation
 xina.pdf        Documentation in Portable Data Format
 forth.lab       Source library
+
+
+testxina        shell script to be used for testing
+testxina.1      testinput  specific test
+testxina.2      test output expected
+tsuite.frt      testinput ISO test
+tsuite.out      testinput ISO test
 
 The latest version can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
@@ -69,11 +76,11 @@ This contains also the generic system that is recommended over
 `xina.asm' if you want to make extensive change.
 
 DOCUMENTATION I
-The regular documentation is your choice of PostScript, PDF with
-the same content.
+The regular documentation is your choice of PostScript(NOT YET),
+PDF with the same content.
 
 DOCUMENTATION II
-Viewing the file ``xina.HTML'' with a html viewer,
+Viewing the file ``xina.html'' with a html viewer,
 gives a reference extract but with more cross links.
 This is only intended to be used while using the system, it
 contains no information about installation or tutorial material.
@@ -86,3 +93,8 @@ that would never work across all the targeted platforms.
 This Forth worked on windows version I never used or even heard of!
 And of course even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)
+
+TESTING
+Run a shell in the directory where xina and forth.lab sit.
+Make sure . is in the PATH.
+Run testxina to do both the specific and the ISO test.

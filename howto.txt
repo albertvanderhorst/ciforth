@@ -168,3 +168,9 @@ make testxina.
 From now on use
 make lina32.zip
 (not make lina64.zip)
+
+2015 jan 7
+releasing xina
+Use `` . setenv '' to set $V
+. releasexina.bat $V
+result in xina-$V.tar

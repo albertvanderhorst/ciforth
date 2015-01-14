@@ -13646,17 +13646,29 @@ tries to HIDE null. That is a crash. So we have to live with
 the situation that this message comes as soon as we are
 case-sensitive.
 
-2015 dec 8
+2014 dec 8
 The random generator is 43 bits only. Adapted a version for
 64 bits that at least generates a 32 bit random number.
 
-2015 dec 16
+2014 dec 16
 Inspired by Williams I've implemented a dynamicstring library. This
 leads to the discovery that GET-FILE should use a 6-th of the
 remaining memory. The dynamicstring facility almost works, but
 if we load the facility a second time, it prints the buffer a second
 time and even tries to evaluate.
 
+2015 jan 6
+Mr. Sokolov sends a test for xina.
+Checked in version 5.122 with DATA introduced, also in the LAB.
+Problem, the texinfo file for xina will not generate an info file.
+
+2015 jan 14
+Received the Skol9obolv test. There were a few glitches concerning
+version and the copying of the forth.lab.
+The most important annoyance is that the version doesn't
+determine whether the input is from a terminal, such that the output
+f tsuite.frt is riddled with ok.
+Also the test of SYSTEM EXIT-CODE failed because it did run ./lina.
 --------------------
 TODO
 The help screen should contain a mention of what the system is,

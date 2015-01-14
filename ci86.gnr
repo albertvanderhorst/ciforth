@@ -6023,7 +6023,7 @@ _C{ Fill user area for single task.}
 _DLL_({
         DC      LCOMMAND, DROP, ARGS, STOR
 })_C{}_END_({_DLL_})
-_LINUX_N_({
+_HOSTED_X_({
         DC      ZERO, LIT, TCGETS, TERMIO
         DC      LIT, ioctl, XOS, ZLESS
         _0BRANCH(COLD1)
@@ -6033,7 +6033,7 @@ _LINUX_N_({
         DC      LIT,OK
         DC      LIT, _CELLS(3), LCMOVE
 COLD1:
-})_C{}_END_({_LINUX_N_})
+})_C{}_END_({_HOSTED_X_})
 _HOSTED_(
 {        DC      OPTIONS})
         _0BRANCH(COLD5)
@@ -7766,6 +7766,82 @@ _HEADER({ZEN},{ZEN}, {DOCOL})
         DC      SEMIS
 })_C{}_END_({ _HOSTED_DPMI_})
 _C
+_C
+worddoc( {FILES},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
+{Write forthvar({n}) characters from forthvar({addr}) to the file that is
+open at forthvar({fd}) , starting at its current position.
+forthvar({u1}) is 0 for success,
+or otherwise _PC_({the MSDOS}) _HOSTED_X_({ forthvar({errno}) })
+error code
+negated, usable as a throw code.
+dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
+},
+dnl This must be the first of the file test! hello.frt is used.
+{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{BLOCK-WRITE}},
+_PC_({
+{ { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE-FILE .},{0},
+{FD CLOSE-FILE .},{0} },
+})
+_HOSTED_X_({
+{ { "hello.frt" 8 BASE ! 644 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE-FILE .},{0},
+{FD CLOSE-FILE .},{0} },
+})
+_DLL_({
+{ { "hello.frt" 2 CREATE-FILE . CONSTANT FD },{0 },
+{"."" Hello world!""" FD WRITE-FILE .},{0},
+{FD CLOSE-FILE .},{0} },
+})
+enddoc)
+_HOSTED_X_({
+_HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      ROT, ROT
+        DC      LIT, write, XOS
+        DC      ZERO, MIN
+        DC      SEMIS
+})_C{}_END_({ _HOSTED_X_})
+_DLL_({
+_HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      TOR             ;fd
+        DC      SWAP, TOR       ;buf
+        DC      TOR     ; Count
+        DC      ZERO, RPFET
+        DC      FROMR, FROMR, FROMR
+        DC      LIT, _WriteFile@20, ICALL
+        DC      TOERR
+        DC      SEMIS
+})_C{}_END_({ _DLL_})
+_HOSTED_MSDOS_({
+_HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      LIT, write, BDOSN
+        DC      ZEQU
+        _0BRANCH({WFILE1})
+        DC      DROP, ZERO
+WFILE1:
+        DC      SEMIS
+})_C{}_END_({ _HOSTED_MSDOS_})
+_HOSTED_DPMI_({
+_HEADER({WRITE-FILE},{WFILE},{DOCOL})
+        DC      TOR             _C{>R}
+WFIL1:                          _C{BEGIN}
+        DC      TDUP, LIT, 0x8000 _C{   2DUP 8000 MIN R@ ^ WRITE-FILE}
+        DC      MIN, RR, LWRITE
+        DC      LDUP             _C{   DUP}
+        _0BRANCH({WFIL2})        _C{ IF RDROP >R 2DROP R> EXIT}
+        DC      RDROP, TOR, TDROP, FROMR, EXIT
+WFIL2:                           _C{ THEN DROP}
+        DC      DROP, LIT, 0x8000, LSUB      _C{ 8000 -}
+        DC      LDUP, ZERO, GREAT      _C{ DUP 0 >}
+        _0BRANCH({WFIL3})        _C{ WHILE}
+        DC      SWAP, LIT, 0x8000 _C{ SWAP 8000}
+        DC      PLUS, SWAP       _C{ + SWAP}
+        _BRANCH({WFIL1})         _C{ REPEAT}
+WFIL3:
+        DC      TDROP, RDROP, ZERO _C{ 2DROP RDROP 0}
+        DC      SEMIS
+})_C{}_END_({ _HOSTED_DPMI_})
+_C
 worddoc( {FILES},{OPEN-FILE}, {open_file},{sc fam --- fileid ior }, {ISO},
 {Open the file with name forthvar({sc}) and file access method
 forthvar({fam}). Return a file handle into forthvar({fileid})
@@ -8061,80 +8137,6 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
 PFILE1:
         DC      SEMIS
 })_C{}_END_({_MODERN_})
-_C
-worddoc( {FILES},{WRITE-FILE}, {write_file},{addr n fd --- u1 }, {ISO},
-{Write forthvar({n}) characters from forthvar({addr}) to the file that is
-open at forthvar({fd}) , starting at its current position.
-forthvar({u1}) is 0 for success,
-or otherwise _PC_({the MSDOS}) _HOSTED_X_({ forthvar({errno}) })
-error code
-negated, usable as a throw code.
-dnl FIXME Wanted : positive for a short read of forthvar({u1}) characters,
-},
-{{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{BLOCK-WRITE}},
-_PC_({
-{ { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE .},{0},
-{FD CLOSE-FILE .},{0} },
-})
-_HOSTED_X_({
-{ { "hello.frt" 8 BASE ! 644 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE .},{0},
-{FD CLOSE-FILE .},{0} },
-})
-_DLL_({
-{ { "hello.frt" 2 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE .},{0},
-{FD CLOSE-FILE .},{0} },
-})
-enddoc)
-_HOSTED_X_({
-_HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      ROT, ROT
-        DC      LIT, write, XOS
-        DC      ZERO, MIN
-        DC      SEMIS
-})_C{}_END_({ _HOSTED_X_})
-_DLL_({
-_HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR             ;fd
-        DC      SWAP, TOR       ;buf
-        DC      TOR     ; Count
-        DC      ZERO, RPFET
-        DC      FROMR, FROMR, FROMR
-        DC      LIT, _WriteFile@20, ICALL
-        DC      TOERR
-        DC      SEMIS
-})_C{}_END_({ _DLL_})
-_HOSTED_MSDOS_({
-_HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      LIT, write, BDOSN
-        DC      ZEQU
-        _0BRANCH({WFILE1})
-        DC      DROP, ZERO
-WFILE1:
-        DC      SEMIS
-})_C{}_END_({ _HOSTED_MSDOS_})
-_HOSTED_DPMI_({
-_HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      TOR             _C{>R}
-WFIL1:                          _C{BEGIN}
-        DC      TDUP, LIT, 0x8000 _C{   2DUP 8000 MIN R@ ^ WRITE-FILE}
-        DC      MIN, RR, LWRITE
-        DC      LDUP             _C{   DUP}
-        _0BRANCH({WFIL2})        _C{ IF RDROP >R 2DROP R> EXIT}
-        DC      RDROP, TOR, TDROP, FROMR, EXIT
-WFIL2:                           _C{ THEN DROP}
-        DC      DROP, LIT, 0x8000, LSUB      _C{ 8000 -}
-        DC      LDUP, ZERO, GREAT      _C{ DUP 0 >}
-        _0BRANCH({WFIL3})        _C{ WHILE}
-        DC      SWAP, LIT, 0x8000 _C{ SWAP 8000}
-        DC      PLUS, SWAP       _C{ + SWAP}
-        _BRANCH({WFIL1})         _C{ REPEAT}
-WFIL3:
-        DC      TDROP, RDROP, ZERO _C{ 2DROP RDROP 0}
-        DC      SEMIS
-})_C{}_END_({ _HOSTED_DPMI_})
 _C
 _HOSTED_DPMI_({
 worddoc( {FILES},{READ}, {read}, {addr n1 fd --- n2 ior }, {ISO},
@@ -10795,8 +10797,18 @@ _HOSTED_X_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
-{{"lina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
+_HOSTED_LINUX_({
+_BITS32_({
+{{"./lina32 -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
+{23 EXIT-CODE ! BYE 23}},  })
+_BITS64_({
+{{"./lina64 -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
+{23 EXIT-CODE ! BYE 23}},  })
+})_C{}_END_({_HOSTED_LINUX_})
+_HOSTED_OSX_({
+{{"./xina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
 {23 EXIT-CODE ! BYE 23}},
+})_C{}_END_({_HOSTED_OSX_})
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to linux, with status as stored. }
