@@ -658,7 +658,7 @@ VARIABLE LAST-IN         VARIABLE start
 WANT 2>R   DATA CRS$ 4096 ALLOT \  WANT :2
 NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
 : c CRS$ $C+ ;  : n ^J c ;   : r ^M c ;  \ Add single char's
-: d 0 <# BL HOLD #S #> CRS$ $+! ;  \ Add INT as a string.
+: d S>D 0 (D.R) CRS$ $+! ;  \ Add INT as a string.
 : s CRS$ $+! ;             \ Add a STRING as such.
 PREVIOUS DEFINITIONS
 \ Format the first part of STRING, up till %, leave REST.
