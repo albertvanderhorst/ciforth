@@ -16,7 +16,7 @@ define({DI},{RDI})dnl
 define({SI},{RSI})dnl
 define({BP},{RBP})dnl
 define({SP},{RSP})dnl
-define({LODSW},{LODSQ})dnl Only instruction to be changed.
+define({LODS},{LODSQ})dnl Only instruction to be changed.
 define({WORD},{QUAD})dnl
 define({_NEXT}, {_NEXT_MACRO})
 define({_PUSH}, {_PUSH_MACRO})

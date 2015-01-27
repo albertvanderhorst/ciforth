@@ -6,4 +6,5 @@ define({SPO},{SP})dnl
 define({RPO},{BP})dnl
 define({HIP},{SI})dnl
 define({WOR},{BX})dnl
+define({LODS},{LODSD})dnl Only instruction to be changed.
 

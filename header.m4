@@ -95,7 +95,7 @@ define({_CELLS},(CW*($1)))dnl
 # See definition of NEXT in glossary.
 define({_NEXT},{JMP     NEXT})
 define({_NEXT_MACRO},
-        {LODSW                 _C NEXT
+        {LODS                  _C NEXT
         JMP     _CELL_PTR[WOR]  } )
 # See definition of PUSH in glossary.
 define({_PUSH},{JMP     APUSH})

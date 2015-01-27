@@ -16,7 +16,7 @@ define({DI},{EDI})dnl
 define({SI},{ESI})dnl
 define({BP},{EBP})dnl
 define({SP},{ESP})dnl
-define({LODSW},{LODSD})dnl Only instruction to be changed.
+define({LODS},{LODSD})dnl Only instruction to be changed.
 define({WORD},{LONG})dnl
 define({_NEXT}, {_NEXT_MACRO})
 define({_PUSH}, {_PUSH_MACRO})

@@ -13688,6 +13688,8 @@ dpmi clean up, READdpmi.txt
     Replace some OVER OVER with 2DUP
 FOR RELEASE  5
 
+PROBLEM : 4.0.7 is not marked in the sources.
+
 Add $\ in the CORE.
 
     Add :I

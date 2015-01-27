@@ -1377,7 +1377,7 @@ _C{      NO BREAKPOINT PAUSE - RESTORE REGISTERS}
 _C
 TNEXT2: POP     AX
         POPF
-TNEXT3: LODSW           _C{ AX <- (IP)}
+TNEXT3: LODS           _C{ AX <- (IP)}
         MOV     WOR,AX
         JMP     SHORT   NEXT1
 })_C{}_END_({_OLDDEBUG_ })
@@ -1423,7 +1423,7 @@ _NEWDEBUG_({
          POP     HIP
 })_C{}_END_({_NEWDEBUG_ })
 })_C{}_END_({_LINUX_C_})
-        LODSW           _C{AX <- (IP)}
+        LODS           _C{AX <- (IP)}
 NEXT1:  MOV     WOR,AX   _C{ (WOR) <- (IP)}
 _PC_({_NEWDEBUG_({ CALL    DISPLAYSI})})
         JMP     _CELL_PTR[WOR]    _C{ TO `CFA'}
@@ -1785,7 +1785,7 @@ Later execution of forthcode({LIT}) causes the contents of this
 next dictionary cell to be pushed to the stack.},{{LITERAL}},
 {{: TL LIT [ 123 , ] ; TL .},{123}}, enddoc)
 CODE_HEADER({LIT},{LIT})
-        LODSW           _C{ AX <- LITERAL}
+        LODS           _C{ AX <- LITERAL}
         _PUSH          _C{ TO TOP OF STACK}
 _C
 worddoc( {MISC},{EXECUTE},{execute},{xt ---},{ISO,FIG},
@@ -1837,7 +1837,7 @@ _VERBOSE_({{Internal, used for nested compilation and compiling strings. }})},
 {20 1}},
 enddoc)
 CODE_HEADER({SKIP},{SKIP})
-BRAN1:  LODSW
+BRAN1:  LODS
 _ALIGNED_({
         DEC     AX
         OR      AL, _OFFSET M4_CELLWIDTH - 1
@@ -1898,7 +1898,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
 {{( See DO)},{}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
-        LODSW
+        LODS
         ADD     AX,HIP  _C{Make absolute}
         POP     DX      _C{ INITIAL INDEX VALUE}
         POP     BX      _C{ LIMIT VALUE}
@@ -1915,7 +1915,7 @@ prepares the return stack, where the looping bookkeeping is kept.},{{?DO}},
 {{( See ?DO)},{}},
 enddoc)
 CODE_HEADER({(?DO)},{XQDO})
-        LODSW
+        LODS
         ADD     AX,HIP  _C{Make absolute}
         POP     DX      _C{ INITIAL INDEX VALUE}
         POP     BX      _C{ LIMIT VALUE}
@@ -10161,17 +10161,22 @@ forthvar({n2}) are determined at run-time and may be the result
 of other operations. Within a loop forthcode({I}) will copy the
 current value of the index to the stack.
 
+It deviates from the ISO standard in that
+that if forthvar({n1}) is equal to forthvar({n2}) the loop is never
+executed even once.
+
+the loop body is not executed.
 When compiling within the colon definition, forthcode({DO}) compiles
 forthcode({(DO)}) and leaves the following address forthvar({addr}) and
 forthvar({n}) for later error checking.},
 {{I},{LOOP},{+LOOP},{LEAVE}},
 { { : GS1 DO 41 EMIT LOOP ; 3 0 GS1},{AAA},
+dnl ISO VIOLATION:
   {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{1},
- {0 WARNING !   DO},{0 WARNING !   DO ? ciforth ERROR # 17 },
- {CR 1 WARNING !},{},
-dnl ISO VIOLATION :
-dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4},
- },
+dnl {: GS3 0 1 1 DO 1+ I 4 = IF LEAVE THEN LOOP . ; GS3 },{4}, dnl ISO
+  {0 WARNING !   DO},{  0 WARNING !   DO ? ciforth ERROR # 17 },
+  {1 WARNING !},{},
+  },
 enddoc)
 _HEADER({DO},{DO},{DOCOL}, , B_IMMED)
          DC      LIT, XDO, COMMA, PFORWARD, PBACK
@@ -10183,21 +10188,23 @@ addr n --- (compile)},{NISO,I,C},
 {Occurs in a colon-definition in form:
     forthexample({?DO ... LOOP})
 It behaves like forthcode({DO}),
-with the exception that if forthvar({n1}) is less or equal to forthvar({n2})
+with the exception that if forthvar({n1}) is less than forthvar({n2})
 the loop body is not executed.
 This is intended to suppress the unwanted behaviour of looping
-through the whole number range.
+through the whole number range,
 ciforth deviates from ISO in that it also suppresses the unwanted
 behaviour of looping through almost the whole number range for
 an input of e.g. forthexample({1 2})
-.
+However, negative increments are made impossible for forthword({?DO}) this way.
 },
 {{DO},{I},{LOOP},{+LOOP},{LEAVE}},
 {
   { : GS1 ?DO 41 EMIT LOOP 0 . ; 3 0 GS1},{AAA0 },
   {: GS3 0 1 1 ?DO I . LOOP . ; GS3 },{0} ,
+dnl ISO VIOLATION:
   {: GS4 0 -1 1 ?DO I . LOOP . ; GS4 },{0} ,
-  {0 WARNING !   ?DO},{0 WARNING !   ?DO ? ciforth ERROR # 17 },
+dnl {: GS4 0 -1 1 ?DO 1- I DUP 4 = IF LEAVE THEN LOOP . ; GS4 },{4}, dnl ISO
+  {0 WARNING !   ?DO},{  0 WARNING !   ?DO ? ciforth ERROR # 17 },
   {CR 1 WARNING !},{}
 },
 enddoc)
@@ -10244,7 +10251,9 @@ compared to the limit.
 The branch back to forthcode({DO}) occurs until the new index
 is equal to or greater than the limit (forthsamp({n1>0})), or
 until the new index is equal to or less than the limit
-(forthsamp({n1<0})). Upon exiting the loop, the parameters are
+(forthsamp({n1<0})). Negative increments cannot be combined with
+ forthword({?DO}) , this deviates from the ISO standard.
+Upon exiting the loop, the parameters are
 discarded and execution continues ahead.
 
 At compile time, forthcode({+LOOP}) compiles the run-time word
