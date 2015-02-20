@@ -302,7 +302,7 @@ DATA _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 : ALLOCATE   ['] _allocate CATCH ;
 : FREE   overhead - _free 0 ;
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
-( REALLOC AT-HERE )                                 AvdHB4Dec03
+( REALLOC AT-HERE )                             \ AvdHB4Dec03
 
 \ For DEA of data fill the data pointer with here.
 : AT-HERE   HERE SWAP >DFA ! ;
