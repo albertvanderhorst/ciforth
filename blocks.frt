@@ -2126,7 +2126,7 @@ CR ;         ' TASK example-by: -hi
 
 
 
-( SEE   -see8- 7 )                                     \ AvdH B2oct02
+( SEE   -see8- )                              \ AvdH B2oct02
 \ For ADDRESS: find DEA to which this address belongs.
  : FIND-HEAD ALIGNED ( Important for CREATE )
      BEGIN DUP HEAD? 0= WHILE 0 CELL+ - REPEAT ;
