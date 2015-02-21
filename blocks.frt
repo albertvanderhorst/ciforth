@@ -1983,22 +1983,38 @@ WANT SEE
 
 
 ( SEE -see0- -table-and-io-  )                 \ AvdH B5Feb20
-WANT H.         WANT BAG    WANT DO-BAG
-: B.. H. SPACE ;
-: H.. BASE B. SPACE ;
-\ From DECOMPILER-POINTER print, leave incremented POINTER
-: ID.+   $@ ID. ;
-
+WANT BAG    WANT DO-BAG
 60 BAG SELTAB   SELTAB !BAG
 \ Put SEARCHED XT in select table)
 : SEL! SWAP SELTAB BAG+! SELTAB BAG+! ;
-( N--M,T / N,F ) \ Look up N in table.
+( N--M,TRUE/ N,FALSE ) \ Look up N in table.
 : SEL@    DUP SELTAB BAG-WHERE DUP IF CELL+ @ NIP -1 THEN ;
+\ Decompile a word from its DEA
+ : CRACKED   DUP @ SEL@ IF EXECUTE ELSE
+   DROP DUP >CFA @ OVER >PHA = IF CR ." Code definition : "
+     ELSE CR ." Can't handle : " THEN ID. CR  THEN ;
+
 \ When finding DEA decompile by "name"
 : by:   ' SEL! ;
 \ When finding words with same cfa of DEA decompile by "name"
 : example-by:   >CFA @    by: ;
-( SEE -see1- -simple-decompilers- )            \ AvdH B5Feb20
+( SEE -see1- -table-and-io-  )                 \ AvdH B5Feb20
+WANT H.         WANT BAG    WANT DO-BAG
+: H.. H. SPACE ;       \ Hex with comma's
+: SH.. HEX: . ;        \ Signed but hex.
+\ From DECOMPILER-POINTER print, leave incremented POINTER
+: ID.+   $@ ID. ;
+
+
+
+
+
+
+
+
+
+
+( SEE -see2- -simple-decompilers- )            \ AvdH B5Feb20
 \ all -words: ( dip --dip' ) decompile pointer
 : -do CR ." DO " CELL+ CELL+ ;     '(DO) by: -do
 : -qdo CR ." ?DO " CELL+ CELL+ ;   '(?DO) by: -qdo
@@ -2011,26 +2027,42 @@ WANT H.         WANT BAG    WANT DO-BAG
 
 
 
+: -pc CR ." ;CODE plus code (suppressed)"
+   ( DIRTY TRICK : make decompile pointer point to exit!)
+   DROP 'TASK >DFA @ ;          ' (;CODE) by: -pc
+( SEE -see3- -simple-decompilers- )            \ AvdH B5Feb20
+\ all -words: ( dip --dip' ) decompile pointer
 
 
 
-( SEE   2 ) \ AvdH A0MAR30
- : CRACKED ( DEA--. Decompile a word from its DEA)
-  (  DUP NEXTD >NFA @ LIM ! Get an absolute limit)
-    DUP @ SEL@ IF ( Is content of CFA known?)
-      EXECUTE ( Assuming CFA also on stack)
-    ELSE
-        DROP CR
-        DUP >CFA @ OVER >PHA = IF
-           ." Code definition : " ELSE ." Can't handle : "
-       THEN ID. CR
-    THEN ;
+
+
+: -co DUP >DFA @ CR H.. ." CONSTANT " ID. CR ;
+   ' BL example-by: -co
+: -va DUP >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
+   ID. CR ;                     ' _PREV example-by: -va
+: -us DUP >DFA C@ CR B. ."  USER " ID. CR ;
+   ' BASE example-by: -us
+
+
+
+( SEE   -see4- ) \ AvdH A0MAR30
 : CRACK  ( Use CRACK "ITEM" to decompile the word ITEM)
     NAME FOUND DUP 0= 11 ?ERROR CRACKED ;
 ( For the DEA : it IS immediate / it IS a denotation )
  : ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
 
-( SEE   3 ) \ AvdH A1MAY17
+
+
+
+
+
+
+
+
+
+
+( SEE   -see5-  ) \ AvdH A1MAY17
 ( DEA--DEA Get the DEA of the word defined after the CFA one)
 : NEXTD CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
 WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
@@ -2038,31 +2070,31 @@ WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
  : CRACK-FROM ' ( .--. Kraak, starting with following word)
 BEGIN DUP NEXTD LATEST < WHILE NEXTC DUP CRACKED REPEAT DROP ;
  VARIABLE LIM
-: H.. BASE @ >R HEX . R> BASE ! ;
-: B.. H.. ;
+
+
 ( For the NUMBER : it IS a proper `dea' )
 ( The <BM is not only optimisation, else `LIT 0' goes wrong.)
 : DEA? DUP BM < IF DROP 0 ELSE
 DUP 'NEXTD CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
 \ For DEA: it IS a header (heuristically).
  : HEAD? DUP >DFA @ SWAP  >PHA = ;
-( SEE   4 ) \ AvdH A9aug30
+( SEE   -see6- 4 ) \ AvdH A9aug30
 \ all -words: ( p --p' ) decompile pointer
 
 
 \ Decompile words with like cfa of DEA by "name"
 
- : -co DUP >DFA @ CR H.. ." CONSTANT " ID. CR ;
-        ' BL example-by: -co
- : -va DUP >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
-    ID. CR ;              ' _PREV example-by: -va
- : -us DUP >DFA C@ CR B.. ."  USER " ID. CR ;
-        ' FENCE example-by: -us
+
+
+
+
+
+
 ( Crack item at POINTER. Leave incremented POINTER , GOON flag)
  : ITEM DUP @ SEL@ IF EXECUTE ( The special) ALIGNED ELSE
         DUP ?IM IF ." POSTPONE " THEN ID. CELL+
      THEN ;
-( SEE   5 ) \ AvdH A9aug30
+( SEE   -see7- ) \ AvdH A9aug30
 : CRACK-CHAIN CR BEGIN DUP @ LIT (;) <>
 ( >R DUP LIM @ < R> AND )  WHILE ITEM REPEAT DROP ;
  ( Decompilation of special high level words)
@@ -2072,13 +2104,13 @@ CR ." ;"  DUP
 CR ;         ' TASK example-by: -hi
  ( for all -words: 1/1 pointer before afd after execution)
  : -con CELL+ DUP @ H.. CELL+ ;
+ : -scon CELL+ DUP @ SH.. CELL+ ;
  : -dea CELL+ DUP @ &' EMIT ID. CELL+ ;
  : -lit DUP CELL+ @ DEA? IF -dea ELSE -con THEN ;
 ' LIT by: -lit
 
 
-
-( SEE   6 ) \ AvdH A0APR11
+( SEE   -see9- ) \ AvdH A0APR11
   : -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
          ."  ] DLITERAL " $@ + 4 CELLS + ;
                       ' SKIP by: -sk
@@ -2090,24 +2122,24 @@ CR ;         ' TASK example-by: -hi
 
 
   (  : -cm ID.+ ID.+ ;                ' COMPILE by: -cm )
-  : -pc CR ." ;CODE plus code (suppressed)"
-  ( DIRTY TRICK FOLLOWING :
-make decompile pointer point to exit!)
-    DROP 'TASK >DFA @ ;             ' (;CODE) by: -pc
-( SEE   7 )                                     \ AvdH B2oct02
+
+
+
+
+( SEE   -see8- 7 )                                     \ AvdH B2oct02
 \ For ADDRESS: find DEA to which this address belongs.
  : FIND-HEAD ALIGNED ( Important for CREATE )
      BEGIN DUP HEAD? 0= WHILE 0 CELL+ - REPEAT ;
 : TO-DOES   >DFA @ @ ; \ For DEA: hl POINTER in ``DOES>'' code.
  : -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID. ID. CR ;
-        ' ONLY  example-by: -dd  \ Use vocab as example.
+        ' FORTH  example-by: -dd  \ Use vocab as example.
 : TARGET DUP 0 CELL+ - @ + ; ( IP -- TARGET OF CURRENT JUMP)
 : .DEA? DUP DEA? IF ID. ELSE DROP ." ? " THEN ; ( DEA --. )
 : -target DUP ( IP -- IP ,print comment about current jump)
 ." ( between " TARGET DUP 0 CELL+ - @ .DEA? @ .DEA? ." ) " ;
-: -0br CR ." 0BRANCH [ " -con ." , ] " -target ;
+: -0br CR ." 0BRANCH [ " -scon ." , ] " -target ;
 ' 0BRANCH by: -0br
-: -br  CR ." BRANCH  [ " -con ." , ] " -target ;
+: -br  CR ." BRANCH  [ " -scon ." , ] " -target ;
 ' BRANCH by: -br
 : KRAAK CRACK ;          : SEE   CRACK ;
 ( ASSEMBLER CODE END-CODE C; )  \ AvdH A0oct21
