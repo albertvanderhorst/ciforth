@@ -13669,6 +13669,14 @@ The most important annoyance is that the version doesn't
 determine whether the input is from a terminal, such that the output
 f tsuite.frt is riddled with ok.
 Also the test of SYSTEM EXIT-CODE failed because it did run ./lina.
+Added this to the code and resend to Skobolev.
+
+2015 deb 20
+Attempt to cleanup the SEE package. Result in try.
+
+2015 feb 24
+See package totally cleaned up and checked.
+
 --------------------
 TODO
 The help screen should contain a mention of what the system is,
