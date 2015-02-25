@@ -606,6 +606,22 @@ DATA _value_jumps  '@ , '! , '+! ,
 
 
 \
+( PAGE AT-XY INVIS REVERSE )                    \ AvdH B5Feb25
+HEX      WANT HEX:       WANT .FORMAT
+FORMAT-WID DEFINITIONS
+: e 1B CRS$ $C+ ;      \ Print escape
+: dd DEC: 0  <# #S #> CRS$ $+! ; \ Print N no space.
+PREVIOUS DEFINITIONS
+\ Define and execute simple escape commands
+: esc-seq   CREATE $, DROP DOES> 1B EMIT $@ TYPE ;
+"[2J"   esc-seq CLEAR  \ Clear Page
+"[H"    esc-seq HOME   \ Set cursor home
+"[?25l" esc-seq INVIS  \ Make cursor invisible
+"[?25h" esc-seq CVVIS  \ Make cursor visible
+"[0m" esc-seq NORMAL
+"[7m" esc-seq REVERSE
+: PAGE   HOME CLEAR ;   \ ISO
+: AT-XY   1+ SWAP 1+ SWAP "%e [%dd ;%dd H" .FORMAT ; \ ISO
 ( BAG !BAG BAG? BAG+! BAG@- BAG-REMOVE BAG-HOLE BAG-INSERT )
 \ Warning uses $@ as as @+
 ( Build a bag with X items. )
