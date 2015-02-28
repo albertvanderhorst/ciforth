@@ -1070,20 +1070,20 @@ We put here also reference implementations.
 
 
 \
-( DEPTH )                               \ AvdH A7mar27
+( DEPTH $@ $! $+! $C+ )                 \ AvdH B5feb27
 : DEPTH   S0 @ DSP@ -   [ 0 CELL+ ] LITERAL /   1- ;
-
-
-
-
-
-
-
-
-
-
-
-
+\ Fetch a constant string c from s
+: $@ ( s -- cs ) DUP CELL+ SWAP @ ;
+\ Store a constant string cs into s
+: $! ( cs s -- ) 2DUP ! CELL+ SWAP CMOVE ;
+\ Store a brain-dead string cs into s
+: $!-BD ( cs s -- ) 2DUP C! 1+ SWAP CMOVE ;
+\ Append a constant string cs to s
+: $+! ( cs s -- ) DUP @ >R 2DUP +! CELL+
+    R> CHARS +   SWAP CMOVE ;
+\ Append a character char to s
+: $C+ ( char s -- ) DUP >R DUP @ CHARS + CELL+ C!
+   1 R> +! ;
 
 
 ( OBSOLETE L! L@ )       \ AvdH A6may13

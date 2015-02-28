@@ -13677,16 +13677,37 @@ Attempt to cleanup the SEE package. Result in try.
 2015 feb 24
 See package totally cleaned up and checked.
 
+2015 feb 27
+At last we must publish 5.2 of ciforth.
+I want addition of a coupole of things:
+chs tri pyr for choose function, triangular
+and pyamidal numbers and such
+Rabbin prime test
+cntbits function, ms bit function and use
+it for sqrt, and a DSQRT.
+Skoboleve  test comes back.
+ - a file is created when a non-existing file is opened
+ - BYE works including exit code. However here is
+  mysterious problem with FORGET XX after that
+That was all! Wht remains is checking the ability to
+generate an executable and it can be released.
+Added screen with strings to the lib for reference.
+
 --------------------
+*SET-SRC should contain a ref to SAVE
+*$! and $+! should use smart moves (MOVE)
+*Smart move is iso.
+*implement :I , must be easy.
+*D< D0< bugs
+*LIMIT -> _LIMIT   FIRST -> _FIRST   INIT  -> _INIT (?)
+*The MEMORY words should get stack comment
+
 TODO
 The help screen should contain a mention of what the system is,
 and a reference to the tutorial page at hcc.
 
-SET-SRC should contain a ref to SAVE
-$! and $+! should use smart moves (MOVE)
-Smart move is iso.
 ANDSI is missing from the built in assembler.
-moving handler zeroing to quit
+move the zeroing if the handler to quit
 DIGIT can be high level and throw.
 
 A word for unsigned double formatting is missing.
@@ -13696,11 +13717,11 @@ dpmi clean up, READdpmi.txt
     Replace some OVER OVER with 2DUP
 FOR RELEASE  5
 
+Traps don't work in 16 bits.
+
 PROBLEM : 4.0.7 is not marked in the sources.
 
 Add $\ in the CORE.
-
-    Add :I
 
     The documentation should mention which CORE-words are
     loadable extensions, instead of announcing that the whole
@@ -13708,12 +13729,8 @@ Add $\ in the CORE.
 
     Add a marker to start windows parameters.
     ?DUP (ABORT") can be moved to extensions
-    LIMIT -> _LIMIT
-    FIRST -> _FIRST
-    INIT  -> _INIT (?)
     WARM should save registers
 
-    D< D0< bugs
 
 If the whole searchorder is filled with ONLY's, it would become
 more robust.
@@ -13722,15 +13739,10 @@ Clean up the optimiser away from the base project.
 
 Trying to have IF better decompiled.
 
-The error message shoudl be moved from HEADER to (CREATE)
-WHY WHY WHY?
-
 What about registers that are unused in 64 bits.
 
 The word ?EXEC must be removed from CODE ENDCODE, if it is
 legacy.
-
-:I must be easy.
 
 QSORT must use VECTOR which is almost DEFER
 then  '<q  >BODY !
@@ -13738,7 +13750,6 @@ Add UNLINK to complement link.
 
 CREATE-FILE in windows works but generates files that can't be deleted
 
-The MEMORY words should get stack comment
 
 What with GET-FILE : why 1000 - ?
 Suppose sda1 is a sandisk.

@@ -2291,7 +2291,7 @@ CODE_HEADER({CMOVE},{LCMOVE})
         MOV     HIP,BX   _C{get back }
         _NEXT
 _C
-worddoc( {MEMORY},{MOVE},{move},{from to count ---},{},
+worddoc( {MEMORY},{MOVE},{move},{from to count ---},{ISO},
 {Move forthvar({count})
 bytes beginning at address forthvar({from}) to
 address forthvar({to}), such that the destination area contains
@@ -3212,7 +3212,7 @@ in the string variable at address forthvar({addr}).},
 {{$@@},{$+!},{$C+}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ - $@ PAD $! PAD $@ TYPE},{A9}}, enddoc)
 _HEADER({$!},{SSTOR},{DOCOL})
-        DC TDUP, STOR, CELLP, SWAP, LCMOVE
+        DC TDUP, STOR, CELLP, SWAP, LMOVE
         DC SEMIS
 _C
 worddoc( {STRING},{$!-BD},{string_store_brain_damaged},{sc addr ---},{WANT},
@@ -3225,7 +3225,7 @@ from?)}})},
 {{ 1 LOAD WANT $!-BD "A9" PAD $!-BD PAD COUNT TYPE},{A9}}, enddoc)
 _SUPPRESSED({{
 _HEADER({$!-BD},{SSTORBD},{DOCOL})
-        DC TDUP, CSTOR, ONEP, SWAP, LCMOVE
+        DC TDUP, CSTOR, ONEP, SWAP, LMOVE
         DC SEMIS
 _C
 }})_C{}_END_({ _SUPPRESSED})
@@ -3238,7 +3238,7 @@ $@ 2DUP PAD $! PAD $+! PAD $@ TYPE},{A9A9}}, enddoc)
 _HEADER({$+!},{SADD},{DOCOL})
         DC   LDUP, FETCH, TOR _C{ Remember old count.}
         DC   TDUP, PSTOR
-        DC   CELLP, FROMR, PLUS, SWAP, LCMOVE
+        DC   CELLP, FROMR, PLUS, SWAP, LMOVE
         DC SEMIS
 _C
 worddoc( {STRING},{$C+},{char_append},{c addr ---},{},
@@ -4555,7 +4555,7 @@ exhausting it has the same effect as exhausting the input that
 called forthcode({SET-SRC}). _VERBOSE_({{In practice this word
 is almost always preceeded by a call to forthcode({SAVE}) and
 followed by a call to }forthcode({INTERPRET}){.}})},
-{{SRC},{EVALUATE},{INTERPRET}},
+{{SRC},{SAVE},{EVALUATE},{INTERPRET}},
 {{ "1 2 3 . CR" SET-SRC . . .},{3},
 { . . },{2 1} },
 enddoc)
@@ -6316,7 +6316,6 @@ CODE_HEADER({SM/REM},{MSLAS})
         IDIV     BX      _C _BITS_ {BIT DIVIDE}
         _2PUSH          _C{STORE QUOT/REM}
 _C
-_LOAD_({
 worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
 {Perform an arithmetical {{shift}} right.
 The bit pattern of forthvar({n1}) is shifted to the right, except that
@@ -6331,25 +6330,37 @@ same as }forthsamp({1 RSHIFT}){.}})},
 {-1 2/ . },{-1},
 },
 enddoc)
+_SUPPRESSED({
 _HEADER({2/},{TWOSL},{DOCOL})
         DC      STOD, TWO, FMSLAS
         DC      NIP
         DC      SEMIS
+})_C{}_END_({_SUPPRESSED})
+CODE_HEADER({2/},{TWOSL})
+        POP     AX      _C{(S1) <- (S1) + (S2)}
+        SAR     AX,1
+        _PUSH
+
 _C
 worddoc( {SUPERFLUOUS},{2*},{two_star},{n1 --- n2},{ISO},
 {Perform an arithmetical {{shift}} left.
 The bit pattern of forthvar({n1}) is shifted to the left,
-with a result identical to forthsamp({1 LSHIFT}).
-_VERBOSE_({{This word should not be used.}})},
+with a result identical to forthsamp({1 LSHIFT}).},
 {{2/} },
 {
 {  2 2* . },{4},
 {  -2 2* . },{-4},
 },
 enddoc)
+_SUPPRESSED({
 _HEADER({2*},{TWOST},{DOCOL})
         DC      TWO, STAR
         DC      SEMIS
+})_C{}_END_({_SUPPRESSED})
+CODE_HEADER({2*},{TWOST})
+        POP     AX      _C{(S1) <- (S1) + (S2)}
+        SAL     AX,1
+        _PUSH
 _C
 worddoc( {SUPERFLUOUS},{1-},{one_minus},{n1 --- n2},{ISO},
 { This is shorthand for forthsamp({1 -}). },
@@ -6363,7 +6374,6 @@ _HEADER({1-},{ONEM},{DOCOL})
         DC      ONE, LSUB
         DC      SEMIS
 _C
-})_C{}_END_({_LOAD_})
 worddoc( {MULTIPLYING},{FM/MOD},{floored_slash},{d n1 --- n2 n3},{ISO},
 {A mixed magnitude math operator which leaves the signed
 remainder forthvar({n2}) and signed quotient forthvar({n3})
