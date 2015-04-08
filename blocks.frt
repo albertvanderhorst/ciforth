@@ -302,14 +302,14 @@ DATA _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 : ALLOCATE   ['] _allocate CATCH ;
 : FREE   overhead - _free 0 ;
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
-( REALLOC AT-HERE )                             \ AvdHB4Dec03
-
+( REALLOT REALLOC AT-HERE )                     \ AvdHB5Mar30
+WANT ALIAS
 \ For DEA of data fill the data pointer with here.
 : AT-HERE   HERE SWAP >DFA ! ;
 
 \ For DEA of data reserve LENGTH bytes at here.
-: REALLOC   SWAP AT-HERE   ALLOT ;
-
+: REALLOT   SWAP AT-HERE   ALLOT ;
+'REALLOT ALIAS REALLOC
 
 
 
@@ -334,7 +334,7 @@ DATA _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 
 
 
-( NOT 0<> >= <= UMIN U> D0= D0<> D0< D< D- )     \ AvdH B3mar12
+( NOT 0<> >= <= UMIN U>                    )     \ AvdH B5Mar9
 WANT ALIAS
 '0= ALIAS NOT           : 0<> 0= NOT ;
 : >=   < NOT ;          : <=   > NOT ;
@@ -342,13 +342,29 @@ WANT ALIAS
 : UMAX   2DUP U< IF SWAP THEN DROP ;
 : U>     SWAP U< ;
 
+
+
+
+
+
+
+
+
+( D0= D0<> D0< D< D- M+ DRSHIFT DLSHIFT DU< )    \ AvdH B5Apr8
+WANT NOT        WANT 0<>
+
 : D0=  OR 0= ;          : D0<>  OR 0<> ;
 : D-   DNEGATE D+ ;     : D0<   NIP 0< ;
 : D<   ROT 2DUP <> IF > NIP NIP ELSE 2DROP U< THEN ;
+: DU<  ROT 2DUP <> IF U> NIP NIP ELSE 2DROP U< THEN ;
 : D>   2SWAP D< ;       : D>=  D< NOT ;         : D<=  D> NOT ;
 
+: DLSHIFT >R SWAP DUP R@ LSHIFT SWAP 8 CELLS R@ - RSHIFT ROT R>
+    LSHIFT OR ;
+: DRSHIFT >R DUP R@ RSHIFT SWAP 8 CELLS R@ - LSHIFT ROT R>
+    RSHIFT OR SWAP ;
 
-
+: M+   S>D D+ ;
 
 ( PARSE-NAME SAVE-INPUT EXECUTE-PARSING --> )   \ B4oct16
 WANT ALIAS
@@ -446,19 +462,19 @@ DROP   CURRENT !
 
 
 
-( 2>R 2R> 2R@ 2VARIABLE 2, )       \ AvdH B4Dec16
+( 2>R 2R> 2R@ 2CONSTANT 2VARIABLE 2, )          \ AvdH B5Mar9
 
 
 
 
-
-\ Double return stack manipulations
+\ Double return stack manipulations all ISO
 : 2>R POSTPONE SWAP POSTPONE >R POSTPONE >R ; IMMEDIATE
 : 2R> POSTPONE R>  POSTPONE R> POSTPONE SWAP  ;  IMMEDIATE
 : 2R@ POSTPONE 2R> POSTPONE 2DUP POSTPONE 2>R ; IMMEDIATE
 
-: 2,   , , ;
-: 2VARIABLE   DATA 0. 2, ;
+: 2,   , , ;                            \ ISO
+: 2VARIABLE   DATA 0. 2, ;              \ ISO
+: 2CONSTANT   CREATE 2, DOES> 2@ ;      \ ISO
 
 
 \
@@ -590,7 +606,23 @@ DATA _value_jumps  '@ , '! , '+! ,
     @ EXECUTE   FROM ;
 
 
-( ORDER .WID .VOCS BUFFER ) \ AvdH A1sep25
+( LOCAL )                               \ AHCH B5mar03
+WANT VALUE      WANT {{    WANT BAG     WANT DO-BAG
+
+16 BAG _locals   _locals !BAG
+
+: LOCAL  POSTPONE {{   _ VALUE   }}
+    POSTPONE TO   LATEST >LFA @ DUP _locals BAG+!
+    POSTPONE LITERAL POSTPONE EXECUTE
+; IMMEDIATE
+
+: ;   _locals DO-BAG I @ HIDDEN LOOP-BAG POSTPONE ;
+   _locals !BAG ;
+IMMEDIATE
+
+
+
+( ORDER .WID .VOCS BUFFER ) \ AvdH B5apr8
 \ Print all namespace (voc) names in existence.
 : .VOCS 'ID. FOR-VOCS ;
 \ Print a voc's name from the WID)
@@ -598,8 +630,8 @@ DATA _value_jumps  '@ , '! , '+! ,
 \ Print the current search order by namespace names
 : ORDER  CONTEXT BEGIN $@ DUP 'ONLY >WID <> WHILE .WID REPEAT
     2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
-\ This is a BUFFER compatible with FIG-Forth.
-: BUFFER   (BUFFER) CELL+ CELL+ ;
+
+
 
 
 
@@ -899,7 +931,7 @@ DECIMAL
 100 STACK DEBUG-STACK
 : PUSH DEBUG-STACK @ SWAP OVER ! 1 CELLS +  DEBUG-STACK ! ;
 : POP DEBUG-STACK @ 1 CELLS - DUP @ SWAP DEBUG-STACK ! ;
-
+: GET DEBUG-STACK @ 1 CELLS - @ ;
 
 
 
@@ -1710,6 +1742,22 @@ WANT TASK-TABLE   WANT CVA
     R> TASK-TABLE SET+! ;
 
 \
+( {{ }} )                               \ AHCH   B5mar03
+WANT NESTED-COMPILE
+\ New context for definitions, maybe in the middle of a word.
+: {{ ( NESTED-COMPILE ) POSTPONE SKIP (FORWARD R>
+        CSP @ >R DPL @ >R UNLINK-LATEST >R STATE @ >R
+    >R POSTPONE [ ; IMMEDIATE
+
+: }} FORWARD)  R>
+        R> STATE ! R> LINK-LATEST R> DPL ! R> CSP !
+    >R ;
+
+
+
+
+
+
 ( NESTED-COMPILE ) \ AvdH A2oct28
 
 \ Isolate the latest word from the dictionary. Leave its DEA.

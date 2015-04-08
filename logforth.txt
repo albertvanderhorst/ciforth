@@ -13693,6 +13693,33 @@ That was all! Wht remains is checking the ability to
 generate an executable and it can be released.
 Added screen with strings to the lib for reference.
 
+2015 mar 27
+The problem Gerard Vriens has with version 5.1 is very serious.
+lina32 gets killed immediately, without the message
+killed
+and error 137. (echo $?).
+We have, from the same source, generated an executable assembler
+programm, using gnu tools and the .s source. On the Debian system
+it runs, on Fedora 6 it has the exact same behaviour as what I passed
+along in the distribution.
+
+2015 apr 8
+I've added DLSHIFT DRSHIFT DU< to the library to easier accomodate the
+bignum package.
+Gerard Vriens reports that he can run lina on an other Linux system
+that Fedora 6.
+The following was triggered by the wish to run bignum.frt.
+The code from FACTORS and JACOBI runs with only harness ina file
+mhx.frt.
+New forth.lab:
+   REALLOC is really REALLOT
+   added DU< DLSHIFT DRSHIFT
+   Added 2CONSTANT
+   BUFFER is rudimentary, removed
+   Added {{ }} nested compile
+   Added a LOCAL compatible with tForth
+   Added a GET at the free STACK
+
 --------------------
 *SET-SRC should contain a ref to SAVE
 *$! and $+! should use smart moves (MOVE)
@@ -13703,6 +13730,8 @@ Added screen with strings to the lib for reference.
 *The MEMORY words should get stack comment
 
 TODO
+Add a screen with fib pyr tri chs
+Add a screen with #LEFT-BIT
 The help screen should contain a mention of what the system is,
 and a reference to the tutorial page at hcc.
 
