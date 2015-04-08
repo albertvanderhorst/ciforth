@@ -281,7 +281,7 @@ ci86.$(s).bin :
 # Canonical targets
 lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 lina64: ci86.lina64.fas ;  fasm $+ -m256000; mv ${<:.fas=} $@
-lina: lina64 ; cp $< $@
+lina: glina64 ; $< -g 8000 $@
 wina.exe: ci86.wina.fas ; fasm $+ -m256000
 
 # Put include type of dependancies here
