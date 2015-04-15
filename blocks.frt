@@ -1856,9 +1856,9 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 : NEW-SEL   0 0 1 0 0 BIOS31+ 2DROP DROP ; DECIMAL
 ( **************ciforth tools*********************************)
 
+EXIT
 
-
-
+Tools and utilities
 
 
 
@@ -2973,6 +2973,38 @@ DECIMAL
 : .PRES
   DUP 80 AND NOT ." PRESENT. "
   DROP ;
+
+( ************** application *********************************)
+
+EXIT
+
+Useful for user programs:
+   - midi
+
+
+
+
+
+
+
+
+
+
+( -midi_driver- sendmidi ) ?WI               \ AHCHB5apr15
+WANT LOAD-DLL:           WANT DLL-ADDRESS:
+"WINMM.DLL" LOAD-DLL: WINMM
+"midiOutOpen"     'WINMM DLL-ADDRESS: midiOutOpen
+"midiOutShortMsg" 'WINMM DLL-ADDRESS: midiOutShortMsg
+"midiOutClose"    'WINMM DLL-ADDRESS: midiOutClose
+
+VARIABLE MidiHandle
+
+\ Open midi, i.e. fill MidiHandle.
+: openmidi  0 0 0 -1 MidiHandle midiOutOpen CALL 2001 ?ERROR ;
+\ Close midi channel in MidiHandle
+: closemidi MidiHandle @ midiOutClose CALL 2002 ?ERROR ;
+\ Send out 3 byte MESSAGE contained in one cell.
+: sendmidi MidiHandle @ midiOutShortMsg CALL 2003 ?ERROR ;
 
 ( **************communication with stand alone hd ************)
 
