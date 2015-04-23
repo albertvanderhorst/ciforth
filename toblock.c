@@ -51,7 +51,11 @@ int main( int argc , char **argv )
         if ( 0 == line%16 ) check_index(buffer);
         line += 1;
         count = strlen(buffer);
-        if ( CPL < count ) error("line too long");
+        if ( CPL < count )
+        {
+            fprintf(stderr, "%s\n", buffer );
+            error("line too long");
+        }
         buffer[--count] = '\000';  /* Remove '\n' */
         for(i=0; i<CPL-1; i++)
             putchar(i<count?buffer[i]:' ');

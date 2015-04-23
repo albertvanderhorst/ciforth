@@ -13719,6 +13719,16 @@ New forth.lab:
    Added {{ }} nested compile
    Added a LOCAL compatible with tForth
    Added a GET at the free STACK
+For blocks.frt version 5.96.
+
+2015 apr 15
+Added a midi driver in forth.lab.  midi.frt can play the song of
+Jones Jonesforth with different voices.
+
+2015 apr 23
+Added INLING, a namespace to be added to the library.
+Committed midi, number theoretical functions and above.
+Version 5.97.
 
 --------------------
 *SET-SRC should contain a ref to SAVE
@@ -13791,7 +13801,6 @@ The library goes undocumented.
 
 A very stupid comment line in the description of the memory
 up till EM must be removed.
-
 
 The registers are not properly described in the manual.
 (Not using the names WOR HIP etc.
