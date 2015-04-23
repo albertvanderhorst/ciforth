@@ -991,7 +991,7 @@ WANT :I WANT XGCD      VARIABLE m ( Modulo number)
 
 :I x^x    m @ >R m !   **m   R> m ! ;   ( a b m -- a^b mod m )
 ( PRIME? FACTOR GCD XGCD                       ) \ AvdH B4Nov03
-\ For N and HINT return FACTOR >= hint, maybe n.
+\ For N and HINT return FACTOR >= hint, maybe n. NOT INLINE!
 : FACTOR   BEGIN   2DUP /MOD SWAP
     0= IF DROP SWAP DROP EXIT THEN
     OVER < IF DROP EXIT THEN
@@ -1006,6 +1006,22 @@ WANT :I WANT XGCD      VARIABLE m ( Modulo number)
 \ For A B return C GCD where C*A+B*x=GCD
 : XGCD 1 0 2SWAP   BEGIN OVER /MOD OVER WHILE >R SWAP
    2SWAP OVER R> * - SWAP 2SWAP REPEAT 2DROP NIP ;
+( PHI CHS TRI PYR SQR                         ) \ AvdH B5apr20
+WANT FACTOR
+\ For X return Euler's TOTIENT
+    : _move-factor   >R BEGIN R@ * SWAP R@ / SWAP OVER R@ MOD
+      UNTIL R@ 1- R> */ ; \ ( N M P - N' M' ) N*M=N'*M\ , P/|M'
+: PHI   1 OVER 2 MOD 0 = IF 2 _move-factor THEN    3 >R
+    BEGIN OVER 1 <> WHILE OVER R> FACTOR >R R@ _move-factor
+    REPEAT RDROP NIP ;
+\ For N M return "N OVER M " (N/M)
+: CHS >R  R@ - 1 R> 1+ 1 ?DO   OVER I + * I / LOOP NIP ;
+\ '(./.) ALIAS CHS
+
+\ For x return it TRIANGLE, | PYRAMIDAL | SQUARE  number
+: TRI    DUP 1+ * 2/ ;  ( : PYR ; ) : SQR DUP * ;
+
+
 ( /STRING -LEADING DROP-WORD        )           \ AvdH B@aug12
 
 \ From SC trim N char's
@@ -1406,7 +1422,7 @@ WANT T]      WANT :2
 
 \ Last scripting block!
 CREATE -scripting-
-( :2 :F :R :I                                 )  \ AvdH B4oct14
+( :2 :F :R :I   INLINING                      )  \ AvdH B4oct14
 WANT ALIAS
 \ Alias of : , redefine an existing(!) word. Or crash.
 : :2   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R> HIDDEN ;
@@ -1420,8 +1436,8 @@ WANT ALIAS
    DOES>   STATE @ IF BEGIN $@ DUP '(;) <> WHILE , REPEAT 2DROP
    ELSE >R THEN ;
 
-
-
+NAMESPACE INLINING
+INLINING DEFINITIONS ':I ALIAS :  PREVIOUS DEFINITIONS
 ( OLD: RESTORED POSTFIX ) \ AvdH A2jun12
 \ WARNING: use these facilities only with high level words.
 
@@ -2990,7 +3006,7 @@ Useful for user programs:
 
 
 
-( -midi_driver- sendmidi ) ?WI               \ AHCHB5apr15
+( -midi_driver- sendmidi ) CF: ?WI           \ AHCHB5apr15
 WANT LOAD-DLL:           WANT DLL-ADDRESS:
 "WINMM.DLL" LOAD-DLL: WINMM
 "midiOutOpen"     'WINMM DLL-ADDRESS: midiOutOpen
@@ -3005,6 +3021,22 @@ VARIABLE MidiHandle
 : closemidi MidiHandle @ midiOutClose CALL 2002 ?ERROR ;
 \ Send out 3 byte MESSAGE contained in one cell.
 : sendmidi MidiHandle @ midiOutShortMsg CALL 2003 ?ERROR ;
+
+( -midi_driver- sendmidi ) CF: ?LI           \ AHCHB5apr15
+\ For the moment Linux midi calls are screened off
+
+
+
+
+
+VARIABLE MidiHandle
+
+\ Open midi, i.e. fill MidiHandle.
+: openmidi  2001 ?ERROR ;
+\ Close midi channel in MidiHandle
+: closemidi 2002 ?ERROR ;
+\ Send out 3 byte MESSAGE contained in one cell.
+: sendmidi 2003 ?ERROR ;
 
 ( **************communication with stand alone hd ************)
 
