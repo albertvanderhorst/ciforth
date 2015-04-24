@@ -37,6 +37,7 @@ creat   EQU     0x8
 unlink  EQU     0xa
 chdir   EQU     0xc
 read    EQU     0x3
+access  EQU     0x21
 select  EQU     0x52
 _newselect      EQU     0x5d    ; Spykerman
 ; _newselect      EQU     0x8e

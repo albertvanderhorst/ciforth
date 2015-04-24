@@ -1534,23 +1534,7 @@ HEX    WANT DROP-WORD
 : SHIFT-ARGS   ARG$ DROP-WORD   DROP ARGS ! ;
 DECIMAL
 
-( SRC>EXEC 1  ) CF: ?LI \ AvdH A3mar20
-
-\ Given a source file NAME, return the binary file NAME.
-: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
-
-
-
-
-
-
-
-
-
-
-
-
-( SRC>EXEC 2 ) CF:                    \ AvdH B1aug16
+( SRC>EXEC 2 ) CF:        ?WIMS            \ AvdH B1aug16
 HEX
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   PAD $!   PAD $@ + 4 - >R
@@ -1566,6 +1550,22 @@ DECIMAL
 
 
 \
+( SRC>EXEC 1  ) CF: ?HS \ AvdH A3mar20
+
+\ Given a source file NAME, return the binary file NAME.
+: SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
+
+
+
+
+
+
+
+
+
+
+
+
 ( LOAD-DLL: DLL-ADDRESS: K32 GET-ENV ) CF: ?WI \ AvdH B2aug9
 ( sc -- adr) : Z 0 , DROP ;
 ( n adr -- )
@@ -1875,6 +1875,22 @@ HEX : 4DROP   2DROP 2DROP ;  : BIOS31+ BIOS31 1 AND 0D ?ERROR ;
 EXIT
 
 Tools and utilities
+
+
+
+
+
+
+
+
+
+
+
+( INSTALL-TRAPS ) CF: ?OSX \ AvdH A9sep15
+\ Nobody knows how to do this on Bill's systems.
+: INSTALL-TRAPS  ;
+: INSTALL-NO-TRAPS  ;
+
 
 
 
@@ -2574,7 +2590,7 @@ DECIMAL
 
 
 
-( OS-IMPORT cdED ) CF: \ AvdH A2feb05
+( OS-IMPORT cdED cd ) CF: \ AvdH A2feb05
 "SYSTEM" PRESENT 0= ?LEAVE-BLOCK
 CREATE cmdbuf 1000 ALLOT
 : OS-IMPORT ( sc "name-forth"  -- )
@@ -2587,25 +2603,9 @@ CREATE cmdbuf 1000 ALLOT
 ?LI WANT -syscalls-
 \ Change directory to SC .
 : cdED   ZEN HERE HERE __NR_chdir XOS ?ERRUR ;
-
-
-
-( cat cp echo diff grep more ls make man rm ee l unix) CF: ?LI
-WANT OS-IMPORT ( and cdED )          \ AvdH A30325
-"cat    "   OS-IMPORT cat
 : cd NAME cdED ;      \ Change directory to "SC"
-"cp     "   OS-IMPORT cp
-"echo   "   OS-IMPORT echo
-"diff   "   OS-IMPORT diff
-"grep   "   OS-IMPORT grep
-"more   "   OS-IMPORT more
-"ls     "   OS-IMPORT ls
-"make   "   OS-IMPORT make
-"man    "   OS-IMPORT man
-"rm  -i "   OS-IMPORT rm
-\ "ee     "   OS-IMPORT ee  \ My favorite editor
-"vi     "     OS-IMPORT ed  \ Less favorite editor
-""          OS-IMPORT !!
+
+
 ( cat cd cp echo ed more ls rm   ee l unix) CF: ?WIMS \ AvdH
 WANT OS-IMPORT       HEX
 "TYPE   "   OS-IMPORT cat
@@ -2638,6 +2638,22 @@ DECIMAL   "CALL" PRESENT ?LEAVE-BLOCK   HEX
 "A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
 
 DECIMAL
+( cat cp echo diff grep more ls make man rm ee l unix) CF: ?HS
+WANT OS-IMPORT ( and cdED )          \ AvdH A30325
+"cat    "   OS-IMPORT cat
+"cp     "   OS-IMPORT cp
+"echo   "   OS-IMPORT echo
+"diff   "   OS-IMPORT diff
+"grep   "   OS-IMPORT grep
+"more   "   OS-IMPORT more
+"ls     "   OS-IMPORT ls
+"make   "   OS-IMPORT make
+"man    "   OS-IMPORT man
+"rm  -i "   OS-IMPORT rm
+\ "ee     "   OS-IMPORT ee  \ My favorite editor
+"vi     "     OS-IMPORT ed  \ Less favorite editor
+""          OS-IMPORT !!
+
 ( DEVELOP EDITOR ME ) CF: ?WIMS    \ AvdH A9oct05
 
 

@@ -7870,7 +7870,16 @@ dnl This may fail the first time the test runs
 enddoc)
 _HOSTED_X_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
-        DC      TOR, ZEN, FROMR, X
+        DC      TOR, ZEN, FROMR
+_HOSTED_OSX_({
+        DC      TDUP, ZERO
+        DC      LIT, access, XOS, LDUP
+        _0BRANCH({OFIL1})
+        DC      NEGATE, NIP, EXIT
+OFIL1:
+        DC      DROP
+})_C{}_END_({_HOSTED_OSX_})
+        DC      X
         DC      LIT, open, XOS
         DC      LDUP, ZERO, MIN
         DC      SEMIS
