@@ -478,7 +478,7 @@ DROP   CURRENT !
 
 
 \
-( READ-LINE GETCHAR ) CF: ?LI                 \ AvdH A5jun28
+( READ-LINE GETCHAR )                         \ AvdH A5jun28
 \ From HANDLE get : a CHAR. Errors are thrown , 6=eof.
 : GETCHAR >R 0 DSP@ 1 R@ READ-FILE THROW 0=  6 AND THROW
     DUP ^M = IF DROP R@ RECURSE THEN RDROP ;
@@ -494,7 +494,7 @@ DROP   CURRENT !
 : READ-LINE   ROT DUP >R ROT ROT   '(READ-LINE) CATCH
    DUP 6 = IF 2DROP 2DROP 0 0 0 ELSE   DUP IF 0 0 ROT ELSE
    DROP   R@ - -1 0 THEN THEN   RDROP ;
-( WRITE-LINE PUTCHAR ) CF: ?LI                \ AvdH A5jun28
+( WRITE-LINE PUTCHAR )                        \ AvdH A5jun28
 
 \ Linux file ending.
 DATA CR$ 1 , ^J C,
