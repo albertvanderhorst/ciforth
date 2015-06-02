@@ -18,9 +18,12 @@ $m.fas            \
 $m.texinfo        \
 $m.html           \
 $m.ps             \
-toblk.frt         \
-fromblk.frt     \
+hellow.frt        \
 " # That's all folks!
+
+#toblk.frt         \
+#fromblk.frt     \
+# MAYBE later
 
 version=`echo $1 | sed -e 's/d/./g'`
 echo $RELEASE
@@ -44,6 +47,6 @@ mv $s.texinfo $m.texinfo
 make $m.ps
 make $m.pdf
 
-rm $m$1.zip
-echo $m$1.zip $RELEASETXT | xargs zip -l
-echo $m$1.zip $RELEASEBIN | xargs zip
+rm $m-$1.zip
+echo $m-$1.zip $RELEASETXT | xargs zip -l
+echo $m-$1.zip $RELEASEBIN | xargs zip

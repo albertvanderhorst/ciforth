@@ -20,7 +20,7 @@ forthitem
 _BITS_-bits _REAL_({real mode })_PROTECTED_({protected mode })
 forthitem
 _BOOTED_({standalone })dnl
-_HOSTED_X_({running under _OS_ using system calls directly})dnl
+_HOSTED_X_({running under _OS_ using system calls directly}){}dnl
 _HOSTED_MSDOS_({running under _OS_
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
 })dnl

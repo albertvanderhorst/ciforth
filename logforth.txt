@@ -13730,6 +13730,31 @@ Added INLING, a namespace to be added to the library.
 Committed midi, number theoretical functions and above.
 Version 5.97.
 
+2015 apr 24
+Session (23 april) Apple of Willem van der Horst.
+The byte benchmark does 0.29 ms.
+In OSX I have added the detection of non existing files in
+OPEN-FILE. OSX system passes all tests.
+
+2015 may 12
+Testing of release 1.2 both linux versions.
+Adaptation of README@ina.txt and release5.2.txt.
+
+2015 may 26
+wina-5.2.zip and xina 5.2. are released.
+All tests done for all 5.2 versions: lina32 lina64 xina wina
+Forth web page adapted, with references to all 5.2 versions.
+At my web page however the lina versions are still copies of 5.1.
+
+2015 june 2
+Trying to release lina32 and lina64. READMElina.* is rewritten.
+The scripting old-style requries a split in two files mywc32
+and mywc64. The both work with 5.2.
+wc.script only works with release 5.1 What gives?
+Test lina32 and lina64 and added releases to the www/page directory.
+The wina release has been tested in full and reported in the testreport.txt
+The xina release is still a snapshot.
+
 --------------------
 *SET-SRC should contain a ref to SAVE
 *$! and $+! should use smart moves (MOVE)
@@ -13740,6 +13765,8 @@ Version 5.97.
 *The MEMORY words should get stack comment
 
 TODO
+end of block file, line nr is not correct
+copyright in screen 0 is old
 Add a screen with fib pyr tri chs
 Add a screen with #LEFT-BIT
 The help screen should contain a mention of what the system is,

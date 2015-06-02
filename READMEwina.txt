@@ -37,32 +37,36 @@ Unpack in the directory where you want to use it by :
 Now you can use wina interactively by :
     wina
 
-You can compile a program `monkey.frt' to an executable `monkey.exe':
-    wina -c monkey.frt
+You can compile a program `hellow.frt' to an executable `hellow.exe':
+    wina -c hellow.frt
 
-The Forth word defined latest in `monkey.frt' is the entry point.
+The Forth word defined latest in `hellow.frt' is the entry point.
 The library contains facilities to access arguments passed to
 a program.
 
 RELEASE CONTENT
-Don't panic! ciforth is just two files.
-The rest is documentation (examples and source).
+Don't panic! ciforth is just two files, binary and library.
+The rest is documentation (plus examples and source).
 
-COPYING         Copyright notice
-READMEwina.txt    This file
-wina.fas        Source, for the ``fasm'' assembler.
-wina.exe        Forth interpreter compiler
-wina.tex        Doc source
-wina.html       Usable reference documentation
-wina.pdf        Documentation in Portable Data Format
-wina.ps         Documentation in PostScript
-forth.lab       Source library
-hellow.frt      Example : hello world.
+ COPYING         Copyright notice
+ READMEwina.txt    This file
+ wina##          The Forth interpreter
+ forth.lab       Source library, a text file
+ wina.fas        Source, for the ``fasm'' assembler
+ wina.exe        Forth interpreter compiler
+ wina.texinfo    Documentation master source
+ wina.pdf        Documentation in Portable Data Format
+ wina.ps         Documentation in PostScript
+ wina.html       Browsable, reference documentation only
+ hellow.frt      Compilation example : hello world.
+ wc.script       Script example: word count 1)
+
+1) Adapt the name of the interpreter.
 
 The latest version can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
 This contains also the generic system that is recommended over
-`wina.fas' if you want to make extensive change.
+`wina.s' if you want to make extensive change.
 
 DOCUMENTATION I
 The regular documentation is your choice of PostScript, PDF with

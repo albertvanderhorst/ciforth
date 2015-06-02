@@ -31,32 +31,25 @@ For the moment however it is only a 32 bit version.
 Unpack in the directory where you want to use it by :
     tar xf xina.tar
 
-Install nasm, the well known net wide assembler.
+Now you can use wina interactively by :
+    xina
 
-Assemble and link using the instructions in the source.
+You can compile a program `hellow.frt' to an executable `hellow.exe':
+    xina -c hellow.frt
 
-You now can compile a program `monkey.frt' to an executable
-`monkey'':
-    xina -c monkey.frt
 
 RELEASE CONTENT
 Don't panic! ciforth is just two files.
 The rest is documentation (examples and source).
 
 COPYING         Copyright notice
-READMExina.txt    This file
+READMExina.txt  This file
 xina.asm        Source, for the ``nasm'' assembler.
 xina            Forth interpreter compiler
 xina.html       Usable reference documentation
 xina.pdf        Documentation in Portable Data Format
+hellow.frt      Compilation example : hello world.
 forth.lab       Source library
-
-
-testxina        shell script to be used for testing
-testxina.1      testinput  specific test
-testxina.2      test output expected
-tsuite.frt      testinput ISO test
-tsuite.out      testinput ISO test
 
 The latest version can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
@@ -64,7 +57,7 @@ This contains also the generic system that is recommended over
 `xina.asm' if you want to make extensive change.
 
 DOCUMENTATION I
-The regular documentation is your choice of PostScript(NOT YET),
+The regular documentation is your choice of PostScript,
 PDF with the same content.
 
 DOCUMENTATION II
@@ -74,7 +67,6 @@ This is only intended to be used while using the system, it
 contains no information about installation or tutorial material.
 
 INSTALLATION
-TBS. This is a preliminary release.
 Installation will remain manual:
 A simple manual installation is superior to an automatic installation
 that would never work across all the targeted platforms.
@@ -82,7 +74,16 @@ This Forth worked on windows version I never used or even heard of!
 And of course even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)
 
-TESTING
-Run a shell in the directory where xina and forth.lab sit.
-Make sure . is in the PATH.
-Run testxina to do both the specific and the ISO test.
+You can use xina from the current directory. You can install it in the
+path, e.g. in your own ~/bin directory using the -i option, that is
+described in the manual. If you install it systemwide, don't forget
+to make it executable for the world and the library readable for the
+world.
+
+ASSEMBLING XINA
+There is no need to assemble xina yourself, but you can if
+you want to.
+
+Install nasm, the well known net wide assembler.
+
+Assemble and link using the instructions in the source.
