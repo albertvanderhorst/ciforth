@@ -67,6 +67,13 @@ TOOLS=  \
 ssort   \
 # That's all folks!
 
+EXAMPLESRC= \
+mywc32      \
+mywc64      \
+hellow.frt \
+wc.script \
+# That's all folks!
+
 # Index files used by info, some are empty for ciforth.
 INDICES= cp fn ky pg tp vr
 
@@ -165,7 +172,7 @@ $(TOOLS)        \
 blocks.frt      \
 options.frt     \
 genboot.bat     \
-mywc            \
+mywc32          \
 mywc64          \
 $(EXAMPLES)     \
 errors.linux.txt \
@@ -188,13 +195,12 @@ ci86.lina32.html \
 ci86.lina32.pdf \
 ci86.lina32.ps \
 ci86.lina32.texinfo \
-ci86.lina32.asm      \
 ci86.lina32.s      \
 lina32      \
 lina.1    \
 forth.lab     \
-$(CSRCAUX:%=%.c)    \
-mywc          \
+$(EXAMPLESRC) \
+#ci86.lina32.asm      \
 # That's all folks!
 
 RELEASELINA64 = \
@@ -205,13 +211,12 @@ ci86.lina64.html \
 ci86.lina64.pdf \
 ci86.lina64.ps \
 ci86.lina64.texinfo \
-ci86.lina64.fas \
 ci86.lina64.s  \
 lina64          \
 lina.1    \
 forth.lab     \
-$(CSRCAUX:%=%.c)    \
-mywc64        \
+$(EXAMPLESRC) \
+#ci86.lina64.fas \
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
@@ -397,22 +402,24 @@ mslinks :
 
 forth.lab : forth.lab.lina forth.lab.wina
 
-lina32.zip : $(RELEASELINA32) ;\
+LINA32ZIP : $(RELEASELINA32) ;\
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
 	make glina32
-	mv glina32 lina
-	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	(cd ..; ln -s ciforth lina32-$(VERSION))
+	mv glina32 lina32
+	ls $+ | sed s:^:lina32-$(VERSION)/: >MANIFEST
+	(cd ..; ln -sf ciforth lina32-$(VERSION))
 	(cd ..; tar -czvf ciforth/lina32-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
 	(cd ..; rm lina32-$(VERSION))
 
-lina64.zip : $(RELEASELINA64) ;\
+LINA64ZIP : $(RELEASELINA64) ;\
 	chmod +x lina64 # Must be compiled on a 64 bit machine, assumed present.
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
+	make glina64
+	mv glina64 lina32
 	ls $+ | sed s:^:lina64-$(VERSION)/: >MANIFEST
-	(cd ..; ln -s ciforth lina64-$(VERSION))
+	(cd ..; ln -sf ciforth lina64-$(VERSION))
 	(cd ..; tar -czvf ciforth/lina64-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
 	(cd ..; rm lina64-$(VERSION))
 
