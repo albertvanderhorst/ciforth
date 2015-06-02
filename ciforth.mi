@@ -1,5 +1,5 @@
 dnl $ Id: $
-dnl Copyright{2000,2012}: Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright{2000,2015}: Albert van der Horst, HCC FIG Holland by GNU Public License
 \input texinfo
 @setfilename thisfilename
 dnl @smallbook
@@ -19,10 +19,13 @@ version ci86gnrversion
 forthitem
 _BITS_-bits _REAL_({real mode })_PROTECTED_({protected mode })
 forthitem
-_BOOTED_({standalone })_HOSTED_X_({running under _OS_ })_HOSTED_MSDOS_({running under _OS_
-forthitem
+_BOOTED_({standalone })dnl
+_HOSTED_X_({running under _OS_ using system calls directly})dnl
+_HOSTED_MSDOS_({running under _OS_
 _CLASSIC_({with classic figforth I/O })_MODERN_({with modern MSDOS I/O })_USEBIOS_({Using the BIOS for I/O })
-})_HOSTED_DPMI_({running under DPMI (``Windows'')})dnl
+})dnl
+_HOSTED_DPMI_({running under DPMI (``Windows'')})dnl
+_HOSTED_DLL_({running under MS-Windows })dnl
 _BOOTED_({ _RESPECTDOS_({It tries to keep bootfloppy's in MSDOS-compatible format})})
 _FEWBLOCKS_({forthitem
 number of blocks limited to 256})
@@ -41,7 +44,7 @@ Dutch Forth Workshop
 
 @page
 @c @vskip Opt plus 1fill
-Copyright @copyright{{}} 2000,2012 Dutch Forth Workshop
+Copyright @copyright{{}} 2000,2015 Dutch Forth Workshop
 
 Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.

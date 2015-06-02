@@ -182,6 +182,9 @@ dnl
 dnl F Rely on some Unix look alike to start the program.
 define({_HOSTED_X_}, _no)dnl
 dnl
+dnl D Rely on DLL (Windows32) to start the program.
+define( {_HOSTED_DLL_}, _no)dnl
+dnl
 dnl ############## FEATURES ##########################################
 dnl    Features that stand on their own, mostly independant
 dnl
