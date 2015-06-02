@@ -1,0 +1,15 @@
+#!/usr/bin/lina32 -s
+\  Copyright 2015 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
+
+\ wc , using all tricks ciforth has to offer, in script style.
+\ Usage: wc.script <filenames>
+
+ARGC 1 ?DO
+   1 ARG[] 2DUP TYPE SPACE
+   GET-FILE
+   2DUP 0 >R BEGIN ^J $/ 2DROP OVER WHILE  R> 1+ >R REPEAT R> . 2DROP
+   2DUP SAVE SET-SRC 0 BEGIN NAME NIP WHILE  1+ REPEAT RESTORE .
+   2DUP . DROP
+   2DROP CR
+   SHIFT-ARGS
+LOOP
