@@ -182,7 +182,7 @@ DATE=2030     # To get the newest version
 
 RELEASELINA32 = \
 COPYING   \
-README.lina \
+READMElina.txt \
 ci86.lina32.info \
 ci86.lina32.html \
 ci86.lina32.pdf \
@@ -199,7 +199,7 @@ mywc          \
 
 RELEASELINA64 = \
 COPYING   \
-README.lina \
+READMElina.txt \
 ci86.lina64.info \
 ci86.lina64.html \
 ci86.lina64.pdf \
@@ -397,9 +397,11 @@ mslinks :
 
 forth.lab : forth.lab.lina forth.lab.wina
 
-lina32.zip : $(RELEASELINA) ;\
+lina32.zip : $(RELEASELINA32) ;\
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
+	make glina32
+	mv glina32 lina
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
 	(cd ..; ln -s ciforth lina32-$(VERSION))
 	(cd ..; tar -czvf ciforth/lina32-$(VERSION).tar.gz `cat ciforth/MANIFEST`)

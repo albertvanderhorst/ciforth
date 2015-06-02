@@ -1,21 +1,6 @@
-CIFORTH CUSTOMIZATION FOR OSX version 5.x.x.
+CIFORTH CUSTOMIZATION FOR OSX version 5.2.x.
 
-************************************************************************
-*  This is not a release, but an experimental version                  *
-*  for the early adapters.                                             *
-*                                                                      *
-*                                                                      *
-*  1. You have to build the executable yourself, using the             *
-*     prescript contained in the nasm source.                          *
-*     You'll have to install nasm first.                               *
-*                                                                      *
-*  2. Now you can test with the batch file testxina                    *
-*                                                                      *
-*     This should not give output. You or I may be at fault.           *
-*                                                                      *
-************************************************************************
-
-COPYRIGHT (c) 2000-2011 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2015 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -25,8 +10,9 @@ document wina.pdf.
 
 DESCRIPTION
 Forth is a tool for evolutionary programming. This is the binary
-distribution of xina 5.x.x, a beta release. Without notice this
-description also applies to versions 4.0.x . xina is the OSX
+distribution of xina release 5.2.x.
+non-beta
+xina is the OSX
 native version of ciforth (common Intel Forth), an interpret
 environment and compiler for Forth. Native is to be understood that
 only system calls are used, no static link libraries or other
@@ -39,6 +25,8 @@ that add i.a. a decompiler and integrated 386 assembler. It is fully
 self contained; if you want to understand a compiler in all details,
 this is your best, if not only, choice. ciforth sports a very high
 documentation to binary ratio.
+xina is compatible with the a release 5.2.x for linux and windows dll.
+For the moment however it is only a 32 bit version.
 
 Unpack in the directory where you want to use it by :
     tar xf xina.tar
@@ -48,7 +36,7 @@ Install nasm, the well known net wide assembler.
 Assemble and link using the instructions in the source.
 
 You now can compile a program `monkey.frt' to an executable
-`monkey.exe':
+`monkey'':
     xina -c monkey.frt
 
 RELEASE CONTENT
@@ -58,7 +46,7 @@ The rest is documentation (examples and source).
 COPYING         Copyright notice
 READMExina.txt    This file
 xina.asm        Source, for the ``nasm'' assembler.
-NOT YET: xina       Forth interpreter compiler
+xina            Forth interpreter compiler
 xina.html       Usable reference documentation
 xina.pdf        Documentation in Portable Data Format
 forth.lab       Source library
