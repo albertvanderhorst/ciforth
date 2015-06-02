@@ -303,9 +303,9 @@ WANT -legacy-     \ Must be first to WANT
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-1 LOAD   WANT OLD:   WANT ARG[] WANT -scripting-
+1 LOAD   WANT OLD:   WANT ARG[]
 WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
-HERE FAR-DP ! 2 ARG[] NIP 2 * ALLOT
+
 : BY-WHO   "XOS" PRESENT IF " run by " TYPE
 0 ARG[] TYPE THEN ;
 \ This error handler may be overwritten by the script.
@@ -314,7 +314,7 @@ HERE FAR-DP ! 2 ARG[] NIP 2 * ALLOT
     BY-WHO CR BYE ;
 -1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 SHIFT-ARGS  SHIFT-ARGS
-SCRIPT-NAME $@ GET-FILE
+SCRIPT-NAME $@ GET-FILE  WANT -scripting-
 ^J $/ 2DROP     \ Line with #!lina
 EVALUATE
 BYE
