@@ -301,11 +301,13 @@ clean: \
 ; rm -f $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy a.out\
 ; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
 
-cleanall: clean  testclean RCSCLEAN ; \
+cleanall: clean  testclean ; \
     rm -f $(OTHERTARGETS) $(INTERTARGETS) ; \
     rm -f *.aux *.log *.ps *.toc *.pdf    ; \
-    rm *.zip *gz
+    rm -f *.zip *gz
 
+# FIXME, RCS is now in use.
+# Until then this target must not be used.
 RCSCLEAN: ;\
 	ln -s $(CVSROOT)/ciforth RCS
 	ln -f Makefile makefile
@@ -416,8 +418,8 @@ LINA64ZIP : $(RELEASELINA64) ;\
 	chmod +x lina64 # Must be compiled on a 64 bit machine, assumed present.
 	make forth.lab.lina
 	ln -f forth.lab.lina forth.lab
-	make glina64
-	mv glina64 lina32
+	make lina64
+	chmod +x wc.script
 	ls $+ | sed s:^:lina64-$(VERSION)/: >MANIFEST
 	(cd ..; ln -sf ciforth lina64-$(VERSION))
 	(cd ..; tar -czvf ciforth/lina64-$(VERSION).tar.gz `cat ciforth/MANIFEST`)

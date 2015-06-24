@@ -1,4 +1,4 @@
-#!./lina -s
+#!/usr/bin/lina -s
 \  Copyright 2015 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
 
 \ wc , using all tricks ciforth has to offer, in script style.

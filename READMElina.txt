@@ -10,7 +10,7 @@ Forth is a tool for evolutionary programming. This is the binary
 distribution of lina 5.# . The following applies to all versions 5.#
 of lina  in 32 or 64 bits. Contrary to what you expect from me,
 this documentation is common to lina32 and lina64, because there
-are vitrually no differences except cell size.
+are virtually no differences except cell size.
 
 lina is the Linux native (= c-less) version of ciforth (common Intel
 Forth), an interpret environment and compiler for Forth. It is (large
@@ -22,10 +22,6 @@ and integrated 386 assembler. It is fully self contained; if you want
 to understand a compiler in all details, this is your best, if not
 only, choice. ciforth sports the highest documentation to binary
 proportion in the EDP industry, barring m4 on Coherent.
-
-The following applies to the 32 and 64 bit version alike, replace lina
-by lina32 or lina 64 as appropriate. The symbolic link to lina may
-point to either version.
 
 RELEASE CONTENT
 Don't panic! ciforth is just two files, binary and library.
@@ -42,23 +38,26 @@ The rest is documentation (plus examples and source).
  lina##.1        man page: options and overview
  ci86.lina##.s   Source in gas format
  hellow.frt      Compilation example : hello world.
- mywc32 / mywc64 Script example, old style. 
- wc.script       Script example, new style 
+ mywc32 / mywc64 Script example, old style.
+ wc.script       Script example, new style.
 
+You can rebuild lina from the .s file, instruction are in this source.
 The latest version and OSX and MS-windows versions can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
-This contains also the generic system that is recommended over
-`lina.fas' if you want to make extensive change.
+This contains also a link to the generic system that is recommended over
+the .s file if you want to make extensive change.
+
 Unpack in the directory where you want to use it by :
     tar fxz lina-5####.gz
+
+The following applies to the 32 and 64 bit version alike, replace lina
+by lina32 or lina 64 as appropriate. A symbolic link to lina may
+point to either version.
 
 Now you can use lina by :
     lina
 or
     lina -e
-
-Compile the example program by :
-    lina -c hellow.frt
 
 Print the manual (150 pages) by :
     lpr ci86.lina##.ps
@@ -86,12 +85,15 @@ For system wide installation (32-bit) the following is recommended:
     cp ci86.lina32.* /usr/share/doc/lina
     cp lina32.1      /usr/share/man/man1
 
-(Growing lina by 60 Mbyte is primaryly useful for lina32, lina64 has
-already an 8000 Mbyte dictionary space. So lina64 installation is the
-same, but leave out the line with ``-g 60''. Having 8060 Mbyte however
-doesn't harm.)
+The above increases Forth's dictionary space from 1 to 61 Mb.
+Installing lina64 is similar, but now you may want to grow
+by 8000 or 128000 Mbyte.
 
-On info :
+Once installed you can use lina :
+    Compile the example program by : lina -c hellow.frt
+    Try the script by : wc.script *.s *.txt *.html
+
+NOTE ON "info"
 The "info" system for program documentation actively discourages
 adding documentation to a system, by hiding how a .info file
 can be installed. The nice folks of Debian had added a separate

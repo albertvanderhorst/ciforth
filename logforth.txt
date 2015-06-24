@@ -13768,9 +13768,13 @@ Experimenting with the fasm build reveals that the only change needed
 to use fasm build lina64 is that the sections must not be killed if
 they are zero already, (provided there is only the one segment,like 
 said above).
+There was also a remark about wc.script from Frans van de Markt.
+I now tell the user to install lina properly before attempting the wc.script.
+The readme is also refurbished. 
 
 --------------------
-*SET-SRC should contain a ref to SAVE
+wc.script doesn't work properly with the interpreter from the current directory.
+*SET SRC should contain a ref to SAVE
 *$! and $+! should use smart moves (MOVE)
 *Smart move is iso.
 *implement :I , must be easy.
