@@ -1630,7 +1630,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
 : TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
   ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
-( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH
+( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH/CH B5jun24
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
 \ Return the START of the ``ELF'' header.
@@ -1640,7 +1640,7 @@ WANT Z$@   WANT COMPARE   WANT ENV
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
  : SAVE-SYSTEM ( ISO )   HERE BM - D-SIZE ! ( dict size)
-   0 SM 28 + ! 1 SM 38 + ! ( Kill sections)
+   SM 28 + @ IF 0 SM 28 + ! 1 SM 38 + ! THEN ( Kill sections)
    U0 @   0 +ORIGIN   40 CELLS  MOVE ( Save user variables)
 \ Now write it. Consume NAME here.
    SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL

@@ -35,7 +35,8 @@ _LINUX_N_(
 _BITS32_({define({ELF_FORMAT},{ELF})})
 _BITS64_({define({ELF_FORMAT},{ELF64})})
         FORMAT  ELF_FORMAT EXECUTABLE ; Instead of telling the linker.
-define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})
+dnl define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})
+define({_SECTION_NOBITS_},{ })
 ;
 })_C{}_END_({ _LINUX_N_})
 ;})

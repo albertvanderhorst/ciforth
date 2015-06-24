@@ -13755,6 +13755,20 @@ Test lina32 and lina64 and added releases to the www/page directory.
 The wina release has been tested in full and reported in the testreport.txt
 The xina release is still a snapshot.
 
+2015 june 24
+Session with Coos Haak. After the change to Debian 7 I could no longer
+build 64 bits lina. This was needed because the distributed version 
+did not run. The problem is that the linker script refuses a 64 bit target.
+The lina64/lina32 elf headers build with fasm where wrong, because the
+dictionary starts a new section unnecessarily. Change in fasm.m4.
+Session with Coos Haak. After the change to Debian 7 I could no longer
+build 64 bits lina. This was needed because the distributed version 
+did not run. The problem is that the linker script refuses a 64 bit target.
+Experimenting with the fasm build reveals that the only change needed
+to use fasm build lina64 is that the sections must not be killed if
+they are zero already, (provided there is only the one segment,like 
+said above).
+
 --------------------
 *SET-SRC should contain a ref to SAVE
 *$! and $+! should use smart moves (MOVE)
