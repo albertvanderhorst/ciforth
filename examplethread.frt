@@ -5,13 +5,13 @@
 \ Have a character converted to upper case by an other thread.
 
 \ Cooperative multitasking:
-REQUIRE THREAD-COT
+WANT THREAD-COT
 : THREAD THREAD-COT ;
 : PAUSE PAUSE-COT ;
 
 \ Works equally well:
 \ Pre-emptive multi-tasking
-\ REQUIRE THREAD-PET
+\ WANT THREAD-PET
 \ : THREAD THREAD-PET ;
 \ : PAUSE PAUSE-PET ;
 

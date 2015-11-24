@@ -1,4 +1,4 @@
- ciforth lab  $Revision$ (c) Albert van der Horst
+  ciforth lab  $Revision$ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -1011,11 +1011,11 @@ WANT FACTOR
 \ For X return Euler's TOTIENT
     : _move-factor   >R BEGIN R@ * SWAP R@ / SWAP OVER R@ MOD
       UNTIL R@ 1- R> */ ; \ ( N M P - N' M' ) N*M=N'*M\ , P/|M'
-: PHI   1 OVER 2 MOD 0 = IF 2 _move-factor THEN    3 >R
-    BEGIN OVER 1 <> WHILE OVER R> FACTOR >R R@ _move-factor
-    REPEAT RDROP NIP ;
+: PHI 1 OVER 2 MOD 0 = IF 2 _move-factor THEN 3 >R BEGIN OVER 1
+  <> WHILE OVER R> FACTOR >R R@ _move-factor REPEAT RDROP NIP ;
+
 \ For N M return "N OVER M " (N/M)
-: CHS >R  R@ - 1 R> 1+ 1 ?DO   OVER I + * I / LOOP NIP ;
+: CHS >R  R@ - 1 R> 1+ 1 ?DO   OVER I + I */ LOOP NIP ;
 \ '(./.) ALIAS CHS
 
 \ For x return it TRIANGLE, | PYRAMIDAL | SQUARE  number
@@ -1437,7 +1437,7 @@ WANT ALIAS
    ELSE >R THEN ;
 
 NAMESPACE INLINING
-INLINING DEFINITIONS ':I ALIAS :  PREVIOUS DEFINITIONS
+INLINING DEFINITIONS :R : :I ; PREVIOUS DEFINITIONS
 ( OLD: RESTORED POSTFIX ) \ AvdH A2jun12
 \ WARNING: use these facilities only with high level words.
 
@@ -1726,15 +1726,15 @@ WANT CVA   WANT -syscalls-      HEX
 \ Kill a THREAD-PET , preemptively. Throw errors.
 : KILL-PET >BODY 2 CELLS + @ 9 _ __NR_kill XOS ?ERRUR ;
 DECIMAL
-( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH A2jul5
-WANT SET
-100 SET TASK-TABLE   VARIABLE TASK-POINTER
+( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH B5nov24
+WANT BAG
+100 BAG TASK-TABLE   VARIABLE TASK-POINTER
 : THIS TASK-POINTER @ ;
 \ Make first task current.
 : SET-FIRST-TASK TASK-TABLE CELL+ TASK-POINTER ! ;
 
 \ Add running task and make it current.
-TASK-TABLE !SET   _ TASK-TABLE SET+!   SET-FIRST-TASK
+TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
 
 \ Switch to next task, only administration.
 : NEXT-TASK   THIS CELL+ TASK-POINTER !
@@ -1743,10 +1743,10 @@ TASK-TABLE !SET   _ TASK-TABLE SET+!   SET-FIRST-TASK
 : PAUSE-COT
     DSP@ >R RSP@ THIS !   NEXT-TASK   THIS @ RSP! R> DSP! ;
 ( EXIT-COT THREAD-COT ) HEX \ AvdH A2jul5
-WANT TASK-TABLE   WANT CVA
+WANT TASK-TABLE   WANT CVA      WANT BAG-
 
 \ Exit: remove current task, then chain to first one.
-: EXIT-COT  THIS TASK-TABLE SET-REMOVE
+: EXIT-COT  THIS TASK-TABLE BAG-
     SET-FIRST-TASK   THIS @ RSP! R> DSP! ;
 
 \ Create a thread with dictionary SPACE. Execute XT in thread.
@@ -1755,7 +1755,7 @@ WANT TASK-TABLE   WANT CVA
     @                   R@ !
     >DFA @              R@ CELL+ !
     'EXIT-COT >DFA @    R@ CELL+ CELL+ !
-    R> TASK-TABLE SET+! ;
+    R> TASK-TABLE BAG+! ;
 
 \
 ( {{ }} )                               \ AHCH   B5mar03

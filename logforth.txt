@@ -13772,7 +13772,32 @@ There was also a remark about wc.script from Frans van de Markt.
 I now tell the user to install lina properly before attempting the wc.script.
 The readme is also refurbished. 
 
+2015 june 30
+
+Session with Cees Nobel. There was a wrong executable in the xina 
+sitribution. With the correct distribution, Cees Nobel can run.
+Tested the speed (ca 500 uS), the SIEVE and compilation.
+defect: KEY doesn't respond until carriage return.
+defect: installation to non-existing directory fails mysteriously, typing
+the library file.
+Defect: GET-ENV on the Apple is not implemented.
+
+Tried to run com-4e6. This doesn't work at all, opening of a usb  
+serial line succeeds but reading from the handle has a defect.
+Despite giving back a 9 there are no 9 chars read, as the buffer
+is not overwritten.
+
+2015 nov 24
+Session with Coos. There was a complaint that THREAD-COT not longer
+works. We must make a test for that.
+This applies to released version 5.2.1
+
 --------------------
+The description of ACCEPT is no good.
+
+Some linux commands may work on OSX but they are not loaded by WANT, and there 
+is not ?X to and ?OSX and ?LI.
+#!/home/albert/PROJECT/ciforth/lina32 -s
 wc.script doesn't work properly with the interpreter from the current directory.
 *SET SRC should contain a ref to SAVE
 *$! and $+! should use smart moves (MOVE)
