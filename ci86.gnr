@@ -126,7 +126,7 @@ TAS     EQU     M4_RTS    _C{Size of unitialised area per task.}
 STACKSIZE   EQU TAS/4  _C{For both stacks. } but for now
 _DLL_(
 {TIBSIZE     EQU 4000H },
-{TIBSIZE     EQU TAS/2  _C{TIB size. }
+{TIBSIZE     EQU TAS/4  _C{TIB size. }
 })dnl
 _C
 _C{ NOTE 1:}
@@ -2004,12 +2004,13 @@ _C{ Make it possible to revector WARM. You can even make it low level. }
         _ALIGN(_CELLS(1))
 USINI:  DC      STRUSA   dnl
 _THREADS_(
-_C{ user area, unused in this threading Forth.},
+_C{ user area, copied before use in this threading Forth.},
 _C{ user area, cold value same as next.}
 )_C{}_END_({_THREADS_})
         DC      STRUSA  _C{ INIT (U0) user area of the main task 1}
         DC      INITS0  _C{ INIT (S0)         2}
-        DC      INITR0  - _CELLS(1)
+_THREADS_( _C{ RSP@ must not be divisible by TASK-SIZE, to serve as user pointer.})
+        DC      INITR0  _THREADS_({ - _CELLS(1)})
                         _C{ INIT (R0)         3}
         DC      STRTIB  _C{ INIT (TIB)        4}
         DC      BSIN    _C{ RUBOUT: get rid of latest char 5}
