@@ -111,7 +111,7 @@
       "wina.pdf" SYSTEM THEN THEN ;
 
 ( -syscalls- ) CF: ?LI ?32                      \ AvdH B4feb10
-
+DECIMAL
  13 CONSTANT __NR_time
  43 CONSTANT __NR_times
   1 CONSTANT __NR_exit
@@ -127,7 +127,7 @@ HEX
 
 CREATE -syscalls- DECIMAL
 ( -syscalls- ) CF: ?LI ?64                      \ AvdH B4feb10
-
+DECIMAL
 201 CONSTANT __NR_time
 100 CONSTANT __NR_times
  60 CONSTANT __NR_exit
@@ -1437,7 +1437,7 @@ WANT ALIAS
    ELSE >R THEN ;
 
 NAMESPACE INLINING
-INLINING DEFINITIONS :R : :I ; PREVIOUS DEFINITIONS
+INLINING DEFINITIONS :2 : :I ; PREVIOUS DEFINITIONS
 ( OLD: RESTORED POSTFIX ) \ AvdH A2jun12
 \ WARNING: use these facilities only with high level words.
 
