@@ -206,14 +206,14 @@ WANT ALIAS
 
 
 
-( -legacy- VOCABULARY )                        \ AvdH B2aug12
+( -legacy- VOCABULARY )                        \ AvdH B5dec01
 \ Use replacing vocabularies instead of pushing namespaces.
 
 : FORTH   CONTEXT @ 'ONLY >WID <> IF PREVIOUS THEN FORTH ;
 
 : VOCABULARY NAMESPACE  DOES> CELL+ CONTEXT ! ;
 
-
+ALSO    \ Start up with two FORTH namespaces.
 
 
 

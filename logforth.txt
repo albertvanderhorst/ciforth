@@ -13757,24 +13757,24 @@ The xina release is still a snapshot.
 
 2015 june 24
 Session with Coos Haak. After the change to Debian 7 I could no longer
-build 64 bits lina. This was needed because the distributed version 
+build 64 bits lina. This was needed because the distributed version
 did not run. The problem is that the linker script refuses a 64 bit target.
 The lina64/lina32 elf headers build with fasm where wrong, because the
 dictionary starts a new section unnecessarily. Change in fasm.m4.
 Session with Coos Haak. After the change to Debian 7 I could no longer
-build 64 bits lina. This was needed because the distributed version 
+build 64 bits lina. This was needed because the distributed version
 did not run. The problem is that the linker script refuses a 64 bit target.
 Experimenting with the fasm build reveals that the only change needed
 to use fasm build lina64 is that the sections must not be killed if
-they are zero already, (provided there is only the one segment,like 
+they are zero already, (provided there is only the one segment,like
 said above).
 There was also a remark about wc.script from Frans van de Markt.
 I now tell the user to install lina properly before attempting the wc.script.
-The readme is also refurbished. 
+The readme is also refurbished.
 
 2015 june 30
 
-Session with Cees Nobel. There was a wrong executable in the xina 
+Session with Cees Nobel. There was a wrong executable in the xina
 sitribution. With the correct distribution, Cees Nobel can run.
 Tested the speed (ca 500 uS), the SIEVE and compilation.
 defect: KEY doesn't respond until carriage return.
@@ -13782,7 +13782,7 @@ defect: installation to non-existing directory fails mysteriously, typing
 the library file.
 Defect: GET-ENV on the Apple is not implemented.
 
-Tried to run com-4e6. This doesn't work at all, opening of a usb  
+Tried to run com-4e6. This doesn't work at all, opening of a usb
 serial line succeeds but reading from the handle has a defect.
 Despite giving back a 9 there are no 9 chars read, as the buffer
 is not overwritten.
@@ -13791,11 +13791,40 @@ is not overwritten.
 Session with Coos. There was a complaint that THREAD-COT not longer
 works. We must make a test for that.
 This applies to released version 5.2.1
+It turns out that I can find a threads.frt that works.
+
+2015 nov 24
+Threading has a problem w.r.t. turnkey/save-system. The stackframe
+is destroyed, so it crashes immediately. Redesigning CVA, such that
+the stack frame for a slave is completely in the dictionary.
+ci86.gnr 5.127 : more careful with threading and STACK-SIZE now
+correct.
+
+2015 nov 25
+A simple test for pre-emptive tasking fails on 32 bits with -a and
+not with -e. The difference is in DO-DEBUG, probably INSTALL-TRAPS
+64 bits fails always.
+I had added an INLINING wordlist, to force to inline things.
+There I used :R which replaced : instead of :2 that suppresses the warning.
+It is incredible that so many tests still passed using that.
+Furthermore it is better to set DECIMAL in the -syscall- screens.
+blocks.frt is now at 5.103
+With the correct syscall numbers the thread example at parpi works.
+The system calls are to be checked for 64 bits.
+I must systematically add all system calls needed to stealconstant.
+
+2015 dec 2
+I have deleted threads.frt that was in the cvs archive since 2002.
+There has been a lot of experimenting and the conclusiong is that
+the setup in blocks.frt is sound. After working out the problems
+with using SET's in the cooperative threads and problems around
+the syscall numbers (?) in the preemptive threads, the threads for
+32 bits run again.
 
 --------------------
 The description of ACCEPT is no good.
 
-Some linux commands may work on OSX but they are not loaded by WANT, and there 
+Some linux commands may work on OSX but they are not loaded by WANT, and there
 is not ?X to and ?OSX and ?LI.
 #!/home/albert/PROJECT/ciforth/lina32 -s
 wc.script doesn't work properly with the interpreter from the current directory.

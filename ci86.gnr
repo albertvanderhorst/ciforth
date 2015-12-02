@@ -2019,7 +2019,7 @@ _THREADS_( _C{ RSP@ must not be divisible by TASK-SIZE, to serve as user pointer
         DC      INITDP  _C{      INIT (FENCE)  8}
 DPA:    DC      INITDP  _C{      INIT (DP)     9}
         DC      _DEA(ENV) _C{       INIT (VOC-LINK) 10}
-        DC      0       _C{ INIT (OFFSET) }
+        DC      _CELLS(38+M4_MAXWORDLIST)  _C{ INIT (MAX-USER) 11}
 _CLASSIC_({
 _COMMENT
 _C{ This will steer clear of a forth executable, provided it is}
@@ -3127,7 +3127,7 @@ worddoc( {DEFINING},{USER},{user},{n ---},{ISO},
                forthsamp({n USER cccc})
 which creates a user variable forthsamp({cccc}) . The data
 field of forthsamp({cccc}) contains forthvar({n}) as a
-cell offset relative to the user pointer register forthsamp({UP})
+byte offset relative to the user pointer register forthsamp({UP})
 for this user variable. When forthsamp({cccc}) is later
 executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
@@ -3139,9 +3139,12 @@ forthsamp({UP}) is switched also automatically.}},
 {{In this ciforth the forthsamp({UP}) is to be found at
 forthsamp({0 +ORIGIN}).
 }})
-forthcode({CONTEXT}) is the last user variable at offset 37 ,
+forthcode({CONTEXT}) is the last user variable at offset 38 ,
 such that new user variables may be allocated using offsets of
-37+M4_MAXWORDLIST and up.
+38+M4_MAXWORDLIST and up.
+It is best to do
+  forthsamp({MAX-USER @ DUP USER cccc    CELL+ MAX-USER ! })
+reflecting the current allocation in the user area.
 },
 {{VARIABLE},{+ORIGIN},{CONTEXT},{>DFA}},
 {{ 0 USER APE 1A34 APE ! APE @ .},{1A34} },
@@ -3434,20 +3437,14 @@ vocabularies.}})},
 enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 _C
-worddoc( {BLOCKS~},{OFFSET},{offset},{--- addr},{U},
-{A user variable which contains a block offset to disc drives;
-in this way a part of it is available for boot-code.
-_HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system it is 0.})
-_HOSTED_X_({As blocks are allocated in a file on the host operating system it is 0.})
-The
-contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before read or
-writing blocks.},
+worddoc( {BLOCKS~},{MAX-USER},{MAX-USER},{--- addr},{U},
+{A user variable which contains the allocated area for user
+variables.},
 {{BLOCK},{MESSAGE},{BLOCK-READ},{BLOCK-WRITE}},
-{{OFFSET @ 1000 U< .},{_T_}},
+{{MAX-USER @ 1000 U< .},{_T_}},
 enddoc)
-_HEADER({OFFSET},{LOFFSET},{DOUSE}, _CELLS(11))
+_HEADER({MAX-USER},{MAXUSER},{DOUSE}, _CELLS(11))
 _C
-_C{ End of user variables with fixed place.}
 _C
 _C
 worddoc( {ERRORS},{WHERE},{where},{--- addr},{U},
@@ -3648,6 +3645,22 @@ _HEADER({REMAINDER},{REMAIND},{DOUSE}, _CELLS(14))
 _C{      IMPORTANT}
 _C{ REQUIRES ONE MORE CELL!}
 _C
+_C
+worddoc( {BLOCKS~},{OFFSET},{offset},{--- addr},{U},
+{A user variable which contains a block offset to disc drives;
+in this way a part of it is available for boot-code.
+_HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system it is 0.})
+_HOSTED_X_({As blocks are allocated in a file on the host operating system it is 0.})
+The
+contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before read or
+writing blocks.},
+{{BLOCK},{MESSAGE},{BLOCK-READ},{BLOCK-WRITE}},
+{{OFFSET @ 1000 U< .},{_T_}},
+enddoc)
+_HEADER({OFFSET},{LOFFSET},{DOUSE}, _CELLS(37))
+_C
+_C
+_C
 worddoc( {WORDLISTS},{CONTEXT},{context},{--- addr},{FIG,U},
 { The context is the address where the WID is found of the wordlist
 that is searched first. In ciforth forthvar({addr}) actually points
@@ -3665,7 +3678,7 @@ least 8.
 {{PRESENT},{NAMESPACE},{CURRENT},{USER}},
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-_HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(37)) _C{ Up to } 37+M4_MAXWORDLIST
+_HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(38)) _C{ Up to } 38+M4_MAXWORDLIST
 _C{      IMPORTANT}
 _C{     }M4_MAXWORDLIST{ USER SPACE CELLS MUST BE KEPT FREE}
 _C{     IN ADDITION TO THE ONE FOR CONTEXT}
