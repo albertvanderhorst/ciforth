@@ -1694,31 +1694,31 @@ VARIABLE HEAD-DP  \ Fill in pointer
 \ Actually this is the same than in Linux.
 \ Save a system to do SOMETHING in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
-( CVA  aux_for_threads ) \ AvdH A2jul5
+( CTA  aux_for_threads )                        \ AvdH B5dec2
 WANT TASK-SIZE   \ Fails unless kernel prepared for threads
+TASK-SIZE 4 / CONSTANT _TASK/4
 
-HEX   40 CELLS CONSTANT US
+\ Return the USERAREA of a new task, aligned.
+: new-u0   DP @ _TASK/4 1- OR 1+    TASK-SIZE + _TASK/4 - ;
 
-\ Clone the stack frame to ``TASK-SIZE'' lower in memory.
-\ This area extends up to ``R0 @ US + '' .
-\ The Forth is left running in the new area.
-: CVA  DSP@   DUP TASK-SIZE -   U0 @ DSP@ - US +   MOVE
-       DSP@ TASK-SIZE - DSP!    RSP@ TASK-SIZE - RSP!
-       4 -1 DO   TASK-SIZE NEGATE U0 I CELLS +   +!   LOOP ;
+\ Clone the tast area to a area of ``TASK-SIZE'' leave TASK
+: CTA   U0 @ new-u0 2DUP  MAX-USER @ CELLS MOVE
+    2DUP SWAP - ( offset) SWAP 5 0 DO 2DUP I CELLS + +! LOOP
+    NIP NIP   DUP _TASK/4 + DP !  1 CELLS - ;
 
 
 
 
 \
-( THREAD-PET KILL-PET PAUSE-PET ) CF: ?LI \ A2nov16
-WANT CVA   WANT -syscalls-      HEX
+( THREAD-PET KILL-PET PAUSE-PET ) CF: ?LI \ B5dec2
+WANT CTA   WANT -syscalls-      HEX
 \ Exit a thread. Indeed this is exit().
 : EXIT-PET 0 _ _ __NR_exit XOS ;
 \ Do a preemptive pause. ( abuse MS )
 : PAUSE-PET 1 MS ;
-
 \ Create a thread with dictionary SPACE. Execute XT in thread.
-: THREAD-PET CREATE S0 @ 2 CELLS - , R0 @ , 0 , CVA ALLOT
+: THREAD-PET   ALLOT CTA CREATE   RSP@ SWAP RSP!   R0 @ S0 @
+    ROT RSP!    2 CELLS - ( DSP) ,  ( TASK) ,  ( pid) 0 ,
     DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
     112 R@ @ _ __NR_clone XOS DUP 0< IF THROW THEN
     DUP IF ( Mother) R> 2 CELLS + !
@@ -1743,14 +1743,14 @@ TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
 : PAUSE-COT
     DSP@ >R RSP@ THIS !   NEXT-TASK   THIS @ RSP! R> DSP! ;
 ( EXIT-COT THREAD-COT ) HEX \ AvdH A2jul5
-WANT TASK-TABLE   WANT CVA      WANT BAG-
+WANT TASK-TABLE   WANT CTA      WANT BAG-
 
 \ Exit: remove current task, then chain to first one.
 : EXIT-COT  THIS TASK-TABLE BAG-
     SET-FIRST-TASK   THIS @ RSP! R> DSP! ;
 
 \ Create a thread with dictionary SPACE. Execute XT in thread.
-: THREAD-COT   CREATE R0 @ 3 CELLS - , S0 @ , CVA ALLOT
+: THREAD-COT   CREATE R0 @ 3 CELLS - , S0 @ , CTA ALLOT
     DOES> $@ >R  \ R@ is rsp of new task
     @                   R@ !
     >DFA @              R@ CELL+ !

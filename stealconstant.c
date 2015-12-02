@@ -83,7 +83,7 @@ printf("_C{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEALSYS(kill)
         STEALSYS(signal)
         STEALSYS(time)
-        STEALSYS(times)
+        STEALNAME(__NR_times)
 printf("_C{ ------------------------------------------------------------      }\n");
 printf("_C{   End of constants stolen from C.                                 }\n");
 printf("_C{ ------------------------------------------------------------      }\n");

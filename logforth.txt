@@ -13814,12 +13814,18 @@ The system calls are to be checked for 64 bits.
 I must systematically add all system calls needed to stealconstant.
 
 2015 dec 2
-I have deleted threads.frt that was in the cvs archive since 2002.
+I had deleted threads.frt that was in the cvs archive since 2002,
+but now I've restored it.
 There has been a lot of experimenting and the conclusiong is that
 the setup in blocks.frt is sound. After working out the problems
 with using SET's in the cooperative threads and problems around
 the syscall numbers (?) in the preemptive threads, the threads for
-32 bits run again.
+32 bits run again, with the cloned area of the slave fully contained
+in the main dictionary, such that it can be prey for FORGET.
+This has been incorporated in the lab.
+
+stealconstant.c cannot handle times, used N_time instead.
+ciforth at 5.129 block.frt at 5.105
 
 --------------------
 The description of ACCEPT is no good.
