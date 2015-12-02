@@ -69,7 +69,7 @@ printf("_C{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEALSYS(chdir)
         STEALSYS(read)
         STEALSYS(select)
-        STEALSYS(_newselect)
+/*      STEALSYS(_newselect)                                                 */
         STEALSYS(write)
         STEALSYS(ioctl)
         STEALSYS(ioperm)
@@ -77,11 +77,11 @@ printf("_C{ 2 of the man pages, e.g. \"man 2 exit\"}\n");
         STEALSYS(lseek)
         STEALSYS(execve)
         STEALSYS(fork)
-        STEALSYS(waitpid)
+/*      STEALSYS(waitpid)                                                    */
         STEALSYS(pipe)
         STEALSYS(clone)
         STEALSYS(kill)
-        STEALSYS(signal)
+/*      STEALSYS(signal)                                                     */
         STEALSYS(time)
         STEALSYS(times)
 printf("_C{ ------------------------------------------------------------      }\n");
