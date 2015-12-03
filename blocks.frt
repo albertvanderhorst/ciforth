@@ -1742,7 +1742,7 @@ TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
 \ Switch from current task to next one.
 : PAUSE-COT
     DSP@ >R RSP@ THIS !   NEXT-TASK   THIS @ RSP! R> DSP! ;
-( EXIT-COT THREAD-COT ) HEX \ AvdH A2jul5
+( EXIT-COT THREAD-COT ) HEX \ AvdH B5dec2
 WANT TASK-TABLE   WANT CTA      WANT BAG-
 
 \ Exit: remove current task, then chain to first one.
@@ -1750,13 +1750,13 @@ WANT TASK-TABLE   WANT CTA      WANT BAG-
     SET-FIRST-TASK   THIS @ RSP! R> DSP! ;
 
 \ Create a thread with dictionary SPACE. Execute XT in thread.
-: THREAD-COT   CREATE R0 @ 3 CELLS - , S0 @ , CTA ALLOT
+: THREAD-COT   ALLOT CTA CREATE   RSP@ SWAP RSP!   S0 @  R0 @
+    ROT RSP!   3 CELLS - , ,
     DOES> $@ >R  \ R@ is rsp of new task
     @                   R@ !
     >DFA @              R@ CELL+ !
     'EXIT-COT >DFA @    R@ CELL+ CELL+ !
     R> TASK-TABLE BAG+! ;
-
 \
 ( {{ }} )                               \ AHCH   B5mar03
 WANT NESTED-COMPILE
