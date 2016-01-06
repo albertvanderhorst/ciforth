@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <asm/ioctls.h>
+#include <sched.h>
 
 /*****************************************************************************/
 /*                                                                           */
@@ -53,6 +54,7 @@ printf("\n");
         STEALNAME(O_WRONLY)
         STEALNAME(O_CREAT)
         STEALNAME(O_NONBLOCK)
+        STEALNAME(CLONE_VM)
 
         STEAL("SIZE_TERMIO",sizeof(struct termios))
 

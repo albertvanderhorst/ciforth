@@ -3437,7 +3437,7 @@ vocabularies.}})},
 enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 _C
-worddoc( {BLOCKS~},{MAX-USER},{MAX-USER},{--- addr},{U},
+worddoc( {BLOCKS~},{MAX-USER},{max_user},{--- addr},{U},
 {A user variable which contains the allocated area for user
 variables.},
 {{BLOCK},{MESSAGE},{BLOCK-READ},{BLOCK-WRITE}},

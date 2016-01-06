@@ -38,9 +38,9 @@
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ : REGRESSION TEST FAILS, STACK DEPTH ERROR
+ : REGRESSION TEST FAILS, RETURN VALUE ERROR
+ : REGRESSION TEST MALL-FORMED, SECOND PART MISSING
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -446,12 +446,12 @@ CURRENT @   'ONLY >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
-( TUCK -ROT PICK ROLL )                          \ AvdH B2sep25
+( TUCK -ROT PICK ROLL )                          \ AvdH B5dec11
 \ Obscure stack manipulations.
 : PICK 1+ CELLS DSP@ + @ ;
 : TUCK SWAP OVER ;
 : -ROT ROT ROT ;
-: ROLL   >R DSP@ DUP CELL+ R> 2 - CELLS
+: ROLL   1+ >R DSP@ DUP CELL+ R> 2 - CELLS
     2DUP + @ >R CELL+ MOVE DROP R> ;
 
 
@@ -686,22 +686,6 @@ PREVIOUS DEFINITIONS
 ( Add/remove VALUE to bag, used as a SET, i.e. no duplicates.)
 : SET+   2DUP IN-BAG? IF 2DROP ELSE BAG+! THEN ;
 : SET-   2DUP IN-BAG? IF BAG- ELSE 2DROP THEN ;
-( F: auxiliary_for_struct ) \ AH A4jun16
-4096 CONSTANT LEN
-DATA NAME$ 128  ALLOT         \ The name of the struct.
-DATA CRS$ LEN ALLOT  : !CRS$ 0 CRS$ ! ; \ Generate struct
-DATA DOES>$ LEN ALLOT   \ Generate fields/methods.
-\ Add STRING and the name of the current struct to CRS$.
-: +NAME$   CRS$ $+!    NAME$ $@ CRS$ $+!   BL CRS$ $C+ ;
-VARIABLE LAST-IN         VARIABLE start
-: RLI PP @ LAST-IN ! ; \ Remember last value of ``PP''.
-: GLI >R LAST-IN @ PP @  R> - OVER - ; \ Input since RLI trim.
-: itoa 0 <# #S BL HOLD #> ; \ Transform an INT to a STRING.
-\ Add the first part of a definition of a field to DOES>$.
-: F:   " : " DOES>$ $+! NAME DOES>$ $+!   RLI
-  HERE start @ - itoa DOES>$ $+!   " ^" DOES>$ $+!
-  NAME$ $@ DOES>$ $+!    " @ + " DOES>$ $+! ;
-
 ( FORMAT FORMAT&EVAL .FORMAT )          \ AH&CH B4Oct16
 WANT 2>R   DATA CRS$ 4096 ALLOT \  WANT :2
 NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
@@ -974,14 +958,14 @@ DECIMAL
 
 
 DECIMAL
-( +m -m *m /m **m x^x )              \ AvdH B4nov2
-WANT :I WANT XGCD      VARIABLE m ( Modulo number)
+( +m -m *m /m **m x^x )              \ AvdH B5dec7
+WANT :I WANT XGCD      VARIABLE _m ( Modulo number)
 \ suffix n : normalized number.
-:I _norm_-m  DUP 0< m @ AND + ; ( x -- xn ) \ -m<xn<+m
-:I +m   + m @ - _norm_-m  ;   ( an bn -- sumn )
+:I _norm_-m  DUP 0< _m @ AND + ; ( x -- xn ) \ -m<xn<+m
+:I +m   + _m @ - _norm_-m  ;   ( an bn -- sumn )
 :I -m   - _norm_-m  ;         ( an bn -- diffn)
-:I *m   M* m @ SM/REM DROP ;  ( a b -- prodn) \ a>=0 b>=0
-:I /m    m @ XGCD DROP _norm_-m  *m ; ( a b -- quotn)
+:I *m   M* _m @ SM/REM DROP ;  ( a b -- prodn) \ a>=0 b>=0
+:I /m    _m @ XGCD DROP _norm_-m  *m ; ( a b -- quotn)
 
 \ Both steps: For A B and C: return A B en C.  Invariant A*B^C.
 :I reduce_1-  1- >R >R    R@ *m   R> R> ;
@@ -989,7 +973,7 @@ WANT :I WANT XGCD      VARIABLE m ( Modulo number)
 :I **m    1 ROT ROT BEGIN   DUP 1 AND IF   reduce_1-   THEN
     reduce_2/ DUP 0= UNTIL   2DROP   ;  ( a b -- apowbn )
 
-:I x^x    m @ >R m !   **m   R> m ! ;   ( a b m -- a^b mod m )
+:I x^x    _m @ >R _m !   **m   R> _m ! ; ( a b m -- a^b mod m )
 ( PRIME? FACTOR GCD XGCD                       ) \ AvdH B4Nov03
 \ For N and HINT return FACTOR >= hint, maybe n. NOT INLINE!
 : FACTOR   BEGIN   2DUP /MOD SWAP
@@ -1006,20 +990,36 @@ WANT :I WANT XGCD      VARIABLE m ( Modulo number)
 \ For A B return C GCD where C*A+B*x=GCD
 : XGCD 1 0 2SWAP   BEGIN OVER /MOD OVER WHILE >R SWAP
    2SWAP OVER R> * - SWAP 2SWAP REPEAT 2DROP NIP ;
-( PHI CHS TRI PYR SQR                         ) \ AvdH B5apr20
-WANT FACTOR
-\ For X return Euler's TOTIENT
-    : _move-factor   >R BEGIN R@ * SWAP R@ / SWAP OVER R@ MOD
-      UNTIL R@ 1- R> */ ; \ ( N M P - N' M' ) N*M=N'*M\ , P/|M'
-: PHI 1 OVER 2 MOD 0 = IF 2 _move-factor THEN 3 >R BEGIN OVER 1
-  <> WHILE OVER R> FACTOR >R R@ _move-factor REPEAT RDROP NIP ;
+( CHS TRI PYR SQR                       ) \ AvdH B5dec5
 
 \ For N M return "N OVER M " (N/M)
 : CHS >R  R@ - 1 R> 1+ 1 ?DO   OVER I + I */ LOOP NIP ;
 \ '(./.) ALIAS CHS
 
-\ For x return it TRIANGLE, | PYRAMIDAL | SQUARE  number
-: TRI    DUP 1+ * 2/ ;  ( : PYR ; ) : SQR DUP * ;
+\ For x return it TRIANGLE, number
+: TRI    DUP 1+ * 2/ ;
+\ For x return it PYRAMIDAL number
+( : PYR ; )
+\ For x return it SQUARE  number
+: SQR DUP * ;
+
+
+
+
+( PHI MU                                        ) \ AvdH B5dec5
+WANT FACTOR
+\ For X return Euler's TOTIENT
+    : _move-factor   >R BEGIN R@ * SWAP R@ / SWAP OVER R@ MOD
+      UNTIL R@ 1- R> */ ; \ ( N M P - N' M' ) N*M=N'*M\ , P/|M'
+: PHI   1 2 >R   BEGIN OVER 1 <> WHILE OVER R> FACTOR >R
+    R@  _move-factor REPEAT RDROP NIP ;
+\ For X return moebius MU.
+   : _move-factor   >R BEGIN NEGATE SWAP R@ / SWAP OVER R@ MOD
+   0= WHILE 0 AND REPEAT RDROP ; \ ( N MU P - N' MU' ) not P|N'
+: MU   1 2 >R   BEGIN OVER 1 <> WHILE OVER R> FACTOR >R
+   R@ _move-factor REPEAT   RDROP NIP ;
+
+
 
 
 ( /STRING -LEADING DROP-WORD        )           \ AvdH B@aug12
@@ -1720,7 +1720,7 @@ WANT CTA   WANT -syscalls-      HEX
 : THREAD-PET   ALLOT CTA CREATE   RSP@ SWAP RSP!   R0 @ S0 @
     ROT RSP!    2 CELLS - ( DSP) ,  ( TASK) ,  ( pid) 0 ,
     DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
-    112 R@ @ _ __NR_clone XOS DUP 0< IF THROW THEN
+    100 R@ @ _ __NR_clone XOS DUP 0< IF THROW THEN
     DUP IF ( Mother) R> 2 CELLS + !
     ELSE ( Child) DROP RSP! EXECUTE EXIT-PET THEN ;
 \ Kill a THREAD-PET , preemptively. Throw errors.
@@ -1918,10 +1918,10 @@ Tools and utilities
 
 
 
-( SET-TRAPS  INSTALL-TRAPS ) CF: ?LI \ AvdH A3jun12
+( SET-TRAPS  INSTALL-TRAPS ) CF: ?LI    \ AvdH B5dec4
 WANT -syscalls-
 \ Make sure any traps restart Forth at ADDRESS .
-: SET-TRAPS  32 0 DO I OVER _ __NR_signal XOS DROP LOOP DROP ;
+: SET-TRAPS  32 1 DO I OVER 0 __NR_signal XOS DROP LOOP DROP ;
 
 \ Still fig tradition: warm and cold starts below origin
 : SET-TRAPS-WARM   -2 CELLS +ORIGIN   SET-TRAPS ;
@@ -1964,6 +1964,38 @@ WANT RESTORED
 \ Install no-security with automatic recovery.
 : NO-SECURITY:    R> '?PAIRS >DFA @ >R  >R NO-SECURITY CO
     R> '?PAIRS >DFA ! ;
+
+
+( REGRESS )                                     \ AvdH B5dec5
+: ?.S?   DUP IF >R .S R> THEN ; \ (e-e) If ERROR, print stack.
+: unbalance?  \ ( A B C - A B C ) give error if "A-B <> B-C "
+    2DUP - >R   >R 2DUP - R> SWAP    R> <>   ?.S? 40 ?ERROR ;
+\ For A B C give error if [A,B) and [B,C) are different.
+: unequal?     OVER - CORA   ?.S? 41 ?ERROR ;
+\ (sc - sc) If not a plausible string, give error.
+: ?test-for-S:?  OVER SRC 2@ SWAP WITHIN 0= 42 ?ERROR ;
+\ Break off the evaluation, leave REMAINDER of parse area
+: S:   SRC CELL+ 2@ OVER - RDROP ;
+\ Insert this to show the text of a test that passed.
+: _RVERBOSE WHERE 2@ TYPE " \ PASSED" TYPE CR ;
+\ Used as: REGRESS <test> S: <result>
+: REGRESS    DSP@ >R   ^J PARSE  2DUP WHERE 2!   EVALUATE
+   DSP@ 2 CELLS + >R   ?test-for-S:? EVALUATE DSP@ R> R@
+   unbalance? unequal? _RVERBOSE R> DSP! ;
+( DO-REGRESS NO-REGRESS DO-VERBOSE-REGRESS   ) \ AH B5dec5
+\ To turn it on and off.
+WANT REGRESS     WANT RESTORED
+
+\ Install and de-install the regress facility.
+: NO-REGRESS   '\ >DFA @   'REGRESS >DFA ! ;
+: DO-REGRESS   'REGRESS RESTORED ;
+
+\ Install and de-install the regress facility.
+: NO-VERBOSE-REGRESS   'TASK >DFA @ '_RVERBOSE >DFA ! ;
+: DO-VERBOSE-REGRESS   '_RVERBOSE RESTORED ;
+
+
+
 
 
 ( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11

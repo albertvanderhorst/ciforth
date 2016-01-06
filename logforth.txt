@@ -13825,13 +13825,39 @@ in the main dictionary, such that it can be prey for FORGET.
 This has been incorporated in the lab.
 
 stealconstant.c cannot handle times, used N_time instead.
-ciforth at 5.129 block.frt at 5.105
+ciforth at 5.129 block.frt at 5.106
+All multitasking work except preemptive 64 bits.
+
+2015 dec 4
+ciasdis request received. The last release is 1.0 and it works
+on release 4.0.7. There has been work done on porting to 5.x
+but it doesn't work. There is a nasty hangup somewhere in labelas.frt.
+
+Apropos threading in 64 bits. If the CLONE_VM is not specified,
+the cloning succeeds. CLONE_VM has been added to stealconstant.c
+The 12 in 112 parameters for clone is the signal the main program
+gets when the child dies. That is problematic for 64 bits, because the
+WARM start doesn't work in 64 bits. I should fix that first.
+A test
+CREATE AAP   -2 CELLS +ORIGIN 'AAP >CFA ! AAP
+reveals that the WARM start of lina64 is okay. However installing
+that address as a signal handler fails.
+
+2015 dec 11
+I needed CS-ROLL for noforth meta compilation.
+CS-ROLL wwith two items each is 2* ROLL. However my ROLL didn't work
+as required. Fixed.
+
+2016 jan 1
+The documentation of error 20 is wrong. A DROP should be added.
+The case about NO-SECURITY merits a place in common problems
 
 --------------------
 The description of ACCEPT is no good.
 
-Some linux commands may work on OSX but they are not loaded by WANT, and there
-is not ?X to and ?OSX and ?LI.
+The case about non-structured things merits a place in common problems.
+Some linux commands may work on OSX but they are not loaded by WANT,
+and there is not ?X to and ?OSX and ?LI.
 #!/home/albert/PROJECT/ciforth/lina32 -s
 wc.script doesn't work properly with the interpreter from the current directory.
 *SET SRC should contain a ref to SAVE
@@ -13925,6 +13951,8 @@ but looks ugly while viewing.
 
 TICKS needed for MSDOS, using some timer.
 
+PP must be added at SRC also
+
 QSORT must add:
    < and <-> must be reasonable compare and exchange operators.
 
@@ -13940,6 +13968,13 @@ Even niet:
 
 - Test to be added for throw from within blocks and strings.
 
+Discovered a bug in ciasdis, de operands for obligatory word, and
+immediate byte, are not in the right order.
+This can be solved to have the priority of OW, changed to
+after the IB, stuff, or introduce a special data thingy for the
+ENTER, like OB, .
+
+INLINING must be moved to its own screen.
 
 -
 Greg Egan
@@ -13947,4 +13982,4 @@ Schild's ladder. l
 --
  mijn wijk + willemstr 565
 
-It could be that lyx is the way to go for documentation. l
+It could be that lyx is the way to go for documentation.
