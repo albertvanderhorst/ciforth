@@ -13852,6 +13852,22 @@ as required. Fixed.
 The documentation of error 20 is wrong. A DROP should be added.
 The case about NO-SECURITY merits a place in common problems
 
+2016 jan 8
+Noforth compiles. The option -legacy- has been expanded and
+does the following:
+ The VOCABULARY structure is compatible with gforth etc.
+ VOCABULARY exist. FORTH replaces the topmost etc.
+ The parse area SOURCE is changed to start at zero.
+ 0>IN goes to the start of the line, REFILL to the
+ start of the next line. This covers a remarkable part of
+ old style source handling.
+
+There is a screen -tricky-control- . This has AHEAD ,
+the ability to jump out of DO LOOP with WHILE etc.
+do-sys and orifg's on the control stack are made the
+same size.
+CS-ROLL has been added. SLITERAL didn't compile well.
+
 --------------------
 The description of ACCEPT is no good.
 

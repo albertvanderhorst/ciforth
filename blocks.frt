@@ -190,22 +190,22 @@ WANT ALIAS
 
 
 
-( -legacy- IN >IN REFILL  )                   \ AvdH B4Oct25
+( -legacy- IN >IN REFILL 0>IN  )                 \ AvdH B5jan7
 WANT ALIAS
-\ Use L_>IN instead of >IN , don't store into it!
-: L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
-'L_>IN ALIAS >IN
-: REFILL 0 ;
-: IN PP ;
+\ Fake a parse area that starts at address 0.
+'PP ALIAS >IN         'PP ALIAS IN
+: SOURCE  0  SCR CELL+ @ ;
+\ Set parse pointer at start of line.
+: 0>IN  BEGIN -1 PP +! PP @ 1- C@ ^J = PP @ SRC @ = OR UNTIL ;
+\ Closest match to traditional line by line interpreting.
+\ Set parse pointer at start of next line
+: REFILL BEGIN PP @ 1- C@ ^J <> PP @ SRC CELL+ @ <> AND WHILE
+    +1 PP +! REPEAT   PP @ SRC CELL+ @ <> ;
 
-
-
-
-
-
-
-
-
+\ UNCLEAR IF THIS EVER WORKED, KEEP FOR REFERENCE!
+\ \ Use L_>IN instead of >IN , don't store into it!
+\ : L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
+\ 'L_>IN ALIAS >IN
 ( -legacy- VOCABULARY )                        \ AvdH B5dec01
 \ Use replacing vocabularies instead of pushing namespaces.
 
@@ -446,7 +446,7 @@ CURRENT @   'ONLY >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
-( TUCK -ROT PICK ROLL )                          \ AvdH B5dec11
+( TUCK -ROT PICK ROLL CS-ROLL )                   \ AvdH B6jan6
 \ Obscure stack manipulations.
 : PICK 1+ CELLS DSP@ + @ ;
 : TUCK SWAP OVER ;
@@ -454,14 +454,30 @@ DROP   CURRENT !
 : ROLL   1+ >R DSP@ DUP CELL+ R> 2 - CELLS
     2DUP + @ >R CELL+ MOVE DROP R> ;
 
+\ -pedantic- required when used with DO-LOOP
+: CS-ROLL 2* 1+ DUP >R ROLL R> ROLL ;
 
 
 
 
 
 
-
-
+( -tricky-control-                              ) \ AvdH B6jan6
+WANT CS-ROLL     : (F (FORWARD _ ; : F) DROP FORWARD) ;
+                 : (B (BACK _ ;    : B) DROP BACK) ;
+               : AHEAD  'BRANCH , (F ; IMMEDIATE
+'IF     HIDDEN : IF     '0BRANCH , (F ; IMMEDIATE
+'ELSE   HIDDEN : ELSE   'BRANCH , (F 1 CS-ROLL F) ; IMMEDIATE
+'THEN   HIDDEN : THEN   F) ; IMMEDIATE
+'BEGIN  HIDDEN : BEGIN  (B ; IMMEDIATE
+'WHILE  HIDDEN : WHILE  '0BRANCH , (F 1 CS-ROLL ; IMMEDIATE
+'REPEAT HIDDEN : REPEAT 'BRANCH , B) F) ; IMMEDIATE
+'AGAIN  HIDDEN : AGAIN  'BRANCH , B) ; IMMEDIATE
+'UNTIL  HIDDEN : UNTIL  '0BRANCH , B) ; IMMEDIATE
+'DO     HIDDEN : DO     '(DO) , (FORWARD (BACK ; IMMEDIATE
+'?DO    HIDDEN : ?DO    '(?DO) , (FORWARD (BACK ; IMMEDIATE
+'LOOP   HIDDEN : LOOP   '(LOOP) , BACK) FORWARD) ; IMMEDIATE
+'+LOOP  HIDDEN : +LOOP  '(+LOOP) , BACK) FORWARD) ; IMMEDIATE
 ( 2>R 2R> 2R@ 2CONSTANT 2VARIABLE 2, )          \ AvdH B5Mar9
 
 
@@ -1230,11 +1246,11 @@ $1B CONSTANT ESC
 
 
 
-( SLITERAL $. $? ."$" )           \ AvdH B2aug12
+( SLITERAL $. $? ."$" )           \ AvdH B5jan8
 
 \ ISO
-: SLITERAL POSTPONE SKIP $, POSTPONE LITERAL POSTPONE $@ ;
-IMMEDIATE
+: SLITERAL 'SKIP , $, $@ SWAP  'LIT , , 'LIT , , ; IMMEDIATE
+
 \ ISO
 
 
@@ -1422,7 +1438,7 @@ WANT T]      WANT :2
 
 \ Last scripting block!
 CREATE -scripting-
-( :2 :F :R :I   INLINING                      )  \ AvdH B4oct14
+( :2 :F :R :I                                 )  \ AvdH B6jan7
 WANT ALIAS
 \ Alias of : , redefine an existing(!) word. Or crash.
 : :2   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R> HIDDEN ;
@@ -1436,8 +1452,24 @@ WANT ALIAS
    DOES>   STATE @ IF BEGIN $@ DUP '(;) <> WHILE , REPEAT 2DROP
    ELSE >R THEN ;
 
+
+
+( INLINING                                     )  \ AvdH B6jan7
+\ With INLINING in the search order, all words are inlined.
 NAMESPACE INLINING
-INLINING DEFINITIONS :2 : :I ; PREVIOUS DEFINITIONS
+INLINING DEFINITIONS
+    :2 : :I ;
+PREVIOUS DEFINITIONS
+
+
+
+
+
+
+
+
+
+
 ( OLD: RESTORED POSTFIX ) \ AvdH A2jun12
 \ WARNING: use these facilities only with high level words.
 

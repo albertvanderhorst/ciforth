@@ -475,6 +475,12 @@ The library is not a supposedly ISO-conforming program.
 It tends to rely on
 ciforth-specific and thisforth-specific -- but hopefully documented -- behaviour.
 Understanding it requires some study of non-portable facilities.
+forthitem
+When a file is forthcode({INCLUDED}) it is read in as a whole,
+so there is never a need for forthcode({REFILL}) .
+After forthcode({ WANT REFILL}) a forthcode({REFILL}) is loaded that
+sets the parse pointer to the start of the next line.
+
 forthendenumerate
 
 Here we will explain how you must read the glossary of thisforth,

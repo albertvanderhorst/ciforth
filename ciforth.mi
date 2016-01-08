@@ -559,6 +559,9 @@ This detection mechanism
 by the ISO standard.
 You may disable this checking by forthcode({NO-SECURITY}) and
 re-instate it by forthcode({DO-SECURITY}).
+You can compile even combination of forthcode({DO}) and 
+forthcode({BRANCH}) controls after
+    forthcode({WANT -tricky-control- })  
 })
 
 forthitem
