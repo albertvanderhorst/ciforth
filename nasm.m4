@@ -44,7 +44,8 @@ _PC_({
 ; documentation of nasm.
 _BOOTED_({; See again the generic system manual for more information how to install
 ; booting versions.
-})})
+})
+})
 
 dnl Directives ignored by NASM.
 define({ASSUME},;)dnl Turn ASSUME into comment.
@@ -81,13 +82,15 @@ define({_BYTE_PTR},{BYTE $1})
 define({_CALL_FAR_INDIRECT},{CALL FAR [$1]})
 define({_FAR_ADDRESS},{[$1:$2]})
 define({_CELL_PTR},{ CELL_M4})dnl Make it specify SIZE only.
-define({_OFFSET})dnl Ignore this design error altogether.
+define({_OFFSET},)dnl Ignore this design error altogether.
+define({QUAD},{QWORD})
 
 dnl Handling large blocks of comment
 define({_COMMENT},{%if 0})
 define({_ENDCOMMENT},{%endif})
 define({SET_16_BIT_MODE},{BITS   16})
 define({SET_32_BIT_MODE},{BITS   32})
+define({SET_64_BIT_MODE},{BITS   64})
 define({_ALIGN},{ALIGN    M4_CELLWIDTH})
 define({DSS},{DB})
 dnl A nobits section takes no place in the object file.

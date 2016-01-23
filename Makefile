@@ -428,8 +428,9 @@ LINA64ZIP : $(RELEASELINA64) ;\
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
 ci86.lina32.o : ci86.lina32.asm ; nasm $+ -felf -g -o $@ -l $(@:.o=.lst)
+ci86.lina64.o : ci86.lina64.asm ; nasm $+ -felf64 -g -o $@ -l $(@:.o=.lst)
 
-ci86.%.o : ci86.%.asm ; nasm $+ -felf -o $@ -l $(@:.o=.lst)
+ci86.%.o : ci86.%.asm ; nasm $+ -o $@ -l $(@:.o=.lst)
 
 # The tricky `link.script' has been dispensed with.
 # However, now we need _fini and _init in ciforth.c and
@@ -440,6 +441,9 @@ ciforthc : ciforth.o ci86.linux.o
 
 # Linux native forth by nasm. FIXME the linking doesn't work.
 nlina32 : ci86.lina32.o ; ld $+ -melf_i386 -N -o $@
+nlina64 : ci86.lina64.o ; \
+  export LDEMULATION=elf_x86_64 ;\
+  ld $+ -N -o $@
 
 # Linux native forth by gnu tools
 glina32 : ci86.lina32.s ; as --32 $+; ld a.out -melf_i386 -N -o $@
