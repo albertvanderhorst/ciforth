@@ -46,9 +46,9 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
 
 
 \
-( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH A1oct02
-1 LOAD   WANT OLD:   WANT TURNKEY   WANT SWAP-DP
-WANT NO-REGRESS WANT ARG[]   WANT INCLUDE   WANT SRC>EXEC
+( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH B5jan23
+1 LOAD   WANT OLD:   TURNKEY   SWAP-DP
+WANT NO-REGRESS ARG[]   INCLUDE   SRC>EXEC
 : MY-ERROR  DUP EXIT-CODE ! OLD: ERROR BYE ;
 'MY-ERROR DUP 'ERROR 3 CELLS MOVE  HIDDEN
 \ Don't include source in executable.
@@ -57,7 +57,7 @@ WANT NO-REGRESS WANT ARG[]   WANT INCLUDE   WANT SRC>EXEC
 
 'TASK 'OPTIONS 3 CELLS MOVE \ No options.
 'TASK '.SIGNON 3 CELLS MOVE \ No sign on.
-NO-REGRESS      \ Turn of regression test
+NO-REGRESS      \ Turn off regression test
 ARGC 3 < 13 ?ERROR
 2 ARG[] INCLUDED
 LATEST   2 ARG[] SRC>EXEC   TURNKEY
@@ -81,22 +81,22 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 ( -e :_Load_system_electives ) \ AvdH A3sep01
 .SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
 1 LOAD
-\ WANT -legacy-    \ If you want this, it must be up front
-WANT CONFIG      WANT HELP       WANT ORDER
-WANT L-S         WANT DO-DEBUG   WANT H.         WANT DUMP
-WANT $.         WANT ^
-WANT INCLUDE     WANT CRACK      WANT LOCATE
-WANT CASE-INSENSITIVE            CASE-INSENSITIVE
+\  "-legacy-" WANTED  \ If you want this, it must be up front
+ "CONFIG" WANTED       "HELP" WANTED        "ORDER" WANTED
+WANT L-S         DO-DEBUG   H.         DUMP
+ "$." WANTED          "^" WANTED
+ "INCLUDE" WANTED      "CRACK" WANTED       "LOCATE" WANTED
+ "CASE-INSENSITIVE" WANTED            CASE-INSENSITIVE
 \ WANT EDITOR      \ WANT OOPS     \ WANT FARDUMP
-\ WANT ASSEMBLERi86 \ WANT DEADBEEF
+\  "ASSEMBLERi86" WANTED \  "DEADBEEF" WANTED
 \ Select os-interface DOS/Unix
-WANT OS-IMPORT  ( WANT DIR )     WANT ls
-WANT -scripting-
+ "OS-IMPORT" WANTED  (  "DIR" WANTED )      "ls" WANTED
+ "-scripting-" WANTED
 
 : TASK ; OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD
-WANT ARG[]   WANT Z$@
+ "ARG[]" WANTED    "Z$@" WANTED
 CREATE COMMAND-BUFFER 0 , 1000 ALLOT
 : DOIT
     BEGIN SHIFT-ARGS ARGC 1 > WHILE
@@ -112,8 +112,8 @@ DOIT    COMMAND-BUFFER $@
 \
 ( -g GROW :_grow_by_megabytes ) \ AvdH B4may28
 'FORTH >WID >LFA @    HERE CONSTANT HERE-NOW
-1 LOAD      WANT ARG[]  CF: ?LI
-ARGC 4 <> 13 ?ERROR    WANT SAVE-SYSTEM
+1 LOAD       "ARG[]" WANTED  CF: ?LI
+ARGC 4 <> 13 ?ERROR     "SAVE-SYSTEM" WANTED
 SM HERE-NOW OVER - $, CONSTANT thisforth$
  2 ARG[] EVALUATE 20 LSHIFT CONSTANT INCREASE
  thisforth$ CELL+ SM - CONSTANT >TARGET
@@ -144,7 +144,7 @@ OK BYE
 \
 ( -i BINARY_PATH LIBRARY_PATH SHELL_PATH )\ A3aug30
 CREATE task     1 LOAD
-   WANT ARG[]   WANT SAVE-SYSTEM
+    "ARG[]" WANTED    "SAVE-SYSTEM" WANTED
 : INSTALL-LIB BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
     3 ARG[] BLOCK-FILE $! ;
 \ Trim back to before ``task''. Save system at binary path.
@@ -192,7 +192,7 @@ DOIT
 \
 ( -l LIBRARY :_LIBRARY_to_be_used_for_blocks ) \ AvdH A1oct05
 CREATE task
-1 LOAD   WANT SHIFT-ARGS   WANT ARG[]
+1 LOAD    "SHIFT-ARGS" WANTED    "ARG[]" WANTED
 \ Install other library
 : SWITCH-LIBS   BLOCK-EXIT
     2 ARG[] BLOCK-FILE $!
@@ -256,7 +256,7 @@ SWITCH-LIBS
 \
 ( -p :_Load_system_preferences ) \ AvdH A1oct02
 1 LOAD
-WANT -legacy-     \ Must be first to WANT
+ "-legacy-" WANTED     \ Must be first to WANT
 
 
 
@@ -303,8 +303,8 @@ WANT -legacy-     \ Must be first to WANT
 
 \
 ( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-1 LOAD   WANT OLD:   WANT ARG[]
-WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
+1 LOAD    "OLD:" WANTED    "ARG[]" WANTED
+ "CTYPE" WANTED   2 ARG[] $, CONSTANT SCRIPT-NAME
 
 : BY-WHO   "XOS" PRESENT IF " run by " TYPE
 0 ARG[] TYPE THEN ;
@@ -314,21 +314,21 @@ WANT CTYPE   2 ARG[] $, CONSTANT SCRIPT-NAME
     BY-WHO CR BYE ;
 -1 WARNING !     'MY-ERROR >DFA @     'ERROR >DFA !
 SHIFT-ARGS  SHIFT-ARGS
-SCRIPT-NAME $@ GET-FILE  WANT -scripting-
+SCRIPT-NAME $@ GET-FILE   "-scripting-" WANTED
 ^J $/ 2DROP     \ Line with #!lina
 EVALUATE
 BYE
 ( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
 .SIGNON 1 LOAD
-\ Reload WANT with new ``CORA'' but hide it direct after.
-WANT CORA-IGNORE
+\ Reload  "with" WANTED new ``CORA'' but hide it direct after.
+ "CORA-IGNORE" WANTED
 : CORA CORA-IGNORE ;   1 LOAD   'CORA HIDDEN
 
-WANT [IF]   WANT ARG[]   WANT PREFIX
+ "[IF]" WANTED    "ARG[]" WANTED    "PREFIX" WANTED
 
-WANT CASE-INSENSITIVE   CASE-INSENSITIVE
-WANT NO-SECURITY        NO-SECURITY
-WANT AUTOLOAD           AUTOLOAD
+ "CASE-INSENSITIVE" WANTED   CASE-INSENSITIVE
+ "NO-SECURITY" WANTED        NO-SECURITY
+ "AUTOLOAD" WANTED           AUTOLOAD
 
 2 ARG[] INCLUDED
 SECOND-PASS @ 0= ?LEAVE-BLOCK

@@ -13895,8 +13895,13 @@ work in 64 bits. It sysfaults at the NEXT of XOS.
 This means that SI and/or BP are not saved properly.
 If I save them in the USINI area, all is well, but that is not
 re-entrant.
-I don't need to save SI via BP in 64 bits. It turns out that
-storing into X15 is well.
+I don't need to save SI via BP in 64 bits. It turns out that with
+storing into X15 all is well.
+
+2016 jan 23
+blocks.frt 5.109 ci86.gnr 5.131 allow threading pet in 64 bit.
+Tested manually with the test section of the last threadpet.frt
+in tools/THREADS.
 
 --------------------
 officialdecompilation fails on SEE _pad.
