@@ -13843,6 +13843,11 @@ CREATE AAP   -2 CELLS +ORIGIN 'AAP >CFA ! AAP
 reveals that the WARM start of lina64 is okay. However installing
 that address as a signal handler fails.
 
+2015 dec 5
+Added a couple of screens to do regression tests.
+REGRESS tests stack depth and parameters.
+The task area's are now allocated in the dictionary.
+
 2015 dec 11
 I needed CS-ROLL for noforth meta compilation.
 CS-ROLL wwith two items each is 2* ROLL. However my ROLL didn't work
@@ -13868,7 +13873,34 @@ do-sys and orifg's on the control stack are made the
 same size.
 CS-ROLL has been added. SLITERAL didn't compile well.
 
+2016 jan 18
+nasm version of 64 bits lina works again and passes test.
+The problems lies in the LDEMULATION thingy. It is added to
+the Makefile. It has been tested whether any of those versions
+works better with threadpet, but no.
+nlina64 glina64 and lina64 (fasm) all work and can compile
+hellow.frt.
+
+2016 jan 20
+Reinvestiaged threading in 64 bits. Downloaded an example,
+see THREADS/threadpet.frt. Apparently the simple minded
+cloning in assembler works. Experimentation reveals that
+cloning returns a 0 or a 16 bit process counter in rax,
+and that the base pointer (my return stack pointer, where
+the HIP is saved) is not spoiled.
+
+2016 jan 20
+At last I have some clue about the problem why threads don't
+work in 64 bits. It sysfaults at the NEXT of XOS.
+This means that SI and/or BP are not saved properly.
+If I save them in the USINI area, all is well, but that is not
+re-entrant.
+I don't need to save SI via BP in 64 bits. It turns out that
+storing into X15 is well.
+
 --------------------
+officialdecompilation fails on SEE _pad.
+
 The description of ACCEPT is no good.
 
 The case about non-structured things merits a place in common problems.

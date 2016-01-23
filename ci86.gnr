@@ -7416,17 +7416,15 @@ _BITS32_({
         INT     0x80        _C{ Generic call on LINUX }
 })_C{}_END_({_BITS32_})
 _BITS64_({
-        LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
-        MOV     [RPO],HIP
-_C({        XCHG    BX,HIP       #Save HIP in BX  why not })
+_C({    Saving HIP on the return stack, with RPO saved in memory or })
+_C({    R15 fails with the __NR_clone syscall (and only then) })
+        MOV     R15,HIP   _C{ HIP is SI }
         POP     AX       _C{ Function number              }
         POP     DX       _C{ Third parameter, or dummy    }
         POP     SI       _C{ Second parameter, or dummy   }
         POP     DI       _C{ First parameter.             }
         SYSCALL          _C{  Generic call on LINUX       }
-        MOV     HIP,[RPO]    _C{ Restore}
-        LEA     RPO,[RPO+_CELLS(1)]
-_C({        XCHG    BX,HIP   #Restore      why not })
+        MOV     HIP,R15
 })_C{}_END_({_BITS64_})
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
@@ -7460,10 +7458,10 @@ _BITS64_({ {{1 "CHIMP" 0 0 1 XOS5 .},{CHIMP5}}, })
 enddoc)
 _LINUX_N_({
 CODE_HEADER({XOS5},{XOS5})
+_BITS32_({
         LEA     RPO,[RPO - _CELLS(1)] _C{Save HIP on return stack.}
         MOV     [RPO],HIP
 
-_BITS32_({
         POP     AX        _C{ Function number}
         POP     DI        _C{ 5th parameter, or dummy}
         POP     SI        _C{ 4th parameter, or dummy}
@@ -7471,8 +7469,11 @@ _BITS32_({
         POP     CX        _C{ Second parameter, or dummy}
         POP     BX        _C{ First parameter.}
         INT     0x80        _C{ Generic call on LINUX }
+        MOV     HIP,[RPO]    _C{ Restore}
+        LEA     RPO,[RPO+_CELLS(1)]
 })_C{}_END_({_BITS32_})
 _BITS64_({
+        MOV     R15,HIP   _C{ HIP is SI }
         POP     AX        _C{ Function number            }
         POP     R8       _C{ 5th parameter, or dummy    }
         POP     R10      _C{ 4th parameter, or dummy    }
@@ -7480,10 +7481,9 @@ _BITS64_({
         POP     SI        _C{ Second parameter, or dummy }
         POP     DI        _C{ First parameter.           }
         SYSCALL           _C{ Generic call on LINUX      }
+        MOV     HIP,R15
 })_C{}_END_({_BITS64_})
 
-        MOV     HIP,[RPO]    _C{ Restore}
-        LEA     RPO,[RPO+_CELLS(1)]
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 })_C{}_END_({_LINUX_N_})

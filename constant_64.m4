@@ -46,7 +46,7 @@ pipe    EQU       0x16
 _newselect EQU select
 
 wait4   EQU     waitpid
-RAWIO           EQU     (ECHO _OR_ ICANON)
+_C{RAWIO           EQU     (ECHO _OR_ ICANON)}
 
 _C{ ------------------------------------------------------------  }
 _C{   End of constants stolen from C in linux 64 bit environment.        }

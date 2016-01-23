@@ -1751,10 +1751,10 @@ WANT CTA   WANT -syscalls-      HEX
 \ Create a thread with dictionary SPACE. Execute XT in thread.
 : THREAD-PET   ALLOT CTA CREATE   RSP@ SWAP RSP!   R0 @ S0 @
     ROT RSP!    2 CELLS - ( DSP) ,  ( TASK) ,  ( pid) 0 ,
-    DOES> >R  ( xt) R@ @ CELL+ !   R@ CELL+ @  ( R0) R@ @ !
-    100 R@ @ _ __NR_clone XOS DUP 0< IF THROW THEN
-    DUP IF ( Mother) R> 2 CELLS + !
-    ELSE ( Child) DROP RSP! EXECUTE EXIT-PET THEN ;
+    DOES> DUP @ >R  SWAP OVER CELL+ @ R@ 2! ( clone S: tp,xt)
+    100 R> _ __NR_clone XOS DUP IF
+    ( Mother) DUP ?ERRUR SWAP 2 CELLS + ! ELSE
+    ( Child) DROP RSP! CATCH DUP IF ERROR THEN EXIT-PET THEN ;
 \ Kill a THREAD-PET , preemptively. Throw errors.
 : KILL-PET >BODY 2 CELLS + @ 9 _ __NR_kill XOS ?ERRUR ;
 DECIMAL
@@ -3709,4 +3709,4 @@ WANT BIN-SEARCH
 
 
 
-( 3344  last line.)
+( 3712 last line in blocks.)
