@@ -1315,16 +1315,16 @@ _COMMENT
 THIS ROUTINE WILL ALLOW YOU TO STEP THRU FORTH PROGRAMS
 EVERY TIME 'NEXT' IS EXECUTED.
 
-IN ORDER TO USE THE STEP FEATURE YOU MUST DO THE FOLLOWING:
+In order to use the step feature you must do the following:
 
-        1.  PATCH THE INSTRUCTION IN 'NEXT' WITH A JUMP
-            TO 'TNEXT'
+        1.  patch the instruction in 'next' with a jump
+            to 'TNEXT'
 
-        2.  PATCH YOUR BREAKPOINT ROUTINE AT
-            LABEL   'BREAK'
+        2.  patch your breakpoint routine at
+            label   'BREAK'
 
-        3.  SET VARIABLES, `BIP' & `BIPE' TO THE
-            ADDRESSES YOU WANT TO STEP THRU.
+        3.  set variables, `BIP' & `BIPE' to the
+            addresses you want to step thru.
 
 THE CONTENTS OF THE 2 VARIABLES 'BIP` AND `BIPE'
 ARE INTERPRETED AS FOLLOWS:
@@ -2249,7 +2249,7 @@ forthcode({>IN}) is not actually a variable:
 its content must be fetched immediately, and changing it has no effect.
 },
 {{(>IN)},{IN}},
-dnl this test to be moved to library test (after WANT legacy.)
+dnl this test to be moved to library test (after  "-legacy-" WANTED .)
 dnl {{: GS1 >IN @ ; QUIT
 dnl GS1 .},{4}},
 {},
@@ -3226,7 +3226,7 @@ forthvar({addr}), i.e. it can be fetched with
 forthcode({COUNT}). _VERBOSE_({{ (Where would that BD come
 from?)}})},
 {{COUNT},{$!}},
-{{ 1 LOAD WANT $!-BD "A9" PAD $!-BD PAD COUNT TYPE},{A9}}, enddoc)
+{{ 1 LOAD  "$!-BD" WANTED "A9" PAD $!-BD PAD COUNT TYPE},{A9}}, enddoc)
 _SUPPRESSED({{
 _HEADER({$!-BD},{SSTORBD},{DOCOL})
         DC TDUP, CSTOR, ONEP, SWAP, LMOVE
@@ -3565,7 +3565,7 @@ _HEADER({PP},{PP},{DOUSE}, _CELLS(29))
 _C
 _LOAD_({
 worddocsafe( {INPUT~},{(>IN)},{paren_iso_in},{--- addr},{},
-{After forthsample({WANT -legacy-}) this is used by
+{After forthsample({ "-legacy-" WANTED }) this is used by
 the word forthcode({L_>IN}), to store
 the offset from the start within the current input
 text buffer (terminal or disc) from which the next text will be
@@ -4787,7 +4787,7 @@ forthcode({WORD}) leaves the character count in the first byte, the characters, 
 ends with two or more blanks.
 },
 {{NAME},{PARSE},{BLK} ,{IN}},
-{{1 LOAD WANT WORD : GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
+{{1 LOAD  "WORD" WANTED : GS1 BL WORD COUNT . C@ EMIT ; GS1 CELLO},{5 C},
 { : GS2 5A WORD COUNT DUP . TYPE ; GS2 QQZ},{2 QQ},
 { : GS3 5A WORD COUNT DUP . TYPE ; GS3 ZZZQQZ},{2 QQ}
 },
@@ -5059,7 +5059,7 @@ that uses a regular string.
 },
 {{CONTEXT},{PRESENT},{(FIND)}},
 {
-{ 1 LOAD WANT FIND : FIND: BL WORD FIND ; dnl
+{ 1 LOAD  "FIND" WANTED : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
 { IMMEDIATE 142 FIND: BONOBO . ' BONOBO = . .},{1 _T_ 142},
 dnl don't find the next, though it is a denotation
@@ -6925,7 +6925,7 @@ saved like this. _VERBOSE_({{In practice the use of
 of the same stream.
 }}) },
 {{SAVE},{RESTORE-INPUT}},
-{{1 LOAD WANT SAVE-INPUT !CSP : GS1 SAVE-INPUT 0 PP ! RESTORE-INPUT ; dnl
+{{1 LOAD  "SAVE-INPUT" WANTED !CSP : GS1 SAVE-INPUT 0 PP ! RESTORE-INPUT ; dnl
     34 GS1 . . ?CSP},{-1 34} },
 enddoc)
 _SUPPRESSED({{
@@ -8838,7 +8838,7 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
 {
-{ 1 LOAD WANT GET-ENV },{},
+{ 1 LOAD  "GET-ENV" WANTED },{},
 { "COMSPEC" GET-ENV SHELL $!},{},
 {"wina.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
 },

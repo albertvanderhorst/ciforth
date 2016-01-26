@@ -26,10 +26,10 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
     DUP 0= 24 AND THROW POSITION 0= WHILE 1+ REPEAT   ;
 : (WANTED)   ( sc -- ) ERRSCR @ 4 + >R   BEGIN 2DUP PRESENT 0=
   WHILE 2DUP R> #LOCATED DUP 1+ >R  LOAD REPEAT RDROP ;
-\ Make sure WORD is present in the current namespace
-: WANTED   '(WANTED) CATCH DUP 24 = IF >R ETYPE R> MESSAGE
-    ELSE THROW 2DROP THEN ;   : WANT   ( "name" ) NAME WANTED ;
-: CF: "CONFIG" WANTED ;
+: WANTED   ( Make WORD available. ) '(WANTED) CATCH DUP 24 = IF
+    >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
+: WANT  ^J PARSE SAVE SET-SRC BEGIN NAME DUP WHILE WANTED
+    REPEAT 2DROP RESTORE ;      : CF: "CONFIG" WANTED ;
 ( -b :_This_option_is_available )
 
 

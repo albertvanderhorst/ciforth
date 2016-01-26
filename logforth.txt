@@ -13902,6 +13902,13 @@ storing into X15 all is well.
 blocks.frt 5.109 ci86.gnr 5.131 allow threading pet in 64 bit.
 Tested manually with the test section of the last threadpet.frt
 in tools/THREADS.
+blocks.frt 5.109 multiple words names after WANT.
+
+2016 jan 26
+The update of 23 jan failed. The new version of WANT was not yet saved.
+Furthermore the tests failed because WANT was used. Changed those to
+used WANTED, blocks.frt was already changed to use WANTED.
+blocks.frt 5.110 ci86.gnr 5.132 allow threading pet in 64 bit.
 
 --------------------
 officialdecompilation fails on SEE _pad.

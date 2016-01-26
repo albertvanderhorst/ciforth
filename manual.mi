@@ -78,6 +78,8 @@ but thisforth does.
 
 thisforth uses the forthdefi({blocks}) as a library
 by addition of the word forthcode({WANTED}) and a convention.
+More convenient is forthcode({WANT}) that adds all words that are on the
+remainder of the line, so without quotes.
 Starting with forthsamp({thisforth -w}) or most any option you have this
 facility available. If you are already in thisforth, you can
 type forthsamp({1 LOAD}).
