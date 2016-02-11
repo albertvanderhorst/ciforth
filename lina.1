@@ -1,41 +1,43 @@
 .\" $Id$
-.TH LINA "1" "nov 2004" "ciforth 4.0.6" DFW
+.TH LINA "1" "feb 2016 " "ciforth 5.3.0" HCC-FORTHGG
 .SH "NAME"
 lina ciforth \- ISO Forth Language And Environment
 .SH "SYNOPSIS"
-\fBlina\fR      [\ \fB\-AEHMRV\fR\ ]
+\fBlina\fR      [\ \fB\-aehmrv\fR\ ]
 .br
-\fBlina\fR      \ \fB\-C\fR\ <source>
+\fBlina\fR      \ \fB\-c\fR\ <source>
 .br
-\fBlina\fR      \ \fB\-F\fR\ [ forth code ]
+\fBlina\fR      \ \fB\-f\fR\ [ forth code ]
 .br
-\fBlina\fR      \ \fB\-G\fR\ <N> <binary-path>
+\fBlina\fR      \ \fB\-g\fR\ <N> <binary-path>
 .br
-\fBlina\fR      \ \fB\-I\fR\ <binary-path> <library-path> [<shell-path>]
+\fBlina\fR      \ \fB\-i\fR\ <binary-path> <library-path> [<shell-path>]
 .br
-\fBlina\fR      \ \fB\-L\fR\ <library> [ params ]
+\fBlina\fR      \ \fB\-l\fR\ <library> [ params ]
 .br
-\fBlina\fR      \ \fB\-S\fR\ <script> [ params ]
+\fBlina\fR      \ \fB\-s\fR\ <script> [ params ]
 .SH "DESCRIPTION"
-Forth is a tried and proven
-language
+Forth is a tried and proven language
 for evolutionary ("check as you go") programming,
 ideal for rapid prototyping and embedded systems.
 \fBlina\fR is the Linux version of \fBciforth\fR (common Intel Forth), an
 interpreter environment, scripter and compiler for Forth. It is (large
 and by) compliant with the ISO Forth standard; the \fICORE\fR wordset
 is fully implemented. The small, classic, indirect threaded
-kernel contains the essential, i.a. file access and exceptions.
+kernel contains the essential, i.a. file access, exceptions and
+interfacing with Linux.
 Its power is multiplied by an extensive source library, that
-add i.a. a decompiler and integrated 386 assembler.
+adds i.a. a number of standard words,
+a decompiler, integrated 386 assembler, sort utilities,
+binary search and numerous small functions.
+.
 
 It is simple, fully
 self contained and intended to be customized by you; if you want
 to understand a compiler in all details, this is your best, if
 not only, choice. \fBciforth\fR
-sports the highest documentation to binary proportion in the
-EDP industry, barring \fBm4\fR on \fICoherent\fR. This is largely due to an
-extremely small binary.
+has a high documentation to binary ratio, largely due to a
+small binary.
 
 .SH "OPTIONS"
 \fBlina\fR without options starts an interactive system.
@@ -50,59 +52,60 @@ Usually one option only is processed.
 If the interactive interpreter is started, that is indicated.
 
 .TP
-\fB\-A\fR, \fB\-R\fR
+\fB\-a\fR, \fB\-w\fR
 
-Make the word \fIREQUIRE\fR available.
+Make the word \fIWANT\fR available.
+\fIWANT XXX\fR loads \fIXXX\fR from the library, if available.
 Then start the interpreter.
 .TP
-\fB\-C\fR \fIfile.frt\fR
+\fB\-c\fR \fIfile.frt\fR
 Compile \fIfile.frt\fR to the binary \fIfile\fR.
 .TP
-\fB\-E\fR
+\fB\-e\fR
 Load the \fBelectives\fR , i.e. tools for interactive development.
 Then start the interpreter.
 .TP
-\fB\-F\fR \fIwords\fR
+\fB\-f\fR \fIwords\fR
 Execute the forthcode \fIwords\fR .
 Then start the interpreter.
 .TP
-\fB\-G N \fIbinary-path\fR
+\fB\-g N \fIbinary-path\fR
 Expand the system by \fIN\fR Megabytes,
 then save it under the name \fIbinary-path\fR.
 \fIN\fR may be negative,
 and in that case the system is made smaller.
 .TP
-\fB\-H\fR
+\fB\-h\fR
 Print help, i.e. the option summary.
 .TP
-\fB\-I\fR \fIbinary-path\fR \fIlibrary-path\fR [\fIshell-path\fR]
+\fB\-i\fR \fIbinary-path\fR \fIlibrary-path\fR [\fIshell-path\fR]
 Install the current compiler into \fIbinary-path\fR and the current library into
 \fIlibrary-path\fR.
 Optionally specify the path of the command interpreter to be used.
 This must be fully qualified names, not directories.
 The system is configured accordingly.
 .TP
-\fB\-L\fR \fIlibrary-path\fR [\fIarguments\fR]
+\fB\-l\fR \fIlibrary-path\fR [\fIarguments\fR]
 Close the default library, and open the library at
 \fIlibrary-path\fR. Shift the arguments such as to make the \fB-L\fR
 option invisible.
 Process any other options, then start the interpreter.
 .TP
-\fB\-S\fR \fIscript-path\fR [\fIarguments\fR]
+\fB\-s\fR \fIscript-path\fR [\fIarguments\fR]
 (Intended to be used in a script with ``\fB#!lina -s\fR'' as the first line.)
-Shift the arguments such as to make the \fB-S\fR option invisible.
+Shift the arguments such as to make the \fB-s\fR option invisible.
 Interpret the file \fIscript-path\fR , ignoring its first line.
 .TP
-\fB\-T\fR \fIfile.frt\fR
+\fB\-t\fR \fIfile.frt\fR
 Try to load the file \fIfile.frt\fR automatically,
-by possibly unsafe means,
+by possibly unsafe means.
 Report facilities that were required,
 then start the interpreter.
 .TP
-\fB\-M\fR, \fB\--\fR, \fB\-\-help\fR, \fB\-\-version\fR
+\fB\-m\fR, \fB\--\fR, \fB\-\-help\fR, \fB\-\-version\fR
 print help, version and copyright information.
 .TP
-\fB\-V\fR
+\fB\-v\fR
 print version and copyright information.
 .SH "AVAILABILITY"
 \fBlina\fR is one of the configurations of \fBciforth\fR.
@@ -126,7 +129,7 @@ This is configurable at install time.
 \fIlina.info\fR
 documents all language features implemented and
 has a tutorial. Further documentation is beneficial but not
-mandatory.
+required.
 \fIlina.html\fR contains only the reference documentation, heavily cross
 referenced.
 .br
@@ -147,20 +150,23 @@ Negative error numbers are OS-specific.
 A mnemonic message is fetched from the library file and displayed,
 if possible.
 
-.SH "DEFECTS"
+.SH "CAVEATS"
 Mistakes can easily crash \fBlina\fR.
 
 \fBlina\fR is case sensitive, so ISO words must be entered in upper case.
 
 Linux error numbers are not officially related to messages (a Linux defect).
+
 A Forth program intended for systems where no Forth library is
 installed must take care of error messages itself.
 
-The library should contain a full complement of the ISO Forth
-language.
+The library does not contain a full complement of the ISO Forth
+language, as it should.
+
+The library has comments but no comprehensive documentation.
 
 .SH "AUTHOR"
-Copyright \(co 2000-2004
+Copyright \(co 2000-2016
 Albert van der Horst \fI albert@spenarnc.xs4all.nl\fR.
 \fBciforth\fR is made available under the GNU Public License:
 quality, but NO warranty.
