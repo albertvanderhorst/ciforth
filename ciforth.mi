@@ -559,9 +559,9 @@ This detection mechanism
 by the ISO standard.
 You may disable this checking by forthcode({NO-SECURITY}) and
 re-instate it by forthcode({DO-SECURITY}).
-You can compile even combination of forthcode({DO}) and 
+You can compile even combination of forthcode({DO}) and
 forthcode({BRANCH}) controls after
-    forthcode({WANT -tricky-control- })  
+    forthcode({WANT -tricky-control- })
 })
 
 forthitem
@@ -622,6 +622,25 @@ forthsamp({ciforth ERROR # 25 : LIST EXPECTS DECIMAL})
 
 This message is used by a redefined forthcode({LIST}) , to prevent
 getting the wrong screen.
+
+forthitem
+forthsamp({ciforth ERROR # 40 : REGRESSION TEST FAILS, STACK DEPTH ERROR})
+
+This message is detected by forthcode({REGRESS}) . It means that the number
+of stack items left by the test, doesn't agree with the number of items in the
+result specification.
+
+forthitem
+forthsamp({ciforth ERROR # 41 : REGRESSION TEST FAILS, RETURN VALUE ERROR})
+
+This message is detected by forthcode({REGRESS}) . It means that the
+stack items left by the test, don't agree with items in the result
+specification.
+
+forthitem
+forthsamp({ciforth ERROR # 42 : REGRESSION TEST MALL-FORMED, SECOND PART MISSING})
+
+This message is given by forthcode({REGRESS}) if there is no forthcode({S:}) part.
 
 forthitem
 forthsamp({ciforth ERROR # 48 : NO BUFFER COULD BE FREED, ALL LOCKED})
