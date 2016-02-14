@@ -2014,10 +2014,10 @@ Tools and utilities
 : REGRESS    DSP@ >R   ^J PARSE  2DUP WHERE 2!   EVALUATE
    DSP@ 2 CELLS + >R   ?test-for-S:? EVALUATE DSP@ R> R@
    unbalance? unequal? _RVERBOSE R> DSP! ;
-( DO-REGRESS NO-REGRESS DO-VERBOSE-REGRESS   ) \ AH B5dec5
+( DO-REGRESS NO-REGRESS DO-VERBOSE-REGRESS   ) \ AH B6feb14
+\ Example : REGRESS 1 2 DROP S: 1
 \ To turn it on and off.
  "REGRESS" WANTED      "RESTORED" WANTED
-
 \ Install and de-install the regress facility.
 : NO-REGRESS   '\ >DFA @   'REGRESS >DFA ! ;
 : DO-REGRESS   'REGRESS RESTORED ;
@@ -2126,7 +2126,7 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
-( KRAAK CRACK CRACKED )                         \ AvdH B5feb14
+( KRAAK CRACK CRACKED )                         \ AvdH B6feb14
 WANT SEE
 
 
@@ -2270,7 +2270,7 @@ WANT SEE
 
 
 
-( SEE  -see8- )                                 \ AvdH B5feb14
+( SEE  -see8- )                                 \ AvdH B6feb14
 \ CRACKED is the central word.
 \ Use CRACK "ITEM" to decompile the word ITEM)
 : SEE ' CRACKED ;
