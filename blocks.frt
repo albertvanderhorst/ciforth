@@ -110,7 +110,7 @@
    ELSE   "BDOSN"  PRESENT IF
       "wina.pdf" SYSTEM THEN THEN ;
 
-( -syscalls- ) CF: ?LI ?32                      \ AvdH B4feb10
+( -syscalls- ) CF: ?LI ?32                      \ AvdH B5feb08
 DECIMAL
  13 CONSTANT __NR_time
  43 CONSTANT __NR_times
@@ -122,11 +122,11 @@ DECIMAL
  12 CONSTANT __NR_chdir
 
 HEX
- 36 CONSTANT __NR_ioctl
- 8E CONSTANT __NR_select
-
+ 36 CONSTANT __NR_ioctl          8E CONSTANT __NR_select
+ 2A CONSTANT __NR_pipe
+ 65 CONSTANT __NR_ioperm         6E CONSTANT __NR_iopl
 CREATE -syscalls- DECIMAL
-( -syscalls- ) CF: ?LI ?64                      \ AvdH B4feb10
+( -syscalls- ) CF: ?LI ?64                      \ AvdH B5feb08
 DECIMAL
 201 CONSTANT __NR_time
 100 CONSTANT __NR_times
@@ -138,9 +138,9 @@ DECIMAL
  80 CONSTANT __NR_chdir
 
 HEX
- 10 CONSTANT __NR_ioctl
- 17 CONSTANT __NR_select
-
+ 10 CONSTANT __NR_ioctl          17 CONSTANT __NR_select
+ 16 CONSTANT __NR_pipe
+0AD CONSTANT __NR_ioperm        0AC CONSTANT __NR_iopl
 CREATE -syscalls- DECIMAL
 ( -syscalls- ) CF: ?OSX                         \ AvdH B4feb10
 
@@ -1790,23 +1790,23 @@ TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
     'EXIT-COT >DFA @    R@ CELL+ CELL+ !
     R> TASK-TABLE BAG+! ;
 \
-( {{ }} )                               \ AHCH   B5mar03
- "NESTED-COMPILE" WANTED
+( {{ }} [: ;] )                             \ AHCH B6feb11
+WANT UNLINK-LATEST
 \ New context for definitions, maybe in the middle of a word.
-: {{ ( NESTED-COMPILE ) POSTPONE SKIP (FORWARD R>
+: {{ POSTPONE SKIP (FORWARD R>
         CSP @ >R DPL @ >R UNLINK-LATEST >R STATE @ >R
     >R POSTPONE [ ; IMMEDIATE
-
 : }} FORWARD)  R>
         R> STATE ! R> LINK-LATEST R> DPL ! R> CSP !
     >R ;
 
-
-
-
-
-
-( NESTED-COMPILE ) \ AvdH A2oct28
+\ Compact version of :NONAME .. ;  not linked in.
+: {{{   HERE 'TASK @ , HERE CELL+ , ] ;
+: }}}   '(;) , POSTPONE [ ; IMMEDIATE
+\ Official 2012 standard quotation.
+: [:   POSTPONE SKIP (FORWARD {{{ SWAP ; IMMEDIATE
+: ;]   POSTPONE }}}  ] FORWARD) POSTPONE LITERAL ;  IMMEDIATE
+( NESTED-COMPILE UNLINK-LATEST )                \ AvdH B5feb11
 
 \ Isolate the latest word from the dictionary. Leave its DEA.
 : UNLINK-LATEST LATEST CURRENT @ >LFA DUP @ >LFA @ SWAP ! ;
@@ -2126,8 +2126,8 @@ DROP KEY DROP .S ;
 : NEW-BLOCK BLOCK2 DB ;
 : DB-INSTALL 'NEW-BLOCK 'BLOCK 3 CELLS MOVE ;
 : DB-UNINSTALL 'BLOCK2 'BLOCK 3 CELLS MOVE ;
-( KRAAK CRACK CRACK-CHAIN ) \ AvdH A2mar21
- "SEE" WANTED
+( KRAAK CRACK CRACKED )                         \ AvdH B5feb14
+WANT SEE
 
 
 
@@ -2230,9 +2230,9 @@ DROP KEY DROP .S ;
      BEGIN DUP HEAD? 0= WHILE 1 CELLS - REPEAT ;
 \ For DEA: hl POINTER in ``DOES>'' code.
 : TO-DOES   >DFA @ @ ;
+
 : -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID. ID. CR ;
     ' FORTH  example-by: -dd  \ Use namespace as example.
-
 
 
 
@@ -2270,15 +2270,15 @@ DROP KEY DROP .S ;
 
 
 
-( SEE  -see8-                                   \ AvdH B2oct02
+( SEE  -see8- )                                 \ AvdH B5feb14
+\ CRACKED is the central word.
 \ Use CRACK "ITEM" to decompile the word ITEM)
-: CRACK ' CRACKED ;
-: KRAAK CRACK ;
-: SEE   CRACK ;
+: SEE ' CRACKED ;
+: CRACK SEE ;
+: KRAAK CRACK ;   \ Dutch synonym
 \ Crack from "name" then newer words.
 : CRACK-FROM   '   BEGIN DUP CRACKED 'NEXT-DEA CATCH UNTIL
    DROP ;
-
 
 
 

@@ -4424,6 +4424,7 @@ DODOE:  LEA     RPO,[RPO - _CELLS(1)] _C{Push HIP.}
         LEA     AX,[HIP+_CELLS(1)]
         MOV     HIP,[HIP]
         _PUSH
+        DC      0       _C{ In behalf of FIND-HEAD in decompilation}
 HLNOOP: DC      SEMIS
 _C
 worddoc( {DEFINING},{DOES>},{does},{},{ISO,FIG},
@@ -8463,7 +8464,7 @@ that excess characters after forthvar({count}) are ignored.
 The number of characters not
 including the forthkey({RET}) is returned into forthvar({n}).
 },
-{{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
+{{(ACCEPT)},{KEY},{KEY?}},
 {
 {PAD 10 ACCEPT},{},
  {GIBBON
@@ -8765,7 +8766,7 @@ The number of characters not
 including the forthkey({RET}) is returned into forthvar({n}).
 The data at adr remains valid indefinitely.
 },
-{{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
+{{(ACCEPT)},{KEY},{KEY?}},
 {
 {PAD 10 ACCEPT},{},
  {GIBBON
@@ -8916,7 +8917,7 @@ forthkey({F3}) and cursor keys probably work as usual with a console application
 Note that excess characters after forthvar({count}) are ignored. The number of
 characters not including the forthkey({RET}) is returned into
 forthvar({n}). },
-{{(ACCEPT)},{KEY},{KEY?},{(ACCEPT)}},
+{{(ACCEPT)},{KEY},{KEY?}},
 {
 {PAD 10 ACCEPT},{},
  {GIBBON

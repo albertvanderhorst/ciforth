@@ -467,9 +467,12 @@ stealconstant: stealconstant.c ;  \
 # Build these only on the linux 32 ,linux 64, osx target,
 # otherwise consider the constantxx files sources.
 constant.m4 : stealconstant ; $+ >$@
-constant_64.m4 : stealconstant ; $+ >$@
-constant_osx.m4 : stealconstant ; $+ >$@
+constant_64.m4 : stealconstant_64; $+ >$@
+constant_osx.m4 : stealconstant_osx ; $+ >$@
 
+stealconstant_64:  ; echo build stealconstant for 64 bit, then rename it
+
+stealconstant_osx: ; echo build stealconstant for osx, then rename it
 
 # Add temporary stuff for testing, if needed.
 include test.mak

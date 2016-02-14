@@ -25,8 +25,14 @@ _HOSTED_OSX_({
 })
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
-;   nasm forth.asm -felf -o forth.o
-;   ld -N forth.o -o forth
+ _BITS32_({ ;   nasm forth.asm -o forth.o
+;   ld -melf_i386 -N forth.o -o forth
+; Tested with nasm version 2.10.01.
+})
+ _BITS64_({ ;   nasm forth.asm -felf64 -o forth.o
+;   ld -melf_x86_64  -N forth.o -o forth
+; Tested with nasm version 2.10.01.
+})
 ;And to get the smallest possible executable(optional):
 ;   strip forth -s -R .data
 })

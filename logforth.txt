@@ -13771,6 +13771,8 @@ said above).
 There was also a remark about wc.script from Frans van de Markt.
 I now tell the user to install lina properly before attempting the wc.script.
 The readme is also refurbished.
+This is release 5.2.1 with no changes in ci86.gnr and the above one line
+in forth.lab.
 
 2015 june 30
 
@@ -13910,6 +13912,8 @@ Furthermore the tests failed because WANT was used. Changed those to
 used WANTED, blocks.frt was already changed to use WANTED.
 blocks.frt 5.110 ci86.gnr 5.132 allow threading pet in 64 bit.
 
+2016 feb 11
+Added [: (quotation). Also {{{ }}} that is a slim version of :NONAME
 --------------------
 officialdecompilation fails on SEE _pad.
 
