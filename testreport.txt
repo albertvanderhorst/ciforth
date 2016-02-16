@@ -15,6 +15,9 @@ It looks as if sometimes K' fails. But not for a freshly booted system.
 If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
+Stable version 5.3.0
+For Debian (linux)  64 and 32
+
 Stable version 5.2.0
 For Debian, Windows XP and Apple OSX.
 
@@ -85,9 +88,9 @@ after  5.62 :  WANT    ERATOSTHENES 0 PAUSE ! 100 SIEVE
   primes ending in 99971 99989 99991
 E (requires A) KRAAK QUIT (5.x.x SEE QUIT)
 F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
-After 5.62 : CASE-INSENSITIVE WANT MEASURE-PRIME
+After 5.62 : CASE-SENSITIVE WANT MEASURE-PRIME
 G (r. A) Editing a screen
- 0 PAUSE ! 100 SIEVEter 5.62 : ``mywc *.asm''.
+H After 5.62 : ``mywc *.asm''.
 J Binary equivalent than compiled on linux (for windows Forths and NASM)
 K BYE
 L Dos Directory correct
@@ -169,6 +172,8 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
+hosted_linux linux_64        5.3.0 lina32.cfg     lina64        ABCDEFHKMNOPR
+hosted_linux linux_64        5.3.0 lina64.cfg     lina64        ABCDEFHKMNOP-
 hosted_win32 windowsXP       5.2.0 wina.cfg       wina          ABCDEF--KMNOPRS
 hosted_osx   linux_32        5.2.0 xina.cfg       xina32        ABCDEFHKMNOPR
 hosted_linux linux_64        5.2.0 lina64.cfg     lina64        ABCDEFHKMNOPR
