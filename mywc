@@ -5,6 +5,7 @@ lina -a <<%
 \ ( plus XOS (par1, par2, par3, function# -- result/error )
 \ ( The following words are not ANSI : none (any more))
 \ ( An environmental dependancy ?BLANK is used. )
+1 CELLS 8 = 1001 ?ERROR
 WANT WORD
 9 CONSTANT TAB
 10 CONSTANT LF
@@ -69,3 +70,5 @@ BYE
 #
 # Note that because the input is not from a terminal messages are suppressed.
 # In principle BYE is not needed, because Forth ends on the end of input.
+
+# 1001 : this program has a syscall numbering that is invalid for 64 bits.
