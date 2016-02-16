@@ -8,8 +8,15 @@ All publications of the DFW are available under GPL, the GNU public license.
 The file forthfile({COPYING}) containing the legal expression of these
 lines must accompany it.
 
+Closed source programs, as made with a -c options, are your own,
+quite the same as programs build with the gcc compiler.
+But also if you base an application program on ciforth, you need not make its
+source available, even if the application contains the Forth interpreter
+exposed. This would be a derived work in a strict interpretation of the
+GPL.
+
 Because Forth is ``programming by extending the language'' the GPL
-could be construed to mean that systems based on ciforth
+could be construed to mean that such interpretive systems based on ciforth
 always are legally obliged to make the source available.
 But we consider this ``normal use in the Forth sense'' as
 expressed by the following statement.
@@ -17,6 +24,8 @@ expressed by the following statement.
 In addition to the GPL M4_SUPPLIER grants the following rights
 in writing:
 
+forthenumerate
+forthitem
 The GPL is interpreted in the sense that a system based on ciforth and
 intended to serve a particular purpose, that purpose not being a
 ``general purpose Forth system'', is considered normal use of the
@@ -25,10 +34,10 @@ could, under the condition that the ciforth it is based on is
 available in accordance to the GPL rules, and this is made known to
 the user of the derived system.
 
-So if you base an application program on ciforth, you need not make its
-source available, even if it would be a derived system in a strict
-interpretation of the GPL.
-
+forthitem
+All code snippets in the library are put in the public domain.
+You can freely borrow from it or build on it.
+forthendenumerate
 @section                         Rationale
 
 This Forth is meant to be simple.
