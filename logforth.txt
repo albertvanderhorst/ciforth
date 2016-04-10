@@ -13914,10 +13914,49 @@ blocks.frt 5.110 ci86.gnr 5.132 allow threading pet in 64 bit.
 
 2016 feb 11
 Added [: (quotation). Also {{{ }}} that is a slim version of :NONAME
---------------------
-officialdecompilation fails on SEE _pad.
 
-The description of ACCEPT is no good.
+2016 feb 14
+Fixes in behalf of release 5.3. Failure of SEE _pad on 64 bits.
+5.133
+
+2016 feb 16
+5.3 release is a fact. Put on my website. Reference made on the Forth web
+site.
+
+2016 mar 23
+blocks.frt : Removed :I from _m. ( must use INLINING ) XGCD split off
+from PRIME? NIP introduced where possible.
+%:m and D= introduced.
+
+2016 apr 6
+fp.frt created, a full floating point package. fpmath.frt in
+$F/tools is a regression test. It also works on the AMD with
+- L>F gets a sign extension
+- DATA>F works with bytes
+- next, gets prefix.
+
+2016 apr 10
+Committed a few things:
+options.frt : better index lines, comment mistakes.
+blocks.frt : NIP
+blocks.frt :
+    D= and DEC: in index line
+    INLINING can be used with -m *m .. so no more :I
+    XXGCD and 1/XMOD added
+    PIPE added
+    ALLOCATE use unsigned memory size
+The file testfp.bat uses fpmathregress.frt to run the regression
+test for floating point math under different circumstances.
+They all pass. The fp package however still uses the _ character
+for the exponent. This is fixed such that I can add
+the package to the official version, checked in. 5.115
+
+
+--------------------
+*officialdecompilation fails on SEE _pad.
+
+*The description of ACCEPT is no good.
+
 
 The case about non-structured things merits a place in common problems.
 Some linux commands may work on OSX but they are not loaded by WANT,
@@ -13933,6 +13972,10 @@ wc.script doesn't work properly with the interpreter from the current directory.
 *The MEMORY words should get stack comment
 
 TODO
+Since the compilation of noforth the legacy stuff is solved reasonable.
+However there must be a careful exampination of the the documentation
+regarding things like IN >IN 0>IN etc.
+
 end of block file, line nr is not correct
 copyright in screen 0 is old
 Add a screen with fib pyr tri chs

@@ -2686,6 +2686,326 @@ CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
 
 
 DECIMAL
+( -fpwa- )  CF:      ?32+                \ B6apr6 AvdH
+"-fp-" PRESENT ?LEAVE-BLOCK
+ WANT ASSEMBLER SWAP-DP ALIAS
+\ Disallow case-insensitive assembler
+'~MATCH DUP >DFA @ SWAP >PHA <> 13 ?ERROR
+SWAP-DP
+   : ASSEMBLERi86 ;
+   ASSEMBLER DEFINITIONS   HEX
+     "ASSEMBLER-GENERIC" WANTED
+     "ASSEMBLER-CODES-i86" WANTED
+     "ASSEMBLER-CODES-PENTIUM" WANTED
+     "ASSEMBLER-MACROS-i86" WANTED
+     "DROP-CELL" WANTED
+   DECIMAL  PREVIOUS DEFINITIONS
+SWAP-DP
+"-fp-" WANTED    TRIM
+( -fpmacros- DROP-CELL [SP] ) CF: ?32+ \ AvdH B6apr03
+
+WANT ASSEMBLERi86
+ASSEMBLER DEFINITIONS
+: [SP]    [SP +1* 0] ;
+: DROP-CELL   LEA, SP'| BO| [SP] 1 CELLS B, ;
+: OPEN-CELL   LEA, SP'| BO| [SP] -1 CELLS B, ;
+( r -- 2**r )
+: common_2**x   FLD, u| ST0|   FLD, u| ST0|   FRNDINT,
+   FSUBP, ST1| a|   F2XM1,   FLD1,   FADDP, ST1|   FSCALE,
+   FSTP|u, ST1| ;
+\ ( rsin -- rsin rcos )
+: _othergonio   FLD1,   FLD, u| ST1|   FMUL, ST0| m|
+   FSUBP, ST1| a|   FSQRT, ;
+FORTH DEFINITIONS : -fpmacros- ; PREVIOUS
+PREVIOUS DEFINITIONS
+( -fp- XC FSTATUS       ) CF: ?32+ \ AvdH B6apr03
+WANT    -fpmacros- $-PREFIX
+: XC BASE @ $0A = IF &E ELSE &_ THEN ; \ Exponent character
+ 3  8 LSHIFT CONSTANT extended-precision
+$0032 CONSTANT exceptions
+extended-precision exceptions OR CONSTANT default-mode
+default-mode 0 10 LSHIFT + CONSTANT nearest-mode
+default-mode 1 10 LSHIFT + CONSTANT down-mode
+default-mode 2 10 LSHIFT + CONSTANT up-mode
+default-mode 3 10 LSHIFT + CONSTANT truncate-mode
+\ Return STATUS of the ndp.
+CODE FSTATUS   FSTSW|AX,    ANDI, X| R| AX| $FFFF IL,
+   PUSH|X, AX|   NEXT, END-CODE
+CODE (FINIT)   FINIT, NEXT, END-CODE
+CODE set-rounding-mode FLDCW, ZO| [SP]   DROP-CELL  NEXT,
+    END-CODE
+( -fp- FINIT FDEPTH WAIT L>F F@>L F>L ) CF: ?32 \ AvdH B6apr03
+
+: FDEPTH   FSTATUS 11 RSHIFT  8 SWAP - 7 AND ;
+
+: FINIT   (FINIT) truncate-mode set-rounding-mode ;
+
+CODE WAIT  WAIT, NEXT, END-CODE
+
+( n -- r )
+CODE L>F   FILD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+
+( r -- r n )
+CODE F@>L   OPEN-CELL   FIST, |32 ZO| [SP]   NEXT, END-CODE
+
+( r -- n )
+CODE F>L   OPEN-CELL   FISTP, |32 ZO| [SP]   NEXT, END-CODE
+( -fp- FINIT FDEPTH WAIT L>F F@>L F>L ) CF: ?64 \ AvdH B6apr03
+: FDEPTH   FSTATUS 11 RSHIFT  8 SWAP - 7 AND ;
+: FINIT   (FINIT) truncate-mode set-rounding-mode ;
+
+CODE WAIT  WAIT, NEXT, END-CODE
+( n -- r )
+CODE L>F   FILD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+( r -- r n )
+CODE (F@>L)   OPEN-CELL   FIST, |32 ZO| [SP]   NEXT, END-CODE
+( r -- n )
+CODE (F>L)   OPEN-CELL   FISTP, |32 ZO| [SP]   NEXT, END-CODE
+
+\ Sign extent 32 to 64
+: sex64   DSP@ DUP L@ $20 LSHIFT 0< SWAP 4 + L! ;
+: F@>L   (F@>L) sex64 ;
+: F>L   (F>L) sex64 ;
+( -fp- FI+ FI- FI* FI/ F+ F- F* F/ ) CF: ?32+ \ AvdH B6apr03
+
+\ All ( n r -- r1 )
+CODE FI+   FIADD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI-   FISUB, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI*   FIMUL, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI/   FIDIV, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+
+\ All: ( r1 r2 -- r3)
+CODE F+ FADDP, ST1|     NEXT, END-CODE
+CODE F- FSUBP, ST1| a|  NEXT, END-CODE
+CODE F* FMULP, ST1|     NEXT, END-CODE
+CODE F/ FDIVP, ST1| a|  NEXT, END-CODE
+
+
+
+( -fp- FSWAP FDUP FOVER FDROP  ) CF: ?32+ \ AvdH B6apr03
+
+
+CODE FSWAP   FXCH, ST1|   NEXT, END-CODE
+CODE FDUP   FLD, u| ST0|   NEXT, END-CODE
+CODE F2DUP   FLD, u| ST1|   FLD, u| ST1|   NEXT, END-CODE
+CODE FOVER   FLD, u| ST1|   NEXT, END-CODE
+CODE FDROP   FSTP|u, ST0|   NEXT, END-CODE
+CODE FNIP    FSTP|u, ST1|   NEXT, END-CODE
+CODE FROT   FXCH, ST1|   FXCH, ST2|   NEXT, END-CODE
+
+
+
+
+
+
+( -fp- F0= F0< F0> F= F> F< FMAX FMIN ) CF: ?32+ \ AvdH B6apr03
+\ ( r -- mask) 3 * ( r -- flag )
+CODE FCOMPARE1   OPEN-CELL   FTST,   FSTP|u, ST0|
+    FSTSW, ZO| [SP]   NEXT, END-CODE
+: F0=  FCOMPARE1 $4000 AND $4000 = ;
+: F0<  FCOMPARE1 $0100 AND $0100 = ;
+: F0>  FCOMPARE1 $4100 AND 0= ;
+\ ( r1 r2 -- mask) 3 * ( r1 r2 -- flag )
+CODE FCOMPARE2   OPEN-CELL   FCOMPP,   FSTSW, ZO| [SP]
+    NEXT, END-CODE
+: F=   FCOMPARE2 $4000 AND $4000 = ;
+: F>   FCOMPARE2 $0100 AND $0100 = ;
+: F<   FCOMPARE2 $4100 AND 0= ;
+
+: FMAX  F2DUP F< IF FNIP ELSE FDROP THEN ;
+: FMIN  F2DUP F> IF FNIP ELSE FDROP THEN ;
+( -fp- FSQRT FABS FNEGATE F1/N FMOD ) CF: ?32+ \ AvdH B6apr03
+
+\ All: ( r -- r )
+CODE FSQRT   FSQRT,     NEXT, END-CODE
+
+CODE FABS   FABS,     NEXT, END-CODE
+
+CODE FNEGATE   FCHS,     NEXT, END-CODE
+
+CODE F1/N   FLD1,  FDIVP, ST1| n|   NEXT, END-CODE
+
+CODE FMOD   FXCH, ST1|   FPREM,   FSTP|u, ST1|   NEXT, END-CODE
+\ Borrowed from gforth.
+: F~ABS   FROT FROT F- FABS F> ;
+: F~REL   FROT FROT FOVER FABS FOVER FABS F+ FROT FROT F- FABS
+    FROT FROT F* F< ;
+( -fp- F.R FS. ) CF: ?32+ \ AvdH B6apr03
+WANT DEC:
+\ Split R int R1 EXPONENT with 1<=r1<BASE r=r1*BASE**exponent
+: _split-base   0   FDUP F0= IF EXIT THEN
+    BEGIN FDUP BASE @ L>F F< 0= WHILE BASE @ FI/ 1+ REPEAT
+    BEGIN F@>L BASE @ < 0= WHILE BASE @ FI/ 1+ REPEAT
+    BEGIN F@>L 0= WHILE BASE @ FI* 1- REPEAT ;
+: >DIGIT   DUP 10 < IF &0 + ELSE 10 - &A + THEN ; ( n -- char)
+: one-digit  F@>L DUP FI-   >DIGIT   BASE @ FI* ; ( r -- r' n)
+: FSIGN  FDUP F0< IF FNEGATE &- EMIT THEN ;  ( r -- |r| )
+\ (n r -- ) Print R with N digits in scientific notation.
+: F.R   FSIGN _split-base >R   one-digit EMIT &. EMIT
+    0 ?DO one-digit EMIT LOOP   XC EMIT FDROP
+    R>   DUP 0< IF NEGATE &- EMIT THEN
+    0 <# #S #> TYPE   BL EMIT ;
+: FS. 18 F.R ;          : F.R# DEC: F.R ;
+( -fp- 0_ 1_ PI LN{2} ) CF: ?32+ \ AvdH B6apr03
+
+\ LN: base e logarithm, LOG base 10 logarithm.
+
+CODE 0_       FLDZ,   NEXT,   END-CODE
+CODE 1_       FLD1,   NEXT,   END-CODE
+CODE PI       FLDPI,  NEXT,   END-CODE
+CODE LN(2)    FLDLN2, NEXT,   END-CODE
+CODE 1/LN(2)  FLDL2E, NEXT,   END-CODE
+CODE LOG(2)   FLDLG2, NEXT,   END-CODE
+CODE 1/LOG(2) FLDL2T, NEXT,   END-CODE
+
+
+
+
+
+( -fp- FLOOR FROUND ) CF: ?32+ \ AvdH B6apr03
+CODE (FROUND)   FRNDINT, NEXT, END-CODE
+
+: FROUND   nearest-mode set-rounding-mode   (FROUND)
+    truncate-mode set-rounding-mode ;
+
+: FLOOR   down-mode set-rounding-mode   (FROUND)
+    truncate-mode set-rounding-mode ;
+
+
+
+
+
+
+
+
+( -fp- FEXP FLN FALOG FLOG FSCALE ) CF: ?32+ \ AvdH B6apr03
+CODE FEXTRACT ( r -- rexp rsign )  FXTRACT,  NEXT, END-CODE
+CODE FSCALE ( rexp r -- rshifted )  FSCALE, NEXT, END-CODE
+
+\ first (r1 r2 -- r2) others ( r - r' )
+CODE F**   FXCH, ST1|   FYL2X, common_2**x   NEXT, END-CODE
+CODE FEXP   FLDL2E,   FMULP, ST1|   common_2**x NEXT, END-CODE
+CODE FALOG  FLDL2T,   FMULP, ST1|   common_2**x NEXT, END-CODE
+CODE F2**    common_2**x   NEXT, END-CODE
+CODE FLN    FLDLN2,   FXCH, ST1|   FYL2X, NEXT, END-CODE
+CODE FLOG   FLDLG2,   FXCH, ST1|   FYL2X, NEXT, END-CODE
+CODE F2LOG  FLD1,     FXCH, ST1|   FYL2X, NEXT, END-CODE
+\ These have limited ranges
+CODE 2**X-1 ( r -- r )    F2XM1,     NEXT, END-CODE
+CODE FEXPM1   FLDL2E,   FMULP, ST1|   F2XM1,   NEXT, END-CODE
+CODE FLNP1    FLDLN2,   FXCH, ST1|   FYL2XP1, NEXT, END-CODE
+( -fp- FCOS FSIN FTAN FASIN FATAN ) CF: ?32+ \ AvdH B6apr03
+
+CODE FCOS FCOS, NEXT, END-CODE
+CODE FSIN FSIN, NEXT, END-CODE
+CODE FSINCOS  FSINCOS, NEXT, END-CODE
+CODE FTAN   FPTAN,   FSTP|u, ST0|   NEXT, END-CODE
+CODE FATAN2   FPATAN,   NEXT, END-CODE
+
+CODE FASIN   _othergonio FPATAN,  NEXT, END-CODE
+CODE FACOS   _othergonio FXCH, ST1|   FPATAN,   NEXT, END-CODE
+CODE FATAN   FLD1,   FPATAN,   NEXT, END-CODE
+
+
+
+
+
+( -fp- FCOSH FSINH FTANH FACOSH ) CF: ?32+       \ AvdH B6apr03
+
+: FCOSH    FEXP FDUP F1/N F+ 2 FI/ ;
+: FSINH_a  FEXP FDUP F1/N F- 2 FI/ ;
+: FSINH_b  FEXPM1  FDUP  FDUP 1 FI+ F/  F+  2 FI/ ;
+: FSINH_c  FDUP LN(2) F< IF FSINH_b ELSE FSINH_a THEN ;
+: FSINH    FDUP F0< IF FNEGATE FSINH_c FNEGATE ELSE FSINH_c
+    THEN ;
+: FTANH    FDUP FSINH FSWAP FCOSH F/ ;
+
+\ These formulae are well-known, borrowed from gforth.
+: FACOSH   FDUP FDUP F* 1 FI- FSQRT F+ FLN ;
+: FATANH   FDUP F0< >R FABS
+                1_ FOVER F- F/ 2 FI* 1 FI+ FLN 2 FI/
+           R> IF  FNEGATE  THEN ;
+: FASINH   FDUP FDUP F* 1 FI+ FSQRT F/ FATANH ;
+( -fp- F@ F! D>F F>D EF@ EF! ) CF: ?32+ \ AvdH B6apr03
+
+\ ( r adr -- )     \ ( adr -- r )
+CODE F!   POP|X, AX|   FSTP, d| ZO| [AX]   NEXT, END-CODE
+CODE F@   POP|X, AX|   FLD, d| ZO| [AX]   NEXT, END-CODE
+CODE EF!   POP|X, AX|   FSTP|e, ZO| [AX]   NEXT, END-CODE
+CODE EF@   POP|X, AX|   FLD|e, ZO| [AX]   NEXT, END-CODE
+
+: (D>F)   -8 L>F   0 L>F   SWAP DSP@ 2 CELLS OVER + SWAP DO
+  FSCALE I C@ FI+ LOOP   16 CELLS 8 - L>F FSWAP FSCALE FNIP
+    FNIP 2DROP ;
+: D>F   DUP 0< IF DNEGATE  (D>F) FNEGATE ELSE (D>F) THEN ;
+: (F>D) -16 CELLS L>F FSWAP FSCALE FNIP FDUP 1_ F< 0= 52 ?ERROR
+  _ _ DSP@ 2 CELLS + 1-   8 L>F FSWAP   2 CELLS 0 DO FSCALE
+  F@>L DUP FI-   OVER C! 1- LOOP   DROP FDROP FDROP SWAP ;
+: F>D   FDUP F0< IF FNEGATE (F>D) DNEGATE ELSE (F>D) THEN ;
+( -fp- F, FVARIABLE FLITERAL ) CF: ?32+ \ AvdH B6apr03
+: FALIGNED 7 + -8 AND ;
+: FALIGN DP   @   FALIGNED   DP   ! ;
+: FLOAT+   8 + ;
+: FLOATS 3 LSHIFT ;
+: F, HERE 1 FLOATS ALLOT F! ;
+: FCONSTANT CREATE F, DOES> F@ ;
+: FVARIABLE DATA 0_ F, ;
+
+\ ( d -- r )  \ ( r -- d ) F! F@  w.r.t. data stack.
+CODE DATA>F   FLD, d| ZO| [SP]   LEA, SP'| BO| [SP] 2 CELLS B,
+    NEXT, END-CODE
+CODE F>DATA   LEA, SP'| BO| [SP] -2 CELLS B,
+     FSTP, d| ZO| [SP]   NEXT, END-CODE
+: FLITERAL STATE @ IF   F>DATA POSTPONE DLITERAL
+    POSTPONE DATA>F THEN ; IMMEDIATE
+( -fp- PARSE-INT PP@@- PARSE-BACKWARDS   ) CF: ?32+ \ AvdH B6ap
+'(NUMBER) ALIAS PARSE-INT
+
+VARIABLE EPL   \ FIXME ! User variable.
+: PP@@-   SRC @ PP @ = IF PP @ 0 ELSE -1 PP +! PP @ DUP C@
+    THEN ;
+\ If CHAR special, handle it. Effect on data and fp stack.
+: _handle-special   >R   R@ &- = IF FNEGATE ELSE
+   R@ &. = IF DROP 0 THEN THEN   RDROP ;
+
+\ Returns DATA: #DIGITS before point and FP: SIGNIFICAND
+: PARSE-BACKWARDS   0 L>F   0 DPL !  0
+   BEGIN   PP@@- NIP DUP ?BLANK 0= WHILE
+      DUP >R ".,+-" R> $^ IF  _handle-special ELSE
+      BASE @ DIGIT 0= 10 ?ERROR   FI+ BASE @ FI/   1+ THEN
+   REPEAT DROP ;
+( -fp- PARSE-EXPONENT PARSE-FLOAT ) CF: ?32+ \ AvdH B6apr03
+\ Parse an exponent from `PP past the `XC. Leave EXPONENT.
+: PARSE-EXPONENT
+   PP@@ NIP DUP ?BLANK IF DROP 0. ELSE
+   DUP &+ = IF DROP PARSE-INT ELSE
+   DUP &- = IF DROP PARSE-INT DNEGATE ELSE
+               DROP -1 PP +! PARSE-INT
+   THEN THEN THEN    ( --  #decimals)
+   DROP ;
+\ Parse an fp number (  -- r) around `EPL . Leave `PP after it
+: PARSE-FLOAT
+       EPL @ PP !  PARSE-BACKWARDS
+       EPL @ 1+ PP ! PARSE-EXPONENT +
+       DUP 0< IF   ABS 0 ?DO BASE @ FI/ LOOP
+       ELSE   0 ?DO BASE @ FI* LOOP
+       THEN ;
+( -fp- NEW-{NUMBER} SDFLITERAL  ) CF: ?32+ \ AvdH B6apr03
+\ The final replacements
+: NEW-(NUMBER)  0 EPL !
+    WHERE 2@ >R >R   'PARSE-INT CATCH
+    DUP 10 =   PP @ 1- C@ XC =   AND IF
+        R> R> WHERE 2!
+        DROP   PP @ 1- EPL !   PARSE-FLOAT
+    ELSE RDROP RDROP THROW THEN ;
+: SDFLITERAL
+   EPL @ IF POSTPONE FLITERAL EXIT THEN
+   DPL @ IF POSTPONE DLITERAL EXIT THEN
+   DROP POSTPONE LITERAL ;
+
+'NEW-(NUMBER) '(NUMBER) 2 CELLS MOVE
+'SDFLITERAL 'SDLITERAL 2 CELLS MOVE
+    CREATE -fp-   \ Completed!
 ( LOCATED LOCATE .SOURCEFIELD ) CF: \ AvdH A6jan31
 ">SFA" PRESENT 0= ?LEAVE-BLOCK
 \ Interpret a SOURCEFIELD heuristically.
