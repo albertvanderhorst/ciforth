@@ -296,8 +296,8 @@ VARIABLE _ADP    : _AH ( -- adr ) _ADP @ ;
     _avail > IF _alloc&move R> _free ELSE R> _alloc_f THEN  ;
 : INTEGRITY? ( -- f ) DUP BEGIN DUP @ 2DUP < WHILE NIP
     REPEAT NIP = ;
-DATA _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
-    _alloc-buf HERE OVER ! DUP , DUP ,  _ADP !
+DATA _alloc-buf _ , 0 , DSP@ HERE - 2 RSHIFT ALLOT ALIGN
+    _alloc-buf HERE OVER ! HERE OVER >DFA ! DUP , DUP ,  _ADP !
 ( ISO )
 : ALLOCATE   ['] _allocate CATCH ;
 : FREE   overhead - _free 0 ;
@@ -350,11 +350,11 @@ DATA _alloc-buf _ , 0 , DSP@ HERE - 4 / ALLOT ALIGN
 
 
 
-( D0= D0<> D0< D< D- M+ DRSHIFT DLSHIFT DU< )    \ AvdH B5Apr8
+( D0= D0<> D0< D= D< D- M+ DRSHIFT DLSHIFT DU< ) \ AvdH B6Mar22
  "NOT" WANTED         "0<>" WANTED
 
 : D0=  OR 0= ;          : D0<>  OR 0<> ;
-: D-   DNEGATE D+ ;     : D0<   NIP 0< ;
+: D-   DNEGATE D+ ;     : D0<   NIP 0< ;   : D= D- D0= ;
 : D<   ROT 2DUP <> IF > NIP NIP ELSE 2DROP U< THEN ;
 : DU<  ROT 2DUP <> IF U> NIP NIP ELSE 2DROP U< THEN ;
 : D>   2SWAP D< ;       : D>=  D< NOT ;         : D<=  D> NOT ;
@@ -974,23 +974,39 @@ DECIMAL
 
 
 DECIMAL
-( +m -m *m /m **m x^x )              \ AvdH B5dec7
- ":I" WANTED  "XGCD" WANTED      VARIABLE _m ( Modulo number)
-\ suffix n : normalized number.
-:I _norm_-m  DUP 0< _m @ AND + ; ( x -- xn ) \ -m<xn<+m
-:I +m   + _m @ - _norm_-m  ;   ( an bn -- sumn )
-:I -m   - _norm_-m  ;         ( an bn -- diffn)
-:I *m   M* _m @ SM/REM DROP ;  ( a b -- prodn) \ a>=0 b>=0
-:I /m    _m @ XGCD DROP _norm_-m  *m ; ( a b -- quotn)
+( +m -m *m /m %:m **m x^x )                     \ AvdH B6mar23
+\ Can be INLINE d.     Suffix n : normalized number.
+VARIABLE _m ( Modulo number)   WANT XGCD
+: _norm_-m  DUP 0< _m @ AND + ; ( x -- xn ) \ -m<xn<+m
+: +m   + _m @ - _norm_-m  ;   ( an bn -- sumn )
+: -m   - _norm_-m  ;         ( an bn -- diffn)
+: *m   M* _m @ SM/REM DROP ;  ( an bn -- prodn)
+: /m    _m @ XGCD DROP _norm_-m  *m ; ( a b -- quotn)
+: %:m  S>D _m @ SM/REM DROP _norm_-m  ;  ( a -- an)
 
 \ Both steps: For A B and C: return A B en C.  Invariant A*B^C.
-:I reduce_1-  1- >R >R    R@ *m   R> R> ;
-:I reduce_2/   2/ SWAP   DUP *m   SWAP ;
-:I **m    1 ROT ROT BEGIN   DUP 1 AND IF   reduce_1-   THEN
-    reduce_2/ DUP 0= UNTIL   2DROP   ;  ( a b -- apowbn )
+: _reduce_1-  1- >R    OVER *m SWAP  R> ;
+: _reduce_2/  2/ >R    DUP *m        R> ;
+: **m    1 ROT ROT BEGIN   DUP 1 AND IF   _reduce_1-   THEN
+    _reduce_2/ DUP 0= UNTIL   2DROP   ;  ( a b -- apowbn )
+: x^x    _m @ >R _m !   **m   R> _m ! ; ( a b m -- a^b mod m )
+( GCD XGCD XXGCD 1/XMOD                       ) \ AvdH B6mar23
+\ For M N , return their GCD.
+: GCD   BEGIN OVER MOD DUP WHILE SWAP REPEAT DROP ;
 
-:I x^x    _m @ >R _m !   **m   R> _m ! ; ( a b m -- a^b mod m )
-( PRIME? FACTOR GCD XGCD                       ) \ AvdH B4Nov03
+\ For A B return C GCD where C*A+x*B=GCD
+: XGCD 1 0 2SWAP   BEGIN OVER /MOD OVER WHILE >R SWAP
+   2SWAP OVER R> * - SWAP 2SWAP REPEAT 2DROP NIP ;
+
+\ For A B return C D GCD where C*A+D*B=GCD GCD>0 !untested!
+: XXGCD   2DUP SWAP XGCD   ( A B D GCD )
+    DUP 0< IF NEGATE SWAP NEGATE SWAP THEN
+    DUP >R OVER >R          ( R: GCD D )
+   >R * R> SWAP - /         ( A B D GCD -- C )
+   R> R> ;
+\ For A P return A^-1 mod p.                     !untested!
+: 1/XMOD DUP >R XGCD 0< IF R> SWAP - ELSE RDROP THEN ;
+( PRIME? FACTOR                                ) \ AvdH B6mar23
 \ For N and HINT return FACTOR >= hint, maybe n. NOT INLINE!
 : FACTOR   BEGIN   2DUP /MOD SWAP
     0= IF DROP NIP EXIT THEN
@@ -1000,12 +1016,12 @@ DECIMAL
 \ For N return: "It IS prime" ( Cases 0 1 return FALSE)
 : PRIME?   DUP 4 < IF 1 > ELSE DUP 2 FACTOR = THEN ;
 
-\ For M N , return their GCD.
-: GCD   BEGIN OVER MOD DUP WHILE SWAP REPEAT DROP ;
 
-\ For A B return C GCD where C*A+B*x=GCD
-: XGCD 1 0 2SWAP   BEGIN OVER /MOD OVER WHILE >R SWAP
-   2SWAP OVER R> * - SWAP 2SWAP REPEAT 2DROP NIP ;
+
+
+
+
+
 ( CHS TRI PYR SQR                       ) \ AvdH B5dec5
 
 \ For N M return "N OVER M " (N/M)
@@ -1198,7 +1214,7 @@ $1B CONSTANT ESC
 
 
 
-(  H. B. DH. BASE? HEX: ) \ AvdH B2mar13
+(  H. B. DH. BASE? HEX: DEC: ) \ AvdH B6apr05
 \ Switch to hex for the duration of the definition.
 : HEX:    R> BASE @ >R  >R HEX CO R> BASE ! ;
 : DEC:    R> BASE @ >R  >R DECIMAL CO R> BASE ! ;
@@ -1455,12 +1471,12 @@ CREATE -scripting-
 
 
 ( INLINING                                     )  \ AvdH B6jan7
+WANT :2
 \ With INLINING in the search order, all words are inlined.
 NAMESPACE INLINING
 INLINING DEFINITIONS
     :2 : :I ;
 PREVIOUS DEFINITIONS
-
 
 
 
@@ -2009,7 +2025,7 @@ Tools and utilities
 \ Break off the evaluation, leave REMAINDER of parse area
 : S:   SRC CELL+ 2@ OVER - RDROP ;
 \ Insert this to show the text of a test that passed.
-: _RVERBOSE WHERE 2@ TYPE " \ PASSED" TYPE CR ;
+: _RVERBOSE LATEST ID. WHERE 2@ TYPE "\ PASSED" TYPE CR ;
 \ Used as: REGRESS <test> S: <result>
 : REGRESS    DSP@ >R   ^J PARSE  2DUP WHERE 2!   EVALUATE
    DSP@ 2 CELLS + >R   ?test-for-S:? EVALUATE DSP@ R> R@
@@ -2558,7 +2574,7 @@ D9DE 2PI FCOMPP,
 E0DF 2PI FSTSW|AX,
 
 
-( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) \ A7oct19 AvdH
+( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?16 \ A7oct19 AvdH
 : NEXT,     \ Works even in 16 bits.
      LODS, X'|
      MOV, X| F| AX'| R| BX|
@@ -2570,6 +2586,38 @@ E0DF 2PI FSTSW|AX,
 ( Tests applicable always )
   CODE TEST-NEXT NEXT,  END-CODE
   " Testing next " TYPE
+  TEST-NEXT
+  " next Tested " TYPE
+
+\
+( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?32 \ AvdH B6apr08
+: NEXT,
+     LODS, X'|
+     MOV, X| F| AX'| R| BX|
+     JMPO, ZO| [BX]    \ JMPO, [AX] not available in 16 bits.
+;
+: PUSH PUSH|X, AX| NEXT, ;
+: PUSH2 PUSH|X, DX| PUSH ;
+
+( Tests applicable always )
+  CODE TEST-NEXT NEXT,  END-CODE
+  " Testing next what? " TYPE
+  TEST-NEXT
+  " next Tested " TYPE
+
+\
+( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?64 \ AvdH B6apr08
+: NEXT,
+     48 C, LODS, X'|
+     MOV, X| F| AX'| R| BX|
+     JMPO, ZO| [BX]    \ JMPO, [AX] not available in 16 bits.
+;
+: PUSH PUSH|X, AX| NEXT, ;
+: PUSH2 PUSH|X, DX| PUSH ;
+
+( Tests applicable always )
+  CODE TEST-NEXT NEXT,  END-CODE
+  " Testing next what? " TYPE
   TEST-NEXT
   " next Tested " TYPE
 
@@ -2590,7 +2638,7 @@ E0DF 2PI FSTSW|AX,
     MOV|SG, T| ES| R| AX|
     MOV|SG, T| SS| R| AX|  ;
 
-( ASSEMBLER-MACROS-i86 TO-PROT, TO-REAL, ) CF: ?32+ \ B4may28
+( ASSEMBLER-MACROS-i86 TO-PROT, TO-REAL, ) CF: ?32 \ B4may28
 
 : GET-CR0   MOV|CD, F| CR0| AX| ;
 : PUT-CR0   MOV|CD, T| CR0| AX| ;
@@ -2606,7 +2654,7 @@ E0DF 2PI FSTSW|AX,
 
 
 \
-( --special_macros_1 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32+
+( --special_macros_1 JMP-REAL, JMP-PROT, REAL, PROT, ) CF: ?32
 HEX   \ Not part of assembler!
  "TO-PROT," WANTED TO-REAL,
 \ These macro's are useful for protected mode under MSDOS
@@ -2670,6 +2718,22 @@ CREATE cmdbuf 1000 ALLOT
 : cd NAME cdED ;      \ Change directory to "SC"
 
 
+( PIPE reorganize2x32   ) CF: ?LI               \ AvdH B6mar4
+WANT -syscalls-
+HEX
+\ The 2 CELLS (8 or 16 bytes) on the stack form a c-struct
+\ of 2 times 32 bits. Make it into 2 CELLS.
+: reorganize2x32   DUP FFFF,FFFF AND >R
+    DSP@ 4 + @ FFFF,FFFF AND >R   2DROP R> R> ;
+
+\ Make pipe: output file DESCRIPTOR, input file DESCRIPTOR
+: PIPE   _ _ DSP@ _ _ __NR_pipe XOS THROW reorganize2x32 ;
+
+
+
+
+
+DECIMAL
 ( cat cd cp echo ed more ls rm   ee l unix) CF: ?WIMS \ AvdH
  "OS-IMPORT" WANTED       HEX
 "TYPE   "   OS-IMPORT cat
