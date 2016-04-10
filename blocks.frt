@@ -225,7 +225,7 @@ ALSO    \ Start up with two FORTH namespaces.
 \ -legacy- WORD FIND (WORD) (PARSE)             \ AvdH B2oct02
  "ALIAS" WANTED       "$!-BD" WANTED
 \ ISO
-: FIND   DUP COUNT PRESENT DUP IF   SWAP DROP DUP SWAP
+: FIND   DUP COUNT PRESENT DUP IF   NIP DUP SWAP
     >FFA @ 4 AND  -1 SWAP IF NEGATE THEN THEN ;
 \ ISO
 : WORD   DUP BL = IF DROP NAME ELSE >R
@@ -416,7 +416,7 @@ HEX
 DECIMAL
 ( DEADBEEF leading_hex_digit) CF: \ AvdH A5jun28
 \ Are denotations starting with "Z" already known?
-"A" 'ONLY >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
+"A" 'ONLY >WID (FIND) NIP NIP ?LEAVE-BLOCK
 \ Apparently not, so:
  "ALIAS" WANTED
 CURRENT @   'ONLY >WID CURRENT !  '3
@@ -432,7 +432,7 @@ DROP   CURRENT !
 \ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
 ( DEADHORSE leading_hex_digit) CF: \ AvdH A5jun28
 \ Are denotations starting with "Z" already known?
-"Z" 'ONLY >WID (FIND) SWAP DROP SWAP DROP ?LEAVE-BLOCK
+"Z" 'ONLY >WID (FIND) NIP NIP ?LEAVE-BLOCK
 \ Apparently not, so:
  "ALIAS" WANTED
 CURRENT @   'ONLY >WID CURRENT !  '3
@@ -762,7 +762,7 @@ VARIABLE COMP \ Execution token of comparison word.
         DUP R@ EXECUTE IF
            1+  SWAP ROT DROP \ Replace IMIN
         ELSE
-           SWAP DROP \ Replace IMAX
+           NIP \ Replace IMAX
         THEN
     REPEAT
 DROP RDROP ;
@@ -884,16 +884,16 @@ VARIABLE *->M   \ Contains XT
 : MERGE   LL< IF SWAP THEN   DUP >R (MERGE) R> ;
 \ Cut ULIST in two. Return LIST and remaining ULIST.
 : SNIP DUP   BEGIN DUP >N   DUP IF LL< ELSE 0 THEN
-    WHILE SWAP DROP REPEAT   >R 0 SWAP LINK! R> ;
+    WHILE NIP REPEAT   >R 0 SWAP LINK! R> ;
 \ Keep on merging as long as two listp 's have the same level.
 : TRY-MERGES   BEGIN >R  OVER R@ =
-    WHILE SWAP DROP MERGE R> 1+ REPEAT R> ;
+    WHILE NIP MERGE R> 1+ REPEAT R> ;
 \ Expand zero, ulist into zero list, level .... list, level
 : EXPAND BEGIN SNIP >R 1 TRY-MERGES R> DUP WHILE REPEAT DROP ;
 \ Keep on merging list-level pairs until end-sentinel.
-: SHRINK DROP BEGIN OVER WHILE SWAP DROP MERGE REPEAT ;
+: SHRINK DROP BEGIN OVER WHILE NIP MERGE REPEAT ;
 \ For compare XT, next XT, linked LIST , leave a sorted LIST1.
-: MERGE-SORT   *->M !  *<M !   0 SWAP EXPAND SHRINK SWAP DROP ;
+: MERGE-SORT   *->M !  *<M !   0 SWAP EXPAND SHRINK NIP ;
 ( SORT-WID SORT-VOC )           \ AvdH A3dec02
  "COMPARE" WANTED          "MERGE-SORT" WANTED
 \ Note that xt's form a linked list
@@ -946,7 +946,7 @@ DECIMAL
 \ For N return FLOOR of the square root of n.
 : SQRT  DUP >R 10 RSHIFT 1024 MAX  \ Minimize iterations.
    BEGIN R@ OVER / OVER + 1 RSHIFT  2DUP > WHILE
-    SWAP DROP REPEAT   DROP RDROP ;
+    NIP REPEAT   DROP RDROP ;
 
 : SQ DUP * ;
 
@@ -993,7 +993,7 @@ DECIMAL
 ( PRIME? FACTOR GCD XGCD                       ) \ AvdH B4Nov03
 \ For N and HINT return FACTOR >= hint, maybe n. NOT INLINE!
 : FACTOR   BEGIN   2DUP /MOD SWAP
-    0= IF DROP SWAP DROP EXIT THEN
+    0= IF DROP NIP EXIT THEN
     OVER < IF DROP EXIT THEN
     1+ 1 OR AGAIN ;
 
@@ -1064,7 +1064,7 @@ VARIABLE SEED       HEX
 : RAND SEED @ 107465 * 234567 + DUP SEED ! ;
 
 ( N -- R Leave a random number < N)
-: CHOOSE RAND UM* SWAP DROP ;
+: CHOOSE RAND UM* NIP ;
 
 
 ( RANDOM-SWAP ( R N -- )
@@ -1291,7 +1291,7 @@ END-CODE   \ Code now in 2 32 bit things.
 : TICKS   (TICKS) 20 LSHIFT OR   0 ;
 
 \ For a TIME in ticks: it IS in the past.
-: PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
+: PAST? DNEGATE TICKS D+ NIP 0< 0= ;
 DECIMAL
 
 ( TICKS PAST? ) CF: ?32 \ AvdH A2oct21
@@ -1308,7 +1308,7 @@ CODE TICKS RDTSC, PUSH|X, AX| PUSH|X, DX| NEXT, END-CODE
 
 TRIM \ The assembler
 \ For a TIME in ticks: it IS in the past.
-: PAST? DNEGATE TICKS D+ SWAP DROP 0< 0= ;
+: PAST? DNEGATE TICKS D+ NIP 0< 0= ;
 DECIMAL
 ( TICKS-PER-SECOND ) CF: \ AvdH A7feb28
 
@@ -1363,7 +1363,7 @@ DECIMAL
  "TICKS-PER-SECOND" WANTED
 
 
-: MS@ TICKS TICKS-PER-SECOND 1000 / M/MOD DROP SWAP DROP ;
+: MS@ TICKS TICKS-PER-SECOND 1000 / M/MOD DROP NIP ;
 
 
 
@@ -2087,7 +2087,7 @@ VARIABLE L
  : 1LINE  L @ OVER (LINE)  TYPE
    L @ 2 .R SPACE  L @ 16 + SWAP (LINE)  TYPE CR ;
   : SUPER-DUPE
-    2 /MOD SWAP DROP 2 *
+    2 /MOD NIP 2 *
     DUP HEADER CR
     16 0 DO  I L ! DUP 1LINE
     LOOP  ;
@@ -2212,7 +2212,7 @@ WANT SEE
 
 \ For DEA1 get DEA2 the word defined later then DEA1
 : NEXT-DEA CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
-    WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT SWAP DROP ;
+    WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT NIP ;
 
 ( For the NUMBER : it IS a proper `dea' )
 ( The <BM is not only optimisation, else `LIT 0' goes wrong.)
@@ -3447,13 +3447,13 @@ HEX
 ( Load and store all of the system, 9,0000 .. A,000 is scratch)
 : LOAD-ALL
 2,7C00 OFFSET @ 40 +  LOAD-MID  ( Skip kernel, stack)
-SWAP DROP 10,0000 SWAP LOAD-HIGH   2DROP ;
+NIP 10,0000 SWAP LOAD-HIGH   2DROP ;
 
 : STORE-MID BEGIN OVER A,0000 < WHILE WRITE++ REPEAT ;
 : STORE-HIGH BEGIN OVER HERE < WHILE WRITE++ REPEAT ;
 : STORE-ALL  ( Store to next chunk, inc. kernel, stack )
 0,7C00 OFFSET @ 40 - STORE-MID
-SWAP DROP 10,0000 SWAP STORE-HIGH 2DROP ;  DECIMAL
+NIP 10,0000 SWAP STORE-HIGH 2DROP ;  DECIMAL
 ( hd_driver1 PATCH-CHUNK ) CF: ?PC ?32 HEX \ AH&CH A1sep01
 SYS  0800,0000 B/BUF / CONSTANT CHUNK-SIZE  ( BLOCKS PER CHUNK)
 : CHUNK-START  OFFSET @ 40 - ;
