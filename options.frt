@@ -24,8 +24,8 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
 \ Find WORD in blocks N and up. Leave the BLOCK or throw.
 : #LOCATED  >R FILL-pad R> BEGIN 0 OVER (LINE) -TRAILING
     DUP 0= 24 AND THROW POSITION 0= WHILE 1+ REPEAT   ;
-: (WANTED)   ( sc -- ) ERRSCR @ 4 + >R   BEGIN 2DUP PRESENT 0=
-  WHILE 2DUP R> #LOCATED DUP 1+ >R  LOAD REPEAT RDROP ;
+: (WANTED)   ( sc -- sc ) ERRSCR @ 4 + >R   BEGIN 2DUP PRESENT
+  0= WHILE 2DUP R> #LOCATED DUP 1+ >R  LOAD REPEAT RDROP ;
 : WANTED   ( Make WORD available. ) '(WANTED) CATCH DUP 24 = IF
     >R ETYPE R> MESSAGE ELSE THROW 2DROP THEN ;
 : WANT  ^J PARSE SAVE SET-SRC BEGIN NAME DUP WHILE WANTED
@@ -126,10 +126,13 @@ SM HERE-NOW OVER - $, CONSTANT thisforth$
 : GROW   'FORTH >WID >LFA >TARGET + ! PATCH-ALL
 thisforth$ $@ 3 ARG[]   PUT-FILE ;
 GROW BYE
-( -h :_help,_show_options ) \ AvdH A1oct04
+( -h :_help,_show_options ) \ AvdH B6feb26
 .SIGNON CR   0 MESSAGE
 0 BLOCK  B/BUF TYPE
-1 20 INDEX CR
+: _indices   DO 0 I (LINE)   BL $/ 2DROP   &) $/ 2SWAP 2DROP
+  BEGIN 2DUP &_ $^ DUP WHILE BL SWAP C! REPEAT   DROP
+  TYPE CR LOOP ;
+^Z 1+ 1 _indices CR
 .( See also the pdf documentation ) CR
 .( or print the PostScript documentation ) CR
 
@@ -138,11 +141,8 @@ OK BYE
 
 
 
-
-
-
 \
-( -i BINARY_PATH LIBRARY_PATH SHELL_PATH )\ A3aug30
+( -i BINARY-PATH LIBRARY-PATH SHELL-PATH )\ A3aug30
 CREATE task     1 LOAD
     "ARG[]" WANTED    "SAVE-SYSTEM" WANTED
 : INSTALL-LIB BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
