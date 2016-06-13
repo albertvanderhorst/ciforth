@@ -13951,6 +13951,22 @@ They all pass. The fp package however still uses the _ character
 for the exponent. This is fixed such that I can add
 the package to the official version, checked in. 5.115
 
+2016 may 15
+
+2016 may 20
+One of the reasons ciasdis no longer works lies with BAG.
+BAG has been made with DATA while it uses DOES>.
+Big bummer! Affects all versions since 5.2.1
+
+With that removed assuming version 5.3.1 ciasdis passes all tests again
+for 32 bit. The simple and non-Intel targets succeed (as80m as6809 and
+alpha) for 64 bits.
+
+2016 may 24
+Continued progress with ciasdis.
+Naming convention gset meaning generated set introduced.
+Renaming done using symbolic links.
+the testinstructionsets target can now be expanded.
 
 --------------------
 *officialdecompilation fails on SEE _pad.
@@ -14083,6 +14099,8 @@ ENTER, like OB, .
 
 INLINING must be moved to its own screen.
 
+TERMIO is nowadays called TERMIOS
+
 -
 Greg Egan
 Schild's ladder. l
@@ -14090,3 +14108,5 @@ Schild's ladder. l
  mijn wijk + willemstr 565
 
 It could be that lyx is the way to go for documentation.
+
+Write the article for allocate using a objects and thingies.
