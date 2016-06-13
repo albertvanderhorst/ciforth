@@ -325,6 +325,7 @@ BOOTOFFSET EQU 0
 })_C{}_END_({ _SWITCH_})
 
 _HOSTED_LINUX_({
+_BITS16_({include(constant.m4) })
 _BITS32_({include(constant.m4) })
 _BITS64_({include(constant_64.m4) })
 RAWIO           EQU     (ECHO _OR_ ICANON)
@@ -6316,7 +6317,7 @@ from a double number dividend forthvar({d}) and divisor
 forthvar({n1}). This is a symmetric division{{}}_VERBOSE_({{, i.e.
 the remainder takes its sign from the
 dividend.}})},
-{{M/MOD},{/},{M*}},
+{{M/MOD}, {FM/MOD},{/},{M*}},
 {
 {  7 S>D  3 SM/REM . . },{2   1},
 {  7 S>D -3 SM/REM . . },{-2   1},
