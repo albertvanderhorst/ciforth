@@ -675,7 +675,7 @@ PREVIOUS DEFINITIONS
 ( Build a bag with X items. )
 : BUILD-BAG   HERE CELL+ , CELLS ALLOT ;
 ( Create a bag "x" with X items. )
-: BAG   DATA HERE CELL+ , CELLS ALLOT DOES> ;
+: BAG   CREATE HERE CELL+ , CELLS ALLOT DOES> ;
 : !BAG   DUP CELL+ SWAP ! ;   ( Make the BAG empty )
 : BAG?   $@ = 0= ;   ( For the BAG : it IS non-empty )
 : BAG+!   DUP >R @ ! 0 CELL+ R> +! ;   ( Push ITEM to the BAG )
