@@ -47,7 +47,7 @@ The resulting executable was tested and runs sueccessfully.
 11:00 The source has been badly mould through my escapades.
 I want a version that is very close to the original, then
 sent it back to the archives where I got it from.
-I have created strt/archive/fetched with a copy of the archives
+I have created strt/archive/fetched with a copy of the archives I used.
 13:00
 
 13:30
@@ -70,7 +70,7 @@ Made a framework: makefile and empty version of *.m4 files.
 13:30
 fig86.gnr now generates a MASM and a NASM version.
 16:30
-To be done output of the masm version compare with the original
+To be done output of the masm version compare with the original.
 23:00
 Still some errors : BYTE, WRD PTR, an extra nop.
 Now it really compares okay.
@@ -164,7 +164,7 @@ the old forth.ps
 4. redefine the screened off definition for BIOS
 12:00
 13:00
-MSDOS version checked in, i.e. a version functionally equivalen
+MSDOS version checked in, i.e. a version functionally equivalent
 to the classical but with the system dependant stuff together
 and made dependant from _____USEDOS__
 and some m4 stuff done.
@@ -176,35 +176,35 @@ So we have an assembling version.
 ...
 20:00
 Testing : there is somethong wrong (no carriage return).
-Also after several pages of output the systems crash (alone and
+Also after several pages of output the systems crash (alone and msdos)
 The masm version did not assembler
 Studying different layout of disks.
 22:00
 2000 feb 4 (fri)
 20:30
-Testing and bugs. A default configuration is made where msdos/b
+Testing and bugs. A default configuration is made where msdos/bios
 specialise on
 23:00
 2000 feb 4 (sat)
 9:20
 More thoughts, the 32 bits symbols.
-Checked in and labeled. 4 configs. To be added another orthogon
+Checked in and labeled. 4 configs. To be added another orthogonal
 switch alone/hosted (using a bootsector on a floppy, and not).
 And the I/O system could be enhanced with a MODERN version were
-there is character i/o at line level and EMIT derived from TYPE
+there is character i/o at line level and EMIT derived from TYPE,
 KEY from ACCEPT / EXPECT.
-The orthogonal definitions have been added and some cosmetics i
+The orthogonal definitions have been added and some cosmetics is
 done to improve the generated files, manipulation of the
 link field of the FORTH vocabulary etc.
-MSDOSBIOS label attached to this version that is truely generat
+MSDOSBIOS label attached to this version that is truely generating
 2 times 2 version, that work.
 15:00
 17:00
 Incorparated the booting but this doesn't work yet.
 19:00
 20:00
-Surprising: there is no assembler instruction in Intel to multi
-a constant. I didn't realise that so I didn't believe the messa
+Surprising: there is no assembler instruction in Intel to multiply by
+a constant. I didn't realise that so I didn't believe the message nasm
 was giving.
 
 21:00
@@ -213,21 +213,21 @@ Rest!
 2000 feb 7
 10:00
 Made a backup to wards the sparc machine.
-Now going to compare the boot floppy generated with the one we
+Now going to compare the boot floppy generated with the one we already had.
 and getting it going.
-Yes, de stuff boots. Lots of cosmetics done, in preparation of
-magic constants such as related to data with a fixed distance t
+Yes, de stuff boots. Lots of cosmetics done, in preparation of eliminating lots of
+magic constants such as related to data with a fixed distance to the origin.
 Discovered the dirty word +ORIGIN. Should not be used.
 But first a check whether it is also a proper MASM version.
 
 15:30
 ...
 16:15
-It turns out that the new version doesnot assemble cleanly unde
+It turns out that the new version doesnot assemble cleanly under
 MASM/TASM. Some fixed have to be done such a
 RESB -> NEWORIGIN also the SAR AH,5 turns out to be in fact an
-assembler feature of TASM. It should give the message. Constant
-out of range (must be 1, or CL). The JMP to ORIG is also proble
+assembler feature of TASM. It should give the message. Constant 5
+out of range (must be 1, or CL). The JMP to ORIG is also problematic.
 Because the result is a PROC.
 Managed to get the ASM effect running again.
 18:30
@@ -238,8 +238,8 @@ geinteresseerd.
 De following tasks can be addressed immediately
 - working on outline
 - experience with TEX
-- version that boots from floppy simple without strange boot la
-* version that boots from floppy that is still recognized by MS
+- version that boots from floppy simple without strange boot layout
+* version that boots from floppy that is still recognized by MSDOS
 - version that uses only modern features of MSDOS
 - bootable version that goes 32 bits
 - getting webside back
@@ -251,7 +251,7 @@ De following tasks can be addressed immediately
 - hanging the digital on the local network
 - getting KDE
 
-A lot of fiddling around with those problematic booting procedu
+A lot of fiddling around with those problematic booting procedures of DOS.
 At least the bios version gives a cr with each lf again.
 18:00
 ......
@@ -295,7 +295,7 @@ ready with stuying the new stuff.
 2000 feb 11
 9:30
 * getting the portable available for experiments
-Trying to at least get at the point where the duplicate version
+Trying to at least get at the point where the duplicate versions
 of the character I/O can be shown to work.
 It works. The MODERN Disk i/o can be programmed
 Fixed the batteries on the portable.
@@ -315,7 +315,7 @@ It can now list blocks from a file.
 But changing it is difficult.
 The listings looked terrible, because the CR LF
 pair was not sent. Now they look terrific.
-There is a weird error, as if the data is not written to disk p
+There is a weird error, as if the data is not written to disk properly.
 
 23:00
 
@@ -396,9 +396,9 @@ I think I should combine this with the 68K assembler listings.
 First what should be in there :
 readme with
     ad for nasm
-    explanation of three version I/O, two version layout, two v
+    explanation of three version I/O, two version layout, two version
     booting
-    Out of the 12 version 4 the booted versions that require MS
+    Out of the 12 version 4 the booted versions that require MSDOS
     are not useful.
     motivation
 A hosted modern version, and a booted bios version
@@ -408,7 +408,7 @@ readme.txt has been finished.
 13:00
 13:30
 Using zip to generate a release.
-Testing reveals that lacking the block file, weird things happe
+Testing reveals that lacking the block file, weird things happen.
 genboot.bat was no good and also has ; as a RCS comment.
 MASM cannot handle unix text files.
 RESB is not accepted by MASM/TASM.
@@ -503,7 +503,7 @@ A note made for publishing it on the internet.
 * version that boots from floppy that handles hard disk.
 Another sweep through the notes.
 Backupped. Carefully checked.
-Now the hard disk. Function 4100 bx=55aa .. int 13H works and t
+Now the hard disk. Function 4100 bx=55aa .. int 13H works and tells
 that the disk supports all the clever things. EDD-3.0
 42 --4e functions of hardware interrupt 13h
 
@@ -531,7 +531,7 @@ So the old system still boots. Than in the old system you may
 either copy the newly written system and the current screen to
 a new mark and than update the boot sector. Or you may write
 the current system and current screen to a new mark and update
-the boot sector. later on we could add a way to boot from any o
+the boot sector. later on we could add a way to boot from any of the
 available systems.
 Have made a system that uses hard disk io after booting.
 Going to test.
@@ -554,7 +554,7 @@ And used it to have a reasonable backup.
 12:00
 The guys of the Forth gg are here for a meeting
 . The assembler got Willem interested.
-At the end of the meeting there I show how the system boots and
+At the end of the meeting there I show how the system boots and the editor
 . There must be a mailing list with Willem Coos and Ben.
 
 22:00
@@ -567,7 +567,7 @@ Wasted my time with 64 bits musings.
 12:0
 ..
 13:00
-Seen the light. Just suround BIOS with DISI en ENI. And a same
+Seen the light. Just suround BIOS with DISI en ENI. And a same pair in next.
 Then you can do protected mode with impunity.
 17:00
 ...
@@ -582,16 +582,16 @@ Much done like introducing DC, CELL and CELLP.
 
 Alterntatives
   - testing 32 bits Forth directly, with protected mode.
-  - testing 32 bits Forth under Linux without protected mode me
-  - testing 32 bits Forth directly not in protected mode by pla
+  - testing 32 bits Forth under Linux without protected mode measures
+  - testing 32 bits Forth directly not in protected mode by playing assembler tricks
     in nasm
 
-The problem is, I want to go 32 bits, bu really I got to test p
+The problem is, I want to go 32 bits, bu really I got to test protected mode first.
 Over last week , see also notes.txt in the FIG86 directory.
 14:30
 ...
 15:30
-De conclusie is onomkoombaar Setting van protected mode via MOV
+De conclusie is onomkoombaar Setting van protected mode via MOV CR0,DX
 werkt gewoon niet.
 17:30
 2000 march 11 (sun)
@@ -599,16 +599,16 @@ werkt gewoon niet.
 19:00
 ...
 21:00
-Some vague experimenting resulting in the printing on the scree
-by incrementing a memory location. The second time it fails, it
-the return somehow resulted in a change of the data segment. Ap
+Some vague experimenting resulting in the printing on the screen of an 'N'
+by incrementing a memory location. The second time it fails, it looks like
+the return somehow resulted in a change of the data segment. Apparently the
 code segment sticks. Which is queer.
 23:00
 2000 marc 12 (mon)
 9:00
-Trying what happens if I just do not fill in the data segment,
+Trying what happens if I just do not fill in the data segment, like
 I didnot fill in the code segment. This just works!
-I can run in protected mode! The delete key doesn't work in edi
+I can run in protected mode! The delete key doesn't work in editing a line.
 And of course the editor itself doesnot work.
 12:30
 ..
@@ -619,44 +619,44 @@ Some experiments. It looks like the gdt is not filled in at all
 10:00
 I can store the gdt back in memory and it looks all right.
 I realize the system is now working in a strange mode.
-The control content of CS and DS agrees with a real mode conten
-7C0 (two times). However the content of these register in prote
-mode is also 7c0, but there is no descriptor at 7C0 to be found
-This means that CS and DS cannot be loaded, or the switching be
-real mode and protected mode breaks down. There is however a ch
-ES as long at is restricted to one mode. The bizar consequence
-while accessing video memory we are switching back to real mode
+The control content of CS and DS agrees with a real mode content of
+7C0 (two times). However the content of these register in protected
+mode is also 7c0, but there is no descriptor at 7C0 to be found.
+This means that CS and DS cannot be loaded, or the switching between
+real mode and protected mode breaks down. There is however a chance to use
+ES as long at is restricted to one mode. The bizar consequence is that
+while accessing video memory we are switching back to real mode.
 12:00
 13:00
-If I can manage to put in a switch at L@ too, I am prepared to
+If I can manage to put in a switch at L@ too, I am prepared to have
 the protected mode stuff into the official version.
 But none of the protected mode programs I saved run any more.
 So I start with cleaning up the mess around +ORIGIN.
-+ORIGIN can now be used to fetch statrup values for the user va
-Everything is put into the user variables, such that they are i
-to 100H (keeping in mind that they are going to be increased to
++ORIGIN can now be used to fetch statrup values for the user variable.s
+Everything is put into the user variables, such that they are increased
+to 100H (keeping in mind that they are going to be increased to 32 bits.)
 
-It turns out that the buffer for READ-BLOCK cannot start at an
+It turns out that the buffer for READ-BLOCK cannot start at an odd addres.
 (probably a DMA thing.)
-The reason I thought the saved versions didnot work was that ?T
-always returned true, such that vlist reported an empty diction
+The reason I thought the saved versions didnot work was that ?TERMINAL
+always returned true, such that vlist reported an empty dictionary.
 Test done with CHFORTH. Byte benchmark 5 ms on ARTEMIS-0 .
 FIGFORTH takes 11 ms.
-The kernel code of Linux has been studied. It reveals that for
-system the interrupts at low numbers must be moved, such that a
-system traps become available. There is however nice code for t
-An attempt is made to run 32 bit protected mode code, but it wa
+The kernel code of Linux has been studied. It reveals that for a decent
+system the interrupts at low numbers must be moved, such that all the
+system traps become available. There is however nice code for that.
+An attempt is made to run 32 bit protected mode code, but it was
 even unsure whether it really was 32 bit.
 23:59
 2000 mar 16
 9:00
 At last a strategy develops :
-1. first make a gdt such that loading the descriptor from 0x7c0
-the code segment results in a code segment at 0x7c0, i.e. switc
-between real and protected mode can be done, and, while in prot
-mode, a jump to some other segment can be done, and back, as lo
+1. first make a gdt such that loading the descriptor from 0x7c0 into
+the code segment results in a code segment at 0x7c0, i.e. switching
+between real and protected mode can be done, and, while in protected
+mode, a jump to some other segment can be done, and back, as long as it is
 done before switching to real mode again.
-2. add a stack segment, such that in real mode the stack is at
+2. add a stack segment, such that in real mode the stack is at a free place
 ( not overwriting anything.
 The above can be tested from a working Forth system.
 The memory layout becomes
@@ -670,20 +670,20 @@ The memory layout becomes
 18000
 ....    GDT
 20000
-[ if the forth is started from MSDOS, 7c00 is replaced by the l
+[ if the forth is started from MSDOS, 7c00 is replaced by the load address. ]
 3.
-Change the code segment to a 32 bit segment and debug the forth
-In this way the constant reloading of the code segment is circu
+Change the code segment to a 32 bit segment and debug the forth.
+In this way the constant reloading of the code segment is circumvented, which is
 much too time consuming.
-Testing in Forthis succesful. Screen 41 .. 44 show how to creat
-16 bits and 32 bits code segment. Experiments show that you can
-switch from a 16 bits code segmen to real mode. But it is possi
-to jump to a 32 bits segment then to 16 bits and then switch to
+Testing in Forthis succesful. Screen 41 .. 44 show how to create a
+16 bits and 32 bits code segment. Experiments show that you can only
+switch from a 16 bits code segmen to real mode. But it is possible
+to jump to a 32 bits segment then to 16 bits and then switch to real
 mode.
 In screen 1 there is now a nice dump for general segments.
 The normal dump was improved too.
-There were problems with listing block 255. It turns out that m
-the block number to restirct it to 255 must not be used in BUFF
+There were problems with listing block 255. It turns out that masking
+the block number to restirct it to 255 must not be used in BUFFER
 which is using absolute block numbers. (Only in BLOCK itself.).
 Thank you, Coos.
 23:00
@@ -693,13 +693,13 @@ Succeeded in temporarily changing the data segment.
 Two improtant errors found in the assembler :
 C|, used ! instead of C! to store the ored result back.
 If W| is not the first fixup this leads to distastrous results.
-Furthermore the groups containing CLI/STI were advertised as tw
+Furthermore the groups containing CLI/STI were advertised as two
 byte opcodes.
 Added a group of Pentium opcodes (TO-REAL,) and the facility to
 have three bytes opcodes.
 TO-PROT now switches to a 32 bit code segment. Then loads
 a 32 bit data segment, uses that to put an 'a' on the screen,
-then switches back. The switching involves disabling interrupts
+then switches back. The switching involves disabling interrupts,
 setting the protected mode bit and saving the data segment (and
 back).
 17:00
@@ -712,34 +712,34 @@ okay. Through version 2.29..2.31
 23:00
 2000 mar 18 (fri)
 11:00
-More experimenting, especially surrounding the load-gdt with no
-running it with interupts disabled and surrounded with nop's su
+More experimenting, especially surrounding the load-gdt with nop's and
+running it with interupts disabled and surrounded with nop's such that
 chances of overwrioting code diminish.
 It crashes after the load-gdt finishes.
 12:00
 ..
 13:30
-Experiments reveal that if the load-gdt is replaced by nop's it
-same way. This means that the problem has started with version
-Solved! Because next has changed, it must change in the assembl
+Experiments reveal that if the load-gdt is replaced by nop's it crashes in the
+same way. This means that the problem has started with version 2.31.
+Solved! Because next has changed, it must change in the assembler too.
 17:00 ..
 22:00
 Timing of the switching and of the innner interpreter.
-Switching takes 0.7 uS. Including jumping to the 16 bit code se
-jumping back. Eliminating that makes hardly a difference. TO-pr
-in screen 44 with some more hoolabaloo (writing to screen, load
-segment some nops), takes a full uS. The inner interpreter test
-DOCOLS take 10 us for a 2^10 nested call, ultimately executng t
+Switching takes 0.7 uS. Including jumping to the 16 bit code segment and
+jumping back. Eliminating that makes hardly a difference. TO-prot, as found
+in screen 44 with some more hoolabaloo (writing to screen, loading data
+segment some nops), takes a full uS. The inner interpreter test (nested
+DOCOLS take 10 us for a 2^10 nested call, ultimately executng the empty ": A0
 ;" a thousand times.
-he stack segment must get a 64 kbyte space clear from the real
-The handling of the stack segments in the source is okay provid
-you go with the interpretation in protected mode that segments
+he stack segment must get a 64 kbyte space clear from the real stack.
+The handling of the stack segments in the source is okay provided that
+you go with the interpretation in protected mode that segments are pointers
 into the GDT (or LDT for that matter.).
 25:00
 2000 mar 19 (sat)
 sat 8:00
-Decided to do the switching first in the Forth itself. Made nic
-screens to do the switch. At last installed the version with th
+Decided to do the switching first in the Forth itself. Made nice and clean
+screens to do the switch. At last installed the version with the improved next
 and intepreter handler on the hard disk.
 12:00..
 15:30
@@ -749,31 +749,31 @@ some thinking
 21:00
 2000 mar 19 (sun)
 13:00
-I really must be more disciplined. Like getting up at 7 a.m. an
-exercice. Doing aikido every wednesday. Trying to get even with
-work every monday. Use thuesday (unless SP activities) to impro
-houshold. in a technical sense. Start the day with some clean u
-most urgen thingies. If things go bad, read the Forth news, or
-the still to read things near my bed such that I can get rid of
-can be thrown away. Make a box withincoming stuff and clean tha
+I really must be more disciplined. Like getting up at 7 a.m. and do some
+exercice. Doing aikido every wednesday. Trying to get even with the paper
+work every monday. Use thuesday (unless SP activities) to improve the
+houshold. in a technical sense. Start the day with some clean up, like the
+most urgen thingies. If things go bad, read the Forth news, or Nature. Keep
+the still to read things near my bed such that I can get rid of things that
+can be thrown away. Make a box withincoming stuff and clean that out at
 least every monday.
 
-It becomes clear what goes wrong. I really cannot do without at
-initialising the codesegment and data segment properly, because
-intialises the extra segment from the data segment. However zoo
-on this problem reveals little. I have very carefully checked t
-and it keeps on crashing. So I guess I start with the save vers
-allowed to switch to protected mode. Than built gradually every
+It becomes clear what goes wrong. I really cannot do without at least
+initialising the codesegment and data segment properly, because (FIND)
+intialises the extra segment from the data segment. However zooming in
+on this problem reveals little. I have very carefully checked the switching
+and it keeps on crashing. So I guess I start with the save versions that
+allowed to switch to protected mode. Than built gradually everything in.
 
 19:30
 ..
 20:30
-The simple version works. After getting rid of superfluous asig
+The simple version works. After getting rid of superfluous asignments
 to segment registers. 2.35
 23:00
 2000 mar 20 (mon)
 9:40
-Made a mess out of it. Di not realize I had to use STOSW instea
+Made a mess out of it. Di not realize I had to use STOSW instead of
 LODSW. That it uses DI instead of SI, and that it goes to ES:
 instead of DS. So..
 12:30
@@ -806,13 +806,13 @@ It turns out to be possible to do conditional code with the
 _yes _no mechanism.
 13:30
 14:00
-Debugging. It is a bit frustrating but the 32 bit version wil n
-run. It looks very solid. There seems no reason it should have
-problems than the 16 bit version. But after the cleanups the 32
+Debugging. It is a bit frustrating but the 32 bit version wil not
+run. It looks very solid. There seems no reason it should have more
+problems than the 16 bit version. But after the cleanups the 32 bit version
 works no more.
 19:00
 20:00
-version 2.42 can now handle hard disk io. It is a candidate for
+version 2.42 can now handle hard disk io. It is a candidate for putting
 it 16 bit protected mode version on disk.
 I have copied the screens 90 97 and 91 to the hard disk.
 21:40
@@ -834,12 +834,12 @@ is written, in order to find out were the difficulty lies.
 22:00
 (stukje geschreven voor robotica blad.
 23:00
-It turns out that setting the datasegment before calling the bi
-makes the system crash. It is correctly restored afterwards in
+It turns out that setting the datasegment before calling the bios
+makes the system crash. It is correctly restored afterwards in protected
 mode, but that doesnot help.
-But YOU MUST REALIZE THAT IT IS 16 BIT CODE. Just putting code
-in an extra 0000H interpreted as an instruction, and a total mi
-everything. And indeed it now works. gehackte baddespray. What
+But YOU MUST REALIZE THAT IT IS 16 BIT CODE. Just putting code there results
+in an extra 0000H interpreted as an instruction, and a total mismatch of
+everything. And indeed it now works. gehackte baddespray. What a success!
 I become not good! Version 2.40.1.5
 26:00
 2000 mar 24 (fri)
@@ -848,9 +848,9 @@ I become not good! Version 2.40.1.5
 First thing : backing it up.
 Second thing sending a message.
 Now I wasted some time composing a message about CASE.
-Putting the knowledge about what was wrong in the latest versio
-leads to something that can load screens. The editor however do
-work and the assembler crashes presumably because it patches at
+Putting the knowledge about what was wrong in the latest version
+leads to something that can load screens. The editor however doesnot
+work and the assembler crashes presumably because it patches at a wrong
 location. I think I just must put the words CELL+ in the
 basic Forth. and CELLS in the 100 screen.
 Problems areas :
@@ -859,22 +859,22 @@ VLIST ID. (?)
 BEGIN WHILE REPEAT constructs
 
 The L@ L! is the most urging because it applies to the editor.
-The version 2.46 has the L@ L! problems fixed, by completely re
-words such that they are in protected mode equivalent ro the re
-the editor works again vlist (and probably ID. as it is used by
-work.) The assembler doesnot work. Executing a word generated b
+The version 2.46 has the L@ L! problems fixed, by completely recoding the
+words such that they are in protected mode equivalent ro the real mode, i.e.
+the editor works again vlist (and probably ID. as it is used by VLIST
+work.) The assembler doesnot work. Executing a word generated by the compiling
 word VOCABULARY leads to an immediate crash.
-For the moment the loading of screen 96 (assembler) is suppress
-CELL+ is added to the system and CELLS CELL is added to screen
+For the moment the loading of screen 96 (assembler) is suppressed.
+CELL+ is added to the system and CELLS CELL is added to screen 100.
 This has been done in the disk version.
 This improved version is stored with the label PROTA.
-It turns out that the L@ L! definitions need improved. They don
+It turns out that the L@ L! definitions need improved. They don't work
 with 16 protected mode. (In fact the even did not compiler.
 
 13:30
-Fixed L! L@ such that it works for real and both protected mode
-Editing screens now works. Also fixed LFA such that VLIST and I
-now work. Version 2.47 installed on hard disk. This agrees with
+Fixed L! L@ such that it works for real and both protected modes.
+Editing screens now works. Also fixed LFA such that VLIST and ID.
+now work. Version 2.47 installed on hard disk. This agrees with total
 RCS version PROTB.
 
 18:00
@@ -892,7 +892,7 @@ cfa of FORTH. This must be wrong.
 Other events :
 Went off showing the results to Coos. It turns out that
 I made a wrong version (HD instead of FD). BUt I got the
-installation manual for scanning, in order to add some document
+installation manual for scanning, in order to add some documentation
 to fig-FORTH.
 New floppies made. But only given to Diane yet.
 Trying to scan at Diane's. But here OCR program is no good, and
@@ -900,32 +900,32 @@ you have no idea what resolution to use.
 2000 mar 26 (sun)
 10:00
 After a lot of experimenting it looks like this is the way:
-Do not use the very small print of the A5 fig Installation book
+Do not use the very small print of the A5 fig Installation booklet.
 It turns out that scanning the larger (A4)
 
 fotocopy I have (although dirty
-and old) gives better results. Still such A4 contains four page
-type writer text in two columns. The scanning resolution is set
+and old) gives better results. Still such A4 contains four pages of
+type writer text in two columns. The scanning resolution is set at
 600 dpi. The scanning intertwined with OCR leads to crashes.
 So the procedure is :
-Scan all pages (each resulting in a 4Mbyte file 1 bit per pixel
+Scan all pages (each resulting in a 4Mbyte file 1 bit per pixel!).
 Done From Corel Draw Aquire.
 Flip them such that they are upside down and mirror image.
 Start Up READIRIS.
 Configure :
-1. page lay out, rectangle defining text (use the floating 3 bu
+1. page lay out, rectangle defining text (use the floating 3 button
 item in the right hand corner for this.)
-2. Make sure to set text (fixed font), source (from disk), outp
-name( and appending, not creating), maximum safety, interactive
+2. Make sure to set text (fixed font), source (from disk), output file
+name( and appending, not creating), maximum safety, interactive and
 learning, retain paragraph and line information.
-3. save this configuration under some name. (Windows tends to c
+3. save this configuration under some name. (Windows tends to crash.)
 
 Even with the poor quality print the OCR works reasonably well.
-(Many a's are closed to the point they resemble 8. m have a lar
-serif's that tend to close. I have yet to see a = where the two
-are separate. A w seldomly has a differentiated middle part. So
+(Many a's are closed to the point they resemble 8. m have a large lower
+serif's that tend to close. I have yet to see a = where the two line
+are separate. A w seldomly has a differentiated middle part. Some char's
 have holes. All this means a lot of interactive work.)
-At the end of the sunday the installation manual and the glossa
+At the end of the sunday the installation manual and the glossary
 are scanned. As well as the picture.
 
 Making fotocopies with the Artiscan and the desk jet :
@@ -947,17 +947,17 @@ Ventilated the idea of eles to Coos Haak.
 2000 mar 28 (tue)
 8:30
 Going on with ispell.
-glossary.txt and figdoc.txt are now spelling checked and format
+glossary.txt and figdoc.txt are now spelling checked and formated.
 For 'JMP NEXT' the macro _NEXT has been introducedd (2.49)
-The OFFSET has been placed at user variable 11. U0 has been int
-as user variable one. RUBOUT is user variable 2. Both at their
+The OFFSET has been placed at user variable 11. U0 has been introduced
+as user variable one. RUBOUT is user variable 2. Both at their sure place
 now.
 13:30
 ..
 14:00
 The both jumps in the bootup area take 2 cells each.
 The version numbers are supposed to take 2 cells.
-So the initialisation of the parameters start at 6 CELLS +ORIGI
+So the initialisation of the parameters start at 6 CELLS +ORIGIN.
 OFFSET gets the more modest offset of 11.
 This is approved and put into version 2.50
 In 2.51 now all user variables are in the correct position.
@@ -972,14 +972,14 @@ Found two at mhx's site.
 Looking into a Unix version.
 Study reveals that Marcel just does the following
 
-For his EFORTH. Put the code at some address, that is apparentl
+For his EFORTH. Put the code at some address, that is apparently
 allocated automatically, then jump to it.
 
 It turns out to be very difficult to arrive at ?TERMINAL
-(?KEY in ANSI parlance.) All my attempts to find an example of
-there is a look unto some pipe failed. Fetching the stat struct
-of file descriptor 0 or 1 gives always 0 for the size. I may be
-something wrong. MArcel Hendrix code is incomprehensible as alw
+(?KEY in ANSI parlance.) All my attempts to find an example of where
+there is a look unto some pipe failed. Fetching the stat structure
+of file descriptor 0 or 1 gives always 0 for the size. I may be doing
+something wrong. MArcel Hendrix code is incomprehensible as always.
 There is no need to save BX BP SI DI as they may not be use by
 C routines without saving them first.
 
@@ -989,21 +989,21 @@ Cleanup before starting the Linux version
 ...
 20:00
 * getting the ORIGIN parameters set up according to the model
-All boot parameters (17 cells) precisely according to the fig m
-Testing of 32 bit protected 16 bit protected real bootin and ms
+All boot parameters (17 cells) precisely according to the fig model.
+Testing of 32 bit protected 16 bit protected real bootin and msdos mode.
 All works resulting in version 2.51.
 M4_CELLWIDTH introduced.
 21:00
 2000 mar 30 (thu)
 11:00
 A figforth that at least does KEY and EMIT and TYPE.
-Acording to the MHX system, via something that is loaded at a m
+Acording to the MHX system, via something that is loaded at a mysterious
 address.
 
 24:00
 2000 mar 31 (fri)
 10:00
-Looking into gcc and the linker and nasm doc reveals that there
+Looking into gcc and the linker and nasm doc reveals that there is
 no problem in getting a setup.
 There is one small advantage to Marcel's setup (possibly).
 SAVESYSTEM could be made more portable.
@@ -1011,10 +1011,10 @@ SAVESYSTEM could be made more portable.
 ..14:00
 Added the block action to the file. And handling of ^C break
 and ^\ interrupt. Unfortunately the stuff still crashes.
-Trying to link it such a way that the sections wanted are conse
+Trying to link it such a way that the sections wanted are consecutive.
 Unfortunately this doesnot succeed.
 The GNU linker is absolutely frustrating. It will not
-put things together unless you specify everything in the link f
+put things together unless you specify everything in the link file.
 You may attach the two segments together but then there are
 zero's filled in.
 2000 apr 1 (sat) JRC
@@ -1023,14 +1023,14 @@ zero's filled in.
 23:00 25:00 Still failing.
 2000 apr 3 (mon)
 11:00 decided to do the whole memeory map by hand.
-Got all the segments from gdb. Then start the program at the co
-range. Works. Now debugging. Crash occurs in ?TERMINAL, It spec
-DOCOL instead of being a code header. Then still an infinite lo
-VLIST. This is because the header of EXPECT in comment is expan
-results in the header of EXPECT to link to _EXPEC instead of _T
+Got all the segments from gdb. Then start the program at the correct
+range. Works. Now debugging. Crash occurs in ?TERMINAL, It specifies
+DOCOL instead of being a code header. Then still an infinite loop in
+VLIST. This is because the header of EXPECT in comment is expanded and
+results in the header of EXPECT to link to _EXPEC instead of _TYPE.
 18:00
 25:00 27:00 It turns out that the Linux interface can easily be
-called from the assembler level. This would result in the LINUX
+called from the assembler level. This would result in the LINUX_LOW
 version.
 2000 apr 4 (thu)
 10:45
@@ -1040,7 +1040,7 @@ Preparation of the announce post.
 12:15
 * screen with disclaimer
 * string package
-* getting the ministring version where $I and $S works on const
+* getting the ministring version where $I and $S works on constant strings
 * getting qterm in linux c
 * catching SYSSEGV in Linux
 All this resulted in version 2.62.
@@ -1054,7 +1054,7 @@ Once a WARM restart has been done BYE no longer works.
 2000 apr 5 (wed)
 8:00
 Saved the block from Artemis.
-Reinstalled the 32 bits booting from harddisk thingy again on a
+Reinstalled the 32 bits booting from harddisk thingy again on artemis.
 toblock.c and splitblock.c made and tested.
 Version 2.63 installed on hard disk.
 The environment saved after a long jump is always the same.
@@ -1064,7 +1064,7 @@ The following problems remain whether or not I save again at
 a warm start.:
     But second and following QUIT signals are never caught.
     Once a WARM restart has been done BYE no longer works.
-The SIGQUIT signal is not mentionned in the Kernel Hackers Guid
+The SIGQUIT signal is not mentionned in the Kernel Hackers Guide.
 
 11:00
 ...
@@ -1073,10 +1073,10 @@ The SIGQUIT signal is not mentionned in the Kernel Hackers Guid
 The above item results in a zip file that indeed can reproduce
 all of the generated files.
 One item still is not pleasant. The linux version is not
-PROTECTED ! This came about because Linux doesnot need the swit
+PROTECTED ! This came about because Linux doesnot need the switching
 and so needed a special treatment within the PROTECTED world.
 All the confiugaration stuff is now under control.
-But after a syssegv caught, the system doesn't want to execute
+But after a syssegv caught, the system doesn't want to execute a
 BYE command.
 17:30
 ...
@@ -1089,7 +1089,7 @@ BLOCK-INIT and BLOCK-EXIT work now with LINOS.
 The whole block stuff works.
 26:00
 2000 apr 6
-* defining M4_CELLWIDTH M4_EM M4_ORIG in the configuration file
+* defining M4_CELLWIDTH M4_EM M4_ORIG in the configuration file.
 10:00
 Documentation first and backup.
 The TYPE is easy enough.
@@ -1121,11 +1121,11 @@ Forth user group. Talked about strings.
 2000 april 9
 Sunday:resting.
 2000 april 10 (mon)
-Created a layout for the website and thought about how to gener
-links automatically. Here it turned out to be rather problemati
+Created a layout for the website and thought about how to generate
+links automatically. Here it turned out to be rather problematic.
 2000 april 10 (tue)
 13:00
-What can be done. I think I must bite the bullet and create som
+What can be done. I think I must bite the bullet and create some
 site generating software in forth.
 Making the specs. (14:00)
 This is not problematic. However it turns out that it will
@@ -1141,7 +1141,7 @@ does.
 18:30
 20:00
 Visit of Coos Haak. The luxury sieve now works for 32 bit.
-(Problem with the mask arrays.) The experiment with the TCGETS
+(Problem with the mask arrays.) The experiment with the TCGETS sits
 safely in the blocks.
 24:00
 2000 april 11 (wed)
@@ -1175,19 +1175,19 @@ Instead of a DO LOOP I introduced ALL-FOR-SET END-A-F-S.
 2000 april 13 (fri)
 11:00
 Get teh Pentium architecture book from Ben Koehorst.
-A curious book. It is aimed at insight for students but I wonde
+A curious book. It is aimed at insight for students but I wonder
 wether one can get any real work done with this book alone.
 Interesting the RDTSC instruction, counts clock cycles.
-Test done for lina and figforth. lina works on Linux 1.2.13 wit
+Test done for lina and figforth. lina works on Linux 1.2.13 without problems.
 figforth seems to have a problem with ?terminal.
 18:00
 
 2000 april 14 (sat)
 Just fooling around with the alpha.
-Its date is just plain wrong. I have now a good connection betw
-except for the remote mounting. Somehow the apple and pear refu
-to be remotely mounted. I could not boot pear for an instant, b
-that was solved by updating the bios. THis system is definitely
+Its date is just plain wrong. I have now a good connection between the machines
+except for the remote mounting. Somehow the apple and pear refuse their disk
+to be remotely mounted. I could not boot pear for an instant, but
+that was solved by updating the bios. THis system is definitely EV4.
 
 2000 april 15 (sun)
 8:15
@@ -1212,10 +1212,10 @@ On the Pentium 90:
 120 ms for the byte benchmark before a witch to 32 bit mode.
 110 ms for the byte benchmark with an in line next.
 2000 april 17 (wed)
-On Artemis the benchmark of screen 89 runs around 11.5 ms +- 0.
-if aligned. Else some 700 us more. This is version 2.68 where w
+On Artemis the benchmark of screen 89 runs around 11.5 ms +- 0.1 ms
+if aligned. Else some 700 us more. This is version 2.68 where we still
 jump to next.
-Automatic procedure to each day backup to the directory sparc:~
+Automatic procedure to each day backup to the directory sparc:~albert/backup.strt
 .
 Version 2.72 didnot work on hd, but 2.71 does.
 It turns out that the disk buffers must be aligned.
@@ -1223,7 +1223,7 @@ In fact I knew this, but it took quite some debugging.
 This is fixed in version 2.73.
 The benchmark now runs at 7.0 ms when aligned. And otherwise
 plus 700 us to 1300 uS. (Only the code of DO-PRIME is aligned.)
-I must decide against introducing alignment. This must be left
+I must decide against introducing alignment. This must be left until
 the Artemis program.
 25:00
 2000 apr 21 (thu)
@@ -1232,25 +1232,25 @@ the Artemis program.
 12:00
 I probably must decide against vectored execution in lina.
 Instead I must use a flag.
-Made labels LINUX_HD . This is a version that runs Linux and al
+Made labels LINUX_HD . This is a version that runs Linux and also boots
 from hard disk.
-Apparently the benchmark went down to 100 mS with the inlining
+Apparently the benchmark went down to 100 mS with the inlining of the code
 on the 90 Mhz Pentium.
 The redirection problem in lina must be solved as follows:
 1. If getterm reports failure the system must be patched.
 2. STTERM must be patched with DROP DROP SEMIS
 3. EXPECT must be patched with OVER OVER 1+ ERASE 0 DO KEY
            DUP LF = IF LEAVE ELSE I C! THEN  LOOP ;
-But for now I must set up my side using the Fig script and just
+But for now I must set up my side using the Fig script and just use
 figforth.
 I finally have replaced all labels with stupid conventions like
 doubling the last letter by a L prefix.
- lina now works when using redirection. It is binary portable f
+ lina now works when using redirection. It is binary portable from
  1.2.13 to 2.0.34
 Made an example program (wc)
 2000 april 21 (fri)
 9:00
-The new EXPECT had a bug. It left a LF on the stack, making it
+The new EXPECT had a bug. It left a LF on the stack, making it impossible
 to do mulitple line definitions in a script (or via any pipe).
 At last wc1 works. Leads to two improvements in $f :
 EXPECT left an LF in pipe mode. ?LINUX-ERROR is improved.
@@ -1275,20 +1275,20 @@ s/\"\(.\)\"\+/'\1'+/
 2000 april 22 (mon)
 14:00
 The following has to be done
-1. Introduce GAS beside MASM/TASM (with extension .ps beside .a
-2. Replace DB for strings in header.m4 with a combinatin of DS
-  DB, where there is no longer a mix of single characters and q
+1. Introduce GAS beside MASM/TASM (with extension .ps beside .asm .msm)
+2. Replace DB for strings in header.m4 with a combinatin of DS and
+  DB, where there is no longer a mix of single characters and quoted
   strings. Now check the resulting binary against old versions.
-  Use the extension .ps because before we have .s preprocessing
+  Use the extension .ps because before we have .s preprocessing is needed
   using transform. But now transform can be smaller.
-3. Build up gas.m4 and transforms up to the point that the gas
+3. Build up gas.m4 and transforms up to the point that the gas linux version
 compiles. Try to put as much as possible in gas.m4.
 4. Get rid of any discrepancies with the nasm version.
-1. has been done. All binaries have been saved, and all old asm
+1. has been done. All binaries have been saved, and all old asm things.
 transform has been introduced.
 2.
-After replacing the resulting *.asm and *.msm have been checked
-They agree. The resulting fig86.alone.bin fig86.msdos.bin, lina
+After replacing the resulting *.asm and *.msm have been checked casually.
+They agree. The resulting fig86.alone.bin fig86.msdos.bin, lina and
 figforth agree perfectly.
 made a target cmp to compare the old versions
 Made a label TEMP: for all rcs files involved.
@@ -1296,17 +1296,17 @@ Made a label TEMP: for all rcs files involved.
 2000 april 25 (tue)
 12:00
 Succeeded in at least getting the stuff assembled by gas.
-So we are now at point 4 finding out what is the difference wit
-version. A problem is that we seem not be able to control the s
-with the gnu assembler, at least the NASM options are not accep
-The other options like present in the documentation are accepte
-They are not in agreement with the docs. I forgot how you can i
+So we are now at point 4 finding out what is the difference with a working
+version. A problem is that we seem not be able to control the sections
+with the gnu assembler, at least the NASM options are not accepted.
+The other options like present in the documentation are accepted neither.
+They are not in agreement with the docs. I forgot how you can inspect the
 sections from within gnu debugger.
-Got an invitation from Paul(aikido) for some "organise you life
+Got an invitation from Paul(aikido) for some "organise you life" course.
 
 2000 april 26 (wed)
 11:00
-Suddenly `apple' froze up during the use of ee. Bizarre. ^C got
+Suddenly `apple' froze up during the use of ee. Bizarre. ^C got me out and
 editing without the graphic shell presents no problem.
 So lets go on with the internet publishing craze.
 I can get sets on the screen all right know.
@@ -1326,14 +1326,14 @@ Hardly done anything, with the visit to Diane and all that.
 10:20
 Lets go on with the generating of the scripts.
 With the help of C.Haak debugged up till the creation of \
-relations. It turns out that it didn.t work on Linux: segmentat
+relations. It turns out that it didn.t work on Linux: segmentation
 fault.
 2000 may 3
 10:00
 Got distracted by going through my news anout patents.
 Solved the segmentation fault thingy.
 The solution is to have an empty set contain a dummy
-element (##) such that SET-FOR-ALL always examines a valid stri
+element (##) such that SET-FOR-ALL always examines a valid string.
 12:00
 ...
 12:30
@@ -1355,7 +1355,7 @@ The alfa release consists of
 4. doc release
 I run through all text's and have improved them a little bit.
 fromblock.c now generates source without trailing blanks.
-Specifically an addendum was made that adds to the installation
+Specifically an addendum was made that adds to the installation manual.
 
 2000 may 4
 10:00
@@ -1382,11 +1382,11 @@ The forth stuff contains a new file, down loaded also.
 10:00
 * tryout post
 * how to handle a combination of c and assembler for linking
-I have copied the latest versions of the software to that direc
+I have copied the latest versions of the software to that directory.
 I finally am happy with the .news_sig.
-Reply to a post is also tested. It works allbeith it takes a ve
-I have now published a request to help me with the sections pro
-Have looked into the matter of my standalone forth, using the d
+Reply to a post is also tested. It works allbeith it takes a very long time.
+I have now published a request to help me with the sections problem.
+Have looked into the matter of my standalone forth, using the dictionary
 above 1 M.
 2000 may 10
 Done nothing.
@@ -1397,32 +1397,32 @@ Done nothing.
 Announcing only the Linux figforth.
 To be done :
 1. posting rigged benchmarks.
-Actually what I did. Do the subscriptions for Forth dimension a
-cricuit cellar. Checked whether the post arrived at gnu.gcc.hel
+Actually what I did. Do the subscriptions for Forth dimension and
+cricuit cellar. Checked whether the post arrived at gnu.gcc.help.
 But no. Tried again and uucp-ed xs4all. To no avail.
-I have now injected the article asking help for linking assembl
+I have now injected the article asking help for linking assembler
 with c via the kadernet link. Testing my site reveals that the
-xp package has not been uploaded. Trying to upload it shows tha
-goes extremely slow. Even so much that I didn't manage to get i
+xp package has not been uploaded. Trying to upload it shows that it
+goes extremely slow. Even so much that I didn't manage to get it done.
 Uploading using netscape is no good.
 
 2000 may 15
 9:00
 Cleaned up everything.
 Posted to comp.linux.announce and comp.lang.forth.
-There is still no reaction to the article about help for linkin
+There is still no reaction to the article about help for linking in
 c/assembler. So what?.
-[16:45] The 32 bit versions that runs standalone must be made s
+[16:45] The 32 bit versions that runs standalone must be made such
 that the bootup code segment must start at 0 (not $7c00).
-The code must remain loaded at the same address, lest we have a
-with the disk buffers. The situation for a 32 bit MSDOS version
-remain as it was, only we must allocate from TASK to relative a
+The code must remain loaded at the same address, lest we have a problem
+with the disk buffers. The situation for a 32 bit MSDOS version must
+remain as it was, only we must allocate from TASK to relative address
 1M+64K )
-as a reserved area for DOS. (The 64K is the high mem. The load
+as a reserved area for DOS. (The 64K is the high mem. The load address
 can be very low, this we don't know ).
-So for both 32 bit versions we have to reserve approximately on
-That is the easies first step, but before that we must check wh
-32 bit msdos version works at all. For that we probably have to
+So for both 32 bit versions we have to reserve approximately one M.
+That is the easies first step, but before that we must check whether the
+32 bit msdos version works at all. For that we probably have to save
 the code segment somewhere in the GDT.
 So
 0. Check whether the 16 bit MSDOS version work
@@ -1430,18 +1430,18 @@ So
 2. Put all MSDOS's conventional memory in a hole.
 3. Shift the code segment down for the booting version.
 
-The MSDOS version doesnot work well. KEY hangs even after an En
+The MSDOS version doesnot work well. KEY hangs even after an Enter is
 given.
 (The standalone version cannot be started from MSDOS.
  It tries to boot, but it shouldn't.)
  This bug has been solved. Yes a CODE-HEADER again.
 2000 may 16
 9:00
-The stand alone version in protected mode 2.42 (very early, als
+The stand alone version in protected mode 2.42 (very early, also cannot run from msdos.
 So I start investigating the real mode booting version.
 This one also cannot be run from MSDOS.
 I must introduce the following trick:
-make a piece of code that ensures the cs:ip is what is in the l
+make a piece of code that ensures the cs:ip is what is in the listing.
 Along the following lines
 here:   mov ax, here-$$
         LEA bx,here
@@ -1456,8 +1456,8 @@ here:   mov ax, here-$$
 here2
 Listing must look like
 preparation (equ etc.)
-optional boot code (msdos compatible, debug code drawn together
-above insurance (Now the code is correctly at an absolute addre
+optional boot code (msdos compatible, debug code drawn together, relocatable)
+above insurance (Now the code is correctly at an absolute address.).
 optional switch to protected mode
 switch to 32 bit assemmbler mode if applicable
 forth
@@ -1466,12 +1466,12 @@ Now we have to move the code to the appropriate sections.
 NATIVE has been renamed into SWITCH.
 It turns out to be nearly impossible to read from floppy disk
 to the right address, without the far jump up front.
-The division into sections is now completed. It has very few ju
-Only towards PROTECTED: because that section has a data area wi
-the GDT address. lina is okay.figforth is okay. real msdos is o
+The division into sections is now completed. It has very few jumps.
+Only towards PROTECTED: because that section has a data area with
+the GDT address. lina is okay.figforth is okay. real msdos is okay.
 Saved as version 2.80
-Boot sector must become relocatable. Failed to recognize that t
-reference to memory addresses LHEAD will not work, so it is not
+Boot sector must become relocatable. Failed to recognize that the
+reference to memory addresses LHEAD will not work, so it is not relocatable.
 
 2000 may 17 (wed)
 9:00
@@ -1481,32 +1481,32 @@ Now we can also boot from floppy a 32 bit version..
 Now we can also boot from hard disk in an orderly fashion.
 The program blocks from hard disk are brought under RCS again.
 The new version 2.83 is installed on the hard disk.
-This version is also kept on floppy, the FD and HD booting vers
+This version is also kept on floppy, the FD and HD booting versions.
 Got rid of linux constants in hd booting versions etc.
 2000 may 18 (thu)
 10:00
-Read all the Linux news of Forth. My announcement of lina has b
+Read all the Linux news of Forth. My announcement of lina has been
 accepted.
-The latest version has been called CLEAN1. It is a version wher
-previous work has been conserved and the sections in the beginn
-that do different things are there, but maybe not fully functio
-Setting the segment registers is no not done until the FAR JUMP
-The JMP FAR section has turned into a universal check that make
+The latest version has been called CLEAN1. It is a version where all
+previous work has been conserved and the sections in the beginning
+that do different things are there, but maybe not fully functional.
+Setting the segment registers is no not done until the FAR JUMP.
+The JMP FAR section has turned into a universal check that makes
 sure the code is loaded at the proper place.
 The booting 16 bit real mode can be started from MSDOS.
 The TIB for the 32 bit system need not be placed under 1 Mbyte,
-because EXPECT is using KEY, such that no BIOS call need addres
+because EXPECT is using KEY, such that no BIOS call need address into
 TIB.
 This has been saved as version 2.84
 2000 may 19 (fri)
 I would like to be able to
 start the booting real 16 bit protected 32 bit protected
-from MSDOS. The problem is in the code segment. The code segmen
-given by MSDOS, by the fact were it loads its code. At this off
-in the GDT we must prepare a corresponding protected mode segme
+from MSDOS. The problem is in the code segment. The code segment is
+given by MSDOS, by the fact were it loads its code. At this offset
+in the GDT we must prepare a corresponding protected mode segment.
 Even that is possible. But in order to switch (see protect.m4)
-we must hard code this code segment in the jumps. So I am afrai
-with the current trickery protected mode can only be executed i
+we must hard code this code segment in the jumps. So I am afraid
+with the current trickery protected mode can only be executed in
 booting versions.
 It is comparitively easy to shift the protected mode segment
 down such that it begins at 0. This is accomplished by
@@ -1518,8 +1518,8 @@ segments and protect.m4 has now only two macro's.
 Not much done. Afternoon the Fokker visit.
 2000 may 21 (sun)
 Read a lot of posts of Bob Brennan. It seems that he wants his
-things patented. This could hamper me in expressing my ideas, o
-anyone else in using them. He has at least the following idea's
+things patented. This could hamper me in expressing my ideas, or
+anyone else in using them. He has at least the following idea's in
 common
 1. small kernel evolving.
 2. NT
@@ -1529,59 +1529,59 @@ Line of atack on the above patents :
 publish the animal program and its ideas.
 construe this as a MT program.
 The 16 bit real mode has been tried out again and still works.
-However I detected that the relocatable aspect of getting the s
-at the address required by the high level code (that assumes an
+However I detected that the relocatable aspect of getting the stuff
+at the address required by the high level code (that assumes an absolute
 adress, in this case 7c00H) was not working.
 This has been improved. The 16 bit protected mode version now
-has been tested to the point that it can switch to protected mo
+has been tested to the point that it can switch to protected mode.
 There is a problem switching back to real mode.
-The reason is in fact that there is an offset involved in the s
-in the new situation. Analysis shows that we can choose the off
-of the switch segment at will in the GDT-table, provided we giv
-(uffruitful) idea that IP shouldn't change upon switching betwe
-protected mode. This means that the current offset maybe is not
-because it maximizes the amount of that can be added to interfa
+The reason is in fact that there is an offset involved in the switching
+in the new situation. Analysis shows that we can choose the offset
+of the switch segment at will in the GDT-table, provided we give up the
+(uffruitful) idea that IP shouldn't change upon switching between real and
+protected mode. This means that the current offset maybe is not such a bad idea
+because it maximizes the amount of that can be added to interface with the
 fois/hardware. o
 A lot of tests failed:
 A test with a consecutive GDT table.
 However we keep this as long as we donot know exactly how
-interupt handling is performed. (The code segment could remain
-Version 2.85 has been checked in with in principle the possibil
-the real and protected code segments, i.e. they need no longer
+interupt handling is performed. (The code segment could remain valid.).
+Version 2.85 has been checked in with in principle the possibility to decouple
+the real and protected code segments, i.e. they need no longer start at the
 same address.
 But switching with a builtin offset has been tested and failed.
 (Changing not only CS but IP at the same time.)
 2000 may 23 (tue)
 Some hardwon knowledge has been incorporated in version 2.86.
 There is a slight cleanup with respect to boot addresses.
-Maybe it is even easier to get the protected mode version runni
+Maybe it is even easier to get the protected mode version runnig
 under MSDOS, than have it start at an absolute address zero.
 An important thingy would be to calculate BIG_L the location
-where the ORG of the FORTH lands. Or even rattle ever so slight
-of the fixed address of the switch segment. Or even derive the
+where the ORG of the FORTH lands. Or even rattle ever so slightly the chains
+of the fixed address of the switch segment. Or even derive the sandbox and gdt segment
 from the switch segment.
-A mayor problem turned out that the GDT was loaded from a wrong
-version 2.89 can at least boot from floppy, but will not yet re
+A mayor problem turned out that the GDT was loaded from a wrong segment.
+version 2.89 can at least boot from floppy, but will not yet read
 blocks. lina version 2.89 looks all right
 2000 may 23 (tue)
 9:20
-Blocks cannot be read because the address of where to read, is
-address. The solution is to add an offset in the R/W (for each
+Blocks cannot be read because the address of where to read, is a protected mode
+address. The solution is to add an offset in the R/W (for each iomodel, but not for Linux)
 i.e.
 dwitch( dw Rot, lit, m4_offset, plus, rot, rot)
-We have now the situation that the protected mode forths (16 an
-can be configured to start from address 0, but cannot use mass
-This is caused by the need to transform the addresses passed to
+We have now the situation that the protected mode forths (16 and 32)
+can be configured to start from address 0, but cannot use mass storage.
+This is caused by the need to transform the addresses passed to the
 operating system, such as to refer to the switch segment.
-The first thing is to clean up further the whole stuff around s
+The first thing is to clean up further the whole stuff around segments.
 2.90 Now can handle the mass storage again in protected mode.
 Some sutdying of how to make a MSDOS version.
 2000 may 24 (wed)
 We could probably do without the SANDBOX segment, if we map the
-the protected data segment and the switch data segment at the s
-address, and then have the stack in this 64 k switch data segme
-In that case the sandbox stack and the real(=protected mode) st
-are identical and the stack pointer is always 16 bit. In that c
+the protected data segment and the switch data segment at the same
+address, and then have the stack in this 64 k switch data segment.
+In that case the sandbox stack and the real(=protected mode) stack
+are identical and the stack pointer is always 16 bit. In that case
 the CS_START cannot be zero and is prescribed by MSDOS.
 Investigation about starting programs from Forth
 1. give back all memory, not needed for FOrth and the GDT
@@ -1594,7 +1594,7 @@ remainder of the command there. This allows for such things as
 pipes.
 The EM was not handled correcly in the lina version. Fixed.
 Now we can expand the memory to 128 Mbyte.
-Disappointing. It looks like its working but only the las line
+Disappointing. It looks like its working but only the las line of the screeen
 is used. Later we get more crashes.
 
 This night been thinking about the
@@ -1602,28 +1602,28 @@ This night been thinking about the
 
 2000 may 25 (thu)
 10:30
-Simple transformations make the program crash. Like getting the
+Simple transformations make the program crash. Like getting the 'BITS 32'
 statement at the correct place. (Now it seems wrong.).
 First I must put my ideas on paper about : .
 I have managed to swap the ESC and ` keys in linux and the
-Caps Lock and left ctrl keys. I now no longer suffer the proble
+Caps Lock and left ctrl keys. I now no longer suffer the problem that
 at times the ctrl key doesn't work with disastrous results.
 The way to do this is :
-copy us.map or whatever your current definition is to a new fil
+copy us.map or whatever your current definition is to a new file.
 Find out with `showkeys' about the keys you want to change.
 Edit them in the <newfile>
 loadkeys <newfile>
 
 Moreover this is more pleasant.
-This version has also a better protect.m4 , with BITS32 at a su
+This version has also a better protect.m4 , with BITS32 at a suitable place.
 The Makefile is also slightly improved for the allboot target.
 The 32 bits version works with the editor.
 All this suggests we must make a new mark and made called
 BITS32_FROMADDRESS0.
 2000 may 26 (fri)
 10:00
-Swapping the keys turns out to be non effective under X. What g
-The plan is to check out whether the new version cannot handle
+Swapping the keys turns out to be non effective under X. What gives?
+The plan is to check out whether the new version cannot handle the
 switching to a large memory. If so I am just going to make the
 MSDOS version of 32 bits protected mode work.
 First some tests :
@@ -1635,17 +1635,17 @@ address, effectively protecting any dirty BIOS stuff from
 corruption by Forth, this doesn't make a difference.
 By isolating the difference it turns out that as long as
 you set ESP to 0 no problems are apparent.
-At last, I can run a protected mode Forth with 128 Mbyte memory
-The 32 bit version has been expanded such as to use the full me
-There may be some errors e.g. in the sieve program but for the
+At last, I can run a protected mode Forth with 128 Mbyte memory.
+The 32 bit version has been expanded such as to use the full memory.
+There may be some errors e.g. in the sieve program but for the most part
 it looks like it runs reasonably.
     i.e 2.92
 2000 may 27 (sat)
-Insight : if the 32 bit protected mode versie is started from D
-be that the code segment is not divisable by 8. It must be beca
-selector must be pointing into the General Description Table an
+Insight : if the 32 bit protected mode versie is started from DOS, it could
+be that the code segment is not divisable by 8. It must be because the
+selector must be pointing into the General Description Table and also
 running at priority level 0.
-This can be accomplished by a copy over a small amount during s
+This can be accomplished by a copy over a small amount during startup under
 MSDOS.
 The code related to zeroing SP has been moved into protect.m4.
 Furthermore some cleanups has been done with respect to
@@ -1664,65 +1664,65 @@ There are few matters nagging me:
 - must I do Hallmark course
 - spitting it on the Forth site.
 At least the taxes have been done.
-In order to improve the keyboard under X, also specify the usok
+In order to improve the keyboard under X, also specify the usok keyboard
 in /etc/X/XF86config
 This works.
 I am now in a position to work on the MSDOS version.
 
-The variables LOW-DP and LOW-EM have been added. (Introduced MA
-The dictionary space for the 32 bits booting version now sits a
+The variables LOW-DP and LOW-EM have been added. (Introduced MAPPED_1_)
+The dictionary space for the 32 bits booting version now sits above the
 whole conventional plus high memory.
-The protected mode now uses a miniscule SANDBOX segment of 1 Kb
+The protected mode now uses a miniscule SANDBOX segment of 1 Kbyte after the
 low Forth itself.
-It doesn't look too bad. However, a long sieve (62500) crashes
+It doesn't look too bad. However, a long sieve (62500) crashes somehow.
 This is saved as 2.95
-Initialising the GDT is made independant of the absolute positi
-Or so it seems, at least it works if the ORG is such that the c
-starts at 0H, such that half way during loading this is indeed
+Initialising the GDT is made independant of the absolute position of ORG.
+Or so it seems, at least it works if the ORG is such that the code segment
+starts at 0H, such that half way during loading this is indeed the value of
 the CS.
 2000 may 30 (tue)
 12:00
 I had a first reaction to my figForth. I have responded to it.
 I must say that this whole mail effort is cumbersome.
-A missing insight hitherto is that the switch segment must be i
+A missing insight hitherto is that the switch segment must be in the
 GDT at the place where the codesegment currently points to .
 Otherwise we go ballistic on every switch.
 This has now been coded as such.
 (It must be because while switching this entries becomes
 
-The idea that the protected mode program could be relocated to
+The idea that the protected mode program could be relocated to just anywhere
 in memory is plain wrong. The above efforts were in vain.
 This can be seen as follows:
 [Fixed means fixed at assemble time.]
-Switching to the protected mode segment requires that the descr
+Switching to the protected mode segment requires that the descriptor and the
 offset between real mode and protected mode are fixed.
-If the descriptor is fixed so is the absolute address in memory
+If the descriptor is fixed so is the absolute address in memory.
 
-So the best we can do is relocate a protected mode program to a
-in memory. This is possible! If dos is loaded high, it turns ou
-code segment for the first loaded program is about. 04xx. So we
+So the best we can do is relocate a protected mode program to a fixed place
+in memory. This is possible! If dos is loaded high, it turns out that the
+code segment for the first loaded program is about. 04xx. So we can shift
 the program up to 7c0. And go on with our dirty deeds.
-I think I should start with redefine as much as possible relati
+I think I should start with redefine as much as possible relative to the
 LOADPOINT , being the magic 7C00.
 jun 1 (thu)
-Indeed the loadpoint is introduced. And code made to shift up t
+Indeed the loadpoint is introduced. And code made to shift up the
 code to arrive at the loadpoint. Apparently it works, too.
-The real code can be booted, even if compiled at 100. It works
-from MSDOS too, but only if compiled at 100, if at C700 mass st
+The real code can be booted, even if compiled at 100. It works if run
+from MSDOS too, but only if compiled at 100, if at C700 mass storage
 access hangs.
-So, the code as started from MSDOS has its code segment improve
+So, the code as started from MSDOS has its code segment improved.
 This becomes version 2.98.
 jun 2 (fri)
 10:50
-Just let us have a look what could possible be wrong with the m
-storage. I have this feel that it is related to the data segmen
+Just let us have a look what could possible be wrong with the mass
+storage. I have this feel that it is related to the data segment not
 being at the expected place.
 
-Discovery : I cannot find back where the code sits, but apparen
+Discovery : I cannot find back where the code sits, but apparently
 it is not correct.
-If the program starts at low memory, it turns out that the rear
-puts the CS such that we address high memory with fatal results
-So what I try to do now is get rid of the third rearrarangement
+If the program starts at low memory, it turns out that the rearrangement
+puts the CS such that we address high memory with fatal results.
+So what I try to do now is get rid of the third rearrarangement of CS
 (the one in the middle) for the protected mode code.
 jun 3 (sat)
 11:00
@@ -1730,53 +1730,53 @@ Trying to go back from FORTH to MSDOS>
 Done properly : going back to protected mdoe first,
 than jumping back to the original cs segment.
 Restore all other registers and execute 4c of 21H interrupt.
-It hangs. The only sin I committed was going back and forth to
+It hangs. The only sin I committed was going back and forth to protected
 mode.
 Lets save this as 2.100 anyway.
 jun 5 (mon)
 2.100 cannot do BYE even not from a 3.3 version MSDOS
-The nice thing is that apparently, we can put the thing at the
+The nice thing is that apparently, we can put the thing at the correct
 boot address.
 The last thing I will try before putting the stuff on the net:
 generate a version that will use the MSDOS i/o.
 Going through the following test:
 PROT32 PROT16 and REAL all boot from floppy, and can can also
 be started from MSDOS directly.
-A lot of improvements with respect to configuration has been ma
+A lot of improvements with respect to configuration has been made.
 Contrary to the expectation the REAL version cannot return to
-MSDOS. This is an indication of a normal bug with respect to th
+MSDOS. This is an indication of a normal bug with respect to the
 return code.
 Trying to debug it with the lightweight 3.3 MSDOS plus DEBUG.`\
-I needed to make a debugp.com that has the version checking cod
-NOP-ped out. The combination of loading COMMAND.COM high in ver
-and a lightweight DEBUG.com allowed to run the 16 bit protected
+I needed to make a debugp.com that has the version checking code
+NOP-ped out. The combination of loading COMMAND.COM high in version 6
+and a lightweight DEBUG.com allowed to run the 16 bit protected mode
 under the debugger. But it worked all right.
-The 32 bit code still crashes in BYE. But the code in BYE is ok
-(and almost the same as with 16 bits.) and the code where it ju
+The 32 bit code still crashes in BYE. But the code in BYE is okay
+(and almost the same as with 16 bits.) and the code where it jumps
 to is also okay (and precisely the same as with 16 bits.).
 jun 6 (tue)
 10:00
 Described my credentials for Bob Brennan.
 Saved the latest version as 2.101.
 This has a lot of cleanup with respect to configurations.
-New names introduced as CLASSIC (instead of USEDOS) ABSOLUTELOA
-and a better dependancy of options and a cleaner meaning of opt
+New names introduced as CLASSIC (instead of USEDOS) ABSOLUTELOAD
+and a better dependancy of options and a cleaner meaning of options.
 This version will run 16 and 32 bit protected mode from MSDOS.
-However the 16 bit version will not EDIT and the 32 bit version
+However the 16 bit version will not EDIT and the 32 bit version will
 not BYE. The thorough BYE code is now firm in the source.
 The problem with editing in 16 bit is there at least from 2.92.
-(I get green happy faces). The old 2.83 version (saved on flopp
+(I get green happy faces). The old 2.83 version (saved on floppy)
 is okay.
-After investigating it turned out that the problem came into be
+After investigating it turned out that the problem came into being
 between 2.88 and 2.90 (2.89 had invalid mass storage.).
-The L@ L! was changed but had not been checked (let alone teste
+The L@ L! was changed but had not been checked (let alone tested).
 
-The fixed version 2.90.1.1 works and is folded back into the ma
+The fixed version 2.90.1.1 works and is folded back into the main
 tree.
 jun 7 (wed)
 10:00
 Today I must
-* work through the pile of Dr Dobbs to find the Mark Stevens co
+* work through the pile of Dr Dobbs to find the Mark Stevens column
 * do a wash of red things
 * clean the table
 * make a file of my 2000 finances etc.
@@ -1796,13 +1796,13 @@ jun 14 (wed)
 
 Test report dd 2000jun21
 Summary
-This is a test report for 12 out of a zillion Forths that can b
+This is a test report for 12 out of a zillion Forths that can be
 generated from fig86.gnr
-Do not bother me. I know what a professional regression test is
-This is not. However, please tell me if any of the following te
+Do not bother me. I know what a professional regression test is.
+This is not. However, please tell me if any of the following tests fails
 you, where it doesn't fail me.
-It looks as if sometimes K' fails. But not for a freshly booted
-If you have observation with regard to this, or even insight, o
+It looks as if sometimes K' fails. But not for a freshly booted system.
+If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
 The following "tests" are defined:
@@ -1821,10 +1821,10 @@ L Dos Directory correct
 Pass criteria
 A OK
 B I made it through make
-C plausible content of 8, everything loads fine, ends in copyri
+C plausible content of 8, everything loads fine, ends in copyright screen
 D primes less then 100000 zip accross the screen
 E plausable decompilation of QUIT
-F timing of Byte benchmarks, must be 7 ms for a 500 Mhz Copperm
+F timing of Byte benchmarks, must be 7 ms for a 500 Mhz Coppermine
 G Effect of cursor (^E ..) word (^A ^F ^T) (un)delete (^Y ^U)
 H Same as /bin/wc
 J Binaries are equal or
@@ -1832,10 +1832,10 @@ J' disassembly reveals only gratuitous MASM deviations.
 K successful return to operating system (linux) or
 K' successful return to "operating system" (msdos)
 
-Test are always mentionned if applicable. A failed test is prec
+Test are always mentionned if applicable. A failed test is preceeded
 by -.
 
-The following environments are defined (Only for BOOTFD BOOTHD)
+The following environments are defined (Only for BOOTFD BOOTHD):
 I Booted from FD or HD
 II Started from MSDOS
 (Other environments following from the executable itself).
@@ -1846,39 +1846,39 @@ Notes about ommitted data:
 
 Description                 Configuration   Executable   Tests
                                 file         name
-hosted_linux linux_native   lina.cfg         (lina)      BCDEFH
-hosted_linux linux_c native linux.cfg        (figforth)  BCDEFH
-bootfd real                 alone1.cfg      forth.com    B I  A
-                                                           II
-bootfd prot16               alone2.cfg      forth.com    B I  A
-                                                           II
-bootfd prot32               alone3.cfg      forth.com    B I  A
-                                                           II
-boothd prot32               alone4.cfg      forth.com    B I  A
-hostedmsdos MASM bios       msdos1.cfg      msdos.com    B II
-hostedmsdos MASM modern     msdos2.cfg      msdos.com    B II
-hostedmsdos MASM classic    msdos3.cfg      msdos.com    B II
+hosted_linux linux_native   lina.cfg         (lina)      BCDEFHK
+hosted_linux linux_c native linux.cfg        (figforth)  BCDEFHK
+bootfd real                 alone1.cfg      forth.com    B I  ACDEG
+                                                           II  CDEG K'L
+bootfd prot16               alone2.cfg      forth.com    B I  ACDEG
+                                                           II  CDEG K'L
+bootfd prot32               alone3.cfg      forth.com    B I  ACDEFG
+                                                           II  CDEFG K' L
+boothd prot32               alone4.cfg      forth.com    B I  ACDEFG
+hostedmsdos MASM bios       msdos1.cfg      msdos.com    B II  CDEG K' L
+hostedmsdos MASM modern     msdos2.cfg      msdos.com    B II  CDEG K' L
+hostedmsdos MASM classic    msdos3.cfg      msdos.com    B II  CDEG K' L*
 
-Version 2.102 has been tested most of the time with growing mod
-for stand alone versions, and later 2.104 for msdos_hosted vers
-Afterwards 2.106 has been checked in and it was checked that th
+Version 2.102 has been tested most of the time with growing modifications
+for stand alone versions, and later 2.104 for msdos_hosted versions.
+Afterwards 2.106 has been checked in and it was checked that the source
 was equivalent to the one tested.
 (i.e. after removing comment lines the source was the same.)
 
 L* :
-The classic version has been tested after properly setting OFFS
-for the fact that the BLOCKS.BLK was not simple dumped on the f
-0. In that case the MSDOS directory would not have remained int
+The classic version has been tested after properly setting OFFSET to compensate
+for the fact that the BLOCKS.BLK was not simple dumped on the floppy from sector
+0. In that case the MSDOS directory would not have remained intact.
 
 jun 15 (THU)
-Filled in further information in above table. The MSDOS USE BIO
-has the problem that the OFFSET should be increased by 21 and t
+Filled in further information in above table. The MSDOS USE BIOS version
+has the problem that the OFFSET should be increased by 21 and that the
 .CPU fails. This is an easy configuration problem.
 
 Although the first version was tested okay, it was not saved.
-The other sources have been checked using a special command `di
-The first version (real mode) unfortunately will no longer do B
-The same with the others. This is unpleasant because the source
+The other sources have been checked using a special command `diffa'
+The first version (real mode) unfortunately will no longer do BYE.
+The same with the others. This is unpleasant because the sources are the
 same.
 
 jun 17 (SAT)
@@ -1889,44 +1889,44 @@ Due to some missing WORD casts for pointers.
 Furthermore crashes result from the use of mass storage.
 (Double faults: trying to access the disk during warnings
 about disk usage.)
-I cannot use the full memory with MASM because it chokes on 100
+I cannot use the full memory with MASM because it chokes on 10000H
 (too large.).
 This has been solved by copying the inverse of DISK-ERROR into
 WARNING. The linux version apparently do not have this problem.
-The three masm versions have been copied to the test directory
-C: disk. With the genboot.bat file. These files have been built
+The three masm versions have been copied to the test directory on the MSDOS
+C: disk. With the genboot.bat file. These files have been built with
 MASM version 1.00.
 jun 19 (mon)
-Updated my web site and some of the scripts. Gotten a linux ver
-I think I have now a very reasonable distribution for fig86.gnr
-I have filled in an upload form for the documentation to Simtel
+Updated my web site and some of the scripts. Gotten a linux version of the scripts.
+I think I have now a very reasonable distribution for fig86.gnr.
+I have filled in an upload form for the documentation to Simtel.
 Actions for portability :
 playing around a bit, restoring the whole stuff from RCS etc.
 Reveals remarkably little problems.
-1. In order to have a zip file compatable with msdos, I have ad
+1. In order to have a zip file compatable with msdos, I have added remarks
 in the release.txt file about file name truncation etc.
-2. For the same reason the fig86.xxx.yyy files are stored as xx
+2. For the same reason the fig86.xxx.yyy files are stored as xxx.yyy in the archives
 3. link.script was not fetched from mass storage.
 jun 20 (tue)
-I have generated a hard disk version. This cannot be copied ont
-disk, it crashes. It is not bootable apparently because if it c
-version 2.83 it doesn't crash but doesn't boot either. Version
-copy the hd version 2.83 to the disk. Maybe that floppy is rott
-After some attempts this succeeds. Experimenting with version 2
-Screen 97 is no longer correct for the situation were the prote
-segments start at 0. For the jump to the switch segment 7C00 mu
-subtracted from HERE. And for the buffer address that is filled
+I have generated a hard disk version. This cannot be copied onto the hard
+disk, it crashes. It is not bootable apparently because if it copied by
+version 2.83 it doesn't crash but doesn't boot either. Version 2.83 cannot
+copy the hd version 2.83 to the disk. Maybe that floppy is rotten.
+After some attempts this succeeds. Experimenting with version 2.92.
+Screen 97 is no longer correct for the situation were the protected mode
+segments start at 0. For the jump to the switch segment 7C00 must be
+subtracted from HERE. And for the buffer address that is filled in the message
 also the proper address must be supplied.
 jun 21 (tue)
 Handling the large disks have not worked since 2.83.
-In screen 90 97 98 and at line 2065 in blocks.frt the handling
-switch to protected mode doesn't take into account the switch s
-This has now changed by introducing COPY-SEGS (making other seg
-equal to CS) and switchsegment that is used whereever appropria
-For this purpose the utilities in 90/91 have been made more rob
+In screen 90 97 98 and at line 2065 in blocks.frt the handling of the
+switch to protected mode doesn't take into account the switch segment.
+This has now changed by introducing COPY-SEGS (making other segments
+equal to CS) and switchsegment that is used whereever appropriate.
+For this purpose the utilities in 90/91 have been made more robust and
 less cramped.
-It turned out that the adaptations to providing addresses prope
-the actual realsegment had still to be done. After that the 32
+It turned out that the adaptations to providing addresses properly relative to
+the actual realsegment had still to be done. After that the 32 hd version
 could be run and tested okay.
 This version has been installed on the hard disk. 2.106.
 jun 23 (fri)
@@ -1939,68 +1939,68 @@ Tried a 32 bit msdos version but it doesnot work at all.
 (crashes).
 jun 26 (mon)
 9:00
-Trying to arrive at a protected mode Forth that runs from MSDOS
+Trying to arrive at a protected mode Forth that runs from MSDOS>
 
 Test must proceed as follows :
 test and compare a 16 bit protected mode
 test and compare a 32 bit mode forth
-The cold code contains a part that will crash if run in protect
+The cold code contains a part that will crash if run in protected
 mode. This is of course a show stopper.
 Before getting onto that I first check in 2.107 which solves
 - not setting of CS if the code is not booted.
 - eliminating of dead code
 - better conditionals around BYE.
 This is version 2.107
-Comparing 16 bits protected mode booting and 16 bits protected
-MSDOS. 16 bits doesn't go BYE. The other crashes immediately. N
-should use the BIOS version in MSDOS too. This would result in
+Comparing 16 bits protected mode booting and 16 bits protected mode MODERN
+MSDOS. 16 bits doesn't go BYE. The other crashes immediately. Now I think I
+should use the BIOS version in MSDOS too. This would result in very few
 differences.
-It turns out that there are no problems if running from MSDOS 5
-COMMAND.COM loaded high. The code doesn't work if the code cann
+It turns out that there are no problems if running from MSDOS 5.x with
+COMMAND.COM loaded high. The code doesn't work if the code cannot be moved
 up to its proper place.
-So this only works from MSDOS.COM versions where the code can b
+So this only works from MSDOS.COM versions where the code can be loaded
 low enough.
 But then it works.
-Made msdos4.cfg where hosted_msdos is combined with bios/io 16
-Made msdos5.cfg where hosted_msdos is combined with modern i/o
+Made msdos4.cfg where hosted_msdos is combined with bios/io 16 bits.
+Made msdos5.cfg where hosted_msdos is combined with modern i/o 16 bits
 
 jun 29 (tue)
-Things get very messy. It looks as if I can go BYE no longer fr
+Things get very messy. It looks as if I can go BYE no longer from a 32 bits
 booting version (and a fortiori no 32 bits version at all.).
 The version that I delivered apparently has the same problem.
-The version in alone3.cfg can not use mass storage or do BYE if
+The version in alone3.cfg can not use mass storage or do BYE if run
 from the MSDOS prompt.
-So in fact I have never had any 32 bits Forth running from MSDO
-As it stands I have to check in everything and call this versio
+So in fact I have never had any 32 bits Forth running from MSDOS.
+As it stands I have to check in everything and call this version
 MESSY
 Two 32-bit version do work however
 the booting version provided memory is below 10000h
-the msdos bios but blocks in file version with memory below 100
+the msdos bios but blocks in file version with memory below 10000h
 Remark nothing can be expected to run under MSDOS 3.3 because
 the forth is copied down into the area for msdos itself.
 (Not loaded high.) because it is well above (D000H) the forth
 the forth itself may indeed run sometimes a little bit.
 Trying to load the program at A000H.
 This works for msdos 6.2 but not for 3.3
-This required modifications, but these are checked using the me
-testbatch. Here the resulting sources of a number of versions a
+This required modifications, but these are checked using the mechanism
+testbatch. Here the resulting sources of a number of versions are
 checked against the previous version. So the modification of
 fig86.gnr has no effect on all configurations thus far.
 jun 30 (wed)
 This version has been checked in as 2.108
-This version can run in 32 bit mode from that address and apare
-switches back and forth to the switch segment properly, but can
+This version can run in 32 bit mode from that address and aparently
+switches back and forth to the switch segment properly, but cannot
 do any MSDOS i/o.
 Okay byte the bullet. Lets make a dimishing version that
 still exhibits the problem. Too difficult.
 It was not to be expected that the forth could be loaded
 at A0000H in MSDOS 3.3, because the first available address is
-ExxxH . This has been discovered by running a real mode relocat
+ExxxH . This has been discovered by running a real mode relocatable
 forth. And then make a small assembler program to see CS.
 Have prepared a reply for the GNU guys, that I am not sure
 whether to transfer the copy right to the DFW.
 
-In protect.m4 I try to use genuine jump instructions instead of
+In protect.m4 I try to use genuine jump instructions instead of the
 DB 0EAH stuff. This must be coded JMP GDT_SWITCH:$+3+CW
 and some such. The code looks goodin the .lst file.
 But a 32 bit version crashesimmediately.
@@ -2030,8 +2030,8 @@ belonging to the assembler that are processor independant.
 (Some from screen 90 )
 tue 4 july
 10:00
-The screens are reorganized in order to recieve the changes nee
-for incorporating protected mode and 32 bits assembler features
+The screens are reorganized in order to recieve the changes needed
+for incorporating protected mode and 32 bits assembler features inti\o
 the assembler.
 A few intermediate versions have been saved.
 21:00 A version of the assembler that can be used to access the
@@ -2041,32 +2041,32 @@ According to Coos there still is a bug in FORGET that should be
 fixed.
 22:30 The memory from 0-1 M is fully mirrored at 1-2 M.
 So is 2-3 M at 3-4M . Conclusion (Coos Haak) A20 is not active!
-How to activate A20 ? It turns out that the INTERRUPT and the p
+How to activate A20 ? It turns out that the INTERRUPT and the port
 list do not much to reveal what to do.
-26:30 Indeed. In nuni there is an example of how to switch this
+26:30 Indeed. In nuni there is an example of how to switch this on.
 wed 4 july
-* msdos 32 bits version and stand alone 32 bits version from 1
+* msdos 32 bits version and stand alone 32 bits version from 1 M on
 10:00
-This helps. Done a test to inspect memory and indeed all memory
-are different. There is a mystery message at screen 120 after l
+This helps. Done a test to inspect memory and indeed all memory cells
+are different. There is a mystery message at screen 120 after loading
 everything that belongs to the assembler.
 BYE from protected mode to DOS still doesnot work.
-cursor up hangs the system (probably because it has the 8th bit
+cursor up hangs the system (probably because it has the 8th bit up)
 After an ABORT the editor sometimes no longer works.
-The tricky interference between SIB and ds32 addressing mode is
+The tricky interference between SIB and ds32 addressing mode is not
 properly handled. there must be a sort SIBM| and SIBM, too. `
 This and more has been handled and the assembler can be used to
 put data on the hard disk.
 Version 2.110 is put on floppy for fd and hd versions.
 thue 5 july
-The 8080 version has been used as an example for the complete a
+The 8080 version has been used as an example for the complete assembler.
 fri 6 july
 Hardly anything done (teeth)
 sat 8 july
 sat 9 july
 mon 10 july
 11:30
-Added last bits such that the 8080 assembler is fully protected
+Added last bits such that the 8080 assembler is fully protected.
 23:00
 Checked in as80.frt
 Now I want to generate a disassembler.
@@ -2090,21 +2090,21 @@ fri 14 july
 12:00
 Now we want the same for the 8086.
 First a lot of improvements. By using a dyummy bit from
-the nonexisting part of an instruction RC, etc. now automatical
+the nonexisting part of an instruction RC, etc. now automatically
 reject A'| for a fixup.
 Last train : REJECT
-Much thinking about how to do the 8086. A point overlooked was
-8080 started from the front, while the 8086 must start from the
-However as starting from the front goes, the xFI instruction li
+Much thinking about how to do the 8086. A point overlooked was that the
+8080 started from the front, while the 8086 must start from the back.
+However as starting from the front goes, the xFI instruction lives up to
 "one size fits all".
 Results present in asi86.frt
 sat 15 july
-Conclusion is that something must be added to fix from the back
+Conclusion is that something must be added to fix from the back.
 the old code was soing that all right.
-Furthermore B| must set a separate bit and the ADDI must set a
+Furthermore B| must set a separate bit and the ADDI must set a s separate
 bit where IB, has two bits set.
-A useful trick is probably that it is allowed to rotate the TAL
-fixup. Bits that would not be allowed because of the instructio
+A useful trick is probably that it is allowed to rotate the TALLY of a
+fixup. Bits that would not be allowed because of the instruction size
 automatically leads to errors. A useful trick to rotate is
 "BINARY 1000...000 U* OR" with the appropriate number of bits.
 1 CONSTANT TABLE 0 , ( I TABLE + @ yields ($100)^I )
@@ -2112,29 +2112,29 @@ automatically leads to errors. A useful trick to rotate is
 : ROTBYTE TABLE + @ U* OR ;
 sun 16 july
 14:30
-I must be able to do a crude disassembly. But to start it is su
-have bytes commaed in! This is the outcome of a train of though
-with the observation that my `switch to real' trick cannot be d
-automatically anyway. So we aim at a framework where assembly c
-commaed in. In a later (very late stage) this can be changed to
-assembly code in the system. Please remark that although the sy
-able to change itself from within, it is no use try to acommoda
+I must be able to do a crude disassembly. But to start it is sufficient to
+have bytes commaed in! This is the outcome of a train of thoughts starting
+with the observation that my `switch to real' trick cannot be disassembled
+automatically anyway. So we aim at a framework where assembly code gets
+commaed in. In a later (very late stage) this can be changed to having
+assembly code in the system. Please remark that although the system must be
+able to change itself from within, it is no use try to acommodate a change
 in paradigm such as using BP instead of SP for the stack.
 So the next step is to finish the 8086 , then the 80386
-assembler/disassembler/generator system. Not for the sake of ha
-the new forth, but for debugging it. Even this is dubious. I pr
-that using the assembler would mean recode the definition and l
-whether the binary code has stayed the same. In this way we nee
+assembler/disassembler/generator system. Not for the sake of having it in
+the new forth, but for debugging it. Even this is dubious. I presume
+that using the assembler would mean recode the definition and look
+whether the binary code has stayed the same. In this way we need no
 disassembler. (But there is also the TUD/TUE BIWMCB).
-It is also nice to have a complete Forth with floating point bu
-is hardly needed at this point. So stop fooling around with thi
+It is also nice to have a complete Forth with floating point but that
+is hardly needed at this point. So stop fooling around with this
 assembler.
 
 mon 18 july
-The assembler for 8086 can disassenble and reassemble the instr
+The assembler for 8086 can disassenble and reassemble the instruction
 set . more or less.
 tue 18 july
-Made a program that prints the codes to a postscript file for a
+Made a program that prints the codes to a postscript file for a quic
 reference card.
 
 
@@ -2154,15 +2154,15 @@ sun 23 july
 The Comprehensice test for the 8086 has been made better.
 mon 24 july
 Almost all 386 instructions are there now.
-However disassembly of perfectly good assemblies doesn't work a
+However disassembly of perfectly good assemblies doesn't work always.
 And with the sign extend from byte to xell we want in fact the
-combination of a AX'| and an AH| register in the same instructi
-That is automatically and definitively made impossible and so w
+combination of a AX'| and an AH| register in the same instruction.
+That is automatically and definitively made impossible and so would
 break a great lot of other things. Making it a feature (
-MOVSZ|B Move the indicate byte. Fill the remainder of the desti
+MOVSZ|B Move the indicate byte. Fill the remainder of the destination
 with zero's up to a full xell.) Doesn't help because the
-source and the destination are interpreted differently. (SP| ve
-So we have in fact to introduce a set of special registers, (ex
+source and the destination are interpreted differently. (SP| versus HL|)
+So we have in fact to introduce a set of special registers, (extended
 byte registers, AX'| and EAH| would not <AH|)
 mon 24 july
 All 80386 are incorpated. Comparison with 8086 reveals that all
@@ -2180,16 +2180,16 @@ The part required for assembly proper is still smaller.
 It counts in at 189 line 550 WOC.
 Without comment lines this is 66 lines of code, at least half
 is error checking. Because this assembler flags all illegal 32
-bit instructions. (It doesn't flag some possible illegal constr
-in case of a segment override *by design*, because there is no
+bit instructions. (It doesn't flag some possible illegal construction
+in case of a segment override *by design*, because there is no decent
 way to tell the assembler the state of the processor).
-There is no IF statement or CASE statement in sight and not a t
+There is no IF statement or CASE statement in sight and not a table
 lookup of any kind. Except for the interpreter itself.
-Now the 386 specific assembler itself. This is, at it should be
-a bunch of tables. Here there is no IF or CASE statement in sig
+Now the 386 specific assembler itself. This is, at it should be, hardly more than
+a bunch of tables. Here there is no IF or CASE statement in sight
 *by design*. 200 lines 1100 WOC.
 As Jerry pointed out: any complexity measurement breaks down.
-There is just a single execution path in this code for each wor
+There is just a single execution path in this code for each word.
 Now with respect to Jerry's claim.
 The NASM assembler is 37000 lines 1 Mbyte.
 My stuff 650 lines 25 kbyte.
@@ -2211,30 +2211,30 @@ For this a ((DISASSEMBLE)) introduced.
   @@
   Calling each other names
 
-   We all know or Einsteins major discovery (E=M*C^2). and Pyth
-   theorem (a^2=B^2+c^2) Now there was a time this wasn't that
-   The way it was formulated by good old Euclides more looked l
-   The area built by squaring build upon the side of the triang
+   We all know or Einsteins major discovery (E=M*C^2). and Pythagoras
+   theorem (a^2=B^2+c^2) Now there was a time this wasn't that easy.
+   The way it was formulated by good old Euclides more looked like:
+   The area built by squaring build upon the side of the triangle
    lying opposed the right angle ....
    Formulae are a maior invention. Giving names like in
-   Look at figure 4. The sides af the triangle are called as us
+   Look at figure 4. The sides af the triangle are called as usual
    with A the right angle.
    Naming for abstract items is a major scientific achievement.
-       The 'I' in DO I @ . LOOP and the `i' in for(i=0;i<MAXBUF
+       The 'I' in DO I @ . LOOP and the `i' in for(i=0;i<MAXBUF; i++)
        are just plain *brilliant*.
 
    Using 'long descriptive'  names takes us back at that era.
    Some people want us back at
-   IF ( AREA_BUILD_BY_SQUARING_UPON_THE_SIDE_OPOSING_RIGHT_ANGL
-   ( HORRIBLE_LONG_EXPRESSION_EXTENDING_OVER_SEVERAL_LINES skip
-   Or the Hungarian people at Microsoft Software Police Departm
-   Maxwell Newton Einstein and the likes would have gotten nowh
+   IF ( AREA_BUILD_BY_SQUARING_UPON_THE_SIDE_OPOSING_RIGHT_ANGLE <
+   ( HORRIBLE_LONG_EXPRESSION_EXTENDING_OVER_SEVERAL_LINES skipped )
+   Or the Hungarian people at Microsoft Software Police Department.
+   Maxwell Newton Einstein and the likes would have gotten nowhere
    without this invention. Instead they contributed
    - You cannot fit even a single name upon a line
    - You certainly can form sentences with those names.
    - You will never understand those sentences.
 
-   Remember: If you to your Mam doesn't understand, your code w
+   Remember: If you to your Mam doesn't understand, your code when you
    read it to hear through the telephone
              IT AIN'T FORTH
 
@@ -2242,22 +2242,22 @@ For this a ((DISASSEMBLE)) introduced.
    To the concept of CONTEXT.
    Ever thought why it was called that way by Chuck Moore?
 "
-Anyway. I have added a feature in the disassembler to allow SIB
-to be disassembled, althout it could not be using the dictionar
+Anyway. I have added a feature in the disassembler to allow SIB,
+to be disassembled, althout it could not be using the dictionary as is.
 Adding a prefix to ps.frt.
-The facilities in the makefile are greatly enhanced with a gene
+The facilities in the makefile are greatly enhanced with a generic interface
 such that for any .frt file a qr.ps can be generated.
 Now systematically chasing errors, found via the qr sheets.
 In 0F SHLDI is missing , BTxxI is at an unexpected place.
 BSF and BSR are missing(totally) IMUL is missing
-It turns out that IMUL and MUL are peculiar in that they define
-precision result. This has been reflected in the opcode IMUL|AD
-IMUL properly fits in with SHRD etc. This has been checked in a
-testas386(a) succeeds. Apparently my posts donot get out. I loo
+It turns out that IMUL and MUL are peculiar in that they define a double
+precision result. This has been reflected in the opcode IMUL|AD,
+IMUL properly fits in with SHRD etc. This has been checked in and the
+testas386(a) succeeds. Apparently my posts donot get out. I looked in
 the Spy file at sparc.
 Now going for page D0.
 All pages come out fine now.
-However there is a problem 7 pairs of inconsistency is too low
+However there is a problem 7 pairs of inconsistency is too low for
 the Pentium.
 fri 25 july
 Redesigned asgen.frt to have a separate TALLY.
@@ -2265,27 +2265,27 @@ Redesigned asgen.frt to have a separate TALLY.
 Letter to COlins.
 
 Hi Rick,
-I have read with interest the discussion between you and the re
+I have read with interest the discussion between you and the rest
 of us about testing and the soul of Forth, length of code etc.
 
-I would be interested what you think of a project defined in th
+I would be interested what you think of a project defined in the
 following:
 
 Specification and deliverables.
-1. A Forth assembler for the 80386SX as of "Intel 386 SX Microp
+1. A Forth assembler for the 80386SX as of "Intel 386 SX Microprocessor
 Programmer's Reference Manual" ISBN 1-555512-154-3.
 2. A matching disassembler using the same opcodes.
-3. Being a Forth assembler no provisions for labels as in the t
+3. Being a Forth assembler no provisions for labels as in the tradional
 assembler need be present, and no other provisions not normally
-deemed necessary in a Forth assembler. The instruction set may
-to its use by a Forth assembler or for reasons following from t
+deemed necessary in a Forth assembler. The instruction set may be adapted
+to its use by a Forth assembler or for reasons following from these
 requirements.
-4. The processor is assumed to operate in 32 bit mode. Under th
+4. The processor is assumed to operate in 32 bit mode. Under this
 assumption the assembler should be able to generate all valid
 instructions. It should flag all invalid attempts.
-Instructions for the 16 bit mode should flag invalid attempts i
+Instructions for the 16 bit mode should flag invalid attempts inasfar
 independant from the assumption in which mode it works.
-5. A source file containing all instruction and addressing comb
+5. A source file containing all instruction and addressing combinations
 the data, offsets, and immediate data being arbitrary.
 6. It must run on XXX forth (a specific Forth). Non portable
 constructions shall be clearly identified.
@@ -2293,72 +2293,72 @@ constructions shall be clearly identified.
 
 Implementation requirements
 The assembler/disassembler shall consist of two parts :
-1. A generic part that doesnot contain opcode and instruction i
-2. A specific part that is "table driven". The latter part shou
+1. A generic part that doesnot contain opcode and instruction information
+2. A specific part that is "table driven". The latter part should contain
 no conditional parts. (No IF or CASE statements.)
 
 Test requirements
-1. The file as of specification 5 shall be assembled and disass
+1. The file as of specification 5 shall be assembled and disassembled,
 and the result shall be the same or equivalent.
-2. The file as of specification 5 shall have all data, offset a
+2. The file as of specification 5 shall have all data, offset and
 immediate data replaced with random data. The outcome should be
-subjected to a test as per 1. The order of the instructions sha
-randomized. This shall be repeated 50 times or for one working
+subjected to a test as per 1. The order of the instructions shall be
+randomized. This shall be repeated 50 times or for one working day
 whatever is longer.
 3. In the test as of 1 the memory content shall be dumped in a
-computer readable form such as to regenerate the memory content
-MASM's DB statements.) This must allow this memory content to b
+computer readable form such as to regenerate the memory content. (Read
+MASM's DB statements.) This must allow this memory content to be
 disassembled, inspected, executed with third part tools etc.
 Performing this comparison is not a deliverable.
 
 Note.
-I will agree with you that 1 and 2 is not really a test, just t
-debugging face. It will be a far cry from "mission critical". T
+I will agree with you that 1 and 2 is not really a test, just the end of the
+debugging face. It will be a far cry from "mission critical". The code is
 merely stable and internally consistent.
-It is the kind of thing that gives you the trust that it just m
-(Note that other c.l.f may think that this is "carpet bombing t
+It is the kind of thing that gives you the trust that it just might work.
+(Note that other c.l.f may think that this is "carpet bombing testing unheard
 of". Marcel what do you think?)
 What you can do with the result of 3 is a real test, all right.
-Of course once 3 is approved, 1 makes up a nice regression test
-Can the people who thought they wanted to do "the" test each ti
+Of course once 3 is approved, 1 makes up a nice regression test.
+Can the people who thought they wanted to do "the" test each time
 they load a program, please comment?
-(I heard you, Rick, saying that you didn't want to do that. I g
+(I heard you, Rick, saying that you didn't want to do that. I guess
 you are right.)
 
-Note that the 80386SX is approximately the Pentium without the
-point instructions, but with all the protected mode stuff prese
+Note that the 80386SX is approximately the Pentium without the floating
+point instructions, but with all the protected mode stuff present.
 
 Note.
-This specification is maybe somewhat unassuming. Look at 4. The
-no assembler known to me that can generate all valid instructio
-example there is most all assemblers cannot discrimate between
-equivalent instructions to copy register AX to BX, because Inte
+This specification is maybe somewhat unassuming. Look at 4. There is
+no assembler known to me that can generate all valid instructions. For
+example there is most all assemblers cannot discrimate between the two
+equivalent instructions to copy register AX to BX, because Intel's
 instruction set cannot specify this. This could mask errors in
-disassemblers. The instruction set *must* be redesigned to meet
-4. However then we have a tool that is eminently suitable at re
+disassemblers. The instruction set *must* be redesigned to meet spec
+4. However then we have a tool that is eminently suitable at reverse
 engineering.
 
 What would you think?
-1. How large is the file at specification 5 assuming one instru
-2. Would you think you need a team, or is it a one mans job? In
+1. How large is the file at specification 5 assuming one instruction per line?
+2. Would you think you need a team, or is it a one mans job? In C? in Forth?
 Assuming a reasonable time, less than a year.
 3. How many lines would you estimate? In C? In Forth?
-   Or you may use lines of code in C (counting ';') or words of
+   Or you may use lines of code in C (counting ';') or words of code in Forth
    (counting, well, words of code).
 
 Greetings Albert.
 @@
 With this reasoning forth on Unix should be subprogrammed in c.
-The MSDOS operating system has BASIC as its system programming
+The MSDOS operating system has BASIC as its system programming langauge.
 Placing Forth under the dictatorship of c is one thin.
-Placing it under the dictatorship of the everchanging, every ve
+Placing it under the dictatorship of the everchanging, every version
 is a blind alley, visual basic isunthinable.
 @@
-Bord de mer. Exuberant. Out thoughts were mutual" If he s bored
+Bord de mer. Exuberant. Out thoughts were mutual" If he s bored the party is over."
 indepeendantly we left. They passed at the see side, ..I
 Nocurls, no gems, no bra,
-From the other side of the beach I heard voces shouting over th
-"...Pourquoi?..." and, more decisive "..voir dancer le blonde..
+From the other side of the beach I heard voces shouting over the waves: "...revenir demain..."
+"...Pourquoi?..." and, more decisive "..voir dancer le blonde..."
 Blauwe hoek 026 4456526
 @@
 If you can't write poems, why would you try Forth?
@@ -2369,9 +2369,9 @@ wild landscape around them) and (i.e spirits).
 30 july
 The 8080 testset succeeds again.
 31 july
-I am in a position to have the testset for 8086 improved. The t
-full. The 586 assembler is prefixed by redefining words, such t
-change can be worked out in bits and pieces however the first v
+I am in a position to have the testset for 8086 improved. The test is also success
+full. The 586 assembler is prefixed by redefining words, such that the
+change can be worked out in bits and pieces however the first version
 fails even so.
 I have analysed the optimiser:
 will write down that tomorrow.
@@ -2379,56 +2379,56 @@ will write down that tomorrow.
 I need the fields NAME CODE and DATA and FLAGS.
 The first THREE fields point into a pool and are uniform:
 <aligned address> <cell with count> < count bytes >
-The first thing to do is rebuild the code kraker such as to gen
+The first thing to do is rebuild the code kraker such as to generate this kind
 of stuff.
 Optimising amounts to just copying the thing you need:
 Add X to the table
    Now pass through the table from X
       For all parts Y make sure Y is in the table.
-         [Start from X  again, to make sure you catch recursive
-Now we are sure that we have all the things we need in the tabl
-Now pass through the table repeatedly until X is a code definit
-   If a COLON definition calls only code definitions replace it
+         [Start from X  again, to make sure you catch recursive things.]
+Now we are sure that we have all the things we need in the table.
+Now pass through the table repeatedly until X is a code definition :
+   If a COLON definition calls only code definitions replace it by the code definitions in line.
 
-A definition indicates which registers are used within a defini
-is optimised within a definition before it is used in some othe
-All data is got from or put back onto stacks as part of the def
+A definition indicates which registers are used within a definition. Register usage
+is optimised within a definition before it is used in some other definition.
+All data is got from or put back onto stacks as part of the definition.
 
 Special cases:
   LITERAL Goes to the appropriate code
   CONSTANT VARIABLE Goes to the appropriate code.
-  DO I LOOP : At the start of the loop BX/CD are pushed/popped
+  DO I LOOP : At the start of the loop BX/CD are pushed/popped relying on the optimiser
   to get rid of those if possible.
   If I is encountered it is reconstructed
   from the stack. So parsing from DO to LOOP what you need not
  remember is whether BX/CX
   is on stack or in a register.
-A PUSH/POP table is maintained. They indicate which POPS and PU
-All PUSHES are postponed. All POPs are postponed all pushes are
-Saving of registers, if needed is done using the RETURN STACK!
-all the time except for the possible use of >R R R> within a si
-DO I LOOP within a single definition. Also These to possibiliti
+A PUSH/POP table is maintained. They indicate which POPS and PUSHES correspond.
+All PUSHES are postponed. All POPs are postponed all pushes are prematured.
+Saving of registers, if needed is done using the RETURN STACK! That one is balanced
+all the time except for the possible use of >R R R> within a single definition or
+DO I LOOP within a single definition. Also These to possibilities exclude each
 other.
 Optimisation oportunities.
-Suppose we have an edge : <USING R1 R2 R3 > <PUSH R1 R2 >  <POP
-This type of code can be replaced by  keep moving the push of R
+Suppose we have an edge : <USING R1 R2 R3 > <PUSH R1 R2 >  <POP R4> <USING R1 R4 R5 >
+This type of code can be replaced by  keep moving the push of R2 to behind.
 DI:= AX POP DI
-Definition of cost: 8 for ax 7 6 for BX/CX and so one.  Now we
-an instruction by the sum of a the costs of all registers alive
+Definition of cost: 8 for ax 7 6 for BX/CX and so one.  Now we define cost for
+an instruction by the sum of a the costs of all registers alive. Registers on the
 stack incurr a very high expense.
-Now define the cost of a piece of code by the sum of the cost o
-We can get the costs down by : 1 eliminating instructions (dram
-MOV AX,3 MUL BX, AX 2. By commuting two instructions where the
-variable is decreased at the expense of a lower cost variable.
-variable by a low cost one. The commutation of LEA DI, [BP+3] P
-would be indicated, because it decreases the life span of a ver
-During a loop the expense of all instructions is multiplied by
+Now define the cost of a piece of code by the sum of the cost of the instructions.
+We can get the costs down by : 1 eliminating instructions (dramatic is back to back
+MOV AX,3 MUL BX, AX 2. By commuting two instructions where the life time of a high cost
+variable is decreased at the expense of a lower cost variable. 3 By replacing a high cost
+variable by a low cost one. The commutation of LEA DI, [BP+3] POP AX by POP AX  LEA DI, [BP]
+would be indicated, because it decreases the life span of a very expensive stack variable.
+During a loop the expense of all instructions is multiplied by 10. All variables that are
 used within the loop get there out supposedly.
-Donot go overboard. In the first place at the very highest leve
-0 variable ape  ape cell+ should be optimised out before this h
+Donot go overboard. In the first place at the very highest level such things as
+0 variable ape  ape cell+ should be optimised out before this hoola boola is started.
 `fwc
-An analysis of a low level definition, if no earlier analysis i
-Define a variable alive once it is written. Now from the end lo
+An analysis of a low level definition, if no earlier analysis is available.
+Define a variable alive once it is written. Now from the end look at the pops and pushes
 and declare a variable dead from its last push onward.
 a piece of code by the sum of the cost of e
 
@@ -2439,7 +2439,7 @@ I finally undertook adding the handling of the SIB byte.
 This was a mere 4 lines of code. The basix idea :
 a SIB byte is added by    xxH SIB,,
 Now this is inconventient. Execute SIB,, by
-<save state> SIB, [ [AX .. [DI ] [ +1* .. +4* ] [ AX] .. DI] ]
+<save state> SIB, [ [AX .. [DI ] [ +1* .. +4* ] [ AX] .. DI] ] restore state
 So SIB, is a one byte instruction with three fields for fixups.
 
 Made a test script that generates a random test file.
@@ -2451,7 +2451,7 @@ Disassembling using gnu reveals some interesting things.
 - SAL must be removed.
 - POP CS| must be ridden of.
 This has all been done
-Moving segment registers FS| GS| was not present, adding it lea
+Moving segment registers FS| GS| was not present, adding it leads
 to three fixups with mask 38.
 Introduced an incompatibily bit for the test registers.
 This does away with the lock bit.
@@ -2462,13 +2462,13 @@ Fixed and asmgentest and make testasm386
 testasm386 succeeds. with all fixes.
 Also :
  added a possibility to use the 16 bit stuff
- fixed asm386endtest to exclude the [MEM versions of the SIB by
-  require extra data and hence disturb the assembly disassembly
- idem to exclude the bald ~SIB, instructions that SHOW-ALL gene
+ fixed asm386endtest to exclude the [MEM versions of the SIB byte that
+  require extra data and hence disturb the assembly disassembly cycle.
+ idem to exclude the bald ~SIB, instructions that SHOW-ALL generates.
  7 aug
 
 Still failed: The proper way to exclude the mem is the pattern
-'\|D0.*[D5] SIB,,'  not '[0-3][D5] SIB,,' . Also it seemed that
+'\|D0.*[D5] SIB,,'  not '[0-3][D5] SIB,,' . Also it seemed that the
 data din't proceed much farther thatn test1.
 '\|D0.*[D5] SIB,,'  still wrong must be
 '\D0| .*[D5] SIB,,'  still wrong must be
@@ -2489,10 +2489,10 @@ I got fan mail form someone wanting a 32 bit Forth on msdos.
 I retraced what he should have done:
 preparing this letter:
   "
-  You are too much intimidated by m4. It is intimidating, but y
+  You are too much intimidated by m4. It is intimidating, but you need
   it only at a user level.
   What you should have done:
-  1. read through fig86gnr.txt and realise that you need only t
+  1. read through fig86gnr.txt and realise that you need only the level 1 adaptation.
   2. Use the msdos.cfg as a starting point.
      The options are explained in prelude.m4.
      You conclude that you are happy with msdos.cfg except
@@ -2500,7 +2500,7 @@ preparing this letter:
   3. Say
      make fig86.msdos.bin
      This give you a message that the CELLWIDTH is not known.
-     If you are as clever as I think you are, you copy also the
+     If you are as clever as I think you are, you copy also the line
 
   define( {_BITS32_1_}, _no({$0}) )dnl
 
@@ -2522,7 +2522,7 @@ preparing this letter:
   5. Run forth.com on a MSDOS system.
 
   6. It hangs. What a disapointment.
-     However reading through prelude.m4 you realise that the en
+     However reading through prelude.m4 you realise that the end
      of memory is set at 64k.
      So you add
 
@@ -2532,51 +2532,51 @@ preparing this letter:
      And repeat steps 4 and 5.
 
   7.
-    This forth gives a prompt. It doesnot work properly, becaus
-    TIB is located at a place where it cannot be filled in by M
-    I do not expect you to sort this one out. It amounts to cop
-    buffers associated with TYPE and EXPECT because MSDOS canno
+    This forth gives a prompt. It doesnot work properly, because its
+    TIB is located at a place where it cannot be filled in by MSDOS.
+    I do not expect you to sort this one out. It amounts to copying the
+    buffers associated with TYPE and EXPECT because MSDOS cannot handle buffers
     placed beyond 100000H (1 M).
 
 "
-In versin 2.111 the modifications to TYPE and EXPECT are succes
-bit Forth works reasonably well. An error message with loading
+In versin 2.111 the modifications to TYPE and EXPECT are succesfull. The resulting 32
+bit Forth works reasonably well. An error message with loading the string package and
 ^O in the editor fail, as well as BYE.
-However loading at an other address as 7c00 fails. It turns out
-must be moved in accordancve with the LOADADDRESS. This has bee
+However loading at an other address as 7c00 fails. It turns out that the ORG
+must be moved in accordancve with the LOADADDRESS. This has been put fixed
 into postlude.m4. At least for so called ABSOLUTELOAD.
 Now the LOADADDRESS can be changed to e.g. 7C00H.
-Loading at 0F000H still fails. An improvement is made such that
-segment is taking uip most of the change during the code move w
+Loading at 0F000H still fails. An improvement is made such that the load
+segment is taking uip most of the change during the code move while loading,
 but this doesnot help apparently.
-At this moment it must be checked whether the code still works
-6.22 for the file currently called msdos.cfg and a LOADADDRESS
+At this moment it must be checked whether the code still works under MSDOS
+6.22 for the file currently called msdos.cfg and a LOADADDRESS of 8000H.
 
 The above analysis is somewhat unclear.
 Better is the following:
 The 32 bits Forth has all segments (CS/ES/DS/SS) identical.
 There are three important addresses:
-M4_LOAD_ADDRESS : The physical address from where the Forth is
-M4_ORG : The logical address in CS/.. whithin Forth that corres
-M4_SWITCH : The physical address where the switch segment start
+M4_LOAD_ADDRESS : The physical address from where the Forth is loaded in memory
+M4_ORG : The logical address in CS/.. whithin Forth that corresponds with M4_LOAD_ADDRESS
+M4_SWITCH : The physical address where the switch segment start.
 Switching is possible if SWITCH < IP < SWITCH + 64K and
                       LOAD - ORG < IP < LOAD - ORG + 64K.
-For the situation that LOAD=ORG (i.e. addresses in Forth corres
-addresses) it follows that SWITCH < 64K . It follows also that
-preferably much smaller that that for the switchable area to be
-If we must have SWITCH > 64 K it is reasonable to choose LOAD=S
-ORG = 0. Care must be taken to diminish M4_EM with LOAD and the
+For the situation that LOAD=ORG (i.e. addresses in Forth correspond with physical
+addresses) it follows that SWITCH < 64K . It follows also that SWITCH must
+preferably much smaller that that for the switchable area to be reasonable.
+If we must have SWITCH > 64 K it is reasonable to choose LOAD=SWITCH and
+ORG = 0. Care must be taken to diminish M4_EM with LOAD and the editor must
 be adapted in screen 1 and 3.
 
 2000 aug 22 (tue)
 8:15
-First : put the knowledhe obtained yesterday into prelude.m4 an
+First : put the knowledhe obtained yesterday into prelude.m4 and postlude.m4.
 2000 aug 22 (wed)
 * experience with TEX
-For printing using .pdf. First odd pages in reverse. Then the e
-No. Print the even pages in reverse. Then the odd pages in norm
-The uppermost page is visible: page 1. Then the back of it is v
-Togehter with Coos Haak made a first stab at a ciForth document
+For printing using .pdf. First odd pages in reverse. Then the even pages in normal order.
+No. Print the even pages in reverse. Then the odd pages in normal order. THink about it!
+The uppermost page is visible: page 1. Then the back of it is visible.
+Togehter with Coos Haak made a first stab at a ciForth document.
 The final solution
   dvips -A -r -i -O 1.8cm,0.0cm -S10 input.dvi -ooutputA
 will get outputA001 ..outputAxxx and print those in that order.
@@ -2585,50 +2585,50 @@ Now do
 will get outputB001 ..outputBxxx and print those in that order.
 More over. After each file you can check whether everything is
 still in good order. And you have the possibility to remove/
-stick in extra stuff to get things right. The resulting pile ne
+stick in extra stuff to get things right. The resulting pile need
 no reversing of pages.
 2000 aug 24 (thu)
 @@
-Data has a pendant in the physical or conceptual world, such th
+Data has a pendant in the physical or conceptual world, such that it can be
 described precisely in natural language.
 I would think the word legal covers the latter nicely,
-as lawyers and judges has to keep do with natural language, yet
+as lawyers and judges has to keep do with natural language, yet have to arrive
 at verdicts which is about as formal as you can get.
 2000 aug 25 (fri)
 A description has two requirements:
-Firstly a description -- specification is the computer buffs wo
-allow someone to decide whether this word can be used for his i
-purpose. This allows taking into account the context of this sp
-One of the big mistakes of computer science is the illusion tha
+Firstly a description -- specification is the computer buffs words -- must
+allow someone to decide whether this word can be used for his intended
+purpose. This allows taking into account the context of this specification.
+One of the big mistakes of computer science is the illusion that the
 specification of a subroutine/procedure/word is absolute.
-The object orientation introduces a single context (the class)
-to keep up the illusion of that specification is absolute in th
+The object orientation introduces a single context (the class) in order
+to keep up the illusion of that specification is absolute in the context of
 that class.  It is equally flawed.
-Forth is the only computer language that captures the concept o
-by being as fuzzy about it, as natural language, i.e. in a Zen
+Forth is the only computer language that captures the concept of context
+by being as fuzzy about it, as natural language, i.e. in a Zen way by not
 even trying to capture it in some formal structure.
-The second requirement for descriptions is that the validity of
-implementation can be checked against the descriptions of its c
-fully and totally, and that means with regard to all exceptions
+The second requirement for descriptions is that the validity of the
+implementation can be checked against the descriptions of its components,
+fully and totally, and that means with regard to all exceptions and error
 situations.
 This is hardly ever attained. Mostly it is not even tried
- because it considered too unattainable to be a worthwhile goal
- the hallmark of bad programs. (That is my definition of bad. O
+ because it considered too unattainable to be a worthwhile goal. That is
+ the hallmark of bad programs. (That is my definition of bad. Others would call
 these programs non-perfect and bearable.)
-Forthers (like FORTRAN programmers) Sometimes have the stand :
-the spec". I hesitate to say that can never work. But certainly
-capacities surpassing mine by at least an order of magnitude (C
+Forthers (like FORTRAN programmers) Sometimes have the stand : "The code is
+the spec". I hesitate to say that can never work. But certainly it requires
+capacities surpassing mine by at least an order of magnitude (Charles
 Moore?).
 @@
-I have skipped through my logboek. I have copied all things tha
-a place in the book. I have marked all places with interesting
-might find a place in the book, some book or my quotation belt
+I have skipped through my logboek. I have copied all things that have
+a place in the book. I have marked all places with interesting text that
+might find a place in the book, some book or my quotation belt by @@.
 2000 aug 26 (sat)
 Put all notes into the thesis at the proper place.
 Index works more or less.
 2000 aug 28 (mon)
 11:00
-Trying to annotate the thesis in order to have an excerpt of th
+Trying to annotate the thesis in order to have an excerpt of the data.
 2000 sep 11 (mon)
 @@
 James--Brown--Is--Dead!
@@ -2663,23 +2663,23 @@ that table
 All went smootyly until loading the interrupt table.
 As soon as the table is loaded, the program hangs
 irrespective of whether the interrupts are disabled.
-All books (386 prm, Pentium arch man) indicate that loading the
+All books (386 prm, Pentium arch man) indicate that loading the idt
 while in real mode is perfectly allowed.
 
 2000 sep 14 (thu)
-* generate all sources and compare. No switching sources should
+* generate all sources and compare. No switching sources should be
 equivalent to the old ones.
 * add a generation of the other (call) table.
 - still equivalent
 - add a subroutine to call the old interrupt vectors
-- now use it, enabling interrupts without going back to real mo
+- now use it, enabling interrupts without going back to real mode
 - still equivalent?
 - does it work?
 - clean out the switching wherever it is no longer necessary
 
 The call table has been added, but not yet installed.
 The macros from protect have to be changed in order to
-precisely enable/disable interrupts, this may solve the BYE bug
+precisely enable/disable interrupts, this may solve the BYE bug.
 This version has been checked in as 2.113.1.
 A new version 2.114 has the BYE bug removed.
 And has all the features of the 1.114 version
@@ -2687,45 +2687,45 @@ And has all the features of the 1.114 version
 2000 sep 15 (fri)
 ......
 2000 sep 18 (mon)
-Actions with respect to using the interrupts from protected mod
+Actions with respect to using the interrupts from protected mode.
 * still equivalent after generating of call tables
 * add a subroutine to call the old interrupt vectors
 - load interupt table (lidt)
 - activate interrupts
-- now use it, enabling interrupts without going back to real mo
+- now use it, enabling interrupts without going back to real mode
 - still equivalent?
 - does it work?
 - clean out the switching wherever it is no longer necessary
 So the call tables have been added and look fine.
-In fact all the code I wanted to add in order to use (but not y
+In fact all the code I wanted to add in order to use (but not yet modify
 the interrupts themselves) have been added to the system.
 But as soon as the LIDT instruction is executed in real mode,
 the system crashes. Even if interrupts are disabled.
-This source can hardly be debugged using debug.exe because it i
-loaded too high in memory. There is a trick to load programs hi
-(it can be set in the header of .exe files, see MSDOS programme
-manual the structure exeheader) However a thusly modified debug
-just crashes, so I must regenerate the debug.com thar runs unde
+This source can hardly be debugged using debug.exe because it is
+loaded too high in memory. There is a trick to load programs high,
+(it can be set in the header of .exe files, see MSDOS programmers reference
+manual the structure exeheader) However a thusly modified debug.exe
+just crashes, so I must regenerate the debug.com thar runs under
 msdos 6.2 by defeating the version control stuff.
-This apparently has succeeded, but still I need to make a speci
+This apparently has succeeded, but still I need to make a special version
 because it cannot load anything under 8260.
-This is called DEBI.COM and sits on the msdos disk in directory
-Further. This FORTH.COM cannot run under MSDOS. As I wanted it
+This is called DEBI.COM and sits on the msdos disk in directory \DOS.
+Further. This FORTH.COM cannot run under MSDOS. As I wanted it too.
 2000 sep 19 (tue)
-It still crashes any time a lidt is attempted. Tested with DEBI
+It still crashes any time a lidt is attempted. Tested with DEBI.COM.
 Plan is to run the Janet Reno program itself.
-This program works. I have made an equivalent (same binary code
-nasm program. And it too works, of course. The road towards a v
+This program works. I have made an equivalent (same binary code)
+nasm program. And it too works, of course. The road towards a version
 that loads and runs a Forth is long and unpleasant.
 
 2000 sep 20 (wed)
 janet reno adapted to change the gdt. This fails and a mail to
 Rick Hohensee is has been sent.
 2000 sep 20 (wed)
-Rick doesn't want to look into it. But I manage to adapt to fin
+Rick doesn't want to look into it. But I manage to adapt to find the bug
 (jr.asm 1.6). I can now place idt and gdt where I want.
 The plan now becomes :
-*Tuck jr.asm onto a working version of Forth, basically ignorin
+*Tuck jr.asm onto a working version of Forth, basically ignoring
 Forth itself.
 -Use my own gdt, gradually removing jr's gdt.
 -use my interrupt handler, still using the video indicator
@@ -2739,14 +2739,14 @@ Forth itself.
 -call real interrupt handlers from the protected video handler
 -use simple assembly program as an example
 -activate Forth
-I have worked through a lot of versions gradually eliminating t
+I have worked through a lot of versions gradually eliminating the
 code of Rick Hohensee, in favor of what I originally wanted.
 2000 sep 22 (thu)
 *call real interrupt handlers from the protected video handler
 -use simple assembly program as an example
 -activate Forth
 
-I have indeed now called interrupt handlers from the protected
+I have indeed now called interrupt handlers from the protected video
 handler, unfortunately, this has not worked once.
 I can simplify the program in two ways :
 specify the switch segment in the interrupt table.
@@ -2763,7 +2763,7 @@ used any registers!.
 This interrupt routine is now impeccable.
 Still you cannot do an interrupt 10 from the interrupt routine
 even if you enable interrupts, and cannot find any difference
-between the state without and with having gone through a protec
+between the state without and with having gone through a protected
 mode interrupt mechanism.
 2000 sep 24 (sun)
 Debugging itnerrupt 10 AH=0E.
@@ -2774,30 +2774,30 @@ It also uses a C1 intruction What gives?
 This is a shift instruction, only available on Pentiums.
 And another vector index at 44c that is multiplied by BL * 256
 Interesting. Adres 463 contains a port (3d4)
-to which 070e is written. That is okay, it implements the curso
+to which 070e is written. That is okay, it implements the cursor.
 So this leaves us with nothing to pick on.
 
 2000 sep 25 (mon)
-AN attempt has been made to eliminate the use of BP by trying t
+AN attempt has been made to eliminate the use of BP by trying to
 increment the flags after they were pushed onto the stack. This
 is not possible: the protected mode flags is not in the EFLAGS
-register. This has however cleaned up the notions about segment
+register. This has however cleaned up the notions about segments
 and
 sparked the idea that it should be
 possible to eliminate the code segment in handling interrupts.
 If we are clever the code segment and the stack segment can be
-used in the interrupt. See 2.114.2.1 where the SANDBOX has beco
+used in the interrupt. See 2.114.2.1 where the SANDBOX has become
 a stack segment that is active as soon as we enter real mode.
-1. We still need a data segment because the stack segment canno
+1. We still need a data segment because the stack segment cannot
 be used to pass the interrupt vector number from protected to
 real mode, and the code segment cannot be written in prot
 mode(!).
 2. We still need to jump through the GDT_CS 32 bit segment,
 because of the calls. These wouldnot work in the switch segment
-because it is a 16 bit segment, (unless some bizar combination
+because it is a 16 bit segment, (unless some bizar combination of
 prefixes would allow to modify the call such as push a 16 bit
 return address that is on a 32 bit stack or some such.),
-3. We still need the switch segment, because after returning fr
+3. We still need the switch segment, because after returning from
 the far call to the interrupt vector we are in a real segment.
 
 2000 sep 25 (tue)
@@ -2812,11 +2812,11 @@ allocating space on both the real and the protected stack.
 Than, from protected mode, save and reload the FS selector
 with a protected mode view of the real mode stack segment
 and save the register again to [fs:sp].
-In this way we can pass data accross the real/protected boundar
+In this way we can pass data accross the real/protected boundary
 that is not in a register.
-So what we loose here is the ability to pass the value of FS an
+So what we loose here is the ability to pass the value of FS and
 EBP through software interrupts. This is only of concern for
-debuggers and those might take special care to get them from th
+debuggers and those might take special care to get them from the
 stack. Moreover it could be made totally transparent by saving
 the old values of fs and bp to the real mode stack too, instead
 of only on the protected mode stack.
@@ -2830,7 +2830,7 @@ pop ebp
 jmp gdt_cs
 without the need for saving and restoring any segments.
 
-But I think first I should put a cleaner view of the stacksegme
+But I think first I should put a cleaner view of the stacksegment in
 the main branch. Maybe even prepare everything by also making a
 separate protected mode 16 bit stack segment that views into
 the real mode stack segment.
@@ -2838,25 +2838,25 @@ Label SS_REALPROT : Still identical version with 2.114 that
 has all the name changes in preparation of the version that
 doesn't load segments while switching.
 Now trying to eliminate all the stack redefining in PROTECT.M4.
-This leads to some bizarre results. Sometimes we have that the
+This leads to some bizarre results. Sometimes we have that the t
 screen no longer supports linefeeds. Sometimes we have crashes.
 Still we are pretty sure the stack segment is valid.
 Not using the setting to zero of ESP leads to crashes.
 
 2000 sep 27 (wed)
-Because the cleanup of the switching leads to crashes fairly im
-I got the idea that a very conservative switching (imitating th
+Because the cleanup of the switching leads to crashes fairly immediately,
+I got the idea that a very conservative switching (imitating the one in
 the main stream Forth 2.115 ) might work better.
-And indeed we can now get XXXXXX on the screen. But it seems to
-very soon. I presume that is as soon as we have some real inter
+And indeed we can now get XXXXXX on the screen. But it seems to crash
+very soon. I presume that is as soon as we have some real interrupt to serve.
 2.114.1.24 works together with protect.m4 version 1.15.
 
-Trying to clean up this success leads to a number of small irre
-but eliminating those results in a Forth where the 10/0E BIOS n
+Trying to clean up this success leads to a number of small irregularities,
+but eliminating those results in a Forth where the 10/0E BIOS no longer
 works. The most clean, but non-working version sits in
 precious2/precious4.
 2000 sep 28 (wed)
-plan is to rebuild the precious2/precious4 version but in worki
+plan is to rebuild the precious2/precious4 version but in working order.
 Saved a version that is clean and is no worse than we had.
 Called PROTEXP1.
 Somehow I fooled up the hard disk.
@@ -2886,23 +2886,23 @@ Beginning of oct: did not succeed in getting the interrupts
 under protected mode working.
 Discovered that GO32 uses an interrupt task.
 
-2000 oct 2 3 4 Read "history of the russian revolution by Leon
-with all those slanderous remarks about Stalin" or is it the tr
+2000 oct 2 3 4 Read "history of the russian revolution by Leon Trotsky,
+with all those slanderous remarks about Stalin" or is it the truth?
 
 2000 oct 2 (thu)
 Session with Coos Haak. A rudimentary BNF system.
 
 2000 oct 5 (fri)
 
-At last I went on with the BNF. Discovery: a patch up of the fo
+At last I went on with the BNF. Discovery: a patch up of the forward
 referencing is not easy. You cannot fill in the address into a
-forward reference word, because that is not an execution addres
-the address of colon. On the other hand the PFA is not a pointe
+forward reference word, because that is not an execution address but
+the address of colon. On the other hand the PFA is not a pointer but
 a field within the header and is tied up.
 Managed to implement ( [ and {.
 Introduced some compiling words, such as <OPT <FAKE.
 2000 oct 9 (mon)
-Made a  backup of Sep.
+Made a  backup of sep.
 Saved what I have got thus far in the archived blocks.
 And another save with a cleaned up version, where
 there is a layer of compiling words that are not immediate
@@ -2913,11 +2913,11 @@ layers of actual calling are replaced by direct R> statements.
 2000 oct 9 (mon)
 I have cleaned up the paranoia directory.
 It now contains a file that must become the Forth definition of
-the Pascal language, and the cleaned up paranoia.pas that at le
+the Pascal language, and the cleaned up paranoia.pas that at least
 can be converted by p2c :
 p2c -l -lp2c paranoia.pas
 cc -lm -lp2c paranoia.c -o paranoia
-Interestingly this gives a SEVERE DEFECT that is not present in
+Interestingly this gives a SEVERE DEFECT that is not present in the
 c-compiled version of paranoia.c.
 
 What I want to do now is:
@@ -2925,40 +2925,40 @@ What I want to do now is:
 *Introduce `IF `BEGIN etc. that do [COMPILE] IF etc.
 * Make " that is a smart C".
 * Have <PTS restore the data stack.
-* PUSH" that pushes the text recognized by the current BNF: to
-* POP" that gets text from stack, than adds it into the diction
+* PUSH" that pushes the text recognized by the current BNF: to stack
+* POP" that gets text from stack, than adds it into the dictionary.
 
 2000 oct 10 (tue)
 With the help of Coos Haak all the items have been done as
 mentionned yesterday.
-caveats: the return stack overflows easily, with dramatic resul
+caveats: the return stack overflows easily, with dramatic results.
 In 40 LOAD you get an enormous return stack.
 2000 oct 11 (WED)
-You cannot count on the items that are PUSH" ed, because many t
+You cannot count on the items that are PUSH" ed, because many times
 they are just skipped. Restoring the data stack depth helps
 to mask this error. The solution is to always output the stuff,
 and rely on backtracking to remove unwanted output.
-Even so it might be advisable to never output when SUCCESS is f
+Even so it might be advisable to never output when SUCCESS is false.
 2000 oct 12 (thu)
 I have written some elementary lexical stuff for the parser.
 The definition of the language I had contained numerous errors.
 In particular some definitions are not used at all.
-After removing from the bnf file what belongs in lexical parser
-interplay between comment and strings etc. I can now load the w
+After removing from the bnf file what belongs in lexical parser (the
+interplay between comment and strings etc. I can now load the whole 
 bnf definition in my BNF system.
 2000 oct 12 (fri)
 
 2000 oct 14 (sun)
-Looking into the possibility of making a break into the recursi
+Looking into the possibility of making a break into the recursion.
 For example
 BNF: A   'b' | A 'c' ;BNF
 Athe beginning of the definition (before the 'b' ) insert
 some code to detect wether this is a recursive call.
 If so the parse pointer might have proceeded since the previous
 time. Then it is okay. Or the previous time a successful parse
-has been made (matching the 'b') but backtracking occurred beca
+has been made (matching the 'b') but backtracking occurred because
 of what was behind the 'b'. Then it is also okay.
-But of we just try to recurse without hope for success, A shoul
+But of we just try to recurse without hope for success, A should
 exit immediately with affecting the remembered stuff.
 This is all really difficult to implement, but  it suffers from
 an even severe thinking error: if 'b' is matched then fails for
@@ -2966,7 +2966,7 @@ what is behind, back tracking never gets at trying the A 'c'
 stuff. You must also realise that x.y.z.p.q.r= will go 5 times
 in the recursion backtracking all the way and waste prodiguous
 amounts of time.
-The bottom line is that left recursion is totally unsuitable fo
+The bottom line is that left recursion is totally unsuitable for
 automatic parsing and should be replaced by right recursion
 anyway.
 So I will try my hand at simplifying pas_extp.bnf.
@@ -2985,9 +2985,9 @@ Created a definition for the pascal langauge that
 can be handled by the BNF tool I have made.
 It goes through the file paranoia.pas quite some bit.
 2000 oct 16 (mon)
-The file pascal.frt now can scan the file paranoia.pas syntacti
-monadic operators and the `or' operator were still missing, and
-`do' part of the `for' statement. But for the rest everything i
+The file pascal.frt now can scan the file paranoia.pas syntactically.
+monadic operators and the `or' operator were still missing, and the
+`do' part of the `for' statement. But for the rest everything is okay.
 It takes 5 minutes generating a 175000 line debug file,
 and merely 44 seconds for just scanning.
 2000 oct 18  (wed)
@@ -3007,7 +3007,7 @@ There are indices for
 - concept   remains
 - data type defining words VARIABLE STRING etc.
 Forth word's get the @code{} tag. (plus subsection)
-@xref(!) is also needed but generates note: instead of see also
+@xref(!) is also needed but generates note: instead of see also.
 Stack effects get @var
 files get @file
 example strings get @samp
@@ -3022,15 +3022,15 @@ Continuing with making dictionary entries.
 I guess that I go with the standard ISO stuff :
 NAME  pronunciation stack-effect wordset description references
 
-The glossary is now such that those fields are present, the fil
-is in a processable format, and the stack-effect and descriptio
+The glossary is now such that those fields are present, the file
+is in a processable format, and the stack-effect and descriptions
 are inspected, (version 1.3)
-I made a mistake by putting things like $var{SP@} in the glossa
+I made a mistake by putting things like $var{SP@} in the glossary.
 They are processable by texinfo, but are no longer amenable to
-e.g. html. So $var{SP@} has been translated back to forthvar(SP
+e.g. html. So $var{SP@} has been translated back to forthvar(SP@)
 The macros to generate it back using m4 are present in x.m4.
-A crucial discovery is that $1 is expanded between curly bracke
-And you can define({quote},{{{$1}}}) which will put quotes arou
+A crucial discovery is that $1 is expanded between curly brackets.
+And you can define({quote},{{{$1}}}) which will put quotes around
 its argument in the output stream.
 So now go ahead with generating a texinfo file first that is a
 plain glossary with an introduction.
@@ -3039,7 +3039,7 @@ info -f filename
 2000 oct 24 (mon)
 What a success! I can now generate an info file with
 a glossary menu that derives from loose items.
-The only problem is when a name contains a comma. There is no w
+The only problem is when a name contains a comma. There is no way 
 texinfo would handle that.
 The solution choosen is to have a worddocsafe that uses
 the pronunciation as an identification, for those words
@@ -3056,7 +3056,7 @@ Furthermore, I want a wordset name for each word.
 Do not confuse these with the iso-wordset names.
 * in prepration for supersort all documentation items
 must be preprended by the wordset name.
-* an experiment show that tex has only trouble with names conta
+* an experiment show that tex has only trouble with names containing commas.
 * see also items using a link in html via glosshtml.m4
 * nice display of word -- stack -- sets in tex
 * generating html files
@@ -3125,19 +3125,19 @@ see if that goes better.
 Still run into problems. Especially with library linking.
 
 2000 nov 3 (fri)
-Upgrading was succesful. My improvement of the keymap was no lo
-effective because the directories have changed. I can now no lo
-link the program, as it seems that the seekg member is missing
-istream. It is unclear whether this means I use the ifstream li
+Upgrading was succesful. My improvement of the keymap was no longer
+effective because the directories have changed. I can now no longer
+link the program, as it seems that the seekg member is missing for
+istream. It is unclear whether this means I use the ifstream library in
 a wrong way, or that the system is misconfigured.
 I somehwere read that I shoud run libconfig -v as root.
 This I did.
-There is a library in /usr/lib libstc++-so.2.8.0 that contains
-member and specifiying the library in the link make the link su
+There is a library in /usr/lib libstc++-so.2.8.0 that contains a seekg
+member and specifiying the library in the link make the link succeed.
 however just saying -libstdc++ will not make the link succeed.
-(After removing the 2.9 version, that apparently was dummy, thi
+(After removing the 2.9 version, that apparently was dummy, this still
 holds.)
-After upgrading also de development library (that was not requi
+After upgrading also de development library (that was not required 
 according to RedHat) I now compile again without problems, but
 the program still crashes.
 It is by no means clear what I did wrong, but now I seem to
@@ -3153,35 +3153,35 @@ and that is the one I use for now.
 
 I have now a stable version that passes the regression test,
 that I have which is not complete.
-This version of supersort should be able to sort the dictionary
+This version of supersort should be able to sort the dictionary entries.
 And it is.
 
 2000 nov 5 (sun)
 For a system to document Forth I need :
-* invent a way to generate output from fig86.gnr towards a doc
+* invent a way to generate output from fig86.gnr towards a doc file
   THis require a cleanup of the doc system :
-  * get the -------- sytem working once and for all, done by ge
+  * get the -------- sytem working once and for all, done by getting rid
   * get rid of superfluous $0 's
   * explain whole file and definition time expansion of _yes
-  * define doc and code that switch between doc and code, and p
+  * define doc and code that switch between doc and code, and place
   doc after code
   * split out the doc and code using sed at some tag
 
 
-I have succesfully cleaned up prelude.m4 , with better explanat
-and a redefinition of worddoc/worddocsafe that redirects the st
+I have succesfully cleaned up prelude.m4 , with better explanations
+and a redefinition of worddoc/worddocsafe that redirects the stuff to
 a separate (documentation) channel first.
 The -------- system must probably go away. It clutters up the
-assembler file with came from information. That is just what I
+assembler file with came from information. That is just what I want to
 hide in the documentation. So remove the --- system.
-I have done just that. The assembler sources are still equivale
-Proceeded to incorporating 2/3 of the glossry items in the gene
+I have done just that. The assembler sources are still equivalent.
+Proceeded to incorporating 2/3 of the glossry items in the generic source.
 
 2000 nov 6 (mon)
-* put all pieces of gloss in, such that it lands in the doc fil
+* put all pieces of gloss in, such that it lands in the doc file
 
-I have indeed put all the documented headers in the generic sou
-This leaves me with the glossary header, non present glossary i
+I have indeed put all the documented headers in the generic source.
+This leaves me with the glossary header, non present glossary items,
 back storage glossary items, untrue stories, things that do not
 belong in a glossary and 70 items still to document.
 
@@ -3194,7 +3194,7 @@ belong in a glossary and 70 items still to document.
 - legalese and meta-information
 
 8:30
-First I must build a mechanism to have chapters in the glossary
+First I must build a mechanism to have chapters in the glossary.
 For this I could use the undirect command of m4, whereby after
 each chapter the contents are dumped much like I did it before.
 I had to make the following separate files :
@@ -3221,19 +3221,19 @@ corresponding names.
 - filling in the manual chapter
 - document all wordsets as a whole
 - document all words including the new ones
-- Collect all information and put in it figforth.texinfo file,
+- Collect all information and put in it figforth.texinfo file, even when wrong
 - Check  and correct the figforth.texinfo file for version A.
 - legalese and meta-information
 
-I have been really messing around. I appear not to be able to g
-right before I very carefully define the file extensions and ad
-to that. That gloss.mig is at the same time an intermediate fil
+I have been really messing around. I appear not to be able to get things
+right before I very carefully define the file extensions and adapt the makefile
+to that. That gloss.mig is at the same time an intermediate file and also
 present in RCS doesn't help.
-So I restarted and documented all extensions carefully in tje M
-After going back a small step, I can no longer generate any tex
-I see that I must get rid of the mig extension in the test.mak
+So I restarted and documented all extensions carefully in tje Makefile.
+After going back a small step, I can no longer generate any tex documentation.
+I see that I must get rid of the mig extension in the test.mak Makefile
 The name of the menu is changed from menu.mi to menu.texinfo.
-I have changed the file setenv such that $s is the stem, e.g. f
+I have changed the file setenv such that $s is the stem, e.g. fig86.alone.
 I have checked in a total version that can generate
 make clean $s.dvi
 (via tex)
@@ -3244,26 +3244,26 @@ conditional documentation now is possible.
 15:00
 $setfilename now right in tex
 The make still was not stable.
-Studied it and discovered that gloss.mi was built again in the
-where it was allready a dependancy. Also gloss.mig is in RCS an
+Studied it and discovered that gloss.mi was built again in the target .tex
+where it was allready a dependancy. Also gloss.mig is in RCS and it is a
 to be built target.
-Solution: renamed gloss.mig into gloss2.mig and removed the ext
+Solution: renamed gloss.mig into gloss2.mig and removed the extra action.
 20:50
-Careful inspection whetehr we have a stable version. Difference
+Careful inspection whetehr we have a stable version. Difference made with all
 the RCS files.
 Eliminated wordset.mi as anintermediate target.
 Eliinated gloss.mig as an intermediate target.
-I have a regression test in cmp. I only proceed if the tex file
+I have a regression test in cmp. I only proceed if the tex file is improved.
 I have now also a regression for the info file and the mi file.
-I can now generate html files and have them in the regression d
-A nagging problem is that the .rawdoc file i generated in conce
-.asm file. Because it is not an explicit target it is contantly
+I can now generate html files and have them in the regression directory.
+A nagging problem is that the .rawdoc file i generated in concert with the 
+.asm file. Because it is not an explicit target it is contantly destroyed.
 This is solved too.
 22:47
-I am now in a position to put information in the framework I ha
-Not yet. The glossary is still not macro-expanded according to
+I am now in a position to put information in the framework I have created.
+Not yet. The glossary is still not macro-expanded according to the .cfg 
 file but according to the defaults.
-I just can get the line about ``%.mi : gloss.m4 %.mig'' such th
+I just can get the line about ``%.mi : gloss.m4 %.mig'' such that it doesn't give
 the message EOF in string. Strange.
 2000 nov 10 (fri)
 10:00
@@ -3271,15 +3271,15 @@ At last I can add the old documentation to figforth.mi.
 
 * filling in the manual chapter
 * legalese and meta-information
-- Collect all information and put in it figforth.texinfo file,
+- Collect all information and put in it figforth.texinfo file, even when wrong
 - document all wordsets as a whole
 - document all words including the new ones
 - Check  and correct the figforth.texinfo file for version A.
 - legalese and meta-information
-I gues I have the copyright in there, and a discription of the
+I gues I have the copyright in there, and a discription of the Forth
 
 2000 nov 11 (sat)
-* Collect all information and put in it figforth.texinfo file,
+* Collect all information and put in it figforth.texinfo file, even when wrong
 * remove _1_ macro's, introduced _ALIGNED macro
 - move general user information out of fig86.gnr to *.mi files.
 - document all wordsets as a whole
@@ -3290,12 +3290,12 @@ I think texinfo is lousy for the following reasons:
 if subsection's (such as a wordset), must not be accessed via a
 menu) they cannot be accessed via the index too.
 As mentionned before much names just cannot be handled.
-much needed formatting (eg. for ANSI type name--stack--affiliat
+much needed formatting (eg. for ANSI type name--stack--affiliation)
 is not possible
-Shorthands are very difficult. (at first I failed.Now doing it
+Shorthands are very difficult. (at first I failed.Now doing it via
 manual.m4).
 
-At least all information of the glossary.txt figdocadd.txt and
+At least all information of the glossary.txt figdocadd.txt and figdoc.txt 
 is put into the .mi files.
 
 It begins to start looking like something.
@@ -3306,8 +3306,8 @@ It begins to start looking like something.
 - document all words including the new ones
 - Check  and correct the figforth.texinfo file for version A.
 
-I have introduced the note in the manual. This is a node you ca
-The manual has now three indices and two table of contents. Nic
+I have introduced the note in the manual. This is a node you can jump to.
+The manual has now three indices and two table of contents. Nice.
 It can also be printed. However if I use the smallbook format,
 I cannot get the page aligned horizontally, if I print them on
 my deskjet.
@@ -3321,10 +3321,10 @@ Appalling.
 11:30
 Trying to get the see also also in the info file. This succeeds
 partially, only the first entry shows up.
-Yecch the latest version somehow has an error with generating f
+Yecch the latest version somehow has an error with generating fig86.alone.ps
 with an unmatched brace.
 Panic for nothing. If cleanly done there is no problem.
-All entries in the documentation must follow the @ with a space
+All entries in the documentation must follow the @ with a space.
 13:10
 Solved the duplication of @ outside of the fig86.gnr file.
 It is simple, every @ turning up in the docs must be
@@ -3341,7 +3341,7 @@ install a ci-Forth.
 You do not want nor need to read this in order to
 use a particular generated ci-Forth.
 In fact the ci-Forth you want to use and the corresponding
-manual you want to consult are generated using these very instr
+manual you want to consult are generated using these very instructions.
 @@
 2000 nov 14 (thu)
 Mainly worked on formula. Tingel tangels.
@@ -3389,22 +3389,22 @@ Promised to send here the thesis in its current form.
 I can now generate the documentation directly from the rawdoc.
 
 2000 nov 27 (mon) During hcc dagen I have managed to
-The gloss.html macro set is updated such that html is now organ
+The gloss.html macro set is updated such that html is now organised by
 chapter.
 It becomes clear how I must document the ciforth package.
 I must use HOWTO. Reference about this are in the HOWTO-index.
 
 wc didn't work anymore, now it does. The sollution was to
 put the BEGIN WHILE REPEAT construct of COUNT-FILE on
-one line. There is however no insight whatsoever about what is
+one line. There is however no insight whatsoever about what is going
 one.
 2000 nov 28 (tue)
-The BEGIN WHILE REPEAT problem is solved. QUIT didnot initialis
+The BEGIN WHILE REPEAT problem is solved. QUIT didnot initialise
 the return pointer properly (!).
 FOR-WORDS and FOR-VOCS have been debugged.
-With FOR-VOCS an improved FORGET has been made, that handles vo
+With FOR-VOCS an improved FORGET has been made, that handles vocabularies
 correctly.
-lina currently measures 11808 bytes. And 11980 after solving th
+lina currently measures 11808 bytes. And 11980 after solving the
 FORGET bug.
 
 2000 nov 29 (wed)
@@ -3422,12 +3422,12 @@ I must make a new release :
 - Make a total index.
 ]
 
-Oeps I lost the trick to get the RCS version in the documentati
+Oeps I lost the trick to get the RCS version in the documentation.
 This must be in the backup of 19 or 20 november.
 I reimplemented it, couldn't find it.
 Testing in behalf of release : 2.147
 lina okay.
-figforth crashes immediately. However building is now adapted t
+figforth crashes immediately. However building is now adapted to new file
 system.
 
 2000 dec 1  (fri)
@@ -3437,7 +3437,7 @@ if built from the old version.
 Testing everything prior to release.
 Except for a configuration problem (real mode booting
 forth must not load at an absolute address)
-eveyrthing works and the documentation builds (html info tex al
+eveyrthing works and the documentation builds (html info tex alike)
 until the version that must boot from hard disk.
 It is not a problem to do RESTORE-BLOCKS (put latest versin
 of blocks on hd). The hd version tries to boot but doesn't
@@ -3450,7 +3450,7 @@ Unfortunately this doesn't seem to help, but that is because
 I installed the wrong version of alone.bin.
 This leads to version 2.148.
 Difference between 2.148 and 2.147 are tested for the assembly
-file, and they are the same for all configurations of 2.147 tha
+file, and they are the same for all configurations of 2.147 that
 were tested.
 Version 2.148 has been successfully installed on harddisk.
 So we can output release5.
@@ -3493,7 +3493,7 @@ variable length strings.
 This is not a pleasant format to generate in Forth.
 Using strip -s -R .bss -R .comment removes a lot from
 the lina file, but there remains at least
-.symtab .strtab .shstrtab and a message with the NASM assembler
+.symtab .strtab .shstrtab and a message with the NASM assembler.
 Talking with Coos Haak. The only reasonable solution is to
 search for the magic number "0x7fELF" , call that SM
 Then we must manipulate bm-sm here-bm and em-here.
@@ -3510,7 +3510,7 @@ The crashing in COLD as long as you don't have dictionaries
 has mysteriously disappeared.
 Most of the configuration information has disappeared from
 the user manual t the configuration manual.
-Quite some work on separating the generic and user documentatio
+Quite some work on separating the generic and user documentation.
 2000 dec 8 (fri)
 The generic manual and the manual for linux native
 begin to look reasonable. There are no significant
@@ -3526,9 +3526,9 @@ Introducing meme's and associations.
 Analysing d++ along these line.
 Experiment with looking for certain Linux programs.
 Expert mode : options yes, no, I dont't know, irrelevant
-or impossible to answer questions, I don't understand the quest
+or impossible to answer questions, I don't understand the question.
 Search mode : options yes, no, I dont't know, irrelevant
-or nonsensic l to answer questions, I don't understand the ques
+or nonsensic l to answer questions, I don't understand the question,
 I don't care.
 Specific mode : you can look up
 a question in the question database. That is than taken into
@@ -3586,7 +3586,7 @@ The stuffwith regard debugging is partly incomprehensible.
 Better first reorganise the vocabulary layout (through link
 at lowest address.) Plus using >BODY to access it.
 This is done and the VLFA moved to the front.
-Now we will do a fresh attempy at introducing FF without using
+Now we will do a fresh attempy at introducing FF without using it.
 In using the flag field crashes occur accessing some blocks
 (during list , then during load). But I can decompile the whole
 lot as long as a stop short of loading all the assembler stuff.
@@ -3606,7 +3606,7 @@ count and the old MATCH words remain.
 - put CFA up front.
 - make PFA point to an area "owned" by a definition
 - keep introducing tests all the way
-I have this idea that for a code word CFA and PFA should contai
+I have this idea that for a code word CFA and PFA should contain
 the same address.
 I have eliminated the eight bits altogether.
 Introduce like $, to put a string into the dictionary
@@ -3689,9 +3689,9 @@ flags in the second cell.
 I have done a lot of improvement, but I am still stuck at the
 crash of the loading of assembler screens.
 This has krept in between fig86.gnr 3.21 and 3.22
-and header.m4 3.3 and 3.4 , where the smudge bit went to a sepa
+and header.m4 3.3 and 3.4 , where the smudge bit went to a separate
 field.
-This doesn't give much of a clue. I can trace that it has crash
+This doesn't give much of a clue. I can trace that it has crashed
 in COPY-SEG in screen 129 but this changes as soon as I try to
 handle it less circumstantially.
 
@@ -3865,17 +3865,17 @@ CREATE is now no longer used.
  - remove block locks after an error
  - Show word where an error occurs.
 12:00..15:00
-Made a clean version were only the field numbers have to be fil
+Made a clean version were only the field numbers have to be filled
 in and the portions of (CREATE) moved and HEADER macro.
 The tests using figforth.c show that it gets into the INTERPRET
 loop. It crashes while looking up words in the dictionary,
 and VLIST also crashes. But ' ? CURRENT @ FOR-WORDS prints
-indeed all code field contents. The problem occurr in particula
+indeed all code field contents. The problem occurr in particular
 while fetching the namefield. But LATEST ID. is no problem.
 15:00..17:00
 Header changed so as to also create the headers of VOCABULARY
 This was the problem, the half baked fields of FORTH and
-denotation contained no name field, that ID. was trying to prin
+denotation contained no name field, that ID. was trying to print
 anyway. But now the fields are in the proper order:
 CFA DFA FFA LFA NFA . Also the block file is okay.
 2001 jan 7 (sun)
@@ -3907,7 +3907,7 @@ Worked through it up till I.
  - skip leading non.blanks in word
  13:30
  I feel somewhat pessimistic about ever being able to
- attain any of the goals I have in mind. Be it this intelligenc
+ attain any of the goals I have in mind. Be it this intelligence
  or launching a call to arms in the Forth community for
  generating useful programs.
  - introduce hay's test for all things in the kernel
@@ -3946,7 +3946,7 @@ BRANCH  [ 18 , ] DUP (SOURCE @ + ) C@   1   IN   +!
 
 : (WORD)
 IN @ >R
-BEGIN IN[] OVER SOURCE CELL+ @ <> >R ?BLANK R> AND WHILE DROP U
+BEGIN IN[] OVER SOURCE CELL+ @ <> >R ?BLANK R> AND WHILE DROP UNTIL
 BEGIN IN[] ?BLANK 0= WHILE DROP UNTIL
 ( SOURCE ) R ( +) SWAP R> - ;
 ;
@@ -3954,7 +3954,7 @@ BEGIN IN[] ?BLANK 0= WHILE DROP UNTIL
 : (PARSE)
 IN @ >R
               DUP  -1             <>
->R BEGIN IN[] OVER SOURCE CELL+ @ <> SWAP R <> AND WHILE DROP U
+>R BEGIN IN[] OVER SOURCE CELL+ @ <> SWAP R <> AND WHILE DROP UNTIL R> DROP
 ( SOURCE ) R ( +) SWAP R> - ;
 ;
 .. 15:00
@@ -4125,7 +4125,7 @@ digit in (NUMBER), not to do a lot of those things elsewhere.
 I have changed the protocol with denotations.
 If a word is found in the normal way or as a denotations,
 the parse pointer is left after the word. This is logical,
-and leads to easier reuse of the words of the denotation wordse
+and leads to easier reuse of the words of the denotation wordset.
 
 ENVIRONMENT? is implemented by an orphan vocabulary, i.e. not
 linking to Forth.
@@ -4154,10 +4154,10 @@ nothing
 Researched the execve system call.
 The results are in
 main(int argc,char **argv, char **env)
-    char *X[] ={ "/uin/sh", "-c","cat hello.c aap e.d>apekop",
+    char *X[] ={ "/uin/sh", "-c","cat hello.c aap e.d>apekop", NULL };
         execve("/bin/sh", X, env);
-Added the ARGS command that allows access to the commmands pass
-the program. Surprisingly, the program is started with argc arg
+Added the ARGS command that allows access to the commmands passed to
+the program. Surprisingly, the program is started with argc argv env
 as local variables rather that arguments. So there is no return
 address and the stack pointer points to (e.g.)
 4 , "lina", "aap", "noot" , "mies", 0, "HOME=/home/..", "..", 0
@@ -4222,10 +4222,10 @@ Pure stack manipulation 360 ms
 
 2001 mar 3 (sat)
 *publish
-I have duplicated fig86.gnr to ci86.gnr, figforth.c to ciforth.
+I have duplicated fig86.gnr to ci86.gnr, figforth.c to ciforth.c
 I have also duplicated the makefiles.
 I have made the testreport up to date.
-Only the lina version works and that without html documentation
+Only the lina version works and that without html documentation.
 
 In behalf of the release i have done
 make release VERSION=2.135
@@ -13968,145 +13968,38 @@ Naming convention gset meaning generated set introduced.
 Renaming done using symbolic links.
 the testinstructionsets target can now be expanded.
 
---------------------
-*officialdecompilation fails on SEE _pad.
+2016 jun 14
+Getting serious about the documentation in behalf of arm version
+at Frans.
+The following issues are moved away from this document, after
+a check they were indeed solved:
+INLINING 'SEE _pad' ACCEPT SET-SRC $! MOVE :I D< CHS
+A number of FCR's are created: 1 .. 5
+The following issue are solved here and now:
+- end of block file, line nr is not correct
+- copyright in screen 0 is old
 
-*The description of ACCEPT is no good.
+2016 jun 15
+FCR up til 22
+Solved here and now :
+ - PP referenced from SRC
+ - ANDSI,
+ -   Replace some OVER OVER with 2DUP
+ - 'W' replaced by 'WOR' in manual.mi
 
+There are a number of protfcr's. They must be pondered
+whether those are real problems.
 
-The case about non-structured things merits a place in common problems.
-Some linux commands may work on OSX but they are not loaded by WANT,
-and there is not ?X to and ?OSX and ?LI.
-#!/home/albert/PROJECT/ciforth/lina32 -s
-wc.script doesn't work properly with the interpreter from the current directory.
-*SET SRC should contain a ref to SAVE
-*$! and $+! should use smart moves (MOVE)
-*Smart move is iso.
-*implement :I , must be easy.
-*D< D0< bugs
-*LIMIT -> _LIMIT   FIRST -> _FIRST   INIT  -> _INIT (?)
-*The MEMORY words should get stack comment
-
-TODO
-Since the compilation of noforth the legacy stuff is solved reasonable.
-However there must be a careful exampination of the the documentation
-regarding things like IN >IN 0>IN etc.
-
-end of block file, line nr is not correct
-copyright in screen 0 is old
-Add a screen with fib pyr tri chs
-Add a screen with #LEFT-BIT
-The help screen should contain a mention of what the system is,
-and a reference to the tutorial page at hcc.
-
-ANDSI is missing from the built in assembler.
-move the zeroing if the handler to quit
-DIGIT can be high level and throw.
-
-A word for unsigned double formatting is missing.
-    (UD.R). May be a loadable extension.
-Get everything from
-dpmi clean up, READdpmi.txt
-    Replace some OVER OVER with 2DUP
-FOR RELEASE  5
-
-Traps don't work in 16 bits.
-
-PROBLEM : 4.0.7 is not marked in the sources.
-
-Add $\ in the CORE.
-
-    The documentation should mention which CORE-words are
-    loadable extensions, instead of announcing that the whole
-    CORE wordset is present.
-
-    Add a marker to start windows parameters.
-    ?DUP (ABORT") can be moved to extensions
-    WARM should save registers
-
-
-If the whole searchorder is filled with ONLY's, it would become
-more robust.
-
-Clean up the optimiser away from the base project.
-
-Trying to have IF better decompiled.
-
-What about registers that are unused in 64 bits.
-
-The word ?EXEC must be removed from CODE ENDCODE, if it is
-legacy.
-
-QSORT must use VECTOR which is almost DEFER
-then  '<q  >BODY !
-Add UNLINK to complement link.
-
-CREATE-FILE in windows works but generates files that can't be deleted
-
-
-What with GET-FILE : why 1000 - ?
-Suppose sda1 is a sandisk.
-
-dd if=binary.bin of=/dev/sda1
-
-Why does a wid require a valid name field?
-
-The library goes undocumented.
-
-A very stupid comment line in the description of the memory
-up till EM must be removed.
-
-The registers are not properly described in the manual.
-(Not using the names WOR HIP etc.
-Dscovered that maybe POSTPONE should be used instead of COMMA.
-
-I have
-the editor must show insert mode and upper lower case.
-Note that ^ fits in the middle of a
-"breath" (three space in horizontal Forth layout.)
-Compressing screens.
-Clean up subdirectories.
-Scripting goes terrible wrong if there is no block file.
-
-The pdf page numbers don't agree with the page numbers printed
-on the page itself. This doesn't affect printed output,
-but looks ugly while viewing.
-
-TICKS needed for MSDOS, using some timer.
-
-PP must be added at SRC also
-
-QSORT must add:
-   < and <-> must be reasonable compare and exchange operators.
-
-There must be a provision that if the assembler is there it is
-not reloaded.
-
-Even niet:
-
-- for version 5.0 the whole library is to be converted to lower
- case.
-
-- WANT DEADBEEF doesn't seem to work on renesas
-
-- Test to be added for throw from within blocks and strings.
-
-Discovered a bug in ciasdis, de operands for obligatory word, and
-immediate byte, are not in the right order.
-This can be solved to have the priority of OW, changed to
-after the IB, stuff, or introduce a special data thingy for the
-ENTER, like OB, .
-
-INLINING must be moved to its own screen.
-
-TERMIO is nowadays called TERMIOS
+2016 jul 10
+2001 aug 21 is the first day where the log is no longer trimmed to
+64 characters.
 
 -
 Greg Egan
-Schild's ladder. l
+Schild's ladder.
 --
- mijn wijk + willemstr 565
-
-It could be that lyx is the way to go for documentation.
 
 Write the article for allocate using a objects and thingies.
+
+Suppose sda1 is a sandisk.
+dd if=binary.bin of=/dev/sda1
