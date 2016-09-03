@@ -123,7 +123,7 @@ _LINUX_C_({It uses C-routines for I/O.}) dnl
 _LINUX_N_({It calls linux system from Forth directly.}) dnl
 _SECURITY_({It has compiler security, sacrificing some ISO
 compatibity.}) dnl
-_CIF_IN_({It use forthcode({PP}) instead of the ISO forthcode({>IN})})dnl
+_CIF_IN_({It use forthcode({PP}) instead of the ISO forthcode({>IN}) . })dnl
 _ISO_IN_({It uses forthcode({>IN}) in the way prescribed by ISO.}) dnl
 _FEWBLOCKS_({The number of blocks limited to 256.}) dnl
 _LOAD_({It contains the full ISO CORE in the kernel,
@@ -133,7 +133,7 @@ It is indirect threaded.
 
 @iftex
 If you are new to Forth you may want to read the Gentle Introduction,
-otherwise you better skip it. The second chapter most users will not
+otherwise you better skip it. The third chapter most users will not 
 be interested in.
 @end iftex
 
