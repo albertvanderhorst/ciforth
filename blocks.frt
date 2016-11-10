@@ -5,7 +5,7 @@
  : ISN'T UNIQUE
  : EMPTY NAME FOR NEW DEFINITION
  : DISK RANGE ?
- : FULL STACK
+ : FULL STACK/DICTIONARY FULL
  : ERROR ACCESSING BLOCKS FROM MASS STORAGE
  : UNRESOLVED FORWARD REFERENCE
  : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION
@@ -366,16 +366,16 @@ DATA _alloc-buf _ , 0 , DSP@ HERE - 2 RSHIFT ALLOT ALIGN
 
 : M+   S>D D+ ;
 
-( PARSE-NAME SAVE-INPUT EXECUTE-PARSING --> )   \ B4oct16
+( PARSE-NAME SAVE-INPUT EXECUTE-PARSING --> )   \ B6oct16
  "ALIAS" WANTED
-: SAVE-INPUT    SRC 2@ PP @ 3 ;                \ ISO
-: RESTORE-INPUT   DROP PP ! SRC 2! -1 ;        \ ISO
+ \ New standard proposed
+: EXECUTE-PARSING ROT ROT SAVE SET-SRC CATCH RESTORE THROW ;
+\ Remainder are all ISO words.
+: SAVE-INPUT    SRC 2@ PP @ 3 ;
+: RESTORE-INPUT   DROP PP ! SRC 2! -1 ;
 : -->   BLK @ DUP UNLOCK   1+ DUP LOCK
-    BLOCK B/BUF SET-SRC ; IMMEDIATE             \ ISO
-'NAME ALIAS PARSE-NAME                          \ ISO
-: EXECUTE-PARSING SAVE SET-SRC CATCH RESTORE THROW ; \ ISO
-
-
+    BLOCK B/BUF SET-SRC ; IMMEDIATE
+'NAME ALIAS PARSE-NAME
 
 
 
@@ -638,19 +638,19 @@ IMMEDIATE
 
 
 
-( ORDER .WID .VOCS BUFFER ) \ AvdH B5apr8
+( ORDER .WID .VOCS WORDLIST )                   \ AvdH B6oct01
 \ Print all namespace (voc) names in existence.
 : .VOCS 'ID. FOR-VOCS ;
+
 \ Print a voc's name from the WID)
 : .WID 0 CELL+ - BODY> ID. ;
+
 \ Print the current search order by namespace names
 : ORDER  CONTEXT BEGIN $@ DUP 'ONLY >WID <> WHILE .WID REPEAT
     2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 
-
-
-
-
+\ Return an anonymous  WORDLIST  , DUP points to "".
+: WORDLIST HERE 0 , 0 , 1 , 0 , DUP , ;
 
 
 \
@@ -1806,18 +1806,18 @@ TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
     'EXIT-COT >DFA @    R@ CELL+ CELL+ !
     R> TASK-TABLE BAG+! ;
 \
-( {{ }} [: ;] )                             \ AHCH B6feb11
-WANT UNLINK-LATEST
+( {{ }} [{ }] [: ;] )                           \ AHCH B6oct16
+WANT UNLINK-LATEST ALIAS
 \ New context for definitions, maybe in the middle of a word.
-: {{ POSTPONE SKIP (FORWARD R>
+: [{ POSTPONE SKIP (FORWARD R>
         CSP @ >R DPL @ >R UNLINK-LATEST >R STATE @ >R
     >R POSTPONE [ ; IMMEDIATE
-: }} FORWARD)  R>
+: }] FORWARD)  R>
         R> STATE ! R> LINK-LATEST R> DPL ! R> CSP !
     >R ;
-
+'[{ ALIAS {{      '}] ALIAS }}  \ For now, my version
 \ Compact version of :NONAME .. ;  not linked in.
-: {{{   HERE 'TASK @ , HERE CELL+ , ] ;
+: {{{   HERE 'TASK @ ( docol) , HERE CELL+ , ] ;
 : }}}   '(;) , POSTPONE [ ; IMMEDIATE
 \ Official 2012 standard quotation.
 : [:   POSTPONE SKIP (FORWARD {{{ SWAP ; IMMEDIATE

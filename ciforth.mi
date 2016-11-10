@@ -133,7 +133,7 @@ It is indirect threaded.
 
 @iftex
 If you are new to Forth you may want to read the Gentle Introduction,
-otherwise you better skip it. The third chapter most users will not 
+otherwise you better skip it. The third chapter most users will not
 be interested in.
 @end iftex
 
@@ -250,7 +250,7 @@ A ciforth error always displays
 the text ``ciforth ERROR #'' plus the error number,
 immediately and directly.
 _VERBOSE_({Of course the error numbers are given in decimal, irrespective of forthcode({BASE}).})
-This allows you to look the error up in the section ``Error explanations''.
+This allows you to look up the error in the section ``Error explanations''.
 More specific problems are addressed in the section ``Common Problems''.
 @section Error philosophy
 If you know the error number issued by ciforth, the situation
@@ -274,7 +274,7 @@ You may issue errors yourself at your discretion using
 forthcode({THROW}) or, preferably, forthcode({?ERROR}) and use
 an error number with an applicable message.
 However, unless yours is a quick and dirty program, you are encouraged to
-use some other unique error number.
+use some other unique error number, and document it.
 @section Common problems
 _HOSTED_({
 _PC_({
@@ -332,9 +332,14 @@ access for the library file.
 You must issue forthcode({DEVELOP}) which reopens the library file in READ_WRITE
 mode. Normally this should be part of loading the forthcode({EDITOR}) .
 _HOSTED_X_({ It may be of course that you don't have privilege to write
-to the file. As non-privileged user you cannot edit the system-wide library file.
+to the file.
+As non-privileged user you cannot edit the system-wide library file.
 })
-You may always edit and use a private copy of the library file, by the forthsamp({-l}) option.
+You may always edit and use a private copy of the library file.
+The forthsamp({-i}) options installs a copy of ciforth to wherever you want,
+and you can edit there.
+Or you can copy the official library file, and edit the copy, then use it
+by the forthsamp({-l}) option.
 forthxref({Manual}) for how options work. _VERBOSE_({The forthsamp({-l}) option itself works only if at least the
 official library file has been correctly installed.})
 })
@@ -376,8 +381,8 @@ The error number is probably used by user programs and hopefully documented ther
 So you can allocate error numbers not yet in use,
 and use them to identify your error situations.
 You can add messages to the library, but errors outside of the
-range [ M4_ERRORMIN M4_ERRORMAX ] need a re-assembly of the source,
-using adapted values of  {M4_ERRORMIN M4_ERRORMAX }.
+range [ M4_ERRORMIN M4_ERRORMAX ] need an edit of the source,
+or regeneration using adapted values of  {M4_ERRORMIN M4_ERRORMAX }.
 
 forthitem
 forthsamp({ciforth ERROR # 1 : EMPTY STACK})
@@ -423,7 +428,7 @@ Reading to the terminal input buffer failed. The message is
 probably inappropriate.
 
 forthitem
-forthsamp({ciforth ERROR # 7 : FULL STACK})
+forthsamp({ciforth ERROR # 7 : FULL STACK/DICTIONARY FULL })
 
 _SECURITY_({ The stack has run into the dictionary. This can be
 caused by pushing too many items, but usually it must be
@@ -450,7 +455,7 @@ forthcode({BLOCK-FILE}) . You may not have the right to access
 it. Try to view the file. Normally the library file is opened
 read-only. If you want to edit it make sure to do
 forthcode({DEVELOP}) in order to reopen it in read/write mode.
-If you forget, you get this message too.
+Otherwise you get this message too.
 
 forthitem
  forthsamp({ciforth ERROR # 9 : UNRESOLVED FORWARD REFERENCE})
@@ -678,28 +683,64 @@ In general these have numbers that are higher than the general errors.
 @node Documentation,Glossary,Errors,top
 @chapter  Documentation summary
 
-The most important Forth site is http://www.forth.org with links to all
+The homepage of this Forth is
+
+http://home.hccnet.nl/a.w.m.van.der.horst/lina.html
+forthbreak
+
+It is based on a generic system available via
+
+http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
+forthbreak
+
+The implementation of this Forth is indebted to FIGForth
+
+http://home.hccnet.nl/a.w.m.van.der.horst/figforth.html
+forthbreak
+
+A tutorial in English (and Dutch) is to be found at
+
+https://forth.hcc.nl/w/Ciforth/Ciforth?setlang=en
+forthbreak
+
+dnl An attempt by the same author at simplicity : yourforth
+
+The most important general Forth site is
+
+http://www.forth.org
+
+with links to all
 Forth chapters and commercial and free Forth implementation.
+forthbreak
 
 Like all modern languages the Forth ISO standard is available on the web
+
 http://www.taygeta.com/forth/dpans.htm
 forthbreak
 The official, printed manual by the Amercian National Standards Institute
 commands a stiff price.
-
-Starting Forth by Leo Brodie
 forthbreak
+
+
+In print
+forthitemize
+forthitem
+Starting forth by Leo Brodie
+
 A classic still worth reading, despite its age. You must adapt the examples
 in order to use it with an ISO Forth,
 A modernized version is available online at
 forthbreak
 http://www.forth.com/starting-forth/
 
+forthitem
 Going Forth by Leo Brodie
 forthbreak
 More timeless, maybe even more important, about the filosofy of Forth.
 
+forthitem
 The German Fig Chapter has a publication: Vierte Dimension.
+forthenditemize
 
 For historic interest the following is copied from the FIG documentation 1978.
 
@@ -747,7 +788,7 @@ _BITS16_({32})_BITS32_({64})_BITS64_({128}) bit signed double integer: most sign
 on top of stack
 forthitem dea
 A forthdefi({dictionary entry address}) , the basic address of a Forth word from which
-all its fields can be found.
+all its properties can be found.
 forthitem f
 logical forthdefi({flag}): zero is interpreted as false, non-zero as true
 forthitem faraddr
@@ -779,8 +820,7 @@ The capital letters on the right show definition characteristics:
 
 @table @samp
 forthitem C
-May only be used within a colon definition. A digit indicates number
-of memory addresses used, if other than one.
+May only be used within a colon definition.
 forthitem E
 Intended for execution only.
 forthitem FIG
@@ -795,6 +835,8 @@ but the implementation is not quite conforming.
 forthitem NISO
 Word belongs to ISO standard, but the implementation is not
 quite conforming.
+forthitem P
+Word is a prefix, interprets and optionally compiles remainder of word.
 forthitem WANT
 Word is not in the kernel, use the forthcode({WANT}) to load
 it from the library.
@@ -807,7 +849,7 @@ A user variable.
 
 Where there is mention of a standard or a model,
 it means that the word actually complies to the standard or the model,
-not that some word of that name is present.
+not that some word of that name is present in that standard.
 _VERBOSE_({Words marked with forthsamp({ISO,FIG}) will behave identically
 over all but the whole spectra of Forth's.})
 

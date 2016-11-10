@@ -78,8 +78,6 @@ but thisforth does.
 
 thisforth uses the forthdefi({blocks}) as a library
 by addition of the word forthcode({WANTED}) and a convention.
-More convenient is forthcode({WANT}) that adds all words that are on the
-remainder of the line, so without quotes.
 Starting with forthsamp({thisforth -w}) or most any option you have this
 facility available. If you are already in thisforth, you can
 type forthsamp({1 LOAD}).
@@ -101,7 +99,10 @@ DO-DEBUG
 S[ ] OK 1 2
 
 S[ 1 2 ] OK})
-You can turn forthcode({DO-DEBUG}) off with forthcode({NO-DEBUG}) .
+(You can turn forthcode({DO-DEBUG}) off with forthcode({NO-DEBUG}) .)
+
+More convenient than forthcode({WANTED}) is forthcode({WANT}) that adds
+all words that are on the remainder of the line, so without quotes.
 
 If you try to forthcode({INCLUDE}) a program, you may
 get errors like forthsamp({TUCK? ciforth ERROR # 12 : NOT RECOGNIZED}).

@@ -1216,11 +1216,13 @@ _C{ ############################################################################
 _C{                       FORTH ITSELF}
 _C{ ########################################################################################}
 _C
+dnl fasm has no multiline comments, appropiate for an assembler.
+dnl So the following is suppressed from the assembler file.
 _COMMENT
    FORTH REGISTERS
    The names under FORTH are used in the generic source.
 
-   FORTH   8088     FORTH PRESERVATION RULES
+   FORTH   Intel    FORTH PRESERVATION RULES
    -----   ----     ----- ------------ -----
 dnl Note how the following is to pass through m4
    {HIP}   HIP      High level Interpreter Pointer.  Must be preserved
@@ -1434,7 +1436,7 @@ _C{       Dictionary starts here.}
 DP0:
 _C{ Vocabularies all end in a link to 0.}
 define({_LINKOLD},0)dnl
-worddocsafe( {DENOTATIONS},{Prefix_TICK}, {tick_denotation},{--- addr},{ISO,FIG,C,I},
+worddocsafe( {DENOTATIONS},{Prefix_TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,P},
 {Used in the form: forthexample({'nnnn})
 In interpret mode it
 leaves the forthdefi({execution token}) (equivalent to the
@@ -1469,7 +1471,7 @@ _HEADER({'},{TICK},{DOCOL}, , B_IMMED + B_DENOT)
         DC      LITER
         DC      SEMIS
 _C
-worddoc( {DENOTATIONS},{Prefix_&},{char_follows}, {--- c},{C,I},
+worddoc( {DENOTATIONS},{Prefix_&},{char_follows}, {--- c},{I,P},
 {Leave forthvar({c}) the non blank char that follows.
 Skip another blank character.
 _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.})
@@ -1489,7 +1491,7 @@ _HEADER({&},{DCHAR},{DOCOL}, , B_IMMED + B_DENOT)
         DC      SEMIS
 
 _C
-worddoc( {DENOTATIONS},{Prefix_^},{control_follows}, {--- b},{C,I},
+worddoc( {DENOTATIONS},{Prefix_^},{control_follows}, {--- b},{I,P},
 {Leave forthvar({b}) the control character value of the char that follows
 _VERBOSE_({{i.e. }forthsamp({^A}){ results in 1 and so on}}).
 Skip another blank character.
@@ -1510,7 +1512,7 @@ _HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
         _SECURITY_({DC      QDELIM})
         DC      SEMIS
 _C
-worddocsafe( {DENOTATIONS},{Prefix_0},{den_zero}, {--- s/d},{C,I},
+worddocsafe( {DENOTATIONS},{Prefix_0},{den_zero}, {--- s/d},{I,P},
 {Implements forthcode({NUMBER}) for numbers that start with
 forthkey({0}) . Similar words are present for all decimal and hex digits.
 _VERBOSE_({{ ISO compatibility ony requires that denotators for
@@ -1532,7 +1534,7 @@ _HEADER({3},{DEN3},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({4},{DEN4},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({5},{DEN5},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({6},{DEN6},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-worddocsafe( {DENOTATIONS},{Prefix_7},{den_seven}, {--- s/d},{C,I},
+worddocsafe( {DENOTATIONS},{Prefix_7},{den_seven}, {--- s/d},{I,P},
 {Implements forthcode({NUMBER}) for numbers that start with
 forthkey({7}) . Similar words are present for all decimal and hex digits.
 },
@@ -1549,7 +1551,7 @@ _HEADER({8},{DEN8},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({9},{DEN9},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({A},{DENA},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({B},{DENB},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
-worddocsafe( {DENOTATIONS},{Prefix_B},{den_b}, {--- s/d},{C,I},
+worddocsafe( {DENOTATIONS},{Prefix_B},{den_b}, {--- s/d},{I,P},
 {Implements forthcode({NUMBER}) for numbers that start with
 forthkey({B}) . Similar words are present for all decimal and hex digits.
 },
@@ -1564,7 +1566,7 @@ _HEADER({D},{DEND},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({E},{DENE},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({F},{DENF},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _C
-worddoc( {DENOTATIONS},{Prefix_-},{den_minus}, {--- s/d},{C,I},
+worddoc( {DENOTATIONS},{Prefix_-},{den_minus}, {--- s/d},{I,P},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
 {},
 {{-48 .},{-48 },
@@ -1573,7 +1575,7 @@ _HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
         DC      PNUMB, DNEGA, SDLITE
         DC      SEMIS
 _C
-worddoc({DENOTATIONS},{Prefix_+},{den_plus}, {--- s/d},{C,I},
+worddoc({DENOTATIONS},{Prefix_+},{den_plus}, {--- s/d},{I,P},
 {Implements forthcode({NUMBER}) for numbers that start with forthkey({+}) .},
 {},
 {{+48 .},{48 },
@@ -1582,7 +1584,7 @@ _HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      PNUMB, SDLITE
         DC      SEMIS
 _C
-worddocsafe( {DENOTATIONS},{Prefix_"},{den_quote}, {--- sc},{C,I},
+worddocsafe( {DENOTATIONS},{Prefix_"},{den_quote}, {--- sc},{I,P},
 {Parse a forthkey({"}) delimited string and leave it on the stack.
 A forthkey({"}) can be embedded in a string by doubling it.
 The string is permanent and takes dictionary space.
@@ -2218,10 +2220,10 @@ parse area.}) Changing forthsamp({SRC}) takes immediate effect,
 and must be atomic,
 by changing only the third cell or
 by e.g. using forthcode({SET-SRC}).
-The third cell has the alias forthsamp({IN}) .
+The third cell has the alias forthsamp({PP}) .
 _VERBOSE_({{Words like }forthsamp({>IN BLK SOURCE}){ are secondary,
 and return their output by ``second-guessing'' }forthsamp({SRC}){ .}})},
-{{SAVE},{RESTORE},{BLK}},
+{{SAVE},{RESTORE},{PP},{BLK}},
 {{SRC @ TIB @ 8000 OVER + WITHIN .},{_T_} },
 enddoc)
 _HEADER({SRC},{SRC},{DOUSE}, _CELLS(27))      _C{ And 28 and 29.}
@@ -2850,8 +2852,8 @@ CODE_HEADER({@},{FETCH})
         _PUSH
 _C
 _BITS64_({
-worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- n},{ISO,FIG},
-{Leave the 32 bit contents forthvar({n})
+worddocsafe( {MEMORY},{L@@},{long_fetch},{addr --- u},{ISO,FIG},
+{Leave the 32 bit contents forthvar({u})
 of forthvar({addr}) .},
 {{!},{C@@},{2@@},{PW@@},{PC@@},{FAR@@}},
 { {-23 PAD L! PAD L@ .},{FFFFFFDD} },
@@ -2901,8 +2903,8 @@ CODE_HEADER({!},{STOR})
         _NEXT
 _C
 _BITS64_({
-worddocsafe( {MEMORY},{L!},{long_store},{n addr --- },{},
-{Store the 32-bit contents of forthvar({n}) at forthvar({addr}) .},
+worddocsafe( {MEMORY},{L!},{long_store},{u addr --- },{},
+{Store the 32-bit contents of forthvar({u}) at forthvar({addr}) .},
 {{L@@},{!},{C!},{2!},{PW!},{PC!},{FAR!}},
 { {-23 PAD L! PAD L@ .},{FFFFFFDD} },
 enddoc)
@@ -2960,8 +2962,8 @@ _HEADER({WITHIN},{WITHIN}, {DOCOL})
         DC      SEMIS
 _C
 _BITS64_(,{
-worddocsafe( {MEMORY},{FAR@@},{far_fetch},{faraddr --- n},{},
-{Leave the _BITS_ bit contents forthvar({n}) of
+worddocsafe( {MEMORY},{FAR@@},{far_fetch},{faraddr --- u},{},
+{Leave the _BITS_ bit contents forthvar({u}) of
 segment address pair forthvar({faraddr}).
 },
 {{FAR!},{@@},{C@@},{2@@}},
@@ -2990,8 +2992,8 @@ _BITS32_({
 })_C{}_END_({_BITS32_})
         _NEXT
 _C
-worddoc( {MEMORY},{FAR!},{far_store},{n faraddr ---},{},
-{Store _BITS_ bits of forthvar({n}) at segment address pair
+worddoc( {MEMORY},{FAR!},{far_store},{u faraddr ---},{},
+{Store _BITS_ bits of forthvar({u}) at segment address pair
 forthvar({faraddr}).
 },
 {{FAR@@},{!},{C!},{2!}},
@@ -3140,9 +3142,9 @@ forthsamp({UP}) is switched also automatically.}},
 {{In this ciforth the forthsamp({UP}) is to be found at
 forthsamp({0 +ORIGIN}).
 }})
-forthcode({CONTEXT}) is the last user variable at offset 38 ,
+forthcode({CONTEXT}) is the last user variable at offset 38 CELLS,
 such that new user variables may be allocated using offsets of
-38+M4_MAXWORDLIST and up.
+38+M4_MAXWORDLIST CELLS and up.
 It is best to do
   forthsamp({MAX-USER @ DUP USER cccc    CELL+ MAX-USER ! })
 reflecting the current allocation in the user area.
@@ -8399,9 +8401,10 @@ _C{        DC      DOTS}
         DC      SEMIS
 _C
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO,FIG},
-{Transfer characters from the terminal to address forthvar({addr}) ,
-until a "RET" is received.
-At most forthvar({count}) characters will be transferred to forthvar({addr})
+{Transfer at most forthvar({count}) characters from the
+terminal to forthvar({addr}) .
+The transfer takes place when a forthkey({RET}) is received,
+and excess characters after forthvar({count}) are ignored.
 Rely on the operating system for input editing. One or more
 nulls are added at the end of the text.
 },{{KEY},{KEY?}}, {}, enddoc)
@@ -8457,11 +8460,13 @@ _C{ device I/O. Code fields are filled in during bootup. }
 _C{ Lower case labels starting with "c_.." are c-supplied facilities.}
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthvar({count}) characters from the
-terminal to address, until a forthkey({RET}) is received. The
+terminal to forthvar({addr}) .
+The transfer takes place when a forthkey({RET}) is received,
+and excess characters after forthvar({count}) are ignored.
+The
 simple tty editing functions of _OS_ are observed, i.e. the
 ``erase'' (delete a character) and ``kill'' (delete a line)
-characters. Typically these are the backspace key and ^U. Note
-that excess characters after forthvar({count}) are ignored.
+characters. Typically these are the backspace key and ^U.
 The number of characters not
 including the forthkey({RET}) is returned into forthvar({n}).
 },
@@ -8492,6 +8497,8 @@ _VERBOSE_({{This is lighter on the system and sometimes easier
 to use than }forthcode({ACCEPT}){ }})
 This input remains valid until the next time that the console
 buffer is refilled.
+With TIBSIZE characters the terminal input buffer overflows,
+with unpredictable results.
 },
 {{KEY},{KEY?},{ACCEPT},{PP@@@@},{REFILL-TIB}},
 {
@@ -8758,11 +8765,11 @@ _HEADER({KEY?},{KEYQ},DOCOL)
 _C
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthvar({count}) characters from the
-terminal to the user supplied buffer address forthvar({adr}), until
-a forthkey({RET}) is received.
+terminal to forthvar({addr}) .
+The transfer takes place when a forthkey({RET}) is received,
+and excess characters after forthvar({count}) are ignored.
 The simple tty editing functions of _OS_ are observed, like the
 backspace key, and probably also the cursors keys, maybe more.
-Note that excess characters after forthvar({count}) are ignored.
 The number of characters not
 including the forthkey({RET}) is returned into forthvar({n}).
 The data at adr remains valid indefinitely.
@@ -8787,7 +8794,7 @@ worddocsafe( {INPUT},{(ACCEPT)},{paren_accept},{ --- sc } ,{},
 {Accept characters from the terminal, until a forthkey({ENTER})
 is pressed and return the result as a constant string
 forthvar({sc}).
-The forthkey({ENTER}) is not part of forhtvar({sc}).
+The forthkey({ENTER}) is not part of forthvar({sc}).
 It is possible that it contains other line endings such as a trailing (0x0D),
 which can be disposed off by forthcode({-TRAILING}).
 The editing functions are the same as with forthcode({ACCEPT}) .
@@ -8910,12 +8917,13 @@ _HEADER({ETYPE},{ETYPE},{DOCOL})
 _C
 worddoc( {INPUT},{ACCEPT},{accept},{addr count --- n},{ISO},
 {Transfer at most forthvar({count}) characters from the
-terminal to address, until a forthkey({RET}) is received.
+terminal to address. The transfer takes place when a forthkey({RET}) is received,
+and excess characters after forthvar({count}) are ignored.
 The backspace key on the standard PC keyboard layout
 is used to delete characters, without involvement of Forth, so
 changing forthcode({RUBOUT}) has no effect. Other editing keys such as
 forthkey({F3}) and cursor keys probably work as usual with a console application.
-Note that excess characters after forthvar({count}) are ignored. The number of
+The number of
 characters not including the forthkey({RET}) is returned into
 forthvar({n}). },
 {{(ACCEPT)},{KEY},{KEY?}},
@@ -11053,11 +11061,11 @@ The remaining memory ( up to 'EM' ) is
 used for:
 
         1. EXTENSION DICTIONARY
-        2. PARAMETER STACK
+        2. DATA STACK
         3. TERMINAL INPUT BUFFER
         4. RETURN STACK
         5. USER VARIABLE AREA
-        6. DISK BUFFERS (UNLESS REQUIRED <1 MBYTE)
+        6. BUFFERS FOR SCREENS
 
 
 _ENDCOMMENT

@@ -47,8 +47,12 @@ The program forthcode(*) multiplies the 3 and the 7 and the result is 21.
 The program forthcode(.) prints this results. It could have
 been put on the same line equally easily.
 
+You will be curious about what are all those commands available.
+Of course they are documented, but you can find the exact set
+by typing forthcode({WORDS}) .
 Programs can be added to the database by special programs: the so
-called forthdefi({defining word})'s. A defining word generally gets the name of the
+called forthdefi({defining word})'s.
+A defining word generally gets the name of the
 new word from the input line.
 
 For example: a constant is just a program that leaves always
@@ -58,7 +62,9 @@ A constant is created in this way, by the defining word forthcode({CONSTANT}) :
 forthexample({127 CONSTANT MONKEY   12 .
 12 OK})
 
-This must not be read like:
+You can check that it has been added, by typing forthcode({WORDS}) again.
+
+The above  must not be read like:
 forthbreak()
  a number, two programs and again a number etc.... ,
 forthbreak()

@@ -51,10 +51,15 @@ Then with code that at least contains valid instruction enter
 the debugging phase with the assembler from the library.
 
 forthbreak
-_BITS64_({There is no assembler yet for 64 bit lina},
-{forth.lab : equivalent to _BITS16_({asgen.frt plus asi86.frt})
-_BITS32_({asgen.frt plus asi86.frt plus asipentium.frt})
-but without error detection.})
+_BITS64_({There is no assembler yet for 64 bit lina.
+The assembler in forthfile({forth.lab}) is useable for instructions
+that do not require a prefix, and a 64 bit version of
+forthcode({NEXT,}) is provided.
+Thus the floating point library works with 64 bits.
+Apart from forthcode({NEXT,}), floating point instructions and
+forthcode({lEA,}) instructions are needed, but neither requires a prefix.})
+
+The following files comprise the great assembler.
 forthbreak
 forthfile({ass.frt})  : the 80-line 8086 assembler (no error detection), a prototype.
 forthbreak
@@ -83,7 +88,12 @@ forthbreak
 forthfile({test.mak}) : makefile, i.e. with targets for opcode sheets.
 forthbreak
 
-De forthfile({asi386.frt}) (containing the full 80386 instruction set) is in
+The relevant assembler present in
+_BITS16_({forth.lab is equivalent to asgen.frt plus asi86.frt})
+_BITS32_({forth.lab is equivalent to asgen.frt plus asi386.frt plus asipentium.frt})
+but without error detection.
+
+The forthfile({asi386.frt}) (containing the full 80386 instruction set) is in
 many respects non-compliant to Intel syntax. The instruction
 mnemonics are redesigned in behalf of reverse engineering.
 There is a one to one correspondence between mnemonics and
@@ -132,7 +142,7 @@ forthitem They are assembled.
 forthitem They are disassembled again and compared with
 the original code, which must be the same.
 
-forthitem They are disassembled by a different tool (GNU's objdump),
+forthitem They are disassembled by a different tool (e.g. GNU's objdump),
 and the output is compared with 3. This has been done manually,
 just once.
 forthendenumerate
@@ -224,13 +234,13 @@ Now if you are serious, you have to study the forthfile({asgen.frt}) and
 forthfile({as80.frt}) sources.
 You better get your feet wet with forthfile({as80.frt})
 before you attack the Pentium.
-The way forthsamp({SIB}) is handled is so
-clever, that sometimes I don't understand it myself.
+forthsamp({SIB}) is handled as an instruction within an instruction,
+clever, but hard to understand.
 It deviates somewhat from the phases explained here.
 
 Another invention in this assembler is the forthdefi({family of instructions}).
 Assembler instructions are grouped into families with identical fixups, and
-a increment for the opcodes.
+an increment for the opcodes.
 These are defined as a group by a single execution of a defining word.
 For each group there is one opportunity to get the opcode wrong;
 formerly that was for each opcode.
@@ -241,21 +251,14 @@ formerly that was for each opcode.
 The 8080 assembler doesn't take less place than Cassady's .
 (In the end the postit-fixup makes the Pentium assembler
 more compact, but not the 8080.)
-But... The regularities are much
-more apparent. It is much more difficult to make a mistake with the
+But... The regularities are much more apparent.
+It is much more difficult to make a mistake with the
 code for the forthsamp({ADD}) and forthsamp({ADI}) instructions.
-And there is information there
-to the point that it allows to make a disassembler that is independant
-of the instruction information, one that will work for the 8086, look
-at the pop family.
-First I had
-forthexample({ 38 C1 02 4 1FAMILY, POP -- PUSH RST      ( B'|) })
-(cause I started from an existing assembler.)
-But of course forthcode({RST}) (the restart instruction) has nothing
-to
-do
-with registers, so it gets separated out. Then the exception, represented
-by the hole forthsamp({--}) disappears.
+This principle allows to make a disassembler that is independant
+of the instruction information, one that will work for the 8086.
+A typical family are the 8 immediate- operand instructions, with an
+increment of 08.
+forthexample({ 08 C6 8 1FAMILY, ADI ACI SUI SBI ANI XRI ORI CPI })
 The bottom line is : the assembler proper now takes 22 lines of code.
 Furthermore the ``call conditional'' and ``return conditional''
 instructions where missing. This became apparent as soon as I printed the
@@ -265,9 +268,9 @@ For me this means turning ``jump conditional'' into a family.
 @node A6, A7, A5, Assembler
 @section Opcode sheets
 
-Using forthfile({test.mak}) (on a linux computer in lina) you can
-generate opcode sheets
-by  "make asi386.ps".
+The makefile for the assembler project contain facilities to
+generate opcode sheets directly from the instruction sets,
+such as forthfile({asi386.ps.}).
 For the opcode sheets featuring a n-byte prefix you must
 pass the forthsamp({PREFIX}) to make and a forthsamp({MASK}) that covers the prefix and
 the byte opcode, e.g. forthsamp({make asi386.ps MASK=FFFF PREFIX=0F})
@@ -300,7 +303,8 @@ Read the introductory comment of forthfile({asgen.frt}) for how the assembler
 keeps track of the state, using the forthcode({BI}) forthcode({BY}) forthcode({BA}) tallies.
 forthenumerate
 forthitem
-A word ending in forthkey({,}), an ``opcode'' reserves place in the dictionary.
+A word ending in forthkey({,}) is an ``opcode'' and reserves place in the
+dictionary.
 It stand for one assembler instruction.
 The start of the instruction is kept and there is a bitfield (the tally) for
 all bits that belong to the instruction, if only mentally. These bits are
@@ -335,7 +339,7 @@ real fixup. A X stands for xell or natural data width. This is
 16 bit for a 16 bit assembler and 32 bit for a 32 bit
 assembler. These can be overruled with forthcode({ AS:, }) dnl
 applying to forthcode({DX|}) and forthcode({MEM|}) and with
-forthcode({ OS:, }) applying to tdata required where there is
+forthcode({ OS:, }) applying to data required where there is
 an I suffix.
 The commaers always reveal their true width.
 It is either forthcode({IW,}) or forthcode({IL,}) .
@@ -365,20 +369,23 @@ forthitem
 If an instructions with r/m has one register, it is always the target,
 i.e. it is modified.
 forthitem
-If instructions with r/m have two registers, the second one is indicated
-by a prime such as forthcode({AX'|}).
-Or if an instruction can handle two general
-registers, the one that cannot be replaced by a memory reference gets a prime.
-forthitem
-Unless overruled by forthcode({T|}) and forthcode({F|}), a primed register is the modifiable one, e.g.
-in forthcode({LEA,})
-forthitem
 Instruction with r/m can have a register instead of memory indicated
 by the normal fixups forthcode({AX|}) etc.
 forthitem
+If instructions with r/m have two registers, the second one is indicated
+by a prime such as forthcode({AX'|}).
+Stated differently, if an instruction can handle two general
+registers, the one that cannot be replaced by a memory reference gets a prime.
+forthitem
+If forthcode({T|}) or forthcode({F|}) are present they apply to the
+primed register.
+forthcode({T|}) ``to'' means that the primed register is modified.
+Absent those the primed register is the one that is modified. e.g.
+in forthcode({LEA,})
+forthitem
 At the start of an instruction the mask of the previous instruction
 plus fixup should add up non-overlappingly to a full field.
-Offsets and immediate data should have been comma-ed in in that order.
+Offsets and immediate data should have been comma-ed in in order as required.
 This is diagnosed in the great assembler.
 forthitem
 Instructions ending in forthsamp({ :, }) are prefixes and are considered in their own
@@ -435,11 +442,16 @@ forthendenumerate
 @node A8, A9, A7, Assembler
 @section 16 and 32 bits code and segments
 
-Note that the handling of segments and mixing thereof changed starting
-ciforth version 4.0.6.
-Contrary to the old situation,
+Since
 commaers are checked correctly in the presence of prefixes
-and you have never to overrule error-checking.
+and you have never to overrule error-checking (as was needed prior
+to version 4.0.6.)
+
+In fixup X is used to mean Xell, or the natural word length.
+This is 16 bits for 16 bits segments and 32 bits for 32 bits segments.
+Likewise in PostIt-FixUp AX means Intel's forthcode({AX}) for 16 bits
+segments, forthcode({EAX}) for 32 bits segments and forthcode({RAX})
+for 64 bits segments.
 
 The description of 16 or 32 bits in the Intel manuals is messy.
 These are the rules.
@@ -453,7 +465,7 @@ forthitem
 In protected mode the size of an immediate data Xell agrees with
 the size of the applicable data segment.
 Mostly this is the data segment, but it may be the stack segment
-or some extra segment.
+or some extra segment in the presence of segment override prefixes.
 forthitem
 In all previous cases the code length can be swapped between
 16 and 32 bits by a code length override prefix forthcode({OS:}),
@@ -463,20 +475,15 @@ forthendenumerate
 The 16 bit indexing in a 32 bit assembler have separate fixup's,
 that all end in a forthkey({%})-sign.
 
-In fixup X is used to mean Xell, or the natural word length.
-This is 16 bits for 16 bits segments and 32 bits for 32 bits segments.
-Likewise in PostIt-FixUp AX means Intel's forthcode({AX}) for 16 bits
-segments, forthcode({EAX}) for 32 bits segments and forthcode({RAX})
-for 64 bits segments.
-
-In comma-ing, you must always select the proper one, xell-wide commaers
-always contain either forthkey({W}) or forthkey({L}) or forthkey({Q}).
+In comma-ing, you must always select the proper one, commaers
+contain either forthkey({W}) or forthkey({L}) or forthkey({Q})
+for 2, 4 or 8 byte widths.
 
 After the directive forthcode({BITS-16}) code is generated for and checked
 against 16 bit code and data segments.
 After the directive forthcode({BITS-32}) code is generated for and checked
 against 32 bit code and data segments.
-At this moment there is no 64 bit code generated.
+At this moment there 64 bit code is not supported, but see below.
 
 In a 16 bits segments the following commaers must be used:
  forthcode({W,}) forthcode({IW,}) forthcode({(RW,)}) and forthcode({RW,}) .
@@ -489,6 +496,8 @@ forthcode({IL,}) instead of forthcode({IW,}) and vice versa.
 Similarly the prefix forthcode({AS:}) switches between forthcode({W,})
 and forthcode({L,}), or between forthcode({RW,}) and forthcode({RL,}).
 
+The great assembler enforces all these rules.
+
 While mixing modes,
 whenever you get error messages and
 you are sure you know better than the assembler,
@@ -500,6 +509,9 @@ but it can be needed if you use e.g. an extra segment forthcode({ES|})dnl
 that is 16 bits in an otherwise 32 bits environment.
 
 A 64-bit assembler is not yet accomodated.
+Even so the assembler built in into forth.lab is used to assembler the
+floating point words,
+as the applicable instructions do not need 64-bit releated prefixes.
 @node A9, AA, A8, Assembler
 @section The built in assembler
 
@@ -577,12 +589,12 @@ in forthcode({X|}) .
 Then the first forthcode({X|}) changes its meaning to 16 bit, because
 of the forthcode({OS:}) prefix.
 forthitem
-The forthcode({X}) in forthcode({XO|}) and in forthcode({X,}) must
+The fixups related to address offsets forthcode({XO|}) and forthcode({L,}) must
 agree and are 32 bits because you are in a 32 bits segment and this
-cannot be overridden.
+was not be overridden.
 forthitem
-The offset (in forthsamp({+AX]}) ) is counted in 64 bits, a strange
-array for fetching the forthsamp({DI}) but anyway.
+The offset (in forthsamp({+AX]}) ) is counted in 64 bits.
+Apparently, the forthsamp({DI}) is fetched from two cell records.
 forthenditemize
 And .. by the way the data is placed in the extra segment.
 Add a bit of awareness of the cost of the instructions in execution time
@@ -795,17 +807,15 @@ But in     those instructions
 register operands are always floating point registers.
 
 
-There is always at most one register specified in a floating point
+There is at most one register specified in a floating point
 instruction.
-This explicit register may be modifiable (target) or not.
 For two register operation forthcode({ST0}) is always implicit.
 In that case normally it is the first operand as per forthsamp({ST0-ST1}).
-If modiable, this means the result is
-stored in forthcode({ST1}), the explicit register.
-Reversed operation means forthcode({ST0})
+forthsamp({a|}) (abnormal operation) means forthcode({ST0})
 is the second operand as per forthsamp({ST1-ST0}).
-If modiable, this means (again) that
-the result is stored in forthcode({ST1}), the explicit register.
+Also normally forthcode({ST0}) gets the result.
+forthsamp({m|}) (modified) means that the explicit register gets modified
+instead.
 
 And don't forget! forthsamp({SHOW: <opcode>}) is your friend.
 
@@ -907,8 +917,8 @@ forthitem ST6|
 forthitem ST7|
 forthitem s|      : Single (16 bit)
 forthitem d|      : Double (32 bit)
-forthitem m|      : Register is modifiable
-forthitem u|      : Register is unmodifiable
+forthitem m|      : Explicit register is modified
+forthitem u|      : Explicit is unmodied, result to ST0
 forthitem n|      : ST0 is first operand (normal)
 forthitem a|      : ST0 is second operand (abnormal)
 forthitem |16     : Int width in memory.
@@ -926,7 +936,7 @@ simple one is LGDT, ) instead of all the sib (forthdefi({scaled index byte}))
 possibilities you see.
 forthsamp({LGDT, BO| ~SIB| 14 SIB,, 18, B,})
 This loads the general description table from an address
-described by a sib-byte of 14.
+described by a sib-byte of 14 and an offset of 18.
 
 The forthsamp({~SIB| 14 SIB,,}) may be replaced by any sib-specification of
 the kind forthsamp({[AX +2* SI]}).
@@ -938,6 +948,10 @@ They must always appear between the normal fixups and
 the commaers, and the first must be the base register,
 the one with opening bracket,
 such as forthcode({[AX}).
+
+Error-prone as that may seem, the great assembler only accepts
+correct instructions.
+Instructions are verbose, but they are hard to misinterpret.
 
  Table 3 SIB-byte fixups.
 @table @var
@@ -1055,7 +1069,7 @@ forthbreak
 WRMSR: Write to Model Specific Register
 forthbreak
 forthbreak
-Suffices of the opcode, i.e. part of the opcode word.
+Suffixes of the opcode, i.e. part of the opcode word.
 forthbreak
 |ALL : All
 forthbreak
