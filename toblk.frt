@@ -29,7 +29,7 @@ VARIABLE INFO-LINE   1 INFO-LINE !
 \ Print the message about non-index lines, if this is the first.
 : INFO-MESSAGE
     INFO-LINE @ IF
-	"Possible non-index line in block file" ETYPE ECR   0 INFO-LINE !
+        "Possible non-index line in block file" ETYPE ECR   0 INFO-LINE !
     THEN ;
 
 \ Current input line.
@@ -44,7 +44,7 @@ VARIABLE LINE   0 LINE !
 \ Check STRING for being an index line, and give message if not.
 : CHECK-INDEX-LINE
     2DUP INDEX? IF
-	2DROP
+        2DROP
     ELSE
        INFO-MESSAGE
        " at block " ETYPE   LINE @ 16 / E. ":" ETYPE ETYPE ECR
@@ -65,7 +65,7 @@ VARIABLE INPUT        VARIABLE OUTPUT   1 OUTPUT !
 : DOWN  OVER - 1- >R   DUP 1+ SWAP R> MOVE ;
 
 \ For STRING leave the first POSITION of compressible white space.
-: FIND-WHITE OVER + 2 - ?DO
+: FIND-WHITE OVER + 2 - DO
     I C@ ?BLANK I 1+ C@ ?BLANK AND IF I UNLOOP EXIT THEN
 -1 +LOOP 0 ;
 
@@ -81,6 +81,7 @@ VARIABLE INPUT        VARIABLE OUTPUT   1 OUTPUT !
     "Input line " ETYPE   LINE @ E. " is too long: " ETYPE 2DUP ETYPE ECR
     BEGIN DUP C/C > WHILE SHOEHORN REPEAT
     "Shoehorned into: " ETYPE 2DUP ETYPE ECR
+    1 INFO-LINE !
     THEN
 ;
 
@@ -99,9 +100,9 @@ CREATE OUTPUT-BUFFER C/L ALLOT
 \ for any inproper index lines.
 : MAIN    GET-HANDLES
     BEGIN PAD DUP 256 INPUT @ READ-LINE THROW WHILE
-	-TRAILING   1 LINE +!
-	LINE @ 16 MOD 1 = IF 2DUP CHECK-INDEX-LINE THEN
-	OUTPUT-LINE
+        -TRAILING   1 LINE +!
+        LINE @ 16 MOD 1 = IF 2DUP CHECK-INDEX-LINE THEN
+        OUTPUT-LINE
     REPEAT
     CLOSE-HANDLES
 ;

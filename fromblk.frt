@@ -34,7 +34,7 @@ THEN ;
 VARIABLE INPUT        VARIABLE OUTPUT   1 OUTPUT !
 \ Check and open files passed as arguments, leaving in above variables.
 : GET-HANDLES
-    3 ARGC <> IF "Usage: fromblock fromfile tofile" ERROR THEN
+    3 ARGC <> IF "Usage: fromblk fromfile tofile" ERROR THEN
     1 ARG[] 0 OPEN-FILE THROW INPUT !
     2 ARG[] "" 2OVER PUT-FILE 1 OPEN-FILE THROW OUTPUT !
 ;
