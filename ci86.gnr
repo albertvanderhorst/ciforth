@@ -1785,7 +1785,9 @@ worddoc( {COMPILING~},{LIT},{lit},{--- n},{FIG,C},
 {Within a colon-definition, forthcode({LIT}) is compiled followed by a
 _BITS_ bit literal number given during compilation.
 Later execution of forthcode({LIT}) causes the contents of this
-next dictionary cell to be pushed to the stack.},{{LITERAL}},
+next dictionary cell to be pushed to the stack.
+This word is compiled by forthcode({LITERAL}) . },
+{{LITERAL}},
 {{: TL LIT [ 123 , ] ; TL .},{123}}, enddoc)
 CODE_HEADER({LIT},{LIT})
         LODS           _C{ AX <- LITERAL}
@@ -1820,10 +1822,10 @@ _C
 })_C{}_END_({_LOAD_})
 worddoc( {CONTROL~},{BRANCH},{branch},{},{FIG,C},
 {The run-time proceedure to unconditionally branch. An in-line
-offset is added to the interpretive pointer forthcode({IP}) to
+offset is added to the interpretive pointer forthvar({HIP}) to
 branch ahead or back. forthcode({BRANCH}) is compiled by
 forthcode({ELSE}) forthcode({AGAIN}) forthcode({REPEAT}) .},
-{{0BRANCH},{FORWARD},{BACK)} },
+{{0BRANCH},{(FORWARD},{(BACK} },
 {{ : GS1 1 BRANCH [ 0 CELL+ , ] BL BL ; GS1 . . },
 {20 1}},
 enddoc)
@@ -1854,7 +1856,7 @@ worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C},
 (zero), the following in-line parameter is added to the interpretive
 pointer to branch ahead or back.
 Compiled by forthcode({IF}) , forthcode({UNTIL}) , and forthcode({WHILE}) .
-},{{BRANCH},{FORWARD},{BACK)} },
+},{{BRANCH},{(FORWARD},{(BACK)},{SKIP} },
 {{ : GS1 1 0 0BRANCH [ 0 CELL+ , ] BL BL ; GS1 . .}, {20 1},
 { : GS2 1 1 0BRANCH [ 0 CELL+ , ] BL BL ; GS2 . . .}, {20 20 1}},
 enddoc)
@@ -3032,8 +3034,8 @@ forthcode({';'}) or forthcode({';CODE'}). The word is added as the latest
 into the forthcode({CURRENT}) word list.
 The compiling process is done by the text interpreter as long as
 forthcode({STATE}) is non-zero.
-Words with the immediate bit
-set (I) are executed rather than being compiled.},{{(CREATE)}},
+Words with the forthdefi({immediate}) bit set, attribute forthvar({I}),
+are executed rather than being compiled.},{{(CREATE)}},
 {{: GS1 1 2 3 ; GS1 . . .},{3 2 1} },
 enddoc)
 _HEADER({:},{COLON},{DOCOL})
@@ -3095,7 +3097,7 @@ that can contain one cell.
 When forthsamp({cccc}) is later executed,
 this pointer forthsamp({n}) is left on the stack,
 so that a fetch or store may access this location.},
-{{USER},{CONSTANT},{>DFA}},
+{{USER},{CONSTANT},{>DFA},{DATA}},
 {{ VARIABLE APE 1A34 APE ! APE @ .},{1A34} },
 enddoc)
 _HEADER({VARIABLE},{VAR},{DOCOL})
@@ -3111,11 +3113,13 @@ it creates the definition forthsamp({cccc})
 whose forthdefi({data field address}) contains a
 pointer forthsamp({n}) to forthcode({HERE}).
 _VERBOSE_({{This code is typically followed by some data
-allocation word like forthcode({ALLOT}) or forthcode({{{{,}}}}) .}})
+allocation word like forthcode({ALLOT}) or forthcode({{{{,}}}}) .
+forthcode({DOES>}) must not be used with forthsamp({cccc}).
+}})
 When forthsamp({cccc}) is later executed,
 this pointer forthsamp({n}) is left on the stack,
 so that data can be accessed.},
-{{VARIABLE},{(CREATE)},{>DFA}},
+{{VARIABLE},{CREATE},{>DFA}},
 {{ DATA APE 1A34 , APE @ .},{1A34} },
 enddoc)
 _HEADER({DATA},{LDATA},{DOCOL})
@@ -3282,8 +3286,8 @@ _HEADER({C/L},{CSLL},{DOCON}, 64)
 _C
 _HIGH_BUF_({
 worddoc( {BLOCKS~},{_FIRST},{first},{--- addr1},{},
-{A constant that leaves the address of the first (lowest) block
-buffer.},
+{A constant that leaves the address of the block
+buffer lowest in memory. },
 {{BLOCK},{_LIMIT}},
 {{_LIMIT _FIRST - B/BUF 2 CELLS + /MOD #BUFF = . .},{_T_ 0}},
 enddoc)
@@ -3295,8 +3299,8 @@ _LOW_BUF_({
         _C{ in into the lba block as a buffer address.}
         DB      0       _C{Padding the odd # of bytes in the name FIRST.}
 worddoc( {BLOCKS~},{_FIRST},{first},{--- n},{},
-{A constant that leaves the address of the first (lowest) block
-buffer.
+{A constant that leaves the address of the block
+buffer lowest in memory.
 This is allocated in the lowest 1 Megabyte of memory,
 to allow the BIOS to access it.
 },{{BLOCK},{_LIMIT}},
@@ -3440,10 +3444,11 @@ vocabularies.}})},
 enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 _C
-worddoc( {BLOCKS~},{MAX-USER},{max_user},{--- addr},{U},
-{A user variable which contains the allocated area for user
-variables.},
-{{BLOCK},{MESSAGE},{BLOCK-READ},{BLOCK-WRITE}},
+worddoc( {DEFINING},{MAX-USER},{max_user},{--- addr},{U},
+{A user variable which contains the part of the
+area for user variables, that is in use.
+It is measured in bytes from the start of the user area. },
+{{BLOCK},{MESSAGE},{U0}},
 {{MAX-USER @ 1000 U< .},{_T_}},
 enddoc)
 _HEADER({MAX-USER},{MAXUSER},{DOUSE}, _CELLS(11))
@@ -3650,13 +3655,13 @@ _C{ REQUIRES ONE MORE CELL!}
 _C
 _C
 worddoc( {BLOCKS~},{OFFSET},{offset},{--- addr},{U},
-{A user variable which contains a block offset to disc drives;
-in this way a part of it is available for boot-code.
+{A user variable which contains a block offset.
+The contents of forthcode({OFFSET}) is added to the argument
+for forthcode({BLOCK}) before reading or writing blocks.
+In this way a part of disc drives can be reserved for boot-code.
 _HOSTED_MSDOS_({As blocks are allocated in a file on the host operating system it is 0.})
 _HOSTED_X_({As blocks are allocated in a file on the host operating system it is 0.})
-The
-contents of forthcode({OFFSET}) is added to the stack number by forthcode({BLOCK}) before read or
-writing blocks.},
+},
 {{BLOCK},{MESSAGE},{BLOCK-READ},{BLOCK-WRITE}},
 {{OFFSET @ 1000 U< .},{_T_}},
 enddoc)
@@ -4388,7 +4393,9 @@ That is, when forthsamp({nnnn}) is executed, it does so by
 jumping to the code after forthsamp({nnnn}) .
 Because of intimate relation to the
 assembler, it is present in loadable form in the screens file
-forthfile({forth.lab}) .},
+forthfile({forth.lab}) .
+Machine code must end in forthcode({NEXT,}) also available with the assembler.
+},
 {{(;CODE)},{(CREATE)}},
 {{." Not present"},{Not present} },
 enddoc)
@@ -4396,7 +4403,7 @@ _C
 worddoc( {DEFINING},{CREATE},{create},{},{ISO},
 {A defining word used in the form:
      forthsamp({CREATE cccc})
-Later execution of forthsamp({cccc}) returns its forthdefi({data}) field, i.e.
+Later execution of forthsamp({cccc}) returns its forthdefi({data field}) , i.e.
 the value of forthcode({HERE}) immediately
 after executing forthcode({CREATE}) .
 
@@ -4409,10 +4416,11 @@ Its datastructure is build by the code forthsamp({aaaa}) and when
 executing forthsamp({cccc}) , its data field is pushed on the stack,
 then the code forthsamp({bbbb}) is executed.
 
-_VERBOSE_({{Space in this data field has yet to
-be allocated and the execution action can be changed.}})
+_VERBOSE_({{Space in this forthdefi({data field}) has yet to
+be allocated. The forthdefi({DFA})  (data field address) points to the
+the execution action that can be changed by forthcode({DOES>}) .}})
 ciforth is byte aligned, so no extra measures are needed.},
-{{>BODY},{DOES>},{;CODE},{ALLOT},{,}},
+{{>BODY},{DOES>},{;CODE},{ALLOT},{,},{>DFA}},
 {{ CREATE ZWY LATEST ID.},{ZWY},
 {HERE ZWY = .},{_T_}},
 enddoc)
@@ -4439,7 +4447,7 @@ the default behaviour of the created word so as to execute the sequence of
 compiled word addresses following forthcode({DOES>}) .
 When the
 forthcode({DOES>}) part executes it begins with the address of
-the data field of the word on the stack. This allows
+the forthdefi({data field}) of the word on the stack. This allows
 interpretation using this area or its contents. _VERBOSE_({{
 Typical uses include the Forth assembler,
 arrays and matrices, and compiler generation.}})
@@ -5340,22 +5348,24 @@ _C
 worddoc( {DEFINING~},{HEADER},{header},{sc --- dea},{},
 {Create a dictionary entry structure for the word forthvar({sc}) and
 returns its address into forthvar({dea}).
-_VERBOSE_({A pointer to each of its fields is called a "field address".
-In particular note that a data field address is not a forthdefi({data field'})
+_VERBOSE_({A pointer to each of its fields is called a "field address" for
+code data flag line name _SOURCEFIELD_({source}) _EXTRAFIELD_({extra}).
+In particular note that a data field address is not a forthdefi({data field})
 in the ISO sense.})
-The forthdefi({code field addres}) and forthdefi({data field address}) addres
-contain a same pointer,
+ forthcode({HEADER}) initializes the forthdefi({code field addres}) and
+forthdefi({data field address}) to contain a same pointer
 to the area owned by this header,
 i.e. immediately following the completed header _VERBOSE_({{as
 appropriate for a low level (assembler) definition}}).
 The flag and link fields are initialised to
 zero _VERBOSE_({{, so not }forthcode({HIDDEN}){}}).
-The name forthvar({sc}) is layed down in the dictionary before
+The name forthvar({sc}) is laid down in the dictionary before
 the header and filled in into the name field.
 _SOURCEFIELD_({{The source field is filled in to best knowledge.}})
 },
-{{(CREATE)},{LINK},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},
-{>SFA},{>XFA}},
+{{(CREATE)},{LINK},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA}
+dnl _SOURCEFIELD_({{,>SFA}})_EXTRAFIELD({{,>XFA}})
+},
 {{"FRED" HEADER >NFA @ $@ TYPE},{FRED}},
 enddoc)
 _HEADER({HEADER},{LHEAD},{DOCOL})
@@ -5414,7 +5424,8 @@ _C
 worddocsafe( {DEFINING~},{(CREATE)},{paren_create},{sc ---},{},
 {This is the basis for all defining words, including
 _VERBOSE_({those which lack a data field in the ISO sense: })dnl
-forthcode({:}) forthcode({USER}) forthcode({VARIABLE}) forthcode({NAMESPACE}) forthcode({CONSTANT}).
+forthcode({:}) forthcode({USER}) forthcode({VARIABLE})
+forthcode({NAMESPACE}) forthcode({CONSTANT}) forthcode({DATA}) .
 It creates a header with name forthvar({sc}) in the dictionary and
 links it into the forthcode({CURRENT}) word list.
 },
@@ -5495,9 +5506,9 @@ _VERBOSE_({{The intended use is:
 Compilation is suspended for the compile time calculation of a
 value. Compilation is resumed and }forthcode({LITERAL}){ compiles
 this value.}}) Later execution of the definition containing the literal will
-push it to the stack. If executing in ciforth, the number will just remain on
+push it to the stack. If executing, the number will just remain on
 the stack.},
-{{LIT},{LITERAL}},
+{{LIT},{SDLITERAL},{STATE}},
 { {: GS3 [ 45 ] LITERAL EMIT ; GS3},{E} },
 enddoc)
 _HEADER({LITERAL},{LITER},{DOCOL}, , B_IMMED)
@@ -5511,8 +5522,8 @@ _C
 worddoc( {COMPILING},{DLITERAL},{dliteral},{d --- d (executing) d --- (compiling)},{I},
 {If compiling, compile a stack double number into a literal.
 Later execution of the definition containing the literal will
-push it to the stack. If executing in ciforth, the number will just remain on
-the stack.},{{LITERAL},{LIT}},
+push it to the stack. If executing, the number will just remain on
+the stack.},{{LITERAL},{LIT},{STATE}},
 { {: GS3 [ 0.46 ] DLITERAL DROP EMIT ; GS3},{F} },
 enddoc)
 _HEADER({DLITERAL},{DLITE},{DOCOL}, , B_IMMED)
@@ -5526,13 +5537,13 @@ DLIT1:  DC      SEMIS
 _C
 _C
 worddoc( {COMPILING~},{SDLITERAL},{sdliteral},
-{d --- s/d (executing) d --- (compiling)},{I},
+{d --- s/d (executing) / d --- (compiling)},{I},
 {If compiling, compile a stack double number into a literal or
 double literal, depending on whether forthcode({DPL}) contains a
 forthdefi({nil pointer}) or points into the input. Later execution of the
 definition containing the literal will push it to the stack. If
 executing, the number will remain on the stack.},
-{{SLITERAL},{DLITERAL}},
+{{LITERAL},{DLITERAL},{STATE}},
 {
 {: GS1 [ 45 0 ] SDLITERAL EMIT ; GS1},{E},
 {: GS2 [ 0.46 ] SDLITERAL DROP EMIT ; GS2},{F},
@@ -6866,7 +6877,7 @@ The buffers are no longer associated with a block and their content is
 no longer available.
 In ciforth no transfer takes place,
 because mass storage is updated automatically in the background.
-},{{EMPTY-BUFFERS},{BLOCK},{SCREEN}},
+},{{EMPTY-BUFFERS},{BLOCK}},
 {{1 BLOCK DROP _PREV @ @ 0= . FLUSH _PREV @ @ 0= .},{0 _T_} },
 enddoc)
 _HEADER({FLUSH},{FLUSH}, {DOCOL}, _VAR_FIELD({MTBUF}))
@@ -9202,9 +9213,9 @@ closing the block file.
 One means an
 error and and zero means okay.}
 _VERBOSE_({{Beware that if error messages are loaded from disk,
-this may clear }forthcode({DISK-ERROR}){ }})})
-dnl _HOSTED_X_({ This is just a flag, indicating there was an error. }).
-_HOSTED_X_({{This variable is not used in thisforth, errors are thrown.}}).
+this may clear }forthcode({DISK-ERROR}){.}})})
+dnl _HOSTED_X_({ This is just a flag, indicating there was an error. })
+_HOSTED_X_({{This variable is not used in thisforth, errors are thrown.}})
 },
 {{BLOCK}},
 {{." See BLOCK-EXIT"},{See BLOCK-EXIT}},
@@ -9215,14 +9226,14 @@ _C
 _BLOCKSINFILE_({
 worddoc( {BLOCKS},{BLOCK-FILE},{block_file},{---addr},{},
 {Leave the address forthvar({addr}) of a counted string,
-the name of a forthdefi({library file})
-in which forthdefi({blocks}) are (to be) allocated.
+the name of a forthdefi({library file}) in
+which forthdefi({blocks}) are (to be) allocated.
 The name may contain a path and be at most}
 M4_FILENAMELENGTH {characters long.
 The default name is forthemph({forth.lab}) .
-This name may be changed and is used by the
+This name is typically changed during installation and is used by the
  forthcode({BLOCK-INIT}) command.
-},{{BLOCK-HANDLE},{BLOCK-INIT},{BLOCK-EXIT},{$@@}},
+},{{BLOCK-HANDLE},{BLOCK-INIT},{LIST},{LOAD},{$@@}},
 {{BLOCK-FILE $@ TYPE},{forth.lab}},
 enddoc)
 _HEADER({BLOCK-FILE},{BLFL},{DOVAR}, )
@@ -9285,7 +9296,7 @@ worddoc( {BLOCKS},{BLOCK-EXIT},{block_exit},{---},{},
 All blocks are unlocked.
 Any changed blocks are written back to mass storage.
 Close the currently open block file forthcode({BLOCK-HANDLE}),
-i.e. the mass storage words no longer work, and will result in
+such that the mass storage words no longer work, and will result in
 error messages.
 If error messages were fetched from disk, they
 no longer are.},
@@ -9311,7 +9322,7 @@ worddoc( {BLOCKS~},{BLOCK-SEEK},{block_seek},{n---},{},
 {A block file must have been opened by forthcode({BLOCK-INIT}) .
 Position the file pointer at block forthvar({n})
 in behalf of subsequent reads and writes.
-},{{BLOCK},{LIST},{LOAD}}, {}, enddoc)
+},{{BLOCK},{LIST},{LOAD},{BLOCK-READ},{BLOCK-WRITE}}, {}, enddoc)
 _HEADER({BLSEEK},{BLSEEK},{DOCOL})
         DC      BBUF
         DC      USTAR
@@ -9326,7 +9337,7 @@ specifies the destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block
 forthcode({BLOCK-READ}) determines the location on mass storage,
 performs the read and throws an exception on errors.},
-{{BLOCK},{DISK-ERROR},{BLOCK-WRITE}},
+{{BLOCK},{DISK-ERROR},{BLOCK-WRITE},{BLOCK-INIT}},
 dnl we can use block 2 for scratch, -b is not an option in use.
 {
 {PAD B/BUF 41 FILL PAD 2 BLOCK-WRITE},{},
@@ -9349,7 +9360,7 @@ specifies the source or destination block buffer, forthvar({blk}) is
 the sequential number of the referenced physical block.
 forthcode({BLOCK-WRITE}) determines the location on mass storage,
 performs the write and throws an exception on errors.},
-{{BLOCK},{DISK-ERROR},{BLOCK-READ}},
+{{BLOCK},{DISK-ERROR},{BLOCK-READ},{BLOCK-INIT}},
 {
 dnl see BLOCK-READ
 },
@@ -10112,11 +10123,11 @@ _HEADER({BACK)},{BACKP},{DOCOL})
         DC      SEMIS
 _C
 worddocsafe( {CONTROL~},{(FORWARD},{paren_forward},{--- addr},{},
-{Start a forward branch by leaving the address that must be
-backpatched with an offset into forthvar({addr}).
+{Start a forward branch by allocating space for an offset,
+that must be backpatched into forthvar({addr}).
 _VERBOSE_({{Usage is
 }forthsamp({ POSTPONE BRANCH (FORWARD .. FORWARD) }){ }})},
-{{IF}},
+{{IF},{BRANCH},{0BRANCH}},
 {
 {: GS1 2 BRANCH [ (FORWARD ] 4 [ FORWARD) ] 6 ; GS1 . .},
 {6 2}
@@ -10134,7 +10145,7 @@ forthcode({HERE}) into forthvar({addr}), left there by forthcode({{{{{(FORWARD}}
 _VERBOSE_({{Usage is }forthsamp({POSTPONE
 BRANCH (FORWARD .. FORWARD) }){ }})
 },
-{{LOOP},{UNTIL}},
+{{LOOP},{UNTIL},{REPEAT}},
 {{( See (FORWARD)},{}},
 enddoc)
 _HEADER({FORWARD)},{FORWARDP},{DOCOL})
@@ -10159,7 +10170,7 @@ to forthcode({BEGIN}) will occur if the top of the stack is false;
 for forthcode({AGAIN}) and forthcode({REPEAT}) a return to forthcode({BEGIN}) always occurs.
 
 At compile time forthcode({BEGIN}) leaves its return address and forthvar({n}) for compiler
-error checking.},{{(BACK}},
+error checking.},{{(BACK},{DO}},
 {
 {0 WARNING !   BEGIN},{0 WARNING !   BEGIN ? ciforth ERROR # 17 },
  {CR 1 WARNING !},{}
@@ -10203,12 +10214,12 @@ and execution continues ahead. Both forthvar({n1}) and
 forthvar({n2}) are determined at run-time and may be the result
 of other operations. Within a loop forthcode({I}) will copy the
 current value of the index to the stack.
+With forthcode({+LOOP}) it can be used with other increments than one.
 
 It deviates from the ISO standard in that
 that if forthvar({n1}) is equal to forthvar({n2}) the loop is never
 executed even once.
 
-the loop body is not executed.
 When compiling within the colon definition, forthcode({DO}) compiles
 forthcode({(DO)}) and leaves the following address forthvar({addr}) and
 forthvar({n}) for later error checking.},
@@ -10283,7 +10294,7 @@ _HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{+LOOP},{plus_loop},
-{n1 --- (run)  addr n2 --- (compile)},{ISO,I,C},
+{n1 --- (run) / addr n2 --- (compile)},{ISO,I,C},
 {Used in a colon-definition in the form:
     forthexample({DO ... n1 +LOOP})
 At run-time, forthcode({+LOOP}) selectively controls branching
@@ -10295,7 +10306,7 @@ The branch back to forthcode({DO}) occurs until the new index
 is equal to or greater than the limit (forthsamp({n1>0})), or
 until the new index is equal to or less than the limit
 (forthsamp({n1<0})). Negative increments cannot be combined with
- forthword({?DO}) , this deviates from the ISO standard.
+ forthcode({?DO}) , this deviates from the ISO standard.
 Upon exiting the loop, the parameters are
 discarded and execution continues ahead.
 
@@ -10315,11 +10326,11 @@ _HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{UNTIL},{until},
-{f --- (run-time) addr n --- (compile)},{ISO,FIG,I,C},
+{f --- (run-time) / addr n --- (compile)},{ISO,FIG,I,C},
 {Occurs within a colon-definition in the form:
               forthexample({BEGIN ... UNTIL})
 At run-time, forthcode({UNTIL}) controls the conditional branch
-back to the corresponding forthcode({BEGIN}) If f is false,
+back to the corresponding forthcode({BEGIN}). If f is false,
 execution returns to just after forthcode({BEGIN}) , otherwise
 execution continues ahead.
 
@@ -10403,7 +10414,7 @@ At compile-time forthcode({IF}) compiles
 forthcode({0BRANCH}) and reserves space for an offset at
 forthvar({addr}) . forthvar({addr}) and forthvar({n}) are
 used later for resolution of the offset and error testing.},
-{{(FORWARD}},
+{{(FORWARD},{0BRANCH}},
 {
 { : GI1 IF 123 THEN ; 234 1 GI1 . .},{123 234},
 {  234 -1 GI1 . .},{123 234},
@@ -10424,14 +10435,14 @@ following forthcode({IF}) . forthcode({ELSE}) forces execution
 to skip over the following false part and resumes execution
 after the forthcode({THEN}) . It has no stack effect.
 
-At compile-time forthcode({ELSE}) emplaces
-forthcode({BRANCH}) reserving a branch offset, leaves the
-address forthvar({addr2}) and forthvar({n2}) for error
+At compile-time forthcode({ELSE}) compiles
+forthcode({BRANCH}) and reserves a places for a branch offset,
+leaving its address forthvar({addr2}) and forthvar({n2}) for error
 testing. forthcode({ELSE}) also resolves the pending forward
 branch from forthcode({IF}) by calculating the offset from
 forthvar({addr1}) to forthcode({HERE}) and storing at
 forthvar({addr1}) .},
-{{(FORWARD}},
+{{(FORWARD},{FORWARD)},{BRANCH}},
 {
 {: GI2 IF 123 ELSE 234 THEN ; 0 GI2 .},{234},
 {1 GI2 .},{123}
@@ -10446,7 +10457,7 @@ _HEADER({ELSE},{LELSE},{DOCOL}, , B_IMMED)
         DC      SEMIS
 _C
 worddoc( {CONTROL},{WHILE},{while},
-{f --- (run-time) addr1 nl --- addr2 n1 addr1 n2(compile-time)},
+{f --- (run-time) / addr1 nl --- addr2 n1 addr1 n2 (compile-time)},
 {ISO,FIG,I,C},
 {Occurs in a colon-definition in the form:
          forthsamp({BEGIN ... WHILE (tp) ... REPEAT})
@@ -11154,9 +11165,10 @@ _C{ Define the entry point, not valid for auto booting.}
         _ENDOFPROGRAM(_ORIG)
 worddocchapter({COMPILING},{ },
 {The wordset forthsamp({COMPILING}) contains words that compile
-forthxref({IMMEDIATE}) words and numbers.
-You need special precautions because these words would execute during
-compilation. Numbers are compiled forthdefi({in line}) , behind a word that fetches
+words and numbers.
+They need special attention because these words in general execute during
+compilation forthxref({IMMEDIATE}) .
+Numbers are compiled forthdefi({in line}) , behind a word that fetches
 them.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({CONTROL},{ },
@@ -11167,7 +11179,8 @@ depending on conditions.
 },{},{},{},{}, {}, enddoc)
 worddocchapter({DEFINING},{ },
 {The wordset forthsamp({DEFINING}) contains words that add new entries
-to the dictionary. A number of such forthdefi({defining word})'s
+to the dictionary, or are related to those words.
+A number of such forthdefi({defining word})'s
 are predefined, but there is
 also the possibility to make new defining words, using
 forthcode({CREATE}) and forthcode({DOES>}) .
