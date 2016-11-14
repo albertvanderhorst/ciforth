@@ -1229,7 +1229,7 @@ dnl Note how the following is to pass through m4
                     across FORTH words.
 
    {WOR}   WOR      Working register.  When entering a word
-                    via its code field the DEA is passed in {WOR}.
+                    via its code field the forthdefi({dea}) is passed in {WOR}.
 
    {SPO}   SPO      Parameter stack pointer.  Must be preserved
                     across FORTH words.
@@ -1434,21 +1434,21 @@ _C
 _C{       Dictionary starts here.}
 
 DP0:
-_C{ Vocabularies all end in a link to 0.}
+_C{ End of ONLY namespace. Namespaces all end in a link to 0.}
 define({_LINKOLD},0)dnl
-worddocsafe( {DENOTATIONS},{Prefix_TICK}, {tick_denotation},{--- addr},{ISO,FIG,I,P},
+worddocsafe( {DENOTATIONS},{Prefix_TICK}, {tick_denotation},{--- addr},{I,P},
 {Used in the form: forthexample({'nnnn})
 In interpret mode it
-leaves the forthdefi({execution token}) (equivalent to the
-dictionary entry address) of dictionary word forthsamp({nnnn}).
+leaves the forthdefi({execution token})
+(equivalent to the forthdefi({dea}) dictionary entry address)
+of dictionary word forthsamp({nnnn}).
 If the word is not found after a search of the search order
 an appropriate error message is given.
-In ciforth it can be used in compilation mode too, it
-then compiles the address as a literal.
-It is recommended that
-one never compiles or postpones it.
+In compile mode it finds the same address,
+then compiles it as a literal.
+It is recommended that one never compiles or postpones it.
 (Use a
-combination of forthcode({WORD}) and forthcode({FIND}) _VERBOSE_({{or
+combination of forthcode({NAME}) and forthcode({FOUND}) _VERBOSE_({{or
 any form of explicit parsing and searching }})
 instead.)
 Furthermore it is recommended
@@ -1457,7 +1457,8 @@ forthdefi({denotation}) form without the space.
 _VERBOSE_({ Note that if you separate forthcode({'}) by a space{,}
 the ISO-conforming version of forthcode({'}) is found}).
 },
-{{HEADER},{CONTEXT}, {[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{EXECUTE}},
+{{HEADER},{CONTEXT},{'},{[']},{PRESENT},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},
+{>SFA},{>XFA},{EXECUTE}},
 dnl Make sure to use the ONLY ' not the FORTH '
 {{ : X EXECUTE ; : || '' HIDDEN ; },{},
 { || : QPE 1 2 ; ' QPE X  ' QPE ID. . . 'QPE ID. ||},{QPE 2 1 QPE},
@@ -1513,13 +1514,14 @@ _HEADER({^},{DCTL},{DOCOL}, , B_IMMED + B_DENOT)
         DC      SEMIS
 _C
 worddocsafe( {DENOTATIONS},{Prefix_0},{den_zero}, {--- s/d},{I,P},
-{Implements forthcode({NUMBER}) for numbers that start with
-forthkey({0}) . Similar words are present for all decimal and hex digits.
+{A prefix that handles numbers that start with
+forthkey({0}) .
+Similar words are present for all decimal and hex digits.
 _VERBOSE_({{ ISO compatibility ony requires that denotators for
 decimal digits are present,
 one can always use a leading zero.}})
 },
-{{B},{7}},
+{{NUMBER},{B},{7}},
 {
 {048 .},{48 },
 {: GS1 058 ; GS1 .},{58 }},
@@ -1535,10 +1537,10 @@ _HEADER({4},{DEN4},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({5},{DEN5},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({6},{DEN6},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 worddocsafe( {DENOTATIONS},{Prefix_7},{den_seven}, {--- s/d},{I,P},
-{Implements forthcode({NUMBER}) for numbers that start with
+{A prefix that handles numbers that start with
 forthkey({7}) . Similar words are present for all decimal and hex digits.
 },
-{{0},{B}},
+{{NUMBER},{0},{B}},
 {
 {13 . 23 . 33 . 43 . 53 . }, {13 23 33 43 53 },
 {53 . 63 . 73 . 83 . 93 . }, {53 63 73 83 93 },
@@ -1552,10 +1554,10 @@ _HEADER({9},{DEN9},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({A},{DENA},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({B},{DENB},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 worddocsafe( {DENOTATIONS},{Prefix_B},{den_b}, {--- s/d},{I,P},
-{Implements forthcode({NUMBER}) for numbers that start with
+{A prefix that handles numbers that start with
 forthkey({B}) . Similar words are present for all decimal and hex digits.
 },
-{{0},{7}},
+{{NUMBER},{0},{7}},
 {
 {A3 . B3 . C3 . D3 . E3 . F3 . }, {A3 B3 C3 D3 E3 F3 },
 {: GS1 A3 . B3 . C3 . D3 . E3 . F3 . ; GS1 }, {A3 B3 C3 D3 E3 F3 }
@@ -1567,8 +1569,9 @@ _HEADER({E},{DENE},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _HEADER({F},{DENF},{DOCOL}, LNUMB, B_IMMED + B_DENOT)
 _C
 worddoc( {DENOTATIONS},{Prefix_-},{den_minus}, {--- s/d},{I,P},
-{Implements forthcode({NUMBER}) for numbers that start with forthkey({-}) .},
-{},
+{A prefix that handles numbers that start with
+forthkey({-}) .},
+{{NUMBER},{7},{B}},
 {{-48 .},{-48 },
 {: GS1 -58 ; GS1 .},{-58 }}, enddoc)
 _HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
@@ -1576,8 +1579,9 @@ _HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
         DC      SEMIS
 _C
 worddoc({DENOTATIONS},{Prefix_+},{den_plus}, {--- s/d},{I,P},
-{Implements forthcode({NUMBER}) for numbers that start with forthkey({+}) .},
-{},
+{A prefix that handles numbers that start with
+forthkey({+}) .},
+{{NUMBER},{7},{B}},
 {{+48 .},{48 },
 {: GS1 +58 ; GS1 .},{58 }}, enddoc)
 _HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
@@ -1668,8 +1672,13 @@ _REAL_({
 })
         DC      SEMIS
 _C
+_C{       If M4_VERSION exists and contains a . it is an official release}
+define({M4_VERSION2}, ifelse( index(M4_VERSION,.), -1,
+{{{beta $RCSfile$ $Revision$}}},
+M4_VERSION))dnl
+_C
 worddoc({ENVIRONMENTS},{VERSION},{version}, {--- sc},{CI},
-{An environment query giving the version of this Forth as a forthdefin({string constant}).
+{An environment query giving the version }"M4_VERSION2"{ of this Forth as a forthdefin({string constant}).
 },
 {{ENVIRONMENT?}},
 dnl Expect nothing to be typed, because the testing filters out RCS stuff.
@@ -1684,13 +1693,9 @@ IBMPC:  DB      'IBM-PC ciforth'
         DB      FIGREL+0x40,ADOT,FIGREV+0x30,ADOT,USRVER+0x30
         DC      LIT, IBMPC, LIT, 22
 _ENDCOMMENT
-_C{       If M4_VERSION exists and contains a . it is an official release}
-define({M4_VERSION2}, ifelse( index(M4_VERSION,.), -1,
-{{{beta $RCSfile$ $Revision$}}},
-M4_VERSION))dnl
         _STRINGINLINE( M4_VERSION2)
-undefine({M4_VERSION2})dnl
         DC      SEMIS
+undefine({M4_VERSION2})dnl
 _C
 worddoc({ENVIRONMENTS},{NAME},{name}, {--- sc},{CI},
 {An environment query giving the name of this Forth as a forthdefin({string constant}).
@@ -1798,7 +1803,7 @@ worddoc( {MISC},{EXECUTE},{execute},{xt ---},{ISO,FIG},
 given by forthvar({xt}) . _VERBOSE_({{The
 }forthdefi({code field address}){ serves as an execution token.
 (It even has offset 0, but one should not assume that a
-}forthdefi({DEA}){ is an execution token in portable code.)}})},
+}forthdefi({dea}){ is an execution token in portable code.)}})},
 {{'},{>CFA}},
 {{ ' BL >CFA EXECUTE .},{20},
 { ' BL EXECUTE .},{20}}, enddoc)
@@ -2103,11 +2108,12 @@ _C
 worddocsafe( {DICTIONARY~},{~MATCH},{unmatch},{sc dea --- sc dea n},{},
 {Intended to cooperate with forthcode({(FIND)}) . Compares
 the forthdefi({string constant}) forthvar({sc}) with the dea
-forthvar({dea}).
+forthvar({dea})'s name,
 Returns into forthvar({n}) the difference between the first characters
 that compare unequal, or zero if the strings are the same up to the
 smallest length.
-It is required that the dea has a non-zero name field.
+_VERBOSE_({ It is required that the dea contains a pointer to a string
+variable{,} which may contain an empty string.})
 },
 {{FOUND},{CORA}},
 { { "TASK" 'TASK ~MATCH . ID. TYPE },{0 TASK TASK },
@@ -3150,7 +3156,7 @@ forthcode({CONTEXT}) is the last user variable at offset 38 CELLS,
 such that new user variables may be allocated using offsets of
 38+M4_MAXWORDLIST CELLS and up.
 It is best to do
-  forthsamp({MAX-USER @ DUP USER cccc    CELL+ MAX-USER ! })
+  forthsamp({MAX-USER @@ DUP USER cccc    CELL+ MAX-USER ! })
 reflecting the current allocation in the user area.
 },
 {{VARIABLE},{+ORIGIN},{CONTEXT},{>DFA}},
@@ -3831,7 +3837,7 @@ _HEADER({,},{COMMA},{DOCOL})
         DC      SEMIS
 _C
 worddocsafe( {DICTIONARY},{C,},{c_comma},{b ---},{ISO,FIG},
-{Store 8 bits of forthvar({b}) into the next available dictionary byte, advancing
+{Store the least significand bits of forthvar({b}) into the next available dictionary byte, advancing
 the forthdefi({dictionary pointer}). },{{DP},{,}},
 {{HERE 62 C, DUP C@ . 1+ HERE = .},{62 _T_}},
 enddoc)
@@ -3984,10 +3990,9 @@ worddoc( {DICTIONARY~},{>CFA},{to_code_field_address},{dea --- addr},{},
 {Given a dictionary entry addres forthvar({dea}) return its
 forthdefi({code field address}) forthvar({addr}). By jumping
 indirectly via this address the definition forthvar({dea}) is
-executed. This is the address that is compiled within high
-level definitions, so it serves as an execution token.
+executed.
 _VERBOSE_({{In ciforth it has offset 0, so it is actually the
-same as the }forthdefi({DEA}){}}).},
+same as the }forthdefi({dea}){}}).},
 {{Prefix_'},{HEADER}},
 {{' TASK  DUP >CFA = .},{_T_}},
 enddoc)
@@ -3999,8 +4004,9 @@ _C
 worddoc( {DICTIONARY~},{>DFA},{to_data_field_address},{dea --- addr},{},
 {Given a dictionary entry addres return
 its forthdefi({data field address}) forthvar({addr}) .
-This points to the code for a
-code word, to the high level code for a colon-definition, and
+This contains a pointer to the code for a code word,
+to the data for a word defined by forthcode({VARIABLE}) or forthcode({DATA}) ,
+to the high level code for a colon-definition, and
 to the forthcode({DOES>}) pointer for a word build using
 forthcode({CREATE}). Normally this is the area behind the
 header, found via forthcode({>PHA}) . },
@@ -4026,7 +4032,7 @@ _C
 worddoc( {DICTIONARY~},{>LFA},{to_link_field_address},{dea --- addr},{},
 {Given a dictionary entry addres return its
 forthdefi({link field address}) forthvar({addr}). It contains
-the DEA of the previous word. },
+the forthdefi({dea}) of the previous word. },
 {{Prefix_'},{HEADER}},
 {{: FRED ; : WILMA ; ' WILMA >LFA @ ID.},{FRED}},
 enddoc)
@@ -4049,7 +4055,17 @@ _C
 _SOURCEFIELD_({
 worddoc( {DICTIONARY~},{>SFA},{to_source_field_address},{dea --- addr},{},
 {Given a dictionary entry addres return the
- forthdefi({source field address}) forthvar({addr}) .},
+ forthdefi({source field address}) forthvar({addr}).
+If its content is higher than 1000, that is a pointer to
+after the name of the definition in the source code.
+This assumes that the source is still present in memory, which is true
+during development.
+If the content is zero, it is a kernel word and the source is not
+available interactively.
+Otherwise it is the block number from which the definition was compiled.
+_VERBOSE_({No attempt is made to erase this information when it becomes
+incorrect{,} for e.g. turnkey programs.})
+},
 {{Prefix_'},{HEADER}},
 {{ ' WORDS >SFA @ .},{0}},
 enddoc)
@@ -4063,8 +4079,11 @@ _C
 _EXTRAFIELD_({
 worddoc( {DICTIONARY~},{>XFA},{to_extra_field_address},{dea --- addr},{},
 {Given a dictionary entry addres return the
- forthdefi({extra field address}) forthvar({addr}) .},
-{{Prefix_'},{HEADER}},
+ forthdefi({extra field address}) forthvar({addr}) .
+This is a field in the header that is free for an application to use
+for whatever purpose.
+},
+{{Prefix_'},{OPT},{HEADER}},
 {{ ' WORDS >XFA @ .},{0}},
 enddoc)
 _C
@@ -4092,7 +4111,7 @@ worddoc( {DICTIONARY},{>BODY},{to_body},{dea --- addr},{ISO},
 definition created with a forthcode({CREATE}) /
 forthcode({DOES>}) construct, return its forthdefi({data}) field (in the ISO sense)
 forthvar({addr}).},
-{{'},{>CFA},{>DFA},{>PHA},{BODY>}},
+{{'},{>CFA},{>DFA},{>PHA},{BODY>},{DATA}},
 {{ CREATE Q  ' Q >BODY HERE = .},{_T_} },
 enddoc)
 _HEADER({>BODY},{TOBODY},{DOCOL})
@@ -4101,13 +4120,14 @@ _HEADER({>BODY},{TOBODY},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {DICTIONARY},{BODY>},{body_from},{addr --- dea},{},
-{Convert the data field forthvar({addr}) of a definition created
+{Convert the forthdefi({data field}) forthvar({addr}) of a definition created
 with a forthcode({CREATE}) / forthcode({DOES>}) construct
-_VERBOSE_({(this is not a header forthdefi({data field address}))})
-to its forthvar({dea}). Where forthcode({>BODY}) keeps working
-after forthdefi({revectoring}) , forthcode({BODY>}) does not.
+to its forthvar({dea}).
+_VERBOSE_({( forthvar({addr}) is not a header forthdefi({data field address}))})
+Where forthcode({>BODY}) keeps working for a copy of the header,
+forthcode({BODY>}) does not.
 _VERBOSE_({{ There is some logic to this, because the
-}forthdefi({DEA}){ to which the body belongs is no longer
+}forthdefi({dea}){ to which the body belongs is no longer
 unique.}})
 },
 {{'},{>BODY}},
@@ -4121,7 +4141,7 @@ _C
 worddoc( {DICTIONARY~},{>WID},{to_w_i_d},{dea --- wid},{},
 {Given the dictionary entry addres forthvar({dea}) of a
 namespace return its
-forthdefi({WID}) forthvar({wid}), a dummy DEA that serves as the start of a
+forthdefi({WID}) forthvar({wid}), a dummy forthdefi({dea}) that serves as the start of a
 dictionary search. },
 {{NAMESPACE},{>VFA},{(FIND)}},
 {{: APE ; ' FORTH >WID >LFA @ ID.},{APE}},
@@ -4775,6 +4795,7 @@ worddoc( {DICTIONARY},{PAD},{pad},{--- addr},{ISO,FIG},
 {Leave the address of the text output buffer, which is a fixed offset
 above forthcode({HERE}). The area growing downward from forthcode({PAD}) is used
 for numeric conversion.
+The use of forthcode({PAD}) is reserved for applications.
 },{},
 {{4321 PAD ! PAD @ .},{4321 } },
 enddoc)
@@ -5008,8 +5029,10 @@ entry address forthvar({dea}) of the first entry found, else
 leave a forthdefin({nil pointer}). If the first part of the string
 matches a forthdefi({denotation}) word, that word is found, whether
 the denotation is correct or not.
+The forthcode({dea}) allows to retrieve all properties of the word
+such as whether it is immediate.
 },
-{{PRESENT}, {CONTEXT}, {(FIND)},{PREFIX}, {FIND} },
+{{FIND}, {PRESENT}, {CONTEXT}, {(FIND)},{PREFIX} },
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is found as a misspelled number!
 { 243 "1ONNOBO" FOUND 0= . .},{0 243},
@@ -5067,9 +5090,9 @@ execution token forthvar({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero.
 In ciforth the alternative forthcode({FOUND}) is used,
-that uses a regular string.
+that uses a regular string, hence this is a loadable extension.
 },
-{{CONTEXT},{PRESENT},{(FIND)}},
+{{FOUND},{CONTEXT},{PRESENT},{(FIND)}},
 {
 { 1 LOAD  "FIND" WANTED : FIND: BL WORD FIND ; dnl
 123 : BONOBO ; FIND: BONOBO . ' BONOBO = . .},{-1 _T_ 123},
@@ -5103,7 +5126,7 @@ This is a vector in behalf of optimisation,
 that starts as a noop, and
 can be filled in if the extra field is used for optimisation.
 It must adhere to the following specification:
-Search down from the forthdefi({DEA}) forthvar({dea}) for a
+Search down from the forthdefi({dea}) forthvar({dea}) for a
 word with name forthvar({sc}).
 Replace forthvar({dea}) with forthvar({dea1}) if the dictionary
 part between both could not contain the name searched for.
@@ -5122,7 +5145,7 @@ worddocsafe( {DICTIONARY~},{(FIND)},{paren_find},
 {Search down from the forthdefi({WID}) forthvar({wid}) for a
 word with name forthvar({sc}).
 _VERBOSE_({{A }forthdefi({WID}){ is
-mostly a dummy }forthdefi({DEA}){ found in the
+mostly a dummy }forthdefi({dea}){ found in the
 data field of a
 namespace, fetched from }forthcode({CURRENT}){ or an other wid in the
 }forthdefi({search order}){ }}). Leave the dictionary entry address
@@ -5193,7 +5216,8 @@ The word that caused it is found using forthcode({WHERE}) and displayed .
 Also forthvar({n}) is passed to forthcode({MESSAGE}) in order to give a description
  of the error, clamped to the range [M4_ERRORMIN, M4_ERRORMAX].
 This word is executed by forthcode({THROW}) before restarting the interpreter
-and can be revectored to give more elaborate diagnostics. },
+and can be revectored to give more elaborate diagnostics,
+or even do a last minute recovery. },
 {{MESSAGE},{?ERROR},{WARNING}},
 { {0 WARNING ! 0. WHERE 2! 12 ERROR},{ ? ciforth ERROR # 18 },
  {CR},{} },
@@ -5299,7 +5323,7 @@ _HEADER({(ABORT")},{PABORTQ},{DOCOL})
 PABQ1:  DC       TDROP
 PABQ2:   DC      SEMIS
 _C
-worddocsafe( {ERRORS},{ABORT"},{abort_quote},{f ---},{ISO,I},
+worddocsafe( {ERRORS},{ABORT"},{abort_quote},{f ---},{ISO,I,C},
 {Usage is forthsamp({: <SOME> ... ABORT" <message>" ... ;}). If
 ABORT" finds a non-zero forthvar({f}) on the stack, the
 forthsamp({<message>}) is displayed and an
@@ -5363,9 +5387,7 @@ The name forthvar({sc}) is laid down in the dictionary before
 the header and filled in into the name field.
 _SOURCEFIELD_({{The source field is filled in to best knowledge.}})
 },
-{{(CREATE)},{LINK},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA}
-dnl _SOURCEFIELD_({{,>SFA}})_EXTRAFIELD({{,>XFA}})
-},
+{{(CREATE)},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>XFA},{LINK}},
 {{"FRED" HEADER >NFA @ $@ TYPE},{FRED}},
 enddoc)
 _HEADER({HEADER},{LHEAD},{DOCOL})
@@ -5680,8 +5702,10 @@ Prefix words are mostly both immediate and forthdefi({smart}),
 i.e. they behave differently when compiled, than interpreted.
 The result is that the compiled code looks the same and behaves the
 same than the interpreted code.
+Postponing prefix words voids your warranty.
  _VERBOSE_({It is recommended that the only smart words present are
- prefix words.}) },{{PP@@@@}, {IMMEDIATE},{Prefix_0}},
+ prefix words.}) },
+{{PP@@@@}, {IMMEDIATE},{Prefix_0}},
 { { : Q &Z EMIT NAME TYPE ; PREFIX QPO},{ZPO}},
 enddoc)
 _HEADER({PREFIX},{PREFX},{DOCOL})
@@ -5709,7 +5733,7 @@ of the next namespace  or  a forthdefi({nil pointer}) for the end.
 Then follows a dummy dea that serves
 as forthdefi({word list identifier}) or forthdefi({WID}) in the sense of the ISO standard.
 It has empty fields, except for the link field.
-The forthdefi({link field address}) contains the DEA of the latest word of
+The forthdefi({link field address}) contains the forthdefi({dea}) of the latest word of
 the namespace or a forthdefin({nil pointer}) if empty. Executing the
 namespace means pushing its WID on top of the
 forthcode({CONTEXT}) order. In ciforth when there can be
@@ -9952,10 +9976,11 @@ _C
 })_C{}_END_({ _RWLBA_})
 _C
 _LOAD_({
-worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG,I},
+worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG},
 {Used in the form: forthexample({' nnnn })
 It leaves the forthdefi({execution token}) (equivalent to the
-dictionary entry address) of dictionary word forthsamp({nnnn}).
+forthdefi({dea}) dictionary entry address)
+of dictionary word forthsamp({nnnn}).
 If the word is not found after a search of
 the search order an appropriate error message is
 given.
@@ -9965,15 +9990,17 @@ Because this is so confusing,
 it is recommended that
 one never compiles or postpones forthcode({'}).
 (Use a
-combination of forthcode({WORD}) and forthcode({FIND}) _VERBOSE_({{or
+combination of forthcode({NAME}) and forthcode({FOUND}) _VERBOSE_({{or
 any form of explicit parsing and searching }})
 instead.)
 _VERBOSE_({Furthermore it is recommended that
 for non-portable code forthcode({'}) is used in its
 forthdefi({denotation}) form without the space}).
 },
-{{[']},{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},
-{>SFA},{>XFA},{EXECUTE}},
+{{[']},{FOUND},{>CFA},{>DFA},{>FFA},{>LFA},{>NFA},{>SFA},{>XFA}
+dnl _SOURCEFIELD_({,{>SFA}},dnl)  doesn't work FIXME
+dnl _EXTRAFIELD({,{>XFA}},dnl)    doesn't work FIXME
+,{EXECUTE}},
 {
 { : QPE 1 2 ; ' QPE EXECUTE ' QPE ID. . . },{QPE 2 1 },
 { : QQ  ' EXECUTE ' ID. . . ; QQ  QPE QPE },{QPE 2 1},
@@ -10010,7 +10037,7 @@ _HEADER({[']},{BTICK},{DOCOL}, _VAR_FIELD({TICK}), B_IMMED)
 _C
 })_C{}_END_({_LOAD_})
 worddoc( {DICTIONARY~},{FORGET-VOC},{forget_voc},{addr wid --- addr },{},
-{Remove all words whose DEA is greater (which mostly means later defined) than
+{Remove all words whose forthdefi({dea}) is greater (which mostly means later defined) than
 forthvar({addr}) from a wordlist given by
 forthvar({wid}) .
 This works too if links have been redirected, such that some earlier
@@ -10727,9 +10754,9 @@ worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt wid --- x1...xn},{},
 forthvar({wid})
 execute forthvar({xt})
  with as data forthvar({x1..xn}) plus
-the forthdefi({DEA}) of those words.         forthvar({xt})
+the forthdefi({dea}) of those words.         forthvar({xt})
 must have the stack diagram forthvar({x1..xn dea --- x1..xn}).
-_VERBOSE_({{Note that you can use the DEA of any word as a WID
+_VERBOSE_({{Note that you can use the forthdefi({dea}) of any word as a WID
 and the remainder of the word list will be searched.}})
 },
 {{FOR-VOCS},{EXECUTE}},
@@ -10755,7 +10782,7 @@ FORW1:  DC      FROMR
 _C
 worddoc( {DICTIONARY~},{FOR-VOCS},{for_vocs},{x1..xn xt --- x1...xn},{},
 {For all vocabularies execute forthvar({xt})
- with as data the forthdefi({DEA}) of those words. forthvar({xt})
+ with as data the forthdefi({dea}) of those words. forthvar({xt})
 must have the stack diagram forthvar({x1..xn dea --- x1..xn})
 },
 {{FOR-WORDS},{EXECUTE}},
@@ -11194,7 +11221,7 @@ data to the dictionary at the expense of the free space, one
 cell or one byte at a time, or allocate a buffer at once. The
 dictionary space may also be shrunk, and the words that were
 there are lost. The forthdefi({dictionary entry address}) or
-forthdefi({DEA}) represents a word. It is the lowest address of
+forthdefi({dea}) represents a word. It is the lowest address of
 a record with fields. Words to access those fields also belong
 to this wordset.},
 {},{},{},{}, {}, enddoc)
@@ -11238,19 +11265,21 @@ order wordlist, associated with the namespace forthcode({ONLY}).
 To make a distinction with the same words in other wordlists,
 the names of denotations are prepended with ``Prefix_'' in the
 documentation. Actual names consists of the one character following
-``Prefix''.
-Apart from forthcode({Prefix_0}) , forthcode({ONLY})
-contains entries for all hex digits 1...9 and A...F.
+``Prefix_''.
+Apart from forthcode({Prefix_0}) , forthcode({ONLY}) contains
+entries for all hex digits 1...9 and A...F.
 Like forthcode({NUMBER}) always did, all denotations behave
 identical in interpret and compile mode and they are not supposed to be
-postponed. },
+postponed.
+The use of prefixes for other purposes than denotations require great care.
+},
 {},{},{},{}, {}, enddoc)
 worddocchapter({ENVIRONMENTS},{ },
 {The wordset forthsamp({ENVIRONMENTS}) contains all words of
 the forthcode({ENVIRONMENT}) namespace and those words needed
 to recognize them as Forth environment queries.
 _VERBOSE_({{Note that these are not environment variables in
-the sense that are passed from an operating system to a
+the sense that they are passed from an operating system to a
 program.}}) },
 {},{},{},{}, {}, enddoc)
 worddocchapter({INPUT},{ },
