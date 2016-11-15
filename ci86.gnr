@@ -1983,14 +1983,26 @@ _HEADER({UNLOOP},{UNLOOP}, {DOCOL}, ,{B_IMMED})
 _C
 worddoc( {INITIALISATIONS},{+ORIGIN},{plus_origin},{n --- addr},{},
 {Leave the memory address relative by forthvar({n}) bytes to
-the area from which the user variables are initialised, so one
-can access or modify the boot-up parameters. During run time
+the area from which the user variables are initialised during startup.
+Given a forthdefi({user variable}) the phrase forthsamp({>DFA @ +ORIGIN}) finds the address
+where its initial value is stored.
+One can access
+or modify those boot-up parameters, prior to saving a customised
+image in behalf of turnkey programs.
+This will affect the initialisation by forthcode({COLD}).
+_THREADS_({{
+In this forth switching of the user area in behalf of multi-tasking
+is accomplished
+automatically when the return stack is switched.}},
+{{
+In this forth switching of the user area in behalf of multi-tasking
+is accomplished as follows.
+During run time
 user variables are fetched from the current user area, via a
-pointer at forthsamp({0 +ORIGIN }) . This can be swapped to get
-a fresh set of user variables, for multi-asking. One can access
-or modify the boot-up parameters, prior to saving a customised
-boot image. This will affect the initialisation by
-forthcode({COLD}). },
+pointer at forthsamp({0 +ORIGIN }) . This pointer can be swapped to get
+a fresh set of user variables. }})
+}
+,
 {{USER}},
 {{0A 0 CELL+ * +ORIGIN @ ' ENVIRONMENT = .}, {_T_}},
 enddoc)
@@ -2133,7 +2145,9 @@ worddoc( {PARSING},{?BLANK},{query_blank},{c --- ff },{},
 {For the character forthvar({c}) return whether this is
 considered to be white space into the flag forthvar({ff}) .
 At least the space, ASCII null, the tab and the carriage return and line
-feed characters are white space.},
+feed characters are white space.
+In ciforth all control characters are considered white space.
+},
 {{BL},{SPACE}},
 {{HEX 20 ?BLANK . 41 ?BLANK .},{_T_ 0}}, enddoc)
 _HEADER({?BLANK},{QBL},{DOCOL})
@@ -2249,6 +2263,7 @@ _HEADER({SOURCE},{SOURCE},{DOCOL})
         DC      SWAP, OVER, LSUB
         DC      SEMIS
 _C
+_SUPPRESSED({{
 worddoc( {LIBRARY},{L_>IN},{legacy_in},{--- addr},{ISO,WANT},
 {Hides and replaces the user variable forthcode({PP}).
 All parsing words use and move the value of that user variable.
@@ -2266,6 +2281,7 @@ dnl GS1 .},{4}},
 {},
 enddoc)
 _C
+}})_C{}_END_({ _SUPPRESSED})
 })_C{}_END_({_LOAD_})
 worddoc( {OUTPUT},{CR},{cr},{},{ISO,FIG},
 {Transmit character(s)
@@ -2288,7 +2304,7 @@ worddoc( {MEMORY},{CMOVE},{cmove},{from to count ---},{},
 address from is moved first proceeding toward high memory, such
 that memory propagation occurs. As the Intel 86-family is
 byte-addressing there are no restrictions in ciforth. },
-{},
+{{MOVE},{CHARS}},
 { {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 CMOVE dnl
 PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
 {PAD DUP 1+ 2 CMOVE PAD COUNT EMIT COUNT EMIT C@ EMIT},{AAA} },
@@ -2309,7 +2325,11 @@ bytes beginning at address forthvar({from}) to
 address forthvar({to}), such that the destination area contains
 what the source area contained, regardless of overlaps.
 As the Intel 86-family is byte-addressing there are
-no restrictions. },
+no restrictions.
+Because in ciforth bytes (address units) and characters are the same
+the difference with forthcode({CMOVE}) anounts to forthcode({MOVE})
+being an intelligent move.
+},
 {},
 { {HERE 41 C, 42 C, 43 C, PAD 10 0 FILL PAD 3 MOVE dnl
 PAD COUNT EMIT COUNT EMIT C@ EMIT},{ABC},
@@ -3343,8 +3363,8 @@ _HEADER({BM},{LBM},{DOCON}, _ORIG)
 _C
 _THREADS_({
 worddoc( {MEMORY},{TASK-SIZE},{task_size},{---- n},{},
-{A constant leaving the size of the per task areas:
-data stack size, return stack size, terminal input buffer plus
+{A constant leaving the total size of the per task areas:
+data stack, return stack, terminal input buffer plus
 user area.
 The data stack of the main task runs down to forthcode({HERE}) .
 },{{DSP@@},{RSP@@},{TIB}},
@@ -3367,8 +3387,11 @@ _C{ The implementation relies on the initialisation of }
 _C{ those with numbers (1..11), so change in concord with USINI.}
 worddoc( {MISC},{U0},{u_zero},{--- addr},{},
 {A user variable, leaving the start address of the user area. This is
-for reference only. What is taken into account by user variables is
-the initialisation variable at forthsamp({0 +ORIGIN}) .
+for reference only.
+_THREADS_({After initialisation user variables derive their start address
+from the return stack pointer.},
+{ What is taken into account by user variables is
+the initialisation variable at forthsamp({0 +ORIGIN}) .})
 _VERBOSE_({{This might be used for task switching.}})
 },
 {{USER},{+ORIGIN}},
@@ -3392,7 +3415,7 @@ _HEADER({R0},{RZERO},{DOUSE}, _CELLS(3))
 _C
 worddoc( {INPUT},{TIB},{t_i_b},{--- addr},{ISO,FIG,U},
 {A user variable containing the address of the terminal input buffer.
-_VERBOSE_({Traditionally{,} this was used for file i/o too, but not so in
+_VERBOSE_({Traditionally{,} this was used for file i/o too{,} but not so in
 ciforth.})
 },
 {{QUIT}},
@@ -3464,7 +3487,7 @@ _C
 worddoc( {ERRORS},{WHERE},{where},{--- addr},{U},
 {A user variable pair which contains the start of the source and the
 position after the last character parsed when an error thrown by
-forthcode({?ERROR}) _VERBOSE_({{,so not of exceptions thrown}}).
+forthcode({?ERROR})_VERBOSE_({{, so not of exceptions thrown}}).
 The contents of forthcode({WHERE}) is interpreted by
 forthcode({ERROR}) if the corresponding exception was never
 caught. },
@@ -3489,7 +3512,7 @@ enddoc)
 _HEADER({STATE},{STATE},{DOUSE}, _CELLS(18))
 _C
 worddoc( {FORMATTING},{BASE},{base},{--- addr},{ISO,FIG,U},
-{A user variable containing the current number base used for input
+{A forthdefi({user variable}) containing the current number base used for input
 and output conversion.},
 {{DECIMAL},{HEX},{<#}},
 {{DECIMAL BASE @ 16 BASE ! .},{A}},
@@ -3498,10 +3521,8 @@ _HEADER({BASE},{BASE},{DOUSE}, _CELLS(19))
 _C
 worddoc( {FORMATTING~},{DPL},{d_p_l},{---- addr},{FIG,U},
 {A user variable containing the address of the decimal point on
-double integer input, or a forthdefin({nil pointer}).
-During output it is free to use, e.g.
-to hold the output column location of a decimal point, in user
-generated formating. },
+double integer or floating point input, or a forthdefin({nil pointer}).
+},
 {{<#},{FLD},{HLD}},
 {{1234.56 DPL @ 0= . 2DROP},{0}},
 enddoc)
@@ -3536,11 +3557,12 @@ _C
 worddoc( {FORMATTING~},{HLD},{hld},{--- addr},{FIG},
 {A user variable that holds the address of the latest character of
 text during numeric output conversion.},
-{{<#},{DPL},{FLD}},
+{{<#},{DPL},{FLD},{HOLD}},
 {{." No test"},{No test} },
 enddoc)
 _HEADER({HLD},{HLD},{DOUSE}, _CELLS(24))
 _C
+dnl This can really be used to prevent lines from overflowing. Keep it.
 worddoc( {OUTPUT},{OUT},{OUT},{--- addr},{U},
 {A user variable that reflects the position at the current line
 of the output device where the next character transmitted will
@@ -3569,7 +3591,7 @@ worddoc( {INPUT},{PP},{parse_pointer},{--- addr},{},
 text buffer (terminal or disc) from which the next text will be
 accepted. All parsing words use and move the value of forthcode({PP}) .
 This is different from how ISO forthcode({>IN}) works,
-in the sense that clearing it
+in the sense that zeroing it
 doesn't reset the parse pointer to the start of the current line.
 },
 {{>IN},{WORD},{NAME},{NUMBER},{PARSE},{PP@@@@}},
@@ -3579,12 +3601,14 @@ _HEADER({PP},{PP},{DOUSE}, _CELLS(29))
 _C
 _LOAD_({
 worddocsafe( {INPUT~},{(>IN)},{paren_iso_in},{--- addr},{},
-{After forthsample({ "-legacy-" WANTED }) this is used by
-the word forthcode({L_>IN}), to store
-the offset from the start within the current input
-text buffer (terminal or disc) from which the next text will be
-accepted, to get a behaviour more in accordance with the standard.
-All parsing words use and move the value of forthcode({>IN}) .},
+{This is a user variable that is foreseen for code that fakes
+the behaviour of forthcode({>IN}) in ciforth.
+This could be part of the code loaded by forthsamp({ "-legacy-" WANTED }) .
+(The word forthcode({>IN}) is intended to be used in the context that the source is
+interpreted line by line.)
+In ciforth the parse pointer forthcode({PP}) is used by the system instead of
+ forthcode({>IN}) .
+},
 {{>IN},{PP}},
 {{." See >IN"},{See >IN}},
 enddoc)
@@ -3597,8 +3621,9 @@ contains a system dependant pointer to any arguments that are
 passed from the operating system to ciforth during startup.
 _HOSTED_X_({{
 In this ciforth it points to an area with the argument count,
-followed by a null ended array of arguments strings,
-then by a null ended array of environment strings.
+followed by a null ended array of arguments c-strings,
+then by a null ended array of environment c-strings.
+C-string are chars followed by a zero byte and no preceeding count.
 }})
 _PC_({{
 In this ciforth it contains the real segment descriptor of the
@@ -3649,7 +3674,10 @@ _HEADER({CURRENT},{CURR},{DOUSE}, _CELLS(34))
 _C
 worddoc( {INPUT~},{REMAINDER},{remainder},{--- addr},{},
 {A pointer to a constant string that contains the balance of
-characters fetched into the input buffer, but not yet consumed.
+characters fetched from the the input stream,
+but not yet part of the input buffer.
+Unless there is redirection from a file,
+this contains an empty string.
 Used as in forthsamp({REMAINDER 2@@}) .
 },
 {{REFILL-TIB}},
@@ -3712,8 +3740,9 @@ _C
 worddoc( {MEMORY},{CELL+},{cell_plus},{n1 --- n2},{ISO},
 {Advance the memory pointer forthvar({n1}) by one (in this case  _BITS_ bits) cell to
 forthvar({n2}). _VERBOSE_({{This is invaluable for writing portable
-code. Much of the library code of ciforth runs on both 16 and 32 bits
-systems, thanks to this.}})
+code.
+Much of the library code of ciforth runs on 64, 32 and 16 bits
+systems, thanks to this. }})
 },{},
 _BITS64_({{{0 CELL+ .},{8}},})dnl expanded before worddoc is!
 _BITS32_({{{0 CELL+ .},{4}},})dnl expanded before worddoc is!
@@ -3727,8 +3756,9 @@ _C
 worddoc( {MEMORY},{CELLS},{cells},{n1 --- n2},{ISO},
 {Return the equivalent of forthvar({n1}) cells in bytes:
 forthvar({n2}). _VERBOSE_({{This is invaluable for writing portable
-code. Much of the library code of ciforth runs on both 16 and 32 bits
-systems, thanks to this.}})
+code.
+Much of the library code of ciforth runs on 64, 32 and 16 bits
+systems, thanks to this. }})
 },{{CELL+}},
 _BITS64_({{{2 CELLS .},{10}},})dnl expanded before worddoc is!
 _BITS32_({{{2 CELLS .},{8}},})dnl expanded before worddoc is!
@@ -4560,7 +4590,7 @@ In ciforth forthcode({."}) always has an effect
 on forthcode({HERE}) during interpretation.
 In ISO programs you may only use this word during compilation.
 _VERBOSE_({{We recommend that }forthsamp({." cccc"}){ is replaced by }forthsamp({"cccc" TYPE}){.}})
-)},
+},
 {{OUT}},
 {{." the end" },{the end},
 {: GS1 ." the end" ; GS1 },{the end},
@@ -4657,11 +4687,8 @@ over a length forthvar({len}) .
 For the first bytes that differ, return -1 if the byte
 from forthvar({addr1}) is less (unsigned) than the one from forthvar({addr2}),
 and 1 if it is greater.
-If all forthvar({len}) bytes are equal, return
-zero.
-_VERBOSE_({{This is an abbreviation of }forthcode({COMPARE-AREA}){.
-It would have been named }forthsamp({COMPARE}){ ,
-if that were not taken by ISO.}})
+If all forthvar({len}) bytes are equal, return zero.
+_VERBOSE_({{This is an abbreviation of }forthcode({COMPARE-AREA}){. }})
 },
 {},
 {{ HEX 41 C, 42 C, 43 C, HERE 3 - DUP 3 CORA .},{0 },
@@ -4896,8 +4923,10 @@ considered as a double. ISO requires it to be at the end of the
 number. ciforth allows any number of decimal points with the
 same meaning. ciforth also allows any number of comma's that
 are just ignored, to improve readability. If the first
-unconvertible digit is not a blank, this is an error. },
-{{NUMBER},{?BLANK}},
+unconvertible digit is not a blank, this is an error.
+This word is used by all number prefixes.
+},
+{{NUMBER},{?BLANK},{Prefix_7}},
 {
 { (NUMBER) 1324 D.},{1324},
 { (NUMBER) 1abcdefgh D.},
@@ -5612,7 +5641,7 @@ _C
 worddoc( {PARSING},{INTERPRET},{interpret},{?? --- ??},{},
 {Repeatedly fetch the next text word from the
 forthdefi({current input source}) and
-execute it (forthcode({STATE}) is not 1) or compile it
+execute it (forthcode({STATE}) is 0) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in the vocabularies of forthdefi({search-order}).
 It can be either matched exactly, or it can match a prefix.
@@ -5633,10 +5662,9 @@ _VERBOSE_({{
 A number is converted according to the current base.
 If a decimal point is found as part of a number, the number
 value that is left is a double number, otherwise it is a single
-number. Comma's are ignored in ciforth.}})
-)
+number. Comma's in numbers are ignored by ciforth.}})
 },
-{{WORD},{NUMBER},{BLK},{DPL}},
+{{NAME},{(NUMBER)},{NUMBER},{BLK},{DPL}},
 {{( No test)},{}},
 enddoc)
 _HEADER({INTERPRET},{INTER},{DOCOL})
@@ -5948,7 +5976,7 @@ reset the exception mechanism.
 _VERBOSE_({{This word is silent. This may be confusing
 at times, because you can't tell the difference between a word
 that is still busy or that has aborted.}})
-},{{WARM},{INIT}},
+},{{WARM},{_INIT}},
 {{( No test)},{}},
 enddoc)
 _HEADER({ABORT},{ABORT},{DOCOL})
@@ -5999,15 +6027,14 @@ _C
 _HOSTED_({
 worddoc( {INITIALISATIONS},{OPTIONS},{options},{ft --- f2},{CI},
 {Handle command line option.
-If an option is passed during startup execute the screen corresponding
+If an option is given at startup, execute the screen corresponding
 to the option letter and return a false flag into forthvar({f2}),
-otherwise leave a true flag. During startup this flag decides whether
-the signon message is displayed.
-_VERBOSE_({ An option can always decide to execute
+otherwise leave a true flag.
+This is used to suppress the signon message if there is an option.
+_VERBOSE_({ An option screen can always decide to execute
 forthcode({.SIGNON}). By redefining forthcode({OPTIONS}) as
-forthsamp({DROP 0}), the handling of options during cold boot is
-suppressed, useful for turnkey applications. }) },
-{{COLD}},
+forthsamp({DROP 0}){,} the handling of options during cold boot is
+suppressed{,} useful for turnkey applications. }) },{{COLD}},
 {{( No test)},{}},
 enddoc)
 _HEADER({OPTIONS},{OPTIONS},{DOCOL})
@@ -6048,21 +6075,21 @@ OPT3:
         DC      ZERO, SWAP _C{ Sign on suppressed.}
 OPT4:
         DC      DROP
-        DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}
+        DC      SEMIS
 })_C{}_END_({_HOSTED_})
 
 worddoc( {INITIALISATIONS},{COLD},{cold},{},{FIG},
 {Initialise all user variables to their boot up values values,
 i.a. the stacks and the forthdefin({dictionary pointer}) .
-Initialise the system as per forthcode({INIT}).
-Handle command line options, if any.
+Initialise the system as per forthcode({_INIT}).
+Handle command line options, if any, as per forthcode({OPTIONS}).
 Show signon message and restart via forthcode({ABORT}) .
 May be called from the terminal to remove application
 programs and restart, as long as there are no
 new vocabularies with definitions.
 _HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
 _BOOTED_({But it is better to reboot.})
-},{{WARM},{INIT},OPTIONS},
+},{{WARM},{_INIT},OPTIONS},
 {{( No test)},{}},
 enddoc)
 _HEADER({COLD},{COLD},{DOCOL})
@@ -6096,19 +6123,19 @@ COLD5:
         DC      BYE     _C{ In case of turnkey programs.}
         DC      SEMIS   _C{ Unnecessary, but helpful for decompilation.}
 _C
-worddoc( {INITIALISATIONS},{INIT},{init},{},{FIG},
+worddoc( {INITIALISATIONS},{_INIT},{init},{},{FIG},
 {Initialise or reinitialise the system.
-Reset the data stack, the wordlists, the number base and the
+Reset the data stack, the search order, the number base and the
 exception mechanism.
 Initialise the block mechanism.
 Any blocks that have not yet been
 written back to mass storage are discarded.
 _BLOCKSINFILE_({Now open the file that contains the blocks{,} in read-only mode.})
-_VERBOSE_({After forthcode({INIT}) we have the following situation.
+_VERBOSE_({After forthcode({_INIT}) we have the following situation.
 The search order contains the forthcode({FORTH}) words{,}
 plus forthcode({ONLY}) with i.a. number handling.
 Definitions are added to the forthcode({FORTH}) forthdefi({namespace}).
-The number base is decimal.   }).
+The number base is decimal.   })
 },{{WARM},{COLD},{FORTH},{BLOCK-INIT},{BASE},{S0}},
 {{( No test)},{}},
 enddoc)
@@ -6528,9 +6555,10 @@ worddoc( {MULTIPLYING},{*/MOD},{start_slash_mod},{n1 n2 n3 --- n4 n5},{ISO,FIG},
 forthvar({n4}) of the operation forthsamp({n1*n2/n3}) (using forthdefi({symmetric division})).
 A double precision
 intermediate product is used giving correct results, unless
-forthvar({n4}) or forthvar({n5}) overflows.
-_VERBOSE_({{ }forthsamp({n1 n2 * n3 /}){ gives an incorrect answer
-as soon as }forthsamp({n1 n2 *}){ overflows.}})
+forthvar({n4}) overflows. Then ciforth will give a floating point exception.
+dnl The following is probably incorrect.
+dnl _VERBOSE_({{ }forthsamp({n1 n2 * n3 /}){ gives an incorrect answer
+dnl as soon as }forthsamp({n1 n2 *}){ overflows.}})
 },
 {{*/},{/MOD}},
 {
@@ -6552,7 +6580,7 @@ worddoc( {MULTIPLYING},{*/},{star_slash},{n1 n2 n3 --- n4},{ISO,FIG},
 numbers(using forthdefi({symmetric division})).
 A double precision
 intermediate product is used giving correct results, unless
-forthvar({n4}) overflows.
+forthvar({n4}) overflows. Then ciforth will give a floating point exception.
 },
 {{*/MOD},{/MOD}},
 {
@@ -6677,9 +6705,7 @@ MESS1:                  _C{THEN}
 _C
 worddocsafe( {MEMORY},{PC@@},{port_char_fetch},{port --- b},{},
 {Fetch a byte forthvar({b}) from the port address
-forthvar({port}). A port address is always 16 bits.
-_VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
+_HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PC!},{PW@@},{PW!},{@@}},
@@ -6695,9 +6721,7 @@ _C
 worddoc( {MEMORY},{PC!},{port_char_store},{b port ---},{},
 {Store a byte forthvar({b}) to the port address
 forthvar({port}).
-A port address is always 16 bits.
-_VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
+_HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PC@@},{PW!},{P@@},{!}},
@@ -6711,9 +6735,8 @@ CODE_HEADER({PC!},{PCSTO})
 _C
 worddocsafe( {MEMORY},{PW@@},{port_fetch},{port --- n},{},
 {Fetch the 16-bit contents forthvar({n}) from the port address
-forthvar({port}). A port address is always 16 bits.
-_VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
+forthvar({port}).
+_HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PW!},{PC@@},{PC!},{@@}},
@@ -6727,8 +6750,7 @@ _C
 worddoc( {MEMORY},{PW!},{port_word_store},{n port ---},{},
 {Store the 16-bit data forthvar({n}) to the 16-bits port address
 forthvar({port}).
-_VERBOSE_({{In practice on a IBM PC architecture a port address is
-10 bits.}}) _HOSTED_X_({You can use ports only after asking permission
+_HOSTED_X_({You can use ports only after asking permission
 (using e.g. forthvar({ioperm}) ) and being super user.})
 },
 {{PW@@},{PC!},{PC@@},{!}},
@@ -7776,10 +7798,12 @@ _HEADER({RW-BUFFER},{RWBUF},{DOVAR},)
 })_C{}_END_({ _DLL_})
 _C
 worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
-{Leaves an address that contains a zero-ended (c-type) equivalent of forthvar({sc}).
-The same buffer is reused, such that this word is not reentrant.
-_VERBOSE_({{Use the word immediately, e.g. its intended used is passing parameters
-to the operating system. In fact this is }forthcode({RW-BUFFER}){ . }})
+{Leaves an address that contains a zero-ended (c-type) equivalent of
+forthvar({sc}).
+The same buffer (in fact forthcode({RW-BUFFER})) is reused,
+such that this word is not reentrant.
+_VERBOSE_({{Use the word immediately, its intended used is
+passing parameters to the operating system. }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
 only is useful to be passed to DPMI. }})
 },
@@ -8329,14 +8353,15 @@ Immediately, after forthcode({REFILL-TIB}) forthsamp({REMAINDER 2@@}) defines
 the characters ready in the input buffer. All characters are
 retained including the forthkey({RET}).
 
-If the input is redirected (such that characters
-after a forthkey({RET}) are available)
+If the input is redirected (such that
+after a forthkey({RET}) more characters are available)
 forthsamp({REMAINDER 2@@}) contains the part of
 forthcode({TIB}) that is not yet consumed by forthcode({(ACCEPT)}) ,
 and outside the reach of forthcode({SRC}) .
 
-All system call errors result in an exception.
-For redirected I/O this word may generate an end-of-pipe exception.
+_HOSTED_({ All errors from _OS_ result in an exception.})
+The end of normal or redirected I/O results in an an end-of-pipe exception
+in this word, which terminates thisforth and is not considered an error condition.
 },
 {{ACCEPT},{(ACCEPT)}},
 {
@@ -8669,7 +8694,7 @@ _HEADER({EMIT},{EMIT},{DOCOL})
 _C
 worddoc( {INPUT~},{TERMIO},{termio},{--- addr},{},
 {Leave the address of the terminal description, this has the layout of
-a c-structure forthsamp({termio}) .
+a c-structure forthsamp({termios}) .
 },{{SET-TERM}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -8678,12 +8703,12 @@ _HEADER({TERMIO},{TERMIO},{DOVAR}, )
 _C
 worddoc( {INPUT~},{SET-TERM},{set_term},{len b ---},{},
 {Set the terminal length to forthvar({len}) and toggle the c_lflag field
-with forthvar({b}) in the termio structure forthcode({TERMIO}) .
+with forthvar({b}) in the termios structure forthcode({TERMIO}) .
 In particular toggling with 0x0A makes that
 the terminal doesn't wait for a forthkey({RET}).
 This word is invalid for pipes, and is replaced by
 a forthcode({2DROP}) in that case.
-},{{SET-TERM}},
+},{{TERMIO},{KEY}},
 {{." interactive"},{interactive}},
 enddoc)
 _HEADER({SET-TERM},{STTERM},{DOCOL})
@@ -9399,10 +9424,10 @@ _HEADER({BLOCK-WRITE},{BLWRITE},{DOCOL})
 _C
 })_C{}_END_({_BLOCKSBYFILEWS_})
 worddoc( {OPERATINGSYSTEM},{SHELL},{shell},{---addr},{},
-{Leave the address forthvar({addr}) of a counted string,
+{Leave the address forthvar({addr}) of a string variable,
 the name of a file that contains the command interpreter,
 or shell.
-This name may be changed an is used by the
+This name may be changed and is used by the
  forthcode({SYSTEM}) command.
 The name may contain a path and be at most}
 M4_FILENAMELENGTH {characters long.
@@ -9410,7 +9435,7 @@ _HOSTED_LINUX_({ The default name is forthemph({/bin/sh}) .})
 _PC_({ The default name is forthemph({C:\COMMAND.COM}) .
 256 bytes after forthcode({SHELL}) are reserved for
 a start up stack.})
-},{{SYSTEM}},
+},{{SYSTEM},{$@@}},
 ,
 enddoc)
 _HEADER({SHELL},{SHELL},{DOVAR}, )
@@ -9426,7 +9451,7 @@ worddoc( {OPERATINGSYSTEM},{SYSTEM},{system},{sc ---},{ISO},
 in the string forthvar({sc}).
 _MODERN_({{The environment is passed to the
 command, but not the changes made after ciforth started.}})
-},{{BLOCK},{?ERROR},{?ERRUR}},
+},{{?ERRUR},{SHELL}},
 _LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}} })
 dnl Redirection can not be reliably tested on Windows XP
 dnl _MODERN_({ {{"TYPE hello.frt" SYSTEM },{." Hello world!"}} })
@@ -10595,7 +10620,7 @@ character which is placed in an output string. Result
 forthvar({d2}) is the quotient after division by
 forthcode({BASE}), and is maintained for further processing.
 Used between forthcode({<#}) and forthcode({#>}).},
-{{#S}},
+{{#S},{HLD}},
 {
 {!CSP 65.123 <# # # #> TYPE ?CSP},{23}
 },
@@ -11374,7 +11399,7 @@ worddocchapter({PARSING},{ },
 {The forthdefi({outer interpreter}) is responsible for parsing,
 i.e. it gets a word from the forthdefi(
 {current input source} ) and interprets or compiles it,
-advancing the _CIF_IN_( {forthcode({IN})}) _ISO_IN_( {forthcode({>IN})}) pointer.
+advancing the forthcode({PP}) pointer.
 The wordset forthsamp({PARSING}) contains the words used by this
 interpreter and other words that consume characters from the
 input source. In this way the outer interpreter need not be
@@ -11428,7 +11453,7 @@ _FILES_({
 worddocchapter({FILES},{ },
 {The wordset forthsamp({FILES}) contains words to input and output
 to files, or load words from files.
-_HOSTED_({They are underlying the forthsamp({BLOCKS}) facilities.})},
+_HOSTED_({They also are underlying the forthsamp({BLOCKS}) facilities.})},
 {},{},{},{}, {}, enddoc)
 })_C{}_END_({_FILES_})
 worddocchapter({STRING},{ },
@@ -11456,16 +11481,29 @@ worddocchapter({OPERATINGSYSTEM},{ },
 system or functions available in the BIOS-rom.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({LIBRARY},{ },
-{The words described into library have nothing particular in common,
-except that they are available in the forthdefi({LAB}) and not the
+{The words of the library have nothing particular in common,
+except that they are available in the Library Accessable by Block forthdefi({LAB}) and not the
 ciforth kernel.
+_SUPPRESSED({{
 They are either words from the library that are sufficiently useful
 to merit being described here, or legacy words that
 were in the kernel in earlier versions.
+}})
 All of them can be loaded from the library by forthsamp({WANT})
-forthvar({LEGACY_WORD}).
+forthvar({SOME_WORD}).
+Most common ISO words are available.
+The assembler is loaded by forthsamp({WANT ASSEMBLERi86}) .
+Floating point is loaded by forthsamp({WANT -fp-}) .
+Interactive controle structures are loaded by forthsamp({WANT -scripting-}) .
+Multi-tasking is loaded by forthsamp({WANT THREAD-PET}) .
+The memory wordset is loaded by forthsamp({WANT ALLOCATE}) .
+
+Useful application words in the forthdefi({LAB}) are i.a. : forthcode({ALIAS}) forthcode({QSORT}) forthcode({MERGE-SORT}) .
+Useful debugging words in the forthdefi({LAB}) are i.a. : forthcode({DO-DEBUG}) forthcode({LOCATE}) forthcode({SEE}) forthcode({REGRESS}) .
+Non-iso words are supposedly usable from the description that goes with the code.
+
 },
-{},{},{},{}, {}, enddoc)
+{},{},{},{},{}, enddoc)
 worddocchapter({WORDLISTS},{ },
 {The dictionary is subdivided in non-overlapping subsets: the
 forthdefi({word list})'s (forthpxref({DICTIONARY})).
