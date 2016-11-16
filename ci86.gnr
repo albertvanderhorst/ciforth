@@ -1619,15 +1619,14 @@ _ALIGNED_({    DC LALIGN}, {dnl})
         DC      SEMIS
 _C
 worddoc( {WORDLISTS},{FORTH},{forth},{},{NISO,FIG},
-{The name of the primary namespace. Execution pushes the
-forthcode({FORTH}) forthdefi({WID})
+{The name of the primary namespace.
+Execution pushes the forthcode({FORTH}) forthdefi({WID})
 to the top of the forthdefi({search order}) .
-(For ISO-compliance it
-would replace the top.)
+(For ISO-compliance it would replace the top, however the phrase
+forthsamp({ONLY FORTH}) has the effect required by ISO.)
 Until additional user forthdefi({word list}) 's are created, new user definitions
-become a part of forthcode({FORTH}) . forthcode({FORTH}) is
-immediate, so it will execute during the creation of a
-colon-definition, to select this forthdefi({word list}) at compile time.},
+become a part of forthcode({FORTH}) .
+},
 {{CONTEXT},{NAMESPACE}},
 { { NAMESPACE JOHN JOHN ' FORTH >WID CONTEXT @ = .},{0},
   { FORTH ' FORTH >WID CONTEXT @ = .},{_T_} },
@@ -1728,21 +1727,18 @@ worddoc( {WORDLISTS},{ONLY},{ONLY},{},{NISO},
 {Set the minimum search order, such that only
 forthdefi({denotation})'s (numbers etc.) can be found
 plus the word forthcode({FORTH}).
-By using forthcode({FORTH}) one can regain control towards a startup search order.
+By using forthcode({FORTH}) one can regain control towards a
+startup search order.
 
 forthcode({ONLY}) is actually a regular forthcode({NAMESPACE}).
-The
-associated forthdefi({word list}) contains mainly prefix words,
+The associated forthdefi({word list}) contains mainly prefix words,
 that scan denotations and are described in the chapter
 forthcode({DENOTATIONS}).
-If found the parse pointer is moved back to immediately after
-the prefix, and the corresponding denotation definition
-executed.
 _VERBOSE_({ If you want to add a denotation{,}
 add it to the forthcode({ONLY}) wordlist preferably.
-This prevents masking regular words with the same prefix.})
+This prevents masking regular words that start with the prefix.})
 },
-{{PREFIX}},
+{{PREFIX},{PP},{>WID}},
 {
 },
 enddoc)
@@ -2185,9 +2181,11 @@ the end of the input source. Leave the word found as a string
 constant forthvar({sc}). _VERBOSE_({{As it goes with string
 constants, you may not alter its content, nor assume anything
 is appended. Note that this is more deserving of the name
-``WORD'' than what is in the ISO standard, that can be used to parse lines.
-}})},
-{{BLK},{WORD},{IN}},
+``WORD'' than what is in the ISO standard, that can be used to parse lines. }})
+Contrast this to a forthcode({PREFIX}) word that leaves the input pointer
+past itself.
+},
+{{BLK},{WORD},{PP}},
 {{: GS2 NAME . C@ EMIT ; GS2 CELLO},{5 C},
 {HEX : GS1 NAME . C@ EMIT ; GS1   QQ},{2 Q}}, enddoc)
 _HEADER({NAME},{LNAME},{DOCOL})
@@ -2235,7 +2233,7 @@ worddoc( {PARSING},{SRC},{s_r_c},{addr ---},{},
 of the forthdefi({current input source}) specification,
 allocated in the user area. It consists of three cells: the
 lowest address of the parse area,
-and _CIF_IN_({the non-inclusive highest address of the parse area
+_CIF_IN_({the non-inclusive highest address of the parse area
 and a pointer to the next character to be parsed.})
 _ISO_IN_({the number of characters and the current offset in the
 parse area.}) Changing forthsamp({SRC}) takes immediate effect,
@@ -2274,7 +2272,7 @@ The legacy
 forthcode({>IN}) is not actually a variable:
 its content must be fetched immediately, and changing it has no effect.
 },
-{{(>IN)},{IN}},
+{{(>IN)}},
 dnl this test to be moved to library test (after  "-legacy-" WANTED .)
 dnl {{: GS1 >IN @ ; QUIT
 dnl GS1 .},{4}},
@@ -2496,7 +2494,7 @@ CODE_HEADER({DSP@},{SPFET})
 _C
 worddoc( {STACKS},{DSP!},{d_s_p_store},{addr ---},{},
 {Initialize the data stack pointer with forthvar({addr}) .},
-{{DSP@@}},
+{{DSP@@},{S0}},
 {{  1 2 3 S0 @ DSP! DSP@ S0 @ = .},{_T_} },
 enddoc)
 CODE_HEADER({DSP!},{SPSTO})
@@ -2520,7 +2518,7 @@ _HEADER({DEPTH},{DEPTH},{DOCOL})
 _C
 worddoc( {STACKS},{CLS},{c_l_s},{ i*x -- },{},
 {Clear the data stack},
-{{DSP@@}},
+{{DSP!}},
 {{  1 2 3 CLS DEPTH .},{0} },
 enddoc)
 _HEADER({CLS},{CLS},{DOCOL})
@@ -2542,7 +2540,7 @@ _C
 worddoc( {STACKS},{RSP!},{r_s_p_store},{addr ---},{},
 {Initialize the return stack
 pointer with forthvar({addr}).},
-{{RSP@@}},
+{{RSP@@},{R0}},
 {{." No test"},{No test} },
 enddoc)
 CODE_HEADER({RSP!},{RPSTO})
@@ -3505,7 +3503,9 @@ _HEADER({SCR},{SCR},{DOUSE}, _CELLS(33))
 _C
 worddoc( {PARSING},{STATE},{state},{--- addr},{ISO,U},
 {A user variable containing the compilation state. A non-zero value
-indicates compilation.},{},
+indicates compilation.
+In ciforth it then contains 1.},
+{{[},{]}},
 {{STATE @ .},{0},
 { : GT8 STATE @ 0= . ; IMMEDIATE : GT7 GT8 ; GT7},{0}},
 enddoc)
@@ -3594,7 +3594,7 @@ This is different from how ISO forthcode({>IN}) works,
 in the sense that zeroing it
 doesn't reset the parse pointer to the start of the current line.
 },
-{{>IN},{WORD},{NAME},{NUMBER},{PARSE},{PP@@@@}},
+{{(>IN)},{WORD},{NAME},{NUMBER},{PARSE},{PP@@@@}},
 {{: GS1 PP @ PP@@ 2DROP PP @ - ; GS1 Q .},{-1}},
 enddoc)
 _HEADER({PP},{PP},{DOUSE}, _CELLS(29))
@@ -4629,8 +4629,9 @@ worddocsafe( {PARSING},{SET-SRC},{set_source},{sc ---},{},
 forthdefi({current input source}). This input is chained, i.e.
 exhausting it has the same effect as exhausting the input that
 called forthcode({SET-SRC}). _VERBOSE_({{In practice this word
-is almost always preceeded by a call to forthcode({SAVE}) and
-followed by a call to }forthcode({INTERPRET}){.}})},
+is almost always surrounded by call's to forthcode({SAVE}) and
+forthcode({RESTORE}) and then
+followed by a call to }forthcode({INTERPRET}){or some such.}})},
 {{SRC},{SAVE},{EVALUATE},{INTERPRET}},
 {{ "1 2 3 . CR" SET-SRC . . .},{3},
 { . . },{2 1} },
@@ -5061,7 +5062,7 @@ the denotation is correct or not.
 The forthcode({dea}) allows to retrieve all properties of the word
 such as whether it is immediate.
 },
-{{FIND}, {PRESENT}, {CONTEXT}, {(FIND)},{PREFIX} },
+{{PP},{FIND}, {PRESENT}, {CONTEXT}, {(FIND)},{PREFIX} },
 { { 123 : BONOBO ; "BONOBO" FOUND ' BONOBO = . .},{_T_ 123},
 dnl 1ONNOBO is found as a misspelled number!
 { 243 "1ONNOBO" FOUND 0= . .},{0 243},
@@ -5645,24 +5646,32 @@ execute it (forthcode({STATE}) is 0) or compile it
 (forthcode({STATE}) is 1). A word is blank-delimited and looked
 up in the vocabularies of forthdefi({search-order}).
 It can be either matched exactly, or it can match a prefix.
+If it is matched regularly the parse pointer remains after the
+blank delimiter as required by ISO.
+If a word matches a prefix, forthcode({INTERPRET}) sets back the
+parse pointer to immediately after the prefix,
 A word that matches a prefix is called a forthdefi({denotation});
 mostly this is a number.
-Prefixes are present in forthcode({ONLY}) which is the last wordlist
-in the search order, and the minimum search order.
-If it is not found at all, it
-is an forthcode({ERROR}).
+If it is not found at all, it is an forthcode({ERROR}).
+Prefixes are present in forthcode({ONLY}) which
+comprises the minimum search order and is always present as
+the last wordlist in the search order.
+An application can add prefixes in whatever namespace is suitable.
 A forthdefi({denotation}) is a number, a double number, a
 character or a string etc. Denotations are handled
 respectively by the words
 forthcode({0}) ... forthcode({F}) forthcode({&}) forthcode({"}) and
 any other word of the
-forthcode({ONLY}) wordlist, depending on the first
+forthcode({ONLY}) wordlist, depending on the first characters.
+The denotation parsing is extendable, e.g. after loading a floating
+point package floating point numbers are recognized.
 character or characters.
 _VERBOSE_({{
 A number is converted according to the current base.
 If a decimal point is found as part of a number, the number
 value that is left is a double number, otherwise it is a single
-number. Comma's in numbers are ignored by ciforth.}})
+number.
+Comma's in numbers are ignored by ciforth.}})
 },
 {{NAME},{(NUMBER)},{NUMBER},{BLK},{DPL}},
 {{( No test)},{}},
@@ -5721,11 +5730,12 @@ worddoc( {DICTIONARY},{PREFIX},{prefix},{},{},
 If searching the wordlists for a name that starts with the prefix,
 the prefix is a match for that name.
 This method allows to define numbers, and other
-forthdefi({denotations}) such as strings, in a modular and extensible
+forthdefi({denotation})'s such as strings, in a modular and extensible
 fashion.
 A prefix word finds the interpreter pointer pointing to
 the remainder of the name (or number) sought for, and must compile
-that remainder.
+that remainder. Some prefixes, like forthcode({Prefix_7}), decrement the
+parse pointer by one before starting to parse.
 Prefix words are mostly both immediate and forthdefi({smart}),
 i.e. they behave differently when compiled, than interpreted.
 The result is that the compiled code looks the same and behaves the
@@ -5733,7 +5743,7 @@ same than the interpreted code.
 Postponing prefix words voids your warranty.
  _VERBOSE_({It is recommended that the only smart words present are
  prefix words.}) },
-{{PP@@@@}, {IMMEDIATE},{Prefix_0}},
+{{PP@@@@}, {IMMEDIATE},{Prefix_0},{ONLY}},
 { { : Q &Z EMIT NAME TYPE ; PREFIX QPO},{ZPO}},
 enddoc)
 _HEADER({PREFIX},{PREFX},{DOCOL})
@@ -5752,6 +5762,8 @@ forthsamp({cccc}) will push this word list (the
 forthdefi({word list associated with}) forthsamp({cccc})) to the top of
 the search order in forthcode({CONTEXT}). So it will be
 searched first by forthcode({INTERPRET}) .
+A word create by forthcode({NAMESPACE}) is not immediate.
+_VERBOSE_({This is also different among Forth implementations.})
 
 A namespace 's data content field contains at first the dovoc
 pointer (like for any forthcode({DOES>}) word) , then follows
@@ -5803,9 +5815,8 @@ _C
 worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{WANT,NISO,FIG},
 {The name of the namespace that contains machine code definitions.
 In ciforth execution it pushes the associated word list to the
-top of the forthcode({CONTEXT}) stack. (For ISO-compliance it
-would replace the top.) forthcode({ASSEMBLER}) is not
-immediate.
+top of the forthcode({CONTEXT}) stack. (A traditional forthcode({VOCABULARY})
+would replace the top.)
 This word makes only sense in combination with the words that
 belong to it. So it is present in loadable form in the screens
 file forthfile({forth.lab}) .},
@@ -5844,8 +5855,11 @@ If there were already M4_MAXWORDLIST WID 's,
 ciforth looses the last one.
 This is not counting
 the forthcode({ONLY}) search order.
-_VERBOSE_({{You seldomly want to use this word, because in ciforth
-by naming a namespace you add it to the order.}})},
+_VERBOSE_({{You seldomly need to use this word, because in ciforth
+by executing a namespace you add it to the order.
+This is different than the words defined by the customary
+forthcode({VOCABULARY}) that replaces the topmost wordlist.
+}})},
 {{CONTEXT},{NAMESPACE}},
 {
   { NAMESPACE JOHN ALSO ' JOHN >WID CONTEXT ! DEFINITIONS dnl
@@ -6399,10 +6413,9 @@ _C
 worddoc( {SUPERFLUOUS},{2/},{two_slash},{n1 --- n2},{ISO},
 {Perform an arithmetical {{shift}} right.
 The bit pattern of forthvar({n1}) is shifted to the right, except that
-the left most bit (``sign bit'') remains the same.
-_VERBOSE_({{ This is the same as }forthsamp({S>D 2 FM/MOD NIP}){.
-It is not the same as }forthsamp({2 /}){ , nor is it the
-same as }forthsamp({1 RSHIFT}){.}})},
+the left most bit (``sign bit'') remains the same, called "arithmetic shift".
+_VERBOSE_({{ On this 2-complement machine this is the same as
+}forthsamp({2 /}) {.}})},
 {{2*} },
 {
 {2 2/ . },{1},
@@ -7024,7 +7037,7 @@ _C
 worddoc( {SCREEN},{LOCK},{lock},{ n ---},{CI},
 {Lock the block forthvar({n}).
 Multiple locks are possible, and require multiple unlocks.
-_VERBOSE_({{Probably, because it
+_VERBOSE_({{Probably, it
 is to become the }forthdefi({current input source}){.}})
 The result is that its buffer will not be reclaimed
 until an forthcode({UNLOCK}) occurs.},
@@ -7120,7 +7133,8 @@ It indicates the block
 number being interpreted, or zero, if input is being taken from
 the terminal input buffer. In ciforth
 changing the content at
-forthvar({addr}) has no effect, and its content must be
+forthvar({addr}) has no effect, which may not be ISO compliant.
+Its content must be
 fetched before the forthdefi({current input source}) has
 changed.},
 {{BLOCK},{TIB}},
@@ -11507,18 +11521,21 @@ Non-iso words are supposedly usable from the description that goes with the code
 worddocchapter({WORDLISTS},{ },
 {The dictionary is subdivided in non-overlapping subsets: the
 forthdefi({word list})'s (forthpxref({DICTIONARY})).
- They are created by the defining word
+They are created by the defining word
 forthcode({NAMESPACE}) and filled by defining words while that
-namespace is forthcode({CURRENT}) . They regulate how words
+forthdefi({namespace}) is forthcode({CURRENT}) . They regulate how words
 are found; different vocabularies can have words with the same
 names.
 
-A word list in the ISO sense has no name, but a
- forthdefi({word list identifier}) or forthdefi({WID}),
-which is
-inconvenient. We use namespace words created by the defining
+A word list in the ISO sense has a
+forthdefi({word list identifier}) or forthdefi({WID}),
+but no name which is inconvenient.
+We use namespace words created by the defining
 word forthcode({NAMESPACE}) . They are used to manipulate the
 word list's that are associated with them. _VERBOSE_({{So
-vocabularies are nearly the wordlist 's of the ISO standard,
-the primary difference is that they have a name.}}) },
+namespaces are nearly the wordlist 's of the ISO standard,
+the primary difference is that they have a name.
+In most Forth literature namespaces are referred to as vocabularies,
+and a word forthcode({VOCABULARY}) is used to create them.
+}}) },
 {},{},{},{})

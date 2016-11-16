@@ -932,8 +932,8 @@ forthitem |32     : Int width in memory.
 @section The dreaded SIB byte
 
 If you ask for the operands of a memory instruction (one of the
-simple one is LGDT, ) instead of all the sib (forthdefi({scaled index byte}))
-possibilities you see.
+simple ones is LGDT, ) instead of all the forthdefi({scaled index byte})
+(forthdefi({SIB})) possibilities you see.
 forthsamp({LGDT, BO| ~SIB| 14 SIB,, 18, B,})
 This loads the general description table from an address
 described by a sib-byte of 14 and an offset of 18.
