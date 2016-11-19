@@ -2,23 +2,23 @@
 BEFORE
 
 : test   
-1   SWAP   3 2   SWAP   
+1   SWAP   3  2   SWAP   
 ;
 AFTER
 
 : test   
-1 SWAP   2 3 
+1  SWAP   2  3  
 ;
 ####################
 BEFORE
 
 : test1   
-1   2   +   3 4 *   OR   
+1   2   +   3  4  *   OR   
 ;
 AFTER
 
 : test1   
-F 
+F  
 ;
 ####################
 BEFORE
@@ -29,7 +29,7 @@ BEFORE
 AFTER
 
 : test2   
-2 1 
+2  1  
 ;
 ####################
 BEFORE
@@ -40,7 +40,7 @@ BEFORE
 AFTER
 
 : test3   
-2 1 
+2  1  
 ;
 ####################
 BEFORE
@@ -51,7 +51,7 @@ A9   A9   +
 AFTER
 
 : B0   
-400 
+400  
 ;
 ####################
 BEFORE
@@ -62,29 +62,29 @@ BEFORE
 AFTER
 
 : DOIT   
-2 1 
+2  1  
 ;
 ####################
 BEFORE
 
 : test4   
-1   2   3 4 BASE   !   
+1   2   3  4  BASE   !   
 ;
 AFTER
 
 : test4   
-4 C04804C !   1 2 3 
+4  C04404C  !   1  2  3  
 ;
 ####################
 BEFORE
 
 : test5   
-SWAP   1   2   3 5 BASE   !   SWAP   
+SWAP   1   2   3  5  BASE   !   SWAP   
 ;
 AFTER
 
 : test5   
-SWAP   5 C04804C !   1 3 2 
+SWAP   5  C04404C  !   1  3  2  
 ;
 ####################
 BEFORE
@@ -103,26 +103,26 @@ BEFORE
 
 : test7   
 
-0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3 +   
+0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3  +   
 ;
 AFTER
 
 : test7   
 
-0BRANCH [ C , ] ( between +   LIT   ) 2 +   3 +   
+0BRANCH [ C , ] ( between +   LIT   ) 2  +   3  +   
 ;
 ####################
 BEFORE
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3 5 7 9 BASE   !   SWAP   
+0BRANCH [ 8 , ] ( between ? LIT   ) 3  5  7  9  BASE   !   SWAP   
 ;
 AFTER
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3 9 C04804C !   7 5 
+0BRANCH [ 8 , ] ( between ? LIT   ) 3  9  C04404C  !   7  5  
 ;
 ####################
 BEFORE
@@ -148,7 +148,7 @@ AFTER
 
 : testA   
 
-0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+0BRANCH [ 14 , ] ( between +   AND   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
 ;
 ####################
 BEFORE
@@ -162,19 +162,6 @@ AFTER
 : testB   
 +   AND   OR   LSHIFT   
 BRANCH  [ -18 , ] ( between (;)   +   ) 
-;
-####################
-BEFORE
-
-: testC   
-(test1)   (test1)   
-BRANCH  [ -10 , ] ( between ? (test1)   ) 
-;
-AFTER
-
-: testC   
-+   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
-BRANCH  [ -28 , ] ( between (;)   +   ) 
 ;
 ####################
 BEFORE
@@ -235,8 +222,8 @@ BEFORE
 
 0BRANCH [ C , ] ( between ? 2   ) 1   
 BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
-0BRANCH [ 10 , ] ( between ? LIT   ) 5 
-BRANCH  [ 8 , ] ( between ? DROP   ) 6 DROP   
+0BRANCH [ 10 , ] ( between ? LIT   ) 5  
+BRANCH  [ 8 , ] ( between ? DROP   ) 6  DROP   
 BRANCH  [ -48 , ] ( between ? 0BRANCH   ) 
 ;
 AFTER
@@ -244,21 +231,6 @@ AFTER
 : testH   
 DROP   DROP   
 BRANCH  [ -10 , ] ( between (;)   DROP   ) 
-;
-####################
-BEFORE
-
-: testI   
-(TESTI)   (TESTI)   
-;
-AFTER
-
-: testI   
-
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   0BRANCH   ) ROT   
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
 ;
 ####################
 BEFORE
@@ -271,8 +243,8 @@ AFTER
 : testJ   
 
 0BRANCH [ 14 , ] ( between ? OR   ) AND   
-BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
-BRANCH  [ C , ] ( between ? SWAP   ) OR   
+BRANCH  [ 14 , ] ( between ? SWAP   ) 
+BRANCH  [ 8 , ] ( between BRANCH   ? ) OR   
 BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
 ;
 ####################
@@ -306,38 +278,6 @@ BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP
 DO 
 LOOP 
 LOOP 2DUP   
-;
-####################
-BEFORE
-
-: testL   
-(TESTL)   2OVER   
-;
-AFTER
-
-: testL   
-
-DO DUP   
-0BRANCH [ 68 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
-BRANCH  [ 50 , ] ( between ? ROT   ) 
-BRANCH  [ 8 , ] ( between ? SWAP   ) 
-BRANCH  [ 44 , ] ( between ROT   2OVER   ) SWAP   2DUP   
-0BRANCH [ 34 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
-BRANCH  [ 1C , ] ( between ? ROT   ) 
-BRANCH  [ 8 , ] ( between ? 2SWAP   ) 
-BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
-LOOP ROT   2OVER   
-;
-####################
-BEFORE
-
-: testM   
-C0   
-;
-AFTER
-
-: testM   
-120000 +   
 ;
 ####################
 BEFORE
@@ -398,7 +338,7 @@ AFTER
 BEFORE
 
 : testO4   
--1 
+-1  
 0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
 ;
 AFTER
@@ -424,23 +364,23 @@ SPLIT HERE
 BEFORE
 
 : test   
-1   SWAP   2   3 
+1   SWAP   2   3  
 ;
 AFTER
 
 : test   
-1 SWAP   2 3 
+1  SWAP   2  3  
 ;
 ####################
 BEFORE
 
 : test1   
-F 
+F  
 ;
 AFTER
 
 : test1   
-F 
+F  
 ;
 ####################
 BEFORE
@@ -451,7 +391,7 @@ BEFORE
 AFTER
 
 : test2   
-2 1 
+2  1  
 ;
 ####################
 BEFORE
@@ -462,18 +402,18 @@ BEFORE
 AFTER
 
 : test3   
-2 1 
+2  1  
 ;
 ####################
 BEFORE
 
 : B0   
-400 
+400  
 ;
 AFTER
 
 : B0   
-400 
+400  
 ;
 ####################
 BEFORE
@@ -484,29 +424,29 @@ BEFORE
 AFTER
 
 : DOIT   
-2 1 
+2  1  
 ;
 ####################
 BEFORE
 
 : test4   
-4 BASE   !   1   2   3 
+4  BASE   !   1   2   3  
 ;
 AFTER
 
 : test4   
-4 C04804C !   1 2 3 
+4  C04404C  !   1  2  3  
 ;
 ####################
 BEFORE
 
 : test5   
-SWAP   5 BASE   !   1   3 2   
+SWAP   5  BASE   !   1   3  2   
 ;
 AFTER
 
 : test5   
-SWAP   5 C04804C !   1 3 2 
+SWAP   5  C04404C  !   1  3  2  
 ;
 ####################
 BEFORE
@@ -525,26 +465,26 @@ BEFORE
 
 : test7   
 
-0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3 +   
+0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3  +   
 ;
 AFTER
 
 : test7   
 
-0BRANCH [ C , ] ( between +   LIT   ) 2 +   3 +   
+0BRANCH [ C , ] ( between +   LIT   ) 2  +   3  +   
 ;
 ####################
 BEFORE
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3 9 BASE   !   7 5 
+0BRANCH [ 8 , ] ( between ? LIT   ) 3  9  BASE   !   7  5  
 ;
 AFTER
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3 9 C04804C !   7 5 
+0BRANCH [ 8 , ] ( between ? LIT   ) 3  9  C04404C  !   7  5  
 ;
 ####################
 BEFORE
@@ -772,12 +712,12 @@ LOOP ROT   2OVER
 BEFORE
 
 : testM   
-120000 +   
+120000  +   
 ;
 AFTER
 
 : testM   
-120000 +   
+120000  +   
 ;
 ####################
 BEFORE

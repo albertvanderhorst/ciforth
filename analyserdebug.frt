@@ -5,7 +5,7 @@
                                 HEX
 \ Debugging aids for analyser.frt. Print the information added to flag fields.
 
-REQUIRE CRACK
+WANT CRACK
 
 \ Type the interpretation of a stack effect NIBBLE.
 : .SE/2 DUP 0 = IF "unknown" TYPE ELSE DUP 0F = IF "variable" TYPE

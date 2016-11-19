@@ -11,7 +11,7 @@
 
 \ List here: FMASK-IL
 
-REQUIRE ALIAS
+WANT ALIAS
 \ : \D POSTPONE \ ; IMMEDIATE
   : \D ;            IMMEDIATE
 \D REQUIRE DUMP
@@ -69,10 +69,10 @@ DECIMAL
 \ For a parse ADDRESS return an incremented parse ADDRESS, its
 \ CONTENT and a go on FLAG.
 : NEXT-PARSE
-   @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF CELL+ THEN
-\   R@ CFA> 'SKIP = IF @+ + ALIGNED THEN
+   @+ >R   R@ >FFA @ FMASK-IL AND IF CELL+ THEN 
+\   R@ 'SKIP = IF @+ + ALIGNED THEN 
    R@
-\D   R@ CFA> ID.
+\D   R@ ID. 
    R> '(;) <> ;
 
 \ For some hl-code at ADDRESS, return the ADDRESS where (;) sits.
@@ -80,10 +80,10 @@ DECIMAL
 \ Doesn't worl anymore after the optimisalisation, very puzzling.
 \ \D : JAN 14 BEGIN 12 WHILE "AAA" TYPE REPEAT 18 ;
 \D : JAN 14 BEGIN 12 WHILE &A EMIT REPEAT 18 ;   \ Alternative test.
-\D 'JAN CFA> >DFA @ >SA
+\D 'JAN >DFA @ >SA 
 
 \ Fetch the hl code from XT , return it as a Forth STRING.
-: HL-CODE@  CFA> >DFA @ DUP >SA OVER - ;
+: HL-CODE@  >DFA @ DUP >SA OVER - ; 
 
 \ Store a STRING with hl-code in the dictionary.
 : HL-CODE, HERE OVER ALLOT SWAP CMOVE ;
@@ -122,7 +122,7 @@ DECIMAL
 : OPTIMISE-B1 DUP HIGH-LEVEL? OVER >FFA @ BR-MASK AND 0= AND IF
     -1 >R
     >DFA @ BEGIN NEXT-PARSE WHILE
-    CFA> DUP OPTIMISE-B
+    DUP OPTIMISE-B 
     B-INLINABLE? R> AND >R REPEAT
     2DROP R>  \D .S
     ELSE

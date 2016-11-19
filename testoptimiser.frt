@@ -1,6 +1,9 @@
 
 ONLY FORTH DEFINITIONS
 
+: new-h. HEX: . ;
+'new-h. 'H. 3 CELLS MOVE
+
 : SHOW-IT
 "####################" TYPE CR
 "BEFORE" TYPE CR
@@ -74,10 +77,10 @@ HIDE A8 HIDE A9
 : testB BEGIN (test1) AGAIN ;
 'testB SHOW-IT
 
-\ Backward branch around expansion.
-: (testC) + AND OR LSHIFT ;
-: testC BEGIN (test1) (test1) AGAIN ;
-'testC SHOW-IT
+\ \ Backward branch around expansion.
+\ : (testC) + AND OR LSHIFT ;
+\ : testC BEGIN (test1) (test1) AGAIN ;
+\ 'testC SHOW-IT
 
 \ Annihilator involving a fetch.
 : testD IF SWAP ELSE DROP BASE @ THEN 2DROP ;
@@ -102,10 +105,10 @@ IF 5 ELSE 6 THEN DROP
 AGAIN ;
 'testH SHOW-IT
 
-\ Expansion with EXITs present.
-: (TESTI)  IF AND EXIT THEN ROT ;
-: testI    (TESTI) (TESTI) ;
-'testI SHOW-IT
+\ \ Expansion with EXITs present.
+\ : (TESTI)  IF AND EXIT THEN ROT ;
+\ : testI    (TESTI) (TESTI) ;
+\ 'testI SHOW-IT
 
 \ Expansion with EXITs present.
 : (TESTJ)  IF AND EXIT ELSE OR EXIT THEN SWAP ;
@@ -127,8 +130,8 @@ AGAIN ;
 DUP IF LEAVE ELSE EXIT THEN SWAP
 2DUP IF LEAVE ELSE EXIT THEN 2SWAP
 LOOP ROT ;
-: testL    (TESTL) 2OVER ;
-'testL SHOW-IT
+\ : testL    (TESTL) 2OVER ;
+\ 'testL SHOW-IT
 
 \ Patterns, combined with inlining.
 0 CONSTANT z
@@ -144,8 +147,8 @@ LOOP ROT ;
 : B4 B3 B3 ;       : B5 B4 z + B4 ;    : B6 B5 o * B5 ;
 : B7 B6 B6 ;       : B8 B7 z + B7 ;    : B9 B8 o * B8 ;
 : C0 B9 B9 ;
-: testM C0 ;
-'testM SHOW-IT
+\ : testM C0 ;
+\ 'testM SHOW-IT
 HIDE A1 HIDE A2 HIDE A3
 HIDE A4 HIDE A5 HIDE A6 HIDE A7
 HIDE A8 HIDE A9

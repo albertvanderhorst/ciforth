@@ -5,7 +5,7 @@
 
 \ WARNING: HEX THROUGHOUT THIS WHOLE FILE !
 
-REQUIRE IN-BAG?
+WANT IN-BAG?
 
                                 HEX
 

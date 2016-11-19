@@ -17,12 +17,9 @@
 
 \ Caveat : adapt the CODE-TYPES bag, if you use threading, as indicated.
 
-1 LOAD          \ To get `` REQUIRE ''.
+1 LOAD          \ To get `` WANT ''.
 
-REQUIRE DEPTH
-REQUIRE ALIAS
-REQUIRE BAG
-REQUIRE IN-BAG?
+WANT ALIAS BAG IN-BAG? INCLUDE
 
 INCLUDE analyserconfig.frt
 INCLUDE asgen.frt
@@ -65,7 +62,7 @@ FMASK-ES              0  1 'I     !FLAGS
 FMASK-ES              0  1 'R>    !FLAGS
 FMASK-ES              0  0 'RDROP !FLAGS
 \ This one has conditional branches around pushes:
-FMASK-ST FMASK-N! OR  3 4  '$S    !FLAGS
+FMASK-ST FMASK-N! OR  3 4  '$/    !FLAGS
 
 MARK-DUP
 FILL-ALL

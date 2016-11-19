@@ -7,10 +7,14 @@
 \ It assumes the stack effect bytes and the optimisation properties
 \ have been filled in in the flag fields.
 
-REQUIRE $-PREFIX
-REQUIRE SWAP-DP
-REQUIRE SET
-REQUIRE BOUNDS
+WANT $-PREFIX
+WANT SWAP-DP
+WANT BAG SET+
+WANT BOUNDS
+
+'BAG ALIAS SET
+'!BAG ALIAS !SET
+'IN-BAG? ALIAS IN-SET?
 
 ( Retract from BAG in same order. Leave ITEM. Use after !BAG )
 \ This is tricky, it uses the filled pointer so while retracting
@@ -85,11 +89,11 @@ R> R> REPEAT 2DROP ;
 \ DEA (content of ``ADDRESS'') and a  FLAG : this IS_NOT the
 \ end of definition.
 : NEXT-PARSE
-   @+ >R   R@ CFA> >FFA @ FMASK-IL AND IF
-       R@ CFA> 'SKIP = IF @+ + ALIGNED ELSE CELL+ THEN
+   @+ >R   R@ >FFA @ FMASK-IL AND IF
+       R@ 'SKIP = IF @+ + ALIGNED ELSE CELL+ THEN
    THEN
    R@
-\  R@ CFA> ID.          \ For desperado debugging.
+\  R@ ID.          \ For desperado debugging.
    R> '(;) <> ;
 
 \ ----------------------    MISCELLANEOUS
@@ -219,7 +223,7 @@ MAX-SET SET BRANCHES
 \ WORKING BUT NO LONGER USED. INVALUABLE DURING TESTIN.
 \ For START if there is some branch at ADDRESS add it to ``BRANCHES''
 : FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
-    CELL+   BRANCHES SET+!
+    CELL+   BRANCHES SET+
     _ THEN DROP ;
 
 \ For a SEQUENCE fill the ``BRANCHES'' set.
@@ -277,13 +281,13 @@ MAX-SET SET MARKED-BRANCHES
 \ the gap, mark it for elimination from the table.
 \ We can't remove them from the set right away because things get entangled.
 : ELIMINATE-BRANCH-IN-GAP   >R   R@ @ DSSWAP WITHIN IF
-    R@ MARKED-BRANCHES SET+!
+    R@ MARKED-BRANCHES SET+
 THEN RDROP ;
 
 \ Delete from ``BRANCHES'' what is marked for elimination.
 \ Must go back because otherwise we would disturb the later addresses.
 : DELETE-MARKED-BRANCHES MARKED-BRANCHES @+
-   BEGIN 2DUP < WHILE   1 CELLS -   DUP @ BRANCHES SET-REMOVE   REPEAT 2DROP ;
+   BEGIN 2DUP < WHILE   1 CELLS -   DUP @ BRANCHES SET-   REPEAT 2DROP ;
 
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
 : ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES @+ SWAP ?DO
@@ -326,8 +330,8 @@ THEN RDROP ;
 : IS-A-LEAVE   'LEAVE = ;
 
 \ \ Expand  the first statement (a ``LEAVE'' ) of SEQUENCE by a branch (plus other code as appropriate.)
-\ : COPY-LEAVE   POSTPONE UNLOOP   POSTPONE BRANCH   HERE BRANCHES SET+!
-\   HERE LEAVES SET+!    _ ,   ;
+\ : COPY-LEAVE   POSTPONE UNLOOP   POSTPONE BRANCH   HERE BRANCHES SET+
+\   HERE LEAVES SET+    _ ,   ;
 
 \ Leave code length. Don't count the (;). It must not be copied.
 'LEAVE-CODE >DFA @   DUP END-OF-SEQUENCE SWAP - 1 CELLS -
@@ -361,7 +365,7 @@ CONSTANT LEAVE-LENGTH
 \ Expand the ``LEAVE'' at the start of SEQUENCE . Execution remains equivalent.
 \ Return SEQUENCE incremented to after the code expanded.
 : REPLACE-LEAVE-BY-BRANCH LEAVE-GAP DUP FILL-LEAVE-BRANCH
-    DUP 1 CELLS - BRANCHES SET+! ;
+    DUP 1 CELLS - BRANCHES SET+ ;
 
 \ Try to apply any special expansion to the start of a SEQUENCE .
 \ Always leave the new SEQUENCE be it just after the expansion or bumped
@@ -395,18 +399,18 @@ MAX-SET SET EXITS     : !EXITS   EXITS !SET ;
 MAX-SET SET LEAVES     : !LEAVES   LEAVES !SET ;
 
 \ If DEA is a BRANCH remember it in ``BRANCHES''
-: REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES SET+!  THEN ;
+: REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES SET+  THEN ;
 
 \ Copy an ``EXIT'' statement to the output sequence, replacing it by a branch.
-: COPY-EXIT   HERE EXITS SET+!
-POSTPONE BRANCH   HERE BRANCHES SET+!   _ ,   ;
+: COPY-EXIT   HERE EXITS SET+
+POSTPONE BRANCH   HERE BRANCHES SET+   _ ,   ;
 
 \ For all the ``EXITS'' remembered, fill in the ``SHIFTS'' caused by expansion
 \ of the ``EXIT''. To be called when ``HERE'' is where the ``EXIT'' must
 \ branch to.
 : HANDLE-EXITS-BRANCHES
 EXITS @+ SWAP ?DO
-    I @ SHIFTS SET+!    0 CELL+ SHIFTS SET+!
+    I @ SHIFTS SET+    0 CELL+ SHIFTS SET+
 0 CELL+ +LOOP ;
 
 \ For all the ``EXITS'' expanded, fill in its branch offset.
@@ -464,8 +468,8 @@ BRANCHES @+ SWAP ?DO
 : (EXPAND-ONE)
 !EXITS
      HERE SWAP COPY-CONTENT
-    DUP SHIFTS SET+!
-    HERE SWAP CELL+ -   SHIFTS SET+!
+    DUP SHIFTS SET+
+    HERE SWAP CELL+ -   SHIFTS SET+
     HANDLE-EXITS
 ;
 
@@ -806,7 +810,7 @@ STRIDE SET PEES
     STRIDE 0 DO
         DUP [I] 'NOOP = IF SWAP DROP STRIDE CELLS + I CELLS LEAVE THEN       \ Success
         DUP [I] 'P = IF
-            OVER [I] PEES SET+!
+            OVER [I] PEES SET+
         ELSE OVER [I] OVER [I] <> IF
             2DROP 0 0 LEAVE                                     \ Failure
         THEN THEN
