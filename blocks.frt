@@ -446,18 +446,18 @@ CURRENT @   'ONLY >WID CURRENT !  '3
     DUP ALIAS Y   DUP ALIAS Z
 DROP   CURRENT !
 \ Use  'ONLY >WID CURRENT ! instead of DEFINITIONS
-( TUCK -ROT PICK ROLL CS-ROLL )                   \ AvdH B6jan6
+( TUCK -ROT PICK ROLL CS-ROLL AHEAD   )         \ AvdH B6nov11
 \ Obscure stack manipulations.
-: PICK 1+ CELLS DSP@ + @ ;
-: TUCK SWAP OVER ;
-: -ROT ROT ROT ;
-: ROLL   1+ >R DSP@ DUP CELL+ R> 2 - CELLS
+: PICK 1+ CELLS DSP@ + @ ;  \ ISO
+: TUCK SWAP OVER ;          \ ISO
+: -ROT ROT ROT ;            \ ISO
+: ROLL   1+ >R DSP@ DUP CELL+ R> 2 - CELLS \ ISO
     2DUP + @ >R CELL+ MOVE DROP R> ;
 
 \ -pedantic- required when used with DO-LOOP
-: CS-ROLL 2* 1+ DUP >R ROLL R> ROLL ;
+: CS-ROLL 2* 1+ DUP >R ROLL R> ROLL ;     \ ISO
 
-
+: AHEAD  'BRANCH , (FORWARD ; IMMEDIATE   \ ISO
 
 
 
