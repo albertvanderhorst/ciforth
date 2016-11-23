@@ -68,7 +68,6 @@ HIDE A8 HIDE A9
 'test9 SHOW-IT
 
 \ Forward branch around expansion.
-"The following test fails" TYPE CR
 : (testA) + AND OR LSHIFT ;
 : testA IF (testA) (testA) THEN ;
 'testA SHOW-IT
@@ -79,11 +78,9 @@ HIDE A8 HIDE A9
 'testB SHOW-IT
 
 \ \ Backward branch around expansion.
-"The following test crashes" TYPE CR
-\ : (testC) + AND OR LSHIFT ;
-\ : testC BEGIN (testC) (testC) AGAIN ;
-\ 'testC SHOW-IT
-\ SEE testC  even this SEE crashes
+: (testC) + AND OR LSHIFT ;
+: testC BEGIN (testC) (testC) AGAIN ;
+'testC SHOW-IT
 
 \ Annihilator involving a fetch.
 : testD IF SWAP ELSE DROP BASE @ THEN 2DROP ;
@@ -112,12 +109,17 @@ IF 5 ELSE 6 THEN DROP
 AGAIN ;
 'testH SHOW-IT
 
+\ Annihilation
+: A9 300 + ;
+: testHA 10 = IF 2* THEN DROP  A9 A9     ;
+'testHA SHOW-IT
+
 \ \ Expansion with EXITs present.
-"The following test crashes" TYPE CR
-\ : (TESTI)  IF AND EXIT THEN ROT ;
-\ : testI    (TESTI) (TESTI) ;
-\ 'testI SHOW-IT
-\ SEE testI
+"TestI fails:" TYPE CR
+\ Both exits jump to the same place in the extension.
+: (TESTI)  IF AND EXIT THEN ROT ;
+: testI    (TESTI) (TESTI) ;
+'testI SHOW-IT
 
 \ Expansion with EXITs present.
 : (TESTJ)  IF AND EXIT ELSE OR EXIT THEN SWAP ;
@@ -136,6 +138,7 @@ AGAIN ;
 'testK2 SHOW-IT
 
 \ Interfering LEAVEs and EXITs.
+" TESTL fails, omitted" TYPE CR
 : (TESTL) DO
 DUP IF LEAVE ELSE EXIT THEN SWAP
 2DUP IF LEAVE ELSE EXIT THEN 2SWAP
@@ -144,6 +147,7 @@ LOOP ROT ;
 \ 'testL SHOW-IT
 
 \ Patterns, combined with inlining.    FIXME! crashes
+" TESTM fails, omitted" TYPE CR
 0 CONSTANT z
 1 CONSTANT o
 : A0-A CELL+ ;   : A0-B 1- ;
@@ -157,9 +161,9 @@ LOOP ROT ;
 : B4 B3 B3 ;       : B5 B4 z + B4 ;    : B6 B5 o * B5 ;
 : B7 B6 B6 ;       : B8 B7 z + B7 ;    : B9 B8 o * B8 ;
 : C0 B9 B9 ;
-\ : testM C0 ;
+: testM C0 ;
 \ 'testM SHOW-IT
-\ SEE testM
+
 HIDE A1 HIDE A2 HIDE A3
 HIDE A4 HIDE A5 HIDE A6 HIDE A7
 HIDE A8 HIDE A9
@@ -303,7 +307,6 @@ ROT
 'testN SHOW-IT
 
 \ These empty branches are taking care off by the annihilator.
-\ testO1 fails: showing a defect in the annihilator.
 : testO1 IF THEN ;
 'testO1 SHOW-IT
 : testO2 IF ROT THEN ;

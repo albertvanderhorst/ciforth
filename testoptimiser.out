@@ -137,7 +137,6 @@ AFTER
 
 0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
 ;
-The following test fails
 ####################
 BEFORE
 
@@ -164,7 +163,19 @@ AFTER
 +   AND   OR   LSHIFT   
 BRANCH  [ -18 , ] ( between (;)   +   ) 
 ;
-The following test crashes
+####################
+BEFORE
+
+: testC   
+(testC)   (testC)   
+BRANCH  [ -10 , ] ( between ? (testC)   ) 
+;
+AFTER
+
+: testC   
++   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+BRANCH  [ -28 , ] ( between (;)   +   ) 
+;
 ####################
 BEFORE
 
@@ -245,7 +256,34 @@ AFTER
 DROP   DROP   
 BRANCH  [ -10 , ] ( between (;)   DROP   ) 
 ;
-The following test crashes
+####################
+BEFORE
+
+: testHA   
+A  =   
+0BRANCH [ 4 , ] ( between 2*   DROP   ) 2*   DROP   A9   A9   
+;
+AFTER
+
+: testHA   
+DROP   DROP   258  +   
+;
+TestI fails:
+####################
+BEFORE
+
+: testI   
+(TESTI)   (TESTI)   
+;
+AFTER
+
+: testI   
+
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 1C , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ C , ] ( between ? ROT   ) AND   
+BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+;
 ####################
 BEFORE
 
@@ -293,6 +331,8 @@ DO
 LOOP 
 LOOP 2DUP   
 ;
+ TESTL fails, omitted
+ TESTM fails, omitted
 ####################
 BEFORE
 
