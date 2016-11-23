@@ -8,9 +8,7 @@
 \ have been filled in in the flag fields.
 
 WANT $-PREFIX
-WANT SWAP-DP
-WANT BAG SET+
-WANT BOUNDS
+WANT SWAP-DP BAG SET+ BOUNDS :F
 
 'BAG ALIAS SET
 '!BAG ALIAS !SET
@@ -30,14 +28,14 @@ WANT BOUNDS
 
 ( ------------ COMFIGURATION --------------------------------- )
 
-500 CONSTANT MAX-SET       \ Default set size.
+500 CONSTANT MAX-BAG       \ Default bag size (sets too)
 
 \ Throw codes used :
 \ 4002 annihilation chain breaks down
 
 ( ------------ DEBUGGING ------------------------------------- )
 : \D POSTPONE \ ; IMMEDIATE    : ^^ ;
-\ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT .S DUP CRACK-CHAIN &> EMIT &; EMIT ;
+\ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT .S DUP CRACK-COLON &> EMIT &; EMIT CR ;
 
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
 \ For a SET print it backwards. Primarily intended as how to loop backwards example.
@@ -93,7 +91,7 @@ R> R> REPEAT 2DROP ;
        R@ 'SKIP = IF @+ + ALIGNED ELSE CELL+ THEN
    THEN
    R@
-\  R@ ID.          \ For desperado debugging.
+\   R@ ID.          \ For desperado debugging.
    R> '(;) <> ;
 
 \ ----------------------    MISCELLANEOUS
@@ -214,7 +212,7 @@ HERE SWAP !
 : IS-A-BRANCH   DUP 'LIT <>   SWAP >FFA @ FMASK-IL AND 0= 0= AND ;
 
 \ The set of addresses where a branch offset is stored.
-MAX-SET SET BRANCHES
+MAX-BAG SET BRANCHES
 : !BRANCHES   BRANCHES !SET ;
 
 \ For a POSITION of a branch offset, find the target.
@@ -223,7 +221,7 @@ MAX-SET SET BRANCHES
 \ WORKING BUT NO LONGER USED. INVALUABLE DURING TESTIN.
 \ For START if there is some branch at ADDRESS add it to ``BRANCHES''
 : FILL-ONE-BRANCH DUP @ IS-A-BRANCH IF
-    CELL+   BRANCHES SET+
+    CELL+   BRANCHES BAG+!
     _ THEN DROP ;
 
 \ For a SEQUENCE fill the ``BRANCHES'' set.
@@ -246,15 +244,15 @@ VARIABLE WORST-CASE
 
 \ For a GAP : it IS forbidden, i.e. there is some branch crossing the gap boundary.
 : FORBIDDEN-GAP? 0 WORST-CASE !
-BRANCHES @+ SWAP ?DO
+BRANCHES DO-BAG
     I @ DUP >TARGET 2OVER UNFREE-WRT? WORST-CASE OR!
-0 CELL+ +LOOP 2DROP WORST-CASE @ ;
+LOOP-BAG 2DROP WORST-CASE @ ;
 
 \ For an ADDRESS : it is the TARGET of a branch.
 : IS-A-BRANCH-TARGET
-BRANCHES @+ SWAP ?DO
+BRANCHES DO-BAG
     DUP I @ >TARGET = IF DROP -1 LEAVE THEN
-0 CELL+ +LOOP   -1 = ;
+LOOP-BAG   -1 = ;
 
 \ ----------------------    Closing a gap -------------------
 
@@ -274,7 +272,7 @@ THEN RDROP ;
 THEN RDROP ;
 
 \ The set of branches that is marked for elimination from the set ``BRANCHES''.
-MAX-SET SET MARKED-BRANCHES
+MAX-BAG SET MARKED-BRANCHES
 : !MARKED-BRANCHES  MARKED-BRANCHES !SET ;
 
 \ For GAP and ADDRESS of entry in branches, if the branch is taken from inside
@@ -290,11 +288,11 @@ THEN RDROP ;
    BEGIN 2DUP < WHILE   1 CELLS -   DUP @ BRANCHES SET-   REPEAT 2DROP ;
 
 \ For GAP adjust all branches sitting in ``BRANCHES'' and the set itself.
-: ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES @+ SWAP ?DO
+: ADJUST-BRANCHES !MARKED-BRANCHES  BRANCHES DO-BAG
     2DUP I @ ADJUST-BRANCH-FROM-LEFT
     2DUP I @ ADJUST-BRANCH-FROM-RIGHT
     2DUP I ELIMINATE-BRANCH-IN-GAP
-0 CELL+ +LOOP 2DROP ;
+LOOP-BAG 2DROP ;
 
 \ For END of gap, shift the remainder to close the gap.
 : SHIFT-GAP-SHUT
@@ -302,9 +300,9 @@ THEN RDROP ;
 
 \ Correct the branch-addresses higher than the START of a gap,
 \ to reflect the position they have after closing the gap.
-: MOVE-BRANCHES   BRANCHES @+ SWAP ?DO
+: MOVE-BRANCHES   BRANCHES DO-BAG
     DUP I @ < IF GAP-OFFSET @   I +! THEN
-0 CELL+ +LOOP DROP ;
+LOOP-BAG DROP ;
 
 \ Correct the GAP, i.e. correct its end with ``GAP-OFFSET''.
 \ The gaps content becomes invalid.
@@ -385,18 +383,18 @@ CONSTANT LEAVE-LENGTH
 \ ----------------------    Expansion  ----------------------
 \ the new expansion is supposed to take care of branches.
 
-\ The set of shifts ; Each pairs is and ADDRESS SHIFT.
+\ The bag of shifts ; Each pairs is an ADDRESS SHIFT.
 \ All branches-parts (start or targets) higher than address are to be
 \ offset by the corresponding shift. These offsets are cumulative.
-MAX-SET SET SHIFTS     : !SHIFTS   SHIFTS !SET ;
+MAX-BAG BAG SHIFTS     : !SHIFTS   SHIFTS !BAG ;
 
 \ The set of exits : places where a branch has to be filled in
 \ that replace an exit from a word that is expanded in line.
-MAX-SET SET EXITS     : !EXITS   EXITS !SET ;
+MAX-BAG SET EXITS     : !EXITS   EXITS !SET ;
 
 \ The set of leaves : places where a branch has to be filled in
 \ that replace a leave from a loop that is expanded in line.
-MAX-SET SET LEAVES     : !LEAVES   LEAVES !SET ;
+MAX-BAG SET LEAVES     : !LEAVES   LEAVES !SET ;
 
 \ If DEA is a BRANCH remember it in ``BRANCHES''
 : REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES SET+  THEN ;
@@ -409,17 +407,17 @@ POSTPONE BRANCH   HERE BRANCHES SET+   _ ,   ;
 \ of the ``EXIT''. To be called when ``HERE'' is where the ``EXIT'' must
 \ branch to.
 : HANDLE-EXITS-BRANCHES
-EXITS @+ SWAP ?DO
-    I @ SHIFTS SET+    0 CELL+ SHIFTS SET+
-0 CELL+ +LOOP ;
+EXITS DO-BAG
+    I @ SHIFTS BAG+!    0 CELL+ SHIFTS BAG+!
+LOOP-BAG ;
 
 \ For all the ``EXITS'' expanded, fill in its branch offset.
 \ The correction that will later be applied caused by shift,
 \ must be precompenstated.
 : HANDLE-EXITS-SHIFTS EXITS @+ -  \ Correction : #EXITS cells.
-EXITS @+ SWAP ?DO
+EXITS DO-BAG
 HERE OVER +   I @ CELL+ -    I @ CELL+ !   CELL+
-0 CELL+ +LOOP DROP ;
+LOOP-BAG DROP ;
 
 \ Keep data structures up to date, w.r.t. ``EXITS''
 \ To be called when ``HERE'' is where the ``EXIT'' must branch to.
@@ -438,7 +436,7 @@ R@  'EXIT = IF SWAP DROP COPY-EXIT ELSE
 : CORRECT-ONE-BRANCH-FORWARD
 SHIFTS
 @+ SWAP ?DO
-    I @    OVER    DUP >TARGET    WITHIN IF I CELL+ @ OVER +! THEN
+    I @    OVER    DUP >TARGET 1+   WITHIN IF I CELL+ @ OVER +! THEN
 2 CELLS +LOOP DROP ;
 
 \ For an ENTRY in ``SHIFTS'' return the highest ADDRESS in the expanded area.
@@ -456,9 +454,9 @@ R> R> REPEAT 2DROP DROP ;
 
 \ Correct all branches.
 : CORRECT-BRANCHES
-BRANCHES @+ SWAP ?DO
+BRANCHES DO-BAG
     I @ DUP @ 0< IF CORRECT-ONE-BRANCH-BACKWARD ELSE CORRECT-ONE-BRANCH-FORWARD THEN
-0 CELL+ +LOOP ;
+LOOP-BAG ;
 
 \ Copy the SEQUENCE of high level code to ``HERE'' , expanding the high level words.
 : COPY-CONTENT   BEGIN DUP NEXT-PARSE WHILE  COPY-ONE REPEAT 2DROP DROP ;
@@ -468,8 +466,8 @@ BRANCHES @+ SWAP ?DO
 : (EXPAND-ONE)
 !EXITS
      HERE SWAP COPY-CONTENT
-    DUP SHIFTS SET+
-    HERE SWAP CELL+ -   SHIFTS SET+
+    DUP SHIFTS BAG+!
+    HERE SWAP CELL+ -   SHIFTS BAG+!
     HANDLE-EXITS
 ;
 
@@ -792,7 +790,7 @@ CONSTANT MATCH-TABLE
 
 
 \ ----------------------------------------------------------------
-STRIDE SET PEES
+STRIDE BAG PEES
 : !PEES PEES !SET ;
 \ ----------------------------------------------------------------
 
@@ -812,7 +810,7 @@ STRIDE SET PEES
     STRIDE 0 DO
         DUP [I] 'NOOP = IF SWAP DROP STRIDE CELLS + I CELLS LEAVE THEN       \ Success
         DUP [I] 'P = IF
-            OVER [I] PEES SET+
+            OVER [I] PEES BAG+!
         ELSE OVER [I] OVER [I] <> IF
             2DROP 0 0 LEAVE                                     \ Failure
         THEN THEN
@@ -893,9 +891,10 @@ SWAP ! ;
 
 \ Try and optimise the DEA with respect HL inlining.
 \ Reach trough to underlying levels first.
-: OPTIMISE
+:F OPTIMISE ;
+:R OPTIMISE
     DUP H-OPTIMISABLE? IF
-        DUP >DFA @ BEGIN NEXT-PARSE WHILE RECURSE REPEAT 2DROP
+        DUP >DFA @ BEGIN NEXT-PARSE WHILE OPTIMISE REPEAT 2DROP
         DUP OPT-EXPAND
     THEN
     DUP ?FILL-SE?   DUP FILL-OB   !OPTIMISED ;

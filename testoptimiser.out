@@ -149,7 +149,7 @@ AFTER
 
 : testA   
 
-0BRANCH [ 14 , ] ( between +   AND   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
 ;
 ####################
 BEFORE
@@ -257,8 +257,8 @@ AFTER
 : testJ   
 
 0BRANCH [ 14 , ] ( between ? OR   ) AND   
-BRANCH  [ 14 , ] ( between ? SWAP   ) 
-BRANCH  [ 8 , ] ( between BRANCH   ? ) OR   
+BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
+BRANCH  [ C , ] ( between ? SWAP   ) OR   
 BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
 ;
 ####################
