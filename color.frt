@@ -57,7 +57,8 @@ CREATE RENDER-TABLE    \ Colors in relation to stack effect.
 'yellow   , 'red      ,     'red      ,     'red      ,
 'red      , 'red      ,     'red      ,     'red      ,
 \   ...                      >3             variable
-'red      , 'red      ,     'red      ,     'pink     ,
+'red      , 'red      ,     'red      ,     'white      ,
+\ 'red      , 'red      ,     'red      ,     'pink     ,
 
 \ Select the color belonging to the stack EFFECT.
 : SELECT-COLOR  DUP CELLS RENDER-TABLE + @ EXECUTE
@@ -95,7 +96,7 @@ CREATE RENDER-TABLE    \ Colors in relation to stack effect.
 \ ******************* PATCH UP THE DECOMPILER WITH COLORS ***************
 \                      DOESN'T BELONG HERE
 
-REQUIRE RESTORED
+WANT RESTORED
 
 \ Install the behaviour of DEA into the behaviour of DEA.
 : REVECTOR 3 CELLS MOVE ;
@@ -112,3 +113,5 @@ REQUIRE RESTORED
 
 \ No more colors.
 : NO-COLOR   'ID. RESTORED   'X-BLOB RESTORED ;
+
+FILL-ALL

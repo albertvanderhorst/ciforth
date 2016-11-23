@@ -2944,7 +2944,7 @@ I have written some elementary lexical stuff for the parser.
 The definition of the language I had contained numerous errors.
 In particular some definitions are not used at all.
 After removing from the bnf file what belongs in lexical parser (the
-interplay between comment and strings etc. I can now load the whole 
+interplay between comment and strings etc. I can now load the whole
 bnf definition in my BNF system.
 2000 oct 12 (fri)
 
@@ -3039,7 +3039,7 @@ info -f filename
 2000 oct 24 (mon)
 What a success! I can now generate an info file with
 a glossary menu that derives from loose items.
-The only problem is when a name contains a comma. There is no way 
+The only problem is when a name contains a comma. There is no way
 texinfo would handle that.
 The solution choosen is to have a worddocsafe that uses
 the pronunciation as an identification, for those words
@@ -3137,7 +3137,7 @@ member and specifiying the library in the link make the link succeed.
 however just saying -libstdc++ will not make the link succeed.
 (After removing the 2.9 version, that apparently was dummy, this still
 holds.)
-After upgrading also de development library (that was not required 
+After upgrading also de development library (that was not required
 according to RedHat) I now compile again without problems, but
 the program still crashes.
 It is by no means clear what I did wrong, but now I seem to
@@ -3256,12 +3256,12 @@ Eliinated gloss.mig as an intermediate target.
 I have a regression test in cmp. I only proceed if the tex file is improved.
 I have now also a regression for the info file and the mi file.
 I can now generate html files and have them in the regression directory.
-A nagging problem is that the .rawdoc file i generated in concert with the 
+A nagging problem is that the .rawdoc file i generated in concert with the
 .asm file. Because it is not an explicit target it is contantly destroyed.
 This is solved too.
 22:47
 I am now in a position to put information in the framework I have created.
-Not yet. The glossary is still not macro-expanded according to the .cfg 
+Not yet. The glossary is still not macro-expanded according to the .cfg
 file but according to the defaults.
 I just can get the line about ``%.mi : gloss.m4 %.mig'' such that it doesn't give
 the message EOF in string. Strange.
@@ -3295,7 +3295,7 @@ is not possible
 Shorthands are very difficult. (at first I failed.Now doing it via
 manual.m4).
 
-At least all information of the glossary.txt figdocadd.txt and figdoc.txt 
+At least all information of the glossary.txt figdocadd.txt and figdoc.txt
 is put into the .mi files.
 
 It begins to start looking like something.
@@ -13992,7 +13992,21 @@ whether those are real problems.
 
 2016 jul 10
 2001 aug 21 is the first day where the log is no longer trimmed to
-64 characters.
+64 characters. Fixed now.
+
+2016 nov 16
+In the course of a few weeks all edits that are marked in the printed
+documentation have been done.
+
+2016 nov 20
+The analyser still works after adaption 4->5 mainly REQUIRE->WANT
+Just two testcases fail, but the regression test is made valid again.
+The colors show off.
+
+2016 nov 21
+A cvs archive is backuped up in the Dropbox.
+xina 5.1 has been made official and added to the hcc website.
+
 
 -
 Greg Egan
