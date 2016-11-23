@@ -68,19 +68,22 @@ HIDE A8 HIDE A9
 'test9 SHOW-IT
 
 \ Forward branch around expansion.
+"The following test fails" TYPE CR
 : (testA) + AND OR LSHIFT ;
-: testA IF (test1) (test1) THEN ;
+: testA IF (testA) (testA) THEN ;
 'testA SHOW-IT
 
 \ Backward branch around expansion.
 : (testB) + AND OR LSHIFT ;
-: testB BEGIN (test1) AGAIN ;
+: testB BEGIN (testB) AGAIN ;
 'testB SHOW-IT
 
 \ \ Backward branch around expansion.
+"The following test crashes" TYPE CR
 \ : (testC) + AND OR LSHIFT ;
-\ : testC BEGIN (test1) (test1) AGAIN ;
+\ : testC BEGIN (testC) (testC) AGAIN ;
 \ 'testC SHOW-IT
+\ SEE testC  even this SEE crashes
 
 \ Annihilator involving a fetch.
 : testD IF SWAP ELSE DROP BASE @ THEN 2DROP ;
@@ -98,6 +101,10 @@ HIDE A8 HIDE A9
 : testG BEGIN IF 1 ELSE 2 THEN DROP AGAIN ;
 'testG SHOW-IT
 
+: (testGA)  'DROP 1 ;
+: testGA  (testGA)  SWAP EXECUTE ;
+'testGA SHOW-IT
+
 \ Backward branch around multiple annihilators.
 : testH BEGIN
 IF 1 ELSE 2 THEN DROP
@@ -106,14 +113,17 @@ AGAIN ;
 'testH SHOW-IT
 
 \ \ Expansion with EXITs present.
+"The following test crashes" TYPE CR
 \ : (TESTI)  IF AND EXIT THEN ROT ;
 \ : testI    (TESTI) (TESTI) ;
 \ 'testI SHOW-IT
+\ SEE testI
 
 \ Expansion with EXITs present.
 : (TESTJ)  IF AND EXIT ELSE OR EXIT THEN SWAP ;
 : testJ    (TESTJ) ;
 'testJ SHOW-IT
+\ SEE testJ
 
 \ Expansion with LEAVEs present.
 : (TESTK) DO ROT IF LEAVE THEN SWAP LOOP 2DUP ;
@@ -133,7 +143,7 @@ LOOP ROT ;
 \ : testL    (TESTL) 2OVER ;
 \ 'testL SHOW-IT
 
-\ Patterns, combined with inlining.
+\ Patterns, combined with inlining.    FIXME! crashes
 0 CONSTANT z
 1 CONSTANT o
 : A0-A CELL+ ;   : A0-B 1- ;
@@ -149,6 +159,7 @@ LOOP ROT ;
 : C0 B9 B9 ;
 \ : testM C0 ;
 \ 'testM SHOW-IT
+\ SEE testM
 HIDE A1 HIDE A2 HIDE A3
 HIDE A4 HIDE A5 HIDE A6 HIDE A7
 HIDE A8 HIDE A9
@@ -156,8 +167,13 @@ HIDE A8 HIDE A9
 : testN BEGIN ROT WHILE IF DROP THEN REPEAT 2OVER ;
 'testN SHOW-IT
 
+\ These empty branches are a special cases in the peephole optimiser.
 : testO1 IF THEN ;
 'testO1 SHOW-IT
+: testO1A IF 1 ELSE THEN 2 ;
+'testO1A SHOW-IT
+
+\ These test don't make a lot of sense yet.
 : testO2 IF ROT ELSE THEN ;
 'testO2 SHOW-IT
 : testO3 0 IF ROT THEN ;
@@ -288,8 +304,7 @@ ROT
 
 \ These empty branches are taking care off by the annihilator.
 \ testO1 fails: showing a defect in the annihilator.
-: testO1 DROP ;
-\ : testO1 IF THEN ;
+: testO1 IF THEN ;
 'testO1 SHOW-IT
 : testO2 IF ROT THEN ;
 'testO2 SHOW-IT

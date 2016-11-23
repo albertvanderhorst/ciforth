@@ -137,12 +137,13 @@ AFTER
 
 0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
 ;
+The following test fails
 ####################
 BEFORE
 
 : testA   
 
-0BRANCH [ 8 , ] ( between (test1)   (;)   ) (test1)   (test1)   
+0BRANCH [ 8 , ] ( between (testA)   (;)   ) (testA)   (testA)   
 ;
 AFTER
 
@@ -154,8 +155,8 @@ AFTER
 BEFORE
 
 : testB   
-(test1)   
-BRANCH  [ -C , ] ( between ? (test1)   ) 
+(testB)   
+BRANCH  [ -C , ] ( between ? (testB)   ) 
 ;
 AFTER
 
@@ -163,6 +164,7 @@ AFTER
 +   AND   OR   LSHIFT   
 BRANCH  [ -18 , ] ( between (;)   +   ) 
 ;
+The following test crashes
 ####################
 BEFORE
 
@@ -218,6 +220,17 @@ BRANCH  [ -C , ] ( between (;)   DROP   )
 ####################
 BEFORE
 
+: testGA   
+(testGA)   SWAP   EXECUTE   
+;
+AFTER
+
+: testGA   
+
+;
+####################
+BEFORE
+
 : testH   
 
 0BRANCH [ C , ] ( between ? 2   ) 1   
@@ -232,6 +245,7 @@ AFTER
 DROP   DROP   
 BRANCH  [ -10 , ] ( between (;)   DROP   ) 
 ;
+The following test crashes
 ####################
 BEFORE
 
@@ -307,6 +321,20 @@ AFTER
 
 : testO1   
 DROP   
+;
+####################
+BEFORE
+
+: testO1A   
+
+0BRANCH [ C , ] ( between ? 2   ) 1   
+BRANCH  [ 0 , ] ( between ? 2   ) 2   
+;
+AFTER
+
+: testO1A   
+
+0BRANCH [ 8 , ] ( between ? LIT   ) 1  2  
 ;
 ####################
 BEFORE
@@ -740,7 +768,8 @@ BRANCH  [ -20 , ] ( between (;)   ROT   ) 2OVER
 BEFORE
 
 : testO1   
-DROP   
+
+0BRANCH [ 0 , ] ( between ? (;)   ) 
 ;
 AFTER
 

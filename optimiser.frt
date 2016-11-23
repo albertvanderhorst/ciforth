@@ -769,8 +769,10 @@ CREATE P
 'P  RSHIFT 'P  RSHIFT   | 'P  'P  + RSHIFT         |
 [ 0 ]L 0BRANCH [ 'P , ] | NOP1 NOP1 BRANCH [ 'P , ] | \ Branch optimisation
 'P 0BRANCH [ 'P , ]     | NOOP                     | \ Non-zero, zero is matched by previous
-< 0=                    | >                        |
-> 0=                    | <                        |
+BRANCH [ 0 , ]          | NOOP                     |
+0BRANCH [ 0 , ]         | DROP                     |
+< 0=                    | 1+ >                     |
+> 0=                    | 1- <                     |
 ;
 
 \ Optimalisation of this table is thoroughly forbidden!
