@@ -13,8 +13,6 @@ DUP OPTIMISE   DUP CRACKED HIDDEN ;
 : A-MARKER ;
 
 : test 1 SWAP 3 2 SWAP ;
-
-
 'test SHOW-IT
 
 : test1 1 2 + 3 4 * OR ;
@@ -32,16 +30,14 @@ DUP OPTIMISE   DUP CRACKED HIDDEN ;
 : A7 A6 A6 + ;   : A8 A7 A7 + ;    : A9 A8 A8 + ;
 : B0 A9 A9 + ;
 'B0 SHOW-IT
-HIDE A0 HIDE A1 HIDE A2 HIDE A3
-HIDE A4 HIDE A5 HIDE A6 HIDE A7
-HIDE A8 HIDE A9
+HIDE A0 HIDE A1 HIDE A2 HIDE A3 HIDE A4 HIDE A5
+HIDE A6 HIDE A7 HIDE A8 HIDE A9
 
 'SWAP CONSTANT (SWAP)
 : ((SWAP)) (SWAP) ;
 : WRONG 'EXECUTE ((SWAP)) ;
 : RIGHT 'SWAP 'EXECUTE ;
 : DOIT 1 2 WRONG RIGHT EXECUTE EXECUTE ;
-
 'DOIT SHOW-IT
 
 : test4 1 2 3 4 BASE ! ;
@@ -53,6 +49,10 @@ HIDE A8 HIDE A9
 \ Test of annihilating.
 : test6 BASE @ IF SWAP THEN 2DROP ;
 'test6 SHOW-IT
+
+\ Test of annihilating.
+: test6A BASE @ IF SWAP ELSE DROP THEN 2DROP ;
+'test6A SHOW-IT
 
 \ Test of match. Cannot be optimised.
 : test7  IF 2 + THEN 3 + ;
@@ -68,6 +68,7 @@ HIDE A8 HIDE A9
 'test9 SHOW-IT
 
 \ Forward branch around expansion.
+\ This failed because of using sets instead of bags.
 : (testA) + AND OR LSHIFT ;
 : testA IF (testA) (testA) THEN ;
 'testA SHOW-IT
@@ -77,7 +78,7 @@ HIDE A8 HIDE A9
 : testB BEGIN (testB) AGAIN ;
 'testB SHOW-IT
 
-\ \ Backward branch around expansion.
+\ Backward branch around expansion.
 : (testC) + AND OR LSHIFT ;
 : testC BEGIN (testC) (testC) AGAIN ;
 'testC SHOW-IT
@@ -103,10 +104,11 @@ HIDE A8 HIDE A9
 'testGA SHOW-IT
 
 \ Backward branch around multiple annihilators.
-: testH BEGIN
-IF 1 ELSE 2 THEN DROP
-IF 5 ELSE 6 THEN DROP
-AGAIN ;
+: testH
+    BEGIN
+        IF 1 ELSE 2 THEN DROP
+        IF 5 ELSE 6 THEN DROP
+    AGAIN ;
 'testH SHOW-IT
 
 \ Annihilation
@@ -115,17 +117,16 @@ AGAIN ;
 'testHA SHOW-IT
 
 \ \ Expansion with EXITs present.
-"TestI fails:" TYPE CR
+"testI still fails:" TYPE CR
 \ Both exits jump to the same place in the extension.
 : (TESTI)  IF AND EXIT THEN ROT ;
-: testI    (TESTI) (TESTI) ;
+: testI    (TESTI) (TESTI) XOR ;
 'testI SHOW-IT
 
 \ Expansion with EXITs present.
 : (TESTJ)  IF AND EXIT ELSE OR EXIT THEN SWAP ;
-: testJ    (TESTJ) ;
+: testJ    (TESTJ) XOR ;
 'testJ SHOW-IT
-\ SEE testJ
 
 \ Expansion with LEAVEs present.
 : (TESTK) DO ROT IF LEAVE THEN SWAP LOOP 2DUP ;
@@ -138,16 +139,16 @@ AGAIN ;
 'testK2 SHOW-IT
 
 \ Interfering LEAVEs and EXITs.
-" TESTL fails, omitted" TYPE CR
 : (TESTL) DO
-DUP IF LEAVE ELSE EXIT THEN SWAP
-2DUP IF LEAVE ELSE EXIT THEN 2SWAP
+    DUP IF LEAVE ELSE UNLOOP EXIT THEN SWAP
+    2DUP IF LEAVE ELSE UNLOOP EXIT THEN 2SWAP
 LOOP ROT ;
-\ : testL    (TESTL) 2OVER ;
-\ 'testL SHOW-IT
+: testL    (TESTL) 2OVER ;
+SEE (TESTL)
+'testL SHOW-IT
 
 \ Patterns, combined with inlining.    FIXME! crashes
-" TESTM fails, omitted" TYPE CR
+" TESTM crashes, omitted" TYPE CR
 0 CONSTANT z
 1 CONSTANT o
 : A0-A CELL+ ;   : A0-B 1- ;
@@ -162,6 +163,7 @@ LOOP ROT ;
 : B7 B6 B6 ;       : B8 B7 z + B7 ;    : B9 B8 o * B8 ;
 : C0 B9 B9 ;
 : testM C0 ;
+SEE testM
 \ 'testM SHOW-IT
 
 HIDE A1 HIDE A2 HIDE A3
@@ -189,7 +191,9 @@ HIDE A8 HIDE A9
 
 \ ---------------------------------------------------------------------------
 
-CR "SPLIT HERE" TYPE CR
+\ The following compiled directly to the optimised code as per above.
+\ This has not been maintained. So now it serves as a check for
+\ what cannot be compiled.
 
 : test 1 SWAP 2 3 ;
 'test SHOW-IT

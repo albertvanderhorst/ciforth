@@ -101,6 +101,21 @@ DROP   DROP
 ####################
 BEFORE
 
+: test6A   
+BASE   @   
+0BRANCH [ C , ] ( between ? DROP   ) SWAP   
+BRANCH  [ 4 , ] ( between DROP   2DROP   ) DROP   2DROP   
+;
+AFTER
+
+: test6A   
+C04404C  @   
+0BRANCH [ C , ] ( between ? DROP   ) SWAP   
+BRANCH  [ 4 , ] ( between DROP   2DROP   ) DROP   2DROP   
+;
+####################
+BEFORE
+
 : test7   
 
 0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3  +   
@@ -268,36 +283,36 @@ AFTER
 : testHA   
 DROP   DROP   258  +   
 ;
-TestI fails:
+testI still fails:
 ####################
 BEFORE
 
 : testI   
-(TESTI)   (TESTI)   
+(TESTI)   (TESTI)   XOR   
 ;
 AFTER
 
 : testI   
 
 0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 1C , ] ( between ROT   (;)   ) ROT   
+BRANCH  [ 1C , ] ( between ROT   XOR   ) ROT   
 0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+BRANCH  [ 4 , ] ( between ROT   XOR   ) ROT   XOR   
 ;
 ####################
 BEFORE
 
 : testJ   
-(TESTJ)   
+(TESTJ)   XOR   
 ;
 AFTER
 
 : testJ   
 
 0BRANCH [ 14 , ] ( between ? OR   ) AND   
-BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
+BRANCH  [ 18 , ] ( between SWAP   XOR   ) 
 BRANCH  [ C , ] ( between ? SWAP   ) OR   
-BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
+BRANCH  [ 4 , ] ( between SWAP   XOR   ) SWAP   XOR   
 ;
 ####################
 BEFORE
@@ -331,8 +346,42 @@ DO
 LOOP 
 LOOP 2DUP   
 ;
- TESTL fails, omitted
- TESTM fails, omitted
+
+: (TESTL)   
+
+DO DUP   
+0BRANCH [ C , ] ( between ? RDROP   ) LEAVE   
+BRANCH  [ 10 , ] ( between EXIT   SWAP   ) RDROP   RDROP   RDROP   EXIT   SWAP   2DUP   
+0BRANCH [ C , ] ( between ? RDROP   ) LEAVE   
+BRANCH  [ 10 , ] ( between EXIT   2SWAP   ) RDROP   RDROP   RDROP   EXIT   2SWAP   
+LOOP ROT   
+;
+####################
+BEFORE
+
+: testL   
+(TESTL)   2OVER   
+;
+AFTER
+
+: testL   
+
+DO DUP   
+0BRANCH [ 1C , ] ( between ? RDROP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 68 , ] ( between ? ROT   ) 
+BRANCH  [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 50 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 1C , ] ( between ? RDROP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 28 , ] ( between ? ROT   ) 
+BRANCH  [ 14 , ] ( between ? 2SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
+LOOP ROT   2OVER   
+;
+ TESTM crashes, omitted
+
+: testM   
+C0   
+;
 ####################
 BEFORE
 
@@ -426,8 +475,6 @@ AFTER
 : testO5   
 ROT   
 ;
-
-SPLIT HERE
 ####################
 BEFORE
 
