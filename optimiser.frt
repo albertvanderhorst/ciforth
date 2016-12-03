@@ -8,11 +8,7 @@
 \ have been filled in in the flag fields.
 
 WANT $-PREFIX
-WANT SWAP-DP BAG SET+ BOUNDS :F
-
-'BAG ALIAS SET
-'!BAG ALIAS !SET
-'IN-BAG? ALIAS IN-SET?
+WANT SWAP-DP BAG DO-BAG BOUNDS :F
 
 ( Retract from BAG in same order. Leave ITEM. Use after !BAG )
 \ This is tricky, it uses the filled pointer so while retracting
@@ -38,8 +34,8 @@ WANT SWAP-DP BAG SET+ BOUNDS :F
 \ : \D ; IMMEDIATE : ^^ &: EMIT &< EMIT .S DUP CRACK-COLON &> EMIT &; EMIT CR ;
 
 ( ------------- SYSTEM INDEPENDANT UTILITIES ----------------------------)
-\ For a SET print it backwards. Primarily intended as how to loop backwards example.
-: SET-PRINT-BACKWARDS
+\ For a BAG print it backwards. Primarily intended as how to loop backwards example.
+: BAG-PRINT-BACKWARDS
 @+ SWAP BEGIN 2DUP > WHILE   >R 1 CELLS - >R
     R@ ?
 R> R> REPEAT 2DROP ;
@@ -191,16 +187,16 @@ CREATE SPECIALS  HERE _ ,
 HERE SWAP !
 
 \ For DEA : it IS a trivial annihilator.
-: IS-A-DROP DROPS IN-SET? ;
+: IS-A-DROP DROPS IN-BAG? ;
 
 \ For DEA : it IS the start of a do loop
-: IS-A-DO DO'S IN-SET? ;
+: IS-A-DO DO'S IN-BAG? ;
 
 \ For DEA : it IS the end of a do loop.
-: IS-A-LOOP LOOPS IN-SET? ;
+: IS-A-LOOP LOOPS IN-BAG? ;
 
 \ For DEA : it IS special, i.e. it must be treated specially in expanding.
-: IS-A-SPECIAL SPECIALS IN-SET? ;
+: IS-A-SPECIAL SPECIALS IN-BAG? ;
 
 
 \ ----------------------    Keeping track of branching ----------------------
@@ -211,9 +207,9 @@ HERE SWAP !
 \ For DEA : it IS a branch, i.e. it is followed by a relative control target.
 : IS-A-BRANCH   DUP 'LIT <>   SWAP >FFA @ FMASK-IL AND 0= 0= AND ;
 
-\ The set of addresses where a branch offset is stored.
-MAX-BAG SET BRANCHES
-: !BRANCHES   BRANCHES !SET ;
+\ The bag of addresses where a branch offset is stored.
+MAX-BAG BAG BRANCHES
+: !BRANCHES   BRANCHES !BAG ;
 
 \ For a POSITION of a branch offset, find the target.
 : >TARGET   @+ + ;
@@ -272,14 +268,14 @@ THEN RDROP ;
 THEN RDROP ;
 
 \ The set of branches that is marked for elimination from the set ``BRANCHES''.
-MAX-BAG SET MARKED-BRANCHES
-: !MARKED-BRANCHES  MARKED-BRANCHES !SET ;
+MAX-BAG BAG MARKED-BRANCHES
+: !MARKED-BRANCHES  MARKED-BRANCHES !BAG ;
 
 \ For GAP and ADDRESS of entry in branches, if the branch is taken from inside
 \ the gap, mark it for elimination from the table.
 \ We can't remove them from the set right away because things get entangled.
 : ELIMINATE-BRANCH-IN-GAP   >R   R@ @ DSSWAP WITHIN IF
-    R@ MARKED-BRANCHES SET+
+    R@ MARKED-BRANCHES BAG+!
 THEN RDROP ;
 
 \ Delete from ``BRANCHES'' what is marked for elimination.
@@ -328,8 +324,8 @@ LOOP-BAG DROP ;
 : IS-A-LEAVE   'LEAVE = ;
 
 \ \ Expand  the first statement (a ``LEAVE'' ) of SEQUENCE by a branch (plus other code as appropriate.)
-\ : COPY-LEAVE   POSTPONE UNLOOP   POSTPONE BRANCH   HERE BRANCHES SET+
-\   HERE LEAVES SET+    _ ,   ;
+\ : COPY-LEAVE   POSTPONE UNLOOP   POSTPONE BRANCH   HERE BRANCHES BAG+!
+\   HERE LEAVES BAG+!    _ ,   ;
 
 \ Leave code length. Don't count the (;). It must not be copied.
 'LEAVE-CODE >DFA @   DUP END-OF-SEQUENCE SWAP - 1 CELLS -
@@ -363,7 +359,7 @@ CONSTANT LEAVE-LENGTH
 \ Expand the ``LEAVE'' at the start of SEQUENCE . Execution remains equivalent.
 \ Return SEQUENCE incremented to after the code expanded.
 : REPLACE-LEAVE-BY-BRANCH LEAVE-GAP DUP FILL-LEAVE-BRANCH
-    DUP 1 CELLS - BRANCHES SET+ ;
+    DUP 1 CELLS - BRANCHES BAG+! ;
 
 \ Try to apply any special expansion to the start of a SEQUENCE .
 \ Always leave the new SEQUENCE be it just after the expansion or bumped
@@ -390,18 +386,18 @@ MAX-BAG BAG SHIFTS     : !SHIFTS   SHIFTS !BAG ;
 
 \ The set of exits : places where a branch has to be filled in
 \ that replace an exit from a word that is expanded in line.
-MAX-BAG SET EXITS     : !EXITS   EXITS !SET ;
+MAX-BAG BAG EXITS     : !EXITS   EXITS !BAG ;
 
 \ The set of leaves : places where a branch has to be filled in
 \ that replace a leave from a loop that is expanded in line.
-MAX-BAG SET LEAVES     : !LEAVES   LEAVES !SET ;
+MAX-BAG BAG LEAVES     : !LEAVES   LEAVES !BAG ;
 
 \ If DEA is a BRANCH remember it in ``BRANCHES''
-: REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES SET+  THEN ;
+: REMEMBER-BRANCH   IS-A-BRANCH IF HERE CELL+ BRANCHES BAG+!  THEN ;
 
 \ Copy an ``EXIT'' statement to the output sequence, replacing it by a branch.
-: COPY-EXIT   HERE EXITS SET+
-POSTPONE BRANCH   HERE BRANCHES SET+   _ ,   ;
+: COPY-EXIT   HERE EXITS BAG+!
+POSTPONE BRANCH   HERE BRANCHES BAG+!   _ ,   ;
 
 \ For all the ``EXITS'' remembered, fill in the ``SHIFTS'' caused by expansion
 \ of the ``EXIT''. To be called when ``HERE'' is where the ``EXIT'' must
@@ -791,7 +787,7 @@ CONSTANT MATCH-TABLE
 
 \ ----------------------------------------------------------------
 STRIDE BAG PEES
-: !PEES PEES !SET ;
+: !PEES PEES !BAG ;
 \ ----------------------------------------------------------------
 
 \ From ARRAY fetch element Index. Return IT.

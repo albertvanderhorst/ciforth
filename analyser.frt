@@ -51,16 +51,17 @@ FMASK-ES FMASK-IL OR  0  0 '(LOOP)    !FLAGS
 FMASK-ES FMASK-IL OR  1  0 '(+LOOP)   !FLAGS
 FMASK-ES FMASK-IL OR  2  0 '(DO)      !FLAGS
 FMASK-ES FMASK-IL OR  2  0 '(?DO)     !FLAGS
-FMASK-ES              0  0 'LEAVE     !FLAGS
+\ FMASK-ES              0  0 'LEAVE     !FLAGS
 FMASK-ES              0  0 'EXIT      !FLAGS
 FMASK-ES              0  1 'DSP@      !FLAGS
 FMASK-ES              0  1 'DEPTH     !FLAGS
-FMASK-ES              0  0 '.S    !FLAGS
-FMASK-ES              1  0 '>R    !FLAGS
-FMASK-ES              0  1 'R@    !FLAGS
-FMASK-ES              0  1 'I     !FLAGS
-FMASK-ES              0  1 'R>    !FLAGS
-FMASK-ES              0  0 'RDROP !FLAGS
+FMASK-ES              0  0 '.S        !FLAGS
+FMASK-ES              1  0 '>R        !FLAGS
+FMASK-ES              0  1 'R@        !FLAGS
+FMASK-ES              0  1 'I         !FLAGS
+FMASK-ES              0  1 'R>        !FLAGS
+FMASK-ES              0  0 'RDROP     !FLAGS
+FMASK-ES              0  0 'UNLOOP    !FLAGS
 \ This one has conditional branches around pushes:
 FMASK-ST FMASK-N! OR  3 4  '$/    !FLAGS
 

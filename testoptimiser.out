@@ -325,7 +325,7 @@ AFTER
 : testK   
 
 DO ROT   
-0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+0BRANCH [ C , ] ( between ? SWAP   ) UNLOOP   
 BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
 LOOP 2DUP   
 ;
@@ -340,7 +340,7 @@ AFTER
 : testK2   
 
 DO ROT   
-0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+0BRANCH [ C , ] ( between ? SWAP   ) UNLOOP   
 BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
 DO 
 LOOP 
@@ -350,10 +350,10 @@ LOOP 2DUP
 : (TESTL)   
 
 DO DUP   
-0BRANCH [ C , ] ( between ? RDROP   ) LEAVE   
-BRANCH  [ 10 , ] ( between EXIT   SWAP   ) RDROP   RDROP   RDROP   EXIT   SWAP   2DUP   
-0BRANCH [ C , ] ( between ? RDROP   ) LEAVE   
-BRANCH  [ 10 , ] ( between EXIT   2SWAP   ) RDROP   RDROP   RDROP   EXIT   2SWAP   
+0BRANCH [ C , ] ( between ? UNLOOP   ) LEAVE   
+BRANCH  [ 8 , ] ( between EXIT   SWAP   ) UNLOOP   EXIT   SWAP   2DUP   
+0BRANCH [ C , ] ( between ? UNLOOP   ) LEAVE   
+BRANCH  [ 8 , ] ( between EXIT   2SWAP   ) UNLOOP   EXIT   2SWAP   
 LOOP ROT   
 ;
 ####################
@@ -367,13 +367,13 @@ AFTER
 : testL   
 
 DO DUP   
-0BRANCH [ 1C , ] ( between ? RDROP   ) RDROP   RDROP   RDROP   
-BRANCH  [ 68 , ] ( between ? ROT   ) 
-BRANCH  [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
-BRANCH  [ 50 , ] ( between ROT   2OVER   ) SWAP   2DUP   
-0BRANCH [ 1C , ] ( between ? RDROP   ) RDROP   RDROP   RDROP   
-BRANCH  [ 28 , ] ( between ? ROT   ) 
-BRANCH  [ 14 , ] ( between ? 2SWAP   ) RDROP   RDROP   RDROP   
+0BRANCH [ 14 , ] ( between ? UNLOOP   ) UNLOOP   
+BRANCH  [ 50 , ] ( between ? ROT   ) 
+BRANCH  [ C , ] ( between ? SWAP   ) UNLOOP   
+BRANCH  [ 40 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 14 , ] ( between ? UNLOOP   ) UNLOOP   
+BRANCH  [ 20 , ] ( between ? ROT   ) 
+BRANCH  [ C , ] ( between ? 2SWAP   ) UNLOOP   
 BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
 LOOP ROT   2OVER   
 ;
