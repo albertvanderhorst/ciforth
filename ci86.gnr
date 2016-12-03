@@ -1971,11 +1971,9 @@ dnl [ FORWARD) ] UNLOOP ; 10 0 GS2},
 dnl {0 1 2 3},
 },
 enddoc)
-_HEADER({UNLOOP},{UNLOOP}, {DOCOL}, ,{B_IMMED})
-        DC      LIT, RDROP, COMMA
-        DC      LIT, RDROP, COMMA
-        DC      LIT, RDROP, COMMA
-        DC      SEMIS
+CODE_HEADER({UNLOOP},{UNLOOP})
+        LEA     RPO,[RPO+_CELLS(3)]
+        _NEXT
 _C
 worddoc( {INITIALISATIONS},{+ORIGIN},{plus_origin},{n --- addr},{},
 {Leave the memory address relative by forthvar({n}) bytes to
