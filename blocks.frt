@@ -1214,7 +1214,7 @@ $1B CONSTANT ESC
 
 
 
-(  H. B. DH. BASE? HEX: DEC: ) \ AvdH B6apr05
+(  H. B. DH. DEC. BASE? HEX: DEC: ) \ AvdH B6dec18
 \ Switch to hex for the duration of the definition.
 : HEX:    R> BASE @ >R  >R HEX CO R> BASE ! ;
 : DEC:    R> BASE @ >R  >R DECIMAL CO R> BASE ! ;
@@ -1228,7 +1228,7 @@ $1B CONSTANT ESC
  : DH. 4 CELLS (DH.) TYPE ; (  print DOUBLE in hex )
 (  print DOUBLE in decimal )
  : DEC. 5 CELLS DEC: <# 1- 0 ?DO # I 3? LOOP # #> TYPE ;
- : BASE?  BASE @ B. ;                ( 0/0 TRUE VALUE OF BASE)
+ : BASE?  BASE @ B. ;   ( print true value of base)
 
 ( HIDE INCLUDE IVAR )            \ AvdH B4Dec03
 
@@ -1671,13 +1671,13 @@ DECIMAL
  SM 48 + CONSTANT G-SIZE  \ Where to patch for GROW.
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
- : SAVE-SYSTEM \ Save the system in a file with NAME .
-  HERE BM - D-SIZE !  \ Fill in dict size (.text)
-   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
-\ Now write it. Consume NAME here.
-   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
-: TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
-  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
+\ Nothing to be done here.
+: _prepare_header ;
+
+
+
+
+DECIMAL
 ( SAVE-SYSTEM TURNKEY ) CF: ?LI ?64 HEX \ AvdH/CH B5jun24
 \ The magic number marking the start of an ELF header
  CREATE MAGIC 7F C, &E C, &L C, &F C,
@@ -1687,29 +1687,45 @@ DECIMAL
  D-SIZE 8 + CONSTANT G-SIZE
 \ Return the VALUE of ``HERE'' when this forth started.
  : HERE-AT-STARTUP  'DP >DFA @ +ORIGIN @ ;
- : SAVE-SYSTEM ( ISO )   HERE BM - D-SIZE ! ( dict size)
-   SM 28 + @ IF 0 SM 28 + ! 1 SM 38 + ! THEN ( Kill sections)
-   U0 @   0 +ORIGIN   40 CELLS  MOVE ( Save user variables)
+\ Kill sections
+: _prepare_header SM 28 + @ IF 0 SM 28 + ! 1 SM 38 + ! THEN ;
+
+
+
+
+
+( SAVE-SYSTEM TURNKEY ) CF: ?OSX ?32 HEX     \ RS/AH B6dec21
+CREATE MAGIC FEEDFACE ,
+: SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
+: __DATA SM BEGIN DUP "__DATA" CORA WHILE 1+ REPEAT ;
+: __LINKEDIT   SM BEGIN DUP "__LINKEDIT" CORA
+   WHILE 1+ REPEAT ;
+
+: _prepare_header 20 10 DO 0 __LINKEDIT I + ! 4 +LOOP
+    48 38 DO 0 __LINKEDIT I + ! 4 +LOOP ;
+\ Forget all segments past __DATA
+: _prepare_header 3 SM 10 + ! ;
+__DATA 1C + CONSTANT D-SIZE
+__DATA 18 + CONSTANT __FILEOFFSET
+  SM __FILEOFFSET @  +  CONSTANT BM
+
+DECIMAL
+( SAVE-SYSTEM TURNKEY ) CF: ?HS HEX     \ AH B6dec21
+
+\ ISO Save the system in a file with NAME .
+ : SAVE-SYSTEM   _prepare_header
+   HERE BM - D-SIZE ! \ Fill in dict size (.text)
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables)
 \ Now write it. Consume NAME here.
-   SM    HERE OVER -   2SWAP   PUT-FILE ;  DECIMAL
+   SM    HERE OVER -   2SWAP   PUT-FILE ;
+
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
-( SAVE-SYSTEM TURNKEY ) CF: ?OSX ?32 HEX        \ RS A8
-CREATE MAGIC FEEDFACE , CREATE __DATA &_ C, &_ C, &D C, &A
-C, &T C, &A C, CREATE __LINKEDIT &_ C, &_ C, &L C, &I C, &N
-C, &K C, &E C, &D C, &I C, &T C, : HERE-AT-STARTUP'DP >DFA @
-+ORIGIN @ ; : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
-: FIND__DATA SM BEGIN DUP __DATA 6 CORA WHILE 1+ REPEAT ;
-: FIND__LINKEDIT SM BEGIN DUP __LINKEDIT A CORA
-WHILE 1+ REPEAT ; : KILL__LINKEDIT 20 10 DO 0 FIND__LINKEDIT
-I + ! 4 +LOOP 48 38 DO 0 FIND__LINKEDIT I + ! 4 +LOOP ;
-FIND__DATA 1C + CONSTANT __DATASIZE FIND__DATA 18 +
-CONSTANT __FILEOFFSET
-: SAVE-SYSTEM \ Save the system in a file
-KILL__LINKEDIT HERE SM - __FILEOFFSET @  -  __DATASIZE !
-U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables
-SM HERE OVER - 2SWAP PUT-FILE ; DECIMAL
-: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+
+
+
+
+DECIMAL
 ( SAVE-SYSTEM TURNKEY ) CF: ?PC HEX \ AvdH A7feb28
 \ Write an MSDOS ``EXEHEADER'' structure over the PSP.
 VARIABLE HEAD-DP  \ Fill in pointer

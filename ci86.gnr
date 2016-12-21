@@ -1216,7 +1216,7 @@ _C{ ############################################################################
 _C{                       FORTH ITSELF}
 _C{ ########################################################################################}
 _C
-dnl fasm has no multiline comments, appropiate for an assembler.
+dnl fasm has no multiline comments, which is appropiate for an assembler.
 dnl So the following is suppressed from the assembler file.
 _COMMENT
    FORTH REGISTERS
@@ -2594,7 +2594,7 @@ forthcode({LOOP}) or forthcode({+LOOP}) .},{},
 { {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3} },
 enddoc)
 _HEADER({LEAVE},{LLEAV},{DOCOL})  _C{LIMIT <- INDEX}
-        DC      RDROP, RDROP, RDROP
+        DC      UNLOOP
         DC      SEMIS
 _C
 worddoc( {STACKS},{>R},{to_r},{n ---},{ISO,FIG,C},

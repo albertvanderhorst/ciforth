@@ -14007,6 +14007,38 @@ The colors show off.
 A cvs archive is backuped up in the Dropbox.
 xina 5.1 has been made official and added to the hcc website.
 
+2016 dec 17
+Since nov some improved versions of xina have been put on the
+website.
+Thanks to Chris I've discovered that forth.lab was no good.
+Moreover he reports this for grow:
+dyld: malformed mach-o image: __LINKEDIT has fileoff==0
+which overlaps  mach_header
+Abort trap: 6
+This may be due to better checks.
+
+2016 dec 19
+Working with klis , checked out 5.2
+Turns out that 5.2 32 bits doesn't work with fasm.
+fasm cannot generate mach header. So the fasm version now
+is adapted to ELF object:
+  FORMAT ELF
+  ...
+  .text
+  ...
+  .bss
+It then must be converted to a macho object, then linked with the
+command that Spykerman provided.
+This doesn't pan out. So we are forced to stay with the nasm assembler.
+
+I managed to get everything converted to git.
+1. get the /usr/local/cvsroot of sparc into a tar archive.
+2. untar in subdirectory of scratch, rename that to cvs
+3. apt-get install cvs-git
+4. run
+    git cvsimport -v -a -k -d `pwd`/cvs -C ciforth ciforth
+
+
 
 -
 Greg Egan

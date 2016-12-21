@@ -308,7 +308,7 @@ asgen.frt : RCS-as/asgen.frt,v ; co $<
 asi386.frt : RCS-as/asi386.frt,v ; co $<
 
 # A Forth with the analyser built-in.
-lina-ana : lina32 asgen.frt asi386.frt #(ANASRC)
+lina-ana : lina32 asgen.frt asi386.frt $(ANASRC)
 	echo '"analyser.frt" INCLUDED   "SAVE-SYSTEM" WANTED  "$@" SAVE-SYSTEM' |./lina32
 
 # Test the optimiser. FIXME! Gives ERROR 22 ( --> not called from block).
