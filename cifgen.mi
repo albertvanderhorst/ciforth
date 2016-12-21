@@ -419,11 +419,24 @@ special anyway (e.g. for TeX).
 The use of quotation is very critical at times,
 and the find points are not covered in the following.
 @subsection Customization
+Plain use of m4 is the use of macro's to just define a string
+that is different under different circumstances.
 Simple customization can be done by forthprog({m4}) as follows:
 
  forthsamp({define(_lbracket_version_rbracket_,2.149)})
 
 Within the text treated the version number is substituted.
+
+Among those we also have segment definitions, defined in the m4 file
+belonging to the assembler used.
+
+_TEXT_ : This introduces the part of the Forth with the definitions.
+It is supposed to be stored on disk.
+
+_BSS_ : This part of the Forth imposes a layout without
+initialising the data.
+It agrees with a traditional bss segment in e.g. an a.out format.
+
 @subsection Selection
 Selection, often one of alternatives, is in general done as follows
 

@@ -22,6 +22,8 @@ _HOSTED_OSX_({
 ;   ld xina.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o xina
 ;And to get the smallest possible executable(optional):
 ;   strip xina
+define({_TEXT_},{ section .text })
+define({_BSS_},{ section .bss })
 })
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
@@ -100,9 +102,8 @@ define({SET_64_BIT_MODE},{BITS   64})
 define({_ALIGN},{ALIGN    M4_CELLWIDTH})
 define({DSS},{DB})
 dnl A nobits section takes no place in the object file.
-define({_SECTION_},{section .text})
-define({_SECTION_NOBITS_},{section .bss})
-define({_SECTION_END_},{})
+define({_TEXT_},{section .text})
+define({_BSS_},{section .bss})
 define({_ENDOFPROGRAM},{
         END $1
 })

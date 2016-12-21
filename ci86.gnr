@@ -350,7 +350,7 @@ EPIPE   EQU     38
 })_C{}_END_({ _PC_})
 
 _HOSTED_X_({
-        _SECTION_({forth})
+        _TEXT_
         PAGE
         GLOBAL  _start       _C Entry point.
         GLOBAL  start        _C Entry point.
@@ -435,8 +435,7 @@ kernel_table:
           db 'SetConsoleMode',0
 _Sleep dw 0
        db 'Sleep', 0
-                section '.text' code executable readable writable
-
+       _TEXT_
 _main:
 _ORIG:
 })_C{}_END_({ _DLL_})
@@ -11127,7 +11126,6 @@ _LARGE_({
          ORG     M4_EM-8    _C{ Silly, NASM doesn't accept EM}
          DB 0,0,0,0,0,0,0,0
 })_C{}_END_({ _LARGE_})
-_SECTION_END_({_TEXT})
 })_C{}_END_({ _EQULAYOUT_})
 
 _COMMENT
@@ -11152,7 +11150,7 @@ _C{       However now we must teach the linker to keep the}
 _C{       two sections together.}
 
 FORTHSIZE       EQU     _AP_ - _main
-        _SECTION_NOBITS_({dictionary})
+        _BSS_
 
 INITDP:                 _C{  It may be that it is not consecutive with TASK.}
                         _C{  Because of bad linking, resulting in a unusable Forth.}
@@ -11177,7 +11175,6 @@ _THREADS_(
 BUF1:   _RESB( BUFFERSIZE )     _C{ FIRST DISK BUFFER}
 ACTUAL_EM:  _C{ Differs from EM if code is relocated.}
 
-        _SECTION_END_({dictionary})
 })_C{}_END_({ _LAYOUTBYSECTION_})
 _C
 

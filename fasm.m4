@@ -23,29 +23,40 @@ define({_HEADER_ASM},{;
 ; FASM version of ciforth created by ``m4'' from generic listing.
 ; This source can be assembled using the Flat Assembler,
 ;  available from the Net.
+; Default for fasm: one section, which is called segment (!)
 _DLL_(
 {;      fasm forth.asm forth
-        FORMAT  PE console  ; Instead of telling the linker.
+        ; fasm generates executable, no separate linking.
+        FORMAT  PE console
 ;
         INCLUDE 'include/win32a.inc'      ; ASCII windows definitions.
-define({_SECTION_NOBITS_},{})
+define({_BSS_},{})dnl
+define({_TEXT_},       { section '.text' code executable readable writable})dnl
 })_C{}_END_({ _DLL_})
+_HOSTED_OSX_({
+; This version can be assembled on an OS X system (Apple):
+;   fasm -f elf xina.asm -o xina.o
+;   convert to macho format
+;   ld xina.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o xina
+;   However as per 2016 dec 21 , it doesn't run.
+        FORMAT  ELF     ; No macho, go via ELF object format.
+define({_TEXT_},{ section '.text' executable  })dnl
+define({_BSS_},{ section '.bss' writable  })dnl
+})
 _LINUX_N_(
 {;      fasm forth.asm forth
 _BITS32_({define({ELF_FORMAT},{ELF})})
 _BITS64_({define({ELF_FORMAT},{ELF64})})
-        FORMAT  ELF_FORMAT EXECUTABLE ; Instead of telling the linker.
-dnl define({_SECTION_NOBITS_},{       SEGMENT executable readable writable})
-define({_SECTION_NOBITS_},{ })
+        ; fam generates executable, no separate linking.
+        FORMAT  ELF_FORMAT EXECUTABLE
 ;
+define({_TEXT_},       {       SEGMENT executable readable writable})dnl
+define({_BSS_},{})dnl
 })_C{}_END_({ _LINUX_N_})
 ;})
 define({SET_16_BIT_MODE},{ use16 })
 define({SET_32_BIT_MODE},{ use32 })
 define({SET_64_BIT_MODE},{ use64 })
-define({_TEXT},{.text})
-define({_SECTION_},       {       SEGMENT executable readable writable})
-define({_SECTION_END_},)
 dnl Get rid of unknown MASM specifier.
 define({_BYTE},)
 

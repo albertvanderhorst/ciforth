@@ -57,9 +57,8 @@ define({_COMMENT}, { /* })
 define({_ENDCOMMENT}, { */ })
 
 dnl A nobits section takes no place in the object file.
-define({_SECTION_},{.text})
-define({_SECTION_NOBITS_},{.bss})
-define({_SECTION_END_},{})
+define({_TEXT_},{.text})
+define({_BSS_},{.bss})
 define({_ENDOFPROGRAM},{
         END $1
 })

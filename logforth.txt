@@ -14038,7 +14038,13 @@ I managed to get everything converted to git.
 4. run
     git cvsimport -v -a -k -d `pwd`/cvs -C ciforth ciforth
 
+2016 dec 20
+Got rid of SEGMENT in names.m4 , SECTION_END everywhere.
 
+2016 dec 21
+The fasm.m4 and nasm.m4 now have proper OSX sections.
+Tested against the original 5.2 files that Chris has been
+testing. Modification of ci86.gnr in accordance:5.141.
 
 -
 Greg Egan
