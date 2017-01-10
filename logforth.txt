@@ -14046,6 +14046,11 @@ The fasm.m4 and nasm.m4 now have proper OSX sections.
 Tested against the original 5.2 files that Chris has been
 testing. Modification of ci86.gnr in accordance:5.141.
 
+2017 jan 10
+The latest version has a defect in ALLOCATE that make that it looks
+like there is zero space. Fixed in blocks.frt.  5.120.
+
+
 -
 Greg Egan
 Schild's ladder.
