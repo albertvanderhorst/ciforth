@@ -297,8 +297,8 @@ VARIABLE _ADP    : _AH ( -- adr ) _ADP @ ;
 : INTEGRITY? ( -- f ) DUP BEGIN DUP @ 2DUP < WHILE NIP
     REPEAT NIP = ;
 DATA _alloc-buf _ , 0 , DSP@ HERE - 2 RSHIFT ALLOT ALIGN
-    _alloc-buf HERE OVER ! HERE OVER >DFA ! DUP , DUP ,  _ADP !
-( ISO )
+    _alloc-buf HERE OVER ! DUP , DUP ,  _ADP !
+( ISO )   ( _alloc-buf @ '_alloc-buf >DFA ! )
 : ALLOCATE   ['] _allocate CATCH ;
 : FREE   overhead - _free 0 ;
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
