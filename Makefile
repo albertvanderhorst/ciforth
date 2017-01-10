@@ -287,7 +287,7 @@ ci86.$(s).bin :
 lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 lina64: ci86.lina64.fas ;  fasm $+ -m256000; mv ${<:.fas=} $@
 lina: glina64 ; $< -g 8000 $@
-wina.exe: ci86.wina.fas ; fasm $+ -m256000
+wina.exe: ci86.wina.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
 
 # Put include type of dependancies here
 $(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else cvs update $@ ; fi

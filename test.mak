@@ -5,7 +5,6 @@
 # and any other commands.
 
 FORTH=lina      # Our utility Forth.
-CVS=cvs -d$(CVSROOT)
 
 TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9] orang hello.frt tsuite.out
 
@@ -198,10 +197,8 @@ testlina32 : $(TESTLINA32) ci86.lina32.rawtest lina32 forth.lab.lina tsuite.frt 
 	./lina32 <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
 	ln -sf forth.lab.lina  forth.lab
-	#./lina32 -a <tsuite.frt 2>&1 |cat >tsuite32.out
-	#$(CVS) diff -bBw tsuite32.out || true
-	./lina32 -a <tsuite.frt 2>&1 |cat >tsuite.out
-	$(CVS) diff -bBw tsuite.out || true
+	./lina32 -a <tsuite.frt 2>&1 |cat >tsuite32.out
+	diff -bBw tsuite32.out testcmp || true
 	rm $(TEMPFILE)
 
 # No output expected, except for an official version (VERSION=A.B.C)
@@ -215,10 +212,8 @@ testlina64 : $(TESTLINA64) ci86.lina64.rawtest lina64 forth.lab.lina tsuite.frt 
 	./lina64 <$@.1 2>&1| grep -v RCSfile >$@.3
 	diff -b -B $@.2 $@.3 || true
 	ln -sf forth.lab.lina  forth.lab
-	#./lina64 -a <tsuite.frt 2>&1 |cat >tsuite64.out
-	#$(CVS) diff -bBw tsuite64.out || true
 	./lina64 -a <tsuite.frt 2>&1 |cat >tsuite64.out
-	$(CVS) diff -bBw tsuite64.out || true
+	diff -bBw tsuite64.out testcmp || true
 	rm $(TEMPFILE)
 
 # No output expected, except for an official version (VERSION=A.B.C)
@@ -232,11 +227,13 @@ testwina : ci86.wina.rawtest test.m4 wina.exe forth.lab.wina tsuite.frt ;
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
-	wine wina.exe <$@.1 2>&1| grep -v RCSfile >$@.3
+	wine wina.exe <$@.1 2>&1|\
+	grep -v RCSfile |\
+	sed -e 's/.*wina.exe/wina.exe/' >$@.3
 	diff -b -B $@.2 $@.3 || true
 	cp -f forth.lab.wina  forth.lab
-	wine wina.exe -a <tsuite.frt 2>&1 |grep -v OK >tsuite.out
-	$(CVS) diff -bBw tsuite.out || true
+	wine wina.exe -a <tsuite.frt 2>&1 |grep -v OK >tsuite32.out
+	diff -bBw tsuite32.out testcmp || true
 
 
 # This just generates a test script and testfiles,
@@ -278,14 +275,14 @@ testwinafiles : ci86.wina.rawtest test.m4 ;
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
 
-testxina : ci86.xina.rawtest test.m4 ;
+testxinafiles : ci86.xina.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
 	echo "'TYPE >DFA @ 'ETYPE >DFA !" >$@.1
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
 
-testmina : ci86.mina.rawtest test.m4 ;
+testminafiles : ci86.mina.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
 	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
@@ -314,7 +311,7 @@ lina-ana : lina32 asgen.frt asi386.frt $(ANASRC)
 # Test the optimiser. FIXME! Gives ERROR 22 ( --> not called from block).
 testoptimiser.out : testoptimiser.frt optimiser.frt lina-ana
 	echo 'INCLUDE optimiser.frt INCLUDE $<' |lina-ana > $@
-	$(CVS) diff -bBw $@ || true
+	diff -bBw $@ testcmp || true
 
 lina-opt : optimiser.frt lina-ana
 	echo 'INCLUDE optimiser.frt "$@" SAVE-SYSTEM' |lina-ana
