@@ -14049,7 +14049,9 @@ testing. Modification of ci86.gnr in accordance:5.141.
 2017 jan 10
 The latest version has a defect in ALLOCATE that make that it looks
 like there is zero space. Fixed in blocks.frt.  5.120.
-
+The tests that compare against a version in the cvs archive are
+akward. Introduced testcmp subdirectory to contain those files.
+Marked everything as LASTCVS
 
 -
 Greg Egan
