@@ -9,7 +9,7 @@ Within Forth :
     CRACK-FROM ONLY BYE
 
 Then
-   sed -f blabla <aap >qqq
+   sed 's/804[0-9A-F,]*/804BLABLA/g' <aap >qqq
    diff qqq officialdecompilation
 If approved :
     mv qqq officialdecompilation
@@ -174,7 +174,6 @@ releasing xina
 Use `` . setenv '' to set $V
 . releasexina.bat $V
 result in xina-$V.tar
-2015 jun2 
+2015 jun2
 The lina32.zip target is replaced by symblic LINA32ZIP.
 The lina64.zip target is replaced by symblic LINA64ZIP.
-
