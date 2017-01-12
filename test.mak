@@ -301,8 +301,8 @@ analysermain.frt        \
 analyserdebug.frt       \
 # That's all folks!
 
-asgen.frt : RCS-as/asgen.frt,v ; co $<
-asi386.frt : RCS-as/asi386.frt,v ; co $<
+#asgen.frt : RCS-as/asgen.frt,v ; co $<
+#asi386.frt : RCS-as/asi386.frt,v ; co $<
 
 # A Forth with the analyser built-in.
 lina-ana : lina32 asgen.frt asi386.frt $(ANASRC)
