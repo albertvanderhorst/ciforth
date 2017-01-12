@@ -1,0 +1,16 @@
+Legenda for releases of ciforth generated Forth's
+
+4 : version 4, using REQUIRE
+5 : version 5, using WANT
+
+ciforth : essential excerpt from generic system
+
+lina : linux, including android
+wina : for mswindows, 32 bit dll
+xina : apple osx
+wna : for mswindows, dpmi
+mna : for msdos,
+sa : stand alone
+
+
+See also logforth.txt testreport.txt
