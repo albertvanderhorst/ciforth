@@ -1,0 +1,59 @@
+ Copyright (2017): Albert van der Horst (HCC FORTH The Netherlands) by GNU Public License.
+
+CIFORTH
+
+``ciforth'' is a factory for making implementations of Forth.
+Forth is a standardized (ANS 94) computer language which is primarily
+interactive, but has facilities for scripting and standalone
+executables.
+
+The name ciforth derives from computer intelligence Forth, because
+the original goal was to make a stand alone artificial intelligence
+machine. Now you may think of it as common Intel Forth.
+As long as your target is i86 based, you can pick your target to be:
+
+    -16 32 or 64 bit
+
+    -interfacing through BIOS, MSDOS INT 21, MSDOS DPMI, WIN32 dll,
+      unix systemcalls (OSX, and LINUX) or dynamic (.so) libraries
+
+    -can be assembled using masm, nasm, gas or fasm.
+
+Few people want to use such a complicated system, but they still want
+strict control over their Forth. The solution is a two tier system.
+What ciforth will do for you is generate three files:
+  - an assembler file
+  - a source library
+  - a generic documentation file
+
+Of course not all combinations have been tried out, let alone tested.
+Released versions have a regressiontest and have been through a
+(sometimes considerable) burn in period. They contain not much more
+than the above three files.
+
+By modifying the assembler file you have in principle unlimited
+control over your Forth In practice few are capable of doing extensive
+modifications, but simple modifications are easy. There is no separate
+documentation about how to build from assembler. The one or two line
+instructions are contained in the source file.
+
+The source library is Forth source. It is a text file divided
+in blocks of 16 lines of 63 chars each. A simple text editor
+and care will allow modifications.
+
+The generic documentation is texinfo. This can be morphed into
+PostScript, Pdf and info. Part of it is separately available
+as html. Texinfo is text, and can be modified by hand too.
+
+Releases are available for the three main OS'es: Linux, including
+Android, MSWindows and OSX.
+A file like READMElina.txt is associated with a release.
+All tags starting with "REL" mark a release. The most important of
+those are in the directory release. A report of tests is in
+testreport.txt.
+
+There is no end to the auxiliary tools that are needed to build all
+versions and all other paraphernalia. cifgen.ps described the
+generic system. howto.txt is a cookbook about things you may want
+to do. A detailed history of ciforth since 2000 is contained in
+logforth.txt.
