@@ -27,9 +27,9 @@ define({_HEADER_ASM},{;
 _DLL_(
 {;      fasm forth.asm forth
         ; fasm generates executable, no separate linking.
-        FORMAT  PE console
+       _BITS32_({FORMAT  PE console})_BITS64_({ FORMAT  PE64 console})
 ;
-        INCLUDE 'include/win32a.inc'      ; ASCII windows definitions.
+        INCLUDE _BITS32_({'include/win32a.inc'})_BITS64_({'include/win64a.inc'})      ; ASCII windows definitions.
 define({_BSS_},{})dnl
 define({_TEXT_},       { section '.text' code executable readable writable})dnl
 })_C{}_END_({ _DLL_})

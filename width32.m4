@@ -1,5 +1,7 @@
 dnl  $Id$  M4 file to handle the develish FIG headers.
-dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl None of the following makes sense unless 32 bit mode
+SET_32_BIT_MODE         _C Assembler directive
 divert(-1)
 define({CELL_M4},LONG)dnl
 define({CWORD},{DWORD})dnl

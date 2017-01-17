@@ -1,6 +1,7 @@
 /* $Id$                   */
-/* Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License */
+/* Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define CPL 64

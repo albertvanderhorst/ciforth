@@ -14053,6 +14053,12 @@ The tests that compare against a version in the cvs archive are
 akward. Introduced testcmp subdirectory to contain those files.
 Marked everything as LASTCVS
 
+2017 jan 14
+Even testwina works, however a symbolic link must be made to
+the include directory from fasm. An exciting possibility is to use
+the include directory from fasmw. That may make a 64 bit version of
+wina work.
+
 -
 Greg Egan
 Schild's ladder.

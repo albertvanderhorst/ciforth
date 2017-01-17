@@ -181,10 +181,9 @@ ci86.lina.labtest \
 # That's all folks!
 
 # 4.0 ### Version : an official release 4.0
-# Left out : beta, revision number is taken from rcs e.g. 3.154
-# Normally VERSION is passed via the command line.
-VERSION=test
-DATE=2030     # To get the newest version
+# Left out : beta, revision number is taken from current date.
+# For a release VERSION is passed via the command line as e.g. 5.3
+VERSION=`date +%Y%b%d`
 # M4_DEBUG=--debug=V   # deperado debugging.
 
 RELEASELINA32 = \
@@ -219,21 +218,25 @@ $(EXAMPLESRC) \
 #ci86.lina64.fas \
 # That's all folks!
 
+VERSION:;echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
+
 TEMPFILE=/tmp/ciforthscratch
 
 # How to generate a Forth executable.
 %: %.frt ; $(FORTH) -c $^
 
 # Define NASM as *the* assembler generating bin files.
-%.bin:%.asm
-	nasm -fbin $< -o $@ -l $*.lst
+%.bin:%.asm ; nasm -fbin $< -o $@ -l $*.lst
 
+# Define fasm as an alternative for generating bin files.
+%:%.fas ; fasm $< -m256000
+
+#%.exe: ci86.%.fas ; fasm $+ -m256000
 
 # mina.cfg and alone.cfg are present (at least via RCS)
 # allow to generate ci86.mina.bin etc.
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
-VERSION : ; echo 'define({M4_VERSION},$(VERSION))' >VERSION
 
 ci86.%.asm : %.cfg VERSION nasm.m4 ci86.gnr
 	cat $+ | $(M4) $(M4_DEBUG) - > $(TEMPFILE)
@@ -289,9 +292,6 @@ lina64: ci86.lina64.fas ;  fasm $+ -m256000; mv ${<:.fas=} $@
 lina: glina64 ; $< -g 8000 $@
 wina.exe: ci86.wina.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
 
-# Put include type of dependancies here
-$(TARGETS:%=%.cfg) : $(INGREDIENTS) ; if [ -f $@ ] ; then touch $@ ; else cvs update $@ ; fi
-
 # Some of these targets make no sense and will fail
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
     $(LINUXFORTHS) $(OTHERTARGETS)
@@ -305,14 +305,6 @@ cleanall: clean  testclean ; \
     rm -f $(OTHERTARGETS) $(INTERTARGETS) ; \
     rm -f *.aux *.log *.ps *.toc *.pdf    ; \
     rm -f *.zip *gz
-
-# FIXME, RCS is now in use.
-# Until then this target must not be used.
-RCSCLEAN: ;\
-	ln -s $(CVSROOT)/ciforth RCS
-	ln -f Makefile makefile
-	rcsclean
-	rm RCS
 
 release : strip zip msdos32.zip msdos.zip lina.zip
 

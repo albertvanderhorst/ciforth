@@ -103,8 +103,14 @@ _ENDCOMMENT
 _C{ ########################################################################################}
 _C{                       PREPARATION (no code)}
 _C{ ########################################################################################}
+dnl It doesn't make sense to have duplicate code for 16/32/64 bits
+dnl where m4 can handle it this easily.
+dnl 16 bits was default for the startup code, now overrule.
 dnl 16 bits is default for the boot code.
 _BITS16_({include(width16.m4)})
+_BITS32_({include(width32.m4)},{dnl})
+_BITS64_({include(width64.m4)},{dnl})
+
 
 FIGREL  EQU     5       _C{ FIG RELEASE #}
 FIGREV  EQU     0       _C{ FIG REVISION #}
@@ -365,31 +371,31 @@ _C
         dd 0,0,0,0,0
 
 kernel_table:
- _ExitProcess@4     dd rva _ExitProcess
- CreateFile     dd rva _CreateFileA
- _CreateProcessA@40     dd rva _CreateProcess
- _ReadFile@20     dd rva _ReadFile
- _WriteFile@20     dd rva _WriteFile
- CloseHandle     dd rva _CloseHandle
- SetFilePointer     dd rva _SetFilePointer
- _GetCommandLineA@0     dd rva _GetCommandLineA
- GetEnvironmentVariable     dd rva _GetEnvironmentVariable
- _DeleteFileA@4     dd rva _DeleteFileA
- _GetConsoleMode@8     dd rva _GetConsoleMode
- _GetProcAddress@8     dd rva _GetProcAddress
- _GetStdHandle@4         dd rva _GetStdHandle
- _LoadLibraryA@4     dd rva _LoadLibraryA
- _GetLastError@0     dd rva _GetLastError
- _PeekConsoleInputA@16     dd rva _PeekConsoleInputA
- _ReadConsoleA@20     dd rva _ReadConsoleA
- GetTickCount     dd rva _GetTickCount
- GetSystemTime     dd rva _GetSystemTime
- GlobalMemoryStatus     dd rva _GlobalMemoryStatus
- _SetConsoleMode@8     dd rva _SetConsoleMode
- _Sleep@4     dd rva _Sleep
-            dd 0
+ _ExitProcess@4     DC rva _ExitProcess
+ CreateFile     DC rva _CreateFileA
+ _CreateProcessA@40     DC rva _CreateProcess
+ _ReadFile@20     DC rva _ReadFile
+ _WriteFile@20     DC rva _WriteFile
+ CloseHandle     DC rva _CloseHandle
+ SetFilePointer     DC rva _SetFilePointer
+ _GetCommandLineA@0     DC rva _GetCommandLineA
+ GetEnvironmentVariable     DC rva _GetEnvironmentVariable
+ _DeleteFileA@4     DC rva _DeleteFileA
+ _GetConsoleMode@8     DC rva _GetConsoleMode
+ _GetProcAddress@8     DC rva _GetProcAddress
+ _GetStdHandle@4         DC rva _GetStdHandle
+ _LoadLibraryA@4     DC rva _LoadLibraryA
+ _GetLastError@0     DC rva _GetLastError
+ _PeekConsoleInputA@16     DC rva _PeekConsoleInputA
+ _ReadConsoleA@20     DC rva _ReadConsoleA
+ GetTickCount     DC rva _GetTickCount
+ GetSystemTime     DC rva _GetSystemTime
+ GlobalMemoryStatus     DC rva _GlobalMemoryStatus
+ _SetConsoleMode@8     DC rva _SetConsoleMode
+ _Sleep@4     DC rva _Sleep
+            DC 0
 
-   kernel_name db 'KERNEL32.DLL',0
+    kernel_name db _BITS64_({'KERNEL32.DLL'})_BITS32_({'KERNEL32.DLL'}),0
 
  _ExitProcess dw 0
           db 'ExitProcess',0
@@ -1124,13 +1130,6 @@ ENDDPMI:
 _C{ ######################### DPMI END ###############################################################}
 })_C{}_END_({_HOSTED_DPMI_})
 
-dnl It doesn't make sense to have duplicate code for 16/32/64 bits
-dnl where m4 can handle it this easily.
-dnl 16 bits was default for the startup code, now overrule.
-_BITS32_({SET_32_BIT_MODE         _C Assembler directive},{dnl})
-_BITS32_({include(width32.m4)},{dnl})
-_BITS64_({SET_64_BIT_MODE         _C Assembler directive},{dnl})
-_BITS64_({include(width64.m4)},{dnl})
 
 _SWITCH_({
         CLI     _C{ Wait for stacks to be setup.}
@@ -1672,7 +1671,7 @@ _REAL_({
 _C
 _C{       If M4_VERSION exists and contains a . it is an official release}
 define({M4_VERSION2}, ifelse( index(M4_VERSION,.), -1,
-{{{beta $RCSfile$ $Revision$}}},
+{beta M4_VERSION},
 M4_VERSION))dnl
 _C
 worddoc({ENVIRONMENTS},{VERSION},{version}, {--- sc},{CI},
@@ -8783,7 +8782,7 @@ _C
 worddoc( {INPUT},{SET-MODE},{set_mode},{u --- },{},
 {Set the mode of standard input to forthvar({u}), as defined
 in MS-WINDOWS forthemph({GetConsoleMode}) function from
-forthemph({KERNEL32.DLL}).
+forthemph({_BITS64_({KERNEL32.DLL})_BITS32_({KERNEL32.DLL})})
 },
 {{GET-MODE},{KEY?}}, {}, enddoc)
 _HEADER({SET-MODE},{SETMODE},{DOCOL})
@@ -8795,7 +8794,7 @@ _C
 worddoc( {INPUT},{GET-MODE},{get_mode},{ --- u },{},
 {Get the mode of standard input to forthvar({u}), as defined
 in MS-WINDOWS forthemph({GetConsoleMode}) function from
-forthemph({KERNEL32.DLL}).
+forthemph({_BITS64_({KERNEL32.DLL})_BITS32_({KERNEL32.DLL})}).
 },
 {{SET-MODE},{KEY?}}, {}, enddoc)
 _C

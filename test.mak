@@ -194,7 +194,7 @@ testlina32 : $(TESTLINA32) ci86.lina32.rawtest lina32 forth.lab.lina tsuite.frt 
 	m4 $(TESTLINA32) >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
-	./lina32 <$@.1 2>&1| grep -v RCSfile >$@.3
+	./lina32 <$@.1 2>&1| grep -v beta >$@.3
 	diff -b -B $@.2 $@.3 || true
 	ln -sf forth.lab.lina  forth.lab
 	./lina32 -a <tsuite.frt 2>&1 |cat >tsuite32.out
@@ -209,7 +209,7 @@ testlina64 : $(TESTLINA64) ci86.lina64.rawtest lina64 forth.lab.lina tsuite.frt 
 	m4 $(TESTLINA64) >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
-	./lina64 <$@.1 2>&1| grep -v RCSfile >$@.3
+	./lina64 <$@.1 2>&1| grep -v beta >$@.3
 	diff -b -B $@.2 $@.3 || true
 	ln -sf forth.lab.lina  forth.lab
 	./lina64 -a <tsuite.frt 2>&1 |cat >tsuite64.out
@@ -228,7 +228,7 @@ testwina : ci86.wina.rawtest test.m4 wina.exe forth.lab.wina tsuite.frt ;
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
 	wine wina.exe <$@.1 2>&1|\
-	grep -v RCSfile |\
+	grep -v beta |\
 	sed -e 's/.*wina.exe/wina.exe/' >$@.3
 	diff -b -B $@.2 $@.3 || true
 	cp -f forth.lab.wina  forth.lab
@@ -246,7 +246,7 @@ testlina64.tar : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.fas forth.lab.lin
 	m4 $(TESTLINA64)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >testlina64.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >testlina64.2
-	echo "lina64 <testlina64.1 2>&1| grep -v RCSfile >testlina64.3      ">>testlina64
+	echo "lina64 <testlina64.1 2>&1| grep -v beta >testlina64.3      ">>testlina64
 	echo "diff -b -B testlina64.2 testlina64.3 || true                ">>testlina64
 	echo "lina64 -a <tsuite.frt 2>&1 |cat >tsuite.tmp   ">>testlina64
 	echo "diff -bBw tsuite.tmp tsuite64.out || true            ">>testlina64
@@ -258,7 +258,7 @@ testlinux : $(TESTLINUX) ci86.linux.rawtest ciforthc forth.lab ;
 	m4 $(TESTLINUX)  >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
-	ciforthc <$@.1 | grep -v RCSfile >$@.3
+	ciforthc <$@.1 | grep -v beta >$@.3
 	diff -b -B $@.2 $@.3 || true
 	rm $(TEMPFILE)
 
