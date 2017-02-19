@@ -1,19 +1,29 @@
 ( $ Id: $ )
-( Copyright{2000,2002}: Albert van der Horst, HCC FIG Holland by GNU Public License)
+( Copyright{2000..2017}: Albert van der Horst, HCC FIG Holland by GNU Public License)
 
-This is the archive of the assembler to complement the 386
+ciforth has an x86 up to the level of the Pentium I in the library.
+This is sufficient to assemble the floating point package, even on 
+64 bits.
+
+The optimiser needs a disassembler hence borrows a couple of files
+from the ciasdis project as a starting point.
+
+This archive of the assembler to complement the 386 can be found under
 ciforth Forth implementations.
 See http://home.hccnet.nl/a.w.m.van.der.horst/forthimpl.frt
 
-Sources : The cvs assembler sources are symbolic links to the ciasdis archives.
+The reason the assemblers are kept here directly is that they
+are essential for the optimiser.
+In order to play, make symbolic links to the ciasdis archives
+for the following files:
+Sources : The cvs assembler sources are 
 
 asgen.frt      Generic assembler / disassembler.
 asi386.frt     80386 plug in
 asi586.frt     80386 plug in (obsolete name, may be removed.)
 
-Test sets:  All tests are now done in the ciasdis directory
+Test sets:  All tests are done in the ciasdis project only
+at least since 2010.
+                                    
+Quick reference cards: All moved to the ciasdis project   
 
-Quick reference cards: All moved to the ciasdis directory
-
-The reason the assemblers are kept here directly is that they
-are essential for the optimiser.

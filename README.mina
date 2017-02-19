@@ -6,6 +6,11 @@ This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
 Public License as published by the Free Software Foundation.
 
+NOTE
+DOS is deprecated, there will be no version 5 releases. New version 4
+releases may only appear in the unlikely event of defects that have no
+work around.
+
 DESCRIPTION
 Forth is a tool for evolutionary programming. This is the
 binary distribution of mina 4.0, a stable release. mina is

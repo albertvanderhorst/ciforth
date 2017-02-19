@@ -1,3 +1,10 @@
+NOTE
+This directory contains bona fide releases.
+However they will be replaced with equivalent releases that fit in
+with the github environment.
+They are copies of
+    http://home.hccnet.nl/a.w.m.van.der.horst
+
 Legenda for releases of ciforth generated Forth's
 
 4 : version 4, using REQUIRE
@@ -6,9 +13,9 @@ Legenda for releases of ciforth generated Forth's
 ciforth : essential excerpt from generic system
 
 lina : linux, including android
-wina : for mswindows, 32 bit dll
+wina : for mswindows, 32 bit dll  5.#.# and later
 xina : apple osx
-wna : for mswindows, dpmi
+wna : for mswindows, dpmi         4.#.# and earlier
 mna : for msdos,
 sa : stand alone
 

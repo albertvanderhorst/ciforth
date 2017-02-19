@@ -1,6 +1,11 @@
 # $Id$
-# Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
+# Copyright(2000..2017): Dutch Forth Workshop Foundation, by GNU Public License
 GENERAL.
+
+OVERVIEW OF THE GENERIC SYSTEM 4.0
+
+The generic system for 5.0 lacks a similar overview, but the texinfo
+is (supposedly) up to date.
 
 Date: See RCS-ID
 Author : Albert van der Horst. albert@spenarnc.xs4all.nl

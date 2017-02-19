@@ -1,6 +1,6 @@
 CIFORTH CUSTOMIZATION FOR LINUX
 
-COPYRIGHT (c) 2000-2015 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2017 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -34,30 +34,35 @@ The rest is documentation (plus examples and source).
  lina##.texinfo  Documentation master source
  lina##.ps       Documentation in PostScript format
  lina##.pdf      Documentation in Portable Data Format
+ lina##.info     Documentation in Portable Data Format
  lina##.html     Browsable, reference documentation only
  lina##.1        man page: options and overview
  ci86.lina##.s   Source in gas format
+      or 
+ ci86.lina##.fas Source in fasm format
+     or
+ ci86.lina##.asm Source in asm format
  hellow.frt      Compilation example : hello world.
  mywc32 / mywc64 Script example, old style.
  wc.script       Script example, new style.
 
-You can rebuild lina from the .s file, instruction are in this source.
+You can rebuild lina from the assembler file, instruction are in this
+source. 
 The latest version and OSX and MS-windows versions can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
-This contains also a link to the generic system that is recommended over
-the .s file if you want to make extensive change.
+or
+    https://github.com/albertvanderhorst/ciforth
+(subdirectory releases). 
+If you want to make extensive changes, this contains also a link to the
+generic system that is recommended over the assembler file 
 
 Unpack in the directory where you want to use it by :
     tar fxz lina-5####.gz
 
-The following applies to the 32 and 64 bit version alike, replace lina
-by lina32 or lina 64 as appropriate. A symbolic link to lina may
-point to either version.
-
 Now you can use lina by :
-    lina
+    lina##
 or
-    lina -e
+    lina## -e
 
 Print the manual (150 pages) by :
     lpr ci86.lina##.ps
@@ -71,7 +76,6 @@ View the same information in ci86.lina##.pdf with an appropriate tool
 Viewing the file ``ci86.lina##.html'' with a html viewer,
 gives a reference that is concise but has more cross links.
 
-For customized installation see the -i option in the manual.
 
 For system wide installation (32-bit) the following is recommended:
     su
@@ -88,6 +92,7 @@ For system wide installation (32-bit) the following is recommended:
 The above increases Forth's dictionary space from 1 to 61 Mb.
 Installing lina64 is similar, but now you may want to grow
 by 8000 or 128000 Mbyte.
+See also the -i option in the manual.    
 
 Once installed you can use lina :
     Compile the example program by : lina -c hellow.frt

@@ -1,6 +1,6 @@
 CIFORTH CUSTOMIZATION FOR OSX version 5.2.x.
 
-COPYRIGHT (c) 2000-2015 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2017 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -51,8 +51,11 @@ xina.pdf        Documentation in Portable Data Format
 hellow.frt      Compilation example : hello world.
 forth.lab       Source library
 
-The latest version can be fetched from
+The latest version and Linux and MS-Windows versions can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
+or
+    https://github.com/albertvanderhorst/ciforth
+(subdirectory releases).
 This contains also the generic system that is recommended over
 `xina.asm' if you want to make extensive change.
 
@@ -70,13 +73,12 @@ INSTALLATION
 Installation will remain manual:
 A simple manual installation is superior to an automatic installation
 that would never work across all the targeted platforms.
-This Forth worked on windows version I never used or even heard of!
 And of course even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)
 
 You can use xina from the current directory. You can install it in the
 path, e.g. in your own ~/bin directory using the -i option, that is
-described in the manual. If you install it systemwide, don't forget
+described in the manual. If you install it system wide, don't forget
 to make it executable for the world and the library readable for the
 world.
 

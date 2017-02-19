@@ -6,12 +6,22 @@ This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
 Public License as published by the Free Software Foundation.
 
+NOTE
+DPMI is deprecated, there will be no version 5 releases. New version 4
+releases may only appear in the unlikely event of defects that have no
+work around.
+
 DESCRIPTION
 Forth is a tool for evolutionary programming. This is the binary
-distribution of wina 4.0.3, a stable release. Without notice this
-description also applies to versions 4.0.x . wina is the Windows
-native (API-independant) version of ciforth (common Intel Forth), an
-interpret environment and compiler for Forth. It is (large and by)
+distribution of wina 4.0.3, a stable release of a 32 bits windows
+Forth that interfaces through the DOS Protected Mode Interface. This
+means that internally it is much like a MS-DOS Forth, using INT 21 for
+Operating System Functions, but with the advantage of protected-mode's
+possibility to have 32 bits. Without notice this description also
+applies to versions 4.0.x . DPMI is deprecated, there will be no
+version 5 releases.
+This wina is a Windows native version of ciforth (common Intel Forth),
+an interpret environment and compiler for Forth. It is (large and by)
 compliant with the ISO Forth standard; the CORE wordset is fully
 implemented. The small, classic, indirect threaded kernel contains the
 essential, i.a. file access and exceptions. Its power is multiplied by
@@ -91,7 +101,7 @@ INSTALLATION
 After unpacking wina is ready to use, because the library sits in
 the current directory as configured.
 
-Installation to a systemwide directory is easy :
+Installation to a system wide directory is easy :
 WINA -i C:\TOOLS\WINA.EXE C:\TOOLS\WINA.LAB
 If C:\TOOLS is in the PATH , wina now is usable from anywhere.
 

@@ -4,7 +4,7 @@ CIFORTH
 
 ``ciforth'' is a factory for making implementations of Forth.
 Forth is a standardized (ANS 94) computer language which is primarily
-interactive, but has facilities for scripting and standalone
+interactive, but has facilities for scripting and stand alone
 executables.
 
 The name ciforth derives from computer intelligence Forth, because
@@ -27,7 +27,7 @@ What ciforth will do for you is generate three files:
   - a generic documentation file
 
 Of course not all combinations have been tried out, let alone tested.
-Released versions have a regressiontest and have been through a
+Released versions have a regression test and have been through a
 (sometimes considerable) burn in period. They contain not much more
 than the above three files.
 
@@ -57,3 +57,5 @@ versions and all other paraphernalia. cifgen.ps described the
 generic system. howto.txt is a cookbook about things you may want
 to do. A detailed history of ciforth since 2000 is contained in
 logforth.txt.
+
+You may want to read the other README's.

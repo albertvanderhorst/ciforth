@@ -1,6 +1,6 @@
 CIFORTH CUSTOMIZATION FOR MS-Windows, DLL. version 5.2.x.
 
-COPYRIGHT (c) 2000-2015 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2017 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -11,17 +11,15 @@ document wina.pdf.
 DESCRIPTION
 Forth is a tool for evolutionary programming. This is the binary
 distribution of wina release 5.2.x.
-wina is the Windows
-native version of ciforth (common Intel Forth), an interpret
-environment and compiler for Forth. Native is to be understood that
-only kernel32.dll facilities are used, no other dll's, no other
-facilities, and no registry.
-There is a major difference with
-releases 4.x.x : the interface with the operating system
-is no longer DOS but via dll's. In particular this means that you
-can import all libraries that are sufficiently documented at a
-low level, in particular kernel.dll, and that long filenames are
-no longer a problem.
+wina is the Windows native version of ciforth (common Intel Forth), an
+interpret environment and compiler for Forth. Native is to be
+understood that only kernel32.dll facilities are used, no other dll's,
+no other facilities, and no registry.
+There is a major difference with releases 4.x.x : the interface with
+the operating system is no longer DOS but via dll's. In particular
+this means that you can import all libraries that are sufficiently
+documented at a low level, in particular kernel.dll, and that long
+filenames are no longer a problem.
 wina is (large and by) compliant with the ISO Forth standard,
 the CORE wordset is fully implemented. The small, classic, indirect
 threaded kernel contains the essential, i.a. file access and
@@ -32,7 +30,7 @@ this is your best, if not only, choice. ciforth sports a very high
 documentation to binary ratio.
 
 Unpack in the directory where you want to use it by :
-    pkunzip wna5d94beta.zip
+    pkunzip wina-5.2.zip
 
 Now you can use wina interactively by :
     wina
@@ -63,10 +61,13 @@ The rest is documentation (plus examples and source).
 
 1) Adapt the name of the interpreter.
 
-The latest version can be fetched from
+The latest version and OSX and Linux versions can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
+or
+    https://github.com/albertvanderhorst/ciforth
+(subdirectory releases).
 This contains also the generic system that is recommended over
-`wina.s' if you want to make extensive change.
+`wina.fas' if you want to make extensive change.
 
 DOCUMENTATION I
 The regular documentation is your choice of PostScript, PDF with
@@ -79,10 +80,11 @@ This is only intended to be used while using the system, it
 contains no information about installation or tutorial material.
 
 INSTALLATION
-After unpacking wina is ready to use, because the library sits in
-the current directory as configured.
+(This is an excerpt of the information in wina.pdf.)
+After unpacking wina is ready to use, because the library is configured
+as sitting in the current directory, no path.
 
-Installation to a systemwide directory is easy :
+Installation to a system wide directory is easy :
 wina -i C:\tools\wina.exe C:\tools\wina.lab %COMSPEC%
 If C:\tools is in the PATH , wina now is usable from anywhere.
 
@@ -103,5 +105,11 @@ And of course even the simplest manual installation weeds out the wimps.
 (Forth is not for wimps.)
 
 NOTE
-The source file wina.fas can be assembled by fasm on a Linux or Apple
-system, maybe even on MS-Windows. Instructions can be found in the source.
+The source file wina.fas can be assembled by fasm on MS-Windows 32-bit
+or 64-bit system, or fasmw. Instructions can be found in the source.
+
+On a a Linux system fasm can be used, provided that besides the Linux
+fasm version, the MS-Windows version of fasm must be decompressed
+to borrow its include subdirectory.
+The generic system can create the assembler file in gas, nasm or masm
+format. Linking can be a problem.

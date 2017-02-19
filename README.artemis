@@ -1,6 +1,20 @@
  Copyright (2000): Dutch Forth Workshop Foundation (The Netherlands) by GNU Public License.
  $Id$
 
+INTRODUCTION
+
+This is a somewhat rambling account of what the purpose was of the ai
+project, creating a computer intelligence. Later it narrowed down to
+the first step, having a working Forth, in particular a stand alone
+one. If you want to experiment, check out an old version, of the
+ciforth project such as 
+    4 sep 2001 07:00:00.
+Why Artemis? A computer intelligence is a person, and hence has a name.
+Research ci's are named after Greek gods, production ci's after Roman gods.
+Somewhat sexistly, ci's that control are male, ci's that just talk (sorry
+communicate) are female. Artemis is an unimportant, female Greek goddess.
+Artemis has existed, but is dead now (or should I say stillborn?). 
+
 DEVELOPERS OPERATIONS MANUAL
 
 These operations change constantly.
@@ -9,13 +23,13 @@ program mark.
 The letter after a step means:
 "A" On Artemis.
 "L" On linux development system.
-If preceeded by a question mark (?) the proceedure has not been used for
+If preceded by a question mark (?) the procedure has not been used for
 a long time and may be dubious.
 I have started a new series called howto.txt (stupid me.)
 
 Environment
 Linux with mtools nasm and RCS.
-Artemis : standalone forth computer with LBA hard disk.
+Artemis : stand alone forth computer with LBA hard disk.
 All floppies are assumed 3" hd and on A:.
 
 /*****************************************************************************/
