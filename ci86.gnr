@@ -40,6 +40,13 @@ _EXTRAFIELD_({_C{ An extra field in the header for double links or free use.}
 _FEWBLOCKS_({_C{ number of blocks limited to 256}
 })dnl
 _C
+dnl It doesn't make sense to have duplicate code for 16/32/64 bits
+dnl where m4 can handle it this easily.
+dnl 16 bits was default for the startup code, now overrule.
+dnl 16 bits is default for the boot code.
+_BITS16_({include(width16.m4)})
+_BITS32_({include(width32.m4)},{dnl})
+_BITS64_({include(width64.m4)},{dnl})
 _HEADER_ASM
 _COMMENT
         A generic version of ISO FORTH for IBM type standard PC's by
@@ -103,14 +110,6 @@ _ENDCOMMENT
 _C{ ########################################################################################}
 _C{                       PREPARATION (no code)}
 _C{ ########################################################################################}
-dnl It doesn't make sense to have duplicate code for 16/32/64 bits
-dnl where m4 can handle it this easily.
-dnl 16 bits was default for the startup code, now overrule.
-dnl 16 bits is default for the boot code.
-_BITS16_({include(width16.m4)})
-_BITS32_({include(width32.m4)},{dnl})
-_BITS64_({include(width64.m4)},{dnl})
-
 
 FIGREL  EQU     5       _C{ FIG RELEASE #}
 FIGREV  EQU     0       _C{ FIG REVISION #}
