@@ -14059,6 +14059,43 @@ the include directory from fasm. An exciting possibility is to use
 the include directory from fasmw. That may make a 64 bit version of
 wina work.
 
+2017 feb 21
+With a better understanding of the mechanism of the ICALL in
+64 bits windows, those ICALL's have been updated.
+All call with 4 or more parameters can just put those parameters
+on the stack as usual, but the first 4 (most accessable)
+parameters must be copied into the registers rcx rdx R8 R9.
+Now a call with 3 or less parameters requires that they are
+filled up until there are 4. Then those param's must later be
+nipped. (Return code comes on top.)
+E.g. for 2 parameters
+   >R >R _ _ R> R> ICALL  NIP NIP
+This can't be done in ICALL because it doesn't know the number of
+parameters. wina64 hangs/crashes on windows. It gives a window
+indicating that it is not responding. Setting a REPEAT AGAIN
+show that it starts and some dll calls survive.
+
+2017 feb 28
+Coos haak has downloaded a 64 bit debugger on his pc. With this
+help we could see that the standard in/out handles were loaded.
+The suddenly we got first light. It shows the .SIGNON and
+it can execute a subsequent .SIGNON but other commands behave
+eratically. In particular it gives error 48 an indication that
+all disk blocks are locked.
+
+2017 mar 5
+Wasted some time getting info right. I have now texinfo.pdf in the
+documents directory. See section 2.21 for what I tried (Installing
+an info file). Changing the lina32 name to lina seems problematic.
+As long as lina.info sits in /usr/share/info the command "info lina"
+works nowadays. Note that dir in /usr/share/info is an info file
+itself.
+
+2017 mar 12
+Euler592 reveals a bug in the modulo package (x^x).
+_reduce_1 contains an error. Fortunately I build that program
+also with the official program.
+
 -
 Greg Egan
 Schild's ladder.
@@ -14068,3 +14105,8 @@ Write the article for allocate using a objects and thingies.
 
 Suppose sda1 is a sandisk.
 dd if=binary.bin of=/dev/sda1
+
+issues:
+* maybe add INCLUDE to the kernel
+* -e in lina.1 should be the normal option.
+  INCLUDE SEE LOCATE DUMP CASESENSITIVE

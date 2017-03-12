@@ -985,7 +985,7 @@ VARIABLE _m ( Modulo number)   WANT XGCD
 : %:m  S>D _m @ SM/REM DROP _norm_-m  ;  ( a -- an)
 
 \ Both steps: For A B and C: return A B en C.  Invariant A*B^C.
-: _reduce_1-  1- >R    OVER *m SWAP  R> ;
+: _reduce_1-  1- >R >R    R@ *m   R> R> ;                      
 : _reduce_2/  2/ >R    DUP *m        R> ;
 : **m    1 ROT ROT BEGIN   DUP 1 AND IF   _reduce_1-   THEN
     _reduce_2/ DUP 0= UNTIL   2DROP   ;  ( a b -- apowbn )
