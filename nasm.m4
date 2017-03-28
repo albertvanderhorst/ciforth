@@ -27,7 +27,7 @@ define({_BSS_},{ section .bss })
 })
 _LINUX_N_({
 ; This version can be assembled on a Linux system by
- _BITS32_({ ;   nasm forth.asm -o forth.o
+ _BITS32_({ ;   nasm forth.asm -felf -g -o forth.o
 ;   ld -melf_i386 -N forth.o -o forth
 ; Tested with nasm version 2.10.01.
 })

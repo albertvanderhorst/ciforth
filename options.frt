@@ -46,9 +46,9 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
 
 
 \
-( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH B5jan23
+( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH B7mar28
 1 LOAD   WANT OLD:   TURNKEY   SWAP-DP
-WANT NO-REGRESS ARG[]   INCLUDE   SRC>EXEC
+WANT ARG[]   INCLUDE   SRC>EXEC
 : MY-ERROR  DUP EXIT-CODE ! OLD: ERROR BYE ;
 'MY-ERROR DUP 'ERROR 3 CELLS MOVE  HIDDEN
 \ Don't include source in executable.
@@ -57,7 +57,7 @@ WANT NO-REGRESS ARG[]   INCLUDE   SRC>EXEC
 
 'TASK 'OPTIONS 3 CELLS MOVE \ No options.
 'TASK '.SIGNON 3 CELLS MOVE \ No sign on.
-NO-REGRESS      \ Turn off regression test
+: REGRESS  POSTPONE \ ; IMMEDIATE \ Turn off regression test
 ARGC 3 < 13 ?ERROR
 2 ARG[] INCLUDED
 LATEST   2 ARG[] SRC>EXEC   TURNKEY
@@ -92,7 +92,7 @@ WANT INCLUDE SEE  LOCATE
 \ Select os-interface DOS/Unix
  "OS-IMPORT" WANTED  (  "DIR" WANTED )      "ls" WANTED
  "-scripting-" WANTED
-
+ "AUTOLOAD" WANTED
 : TASK ; OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD

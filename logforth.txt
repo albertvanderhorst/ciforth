@@ -14096,6 +14096,21 @@ Euler592 reveals a bug in the modulo package (x^x).
 _reduce_1 contains an error. Fortunately I build that program
 also with the official program.
 
+2017 mar 14
+The 64 bit icall's in mswindows must be 128 bit aligned.
+The 64 bit version of wina works now with an experimental version
+of a PARS[  .. PAR1 .. PAR2 .. ICALL] mechanism.
+The idea is to reserve a stack area by PARS[ at PARS.
+The Forth stack is above that so it is protected. PARS is the stack
+that is used by Windows. PAR1 fills in parameter1 and so for the
+others. ICALL] calls windows like ICALL, using the stack at PARS
+and switching back to the Forth stack after that.
+The plan is to add this mechanism in wina32, which should make porting
+easier.
+
+2017 mar 28
+REGRESS is made harmless in the -c option.
+
 -
 Greg Egan
 Schild's ladder.
