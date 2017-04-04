@@ -14110,6 +14110,28 @@ easier.
 
 2017 mar 28
 REGRESS is made harmless in the -c option.
+A PARS[ ICALL] mechanism is added to $f, in an RCS archive beneath
+the git directory. It is gradually introduced and now covers all
+except KEY KEY?. Those are not working properly, maybe a wine thing.
+KEY? always gives TRUE. KEY handles normal char's and mostr control
+characters, but behaves strange on <ESC> and ignores function keys.
+GET-MODE gives B7.
+
+2017 mar 29
+Reordering around SYSTEM in ci86.gnr
+
+2017 mar 30
+KEY now uses PARS[ and ICALL], not for its factors GET-MDOE SET-MODE
+and behaves still the same.
+Transforming GET-MODE and SET-MODE runs into mysterious differences.
+`make testwina ' still succeeds.
+
+2017 mar 31
+PARS[ is renamed to ICALL[. All words transformed.
+Actually ready to be made assembler words.
+Problems with KEY and KEY? under wine:
+KEY behaves strange if <ESC> is pressed. KEY? always gives true.
+
 
 -
 Greg Egan
