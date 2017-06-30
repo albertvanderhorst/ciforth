@@ -186,6 +186,22 @@ ci86.lina.labtest \
 VERSION=`date +%Y%b%d`
 # M4_DEBUG=--debug=V   # deperado debugging.
 
+RELEASELINA = \
+COPYING   \
+READMElina.txt \
+ci86.lina.info \
+ci86.lina.html \
+ci86.lina.pdf \
+ci86.lina.ps \
+ci86.lina.texinfo \
+ci86.lina.fas    \
+lina      \
+lina.1    \
+forth.lab     \
+$(EXAMPLESRC) \
+#ci86.lina32.asm      \
+# That's all folks!
+
 RELEASELINA32 = \
 COPYING   \
 READMElina.txt \
@@ -225,11 +241,11 @@ TEMPFILE=/tmp/ciforthscratch
 # How to generate a Forth executable.
 %: %.frt ; $(FORTH) -c $^
 
-# Define NASM as *the* assembler generating bin files.
-%.bin:%.asm ; nasm -fbin $< -o $@ -l $*.lst
-
-# Define fasm as an alternative for generating bin files.
+# Define fasm as *the* assembler generating bin files.
 %:%.fas ; fasm $< -m256000
+
+# Define NASM as an alternative for generating bin files.
+%.bin:%.asm ; nasm -fbin $< -o $@ -l $*.lst
 
 #%.exe: ci86.%.fas ; fasm $+ -m256000
 
@@ -287,9 +303,9 @@ default : lina64
 ci86.$(s).bin :
 
 # Canonical targets
+lina : ci86.lina.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 lina64: ci86.lina64.fas ;  fasm $+ -m256000; mv ${<:.fas=} $@
-lina: glina64 ; $< -g 8000 $@
 wina.exe: ci86.wina.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
 
 # Some of these targets make no sense and will fail
@@ -395,6 +411,15 @@ mslinks :
 
 
 forth.lab : forth.lab.lina forth.lab.wina
+
+LINAZIP : $(RELEASELINA) ;\
+	make clean
+	rm -f forth.lab.lina VERSION namescooked.m4
+	make VERSION=$(VERSION) forth.lab.lina VERSION namescooked.m4
+	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
+	(cd ..; ln -sf ciforth lina-$(VERSION))
+	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
+	(cd ..; rm lina-$(VERSION))
 
 LINA32ZIP : $(RELEASELINA32) ;\
 	make forth.lab.lina
