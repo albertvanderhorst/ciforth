@@ -121,7 +121,7 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 # Sort the raw information and add the wordset chapter ends
 # In the input of the .mig file all @ are (should be) duplicated!
 %.mig : %.rawdoc ;
-	ssort $+ -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 1s2s >$@
+	sortworddoc.frt $^ $@
 
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
@@ -142,11 +142,11 @@ ci86.%.html : %.cfg glosshtml.m4 indexhtml.m4 ci86.%.mig namescooked.m4
 	sed -e 's/@@/@/g'               |\
 	sed -e s'/worddocsafe/worddoc/g'  |\
 	sed -e 's/</\&lt\;/g'   > temp.html
+	sortworddoc.frt -r temp.html temp2.html
 	echo 'define({thisfilename},{$@})' >>namescooked.m4
 	echo 'define({thisforth},{$(@:ci86.%.texinfo=%)})'>>namescooked.m4
 	( \
-	    cat indexhtml.m4 namescooked.m4 ; \
-	    ssort temp.html -e '^worddoc[a-z]*($${@},{@}.*\n$$worddoc' -m 2s1s \
+	    cat indexhtml.m4 namescooked.m4 temp2.html \
 	)| m4 > $@
 	m4 $(@:ci86.%.html=%.cfg) glosshtml.m4 namescooked.m4 temp.html |\
 	sed -e 's/~"/"/' -e 's/_left_parenthesis_/\(/' >> $@
