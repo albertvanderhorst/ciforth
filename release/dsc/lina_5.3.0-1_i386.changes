@@ -1,0 +1,33 @@
+Format: 1.8
+Date: Thu, 07 Sep 2017 14:48:03 +0200
+Source: lina
+Binary: lina
+Architecture: source i386
+Version: 5.3.0-1
+Distribution: unstable
+Urgency: low
+Maintainer: Albert van der Horst <albert@spenarnc.xs4all.nl>
+Changed-By: Albert van der Horst <albert@cherry.spenarnc.xs4all.nl>
+Description: 
+ lina       - ISO-compliant Forth interpreter and compiler
+Closes: 859130
+Changes: 
+ lina (5.3.0-1) unstable; urgency=low
+ .
+   * Initial release (Closes: #859130)
+   * Added a Makefile
+Checksums-Sha1: 
+ 3c9ec44167797beb7dc5ea4d7b25dc09cf934644 816 lina_5.3.0-1.dsc
+ 349f5938c2dd8a41f55e85874c9d9399327adf34 1466988 lina_5.3.0.orig.tar.gz
+ 427314e38f9bb9733de1a908b74ff044739da203 3577 lina_5.3.0-1.debian.tar.gz
+ 0db1912bbc11ae027d8b32a6ecb9e8cef97da705 1360442 lina_5.3.0-1_i386.deb
+Checksums-Sha256: 
+ 55f3ddb15cb6a78f041b885627d57744901a3a244825de589efb17fc109824fb 816 lina_5.3.0-1.dsc
+ 674a560c8cf4cd6b6af14ce899f95d2d0360216f885a606fc7c006ec6c34171a 1466988 lina_5.3.0.orig.tar.gz
+ 60780f30d9ad05e1e87f1b25966772dcc80e75f806cf7ff4ba8beda70d9e79b0 3577 lina_5.3.0-1.debian.tar.gz
+ 7ff9b3e8daa549cf2571ff59ee8a64159c12b684ed565057b8f1f657a03fd3c7 1360442 lina_5.3.0-1_i386.deb
+Files: 
+ 4b31f1fd6b70eef24f1394b2adc80e61 816 devel optional lina_5.3.0-1.dsc
+ 540a131e29bfa510166e9ebbba84e694 1466988 devel optional lina_5.3.0.orig.tar.gz
+ 6cd1ac7300d507dca2aec26e5481a77d 3577 devel optional lina_5.3.0-1.debian.tar.gz
+ 50385533cdb809120ad4ed3e180f5203 1360442 devel optional lina_5.3.0-1_i386.deb
