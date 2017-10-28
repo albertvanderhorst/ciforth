@@ -1,4 +1,4 @@
-# $Id$
+# $Id: Makefile,v 5.50 2017/10/28 21:27:27 albert Exp $
 # Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # This defines the transformation from the generic file ci86.gnr
@@ -36,7 +36,7 @@ M4=m4 -G ciforth.m4
 # Only needed for gas where we need the patsubst macro.
 M4_GNU=m4 ciforth.m4
 
-FORTH=./lina64      # Our utility Forth.
+FORTH=./lina            # Our utility Forth.
 
 # ALL FILES STARTING IN ``ci86'' (OUTHER ``ci86.gnr'') ARE GENERATED
 
@@ -95,9 +95,7 @@ filler.frt      \
 forth.lab       \
 forth.lab.lina  \
 forth.lab.wina  \
-toblock         \
 toblk           \
-fromblock       \
 constant.m4     \
 namescooked.m4  \
 stealconstant   \
@@ -112,7 +110,7 @@ wordset.mi      \
 # That's all folks!
 
 # C-sources with various aims. FIXME: start with .c names.
-CSRCAUX= toblock fromblock stealconstant
+CSRCAUX= stealconstant
 CSRCFORTH= ciforth stealconstant
 CSRC= $(CSRCAUX) $(CSRCFORTH)
 
@@ -239,7 +237,10 @@ VERSION:;echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
 TEMPFILE=/tmp/ciforthscratch
 
 # How to generate a Forth executable.
-%: %.frt ; $(FORTH) -c $^
+%: %.frt ; $(FORTH) -c $<
+
+# KEEP THIS IN UNTIL CREATION OF toblk IS OKAY
+#%: %.frt ./lina ; cp boot.lab forth.lab; $(FORTH) -c $^
 
 # Define fasm as *the* assembler generating bin files.
 %:%.fas ; fasm $< -m256000
@@ -302,10 +303,18 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 default : lina64
 ci86.$(s).bin :
 
+# tools
+toblk: toblk.frt $(FORTH)
+	cp boot.lab forth.lab
+	$(FORTH) -c $<
+	rm -f forth.lab forth.lab.lina
+
+
 # Canonical targets
-lina : ci86.lina.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+lina   : ci86.lina.fas   ; fasm $+ -m256000; mv ${<:.fas=} $@
 lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
-lina64: ci86.lina64.fas ;  fasm $+ -m256000; mv ${<:.fas=} $@
+lina64 : ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+#lina: lina64 ; $< -g 8000 $@
 wina.exe: ci86.wina.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
 
 # Some of these targets make no sense and will fail
@@ -314,6 +323,7 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
 
 clean: \
 ; rm -f $(TARGETS:%=%.asm)  $(TARGETS:%=%.msm)  $(TARGETS:%=ci86.%.*)  \
+; rm -f $(INTERTARGETS) \
 ; rm -f $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy a.out\
 ; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
 
@@ -367,12 +377,12 @@ moreboot: forth.lab.wina ci86.alone.bin  ci86.mina.bin
 
 allboot: boot filler moreboot
 
-forth.lab.lina : toblock options.frt errors.linux.txt blocks.frt
-	cat options.frt errors.linux.txt blocks.frt | toblock >$@
+forth.lab.lina : toblk options.frt errors.linux.txt blocks.frt
+	cat options.frt errors.linux.txt blocks.frt | toblk >$@
 	ln -f $@ forth.lab
 
-forth.lab.wina : toblock options.frt errors.dos.txt blocks.frt
-	cat options.frt errors.dos.txt blocks.frt | toblock >$@
+forth.lab.wina : toblk options.frt errors.dos.txt blocks.frt
+	cat options.frt errors.dos.txt blocks.frt | toblk >$@
 	ln -f $@ forth.lab
 
 # Like above. However there is no attempt to have MSDOS reading from
@@ -414,7 +424,7 @@ forth.lab : forth.lab.lina forth.lab.wina
 
 LINAZIP : $(RELEASELINA) ;\
 	make clean
-	rm -f forth.lab.lina VERSION namescooked.m4
+	#rm -f forth.lab.lina VERSION namescooked.m4
 	make VERSION=$(VERSION) forth.lab.lina VERSION namescooked.m4
 	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
 	(cd ..; ln -sf ciforth lina-$(VERSION))
@@ -487,9 +497,11 @@ constant.m4 : stealconstant ; $+ >$@
 #constant_64.m4 : stealconstant_64; $+ >$@
 #constant_osx.m4 : stealconstant_osx ; $+ >$@
 
-stealconstant_64:  ; echo build stealconstant for 64 bit, then rename it
+stealconstant_64:
+	@echo By hand: build stealconstant for 64 bit using -m64, then rename it
 
-stealconstant_osx: ; echo build stealconstant for osx, then rename it
+stealconstant_osx:
+	@echo By hand: build stealconstant for osx, then rename it
 
 # Add temporary stuff for testing, if needed.
 include test.mak
