@@ -1,4 +1,4 @@
-# $Id: Makefile,v 5.50 2017/10/28 21:27:27 albert Exp $
+# $Id: Makefile,v 5.51 2017/10/29 13:46:29 albert Exp $
 # Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # This defines the transformation from the generic file ci86.gnr
@@ -208,7 +208,7 @@ ci86.lina32.html \
 ci86.lina32.pdf \
 ci86.lina32.ps \
 ci86.lina32.texinfo \
-ci86.lina32.s      \
+ci86.lina32.fas      \
 lina32      \
 lina.1    \
 forth.lab     \
@@ -224,7 +224,7 @@ ci86.lina64.html \
 ci86.lina64.pdf \
 ci86.lina64.ps \
 ci86.lina64.texinfo \
-ci86.lina64.s  \
+ci86.lina64.fas  \
 lina64          \
 lina.1    \
 forth.lab     \
@@ -423,34 +423,28 @@ mslinks :
 forth.lab : forth.lab.lina forth.lab.wina
 
 LINAZIP : $(RELEASELINA) ;\
-	make clean
-	#rm -f forth.lab.lina VERSION namescooked.m4
-	make VERSION=$(VERSION) forth.lab.lina VERSION namescooked.m4
-	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	(cd ..; ln -sf ciforth lina-$(VERSION))
-	(cd ..; tar -czvf ciforth/lina-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
-	(cd ..; rm lina-$(VERSION))
-
-LINA32ZIP : $(RELEASELINA32) ;\
+	rm -f lina-$(VERSION) forth.lab.lina
 	make forth.lab.lina
-	ln -f forth.lab.lina forth.lab
-	make glina32
-	mv glina32 lina32
+	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
+	ln -sf . lina-$(VERSION)
+	tar -czvf lina-$(VERSION).tar.gz `cat MANIFEST`
+	rm lina-$(VERSION)
+
+LINA32ZIP : $(RELEASELINA32)
+	rm -f lina32-$(VERSION) forth.lab.lina
+	make forth.lab.lina
 	ls $+ | sed s:^:lina32-$(VERSION)/: >MANIFEST
-	(cd ..; ln -sf ciforth lina32-$(VERSION))
-	(cd ..; tar -czvf ciforth/lina32-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
-	(cd ..; rm lina32-$(VERSION))
+	ln -sf . lina32-$(VERSION)
+	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
+	rm lina32-$(VERSION)
 
 LINA64ZIP : $(RELEASELINA64) ;\
-	chmod +x lina64 # Must be compiled on a 64 bit machine, assumed present.
+	rm -f lina64-$(VERSION) forth.lab.lina
 	make forth.lab.lina
-	ln -f forth.lab.lina forth.lab
-	make lina64
-	chmod +x wc.script
 	ls $+ | sed s:^:lina64-$(VERSION)/: >MANIFEST
-	(cd ..; ln -sf ciforth lina64-$(VERSION))
-	(cd ..; tar -czvf ciforth/lina64-$(VERSION).tar.gz `cat ciforth/MANIFEST`)
-	(cd ..; rm lina64-$(VERSION))
+	ln -sf . lina64-$(VERSION)
+	tar -czvf lina64-$(VERSION).tar.gz `cat MANIFEST`
+	rm lina64-$(VERSION)
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
