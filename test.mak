@@ -1,10 +1,8 @@
-# $Id$
+# $Id: test.mak,v 5.33 2017/10/28 21:27:28 albert Exp $
 # Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # Just to jot down small tests not wanted in the makefile
 # and any other commands.
-
-FORTH=lina      # Our utility Forth.
 
 TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9] orang hello.frt tsuite.out
 
@@ -120,8 +118,8 @@ msdos32.zip : forth32.asm forth32.com msdos32.txt msdos9.cfg config.sys ; \
 
 # Sort the raw information and add the wordset chapter ends
 # In the input of the .mig file all @ are (should be) duplicated!
-%.mig : %.rawdoc ;
-	sortworddoc.frt $^ $@
+%.mig : %.rawdoc lina forth.lab.lina ;
+	sortworddoc.frt $< $@
 
 namescooked.m4 : names.m4 ci86.gnr ; \
 	cat names.m4 >$@ ; \
@@ -269,6 +267,13 @@ testdpmi : ci86.dpmi.rawtest test.m4 ;
 	rm $(TEMPFILE)
 
 testwinafiles : ci86.wina.rawtest test.m4 ;
+	m4 test.m4 $<  >$(TEMPFILE)
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	rm $(TEMPFILE)
+
+testwina64files : ci86.wina64.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
 	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1

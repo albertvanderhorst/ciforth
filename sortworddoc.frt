@@ -1,10 +1,17 @@
 #!./lina -s
 
-WANT QSORT R/W PAIR[] 2, COMPARE ARG[]
+\ Usage: sortworddoc.frt [-r] <file1> <file2>
+\ file1 must contain worddoc records in a format
+\  worddocxxx(field1a, field2a, ....)
+\  worddocyyy(field1b, field2b, ....)
+\ The records are sorted on field1, then on field2 and output to file2.
+\ If -r is present the sorting is first on field2, then field1.
 
-\ Prepare data area for `POSITION .
+WANT QSORT PAIR[] 2, COMPARE
+
+\ Use the search mechanism of screen1. Prepare data area for `POSITION .
 0 _pad !  ^J _pad $C+   "worddoc" _pad $+!
-\ Split  string  into  firstdoc  and  remainingdocs  .
+\ Split and store from  string  its firstdoc, leave  remainingdocs  .
 : split
    2DUP POSITION DUP IF 1+ >R   OVER R@ OVER -  2,  + R> SWAP OVER -
    ELSE DROP 2, 0 0 THEN ;

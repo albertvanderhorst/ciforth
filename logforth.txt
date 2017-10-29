@@ -12167,7 +12167,7 @@ All checked in. CH+ is now $C+.
 2009 may 21
 The linking of an assembler file can use a very simple script
 "
-/* $Id$ */
+/* $Id: logforth.txt,v 1.40 2017/10/29 13:46:29 albert Exp $ */
 /* Script for -N: mix text and data on same page; don't align data */
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
@@ -14132,11 +14132,313 @@ Actually ready to be made assembler words.
 Problems with KEY and KEY? under wine:
 KEY behaves strange if <ESC> is pressed. KEY? always gives true.
 
+2017 apr 4
+The version with ICALL[ ICALL] is committed to git.
+Now the sytem is made such that the OS words
+use a pointer that resides on the
+return stack as a frame pointer instead of a global PARS.
+The PAR# words are now ;CODE words using DOPAR.
+This was all still in wina32. Now the win64 source for .fas
+is generated.
+All test pass except SYSTEM first time. The reason is that the
+shell is not filled in correctly.
+It turns out that GET-ENV doesn't work in 64 bit modem because it
+uses the old call mechanism. Filling in the correct %comspec%
+still gives
+"DIR" SYSTEM
+? ciforth ERROR # 2 file not found
+This may mean that the PATH is not pointing to a correct
+executable, on a system with very annoying safety features that
+destroys files without notice.
+However the 32 bits Forth under Linux wine gives the same message.
 
--
+2017 apr 6
+The problem with SYSTEM is solved. Also midi.frt works under
+wine.
+
+2017 apr 7
+ICALL[ renamed into CALL[ in order to start using CALL] .
+Trying out CALL] with the midi example fails under 32 bit.
+So for the moment this addition is present in a file "callclose".
+
+2017 apr 8
+CALL[ is made into a code definition, wina64.exe
+is released in beta on my own website.
+
+2017 apr 10
+CALL] is added. At first it seemed not to be working, because it
+was tested using sendmidi. The trick to fill in the address the
+first time e.g. midiOutOpen was used made it fail, because
+that used another CALL[ . The solution is to force this fetching
+in midiopen by `` midiOutOpen DROP '' This works, at least in
+32 bits.
+
+2017 apr 11
+SAVE-SYSTEM on windows 64 bits now works.
+Other minor points : SHELL now has a default and uses backslashes.
+64 bits wina doesn't try to compile cd , the OS-IMPORT screen
+test for CALL] now not CALL.
+
+2017 apr 26
+Extensive test. The whole internal test for windows 64 bits succeeds.
+Points improved:
+- LAST-ERROR : proper test
+- LOAD-DLL DLL-ADDRESS didn't work till now. Proper test.
+- LOAD-DLL: DLL-ADDRESS: didn't work till now. Proper test.
+- STDERR STDIN STDOUT : range enlarged. Tests pass now.
+
+A turnkey system that connects to the OS directly, using
+LOAD-DLL: DLL-ADDRESS: works. This is tested by using the
+midi commands.
+
+2017 mei 1
+The debian archive is passed through lintian and some errors
+are removed.
+
+2017 mei 2
+More lintian errors are removed.
+The beta version of wina64 that is on the personal website has
+been tested w.r.t. testreport.txt. There are no problems.
+The tests around SYSTEM BYE and EXIT-CODE are reorganized.
+
+2017 mei 4
+The lintian error regarding static compile has been removed.
+lintian gives 0 error, so ready.
+2017 mei 5
+Experimenting with wc.script reveals two defects:
+1. GET-FILE must give an error if it cannot accomodatea file.
+    read-file there must be replaced by:
+    : READ-FILE   OVER >R READ-FILE OVER R> = ## ?ERROR ;
+    The 6 can be replaced by 2. The 1000 - makes no sense and
+    can be left out.
+
+2. the -s options should allocate a static buffer and installs
+    that in FAR-DP.
+    SCRIPT-NAME $@ GET-FILE   HERE FAR-DP ! 10,000 ALLOT
+    In the instructions one can suggest to increase the buffer
+    by just ALLOT ting.
+
+2017 jun 30
+
+The usage of ssort is eliminated from the git archive.
+Adding the file sortworddoc.frt.
+I've cloned the archive or how they call that and eliminated all files
+that are not needed for lina.
+
+2017 jul 1
+The cvs archive is accessible through anonymous ftp.
+I've added a user anonymous in the CVSROOT/passwd and added
+her also to the readers file.
+The user existed, but had a shell for no good reason.
+Changed that and ftp still works.
+
+2017 jul 4
+Discovery: alioth has cvs archives.
+plan
+- have a pgpsignature
+   * size of Paul Wise's pgp  : 4096
+   * install pgp
+    * generate key
+    * disk with backup
+
+2017 jul 5
+Made a motivation for a small source archive.
+Looked into ssort
+
+2017 jul 6
+I still don't know how to use pgp for sending an signed email
+gpg --detach-sig xxxx
+en
+gpg --verify xxxx.sig
+work together to sign an archive.
+
+Ik kan een geencrypte mail voor mij ontcijferen met
+gpg -d
+Ik krijg dan een geheimzinnige vraag voor een filenaam.
+Ik kan ook de *.asc file in the attachment gebruiken.
+Dan wordt de asc er afgehaald voor de cleartext.
+
+2017 jul 10
+* mail to admin@alioth.org
+- msdos version of ssort in git
+
+2017 aug 6
+het lijkt onmogelijk om contact op te nemen met alioth.
+Ik heb een account geopend als manipal-guest.
+Hiermee wordt ik nog steeds als een anonymous beschouwd.
+
+2017 aug 31
+I've made a file lina.mak that can serve as an example for
+the Makefile in a source distribution.
+There is a target LINAZIP That doesn't belong in that file.
+
+2017 sep 2
+I must make a makesourcelina.bat in order to make a Debian
+source distribution. It just copies all relevant file to
+a subdirectory and tars it. It renames by leaving off the
+ci86 prefix.
+Otherwise it is similar to the LINAZIP target in the great Makefile.
+I must have a separate Makefile for debian, called lina.mak.
+
+README.lina must refer to just lina. This is also in accordance
+with the future where there may be lina's for ARM etc.
+
+2017 sep 7
+At last we're zoomin in on making a source package for lina. The
+first is to put the upstream archive lina-5.3.0.tgz somewhere and
+unpack it. Then go to the subdirectory lina-5.3.0 and
+type dh_make --createorig
+This will prepare a xx.orig. alongside lina-5.3.0.tgz and a debian
+directory with all sorts of templates that must be filled in.
+Now adapt the package. In our case it is necessary to patch the path
+in the assembler file and copy (link) all files that start with
+ci86.
+dpkg-source --commit
+quilt refresh
+dpkg-buildpackage -us -uc
+
+2017 sep 10
+Before publishing the .dsc file, I must first
+- have an official lina source archive.
+- build lina from that
+I already have a facility for the first: "make LINAZIP". This makes
+an archive with the .fas file as the source file.
+In order to have an official lina source archive for 5.3.0 I went back
+to RCS because I don't seem to know how to get back a tagged
+git archive. I also manually added the comment that was removed
+because fasm doesn't support block comment.
+The archive was cloned into the makelinazip, then deleted and
+a proper lina-5.3.0.tar.gz is present in the release directory.
+The lina 5.3.0 archive texinfo was compared to the lina32 archive
+and only the executable name was different. Also .html and assembler
+was compared.
+If is strange but ssort.exe shows up in git, but is not presented
+in a checked out version.
+
+2017 oct 8
+At last trying to add an archive.
+All is well except that lintian gives a mysterious message.
+Maybe I've made a patch duplicate.
+Anyway there is a release/dsc that contains even a pgp signed
+dsc.asc
+Published in mentors. In fact this solves ITP bug 859130 halfway.
+.
+2017 oct 9
+It appears that you can address revisions as follows:
+git diff REL-5-3-0 -- nasm.m4
+
+2017 oct 12
+The following files are different w.r.t. the local git archive.
+
+Makefile blocks.frt ci86.gnr ciforth.mi debian.sh glossary.texinfo
+lina.1 linux.cfg logforth.txt mywc mywc32 mywc64
+release/lina_5.3.0_i386.deb setenv sortworddoc.frt test.mak
+testreport.txt
+This is the origin branch.
+It is a mess, so I change the development workflow:
+The development branch is in cvs, the master branch is in git.
+This means that I must put the Debian commits in cvs which is
+not a big deal.
+859130
+
+2017 oct 16
+It turns out that Gianfranco has answered me a long time ago.
+I must close bug 859130 by having a request to sponsor bug.
+Then upload to debian.mentors.net (not org)
+
+2017 oct 17
+I have filled in my C12C8A7A public key in my Debian account.
+Apparently an upload works by signing both the changes and
+the sdc. However this can only be retrofitted by debsign
+that refuses to work.
+
+   1. sign by the Debian account key : the changes file (!)
+   2. dput has the options -o dryrun and -d debug and -s simulate
+
+2017 oct 19
+I managed to sign the package by using an explicit -k option to
+debsign. The changes were accepted by dput in simulation.
+Then I uploaded it. It doesnot show up directly at mentors page.
+"
+Uploading to mentors (via http to mentors.debian.net):
+Uploading lina_5.3.0-1.dsc: done.
+Uploading lina_5.3.0.orig.tar.gz: done.
+Uploading lina_5.3.0-1.debian.tar.gz: done.
+Uploading lina_5.3.0-1_i386.deb: done.
+Uploading lina_5.3.0-1_i386.changes: done.
+Successfully uploaded packages.
+"
+
+2017 oct 23
+Adding the      1d9d14a1a290ce9cfa753af7d9cb928464ec2adf (2017jan17)
+(improve beta release names)
+54b6189e84851b30230c6f6a3c85e1d789f3c375 (cosmetic reordering)
+git to the CVS archive marked GIT2017JAN17 and GITFEB19
+
+4b5a1e5651a494d8ef8e1001a8beb4b707e775ab
+The windows calls are via the ICALL[ ICALL] mechanism.
+Couple of README's added and updated in behalf of git appearance.
+Other small changes.
+git to the CVS archive marked GIT2017APR4
+This git change has also the release stuff and debian.sh but I
+don't want to have that in CVS
+
+2017 oct 25
+Added the 25343e829c3819fc144f924bf7822bc11f6989f8 commit
+with label GIT2017JUN30  concerning sortworddoc.frt to CVS
+and corresponding changes to test.mak.
+Made a list of things I want to be removed from the main
+directory. The script likegit.bat does that and it is added in CVS.
+It can be run each time CVS dir must look like git, in particular
+for testing whether files are missing.
+
+Now the Makefile is updatedin order not to use c-tools to build
+the library from options.frt and blocks.frt. Also
+    wordset.mi is now cleaned in 'make clean'
+    likegit.bat added
+forth.lab.orig is used to build the first version of toblk.
+Forgotten to upload that.
+Now toblk.c and fromblk.c are no longer used and can be moth-balled.
+
+2017 oct 26
+I forgot to upload forth.lab.orig.
+
+In git likegit.bat is to be made permanent, resulting in directories
+that contain snippets examples moth-balled optimiser etc.
+Some files to be deleted are by accident already here.
+
+In git the moves must actually take place
+and we'll make a README for each.
+git.bat that moves them in the git environment.
+
+2017 oct 27
+forth.lab.orig. has been renamed boot.lab and is uploaded.
+This didn't work at first because cvs caused a one char offset.
+5.2 is okay now.
+
+2017 oct 28
+Before proceeding some cleanup is in order:
+  some things are duplicated in test.mak, e.g. handling fasm files etc.
+  the excursion via .. is probably superfluous for the LINAZIP files.
+  sortworddoc.frt must have $< instead of $^ , otherwise lina
+  and forth.lab are included in the sort.
+Checked in also in git.
+
+Default for lina64 increased to 64 Megabyte.
+Building with directory inside ciforth works and tested to generate
+the same files than the old target LINA64ZIP.
+
+What remains are officialdecompilation sortworddoc.frt is not up
+to date. spy is a scratch file.
+
+
+===========================
 Greg Egan
 Schild's ladder.
 --
+
+Get-file should check for memory overflow.
+In lina.html in the first screen a remark about concepts.
 
 Write the article for allocate using a objects and thingies.
 
@@ -14147,3 +14449,5 @@ issues:
 * maybe add INCLUDE to the kernel
 * -e in lina.1 should be the normal option.
   INCLUDE SEE LOCATE DUMP CASESENSITIVE
+- the definition generated by :R should be hidden.
+  then it can be redefined several times and RESTORED works.

@@ -1,6 +1,7 @@
 \ Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-\ $Id$
-\ Convert a text file to a .lab file.
+\ $Id: toblk.frt,v 5.5 2017/10/26 03:40:58 albert Exp $
+\ Convert a text file <arg1> to a .lab file.<arg2> .
+\ Without args act like a filter.
 
 \ Blocks with built in separators ciforth style.
 C/L 1- CONSTANT C/C     \ Content characters
@@ -53,10 +54,11 @@ VARIABLE LINE   0 LINE !
 VARIABLE INPUT        VARIABLE OUTPUT   1 OUTPUT !
 \ Check and open files passed as arguments, leaving in above variables.
 : GET-HANDLES
-    3 ARGC <> IF "Usage: toblock fromfile tofile" ERROR THEN
+    3 ARGC = IF
     1 ARG[] 0 OPEN-FILE THROW INPUT !
     2 ARG[] "" 2OVER PUT-FILE 1 OPEN-FILE THROW OUTPUT !
-;
+    ELSE 1 ARGC = IF   0 INPUT !   1 OUTPUT ! ELSE
+    "Usage: toblock [fromfile tofile]" ERROR THEN THEN ;
 
 \ Close the files passed as arguments, using above variables.
 : CLOSE-HANDLES INPUT @ CLOSE-FILE THROW OUTPUT @ CLOSE-FILE THROW ;
