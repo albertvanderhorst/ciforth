@@ -1,5 +1,5 @@
 dnl $Id$
-dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in _HEADER, because index must look in the real string,
@@ -94,8 +94,7 @@ define({_OFFSET},)dnl Ignore this design error altogether.
 define({QUAD},{QWORD})
 
 dnl Handling large blocks of comment
-define({_COMMENT},{%if 0})
-define({_ENDCOMMENT},{%endif})
+define({_COMMENTED},{%if 0}$1{%endif})
 define({SET_16_BIT_MODE},{BITS   16})
 define({SET_32_BIT_MODE},{BITS   32})
 define({SET_64_BIT_MODE},{BITS   64})

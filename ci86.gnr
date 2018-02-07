@@ -1,10 +1,10 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
-_C{ $Id: ci86.gnr,v 1.13 2017/03/31 09:45:32 albert Exp $}
+_C{ $Id: ci86.gnr,v 5.145 $}    
 _C{ Copyright (2012):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
- TITLE   ciforth $Revision: 1.13 $
+ TITLE   ciforth $Revision: 5.145 $
 _C
 _C{ For the generic system (to generate ciforth in an other configuration than this one):}
 _C{     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html}
@@ -48,7 +48,7 @@ _BITS16_({include(width16.m4)})
 _BITS32_({include(width32.m4)},{dnl})
 _BITS64_({include(width64.m4)},{dnl})
 _HEADER_ASM
-_COMMENT
+_COMMENTED({
         A generic version of ISO FORTH for IBM type standard PC's by
                 M4_SUPPLIER
 
@@ -105,7 +105,8 @@ credit notice:
                San Carlos, Ca.  94070
 [I feel obliged to keep this last one in (AH). Note that although it is
 based on fig-Forth no stone is left unturned.]
-_ENDCOMMENT
+})
+
         PAGE
 _C{ ########################################################################################}
 _C{                       PREPARATION (no code)}
@@ -202,9 +203,9 @@ _C
 })_C{}_END_({_CLASSIC_})
 _USEBIOS_({
 DRIVE   EQU     0       _C{ Use floppy A for blocks.}
-_COMMENT
+_COMMENTED({
 DRIVE   EQU     0x80     _C{ Use drive C for blocks.}
-_ENDCOMMENT
+})
 _C
 })_C{}_END_({_USEBIOS_})
 BPS     EQU     512             _C{Bytes/sector, common to all of MSDOS}
@@ -236,7 +237,7 @@ SECROOT EQU     0x0E   _C{ Sectors for root directory entry.}
 SECFAT  EQU     9     _C{ Sectors per FAT}
 MEDIA   EQU    0x0F0   _C{ Descriptor byte. Used for selecting between A: and C:.}
 
-_COMMENT
+_COMMENTED({
 _C{ FD drive 5" }
 TRKS    EQU     80      _C{Number of tracks}
 SPT     EQU     15      _C{Sectors/track}
@@ -245,9 +246,9 @@ NFAT    EQU     2       _C{ Number of FATS}
 SECROOT EQU     ?       _C{ Sectors for root directory entry.}
 SECFAT  EQU     7       _C{ Sectors per FAT}
 MEDIA   EQU    0x0F0     _C{ Descriptor byte. Used for selecting between A: and C:.}
-_ENDCOMMENT
+})
 
-_COMMENT
+_COMMENTED({
 _C{ Hard drive }
 _C{This works supposedly with all reasonably modern drives. }
 TRKS    EQU     1       _C{Number of tracks, dummy}
@@ -257,7 +258,7 @@ NFAT    EQU     2       _C{ Number of FATS}
 SECROOT EQU     0       _C{ Sectors for root directory entry, dummy.}
 SECFAT  EQU     0       _C{ Sectors per FAT, dummy}
 MEDIA   EQU    0x0F8     _C{ Descriptor byte. Used for selecting between A: and C:.}
-_ENDCOMMENT
+})
 
 _C{ Bios specific equates.}
 BOOTADDRESS     EQU     M4_BIOSBOOT _C{ PC jumps to 0:7C00 to boot}
@@ -1215,7 +1216,7 @@ _C{ ############################################################################
 _C
 dnl fasm has no multiline comments, which is appropiate for an assembler.
 dnl So the following is suppressed from the assembler file.
-_COMMENT
+_COMMENTED({
    FORTH REGISTERS
    The names under FORTH are used in the generic source.
 
@@ -1269,9 +1270,9 @@ dnl Note how the following is to pass through m4
 
 
 ----------------------------------------------------------
-_ENDCOMMENT
+})
         PAGE
-_COMMENT
+_COMMENTED({
 ---------------------------------------------
 
    COMMENT CONVENTIONS
@@ -1306,10 +1307,10 @@ _COMMENT
   HC          =  High cell
 
 ------------------------------------------------------------
-_ENDCOMMENT
+})
 _OLDDEBUG_({
         PAGE
-_COMMENT
+_COMMENTED({
              DEBUG SUPPORT
 
 THIS ROUTINE WILL ALLOW YOU TO STEP THRU FORTH PROGRAMS
@@ -1342,7 +1343,7 @@ NOTE:   THE ABOVE ADDRESSES CAN'T POINT TO A
         X = DON'T CARE
 
 -----------------------------------------------------
-_ENDCOMMENT
+})
 
 BIP     DC      0       _C{ BREAKPOINT START ADDRESS}
 BIPE    DC      0       _C{ BREAKPOINT END ADDR}
@@ -1407,10 +1408,10 @@ _C
 })_C{}_END_({_NEWDEBUG_ })
 })_C{}_END_({_PC_ })
 _C
-_OLDDEBUG_({ _COMMENT
+_OLDDEBUG_({ _COMMENTED({
     Patch the code from NEXT:  ( using a debugger ) with a
     `JMP TNEXT' for tracing through high level FORTH words.
-_ENDCOMMENT })_C{}_END_({_OLDDEBUG_ })
+}) })_C{}_END_({_OLDDEBUG_ })
 _C{ In 32 bit versions there may be no jumps to NEXT at all }
 _C{ The label NEXT1 is rarely relevant (for _OLDDEBUG_) }
 DPUSH:  PUSH    DX      _C{ Fall through.}
@@ -1681,14 +1682,14 @@ dnl Expect nothing to be typed, because the testing filters out RCS stuff.
 {{"VERSION" ENVIRONMENT? . CR TYPE },{_T_ }},
 enddoc)
 _HEADER({VERSION},{LVERSION},{DOCOL})
-_COMMENT
+_COMMENTED({
 _C{       If this is there it is an official release}
         DC      SKIP
         DC      22
 IBMPC:  DB      'IBM-PC ciforth'
         DB      FIGREL+0x40,ADOT,FIGREV+0x30,ADOT,USRVER+0x30
         DC      LIT, IBMPC, LIT, 22
-_ENDCOMMENT
+})
         _STRINGINLINE( M4_VERSION2)
         DC      SEMIS
 undefine({M4_VERSION2})dnl
@@ -2034,7 +2035,7 @@ DPA:    DC      INITDP  _C{      INIT (DP)     9}
         DC      _DEA(ENV) _C{       INIT (VOC-LINK) 10}
         DC      _CELLS(39+M4_MAXWORDLIST)  _C{ INIT (MAX-USER) 11}
 _CLASSIC_({
-_COMMENT
+_COMMENTED({
 _C{ This will steer clear of a forth executable, provided it is}
 _C{ the first file on the floppy. }
 _C{ (X-1)/S+1 rounds up to whole `S', this is used several times. }
@@ -2042,7 +2043,7 @@ _C{ The 2 is rounding plus the extra sector in .EXE files.}
 _C{ However it deviates much from the classic model and requires}
 _C{ that the disk parameters are available (not only for USEBIOS)}
         DC      (RELATIVE_WRT_ORIG(TEXTEND)-1)/KBBUF+1 _C{ +1 for EXE}
-_ENDCOMMENT
+})
 _C{ So for now just the classic, swap disk after booting.}
         DC      0       _C{ INIT (OFFSET) }
 })_C{}_END_({_CLASSIC_})
@@ -11245,7 +11246,7 @@ _LARGE_({
 })_C{}_END_({ _LARGE_})
 })_C{}_END_({ _EQULAYOUT_})
 
-_COMMENT
+_COMMENTED({
 
 The remaining memory ( up to 'EM' ) is
 used for:
@@ -11258,7 +11259,7 @@ used for:
         6. BUFFERS FOR SCREENS
 
 
-_ENDCOMMENT
+})
 
 _LAYOUTBYSECTION_({
 _C{       This is the proper way to do it.}
@@ -11299,7 +11300,7 @@ _BOOTED_({
         CSEG    ENDS
 })_C{}_END_({ _BOOTED_})
         PAGE
-_COMMENT
+_COMMENTED({
 
   MISC. NOTES AND SCATTERED THOUGHTS
 
@@ -11337,7 +11338,7 @@ _HOSTED_MSDOS_({
   Consider joining a FIG chapter.  See the back of FORTH
   Dimensions for more info.
 
-_ENDCOMMENT
+})
 
 _C{ Define the entry point, not valid for auto booting.}
         _ENDOFPROGRAM(_ORIG)

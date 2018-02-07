@@ -1,5 +1,5 @@
 dnl $Id$
-dnl Copyright(2011): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Macro's to adapt the source to Flat Assembler
 divert(-1)
 dnl Directives ignored by FASM.
@@ -87,13 +87,9 @@ define({QUAD},{QWORD})
 
 dnl Handling large blocks of comment
 dnl This just doesn't work, because fasm syntax checks the content.
-dnl define({_COMMENT},{        if 0
-dnl })
-dnl define({_ENDCOMMENT},{       end if
-dnl })
-dnl Last possibility of block comment, suppress it in output.
-define({_COMMENT},{_SUPPRESSED(})
-define({_ENDCOMMENT},{)})
+define({_COMMENTED},{patsubst({$1},{^},{;})})
+dnl Alternative if patsubst not available.
+dnl define({_COMMENTED},{_SUPPRESSED})
 define({_ENDOFPROGRAM},{
 _DLL_({
         ENTRY  $1

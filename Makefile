@@ -1,5 +1,5 @@
-# $Id: Makefile,v 5.51 2017/10/29 13:46:29 albert Exp $
-# Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
+# $Id: Makefile,v 5.52 $
+# Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # This defines the transformation from the generic file ci86.gnr
 # into a diversity of Intel 86 assembly sources, and further into
@@ -33,7 +33,7 @@
 
 # Normal use of m4
 M4=m4 -G ciforth.m4
-# Only needed for gas where we need the patsubst macro.
+# Needed for gas and fasm where we need the patsubst macro.
 M4_GNU=m4 ciforth.m4
 
 FORTH=./lina            # Our utility Forth.
@@ -278,7 +278,7 @@ ci86.%.msm : VERSION %.cfg masm.m4 ci86.gnr
 
 # Using FASM, generating a windows executable on linux.
 ci86.%.fas : VERSION %.cfg fasm.m4 ci86.gnr
-	cat $+ | $(M4) - >$(TEMPFILE)
+	cat $+ | $(M4_GNU) - >$(TEMPFILE)
 	sed $(TEMPFILE) -e '/Split here for doc/,$$d' \
 	>$@
 	sed $(TEMPFILE) -e '1,/Split here for doc/d' | \

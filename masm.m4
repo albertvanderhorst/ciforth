@@ -1,5 +1,5 @@
 dnl $Id$
-dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in _HEADER, because index must look in the real string,
@@ -41,12 +41,9 @@ define({_CELL_PTR},{WORD PTR})dnl Sometimes really needed even after introducing
 define({_OFFSET},OFFSET)dnl
 dnl
 dnl Handling large blocks of comment
-define({_COMMENT},COMMENT ~
-)dnl
-define({_ENDCOMMENT},~
-)dnl
+define({_COMMENTED},{COMMENT ~}$1{~})dnl
 define({_ENDOFPROGRAM},{
-        END $1 
+        END $1
 })dnl
 define({_ALIGN},{ALIGN    $1})dnl
 define({DSS},{DB})dnl
