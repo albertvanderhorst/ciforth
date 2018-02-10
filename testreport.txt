@@ -1,5 +1,6 @@
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
-# $Id$
+
+# $Id: testreport.txt,v 5.11 2017/12/19 20:00:44 albert Exp $
 Test report of generic forth's for Intel 86 family.
 First part for ISO forth's, in the appendix some figforth's.
 
@@ -91,7 +92,8 @@ F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
 After 5.62 : CASE-SENSITIVE WANT MEASURE-PRIME
 G (r. A) Editing a screen
 H After 5.62 : ``mywc *.asm''.
-J Binary equivalent than compiled on linux (for windows Forths and NASM)
+J Binary equivalent than compiled on linux (for windows Forths and
+  one of NASM and FASM)
 K BYE
 L Dos Directory correct
 M  Documentation complete
@@ -172,7 +174,8 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
-hosted_linux linux_64        5.3.0 lina32.cfg     lina64        ABCDEFHKMNOPR
+hosted_windows wina64        5.3.0 wina64.cfg     wina64        ABCDEF JKLMNOPR
+hosted_linux linux_32        5.3.0 lina32.cfg     lina32        ABCDEFHKMNOPR
 hosted_linux linux_64        5.3.0 lina64.cfg     lina64        ABCDEFHKMNOP-
 hosted_win32 windowsXP       5.2.0 wina.cfg       wina          ABCDEF--KMNOPRS
 hosted_osx   linux_32        5.2.0 xina.cfg       xina32        ABCDEFHKMNOPR

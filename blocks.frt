@@ -1,4 +1,4 @@
-  ciforth lab  $Revision$ (c) Albert van der Horst
+  ciforth lab  $Revision: 5.126 $ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -31,7 +31,7 @@
  : AS: COMMAERS IN WRONG ORDER
  : AS: DESIGN ERROR, INCOMPATIBLE MASK
  : AS: PREVIOUS OPCODE PLUS FIXUPS INCONSISTENT
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ : INPUT EXHAUSTED
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -462,9 +462,9 @@ DROP   CURRENT !
 
 
 
-( -tricky-control-                              ) \ AvdH B6jan6
+( -plain-control-                              ) \ AvdH B7dec20
  "CS-ROLL" WANTED     : (F (FORWARD _ ; : F) DROP FORWARD) ;
-                 : (B (BACK _ ;    : B) DROP BACK) ;
+                      : (B (BACK _ ;    : B) DROP BACK) ;
                : AHEAD  'BRANCH , (F ; IMMEDIATE
 'IF     HIDDEN : IF     '0BRANCH , (F ; IMMEDIATE
 'ELSE   HIDDEN : ELSE   'BRANCH , (F 1 CS-ROLL F) ; IMMEDIATE
@@ -478,7 +478,7 @@ DROP   CURRENT !
 '?DO    HIDDEN : ?DO    '(?DO) , (FORWARD (BACK ; IMMEDIATE
 'LOOP   HIDDEN : LOOP   '(LOOP) , BACK) FORWARD) ; IMMEDIATE
 '+LOOP  HIDDEN : +LOOP  '(+LOOP) , BACK) FORWARD) ; IMMEDIATE
-( 2>R 2R> 2R@ 2CONSTANT 2VARIABLE 2, )          \ AvdH B5Mar9
+( 2>R 2R> 2R@ 2CONSTANT 2VARIABLE )             \ AvdH B7Dec22
 
 
 
@@ -488,9 +488,9 @@ DROP   CURRENT !
 : 2R> POSTPONE R>  POSTPONE R> POSTPONE SWAP  ;  IMMEDIATE
 : 2R@ POSTPONE 2R> POSTPONE 2DUP POSTPONE 2>R ; IMMEDIATE
 
-: 2,   , , ;                            \ ISO
 : 2VARIABLE   DATA 0. 2, ;              \ ISO
 : 2CONSTANT   CREATE 2, DOES> 2@ ;      \ ISO
+
 
 
 \
@@ -526,6 +526,22 @@ DATA CR$ 1 , ^J C,
 \ Write a line from BUFFER COUNT characters to HANDLE.
 \ Leave actual ERROR.
 : WRITE-LINE '(WRITE-LINE) CATCH DUP IF >R 2DROP DROP R> THEN ;
+( INCLUDE-FILE include )                        \ AvdH B7dec20
+WANT R/W READ-LINE
+VARIABLE SOURCE-ID         0 SOURCE-ID !
+
+: REFILL SRC @ DUP B/BUF SOURCE-ID @ READ-LINE THROW >R
+   + SRC CELL+ !   SRC @ PP !  R> ;
+: NAME   BEGIN NAME DUP 0= WHILE 2DROP REFILL 0= IF 0.0 EXIT
+    THEN REPEAT ;
+
+: (INCLUDE-FILE)   BEGIN REFILL WHILE INTERPRET REPEAT ;
+: INCLUDE-FILE   SOURCE-ID @ >R SAVE   SOURCE-ID !
+    SOURCE-ID @ NEGATE DUP LOCK   (BUFFER) 2 CELLS + SRC !
+    '(INCLUDE-FILE) CATCH   SOURCE-ID @ NEGATE UNLOCK
+    RESTORE R> SOURCE-ID !   THROW   ;
+: include   NAME R/W OPEN-FILE THROW  DUP >R
+   'INCLUDE-FILE CATCH   R> CLOSE-FILE   SWAP THROW THROW ;
 ( COMPARE $= BOUNDS ALIGN UNUSED ) \ AvdH A1oct04
 \ ISO
  : COMPARE ROT 2DUP SWAP - >R
@@ -1282,7 +1298,7 @@ $1B CONSTANT ESC
  "2>R" WANTED       "MARKER" WANTED
 
 \ Like name but abort on eof.
-: _name NAME DUP 0= 13 ?ERROR ;
+: _name NAME DUP 0= 33 ?ERROR ;
 \ Skip words until and including STRING.
 : SCAN-WORD 2>R BEGIN BEGIN _name R@ <> WHILE DROP REPEAT
    2R@ CORA WHILE REPEAT RDROP RDROP ;
@@ -2062,8 +2078,8 @@ Tools and utilities
 
 
 
-( CASE-INSENSITIVE CASE-SENSITIVE CORA-IGNORE ) \ AvdH A7oct11
- "RESTORED" WANTED HEX
+( C=-IGNORE CORA-IGNORE ~MATCH-IGNORE CI-DIGIT )\ AvdH B7dec22
+HEX
 \ Characters ONE and TWO are equal, ignoring case.
 : C=-IGNORE DUP >R   XOR DUP 0= IF 0= ELSE
      20 <> IF 0 ELSE
@@ -2074,10 +2090,26 @@ Tools and utilities
 \ Caseinsensitive version of ~MATCH
 : ~MATCH-IGNORE   >R   2DUP   R@ >NFA @ $@   ROT MIN
     CORA-IGNORE   R> SWAP ;
+\ Case-insensitive alternative for DIGIT
+: CI-DIGIT   SWAP 20 OR "0123456789abcdefghijklmnopqrstuvwxyz"
+    OVER  >R ROT $^ R> - SWAP OVER > ;
+DECIMAL
+( CASE-INSENSITIVE CASE-SENSITIVE )             \ AvdH B7dec22
+WANT ~MATCH-IGNORE CI-DIGIT RESTORED" WANTED
+
 : CASE-SENSITIVE?  '~MATCH DUP >DFA @ SWAP >PHA = ;
+
 \ Install matchers
-: CASE-INSENSITIVE   '~MATCH-IGNORE >DFA @ '~MATCH >DFA ! ;
-: CASE-SENSITIVE '~MATCH RESTORED ; DECIMAL
+: CASE-INSENSITIVE   '~MATCH-IGNORE >DFA @ '~MATCH >DFA !
+  'CI-DIGIT 'DIGIT 3 CELLS MOVE ;
+
+: CASE-SENSITIVE   '~MATCH RESTORED
+    'DIGIT DUP >PHA SWAP >CFA ! ;
+
+
+
+
+
 ( DUMP )  "B." WANTED  HEX: \ AvdH A1oct02
  : TO-PRINT DUP DUP BL < SWAP 7F > OR IF DROP [CHAR] . THEN ;
  : .CHARS  [CHAR] | EMIT 0 DO DUP I + C@ TO-PRINT EMIT LOOP

@@ -6847,17 +6847,19 @@ _HEADER({EMPTY-BUFFERS},{MTBUF},{DOCOL})
 _C
 worddocsafe({BLOCKS~},{(BUFFER)},{paren_buffer},{n --- addr},{},
 {Return the addres forthvar({addr}) of a buffer assigned to
-block forthvar({n}) .
+identification forthvar({n}) , probably a block number.
 The buffer layout is as follows: a cell
-with the block number, a cell with the status, and the
-content. The status is negative for locked, zero for free and
-one for present and unlocked.
+with forthvar({n}), a cell with the status, and the
+content of length forthdefi({B/BUF}) .
+The status is negative for locked. The l.s.b. gives
+zero for free and one for valid data.
 The block is not read from the disc. The buffer
 is either one that was already assigned, or else a free buffer.
 If there is none free, some non-locked buffer is freed. The
 contents of that buffer is written to the disc, if it was
 marked as updated. In ciforth this is never needed, because
-updated blocks are written immediately. In ciforth blocks can
+updated blocks are written immediately.
+In ciforth blocks can
 be locked, and locked buffers are never freed by
 forthcode({(BUFFER)}) .
 _VERBOSE_({{An update flag would somehow be multiplexed with
@@ -6913,13 +6915,13 @@ enddoc)
 _HEADER({BLOCK},{BLOCK},{DOCOL})
 _FEWBLOCKS_({        DC      LIT, PMASK, LAND})
         DC      BUFFER
-        DC      LDUP, CELLP, FETCH, ZEQU
+        DC      LDUP, CELLP, FETCH, ONE, LAND, ZEQU
         _0BRANCH(BLOCK1)
         DC      LDUP, CELLP, CELLP
         DC      OVER, FETCH
         DC      LOFFSET,  FETCH, PLUS
         DC      BLREAD
-        DC      ONE, OVER, CELLP, STOR
+        DC      LDUP, CELLP , ONE, TOGGL
 BLOCK1:
         DC      LDUP, _PREV, STOR
         DC      CELLP, CELLP
@@ -7031,13 +7033,14 @@ _HEADER({RESTORE-INPUT},{RESTOI},{DOCOL})
 _C
 })_C{}_END_({_LOAD_})
 worddoc( {SCREEN},{LOCK},{lock},{ n ---},{CI},
-{Lock the block forthvar({n}).
+{Lock the buffer with identification forthvar({n}),
+mostly a block number.
 Multiple locks are possible, and require multiple unlocks.
 _VERBOSE_({{Probably, it
 is to become the }forthdefi({current input source}){.}})
 The result is that its buffer will not be reclaimed
 until an forthcode({UNLOCK}) occurs.},
-{{BLOCK},{UNLOCK},{#BUFF}},
+{{BLOCK},{(BUFFER}),{UNLOCK},{#BUFF}},
 { {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
     _PREV @ CELL+ @ . FLUSH _PREV @ CELL+ @ 0= .},{-1 _T_},
 { : test #BUFF 1+ 0 DO I LOCK LOOP ; test },
@@ -7046,26 +7049,27 @@ until an forthcode({UNLOCK}) occurs.},
 },
 enddoc)
 _HEADER({LOCK},{LLOCK},{DOCOL})
-        DC      BLOCK
-        DC      LIT, CW, LSUB
+        DC      BUFFER
+        DC      CELLP
         DC      LIT, -2, SWAP, PSTOR
         DC      SEMIS
 _C
 worddoc( {SCREEN},{UNLOCK},{unlock},{ n ---},{CI},
-{Unlock the block forthvar({n}).
+{Unlock the buffer with identification forthvar({n}),
+mostly a block number.
 _VERBOSE_({{Probably, because it
 is no longer the }forthdefi({current input source}){.}})
 The result is that its buffer can again be reclaimed.
 Unlocking without a previous lock may lead to a crash.
 },
-{{LOCK},{#BUFF}},
+{{LOCK},{(BUFFER)},{#BUFF}},
 {
 {EMPTY-BUFFERS 1 BLOCK DROP 1 LOCK dnl
  _PREV @ CELL+ @ . 1 UNLOCK _PREV @ CELL+ @ .},{-1 1} },
 enddoc)
 _HEADER({UNLOCK},{LUNLOCK},{DOCOL})
-        DC      BLOCK
-        DC      LIT, CW, LSUB
+        DC      BUFFER
+        DC      CELLP
         DC      TWO, SWAP, PSTOR
         DC      SEMIS
 _C
@@ -7075,11 +7079,25 @@ interpret screen forthvar({n}) .
 _VERBOSE_({{The stack changes in according with the words executed.}})
 At the end of the screen, barring errors or forced changes,
 it continues with the interrupted input source.},
-{{BLOCK},{#BUFF},{THRU},{QUIT},{EXIT},{-->},{LIST}},
+{{BLOCK},{LOCK},{#BUFF},{THRU},{QUIT},{EXIT},{-->},{LIST}},
 {{." interactive"},{interactive}},
 enddoc)
 _HEADER({LOAD},{LLOAD},{DOCOL})
-        DC      LDUP, THRU
+        DC      SAVE
+        DC      TOR
+        DC      RR, LIT, LLOCK, CATCH  _C{ Be careful about always unlocking.}
+        DC      LDUP, ZEQU
+        _0BRANCH(LOAD5)
+        DC      DROP
+        DC      RR, BLOCK     _C{ Can't fail anymore. }
+        DC      BBUF
+        DC      SETSRC
+        DC      LIT, INTER, CATCH
+        DC      RR, LUNLOCK
+LOAD5:
+        DC      RDROP
+        DC      RESTO
+        DC      THROW
         DC      SEMIS
 _C
 worddoc( {SCREEN},{THRU},,{n1 n2 --- ??},{ISO,FIG},
@@ -7093,29 +7111,12 @@ it continues with the interrupted input source.},
 {{." interactive"},{interactive}},
 enddoc)
 _HEADER({THRU},{THRU},{DOCOL})
-        DC      SAVE
         DC      ONEP, SWAP
         _DO(THRU2)
 THRU1:
-        DC      IDO
-        DC      LIT, LLOCK, CATCH  _C{ Be careful about always unlocking.}
-        DC      QDUP, ZEQU
-        _0BRANCH(THRU5)
-        DC      IDO, BLOCK     _C{ Can't fail anymore. }
-        DC      BBUF
-        DC      SETSRC
-        DC      LIT, INTER, CATCH
-        DC      IDO, LUNLOCK
-        DC      QDUP
-        _0BRANCH(THRU3)
-THRU5:
-        DC      RDROP, RDROP, RDROP _C{UNLOOP.}
-        DC      RESTO
-        DC      THROW
-THRU3:
+        DC      IDO, LLOAD
         _LOOP({THRU1})
 THRU2:
-        DC      RESTO
         DC      SEMIS
 _C
 _LOAD_({
