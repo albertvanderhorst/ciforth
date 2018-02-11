@@ -206,7 +206,7 @@ CREATE -syscalls- DECIMAL
 \ \ Use L_>IN instead of >IN , don't store into it!
 \ : L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
 \ 'L_>IN ALIAS >IN
-( -legacy- VOCABULARY )                        \ AvdH B5dec01
+( -traditional- VOCABULARY )                    \ AvdH B8feb11
 \ Use replacing vocabularies instead of pushing namespaces.
 
 : FORTH   CONTEXT @ 'ONLY >WID <> IF PREVIOUS THEN FORTH ;
@@ -222,7 +222,7 @@ ALSO    \ Start up with two FORTH namespaces.
 
 
 
-\ -legacy- WORD FIND (WORD) (PARSE)             \ AvdH B2oct02
+\ -traditional- WORD FIND (WORD) (PARSE)       \ AvdH B8feb11
  "ALIAS" WANTED       "$!-BD" WANTED
 \ ISO
 : FIND   DUP COUNT PRESENT DUP IF   NIP DUP SWAP
@@ -238,7 +238,7 @@ ALSO    \ Start up with two FORTH namespaces.
 
 
 
-\ -legacy- ?LOADING ?EXEC                       \ AvdH B2oct02
+\ -traditional- ?LOADING ?EXEC               \ AvdH B8feb11  
 
 
 
@@ -253,7 +253,23 @@ ALSO    \ Start up with two FORTH namespaces.
 : ?EXEC   STATE @   12 ?ERROR ;
 : ?LOADING   BLK   @   0=   16 ?ERROR ;
 
-CREATE -legacy-     \ Last legacy block!
+\
+\ -traditional-                              \ AvdH B8feb11  
+\ This last block belonging to traditional restores
+\ meta-behaviour that is traditionally expected.
+
+WANT INCLUDE-FILE
+WANT -plain-control- 
+
+
+
+
+
+
+
+
+
+CREATE -traditional-     \ Last legacy block!
 ( **************ISO language extension ***********************)
                     EXIT
 
@@ -1001,7 +1017,7 @@ VARIABLE _m ( Modulo number)   WANT XGCD
 : %:m  S>D _m @ SM/REM DROP _norm_-m  ;  ( a -- an)
 
 \ Both steps: For A B and C: return A B en C.  Invariant A*B^C.
-: _reduce_1-  1- >R >R    R@ *m   R> R> ;                      
+: _reduce_1-  1- >R >R    R@ *m   R> R> ;
 : _reduce_2/  2/ >R    DUP *m        R> ;
 : **m    1 ROT ROT BEGIN   DUP 1 AND IF   _reduce_1-   THEN
     _reduce_2/ DUP 0= UNTIL   2DROP   ;  ( a b -- apowbn )
@@ -2094,8 +2110,8 @@ HEX
 : CI-DIGIT   SWAP 20 OR "0123456789abcdefghijklmnopqrstuvwxyz"
     OVER  >R ROT $^ R> - SWAP OVER > ;
 DECIMAL
-( CASE-INSENSITIVE CASE-SENSITIVE )             \ AvdH B7dec22
-WANT ~MATCH-IGNORE CI-DIGIT RESTORED" WANTED
+( CASE-INSENSITIVE CASE-SENSITIVE )             \ AvdH B8feb7
+WANT ~MATCH-IGNORE CI-DIGIT RESTORED
 
 : CASE-SENSITIVE?  '~MATCH DUP >DFA @ SWAP >PHA = ;
 
