@@ -1,0 +1,7 @@
+#
+# What git may ignore
+#
+Makefile
+VERSION
+#
+# l l
