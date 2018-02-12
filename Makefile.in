@@ -232,6 +232,9 @@ $(EXAMPLESRC) \
 #ci86.lina64.fas \
 # That's all folks!
 
+@MY_NAME@: ci86.gnr stealconstant VERSION
+	echo not yet beyond voodoo  :-)
+
 VERSION:;echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
 
 TEMPFILE=/tmp/ciforthscratch
@@ -482,7 +485,7 @@ flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
 # Convenience under linux's and osx.
 # Steal the definitions of constants from c include's.
-stealconstant: stealconstant.c ;  \
+stealconstant: @MY_STEALC@.c ;  \
     cc $+ -o stealconstant
 
 # Build these only on the linux 32 ,linux 64, osx target,
