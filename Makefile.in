@@ -1,4 +1,4 @@
-# $Id: Makefile,v 5.51 2017/10/29 13:46:29 albert Exp $
+#
 # Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # This defines the transformation from the generic file ci86.gnr
