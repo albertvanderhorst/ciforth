@@ -1,9 +1,13 @@
 #
 # What git may ignore
 #
+ci86.*.*as*
+ci86.*.rawdoc
+ci86.*.rawtest
 constant.m4
 namescooked.m4
 Makefile
+stealconstant
 VERSION
 #
 # l l
