@@ -1,0 +1,9 @@
+#
+# What git may ignore
+#
+constant.m4
+namescooked.m4
+Makefile
+VERSION
+#
+# l l
