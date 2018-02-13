@@ -232,6 +232,14 @@ $(EXAMPLESRC) \
 #ci86.lina64.fas \
 # That's all folks!
 
+@MY_NAME@: \
+  constant.m4 \
+  namescooked.m4 \
+  VERSION \
+  ci86.@MY_NAME@.fas \
+  ci86.gnr
+	echo FIXME fasm -o $@ ci86.@MY_NAME@.fas -m256000 FIXME > $@
+
 VERSION:;echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
 
 TEMPFILE=/tmp/ciforthscratch
@@ -311,9 +319,9 @@ toblk: toblk.frt $(FORTH)
 
 
 # Canonical targets
-lina   : ci86.lina.fas   ; fasm $+ -m256000; mv ${<:.fas=} $@
-lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
-lina64 : ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+## lina   : ci86.lina.fas   ; fasm $+ -m256000; mv ${<:.fas=} $@
+## lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+## lina64 : ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 #lina: lina64 ; $< -g 8000 $@
 wina.exe: ci86.wina.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
 
@@ -482,12 +490,13 @@ flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
 # Convenience under linux's and osx.
 # Steal the definitions of constants from c include's.
-stealconstant: stealconstant.c ;  \
+stealconstant: @MY_STEALC@.c ;  \
     cc $+ -o stealconstant
 
 # Build these only on the linux 32 ,linux 64, osx target,
 # otherwise consider the constantxx files sources.
-constant.m4 : stealconstant ; $+ >$@
+constant.m4: stealconstant
+	./stealconstant > $@
 #constant_64.m4 : stealconstant_64; $+ >$@
 #constant_osx.m4 : stealconstant_osx ; $+ >$@
 
