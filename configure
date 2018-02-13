@@ -7,7 +7,7 @@
 #
 FND_OS=$( uname )
 case $( arch ) in
-  (i.86)
+  (i?86)
     FND_BITNESS=32
   ;;
   (x86_64)
