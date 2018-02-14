@@ -1,19 +1,17 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
-_C{ $Id: ci86.gnr,v 5.145 $}    
+_C{ $Id: ci86.gnr,v 5.156 2018/02/14 02:24:04 albert Exp $}
 _C{ Copyright (2012):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
- TITLE   ciforth $Revision: 5.145 $
+ TITLE   ciforth $Revision: 5.156 $
 _C
 _C{ For the generic system (to generate ciforth in an other configuration than this one):}
 _C{     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html}
 _C
-_C{ If this is a configured assembly file, it should be accompanied with configured}
-_C{ documentation (texinfo, ps, html.)}
-_C{ WITHOUT THE DOCUMENTATION: GIVE UP! GET THE REAL THING!}
-_C{ You have a configured system, if there are NO curly brackets on the next line.}
-_C{ } {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {} {}
+_C{ The following configuration information should agree with the configuration}
+_C{ on the frontpage of your docmentation (texinfo, ps, pdf.)}
+_C{ WITHOUT FITTING DOCUMENTATION YOU MIGHT AS WELL GIVE UP! }
 _C
 _C{ Configuration of this particular version:}
 _C _BITS_{}-bits _REAL_({real mode })_PROTECTED_({protected mode })
@@ -3045,7 +3043,7 @@ _BITS32_({
 })_C{}_END_({_BITS32_})
 })_C{}_END_({_BITS64_})
 _C
-worddoc( {DEFINING},{:},{colon},{},{ISO,FIG,E},
+worddoc( {DEFINING},{colon},{colon},{},{ISO,FIG,E},
 {Used in the form called a colon-definition:
 forthexample({: cccc     ...     ;})
 Creates a dictionary entry defining forthsamp({cccc}) as equivalent to the
@@ -3227,7 +3225,9 @@ enddoc)
 _HEADER({BL},{LBL},{DOCON}, ABL)
 _C
 worddocsafe( {STRING},{$@@},{string_fetch},{addr --- sc},{},
-{ From address forthvar({addr}) fetch a forthdefin({string constant}) forthvar({sc}) .},
+{ From address forthvar({addr}) fetch a forthdefin({string constant}) forthvar({sc}) .
+This is similar to forthcode({COUNT}) with a cell-length instead of a char-length.
+},
 {{$!},{$+!},{$C+}},
 {{ HEX 4 , 41 C, 39 C, 45 C, 30 C, HERE 4 CELL+ - $@ TYPE},{A9E0}}, enddoc)
 _C
@@ -3275,7 +3275,7 @@ _C
 worddoc( {STRING},{$C+},{char_append},{c addr ---},{},
 {Append a char forthvar({c})
 to the string variable at address forthvar({addr}).},
-{{$@@},{$!},{$+!}},
+{{$!},{$+!},{&},{^},{CHAR}},
 {{ HEX 2 , 41 C, 39 C, HERE 2 CELL+ -  dnl
 $@ PAD $! HERE 1 - C@ PAD $C+ PAD $@ TYPE},{A99}}, enddoc)
 _HEADER({$C+},{CHAPP},{DOCOL})
@@ -3872,6 +3872,21 @@ _HEADER({C,},{CCOMM},{DOCOL})
         DC      ONE
         DC      ALLOT
         DC      CSTOR
+        DC      SEMIS
+_C
+worddocsafe( {DICTIONARY},{2,},{two_comma},{d ---},{ISO,FIG},
+{Store the most significand cell of forthvar({d}) into the next available dictionary
+cell, advancing
+the forthdefi({dictionary pointer}), then the least significand one.
+. },{{DP},{,}},
+{{HERE 62. 2, DUP $@ . @ . CELL+ CELL+  HERE = .},{0 62 _T_}},
+enddoc)
+_HEADER({2,},{TCOMM},{DOCOL})
+        DC      HERE
+        DC      LIT
+        DC      CW*2
+        DC      ALLOT
+        DC      TSTOR
         DC      SEMIS
 _C
 worddoc( {OPERATOR},{-},{minus_sign},{n1 n2 --- diff},{ISO,FIG},
@@ -6159,11 +6174,11 @@ _BLOCKSINFILE_({
         DC      MTBUF
 })_C{}_END_({_BLOCKSINFILE_})
 _DLL_({
-        DC      ICALLOPEN, LIT, STD_INPUT_HANDLE, PAR1, LIT, _GetStdHandle@4, ICALLCLOSE
+        DC      CALLOPEN, LIT, STD_INPUT_HANDLE, PAR1, LIT, _GetStdHandle@4, ICALLCLOSE
         DC      LIT, STDIN+(CW*(D_HOFFSET)), STOR
-        DC      ICALLOPEN, LIT, STD_OUTPUT_HANDLE, PAR1, LIT, _GetStdHandle@4, ICALLCLOSE
+        DC      CALLOPEN, LIT, STD_OUTPUT_HANDLE, PAR1, LIT, _GetStdHandle@4, ICALLCLOSE
         DC      LIT, STDOUT+(CW*(D_HOFFSET)), STOR
-        DC      ICALLOPEN, LIT, STD_ERROR_HANDLE, PAR1, LIT, _GetStdHandle@4, ICALLCLOSE
+        DC      CALLOPEN, LIT, STD_ERROR_HANDLE, PAR1, LIT, _GetStdHandle@4, ICALLCLOSE
         DC      LIT, STDERR+(CW*(D_HOFFSET)), STOR
 })_C{}_END_({_DLL_})
         DC      SEMIS
@@ -6179,7 +6194,7 @@ until the program is run, you can't do it at compile time.
  { "GetLastError" K32 DLL-ADDRESS 0= . },{0} },
 enddoc)
 _HEADER({LOAD-DLL},{LOLI},{DOCOL} )
-        DC      ICALLOPEN, ZEN, PAR1
+        DC      CALLOPEN, ZEN, PAR1
         DC      LIT, _LoadLibraryA@4, ICALLCLOSE
         DC      LDUP, TOERR, THROW
         DC      SEMIS
@@ -6187,11 +6202,17 @@ _C
 worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ --- sc },{},
 {forthvar({sc}) is the command line with which this forth is invoked. },
 {},
+_BITS32_({
 {{ COMMAND-LINE TYPE }, {wina.exe},
  { LAST-ERROR .}, {0} },
+})
+_BITS64_({
+{{ COMMAND-LINE TYPE }, {wina64.exe},
+ { LAST-ERROR .}, {0} },
+})
 enddoc)
 _HEADER({COMMAND-LINE},{LCOMMAND},{DOCOL} )
-        DC      ICALLOPEN, LIT, _GetCommandLineA@0, ICALLCLOSE
+        DC      CALLOPEN, LIT, _GetCommandLineA@0, ICALLCLOSE
         DC      ZERO, INVERT, ZERO
         DC      SSLAS, TSWAP, TDROP
         DC      SEMIS
@@ -6204,7 +6225,7 @@ Provide it with correct parameters and you can use it with forthcode({CALL}).
 { {." See LOAD-DLL"},{See LOAD-DLL} },
 enddoc)
 _HEADER({DLL-ADDRESS},{DLLADR},{DOCOL})
-        DC      ICALLOPEN, PAR1, ZEN, PAR2
+        DC      CALLOPEN, PAR1, ZEN, PAR2
         DC      LIT, _GetProcAddress@8, ICALLCLOSE
         DC      LDUP, TOERR, THROW
         DC      SEMIS
@@ -6220,7 +6241,7 @@ or a non-zero value, or by resetting this global variable to zero.
 {{ LAST-ERROR .},{0} },
 enddoc)
 _HEADER({LAST-ERROR},{GLE},{DOCOL})
-        DC      ICALLOPEN, LIT, _GetLastError@0, ICALLCLOSE
+        DC      CALLOPEN, LIT, _GetLastError@0, ICALLCLOSE
         DC      SEMIS
 _C
 worddoc( {ERRORS},{>ERROR},{query_error_windows},{n --- err},{},
@@ -6252,19 +6273,22 @@ _C
 worddoc( {OUTPUT},{STDIN},{standard_in},{ --- n},{},
 {The handle to the file input buffer for the console.
 },{},
-{{ STDIN 100 < . },{_T_} },
+_BITS32_({ {{ STDIN 100 < . },{_T_} }, })
+_BITS64_({ {{ STDIN 1000 < . },{_T_} }, })
 enddoc)
 _HEADER({STDIN},{STDIN},{DOCON}, 0)
 _C
 worddoc( {OUTPUT},{STDOUT},{standard_out},{ --- n},{},
 {The file descriptior for standard output at the console.},{},
-{{ STDOUT 100 < . },{_T_} },
+_BITS32_({ {{ STDOUT 100 < . },{_T_} }, })
+_BITS64_({ {{ STDOUT 1000 < . },{_T_} }, })
 enddoc)
 _HEADER({STDOUT},{STDOUT},{DOCON}, 1 )
 _C
 worddoc( {OUTPUT},{STDERR},{standard_err},{ --- n},{},
 {The file descriptior for standard error output at the console.},{},
-{{ STDERR 100 < . },{_T_} },
+_BITS32_({ {{ STDERR 100 < . },{_T_} }, })
+_BITS64_({ {{ STDERR 1000 < . },{_T_} }, })
 enddoc)
 _HEADER({STDERR},{STDERR},{DOCON}, 2)
 })_C{}_END_({_DLL_})
@@ -7813,6 +7837,7 @@ worddoc( {OPERATINGSYSTEM},{ZEN},{zren},{sc --- addr},{},
 forthvar({sc}).
 The same buffer (in fact forthcode({RW-BUFFER})) is reused,
 such that this word is not reentrant.
+The size available is SIZE_RWBUF minus one for the zero character.
 _VERBOSE_({{Use the word immediately, its intended used is
 passing parameters to the operating system. }})
 _HOSTED_DPMI_({{The result is present in the "real" segment, such that this address
@@ -7878,17 +7903,20 @@ dnl This must be the first of the file test! hello.frt is used.
 {{OPEN-FILE},{READ-FILE},{REPOSITION-FILE},{BLOCK-WRITE}},
 _PC_({
 { { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE .},{0},
+{"""Hello world!"" TYPE" FD WRITE-FILE .},{0},
+{^M PAD C! ^J PAD 1+ C! PAD 2 FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
 })
 _HOSTED_X_({
 { { "hello.frt" 8 BASE ! 644 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE .},{0},
+{"""Hello world!"" TYPE" FD WRITE-FILE .},{0},
+{^J PAD C! PAD 1 FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
 })
 _DLL_({
 { { "hello.frt" 2 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE-FILE .},{0},
+{"""Hello world!"" TYPE" FD WRITE-FILE .},{0},
+{^M PAD C! ^J PAD 1+ C! PAD 2 FD WRITE-FILE .},{0},
 {FD CLOSE-FILE .},{0} },
 })
 enddoc)
@@ -7901,7 +7929,7 @@ _HEADER({WRITE-FILE},{WFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({WRITE-FILE},{WFILE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      PAR1             ;   hFile: dword;
         DC      PAR3     ; nNumberOfBytesToWrite: dword;
         DC      PAR2       ; var lpBuffer: var;
@@ -7976,7 +8004,7 @@ OFIL1:
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({OPEN-FILE},{OFILE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      LIT, GENERIC_READ, LOR, PAR2 ; OR 8000H
         DC      ZEN, PAR1
         DC      LIT, FILE_SHARE_READ, PAR3
@@ -8016,7 +8044,7 @@ _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({CLOSE-FILE},{CFILE},{DOCOL})
-        DC      ICALLOPEN, PAR1, LIT, CloseHandle, ICALLCLOSE
+        DC      CALLOPEN, PAR1, LIT, CloseHandle, ICALLCLOSE
         DC      ZEQU, TOERR
         DC      SEMIS
 })_C{}_END_({_DLL_})
@@ -8032,25 +8060,27 @@ CFILE2:
         DC      SEMIS
 })_C{}_END_({_MODERN_})
 _C
-worddoc( {FILES},{CREATE-FILE}, {create_file},{sc u --- fileid ior }, {ISO},
+_HOSTED_OSX_({
+worddoc( {FILES},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO},
 {_MODERN_({ Create a file with name forthvar({sc}) and
-properties forthvar({u}), for normal files this is just 0.})
+access method forthvar({fam}), for normal files this is just 0.})
 _PC_({The meaning is to be found in the MSDOS programmers
 manual at INT 21h function 3Ch "Create file with handle"}).
 _HOSTED_({ Create a file with name forthvar({sc}) and file
-access privileges forthvar({u}) })
+access method forthvar({fam}) })
 If the file already exists,
 it is truncated to zero length. Return a file handle into
 forthvar({fileid}) and a result code into forthvar({ior}).
 The latter is the _PC_({ MSDOS}) _HOSTED_X_({
 forthvar({errno}) }) negated, to be inspected using
 forthcode({MESSAGE}) .
-The handle is open for READ_WRITE. },
+_HOSTED_LINUX_({ The handle is open for READ_WRITE, so forthvar({fam}) is
+in fact ignored. The access privileges default to octal 755. })
+},
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{DELETE-FILE}},
 {{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
 {CLOSE-FILE .},{0}},
 enddoc)
-_HOSTED_OSX_({
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, TDUP, DFILE, DROP
         DD      ZEN, LIT, O_CREAT|O_WRONLY|O_TRUNC, FROMR
@@ -8059,16 +8089,55 @@ _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      SEMIS
 })_C{}_END_({_HOSTED_OSX_})
 _HOSTED_LINUX_({
+worddoc( {FILES},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO},
+{ Create a file with name forthvar({sc}) and file
+access method forthvar({fam}) .
+If the file already exists,
+it is truncated to zero length. Return a file handle into
+forthvar({fileid}) and a result code into forthvar({ior}).
+The latter is the forthvar({errno})  negated, to be inspected using
+forthcode({MESSAGE}) .
+ The handle is open for READ_WRITE, so forthvar({fam}) is
+in fact ignored.
+The access privileges default to octal 755.
+This can be changed by applying forthcode({mask 8 LSHIFT OR}) where
+ forthcode({mask}) contains the privilege bits one wants to change.
+},
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{DELETE-FILE}},
+{{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
+{CLOSE-FILE .},{0}},
+enddoc)
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
-        DC      TOR, TDUP, DFILE, DROP
-        DC      ZEN, FROMR, X
+        DC      TOR, TDUP, DFILE, DROP, ZEN
+        DC      LIT, _O(755), FROMR, LIT, 8, RSHIFT, LXOR
+        DC      X
         DC      LIT, creat, XOS
         DC      LDUP, ZERO, MAX, SWAP, ZERO, MIN
         DC      SEMIS
 })_C{}_END_({_HOSTED_LINUX_})
 _DLL_({
+worddoc( {FILES},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO},
+{_MODERN_({ Create a file with name forthvar({sc}) and
+access method forthvar({fam}), for normal files this is just 0.})
+_PC_({The meaning is to be found in the MSDOS programmers
+manual at INT 21h function 3Ch "Create file with handle"}).
+_HOSTED_({ Create a file with name forthvar({sc}) and file
+access method forthvar({fam}) })
+If the file already exists,
+it is truncated to zero length. Return a file handle into
+forthvar({fileid}) and a result code into forthvar({ior}).
+The latter is the _PC_({ MSDOS}) _HOSTED_X_({
+forthvar({errno}) }) negated, to be inspected using
+forthcode({MESSAGE}) .
+_HOSTED_LINUX_({ The handle is open for READ_WRITE, so forthvar({fam}) is
+in fact ignored. The access privileges default to octal 755. })
+},
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{DELETE-FILE}},
+{{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
+{CLOSE-FILE .},{0}},
+enddoc)
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
-        DC      ICALLOPEN, DROP
+        DC      CALLOPEN, DROP
         DC      ZEN, PAR1
         DC      LIT, GENERIC_WRITE, PAR2
         DC      LIT, FILE_SHARE_READ, PAR3
@@ -8081,6 +8150,26 @@ _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _MODERN_({
+worddoc( {FILES},{CREATE-FILE}, {create_file},{sc fam --- fileid ior }, {ISO},
+{_MODERN_({ Create a file with name forthvar({sc}) and
+access method forthvar({fam}), for normal files this is just 0.})
+_PC_({The meaning is to be found in the MSDOS programmers
+manual at INT 21h function 3Ch "Create file with handle"}).
+_HOSTED_({ Create a file with name forthvar({sc}) and file
+access method forthvar({fam}) })
+If the file already exists,
+it is truncated to zero length. Return a file handle into
+forthvar({fileid}) and a result code into forthvar({ior}).
+The latter is the _PC_({ MSDOS}) _HOSTED_X_({
+forthvar({errno}) }) negated, to be inspected using
+forthcode({MESSAGE}) .
+_HOSTED_LINUX_({ The handle is open for READ_WRITE, so forthvar({fam}) is
+in fact ignored. The access privileges default to octal 755. })
+},
+{{OPEN-FILE},{READ-FILE},{WRITE-FILE},{DELETE-FILE}},
+{{"AAP" 0 CREATE-FILE . DUP 0 > . },{0 _T_},
+{CLOSE-FILE .},{0}},
+enddoc)
 _HEADER({CREATE-FILE},{CREATEF},{DOCOL})
         DC      TOR, ZEN, FROMR, X
         DC      LIT, create, BDOSN
@@ -8113,7 +8202,7 @@ _HEADER({DELETE-FILE},{DFILE},{DOCOL})
 })_C{}_END_({_HOSTED_X_})
 _DLL_({
 _HEADER({DELETE-FILE},{DFILE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      ZEN, PAR1
         DC      LIT, _DeleteFileA@4, ICALLCLOSE
         DC      ZEQU, TOERR
@@ -8140,7 +8229,7 @@ error code negated, usable as a throw code. },
 {{OPEN-FILE},{WRITE-FILE},{REPOSITION-FILE},{BLOCK-READ}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD FD 0 > . },{0 _T_},
-{PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 ." Hello world!"},
+{PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 "Hello world!" TYPE},
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
@@ -8153,7 +8242,7 @@ _HEADER({READ-FILE},{RFILE},{DOCOL})
 })_C{}_END_({ _HOSTED_X_})
 _DLL_({
 _HEADER({READ-FILE},{RFILE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      PAR1            ; hFile: dword;
         DC      PAR3            ; nNumberOfBytesToRead: dword;
         DC      PAR2            ; lpBuffer: var;
@@ -8208,7 +8297,7 @@ error codes can be found by forthcode({MESSAGE}). },
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD },{0 },
 {5. FD REPOSITION-FILE .},{0},
-{PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 llo world!"},
+{PAD 1024 FD READ-FILE . PAD SWAP TYPE },{0 o world!" TYPE},
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
@@ -8231,7 +8320,7 @@ _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
 })_C{}_END_({_HOSTED_OSX_})
 _DLL_({
 _HEADER({REPOSITION-FILE},{PFILE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      PAR1
         DC      DROP, PAR2       _C{Convert to single precision.}
         DC      ZERO, PAR3
@@ -8259,7 +8348,7 @@ worddoc( {FILES},{READ}, {read}, {addr n1 fd --- n2 ior }, {ISO},
 {{READ-FILE}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD FD 0 > . },{0 _T_},
-{PAD 1024 FD READ . PAD SWAP TYPE },{0 ." Hello world!"},
+{PAD 1024 FD READ . PAD SWAP TYPE },{0 "Hello world!" TYPE},
 {FD CLOSE-FILE .},{0}
 },
 enddoc)
@@ -8283,7 +8372,8 @@ worddoc( {FILES},{WRITE}, {write},{addr n fd --- u1 }, {ISO},
 },
 {{RW-BUFFER}},
 { { "hello.frt" 0 CREATE-FILE . CONSTANT FD },{0 },
-{"."" Hello world!""" FD WRITE .},{0},
+{"""Hello world!"" TYPE" FD WRITE .},{0},
+{^M PAD C! ^J PAD 1+ C! PAD 2 FD WRITE .},{0},
 {FD CLOSE-FILE .},{0} },
 enddoc)
 _HEADER({WRITE},{LWRITE},{DOCOL})
@@ -8306,7 +8396,7 @@ leave it as a string forthvar({sc2}). Any errors are thrown.
 The file is permanently stored at forthcode({HERE}) .
 },
 {{PUT-FILE},{OPEN-FILE},{THROW}},
-{{"hello.frt" GET-FILE TYPE },{." Hello world!"}},
+{{"hello.frt" GET-FILE TYPE },{"Hello world!" TYPE}},
 enddoc)
 _HEADER({GET-FILE},{GETFILE},DOCOL)
         DC      TDUP, SCOMMA, DROP
@@ -8328,7 +8418,7 @@ the name forthvar({sc2}). Any errors are thrown. },
 {{"CONTENT" "orang" PUT-FILE "orang" GET-FILE TYPE },{CONTENT}},
 enddoc)
 _HEADER({PUT-FILE},{PUTFILE},DOCOL)
-        DC      _PC_({{ZERO}})_HOSTED_X_({LIT, _O(755)})_DLL_({ZERO})
+        DC      ZERO
         DC      CREATEF, THROW
         DC      LDUP, TOR
         DC      WFILE, THROW
@@ -8794,7 +8884,7 @@ forthemph({_BITS64_({KERNEL32.DLL})_BITS32_({KERNEL32.DLL})})
 },
 {{GET-MODE},{KEY?}}, {}, enddoc)
 _HEADER({SET-MODE},{SETMODE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      STDIN, PAR1
         DC      PAR2
         DC      LIT, _SetConsoleMode@8, ICALLCLOSE
@@ -8809,7 +8899,7 @@ forthemph({_BITS64_({KERNEL32.DLL})_BITS32_({KERNEL32.DLL})}).
 {{SET-MODE},{KEY?}}, {}, enddoc)
 _C
 _HEADER({GET-MODE},{GETMODE},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      STDIN, PAR1
         DC      X, SPFET,  PAR2
         DC      LIT, _GetConsoleMode@8, ICALLCLOSE
@@ -8824,7 +8914,7 @@ worddoc( {INPUT},{KEY},{key},{--- c},{ISO,FIG},
 _HEADER({KEY},{KEY},{DOCOL})
         DC      GETMODE, TOR, ZERO, SETMODE  _C{ Raw mode.}
 
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      STDIN, PAR1
         DC      ZERO, SPFET, PAR2
         DC      ONE, PAR3
@@ -8841,7 +8931,7 @@ worddoc( {INPUT},{KEY?},{key_question},{--- f},{ISO},
 Any key pressed is interpreted as such and the key is not consumed.
 A non-zero flag indicates actuation. },{{KEY},{ACCEPT}}, {}, enddoc)
 _HEADER({KEY?},{KEYQ},DOCOL)
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      X, SPFET, PAR4       _C{ 4: Result buffer of length.}
         DC      ONE, PAR3, RWBUF, PAR2, STDIN, PAR1   _C{ 3..1 }
         DC      LIT, _PeekConsoleInputA@16, ICALLCLOSE
@@ -8924,23 +9014,30 @@ worddoc( {OPERATINGSYSTEM},{MS},{millisecond},{n ---},{ISO},
 {{ 123 10 MS . },{123}},
 enddoc)
 _HEADER({MS},{MS},{DOCOL})
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      PAR1
         DC      LIT, _Sleep@4, ICALLCLOSE
         DC      DROP
         DC      SEMIS
 })_C{}_END_({_DLL_})
 _DLL_({
-worddoc( {OPERATINGSYSTEM},{ICALL[}, {icallopen}, { --- }, {},
-{ Reserve 256 bytes on the stack to be handed to MS-Windows.
-A pointer to there is stored in forthdefi({PARS}) },
-{{PAR1},{PAR2},{PAR3},{PAR4},{PARI},{ICALL]}},
+worddoc( {OPERATINGSYSTEM},{CALL[}, {icallopen}, { --- }, {},
+{ Reserve 256 bytes to serve as an MS-Windows stack frame
+in behalf of calling an externally supplied subroutine.
+A pointer to there is stored in forthdefi({PARS}).
+The parameters are fille with forthcode({PAR1}) etc. and then a
+direct or indirect call is executed
+_BITS64_({It takes care that it is aligned at a 16-byte boundary,
+which is required for 64-bits.})
+It may be closed by either forthcode({ICALL]}) or forthcode({CALL]})
+},
+{{PAR1},{PAR2},{PAR4},{PARI},{ICALL]},{CALL]} },
 {
-{ ICALL[ DSP@ PARS @ - 0FE 102 WITHIN .}, {_T_}
+{ CALL[ DSP@ PARS @ - 0FE 102 WITHIN .}, {_T_}
 },
 enddoc)
 
-_HEADER({ICALL[},{ICALLOPEN},{DOCOL})
+_HEADER({CALL[},{CALLOPEN},{DOCOL})
          DC      SPFET,  LIT, 256, LSUB
 _BITS64_({         DC      LIT, -16, LAND},{dnl})
          DC      PARS, STOR
@@ -8984,18 +9081,23 @@ _HEADER({PARI},{PARI},{DOCOL})
         DC      ONEM, LCELLS, PARS, FETCH, PLUS, STOR
         DC      SEMIS
 
-worddoc( {OPERATINGSYSTEM},{ICALL]}, {indirect_call_close}, { addr --- ior }, {},
+worddoc( {OPERATINGSYSTEM},{ICALL]}, {indirect_call_close}, { addr --- u }, {},
 { Execute an indirect call to forthvar({addr}).
-This is probably an external subroutine, supplied via a DLL that is
-directly linked, not fetched via forthcode({DLL-ADDRESS}).
-The stack at forthdefi({PARS}) must be filled with its parameters.
+This is probably an external subroutine, whose addres is filled in
+in the header of the executable during start up,
+not fetched via forthcode({DLL-ADDRESS}).
+It is an indirect call because the external subroutines address is
+filled in into the header at startup.
+The stack frame at forthdefi({PARS}) must be filled with its parameters.
 The call is given PARS as its stack pointer, and immediately there
 after the original stack is restored.
-The forthvar({ior}) is a subroutine dependent indication whether
-the operation has succeeded.
-It is assumed that it was returned into AX.
+The forthvar({u}) is subroutine dependent, to be found in the documentation
+of whoever wrote the DLL.
+It may be a result or an error condition or an indication that there is
+an error to be fetched by forthcode({LAST-ERROR}) .
+It was returned into AX.
 },
-{{OPEN-FILE},{DLL-ADDRESS},{LOAD-DLL}},
+{{OPEN-FILE},{DLL-ADDRESS},{LOAD-DLL},{CALL[},{LAST-ERROR} },
 {
 { dnl most OS calls testin fact this interface
 }
@@ -9018,12 +9120,50 @@ _BITS64_({
         XCHG    SP,   [PARS+ (CW*(PH_OFFSET)) ] ; Nieuwe stack.
         _PUSH
 
-dnl specific for DLL . This word must be duplicated with different meaning
-dnl for DLL64
+worddoc( {OPERATINGSYSTEM},{CALL]}, {direct_call_close}, { addr --- u }, {},
+{ Execute a direct call to forthvar({addr}).
+This is probably an external subroutine, supplied via a DLL that is
+directly called with an address fetched via forthcode({DLL-ADDRESS}).
+The stack frame at forthdefi({PARS}) must be filled with its parameters.
+The call is given PARS as its stack pointer, and immediately there
+after the original stack is restored.
+The forthvar({u}) is subroutine dependent, to be found in the documentation
+of whoever wrote the DLL.
+It may be a result or an error condition or an indication that there is
+an error to be fetched by forthcode({LAST-ERROR}) .
+It was returned into AX.
+_VERBOSE_({ If the c-convention is used, the caller must nip
+results that are under forthvar({status}). })
+},
+{{OPEN-FILE},{DLL-ADDRESS},{LOAD-DLL},{CALL[},{LAST-ERROR}},
+{
+{ dnl e.g. GET-EVENT in forth.lab
+}
+},
+enddoc)
+CODE_HEADER({CALL]},{CALLCLOSE})
+
+        POP    AX
+        XCHG SP,   [PARS+ (CW*(PH_OFFSET)) ] ; Nieuwe stack.
+
+_BITS64_({
+        MOV    CX,   [SP+(CW*(0))]
+        MOV    DX,   [SP+(CW*(1))]
+        MOV    R8,   [SP+(CW*(2))]
+        MOV    R9,   [SP+(CW*(3))]
+})
+        CALL   AX
+        XCHG    SP,   [PARS+ (CW*(PH_OFFSET)) ] ; Nieuwe stack.
+        _PUSH
+
+_BITS32_({
 worddoc( {OPERATINGSYSTEM},{ICALL}, {indirect_call}, { n1*x addr --- ior }, {},
 { Execute an indirect call to forthvar({addr}).
 This is probably an external subroutine, supplied via a DLL that is
-directly linked, not fetched via forthcode({DLL-ADDRESS}).
+indirectly linked, not fetched via forthcode({DLL-ADDRESS}) and positioned
+in the table at the head of the forthfile({.exe}) file.
+This is slightly faster than a forthcode({ICALL[}) forthcode({ICALL]})
+that uses a stackframe.
 The stack must be filled with its parameters,
 those are popped by the external subroutien.
 The forthvar({ior}) is a subroutine dependent indication whether
@@ -9045,6 +9185,8 @@ worddoc( {OPERATINGSYSTEM},{CALL}, {call}, { n1*x addr --- ior }, {},
 { Execute a call to forthvar({addr}).
 This is probably an external subroutine, supplied via a DLL-library.
 The stack must be filled with its parameters,
+This is slightly faster than a forthcode({ICALL[}) forthcode({CALL]})
+that uses a stackframe.
 the forthvar({ior}) is a subroutine dependent indication whether
 the operation has succeeded.
 It is assumed that it was returned into AX.
@@ -9060,6 +9202,7 @@ CODE_HEADER({CALL},{LCALL})
         CALL   AX
        _PUSH
 _C
+})_C{}_END_({ _BITS32_})
 })_C{}_END_({_DLL_})
 _PC_({
 worddoc( {OUTPUT},{ETYPE},{etype},{addr count ---},{},
@@ -9542,9 +9685,12 @@ enddoc)
 _HEADER({SHELL},{SHELL},{DOVAR}, )
          _HOSTED_X_(
 {        _STRING({/bin/sh})})
+        _DLL_(
+{        _STRING({C:\windows\system32\cmd.exe})
+        _RESB(M4_FILENAMELENGTH-27)_C{ Allow for some path} })
         _PC_(
-{        _STRING({C:\COMMAND.COM})})
-        _RESB(M4_FILENAMELENGTH-9)               _C{ Allow for some path}
+{        _STRING({C:\COMMAND.COM})
+        _RESB(M4_FILENAMELENGTH-9)_C{ Allow for some path}  })
 _PC_({  _RESB(0x100)     _C{ Double serve as stack at start up. }})
 _C
 _HOSTED_OSX_({
@@ -9572,9 +9718,9 @@ in the string forthvar({sc}).
 _MODERN_({{The environment is passed to the
 command, but not the changes made after ciforth started.}})
 },{{?ERRUR},{SHELL}},
-_LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{." Hello world!"}} })
+_LINUX_N_({ {{"cat hello.frt" SYSTEM 2000 MS},{"Hello world!" TYPE}} })
 dnl Redirection can not be reliably tested on Windows XP
-dnl _MODERN_({ {{"TYPE hello.frt" SYSTEM },{." Hello world!"}} })
+dnl _MODERN_({ {{"TYPE hello.frt" SYSTEM },{"Hello world!" TYPE}} })
 _DLL_({
 { dnl these test must be unconditional, in separate worddoc headers
 { 1 LOAD  "GET-ENV" WANTED },{},
@@ -9710,7 +9856,7 @@ _HEADER({SYSTEM},{SYSTEM},{DOCOL})
         DC      RR, SADD, RR, SADD
         DC      ZERO, RR, CHAPP
 
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      LIT, -2000H, PARS, PSTOR
         DC      PARS, FETCH
         DC      LDUP, LIT, 02000H+_CELLS(10), LERASE
@@ -11025,15 +11171,20 @@ _DLL_({
 worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 {Return to the host environment _OS_.
 },{{COLD},{EXIT-CODE}},
-{
+_BITS32_({  {
 { 1 LOAD  "GET-ENV" WANTED },{},
 { "COMSPEC" GET-ENV SHELL $!},{},
 {"wina.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
-},
+}, })
+_BITS64_({  {
+{ 1 LOAD  "GET-ENV" WANTED },{},
+{ "COMSPEC" GET-ENV SHELL $!},{},
+{"wina64.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
+}, })
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
 _C{ Exit to _OS_, with status as stored. }
-        DC      ICALLOPEN
+        DC      CALLOPEN
         DC      XCODE, FETCH, PAR1
         DC      LIT, _ExitProcess@4, ICALLCLOSE
         DC      SEMIS   _C{Unnecessary, but helpful for decompilation.}

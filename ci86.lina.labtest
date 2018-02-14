@@ -61,3 +61,35 @@ wordtest( {0>IN},
  { " 1 2 3 4| DUP . _G14 |. . . ." _G13 EVALUATE},{4 3 2 1 0 0 3 2 1 },
  { " 1 2 3 4| DUP . _G14|. . . ." _G13 EVALUATE},{4 3 2 1 0 0 3 2 1 },
 })
+wordtest( {READ-LINE},
+{
+    {"READ-LINE" WANTED "R/W" WANTED },{},
+    {"hello.frt" R/W OPEN-FILE . CONSTANT FD},{0},
+    {PAD DUP 100 FD READ-LINE THROW . TYPE},{-1 "Hello world!" TYPE},
+    {FD CLOSE-FILE . },{0},
+} )
+wordtest( {INCLUDE-FILE},
+{
+    {"INCLUDE-FILE" WANTED },{NAME : ISN'T UNIQUE},
+    {include hello.frt },{Hello world!},
+})
+wordtest( {CI-DIGIT},
+{
+    {"CI-DIGIT" WANTED},{},
+    { &0 10 DIGIT . . },{-1  0 },
+    { &A 10 DIGIT . . },{0  10 },
+    { &F 16 DIGIT . . },{-1 15 },
+    { &G 16 DIGIT . . },{0  16 },
+})
+wordtest( {CASE-INSENSITIVE},
+{
+ { "CASE-INSENSITIVE" WANTED},{},
+ { CASE-INSENSITIVE },{},
+ { 4321 2 drop . },{4321},
+ { hex 1af . decimal },{1AF},
+ { CASE-SENSITIVE },{},
+})
+wordtest( {NOOP},
+{
+    { NOOP },{},
+})

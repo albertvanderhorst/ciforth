@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: gas.m4,v 5.16 2017/11/10 18:33:43 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 
@@ -53,8 +53,7 @@ define({SET_64_BIT_MODE},)
 define({_OFFSET},OFFSET)
 
 dnl Handling large blocks of comment
-define({_COMMENT}, { /* })
-define({_ENDCOMMENT}, { */ })
+define({_COMMENTED}, { /* }$1{ */ })
 
 dnl A nobits section takes no place in the object file.
 define({_TEXT_},{.text})

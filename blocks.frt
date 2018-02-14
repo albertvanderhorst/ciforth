@@ -1,4 +1,4 @@
-  ciforth lab  $Revision: 5.126 $ (c) Albert van der Horst
+  ciforth lab  $Revision: 5.133 $ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -50,7 +50,7 @@
  : EXECUTION OF EXTERNAL PROGRAM FAILED
  : NOT ENOUGH MEMORY FOR ALLOCATE
  : UNKNOWN FORMAT IDENTIFIER
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ : CANNOT HEAPIFY BUFFER
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -78,12 +78,12 @@
 
 
 \
-( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B0jan12
+( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B8feb07
 : ?LEAVE-BLOCK   IF SRC CELL+ @ PP ! THEN ;
 : CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
   0 CELL+   DUP 2 = CONFIG ?16   DUP 2 > CONFIG ?32+
     DUP 4 = CONFIG ?32   DUP 8 = CONFIG ?64 DROP
- "CALL" PRESENT DUP   CONFIG ?WI   \ (MS-windows)
+ "CALL[" PRESENT DUP   CONFIG ?WI   \ (MS-windows)
  "BIOS31" PRESENT DUP   CONFIG ?DP   \ DPMI (legacy windows)
  DUP 0= "BIOSN" PRESENT AND DUP   CONFIG ?MS   \ MS-DOS
             OR OR DUP   CONFIG ?WIMS \ One of 3 above
@@ -206,7 +206,7 @@ CREATE -syscalls- DECIMAL
 \ \ Use L_>IN instead of >IN , don't store into it!
 \ : L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
 \ 'L_>IN ALIAS >IN
-( -traditional- VOCABULARY )                    \ AvdH B8feb11
+( -traditional- VOCABULARY )                    \ AvdH B5dec01
 \ Use replacing vocabularies instead of pushing namespaces.
 
 : FORTH   CONTEXT @ 'ONLY >WID <> IF PREVIOUS THEN FORTH ;
@@ -238,7 +238,7 @@ ALSO    \ Start up with two FORTH namespaces.
 
 
 
-\ -traditional- ?LOADING ?EXEC               \ AvdH B8feb11  
+\ -traditional- ?LOADING ?EXEC               \ AvdH B8feb11
 
 
 
@@ -254,12 +254,12 @@ ALSO    \ Start up with two FORTH namespaces.
 : ?LOADING   BLK   @   0=   16 ?ERROR ;
 
 \
-\ -traditional-                              \ AvdH B8feb11  
+\ -traditional-                              \ AvdH B8feb11
 \ This last block belonging to traditional restores
 \ meta-behaviour that is traditionally expected.
 
 WANT INCLUDE-FILE
-WANT -plain-control- 
+WANT -plain-control-
 
 
 
@@ -1646,22 +1646,70 @@ DECIMAL
 
 
 
-( LOAD-DLL: DLL-ADDRESS: K32 GET-ENV ) CF: ?WI \ AvdH B2aug9
+( LOAD-DLL: DLL-ADDRESS: K32 ) CF: ?WI          \ AvdH B8feb11
 ( sc -- adr) : Z 0 , DROP ;
 ( n adr -- )
 : make-constant
    BODY> >R    R@ >DFA  !   'BL >CFA @   R> >CFA ! ;
 ( sc -- u )
-: LOAD-DLL: CREATE $, DROP DOES> DUP >R $@  LOAD-DLL
-    DUP R> make-constant ;
+: LOAD-DLL: CREATE $, DROP DOES> >R
+    R@ $@  LOAD-DLL R@ make-constant
+    R> BODY> EXECUTE ;
 ( sc xt -- adr )
 : DLL-ADDRESS:   CREATE , $, DROP     DOES> DUP >R   CELL+ $@
     R@ @ EXECUTE DLL-ADDRESS   DUP R> make-constant ;
-
 "kernel32.dll" LOAD-DLL: K32
+
+
+
+( GET-ENV ) CF: ?WI                             \ AvdH B8feb11
+  WANT K32
+
 "GetEnvironmentVariableA" 'K32 DLL-ADDRESS: _gev
-( sc -- sc )
-: GET-ENV    _gev >R ZEN 4096 OVER DUP R> CALL ;
+\ Turn   environmentstring  into its  value  .
+: GET-ENV    _gev DROP \ preload
+   CALL[ ZEN PAR1  RW-BUFFER PAR2  4096 PAR3  _gev CALL]
+   RW-BUFFER SWAP 4096 MIN ;
+
+
+
+
+
+
+
+
+( TIME&DATE ) CF: ?WI ?32                       \ AHCH B8feb14
+WANT K32
+   HEX
+"GetSystemTime" 'K32 DLL-ADDRESS: _gst
+
+: TIME&DATE    DSP@ 10 - DSP! DSP@ _gst CALL DROP
+      DUP 0FFFF AND >R   10 RSHIFT >R 10 RSHIFT >R
+      DUP FFFF AND >R    10 RSHIFT >R    FFFF AND >R
+      R> R> R> R> R> R> ;
+
+
+
+
+
+
+DECIMAL
+( TIME&DATE ) CF: ?WI ?64                       \ AHCH B8feb14
+WANT K32
+   HEX
+"GetSystemTime" 'K32 DLL-ADDRESS: _gst
+
+: TIME&DATE
+    _gst DROP  DSP@ 10 - DSP! DSP@ CALL[ PAR1 _gst CALL] DROP
+    DUP 0FFFF AND >R   10 RSHIFT       \ year
+    DUP 0FFFF AND >R   20 RSHIFT >R  \ month day
+    DUP 0FFFF AND >R   10 RSHIFT       \ hour
+    DUP 0FFFF AND >R   10 RSHIFT       \ minutes
+    0FFFF AND >R                   \ seconds
+    R> R> R> R> R> R> ;
+
+DECIMAL
+
 ( GET-ENV ) CF: ?LI \ AvdH A3mar20
 
  "Z$@" WANTED    "COMPARE" WANTED    "ENV" WANTED
@@ -1678,6 +1726,38 @@ DECIMAL
 
 
 
+( SAVE-SYSTEM TURNKEY ) CF: ?WI ?32 HEX \ AvdH   B1oct1
+: _BOOT-SECTION    BM 2000 -   BM  400 - 200 MOVE ;
+: _KERNEL-SECTION  BM 1000 - BM  200 - 200 MOVE ;
+: _FIXUP  SAVE >R  \ Fix up the kernel section at ADDRESS
+   R@ 0C + @ 1000 -   R@ +   DUP 200 +   1FF INVERT AND
+   OVER - SET-SRC    NAME 2DROP   R@ 10 + @  1000 -  R@ +
+   BEGIN NAME WHILE  2 - 1000 + R@ - OVER !
+    CELL+ REPEAT DROP RDROP RESTORE ;
+: SAVE-USER-VARS U0 @   0 +ORIGIN   40 CELLS  MOVE ;
+: INCREMENT    HERE   'DP >DFA @ +ORIGIN @ 'TASK DROP - ;
+: SAVE-SYSTEM  ( Save the system in a file with NAME )
+   >R >R _BOOT-SECTION INCREMENT BM  400 - 1B0 + +!
+  _KERNEL-SECTION BM  200 - _FIXUP  SAVE-USER-VARS
+   BM  400 - HERE  OVER - 200 + R> R> PUT-FILE ;
+: TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
+  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
+( SAVE-SYSTEM TURNKEY ) CF: ?WI ?64 HEX \ AvdH   B1oct1
+: _BOOT-SECTION    BM 2000 -   BM  600 - 200 MOVE ;
+: _KERNEL-SECTION  BM 1000 - BM  400 - 400 MOVE ;
+: _FIXUP  SAVE >R  \ Fix up the kernel section at ADDRESS
+   R@ 0C + L@ 1000 -   R@ +   DUP 400 +   1FF INVERT AND
+   OVER - SET-SRC    NAME 2DROP   R@ 10 + @  1000 -  R@ +
+   BEGIN NAME WHILE  2 - 1000 + R@ - OVER !
+    CELL+ REPEAT DROP RDROP RESTORE ; : L+! >R R@ L@ + R> L! ;
+: SAVE-USER-VARS U0 @   0 +ORIGIN   40 CELLS  MOVE ;
+: INCREMENT    HERE   'DP >DFA @ +ORIGIN @ 'TASK DROP - ;
+: SAVE-SYSTEM  ( Save the system in a file with NAME )
+   >R >R _BOOT-SECTION INCREMENT BM  600 - 1C0 + L+!
+  _KERNEL-SECTION BM  400 - _FIXUP  SAVE-USER-VARS
+   BM  600 - HERE  OVER - 200 + R> R> PUT-FILE ;
+: TURNKEY  ( Save a system to do ACTION in a file witH NAME .)
+  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ; DECIMAL
 ( SAVE-SYSTEM TURNKEY ) CF: ?WI HEX \ AvdH   B1oct1
 : _BOOT-SECTION    BM 2000 -   BM  400 - 200 MOVE ;
 : _KERNEL-SECTION  BM 1000 - BM  200 - 200 MOVE ;
@@ -2030,22 +2110,22 @@ Tools and utilities
    'NEW-WARM >DFA @   'WARM >DFA ! ;
 
 
-( DO-DEBUG NO-DEBUG ) \ AvdH A6sep19
+( DO-DEBUG NO-DEBUG )                   \ AvdH B8feb7
  "OLD:" WANTED     "INSTALL-TRAPS" WANTED
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 \ Print index line of SCREEN .
 : .INDEX-LINE  CR DUP 4 .R 0 SWAP (LINE) -TRAILING TYPE ;
-\ An alternative ``THRU'' that displays first and last index.
-: NEW-THRU  OVER .INDEX-LINE " -- " TYPE  DUP .INDEX-LINE CR
-  OLD: THRU ;
+\ An alternative ``LOAD'' that displays the index line.
+: NEW-LOAD  DUP .INDEX-LINE   OLD: LOAD ;
 \ Install and de-install the alternative ``OK'' and traps
 : DO-DEBUG   INSTALL-TRAPS   'NEW-OK >DFA @   'OK >DFA !
-   'NEW-THRU >DFA @   'THRU >DFA ! ;
+   'NEW-LOAD >DFA @   'LOAD >DFA ! ;
 : NO-DEBUG   INSTALL-NO-TRAPS  'OK RESTORED
- 'WARM RESTORED 'THRU RESTORED ;
+ 'WARM RESTORED 'LOAD RESTORED ;
 : break   SAVE  BEGIN '(ACCEPT) CATCH DUP -32 <> WHILE ?ERRUR
     SET-SRC INTERPRET REPEAT   DROP RESTORE ; \ End by ^D
+ DO-DEBUG
 ( DO-SECURITY NO-SECURITY NO-SECURITY: ) \ AH B2jun15
  "RESTORED" WANTED
 \
@@ -2122,8 +2202,8 @@ WANT ~MATCH-IGNORE CI-DIGIT RESTORED
 : CASE-SENSITIVE   '~MATCH RESTORED
     'DIGIT DUP >PHA SWAP >CFA ! ;
 
-
-
+\ You want this normally
+CASE-INSENSITIVE
 
 
 ( DUMP )  "B." WANTED  HEX: \ AvdH A1oct02
@@ -2383,9 +2463,9 @@ NAMESPACE ASSEMBLER
 
 \
 ( ASSEMBLERi86-HIGH )  CF:          \ B1oct16 AvdH
- "ASSEMBLER" WANTED    "SWAP-DP" WANTED    "ALIAS" WANTED
+WANT ASSEMBLER SWAP-DP ALIAS RESTORED
 \ Disallow case-insensitive assembler
-'~MATCH DUP >DFA @ SWAP >PHA <> 13 ?ERROR
+'~MATCH RESTORED
 "ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
 SWAP-DP
 : ASSEMBLERi86 ;
@@ -2399,10 +2479,10 @@ ASSEMBLER DEFINITIONS
 SWAP-DP
 PREVIOUS DEFINITIONS
 ( ASSEMBLERi86 )  CF:               \ B4feb28 AvdH
- "ASSEMBLER" WANTED    "ALIAS" WANTED
+WANT     ASSEMBLER ALIAS RESTORED
+\ Disallow case-insensitive assembler
+'~MATCH RESTORED
 
-
-"ASSEMBLERi86" PRESENT ?LEAVE-BLOCK
 
 : ASSEMBLERi86 ;
 ASSEMBLER DEFINITIONS
@@ -2752,9 +2832,9 @@ CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
 DECIMAL
 ( -fpwa- )  CF:      ?32+                \ B6apr6 AvdH
 "-fp-" PRESENT ?LEAVE-BLOCK
- WANT ASSEMBLER SWAP-DP ALIAS
+ WANT ASSEMBLER SWAP-DP ALIAS RESTORED
 \ Disallow case-insensitive assembler
-'~MATCH DUP >DFA @ SWAP >PHA <> 13 ?ERROR
+'~MATCH RESTORED
 SWAP-DP
    : ASSEMBLERi86 ;
    ASSEMBLER DEFINITIONS   HEX
@@ -3069,7 +3149,7 @@ VARIABLE EPL   \ FIXME ! User variable.
 
 'NEW-(NUMBER) '(NUMBER) 2 CELLS MOVE
 'SDFLITERAL 'SDLITERAL 2 CELLS MOVE
-    CREATE -fp-   \ Completed!
+FINIT    CREATE -fp-   \ Completed!
 ( LOCATED LOCATE .SOURCEFIELD ) CF: \ AvdH A6jan31
 ">SFA" PRESENT 0= ?LEAVE-BLOCK
 \ Interpret a SOURCEFIELD heuristically.
@@ -3130,7 +3210,7 @@ DECIMAL
 "EDIT   "   OS-IMPORT ed
 "ee     "   OS-IMPORT ee  \ My favorite editor
 ""          OS-IMPORT !!
-DECIMAL   "CALL" PRESENT ?LEAVE-BLOCK   HEX
+DECIMAL   "CALL[" PRESENT ?LEAVE-BLOCK   HEX
 : cd   NAME ZEN _ _ 3B00 BDOSN 1 AND SWAP ?ERROR ;
 "A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
 DECIMAL
@@ -3145,7 +3225,7 @@ DECIMAL
 "DEL    "   OS-IMPORT DEL
 "EDIT   "   OS-IMPORT ed  \ Not to conflict with: #BL EDIT
 "RENAME "   OS-IMPORT RENAME
-DECIMAL   "CALL" PRESENT ?LEAVE-BLOCK   HEX
+DECIMAL   "CALL[" PRESENT ?LEAVE-BLOCK   HEX
 : CD   NAME ZEN _ _ 3B00 BDOSN 1 AND SWAP ?ERROR ;
 "A:" OS-IMPORT A:   "C:" OS-IMPORT C:   "D:" OS-IMPORT D:
 
@@ -3534,7 +3614,7 @@ Useful for user programs:
 
 
 
-( -midi_driver- sendmidi ) CF: ?WI           \ AHCHB5apr15
+( -midi_driver- sendmidi ) CF: ?WI ?32       \ AHCHB5apr15
  "LOAD-DLL:" WANTED            "DLL-ADDRESS:" WANTED
 "WINMM.DLL" LOAD-DLL: WINMM
 "midiOutOpen"     'WINMM DLL-ADDRESS: midiOutOpen
@@ -3550,6 +3630,22 @@ VARIABLE MidiHandle
 \ Send out 3 byte MESSAGE contained in one cell.
 : sendmidi MidiHandle @ midiOutShortMsg CALL 2003 ?ERROR ;
 
+( -midi_driver- sendmidi ) CF: ?WI           \ AHCHB8feb13
+ "LOAD-DLL:" WANTED            "DLL-ADDRESS:" WANTED
+"WINMM.DLL" LOAD-DLL: WINMM
+"midiOutOpen"     'WINMM DLL-ADDRESS: midiOutOpen
+"midiOutShortMsg" 'WINMM DLL-ADDRESS: midiOutShortMsg
+"midiOutClose"    'WINMM DLL-ADDRESS: midiOutClose
+VARIABLE MidiHandle
+\ Open midi, i.e. fill MidiHandle.
+: openmidi  midiOutOpen CALL[ MidiHandle PAR1  -1 PAR2
+    0 PAR3  0 PAR4 0 PAR5 CALL] 2001 ?ERROR ;
+\ Close midi channel in MidiHandle
+: closemidi midiOutClose CALL[ MidiHandle @ PAR1 CALL]
+    2002 ?ERROR ;
+\ Send out 3 byte MESSAGE contained in one cell.
+: sendmidi >R midiOutShortMsg CALL[ MidiHandle @ PAR1
+   R> PAR2  CALL] 2003 ?ERROR ;
 ( -midi_driver- sendmidi ) CF: ?LI           \ AHCHB5apr15
 \ For the moment Linux midi calls are screened off
 
@@ -4157,4 +4253,4 @@ IMIN @ 1+ ; ( This example with variables works the same as )
 
 
 
-( 3712 last line in blocks.)
+( 4144 last line in blocks.)
