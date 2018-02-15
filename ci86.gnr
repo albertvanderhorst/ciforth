@@ -1,10 +1,10 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
-_C{ $Id: ci86.gnr,v 5.156 2018/02/14 02:24:04 albert Exp $}
+_C{ $Id: ci86.gnr,v 5.157 2018/02/15 23:01:33 albert Exp $}
 _C{ Copyright (2012):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
- TITLE   ciforth $Revision: 5.156 $
+ TITLE   ciforth $Revision: 5.157 $
 _C
 _C{ For the generic system (to generate ciforth in an other configuration than this one):}
 _C{     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html}
@@ -9683,14 +9683,11 @@ a start up stack.})
 ,
 enddoc)
 _HEADER({SHELL},{SHELL},{DOVAR}, )
-         _HOSTED_X_(
-{        _STRING({/bin/sh})})
-        _DLL_(
-{        _STRING({C:\windows\system32\cmd.exe})
-        _RESB(M4_FILENAMELENGTH-27)_C{ Allow for some path} })
-        _PC_(
-{        _STRING({C:\COMMAND.COM})
-        _RESB(M4_FILENAMELENGTH-9)_C{ Allow for some path}  })
+         _HOSTED_X_( {_STRING({/bin/sh})})
+        _DLL_( {_STRING({C:\windows\system32\cmd.exe})})
+        _PC_( {_STRING({C:\COMMAND.COM})})
+        _ALIGN(_CELLS(1))
+        _RESB(M4_FILENAMELENGTH)_C{ Allow for some path}  
 _PC_({  _RESB(0x100)     _C{ Double serve as stack at start up. }})
 _C
 _HOSTED_OSX_({
