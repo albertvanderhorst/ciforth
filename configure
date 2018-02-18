@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# configure
+#   checks where it is running
+#   creates Makefile for that environment
+#   depends heavely on sed, streaming editor
+#
+FND_OS=$( uname )
+case $( arch ) in
+  (i?86)
+    FND_BITNESS=32
+  ;;
+  (x86_64)
+    FND_BITNESS=64
+  ;;
+  (*)
+    FND_BITNESS=32
+    echo W: Using default bitness of ${FND_BITNESS}
+  ;;
+esac
+
+case ${FND_OS}_${FND_BITNESS} in
+  (Linux_32)
+    MY_NAME=lina
+    MY_STEALC=stealconstant
+  ;;
+  (Linux_64)
+    MY_NAME=lina
+    MY_STEALC=stealconstant64
+  ;;
+  (MacOS_64)
+    MY_NAME=xina
+    MY_STEALC=stealconstant64
+  ;;
+  (*)
+     echo W: Oops
+     echo I: Found Operating System: ${FND_OS}
+     echo I: Found bitness: {FND_BITNESS}
+  ;;
+esac
+
+sed \
+  -e "s/@MY_NAME@/${MY_NAME}/g" \
+  -e "s/@MY_STEALC@/${MY_STEALC}/g" \
+  Makefile.in > Makefile
+
+# l l
