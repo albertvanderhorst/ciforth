@@ -1,4 +1,4 @@
-  ciforth lab  $Revision: 5.133 $ (c) Albert van der Horst
+  ciforth lab  $Revision: 5.143 $ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -206,7 +206,7 @@ CREATE -syscalls- DECIMAL
 \ \ Use L_>IN instead of >IN , don't store into it!
 \ : L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
 \ 'L_>IN ALIAS >IN
-( -traditional- VOCABULARY )                    \ AvdH B5dec01
+( -traditional- VOCABULARY )                        \ AvdH B5dec01
 \ Use replacing vocabularies instead of pushing namespaces.
 
 : FORTH   CONTEXT @ 'ONLY >WID <> IF PREVIOUS THEN FORTH ;
@@ -286,15 +286,15 @@ Note that ISO words are only documented by the comment ISO.
 
 
 \
-( MEMORY _AH            )                      \ AvdH B0aug02
-2 CELLS CONSTANT overhead
-VARIABLE _ADP    : _AH ( -- adr ) _ADP @ ;
+( MEMORY _AH            )                      \ AvdH B8jan24
+DECIMAL VARIABLE _ADP  HERE DUP , DUP , _ADP !
+2 CELLS CONSTANT overhead    : _AH ( -- adr ) _ADP @ ;
 : _bump ( -- ) _AH @ _ADP ! ;
 : _alloc_f   ( adr -- ) CELL+ DUP >R CELL+ + R> ! ;
 : _free   ( adr -- ) 0 SWAP CELL+ ! ;
 : _split ( adr -- ) DUP $@ SWAP @ ALIGNED >R 0 R@ CELL+ !
     R@ ! R> SWAP ! ;
-: _merge ( adr -- ) DUP @ OVER < IF DROP ELSE DUP >R
+: _merge ( adr -- ) DUP @ OVER U< IF DROP ELSE DUP >R
     BEGIN @ DUP CELL+ @ UNTIL R> !  THEN ;
 : _free? ( adr -- f ) CELL+ @ 0= ;
 : _avail ( adr -- n )   DUP @ SWAP - overhead - ;
@@ -302,22 +302,38 @@ VARIABLE _ADP    : _AH ( -- adr ) _ADP @ ;
     SWAP - THEN overhead - ;
 : _search  ( n -- adr ) _AH BEGIN DUP _merge 2DUP _remain >
     WHILE @ DUP _AH = 50 ?ERROR REPEAT _ADP ! DROP ;
-( MEMORY ALLOCATE FREE RESIZE  )                \ AvdH B0aug02
- "_AH" WANTED
-: _allocate ( n -- adu ) _AH _merge   DUP _AH _remain > IF
-   _bump DUP _search THEN   _AH _free? 0= IF
-   _AH _split _bump THEN   _AH _alloc_f _AH overhead + ;
+( MEMORY _allocate _resize  heapify  )          \ AvdH B8jan24
+DECIMAL  WANT _AH
+: _allocate ( n -- adu ) DUP 0< 50 ?ERROR   _AH _merge
+    DUP _AH _remain > IF _bump DUP _search THEN
+    _AH _free? 0= IF _AH _split _bump THEN
+    _AH _alloc_f _AH overhead + ;
 : _alloc&move ( n -- adu) DUP _allocate DUP >R SWAP CMOVE  R> ;
-: _resize ( adu n -- adu) OVER overhead - >R R@ _merge  DUP R@
+: _resize ( adu n -- adu)   DUP 0< 50 ?ERROR
+    OVER overhead - >R R@ _merge  DUP R@
     _avail > IF _alloc&move R> _free ELSE R> _alloc_f THEN  ;
+\ For   address len  make buffer current where it is in.
+: migrate   BEGIN  _bump OVER _AH _AH @ 1- WITHIN UNTIL
+    _AH 2@ <> 52 ?ERROR  + _AH @ 1- _AH ROT WITHIN 52 ?ERROR  ;
+: heapify   ( adr n -- ) 2DUP migrate   SWAP _AH CELL+ !
+    _AH _split  _bump    overhead  2* - _AH _alloc_f
+    _AH _split  _AH _free _bump   _AH @ _AH CELL+ ! ;
+( MEMORY ALLOCATE FREE RESIZE SIZE INIT-ALLOC ) \ AvdH B8jan24
+WANT _AH _allocate UNUSED
 : INTEGRITY? ( -- f ) DUP BEGIN DUP @ 2DUP < WHILE NIP
     REPEAT NIP = ;
-DATA _alloc-buf _ , 0 , DSP@ HERE - 2 RSHIFT ALLOT ALIGN
-    _alloc-buf HERE OVER ! DUP , DUP ,  _ADP !
-( ISO )   ( _alloc-buf @ '_alloc-buf >DFA ! )
-: ALLOCATE   ['] _allocate CATCH ;
-: FREE   overhead - _free 0 ;
-: RESIZE  ['] _resize CATCH DUP IF NIP THEN ;
+
+: ALLOCATE   ['] _allocate CATCH ;              ( ISO )
+: FREE   overhead - _free 0 ;                   ( ISO )
+: RESIZE  ['] _resize CATCH DUP IF NIP THEN ;   ( ISO )
+: SIZE   DUP 1 CELLS - @ SWAP - ;
+\ Only to be used on a virgin MEMORY
+: INIT-ALLOC  HERE UNUSED 4 / ALIGN DUP ALLOT heapify ;
+\ Add  n  space to allocation space.
+: ADD-ALLOC   HERE SWAP DUP ALLOT heapify ;
+\ Make a freshly created   object   at `HERE permanent.
+: >ALLOC   HERE OVER - DUP ALLOCATE THROW   DUP >R SWAP MOVE
+    R> ;
 ( REALLOT REALLOC AT-HERE )                     \ AvdHB5Mar30
  "ALIAS" WANTED
 \ For DEA of data fill the data pointer with here.
@@ -574,7 +590,7 @@ CF:
 : ALIGNED    1-   0 CELL+ 1- OR   1+ ;
 : ALIGN   DP @   ALIGNED   DP ! ;
 \
-( --manifest TRUE FALSE NULL NULL$ NONE R/O W/O R/W ) \ AvdH
+( -manifest MAX-N TRUE NULL NULL$ NONE R/O W/O R/W ) \ AvdH
 \ Define some manifest constants.
 -1 CONSTANT TRUE       \ Flag
 0 CONSTANT FALSE       \ Flag
@@ -582,13 +598,13 @@ CF:
 : NULL$ 0 0 ;          \ Invalid string
 -1 CONSTANT NONE       \ Invalid index, where valid is pos.
 
+-1 DUP CONSTANT MAX-U  1 RSHIFT CONSTANT MAX-N
+ : MAX-UD  MAX-U MAX-U ;     : MAX-D MAX-U MAX-N ;
 
 0 CONSTANT R/O
 1 CONSTANT W/O
 2 CONSTANT R/W
-
-
-
+HEX : EXEC-  4900 OR ; DECIMAL
 \
 ( 0> U.R ) \ AvdH A2oct23
 
@@ -897,7 +913,7 @@ DEFER *<-->
 \ (MERGE)       \ AvdH A3dec02
 \ list : sorted   ulist : unsorted   listp : list level
 \ For EL1 and EL2, return EL1 and EL2 plus "el1 IS lower".
-VARIABLE *<M   : LL< *<M @ EXECUTE ;
+VARIABLE *<M   : LL< 2DUP *<M @ EXECUTE ;
 VARIABLE *->M   \ Contains XT
 \ For EL return next EL of list.
 : >N   *->M @ EXECUTE @ ;
@@ -910,7 +926,7 @@ VARIABLE *->M   \ Contains XT
 : (MERGE)   BEGIN FIND-END   DUP >R  DUP >N >R LINK!
     R> R>   OVER 0= UNTIL 2DROP ;
 
-( MERGE-SORT )   "(MERGE)" WANTED  \ AvdH A3dec02
+( MERGE-SORT )   "(MERGE)" WANTED               \ AvdH B7dec17
 
 \ Merge LIST1 and LIST2, leave merged LIST.
 : MERGE   LL< IF SWAP THEN   DUP >R (MERGE) R> ;
@@ -924,14 +940,14 @@ VARIABLE *->M   \ Contains XT
 : EXPAND BEGIN SNIP >R 1 TRY-MERGES R> DUP WHILE REPEAT DROP ;
 \ Keep on merging list-level pairs until end-sentinel.
 : SHRINK DROP BEGIN OVER WHILE NIP MERGE REPEAT ;
-\ For compare XT, next XT, linked LIST , leave a sorted LIST1.
+\ For linked LIST compare XT, next XT, , leave a sorted LIST1.
 : MERGE-SORT   *->M !  *<M !   0 SWAP EXPAND SHRINK NIP ;
-( SORT-WID SORT-VOC )           \ AvdH A3dec02
+( SORT-WID SORT-VOC )                           \ AvdH B7dec17
  "COMPARE" WANTED          "MERGE-SORT" WANTED
 \ Note that xt's form a linked list
 \ For XT1 and XT2 return XT1 and XT2 plus "xt IS lower".
     : GET-NAME >NFA @ $@   ;  \ Aux. For EL, return NAME.
-: NAMES< DUP >R OVER GET-NAME    R> GET-NAME    COMPARE 0 < ;
+: NAMES< SWAP >R GET-NAME    R> GET-NAME    COMPARE 0 < ;
 
 \ Sort the WID alphabetically on names.
 \ A wid is a head of a list and doesn't take part in the
@@ -1054,22 +1070,22 @@ VARIABLE _m ( Modulo number)   WANT XGCD
 
 
 
-( CHS TRI PYR SQR                       ) \ AvdH B5dec5
+( CHS TRI PYR SQ CUB FIB               ) \ AvdH B8jan21
 
 \ For N M return "N OVER M " (N/M)
 : CHS >R  R@ - 1 R> 1+ 1 ?DO   OVER I + I */ LOOP NIP ;
 \ '(./.) ALIAS CHS
 
-\ For x return it TRIANGLE, number
+\ For x return its TRIANGLE, number
 : TRI    DUP 1+ * 2/ ;
-\ For x return it PYRAMIDAL number
+\ For x return its PYRAMIDAL number
 ( : PYR ; )
-\ For x return it SQUARE  number
-: SQR DUP * ;
-
-
-
-
+\ For x return its SQUARE  number
+: SQ DUP * ;
+\ For x return its CUBE number
+: CUB DUP DUP * * ;
+\ For x return the  xth  Fibonacci  .
+: FIB   >R 0 1 R> 0 ?DO SWAP OVER + LOOP DROP ;
 ( PHI MU                                        ) \ AvdH B5dec5
  "FACTOR" WANTED
 \ For X return Euler's TOTIENT
@@ -1934,8 +1950,24 @@ TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
     'EXIT-COT >DFA @    R@ CELL+ CELL+ !
     R> TASK-TABLE BAG+! ;
 \
-( {{ }} [{ }] [: ;] )                           \ AHCH B6oct16
-WANT UNLINK-LATEST ALIAS
+( { } [: ;] )                                   \ B8feb26 AvdH
+WANT ALIAS
+\ Denotation for lambda, ends with `}
+: {   'SKIP , (FORWARD   HERE 'TASK @ ,   HERE CELL+ ,
+     STATE @ 1 STATE ! ; IMMEDIATE
+: }  '(;) ,   STATE !   >R FORWARD) R>   POSTPONE LITERAL
+    ; IMMEDIATE
+
+\ Official 2012 standard quotation.
+'{ ALIAS [:           '} ALIAS ;]
+
+
+
+
+
+
+( {{ }} [{ }] {{{ }}} )                         \ AHCH B8feb17
+WANT UNLINK-LATEST ALIAS {
 \ New context for definitions, maybe in the middle of a word.
 : [{ POSTPONE SKIP (FORWARD R>
         CSP @ >R DPL @ >R UNLINK-LATEST >R STATE @ >R
@@ -1947,9 +1979,9 @@ WANT UNLINK-LATEST ALIAS
 \ Compact version of :NONAME .. ;  not linked in.
 : {{{   HERE 'TASK @ ( docol) , HERE CELL+ , ] ;
 : }}}   '(;) , POSTPONE [ ; IMMEDIATE
-\ Official 2012 standard quotation.
-: [:   POSTPONE SKIP (FORWARD {{{ SWAP ; IMMEDIATE
-: ;]   POSTPONE }}}  ] FORWARD) POSTPONE LITERAL ;  IMMEDIATE
+
+
+
 ( NESTED-COMPILE UNLINK-LATEST )                \ AvdH B5feb11
 
 \ Isolate the latest word from the dictionary. Leave its DEA.
@@ -2142,7 +2174,7 @@ Tools and utilities
     R> '?PAIRS >DFA ! ;
 
 
-( REGRESS )                                     \ AvdH B5dec5
+( REGRESS )                                     \ AvdH B7dec17
 : ?.S?   DUP IF >R .S R> THEN ; \ (e-e) If ERROR, print stack.
 : unbalance?  \ ( A B C - A B C ) give error if "A-B <> B-C "
     2DUP - >R   >R 2DUP - R> SWAP    R> <>   ?.S? 40 ?ERROR ;
@@ -2151,11 +2183,11 @@ Tools and utilities
 \ (sc - sc) If not a plausible string, give error.
 : ?test-for-S:?  OVER SRC 2@ SWAP WITHIN 0= 42 ?ERROR ;
 \ Break off the evaluation, leave REMAINDER of parse area
-: S:   SRC CELL+ 2@ OVER - RDROP ;
+: S:   SRC CELL+ 2@ OVER - RDROP ;  DATA _wh _ , _ ,
 \ Insert this to show the text of a test that passed.
-: _RVERBOSE LATEST ID. WHERE 2@ TYPE "\ PASSED" TYPE CR ;
+: _RVERBOSE LATEST ID. _wh 2@ TYPE " \ PASSED" TYPE CR ;
 \ Used as: REGRESS <test> S: <result>
-: REGRESS    DSP@ >R   ^J PARSE  2DUP WHERE 2!   EVALUATE
+: REGRESS    DSP@ >R   ^J PARSE  2DUP _wh 2!   EVALUATE
    DSP@ 2 CELLS + >R   ?test-for-S:? EVALUATE DSP@ R> R@
    unbalance? unequal? _RVERBOSE R> DSP! ;
 ( DO-REGRESS NO-REGRESS DO-VERBOSE-REGRESS   ) \ AH B6feb14
@@ -2321,14 +2353,14 @@ WANT SEE
 ( SEE -see1-io-  )                 \ AvdH B5Feb20
  "H." WANTED          "BAG" WANTED     "DO-BAG" WANTED
 : H.. H. SPACE ;       \ Hex with comma's
-: SH.. HEX: . ;        \ Signed but hex.
+
 \ From DECOMPILER-POINTER print, leave incremented POINTER
 : ID.+   $@ ID. ;
 : H.+ CELL+ DUP @ H.. CELL+ ;
-: SH.+ CELL+ DUP @ SH.. CELL+ ;
+
 : '.+ CELL+ DUP @ &' EMIT ID. CELL+ ;
-
-
+: .$"   BEGIN &" $/ TYPE DUP WHILE   &" EMIT &" EMIT REPEAT
+    2DROP ;
 
 
 
@@ -2345,9 +2377,9 @@ WANT SEE
    ( DIRTY TRICK : make decompile pointer point to exit!)
    DROP 'TASK >DFA @ ;          ' (;CODE) by: -pc
 
-\ Decompile inline string constant
-: -sk CELL+ CR ." [ " &" EMIT DUP $@ TYPE &" EMIT
-   ."  ] DLITERAL " $@ + 4 CELLS + ;    ' SKIP by: -sk
+
+
+
 
 
 ( SEE -see3-example-decompilers- )             \ AvdH B5Feb20
@@ -2398,33 +2430,81 @@ WANT SEE
 
 
 
-( SEE   -see6-colon&literals- )
+( SEE   -see6a-targets- )
+WANT BAG BAG-WHERE
+100 BAG targets
+: targ+   DUP >R + targets BAG+! R> targets BAG+! ;
+: skip-constant  BEGIN DUP 'LIT = WHILE DROP  $@ DROP $@
+    REPEAT ;
+: ITEM2 $@  skip-constant  ( dip -- dip')
+     DUP 'BRANCH = IF DROP $@ 2DUP targ+ DROP EXIT THEN
+     DUP '0BRANCH = IF DROP $@ 2DUP targ+ DROP EXIT THEN
+     DROP ;
+: FILL-TARGETS  targets !BAG  ( dip -- )
+    BEGIN DUP @ LIT (;) <> WHILE ITEM2 REPEAT DROP ;
+: .target  targets BAG-WHERE DUP IF
+    DUP targets BAG-REMOVE
+    DUP @ 0< IF CR ." BEGIN " ELSE ." THEN " CR THEN
+    targets BAG-REMOVE _ THEN DROP ( targets .BAG  ) ;
+( SEE   -see6b-colon- )
 ( dip -- dip )
 : ITEM DUP @ SEL@ IF EXECUTE ( special) ALIGNED ELSE
     DUP ?IM IF ." POSTPONE " THEN ID. CELL+ THEN ;
-: CRACK-COLON CR BEGIN DUP @ LIT (;) <> WHILE
-    ITEM REPEAT DROP ;
+: CRACK-COLON   CR DUP FILL-TARGETS  ( dip -- )
+    BEGIN DUP .target DUP @ LIT (;) <> WHILE ITEM REPEAT
+    DROP ;
+
 : -hi CR ." : " DUP DUP ID. >DFA @ CRACK-COLON CR ." ;"  DUP
    ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  PREFIX" THEN CR ;
     ' TASK example-by: -hi
 
+
+
+
+
+( SEE   -inline-literals- )
+( dip -- dip )
 : -lit DUP CELL+ @ DEA? IF '.+ ELSE H.+ THEN ;
     ' LIT by: -lit
 
+\ Decompile inline string constant
+: -sk1 CR ." [ " &" EMIT DUP $@ .$" &" EMIT
+   ."  ] DLITERAL " $@ + 4 CELLS + ;
 
+\ Decompile inline code
+: -sk2 DUP $@ + >R CR ." { " 3 CELLS + CRACK-COLON ."  } "
+   R> 2 CELLS + ;
 
+: -sk  CELL+ DUP CELL+ @ 'TASK @ = IF  -sk2 ELSE -sk1 THEN ;
+' SKIP by: -sk
 
 ( SEE   -see7-branch-decompilers- )
-: TARGET DUP 1 CELLS - @ + ; ( dip -- jump target )
-: .DEA? DUP DEA? IF ID. ELSE DROP ." ? " THEN ; ( dea --. )
-: PRINT-TARGET DUP ( dip -- dip )   ." ( between " TARGET DUP
-  1 CELLS - @ .DEA? @ .DEA? ." ) " ;
-: -0br CR ." 0BRANCH [ " SH.+ ." , ] " PRINT-TARGET ;
-    ' 0BRANCH by: -0br
-: -br  CR ." BRANCH  [ " SH.+ ." , ] " PRINT-TARGET ;
+: remove-target DUP targets BAG-REMOVE targets BAG-REMOVE ;
+: remove-implied-target DUP targets BAG-WHERE ?DUP IF
+    remove-target THEN ;
+: do-repeat   CELL+ DUP targets BAG-WHERE DUP IF
+    remove-target ." REPEAT "  ELSE DROP ." AGAIN " THEN CR ;
+: do-else   ." ELSE " CELL+  remove-implied-target ;
+: -br CELL+ DUP @ 0< IF do-repeat ELSE do-else THEN ;
     ' BRANCH by: -br
+: do-until    ." UNTIL  "  CR CELL+ ;
+: do-if/while   DUP DUP @ + @ 0< IF ." WHILE" ELSE
+    ." IF" THEN CR   CELL+ ;
+: -0br CELL+ DUP @ 0< IF do-until ELSE do-if/while THEN ;
+    ' 0BRANCH by: -0br
 
 
+( old-see  -see7-branch-decompilers- )
+WANT HEX:
+: SH.. HEX: . ;        \ Signed but hex.
+: SH.+ CELL+ DUP @ SH.. CELL+ ;
+
+
+\ Was in use, is instrumental in analysing optimised code.
+: -br CR ." BRANCH  [ " SH.+ ." , ] " ;
+: -0br CR ." 0BRANCH [ " SH.+ ." , ] " ;
+    ' BRANCH by: -br
+    ' 0BRANCH by: -0br
 
 
 
@@ -2750,20 +2830,20 @@ E0DF 2PI FSTSW|AX,
   " next Tested " TYPE
 
 \
-( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?64 \ AvdH B6apr08
+( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?64 \ AvdH B8jun26
+48 1PI REX,   \ Needed before LODS, MOV, LEA,
 : NEXT,
-     48 C, LODS, X'|
-     MOV, X| F| AX'| R| BX|
-     JMPO, ZO| [BX]    \ JMPO, [AX] not available in 16 bits.
-;
+     REX, LODS, X'|
+     JMPO, ZO| [AX] ;
 : PUSH PUSH|X, AX| NEXT, ;
 : PUSH2 PUSH|X, DX| PUSH ;
 
 ( Tests applicable always )
   CODE TEST-NEXT NEXT,  END-CODE
-  " Testing next what? " TYPE
-  TEST-NEXT
-  " next Tested " TYPE
+  " Testing next what? " TYPE TEST-NEXT " next Tested " TYPE
+
+
+
 
 \
 ( ASSEMBLER-MACROS-i86 NOP, CP, COPY-SEG ) \ A7oct19 AvdH

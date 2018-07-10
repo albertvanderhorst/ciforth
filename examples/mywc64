@@ -1,4 +1,8 @@
-#  Copyright 2000 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
+#!/bin/sh
+#  Copyright 2000-2017 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
+# This is an example of poor man's scripting, using the fact that
+# Forth is an interpreter. This technique will work portably.
+# See also the -s option.
 ./lina64 -a <<%
 \ ( Environmental dependancies : )
 \ ( This is a ISO Forth Program using only standard ISO Words)

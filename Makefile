@@ -1,5 +1,5 @@
-# $Id: Makefile,v 5.52 $
-# Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
+# $Id: Makefile $ 
+# Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # This defines the transformation from the generic file ci86.gnr
 # into a diversity of Intel 86 assembly sources, and further into
@@ -80,7 +80,7 @@ INDICES= cp fn ky pg tp vr
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= nasm  gas fasm masm
 # Forth assembler sources that can be made using any assembler
-# on any system, maybe needing a file constant.m4
+# on any system, maybe needing a file constantxxx.m4
 TARGETS= lina32 lina64 wina mina xina \
 alone linux alonehd msdos32 alonetr dpmi
 
@@ -98,7 +98,6 @@ forth.lab.wina  \
 toblk           \
 constant.m4     \
 namescooked.m4  \
-stealconstant   \
 MANIFEST        \
 # That's all folks!
 
@@ -110,8 +109,7 @@ wordset.mi      \
 # That's all folks!
 
 # C-sources with various aims. FIXME: start with .c names.
-CSRCAUX= stealconstant
-CSRCFORTH= ciforth stealconstant
+CSRCFORTH= ciforth 
 CSRC= $(CSRCAUX) $(CSRCFORTH)
 
 # Texinfo files still to be processed by m4.
@@ -179,8 +177,8 @@ ci86.lina.labtest \
 # That's all folks!
 
 # 4.0 ### Version : an official release 4.0
-# Left out : beta, revision number is taken from current date.
 # For a release VERSION is passed via the command line as e.g. 5.3
+# If left out : beta, revision number is taken from current date.
 VERSION=`date +%Y%b%d`
 # M4_DEBUG=--debug=V   # deperado debugging.
 
@@ -200,7 +198,7 @@ $(EXAMPLESRC) \
 #ci86.lina32.asm      \
 # That's all folks!
 
-RELEASELINA32 = \
+RELEASELINA32BASE = \
 COPYING   \
 READMElina.txt \
 ci86.lina32.info \
@@ -208,12 +206,34 @@ ci86.lina32.html \
 ci86.lina32.pdf \
 ci86.lina32.ps \
 ci86.lina32.texinfo \
-ci86.lina32.fas      \
-lina32      \
 lina.1    \
 forth.lab     \
 $(EXAMPLESRC) \
-#ci86.lina32.asm      \
+# That's all folks!
+
+
+EXTRACTORS= \
+$(INGREDIENTS) \
+$(ASSEMBLERS:%=%.m4)    \
+constant_32.m4 \
+constant_64.m4 \
+namescooked.m4 \
+# That's all folks!
+
+CONFIGURATIONS= \
+lina32.cfg            \
+lina64.cfg
+
+RELEASELINA32SRC = \
+$(RELEASELINA32BASE) \
+$(EXTRACTORS) \
+$(CONFIGURATIONS) \
+# That's all folks!
+
+RELEASELINA32 = \
+$(RELEASELINA32BASE) \
+ci86.lina32.fas      \
+lina32      \
 # That's all folks!
 
 RELEASELINA64 = \
@@ -232,28 +252,22 @@ $(EXAMPLESRC) \
 #ci86.lina64.fas \
 # That's all folks!
 
-VERSION:;echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
-
 TEMPFILE=/tmp/ciforthscratch
 
 # How to generate a Forth executable.
 %: %.frt ; $(FORTH) -c $<
 
-# KEEP THIS IN UNTIL CREATION OF toblk IS OKAY
-#%: %.frt ./lina ; cp boot.lab forth.lab; $(FORTH) -c $^
-
-# Define fasm as *the* assembler generating bin files.
+# Define fasm as *the* assembler generating binary files.
 %:%.fas ; fasm $< -m256000
 
 # Define NASM as an alternative for generating bin files.
 %.bin:%.asm ; nasm -fbin $< -o $@ -l $*.lst
 
-#%.exe: ci86.%.fas ; fasm $+ -m256000
-
 # mina.cfg and alone.cfg are present (at least via RCS)
 # allow to generate ci86.mina.bin etc.
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
+VERSION : ; echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
 
 ci86.%.asm : %.cfg VERSION nasm.m4 ci86.gnr
 	cat $+ | $(M4) $(M4_DEBUG) - > $(TEMPFILE)
@@ -298,7 +312,7 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 
 .PRECIOUS: ci86.lina32.rawdoc ci86.lina32.mig ci86.wina.rawdoc ci86.wina.mig $(TEMPFILE)
 
-.PHONY: default all clean RCSCLEAN boot filler moreboot allboot hdboot releaseproof zip mslinks release
+.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release 
 # Default target for convenience
 default : lina64
 ci86.$(s).bin :
@@ -323,7 +337,6 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
 
 clean: \
 ; rm -f $(TARGETS:%=%.asm)  $(TARGETS:%=%.msm)  $(TARGETS:%=ci86.%.*)  \
-; rm -f $(INTERTARGETS) \
 ; rm -f $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy a.out\
 ; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
 
@@ -438,6 +451,17 @@ LINA32ZIP : $(RELEASELINA32)
 	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
 	rm lina32-$(VERSION)
 
+LINA32SRCZIP : $(RELEASELINA32SRC) VERSION ci86.gnr extract.mak
+	rm -f lina32-$(VERSION) forth.lab.lina
+	make forth.lab.lina
+	mkdir extract
+	cp ci86.gnr VERSION extract.mak $(EXTRACTORS) $(CONFIGURATIONS) extract
+	find $(RELEASELINA32BASE) extract | \
+	sed s:^:lina32-$(VERSION)/: >MANIFEST
+	ln -sf . lina32-$(VERSION)
+	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
+	rm -r lina32-$(VERSION) extract
+
 LINA64ZIP : $(RELEASELINA64) ;\
 	rm -f lina64-$(VERSION) forth.lab.lina
 	make forth.lab.lina
@@ -480,22 +504,10 @@ flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 # Because otherwise `constant.m4' is counted into the ``$+'' set.b
 # ci86.alone.asm : constant.m4
 
-# Convenience under linux's and osx.
-# Steal the definitions of constants from c include's.
-stealconstant: stealconstant.c ;  \
-    cc $+ -o stealconstant
-
-# Build these only on the linux 32 ,linux 64, osx target,
-# otherwise consider the constantxx files sources.
-constant.m4 : stealconstant ; $+ >$@
-#constant_64.m4 : stealconstant_64; $+ >$@
-#constant_osx.m4 : stealconstant_osx ; $+ >$@
-
-stealconstant_64:
-	@echo By hand: build stealconstant for 64 bit using -m64, then rename it
-
-stealconstant_osx:
-	@echo By hand: build stealconstant for osx, then rename it
+# FIXME: in the future the name constant.m4 must disappear in
+# favour of constant_32.m4
+# All constant*.m4 files are fotten from source control.
+constant.m4 : constant_32.m4 ; cp $+ $@  
 
 # Add temporary stuff for testing, if needed.
 include test.mak

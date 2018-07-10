@@ -53,11 +53,13 @@ the debugging phase with the assembler from the library.
 forthbreak
 _BITS64_({There is no assembler yet for 64 bit lina.
 The assembler in forthfile({forth.lab}) is useable for instructions
-that do not require a prefix, and a 64 bit version of
-forthcode({NEXT,}) is provided.
-Thus the floating point library works with 64 bits.
-Apart from forthcode({NEXT,}), floating point instructions and
-forthcode({lEA,}) instructions are needed, but neither requires a prefix.})
+that do not require a prefix. Furthermore
+the forthcode({REX,}) instruction
+that makes the operand size 64 bits  is provided, plus
+a 64 bit version of forthcode({NEXT,}).
+These additions are sufficient to make the floating point library
+assemble under 64 bits as floating point instructions do not require
+a prefix, nor does the instruction forthcode({lEA,}).})
 
 The following files comprise the great assembler.
 forthbreak
@@ -720,7 +722,7 @@ forthitem LSL,
 forthitem LSS,
 forthitem LTR,
 forthitem MOV, MOV|CD, MOV|FA, MOV|SG, MOV|TA,
-forthitem MOVI, MOVI|BR, MOVI|XR,
+forthitem MOVI, MOVI|B, MOVI|X,
 forthitem MOVS,
 forthitem MOVSX|B, MOVSX|W,
 forthitem MOVZX|B, MOVZX|W,

@@ -1,10 +1,10 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
-_C{ $Id: ci86.gnr,v 5.157 2018/02/15 23:01:33 albert Exp $}
+_C{ $Id: ci86.gnr,v 5.167 2018/07/10 18:49:20 albert Exp $}
 _C{ Copyright (2012):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
- TITLE   ciforth $Revision: 5.157 $
+ TITLE   ciforth $Revision: 5.167 $
 _C
 _C{ For the generic system (to generate ciforth in an other configuration than this one):}
 _C{     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html}
@@ -329,8 +329,7 @@ BOOTOFFSET EQU 0
 })_C{}_END_({ _SWITCH_})
 
 _HOSTED_LINUX_({
-_BITS16_({include(constant.m4) })
-_BITS32_({include(constant.m4) })
+_BITS32_({include(constant_32.m4) })
 _BITS64_({include(constant_64.m4) })
 RAWIO           EQU     (ECHO _OR_ ICANON)
 _LINUX_C_({Called from c. Remainder c-routines to be called from here.
@@ -3468,10 +3467,10 @@ enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 _C
 worddoc( {DEFINING},{MAX-USER},{max_user},{--- addr},{U},
-{A user variable which contains the part of the
+{A user variable which contains the size of the
 area for user variables, that is in use.
 It is measured in bytes from the start of the user area. },
-{{BLOCK},{MESSAGE},{U0}},
+{{BLOCK},{USER},{MESSAGE},{U0}},
 {{MAX-USER @ 1000 U< .},{_T_}},
 enddoc)
 _HEADER({MAX-USER},{MAXUSER},{DOUSE}, _CELLS(11))
@@ -5782,16 +5781,14 @@ its body. The body contains the namespace ("vocabulary") link
 field address ( forthdefi({VLFA}) ). The VLFA points to the VLFA
 of the next namespace  or  a forthdefi({nil pointer}) for the end.
 Then follows a dummy dea that serves
-as forthdefi({word list identifier}) or forthdefi({WID}) in the sense of the ISO standard.
-It has empty fields, except for the link field.
-The forthdefi({link field address}) contains the forthdefi({dea}) of the latest word of
-the namespace or a forthdefin({nil pointer}) if empty. Executing the
+as forthdefi({word list identifier})or forthdefi({WID}) .
+Executing the
 namespace means pushing its WID on top of the
 forthcode({CONTEXT}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
-oldest one gets lost. The vocabularies generated are
-forthcode({IMMEDIATE}) words.},
-{{VOC-LINK},{DEFINITIONS},{FOR-VOCS},{>WID}},
+oldest one gets lost.
+},
+{{ALSO},{VOC-LINK},{DEFINITIONS},{FOR-VOCS},{>WID}},
 {{123 NAMESPACE JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
@@ -5803,17 +5800,11 @@ _HEADER({NAMESPACE},{VOCAB},{DOCOL})
         DC      COMMA
         DC      VOCL
         DC      STOR
-        DC      ZERO, COMMA   _C{ Dummy code field}
-        DC      ZERO, COMMA   _C{ Dummy data field}
-        DC      LIT, B_DUMMY, COMMA _C{ Dummy flag field}
-        DC      ZERO, COMMA _C{Link field: empty chain}
-        DC      LIT, _DATA_FIELD(ZERO), COMMA _C{Empty string for name.}
-        _SOURCEFIELD_({DC      ZERO, COMMA}, {dnl})
-        _EXTRAFIELD_({DC      ZERO, COMMA}, {dnl})
+        DC      WORDLIST, DROP
         DC      DOES
 DOVOC:
         DC      ALSO
-        DC      CELLP   _C{ Make it a WID. }
+        DC      CELLP   _C{ Now points to WID. }
         DC      CONTEXT
         DC      STOR
         DC      SEMIS
@@ -5822,6 +5813,42 @@ _C
 _C{   The link to task is a cold start value only.}
 _C{   It is updated each time a definition is}
 _C{   appended to the 'FORTH' namespace.}
+_C
+worddoc( {DEFINING},{WORDLIST},{wordlist},{--- wid},{ISO},
+{This words creates an empty wordlist which is a single header
+structure forthdefi({dea}) that serves as a
+forthdefi({word list identifier}) or forthdefi({WID}) in the sense of
+the ISO standard.
+Definitions will be added to it after it has been copied to
+forthcode({CURRENT}).
+This handle can be placed in the top of the search order
+forthcode({CONTEXT}) and the wordlist will be searched.
+This word underlies forthcode({NAMESPACE}), there is no forthdefi({VLFA}).
+
+A wid's significant fields are the flag field and the link field.
+The flag field indicates
+that it is dummy, i.e. not intended to be executed.
+The forthdefi({link field address}) contains the forthdefi({dea}) of
+the latest word of the wordlist or a forthdefin({nil pointer}) if empty.
+The namefield points to an empty string
+},
+{{NAMESPACE},{ALSO},{>FFA},{>LFA},{FOR-WORDS}},
+{{WORDLIST CONSTANT JOHN },{},
+{JOHN DUP CURRENT ! ALSO CONTEXT ! },{ },
+{: X ; 'NOOP JOHN FOR-WORDS 'X = . JOHN = .},{-1 -1 },
+{ONLY FORTH DEFINITIONS },{} },
+enddoc)
+_HEADER({WORDLIST},{WORDLIST},{DOCOL})
+        DC      HERE
+        DC      ZERO, COMMA   _C{ Dummy code field}
+        DC      ZERO, COMMA   _C{ Dummy data field}
+        DC      LIT, B_DUMMY, COMMA _C{ Dummy flag field}
+        DC      ZERO, COMMA _C{Link field: empty chain}
+        DC      LIT, _DATA_FIELD(ZERO), COMMA _C{Empty string for name.}
+        _SOURCEFIELD_({DC      ZERO, COMMA}, {dnl})
+        _EXTRAFIELD_({DC      ZERO, COMMA}, {dnl})
+        DC      SEMIS
+        PAGE
 _C
 worddoc( {WORDLISTS},{ASSEMBLER},{assembler},{},{WANT,NISO,FIG},
 {The name of the namespace that contains machine code definitions.
@@ -5863,11 +5890,12 @@ _C
 worddoc( {WORDLISTS},{ALSO},{also},{},{ISO},
 {Duplicate the topmost forthdefi({WID}) in the search order stack.
 If there were already M4_MAXWORDLIST WID 's,
-ciforth looses the last one.
-This is not counting
-the forthcode({ONLY}) search order.
-_VERBOSE_({{You seldomly need to use this word, because in ciforth
-by executing a namespace you add it to the order.
+ciforth looses the last one, i.e. the first added to the search
+order probably forthcode({FORTH}). This is probably fatal.
+forthcode({ONLY}) remains in the search order and
+forthsamp({ONLY FORTH}) can be used to recover.
+_VERBOSE_({{Using namespaces you will not need to use this word,
+because in ciforth by executing a namespace you add it to the order.
 This is different than the words defined by the customary
 forthcode({VOCABULARY}) that replaces the topmost wordlist.
 }})},
@@ -6104,27 +6132,26 @@ OPT4:
 })_C{}_END_({_HOSTED_})
 
 worddoc( {INITIALISATIONS},{COLD},{cold},{},{FIG},
-{Initialise all user variables to their boot up values values,
+{When called for the first time it
+initialises all user variables to their boot up values values,
 i.a. the stacks and the forthdefin({dictionary pointer}) .
 Initialise the system as per forthcode({_INIT}).
 Handle command line options, if any, as per forthcode({OPTIONS}).
 Show signon message and restart via forthcode({ABORT}) .
-May be called from the terminal to remove application
-programs and restart, as long as there are no
-new vocabularies with definitions.
+May be called from the terminal to restart, while keeping all definitions.
 _HOSTED_({But it is better to say forthcode({BYE}) to Forth and start again.})
 _BOOTED_({But it is better to reboot.})
 },{{WARM},{_INIT},OPTIONS},
 {{( No test)},{}},
 enddoc)
-_HEADER({COLD},{COLD},{DOCOL})
+_HEADER({COLD},{COLD},{DOCOL},{COLD5})
 _C{ Fill user area for single task.}
         DC      LIT, USINI      _C{ Fails if SP/RP are not usable!}
         DC      LIT, USINI+_CELLS(1), FETCH
         DC      LIT, US
         DC      LCMOVE
         DC      INIT
-        DC      ONE            _C{ Sign on wanted.}
+COLD0:  DC      ONE            _C{ Sign on wanted.}
 _DLL_({
         DC      LCOMMAND, DROP, ARGS, STOR
 })_C{}_END_({_DLL_})
@@ -6872,6 +6899,8 @@ _C
 worddocsafe({BLOCKS~},{(BUFFER)},{paren_buffer},{n --- addr},{},
 {Return the addres forthvar({addr}) of a buffer assigned to
 identification forthvar({n}) , probably a block number.
+Block numbers are positive, so a negative value can be
+used for a buffer that is used for some other purpose.
 The buffer layout is as follows: a cell
 with forthvar({n}), a cell with the status, and the
 content of length forthdefi({B/BUF}) .
@@ -6881,8 +6910,8 @@ The block is not read from the disc. The buffer
 is either one that was already assigned, or else a free buffer.
 If there is none free, some non-locked buffer is freed. The
 contents of that buffer is written to the disc, if it was
-marked as updated. In ciforth this is never needed, because
-updated blocks are written immediately.
+marked as updated. In ciforth this will never happen,
+because updated blocks are written immediately.
 In ciforth blocks can
 be locked, and locked buffers are never freed by
 forthcode({(BUFFER)}) .
@@ -7100,9 +7129,12 @@ _C
 worddoc( {SCREEN},{LOAD},,{n --- ??},{ISO,FIG},
 {Interrupt the forthdefi({current input source}) in order to
 interpret screen forthvar({n}) .
+While the screen is interpreted, it is locked, meaning that it
+cannot be associated with a different screen nr than forthvar({n}) .
 _VERBOSE_({{The stack changes in according with the words executed.}})
 At the end of the screen, barring errors or forced changes,
-it continues with the interrupted input source.},
+it continues with the interrupted input source.
+},
 {{BLOCK},{LOCK},{#BUFF},{THRU},{QUIT},{EXIT},{-->},{LIST}},
 {{." interactive"},{interactive}},
 enddoc)
@@ -7495,7 +7527,9 @@ worddoc( {OPERATINGSYSTEM},{XOS},{xos},{n1 n2 n3 n---ret},{},
 system call forthvar({n})
 (man 2) with parameters forthvar({n1 n2 n3}).
 forthvar({ret}) is the return value of the call. If it is negative, it
-is mostly an error, such as known by forthemph({errno}) . This makes
+is mostly an error. It is related to forthemph({errno}) in the c standard library
+and will mostly be equal.
+This makes
 available all facilities present in _OS_, except those with 4 or 5 parameters
 that are handled by forthcode({XOS5}) .
 },{{?ERRUR}},
@@ -8074,7 +8108,8 @@ forthvar({fileid}) and a result code into forthvar({ior}).
 The latter is the _PC_({ MSDOS}) _HOSTED_X_({
 forthvar({errno}) }) negated, to be inspected using
 forthcode({MESSAGE}) .
-_HOSTED_LINUX_({ The handle is open for READ_WRITE, so forthvar({fam}) is
+_HOSTED_LINUX_({ The handle is open for READ_WRITE, so the
+lowest 8 bits of forthvar({fam}) are
 in fact ignored. The access privileges default to octal 755. })
 },
 {{OPEN-FILE},{READ-FILE},{WRITE-FILE},{DELETE-FILE}},
@@ -8287,6 +8322,35 @@ RFIL3:
 RC:     DC      0
 })_C{}_END_({ _HOSTED_DPMI_})
 _C
+_LINUX_N_({
+worddoc( {FILES}, {FILE-POSITION}, {file_position}, {fd --- ud ior }, {ISO},
+{
+forthvar({ud}) is
+the file current position for the file that is open at forthvar({fd}).
+forthvar({ior}) is 0 for success, or otherwise
+_PC_({the MSDOS error code}) _HOSTED_X_({forthvar({errno})})
+negated . Information about
+error codes can be found by forthcode({MESSAGE}). },
+{{OPEN-FILE},{REPOSITION-FILE}},
+{
+{ "hello.frt" 0 OPEN-FILE . CONSTANT FD },{0 },
+{FD FILE-POSITION . D.},{0 0},
+{PAD DUP 5 FD READ-FILE . TYPE},{0 "Hell},
+{FD FILE-POSITION . D.},{0 5},
+{FD CLOSE-FILE .},{0}
+},
+enddoc)
+_C
+_HEADER({FILE-POSITION},{FPFILE},{DOCOL})
+        DC      ZERO
+        DC      LIT, SEEK_CUR
+        DC      LIT, lseek, XOS
+        DC      ZERO     _C{Double precision return result}
+        DC      OVER, LDUP
+        DC      NEGATE, LIT, 256, ULESS, LAND _C{ Heuristic }
+        DC      SEMIS
+})_C{}_END_({_LINUX_N_})
+_C
 worddoc( {FILES}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
 {Position the file that is open at forthvar({fd}) at position
 forthvar({ud}). forthvar({ior}) is 0 for success, or otherwise
@@ -8399,6 +8463,7 @@ The file is permanently stored at forthcode({HERE}) .
 {{"hello.frt" GET-FILE TYPE },{"Hello world!" TYPE}},
 enddoc)
 _HEADER({GET-FILE},{GETFILE},DOCOL)
+_ALIGNED_({    DC LALIGN}, {dnl})
         DC      TDUP, SCOMMA, DROP
         DC      LIT, 'F'+(0x100*('i'+0x100*('L'+0x100*'e'))), COMMA _C{Magic number.}
         DC      ZERO, OFILE, THROW, TOR
@@ -9053,9 +9118,10 @@ dnl { DSP@ ICALL[ DUP DSP@ - 254 258 WITHIN DSP! }, { T }
 enddoc)
 
 dnl This one is only used in MS-Windows, otherwise it is a wasted cell.
-dnl _HEADER({PARS},{PARS},{DOUSE}, _CELLS(38))
+dnl _HEADER({PARS},{PARS},{DOUSE}, _CELLS(23) )
+dnl NOT YET! It crashes for now.
 _HEADER({PARS},{PARS},{DOVAR}, )
-        DC      0
+          DC      0
 
 _HEADER({PAR1},{PAR1},{DOCOL})
         DC      PARS, FETCH, STOR
@@ -9687,7 +9753,7 @@ _HEADER({SHELL},{SHELL},{DOVAR}, )
         _DLL_( {_STRING({C:\windows\system32\cmd.exe})})
         _PC_( {_STRING({C:\COMMAND.COM})})
         _ALIGN(_CELLS(1))
-        _RESB(M4_FILENAMELENGTH)_C{ Allow for some path}  
+        _RESB(M4_FILENAMELENGTH)_C{ Allow for some path}
 _PC_({  _RESB(0x100)     _C{ Double serve as stack at start up. }})
 _C
 _HOSTED_OSX_({
@@ -9722,10 +9788,7 @@ _DLL_({
 { dnl these test must be unconditional, in separate worddoc headers
 { 1 LOAD  "GET-ENV" WANTED },{},
 { "COMSPEC" GET-ENV SHELL $!},{},
-dnl Output would come at the end of file, fails under wine.
-dnl{"wina.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
 {"REM NO OUTPUT" SYSTEM },{}
-dnl{"" SYSTEM },{}
 } dnl these test must be unconditional, in separate worddoc headers
 })
 ,enddoc)
@@ -11030,13 +11093,17 @@ _HEADER({U.},{UDOT},{DOCOL})
         DC      DDOT
         DC      SEMIS
 _C
-worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt wid --- x1...xn},{},
-{For all words from a word list identified by
-forthvar({wid})
+worddoc( {DICTIONARY~},{FOR-WORDS},{for_words},{x1...xn xt dea --- x1...xn},{},
+{For all words starting with and including forthvar({dea})
 execute forthvar({xt})
  with as data forthvar({x1..xn}) plus
-the forthdefi({dea}) of those words.         forthvar({xt})
-must have the stack diagram forthvar({x1..xn dea --- x1..xn}).
+the forthdefi({dea}) of those words by following the link fields.
+forthvar({xt})
+must have the stack diagram forthvar({x1..xn dea' --- x1..xn}).
+Mostly the dea will identify a WID.
+In that case all words of a wordlist are handled.
+If you don't want to include the WID itself, you can ignore
+it based on the dummy flag in its flag field.
 _VERBOSE_({{Note that you can use the forthdefi({dea}) of any word as a WID
 and the remainder of the word list will be searched.}})
 },
@@ -11171,12 +11238,14 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 _BITS32_({  {
 { 1 LOAD  "GET-ENV" WANTED },{},
 { "COMSPEC" GET-ENV SHELL $!},{},
-{"wina.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
+ {"wina.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
+dnl {"echo 23 EXIT-CODE ! | wina32  |echo %errorlevel%" SYSTEM }, {23}
 }, })
 _BITS64_({  {
 { 1 LOAD  "GET-ENV" WANTED },{},
 { "COMSPEC" GET-ENV SHELL $!},{},
-{"wina64.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
+ {"wina64.exe -f 23 EXIT-CODE ! BYE >null:" SYSTEM ( No error!)}, { }
+dnl{"wina64.exe -f 23 EXIT-CODE ! BYE|echo %errorlevel%" SYSTEM }, {23}
 }, })
 enddoc)
 _HEADER({BYE},{BYE},{DOCOL})
@@ -11192,11 +11261,11 @@ worddoc( {OPERATINGSYSTEM},{BYE},{bye},{---},{ISO},
 },{{COLD},{EXIT-CODE}},
 _HOSTED_LINUX_({
 _BITS32_({
-{{"./lina32 -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
-{23 EXIT-CODE ! BYE 23}},  })
+{{"echo 23 EXIT-CODE ! | ./lina32 ;echo $?" SYSTEM},
+{23}},  })
 _BITS64_({
-{{"./lina64 -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},
-{23 EXIT-CODE ! BYE 23}},  })
+{{"echo 23 EXIT-CODE ! | ./lina64 ;echo $?" SYSTEM},
+{23}},  })
 })_C{}_END_({_HOSTED_LINUX_})
 _HOSTED_OSX_({
 {{"./xina -f 23 EXIT-CODE ! BYE ;echo $?" SYSTEM},

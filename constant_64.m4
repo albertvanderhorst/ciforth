@@ -1,9 +1,13 @@
-
 _C{ ------------------------------------------------------------ }
-_C{   Constants stolen from C in linux 64 bit environment.        }
+_C{   syscalls are copied from                                            }
+_C{https://github.com/torvalds/linux/blob/master/arch/x86/entry/syscalls/syscall_64.tbl }
 _C{ ------------------------------------------------------------ }
+_C{ https://github.com/torvalds/linux/tree/master/arch/x86/entry/syscalls}
+_C{ you may benefit from the program stealconstant }
+_C{ https://github.com/albertvanderhorst/stealconstant }
 
-SEEK_SET        EQU       0x0
+SEEK_SET        EQU     0x0    
+SEEK_CUR	EQU     0x1     
 TCGETS  EQU       0x5401
 TCSETS  EQU       0x5402
 ECHO    EQU       0x8

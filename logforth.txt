@@ -1,5 +1,4 @@
 2000 jan 17
-
 10:30 Finaly started. directory structure created and readme's.
 goals for today
 - directory tree and its readme's
@@ -12167,7 +12166,7 @@ All checked in. CH+ is now $C+.
 2009 may 21
 The linking of an assembler file can use a very simple script
 "
-/* $Id: logforth.txt,v 1.40 2017/10/29 13:46:29 albert Exp $ */
+/* $Id: logforth.txt,v 1.66 2018/06/15 04:00:23 albert Exp $ */
 /* Script for -N: mix text and data on same page; don't align data */
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
@@ -14326,6 +14325,8 @@ Published in mentors. In fact this solves ITP bug 859130 halfway.
 2017 oct 9
 It appears that you can address revisions as follows:
 git diff REL-5-3-0 -- nasm.m4
+NOTE 2018 feb 7 : can't get this to work.
+NOTE 2018 jul 3 : must be CVS_REL-5-3-0 .
 
 2017 oct 12
 The following files are different w.r.t. the local git archive.
@@ -14349,7 +14350,7 @@ Then upload to debian.mentors.net (not org)
 2017 oct 17
 I have filled in my C12C8A7A public key in my Debian account.
 Apparently an upload works by signing both the changes and
-the sdc. However this can only be retrofitted by debsign
+the dsc. However this can only be retrofitted by debsign
 that refuses to work.
 
    1. sign by the Debian account key : the changes file (!)
@@ -14428,18 +14429,497 @@ Default for lina64 increased to 64 Megabyte.
 Building with directory inside ciforth works and tested to generate
 the same files than the old target LINA64ZIP.
 
-What remains are officialdecompilation sortworddoc.frt is not up
-to date. spy is a scratch file.
+Abandoning all changes in git:
+  remove all files
+  git reset --hard
+  git clean -fd
 
+The directory tree for the git archive has been reoriganised
+This is not reflected in cvs.
+GIT2017OCT29 tagged.
 
+2017 nov 1
+Apropos optimising:
+    make lina-ana
+    make testoptimiser
+succeeds.
+2017 nov 7
+Optimising: it is clear what is wrong with TESTI. The constituents
+should be optimised beforehand.
+In lina.html in the first screen a remark about concepts added.
+
+2017 nov 8
+blocks.frt : decompilation no longer generates BRANCH.
+Worked on burning down the git version.
+A number of rather unimportant stuff has been moved to the ciforth directory
+such that local git archives can be deleted. Inadvertantly I deleted
+a directory that is now in ~/PROJECT/ciforthfrombackup being burned down.
+
+2017 nov 10
+The comment mechanism is update. M4 handles comments a blocks,
+such that in .fas files it can be changed to single comment lines,
+instead of suppressing it. Concerns:
+Makefile ci86.gnr fasm.m4 gas.m4 masm.m4 nasm.m4
+
+2017 nov 14
+W.r.t. the building of a deb package of sept 7
+dpkg-buildpackage -us -uc
+must be replaced by just
+dpkg-buildpackage
+Otherwise the package will not be signed, and that must then be done
+later somehow.
+I've made a patched lina-5.3.0.tar.gz archive in project/debianlina
+with the proposed Makefile and no lina executable.
+Also a dosh that adds shell variable
+
+2017 nov 14
+With Coos Haak worked on parallel prime counting. 2 paralel now
+works.
+
+2017 nov 16
+Off it goes.
+Unpack the patched lina-5.3.0.tar.gz.
+
+2017 nov 17
+I have now gitjunk/ciforth. With a lina-5.3.0 with a Makefile and
+no lina. This is the base for a package.
+
+2017 nov 19
+REGRESS misbehaves when testing caught exceptions.
+This was due to the use of WHERE to keep track in DO-VERBOSE
+The remedy is to use a separate variable. Done.
+2, is now in the core.
+
+2017 nov 24
+Studying FSl.
+My mergesort is a good candidate.
+It took some time to have it working.
+I adapted it such that LL< destroys its parameters.
+
+2017 dec 4
+I can't use my password for my pgp key.
+So I created a new one.
+Made a test for Diane to try it out.
+There are two nits left.
+No DIR-ENTRY for info
+W: lina: extended-description-contains-empty-paragraph
+W: lina: unknown-section contrib
+E: lina: info-document-missing-dir-section usr/share/info/lina.info.gz
+E: lina: info-document-missing-dir-entry usr/share/info/lina.info.gz
+W: lina: manpage-has-bad-whatis-entry usr/share/man/man1/lina.1.gz
+W: lina: executable-not-elf-or-script usr/share/doc/lina/examples/mywc32
+N: 1 tag overridden (1 error)
+All this was solved except the last.
+
+2017 dec 5
+This is all incorporated in a .dcs file.
+It has been uploaded with dput and it tells that everything is okay.
+No package shows up in my account. I've sent a message to
+support@debian.mentors.com
+
+2017 dec 15
+Implemented include-file, see include-file.frt in tools.
+This has been added to the screens.
+
+2017 dec 17
+I struggled with a test for MERGE-SORT. It turns out that
+I can use SORT-VOC as a test. The id that I can use a prime
+with primitive root 2 e.g 197 to generate a linked list somehow
+didn't pan out. Anyhow the MERGE-SORT contains a design error
+that < doesn't consume its arguments, and the stack comment is
+wrong. blocks.frt 1.34 solves this and also reverse the order
+of sorting in SORT-VOC, such that WORDS come out in alphabetic order.
+blocks.frt fixes REGRESS, verbose regress no longer get upset by
+exceptions.
+
+2017 dec 18
+hello.frt doesn't contain the nonstandard .", but it has the upcoming
+" and TYPE. INCLUDE-FILE is added, with a lowercase include that
+uses ot. REGRESS READ-FILE INCLUDE-FILE tests are added to
+ciforth.lab.test. This was tricky because READ-FILE doesn't handle
+files that don't end in ^J gracefully. Now changed hello.frt
+to be usable. Version 5.134 of blocks.frt.
+
+2017 dec 19
+INCLUDE-FILE doesn't work properly with noforth.
+A fresh effort requires that LOCK  can be used with disk buffers
+without reading them from disk. The first step is making
+THRU a loop over simple LOAD's. In 5.147.
+
+2017 dec 19
+Block locking without reading,
+Comment w.r.t. buffer mechanism addapted. It is used in INCLUDE-FILE
+by lines, in 1.45  ci86,gnr   5.148.
+
+2017 dec 22
+NAME must be redefined for line by line parsing. (INCLUDE-FILE block).
+2, must not be in the library now it is in the kernel.
+error 33 added: INPUT exhausted
+
+2017 dec 30
+Much work into a new release. buster installed.
+The signing of my new package doesn't work. because of problems with
+gpg.
+
+2017 dec 31
+Computer broke down
+
+2018 jan 1
+After clearing Cmos, replacing battery reseating memory etc.
+it works again.
+Added a removal of trailing spaces to the building.
+gpg only accepts my secret key as root
+Managed to sign the package as root.
+Transported it from strawberry to cherry.
+
+2018 jan 2
+UPloaded. One error remaining. "Solved a wrong bug"
+The gpg system doesn't work properly, I must use root account
+to sign the package. One serious error remains.
+
+2018 jan 6
+Updated the package not mentoning the error. Now there is
+one yellow mark left.  "A watch file is present but doesn't work"
+Added a tag snapshot2017Oct29 to tag the latest git. Added a
+source release to it and added binary distributions to it.
+
+2018 jan 8
+Edits to cifgen.mi.
+Not yet checked in.
+
+2018 jan 10
+With the help of advise from Geert Stappers, the git
+archive is now okay to have a debian program using it as a watch.
+Added a tag, and based the distrbution on that tag,
+Added a tag CSV_REL, made similar binary distribution for 5.3
+(lina/wina).
+
+2018 jan 12
+Time out w.r.t. packaging, Geert Stappers.
+Trying to formulate a lesson about literals.
+
+2018 jan 15
+Test results from Coos Haak for 64 bits windows.
+It is discovered that there is no default command intepreter
+for _DLL_ , only _PC_. In fact _DLL_ _PC_ are conflicting.
+
+2018 jan 18
+Checked in:
+blocks.frt contained annoying type. labtest extended.
+checked in: (for debian release)
+lina.mak releaselina.bat
+checked in: textual stuff induced by Debian  ci86.gnr 5.149
+
+2018 jan 24
+The initialisation of the MEMORY wordset is done properly,
+adding the word heapify. blocks.frt agree with the label
+OKAY2 in tools/ALLOCATE. INIT-ALLOC uses up one quarter
+of the memory. Also a test added.
+At the same time FIB added to calculate Fibonacci
+
+Initialisation for MEMORY wordset separate from loading the wordset,
+error detection improved.
+Fixed: index lines of screens loaded during debugging
+Fibonacci added.
+
+2018 jan 25
+* Assembler switches to CASE-SENSITIVE, MEASURE-PRIME always loads.
+* FINIT is always done in loading the fp system
+
+2018 jan 30
+- check whether the orig file is somehow modified.
+
+2018 feb 6
+Test of 64 bit wina.
+* testwina64files.1 contains wina.exe instead of wina64.exe
+* -e doesn't work, because of INSTALL-TRAPS
+* -c doesn;t work TURNKEY NOT PRESENT
+* prompt message misses AMD...
+* CALL[ CALL] No actual test but a message
+* GET-ENV fails (known: library)
+* mysterious message: regression test
+Building a program didn't work. It turns out that barring the
+early publication of the 64 bit wina, the screen that does it
+was lost. It is reintroduced in blocks.frt.
+
+2018 feb 7
+We want the git archive up to date.
+First thing is to updating the comment mechanism.
+This done by cvs diff -D 20171109 -D 20171111 and apply that
+to the latest git version.  Done.
+Secondly: the change to the cifgen docs and texinfo and
+lina.1.
+texinfo : direntry must be added and references to top must be Top.
+
+wina64.exe succeeds the regression test testwina64files.1 ,
+assuming the same command like wina32.exe in the Makefile.
+
+2018 feb 9
+Documentation cifgen.mi ciforth.mi and lina.1 are transferred
+to the git directory.
+
+2018 feb 11
+Modifications in behalf of compiling noforth to the git directory
+git directory pushed to github.
+Explanation at git hub.
+
+The problem with nested use of RW-BUFFER. It diesn't end there.
+If a windows call is in progress, and e.g. _gev must call
+windows to find a call address, there is also a problem
+with recursive use of PARS.
+A simple solution is just to save PARS on the return stack.
+Another solutions is to introduce RTUCK and R2@.
+
+2018 feb 12
+I tried to make LOAD-DLL and DLL-ADDRESS fully re-entrant by not using
+RW-BUFFER to store their zero-ended names using ZEN, but storing
+the names in buffer reserved by CALL[. Furthermore PARS is save
+and restored via the return stack. This is still in 5.153.
+Still GET-ENV needs a `` _gev DROP '' to make it work the first
+time. The reason is that LOAD-DLL DLL-ADDRESS and GET-ENV
+still use the same stack frame at DSP-256. So the change
+made just doesn't work. There is no choice but to document
+the restriction that within CALL[ CALL] absolutely no
+recursive calls on MS-WINDOWS are allowed, and that a
+subroutine name is potentially a call in compiled program.
+blocks.frt 5.152 : the comment is incorrect!
+
+2018 feb 13
+CREATE-FILE in Linux now allways makes a 755 file and ignores fam.
+TIME&DATE GET-ENV and midi all tested in 64 bit.
+
+2018 feb 14
+64 bit wina toegevoegd aan git
+
+2018 feb 15
+ci86.lina.labtest renamed to ci86.lina.labtest.
+test.mak all test targets include that test, cleanup.
+
+2018 feb 23
+Feared that MERGE-SORT was no good. However tested 5.3.0 version.
+Now there is a mergesort.tst in the tools directory.
+The usage comment was wrong!
+
+2018 feb 27
+The quotations using { } are tested on the forth lisp
+of Probst and checked in. Can now decompile { } too.
+Introduced >ALLOC. Both added to test.
+COLD crashes no more, by only installing the user variables
+the first time.
+
+2018 mar 2
+Message to bdale, a request for sponsorship. Using gpg.
+gpg --clearsign message
+
+2018 mar 5
+The command to build from a .dsc file is
+    dpkg-source -x myprogram.dsc
+
+2018 mar 11
+Contact with Phil Burke of pforth lead to a response.
+He is interested. I've returned an explanation.
+Added a wiki page for MERGESORT.
+
+2018 mar 12
+Phil Burke tries to stimulate Bardeen.
+There is now a debiansrc.bat that generates a src archive.
+It is too hard to make reasonable commands to generate ps pdf info,
+so it includes those files.
+The filename decided for the extraction directory is extract.mak
+The filename decide for the Makefile in the main directory is debian.mak
+Can now make a source distrbution by makesrc.bat.
+A usable lina- 5.3.0.tar.gz is placed in debinalina/2018mar
+
+2018 mar 13
+Testing EXIT-CODE leads to a way to avoid using the -f options.
+This is introduced into the lina code. The same code works for
+wina in a separate command but not in the automatic test, so
+it is commented out with a dnl.
+The 64 bits code didn't even compile.
+
+2018 mar 26
+Building a distributie on kiwi has succeeded, however
+the file seems to be known as AMD.
+the makefiles have to be added
+.texinfo still contains a spurious top without capital.
+the library name has to be patched.
+
+2018 mar 27
+The files makesrc.bat extract.mak and debian.mak now
+generate a source distribution where two makefiles are
+to be added. These files are in the latest cvs distribution.
+From debians viewpoint they are patches.
+
+2018 mar 28
+Uploaded a reasonable version.
+
+2018 mar 30
+New (final) version of the files makesrc.bat extract.mak and debian.mak
+uploaded.
+
+2018 mar 31
+FILE-POSITION was missing. Added it, but alone for LINUX_N.
+The SEEK_CUR is hard coded as 1, adding the stealing has still
+to be done.
+
+2018 apr 8
+Working on ocr, I discovered that INIT-ALLOC GET-FILE can result
+in a corrupt link chain for ALLOCATE, the count for the file
+name enters into the last address. This is solved by a couple
+of ALIGNED/ALIGN. In particular the heapified block in
+INIT-ALLOC is now an multiple of CELL and GET-FILE starts
+with alignment.
+
+2018 may 3
+In euler566 it is dicovered that the experimental version
+cannot load euler566.frt if the memory is enhanced above
+4 Gbyte.
+Made the loading of -fp- somewhat more sensible.
+
+2018 may 22
+Uploaded a deb file to debian -2 with lots of errors in the
+watch file.
+2018 may 23
+Uploaded a deb file to debian -2 without a watch file.
+For me this archive is perfect.
+
+2018 may 25
+I dare not look at Geert Stappers responses.
+26th there is a meeting of the linux user group.
+
+Plan for the constant.m4 thing.
+1. all relevant files (constant_32.m4 constant_64.m4 constant_osx.m4
+are in the archive and considered source w.r.t. ciforth.)
+2. makefile constant.m4 target just copies constant_32.m4.
+3. all making of constant (stealconstant.c etc.) is moved to
+ a different project.
+
+2018 jun 4
+Geert has made an example for me. I only need to fill in project
+and archive. I made a watch file and had to change the tags directory
+from Geert to the actual release directory. There it goes again.
+Because no source are changed, we can just put the watch in the
+debian subdirectory. Then goto  lina-5.3.0
+en type "dpkg build-package -k$GPGKEY"
+The GPGKEY comes from ". dosh". After the pass phrase is ready
+we can ship it to cherry using
+    dput mentors lina_5.3.0-2_amd64.changes
+(because mentors is present in dput.cf , remember.)
+That has been done. mentors still thinks the watch file is
+no good.
+
+2018 jun 5
+While waiting for the verdict of Geert Stappers, I thought maybe do
+something useful. WORDLIST really belongs in the kernel, because
+it is dependent on whether we want a sourcefield and an extra field.
+It also has B_DUMMY. Is has been moved now from blocks.frt to
+the kernel and used within NAMESPACE. This triggers a rewrite
+of the documentation and also's. ORDER now handles anonymous wid's.
+
+2018 jun 11
+At last a totally green version of lina is uploaded to mentors.
+
+2018 jun 12
+Geert Stappers insists that lina-5.3.0.tar.gz is not an acceptable
+source. That means I've no longer a sponsor. Or at least he
+thinks all of the github website should be included.
+optimiser.frt : If a branch ends at a next, the code can not be
+concatenated with other expansion, but it can with single words.
+This is TESTIA that is added. It looks as if there is no
+problem (or no longer) with EXIT.
+
+2018 jun 14
+Tedious debugging of optimiser. An obvious failure of correcting
+branch offsets was caused by a 1+ error. TESTI.
+There is now considerable more grip and a note about how to handle
+EXIT and LEAVE.
+It will probably be necessary to expand NIP because it is and
+ugly bastard of a juggler and annihilator.
+: test OR EXIT XOR ; still not optimises.
+
+2018 jun 19
+Start with multi-threading under windows. in tools/threads/windows
+A windows thread can be created.
+
+2018 jun 21
+Working on THREAD-PET for windows.
+
+2018 jul 3
+stealconstant.c and strerror.c removed from the archives and
+moved to the project stealconstant.c
+
+============
+Notes for release 5.4
+Before 2017 oct 20
+* NIP introduced where possible in the library
+* Inlining removed from modulo package.
+After  2017 oct 20
+* SORT-VOC no longer results in anti-alphabetic order
+* Regress now can be used to test words that catch exceptions.
+* Usage of MERGE-SORT -- stack diagram -- changed.
+* 2, in the kernel, so default no longer a number, removed in library
+* hello.frt uses " and TYPE, no more ." and has OS-dependant line ending
+* CASE-INSENSITIVE now also does numbers.
+* THRU is now a loop of LOAD 's. Affect DO-DEBUG
+* LOCK locks a buffer without reading from disk, in behalf of files
+* INCLUDE-FILE added that reads by lines, proper REFILL, proper NAME
+* introduce error for input exhausted in SCAN-WORD
+* textual and example improvement
+* (MEMORY wordset) added INIT-ALLOC c.s.
+* (MEMORY wordset) size and address now may be negative.
+* Assembler switches to CASE-SENSITVE, MEASURE-PRIME always loads.
+* FINIT is always done in loading the fp system
+* WANT DO-DEBUG CASE-INSENSITIVE now runs DO-DEBUG CASE-INSENSITIVE
+* GET-ENV didn't work the first time,
+* LOAD-DLL LOAD-ADDRESS ca now be called from between CALL[ CALL]
+* Better default command interpreter for modern MS-Windows
+- ? move TUCK to kernel?
+- with 6.0 the fp package should be introduced
+- 6.0 floored division and comprehensive tests for GCD XGCD c.s.
+* CREATE-FILE makes a file with no read access.
+* add >ALLOC ,, ADD-ALLOC  maybe use it internally.
+* Add a test for merge, inorder to be able to modify mergesort
+* COMMENT/ENDCOMMENT has become _COMMENTED({ }) such that
+    fasm can handle it.
+* lina / 1 load / COLD / WORDS crashed, no more.
+- TICKS misbehaves on a 4Ghz machine/32 bit
+- decompilation improvements: nested THEN , IF/WHILE , loose {
+* FILE-POSITION was missing
+- SEEK_CUR must be in stealconstant
+- errno is a global variable in libc, it shouldn't be in ciforth docs.
+- the -l option must be retested, in behalf of COLD
+* WORDLIST must be added to the kernel (B_DUMMY SOURCE_FIELD)
+- NAMESPACE must refer to PREVIOUS
+- CORRECT-BRANCHES in optimiser.frt is wrong.
+- 0.E leaves a zero on the data stack
+- are S>F D>F missing?
+- WANT ASSEMBLER crashes a wina64 5.3.0 after -e
+- Document that ;CODE cooperates with DATA
+- ;CODE needs added ` LATEST HIDDEN '
+- replace max-user with last-user
 ===========================
 Greg Egan
 Schild's ladder.
 --
+What remains sortworddoc.frt is not up to date.
 
-Get-file should check for memory overflow.
-In lina.html in the first screen a remark about concepts.
 
+- M:r  endclass-p
+
+- filter reduce(fold) map are useful words to add.
+  It can be used by bags on the stack
+  DSP@ >R 1 2 3 4 5 R>
+  generates a bag at DSP@
+
+
++ALIAS should be in core
++TRIAD must become a loadable extension.
++I must remake VALUE as an alias of CONSTANT. Make the optimiser
+    understand that VALUES are not constant. Never patch DFA's of
+    constants again.
+
++ Get-file should check for memory overflow.
++ there may be an improved version of sortworddoc.frt
 Write the article for allocate using a objects and thingies.
 
 Suppose sda1 is a sandisk.
@@ -14451,3 +14931,9 @@ issues:
   INCLUDE SEE LOCATE DUMP CASESENSITIVE
 - the definition generated by :R should be hidden.
   then it can be redefined several times and RESTORED works.
+ - add
+~> https://www.forth.com/starting-forth/
+ > https://sourceforge.net/projects/thinking-forth
+Scripting under MS-windows:
+    -s : trimline must be: CF: "?LI <trim>" EVALUATE
+    documentation
