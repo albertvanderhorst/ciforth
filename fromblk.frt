@@ -1,5 +1,5 @@
 \ Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-\ $Id$
+\ $Id: fromblk.frt,v 5.4 2016/11/10 00:12:54 albert Exp $
 \ Convert a text file to a .lab file.
 
 WANT WRITE-LINE

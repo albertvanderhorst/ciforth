@@ -1,0 +1,236 @@
+# $Id: opcodes.txt,v 5.2 2005/06/16 15:54:18 albert Exp $
+# Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
+This is a quick reference card for Intel 386 in its 16 bit mode.
+It applies to the code in ass.frt, that is no longer updated.
+This assembler is in figforth codem and has some errors probably.
+See asi86.frt for a maintained assembler.
+
+     0       1      2      3      4      5     6      7
+     8       9      a      b      c      d     e      f
+  +------+------+------+------+------+------+------+------+
+  |2 B|     W|     B|     W|  |  B1|    W1| | PUSHS  POPS |
+0 |           ADD             |    ADDAI    |     ES|     |
+  | AX|                       |             |             |
+  + CX|                 R|    +             +      +------+
+  | DX|                 D0|   |             |      |      |
+  | BX|       OR        DB|   |    ORAI     | CS|  |  X   |
+0 | SP|                 DW|   |             |      |      |
+  + BP|  F|        T|         +  B,     W,  +      +------+
+  | SI|                       |             |             |
+1 | DI|       ADC      MEM|   |    ADCAI    |     SS|     |
+  |                    MEM,   |             |             |
+  +                           +             +             +
+  |                           |             |             |
+1 |           SBB             |    SBBAI    |     DS|     |
+  |                           |             |             |
+  +  B|     W|     B|     W|  +  B1|    W1| +------+------+
+  |                           |             |      |      |
+2 |           AND             |    ANDAI    |  ES: | DAA  |
+  | AX1|                      |             |      |      |
+  + CX1|              [BX+SI] +             +      +      +
+  | DX1|              [BX+DI] |             |      |      |
+2 | BX1|      SUB     [BP+SI] |    SUBAI    |  CS: | DAS  |
+  | SP1|              [BP+DI] |             |      |      |
+  + BP1| F|        T| [SI]    +  B,     W,  +      +      +
+  | SI1|              [DI]    |             |      |      |
+3 | DI1|      XOR     [BP]    |    XORAI    |  SS: | AAA  |
+  |                   [BX]    |             |      |      |
+  +                           +             +      +      +
+  |                           |             |      |      |
+3 |           CMP             |    CMPAI    |  DS: | AAS  |
+  |   B|     W|     B|     W| |  B1|    W1| |      |      |
+  +------+------+------+------+------+------+------+------+
+  |  AX|    CX|    DX|    BX|    SP|    BP|    SI|    DI| |
+4 |                         INCX                          |
+  |                                                       |
+  +                                                       +
+  |                                                       |
+4 |                         DECX                          |
+  |                                                       |
+  +                                                       +
+  |                                                       |
+5 |                         PUSHX                         |
+  |                                                       |
+  +                                                       +
+  |                                                       |
+5 |                         POPX                          |
+  |  AX|    CX|    DX|    BX|    SP|    BP|    SI|    DI| |
+  +------+------+------+------+------+------+------+------+
+  |                                                       |
+6 |                                                       |
+  |                                                       |
+  +                           X                           +
+  |                                                       |
+6 |                                                       |
+  |                                                       |
+  +------+------+------+------+------+------+------+------+
+  |  Y|     N|    Y|     N|      Y|     N|    Y|     N|   |
+7 |                                                       |
+  |     S|            P|            L|            LE|     |
+  +                          J                            +
+  |                                                       |
+7 |     O|            C|            Z|            CZ|     |
+  |  Y|     N|    Y|     N|      Y|     N|    Y|     N|   |
+  +------+------+------+------+------+------+------+------+
+     0       1      2      3      4      5     6      7
+     8       9      a      b      c      d     e      f
+  +------+------+------+------+------+------+------+------+
+  |+-----------+|      |+----+|2 B|     W|     B|     W|  |
+8 ||     A     ||  X   || B  ||    TEST          XCGH     |
+  |+-----------+|      |+----+|                           |
+  +------+------+------+------+------+------+------+------+
+  |2 B|     W|     B|     W|  |* F|  |2     |* T|  |+----+|
+8 |            MOV            | MOVSG| LEA  | MOVSG|| C  ||
+  |      F|           T|      |  SEG||      |  SEG||+----+|
+  +------+------+------+------+------+------+------+------+
+  |  AX|    CX|    DX|    BX|    SP|    BP|    SI|    DI| |
+9 |                         XCHGX                         |
+  |                                                       |
+  +------+------+------+------+------+------+------+------+
+  |                                                       |
+9 | CBW    CWD  +------+ WAIT  PUSHF   POPF   SAHF   LAHF |
+  |             CALLFAR|                                  |
+  +------+------+------+------+------+------+------+------+
+  |  B1|    W1| |  B1|    W1| |  B1|    W1|    B1|    W1| |
+a |    MOVTA    |    MOVFA    |   MOVS          CMPS      |
+  |         MEM,|         MEM,|                           |
+  +------+------+------+------+                           +
+  |  B1|    W1| |                                         |
+a |   TESTAI    |    STOS          LODS          SCAS     |
+  |  B,     W,  |  B1|    W1|    B1|    W1|    B1|    W1| |
+  +------+------+------+------+------+------+------+------+
+  |  AL|    CL|    DL|    BL|    AH|    CH|    DH|    BH| |
+b |                          MOVRI                        |
+  |                                                  B,   |
+  +------+------+------+------+------+------+------+------+
+  |  AX|    CX|    DX|    BX|    SP|    BP|    SI|    DI| |
+b |                          MOVXI                        |
+  |                                                  W,   |
+  +------+------+------+------+------+------+------+------+
+  |             |      |      |1            |  B|     W|  |
+c |             | RET+ | RET  | LES    LDS  |    MOVI     |
+  |             |      |      |             |  B,     W,  |
+  +      X      +      +      +------+------+------+------+
+  |             | RET  | RET  |                           |
+c |             | FAR+ | FAR  | INT3 +------+ INTO   IRET |
+  |             |   W, |      |      |INT B,|             |
+  +------+------+------+------+------+------+------+------+
+  |+-------------------------+|             |  X   |      |
+d ||            D            || AAM    AAD  +------+ XLAT |
+  |+-------------------------+|                           |
+  +------+------+------+------+------+------+------+------+
+  |                                                       |
+d |                         ESC                           |
+  |                                                       |
+  +------+------+------+------+------+------+------+------+
+  |                           |  B1|    W1|   B1|    W1|  |
+e | LOOPNZ  LOOPZ  LOOP  JCXZ |    INAP     P,   OUTAP    |
+  |                         B,|                           |
+  +------+------+------+------+------+------+------+------+
+  |      |      | JMP  |      |  B1|    W1|   B1|    W1|  |
+e | CALL | JMP  | FAR  | JMPS,|    INAD         OUTAD     |
+  |    W,|    W,|SEG,W,|    B,|                           |
+  +------+------+------+------+------+------+------+------+
+  |      |  X   | REP                       |+-----------+|
+f | LOCK +------+  =     REPZ   HLT    CMC  ||     E     ||
+  |               REPNZ                     |+-----------+|
+  +------+------+------+------+------+------+------+------+
+  |                                         |+-----------+|
+f |  CLC    STC    CLI    STI    CLD   STD  ||     F     ||
+  |                                         |+-----------+|
+  +------+------+------+------+------+------+------+------+
+     0       1      2      3      4      5     6      7
+     8       9      a      b      c      d     e      f
+
+     00     08     10     18     20     28     30     38
+  +------+------+------+------+------+------+------+------+
+  |1                                                      |
+80| B|                                                B|  |
+  |                                                     B,|
+  +ADDI    ORI   ADCI   SBBI   ANDI   SUBI   XORI   CMPI  | A
+  |                                                       |
+81| W|                                                W|  |
+  |                                                     W,|
+  +------+------+------+------+------+------+------+------+
+
+   ADDAI   ORAI  ADCAI  SBBAI  ANDAI  SUBAI  XORAI  CMPAI
+
+  +------+------+------+------+------+------+------+------+
+  |1     |  X   |             |  X   |      |  X   |      |
+83|ADDSI +------+ADCSI  SBBSI +------+SUBSI +------+CMPSI | B
+  |                                                     B,|
+  +------+------+------+------+------+------+------+------+
+
+  +------+------+------+------+------+------+------+------+
+  |1     |1                                               |
+8F| POP  |                                                | C
+  |      |                                                |
+  +------+------+------+------+------+------+------+------+
+
+     00     08     10     18     20     28     30     38
+  +------+------+------+------+------+------+------+------+
+  |1                                        |  X   |      |
+d0| B|                                      +------+  B|  |
+  |                                                       |
+  + ROL    ROR    RCL    RCR    SHL    SHR           RAR  +
+  |                                                       |
+d1| W|                                      +------+  W|  |
+  |                                         |  X   |      |
+  +------+------+------+------+------+------+------+------+ D
+  |1                                        |  X   |      |
+d2| B|                                      +------+  B|  |
+  |                                                       |
+  + ROLV   RORV   RCLV   RCRV   SHLV   SHRV          RARV +
+  |                                                       |
+d3| W|                                      +------+  W|  |
+  |                                         |  X   |      |
+  +------+------+------+------+------+------+------+------+
+
+     00     08     10     18     20     28     30     38
+  +------+------+------+------+------+------+------+------+
+  |      |      |1                                        |
+F6| B|   |      | B|                                      |
+  |    B,|      |                                         |
+  + TESTI+  X   +NOT    NEG    MUL    IMUL    DIV    IDIV + E
+  |      |      |                                         |
+F7| W|   |      | W|                                      |
+  |    W,|      |                                         |
+  +------+------+------+------+------+------+------+------+
+
+
+  +------+------+------+------+------+------+------+------+
+  |1            |                                         |
+FE| B|          |                    X                    |
+  |             |                                         |
+  + INC    DEC  +------+------+------+------+------+------+ F
+  |             |1     |1     |1     |1     |1     |      |
+FF| w|          | CALLO| CALL | JMPO | JMP  | PUSH |  X   |
+  |             |      | FARO |      | FARO |      |      |
+  +------+------+------+------+------+------+------+------+
+
+
+The upper left large box holds most
+two operand instructions.
+They contain an obligatory primary register operand (AX1|)
+T| (to) and F| (from) are with respect to this primary operand.
+
+So
+AND, R| BX1| T| SI|
+and
+AND, R| T| SI| BX1|
+are the same instruction.
+AND, R| F| SI1| BX|
+is a different instruction with the same effect. Most other
+assemblers will not allow you this kind of control.
+
+As a bonus it does away with the head aches about whether
+the left register is the source.
+
+A 2 in the upper left corner means it is a two operand
+instruction, and has all the fixups as in the upper left
+large box.
+* : Fill in a segment register for the primary register,
+instead of AX1| .. , otherwise it is like 2.
+1 : There is no primary register and no direction fixup                                                         
+(|T |F). For the rest the fixup of the 2 operand instructions
+apply.

@@ -1,6 +1,6 @@
 CIFORTH CUSTOMIZATION FOR LINUX
 
-COPYRIGHT (c) 2000-2017 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2022 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -34,35 +34,43 @@ The rest is documentation (plus examples and source).
  lina##.texinfo  Documentation master source
  lina##.ps       Documentation in PostScript format
  lina##.pdf      Documentation in Portable Data Format
- lina##.info     Documentation in Portable Data Format
+ lina##.info     Documentation in info format
  lina##.html     Browsable, reference documentation only
  lina##.1        man page: options and overview
- ci86.lina##.s   Source in gas format
-      or 
  ci86.lina##.fas Source in fasm format
+      or
+ ci86.lina##.s   Source in gas format (alternative)
      or
- ci86.lina##.asm Source in asm format
+ ci86.lina##.asm Source in asm format (alternative)
  hellow.frt      Compilation example : hello world.
- mywc32 / mywc64 Script example, old style.
+ mywc            Script example, old style.
  wc.script       Script example, new style.
 
+The script examples only runs once you have installed /usr/bin/lina.
+
 You can rebuild lina from the assembler file, instruction are in this
-source. 
+source.
 The latest version and OSX and MS-windows versions can be fetched from
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
-or
+You have to change just one file, ci86.lina.fas.
+
+For making extensive changes, such as modifying the header fields or
+making a version booting from a hard disk or adapting to a different
+assembler, I recomment the compiler factory over modifying the
+assembler file. It is present in
     https://github.com/albertvanderhorst/ciforth
-(subdirectory releases). 
-If you want to make extensive changes, this contains also a link to the
-generic system that is recommended over the assembler file 
 
 Unpack in the directory where you want to use it by :
-    tar fxz lina-5####.gz
+    tar xfz ci86.lina##-#.#.#.gz
 
 Now you can use lina by :
     lina##
 or
     lina## -e
+or
+    lina
+After linking with so:
+ln -s /usr/bin/lina /usr/bin/lina64
 
 Print the manual (150 pages) by :
     lpr ci86.lina##.ps
@@ -92,11 +100,16 @@ For system wide installation (32-bit) the following is recommended:
 The above increases Forth's dictionary space from 1 to 61 Mb.
 Installing lina64 is similar, but now you may want to grow
 by 8000 or 128000 Mbyte.
-See also the -i option in the manual.    
+See also the -i option in the manual.
 
 Once installed you can use lina :
     Compile the example program by : lina -c hellow.frt
     Try the script by : wc.script *.s *.txt *.html
+
+Source package in debian format
+If you are installing from a deb file, all files are placed in the
+appropriate directories. This solves the problem how to add the
+.info file to the system, as this is difficult to do by hand.
 
 NOTE ON "info"
 The "info" system for program documentation actively discourages
@@ -105,10 +118,7 @@ can be installed. The nice folks of Debian had added a separate
 program install-info , but as of 2015 that has been replaced by
 ginstall-info that reinstates the former unworkable situation
 with info files.
-Your only option is to do
+In a pinch you can do
    info -f <absolute-path>
-[unless you're a hacker, then start up info. Find a <subject> that
-exists. locate <subject>.info . Copy documentation there and edit
-the dir file in that directory.]
 
-$Id$
+$Id: READMElina.txt,v 5.7 2022/03/12 12:42:15 albert Exp $

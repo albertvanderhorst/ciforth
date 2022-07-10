@@ -12166,7 +12166,7 @@ All checked in. CH+ is now $C+.
 2009 may 21
 The linking of an assembler file can use a very simple script
 "
-/* $Id: logforth.txt,v 1.66 2018/06/15 04:00:23 albert Exp $ */
+/* $ I d : $ */
 /* Script for -N: mix text and data on same page; don't align data */
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
@@ -12585,7 +12585,7 @@ The unreasonable bugs
 2010 nov 25 th
 Inspecting the web site reveals a fault in the description
 of FORTH. Fixed. 5.66.
-2010 may 4
+2010 may 4  \ probably 2011
 I have a VC directory on the portable, that contains an attempt
 to assemble the windows Forth.
 If using __write and __read instead of _write and _read it is
@@ -14848,92 +14848,1487 @@ Working on THREAD-PET for windows.
 stealconstant.c and strerror.c removed from the archives and
 moved to the project stealconstant.c
 
-============
-Notes for release 5.4
-Before 2017 oct 20
-* NIP introduced where possible in the library
-* Inlining removed from modulo package.
-After  2017 oct 20
-* SORT-VOC no longer results in anti-alphabetic order
-* Regress now can be used to test words that catch exceptions.
-* Usage of MERGE-SORT -- stack diagram -- changed.
-* 2, in the kernel, so default no longer a number, removed in library
-* hello.frt uses " and TYPE, no more ." and has OS-dependant line ending
-* CASE-INSENSITIVE now also does numbers.
-* THRU is now a loop of LOAD 's. Affect DO-DEBUG
-* LOCK locks a buffer without reading from disk, in behalf of files
-* INCLUDE-FILE added that reads by lines, proper REFILL, proper NAME
-* introduce error for input exhausted in SCAN-WORD
-* textual and example improvement
-* (MEMORY wordset) added INIT-ALLOC c.s.
-* (MEMORY wordset) size and address now may be negative.
-* Assembler switches to CASE-SENSITVE, MEASURE-PRIME always loads.
-* FINIT is always done in loading the fp system
-* WANT DO-DEBUG CASE-INSENSITIVE now runs DO-DEBUG CASE-INSENSITIVE
-* GET-ENV didn't work the first time,
-* LOAD-DLL LOAD-ADDRESS ca now be called from between CALL[ CALL]
-* Better default command interpreter for modern MS-Windows
-- ? move TUCK to kernel?
-- with 6.0 the fp package should be introduced
-- 6.0 floored division and comprehensive tests for GCD XGCD c.s.
-* CREATE-FILE makes a file with no read access.
-* add >ALLOC ,, ADD-ALLOC  maybe use it internally.
-* Add a test for merge, inorder to be able to modify mergesort
-* COMMENT/ENDCOMMENT has become _COMMENTED({ }) such that
-    fasm can handle it.
-* lina / 1 load / COLD / WORDS crashed, no more.
-- TICKS misbehaves on a 4Ghz machine/32 bit
-- decompilation improvements: nested THEN , IF/WHILE , loose {
-* FILE-POSITION was missing
-- SEEK_CUR must be in stealconstant
-- errno is a global variable in libc, it shouldn't be in ciforth docs.
-- the -l option must be retested, in behalf of COLD
-* WORDLIST must be added to the kernel (B_DUMMY SOURCE_FIELD)
-- NAMESPACE must refer to PREVIOUS
-- CORRECT-BRANCHES in optimiser.frt is wrong.
-- 0.E leaves a zero on the data stack
-- are S>F D>F missing?
-- WANT ASSEMBLER crashes a wina64 5.3.0 after -e
-- Document that ;CODE cooperates with DATA
-- ;CODE needs added ` LATEST HIDDEN '
-- replace max-user with last-user
+2018 jul 11
+git archive is up to date except for the experiments with paralellism
+in MS-Windows.
+Experimenting with 64 bits suggest that maybe CreateThread doesn't
+preserve one of the vital registers SI or BP.
+De runthread code routine is able to start a high level Forth routine
+via setting SI, also in 64 bit mode. When it is used by CreateThread
+it fails.
+
+NO! It isn't that. MS-WINDOWS just doesn't pass the parameter into a
+visiible place.
+
+2018 sep/oct
+Much work on ciasdis see there.
+
+2018 oct 12
+ciasdis totally cleared. ready for cloning into git.
+
+2018 oct 29
+ciasdis on the spenarnc server in cvs.
+Some more improvements
+
+2018 nov 9
+Last improvements to ciasdis before a copy is sent to github. Makefile
+1.66 Added a README.txt.
+Compared to dec 16
+I managed to get ciasdis converted to git in an easier way.
+1. make sure you are coupled to a cvs archive.
+2. -
+3. if needed: apt-get install cvs-git
+4. run
+    git cvsimport -v -a -k -C ciasdis ciasdis
+
+Succeeded. Important discovery. From git cvsimport manpage:
+"
+ Problems related to tags:
+       o   Multiple tags on the same revision are not imported.
+"
+The equivalent of
+co -rREL_3 RCS/*
+make
+is not possible!
+This makes cvsimport worthless.
+
+2018 dec 7
+An important idea, always add the length of the lexeme in INTERPRET.
+That means the denotation bit need no longer be tested.
+Two important idea's go to the backburner in 2018nov:
+   the -d option that adds [DEFINED] to allow conditional compilation.
+   experiments with multi threading in Windows.
+2018 dec 8
+The following is an interesting experiment, saving a jump in
+INTERPRET
+5697a5703,5704
+>         DC      LDUP, TNFA, FETCH, FETCH
+>         DC      FROMR, PLUS, PP, STOR  _C{Skip over name/prefix.}
+5699,5704d5705
+<         DC      LDUP, LIT, B_DENOT, LAND _C{Retain copy of flags.}
+<         _0BRANCH(INTE3B) _C{IF}
+<         DC      OVER, TNFA, FETCH, FETCH
+<         DC      RR, PLUS, PP, STOR  _C{Skip over prefix.}
+< INTE3B:                  _C{THEN }
+<         DC      RDROP           _C{ Drop old parse p
+
+The behaviour that after each normal word a delimiter is skipped,
+is normal, while S" AAP"OVER is accepted in most Forths.
+An improvement is to have the parse pointer left directly
+after (NUMBER) always, making it no different if we are at the end
+of a parse area. Then it can be guaranteed that PP@ DPL @ - 1- gives
+the number behind the decimal point.
+2019 jan 23
+Experimentally added a message about AUTOLOAD, and moved DO-DEBUG
+to the start of -e screen, such that all faciltities are shown.
+nrw.frt is a possibility to get rid of all redefinition warning
+in loading the assembler.
+AUTOLOAD added with a warning and all screens loaded visible.
+2019 jan 29
+uploaded options 5.44 & blocks.frt 5.144
+1. no more UNIQUE warnings from loading assembler,
+  removed : lsbyte SPLIT  added: NO--
+2. electives shows all by moving DO-DEBUG to the front
+   AUTOLOAD advertised but not loaded by -e
+3. WORDLIST moved to kernel
+The new assembler has been tested with floating point.
+
+2019 apr 14
+
+I managed to get a link script going, extra target
+gllina32 in Makefile. This has the advantage that
+the mysterious -N options has disappeared.
+(NO! see below)
+However although the sections are the same, the program
+header is not, and the -c option fails.
+
+http://www.scoberlin.de/content/media/http/informatik/gcc_docs/ld_3.html
+contains sensible information about the loader.
+
+I did not manage to find out why EM BM - does not yield M4_EM
+2018 apr 15
+Experiment. The -N option is something I want to get rid off.
+What if I define only one segment for Forth.
+The first thing to inspect is why EM BM - is not correct even for
+fasm. I've officially installed fasm which is just slightly better
+than the version I have in my local directory.
+However the documentation is unfindable, but it is present in
+/usr/share/doc in someplace. There is no information at all
+about the debug file. It certainly is not a text file.
+
+I've not succeeded in finding out why EM BM - is not correct.
+
+It is also in fasm but the symbols in fasm can be generated by -d
+but there is no information about how to use them.
+
+I have reinstated the names forth and dict for the sections of
+Forth. They need to have attributes that are under control, however
+gnu ignores attributes for the text segment.
+Both glina32 and glna64 still work, linked with the -N option.
+I have experimented with elaborate link scripts that explicitly set
+the start address of the dict to ADDR(forth) + SIZEOF(forth).
+That doesn;t help.
+Analysing with ciasdis (!) reveals that the -N option set p_type
+to the cell size. That seems to be critical.
+For the moment I get by with not explicitly mentioning sections.
+That may at one moment be fatal.
+All these experiments were executed without threads!
+Threads have been reinstated in lina32.cfg because wihtout them
+make testlina32 fails!
+
+2019 may 1
+Adding a high level to low level conversion for the optimiser.
+First upgrade the optimiser to handle 'P @ P !' '>R R>'
+and cleanup.
+
+2019 may 3
+There was alignment issue in INIT-ALLOC causing the test for wina.exe
+to crash (not just fail). Fixed in blocks.frt.
+
+2019 may 21
+Developped "locals done right"
+This triggers a review of the 64 bit code screens.
+Prefixes that allow to use the ghost registers are added
+in the style Q'][, .
+Apparently use ' for all registers that occur with a '.
+Use [ for single operands like pop/push.
+In [Rx +x* Ry] use [ to turn Rx into ghost ] for y.
+Important note! All offsets (XO} thingies) are 32 bits.
+
+2019 jul 2
+ciasdis has problems w.r.t. ghost bits, in particular J,
+Worked on hightolow.frt. Code can now be inlined, ready
+for peephole optimisation.
+
+It is unclear what optimcodgen.frt is.
+
+2019 jul 9
+TESTIB misses an opportunity, it has a BRANCH immediately after a BRANCH
+However optimisation must make sure there is no BRANCH to the second
+BRANCH. So this awaits the splitting of the code into small sequences
+that can be reordered and each end in a branch or unconditional branch.
+
+2019 jul 11
+test.mak is cleaned up w.r.t. optimisation.
+There was a file called hightolow.frt that inlines the machine code
+like optimcodgen.frt did previously. So this file is inserted in
+optimcodgen.frt and the remainder commented out.
+This must be burned down of course.
+Some of the code sequences without branches now translate into
+machine code. Checked in. optimiser.frt 5.13
+
+2019 jul 13
+Optimiser.frt has the high level part split off to optimhigh.frt.
+In optimhigh.frt a class gap is introduced that replaces
+the former branches. All gaps are register and put in a bag
+that replaces BRANCHES. This modification failed.
+
+2019 jul 14
+The structural change introducing optimhigh.frt is checked in
+and test.mak cleaned up before going any further.
+Introducing objects runs into a problem: the objects interfere
+with the use of the dictionary for copying code. The
+solution is to dynamically allocate objects.
+This triggers a change in the definition of >ALLOC .
+>ALLOC must recover the space. So a new version of testoptim.lab
+was needed, it is made up to date w.r.t. the new 64 bit assembler
+stuff.
+
+2019 jul 15
+A block ended in a branch is called a "basic block" in the dragon
+book. The bag of branch offset addresses is now replaced by
+a bag of allocated bblock descriptors.
+
+2019 jul 16
+
+At last fill-bblock works. This can be the basis, allthough the
+last step of inline&fold delivers a bblock bag, but not with
+a reasonable last bblock.
+
+2019 jul 17
+The plan:
+move bblock struct to general part of optimiser.
+Add a type to bblock:
+BRANCH/0BRANCH/FALLTHROUGH/END
+While executing fill-bblocks maintain a list of targets and fill
+in the type. DO and LOOP code must be replaced during copying,
+the way it is done with LEAVE and EXIT.
+DO is of type FALLTHROUGH , LOOP is of type ZBRANCH
+So LOOP must compile
+   - loop params manipulation leaving a flag
+   - a zero branch
+   - code to remove the loop parameters
+   - resolve forward branch from leave
+For now we try to have the block structure right as above.
+There will be no new type when we introduce DO!
+
+2019 jul 18
+Apart form DO LOOP, fill-bblocks generates a set of bblocks,
+ready to be optimised.
+
+2019 jul 19
+optimcodgen.frt has been tested using REGRESS.
+All tests that are present succeed, i.e. up and includeing
+compile-chain.
+2019 jul 20
+optimcodgen.frt is completely equipped with REGRESS.
+Some serieus testoutput results in testoptimiser.out, but it
+crashes still.
+2019 jul 21
+The optimisation now handles backward branches, and
+testoptimiser.frt looks okay until the DO..LOOP's comes.
+2019 jul 22
+Managed to have the DO LOOP's change so as to use a separate
+(+LOOP) that leaves a flag for Until.
+
+2019 aug 20
+The compiled code for LOOP is now  1 (+LOOP) 0BRANCH <offset>
+UNLOOP.  A normal LEAVE jumps to after UNLOOP. The optimiser
+replaces LEAVE by a jump to the UNLOOP after the 0BRANCH.
+(Like the EXIT is replaced by a jump.)
+The consequence is a change in the decompiler, and in the
+decompiler in the lab file for the optimisation.
+From now on the DO..LOOPs can be expanded, but they cannot yet be
+replaced by low level code.
+
+2019 aug 21
+Introduced ,, and changed >ALLOC to recover memory.
+In the optimiser the temporary code to generate literals
+in folding is ALLOCATE. So there is no longer a
+dangerous use of the dictionary space after compilation.
+
+2019 aug 22
+Introduced optimexpand.frt to handle the expansion.
+It is a bit of a mess. both LEAVE and EXIT are handled
+separately from the normal expansion.
+
+2019 aug 23
+It was a problem that EXIT was handled while inlining
+a word that has an EXIT in it. Now EXIT is handled while
+expanding the word itself. This saves the whole bag of EXIT's.
+       optimcodgen.frt 5.14;
+       optimexpand.frt 5.3;
+       testoptimiser.frt 5.15;
+       optimiser.frt 5.27;
+This is a pretty decent bunch.
+
+LEAVE is handled in a similar way to EXIT.
+A stupendous amount of code related to EXIT and lEAVE has
+been removed, and EXPAND-LEAVE and EXPAND-EXIT are gone.
+
+2019 aug 27
+The optimiser has now a bblock with separate fields for
+high and low level code. This is a boon to see what
+optimisation does. DO-PRIME-ISO shows a stupendous amount of memory
+accesses.
+
+2019 aug 28
+Written some theory about low level optimisation.
+
+2019 aug 30
+It is advantageous to have all tests in an uniform way.
+So (+LOOP) < = <>  0< 0= U<  all end in a
+SET<flag> AL; MOVZX  AX,AL; PUSH AX;
+that is to be combined with POP AX; AND AX AX; J, Z|
+in the optimizer. This crashes the regression test unless
+the >ALLOC word is removed from the test.
+
+2019 sep 1
+Two operand words preferably pop AX first, for easy optimisation.
+All conditionals prepared for optimisation by using MOVZX.
+bblock have now a low level code range besides a high level.
+I have made a seesim.frt that dump a definition in high and low
+level.
+
+I can use the ciasdis mechanism for masks to find out what
+instruction is next, and if it can be optimised.
+
+2019 sep 3
+The jump after the semis block in the optimiser went wrong,
+this is regressed.
+At this point the change from high to low code is put directly
+at HERE. This must be split in changing and then putting at here.
+For this the bstart-low pointer is used to indicate that the
+low level code exists and the compiled? flag is changed to
+gathered?. This flag can now be reset if an optimisation has been
+done to basic blocks and they must be collected again and linked
+with jumps.
+
+2019 sep 4
+The problem with optimising per bblock was that bblocks's lowlevel
+was generated in concert with the gather of lowlevel blocks to
+an executable block of lowlevel code. The gathering is renamed
+from compiling.
+The code has been adapted to this but if hightolow is omitted
+while gathering it fails.
+I got rid of the JMP, 5. However the jump to the last (#SEMI)
+bblock is still there, mostly if not always jmp, 0 (RL),
+This can be handled in the last minute by having a #SEMI block that
+only contains a NEXT.
+Also the regression test succeeds for optimcodgen.frt 5.19.
+The low level code was generated okay, but the jumps to glue it where
+not filled in correctly. Now the optimiser can be called.
+
+2019 sep 6
+The optimiser is now copying the assembler code instruction by
+instruction without yet optimising it.
+ll@ ll! introduced. This will help later to use ALLOCATE code.
+At last, managed to optimise push a;pop a away.
+2019 sep 7
+The push a; pop a just before a conditional jump was not handled.
+Now the conditonal jump is drawn into the lowlevel code, so
+it can be optimised to a different jump.
+2019 sep 8
+The word matched compares actual code with a piece of code that
+admits optimisation. This is used for the push pop sequence and
+succeeds. the code for a condition sequence is prepared but
+not aggregated.
+
+2019 sep 9
+The elimination of the SET .. J|X, sequence did not work, because
+that happened just in the second round.
+Now it works.
+2019 sep 10
+Test for eliminating SET : from about 500 to 200 uS.
+REplacing PUSHI R POP with MOVI R about 190.
+
+2019 sep 11
+Finding the variant part in a code match is tedious, a lot of
+masking actions are need. `matched is modified to fill in  a
+buffer `bufv with the variant parts, those that need not be matched.
+This lead to much simplification.
+The test output was wrong because not extending a match beyond stopper
+was not yet implemented. It took time to realize that.
+Now the common code between condition pushi pupo is eliminated.
+
+2019 sep 14
+MOVI and POP can be interchanged, as long as it is not the same
+register.
+push pop can be replaced by xchange if the pushed register is
+dead. Goes from190 to 170 uS.
+
+2019 sep 17
+At last the pupomovi optimisation works.
+
+Reordering blocks such that the tightest loop has only one
+jump back. This goes down from 170 to 140 something.
+
+2019 sep 24
+The LEA with negative offset for RSP is moved to the front.
+It is also commuted through the setting of the return stack
+from BX'| .
+
+2019 sep 27
+The return stack usage is analysed and the mostly used
+stack item is put in DI. Mostly this is the loop index.
+2019 sep 28
+Resulting nops removed.
+
+2019 oct 1
+MOVI's are commuted down. MOVI's to dead registers at
+the end of a basic block are removed.
+testK2 now fails and is temporarily commented out.
+PUSH R1;POP R2; POP R1 can be replaced by an exchange and
+POP R1. This takes place in the innermost block.
+
+2019 oct 3
+Trying to commute PUSHI down. That should be simple because
+it commutes with everything except stack manipulations.
+It must not be commuted with MOVI, or we get infinite loops.
+However now test2a (1 >R 2 R> ) results in a dump.
+It has been confirmed that this must be in the ?commute2?.
+I've introduced a decorator, to no avail.
+(mydecor.frt that prints the current lowlevel code.)
+2019 oct 4
+It turns out that the [BX] of ! was not counted as a
+usage of BX, such that addresses to be stored disappeared.
+Commuting PUSHI MOVI sequence doesn't work, so there it stops
+for the sieve. testK2 doesn't work still.
+
+Now the MOVI BX| MOV F| BX'| .. is in order.
+2019 oct 5
+testk fails. INS CLD is introduced. It turns out,using a
+decorator on (optimise-bblock) that the optimisation
+looks correctly executed, but
+2019 oct 6
+The sequence movi r ## mov, F| r BO| keeps failing.
+It is there suddenly between calls of (optimise-bblock).
+The sequence movi r ## mov, F| r R| is now optimised instead.
+It still fails replacing rsp -:= 4 with rsp -:= 8
+It turns out that the movi falling off the edge introduces
+a spurious instruction.
+A better way is to match MOVI as itself (movinope) and involve
+stopper in the process. Done and works remove-movi? eliminated.
+This also doesn't work. The problem is that a incrsp eats
+a following instruction. So the movi must be removed directly.
+This is now done by special recognition at HERE.
+The MOV, T| R| is replaced by the equivalent MOV, F| R| to ease
+matching.
+2019 oct 7
+Progress on the long standing bug that
+generates INS in testoptimiser.out. It is provoked by installing
+movimovb but it is in fact caused by ?commute2? that is not able
+to handle
+   LEA, BP'| BO| [BP] 252 B,     POP|X, AX|
+The resulting buffer contains the commuted instruction, but the first
+byte is copied into the second for some reason, resulting in
+        POP|X,  AX|     POP|X, AX|      INS, X'|        CLD,
+Thanks to movimovix test2 now optimises now to 2 push immediates.
+
+2019 oct 8
+The optimisation to add a superfluous register mov into a
+next operation has succeeded. There is no improvement in speed,
+but a slighter shorter program.
+
+2019 oct 9
+At last I found an abbreviation for
+    movi r1  add r2 to r1
+It can be replace by a lea r1 [r2] plus offset.
+This leads to shorter code, but it is not recognized
+that "movi|x, ax|" does not commute by something containing AL.
+I solve that for the moment by immediately adding something
+for getting rid of AL'| . That doesn't work.
+I just forbid a commute with an instruction using AL'| now.
+
+2019 oct 10
+Eliminated XOR for TEST before a J S| .
+2019 oct 11
+Replace (DISASSEMBLE) by a silent ~DISASSEMBLE .
+
+2019 oct 13
+I'm stuck trying to mold the sieve into the optimal assembler code,
+i.e. starting with 2 pop's ending with 2 pushses.
+The best is to transform an ending push d into a push a using an exchange.
+Commuting the exchange up we arrive at
+   XCHG, AX'| BX|
+   ADD, X| F| AX'| R| DX|
+
+2019 nov 5
+After a regression via the ciasdis we're back at implementing the optimiser.
+First create a fork point to maybe later get back at an optimiser for
+32 bit. Now reimplement in 64 bits.
+
+2019 nov 8
+test.mak is changed and all code now relates to 64 bits.
+However compiled is switched off. testoptimiser.out is  in accordance
+with the new test.mak. lina-ana64 accepts optimiser.frt with
+DO-REGRESS and passes.
+There was a problem was with filling in the branch offsets.
+Those are longs not quads. Now the filling and gathering of the
+bblocks succeeds, with a sieve that works with all code inlined.
+
+2019 nov 9
+At last WHERE? tells you in what file and at what position
+an error occurred. For that I had to introduce $\.
+(Not really, but whatever.)
+
+2019 nov 11
+testoptim.lab is an embarassement. It precludes taking advantage
+of any progress in the standard library. I excerpted it to oldsee.frt
+and instead of using it as a lab, just include it.
+With a small change in test.mak, I now can use WHERE?.
+
+2019 dec 3
+The whole config stuff has been cleaned up, making the mechanism
+and the configuration separate.
+The proper way is to have in the mechanism screen : WANT ?LI
+and in the configuration screens : WANT CONFIG.
+Took me some time before I arrived at that.
+Also important, you cannot leave out any ?xx things that are
+use anywhere, lest the whole library falls apart.
+
+2019 dec 16
+The optimiser project PROJECT/ciforth/optim has been updated to
+work with 64 bits. A special optim.mak has been added.
+The test "thetest" has been changed to use citesta64.
+lina plain, gforth plain, gforth fast, lina optimised, swiftforth, mpeforth
+5.84    4.32    3.60    2.35    1.13    0.70
+
+2019 dec 17
+
+After reintroducing the basic optimisation we get
+5.77     6.04    3.61    1.64    0.86    0.70
+optimisebblock 5.38
+
+2019 dec 18
+After reintroducing the loop optimision we get
+5.95     5.88    3.59    1.37    1.04    0.70
+optimisebblock 5.39 sieve64.asm 1.4
+
+2019 dec 20
+Wasted some time trying to replace the byte offset of BP
+by a long offset. This leads to crashes. It suggest that
+there is a fundamental mistake somewhere but it can not
+be readily found.
+Changing the strategy now. All code that is not essential
+will be commented out as long as it passes testoptimiser.out.
+Only code in optimisebblock.frt remains that is tested.
+All other code is commented out.
+At last the faults is found: a missing END-CODE.
+
+So replacing the byte offset of BP is checked in.
+
+2019 dec 21
+
+I've introduced a class optimisation, and it works for
+changing BP using LEA, from byte to long offsets.
+However, it seems that the mask from Q: and the remainder
+of the instruction are interchanged:
+ FF FC F0 expected
+ FC F0 FF gotten
+
+2019 dec 22
+Problem solved: the tally must be refreshed between parts
+of instructions that reinitialise the tally like so
+<!- Q: !!T MOV, BO| !!T 0 C, ~!!T !>-
+!!T can be used also in the replacement <A A> and then there is
+no need to carefully insert AX| because it fills in zeroes,
+which is probably clearer.
+Some pupo stuff done using optimisation, featuring extra
+requirements before a replacement can be done.
+
+2019 dec 23
+All byte offsets that are coupled to normal opcodes ADD..CMP
+are replaced by long offsets.
+Results:
+6.11    5.86    3.36    1.36    1.07    0.68
+The offsets for the return stack are migrated to top and bottom
+and adjacent offsets are combined.
+
+2019 dec 25
+6.31    4.18    3.30    1.30    0.95    0.68
+After having I in a register.
+2020 jan 30
+At last back on our feet, the main computer didn't work for
+a month. I have an athlon now, so the benchmarks are off.
+Before having I in a register:
+7.01    7.01    5.51    1.87    1.27    0.94
+7.18    6.78    5.01    1.87    1.27    0.94
+After having I in a register.
+7.00    5.89    5.03    1.60    1.28    0.94
+7.00    5.90    5.26    1.60    1.28    0.94
+
+Introducing constant data in comparison, if the data was
+previously put in a register.
+
+2020 feb 9
+FILE-POSITION was missing in linux and windows.
+Now the EXIT-CODE test fails in wine, with an error 8.
+Apparently one can run wina recursively in wine, but then
+it has problems with the library.
+Testing that by hand passes.
+
+2020 feb 10
+The optimiser is done in stage, such that compressing is possible
+at the end and expanding is not tried all the time.
+The sieve now just crashes.
+2020 feb 11
+Introduction of the expansion:
+After introducing q: pop a lot of the tests fail.
+The optimisation have to adapted to this. Meanwhile the
+testoptimiser.out is *not* adapted. Instead temporarily an alternative
+testoptimiser.out is kept. In this way we can arrive
+again at a trusted test.
+After reinstating some optimisation we have again a passing test
+with q: pop.
+
+Expansion and compression now handles MOVI|X, too.
+?commute2? is commented out, because it crashes.
+Now trying to derive commute properties from the table indexed with
+first byte of instructions.
+
+2020 feb 12
+After some fiddling around, seesim.frt can be loaded without crashing.
+The categorization of instructions expanded.
+2020 feb 13
+At last again we have a movi that commutes with some things.
+The difference with the official testoptimiser.out is now down to 62.
+
+2020 feb 14
+The first thing to do is commute movi through pushes and pops.
+This will result in other movi's generated.
+Works, also reintroduced LEA for movi+add.
+ 7.14   7.01    5.03     1.93    1.27    0.92
+This is worse by about 16%.
+
+2020 feb 15
+In order to find out why movi did not commute to the end in
+one of the examples that still doesn't work as in the reference in
+testcmp/testoptimiser.out, the categories have been cleaned up.
+It turns out that the original generation of movi's from Forth's LIT
+was to blame. With this cleared up, the seesim test now generates
+all movi's up front.
+We are back on track, "make testoptimiser.out" passes again.
+
+2020 feb 16
+Introduced !Q! and pupomovi'.
+
+2020 feb 17
+The weakest point now is movi/pop. Either the register popped
+is the same, or not. It the same movi can be left out,
+otherwise there is a commute.
+
+movipop is reintroduced, at last. It was not activated and had a defect in
+`movipop-same. In optim.mak the target sieve64.dis is introduced.
+This leads to removal of an annoying remnant in test2a. (MOVI BX)
+
+2020 feb 18
+Trying to generalise commute-movi fails. movi of course commutes
+with anything that doesn't involve its register.
+It was too complicated to combine this with the reorganisation of
+optimcategory this asked for. So this reorganisation is done first.
+
+2020 feb 19
+Added the optimisation that a movix followed by a mov to mem
+of the register just filled, is replaced by a movi to memory.
+This doesn't kick in for the situation " variable x 1 x ! ".
+The reason is that the MOVI|X, doesnot get close to the place where
+it is used. A solution is to continue after a commute, not after the
+last instruction, but after the first instruction.
+This means patching the input, which is not objectionable, because
+remains equivalent.
+This is a done as a separate checkin, and so the movimovxo goes
+initially untested.
+
+2020 feb 20
+Some cleanup of the calculation of the registers used.
+All regular instructions commute with MOVI (except for the register).
+However, if instructions commuted are both MOVI, it is not counted as progress.
+I must check whether such as from " 1 base !"  doesn't optimise to a
+movi to memory is caused by ZO instead of XO.
+
+2020 feb 21
+Today we go after optimisation of movi movi movixo such as in
+test4 and test5. The reason it didn't kick in was the absence of
+the base patterns. The MOV, ZO| must get a Q: prefix first, and
+so do other instructions like LEA, . It makes no sense to match
+all the addressing patterns separately, but after the Q: prefix
+still the ZO->XO BO->XO expansion has to be done.
+So there is a first expansion where the test is whether it is a regular
+instruction without a Q: and the Q: is added. Then the expansion
+such as there is now is executed.
+The stack effect for (optimise-bblock) was not (range -- range).
+This has now been corrected.
+2020 feb 22
+A corresponding Q: removal is introduced in optbb_compress.frt
+XXX, XXXI, is supposed to  be don't care operands.
+2020 feb 23
+A contraction from MOVI / XXX, works, but does not kick in often.
+2020 feb 24
+The contraction now kicks in because a Q: is added in front of
+the MOVI result. This triggers the introduction of the -w
+option that foregoes compression.
+!Q is introduced that allows matching ghost registers.
+
+2020 feb 25
+movimovxo and movimovr added. movimovr required addition of
+a test.
+After that: testresults
+7.00     6.30    5.22    1.90    1.27    0.93
+
+2020 feb 26
+The XOR is now replace by a test
+
+2020 feb 27
+All MOV's between registers must be replaced by PUSH and POP.
+The !Q now remember the start of instructions.
+Then !>- now remembers those to  analyse those to find out register
+masks as decribed in optimiserbblocks.frt.
+Awaiting getting rid of pushes and pops I introduced some MOVR,
+the pupomovr optimisation, replacing a push pop pair by a mov R|
+This uses find-reg-RGL. from the starts of instruction.
+This puts the optimiser in the ballpark of swiftforth.
+7.05     6.03    5.15    1.32    1.27    0.94
+
+2020 mar 3
+Moves to and from the return stack are replaced by registers.
+Now these movements are replaced by push and pops which include
+sometimes the ghost registers.
+The other optimisations start to handle those ghost registers
+to, resulting in test2 starting with push 1, push 2.
+
+2020 mar 4
+A QN: MOVI in test2a was not moved to the end. This was caused
+by wrong calculation of the register id in commute-movi.
+Now trying to better handle the RSP handling.
+2020 mar 5
+Next thing to do. Commute all increments of RSP to the front,
+hopefully collapsing with the decrement.
+Note that floating point is not part of the optimiser.
+Note that MOVR means a push pop pair.
+The general idea should become:
+   find the type of two consequitive instructions
+   1. MOVI + XXX       commute
+   2. MOVR + XXX       commute
+   3. XXX  + RSP-      commute
+   4. XXX  + RSP+      commute
+   5. PUSH + XXX       commute
+   6. XXX  + POP       commute
+
+At the end of a basic block we can annihillate
+   1. MOVI of non-permanent registers
+   2. MOVR of non-permanent registers
+   3. Setting of irrelevant flags
+
+2020 mar 6
+A nasty surprise: test2a crashes after optimisation.
+This is due to the fact that QN: MOVI, AX| ..
+requires a 64-bit immediate constant, not a 32 bit.
+The sieve works still okay because the removal of many Q:
+prefixes. Surprisingly lina530 seems to have a load of zero
+in 0< that doesn't lead to a crash despite being 32 bits
+This is useful testcode (after WANT's)
+CODE PIET2
+    $49 C, MOVI|X, AX| 2 IL, NOP, NOP, NOP, NOP, NOP, NOP,
+    $49 C, PUSH|X, AX|
+NEXT,
+Because the problem is now well identified I check in the code
+that cleans up the commutating of rsp.
+
+2020 mar 8
+The MOVI problem requires an adaptation of the 64 bit ciasdis.
+In the mean time, I can add commutation to any PUSHI instructions.
+commute-pushi. This should allow for some improvements.
+2020 mar 9
+The pushi addition failed. Mostly because the removal of the
+last movi could not be conveniently added to the commute part
+and the commutes started interfering with each other.
+Now the pattern movinope is transferred to optbb_gen.frt
+where it inspects `stopper, which is not really objectionable.
+2020 mar 10
+At last the pushi addition succeeds. It saves a push pop pair
+and results in some speedup
+7.00    7.15    5.21    1.21    1.27    0.93
+That puts it past swiftforth.
+The base idea is that a block must end in pushi's then movi's.
+The movi's can be removed, unless the register is permanent.
+
+Cleaning up the situation around the replacing of BP relative
+access by registers. The rs-src[] array was indexed by byte-offsets
+instead of cell offsets. For now the reports of BP will be in the
+testoutput.
+
+2020 mar 13
+I now can replace several return stack items.
+However the SIEVE crashes. Despite that the result is stored in cvs.
+2020 mar 16
+After several days of head banging and depression it becomes
+clear what is going on:
+After replacing several return stack items sometimes
+a constant gets loaded into a 64 bit register.
+This doesn't get converted to a 32 bit instruction like a
+usage of a 32 bit register would.
+So there.
+2020 apr 7
+The XOR is preplaced by a MOVI 0.
+It can now be taken together with a MOV to 8 bit.
+2020 apr 9
+The setup mist be changed to analysing what registers
+are used and changed by two consequitive instructions.
+To this a "mod-mask" is defined. The first step
+will be to analyse the instruction following a pupo.
+If the next instruction targets and not uses the same register,
+the pupo can be removed. This must be tried first for a movi.
+Then the pupomovi' match can be removed.
+
+2020 apr 13
+If pupo is followed by a chaining src, the src is replaced by
+the original source. There is a version that has a lot of testoutput
+but now also a version without testoutput and achange testoptimiser.out.
+2020 apr 14
+The next step is to optimise a pupo that is followed by a normal
+reg-reg operation like ADD. If the source in add is a target
+of the pupo it is to be replaced by the source of the pupo.
+2020 apr 15
+A source can now be transferred to any one or two operand instruction.
+2020 apr 16
+pupo followed by a definitive filler, can be anihillated.
+This cann hardly be added in this messy situation.
+2020 apr 17
+The commuters have been confounded in one part that finds
+whether commuting is in order, one part that actually commutes.
+This was an elaborate and cumbersome change, but it allows
+to throw away a lot of old code.
+2020 apr 18
+I failed to introduced pupo's commuting.
+All tests pass again.
+2020 apr 19
+Clean up's and still pupo's commuting fails.
+A real improvement : TEST instruction removed, 6uS on the 120.
+
+2020 apr 23
+Replaced SUB by CMP . This was wrong as it did not copy the
+condition of the jump. So a second check in.
+(optimisation subjx).
+Introduced the copying of the first instruction, in case
+that does not change, using `ins1$. Used in 3 instances and
+checked in. Then used in all instances, also introducing
+ins1 getx-reg-.. putx-reg-.. .
+
+2020 apr 24
+Introduced CASE construct in peep-hole to prevent the rows of THEN's.
+Removed movicmpr as it has become unneeded.
+2020 apr 25
+?DO leads to a crash.
+Also there is something fishy about the return stack in `?commute ,
+the instruction investigated is at R@ not at DUP.
+
+2020 apr 26
+If there is one more increment of the return stack (as in
+>R >R .. R> R> ) the optimisation does nothing.
+The solution is to commute incrementing towards the end sweeping
+up increments, like till now decrementing gravitate towards
+the beginning. This requires an extra entry in ?commute and the
+introduction of movxorsp pattern.
+
+2020 apr 27
+Split off optbb_propagate.frt because the replacement of source
+and destination thingies is the next big issue.
+It is now inverted, e.g. the instruction type is found once,
+and then also used to find the optimisation to apply.
+
+2020 apr 28
+In the loop optimisation:
+At long last SUB is replaced by CMP and it is recognized that
+the former target register is no source and can be replaced.
+At last the problem with the commuting of pupo becomes clear.
+An attempt is made to commute the pupo with the instruction
+after `stopper which is of course bound to fail.
+For now commuting itself gives an anti bugging message in
+commute2 error 3025. Furthermore commuting is not requested
+by ?commute . An attempt is made to prevent such the situation
+by an earlier match in pupo-nihil, but that is too hard for now.
+However pupo commutation tends to lead to inifinite loops.
+I must built in a mechanism to prevent those loops by not allowing
+more than a certainamount of commutations.
+2020 apr 29
+Mechanism built in to prevent infinite loops.
+2020 apr 30
+At last the commutation with pupo is installed and works.
+testoptimiser.out version 1.75
+Now also the annihilation of a pupo at the end of a basic block
+works.
+testoptimiser.out version 1.76
+This means down from 113 uS to 110 us.
+2020 may 1
+pupo-nihil cleaned up. It actually does something now.
+testoptimiser.out version 1.77
+There is an annoying push pop in the optimised sieve.
+The jump back from REPEAT is removed by collating
+blocks, but there is no optimisation over that
+boundary.
+2020 may 2
+Propagation through a regular reg-reg operation improved.
+Propagation through a CMPI/TESTI operation improved.
+testoptimiser.out version 1.78
+2020 may 3
+I tried different addressing modes and contrary to
+expectation there is no progress by compacting an address
+calculation into a memory access with offset.
+citesta64.addizo citesta64.addixo citesta64.offset citesta64.sib
+0m0.671s         0m0.673s         0m0.706s         0m0.709s
+This a modified assembler experiment where the current
+optimiser stands at 110 uS.
+
+2020 may 6
+
+2020 may 11
+Added error 52 to the documentation. Improved documentation
+for mixed magnitude operations.
+AUTOLOAD no longer elected.
+
+2020 may 13
+The next step in optimisation is the realisation that
+PUSHI, must have the highest priority in moving to the
+bottom, as it has the highest likeluhood to be eliminated.
+In particular it must made to commute with a pupo.
+MOVI now commutes with a pupo.
+
+2020 may 14
+AND replaced by test before a conditionality test.
+
+2020 may 15
+There is no need to directly optimise after stitching.
+This saves a forward definition.
+The complex multiplication added to the testset.
+
+2020 may 17
+fill-one-bblock only fills a bblock if at the end of one.
+So the name is changed. The entry-block and the semis-block
+of a bblocks array are unique and belong alongside it.
+Also it make sense that they are filled once and for all in
+fill-bblocks. This didn't succeed and mysterious hangups resulted,
+because it is a wrong idea. The idea that semis-bblock could be filled
+in `fill-bblocks is incorrect. It that were done, it should be
+corrected each time the semis-bblock got split.
+The idea is that if there later is a subrange
+that is separately optimised, those blocks need not longer
+be the first and last of bblocks, but I guess that follows
+automatically during gathering. If there is just one
+unresolved block, and we are at a block that jumps there
+unconditionally, we have a subrange.
+add-alloc uses >ALLOC inorder not to interfere with the
+dictionary. The end of the range is passed and the start
+is remembered in end-bblock.
+NEXT-PARSE is more complicated than necessary for fill-one-block.
+That has been simplified.
+
+2020 may 18
+At last I cvan try my hand at a recursive version with an
+explicit stack. This runs in problems. A function like TASK
+leads to an initialisation where entry-bblock is not filled in.
+(semis-bblock is filled in during execution).
+At last it didn;t crashed but still generated wrong code.
+The attempt is save in 2020may18/
+
+2020 may 22
+An addition to the test is a BEGIN WHILE REPEAT and BEGIN UNTIL
+loop. Both succeed, but if put in a separate file they crash
+the optimiser. Adding the test to testoptimiser.frt
+gives no problems.
+
+2020 may 27
+There appears to be an error in reordable? fetching from btype.
+There has been a function identified that was wrong,
+using a btype of -1.
+
+2020 jun 3
+A customer complains that the 64 bit wina cannot compile programms.
+That is true! wina 5.3.0 still has to be released.
+Send him a snapshot version that has not fully been tested.
+
+The simple test
+: test6 BASE @ IF SWAP THEN 2DROP ;
+goes wrong with inline&fold : an infinitenumber of zeroes on the
+stack. Why was this no problem before?
+optimiser-5.114 works fine. (may2)
+There was a reorganisation of splitting in basic blocks in optimcodgen.frt
+Fetched that version, but it makes no difference.
+Now the problem has gone!
+
+Looked at the push pop that won't disappear. After staring at
+seesim run I still cannot  find where it is.
+
+The following optimisation: a pupo commutes with a cmpi.
+An experiment shows that this will not result in a speedup.
+
+If a compiler or scripter already has WANT available it is
+annoying to see the messages from loading it again ( -c -s options.)
+"1 LOAD" is evaluated but if WANT is already present the
+length of that string is shortened to zero.
+
+2020 jun 4
+EPL is modeled after DPL (digital point location) but the
+name should be ECL (exponent char location)
+2020 jun 5
+In the issue of spilling the floating point stack.
+There is an FXAM, instruction which puts information
+about the top of the fp stack into status flags/
+the following seem to work
+CODE FXAM FXAM, NEXT, END-CODE
+: empty? FCOMPARE1 $4100 AND $4100 = ;
+It has been added to blocks. Note that if you fetch
+from an empty registers, you get an exception, but
+for FDROP that takes place when executing FXAM,
+
+2020 jul 8
+ECL is replaced in the tools/fp directory too.
+
+2020 jun 5
+RGL-modmask now also works for OPRI, . Even with the proviso that
+for CMPI, the register is only source not also destination.
+
+2020 jun 14
+Eliminated CASE in favour of CONDS / THENS .
+The idea for how to get rid of deeply nested push pops.
+A pop a push a  can be replaced by  a := SP[0] which can be
+commuted down.
+
+popc popb popa  pushb pushc pusha  (rot)
+Is much harder.
+For now let us go after
+POP AX PUSH AX .
+
+2020 jun 20
+Added GCD XGCD XXGCD to the tests. Not only does the optimiser
+generate 150 instructions for XXGCD , the test
+12 17 XGCD crashed.
+
+2020 jun 17
+At last added TO-UPPER in behalf of risc-V metacompilation.
+Used in AUTOLOAD.
+2020 jul 12
+Better call it TOUPPER.
+The xgcd result is very bad, but also xgcd crashes after
+optimisation. Not if `optimise-bblocks is commented out in
+`compiled.
+XGCD benchmark added . Remarkable is gforth. and lina comparison
+to the fast Forth's. The difference is much smaller.
+
+Better code for U< , submitted.
+Code for digit: made a high level alternative without loops.
+Optimiser: the code for XGCD crashes because the return stack allocation
+is commuted with a conditional jump.
+
+I have an idea for the optimisation of nested returns stack.
+See returnstack allocation.
+
+2020 jul 13
+A change of RSP does not commute with a conditional jump
+at the end of a bblock. Code to that effect added into
+`#commute. Now the optimisation no longer breaks XGCD.
+
+2020 jul 14
+Fixed the problem that DIGIT had two exits, which indeed
+plays havoc in the optimiser.
+Building a BBLOCK no longer keeps track of previous bblock
+endings.
+Adding fan-in fan-out properties in BBLOCK.
+2020 jul 15
+Detecting return stack allocations and releases at the begin and
+end of bblocks.
+2020 jul 16
+Code reorganisation,  some include and low level stuff moved
+away from the main optimiser program.
+2020 jul 17
+It becomes clear how the reorganisation of return stack allocate and
+release should go about.
+
+2020 jul 17
+Preparation for introducing the splitting off of the return stack
+code at the beginning and end of basic blocks.
+It is absolutely necessary that optimise-RSP is followed by
+expand-bblock but not clear why. The fan-out is not needed as
+a field, just inspect next-bblock-cond.
+With those manipulations OPTIMISED sometimes has no longer a correct
+stack effect. This is now error 4005. Even if the actual
+split-off-RSP-release split-off-RSP-allocate  are not executed,
+this happens. If they are, the system even crashes.
+
+2020 jul 18
+Debugging is in order. If all RSP stuff is added, stack effects are
+not correct and the system crashes.
+The situation round the creation of BBLOCKs cleaned up.
+The range is no longer passed to the creation of the block.
+(The akward remembering of the previous end had been removed.)
+bblock's with a single unconditionally following block are
+collapsed with their successor. Further blocks with a
+fan-in of zero are killed.  This improves somewhat.
+Also wrong stack effect in OPTIMISED is reported.
+The mysterious stack effect is caused by complete-bblocks if
+it called for the second time, and the first time it had resolved
+items.
+
+2020 jul 19
+The problem with stack unbalance is narrowed down to the splitting
+of bblocks. The comment for clone-bblock was wrong and
+it is changed to (bbl -- bbl). Also the error detection for 4003
+was wrong.
+split-bblock-high leaves the block it had to split resulting in
+a stack error in `OPTIMISED. Alleviating this stack error leads to
+a crash.
+At last the latest addition eliminate-bblocks had a stack error.
+It turned out that there was another problem, but at last
+we have no more stack errors and testoptimiser.frt tests for it.
+So that is now fixed.
+eliminate-bblocks crashes as soon as a bblock
+is freed and or erased. Even balancing next-cond and fan-in does not
+work, nulling next-cond crashes too. Screened off with error 4009.
+
+Continuing with the return stack optimisation.
+
+2020 jul 22
+At long last the return stack optimisation no longer crashes and
+returns a proper result on GCD. However it will not cooperate with
+gather-bblocks, if either the release or the allocate are done.
+It is checked in with comment and both actions commented out
+in split-off-RSP.
+
+2020 jul 23
+Working on MEMORY wordset. There is a defect. If the end of allocation
+pointer is not aligned _remain gives a slightly too optimistic result
+for the remaining space in the block. Fixed.
+
+2020 aug 12
+The problem with the 64 bit immediate value in the optimiser is
+that it depends on the prefix. In the 16/32 bit switch for
+i386 the situation was different in the sense that either could
+be present in either BITS-32/BITS-16 state.
+Now we have an instruction that is only possible in 64 bit,
+but then requires a prefix.
+The solution is to have E:MOVI|X, and Q:MOVI|X, that each require the
+proper data length. Then we also need EN:MOVI|X, and QN:MOVI|X,
+After all this works properly, MOVI|X, still cannot be forbidden in
+64 bit mode, because the E: prefix can be left out, unlike Q: or QN:
+
+This introduces problems. It turns out there is a file tooltje
+that was not in cvs. This file is now part of optimiser.frt
+until such time that it is no longer needed.
+
+2020 aug 15
+There was the idea to have the Q prefixes generate the same code
+for E: temporarily for the optimiser. This doesn't work because
+now all the disassemblies of the low level code fail.
+So we must just start the tedious work of introducing the E:
+prefix manually at the places in front of the movi|x, where the
+data is just 32 bits. The rule is that temparory code inside the optimiser
+interprets E#: MOVI|X, as pertaining to 64 bits data.
+Should ever the need arise to have an e: prefix in combination with
+MOVI to pertain to 32 bit data E#" MOVI, can be used.
+The expansion step takes care that the internal interpretation
+during optimisation doesn't leak out.
+
+2020 aug 16
+At last handled the matter of 64 bit immediate data.
+The regression test works with the ciasdis of 2020 juli 01
+Probably the extra E:MOVI|X stuff can be removed from ciasdis
+and it will still work but for now this major update is checked in.
+The optimiser now works again, with the ciasdis of a corresponding
+date, after the JAN test is commented out.
+
+2021 mar 21
+It is embarassing that the -a option is not idempotent in screen 5.
+Changed. Also -p commented.
+The general rule for a facility wanted that can change the behaviour of
+the system (like case-insensitive/ case-sensitive) then the non-default
+behaviour is installed immediately (case insensitive in this case.)
+Cleaned up the situation around user variables, only refering to
+cell offsets w.r.t. the user area. Renamed EPL to ECL.
+
+2021 apr 13
+testwina target fails. Fixed the removal of current directory
+from wina.exe name.
+
+2021 apr 17
+mina failed. Fixed width16.m4 that had a wrong LODS.
+
+2021 apr 18
+Cleaned up (( (s (; LINK-LATEST [: etc
+in behalf of lucky7. Introduced IMPORT.
+
+2021 apr 22
+Comparing blocks between Intel and arm.
+Some messiness removed, comparing with arm: numbering in index lines,
+introduced default INSTALL-TRAPS that does nothing.
+
+2021 apr 23
+Comparing blocks between Intel and arm.
+The 8086 assembler should be moved to the end of the .lab.
+OTOH the fp packages defines standard words, and could probably
+remain. Having some common ground between different processors.
+The use of +THRU should be removed.
+The editor should be retested on msdos and dpmi before an attempt
+is made to clean up the editor on arm.
+I believe that apart from that. arm is neatly updated.
+
+2021 apr 24
+The use of THRU is eliminated by using symbolic names in the
+index lines.
+
+2021 mei 6
+PUSHI|X, expects 32 bits data. Despite the misleading
+PUSH imm64 on page 197 of AMD vol 3.
+The same is goning on with
+MOV AL,moffset8 The offset is given as 64 bits in line Q,
+MOV RAX,moffset64  The offset is given as 64 bits inline Q,
+These are LOAD instructions. The corresponding store works
+similarly.
+MOV reg64, imm64 (B8) leaves no room for the interpretation I
+gave to it, that it becomes mov, reg64 imm32 with an E: prefix.
+It states unequivocally that my
+MOV|TA, MOV|FA, are the only instructions that have a 64
+immediate address inlined.  ( A0 A2 )
+MOVI|X, (B8) seems to be the only instruction that has
+64 bit immediate data inlined.
+PUSHI|X, sign extends and always pushes a 64 bit thingy.
+
+2021 mei 7
+Everything related to E: !E was a mistake.
+Reverted the changes made in 2020-08.
+
+2021 mei 10
+A branch made called beforeE. In that branch a cleanup is intended for
+all the flags pertaining to instructions.
+MOVI|L, MOVI|X, MOVI, are using those flags properly.
+
+2021 mei 11
+Inspectors for properties moved to optimcategory.frt
+
+2021 mei 17
+The optimiser has turned into a horrible mess.
+The plan:
+1. get the optimiser directory working. As per 'make testoptimiser.out'
+2. get $F2 and optim/ciforth in line
+3. introduce the categories and use them.
+4. clean out obsolete stuff
+5. carefully describe 32 and 64 bit moves in the optimiser documentation
+6. make optimisations work on alternatives, but don't change the outputs.
+7. change outputs for optimisation, one by one.
+The version of 17 aug passes the testoptimiser test.
+
+2021 jun 9
+wine can run a 64 bit wina.exe. So the target testwina is
+replaced by testwina32 and testwina64 is addd.
+
+2022 feb 15
+QUIT now uses CLS , such it can be vectored.
+Floating point doesn't crash after lina -e WANT -fp- for 3G dictspace
+Floating point crashes after lina -a WANT -fp- for normal 64M sometimes.
+
+2022 feb 18
+Remarks collected since ages moved to the release notes of version 6,
+inasfar applicable. Some are reflected in the internal doc's of ci86.gnr
+CLS is used in THROW such that it can be revectored doing nothing.
+2>R can be removed from the FORMAT screen, but it triggers a
+modification in ciasdis. ci86.gnr 5.184
+-d option throws no message if 1 is already present (aka -e -s)
+
+2022 feb 19
+All usage of [SP] require a REX, in front, less the 32 bit truncated
+version of SP is used. This solves the crashing of the fp package in a
+version that has been expanded to 8G and beyond.
+How this comes about is a bit vague, but the missing REX, is certainly
+a defect. Testing succeeded using TOOLS/fpmathregress.frt
+The remark about errno is overhauled in XOS.
+2022 feb 21
+Suddenly fpmathregress.frt doesn't succeed. After floating point
+123_4 is no longer recognizes as a floating point number.
+This is due to case-insensitivity issues.
+In using the assembler and floating point case-insensitive is
+obligatory.
+5.165
+The annoying problem with 9.999999E12 as we expect 10.0000E12
+This cannot be solved with rounding, as we then have to cope with
+9.A00000000E12 which is worse.
+The assembler in blocks has been checked with the testsets of
+testas386 testas386a testsetpentium. It is discovered that lately
+XORSI, etc. no longer represent holes on the instruction set.
+Those are added, no descrepancies have been found.
+The floating point printing got an extra screen.
+blocks 5.165 & 5.166
+
+2022 feb 22
+It appears the -l option doesnot work as advertised, but it did in
+5.3.0. The reason is that I have made a short cut for COLD (skipping
+i.a. OPTIONS) that is not to be used in the -l option.
+This is easily fixed in screen ^L , in 5.186 ci86.gnr.
+MERGE-SORT crashes no more with the current version of forth.lab.
+SEE suddenly stops working. Luckily that doesn't apply to the
+official version 5.3.0 . It was discovered in relation to forward
+declaration. There was an unrelated bug, if :R was used with no
+previous :F.
+TRIAD ABORT" (ABORT") have been moved to loadable extension.
+2022 feb 23
+Version 5.187 of ci86.gnr has INCLUDE , at last.
+Version 5.168 of blocks.frt has `` decorated  '', at last.
+Added a test for decorated , which is also a test for the assembler
+high. Annoying testing next message removed.
+Target wina64.exe is missing in the Makefile (!)
+2022 feb 24
+FCR32: in rare cases SEE crashes
+I'm giving up on this bug, it doesn't detract much from the
+usability of SEE.
+The 99999 problem. Sneeking up from behind, it may result of a digit of A.
+Giving up
+2022 feb 26
+Experimenting with generating deb files. For the moment ./debian/2018..
+succeeds.
+2022 mar 1
+Added a 64 bit crc. 5.170 blocks.frt
+Building a zip archive, the indices of the ps files were no longer generated.
+Fixed. test.mak 5.52
+The mywc.. script are annoying. It contains direct calls for the linux os
+to open and read files. Changed that to using OPEN-FILE etc.
+
+Many administrative additions to the readme's and doc's (notably assembler 64
+bit) in preparation of release 5.4.
+
+``make zip VERSION=#.#.#'' generates an archive that makes lab's, executable's
+and perform
+make testlina32 testlina64 testwina32 testwina64.
+
+2022 mar 4
+The previous was a source archive.
+Now we have to make a installable deb based on the source archive,
+which is customary to debian.
+
+2022 mar 5
+The first step is to get rid of the extract directory.
+This is done by for the moment restricting it to target
+LINA32SRCZIPDEBIAN  to be deleted shortly.
+Now we have to face the decision:
+What is the source archive for lina really containing?
+I tend to restrict it to non-generated files.
+An alternative is the original idea, a combined source and binary
+archive, hiding that most of the documentation is generated.
+The is no merit to the renaming of ci86.lina32.html to html.
+It make no sense to have lina32-5.6.7.gz containing filesnames with ci86
+inside, and the same file name with arm lina inside.
+The official names become
+ciarm.lina32-#.#.#.tgz     ciarm.lina64-#.#.#.tgz
+ci86.lina32-#.#.#.tgz      ci86.lina64-#.#.#.tgz
+Snapshot version have #.#.# replaced by e.g.snapshot-6.87 (old)
+now snapshot 2022Mar05.
+
+2022 mar 6
+Looking at the report Hofman send me. Indeed the program toblk crashes and
+also hellow, if I have tried on the old Debian with fasm 1.73.09.
+The header is different and apart from that the files are the same.
+I can grow the the new lina64 and do a SAVE-SYSTEM with facilities
+loaded and that runs.
+Things to try :
+1. look at the indiciation Ullrich gave me. It looks like the output
+file is closed in toblk. This should not lead to segfault.
+2. ALLOT some space after HERE before compiling toblk.frt
+3. Use a different compiler, such a glina64 and glina32.
+
+2022 mar 7
+In the texinfo the top issue must be named top not Top, and
+the generation is okay.
+
+Apparently the new fasm requires extra length for saving:
+" 1000 ALLOT SAVE-SYSTEM" Awaiting this, the Makefile
+is adapted for gas, and prepared for swift switching.
+
+The make system generates ci86.lina*z files with and without
+assembler and texinfo source. target LINA32ZIP LINA32SRCZIP.
+
+2022 mar 8
+Maak een src archief met generieke filenamen. It is objectionable to
+rename the executable after the fact, because all information in the
+supplied doc files would be wrong. The solution is to remove the ci86.
+or ciarm. prefixes but keep the 32 or 64 bit suffixes.
+To complement that, a note is added to README to add a symbolic link to
+lina.
+In order to assembler for debian, the string forth.lab must be
+edited to /usr/lib/forth.lab. This plays havoc with the hard coded 9
+meaning the character count. The solution is to have a 80 character
+string with trailing spaces, to be cut off in BLOCK-INIT.
+
+2022 mar 10
+Gotten essentially nowhere. Using
+dpkg-buildpackage -uc -us
+we got complaints from binary files( *.ps.gz etc.) not possible to
+get rid of by manipulation of dh_compress. "binary files specified
+un some unspecified place" Then there are complaints about **build
+file missing.
+
+I start afresh using notes I collected long time ago.
+I forego the problem of assembling 32 bits on a 64 bit system and also
+the use of a foreign tool (fasm).
+
+2022 mar 11
+The notes were obsolete (I think).
+This was successful (right from debian documentation).:
+- unpack the source archive giving lina64_#.#.#
+- run debmake from within
+- run debuild from within
+
+2022 mar 12
+I added the docs and info files to debian/
+This succeeds.
+Adapt manpage, to reflect 32 64 bit differences.
+Finally I'm able to build the package with lintian output:
+E: ci86.lina64: statically-linked-binary usr/bin/lina
+E: ci86.lina64: unstripped-binary-or-object usr/bin/lina
+W: ci86.lina64: new-package-should-close-itp-bug
+debianE.tar reflects what has to put in the debian directory.
+
+2022 mar 13
+Finally  ci86.lina-5.4.0.deb succeeds.
+Had to make specific debian makefiles lina32.mak
+Now available ci86.lina32_5.4.0-1_amd64.deb ci86.lina64_5.4.0-1_amd64.deb
+The amd64 reflects the build architecture. The directories are sealed
+for the moment.
+2022 mar 14
+The generation of external to be used testfiles cleaned up and added
+stuff for xina.
+Send to Ullrich Hoffman and returned.
+2022 mar 16
+Most succeeded.
+2022 mar 17
+Forth bestuursvergadering. I must prepare a note about 5.4.0,
+possibly with telling about the library.
+2022 mar 19
+Send request to run test with redirection to UH.
+
+2022 mar 20
+Prepare to talk about the library.
+Analysis of the return of UH. The patching of the header macho
+went wrong. The magic number appears to be official with Apple.
+https://stackoverflow.com/questions/27669766/how-to-read-mach-o-header-from-object-file
+probably is invaluable.
+
+2022 mar 21
+The riddle detected at Mar 6 is solved. The size to be filled in
+is not the size of a segment but of the file. Two screens has
+been added that serve at the same time for 32 and 64 bit linux.
+
+2022 mar 22
+The new SAVE-SYSTEM screens added.
+Testing with CH
+1. beta instead of release nr
+Fixed with a new releasewina.bat
+It works as follows
+    $1 wina32/wina64
+    $2 9.8.7
+2.
+There is a failed test during testwina64,
+"wina -f 23 EXIT-CODE ! BYE" SYSTEM
+This passes during manual testing. Approved.
+3.
+READMEwina.txt is garbage. Fixed.
+
+Alle testen wina 5.4.0 32/64 geslaagd en op de website geplaatst.
+
+2022 mar 23
+This is the command to release normally
+    make clean VERSION VERSION=5.4.0 LINA64ZIP
+The wina/lina have been uploaded to my page and the forth-ig.nl
+page.
+
+2022 mar 25
+Synchronised libraries between arm and i86.
+Source need to be synchronised.
+2022 mar 27
+Working on the ARM. Suddenly the decorator fails the automatic test.
+Removed from ..labtest.
+2022 apr 6
+Working on xina. Most problems experienced by Ullrich were caused
+by comment symbols.
+Fixed in 5.190.
+2022 apr 30
+There is a search based on screen 1 in the file search.frt
+It is recommended that it be place in the screen with COMPARE
+and that UNUSED and ALIGN move to an other screen.
+2022 jun 9
+The version that is synchronised with ARM and has comment
+improved replacving ; with C_{ is now called REL-5-4-0 and
+installed on github.
+2022 jun 12
+Reinstalled the testing of decorated.
+The word ?IL was wrong if CF: called in hex mode.
+Replaced 36 by 6 6 * , made it work in hex and decimal.
+
 ===========================
+
+.BL is wrong, 1 is unlocked, -1 is locked.
+README.ciforth has to be updated for the generic system.
+namescooked.m4 doesnot force a release version e.g. 9.9.3 (howto.txt).
+
+Unrelated notes.
+
 Greg Egan
 Schild's ladder.
---
-What remains sortworddoc.frt is not up to date.
 
-
-- M:r  endclass-p
-
-- filter reduce(fold) map are useful words to add.
-  It can be used by bags on the stack
-  DSP@ >R 1 2 3 4 5 R>
-  generates a bag at DSP@
-
-
-+ALIAS should be in core
-+TRIAD must become a loadable extension.
-+I must remake VALUE as an alias of CONSTANT. Make the optimiser
-    understand that VALUES are not constant. Never patch DFA's of
-    constants again.
-
-+ Get-file should check for memory overflow.
-+ there may be an improved version of sortworddoc.frt
 Write the article for allocate using a objects and thingies.
 
 Suppose sda1 is a sandisk.
 dd if=binary.bin of=/dev/sda1
 
-issues:
-* maybe add INCLUDE to the kernel
-* -e in lina.1 should be the normal option.
-  INCLUDE SEE LOCATE DUMP CASESENSITIVE
-- the definition generated by :R should be hidden.
-  then it can be redefined several times and RESTORED works.
- - add
-~> https://www.forth.com/starting-forth/
- > https://sourceforge.net/projects/thinking-forth
-Scripting under MS-windows:
-    -s : trimline must be: CF: "?LI <trim>" EVALUATE
-    documentation
+Notes about something called S static analysis
+>[1]: http://wiki.luajit.org/SSA-IR-2.0
+>[2]: https://github.com/MLton/mlton/blob/master/mlton/ssa/ssa-tree.sig
+>[3]: http://mlton.org/pipermail/mlton/2007-February/029597.html
+>[4]: https://c9x.me/compile/
+>

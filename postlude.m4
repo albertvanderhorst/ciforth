@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: postlude.m4,v 5.25 2021/11/23 09:43:24 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 include(header.m4)
 dnl architectural consequences
@@ -106,6 +106,8 @@ define({_CIF_IN_}, _yes)
 _ISO_IN_({define({_CIF_IN_}, _no)})
 
 dnl Detectable error situations. Terminate.
+_DLL_({_PC_({errprint({dll conflicts with old MS
+})m4exit(1000)})})
 _RWSECTRK_({ _RWLBA_({errprint({LBA disk access conflicts with access by sectors and tracks.
 })m4exit(1000)})})
 _BOOTED_({_HOSTED_({errprint({Cannot boot into a _OS_ hosted Forth.
@@ -135,8 +137,8 @@ _SOURCEFIELD_({define({M4_HS},M4_HS+1)})dnl
 _EXTRAFIELD_({define({M4_HS},M4_HS+1)})dnl
 _EQULAYOUT_({define({M4_INITDP}, {TEXTEND})})
 dnl must be overruled after inclusion of postlude.4m
-_HOSTED({_LARGE_({define({M4_NBUF}, 16)})})
-_HOSTED({_SWITCH_({_LARGE_({define({M4_INITDP},{0x110000})})})})
+_HOSTED_({_LARGE_({define({M4_NBUF}, 16)})})
+_HOSTED_({_SWITCH_({_LARGE_({define({M4_INITDP},{0x110000})})})})
 _LARGE_({define({M4_MAXWORDLIST}, 16)})
 _BITS16_({define({M4_FILENAMELENGTH},{30})})
 _LARGE_({define({M4_FILENAMELENGTH},{252})})

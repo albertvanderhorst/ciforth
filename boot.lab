@@ -354,7 +354,7 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 "CPU  NAME  VERSION" TYPE .SIGNON CR                           
 "LIBRARY FILE: " TYPE                                          
 0 MESSAGE                                                      
-"$RCSfile$ $Revision$" TYPE CR                                 
+"$RCSfile: boot.lab,v $ $Revision: 5.2 $" TYPE CR              
 CR                                                             
 0 BLOCK  B/BUF TYPE                                            
 BYE                                                            
@@ -766,7 +766,7 @@ BYE
  : No such process                                             
  : No such file or directory                                   
  : Operation not permitted                                     
-  ciforth lab  $Revision$ (c) Albert van der Horst             
+  ciforth lab  $Revision: 5.2 $ (c) Albert van der Horst       
  : EMPTY STACK                                                 
  : DICTIONARY FULL                                             
  : FIRST ARGUMENT MUST BE OPTION                               

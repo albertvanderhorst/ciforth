@@ -1,4 +1,4 @@
-/* $Id$                   */
+/* $Id: fromblock.c,v 5.2 2005/06/16 15:54:15 albert Exp $                   */
 /* Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License */
 #include <stdio.h>
 #include <string.h>

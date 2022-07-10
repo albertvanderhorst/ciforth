@@ -1,0 +1,764 @@
+In this lecture we will try to show some of the
+benefits of generic programming.
+
+At the same time a technique of program transformation is shown.
+Keep in mind that the example is too simple to show off the
+full prowess of the program transformation technique.
+
+QSORT
+
+As an example we will use QSORT of Wil Baden that has apparently been
+published in 1983.
+We will see that in 1983 Forth was almost ahead of the C++ of 1998,
+and at least could have been using techniques known at the time.
+(On the premise that we take the lack of static and dynamic type
+checking for granted, as an essential feature of Forth and not
+something that will change as the language ``evolves''.)
+
+At first let us have a look at Wil's code, such as he has published on his
+web site.
+
+\ ----------------------------------------------------------
+\  Set PRECEDES for different datatypes or sort order.
+DEFER PRECEDES  ' < IS PRECEDES
+
+\  For sorting character strings in increasing order:
+: SPRECEDES         ( addr addr -- flag )
+    >R COUNT R> COUNT COMPARE 0< ;
+  ' SPRECEDES IS PRECEDES
+
+: EXCHANGE          ( addr_1 addr_2 -- )
+    DUP @ >R  OVER @ SWAP !  R> SWAP ! ;
+
+: -CELL ( -- n )  -1 CELLS ;
+
+: CELL-  ( addr -- addr' )  1 CELLS - ;
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  -CELL AND +  @ >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF  2DUP EXCHANGE  >R CELL+ R> CELL-  THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    R> DROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+: QSORT             ( lo hi -- )
+    PARTITION                ( lo_1 hi_1 lo_2 hi_2)
+    2OVER 2OVER  - +         ( . . . . lo_1 hi_1+lo_2-hi_2)
+        < IF  2SWAP  THEN    ( lo_1 hi_1 lo_2 hi_2)
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
+
+: SORT              ( addr n -- )
+    DUP 2 < IF  2DROP  EXIT THEN
+    1- CELLS OVER + ( addr addr+{n-1}cells) QSORT ( ) ;
+\ ----------------------------------------------------------
+
+The heart of the matter is in PARTITION. The range of items
+to be sorted, represented by [lo,hi] , is split into two
+subranges [lo1, hi1] and [lo2,hi2], where each item of the first range
+is smaller than each element of the second range.
+We use square brackets here using the mathematical convention of an
+inclusive range, i.e. the boundary indices belong to the range.
+Mathematics uses round brackets for non-inclusive ranges, i.e.
+the range (1,3) only contains 2.
+The trick is that an item is selected, somewhere in the middle (2/)
+called the pivot,
+and what is smaller is swapped to the first partition, what is larger
+is swapped to the second partition.
+
+Then the smaller ranges are partitioned again, until the range
+are trivially sorted because they consist of one element.
+
+What is meant by smaller? You see that Wil leaves that up to the
+user to decide. The word PRECEDES is a vector, i.e. it contains
+a reference to a word to be executed, and that word may be changed
+to whatever is appropriate. You see that the execution token of
+< is filled in as a default.
+
+This code is marvellously fast at sorting a table like the
+following
+
+CREATE INT-TABLE
+9 , 4 , 3 , 7 , 0 , 8 , 2 , 6 , 1 , 5 ,
+
+(And will come into its own only for tables a great deal larger.)
+
+It may also be used to sort a table of floats provided all floats
+are one cell wide like the integers.
+
+CREATE FLOAT-TABLE
+9.0E0 F, 4.0E0 F, 3.0E0 F, 7.0E0 F, 0.0E0 F,
+8.0E0 F, 2.0E0 F, 6.0E0 F, 1.0E0 F, 5.0E0 F,
+
+AND indeed we say
+' F< IS PRECEDES
+
+It cannot be used however to sort the following table of doubles
+
+CREATE DOUBLE-TABLE
+9.0 , ,  4.0 , ,  3.0 , ,  7.0 , ,  0.0 , ,  8.0 , ,  2.0 , ,  6.0 , ,  1.0 , ,  5.0 , ,
+
+On the other hand
+With
+: $PRECEDES   EXECUTE SWAP EXECUTE COMPARE 0 > ;
+again it CAN be used to sort the following table of strings
+
+: A0 S" nine" ;
+: A1 S" fout" ;
+: A2 S" three" ;
+: A3 S" seven" ;
+: A4 S" zero" ;
+: A5 S" eight" ;
+: A6 S" two" ;
+: A7 S" six" ;
+: A8 S" one" ;
+: A9 S" five" ;
+
+CREATE STRING-TABLE
+' A0 ,   ' A1 ,   ' A2 ,   ' A3 ,   ' A4 ,
+' A5 ,   ' A6 ,   ' A7 ,   ' A8 ,   ' A9
+
+
+And A5 (``eight'') will go to the top.
+
+And lastly it will fail on
+
+" nine  | fout  | three | seven | zero  | eight | two   | six   | one   | five  |"
+
+CREATE x-TABLE , ,
+
+Considered as 10 8 character strings.
+
+One of the reasons of the failures
+is immediately apparent in EXCHANGE . It is assumed
+that the things to exchange are one cell wide. More hidden in PARTITION
+is that we want the element to compare with to reside on the
+return stack, aghain taking up one cell.
+Especially with the last example, that will be a problem.
+
+ALGORIHTMIC TRANSFORMATION
+
+In order to make QSORT do what we want, we first define a regression test.
+This is a test that we do before and after an improvement. If the test
+doesn't come out the same, the "improvement" is rejected.
+In this way we can go ahead step by step, and it is possible in the end
+that the result doesn't look anything we started with.
+This is called algorithmic transformation.
+You see we will do a lot of small changes. What we do not want is
+any debugging after say 200 small changes. Especially not when you are
+in a maintenance situation and your program is horribly complicated
+and not written by you. (Of course such a program doesn't make a good
+example to treat in a few pages.)
+
+The test looks as follows
+' INT-TABLE DUP 9 CELLS + QSORT
+: ' INT-TABLE DUP 9 CELLS + BOUNDS I @ . 0 CELL+ +LOOP :
+We expect
+0 1 2 3 4 5 6 7 8 9
+
+' FLOAT-TABLE DUP 9 CELLS + QSORT
+: ' FLOAT-TABLE DUP 9 CELLS + BOUNDS I @ F. 0 CELL+ +LOOP :
+We expect
+0.0 1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0
+
+We want to make the algorithm more powerful. This translates
+in a larger regression test that in our case shows that we can
+sort the STRING-TABLE . On no account will we accept a regression
+test that is less powerful.
+
+A DIGRESSION: SOFTWARE MAINTENANCE
+
+The rules about what changes are allowed are simple:
+the changes must be ``infinitesimal'' . An infinitesimal change
+has the following properties:
+1. The change must result in theoritically equivalent code
+(what you are supposed to understand by this is, is explained
+in more detail in the following section.)
+2. It must pass pass the regression test.
+3. You can't think of a smaller change that would
+pass the regression test again.
+
+In software maintenance the real regression test may mean that
+the complicated machine with dozens of moving parts still works.
+A test may cost up to a hundred thousand euro.
+Still we want to test each minute change in principle. That is possible
+to have it ``hike'' along whith a larger change that is requested
+by a customer, and that demands a test anyway.
+
+There is an exception.
+If your analysis proves that a certain test
+will reveal a bug, show the bug in actual symptons to the user.
+Now he probably wants it removed. This makes it a customer requested
+change and you are no longer bound to rule 2,
+you are allowed to make an actual functional change.
+Now you add the test that would reveal the bug to the regression test.
+
+SET UP THRE REGRESSION TEST
+
+At this point we set up the regression test, typically using a
+makefile. If you are on a brain dead system, you may have trouble
+making a fitting regression test. Do it any way. Go back to DOS boxes,
+transport your code over a network. Run an emulator.
+Do what ever is necessary, but do it. You cannot proceed past this
+point without a regression test.
+
+At this point our regression test consists of sorting
+INT-TABLE FLOAT-TABLE and STRING-TABLE.
+
+OUR FIRST CHANGE : ALIGN-DOWN
+
+Let us return to SQORT.
+Puzzling to me is the story around -CELL. At this point I
+already known that in the final version this will be eliminated without
+leaving a trace. This doesn't prevent me from treating this change
+with utmost care.
+I fear that it might only work in a two complement system.
+I understand that it is used to take the average of two addresses
+in combination with ``AND +'' and then sort of align it to be
+a cell boundary, but lower than the original.
+
+So our first infinitesimal change is.
+
+: -CELL ( -- n )  -1 CELLS ;
+
+becomes
+
+\ For ADDRESS return a next lower ADDRESS that is aligned.
+\ This may work only on two complement machines.
+: ALIGN-DOWN -1 CELL AND + ;
+
+and
+    2DUP OVER - 2/  -CELL AND +  @ >R  ( R: median)
+becomes
+    2DUP OVER - 2/  ALIGN-DOWN  @ >R  ( R: median)
+
+This is an infinitesimal change. Renaming a function must result in
+theoretically the same code. And moving code inside a function from
+the place where it is called is again impossible to fail.
+There cannot be a smaller change. Only moving ``AND'' makes no sense,
+and keeping the original name is also out of the question.
+So this is an infinitesimal change.
+
+Some CS-people would argue that it is not necessary to test this.
+Don't listen to them. They know nothing about life.
+Listen to me. Run the regression test. Even if you have to wait
+months, such as in the case of the embedded systems I was talking about. So be it.
+Now you may look back at the change differently. This change may be
+the code people will see for months, or for an indefinite time, if I
+were to leave.
+The warning about two-complement may save thousands of Euro in 3 years
+time. (Or it may be that there is no problem at all on non-two complement
+systems. Interestingly, analysing this is a waste of time and I will not
+do it. Unless of course, such a system is going to be actually used at
+some point. Then I will look up ``two complement'' in my log book,
+or they will, if they are smart enough.
+Remember: ALIGN-DOWN will be eliminated shortly.)
+
+To my surprise and relief the regression test succeeds.
+
+OUR SECOND CHANGE : EXCHANGE
+
+In view of the table with fixed length strings ("one   |   ...")
+we need to introduce a general word to swap memory area's.
+EXCHANGE is indeed a good name for this (thank you, Wil!) and it is almost
+unbelievable that nobody came up with this, it is similar to MOVE
+and certainly a candidate for a kernel word.
+If we do not have a word like that, making a generic QSORT -- one that
+can be used always -- makes no sense. We will find ourselves coding
+exchanges all the time, and might as well recode QSORT all the time.
+(The current practice.)
+
+\ Exchange the content at ADDRESS1 and ADDRESS2 over a fixed LENGTH.
+: EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
+                   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
+
+This type of code shows the ugly side of Forth. Anyway, let us
+assume that it is a word considered standard, used extensively and
+tested beyond doubt, guaranteed by the vendor of your Forth, whatever.
+That means that testing EXCHANGE itself falls outside of the regressing
+test, and introducing it in QSORT is an infinitesimal change.
+
+We need a new name for Wil's ECHANGE , let us
+call it <--> . Again this change will not live long, because
+of course the exchanging must be done via vectored execution,
+in the same way as the comparison.
+
+\ Exchange the content of one cell at ADDRESS1 and ADDRESS2.
+: <-->    0 CELL+ EXCHANGE ;
+
+To my surprise and relief the regression test succeeds.
+
+You might get bored with infinitesimal changes at this point.
+Make no mistake. At the end of the day the code will be seemingly
+unrelated with what we started with in a non-trivial maintenance
+project.
+
+OUR THIRD CHANGE : SIMPLICATION
+
+It is practice in quicksort to sort the smaller partition first.
+That doesn't influence the sorting time, but it prevents that
+the stack space needed is as large as the stuff to be sorted.
+In the following let us say we have N items.
+You see, if partitioning in two succeeds very good, we will have
+2 log N levels of partitioning and some 2 log N cells of stack are needed.
+Worst case partitioning may partition in a piece 1 and a piece N-1 .
+So we have N steps whatever partition we choose to do next,
+but if we take the largest part to repartition
+first a stack depth of N results.
+But now practice. My N is a million. Wil takes an element at the middle
+each time. The unwanted behaviour -- a million things on the stack --
+occurs
+if this element is exactly the smallest number of the million, then
+the smallest number of the 999,999 remaining and so on.
+This is extremely unlikely.
+It can only be generated artificially as a test case. Even then my
+computer has stack depth of a million to spare and will run the test
+without a hitch (and faster).
+
+(In the early days of qsort people where bitten by this, because they
+selected the first element. The unwanted behaviour resulted when
+the input was already sorted or almost sorted.
+This  of course occurs in actual practice.
+But using a middle pivot make qsort behave optimally for sorted input.)
+
+So out go the following two lines :
+
+    2OVER 2OVER  - +         ( . . . . lo_1 hi_1+lo_2-hi_2)
+        < IF  2SWAP  THEN    ( lo_1 hi_1 lo_2 hi_2)
+
+If you are on a 16 bit machine, the practical result is that you can
+no longer sort 64 k worth of items, but 64K/Q where Q is a small number, say 2.
+At the end of the ride, we will review this issue and maybe
+put back in equivalent code.
+(We will put it back. And in hind sight  we will see that this change makes no sense.
+But this is the kind of thing you should do at this point.)
+
+To my surprise and relief the regression test succeeds.
+
+OUR FIRST NO-CHANGE : INDICES
+
+It is clear that if we want to make qsort oblivious of the kind of
+item to sort we rather not want to use addresses.
+There is no reasonable way to select the middle item in that way.
+We could pass the lenght of each item. But I don't want
+to assume that they have the same length. So what remains is using
+indices. Where it says
+'< IS PRECEEDES
+we introduced
+: MY<   CELLS BUFFER + @   CELLS BUFFER + @   SWAP < ;
+
+This also removes the ugly assymetry between the vectors for PRECEEDES
+and <--> . In one case we pass address, and in another case we pass
+content. In the strings example we pass addresses, and then the
+content which turns out to be addresses as well, and make my poor
+brain hurt.
+
+Lets experiment a bit. The word SORT disappears, or better it will
+get a stack phrase like.
+\ Sort the range FIRST to LAST (inclusive) of item compared by the xt
+\ COMPARING and exchanged by the xt EXHANGING.
+\ ``For FIRST<=I<J<=LAST      I J COMPARING EXECUTE leaves TRUE.''
+For the moment we will concentrate on QSORT.
+
+------------- what we have ----------------------
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  ALIGN-DOWN @ >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP @ R@  PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER @  PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF  2DUP EXCHANGE  >R CELL+ R> CELL-  THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    R> DROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+: QSORT             ( lo hi -- )
+    PARTITION                ( lo_1 hi_1 lo_2 hi_2)
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
+-------------------------- ----------------------
+
+Using indices this becomes:
+
+
+------------- what we get ----------------------
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP + 2/ >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@  PRECEDES WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER PRECEDES WHILE  1-  REPEAT
+         2DUP > NOT IF  2DUP EXCHANGE  >R 1+ R> 1-  THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    R> DROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+-------------------------- ----------------------
+
+We leave out SORT, because we don't need it anymore.
+For the test we just use
+0 9 QSORT.
+
+This looks like an improvement for simplicity. The ``DUP R@ PRECEDES''
+is more symmetric than ``DUP @ R@ PRECEDES''. The code ``ALIGN-DOWN @''
+just disappeared. It makes it easier to
+check against the basic idea of
+qsort.
+It looks like an infinitesimal change.
+
+But we needed a defered EXCHANGE.
+This was the code that went into it.
+
+: MY-EXCHANGE          ( i1 i2 -- )
+CELLS INT-TABLE + SWAP   CELLS INT-TABLE + SWAP
+    DUP @ >R  OVER @ SWAP !  R> SWAP ! ;
+
+However, to your distress the regression test fails.
+(Not to mine, because I made this up.)
+
+This is the result of the test :
+
+0 3 4 7 1 2 5 6 8 9
+
+What is going on is that the element we compare against changes
+place. From then on we effectively compare against some random
+element.
+
+So what we want to do just cannot be done with qsort.
+Dead end.
+
+QSORT REVISITED
+
+If you can't win, change the rules of the game.
+We felt in the previous section that we were almost there.
+So what if we bent qsort a little bit? After all,
+the only thing we need is
+that the pivot doesn't get exchanged. Is that too much to ask?
+
+Looking more precisely at the PARTITION we see that if we fill
+an array with all fives all of them get exchanged.
+    We select the pivot,
+    in the middle,
+a 5 , and then require the first, a 5, to be less then the pivot,
+lest we exchange it.
+So is this
+algorithm floating around in Forth circles for decades slightly
+off the mark? Indeed if we consult Knuth (The Art of Programming, part 3)
+we see that normally a smaller or equal comparison is used.
+Actually, the Forth algorithm is very clever. The answer is infinite loops.
+What if we have all 5 and then search up for something smaller then 5?
+You end with an address outside of the area to be sorted, and a fetch from there
+may lead to a crash. And sorting where all items are the same is not an important
+case anyway. By doing a smaller than comparision we are sure we will find
+something somewhere, even if it is merely the pivot.
+
+Normally you would go for three
+parts. The first part is all
+less than or equal to the pivot, the second part is the pivot, and the third
+part is all greater than or equal to
+the pivot. Because the pivot is in place we need not place it into one of the partitions.
+Indeed a range [1,10] is paritioned [1,3] , pivot at place 4 and range [5,10].
+So we expect to be able to replace
+
+DEFER PRECEDES  ' < IS PRECEDES
+
+by
+
+DEFER PRECEDES  ' <= IS PRECEDES
+
+Knuth has not our problem, because he takes the first element as the pivot, and
+after partitioning swap it into place. Knuth however suffers from the problem
+that sorted input takes a lot of time.
+
+What we will do is use the proper <=. Now the pivot never gets exchanged.
+We get then a partitioning like [1,4] [5,10] with the pivot in the first
+paritioning. We ma just leave it at that. Or we may consider the optimisation
+to exchange the pivot with item 4 and have the partitioning [1,3] 4 [5,10].
+
+OUR SECOND NOCHANGE:  FIXING PRECEEDES
+
+Fixing PRECEEDES in the above sense, is not an infinitesimal change to the
+algorithm. It is not a change in the algorithm at all.
+It is a change in the user manual. And it is reflected in a change in the regression
+test itself, and no change in QSORT.
+
+Of course we will have to run the regression test, so to say to test the test.
+
+To our dismay it takes 10 iterations to get the regression test in order again.
+
+And it dumps core. It crashes.
+
+(No examples, because I didn't actually try this out. Maybe it doesn't
+even crash nicely.)
+
+Lesson. You may change the rules of the game. But then you really must be
+Master of the Situation. More often than not that is not the case.
+
+OUR FOURTH CHANGE: ADDRESS ON RETURN STACK
+
+We may have failed in the previous step, but we did gain. We gained insight.
+The more precise analysis above shows that there is no choice but
+keeping track where our pivot remains.
+
+The first change we make is to hold the address of the pivot instead
+of the content. Then we must place a @ fetch after each R@ and
+We have to add a test whether the pivot is about to move, and replace
+the top of the return stack with that new address.
+
+The code for this is straightforward, but the algorithm suffers
+in simplicity and speed.
+That is the price we have to pay.
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP @ R@ @ PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ @ OVER @  PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF R> DROP DUP >R ELSE
+            DUP  R@ = IF R> DROP OVER >R THEN THEN
+            2DUP (<-->)
+            >R CELL+ R> CELL-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    R> DROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+This was an infinitesimal change, but a large one.
+It was not possible to make it smaller.
+
+To my surprise and relief the regression test succeeds.
+
+OUR FIFTH CHANGE: PRECEDES USES ADDRESSES
+
+We are now in a position to make the next move towards using
+indices, instead of addresses. That is by passing the addresses
+to PRECEDES instead of the content.
+(Like in STL the standard library for C++.)
+This is not only infinitesimal, it is also in absolute sense
+a small change, it amounts to eliminating four fetches from
+PARTITION.
+It looks much better, because the same ``things'' are passed to
+PRECEDES and to <--> . This is important, because it makes you forget
+about what type of data is there, the only important thing is the
+manipulation.
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ PRECEDES WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER PRECEDES WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF R> DROP DUP >R ELSE
+            DUP  R@ = IF R> DROP OVER >R THEN THEN
+            2DUP (<-->)
+            >R CELL+ R> CELL-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    R> DROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+Note that two of the four fetches where added just in the previous
+step.
+
+To my surprise and relief the regression test succeeds.
+
+OUR SIXTH CHANGE: CLEANUP
+
+I somehow don't like the names PRECEDES and (<-->)
+It is time to come up with a naming convention.
+I think we should have just < and <--> in the SORT module.
+However Forth has no modules and wordlists are too slimy, sticky
+and slippery (if it is possible to be all that at the same time!)
+So vectors have to stand off by a naming convention to reduce the
+risk of name clashes. The solution is to prepend the name with
+a ``*'' to be associated with the c- reference operator.
+(``&'' would be better but that one is taken.).
+When we are at it, we introduce RDROP that is pretty ubiquitous and
+can be defined easily anyway.
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP OVER - 2/  ALIGN-DOWN +  >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  CELL+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  CELL-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R CELL+ R> CELL-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    RDROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+Furthermore the whole deferring stuff must be hidden in the SORT
+module, meaning that there are no assignement to deferred vectors
+outside of SORT. If you want to sort you have to pass the
+low and high addresses and two execution tokens.
+As follows :
+
+( lo hi xt-c xt-e -- )
+: SORT   '*<--> >BODY !   '*< >BODY !   QSORT ;
+
+Note that there is no use for IS . Anyway I hate that word
+because it looks ahead in the input stream, and that is exactly
+the reason the word is no use.
+
+Note that I do this cleanup as soon as it comes up, even now
+we are just one step short of our goal. This is the
+right way, lest we use much time in the frenzy that results
+when all those opportunities open up.
+
+To my surprise and relief the regression test succeeds.
+
+OUR SIXTH CHANGE: PRECEDES USES INDICES
+
+At last we now can use indices instead of addresses:
+Indices were our ultimate goal, we have attained sufficient
+generality at this point that we can sort all the other tables
+described in the introduction. We have attained genericity.
+
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP + 2/   >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    RDROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+
+There is a lot to be changed in the regression test.
+
+To my surprise and relief the regression test succeeds.
+
+Isn't it beautiful? Let us have a look at it without those ugly
+comments.
+
+: PARTITION
+    2DUP + 2/   >R
+    2DUP BEGIN
+         SWAP BEGIN  DUP R@  *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > NOT IF
+            OVER R@ = IF RDROP DUP >R  ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL
+    RDROP
+    SWAP ROT
+    ;
+
+: QSORT
+    PARTITION
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
+
+This looks clean and crisp compared to Knuth's algorithm Q
+(TACP part 3). But this is actual code...
+
+OUR TENTH CHANGE: NOTHING TO DO EXCEPT ....
+
+Suddenly we find ourselves in the position that all the examples can be sorted using the
+new qsort.
+
+With great effort the regression test is expanded.
+But then it succeeds for all examples.
+
+OUR ELEVENTH CHANGE: OPTIMISATIONS.
+
+We read back looking for optimisations that can be put back in.
+
+1. Two lines in SORT :
+    2OVER 2OVER  - +         ( . . . . lo_1 hi_1+lo_2-hi_2)
+        < IF  2SWAP  THEN    ( lo_1 hi_1 lo_2 hi_2)
+
+This probably is worthwhile. Is it? Answer test.
+
+This is left as an exercise for the reader.
+
+BOTTOM LINE
+
+We have now a generic algorithm for qsort.
+Using EXCHANGE to exchange memory area's and properly filling in
+PRECEEDES and <--> vectors we can have the joy of really fast sorting.
+
+\   For INDEX1 and INDEX2 and TABLE, return corresponding ADDRESS1
+\   and ADDRESS2 .
+: PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
+
+With proper description of the words using the Stallman convention
+we get at last :
+
+
+\ ----------------- auxiliary -------------------------------
+
+\ Exchange the content at ADDRESS1 and ADDRESS2 over a fixed LENGTH.
+: EXCHANGE 0 ?DO   OVER I +     OVER I +  OVER C@   OVER C@
+                   >R SWAP C!  R> SWAP C! LOOP 2DROP ;
+
+\   For INDEX1 and INDEX2 and TABLE, return corresponding ADDRESS1
+\   and ADDRESS2 .
+: PAIR[] >R   CELLS R@ + SWAP   CELLS R@ + SWAP   RDROP ;
+
+\ ----------------- quick sort proper -----------------------
+
+\ Compare item N1 and N2. Return ``N1'' IS lower and not equal.
+DEFER *<
+\ Exchange item N1 and N2.
+DEFER *<-->
+
+\ Sort the range LOW to HIGH inclusive observing *< and *<-->
+: PARTITION         ( lo hi -- lo_1 hi_1 lo_2 hi_2 )
+    2DUP + 2/   >R  ( R: median)
+    2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
+         SWAP BEGIN  DUP R@ *< WHILE  1+  REPEAT
+         SWAP BEGIN  R@ OVER *< WHILE  1-  REPEAT
+         2DUP > NOT IF
+            \ Do we have a new position for our pivot?
+            OVER R@ = IF RDROP DUP >R ELSE
+            DUP  R@ = IF RDROP OVER >R THEN THEN
+            2DUP *<-->
+            >R 1+ R> 1-
+        THEN
+    2DUP > UNTIL    ( lo_1 hi_2 lo_2 hi_1)
+    RDROP                            ( R: )
+    SWAP ROT        ( lo_1 hi_1 lo_2 hi_2)
+    ;
+
+\ Sort the range LOW to HIGH inclusive observing
+\ ``LOW'' and ``HIGH'' must be indices compatible with the current
+\ values of *< and *<-->
+: QSORT             ( lo hi -- )
+    PARTITION                ( lo_1 hi_1 lo_2 hi_2)
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN
+    2DUP < IF  RECURSE  ELSE  2DROP  THEN ;
+
+\ Sort the range FIRST to LAST (inclusive) of item compared by the xt
+\ COMPARING and exchanged by the xt EXHANGING.
+\ All indices in this range must be proper to pass to both of the xt's.
+\ The xt's are filled in into *< and *<--> and must observe the
+\ interface.
+\ After the call we have that :
+\ ``For FIRST<=I<J<=LAST      I J *<--> EXECUTE leaves TRUE.''
+: SORT   '*<--> >BODY !   '*< >BODY !   QSORT ;

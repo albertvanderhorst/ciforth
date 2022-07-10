@@ -1,4 +1,4 @@
-dnl $Id: gas.m4,v 5.16 2017/11/10 18:33:43 albert Exp $
+dnl $Id: gas.m4,v 5.19 2022/03/06 19:58:36 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 
@@ -10,9 +10,9 @@ define({_HEADER_ASM},{#
 # Gnu as version of ciforth created by ``m4'' from generic listing.
 # This source can be assembled using versions better than 2.13.
 # This file can be assembled and linked in the following way:
-#       as _BITS64_({-64}) lina.s
-#       ld -s -N a.out -o lina
-# The -s (strip) may not be necessary.
+#       as _BITS64_({-64},{-32}) lina.s
+#       ld _BITS64_({-melf_x86_64 },{-melf_i386 })  -s -N a.out -o lina
+# The -s (strip) is not necessary, and may even be detrimental.
 
 .Intel_syntax prefix
 })
@@ -56,8 +56,8 @@ dnl Handling large blocks of comment
 define({_COMMENTED}, { /* }$1{ */ })
 
 dnl A nobits section takes no place in the object file.
-define({_TEXT_},{.text})
-define({_BSS_},{.bss})
+define({_TEXT_},{    .section .forth,"awx",@progbits})
+define({_BSS_},{    .section .dict,"awx",@nobits})
 define({_ENDOFPROGRAM},{
         END $1
 })

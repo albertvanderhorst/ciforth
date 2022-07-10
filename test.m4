@@ -1,5 +1,5 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl $Id$
+dnl $Id: test.m4,v 5.3 2013/03/19 22:33:30 albert Exp $
 dnl Split each wordtest() struct into tests (odd) and testresults (even)
 dnl on different diversion.
 divert(-1)dnl

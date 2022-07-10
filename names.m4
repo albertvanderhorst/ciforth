@@ -1,5 +1,5 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl $Id$
+dnl $Id: names.m4,v 5.6 2016/12/21 16:57:30 albert Exp $
 divert(-1)dnl
 include(VERSION)
                 Macros for names in the documentation

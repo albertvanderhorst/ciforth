@@ -1,4 +1,4 @@
-# $Id$
+# $Id: README.ciforth,v 5.4 2022/03/01 14:11:22 albert Exp $
 # Copyright(2000..2017): Dutch Forth Workshop Foundation, by GNU Public License
 GENERAL.
 
@@ -129,7 +129,7 @@ errors.linux.txt: Linux error messages, aka strerror()
 errors.dos.txt  : DOS and DPMI error messages.
 forth.lab       : Generated from blocks.frt but in block format,
                   Supplied in MSDOS archive instead of blocks.frt
-wc              : Featuring lina as a script language.
+mywc wc.script  : Featuring lina as a script language. 
 
 May have become obsolete. Not checked for ages.
 genboot.bat     : Generate a bootable floppy on an MSDOS system

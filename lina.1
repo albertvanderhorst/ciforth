@@ -1,11 +1,13 @@
-.\" $Id: lina.1,v 5.4 2018/01/18 19:37:28 albert Exp $
-.TH LINA "1" "dec 2017 " "ciforth 5.3.0" HCC-FORTHGG
+.\" $Id: lina.1,v 5.6 2022/03/12 12:33:25 albert Exp $
+.TH LINA "1" "feb 2022 " "ciforth 5.4.0" HCC-FORTHIG
 .SH "NAME"
 lina \- close to ISO Forth Language And Environment
 .SH "SYNOPSIS"
 \fBlina\fR      [\ \fB\-aehmrv\fR\ ]
 .br
 \fBlina\fR      \ \fB\-c\fR\ <source>
+.br
+\fBlina\fR      \ \fB\-d\fR\ [<source>]
 .br
 \fBlina\fR      \ \fB\-f\fR\ [ forth code ]
 .br
@@ -27,7 +29,7 @@ is fully implemented. The small, classic, indirect threaded
 kernel contains the essential, i.a. file access, exceptions and
 interfacing with Linux.
 Its power is multiplied by an extensive source library, that
-adds i.a. a number of standard words,
+adds i.a. a number of standard words, floating point,
 a decompiler, integrated 386 assembler, sort utilities,
 binary search and numerous small functions.
 .
@@ -60,6 +62,11 @@ Then start the interpreter.
 .TP
 \fB\-c\fR \fIfile.frt\fR
 Compile \fIfile.frt\fR to the binary \fIfile\fR.
+.TP
+\fB\-d\fR \fIfile.frt\fR
+Include \fIfile.frt\fR after loading conditional compilation facilities
+(\fI[IF]\fR etc.).
+This is helpful if the file must be portable.
 .TP
 \fB\-e\fR
 Load the \fBelectives\fR , i.e. tools for interactive development.
@@ -126,21 +133,23 @@ This is configurable at install time.
 
 .SH "SEE ALSO"
 
-\fIlina.info\fR
+\fIlina64.info\fR
 documents all language features implemented and
 has a tutorial. Further documentation is beneficial but not
 required.
-\fIlina.html\fR contains only the reference documentation, heavily cross
+\fIlina64.html\fR contains only the reference documentation, heavily cross
 referenced.
 .br
-\fI/usr/share/doc/lina/lina.texinfo\fR allows you to generate the documentation
+\fI/usr/share/doc/ci86.lina64/lina64.texinfo\fR allows you to generate the documentation
 in html, ps and pdf form.
 .br
-\fI/usr/share/doc/lina/lina.asm\fR and \fIforth.lab\fR are source code and can be viewed.
+\fI/usr/share/doc/lina.lina64/lina64.s\fR and \fIforth.lab\fR are source code and can be viewed.
+.br
+\fIlina\fR comes also in cell-width 32; the filenames change accordingly.
 .br
 gforth(1) GNU Forth, a faster and more complicated Forth system.
 .br
-nasm(1) The Netwide Assembler.
+as(1) The portable GNU assembler.
 
 .SH "DIAGNOSTICS"
 Uncaught exceptions will show the error number.
@@ -161,12 +170,12 @@ A Forth program intended for systems where no Forth library is
 installed must take care of error messages itself.
 
 The library does not contain a full complement of the ISO Forth
-language, as it should.
+language.
 
 The library has comments but no comprehensive documentation.
 
 .SH "AUTHOR"
-Copyright \(co 2000-2016
+Copyright \(co 2000-2022
 Albert van der Horst \fI albert@spenarnc.xs4all.nl\fR.
 \fBciforth\fR is made available under the GNU Public License:
 quality, but NO warranty.

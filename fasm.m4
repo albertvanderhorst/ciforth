@@ -1,5 +1,5 @@
-dnl $Id$
-dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl $Id: fasm.m4,v 5.13 2017/11/10 18:33:43 albert Exp $
+dnl Copyright(2011): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Macro's to adapt the source to Flat Assembler
 divert(-1)
 dnl Directives ignored by FASM.

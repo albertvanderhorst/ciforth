@@ -1,4 +1,4 @@
-# $Id$
+# $Id: linarelease.txt,v 5.2 2005/06/16 15:54:16 albert Exp $
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 
 SYNOPSIS

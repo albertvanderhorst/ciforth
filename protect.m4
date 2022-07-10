@@ -1,4 +1,4 @@
-dnl  $Id$  M4 file to handle siwtching from to preotected mode
+dnl  $Id: protect.m4,v 5.3 2013/05/10 19:44:11 albert Exp $  M4 file to handle siwtching from to preotected mode
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 _BITS16_( {define({IDENTIFY_PROT},{IDENTIFY_16})})

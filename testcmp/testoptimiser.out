@@ -1,3 +1,4 @@
+
 ####################
 BEFORE
 
@@ -9,6 +10,14 @@ AFTER
 : test   
 1  SWAP   2  3  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   PUSHI|X, 1 IL, 
+   PUSH|X, AX| 
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 3 IL, 
 ####################
 BEFORE
 
@@ -20,6 +29,10 @@ AFTER
 : test1   
 F  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 15 IL, 
 ####################
 BEFORE
 
@@ -31,6 +44,143 @@ AFTER
 : test2   
 2  1  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 1 IL, 
+####################
+BEFORE
+
+: test2a   
+2   >R   1   R>   
+;
+AFTER
+
+: test2a   
+2  >R   1  R>   
+;
+Report about return stack usage
+new report 
+0 8 1 1 
+
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 2 IL, 
+   QN:    MOVI, X| R| AX| 2 IL, 
+####################
+BEFORE
+
+: test2aa   
+4  >R   2   >R   1   R>   3  R>   
+;
+AFTER
+
+: test2aa   
+4  >R   2  >R   1  R>   3  R>   
+;
+Report about return stack usage
+new report 
+1 8 1 1 
+0 9 1 1 
+
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 3 IL, 
+   QN:    MOVI, X| R| AX| 4 IL, 
+   QN:    MOVI, X| R| CX| 2 IL, 
+   PUSHI|X, 4 IL, 
+####################
+BEFORE
+
+: test10a   
+A  0   
+DO I   +   1   (+LOOP)   
+0BRANCH [ -30 , ] ( between ? I   ) UNLOOP   
+;
+AFTER
+
+: test10a   
+A  0  0  >R   SWAP   >R   >R   I   +   1  (+LOOP)   
+0BRANCH [ -38 , ] ( between >R   I   ) UNLOOP   
+;
+Report about return stack usage
+new report 
+2 8 1 0 
+1 9 1 1 
+0 10 2 3 
+
+   QN:    MOVI, X| R| CX| 10 IL, 
+   QN:    MOVI, X| R| DX| 0 IL, 
+   POP|X, BX| 
+   Q':    MOV, X| F| DX'| R| AX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   QN:    ADDI, X| R| DX| 1 IL, 
+   QN':    CMP, X| T| DX'| R| CX| 
+   J|X, S| Y| 4294967272 (RL,) 
+   JMP, 0 (RL,) 
+####################
+BEFORE
+
+: test10b   
+A  0   
+DO I   +   1   (+LOOP)   
+0BRANCH [ -30 , ] ( between ? I   ) UNLOOP   8  0   
+DO I   2*   +   1   (+LOOP)   
+0BRANCH [ -38 , ] ( between ? I   ) UNLOOP   
+;
+AFTER
+
+: test10b   
+A  0  0  >R   SWAP   >R   >R   I   +   1  (+LOOP)   
+0BRANCH [ -38 , ] ( between >R   I   ) UNLOOP   8  0  0  >R   SWAP   >R   >R   I   2*   +   1  (+LOOP)   
+0BRANCH [ -40 , ] ( between >R   I   ) UNLOOP   
+;
+Report about return stack usage
+new report 
+2 8 2 0 
+1 9 2 2 
+0 10 4 6 
+
+   QN:    MOVI, X| R| CX| 10 IL, 
+   QN:    MOVI, X| R| DX| 0 IL, 
+   POP|X, BX| 
+   Q':    MOV, X| F| DX'| R| AX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   QN:    ADDI, X| R| DX| 1 IL, 
+   QN':    CMP, X| T| DX'| R| CX| 
+   J|X, S| Y| 4294967272 (RL,) 
+   QN:    MOVI, X| R| CX| 8 IL, 
+   QN:    MOVI, X| R| DX| 0 IL, 
+   Q':    MOV, X| F| DX'| R| AX| 
+   Q:    SHL, 1| X| R| AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   QN:    ADDI, X| R| DX| 1 IL, 
+   QN':    CMP, X| T| DX'| R| CX| 
+   J|X, S| Y| 4294967269 (RL,) 
+   JMP, 0 (RL,) 
+####################
+BEFORE
+
+: test2b   
+OVER   +   
+;
+AFTER
+
+: test2b   
+OVER   +   
+;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    ADD, X| F| DX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -42,6 +192,11 @@ AFTER
 : test3   
 2  1  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 1 IL, 
 ####################
 BEFORE
 
@@ -53,6 +208,10 @@ AFTER
 : B0   
 400  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 1024 IL, 
 ####################
 BEFORE
 
@@ -64,6 +223,11 @@ AFTER
 : DOIT   
 2  1  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 1 IL, 
 ####################
 BEFORE
 
@@ -73,8 +237,16 @@ BEFORE
 AFTER
 
 : test4   
-4  C04404C  !   1  2  3  
+4  43FC098  !   1  2  3  
 ;
+Report about return stack usage
+new report 
+
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 4 IL, 
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 3 IL, 
 ####################
 BEFORE
 
@@ -84,126 +256,309 @@ SWAP   1   2   3  5  BASE   !   SWAP
 AFTER
 
 : test5   
-SWAP   5  C04404C  !   1  3  2  
+SWAP   5  43FC098  !   1  3  2  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 5 IL, 
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 3 IL, 
+   PUSHI|X, 2 IL, 
+####################
+BEFORE
+
+: test5a   
+DUP   DROP   
+;
+AFTER
+
+: test5a   
+DUP   DROP   
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: test5b   
+7  DUP   DROP   
+;
+AFTER
+
+: test5b   
+7  
+;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 7 IL, 
 ####################
 BEFORE
 
 : test6   
 BASE   @   
-0BRANCH [ 4 , ] ( between SWAP   2DROP   ) SWAP   2DROP   
+0BRANCH [ 8 , ] ( between SWAP   2DROP   ) SWAP   2DROP   
 ;
 AFTER
 
 : test6   
 DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
 : test6A   
 BASE   @   
-0BRANCH [ C , ] ( between ? DROP   ) SWAP   
-BRANCH  [ 4 , ] ( between DROP   2DROP   ) DROP   2DROP   
+0BRANCH [ 18 , ] ( between ? DROP   ) SWAP   
+BRANCH  [ 8 , ] ( between DROP   2DROP   ) DROP   2DROP   
 ;
 AFTER
 
 : test6A   
-C04404C  @   
-0BRANCH [ C , ] ( between ? DROP   ) SWAP   
-BRANCH  [ 4 , ] ( between DROP   2DROP   ) DROP   2DROP   
+43FC098  @   
+0BRANCH [ 18 , ] ( between ? DROP   ) SWAP   
+BRANCH  [ 8 , ] ( between DROP   DROP   ) DROP   DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOV, X| T| AX'| XO| [BX] 0 L, 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 9 (RL,) 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 6 (RL,) 
+   POP|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
 : test7   
 
-0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3  +   
+0BRANCH [ 10 , ] ( between +   LIT   ) 2   +   3  +   
 ;
 AFTER
 
 : test7   
 
-0BRANCH [ C , ] ( between +   LIT   ) 2  +   3  +   
+0BRANCH [ 18 , ] ( between +   LIT   ) 2  +   3  +   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 17 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 2 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 3 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3  5  7  9  BASE   !   SWAP   
+0BRANCH [ 10 , ] ( between ? LIT   ) 3  5  7  9  BASE   !   SWAP   
 ;
 AFTER
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3  9  C04404C  !   7  5  
+0BRANCH [ 10 , ] ( between ? LIT   ) 3  9  43FC098  !   7  5  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 10 (RL,) 
+   PUSHI|X, 3 IL, 
+   JMP, 0 (RL,) 
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 9 IL, 
+   PUSHI|X, 7 IL, 
+   PUSHI|X, 5 IL, 
 ####################
 BEFORE
 
 : test9   
 
-0BRANCH [ 4 , ] ( between (test1)   (;)   ) (test1)   
+0BRANCH [ 8 , ] ( between (test1)   (;)   ) (test1)   
 ;
 AFTER
 
 : test9   
 
-0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 26 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testA   
 
-0BRANCH [ 8 , ] ( between (testA)   (;)   ) (testA)   (testA)   
+0BRANCH [ 10 , ] ( between (testA)   (;)   ) (testA)   (testA)   
 ;
 AFTER
 
 : testA   
 
-0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+0BRANCH [ 40 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 45 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testB   
 (testB)   
-BRANCH  [ -C , ] ( between ? (testB)   ) 
+BRANCH  [ -18 , ] ( between ? (testB)   ) 
 ;
 AFTER
 
 : testB   
 +   AND   OR   LSHIFT   
-BRANCH  [ -18 , ] ( between (;)   +   ) 
+BRANCH  [ -30 , ] ( between (;)   +   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 4294967270 (RL,) 
 ####################
 BEFORE
 
 : testC   
 (testC)   (testC)   
-BRANCH  [ -10 , ] ( between ? (testC)   ) 
+BRANCH  [ -20 , ] ( between ? (testC)   ) 
 ;
 AFTER
 
 : testC   
 +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
-BRANCH  [ -28 , ] ( between (;)   +   ) 
+BRANCH  [ -50 , ] ( between (;)   +   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 4294967251 (RL,) 
 ####################
 BEFORE
 
 : testD   
 
-0BRANCH [ C , ] ( between ? DROP   ) SWAP   
-BRANCH  [ C , ] ( between @   2DROP   ) DROP   BASE   @   2DROP   
+0BRANCH [ 18 , ] ( between ? DROP   ) SWAP   
+BRANCH  [ 18 , ] ( between @   2DROP   ) DROP   BASE   @   2DROP   
 ;
 AFTER
 
 : testD   
 DROP   DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
@@ -215,34 +570,48 @@ AFTER
 : testE   
 DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
 : testF   
 
-0BRANCH [ C , ] ( between ? 2   ) 1   
-BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
+0BRANCH [ 18 , ] ( between ? 2   ) 1   
+BRANCH  [ 8 , ] ( between 2   DROP   ) 2   DROP   
 ;
 AFTER
 
 : testF   
 DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
 ####################
 BEFORE
 
 : testG   
 
-0BRANCH [ C , ] ( between ? 2   ) 1   
-BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
-BRANCH  [ -24 , ] ( between ? 0BRANCH   ) 
+0BRANCH [ 18 , ] ( between ? 2   ) 1   
+BRANCH  [ 8 , ] ( between 2   DROP   ) 2   DROP   
+BRANCH  [ -48 , ] ( between ? 0BRANCH   ) 
 ;
 AFTER
 
 : testG   
 DROP   
-BRANCH  [ -C , ] ( between (;)   DROP   ) 
+BRANCH  [ -18 , ] ( between (;)   DROP   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   JMP, 4294967290 (RL,) 
 ####################
 BEFORE
 
@@ -254,36 +623,179 @@ AFTER
 : testGA   
 
 ;
+Report about return stack usage
+new report 
+
+   Q: 
+####################
+BEFORE
+
+: test>cond   
+C  OVER   >   
+0BRANCH [ 20 , ] ( between ? LIT   ) 7B  
+BRANCH  [ 10 , ] ( between ? (;)   ) 141  
+;
+AFTER
+
+: test>cond   
+C  OVER   SWAP   <   
+0BRANCH [ 20 , ] ( between ? LIT   ) 7B  
+BRANCH  [ 10 , ] ( between ? (;)   ) 141  
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    CMPI, X| R| AX| 12 IL, 
+   J|X, L| N| 10 (RL,) 
+   PUSHI|X, 123 IL, 
+   JMP, 10 (RL,) 
+   PUSHI|X, 321 IL, 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testH   
 
-0BRANCH [ C , ] ( between ? 2   ) 1   
-BRANCH  [ 4 , ] ( between 2   DROP   ) 2   DROP   
-0BRANCH [ 10 , ] ( between ? LIT   ) 5  
-BRANCH  [ 8 , ] ( between ? DROP   ) 6  DROP   
-BRANCH  [ -48 , ] ( between ? 0BRANCH   ) 
+0BRANCH [ 18 , ] ( between ? 2   ) 1   
+BRANCH  [ 8 , ] ( between 2   DROP   ) 2   DROP   
+0BRANCH [ 20 , ] ( between ? LIT   ) 5  
+BRANCH  [ 10 , ] ( between ? DROP   ) 6  DROP   
+BRANCH  [ -90 , ] ( between ? 0BRANCH   ) 
 ;
 AFTER
 
 : testH   
 DROP   DROP   
-BRANCH  [ -10 , ] ( between (;)   DROP   ) 
+BRANCH  [ -20 , ] ( between (;)   DROP   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
+   JMP, 4294967289 (RL,) 
 ####################
 BEFORE
 
 : testHA   
 A  =   
-0BRANCH [ 4 , ] ( between 2*   DROP   ) 2*   DROP   A9   A9   
+0BRANCH [ 8 , ] ( between 2*   DROP   ) 2*   DROP   A9   A9   
 ;
 AFTER
 
 : testHA   
 DROP   DROP   258  +   
 ;
-testI still fails:
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 600 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: TESTH1   
+(TESTH1)   TASK   (TESTH1)   TASK   (TESTH1)   XOR   
+;
+AFTER
+
+: TESTH1   
+
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   XOR   ) ROT   XOR   
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 43 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 38 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 33 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 33 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 4294967248 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 4294967253 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    XOR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: (TESTI)   
+
+0BRANCH [ 10 , ] ( between EXIT   ROT   ) AND   EXIT   ROT   
+;
+AFTER
+
+: (TESTI)   
+
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   (;)   ) ROT   
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 11 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
@@ -294,11 +806,153 @@ AFTER
 
 : testI   
 
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 1C , ] ( between ROT   XOR   ) ROT   
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   XOR   ) ROT   XOR   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   XOR   ) ROT   XOR   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 27 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 22 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 22 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 4294967264 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    XOR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: TESTIB   
+(TESTIB)   (TESTIB)   XOR   
+;
+AFTER
+
+: TESTIB   
+
+0BRANCH [ 28 , ] ( between ? ROT   ) AND   
+BRANCH  [ 18 , ] ( between ROT   0BRANCH   ) 
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 28 , ] ( between ? ROT   ) AND   
+BRANCH  [ 18 , ] ( between ROT   XOR   ) 
+BRANCH  [ 8 , ] ( between ROT   XOR   ) ROT   XOR   
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 27 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 22 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 22 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 4294967264 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    XOR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: TESTIC   
+(TESTIC)   (TESTIC)   XOR   
+;
+AFTER
+
+: TESTIC   
+
+0BRANCH [ 28 , ] ( between ? ROT   ) AND   
+BRANCH  [ 18 , ] ( between ROT   0BRANCH   ) 
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 28 , ] ( between ? ROT   ) AND   
+BRANCH  [ 18 , ] ( between ROT   XOR   ) 
+BRANCH  [ 8 , ] ( between ROT   XOR   ) ROT   XOR   
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 27 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 22 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 22 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 4294967264 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    XOR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -309,11 +963,31 @@ AFTER
 
 : testJ   
 
-0BRANCH [ 14 , ] ( between ? OR   ) AND   
-BRANCH  [ 18 , ] ( between SWAP   XOR   ) 
-BRANCH  [ C , ] ( between ? SWAP   ) OR   
-BRANCH  [ 4 , ] ( between SWAP   XOR   ) SWAP   XOR   
+0BRANCH [ 28 , ] ( between ? OR   ) AND   
+BRANCH  [ 30 , ] ( between SWAP   XOR   ) 
+BRANCH  [ 18 , ] ( between ? SWAP   ) OR   
+BRANCH  [ 8 , ] ( between SWAP   XOR   ) SWAP   XOR   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 11 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    XOR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -323,12 +997,43 @@ BEFORE
 AFTER
 
 : testK   
-
-DO ROT   
-0BRANCH [ C , ] ( between ? SWAP   ) UNLOOP   
-BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
-LOOP 2DUP   
+0  >R   SWAP   >R   >R   ROT   
+0BRANCH [ 10 , ] ( between ? SWAP   ) 
+BRANCH  [ 30 , ] ( between ? UNLOOP   ) SWAP   1  (+LOOP)   
+0BRANCH [ -58 , ] ( between >R   ROT   ) UNLOOP   2DUP   
 ;
+Report about return stack usage
+new report 
+2 8 1 0 
+1 9 1 1 
+0 10 2 2 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   QN:    MOV, X| F| AX'| R| CX| 
+   QN:    MOV, X| F| DX'| R| DX| 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 5 (RL,) 
+   JMP, 25 (RL,) 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   QN:    ADDI, X| R| DX| 1 IL, 
+   QN':    CMP, X| T| DX'| R| CX| 
+   J|X, S| Y| 4294967257 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -338,24 +1043,79 @@ BEFORE
 AFTER
 
 : testK2   
-
-DO ROT   
-0BRANCH [ C , ] ( between ? SWAP   ) UNLOOP   
-BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
-DO 
-LOOP 
-LOOP 2DUP   
+0  >R   SWAP   >R   >R   ROT   
+0BRANCH [ 10 , ] ( between ? SWAP   ) 
+BRANCH  [ 90 , ] ( between ? UNLOOP   ) SWAP   0  >R   SWAP   >R   >R   1  (+LOOP)   
+0BRANCH [ -28 , ] ( between >R   LIT   ) UNLOOP   1  (+LOOP)   
+0BRANCH [ -B8 , ] ( between >R   ROT   ) UNLOOP   2DUP   
 ;
+Report about return stack usage
+new report 
+2 8 2 0 
+1 9 2 2 
+0 10 4 4 
 
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 5 (RL,) 
+   JMP, 115 (RL,) 
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   Q:    MOVI, X| R| BX| 1 IL, 
+   Q:    ADD, X| F| BX'| BO| [BP] 0 B, 
+   Q:    MOV, X| T| CX'| XO| [BP] 0 L, 
+   Q:    SUB, X| T| CX'| BO| [BP] 8 B, 
+   Q:    XOR, X| F| BX'| R| CX| 
+   J|X, S| Y| 4294967265 (RL,) 
+   Q:    MOVI, X| R| BX| 1 IL, 
+   LEA, BP'| XO| [BP] 24 L, 
+   Q:    ADD, X| F| BX'| BO| [BP] 0 B, 
+   Q:    MOV, X| T| CX'| XO| [BP] 0 L, 
+   Q:    SUB, X| T| CX'| BO| [BP] 8 B, 
+   Q:    XOR, X| F| BX'| R| CX| 
+   J|X, S| Y| 4294967167 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   LEA, BP'| XO| [BP] 24 L, 
 : (TESTL)   
 
 DO DUP   
-0BRANCH [ C , ] ( between ? UNLOOP   ) LEAVE   
-BRANCH  [ 8 , ] ( between EXIT   SWAP   ) UNLOOP   EXIT   SWAP   2DUP   
-0BRANCH [ C , ] ( between ? UNLOOP   ) LEAVE   
-BRANCH  [ 8 , ] ( between EXIT   2SWAP   ) UNLOOP   EXIT   2SWAP   
-LOOP ROT   
+0BRANCH [ 18 , ] ( between ? UNLOOP   ) LEAVE   
+BRANCH  [ 10 , ] ( between EXIT   SWAP   ) UNLOOP   EXIT   SWAP   2DUP   
+0BRANCH [ 18 , ] ( between ? UNLOOP   ) LEAVE   
+BRANCH  [ 10 , ] ( between EXIT   2SWAP   ) UNLOOP   EXIT   2SWAP   1   (+LOOP)   
+0BRANCH [ -B0 , ] ( between ? DUP   ) UNLOOP   ROT   
 ;
+
 ####################
 BEFORE
 
@@ -365,40 +1125,120 @@ BEFORE
 AFTER
 
 : testL   
-
-DO DUP   
-0BRANCH [ 14 , ] ( between ? UNLOOP   ) UNLOOP   
-BRANCH  [ 50 , ] ( between ? ROT   ) 
-BRANCH  [ C , ] ( between ? SWAP   ) UNLOOP   
-BRANCH  [ 40 , ] ( between ROT   2OVER   ) SWAP   2DUP   
-0BRANCH [ 14 , ] ( between ? UNLOOP   ) UNLOOP   
-BRANCH  [ 20 , ] ( between ? ROT   ) 
-BRANCH  [ C , ] ( between ? 2SWAP   ) UNLOOP   
-BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
-LOOP ROT   2OVER   
+0  >R   SWAP   >R   >R   DUP   
+0BRANCH [ 20 , ] ( between ? UNLOOP   ) 
+BRANCH  [ B0 , ] ( between ? UNLOOP   ) 
+BRANCH  [ 18 , ] ( between ? SWAP   ) UNLOOP   
+BRANCH  [ 98 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 20 , ] ( between ? UNLOOP   ) 
+BRANCH  [ 58 , ] ( between ? UNLOOP   ) 
+BRANCH  [ 18 , ] ( between ? 2SWAP   ) UNLOOP   
+BRANCH  [ 40 , ] ( between ROT   2OVER   ) 2SWAP   1  (+LOOP)   
+0BRANCH [ -D8 , ] ( between >R   DUP   ) UNLOOP   ROT   2OVER   
 ;
- TESTM crashes, omitted
+Report about return stack usage
+new report 
+2 8 1 0 
+1 9 1 1 
+0 10 2 2 
+
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 17 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 27 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 16 (RL,) 
+   JMP, 4294967263 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 0 (RL,) 
+   POP|X, BX| 
+   POP|X, CX| 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+####################
+BEFORE
 
 : testM   
 C0   
 ;
+AFTER
+
+: testM   
+2A0000  +   
+;
+Report about return stack usage
+new report 
+
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 2752512 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : testN   
 ROT   
-0BRANCH [ 14 , ] ( between ? 2OVER   ) 
-0BRANCH [ 4 , ] ( between DROP   BRANCH   ) DROP   
-BRANCH  [ -20 , ] ( between ? ROT   ) 2OVER   
+0BRANCH [ 28 , ] ( between ? 2OVER   ) 
+0BRANCH [ 8 , ] ( between DROP   BRANCH   ) DROP   
+BRANCH  [ -40 , ] ( between ? ROT   ) 2OVER   
 ;
 AFTER
 
 : testN   
 ROT   
-0BRANCH [ 14 , ] ( between ? 2OVER   ) 
-0BRANCH [ -14 , ] ( between (;)   ROT   ) DROP   
-BRANCH  [ -20 , ] ( between (;)   ROT   ) 2OVER   
+0BRANCH [ 28 , ] ( between ? 2OVER   ) 
+0BRANCH [ -28 , ] ( between (;)   ROT   ) DROP   
+BRANCH  [ -40 , ] ( between (;)   ROT   ) 2OVER   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 21 (RL,) 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 4294967272 (RL,) 
+   POP|X, AX| 
+   JMP, 4294967266 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, BX| 
+   POP|X, CX| 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -411,70 +1251,296 @@ AFTER
 : testO1   
 DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
 ####################
 BEFORE
 
 : testO1A   
 
-0BRANCH [ C , ] ( between ? 2   ) 1   
+0BRANCH [ 18 , ] ( between ? 2   ) 1   
 BRANCH  [ 0 , ] ( between ? 2   ) 2   
 ;
 AFTER
 
 : testO1A   
 
-0BRANCH [ 8 , ] ( between ? LIT   ) 1  2  
+0BRANCH [ 10 , ] ( between ? LIT   ) 1  2  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 10 (RL,) 
+   PUSHI|X, 1 IL, 
+   JMP, 0 (RL,) 
+   PUSHI|X, 2 IL, 
 ####################
 BEFORE
 
 : testO2   
 
-0BRANCH [ C , ] ( between ? (;)   ) ROT   
+0BRANCH [ 18 , ] ( between ? (;)   ) ROT   
 BRANCH  [ 0 , ] ( between ? (;)   ) 
 ;
 AFTER
 
 : testO2   
 
-0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testO3   
 0   
-0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
 AFTER
 
 : testO3   
 
 ;
+Report about return stack usage
+new report 
+
+   Q: 
 ####################
 BEFORE
 
 : testO4   
 -1  
-0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
 AFTER
 
 : testO4   
 ROT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : testO5   
 1   
-0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
 AFTER
 
 : testO5   
 ROT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: testR1   
+C  >R   R>   D  
+;
+AFTER
+
+: testR1   
+C  D  
+;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 12 IL, 
+   PUSHI|X, 13 IL, 
+####################
+BEFORE
+
+: testR2   
+C  R>   >R   D  
+;
+AFTER
+
+: testR2   
+C  D  
+;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 12 IL, 
+   PUSHI|X, 13 IL, 
+####################
+BEFORE
+
+: testFS1   
+C  RUBOUT   !   RUBOUT   @   
+;
+AFTER
+
+: testFS1   
+C  43FC028  !   C  
+;
+Report about return stack usage
+new report 
+
+   Q:    MOVI, X| R| BX| 71286824 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 12 IL, 
+   PUSHI|X, 12 IL, 
+####################
+BEFORE
+
+: testFS2   
+C  RUBOUT   @   RUBOUT   !   
+;
+AFTER
+
+: testFS2   
+C  
+;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 12 IL, 
+####################
+BEFORE
+
+: test<   
+ROT   <   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+AFTER
+
+: test<   
+ROT   <   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   Q:    CMP, X| F| AX'| R| DX| 
+   J|X, L| N| 17 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 12 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+####################
+BEFORE
+
+: test<   
+ROT   0=   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+AFTER
+
+: test<   
+ROT   0=   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| N| 17 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 12 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+####################
+BEFORE
+
+: test<   
+ROT   U<   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+AFTER
+
+: test<   
+ROT   U<   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   Q:    SUB, X| F| AX'| R| DX| 
+   Q:    SBB, X| F| AX'| R| AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 17 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 12 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+####################
+BEFORE
+
+: test<   
+ROT   >   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+AFTER
+
+: test<   
+ROT   SWAP   <   
+0BRANCH [ 18 , ] ( between +   (;)   ) C  +   
+;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   Q:    CMP, X| F| AX'| R| DX| 
+   J|X, L| N| 17 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 12 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
@@ -486,6 +1552,14 @@ AFTER
 : test   
 1  SWAP   2  3  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   PUSHI|X, 1 IL, 
+   PUSH|X, AX| 
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 3 IL, 
 ####################
 BEFORE
 
@@ -497,6 +1571,10 @@ AFTER
 : test1   
 F  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 15 IL, 
 ####################
 BEFORE
 
@@ -508,6 +1586,11 @@ AFTER
 : test2   
 2  1  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 1 IL, 
 ####################
 BEFORE
 
@@ -519,6 +1602,11 @@ AFTER
 : test3   
 2  1  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 1 IL, 
 ####################
 BEFORE
 
@@ -530,6 +1618,10 @@ AFTER
 : B0   
 400  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 1024 IL, 
 ####################
 BEFORE
 
@@ -541,6 +1633,11 @@ AFTER
 : DOIT   
 2  1  
 ;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 1 IL, 
 ####################
 BEFORE
 
@@ -550,8 +1647,16 @@ BEFORE
 AFTER
 
 : test4   
-4  C04404C  !   1  2  3  
+4  43FC098  !   1  2  3  
 ;
+Report about return stack usage
+new report 
+
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 4 IL, 
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 2 IL, 
+   PUSHI|X, 3 IL, 
 ####################
 BEFORE
 
@@ -561,98 +1666,228 @@ SWAP   5  BASE   !   1   3  2
 AFTER
 
 : test5   
-SWAP   5  C04404C  !   1  3  2  
+SWAP   5  43FC098  !   1  3  2  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 5 IL, 
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 3 IL, 
+   PUSHI|X, 2 IL, 
 ####################
 BEFORE
 
 : test6   
 BASE   @   
-0BRANCH [ 4 , ] ( between SWAP   2DROP   ) SWAP   2DROP   
+0BRANCH [ 8 , ] ( between SWAP   2DROP   ) SWAP   2DROP   
 ;
 AFTER
 
 : test6   
 DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
 : test7   
 
-0BRANCH [ 8 , ] ( between +   LIT   ) 2   +   3  +   
+0BRANCH [ 10 , ] ( between +   LIT   ) 2   +   3  +   
 ;
 AFTER
 
 : test7   
 
-0BRANCH [ C , ] ( between +   LIT   ) 2  +   3  +   
+0BRANCH [ 18 , ] ( between +   LIT   ) 2  +   3  +   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 17 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 2 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 3 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3  9  BASE   !   7  5  
+0BRANCH [ 10 , ] ( between ? LIT   ) 3  9  BASE   !   7  5  
 ;
 AFTER
 
 : test8   
 SWAP   
-0BRANCH [ 8 , ] ( between ? LIT   ) 3  9  C04404C  !   7  5  
+0BRANCH [ 10 , ] ( between ? LIT   ) 3  9  43FC098  !   7  5  
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 10 (RL,) 
+   PUSHI|X, 3 IL, 
+   JMP, 0 (RL,) 
+   Q:    MOVI, X| R| BX| 71286936 IL, 
+   Q:    MOVI, X| BO| [BX] 0 B, 9 IL, 
+   PUSHI|X, 7 IL, 
+   PUSHI|X, 5 IL, 
 ####################
 BEFORE
 
 : test9   
 
-0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
 ;
 AFTER
 
 : test9   
 
-0BRANCH [ 10 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
+0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 26 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testA   
 
-0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+0BRANCH [ 40 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
 ;
 AFTER
 
 : testA   
 
-0BRANCH [ 20 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
+0BRANCH [ 40 , ] ( between LSHIFT   (;)   ) +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 45 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testB   
 +   AND   OR   LSHIFT   
-BRANCH  [ -18 , ] ( between ? +   ) 
+BRANCH  [ -30 , ] ( between ? +   ) 
 ;
 AFTER
 
 : testB   
 +   AND   OR   LSHIFT   
-BRANCH  [ -18 , ] ( between (;)   +   ) 
+BRANCH  [ -30 , ] ( between (;)   +   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 4294967270 (RL,) 
 ####################
 BEFORE
 
 : testC   
 +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
-BRANCH  [ -28 , ] ( between ? +   ) 
+BRANCH  [ -50 , ] ( between ? +   ) 
 ;
 AFTER
 
 : testC   
 +   AND   OR   LSHIFT   +   AND   OR   LSHIFT   
-BRANCH  [ -28 , ] ( between (;)   +   ) 
+BRANCH  [ -50 , ] ( between (;)   +   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   POP|X, BX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| CX| 
+   POP|X, AX| 
+   Q:    SHL, V| X| R| AX| 
+   PUSH|X, AX| 
+   JMP, 4294967251 (RL,) 
 ####################
 BEFORE
 
@@ -664,6 +1899,12 @@ AFTER
 : testD   
 DROP   DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
@@ -675,6 +1916,11 @@ AFTER
 : testE   
 DROP   DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
 ####################
 BEFORE
 
@@ -686,143 +1932,397 @@ AFTER
 : testF   
 DROP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
 ####################
 BEFORE
 
 : testG   
 DROP   
-BRANCH  [ -C , ] ( between ? DROP   ) 
+BRANCH  [ -18 , ] ( between ? DROP   ) 
 ;
 AFTER
 
 : testG   
 DROP   
-BRANCH  [ -C , ] ( between (;)   DROP   ) 
+BRANCH  [ -18 , ] ( between (;)   DROP   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   JMP, 4294967290 (RL,) 
+####################
+BEFORE
+
+: testG1   
+64  1-   DUP   0=   
+0BRANCH [ -28 , ] ( between ? 1-   ) DROP   
+;
+AFTER
+
+: testG1   
+64  1  -   DUP   0=   
+0BRANCH [ -38 , ] ( between ? LIT   ) DROP   
+;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 100 IL, 
+   POP|X, AX| 
+   Q:    SUBI, X| R| AX| 1 IL, 
+   PUSH|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| N| 4294967278 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+####################
+BEFORE
+
+: testG2   
+64  DUP   
+0BRANCH [ 18 , ] ( between ? DROP   ) 1-   
+BRANCH  [ -30 , ] ( between ? DUP   ) DROP   
+;
+AFTER
+
+: testG2   
+64  DUP   
+0BRANCH [ 28 , ] ( between ? DROP   ) 1  -   
+BRANCH  [ -40 , ] ( between ? DUP   ) DROP   
+;
+Report about return stack usage
+new report 
+
+   PUSHI|X, 100 IL, 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 23 (RL,) 
+   POP|X, AX| 
+   Q:    SUBI, X| R| AX| 1 IL, 
+   PUSH|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| N| 4294967278 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
 ####################
 BEFORE
 
 : testH   
 DROP   DROP   
-BRANCH  [ -10 , ] ( between ? DROP   ) 
+BRANCH  [ -20 , ] ( between ? DROP   ) 
 ;
 AFTER
 
 : testH   
 DROP   DROP   
-BRANCH  [ -10 , ] ( between (;)   DROP   ) 
+BRANCH  [ -20 , ] ( between (;)   DROP   ) 
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   POP|X, AX| 
+   JMP, 4294967289 (RL,) 
 ####################
 BEFORE
 
 : testI   
 
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   0BRANCH   ) ROT   
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
 AFTER
 
 : testI   
 
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   0BRANCH   ) ROT   
-0BRANCH [ C , ] ( between ? ROT   ) AND   
-BRANCH  [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   0BRANCH   ) ROT   
+0BRANCH [ 18 , ] ( between ? ROT   ) AND   
+BRANCH  [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 27 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 22 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 22 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 4294967264 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testJ   
 
-0BRANCH [ 14 , ] ( between ? OR   ) AND   
-BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
-BRANCH  [ C , ] ( between ? SWAP   ) OR   
-BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
+0BRANCH [ 28 , ] ( between ? OR   ) AND   
+BRANCH  [ 30 , ] ( between SWAP   (;)   ) 
+BRANCH  [ 18 , ] ( between ? SWAP   ) OR   
+BRANCH  [ 8 , ] ( between SWAP   (;)   ) SWAP   
 ;
 AFTER
 
 : testJ   
 
-0BRANCH [ 14 , ] ( between ? OR   ) AND   
-BRANCH  [ 18 , ] ( between SWAP   (;)   ) 
-BRANCH  [ C , ] ( between ? SWAP   ) OR   
-BRANCH  [ 4 , ] ( between SWAP   (;)   ) SWAP   
+0BRANCH [ 28 , ] ( between ? OR   ) AND   
+BRANCH  [ 30 , ] ( between SWAP   (;)   ) 
+BRANCH  [ 18 , ] ( between ? SWAP   ) OR   
+BRANCH  [ 8 , ] ( between SWAP   (;)   ) SWAP   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    AND, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 11 (RL,) 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    OR, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
 : testK   
 
 DO ROT   
-0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
-BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
-LOOP 2DUP   
+0BRANCH [ 28 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 30 , ] ( between UNLOOP   2DUP   ) SWAP   1   (+LOOP)   
+0BRANCH [ -68 , ] ( between ? ROT   ) UNLOOP   2DUP   
 ;
 AFTER
 
 : testK   
-
-DO ROT   
-0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
-BRANCH  [ C , ] ( between ? 2DUP   ) SWAP   
-LOOP 2DUP   
+0  >R   SWAP   >R   >R   ROT   
+0BRANCH [ 28 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 38 , ] ( between UNLOOP   2DUP   ) SWAP   1  (+LOOP)   
+0BRANCH [ -70 , ] ( between >R   ROT   ) UNLOOP   2DUP   
 ;
+Report about return stack usage
+new report 
+2 8 1 0 
+1 9 1 1 
+0 10 2 2 
+
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 46 (RL,) 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOVI, X| R| BX| 1 IL, 
+   Q:    ADD, X| F| BX'| BO| [BP] 0 B, 
+   Q:    MOV, X| T| CX'| XO| [BP] 0 L, 
+   Q:    SUB, X| T| CX'| BO| [BP] 8 B, 
+   Q:    XOR, X| F| BX'| R| CX| 
+   J|X, S| Y| 4294967236 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : testK2   
 
 DO ROT   
-0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
-BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
-DO 
-LOOP 
-LOOP 2DUP   
+0BRANCH [ 28 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 68 , ] ( between UNLOOP   2DUP   ) SWAP   
+DO 1   (+LOOP)   
+0BRANCH [ -20 , ] ( between ? 1   ) UNLOOP   1   (+LOOP)   
+0BRANCH [ -A0 , ] ( between ? ROT   ) UNLOOP   2DUP   
 ;
 AFTER
 
 : testK2   
-
-DO ROT   
-0BRANCH [ 14 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
-BRANCH  [ 1C , ] ( between ? 2DUP   ) SWAP   
-DO 
-LOOP 
-LOOP 2DUP   
+0  >R   SWAP   >R   >R   ROT   
+0BRANCH [ 28 , ] ( between ? SWAP   ) RDROP   RDROP   RDROP   
+BRANCH  [ 98 , ] ( between UNLOOP   2DUP   ) SWAP   0  >R   SWAP   >R   >R   1  (+LOOP)   
+0BRANCH [ -28 , ] ( between >R   LIT   ) UNLOOP   1  (+LOOP)   
+0BRANCH [ -D0 , ] ( between >R   ROT   ) UNLOOP   2DUP   
 ;
+Report about return stack usage
+new report 
+2 8 2 0 
+1 9 2 2 
+0 10 4 4 
+
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 121 (RL,) 
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   Q:    MOVI, X| R| BX| 1 IL, 
+   Q:    ADD, X| F| BX'| BO| [BP] 0 B, 
+   Q:    MOV, X| T| CX'| XO| [BP] 0 L, 
+   Q:    SUB, X| T| CX'| BO| [BP] 8 B, 
+   Q:    XOR, X| F| BX'| R| CX| 
+   J|X, S| Y| 4294967265 (RL,) 
+   Q:    MOVI, X| R| BX| 1 IL, 
+   LEA, BP'| XO| [BP] 24 L, 
+   Q:    ADD, X| F| BX'| BO| [BP] 0 B, 
+   Q:    MOV, X| T| CX'| XO| [BP] 0 L, 
+   Q:    SUB, X| T| CX'| BO| [BP] 8 B, 
+   Q:    XOR, X| F| BX'| R| CX| 
+   J|X, S| Y| 4294967161 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : testL   
 
 DO DUP   
-0BRANCH [ 1C , ] ( between ? BRANCH   ) RDROP   RDROP   RDROP   
-BRANCH  [ 50 , ] ( between ? ROT   ) 
-BRANCH  [ 8 , ] ( between ? SWAP   ) 
-BRANCH  [ 44 , ] ( between ROT   2OVER   ) SWAP   2DUP   
-0BRANCH [ 1C , ] ( between ? BRANCH   ) RDROP   RDROP   RDROP   
-BRANCH  [ 1C , ] ( between ? ROT   ) 
-BRANCH  [ 8 , ] ( between ? 2SWAP   ) 
-BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
-LOOP ROT   2OVER   
+0BRANCH [ 38 , ] ( between ? BRANCH   ) RDROP   RDROP   RDROP   
+BRANCH  [ B8 , ] ( between UNLOOP   ROT   ) 
+BRANCH  [ 10 , ] ( between ? SWAP   ) 
+BRANCH  [ A0 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 38 , ] ( between ? BRANCH   ) RDROP   RDROP   RDROP   
+BRANCH  [ 50 , ] ( between UNLOOP   ROT   ) 
+BRANCH  [ 10 , ] ( between ? 2SWAP   ) 
+BRANCH  [ 38 , ] ( between ROT   2OVER   ) 2SWAP   1   (+LOOP)   
+0BRANCH [ -F0 , ] ( between ? DUP   ) UNLOOP   ROT   2OVER   
 ;
 AFTER
 
 : testL   
-
-DO DUP   
-0BRANCH [ 68 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
-BRANCH  [ 50 , ] ( between ? ROT   ) 
-BRANCH  [ 8 , ] ( between ? SWAP   ) 
-BRANCH  [ 44 , ] ( between ROT   2OVER   ) SWAP   2DUP   
-0BRANCH [ 34 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
-BRANCH  [ 1C , ] ( between ? ROT   ) 
-BRANCH  [ 8 , ] ( between ? 2SWAP   ) 
-BRANCH  [ 10 , ] ( between ROT   2OVER   ) 2SWAP   
-LOOP ROT   2OVER   
+0  >R   SWAP   >R   >R   DUP   
+0BRANCH [ F0 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
+BRANCH  [ C0 , ] ( between UNLOOP   ROT   ) 
+BRANCH  [ 10 , ] ( between ? SWAP   ) 
+BRANCH  [ A8 , ] ( between ROT   2OVER   ) SWAP   2DUP   
+0BRANCH [ 88 , ] ( between ROT   2OVER   ) RDROP   RDROP   RDROP   
+BRANCH  [ 58 , ] ( between UNLOOP   ROT   ) 
+BRANCH  [ 10 , ] ( between ? 2SWAP   ) 
+BRANCH  [ 40 , ] ( between ROT   2OVER   ) 2SWAP   1  (+LOOP)   
+0BRANCH [ -F8 , ] ( between >R   DUP   ) UNLOOP   ROT   2OVER   
 ;
+Report about return stack usage
+new report 
+2 8 1 0 
+1 9 1 1 
+0 10 2 2 
+
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   Q:    MOVI, X| R| BX| 0 IL, 
+   Q:    MOV, X| F| BX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 39 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 22 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 4294967274 (RL,) 
+   LEA, BP'| XO| [BP] 24 L, 
+   JMP, 4294967263 (RL,) 
+   POP|X, BX| 
+   POP|X, CX| 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -834,48 +2334,82 @@ AFTER
 : testM   
 120000  +   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, BX| 
+   Q:    MOVI, X| R| AX| 1179648 IL, 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : testN   
 ROT   
-0BRANCH [ 14 , ] ( between ? 2OVER   ) 
-0BRANCH [ -14 , ] ( between ? ROT   ) DROP   
-BRANCH  [ -20 , ] ( between ? ROT   ) 2OVER   
+0BRANCH [ 28 , ] ( between ? 2OVER   ) 
+0BRANCH [ -28 , ] ( between ? ROT   ) DROP   
+BRANCH  [ -40 , ] ( between ? ROT   ) 2OVER   
 ;
 AFTER
 
 : testN   
 ROT   
-0BRANCH [ 14 , ] ( between ? 2OVER   ) 
-0BRANCH [ -14 , ] ( between (;)   ROT   ) DROP   
-BRANCH  [ -20 , ] ( between (;)   ROT   ) 2OVER   
+0BRANCH [ 28 , ] ( between ? 2OVER   ) 
+0BRANCH [ -28 , ] ( between (;)   ROT   ) DROP   
+BRANCH  [ -40 , ] ( between (;)   ROT   ) 2OVER   
 ;
-####################
-BEFORE
+Report about return stack usage
+new report 
 
-: testO1   
-
-0BRANCH [ 0 , ] ( between ? (;)   ) 
-;
-AFTER
-
-: testO1   
-DROP   
-;
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 21 (RL,) 
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 4294967272 (RL,) 
+   POP|X, AX| 
+   JMP, 4294967266 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, BX| 
+   POP|X, CX| 
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
 : testO2   
 
-0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
 AFTER
 
 : testO2   
 
-0BRANCH [ 4 , ] ( between ROT   (;)   ) ROT   
+0BRANCH [ 8 , ] ( between ROT   (;)   ) ROT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, Z| Y| 11 (RL,) 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
 ####################
 BEFORE
 
@@ -887,6 +2421,10 @@ AFTER
 : testO3   
 
 ;
+Report about return stack usage
+new report 
+
+   Q: 
 ####################
 BEFORE
 
@@ -898,6 +2436,15 @@ AFTER
 : testO4   
 ROT   
 ;
+Report about return stack usage
+new report 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
 ####################
 BEFORE
 
@@ -909,4 +2456,575 @@ AFTER
 : testO5   
 ROT   
 ;
+Report about return stack usage
+new report 
 
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+
+####################
+BEFORE
+
+: tt2   
+tt0   2DROP   
+;
+AFTER
+
+: tt2   
+2  >R   1  R>   DROP   DROP   
+;
+Report about return stack usage
+new report 
+0 8 1 1 
+
+   QN:    MOVI, X| R| AX| 2 IL, 
+####################
+BEFORE
+
+: tt3   
+tt0   1-   3  *   
+;
+AFTER
+
+: tt3   
+2  >R   1  R>   1  -   3  M*   DROP   
+;
+Report about return stack usage
+new report 
+0 8 1 1 
+
+   Q:    MOVI, X| R| AX| 2 IL, 
+   Q:    SUBI, X| R| AX| 1 IL, 
+   Q:    MOVI, X| R| DX| 1 IL, 
+   QN:    MOVI, X| R| AX| 2 IL, 
+   Q:    MOV, X| F| AX'| R| BX| 
+   Q:    MOVI, X| R| AX| 3 IL, 
+   PUSHI|X, 1 IL, 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   PUSH|X, DX| 
+####################
+BEFORE
+
+: tt4   
+tt0   1-   SWAP   3  *   +   
+;
+AFTER
+
+: tt4   
+2  >R   1  R>   1  -   SWAP   3  M*   DROP   +   
+;
+Report about return stack usage
+new report 
+0 8 1 1 
+
+   Q:    MOVI, X| R| AX| 2 IL, 
+   Q:    SUBI, X| R| AX| 1 IL, 
+   PUSH|X, AX| 
+   Q:    MOVI, X| R| BX| 2 IL, 
+   Q:    MOV, X| F| AX'| R| DX| 
+   Q:    MOVI, X| R| AX| 1 IL, 
+   QN:    MOVI, X| R| AX| 2 IL, 
+   Q:    MOVI, X| R| BX| 1 IL, 
+   Q:    MOVI, X| R| AX| 3 IL, 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   POP|X, BX| 
+   Q:    MOV, X| F| DX'| R| AX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: test-D+   
+C  0  D+   D  0  D+   
+;
+AFTER
+
+: test-D+   
+19  0  D+   
+;
+Report about return stack usage
+new report 
+
+   POP|X, BX| 
+   POP|X, CX| 
+   Q:    MOVI, X| R| DX| 25 IL, 
+   Q:    ADD, X| F| CX'| R| DX| 
+   Q:    MOVI, X| R| AX| 0 IL, 
+   Q:    ADC, X| F| BX'| R| AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: z*   
+ROT   SWAP   >R   >R   2DUP   *   R>   R>   SWAP   2DUP   SWAP   >R   >R   *   -   -ROT   R>   *   SWAP   R>   *   +   
+;
+AFTER
+
+: z*   
+ROT   SWAP   >R   >R   2DUP   M*   DROP   R>   R>   SWAP   2DUP   SWAP   >R   >R   M*   DROP   -   ROT   ROT   R>   M*   DROP   SWAP   R>   M*   DROP   +   
+;
+Report about return stack usage
+new report 
+1 8 2 2 
+0 9 2 2 
+
+   POP|X, DX| 
+   POP|X, BX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   QN:    MOV, X| F| AX'| R| AX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| DX'| R| BX| 
+   QN:    MOV, X| F| DX'| R| CX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| F| DX'| R| BX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   PUSH|X, DX| 
+   QN:    PUSH|X, AX| 
+   QN:    PUSH|X, CX| 
+   QN:    PUSH|X, AX| 
+   Q':    MOV, X| F| AX'| R| AX| 
+   QN:    POP|X, AX| 
+   POP|X, AX| 
+   POP|X, BX| 
+   QN:    PUSH|X, CX| 
+   Q':    MOV, X| F| CX'| R| DX| 
+   QN:    POP|X, CX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   POP|X, AX| 
+   Q:    SUB, X| F| DX'| R| AX| 
+   POP|X, BX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| F| DX'| R| BX| 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   QN:    PUSH|X, CX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   QN:    PUSH|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   POP|X, BX| 
+   Q:    MOV, X| F| DX'| R| AX| 
+   Q:    ADD, X| F| BX'| R| AX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: GCD   
+OVER   MOD   DUP   
+0BRANCH [ 18 , ] ( between ? DROP   ) SWAP   
+BRANCH  [ -40 , ] ( between ? OVER   ) DROP   
+;
+AFTER
+
+: GCD   
+OVER   >R   S>D   R>   SM/REM   DROP   DUP   
+0BRANCH [ 18 , ] ( between ? DROP   ) SWAP   
+BRANCH  [ -60 , ] ( between (;)   OVER   ) DROP   
+;
+Report about return stack usage
+new report 
+0 8 1 1 
+
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   QN:    MOV, X| F| AX'| R| AX| 
+   Q:    SUB, X| F| AX'| R| AX| 
+   Q:    OR, X| F| DX'| R| DX| 
+   J, S| N| 3 (RB,) 
+   Q:    DEC, X| R| AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   Q':    MOV, X| F| AX'| R| BX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| DX'| R| AX| 
+   Q:    TEST, X| DX'| R| DX| 
+   J|X, Z| Y| 54 (RL,) 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   QN:    MOV, X| F| AX'| R| AX| 
+   Q:    SUB, X| F| AX'| R| AX| 
+   Q:    OR, X| F| DX'| R| DX| 
+   J, S| N| 3 (RB,) 
+   Q:    DEC, X| R| AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   Q':    MOV, X| F| AX'| R| BX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| DX'| R| AX| 
+   Q:    TEST, X| DX'| R| DX| 
+   J|X, Z| N| 4294967247 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+####################
+BEFORE
+
+: XGCD   
+1   0   2SWAP   OVER   /MOD   OVER   
+0BRANCH [ 58 , ] ( between ? 2DROP   ) >R   SWAP   2SWAP   OVER   R>   *   -   SWAP   2SWAP   
+BRANCH  [ -80 , ] ( between 2SWAP   OVER   ) 2DROP   NIP   
+;
+AFTER
+
+: XGCD   
+1  0  2SWAP   OVER   >R   DUP   0<   R>   SM/REM   OVER   
+0BRANCH [ 60 , ] ( between ? DROP   ) >R   SWAP   2SWAP   OVER   R>   M*   DROP   -   SWAP   2SWAP   
+BRANCH  [ -A8 , ] ( between 2SWAP   OVER   ) DROP   DROP   NIP   
+;
+Report about return stack usage
+new report 
+0 8 2 2 
+
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 0 IL, 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   LEA, BP'| XO| [BP] 4294967288 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 0 L, 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    AND, X| F| AX'| R| AX| 
+   SET, S'| Y'| R| AL| 
+   Q:    MOVZX|B, AL'| R| AL| 
+   Q:    NEG, X| R| AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    AND, X| T| AX'| R| AX| 
+   LEA, BP'| XO| [BP] 8 L, 
+   J|X, Z| Y| 140 (RL,) 
+   LEA, BP'| XO| [BP] 4294967288 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| DX'| R| CX| 
+   POP|X, DX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, BX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   POP|X, AX| 
+   Q:    SUB, X| F| DX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| DX'| R| CX| 
+   POP|X, DX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 0 L, 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    AND, X| F| AX'| R| AX| 
+   SET, S'| Y'| R| AL| 
+   Q:    MOVZX|B, AL'| R| AL| 
+   Q:    NEG, X| R| AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    AND, X| T| AX'| R| AX| 
+   LEA, BP'| XO| [BP] 8 L, 
+   J|X, Z| N| 4294967161 (RL,) 
+   JMP, 0 (RL,) 
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, BX| 
+   PUSH|X, AX| 
+####################
+BEFORE
+
+: XXGCD   
+2DUP   SWAP   XGCD   DUP   0<   
+0BRANCH [ 20 , ] ( between SWAP   DUP   ) NEGATE   SWAP   NEGATE   SWAP   DUP   >R   OVER   >R   >R   *   R>   SWAP   -   /   R>   R>   
+;
+AFTER
+
+: XXGCD   
+2DUP   SWAP   1  0  2SWAP   OVER   >R   DUP   0<   R>   SM/REM   OVER   
+0BRANCH [ 60 , ] ( between ? DROP   ) >R   SWAP   2SWAP   OVER   R>   M*   DROP   -   SWAP   2SWAP   
+BRANCH  [ -A8 , ] ( between 2SWAP   OVER   ) DROP   DROP   NIP   DUP   0<   
+0BRANCH [ 20 , ] ( between SWAP   DUP   ) NEGATE   SWAP   NEGATE   SWAP   DUP   >R   OVER   >R   >R   M*   DROP   R>   SWAP   -   >R   S>D   R>   SM/REM   NIP   R>   R>   
+;
+Report about return stack usage
+new report 
+0 8 4 4 
+2 9 1 1 
+1 10 1 1 
+
+   POP|X, AX| 
+   POP|X, DX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSHI|X, 1 IL, 
+   PUSHI|X, 0 IL, 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   LEA, BP'| XO| [BP] 4294967288 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 0 L, 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    AND, X| F| AX'| R| AX| 
+   SET, S'| Y'| R| AL| 
+   Q:    MOVZX|B, AL'| R| AL| 
+   Q:    NEG, X| R| AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    AND, X| T| AX'| R| AX| 
+   LEA, BP'| XO| [BP] 8 L, 
+   J|X, Z| Y| 135 (RL,) 
+   LEA, BP'| XO| [BP] 4294967288 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| DX'| R| CX| 
+   POP|X, DX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, BX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   POP|X, AX| 
+   Q:    SUB, X| F| DX'| R| AX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    MOV, X| F| DX'| R| CX| 
+   POP|X, DX| 
+   PUSH|X, CX| 
+   PUSH|X, BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 0 L, 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    AND, X| F| AX'| R| AX| 
+   SET, S'| Y'| R| AL| 
+   Q:    MOVZX|B, AL'| R| AL| 
+   Q:    NEG, X| R| AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    AND, X| T| AX'| R| AX| 
+   LEA, BP'| XO| [BP] 8 L, 
+   J|X, Z| N| 4294967161 (RL,) 
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, AX| 
+   POP|X, BX| 
+   PUSH|X, AX| 
+   Q:    TEST, X| AX'| R| AX| 
+   J|X, S| N| 23 (RL,) 
+   POP|X, AX| 
+   Q:    NEG, X| R| AX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    NEG, X| R| AX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   JMP, 0 (RL,) 
+   LEA, BP'| XO| [BP] 4294967272 L, 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 16 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   PUSH|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 8 L, 
+   POP|X, BX| 
+   Q:    MOV, X| F| BX'| XO| [BP] 0 L, 
+   POP|X, AX| 
+   POP|X, BX| 
+   Q:    IMUL|AD, X| R| BX| 
+   Q:    XCHG|AX, DX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   PUSH|X, DX| 
+   Q:    MOV, X| F| AX'| R| DX| 
+   POP|X, AX| 
+   Q:    SUB, X| F| DX'| R| AX| 
+   Q:    MOV, X| F| AX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   Q:    SUB, X| F| AX'| R| AX| 
+   Q:    OR, X| F| DX'| R| DX| 
+   J, S| N| 3 (RB,) 
+   Q:    DEC, X| R| AX| 
+   PUSH|X, DX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 0 L, 
+   POP|X, DX| 
+   Q:    MOV, X| F| AX'| R| BX| 
+   POP|X, AX| 
+   Q:    IDIV|AD, X| R| BX| 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 8 L, 
+   PUSH|X, AX| 
+   Q:    MOV, X| T| AX'| XO| [BP] 16 L, 
+   PUSH|X, AX| 
+   LEA, BP'| XO| [BP] 24 L, 
+####################
+BEFORE
+
+: test0   
+AAP   
+0BRANCH [ 8 , ] ( between NOOT   MIES   ) NOOT   MIES   
+;
+AFTER
+
+: test0   
+AAP   
+0BRANCH [ 8 , ] ( between NOOT   MIES   ) NOOT   MIES   
+;
+Report about return stack usage
+new report 
+
+   Q:    MOV, X| F| BP'| R| AX| 
+   Q:    TEST, X| BP'| R| BP| 
+   J|X, Z| Y| 6 (RL,) 
+   PUSH|X, BP| 
+   JMP, 0 (RL,) 
+   PUSH|X, BP| 
+####################
+BEFORE
+
+: test0-B   
+test0-A   ROT   
+;
+AFTER
+
+: test0-B   
+AAP   NOOT   ROT   
+;
+Report about return stack usage
+new report 
+
+   POP|X, AX| 
+   PUSH|X, BP| 
+   PUSH|X, BP| 
+   PUSH|X, AX| 

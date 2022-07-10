@@ -1,7 +1,6 @@
 #!/bin/bash --debug
-# Not tried out after moving the zip building to the end
-# To be added TOBLOCK.FRT TOBLOCK.EXE
-m=wina
+
+m=$1
 s=ci86.$m
 r=release
 echo $m $s
@@ -25,10 +24,11 @@ hellow.frt        \
 #fromblk.frt     \
 # MAYBE later
 
-version=`echo $1 | sed -e 's/d/./g'`
 echo $RELEASE
 
-make VERSION=$version clean
+make clean
+make VERSION VERSION=$2
+
 
 make forth.lab.wina
 ln -sf forth.lab.wina forth.lab
@@ -47,6 +47,6 @@ mv $s.texinfo $m.texinfo
 make $m.ps
 make $m.pdf
 
-rm $m-$1.zip
-echo $m-$1.zip $RELEASETXT | xargs zip -l
-echo $m-$1.zip $RELEASEBIN | xargs zip
+rm $m-$2.zip
+echo $m-$2.zip $RELEASETXT | xargs zip -l
+echo $m-$2.zip $RELEASEBIN | xargs zip

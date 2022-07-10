@@ -1,0 +1,160 @@
+( SEE -see0-table-  )                        \ AvdH B5Feb24
+ "BAG" WANTED     "DO-BAG" WANTED
+60 BAG SELTAB   SELTAB !BAG
+\ Put SEARCHED XT in select table)
+: SEL! SWAP SELTAB BAG+! SELTAB BAG+! ;
+( N--M,TRUE/ N,FALSE ) \ Look up N in table.
+: SEL@    DUP SELTAB BAG-WHERE DUP IF CELL+ @ NIP -1 THEN ;
+\ Decompile a word from its DEA
+ : CRACKED   DUP @ SEL@ IF EXECUTE ELSE
+   DROP DUP >CFA @ OVER >PHA = IF CR ." Code definition : "
+     ELSE CR ." Can't handle : " THEN ID. CR  THEN ;
+
+\ When finding DEA decompile by "name"
+: by:   ' SEL! ;
+\ When finding words with same cfa of DEA decompile by "name"
+: example-by:   >CFA @    by: ;
+( SEE -see1-io-  )                 \ AvdH B5Feb20
+ "H." WANTED          "BAG" WANTED     "DO-BAG" WANTED
+: H.. H. SPACE ;       \ Hex with comma's
+: SH.. HEX: . ;        \ Signed but hex.
+\ From DECOMPILER-POINTER print, leave incremented POINTER
+: ID.+   $@ ID. ;
+: H.+ CELL+ DUP @ H.. CELL+ ;
+: SH.+ CELL+ DUP @ SH.. CELL+ ;
+: '.+ CELL+ DUP @ &' EMIT ID. CELL+ ;
+: .$"   BEGIN &" $/ TYPE DUP WHILE   &" EMIT &" EMIT REPEAT
+    2DROP ;
+
+
+
+
+
+( SEE -see2-simple-decompilers- )              \ AvdH B5Feb24
+\ all -words: ( dip --dip' ) decompile pointer
+: -do CR ." DO " CELL+ CELL+ ;     '(DO) by: -do
+: -qdo CR ." ?DO " CELL+ CELL+ ;   '(?DO) by: -qdo
+
+\ : -pl CR ." +LOOP " 4 CELLS + ;  '(+LOOP) by: -pl
+
+: -pc CR ." ;CODE plus code (suppressed)"
+   ( DIRTY TRICK : make decompile pointer point to exit!)
+   DROP 'TASK >DFA @ ;          ' (;CODE) by: -pc
+
+
+
+
+
+
+( SEE -see3-example-decompilers- )             \ AvdH B5Feb20
+: -co DUP >DFA @ CR H.. ." CONSTANT " ID. CR ;
+   ' BL example-by: -co
+: -va DUP >DFA @ @ CR &( EMIT SPACE H.. ." ) VARIABLE "
+   ID. CR ;                     ' _PREV example-by: -va
+: -us DUP >DFA C@ CR B. ."  USER " ID. CR ;
+   ' BASE example-by: -us
+
+
+
+
+
+
+
+
+
+( SEE   -see4-auxiliary- )
+( For the DEA : it IS immediate / it IS a denotation )
+: ?IM >FFA @ 4 AND ;     : ?DN >FFA @ 8 AND ;
+
+\ For DEA1 get DEA2 the word defined later then DEA1
+: NEXT-DEA CURRENT @ BEGIN ( CR DUP ID.) 2DUP >LFA @ <>
+    WHILE >LFA @ DUP 0= IF 1000 THROW THEN REPEAT NIP ;
+
+( For the NUMBER : it IS a proper `dea' )
+( The <BM is not only optimisation, else `LIT 0' goes wrong.)
+: DEA? DUP BM < IF DROP 0 ELSE
+    DUP 'NEXT-DEA CATCH IF 2DROP 0 ELSE >LFA @ = THEN THEN ;
+
+
+
+
+( SEE   -see5-does-objecten- )
+\ For ADR: it IS a dea (heuristically).
+: HEAD? DUP >DFA @ SWAP  >PHA = ;
+\ For ADDRESS: find DEA to which this address belongs.
+: FIND-HEAD ALIGNED ( Important for CREATE )
+     BEGIN DUP HEAD? 0= WHILE 1 CELLS - REPEAT ;
+\ For DEA: hl POINTER in ``DOES>'' code.
+: TO-DOES   >DFA @ @ ;
+
+: -dd   DUP TO-DOES FIND-HEAD ." ( data ) " ID. ID. CR ;
+    ' FORTH  example-by: -dd  \ Use namespace as example.
+
+
+
+
+
+( SEE   -see6-colon&literals- )
+  ( dip -- dip )
+  : ITEM DUP @ SEL@ IF EXECUTE ( special) ALIGNED ELSE
+      DUP ?IM IF ." POSTPONE " THEN ID. CELL+ THEN ;
+ : CRACK-COLON CR BEGIN DUP @ LIT (;) <> WHILE
+     ITEM REPEAT DROP ;
+  : -hi CR ." : " DUP DUP ID. >DFA @ CRACK-COLON CR ." ;"  DUP
+     ?IM IF ."  IMMEDIATE " THEN ?DN IF ."  PREFIX" THEN CR ;
+      ' TASK example-by: -hi
+
+  : -lit DUP CELL+ @ DEA? IF '.+ ELSE H.+ THEN ;
+      ' LIT by: -lit
+
+
+
+
+( SEE   -see7-branch-decompilers- )
+ : TARGET DUP 1 CELLS - @ + ; ( dip -- jump target )
+ : .DEA? DUP DEA? IF ID. ELSE DROP ." ? " THEN ; ( dea --. )
+ : PRINT-TARGET DUP ( dip -- dip )   ." ( between " TARGET DUP
+   1 CELLS - @ .DEA? @ .DEA? ." ) " ;
+ : -0br CR ." 0BRANCH [ " SH.+ ." , ] " PRINT-TARGET ;
+     ' 0BRANCH by: -0br
+ : -br  CR ." BRANCH  [ " SH.+ ." , ] " PRINT-TARGET ;
+     ' BRANCH by: -br
+
+
+
+
+
+
+
+( SEE   -inline-literals- )
+( dip -- dip )
+: -lit DUP CELL+ @ DEA? IF '.+ ELSE H.+ THEN ;
+    ' LIT by: -lit
+
+\ Decompile inline string constant
+: -sk1 CR ." [ " &" EMIT DUP $@ .$" &" EMIT
+   ."  ] DLITERAL " $@ + 4 CELLS + ;
+
+\ Decompile inline code
+: -sk2 DUP $@ + >R CR ." { " 3 CELLS + CRACK-COLON ."  } "
+   R> 2 CELLS + ;
+
+: -sk  CELL+ DUP CELL+ @ 'TASK @ = IF  -sk2 ELSE -sk1 THEN ;
+' SKIP by: -sk
+
+( SEE  -see8- )                                 \ AvdH B6feb14
+\ CRACKED is the central word.
+\ Use CRACK "ITEM" to decompile the word ITEM)
+: SEE ' CRACKED ;
+: CRACK SEE ;
+: KRAAK CRACK ;   \ Dutch synonym
+\ Crack from "name" then newer words.
+: CRACK-FROM   '   BEGIN DUP CRACKED 'NEXT-DEA CATCH UNTIL
+   DROP ;
+
+
+
+
+
+
+

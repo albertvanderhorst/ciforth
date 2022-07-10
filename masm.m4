@@ -1,5 +1,5 @@
-dnl $Id$
-dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl $Id: masm.m4,v 5.6 2017/11/10 18:33:43 albert Exp $
+dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 dnl Take care of embedded double quotes by using single quotes.
 dnl Note: this cannot be used in _HEADER, because index must look in the real string,

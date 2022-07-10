@@ -50,6 +50,7 @@ forthbreak
 (That is forthkey({c}) for compile.)
 The result is a file _HOSTED_LINUX_({forthfile({hello})}) _PC_({forthfile({HELLO.EXE})}).
 This file can be run from your command interpreter, or shell.
+It then will execute the last word defined in the source file in this case forthsamp({HELLO}) .
 It is a single file that you can pass to some one else to run on their
 computer, without the need for them to install Forth.
 For the compiler to run you must have the library correctly
@@ -1215,6 +1216,11 @@ _VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
 In addition forthcode({WANT}) and ARG[] are made available.
 
 forthitem
+forthsamp({-d name })
+Include forthfile({name}) with forthcode({[DEFINED]}) available.
+This file can be made to load onto other Forths without modifications.
+
+forthitem
 forthsamp({-e})
 
 Load the elective screen, screen 5. This contains forthdefi({preferences}),
@@ -1405,14 +1411,24 @@ with respect to all options, including forthsamp({-l}).
 Analysing arguments passed to thisforth in your programs can remain
 the same.
 
-@subsection Turnkey applications.
-Turnkey application are made using the word forthcode({TURNKEY}) .
+@subsection Stand alone programs.
+A stand alone program is made relying on the word forthcode({SAVE-SYSTEM}) .
+A stand alone program may be an enhanced version of ciforth or a program
+with a special purpose,
+what in other languages is normally called a compiled program.
+In Forth parlance this is called a forthdefi({turnkey application}),
+because mostly the program has special requirements from the environment.
+They are made using the word forthcode({TURNKEY}) .
 They take a word, that is to be done, and a string with the file name.
-A turnkey application should decide what to do with the library file that is default
-opened in forthcode({COLD}) . Make sure to forthcode({CATCH}) errors from
-forthcode({BLOCK-EXIT}) and ignore them.
-dnl This was the former philosophy: (is it better?)
+Unlike other Forths, the resulting program is a regular executable,
+that can be run on other computers with the same operating system.
+Generally an application ignores the absence of a library file.
+It must make sure to forthcode({CATCH}) any possible errors and
+report them in terms of the situation the user is in.
+Otherwise the user will be confronted with raw Forth error numbers
+without even the one line description.
 dnl Errors from BLOCK-EXIT never lead to throws and can be safely ignored.
 
 Mostly it is much easier to just use the forthsamp({-c}) option.
+For a simple example
 forthxref(Manual) Getting Started Subsection Hello World!

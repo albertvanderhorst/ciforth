@@ -4,22 +4,22 @@ dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public Li
 This application currently is copyright by M4_SUPPLIER.
 This Forth is called ciforth and is made available by the
 DFW.
-This publicationis is available under GPL 2, the GNU public license.    
+This publicationis is available under GPL 2, the GNU public license.
 The file forthfile({COPYING}) containing the legal expression of these
 lines must accompany it.
 
-You can make closed source program with the -c options. 
-Such programs are naturally your own,      
+You can make closed source program with the -c options.
+Such programs are naturally your own,
 quite the same as programs build with the gcc compiler.
-However also if you base an application program on ciforth, 
-you need not make its source available, 
+However also if you base an application program on ciforth,
+you need not make its source available,
 even if the application contains the Forth interpreter
-exposed. This would be a derived work and, 
+exposed. This would be a derived work and,
 in a strict interpretation of the GPL,
-such interpretive systems based on ciforth 
-are always legally obliged to make the source available. 
-Because Forth is ``programming by extending the language'' , 
-we consider this ``normal use in the Forth sense'' as 
+such interpretive systems based on ciforth
+are always legally obliged to make the source available.
+Because Forth is ``programming by extending the language'' ,
+we consider this ``normal use in the Forth sense'' as
 expressed by the following statement.
 
 In addition to the GPL M4_SUPPLIER grants the following rights
@@ -36,8 +36,9 @@ available in accordance to the GPL rules, and this is made known to
 the user of the derived system.
 
 forthitem
-All code snippets in the library are put in the public domain.
-You can freely borrow from it or build on it.
+Code snippets in the library inasfar not in the public domain
+are available under the LGPL, so you can freely borrow from it
+or build on it.
 forthendenumerate
 @section                         Rationale
 
@@ -96,7 +97,7 @@ The source and executable of this ciforth was generated, out of at
 least dozens of possibilities, by a generic system.
 You can configure
 the operating system, memory sizes, file names and minor issues like
-security policy. You can select between a 16, 32 and 64 bit word size. 
+security policy. You can select between a 16, 32 and 64 bit word size.
 You may undertake more fundamental changes by adapting one or more of
 the macro header files.
 An important goal

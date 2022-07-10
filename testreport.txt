@@ -1,8 +1,10 @@
 # Copyright(2000): Dutch Forth Workshop Foundation, by GNU Public License
 
-# $Id: testreport.txt,v 5.11 2017/12/19 20:00:44 albert Exp $
+# $Id: testreport.txt,v 5.13 2022/03/22 23:04:17 albert Exp $
 Test report of generic forth's for Intel 86 family.
 First part for ISO forth's, in the appendix some figforth's.
+
+Before 3.223, old stuff : checkout REL-5-3-0
 
 Summary
 This is a test report for 12 out of a zillion Forths that can be
@@ -16,8 +18,11 @@ It looks as if sometimes K' fails. But not for a freshly booted system.
 If you have observation with regard to this, or even insight, or even
 a fix, I urge you to inform me.
 
+Stable version 5.4.0
+Linux 64 bit 32 bit wina 64 bit 32 bit
+
 Stable version 5.3.0
-For Debian (linux)  64 and 32
+For Debian (linux)  64 and 32 passed
 
 Stable version 5.2.0
 For Debian, Windows XP and Apple OSX.
@@ -77,21 +82,21 @@ MSDOS 3.3            (Pentium III "Coppermine")
 MASM 1.0 Copyright IBM 1981  (!)
 nasm 0.98
 
-The following tests are defined:  (USED for 4.0.# and 5.#.#
-After 4.0 WANT
+The following tests are defined: After 4.0 WANT
+(replaced with REQUIRE for old versions) 4.0.# and 5.#.#
+
 A Booting/starting up
 B make it
 C List and load the elective screen (8 before 3.223, now 5)
 D
-after 2.223 : REQUIRE SIEVE 0 PAUSE ! 100 SIEVE
-before 2.223 : REQUIRE ERATOSTHENES 0 PAUSE ! 100 SIEVE
-after  5.62 :  WANT    ERATOSTHENES 0 PAUSE ! 100 SIEVE
+after  5.62 : "SIEVE" WANTED 0 PAUSE ! 100 SIEVE
+before 5.62 :  "ERATOSTHENES" WANTED 0 PAUSE ! 100 SIEVE
   primes ending in 99971 99989 99991
 E (requires A) KRAAK QUIT (5.x.x SEE QUIT)
-F REQUIRE MEASURE-PRIME (does nothing for 16 bit, assembly code)
-After 5.62 : CASE-SENSITIVE WANT MEASURE-PRIME
-G (r. A) Editing a screen
-H After 5.62 : ``mywc *.asm''.
+F "MEASURE-PRIME" WANTED (does nothing for 16 bit, assembly code)
+    Before 5.188: CASE-SENSITIVE
+ (G edit msdos)
+H After 5.62 : ``mywc *.asm''.  or wc.script (only linux)
 J Binary equivalent than compiled on linux (for windows Forths and
   one of NASM and FASM)
 K BYE
@@ -101,30 +106,11 @@ N "ls -l" SYSTEM or "dir" SYSTEM
 O Built in regression test
 P Johns Hopkins university test (always with restrictions)
 R Assemble empty code definition
-Z The assembly source of this version is equivalent with previous version
+S The assembly source of this version is equivalent with previous version
 
-Before 3.223
-The following tests are defined:
-A Booting
-B make it
-C 5 LIST 5 LOAD
-D (requires A) 25 LOAD 0 PAUSE ! 100 SIEVE
-  primes ending in 99971 99989 99991
-E (requires A) KRAAK QUIT
-F ( <load assembler> 89 LOAD (does nothing for 16 bit, assembly code))
-G (r. A) Editing a screen
-H wc *.asm  after 5.x named mywc
-J Binary equivalent than compiled on linux
-K BYE
-L Dos Directory correct  / WANT ls ls
-M  Documentation complete
-N "ls -l" SYSTEM or "dir" SYSTEM
-O Built in regression test
-P Johns Hopkins university test (always with restrictions)
-R Assemble empty code definition
 
 Pass criteria
-A booted OK
+A booted, started OK
 B I made it through make (version can be built).
 C plausible content of 8, everything loads fine, shows  copyright screen
 D primes less then 100000 zip accross the screen
@@ -174,6 +160,8 @@ the changes only relate to the general part.
                                                                       )
 Description                 Latest Configuration   Executable     Tests
                             test       file         name
+hosted_windows wina32        5.4.0 wina32.cfg     wina32        ABCDEF JKLMNOPR
+hosted_linux linux_64        5.4.0 lina64.cfg     lina64        ABCDEFHKMNOPRS
 hosted_windows wina64        5.3.0 wina64.cfg     wina64        ABCDEF JKLMNOPR
 hosted_linux linux_32        5.3.0 lina32.cfg     lina32        ABCDEFHKMNOPR
 hosted_linux linux_64        5.3.0 lina64.cfg     lina64        ABCDEFHKMNOP-

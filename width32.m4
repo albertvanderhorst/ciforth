@@ -1,4 +1,4 @@
-dnl  $Id$  M4 file to handle the develish FIG headers.
+dnl  $Id: width32.m4,v 5.7 2017/10/23 20:17:50 albert Exp $  M4 file to handle the develish FIG headers.
 dnl Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl None of the following makes sense unless 32 bit mode
 SET_32_BIT_MODE         _C Assembler directive

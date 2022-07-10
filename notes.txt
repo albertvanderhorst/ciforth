@@ -1,0 +1,309 @@
+The following had to be done in order to change 
+the listing of FIG86 for NASM.
+
+1. Got rid of most of the useless MASM directives
+by redefining them as empty macros.
+2. Others where commented out by hand: PAGE ENDP
+3. comment ~ /~
+   was replaced by
+   %if 0 / %endif
+4. NASM doesn't allow labels that duplicate instruction
+   names, so renames: CLD -> LCLD, AT -> FETCH, LEAVE -> LLEAV
+   CMOVE -> LCMOVE
+5. Did by hand the real differences i.e. square brackets
+   around memory references.
+
+This version is marked in RCS as SANSHEADER
+
+The following had to be done to make a generic listing
+1. define generic comment introducer etc. and define
+it for both assemblers
+2. Leave the renames thatavoid duplication with instructions.
+3. Tweak instructions that behave differently, e.g.
+define _BYTE as BYTE on NASM and as nought on MASM.
+4. define GENERIC header handling.
+The following macro helped to generate the proper header.
+\E3=ssp"^[A-Z][A-Z0-9]*"sdfesn dew ufl
+\E2=solimf txt' ' gtc"9" imn txt"HEADER({"eoltxt"},{" max ssp"^[A-Z][A-Z0-9]*"sdfesn gtc"16" ete sol dew ufl mae gmx ufl eol txt"},{})"clecle unl ssp"^;[^ ][^ ]*$" cdo mas dml
+\E1=ssp"^;[^ ][^ ]*$"
+
+Get rid of the OFFSET related to branching.
+\E4=cdo gtc"9" dew dew dew imf txt"_0BRANCH(" ((("99"cridec)))ufl eol txt")"
+
+This version is marked in RCS as HEADERMACROS
+It is still FIGFORTH IBM 1.0.0 because the executable is not changed a bit.
+
+The following is done but is is called version 2.0.0 
+This is still FIGFORTH, but
+1. in line with ANSI the buffer length is made equal to the screen length.
+2. the blocks are allocated in a disk file, using non-obsolete disk i/o.
+3. the stuff related to having two drives is removed, also the mess
+with printing.
+4. an explicit BDOS (and BIOS) word is introduced
+and where opportune the terminal I/O and other I/O uses these
+word.
+5. the I/O relying on MSDOS is surrounded with conditional assembly, such
+that it can be replaced easily.
+
+Next step :
+The previous version is called FIGFORTH for MSDOS.
+With conditional compilation one can get FIGFORTH for PC,
+which is stand alone.
+
+The label UNCHANGEDBUTMOVED is hung of all sources that
+are reorganised to have all dependant stuff together.
+That is conditionally put in for _USEDOS_1_
+We can now plug in for the conditional part the 
+_USEBIOS_1_ stuff.
+
+The label MSDOSBIOS marks a clean version that supports the 
+choise between MSDOS and BIOS. These cleanups resulted in the
+removal of the printer stuff, but in BIOS there is no
+CR send with each LF.
+
+There is now choice between HOSTED and BOOTED.
+I introduced the convention to use the prefix L for any labels that would
+interfere with assembly key words (notably instructions like CLD OR XOR AND
+SUB). Unlike the duplicating convention (AND ->ANDD) there is nowhere need for
+exceptions. I also use FET for @ instead of AT. This also works out more
+nicely. 
+
+The MODERN set is an alternative I/O to MSDOS or BIOS. It is based
+on MSDOS, but no features marked obsolete are used.
+The version of ?TERMINAL is now the same as KEY? in ANSI.
+(Previously it was not, it ate the key pressed.).
+Although Bill says they are obsolete, it is not possible to
+make a reasonable KEY with the file I/O functin 3f and 40.
+(You would to have press <Enter> after each key or switch
+back and forth modes, which would require a terrible amount
+of experimenting because, the "ultimate reference" 
+MSDOS programmers reference guide only offers the information
+like bit 5 means binary.) (Compared to that using DEBUG
+with IBM's own documentation of version 3.20 is a luxury.)
+
+It is possible to create a bootable MSDOS readable floppy from
+Linux alone using the m(dir copy format ..) tools from GNU.
+For this purpose the characteristics of the floppy wanted
+must be set up in the source. Furthermore the Makefile
+assumes a 3" floppy drive as /dev/fd0. This will cover
+over 90% of all systems. 
+
+MODERN :
+By writing a block past the end of file the block system is extended.
+This is a feature, not a bug.
+
+MODERN: and USEBIOS:
+The offset is used to screen off a part of the disk, instead of 
+changing disks. The old use was based on the assumption that
+you have a system with two identical floppy drives (instead of
+a hard disk). This is valid for a vanishing number
+of systems nowaday's of course. The meaning of R/W has shifted
+towards the physical access, where the BLOCK means logical access.
+This is not done in USEDOS, because that is the original FIGFORTH
+way.
+
+USEBIOS WORKS REASONABLY now. However if you have once addressed outside
+of the the disk (say 1500 LIST) you cannot recover (unless probably, 
+you do an init of the disk again.). yes 0 0 0 0 13 BIOS
+This definition is put into screen 100 the utilities screen.
+Some programs of old have been run, such as the elaborate sieve.
+
+MASM cannot assemble the current source probably, because
+there is a quirk in NASM to be able to use absolute addresses,
+such as needed in creating an offset.
+
+============================== revision log of recent changes ===
+----------------------------
+revision 2.116
+date: 2000/09/26 17:10:59;  author: albert;  state: Exp;  lines: +35 -20
+More cosmetic changes. Eliminating stack setting and stack
+segment loading from the switch code attempted but failed.
+----------------------------
+revision 2.115
+date: 2000/09/26 12:21:22;  author: albert;  state: Exp;  lines: +37 -27
+Identical object to 2.114. But with renames towrds
+the change inphilospohy that the SS reigster remains valid
+across real/protected mode switches
+----------------------------
+revision 2.114
+date: 2000/09/14 14:52:49;  author: albert;  stat: Exp;  lines: +6 -4
+branches:  2.114.1;  2.114.2;
+BYE for Forth's started from MSDOS works, by
+slight cleanup of protected mode switching.
+----------------------------
+revision 2.113
+date: 2000/09/13 11:21:41;  author: albert;  state: Exp;  lines: +22 -14
+branches:  2.113.1;
+The equ-layout of the switching version is now based on
+absolute addresses, not segments.
+It has been tested by verifying that only the binary for ..alone..
+versions differ, and well in the LOW-DP preset value, that was
+previously wrong.
+                                                 
+============================== history of older changes ===
+2.22 OFFSET in its present form must be eleminated from MESSAGE
+Done
+2.23 booting from hard disk possible.
+BOOTED option splitted between BOOTHD and BOOTFD.
+There are now two version possible for booting.
+SMALL can be removed. (better use MODE 0 0 0 13H BIOS )
+8 LOAD gives an elaborate system with editor and assembler.
+2.24 Got to remove SMALL and for BOOTHD change R/W.
+
+2.27 Preparations to make a 32/16 switch, like DC
+The executable is not changed from 2.26.
+This version is marked LASTBEFOREPROTECTED. (allthough it turns out there
+is much more to do before we go protected.
+
+2.28 
+
+2.29
++ORIGIN is from now on associated with the initial values for the user
+variables, not with some vague origin of the program.
+So 0 +origin tells you were this area starts.
+
+2.30..2.32
+More and more of the increments are replaced by LEA .. +-CELL .
+There was problem with LOAD-GDT , after execution it crashed.
+However this had only to do with the oversight that in my own assembler
+the way to execute NEXT had to change too.
+The usage of the register BP is restricted to the return stack. This is
+cleaner, because BP uses the stack segment. If in the future the stack
+segment is made separate, we do need to change the code for e.g. user
+variables. This has been checked, but no places were found were this was 
+a problem.
+
+2.34
+I don't want to introduce a real.m4. It should not be necessary. I see that
+the DS SS and ES are reassigned in LCLD. This is better left to the boot
+code. When hosted by MSDOS these values are filled in perfectly, thank you.
+I have changed the filosofy regards to ES. In general it MUST remain equal
+to DS, such that string primitives can be used with impunity. 
+Makefile enriched with protect.m4
+Cautious introduction of protected mode (using the inherited invisible
+parts of real mode) succeeds resulting in
+version
+2.35
+At least here the GDT has been filled in correctly.
+2.36
+2.36 works nicely in protected mode.
+
+2.38 has also the hard disk and the use of extra segment fixed up.
+And has the label FIRSTWORKINGPROT
+
+2.41 is a 16 bit version. It is a catchup with respect to insights
+gained from trying to make a 32 bit version working.
+Label PROT16A.
+
+2.42 is improved towards the portability for 32 bits.
+It has label PROT16A (with all its companions. I dared not remove the label
+PROT16 I had.) However it cannot handle the hard disk drive from the 
+Forth assembler routines. But then, at least the enabling of the interrupts
+is needed before I expect to be able to read from disk.
+
+2.43 Is a confirmed version that is installed on the harddisk and has saved
+block files. PROT16B
+2.44 improvements towards more portability 16/32
+
+Because BX can index as well as DI can, and it is not associated with ES
+I am using BX as the pointer to the new code field address ("working register")
+(and because I hope this gives an indication why the 32 bit version doesnot work.)
+
+2.44 contain the bug in REPEAT that 2 is used instead of CW for subtraction.
+
+2.45 is a working 32 bit version (label PROT). The diffence is in protect.m4
+so make sure you check out everything belonging to that.
+
+2.51 is quite a decent version. 32 bit protected through 16 bit msdos 
+works for NASM.
+
+2.53 Is the best version till now with all options available.
+
+2.55 A bug was present in C@ (The high part of AX was not cleared!).
+Removed and a slightly working version of linux.
+
+2.58 The first version of linux figforth. It is directly linked.
+
+2.66 A stable version of linux figforth with mass stoarage and all.
+Handles interrupts.
+
+2.100 
+Decided to publish now.
+This version will start a BIOS protected mode Forth from MSDOS,
+but cannot return for some reason.
+Reimplemented BYE for protected mode under MSDOS, but it doesn't
+work.
+
+2.101
+Major reorganisation of conditional compilation.
+Editing in 16 bit protected no longer works.
+32 bit booted version can run from MSDOS but not BYE.
+
+2.102
+This version can edit again in 16 bits mode, merge 2.90.1.1.
+
+2.103
+Configuration clean up and final test.
+Only real bug : not setting SS/ES always.
+Further mainly configuration problems.
+8 version tested!
+
+2.104
+Version was destroyed in cold message.
+
+2.105
+This version can again be assembled by MASM ($$ translated).
+ORIG: reintroduced so that on MSDOS a .EXE file can be generated.
+EM reduced to 0FFFEH because MASM chokes otherwise, not entirely unjustified.
+Made sure that if mass storage is not available, no attempts are made
+to read error message from disk.
+
+revision 2.106
+Hard disk i/o works again after protected mode starts at zero.
+This gets released with the label RELEASE1. 
+=============================================================================
+
+revision 2.107
+Dead code removed.
+cs was not filled in correctly in BYE vector for non-booting code.
+
+2.108
+32 bits MSDOS mass storage works
+RWFILE introduced
+filling in return to MSDOS vector is made safer.
+
+2.109
+Jumps used in a regular fashion.
+REALSEGMENT is in reality the switch segment.
+PC_1 defaults to _no like everything.
+
+revision 2.110
+date: 2000/07/05 19:33:39;  author: albert;  state: Exp;  lines: +37 -9
+32 bit protected mode now activates address line 20.
+Without this the first Megabyte mirrors at 0x100000 ,
+This version is released with label RELEASE2
+
+=============================================================================
+2.111
+I/O for 32 bits MSDOS now copies through temporoary buffers.
+Tehe sandbox must have a size of 10000H.
+
+2.112
+This version is released with label RLEASE3.
+Plain LOAD_ADDRESS eliminated. M4_LOADADDRESS has precise meaning
+see logboek.txt and m4 files.
+=============================================================================
+2.121
+All documentation (from FIG) is incorporated in the source.
+2.139
+All remaining and new words documented in source.
+2.147
+The three classic Fig bugs have been solved:
+ * Forgetting half of a vocabulary
+ * Redefining the NULL word 
+ * Loading a screen with some 8th bit char's
+2.148
+All necessary files are now in the release.
+
+=============================================================================
+

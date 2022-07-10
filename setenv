@@ -11,8 +11,9 @@ a=$s.asm
 A=$s.fas
 d=$s.doc
 b=$s.bin
-o=$s.o
-t=$s.rawtest
+g=optbb_gen.frt
+o=optimisebblock.frt
+t=testoptimiser.out
 fl=/dev/fd0H1440
 #lias r='rcsdiff -b -r2.28.1'
 alias r='rcsdiff -b -B'
@@ -27,8 +28,13 @@ N=2.114.1
 alias CO='co -r2.114.1'
 I=/home/albert/interrupts/unpacked/
 FD=/mnt/dosc/project/fig86/
+CJ=~/PROJECT/ciforthjunk/official/ciforth
 O=/mnt/dosc/dfw/tforth/test/system/okay
 DATE='"2010/04/05 15:00:00"'
-export b c d x C f p l a A s t R O FD I M DATE pat
+export b c d g o t x C f p l a A s R O FD I M DATE pat
 export CVSROOT=:pserver:albert@sparc:/usr/local/cvsroot
-V='2017jan15'
+unalias cvs
+alias cvs='cvs -d$CVSROOT'
+alias cvsdiff="cvs diff | grep -v '^?'"
+cvs -d$CVSROOT login
+V=`cvs log -r $f | grep -w revision| sed -e 's/revision /beta-/'`

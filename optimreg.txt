@@ -1,0 +1,178 @@
+\ $Id: optimreg.txt,v 1.3 2019/10/10 13:54:49 albert Exp $
+\ Copyright (2018): Albert van der Horst {by GNU Public License}
+
+Some notes with respect to the optimiser of ciforth.
+
+For a sequence of code we have the following properties for each register:
+A
+1. the register is free, not used here
+2. the register could be freed, i.e. it could be exchanged with
+  some other register
+3. the register is essential e.g. the DI and SI registers in MOVE
+
+and also
+B. The register is valid when it is passed in.
+C. The register is valid when it is passed out. All A except WOR.
+
+For  A1 & ~B & ~C the register can be used as a pass through,
+i.e. as a global register that remains valid accross this word.
+
+The first thing is to establish whether a register is used at all.
+With the Intel we can use one byte.
+AX BX CX DX  SI DI SP BP
+             XX    XX XX
+
+This is so unfavourable, and with 8 more it is so favourable,
+that the optimisation should become:
+look whether there is a register still free.
+In the Forth itself it is clear that we want scratch registers
+to be used in the order
+AX DI DX CX BC
+The strategy in looping would be to try the first one unused
+in this set, AX is always used already.
+Moreover we'd use the loop limit on the top of the return stack
+instead of an extra register, the loop index in a register is
+first priority.
+
+Optimising threaded code.
+Optimising threaded code for a system that is purposely helt simple
+like ciforth is probably easier than for a system with premature
+optimisation, many code words carefully designed for speed, and
+preliminary optimisation during compilation, such as Top of Stack in a
+register. The first step is the elaborate folding with knowledge of the
+properties of the code words. This also includes inlining.
+Now  we are left with threaded code consisting of code words, and
+branches. Because there are no calls both stacks are totally free, and
+the pieces of code can just be stringed together. This is even true for
+words like the run time actions for DO and LOOP. A slight complication
+gives e.g. EXIT or LEAVE in a loop body. They must be replaced by a
+code sequence and a BRANCH. That is tedious but I've already done it.
+The high level
+branches must be replaced by machine code branches, not particularly
+difficult. The next step is peephole optimisation. A large part of the
+boundaries consist of a sequence like " push register1, pop register2 "
+which can be eliminated by register renaming or replaced by a move.
+During the high level analysis, the code was broken up into pieces of
+straight code, where there are no jumps to inside the pieces.
+Pushes and pops can be concentrated to the start and end of the piece.
+
+The example of the _allocate code of ciforth shows that there are
+pretty large pieces of code accessing just one VARIABLE. We can hold
+that variable in a registers, but if there are stores, in principle,
+that store
+could destroy the variable.
+We know that this socalled
+"aliasing" does not occurr in the example of _allocate
+but it is not yet
+clear how we must convey this information to the optimiser.
+for an arbitrary piece of code.
+
+The error handling
+The problem with error handling is that the handling itself
+is very involved. If it is inlined, chances are that it destroys other
+optimisation opportunities. The solution is to separate the
+unconditional part out and place a conditional jump to it in the
+lowlevel code. Hopefully branch prediction does the rest.
+There is no return from the error situation, unless maybe after
+a catch, where all optimisation has stalled anyway.
+This requires a mechanism to get from machine code to high level code,
+a bit of an issue in the case of indirect threaded code.
+
+A benchmark
+The ALLOCATE code of ciforth seems a nice benchmark because it is
+critical, may be called a lot, and features a nice factorisation. We
+don't want to destroy that for the mere purpose of
+optimisation, even if it accesses a global variable.
+Proponents of local variables would
+like to turn into one large word, but the benchmark must not be changed
+or it wouldn't be a benchmark.
+
+The idea of the benchmark.
+1. The pool is about 10 Mbyte
+2. Choose a prime just above 10K 10,007.
+3. For increasing n allocate p buffers of 17^n %p size
+   and register them in an array of p pointers.
+4. From now on free the buffer with index 23^n %p m ,
+then allocate a new buffer as in 3.
+5. Repeat step 4 incrementing n and show the time till n=10p
+6. Continue until fragmentation results in an error message.
+   Register n and the time.
+
+Notes about optimisation of CATCH.
+Catch looks something like this
+
+: CATCH DSP@ CELL+ >R HANDLER @ >R RSP@ HANDLER ! EXECUTE R> HANDLER !
+R> DROP 0 ;
+
+Even if HANDLER is a USER variable this is a sequence of small code words.
+There is no reason CATCH couldn't be inlined, in the manner described above.
+
+Let us consider a case where a CATCH is places around an innocent word,
+that e.g. calculates a cosine.  Suppose we have code
+like
+'FCOS CATCH IF " Too sick" ETYPE BYE THEN
+
+After inlining we get, leaving the IF part for the moment:
+'FCOS DSP@ CELL+ >R HANDLER @ >R RSP@ HANDLER ! EXECUTE R> HANDLER ! R>
+0
+There is no jump to an error handler here, taken or not taken.
+It would sit in the FCOS , but it isn't.
+'FCOS is a constant, hence commutes with the sequence "DSP@ CELL+ >R"
+[In the color view of the words it is easy to see the neutral
+sequences in this case  white-cyan cyan-cyan cyan-white ]
+We get:
+DSP@ CELL+ >R 'FCOS HANDLER @ >R RSP@ HANDLER ! EXECUTE R> HANDLER !
+R> DROP 0
+Likewise it commutes with "HANDLER @ >R" and "RSP@ HANDLER !"
+The  | P' EXECUTE | P | pattern kicks in. So we get
+DSP@ CELL+ >R HANDLER @ >R RSP@ HANDLER ! FCOS R> HANDLER
+The floating point code
+commutes with everything, so let us put it at the start:
+FCOS DSP@ CELL+ >R HANDLER @ >R RSP@ HANDLER ! R> HANDLER ! R> DROP 0
+
+For a human it is easy to see that the first store to HANDLER makes
+no sense, because it is immediately overwritten. R> does *not*
+commute with "RSP@ HANDLER !" because the result of RSP@ is
+changed if R> is in front instead of after it.
+The we cannot transform and use the | P @ P ! | P ! | pattern.
+So the optimiser must take into account that what is stored into
+HANDLER doesn't matter in this case.
+Anyway after
+FCOS DSP@ CELL+ >R HANDLER @ >R R> HANDLER ! R> DROP 0
+the R> cancels the <R , then " HANDLER @ HANDLER !"
+can also be left out.
+
+FCOS DSP@ CELL+ >R R> DROP 0
+Another cancel of R-stack manipulation, and the folder now sees
+"DSP@ CELL+ DROP" .
+DSP@ has no output side effect, and CELL+ has no side effect at
+all, so they fall prey to the annihilator DROP .
+
+The result is
+FCOS 0 IF ABORT ... THEN
+
+and of course the IF part is eliminated too.
+
+It is advantageous to have
+(adr  -- flags cnt)
+For addr  return  flags  length  of following instruction.
+If unknown return UNKNOWN UNKNOWN
+The flags have a bit up for each of the intel calculation
+registers used.
+The algorithm is
+ next byte b
+ start with len 0
+ if tab[b] <0  return  -1 if -1 else AND with MAX-INT and 1
+ ELSE add one to length and
+
+We can have a table containing "flags MIN-INT OR " or an
+execution token.
+We could have flag fields for
+1. also 64 bit stuff
+2. extra set for obliterated, the register is totally replaced.
+3. extra set for used but not changed.
+
+So the rule are that if x obliterates r , and is followed
+by an instruction that obliterates r, it can be removed.
+XOR r,r require special care. Maybe just replace by
+MOVI r 0 .

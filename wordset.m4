@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: wordset.m4,v 5.2 2005/06/16 15:54:35 albert Exp $
 changequote({,})dnl
 define({worddoc},{dnl})dnl ignore those
 define({worddocsafe},{dnl})dnl ignore those

@@ -1,5 +1,5 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl $Id$
+dnl $Id: indexhtml.m4,v 5.5 2018/01/18 19:37:28 albert Exp $
 define(divert,)
 divert(-1)
 changequote({,})dnl
@@ -56,6 +56,10 @@ GLOSSARY INDEX</H1>
 <P>
 Here you can select the glossary entry of a
 word. All words in the basic set are documented.
+This is for reference. If you don't understand ciforth concepts
+(printed in italics), you have to look them up in the concept index
+of the real manual, either printed, PostScript or pdf.
+(Info won't do, it lacks indices or content overview).
 <P>
 divert(3)dnl
 <P>

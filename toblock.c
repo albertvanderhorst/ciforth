@@ -1,4 +1,4 @@
-/* $Id$                   */
+/* $Id: toblock.c,v 5.4 2017/10/23 20:17:50 albert Exp $                   */
 /* Copyright(2017): Albert van der Horst, HCC FIG Holland by GNU Public License */
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: msdos.m4,v 5.3 2007/03/27 17:58:06 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 include(default.m4)

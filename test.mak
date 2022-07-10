@@ -1,19 +1,30 @@
-# $Id: test.mak,v 5.33 2017/10/28 21:27:28 albert Exp $
+# $Id: test.mak,v 5.55 2022/03/22 08:20:45 albert Exp $
 # Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
-# Just to jot down small tests not wanted in the makefile
-# and any other commands.
+# This makefile contains test and documentation targets,
+# lately optimisation targets.
+
+# Index files used by info, some are empty for ciforth.
+#INDICES= cp fn ky pg tp vr
+INDICES= cp fn pg
 
 TESTTARGETS=testlina.[0-9] testmina.[0-9] testlinux.[0-9] orang hello.frt tsuite.out
 
-testclean: ; rm -f $(TESTTARGETS)
+PRECIOUS : testoptimiser.out
+
+testclean:
+	rm -f $(TESTTARGETS)
+	for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
 
 # WARNING : the generation of postscript and pdf use the same files
 # for indices, but with different content.
 
-%.ps:%.dvi  ;
-	for i in $(INDICES) ; do texindex  $(@:%.ps=%.$$i) ; done
-	 dvips -ta4 $< -o$@
+%.ps:%.texinfo ;
+	 tex $<
+	 for i in $(INDICES) ; do texindex  $(@:%.ps=%.$$i) ; done
+#         dvips -ta4 $< -o$@
+	 tex $<
+	 dvips -ta4 $(@:%.ps=%.dvi)
 #       dvips -A -r -i       -S10 $< -oA$@
 #       dvips -B -i -T 1.8cm,0.0cm -S10 $< -oB$@
 
@@ -173,12 +184,32 @@ cifgen.texinfo : cifgen.mi manual.m4 namescooked.m4 lina32.cfg
 TESTLINA32= \
 test.m4 \
 ci86.lina32.rawtest \
-ci86.lina.labtest
+ci86.labtest
 
 TESTLINA64= \
 test.m4 \
 ci86.lina64.rawtest \
-ci86.lina.labtest
+ci86.labtest
+
+TESTWINA32= \
+test.m4 \
+ci86.wina32.rawtest \
+ci86.labtest
+
+TESTWINA64= \
+test.m4 \
+ci86.wina64.rawtest \
+ci86.labtest
+
+TESTXINA32= \
+test.m4 \
+ci86.xina32.rawtest \
+ci86.labtest
+
+TESTXINA64= \
+test.m4 \
+ci86.xina64.rawtest \
+ci86.labtest
 
 TESTLINUX= \
 test.m4 \
@@ -186,7 +217,7 @@ ci86.linux.rawtest
 
 # No output expected, except for an official version (VERSION=A.B.C)
 # The version number shows up in the diff.
-testlina32 : $(TESTLINA32) ci86.lina32.rawtest lina32 forth.lab.lina tsuite.frt ;
+testlina32 : $(TESTLINA32) lina32 forth.lab.lina tsuite.frt ;
 	rm -f forth.lab
 	cp forth.lab.lina forth.lab
 	m4 $(TESTLINA32) >$(TEMPFILE)
@@ -201,7 +232,7 @@ testlina32 : $(TESTLINA32) ci86.lina32.rawtest lina32 forth.lab.lina tsuite.frt 
 
 # No output expected, except for an official version (VERSION=A.B.C)
 # The version number shows up in the diff.
-testlina64 : $(TESTLINA64) ci86.lina64.rawtest lina64 forth.lab.lina tsuite.frt ;
+testlina64 : $(TESTLINA64) lina64 forth.lab.lina tsuite.frt ;
 	rm -f forth.lab
 	cp forth.lab.lina forth.lab
 	m4 $(TESTLINA64) >$(TEMPFILE)
@@ -216,28 +247,47 @@ testlina64 : $(TESTLINA64) ci86.lina64.rawtest lina64 forth.lab.lina tsuite.frt 
 
 # No output expected, except for an official version (VERSION=A.B.C)
 # The version number shows up in the diff.
-testwina : ci86.wina.rawtest test.m4 wina.exe forth.lab.wina tsuite.frt ;
+testwina32: $(TESTWINA32) wina32.exe forth.lab.wina tsuite.frt ;
 	rm -f forth.lab
 	cp forth.lab.wina forth.lab
-	m4 test.m4 $<  >$(TEMPFILE)
+	m4 $(TESTWINA32) >$(TEMPFILE)
 	echo "'NOOP 'OK 3 CELLS MOVE"        >$@.1
 	echo "'STDOUT >DFA @ 'STDERR >DFA !" >>$@.1
 	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
-	wine wina.exe <$@.1 2>&1|\
+	wine wina32.exe <$@.1 2>&1|\
 	grep -v beta |\
-	sed -e 's/.*wina.exe/wina.exe/' >$@.3
+	sed -e 's/.*wina32.exe.*/wina32.exe/' >$@.3
 	diff -b -B $@.2 $@.3 || true
 	cp -f forth.lab.wina  forth.lab
-	wine wina.exe -a <tsuite.frt 2>&1 |grep -v OK >tsuite32.out
+	wine wina32.exe -a <tsuite.frt 2>&1 |grep -v OK >tsuite32.out
 	diff -bBw tsuite32.out testcmp || true
+
+# No output expected, except for an official version (VERSION=A.B.C)
+# The version number shows up in the diff.
+testwina64: $(TESTWINA64) wina64.exe forth.lab.wina tsuite.frt ;
+	rm -f forth.lab
+	cp forth.lab.wina forth.lab
+	m4 $(TESTWINA64) >$(TEMPFILE)
+	echo "'NOOP 'OK 3 CELLS MOVE"        >$@.1
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >>$@.1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	rm $(TEMPFILE)
+	wine wina64.exe <$@.1 2>&1 |\
+	grep -v beta |\
+	sed -e 's/.*wina64.exe.*/wina64.exe/' >$@.3
+	diff -b -B $@.2 $@.3 || true
+	cp -f forth.lab.wina  forth.lab
+	wine wina64.exe -a <tsuite.frt 2>&1 |grep -v OK >tsuite64.out
+	diff -bBw tsuite64.out testcmp || true
 
 
 # This just generates a test script and testfiles,
 # but expects the test to run on a different system.
 # The version number shows up in the diff.
-testlina64.tar : $(TESTLINA64) ci86.lina64.rawtest ci86.lina64.fas forth.lab.lina tsuite.frt ;
+testlina64.tar : $(TESTLINA64) ci86.lina64.fas forth.lab.lina tsuite.frt ;
 	echo "#!/bin/sh ">testlina64
 	echo "rm -f forth.lab                                 ">>testlina64
 	echo "cp forth.lab.lina forth.lab                  ">>testlina64
@@ -266,32 +316,43 @@ testdpmi : ci86.dpmi.rawtest test.m4 ;
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
 	rm $(TEMPFILE)
 
-testwinafiles : ci86.wina.rawtest test.m4 ;
-	m4 test.m4 $<  >$(TEMPFILE)
-	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
-	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
-	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+testwina32files : $(TESTWINA32) ;
+	m4 $(TESTWINA32) > $(TEMPFILE)
+	echo "'NOOP 'OK 3 CELLS MOVE"        >$(@:%files=%).1
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%files=%).2
 	rm $(TEMPFILE)
 
-testwina64files : ci86.wina64.rawtest test.m4 ;
-	m4 test.m4 $<  >$(TEMPFILE)
-	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
-	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
-	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+testwina64files : $(TESTWINA64) ;
+	m4 $(TESTWINA64) > $(TEMPFILE)
+	echo "'NOOP 'OK 3 CELLS MOVE"        >$(@:%files=%).1
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%files=%).2
 	rm $(TEMPFILE)
 
-testxinafiles : ci86.xina.rawtest test.m4 ;
-	m4 test.m4 $<  >$(TEMPFILE)
-	echo "'TYPE >DFA @ 'ETYPE >DFA !" >$@.1
-	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
-	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+
+testxina32files : $(TESTXINA32) ;
+	m4 $(TESTXINA32) > $(TEMPFILE)
+	echo "'NOOP 'OK 3 CELLS MOVE"        >$(@:%files=%).1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%files=%).2
 	rm $(TEMPFILE)
+
+testxina64files : $(TESTXINA64) ;
+	m4 $(TESTXINA64) > $(TEMPFILE)
+	echo "'NOOP 'OK 3 CELLS MOVE"        >$(@:%files=%).1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%files=%).2
+	rm $(TEMPFILE)
+
 
 testminafiles : ci86.mina.rawtest test.m4 ;
 	m4 test.m4 $<  >$(TEMPFILE)
-	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$@.1
-	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$@.1
-	sed $(TEMPFILE) -e '1,/Split here for test/d' >$@.2
+	echo "'STDOUT >DFA @ 'STDERR >DFA !" >$(@:%files=%).1
+	sed $(TEMPFILE) -e '/Split here for test/,$$d' >>$(@:%files=%).1
+	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%files=%).2
 	rm $(TEMPFILE)
 
 # #################################################################
@@ -306,18 +367,40 @@ analysermain.frt        \
 analyserdebug.frt       \
 # That's all folks!
 
+OPTIMSRC=               \
+optimiser.frt           \
+optimexpand.frt         \
+optimhigh.frt         \
+optimcodgen.frt         \
+optimcategory.frt         \
+optimisebblock.frt         \
+optbb_compress.frt         \
+optbb_expand.frt           \
+optbb_gen.frt              \
+optbb_nobrain.frt          \
+optbb_propagate.frt          \
+optbb_tools.frt            \
+# That's all folks!
+
 #asgen.frt : RCS-as/asgen.frt,v ; co $<
 #asi386.frt : RCS-as/asi386.frt,v ; co $<
 
-# A Forth with the analyser built-in.
-lina-ana : lina32 asgen.frt asi386.frt $(ANASRC)
-	echo '"analyser.frt" INCLUDED   "SAVE-SYSTEM" WANTED  "$@" SAVE-SYSTEM' |./lina32
+# # A Forth with the analyser built-in.
+# lina-ana : lina32 asgen.frt asi386.frt $(ANASRC)
+#         echo '"analyser.frt" INCLUDED   "SAVE-SYSTEM" WANTED  "$@" SAVE-SYSTEM' |./lina32 -l testoptim.lab
 
-# Test the optimiser. FIXME! Gives ERROR 22 ( --> not called from block).
-testoptimiser.out : testoptimiser.frt optimiser.frt lina-ana
-	echo 'INCLUDE optimiser.frt INCLUDE $<' |lina-ana > $@
+# A Forth with the analyser built-in.
+lina-ana64 : lina64 asgen.frt asi386.frt $(ANASRC)
+	echo '"testoptim.lab" INCLUDED   "analyser.frt" INCLUDED   "WHERE?" WANTED "SAVE-SYSTEM" WANTED  "$@" SAVE-SYSTEM' |./lina64 -a
+
+optimiser: $(OPTIMSRC) lina-ana64 ; lina-ana64 -c $<
+
+# Test the optimiser.
+testoptimiser.out : testoptimiser.frt optimiser
+	optimiser  $< > $@
 	diff -bBw $@ testcmp || true
 
-lina-opt : optimiser.frt lina-ana
-	echo 'INCLUDE optimiser.frt "$@" SAVE-SYSTEM' |lina-ana
-	echo include optimiser.frt from lina-opt manually!
+# Old skool.
+#lina-opt : optimiser.frt lina-ana
+#        echo 'INCLUDE optimiser.frt "$@" SAVE-SYSTEM' |lina-ana
+#        echo include optimiser.frt from lina-opt manually!

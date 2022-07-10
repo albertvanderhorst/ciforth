@@ -1,4 +1,4 @@
-dnl  $Id$  M4 file to handle the develish FIG headers.
+dnl  $Id: header.m4,v 5.6 2019/07/22 10:14:31 albert Exp $  M4 file to handle the develish FIG headers.
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl
 dnl _STRING : Lay down a string in memory.
@@ -74,8 +74,9 @@ define({_QDO},dnl
 {DC     XQDO
         DC      $1-_AP_-CW})dnl
 define({_LOOP},dnl
-{DC     XLOOP
-        DC      $1-_AP_-CW})dnl
+{DC     ONE, XPLOOP, ZBRAN
+        DC      $1-_AP_-CW
+        DC      UNLOOP })dnl
 dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
 {_HEADER({$1},

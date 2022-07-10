@@ -1,5 +1,5 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl $Id$
+dnl $Id: glosshtml.m4,v 5.4 2022/02/18 18:21:19 albert Exp $
 divert(-1)
 define({forall}, {ifelse(len({$2}),0,,
 {$1}({{{$2}}}) &nbsp;
@@ -33,7 +33,7 @@ STACKEFFECT: $4
 
 DESCRIPTION:
 <P>
-$6
+($5) $6
 <P>
 <A HREF="#GLOSSARY_INDEX">GLOSSARY INDEX</A>
 <P>

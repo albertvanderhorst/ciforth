@@ -1,0 +1,66 @@
+#!/bin/sh
+#  Copyright 2000-2022 (c): Albert van der Horst, Dutch Forth Worksshop by GPL
+# This is an example of poor man's scripting, using the fact that
+# Forth is an interpreter. This technique will work portably accross Forth's.
+# See also the -s option.
+/usr/bin/lina -a <<%
+\ ( Environmental dependancies : )
+\ ( This is a ISO Forth Program using only standard ISO Words)
+\ ( The following words are not ANSI : none (any more))
+WANT WORD R/O
+10 CONSTANT LF      \ Uses that ^J is Unix universal record separator.
+ ( char -- flag)
+: IS-BLANK    BL 1+ < ;
+
+VARIABLE LAST-WAS-BLANK
+VARIABLE L
+VARIABLE W
+VARIABLE C_
+: ZERO-COUNT 0 L !   0 W !   0 C_ ! -1 LAST-WAS-BLANK ! ;
+: SHOW-COUNT SPACE L @ . W @ . C_ @ . CR ;
+
+100000 CONSTANT SIZE
+CREATE Buffer SIZE ALLOT
+: AT-WORD-START IS-BLANK  LAST-WAS-BLANK @ 0= AND ; ( char -- flag)
+( All four  : ( char -- char )
+: COUNT-L LF OVER = IF 1 L +! THEN ;
+: COUNT-W DUP AT-WORD-START IF 1 W +! THEN DUP IS-BLANK LAST-WAS-BLANK ! ;
+: COUNT-C 1 C_ +! ;
+: COUNT-CHAR COUNT-C COUNT-W COUNT-L ;
+: COUNT-BUFFER Buffer SWAP OVER + SWAP DO I C@ COUNT-CHAR DROP LOOP ; ( len-)
+
+VARIABLE HANDLE
+: COUNT-FILE
+    BEGIN
+        Buffer SIZE HANDLE @ READ-FILE  THROW
+    DUP 0 > WHILE
+        COUNT-BUFFER
+    REPEAT DROP ;
+
+: ZERO-ENDED COUNT OVER + 0 SWAP C! ; ( filename -- c-zero ended filename )
+: STILL-FILES C@  ; ( string variable -- flag )( Length <>0 means more files)
+( c-name -- ) ( Open file with the specified name stored in mem)
+: MY-OPEN-FILE COUNT 0 OPEN-FILE THROW HANDLE ! ;
+( [filename-at-here] -- handle/-1 )
+: TREAT-FILE ZERO-COUNT COUNT-FILE COUNT TYPE SHOW-COUNT ;
+: MY-CLOSE-FILE HANDLE @ CLOSE-FILE THROW ;
+
+: DO-FILE
+    BEGIN
+        BL WORD
+    DUP STILL-FILES WHILE
+        DUP MY-OPEN-FILE TREAT-FILE MY-CLOSE-FILE
+    REPEAT ;
+
+0 WARNING !
+
+DO-FILE $*
+
+BYE
+%
+
+# The remainder is interpreted by the shell as a here document,
+# but forth has long gone bye.
+#
+# Note that because the input is not from a terminal messages are suppressed.
+# In principle BYE is not needed, because Forth ends on the end of input.

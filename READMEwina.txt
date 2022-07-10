@@ -1,6 +1,6 @@
-CIFORTH CUSTOMIZATION FOR MS-Windows, DLL. version 5.2.x.
+CIFORTH CUSTOMIZATION FOR MS-Windows, DLL. version 5.4.x
 
-COPYRIGHT (c) 2000-2017 Albert van der Horst , THE NETHERLANDS
+COPYRIGHT (c) 2000-2022 Albert van der Horst , THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -10,7 +10,7 @@ document wina.pdf.
 
 DESCRIPTION
 Forth is a tool for evolutionary programming. This is the binary
-distribution of wina release 5.2.x.
+distribution of wina release 5.4.x.
 wina is the Windows native version of ciforth (common Intel Forth), an
 interpret environment and compiler for Forth. Native is to be
 understood that only kernel32.dll facilities are used, no other dll's,
@@ -28,15 +28,16 @@ that add i.a. a decompiler and integrated 386 assembler. It is fully
 self contained; if you want to understand a compiler in all details,
 this is your best, if not only, choice. ciforth sports a very high
 documentation to binary ratio.
+The Forth is 64 or 32 bits, indicated by ## in the following.
 
 Unpack in the directory where you want to use it by :
-    pkunzip wina-5.2.zip
+    pkunzip wina64-5.4.#.zip
 
 Now you can use wina interactively by :
-    wina
+    wina64
 
 You can compile a program `hellow.frt' to an executable `hellow.exe':
-    wina -c hellow.frt
+    wina64 -c hellow.frt
 
 The Forth word defined latest in `hellow.frt' is the entry point.
 The library contains facilities to access arguments passed to
@@ -45,51 +46,52 @@ a program.
 RELEASE CONTENT
 Don't panic! ciforth is just two files, binary and library.
 The rest is documentation (plus examples and source).
+In the following ## means 64 or 32.
 
  COPYING         Copyright notice
  READMEwina.txt    This file
  wina##          The Forth interpreter
  forth.lab       Source library, a text file
- wina.fas        Source, for the ``fasm'' assembler
- wina.exe        Forth interpreter compiler
- wina.texinfo    Documentation master source
- wina.pdf        Documentation in Portable Data Format
- wina.ps         Documentation in PostScript
- wina.html       Browsable, reference documentation only
+ wina##.fas      Source, for the ``fasm'' assembler
+ wina##.exe      Forth interpreter compiler
+ wina##.texinfo  Documentation master source
+ wina##.pdf      Documentation in Portable Data Format
+ wina##.ps       Documentation in PostScript
+ wina##.html     Browsable, reference documentation only
  hellow.frt      Compilation example : hello world.
  wc.script       Script example: word count 1)
 
 1) Adapt the name of the interpreter.
 
-The latest version and OSX and Linux versions can be fetched from
+The latest version and OSX and Linux versions can be fetched via
     http://home.hccnet.nl/a.w.m.van.der.horst/ciforth.html
 or
     https://github.com/albertvanderhorst/ciforth
 (subdirectory releases).
 This contains also the generic system that is recommended over
-`wina.fas' if you want to make extensive change.
+`wina##.fas' if you want to make extensive changes.
 
 DOCUMENTATION I
 The regular documentation is your choice of PostScript, PDF with
 the same content.
 
 DOCUMENTATION II
-Viewing the file ``wina.html'' with a html viewer,
+Viewing the file ``wina##.html'' with a html viewer,
 gives a reference extract but with more cross links.
 This is only intended to be used while using the system, it
 contains no information about installation or tutorial material.
 
 INSTALLATION
-(This is an excerpt of the information in wina.pdf.)
+(This is an excerpt of the information in wina##.pdf.)
 After unpacking wina is ready to use, because the library is configured
 as sitting in the current directory, no path.
 
 Installation to a system wide directory is easy :
-wina -i C:\tools\wina.exe C:\tools\wina.lab %COMSPEC%
-If C:\tools is in the PATH , wina now is usable from anywhere.
+wina## -i C:\tools\wina##.exe C:\tools\wina.lab %COMSPEC%
+If C:\tools is in the PATH , wina## now is usable from anywhere.
 
 On a XP system it is recommended  to do :
-wina -i C:\WINDOWS\system32\wina.exe c:\WINDOWS\system32\wina.lab c:\WINDOWS\system32\cmd.exe
+wina## -i C:\WINDOWS\system32\wina##.exe c:\WINDOWS\system32\wina.lab c:\WINDOWS\system32\cmd.exe
 The executable contains its own configuration information.
 All this is explained in detail in the documentation.
 

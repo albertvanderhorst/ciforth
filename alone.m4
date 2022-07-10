@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: alone.m4,v 5.2 2005/06/16 15:53:57 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 include(default.m4)

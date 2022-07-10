@@ -1,5 +1,5 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl $Id$
+dnl $Id: gloss.m4,v 5.5 2012/09/25 19:08:33 albert Exp $
 dnl NOTE IT DOESN'T WORK WITHOUT THE NEW LINE FOR THE RECURSIVE CALL
 dnl TO FORALL. THIS IS RATHER MYSTERIOUS.
 changequote({,})dnl

@@ -1,4 +1,4 @@
-dnl $Id$
+dnl $Id: ciforth.m4,v 5.1 2013/10/23 13:33:14 albert Exp $
 dnl Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 

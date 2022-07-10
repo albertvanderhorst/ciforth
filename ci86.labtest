@@ -1,0 +1,150 @@
+1 LOAD
+dnl  $Id: ci86.labtest,v 5.8 2022/06/12 13:54:08 albert Exp $
+dnl Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl formerly called ci86.lina.labtest
+divert(4)dnl
+wordtest( {D0<},
+{ { "D0<" WANTED },{},
+  {  0 0 D0< . },{0},
+  {  1 0 D0< . },{0},
+  {  0 1 D0< . },{0},
+  {  -1 0 D0< . },{0},
+  {  -1 -1 D0< . },{-1},
+  {  0 -1 D0< . },{-1}
+})
+wordtest( {D<},
+{ { "D<" WANTED },{},
+  {  0. 0. D< . },{0},
+  {  1. 0. D< . },{0},
+  {  0. 1. D< . },{-1},
+  {  -1. 0. D< . },{-1},
+})
+
+wordtest( {D<},
+{ { "D<" WANTED },{},
+  {  -1. -1. D< . },{0},
+  {  0. -1. D< . },{0},
+  {  1. -1. D< . },{0},
+  {  -1. 1. D< . },{-1},
+  {  1. INVERT -1. INVERT D< . },{-1},
+  {  -1. INVERT 1. INVERT D< . },{0}
+})
+wordtest( {<=},
+{ { "<=" WANTED },{},
+{1 2 <= .},{_T_},
+ {-1 -2 <= .},{0},
+ {0 -1 <= .},{0},
+ {1 1 <= .},{_T_} },
+)
+wordtest( {>=},
+{ { ">=" WANTED },{},
+ {1 2 >= .},{0},
+ {-1 -2 >= .},{_T_},
+ {0 -1 >= .},{_T_},
+ {1 1 >= .},{_T_} },
+})
+wordtest( {ROLL},
+{ { "ROLL" WANTED},{},
+ {2 1 1 ROLL . . },{2 1 },
+ {3 2 1 0 3 ROLL . . . . },{3 0 1 2 },
+ {4 3 2 1 0 4 ROLL . . . . . },{4 0 1 2 3 },
+})
+wordtest( {TUCK},
+{ { "TUCK" WANTED},{},
+ {1 2 3 TUCK . . . . },{3 2 3 1 },
+})
+wordtest( {REFILL},
+{ {  "REFILL" WANTED}, {SOURCE : ISN'T UNIQUE },
+ { : _G13 2DUP OVER + SWAP DO I C@ &| = IF ^J I C! THEN LOOP ;},{},
+ { " 1 2 3 4 REFILL| 1 . 3 .| .| . . . . " _G13 EVALUATE },{1 3 -1 4 3 2 1 },
+})
+wordtest( {0>IN},
+{ {  "0>IN" WANTED}, {SOURCE : ISN'T UNIQUE },
+{: _G14 DUP IF 1- 0>IN THEN ;},{},
+ { : _G13 2DUP OVER + SWAP DO I C@ &| = IF ^J I C! THEN LOOP ;},{},
+ { " 4| DUP . _G14 | 9 + . " _G13 EVALUATE},{4 3 2 1 0 9},
+ { " 1 2 3 4| DUP . _G14 |. . . ." _G13 EVALUATE},{4 3 2 1 0 0 3 2 1 },
+ { " 1 2 3 4| DUP . _G14|. . . ." _G13 EVALUATE},{4 3 2 1 0 0 3 2 1 },
+})
+wordtest( {MERGE-SORT},
+{ { "MERGE-SORT" WANTED "SORT-VOC" WANTED},{},
+  { 'FORTH SORT-VOC},{},
+  { 'FORTH >WID >LFA @ ID. },{~MATCH},
+})
+wordtest( {REGRESS},
+{ { "REGRESS" WANTED "DO-VERBOSE-REGRESS" WANTED},{},
+  { NO-VERBOSE-REGRESS },{},
+  { REGRESS 1 2 + S: 3 },{ },
+  { DO-VERBOSE-REGRESS : q ;},{},
+  { REGRESS 1 2 + S: 3 },{q   1 2 + S: 3  CR \ PASSED},
+  { : 3t -1 3 ?ERROR ; },{},
+  { REGRESS '3t CATCH S: 3},{3t   '3t CATCH S: 3 CR \ PASSED},
+})
+wordtest( {ALLOCATE},
+{ { "ALLOCATE" WANTED },{},
+  { 1024 ALLOCATE . DROP},{50},
+  { INIT-ALLOC 1024 ALLOCATE . FREE .},{0 0},
+  { -10 ALLOCATE . DROP},{50},
+  { -1 1 RSHIFT ALLOCATE . DROP},{50},
+dnl  { "APE" $, >ALLOC $@ TYPE},{APE},
+  { 1024 ALLOCATE . },{0},
+  { 1024 heapify },{ 1024 heapify ? ciforth ERROR # 52 : CANNOT HEAPIFY BUFFER },
+})
+wordtest( {READ-LINE},
+{
+    {"READ-LINE" WANTED "R/W" WANTED },{},
+    {"hello.frt" R/W OPEN-FILE . CONSTANT FD},{0},
+    {PAD DUP 100 FD READ-LINE THROW . TYPE},{-1 "Hello world!" TYPE},
+    {FD CLOSE-FILE . },{0},
+} )
+wordtest( {INCLUDE-FILE},
+{
+    {"INCLUDE-FILE" WANTED },{NAME : ISN'T UNIQUE},
+    {include hello.frt },{Hello world!},
+})
+wordtest( {CI-DIGIT},
+{
+    {"CI-DIGIT" WANTED},{},
+    { &0 10 DIGIT . . },{-1  0 },
+    { &A 10 DIGIT . . },{0  10 },
+    { &F 16 DIGIT . . },{-1 15 },
+    { &G 16 DIGIT . . },{0  16 },
+})
+wordtest( {CASE-INSENSITIVE},
+{
+ { "CASE-INSENSITIVE" WANTED},{},
+ { CASE-INSENSITIVE },{},
+ { 4321 2 drop . },{4321},
+ { hex 1af . decimal },{1AF},
+ { CASE-SENSITIVE },{},
+})
+dnl By proxy this is a test for my curly brackets.
+wordtest( {[:},
+{
+{ "[:" WANTED},{},
+{ [: "APE" TYPE ;] EXECUTE },{APE},
+{ : t  [: "APE" TYPE ;] ; t EXECUTE },{APE},
+})
+wordtest( {NOOP},
+{
+    { NOOP },{},
+})
+wordtest( {,,},
+{
+{ ",," WANTED},{},
+{ "AAP" HERE ROT ROT ,,  HERE OVER - . C@ EMIT},{3 A},
+})
+dnl  This tests also the loading of the assembler, high
+wordtest( {decorated},
+{
+{ "decorated" WANTED},{
+ASSEMBLER-GENERIC : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ASSEMBLER-CODES-i86 : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ASSEMBLER-CODES-PENTIUM : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ASSEMBLER-MACROS-i86 : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ASSEMBLERi86-HIGH : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+},
+{ : aap 3 ;   : sos DUP . CO DUP . ; },{},
+{ 'sos 'aap decorated 1 aap 2DROP},{1 3},
+{ 'aap undecorated 1 aap . . },{3 1},
+})

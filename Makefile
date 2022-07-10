@@ -1,4 +1,5 @@
-# $Id: Makefile $ 
+# $Id: Makefile,v 5.67 2022/03/23 12:59:50 albert Exp $
+
 # Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
 # This defines the transformation from the generic file ci86.gnr
@@ -25,7 +26,7 @@
 #* .rawdoc : unsorted glossary items from the generic source.
 #* .rawtest : unsorted and unexpanded tests.
 #+ .m4 : m4 macro's possibly including other macro's
-#   except constant.m4
+#   except constant_*.m4
 # .cfg : m4 macro's generating files ( ci86.%.x + %.cfg -> ci86.%.y)
 # .mi : files that after processed by m4 give a .texinfo file
 # .mig : Currently in use for the wordset, which is a .mi file (WRONG!)
@@ -61,34 +62,45 @@ names.m4        \
 wordset.m4      \
 # That's all folks!
 
+TOOLSFORTH = \
+boot.lab \
+toblk.frt \
+fromblk.frt \
+sortworddoc.frt \
+# That's all folks!
+
 # Normally tools are not supplied with the release.
 # But this is a tool not otherwise available.
 TOOLS=  \
-ssort   \
+$(TOOLSFORTH:%.frt:%)
 # That's all folks!
 
-EXAMPLESRC= \
-mywc32      \
-mywc64      \
+EXAMPLES= \
+mywc        \
 hellow.frt \
 wc.script \
 # That's all folks!
 
-# Index files used by info, some are empty for ciforth.
-INDICES= cp fn ky pg tp vr
 
 # Different assemblers should generate equivalent Forth's.
 ASSEMBLERS= nasm  gas fasm masm
 # Forth assembler sources that can be made using any assembler
-# on any system, maybe needing a file constantxxx.m4
-TARGETS= lina32 lina64 wina mina xina \
+# on any system, maybe needing a file constant_*.m4
+TARGETS= lina32 lina64 wina64 wina32 xina32 xina64 \
 alone linux alonehd msdos32 alonetr dpmi
+DOCFORMAT= a.html  \
+a.info             \
+a.pdf              \
+a.ps               \
+# That's all folks!
 
 # The kinds of Forth's binaries that can be made using NASM (not used)
 BINTARGETS= mina alone
 # If this makefile runs under Linux, the following forth's can be made and
 # subsequently run
-LINUXFORTHS= ciforthc lina32 glina32 lina64
+LINUXFORTHS= ciforthc lina32 lina64 flina32  flina64 nlina32  \
+    nlina64 glina32  glina64
+
 # Auxiliary targets.
 OTHERTARGETS=   \
 filler.frt      \
@@ -96,7 +108,6 @@ forth.lab       \
 forth.lab.lina  \
 forth.lab.wina  \
 toblk           \
-constant.m4     \
 namescooked.m4  \
 MANIFEST        \
 # That's all folks!
@@ -109,8 +120,7 @@ wordset.mi      \
 # That's all folks!
 
 # C-sources with various aims. FIXME: start with .c names.
-CSRCFORTH= ciforth 
-CSRC= $(CSRCAUX) $(CSRCFORTH)
+CSRCFORTH= ciforth.c
 
 # Texinfo files still to be processed by m4.
 SRCMI= \
@@ -132,35 +142,36 @@ $(SRCMI) \
 
 # These files can be generated, on the linux Suse host.
 # They assemble mostly on the Suse host, but always on the target.
-EXAMPLES = \
+ASSEMGEN = \
 ci86.alone.asm  \
 ci86.mina.msm  \
-ci86.wina.fas  \
-ci86.lina.asm  \
-ci86.lina.fas \
-ci86.lina.s  \
-ci86.lina64.s  \
+ci86.wina32.fas  \
+ci86.wina64.fas  \
+ci86.lina32.fas \
+ci86.lina32.s  \
+ci86.lina32.asm  \
 ci86.lina64.fas \
+ci86.lina64.s  \
 ci86.alonehd.asm  \
 forth.lab.wina \
 forth.lab.lina \
-constant.m4  \
-constant_64.m4  \
-constant_osx.m4  \
 # That's all folks!
 
 # Note that the generated file ``namescooked.m4'' is included,
-# because it require RCS to generate.
+# because it forces to contain the release id.
 RELEASECONTENT = \
 ci86.gnr        \
-$(CSRC:%=%.c)   \
+constant_32.m4  \
+constant_64.m4  \
+constant_osx.m4  \
+namescooked.m4  \
 $(TARGETS:%=%.cfg)      \
 $(DOC)          \
-namescooked.m4  \
 Makefile        \
 test.mak        \
+optim.mak        \
 test.m4         \
-tsuite.frt      \
+$(TOOLSFORTH)   \
 $(INGREDIENTS)  \
 $(ASSEMBLERS:%=%.m4)    \
 $(DOCTRANSFORMS)        \
@@ -168,12 +179,17 @@ $(TOOLS)        \
 blocks.frt      \
 options.frt     \
 genboot.bat     \
-mywc32          \
-mywc64          \
-$(EXAMPLES)     \
+$(EXAMPLES)   \
+$(ASSEMGEN)  \
 errors.linux.txt \
 errors.dos.txt \
-ci86.lina.labtest \
+tsuite.frt      \
+ci86.labtest \
+# That's all folks!
+
+TESTCMP = \
+testcmp/tsuite32.out \
+testcmp/tsuite64.out \
 # That's all folks!
 
 # 4.0 ### Version : an official release 4.0
@@ -181,36 +197,6 @@ ci86.lina.labtest \
 # If left out : beta, revision number is taken from current date.
 VERSION=`date +%Y%b%d`
 # M4_DEBUG=--debug=V   # deperado debugging.
-
-RELEASELINA = \
-COPYING   \
-READMElina.txt \
-ci86.lina.info \
-ci86.lina.html \
-ci86.lina.pdf \
-ci86.lina.ps \
-ci86.lina.texinfo \
-ci86.lina.fas    \
-lina      \
-lina.1    \
-forth.lab     \
-$(EXAMPLESRC) \
-#ci86.lina32.asm      \
-# That's all folks!
-
-RELEASELINA32BASE = \
-COPYING   \
-READMElina.txt \
-ci86.lina32.info \
-ci86.lina32.html \
-ci86.lina32.pdf \
-ci86.lina32.ps \
-ci86.lina32.texinfo \
-lina.1    \
-forth.lab     \
-$(EXAMPLESRC) \
-# That's all folks!
-
 
 EXTRACTORS= \
 $(INGREDIENTS) \
@@ -224,32 +210,55 @@ CONFIGURATIONS= \
 lina32.cfg            \
 lina64.cfg
 
-RELEASELINA32SRC = \
-$(RELEASELINA32BASE) \
-$(EXTRACTORS) \
-$(CONFIGURATIONS) \
+# The usable files.
+RELEASELINA32USER = \
+COPYING   \
+READMElina.txt \
+lina32      \
+forth.lab     \
+lina.1    \
+$(DOCFORMAT:a%=ci86.lina32%) \
+$(EXAMPLES) \
 # That's all folks!
 
+# Added source for modification.
 RELEASELINA32 = \
-$(RELEASELINA32BASE) \
+$(RELEASELINA32USER) \
 ci86.lina32.fas      \
-lina32      \
+ci86.lina32.s      \
+ci86.lina32.texinfo \
+# That's all folks!
+
+RELEASELINA64USER = \
+COPYING   \
+READMElina.txt \
+lina64      \
+forth.lab     \
+lina.1    \
+$(DOCFORMAT:a%=ci86.lina64%) \
+$(EXAMPLES) \
 # That's all folks!
 
 RELEASELINA64 = \
-COPYING   \
-READMElina.txt \
-ci86.lina64.info \
-ci86.lina64.html \
-ci86.lina64.pdf \
-ci86.lina64.ps \
+$(RELEASELINA64USER) \
+ci86.lina64.fas      \
+ci86.lina64.s      \
 ci86.lina64.texinfo \
-ci86.lina64.fas  \
-lina64          \
-lina.1    \
-forth.lab     \
-$(EXAMPLESRC) \
-#ci86.lina64.fas \
+# That's all folks!
+
+# full source release.
+RELEASELINA32_M4 = \
+$(RELEASELINA32) \
+$(EXTRACTORS) \
+$(TOOLS) \
+$(CONFIGURATIONS) \
+# That's all folks!
+
+RELEASELINA64_M4 = \
+$(RELEASELINA64) \
+$(EXTRACTORS) \
+$(TOOLS) \
+$(CONFIGURATIONS) \
 # That's all folks!
 
 TEMPFILE=/tmp/ciforthscratch
@@ -310,9 +319,9 @@ ci86.%.s : VERSION %.cfg gas.m4 ci86.gnr ; \
 	sed $(TEMPFILE) -e '1,/Split here for test/d' >$(@:%.s=%.rawtest)
 	rm $(TEMPFILE)
 
-.PRECIOUS: ci86.lina32.rawdoc ci86.lina32.mig ci86.wina.rawdoc ci86.wina.mig $(TEMPFILE)
+.PRECIOUS: ci86.lina32.rawdoc ci86.lina32.mig ci86.wina32.rawdoc ci86.wina32.mig $(TEMPFILE) MANIFEST
 
-.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release 
+.PHONY: default all clean boot filler moreboot allboot hdboot releaseproof zip mslinks release
 # Default target for convenience
 default : lina64
 ci86.$(s).bin :
@@ -323,13 +332,18 @@ toblk: toblk.frt $(FORTH)
 	$(FORTH) -c $<
 	rm -f forth.lab forth.lab.lina
 
-
 # Canonical targets
-lina   : ci86.lina.fas   ; fasm $+ -m256000; mv ${<:.fas=} $@
-lina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
-lina64 : ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+lina   : lina32 ; cp $< $@
+#lina32   : flina32 ; cp $< $@
+#lina64   : flina64 ; cp $< $@
+lina32   : glina32 ; cp $< $@
+lina64   : glina64 ; cp $< $@
+
 #lina: lina64 ; $< -g 8000 $@
-wina.exe: ci86.wina.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
+# For MS-windows programs fasm demands an include directory with assorted
+# stuff. Use a symbolic link. Works on fasm 1.73.20 possibly not earlier.
+wina32.exe: ci86.wina32.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
+wina64.exe: ci86.wina64.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
 
 # Some of these targets make no sense and will fail
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
@@ -337,8 +351,7 @@ all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) 
 
 clean: \
 ; rm -f $(TARGETS:%=%.asm)  $(TARGETS:%=%.msm)  $(TARGETS:%=ci86.%.*)  \
-; rm -f $(CSRCS:%=%.o) $(LINUXFORTHS) VERSION spy a.out\
-; for i in $(INDICES) ; do rm -f *.$$i *.$$i's' ; done
+; rm -f $(CSRCFORTHS:%.c=%.o) $(LINUXFORTHS) VERSION spy a.out\
 
 cleanall: clean  testclean ; \
     rm -f $(OTHERTARGETS) $(INTERTARGETS) ; \
@@ -391,11 +404,11 @@ moreboot: forth.lab.wina ci86.alone.bin  ci86.mina.bin
 allboot: boot filler moreboot
 
 forth.lab.lina : toblk options.frt errors.linux.txt blocks.frt
-	cat options.frt errors.linux.txt blocks.frt | toblk >$@
+	cat options.frt errors.linux.txt blocks.frt | ./toblk >$@
 	ln -f $@ forth.lab
 
 forth.lab.wina : toblk options.frt errors.dos.txt blocks.frt
-	cat options.frt errors.dos.txt blocks.frt | toblk >$@
+	cat options.frt errors.dos.txt blocks.frt | ./toblk >$@
 	ln -f $@ forth.lab
 
 # Like above. However there is no attempt to have MSDOS reading from
@@ -409,7 +422,9 @@ figdoc.zip : ; echo "checkout an old version for figdoc.zip, use rcs!"
 # Release a generic system.
 zip : $(RELEASECONTENT) cifgen.info ;\
 	mkdir ciforth-$(VERSION) ;\
+	mkdir ciforth-$(VERSION)/testcmp ;\
 	cp $+ ciforth-$(VERSION) ;\
+	cp $(TESTCMP) ciforth-$(VERSION)/testcmp ;\
 	tar -cvzf ciforth-$(VERSION).tar.gz ciforth-$(VERSION) ;\
 	rm -r ciforth-$(VERSION)
 
@@ -435,40 +450,29 @@ mslinks :
 
 forth.lab : forth.lab.lina forth.lab.wina
 
-LINAZIP : $(RELEASELINA) ;\
-	rm -f lina-$(VERSION) forth.lab.lina
-	make forth.lab.lina
-	ls $+ | sed s:^:lina-$(VERSION)/: >MANIFEST
-	ln -sf . lina-$(VERSION)
-	tar -czvf lina-$(VERSION).tar.gz `cat MANIFEST`
-	rm lina-$(VERSION)
-
 LINA32ZIP : $(RELEASELINA32)
-	rm -f lina32-$(VERSION) forth.lab.lina
+	rm -f ci86.lina32-$(VERSION) forth.lab.lina
 	make forth.lab.lina
-	ls $+ | sed s:^:lina32-$(VERSION)/: >MANIFEST
-	ln -sf . lina32-$(VERSION)
-	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
-	rm lina32-$(VERSION)
+	ls $+ | sed s:^:ci86.lina32-$(VERSION)/: >MANIFEST
+	ln -sf . ci86.lina32-$(VERSION)
+	tar -czvf ci86.lina32-$(VERSION).tar.gz `cat MANIFEST`
+	rm ci86.lina32-$(VERSION)
 
-LINA32SRCZIP : $(RELEASELINA32SRC) VERSION ci86.gnr extract.mak
-	rm -f lina32-$(VERSION) forth.lab.lina
-	make forth.lab.lina
-	mkdir extract
-	cp ci86.gnr VERSION extract.mak $(EXTRACTORS) $(CONFIGURATIONS) extract
-	find $(RELEASELINA32BASE) extract | \
-	sed s:^:lina32-$(VERSION)/: >MANIFEST
-	ln -sf . lina32-$(VERSION)
-	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
-	rm -r lina32-$(VERSION) extract
+LINA64DEB  :  $(RELEASELINA64)
+	echo $+ >MANIFEST
+	debian.sh $(VERSION) lina64
 
-LINA64ZIP : $(RELEASELINA64) ;\
-	rm -f lina64-$(VERSION) forth.lab.lina
+LINA32DEB  :  $(RELEASELINA32)
+	echo $+ >MANIFEST
+	debian.sh $(VERSION) lina32
+
+LINA64ZIP : $(RELEASELINA64)
+	rm -f ci86.lina64-$(VERSION) forth.lab.lina
 	make forth.lab.lina
-	ls $+ | sed s:^:lina64-$(VERSION)/: >MANIFEST
-	ln -sf . lina64-$(VERSION)
-	tar -czvf lina64-$(VERSION).tar.gz `cat MANIFEST`
-	rm lina64-$(VERSION)
+	ls $+ | sed s:^:ci86.lina64-$(VERSION)/: >MANIFEST
+	ln -sf . ci86.lina64-$(VERSION)
+	tar -czvf ci86.lina64-$(VERSION).tar.gz `cat MANIFEST`
+	rm ci86.lina64-$(VERSION)
 
 releaseproof : ; for i in $(RELEASECONTENT); do  rcsdiff -w $$i ; done
 
@@ -491,23 +495,60 @@ nlina64 : ci86.lina64.o ; \
   ld $+ -N -o $@
 
 # Linux native forth by gnu tools
-glina32 : ci86.lina32.s ; as --32 $+; ld a.out -melf_i386 -N -o $@
-
 # Linux native forth by gnu tools, only works on a 64 bit system
-glina64 : ci86.lina64.s ; as --64 $+; ld -N a.out -o $@
+glina32 : ci86.lina32.s ; as --32 $+; ld a.out -melf_i386 -N -o $@
+glina64 : ci86.lina64.s ; as --64 $+; ld a.out -melf_x86_64  -N -o $@
+
 
 # Linux native forth by fasm tools
 flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+flina64 : ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
 
-# This dependancy is problematic.
-# Do `make constant.m4' explicitly beforehand.
-# Because otherwise `constant.m4' is counted into the ``$+'' set.b
-# ci86.alone.asm : constant.m4
+# Nowadays in the future the name constant.m4 has disappeared in
+# favour of constant_*.m4
+# All constant*.m4 files are gotten from source control.
 
-# FIXME: in the future the name constant.m4 must disappear in
-# favour of constant_32.m4
-# All constant*.m4 files are fotten from source control.
-constant.m4 : constant_32.m4 ; cp $+ $@  
+# Linux native forth by gnu tools and linker
+# The explicit invocation of a link script is intended to
+# rid of -N. But -N seems the only one able to set p_type to CW .
+# Otherwise the -c version leads to crashing progs.
+gllina32 : ci86.lina32.s ; as --32 $+ -o gllina32.o; \
+    echo ' SECTIONS { . = 0x08048054; }' >null.lds ;\
+    ld -T null.lds gllina32.o -melf_i386 -N -o $@
 
-# Add temporary stuff for testing, if needed.
+# not functional
+LINA32_M4ZIP : $(RELEASELINA32_M4) VERSION ci86.gnr
+	rm -f lina32-$(VERSION) forth.lab.lina
+	make forth.lab.lina
+	echo  ci86.gnr VERSION $(EXTRACTORS) $(CONFIGURATIONS) |\
+	sed s:^:lina32-$(VERSION)/: >MANIFEST
+	ln -sf . lina32-$(VERSION)
+	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
+	rm -r lina32-$(VERSION)
+
+# not functional
+LINA64_M4ZIP : $(RELEASELINA64_M4) VERSION ci86.gnr
+	rm -f lina64-$(VERSION) forth.lab.lina
+	make forth.lab.lina
+	echo  ci86.gnr VERSION $(EXTRACTORS) $(CONFIGURATIONS) |\
+	sed s:^:lina64-$(VERSION)/: >MANIFEST
+	ln -sf . lina64-$(VERSION)
+	tar -czvf lina64-$(VERSION).tar.gz `cat MANIFEST`
+	rm -r lina64-$(VERSION)
+
+# Add temporary stuff for testing, docs, optims.
 include test.mak
+include optim.mak
+
+# not functional
+# Obsolete, we don't yield for Debian pressure!
+LINA32SRCZIPDEBIAN : $(RELEASELINA32_M4) VERSION ci86.gnr extract.mak
+	rm -f lina32-$(VERSION) forth.lab.lina
+	make forth.lab.lina
+	mkdir extract
+	cp ci86.gnr VERSION extract.mak $(EXTRACTORS) $(CONFIGURATIONS) extract
+	find $(RELEASELINA32USER) extract | \
+	sed s:^:lina32-$(VERSION)/: >MANIFEST
+	ln -sf . lina32-$(VERSION)
+	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
+	rm -r lina32-$(VERSION) extract

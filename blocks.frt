@@ -1,4 +1,4 @@
-  ciforth lab  $Revision: 5.143 $ (c) Albert van der Horst
+  ciforth lab  $Revision: 5.176 $ (c) Albert van der Horst
  : EMPTY STACK
  : DICTIONARY FULL
  : FIRST ARGUMENT MUST BE OPTION
@@ -51,7 +51,7 @@
  : NOT ENOUGH MEMORY FOR ALLOCATE
  : UNKNOWN FORMAT IDENTIFIER
  : CANNOT HEAPIFY BUFFER
- : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
+ : NO FORWARD DEFINITION TO RESOLVE
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
  : ( NO TEXT MESSAGE AVAILABLE FOR THIS ERROR )
@@ -78,11 +78,27 @@
 
 
 \
-( CONFIG ?LEAVE-BLOCK ?16 ?64 ?LI ?PC ?MS ?FD ?HD ) \ B8feb07
-: ?LEAVE-BLOCK   IF SRC CELL+ @ PP ! THEN ;
-: CONFIG   CREATE 0= , DOES> @ ?LEAVE-BLOCK ;
+( CONFIG ?LEAVE-SRC ?LEAVE-BLOCK ?16 ?32 ?64 )   \ B9dec03
+: ?LEAVE-SRC   IF SRC CELL+ @ PP ! THEN ;
+: ?LEAVE-BLOCK   ?LEAVE-SRC  ;
+
+: CONFIG   CREATE 0= , DOES> @ ?LEAVE-SRC ;
+
   0 CELL+   DUP 2 = CONFIG ?16   DUP 2 > CONFIG ?32+
     DUP 4 = CONFIG ?32   DUP 8 = CONFIG ?64 DROP
+
+ENVIRONMENT CPU PREVIOUS 6 6 * BASE ! DROP
+  DUP ARMV8 = CONFIG ?ARM
+  DUP AMDX86 = SWAP 80386 = OR CONFIG ?IL
+DECIMAL
+WANT ?LI
+WANT ?RP1
+
+( ?LI ?WI ?OSX ?PC ?MS ?FD ?HD )                      \ B9dec03
+  WANT CONFIG
+
+
+
  "CALL[" PRESENT DUP   CONFIG ?WI   \ (MS-windows)
  "BIOS31" PRESENT DUP   CONFIG ?DP   \ DPMI (legacy windows)
  DUP 0= "BIOSN" PRESENT AND DUP   CONFIG ?MS   \ MS-DOS
@@ -94,6 +110,22 @@
  "LBAPAR" PRESENT DUP   CONFIG ?HD   \ Hard disk, modern
  "SEC-RW" PRESENT DUP   CONFIG ?FD   \ Floppy or hard disk old
     OR CONFIG ?SA
+( ?RP1 ?OP1                )                    \ B9dec03
+WANT CONFIG
+    \ For the moment all rasp's are type 1 ( A/B)
+    \ and all oran's are type 1 ( Orange Pi 1+ )
+ENVIRONMENT CPU PREVIOUS 6 6 * BASE ! DROP ARMV8 = DECIMAL
+  0 CELL+   2DUP 4 = AND CONFIG ?RP1
+    2DUP 8 = AND CONFIG ?OP1
+    2DROP
+
+
+
+
+
+
+
+
 ( HELP ) CF: ?HS \ A5dec07
 : HELP-WANTED? ." Press space to skip " TYPE
  ." , other key to confirm" CR KEY BL <> ;
@@ -174,7 +206,7 @@ CREATE -syscalls- DECIMAL
 
 
 
-( -legacy- $!-BD $S $I PRESENT? REQUIRE )       \ AvdH B4may28
+( -legacy- $!-BD $S $I PRESENT? REQUIRE )       \ AvdH B9apr01
 \ This will make most old programs run.
  "ALIAS" WANTED
 
@@ -183,7 +215,7 @@ CREATE -syscalls- DECIMAL
 
 
 
-: REQUIRE  WANT ;   : REQUIRED WANTED ;
+: REQUIRE  NAME WANTED ;   : REQUIRED WANTED ;
 
 : PRESENT? PRESENT 0= 0= ;  \ For WORD sc: it IS found as such
 
@@ -206,7 +238,7 @@ CREATE -syscalls- DECIMAL
 \ \ Use L_>IN instead of >IN , don't store into it!
 \ : L_>IN PP   @   SRC   @   -   (>IN)   !   (>IN) ;
 \ 'L_>IN ALIAS >IN
-( -traditional- VOCABULARY )                        \ AvdH B5dec01
+( -traditional- VOCABULARY )                     \ AvdH B5dec01
 \ Use replacing vocabularies instead of pushing namespaces.
 
 : FORTH   CONTEXT @ 'ONLY >WID <> IF PREVIOUS THEN FORTH ;
@@ -238,23 +270,23 @@ ALSO    \ Start up with two FORTH namespaces.
 
 
 
-\ -traditional- ?LOADING ?EXEC               \ AvdH B8feb11
-
-
-
-
-
-
-
-
-
+( -traditional- ?LOADING ?EXEC TRIAD ABORT" )    \ AvdH C2feb22
 
 \ Exceptions on compilation modes.
 : ?EXEC   STATE @   12 ?ERROR ;
 : ?LOADING   BLK   @   0=   16 ?ERROR ;
 
+\ Print 3 screens around  n  .
+: TRIAD ^L EMIT
+    3 / 3 * 3 OVER + SWAP DO
+        CR I LIST 1
+    +LOOP CR 0 MESSAGE ;
+
+: (ABORT")  ROT IF ETYPE ABORT ELSE 2DROP THEN ;
+
+: ABORT" ?COMP POSTPONE " '(ABORT") , ; IMMEDIATE
 \
-\ -traditional-                              \ AvdH B8feb11
+( -traditional- )                            \ AvdH B8feb11
 \ This last block belonging to traditional restores
 \ meta-behaviour that is traditionally expected.
 
@@ -286,7 +318,7 @@ Note that ISO words are only documented by the comment ISO.
 
 
 \
-( MEMORY _AH            )                      \ AvdH B8jan24
+( -memory- _AH            )                    \ AvdH B8jan24
 DECIMAL VARIABLE _ADP  HERE DUP , DUP , _ADP !
 2 CELLS CONSTANT overhead    : _AH ( -- adr ) _ADP @ ;
 : _bump ( -- ) _AH @ _ADP ! ;
@@ -298,11 +330,11 @@ DECIMAL VARIABLE _ADP  HERE DUP , DUP , _ADP !
     BEGIN @ DUP CELL+ @ UNTIL R> !  THEN ;
 : _free? ( adr -- f ) CELL+ @ 0= ;
 : _avail ( adr -- n )   DUP @ SWAP - overhead - ;
-: _remain ( adr -- n ) DUP $@ SWAP @ DUP IF - NIP ELSE DROP
-    SWAP - THEN overhead - ;
+: _remain ( adr -- n ) DUP $@ SWAP @ ALIGNED DUP IF
+    - NIP ELSE DROP SWAP - THEN overhead - ;
 : _search  ( n -- adr ) _AH BEGIN DUP _merge 2DUP _remain >
     WHILE @ DUP _AH = 50 ?ERROR REPEAT _ADP ! DROP ;
-( MEMORY _allocate _resize  heapify  )          \ AvdH B8jan24
+( -memory- _allocate _resize  heapify  )        \ AvdH B8jan24
 DECIMAL  WANT _AH
 : _allocate ( n -- adu ) DUP 0< 50 ?ERROR   _AH _merge
     DUP _AH _remain > IF _bump DUP _search THEN
@@ -314,26 +346,26 @@ DECIMAL  WANT _AH
     _avail > IF _alloc&move R> _free ELSE R> _alloc_f THEN  ;
 \ For   address len  make buffer current where it is in.
 : migrate   BEGIN  _bump OVER _AH _AH @ 1- WITHIN UNTIL
-    _AH 2@ <> 52 ?ERROR  + _AH @ 1- _AH ROT WITHIN 52 ?ERROR  ;
+    _AH 2@ <> 52 ?ERROR  + _AH @ 1- _AH WITHIN 52 ?ERROR  ;
 : heapify   ( adr n -- ) 2DUP migrate   SWAP _AH CELL+ !
     _AH _split  _bump    overhead  2* - _AH _alloc_f
     _AH _split  _AH _free _bump   _AH @ _AH CELL+ ! ;
-( MEMORY ALLOCATE FREE RESIZE SIZE INIT-ALLOC ) \ AvdH B8jan24
-WANT _AH _allocate UNUSED
-: INTEGRITY? ( -- f ) DUP BEGIN DUP @ 2DUP < WHILE NIP
-    REPEAT NIP = ;
-
+( -memory- ALLOCATE RESIZE SIZE INIT-ALLOC )   \ AvdH B9aug21
+WANT _AH _allocate
+: INTEGRITY? ( -- f ) \ Returns true if ok or crashes.
+ _AH @ BEGIN DUP @ 2DUP < WHILE NIP REPEAT NIP
+ DUP BEGIN DUP @ 2DUP < WHILE NIP REPEAT NIP = ;
 : ALLOCATE   ['] _allocate CATCH ;              ( ISO )
 : FREE   overhead - _free 0 ;                   ( ISO )
 : RESIZE  ['] _resize CATCH DUP IF NIP THEN ;   ( ISO )
 : SIZE   DUP 1 CELLS - @ SWAP - ;
-\ Only to be used on a virgin MEMORY
-: INIT-ALLOC  HERE UNUSED 4 / ALIGN DUP ALLOT heapify ;
 \ Add  n  space to allocation space.
-: ADD-ALLOC   HERE SWAP DUP ALLOT heapify ;
+: ADD-ALLOC   ALIGN HERE SWAP ALIGN DUP ALLOT heapify ;
+\ Assign a quarter of the memory to the heap.
+: INIT-ALLOC  DSP@ HERE - 4 / ADD-ALLOC ;
 \ Make a freshly created   object   at `HERE permanent.
-: >ALLOC   HERE OVER - DUP ALLOCATE THROW   DUP >R SWAP MOVE
-    R> ;
+: >ALLOC   DUP >R   HERE OVER - DUP ALLOCATE THROW
+    DUP >R SWAP MOVE R>   R> DP ! ;
 ( REALLOT REALLOC AT-HERE )                     \ AvdHB5Mar30
  "ALIAS" WANTED
 \ For DEA of data fill the data pointer with here.
@@ -342,6 +374,22 @@ WANT _AH _allocate UNUSED
 \ For DEA of data reserve LENGTH bytes at here.
 : REALLOT   SWAP AT-HERE   ALLOT ;
 'REALLOT ALIAS REALLOC
+
+
+
+
+
+
+
+
+( ,, )                                          \ AvdH B9jul12
+\ Allot  sc .
+: ,,  HERE SWAP DUP ALLOT MOVE ;
+
+
+
+
+
 
 
 
@@ -494,23 +542,23 @@ DROP   CURRENT !
 
 
 
-( -plain-control-                              ) \ AvdH B7dec20
- "CS-ROLL" WANTED     : (F (FORWARD _ ; : F) DROP FORWARD) ;
-                      : (B (BACK _ ;    : B) DROP BACK) ;
-               : AHEAD  'BRANCH , (F ; IMMEDIATE
-'IF     HIDDEN : IF     '0BRANCH , (F ; IMMEDIATE
-'ELSE   HIDDEN : ELSE   'BRANCH , (F 1 CS-ROLL F) ; IMMEDIATE
-'THEN   HIDDEN : THEN   F) ; IMMEDIATE
-'BEGIN  HIDDEN : BEGIN  (B ; IMMEDIATE
-'WHILE  HIDDEN : WHILE  '0BRANCH , (F 1 CS-ROLL ; IMMEDIATE
-'REPEAT HIDDEN : REPEAT 'BRANCH , B) F) ; IMMEDIATE
-'AGAIN  HIDDEN : AGAIN  'BRANCH , B) ; IMMEDIATE
-'UNTIL  HIDDEN : UNTIL  '0BRANCH , B) ; IMMEDIATE
+( -plain-control-                              ) \ AvdH B9jun22
+( 'AHEAD  HIDDEN ) : AHEAD  'BRANCH , (FORWARD ; IMMEDIATE
+'IF     HIDDEN : IF     '0BRANCH , (FORWARD ; IMMEDIATE
+'ELSE   HIDDEN : ELSE   'BRANCH , (FORWARD SWAP FORWARD) ;
+    IMMEDIATE
+'THEN   HIDDEN : THEN   FORWARD) ; IMMEDIATE
+'BEGIN  HIDDEN : BEGIN  (BACK ; IMMEDIATE
+'WHILE  HIDDEN : WHILE  '0BRANCH , (FORWARD SWAP ; IMMEDIATE
+'REPEAT HIDDEN : REPEAT 'BRANCH , BACK) FORWARD) ; IMMEDIATE
+'AGAIN  HIDDEN : AGAIN  'BRANCH , BACK) ; IMMEDIATE
+'UNTIL  HIDDEN : UNTIL  '0BRANCH , BACK) ; IMMEDIATE
 'DO     HIDDEN : DO     '(DO) , (FORWARD (BACK ; IMMEDIATE
 '?DO    HIDDEN : ?DO    '(?DO) , (FORWARD (BACK ; IMMEDIATE
-'LOOP   HIDDEN : LOOP   '(LOOP) , BACK) FORWARD) ; IMMEDIATE
-'+LOOP  HIDDEN : +LOOP  '(+LOOP) , BACK) FORWARD) ; IMMEDIATE
-( 2>R 2R> 2R@ 2CONSTANT 2VARIABLE )             \ AvdH B7Dec22
+'+LOOP  HIDDEN : +LOOP
+    '(+LOOP) , '0BRANCH , BACK) 'UNLOOP , FORWARD) ; IMMEDIATE
+'LOOP  HIDDEN : LOOP  '1 , POSTPONE +LOOP ; IMMEDIATE
+( 2>R 2R> 2R@ 2CONSTANT 2VARIABLE )             \ AvdH C1Apr21
 
 
 
@@ -686,7 +734,7 @@ IMMEDIATE
 
 
 
-( ORDER .WID .VOCS WORDLIST )                   \ AvdH B6oct01
+( ORDER .WID .VOCS )                            \ AvdH B9jan22
 \ Print all namespace (voc) names in existence.
 : .VOCS 'ID. FOR-VOCS ;
 
@@ -697,8 +745,8 @@ IMMEDIATE
 : ORDER  CONTEXT BEGIN $@ DUP 'ONLY >WID <> WHILE .WID REPEAT
     2DROP &[ EMIT SPACE CURRENT @ .WID &] EMIT ;
 
-\ Return an anonymous  WORDLIST  , DUP points to "".
-: WORDLIST HERE 0 , 0 , 1 , 0 , DUP , ;
+
+
 
 
 \
@@ -750,8 +798,8 @@ PREVIOUS DEFINITIONS
 ( Add/remove VALUE to bag, used as a SET, i.e. no duplicates.)
 : SET+   2DUP IN-BAG? IF 2DROP ELSE BAG+! THEN ;
 : SET-   2DUP IN-BAG? IF BAG- ELSE 2DROP THEN ;
-( FORMAT FORMAT&EVAL .FORMAT )          \ AH&CH B4Oct16
- "2>R" WANTED   DATA CRS$ 4096 ALLOT \   ":2" WANTED
+( FORMAT FORMAT&EVAL .FORMAT )          \ AH&CH C2feb15
+DATA CRS$ 4096 ALLOT \   ":2" WANTED
 NAMESPACE FORMAT-WID           FORMAT-WID DEFINITIONS
 : c CRS$ $C+ ;  : n ^J c ;   : r ^M c ;  \ Add single char's
 : d S>D 0 (D.R) CRS$ $+! ;  \ Add INT as a string.
@@ -760,8 +808,8 @@ PREVIOUS DEFINITIONS
 \ Format the first part of STRING, up till %, leave REST.
 : _plain    &% $/ CRS$ $+! ;
 \ Format X with first word of STRING, up till BL, leave REST.
-: _format   BL $/ 2SWAP 2>R 'FORMAT-WID >WID (FIND) NIP NIP
-    DUP 0= 51 ?ERROR EXECUTE 2R> ;
+: _format   BL $/ 2SWAP >R >R 'FORMAT-WID >WID (FIND) NIP NIP
+    DUP 0= 51 ?ERROR EXECUTE R> R> ;
 \ Format X1 .. Xn using the format STRING.
 : FORMAT 0 CRS$ ! BEGIN DUP WHILE _plain DUP IF _format THEN
     REPEAT 2DROP CRS$ $@ ;
@@ -782,20 +830,36 @@ VARIABLE DP-MARKER   DATA NAME$ 128 ALLOT  DATA BLD$ 4096 ALLOT
   BLD$ $@ NAME$ $@ ": BUILD-%s  HERE >R %s  R> ;" FORMAT&EVAL
   NAME$ $@ 2DUP 2DUP 2DUP
   ": %s  CREATE BUILD-%s  ^%s  ! DOES> ^%s  ! ;" FORMAT&EVAL ;
-( :NONAME CASE MARKER )
+( CONDS CASE )
+"ALIAS" WANTED
+: CONDS 0 ; IMMEDIATE
+: THENS   BEGIN DUP WHILE POSTPONE THEN REPEAT
+    DROP ; IMMEDIATE
+
+\ ISO : CASE
+'CONDS ALIAS CASE
+'ELSE ALIAS ENDOF
+: OF   POSTPONE OVER POSTPONE = POSTPONE IF
+        POSTPONE DROP ; IMMEDIATE
+: ENDCASE POSTPONE DROP POSTPONE THENS ; IMMEDIATE
+
+'IF ALIAS ?OF   \ NOT ISO : ?OF .. ENDOF
+
+
+( :NONAME MARKER ANEW )                         \ C0apr25
  "POSTFIX" WANTED
 : :NONAME "NONAME" POSTFIX : LATEST DUP HIDDEN !CSP ; \ ISO
 
 \ ISO
-: CASE 0 ; IMMEDIATE
-: OF   POSTPONE OVER POSTPONE =
-    POSTPONE IF POSTPONE DROP ; IMMEDIATE
-: ENDOF POSTPONE ELSE ; IMMEDIATE
-: ENDCASE POSTPONE DROP BEGIN DUP WHILE POSTPONE THEN REPEAT
-  DROP ; IMMEDIATE
-
-\ ISO
 : MARKER HERE CREATE , DOES> @ 'FORGET-VOC FOR-VOCS DP ! ;
+
+\ Destructive MARKER
+: ANEW PP @ >R NAME FOUND DUP IF EXECUTE _ THEN DROP
+  R> PP ! MARKER ;
+
+
+
+
 
 
 ( BIN-SEARCH binary_search_by stack ) \ AvdH
@@ -862,7 +926,7 @@ VARIABLE _table_         VARIABLE _blen_
 : _b<-->  _l_ SWAP _l_ _blen_ @ EXCHANGE ;
 \ For TABLE and LENGTH BLEN sort bytes in collating order.
 : SORT-B _blen_ ! >R _table_ ! 0 R> 1- '_b<_ '_b<--> QSORT ;
-( QSORT 1 ) \ AvdH B3dec22
+( QSORT   ) \ AvdH B3dec22
  "DEFER" WANTED
 \ Compare item N1 and N2. Return ``N1'' IS lower and not equal.
 DEFER *<
@@ -878,7 +942,7 @@ DEFER *<-->
 
 
 
-( QSORT 2 ) \      AvdH A7feb28
+( QSORT   ) \      AvdH A7feb28
 \ Partition inclusive range LO HI leaving LO_1 HI_1 LO_2 HI_2.
 : PARTITION   2DUP + 2/   >R  ( R: median)
     2DUP BEGIN      ( lo_1 hi_2 lo_2 hi_1)
@@ -926,8 +990,7 @@ VARIABLE *->M   \ Contains XT
 : (MERGE)   BEGIN FIND-END   DUP >R  DUP >N >R LINK!
     R> R>   OVER 0= UNTIL 2DROP ;
 
-( MERGE-SORT )   "(MERGE)" WANTED               \ AvdH B7dec17
-
+( MERGE-SORT )   "(MERGE)" WANTED               \ AvdH C0aug11
 \ Merge LIST1 and LIST2, leave merged LIST.
 : MERGE   LL< IF SWAP THEN   DUP >R (MERGE) R> ;
 \ Cut ULIST in two. Return LIST and remaining ULIST.
@@ -941,7 +1004,8 @@ VARIABLE *->M   \ Contains XT
 \ Keep on merging list-level pairs until end-sentinel.
 : SHRINK DROP BEGIN OVER WHILE NIP MERGE REPEAT ;
 \ For linked LIST compare XT, next XT, , leave a sorted LIST1.
-: MERGE-SORT   *->M !  *<M !   0 SWAP EXPAND SHRINK NIP ;
+: MERGE-SORT   *->M !  *<M !   0 SWAP
+    DUP IF EXPAND SHRINK THEN NIP ;
 ( SORT-WID SORT-VOC )                           \ AvdH B7dec17
  "COMPARE" WANTED          "MERGE-SORT" WANTED
 \ Note that xt's form a linked list
@@ -958,18 +1022,34 @@ VARIABLE *->M   \ Contains XT
 
 : SORT-VOC >WID SORT-WID ;
 
-( CRC-MORE CRC ) CF:                    \ AvdH
-1 CELLS 4 < ?LEAVE-BLOCK
- "BOUNDS" WANTED    "NEW-IF" WANTED    HEX
+( CRC64 ) CF: ?64                    \ AvdH C2feb27
+
+ "BOUNDS" WANTED    "-scripting-" WANTED    HEX
 \ Well the polynomial
-EDB8,8320 CONSTANT CRC32_POLYNOMIAL
+C96C,5795,D787,0F42 CONSTANT CRC64_POLYNOMIAL   \ ECMA-182
+\ Auxiliary table with values for single bytes.
+CREATE CRCTable
+100 0 DO   I 8 0 DO
+    DUP >R   1 RSHIFT   R> 1 AND IF CRC64_POLYNOMIAL XOR THEN
+LOOP ,   LOOP
+\ For initial CRC and BUFFER COUNT pair, leave the updated CRC
+: CRC-MORE  BOUNDS ?DO  DUP I C@ XOR 0FF AND CELLS CRCTable + @
+   SWAP 8 RSHIFT XOR   LOOP ;
+\ For BUFFER COUNT pair, leave the CRC .
+: CRC64   -1 ROT ROT CRC-MORE INVERT ;
+DECIMAL
+( CRC-MORE CRC ) CF: ?32                    \ AvdH C2feb27
+
+ "BOUNDS" WANTED    "-scripting-" WANTED    HEX
+\ Well the polynomial
+EDB8,8320 CONSTANT CRC32_POLYNOMIAL   \ CRC-32K
 \ Auxiliary table with values for single bytes.
 CREATE CRCTable
 100 0 DO   I 8 0 DO
     DUP >R   1 RSHIFT   R> 1 AND IF CRC32_POLYNOMIAL XOR THEN
 LOOP ,   LOOP
 \ For initial CRC and BUFFER COUNT pair, leave the updated CRC
-: CRC-MORE   BOUNDS DO  DUP I C@ XOR 0FF AND CELLS CRCTable + @
+: CRC-MORE  BOUNDS ?DO  DUP I C@ XOR 0FF AND CELLS CRCTable + @
    SWAP 8 RSHIFT XOR   LOOP ;
 \ For BUFFER COUNT pair, leave the CRC .
 : CRC   -1 ROT ROT CRC-MORE INVERT ;
@@ -1182,6 +1262,54 @@ We put here also reference implementations.
 
 
 
+( IMPORT GET-NAME )                             \ AvdHC1apr18
+WANT ALIAS
+\ Get a  name  from the input stream without advancing PP.
+: GET-NAME SAVE NAME RESTORE ;
+
+\ Intended to be used "FROM wordlist IMPORT <name1> <name2> "
+
+\ Announce wordlist, temporarily added to search order
+: FROM: ;
+\ Import remainder of the line to CURRENT .
+: IMPORT    ^J PARSE SAVE SET-SRC
+    BEGIN GET-NAME DUP WHILE FOUND ALIAS REPEAT 2DROP
+    RESTORE  PREVIOUS ;
+
+
+\
+( decorated undecorated ) CF:   ?IL ?32          \ AvdH C2mar25
+WANT ASSEMBLERi86-HIGH RESTORED
+\ Docol plus pushing extra address. (**)
+CODE dodec     LEA,     BP'| BO| [BP] -4 B,
+               MOV,     X| F| SI'| BO| [BP] 0 B,
+               LEA,     BX'| BO| [AX] 0 >PHA B,      \ **
+               LEA,     BP'| BO| [BP] -4 B,          \ **
+               MOV,     X| F| BX'| BO| [BP] 0 B,     \ **
+               MOV,    X| T| SI'| BO| [AX] 4 B,
+               NEXT,                             END-CODE
+\ Add behaviour of XT2 in front of XT
+: decorated   'dodec >CFA @  OVER >CFA !
+    SWAP >DFA @ SWAP >DFA ! ;
+\ Restore XT to former glory.  TASK supplies docol pointer.
+:  undecorated   'TASK >CFA  @ OVER >CFA !  RESTORED ;
+TRIM
+( decorated undecorated ) CF:   ?IL ?64          \ AvdH C2mar25
+WANT ASSEMBLERi86-HIGH RESTORED
+\ Docol plus pushing extra address. (**)
+CODE dodec      REX, LEA,     BP'| BO| [BP] -8 B,
+                REX, MOV,     X| F| SI'| BO| [BP] 0 B,
+                REX, LEA,     BX'| BO| [AX] 0 >PHA B,      \ **
+                REX, LEA,     BP'| BO| [BP] -8 B,          \ **
+                REX, MOV,     X| F| BX'| BO| [BP] 0 B,     \ **
+                REX, MOV,    X| T| SI'| BO| [AX] 8 B,
+                NEXT,                                 END-CODE
+\ Add behaviour of XT2 in front of XT
+: decorated   'dodec >CFA @  OVER >CFA !
+    SWAP >DFA @ SWAP >DFA ! ;
+\ Restore XT to former glory.  TASK supplies docol pointer.
+:  undecorated   'TASK >CFA  @ OVER >CFA !  RESTORED ;
+TRIM
 ( ?EXIT ?LEAVE )                        \ AvdH B2aug12
 \ Exit current definitions if FLAG.
 : ?EXIT   IF RDROP THEN ;
@@ -1326,8 +1454,8 @@ $1B CONSTANT ESC
 \ Print STRING, as a quoted string, reconsumable.
 : ."$" BEGIN &" $/ &" EMIT TYPE &" EMIT OVER 0= UNTIL 2DROP ;
 \
-( SCAN-WORD DOC ANEW )                          \ AvdH B2aug18
- "2>R" WANTED       "MARKER" WANTED
+( SCAN-WORD DOC )                               \ AvdH C0apr25
+ "2>R" WANTED
 
 \ Like name but abort on eof.
 : _name NAME DUP 0= 33 ?ERROR ;
@@ -1336,13 +1464,13 @@ $1B CONSTANT ESC
    2R@ CORA WHILE REPEAT RDROP RDROP ;
 : DOC "ENDDOC" SCAN-WORD ;  \ Skip till "ENDDOC".
 
-\ Destructive MARKER
-: ANEW PP @ >R NAME FOUND DUP IF EXECUTE _ THEN DROP
-  R> PP ! MARKER ;
+
+
+
 
 
 \
-( TICKS PAST? ) CF: ?64 \ AvdH A2oct21
+( TICKS PAST? ) CF: ?64 ?IL    \ AvdH C2mar25
 \ We can't use the assembler in 64 bits.
  "ASSEMBLER" WANTED HEX    \ Just for using CODE
 
@@ -1358,7 +1486,7 @@ END-CODE   \ Code now in 2 32 bit things.
 : PAST? DNEGATE TICKS D+ NIP 0< 0= ;
 DECIMAL
 
-( TICKS PAST? ) CF: ?32 \ AvdH A2oct21
+( TICKS PAST? ) CF: ?32 ?IL    \ AvdH C2mar25
 \ Assuming we run on an 486 or better, and a 32 bits Forth
  "ASSEMBLERi86-HIGH" WANTED HEX
 CODE  TEST-EF POPF, PUSHF, NEXT, END-CODE
@@ -1396,7 +1524,7 @@ DECIMAL TICKS DNEGATE 1000 MS TICKS D+ DROP
 
 
 
-." What is the speed of your Pentium (in Mhz)?"
+." What is the speed of your CPU (in Mhz)?"
 PAD DUP 80 ACCEPT EVALUATE 1000000 *
   CONSTANT TICKS-PER-SECOND
 
@@ -1504,18 +1632,18 @@ DSP@ 1 RSHIFT HERE 1 RSHIFT + ALIGNED FAR-DP !
 CREATE -scripting-
 ( :2 :F :R :I                                 )  \ AvdH B6jan7
  "ALIAS" WANTED
+: _NF_ NAME FOUND DUP 0= 53 AND THROW ;
 \ Alias of : , redefine an existing(!) word. Or crash.
-: :2   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R> HIDDEN ;
+: :2   PP @ _NF_ >R R@ HIDDEN PP !   :   R> HIDDEN ;
 \ Use for dummy forward definitions.
 ': ALIAS :F
 \ Resolve an earlier dummy definition for recursion.
-: :R   PP @ NAME FOUND >R R@ HIDDEN PP !   :   R@ HIDDEN
+: :R   PP @ _NF_ >R R@ HIDDEN PP !   :   R@ HIDDEN
   LATEST >DFA @ R> >DFA ! ;
 \ Alias of :, define a word that inlines it code.
 : :I   CREATE IMMEDIATE ]    LATEST HIDDEN !CSP
    DOES>   STATE @ IF BEGIN $@ DUP '(;) <> WHILE , REPEAT 2DROP
    ELSE >R THEN ;
-
 
 
 ( INLINING                                     )  \ AvdH B6jan7
@@ -1534,15 +1662,15 @@ PREVIOUS DEFINITIONS
 
 
 
-( OLD: RESTORED POSTFIX ) \ AvdH A2jun12
+( OLD: RESTORED POSTFIX ) \ AvdH C2feb21
 \ WARNING: use these facilities only with high level words.
-
 \ Compile the current execution behaviour of "name".
 \ This behaviour remains the same if "name" is revectored.
 : OLD:   NAME FOUND >DFA @ POSTPONE LITERAL   POSTPONE >R
     POSTPONE CO ; IMMEDIATE
 \ Have the original behaviour of DEA restored.
-: RESTORED   DUP >PHA SWAP >DFA ! ;
+: RESTORED   DUP >PHA SWAP >DFA ! ;  \ high-level
+: RESTORED-ASM   DUP >PHA SWAP >CFA ! ;  \ asm
 \ Do nothing for one call of ``NAME''
 : NAME-NEW   'NAME RESTORED ;
 \ Make the following defining word postfix for one execution.
@@ -1614,7 +1742,7 @@ HEX     "DROP-WORD" WANTED
 : SHIFT-ARGS   ARG$ DROP-WORD   80 $!-BD   ^M ARG$ + C! ;
 DECIMAL
 
-( ARG$ ARGC ARG[] SHIFT-ARGS 2 ) CF: ?WI        \ AvdH B1jul10
+( ARG$ ARGC ARG[] SHIFT-ARGS   ) CF: ?WI        \ AvdH B1jul10
 HEX     "DROP-WORD" WANTED
 \ Return argument STRING for Windows.
 : ARG$   ARGS @ -1 0 $/ 2SWAP 2DROP ;
@@ -1630,7 +1758,7 @@ HEX     "DROP-WORD" WANTED
 : SHIFT-ARGS   ARG$ DROP-WORD   DROP ARGS ! ;
 DECIMAL
 
-( SRC>EXEC 2 ) CF:        ?WIMS            \ AvdH B1aug16
+( SRC>EXEC   ) CF:        ?WIMS            \ AvdH B1aug16
 HEX
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   PAD $!   PAD $@ + 4 - >R
@@ -1646,7 +1774,7 @@ DECIMAL
 
 
 \
-( SRC>EXEC 1  ) CF: ?HS \ AvdH A3mar20
+( SRC>EXEC    ) CF: ?HS \ AvdH A3mar20
 
 \ Given a source file NAME, return the binary file NAME.
 : SRC>EXEC   4 -   2DUP + ".frt" CORA IF 2DROP "a.out" THEN ;
@@ -1835,8 +1963,8 @@ CREATE MAGIC FEEDFACE ,
 : _prepare_header 3 SM 10 + ! ;
 __DATA 1C + CONSTANT D-SIZE
 __DATA 18 + CONSTANT __FILEOFFSET
-  SM __FILEOFFSET @  +  CONSTANT BM
-
+  SM __FILEOFFSET @  +  CONSTANT BM  \ Ugly!
+: _correct_size   HERE BM - D-SIZE ! ;
 DECIMAL
 ( SAVE-SYSTEM TURNKEY ) CF: ?HS HEX     \ AH B6dec21
 
@@ -1849,6 +1977,38 @@ DECIMAL
 
 \ Save a system to do ACTION in a file with NAME .
 : TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+
+
+
+
+DECIMAL
+( SAVE-SYSTEM TURNKEY ) CF: ?LI     HEX \ AvdH C1Mar21
+\ The magic number marking the start of an ELF header
+ CREATE MAGIC 7F C, &E C, &L C, &F C,
+\ Return the START of the ``ELF'' header.
+ : SM BM BEGIN DUP MAGIC 4 CORA WHILE 1- REPEAT ;
+ SM 18 + CELL+ CONSTANT _ph_offset
+SM _ph_offset @ + 4 CELLS + CONSTANT F-SIZE \ File size(!).
+F-SIZE CELL+ CONSTANT G-SIZE
+\ Kill sections
+_ph_offset CELL+ CONSTANT _sof
+: _prepare_header _sof @ IF 0 _sof ! ( 1 _sof 10 + W!)  THEN ;
+
+: _correct_size  HERE SM - F-SIZE ! ;
+
+
+
+( SAVE-SYSTEM TURNKEY ) CF: ?HS HEX     \ AH C1Mar21
+
+\ ISO Save the system in a file with NAME .
+ : SAVE-SYSTEM   _prepare_header _correct_size
+   U0 @   0 +ORIGIN   40 CELLS  MOVE \ Save user variables)
+\ Now write it. Consume NAME here.
+   SM    HERE OVER -   2SWAP   PUT-FILE ;
+
+\ Save a system to do ACTION in a file with NAME .
+: TURNKEY  ROT >DFA @  'ABORT >DFA !  SAVE-SYSTEM BYE ;
+
 
 
 
@@ -1918,6 +2078,70 @@ TASK-SIZE 4 / CONSTANT _TASK/4
 \ Kill a THREAD-PET , preemptively. Throw errors.
 : KILL-PET >BODY 2 CELLS + @ 9 _ __NR_kill XOS ?ERRUR ;
 DECIMAL
+( runthread )  CF: ?WI ?32
+WANT ASSEMBLERi86-HIGH
+ MAX-USER @ DUP USER ME    CELL+ MAX-USER !
+CODE return    RET, END-CODE   \ Return via the stack
+: EXIT-PET   ME @ DSP! return ;
+\ Run xt from  thread  to completion, remember  handle  .
+: doit   ME !  DUP 2 CELLS + @ CATCH   DUP IF ERROR THEN
+    EXIT-PET ;
+CODE runthread  \ Run the thread passed via the MS-stack.
+    MOV,  X| T| BX'|   R| SP|
+    POP, R| AX|         POP, R| AX|
+    MOV,  X| T| SP'|   BO|  [AX]  0 B,
+    MOV,  X| T| BP'|   BO|  [AX]  1 CELLS B,
+    PUSH|X, AX|         PUSH|X, BX|
+    MOVI|X, SI| 'doit >PHA L,  NEXT,
+END-CODE   TRIM
+( runthread )  CF: ?WI ?32
+WANT ASSEMBLERi86-HIGH
+ MAX-USER @ DUP USER ME    CELL+ MAX-USER !
+CODE return   POP|X, BP|   POP|X, SI|   RET, END-CODE
+: EXIT-PET   ME @ DSP! return ;
+\ Run xt from  thread  to completion, remember  handle  .
+: doit   ME !  DUP 2 CELLS + @ CATCH   DUP IF ERROR THEN
+    EXIT-PET ;
+CODE runthread  \ Run the thread passed via the MS-stack.
+    PUSH|X, SI|         PUSH|X, BP|  \ ms stack
+    MOV,  X| T| BX'|   R| SP|
+    MOV,  X| T| AX'|   BO|  [BX]  3 CELLS B, \ Thread
+    MOV,  X| T| SP'|   BO|  [AX]  0 B,
+    MOV,  X| T| BP'|   BO|  [AX]  1 CELLS B,
+    PUSH|X, AX|         PUSH|X, BX|
+    LEA,  SI'| MEM| 'doit >PHA L,    NEXT, END-CODE   TRIM
+( runthread )  CF: ?WI ?64
+WANT ASSEMBLERi86-HIGH
+ MAX-USER @ DUP USER ME    CELL+ MAX-USER !
+CODE return    RET, END-CODE   \ Return via the stack
+: EXIT-PET   ME @ DSP! return ;
+\ Run xt from  thread  to completion, remember  handle  .
+: doit   ME !  DUP 2 CELLS + @ CATCH   DUP IF ERROR THEN
+    EXIT-PET ;
+CODE runthread  \ Run the thread passed via the MS-stack.
+    REX, MOV,  X| T| BX'|   R| SP|
+    REX, MOV,  X| T| AX'|   BO|  [BX]  1 CELLS B, \ Thread
+    REX, MOV,  X| T| SP'|   BO|  [AX]  0 B,
+    REX, MOV,  X| T| BP'|   BO|  [AX]  1 CELLS B,
+    PUSH, R| AX|         PUSH, R| BX|
+    REX, MOVI|X, SI| 'doit >PHA ,
+    NEXT, END-CODE   TRIM
+( THREAD-PET KILL-PET )        CF: ?WI
+WANT K32 CTA runthread
+"CreateThread"  'K32 DLL-ADDRESS: _Create-Thread
+"TerminateThread"  'K32 DLL-ADDRESS: _Terminate-Thread
+_Terminate-Thread DROP   _Create-Thread DROP
+\ Start  thread  : thread-id  .
+: CREATE-THREAD CALL[   PARS @ 6 CELLS ERASE  1024 PAR2
+   'runthread >CFA @ PAR3 ( thr) PAR4  _Create-Thread CALL]
+   DUP 0= IF 1- >ERROR THEN ;
+\ Use  space  for "thread"  / run  xt  in thread.
+: THREAD-PET   ALLOT CTA CREATE RSP@ SWAP RSP!   R0 @ S0 @
+   ROT RSP!    ( DSP) ,  ( TASK) ,  ( xt ) 0 ,  ( pid) 0 ,
+   DOES> >R   R@ 2 CELLS + !  R@ CREATE-THREAD  ." poep"
+   R> 3 CELLS + ! ;
+: KILL-PET   >BODY 3 CELLS + @ \ Forced kill of  thread  .
+    CALL[ PAR1 0 PAR2 _Terminate-Thread CALL] ;
 ( TASK-TABLE NEXT-TASK PAUSE-COT) HEX \ AvdH B5nov24
  "BAG" WANTED
 100 BAG TASK-TABLE   VARIABLE TASK-POINTER
@@ -1950,16 +2174,48 @@ TASK-TABLE !BAG   _ TASK-TABLE BAG+!   SET-FIRST-TASK
     'EXIT-COT >DFA @    R@ CELL+ CELL+ !
     R> TASK-TABLE BAG+! ;
 \
-( { } [: ;] )                                   \ B8feb26 AvdH
-WANT ALIAS
+\ LINK-LATEST (( (s ({) :)                   \ AvdH B5feb11
+\ Isolate the latest word from the dictionary. Leave its DEA.
+: UNLINK-LATEST LATEST CURRENT @ >LFA DUP @ >LFA @ SWAP ! ;
+\ Link DEA into the dictionary, as the latest.
+: LINK-LATEST LATEST OVER >LFA ! CURRENT @ >LFA ! ;
+
+\ Compact version of :NONAME .. ;  not linked in.
+: ({)   HERE 'TASK @ , HERE CELL+ , 1 STATE ! ;
+: (})   '(;) , ;      \ (;) is an alias for EXIT
+\ Nest dictionary space.
+: ((  'SKIP , (FORWARD ;         : ))  FORWARD) ;
+\ (s s) save and restore STATE.
+: (s STATE @ ;           : s) STATE ! ;
+\ Nest definitions
+: ;) CSP @   UNLINK-LATEST   0 STATE ! ;
+: (: LINK-LATEST CSP ! ;
+( { }       )                                   \ B8feb26 AvdH
+
 \ Denotation for lambda, ends with `}
 : {   'SKIP , (FORWARD   HERE 'TASK @ ,   HERE CELL+ ,
      STATE @ 1 STATE ! ; IMMEDIATE
 : }  '(;) ,   STATE !   >R FORWARD) R>   POSTPONE LITERAL
     ; IMMEDIATE
 
-\ Official 2012 standard quotation.
-'{ ALIAS [:           '} ALIAS ;]
+
+
+
+
+
+
+
+
+( [: ;] )                                       \ AvdH C1apr18
+WANT ALIAS {
+
+'{ ALIAS [:  \ ISO'12
+'} ALIAS ;]  \ ISO'12
+
+
+
+
+
 
 
 
@@ -1982,13 +2238,13 @@ WANT UNLINK-LATEST ALIAS {
 
 
 
-( NESTED-COMPILE UNLINK-LATEST )                \ AvdH B5feb11
+( NESTED-COMPILE )                \ AvdH B5feb11
+WANT  LINK-LATEST
 
-\ Isolate the latest word from the dictionary. Leave its DEA.
-: UNLINK-LATEST LATEST CURRENT @ >LFA DUP @ >LFA @ SWAP ! ;
 
-\ Link DEA into the dictionary, as the latest.
-: LINK-LATEST LATEST OVER >LFA ! CURRENT @ >LFA ! ;
+
+
+
 
 \ Save all compilation information on the return stack. It is
 \ restored upon exit of the calling word.
@@ -1998,6 +2254,22 @@ WANT UNLINK-LATEST ALIAS {
 
 
 \
+( WHERE? )                                     \ A9nov7 AvdH
+HEX
+: MAGIC "FiLe" DROP 0FFFF,FFFF AND ;
+DECIMAL
+: WHERE?
+   WHERE 2@
+    DUP 1 CELLS - DUP @ MAGIC @ = IF
+    BEGIN 1 CELLS - DUP @ 60 < UNTIL
+    "In file """ TYPE $@ TYPE """ at line "  TYPE
+   SWAP OVER - 0 >R
+    BEGIN OVER WHILE ^J $\ 2DROP R> 1+ >R REPEAT 2DROP
+    R> . CR
+    ELSE "Around here " DROP 100 - 200 TYPE
+    THEN ;
+
+
 \ LATEST-WORD (WORD-BACK)             \ A2oct28 AvdH
 \ Trim a possible leading &' from a word.
 : TRIM' OVER C@ &' = IF 1- SWAP 1+ SWAP THEN ;
@@ -2014,11 +2286,11 @@ VARIABLE SECOND-PASS 0 SECOND-PASS !
 : .FAILURE "Find out about " TYPE TYPE CR -1 FAILED ! ;
 
 
-( REMEDY FIX-DEA FIX-NMB )                      \ AvdH B6jan23
-WANT SWAP-DP LATEST-WORD NESTED-COMPILE
+( REMEDY FIX-DEA FIX-NMB )                      \ C0jul07 AvdH
+WANT SWAP-DP LATEST-WORD NESTED-COMPILE WANTED-IC
 \ Try to add the current, missing word to the dictionary: DEA.
 : REMEDY NESTED-COMPILE   POSTPONE [ SWAP-DP LATEST-WORD 2DUP
- WANTED SWAP-DP   2DUP PRESENT IF 2DUP .SUCCESS FOUND ELSE
+ WANTED-IC SWAP-DP   2DUP PRESENT IF 2DUP .SUCCESS FOUND ELSE
 .FAILURE 'NOOP THEN ;
 \ Make words that look like malformed numbers (like 2R> )
 \ compile without error, but with run time errors.
@@ -2030,7 +2302,23 @@ WANT SWAP-DP LATEST-WORD NESTED-COMPILE
 \ resolve them. At least go on compiling.
 : FIX-DEA REMEDY 0 DSP@ 3 CELLS + ! DSP@ 3 CELLS + ! ;
 
-( ?ERROR-FIXING AUTOLOAD NO-AUTOLOAD ) \ A2oct28 AvdH
+( TO-UPPER WANTED-IC    )                       \ C0jul07 AvdH
+HEX
+\ For SC make it upper case in place.
+: (TO-UPPER)   OVER + SWAP DO I C@ &a &z 1+ WITHIN IF
+        I C@ 20 INVERT AND I C!
+    THEN LOOP ;
+DATA _tu-buffer 100 ALLOT
+\ For SC return uppercase EQUIVALENT in static buffer.
+: TO-UPPER  _tu-buffer $! _tu-buffer $@ 2DUP (TO-UPPER) ;
+: WANTED-IC  2DUP WANTED  TO-UPPER WANTED ;
+
+
+
+
+
+DECIMAL
+( ?ERROR-FIXING AUTOLOAD NO-AUTOLOAD ) \ C0may09 AvdH
  "OLD:" WANTED  "FIX-NMB" WANTED  "FIX-DEA" WANTED
 \ Replacement for ?ERROR. Fix up errors, see FIX-NMB FIX-DEA.
 : ?ERROR-FIXING OVER IF
@@ -2042,7 +2330,7 @@ THEN OLD: ?ERROR ;
 : AUTOLOAD '?ERROR-FIXING >DFA @ '?ERROR >DFA ! ;
 : NO-AUTOLOAD '?ERROR RESTORED ;  \ And off again.
 
-
+AUTOLOAD
 
 
 
@@ -2094,39 +2382,7 @@ Tools and utilities
 
 
 
-( INSTALL-TRAPS ) CF: ?OSX \ AvdH A9sep15
-\ Nobody knows how to do this on Bill's systems.
-: INSTALL-TRAPS  ;
-: INSTALL-NO-TRAPS  ;
-
-
-
-
-
-
-
-
-
-
-
-
-( INSTALL-TRAPS ) CF: ?WIMS \ AvdH A9sep15
-\ Nobody knows how to do this on Bill's systems.
-: INSTALL-TRAPS  ;
-: INSTALL-NO-TRAPS  ;
-
-
-
-
-
-
-
-
-
-
-
-
-( SET-TRAPS  INSTALL-TRAPS ) CF: ?LI    \ AvdH B5dec4
+( SET-TRAPS  INSTALL-TRAPS ) CF: ?LI ?32 ?IL \ AvdH C1Apr22
  "-syscalls-" WANTED
 \ Make sure any traps restart Forth at ADDRESS .
 : SET-TRAPS  32 1 DO I OVER 0 __NR_signal XOS DROP LOOP DROP ;
@@ -2142,12 +2398,28 @@ Tools and utilities
    'NEW-WARM >DFA @   'WARM >DFA ! ;
 
 
-( DO-DEBUG NO-DEBUG )                   \ AvdH B8feb7
+( INSTALL-TRAPS )                            \ AvdH C1Apr22
+\ Nobody knows how to do this on 64 bit linux  MS-windows OSX
+: INSTALL-TRAPS  ;
+: INSTALL-NO-TRAPS  ;
+
+
+
+
+
+
+
+
+
+
+
+
+( DO-DEBUG NO-DEBUG )                   \ AvdH B9jan29
  "OLD:" WANTED     "INSTALL-TRAPS" WANTED
 \ An alternative ``OK'' message with a stack dump.
 : NEW-OK   .S ."  OK " ;
 \ Print index line of SCREEN .
-: .INDEX-LINE  CR DUP 4 .R 0 SWAP (LINE) -TRAILING TYPE ;
+: .INDEX-LINE  DUP 4 .R 0 SWAP (LINE) 1+ TYPE ;
 \ An alternative ``LOAD'' that displays the index line.
 : NEW-LOAD  DUP .INDEX-LINE   OLD: LOAD ;
 \ Install and de-install the alternative ``OK'' and traps
@@ -2173,7 +2445,7 @@ Tools and utilities
 : NO-SECURITY:    R> '?PAIRS >DFA @ >R  >R NO-SECURITY CO
     R> '?PAIRS >DFA ! ;
 
-
+NO-SECURITY
 ( REGRESS )                                     \ AvdH B7dec17
 : ?.S?   DUP IF >R .S R> THEN ; \ (e-e) If ERROR, print stack.
 : unbalance?  \ ( A B C - A B C ) give error if "A-B <> B-C "
@@ -2201,7 +2473,7 @@ Tools and utilities
 \ Install and de-install the regress facility.
 : NO-VERBOSE-REGRESS   'TASK >DFA @ '_RVERBOSE >DFA ! ;
 : DO-VERBOSE-REGRESS   '_RVERBOSE RESTORED ;
-
+: WHAT? _wh 2@ TYPE ;
 
 
 
@@ -2370,8 +2642,8 @@ WANT SEE
 \ all -words: ( dip --dip' ) decompile pointer
 : -do CR ." DO " CELL+ CELL+ ;     '(DO) by: -do
 : -qdo CR ." ?DO " CELL+ CELL+ ;   '(?DO) by: -qdo
-: -lo CR ." LOOP " CELL+ CELL+ ;   '(LOOP) by: -lo
-: -pl CR ." +LOOP " CELL+ CELL+ ;  '(+LOOP) by: -pl
+
+: -pl CR ." +LOOP " 4 CELLS + ;  '(+LOOP) by: -pl
 
 : -pc CR ." ;CODE plus code (suppressed)"
    ( DIRTY TRICK : make decompile pointer point to exit!)
@@ -2437,9 +2709,9 @@ WANT BAG BAG-WHERE
 : skip-constant  BEGIN DUP 'LIT = WHILE DROP  $@ DROP $@
     REPEAT ;
 : ITEM2 $@  skip-constant  ( dip -- dip')
-     DUP 'BRANCH = IF DROP $@ 2DUP targ+ DROP EXIT THEN
-     DUP '0BRANCH = IF DROP $@ 2DUP targ+ DROP EXIT THEN
-     DROP ;
+     DUP '(+LOOP) = IF DROP 3 CELLS + EXIT THEN
+     DUP '0BRANCH = OVER 'BRANCH = OR IF DROP $@
+        2DUP targ+ DROP EXIT THEN DROP ;
 : FILL-TARGETS  targets !BAG  ( dip -- )
     BEGIN DUP @ LIT (;) <> WHILE ITEM2 REPEAT DROP ;
 : .target  targets BAG-WHERE DUP IF
@@ -2574,22 +2846,22 @@ ASSEMBLER DEFINITIONS
  DECIMAL
 
 PREVIOUS DEFINITIONS
-( ASSEMBLER-GENERIC SPLIT 1PI FIR 1FAMILY, )  \ A7oct19 AvdH
-: SPLIT 0 100 UM/MOD SWAP   ; \ Split X : ls BYTE and REMAINDER
-\ Post INSTRUCTION of LENGTH.  Big endian specific!
-: POST  SWAP , 1 CELLS - ALLOT ;
+( ASSEMBLER-GENERIC SPLIT 1PI FIR 1FAMILY, )  \ B9jan27 AvdH
+\ Post one byte of INSTRUCTION . Leave REMAINDER.
+: POST  DUP C, 8 RSHIFT ;
 \ Fixup with ms byte of FIX below ADDR, leave next FIX ADDR
-: FIX| 1- >R   SPLIT R@ SWAP TOGGLE   R> ;
-: 1PI CREATE , DOES>  @ 1 POST  ;   \ 1 byte post-it opcode
-: 2PI CREATE , DOES>  @ 2 POST  ;   \ 2 byte post-it opcode
-: 3PI CREATE , DOES>  @ 3 POST  ;   \ 3 byte post-it opcode
+: FIX| 1- >R   R@ OVER 0FF AND TOGGLE 8 RSHIFT R> ;
+: 1PI CREATE , DOES>  @ POST DROP ; \ post-it 1 byte opcode
+: 2PI CREATE , DOES>  @ POST POST DROP ;      \ 2 byte
+: 3PI CREATE , DOES>  @ POST POST POST DROP ; \ 3 byte
 \ Fixup from behind starting with ls byte.
 : FIR CREATE , DOES> @ HERE BEGIN FIX| OVER 0= UNTIL 2DROP ;
 \ Create a family adding INC to OPCODE with COUNT members
-: 1FAMILY, 0 DO DUP 1PI OVER + LOOP DROP DROP ;
-: 2FAMILY, 0 DO DUP 2PI OVER + LOOP DROP DROP ;
-: 3FAMILY, 0 DO DUP 3PI OVER + LOOP DROP DROP ;
-: FAMILY|R 0 DO DUP FIR OVER + LOOP DROP DROP ;
+: NO--   PP @ NAME PRESENT ?DUP IF HIDDEN THEN PP ! ;
+: 1FAMILY, 0 DO DUP NO-- 1PI OVER + LOOP DROP DROP ;
+: 2FAMILY, 0 DO DUP NO-- 2PI OVER + LOOP DROP DROP ;
+: 3FAMILY, 0 DO DUP NO-- 3PI OVER + LOOP DROP DROP ;
+: FAMILY|R 0 DO DUP NO-- FIR OVER + LOOP DROP DROP ;
 ( ASSEMBLER-CODES-i86 AX| ) CF: ?16 \ A2oct21 AvdH
  40 00 4 FAMILY|R ZO| BO| XO| R|
  01 00 8 FAMILY|R AL| CL| DL| BL| AH| CH| DH| BH|
@@ -2638,10 +2910,9 @@ PREVIOUS DEFINITIONS
 
 
 
-( ASSEMBLER-CODES-i86 IL, IW, ) \ A4sep27 AvdH
-: lsbyte, SPLIT C, ;
-: (W,) lsbyte, lsbyte, DROP ;
-: (L,) lsbyte, lsbyte, lsbyte, lsbyte, DROP ;
+( ASSEMBLER-CODES-i86 IL, IW, ) \ B9jan27 AvdH
+: (W,) POST POST DROP ;
+: (L,) POST POST POST POST DROP ;
 
 ( O=obligatory R=Relative I=Immediate )
 ' (W,) ALIAS OW,        ' (L,) ALIAS IL,
@@ -2651,6 +2922,7 @@ PREVIOUS DEFINITIONS
 ' (W,) ALIAS SG,        ' (W,) ALIAS W,
 ' C,   ALIAS P,         ' C,   ALIAS B,
 ' C,   ALIAS IS,
+
 
 
 
@@ -2686,16 +2958,16 @@ PREVIOUS DEFINITIONS
 
 0088 2PI MOV,           008C 2PI MOV|SG,        008D 2PI LEA,
 EA 1PI JMPFAR,  EB 1PI JMPS,    9A 1PI CALLFAR, A8 1PI TESTI|A,
-( ASSEMBLER-CODES-i86 --opcodes3 ) \ A2oct21 AvdH
+( ASSEMBLER-CODES-i86 --opcodes3 )      \ C2feb21 AvdH
 01 F0 6 1FAMILY, LOCK, -- REPNZ, REPZ, HLT, CMC,
 01 F8 6 1FAMILY, CLC, STC, CLI, STI, CLD, STD, ( 38FE)
 800 80 8 2FAMILY, ADDI, ORI, ADCI, SBBI, ANDI, SUBI, XORI,
     CMPI,
-0800 83 8 2FAMILY, ADDSI, -- ADCSI, SBBSI, -- SUBSI, -- CMPSI,
+0800 83 8 2FAMILY, ADDSI, ORSI, ADCSI, SBBSI, ANDSI, SUBSI,
+    XORSI, CMPSI,
 800 10F6 6 2FAMILY, NOT, NEG, MUL|AD, IMUL|AD, DIV|AD, IDIV|AD,
 0800 00FE 2 2FAMILY, INC, DEC,
 0800 10FF 4 2FAMILY, CALLO, CALLFARO, JMPO, JMPFARO,
-
 0200 0000 2 FAMILY|R 1| V|
 0800 00D0 8 2FAMILY, ROL, ROR, RCL, RCR, SHL, SHR, -- SAR,
 0800 C0 8 2FAMILY, ROLI, RORI, RCLI, RCRI, SHLI, SHRI, -- SARI,
@@ -2809,9 +3081,9 @@ E0DF 2PI FSTSW|AX,
 
 ( Tests applicable always )
   CODE TEST-NEXT NEXT,  END-CODE
-  " Testing next " TYPE
+
   TEST-NEXT
-  " next Tested " TYPE
+
 
 \
 ( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?32 \ AvdH B6apr08
@@ -2825,9 +3097,9 @@ E0DF 2PI FSTSW|AX,
 
 ( Tests applicable always )
   CODE TEST-NEXT NEXT,  END-CODE
-  " Testing next what? " TYPE
+
   TEST-NEXT
-  " next Tested " TYPE
+
 
 \
 ( ASSEMBLER-MACROS-i86 NEXT, TEST-NEXT ) ?64 \ AvdH B8jun26
@@ -2840,7 +3112,7 @@ E0DF 2PI FSTSW|AX,
 
 ( Tests applicable always )
   CODE TEST-NEXT NEXT,  END-CODE
-  " Testing next what? " TYPE TEST-NEXT " next Tested " TYPE
+  TEST-NEXT
 
 
 
@@ -2910,11 +3182,11 @@ CODE TEST-SWITCH   TO-REAL,   SWITCH_DS COPY-SEG   TO-PROT,
 
 
 DECIMAL
-( -fpwa- )  CF:      ?32+                \ B6apr6 AvdH
+( -fpwa- )  CF:      ?32+                \ C2feb21 AvdH
 "-fp-" PRESENT ?LEAVE-BLOCK
  WANT ASSEMBLER SWAP-DP ALIAS RESTORED
-\ Disallow case-insensitive assembler
-'~MATCH RESTORED
+\ Force case-sensitive
+'~MATCH RESTORED   'DIGIT RESTORED-ASM
 SWAP-DP
    : ASSEMBLERi86 ;
    ASSEMBLER DEFINITIONS   HEX
@@ -2926,22 +3198,38 @@ SWAP-DP
    DECIMAL  PREVIOUS DEFINITIONS
 SWAP-DP
 "-fp-" WANTED    TRIM
-( -fpmacros- DROP-CELL [SP] ) CF: ?32+ \ AvdH B6apr03
-
-WANT ASSEMBLERi86
+( -fpmacros- DROP-CELL [SP] ) CF: ?64 \ AvdH C2feb20
+WANT ASSEMBLERi86 RESTORED
+\ Force case-sensitive
+'~MATCH RESTORED   'DIGIT RESTORED-ASM
 ASSEMBLER DEFINITIONS
 : [SP]    [SP +1* 0] ;
-: DROP-CELL   LEA, SP'| BO| [SP] 1 CELLS B, ;
-: OPEN-CELL   LEA, SP'| BO| [SP] -1 CELLS B, ;
-( r -- 2**r )
-: common_2**x   FLD, u| ST0|   FLD, u| ST0|   FRNDINT,
-   FSUBP, ST1| a|   F2XM1,   FLD1,   FADDP, ST1|   FSCALE,
-   FSTP|u, ST1| ;
+: TS, REX, ;   \ Thirty two, sixty four prefix
+: DROP-CELL   TS, LEA, SP'| BO| [SP] 1 CELLS B, ;
+: OPEN-CELL   TS, LEA, SP'| BO| [SP] -1 CELLS B, ;
+
+
 \ ( rsin -- rsin rcos )
 : _othergonio   FLD1,   FLD, u| ST1|   FMUL, ST0| m|
    FSUBP, ST1| a|   FSQRT, ;
 FORTH DEFINITIONS : -fpmacros- ; PREVIOUS
 PREVIOUS DEFINITIONS
+( -fpmacros- DROP-CELL [SP] ) CF: ?32 \ AvdH C2feb20
+WANT ASSEMBLERi86 RESTORED
+\ Force case-sensitive, for asm AND fp.
+'~MATCH RESTORED   'DIGIT RESTORED-ASM
+ASSEMBLER DEFINITIONS
+: [SP]    [SP +1* 0] ;
+: TS, ;   \ Thirty two, sixty four prefix
+: DROP-CELL   TS, LEA, SP'| BO| [SP] 1 CELLS B, ;
+: OPEN-CELL   TS, LEA, SP'| BO| [SP] -1 CELLS B, ;
+\ ( rsin -- rsin rcos )
+: _othergonio   FLD1,   FLD, u| ST1|   FMUL, ST0| m|
+   FSUBP, ST1| a|   FSQRT, ;
+FORTH DEFINITIONS : -fpmacros- ; PREVIOUS
+PREVIOUS DEFINITIONS
+
+
 ( -fp- XC FSTATUS       ) CF: ?32+ \ AvdH B6apr03
 WANT    -fpmacros- $-PREFIX
 : XC BASE @ $0A = IF &E ELSE &_ THEN ; \ Exponent character
@@ -2956,36 +3244,36 @@ default-mode 3 10 LSHIFT + CONSTANT truncate-mode
 CODE FSTATUS   FSTSW|AX,    ANDI, X| R| AX| $FFFF IL,
    PUSH|X, AX|   NEXT, END-CODE
 CODE (FINIT)   FINIT, NEXT, END-CODE
-CODE set-rounding-mode FLDCW, ZO| [SP]   DROP-CELL  NEXT,
+CODE set-rounding-mode TS, FLDCW, ZO| [SP]   DROP-CELL  NEXT,
     END-CODE
-( -fp- FINIT FDEPTH WAIT L>F F@>L F>L ) CF: ?32 \ AvdH B6apr03
-
+( -fp- FINIT FDEPTH WAIT L>F F@>L F>L ) CF: ?32 \ AvdH C2feb20
+: rounding: set-rounding-mode
+    CO truncate-mode set-rounding-mode ;
 : FDEPTH   FSTATUS 11 RSHIFT  8 SWAP - 7 AND ;
-
 : FINIT   (FINIT) truncate-mode set-rounding-mode ;
 
 CODE WAIT  WAIT, NEXT, END-CODE
 
 ( n -- r )
-CODE L>F   FILD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE L>F   TS, FILD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
 
 ( r -- r n )
-CODE F@>L   OPEN-CELL   FIST, |32 ZO| [SP]   NEXT, END-CODE
+CODE F@>L  OPEN-CELL   TS, FIST, |32 ZO| [SP]   NEXT, END-CODE
 
 ( r -- n )
-CODE F>L   OPEN-CELL   FISTP, |32 ZO| [SP]   NEXT, END-CODE
-( -fp- FINIT FDEPTH WAIT L>F F@>L F>L ) CF: ?64 \ AvdH B6apr03
+CODE F>L   OPEN-CELL   TS, FISTP, |32 ZO| [SP]  NEXT, END-CODE
+( -fp- FINIT FDEPTH WAIT L>F F@>L F>L ) CF: ?64 \ AvdH C2feb20
+: rounding: set-rounding-mode
+    CO truncate-mode set-rounding-mode ;
 : FDEPTH   FSTATUS 11 RSHIFT  8 SWAP - 7 AND ;
 : FINIT   (FINIT) truncate-mode set-rounding-mode ;
-
 CODE WAIT  WAIT, NEXT, END-CODE
 ( n -- r )
-CODE L>F   FILD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE L>F   TS, FILD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
 ( r -- r n )
-CODE (F@>L)   OPEN-CELL   FIST, |32 ZO| [SP]   NEXT, END-CODE
+CODE (F@>L)  OPEN-CELL  TS, FIST, |32 ZO| [SP]  NEXT, END-CODE
 ( r -- n )
-CODE (F>L)   OPEN-CELL   FISTP, |32 ZO| [SP]   NEXT, END-CODE
-
+CODE (F>L)  OPEN-CELL  TS, FISTP, |32 ZO| [SP]  NEXT, END-CODE
 \ Sign extent 32 to 64
 : sex64   DSP@ DUP L@ $20 LSHIFT 0< SWAP 4 + L! ;
 : F@>L   (F@>L) sex64 ;
@@ -2993,10 +3281,10 @@ CODE (F>L)   OPEN-CELL   FISTP, |32 ZO| [SP]   NEXT, END-CODE
 ( -fp- FI+ FI- FI* FI/ F+ F- F* F/ ) CF: ?32+ \ AvdH B6apr03
 
 \ All ( n r -- r1 )
-CODE FI+   FIADD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
-CODE FI-   FISUB, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
-CODE FI*   FIMUL, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
-CODE FI/   FIDIV, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI+  TS, FIADD, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI-  TS, FISUB, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI*  TS, FIMUL, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
+CODE FI/  TS, FIDIV, |32 ZO| [SP]   DROP-CELL   NEXT, END-CODE
 
 \ All: ( r1 r2 -- r3)
 CODE F+ FADDP, ST1|     NEXT, END-CODE
@@ -3025,12 +3313,12 @@ CODE FROT   FXCH, ST1|   FXCH, ST2|   NEXT, END-CODE
 ( -fp- F0= F0< F0> F= F> F< FMAX FMIN ) CF: ?32+ \ AvdH B6apr03
 \ ( r -- mask) 3 * ( r -- flag )
 CODE FCOMPARE1   OPEN-CELL   FTST,   FSTP|u, ST0|
-    FSTSW, ZO| [SP]   NEXT, END-CODE
+    TS, FSTSW, ZO| [SP]   NEXT, END-CODE
 : F0=  FCOMPARE1 $4000 AND $4000 = ;
 : F0<  FCOMPARE1 $0100 AND $0100 = ;
 : F0>  FCOMPARE1 $4100 AND 0= ;
 \ ( r1 r2 -- mask) 3 * ( r1 r2 -- flag )
-CODE FCOMPARE2   OPEN-CELL   FCOMPP,   FSTSW, ZO| [SP]
+CODE FCOMPARE2   OPEN-CELL   FCOMPP,   TS, FSTSW, ZO| [SP]
     NEXT, END-CODE
 : F=   FCOMPARE2 $4000 AND $4000 = ;
 : F>   FCOMPARE2 $0100 AND $0100 = ;
@@ -3054,22 +3342,38 @@ CODE FMOD   FXCH, ST1|   FPREM,   FSTP|u, ST1|   NEXT, END-CODE
 : F~ABS   FROT FROT F- FABS F> ;
 : F~REL   FROT FROT FOVER FABS FOVER FABS F+ FROT FROT F- FABS
     FROT FROT F* F< ;
-( -fp- F.R FS. ) CF: ?32+ \ AvdH B6apr03
+( -fp- printing-aux             ) CF: ?32+ \ AvdH C2feb21
 WANT DEC:
 \ Split R int R1 EXPONENT with 1<=r1<BASE r=r1*BASE**exponent
-: _split-base   0   FDUP F0= IF EXIT THEN
+: _split-base   truncate-mode rounding: 0 FDUP F0= IF EXIT THEN
     BEGIN FDUP BASE @ L>F F< 0= WHILE BASE @ FI/ 1+ REPEAT
     BEGIN F@>L BASE @ < 0= WHILE BASE @ FI/ 1+ REPEAT
     BEGIN F@>L 0= WHILE BASE @ FI* 1- REPEAT ;
 : >DIGIT   DUP 10 < IF &0 + ELSE 10 - &A + THEN ; ( n -- char)
 : one-digit  F@>L DUP FI-   >DIGIT   BASE @ FI* ; ( r -- r' n)
 : FSIGN  FDUP F0< IF FNEGATE &- EMIT THEN ;  ( r -- |r| )
+\ Print float  r  (<1.) with  n   digits.
+: .float-digits
+    0 ?DO
+        one-digit EMIT
+    LOOP   FDROP   ;
+
+( -fp- F.R FS. F.R#             ) CF: ?32+ \ AvdH C2feb21
+\ Conver n  to  sc  .
+: itoa   0 <# #S #> ;
+
 \ (n r -- ) Print R with N digits in scientific notation.
-: F.R   FSIGN _split-base >R   one-digit EMIT &. EMIT
-    0 ?DO one-digit EMIT LOOP   XC EMIT FDROP
-    R>   DUP 0< IF NEGATE &- EMIT THEN
-    0 <# #S #> TYPE   BL EMIT ;
-: FS. 18 F.R ;          : F.R# DEC: F.R ;
+: F.R   FSIGN _split-base >R
+    one-digit EMIT &. EMIT   .float-digits   XC EMIT
+    R>   DUP 0< IF NEGATE &- EMIT THEN   itoa TYPE BL EMIT ;
+
+: FS. 18 F.R ;
+
+: F.R# DEC: F.R ;
+
+
+
+
 ( -fp- 0_ 1_ PI LN{2} ) CF: ?32+ \ AvdH B6apr03
 
 \ LN: base e logarithm, LOG base 10 logarithm.
@@ -3086,20 +3390,20 @@ CODE 1/LOG(2) FLDL2T, NEXT,   END-CODE
 
 
 
-( -fp- FLOOR FROUND ) CF: ?32+ \ AvdH B6apr03
+( -fp- FLOOR FROUND ) CF: ?32+ \ AvdH C2feb20
+\ Some words that require special rounding modes
 CODE (FROUND)   FRNDINT, NEXT, END-CODE
 
-: FROUND   nearest-mode set-rounding-mode   (FROUND)
-    truncate-mode set-rounding-mode ;
+: FROUND   nearest-mode rounding: (FROUND) ;
 
-: FLOOR   down-mode set-rounding-mode   (FROUND)
-    truncate-mode set-rounding-mode ;
+: FLOOR   down-mode rounding: (FROUND) ;
 
-
-
-
-
-
+ASSEMBLER
+( r -- 2**r )
+: common_2**x   truncate-mode rounding:
+    FLD, u| ST0|   FLD, u| ST0|   FRNDINT,   FSUBP, ST1| a|
+    F2XM1,   FLD1,   FADDP, ST1|   FSCALE,   FSTP|u, ST1| ;
+PREVIOUS
 
 
 ( -fp- FEXP FLN FALOG FLOG FSCALE ) CF: ?32+ \ AvdH B6apr03
@@ -3176,16 +3480,16 @@ CODE EF@   POP|X, AX|   FLD|e, ZO| [AX]   NEXT, END-CODE
 : FVARIABLE DATA 0_ F, ;
 
 \ ( d -- r )  \ ( r -- d ) F! F@  w.r.t. data stack.
-CODE DATA>F   FLD, d| ZO| [SP]   LEA, SP'| BO| [SP] 2 CELLS B,
-    NEXT, END-CODE
-CODE F>DATA   LEA, SP'| BO| [SP] -2 CELLS B,
-     FSTP, d| ZO| [SP]   NEXT, END-CODE
+CODE DATA>F   TS, FLD, d| ZO| [SP]
+    TS, LEA, SP'| BO| [SP] 2 CELLS B,   NEXT, END-CODE
+CODE F>DATA   TS, LEA, SP'| BO| [SP] -2 CELLS B,
+     TS, FSTP, d| ZO| [SP]   NEXT, END-CODE
 : FLITERAL STATE @ IF   F>DATA POSTPONE DLITERAL
     POSTPONE DATA>F THEN ; IMMEDIATE
 ( -fp- PARSE-INT PP@@- PARSE-BACKWARDS   ) CF: ?32+ \ AvdH B6ap
 '(NUMBER) ALIAS PARSE-INT
 
-VARIABLE EPL   \ FIXME ! User variable.
+\ ECL is a user variable.
 : PP@@-   SRC @ PP @ = IF PP @ 0 ELSE -1 PP +! PP @ DUP C@
     THEN ;
 \ If CHAR special, handle it. Effect on data and fp stack.
@@ -3207,23 +3511,23 @@ VARIABLE EPL   \ FIXME ! User variable.
                DROP -1 PP +! PARSE-INT
    THEN THEN THEN    ( --  #decimals)
    DROP ;
-\ Parse an fp number (  -- r) around `EPL . Leave `PP after it
+\ Parse an fp number (  -- r) around `ECL . Leave `PP after it
 : PARSE-FLOAT
-       EPL @ PP !  PARSE-BACKWARDS
-       EPL @ 1+ PP ! PARSE-EXPONENT +
+       ECL @ PP !  PARSE-BACKWARDS
+       ECL @ 1+ PP ! PARSE-EXPONENT +
        DUP 0< IF   ABS 0 ?DO BASE @ FI/ LOOP
        ELSE   0 ?DO BASE @ FI* LOOP
        THEN ;
 ( -fp- NEW-{NUMBER} SDFLITERAL  ) CF: ?32+ \ AvdH B6apr03
 \ The final replacements
-: NEW-(NUMBER)  0 EPL !
+: NEW-(NUMBER)  0 ECL !
     WHERE 2@ >R >R   'PARSE-INT CATCH
     DUP 10 =   PP @ 1- C@ XC =   AND IF
         R> R> WHERE 2!
-        DROP   PP @ 1- EPL !   PARSE-FLOAT
+        DROP   PP @ 1- ECL !   PARSE-FLOAT
     ELSE RDROP RDROP THROW THEN ;
 : SDFLITERAL
-   EPL @ IF POSTPONE FLITERAL EXIT THEN
+   ECL @ IF POSTPONE FLITERAL EXIT THEN
    DPL @ IF POSTPONE DLITERAL EXIT THEN
    DROP POSTPONE LITERAL ;
 
@@ -3344,9 +3648,9 @@ CR
 ." will execute an `` edit '' command (for files)." CR
 ( EDITOR ) CF: ?PC    \ AvdH A1oct05
 CREATE EDITOR   'EDITOR DUP HIDDEN
- "+THRU" WANTED
+
  "VIDEO-MODE" WANTED    "$-PREFIX" WANTED
-  1 12 +THRU
+WANT -ed-
 
 HIDDEN  \ Unhide `` EDITOR ''.
 
@@ -3358,7 +3662,7 @@ HIDDEN  \ Unhide `` EDITOR ''.
 
 
 
-( protected_editor_stuff ) CF: ?DP \ AvdH A1nov01
+( -ed- protected_editor_stuff ) CF: ?DP \ AvdH A1nov01
  "NEW-SEL" WANTED  HEX
 NEW-SEL CONSTANT VID
 VID PAD GET-SEL
@@ -3374,7 +3678,7 @@ DECIMAL
 
 
 
-( 16_bit_editor_stuff ) CF: ?16 \ A1oct05
+( -ed- 16_bit_editor_stuff ) CF: ?16 \ A1oct05
 "VID" PRESENT ?LEAVE-BLOCK  \ Already protected mode
 HEX
 B800 CONSTANT VID
@@ -3390,7 +3694,7 @@ DECIMAL
 
 
 
-( 32_bit_editor_stuff ) CF: ?32 \ A1oct05
+( -ed- 32_bit_editor_stuff ) CF: ?32 \ A1oct05
 "VID" PRESENT ?LEAVE-BLOCK  \ Already protected mode
 HEX
 B800 CONSTANT VID
@@ -3406,7 +3710,7 @@ B800 CONSTANT VID
 
 
 
-( BLUE FRAME NO-FRAME --editor_stuff ) \ AvdH A1nov01
+( -ed- BLUE FRAME NO-FRAME --editor_stuff ) \ AvdH A1nov01
 "FRAME" PRESENT ?LEAVE-BLOCK
 HEX
 17 CONSTANT BLUE           7 CONSTANT BLACK
@@ -3422,7 +3726,7 @@ VARIABLE COLOR
 
 : NO-FRAME   BLACK COLOR !   VERTICAL-FRAME  HORIZONTAL-FRAME ;
 DECIMAL
-( FIG-GREEN FRAME NO-FRAME --editor_stuff ) \ AvdH A1nov01
+( -ed- FIG-GREEN FRAME NO-FRAME --editor_stuff ) \ AvdH A1nov01
 "FRAME" PRESENT ?LEAVE-BLOCK
 HEX
 2F CONSTANT FIG-GREEN    7 CONSTANT BLACK
@@ -3438,7 +3742,7 @@ VARIABLE COLOR
 : NO-FRAME   BLACK COLOR !       SIXTEEN-LINES ;
 
 DECIMAL
-( Screen_access ) HEX
+( -ed- Screen_access ) HEX
 050 CONSTANT VW   19 CONSTANT VH
 VH VW * CONSTANT VL
 : A-L SCR @ (LINE) ;
@@ -3454,7 +3758,7 @@ VH VW * CONSTANT VL
 : PAGE PAD VL 2DUP BLANK 0 >V ;
 : PG PAD 10 VW * 2DUP BLANK 0 >V ;
  DECIMAL
-( editor ) HEX
+( -ed- scrolling ) HEX
 : BLK>V 10 0 DO I A-L I VW * >V LOOP ;
 : BLK<V   SCR @ BLOCK B/BUF ^J FILL
     10 0 DO I A-L I VW * V> LOOP UPDATE ;
@@ -3470,7 +3774,7 @@ VH VW * CONSTANT VL
 
 
  DECIMAL
-( editor CURSOR ) HEX
+( -ed- CURSOR ) HEX
 VARIABLE CURSOR    0 CURSOR !
 : CURL CURSOR @ VW / ; : CP CURSOR @ VW MOD  ;
 : BIOS-CURSOR CURSOR @ VW /MOD 100 * + ;
@@ -3486,7 +3790,7 @@ DUP ^I = IF  8 ELSE       DUP ^M = IF VW CP - ELSE
     DUP ^P = IF CURL POP-L ELSE
     DUP ^U = IF CURL UFL-L ELSE
     THEN THEN THEN ;                                 DECIMAL
-( editor ) HEX
+( -ed- lines ) HEX
 : PAD-B PAD VW BLANK  ;
 : GET-R PAD VW CP - CURL VW * CP + >V ;
 : GET-P PAD    CP   CURL VW *      >V ;
@@ -3502,7 +3806,7 @@ DUP ^I = IF  8 ELSE       DUP ^M = IF VW CP - ELSE
 : JOL PAD-B CURL 1+ PAD<V GET-R CURL 1+ 10 SWAP ROLL^ ;
 
 DECIMAL
-( INSELETING JOINITTING )
+( -ed- INSELETING JOINITTING )
 HEX VARIABLE I-MODE   0 I-MODE !
 : INSELETING
       DUP ^H = IF RUB-C ELSE
@@ -3518,7 +3822,7 @@ HEX VARIABLE I-MODE   0 I-MODE !
   I-MODE @   IF INS-C THEN  DUP EM-C
   THEN THEN ;
 DECIMAL
-( Finding the next word A0MAY25 )
+( -ed- Finding the next word A0MAY25 )
  : BL? VA LC@ $FF AND BL = ;
 : BOUNDARY? BL? 0= OVER 1 - BL? AND ;
 : >SEARCH BEGIN 1 + DUP BOUNDARY? UNTIL  ;
@@ -3534,7 +3838,7 @@ DECIMAL
   DUP ^F = IF NEXT-W ELSE   DUP ^A = IF BACK-W ELSE
   DUP ^T = IF DEL-W ELSE    DUP ^Z = IF UDL-W ELSE
   DUP ^W = IF POP-W ELSE    THEN THEN THEN THEN THEN ;
-( DISPATCHER )    HEX
+( -ed- DISPATCHER )    HEX
 : AT-END VH 1 - VW * CURSOR ! SET-CURSOR ;
 : DEBUG CURSOR @ AT-END .S CURSOR ! ;
 : EXITING KEY 20 OR &q <> IF BLK<V THEN ;
@@ -3646,23 +3950,7 @@ LOOP ;
    LOOP ;
 PROBE @   MAGIC PROBE !   SET-MEMORY TEST-MEMORY PROBE !
 (MEM-SIZE) @ CONSTANT MEM-SIZE DECIMAL
-( SEL-DUMP dump_a_selector ) \ AvdH A1nov02
- "DH." WANTED HEX 1 1 +THRU
-: .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
-." CODE SEGMENT: " R@ .CODE ELSE
-." DATA SEGMENT: " R@ .DATA THEN  R@ 1+ .PRES
-   ELSE ." SOME SORT OF GATE" THEN CR RDROP ;
-: .LIMIT DUP @ 0FFFF AND  OVER 6 + C@ 0F AND  DH.
-   ."  PARAGRAPHS OF " 6 + C@
-80 AND IF ." A 4K PAGE"  ELSE ." ONE BYTE" THEN  CR  ;
-: .BASE >R   R@ 2 + @ 0FFFF AND  R@ 4 + @ 0FF AND
-R@ 6 + @ 0FF00 AND OR   RDROP
- ." LINEAR BASE ADDRESS : " DH. CR ;
-: .ST 6 + C@ 40 AND IF ." 32-BITS " ELSE ." 16-BITS" THEN
- CR ;
-: SEL-DUMP DUP .PRIV   DUP .ST   DUP .CD   DUP .BASE   .LIMIT ;
-DECIMAL
-( dump_a_selector ) \ AvdH A1nov02
+( SEL-DUMP  .CODE .DATA ) CF: ?PC ?32           \ AvdH C1Apr23
 
 : .PRIV 5 + C@ 5 RSHIFT 3 AND ." PRIVILEGE LEVEL: " . CR ;
 : NOT 0= IF ." NOT " THEN ;
@@ -3678,6 +3966,22 @@ DECIMAL
   DUP 80 AND NOT ." PRESENT. "
   DROP ;
 
+( SEL-DUMP              ) CF: ?PC ?32           \ AvdH C1Apr23
+"DH."  WANTED HEX
+: .CD 5 + C@  >R  R@  10 AND IF R@ 08 AND IF
+." CODE SEGMENT: " R@ .CODE ELSE
+." DATA SEGMENT: " R@ .DATA THEN  R@ 1+ .PRES
+   ELSE ." SOME SORT OF GATE" THEN CR RDROP ;
+: .LIMIT DUP @ 0FFFF AND  OVER 6 + C@ 0F AND  DH.
+   ."  PARAGRAPHS OF " 6 + C@
+80 AND IF ." A 4K PAGE"  ELSE ." ONE BYTE" THEN  CR  ;
+: .BASE >R   R@ 2 + @ 0FFFF AND  R@ 4 + @ 0FF AND
+R@ 6 + @ 0FF00 AND OR   RDROP
+ ." LINEAR BASE ADDRESS : " DH. CR ;
+: .ST 6 + C@ 40 AND IF ." 32-BITS " ELSE ." 16-BITS" THEN CR ;
+
+: SEL-DUMP DUP .PRIV   DUP .ST   DUP .CD   DUP .BASE   .LIMIT ;
+DECIMAL
 ( ************** application *********************************)
 
 EXIT
@@ -3759,14 +4063,14 @@ VARIABLE MidiHandle
 
 
 ( --hd_LBA utils_for_stand_alone_disk ) CF: ?PC ?16
- "ASSEMBLERi86" WANTED    "DISK-INIT" WANTED    "+THRU" WANTED
+ "ASSEMBLERi86" WANTED    "DISK-INIT" WANTED
 ( backup and restore a stand alone hard disk system to floppy )
 ( run from a booted floppy system )
 ( this is for a 16 bit system, because the assembly assumes )
 ( so. If you have a 32 bit system, there are easier ways.   )
-: --hd_LBA ;
+
 256 CONSTANT #BLOCKS
-1 5 +THRU DECIMAL
+
 
 
 
@@ -3823,7 +4127,7 @@ DECIMAL
 : BACKUP>FLOPPY  SWAP-FLOPPY
   1400 0 DO 2DUP I S>D D+ (HRD) I (FWD) LOOP 2DROP ;
 ( --hd_LBA BACKUP-KERNEL BACKUP-BLOCKS ) CF: ?PC ?16
- "--hd_LBA" WANTED
+
 \ Prompt for floppy created with ``BACKUP>FLOPPY''
 \ Restore to hard disk ``DBS'' 1400 K from floppy.
 : RESTORE<FLOPPY SWAP-FLOPPY
@@ -3838,8 +4142,7 @@ DECIMAL
 
 
 
-( INSTALL-KERNEL RESTORE-BLOCKS ) CF: ?PC ?16
- "--hd_LBA" WANTED
+( --hd_LBA INSTALL-KERNEL RESTORE-BLOCKS ) CF: ?PC ?16
 
 \ Copy the kernel (first 64K of ``DBS'') from raw floppy.
 : INSTALL-KERNEL SWAP-FLOPPY 64 0 DO I (FRD) I S>D (HWD) LOOP ;
@@ -3853,9 +4156,10 @@ DECIMAL
 
 
 
+: --hd_LBA ;
 
 ( SECTORS/TRACK #HEADS ) CF: \ AvdH A1oct10
-1 2 +THRU
+
 EXIT
 Get information directly after booting aboot the hard disk
 The BIOS puts this in the real memory area, and it is
@@ -3903,7 +4207,7 @@ DECIMAL
 #BLOCKS OFFSET @ + CONSTANT FORTH-SIZE
 
 ( INSTALL-FORTH-ON-HD ) CF: ?SA ?32 \ AvdH A1oct11
- "+THRU" WANTED
+
 \ Elective and configuration screen
 \ You can overrule here for manual installation
 \ ?? CONSTANT FORTH-SIZE   ?? CONSTANT MEDIA-HD
@@ -3911,14 +4215,14 @@ DECIMAL
 \ ?? CONSTANT #HEADS    ?? CONSTANT SECTORS/TRACK
 \ ?? CONSTANT MEM-SIZE
  "#HEADS" WANTED   "SECTORS/TRACK" WANTED    "MEM-SIZE" WANTED
-1 6 +THRU
+WANT -sa_hd-
 CR ." If you really want to install on hard disk"
 CR ." issue the command: INSTALL-FORTH-ON-HD"
 \ Re-installs a sector-and-track ciforth to a hard disk (or
 \ floppy). This is a user utility, so it can be run for other
 \ type ciforth's. But then it only explains to the user what is
 \ going wrong.
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?HD \ AvdH A1oct11
+( -sa_hd- INSTALL-FORTH-ON-HD ) CF: ?HD \ AvdH A1oct11
 
 \ This utility is intended for sectors & track installations
 \ so for floppy compatible hard disks.
@@ -3934,7 +4238,7 @@ QUIT
 
 
 
-( flush-key fatal-questiON last-chance show ready ) CF: ?32
+( -sa_hd- flush-key fatal-question last-chance ) CF: ?32
 \ Throw away any keys that are typed ahead
 : flush-key   BEGIN KEY? WHILE KEY DROP REPEAT ;
 \ Stop, unless the user types Y.
@@ -3950,7 +4254,7 @@ QUIT
 
 : ready ." Press the reset button, to boot your new FORTH"
     CR ;
-( PATCH-NEW-FORTH PATCH-THIS-FORTH ) CF: ?FD ?32 \ AvdH A1oct12
+( -sa_hd- PATCH-THIS-FORTH ) CF: ?FD ?32 \ AvdH A1oct12
  "#HEADS" WANTED   "MEDIA-HD" WANTED          HEX
  "FORTH-SIZE" WANTED
 
@@ -3966,7 +4270,7 @@ CREATE buffer FORTH-SIZE B/BUF * ALLOT
    80                DRIVE C!
    SECTORS/TRACK     DRIVE 1+ C!
    #HEADS            DRIVE 2 + C! ;
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD \ AvdH A1oct11
+( -sa_hd- INSTALL-FORTH-ON-HD ) CF: ?FD \ AvdH A1oct11
 
 CR ." You are about to install Forth on your hard disk"
 CR ." making it unusable for any other purpose."
@@ -3982,7 +4286,7 @@ CR ." The number of heads on your hard disk is reported: "
 #HEADS DUP . B. &H EMIT
 
 
-( --disclaimer_INSTALL_FORTH_ON_HD ) CF: ?FD ?32 \ AvdH A1oct17
+( -sa_hd- INSTALL-FORTH-ON-HD ) CF: ?FD ?32 \ AvdH A1oct17
 CR ." The number of sectors/track is reported: "
 SECTORS/TRACK DUP . B. &H EMIT
 CR ." (If this is incorrect, you have to configure manually)"
@@ -3998,7 +4302,7 @@ CR CR " Do you believe this?" fatal-question
 
 
 
-( INSTALL-FORTH-ON-HD PATCH-MEM ) CF: ?FD \ AvdH A5sep26
+( -sa_hd- INSTALL-FORTH-ON-HD PATCH-MEM) CF: ?FD \ AvdH A5sep26
 \ Read into BUFFER absolute block NUMBER , leave NEXT buffer.
 : read+ OFFSET @ -   BLOCK     OVER B/BUF MOVE   B/BUF + ;
 \ Cannot read directly into the buffer because it is above 1 Mb
@@ -4016,7 +4320,7 @@ buffer PATCH-MEM PATCH-NEW-FORTH PATCH-THIS-FORTH WRITE-FORTH
 EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
 ( --hd_driver_standalone_) CF: ?PC ?32 ?HD HEX
 
-  1 8 +THRU
+WANT -sa_32
 
 
 
@@ -4030,10 +4334,10 @@ EMPTY-BUFFERS 1 WARNING ! DRIVE ! ready ;
 
 
 
-( 250 Redefine R|W to accomodate larger addresses. A1may05AH)
+( -sa_32 NEW-COLD )                             \   A1may05AH
+HEX     \ Redefine R|W to accomodate larger addresses.
 NAMESPACE SYS ONLY FORTH
  DP @ LOW-DP @  DP ! LOW-DP ! SYS DEFINITIONS
-( 247 248 ) THRU HEX
 : NEW-COLD
 EMPTY-BUFFERS   FIRST _PREV !
 0 CELLS +ORIGIN DUP CELL+ @  40 CELLS CMOVE
@@ -4046,8 +4350,8 @@ DP @ LOW-DP @  DP ! LOW-DP ! PREVIOUS DEFINITIONS DECIMAL
    STORE-ALL ;
 PREVIOUS
 
-( 247: Redefine R|W to accomdate larger addresses. A1aug05AH)
-HEX
+( -sa_32          )  CF: ?PC ?32                \ AvdHA1aug05
+HEX   \ Redefine R|W to accomdate larger addresses.
 ( The screen BUFFER is apparently virgin)
 : (FREE?) B/BUF 0 DO DUP I + C@ &v - IF UNLOOP DROP 0 EXIT THEN
    LOOP DROP -1 ;
@@ -4062,8 +4366,8 @@ OVER RW-BUFFER SWAP 1,0000 MOVE   40,0001,0000. D+ 1<>64 ;
   DUP RW-BUFFER SWAP 0 R|W 40,0001,0000. D+ 1<>64 ;
 
 DECIMAL
-( 248: Words to load and store a system A1aug31 AH)
-HEX
+( -sa_32 MUD? )        CF: ?PC ?32              \ A1aug31 AH
+HEX  \ Words to load and store a system
 : MUD? B/BUF - (FREE?) ;  ( limit -- loaded/stored empty block)
 ( All: address block -- addres' block' )
 : LOAD-MID BEGIN OVER A,0000 < WHILE READ++ REPEAT ;
@@ -4078,7 +4382,7 @@ NIP 10,0000 SWAP LOAD-HIGH   2DROP ;
 : STORE-ALL  ( Store to next chunk, inc. kernel, stack )
 0,7C00 OFFSET @ 40 - STORE-MID
 NIP 10,0000 SWAP STORE-HIGH 2DROP ;  DECIMAL
-( hd_driver1 PATCH-CHUNK ) CF: ?PC ?32 HEX \ AH&CH A1sep01
+( -sa_32 PATCH-CHUNK ) CF: ?PC ?32 HEX \ AH&CH A1sep01
 SYS  0800,0000 B/BUF / CONSTANT CHUNK-SIZE  ( BLOCKS PER CHUNK)
 : CHUNK-START  OFFSET @ 40 - ;
 : CURRENT-CHUNK
@@ -4094,7 +4398,7 @@ CHUNK-START  CHUNK-SIZE / -6 +ORIGIN OVER SWAP C! ;
 ; DECIMAL
 
 
-( hd_driver2 WIPE-HD )  CF: ?PC ?32 \ AH A1may3
+( -sa_32 hd_driver2 WIPE-HD )  CF: ?PC ?32 \ AH A1may3
 : WIPE-BUFFER RW-BUFFER B/BUF &v FILL ;
 : WRITE-BUFFER RW-BUFFER SWAP OFFSET @ + 64 - 0 R|W ;
 : CHECK-RANGE 589 64 + CHUNK-SIZE WITHIN 0= 13 ?ERROR ;
@@ -4110,7 +4414,7 @@ CHUNK-SIZE 8 * CONSTANT FIRST-BLOCK
         DUP SHOW 1+ REPEAT DROP ;
 
 
-( hd_driver3 FIRST-FREE ) CF: ?PC ?32 \ AH A1may3
+( -sa_32 hd_driver3 FIRST-FREE ) CF: ?PC ?32 \ AH A1may3
  "BIN-SEARCH" WANTED
 : FREE? RW-BUFFER SWAP 1 R|W
 DISK-ERROR 1 AND   RW-BUFFER (FREE?)   OR ;
@@ -4126,7 +4430,7 @@ FIRST-BLOCK LAST-BLOCK 'NON-FREE? BIN-SEARCH 1 + ;
 
 
 
-( hd_driver4 BLMOVE BLMOVE-FAST BACKUP ) CF: ?PC ?32 \ AvdH
+( -sa_32 hd_driver4 BLMOVE BLMOVE-FAST ) CF: ?PC ?32 \ AvdH
 HEX
 : BLMOVE 0 DO  ( as MOVE for blocks.)
   SWAP RW-BUFFER OVER 1 R|W 1+   SWAP RW-BUFFER OVER 0 R|W 1+
@@ -4142,7 +4446,7 @@ HEX
 : SAVE-CHUNK DUP CHECK
  CURRENT-CHUNK CHUNK-SIZE * OVER CHUNK-SIZE * CHUNK-SIZE
 BLMOVE-FAST PATCH-CHUNK ; DECIMAL
-( hd_driver5 I-INSPECT AH) CF: ?PC ?32 HEX \ AH A1sep01
+( -sa_32 hd_driver5 I-INSPECT AH) CF: ?PC ?32 HEX \ AH A1sep01
 : ASCII? DUP BL 7F WITHIN SWAP ^J = OR ;
 ( SC contains all ``ASCII'' )
 : ALL-ASCII? OVER + SWAP DO I C@ DUP ASCII? 0=

@@ -25,7 +25,7 @@ Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
 @end titlepage
 
-@node Top, , ,
+@node top, , ,
 @chapter Overview
 forthvar({ci86.gnr}) is a system to build a ciforth in diverse
 configuration's.
@@ -1566,15 +1566,15 @@ forthcode({COLD}) performs a second execution of the startup options
 that almost always give give problems
 and it may leave an undefined situation w.r.t. wordlists.
 
-dnl@node Glossary Index,,,Top
+dnl@node Glossary Index,,,top
 @unnumbered Program Index
 This index lists programs words.
 @printindex pg
-dnl@node Forth Word Index,,,Top
+dnl@node Forth Word Index,,,top
 @unnumbered Forth Word Index
 This index lists forth words.
 @printindex fn
-dnl@node Concept Index,,,Top
+dnl@node Concept Index,,,top
 @unnumbered Concept Index
 This index lists concepts.
 dnl The first reference is where the concept is explained.

@@ -1,10 +1,10 @@
 _C{         ciforth : a generic I86 ISO FORTH by HCC FIG}
-_C{ $Id: ci86.gnr,v 5.167 2018/07/10 18:49:20 albert Exp $}
+_C{ $Id: ci86.gnr,v 5.190 2022/04/06 14:41:12 albert Exp $}
 _C{ Copyright (2012):} M4_SUPPLIER {by GNU Public License}
 _C
 _C{HCC FIG Holland : Hobby Computer Club, Forth Interest Group  Holland}
         PAGE  66,106
- TITLE   ciforth $Revision: 5.167 $
+ TITLE   ciforth $Revision: 5.190 $
 _C
 _C{ For the generic system (to generate ciforth in an other configuration than this one):}
 _C{     http://home.hccnet.nl/a.w.m.van.der.horst/ci86gnr.html}
@@ -121,17 +121,17 @@ _C
 _C{      MEMORY LAYOUT.}
 _C{ Normally this is specified at the m4 configuration level.}
 _C{ For a configured system these values can be changed at this single place. }
+dnl This is the index of the CONTEXT user variable.
+define({M4_USUSED},39)dnl
 NBUF    EQU     M4_NBUF   _C{ No. of buffers, or screens }
 KBBUF   EQU     1024      _C{ Data bytes per disk buffer}
 US      EQU     M4_US*CW  _C{ User variable space, eats into next data stack, if any.}
 EM      EQU     M4_EM     _C{ Where the memory ends w.r.t. ORIG. 1) }
 EMP     EQU     (EM-1)/0x1000+1 _C{ Number of pages.}
 TAS     EQU     M4_RTS    _C{Size of unitialised area per task.}
-STACKSIZE   EQU TAS/4  _C{For both stacks. } but for now
-_DLL_(
-{TIBSIZE     EQU 4000H },
-{TIBSIZE     EQU TAS/4  _C{TIB size. }
-})dnl
+STACKSIZE   EQU TAS/4  _C{For both stacks. }
+dnl It seems that DLL cannot have this larger than about 4000H
+TIBSIZE     EQU TAS/4  _C{TIB size. }
 _C
 _C{ NOTE 1:}
 _BITS64_({_C{Nothing tricky on 64 bits systems}},
@@ -355,8 +355,9 @@ EPIPE   EQU     38
 _HOSTED_X_({
         _TEXT_
         PAGE
-        GLOBAL  _start       _C Entry point.
+        GLOBAL  _start       _C Entry point's guesses.
         GLOBAL  start        _C Entry point.
+        GLOBAL  _main        _C Entry point.
 _ORIG:
 _start:      _C Entry point.
 })_C{}_END_({ _HOSTED_X_})
@@ -1211,8 +1212,6 @@ _C{ ############################################################################
 _C{                       FORTH ITSELF}
 _C{ ########################################################################################}
 _C
-dnl fasm has no multiline comments, which is appropiate for an assembler.
-dnl So the following is suppressed from the assembler file.
 _COMMENTED({
    FORTH REGISTERS
    The names under FORTH are used in the generic source.
@@ -1224,7 +1223,7 @@ dnl Note how the following is to pass through m4
                     across FORTH words.
 
    {WOR}   WOR      Working register.  When entering a word
-                    via its code field the forthdefi({dea}) is passed in {WOR}.
+                    via its code field the dea is passed in {WOR}.
 
    {SPO}   SPO      Parameter stack pointer.  Must be preserved
                     across FORTH words.
@@ -1432,7 +1431,8 @@ DP0:
 _C{ End of ONLY namespace. Namespaces all end in a link to 0.}
 define({_LINKOLD},0)dnl
 worddocsafe( {DENOTATIONS},{Prefix_TICK}, {tick_denotation},{--- addr},{I,P},
-{Used in the form: forthexample({'nnnn})
+{Used in the form:
+forthexample({'nnnn})
 In interpret mode it
 leaves the forthdefi({execution token})
 (equivalent to the forthdefi({dea}) dictionary entry address)
@@ -1516,7 +1516,7 @@ _VERBOSE_({{ ISO compatibility ony requires that denotators for
 decimal digits are present,
 one can always use a leading zero.}})
 },
-{{NUMBER},{B},{7}},
+{{NUMBER},{(NUMBER)},{B},{7}},
 {
 {048 .},{48 },
 {: GS1 058 ; GS1 .},{58 }},
@@ -1535,7 +1535,7 @@ worddocsafe( {DENOTATIONS},{Prefix_7},{den_seven}, {--- s/d},{I,P},
 {A prefix that handles numbers that start with
 forthkey({7}) . Similar words are present for all decimal and hex digits.
 },
-{{NUMBER},{0},{B}},
+{{NUMBER},{(NUMBER)},{0},{B}},
 {
 {13 . 23 . 33 . 43 . 53 . }, {13 23 33 43 53 },
 {53 . 63 . 73 . 83 . 93 . }, {53 63 73 83 93 },
@@ -1552,7 +1552,7 @@ worddocsafe( {DENOTATIONS},{Prefix_B},{den_b}, {--- s/d},{I,P},
 {A prefix that handles numbers that start with
 forthkey({B}) . Similar words are present for all decimal and hex digits.
 },
-{{NUMBER},{0},{7}},
+{{NUMBER},{(NUMBER)},{0},{7}},
 {
 {A3 . B3 . C3 . D3 . E3 . F3 . }, {A3 B3 C3 D3 E3 F3 },
 {: GS1 A3 . B3 . C3 . D3 . E3 . F3 . ; GS1 }, {A3 B3 C3 D3 E3 F3 }
@@ -1566,7 +1566,7 @@ _C
 worddoc( {DENOTATIONS},{Prefix_-},{den_minus}, {--- s/d},{I,P},
 {A prefix that handles numbers that start with
 forthkey({-}) .},
-{{NUMBER},{7},{B}},
+{{NUMBER},{(NUMBER)},{7},{B}},
 {{-48 .},{-48 },
 {: GS1 -58 ; GS1 .},{-58 }}, enddoc)
 _HEADER({-},{DENM},{DOCOL}, , B_IMMED + B_DENOT)
@@ -1576,7 +1576,7 @@ _C
 worddoc({DENOTATIONS},{Prefix_+},{den_plus}, {--- s/d},{I,P},
 {A prefix that handles numbers that start with
 forthkey({+}) .},
-{{NUMBER},{7},{B}},
+{{NUMBER},{(NUMBER)},{7},{B}},
 {{+48 .},{48 },
 {: GS1 +58 ; GS1 .},{58 }}, enddoc)
 _HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
@@ -1584,9 +1584,12 @@ _HEADER({+},{DENP},{DOCOL}, , B_IMMED + B_DENOT)
         DC      SEMIS
 _C
 worddocsafe( {DENOTATIONS},{Prefix_"},{den_quote}, {--- sc},{I,P},
-{Parse a forthkey({"}) delimited string and leave it on the stack.
+{Parse a forthkey({"}) delimited string and leave it on the stack
+as a forthdefi({stringconstant}) , i.e. an address and a length.
 A forthkey({"}) can be embedded in a string by doubling it.
 The string is permanent and takes dictionary space.
+The cell below the address contains the length,
+so forthsamp({DROP 1 CELLS  - }) can be used as a single cell reference.
 _VERBOSE_({This is a denotation: during compilation this behaviour is compiled.})
 },
 {},
@@ -1753,7 +1756,7 @@ be used as a forthcode({CONTEXT}) word list; and only as a
 forthcode({CURRENT}) whenever you want to add an environment
 query.},
 {{NAMESPACE}},
-{{: GS1 [COMPILE] ENVIRONMENT DEFINITIONS LATEST ID. [COMPILE] dnl
+{{: GS1 ENVIRONMENT DEFINITIONS LATEST ID. dnl
 FORTH DEFINITIONS ; GS1},{SUPPLIER}},
 enddoc)
 _HEADER({ENVIRONMENT},{ENV},{DODOE}, , )
@@ -1852,7 +1855,7 @@ worddoc( {CONTROL~},{0BRANCH},{zero_branch},{f ---},{FIG,C},
 (zero), the following in-line parameter is added to the interpretive
 pointer to branch ahead or back.
 Compiled by forthcode({IF}) , forthcode({UNTIL}) , and forthcode({WHILE}) .
-},{{BRANCH},{(FORWARD},{(BACK)},{SKIP} },
+},{{BRANCH},{(FORWARD},{(BACK},{SKIP} },
 {{ : GS1 1 0 0BRANCH [ 0 CELL+ , ] BL BL ; GS1 . .}, {20 1},
 { : GS2 1 1 0BRANCH [ 0 CELL+ , ] BL BL ; GS2 . . .}, {20 20 1}},
 enddoc)
@@ -1863,39 +1866,46 @@ CODE_HEADER({0BRANCH},{ZBRAN})
         LEA     HIP,[HIP+_CELLS(1)]
         _NEXT
 _C
-_C
-worddocsafe( {CONTROL~},{(LOOP)},{paren_loop},{},{C},
-{The run-time proceedure compiled by LOOP which increments the loop
-index and tests for loop completion.
-},{{LOOP}},
-{{." See LOOP"},{See LOOP}},
-enddoc)
-CODE_HEADER({(LOOP)},{XLOOP})
-        MOV     BX,1    _C{ INCREMENT}
-XLOO1:  ADD     [RPO],BX _C{ INDEX = INDEX + INCR}
-        MOV     AX,[RPO] _C{ GET NEW INDEX}
-        SUB     AX,[RPO+_CELLS(1)]        _C{ COMPARE WITH LIMIT}
-        XOR     AX,BX   _C{ TEST SIGN}
-        JS      BRAN1   _C{ KEEP LOOPING}
-_C
-_C{  END OF `DO' LOOP}
-        LEA     RPO,[RPO+_CELLS(3)]  _C{ ADJ RETURN STACK}
-        LEA     HIP,[HIP+_CELLS(1)]       _C{ BYPASS BRANCH OFFSET}
-        _NEXT
-_C
+dnl _C
+dnl worddocsafe( {CONTROL~},{(LOOP)},{paren_loop},{},{C},
+dnl {The run-time proceedure compiled by LOOP which increments the loop
+dnl index and tests for loop completion.
+dnl },{{LOOP}},
+dnl {{." See LOOP"},{See LOOP}},
+dnl enddoc)
+dnl CODE_HEADER({(LOOP)},{XLOOP})
+dnl         MOV     BX,1    _C{ INCREMENT}
+dnl XLOO1:  ADD     [RPO],BX _C{ INDEX = INDEX + INCR}
+dnl         MOV     AX,[RPO] _C{ GET NEW INDEX}
+dnl         SUB     AX,[RPO+_CELLS(1)]        _C{ COMPARE WITH LIMIT}
+dnl         XOR     AX,BX   _C{ TEST SIGN}
+dnl         JS      BRAN1   _C{ KEEP LOOPING}
+dnl _C
+dnl _C{  END OF `DO' LOOP}
+dnl         LEA     RPO,[RPO+_CELLS(3)]  _C{ ADJ RETURN STACK}
+dnl         LEA     HIP,[HIP+_CELLS(1)]       _C{ BYPASS BRANCH OFFSET}
+dnl         _NEXT
+dnl _C
 worddocsafe( {CONTROL~},{(+LOOP)},{paren_plus_loop},{n ---},{C},
 {The run-time proceedure compiled by forthcode({+LOOP}), which increments the loop
 index by n and tests for loop completion.},{{+LOOP}},
 {{." Via +LOOP"},{Via +LOOP}},
 enddoc)
-CODE_HEADER({(+LOOP)},{XPLOO})
-        POP     BX      _C{ GET LOOP VALUE}
-        JMP SHORT     XLOO1
-        _NEXT           _C{Helpfull for disassembly.}
+CODE_HEADER({(+LOOP)},{XPLOOP})
+        POP     BX      _C{ GET INCREMENT}
+        ADD     [RPO],BX _C{ INDEX = INDEX + INCR}
+        MOV     CX,[RPO] _C{ GET NEW INDEX}
+        SUB     CX,[RPO+_CELLS(1)]        _C{ COMPARE WITH LIMIT}
+        XOR     CX,BX   _C{ compare sign}
+        SETNS    AL      _C{different signs?}
+        MOVZX   AX,AL
+        NEG     AX
+        _PUSH
+
 _C
 worddocsafe( {CONTROL~},{(DO)},{paren_do},{},{C},
 {The run-time proceedure compiled by forthcode({DO}) which
-prepares the return stack, where the looping bookkeeping is kept.},{{DO}},
+prepares the return stack, where the looping bookkeeping is kept.},{{DO},{UNLOOP}},
 {{( See DO)},{}},
 enddoc)
 CODE_HEADER({(DO)},{XDO})
@@ -1955,8 +1965,13 @@ _C
 worddoc( {CONTROL},{UNLOOP},{unloop},{},{ISO,I,C},
 {Discard the loop parameters. Must be used when the regular end
 of the loop is by-passed. That means it is not ended via
-forthcode({LOOP}) forthcode({+LOOP}) or forthcode({LEAVE}). },
-{{DO},{LOOP},{+LOOP},{(BACK},{(FORWARD},{EXIT}},
+forthcode({LOOP}) forthcode({+LOOP}) or forthcode({LEAVE}),
+but my means of forthcode({EXIT}) or unstructured branching.
+_VERBOSE_({In this Forth the parameters are the address after
+the loop, the end limit, end the current index.})
+af
+. },
+{{DO},{LEAVE},{0BRANCH},{(FORWARD}},
 {
 { : GS1 DO I . I 3 = IF UNLOOP EXIT THEN LOOP ; 10 0 GS1},
 {0 1 2 3},
@@ -2030,7 +2045,7 @@ _THREADS_( _C{ RSP@ must not be divisible by TASK-SIZE, to serve as user pointer
         DC      INITDP  _C{      INIT (FENCE)  8}
 DPA:    DC      INITDP  _C{      INIT (DP)     9}
         DC      _DEA(ENV) _C{       INIT (VOC-LINK) 10}
-        DC      _CELLS(39+M4_MAXWORDLIST)  _C{ INIT (MAX-USER) 11}
+        DC      M4_USUSED+M4_MAXWORDLIST  _C{ INIT (MAX-USER) 11}
 _CLASSIC_({
 _COMMENTED({
 _C{ This will steer clear of a forth executable, provided it is}
@@ -2101,9 +2116,10 @@ DIGI1:  CMP     AL,DL   _C{ COMPARE NUMBER TO BASE}
         MOV     DL,AL   _C{NEW BINARY NUMBER}
         MOV     AL,_OFFSET 1    _C{TRUE FLAG}
         NEG     AX
-        _2PUSH          _C{ADD TO STACK}
+        JMP     DIGI3
 _C{   NUMBER ERROR}
 DIGI2:  SUB     AX,AX   _C{FALSE FLAG}
+DIGI3:
         _2PUSH
 _C
 worddocsafe( {DICTIONARY~},{~MATCH},{unmatch},{sc dea --- sc dea n},{},
@@ -2123,9 +2139,8 @@ enddoc)
 _HEADER({~MATCH},{NMATCH},{DOCOL})
 _C
         DC      TOR                           _C{ Remember dea}
-        DC      TDUP
+        DC      OVER
         DC      RR, TNFA, FETCH, SFET
-        DC      ROT, MIN
         DC      CORA
         DC      FROMR, SWAP                   _C{ Leave flag on top of dea.}
         DC      SEMIS                            _C
@@ -2318,7 +2333,7 @@ what the source area contained, regardless of overlaps.
 As the Intel 86-family is byte-addressing there are
 no restrictions.
 Because in ciforth bytes (address units) and characters are the same
-the difference with forthcode({CMOVE}) anounts to forthcode({MOVE})
+the difference with forthcode({CMOVE}) amounts to forthcode({MOVE})
 being an intelligent move.
 },
 {},
@@ -2585,7 +2600,7 @@ worddoc( {CONTROL},{LEAVE},{leave},{},{ISO},
 {Terminate a do-loop by branching to directly behind the
 end of a loop started by forthcode({DO}) or forthcode({?DO}) ,
 so after the corresponding
-forthcode({LOOP}) or forthcode({+LOOP}) .},{},
+forthcode({LOOP}) or forthcode({+LOOP}) .},{{UNLOOP}},
 { {: GS1 10 1 DO I 4 = IF LEAVE THEN I . LOOP ; GS1},{1 2 3} },
 enddoc)
 _HEADER({LEAVE},{LLEAV},{DOCOL})  _C{LIMIT <- INDEX}
@@ -2639,11 +2654,13 @@ It may be aliased to forthcode({NOT}) , which inverts a flag.
   {  -1 0= .},{0} },
 enddoc)
 CODE_HEADER({0=},{ZEQU})
-        POP     AX
+        POP     AX      _C{S2}
+        AND     AX,AX
+        SETZ    AL
+        MOVZX   AX,AL
         NEG     AX
-        CMC
-        SBB     AX,AX
         _PUSH
+        POP     AX
 _C
 worddoc( {LOGIC},{0<},{zero_less},{n --- ff},{ISO,FIG},
 {Leave a true flag if the number is less than zero (negative),
@@ -2654,11 +2671,11 @@ otherwise leave a false flag.},{{<},{0=}},
 enddoc)
 CODE_HEADER({0<},{ZLESS})
         POP     AX
-        OR      AX,AX   _C{SET FLAGS}
-        MOV     AX,0    _C{FALSE}
-        JNS     ZLESS1
-        DEC     AX      _C{TRUE}
-ZLESS1: _PUSH
+        AND     AX,AX
+        SETS    AL
+        MOVZX   AX,AL
+        NEG     AX
+        _PUSH
 _C
 worddoc( {OPERATOR},{+},{plus},{n1 n2 --- sum},{ISO,FIG},
 {Leave the sum of forthvar({n1}) and forthvar({n2}) .},{{-},{*},{/},{MOD}},
@@ -3152,7 +3169,8 @@ worddoc( {DEFINING},{USER},{user},{n ---},{ISO},
 which creates a user variable forthsamp({cccc}) . The data
 field of forthsamp({cccc}) contains forthvar({n}) as a
 byte offset relative to the user pointer register forthsamp({UP})
-for this user variable. When forthsamp({cccc}) is later
+for this user variable, which is forthsamp({ n CELLS}).
+When forthsamp({cccc}) is later
 executed, it places the sum of its offset and the user area
 base address on the stack as the storage address of that
 particular variable.
@@ -3163,11 +3181,8 @@ forthsamp({UP}) is switched also automatically.}},
 {{In this ciforth the forthsamp({UP}) is to be found at
 forthsamp({0 +ORIGIN}).
 }})
-forthcode({CONTEXT}) is the last user variable at offset 38 CELLS,
-such that new user variables may be allocated using offsets of
-38+M4_MAXWORDLIST CELLS and up.
 It is best to do
-  forthsamp({MAX-USER @@ DUP USER cccc    CELL+ MAX-USER ! })
+  forthsamp({MAX-USER @@ DUP USER cccc    1 MAX-USER ! })
 reflecting the current allocation in the user area.
 },
 {{VARIABLE},{+ORIGIN},{CONTEXT},{>DFA}},
@@ -3467,9 +3482,8 @@ enddoc)
 _HEADER({VOC-LINK},{VOCL},{DOUSE}, _CELLS(10))
 _C
 worddoc( {DEFINING},{MAX-USER},{max_user},{--- addr},{U},
-{A user variable which contains the size of the
-area for user variables, that is in use.
-It is measured in bytes from the start of the user area. },
+{A user variable which contains the offset of next user variable.
+It is measured in cells from the start of the user area. },
 {{BLOCK},{USER},{MESSAGE},{U0}},
 {{MAX-USER @ 1000 U< .},{_T_}},
 enddoc)
@@ -3522,6 +3536,15 @@ double integer or floating point input, or a forthdefin({nil pointer}).
 {{1234.56 DPL @ 0= . 2DROP},{0}},
 enddoc)
 _HEADER({DPL},{DPL},{DOUSE}, _CELLS(20))
+_C
+worddoc( {FORMATTING~},{ECL},{e_c_l},{---- addr},{},
+{A user variable containing the address of the exponential sign
+in a floating point input, or a forthdefin({nil pointer}).
+},
+{{DPL}},
+{{." No test"},{No test} },
+enddoc)
+_HEADER({ECL},{ECL},{DOUSE}, _CELLS(38))
 _C
 worddoc( {FORMATTING~},{FLD},{f_l_d},{--- addr},{FIG,U},
 {A user variable for control of number output field width.
@@ -3715,7 +3738,7 @@ least 8.
 {{PRESENT},{NAMESPACE},{CURRENT},{USER}},
 {{CONTEXT @ ' FORTH >WID = .},{_T_}},
 enddoc)
-_HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(38)) _C{ Up to } 38+M4_MAXWORDLIST
+_HEADER({CONTEXT},{CONTEXT},{DOUSE}, _CELLS(M4_USUSED)) _C{ Up to } M4_USUSED+M4_MAXWORDLIST
 _C{      IMPORTANT}
 _C{     }M4_MAXWORDLIST{ USER SPACE CELLS MUST BE KEPT FREE}
 _C{     IN ADDITION TO THE ONE FOR CONTEXT}
@@ -3905,10 +3928,14 @@ worddoc( {LOGIC},{=},{equals},{n1 n2 --- ff},{ISO,FIG},
 { { 0A BASE !  240 204 = .},{0},
   { 240 240 = .},{_T_} },
 enddoc)
-_HEADER({=},{EQUAL},{DOCOL})
-        DC      LSUB
-        DC      ZEQU
-        DC      SEMIS
+CODE_HEADER({=},{EQUAL})
+         POP     AX
+         POP     BX
+         CMP     AX,BX
+         SETZ    AL
+         MOVZX   AX,AL
+         NEG     AX
+         _PUSH
 _C
 worddoc( {LOGIC},{<},{less_than},{n1 n2 --- ff},{ISO},
 {Leave a true flag if forthvar({n1}) is less than forthvar({n2}) ;
@@ -3920,13 +3947,13 @@ flag.},{{=},{>},{0<}},
  {1 1 < .},{0} },
 enddoc)
 CODE_HEADER({<},{LESS})
-        POP     DX      _C{S1}
-        POP     BX      _C{S2}
-        XOR     AX,AX   _C{0 default RESULT}
-        CMP     BX,DX
-        JNL     LES1
-        DEC     AX
-LES1:   _PUSH
+        POP     AX
+        POP     BX
+        CMP     BX,AX
+        SETL    AL
+        MOVZX   AX,AL
+        NEG     AX
+        _PUSH
 _C
 worddoc( {LOGIC},{U<},{u_less_than},{u1 u2 --- ff},{ISO},
 {Leave a true flag if forthvar({u1}) is less than forthvar({u2}) ; otherwise leave a false
@@ -3937,11 +3964,18 @@ flag.(Interpreted as unsigned numbers).},{{<}},
  {1 1 U< .},{0} },
 enddoc)
 CODE_HEADER({U<},{ULESS})
-        POP     AX
-        POP     DX
-        SUB     DX,AX
-        SBB     AX,AX
-        _PUSH
+       POP     AX
+               POP     DX
+               SUB     DX,AX
+               SBB     AX,AX
+               _PUSH
+dnl         POP     AX
+dnl         POP     BX
+dnl         CMP     BX,AX
+dnl         SETC    AL
+dnl         MOVZX   AX,AL
+dnl        NEG     AX
+dnl        _PUSH
 _C
 worddoc( {LOGIC},{>},{greater_than},{n1 n2 --- ff},{ISO},
 {Leave a true flag if forthvar({n1}) is greater than
@@ -3966,11 +4000,14 @@ forthvar({n2}) ; otherwise leave a false flag.},
  {0 -1 <> .},{_T_},
  {1 1 <> .},{0} },
 enddoc)
-_HEADER({<>},{UNEQ},{DOCOL})
-        DC      LSUB
-        DC      ZEQU
-        DC      ZEQU
-        DC      SEMIS
+CODE_HEADER({<>},{UNEQ})
+         POP     AX
+         POP     BX
+         CMP     AX,BX
+         SETNZ    AL
+         MOVZX   AX,AL
+         NEG     AX
+         _PUSH
 _C
 worddoc( {JUGGLING},{ROT},{rot},{nl n2 n3 --- n2 n3 nl},{ISO,FIG},
 {Rotate the top three values on the stack, bringing the third to the
@@ -4353,7 +4390,7 @@ _C
 _C
 worddocsafe( {PARSING},{[},{left_bracket},{},{ISO,FIG,I,},
 {Used in a colon-definition in form:
-forthexample({:  xxx    [  words   ]    more   ;})
+    forthexample({:  xxx    [  words   ]    more   ;})
 Suspend compilation. The words after forthcode({[}) are executed, not compiled.
 This allows calculation or compilation exceptions before resuming
 compilation with forthcode({]})},{{LITERAL} ,{]}},
@@ -4436,6 +4473,7 @@ _HEADER({(;CODE)},{PSCOD},{DOCOL})
         DC      STOR
         DC      SEMIS
 _C
+_SUPPRESSED({{
 worddoc( {DEFINING~},{;CODE},{semicolon_code},{},{WANT,ISO,FIG,I,C},
 {Used in the form:
   forthsamp({: cccc CREATE .... ;CODE assembly mnemonics })
@@ -4460,6 +4498,7 @@ Machine code must end in forthcode({NEXT,}) also available with the assembler.
 {{." Not present"},{Not present} },
 enddoc)
 _C
+}})_C{}_END_({ _SUPPRESSED})
 worddoc( {DEFINING},{CREATE},{create},{},{ISO},
 {A defining word used in the form:
      forthsamp({CREATE cccc})
@@ -4468,7 +4507,7 @@ the value of forthcode({HERE}) immediately
 after executing forthcode({CREATE}) .
 
 It can be the base of a new defining word if used in the form:
-     forthexample({: CREATOR CREATE aaaa DOES> bbbb ;
+    forthexample({: CREATOR CREATE aaaa DOES> bbbb ;
 CREATOR cccc
 })
 The second line has the effect of creating a word forthsamp({cccc}) .
@@ -4790,6 +4829,52 @@ SSLAS2:
         PUSH    BX   _C{Skipped length.}
         _NEXT
 _C
+worddoc( {STRING},{$\},{string_backslash},{sc c --- sc1 sc2},{},
+{Find the first forthvar({c}) in the forthdefin({string constant})
+forthvar({sc}) from the back and split it at that address.
+Return the strings before and after forthvar({c}) into forthvar({sc1}) and
+forthvar({sc2}) respectively.
+If the character is not present forthvar({sc1}) is a null string
+_VERBOSE_({{(its address is zero)}}) and forthvar({sc2}) is the
+original string.
+_VERBOSE_({{Both }forthvar({sc1}){ and }forthvar({sc2}){ may be
+empty strings (i.e. their count is zero), if }forthvar({c}){ is
+the last or first character in }forthvar({sc}){ .}}) },
+{{$^},{CORA},{$@@}},
+{{ 132 "ORANG" &O $\ DUP . TYPE . DROP . },{4 RANG0 132},
+{ "ORANG OETAN" BL $\ DUP . TYPE DUP . TYPE },{5 OETAN5 ORANG},
+{ "ORANG" &G $\ DUP . TYPE DUP . TYPE },{0 4 ORAN},
+{ 132 "ORANG" &Z $\ DUP . TYPE . . .},{5 ORANG0 0 132 }},
+enddoc)
+CODE_HEADER({$\},{BSLAS})
+_C{       Assume the extra segment points to the data segment }
+        POP     AX      _C{ char}
+        POP     CX      _C{ count}
+        MOV     BX,CX
+        POP     DI      _C{ addr}
+        MOV     DX,DI   _C{ Copy}
+        ADD     DI,CX
+        DEC     DI      _C{Last char & clear zero flag.}
+        STD    _C{ DEC DIRECTION}
+        REPNZ     SCASB   _C{ Compare BYTE}
+        JZ      BSLAS1
+_C{ Not present.}
+        PUSH    CX   _C{ Nil pointer.}
+        INC     DI   _C{Start of end string}
+        JMP SHORT BSLAS2
+BSLAS1:
+        PUSH    DX   _C{Start of start string.}
+        INC     DI
+        INC     DI   _C{Start of end string}
+        SUB     BX,CX
+        DEC     BX      _C{Delimiter is not part of ending string.}
+BSLAS2:
+        PUSH    CX   _C{Remaining length}
+        PUSH    DI
+        PUSH    BX
+        CLD
+        _NEXT
+_C
 worddoc( {MEMORY},{ERASE},{erase},{addr n ---},{ISO},
 {This is shorthand for forthsamp({0 FILL}).},
 {{BLANK},{FILL}},
@@ -4936,10 +5021,15 @@ same meaning. ciforth also allows any number of comma's that
 are just ignored, to improve readability. If the first
 unconvertible digit is not a blank, this is an error.
 This word is used by all number prefixes.
+ciforth guarantees that PP points directly after a number parsed,
+such that for double numbers forthsamp({PP@ DPL @ - 1-}) gives
+the number of decimals.
 },
 {{NUMBER},{?BLANK},{Prefix_7}},
 {
 { (NUMBER) 1324 D.},{1324},
+{ : GS1 (NUMBER) PP @ ; },{},
+{ GS1 13.24 DPL @ - . D.},{3 1324 },
 { (NUMBER) 1abcdefgh D.},
 { (NUMBER) 1abcdefgh ? ciforth ERROR # 10 : NOT A WORD, NOR A NUMBER OR OTHER DENOTATION}
 },
@@ -4977,7 +5067,7 @@ NPNUM3:
         DC      DPLUS
         _BRANCH(NPNUM1) _C{ repeat }
 NPNUM5:
-        DC      TDROP
+        DC      DROP, PP, STOR
         DC      SEMIS
 _C
 worddoc( {FORMATTING~},{NUMBER},{number},{ ---  s/d},{},
@@ -5130,7 +5220,8 @@ execution token forthvar({xt}). If the word is immediate, also
 return 1, otherwise also return -1. If it is not found, leave
 the original forthvar({addr}) and a zero.
 In ciforth the alternative forthcode({FOUND}) is used,
-that uses a regular string, hence this is a loadable extension.
+that uses a regular forthdefi({stringconstant}) ,
+hence this is a loadable extension.
 },
 {{FOUND},{CONTEXT},{PRESENT},{(FIND)}},
 {
@@ -5201,52 +5292,38 @@ _C{ The idea is to have a fast slim loop.}
 _C{ The optimisation tries to skip, using the extra links.}
 _C{ At all labels the stack is (sc, dea).}
 _C{ PFIND0 : nothing known yet about dea}
-_C{ PFINDM1 : dea has no optimisation possibilities any more}
-_C{ PFINDM2 : dea has a possible match: ~MATCH returns 0(=equal)}
-_C{ PFIND1 : dea is a match, inasfar name and prefix}
-_C{ PFIND2 : dea is the match, or null.}
+_C{ PFCONTINUE : dea is disapproved, go on}
+_C{ PFEXIT : dea is the match, or null.}
 
-PFIND0:                       _C{Start of fast loop}.
-        _EXTRAFIELD_({DC      OPT                   _C{ (Speed optimisation).}
-        DC      LDUP
-        _0BRANCH(PFIND2)
-})        DC      NMATCH
-        _0BRANCH(PFINDM2)
-PFINDM1:
-        DC      TLFA, FETCH
-        DC      LDUP, ZEQU
-        _0BRANCH(PFIND0)      _C{End of fast loop}.
-
-_C{ Exit for end of chain (fall through)}
-        _BRANCH(PFIND2)
-_C{ Exit for possible match}
+PFIND0:                       _C{Start of loop}.
+        DC      NMATCH
+        DC      ZEQU
+        _0BRANCH(PFCONTINUE)
 _C{ ~MATCH is sure in determining a no-match,}
 _C{ a possible match must be investigated closely.}
-PFINDM2:
 _C
-_C{ Discard, because name too short to match dea, can't be a denotation.}
+_C{ dea's name and sc have equal length}
         DC      TDUP, TNFA, FETCH, FETCH
-        DC      LESS, ZEQU
-        _0BRANCH(PFINDM1)
-_C
-_C{ Equal: found, barring invisibility and dummy entries.}
-        DC      TDUP, TNFA, FETCH, FETCH
-        DC      LSUB
-        _0BRANCH(PFIND1)
-_C
-_C{ Discard, unless dea is a denotation ("prefix")}
-        DC      LDUP, TFFA, FETCH
+        DC      EQUAL
+_C{ dea is a prefix }
+        DC      OVER, TFFA, FETCH
         DC      LIT, B_DENOT, LAND
-        _0BRANCH(PFINDM1)
+        DC      LOR             _C{ One of those must apply.}
+        _0BRANCH(PFCONTINUE)
 
 _C{ Discard still, if invisible ("smudged") or dummy.}
-PFIND1:
         DC      LDUP, TFFA, FETCH
         DC      LIT, B_INVIS _OR_ B_DUMMY, LAND
         DC      ZEQU
-        _0BRANCH(PFINDM1)
+        _0BRANCH(PFCONTINUE)
+        _BRANCH(PFEXIT)         _C{ Match! }
+PFCONTINUE:
+        DC      TLFA, FETCH
+        DC      LDUP, ZEQU
+        _0BRANCH(PFIND0)      _C{End of loop}.
+_C{ Fall through leaves zero, as required.}
 
-PFIND2:
+PFEXIT:
         DC      SEMIS
 _C
 worddoc( {ERRORS},{ERROR},{error},{n ---},{},
@@ -5335,7 +5412,7 @@ _HEADER({THROW},{THROW},{DOCOL})
         DC      HANDLER, FETCH, ZEQU
         _0BRANCH(THROW2)
         DC      LERROR
-        DC      SZERO, FETCH, SPSTO
+        DC      CLS
         DC      QUIT
 THROW2:
         DC      HANDLER, FETCH, RPSTO
@@ -5354,7 +5431,8 @@ worddocsafe( {ERRORS~},{(ABORT")},{paren_abort_quote},{f ---},{},
 {},
 {{( See abort_quote)},{}},
 enddoc)
-_HEADER({(ABORT")},{PABORTQ},{DOCOL})
+_SUPPRESSED({{
+_C{}_HEADER({(ABORT")},{PABORTQ},{DOCOL})
         DC      ROT
         _0BRANCH(PABQ1) _C{IF}
         DC      ETYPE
@@ -5362,6 +5440,7 @@ _HEADER({(ABORT")},{PABORTQ},{DOCOL})
         _BRANCH(PABQ2) _C{ELSE}
 PABQ1:  DC       TDROP
 PABQ2:   DC      SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 _C
 worddocsafe( {ERRORS},{ABORT"},{abort_quote},{f ---},{ISO,I,C},
 {Usage is forthsamp({: <SOME> ... ABORT" <message>" ... ;}). If
@@ -5372,18 +5451,21 @@ words after forthsamp({<message>}). This word can only be used
 in compile mode.
 },
 {{?ERROR}},
-{{ 0 WARNING ! 1  ABORT" APE" }, {WARNING ! 1 ABORT" ? ciforth ERROR # 17 },
+{{1 LOAD  "ABORT""" WANTED },{},
+{ 0 WARNING ! 1  ABORT" APE" }, {WARNING ! 1 ABORT" ? ciforth ERROR # 17 },
 {CR : GS1 0 ABORT" APE" 123 ; GS1 .},{123},
 dnl The warm start message is filtered away!
 {: GS2 1 ABORT" APE" 123 ; GS2 .},{APE}
 },
 enddoc)
-_HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
+_SUPPRESSED({{
+_C{}_HEADER({ABORT"},{ABORTQ},{DOCOL},,B_IMMED)
         DC      QCOMP
         DC      DENQ
         DC      LIT, PABORTQ, COMMA
         DC      SEMIS
-_C
+}})_C{}_END_({ _SUPPRESSED})
+
 })_C{}_END_({_LOAD_})
 worddoc( {DICTIONARY},{ID.},{i_d_dot},{dea ---},{},
 {Print a definition's name from its dictionary entry address.
@@ -5502,7 +5584,7 @@ _HEADER({(CREATE)},{PCREAT},{DOCOL})
 _C
 worddocsafe( {COMPILING},{[COMPILE]},{bracket_compile},{},{ISO,I,C},
 {Used in a colon-definition in the form:
-forthexample({:  xxx ... [COMPILE] IF ...  ;})
+    forthexample({:  xxx ... [COMPILE] IF ...  ;})
 forthcode({[COMPILE]}) will force the compilation of an immediate definition,
 that would otherwise execute during compilation.
 The above example will perform forthcode({IF}) when forthsamp({xxx})
@@ -5663,7 +5745,7 @@ parse pointer to immediately after the prefix,
 A word that matches a prefix is called a forthdefi({denotation});
 mostly this is a number.
 If it is not found at all, it is an forthcode({ERROR}).
-Prefixes are present in forthcode({ONLY}) which
+Prefixes are present in the forthdefi({namespace}) forthcode({ONLY}) which
 comprises the minimum search order and is always present as
 the last wordlist in the search order.
 An application can add prefixes in whatever namespace is suitable.
@@ -5777,18 +5859,18 @@ _VERBOSE_({This is also different among Forth implementations.})
 
 A namespace 's data content field contains at first the dovoc
 pointer (like for any forthcode({DOES>}) word) , then follows
-its body. The body contains the namespace ("vocabulary") link
+its body.
+The body contains the namespace ("vocabulary") link
 field address ( forthdefi({VLFA}) ). The VLFA points to the VLFA
 of the next namespace  or  a forthdefi({nil pointer}) for the end.
-Then follows a dummy dea that serves
-as forthdefi({word list identifier})or forthdefi({WID}) .
+Then follows a wordlist forthdefi({word list identifier}) or forthdefi({WID}) .
 Executing the
 namespace means pushing its WID on top of the
 forthcode({CONTEXT}) order. In ciforth when there can be
 at most M4_MAXWORDLIST word list 's in the search order, the
 oldest one gets lost.
 },
-{{ALSO},{VOC-LINK},{DEFINITIONS},{FOR-VOCS},{>WID}},
+{{ALSO},{PREVIOUS},{WORDLIST},{DEFINITIONS},{FOR-VOCS},{>WID}},
 {{123 NAMESPACE JOHN .},{123},
 {123 JOHN . ONLY FORTH},{123}},
 enddoc)
@@ -6230,7 +6312,7 @@ worddoc( {OPERATINGSYSTEM},{COMMAND-LINE},{command_line},{ --- sc },{},
 {forthvar({sc}) is the command line with which this forth is invoked. },
 {},
 _BITS32_({
-{{ COMMAND-LINE TYPE }, {wina.exe},
+{{ COMMAND-LINE TYPE }, {wina32.exe},
  { LAST-ERROR .}, {0} },
 })
 _BITS64_({
@@ -6424,7 +6506,7 @@ worddoc( {MULTIPLYING},{M*},{m_star},{n1 n2 --- d},{ISO,FIG},
 {A mixed magnitude math operation which leaves the double
 number forthvar({d}) : the signed product of two signed number
 forthvar({n1}) and forthvar({n2}) .},
-{{M/MOD},{SM/REM},{*}},
+{{UDM/MOD},{SM/REM},{*}},
 { { -1 -1 M* D. },{1},
   {DECIMAL 240 204 M* D.},{48960} },
 enddoc)
@@ -6442,7 +6524,7 @@ from a double number dividend forthvar({d}) and divisor
 forthvar({n1}). This is a symmetric division{{}}_VERBOSE_({{, i.e.
 the remainder takes its sign from the
 dividend.}})},
-{{M/MOD}, {FM/MOD},{/},{M*}},
+{{UDM/MOD}, {FM/MOD},{/},{M*}},
 {
 {  7 S>D  3 SM/REM . . },{2   1},
 {  7 S>D -3 SM/REM . . },{-2   1},
@@ -6520,7 +6602,7 @@ remainder forthvar({n2}) and signed quotient forthvar({n3})
 from a double number dividend forthvar({d}) and divisor
 forthvar({n1}). This is floored division{{}}, i.e.
 the remainder takes its sign from the divisor.},
-{{SM/REM}, {M/MOD},{/},{M*}},
+{{SM/REM}, {UDM/MOD},{/},{M*}},
 {
 {  7 S>D  3 FM/MOD . . },{2   1},
 {  7 S>D -3 FM/MOD . . },{-3   -2},
@@ -6655,33 +6737,43 @@ _HEADER({*/},{SSLA},{DOCOL})
         DC      SEMIS
 _C
 worddoc( {MULTIPLYING},{M/MOD},{m_slash_mod},{ud1 u2 --- u3 ud4},{CIF,FIG},
+{This is an irregarly named alias of  forthdefi({UDM/MOD}) .
+},
+{{UDM/MOD}},
+,
+enddoc)
+worddoc( {MULTIPLYING},{UDM/MOD},{u_d_m_slash_mod},{ud1 u2 --- u3 ud4},{CIF,FIG},
 {An unsigned mixed magnitude math operation which leaves a
 double quotient forthvar({ud4}) and remainder forthvar({u3}) ,
 from a double dividend forthvar({ud1}) and single divisor
 forthvar({u2}).
+Unlike with forthdefi({UM/MOD}) the quotient can not overflow.
+The traditional alias forthcdefi({M/MOD}) dates from the fig-forth era.
 },
 {{UM/MOD},{SM/REM},{M*}},
 _BITS16_({
 {
-{-1. -1 M/MOD D. .},{10001 0},
-{ 88812.34 100 M/MOD D. .},{88812 34},
-{DECIMAL 12.34 100 M/MOD D. .},{12 34},
+{-1. -1 UDM/MOD D. .},{10001 0},
+{ 88812.34 100 UDM/MOD D. .},{88812 34},
+{DECIMAL 12.34 100 UDM/MOD D. .},{12 34},
 } })
 _BITS32_({
 {
-{-1. -1 M/MOD D. .},{100000001 0},
-{ 8888812.34 100 M/MOD D. .},{8888812 34},
-{DECIMAL 12.34 100 M/MOD D. .},{12 34},
+{-1. -1 UDM/MOD D. .},{100000001 0},
+{ 8888812.34 100 UDM/MOD D. .},{8888812 34},
+{DECIMAL 12.34 100 UDM/MOD D. .},{12 34},
 } })
 _BITS64_({
 {
-{-1. -1 M/MOD D. .},{10000000000000001 0},
-{ 8888888812.34 100 M/MOD D. .},{8888888812 34},
-{DECIMAL 12.34 100 M/MOD D. .},{12 34},
+{-1. -1 UDM/MOD D. .},{10000000000000001 0},
+{ 8888888812.34 100 UDM/MOD D. .},{8888888812 34},
+{DECIMAL 12.34 100 UDM/MOD D. .},{12 34},
 } })
 ,
 enddoc)
-_HEADER({M/MOD},{MSMOD},{DOCOL})
+_HEADER({M/MOD},{MSMOD1},{DOCOL}, UDMSMOD )
+_HEADER({UDM/MOD},{MSMOD},{DOCOL})
+UDMSMOD:
         DC      TOR
         DC      ZERO
         DC      RR
@@ -7527,8 +7619,9 @@ worddoc( {OPERATINGSYSTEM},{XOS},{xos},{n1 n2 n3 n---ret},{},
 system call forthvar({n})
 (man 2) with parameters forthvar({n1 n2 n3}).
 forthvar({ret}) is the return value of the call. If it is negative, it
-is mostly an error. It is related to forthemph({errno}) in the c standard library
-and will mostly be equal.
+is mostly an error.
+_VERBOSE_({Note, that the c standard library functions store the return
+value in forthvar({errno}) and return -1.})
 This makes
 available all facilities present in _OS_, except those with 4 or 5 parameters
 that are handled by forthcode({XOS5}) .
@@ -7561,8 +7654,9 @@ _C
 })_C{}_END_({_LINUX_N_})
 _HOSTED_OSX_({
 CODE_HEADER({XOS},{XOS})
-; OS X expects parameters on the stack, parm 1 in the most accessible place,
-; so swap first and third parameter
+_BITS32_({
+_C{ OS X 32 expects parameters on the stack, parm 1 in the most accessible }
+_C{ place, so swap first and third parameter}
         MOV     BX, [SP+_CELLS(1)]
         MOV     CX, [SP+_CELLS(3)]
         MOV     [SP+_CELLS(1)], CX
@@ -7571,7 +7665,19 @@ CODE_HEADER({XOS},{XOS})
         MOV     AX, [SP]    _C{ Get call number, leave dummy.}
         INT     0x80        _C{ Generic call on OSX }
         LEA     SP, [SP+_CELLS(4)] _C{ 3 parameters plus call number.}
+})_C{}_END_({_BITS32_})
 
+_BITS64_({
+_C({    Saving HIP on the return stack, with RPO saved in memory or })
+_C({    R15 fails with the __NR_clone syscall (and only then) })
+        MOV     R15,HIP   _C{ HIP is SI }
+        POP     AX       _C{ Function number              }
+        POP     DX       _C{ Third parameter, or dummy    }
+        POP     SI       _C{ Second parameter, or dummy   }
+        POP     DI       _C{ First parameter.             }
+        SYSCALL          _C{  Generic call on LINUX       }
+        MOV     HIP,R15
+})_C{}_END_({_BITS64_})
         _PUSH     _C{ Positive means okay. Negative means -errno.}
 _C
 })_C{}_END_({_HOSTED_OSX_})
@@ -7619,8 +7725,8 @@ _C
 })_C{}_END_({_LINUX_N_})
 _HOSTED_OSX_({
 CODE_HEADER({XOS5},{XOS5})
-; OS X expects parameters on the stack, parm 1 in the most accessible place,
-; so swap first and fifth parameter, second and fourth too.
+_C{ OS X expects parameters on the stack, parm 1 in the most accessible place,}
+_C{ so swap first and fifth parameter, second and fourth too.}
         MOV     BX, [SP+_CELLS(1)]
         MOV     CX, [SP+_CELLS(5)]
         MOV     [SP+_CELLS(1)], CX
@@ -8322,7 +8428,6 @@ RFIL3:
 RC:     DC      0
 })_C{}_END_({ _HOSTED_DPMI_})
 _C
-_LINUX_N_({
 worddoc( {FILES}, {FILE-POSITION}, {file_position}, {fd --- ud ior }, {ISO},
 {
 forthvar({ud}) is
@@ -8334,6 +8439,7 @@ error codes can be found by forthcode({MESSAGE}). },
 {{OPEN-FILE},{REPOSITION-FILE}},
 {
 { "hello.frt" 0 OPEN-FILE . CONSTANT FD },{0 },
+dnl awaits testing on OSX and windows.
 {FD FILE-POSITION . D.},{0 0},
 {PAD DUP 5 FD READ-FILE . TYPE},{0 "Hell},
 {FD FILE-POSITION . D.},{0 5},
@@ -8341,6 +8447,7 @@ error codes can be found by forthcode({MESSAGE}). },
 },
 enddoc)
 _C
+_LINUX_N_({
 _HEADER({FILE-POSITION},{FPFILE},{DOCOL})
         DC      ZERO
         DC      LIT, SEEK_CUR
@@ -8350,6 +8457,23 @@ _HEADER({FILE-POSITION},{FPFILE},{DOCOL})
         DC      NEGATE, LIT, 256, ULESS, LAND _C{ Heuristic }
         DC      SEMIS
 })_C{}_END_({_LINUX_N_})
+_HOSTED_OSX_({
+_HEADER({FILE-POSITION},{FPFILE},{DOCOL})
+        DC      LIT, 13, LERROR     _C{ Not implemented.}
+        DC      SEMIS
+})_C{}_END_({_HOSTED_OSX_})
+_HOSTED_DLL_({
+_HEADER({FILE-POSITION},{FPFILE},{DOCOL})
+        DC      CALLOPEN
+        DC      PAR1
+        DC      ZERO, PAR2       _C{offset.}
+        DC      ZERO, PAR3
+        DC      LIT, FILE_CURRENT, PAR4
+        DC      LIT, SetFilePointer, ICALLCLOSE
+        DC      ZERO     _C{Double precision return result}
+        DC      OVER, TOERR
+        DC      SEMIS
+})_C{}_END_({_HOSTED_DLL_})
 _C
 worddoc( {FILES}, {REPOSITION-FILE}, {reposition_file}, {ud fd --- ior }, {ISO},
 {Position the file that is open at forthvar({fd}) at position
@@ -8474,6 +8598,7 @@ _ALIGNED_({    DC LALIGN}, {dnl})
         DC      RR, RFILE, THROW
         DC      FROMR, CFILE, THROW
         DC      TDUP, PLUS, LDP, STOR        _C{ No allocation if it fails.}
+_ALIGNED_({    DC LALIGN}, {dnl})
         DC      SEMIS
 _C
 worddoc( {FILES},{PUT-FILE},{put_file},{sc1 sc2 ---},{},
@@ -8494,12 +8619,13 @@ worddoc( {FILES},{INCLUDED},{INCLUDED},{sc1 --- i*x},{ISO},
 {Interpret the content of the file with name forthvar({sc1})
 as if it was typed from the console, leaving result
 forthvar({i*x}).
-The file is permanently stored in the dictionary.
+The file is permanently stored in the dictionary,
+but trimmed in compiled programs.
 },
-{{LOAD},{}},
+{{LOAD},{INCLUDE}},
 {{"hello.frt" INCLUDED},{Hello world!}},
 enddoc)
-_HEADER({INCLUDED},{INCLUD},DOCOL)
+_HEADER({INCLUDED},{INCLUDED},DOCOL)
         DC      HERE, TOR
         DC      LIT, GETFILE, CATCH
         DC      LDUP
@@ -8511,6 +8637,20 @@ INCLUD1:
         DC      RDROP, DROP
 INCLUD2:
         DC      EVALUATE
+        DC      SEMIS
+_C
+worddoc( {FILES},{INCLUDE},{INCLUDE},{"name" --- i*x},{ISO},
+{Interpret the content of the file with "name"
+as if it was typed from the console, leaving result
+forthvar({i*x}).
+The file is permanently stored in the dictionary,
+but trimmed in compiled programs.
+},
+{{LOAD},{}},
+{{"INCLUDE hello.frt" EVALUATE},{Hello world!}},
+enddoc)
+_HEADER({INCLUDE},{LINCLUD},DOCOL)
+        DC      LNAME, INCLUDED
         DC      SEMIS
 _C
 worddoc( {INPUT~},{REFILL-TIB},{refill_tib},{ ---} ,{},
@@ -9253,10 +9393,10 @@ This is probably an external subroutine, supplied via a DLL-library.
 The stack must be filled with its parameters,
 This is slightly faster than a forthcode({ICALL[}) forthcode({CALL]})
 that uses a stackframe.
-the forthvar({ior}) is a subroutine dependent indication whether
+The forthvar({ior}) is a subroutine dependent indication whether
 the operation has succeeded.
 It is assumed that it was returned into AX.
-_VERBOSE_({ If the c-convention is used, the caller must nip
+_VERBOSE_({ If the c-convention is used{,} the caller must nip
 results that are under forthvar({ior}). })     },
 {{DLL-ADDRESS}},
 {
@@ -9596,8 +9736,8 @@ This name is typically changed during installation and is used by the
 {{BLOCK-FILE $@ TYPE},{forth.lab}},
 enddoc)
 _HEADER({BLOCK-FILE},{BLFL},{DOVAR}, )
-        _STRING({forth.lab})
-        _RESB(M4_FILENAMELENGTH-9)               _C{ Allow for some path}
+        _C{ Allow for some path, at most 80 char's}
+        _STRING({forth.lab                                                                       })
 worddoc( {BLOCKS},{BLOCK-HANDLE},{block_handle},{---n},{},
 {Leave a file handle in forthvar({n}) .
 If it is negative there is no block file open,
@@ -9640,7 +9780,7 @@ by setting forthcode({WARNING}).
 {{." Via MESSAGE"},{Via MESSAGE}},
 enddoc)
 _HEADER({BLOCK-INIT},{BLINI},{DOCOL})
-        DC      BLFL, SFET
+        DC      BLFL, SFET, DTRAI
         DC      ROT
         DC      OFILE
         DC      ZEQU, NEGATE  _C{ 0 if disk problems, 1 if not.}
@@ -9764,14 +9904,14 @@ mother.}, {{SYSTEM}}, {}, enddoc )
 CODE_HEADER({XOSFORK},{XOSFORK})
 _C{ This is coded in assembler because there is a return value in DX :}
 _C{ 0 = parent 1 = child }
-        MOV     EAX, fork  _C{ Syscall with no parameters}
-        PUSH EAX
+        MOV     AX, fork  _C{ Syscall with no parameters}
+        PUSH AX
         INT     0x80
-        ADD     ESP, 4
+        ADD     SP, 4
 
-        NEG EDX
-        NOT     EDX     _C{ TRUE: parent  FALSE: child }
-        AND EAX, EDX    _C{ parent: like classic fork }
+        NEG DX
+        NOT     DX     _C{ TRUE: parent  FALSE: child }
+        AND AX, DX    _C{ parent: like classic fork }
                         _C{ child: always zero }
         _PUSH
 })_C{}_END_({_HOSTED_OSX_})
@@ -9847,13 +9987,13 @@ _C{  Get environment vector}
 SYSTEM1:
         DC      LDUP
 
-        DD      ZERO ; struct rusage *rusage
-        DD      ZERO, ; options
+        DD      ZERO _C{ struct rusage *rusage }
+        DD      ZERO _C{ options }
         DD      ROT
-        DD      LIT, STATUS ; status
-        DD      SWAP  ; pid on top
+        DD      LIT, STATUS _C{ status }
+        DD      SWAP  _C{ pid on top }
         DD      LIT, 4
-        DD      LIT, waitpid  ; wait4 (OSX)
+        DD      LIT, waitpid  _C{ wait4 (OSX) }
         DD      XOSV
 
         DC      LDUP
@@ -10321,7 +10461,8 @@ _C
 _C
 _LOAD_({
 worddocsafe( {DICTIONARY},{'},{tick_iso},{--- addr},{ISO,FIG},
-{Used in the form: forthexample({' nnnn })
+{Used in the form:
+    forthexample({' nnnn })
 It leaves the forthdefi({execution token}) (equivalent to the
 forthdefi({dea}) dictionary entry address)
 of dictionary word forthsamp({nnnn}).
@@ -10359,7 +10500,7 @@ _HEADER({'},{ITICK},{DOCOL} )
 _C
 worddocsafe( {DICTIONARY},{[']},{bracket_tick_bracket},{--- addr},{ISO,I},
 {Used in the form:
-forthexample({['] nnnn})
+    forthexample({['] nnnn})
 In compilation mode it leaves the
 forthdefi({execution token}) (equivalent to the dictionary
 entry address) of dictionary word forthsamp({nnnn}). So as a
@@ -10619,7 +10760,8 @@ This is intended to suppress the unwanted behaviour of looping
 through the whole number range,
 ciforth deviates from ISO in that it also suppresses the unwanted
 behaviour of looping through almost the whole number range for
-an input of e.g. forthexample({1 2})
+an input of e.g.
+forthexample({1 2})
 However, negative increments are made impossible for forthword({?DO}) this way.
 },
 {{DO},{I},{LOOP},{+LOOP},{LEAVE}},
@@ -10650,18 +10792,18 @@ forthcode({DO}) occurs until the index equals or exceeds the
 limit; at that time, the parameters are discarded and execution
 continues ahead.
 
-At compile-time, forthcode({LOOP}) compiles
-forthcode({(LOOP)}) and uses forthvar({addr}) to calculate an
-offset to forthsamp({DO}) . forthvar({n2}) is used for compile
+At compile-time, forthcode({LOOP}) compiles code to the above
+effect, existing of forthcode({ONE (+LOOP) 0BRANCH UNLOOP})
+and uses forthvar({addr}) to calculate an
+offset to be used by forthsamp({0BRANCH}) . forthvar({n}) is used for compile
 time error checking.},
 {{+LOOP}},
 { { : GS1 DO I . LOOP ; 2 -2 GS1},{-2 -1 0 1},
   { : GS2 DO I . LOOP ; 4 0 GS2},{0 1 2 3} },
 enddoc)
 _HEADER({LOOP},{LLOOP},{DOCOL}, , B_IMMED)
-        _SECURITY_({DC      QCOMP, LIT, 3, QPAIR})
-        DC      LIT, XLOOP, COMMA, BACKP
-        DC      FORWARDP _C{ For DO to push the leave address.}
+        DC      LIT, ONE, COMMA
+        DC      PLOOP
         DC      SEMIS
 _C
 worddoc( {CONTROL},{+LOOP},{plus_loop},
@@ -10681,18 +10823,21 @@ until the new index is equal to or less than the limit
 Upon exiting the loop, the parameters are
 discarded and execution continues ahead.
 
-At compile time, forthcode({+LOOP}) compiles the run-time word
-forthcode({(+LOOP)}) and the branch offset computed from
-forthcode({HERE}) to the address left on the stack by
-forthcode({DO}) .
+At compile-time, forthcode({LOOP}) compiles code to the above
+effect, existing of forthcode({(+LOOP) 0BRANCH UNLOOP})
+and uses forthvar({addr}) , left on the stack by forthcode({DO}),
+to calculate the branch offset from forthcode({HERE}).
+
  forthvar({n2}) is used for compile time error
-checking.},{},
+checking.},{LOOP},
 { { : GS1 DO I . -1 +LOOP ; -1 2 GS1},{2 1 0 -1},
   { : GS2 DO I . 2 +LOOP ; 4 0 GS2},{0 2 } },
 enddoc)
 _HEADER({+LOOP},{PLOOP},{DOCOL}, , B_IMMED)
         _SECURITY_({DC      QCOMP, LIT, 3, QPAIR})
-        DC      LIT, XPLOO, COMMA, BACKP
+        DC      LIT, XPLOOP, COMMA
+        DC      LIT, ZBRAN, COMMA, BACKP     _C{ Until }
+        DC      LIT, UNLOOP, COMMA
         DC      FORWARDP _C{ For DO to push the leave address.}
         DC      SEMIS
 _C
@@ -11375,7 +11520,7 @@ ENVQ1:
         DC      SEMIS
 _C
 _LOAD_({
-worddoc( {SCREEN},{TRIAD},{triad},{scr ---},{},
+worddoc( {SCREEN},{TRIAD},{triad},{scr ---},{FIG,WANT},
 {Display on the selected output device the three screens which
 include that numbered forthvar({scr}) , beginning with a screen evenly divisible
 by three. Output is suitable for source text records, and includes a
@@ -11383,6 +11528,7 @@ reference line at the bottom taken from line 0 of the first error screen.},
 {{MESSAGE},{ERRSCR} },
 {{." interactive"},{interactive}},
 enddoc)
+_SUPPRESSED({{
 _HEADER({TRIAD},{TRIAD},{DOCOL})
         DC      LIT,AFF
         DC      EMIT
@@ -11401,6 +11547,7 @@ TRIA9:
         DC      CR
         DC      ZERO, MESS
         DC      SEMIS
+}})_C{}_END_({ _SUPPRESSED})
 })_C{}_END_({_LOAD_})
 _C
 _C{ This word is not even fig!}
@@ -11474,7 +11621,7 @@ used for:
         3. TERMINAL INPUT BUFFER
         4. RETURN STACK
         5. USER VARIABLE AREA
-        6. BUFFERS FOR SCREENS
+        6. BUFFERS FOR SCREENS/FILES
 
 
 })
@@ -11499,12 +11646,13 @@ _C          _RESB( US )             _C{  For next task, if present. }
 _C{ The following framework may be repeated for more tasks.}
 _C{ It is floating, i.e. it may be shifted up and down, in order}
 _C{ to have INITR0 at a STACKSIZE boundary. }
-        _RESB( STACKSIZE - US )   _C{ Data stack, only limited if more tasks present.}
+        _RESB( STACKSIZE)   _C{ Data stack, only limited if more tasks present.}
 INITS0:                         _C{ Grows down.}
 STRTIB: _RESB( TIBSIZE )    _C{ Terminal input buffer.}
         _RESB( STACKSIZE )      _C{ Return stack, grows down.}
 INITR0:                         _C{ Grows down}
 STRUSA: _RESB( US )             _C{ User area}
+        _RESB( STACKSIZE - US )  _C{ Spare user area }
 _THREADS_(
 {        _RESB( STACKSIZE )            _C{ Possibly the framework is shifted up by this.}
 })dnl _END_({_THREADS_})
@@ -11696,14 +11844,26 @@ fetch a forthdefi({cell}), operate on it and store it back.},
 worddocchapter({MISC},{ },
 {The wordset forthsamp({MISC}) contains words that defy categorisation.},
 {},{},{},{}, {}, enddoc)
+dnl FIXME rename to scaling.
 worddocchapter({MULTIPLYING},{ },
 {The _LARGE_(original) 16 bits Forth's have problems with overflow (forthpxref({OPERATOR})).
 Operators with intermediate results of double precision, mostly scaling operators,
 solve this and are
-present in the forthsamp({MULTIPLYING}) wordset. _LARGE_({In this _BITS_ bit Forth
+present in the forthxref({MULTIPLYING}) wordset. _LARGE_({In this _BITS_ bit Forth
 you will have less need, but scaling remains tricky}).
-Formatting is done with forthdefi({double})'s exclusively, and relies
-on this wordset. Operators with mixed precision and unsigned operators
+When you divide a 2.n digit number by an n digit number you get an n-digit
+quotient and an n-digit remainder. So naturally many operators in this set
+have a mix of double and single numbers in their
+stack diagram: they are forthdefi({mixed magnitude}).
+All those have forthcode({M}) in the name.
+Furthermore all operations are signed,
+with the exception of the ones starting with forthcode({U}) .
+Those have unsigned operands exclusively.
+The irregularly named word forthdefi({M/MOD}) is a relic from the
+fig-forth era;
+preferably its alias forthdefi({UDM/MOD}) is to be used.
+Output formatting is done with forthdefi({double})'s exclusively, and relies
+on this wordset and the forthsamp({DOUBLE}) wordset. Operators with mixed magnitude and unsigned operators
 allow to build arbitrary precision operators from them in forthdefi({high level}) code.},
 {},{},{},{}, {}, enddoc)
 worddocchapter({OPERATOR},{ },

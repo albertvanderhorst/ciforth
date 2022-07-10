@@ -1,4 +1,4 @@
-COPYRIGHT (c) 2000-2016 Albert van der Horst, THE NETHERLANDS
+COPYRIGHT (c) 2000-2022 Albert van der Horst, THE NETHERLANDS
                    LICENSE
 This program is free software; you can redistribute it and/or
 modify it under the terms of version 2 of the GNU General
@@ -46,8 +46,9 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
 
 
 \
-( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH B7mar28
-1 LOAD   WANT OLD:   TURNKEY   SWAP-DP
+( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH C0jun03
+"1 LOAD"    "WANT" PRESENT 0= AND EVALUATE \ idempotent
+WANT OLD:   TURNKEY   SWAP-DP
 WANT ARG[]   INCLUDE   SRC>EXEC
 : MY-ERROR  DUP EXIT-CODE ! OLD: ERROR BYE ;
 'MY-ERROR DUP 'ERROR 3 CELLS MOVE  HIDDEN
@@ -61,13 +62,12 @@ WANT ARG[]   INCLUDE   SRC>EXEC
 ARGC 3 < 13 ?ERROR
 2 ARG[] INCLUDED
 LATEST   2 ARG[] SRC>EXEC   TURNKEY
-
-( -d :_This_option_is_available )
-
-
-
-
-
+( -d :_add_defined_then_include )
+\ Run a program that uses [DEFINED] to run on other Forths
+"1 LOAD"    "WANT" PRESENT 0= AND EVALUATE \ Idempotent
+WANT [DEFINED] ARG[]
+ARGC 3 < 13 ?ERROR
+2 ARG[] INCLUDED
 
 
 
@@ -79,21 +79,21 @@ LATEST   2 ARG[] SRC>EXEC   TURNKEY
 
 \
 ( -e :_Load_system_electives ) \ AvdH A3sep01
+"1 LOAD"    "WANT" PRESENT 0= AND EVALUATE \ Idempotent
 .SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
-1 LOAD
 \  "-legacy-" WANTED  \ If you want this, it must be up front
-WANT CONFIG HELP ORDER
-WANT L-S DO-DEBUG H. DUMP
-WANT  $.
-WANT INCLUDE SEE  LOCATE
- "CASE-INSENSITIVE" WANTED            CASE-INSENSITIVE
-\ WANT EDITOR      \ WANT OOPS     \ WANT FARDUMP
-\  "ASSEMBLERi86" WANTED \  "DEADBEEF" WANTED
-\ Select os-interface DOS/Unix
- "OS-IMPORT" WANTED  (  "DIR" WANTED )      "ls" WANTED
- "-scripting-" WANTED
- "AUTOLOAD" WANTED
-: TASK ; OK
+WANT INCLUDE CONFIG ORDER
+WANT H. DUMP
+WANT HELP SEE LOCATE $.
+( "EDITOR" WANTED) ( "OOPS" WANTED) ( "L-S" WANTED)
+(  "ASSEMBLERi86" WANTED ) ( "DEADBEEF" WANTED )
+ "OS-IMPORT" WANTED
+(  "DIR" ) "ls" WANTED \ Select os-interface DOS/Unix
+ "-scripting-" WANTED  "CASE-INSENSITIVE" WANTED
+
+"DO-DEBUG" WANTED : TASK ;
+
+CR .( TYPE "WANT AUTOLOAD" for automatic loading.) OK
 ( -f :_Forth_words_to_be_executed_80_chars) \ AvdH A1oct05
 1 LOAD
  "ARG[]" WANTED    "Z$@" WANTED
@@ -190,7 +190,7 @@ DOIT
 
 
 \
-( -l LIBRARY :_LIBRARY_to_be_used_for_blocks ) \ AvdH A1oct05
+( -l LIBRARY :_LIBRARY_to_be_used_for_blocks ) \ AvdH C2feb22
 CREATE task
 1 LOAD    "SHIFT-ARGS" WANTED    "ARG[]" WANTED
 \ Install other library
@@ -198,11 +198,11 @@ CREATE task
     2 ARG[] BLOCK-FILE $!
     2 BLOCK-INIT
     SHIFT-ARGS   SHIFT-ARGS
-    'task 'FORTH FORGET-VOC COLD ;
+    'task 'FORTH FORGET-VOC
+    'COLD >PHA >R CO ;
 
 \ Must all be done in one go!
 SWITCH-LIBS
-
 
 
 \
@@ -257,8 +257,8 @@ SWITCH-LIBS
 ( -p :_Load_system_preferences ) \ AvdH A1oct02
 1 LOAD
  "-legacy-" WANTED     \ Must be first to WANT
-
-
+"Pedantic is not implemented but ""-legacy-"" WANTED
+goes a long way." TYPE
 
 
 
@@ -302,10 +302,10 @@ SWITCH-LIBS
 
 
 \
-( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH A1oct02
-1 LOAD    "OLD:" WANTED    "ARG[]" WANTED
+( -s SCRIPT-FILE :_Interpret_SCRIPT-FILE ) \ AvdH C0jun03
+"1 LOAD"    "WANT" PRESENT 0= AND EVALUATE
+"OLD:" WANTED    "ARG[]" WANTED
  "CTYPE" WANTED   2 ARG[] $, CONSTANT SCRIPT-NAME
-
 : BY-WHO   "XOS" PRESENT IF " run by " TYPE
 0 ARG[] TYPE THEN ;
 \ This error handler may be overwritten by the script.
@@ -354,7 +354,7 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 "CPU  NAME  VERSION" TYPE .SIGNON CR
 "LIBRARY FILE: " TYPE
 0 MESSAGE
-"$RCSfile$ $Revision$" TYPE CR
+"$RCSfile: options.frt,v $ $Revision: 5.50 $" TYPE CR
 CR
 0 BLOCK  B/BUF TYPE
 BYE

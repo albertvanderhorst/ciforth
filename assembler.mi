@@ -1,10 +1,15 @@
 dnl $ Id: $
-dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright{2000,2022}: Albert van der Horst, HCC FIG Holland by GNU Public License
 
-The assembler is described in this manual,
-because it is not feasable to use it from the description in the source.
+The forthfile({ciasdis}) assembler is described in this manual,
+because the assembler that is in the lab file is compatible.
+The idea is that you test code with ciasdis relying on comprehensive
+consistency checking.
+Then can you use the assembler in the blocks and can the real
+debugging begin.
 This chapter is about the assembler itself,
-not about how it is used in relation with ciforth.
+the information about what registers are used in ciforth is
+contained in its assemblers source.
 
 
 @menu
@@ -14,7 +19,7 @@ not about how it is used in relation with ciforth.
 * A5:: The 8080 assembler
 * A6:: Opcode sheets
 * A7:: Details about the 80386 instructions
-* A8:: 16 and 32 bits code and segments
+* A8:: 16, 32 and 64 bits code and segments
 * A9:: Difference with the built in assembler
 * AA:: A rant about redundancy
 * AB:: Reference opcodes Intel 386
@@ -51,8 +56,9 @@ Then with code that at least contains valid instruction enter
 the debugging phase with the assembler from the library.
 
 forthbreak
-_BITS64_({There is no assembler yet for 64 bit lina.
-The assembler in forthfile({forth.lab}) is useable for instructions
+_BITS64_({The assembler is usable for 64 bit lina.
+The assembler in forthfile({forth.lab}) is without reserve
+useable for instructions
 that do not require a prefix. Furthermore
 the forthcode({REX,}) instruction
 that makes the operand size 64 bits  is provided, plus
@@ -190,14 +196,18 @@ A simple example to illustrate this problem is
 forthexample({        INC [BX]})
 Are we to increment the byte or the word at BX?
 Intel's solution is forthsamp({INC BYTE POINTER BX}))
-Contrarily here we adapt the rule:
+The INC instruction in this (the mod/rm) incarnation has
+a size bit. Here we require that this bit be filled in
+explicitly, either with forthsamp({ X| }) or forthsamp({ B| }) ).
+Failing to do so is a fatal error.
+This results in the rule:
 if an instruction doesn't determine the operand
 size (some do, like forthcode({LEA,}) ),
-then a size fixup is needed ( forthsamp({X|}) or forthsamp({B|}) ).
+then a size fixup is needed: forthsamp{ X| } or forthsamp{ B| } .
 forthbreak
 In this assembler this looks like
 forthexample({        INC, B| ZO| [BX] })
-This is completely unambiguous.
+This completely unambiguously determines the actual machine code.
 
 These are the phases in which this assembler handles an instruction:
 
@@ -220,7 +230,6 @@ are present.
 This check is actually executed by the next postit
 prior to assembling, or by forthcode({END-CODE}).
 forthenditemize
-
 
 Doesn't this system lay a burden on the programmer? Yes.
 He has to know exactly what he is doing.
@@ -402,11 +411,13 @@ bracket such as forthcode({[AX}), that handles this transparently.
 forthitem The forthcode({SET,}) instruction unfortunately requires a duplicate of the
 forthcode({O|}) etc. fixups of the forthcode({J,}) and forthcode({J|X,}) instructions,
 called forthcode({O'|}) etc.
+It
 forthitem
 Similarly,
 some single byte instructions require forthcode({X'|}) and
 forthcode({B'|}) instead of forthcode({X|}) and forthcode({B|}) dnl
 that are used for the ubiquitous instructions with r/m.
+(FIXME! This probably is remedied in the first release of ciasdis. )
 forthendenumerate
 
 This is the way the disassembler works.
@@ -442,18 +453,20 @@ forthendenumerate
  })_END_({_VERBOSE_})
 
 @node A8, A9, A7, Assembler
-@section 16 and 32 bits code and segments
+@section 16, 32 and 64 bits code and segments
 
-Since
-commaers are checked correctly in the presence of prefixes
-and you have never to overrule error-checking (as was needed prior
-to version 4.0.6.)
+The buildin assembler would be cumbersome to use,
+without the help of forthfile({ciasdis}), the great assembler.
+Not only are the instructions checked as explained before,
+from version 2.0.0 on, the interplay between segment size as
+instruction size are checked.
 
-In fixup X is used to mean Xell, or the natural word length.
-This is 16 bits for 16 bits segments and 32 bits for 32 bits segments.
-Likewise in PostIt-FixUp AX means Intel's forthcode({AX}) for 16 bits
-segments, forthcode({EAX}) for 32 bits segments and forthcode({RAX})
-for 64 bits segments.
+In fixup forthcode({X}) is used to mean Xell, or the natural word length.
+This is 16 bits for 16 bits segments, 32 bits for 32 bits segments and
+64 bits for 64 bits segments
+Likewise in PostIt-FixUp forthcode({AX}) means Intel's forthcode({AX}) for 16 bits
+segments, forthcode({EAX}) for 32 bits segments and forthcode({RAX}) for
+64 bits segments.
 
 The description of 16 or 32 bits in the Intel manuals is messy.
 These are the rules.
@@ -478,14 +491,15 @@ The 16 bit indexing in a 32 bit assembler have separate fixup's,
 that all end in a forthkey({%})-sign.
 
 In comma-ing, you must always select the proper one, commaers
-contain either forthkey({W}) or forthkey({L}) or forthkey({Q})
-for 2, 4 or 8 byte widths.
+contain either forthkey({C}), forthkey({W}), forthkey({L}) or
+forthkey({Q}) for 1, 2, 4 or 8 byte widths.
 
 After the directive forthcode({BITS-16}) code is generated for and checked
 against 16 bit code and data segments.
 After the directive forthcode({BITS-32}) code is generated for and checked
 against 32 bit code and data segments.
-At this moment there 64 bit code is not supported, but see below.
+After the directive forthcode({BITS-64}) code is generated for and checked
+against 64 bit code and data segments.
 
 In a 16 bits segments the following commaers must be used:
  forthcode({W,}) forthcode({IW,}) forthcode({(RW,)}) and forthcode({RW,}) .
@@ -493,12 +507,15 @@ In a 16 bits segments the following commaers must be used:
 In a 32 bits segments the following commaers must be used:
  forthcode({L,}) forthcode({IL,}) forthcode({(RL,)}) and forthcode({RL,}) .
 
+In a 64 bits segments the following commaers must be used:
+ forthcode({L,}) forthcode({IL,}) forthcode({(RL,)}) and
+forthcode({RL,}) and occasionally forthcode({IQ,}).
+
 The prefix forthcode({OS:}) switches the following opcode to use
 forthcode({IL,}) instead of forthcode({IW,}) and vice versa.
-Similarly the prefix forthcode({AS:}) switches between forthcode({W,})
-and forthcode({L,}), or between forthcode({RW,}) and forthcode({RL,}).
-
-The great assembler enforces all these rules.
+Similarly the prefix forthcode({AS:}) switches between
+forthcode({W,}) and forthcode({L,}), or between forthcode({RW,}) and
+forthcode({RL,}).
 
 While mixing modes,
 whenever you get error messages and
@@ -510,24 +527,106 @@ Proper use of the BITS-xx directives makes this largely unnecessary,
 but it can be needed if you use e.g. an extra segment forthcode({ES|})dnl
 that is 16 bits in an otherwise 32 bits environment.
 
-A 64-bit assembler is not yet accomodated.
-Even so the assembler built in into forth.lab is used to assembler the
-floating point words,
-as the applicable instructions do not need 64-bit releated prefixes.
+In 64 bits mode instructions that contain an immediate address
+differ from 32 bits mode.
+Those addresses are specified relative to the program counter, not absolute.
+Consequently the forthcode({MEM|}) fixup leads to an error message, and
+instead forthcode({REL|}) must be used with either a forthcode({RL,}) or
+an forthcode({(RL,)}) commaer.
+Absolute 64-bits addresses are nowhere present in the instruction set,
+as they are not really useful.
+
+The great assembler enforces all these rules.
+
+AMD took advantage of the fact that Intel instruction are available
+in a short and long form, e.g. forthcode({INC|X,}) and forthcode({INC, X|}).
+The short form is hijacked, so forthcode({DEC|X, AX|}) becomes
+forthcode({REX,}) .
+All immediate data and offsets are sign-extended from 32 to 64 bits
+in 64 bits code, with the rational that full 64 bit is rarely useful.
+The result is that 32 and 64 code looks the same.
+In the rare case that a 64 bit value is needed, forthcode({MOVI|X,})  is
+hijacked and replaced with forthcode({MOVI|Q,}) .
+(Remember forthcode({MOVI, X|}) is a duplicate.)
+So only instructions involving ghost registers representing
+integers and memory storage
+are different between 32 and 64 bits.
+That is all, and a 64-bit assembler is practically accommodated in full.
+Bottom line, the assembler built in into forth.lab is adequate to assemble
+the floating point wordset.
+
+We need the 64-bit related prefix 0x48 to force the size to 64 bit in all
+cases where a register is mentioned in the instruction.
+Floating point instructions don't use regular registers and need not use
+this prefix unless e.g. forthcode({[SP}) is used.
+The three least significant bits in the 0x4#  switch the registers
+(possible in three positions) to the ghost registers.
+Such prefixes are present in forthfile({ciasdis}),
+but in the lab file only forthcode({REX,}) is available.
+
+
+There us more to say about forthdefi({ghost}) registers
+in using forthfile({ciasdis}) itself.
+ They appear instead of the regular
+registers, e.g forthcode({AX}) is turned into forthcode({R8}) .
+We make a distinction between instruction with possibly two
+register operands, and the others. The first class is called modr/m
+in Intel and AMD lit.
+A two operand instruction always has a primary register that has
+a prime like forthcode({AX'|}) and forthcode({T|}) forthcode({F|}) apply
+to that register.
+(The other operand may be a register, or indirect such as
+sib or memory address.)
+If you learned the distinction and use of primed and unprimed registers
+it is easy:
+
+forthenumerate
+forthitem
+  forthcode({'}) applies to primed registers, turns forthcode({AX'|}) to forthcode({R8'|})
+forthitem
+forthcode({]}) applies to index registers in sib-intructions, turns forthcode({AX']}) to forthcode({R8']})
+forthitem
+  forthcode({N}) bit applies to all other registers:
+forthendenumerate
+
+The remaining case of use of registers are
+forthenumerate
+forthitem
+     - unprimed register like forthcode({BX|}) .
+forthitem
+     - indirect like forthcode({[BX]}) .
+forthitem
+     - base register in sib like forthcode({[AX}) .
+forthendenumerate
+
+In summary we get
+  forthcode({ Q: QN: Q]: QN]: Q': QN': Q']: QN']: }) for possible
+ prefixes, that switch at the same time to 64 bits.
+Similar prefixes are available with E , if you want the 32
+  bit ghost registers.
+
+Note that
+an unprimed register cannot be combined with sib (scaled
+indexing) in any way, which would signify conflict between
+forthcode({AX|}) and forthcode({[AX}) .
+
+Note that most assemblers would conflate
+forthcode({MOV, MOVI, MOVI|X, }) etc,
+instructions and would not allow for such an easy explanation.
+
 @node A9, AA, A8, Assembler
 @section The built in assembler
 
 From within ciforth one can load an assembler from the installed LAB
 library by the command forthcode({WANT ASSEMBLERi86 }).
 Automatically a 32 bit assembler is loaded
-if the Forth itself is 32 bits and a 16 bit assembler for the
+if the Forth itself is 32/64 bits and a 16 bit assembler for the
 16 bit forths.
 This is a simplified version with no error checking and
 no provisions for 16/32 bit mixing.
 (Those are not needed, because you can mix with impunity.)
-In the future this assembler is now (since 4.0.6)
-fully compatible
-with the large file-based one.
+This assembler is now (since 5.0.0) fully compatible with the large
+file-based one.
 
 forthemph({Consequently you can take a debugged program and run it
 through the LAB assembler. })
@@ -535,7 +634,7 @@ through the LAB assembler. })
 forthemph({The built in assembler has no error
 checking.})
 
-forthemph({IMPORTANT NOTE: The 4.0.6 version and later contains
+forthemph({IMPORTANT NOTE: The 5.169 version and later may contain
 assembler code in the LAB file that has not yet been converted.
 This code largely relates to a booting version;
 It will be updated as soon as I have a booting version in a binary
@@ -907,6 +1006,10 @@ forthitem WRMSR,
 forthitem XADD,
 @end table
 
+The fixups for floating point are in lower case to make
+some distinction with the regular instructions.
+There is one fixup that conflicts with an uppercase
+fixup: forthdefi({n|}) .
 Table 4 Fixups and their meanings, Pentium-only.
 @table @var
 forthitem ST0|    : Register name
@@ -970,14 +1073,14 @@ forthitem +1*   : Scale by 1 byte.
 forthitem +2*   : Scale by 2 bytes.
 forthitem +4*   : Scale by 4 bytes.
 forthitem +8*   : Scale by 8 bytes.
-forthitem AX]   : Scaled register
-forthitem CX]   : Scaled register
-forthitem DX]   : Scaled  register
-forthitem BX]   : Scaled register
-forthitem 0]    : No register
-forthitem BP]   : Scaled register
-forthitem SI]   : Scaled register
-forthitem DI]   : Scaled register
+forthitem AX]   : Scaled index
+forthitem CX]   : Scaled index
+forthitem DX]   : Scaled  index
+forthitem BX]   : Scaled index
+forthitem 0]    : No index
+forthitem BP]   : Scaled index
+forthitem SI]   : Scaled index
+forthitem DI]   : Scaled index
 
 @end table
 
@@ -995,6 +1098,8 @@ Instead of the comma-er we use a forthcode({~SIB,}) instruction.
 This specifies in fact a one byte opcode with three fields
 examplified by forthsamp({[AX +2* SI})] (and
 again you might say forthsamp({+2* SI] [AX}) with the same meaning.)
+At the same time it is a comma-er in the sense that it reports
+that the demand for a sib-commaer is fill filled.
 
 Many subtleties are involved to get right the error detection and the
 disassembly.
@@ -1027,7 +1132,8 @@ or for instructions preceeded by an address size overwrite prefix.
 
 The forthdefi({primed registers}) have a prime after the register name
 such as forthcode({AX'|}) , compared to forthcode({AX|}).
-Some opcodes allow two registers.
+Some opcodes allow two operands and then always one of them is a
+primed register.
 Whether the primed register is a source or destination is explicitly
 covered by forthcode({T|}) and forthcode({F|}) ,
 forthemph({not}) by any order in which the operands appear.
@@ -1125,7 +1231,7 @@ forthbreak
 Items in Commaers.
 Note that in commaers, there is never an forthkey({X}).
 You always have to choose between forthkey({W}) for 16 bits
-and forthkey({L}) for 32 bits.
+and forthkey({L}) for 32 bits or forthkey({Q}) for 64 bits.
 forthbreak
 OW,    Obligatory word
 forthbreak
@@ -1189,8 +1295,8 @@ forthsamp({ciforth ERROR # 26 : AS: PREVIOUS INSTRUCTION INCOMPLETE})
 You left holes in the instruction before the current one, i.e.
 one or more fixups like forthcode({X|}) are missing. Or you forget
 to supply data required by the opcode like forthcode({OW,}) .
-_VERBOSE_({With forthcode({SHOW:}) you can see what completions of your opcode
-are legal.})
+_VERBOSE_({With forthcode({??}) you can see what completions of your opcode
+are possible.})
 
 forthitem
 forthsamp({ciforth ERROR # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY})
@@ -1198,6 +1304,8 @@ forthsamp({ciforth ERROR # 27 : AS: INSTRUCTION PROHIBITED IRREGULARLY})
 The instruction you try to assemble would have been legal, if Intel
 had not made an exception just for this combination. This situation
 is handled by special code, to issue just this error.
+(This is rare, most situations are handled by bad bits, resulting
+in different errors.)
 
 forthitem
 forthsamp({ciforth ERROR # 28 : AS: UNEXPECTED FIXUP/COMMAER})
@@ -1208,8 +1316,8 @@ with what you specified earlier. So the fixup/comma-er word at
 which this error is detected conflicts with either the opcode,
 or one of the other fixups/comma-ers.
 dnl FIXME This explanation is the same as the following.
-_VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode
-or with a forthcode({DI|}) operand.})
+_VERBOSE_({For example specifying both a forthcode({SI'|}) and a forthcode({DI'|}) operand
+for a forthcode({LEA,}) opcode.})
 
 forthitem
  forthsamp({ciforth ERROR # 29 : AS: DUPLICATE FIXUP/UNEXPECTED COMMAER})
@@ -1219,9 +1327,8 @@ You try to complete an opcode by fixup's (like forthcode({X|})  dnl
 with what you specified earlier. So the fixup/comma-er word at
 which this error is detected conflicts with either the opcode,
 or one of other fixups/comma-ers.
-dnl FIXME This explanation is the same as the previous.
-_VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode
-or with a DI| operand.})
+FIXME This explanation is the same as the previous.
+_VERBOSE_({For example forthcode({B|}) (byte size) with a forthcode({LEA,}) opcode .})
 
 forthitem
 forthsamp({ciforth ERROR # 30 : AS: COMMAERS IN WRONG ORDER})
