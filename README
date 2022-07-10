@@ -53,9 +53,15 @@ those are in the directory release. A report of tests is in
 testreport.txt.
 
 There is no end to the auxiliary tools that are needed to build all
-versions and all other paraphernalia. cifgen.ps described the
-generic system. howto.txt is a cookbook about things you may want
+versions and all other paraphernalia. *cifgen.ps describe the
+generic system.* howto.txt is a cookbook about things you may want
 to do. A detailed history of ciforth since 2000 is contained in
 logforth.txt.
 
 You may want to read the other README's.
+
+Note Regarding directories:
+release constains supersecure old version with digital signatures
+optimiser contains an experimental optimiser, work in progress.
+moth-balled old sources
+testcmp contains expected test results
