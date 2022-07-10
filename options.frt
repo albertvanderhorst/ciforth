@@ -142,11 +142,11 @@ OK BYE
 
 
 \
-( -i BINARY-PATH LIBRARY-PATH SHELL-PATH )\ A3aug30
+( -i BINARY-PATH LIBRARY-PATH SHELL-PATH ) \ C2jul10
 CREATE task     1 LOAD
     "ARG[]" WANTED    "SAVE-SYSTEM" WANTED
-: INSTALL-LIB BLOCK-FILE $@ GET-FILE   3 ARG[] PUT-FILE
-    3 ARG[] BLOCK-FILE $! ;
+: INSTALL-LIB BLOCK-FILE $@ -TRAILING GET-FILE
+    3 ARG[] PUT-FILE 3 ARG[] BLOCK-FILE $! ;
 \ Trim back to before ``task''. Save system at binary path.
 \ Must be done all at once, because of forgetting.
 : INSTALL-BIN 'task    DUP 'FORTH FORGET-VOC   >NFA @ DP !
@@ -354,7 +354,7 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 "CPU  NAME  VERSION" TYPE .SIGNON CR
 "LIBRARY FILE: " TYPE
 0 MESSAGE
-"$RCSfile: options.frt,v $ $Revision: 5.50 $" TYPE CR
+"$RCSfile: options.frt,v $ $Revision: 5.51 $" TYPE CR
 CR
 0 BLOCK  B/BUF TYPE
 BYE

@@ -16309,6 +16309,14 @@ installed on github.
 Reinstalled the testing of decorated.
 The word ?IL was wrong if CF: called in hex mode.
 Replaced 36 by 6 6 * , made it work in hex and decimal.
+2022 jul 10
+The -i option no longer works, because of the trailing spaces
+in the block-file. The solution is to do a -TRAILING after $@.
+This triggers 5.4.1 versions of the 32/64 wina/lina software.
+The deb files are presumably working.
+The zip files can be update by e.g.
+zip wina32_5.4.0.zip forth.lab
+The tar.gz files have to be newly generated.
 
 ===========================
 

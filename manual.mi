@@ -1186,10 +1186,15 @@ equivalent to forthsamp({1 LOAD}) and forthsamp({-z}) or
  _VERBOSE_({{In fact all options are mapped onto screen 0..31 by a bitwise and.}})
 @subsection Options
 ciforth is a primitive system, and can interpret just one option on the
-command line. If the first argument is not starting with forthkey({-}) _PC_({or forthkey({/})})
+command line.
+Moreover it can interpret options, only if it is properly
+installed with a connection to a forthfile({lab}) file.
+If the first argument is not starting with forthkey({-}) _PC_({or forthkey({/})})
 ciforth returns with error code 3.
 However the option forthsamp({-l}) can bootstrap it into
 more sophisticated behaviour.
+The option forthcode({-x}) triggers the code forthcode({^X LOAD}),
+loading screen 24.
 
 The following options can be passed to thisforth on the command line:
 
