@@ -1,5 +1,5 @@
 dnl $ Id: $
-dnl Copyright{2000,2001}: Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright{2000,2024}: Albert van der Horst, HCC FIG Holland by GNU Public License
 undefine({worddoc})
 \input texinfo
 @setfilename thisfilename
@@ -19,7 +19,7 @@ Dutch Forth Workshop
 
 @page
 @c @vskip Opt plus 1fill
-Copyright @copyright{{}} 2018 Albert van der Horst
+Copyright @copyright{{}} 2024 Albert van der Horst
 
 Permission is granted to copy with attribution.
 Program is protected by the GNU Public License.
@@ -463,10 +463,24 @@ belonging to the assembler used.
 
 _TEXT_ : This introduces the part of the Forth with the definitions.
 It is supposed to be stored on disk.
+Normally it is modifiable, so e.g. VARIABLE's can be in here.
+
+In the circumstance that there is separation of code and data,
+there is the another segment
+_DATA_ : modifiable data, not machine-executable code
+This is important if the underlying operating system doesnot
+allow the modifiation of code.
+In that case the _TEXT_ segment is non-writable.
+Most Forth's to date can get by with this data in the _TEXT_
+segment.
+This macro is conditional on _SEPARATED_.
+So mostly _DATA_ is a void statement.
 
 _BSS_ : This part of the Forth imposes a layout without
 initialising the data.
 It agrees with a traditional bss segment in e.g. an a.out format.
+
+_IDATA_ : As an exception extra segments has to be introduced.
 
 @subsection Selection
 Selection, often one of alternatives, is in general done as follows

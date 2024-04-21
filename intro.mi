@@ -1,5 +1,5 @@
 dnl $ Id: $
-dnl Copyright{2000-2014}: Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright{2000-2024}: Albert van der Horst, HCC FIG Holland by GNU Public License
 A Forth system is a database of small programs.
 The database is called the dictionary.
 The programs are called forthdefi({word})'s, or definitions.

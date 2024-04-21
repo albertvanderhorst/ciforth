@@ -46,7 +46,7 @@ CREATE _pad 80 ALLOT \ Word surrounded by spaces
 
 
 \
-( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH C0jun03
+( -c PROGRAM :_compile_PROGRAM_to_binary ) \ AvdH C4apr05
 "1 LOAD"    "WANT" PRESENT 0= AND EVALUATE \ idempotent
 WANT OLD:   TURNKEY   SWAP-DP
 WANT ARG[]   INCLUDE   SRC>EXEC
@@ -60,7 +60,7 @@ WANT ARG[]   INCLUDE   SRC>EXEC
 'TASK '.SIGNON 3 CELLS MOVE \ No sign on.
 : REGRESS  POSTPONE \ ; IMMEDIATE \ Turn off regression test
 ARGC 3 < 13 ?ERROR
-2 ARG[] INCLUDED
+2 ARG[] INCLUDED  4096 ALLOT \ one extra page
 LATEST   2 ARG[] SRC>EXEC   TURNKEY
 ( -d :_add_defined_then_include )
 \ Run a program that uses [DEFINED] to run on other Forths
@@ -78,10 +78,10 @@ ARGC 3 < 13 ?ERROR
 
 
 \
-( -e :_Load_system_electives ) \ AvdH A3sep01
+( -e :_Load_system_electives )                   \ C2Dec28 AvdH
 "1 LOAD"    "WANT" PRESENT 0= AND EVALUATE \ Idempotent
 .SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
-\  "-legacy-" WANTED  \ If you want this, it must be up front
+\  WANT  -traditional- \ If you want this, it must be up front
 WANT INCLUDE CONFIG ORDER
 WANT H. DUMP
 WANT HELP SEE LOCATE $.
@@ -142,22 +142,22 @@ OK BYE
 
 
 \
-( -i BINARY-PATH LIBRARY-PATH SHELL-PATH ) \ C2jul10
-CREATE task     1 LOAD
-    "ARG[]" WANTED    "SAVE-SYSTEM" WANTED
+( -i BINARY-PATH LIBRARY-PATH SHELL-PATH ) \ C4apr21
+CREATE _task     1 LOAD
+WANT ARG[] SAVE-SYSTEM _exename
 : INSTALL-LIB BLOCK-FILE $@ -TRAILING GET-FILE
     3 ARG[] PUT-FILE 3 ARG[] BLOCK-FILE $! ;
 \ Trim back to before ``task''. Save system at binary path.
 \ Must be done all at once, because of forgetting.
-: INSTALL-BIN 'task    DUP 'FORTH FORGET-VOC   >NFA @ DP !
-    2 ARG[] SAVE-SYSTEM  BYE ;
-\ Specify shell name.
-: INSTALL-SHELL 4 ARG[] SHELL $! ;
+\ : INSTALL-SHELL ;
+: INSTALL-SHELL OVER BM' >R 4 ARG[] SHELL BM - R> + $! ;
+: INSTALL-BIN _exename GET-FILE
+    ARGC 5 = IF INSTALL-SHELL THEN
+   2 ARG[] PUT-FILE ;
 : DOIT   ARGC 4 6 WITHIN 0=
     IF ." -i requires 2 or 3 arguments" CR BYE THEN
-    ARGC 5 = IF INSTALL-SHELL THEN   INSTALL-LIB INSTALL-BIN ;
+    INSTALL-LIB INSTALL-BIN BYE ;
 DOIT
-\
 ( -j :_This_option_is_available )
 
 
@@ -222,14 +222,14 @@ SWITCH-LIBS
 
 
 \
-( -n :_This_option_is_available )
-
-
-
-
-
-
-
+( -n : "newby" AUTOLOAD )                       \ C3jan31
+"1 LOAD"    "WANT" PRESENT 0= AND EVALUATE \ idempotent
+WANT AUTOLOAD
+WANT DO-DEBUG
+WANT CASE-INSENSITIVE
+.SIGNON CR 0 MESSAGE CR 0 BLOCK  B/BUF TYPE
+"autoload on, case insensitive " TYPE CR
+"stack printing on, index lines printing on"  TYPE CR
 
 
 
@@ -254,10 +254,10 @@ SWITCH-LIBS
 
 
 \
-( -p :_Load_system_preferences ) \ AvdH A1oct02
+( -p :_pedantic                )                 \ C3nov06 AvdH
 1 LOAD
- "-legacy-" WANTED     \ Must be first to WANT
-"Pedantic is not implemented but ""-legacy-"" WANTED
+ "-traditional-" WANTED     \ Preferably first
+"Pedantic is not implemented but ""-traditional-"" WANTED
 goes a long way." TYPE
 
 
@@ -318,21 +318,21 @@ SCRIPT-NAME $@ GET-FILE   "-scripting-" WANTED
 ^J $/ 2DROP     \ Line with #!lina
 EVALUATE
 BYE
-( -t FILE :_Try_to_compile_FILE_by_all_means ) \ AvdH A1oct26
-.SIGNON 1 LOAD
-\ Reload  "with" WANTED new ``CORA'' but hide it direct after.
- "CORA-IGNORE" WANTED
-: CORA CORA-IGNORE ;   1 LOAD   'CORA HIDDEN
+( -t :_This_option_is_available )
 
- "[IF]" WANTED    "ARG[]" WANTED    "PREFIX" WANTED
 
- "CASE-INSENSITIVE" WANTED   CASE-INSENSITIVE
- "NO-SECURITY" WANTED        NO-SECURITY
- "AUTOLOAD" WANTED           AUTOLOAD
-ARGC 3 < 13 ?ERROR
-2 ARG[] INCLUDED
-SECOND-PASS @ 0= ?LEAVE-BLOCK
-2 ARG[] INCLUDED
+
+
+
+
+
+
+
+
+
+
+
+
 \
 ( -u :_This_option_is_available )
 
@@ -353,8 +353,8 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 ( -v :_Version_and_copyright_information_)
 "CPU  NAME  VERSION" TYPE .SIGNON CR
 "LIBRARY FILE: " TYPE
-0 MESSAGE
-"$RCSfile: options.frt,v $ $Revision: 5.51 $" TYPE CR
+" for M4_VERSION " TYPE 0 MESSAGE
+"$RCSfile: options.frt,v $ $Revision: 5.55 $" TYPE CR
 CR
 0 BLOCK  B/BUF TYPE
 BYE

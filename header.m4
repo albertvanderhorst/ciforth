@@ -1,4 +1,5 @@
-dnl  $Id: header.m4,v 5.6 2019/07/22 10:14:31 albert Exp $  M4 file to handle the develish FIG headers.
+dnl  $Id: header.m4,v 5.9 2023/10/23 15:12:10 albert Exp $  M4 file to handle the develish FIG headers.
+
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl
 dnl _STRING : Lay down a string in memory.
@@ -60,6 +61,8 @@ define({_CODE_FIELD},$1)dnl
 define({_DATA_FIELD},{($1+_CELLS(D_HOFFSET))})dnl
 define({_LINK_FIELD},{($1+_CELLS(L_HOFFSET))})dnl
 define({_VAR_FIELD},{($1+HEADSIZE)})dnl
+define({_HIGH_CODE},{($1+HEADSIZE)})dnl
+define({_LOW_CODE},{(X_$1)})dnl
 dnl     Handle Branching
 define({_0BRANCH},dnl
 {DC      ZBRAN
@@ -81,9 +84,12 @@ dnl The field where a pointer to the latest entry of a vocabulary resides.
 define({CODE_HEADER},
 {_HEADER({$1},
 {$2},
+{X_$2},
 {$2+HEADSIZE},
-{$2+HEADSIZE},
-$5)})dnl
+$5)
+        _TEXT_
+X_$2:
+})dnl
 define({JMPHERE_FROM_PROT},{})dnl
 define({JMPHERE_FROM_REAL},{})dnl
 define({JMPFAR},{DB    0x0EA})dnl
@@ -97,7 +103,9 @@ define({_CELLS},(CW*($1)))dnl
 define({_NEXT},{JMP     NEXT})
 define({_NEXT_MACRO},
         {LODS                  _C NEXT
-        JMP     _CELL_PTR[WOR]  } )
+        JMP     _CELL_PTR[WOR]
+        _DATA_
+} )
 # See definition of PUSH in glossary.
 define({_PUSH},{JMP     APUSH})
 define({_PUSH_MACRO},

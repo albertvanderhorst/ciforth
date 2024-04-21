@@ -59,7 +59,7 @@ WANT ARG[]   INCLUDE   SRC>EXEC
 'TASK '.SIGNON 3 CELLS MOVE \ No sign on.                      
 : REGRESS  POSTPONE \ ; IMMEDIATE \ Turn off regression test   
 ARGC 3 < 13 ?ERROR                                             
-2 ARG[] INCLUDED                                               
+2 ARG[] INCLUDED 4096 ALLOT                                    
 LATEST   2 ARG[] SRC>EXEC   TURNKEY                            
                                                                
 ( -d :_This_option_is_available )                              
@@ -354,7 +354,7 @@ SECOND-PASS @ 0= ?LEAVE-BLOCK
 "CPU  NAME  VERSION" TYPE .SIGNON CR                           
 "LIBRARY FILE: " TYPE                                          
 0 MESSAGE                                                      
-"$RCSfile: boot.lab,v $ $Revision: 5.2 $" TYPE CR              
+"$RCSfile: boot.lab,v $ $Revision: 5.3 $" TYPE CR              
 CR                                                             
 0 BLOCK  B/BUF TYPE                                            
 BYE                                                            
@@ -766,7 +766,7 @@ BYE
  : No such process                                             
  : No such file or directory                                   
  : Operation not permitted                                     
-  ciforth lab  $Revision: 5.2 $ (c) Albert van der Horst       
+  ciforth lab  $Revision: 5.3 $ (c) Albert van der Horst       
  : EMPTY STACK                                                 
  : DICTIONARY FULL                                             
  : FIRST ARGUMENT MUST BE OPTION                               

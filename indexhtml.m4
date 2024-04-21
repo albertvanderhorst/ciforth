@@ -1,5 +1,5 @@
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
-dnl $Id: indexhtml.m4,v 5.5 2018/01/18 19:37:28 albert Exp $
+dnl $Id: indexhtml.m4,v 5.6 2023/10/18 11:53:49 albert Exp $
 define(divert,)
 divert(-1)
 changequote({,})dnl
@@ -15,9 +15,14 @@ define({forthkey}, {<B>$1</B>})
 define({forthexample},{<P><B>$1</B><P>})
 define({forthcode}, {<A HREF="#$1">$1</A>})
 define({forthxref}, {<A HREF="#$1">See also $1</A>})
+define({OldLetter},{_})
 dnl ----------------------- worddoc ------------------------------------
 define({worddoc},
 {divert(2)dnl
+define({newdef},translit({{$2}},{,()#},{____}))dnl
+define({NewLetter}, substr(newdef,0,1))dnl
+ifelse(OldLetter,NewLetter,,{<HR> })dnl
+define({OldLetter}, NewLetter)dnl
 forthcode({$2}) &nbsp; &nbsp; })dnl
 dnl ----------------------- worddocsafe  ------------------------------------
 define({worddocsafe},

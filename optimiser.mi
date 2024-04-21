@@ -42,7 +42,7 @@ if it only pops, what it has pushed itself, and the stack is left
 with the same depth as before.
 
 A sequence is called stable if it is stable with respect to
-anything that is relevant in the contest, mostly with respect to
+anything that is relevant in the context, mostly with respect to
 everything.
 
 @subsection Notations
@@ -461,7 +461,7 @@ of a basic block.
 Thereafter the code can be replaced by machine code as is found in the
 constituent words. This code is inspected by a peep hole optimiser,
 eliminating e.g. a push pop sequences. In exceptional cases Forth
-calls to high level code, may need to be inserted, which block
+calls to high level code, may need to be inserted. This blocks
 probably most possibilities for further optimisation.
 
 Originally a DO LOOP looks like

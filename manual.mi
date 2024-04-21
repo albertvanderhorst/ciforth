@@ -1,5 +1,5 @@
 dnl $ Id: $
-dnl Copyright{2000-2014}: Albert van der Horst, HCC FIG Holland by GNU Public License
+dnl Copyright{2000-2024}: Albert van der Horst, HCC FIG Holland by GNU Public License
 @section Getting started
 
 @subsection Hello world!
@@ -112,17 +112,35 @@ Apparently, thisforth doesn't know about a forth word named
 forthcode({TUCK}), but after forthsamp({"TUCK" WANTED}) maybe
 it does. You may try again.
 
+The library file must be organized for forthcode({WANTED}) in a
+particular way to find something. It is in fact familiar.
+It is divided into blocks of 16 lines.
 The convention about the way the library file must be
 organized for forthcode({WANTED}) to find something is
 simple. It is divided into blocks of 16 lines.
-The first line is the header of the block.
+The first line is the header of the block, the so called forthdefi({indexline})
 If the word we are looking for is mentioned in the header,
 that block is compiled.
-This continues until the word has been defined,
-or the end of the search area is reached.
-This is marked by a screen with an empty index line.
-I tell you this not because you need to know,
-but to show that there is nothing to it.
+There may be several blocks that define a particular
+word.
+If the first block is terminated early,
+the word is not yet defined and the next blocks is loaded.
+E.g. a words like forthcode({?32}) mark 32-bits code and the
+screen is terminated if the Forth is 64 bits.
+This goes on until the word is defined, or the end of the
+screens is reached.
+The terminators that cut loading a screen short, are
+defined by the the forthcode({CONFIG}) defining word.
+The last screen  is marked by an empty index line.
+There may be names that represent a whole package.
+Among those symbolic names are forthsamp({-fp- -fpwa- ASSEMBLERi86
+ASSEMBLERi86-HIGH -traditional- }).
+After forthcode({WANT}) symbolic names may not be in the dictionary,
+but note that they are not intended to be executed anyway.
+
+There is really nothing much to it.
+The bottom line is that one library file serves a range
+of operating systems and cell sizes.
 
 The library file contains examples for you
 to load using forthcode({WANT}) .
@@ -225,34 +243,6 @@ forthexample(
 SEE TUCK})
 show you the source for TUCK if it is in the library or in the kernel,
 but without comment or usage information.
-
-@section Configuring
-For configuring your thisforth,
-you may use forthcode({"newforth" SAVE-SYSTEM}) .
-This will do most of the time,
-but then you build in the forthcode({SAVE-SYSTEM}) command as well.
-For configuring your thisforth, without enlarging the dictionary,
-you may use the following sequence
-forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any configuration command
-1 LOAD
-WANT SAVE-SYSTEM
-: DOIT
-    '_pad 'FORTH FORGET-VOC
-    '_pad >NFA @@ DP !
-    "newforth" SAVE-SYSTEM BYE ;
-DOIT })
-Here forthvar({DOIT}) trims the dictionary just before
-saving your system into a file.
-forthcode({_pad}) is the first word of
-the facilities in screen 1 that was loaded.
-(This was different in previous version of ciforth.)
-
-forthcode({FAR-DP}) allows to have a disposable part of the
-dictionary.
-If you decide to use this facility for your own purposes,
-make sure to always forthcode({FORGET}) the disposed off words.
-The forthsamp({-c}) option uses this to avoid having
-source files as part of an executable image.
 
 @section Concepts
 
@@ -454,11 +444,13 @@ Files are not read line by line, but read in full and
 evaluated.
 _CIF_IN_({
 forthitem
-It uses forthcode({PP}) instead of the ISO forthcode({>IN})
-The forthcode({>IN}) that is available via the library is a fake, that can only be
-read, but changing it has no effect.
-forthcode({PP}) can be manipulated to have such effects as the familiar
-forthcode({0 >IN !}) idiom.
+It uses forthcode({PP}) instead of the ISO forthcode({>IN}).
+The forthcode({>IN}) that is available via the library is to be
+loaded only via forthcode({WANT -traditional-}) and then work as
+in expected.
+In particular forthcode({INCLUDED}) compiles a file line by line.
+forthcode({PP}) could be manipulated to have such effects manipulating
+ forthcode({>IN})
 }) dnl
 forthitem
 Counting in do loops do not wrap through the boundary between
@@ -486,12 +478,14 @@ ciforth-specific and thisforth-specific -- but hopefully documented -- behaviour
 Understanding it requires some study of non-portable facilities.
 forthitem
 When a file is forthcode({INCLUDED}) it is read in as a whole,
-so there is never a need for forthcode({REFILL}) .
+so there is no need for forthcode({REFILL}) .
 After forthcode({ WANT REFILL}) a forthcode({REFILL}) is loaded that
 sets the parse pointer to the start of the next line.
-In nearly all cases this will accomplish the effect described by the standard.
-dnl The effect of forthcode({ 0 >IN !}) can be had by forthcode({UNFILL}).
-dnl After forthcode({WANTREFILL })
+Moreover forthcode({0>IN}) will set the parse pointer to the start of
+the current line.
+In many cases this will accomplish the effect described by the standard.
+If this doesn't help, use forthcode({-traditional-}) .
+forthxref({Manual}), subsection forthsamp({REFILL}) .
 
 forthendenumerate
 
@@ -536,7 +530,36 @@ where you want your code to run on.
 
 By using forthcode({CELL+}) it is easy to keep your code 16/32/64 bit clean.
 This means that it runs on 16, 32 and 64 bits systems.
-@section Compatibility with thisforth 4.0.x
+@subsection REFILL
+Some programs rely on line by line loading by forthcode({REFILL}) .
+This is substantially different from normal ciforth practice.
+You want at least forthcode({REFILL}) forthcode({>IN}) ,
+and you probably use forthcode({WORD}) and forthcode({FIND}) and
+the (traditional, but non standard) word of forthcode({VOCABULARY}) that
+is different from forthcode({NAMESPACE}) .
+This is accomplished by the symbolic target of forthdefi({-traditional-}).
+forthexample(
+{WANT -traditional- })
+All the words that are loaded by this command are in the library and
+they are marked with forthsamp({-traditional-}) in the index line.
+The word forthcode({-traditional-}) is not itself defined, expect to get
+get a warning for that.
+This is done in order to be able to reload (and forcibly redefine) all words
+by forthcode({WANT -traditional-}) .
+
+It is recommended that this is the first facility loaded,
+that way there is the least chance with interference.
+The following sequence generates a traditional Forth:
+forthexample({
+lina -a
+WANT -traditional- SAVE-SYSTEM
+....
+"traditionalforth" SAVE-SYSTEM
+BYE
+})
+It is of course possible to enhance this Forth with more words
+at the place of the dots.
+@subsection Compatibility with thisforth 4.0.x
 Since version 5.x changes have been made to increase compatibility
 with existing practice.
 By invoking forthcode({WANT -legacy-}) you load a screen that
@@ -547,11 +570,13 @@ In either case, those programs have been tested with version 5.x
 
 What the legacy items are can be seen from the screen that has
 forthcode({-legacy-}) in its index line.
-In particular forthcode({REQUIRE REQUIRED PRESENT? VOCABULARY
-WORD FIND (WORD) (PARSE) SAVE-INPUT RESTORE-INPUT }) are
+In particular forthcode({REQUIRE REQUIRED PRESENT? }) are
 to be found in those screens.
 Note that by using legacy items your code may be in conflict with
 upcoming standards.
+It is also likely that in those programs traditional words are used
+that are no longer present in the kernel such as forthcode({WORD FIND }).
+These can be loaded by regular forthcode({WANT}) .
 
 The names forthcode({VOCABULARY}) and forthcode({REQUIRE}) are
 being proposed for standardisation.
@@ -563,6 +588,34 @@ forthcode({VOCABULARY}) is renamed to forthcode({NAMESPACE}),
 with the difference that forthcode({NAMESPACE}) is not immediate.
 This allows to include the new standardised definitions
 in a loadable screen.
+@section Configuring
+For configuring your thisforth,
+you may use forthcode({"newforth" SAVE-SYSTEM}) .
+This will do most of the time,
+but then you build in the forthcode({SAVE-SYSTEM}) command as well.
+For configuring your thisforth, without enlarging the dictionary,
+you may use the following sequence
+forthexample({ S" myforth.lab" BLOCK-FILE $! \ Or any configuration command
+1 LOAD
+WANT SAVE-SYSTEM
+: DOIT
+    '_pad 'FORTH FORGET-VOC
+    '_pad >NFA @@ DP !
+    "newforth" SAVE-SYSTEM BYE ;
+DOIT })
+Here forthvar({DOIT}) trims the dictionary just before
+saving your system into a file.
+forthcode({_pad}) is the first word of
+the facilities in screen 1 that was loaded.
+(This was different in previous version of ciforth.)
+
+forthcode({FAR-DP}) allows to have a disposable part of the
+dictionary.
+If you decide to use this facility for your own purposes,
+make sure to always forthcode({FORGET}) the disposed off words.
+The forthsamp({-c}) option uses this to avoid having
+source files as part of an executable image.
+
 @section Saving a new system
 We have said it before: ``Programming Forth is extending the Forth language.''.
 A facility to save your system after it has been extended is essential.
@@ -636,10 +689,17 @@ The dictionary
 forthitem
 Free memory, available for dictionary, from below, and stacks, from above
 forthitem
-Stacks and
-the input buffer for the console
-_HIGH_BUF_({and disk block buffers})
-.
+The work area for each task with a total size of forthcode({TASK-SIZE})
+that must be a power of two.
+This may be replicated for multi-tasking.
+It is evenly divided into the data stack, the return stack and user variables,
+the input buffer for the console, _HIGH_BUF_({and disk block buffers}).
+The work area is initialised on startup.
+_THREADS_({
+These areas have an alignment of 1/4  of the forthcode({TASK-SIZE}) .
+This way the return stack pointer can serve double duty as a user pointer;
+this is one register less to save for a task switch.
+})
 forthenditemize
 The lowest part of the free memory is used as a scratch area: forthcode({PAD}) .
 _LOW_BUF_({The disk block buffers are allocated in the dictionary,
@@ -830,7 +890,7 @@ forthsamp({ "mysrc.frt" INCLUDED })
 forthbreak
 })forthxref(Manual) Section Getting Started.
 forthbreak
-In an installed system you will put forthsamp({WANT OS-IMPORT WANT INCLUDE})
+In an installed system you will put forthsamp({WANT OS-IMPORT INCLUDE})
 in your electives screen (5), and just type
 forthsamp({vim mysrc.frt}) to edit a file, without leaving thisforth and
 load it with forthsamp({INCLUDE mysrc.frt})
@@ -1218,7 +1278,14 @@ name of the binary, otherwise the binary is called forthfile({a.out}).
 Upon invocation of the binary the word defined latest is executed, then Forth goes
  forthcode({BYE}) .
 _VERBOSE_({ forthfile({name}) {is a regular source file, not a block file.}})
-In addition forthcode({WANT}) and ARG[] are made available.
+In addition forthcode({WANT}) and forthcode({ARG[]}) are made available.
+The source of the source file is temporarily stored in a kind of far
+forthcode({PAD}) .
+The source is not part of the resulting binary,
+as would be the case if it is built with forthcode({TURNKEY}).
+A far forthcode({PAD}) can cause problems if during compilation the program
+allocates a large amount of memory to touch that area;
+in that case use the -g option that make a larger Forth.
 
 forthitem
 forthsamp({-d name })
@@ -1324,9 +1391,30 @@ forthcode({OS-IMPORT}) is made available to add to this list.
 })
 
 forthitem
+forthsamp({-n })
+
+This is an option intended for newbies.
+It loads forthcode({AUTOLOAD}) forthcode({WANT}) and prints the
+stack after each command.
+Autoload means that if you type in an unknown Forth word,
+an attempt is made to load it from the library.
+You can see the forthdefi({index lines }) of the facilities that are
+loaded.
+The definition that you are compiling is interrupted and a jump
+is made over the space you are using for the new definition.
+That works for smallish definitions, but not for complete
+facilities like floating point or an assembler.
+Thus this is for convenience only, and not absolutely reliable.
+It may succeed right away, or you have to repeat the command you give.
+If it fails, you can resort to forthsamp({WANT <word>}).
+After development you should never rely on forthcode({AUTOLOAD}) but paste the
+lines with forthcode({WANT}) in your source.
+They are printed for convenience.
+
+forthitem
 forthsamp({-p})
 
-forthemph({Reserved option, not implemented.})
+forthemph({Reserved}) option, not implemented.
 forthbreak
 Be pedantic about ISO.
 Redefine some words to follow the standard as closely as possible.
@@ -1352,15 +1440,6 @@ This follows the Unix conventions for script files.
 If you set the execute bit the file file becomes a command and accepts
 arguments.
 })
-forthitem
-forthsamp({-t sourcefile})
-
-Try to load the file forthfile({script}) automatically, by possibly unsafe means.
-Report facilities that were required.
-This is a first step in a porting activity.
-_VERBOSE_({Redefinition messages are issued on the error channel that
-can be redirected to /dev/nul leaving the report.})
-
 forthitem
 forthsamp({-v})
 

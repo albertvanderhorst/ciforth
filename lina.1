@@ -1,9 +1,9 @@
-.\" $Id: lina.1,v 5.6 2022/03/12 12:33:25 albert Exp $
-.TH LINA "1" "feb 2022 " "ciforth 5.4.0" HCC-FORTHIG
+.\" $Id: lina.1,v 5.7 2024/04/16 21:28:51 albert Exp $
+.TH LINA "1" "apr 2024 " "ciforth 5.5.0" HCC-FORTHIG
 .SH "NAME"
 lina \- close to ISO Forth Language And Environment
 .SH "SYNOPSIS"
-\fBlina\fR      [\ \fB\-aehmrv\fR\ ]
+\fBlina\fR      [\ \fB\-aehmnrv\fR\ ]
 .br
 \fBlina\fR      \ \fB\-c\fR\ <source>
 .br
@@ -30,7 +30,7 @@ kernel contains the essential, i.a. file access, exceptions and
 interfacing with Linux.
 Its power is multiplied by an extensive source library, that
 adds i.a. a number of standard words, floating point,
-a decompiler, integrated 386 assembler, sort utilities,
+a decompiler, integrated i86 assembler, sort utilities,
 binary search and numerous small functions.
 .
 
@@ -76,7 +76,7 @@ Then start the interpreter.
 Execute the forthcode \fIwords\fR .
 Then start the interpreter.
 .TP
-\fB\-g N \fIbinary-path\fR
+\fB\-g \fIN binary-path\fR
 Expand the system by \fIN\fR Megabytes,
 then save it under the name \fIbinary-path\fR.
 \fIN\fR may be negative,
@@ -94,20 +94,22 @@ The system is configured accordingly.
 .TP
 \fB\-l\fR \fIlibrary-path\fR [\fIarguments\fR]
 Close the default library, and open the library at
-\fIlibrary-path\fR. Shift the arguments such as to make the \fB-L\fR
+\fIlibrary-path\fR. Shift the arguments such as to make the \fB-l\fR
 option invisible.
 Process any other options, then start the interpreter.
+.TP
+\fB\-n\fR
+This starts the interpreter for newbies.
+It is convenient but somewhat unsafe.
+The interpreter is made case-insensitive.
+The stack is printed after each command.
+For unknown words an attempt is made to load it from the library.
 .TP
 \fB\-s\fR \fIscript-path\fR [\fIarguments\fR]
 (Intended to be used in a script with ``\fB#!lina -s\fR'' as the first line.)
 Shift the arguments such as to make the \fB-s\fR option invisible.
 Interpret the file \fIscript-path\fR , ignoring its first line.
-.TP
-\fB\-t\fR \fIfile.frt\fR
-Try to load the file \fIfile.frt\fR automatically,
-by possibly unsafe means.
-Report facilities that were required,
-then start the interpreter.
+The arguments are to appended to the script involation, not to the first line.
 .TP
 \fB\-m\fR, \fB\--\fR, \fB\-\-help\fR, \fB\-\-version\fR
 print help, version and copyright information.
@@ -123,6 +125,11 @@ The generic system can be fetched from
 .PP
 MS-DOS, "windows" , stand alone and Alpha Linux
 binary versions are available.
+.br
+The Intel specific system can be fetched from
+.IP
+\fI https://github.com/albertvanderhorst/ciforth\fR
+.PP
 
 .SH "ENVIRONMENT"
 Configuration is done fully internal.
@@ -143,13 +150,14 @@ referenced.
 \fI/usr/share/doc/ci86.lina64/lina64.texinfo\fR allows you to generate the documentation
 in html, ps and pdf form.
 .br
-\fI/usr/share/doc/lina.lina64/lina64.s\fR and \fIforth.lab\fR are source code and can be viewed.
+\fI/usr/share/doc/lina.lina64/lina64.fasm\fR and \fIforth.lab\fR are source code and can be viewed.
 .br
-\fIlina\fR comes also in cell-width 32; the filenames change accordingly.
+\fIlina\fR comes also in cell-width 32,
+the documentation corresponds.
 .br
 gforth(1) GNU Forth, a faster and more complicated Forth system.
 .br
-as(1) The portable GNU assembler.
+fasm(1) The flat assembler.
 
 .SH "DIAGNOSTICS"
 Uncaught exceptions will show the error number.
@@ -175,7 +183,7 @@ language.
 The library has comments but no comprehensive documentation.
 
 .SH "AUTHOR"
-Copyright \(co 2000-2022
+Copyright \(co 2000-2024
 Albert van der Horst \fI albert@spenarnc.xs4all.nl\fR.
-\fBciforth\fR is made available under the GNU Public License:
+\fBciforth\fR is made available under the GNU Public License 2:
 quality, but NO warranty.

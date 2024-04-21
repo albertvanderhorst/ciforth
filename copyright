@@ -1,0 +1,34 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: lina
+Source: https://github.com/albertvanderhorst/ciforth
+
+Files: *
+Copyright: 2000-2024  Albert van der Horst <albert@spenarnc.xs4all.nl>
+License: GPL-2_or_LGPL
+ Whether GPL-2 or LPGPL applies is documented below.
+
+Files: extract/ci86.gnr
+Copyright: 2000-2024  Albert van der Horst <albert@spenarnc.xs4all.nl>
+License: GPL-2
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
+ lina itself is released under version 2 of the GNU General Public License.
+ However, this is a compiler and a substantial part of the package
+ are for all practical purposes libraries.
+ The GPL only applies to the compiler build as a derivative work of
+ the lina.s source and saved configurations of lina, not to compiled
+ programs.
+ All other usage, in particular of the library forth.lab and binaries
+ build by lina, are made available under the Lesser GNU General Public License.
+ This even applies to applications that have the Forth interpreter
+ exposed, provided they are truly applications.
+
+Files: forth.lab
+Copyright: 2000-2024  Albert van der Horst <albert@spenarnc.xs4all.nl>
+License: LGPL-2
+ On Debian systems, the complete text of the lesser GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/LGPL-2".
+ .
+ [lina is an instance of a Forth build by the ciforth compiler factory.
+ Different conditions (essentially none) apply to a Forth that you
+ build yourself using that tool.]

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 5.67 2022/03/23 12:59:50 albert Exp $
+# $Id: Makefile,v 5.75 2024/04/21 17:54:09 albert Exp $
 
 # Copyright(2013): Albert van der Horst, HCC FIG Holland by GNU Public License
 #
@@ -38,7 +38,8 @@ M4=m4 -G ciforth.m4
 M4_GNU=m4 ciforth.m4
 
 FORTH=./lina            # Our utility Forth.
-
+FASM=/usr/bin/fasm
+#FASM=$(BIN)/fasm
 # ALL FILES STARTING IN ``ci86'' (OUTHER ``ci86.gnr'') ARE GENERATED
 
 INGREDIENTS = \
@@ -129,12 +130,18 @@ cifgen.mi \
 ciforth.mi \
 intro.mi    \
 manual.mi   \
+optimiser.mi   \
 rational.mi  \
 # That's all folks!
 
 # Documentation files and archives
 DOC = \
 COPYING   \
+copyright       \
+lina.1          \
+READMElina.txt \
+READMEwina.txt \
+howto.txt \
 README.ciforth      \
 testreport.txt     \
 $(SRCMI) \
@@ -213,6 +220,7 @@ lina64.cfg
 # The usable files.
 RELEASELINA32USER = \
 COPYING   \
+copyright \
 READMElina.txt \
 lina32      \
 forth.lab     \
@@ -231,6 +239,7 @@ ci86.lina32.texinfo \
 
 RELEASELINA64USER = \
 COPYING   \
+copyright \
 READMElina.txt \
 lina64      \
 forth.lab     \
@@ -267,7 +276,7 @@ TEMPFILE=/tmp/ciforthscratch
 %: %.frt ; $(FORTH) -c $<
 
 # Define fasm as *the* assembler generating binary files.
-%:%.fas ; fasm $< -m256000
+%:%.fas ; $(FASM) $< -m256000 ; chmod +x $@
 
 # Define NASM as an alternative for generating bin files.
 %.bin:%.asm ; nasm -fbin $< -o $@ -l $*.lst
@@ -276,7 +285,7 @@ TEMPFILE=/tmp/ciforthscratch
 # allow to generate ci86.mina.bin etc.
 ci86.%.rawdoc ci86.%.rawtest : ci86.%.asm ;
 
-VERSION : ; echo 'define({M4_VERSION},{'${VERSION}'})' >VERSION
+VERSION : ; echo 'define({M4_VERSION},{'${VERSION}'})dnl' >VERSION
 
 ci86.%.asm : %.cfg VERSION nasm.m4 ci86.gnr
 	cat $+ | $(M4) $(M4_DEBUG) - > $(TEMPFILE)
@@ -333,17 +342,17 @@ toblk: toblk.frt $(FORTH)
 	rm -f forth.lab forth.lab.lina
 
 # Canonical targets
-lina   : lina32 ; cp $< $@
-#lina32   : flina32 ; cp $< $@
-#lina64   : flina64 ; cp $< $@
-lina32   : glina32 ; cp $< $@
-lina64   : glina64 ; cp $< $@
+lina   : lina64 ; cp $< $@
+lina32   : flina32 ; cp $< $@
+lina64   : flina64 ; cp $< $@
+#lina32   : glina32 ; cp $< $@
+#lina64   : glina64 ; cp $< $@
 
 #lina: lina64 ; $< -g 8000 $@
 # For MS-windows programs fasm demands an include directory with assorted
 # stuff. Use a symbolic link. Works on fasm 1.73.20 possibly not earlier.
-wina32.exe: ci86.wina32.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
-wina64.exe: ci86.wina64.fas ; fasm $+ -m256000 ; mv ${<:.fas=}.exe $@
+wina32.exe: ci86.wina32.fas ; $(FASM) $+ -m256000 ; mv ${<:.fas=}.exe $@
+wina64.exe: ci86.wina64.fas ; $(FASM) $+ -m256000 ; mv ${<:.fas=}.exe $@
 
 # Some of these targets make no sense and will fail
 all: $(TARGETS:%=ci86.%.asm) $(TARGETS:%=ci86.%.msm) $(BINTARGETS:%=ci86.%.bin) \
@@ -404,7 +413,8 @@ moreboot: forth.lab.wina ci86.alone.bin  ci86.mina.bin
 allboot: boot filler moreboot
 
 forth.lab.lina : toblk options.frt errors.linux.txt blocks.frt
-	cat options.frt errors.linux.txt blocks.frt | ./toblk >$@
+	$(M4) VERSION options.frt > optionscook.frt
+	cat optionscook.frt errors.linux.txt blocks.frt | ./toblk >$@
 	ln -f $@ forth.lab
 
 forth.lab.wina : toblk options.frt errors.dos.txt blocks.frt
@@ -451,25 +461,19 @@ mslinks :
 forth.lab : forth.lab.lina forth.lab.wina
 
 LINA32ZIP : $(RELEASELINA32)
-	rm -f ci86.lina32-$(VERSION) forth.lab.lina
+	rm forth.lab.lina
 	make forth.lab.lina
 	ls $+ | sed s:^:ci86.lina32-$(VERSION)/: >MANIFEST
+	rm -rf ci86.lina32-$(VERSION) || true
 	ln -sf . ci86.lina32-$(VERSION)
 	tar -czvf ci86.lina32-$(VERSION).tar.gz `cat MANIFEST`
 	rm ci86.lina32-$(VERSION)
 
-LINA64DEB  :  $(RELEASELINA64)
-	echo $+ >MANIFEST
-	debian.sh $(VERSION) lina64
-
-LINA32DEB  :  $(RELEASELINA32)
-	echo $+ >MANIFEST
-	debian.sh $(VERSION) lina32
-
 LINA64ZIP : $(RELEASELINA64)
-	rm -f ci86.lina64-$(VERSION) forth.lab.lina
+	rm forth.lab.lina
 	make forth.lab.lina
 	ls $+ | sed s:^:ci86.lina64-$(VERSION)/: >MANIFEST
+	rm -rf ci86.lina64-$(VERSION) || true
 	ln -sf . ci86.lina64-$(VERSION)
 	tar -czvf ci86.lina64-$(VERSION).tar.gz `cat MANIFEST`
 	rm ci86.lina64-$(VERSION)
@@ -496,13 +500,15 @@ nlina64 : ci86.lina64.o ; \
 
 # Linux native forth by gnu tools
 # Linux native forth by gnu tools, only works on a 64 bit system
-glina32 : ci86.lina32.s ; as --32 $+; ld a.out -melf_i386 -N -o $@
-glina64 : ci86.lina64.s ; as --64 $+; ld a.out -melf_x86_64  -N -o $@
+glina32 : ci86.lina32.s ; as --32 -a=$@.lst $+; ld a.out -melf_i386 -N -o $@
+glina64 : ci86.lina64.s ; as --64 -a=$@.lst $+; ld a.out -melf_x86_64  -N -o $@
 
 
 # Linux native forth by fasm tools
-flina32 : ci86.lina32.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
-flina64 : ci86.lina64.fas ; fasm $+ -m256000; mv ${<:.fas=} $@
+# flina32 : ci86.lina32.fas ; $(FASM) $+ -m256000; mv ${<:.fas=} $@
+# flina64 : ci86.lina64.fas ; $(FASM) $+ -m256000; mv ${<:.fas=} $@
+flina32 : ci86.lina32 ; mv $< $@
+flina64 : ci86.lina64 ; mv $< $@
 
 # Nowadays in the future the name constant.m4 has disappeared in
 # favour of constant_*.m4
@@ -539,16 +545,3 @@ LINA64_M4ZIP : $(RELEASELINA64_M4) VERSION ci86.gnr
 # Add temporary stuff for testing, docs, optims.
 include test.mak
 include optim.mak
-
-# not functional
-# Obsolete, we don't yield for Debian pressure!
-LINA32SRCZIPDEBIAN : $(RELEASELINA32_M4) VERSION ci86.gnr extract.mak
-	rm -f lina32-$(VERSION) forth.lab.lina
-	make forth.lab.lina
-	mkdir extract
-	cp ci86.gnr VERSION extract.mak $(EXTRACTORS) $(CONFIGURATIONS) extract
-	find $(RELEASELINA32USER) extract | \
-	sed s:^:lina32-$(VERSION)/: >MANIFEST
-	ln -sf . lina32-$(VERSION)
-	tar -czvf lina32-$(VERSION).tar.gz `cat MANIFEST`
-	rm -r lina32-$(VERSION) extract

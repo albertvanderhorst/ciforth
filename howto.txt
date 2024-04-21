@@ -232,23 +232,35 @@ Release of the full source, but also ready to run.
 make VERSION=5.6.7 clean VERSION LINA32SRC_M4
 make VERSION=5.6.7 clean VERSION LINA64SRC_M4
 
+OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE-
 2022 mar 13
 To make a source archive that can be converted to a debian
 archive.
-make VERSION=5.6.7 clean VERSION LINA64DEB
+make VERSION=5.6.7 clean VERSION LINA64dDEB
 - unpack the source archive giving lina64_#.#.#
 - run debmake from within
 - replace debian/ with an unpacked debianE.tar
 - run debuild from within
 You get an debian archive and some stuff that can be uploaded
 in principle  ..orig..xz and ..#.#.#-1..xz
+OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE- OBSOLETE-
 
 2022mar 22
 OFficial releases
-releasewina.bat works as follows  
-    $1 wina32/wina64 
-    $2 9.8.7 
+releasewina.bat works as follows
+    $1 wina32/wina64
+    $2 9.8.7
 
 make clean VERSION VERSION=5.4.0 LINA64ZIP
 
+Result in ci86.lina64-$(VERSION).tar.gz
 
+2022dec 27
+
+To make a source archive that can be converted to a debian
+archive.
+make VERSION=5.6.7 clean VERSION LINA64ZIP
+Follow the instructions in debbuild.sh
+
+2023apr 21
+releasewina64.bat is obsolete, use releasewina.bat.

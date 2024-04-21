@@ -1,4 +1,4 @@
-dnl $Id: gas.m4,v 5.19 2022/03/06 19:58:36 albert Exp $
+dnl $Id: gas.m4,v 5.21 2023/10/23 15:12:10 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 
@@ -15,6 +15,10 @@ define({_HEADER_ASM},{#
 # The -s (strip) is not necessary, and may even be detrimental.
 
 .Intel_syntax prefix
+     .section .forthx,"awx",@progbits
+     .section .forthd,"awx",@progbits
+     .section .dict,"awx",@nobits
+     .section .forthx
 })
 define({_C},{{#}})
 define({_O},{{0$1}})
@@ -56,8 +60,9 @@ dnl Handling large blocks of comment
 define({_COMMENTED}, { /* }$1{ */ })
 
 dnl A nobits section takes no place in the object file.
-define({_TEXT_},{    .section .forth,"awx",@progbits})
-define({_BSS_},{    .section .dict,"awx",@nobits})
+define({_TEXT_}, {_SEPARATED_( {    .section .forthx},{dnl})})dnl
+define({_DATA_}, {_SEPARATED_( {    .section .forthd},{dnl})})dnl
+define({_BSS_},{    .section .dict})
 define({_ENDOFPROGRAM},{
         END $1
 })

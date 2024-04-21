@@ -1,4 +1,4 @@
-dnl $Id: fasm.m4,v 5.13 2017/11/10 18:33:43 albert Exp $
+dnl $Id: fasm.m4,v 5.16 2024/04/16 20:35:46 albert Exp $
 dnl Copyright(2011): Albert van der Horst, HCC FIG Holland by GNU Public License
 dnl Macro's to adapt the source to Flat Assembler
 divert(-1)
@@ -30,8 +30,10 @@ _DLL_(
        _BITS32_({FORMAT  PE console})_BITS64_({ FORMAT  PE64 console})
 ;
         INCLUDE _BITS32_({'include/win32a.inc'})_BITS64_({'include/win64a.inc'})      ; ASCII windows definitions.
+define({_IDATA_},{ section '.idata' import data readable writeable executable })dnl
+define({_TEXT_}, {_SEPARATED_( {     section '.text' code executable readable writable},{dnl})})dnl
+define({_DATA_}, {_SEPARATED_( {     section '.text' code executable readable writable},{dnl})})dnl
 define({_BSS_},{})dnl
-define({_TEXT_},       { section '.text' code executable readable writable})dnl
 })_C{}_END_({ _DLL_})
 _HOSTED_OSX_({
 ; This version can be assembled on an OS X system (Apple):
@@ -40,18 +42,21 @@ _HOSTED_OSX_({
 ;   ld xina.o -segprot __TEXT rwx rwx -segprot __DATA rwx rwx -o xina
 ;   However as per 2016 dec 21 , it doesn't run.
         FORMAT  ELF     ; No macho, go via ELF object format.
-define({_TEXT_},{ section '.text' executable  })dnl
+define({_TEXT_}, {_SEPARATED_( {     section '.text' executable  },{dnl})})dnl
+define({_DATA_}, {_SEPARATED_( {     section '.text' executable  },{dnl})})dnl
 define({_BSS_},{ section '.bss' writable  })dnl
 })
 _LINUX_N_(
 {;      fasm forth.asm forth
 _BITS32_({define({ELF_FORMAT},{ELF})})
 _BITS64_({define({ELF_FORMAT},{ELF64})})
-        ; fam generates executable, no separate linking.
-        FORMAT  ELF_FORMAT EXECUTABLE
+        ; fam generates executable, no separate linking. 3 is linux
+        FORMAT  ELF_FORMAT EXECUTABLE 3
+        SEGMENT executable writable readable
 ;
-define({_TEXT_},       {       SEGMENT executable readable writable})dnl
-define({_BSS_},{})dnl
+define({_TEXT_}, {_SEPARATED_( {     SEGMENT executable readable},{dnl})})dnl
+define({_DATA_}, {_SEPARATED_( {     SEGMENT writable readable},{dnl})})dnl
+define({_BSS_}, {_SEPARATED_( {     SEGMENT writable readable},{dnl})})dnl
 })_C{}_END_({ _LINUX_N_})
 ;})
 define({SET_16_BIT_MODE},{ use16 })
@@ -86,7 +91,7 @@ define({LONG},{DWORD})
 define({QUAD},{QWORD})
 
 dnl Handling large blocks of comment
-dnl This just doesn't work, because fasm syntax checks the content.
+dnl All lines are changed in line comment.
 define({_COMMENTED},{patsubst({$1},{^},{;})})
 dnl Alternative if patsubst not available.
 dnl define({_COMMENTED},{_SUPPRESSED})
@@ -94,6 +99,9 @@ define({_ENDOFPROGRAM},{
 _DLL_({
         ENTRY  $1
 })_C{}_END_({ _DLL_})
+_LINUX_N_({
+        ENTRY  $1
+})_C{}_END_({ _LINUX_N_})
 })
 define({_ALIGN},{ALIGN    M4_CELLWIDTH})
 define({DSS},{DB})

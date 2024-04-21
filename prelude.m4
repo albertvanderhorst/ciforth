@@ -1,4 +1,4 @@
-dnl $Id: prelude.m4,v 5.13 2015/06/02 12:44:47 albert Exp $
+dnl $Id: prelude.m4,v 5.14 2023/10/22 19:37:55 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)dnl
 dnl
@@ -276,6 +276,9 @@ define({_VERBOSE_},_yes)
 dnl
 dnl The fields in the dictionary headers are aligned to a cell boundary.
 define( {_ALIGNED_}, _no)dnl
+dnl
+dnl The code and data areas are separated.
+define( {_SEPARATED_}, _no)dnl
 dnl
 
 dnl ############## USER CHOICES END #########################################

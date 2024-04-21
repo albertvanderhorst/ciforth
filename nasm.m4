@@ -1,4 +1,4 @@
-dnl $Id: nasm.m4,v 5.18 2017/11/10 18:33:43 albert Exp $
+dnl $Id: nasm.m4,v 5.19 2024/04/09 16:00:12 albert Exp $
 dnl Copyright(2000): Albert van der Horst, HCC FIG Holland by GNU Public License
 divert(-1)
 dnl Take care of embedded double quotes by using single quotes.
@@ -99,6 +99,8 @@ define({SET_16_BIT_MODE},{BITS   16})
 define({SET_32_BIT_MODE},{BITS   32})
 define({SET_64_BIT_MODE},{BITS   64})
 define({_ALIGN},{ALIGN    M4_CELLWIDTH})
+define({_CODE_},{dnl})
+define({_DATA_},{dnl})
 define({DSS},{DB})
 dnl A nobits section takes no place in the object file.
 define({_TEXT_},{section .text})
