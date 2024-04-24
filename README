@@ -1,5 +1,5 @@
- Copyright (2017): Albert van der Horst (HCC FORTH The Netherlands) by GNU Public License.
-
+ Copyright (2000-2024): Albert van der Horst (HCC FORTH The Netherlands) by GNU Public License.
+This is updated to cvs release REL-5-5-0.
 CIFORTH
 
 ``ciforth'' is a factory for making implementations of Forth.
